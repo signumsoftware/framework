@@ -41,7 +41,6 @@
     <OutputPath>bin\Partial\</OutputPath>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.Office.Interop.Excel, Version=12.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c" />
     <Reference Include="PresentationFramework.Aero" />
     <Reference Include="System" />
     <Reference Include="System.Core">
@@ -175,7 +174,6 @@
     </Compile>
     <Compile Include="Reports\PlainExcelMenuItem.cs" />
     <Compile Include="Reports\ReportMenuItem.cs" />
-    <Compile Include="Reports\ExcelReportGenerator.cs" />
     <Compile Include="Operations\OperationClient.cs" />
     <Compile Include="Panels\TreeMapPanel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">

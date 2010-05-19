@@ -51,7 +51,7 @@ namespace Signum.Windows.Reports
 
                     // pedimos la consulta y traemos los datos
                     ResultTable queryResult = Server.Return((IDynamicQueryServer s) => s.GetQueryResult(QueryClient.GetQueryName(er.Query.Key), null, null, null, null)); 
-                    ExcelReportGenerator.GenerarInforme(filename, queryResult);
+                    ExcelGenerator.WriteDataInExcelFile(queryResult, filename);
                     filename = "";
 
                 }

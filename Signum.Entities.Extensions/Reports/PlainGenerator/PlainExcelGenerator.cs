@@ -20,6 +20,48 @@ namespace Signum.Entities.Reports
 {
     public static class PlainExcelGenerator
     {
+        public static byte[] Template { get; set; }
+        public static CellBuilder CellBuilder { get; set; }
+
+        static PlainExcelGenerator()
+        {
+            SetTemplate(typeof(PlainExcelGenerator).Assembly.GetManifestResourceStream("Signum.Entities.Extensions.Reports.PlainGenerator.plainExcelTemplate.xlsx"));
+        }
+
+        public static void SetTemplate(Stream templateStream)
+        {
+            Template = templateStream.ReadAllBytes();
+
+            MemoryStream memoryStream = new MemoryStream();
+            memoryStream.WriteAllBytes(Template);
+
+            using (SpreadsheetDocument document = SpreadsheetDocument.Open(memoryStream, true))
+            {
+                document.PackageProperties.Creator = "";
+                document.PackageProperties.LastModifiedBy = "";
+
+                WorkbookPart workbookPart = document.WorkbookPart;
+
+                WorksheetPart worksheetPart = document.GetWorksheetPartById("rId1");
+                Worksheet worksheet = worksheetPart.Worksheet;
+
+                CellBuilder = new CellBuilder()
+                {
+                    DefaultStyles = new Dictionary<TemplateCells, UInt32Value>
+                    {
+                        { TemplateCells.Header, worksheet.FindCell("A1").StyleIndex },
+
+                        { TemplateCells.Date, worksheet.FindCell("B2").StyleIndex },
+                        { TemplateCells.DateTime, worksheet.FindCell("C2").StyleIndex },
+                        { TemplateCells.Text, worksheet.FindCell("D2").StyleIndex },
+                        { TemplateCells.General, worksheet.FindCell("E2").StyleIndex },
+                        { TemplateCells.Number, worksheet.FindCell("F2").StyleIndex },
+                        { TemplateCells.Decimal, worksheet.FindCell("G2").StyleIndex },
+                    }
+                };
+            }
+        }
+        
         public static byte[] WritePlainExcel(ResultTable results)
         {
             using (MemoryStream ms = new MemoryStream())
@@ -37,7 +79,7 @@ namespace Signum.Entities.Reports
 
         static void WritePlainExcel(ResultTable results, Stream stream)
         {
-            typeof(PlainExcelGenerator).Assembly.GetManifestResourceStream("Signum.Entities.Extensions.Reports.PlainGenerator.plainExcelTemplate.xlsx").CopyTo(stream); 
+            stream.WriteAllBytes(Template);
 
             if (results == null)
                 throw new ApplicationException(Resources.ThereAreNoResultsToWrite);
@@ -50,46 +92,27 @@ namespace Signum.Entities.Reports
                 WorkbookPart workbookPart = document.WorkbookPart;
 
                 WorksheetPart worksheetPart = document.GetWorksheetPartById("rId1");
-                Worksheet worksheet = worksheetPart.Worksheet;
-
-                CellBuilder cb = new CellBuilder()
-                {
-                    DefaultStyles = new Dictionary<TemplateCells, UInt32Value>
-                    {
-                        { TemplateCells.Date, worksheet.FindCell("B2").StyleIndex },
-                        { TemplateCells.DateTime, worksheet.FindCell("C2").StyleIndex },
-                        { TemplateCells.Text, worksheet.FindCell("D2").StyleIndex },
-                        { TemplateCells.General, worksheet.FindCell("E2").StyleIndex },
-                        { TemplateCells.Number, worksheet.FindCell("F2").StyleIndex },
-                        { TemplateCells.Decimal, worksheet.FindCell("G2").StyleIndex },
-                    }
-                };
-
-                UInt32Value headerStyleIndex = worksheet.FindCell("A1").StyleIndex;
-
+                
                 worksheetPart.Worksheet = new Worksheet();
 
-                Columns columns1 = new Columns();
-                foreach (var c in results.VisibleColumns)
-                    columns1.Append(new spreadsheet.Column()
+                worksheetPart.Worksheet.Append(new Columns(results.VisibleColumns.Select(c => new spreadsheet.Column()
                     {
                         Min = (uint)c.Index,
                         Max = (uint)c.Index,
                         Width = GetColumnWidth(c.Type),
                         BestFit = true,
                         CustomWidth = true
-                    });
-                worksheetPart.Worksheet.Append(columns1);
+                    }).ToArray()));
 
                 worksheetPart.Worksheet.Append(new Sequence<Row>()
                 {
                     (from c in results.VisibleColumns
-                    select cb.Cell(c.DisplayName, headerStyleIndex)).ToRow(),
+                    select CellBuilder.Cell(c.DisplayName, TemplateCells.Header)).ToRow(),
 
                     from r in results.Rows
                     select (from c in results.VisibleColumns
-                            let template = c.Format == "d" ? TemplateCells.Date : cb.GetTemplateCell(c.Type)
-                            select cb.Cell(r[c], template)).ToRow()
+                            let template = c.Format == "d" ? TemplateCells.Date : CellBuilder.GetTemplateCell(c.Type)
+                            select CellBuilder.Cell(r[c], template)).ToRow()
                 }.ToSheetData());
 
                 workbookPart.Workbook.Save();

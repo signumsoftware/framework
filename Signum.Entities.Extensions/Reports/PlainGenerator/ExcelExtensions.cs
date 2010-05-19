@@ -81,6 +81,12 @@ namespace Signum.Entities.Reports
               Where(c => c.CellReference == addressName).FirstOrDefault();
         }
 
+        public static Cell FindCell(this SheetData sheetData, string addressName)
+        {
+            return sheetData.Descendants<Cell>().
+              Where(c => c.CellReference == addressName).FirstOrDefault();
+        }
+
         public static string GetCellValue(this SpreadsheetDocument document, Worksheet worksheet, string addressName)
         {
             Cell theCell = worksheet.Descendants<Cell>().
@@ -89,7 +95,12 @@ namespace Signum.Entities.Reports
             // If the cell doesn't exist, return an empty string:
             if (theCell == null)
                 return "";
-            
+
+            return GetCellValue(document, theCell);
+        }
+
+        public static string GetCellValue(this SpreadsheetDocument document, Cell theCell)
+        {
             string value = theCell.InnerText;
 
             // If the cell represents an integer number, you're done. 

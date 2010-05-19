@@ -37,8 +37,6 @@ namespace Signum.Entities.Reports
 
         static void WriteDataInExcelFile(ResultTable results, Stream stream)
         {
-            //typeof(PlainExcelGenerator).Assembly.GetManifestResourceStream("Signum.Entities.Extensions.Reports.Generator.plainExcelTemplate.xlsx").CopyTo(stream); 
-
             if (results == null)
                 throw new ApplicationException(Resources.ThereAreNoResultsToWrite);
 
@@ -51,24 +49,25 @@ namespace Signum.Entities.Reports
 
                 WorksheetPart worksheetPart = document.GetWorksheetPartByName(Resources.Data);
                 
-                CellBuilder cb = new CellBuilder();
+                CellBuilder cb = PlainExcelGenerator.CellBuilder;
                 
-                //Dictionary<ColumnAddress, Tuple<ResultTableColumnIndex, ColumnData>>
-                Dictionary<string, Tuple<int, ColumnData>> templateColumnInfo = GetTemplateColumnsResultsTableEquivalent(document, worksheetPart, results);
+                SheetData sheetData = worksheetPart.Worksheet.Descendants<SheetData>().Single();
+
+                List<ColumnData> columnEquivalences = GetColumnsEquivalences(document, sheetData, results);
 
                 UInt32Value headerStyleIndex = worksheetPart.Worksheet.FindCell("A1").StyleIndex;
 
                 //Clear sheetData from the template sample data
-                worksheetPart.Worksheet.Descendants<SheetData>().FirstOrDefault().InnerXml = "";
+                sheetData.InnerXml = "";
 
-                worksheetPart.Worksheet.Descendants<SheetData>().FirstOrDefault().Append(new Sequence<Row>()
+                sheetData.Append(new Sequence<Row>()
                 {
-                    (from c in results.VisibleColumns
-                        select cb.Cell(c.DisplayName, headerStyleIndex)).ToRow(),
+                    (from columnData in columnEquivalences
+                        select cb.Cell(columnData.Column.DisplayName, headerStyleIndex)).ToRow(),
 
                     from r in results.Rows
-                        select (from kvp in templateColumnInfo
-                                select cb.Cell(r[kvp.Value.First], kvp.Value.Second.StyleIndex)).ToRow()
+                        select (from columnData in columnEquivalences
+                                select cb.Cell(r[columnData.Column], columnData.StyleIndex)).ToRow()
                 }.Cast<OpenXmlElement>());
 
                 var pivotTableParts = workbookPart.PivotTableCacheDefinitionParts
@@ -79,10 +78,8 @@ namespace Signum.Entities.Reports
                 {
                     PivotCacheDefinition pcd = ptpart.PivotCacheDefinition;
                     WorksheetSource wss = pcd.Descendants<WorksheetSource>().First();
-                    wss.Reference.Value = "A1:" + GetExcelColumn(results.VisibleColumns.Count() - 1) + (results.Rows.Count() + 1).ToString();
-                    //foreach (CacheField cf in pcd.CacheFields.Descendants<CacheField>())
-                    //    cf.InnerXml = "";
-                    //ptpart.PivotCacheDefinition = pcd;
+                    wss.Reference.Value = "A1:" + GetExcelColumn(columnEquivalences.Count(ce => !ce.IsNew) - 1) + (results.Rows.Count() + 1).ToString();
+                    
                     pcd.RefreshOnLoad = true;
                     pcd.SaveData = false;
                     pcd.Save();
@@ -93,84 +90,118 @@ namespace Signum.Entities.Reports
             }
         }
 
-        private static Dictionary<string, Tuple<int, ColumnData>> GetTemplateColumnsResultsTableEquivalent(SpreadsheetDocument document, WorksheetPart worksheetPart, ResultTable results)
+        private static List<ColumnData> GetColumnsEquivalences(this SpreadsheetDocument document, SheetData sheetData, ResultTable results)
         {
-            Dictionary<int, ColumnData> templateColumnData = document.GetTemplateColumnData(worksheetPart, results);
+            var resultsCols = results.VisibleColumns.ToDictionary(c => c.DisplayName);
 
-            //Find Window can have more columns than the Excel template, and they will be appended
-            AddNewColumnsAtTheEnd(results, templateColumnData);
+            var headerCells = sheetData.Descendants<Row>().First().Descendants<Cell>().ToList();
+            var templateCols = headerCells.ToDictionary(c => document.GetCellValue(c));
 
-            Dictionary<string, Tuple<int, ColumnData>> templateColumnInfo = templateColumnData.ToDictionary(kvp => kvp.Value.TemplateColumnAddress, kvp => new Tuple<int, ColumnData>(kvp.Key, kvp.Value));
+            var firstDataRowCells = sheetData.Descendants<Row>().First(r => r.RowIndex == 2).Descendants<Cell>().ToList();
 
-            //Template cannot have more columns than the Find Window
-            CheckAllTemplateColumnsAreInResultTable(document, worksheetPart, templateColumnInfo, results);
-
-            return templateColumnInfo;
-        }
-
-        private static Dictionary<int, ColumnData> GetTemplateColumnData(this SpreadsheetDocument document, WorksheetPart worksheetPart, ResultTable results)
-        {
-            Dictionary<int, ColumnData> templateColumnData = new Dictionary<int,ColumnData>();
-                            
-            foreach (var c in results.VisibleColumns)
+            var dic = templateCols.OuterJoinDictionaryCC(resultsCols, (name, cell, resultCol) =>
             {
-                string columnAddress;
-                bool found = document.FindColumnByHeaderContent(worksheetPart, c.DisplayName, out columnAddress);
-                templateColumnData.Add(c.Index, new ColumnData
+                if (resultCol == null)
+                    throw new ApplicationException(Resources.TheExcelTemplateHasAColumn0NotPresentInTheFindWindow.Formato(name));
+                
+                if (cell != null)
                 {
-                    TemplateColumnAddress = columnAddress,
-                    IsNew = !found,
-                    StyleIndex = found ? worksheetPart.Worksheet.FindCell(columnAddress + "2").StyleIndex : (UInt32Value)0
-                });
-            }
+                    return new ColumnData
+                    {
+                        IsNew = false,
+                        StyleIndex = firstDataRowCells[headerCells.IndexOf(cell)].StyleIndex,
+                        Column = resultCol,
+                    };
+                }
+                else
+                {
+                    CellBuilder cb = PlainExcelGenerator.CellBuilder;
+                    return new ColumnData
+                    {
+                        IsNew = true,
+                        StyleIndex = 0, //cb.DefaultStyles[resultCol.Format == "d" ? TemplateCells.Date : cb.GetTemplateCell(resultCol.Type)],
+                        Column = resultCol,
+                    };
+                }
+            });
 
-            return templateColumnData;
+            return dic.Values.ToList();
+            //Dictionary<int, ColumnData> templateColumnData = document.GetTemplateColumnData(worksheetPart, results);
+
+            ////Find Window can have more columns than the Excel template, and they will be appended
+            //AddNewColumnsAtTheEnd(results, templateColumnData);
+
+            //Dictionary<string, Tuple<int, ColumnData>> templateColumnInfo = templateColumnData.ToDictionary(kvp => kvp.Value.TemplateColumnAddress, kvp => new Tuple<int, ColumnData>(kvp.Key, kvp.Value));
+
+            ////Template cannot have more columns than the Find Window
+            //CheckAllTemplateColumnsAreInResultTable(document, worksheetPart, templateColumnInfo, results);
+
+            //return templateColumnInfo;
         }
 
-        private static bool FindColumnByHeaderContent(this SpreadsheetDocument document, WorksheetPart worksheetPart, string content, out string columnAddress)
-        {
-            bool found = false;
-            columnAddress = "";
-            string cellContent = "not found";
-            int i = 0;
-            while (!found && cellContent.HasText())
-            {
-                columnAddress = GetExcelColumn(i);
-                cellContent = document.GetCellValue(worksheetPart.Worksheet, columnAddress + "1");
-                found = cellContent == content;
-                i++;
-            }
-            return found;
-        }
+        //private static Dictionary<int, ColumnData> GetTemplateColumnData(this SpreadsheetDocument document, WorksheetPart worksheetPart, ResultTable results)
+        //{
+        //    Dictionary<int, ColumnData> templateColumnData = new Dictionary<int,ColumnData>();
+                            
+        //    foreach (var c in results.VisibleColumns)
+        //    {
+        //        string columnAddress;
+        //        bool found = document.FindColumnByHeaderContent(worksheetPart, c.DisplayName, out columnAddress);
+        //        templateColumnData.Add(c.Index, new ColumnData
+        //        {
+        //            TemplateColumnAddress = columnAddress,
+        //            IsNew = !found,
+        //            StyleIndex = found ? worksheetPart.Worksheet.FindCell(columnAddress + "2").StyleIndex : (UInt32Value)0
+        //        });
+        //    }
 
-        private static void AddNewColumnsAtTheEnd(ResultTable results, Dictionary<int, ColumnData> templateColumnData)
-        {
-            int templateColumnsCount = templateColumnData.Count(kvp => !kvp.Value.TemplateColumnAddress.HasText());
+        //    return templateColumnData;
+        //}
+
+        //private static bool FindColumnByHeaderContent(this SpreadsheetDocument document, WorksheetPart worksheetPart, string content, out string columnAddress)
+        //{
+        //    bool found = false;
+        //    columnAddress = "";
+        //    string cellContent = "not found";
+        //    int i = 0;
+        //    while (!found && cellContent.HasText())
+        //    {
+        //        columnAddress = GetExcelColumn(i);
+        //        cellContent = document.GetCellValue(worksheetPart.Worksheet, columnAddress + "1");
+        //        found = cellContent == content;
+        //        i++;
+        //    }
+        //    return found;
+        //}
+
+        //private static void AddNewColumnsAtTheEnd(ResultTable results, Dictionary<int, ColumnData> templateColumnData)
+        //{
+        //    int templateColumnsCount = templateColumnData.Count(kvp => !kvp.Value.TemplateColumnAddress.HasText());
             
-            foreach (var c in results.VisibleColumns.Where(c => !templateColumnData.Keys.Contains(c.Index)))
-            {
-                templateColumnData.Add(c.Index, new ColumnData 
-                { 
-                    IsNew = true, 
-                    TemplateColumnAddress = GetExcelColumn(templateColumnsCount)
-                });
+        //    foreach (var c in results.VisibleColumns.Where(c => !templateColumnData.Keys.Contains(c.Index)))
+        //    {
+        //        templateColumnData.Add(c.Index, new ColumnData 
+        //        { 
+        //            IsNew = true, 
+        //            TemplateColumnAddress = GetExcelColumn(templateColumnsCount)
+        //        });
 
-                templateColumnsCount++;
-            }
-        }
+        //        templateColumnsCount++;
+        //    }
+        //}
 
-        private static void CheckAllTemplateColumnsAreInResultTable(SpreadsheetDocument document, WorksheetPart worksheetPart, Dictionary<string, Tuple<int, ColumnData>> templateColumnInfo, ResultTable results)
-        {
-            //All the columns in the template must be in the ResultTable, otherwise the pivot tables or formulas could be broken
-            string cellValue = "start";
-            for (int i = 0; cellValue.HasText(); i++)
-            {
-                string columnAddress = GetExcelColumn(i);
-                cellValue = document.GetCellValue(worksheetPart.Worksheet, columnAddress + "1");
-                if (cellValue.HasText() && !templateColumnInfo.ContainsKey(columnAddress))
-                    throw new ApplicationException(Resources.TheExcelTemplateHasAColumn0NotPresentInTheFindWindow.Formato(cellValue));
-            }
-        }
+        //private static void CheckAllTemplateColumnsAreInResultTable(SpreadsheetDocument document, WorksheetPart worksheetPart, Dictionary<string, Tuple<int, ColumnData>> templateColumnInfo, ResultTable results)
+        //{
+        //    //All the columns in the template must be in the ResultTable, otherwise the pivot tables or formulas could be broken
+        //    string cellValue = "start";
+        //    for (int i = 0; cellValue.HasText(); i++)
+        //    {
+        //        string columnAddress = GetExcelColumn(i);
+        //        cellValue = document.GetCellValue(worksheetPart.Worksheet, columnAddress + "1");
+        //        if (cellValue.HasText() && !templateColumnInfo.ContainsKey(columnAddress))
+        //            throw new ApplicationException(Resources.TheExcelTemplateHasAColumn0NotPresentInTheFindWindow.Formato(cellValue));
+        //    }
+        //}
 
         private static string GetExcelColumn(int columnNumberBase0)
         {
@@ -190,12 +221,12 @@ namespace Signum.Entities.Reports
         public class ColumnData
         {
             /// <summary>
-            /// Column Address of the column in the template excel
+            /// Column Data
             /// </summary>
-            public string TemplateColumnAddress { get; set; }
+            public Signum.Entities.DynamicQuery.Column Column { get; set; }
 
             /// <summary>
-            /// Indicates the column is not presen in the template excel
+            /// Indicates the column is not present in the template excel
             /// </summary>
             public bool IsNew { get; set; }
 

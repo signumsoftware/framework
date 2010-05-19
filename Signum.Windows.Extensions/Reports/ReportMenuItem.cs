@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Signum.Entities.Extensions;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities;
 using System.Windows;
-using System.Windows.Media.Imaging;
 using System.Windows.Controls;
 using System.IO;
 using Microsoft.Win32;
@@ -14,7 +10,6 @@ using Signum.Entities.Reports;
 using Prop = Signum.Windows.Extensions.Properties;
 using Signum.Services;
 using System.Windows.Documents;
-using Signum.Utilities;
 
 namespace Signum.Windows.Reports
 {
@@ -81,14 +76,14 @@ namespace Signum.Windows.Reports
 
                 ExcelReportDN report = reportLite.RetrieveAndForget();
                 string extension = Path.GetExtension(report.File.FileName);
-                if (extension != ".xls" && extension != ".xlsx")
-                    throw new ApplicationException("El template de los ficheros Excel personalizados debe tener la extensión .xls o .xlsx, y el fichero seleccionado tiene " + extension);
+                if (extension != ".xlsx")
+                    throw new ApplicationException("El template de los ficheros Excel personalizados debe tener la extensión .xlsx, y el fichero seleccionado tiene " + extension);
 
                 SaveFileDialog sfd = new SaveFileDialog()
                 {
                     AddExtension = true,
-                    DefaultExt = extension, //".xls", //".xlsx",
-                    Filter = (extension == ".xls") ? Prop.Resources.Excel97_2003Spreadsheet : Prop.Resources.Excel2007Spreadsheet, //.Excel2007Spreadsheet,
+                    DefaultExt = extension, //".xlsx",
+                    Filter = Prop.Resources.Excel2007Spreadsheet,
                     FileName = report.DisplayName + " - " + DateTime.Now.ToString("yyyyMMddhhmmss") + extension,
                     OverwritePrompt = true,
                     Title = Prop.Resources.FindLocationFoExcelReport
@@ -98,7 +93,6 @@ namespace Signum.Windows.Reports
                 {
                     File.WriteAllBytes(sfd.FileName, report.File.BinaryFile);
 
-                    //ExcelReportGenerator.GenerarInforme(sfd.FileName, SearchControl.ResultTable);
                     ExcelGenerator.WriteDataInExcelFile(SearchControl.ResultTable, sfd.FileName);
 
                     System.Diagnostics.Process.Start(sfd.FileName);

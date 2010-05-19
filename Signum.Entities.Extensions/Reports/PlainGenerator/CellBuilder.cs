@@ -18,6 +18,8 @@ namespace Signum.Entities.Reports
 {
     public enum TemplateCells
     {
+        Header,
+
         Date,
         DateTime,
         Text,
@@ -98,7 +100,7 @@ namespace Signum.Entities.Reports
                         (template == TemplateCells.Decimal) ? Convert.ToDecimal(value).ToStringExcel() :
                         value.ToString();
 
-            Cell cell = (template == TemplateCells.General || template == TemplateCells.Text) ? 
+            Cell cell = (template == TemplateCells.General || template == TemplateCells.Text || template == TemplateCells.Header) ? 
                 new Cell(new InlineString(new Text { Text = excelValue })) { DataType = CellValues.InlineString } : 
                 new Cell { CellValue = new CellValue(excelValue), DataType = DefaultCellValues[template] };
 
