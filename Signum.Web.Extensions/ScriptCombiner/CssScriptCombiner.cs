@@ -16,7 +16,7 @@ namespace Signum.Web.ScriptCombiner
     public class CssScriptCombiner : ScriptCombiner {
         public CssScriptCombiner() {
             this.contentType = "text/css";
-            this.cacheable = false;
+            this.cacheable = true;
             this.gzipable = true;
             this.resourcesFolder = "../Content";
         }
@@ -92,7 +92,7 @@ namespace Signum.Web.ScriptCombiner
         public JSScriptCombiner()
         {
             this.contentType = "application/x-javascript";
-            this.cacheable = false;
+            this.cacheable = true;
             this.gzipable = true;
             this.resourcesFolder = "../Scripts";
         }
@@ -114,7 +114,7 @@ namespace Signum.Web.ScriptCombiner
         /// <summary>
         /// The folder where the scripts are stored
         /// </summary>
-        protected string resourcesFolder;
+        public string resourcesFolder;
 
         /// <summary>
         /// Indicates if the output file should be cached
@@ -138,7 +138,7 @@ namespace Signum.Web.ScriptCombiner
 
         protected abstract string Minify(string content);
 
-        private readonly static TimeSpan CACHE_DURATION = TimeSpan.FromDays(30);
+        private readonly static TimeSpan CACHE_DURATION = TimeSpan.FromDays(2);
         private HttpContextBase context;
 
         public virtual string ProcessFile(string fileName)
@@ -234,7 +234,7 @@ namespace Signum.Web.ScriptCombiner
             context.Response.Cache.SetCacheability(HttpCacheability.Public);
             context.Response.Cache.SetExpires(DateTime.Now.Add(CACHE_DURATION));
             context.Response.Cache.SetMaxAge(CACHE_DURATION);
-            context.Response.Cache.SetValidUntilExpires(true);
+            context.Response.Cache.AppendCacheExtension("must-revalidate, proxy-revalidate");
 
             response.ContentEncoding = Encoding.Unicode;
             response.OutputStream.Write(bytes, 0, bytes.Length);
@@ -265,6 +265,7 @@ namespace Signum.Web.ScriptCombiner
 #endif
             return result;
         }*/
+
 
         public string GetUniqueKey(HttpContextBase context)
         {

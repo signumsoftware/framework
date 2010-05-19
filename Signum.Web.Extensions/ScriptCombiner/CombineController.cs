@@ -10,7 +10,7 @@ namespace Signum.Web.ScriptCombiner
     {
         [AcceptVerbs(HttpVerbs.Get)]
         public void CSS(string f, string p)
-        {      
+        {
             new CssScriptCombiner().Process(f.Split(','),p,
                 ControllerContext.RequestContext.HttpContext);
         }
