@@ -129,7 +129,7 @@ namespace Signum.Utilities
             else
                 content = Regex.Replace(content,
                 "(?<begin>={2,})(?<content>[^\\n]+?)(?<end>={2,})[\\n]*",
-                "${content} ",
+                "${content}. ",
                 RegexOptions.Compiled);
 
             //Remove multiple breakline  
@@ -138,7 +138,7 @@ namespace Signum.Utilities
            RegexOptions.Compiled);
 
             content = Regex.Replace(content,
-                "(?<content>\n)", settings.LineBreaks ? "<br/>" : "",
+                "(?<content>\n)", settings.LineBreaks ? "<br/>" : ". ",
             RegexOptions.Compiled);
 
             content = Regex.Replace(content,
