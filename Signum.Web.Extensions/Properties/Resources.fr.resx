@@ -235,16 +235,16 @@
     <value>The provided User Name is already registered, please choose another one</value>
   </data>
   <data name="UserNameMustHaveAValue" xml:space="preserve">
-    <value>The user name must have a value</value>
+    <value>Le nom d'utilisateur doit avoir une valeur</value>
   </data>
   <data name="ViewName" xml:space="preserve">
     <value>View name</value>
   </data>
   <data name="YouMustEnterTheCurrentPassword" xml:space="preserve">
-    <value>You must enter the current password</value>
+    <value>Vous devez entrer le mot de passe actuel</value>
   </data>
   <data name="YouMustRepeatTheNewPassword" xml:space="preserve">
-    <value>You must repeat the new password</value>
+    <value>Vous devez répéter le nouveau mot de passe</value>
   </data>
   <data name="EmailNotExistsDatabase" xml:space="preserve">
     <value>L'adresse mail donnée n'appartient à aucun utilisateur enrigistré</value>

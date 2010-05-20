@@ -113,7 +113,7 @@ namespace Signum.Web.Authorization
 
                 rpr.Save();
 
-                //TODO: Send email
+                //TODO: This won't work, we have to pass the password in the third parameter
                 EmailLogic.Send(user, UserMailTemplate.ResetPassword, null);
 
                 /* MailMessage message = new MailMessage()
