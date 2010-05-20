@@ -197,9 +197,6 @@
   <data name="Operation0HasNoConstruct" xml:space="preserve">
     <value>La operación {0} no tiene Construct inicializado</value>
   </data>
-  <data name="A0HaveAlreadyBeenRegistered" xml:space="preserve">
-    <value>Ya se ha registrado un {0}</value>
-  </data>
   <data name="TheFollowingKeysHaveBeenRepeatedIn01" xml:space="preserve">
     <value>Las siguientes claves estan repetidas en {0}:
 {1}</value>

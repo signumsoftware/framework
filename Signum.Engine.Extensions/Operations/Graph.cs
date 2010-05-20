@@ -172,13 +172,9 @@ namespace Signum.Engine.Operations
         protected List<IGraphOperation> Operations { get; set; }
         protected Dictionary<S, StateOptions> States { get; set; }
 
-        protected static bool Registered = false;
 
         public virtual void Register()
         {
-            if (Registered)
-                throw new InvalidOperationException(Resources.A0HaveAlreadyBeenRegistered.Formato(typeof(Graph<E, S>).TypeName()));
-
             var errors = Operations.GroupCount(a => a.Key).Where(kvp => kvp.Value > 1).ToList();
 
             if (errors.Count != 0)
@@ -190,8 +186,6 @@ namespace Signum.Engine.Operations
 
                 OperationLogic.Register(operation);
 	        }
-
-            Registered = true;
         }
 
         public DirectedEdgedGraph<string, Enum> ToDirectedGraph()
