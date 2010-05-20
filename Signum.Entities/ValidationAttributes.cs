@@ -39,7 +39,11 @@ namespace Signum.Entities
             if (defaultError == null)
                 return null;
 
-            return GetLocalizedErrorMessage(property, this) ?? ErrorMessage ?? defaultError;
+            string error = GetLocalizedErrorMessage(property, this) ?? ErrorMessage ?? defaultError;
+            if (error != null)
+                error = error.Formato(property.NiceName());
+
+            return error; 
         }
 
         static string GetLocalizedErrorMessage(PropertyInfo property, ValidatorAttribute validator)

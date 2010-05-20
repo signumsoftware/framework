@@ -309,7 +309,7 @@ namespace Signum.Entities
             {
                 string result = validator.Error(pp.PropertyInfo, propertyValue);
                 if (result != null)
-                    return result.Formato(pp.PropertyInfo.NiceName());
+                    return result;
             }
 
             //Internal Validation

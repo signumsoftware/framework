@@ -83,7 +83,7 @@ Autocompleter.prototype = {
         this.timerID = setTimeout(function() { self.keyup(e) }, (self.options.cacheResults && self.cacheResults[self.$control.val().toLowerCase()] != null) ? 0 : self.options.delay);
     },
     keyup: function(key) {
-        if (key == 37 || key == 39 || key == 38 || key == 40 || key == 13) return;
+    if (key == 37 || key == 39 || key == 38 || key == 40 || key == 13) return;
         var input = this.$control.val();
         if (this.currentText == input) return;
 
@@ -192,9 +192,9 @@ Autocompleter.prototype = {
 
     },
     keydown: function(e) {
-        var key = e.which ? e.which : e.keyCode;
-        if (key == 13 || key == 9) {    //enter or tab
-            var selectedOption = $("." + this.resultSelectedClass);
+    var key = e.which ? e.which : e.keyCode;
+    if (key == 13 || key == 9) {    //enter or tab
+            var selectedOption = this.$dd.find("." + this.resultSelectedClass);
             if (selectedOption.length > 0) {
                 if (selectedOption.hasClass("extra")) selectedOption.click();
                 else this.onOk(selectedOption.data("data"));

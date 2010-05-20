@@ -1179,8 +1179,9 @@ function GetSFInfoParams(prefix) {
 function AutocompleteOnSelected(controlId, data) {
     var prefix = controlId.substr(0, controlId.indexOf(sfToStr) - 1);
     var info = RuntimeInfoFor(prefix);
-	info.setEntity(data.type, data.id)
-        .ticks(new Date().getTime());
+	info.setEntity(data.type, data.id);
+	if ($('#' + sfReactive).length > 0)
+	    info.ticks(new Date().getTime());
     info.find().after(hiddenDiv(prefix.compose(sfEntity), ''));
 	$('#' + prefix.compose(sfLink)).html($('#' + controlId).val());
     new ELine({ prefix: prefix }).fireOnEntityChangedWithTicks(true);	
