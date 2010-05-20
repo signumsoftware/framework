@@ -18,9 +18,11 @@ Autocompleter = function(controlId, url, _options) {
         entityIdFieldName: null,
         textField: "text",
         extraParams: {},
-        
-        extraResult : null,
-        extraResultClick : null
+
+        extraResult: null,
+        extraResultClick: null,
+
+        cacheResults: true
     }, _options);
 
     self.timerID = 10;
@@ -28,12 +30,13 @@ Autocompleter = function(controlId, url, _options) {
     self.$control = $("#" + controlId);
     self.controlId = controlId;
     self.url = url;
+    self.cacheResults = [];
     self.currentResults = [];
     self.currentInput = undefined;
     self.resultClass = "ddlAuto";
     self.resultSelectedClass = "ddlAutoOn";
     self.$resultDiv = $("<div class='" + self.resultClass + "'></div>");
-    self.create();   
+    self.create();
 };
 
 Autocompleter.prototype = {
@@ -77,7 +80,7 @@ Autocompleter.prototype = {
     clear: function(e) {
         clearTimeout(this.timerID);
         var self = this;
-        this.timerID = setTimeout(function() { self.keyup(e) }, self.options.delay);
+        this.timerID = setTimeout(function() { self.keyup(e) }, (self.options.cacheResults && self.cacheResults[self.$control.val().toLowerCase()] != null) ? 0 : self.options.delay);
     },
     keyup: function(key) {
         if (key == 37 || key == 39 || key == 38 || key == 40 || key == 13) return;
@@ -97,20 +100,25 @@ Autocompleter.prototype = {
 
         var self = this;
 
-        self.$control.addClass('loading');
-        if (self.currentResults == [] && self.currentInput != null && input.indexOf(self.currentInput) == 0)
+        if (self.currentResults == [] && self.currentInput != null && input.indexOf(self.currentInput) == 0) {
             self.showResults([], input);
-        else {
-            if (self.request) self.request.abort();
+            return;
+        }
 
-            self.request = $.getJSON(
+        if (self.options.cacheResults && self.cacheResults[input.toLowerCase()] != null) {
+            self.showResults(self.cacheResults[input.toLowerCase()], input);
+            return;
+        }
+
+        if (self.request) self.request.abort();
+        self.$control.addClass('loading');
+        self.request = $.getJSON(
             self.url, data,
             function(results) {
                 if (results) {
                     self.showResults(results, input);
                 }
             });
-        }
     },
 
     showResults: function(results, input) {
@@ -142,6 +150,8 @@ Autocompleter.prototype = {
         }
 
         self.currentResults = results;
+        if (self.options.cacheResults)
+            self.cacheResults[input.toLowerCase()] = results;
 
         var $previousExtra = self.$dd.find(".extra");
 
