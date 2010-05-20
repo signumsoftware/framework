@@ -217,13 +217,15 @@ namespace Signum.Web
             string result = "";
             
             string value = "";
-            if (Value != null && typeof(Lite).IsAssignableFrom(Value.GetType()))
+
+            object v = Convert(Value, Token.Type);
+            if (v != null && typeof(Lite).IsAssignableFrom(v.GetType()))
             {
-                Lite lite = (Lite)Value;
+                Lite lite = (Lite)v;
                 value = "{0};{1}".Formato(lite.Id.ToString(), lite.RuntimeType.Name);
             }
             else
-                value = Value.ToString();
+                value = v.ToString();
 
             result = "&cn{0}={1}&sel{0}={2}&val{0}={3}".Formato(filterIndex, ColumnName, Operation.ToString(), value);
             if (Frozen)
