@@ -25,32 +25,12 @@ namespace Signum.Web.Controllers
                  if (int.TryParse(value, out id))
                      return Database.RetrieveLite(cleanType, id);
 
-                 return ParseLite(cleanType, value);
+                 return Navigator.ParseLite(cleanType, value);
              }
              return base.BindModel(controllerContext, bindingContext);
         }
-
-        public static string WriteLite(Lite lite, bool forceRuntimeType)
-        {
-            if(lite == null)
-                return null;
-
-            if (lite.RuntimeType == Reflector.ExtractLite(lite.GetType()) && !forceRuntimeType)
-                return lite.Id.ToString();
-
-            return lite.Key(rt=>Navigator.TypesToNames.GetOrThrow(rt, Resources.TheType0IsNotRegisteredInNavigator));
-        }
-
-
-        public static Lite ParseLite(Type staticType, string value)
-        {
-            if (string.IsNullOrEmpty(value))
-                return null;
-
-            return Lite.ParseLite(staticType, value, typeName => 
-                Navigator.NamesToTypes.GetOrThrow(typeName, Resources.TheName0DoesNotCorrespondToAnyTypeInNavigator));
-        }
     }
+
 
     public class ImplementationsModelBinder : IModelBinder
     {

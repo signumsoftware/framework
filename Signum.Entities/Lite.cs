@@ -288,19 +288,9 @@ namespace Signum.Entities
             return null;
         }
 
-        public string Key()
-        {
-            return "{0};{1}".Formato(this.RuntimeType.Name, this.Id);
-        }
-
         public string Key(Func<Type, string> typeName)
         {
             return "{0};{1}".Formato(typeName(this.RuntimeType), this.Id);
-        }
-
-        public string KeyLong()
-        {
-            return "{0};{1};{2}".Formato(this.RuntimeType.Name, this.Id, this.ToStr);
         }
 
         public string KeyLong(Func<Type, string> typeName)

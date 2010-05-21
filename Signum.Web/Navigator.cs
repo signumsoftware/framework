@@ -452,6 +452,23 @@ namespace Signum.Web
         {
             return TypesToNames.GetOrThrow(type, "{0} not registered. Call Navigator.RegisterTypeName");
         }
+
+        public static Lite ParseLite(Type staticType, string value)
+        {
+            if (string.IsNullOrEmpty(value))
+                return null;
+
+            return Lite.ParseLite(staticType, value, typeName =>
+                Navigator.NamesToTypes.GetOrThrow(typeName, Resources.TheName0DoesNotCorrespondToAnyTypeInNavigator));
+        }
+
+        public static string Key(this Lite lite)
+        {
+            if (lite == null)
+                return null;
+
+            return lite.Key(rt => Navigator.TypesToNames.GetOrThrow(rt, Resources.TheType0IsNotRegisteredInNavigator));
+        }
     }
     
     public class NavigationManager
