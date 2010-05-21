@@ -178,28 +178,28 @@
     <value>We send you this email as you have requested to remember your password. For yoyr safety, we have generated a new random passwor, that you will be able to modify later.&lt;br/&gt;&lt;br/&gt;The password is &lt;b&gt;{0}&lt;/b&gt;</value>
   </data>
   <data name="MailSubject_RememberPassword" xml:space="preserve">
-    <value>Remeber Password</value>
+    <value>Rappeler mot de passe</value>
   </data>
   <data name="Message" xml:space="preserve">
     <value>Message</value>
   </data>
   <data name="NewPassword" xml:space="preserve">
-    <value>New password</value>
+    <value>Nouveau mot de passe</value>
   </data>
   <data name="PasswordDoesNotMatchCurrent" xml:space="preserve">
-    <value>The given password doesn't match the current one</value>
+    <value>Le mot de passe ne correspond pas à celui en cours</value>
   </data>
   <data name="PasswordHasBeenChangedSuccessfully" xml:space="preserve">
-    <value>The password has been changed successfully</value>
+    <value>Le mot de passe a été changé avec succès</value>
   </data>
   <data name="PasswordHasBeenSent" xml:space="preserve">
-    <value>The password has been sent to the provided mail account {0}</value>
+    <value>Le mot de passe a été envoyé sur le compte mail {0}</value>
   </data>
   <data name="PasswordMustHave0orMoreCharacters" xml:space="preserve">
     <value>The password must have {0} or more characters</value>
   </data>
   <data name="PasswordMustHaveAValue" xml:space="preserve">
-    <value>The password must have a value</value>
+    <value>Le mot de passe doit avoir une valeur</value>
   </data>
   <data name="Property0DoesNotExistInType1" xml:space="preserve">
     <value>Property {0} does not exist in type {1}</value>
@@ -211,7 +211,7 @@
     <value>Property {0} does not exist in type {1}</value>
   </data>
   <data name="RememberPassword" xml:space="preserve">
-    <value>Remember password</value>
+    <value>Rappeler mot de passe</value>
   </data>
   <data name="RememberPasswordExplanation" xml:space="preserve">
     <value>Type your username and your email address to receive an email message with the password</value>
@@ -229,10 +229,10 @@
     <value>There's no view registered for type {0}</value>
   </data>
   <data name="TheSpecifiedPasswordsDontMatch" xml:space="preserve">
-    <value>The specified passwords don't match</value>
+    <value>Les mots de passe spécifiés ne correspondent pas</value>
   </data>
   <data name="UserNameAlreadyExists" xml:space="preserve">
-    <value>The provided User Name is already registered, please choose another one</value>
+    <value>Le nom d'utilisateur est déjà enregistré, s'il vous plaît choisir un autre.</value>
   </data>
   <data name="UserNameMustHaveAValue" xml:space="preserve">
     <value>Le nom d'utilisateur doit avoir une valeur</value>
@@ -277,6 +277,15 @@
     <value>Forgot your password? Enter your login email below. We will send you an email with a link to reset your password.</value>
   </data>
   <data name="Remember" xml:space="preserve">
-    <value>Remember</value>
+    <value>Rappeler</value>
+  </data>
+  <data name="GoBackToLoginPage" xml:space="preserve">
+    <value>Tourner à la page de connexion</value>
+  </data>
+  <data name="PasswordReseted" xml:space="preserve">
+    <value>Votre mot de passe a été réinitialisé</value>
+  </data>
+  <data name="YourNewPasswordIs0" xml:space="preserve">
+    <value>Votre nouveau mot de passe est {0}</value>
   </data>
 </root>

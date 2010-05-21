@@ -250,6 +250,15 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Go back to login page.
+        /// </summary>
+        public static string GoBackToLoginPage {
+            get {
+                return ResourceManager.GetString("GoBackToLoginPage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Help documentation.
         /// </summary>
         public static string HelpDocumentation {
@@ -372,6 +381,15 @@ namespace Signum.Web.Extensions.Properties {
         public static string PasswordMustHaveAValue {
             get {
                 return ResourceManager.GetString("PasswordMustHaveAValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your password has been reseted.
+        /// </summary>
+        public static string PasswordReseted {
+            get {
+                return ResourceManager.GetString("PasswordReseted", resourceCulture);
             }
         }
         
@@ -543,6 +561,15 @@ namespace Signum.Web.Extensions.Properties {
         public static string YouMustRepeatTheNewPassword {
             get {
                 return ResourceManager.GetString("YouMustRepeatTheNewPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your new password is {0}.
+        /// </summary>
+        public static string YourNewPasswordIs0 {
+            get {
+                return ResourceManager.GetString("YourNewPasswordIs0", resourceCulture);
             }
         }
     }

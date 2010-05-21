@@ -279,4 +279,13 @@
   <data name="Remember" xml:space="preserve">
     <value>Remember</value>
   </data>
+  <data name="GoBackToLoginPage" xml:space="preserve">
+    <value>Go back to login page</value>
+  </data>
+  <data name="PasswordReseted" xml:space="preserve">
+    <value>Your password has been reseted</value>
+  </data>
+  <data name="YourNewPasswordIs0" xml:space="preserve">
+    <value>Your new password is {0}</value>
+  </data>
 </root>

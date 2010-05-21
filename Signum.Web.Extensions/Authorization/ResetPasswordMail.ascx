@@ -6,7 +6,7 @@
 <%@ Import Namespace="Signum.Utilities" %>
 <%@ Import Namespace="Ucalenda.Entities" %>
 <%@ Import Namespace="Ucalenda.Web.Properties" %>
-
-Your Password have been reseted.
+<%@ Import Namespace="Signum.Web.Extensions.Properties" %>
+<%= Html.Encode(Resources.PasswordReseted) %>
 <p />
-Your new password is <%=(string)ViewData["password"] %>
+<%= Html.Encode(Resources.YourNewPasswordIs0.Formato(ViewData["password"]) %>
