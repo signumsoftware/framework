@@ -101,7 +101,7 @@ namespace Signum.Utilities
             }
         }
 
-        private V GetValue(string line)
+        public V GetValue(string line)
         {
             return dictionary.Where(kvp => string.Equals(kvp.Key.ToString(), line, StringComparison.InvariantCultureIgnoreCase)).Single(Resources.NoOptionWithKey0Found.Formato(line))
                 .Value.First;
