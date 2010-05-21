@@ -83,7 +83,7 @@ Autocompleter.prototype = {
         this.timerID = setTimeout(function() { self.keyup(e) }, (self.options.cacheResults && self.cacheResults[self.$control.val().toLowerCase()] != null) ? 0 : self.options.delay);
     },
     keyup: function(key) {
-    if (key == 37 || key == 39 || key == 38 || key == 40 || key == 13) return;
+        if (key == 37 || key == 39 || key == 38 || key == 40 || key == 13) return;
         var input = this.$control.val();
         if (this.currentText == input) return;
 
@@ -192,8 +192,8 @@ Autocompleter.prototype = {
 
     },
     keydown: function(e) {
-    var key = e.which ? e.which : e.keyCode;
-    if (key == 13 || key == 9) {    //enter or tab
+        var key = e.which ? e.which : e.keyCode;
+        if (key == 13 || key == 9) {    //enter or tab
             var selectedOption = this.$dd.find("." + this.resultSelectedClass);
             if (selectedOption.length > 0) {
                 if (selectedOption.hasClass("extra")) selectedOption.click();
@@ -257,9 +257,11 @@ Autocompleter.prototype = {
             //look if there are non-bolded strings
             var nd_i = replaceDiacritics(i).toLowerCase();
             var nd_s = replaceDiacritics(s).toLowerCase();
+            console.log("nd_i " + nd_i);
+            console.log("nd_s " + nd_s);
 
             var index = nd_s.indexOf(nd_i), l = i.length;
-            if (index != -1) s = s.substring(0, index) + "<strong>" + s.substring(index, l) + "</strong>" + s.substring(index + l);
+            if (index != -1) s = s.substr(0, index) + "<strong>" + s.substr(index, i.length) + "</strong>" + s.substr(index + i.length);
         }
         return s;
     },
