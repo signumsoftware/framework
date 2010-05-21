@@ -181,7 +181,7 @@
     <value>,</value>
   </data>
   <data name="DateThis" xml:space="preserve">
-    <value>Celui-ci {0}</value>
+    <value>{0} prochain</value>
   </data>
   <data name="DateTimePrecision_Days" xml:space="preserve">
     <value>Jours</value>
