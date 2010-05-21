@@ -153,6 +153,11 @@ namespace Signum.Entities
             this.regex = regex;
         }
 
+        public RegexValidatorAttribute(string regexExpresion)
+        {
+            this.regex = new Regex(regexExpresion);
+        }
+
         string formatName;
         public string FormatName
         {
