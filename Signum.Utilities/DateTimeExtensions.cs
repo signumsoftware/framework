@@ -230,7 +230,7 @@ namespace Signum.Utilities
                     if (dateString.EndsWith(endSeparator))
                         dateString = dateString.Substring(0, dateString.Length - endSeparator.Length);
                 }
-                return dateString.Trim();
+                return dateString.Trim().FirstUpper();
             }
             return date.ToLongDateString();
         }
