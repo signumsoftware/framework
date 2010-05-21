@@ -10,6 +10,7 @@ using System.Web.Configuration;
 using System.Security;
 using System.Configuration;
 using System.Security.Permissions;
+using System.Net;
 
 namespace Signum.Web.ScriptCombiner
 {
@@ -152,18 +153,46 @@ namespace Signum.Web.ScriptCombiner
             if (path != null) resourcesFolder = "../" + path.Replace("%2f", "/");
 
             this.context = context;
+            DateTime lmServer = DateTime.MinValue;
+            foreach (string fileName in files)
+            {
+                string file = context.Server.MapPath(resourcesFolder + "/" + fileName.Replace("%2f", "/"));
+                DateTime fileLastModified = File.GetLastWriteTimeUtc(file);
+                if (fileLastModified > lmServer) lmServer = fileLastModified;
+            }
+
+            //check dates
+            if (context.Request["HTTP_IF_MODIFIED_SINCE"] != null)
+            {
+                DateTime lmBrowser = DateTime.Parse(context.Request["HTTP_IF_MODIFIED_SINCE"].ToString()).ToUniversalTime();
+
+                if (Math.Truncate(lmServer.TimeOfDay.TotalSeconds) <= lmBrowser.TimeOfDay.TotalSeconds)
+                {
+                    context.Response.Clear();
+                    context.Response.StatusCode = (int)HttpStatusCode.NotModified;
+                    context.Response.SuppressContent = true;
+                    return;
+                }
+            }
+
+            context.Response.Cache.SetLastModified(lmServer);
+
             // Decide if browser supports compressed response
+            bool isCompressed = this.CanGZip(context.Request);
 
             // If the set has already been cached, write the response directly from
             // cache. Otherwise generate the response and cache it
-            if (cacheable && !this.WriteFromCache(version) || !cacheable)
+            if (cacheable && !this.WriteFromCache(version, isCompressed) || !cacheable)
             {
                 using (MemoryStream memoryStream = new MemoryStream(8092))
                 {
                     // Decide regular stream or gzip stream based on whether the response can be compressed or not
                     //using (Stream writer = isCompressed ?  (Stream)(new GZipStream(memoryStream, CompressionMode.Compress)) : memoryStream)
-                    using (Stream writer = memoryStream)
-                    {
+                   using (Stream writer = isCompressed ?
+                               (Stream)(new GZipStream(memoryStream, CompressionMode.Compress)) :
+                               memoryStream)
+                          {
+
                         // Read the files into one big string
                         StringBuilder allScripts = new StringBuilder();
                         foreach (string fileName in files)
@@ -173,8 +202,8 @@ namespace Signum.Web.ScriptCombiner
                                 try
                                 {
                                     //allScripts.Append(File.ReadAllText(context.Server.MapPath(fileName)));
-                                    allScripts.Append(
-                                        ProcessFile(context.Server.MapPath(resourcesFolder + "/" + fileName.Replace("%2f", "/"))));
+                                    string file = context.Server.MapPath(resourcesFolder + "/" + fileName.Replace("%2f", "/"));
+                                    allScripts.Append(ProcessFile(file));
                                 }
                                 catch (Exception) { }
                             }
@@ -195,8 +224,10 @@ namespace Signum.Web.ScriptCombiner
                         responseBytes, null, System.Web.Caching.Cache.NoAbsoluteExpiration,
                         CACHE_DURATION);
 
+
                     // Generate the response
-                    this.WriteBytes(responseBytes);
+                    this.WriteBytes(responseBytes, isCompressed);
+
                 }
             }
         }
@@ -208,34 +239,37 @@ namespace Signum.Web.ScriptCombiner
             if (responseBytes == null || responseBytes.Length == 0)
                 return false;
 
-            this.WriteBytes(responseBytes);
+            this.WriteBytes(responseBytes, isCompressed);
             return true;
         }
 
-        private bool WriteFromCache(string version)
+        private bool WriteFromCache(string version, bool isCompressed)
         {
             byte[] responseBytes = context.Cache[GetCacheKey(version)] as byte[];
 
             if (responseBytes == null || responseBytes.Length == 0)
                 return false;
 
-            this.WriteBytes(responseBytes);
+            this.WriteBytes(responseBytes, isCompressed);
             return true;
         }
 
-        private void WriteBytes(byte[] bytes)
+        private void WriteBytes(byte[] bytes, bool isCompressed)
         {
             HttpResponseBase response = context.Response;
 
             response.AppendHeader("Content-Length", bytes.Length.ToString());
             response.ContentType = contentType;
-            response.AppendHeader("Content-Encoding", "utf-8");
 
-            context.Response.Cache.SetCacheability(HttpCacheability.Public);
-            context.Response.Cache.SetExpires(DateTime.Now.Add(CACHE_DURATION));
-            context.Response.Cache.SetMaxAge(CACHE_DURATION);
-            context.Response.Cache.AppendCacheExtension("must-revalidate, proxy-revalidate");
+            if (isCompressed)
+                response.AppendHeader("Content-Encoding", "gzip");
+            else
+                response.AppendHeader("Content-Encoding", "utf-8");
 
+            //response.Cache.SetCacheability(HttpCacheability.Public);
+            //response.Cache.SetExpires(DateTime.Now.Add(CACHE_DURATION));
+            //response.Cache.SetMaxAge(CACHE_DURATION);
+            //response.Cache.AppendCacheExtension("must-revalidate, proxy-revalidate");
             response.ContentEncoding = Encoding.Unicode;
             response.OutputStream.Write(bytes, 0, bytes.Length);
             response.Flush();
@@ -250,6 +284,16 @@ namespace Signum.Web.ScriptCombiner
         {
             return "HttpCombiner." + GetUniqueKey(context) + "." + version;
         }
+
+        private bool CanGZip(HttpRequestBase request)
+        {
+            string acceptEncoding = request.Headers["Accept-Encoding"];
+            if (!string.IsNullOrEmpty(acceptEncoding) &&
+                 (acceptEncoding.Contains("gzip") || acceptEncoding.Contains("deflate")))
+                return true;
+            return false;
+        }
+
 
 
       /*  public static string GetScriptTags(string setName, int version)
