@@ -300,7 +300,7 @@ namespace Signum.Entities.Reports
                 return FilterValueConverter.Continue;
             }
 
-            result = ((Lite)value).Key();
+            result = ((Lite)value).Key(v => v.Name);
             return null;
         }
 
