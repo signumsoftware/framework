@@ -257,8 +257,6 @@ Autocompleter.prototype = {
             //look if there are non-bolded strings
             var nd_i = replaceDiacritics(i).toLowerCase();
             var nd_s = replaceDiacritics(s).toLowerCase();
-            console.log("nd_i " + nd_i);
-            console.log("nd_s " + nd_s);
 
             var index = nd_s.indexOf(nd_i), l = i.length;
             if (index != -1) s = s.substr(0, index) + "<strong>" + s.substr(index, i.length) + "</strong>" + s.substr(index + i.length);
