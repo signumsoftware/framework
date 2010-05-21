@@ -153,6 +153,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Authorization\Authorization.cd" />
+    <None Include="Reports\CompositeReport.cd" />
     <None Include="Files\Files.cd" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
