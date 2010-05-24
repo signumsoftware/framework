@@ -18,11 +18,6 @@ namespace Signum.Web
     {
         public static string HiddenLite(this HtmlHelper helper, string name, Lite lite)
         {
-            return helper.Hidden(name, LiteModelBinder.WriteLite(lite, false));
-        }
-
-        public static string HiddenLite(this HtmlHelper helper, string name, Lite lite, bool forceRuntimeType)
-        {
             return helper.Hidden(name, LiteModelBinder.WriteLite(lite, false)).ToHtmlString();
         }
 
