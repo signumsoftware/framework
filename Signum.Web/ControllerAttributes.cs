@@ -213,6 +213,8 @@ namespace Signum.Web
 
             context.Response.StatusCode = GetHttpError(ex);
 
+            if (LogGlobalException != null) LogGlobalException(ex);
+
             context.Session[ErrorSessionKey] = ex;
 
             var httpContext = HttpContext.Current;
