@@ -1,17 +1,16 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{86EE7792-96CF-4420-997B-8C811E2B166D}</ProjectGuid>
+    <ProjectTypeGuids>{F85E285D-A4E0-4152-9332-AB1D724D3325};{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Signum.Web.Extensions</RootNamespace>
     <AssemblyName>Signum.Web.Extensions</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
     <SccProjectName>SAK</SccProjectName>
     <SccLocalPath>SAK</SccLocalPath>
     <SccAuxPath>SAK</SccAuxPath>
@@ -34,9 +33,6 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Partial|AnyCPU' ">
-    <OutputPath>bin\Partial\</OutputPath>
-  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
@@ -48,7 +44,7 @@
     <Reference Include="System.Web.Abstractions">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
-    <Reference Include="System.Web.Mvc, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="System.Web.Mvc, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System.Web.Routing">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -66,13 +62,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Authorization\AuthAdminController.cs" />
-    <Compile Include="Authorization\AuthController.cs" />
-    <Compile Include="Authorization\AuthClient.cs" />
-    <Compile Include="Authorization\UserMapping.cs" />
+    <Compile Include="AuthAdmin\Controllers\AuthAdminController.cs" />
+    <Compile Include="AuthAdmin\AuthAdminClient.cs" />
+    <Compile Include="Auth\AuthClient.cs" />
+    <Compile Include="AuthAdmin\UserMapping.cs" />
     <Compile Include="Basic\BasicClient.cs" />
     <Compile Include="Captcha\CaptchaClient.cs" />
-    <Compile Include="Captcha\CaptchaController.cs" />
+    <Compile Include="Captcha\Controllers\CaptchaController.cs" />
     <Compile Include="Captcha\CaptchaHtmlHelper.cs" />
     <Compile Include="Captcha\CaptchaImage.cs" />
     <Compile Include="Captcha\CaptchaValidationAttribute.cs" />
@@ -83,7 +79,7 @@
     <Compile Include="Files\FileController.cs" />
     <Compile Include="Files\FilesClient.cs" />
     <Compile Include="Help\HelpClient.cs" />
-    <Compile Include="Help\HelpController.cs" />
+    <Compile Include="Help\Controllers\HelpController.cs" />
     <Compile Include="Help\HelpModels.cs" />
     <Compile Include="HttpModules\WhitespaceModule.cs" />
     <Compile Include="Mailing\EmailClient.cs" />
@@ -116,8 +112,9 @@
     <Compile Include="ScriptCombiner\CombinerHtmlHelper.cs" />
     <Compile Include="ScriptCombiner\JavaScriptMinifier.cs" />
     <Compile Include="ScriptCombiner\CssScriptCombiner.cs" />
+    <Compile Include="ViewsChecker\ViewsCheckerClient.cs" />
     <Compile Include="ViewsChecker\ViewError.cs" />
-    <Compile Include="ViewsChecker\ViewsCheckerController.cs" />
+    <Compile Include="ViewsChecker\Controllers\ViewsCheckerController.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Framework\Signum.Engine\Signum.Engine.csproj">
@@ -146,29 +143,35 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
-    <None Include="Files\app.config" />
     <None Include="ScriptCombiner\csCombiner.cd" />
+    <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Captcha\captcha.ascx">
+    <Content Include="Captcha\Views\captcha.ascx">
       <SubType>ASPXCodeBehind</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Captcha\captchaImage.ascx">
+    </Content>
+    <Content Include="Captcha\Views\captchaImage.ascx">
       <SubType>ASPXCodeBehind</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Authorization\ChangePassword.aspx">
-    </EmbeddedResource>
-    <EmbeddedResource Include="Authorization\ChangePasswordSuccess.aspx">
-    </EmbeddedResource>
-    <EmbeddedResource Include="Authorization\Login.aspx">
+    </Content>
+    <Content Include="Auth\Views\ChangePassword.aspx" />
+    <Content Include="Auth\Views\ChangePasswordSuccess.aspx" />
+    <Content Include="Auth\Views\Login.aspx">
       <SubType>ASPXCodeBehind</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Authorization\LoginUserControl.ascx">
-    </EmbeddedResource>
-    <EmbeddedResource Include="Authorization\Register.aspx">
+    </Content>
+    <Content Include="Auth\Views\LoginUserControl.ascx" />
+    <Content Include="Auth\Views\Register.aspx">
       <SubType>ASPXCodeBehind</SubType>
-    </EmbeddedResource>
+    </Content>
+    <Content Include="Auth\Views\UserControlPwdUI.ascx">
+      <SubType>ASPXCodeBehind</SubType>
+    </Content>
+    <Content Include="Auth\Views\RememberPassword.aspx" />
+    <Content Include="Auth\Views\RememberPasswordSuccess.aspx" />
+    <Content Include="Auth\Views\ResetPassword.aspx" />
+    <Content Include="Auth\Views\ResetPasswordMail.ascx" />
+    <Content Include="Auth\Views\ResetPasswordCode.aspx" />
+    <Content Include="Auth\Views\ResetPasswordSuccess.aspx" />
+    <Content Include="Auth\Views\ResetPasswordSetNew.aspx" />
     <EmbeddedResource Include="Properties\Resources.fr.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.fr.Designer.cs</LastGenOutput>
@@ -183,61 +186,90 @@
       <LastGenOutput>Resources.es.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Authorization\UserControlPwdUI.ascx">
+    <Content Include="Basic\Views\DateSpanIU.ascx" />
+    <Content Include="Help\Content\help.css" />
+    <Content Include="Help\Images\favicon.ico" />
+    <Content Include="Help\Images\icon-warning.png" />
+    <Content Include="Help\Images\table.gif" />
+    <Content Include="Help\Views\EntityProperty.ascx">
       <SubType>ASPXCodeBehind</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Basic\DateSpanIU.ascx">
-    </EmbeddedResource>
-    <EmbeddedResource Include="Help\EntityProperty.ascx">
+    </Content>
+    <Content Include="Help\Views\Index.aspx" />
+    <Content Include="Help\Views\Menu.ascx" />
+    <Content Include="Help\Views\NamespaceControl.ascx">
       <SubType>ASPXCodeBehind</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Help\Index.aspx">
-    </EmbeddedResource>
-    <EmbeddedResource Include="Help\Menu.ascx">
-    </EmbeddedResource>
-    <EmbeddedResource Include="Help\NamespaceControl.ascx">
+    </Content>
+    <Content Include="Help\Views\Search.aspx">
       <SubType>ASPXCodeBehind</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Help\Search.aspx">
+    </Content>
+    <Content Include="Help\Views\ViewAppendix.aspx">
       <SubType>ASPXCodeBehind</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Help\ViewAppendix.aspx">
+    </Content>
+    <Content Include="Help\Views\ViewEntity.aspx">
       <SubType>ASPXCodeBehind</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Help\ViewEntity.aspx">
+    </Content>
+    <Content Include="Help\Views\ViewNamespace.aspx">
       <SubType>ASPXCodeBehind</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Help\ViewNamespace.aspx">
+    </Content>
+    <Content Include="Help\Views\ViewTodo.aspx">
       <SubType>ASPXCodeBehind</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Help\ViewTodo.aspx">
-      <SubType>ASPXCodeBehind</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Authorization\RememberPassword.aspx">
-    </EmbeddedResource>
-    <EmbeddedResource Include="Authorization\RememberPasswordSuccess.aspx">
-    </EmbeddedResource>
-    <EmbeddedResource Include="Authorization\ResetPassword.aspx">
-    </EmbeddedResource>
-    <EmbeddedResource Include="Authorization\ResetPasswordMail.ascx">
-    </EmbeddedResource>
-    <EmbeddedResource Include="Authorization\ResetPasswordCode.aspx">
-    </EmbeddedResource>
-    <EmbeddedResource Include="Authorization\ResetPasswordSuccess.aspx">
-    </EmbeddedResource>
-    <EmbeddedResource Include="Authorization\ResetPasswordSetNew.aspx">
-    </EmbeddedResource>
+    </Content>
+    <Content Include="AuthAdmin\Content\authAdmin.css" />
+    <Content Include="AuthAdmin\Images\class.png" />
+    <Content Include="AuthAdmin\Images\namespace.png" />
+    <Content Include="AuthAdmin\Images\operation.png" />
+    <Content Include="AuthAdmin\Images\property.png" />
+    <Content Include="AuthAdmin\Images\query.png" />
+    <Content Include="AuthAdmin\Images\radioBlue.png" />
+    <Content Include="AuthAdmin\Images\radioGreen.png" />
+    <Content Include="AuthAdmin\Images\radioRed.png" />
+    <Content Include="AuthAdmin\Images\radioYellow.png" />
+    <Content Include="AuthAdmin\Images\treeView.png" />
+    <Content Include="AuthAdmin\Scripts\authAdmin.js" />
+    <Content Include="AuthAdmin\Views\EntityGroups.ascx" />
+    <Content Include="AuthAdmin\Views\FacadeMethods.ascx" />
+    <Content Include="AuthAdmin\Views\Operations.ascx" />
+    <Content Include="AuthAdmin\Views\Permissions.ascx" />
+    <Content Include="AuthAdmin\Views\Properties.ascx" />
+    <Content Include="AuthAdmin\Views\Queries.ascx" />
+    <Content Include="AuthAdmin\Views\Role.ascx" />
+    <Content Include="AuthAdmin\Views\Types.ascx" />
+    <Content Include="AuthAdmin\Views\User.ascx" />
     <Content Include="ScriptCombiner\ICSharpCode.SharpZipLib.dll" />
-    <EmbeddedResource Include="ViewsChecker\ViewsChecker.aspx">
+    <Content Include="ViewsChecker\Views\ViewsChecker.aspx">
       <SubType>ASPXCodeBehind</SubType>
-    </EmbeddedResource>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Auth\Controllers\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v9.0\WebApplications\Microsoft.WebApplication.targets" />
   <Target Name="BeforeBuild">
+    <ItemGroup>
+      <EmbeddedResource Include="**\*.aspx;**\*.ascx;**\*.gif;**\*.png;**\*.jpg;**\*.css;**\*.js" />
+    </ItemGroup>
   </Target>
-  <Target Name="AfterBuild">
+  <Target Name="AfterBuild" Condition="'$(MvcBuildViews)'=='true'">
+    <AspNetCompiler VirtualPath="temp" PhysicalPath="$(ProjectDir)" />
   </Target>
-  -->
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
+        <WebProjectProperties>
+          <UseIIS>False</UseIIS>
+          <AutoAssignPort>True</AutoAssignPort>
+          <DevelopmentServerPort>2021</DevelopmentServerPort>
+          <DevelopmentServerVPath>/</DevelopmentServerVPath>
+          <IISUrl>
+          </IISUrl>
+          <NTLMAuthentication>False</NTLMAuthentication>
+          <UseCustomServer>False</UseCustomServer>
+          <CustomServerUrl>
+          </CustomServerUrl>
+          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+        </WebProjectProperties>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
 </Project>

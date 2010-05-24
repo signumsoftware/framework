@@ -108,7 +108,7 @@ namespace Signum.Engine.Authorization
                 EmailLogic.RegisterTemplate(UserMailTemplate.ResetPassword, (eo, args) =>
                 {
                     return EmailLogic.RenderWebMail(Signum.Engine.Extensions.Properties.Resources.ResetPasswordCode,
-                        "~/Plugin/Signum.Web.Extensions.dll/Signum.Web.Extensions.Authorization.ResetPasswordMail.ascx", eo, args);
+                        "auth/Views/ResetPasswordMail", eo, args);
                 });
             }
         }

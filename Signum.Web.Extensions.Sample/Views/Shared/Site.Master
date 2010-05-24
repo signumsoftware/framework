@@ -12,16 +12,10 @@
 
     <script src="<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/Scripts/jquery-1.4.min.js" ) %>" type="text/javascript"></script>    
     <script type='text/javascript' src='http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.min.js'></script>
-    <script src="<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/Scripts/jquery.weekcalendar.js" ) %>" type="text/javascript"></script>    
-    <%--<script src="<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/Scripts/SF_Tabs.js" ) %>" type="text/javascript"></script>--%>
-   
+
     <link href="<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/Content/basic.merged.min.css" ) %>" rel="stylesheet" type="text/css" />
-    
-    <link href="<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/Content/fluid/grid.css" ) %>" rel="stylesheet" type="text/css" />
-    
     <link href="<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/Content/LineStyles.css" ) %>" rel="stylesheet" type="text/css" />
     <link href="<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/Content/results.css" ) %>" rel="stylesheet" type="text/css" />    
-    <link href="<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/Content/jquery.weekcalendar.css" ) %>" rel="stylesheet" type="text/css" />    
     <link href="<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/Scripts/jqueryui/ui.theme.css" ) %>" rel="stylesheet" type="text/css" />    
 
     <asp:ContentPlaceHolder ID="head" runat="server"></asp:ContentPlaceHolder>    
@@ -83,7 +77,7 @@
     <div class="container_16" id="main">
 
         <div class="grid_3 prefix_13" id="login">
-            <% Html.RenderPartial(AuthClient.LoginUserControlUrl); %>
+            <% //Html.RenderPartial(AuthClient.LoginUserControlUrl); %>
         </div>    
         <div class="clear"></div> 
         
@@ -101,7 +95,7 @@
                     {ViewDataKeys.PartialViewName, ViewData[ViewDataKeys.PartialViewName]}
                    };
 
-                   Html.RenderPartial("Views/Shared/WidgetView", vdd);
+                   Html.RenderPartial("WidgetView", vdd);
             }%>
           
         </div>

@@ -279,4 +279,121 @@
   <data name="Remember" xml:space="preserve">
     <value>Recordar</value>
   </data>
+  <data name="TypesAscx_Create" xml:space="preserve">
+    <value>Crear</value>
+  </data>
+  <data name="TypesAscx_Modify" xml:space="preserve">
+    <value>Modificar</value>
+  </data>
+  <data name="TypesAscx_None" xml:space="preserve">
+    <value>Ninguno</value>
+  </data>
+  <data name="TypesAscx_Operations" xml:space="preserve">
+    <value>Operaciones</value>
+  </data>
+  <data name="TypesAscx_Overriden" xml:space="preserve">
+    <value>Sobrescrito</value>
+  </data>
+  <data name="TypesAscx_Properties" xml:space="preserve">
+    <value>Propiedades</value>
+  </data>
+  <data name="TypesAscx_Queries" xml:space="preserve">
+    <value>Queries</value>
+  </data>
+  <data name="TypesAscx_Read" xml:space="preserve">
+    <value>Leer</value>
+  </data>
+  <data name="TypesAscx_Type" xml:space="preserve">
+    <value>Tipo</value>
+  </data>
+  <data name="EntityGroupsAscx_All" xml:space="preserve">
+    <value>Todos</value>
+  </data>
+  <data name="EntityGroupsAscx_EntityGroup" xml:space="preserve">
+    <value>Grupos de Entidades</value>
+  </data>
+  <data name="EntityGroupsAscx_In" xml:space="preserve">
+    <value>Dentro</value>
+  </data>
+  <data name="EntityGroupsAscx_None" xml:space="preserve">
+    <value>Ninguno</value>
+  </data>
+  <data name="EntityGroupsAscx_Out" xml:space="preserve">
+    <value>Fuera</value>
+  </data>
+  <data name="EntityGroupsAscx_Overriden" xml:space="preserve">
+    <value>Sobrescrito</value>
+  </data>
+  <data name="FacadeMethodsAscx_Allow" xml:space="preserve">
+    <value>Permitir</value>
+  </data>
+  <data name="FacadeMethodsAscx_Deny" xml:space="preserve">
+    <value>Denegar</value>
+  </data>
+  <data name="FacadeMethodsAscx_FacadeMethod" xml:space="preserve">
+    <value>Método de fachada</value>
+  </data>
+  <data name="FacadeMethodsAscx_Overriden" xml:space="preserve">
+    <value>Sobrescrito</value>
+  </data>
+  <data name="OperationsAscx_Allow" xml:space="preserve">
+    <value>Permitir</value>
+  </data>
+  <data name="OperationsAscx_Deny" xml:space="preserve">
+    <value>Denegar</value>
+  </data>
+  <data name="OperationsAscx_Operation" xml:space="preserve">
+    <value>Operación</value>
+  </data>
+  <data name="OperationsAscx_Overriden" xml:space="preserve">
+    <value>Sobrescrito</value>
+  </data>
+  <data name="PermissionsAscx_Allow" xml:space="preserve">
+    <value>Permitir</value>
+  </data>
+  <data name="PermissionsAscx_Deny" xml:space="preserve">
+    <value>Denegar</value>
+  </data>
+  <data name="PermissionsAscx_Overriden" xml:space="preserve">
+    <value>Sobrescrito</value>
+  </data>
+  <data name="PermissionsAscx_Permission" xml:space="preserve">
+    <value>Permiso</value>
+  </data>
+  <data name="PropertiesAscx_Modify" xml:space="preserve">
+    <value>Modicar</value>
+  </data>
+  <data name="PropertiesAscx_None" xml:space="preserve">
+    <value>Ninguno</value>
+  </data>
+  <data name="PropertiesAscx_Overriden" xml:space="preserve">
+    <value>Sobrescrito</value>
+  </data>
+  <data name="PropertiesAscx_Property" xml:space="preserve">
+    <value>Propiedad</value>
+  </data>
+  <data name="PropertiesAscx_Read" xml:space="preserve">
+    <value>Leer</value>
+  </data>
+  <data name="QueriesAscx_Allow" xml:space="preserve">
+    <value>Permitir</value>
+  </data>
+  <data name="QueriesAscx_Deny" xml:space="preserve">
+    <value>Denegar</value>
+  </data>
+  <data name="QueriesAscx_Overriden" xml:space="preserve">
+    <value>Sobrescrito</value>
+  </data>
+  <data name="QueriesAscx_Query" xml:space="preserve">
+    <value>Query</value>
+  </data>
+  <data name="NoErrorsFound" xml:space="preserve">
+    <value>No se encontraron errores</value>
+  </data>
+  <data name="ThereAreATotalOf0Errors" xml:space="preserve">
+    <value>Hay un total de {0} errores</value>
+  </data>
+  <data name="ViewsChecker" xml:space="preserve">
+    <value>Comprobador de Vistas</value>
+  </data>
 </root>

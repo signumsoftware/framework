@@ -47,15 +47,8 @@ namespace Signum.Web.Extensions.Sample
 
         protected void Application_Start()
         {
-            //System.Diagnostics.Debugger.Break();
-
             RegisterRoutes(RouteTable.Routes);
             //RouteDebug.RouteDebugger.RewriteRoutesForTesting(RouteTable.Routes);
-
-            ViewEngines.Engines.Clear();
-            ViewEngines.Engines.Add(new SignumViewEngine());
-
-            HostingEnvironment.RegisterVirtualPathProvider(new AssemblyResourceProvider());
 
             Signum.Test.Extensions.Starter.Start(Settings.Default.ConnectionString);
 
@@ -63,7 +56,6 @@ namespace Signum.Web.Extensions.Sample
             LinkTypesAndViews();
 
             AuthenticationRequiredAttribute.Authenticate = null;
-            //Thread.CurrentPrincipal = Database.Query<UserDN>().Where(u => u.UserName == "externo").Single();
         }
 
         private void LinkTypesAndViews()

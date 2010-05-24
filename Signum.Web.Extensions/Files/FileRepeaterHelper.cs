@@ -29,8 +29,8 @@ namespace Signum.Web.Files
 
             sb.AppendLine(EntityBaseHelper.BaseLineLabel(helper, fileRepeater));
 
-            sb.AppendLine(helper.Hidden(fileRepeater.Compose(EntityBaseKeys.StaticInfo), new StaticInfo(fileRepeater.ElementType.CleanType()) { IsReadOnly = fileRepeater.ReadOnly }.ToString(), new { disabled = "disabled" }));
-            sb.AppendLine(helper.Hidden(fileRepeater.Compose(TypeContext.Ticks), EntityInfoHelper.GetTicks(helper, fileRepeater).TryToString() ?? ""));
+            sb.AppendLine(helper.Hidden(fileRepeater.Compose(EntityBaseKeys.StaticInfo), new StaticInfo(fileRepeater.ElementType.CleanType()) { IsReadOnly = fileRepeater.ReadOnly }.ToString(), new { disabled = "disabled" }).ToHtmlString());
+            sb.AppendLine(helper.Hidden(fileRepeater.Compose(TypeContext.Ticks), EntityInfoHelper.GetTicks(helper, fileRepeater).TryToString() ?? "").ToHtmlString());
 
             sb.AppendLine(ListBaseHelper.WriteCreateButton(helper, fileRepeater, new Dictionary<string, object> { { "title", fileRepeater.AddElementLinkText } }));
 
@@ -53,7 +53,7 @@ namespace Signum.Web.Files
 
             sb.AppendLine("<div id='{0}' name='{0}' class='repeaterElement'>".Formato(itemTC.Compose(EntityRepeaterKeys.RepeaterElement)));
 
-            sb.AppendLine(helper.Hidden(itemTC.Compose(EntityListBaseKeys.Index), itemTC.Index.ToString()));
+            sb.AppendLine(helper.Hidden(itemTC.Compose(EntityListBaseKeys.Index), itemTC.Index.ToString()).ToHtmlString());
 
             if (fileRepeater.Remove)
                 sb.AppendLine(

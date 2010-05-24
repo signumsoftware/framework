@@ -54,7 +54,7 @@
                 {%>
                 <span class='shortcut'>[q:<%=QueryUtils.GetQueryName(mq.Key).ToString()%>]</span>
                 <dt><%=QueryUtils.GetNiceQueryName(mq.Key)%></dt>
-                <dd><img src='Images/Help/table.gif' title='Ver columnas' style='float:right' onclick="javascript:$(this).siblings('.query-columns').toggle('fast');" /><%=mq.Value.Info.WikiParse(HelpClient.DefaultWikiSettings)%>
+                <dd><img src='help/Images/table.gif' title='Ver columnas' style='float:right' onclick="javascript:$(this).siblings('.query-columns').toggle('fast');" /><%=mq.Value.Info.WikiParse(HelpClient.DefaultWikiSettings)%>
                 <%=Html.TextArea("q-" + QueryUtils.GetQueryName(mq.Key).ToString().Replace(".", "_"), mq.Value.UserDescription, new { @class = "editable" })%>
                 <span class="editor" id="q-<%=QueryUtils.GetQueryName(mq.Key).ToString().Replace(".", "_")%>-editor">
                     <%=mq.Value.UserDescription.WikiParse(HelpClient.DefaultWikiSettings).Replace("\n", "<p>")%>

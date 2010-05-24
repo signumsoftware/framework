@@ -4,6 +4,10 @@
 <%@ Import Namespace="Signum.Engine.Help" %>
 <%@ Import Namespace="Signum.Web.Help" %>
 <%@ Import Namespace="Signum.Web.Extensions" %>
+
+<asp:Content ID="Content2" ContentPlaceHolderID="head" runat="server">
+    <link href="help/Content/help.css" rel="stylesheet" type="text/css" />
+</asp:Content>
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
 
 <script type="text/javascript">
@@ -65,8 +69,4 @@
   <%} %>
 </ul>
 </div>
-</asp:Content>
-<asp:Content ID="Content2" ContentPlaceHolderID="head" runat="server">
-    <link href="<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/Content/help.css" ) %>"
-        rel="stylesheet" type="text/css" />
 </asp:Content>

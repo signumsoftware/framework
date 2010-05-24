@@ -21,13 +21,11 @@ using Signum.Web.Extensions.Properties;
 
 namespace Signum.Web.ViewsChecker
 {
-
     [HandleError]
     public class ViewsCheckerController : Controller
     {
-        public ViewResult ViewsChecker()
+        public ViewResult Index()
         {
-
             //We ensure Buffer is active
             Response.Buffer = true;
 
@@ -73,7 +71,7 @@ namespace Signum.Web.ViewsChecker
             //Clear content written by the renderization of views, just want error content
             Response.Clear();
 
-            return View("~/Plugin/Signum.Web.Extensions.dll/Signum.Web.Extensions.ViewsChecker.ViewsChecker.aspx", errors);
+            return View(ViewsCheckerClient.ViewPrefix + "ViewsChecker", errors);
         }
 
         private string FindRegion(string result, string key)

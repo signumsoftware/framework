@@ -2,41 +2,40 @@
 <%@ Import Namespace="Signum.Web" %>
 <%@ Import Namespace="System.Collections.Generic" %>
 <%@ Import Namespace="Signum.Web.ViewsChecker" %>
+<%@ Import Namespace="Signum.Web.Extensions.Properties" %>
+<%@ Import Namespace="Signum.Utilities" %>
 
 <asp:Content ID="loginTitle" ContentPlaceHolderID="head" runat="server">
-    <title>Views Checker</title>
-    <link href="Content/Site.css" rel="stylesheet" type="text/css" />
-    <link href="Content/LineStyles.css" rel="stylesheet" type="text/css" />
+    <title><%= Resources.ViewsChecker %></title>
 </asp:Content>
 
 <asp:Content ID="loginContent" ContentPlaceHolderID="MainContent" runat="server">
-    <h1>Views Checker</h1>
-    
+    <h1><%= Resources.ViewsChecker %></h1>
     <% 
         List<ViewError> errors = (List<ViewError>)Model;
         if (errors == null || errors.Count == 0)
-            Response.Write("<h2>No se encontraron errores</h2>");
+            Response.Write("<h2>" + Resources.NoErrorsFound + "</h2>");
         else
         {
-            Response.Write("<h2>Hay un total de " + errors.Count + " errores</h2>");
+            Response.Write("<h2>" + Resources.ThereAreATotalOf0Errors.Formato(errors.Count) + "</h2>");
         %>
      <div>
         <table border="solid 1px black" cellpadding="5px" cellspacing="1">
             <tr valign="top" style="font-weight:bold">
                 <td>
-                    <%= ViewError.ViewNameLbl%>
+                    <%= Resources.ViewName %>
                 </td>
                 <td>
-                    <%= ViewError.MessageLbl%>
+                    <%= Resources.Message %>
                 </td>
                 <td>
-                    <%= ViewError.SourceLbl%>
+                    <%= Resources.Source %>
                 </td>
                 <td>
-                    <%= ViewError.StackTraceLbl%>
+                    <%= Resources.StackTrace %>
                 </td>
                 <td>
-                    <%= ViewError.TargetSiteLbl%>
+                    <%= Resources.TargetSite %>
                 </td>
             </tr>
             <%

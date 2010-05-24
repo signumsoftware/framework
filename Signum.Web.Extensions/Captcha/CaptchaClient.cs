@@ -3,13 +3,23 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Drawing;
+using System.Reflection;
 
 namespace Signum.Web.Captcha
 {
     public static class CaptchaClient
     {
-        public static string CaptchaUrl = "~/Plugin/Signum.Web.Extensions.dll/Signum.Web.Extensions.Captcha.captcha.ascx";
-        public static string CaptchaImageUrl = "~/Plugin/Signum.Web.Extensions.dll/Signum.Web.Extensions.Captcha.captchaImage.ascx";
+        public static string CaptchaUrl = "captcha/Views/captcha";
+        public static string CaptchaImageUrl = "captcha/Views/captchaImage";
+
+        public static void Start()
+        {
+            if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
+            {
+                AssemblyResourceManager.RegisterAreaResources(
+                    new AssemblyResourceStore(typeof(CaptchaClient), "/captcha/", "Signum.Web.Extensions.Captcha."));
+            }
+        }
 
         public static FontWarpFactor? fontWarpFactor { set { CaptchaImage.FontWarp = value; } }
         public static BackgroundNoiseLevel? backgroundNoiseLevel { set { CaptchaImage.BackgroundNoise = value; } }

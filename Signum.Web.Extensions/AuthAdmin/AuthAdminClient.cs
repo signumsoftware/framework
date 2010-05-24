@@ -1,4 +1,5 @@
-﻿using System;
+﻿#region usings
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,83 +18,36 @@ using Signum.Entities.Reflection;
 using Signum.Entities.Operations;
 using System.Linq.Expressions;
 using Signum.Engine.Maps;
+using System.Web.Routing;
+#endregion
 
 namespace Signum.Web.Authorization
 {
-    public static class AuthClient
+    public static class AuthAdminClient
     {
-        public static string ViewPrefix = "~/Plugin/Signum.Web.Extensions.dll/Signum.Web.Extensions.Authorization.";
+        public static string ViewPrefix = "authAdmin/Views/";
 
-        public static string CookieName = "sfUser";
-        public static string LoginUrl = ViewPrefix + "Login.aspx";
-        public static string LoginUserControlUrl = ViewPrefix + "LoginUserControl.ascx";
-        public static string ChangePasswordUrl = ViewPrefix + "ChangePassword.aspx";
-        public static string ChangePasswordSuccessUrl = ViewPrefix + "ChangePasswordSuccess.aspx";
-
-        public static string ResetPasswordUrl = ViewPrefix + "ResetPassword.aspx";
-        public static string ResetPasswordCodeUrl = ViewPrefix + "ResetPasswordCode.aspx";
-        public static string ResetPasswordSuccessUrl = ViewPrefix + "ResetPasswordSuccess.aspx";
-        public static string ResetPasswordSetNewUrl = ViewPrefix + "ResetPasswordSetNew.aspx";
-
-        public static string RememberPasswordUrl = ViewPrefix + "RememberPassword.aspx";
-        public static string RememberPasswordSuccessUrl = ViewPrefix + "RememberPasswordSuccess.aspx";
-
-        //public static string RegisterUrl = "~/Plugin/Signum.Web.Extensions.dll/Signum.Web.Extensions.Authorization.Register.aspx";
-
-        public static void Start(bool types, bool property, bool queries)
+        public static void Start(bool types, bool properties, bool queries, bool operations, bool permissions, bool facadeMethods, bool entityGroups)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                Navigator.AddSettings(new List<EntitySettings>
-                {
-                    new EntitySettings<UserDN>(EntityType.Default), 
-                    new EntitySettings<RoleDN>(EntityType.Admin)
-                });
+                AssemblyResourceManager.RegisterAreaResources(
+                    new AssemblyResourceStore(typeof(AuthClient), "/authAdmin/", "Signum.Web.Extensions.AuthAdmin."));
 
-                if (property)
-                    Common.CommonTask += new CommonTask(TaskAuthorizeProperties);
+                RouteTable.Routes.InsertRouteAt0("authAdmin/{resourcesFolder}/{*resourceName}",
+                    new { controller = "Resources", action = "Index", area = "authAdmin" },
+                    new { resourcesFolder = new InArray(new string[] { "Scripts", "Content", "Images" }) });
 
-                if (types)
-                {
-                    Navigator.Manager.GlobalIsCreable += type => TypeAuthLogic.GetTypeAllowed(type) == TypeAllowed.Create;
-                    Navigator.Manager.GlobalIsReadOnly += type => TypeAuthLogic.GetTypeAllowed(type) <= TypeAllowed.Read;
-                    Navigator.Manager.GlobalIsNavigable += type => TypeAuthLogic.GetTypeAllowed(type) >= TypeAllowed.Read;
-                    Navigator.Manager.GlobalIsViewable += type => TypeAuthLogic.GetTypeAllowed(type) >= TypeAllowed.Read;
-                }
+                if (Navigator.Manager.EntitySettings.ContainsKey(typeof(UserDN)))
+                    Navigator.EntitySettings<UserDN>().PartialViewName = _ => ViewPrefix + "User";
+                else
+                    Navigator.AddSetting(new EntitySettings<UserDN>(EntityType.Default) { PartialViewName = _ => ViewPrefix + "User" });
 
-                if (queries)
-                    Navigator.Manager.GlobalIsFindable += type => QueryAuthLogic.GetQueryAllowed(type);
-
-
-                AuthenticationRequiredAttribute.Authenticate = context =>
-                {
-                    if (UserDN.Current == null)
-                    {
-                        //use the current url for the redirect
-                        string redirectOnSuccess = context.HttpContext.Request.Url.AbsolutePath;
-                        //send them off to the login page
-                        string redirectUrl = string.Format("?ReturnUrl={0}", redirectOnSuccess);
-                        string loginUrl = context.HttpContext.Request.ApplicationPath + "/Auth/Login" + redirectUrl;
-                        context.HttpContext.Response.Redirect(loginUrl, true);
-                    }
-                };
-
-                Schema.Current.EntityEvents<UserDN>().Saved += new SavedEntityEventHandler<UserDN>(AuthClient_Saved);
-
+                if (Navigator.Manager.EntitySettings.ContainsKey(typeof(RoleDN)))
+                    Navigator.EntitySettings<RoleDN>().PartialViewName = _ => ViewPrefix + "Role";
+                else
+                    Navigator.AddSetting(new EntitySettings<RoleDN>(EntityType.Admin) { PartialViewName = _ => ViewPrefix + "Role" });
                 
-            }
-        }
-
-        static void AuthClient_Saved(UserDN ident, bool isRoot, bool isNew)
-        {
-            if (ident.Is(UserDN.Current))
-                AuthController.UpdateSessionUser(); 
-        }
-
-        public static void StartAuthAdmin(bool types, bool properties, bool queries, bool operations, bool permissions, bool facadeMethods, bool entityGroups)
-        {
-            if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
-            {
                 if (types)
                     Register<TypeRulePack, TypeAllowedRule, TypeDN, TypeAllowed, TypeDN>("types", a => a.Resource, "Resource", false);
 
@@ -153,7 +107,7 @@ namespace Signum.Web.Authorization
 
             Navigator.AddSetting(new EntitySettings<T>(EntityType.NotSaving)
             {
-                PartialViewName = e => "Views/AuthAdmin/{0}".Formato(partialViewName),
+                PartialViewName = e => ViewPrefix + partialViewName,
                 MappingAdmin = new EntityMapping<T>(false)
                     .SetProperty(m => m.Rules,
                     new MListDictionaryMapping<AR, K>(getKey, getKeyRoute)
@@ -168,24 +122,6 @@ namespace Signum.Web.Authorization
                     OnClick = (embedded ? "postDialog('{0}', '{1}')" :  "Submit('{0}', '{1}')").Formato(
                         new UrlHelper(controllerContext.RequestContext).Action((embedded? "save" : "") +  partialViewName, "AuthAdmin"), prefix), 
                     Text = Resources.Save } });
-        }
-
-        static void TaskAuthorizeProperties(BaseLine bl)
-        {
-            if (bl.PropertyRoute.PropertyRouteType == PropertyRouteType.Property)
-            {
-                switch (PropertyAuthLogic.GetPropertyAccess(bl.PropertyRoute))
-                {
-                    case PropertyAllowed.None:
-                        bl.Visible = false;
-                        break;
-                    case PropertyAllowed.Read:
-                        bl.ReadOnly = true;
-                        break;
-                    case PropertyAllowed.Modify:
-                        break;
-                }
-            }
         }
     }
 }

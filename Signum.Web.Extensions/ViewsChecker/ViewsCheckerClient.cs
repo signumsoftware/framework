@@ -8,21 +8,21 @@ using System.Reflection;
 using Signum.Entities.Extensions.Basics;
 using Signum.Utilities.Reflection;
 
-namespace Signum.Web.Basic
+namespace Signum.Web.ViewsChecker
 {
-    public static class BasicClient
+    public static class ViewsCheckerClient
     {
-        public static string ViewPrefix = "basic/Views/";
+        public static string ViewPrefix = "viewsChecker/Views/";
 
         public static void Start()
         {
+            #if (DEBUG)
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 AssemblyResourceManager.RegisterAreaResources(
-                    new AssemblyResourceStore(typeof(BasicClient), "/basic/", "Signum.Web.Extensions.Basic."));
-
-                Navigator.AddSetting(new EntitySettings<DateSpanDN>(EntityType.Default) { PartialViewName = _ => ViewPrefix + "DateSpanIU" });
+                    new AssemblyResourceStore(typeof(ViewsCheckerClient), "/viewsChecker/", "Signum.Web.Extensions.ViewsChecker."));
             }
+            #endif
         }
     }
 }

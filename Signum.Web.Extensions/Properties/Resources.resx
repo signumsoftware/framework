@@ -288,4 +288,121 @@
   <data name="YourNewPasswordIs0" xml:space="preserve">
     <value>Your new password is {0}</value>
   </data>
+  <data name="TypesAscx_Create" xml:space="preserve">
+    <value>Create</value>
+  </data>
+  <data name="TypesAscx_Modify" xml:space="preserve">
+    <value>Modify</value>
+  </data>
+  <data name="TypesAscx_None" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="TypesAscx_Operations" xml:space="preserve">
+    <value>Operations</value>
+  </data>
+  <data name="TypesAscx_Overriden" xml:space="preserve">
+    <value>Overriden</value>
+  </data>
+  <data name="TypesAscx_Properties" xml:space="preserve">
+    <value>Properties</value>
+  </data>
+  <data name="TypesAscx_Queries" xml:space="preserve">
+    <value>Queries</value>
+  </data>
+  <data name="TypesAscx_Read" xml:space="preserve">
+    <value>Read</value>
+  </data>
+  <data name="TypesAscx_Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="EntityGroupsAscx_All" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="EntityGroupsAscx_EntityGroup" xml:space="preserve">
+    <value>Entity Group</value>
+  </data>
+  <data name="EntityGroupsAscx_In" xml:space="preserve">
+    <value>In</value>
+  </data>
+  <data name="EntityGroupsAscx_None" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="EntityGroupsAscx_Out" xml:space="preserve">
+    <value>Out</value>
+  </data>
+  <data name="EntityGroupsAscx_Overriden" xml:space="preserve">
+    <value>Overriden</value>
+  </data>
+  <data name="FacadeMethodsAscx_Allow" xml:space="preserve">
+    <value>Allow</value>
+  </data>
+  <data name="FacadeMethodsAscx_Deny" xml:space="preserve">
+    <value>Deny</value>
+  </data>
+  <data name="FacadeMethodsAscx_FacadeMethod" xml:space="preserve">
+    <value>Facade Method</value>
+  </data>
+  <data name="FacadeMethodsAscx_Overriden" xml:space="preserve">
+    <value>Overriden</value>
+  </data>
+  <data name="OperationsAscx_Allow" xml:space="preserve">
+    <value>Allow</value>
+  </data>
+  <data name="OperationsAscx_Deny" xml:space="preserve">
+    <value>Deny</value>
+  </data>
+  <data name="OperationsAscx_Operation" xml:space="preserve">
+    <value>Operation</value>
+  </data>
+  <data name="OperationsAscx_Overriden" xml:space="preserve">
+    <value>Overriden</value>
+  </data>
+  <data name="PermissionsAscx_Allow" xml:space="preserve">
+    <value>Allow</value>
+  </data>
+  <data name="PermissionsAscx_Deny" xml:space="preserve">
+    <value>Deny</value>
+  </data>
+  <data name="PermissionsAscx_Overriden" xml:space="preserve">
+    <value>Overriden</value>
+  </data>
+  <data name="PermissionsAscx_Permission" xml:space="preserve">
+    <value>Permission</value>
+  </data>
+  <data name="PropertiesAscx_Modify" xml:space="preserve">
+    <value>Modify</value>
+  </data>
+  <data name="PropertiesAscx_None" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="PropertiesAscx_Overriden" xml:space="preserve">
+    <value>Overriden</value>
+  </data>
+  <data name="PropertiesAscx_Property" xml:space="preserve">
+    <value>Property</value>
+  </data>
+  <data name="PropertiesAscx_Read" xml:space="preserve">
+    <value>Read</value>
+  </data>
+  <data name="QueriesAscx_Allow" xml:space="preserve">
+    <value>Allow</value>
+  </data>
+  <data name="QueriesAscx_Deny" xml:space="preserve">
+    <value>Deny</value>
+  </data>
+  <data name="QueriesAscx_Overriden" xml:space="preserve">
+    <value>Overriden</value>
+  </data>
+  <data name="QueriesAscx_Query" xml:space="preserve">
+    <value>Query</value>
+  </data>
+  <data name="NoErrorsFound" xml:space="preserve">
+    <value>No errors found</value>
+  </data>
+  <data name="ThereAreATotalOf0Errors" xml:space="preserve">
+    <value>There are a total of {0} errors</value>
+  </data>
+  <data name="ViewsChecker" xml:space="preserve">
+    <value>Views Checker</value>
+  </data>
 </root>

@@ -38,7 +38,7 @@ namespace Signum.Web.Files
             sb.AppendLine(helper.Hidden(fileLine.Compose(FileLineKeys.FileType),
                 EnumDN.UniqueKey((value != null) ?
                     value.FileTypeEnum ?? EnumLogic<FileTypeDN>.ToEnum(value.FileType) :
-                    fileLine.FileType)));
+                    fileLine.FileType)).ToHtmlString());
 
             if (value != null)
                 sb.AppendLine(helper.Div(fileLine.Compose(EntityBaseKeys.Entity), "", "", new Dictionary<string, object> { { "style", "display:none" } }));
@@ -75,7 +75,7 @@ namespace Signum.Web.Files
             if (fileLine.ShowValidationMessage)
             {
                 sb.Append("&nbsp;");
-                sb.AppendLine(helper.ValidationMessage(fileLine.ControlID));
+                sb.AppendLine(helper.ValidationMessage(fileLine.ControlID).TryCC(hs => hs.ToHtmlString()));
             }
 
             sb.AppendLine(EntityBaseHelper.WriteBreakLine(helper, fileLine));

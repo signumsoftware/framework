@@ -16,7 +16,7 @@ namespace Signum.Web.Files
 {
     public static class FilesClient
     {
-        public static string ViewPrefix = "~/Plugin/Signum.Web.Extensions.dll/Signum.Web.Extensions.Files.";
+        //public static string ViewPrefix = "files/Views";
 
         public static void Start()
         {
@@ -24,7 +24,7 @@ namespace Signum.Web.Files
             {
                 FileRepositoryDN.OverridenPhisicalCurrentDirectory = AppDomain.CurrentDomain.BaseDirectory;
 
-                Navigator.AddSetting(new EntitySettings<FilePathDN>(EntityType.Default) { PartialViewName = _ => ViewPrefix + "FilePathIU.ascx" });
+                Navigator.AddSetting(new EntitySettings<FilePathDN>(EntityType.Default));
             }
         }
     }

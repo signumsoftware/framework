@@ -3,6 +3,11 @@
 <%@ Import Namespace="Signum.Web.Help" %>
 <%@ Import Namespace="Signum.Engine.Help" %>
 <%@ Import Namespace="Signum.Utilities" %>
+
+<asp:Content ID="Content2" ContentPlaceHolderID="head" runat="server">
+    <link href="help/Content/help.css" rel="stylesheet" type="text/css" />
+</asp:Content>
+
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
 <div class="grid_16" id="entityContent">
     <h1>Documentación de ayuda</h1>
@@ -29,11 +34,7 @@
         <ul>
             <%=appendices.ToString(a => "<li><a href=\"Help/Appendix/{0}\">{1}</a></li>".Formato(a.Name, a.Title), "")%>
         </ul>
-    <%}
+    <%} 
     }%>
 </div>    
-</asp:Content>
-<asp:Content ID="Content2" ContentPlaceHolderID="head" runat="server">
-    <link href="<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/Content/help.css" ) %>"
-        rel="stylesheet" type="text/css" />
 </asp:Content>

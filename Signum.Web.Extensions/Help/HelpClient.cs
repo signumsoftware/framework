@@ -1,4 +1,5 @@
-﻿using System;
+﻿#region usings
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,78 +18,94 @@ using Signum.Engine.Operations;
 using Signum.Engine.DynamicQuery;
 using Signum.Entities.DynamicQuery;
 using Signum.Engine.Basics;
+#endregion
+
 namespace Signum.Web.Help
 {
     public static class HelpClient
     {
         //pages
-        public static string ViewPrefix = "~/Plugin/Signum.Web.Extensions.dll/Signum.Web.Extensions.Help.";
-        public static string IndexUrl = "Index.aspx";
-        public static string ViewEntityUrl = "ViewEntity.aspx";
-        public static string ViewAppendixUrl = "ViewAppendix.aspx";
-        public static string ViewNamespaceUrl = "ViewNamespace.aspx";
-        public static string TodoUrl = "ViewTodo.aspx";
-        public static string SearchResults = "Search.aspx";
+        public static string ViewPrefix = "help/Views/";
+        
+        public static string IndexUrl = "Index";
+        public static string ViewEntityUrl = "ViewEntity";
+        public static string ViewAppendixUrl = "ViewAppendix";
+        public static string ViewNamespaceUrl = "ViewNamespace";
+        public static string TodoUrl = "ViewTodo";
+        public static string SearchResults = "Search";
 
         //controls
-        public static string Menu = "Menu.ascx";
-        public static string ViewEntityPropertyUrl = "EntityProperty.ascx";
-        public static string NamespaceControlUrl = "NamespaceControl.ascx";
+        public static string Menu = "Menu";
+        public static string ViewEntityPropertyUrl = "EntityProperty";
+        public static string NamespaceControlUrl = "NamespaceControl";
 
-        public static void RegisterRoutes(RouteCollection routes)
+        public static void Start()
         {
-            routes.MapRoute(
-            "HelpIndex",                                             // Route name
-            "Help",                                 // URL with parameters
-            new { controller = "Help", action = "Index", }  // Parameter defaults
-            );
+            if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
+            {
+                AssemblyResourceManager.RegisterAreaResources(
+                    new AssemblyResourceStore(typeof(HelpClient), "/help/", "Signum.Web.Extensions.Help."));
 
-            routes.MapRoute(
-            "EntityHelpSearch",                                             // Route name
-            "Help/Search",                           // URL with parameters
-            new { controller = "Help", action = "Search" }  // Parameter defaults
-            );
+                RouteTable.Routes.InsertRouteAt0("help/{resourcesFolder}/{*resourceName}",
+                    new { controller = "Resources", action = "Index", area = "help" },
+                    new { resourcesFolder = new InArray(new string[] { "Scripts", "Content", "Images" }) });
 
-            routes.MapRoute(
-            "ViewTodo",                                             // Route name
-            "Help/ViewTodo",                           // URL with parameters
-            new { controller = "Help", action = "ViewTodo" }  // Parameter defaults
-            );
-            routes.MapRoute(
-            "EntityHelp",                                             // Route name
-            "Help/{entity}",                           // URL with parameters
-            new { controller = "Help", action = "ViewEntity", entity = "" }  // Parameter defaults
-            );
+                RegisterHelpRoutes();
 
-            routes.MapRoute(
-            "NamespaceHelp",                                             // Route name
-            "Help/Namespace/{namespace}",                           // URL with parameters
-            new { controller = "Help", action = "ViewNamespace", @namespace = "" }  // Parameter defaults
-            );
+                DefaultWikiSettings = new WikiSettings(true) { TokenParser = TokenParser };
+                DefaultWikiSettings.TokenParser += s =>
+                {
+                    try
+                    {
+                        WikiLink wl = LinkParser(s);
+                        if (wl != null) return wl.ToHtmlString();
+                    }
+                    catch (Exception)
+                    {
+                        return new WikiLink("#", s, "unavailable").ToHtmlString();
+                    }
+                    return null;
+                };
 
-            routes.MapRoute(
-            "AppendixHelp",                                             // Route name
-            "Help/Appendix/{appendix}",                           // URL with parameters
-            new { controller = "Help", action = "ViewAppendix", appendix = "" }  // Parameter defaults
-            );
+                DefaultWikiSettings.TokenParser += ProcessImages;
 
-            routes.MapRoute(
-            "EntityHelpSave",                                             // Route name
-            "Help/{entity}/Save",                           // URL with parameters
-            new { controller = "Help", action = "SaveEntity", entity = "" }  // Parameter defaults
-            );
+                NoLinkWikiSettings = new WikiSettings(false) { TokenParser = TokenParser };
+                NoLinkWikiSettings.TokenParser += s =>
+                {
+                    try
+                    {
+                        WikiLink wl = LinkParser(s);
+                        if (wl != null) return wl.Text;
+                    }
+                    catch (Exception)
+                    {
+                        return new WikiLink("#", s, "unavailable").ToHtmlString();
+                    }
+                    return null;
+                };
+                NoLinkWikiSettings.TokenParser += RemoveImages;
+            }
+        }
 
-            routes.MapRoute(
-             "NamespaceHelpSave",                                             // Route name
-             "Help/Namespace/{namespace}/Save",                           // URL with parameters
-             new { controller = "Help", action = "SaveNamespace", @namespace = "" }  // Parameter defaults
-             );
+        private static void RegisterHelpRoutes()
+        {
+            RouteTable.Routes.InsertRouteAt0("Help", new { controller = "Help", action = "Index", });
 
-            routes.MapRoute(
-             "AppendixHelpSave",                                             // Route name
-             "Help/Appendix/{appendix}/Save",                           // URL with parameters
-             new { controller = "Help", action = "SaveAppendix", appendix = "" }  // Parameter defaults
-             );
+            RouteTable.Routes.InsertRouteAt0("Help/Search", new { controller = "Help", action = "Search" });
+
+            RouteTable.Routes.InsertRouteAt0("Help/ViewTodo", new { controller = "Help", action = "ViewTodo" });
+
+            RouteTable.Routes.InsertRouteAt0("Help/{entity}", new { controller = "Help", action = "ViewEntity", entity = "" });
+
+            RouteTable.Routes.InsertRouteAt0("Help/Namespace/{namespace}", new { controller = "Help", action = "ViewNamespace", @namespace = "" });
+
+            RouteTable.Routes.InsertRouteAt0("Help/Appendix/{appendix}", new { controller = "Help", action = "ViewAppendix", appendix = "" });
+
+            RouteTable.Routes.InsertRouteAt0("Help/{entity}/Save", new { controller = "Help", action = "SaveEntity", entity = "" });
+
+            RouteTable.Routes.InsertRouteAt0("Help/Namespace/{namespace}/Save", new { controller = "Help", action = "SaveNamespace", @namespace = "" });
+
+            RouteTable.Routes.InsertRouteAt0("Help/Appendix/{appendix}/Save", new { controller = "Help", action = "SaveAppendix", appendix = "" });
         }
 
         public static string WikiUrl = "http://192.168.0.5:8085/";
@@ -157,42 +174,6 @@ namespace Signum.Web.Help
         public static WikiSettings DefaultWikiSettings;
         public static WikiSettings NoLinkWikiSettings;
         public static Func<string, string> TokenParser;
-
-        public static void Start()
-        {
-            DefaultWikiSettings = new WikiSettings(true) { TokenParser = TokenParser };
-            DefaultWikiSettings.TokenParser += s =>
-            {
-                try
-                {
-                    WikiLink wl = LinkParser(s);
-                    if (wl != null) return wl.ToHtmlString();
-                }
-                catch (Exception) {
-                    return new WikiLink("#",s, "unavailable").ToHtmlString();
-                }
-                return null;
-            };
-            
-            DefaultWikiSettings.TokenParser += ProcessImages;
-
-            NoLinkWikiSettings = new WikiSettings(false) { TokenParser = TokenParser};
-            NoLinkWikiSettings.TokenParser += s =>
-            {
-                try
-                {
-                    WikiLink wl = LinkParser(s);
-                    if (wl != null) return wl.Text;
-                }
-                catch (Exception)
-                {
-                    return new WikiLink("#", s, "unavailable").ToHtmlString();
-                }
-                return null;
-            };
-            NoLinkWikiSettings.TokenParser += RemoveImages;
-        }
-
 
         public static WikiLink LinkParser(string content)
         {
@@ -276,7 +257,6 @@ namespace Signum.Web.Help
             }
             return null;
         }
-
 
         static Regex ImageRegex = new Regex(@"\[image(?<position>[^\|]+)\|(?<url>[^\|\]]*)(\|(?<footer>.*))?\]");
 
