@@ -7,4 +7,4 @@
 <%@ Import Namespace="Signum.Web.Extensions.Properties" %>
 <%= Html.Encode(Resources.PasswordReseted) %>
 <p />
-<%= Html.Encode(Resources.YourNewPasswordIs0.Formato(ViewData["password"]) %>
+<%= Html.Encode(Resources.YourNewPasswordIs0.Formato(ViewData["password"])) %>
