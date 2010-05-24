@@ -26,7 +26,7 @@ namespace Signum.Web.Authorization
     public static class AuthClient
     {
         public static string ViewPrefix = "auth/Views/";
-        
+         
         public static string CookieName = "sfUser";
         
         public static string LoginUrl = ViewPrefix + "Login";
