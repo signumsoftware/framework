@@ -141,6 +141,7 @@ namespace Signum.Web.ScriptCombiner
 
         private readonly static TimeSpan CACHE_DURATION = TimeSpan.FromDays(2);
         private HttpContextBase context;
+        string lastModifiedDateKey = "-lmd";
 
         public virtual string ProcessFile(string fileName)
         {
@@ -149,7 +150,6 @@ namespace Signum.Web.ScriptCombiner
 
         public void Process(string[] files, string path, HttpContextBase context)
         {
-            this.version = "1.1";
             if (path != null) resourcesFolder = "../" + path.Replace("%2f", "/");
 
             this.context = context;
@@ -166,7 +166,7 @@ namespace Signum.Web.ScriptCombiner
             {
                 DateTime lmBrowser = DateTime.Parse(context.Request["HTTP_IF_MODIFIED_SINCE"].ToString()).ToUniversalTime();
 
-                if (Math.Truncate(lmServer.TimeOfDay.TotalSeconds) <= lmBrowser.TimeOfDay.TotalSeconds)
+                if (lmServer.Date == lmBrowser.Date && Math.Truncate(lmServer.TimeOfDay.TotalSeconds) <= lmBrowser.TimeOfDay.TotalSeconds)
                 {
                     context.Response.Clear();
                     context.Response.StatusCode = (int)HttpStatusCode.NotModified;
@@ -182,7 +182,7 @@ namespace Signum.Web.ScriptCombiner
 
             // If the set has already been cached, write the response directly from
             // cache. Otherwise generate the response and cache it
-            if (cacheable && !this.WriteFromCache(version, isCompressed) || !cacheable)
+            if (cacheable && !this.WriteFromCache(isCompressed, lmServer) || !cacheable)
             {
                 using (MemoryStream memoryStream = new MemoryStream(8092))
                 {
@@ -220,10 +220,15 @@ namespace Signum.Web.ScriptCombiner
                     // in subsequent calls 
                     byte[] responseBytes = memoryStream.ToArray();
                     if (cacheable)
+                    {
                         context.Cache.Insert(GetCacheKey(version),
                         responseBytes, null, System.Web.Caching.Cache.NoAbsoluteExpiration,
                         CACHE_DURATION);
 
+                        context.Cache.Insert(GetCacheKey(version) + lastModifiedDateKey,
+                        lmServer, null, System.Web.Caching.Cache.NoAbsoluteExpiration,
+                        CACHE_DURATION);
+                    }
 
                     // Generate the response
                     this.WriteBytes(responseBytes, isCompressed);
@@ -232,23 +237,16 @@ namespace Signum.Web.ScriptCombiner
             }
         }
 
-        private bool WriteFromCache(string setName, string version, bool isCompressed)
+        private bool WriteFromCache(bool isCompressed, DateTime lastModificationDate)
         {
-            byte[] responseBytes = context.Cache[GetCacheKey(setName, version)] as byte[];
+            byte[] responseBytes = context.Cache[GetCacheKey()] as byte[];
 
             if (responseBytes == null || responseBytes.Length == 0)
                 return false;
 
-            this.WriteBytes(responseBytes, isCompressed);
-            return true;
-        }
-
-        private bool WriteFromCache(string version, bool isCompressed)
-        {
-            byte[] responseBytes = context.Cache[GetCacheKey(version)] as byte[];
-
-            if (responseBytes == null || responseBytes.Length == 0)
-                return false;
+            //Compare with the date of the server cache content
+            DateTime lmd = (DateTime) context.Cache[GetCacheKey() + lastModifiedDateKey];
+            if (lmd != lastModificationDate) return false;
 
             this.WriteBytes(responseBytes, isCompressed);
             return true;
@@ -275,14 +273,14 @@ namespace Signum.Web.ScriptCombiner
             response.Flush();
         }
 
-        private string GetCacheKey(string setName, string version)
+        private string GetCacheKey(string setName)
         {
-            return "HttpCombiner." + setName + "." + version;
+            return "HttpCombiner." + setName;
         }
 
-        private string GetCacheKey(string version)
+        private string GetCacheKey()
         {
-            return "HttpCombiner." + GetUniqueKey(context) + "." + version;
+            return "HttpCombiner." + GetUniqueKey(context);
         }
 
         private bool CanGZip(HttpRequestBase request)
