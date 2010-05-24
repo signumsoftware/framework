@@ -32,7 +32,7 @@ namespace Signum.Engine.Mailing
 
     public static class EmailLogic
     {
-        public static event BodyRenderer BodyRenderer;
+        public static BodyRenderer BodyRenderer;
 
         public static Func<SmtpClient> SmtpClientBuilder;
 

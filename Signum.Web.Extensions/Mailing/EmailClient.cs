@@ -15,54 +15,36 @@ using Signum.Engine.Mailing;
 using System.Web.UI;
 using System.IO;
 using Signum.Entities.Mailing;
+using System.Web.Routing;
 
 namespace Signum.Web.Mailing
 {
     public static class EmailClient
     {
+        public static string ViewPrefix = "email/Views/";
+
         public static void Start()
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 //EmailLogic.BodyRenderer += (vn, model, args) => RenderControl(vn, model, args);
-                EmailLogic.BodyRenderer += (vn, args) => RenderView(vn, args);
+                EmailLogic.BodyRenderer = (vn, args) => RenderView(vn, args);
+                
+                AssemblyResourceManager.RegisterAreaResources(
+                    new AssemblyResourceStore(typeof(EmailClient), "/email/", "Signum.Web.Extensions.Mailing."));
+                
+                RouteTable.Routes.InsertRouteAt0("email/{resourcesFolder}/{*resourceName}",
+                    new { controller = "Resources", action = "Index", area = "email" },
+                    new { resourcesFolder = new InArray(new string[] { "Scripts", "Content", "Images" }) });
+
+                Navigator.AddSettings(new List<EntitySettings>{
+                    new EntitySettings<EmailMessageDN>(EntityType.Default){ PartialViewName = e => ViewPrefix + "EmailMessage"},
+                    new EntitySettings<EmailPackageDN>(EntityType.Default){ PartialViewName = e => ViewPrefix + "EmailPackage"},                    
+               });
+
             }
         }
 
-        //public static string RenderControl(string viewName, object model, IDictionary<string, object> args)
-        //{
-        //    ViewDataDictionary viewData = new ViewDataDictionary();
-        //    viewData.Model = model;
-        //    if (args != null)
-        //        viewData.AddRange(args);
-
-        //    ViewPage vp = new ViewPage { ViewData = viewData };
-        //    Control control = vp.LoadControl(viewName);
-
-        //    vp.Controls.Add(control);
-
-        //    StringBuilder sb = new StringBuilder();
-        //    using (StringWriter sw = new StringWriter(sb))
-        //    {
-        //        var fakeResponse = new HttpResponse(sw);
-        //        var fakeRequest = new HttpRequest(null, "http://fakeUri.com", null);
-        //        var fakeContext = new HttpContext(fakeRequest, fakeResponse);
-
-        //        var oldContext = HttpContext.Current;
-        //        HttpContext.Current = fakeContext;
-
-        //        using (HtmlTextWriter tw = new HtmlTextWriter(sw))
-        //        {
-        //            vp.RenderView(new ViewContext());
-        //        }
-
-        //        HttpContext.Current = oldContext;
-
-        //        sw.Flush();
-        //    }
-
-        //    return sb.ToString();
-        //}
 
         public static string RenderView(string templateAbsoluteUrl, IDictionary<string, string> args)
         {
@@ -72,7 +54,7 @@ namespace Signum.Web.Mailing
             byte[] postData = null;
             if (args != null && args.Count > 0)
             {
-            postData = System.Text.Encoding.UTF8.GetBytes(args.ToString(kvp => "{0}={1}".Formato(kvp.Key, HttpUtility.UrlEncode(kvp.Value)), "&"));
+                postData = System.Text.Encoding.UTF8.GetBytes(args.ToString(kvp => "{0}={1}".Formato(kvp.Key, HttpUtility.UrlEncode(kvp.Value)), "&"));
 
                 //if (!templateAbsoluteUrl.Contains('?'))
                 //    foreach (var kvp in args)
