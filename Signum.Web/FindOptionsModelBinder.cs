@@ -24,7 +24,7 @@ namespace Signum.Web
             NameValueCollection parameters = controllerContext.HttpContext.Request.Params;
 
             string queryUrlName = "";
-            object rawValue = bindingContext.ValueProvider.TryGetC("sfQueryUrlName").TryCC(vp => vp.RawValue);
+            object rawValue = bindingContext.ValueProvider.GetValue("sfQueryUrlName").TryCC(vp => vp.RawValue);
             if (rawValue.GetType() == typeof(string[]))
                 queryUrlName = ((string[])rawValue)[0];
             else 

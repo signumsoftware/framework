@@ -20,6 +20,7 @@ using Signum.Engine.DynamicQuery;
 using System.Configuration;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Web.Controllers;
+using System.Web.Hosting;
 #endregion
 
 namespace Signum.Web
@@ -229,6 +230,11 @@ namespace Signum.Web
         public static PartialViewResult Search(ControllerBase controller, FindOptions findOptions, int? top, string prefix)
         {
             return Manager.Search(controller, findOptions, top, new Context(null, prefix));
+        }
+
+        public static void SetTokens(object queryName, List<FilterOption> filters)
+        {
+            Manager.SetTokens(queryName, filters);
         }
 
         internal static List<Filter> ExtractFilters(HttpContextBase httpContext, object queryName)
@@ -476,20 +482,20 @@ namespace Signum.Web
         public Dictionary<Type, EntitySettings> EntitySettings;
         public Dictionary<object, QuerySettings> QuerySettings;
 
-        public static string ViewsPrefix = "~/Plugin/Signum.Web.dll/Signum.Web.Views.";
+        public static string ViewsPrefix = "signum/Views/";
 
-        public string AjaxErrorPageUrl = ViewsPrefix + "AjaxError.ascx";
-        public string ErrorPageUrl = ViewsPrefix + "Error.aspx";
-        public string NormalPageUrl = ViewsPrefix + "NormalPage.aspx";
-        public string NormalControlUrl = ViewsPrefix + "NormalControl.ascx";
-        public string PopupControlUrl = ViewsPrefix + "PopupControl.ascx";
-        public string ChooserPopupUrl = ViewsPrefix + "ChooserPopup.ascx";
-        public string SearchPopupControlUrl = ViewsPrefix + "SearchPopupControl.ascx";
-        public string SearchWindowUrl = ViewsPrefix + "SearchWindow.aspx";
-        public string SearchControlUrl = ViewsPrefix + "SearchControl.ascx";
-        public string SearchResultsUrl = ViewsPrefix + "SearchResults.ascx";
-        public string FilterBuilderUrl = ViewsPrefix + "FilterBuilder.ascx";
-        public string ValueLineBoxUrl = ViewsPrefix + "ValueLineBox.ascx";
+        public string AjaxErrorPageUrl = ViewsPrefix + "AjaxError";
+        public string ErrorPageUrl = ViewsPrefix + "Error";
+        public string NormalPageUrl = ViewsPrefix + "NormalPage";
+        public string NormalControlUrl = ViewsPrefix + "NormalControl";
+        public string PopupControlUrl = ViewsPrefix + "PopupControl";
+        public string ChooserPopupUrl = ViewsPrefix + "ChooserPopup";
+        public string SearchPopupControlUrl = ViewsPrefix + "SearchPopupControl";
+        public string SearchWindowUrl = ViewsPrefix + "SearchWindow";
+        public string SearchControlUrl = ViewsPrefix + "SearchControl";
+        public string SearchResultsUrl = ViewsPrefix + "SearchResults";
+        public string FilterBuilderUrl = ViewsPrefix + "FilterBuilder";
+        public string ValueLineBoxUrl = ViewsPrefix + "ValueLineBox";
         
         protected internal Dictionary<string, Type> URLNamesToTypes { get; private set; }
         protected internal Dictionary<Type, string> TypesToURLNames { get; private set; }
@@ -535,10 +541,27 @@ namespace Signum.Web
                 UrlQueryNames = QuerySettings.ToDictionary(kvp => kvp.Value.UrlName ?? GetQueryName(kvp.Key), kvp => kvp.Key, StringComparer.InvariantCultureIgnoreCase, "UrlQueryNames");
             }
 
+            ConfigureSignumWebApplication();
+
+            Started = true;
+        }
+
+        private void ConfigureSignumWebApplication()
+        {
+            ViewEngines.Engines.Clear();
+            ViewEngines.Engines.Add(new SignumViewEngine());
+
+            AssemblyResourceManager.RegisterAreaResources(
+                new AssemblyResourceStore(typeof(Navigator), "/signum/", "Signum.Web.Signum."));
+
+            RouteTable.Routes.InsertRouteAt0("signum/{resourcesFolder}/{*resourceName}",
+                    new { controller = "Resources", action = "Index", area = "signum" },
+                    new { resourcesFolder = new InArray(new string[] { "Scripts", "Content", "Images" }) });
+
             ModelBinders.Binders.DefaultBinder = new LiteModelBinder();
             ModelBinders.Binders.Add(typeof(Implementations), new ImplementationsModelBinder());
 
-            Started = true;
+            HostingEnvironment.RegisterVirtualPathProvider(new AssemblyResourceProvider());
         }
 
         public bool Started { get; private set; } 
@@ -676,16 +699,13 @@ namespace Signum.Web
             if (!Navigator.IsFindable(findOptions.QueryName))
                 throw new UnauthorizedAccessException(Resources.ViewForType0IsNotAllowed.Formato(findOptions.QueryName));
 
-            QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
-
-            foreach (FilterOption opt in findOptions.FilterOptions)
-                opt.Token = QueryToken.Parse(queryDescription, opt.ColumnName);
+            Navigator.SetTokens(findOptions.QueryName, findOptions.FilterOptions);
 
             controller.ViewData.Model = new Context(null, "");
 
             controller.ViewData[ViewDataKeys.PartialViewName] = SearchControlUrl;
 
-            controller.ViewData[ViewDataKeys.QueryDescription] = queryDescription;
+            controller.ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
             controller.ViewData[ViewDataKeys.FindOptions] = findOptions;
 
             if (controller.ViewData.Keys.Count(s => s == ViewDataKeys.PageTitle) == 0)

@@ -28,8 +28,8 @@ namespace Signum.Web
 
             sb.AppendLine(EntityBaseHelper.BaseLineLabel(helper, entityRepeater));
 
-            sb.AppendLine(helper.Hidden(entityRepeater.Compose(EntityBaseKeys.StaticInfo), new StaticInfo(entityRepeater.ElementType.CleanType()) { IsReadOnly = entityRepeater.ReadOnly }.ToString(), new { disabled = "disabled" }));
-            sb.AppendLine(helper.Hidden(entityRepeater.Compose(TypeContext.Ticks), EntityInfoHelper.GetTicks(helper, entityRepeater).TryToString() ?? ""));
+            sb.AppendLine(helper.Hidden(entityRepeater.Compose(EntityBaseKeys.StaticInfo), new StaticInfo(entityRepeater.ElementType.CleanType()) { IsReadOnly = entityRepeater.ReadOnly }.ToString(), new { disabled = "disabled" }).ToHtmlString());
+            sb.AppendLine(helper.Hidden(entityRepeater.Compose(TypeContext.Ticks), EntityInfoHelper.GetTicks(helper, entityRepeater).TryToString() ?? "").ToHtmlString());
 
             sb.AppendLine(EntityBaseHelper.WriteImplementations(helper, entityRepeater));
 
@@ -64,7 +64,7 @@ namespace Signum.Web
 
             sb.AppendLine("<div id='{0}' name='{0}' class='repeaterElement'>".Formato(itemTC.Compose(EntityRepeaterKeys.RepeaterElement)));
 
-            sb.AppendLine(helper.Hidden(itemTC.Compose(EntityListBaseKeys.Index), itemTC.Index.ToString()));
+            sb.AppendLine(helper.Hidden(itemTC.Compose(EntityListBaseKeys.Index), itemTC.Index.ToString()).ToHtmlString());
 
             sb.AppendLine(helper.HiddenRuntimeInfo(itemTC));
 

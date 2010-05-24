@@ -93,7 +93,7 @@ namespace Signum.Web
 
             string implementations = ImplementationsModelBinder.Render(entityBase.Implementations);
 
-            return helper.Hidden(entityBase.Compose(EntityBaseKeys.Implementations), implementations, new { disabled = "disabled"});
+            return helper.Hidden(entityBase.Compose(EntityBaseKeys.Implementations), implementations, new { disabled = "disabled" }).ToHtmlString();
         }
 
         public static string WriteViewButton(HtmlHelper helper, EntityBase entityBase)

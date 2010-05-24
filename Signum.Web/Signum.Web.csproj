@@ -1,17 +1,16 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{61898D02-521F-49AB-928B-F80615D55CA3}</ProjectGuid>
+    <ProjectTypeGuids>{F85E285D-A4E0-4152-9332-AB1D724D3325};{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Signum.Web</RootNamespace>
     <AssemblyName>Signum.Web</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
     <SccProjectName>SAK</SccProjectName>
     <SccLocalPath>SAK</SccLocalPath>
     <SccAuxPath>SAK</SccAuxPath>
@@ -36,9 +35,6 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Partial|AnyCPU' ">
-    <OutputPath>bin\Partial\</OutputPath>
-  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
@@ -56,11 +52,7 @@
     <Reference Include="System.Web.Extensions">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
-    <Reference Include="System.Web.Mvc, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files\Microsoft ASP.NET\ASP.NET MVC RC\Assemblies\System.Web.Mvc.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
+    <Reference Include="System.Web.Mvc, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System.Web.Routing">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
       <Private>False</Private>
@@ -82,7 +74,6 @@
       <Link>Properties\Version.cs</Link>
     </Compile>
     <Compile Include="AppSettings.cs" />
-    <Compile Include="AssemblyResourceProvider.cs" />
     <Compile Include="ButtonBar.cs" />
     <Compile Include="CalendarHelper.cs" />
     <Compile Include="Common.cs" />
@@ -91,9 +82,15 @@
     <Compile Include="JSRenderer\JsOptions.cs" />
     <Compile Include="Lines\EntityListBase.cs" />
     <Compile Include="ControllerAttributes.cs" />
-    <Compile Include="Controllers\ModelBinders.cs" />
-    <Compile Include="Controllers\SignumController.cs" />
-    <Compile Include="Controllers\WidgetsController.cs" />
+    <Compile Include="PortableAreas\AssemblyResourceManager.cs" />
+    <Compile Include="PortableAreas\AssemblyResourceProvider.cs" />
+    <Compile Include="PortableAreas\AssemblyResourceStore.cs" />
+    <Compile Include="PortableAreas\AssemblyResourceVirtualFile.cs" />
+    <Compile Include="RouteExtensions.cs" />
+    <Compile Include="Signum\Controllers\ResourcesController.cs" />
+    <Compile Include="Signum\Controllers\ModelBinders.cs" />
+    <Compile Include="Signum\Controllers\SignumController.cs" />
+    <Compile Include="Signum\Controllers\WidgetsController.cs" />
     <Compile Include="Lines\ValueLine.cs" />
     <Compile Include="Mappings\Mapping.cs">
       <SubType>Code</SubType>
@@ -170,32 +167,28 @@
     <Compile Include="ViewDataKeys.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Images\eliminar16.gif" />
-    <EmbeddedResource Include="Views\SearchResults.ascx">
+    <Content Include="Signum\Images\eliminar16.gif" />
+    <Content Include="Signum\Views\SearchResults.ascx">
       <SubType>ASPXCodeBehind</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Views\FilterBuilder.ascx">
+    </Content>
+    <Content Include="Signum\Views\FilterBuilder.ascx" />
+    <Content Include="Signum\Views\SearchControl.ascx">
       <SubType>ASPXCodeBehind</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Views\SearchControl.ascx">
+    </Content>
+    <Content Include="Signum\Views\SearchWindow.aspx">
       <SubType>ASPXCodeBehind</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Views\SearchWindow.aspx">
+    </Content>
+    <Content Include="Signum\Views\ChooserPopup.ascx" />
+    <Content Include="Signum\Views\PopupControl.ascx">
       <SubType>ASPXCodeBehind</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Views\ChooserPopup.ascx">
-      <SubType>ASPXCodeBehind</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Views\PopupControl.ascx">
-      <SubType>ASPXCodeBehind</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Views\NormalPage.aspx">
-      <SubType>ASPXCodeBehind</SubType>
-    </EmbeddedResource>
+    </Content>
+    <Content Include="Signum\Views\NormalPage.aspx" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ClassDiagram1.cd" />
     <None Include="SignumFramework.pfx" />
+    <Content Include="Web.config" />
+    <Content Include="Signum\Views\Web.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Signum.Engine\Signum.Engine.csproj">
@@ -212,41 +205,35 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Scripts\MicrosoftAjax.debug.js" />
-    <EmbeddedResource Include="Scripts\MicrosoftAjax.js" />
-    <EmbeddedResource Include="Scripts\MicrosoftMvcAjax.debug.js" />
-    <EmbeddedResource Include="Scripts\MicrosoftMvcAjax.js" />
-    <EmbeddedResource Include="Scripts\SF_Globals.js" />
+    <Content Include="Signum\Scripts\SF_Globals.js" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Scripts\SF_Autocomplete.js" />
-    <EmbeddedResource Include="Scripts\SF_DragAndDrop.js" />
+    <Content Include="Signum\Scripts\SF_Autocomplete.js" />
+    <Content Include="Signum\Scripts\SF_DragAndDrop.js" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Images\fancy_closebox.png" />
-    <EmbeddedResource Include="Views\NormalControl.ascx">
+    <Content Include="Signum\Images\fancy_closebox.png" />
+    <Content Include="Signum\Views\NormalControl.ascx">
       <SubType>ASPXCodeBehind</SubType>
-    </EmbeddedResource>
+    </Content>
     <EmbeddedResource Include="Properties\Resources.fr.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.fr.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Include="Views\ValueLineBox.ascx">
+    <Content Include="Signum\Views\ValueLineBox.ascx">
       <SubType>ASPXCodeBehind</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Scripts\SF_FindNavigator.js" />
-    <EmbeddedResource Include="Scripts\SF_Lines.js" />
-    <EmbeddedResource Include="Scripts\SF_Mixin.js" />
-    <EmbeddedResource Include="Scripts\SF_Operations.js" />
-    <EmbeddedResource Include="Scripts\SF_Popup.js" />
-    <EmbeddedResource Include="Scripts\SF_Validator.js" />
-    <EmbeddedResource Include="Scripts\SF_ViewNavigator.js" />
-    <EmbeddedResource Include="Views\AjaxError.ascx">
+    </Content>
+    <Content Include="Signum\Scripts\SF_FindNavigator.js" />
+    <Content Include="Signum\Scripts\SF_Lines.js" />
+    <Content Include="Signum\Scripts\SF_Mixin.js" />
+    <Content Include="Signum\Scripts\SF_Operations.js" />
+    <Content Include="Signum\Scripts\SF_Popup.js" />
+    <Content Include="Signum\Scripts\SF_Validator.js" />
+    <Content Include="Signum\Scripts\SF_ViewNavigator.js" />
+    <Content Include="Signum\Views\AjaxError.ascx">
       <SubType>ASPXCodeBehind</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Views\Error.aspx">
-      <SubType>ASPXCodeBehind</SubType>
-    </EmbeddedResource>
+    </Content>
+    <Content Include="Signum\Views\Error.aspx" />
     <EmbeddedResource Include="Properties\Resources.es.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.es.Designer.cs</LastGenOutput>
@@ -257,22 +244,45 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Views\ElapsedTime.aspx">
+    <Content Include="Signum\Views\ElapsedTime.aspx">
       <SubType>ASPXCodeBehind</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Views\SearchPopupControl.ascx">
+    </Content>
+    <Content Include="Signum\Views\SearchPopupControl.ascx">
       <SubType>ASPXCodeBehind</SubType>
-    </EmbeddedResource>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="obj\" />
+    <Folder Include="Signum\Content\" />
+    <Folder Include="Signum\Views\Shared\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v9.0\WebApplications\Microsoft.WebApplication.targets" />
   <Target Name="BeforeBuild">
+    <ItemGroup>
+      <EmbeddedResource Include="**\*.aspx;**\*.ascx;**\*.gif;**\*.png;**\*.jpg;**\*.css;**\*.js" />
+    </ItemGroup>
   </Target>
-  <Target Name="AfterBuild">
+  <Target Name="AfterBuild" Condition="'$(MvcBuildViews)'=='true'">
+    <AspNetCompiler VirtualPath="temp" PhysicalPath="$(ProjectDir)" />
   </Target>
-  -->
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
+        <WebProjectProperties>
+          <UseIIS>False</UseIIS>
+          <AutoAssignPort>True</AutoAssignPort>
+          <DevelopmentServerPort>3249</DevelopmentServerPort>
+          <DevelopmentServerVPath>/</DevelopmentServerVPath>
+          <IISUrl>
+          </IISUrl>
+          <NTLMAuthentication>False</NTLMAuthentication>
+          <UseCustomServer>False</UseCustomServer>
+          <CustomServerUrl>
+          </CustomServerUrl>
+          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+        </WebProjectProperties>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
 </Project>

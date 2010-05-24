@@ -83,15 +83,12 @@ namespace Signum.Web
 
         public static void SearchControl(this HtmlHelper helper, FindOptions findOptions, Context context)
         {
-            QueryDescription queryDescription =  DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
-
-            foreach (FilterOption opt in findOptions.FilterOptions)
-                opt.Token = QueryToken.Parse(queryDescription, opt.ColumnName);
+            Navigator.SetTokens(findOptions.QueryName, findOptions.FilterOptions);
             
             helper.ViewData.Model = context;
 
             helper.ViewData[ViewDataKeys.FindOptions] = findOptions;
-            helper.ViewData[ViewDataKeys.QueryDescription] = queryDescription;
+            helper.ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
             
             if (helper.ViewData.Keys.Count(s => s == ViewDataKeys.PageTitle) == 0)
                 helper.ViewData[ViewDataKeys.PageTitle] = Navigator.Manager.SearchTitle(findOptions.QueryName);
@@ -151,7 +148,7 @@ namespace Signum.Web
                         Value = fo.ToString(),
                         Selected = fo == filterOptions.Operation
                     }),
-                    (filterOptions.Frozen) ? new Dictionary<string, object>{{"disabled","disabled"}} : null));
+                    (filterOptions.Frozen) ? new Dictionary<string, object> { { "disabled", "disabled" } } : null).ToHtmlString());
             sb.AppendLine("</td>");
             
             sb.AppendLine("<td>");
@@ -160,7 +157,7 @@ namespace Signum.Web
             if (filterOptions.Frozen)
             {
                 string txtValue = (filterOptions.Value != null) ? filterOptions.Value.ToString() : "";
-                sb.AppendLine(helper.TextBox(valueContext.ControlID, txtValue, new { @readonly = "readonly" }));
+                sb.AppendLine(helper.TextBox(valueContext.ControlID, txtValue, new { @readonly = "readonly" }).ToHtmlString());
             }
             else
                 sb.AppendLine(PrintValueField(helper, valueContext, filterOptions));
@@ -187,17 +184,6 @@ namespace Signum.Web
         //    return NewFilter(controller, type.Name, null, token.FullKey(), filterRowIndex, prefix, suffix, FilterOperation.EqualTo, value);
         //}
 
-
-        private static HtmlHelper CreateHtmlHelper(Controller c)
-        {
-            return new HtmlHelper(
-                        new ViewContext(
-                            c.ControllerContext,
-                            new WebFormView(c.ControllerContext.RequestContext.HttpContext.Request.FilePath),
-                            c.ViewData,
-                            c.TempData),
-                        new ViewPage()); 
-        }        
 
         private static string PrintValueField(HtmlHelper helper, Context parent, FilterOption filterOption)
         {

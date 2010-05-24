@@ -27,8 +27,8 @@ namespace Signum.Web
 
             sb.AppendLine(EntityBaseHelper.BaseLineLabel(helper, entityList));
 
-            sb.AppendLine(helper.Hidden(entityList.Compose(EntityBaseKeys.StaticInfo), new StaticInfo(entityList.ElementType.CleanType()) { IsReadOnly = entityList.ReadOnly }.ToString(), new { disabled = "disabled" }));
-            sb.AppendLine(helper.Hidden(entityList.Compose(TypeContext.Ticks), EntityInfoHelper.GetTicks(helper, entityList).TryToString() ?? ""));
+            sb.AppendLine(helper.Hidden(entityList.Compose(EntityBaseKeys.StaticInfo), new StaticInfo(entityList.ElementType.CleanType()) { IsReadOnly = entityList.ReadOnly }.ToString(), new { disabled = "disabled" }).ToHtmlString());
+            sb.AppendLine(helper.Hidden(entityList.Compose(TypeContext.Ticks), EntityInfoHelper.GetTicks(helper, entityList).TryToString() ?? "").ToHtmlString());
             
             sb.AppendLine(EntityBaseHelper.WriteImplementations(helper, entityList));
 
@@ -73,8 +73,8 @@ namespace Signum.Web
         private static string InternalListElement<T>(this HtmlHelper helper, StringBuilder sbOptions, TypeElementContext<T> itemTC, EntityList entityList)
         {
             StringBuilder sb = new StringBuilder();
-            
-            sb.AppendLine(helper.Hidden(itemTC.Compose(EntityListBaseKeys.Index), itemTC.Index.ToString()));
+
+            sb.AppendLine(helper.Hidden(itemTC.Compose(EntityListBaseKeys.Index), itemTC.Index.ToString()).ToHtmlString());
 
             sb.AppendLine(helper.HiddenRuntimeInfo(itemTC));
 

@@ -352,7 +352,14 @@ namespace Signum.Web.Controllers
                             c.ControllerContext,
                             new WebFormView(c.ControllerContext.RequestContext.HttpContext.Request.FilePath),
                             c.ViewData,
-                            c.TempData),
+                            c.TempData,
+                            c.Response.Output
+                        ),
+                        //new ViewContext(
+                        //    c.ControllerContext,
+                        //    new WebFormView(c.ControllerContext.RequestContext.HttpContext.Request.FilePath),
+                        //    c.ViewData,
+                        //    c.TempData),
                         new ViewPage());
         }
 

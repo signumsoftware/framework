@@ -34,7 +34,7 @@ namespace Signum.Web
         public static void WritePageHeader(this HtmlHelper helper)
         {
             if (helper.ViewData.ContainsKey(ViewDataKeys.Reactive))
-                helper.Write(helper.Hidden(ViewDataKeys.Reactive));
+                helper.Write(helper.Hidden(ViewDataKeys.Reactive).ToHtmlString());
 
             helper.WriteEntityInfo((TypeContext)helper.ViewData.Model);
         }
@@ -42,7 +42,7 @@ namespace Signum.Web
         public static void WritePopupHeader(this HtmlHelper helper)
         {
             if (helper.ViewData.ContainsKey(ViewDataKeys.Reactive))
-                helper.Write(helper.Hidden(ViewDataKeys.Reactive));
+                helper.Write(helper.Hidden(ViewDataKeys.Reactive).ToHtmlString());
 
             if (helper.ViewData.ContainsKey(ViewDataKeys.WriteSFInfo))
             {

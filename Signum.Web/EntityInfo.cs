@@ -18,7 +18,17 @@ namespace Signum.Web
     {
         public static string HiddenLite(this HtmlHelper helper, string name, Lite lite)
         {
-            return helper.Hidden(name, lite.Key());
+            return helper.Hidden(name, LiteModelBinder.WriteLite(lite, false));
+        }
+
+        public static string HiddenLite(this HtmlHelper helper, string name, Lite lite, bool forceRuntimeType)
+        {
+            return helper.Hidden(name, LiteModelBinder.WriteLite(lite, false)).ToHtmlString();
+        }
+
+        public static string HiddenLite(this HtmlHelper helper, string name, Lite lite, bool forceRuntimeType)
+        {
+            return helper.Hidden(name, LiteModelBinder.WriteLite(lite, forceRuntimeType)).ToHtmlString();  
         }
 
         public static string HiddenEntityInfo(this HtmlHelper helper, TypeContext tc)
@@ -28,12 +38,12 @@ namespace Signum.Web
 
         public static string HiddenRuntimeInfo(this HtmlHelper helper, TypeContext tc)
         {
-            return helper.Hidden(tc.Compose(EntityBaseKeys.RuntimeInfo), new RuntimeInfo(tc.UntypedValue) { Ticks = GetTicks(helper, tc) }.ToString());
+            return helper.Hidden(tc.Compose(EntityBaseKeys.RuntimeInfo), new RuntimeInfo(tc.UntypedValue) { Ticks = GetTicks(helper, tc) }.ToString()).ToHtmlString();
         }
 
         public static string HiddenStaticInfo(this HtmlHelper helper, TypeContext tc)
         {
-            return helper.Hidden(tc.Compose(EntityBaseKeys.StaticInfo), new StaticInfo(tc.Type) { IsReadOnly = tc.ReadOnly }.ToString(), new { disabled = "disabled" });
+            return helper.Hidden(tc.Compose(EntityBaseKeys.StaticInfo), new StaticInfo(tc.Type) { IsReadOnly = tc.ReadOnly }.ToString(), new { disabled = "disabled" }).ToHtmlString();
         }
 
         public static string HiddenEntityInfo<T, S>(this HtmlHelper helper, TypeContext<T> parent, Expression<Func<T, S>> property)

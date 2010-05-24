@@ -47,7 +47,7 @@ namespace Signum.Web
                 htmlAttributes = new Dictionary<string, object>();
 
             if (enabled)
-                return html.CheckBox(name, value, htmlAttributes);
+                return html.CheckBox(name, value, htmlAttributes).ToHtmlString();
             else 
             {
                 StringBuilder sb = new StringBuilder();

@@ -48,11 +48,6 @@ namespace Signum.Web.Sample
             RegisterRoutes(RouteTable.Routes);
             //RouteDebug.RouteDebugger.RewriteRoutesForTesting(RouteTable.Routes);
 
-            ViewEngines.Engines.Clear();
-            ViewEngines.Engines.Add(new SignumViewEngine());
-
-            HostingEnvironment.RegisterVirtualPathProvider(new AssemblyResourceProvider());
-
             Starter.Start(Settings.Default.ConnectionString);
 
             Schema.Current.Initialize();

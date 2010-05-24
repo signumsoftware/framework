@@ -80,7 +80,7 @@ namespace Signum.Web
                 sb.AppendLine(helper.DropDownList(
                         entityCombo.Compose(EntityComboKeys.Combo),
                         items,
-                        entityCombo.ComboHtmlProperties));
+                        entityCombo.ComboHtmlProperties).ToHtmlString());
             }
 
             sb.AppendLine(EntityBaseHelper.WriteViewButton(helper, entityCombo));

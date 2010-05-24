@@ -28,7 +28,7 @@ namespace Signum.Web
 
             long? ticks = EntityInfoHelper.GetTicks(helper, valueLine);
             if (ticks != null)
-                sb.AppendLine(helper.Hidden(valueLine.Compose(TypeContext.Ticks), ticks.Value));
+                sb.AppendLine(helper.Hidden(valueLine.Compose(TypeContext.Ticks), ticks.Value).ToHtmlString());
 
             if (valueLine.LabelVisible)
             {
@@ -50,7 +50,7 @@ namespace Signum.Web
             if (valueLine.ShowValidationMessage)
             {
                 sb.Append("&nbsp;");
-                sb.AppendLine(helper.ValidationMessage(valueLine.ControlID));
+                sb.AppendLine(helper.ValidationMessage(valueLine.ControlID).TryCC(hs => hs.ToHtmlString()));
             }
 
             if (valueLine.LabelVisible && valueLine.ValueFirst)
@@ -107,7 +107,7 @@ namespace Signum.Web
             else
                 valueLine.ValueHtmlProps.Add("onchange", setTicks + reloadOnChangeFunction);
 
-            return helper.DropDownList(valueLine.ControlID, items, valueLine.ValueHtmlProps);
+            return helper.DropDownList(valueLine.ControlID, items, valueLine.ValueHtmlProps).ToHtmlString();
         }
 
         public static string DateTimePickerTextbox(this HtmlHelper helper, ValueLine valueLine)
@@ -168,7 +168,7 @@ namespace Signum.Web
             else
                 valueLine.ValueHtmlProps.Add("onblur", "this.setAttribute('value', this.value); " + setTicks + reloadOnChangeFunction);
 
-            return helper.TextBox(valueLine.ControlID, valueLine.UntypedValue.TryToString() ?? "", valueLine.ValueHtmlProps);
+            return helper.TextBox(valueLine.ControlID, valueLine.UntypedValue.TryToString() ?? "", valueLine.ValueHtmlProps).ToHtmlString();
         }
 
         public static string NumericTextbox(this HtmlHelper helper, ValueLine valueLine)
@@ -195,7 +195,7 @@ namespace Signum.Web
             else
                 valueLine.ValueHtmlProps.Add("onblur", "this.setAttribute('value', this.value); " + setTicks + reloadOnChangeFunction);
 
-            return helper.TextArea(valueLine.ControlID, (string)valueLine.UntypedValue, valueLine.ValueHtmlProps);
+            return helper.TextArea(valueLine.ControlID, (string)valueLine.UntypedValue, valueLine.ValueHtmlProps).ToHtmlString();
         }
 
         public static string CheckBox(this HtmlHelper helper, ValueLine valueLine)
@@ -232,12 +232,12 @@ namespace Signum.Web
 
             valueLine.ValueHtmlProps.AddCssClass("rbValueLine");
 
-            string rb = helper.RadioButton(valueLine.ControlID, true, value == true, valueLine.ValueHtmlProps);
+            string rb = helper.RadioButton(valueLine.ControlID, true, value == true, valueLine.ValueHtmlProps).ToHtmlString();
             rb = rb.Replace("id=\"" + valueLine.ControlID + "\"", "id=\"" + valueLine.ControlID + "_True\"");
 
             sb.AppendLine(rb);
             sb.AppendLine(helper.Span("", valueLine.RadioButtonLabelTrue, "lblRadioTrue"));
-            rb = helper.RadioButton(valueLine.ControlID, false, value == false, valueLine.ValueHtmlProps);
+            rb = helper.RadioButton(valueLine.ControlID, false, value == false, valueLine.ValueHtmlProps).ToHtmlString();
             rb = rb.Replace("id=\"" + valueLine.ControlID + "\"", "id=\"" + valueLine.ControlID + "_False\"");
             sb.AppendLine(rb);
 

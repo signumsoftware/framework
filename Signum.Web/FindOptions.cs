@@ -101,6 +101,8 @@ namespace Signum.Web
 
         public void Fill(JsOptionsBuilder op)
         {
+            Navigator.SetTokens(this.QueryName, this.FilterOptions); 
+
             op.Add("queryUrlName", QueryName.TryCC(qn => Navigator.Manager.QuerySettings[qn].UrlName.Quote()));
             op.Add("searchOnLoad", SearchOnLoad == true ? "true" : null);
             op.Add("filterMode", FilterMode != FilterMode.Visible ? FilterMode.ToString().Quote() : null);

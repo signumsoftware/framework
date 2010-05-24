@@ -31,8 +31,8 @@ namespace Signum.Web
 
             sb.AppendLine(EntityBaseHelper.BaseLineLabel(helper, listDetail));
 
-            sb.AppendLine(helper.Hidden(listDetail.Compose(EntityBaseKeys.StaticInfo), new StaticInfo(listDetail.ElementType.CleanType()) { IsReadOnly = listDetail.ReadOnly }.ToString(), new { disabled = "disabled" }));
-            sb.AppendLine(helper.Hidden(listDetail.Compose(TypeContext.Ticks), EntityInfoHelper.GetTicks(helper, listDetail).TryToString() ?? ""));
+            sb.AppendLine(helper.Hidden(listDetail.Compose(EntityBaseKeys.StaticInfo), new StaticInfo(listDetail.ElementType.CleanType()) { IsReadOnly = listDetail.ReadOnly }.ToString(), new { disabled = "disabled" }).ToHtmlString());
+            sb.AppendLine(helper.Hidden(listDetail.Compose(TypeContext.Ticks), EntityInfoHelper.GetTicks(helper, listDetail).TryToString() ?? "").ToHtmlString());
             
             sb.AppendLine(EntityBaseHelper.WriteImplementations(helper, listDetail));
 
@@ -90,7 +90,7 @@ namespace Signum.Web
         {
             StringBuilder sb = new StringBuilder();
             
-            sb.AppendLine(helper.Hidden(itemTC.Compose(EntityListBaseKeys.Index), itemTC.Index.ToString()));
+            sb.AppendLine(helper.Hidden(itemTC.Compose(EntityListBaseKeys.Index), itemTC.Index.ToString()).ToHtmlString());
 
             sb.AppendLine(helper.HiddenRuntimeInfo(itemTC));
 

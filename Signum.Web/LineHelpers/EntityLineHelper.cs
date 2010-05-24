@@ -49,7 +49,7 @@ namespace Signum.Web
                         { "class", "valueLine" }, 
                         { "autocomplete", "off" }, 
                         { "style", "display:" + ((entityLine.UntypedValue==null && !entityLine.ReadOnly) ? "block" : "none")}
-                    }));
+                    }).ToHtmlString());
 
                 if (entityLine.Autocomplete)
                 {
