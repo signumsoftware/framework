@@ -66,6 +66,7 @@
     <Compile Include="AuthAdmin\AuthAdminClient.cs" />
     <Compile Include="Auth\AuthClient.cs" />
     <Compile Include="AuthAdmin\UserMapping.cs" />
+    <Compile Include="Auth\Controllers\AuthController.cs" />
     <Compile Include="Basic\BasicClient.cs" />
     <Compile Include="Captcha\CaptchaClient.cs" />
     <Compile Include="Captcha\Controllers\CaptchaController.cs" />
@@ -239,9 +240,6 @@
     <Content Include="ViewsChecker\Views\ViewsChecker.aspx">
       <SubType>ASPXCodeBehind</SubType>
     </Content>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Auth\Controllers\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v9.0\WebApplications\Microsoft.WebApplication.targets" />
