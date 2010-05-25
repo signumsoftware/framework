@@ -19,6 +19,7 @@ using Signum.Entities.Operations;
 using System.Linq.Expressions;
 using Signum.Engine.Maps;
 using System.Web.Routing;
+using System.Web;
 #endregion
 
 namespace Signum.Web.Authorization
@@ -68,7 +69,6 @@ namespace Signum.Web.Authorization
                 if (queries)
                     Navigator.Manager.GlobalIsFindable += type => QueryAuthLogic.GetQueryAllowed(type);
 
-
                 AuthenticationRequiredAttribute.Authenticate = context =>
                 {
                     if (UserDN.Current == null)
@@ -77,7 +77,8 @@ namespace Signum.Web.Authorization
                         string redirectOnSuccess = context.HttpContext.Request.Url.AbsolutePath;
                         //send them off to the login page
                         string redirectUrl = string.Format("?ReturnUrl={0}", redirectOnSuccess);
-                        string loginUrl = context.HttpContext.Request.ApplicationPath + "/Auth/Login" + redirectUrl;
+                        //string loginUrl = context.HttpContext.Request.ApplicationPath + "/Auth/Login" + redirectUrl;
+                        string loginUrl = HttpContextUtils.FullyQualifiedApplicationPath + "Auth/Login" + redirectUrl;
                         context.HttpContext.Response.Redirect(loginUrl, true);
                     }
                 };
