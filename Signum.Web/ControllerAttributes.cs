@@ -125,7 +125,7 @@ namespace Signum.Web
             if (!context.HttpContext.User.Identity.IsAuthenticated)
             {
                 //use the current url for the redirect
-                string redirectOnSuccess = context.HttpContext.Request.Url.AbsolutePath;
+                string redirectOnSuccess = context.HttpContext.Request.Url.PathAndQuery;
                 //send them off to the login page
                 string redirectUrl = string.Format("?ReturnUrl={0}", redirectOnSuccess);
                 //string loginUrl = context.HttpContext.Request.UrlReferrer + "Auth/Login" + redirectUrl;
