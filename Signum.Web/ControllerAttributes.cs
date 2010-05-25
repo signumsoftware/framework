@@ -130,7 +130,8 @@ namespace Signum.Web
                 string redirectOnSuccess = context.HttpContext.Request.Url.AbsolutePath;
                 //send them off to the login page
                 string redirectUrl = string.Format("?ReturnUrl={0}", redirectOnSuccess);
-                string loginUrl = context.HttpContext.Request.UrlReferrer + "Auth/Login" + redirectUrl;
+                //string loginUrl = context.HttpContext.Request.UrlReferrer + "Auth/Login" + redirectUrl;
+                string loginUrl = HttpContextUtils.FullyQualifiedApplicationPath + "Auth/Login" + redirectUrl;
                 context.HttpContext.Response.Redirect(loginUrl, true);
             }
         };
