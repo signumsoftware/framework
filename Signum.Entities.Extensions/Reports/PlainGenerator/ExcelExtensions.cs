@@ -131,7 +131,7 @@ namespace Signum.Entities.Reports
                         default:
                             return "TRUE";
                     }
-                    break;
+                    //break;
             }
             return value;
         }

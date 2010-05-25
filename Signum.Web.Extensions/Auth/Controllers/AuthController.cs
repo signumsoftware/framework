@@ -303,7 +303,7 @@ namespace Signum.Web.Authorization
             {
                 user = AuthLogic.Login(username, Security.EncodePassword(password));
             }
-            catch (Exception ex) { }
+            catch (Exception ) { }
 
             if (user == null)
                 return LoginError("_FORM", Resources.InvalidUsernameOrPassword);
