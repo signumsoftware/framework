@@ -122,8 +122,6 @@ namespace Signum.Web
     {
         public static Action<AuthorizationContext> Authenticate = context =>
         {
-            //if (!((string)HttpContext.Current.Session[SessionUserKey]).HasText())
-            //System.Threading.Thread.CurrentPrincipal.Identity.IsAuthenticated
             if (!context.HttpContext.User.Identity.IsAuthenticated)
             {
                 //use the current url for the redirect
