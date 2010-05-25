@@ -211,6 +211,7 @@ namespace Signum.Web
             context.Server.ClearError();
 
             context.Response.StatusCode = GetHttpError(ex);
+            context.Response.TrySkipIisCustomErrors = true;
 
             if (LogGlobalException != null) LogGlobalException(ex);
 
