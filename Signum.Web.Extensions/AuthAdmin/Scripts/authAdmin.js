@@ -24,6 +24,8 @@ $(function() {
 
 $(function() {
     $(".ruleTable a.namespace").live("click", function() {
+        var tv = $(".tvExpandedLast,.tvClosedLast",this).toggleClass("tvExpandedLast").toggleClass("tvClosedLast");
+        var tv = $(".tvExpanded,.tvClosed", this).toggleClass("tvExpanded").toggleClass("tvClosed");
         var ns = $("span.namespace", this).html();
         $(".ruleTable tr").filter(function() {
             return $("td > span.namespace", this).html() == ns;
