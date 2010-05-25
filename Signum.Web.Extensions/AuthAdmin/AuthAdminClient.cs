@@ -47,7 +47,9 @@ namespace Signum.Web.Authorization
                     Navigator.EntitySettings<RoleDN>().PartialViewName = _ => ViewPrefix + "Role";
                 else
                     Navigator.AddSetting(new EntitySettings<RoleDN>(EntityType.Admin) { PartialViewName = _ => ViewPrefix + "Role" });
-                
+
+                Navigator.RegisterTypeName<IUserRelatedDN>();
+
                 if (types)
                     Register<TypeRulePack, TypeAllowedRule, TypeDN, TypeAllowed, TypeDN>("types", a => a.Resource, "Resource", false);
 
@@ -121,7 +123,10 @@ namespace Signum.Web.Authorization
                 new[] { new ToolBarButton { 
                     OnClick = (embedded ? "postDialog('{0}', '{1}')" :  "Submit('{0}', '{1}')").Formato(
                         new UrlHelper(controllerContext.RequestContext).Action((embedded? "save" : "") +  partialViewName, "AuthAdmin"), prefix), 
-                    Text = Resources.Save } });
+                    Text = Resources.Save,
+                    DivCssClass = ToolBarButton.DefaultEntityDivCssClass 
+                } 
+                });
         }
     }
 }
