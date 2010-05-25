@@ -25,6 +25,11 @@ namespace Signum.Engine.Authorization
             permissionTypes.AddRange(types);
         }
 
+        public static IEnumerable<Enum> RegisteredPermission
+        {
+            get { return permissionTypes.SelectMany<Type, Enum>(t => Enum.GetValues(t).Cast<Enum>()); }
+        }
+
         static AuthCache<RulePermissionDN, PermissionAllowedRule, PermissionDN, Enum, bool> cache;
 
         public static void AssertStarted(SchemaBuilder sb)
@@ -40,7 +45,7 @@ namespace Signum.Engine.Authorization
 
                 sb.Include<PermissionDN>();
 
-                EnumLogic<PermissionDN>.Start(sb, () => permissionTypes.SelectMany(t => Enum.GetValues(t).Cast<Enum>()).ToHashSet());
+                EnumLogic<PermissionDN>.Start(sb, () => RegisteredPermission.ToHashSet());
 
                 cache = new AuthCache<RulePermissionDN, PermissionAllowedRule, PermissionDN, Enum, bool>(sb,
                     EnumLogic<PermissionDN>.ToEnum,
@@ -53,7 +58,7 @@ namespace Signum.Engine.Authorization
 
         public static void Authorize(this Enum permissionKey)
         {
-            if (!cache.GetAllowed(RoleDN.Current, permissionKey))
+            if (!cache.GetAllowed(permissionKey))
                 throw new UnauthorizedAccessException("Permission '{0}' is denied".Formato(permissionKey));
         }
 
@@ -61,12 +66,12 @@ namespace Signum.Engine.Authorization
         {
             RoleDN role = RoleDN.Current;
 
-            return EnumLogic<PermissionDN>.Keys.ToDictionary(a => a, a => cache.GetAllowed(RoleDN.Current, a));
+            return EnumLogic<PermissionDN>.Keys.ToDictionary(a => a, a => cache.GetAllowed(a));
         }
 
         public static bool IsAuthorized(this Enum permissionKey)
         {
-            return cache.GetAllowed(RoleDN.Current, permissionKey);
+            return cache.GetAllowed(permissionKey);
         }
 
         public static PermissionRulePack GetPermissionRules(Lite<RoleDN> roleLite)
@@ -88,6 +93,16 @@ namespace Signum.Engine.Authorization
         public static void SetPermissionAllowed(Lite<RoleDN> role, Enum permissionKey, bool allowed)
         {
             cache.SetAllowed(role, permissionKey, allowed);
+        }
+
+        public static bool GetPermissionAllowed(Lite<RoleDN> role, Enum permissionKey)
+        {
+            return cache.GetAllowed(role, permissionKey);
+        }
+
+        public static bool GetPermissionAllowed(Enum permissionKey)
+        {
+            return cache.GetAllowed(permissionKey);
         }
     }
 }

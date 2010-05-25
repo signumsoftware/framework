@@ -43,17 +43,14 @@ namespace Signum.Engine.Authorization
 
         static bool Schema_IsAllowedCallback(Type type)
         {
-            if (!AuthLogic.IsEnabled)
-                return true;
-
-            return cache.GetAllowed(RoleDN.Current, type) != TypeAllowed.None;
+            return cache.GetAllowed(type) != TypeAllowed.None;
         }
 
         static void Schema_Saving(IdentifiableEntity ident, bool isRoot)
         {
-            if (AuthLogic.IsEnabled && ident.Modified)
+            if (ident.Modified)
             {
-                TypeAllowed access = cache.GetAllowed(RoleDN.Current, ident.GetType());
+                TypeAllowed access = cache.GetAllowed(ident.GetType());
 
                 if (access == TypeAllowed.Create || (!ident.IsNew && access == TypeAllowed.Modify))
                     return;
@@ -64,12 +61,9 @@ namespace Signum.Engine.Authorization
 
         static void Schema_Retrieving(Type type, int id, bool isRoot)
         {
-            if (AuthLogic.IsEnabled)
-            {
-                TypeAllowed access = cache.GetAllowed(RoleDN.Current, type);
-                if (access < TypeAllowed.Read)
-                    throw new UnauthorizedAccessException(Resources.NotAuthorizedToRetrieve0.Formato(type));
-            }
+            TypeAllowed access = cache.GetAllowed(type);
+            if (access < TypeAllowed.Read)
+                throw new UnauthorizedAccessException(Resources.NotAuthorizedToRetrieve0.Formato(type));
         }
 
         public static TypeRulePack GetTypeRules(Lite<RoleDN> roleLite)
@@ -86,19 +80,19 @@ namespace Signum.Engine.Authorization
             cache.SetRules(rules, r => true);
         }
 
-        public static void SetTypeAllowed(Lite<RoleDN> role, Type type, TypeAllowed allowed)
-        {
-            cache.SetAllowed(role, type, allowed);
-        }
-
         public static TypeAllowed GetTypeAllowed(Type type)
         {
-            return cache.GetAllowed(RoleDN.Current, type);
+            return cache.GetAllowed(type);
         }
 
         public static TypeAllowed GetTypeAllowed(Lite<RoleDN> role, Type type)
         {
             return cache.GetAllowed(role, type);
+        }
+
+        public static void SetTypeAllowed(Lite<RoleDN> role, Type type, TypeAllowed allowed)
+        {
+            cache.SetAllowed(role, type, allowed);
         }
 
         public static Dictionary<Type, TypeAllowed> AuthorizedTypes()

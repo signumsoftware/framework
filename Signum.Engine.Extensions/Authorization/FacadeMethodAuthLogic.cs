@@ -52,9 +52,19 @@ namespace Signum.Engine.Authorization
             cache.SetAllowed(role, mi.Name, allowed);
         }
 
+        public static bool SetFacadeMethodAllowed(Lite<RoleDN> role, MethodInfo mi)
+        {
+            return cache.GetAllowed(role, mi.Name);
+        }
+
+        public static bool SetFacadeMethodAllowed(MethodInfo mi)
+        {
+            return cache.GetAllowed(mi.Name);
+        }
+
         public static void AuthorizeAccess(MethodInfo mi)
         {
-            if (!cache.GetAllowed(RoleDN.Current, mi.Name))
+            if (!cache.GetAllowed(mi.Name))
                 throw new UnauthorizedAccessException(Resources.AccessToFacadeMethod0IsNotAllowed.Formato(mi.Name));
         }
     }

@@ -41,6 +41,11 @@ namespace Signum.Engine.Operations
     {
         static Dictionary<Type, Dictionary<Enum, IOperation>> operations = new Dictionary<Type, Dictionary<Enum, IOperation>>();
 
+        public static IEnumerable<Enum> RegisteredOperations
+        {
+            get { return operations.Values.SelectMany(b => b.Keys); }
+        }
+
         public static void AssertStarted(SchemaBuilder sb)
         {
             sb.AssertDefined(ReflectionTools.GetMethodInfo(()=>Start(null,null))); 
@@ -53,7 +58,7 @@ namespace Signum.Engine.Operations
                 sb.Include<OperationDN>();
                 sb.Include<LogOperationDN>();
 
-                EnumLogic<OperationDN>.Start(sb, () => operations.Values.SelectMany(b => b.Keys).ToHashSet());
+                EnumLogic<OperationDN>.Start(sb, () => RegisteredOperations.ToHashSet());
 
                 dqm[typeof(LogOperationDN)] = (from lo in Database.Query<LogOperationDN>()
                                                select new

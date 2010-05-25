@@ -144,9 +144,12 @@ namespace Signum.Entities.Authorization
 
 
 
-        internal A GetAllowed(RoleDN role, K key)
+        internal A GetAllowed(K key)
         {
-            return RuntimeRules.TryGetC(role.ToLite()).TryGetS(key) ??  MaxValue;
+            if (!AuthLogic.IsEnabled)
+                return MaxValue;
+
+            return GetAllowed(RoleDN.Current.ToLite(), key);
         }
 
         internal A GetAllowed(Lite<RoleDN> role, K key)

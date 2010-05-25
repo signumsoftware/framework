@@ -39,33 +39,14 @@ namespace Signum.Engine.Authorization
 
         static bool dqm_AllowQuery(object queryName)
         {
-            if (!AuthLogic.IsEnabled)
-                return true;
-
-            return cache.GetAllowed(RoleDN.Current, queryName);
+            return cache.GetAllowed(queryName);
         }
 
         public static HashSet<object> AuthorizedQueryNames()
         {
-            RoleDN role = RoleDN.Current;
-
-            return DynamicQueryManager.Current.GetQueryNames().Where(q => cache.GetAllowed(role, q)).ToHashSet();
+            return DynamicQueryManager.Current.GetQueryNames().Where(q => cache.GetAllowed(q)).ToHashSet();
         }
 
-        public static bool GetQueryAllowed(object queryName)
-        {
-            if (!AuthLogic.IsEnabled)
-                return true;
-
-            return cache.GetAllowed(RoleDN.Current, queryName);
-        }
-        public static bool GetQueryAllowed(Lite<RoleDN>role, object queryName)
-        {
-            if (!AuthLogic.IsEnabled)
-                return true;
-
-            return cache.GetAllowed(role, queryName);
-        }
 
         public static QueryRulePack GetQueryRules(Lite<RoleDN> roleLite, TypeDN typeDN)
         {
@@ -82,6 +63,16 @@ namespace Signum.Engine.Authorization
             string[] queryNames = DynamicQueryManager.Current.GetQueryNames(TypeLogic.DnToType[rules.Type]).Keys.Select(qn => QueryUtils.GetQueryName(qn)).ToArray();
 
             cache.SetRules(rules, r => queryNames.Contains(r.Key));
+        }
+
+        public static bool GetQueryAllowed(object queryName)
+        {
+            return cache.GetAllowed(queryName);
+        }
+
+        public static bool GetQueryAllowed(Lite<RoleDN> role, object queryName)
+        {
+            return cache.GetAllowed(role, queryName);
         }
 
         public static void SetQueryAllowed(Lite<RoleDN> role, object queryName, bool allowed)

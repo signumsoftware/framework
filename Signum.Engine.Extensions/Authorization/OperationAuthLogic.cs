@@ -40,14 +40,12 @@ namespace Signum.Engine.Authorization
 
         static bool OperationLogic_AllowOperation(Enum operationKey)
         {
-            return cache.GetAllowed(RoleDN.Current.ToLite(), operationKey);
+            return cache.GetAllowed(operationKey);
         }
 
         public static List<OperationInfo> Filter(List<OperationInfo> operationInfos)
         {
-            RoleDN role = RoleDN.Current;
-
-            return operationInfos.Where(ai => cache.GetAllowed(role.ToLite(), ai.Key)).ToList(); 
+            return operationInfos.Where(ai => cache.GetAllowed(ai.Key)).ToList(); 
         }
 
         public static OperationRulePack GetOperationRules(Lite<RoleDN> roleLite, TypeDN typeDN)
@@ -75,10 +73,14 @@ namespace Signum.Engine.Authorization
             cache.SetAllowed(role, operationKey, allowed);
         }
 
+        public static bool GetOperationAllowed(Lite<RoleDN> role, Enum operationKey)
+        {
+            return cache.GetAllowed(role, operationKey);
+        }
 
         public static bool GetOperationAllowed(Enum operationKey)
         {
-            return cache.GetAllowed(RoleDN.Current.ToLite(), operationKey);
+            return cache.GetAllowed(operationKey);
         }
     }
 }

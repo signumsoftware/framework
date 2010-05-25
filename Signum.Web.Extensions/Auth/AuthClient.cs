@@ -74,7 +74,7 @@ namespace Signum.Web.Authorization
                     if (UserDN.Current == null)
                     {
                         //use the current url for the redirect
-                        string redirectOnSuccess = context.HttpContext.Request.Url.AbsolutePath;
+                        string redirectOnSuccess = context.HttpContext.Request.Url.PathAndQuery;
                         //send them off to the login page
                         string redirectUrl = string.Format("?ReturnUrl={0}", redirectOnSuccess);
                         //string loginUrl = context.HttpContext.Request.ApplicationPath + "/Auth/Login" + redirectUrl;
@@ -91,7 +91,7 @@ namespace Signum.Web.Authorization
         {
             if (bl.PropertyRoute.PropertyRouteType == PropertyRouteType.Property)
             {
-                switch (PropertyAuthLogic.GetPropertyAccess(bl.PropertyRoute))
+                switch (PropertyAuthLogic.GetPropertyAllowed(bl.PropertyRoute))
                 {
                     case PropertyAllowed.None:
                         bl.Visible = false;

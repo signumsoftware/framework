@@ -128,11 +128,9 @@ namespace Signum.Engine.Authorization
             if(!AuthLogic.IsEnabled)
                 return true;
 
-            RoleDN role = RoleDN.Current;
-
             return EntityGroupLogic.GroupsFor(ident.GetType()).All(eg =>
                 {
-                    EntityGroupAllowed access = cache.GetAllowed(role, eg);
+                    EntityGroupAllowed access = cache.GetAllowed(eg);
                     TypeAllowed inAllowed = EntityGroupAllowedUtils.In(access);
                     TypeAllowed outAllowed = EntityGroupAllowedUtils.Out(access);
                     if (inAllowed >= allowed && outAllowed >= allowed)
@@ -152,10 +150,8 @@ namespace Signum.Engine.Authorization
             if (!AuthLogic.IsEnabled)
                 return query;
 
-            RoleDN role = RoleDN.Current;
-
             var pairs = (from eg in EntityGroupLogic.GroupsFor(typeof(T))
-                         let allowed = cache.GetAllowed(role, eg)
+                         let allowed = cache.GetAllowed(eg)
                          select new
                          {
                              Group = eg,
@@ -245,6 +241,16 @@ namespace Signum.Engine.Authorization
         public static void SetEntityGroupAllowed(Lite<RoleDN> role, Enum entityGroupKey, EntityGroupAllowed allowed)
         {
             cache.SetAllowed(role, entityGroupKey, allowed); 
+        }
+
+        public static EntityGroupAllowed GetEntityGroupAllowed(Lite<RoleDN> role, Enum entityGroupKey)
+        {
+            return cache.GetAllowed(role, entityGroupKey);
+        }
+
+        public static EntityGroupAllowed GetEntityGroupAllowed(Enum entityGroupKey)
+        {
+            return cache.GetAllowed(entityGroupKey);
         }
     }
 }

@@ -32,7 +32,7 @@ namespace Signum.Engine.Authorization
 
                 if (queries)
                 {
-                    PropertyRoute.SetIsAllowedCallback(pp => GetPropertyAccess(pp) > PropertyAllowed.None);
+                    PropertyRoute.SetIsAllowedCallback(pp => GetPropertyAllowed(pp) > PropertyAllowed.None);
                 }
             }
         }
@@ -40,11 +40,6 @@ namespace Signum.Engine.Authorization
         static PropertyAllowed MaxPropertyAccess(this IEnumerable<PropertyAllowed> collection)
         {
             return collection.Max();
-        }
-     
-        public static PropertyAllowed GetPropertyAccess(PropertyRoute propertyPath)
-        {
-            return cache.GetAllowed(RoleDN.Current, propertyPath);
         }
 
         public static PropertyRulePack GetPropertyRules(Lite<RoleDN> roleLite, TypeDN typeDN)
@@ -67,6 +62,16 @@ namespace Signum.Engine.Authorization
         public static void SetPermissionAllowed(Lite<RoleDN> role, PropertyRoute property, PropertyAllowed allowed)
         {
             cache.SetAllowed(role, property, allowed);
+        }
+
+        public static PropertyAllowed GetPropertyAllowed(Lite<RoleDN> role, PropertyRoute property)
+        {
+            return cache.GetAllowed(role, property);
+        }
+
+        public static PropertyAllowed GetPropertyAllowed(PropertyRoute property)
+        {
+            return cache.GetAllowed(property);
         }
 
         public static Dictionary<PropertyRoute, PropertyAllowed> AuthorizedProperties()
