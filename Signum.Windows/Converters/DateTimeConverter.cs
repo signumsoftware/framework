@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Globalization;
 using Signum.Utilities;
+using Signum.Entities;
 
 namespace Signum.Windows
 {
@@ -26,7 +27,7 @@ namespace Signum.Windows
         {
             DateTime? dt = (DateTime?)value;
             if (dt.HasValue)
-                return dt.Value.ToString(Format, culture);
+                return dt.Value.ToUserInterface().ToString(Format, culture);
             else
                 return null;
         }
@@ -37,9 +38,9 @@ namespace Signum.Windows
             if (!string.IsNullOrEmpty(str))
             {
                 if (Strict)
-                    return DateTime.ParseExact(str, Format, culture);
+                    return DateTime.ParseExact(str, Format, culture, DateTimeStyles.None).FromUserInterface();
                 else
-                    return DateTime.Parse(str, culture);
+                    return DateTime.Parse(str, culture, DateTimeStyles.None).FromUserInterface();
             }
             else
                 return null;
@@ -59,7 +60,7 @@ namespace Signum.Windows
                 }
                 else
                 {
-                     if (!DateTime.TryParse(str, cultureInfo, DateTimeStyles.None, out result))
+                    if (!DateTime.TryParse(str, cultureInfo, DateTimeStyles.None, out result))
                          return new ValidationResult(false, Properties.Resources.InvalidDateFormat);
                 }
             }

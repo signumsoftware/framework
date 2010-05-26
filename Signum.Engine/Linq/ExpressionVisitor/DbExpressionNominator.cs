@@ -111,7 +111,7 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitConstant(ConstantExpression c)
         {
-            if (IsFullNominate || c.Value == null)
+            if (IsFullNominate)
                 candidates.Add(c);
             return c;
         }

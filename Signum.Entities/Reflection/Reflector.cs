@@ -90,7 +90,7 @@ namespace Signum.Entities.Reflection
 
         public static PropertyInfo[] PublicInstancePropertiesInOrder(Type type)
         {
-            var result = type.For(t => t != typeof(object), t => t.BaseType)
+            var result = type.FollowC(t => t.BaseType)
                 .Reverse()
                 .SelectMany(t => t.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
                                 .Where(p => !p.HasAttribute<HiddenPropertyAttribute>())

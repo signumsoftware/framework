@@ -52,7 +52,7 @@ namespace Signum.Windows
                     c=> b => FormatTools.CheckBoxTemplate(b, c.Format == null ? null : ConverterFactory.New(Reflector.GetPropertyFormatter(c.Format, null)))),
 
                     new FormatterRule(FormatterPriority.Type, "Enum",
-                    c=>c.Type.IsEnum, 
+                    c=>c.Type.UnNullify().IsEnum, 
                     c=> b => FormatTools.TextBlockTemplate(b, TextAlignment.Left, Converters.EnumDescriptionConverter)),
                 new FormatterRule(FormatterPriority.Type, "Number",
                     c=>Reflector.IsNumber(c.Type), 

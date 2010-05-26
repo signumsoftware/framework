@@ -159,7 +159,10 @@ namespace Signum.Entities.DynamicQuery
                 throw new InvalidOperationException(Resources.EntityMustBeALite);
 
             if (meta is CleanMeta && ((CleanMeta)meta).PropertyRoute.PropertyRouteType != PropertyRouteType.Root)
+            {
                 PropertyRoute = ((CleanMeta)meta).PropertyRoute;
+                Implementations = PropertyRoute.GetImplementations();
+            }
 
             if (DisplayName == null)
             {

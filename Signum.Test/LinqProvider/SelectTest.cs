@@ -328,6 +328,30 @@ namespace Signum.Test.LinqProvider
                              where s.Duration.HasValue
                              select s.Duration.Value).ToArray();
         }
+
+        [TestMethod]
+        public void SelectAvoidNominate()
+        {
+            var durations =
+                (from a in Database.Query<AlbumDN>()
+                 select new
+                {
+                    a.Name,
+                    Value = 3,
+                }).ToList();
+        }
+
+        [TestMethod]
+        public void SelectAvoidNominateEntity()
+        {
+            var durations =
+                (from a in Database.Query<AlbumDN>()
+                 select new
+                 {
+                     a.Name,
+                     Friend = (Lite<BandDN>)null
+                 }).ToList();
+        }
     }
 
     public static class AuthorExtensions

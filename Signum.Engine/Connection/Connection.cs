@@ -19,8 +19,6 @@ namespace Signum.Engine
         public BaseConnection(Schema schema, DynamicQueryManager dqm)
         {
             this.Schema = schema;
-            if (dqm != null)
-                dqm.SetSchemaImplementations(schema);
             this.DynamicQueryManager = dqm;
         }
 

@@ -115,17 +115,5 @@ namespace Signum.Engine.DynamicQuery
                 return Resources.Error01.Formato(queryName, e.Message);
             }
         }
-
-        internal void SetSchemaImplementations(Schema schema)
-        {
-            foreach (var dm in queries.Values)
-            {
-                foreach (var col in dm.StaticColumns)
-                {
-                    if (col.PropertyRoute != null && col.Implementations == null)
-                        col.Implementations = schema.FindImplementations(col.PropertyRoute); 
-                }
-            }
-        }
     }
 }
