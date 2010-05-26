@@ -243,7 +243,7 @@ function ClosePopup(prefix) {
     $('#' + prefix.compose("externalPopupDiv")).remove();
 }
 
-function openChooser(_prefix, onOptionClicked, jsonOptionsListFormat) {
+function openChooser(_prefix, onOptionClicked, jsonOptionsListFormat, onCancelled) {
     log("openChooser");
     //Construct popup
     var tempDivId = _prefix + "Temp";
@@ -275,7 +275,11 @@ function openChooser(_prefix, onOptionClicked, jsonOptionsListFormat) {
                 });
             });
             new popup({ prefix: _prefix }).show(tempDivId);
-            $('#' + tempDivId.compose(sfBtnCancel)).unbind('click').click(function() { $('#' + tempDivId).remove(); });
+            $('#' + tempDivId.compose(sfBtnCancel)).unbind('click').click(function() {
+                $('#' + tempDivId).remove();
+                if (onCancelled != null)
+                    onCancelled();
+            });
         }
     });
 }
