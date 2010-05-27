@@ -9,39 +9,26 @@ namespace Signum.Web
 {
     public static class ViewDataKeys
     {
-        //public const string TypeContextKey = "sfTypeContextKey";
         public const string ResourcesRoute = "sfResourcesRoute";
         public const string SearchResourcesRoute = "sfSearchResourcesRoute";
-        //public const string PopupPrefix = "sfPrefix";
         public const string WriteSFInfo = "sfWriteSFInfo";
-        //public const string PopupSufix = "sfSufix";
-        //public const string DivASustituir = "sfDivASustituir";
-        //public const string LoadAll = "sfLoadAll";
         public const string GlobalErrors = "sfGlobalErrors"; //Key for Global Errors in ModelStateDictionary
         public const string GlobalValidationSummary = "sfGlobalValidationSummary";
         public const string PartialViewName = "sfPartialViewName";
-       // public const string PopupInnerControlUrl = "sfPopupInnerControlUrl";
-        //public const string StyleContext = "sfStyleContext";
         public const string PageTitle = "sfTitle";
         public const string PageDescription = "sfDescription";
         public const string CustomHtml = "sfCustomHtml";
         public const string OnOk = "sfOnOk";
         public const string OnCancel = "sfOnCancel";
         public const string BtnOk = "sfBtnOk";
-        //public const string OnCancelS = "sfOnCancelS";
-        //public const string BtnOkS = "sfBtnOkS";
         public const string BtnCancel = "sfBtnCancel";
         public const string NavigationButtons = "sfNavigationButtons";
-        //public const string FilterColumns = "sfFilterColumns";
         public const string FindOptions = "sfFindOptions";
         public const string QueryDescription = "sfQueryDescription";
         public const string Top = "sfTop";
-        //public const string QuerySettings = "sfQuerySettings";
         public const string Results = "sfResults";
         public const string EntityColumnIndex = "sfEntityColumnIndex";
         public const string EntityTypeName = "sfEntityTypeName";
-        //public const string EntityTypeNiceName = "sfEntityTypeNiceName";
-        //public const string EntityType = "sfEntityType";
         public const string AllowMultiple = "sfAllowMultiple";
         public const string Create = "sfCreate";
         public const string View = "sfView";
