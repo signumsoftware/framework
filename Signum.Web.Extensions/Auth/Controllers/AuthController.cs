@@ -1,4 +1,5 @@
-﻿using System;
+﻿#region usings
+using System;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Security;
@@ -17,6 +18,7 @@ using System.Text.RegularExpressions;
 using Signum.Entities;
 using Signum.Engine.Mailing;
 using System.Collections.Generic;
+#endregion
 
 namespace Signum.Web.Authorization
 {
@@ -273,6 +275,7 @@ namespace Signum.Web.Authorization
         }
         #endregion
 
+        #region Login
         public ActionResult Login(string referrer)
         {
             //We store the url referrer so that we can go back when logged in
@@ -388,6 +391,7 @@ namespace Signum.Web.Authorization
                 }
             }
         }
+        #endregion
 
         #region Register User (Commented)
 
