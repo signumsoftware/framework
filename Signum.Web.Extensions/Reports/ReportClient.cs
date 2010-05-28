@@ -40,7 +40,7 @@ namespace Signum.Web.Reports
                     //ImgSrc = new ScriptManager().ClientScript.GetWebResourceUrl(typeof(ReportClient), "excelPlain.png"), 
                     Text = "Exportar a Excel",
                     OnClick = "SubmitOnly('{0}', new FindNavigator({{prefix:'{1}'}}).requestData());".Formato(ToExcelControllerUrl, prefix), 
-                    DivCssClass = ToolBarButton.DefaultQueryDivCssClass
+                    DivCssClass = ToolBarButton.DefaultQueryCssClass
                 }
             };
         }

@@ -8,6 +8,11 @@ table.ruleTable .overriden
     text-align:center;
 }
 
+table.ruleTable a:hover 
+{
+	cursor:pointer;
+}
+
 a.cbLink
 {
     display: block;
@@ -22,21 +27,21 @@ a.cbLink
 
 a.cbLink:hover
 {
-    background-position: 0 -48px! important; 
+    background-position: 0 -48px!; 
 }
 
 a.cbDisabled
 {
-    background-position: 0 0px ! important; 
+    background-position: 0 0px; 
 }
 
 a.cbDisabled:hover
 {
-    background-position: 0 -16px ! important; 
+    background-position: 0 -16px; 
 }
 
 
-div.treeView
+.treeView
 {
     float:left;
     width: 16px;
@@ -46,46 +51,45 @@ div.treeView
     cursor:pointer;
 }
 
-
 .tvLeaf
 {
-    background-position: 0px 0px !important; 
+    background-position: 0px 0px; 
 }
 
 .tvLeafLast
 {
-    background-position: 0px -22px !important; 
+    background-position: 0px -22px; 
 }
 
 .tvClosed
 {
     
-    background-position: -16px 0px !important; 
+    background-position: -16px 0px; 
 }
 
 .tvClosedLast
 {
-    background-position: -16px -22px !important; 
+    background-position: -16px -22px; 
 }
 
 .tvExpanded
 {
-    background-position: -32px 0px !important; 
+    background-position: -32px 0px; 
 }
 
 .tvExpandedLast
 {
-    background-position: -32px -22px !important; 
+    background-position: -32px -22px; 
 }
 
 .tvLine
 {
-    background-position: -48px 0px !important; 
+    background-position: -48px 0px; 
 }
 
 .tvBlank
 {
-    background-position: -48px -22px !important; 
+    background-position: -48px -22px; 
 }
 
 

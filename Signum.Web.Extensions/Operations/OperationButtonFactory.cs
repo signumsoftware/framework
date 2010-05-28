@@ -35,7 +35,7 @@ namespace Signum.Web.Operations
             return new ToolBarButton
             {
                 Id = EnumDN.UniqueKey(ctx.OperationInfo.Key),
-                DivCssClass = ctx.OperationSettings.TryCC(o => o.CssClass) ?? ToolBarButton.DefaultQueryDivCssClass,
+                DivCssClass = ctx.OperationSettings.TryCC(o => o.CssClass) ?? ToolBarButton.DefaultQueryCssClass,
                 AltText = ctx.OperationSettings.TryCC(o => o.AltText),
 
                 Text = ctx.OperationSettings.TryCC(o => o.Text) ?? ctx.OperationInfo.Key.NiceToString(),

@@ -1,25 +1,27 @@
 ﻿/// <reference path="jquery-1.4.min.vsdoc.js" />"
 
-function magicRadios(ctx) {
+function magicRadios($ctx) {
     var updateBackground = function() {
         $(this).toggleClass("cbDisabled", !$(":radio", this).attr("checked"));
-    }
+    };
 
-    $(".ruleTable .cbLink :radio", ctx).hide();
-    $(".ruleTable .cbLink", ctx).each(updateBackground);
+    var $links = $ctx.find(".ruleTable .cbLink");
+    
+    $links.find("input:radio").hide();
+    $links.each(updateBackground);
 
-    $(".ruleTable .cbLink", ctx).live("click", function() {
-        var td = $(this).parent("td");
-        var tr = $(td).parent("tr");
+    $links.live("click", function() {
+        var $td = $(this).parent("td");
+        var $tr = $td.parent("tr");
         var radio = $(":radio", this);
         radio.attr("checked", true);
-        $(".overriden", tr).attr("checked", radio.val() != $("input[name$="+this.name+"Base]", tr).val());
-        $(".cbLink", tr).each(updateBackground);
+        $(".overriden", $tr).attr("checked", radio.val() != $("input[name$="+this.name+"Base]", $tr).val());
+        $(".cbLink", $tr).each(updateBackground);
     });
 }
 
 $(function() {
-    magicRadios(document);
+    magicRadios($(document));
 });
 
 $(function() {
