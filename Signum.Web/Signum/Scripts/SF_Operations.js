@@ -225,47 +225,17 @@ var DeleteExecutor = function(_options) {
         controllerUrl: "Operation/DeleteExecute"
     }, _options));
 
-    this.execute = function() {
-        log("DeleteOperation delete");
-
-        if (!empty(this.options.confirmMsg) && !confirm(this.options.confirmMsg))
-            return;
-
-        NotifyInfo(lang['executingOperation']);
-
-        if (!this.options.avoidValidation && isFalse(this.options.isLite)) {
-            if (!this.entityIsValid()) {
-                NotifyInfo(lang['error'], 2000);
-                return;
-            }
-        }
+    this.defaultDelete = function() {
+        log("DeleteExecutor defaultDelete");
 
         var self = this;
-        $.ajax({
-            type: "POST",
-            url: this.options.controllerUrl,
-            data: this.requestData(this.newPrefix()),
-            async: false,
-            dataType: "html",
-            success: function(operationResult) {
-                if (!self.executedSuccessfully(operationResult)) {
-                    NotifyInfo(lang['error'], 2000);
-                    return;
-                }
-
-                if (self.options.navigateOnSuccess) {
-                    Submit(operationResult);
-                    return;
-                }
-
-                if (!empty(self.options.onOperationSuccess))
-                    self.options.onOperationSuccess();
-
-                NotifyInfo(lang['operationExecuted'], 2000);
-            },
-            error:
-                function() { NotifyInfo(lang['error'], 2000); }
-        });
+        if (isTrue(this.options.isLite)) {
+            NotifyInfo(lang['executingOperation']);
+            this.operationAjax(this.newPrefix(), function() { NotifyInfo(lang['operationExecuted'], 2000); });
+        }
+        else {
+            throw "Delete operation must be Lite";
+        }
     };
 };
 
