@@ -113,7 +113,7 @@
     <Compile Include="ScriptCombiner\CombineController.cs" />
     <Compile Include="ScriptCombiner\CombinerHtmlHelper.cs" />
     <Compile Include="ScriptCombiner\JavaScriptMinifier.cs" />
-    <Compile Include="ScriptCombiner\CssScriptCombiner.cs" />
+    <Compile Include="ScriptCombiner\ScriptCombiner.cs" />
     <Compile Include="ViewsChecker\ViewsCheckerClient.cs" />
     <Compile Include="ViewsChecker\ViewError.cs" />
     <Compile Include="ViewsChecker\Controllers\ViewsCheckerController.cs" />
@@ -265,7 +265,7 @@
         <WebProjectProperties>
           <UseIIS>False</UseIIS>
           <AutoAssignPort>True</AutoAssignPort>
-          <DevelopmentServerPort>2021</DevelopmentServerPort>
+          <DevelopmentServerPort>16189</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
           <IISUrl>http://localhost/Signum.Web.Extensions</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>

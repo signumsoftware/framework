@@ -18,8 +18,22 @@ namespace Signum.Web.ScriptCombiner
         [AcceptVerbs(HttpVerbs.Get)]
         public void JS(string f, string p)
         {
-            new JSScriptCombiner().Process(f.Split(','),p,
+            new JsScriptCombiner().Process(f.Split(','),p,
                 ControllerContext.RequestContext.HttpContext);
+        }
+
+        [AcceptVerbs(HttpVerbs.Get)]
+        public void AreaJs(string f)
+        {
+            new AreaJsScriptCombiner()
+                .Process(f.Split(','), null, ControllerContext.RequestContext.HttpContext);
+        }
+
+        [AcceptVerbs(HttpVerbs.Get)]
+        public void AreaCss(string f)
+        {
+            new AreaCssScriptCombiner()
+                .Process(f.Split(','), null, ControllerContext.RequestContext.HttpContext);
         }
     }
 }

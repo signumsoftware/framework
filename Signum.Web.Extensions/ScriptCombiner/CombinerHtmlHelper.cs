@@ -21,6 +21,8 @@ namespace Signum.Web
             return "Combine/CSS?f={0}&p={1}".Formato(String.Join(",", files).Replace("/", "%2f"), path.Replace("/", "%2f"));
         }
 
+
+
         public static void CombinedCss(this HtmlHelper html, string path, params string[] files)
         {
             string content = "";
@@ -58,6 +60,41 @@ namespace Signum.Web
             #endif
             content = "<script type='text/javascript' src=\"{0}\"></script>\n".Formato(CombinedJsUrlPath(html, path, files));
             html.ViewContext.HttpContext.Response.Write(content);
+        }
+
+
+        public static void IncludeAreaJs(this HtmlHelper html, params string[] files)
+        {
+            string content = "";
+#if (DEBUG)
+            content = files.ToString(f => "<script type='text/javascript' src=\"{0}\"></script>\n".Formato(f), "");
+            html.ViewContext.HttpContext.Response.Write(content);
+            return;
+#endif
+            content = "<script type='text/javascript' src=\"{0}\"></script>\n".Formato(IncludeAreaJsPath(files));
+            html.ViewContext.HttpContext.Response.Write(content);
+        }
+
+        static string IncludeAreaJsPath(params string[] files)
+        {
+            return "combine/areajs?f={0}".Formato(String.Join(",", files).Replace("/", "%2f"));
+        }
+
+        public static void IncludeAreaCss(this HtmlHelper html, params string[] files)
+        {
+            string content = "";
+#if (DEBUG)
+            content = files.ToString(f => "<link href=\"{0}\" rel='stylesheet' type='text/css' />\n".Formato(f), "");
+            html.ViewContext.HttpContext.Response.Write(content);
+            return;
+#endif
+            content = "<link href=\"{0}\" rel='stylesheet' type='text/css' />\n".Formato(IncludeAreaCssPath(files));
+            html.ViewContext.HttpContext.Response.Write(content);
+        }
+
+        static string IncludeAreaCssPath(params string[] files)
+        {
+            return "Combine/areacss?f={0}".Formato(String.Join(",", files).Replace("/", "%2f"));
         }
     }
 }

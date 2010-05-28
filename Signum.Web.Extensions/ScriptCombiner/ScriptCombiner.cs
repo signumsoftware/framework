@@ -11,6 +11,7 @@ using System.Security;
 using System.Configuration;
 using System.Security.Permissions;
 using System.Net;
+using Signum.Utilities;
 
 namespace Signum.Web.ScriptCombiner
 {
@@ -25,11 +26,6 @@ namespace Signum.Web.ScriptCombiner
         protected override string Minify(string content) {
             content = Regex.Replace(content, "/\\*.+?\\*/", "", RegexOptions.Singleline);
             content = Regex.Replace(content,"(\\s{2,}|\\t+|\\r+|\\n+)", string.Empty);
-            //content = content.Replace(Environment.NewLine + Environment.NewLine + Environment.NewLine, string.Empty);
-            //content = content.Replace(Environment.NewLine + Environment.NewLine, Environment.NewLine);
-            //content = content.Replace(Environment.NewLine, string.Empty);
-            //content = content.Replace("\\t", string.Empty);
-           // content = content.Replace("\t", string.Empty);
             content = content.Replace(" {", "{");
             content = content.Replace("{ ", "{");
             content = content.Replace(" :", ":");
@@ -39,8 +35,7 @@ namespace Signum.Web.ScriptCombiner
             content = content.Replace(";}", "}");
             content = Regex.Replace(content, "/\\*[^\\*]*\\*+([^/\\*]*\\*+)*/", "$1");
             content = Regex.Replace(content, "(?<=[>])\\s{2,}(?=[<])|(?<=[>])\\s{2,}(?=&nbsp;)|(?<=&ndsp;)\\s{2,}(?=[<])", string.Empty);
-            //content = content.Replace("../", "../Content/");   //Eliminamos rutas relativas
-            //content = content.Replace("../", new System.Web.Mvc.UrlHelper(.Content("~/Content"));
+
             content = Regex.Replace(content, "[^\\}]+\\{\\}", string.Empty);  //Eliminamos reglas vacías
 
             Regex color = new Regex("#([A-Fa-f0-9]{6})");
@@ -54,43 +49,12 @@ namespace Signum.Web.ScriptCombiner
             }
             return content;
         }
-        public override string ProcessFile(string fileName)
-        {
-
-            return File.ReadAllText(fileName);
-
-            //string[] folders = fileName.Replace("\\\\", "\\").Split('\\');
-            ////allScripts.Append(File.ReadAllText(context.Server.MapPath(this.resourcesFolder + "/" + fileName.Replace("%2f", "/"))));
-
-            //string content = File.ReadAllText(fileName);
-            ////convert relative paths to absolute paths
-            ////we get all the paths
-            //string pattern = @"url\(([^\)]*)\)";
-            //Match match = Regex.Match(content, pattern);
-
-            //while (match.Success){
-            //    string path=match.Groups[1].Value;
-            //    int parents=0;
-            //    while (path.StartsWith("../")){
-            //        parents++;
-            //        path = path.Substring(3);
-            //    }
-            //    string absolutePath = String.Empty;
-            //    for (int i=0; i<(folders.Length-1-parents);i++){
-            //        absolutePath += folders[i] + "/";
-            //    }
-            //    content = content.Replace(match.Groups[0].Value, "url(" + absolutePath + path + ")");
-            //    match = Regex.Match(content, pattern);
-            //}
-            //return String.Empty;
-
-        }
 
         protected override string Extension { get { return "css"; } }
     }
 
-    public class JSScriptCombiner : ScriptCombiner {
-        public JSScriptCombiner()
+    public class JsScriptCombiner : ScriptCombiner {
+        public JsScriptCombiner()
         {
             this.contentType = "application/x-javascript";
             this.cacheable = true;
@@ -102,6 +66,63 @@ namespace Signum.Web.ScriptCombiner
         {
             var minifier = new JavaScriptMinifier();
             return minifier.Minify(content);
+        }
+    }
+
+
+    public class AreaJsScriptCombiner : JsScriptCombiner
+    {
+        public AreaJsScriptCombiner()
+        {
+            this.cacheable = true;
+            this.gzipable = true;
+            this.resourcesFolder = null;
+        }
+
+        public override DateTime GetLastModifiedDate(string fileName)
+        {
+            AssemblyResourceStore ars = AssemblyResourceManager.GetResourceStoreFromVirtualPath("~/" + fileName);
+
+            FileInfo fileInfo = new FileInfo(ars.typeToLocateAssembly.Assembly.Location);
+            return fileInfo.LastWriteTimeUtc;
+        }
+
+        public override string ReadFile(string fileName)
+        {
+            AssemblyResourceStore ars = AssemblyResourceManager.GetResourceStoreFromVirtualPath("~/" + fileName);
+            Stream stream = ars.GetResourceStream("~/" + fileName);
+            byte[] bytes  = new byte[stream.Length];
+            stream.Position = 0;
+            stream.Read(bytes, 0, (int) stream.Length);
+            return Encoding.UTF8.GetString(bytes);
+        }
+    }
+
+    public class AreaCssScriptCombiner : CssScriptCombiner
+    {
+        public AreaCssScriptCombiner()
+        {
+            this.cacheable = true;
+            this.gzipable = true;
+            this.resourcesFolder = null;
+        }
+
+        public override DateTime GetLastModifiedDate(string fileName)
+        {
+            AssemblyResourceStore ars = AssemblyResourceManager.GetResourceStoreFromVirtualPath("~/" + fileName);
+
+            FileInfo fileInfo = new FileInfo(ars.typeToLocateAssembly.Assembly.Location);
+            return fileInfo.LastWriteTimeUtc;
+        }
+
+        public override string ReadFile(string fileName)
+        {
+            AssemblyResourceStore ars = AssemblyResourceManager.GetResourceStoreFromVirtualPath("~/" + fileName);
+            Stream stream = ars.GetResourceStream("~/" + fileName);
+            byte[] bytes = new byte[stream.Length];
+            stream.Position = 0;
+            stream.Read(bytes, 0, (int)stream.Length);
+            return Encoding.UTF8.GetString(bytes);
         }
     }
 
@@ -143,9 +164,15 @@ namespace Signum.Web.ScriptCombiner
         private HttpContextBase context;
         string lastModifiedDateKey = "-lmd";
 
-        public virtual string ProcessFile(string fileName)
+        public virtual string ReadFile(string fileName)
         {
-            return File.ReadAllText(fileName);
+            string file = context.Server.MapPath((!string.IsNullOrEmpty(resourcesFolder) ? (resourcesFolder + "/") : "") + fileName.Replace("%2f", "/"));            
+            return File.ReadAllText(file);
+        }
+
+        public virtual DateTime GetLastModifiedDate(string fileName)
+        {
+            return File.GetLastWriteTimeUtc(fileName);
         }
 
         public void Process(string[] files, string path, HttpContextBase context)
@@ -156,8 +183,7 @@ namespace Signum.Web.ScriptCombiner
             DateTime lmServer = DateTime.MinValue;
             foreach (string fileName in files)
             {
-                string file = context.Server.MapPath(resourcesFolder + "/" + fileName.Replace("%2f", "/"));
-                DateTime fileLastModified = File.GetLastWriteTimeUtc(file);
+                DateTime fileLastModified = GetLastModifiedDate(fileName);
                 if (fileLastModified > lmServer) lmServer = fileLastModified;
             }
 
@@ -201,9 +227,7 @@ namespace Signum.Web.ScriptCombiner
                             {
                                 try
                                 {
-                                    //allScripts.Append(File.ReadAllText(context.Server.MapPath(fileName)));
-                                    string file = context.Server.MapPath(resourcesFolder + "/" + fileName.Replace("%2f", "/"));
-                                    allScripts.Append(ProcessFile(file));
+                                    allScripts.Append(ReadFile(fileName));
                                 }
                                 catch (Exception) { }
                             }
