@@ -18,7 +18,7 @@ namespace Signum.Web
         public string OnClick { get; set; }
         
         public static string DefaultEntityDivCssClass = "ButtonDiv";
-        public static string DefaultQueryDivCssClass = "QueryButtonDiv";
+        public static string DefaultQueryCssClass = "QueryButton";
 
         private string divCssClass;
         public string DivCssClass 
@@ -51,7 +51,7 @@ namespace Signum.Web
                 else
                     HtmlProps["style"] = "background:transparent url(" + ImgSrc + ")  no-repeat scroll left top;";
 
-                return helper.Div(Id, "", DivCssClass, HtmlProps);
+                return helper.Link(Id, "", DivCssClass, HtmlProps);
             }
             else
             {
@@ -61,7 +61,7 @@ namespace Signum.Web
                 }
                 else
                     DivCssClass = DivCssClass + " disabled"; 
-                return helper.Div(Id, Text, DivCssClass, HtmlProps);
+                return helper.Link(Id, Text, DivCssClass, HtmlProps);
             }
         }
     }

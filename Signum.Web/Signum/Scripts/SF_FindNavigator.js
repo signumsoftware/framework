@@ -14,7 +14,7 @@
         onOk: null,
         onCancelled: null,
         onOkClosed: null,
-        async: false
+        async: true
     }, _findOptions);
 };
 
@@ -384,8 +384,28 @@ function toggleFilters(id) {
     return false;
 }
 
-var concurrentSearch = new Array();
-function SearchOnLoad(btnSearchId) {
-    concurrentSearch[btnSearchId] = true;
-	$("#" + btnSearchId).click();
+var asyncSearchFinished = new Array();
+function SearchOnLoad(btnSearchId) {    
+    var $button = $("#" + btnSearchId);
+    var makeSearch = function() {
+        if (!asyncSearchFinished[btnSearchId]) {
+            $button.click();
+            asyncSearchFinished[btnSearchId] = true;
+        }
+    };
+    
+    if ($button.is(':visible')) {
+        makeSearch();
+    }
+    else {
+        var $tabContainer = $button.parents(".tabs").first();
+        if ($tabContainer.length) {
+            $tabContainer.find("a").click(
+                function() {                    
+                    if ($button.is(':visible')) makeSearch();
+                });
+        } else{
+            makeSearch();
+        }                
+    }
 }

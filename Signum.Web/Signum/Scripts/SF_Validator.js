@@ -22,8 +22,16 @@ Validator.prototype = {
 
     constructRequestData: function() {
         log("Validator constructRequestData");
-        var formChildren = empty(this.valOptions.parentDiv) ? $("form *") : $("#" + this.valOptions.parentDiv + " *, #" + sfTabId + ", #" + sfReactive);
-        formChildren = formChildren.not(".searchControl *");
+        var formChildren = empty(this.valOptions.parentDiv) ?
+            $("form").find("input, select, textarea")
+            : $("#" + this.valOptions.parentDiv)
+                .find("input, select, textarea")
+                .add("#" + sfTabId)
+                .add("#" + sfReactive);
+
+        var searchControlInputs = $(".searchControl").find("input, select, textarea");
+        formChildren = formChildren.not(searchControlInputs);
+
         var requestData = formChildren.serialize();
 
         requestData += qp(sfPrefix, this.valOptions.prefix);
@@ -51,7 +59,7 @@ Validator.prototype = {
             data: this.constructRequestData(),
             success: function(msg) {
                 if (msg.indexOf("ModelState") > 0) {
-                    eval('var result=' + msg);
+                    var result = $.parseJSON(msg);
                     var modelState = result["ModelState"];
                     returnValue = self.showErrors(modelState, true);
                     NotifyInfo(lang['error'], 2000);
@@ -80,7 +88,7 @@ Validator.prototype = {
             data: this.constructRequestData(),
             success: function(msg) {
                 if (msg.indexOf("ModelState") > 0) {
-                    eval('var result=' + msg);
+                    var result = $.parseJSON(msg);
                     var modelState = result["ModelState"];
                     returnValue = self.showErrors(modelState, true);
                 }
@@ -98,9 +106,7 @@ Validator.prototype = {
     isValid: function(modelState) {
         log("Validator isValid");
         for (var controlID in modelState) {
-            var errorsArray = modelState[controlID];
-            for (var j = 0; j < errorsArray.length; j++)
-                return false; //Stop as soon as I find an error
+            if (modelState[controlID].length) return false; //Stop as soon as I find an error
         }
         return true;
     },

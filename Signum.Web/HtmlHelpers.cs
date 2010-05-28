@@ -147,6 +147,14 @@ namespace Signum.Web
             return "<input type='button'{0}{1} value='{2}'{3} onclick=\"{4}\" />".Formato(idname, css, value, attributes, onclick);
         }
 
+        public static string Link(this HtmlHelper html, string id, string innerHTML, string cssClass, IDictionary<string, object> htmlAttributes)
+        {
+            string idname = id.HasText() ? (" id='" + id + "'") : "";
+            string attributes = htmlAttributes != null ? (" " + htmlAttributes.ToString(kv => kv.Key + "=\"" + kv.Value.ToString() + "\"", " ")) : "";
+            string css = cssClass.HasText() ? " class='" + cssClass + "'" : "";
+            return "<a{0}{1}{2}>{3}</a>".Formato(idname, css, attributes, innerHTML);
+        }
+
         public static string ImageButton(this HtmlHelper html, string name, string imgSrc, string altText, string onclick, IDictionary<string, object> htmlAttributes)
         {
             string attributes = htmlAttributes != null ? (" " + htmlAttributes.ToString(kv => kv.Key + "=" + kv.Value.ToString().Quote(), " ")) : "";

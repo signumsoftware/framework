@@ -14,6 +14,7 @@ a {
 
 a:hover {
     color:#d54e21;
+    cursor:pointer;
 }
 
 ::-moz-focus-inner {
@@ -72,7 +73,8 @@ input,textarea,select {
     -moz-border-radius:2px;
 }
 
-.field input,field textarea,field select {
+.field input,field textarea,field select, .fieldList select 
+{
     float:left;
 }
 
@@ -110,9 +112,29 @@ span.valueLine {
     float:left;
 }
 
+.valueFirst{float:left;margin-bottom:3px;margin-right:2px;}
+.valueFirst label {
+	clear:both !important;
+	color:#444444 !important;
+	display:block !important;
+	font-size:11px !important;
+	margin:0 !important;
+	width:auto;
+	text-align:left;
+	float:none;
+	line-height:15px;
+	padding-left:2px;
+}
+
+/* datetime pickers */
 img.ui-datepicker-trigger {
     padding:4px;
 }
+img.ui-datepicker-trigger:hover 
+{
+	cursor:pointer;
+}
+/* entitylist */
 
 .field,.EntityLineDetail {
     margin:6px 0;
@@ -125,6 +147,15 @@ img.ui-datepicker-trigger {
     border-left:2px dotted #bbb;
     margin-left:120px;
 }
+
+.field .valueFirst .labelLine
+{
+	width:inherit;
+	border:0;
+	margin:inherit;
+}
+
+.around .field{ float:left; clear:none;}
 
 input.lineButton {
     font-size:0px;
@@ -167,6 +198,45 @@ div.clearall {
 .fieldList td {
     padding: 0;
 }
+
+legend 
+{
+	color:#555;
+	font-weight:bold;
+	padding:0.1em 0.2em;
+	clear:both;
+	border:0;	/* overrides default fluid css */
+}
+
+fieldset 
+{
+	border:1px dotted #bbb;
+	padding:10px;
+	margin-bottom:10px;
+	background-color:#fff;		/* overrides default fluid css */
+}
+
+.repeaterElement
+{
+	margin-left:160px;
+	padding: 5px;
+	display:block;
+	border-color:#dfdfdf #eee #fff #eee;
+	border-width:1px;
+	border-style:solid;
+}
+.repeater a.remove
+{
+	position:absolute;
+}
+.repeaterElement a
+{
+	text-decoration: underline;
+	font-weight:bold;
+	float:left;
+	margin-right:5px;
+}
+
 
 /* popup */
 .popupWindow {
@@ -335,9 +405,10 @@ input.input-validation-error[type=checkbox] {
 /* operations */
 .ButtonDiv {
     float:left;
-    padding:0 5px;
+    padding:4px 4px 4px 10px;
     cursor:pointer;
     border-left:1px solid #ddd;
+	margin-right:6px;
 }
 
 .ButtonDiv:first-child {
@@ -364,6 +435,12 @@ input.input-validation-error[type=checkbox] {
     font-weight: bold;
 }
 
+.operations 
+{
+	margin-bottom:20px;
+	overflow:auto;
+}
+	
 /* entity title */
 h2 .typeNiceName {
     font-size:13px;
@@ -496,6 +573,8 @@ h2 .title {
 
 .tblResults td {
     border-right:1px solid #eee;
+    border-bottom:1px solid #eee;
+    word-wrap:break-word;    
 }
 
 .tblResults th {
@@ -516,10 +595,6 @@ h2 .title {
     border:0;
 }
 
-.tblResults td {
-    word-wrap:break-word;
-}
-
 .tblResults tr:hover {
     background-color:#efefef;
 }
@@ -527,6 +602,12 @@ h2 .title {
 #tblFilters td {
     vertical-align:middle;
     padding: 0 5px;
+}
+
+.QueryButton
+{
+	display:inline;
+	margin-left:10px;
 }
 
 /* autocomplete */
