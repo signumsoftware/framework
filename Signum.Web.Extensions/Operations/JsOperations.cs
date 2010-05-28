@@ -29,14 +29,14 @@ namespace Signum.Web.Operations
             return new JsInstruction(() => "{0}.operationSubmit()".Formato(this.ToJS()));
         }
 
-        public JsInstruction OperationAjax(string newPrefix, JsFunction onSucess)
+        public JsInstruction OperationAjax(string newPrefix, JsFunction onSuccess)
         {
-            return new JsInstruction(() => "{0}.operationAjax('{1}', {2})".Formato(this.ToJS(), newPrefix, onSucess.ToJS()));
+            return new JsInstruction(() => "{0}.operationAjax('{1}', {2})".Formato(this.ToJS(), newPrefix, onSuccess.ToJS()));
         }
 
-        public JsInstruction OperationAjax(string newPrefix, string querySelectedItems, JsFunction onSucess)
+        public JsInstruction OperationAjax(string newPrefix, string querySelectedItems, JsFunction onSuccess)
         {
-            return new JsInstruction(() => "{0}.operationAjax('{1}',{2},{3})".Formato(this.ToJS(), newPrefix, querySelectedItems, onSucess.ToJS()));
+            return new JsInstruction(() => "{0}.operationAjax('{1}',{2},{3})".Formato(this.ToJS(), newPrefix, querySelectedItems, onSuccess.ToJS()));
         }
     }
 
