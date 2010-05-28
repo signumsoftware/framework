@@ -265,7 +265,7 @@
         <WebProjectProperties>
           <UseIIS>False</UseIIS>
           <AutoAssignPort>True</AutoAssignPort>
-          <DevelopmentServerPort>16189</DevelopmentServerPort>
+          <DevelopmentServerPort>6005</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
           <IISUrl>http://localhost/Signum.Web.Extensions</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
