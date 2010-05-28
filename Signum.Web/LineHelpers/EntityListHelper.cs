@@ -54,9 +54,17 @@ namespace Signum.Web
             sb.Append(sbSelect);
 
             StringBuilder sbBtns = new StringBuilder();
-            sbBtns.AppendLine("<tr><td>" + ListBaseHelper.WriteCreateButton(helper, entityList, null) + "</td></tr>");
-            sbBtns.AppendLine("<tr><td>" + ListBaseHelper.WriteFindButton(helper, entityList) + "</td></tr>");
-            sbBtns.AppendLine("<tr><td>" + ListBaseHelper.WriteRemoveButton(helper, entityList) + "</td></tr>");
+            string buttonContent = ListBaseHelper.WriteCreateButton(helper, entityList, null);
+            if (buttonContent.HasText())
+                sbBtns.AppendLine("<tr><td>" + buttonContent + "</td></tr>");
+
+            buttonContent = ListBaseHelper.WriteFindButton(helper, entityList);
+            if (buttonContent.HasText())
+                sbBtns.AppendLine("<tr><td>" + buttonContent + "</td></tr>");
+
+            buttonContent = ListBaseHelper.WriteRemoveButton(helper, entityList);
+            if (buttonContent.HasText())
+                sbBtns.AppendLine("<tr><td>" + buttonContent + "</td></tr>");
             
             string sBtns = sbBtns.ToString();
             if (sBtns.HasText())

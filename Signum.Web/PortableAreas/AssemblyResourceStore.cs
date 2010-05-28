@@ -11,7 +11,7 @@ namespace Signum.Web
     public class AssemblyResourceStore
     {
         private readonly Dictionary<string, string> resources;
-        private readonly Type typeToLocateAssembly;
+        public readonly Type typeToLocateAssembly;
         private readonly string namespaceName;
 
         public string VirtualPath { get; private set; }

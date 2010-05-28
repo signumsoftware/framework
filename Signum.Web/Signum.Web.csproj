@@ -168,7 +168,6 @@
     <Compile Include="ViewDataKeys.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Signum\Images\eliminar16.gif" />
     <Content Include="Signum\Views\SearchResults.ascx">
       <SubType>ASPXCodeBehind</SubType>
     </Content>
@@ -213,7 +212,11 @@
     <Content Include="Signum\Scripts\SF_DragAndDrop.js" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Signum\Content\LineStyles.css" />
     <Content Include="Signum\Images\fancy_closebox.png" />
+    <Content Include="Signum\Images\gray-grad.png" />
+    <Content Include="Signum\Images\lineButtons.gif" />
+    <Content Include="Signum\Images\popup-header-back.jpg" />
     <Content Include="Signum\Views\NormalControl.ascx">
       <SubType>ASPXCodeBehind</SubType>
     </Content>
@@ -254,7 +257,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="obj\" />
-    <Folder Include="Signum\Content\" />
     <Folder Include="Signum\Views\Shared\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
@@ -273,7 +275,7 @@
         <WebProjectProperties>
           <UseIIS>False</UseIIS>
           <AutoAssignPort>True</AutoAssignPort>
-          <DevelopmentServerPort>3249</DevelopmentServerPort>
+          <DevelopmentServerPort>16183</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
           <IISUrl>
           </IISUrl>

@@ -26,10 +26,10 @@
          <%} %>               
     </div>  
     <%} %>
-    <div class="clearall"></div>
-    <%Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString(), Model); %>
-    <br />
-    <%= Html.ValidationSummaryAjax(context) %>
+    <div class="popup-body">
+        <%Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString(), Model); %>
+        <%= Html.ValidationSummaryAjax(context) %>
+    </div>
 </div>
 </div>
 

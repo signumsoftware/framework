@@ -7,7 +7,7 @@
     TypeContext modelTC = (TypeContext)ViewData.Model;
 %>
 <div id="<%=modelTC.Compose("externalPopupDiv")%>">
-<div id="<%=modelTC.Compose("modalBackground")%>" class="transparent popupBackground"></div>
+<div class="transparent popupBackground"></div>
   
 <div id="<%=modelTC.Compose("panelPopup")%>" class="popupWindow">
     <%if (ViewData[ViewDataKeys.OnCancel] != null){ %>
@@ -15,7 +15,7 @@
     <%} else { %>
         <div class="closebox" id="<%=modelTC.Compose(ViewDataKeys.BtnCancel)%>"></div>
     <%} %>
-    <div id="<%=modelTC.Compose("divPopupDragHandle")%>" class="dragHandle" onmousedown="comienzoMovimiento(event, '<%=modelTC.Compose("panelPopup")%>');">
+    <div class="dragHandle" onmousedown="comienzoMovimiento(event, '<%=modelTC.Compose("panelPopup")%>');">
         <%
             string pageTitle = (string)ViewData[ViewDataKeys.PageTitle];
             if (pageTitle != null)
@@ -31,9 +31,9 @@
     <div id="<%=modelTC.Compose("divButtonBar")%>" class="buttonBar">
         <%if (Model != null && Navigator.Manager.ShowOkSave(modelTC.UntypedValue.GetType(), false)){ %>
             <% if(ViewData[ViewDataKeys.OnOk]!=null) { %>
-            <input type="button" class="ButtonDiv" id="<%=modelTC.Compose(ViewDataKeys.BtnOk)%>" value="OK" onclick="<%=ViewData[ViewDataKeys.OnOk]%>" />
+            <input type="button" id="<%=modelTC.Compose(ViewDataKeys.BtnOk)%>" value="OK" onclick="<%=ViewData[ViewDataKeys.OnOk]%>" />
         <%} else{ %>
-            <input type="button" class="ButtonDiv" id="<%=modelTC.Compose(ViewDataKeys.BtnOk)%>" value="OK" />
+            <input type="button" id="<%=modelTC.Compose(ViewDataKeys.BtnOk)%>" value="OK" />
          <%} %>    
             
         <%} %>

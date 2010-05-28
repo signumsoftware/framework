@@ -221,6 +221,7 @@ FindNavigator.prototype = {
                 $(self.pf("filters-list .explanation")).hide();
                 $(self.pf("filters-list table")).show('fast');
                 tableFilters.append(filterHtml);
+                $(self.pf("btnClearAllFilters")).show();
             }
         });
     },
@@ -266,6 +267,7 @@ FindNavigator.prototype = {
         if ($(this.pf("tblFilters tbody tr")).length == 0) {
             $(this.pf("filters-list .explanation")).show();
             $(this.pf("filters-list table")).hide('fast');
+            $(this.pf("btnClearAllFilters")).hide();            
         }
     },
 

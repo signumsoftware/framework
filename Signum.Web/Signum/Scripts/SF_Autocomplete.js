@@ -179,8 +179,8 @@ Autocompleter.prototype = {
         var offset = self.$control.position();
         self.$dd.css({
             left: offset.left,
-            top: offset.top + self.$control.outerHeight(),
-            width: self.$control.width()
+            top: offset.top + self.$control.outerHeight() - 1,
+            width: self.$control.outerWidth() - 2
         });
 
         self.$control.removeClass('loading');

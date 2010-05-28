@@ -27,6 +27,8 @@ namespace Signum.Web
                 return null;
 
             StringBuilder sb = new StringBuilder();
+            if (entityLine.ShowFieldDiv)
+                sb.AppendLine("<div class='field'>");
 
             sb.AppendLine(EntityBaseHelper.BaseLineLabel(helper, entityLine));
 
@@ -101,6 +103,9 @@ namespace Signum.Web
             sb.AppendLine(EntityBaseHelper.WriteRemoveButton(helper, entityLine));
 
             sb.AppendLine(EntityBaseHelper.WriteBreakLine(helper, entityLine));
+
+            if (entityLine.ShowFieldDiv)
+                sb.AppendLine("</div>");
 
             return sb.ToString();
         }

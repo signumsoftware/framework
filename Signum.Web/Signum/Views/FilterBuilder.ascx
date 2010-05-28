@@ -40,7 +40,7 @@
                 %>
                </select> 
                <%=Html.Button(context.Compose("btnAddFilter"), "+", "AddFilter('{0}');".Formato(context.ControlID), "", null)%>
-               <%=Html.Button(context.Compose("btnClearAllFilters"), Html.Encode(Resources.DeleteFilters), "ClearAllFilters('{0}');".Formato(context.ControlID), "", null)%>
+               <%=Html.Button(context.Compose("btnClearAllFilters"), Html.Encode(Resources.DeleteFilters), "ClearAllFilters('{0}');".Formato(context.ControlID), "", findOptions.FilterOptions.Count == 0 ? new Dictionary<string, object> { { "style", "display:none;" } } : new Dictionary<string, object>())%>
            </div>
     <% List<FilterOption> filterOptions = findOptions.FilterOptions; %>
   
