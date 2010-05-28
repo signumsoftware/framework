@@ -13,7 +13,8 @@ namespace Signum.Windows.Files
     public static class ImageFileExtension
     {
         static BitmapFrame png = ExtensionsImageLoader.GetImageSortName("pdf.png");
-        static BitmapFrame word = ExtensionsImageLoader.GetImageSortName("word.png");
+        static BitmapFrame wordx = ExtensionsImageLoader.GetImageSortName("word.png");
+        static BitmapFrame word = ExtensionsImageLoader.GetImageSortName("word9703.png");
         static BitmapFrame excel = ExtensionsImageLoader.GetImageSortName("excel.png");
         static BitmapFrame email = ExtensionsImageLoader.GetImageSortName("email2.png");
         static BitmapFrame html = ExtensionsImageLoader.GetImageSortName("html.png");
@@ -32,7 +33,7 @@ namespace Signum.Windows.Files
         {
             {".pdf", png},
             {".doc", word},
-            {".docx", word},
+            {".docx", wordx},
             {".xls", excel},
             {".xlsx", excel},
             {".csv", excel},
