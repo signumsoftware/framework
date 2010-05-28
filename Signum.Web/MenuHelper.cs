@@ -98,7 +98,7 @@ namespace Signum.Web
                     sb.AppendLine("<ul class='{0}'>".Formato(rootClass));
                 else
                 {
-                    sb.AppendLine("<span title='{0}'{1}>{2}</span>".Formato(Title, fullClass, Text));
+                    sb.AppendLine("<span onmouseover=\"\" title='{0}'{1}>{2}</span>".Formato(Title, fullClass, Text));
                     sb.AppendLine("<ul class='submenu'>");
                 }
 
