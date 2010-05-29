@@ -11,6 +11,8 @@ using Signum.Utilities.Reflection;
 using System.Collections;
 using Signum.Engine.Properties;
 using System.Collections.ObjectModel;
+using Signum.Engine.Maps;
+using System.Data;
 
 namespace Signum.Engine.Linq
 {
@@ -185,13 +187,20 @@ namespace Signum.Engine.Linq
             if (!candidates.Contains(expr))
                 return null;
 
-            Expression result = DateAdd(SqlEnums.hour, MinusDatePart(SqlEnums.hour, expr),
-                                 DateAdd(SqlEnums.minute, MinusDatePart(SqlEnums.minute, expr),
-                                  DateAdd(SqlEnums.second, MinusDatePart(SqlEnums.second, expr),
-                                   DateAdd(SqlEnums.millisecond, MinusDatePart(SqlEnums.millisecond, expr), expr))));
+            Expression result =
+                  new SqlCastExpression(typeof(DateTime),
+                    new SqlFunctionExpression(typeof(double), SqlFunction.FLOOR.ToString(),
+                        new[] { new SqlCastExpression(typeof(double), expr) }
+                    ));
 
             candidates.Add(result);
             return result; 
+        }
+
+        Expression Convert(Expression exp, Type type)
+        {
+            return new SqlFunctionExpression(type, SqlFunction.CONVERT.ToString(), new[]{exp, 
+                new SqlConstantExpression(Schema.Current.Settings.DefaultSqlType(type).ToString(), typeof(string))});
         }
 
         private Expression DateAdd(SqlEnums part, Expression dateExpression, Expression intExpression)

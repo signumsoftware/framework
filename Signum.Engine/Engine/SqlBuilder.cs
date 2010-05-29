@@ -17,11 +17,11 @@ namespace Signum.Engine
 {
     public static class SqlUtils
     {
-        static HashSet<string> Keywords = Resources.__SqlKeywords__.Lines().Select(a => a.Trim().ToUpper(CultureInfo.InvariantCulture)).ToHashSet();
+        static HashSet<string> Keywords = Resources.__SqlKeywords__.Lines().Select(a => a.Trim().ToUpperInvariant()).ToHashSet();
 
         public static string SqlScape(this string ident)
         {
-            if (Keywords.Contains(ident.ToUpper(CultureInfo.InvariantCulture)))
+            if (Keywords.Contains(ident.ToUpperInvariant()))
                 return "[" + ident + "]";
 
             return ident;

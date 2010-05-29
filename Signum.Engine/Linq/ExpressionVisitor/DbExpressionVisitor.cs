@@ -39,6 +39,8 @@ namespace Signum.Engine.Linq
                     return this.VisitAggregate((AggregateExpression)exp);
                 case DbExpressionType.AggregateSubquery:
                     return this.VisitAggregateSubquery((AggregateSubqueryExpression)exp);
+                case DbExpressionType.SqlCast:
+                    return this.VisitSqlCast((SqlCastExpression)exp);
                 case DbExpressionType.SqlEnum:
                     return this.VisitSqlEnum((SqlEnumExpression)exp);
                 case DbExpressionType.SqlFunction:
@@ -157,6 +159,14 @@ namespace Signum.Engine.Linq
         protected virtual Expression VisitSqlEnum(SqlEnumExpression sqlEnum)
         {
             return sqlEnum;
+        }
+
+        protected virtual Expression VisitSqlCast(SqlCastExpression castExpr)
+        {
+            var expression = Visit(castExpr.Expression);
+            if (expression != castExpr.Expression)
+                return new SqlCastExpression(castExpr.Type, expression,castExpr.SqlDbType);
+            return castExpr;
         }
 
         protected virtual Expression VisitTable(TableExpression table)

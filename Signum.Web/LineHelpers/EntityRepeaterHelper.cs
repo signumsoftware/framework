@@ -95,8 +95,9 @@ namespace Signum.Web
 
             EntityRepeater el = new EntityRepeater(context.Type, context.UntypedValue, context, null, context.PropertyRoute);
 
-            Navigator.ConfigureEntityBase(el, Reflector.ExtractLite(typeof(S)) ?? typeof(S), false);
             Common.FireCommonTasks(el);
+
+            EntityBaseHelper.ConfigureEntityBase(el, Reflector.ExtractLite(typeof(S)) ?? typeof(S));
 
             if (settingsModifier != null)
                 settingsModifier(el);

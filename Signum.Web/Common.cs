@@ -27,7 +27,6 @@ namespace Signum.Web
             CommonTask += new CommonTask(TaskSetFormatText);
             CommonTask += new CommonTask(TaskSetImplementations);
             CommonTask += new CommonTask(TaskSetReadOnly);
-            CommonTask += new CommonTask(TaskSetAccess);
             CommonTask += new CommonTask(TaskSetHtmlProperties);
             CommonTask += new CommonTask(TaskSetReloadOnChange);
         }
@@ -95,40 +94,6 @@ namespace Signum.Web
                 {
                     bl.ReadOnly = true;
                 }
-            }
-        }
-
-        public static void TaskSetAccess(BaseLine bl)
-        {
-            EntityBase eb = bl as EntityBase;
-            if (eb != null && bl.PropertyRoute.PropertyRouteType == PropertyRouteType.Property)
-            {
-                Type cleanType = bl.Type.ElementType() ?? bl.Type;
-                cleanType = Reflector.ExtractLite(cleanType) ?? cleanType;
-
-                if (cleanType.IsAbstract || cleanType.IsInterface)
-                {
-                    if (bl.UntypedValue == null)
-						return; //No access control possible
-                    cleanType = bl.UntypedValue.GetType();
-                    cleanType = cleanType.ElementType() ?? cleanType;
-                    cleanType = Reflector.ExtractLite(cleanType) ?? cleanType;
-                    if (cleanType.IsAbstract || cleanType.IsInterface)
-                        return; //No access control possible
-                }
-
-                if (!Navigator.IsViewable(cleanType, false))
-                    eb.View = false;
-
-                if (!Navigator.IsCreable(cleanType, false))
-                    eb.Create = false;
-
-                if (!Navigator.IsFindable(cleanType))
-                    eb.Find = false;
-
-                EntityLine el = eb as EntityLine;
-                if (el != null && !Navigator.IsNavigable(cleanType, false))
-                    el.Navigate = false;
             }
         }
 

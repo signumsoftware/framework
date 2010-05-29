@@ -330,6 +330,15 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void SelectIsNull()
+        {
+            var durations = (from a in Database.Query<AlbumDN>()
+                             from s in a.Songs
+                             where s.Duration.HasValue
+                             select s.Duration == null).ToArray();
+        }
+
+        [TestMethod]
         public void SelectAvoidNominate()
         {
             var durations =

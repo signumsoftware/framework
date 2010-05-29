@@ -384,19 +384,6 @@ namespace Signum.Web
             return true;
         }
 
-        internal static void ConfigureEntityBase(EntityBase eb, Type entityType, bool admin)
-        {
-            if (Manager.EntitySettings.ContainsKey(entityType))
-            {
-                eb.Create = Navigator.IsCreable(entityType, admin);
-                eb.View = Navigator.IsViewable(entityType, admin);
-                eb.Find = Navigator.IsFindable(entityType);
-            }
-            EntityLine el = eb as EntityLine;
-            if (el != null)
-                el.Navigate = Navigator.IsNavigable(entityType, admin);
-        }
-
         public static bool IsNavigable(Type type, bool admin)
         {
             return Manager.IsNavigable(type, admin);

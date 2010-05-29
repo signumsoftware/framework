@@ -121,8 +121,9 @@ namespace Signum.Web
 
             EntityLine el = new EntityLine(typeof(S), context.Value, context, null, context.PropertyRoute);
 
-            Navigator.ConfigureEntityBase(el, el.CleanRuntimeType ?? el.Type.CleanType(), false);
             Common.FireCommonTasks(el);
+
+            EntityBaseHelper.ConfigureEntityBase(el, el.CleanRuntimeType ?? el.Type.CleanType());
 
             if (settingsModifier != null)
                 settingsModifier(el);

@@ -151,7 +151,7 @@ namespace Signum.Test
 
             smashingPumpkins.Members.ForEach(m => m.Friends = smashingPumpkins.Members.Where(a => a.Sex != m.Sex).Select(a => a.ToLiteFat()).ToMList());
 
-            new NoteDN { CreationTime = DateTime.Now.AddDays(-30), Text = "American alternative rock band", Target = smashingPumpkins }.Save();
+            new NoteDN { CreationTime = DateTime.Now.AddHours(+8), Text = "American alternative rock band", Target = smashingPumpkins }.Save();
 
             LabelDN virgin = new LabelDN { Name = "Virgin", Country = usa };
 
@@ -181,7 +181,7 @@ namespace Signum.Test
 
             mellon.Save();
 
-            new NoteDN { CreationTime = DateTime.Now.AddDays(-100), Text = "The blue one with the angel", Target = mellon }.Save();
+            new NoteDN { CreationTime = DateTime.Now.AddDays(-100).AddHours(-8), Text = "The blue one with the angel", Target = mellon }.Save();
 
             LabelDN wea = new LabelDN { Name = "WEA International", Country = usa, Owner = virgin.ToLite() };
 

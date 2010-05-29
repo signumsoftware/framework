@@ -72,10 +72,11 @@ namespace Signum.Web
         {
             TypeContext<S> context = Common.WalkExpression(tc, property);
 
-            EntityLineDetail edl = new EntityLineDetail(context.Type, context.Value, context, null, context.PropertyRoute);
-            
-            Navigator.ConfigureEntityBase(edl, edl.CleanRuntimeType ?? edl.Type.CleanType(), false);
+            EntityLineDetail edl = new EntityLineDetail(context.Type, context.Value, context, null, context.PropertyRoute); 
+           
             Common.FireCommonTasks(edl);
+
+            EntityBaseHelper.ConfigureEntityBase(edl, edl.CleanRuntimeType ?? edl.Type.CleanType());
 
             if (settingsModifier != null)
                 settingsModifier(edl);

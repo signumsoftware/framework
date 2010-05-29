@@ -110,7 +110,7 @@ namespace Signum.Web
 
         public static string WriteCreateButton(HtmlHelper helper, EntityBase entityBase)
         {
-            if (!entityBase.Create && entityBase.Implementations == null)
+            if (!entityBase.Create)
                 return "";
 
             return helper.Button(entityBase.Compose("btnCreate"),
@@ -154,6 +154,19 @@ namespace Signum.Web
             return "<script type=\"text/javascript\">var {0} = \"{1}\"</script>".Formato(
                                 entityBase.Compose(EntityBaseKeys.Template),
                                 EntityBaseHelper.JsEscape(template));
+        }
+
+        internal static void ConfigureEntityBase(EntityBase eb, Type entityType)
+        {
+            if (eb.Implementations == null && Navigator.Manager.EntitySettings.ContainsKey(entityType))
+            {
+                eb.Create = Navigator.IsCreable(entityType, false);
+                eb.View = Navigator.IsViewable(entityType, false);
+                eb.Find = Navigator.IsFindable(entityType);
+            }
+            EntityLine el = eb as EntityLine;
+            if (el != null)
+                el.Navigate = Navigator.IsNavigable(entityType, false);
         }
     }
 

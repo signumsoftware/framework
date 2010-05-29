@@ -23,7 +23,7 @@ namespace Signum.Engine.Maps
 
         Dictionary<Type, SchemaTypeSettings> types = new Dictionary<Type,SchemaTypeSettings>();
 
-        internal static Dictionary<Type, SqlDbType> TypeValues = new Dictionary<Type, SqlDbType>
+        public Dictionary<Type, SqlDbType> TypeValues = new Dictionary<Type, SqlDbType>
         {
             {typeof(bool), SqlDbType.Bit},
 
@@ -227,6 +227,11 @@ namespace Signum.Engine.Maps
             SqlDbTypeAttribute att = FieldInfoAttributes(type, fi).OfType<SqlDbTypeAttribute>().SingleOrDefault();
 
             return att.TryCS(a => a.HasScale ? a.Scale : (int?)null) ?? defaultScale.TryGetS(sqlDbType);
+        }
+
+        internal SqlDbType DefaultSqlType(Type type)
+        {
+            return this.TypeValues.GetOrThrow(type, "Type {0} not registered"); 
         }
     }
 

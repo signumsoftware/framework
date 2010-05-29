@@ -195,9 +195,10 @@ namespace Signum.Web
                     EntityCombo ec = new EntityCombo(filterOption.Token.Type, filterOption.Value, parent, "", filterOption.Token.GetPropertyRoute())
                     {
                         LabelVisible = false,
-                        BreakLine = false
+                        BreakLine = false,
+                        Implementations = filterOption.Token.Implementations()
                     };
-                    Navigator.ConfigureEntityBase(ec, filterOption.Token.Type.CleanType(), false);
+                    EntityBaseHelper.ConfigureEntityBase(ec, filterOption.Token.Type.CleanType());
                     return EntityComboHelper.InternalEntityCombo(helper, ec);
                 }
                 else
@@ -205,9 +206,11 @@ namespace Signum.Web
                     EntityLine el = new EntityLine(filterOption.Token.Type, filterOption.Value, parent, "", filterOption.Token.GetPropertyRoute())
                     {
                         LabelVisible = false,
-                        BreakLine = false
+                        BreakLine = false,
+                        Create = false,
+                        Implementations = filterOption.Token.Implementations()
                     };
-                    Navigator.ConfigureEntityBase(el, filterOption.Token.Type.CleanType(), false);
+                    EntityBaseHelper.ConfigureEntityBase(el, filterOption.Token.Type.CleanType());
                     el.Create = false;
 
                     return EntityLineHelper.InternalEntityLine(helper, el);

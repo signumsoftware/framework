@@ -14,6 +14,7 @@ using Signum.Utilities.Reflection;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Engine.Maps;
 using Signum.Entities.DynamicQuery;
+using System.Data;
 
 
 namespace Signum.Engine.Linq
@@ -34,6 +35,7 @@ namespace Signum.Engine.Linq
         SqlFunction,
         SqlConstant,
         SqlEnum,
+        SqlCast,
         Case, 
         RowNumber,
         Like,
@@ -405,6 +407,7 @@ namespace Signum.Engine.Linq
         DATEADD,
 
         COALESCE,
+        CONVERT,
     }
 
     internal enum SqlEnums
@@ -434,6 +437,29 @@ namespace Signum.Engine.Linq
         public override string ToString()
         {
             return Value.ToString();
+        }
+    }
+
+    internal class SqlCastExpression : DbExpression
+    {
+        public readonly SqlDbType SqlDbType;
+        public readonly Expression Expression;
+
+        public SqlCastExpression(Type type, Expression expression)
+            : this(type, expression, Schema.Current.Settings.DefaultSqlType(type))
+        {
+        }
+
+        public SqlCastExpression(Type type, Expression expression, SqlDbType sqlDbType)
+            :base(DbExpressionType.SqlCast, type)
+        {
+            this.Expression = expression;
+            this.SqlDbType = sqlDbType; 
+        }
+
+        public override string ToString()
+        {
+            return "Cast({0} as {1})".Formato(Expression.NiceToString(), SqlDbType.ToString().ToUpper());
         }
     }
 

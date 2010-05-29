@@ -49,7 +49,7 @@ namespace Signum.Engine.Linq
             if (clrType.IsEnum)
                 clrType = typeof(int);
 
-            SqlDbType sqlDbType = SchemaSettings.TypeValues.TryGetS(clrType) ?? SqlDbType.Variant;
+            SqlDbType sqlDbType = Schema.Current.Settings.TypeValues.TryGetS(clrType) ?? SqlDbType.Variant;
 
             Expression valExpression = value.Type.IsNullable() ? 
                 Expression.Coalesce(Expression.Convert(value, typeof(object)), Expression.Constant(DBNull.Value)) :
@@ -339,6 +339,16 @@ namespace Signum.Engine.Linq
         {
             sb.Append(sqlEnum.Value);
             return sqlEnum;
+        }
+
+        protected override Expression VisitSqlCast(SqlCastExpression castExpr)
+        {
+            sb.Append("CAST(");
+            Visit(castExpr.Expression);
+            sb.Append(" as ");
+            sb.Append(castExpr.SqlDbType.ToString().ToUpperInvariant());
+            sb.Append(")");
+            return castExpr;
         }
 
         internal static bool IsSupported(Type type)
