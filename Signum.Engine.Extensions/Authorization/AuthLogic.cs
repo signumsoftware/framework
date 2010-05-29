@@ -72,8 +72,9 @@ namespace Signum.Engine.Authorization
                                            Entity = e.ToLite(),
                                            e.Id,
                                            e.UserName,
+                                           e.Email,
                                            Rol = e.Role.ToLite(),
-                                           //Empleado = e.Related.ToString(),
+                                           Related = e.Related.ToLite(),
                                        }).ToDynamic();
             }
         }

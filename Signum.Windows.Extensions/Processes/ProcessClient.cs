@@ -40,7 +40,7 @@ namespace Signum.Windows.Processes
 
         static IIdentifiable ProcessOperation_Plan(EntityOperationEventArgs args)
         {
-            DateTime plan = DateTime.Now;
+            DateTime plan = TimeZoneManager.Now;
             if (ValueLineBox.Show(ref plan, "Choose planned date", "Please, choose the date you want the process to start", "Planned date", null, null, args.SenderButton.FindCurrentWindow()))
             {
                 return  ((ProcessExecutionDN)args.Entity).ToLite().ExecuteLite(ProcessOperation.Plan, plan); 

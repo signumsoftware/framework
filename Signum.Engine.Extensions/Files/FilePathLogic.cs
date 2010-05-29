@@ -11,6 +11,7 @@ using System.IO;
 using Signum.Engine.Extensions.Properties;
 using Signum.Engine.DynamicQuery;
 using System.Reflection;
+using System.Diagnostics;
 
 namespace Signum.Engine.Files
 {
@@ -75,8 +76,16 @@ namespace Signum.Engine.Files
                                where f.Id == id
                                select f.FullPhysicalPath).Single();
 
-            Transaction.RealCommit += () => File.Delete(fullPath);
+            Transaction.RealCommit += () =>
+            {
+                if (unsafeMode)
+                    Debug.WriteLine(fullPath);
+                else
+                    File.Delete(fullPath);
+            };
         }
+
+        
 
         const long ERROR_DISK_FULL = 112L; // see winerror.h
 
