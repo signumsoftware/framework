@@ -63,16 +63,16 @@ namespace Signum.Web
         }
 
 
-        public static void IncludeAreaJs(this HtmlHelper html, params string[] files)
+        public static string IncludeAreaJs(params string[] files)
         {
+
             string content = "";
 #if (DEBUG)
             content = files.ToString(f => "<script type='text/javascript' src=\"{0}\"></script>\n".Formato(f), "");
-            html.ViewContext.HttpContext.Response.Write(content);
-            return;
+            return content;
 #endif
             content = "<script type='text/javascript' src=\"{0}\"></script>\n".Formato(IncludeAreaJsPath(files));
-            html.ViewContext.HttpContext.Response.Write(content);
+            return content;
         }
 
         static string IncludeAreaJsPath(params string[] files)
@@ -82,14 +82,20 @@ namespace Signum.Web
 
         public static void IncludeAreaCss(this HtmlHelper html, params string[] files)
         {
-            string content = "";
+       /*     string content = "";
 #if (DEBUG)
             content = files.ToString(f => "<link href=\"{0}\" rel='stylesheet' type='text/css' />\n".Formato(f), "");
             html.ViewContext.HttpContext.Response.Write(content);
             return;
 #endif
             content = "<link href=\"{0}\" rel='stylesheet' type='text/css' />\n".Formato(IncludeAreaCssPath(files));
+            html.ViewContext.HttpContext.Response.Write(content);*/
+
+            //currently we don't combine and minimize area css files to avoid problems with relative paths
+            string content = "";
+            content = files.ToString(f => "<link href=\"{0}\" rel='stylesheet' type='text/css' />\n".Formato(f), "");
             html.ViewContext.HttpContext.Response.Write(content);
+            return;
         }
 
         static string IncludeAreaCssPath(params string[] files)
