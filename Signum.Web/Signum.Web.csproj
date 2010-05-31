@@ -78,6 +78,7 @@
     <Compile Include="CalendarHelper.cs" />
     <Compile Include="Common.cs" />
     <Compile Include="Constructor.cs" />
+    <Compile Include="AreaResourceHelper.cs" />
     <Compile Include="JSRenderer\JsFunction.cs" />
     <Compile Include="JSRenderer\JsOptions.cs" />
     <Compile Include="Lines\EntityListBase.cs" />

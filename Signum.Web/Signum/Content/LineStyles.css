@@ -64,7 +64,7 @@ input[type=submit]:active,input[type=button]:active {
     padding-top:6px;
 }
 
-input,textarea,select {
+input[type=text],input[type=password],input[type=button], textarea,select {/* IE will show a border around input radio */
     border:1px solid #ccc;
     color:#333;
     padding:3px 4px 4px;
@@ -278,6 +278,7 @@ fieldset
 .popup-body {
     clear:both;
     padding:10px;
+	overflow:auto;	/*important when a popup contains a search control */
 }
 
 .popupBackground {
