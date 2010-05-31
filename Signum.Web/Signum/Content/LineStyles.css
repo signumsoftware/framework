@@ -142,7 +142,7 @@ img.ui-datepicker-trigger:hover
     overflow:auto;
 }
 
-.EntityLineDetail .field .labelLine {
+.EntityLineDetail .field .labelLine, .EntityLineDetail .around .labelLine {
     width:100px;
     border-left:2px dotted #bbb;
     margin-left:120px;
