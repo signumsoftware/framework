@@ -491,28 +491,4 @@ namespace Signum.Engine
             return Expression.Call(reader, mi, ordinal);
         }
     }
-
-    public class DisposableDataReader : IDisposable
-    {
-        public readonly SqlDataReader Reader;
-        public readonly Transaction Transaction;
-
-        public DisposableDataReader(SqlDataReader reader, Transaction transaction)
-        {
-            this.Transaction = transaction;
-            this.Reader = reader;
-        }
-
-        public void Dispose()
-        {
-            if(!Reader.IsClosed)
-                throw new InvalidOperationException();
-
-            if (Transaction != null)
-            {
-                Transaction.Commit();
-                Transaction.Dispose();
-            }
-        }
-    }
 }

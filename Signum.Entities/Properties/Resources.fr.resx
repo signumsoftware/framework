@@ -355,8 +355,8 @@
   <data name="PropertyInfoIsNotSupported" xml:space="preserve">
     <value>{0} L'info de propriété n'est pas supporté</value>
   </data>
-  <data name="PropertyPathFindImplementationsNotSet" xml:space="preserve">
-    <value>PropertyPath.FindImplementations not set</value>
+  <data name="PropertyRouteFindImplementationsNotSet" xml:space="preserve">
+    <value>PropertyRoute.FindImplementations not set</value>
   </data>
   <data name="PropertyRouteCanNotBeOfTypeRoot" xml:space="preserve">
     <value>PropertyRoute can not be of type Root</value>

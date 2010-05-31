@@ -791,20 +791,20 @@ namespace Signum.Entities.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to PropertyPath.FindImplementations not set.
-        /// </summary>
-        internal static string PropertyPathFindImplementationsNotSet {
-            get {
-                return ResourceManager.GetString("PropertyPathFindImplementationsNotSet", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to PropertyRoute can not be of type Root.
         /// </summary>
         internal static string PropertyRouteCanNotBeOfTypeRoot {
             get {
                 return ResourceManager.GetString("PropertyRouteCanNotBeOfTypeRoot", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to PropertyRoute.FindImplementations not set.
+        /// </summary>
+        internal static string PropertyRouteFindImplementationsNotSet {
+            get {
+                return ResourceManager.GetString("PropertyRouteFindImplementationsNotSet", resourceCulture);
             }
         }
         

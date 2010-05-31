@@ -14,7 +14,6 @@ namespace Signum.Engine.Linq
         Type ElementType { get; }
         string CommandText { get; }
         UniqueFunction? Unique { get; }
-        bool HasFullObjects { get; }
 
         string CleanCommandText();
 
@@ -25,7 +24,6 @@ namespace Signum.Engine.Linq
     {
         public string CommandText { get; set; }
         public UniqueFunction? Unique { get; set; }
-        public bool HasFullObjects { get; set; }
         public Type ElementType { get { return typeof(T); } }
 
         internal Expression<Func<IProjectionRow, SqlParameter[]>> GetParametersExpression;
@@ -34,30 +32,46 @@ namespace Signum.Engine.Linq
 
         public object Execute(IProjectionRow pr)
         {
-            SqlPreCommandSimple command = new SqlPreCommandSimple(CommandText, GetParameters(pr).ToList());
+            using (Transaction tr = new Transaction())
+            using (EntityCache cache = new EntityCache())
+            {
+                SqlPreCommandSimple command = new SqlPreCommandSimple(CommandText, GetParameters(pr).ToList());
 
-            var disposable = Executor.ExecuteDataReader(command);
-
-            ProjectionRowEnumerator<T> enumerator = new ProjectionRowEnumerator<T>(disposable, ProjectorExpression, HasFullObjects, pr);
-
-            IEnumerable<T> reader = new ProjectionRowEnumerable<T>(enumerator);
-
-            if (Unique.HasValue)
-                switch (Unique.Value)
+                object result; 
+                using (SqlDataReader reader = Executor.UnsafeExecuteDataReader(command))
                 {
-                    case UniqueFunction.First: return reader.First();
-                    case UniqueFunction.FirstOrDefault: return reader.FirstOrDefault();
-                    case UniqueFunction.Single: return reader.Single();
-                    case UniqueFunction.SingleOrDefault: return reader.SingleOrDefault();
-                    default:
-                        throw new InvalidOperationException();
+                    Retriever retriever = pr != null ? pr.Retriever : new Retriever();
+
+                    ProjectionRowEnumerator<T> enumerator = new ProjectionRowEnumerator<T>(reader, ProjectorExpression, pr, retriever);
+
+                    IEnumerable<T> enumerable = new ProjectionRowEnumerable<T>(enumerator);
+
+                    result = Result(enumerable);
+
+                    if (pr == null)
+                        retriever.ProcessAll();
                 }
-            else
-                if (HasFullObjects || pr != null)
-                    return reader.ToList();
-                else
-                    return reader;
+
+                return tr.Commit(result);
+            }
         }
+
+        private object Result(IEnumerable<T> enumerable)
+        {
+            if (Unique == null)
+                return enumerable.ToList();
+
+            switch (Unique.Value)
+            {
+                case UniqueFunction.First: return enumerable.First();
+                case UniqueFunction.FirstOrDefault: return enumerable.FirstOrDefault();
+                case UniqueFunction.Single: return enumerable.Single();
+                case UniqueFunction.SingleOrDefault: return enumerable.SingleOrDefault();
+                default:
+                    throw new InvalidOperationException();
+            }
+        } 
+        
 
         #region ITranslateResult Members
 

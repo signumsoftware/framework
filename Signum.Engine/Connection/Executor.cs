@@ -59,19 +59,19 @@ public static class Executor
         ConnectionScope.Current.ExecuteDataReader(preCommand, forEach);
     }
 
-    public static DisposableDataReader ExecuteDataReader(string sql)
+    public static SqlDataReader UnsafeExecuteDataReader(string sql)
     {
-        return ConnectionScope.Current.ExecuteDataReader(new SqlPreCommandSimple(sql));
+        return ConnectionScope.Current.UnsafeExecuteDataReader(new SqlPreCommandSimple(sql));
     }
 
-    public static DisposableDataReader ExecuteDataReader(string sql, List<SqlParameter> parameters)
+    public static SqlDataReader UnsafeExecuteDataReader(string sql, List<SqlParameter> parameters)
     {
-        return ConnectionScope.Current.ExecuteDataReader(new SqlPreCommandSimple(sql, parameters));
+        return ConnectionScope.Current.UnsafeExecuteDataReader(new SqlPreCommandSimple(sql, parameters));
     }
 
-    public static DisposableDataReader ExecuteDataReader(this SqlPreCommandSimple preCommand)
+    public static SqlDataReader UnsafeExecuteDataReader(this SqlPreCommandSimple preCommand)
     {
-        return ConnectionScope.Current.ExecuteDataReader(preCommand);
+        return ConnectionScope.Current.UnsafeExecuteDataReader(preCommand);
     }
 
 

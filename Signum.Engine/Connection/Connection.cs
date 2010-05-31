@@ -48,13 +48,11 @@ namespace Signum.Engine
             }
         }
 
-        protected internal abstract bool IsMock { get; }
-
         protected internal abstract object ExecuteScalar(SqlPreCommandSimple preCommand);
         protected internal abstract int ExecuteNonQuery(SqlPreCommandSimple preCommand);
         protected internal abstract DataTable ExecuteDataTable(SqlPreCommandSimple command);
         protected internal abstract void ExecuteDataReader(SqlPreCommandSimple command, Action<FieldReader> forEach);
-        protected internal abstract DisposableDataReader ExecuteDataReader(SqlPreCommandSimple sqlPreCommandSimple);
+        protected internal abstract SqlDataReader UnsafeExecuteDataReader(SqlPreCommandSimple sqlPreCommandSimple);
         protected internal abstract DataSet ExecuteDataSet(SqlPreCommandSimple sqlPreCommandSimple);
 
         public abstract string SchemaName();
@@ -93,11 +91,6 @@ namespace Signum.Engine
         {
             get { return connectionString; }
             set { connectionString = value; }
-        }
-
-        protected internal override bool IsMock
-        {
-            get { return false; }
         }
 
         [ThreadStatic]
@@ -213,14 +206,12 @@ namespace Signum.Engine
             }
         }
 
-        protected internal override DisposableDataReader ExecuteDataReader(SqlPreCommandSimple preCommand)
+        protected internal override SqlDataReader UnsafeExecuteDataReader(SqlPreCommandSimple preCommand)
         {
             try
             {
-                Transaction tr = new Transaction();
                 SqlCommand cmd = NewCommand(preCommand, null);
-                SqlDataReader reader = cmd.ExecuteReader();
-                return new DisposableDataReader(reader, tr);
+                return cmd.ExecuteReader();
             }
             catch (SqlException ex)
             {
@@ -294,68 +285,5 @@ namespace Signum.Engine
         {
             return new SqlConnection(connectionString).Database;
         }
-    }
-
-    public class MockConnection : BaseConnection
-    {
-        public MockConnection(Schema schema, DynamicQueryManager dqm)
-            : base(schema, dqm)
-        {
-
-        }
-
-        List<SqlPreCommandSimple> executedCommands = new List<SqlPreCommandSimple>();
-        public List<SqlPreCommandSimple> ExecutedCommands
-        {
-            get { return executedCommands; }
-        }
-
-        protected internal override bool IsMock
-        {
-            get { return true; }
-        }
-
-        protected internal override object ExecuteScalar(SqlPreCommandSimple preCommand)
-        {
-            executedCommands.Add(preCommand);
-            return null;
-        }
-
-        protected internal override int ExecuteNonQuery(SqlPreCommandSimple preCommand)
-        {
-            executedCommands.Add(preCommand);
-            return 0;
-        }
-
-        protected internal override DataTable ExecuteDataTable(SqlPreCommandSimple preCommand)
-        {
-            executedCommands.Add(preCommand);
-            return null;
-        }
-
-        protected internal override DataSet ExecuteDataSet(SqlPreCommandSimple preCommand)
-        {
-            executedCommands.Add(preCommand);
-            return null;
-        }
-
-        protected internal override void ExecuteDataReader(SqlPreCommandSimple preCommand, Action<FieldReader> forEach)
-        {
-            executedCommands.Add(preCommand);
-        }
-
-        protected internal override DisposableDataReader ExecuteDataReader(SqlPreCommandSimple sqlPreCommandSimple)
-        {
-            executedCommands.Add(sqlPreCommandSimple);
-            return null;
-        }
-
-        public override string SchemaName()
-        {
-            return "Mock";
-        }
-
-
-
     }
 }

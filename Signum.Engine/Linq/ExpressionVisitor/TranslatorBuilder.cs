@@ -37,9 +37,8 @@ namespace Signum.Engine.Linq
                 Positions = proj.Source.Columns.Select((c, i) => new { c.Name, i }).ToDictionary(p => p.Name, p => p.i)
             };
 
-            bool hasFullObjects;
 
-            Expression<Func<IProjectionRow, T>> lambda = ProjectionBuilder.Build<T>(proj.Projector, scope, out hasFullObjects);
+            Expression<Func<IProjectionRow, T>> lambda = ProjectionBuilder.Build<T>(proj.Projector, scope);
 
             Expression<Func<IProjectionRow, SqlParameter[]>> createParams;
             string sql = QueryFormatter.Format(proj.Source, previousScope, out createParams);
@@ -54,8 +53,6 @@ namespace Signum.Engine.Linq
                 GetParametersExpression = createParams,
 
                 Unique = proj.UniqueFunction,
-
-                HasFullObjects = hasFullObjects,
             };
 
             return result;
@@ -87,10 +84,6 @@ namespace Signum.Engine.Linq
 
             public PropertyInfo piToStrLite = ReflectionTools.GetPropertyInfo((Lite l) =>l.ToStr);
 
-           
-
-            bool HasFullObjects;
-
             static MethodInfo miGetList = ReflectionTools.GetMethodInfo((IProjectionRow row) => row.GetList<int>(null, 1)).GetGenericMethodDefinition();
 
             static MethodInfo miGetIdentifiable = ReflectionTools.GetMethodInfo((IProjectionRow row) => row.GetIdentifiable<TypeDN>(null)).GetGenericMethodDefinition();
@@ -100,11 +93,10 @@ namespace Signum.Engine.Linq
             static MethodInfo miGetLiteIdentifiable = ReflectionTools.GetMethodInfo((IProjectionRow row) => row.GetLiteIdentifiable<TypeDN>(null, null, null)).GetGenericMethodDefinition(); 
             static MethodInfo miGetLiteImplementedByAll = ReflectionTools.GetMethodInfo((IProjectionRow row) => row.GetLiteImplementedByAll<TypeDN>(null, null)).GetGenericMethodDefinition(); 
 
-            static internal Expression<Func<IProjectionRow, T>> Build<T>(Expression expression, Scope scope, out bool hasFullObjects)
+            static internal Expression<Func<IProjectionRow, T>> Build<T>(Expression expression, Scope scope)
             {
                 ProjectionBuilder pb = new ProjectionBuilder() { scope = scope };
                 Expression body = pb.Visit(expression);
-                hasFullObjects = pb.HasFullObjects;
                 return Expression.Lambda<Func<IProjectionRow, T>>(body, pb.row);
             }
 
@@ -130,7 +122,6 @@ namespace Signum.Engine.Linq
             protected override Expression VisitProjection(ProjectionExpression proj)
             {
                 ITranslateResult tr = TranslatorBuilder.Build(proj, scope);
-                HasFullObjects |= tr.HasFullObjects;
 
                 Expression call = Expression.Call(Expression.Constant(tr), miExecute, this.row);
 
@@ -142,7 +133,6 @@ namespace Signum.Engine.Linq
 
             protected override Expression VisitFieldInit(FieldInitExpression fieldInit)
             {
-                HasFullObjects = true;
                 return Expression.Call(row, miGetIdentifiable.MakeGenericMethod(fieldInit.Type), 
                     Visit(NullifyColumn(fieldInit.ExternalId)));
             }
@@ -160,7 +150,6 @@ namespace Signum.Engine.Linq
 
             protected override Expression VisitMList(MListExpression ml)
             {
-                HasFullObjects = true;
                 return Expression.Call(row, miGetList.MakeGenericMethod(ml.Type.ElementType()),
                     Expression.Constant(ml.RelationalTable),
                     Visit(ml.BackID));
@@ -168,7 +157,6 @@ namespace Signum.Engine.Linq
 
             protected override Expression VisitImplementedBy(ImplementedByExpression rb)
             {
-                HasFullObjects = true;
                 Type[] types = rb.Implementations.Select(a => a.Type).ToArray();
                 return Expression.Call(row,
                     miGetImplementedBy.MakeGenericMethod(rb.Type),
@@ -179,7 +167,6 @@ namespace Signum.Engine.Linq
 
             protected override Expression VisitImplementedByAll(ImplementedByAllExpression rba)
             {
-                HasFullObjects = true;
                 return Expression.Call(row, miGetImplementedByAll.MakeGenericMethod(rba.Type),
                     Visit(NullifyColumn(rba.Id)),
                     Visit(NullifyColumn(rba.TypeId)));
@@ -197,7 +184,6 @@ namespace Signum.Engine.Linq
                     return Expression.Constant(null, lite.Type);
                 else if (toStr == null)
                 {
-                    HasFullObjects = true;
                     return Expression.Call(row, miGetLiteImplementedByAll.MakeGenericMethod(liteType), id, typeId.Nullify());
                 }
                 else

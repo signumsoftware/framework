@@ -64,7 +64,7 @@
     </Compile>
     <Compile Include="DynamicQuery\ExpandableResult.cs" />
     <Compile Include="DynamicQuery\Filter.cs" />
-    <Compile Include="DynamicQuery\QueryResult.cs" />
+    <Compile Include="DynamicQuery\ResultTable.cs" />
     <Compile Include="DynamicQuery\QueryUtils.cs" />
     <Compile Include="DynamicQuery\QueryToken.cs" />
     <Compile Include="FieldAttributes.cs" />

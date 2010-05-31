@@ -22,6 +22,18 @@ namespace Signum.Engine
     /// </summary>
     public class Transaction : IDisposable
     {
+        public static Action<string, StackTrace> UnexpectedBehaviourCallback { get; set; }
+
+        static Transaction()
+        {
+            UnexpectedBehaviourCallback = (msg, st) => Debug.WriteLine(msg); 
+        }
+
+        static void NotifyRollback()
+        {
+            UnexpectedBehaviourCallback(Resources.TransactionRollbacked, new StackTrace(2, true));
+        }
+
         [ThreadStatic]
         static Dictionary<BaseConnection, ICoreTransaction> currents;
 
@@ -123,7 +135,7 @@ namespace Signum.Engine
                 if (Started && !RolledBack)
                 {
                     Transaction.Rollback();
-                    Debug.WriteLine(Resources.TransactionRollbacked);
+                    NotifyRollback();
                     RolledBack = true;
                 }
             }
@@ -184,99 +196,7 @@ namespace Signum.Engine
                 if (Started && !RolledBack)
                 {
                     Transaction.Rollback(savePointName);
-                    Debug.WriteLine(Resources.TransactionRollbacked);
-                    RolledBack = true;
-                }
-            }
-
-            public void Commit() { }
-
-            public ICoreTransaction Finish() { return parent; }
-        }
-
-        class MockRealTransaction : ICoreTransaction
-        {
-            ICoreTransaction parent;
-
-            public SqlConnection Connection { get{return null;} }
-            public SqlTransaction Transaction { get{return null;} }
-            public DateTime Time { get; private set; }
-            public bool RolledBack { get; private set; }
-            public bool Started { get; set; }
-            public event Action RealCommit;
-            
-
-            public MockRealTransaction(ICoreTransaction parent)
-            {
-                Time = TimeZoneManager.Now;
-                this.parent = parent;
-            }
-
-            public void Start()
-            {
-                Started = true;
-            }
-
-            public void Commit()
-            {
-                if (Started)
-                {
-                    if (RealCommit != null)
-                        RealCommit();
-                }
-            }
-
-            public void Rollback()
-            {
-                if (Started && !RolledBack)
-                {
-                    Debug.WriteLine(Resources.TransactionRollbacked);
-                    RolledBack = true;
-                }
-            }
-
-            public ICoreTransaction Finish()
-            {
-                return parent;
-            }
-        }
-
-        class MockNamedTransaction : ICoreTransaction
-        {
-            ICoreTransaction parent;
-            string savePointName;
-            public bool RolledBack { get; private set; }
-            public bool Started { get; private set; }
-
-            public MockNamedTransaction(ICoreTransaction parent, string savePointName)
-            {
-                this.parent = parent;
-                this.savePointName = savePointName;
-            }
-
-            public event Action RealCommit
-            {
-                add { parent.RealCommit += value; }
-                remove { parent.RealCommit -= value; }
-            }
-
-            public SqlConnection Connection { get { return parent.Connection; } }
-            public SqlTransaction Transaction { get { return parent.Transaction; } }
-            public DateTime Time { get { return parent.Time; } }
-
-            public void Start()
-            {
-                if (!Started)
-                {
-                    parent.Start();
-                    Started = true;
-                }
-            }
-
-            public void Rollback()
-            {
-                if (Started && !RolledBack)
-                {
+                    NotifyRollback();
                     RolledBack = true;
                 }
             }
@@ -303,10 +223,7 @@ namespace Signum.Engine
             ICoreTransaction parent = currents.TryGetC(bc);
             if (parent == null || forceNew)
             {
-                if (bc.IsMock)
-                    currents[bc] = coreTransaction = new MockRealTransaction(parent);
-                else
-                    currents[bc] = coreTransaction = new RealTransaction(parent, isolationLevel);
+                currents[bc] = coreTransaction = new RealTransaction(parent, isolationLevel);
             }
             else
             {
@@ -326,10 +243,7 @@ namespace Signum.Engine
                 throw new InvalidOperationException(Resources.NoCurrentConnectionEstablishedUseConnectionScopeDefaultToDoIt);
 
             ICoreTransaction parent = GetCurrent();
-            if (bc.IsMock)
-                currents[bc] = coreTransaction = new MockNamedTransaction(parent, savePointName);
-            else
-                currents[bc] = coreTransaction = new NamedTransaction(parent, savePointName);
+            currents[bc] = coreTransaction = new NamedTransaction(parent, savePointName);
         }
 
         void AssertTransaction()
@@ -410,6 +324,15 @@ namespace Signum.Engine
                 currents.Remove(ConnectionScope.Current);
             else
                 currents[ConnectionScope.Current] = parent;
+        }
+
+        public static void ForceClean()
+        {
+            if (currents != null && currents.Count != 0)
+            {
+                UnexpectedBehaviourCallback("DIRTY TRANSACTIONS FOUND!", new StackTrace(1));
+                currents.Clear();
+            }
         }
     }
 }

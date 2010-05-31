@@ -18,6 +18,13 @@ namespace Signum.Test
     [TestClass]
     public class MetaTest
     {
+        [ClassInitialize()]
+        public static void MyClassInitialize(TestContext testContext)
+        {
+            Starter.StartAndLoad();
+        }
+
+
         [TestMethod]
         public void NoMetadata()
         {

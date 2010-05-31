@@ -134,18 +134,15 @@ namespace Signum.Engine
 
             DataSet ds = Executor.ExecuteDataSet(combine.ToSimple());
 
+            DataTable dt = ds.Tables[0];
+            if (dt.Rows.Count != insertedEntities.Count)
+                throw new InvalidOperationException(Resources._0ObjectsInsertedButOnly1IdsAreGenerated.Formato(insertedEntities.Count, dt.Rows.Count));
 
-            if (!ConnectionScope.Current.IsMock)
-            {
-                DataTable dt = ds.Tables[0];
-                if (dt.Rows.Count != insertedEntities.Count)
-                    throw new InvalidOperationException(Resources._0ObjectsInsertedButOnly1IdsAreGenerated.Formato(insertedEntities.Count, dt.Rows.Count));
+            dt.Rows.Cast<DataRow>().ZipForeach(insertedEntities, (dr, ei) => ei.id = (int)dr[0]);
 
-                dt.Rows.Cast<DataRow>().ZipForeach(insertedEntities, (dr, ei) => ei.id = (int)dr[0]);
+            EntityCache.Add<IdentifiableEntity>(insertedEntities);
+            lastId = ds.Tables[1].Rows[0]["LastID"].Map(o => o == DBNull.Value ? (int?)null : (int?)o);
 
-                EntityCache.Add<IdentifiableEntity>(insertedEntities);
-                lastId = ds.Tables[1].Rows[0]["LastID"].Map(o => o == DBNull.Value ? (int?)null : (int?)o);
-            }
         }
 
     }

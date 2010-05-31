@@ -183,7 +183,7 @@ namespace Signum.Entities
         public Implementations GetImplementations()
         {
             if (FindImplementations == null)
-                throw new InvalidOperationException(Resources.PropertyPathFindImplementationsNotSet);
+                throw new InvalidOperationException(Resources.PropertyRouteFindImplementationsNotSet);
 
             return FindImplementations(this);
         }
