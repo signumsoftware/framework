@@ -274,7 +274,7 @@
     <value>Escriba su contraseña actual y la nueva contraseña</value>
   </data>
   <data name="ForgotYourPassword" xml:space="preserve">
-    <value>Olvidó su contraseña, Introduzca su correo electrónico a conitnuación. Le enviaremos un email con un enlace para restablecer su contraseña.</value>
+    <value>Olvidó su contraseña, Introduzca su correo electrónico a continuación. Le enviaremos un email con un enlace para restablecer su contraseña.</value>
   </data>
   <data name="Remember" xml:space="preserve">
     <value>Recordar</value>
@@ -395,5 +395,53 @@
   </data>
   <data name="ViewsChecker" xml:space="preserve">
     <value>Comprobador de Vistas</value>
+  </data>
+  <data name="ThereSNotARegisteredUserWithThatEmailAddress" xml:space="preserve">
+    <value>No hay ningún usuario registrado con esa dirección de email</value>
+  </data>
+  <data name="EmailSent" xml:space="preserve">
+    <value>Email enviado</value>
+  </data>
+  <data name="TheConfirmationCodeThatYouHaveJustSentIsInvalid" xml:space="preserve">
+    <value>El código de confirmación proporcionado es inválido</value>
+  </data>
+  <data name="YouCanResetYourPasswordByFollowingTheLinkBelow" xml:space="preserve">
+    <value>Puedes crear una nueva contraseña haciendo click en el siguiente enlace:</value>
+  </data>
+  <data name="YouRecentlyRequestedANewPassword" xml:space="preserve">
+    <value>Has solicitado recientemente una nueva contraseña</value>
+  </data>
+  <data name="ThereHasBeenAnErrorWithYourRequestToResetYourPasswordPleaseEnterYourLogin" xml:space="preserve">
+    <value>Se ha producido un error con tu solicitud de cambio de contraseña. Por favor, introduzca su email.</value>
+  </data>
+  <data name="ThePasswordMustHaveBetween7And15CharactersEachOfThemBeingANumber09OrALetter" xml:space="preserve">
+    <value>La contraseña debe tener entre 7 y 15 caracteres, siendo cada uno de ellos un número del 0 al 9 o una letra</value>
+  </data>
+  <data name="GoBackToLoginPage" xml:space="preserve">
+    <value>Volver a la página de login</value>
+  </data>
+  <data name="IHaveForgottenMyPassword" xml:space="preserve">
+    <value>He olvidado mi contraseña</value>
+  </data>
+  <data name="IntroduceYourUserNameAndPassword" xml:space="preserve">
+    <value>Introduzca su nombre de usuario y contraseña</value>
+  </data>
+  <data name="LoginEnter" xml:space="preserve">
+    <value>Entrar</value>
+  </data>
+  <data name="Password" xml:space="preserve">
+    <value>Contraseña</value>
+  </data>
+  <data name="Please0IntoYourAccount" xml:space="preserve">
+    <value>Por favor, vaya al {0} para acceder a la aplicación</value>
+  </data>
+  <data name="PleaseEnterYourChosenNewPassword" xml:space="preserve">
+    <value>Por favor, introduzca su nueva contraseña</value>
+  </data>
+  <data name="RememberMe" xml:space="preserve">
+    <value>Recordarme</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>Usuario</value>
   </data>
 </root>

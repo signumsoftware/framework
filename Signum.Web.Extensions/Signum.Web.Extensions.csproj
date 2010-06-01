@@ -65,7 +65,7 @@
     <Compile Include="AuthAdmin\Controllers\AuthAdminController.cs" />
     <Compile Include="AuthAdmin\AuthAdminClient.cs" />
     <Compile Include="Auth\AuthClient.cs" />
-    <Compile Include="AuthAdmin\UserMapping.cs" />
+    <Compile Include="Auth\UserMapping.cs" />
     <Compile Include="Auth\Controllers\AuthController.cs" />
     <Compile Include="Basic\BasicClient.cs" />
     <Compile Include="Captcha\CaptchaClient.cs" />
@@ -83,6 +83,7 @@
     <Compile Include="Help\Controllers\HelpController.cs" />
     <Compile Include="Help\HelpModels.cs" />
     <Compile Include="HttpModules\WhitespaceModule.cs" />
+    <Compile Include="Mailing\Controllers\EmailTemplateController.cs" />
     <Compile Include="Mailing\EmailClient.cs" />
     <Compile Include="Operations\JsOperations.cs" />
     <Compile Include="Operations\JsOperationOptions.cs" />
@@ -171,7 +172,7 @@
     <Content Include="Auth\Views\RememberPasswordSuccess.aspx" />
     <Content Include="Auth\Views\ResetPassword.aspx" />
     <Content Include="Auth\Views\ResetPasswordMail.ascx" />
-    <Content Include="Auth\Views\ResetPasswordCode.aspx" />
+    <Content Include="Auth\Views\ResetPasswordSend.aspx" />
     <Content Include="Auth\Views\ResetPasswordSuccess.aspx" />
     <Content Include="Auth\Views\ResetPasswordSetNew.aspx" />
     <EmbeddedResource Include="Properties\Resources.fr.resx">
@@ -239,6 +240,8 @@
     <Content Include="AuthAdmin\Views\User.ascx" />
     <Content Include="Mailing\Views\EmailMessage.ascx" />
     <Content Include="Mailing\Views\EmailPackage.ascx" />
+    <Content Include="Mailing\Views\EmailTemplate.ascx" />
+    <Content Include="Mailing\Views\EmailTemplateView.aspx" />
     <Content Include="Processes\Content\Processes.css" />
     <Content Include="Processes\Views\Package.ascx" />
     <Content Include="Processes\Views\PackageLine.ascx" />

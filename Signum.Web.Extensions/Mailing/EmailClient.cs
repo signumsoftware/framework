@@ -1,4 +1,5 @@
-﻿using System;
+﻿#region usings
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,6 +17,7 @@ using System.Web.UI;
 using System.IO;
 using Signum.Entities.Mailing;
 using System.Web.Routing;
+#endregion
 
 namespace Signum.Web.Mailing
 {
@@ -23,13 +25,15 @@ namespace Signum.Web.Mailing
     {
         public static string ViewPrefix = "email/Views/";
 
+        public static string EmailTemplateUrl = "email/Views/EmailTemplate";
+        public static string EmailTemplateViewUrl = "email/Views/EmailTemplateView";
+
         public static void Start()
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                //EmailLogic.BodyRenderer += (vn, model, args) => RenderControl(vn, model, args);
-                EmailLogic.BodyRenderer = (vn, args) => RenderView(vn, args);
-                
+                EmailLogic.BodyRenderer += new BodyRenderer(EmailLogic_WebMailRenderer);
+
                 AssemblyResourceManager.RegisterAreaResources(
                     new AssemblyResourceStore(typeof(EmailClient), "/email/", "Signum.Web.Extensions.Mailing."));
                 
@@ -47,6 +51,13 @@ namespace Signum.Web.Mailing
             }
         }
 
+        static string EmailLogic_WebMailRenderer(string viewName, Dictionary<string, string> args)
+        {
+            if (viewName != null)
+                args["viewName"] = viewName;
+
+            return EmailClient.RenderView(HttpContextUtils.FullyQualifiedApplicationPath + "EmailTemplate/EmailTemplateView", args);
+        }
 
         public static string RenderView(string templateAbsoluteUrl, IDictionary<string, string> args)
         {
@@ -55,21 +66,10 @@ namespace Signum.Web.Mailing
             wc.Headers.Add("Content-Type", "application/x-www-form-urlencoded");
             byte[] postData = null;
             if (args != null && args.Count > 0)
-            {
                 postData = System.Text.Encoding.UTF8.GetBytes(args.ToString(kvp => "{0}={1}".Formato(kvp.Key, HttpUtility.UrlEncode(kvp.Value)), "&"));
 
-                //if (!templateAbsoluteUrl.Contains('?'))
-                //    foreach (var kvp in args)
-                //    {
-                //        wc.QueryString[kvp.Key] = kvp.Value;
-                //    }
-                //else
-                //    templateAbsoluteUrl = "{0}&{1}".Formato(templateAbsoluteUrl, args.ToString(kvp =>
-                //        "{0}={1}".Formato(kvp.Key, kvp.Value), "&"));
-            }
             byte[] requestedHTML = wc.UploadData(templateAbsoluteUrl, postData);
 
-            //byte[] requestedHTML = wc.DownloadData(templateAbsoluteUrl);
             return encoding.GetString(requestedHTML);
         }
 

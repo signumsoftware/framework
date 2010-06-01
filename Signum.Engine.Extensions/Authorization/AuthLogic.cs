@@ -87,11 +87,10 @@ namespace Signum.Engine.Authorization
             }
         }
 
-        public static void StartPortal(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void StartResetPasswordFeature(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                //starts password modification feature
                 sb.Include<ResetPasswordRequestDN>();
 
                 dqm[typeof(ResetPasswordRequestDN)] = (from e in Database.Query<ResetPasswordRequestDN>()
@@ -101,7 +100,8 @@ namespace Signum.Engine.Authorization
                                                            e.Id,
                                                            e.RequestDate,
                                                            e.Code,
-                                                           e.Email
+                                                           User = e.User.ToLite(),
+                                                           e.User.Email 
                                                        }).ToDynamic();
 
                 EmailLogic.AssertStarted(sb);

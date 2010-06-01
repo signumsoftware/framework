@@ -36,14 +36,14 @@ namespace Signum.Web.Authorization
         public static string ChangePasswordSuccessUrl = ViewPrefix + "ChangePasswordSuccess";
 
         public static string ResetPasswordUrl = ViewPrefix + "ResetPassword";
-        public static string ResetPasswordCodeUrl = ViewPrefix + "ResetPasswordCode";
+        public static string ResetPasswordSendUrl = ViewPrefix + "ResetPasswordSend";
         public static string ResetPasswordSuccessUrl = ViewPrefix + "ResetPasswordSuccess";
         public static string ResetPasswordSetNewUrl = ViewPrefix + "ResetPasswordSetNew";
 
         public static string RememberPasswordUrl = ViewPrefix + "RememberPassword";
         public static string RememberPasswordSuccessUrl = ViewPrefix + "RememberPasswordSuccess";
 
-        public static void Start(bool types, bool property, bool queries)
+        public static void Start(bool types, bool property, bool queries, bool resetPasswordFeature)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -55,6 +55,9 @@ namespace Signum.Web.Authorization
                 if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(RoleDN)))
                     Navigator.AddSetting(new EntitySettings<RoleDN>(EntityType.Admin));
                 
+                if (resetPasswordFeature)
+                    Navigator.RegisterTypeName<ResetPasswordRequestDN>();
+
                 if (property)
                     Common.CommonTask += new CommonTask(TaskAuthorizeProperties);
 

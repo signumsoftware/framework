@@ -1,5 +1,4 @@
 ﻿<%@ Page Language="C#" MasterPageFile="~/Views/Shared/Site.Master" Inherits="System.Web.Mvc.ViewPage" %>
-
 <%@ Import Namespace="Signum.Web.Authorization" %>
 <%@ Import Namespace="Signum.Web.Extensions.Properties" %>
 

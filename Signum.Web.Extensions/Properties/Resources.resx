@@ -405,4 +405,49 @@
   <data name="ViewsChecker" xml:space="preserve">
     <value>Views Checker</value>
   </data>
+  <data name="ThereSNotARegisteredUserWithThatEmailAddress" xml:space="preserve">
+    <value>There's not a registered user with that email address</value>
+  </data>
+  <data name="EmailSent" xml:space="preserve">
+    <value>Email sent</value>
+  </data>
+  <data name="TheConfirmationCodeThatYouHaveJustSentIsInvalid" xml:space="preserve">
+    <value>The confirmation code that you have just sent is invalid</value>
+  </data>
+  <data name="YouCanResetYourPasswordByFollowingTheLinkBelow" xml:space="preserve">
+    <value>You can reset your password by following the link below:</value>
+  </data>
+  <data name="YouRecentlyRequestedANewPassword" xml:space="preserve">
+    <value>You recently requested a new password</value>
+  </data>
+  <data name="IHaveForgottenMyPassword" xml:space="preserve">
+    <value>I have forgotten my password</value>
+  </data>
+  <data name="IntroduceYourUserNameAndPassword" xml:space="preserve">
+    <value>Introduce your username and password</value>
+  </data>
+  <data name="LoginEnter" xml:space="preserve">
+    <value>Login</value>
+  </data>
+  <data name="Password" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="Please0IntoYourAccount" xml:space="preserve">
+    <value>Please, {0} into your account</value>
+  </data>
+  <data name="PleaseEnterYourChosenNewPassword" xml:space="preserve">
+    <value>Please, enter your chosen new password</value>
+  </data>
+  <data name="RememberMe" xml:space="preserve">
+    <value>Remember me</value>
+  </data>
+  <data name="ThePasswordMustHaveBetween7And15CharactersEachOfThemBeingANumber09OrALetter" xml:space="preserve">
+    <value>The password must have between 7 and 15 characters, each of them being a number 0-9 or a letter</value>
+  </data>
+  <data name="ThereHasBeenAnErrorWithYourRequestToResetYourPasswordPleaseEnterYourLogin" xml:space="preserve">
+    <value>There has been an error with your request to reset your password. Please, enter your login.</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>User</value>
+  </data>
 </root>

@@ -5,6 +5,12 @@
 <%@ Import Namespace="Signum.Entities.Authorization" %>
 <%@ Import Namespace="Signum.Utilities" %>
 <%@ Import Namespace="Signum.Web.Extensions.Properties" %>
-<%= Html.Encode(Resources.PasswordReseted) %>
-<p />
-<%= Html.Encode(Resources.YourNewPasswordIs0.Formato(ViewData["password"])) %>
+
+<p>
+<%= Html.Encode(Resources.YouRecentlyRequestedANewPassword)%>
+</p>
+<p>
+<%= Html.Encode(Resources.YouCanResetYourPasswordByFollowingTheLinkBelow)%>
+</p>
+<%= Html.Href(ViewData["link"].ToString(), ViewData["link"].ToString()) %>
+

@@ -1,5 +1,7 @@
 ﻿<%@ Page Language="C#" MasterPageFile="~/Views/Shared/Site.Master" Inherits="System.Web.Mvc.ViewPage" %>
 <%@ Import Namespace="Signum.Web" %>
+<%@ Import Namespace="Signum.Entities.Authorization" %>
+<%@ Import Namespace="Signum.Web.Extensions.Properties" %>
 
 <asp:Content ID="loginTitle" ContentPlaceHolderID="head" runat="server">
     <title>Log On</title>
@@ -12,7 +14,7 @@
     <h2>
         Login</h2>
     <p>
-        Introduzca su nombre de usuario y contraseña.
+        <%= Resources.IntroduceYourUserNameAndPassword %>
     </p>
     <%= Html.ValidationSummary() %>
     <% using (Html.BeginForm())
@@ -22,7 +24,7 @@
         <table>
             <tr>
                 <td>
-                    Usuario:
+                    <%= Resources.User %>:
                 </td>
                 <td>
                     <%= Html.TextBox("username") %>
@@ -31,7 +33,7 @@
             </tr>
             <tr>
                 <td>
-                    Contraseña:
+                    <%= Resources.Password %>:
                 </td>
                 <td>
                     <%= Html.Password("password") %>
@@ -46,22 +48,35 @@
                     <%if (Request.Browser.Cookies)
                       {
                     %>
-                    <%= Html.CheckBox("rememberMe") %> Recordarme
+                    <%= Html.CheckBox("rememberMe") %> <%= Resources.RememberMe %>
                     <%
                         } 
                     %>                  
                 </td>
             </tr>
+            <% if (Navigator.TypesToNames.ContainsKey(typeof(ResetPasswordRequestDN))) { %>
+            <tr>
+                <td>
+                </td>
+                <td>
+                <div id="login-others">
+                    <a href="Auth/ResetPassword"><%= Resources.IHaveForgottenMyPassword %></a><br />
+                </div>
+                </td>
+            </tr>
+            <%} %>
             <tr>
                 <td>
                     &nbsp
                 </td>
                 <td>
-                    <input id="login" type="submit" value="Entrar" />
+                    <input id="login" type="submit" value="<%= Resources.LoginEnter %>" />
                 </td>
             </tr>
         </table>
-        <% if (ViewData.ContainsKey("referrer")) {%> <%=Html.Hidden("referrer", ViewData["referrer"])%> <% } %>
+        <% if (ViewData.ContainsKey("referrer")) { %> 
+               <%=Html.Hidden("referrer", ViewData["referrer"])%> 
+        <% } %>
     </div>
     <% } %>
 </asp:Content>

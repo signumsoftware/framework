@@ -16,12 +16,12 @@ namespace Signum.Entities.Authorization
             set { Set(ref code, value, () => Code); }
         }
 
-        string email;
+        UserDN user;
         [NotNullValidator]
-        public string Email
+        public UserDN User
         {
-            get { return email; }
-            set { Set(ref email, value, () => Email); }
+            get { return user; }
+            set { Set(ref user, value, () => User); }
         }
 
         DateTime requestDate;
