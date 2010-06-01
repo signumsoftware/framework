@@ -62,7 +62,7 @@ namespace Signum.Web
             if (obj is bool)
                 return new JsValue<T>() { Renderer = () => ((bool)obj) ? "true" : "false" };
             else if (obj is string)
-                return new JsValue<T>() { Renderer = () => ((string)obj).Quote() };
+                return new JsValue<T>() { Renderer = () => ((string)obj).SingleQuote() };
             else
                 return new JsValue<T>() { Renderer = () => value.ToString() }; //numbers an other
         }

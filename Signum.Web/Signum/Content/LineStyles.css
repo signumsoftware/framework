@@ -24,12 +24,12 @@ a:hover {
 /* buttons */
 input[type=submit],input[type=button] {
     border:solid 1px #b7b7b7;
-    background:#fff;
+    /*background:#fff;*/
     background:-webkit-gradient(linear,left top,left bottom,from(#fbfbfb),to(#e9e9e9));
     background:-moz-linear-gradient(top,#fbfbfb,#e9e9e9);
  /*   filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#fbfbfb',endColorstr='#e9e9e9');*/
     text-shadow:0 1px 1px #fff;
-    min-width:20px;
+   /* min-width:20px;*/
 }
 
 input[type=submit]:hover,input[type=button]:hover {
@@ -68,12 +68,13 @@ input[type=text],input[type=password],input[type=button], textarea,select {/* IE
     border:1px solid #ccc;
     color:#333;
     padding:3px 4px 4px;
+    
     border-radius:2px;
     -webkit-border-radius:2px;
     -moz-border-radius:2px;
 }
 
-.field input,field textarea,field select, .fieldList select 
+.field input, .field textarea, .field select, .fieldList select 
 {
     float:left;
 }
@@ -375,8 +376,8 @@ fieldset
 }
 
 .input-validation-error {
-    border:1px solid #ff6666;
-    background-color:#ffeeee;
+    border:1px solid #ff6666 !important;
+    background-color:#ffeeee !important;
 }
 
 input.input-validation-error[type=checkbox] {
@@ -544,7 +545,7 @@ h2 .title {
 }
 
 .tblResults {
-    table-layout:fixed;
+/*    table-layout:fixed;*/
     background-color:#fff;
     border:1px solid #dfdfdf;
     -moz-border-radius:4px;

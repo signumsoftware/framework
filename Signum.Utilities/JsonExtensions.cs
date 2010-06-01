@@ -16,9 +16,9 @@ namespace Signum.Utilities
         public static string Quote(this string s)
         {
             if (s == null || s.Length == 0)
-                return "\'\'";
+                return "\"\"";
 
-            return "\'" + s.Escape() + "\'";
+            return "\"" + s.Escape() + "\"";
         }
 
         private static string Escape(this string s)
@@ -34,7 +34,6 @@ namespace Signum.Utilities
                 char c = s[i];
                 switch (c)
                 {
-                    case '\'':
                     case '\\':
                     case '"':
                     case '>':
@@ -62,7 +61,17 @@ namespace Signum.Utilities
                 }
             }
             return sb.ToString();
-        } 
+        }
+
+
+        public static string SingleQuote(this string s)
+        {
+            if (s == null || s.Length == 0)
+                return "\'\'";
+
+            return "\'" + s.Escape() + "\'";
+        }
+
         public static string Unquote(this string obj)
         {
             if (obj.Length > 1 && obj[0] == '\"' && obj[obj.Length - 1] == '\"')
@@ -110,4 +119,5 @@ namespace Signum.Utilities
             
         }
     }
+
 }

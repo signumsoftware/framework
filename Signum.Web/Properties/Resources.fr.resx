@@ -169,7 +169,7 @@
     <value>There's no query with name {0}</value>
   </data>
   <data name="NotPossibleToAssign0" xml:space="preserve">
-    <value>It's not possible to set {0}</value>
+    <value>Il n'est pas possible de fixer {0}</value>
   </data>
   <data name="NoTypeForUrlName0" xml:space="preserve">
     <value>There's no type registered for UrlName {{{0}}}</value>

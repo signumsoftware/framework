@@ -59,7 +59,7 @@ Validator.prototype = {
             data: this.constructRequestData(),
             success: function(msg) {
                 if (msg.indexOf("ModelState") > 0) {
-                    eval('var result=' + msg); //var result = $.parseJSON(msg);
+                    var result = $.parseJSON(msg);  //eval('var result=' + msg);
                     var modelState = result["ModelState"];
                     returnValue = self.showErrors(modelState, true);
                     NotifyInfo(lang['error'], 2000);
@@ -88,7 +88,7 @@ Validator.prototype = {
             data: this.constructRequestData(),
             success: function(msg) {
                 if (msg.indexOf("ModelState") > 0) {
-                    eval('var result=' + msg); // var result = $.parseJSON(msg);
+                    var result = $.parseJSON(msg);  //eval('var result=' + msg);
                     var modelState = result["ModelState"];
                     returnValue = self.showErrors(modelState, true);
                 }

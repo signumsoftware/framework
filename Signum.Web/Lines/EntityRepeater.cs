@@ -48,7 +48,7 @@ namespace Signum.Web
             var result = base.OptionsJSInternal();
             result.Add("maxElements", MaxElements.TryToString());
             if (RemoveElementLinkText.HasText())
-                result.Add("removeItemLinkText", RemoveElementLinkText.Quote());
+                result.Add("removeItemLinkText", RemoveElementLinkText.SingleQuote());
             return result;
         }
 

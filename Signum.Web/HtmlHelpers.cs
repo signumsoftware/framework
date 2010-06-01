@@ -23,12 +23,12 @@ namespace Signum.Web
     {
         public static string ValidationSummaryAjax(this HtmlHelper html)
         {
-            return "<div id='sfGlobalValidationSummary'></div>";
+            return "<div id=\"sfGlobalValidationSummary\"></div>";
         }
 
         public static string ValidationSummaryAjax(this HtmlHelper html, Context context)
         {
-            return "<div id='{0}'></div>".Formato(context.Compose("sfGlobalValidationSummary"));
+            return "<div id=\"{0}\"></div>".Formato(context.Compose("sfGlobalValidationSummary"));
         }
 
         public static void Field(this HtmlHelper html, string label, string value)
@@ -51,13 +51,13 @@ namespace Signum.Web
             else 
             {
                 StringBuilder sb = new StringBuilder();
-                sb.AppendLine("<input type='checkbox' id='{0}' name='{0}' value='{1}' disabled='disabled'{2}{3} />".Formato(
+                sb.AppendLine("<input type=\"checkbox\" id=\"{0}\" name=\"{0}\" value=\"{1}\" disabled=\"disabled\"{2}{3} />".Formato(
                     name, 
                     value ? "true" : "false", 
-                    htmlAttributes.ToString(kv => kv.Key + "=\"" + kv.Value.ToString() + "\"", " "), 
-                    value ? "checked='checked'" : ""));
+                    htmlAttributes.ToString(kv => kv.Key + "=\"" + kv.Value.ToString() + "\"", " "),
+                    value ? "checked=\"checked\"" : ""));
 
-                sb.AppendLine("<input type='hidden' id='{0}' name='{0}' value='{1}' disabled='disabled' />".Formato(
+                sb.AppendLine("<input type=\"hidden\" id=\"{0}\" name=\"{0}\" value=\"{1}\" disabled=\"disabled\" />".Formato(
                     name,
                     value ? "true" : "false"
                     ));
@@ -86,8 +86,8 @@ namespace Signum.Web
 
             return
             String.IsNullOrEmpty(id) ?
-                String.Format("<label for='{0}' {1}>{2}</label>", idField, htmlAttributes.ToString(kv => kv.Key + "=" + kv.Value.ToString().Quote(), " "), value) :
-                String.Format("<label for='{0}' id='{1}' {2}>{3}</label>", idField, id, htmlAttributes.ToString(kv => kv.Key + "=" + kv.Value.ToString().Quote(), " "), value);
+                String.Format("<label for=\"{0}\" {1}>{2}</label>", idField, htmlAttributes.ToString(kv => kv.Key + "=" + kv.Value.ToString().Quote(), " "), value) :
+                String.Format("<label for=\"{0}\" id=\"{1}\" {2}>{3}</label>", idField, id, htmlAttributes.ToString(kv => kv.Key + "=" + kv.Value.ToString().Quote(), " "), value);
         }
 
         public static string Label(this HtmlHelper html, string id, string value, string idField, string cssClass)
@@ -97,9 +97,9 @@ namespace Signum.Web
 
         public static string Span(this HtmlHelper html, string id, string value, string cssClass, IDictionary<string, object> htmlAttributes)
         {
-            string idname = id.HasText() ? (" id='" + id + "'") : "";
+            string idname = id.HasText() ? (" id=\"" + id + "\"") : "";
             string attributes = htmlAttributes != null ? (" " + htmlAttributes.ToString(kv => kv.Key + "=" + kv.Value.ToString().Quote(), " ")) : "";
-            string css = cssClass.HasText() ? " class='" + cssClass + "'" : "";
+            string css = cssClass.HasText() ? " class=\"" + cssClass + "\"" : "";
             return "<span{0}{1}{2}>{3}</span>".Formato(idname, attributes, css, value);
         }
 
@@ -119,10 +119,10 @@ namespace Signum.Web
 
         public static string Href(this HtmlHelper html, string name, string text, string href, string title, string cssClass, IDictionary<string, object> htmlAttributes)
         {
-            string idname = name.HasText() ? (" id='" + name + "' name='" + name + "'") : "";
+            string idname = name.HasText() ? (" id=\"" + name + "\" name=\"" + name + "\"") : "";
             string attributes = htmlAttributes != null ? (" " + htmlAttributes.ToString(kv => kv.Key + "=" + kv.Value.ToString().Quote(), " ")) : "";
-            string css = cssClass.HasText() ? " class='" + cssClass + "'" : "";
-            string tooltip = " title='" + (title.HasText() ? title : text) + "' ";
+            string css = cssClass.HasText() ? " class=\"" + cssClass + "\"" : "";
+            string tooltip = " title=\"" + (title.HasText() ? title : text) + "\" ";
             return "<a{0}{1}{2}{3} href=\"{4}\">{5}</a>".Formato(idname,css,tooltip,attributes,href,text);
         }
 
@@ -133,32 +133,26 @@ namespace Signum.Web
 
         public static string Div(this HtmlHelper html, string id, string innerHTML, string cssClass, IDictionary<string, object> htmlAttributes)
         {
-            string idname = id.HasText() ? (" id='" + id + "'") : "";
+            string idname = id.HasText() ? (" id=\"" + id + "\"") : "";
             string attributes = htmlAttributes != null ? (" " + htmlAttributes.ToString(kv => kv.Key + "=\"" + kv.Value.ToString() + "\"", " ")) : "";
-            string css = cssClass.HasText() ? " class='" + cssClass + "'" : "";
+            string css = cssClass.HasText() ? " class=\"" + cssClass + "\"" : "";
             return "<div{0}{1}{2}>{3}</div>".Formato(idname, css, attributes, innerHTML);
         }
 
         public static string Button(this HtmlHelper html, string name, string value, string onclick, string cssClass, IDictionary<string, object> htmlAttributes)
         {
-            string idname = name.HasText() ? (" id='" + name + "'") : "";
+            string idname = name.HasText() ? (" id=\"" + name + "\"") : "";
             string attributes = htmlAttributes != null ? (" " + htmlAttributes.ToString(kv => kv.Key + "=" + kv.Value.ToString().Quote(), " ")) : "";
-            string css = cssClass.HasText() ? " class='" + cssClass + "'" : "";
-            return "<input type='button'{0}{1} value='{2}'{3} onclick=\"{4}\" />".Formato(idname, css, value, attributes, onclick);
+            string css = cssClass.HasText() ? " class=\"" + cssClass + "\"" : "";
+            return "<input type=\"button\"{0}{1} value=\"{2}\"{3} onclick=\"{4}\" />".Formato(idname, css, value, attributes, onclick);
         }
 
         public static string Link(this HtmlHelper html, string id, string innerHTML, string cssClass, IDictionary<string, object> htmlAttributes)
         {
-            string idname = id.HasText() ? (" id='" + id + "'") : "";
+            string idname = id.HasText() ? (" id=\"" + id + "\"") : "";
             string attributes = htmlAttributes != null ? (" " + htmlAttributes.ToString(kv => kv.Key + "=\"" + kv.Value.ToString() + "\"", " ")) : "";
-            string css = cssClass.HasText() ? " class='" + cssClass + "'" : "";
+            string css = cssClass.HasText() ? " class=\"" + cssClass + "\"" : "";
             return "<a{0}{1}{2}>{3}</a>".Formato(idname, css, attributes, innerHTML);
-        }
-
-        public static string ImageButton(this HtmlHelper html, string name, string imgSrc, string altText, string onclick, IDictionary<string, object> htmlAttributes)
-        {
-            string attributes = htmlAttributes != null ? (" " + htmlAttributes.ToString(kv => kv.Key + "=" + kv.Value.ToString().Quote(), " ")) : "";
-            return "<img id='{0}' src='{1}' alt='{2}' title='{2}' onclick=\"{3}\"{4} />".Formato(name, imgSrc, altText, onclick, attributes);
         }
 
         public static void Write(this HtmlHelper html, string text)
@@ -176,7 +170,7 @@ namespace Signum.Web
         }
 
         public static void Message(this HtmlHelper html, string title, string content, MessageType type, object attributeList) {
-            string cadena=String.Format("<div class='message{0}' {3}><p class='title'>{1}</p><p class='content'>{2}</p></div>",
+            string cadena = String.Format("<div class=\"message{0}\" {3}><p class=\"title\">{1}</p><p class=\"content\">{2}</p></div>",
                     Enum.GetName(typeof(MessageType),type),
                     title,
                     content,
@@ -198,10 +192,10 @@ namespace Signum.Web
         public static string AutoCompleteExtender(this HtmlHelper html, string ddlName, string entityTypeName, string implementations, string entityIdFieldName,
                                                   string controllerUrl, string onSuccess)
         {                   
-            return  @"<script type='text/javascript'>
-                        new Autocompleter('{0}', '{1}', {{
-	                        entityIdFieldName: '{2}',
-	                        extraParams: {{typeName: '{3}', implementations : '{4}'}}}});
+            return  @"<script type=""text/javascript"">
+                        new Autocompleter(""{0}"", ""{1}"", {{
+	                        entityIdFieldName: ""{2}"",
+	                        extraParams: {{typeName: ""{3}"", implementations : ""{4}""}}}});
                      </script>"
                     .Formato(ddlName, controllerUrl, entityIdFieldName, entityTypeName, implementations); 
         }

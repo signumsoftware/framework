@@ -101,7 +101,7 @@ namespace Signum.Web
 
             //Note this is added to the sbOptions, not to the result sb
             sbOptions.AppendLine("<option id='{0}' name='{0}' value='' class='valueLine entityListOption'{1}>{2}</option>".Formato(itemTC.Compose(EntityBaseKeys.ToStr),
-                (itemTC.Index == 0) ? "selected='selected'" : "",                
+                (itemTC.Index == 0) ? " selected='selected'" : "",                
                 (itemTC.Value as IIdentifiable).TryCC(i => i.ToString()) ??
                 (itemTC.Value as Lite).TryCC(i => i.ToStr) ??
                 (itemTC.Value as EmbeddedEntity).TryCC(i => i.ToString()) ?? ""));

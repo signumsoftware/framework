@@ -78,7 +78,7 @@ namespace Signum.Web
         {
             return new JsOptionsBuilder(false)
             {
-                {"prefix", ControlID.Quote()},
+                {"prefix", ControlID.SingleQuote()},
                 {"onEntityChanged", OnChangedTotal}, 
             };
         }

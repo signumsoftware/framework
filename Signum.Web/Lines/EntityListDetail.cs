@@ -36,7 +36,7 @@ namespace Signum.Web
         {
             var result = base.OptionsJSInternal();
             if (DetailDiv.HasText())
-                result.Add("detailDiv", DetailDiv.Quote());
+                result.Add("detailDiv", DetailDiv.SingleQuote());
             return result;
         }
 
