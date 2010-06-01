@@ -31,12 +31,12 @@ namespace Signum.Web.Operations
 
         public JsInstruction OperationAjax(string newPrefix, JsFunction onSuccess)
         {
-            return new JsInstruction(() => "{0}.operationAjax('{1}', {2})".Formato(this.ToJS(), newPrefix, onSuccess.ToJS()));
+            return new JsInstruction(() => "{0}.operationAjax(\'{1}\', {2})".Formato(this.ToJS(), newPrefix, onSuccess.ToJS()));
         }
 
         public JsInstruction OperationAjax(string newPrefix, string querySelectedItems, JsFunction onSuccess)
         {
-            return new JsInstruction(() => "{0}.operationAjax('{1}',{2},{3})".Formato(this.ToJS(), newPrefix, querySelectedItems, onSuccess.ToJS()));
+            return new JsInstruction(() => "{0}.operationAjax(\'{1}\',{2},{3})".Formato(this.ToJS(), newPrefix, querySelectedItems, onSuccess.ToJS()));
         }
     }
 

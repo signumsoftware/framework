@@ -122,7 +122,44 @@ namespace Signum.Web.ScriptCombiner
             byte[] bytes = new byte[stream.Length];
             stream.Position = 0;
             stream.Read(bytes, 0, (int)stream.Length);
-            return Encoding.UTF8.GetString(bytes);
+            string content = Encoding.UTF8.GetString(bytes);
+
+            string[] parts = fileName.Split('/');
+            //replace relative paths
+
+            Match m = Regex.Match(content, "(?<begin>url\\(\"?)(?<content>.+?)[\"\\)]+");
+
+            StringBuilder sb = new StringBuilder();
+            int firstIndex = 0;
+
+            while (m.Success)
+            {
+                string relativePath = m.Groups["content"].ToString();
+                
+                int partsIndex = parts.Length-1;
+
+                while (relativePath.StartsWith("../")) {
+                    partsIndex--;
+                    relativePath = relativePath.Substring(3);
+                }
+
+                if (partsIndex < 0) break;
+
+                StringBuilder sbPath = new StringBuilder();
+                for (int i = 0; i < partsIndex; i++) {
+                    sbPath.Append(parts[i]);
+                    sbPath.Append("/");
+                }
+                sbPath.Append(relativePath);               
+
+                sb.Append(content.Substring(firstIndex, m.Index - firstIndex));
+                sb.Append("url(\"{0}\")".Formato("../" + sbPath.ToString()));
+                firstIndex = m.Index + m.Length;
+                m = m.NextMatch();
+            }
+           sb.Append(content.Substring(firstIndex, content.Length - firstIndex));
+
+            return sb.ToString();
         }
     }
 
