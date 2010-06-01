@@ -121,7 +121,7 @@
     <value>The control ID {0} has an invalid format</value>
   </data>
   <data name="FilterColumn0NotFoundOrFoundMoreThanOnce" xml:space="preserve">
-    <value>FilterColumn {0} not found or found more than once in QueryDescription</value>
+    <value>Le filtre de la colonne {0} ne s'est pas trouvé ou il a trouvé répété dans QueryDescription</value>
   </data>
   <data name="IncorrectEntityInSession" xml:space="preserve">
     <value>Incorrect entity in Session</value>
@@ -187,7 +187,7 @@
     <value>A value must be specified for {0}</value>
   </data>
   <data name="YourSessionHasTimedOutClickF5ToReloadTheEntity" xml:space="preserve">
-    <value>Your Session has timed out, click F5 to reload the entity from the Database</value>
+    <value>Sa séance a été périmé, appuyez F5 pour recharger l'entité depuis la base de données.</value>
   </data>
   <data name="QuickLinkIsNotInitialized" xml:space="preserve">
     <value>QuickLink doesn't have its FindOptions initialized</value>
@@ -196,7 +196,7 @@
     <value>New</value>
   </data>
   <data name="Remove" xml:space="preserve">
-    <value>Remove</value>
+    <value>Éliminer</value>
   </data>
   <data name="ImposibleConvertObject0From1To2" xml:space="preserve">
     <value>Impossible to convert objet {0} from type {1} to type {2}</value>
@@ -220,7 +220,7 @@
     <value>Notes</value>
   </data>
   <data name="ViewNotes" xml:space="preserve">
-    <value>View notes</value>
+    <value>Voir des notes</value>
   </data>
   <data name="Warned" xml:space="preserve">
     <value>Warned</value>
@@ -229,7 +229,7 @@
     <value>TypeSubContext can not be created: {0}</value>
   </data>
   <data name="View" xml:space="preserve">
-    <value>View</value>
+    <value>Voir</value>
   </data>
   <data name="Query0HasNoUrlName" xml:space="preserve">
     <value>Query {0} has no UrlName</value>
@@ -238,16 +238,16 @@
     <value>Incorrect data in Session. You must reload the page to continue</value>
   </data>
   <data name="Save" xml:space="preserve">
-    <value>Save</value>
+    <value>Garder</value>
   </data>
   <data name="No" xml:space="preserve">
     <value>no</value>
   </data>
   <data name="Yes" xml:space="preserve">
-    <value>yes</value>
+    <value>oui</value>
   </data>
   <data name="ShowCalendar" xml:space="preserve">
-    <value>Show calendar</value>
+    <value>Montrer le Calendrier</value>
   </data>
   <data name="Column0NotFoundOnQuery1" xml:space="preserve">
     <value>The column {0} is not found on query {1}</value>
@@ -349,48 +349,48 @@
     <value>Average</value>
   </data>
   <data name="DeleteFilters" xml:space="preserve">
-    <value>Delete Filters</value>
+    <value>Éliminer des filtres</value>
   </data>
   <data name="ExecutedXTimes" xml:space="preserve">
     <value>Executed x times</value>
   </data>
   <data name="Field" xml:space="preserve">
-    <value>Field</value>
+    <value>Donnée</value>
   </data>
   <data name="FilterByField" xml:space="preserve">
-    <value>Filter by field</value>
+    <value>Filtrer par donnée</value>
   </data>
   <data name="HideFilters" xml:space="preserve">
-    <value>Hide filters</value>
+    <value>Cacher des filtres</value>
   </data>
   <data name="Maximum" xml:space="preserve">
     <value>Maximum</value>
   </data>
   <data name="Minimum" xml:space="preserve">
-    <value>Minimum</value>
+    <value>Minime</value>
   </data>
   <data name="Name" xml:space="preserve">
-    <value>Name</value>
+    <value>Nom</value>
   </data>
   <data name="NoFiltersSpecified" xml:space="preserve">
-    <value>No filters specified</value>
+    <value>Des filtres n'ont pas été spécifiés</value>
   </data>
   <data name="Operation" xml:space="preserve">
-    <value>Operation</value>
+    <value>Opération</value>
   </data>
   <data name="Search" xml:space="preserve">
-    <value>Search</value>
+    <value>Chercher</value>
   </data>
   <data name="ShowFilters" xml:space="preserve">
-    <value>Show filters</value>
+    <value>Montrer les Filtres</value>
   </data>
   <data name="Value" xml:space="preserve">
-    <value>Value</value>
+    <value>Valeur</value>
   </data>
   <data name="Type0NotFoundInTheSchema" xml:space="preserve">
     <value>Type {0} not found in the schema</value>
   </data>
   <data name="NumberOfRows" xml:space="preserve">
-    <value>Number of rows</value>
+    <value>Nombre de files</value>
   </data>
 </root>

@@ -134,7 +134,7 @@ namespace Signum.Web
             sb.AppendLine("<tr id='{0}' name='{0}'>".Formato(context.Compose("trFilter", index.ToString())));
 
             sb.AppendLine("<td id='{0}' name='{0}'>".Formato(context.Compose("td" + index.ToString() + "__" + filterOptions.Token.FullKey())));
-            sb.AppendLine(filterOptions.Token.FullKey());
+            sb.AppendLine(filterOptions.Token.NiceName());
             sb.AppendLine("</td>");
 
             sb.AppendLine("<td>");
