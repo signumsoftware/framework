@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Deleted" xml:space="preserve">
+    <value>(Deleted)</value>
+  </data>
   <data name="ProcessOperation_Cancel" xml:space="preserve">
     <value>Cancel</value>
   </data>
@@ -564,9 +567,6 @@
   <data name="ProcessStartIsNullButProcessEndIsNot" xml:space="preserve">
     <value>Process Start is null but Process End is not</value>
   </data>
-  <data name="Deleted" xml:space="preserve">
-    <value>(Deleted)</value>
-  </data>
   <data name="ThereAreNoResultsToWrite" xml:space="preserve">
     <value>There are no results to write</value>
   </data>
@@ -575,5 +575,11 @@
   </data>
   <data name="TheExcelTemplateHasAColumn0NotPresentInTheFindWindow" xml:space="preserve">
     <value>The Excel Template has a column {0} not present in the Find Window</value>
+  </data>
+  <data name="EmailMessageDN" xml:space="preserve">
+    <value>Email Message</value>
+  </data>
+  <data name="EmailPackageDN" xml:space="preserve">
+    <value>Email Package</value>
   </data>
 </root>

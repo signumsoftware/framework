@@ -52,8 +52,8 @@ namespace Signum.Engine.Scheduler
                                             where cte2.Id == g.Max(a => a.Id)
                                             select cte2.ToLite()).SingleOrDefault()
                        }).ToDynamic()
-                       .Column(a => a.NumExecutions, c => c.DisplayName = Resources.Executions)
-                       .Column(a => a.LastExecution, c => c.DisplayName = Resources.LastExecution);
+                       .Column(a => a.NumExecutions, c => c.OverrideDisplayName = () => Resources.Executions)
+                       .Column(a => a.LastExecution, c => c.OverrideDisplayName = () => Resources.LastExecution);
 
                 dqm[typeof(CustomTaskExecutionDN)] =
                      (from cte in Database.Query<CustomTaskExecutionDN>()

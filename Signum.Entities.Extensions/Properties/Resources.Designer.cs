@@ -223,6 +223,24 @@ namespace Signum.Entities.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Email Message.
+        /// </summary>
+        public static string EmailMessageDN {
+            get {
+                return ResourceManager.GetString("EmailMessageDN", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Email Package.
+        /// </summary>
+        public static string EmailPackageDN {
+            get {
+                return ResourceManager.GetString("EmailPackageDN", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Key.
         /// </summary>
         public static string EnumDN_Key {

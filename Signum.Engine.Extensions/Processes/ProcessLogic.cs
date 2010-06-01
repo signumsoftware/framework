@@ -80,8 +80,8 @@ namespace Signum.Engine.Processes
                                                    where pe2.Id == g.Max(a => (int?)a.Id)
                                                    select pe2.ToLite()).FirstOrDefault()
                               }).ToDynamic()
-                              .Column(a => a.NumExecutions, a => a.DisplayName = Resources.Executions)
-                              .Column(a => a.LastExecution, a => a.DisplayName = Resources.LastExecution);
+                              .Column(a => a.NumExecutions, a => a.OverrideDisplayName = () => Resources.Executions)
+                              .Column(a => a.LastExecution, a => a.OverrideDisplayName = () => Resources.LastExecution);
 
                 dqm[typeof(ProcessExecutionDN)] =
                              (from pe in Database.Query<ProcessExecutionDN>()
