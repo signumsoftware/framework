@@ -451,7 +451,7 @@ function() {
 }
 
 
-$.getScript = function(url, callback, cache, async){ $.ajax({ type: "GET", url: url, success: callback, async: async, dataType: "script", cache: cache }); }; 
+$.getScript = function(url, callback, cache, async){ $.ajax({ type: "GET", url: url, cache:true, success: callback, async: async, dataType: "script", cache: cache }); }; 
 
 var resourcesLoaded = new Array();
 $.jsLoader = function(cond, url, callback, async) {
