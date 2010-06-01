@@ -501,7 +501,11 @@ namespace Signum.Windows
             {
                 UserColumnOption uco = userColumns[i];
                 QueryToken token = QueryToken.Parse(description, uco.Path);
-                uco.UserColumn = new UserColumn(description.StaticColumns.Count, token) { UserColumnIndex = i, DisplayName = uco.DisplayName.DefaultText(token.FullKey()) };
+                uco.UserColumn = new UserColumn(description.StaticColumns.Count, token)
+                {
+                    UserColumnIndex = i,
+                    OverrideDisplayName = () => uco.DisplayName.DefaultText(token.FullKey())
+                };
             }
         }
 

@@ -650,7 +650,11 @@ namespace Signum.Windows
             {
                 ClearResults();
 
-                UserColumn col = new UserColumn(Description.StaticColumns.Count, token) { UserColumnIndex = UserColumns.Count, DisplayName = result };
+                UserColumn col = new UserColumn(Description.StaticColumns.Count, token)
+                {
+                    UserColumnIndex = UserColumns.Count,
+                    OverrideDisplayName = () => result
+                };
 
                 var gridViewColumn = AddListViewColumn(col);
 
@@ -689,7 +693,7 @@ namespace Signum.Windows
             string result = col.DisplayName;
             if (ValueLineBox.Show<string>(ref result, Properties.Resources.NewColumnSName, Properties.Resources.ChooseTheDisplayNameOfTheNewColumn, Properties.Resources.Name, null, null, this.FindCurrentWindow()))
             {
-                col.DisplayName = result;
+                col.OverrideDisplayName = () => result;
                 gvch.Content = result;
             }
         }
