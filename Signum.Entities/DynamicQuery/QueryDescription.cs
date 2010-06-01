@@ -35,7 +35,22 @@ namespace Signum.Entities.DynamicQuery
         public string Unit { get; set; }
         public Implementations Implementations { get; set; }
 
-        public string DisplayName { get; set; }
+        public string DisplayName
+        {
+            get
+            {
+                if (OverrideDisplayName != null)
+                    return OverrideDisplayName();
+                return DefaultDisplayName();
+            }
+        }
+
+        protected virtual string DefaultDisplayName()
+        {
+            return Name.NiceName(); ;
+        }
+
+        public Func<string> OverrideDisplayName { get; set; } 
 
         public bool Filterable { get; set; }
         public bool Visible { get; set; }
@@ -109,9 +124,6 @@ namespace Signum.Entities.DynamicQuery
                             throw new InvalidOperationException(Resources.PropertyRouteCanNotBeOfTypeRoot);
                         case PropertyRouteType.Property:
                             PropertyInfo pi = propertyRoute.PropertyInfo;
-
-                            if (pi.Name == this.Name)
-                                DisplayName = pi.NiceName();
                             Format = Reflector.FormatString(propertyRoute);
                             Unit = pi.SingleAttribute<UnitAttribute>().TryCC(u => u.UnitName);
                             return;
@@ -121,6 +133,17 @@ namespace Signum.Entities.DynamicQuery
                     }
                 }
             }
+        }
+
+        protected override string DefaultDisplayName()
+        {
+            if (IsEntity)
+                return this.Type.NiceName();
+
+            if (PropertyRoute != null && propertyRoute.PropertyRouteType == PropertyRouteType.Property)
+                return propertyRoute.PropertyInfo.NiceName();
+
+            return base.DefaultDisplayName();
         }
 
         public void SetPropertyRoute<T>(Expression<Func<T, object>> expression)
@@ -162,16 +185,6 @@ namespace Signum.Entities.DynamicQuery
             {
                 PropertyRoute = ((CleanMeta)meta).PropertyRoute;
                 Implementations = PropertyRoute.GetImplementations();
-            }
-
-            if (DisplayName == null)
-            {
-                if (IsEntity)
-                    DisplayName = cleanType.NiceName();
-                else if (mi is PropertyInfo)
-                    DisplayName = ((PropertyInfo)mi).NiceName();
-                else
-                    DisplayName = mi.Name.NiceName();
             }
 
             Sortable = true;
