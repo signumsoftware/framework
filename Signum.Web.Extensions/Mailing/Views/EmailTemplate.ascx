@@ -11,7 +11,7 @@
             string viewName = (string)ViewData["viewName"];
             if (viewName.HasText())
             {
-                Html.RenderPartial((string)ViewData["viewName"]); 
+                Html.RenderPartial(viewName); 
             }
             else
             {
