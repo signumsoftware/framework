@@ -1348,6 +1348,15 @@ namespace Signum.Entities.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to State.
+        /// </summary>
+        public static string UserDN_State {
+            get {
+                return ResourceManager.GetString("UserDN_State", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to UserName.
         /// </summary>
         public static string UserDN_UserName {

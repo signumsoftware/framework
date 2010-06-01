@@ -582,4 +582,7 @@
   <data name="EmailPackageDN" xml:space="preserve">
     <value>Paquet d'e-mail</value>
   </data>
+  <data name="UserDN_State" xml:space="preserve">
+    <value>État</value>
+  </data>
 </root>
