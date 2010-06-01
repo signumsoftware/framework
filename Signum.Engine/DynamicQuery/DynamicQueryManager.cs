@@ -72,6 +72,16 @@ namespace Signum.Engine.DynamicQuery
             return AllowQuery(queryName);
         }
 
+        public bool QueryDefined(object queryName)
+        {
+            return this.queries.ContainsKey(queryName);
+        }
+
+        public bool QueryDefinedAndAllowed(object queryName)
+        {
+            return QueryDefined(queryName) && QueryAllowed(queryName);
+        }
+
         public void AssertQueryAllowed(object queryName)
         {
             if(!QueryAllowed(queryName))

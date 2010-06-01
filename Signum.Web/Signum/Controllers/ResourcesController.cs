@@ -39,6 +39,8 @@ namespace Signum.Web.Controllers
                     return "text/html";
             }
         }
+
+
     }
 
     public static class ResourcesUrlHelperExtensions
