@@ -289,19 +289,19 @@
     <value>Votre nouveau mot de passe est {0}</value>
   </data>
   <data name="TypesAscx_Create" xml:space="preserve">
-    <value>créer</value>
+    <value>Créer</value>
   </data>
   <data name="TypesAscx_Modify" xml:space="preserve">
     <value>Modifier</value>
   </data>
   <data name="TypesAscx_None" xml:space="preserve">
-    <value>aucun</value>
+    <value>Aucun</value>
   </data>
   <data name="TypesAscx_Operations" xml:space="preserve">
     <value>Opérations</value>
   </data>
   <data name="TypesAscx_Overriden" xml:space="preserve">
-    <value>Supplanté</value>
+    <value>Remplace</value>
   </data>
   <data name="TypesAscx_Properties" xml:space="preserve">
     <value>Propriétés</value>
@@ -331,7 +331,7 @@
     <value>Dehors</value>
   </data>
   <data name="EntityGroupsAscx_Overriden" xml:space="preserve">
-    <value>Supplanté</value>
+    <value>Remplace</value>
   </data>
   <data name="FacadeMethodsAscx_Allow" xml:space="preserve">
     <value>Authoriser</value>
@@ -355,7 +355,7 @@
     <value>Opération</value>
   </data>
   <data name="OperationsAscx_Overriden" xml:space="preserve">
-    <value>Supplanté</value>
+    <value>Remplace</value>
   </data>
   <data name="PermissionsAscx_Allow" xml:space="preserve">
     <value>Authoriser</value>
@@ -364,7 +364,7 @@
     <value>Interdire</value>
   </data>
   <data name="PermissionsAscx_Overriden" xml:space="preserve">
-    <value>Supplanté</value>
+    <value>Remplace</value>
   </data>
   <data name="PermissionsAscx_Permission" xml:space="preserve">
     <value>Permission</value>
@@ -373,7 +373,7 @@
     <value>Modifier</value>
   </data>
   <data name="PropertiesAscx_None" xml:space="preserve">
-    <value>aucun</value>
+    <value>Aucun</value>
   </data>
   <data name="PropertiesAscx_Overriden" xml:space="preserve">
     <value>Surchargé</value>
@@ -391,7 +391,7 @@
     <value>Interdire</value>
   </data>
   <data name="QueriesAscx_Overriden" xml:space="preserve">
-    <value>Supplanté</value>
+    <value>Remplace</value>
   </data>
   <data name="QueriesAscx_Query" xml:space="preserve">
     <value>Question</value>

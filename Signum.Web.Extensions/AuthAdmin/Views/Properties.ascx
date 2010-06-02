@@ -31,7 +31,7 @@
             <th>
                 <%=Html.Encode(Resources.PropertiesAscx_None) %>
             </th>
-            <th style="display: none">
+            <th>
                 <%=Html.Encode(Resources.PropertiesAscx_Overriden) %>
             </th>
         </tr>

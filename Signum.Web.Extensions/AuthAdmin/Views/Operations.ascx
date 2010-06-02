@@ -28,7 +28,7 @@
             <th>
                 <%=Html.Encode(Resources.OperationsAscx_Deny) %>
             </th>
-            <th style="display: none">
+            <th>
                 <%=Html.Encode(Resources.OperationsAscx_Overriden) %>
             </th>
         </tr>

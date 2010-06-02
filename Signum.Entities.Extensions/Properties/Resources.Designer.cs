@@ -61,6 +61,15 @@ namespace Signum.Entities.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Admin rules.
+        /// </summary>
+        public static string BasicPermissions_AdminRules {
+            get {
+                return ResourceManager.GetString("BasicPermissions_AdminRules", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Calendar.
         /// </summary>
         public static string CalendarDN {
@@ -232,11 +241,119 @@ namespace Signum.Entities.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Exception.
+        /// </summary>
+        public static string EmailMessageDN_Exception {
+            get {
+                return ResourceManager.GetString("EmailMessageDN_Exception", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Package.
+        /// </summary>
+        public static string EmailMessageDN_Package {
+            get {
+                return ResourceManager.GetString("EmailMessageDN_Package", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Received.
+        /// </summary>
+        public static string EmailMessageDN_Received {
+            get {
+                return ResourceManager.GetString("EmailMessageDN_Received", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Recipient.
+        /// </summary>
+        public static string EmailMessageDN_Recipient {
+            get {
+                return ResourceManager.GetString("EmailMessageDN_Recipient", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sent.
+        /// </summary>
+        public static string EmailMessageDN_Sent {
+            get {
+                return ResourceManager.GetString("EmailMessageDN_Sent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to State.
+        /// </summary>
+        public static string EmailMessageDN_State {
+            get {
+                return ResourceManager.GetString("EmailMessageDN_State", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Subject.
+        /// </summary>
+        public static string EmailMessageDN_Subject {
+            get {
+                return ResourceManager.GetString("EmailMessageDN_Subject", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Template.
+        /// </summary>
+        public static string EmailMessageDN_Template {
+            get {
+                return ResourceManager.GetString("EmailMessageDN_Template", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Resend emails.
+        /// </summary>
+        public static string EmailOperations_ReSendEmails {
+            get {
+                return ResourceManager.GetString("EmailOperations_ReSendEmails", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Email Package.
         /// </summary>
         public static string EmailPackageDN {
             get {
                 return ResourceManager.GetString("EmailPackageDN", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Num errors.
+        /// </summary>
+        public static string EmailPackageDN_NumErrors {
+            get {
+                return ResourceManager.GetString("EmailPackageDN_NumErrors", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Num lines.
+        /// </summary>
+        public static string EmailPackageDN_NumLines {
+            get {
+                return ResourceManager.GetString("EmailPackageDN_NumLines", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Template.
+        /// </summary>
+        public static string EmailPackageDN_Template {
+            get {
+                return ResourceManager.GetString("EmailPackageDN_Template", resourceCulture);
             }
         }
         
@@ -588,6 +705,24 @@ namespace Signum.Entities.Extensions.Properties {
         public static string PackageDN {
             get {
                 return ResourceManager.GetString("PackageDN", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Lines.
+        /// </summary>
+        public static string PackageDN_Lines {
+            get {
+                return ResourceManager.GetString("PackageDN_Lines", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Name.
+        /// </summary>
+        public static string PackageDN_Name {
+            get {
+                return ResourceManager.GetString("PackageDN_Name", resourceCulture);
             }
         }
         

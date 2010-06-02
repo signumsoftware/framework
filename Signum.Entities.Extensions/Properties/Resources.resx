@@ -585,4 +585,49 @@
   <data name="UserDN_State" xml:space="preserve">
     <value>State</value>
   </data>
+  <data name="EmailMessageDN_Exception" xml:space="preserve">
+    <value>Exception</value>
+  </data>
+  <data name="EmailMessageDN_Package" xml:space="preserve">
+    <value>Package</value>
+  </data>
+  <data name="EmailMessageDN_Received" xml:space="preserve">
+    <value>Received</value>
+  </data>
+  <data name="EmailMessageDN_Recipient" xml:space="preserve">
+    <value>Recipient</value>
+  </data>
+  <data name="EmailMessageDN_Sent" xml:space="preserve">
+    <value>Sent</value>
+  </data>
+  <data name="EmailMessageDN_State" xml:space="preserve">
+    <value>State</value>
+  </data>
+  <data name="EmailMessageDN_Subject" xml:space="preserve">
+    <value>Subject</value>
+  </data>
+  <data name="EmailMessageDN_Template" xml:space="preserve">
+    <value>Template</value>
+  </data>
+  <data name="EmailOperations_ReSendEmails" xml:space="preserve">
+    <value>Resend emails</value>
+  </data>
+  <data name="EmailPackageDN_NumErrors" xml:space="preserve">
+    <value>Num errors</value>
+  </data>
+  <data name="EmailPackageDN_NumLines" xml:space="preserve">
+    <value>Num lines</value>
+  </data>
+  <data name="EmailPackageDN_Template" xml:space="preserve">
+    <value>Template</value>
+  </data>
+  <data name="PackageDN_Lines" xml:space="preserve">
+    <value>Lines</value>
+  </data>
+  <data name="PackageDN_Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="BasicPermissions_AdminRules" xml:space="preserve">
+    <value>Admin rules</value>
+  </data>
 </root>

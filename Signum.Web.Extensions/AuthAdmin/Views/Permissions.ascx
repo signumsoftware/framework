@@ -29,7 +29,7 @@
             <th>
                 <%=Html.Encode(Resources.PermissionsAscx_Deny) %>
             </th>
-            <th style="display: none">
+            <th>
                 <%=Html.Encode(Resources.PermissionsAscx_Overriden) %>
             </th>
         </tr>

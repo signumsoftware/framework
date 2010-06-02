@@ -574,7 +574,7 @@
     <value>Données</value>
   </data>
   <data name="TheExcelTemplateHasAColumn0NotPresentInTheFindWindow" xml:space="preserve">
-    <value>La semelle Excel a une colonne {0} qui n'est pas présent chez le chercheur</value>
+    <value>Le Mòdel Excel a une colonne {0} qui n'est pas présent chez le chercheur</value>
   </data>
   <data name="EmailMessageDN" xml:space="preserve">
     <value>Message d'e-mail</value>
@@ -584,5 +584,53 @@
   </data>
   <data name="UserDN_State" xml:space="preserve">
     <value>État</value>
+  </data>
+  <data name="EmailMessageDN_Exception" xml:space="preserve">
+    <value>Erreur</value>
+  </data>
+  <data name="EmailMessageDN_Package" xml:space="preserve">
+    <value>Paquet</value>
+  </data>
+  <data name="EmailMessageDN_Received" xml:space="preserve">
+    <value>Reçu</value>
+  </data>
+  <data name="EmailMessageDN_Recipient" xml:space="preserve">
+    <value>Destinataire</value>
+  </data>
+  <data name="EmailMessageDN_Sent" xml:space="preserve">
+    <value>Envoyé</value>
+  </data>
+  <data name="EmailMessageDN_State" xml:space="preserve">
+    <value>État</value>
+  </data>
+  <data name="EmailMessageDN_Subject" xml:space="preserve">
+    <value>Sujet</value>
+  </data>
+  <data name="EmailMessageDN_Template" xml:space="preserve">
+    <value>Modèle</value>
+  </data>
+  <data name="EmailOperations_ReSendEmails" xml:space="preserve">
+    <value>Renvoyer emails</value>
+  </data>
+  <data name="EmailPackageDN_NumErrors" xml:space="preserve">
+    <value>Nombre d'erreurs</value>
+  </data>
+  <data name="EmailPackageDN_NumLines" xml:space="preserve">
+    <value>Nombre de lignes</value>
+  </data>
+  <data name="EmailPackageDN_Template" xml:space="preserve">
+    <value>Modèle</value>
+  </data>
+  <data name="PackageDN_Lines" xml:space="preserve">
+    <value>Lignes</value>
+  </data>
+  <data name="PackageDN_Name" xml:space="preserve">
+    <value>Nom</value>
+  </data>
+  <data name="BasicPermissions_AdminRules" xml:space="preserve">
+    <value>Administrer règles</value>
+  </data>
+  <data name="EntityGroupDN" xml:space="preserve">
+    <value>Groupe d'entités</value>
   </data>
 </root>
