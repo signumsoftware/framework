@@ -5,31 +5,91 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Signum.Web.Sample", "Signum
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Signum.Web.Sample.Tests", "..\Signum.Web.Sample.Tests\Signum.Web.Sample.Tests.csproj", "{047FCDA4-39F3-49E6-85D2-E355A73FDCC3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Signum.Engine", "..\Signum.Engine\Signum.Engine.csproj", "{7F2DB6FE-C109-4057-B207-C62A767F905D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Signum.Entities", "..\Signum.Entities\Signum.Entities.csproj", "{F2B51D08-498D-4C9F-8112-9521A7762B02}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Signum.Test", "..\Signum.Test\Signum.Test.csproj", "{DE565EB3-EE44-469D-B6B9-C8F3CA0712EF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Signum.Utilities", "..\Signum.Utilities\Signum.Utilities.csproj", "{F7D3F72D-741D-4F67-8CF8-CD41B9035FED}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Signum.Web", "..\Signum.Web\Signum.Web.csproj", "{61898D02-521F-49AB-928B-F80615D55CA3}"
+EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 3
+		SccNumberOfProjects = 8
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
-		SccTeamFoundationServer = http://andromeda:8080/
-		SccProjectUniqueName0 = ..\\Signum.Web.Sample.Tests\\Signum.Web.Sample.Tests.csproj
-		SccProjectName0 = ../Signum.Web.Sample.Tests
-		SccLocalPath0 = ..\\Signum.Web.Sample.Tests
-		SccProjectUniqueName1 = Signum.Web.Sample.csproj
-		SccLocalPath1 = .
+		SccTeamFoundationServer = http://192.168.0.8:8080/
+		SccLocalPath0 = .
+		SccProjectUniqueName1 = ..\\Signum.Web.Sample.Tests\\Signum.Web.Sample.Tests.csproj
+		SccProjectName1 = ../Signum.Web.Sample.Tests
+		SccLocalPath1 = ..\\Signum.Web.Sample.Tests
+		SccProjectUniqueName2 = Signum.Web.Sample.csproj
 		SccLocalPath2 = .
+		SccProjectUniqueName3 = ..\\Signum.Engine\\Signum.Engine.csproj
+		SccProjectName3 = ../Signum.Engine
+		SccLocalPath3 = ..\\Signum.Engine
+		SccProjectUniqueName4 = ..\\Signum.Entities\\Signum.Entities.csproj
+		SccProjectName4 = ../Signum.Entities
+		SccLocalPath4 = ..\\Signum.Entities
+		SccProjectUniqueName5 = ..\\Signum.Test\\Signum.Test.csproj
+		SccProjectName5 = ../Signum.Test
+		SccLocalPath5 = ..\\Signum.Test
+		SccProjectUniqueName6 = ..\\Signum.Utilities\\Signum.Utilities.csproj
+		SccProjectName6 = ../Signum.Utilities
+		SccLocalPath6 = ..\\Signum.Utilities
+		SccProjectUniqueName7 = ..\\Signum.Web\\Signum.Web.csproj
+		SccProjectName7 = ../Signum.Web
+		SccLocalPath7 = ..\\Signum.Web
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		Partial|Any CPU = Partial|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{C6E52C42-F9BB-4CEE-B0F4-B5743CD96C19}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C6E52C42-F9BB-4CEE-B0F4-B5743CD96C19}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C6E52C42-F9BB-4CEE-B0F4-B5743CD96C19}.Partial|Any CPU.ActiveCfg = Release|Any CPU
+		{C6E52C42-F9BB-4CEE-B0F4-B5743CD96C19}.Partial|Any CPU.Build.0 = Release|Any CPU
 		{C6E52C42-F9BB-4CEE-B0F4-B5743CD96C19}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C6E52C42-F9BB-4CEE-B0F4-B5743CD96C19}.Release|Any CPU.Build.0 = Release|Any CPU
 		{047FCDA4-39F3-49E6-85D2-E355A73FDCC3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{047FCDA4-39F3-49E6-85D2-E355A73FDCC3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{047FCDA4-39F3-49E6-85D2-E355A73FDCC3}.Partial|Any CPU.ActiveCfg = Release|Any CPU
+		{047FCDA4-39F3-49E6-85D2-E355A73FDCC3}.Partial|Any CPU.Build.0 = Release|Any CPU
 		{047FCDA4-39F3-49E6-85D2-E355A73FDCC3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{047FCDA4-39F3-49E6-85D2-E355A73FDCC3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7F2DB6FE-C109-4057-B207-C62A767F905D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7F2DB6FE-C109-4057-B207-C62A767F905D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7F2DB6FE-C109-4057-B207-C62A767F905D}.Partial|Any CPU.ActiveCfg = Partial|Any CPU
+		{7F2DB6FE-C109-4057-B207-C62A767F905D}.Partial|Any CPU.Build.0 = Partial|Any CPU
+		{7F2DB6FE-C109-4057-B207-C62A767F905D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7F2DB6FE-C109-4057-B207-C62A767F905D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F2B51D08-498D-4C9F-8112-9521A7762B02}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F2B51D08-498D-4C9F-8112-9521A7762B02}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F2B51D08-498D-4C9F-8112-9521A7762B02}.Partial|Any CPU.ActiveCfg = Partial|Any CPU
+		{F2B51D08-498D-4C9F-8112-9521A7762B02}.Partial|Any CPU.Build.0 = Partial|Any CPU
+		{F2B51D08-498D-4C9F-8112-9521A7762B02}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F2B51D08-498D-4C9F-8112-9521A7762B02}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DE565EB3-EE44-469D-B6B9-C8F3CA0712EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE565EB3-EE44-469D-B6B9-C8F3CA0712EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE565EB3-EE44-469D-B6B9-C8F3CA0712EF}.Partial|Any CPU.ActiveCfg = Partial|Any CPU
+		{DE565EB3-EE44-469D-B6B9-C8F3CA0712EF}.Partial|Any CPU.Build.0 = Partial|Any CPU
+		{DE565EB3-EE44-469D-B6B9-C8F3CA0712EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DE565EB3-EE44-469D-B6B9-C8F3CA0712EF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F7D3F72D-741D-4F67-8CF8-CD41B9035FED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F7D3F72D-741D-4F67-8CF8-CD41B9035FED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F7D3F72D-741D-4F67-8CF8-CD41B9035FED}.Partial|Any CPU.ActiveCfg = Partial|Any CPU
+		{F7D3F72D-741D-4F67-8CF8-CD41B9035FED}.Partial|Any CPU.Build.0 = Partial|Any CPU
+		{F7D3F72D-741D-4F67-8CF8-CD41B9035FED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F7D3F72D-741D-4F67-8CF8-CD41B9035FED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{61898D02-521F-49AB-928B-F80615D55CA3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{61898D02-521F-49AB-928B-F80615D55CA3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{61898D02-521F-49AB-928B-F80615D55CA3}.Partial|Any CPU.ActiveCfg = Partial|Any CPU
+		{61898D02-521F-49AB-928B-F80615D55CA3}.Partial|Any CPU.Build.0 = Partial|Any CPU
+		{61898D02-521F-49AB-928B-F80615D55CA3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{61898D02-521F-49AB-928B-F80615D55CA3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

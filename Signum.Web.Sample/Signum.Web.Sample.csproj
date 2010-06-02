@@ -86,10 +86,6 @@
     <Content Include="Views\Shared\Menu.ascx" />
     <Content Include="Views\Shared\WidgetView.ascx" />
     <Content Include="Web.config" />
-    <Content Include="Scripts\MicrosoftAjax.js" />
-    <Content Include="Scripts\MicrosoftAjax.debug.js" />
-    <Content Include="Scripts\MicrosoftMvcAjax.js" />
-    <Content Include="Scripts\MicrosoftMvcAjax.debug.js" />
     <Content Include="Views\Home\Index.aspx" />
     <Content Include="Views\Shared\Error.aspx" />
     <Content Include="Views\Web.config" />
@@ -119,13 +115,11 @@
   <ItemGroup>
     <Content Include="Content\grid.css" />
     <Content Include="Content\layout.css" />
-    <Content Include="Content\LineStyles.css" />
     <Content Include="Content\nav.css" />
     <Content Include="Content\reset.css" />
     <Content Include="Content\results.css" />
     <Content Include="Content\Site.css" />
     <Content Include="Content\text.css" />
-    <Content Include="Images\alert-overlay.png" />
     <Content Include="Images\bg-browser.gif" />
     <Content Include="Images\body-fondo.jpg" />
     <Content Include="Images\body-fondo2.jpg" />
@@ -134,12 +128,10 @@
     <Content Include="Images\browser_buttons.gif" />
     <Content Include="Images\browser_buttons2.gif" />
     <Content Include="Images\fade-butt.png" />
-    <Content Include="Images\fancy_closebox.png" />
     <Content Include="Images\fondo-repeater.jpg" />
     <Content Include="Images\gray-grad.png" />
     <Content Include="Images\lupa.gif" />
     <Content Include="Images\popup-body-back.jpg" />
-    <Content Include="Images\popup-header-back.jpg" />
     <Content Include="Images\separador.gif" />
     <Content Include="Images\sign_error.gif" />
     <Content Include="Images\sign_info.gif" />
@@ -148,7 +140,6 @@
     <Content Include="Images\switch_minus.gif" />
     <Content Include="Images\switch_plus.gif" />
     <Content Include="Images\tab.png" />
-    <Content Include="Scripts\jquery-1.4.min.js" />
     <Content Include="Scripts\jqueryui\i18n\jquery-ui-i18n.js" />
     <Content Include="Scripts\jqueryui\i18n\ui.datepicker-ar.js" />
     <Content Include="Scripts\jqueryui\i18n\ui.datepicker-bg.js" />
@@ -228,6 +219,13 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
+    <Content Include="Content\Copy of LineStyles.css" />
+    <Content Include="Images\lineButtons.gif" />
+    <Content Include="Scripts\jquery-1.4.min.js" />
+    <Content Include="Scripts\jquery.address-1.1.min.js" />
+    <Content Include="Scripts\jquery.address-1.2.js" />
+    <Content Include="Scripts\jquery.address-1.2.min.js" />
+    <Content Include="Scripts\main.js" />
     <Content Include="Views\Shared\Site.Master" />
   </ItemGroup>
   <ItemGroup>

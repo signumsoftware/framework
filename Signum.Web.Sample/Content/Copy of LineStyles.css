@@ -1062,7 +1062,7 @@ input[type=button],#lupa{cursor:pointer;}
 #datespan .labelLine { width:50px;}
 
 
-.dragHandle{
+.popupWindow .dragHandle{
 	cursor:move; text-shadow:1px 1px #fff;
 	background:url(../images/popup-title-back.jpg) repeat-x 0 0 #e5e5e5;
 	padding-top:1px; padding-bottom:1px;
