@@ -442,4 +442,7 @@
   <data name="Year" xml:space="preserve">
     <value>Año</value>
   </data>
+  <data name="EntityGroupDN" xml:space="preserve">
+    <value>Entity Group</value>
+  </data>
 </root>

@@ -451,4 +451,7 @@
   <data name="RemoteTimeZoneNotSet" xml:space="preserve">
     <value>RemoteTimeZone not set</value>
   </data>
+  <data name="EntityGroupDN" xml:space="preserve">
+    <value>Entity Group</value>
+  </data>
 </root>

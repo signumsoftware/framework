@@ -221,13 +221,16 @@ namespace Signum.Web
             string value = "";
 
             object v = Convert(Value, Token.Type);
-            if (v != null && typeof(Lite).IsAssignableFrom(v.GetType()))
+            if (v != null)
             {
-                Lite lite = (Lite)v;
-                value = "{0};{1}".Formato(lite.Id.ToString(), lite.RuntimeType.Name);
+                if (typeof(Lite).IsAssignableFrom(v.GetType()))
+                {
+                    Lite lite = (Lite)v;
+                    value = "{0};{1}".Formato(lite.Id.ToString(), lite.RuntimeType.Name);
+                }
+                else
+                    value = v.ToString();
             }
-            else
-                value = v.ToString();
 
             result = "&cn{0}={1}&sel{0}={2}&val{0}={3}".Formato(filterIndex, ColumnName, Operation.ToString(), value);
             if (Frozen)
