@@ -33,7 +33,7 @@ namespace Signum.Web
 
         public static string HiddenStaticInfo(this HtmlHelper helper, TypeContext tc)
         {
-            return helper.Hidden(tc.Compose(EntityBaseKeys.StaticInfo), new StaticInfo(tc.Type) { IsReadOnly = tc.ReadOnly }.ToString(), new { disabled = "disabled" }).ToHtmlString();
+            return helper.Hidden(tc.Compose(EntityBaseKeys.StaticInfo), new StaticInfo(tc.UntypedValue.TryCC(uv=>uv.GetType()) ?? tc.Type) { IsReadOnly = tc.ReadOnly }.ToString(), new { disabled = "disabled" }).ToHtmlString();
         }
 
         public static string HiddenEntityInfo<T, S>(this HtmlHelper helper, TypeContext<T> parent, Expression<Func<T, S>> property)
