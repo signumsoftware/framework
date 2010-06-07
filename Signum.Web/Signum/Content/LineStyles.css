@@ -370,6 +370,9 @@ fieldset
     background-color: #dedede;
 }
 
+.ddlAuto:hover, .ddlAutoOn:hover {cursor:pointer;}
+
+
 /* errors */
 .field-validation-error {
     color:#ff0000;
