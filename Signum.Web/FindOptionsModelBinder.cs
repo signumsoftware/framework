@@ -86,17 +86,19 @@ namespace Signum.Web
                 string operation = parameters["sel" + index.ToString()];
                 bool frozen = parameters.AllKeys.Any(k => k == "fz" + index.ToString());
 
-                Type type = queryDescription.StaticColumns
-                            .SingleOrDefault(c => c.Name == name)
-                            .ThrowIfNullC(Resources.InvalidFilterColumn0NotFound.Formato(name))
-                           .Type;
+                //Type type = queryDescription.StaticColumns
+                //            .SingleOrDefault(c => c.Name == name)
+                //            .ThrowIfNullC(Resources.InvalidFilterColumn0NotFound.Formato(name))
+                //           .Type;
 
-                object valueObject = Convert(value, type);
+                QueryToken token = QueryToken.Parse(queryDescription, name);
+
+                object valueObject = Convert(value, token.Type);
 
                 result.Add(new FilterOption
                 {
                     ColumnName = name,
-                    Token = QueryToken.Parse(queryDescription, name),
+                    Token = token,
                     Operation = EnumExtensions.ToEnum<FilterOperation>(operation),
                     Frozen = frozen,
                     Value = valueObject,

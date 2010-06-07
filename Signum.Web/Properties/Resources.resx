@@ -399,4 +399,16 @@
   <data name="Excel" xml:space="preserve">
     <value>Excel</value>
   </data>
+  <data name="CalendarClose" xml:space="preserve">
+    <value>Done</value>
+  </data>
+  <data name="CalendarNext" xml:space="preserve">
+    <value>Next</value>
+  </data>
+  <data name="CalendarPrevious" xml:space="preserve">
+    <value>Prev</value>
+  </data>
+  <data name="CalendarToday" xml:space="preserve">
+    <value>Today</value>
+  </data>
 </root>

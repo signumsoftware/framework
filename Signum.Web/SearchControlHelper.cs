@@ -1,4 +1,5 @@
-﻿using System;
+﻿#region usings
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,73 +15,12 @@ using Signum.Utilities.Reflection;
 using Signum.Web.Properties;
 using Signum.Engine;
 using Signum.Engine.DynamicQuery;
+#endregion
 
 namespace Signum.Web
 {
     public static class SearchControlHelper
     {
-        public delegate ToolBarButton MenuItemForQueryName(object queryName);
-
-        public static event MenuItemForQueryName GetCustomMenuItems;
-
-        public static string GetMenuItems(this HtmlHelper helper, object queryName, object prefix)
-        {
-            StringBuilder sb = new StringBuilder();
-            if (GetCustomMenuItems != null)
-            {
-                ToolBarButton[] menus = GetCustomMenuItems.GetInvocationList().Cast<MenuItemForQueryName>().Select(d => d(queryName)).NotNull().ToArray();
-                foreach (ToolBarButton mi in menus)
-                {
-                    throw new NotImplementedException("ConstructorFromMany operations are not supported yet");
-                   // string onclick = "";
-                   // string strPrefix = (prefix != null) ? ("'" + prefix.ToString() + "'") : "''";
-                        
-                   // //Add prefix to onclick
-                   // if (!string.IsNullOrEmpty(mi.OnClick))
-                   // {
-                   //     if (!string.IsNullOrEmpty(mi.OnServerClickAjax) || !string.IsNullOrEmpty(mi.OnServerClickPost))
-                   //         throw new ArgumentException(Resources.MenuItem0HasOnClickAndAnotherClickDefined.Formato(mi.Id));
-
-                   //     int lastEnd = mi.OnClick.LastIndexOf(")");
-                   //     int lastStart = mi.OnClick.LastIndexOf("(");
-                   //     if (lastStart == lastEnd -1)
-                   //         onclick = mi.OnClick.Insert(lastEnd, strPrefix);
-                   //     else
-                   //         onclick = mi.OnClick.Insert(lastEnd, ", " + strPrefix);
-                   // }
-                    
-                   // //Constructo OnServerClick
-                   // if (!string.IsNullOrEmpty(mi.OnServerClickAjax))
-                   // {
-                   //     if (!string.IsNullOrEmpty(mi.OnClick) || !string.IsNullOrEmpty(mi.OnServerClickPost))
-                   //         throw new ArgumentException(Resources.MenuItem0HasOnServerClickAjaxAndAnotherClickDefined.Formato(mi.Id));
-                   //     onclick = "CallServer('{0}',{1});".Formato(mi.OnServerClickAjax, strPrefix);
-                   // }
-
-                   // //Constructo OnServerClick
-                   // if (!string.IsNullOrEmpty(mi.OnServerClickPost))
-                   // {
-                   //     if (!string.IsNullOrEmpty(mi.OnClick) || !string.IsNullOrEmpty(mi.OnServerClickAjax))
-                   //         throw new ArgumentException(Resources.MenuItem0HasOnServerClickPostAndAnotherClickDefined.Formato(mi.Id));
-                    //     onclick = "Submit('{0}');".Formato(mi.OnServerClickPost);
-                   // }
-
-                   // //Add cursor pointer to the htmlProps
-                   // if (!mi.HtmlProps.ContainsKey("style"))
-                   //     mi.HtmlProps.Add("style", "cursor: pointer");
-                   // else if (mi.HtmlProps["style"].ToString().IndexOf("cursor")==-1)
-                   //     mi.HtmlProps["style"] = "cursor:pointer; " + mi.HtmlProps["style"].ToString();
-
-                   // if(!mi.HtmlProps.ContainsKey("title"))
-                   //     mi.HtmlProps["title"] = mi.AltText ?? "";
-
-                   //// sb.Append(helper.ImageButton(mi.Id, mi.ImgSrc, mi.AltText, onclick, mi.HtmlProps));
-                   // sb.Append(helper.Button(mi.Id, mi.Text, onclick, "", mi.HtmlProps));
-                }
-            }
-            return sb.ToString();
-        }
-
         public static void SearchControl(this HtmlHelper helper, FindOptions findOptions, Context context)
         {
             Navigator.SetTokens(findOptions.QueryName, findOptions.FilterOptions);
@@ -134,7 +74,7 @@ namespace Signum.Web
             sb.AppendLine("<tr id='{0}' name='{0}'>".Formato(context.Compose("trFilter", index.ToString())));
 
             sb.AppendLine("<td id='{0}' name='{0}'>".Formato(context.Compose("td" + index.ToString() + "__" + filterOptions.Token.FullKey())));
-            sb.AppendLine(filterOptions.Token.NiceName());
+            sb.AppendLine(filterOptions.Token.FullKey());
             sb.AppendLine("</td>");
 
             sb.AppendLine("<td>");
@@ -171,6 +111,14 @@ namespace Signum.Web
             sb.AppendLine("</tr>");
             
             return sb.ToString();
+        }
+
+        public static string TokensCombo(this HtmlHelper helper, IEnumerable<SelectListItem> items, Context context, int index)
+        {
+            return helper.DropDownList(context.Compose("ddlTokens_" + index),
+                items,
+                new { onchange = "javascript:NewSubTokensCombo('" + context.ControlID + "'," + index + ");" }
+                ).ToString();
         }
 
         //public static string QuickFilter(Controller controller, string queryUrlName, int visibleColumnIndex, int filterRowIndex, object value, string prefix, string suffix)

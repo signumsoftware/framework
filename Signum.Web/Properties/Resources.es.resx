@@ -396,4 +396,16 @@
   <data name="NumberOfRows" xml:space="preserve">
     <value>Núm. registros</value>
   </data>
+  <data name="CalendarClose" xml:space="preserve">
+    <value>Cerrar</value>
+  </data>
+  <data name="CalendarNext" xml:space="preserve">
+    <value>Sig</value>
+  </data>
+  <data name="CalendarPrevious" xml:space="preserve">
+    <value>Ant</value>
+  </data>
+  <data name="CalendarToday" xml:space="preserve">
+    <value>Hoy</value>
+  </data>
 </root>

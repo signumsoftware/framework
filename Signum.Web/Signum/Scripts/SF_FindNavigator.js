@@ -199,22 +199,21 @@ FindNavigator.prototype = {
 
     addFilter: function() {
         log("FindNavigator addFilter");
-        var selectedColumn = $(this.pf("ddlNewFilters option:selected"));
-        if (selectedColumn.length == 0) return;
 
         var tableFilters = $(this.pf("tblFilters tbody"));
         if (tableFilters.length == 0)
             throw "Adding filters is not allowed";
 
-        var optionId = selectedColumn[0].id;
-        var filterName = optionId.substring(optionId.indexOf("__") + 2, optionId.length);
+        var tokenName = this.constructTokenName();
+        if (empty(tokenName)) return;
+
         var queryUrlName = ((empty(this.findOptions.queryUrlName)) ? $(this.pf(sfQueryUrlName)).val() : this.findOptions.queryUrlName);
 
         var self = this;
         $.ajax({
             type: "POST",
             url: "Signum/AddFilter",
-            data: { "sfQueryUrlName": queryUrlName, "columnName": filterName, "index": this.newFilterRowIndex(), "prefix": this.findOptions.prefix },
+            data: { "sfQueryUrlName": queryUrlName, "tokenName": tokenName, "index": this.newFilterRowIndex(), "prefix": this.findOptions.prefix },
             async: false,
             dataType: "html",
             success: function(filterHtml) {
@@ -224,6 +223,54 @@ FindNavigator.prototype = {
                 $(self.pf("btnClearAllFilters")).show();
             }
         });
+    },
+
+    newSubTokensCombo: function(index) {
+        log("FindNavigator newSubTokensCombo");
+        var selectedColumn = $(this.pf("ddlTokens_" + index));
+        if (selectedColumn.length == 0) return;
+
+        //Clear child subtoken combos
+        var self = this;
+        $("select")
+        .filter(function() { return $(this).attr("id").indexOf(self.findOptions.prefix.compose("ddlTokens_")) == 0; })
+        .filter(function() {
+            var currentId = $(this).attr("id");
+            var lastSeparatorIndex = currentId.lastIndexOf("_");
+            var currentIndex = currentId.substring(lastSeparatorIndex + 1, currentId.length);
+            return parseInt(currentIndex) > index;
+        })
+        .remove();
+
+        if (selectedColumn.children("option:selected").val() == "") return;
+
+        var tokenName = this.constructTokenName();
+        var queryUrlName = ((empty(this.findOptions.queryUrlName)) ? $(this.pf(sfQueryUrlName)).val() : this.findOptions.queryUrlName);
+
+        $.ajax({
+            type: "POST",
+            url: "Signum/NewSubTokensCombo",
+            data: { "sfQueryUrlName": queryUrlName, "tokenName": tokenName, "index": index, "prefix": this.findOptions.prefix },
+            async: false,
+            dataType: "html",
+            success: function(newCombo) {
+                $(self.pf("ddlTokens_" + index)).after(newCombo);
+            }
+        });
+    },
+
+    constructTokenName: function() {
+        log("FindNavigator constructTokenName");
+        var tokenName = "";
+        var stop = false;
+        for (i = 0; !stop; i++) {
+            var currSubtoken = $(this.pf("ddlTokens_" + i));
+            if (currSubtoken.length > 0)
+                tokenName = tokenName.compose(currSubtoken.val(), ".");
+            else
+                stop = true;
+        }
+        return tokenName;
     },
 
     quickFilter: function(idTD) {
@@ -267,7 +314,7 @@ FindNavigator.prototype = {
         if ($(this.pf("tblFilters tbody tr")).length == 0) {
             $(this.pf("filters-list .explanation")).show();
             $(this.pf("filters-list table")).hide('fast');
-            $(this.pf("btnClearAllFilters")).hide();            
+            $(this.pf("btnClearAllFilters")).hide();
         }
     },
 
@@ -343,6 +390,10 @@ function HasSelectedItems(_findOptions, onSuccess) {
 
 function AddFilter(prefix) {
     new FindNavigator({ prefix: prefix }).addFilter();
+}
+
+function NewSubTokensCombo(prefix, index) {
+    new FindNavigator({ prefix: prefix }).newSubTokensCombo(index);
 }
 
 function QuickFilter(prefix, idTd) {

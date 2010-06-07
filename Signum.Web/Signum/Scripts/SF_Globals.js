@@ -200,12 +200,14 @@ function empty(myString) {
 
 String.prototype.hasText = function() { return (this == null || this == undefined || this == '') ? false : true; }
 
-String.prototype.compose = function(name) {
+String.prototype.compose = function(name, separator) {
     if (empty(this))
         return name;
     if (empty(name))
-        return this;
-    return this.toString() + sfSeparator + name.toString();
+        return this.toString();
+    if (empty(separator))
+        separator = sfSeparator;
+    return this.toString() + separator + name.toString();
 }
 
 function isFalse(value) {

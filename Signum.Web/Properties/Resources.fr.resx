@@ -393,4 +393,16 @@
   <data name="NumberOfRows" xml:space="preserve">
     <value>Nombre de files</value>
   </data>
+  <data name="CalendarClose" xml:space="preserve">
+    <value>Fermer</value>
+  </data>
+  <data name="CalendarNext" xml:space="preserve">
+    <value>Suiv</value>
+  </data>
+  <data name="CalendarPrevious" xml:space="preserve">
+    <value>Préc</value>
+  </data>
+  <data name="CalendarToday" xml:space="preserve">
+    <value>Courant</value>
+  </data>
 </root>

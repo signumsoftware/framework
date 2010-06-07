@@ -114,17 +114,18 @@ namespace Signum.Web
         {
             DateTime? value = (DateTime?)valueLine.UntypedValue;
 
+            if (valueLine.DatePickerOptions == null)
+                valueLine.DatePickerOptions = new DatePickerOptions();
+    
             if (value.HasValue)
                 value = value.Value.ToUserInterface();
 
             if (valueLine.ReadOnly)
-            {
                 return helper.Span(valueLine.ControlID, value.TryToString(valueLine.Format), "valueLine");
-            }
     
             valueLine.ValueHtmlProps.AddCssClass("maskedEdit");
             
-            if (valueLine.DatePickerOptions != null && valueLine.DatePickerOptions.ShowAge)
+            if (valueLine.DatePickerOptions.ShowAge)
                 valueLine.ValueHtmlProps.AddCssClass("hasAge");
 
             string setTicks = SetTicksFunction(helper, valueLine);
@@ -138,13 +139,17 @@ namespace Signum.Web
                     valueLine.ValueHtmlProps.Add("onblur", setTicks + reloadOnChangeFunction);
             }
 
-            valueLine.ValueHtmlProps["size"] = (valueLine.Format == "d") ? 10 : 20;
-            
+            //valueLine.ValueHtmlProps["size"] = (valueLine.Format == "d") ? 10 : 20;
+            valueLine.ValueHtmlProps["size"] = CalendarHelper.FormatToString(valueLine.Format ?? "g").Length;
+
+            if (valueLine.DatePickerOptions.Format == null)
+                valueLine.DatePickerOptions.Format = valueLine.Format;
+
             string returnString = helper.TextBox(valueLine.ControlID, value.TryToString(valueLine.Format), valueLine.ValueHtmlProps) +
                    "\n" +
                    helper.Calendar(valueLine.ControlID, valueLine.DatePickerOptions);
 
-            if (valueLine.DatePickerOptions != null && valueLine.DatePickerOptions.ShowAge)
+            if (valueLine.DatePickerOptions.ShowAge)
                 returnString += helper.Span(valueLine.ControlID + "Age", String.Empty, "age");
 
             return returnString;

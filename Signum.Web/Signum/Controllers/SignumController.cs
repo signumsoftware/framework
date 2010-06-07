@@ -250,19 +250,38 @@ namespace Signum.Web.Controllers
             return Navigator.Search(this, findOptions, sfTop, prefix);
         }
 		[AcceptVerbs(HttpVerbs.Post)]
-        public ContentResult AddFilter(string sfQueryUrlName, string columnName, int index, string prefix)
+        public ContentResult AddFilter(string sfQueryUrlName, string tokenName, int index, string prefix)
         {
             object queryName = Navigator.ResolveQueryFromUrlName(sfQueryUrlName);
 
-            FilterOption fo = new FilterOption(columnName, null);
+            FilterOption fo = new FilterOption(tokenName, null);
             if (fo.Token == null)
             {
                 QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-                fo.Token = QueryToken.Parse(qd, fo.ColumnName);
+                fo.Token = QueryToken.Parse(qd, tokenName);
             }
             fo.Operation = QueryUtils.GetFilterOperations(QueryUtils.GetFilterType(fo.Token.Type)).First();
 
             return Content(SearchControlHelper.NewFilter(CreateHtmlHelper(this), queryName, fo, new Context(null, prefix), index));
+        }
+
+        [AcceptVerbs(HttpVerbs.Post)]
+        public ContentResult NewSubTokensCombo(string sfQueryUrlName, string tokenName, string prefix, int index)
+        { 
+            object queryName = Navigator.ResolveQueryFromUrlName(sfQueryUrlName);
+            QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
+            QueryToken[] subtokens = QueryToken.Parse(qd, tokenName).SubTokens();
+            if (subtokens == null)
+                return Content("");
+
+            var items = subtokens.Select(t => new SelectListItem
+            {
+                Text = t.ToString(),
+                Value = t.Key,
+                Selected = false
+            }).ToList();
+            items.Insert(0, new SelectListItem { Text = "-", Selected = true, Value = "" });
+            return Content(SearchControlHelper.TokensCombo(CreateHtmlHelper(this), items, new Context(null, prefix), index + 1));
         }
 
         //[AcceptVerbs(HttpVerbs.Post)]
