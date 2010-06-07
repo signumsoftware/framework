@@ -41,8 +41,11 @@
         var maxPercentageWidth = 0.95;
         popup2.style.maxWidth = (maxPercentageWidth * 100) + "%";
         popup2.style.maxHeight = $(window).height() + "px";
-        if ($(popup2).children(".searchControl").length) {
-            $(popup2).children(".searchControl").first().css({ "maxHeight": $(window).height() - 100, "overflow": "auto" });
+
+        var searchControl = $(popup2).find(".searchControl");   //we have to limit its height
+        if (searchControl.length > 0) {
+            var marginTop = searchControl.position().top;
+            searchControl.css({ "maxHeight": $(window).height() - marginTop, "overflow": "auto" });
         }
         popup2.style.minWidth = ((popupWidth > (maxPercentageWidth * 100)) ? (maxPercentageWidth * 100) : popupWidth) + "px";
 

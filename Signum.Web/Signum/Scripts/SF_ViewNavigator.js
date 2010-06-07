@@ -243,7 +243,7 @@ function ClosePopup(prefix) {
     $('#' + prefix.compose("externalPopupDiv")).remove();
 }
 
-function openChooser(_prefix, onOptionClicked, jsonOptionsListFormat, onCancelled) {
+function openChooser(_prefix, onOptionClicked, jsonOptionsListFormat, onCancelled, ids) {
     log("openChooser");
     //Construct popup
     var tempDivId = _prefix + "Temp";
@@ -255,8 +255,10 @@ function openChooser(_prefix, onOptionClicked, jsonOptionsListFormat, onCancelle
         url = "Signum/GetTypeChooser";
         }
     else {
-        for (var i = 0; i < jsonOptionsListFormat.length; i++)
+        for (var i = 0; i < jsonOptionsListFormat.length; i++) {
             requestData += "&buttons=" + jsonOptionsListFormat[i];  //This will Bind to the List<string> "buttons"
+            if (ids != null) requestData += "&ids=" + ids[i];  //This will Bind to the List<string> "ids"            
+        }
     }
     $.ajax({
         type: "POST",

@@ -17,6 +17,7 @@ using System.Reflection;
 using System.Collections;
 using System.Collections.Specialized;
 using System.Web.Script.Serialization;
+using System.Text;
 #endregion
 
 namespace Signum.Web.Controllers
@@ -307,16 +308,21 @@ namespace Signum.Web.Controllers
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public PartialViewResult GetChooser(List<string> buttons, string prefix)
+        public PartialViewResult GetChooser(List<string> buttons, List<string> ids, string prefix)
         {
             if (buttons == null || buttons.Count == 0)
                 throw new InvalidOperationException(Resources.GetChooserNeedsAListOfOptions);
 
-            string strButtons = buttons
-                .ToString(b => "<input type='button' id='{0}' name='{0}' value='{1}' /><br />\n".Formato(b.Replace(" ", ""), b), "");
+            StringBuilder sb = new StringBuilder();
+            int i = 0;
+            foreach (string button in buttons) {
+                sb.Append("<input type='button' id='{0}' name='{0}' value='{1}' />"
+                    .Formato(ids != null ? ids[i] : button.Replace(" ", ""), button));
+                i++;
+            }
 
             ViewData.Model = new Context(null, prefix);
-            ViewData[ViewDataKeys.CustomHtml] = strButtons;
+            ViewData[ViewDataKeys.CustomHtml] = sb.ToString();
 
             return PartialView(Navigator.Manager.ChooserPopupUrl);
         }
