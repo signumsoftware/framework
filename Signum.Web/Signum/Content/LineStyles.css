@@ -142,6 +142,10 @@ img.ui-datepicker-trigger:hover
     clear:both;
     overflow:auto;
 }
+.fieldList 
+{
+    margin:6px 0;
+}
 
 .EntityLineDetail .field .labelLine, .EntityLineDetail .around .labelLine {
     width:100px;
