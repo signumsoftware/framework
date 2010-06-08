@@ -65,10 +65,10 @@ namespace Signum.Engine.Basics
         {
             Type type = TypeLogic.DnToType[typeDN];
 
-            string[] queryNames = DynamicQueryManager.Current.GetQueryNames(type).Keys.Select(qn => QueryUtils.GetQueryName(qn)).ToArray();
+            string[] queryNames = DynamicQueryManager.Current.GetQueries(type).Keys.Select(qn => QueryUtils.GetQueryName(qn)).ToArray();
 
             var current = Database.RetrieveAll<QueryDN>().Where(a => queryNames.Contains(a.Key)).ToDictionary(a => a.Key);
-            var total = DynamicQueryManager.Current.GetQueryNames(type).Keys.Select(qn => CreateQuery(qn)).ToDictionary(a => a.Key);
+            var total = DynamicQueryManager.Current.GetQueries(type).Keys.Select(qn => CreateQuery(qn)).ToDictionary(a => a.Key);
 
             total.SetRange(current);
             return total.Values.ToList();

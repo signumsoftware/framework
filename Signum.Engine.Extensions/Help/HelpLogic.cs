@@ -328,7 +328,7 @@ namespace Signum.Engine.Help
 
             foreach (Type type in types)
             {
-                foreach (var v in DynamicQueryManager.Current.GetQueryNames(type))
+                foreach (var v in DynamicQueryManager.Current.GetQueries(type))
                     QueryHelp.Create(v.Key).Save();
             }
         }
@@ -411,7 +411,7 @@ namespace Signum.Engine.Help
             //Queries
             {
                 var should = (from type in types
-                              let keys = DynamicQueryManager.Current.GetQueryNames(type).Keys
+                              let keys = DynamicQueryManager.Current.GetQueries(type).Keys
                               from key in keys
                               select key).ToDictionary(q => QueryUtils.GetQueryName(q));
 
