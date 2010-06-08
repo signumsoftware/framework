@@ -98,9 +98,14 @@ namespace Signum.Engine.DynamicQuery
             return queries.Keys.ToList();
         }
 
-        public Dictionary<object, IDynamicQuery> GetQueryNames(Type entityType)
+        public Dictionary<object, IDynamicQuery> GetQueries(Type entityType)
         {
             return queries.Where(kvp => kvp.Value.EntityColumn().CompatibleWith(entityType)).ToDictionary();
+        }
+
+        public Dictionary<object, IDynamicQuery> GetQueries()
+        {
+            return queries.ToDictionary();
         }
 
         public string Errors(object queryName)
