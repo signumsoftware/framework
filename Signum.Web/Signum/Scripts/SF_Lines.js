@@ -32,10 +32,8 @@ EBaseLine.prototype = {
         var validator = new PartialValidator({ controllerUrl: validateUrl, prefix: this.options.prefix, id: id, type: runtimeType });
         var validatorResult = validator.validate();
         if (!validatorResult.isValid) {
-            if (!confirm(lang['popupErrors']))
-                return false;
-            else
-                validator.showErrors(validatorResult.modelState, true);
+            if (!confirm(lang['popupErrors'])) return false;
+            validator.showErrors(validatorResult.modelState, true);
         }
         this.updateLinks(validatorResult.newToStr, validatorResult.newLink);
         return true;

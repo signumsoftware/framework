@@ -1,53 +1,53 @@
-﻿var sfSeparator = "_";
-var sfPrefix = "prefix";
-var sfPrefixToIgnore = "prefixToIgnore";
-var sfTabId = "sfTabId";
-var sfPartialViewName = "sfPartialViewName";
-var sfReactive = "sfReactive";
-var sfFieldErrorClass = "field-validation-error";
-var sfInputErrorClass = "input-validation-error";
-var sfSummaryErrorClass = "validation-summary-errors";
-var sfInlineErrorVal = "inlineVal";
-var sfGlobalErrorsKey = "sfGlobalErrors";
-var sfGlobalValidationSummary = "sfGlobalValidationSummary";
+﻿var sfSeparator = "_",
+    sfPrefix = "prefix",
+    sfPrefixToIgnore = "prefixToIgnore",
+    sfTabId = "sfTabId",
+    sfPartialViewName = "sfPartialViewName",
+    sfReactive = "sfReactive",
+    sfFieldErrorClass = "field-validation-error",
+    sfInputErrorClass = "input-validation-error",
+    sfSummaryErrorClass = "validation-summary-errors",
+    sfInlineErrorVal = "inlineVal",
+    sfGlobalErrorsKey = "sfGlobalErrors",
+    sfGlobalValidationSummary = "sfGlobalValidationSummary",
 
-var sfRuntimeInfo = "sfRuntimeInfo";
-var sfStaticInfo = "sfStaticInfo";
-var sfImplementations = "sfImplementations";
-var sfEntity = "sfEntity";
-var sfToStr = "sfToStr";
-var sfLink = "sfLink";
-var sfIndex = "sfIndex";
-var sfCombo = "sfCombo";
-var sfTicks = "sfTicks";
+    sfRuntimeInfo = "sfRuntimeInfo",
+    sfStaticInfo = "sfStaticInfo",
+    sfImplementations = "sfImplementations",
+    sfEntity = "sfEntity",
+    sfToStr = "sfToStr",
+    sfLink = "sfLink",
+    sfIndex = "sfIndex",
+    sfCombo = "sfCombo",
+    sfTicks = "sfTicks",
 
-var sfItemsContainer = "sfItemsContainer";
-var sfRepeaterItem = "sfRepeaterItem";
+    sfItemsContainer = "sfItemsContainer",
+    sfRepeaterItem = "sfRepeaterItem",
 
-var sfBtnCancel = "sfBtnCancel";
-var sfBtnOk = "sfBtnOk";
+    sfBtnCancel = "sfBtnCancel",
+    sfBtnOk = "sfBtnOk",
 
-var sfQueryUrlName = "sfQueryUrlName";
-var sfTop = "sfTop";
-var sfAllowMultiple = "sfAllowMultiple";
-var sfView = "sfView";
-var sfEntityTypeName = "sfEntityTypeName";
+    sfQueryUrlName = "sfQueryUrlName",
+    sfTop = "sfTop",
+    sfAllowMultiple = "sfAllowMultiple",
+    sfView = "sfView",
+    sfEntityTypeName = "sfEntityTypeName",
 
-var sfIdRelated = "sfIdRelated";
-var sfRuntimeTypeRelated = "sfRuntimeTypeRelated";
+    sfIdRelated = "sfIdRelated",
+    sfRuntimeTypeRelated = "sfRuntimeTypeRelated",
 
-var lang = {
-    "error": "Error",
-    "saving": "Guardando...",
-    "saved": "Guardado",
-    "searching": "Buscando...",
-    "buscar": "Buscar",
-    "executingOperation": "Ejecutando operación...",
-    "operationExecuted": "Operación ejecutada",
-    "noElementsSelected": "Debe seleccionar algún elemento",
-    "popupErrors": "Hay errores en la entidad, ¿desea continuar?",
-    "popupErrorsStop": "Hay errores en la entidad"
-};
+    lang = {
+        "error": "Error",
+        "saving": "Guardando...",
+        "saved": "Guardado",
+        "searching": "Buscando...",
+        "buscar": "Buscar",
+        "executingOperation": "Ejecutando operación...",
+        "operationExecuted": "Operación ejecutada",
+        "noElementsSelected": "Debe seleccionar algún elemento",
+        "popupErrors": "Hay errores en la entidad, ¿desea continuar?",
+        "popupErrorsStop": "Hay errores en la entidad"
+    };
 
 var StaticInfo = function(_prefix) {
     this.prefix = _prefix;
