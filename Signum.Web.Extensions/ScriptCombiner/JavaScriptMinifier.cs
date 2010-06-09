@@ -179,6 +179,8 @@ public class JavaScriptMinifier
        action treats a string as a single character. Wow!
        action recognizes a regular expression if it is preceded by ( or , or =.
     */
+
+    bool multilineString = false;
     void action(int d)
     {
         if (d <= 1)
@@ -192,8 +194,37 @@ public class JavaScriptMinifier
             {
                 for (; ; )
                 {
-                    put(theA);
-                    theA = get();
+                    if (multilineString)
+                    {
+                        theA = get();
+                        if (theA != 10)
+                        {
+                            put('\\');
+                           /* put(theA);
+                            theA = get();*/
+                            /*theA = get();
+                            if (theA == '\n')
+                                theA = get();*/
+                        }
+                        else
+                        {
+                            do
+                            {
+                                theA = get();
+                            } while (theA == 10);
+
+                            theA = get();
+                            if (theA == '\n')
+                                theA = get();
+                        }
+                        multilineString = false;
+                        continue;
+                    }
+                    else
+                    {
+                        put(theA);
+                        theA = get();
+                    }
                     if (theA == theB)
                     {
                         break;
@@ -204,8 +235,7 @@ public class JavaScriptMinifier
                     }
                     if (theA == '\\')
                     {
-                        put(theA);
-                        theA = get();
+                        multilineString = true;
                     }
                 }
             }
@@ -327,6 +357,7 @@ public class JavaScriptMinifier
     void put(int c)
     {
         sw.Write((char)c);
+
     }
     /* isAlphanum -- return true if the character is a letter, digit, underscore,
             dollar sign, or non-ASCII character.
