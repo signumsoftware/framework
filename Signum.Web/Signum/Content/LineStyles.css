@@ -88,6 +88,11 @@ input[type=text],input[type=password],input[type=button], textarea,select {/* IE
 	float: left;
 }
 
+.field .entityList
+{
+	float:left;
+}
+
 select {
     padding:4px 4px 3px;
 }

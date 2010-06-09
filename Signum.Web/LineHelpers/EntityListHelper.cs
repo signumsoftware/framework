@@ -94,7 +94,7 @@ namespace Signum.Web
             if (typeof(T).IsEmbeddedEntity() || EntityBaseHelper.RequiresLoadAll(helper, entityList))
                 sb.AppendLine(EntityBaseHelper.RenderTypeContext(helper, itemTC, RenderMode.PopupInDiv, entityList.PartialViewName, entityList.ReloadOnChange));
             else if (itemTC.Value != null)
-                sb.Append(helper.Div(itemTC.Compose(EntityBaseKeys.Entity), "", "", new Dictionary<string, object> { { "style", "display:none" } }));
+                sb.Append(helper.Div(itemTC.Compose(EntityBaseKeys.Entity), "", "", new Dictionary<string, object> { { "style", "display:none" }, {"class", "entityList"}}));
             
             //Note this is added to the sbOptions, not to the result sb
             sbOptions.AppendLine("<option id='{0}' name='{0}' value='' class='valueLine entityListOption'>{1}</option>".Formato(itemTC.Compose(EntityBaseKeys.ToStr),
