@@ -30,12 +30,12 @@ EBaseLine.prototype = {
         var info = this.runtimeInfo();
         var id = (info.find().length > 0) ? info.id() : '';
         var validator = new PartialValidator({ controllerUrl: validateUrl, prefix: this.options.prefix, id: id, type: runtimeType });
-        var validatorResult = validator.validate();
-        if (!validatorResult.isValid) {
+        var result = validator.validate();
+        if (!result.isValid) {
             if (!confirm(lang['popupErrors'])) return false;
-            validator.showErrors(validatorResult.modelState, true);
+            validator.showErrors(result.modelState, true);
         }
-        this.updateLinks(validatorResult.newToStr, validatorResult.newLink);
+        this.updateLinks(result.newToStr, result.newLink);
         return true;
     },
 
@@ -424,7 +424,7 @@ var EList = function(_elistOptions) {
         var staticInfo = this.staticInfo();
         if (staticInfo.isEmbedded() == "e") {
             var pathInfo = FullPathNodesSelector(itemPrefix);
-            for (var i = 0; i < pathInfo.length; i++) {
+            for (var i = 0, l = pathInfo.length; i < l; i++) {
                 var node = pathInfo[i];
                 extraParams[node.id] = node.value;
             }

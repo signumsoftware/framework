@@ -83,6 +83,11 @@ input[type=text],input[type=password],input[type=button], textarea,select {/* IE
     float:none;
 }
 
+.field .fieldList, .field .fieldList table	/* ej.titulares cuenta bancaria */
+{
+	float: left;
+}
+
 select {
     padding:4px 4px 3px;
 }

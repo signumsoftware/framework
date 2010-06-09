@@ -266,7 +266,7 @@ FindNavigator.prototype = {
             $fieldsList = $(".fields-list");
             
         for (i = 0; !stop; i++) {
-            var currSubtoken = $fieldsList.find(this.pf("ddlTokens_" + i)));
+            var currSubtoken = $fieldsList.find(this.pf("ddlTokens_" + i));
             if (currSubtoken.length > 0)
                 tokenName = tokenName.compose(currSubtoken.val(), ".");
             else
