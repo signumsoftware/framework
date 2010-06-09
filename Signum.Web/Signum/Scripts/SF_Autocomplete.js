@@ -35,7 +35,7 @@ Autocompleter = function(controlId, url, _options) {
     self.currentInput = undefined;
     self.resultClass = "ddlAuto";
     self.resultSelectedClass = "ddlAutoOn";
-    self.$resultDiv = $("<div class='" + self.resultClass + "'></div>");
+    self.$resultDiv = $("<div/>").addClass(self.resultClass);
     self.create();
 };
 

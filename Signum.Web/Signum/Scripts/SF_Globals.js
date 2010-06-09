@@ -49,45 +49,45 @@
         "popupErrorsStop": "Hay errores en la entidad"
     };
 
-var StaticInfo = function(_prefix) {
-    this.prefix = _prefix;
-    this._staticType = 0;
-    this._isEmbedded = 1;
-    this._isReadOnly = 2;
+    var StaticInfo = function(_prefix) {
+        this.prefix = _prefix;
+        this._staticType = 0;
+        this._isEmbedded = 1;
+        this._isReadOnly = 2;
 
-    this.find = function() {
-        return $('#' + this.prefix.compose(sfStaticInfo));
-    };
-    this.value = function() {
-        return this.find().val();
-    };
-    this.toArray = function() {
-        return this.value().split(";")
-    };
-    this.toValue = function(array) {
-        return array[0] + ";" + array[1] + ";" + array[2];
-    };
-    this.getValue = function(key) {
-        var array = this.toArray();
-        return array[key];
-    };
-    this.staticType = function() {
-        return this.getValue(this._staticType);
-    };
-    this.isEmbedded = function() {
-        return this.getValue(this._isEmbedded);
-    };
-    this.isReadOnly = function() {
-        return this.getValue(this._isReadOnly);
-    };
-    this.createValue = function(staticType, isEmbedded, isReadOnly) {
-        var array = new Array();
-        array[this._staticType] = staticType;
-        array[this._isEmbedded] = isEmbedded;
-        array[this._isReadOnly] = isReadOnly;
-        return this.toValue(array);
-    };
-}
+        this.find = function() {
+            return $('#' + this.prefix.compose(sfStaticInfo));
+        };
+        this.value = function() {
+            return this.find().val();
+        };
+        this.toArray = function() {
+            return this.value().split(";")
+        };
+        this.toValue = function(array) {
+            return array.join(";");     //return array[0] + ";" + array[1] + ";" + array[2];
+        };
+        this.getValue = function(key) {
+            var array = this.toArray();
+            return array[key];
+        };
+        this.staticType = function() {
+            return this.getValue(this._staticType);
+        };
+        this.isEmbedded = function() {
+            return this.getValue(this._isEmbedded);
+        };
+        this.isReadOnly = function() {
+            return this.getValue(this._isReadOnly);
+        };
+        this.createValue = function(staticType, isEmbedded, isReadOnly) {
+            var array = new Array();
+            array[this._staticType] = staticType;
+            array[this._isEmbedded] = isEmbedded;
+            array[this._isReadOnly] = isReadOnly;
+            return this.toValue(array);
+        };
+    }
 function StaticInfoFor(prefix) {
     return new StaticInfo(prefix);
 }
@@ -109,7 +109,7 @@ var RuntimeInfo = function(_prefix) {
         return this.value().split(";")
     };
     this.toValue = function(array) {
-        return array[0] + ";" + array[1] + ";" + array[2] + ";" + array[3];
+        return array.join(";"); //return array[0] + ";" + array[1] + ";" + array[2] + ";" + array[3];
     };
     this.getSet = function(key, val) {
         var array = this.toArray();
@@ -161,27 +161,30 @@ function RuntimeInfoFor(prefix) {
 
 $(function() {
     $(document).ajaxError(function(event, XMLHttpRequest, ajaxOptions, thrownError) {
-    ShowError(XMLHttpRequest, ajaxOptions, thrownError);
+        ShowError(XMLHttpRequest, ajaxOptions, thrownError);
+    });
 });
-});
+
+/* show messages on top (info, error...) */
 
 function NotifyError(s, t) {
     NotifyInfo(s, t, 'error');
 }
+
 function NotifyInfo(s, t, cssClass) {
-    if (cssClass == undefined) cssClass='info';
-    $("#loading-area-text").html(s)
-        .children().first().addClass(cssClass);
-    //$("#loading-area-text").css({left: parseInt(document.documentElement.clientWidth - $("#loading-area").outerWidth() / 2) + "px"});
-    $(".message-area-text-container").addClass(cssClass);
-    $("#loading-area").css({ marginLeft: -parseInt($("#loading-area").outerWidth() / 2) + "px" })
-        .css({top:"0px"})
-        .show()
-       // .animate({"top": "0px"}, "slow");
+    var $messageArea = $("#message-area"), cssClass = (cssClass != undefined ? cssClass : "info");
+    if ($messageArea.length == 0) {
+        //create the message container
+        $messageArea = $("<div id=\"message-area\"><div class=\"message-area-text-container\"><span></span></div></div>").hide().prependTo($("body"));
+    }
+
+    $messageArea.find("span").html(s);  //write message
+    $messageArea.children().first().addClass(cssClass != undefined ? cssClass : "info");    //set class
+    $messageArea.css({ marginLeft: -parseInt($messageArea.outerWidth() / 2), top: 0 }).show();
+
     if (t != undefined) {
         var timer = setTimeout(function() {
-            //$("#loading-area").fadeOut("slow");
-            $("#loading-area").animate({"top": "-30px"}, "slow")
+            $messageArea.animate({ top: -30 }, "slow")
                 .hide()
                 .children().first().removeClass(cssClass);
             clearTimeout(timer);
@@ -221,20 +224,21 @@ function isTrue(value) {
 function GetPathPrefixes(prefix) {
     var path = new Array();
     var pathSplit = prefix.split("_");
-    var length = pathSplit.length;
-    for (var i = 0; i < length; i++)
+
+    for (var i = 0, l = pathSplit.length; i < l; i++)
         path[i] = concat(pathSplit, i, "_");
-    for (var i = 0; i < length; i++)
-        path[length + i] = concat(pathSplit, i, "");
+
+    for (var i = 0, l = pathSplit.length; i < l; i++)
+        path[l + i] = concat(pathSplit, i, "");
+
     var pathNoReps = new Array();
-    var current = 0;
+
     var hasEmpty = false;
-    for (var i = 0; i < path.length; i++) { 
+    for (var i = 0, l = path.length; i < l; i++) { 
         if ($.inArray(path[i], pathNoReps) == -1) {
-            pathNoReps[current] = path[i];
+            pathNoReps[i] = path[i];
             if (path[i] == "")
                 hasEmpty = true;
-            current++;
         }
     }
     if (!hasEmpty)
@@ -256,11 +260,11 @@ function concat(array, toIndex, firstChar) {
 
 function Submit(urlController, requestExtraJsonData) {
     if (!empty(requestExtraJsonData)) {
+        var $form = $("form");
         for (var key in requestExtraJsonData) {
-            if (jQuery.isFunction(requestExtraJsonData[key]))
-                $("form").append(hiddenInput(key, requestExtraJsonData[key]()));
-            else
-                $("form").append(hiddenInput(key, requestExtraJsonData[key]));
+            var str = $.isFunction(requestExtraJsonData[key]) ? requestExtraJsonData[key]() : requestExtraJsonData[key];
+            
+            $form.append(hiddenInput(key, str));
         }
     }
 
@@ -277,19 +281,16 @@ function SubmitOnly(urlController, requestExtraJsonData) {
     
     if (!empty(requestExtraJsonData)) {
         for (var key in requestExtraJsonData) {
-            if (jQuery.isFunction(requestExtraJsonData[key]))
-                $form.append(hiddenInput(key, requestExtraJsonData[key]()));
-            else
-                $form.append(hiddenInput(key, requestExtraJsonData[key]));
+            var str = $.isFunction(requestExtraJsonData[key]) ? requestExtraJsonData[key]() : requestExtraJsonData[key];
+            $form.append(hiddenInput(key, str));
         }
     }
 
     var currentForm = $("form");
     currentForm.after($form);
-    
-    $form[0].submit();
-    
-    $form.remove();
+
+    $form.submit()
+        .remove();
     
     return false;
 }
@@ -322,9 +323,7 @@ function ShowError(XMLHttpRequest, textStatus, errorThrown) {
     
     var message = error.length > 50 ? error.substring(0,49) + "..." : error;
     NotifyError(lang['error'] + ": " + message, 2000);
-    /* error = replaceAll(error,
-    {'&#237;' : 'í',
-    '&#243;' : 'ó' });*/
+
     alert("Error: " + error);
 }
 
@@ -333,8 +332,7 @@ function log(s) {
     if (debug) {
         if (typeof console != "undefined" && typeof console.debug != "undefined")
             console.log(s);
-        //else
-        //    alert(s);
+
     }
 }
 

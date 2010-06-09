@@ -261,10 +261,12 @@ FindNavigator.prototype = {
 
     constructTokenName: function() {
         log("FindNavigator constructTokenName");
-        var tokenName = "";
-        var stop = false;
+        var tokenName = "",
+            stop = false,
+            $fieldsList = $(".fields-list");
+            
         for (i = 0; !stop; i++) {
-            var currSubtoken = $(this.pf("ddlTokens_" + i));
+            var currSubtoken = $fieldsList.find(this.pf("ddlTokens_" + i)));
             if (currSubtoken.length > 0)
                 tokenName = tokenName.compose(currSubtoken.val(), ".");
             else

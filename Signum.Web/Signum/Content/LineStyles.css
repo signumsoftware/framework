@@ -322,7 +322,7 @@ fieldset
 .closebox:hover{cursor:pointer;}
 
 /* top message */
-.message-area {
+#message-area {
     font-size:12px;
     left:50%;
     overflow:hidden;
