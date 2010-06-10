@@ -22,39 +22,11 @@
    //"</script>"
 %>
 <%  ResultTable queryResult = (ResultTable)ViewData[ViewDataKeys.Results];
-    var entityColumn = queryResult.Columns.OfType<StaticColumn>().Single(c => c.IsEntity);
+    var entityColumn = (queryResult == null) ? null : queryResult.Columns.OfType<StaticColumn>().Single(c => c.IsEntity);
     Dictionary<int, Action<HtmlHelper, object>> formatters = (Dictionary<int, Action<HtmlHelper, object>>)ViewData[ViewDataKeys.Formatters];
-%>
-<table id="<%=context.Compose("tblResults")%>" class="tblResults">
-    <thead>
-        <tr>
-            <%if (findOptions.AllowMultiple.HasValue)
-              {
-            %>
-            <th>
-            </th>
-            <%}
-              if (viewable)
-              {%>
-            <th>
-            </th>
-            <%}
 
-              foreach (Column c in queryResult.VisibleColumns)
-              {
-            %>
-            <th>
-                <%= c.DisplayName %>
-            </th>
-            <%
-                }      
-            %>
-        </tr>
-    </thead>
-    <tbody>
-        <%
-            foreach (var row in queryResult.Rows)
-            {
+                foreach (var row in queryResult.Rows)
+                {
         %>
         <tr class="<%=(row.Index % 2 == 1) ? "even" : ""%>" id="<%=context.Compose("trResults", row.Index.ToString())%>"
             name="<%=context.Compose("trResults", row.Index.ToString())%>">
@@ -65,18 +37,18 @@
             %>
             <td class="<%=context.Compose("tdRowSelection")%>">
                 <%
-                    if (findOptions.AllowMultiple.Value)
-                    { 
+            if (findOptions.AllowMultiple.Value)
+            { 
                 %>
                 <input type="checkbox" name="<%=context.Compose("rowSelection", row.Index.ToString())%>"
                     id="<%=context.Compose("rowSelection", row.Index.ToString())%>" value="<%= entityField.Id.ToString() + "__" + entityField.RuntimeType.Name + "__" + entityField.ToStr %>" />
                 <%}
-                        else
-                        { %>
+            else
+            { %>
                 <input type="radio" name="<%=context.Compose("rowSelection")%>" id="<%=context.Compose("radio", row.Index.ToString())%>"
                     value="<%= entityField.Id.ToString() + "__" + entityField.RuntimeType.Name + "__" + entityField.ToStr %>" />
                 <%
-                    }
+            }
                 %>
             </td>
             <%} %>
@@ -84,24 +56,20 @@
                { %>
             <td id="<%=context.Compose("tdResults")%>">
                 <a href="<%= Navigator.ViewRoute(entityField.RuntimeType, entityField.Id) %>" title="<%=Html.Encode(Resources.View) %>">
-                    <%=Html.Encode(Resources.View) %></a>
+                    <%=Html.Encode(Resources.View)%></a>
             </td>
             <% } %>
             <%
-                foreach (var col in queryResult.VisibleColumns)
-                {      
+            foreach (var col in queryResult.VisibleColumns)
+            {      
             %>
             <td id="<%=context.Compose("row"+row.Index+"td", col.Index.ToString())%>">
                 <%formatters[col.Index](Html, row[col]);%>
             </td>
             <%
-                }
+            }
             %>
         </tr>
         <%
             }
         %>
-    </tbody>
-    <tfoot>
-    </tfoot>
-</table>

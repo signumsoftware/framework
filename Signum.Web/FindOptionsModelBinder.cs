@@ -12,6 +12,7 @@ using Signum.Entities;
 using System.Web;
 using Signum.Entities.Reflection;
 using Signum.Utilities.Reflection;
+using System.Text.RegularExpressions;
 
 namespace Signum.Web
 {
@@ -36,6 +37,8 @@ namespace Signum.Web
             fo.QueryName = Navigator.ResolveQueryFromUrlName(queryUrlName);
 
             fo.FilterOptions = ExtractFilterOptions(controllerContext.HttpContext, fo.QueryName);
+
+            fo.OrderOptions = ExtractOrderOptions(controllerContext.HttpContext, fo.QueryName);
 
             if (parameters.AllKeys.Any(k => k == "sfAllowMultiple"))
             {
@@ -65,7 +68,6 @@ namespace Signum.Web
 
             return fo;
         }
-
 
         public static List<FilterOption> ExtractFilterOptions(HttpContextBase httpContext, object queryName)
         {
@@ -104,6 +106,34 @@ namespace Signum.Web
                     Value = valueObject,
                 });
             }
+            return result;
+        }
+
+        public static List<OrderOption> ExtractOrderOptions(HttpContextBase httpContext, object queryName)
+        {
+            List<OrderOption> result = new List<OrderOption>();
+
+            QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(queryName);
+
+            NameValueCollection parameters = httpContext.Request.Params;
+            string field = parameters["sfOrderBy"];
+            
+            if (!field.HasText())
+                return result;
+
+            string[] orderArray = field.Split(new []{","}, StringSplitOptions.RemoveEmptyEntries);
+            
+            foreach (string currentOrderString in orderArray)
+            {
+                OrderType orderType = currentOrderString.StartsWith("-") ? OrderType.Descending : OrderType.Ascending;
+                string token = orderType == OrderType.Ascending ? currentOrderString : currentOrderString.Substring(1, currentOrderString.Length-1);
+                result.Add(new OrderOption
+                {
+                    Token = QueryToken.Parse(queryDescription, token),
+                    Type = orderType
+                });
+            }
+
             return result;
         }
 

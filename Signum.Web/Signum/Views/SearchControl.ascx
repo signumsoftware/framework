@@ -36,6 +36,9 @@
     <label for="<%=context.Compose(ViewDataKeys.Top)%>"><%=Html.Encode(Resources.NumberOfRows) %></label> 
     <%= Html.TextBox(context.Compose(ViewDataKeys.Top), Navigator.Manager.QuerySettings.GetOrThrow(findOptions.QueryName, Resources.MissingQuerySettingsForQueryName0).Top.TryToString(), new Dictionary<string, object> { { "size", "5" }, { "onkeydown", "return validator.number(event)" } })%>
 
+    <%= Html.Hidden(context.Compose("OrderBy"), findOptions.OrderOptions == null ? "[]" : 
+        ("[" + findOptions.OrderOptions.ToString(oo => "[\"" + oo.Token.FullKey() + "\"," + (oo.Type == OrderType.Ascending ? "0" : "1") + "]", ",") + "]")) %>
+
     <input class="btnSearch" id="<%=context.Compose("btnSearch")%>" type="button" onclick="<%="Search({{prefix:'{0}'}});".Formato(context.ControlID) %>" value="<%=Html.Encode(Resources.Search) %>" /> 
     <% if (findOptions.Create && Navigator.IsCreable(entitiesType, true) && viewable)
        { %>
@@ -44,5 +47,40 @@
     <%= ButtonBarQueryHelper.GetButtonBarElementsForQuery(this.ViewContext, findOptions.QueryName, entitiesType, context.ControlID).ToString(Html)%> 
 </div>
 <div class="clearall"></div>
-<div id="<%=context.Compose("divResults")%>" class="divResults"></div>
+<div id="<%=context.Compose("divResults")%>" class="divResults">
+
+<table id="<%=context.Compose("tblResults")%>" class="tblResults">
+    <thead>
+        <tr>
+            <%if (findOptions.AllowMultiple.HasValue)
+              {
+            %>
+            <th>
+            </th>
+            <%}
+              if (viewable)
+              {%>
+            <th>
+            </th>
+            <%}
+
+              foreach (StaticColumn sc in queryDescription.StaticColumns.Where(sc => sc.Visible))
+              {
+            %>
+            <th id="<%= context.Compose(sc.Name) %>">
+                <input type="hidden" value="<%= sc.Name %>" />
+                <%= sc.DisplayName %>
+            </th>
+            <%
+                }      
+            %>
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
+    <tfoot>
+    </tfoot>
+</table>
+
+</div>
 </div>

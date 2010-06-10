@@ -123,10 +123,25 @@ namespace Signum.Web
 
         public static string TokensCombo(this HtmlHelper helper, IEnumerable<SelectListItem> items, Context context, int index)
         {
-            return helper.DropDownList(context.Compose("ddlTokens_" + index),
-                items,
-                new { onchange = "javascript:NewSubTokensCombo('" + context.ControlID + "'," + index + ");" }
-                ).ToString();
+            string result = "";
+            if (index > 0)
+            {
+                result = helper.Span(context.Compose("lblddlTokens_" + index), "[...]", "",
+                new Dictionary<string, object>
+                { 
+                    { "style", "cursor:pointer;margin-left:5px" },
+                    { "onclick", "$('#{0}').remove();$('#{1}').show().focus().click();".Formato(context.Compose("lblddlTokens_" + index), context.Compose("ddlTokens_" + index))}
+                });
+            }
+
+            result += helper.DropDownList(context.Compose("ddlTokens_" + index), items,
+                new
+                {
+                    style = (index > 0) ? "display:none" : "",
+                    onchange = "javascript:NewSubTokensCombo('" + context.ControlID + "'," + index + ");"
+                }).ToString();
+
+            return result;
         }
 
         //public static string QuickFilter(Controller controller, string queryUrlName, int visibleColumnIndex, int filterRowIndex, object value, string prefix, string suffix)

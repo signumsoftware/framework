@@ -214,6 +214,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Signum\Content\LineStyles.css" />
+    <Content Include="Signum\Images\asc.gif" />
+    <Content Include="Signum\Images\desc.gif" />
     <Content Include="Signum\Images\fancy_closebox.png" />
     <Content Include="Signum\Images\gray-grad.png" />
     <Content Include="Signum\Images\lineButtons.gif" />

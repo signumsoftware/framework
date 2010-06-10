@@ -484,6 +484,7 @@ h2 .title {
 }
 
 /* search table */
+
 .fields-search {
     /*background-color:#eee;
     */width:700px;
@@ -596,14 +597,25 @@ h2 .title {
     word-wrap:break-word;    
 }
 
-.tblResults th {
+.tblResults th 
+{
+	background: #DFDFDF;
     border-right:1px solid #d0d0d0;
     text-shadow:0 1px 0 rgba(255,255,255,0.8);
     line-height:1.3em;
     text-align:left;
     overflow:hidden;
-    background:#dfdfdf url(../images/gray-grad.png) repeat-x scroll left top;
     color:#333;
+}
+
+th.headerSortUp {
+	background: url(../images/asc.gif) no-repeat scroll left 11px #DFDFDF;
+	text-indent:10px;
+}
+
+th.headerSortDown {
+	background: url(../images/desc.gif) no-repeat scroll left 11px #DFDFDF;
+	text-indent:10px;
 }
 
 .tblResults tr:last-child td {

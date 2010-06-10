@@ -1,4 +1,16 @@
-﻿var FindNavigator = function(_findOptions) {
+﻿$(function() {
+    $(".searchControl th")
+        .live('click', function(e) {
+            Sort(e);
+            return false;
+        })
+        .live('mousedown', function(e) {
+            this.onselectstart = function() { return false };
+            return false;
+        });
+});
+
+var FindNavigator = function(_findOptions) {
     this.findOptions = $.extend({
         prefix: "",
         queryUrlName: null,
@@ -9,6 +21,7 @@
         top: null,
         filters: null,
         filterMode: null,
+        orders: null, //A Json array like ["columnName1","-columnName2"] => will order by columnname1 asc, then by columnname2 desc
         navigatorControllerUrl: "Signum/PartialFind",
         searchControllerUrl: "Signum/Search",
         onOk: null,
@@ -94,7 +107,7 @@ FindNavigator.prototype = {
             async: this.findOptions.async,
             dataType: "html",
             success: function(resultsHtml) {
-                $(self.pf("divResults")).html(resultsHtml);
+                $(self.pf("divResults tbody")).html(resultsHtml);
             }
         });
         btnSearch.val(lang['buscar']).toggleClass('loading');
@@ -134,6 +147,8 @@ FindNavigator.prototype = {
             }
         }
 
+        requestData["sfOrderBy"] = empty(this.findOptions.orders) ? this.serializeOrders() : this.findOptions.orders;
+
         requestData[sfPrefix] = this.findOptions.prefix;
 
         return requestData;
@@ -166,6 +181,60 @@ FindNavigator.prototype = {
         filter["sel" + index] = selector.val();
         filter["val" + index] = value;
         return filter;
+    },
+
+    serializeOrders: function() {
+        var currOrder = $(this.pf("OrderBy")).val();
+        if (empty(currOrder))
+            return "";
+        return currOrder.replace(/"/g, "").replace("[", "").replace("]", "");
+    },
+
+    getOrdersAsJson: function() {
+        var currOrder = $(this.pf("OrderBy"));
+        return jQuery.parseJSON(currOrder.val());
+    },
+
+    setNewSortOrder: function(columnName, multiCol) {
+        log("FindNavigator sort");
+        var currOrderArray = this.getOrdersAsJson();
+
+        var found = false;
+        var currIndex;
+        var oldOrder = "";
+        for (var currIndex = 0; currIndex < currOrderArray.length && !found; currIndex++) {
+            found = currOrderArray[currIndex] == columnName;
+            if (found) {
+                oldOrder = "";
+                break;
+            }
+            found = currOrderArray[currIndex] == "-" + columnName;
+            if (found) {
+                oldOrder = "-";
+                break;
+            }
+        }
+        var newOrder = found ? (oldOrder == "" ? "-" : "") : "";
+        var currOrder = $(this.pf("OrderBy"));
+        if (!multiCol) {
+            $(this.pf("divSearchControl")).find(".divResults th").removeClass("headerSortUp").removeClass("headerSortDown");
+            currOrder.val("[\"" + newOrder + columnName + "\"]");
+        }
+        else {
+            if (found)
+                currOrderArray[currIndex] = newOrder + columnName;
+            else
+                currOrderArray[currOrderArray.length] = newOrder + columnName;
+            var currOrderStr = "";
+            for (var i = 0; i < currOrderArray.length; i++)
+                currOrderStr = currOrderStr.compose("\"" + currOrderArray[i] + "\"", ",");
+            currOrder.val("[" + currOrderStr + "]");
+        }
+
+        if (newOrder == "-")
+            $(this.pf(columnName)).removeClass("headerSortDown").addClass("headerSortUp");
+        else
+            $(this.pf(columnName)).removeClass("headerSortUp").addClass("headerSortDown");
     },
 
     onSearchOk: function() {
@@ -233,7 +302,10 @@ FindNavigator.prototype = {
         //Clear child subtoken combos
         var self = this;
         $("select")
-        .filter(function() { return $(this).attr("id").indexOf(self.findOptions.prefix.compose("ddlTokens_")) == 0; })
+        .filter(function() {
+        return ($(this).attr("id").indexOf(self.findOptions.prefix.compose("ddlTokens_")) == 0)
+            || ($(this).attr("id").indexOf(self.findOptions.prefix.compose("lblddlTokens_")) == 0)
+        })
         .filter(function() {
             var currentId = $(this).attr("id");
             var lastSeparatorIndex = currentId.lastIndexOf("_");
@@ -420,6 +492,26 @@ function SearchCreate(viewOptions){
         var viewOptions = findNavigator.viewOptionsForSearchPopupCreate(viewOptions);
         new ViewNavigator(viewOptions).createSave();
     }
+}
+
+function Sort(evt) {
+    var $target = $(evt.target);
+    var columnName = $target.find("input:hidden").val();
+    if (empty($target[0].id))
+        return;
+       
+    var searchControlDiv = $(evt.target).parents("div[id$=divSearchControl]");
+    
+    var prefix = searchControlDiv[0].id;
+    prefix = prefix.substring(0, prefix.indexOf("divSearchControl"));
+    if (prefix.lastIndexOf("_") == prefix.length-1)
+        prefix = prefix.substring(0, prefix.length-1);
+    var findNavigator = new FindNavigator({ prefix: prefix });
+    
+    var multiCol = evt.shiftKey;
+
+    findNavigator.setNewSortOrder(columnName, multiCol);
+    findNavigator.search();    
 }
 
 function toggleVisibility(elementId) {
