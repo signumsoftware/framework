@@ -158,7 +158,7 @@ OperationManager.prototype = {
         log("OperationManager defaultSubmit");
         
         if (isTrue(this.options.isLite))
-            operationSubmit();
+            this.operationSubmit();
         else {
             var onSuccess = function() { this.operationSubmit(); };
             var self = this;

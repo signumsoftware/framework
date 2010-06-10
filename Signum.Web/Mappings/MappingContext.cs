@@ -80,10 +80,16 @@ namespace Signum.Web
         public abstract SortedList<string, string> GlobalInputs { get; }
         public abstract Dictionary<string, List<string>> GlobalErrors { get; }
 
+        public bool HasInput
+        {
+            get { return Root.GlobalInputs.ContainsKey(ControlID); }
+        }
+
         public string Input
         {
-            get { return Root.GlobalInputs.TryGetC(ControlID); }
+            get { return Root.GlobalInputs.GetOrThrow(ControlID, "'{0}' is not in the form"); }
         }
+
         public abstract IDictionary<string, string> Inputs { get; }
 
         public List<string> Error
@@ -200,7 +206,7 @@ namespace Signum.Web
 
         public bool Empty()
         {
-            return Input == null && Inputs.Count == 0;
+            return !HasInput && Inputs.Count == 0;
         }
 
         public override MappingContext Parent
