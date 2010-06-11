@@ -308,7 +308,7 @@ namespace Signum.Web.Controllers
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public PartialViewResult GetChooser(List<string> buttons, List<string> ids, string prefix)
+        public PartialViewResult GetChooser(List<string> buttons, List<string> ids, string prefix, string title)
         {
             if (buttons == null || buttons.Count == 0)
                 throw new InvalidOperationException(Resources.GetChooserNeedsAListOfOptions);
@@ -323,7 +323,7 @@ namespace Signum.Web.Controllers
 
             ViewData.Model = new Context(null, prefix);
             ViewData[ViewDataKeys.CustomHtml] = sb.ToString();
-
+            if (!string.IsNullOrEmpty(title)) ViewData[ViewDataKeys.PageTitle] = title;
             return PartialView(Navigator.Manager.ChooserPopupUrl);
         }
 

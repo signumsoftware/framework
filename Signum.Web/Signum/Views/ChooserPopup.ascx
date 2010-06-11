@@ -13,9 +13,9 @@
         <div class="closebox" id="<%=context.Compose(ViewDataKeys.BtnCancel)%>"></div>
     <%} %>
     <div id="<%=context.Compose("divPopupDragHandle")%>" class="dragHandle" onmousedown="comienzoMovimiento(event, '<%=context.Compose("panelPopup")%>');">
-        &nbsp;
+        <% string pageTitle = (string)ViewData[ViewDataKeys.PageTitle];
+           if (pageTitle != null) { %> <span class="popupEntityName"><%= pageTitle%></span> <%}%>           
     </div>
-    
     <%= ViewData[ViewDataKeys.CustomHtml].ToString() %>
 </div>
 </div>

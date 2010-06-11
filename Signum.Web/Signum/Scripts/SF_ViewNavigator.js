@@ -261,7 +261,11 @@ function ClosePopup(prefix) {
     $('#' + prefix.compose("externalPopupDiv")).remove();
 }
 
-function openChooser(_prefix, onOptionClicked, jsonOptionsListFormat, onCancelled, ids) {
+/* chooserOptions */
+/* ids: List of ids */
+/* title: Window title */
+
+function openChooser(_prefix, onOptionClicked, jsonOptionsListFormat, onCancelled, chooserOptions) {
     log("openChooser");
     //Construct popup
     var tempDivId = _prefix + "Temp";
@@ -275,9 +279,11 @@ function openChooser(_prefix, onOptionClicked, jsonOptionsListFormat, onCancelle
     else {
         for (var i = 0; i < jsonOptionsListFormat.length; i++) {
             requestData += "&buttons=" + jsonOptionsListFormat[i];  //This will Bind to the List<string> "buttons"
-            if (ids != null) requestData += "&ids=" + ids[i];  //This will Bind to the List<string> "ids"            
+            if (chooserOptions && chooserOptions.ids != null) requestData += "&ids=" + chooserOptions.ids[i];  //This will Bind to the List<string> "ids"            
         }
     }
+    if (chooserOptions && chooserOptions.title) requestData += "&title=" + chooserOptions.title;
+    
     $.ajax({
         type: "POST",
         url: url,
