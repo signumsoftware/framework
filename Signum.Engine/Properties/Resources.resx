@@ -625,4 +625,13 @@ WRITETEXT</value>
   <data name="Warning0NoResults" xml:space="preserve">
     <value>Warning {0}: No results</value>
   </data>
+  <data name="EntityMustBeALite" xml:space="preserve">
+    <value>Entity must be a Lite</value>
+  </data>
+  <data name="PropertyRouteCanNotBeOfTypeRoot" xml:space="preserve">
+    <value>PropertyRoute can not be of type Root</value>
+  </data>
+  <data name="TheTypeOfColumn0IsASubtypeOfIIdentifiableUseALiteInstead" xml:space="preserve">
+    <value>The type of column {0} is a subtype of IIdentifiable, use a Lite instead!!</value>
+  </data>
 </root>

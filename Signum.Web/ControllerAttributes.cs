@@ -153,10 +153,10 @@ namespace Signum.Web
 
         public override void OnException(ExceptionContext filterContext)
         {
-            Exception exception = filterContext.Exception;
+            Exception exception = filterContext.Exception.FollowC(a => a.InnerException).Last();
             string controllerName = (string)filterContext.RouteData.Values["controller"];
             string actionName = (string)filterContext.RouteData.Values["action"];
-            HandleErrorInfo model = new HandleErrorInfo(filterContext.Exception, controllerName, actionName);
+            HandleErrorInfo model = new HandleErrorInfo(exception, controllerName, actionName);
 
             if (LogControllerException != null) LogControllerException(model);
 
@@ -207,7 +207,7 @@ namespace Signum.Web
             if (Navigator.Manager == null || !Navigator.Manager.Started)
                 return;
 
-            Exception ex = context.Server.GetLastError();
+            Exception ex = context.Server.GetLastError().FollowC(a => a.InnerException).Last();
             context.Server.ClearError();
 
             context.Response.StatusCode = GetHttpError(ex);

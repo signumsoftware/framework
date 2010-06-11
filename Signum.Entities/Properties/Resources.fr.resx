@@ -223,9 +223,6 @@
   <data name="EntitiesDoNotMatch" xml:space="preserve">
     <value>L'entité ne correspond pas avec le Lite</value>
   </data>
-  <data name="EntityMustBeALite" xml:space="preserve">
-    <value>L'entité doit être un Lite</value>
-  </data>
   <data name="FieldForPropertyNotFound" xml:space="preserve">
     <value>Champ introuvable pour la propriété {0}</value>
   </data>
@@ -358,9 +355,6 @@
   <data name="PropertyRouteFindImplementationsNotSet" xml:space="preserve">
     <value>PropertyRoute.FindImplementations not set</value>
   </data>
-  <data name="PropertyRouteCanNotBeOfTypeRoot" xml:space="preserve">
-    <value>PropertyRoute can not be of type Root</value>
-  </data>
   <data name="PropertyShouldBeAnExpressionAccessingAProperty" xml:space="preserve">
     <value>property should be an expression accessing a property</value>
   </data>
@@ -414,9 +408,6 @@
   </data>
   <data name="TheStateValidator0ForState1Has2ValuesInsteadOf3" xml:space="preserve">
     <value>Le validateur d'état {0} pour l'état {1} a {2} valeur au lieu def {3}</value>
-  </data>
-  <data name="TheTypeOfColumn0IsASubtypeOfIIdentifiableUseALiteInstead" xml:space="preserve">
-    <value>Le type de colonne {0} est un sous-type d'Identifiable, utiliser un Lite sa place</value>
   </data>
   <data name="Token0NotCompatibleWith1" xml:space="preserve">
     <value>saisie {0} n'est pas compatible {1}</value>

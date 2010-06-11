@@ -23,6 +23,7 @@ namespace Signum.Entities.DynamicQuery
         public List<StaticColumn> StaticColumns { get; set; }
     }
 
+
     [Serializable]
     public abstract class Column
     {
@@ -35,28 +36,11 @@ namespace Signum.Entities.DynamicQuery
         public string Unit { get; set; }
         public Implementations Implementations { get; set; }
 
-        public string DisplayName
-        {
-            get
-            {
-                if (OverrideDisplayName != null)
-                    return OverrideDisplayName();
-                return DefaultDisplayName();
-            }
-        }
+        public string DisplayName{get;set;}
 
-        protected virtual string DefaultDisplayName()
-        {
-            return Name.NiceName(); ;
-        }
-
-        public Func<string> OverrideDisplayName { get; set; } 
-
-        public bool Filterable { get; set; }
-        public bool Visible { get; set; }
-        public bool Sortable { get; set; }
-
-        public abstract bool IsAllowed();
+        public abstract bool Filterable { get; set; }
+        public abstract bool Visible { get; set; }
+        public abstract bool Sortable { get; set; }
 
         public override string ToString()
         {
@@ -64,6 +48,8 @@ namespace Signum.Entities.DynamicQuery
         }
 
         public abstract QueryToken GetQueryToken();
+
+        public abstract bool IsAllowed();
     }
 
     [Serializable]
@@ -84,78 +70,64 @@ namespace Signum.Entities.DynamicQuery
             this.Type = token.Type;
         }
 
-        public override bool IsAllowed()
-        {
-            return Token.IsAllowed();
-        }
-
         public override QueryToken GetQueryToken()
         {
             return Token;
+        }
+
+        public override bool Visible
+        {
+            get { return true;  }
+            set { throw new InvalidOperationException(); }
+        }
+
+        public override bool Filterable
+        {
+            get { return false; }
+            set { throw new InvalidOperationException(); }
+
+        }
+
+        public override bool Sortable
+        {
+            get { return true; }
+            set { throw new InvalidOperationException(); }
         }
 
         public override int Index
         {
             get { return baseIndex + UserColumnIndex; }
         }
+
+        public override bool IsAllowed()
+        {
+            return Token.IsAllowed();
+        }
     }
 
     [Serializable]
     public class StaticColumn : Column
     {
+        int index;
         public override int Index
         {
             get { return index; }
         }
 
-        PropertyRoute propertyRoute;
-        public PropertyRoute PropertyRoute
+        public StaticColumn(int index, string name, Type type)
         {
-            get { return propertyRoute; }
-            set
-            {
-                propertyRoute = value;
-                if (propertyRoute != null)
-                {
-                    switch (propertyRoute.PropertyRouteType)
-                    {
-                        case PropertyRouteType.LiteEntity:
-                        case PropertyRouteType.Root:
-                            throw new InvalidOperationException(Resources.PropertyRouteCanNotBeOfTypeRoot);
-                        case PropertyRouteType.Property:
-                            PropertyInfo pi = propertyRoute.PropertyInfo;
-                            Format = Reflector.FormatString(propertyRoute);
-                            Unit = pi.SingleAttribute<UnitAttribute>().TryCC(u => u.UnitName);
-                            return;
-                        case PropertyRouteType.MListItems:
-                            Format = Reflector.FormatString(propertyRoute.Type);
-                            return;
-                    }
-                }
-            }
+            this.index = index;
+            this.Name = name;
+            this.Type = type;
         }
 
-        protected override string DefaultDisplayName()
-        {
-            if (IsEntity)
-                return this.Type.NiceName();
+        public override bool Visible { get; set; }
+        public override bool Filterable { get; set; }
+        public override bool Sortable { get; set; }
 
-            if (PropertyRoute != null && propertyRoute.PropertyRouteType == PropertyRouteType.Property)
-                return propertyRoute.PropertyInfo.NiceName();
+        public bool Allowed { get; set; }
 
-            return base.DefaultDisplayName();
-        }
-
-        public void SetPropertyRoute<T>(Expression<Func<T, object>> expression)
-            where T : IdentifiableEntity
-        {
-            PropertyRoute = PropertyRoute.Construct(expression);
-        }
-
-        [NonSerialized]
-        readonly internal Delegate Getter;
-        [NonSerialized]
-        readonly internal Meta Meta;
+        public PropertyRoute PropertyRoute { get; set; }
 
         public const string Entity = "Entity";
         public bool IsEntity
@@ -163,65 +135,14 @@ namespace Signum.Entities.DynamicQuery
             get { return this.Name == Entity; }
         }
 
-        int index;
-
-        public StaticColumn(int index, MemberInfo mi, Meta meta, Delegate getter)
-        {
-            this.index = index;
-            Name = mi.Name;
-            Getter = getter;
-
-            Type = mi.ReturningType();
-            Meta = meta;
-
-            if (typeof(IIdentifiable).IsAssignableFrom(Type))
-                throw new InvalidOperationException(Resources.TheTypeOfColumn0IsASubtypeOfIIdentifiableUseALiteInstead.Formato(mi.MemberName()));
-
-            Type cleanType = Reflector.ExtractLite(Type); 
-            if (IsEntity &&  cleanType == null)
-                throw new InvalidOperationException(Resources.EntityMustBeALite);
-
-            if (meta is CleanMeta && ((CleanMeta)meta).PropertyRoute.PropertyRouteType != PropertyRouteType.Root)
-            {
-                PropertyRoute = ((CleanMeta)meta).PropertyRoute;
-                Implementations = PropertyRoute.GetImplementations();
-            }
-
-            Sortable = true;
-            Filterable = true;
-            Visible = !IsEntity;
-        }
-
-        public override bool IsAllowed()
-        {
-            return Meta == null || Meta.IsAllowed();
-        }
-
         public override QueryToken GetQueryToken()
         {
             return QueryToken.NewColumn(this);
         }
 
-        public Type DefaultEntityType()
+        public override bool IsAllowed()
         {
-            if (Implementations == null)
-                return Reflector.ExtractLite(this.Type);
-
-            if (Implementations.IsByAll)
-                return null;
-
-            return ((ImplementedByAttribute)Implementations).ImplementedTypes.FirstOrDefault(); 
-        }
-
-        public bool CompatibleWith(Type entityType)
-        {
-            if (Implementations == null)
-                return Reflector.ExtractLite(this.Type) == entityType;
-
-            if (Implementations.IsByAll)
-                return true;
-
-            return ((ImplementedByAttribute)Implementations).ImplementedTypes.Contains(entityType); 
+            return Allowed;
         }
     }
 }

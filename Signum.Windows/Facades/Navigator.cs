@@ -504,7 +504,7 @@ namespace Signum.Windows
                 uco.UserColumn = new UserColumn(description.StaticColumns.Count, token)
                 {
                     UserColumnIndex = i,
-                    OverrideDisplayName = () => uco.DisplayName.DefaultText(token.FullKey())
+                    DisplayName = uco.DisplayName.DefaultText(token.FullKey())
                 };
             }
         }

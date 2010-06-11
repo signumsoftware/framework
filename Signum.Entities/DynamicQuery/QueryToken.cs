@@ -541,7 +541,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override bool IsAllowed()
         {
-            return Column.IsAllowed();
+            return true;  // Is it wasn't it sould be filtered before
         }
 
         public override PropertyRoute GetPropertyRoute()

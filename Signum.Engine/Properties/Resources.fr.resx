@@ -427,4 +427,13 @@
   <data name="Warning0NoResults" xml:space="preserve">
     <value>Warning {0}: No results</value>
   </data>
+  <data name="EntityMustBeALite" xml:space="preserve">
+    <value>L'entité doit être un Lite</value>
+  </data>
+  <data name="PropertyRouteCanNotBeOfTypeRoot" xml:space="preserve">
+    <value>PropertyRoute can not be of type Root</value>
+  </data>
+  <data name="TheTypeOfColumn0IsASubtypeOfIIdentifiableUseALiteInstead" xml:space="preserve">
+    <value>Le type de colonne {0} est un sous-type d'Identifiable, utiliser un Lite sa place</value>
+  </data>
 </root>

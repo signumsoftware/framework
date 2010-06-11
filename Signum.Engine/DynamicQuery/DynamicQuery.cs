@@ -20,18 +20,18 @@ namespace Signum.Engine.DynamicQuery
 {
     public interface IDynamicQuery
     {
-        StaticColumn EntityColumn();
+        StaticColumnFactory EntityColumn();
         QueryDescription GetDescription(object queryName);
         ResultTable ExecuteQuery(List<UserColumn> userColumns, List<Filter> filters, List<Order> orders, int? limit);
         int ExecuteQueryCount(List<Filter> filters);
         Lite ExecuteUniqueEntity(List<Filter> filters, List<Order> orders, UniqueType uniqueType);
         Expression Expression { get; } //Optional
-        StaticColumn[] StaticColumns { get; } 
+        StaticColumnFactory[] StaticColumns { get; } 
     }
 
     public abstract class DynamicQuery<T> : IDynamicQuery
     {
-        public StaticColumn[] StaticColumns { get; private set; } 
+        public StaticColumnFactory[] StaticColumns { get; private set; } 
 
         public abstract ResultTable ExecuteQuery(List<UserColumn> userColumns, List<Filter> filters, List<Order> orders, int? limit);
         public abstract int ExecuteQueryCount(List<Filter> filters);
@@ -40,7 +40,7 @@ namespace Signum.Engine.DynamicQuery
         protected void InitializeColumns(Func<MemberInfo, Meta> getMeta)
         {
             this.StaticColumns = MemberEntryFactory.GenerateList<T>(MemberOptions.Properties | MemberOptions.Fields)
-              .Select((e, i) => new StaticColumn(i, e.MemberInfo, getMeta(e.MemberInfo), CreateGetter(e.MemberInfo))).ToArray();
+              .Select((e, i) => new StaticColumnFactory(i, e.MemberInfo, getMeta(e.MemberInfo), CreateGetter(e.MemberInfo))).ToArray();
 
             StaticColumns.Where(a => a.IsEntity).Single(Resources.EntityColumnNotFound, Resources.MoreThanOneEntityColumn); 
         }
@@ -50,25 +50,22 @@ namespace Signum.Engine.DynamicQuery
             return new QueryDescription
             {
                 QueryName = queryName,
-                StaticColumns = StaticColumns.Where(a => a.IsAllowed()).ToList()
+                StaticColumns = StaticColumns.Where(a => a.IsAllowed()).Select(a => a.BuildStaticColumn()).ToList()
             };
         }
 
-        protected ResultTable ToQueryResult(Expandable<T>[] result, List<UserColumn> userColumns)
-        {
-            return Create(result, StaticColumns, userColumns ?? new List<UserColumn>());
-        }
+      
 
-        public DynamicQuery<T> Column<S>(Expression<Func<T, S>> column, Action<StaticColumn> change)
+        public DynamicQuery<T> Column<S>(Expression<Func<T, S>> column, Action<StaticColumnFactory> change)
         {
             MemberInfo member = ReflectionTools.GetMemberInfo(column);
-            StaticColumn col = StaticColumns.Single(a => a.Name == member.Name);
+            StaticColumnFactory col = StaticColumns.Single(a => a.Name == member.Name);
             change(col);
 
             return this;
         }
 
-        public StaticColumn EntityColumn()
+        public StaticColumnFactory EntityColumn()
         {
             return StaticColumns.Where(c => c.IsEntity).Single(Resources.ThereIsNoEntityColumn, Resources.ThereAreMoreThanOneEntityColumn);
         }
@@ -87,25 +84,30 @@ namespace Signum.Engine.DynamicQuery
                        memberInfo.Name), pe).Compile();
         }
 
-        protected static ResultTable Create(Expandable<T>[] collection, StaticColumn[] staticColumns, List<UserColumn> userColumns)
+        protected ResultTable ToQueryResult(Expandable<T>[] result, List<UserColumn> userColumns)
         {
-            ResultTable result = new ResultTable(
-                   staticColumns,
-                   userColumns.ToArray(),
-                   collection.Length,
-                   c=> c is StaticColumn? CreateValuesStaticColumnsUntyped((StaticColumn)c, collection):
-                       collection.Select(e=>e.Expansions[((UserColumn)c).UserColumnIndex]).ToArray());
-            return result;
+            var dic = StaticColumns.ToDictionary(a => a.BuildStaticColumn());
+
+            return new ResultTable(dic.Keys.ToArray(), userColumns.ToArray(), result.Length,
+                c => c is StaticColumn ?
+                    CreateValuesStaticColumn(dic[(StaticColumn)c], result) :
+                    CreateValuesUserColumn((UserColumn)c, result));
+
         }
 
-        static Array CreateValuesStaticColumnsUntyped(StaticColumn column, Expandable<T>[] collection)
+        static Array CreateValuesUserColumn(UserColumn column, Expandable<T>[] collection)
         {
-            Type getterType = column.Getter.GetType();
+            ParameterExpression pe = Expression.Parameter(typeof(Expandable<T>), "e");
 
-            if (getterType.GetGenericTypeDefinition() != typeof(Func<,>))
-                throw new InvalidOperationException("column.Getter should be a Func<T,S> for some S");
+            Delegate getter = Expression.Lambda(Expression.Convert(
+                 Expression.ArrayIndex(Expression.Property(pe, "Expansions"), Expression.Constant(column.UserColumnIndex)), column.Type), pe).Compile();
 
-            return (Array)miCreateValues.GenericInvoke(new[] { getterType.GetGenericArguments()[1] }, null, new object[] { column.Getter, collection });
+            return (Array)miCreateValues.GenericInvoke(new[] { column.Type }, null, new object[] { getter, collection });
+        }
+       
+        static Array CreateValuesStaticColumn(StaticColumnFactory column, Expandable<T>[] collection)
+        {
+            return (Array)miCreateValues.GenericInvoke(new[] { column.Type }, null, new object[] { column.Getter, collection });
         }
 
         static MethodInfo miCreateValues = ReflectionTools.GetMethodInfo(() => CreateValues<int>(null, null)).GetGenericMethodDefinition();

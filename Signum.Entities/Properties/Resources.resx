@@ -223,9 +223,6 @@
   <data name="EntitiesDoNotMatch" xml:space="preserve">
     <value>Entity do not Match with the Lite</value>
   </data>
-  <data name="EntityMustBeALite" xml:space="preserve">
-    <value>Entity must be a Lite</value>
-  </data>
   <data name="FieldForPropertyNotFound" xml:space="preserve">
     <value>Field not found for property {0}</value>
   </data>
@@ -358,9 +355,6 @@
   <data name="PropertyRouteFindImplementationsNotSet" xml:space="preserve">
     <value>PropertyRoute.FindImplementations not set</value>
   </data>
-  <data name="PropertyRouteCanNotBeOfTypeRoot" xml:space="preserve">
-    <value>PropertyRoute can not be of type Root</value>
-  </data>
   <data name="PropertyShouldBeAnExpressionAccessingAProperty" xml:space="preserve">
     <value>property should be an expression accessing a property</value>
   </data>
@@ -414,9 +408,6 @@
   </data>
   <data name="TheStateValidator0ForState1Has2ValuesInsteadOf3" xml:space="preserve">
     <value>The state Validator {0} for state {1} has {2} values instead of {3}</value>
-  </data>
-  <data name="TheTypeOfColumn0IsASubtypeOfIIdentifiableUseALiteInstead" xml:space="preserve">
-    <value>The type of column {0} is a subtype of IIdentifiable, use a Lite instead!!</value>
   </data>
   <data name="Token0NotCompatibleWith1" xml:space="preserve">
     <value>Token {0} not compatible with {1}</value>
