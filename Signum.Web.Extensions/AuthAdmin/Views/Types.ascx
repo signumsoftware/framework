@@ -133,7 +133,7 @@
         <% if (Navigator.Manager.EntitySettings.ContainsKey(typeof(QueryRulePack)))
            { %>
         <td>
-            <%if (DynamicQueryManager.Current.GetQueryNames(TypeLogic.DnToType[item.Value.Resource]).Any())
+            <%if (Signum.Engine.Authorization.QueryAuthLogic.GetAllowedThumbnail(TypeLogic.DnToType[item.Value.Resource]))
               {%>
             <a href="javascript:openDialog('AuthAdmin/Queries', {role:<%=tc.Value.Role.Id%>, type:<%=item.Value.Resource.Id%>});">
                 <img src="authAdmin/images/query.png" />
