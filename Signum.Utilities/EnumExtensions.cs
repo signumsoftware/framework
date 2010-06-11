@@ -81,4 +81,28 @@ namespace Signum.Utilities
             return true;
         }
     }
+
+    public static class EnumFieldCache
+    {
+        static Dictionary<Type, Dictionary<Enum, FieldInfo>> enumCache = new Dictionary<Type, Dictionary<Enum, FieldInfo>>();
+
+        public static FieldInfo Get(Enum value)
+        {
+            if (value == null)
+                throw new ArgumentNullException("value");
+
+            return Get(value.GetType())[value];
+        }
+
+        public static Dictionary<Enum, FieldInfo> Get(Type type)
+        {
+            if (!type.IsEnum)
+                throw new ArgumentException(Resources.IsNotAnEnum.Formato(type));
+
+            lock (enumCache)
+                return enumCache.GetOrCreate(type, () => type.GetFields().Skip(1).ToDictionary(
+                    fi => (Enum)fi.GetValue(null),
+                    fi => fi));
+        }
+    }
 }

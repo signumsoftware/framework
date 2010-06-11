@@ -108,9 +108,8 @@ namespace Signum.Engine
             return (from t in Schema.Current.Tables.Values
                     let enumType = Reflector.ExtractEnumProxy(t.Type)
                     where enumType != null
-                    select (from item in Enum.GetValues(enumType).Cast<object>()
-                            let ei = EnumProxy.FromEnum((Enum)item)
-                            select t.InsertSqlSync(ei)).Combine(Spacing.Simple)).Combine(Spacing.Double);
+                    select (from ie in EnumProxy.GetEntities(enumType)
+                            select t.InsertSqlSync(ie)).Combine(Spacing.Simple)).Combine(Spacing.Double);
         }
 
 
@@ -238,7 +237,7 @@ deallocate cur");
                 Type enumType = Reflector.ExtractEnumProxy(table.Type);
                 if (enumType != null)
                 {
-                    var should = Enum.GetValues(enumType).Cast<Enum>().Select(e => EnumProxy.FromEnum(e));
+                    var should =  EnumProxy.GetEntities(enumType);
                     var current = Administrator.TryRetrieveAll(table.Type, replacements);
 
                     SqlPreCommand com = Synchronizer.SynchronizeScript(

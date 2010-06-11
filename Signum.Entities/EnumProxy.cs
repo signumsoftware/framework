@@ -57,9 +57,6 @@ namespace Signum.Entities
         }
     }
 
-    /// <summary>
-    /// Equivalente a System.Nullable sin parametros de tipo: algunas helpers dinámicos
-    /// </summary>
     public static class EnumProxy
     {
         public static IdentifiableEntity FromEnum(Enum value)
@@ -84,6 +81,16 @@ namespace Signum.Entities
         public static bool IsEnumProxy(this Type type)
         {
             return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(EnumProxy<>);
+        }
+
+        public static IEnumerable<Enum> GetValues(Type enumType)
+        {
+            return EnumFieldCache.Get(enumType).Where(a => !a.Value.HasAttribute<IgnoreAttribute>()).Select(a => a.Key); 
+        }
+
+        public static IEnumerable<IdentifiableEntity> GetEntities(Type enumType)
+        {
+            return GetValues(enumType).Select(a => FromEnum(a));
         }
     }
 }
