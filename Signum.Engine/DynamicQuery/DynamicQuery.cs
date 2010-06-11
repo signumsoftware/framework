@@ -88,11 +88,10 @@ namespace Signum.Engine.DynamicQuery
         {
             var dic = StaticColumns.ToDictionary(a => a.BuildStaticColumn());
 
-            return new ResultTable(dic.Keys.ToArray(), userColumns.ToArray(), result.Length,
+            return new ResultTable(dic.Keys.ToArray(), (userColumns ?? new List<UserColumn>()).ToArray(), result.Length,
                 c => c is StaticColumn ?
                     CreateValuesStaticColumn(dic[(StaticColumn)c], result) :
                     CreateValuesUserColumn((UserColumn)c, result));
-
         }
 
         static Array CreateValuesUserColumn(UserColumn column, Expandable<T>[] collection)
