@@ -25,7 +25,7 @@
         <%}
           else
           { %>
-        <span class="popupEntityName"><%= modelTC.UntypedValue.GetType().NiceName()%></span><span class="popupTitle"><%= modelTC.UntypedValue.TryToString() %></span>
+        <span class="popupEntityName"><%= modelTC.UntypedValue.GetType().NiceName()%></span> <span class="popupTitle"><%= modelTC.UntypedValue.TryToString() %></span>
         <%} %>
     </div>
     <div id="<%=modelTC.Compose("divButtonBar")%>" class="buttonBar">

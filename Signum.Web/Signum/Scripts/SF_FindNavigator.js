@@ -202,7 +202,7 @@ FindNavigator.prototype = {
         var found = false;
         var currIndex;
         var oldOrder = "";
-        for (var currIndex = 0; currIndex < currOrderArray.length && !found; currIndex++) {
+        for (var currIndex = 0, l = currOrderArray.length; currIndex < l && !found; currIndex++) {
             found = currOrderArray[currIndex] == columnName;
             if (found) {
                 oldOrder = "";
@@ -217,7 +217,7 @@ FindNavigator.prototype = {
         var newOrder = found ? (oldOrder == "" ? "-" : "") : "";
         var currOrder = $(this.pf("OrderBy"));
         if (!multiCol) {
-            $(this.pf("divSearchControl")).find(".divResults th").removeClass("headerSortUp").removeClass("headerSortDown");
+            $(this.pf("divSearchControl")).find(".divResults th").removeClass("headerSortUp headerSortDown");
             currOrder.val("[\"" + newOrder + columnName + "\"]");
         }
         else {
@@ -226,7 +226,7 @@ FindNavigator.prototype = {
             else
                 currOrderArray[currOrderArray.length] = newOrder + columnName;
             var currOrderStr = "";
-            for (var i = 0; i < currOrderArray.length; i++)
+            for (var i = 0, l = currOrderArray.length; i < l; i++)
                 currOrderStr = currOrderStr.compose("\"" + currOrderArray[i] + "\"", ",");
             currOrder.val("[" + currOrderStr + "]");
         }
@@ -235,6 +235,8 @@ FindNavigator.prototype = {
             $(this.pf(columnName)).removeClass("headerSortDown").addClass("headerSortUp");
         else
             $(this.pf(columnName)).removeClass("headerSortUp").addClass("headerSortDown");
+
+        return this;
     },
 
     onSearchOk: function() {
@@ -303,7 +305,7 @@ FindNavigator.prototype = {
         var self = this;
         $("select")
         .filter(function() {
-        return ($(this).attr("id").indexOf(self.findOptions.prefix.compose("ddlTokens_")) == 0)
+            return ($(this).attr("id").indexOf(self.findOptions.prefix.compose("ddlTokens_")) == 0)
             || ($(this).attr("id").indexOf(self.findOptions.prefix.compose("lblddlTokens_")) == 0)
         })
         .filter(function() {
@@ -336,7 +338,7 @@ FindNavigator.prototype = {
         var tokenName = "",
             stop = false,
             $fieldsList = $(".fields-list");
-            
+
         for (i = 0; !stop; i++) {
             var currSubtoken = $fieldsList.find(this.pf("ddlTokens_" + i));
             if (currSubtoken.length > 0)
@@ -500,7 +502,7 @@ function Sort(evt) {
     if (empty($target[0].id))
         return;
        
-    var searchControlDiv = $(evt.target).parents("div[id$=divSearchControl]");
+    var searchControlDiv = $target.parents("div[id$=divSearchControl]");
     
     var prefix = searchControlDiv[0].id;
     prefix = prefix.substring(0, prefix.indexOf("divSearchControl"));
@@ -510,22 +512,18 @@ function Sort(evt) {
     
     var multiCol = evt.shiftKey;
 
-    findNavigator.setNewSortOrder(columnName, multiCol);
-    findNavigator.search();    
+    findNavigator.setNewSortOrder(columnName, multiCol).search();    
 }
 
 function toggleVisibility(elementId) {
 	$('#' + elementId).toggle();
 }
 
-function toggleFilters(id) {
-    var elem = $('#' + id + " .filters-header");
-    var R = elem.attr('rev');
-    var D = $('#' + R);
-    D.toggle('fast');
-    $('#' + id + ' .filters').toggle('fast');
-    elem.toggleClass('close');
-    if (elem.hasClass('close')) elem.html('Mostrar filtros'); else elem.html('Ocultar filtros');
+function toggleFilters(elem) {
+    var $elem = $(elem);
+    $elem.toggleClass('close').siblings(".filters").toggle();
+    if ($elem.hasClass('close')) $elem.html('Mostrar filtros');
+    else $elem.html('Ocultar filtros');
     return false;
 }
 

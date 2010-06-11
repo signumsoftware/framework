@@ -102,6 +102,7 @@ ViewNavigator.prototype = {
     showViewOk: function(newHtml) {
         log("ViewNavigator showViewOk");
         //Backup current Html (for cancel scenarios)
+
         this.backup = cloneContents(this.viewOptions.containerDiv);
         //Insert new Html in the appropriate place
         if (!empty(newHtml))
@@ -159,7 +160,7 @@ ViewNavigator.prototype = {
 
         $('#' + this.viewOptions.prefix.compose(sfBtnOk)).unbind('click').click(function() { self.onCreateSave(); });
 
-        $("#"+ tempDivId).delegate(
+        $("#" + tempDivId).delegate(
             '#' + self.viewOptions.prefix.compose(sfBtnCancel),
             "click",
             function() { self.onCreateCancel(); });
@@ -311,23 +312,28 @@ function openChooser(_prefix, onOptionClicked, jsonOptionsListFormat, onCancelle
 }
 
 function RelatedEntityCreate(viewOptions) {
-    var extraJsonData = new Object();
     var info = RuntimeInfoFor('');
-    extraJsonData.sfIdRelated = info.id();
-    extraJsonData.sfRuntimeTypeRelated = info.runtimeType();
-    
-    var navigator = new ViewNavigator($.extend(viewOptions, {requestExtraJsonData:extraJsonData}));
+    var extraJson = {
+        sfIdRelated: info.id(),
+        sfRuntimeTypeRelated: info.runtimeType()
+    };
+
+    var navigator = new ViewNavigator($.extend(viewOptions, { requestExtraJsonData: extraJson }));
     navigator.createSave();
 }
 
 function cloneContents(sourceContainerId) {
-    var clone = $('#' + sourceContainerId).children().clone(true);
-    var selects = $('#' + sourceContainerId).find("select");
-    $(selects).each(function(i) {
-        var select = this;
-        $(clone).find("select").eq(i).val($(select).val());
-    });
-    return clone;
+    var $source = $('#' + sourceContainerId);
+    var $clone = $source.children().clone(true);
+
+    var $sourceSelect = $source.find("select");
+    var $cloneSelect = $clone.find("select");
+
+    for (var i = 0, l = $sourceSelect.length; i < l; i++) {
+        $cloneSelect.eq(i).val($sourceSelect.eq(i).val());
+    } 
+    
+    return $clone;
 }
 
 function hiddenInput(id, value)
