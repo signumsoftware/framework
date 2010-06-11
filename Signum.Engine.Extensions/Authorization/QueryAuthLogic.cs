@@ -79,5 +79,10 @@ namespace Signum.Engine.Authorization
         {
             cache.SetAllowed(role, queryName, allowed);
         }
+
+        public static AuthThumbnail? GetAllowedThumbnail(Lite<RoleDN> role, Type entityType)
+        {
+            return DynamicQueryManager.Current.GetQueries(entityType).Keys.Select(qn => cache.GetAllowed(role, qn)).Collapse(); 
+        }
     }
 }

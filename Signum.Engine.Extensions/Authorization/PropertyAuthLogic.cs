@@ -78,5 +78,10 @@ namespace Signum.Engine.Authorization
         {
             return cache.GetCleanDictionary();
         }
+
+        public static AuthThumbnail? GetAllowedThumbnail(Lite<RoleDN> role, Type entityType)
+        {
+            return PropertyRoute.GenerateRoutes(entityType).Select(pr => cache.GetAllowed(role, pr)).Collapse();
+        }
     }
 }

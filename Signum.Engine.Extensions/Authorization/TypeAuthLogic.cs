@@ -100,4 +100,51 @@ namespace Signum.Engine.Authorization
             return cache.GetCleanDictionary();
         }
     }
+
+    public static class AuthThumbnailExtensions
+    {
+        public static AuthThumbnail? Collapse(this IEnumerable<bool> values)
+        {
+            bool? acum = null;
+            foreach (var item in values)
+            {
+                if (acum == null)
+                    acum = item;
+                else if (acum.Value != item)
+                    return AuthThumbnail.Mix;
+            }
+
+            if (acum == null)
+                return null;
+
+            return acum.Value ? AuthThumbnail.All : AuthThumbnail.None;
+        }
+
+        public static AuthThumbnail? Collapse(this IEnumerable<PropertyAllowed> values)
+        {
+            PropertyAllowed? acum = null;
+            foreach (var item in values)
+            {
+                if (acum == null)
+                    acum = item;
+                else if (acum.Value != item || acum.Value == PropertyAllowed.Read)
+                    return AuthThumbnail.Mix;
+            }
+
+            if (acum == null)
+                return null;
+
+            return 
+                acum.Value == PropertyAllowed.None ? AuthThumbnail.None :
+                acum.Value == PropertyAllowed.Read ? AuthThumbnail.Mix : AuthThumbnail.All;
+
+        }
+    }
+
+    public enum AuthThumbnail
+    {
+        All,
+        Mix,
+        None,
+    }
 }

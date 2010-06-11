@@ -139,11 +139,6 @@ namespace Signum.Engine.Operations
             };
         }
 
-        public static bool HasOperations(Type entityType)
-        {
-            return TypeOperations(entityType).Any(); 
-        }
-
         public static List<OperationInfo> ServiceGetConstructorOperationInfos(Type entityType)
         {
             return (from o in TypeOperations(entityType)
