@@ -32,10 +32,10 @@ namespace Signum.Windows
                    ConverterFactory.New((Lite lite) => lite == null ? null : Server.Retrieve(lite));
 
         public static readonly IValueConverter NullableEnumConverter =
-            ConverterFactory.New((object v) => v == null ? "-" : v, (object v) => (v as string) == "-" ? null : v);
+            ConverterFactory.New((object v) => v == null ?  VoidEnum.Instance : v, (object v) => v.Equals(VoidEnum.Instance) ? null : v);
 
         public static readonly IValueConverter EnumDescriptionConverter =
-            ConverterFactory.New((object v) => v is Enum ? ((Enum)v).NiceToString() : (string)v);
+            ConverterFactory.New((object v) => ((Enum)v).NiceToString());
 
         public static readonly IValueConverter ErrorListToToolTipString =
             ConverterFactory.New((IEnumerable<ValidationError> err) => err.Select(e => DoubleListConverter.CleanErrorMessage(e)).FirstOrDefault());

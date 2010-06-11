@@ -23,6 +23,7 @@ using System.Windows.Controls.Primitives;
 using System.Globalization;
 using Signum.Entities.Basics;
 using System.Windows.Automation.Peers;
+using Signum.Entities;
 
 namespace Signum.Windows
 {
@@ -74,6 +75,14 @@ namespace Signum.Windows
             set { SetValue(ValueControlProperty, value); }
         }
 
+        public static readonly DependencyProperty ItemSourceProperty =
+            DependencyProperty.Register("ItemSource", typeof(IEnumerable), typeof(ValueLine), new UIPropertyMetadata(null));
+        public IEnumerable ItemSource
+        {
+            get { return (IEnumerable)GetValue(ItemSourceProperty); }
+            set { SetValue(ItemSourceProperty, value); }
+        }
+
         public ValueLine()
         {
             InitializeComponent();
@@ -89,7 +98,7 @@ namespace Signum.Windows
             if (this.NotSet(ValueLineTypeProperty))
                 this.ValueLineType = Configurator.GetDefaultValueLineType(this.Type);
 
-            this.ValueControl = this.CreateControl(this.ValueLineType, this.Type);
+            this.ValueControl = this.CreateControl();
 
             this.label.Target = this.ValueControl;
         }
@@ -103,13 +112,10 @@ namespace Signum.Windows
         public static ValueLineConfigurator Configurator = new ValueLineConfigurator(); 
 
    
-        private Control CreateControl(ValueLineType lineType, Type type)
+        private Control CreateControl()
         {
-            Type nType = Nullable.GetUnderlyingType(type);
-            bool nullable = nType != null;
-            type = nType ?? type;
-            Control control = Configurator.constructor[lineType](type, nullable, Format);
-            if(Configurator.SetToolTipStyle(lineType, type, nullable))
+            Control control = Configurator.constructor[ValueLineType](this);
+            if(Configurator.SetToolTipStyle(this))
               control.Style = (Style)FindResource("toolTip"); 
             
             Binding b; 
@@ -121,7 +127,7 @@ namespace Signum.Windows
                 BindingOperations.ClearBinding(this, ValueProperty);
                 b = new Binding(binding.Path.Path)
                 {
-                    UpdateSourceTrigger =  Configurator.GetUpdateSourceTrigger(lineType, type, nullable, binding.UpdateSourceTrigger),
+                    UpdateSourceTrigger =  Configurator.GetUpdateSourceTrigger(this),
                     Mode = binding.Mode,
                     ValidatesOnExceptions = true,
                     ValidatesOnDataErrors = true,
@@ -141,13 +147,13 @@ namespace Signum.Windows
             }
 
             if (b.Converter == null)
-                b.Converter = Configurator.GetConverter(lineType, type, nullable);
+                b.Converter = Configurator.GetConverter(this);
 
-            ValidationRule validation = Configurator.GetValidation(lineType, type, nullable);
+            ValidationRule validation = Configurator.GetValidation(this);
             if (validation != null)
                 b.ValidationRules.Add(validation);
 
-            DependencyProperty prop = Configurator.properties[lineType];
+            DependencyProperty prop = Configurator.properties[this.ValueLineType];
        
             control.SetBinding(prop, b);
 
@@ -156,10 +162,10 @@ namespace Signum.Windows
                 Source = this,
                 Path = new PropertyPath(Common.IsReadOnlyProperty),
                 Mode = BindingMode.OneWay,
-                Converter = Configurator.GetReadOnlyConverter(lineType, type, nullable)
+                Converter = Configurator.GetReadOnlyConverter(this)
             };
 
-            control.SetBinding(Configurator.readOnlyProperties[lineType], rb);  
+            control.SetBinding(Configurator.readOnlyProperties[this.ValueLineType], rb);  
             // Binding b = new Binding(binding.Path.Path) { Mode = binding.Mode, UpdateSourceTrigger = binding.UpdateSourceTrigger };
 
             //System.Diagnostics.PresentationTraceSources.SetTraceLevel(b, PresentationTraceLevel.High);
@@ -242,102 +248,98 @@ namespace Signum.Windows
             {ValueLineType.Color, ColorPicker.IsReadOnlyProperty}
         };
 
-        public Dictionary<ValueLineType, Func<Type, bool, string, Control>> constructor = new Dictionary<ValueLineType, Func<Type, bool, string, Control>>()
+        public Dictionary<ValueLineType, Func<ValueLine, Control>> constructor = new Dictionary<ValueLineType, Func<ValueLine, Control>>()
         {
-            {ValueLineType.Enum, (t,n,f)=>new ComboBox(){ ItemsSource = GetEnums(t,n), ItemTemplate = comboDataTemplate, VerticalContentAlignment = VerticalAlignment.Center}},
-            {ValueLineType.Boolean, (t,n,f)=>new CheckBox(){ VerticalAlignment = VerticalAlignment.Center, HorizontalAlignment = HorizontalAlignment.Left}},
-            {ValueLineType.Number, (t,n,f)=>
+            {ValueLineType.Enum, vl =>new ComboBox()
+            { 
+                ItemsSource = vl.ItemSource ??  EnumExtensions.UntypedGetValues(vl.Type.UnNullify()).PreAndNull(vl.Type.IsNullable()),
+                ItemTemplate = comboDataTemplate, 
+                VerticalContentAlignment = VerticalAlignment.Center
+            }},
+            {ValueLineType.Boolean, vl =>new CheckBox(){ VerticalAlignment = VerticalAlignment.Center, HorizontalAlignment = HorizontalAlignment.Left}},
+            {ValueLineType.Number, vl =>
             {
                 var nt = new NumericTextBox(){ XIncrement = 10, YIncrement = 1};
-                if(f != null)
+                if(vl.Format != null)
                 {
-                    f = NullableDecimalConverter.NormalizeToDecimal(f);
+                    var format = NullableDecimalConverter.NormalizeToDecimal(vl.Format);
 
                     nt.NullableDecimalConverter = 
-                        f == NullableDecimalConverter.Integer.Format?  NullableDecimalConverter.Integer:
-                        f == NullableDecimalConverter.Number.Format?  NullableDecimalConverter.Number:
-                        new NullableDecimalConverter(f); 
+                        format == NullableDecimalConverter.Integer.Format?  NullableDecimalConverter.Integer:
+                        format == NullableDecimalConverter.Number.Format?  NullableDecimalConverter.Number:
+                        new NullableDecimalConverter(format); 
                 }
                 return nt;
             }},
-            {ValueLineType.String, (t,n,f)=> 
+            {ValueLineType.String, vl => 
                 {
                     var tb = new TextBox();
-                    if(f == "U")
+                    if(vl.Format == "U")
                         tb.CharacterCasing = CharacterCasing.Upper;
-                    else if(f == "L")
+                    else if(vl.Format == "L")
                         tb.CharacterCasing = CharacterCasing.Lower;
                     return tb;
                 }
             },
-            {ValueLineType.DateTime, (t,n,f)=> 
+            {ValueLineType.DateTime, vl => 
             {
                 var dt = new DateTimePicker(); 
-                if(f!= null) 
+                if(vl.Format != null) 
                 {
                     dt.DateTimeConverter = 
-                        f == DateTimeConverter.DateAndTime.Format?  DateTimeConverter.DateAndTime:
-                        f == DateTimeConverter.Date.Format?  DateTimeConverter.Date:
-                        new DateTimeConverter(f); 
+                        vl.Format == DateTimeConverter.DateAndTime.Format?  DateTimeConverter.DateAndTime:
+                        vl.Format == DateTimeConverter.Date.Format?  DateTimeConverter.Date:
+                        new DateTimeConverter(vl.Format); 
                 }
                 return dt;
             }},
-            {ValueLineType.Color, (t,n,f) => new ColorPicker()}
-        };       
+            {ValueLineType.Color, vl => new ColorPicker()}
+        };
 
 
-        public virtual IValueConverter GetConverter(ValueLineType lineType, Type type, bool nullable)
+        public virtual IValueConverter GetConverter(ValueLine vl)
         {
-            if (lineType == ValueLineType.Enum && nullable)
+            if (vl.ValueLineType == ValueLineType.Enum && vl.Type.IsNullable())
                 return Converters.NullableEnumConverter;
 
-            if (lineType == ValueLineType.Color)
+            if (vl.ValueLineType == ValueLineType.Color)
                 return Converters.ColorConverter;
 
-            if (nullable)
+            if (vl.Type.IsNullable())
                 return Converters.Identity;
 
             return null;
         }
 
 
-        public virtual ValidationRule GetValidation(ValueLineType lineType, Type type, bool nullable)
+        public virtual ValidationRule GetValidation(ValueLine vl)
         {
-            if (!nullable && type.IsValueType)
+            if (vl.Type.IsValueType && !vl.Type.IsNullable())
                 return NotNullValidationRule.Instance;
 
             return null;
         }
 
-        public virtual bool SetToolTipStyle(ValueLineType lineType, Type type, bool nullable)
+        public virtual bool SetToolTipStyle(ValueLine vl)
         {
-            if (lineType == ValueLineType.String)
+            if (vl.ValueLineType == ValueLineType.String)
                 return false;
 
             return true; 
         }
 
-        public virtual UpdateSourceTrigger GetUpdateSourceTrigger(ValueLineType lineType, Type type, bool nullable, UpdateSourceTrigger original)
+        public virtual UpdateSourceTrigger GetUpdateSourceTrigger(ValueLine vl)
         {
             return UpdateSourceTrigger.PropertyChanged;
         }
 
-        public virtual IValueConverter GetReadOnlyConverter(ValueLineType lineType, Type type, bool nullable)
+        public virtual IValueConverter GetReadOnlyConverter(ValueLine vl)
         {
-            if (lineType == ValueLineType.Boolean || lineType == ValueLineType.Enum)
+            if (vl.ValueLineType == ValueLineType.Boolean || vl.ValueLineType == ValueLineType.Enum)
                 return Converters.Not;
 
             return null;
         }
-
-        public static IEnumerable GetEnums(Type t, bool b)
-        {
-            var bla = Enum.GetValues(t).Cast<object>();
-            if (b)
-                bla = bla.PreAnd("-");
-            return bla.ToArray();
-        }
-
     }
 
     public enum ValueLineType

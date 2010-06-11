@@ -114,10 +114,22 @@ namespace Signum.Windows
             {
                 QueryToken token = f.Token;
 
-                ValueLine vl = new ValueLine() { Type = type, Format = token.Format, UnitText = token.Unit };
+                ValueLine vl = new ValueLine() 
+                { 
+                    Type = type, 
+                    Format = token.Format, 
+                    UnitText = token.Unit 
+                };
+
+                if (type.UnNullify().IsEnum)
+                {
+                    vl.ItemSource = EnumProxy.GetValues(type.UnNullify()).PreAndNull(type.IsNullable());
+                }
+               
+
                 vl.SetBinding(ValueLine.ValueProperty, new Binding
                 {
-                    Path = new PropertyPath("RealValue"),
+                    Path = new PropertyPath("RealValue"), //odd
                     NotifyOnValidationError = true,
                     ValidatesOnDataErrors = true,
                     ValidatesOnExceptions = true,

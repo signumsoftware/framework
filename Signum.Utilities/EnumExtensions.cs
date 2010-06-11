@@ -80,6 +80,31 @@ namespace Signum.Utilities
             result = (T)(object)Enum.Parse(typeof(T), value);
             return true;
         }
+
+        public static IEnumerable<Enum> PreAndNull(this IEnumerable<Enum> collection)
+        {
+            return collection.PreAnd(VoidEnum.Instance);
+        }
+
+        public static IEnumerable<Enum> PreAndNull(this IEnumerable<Enum> collection, bool isNullable)
+        {
+            if (isNullable)
+                return collection.PreAnd(VoidEnum.Instance);
+            return collection;
+        }
+
+        public static IEnumerable<Enum> UntypedGetValues(Type type)
+        {
+            return Enum.GetValues(type).Cast<Enum>();
+        }
+
+        
+    }
+
+    public enum VoidEnum
+    {
+        [Description("-")]
+        Instance
     }
 
     public static class EnumFieldCache
