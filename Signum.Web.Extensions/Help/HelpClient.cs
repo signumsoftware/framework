@@ -89,23 +89,15 @@ namespace Signum.Web.Help
 
         private static void RegisterHelpRoutes()
         {
-            RouteTable.Routes.InsertRouteAt0("Help", new { controller = "Help", action = "Index", });
-
-            RouteTable.Routes.InsertRouteAt0("Help/Search", new { controller = "Help", action = "Search" });
-
-            RouteTable.Routes.InsertRouteAt0("Help/ViewTodo", new { controller = "Help", action = "ViewTodo" });
-
-            RouteTable.Routes.InsertRouteAt0("Help/{entity}", new { controller = "Help", action = "ViewEntity", entity = "" });
-
-            RouteTable.Routes.InsertRouteAt0("Help/Namespace/{namespace}", new { controller = "Help", action = "ViewNamespace", @namespace = "" });
-
-            RouteTable.Routes.InsertRouteAt0("Help/Appendix/{appendix}", new { controller = "Help", action = "ViewAppendix", appendix = "" });
-
-            RouteTable.Routes.InsertRouteAt0("Help/{entity}/Save", new { controller = "Help", action = "SaveEntity", entity = "" });
-
-            RouteTable.Routes.InsertRouteAt0("Help/Namespace/{namespace}/Save", new { controller = "Help", action = "SaveNamespace", @namespace = "" });
-
             RouteTable.Routes.InsertRouteAt0("Help/Appendix/{appendix}/Save", new { controller = "Help", action = "SaveAppendix", appendix = "" });
+            RouteTable.Routes.InsertRouteAt0("Help/Namespace/{namespace}/Save", new { controller = "Help", action = "SaveNamespace", @namespace = "" });
+            RouteTable.Routes.InsertRouteAt0("Help/{entity}/Save", new { controller = "Help", action = "SaveEntity", entity = "" });
+            RouteTable.Routes.InsertRouteAt0("Help/Appendix/{appendix}", new { controller = "Help", action = "ViewAppendix", appendix = "" });
+            RouteTable.Routes.InsertRouteAt0("Help/Namespace/{namespace}", new { controller = "Help", action = "ViewNamespace", @namespace = "" });
+            RouteTable.Routes.InsertRouteAt0("Help/{entity}", new { controller = "Help", action = "ViewEntity", entity = "" });
+            RouteTable.Routes.InsertRouteAt0("Help/ViewTodo", new { controller = "Help", action = "ViewTodo" });
+            RouteTable.Routes.InsertRouteAt0("Help/Search", new { controller = "Help", action = "Search" });
+            RouteTable.Routes.InsertRouteAt0("Help", new { controller = "Help", action = "Index", });
         }
 
         public static string WikiUrl = "http://192.168.0.5:8085/";
