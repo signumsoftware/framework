@@ -562,6 +562,16 @@ h2 .title {
     margin-right:5px;
 }
 
+.search-footer input, .search-footer a.QueryButton
+{
+    float:left;	
+}
+.search-footer a.QueryButton 
+{
+	padding:5px 10px 5px 1px;
+	margin-left:0;
+}
+
 .tblResults {
 /*    table-layout:fixed;*/
     background-color:#fff;

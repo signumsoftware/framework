@@ -110,7 +110,10 @@ ViewNavigator.prototype = {
         new popup().show(this.viewOptions.containerDiv);
         var self = this;
         $('#' + this.viewOptions.prefix.compose(sfBtnOk)).unbind('click').click(function() { self.onViewOk(); });
-        $('#' + this.viewOptions.prefix.compose(sfBtnCancel)).unbind('click').click(function() { self.onViewCancel(); });
+        $('#' + this.viewOptions.containerDiv).delegate(
+            '#' + self.viewOptions.prefix.compose(sfBtnCancel),
+            "click",
+            function() { self.onViewCancel(); });
     },
 
     showViewSave: function(newHtml) {
@@ -121,7 +124,11 @@ ViewNavigator.prototype = {
         new popup().show(this.viewOptions.containerDiv);
         var self = this;
         $('#' + this.viewOptions.prefix.compose(sfBtnOk)).unbind('click').click(function() { self.onCreateSave(); });
-        $('#' + this.viewOptions.prefix.compose(sfBtnCancel)).unbind('click').click(function() { self.onCreateCancel(); });
+
+        $('#' + this.viewOptions.containerDiv).delegate(
+            '#' + self.viewOptions.prefix.compose(sfBtnCancel),
+            "click",
+            function() { self.onCreateCancel(); });
     },
 
     showCreateOk: function(newHtml) {
@@ -129,10 +136,15 @@ ViewNavigator.prototype = {
         if (!empty(newHtml))
             $('#divASustituir').after(hiddenDiv(this.tempDivId(), newHtml));
 
-        new popup().show(this.tempDivId());
+        var tempDivId = this.tempDivId();
+        new popup().show(tempDivId);
         var self = this;
         $('#' + this.viewOptions.prefix.compose(sfBtnOk)).unbind('click').click(function() { self.onCreateOk(); });
-        $('#' + this.viewOptions.prefix.compose(sfBtnCancel)).unbind('click').click(function() { self.onCreateCancel(); });
+
+        $("#" + tempDivId).delegate(
+            '#' + self.viewOptions.prefix.compose(sfBtnCancel),
+            "click",
+            function() { self.onCreateCancel(); });
     },
 
     showCreateSave: function(newHtml) {
@@ -140,11 +152,17 @@ ViewNavigator.prototype = {
         if (!empty(newHtml)) {
             $('#divASustituir').after(hiddenDiv(this.tempDivId(), newHtml));
         }
-        new popup().show(this.tempDivId());
+
+        var tempDivId = this.tempDivId();
+        new popup().show(tempDivId);
         var self = this;
 
         $('#' + this.viewOptions.prefix.compose(sfBtnOk)).unbind('click').click(function() { self.onCreateSave(); });
-        $('#' + this.viewOptions.prefix.compose(sfBtnCancel)).unbind('click').click(function() { self.onCreateCancel(); });
+
+        $("#"+ tempDivId).delegate(
+            '#' + self.viewOptions.prefix.compose(sfBtnCancel),
+            "click",
+            function() { self.onCreateCancel(); });
 
         if (this.viewOptions.onLoaded != null)
             this.viewOptions.onLoaded(this.tempDivId());
