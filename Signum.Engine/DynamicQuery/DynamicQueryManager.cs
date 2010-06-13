@@ -10,6 +10,7 @@ using Signum.Engine.Properties;
 using Signum.Entities;
 using System.Diagnostics;
 using Signum.Engine.Maps;
+using Signum.Services;
 
 namespace Signum.Engine.DynamicQuery
 {
@@ -42,19 +43,19 @@ namespace Signum.Engine.DynamicQuery
             return queries.TryGetC(queryName);
         }
 
-        public ResultTable ExecuteQuery(object queryName, List<UserColumn> userColumns, List<Filter> filters, List<Order> orders, int? limit)
+        public ResultTable ExecuteQuery(QueryRequest request)
         {
-            return this[queryName].ExecuteQuery(userColumns, filters, orders, limit);
+            return this[request.QueryName].ExecuteQuery(request);
         }
 
-        public int ExecuteQueryCount(object queryName, List<Filter> filters)
+        public int ExecuteQueryCount(QueryCountRequest request)
         {
-            return this[queryName].ExecuteQueryCount(filters);
+            return this[request.QueryName].ExecuteQueryCount(request);
         }
 
-        public Lite ExecuteUniqueEntity(object queryName, List<Filter> filters, List<Order> orders, UniqueType uniqueType)
+        public Lite ExecuteUniqueEntity(UniqueEntityRequest request)
         {
-            return this[queryName].ExecuteUniqueEntity(filters, orders, uniqueType);
+            return this[request.QueryName].ExecuteUniqueEntity(request);
         }
 
         public QueryDescription QueryDescription(object queryName)
@@ -115,7 +116,7 @@ namespace Signum.Engine.DynamicQuery
                 IDynamicQuery dq = this[queryName];
 
                 Connection.CommandCount = 0;
-                ResultTable result = dq.ExecuteQuery(null, null, null, 100);
+                ResultTable result = dq.ExecuteQuery(new QueryRequest { QueryName = queryName, Limit = 100 });
 
                 if(result.Rows.Length == 0)
                     return Resources.Warning0NoResults.Formato(queryName);

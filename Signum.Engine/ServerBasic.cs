@@ -20,7 +20,7 @@ namespace Signum.Services
         {
             return Return(mi, mi.Name, function);
         }
-        
+
         protected virtual T Return<T>(MethodBase mi, string description, Func<T> function)
         {
             try
@@ -113,22 +113,22 @@ namespace Signum.Services
              () => DynamicQueryManager.Current.QueryDescription(queryName));
         }
 
-        public ResultTable GetQueryResult(object queryName, List<UserColumn> userColumns, List<Filter> filters, List<Order> orders, int? limit)
+        public ResultTable ExecuteQuery(QueryRequest request)
         {
-            return Return(MethodInfo.GetCurrentMethod(), "GetQueryResult {0}".Formato(queryName),
-             () => DynamicQueryManager.Current.ExecuteQuery(queryName, userColumns, filters, orders, limit));
+            return Return(MethodInfo.GetCurrentMethod(), "GetQueryResult {0}".Formato(request.QueryName),
+              () => DynamicQueryManager.Current.ExecuteQuery(request));
         }
 
-        public int GetQueryCount(object queryName, List<Filter> filters)
+        public int ExecuteQueryCount(QueryCountRequest request)
         {
-            return Return(MethodInfo.GetCurrentMethod(), "GetQueryCount {0}".Formato(queryName),
-                () => DynamicQueryManager.Current.ExecuteQueryCount(queryName, filters));
+            return Return(MethodInfo.GetCurrentMethod(), "GetQueryCount {0}".Formato(request.QueryName),
+                () => DynamicQueryManager.Current.ExecuteQueryCount(request));
         }
 
-        public Lite GetUniqueEntity(object queryName, List<Filter> filters, List<Order> orders, UniqueType uniqueType)
+        public Lite ExecuteUniqueEntity(UniqueEntityRequest request)
         {
-            return Return(MethodInfo.GetCurrentMethod(), "GetQueryEntity {0}".Formato(queryName),
-                () => DynamicQueryManager.Current.ExecuteUniqueEntity(queryName, filters, orders, uniqueType));
+            return Return(MethodInfo.GetCurrentMethod(), "GetQueryEntity {0}".Formato(request.QueryName),
+                () => DynamicQueryManager.Current.ExecuteUniqueEntity(request));
         }
 
         public List<object> GetQueryNames()

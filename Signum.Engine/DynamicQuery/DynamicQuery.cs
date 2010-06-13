@@ -15,6 +15,7 @@ using Signum.Entities;
 using System.Diagnostics;
 using Signum.Entities.Reflection;
 using Signum.Utilities.DataStructures;
+using Signum.Services;
 
 namespace Signum.Engine.DynamicQuery
 {
@@ -22,9 +23,9 @@ namespace Signum.Engine.DynamicQuery
     {
         StaticColumnFactory EntityColumn();
         QueryDescription GetDescription(object queryName);
-        ResultTable ExecuteQuery(List<UserColumn> userColumns, List<Filter> filters, List<Order> orders, int? limit);
-        int ExecuteQueryCount(List<Filter> filters);
-        Lite ExecuteUniqueEntity(List<Filter> filters, List<Order> orders, UniqueType uniqueType);
+        ResultTable ExecuteQuery(QueryRequest request);
+        int ExecuteQueryCount(QueryCountRequest request);
+        Lite ExecuteUniqueEntity(UniqueEntityRequest request);
         Expression Expression { get; } //Optional
         StaticColumnFactory[] StaticColumns { get; } 
     }
@@ -33,9 +34,9 @@ namespace Signum.Engine.DynamicQuery
     {
         public StaticColumnFactory[] StaticColumns { get; private set; } 
 
-        public abstract ResultTable ExecuteQuery(List<UserColumn> userColumns, List<Filter> filters, List<Order> orders, int? limit);
-        public abstract int ExecuteQueryCount(List<Filter> filters);
-        public abstract Lite ExecuteUniqueEntity(List<Filter> filters, List<Order> orders, UniqueType uniqueType);
+        public abstract ResultTable ExecuteQuery(QueryRequest request);
+        public abstract int ExecuteQueryCount(QueryCountRequest request);
+        public abstract Lite ExecuteUniqueEntity(UniqueEntityRequest request);
 
         protected void InitializeColumns(Func<MemberInfo, Meta> getMeta)
         {
@@ -84,11 +85,16 @@ namespace Signum.Engine.DynamicQuery
                        memberInfo.Name), pe).Compile();
         }
 
+        static UserColumn[] Empty = new UserColumn[0];
+
         protected ResultTable ToQueryResult(Expandable<T>[] result, List<UserColumn> userColumns)
         {
             var dic = StaticColumns.ToDictionary(a => a.BuildStaticColumn());
 
-            return new ResultTable(dic.Keys.ToArray(), (userColumns ?? new List<UserColumn>()).ToArray(), result.Length,
+            return new ResultTable(
+                dic.Keys.ToArray(),
+                userColumns == null ? Empty : userColumns.ToArray(),
+                result.Length,
                 c => c is StaticColumn ?
                     CreateValuesStaticColumn(dic[(StaticColumn)c], result) :
                     CreateValuesUserColumn((UserColumn)c, result));
@@ -124,7 +130,7 @@ namespace Signum.Engine.DynamicQuery
             return new AutoDynamicQuery<T>(query); 
         }
 
-        public static DynamicQuery<T> Manual<T>(Func<List<UserColumn>, List<Filter>, List<Order>, int?, IEnumerable<Expandable<T>>> execute)
+        public static DynamicQuery<T> Manual<T>(Func<QueryRequest, IEnumerable<Expandable<T>>> execute)
         {
             return new ManualDynamicQuery<T>(execute); 
         }

@@ -712,19 +712,28 @@ namespace Signum.Web
             SetTokens(options.QueryName, options.FilterOptions);
             SetTokens(options.QueryName, options.OrderOptions);
 
-            var filters = options.FilterOptions.Select(f => f.ToFilter()).ToList();
-            var orders = options.OrderOptions.Select(o => o.ToOrder()).ToList();
+            var request = new UniqueEntityRequest
+            {
+                QueryName = options.QueryName,
+                Filters = options.FilterOptions.Select(f => f.ToFilter()).ToList(),
+                Orders = options.OrderOptions.Select(o => o.ToOrder()).ToList(),
+                UniqueType = options.UniqueType,
+            };
 
-            return DynamicQueryManager.Current.ExecuteUniqueEntity(options.QueryName, filters, orders, options.UniqueType);
+            return DynamicQueryManager.Current.ExecuteUniqueEntity(request);
         }
 
         protected internal virtual int QueryCount(CountOptions options)
         {
             SetTokens(options.QueryName, options.FilterOptions);
 
-            var filters = options.FilterOptions.Select(f => f.ToFilter()).ToList();
+            var request = new QueryCountRequest
+            { 
+                QueryName = options.QueryName,
+                Filters = options.FilterOptions.Select(f => f.ToFilter()).ToList()
+            };
 
-            return DynamicQueryManager.Current.ExecuteQueryCount(options.QueryName, filters);
+            return DynamicQueryManager.Current.ExecuteQueryCount(request);
         }
 
         protected internal void SetTokens(object queryName, List<FilterOption> filters)
@@ -790,10 +799,16 @@ namespace Signum.Web
             if (!Navigator.IsFindable(findOptions.QueryName))
                 throw new UnauthorizedAccessException(Resources.ViewForType0IsNotAllowed.Formato(findOptions.QueryName));
 
-            var filters = findOptions.FilterOptions.Select(fo => fo.ToFilter()).ToList();
-            var orders = findOptions.OrderOptions.Select(fo => fo.ToOrder()).ToList();
+            var request = new QueryRequest
+            {
+                QueryName = findOptions.QueryName,
+                Filters = findOptions.FilterOptions.Select(fo => fo.ToFilter()).ToList(),
+                Orders = findOptions.OrderOptions.Select(fo => fo.ToOrder()).ToList(),
+                Limit = top,
+            };
 
-            ResultTable queryResult = DynamicQueryManager.Current.ExecuteQuery(findOptions.QueryName, new List<UserColumn>(), filters, orders, top);
+
+            ResultTable queryResult = DynamicQueryManager.Current.ExecuteQuery(request);
 
             controller.ViewData.Model = context;
             

@@ -12,9 +12,9 @@ namespace Signum.Engine.DynamicQuery
 {
     public class ManualDynamicQuery<T> : DynamicQuery<T>
     {
-        Func<List<UserColumn>, List<Filter>, List<Order>, int?, IEnumerable<Expandable<T>>> execute;
+        Func<QueryRequest, IEnumerable<Expandable<T>>> execute;
 
-        public ManualDynamicQuery(Func<List<UserColumn>, List<Filter>, List<Order>, int?, IEnumerable<Expandable<T>>> execute)
+        public ManualDynamicQuery(Func<QueryRequest, IEnumerable<Expandable<T>>> execute)
         {
             if (execute == null)
                 throw new ArgumentNullException("execute");
@@ -24,21 +24,35 @@ namespace Signum.Engine.DynamicQuery
             InitializeColumns(mi => null);
         }
 
-        public override ResultTable ExecuteQuery(List<UserColumn> userColumns, List<Filter> filters, List<Order> orders, int? limit)
+        public override ResultTable ExecuteQuery(QueryRequest request)
         {
-            Expandable<T>[] list = execute(userColumns, filters, orders, limit).ToArray();
+            Expandable<T>[] list = execute(request).ToArray();
 
-            return ToQueryResult(list, userColumns);
+            return ToQueryResult(list, request.UserColumns);
         }
 
-        public override int ExecuteQueryCount(List<Filter> filters)
+        public override int ExecuteQueryCount(QueryCountRequest request)
         {
-            return execute(null, filters, null, null).Count();
+            var req = new QueryRequest
+            {
+                QueryName = request.QueryName,
+                Filters = request.Filters,
+            };
+
+            return execute(req).Count();
         }
 
-        public override Lite ExecuteUniqueEntity(List<Filter> filters, List<Order> orders, UniqueType uniqueType)
+        public override Lite ExecuteUniqueEntity(UniqueEntityRequest request)
         {
-            return execute(null, filters, orders, 1).SelectEntity().Unique(uniqueType);
+            var req = new QueryRequest
+            {
+                QueryName = request.QueryName,
+                Filters = request.Filters,
+                Limit = 1,
+                Orders = request.Orders,
+            };
+
+            return execute(req).SelectEntity().Unique(request.UniqueType);
         }
     }
 }

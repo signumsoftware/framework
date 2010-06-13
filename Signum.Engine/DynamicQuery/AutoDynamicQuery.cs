@@ -27,23 +27,23 @@ namespace Signum.Engine.DynamicQuery
             InitializeColumns(mi => metas[mi.Name]);
         }
 
-        public override ResultTable ExecuteQuery(List<UserColumn> userColumns, List<Filter> filters, List<Order> orders, int? limit)
+        public override ResultTable ExecuteQuery(QueryRequest request)
         {
-            IQueryable<Expandable<T>> result = query.SelectExpandable(userColumns).Where(filters).OrderBy(orders).TryTake(limit);
+            IQueryable<Expandable<T>> result = query.SelectExpandable(request.UserColumns).Where(request.Filters).OrderBy(request.Orders).TryTake(request.Limit);
 
             Expandable<T>[] list = result.ToArray();
 
-            return ToQueryResult(list, userColumns);
+            return ToQueryResult(list, request.UserColumns);
         }
 
-        public override int ExecuteQueryCount(List<Filter> filters)
+        public override int ExecuteQueryCount(QueryCountRequest request)
         {
-            return query.SelectExpandable(null).Where(filters).Count();
+            return query.SelectExpandable(null).Where(request.Filters).Count();
         }
 
-        public override Lite ExecuteUniqueEntity(List<Filter> filters, List<Order> orders, UniqueType uniqueType)
+        public override Lite ExecuteUniqueEntity(UniqueEntityRequest request)
         {
-            return query.SelectExpandable(null).Where(filters).OrderBy(orders).SelectEntity().Unique(uniqueType);
+            return query.SelectExpandable(null).Where(request.Filters).OrderBy(request.Orders).SelectEntity().Unique(request.UniqueType);
         }
 
         public override Expression Expression
