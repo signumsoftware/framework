@@ -50,7 +50,7 @@ namespace Signum.Windows.Reports
                     File.WriteAllBytes(filename, er.File.BinaryFile);
 
                     // pedimos la consulta y traemos los datos
-                    ResultTable queryResult = Server.Return((IDynamicQueryServer s) => s.GetQueryResult(QueryClient.GetQueryName(er.Query.Key), null, null, null, null)); 
+                    ResultTable queryResult = Server.Return((IDynamicQueryServer s) => s.ExecuteQuery(new QueryRequest { QueryName = QueryClient.GetQueryName(er.Query.Key) })); 
                     ExcelGenerator.WriteDataInExcelFile(queryResult, filename);
                     filename = "";
 
