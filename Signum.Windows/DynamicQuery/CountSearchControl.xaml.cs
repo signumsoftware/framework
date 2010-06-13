@@ -100,14 +100,16 @@ namespace Signum.Windows
         {
             queryCount = 0;
 
-            object vn = QueryName;
-
-            var lf = FilterOptions.Select(f => f.ToFilter()).ToList();
+            
+            var request = new QueryCountRequest
+            {
+                QueryName = QueryName, 
+                Filters = FilterOptions.Select(f => f.ToFilter()).ToList()
+            }; 
 
             Async.Do(this.FindCurrentWindow(),
                 () =>
-
-                    queryCount = Server.Return((IDynamicQueryServer s)=>s.GetQueryCount(vn, lf)),
+                    queryCount = Server.Return((IDynamicQueryServer s)=>s.ExecuteQueryCount(request)),
                 () =>
                 {
                     ItemsCount = queryCount;

@@ -455,10 +455,15 @@ namespace Signum.Windows
             SetFilterTokens(options.QueryName, options.FilterOptions);
             SetOrderTokens(options.QueryName, options.OrderOptions);
 
-            var filters = options.FilterOptions.Select(f => f.ToFilter()).ToList();
-            var orders = options.OrderOptions.Select(f => f.ToOrder()).ToList();
+            var request = new UniqueEntityRequest
+            {
+                 QueryName = options.QueryName,
+                 Filters = options.FilterOptions.Select(f => f.ToFilter()).ToList(),
+                 Orders = options.OrderOptions.Select(f => f.ToOrder()).ToList(),
+                 UniqueType = options.UniqueType,
+            };
 
-            return Server.Return((IDynamicQueryServer s) => s.GetUniqueEntity(options.QueryName, filters, orders, options.UniqueType));
+            return Server.Return((IDynamicQueryServer s) => s.ExecuteUniqueEntity(request));
         }
 
         public int QueryCount(CountOptions options)
@@ -467,9 +472,13 @@ namespace Signum.Windows
 
             SetFilterTokens(options.QueryName, options.FilterOptions);
 
-            var filters = options.FilterOptions.Select(f => f.ToFilter()).ToList();
+            var request = new QueryCountRequest
+            {
+                QueryName = options.QueryName,
+                Filters = options.FilterOptions.Select(f => f.ToFilter()).ToList()
+            };
 
-            return Server.Return((IDynamicQueryServer s) => s.GetQueryCount(options.QueryName, filters));
+            return Server.Return((IDynamicQueryServer s) => s.ExecuteQueryCount(request));
         }
 
         public void SetFilterTokens(object queryName, IEnumerable<FilterOption> filters)

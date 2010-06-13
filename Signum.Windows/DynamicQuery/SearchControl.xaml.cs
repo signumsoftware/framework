@@ -436,17 +436,19 @@ namespace Signum.Windows
 
             btFind.IsEnabled = false;
 
-            object vn = QueryName;
-            List<Filter> filters = FilterOptions.Select(f => f.ToFilter()).ToList();
-            List<Order> orders = OrderOptions.Select(o => o.ToOrder()).ToList();
-
             AssertUserColumnIndexes();
-            List<UserColumn> userColumns = UserColumns.Select(c => c.UserColumn).ToList();
 
-            int? limit = MaxItemsCount;
+            var request = new QueryRequest
+            {
+                QueryName = QueryName, 
+                Filters = FilterOptions.Select(f => f.ToFilter()).ToList(),
+                Orders = OrderOptions.Select(o => o.ToOrder()).ToList(),
+                UserColumns = UserColumns.Select(c => c.UserColumn).ToList(),
+                Limit = MaxItemsCount
+            };
 
             Async.Do(this.FindCurrentWindow(),
-                () => resultTable = Server.Return((IDynamicQueryServer s) => s.GetQueryResult(vn, userColumns, filters, orders, limit)),
+                () => resultTable = Server.Return((IDynamicQueryServer s) => s.ExecuteQuery(request)),
                 () =>
                 {
                     if (resultTable != null)
