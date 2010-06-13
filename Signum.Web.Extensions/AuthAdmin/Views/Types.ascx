@@ -78,6 +78,7 @@
         foreach (var iter2 in iter.Value.OrderBy(a => a.Value.Resource.FriendlyName).Iterate())
         {
             var item = iter2.Value;
+  
     %>
     <tr>
         <td>
@@ -112,31 +113,43 @@
             <%= Html.CheckBox(item.Compose("Overriden"), item.Value.Overriden, new {disabled = "disabled",  @class = "overriden"}) %>
         </td>
         <% if (Navigator.Manager.EntitySettings.ContainsKey(typeof(PropertyRulePack)))
-           { %>
+           { 
+               %>
         <td>
+         <%if (item.Value.Properties.HasValue)
+              {%>
             <a href="javascript:openDialog('AuthAdmin/Properties', {role:<%=tc.Value.Role.Id%>, type:<%=item.Value.Resource.Id%>});">
-                <img src="authAdmin/images/property.png" />
+               <div style="background-image:url(authAdmin/images/property.png); background-repeat:no-repeat">
+                    <div class="thumb <%=item.Value.Properties.ToString().ToLower()%>"></div>
+                </div>
             </a>
+              <%} %>
         </td>
         <%} %>
         <% if (Navigator.Manager.EntitySettings.ContainsKey(typeof(OperationRulePack)))
-           { %>
+           { 
+               %>
         <td>
-            <%if (OperationLogic.HasOperations(TypeLogic.DnToType[item.Value.Resource]))
+            <%if (item.Value.Operations.HasValue)
               {%>
             <a href="javascript:openDialog('AuthAdmin/Operations', {role:<%=tc.Value.Role.Id%>, type:<%=item.Value.Resource.Id%>});">
-                <img src="authAdmin/images/operation.png" />
+                <div style="background-image:url(authAdmin/images/operation.png); background-repeat:no-repeat">
+                    <div class="thumb <%=item.Value.Operations.ToString().ToLower()%>"></div>
+                </div>
             </a>
             <%} %>
         </td>
         <%} %>
         <% if (Navigator.Manager.EntitySettings.ContainsKey(typeof(QueryRulePack)))
-           { %>
+           {
+               %>
         <td>
-            <%if (Signum.Engine.Authorization.QueryAuthLogic.GetAllowedThumbnail(TypeLogic.DnToType[item.Value.Resource]))
+            <%if (item.Value.Queries.HasValue)
               {%>
             <a href="javascript:openDialog('AuthAdmin/Queries', {role:<%=tc.Value.Role.Id%>, type:<%=item.Value.Resource.Id%>});">
-                <img src="authAdmin/images/query.png" />
+                <div style="background-image:url(authAdmin/images/query.png); background-repeat:no-repeat">
+                    <div class="thumb <%=item.Value.Queries.ToString().ToLower()%>"></div>
+                </div>
             </a>
             <%} %>
         </td>

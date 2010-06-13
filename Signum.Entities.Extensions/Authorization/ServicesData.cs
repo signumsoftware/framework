@@ -91,7 +91,36 @@ namespace Signum.Entities.Authorization
     [Serializable]
     public class TypeRulePack : BaseRulePack<TypeAllowedRule> { }
     [Serializable]
-    public class TypeAllowedRule : AllowedRule<TypeDN, TypeAllowed> { }
+    public class TypeAllowedRule : AllowedRule<TypeDN, TypeAllowed> 
+    {
+        AuthThumbnail? properties;
+        public AuthThumbnail? Properties
+        {
+            get { return properties; }
+            set { Set(ref properties, value, () => Properties); }
+        }
+
+        AuthThumbnail? operations;
+        public AuthThumbnail? Operations
+        {
+            get { return operations; }
+            set { Set(ref operations, value, () => Operations); }
+        }
+
+        AuthThumbnail? queries;
+        public AuthThumbnail? Queries
+        {
+            get { return queries; }
+            set { Set(ref queries, value, () => Queries); }
+        }
+    }
+
+    public enum AuthThumbnail
+    {
+        All,
+        Mix,
+        None,
+    }
 
 
     [Serializable]

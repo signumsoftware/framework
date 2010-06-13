@@ -150,6 +150,7 @@
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="AuthAdmin\Images\thumb.png" />
     <Content Include="Captcha\Views\captcha.ascx">
       <SubType>ASPXCodeBehind</SubType>
     </Content>

@@ -20,7 +20,9 @@ namespace Signum.Engine.Authorization
 {
     public static class OperationAuthLogic
     {
-        static AuthCache<RuleOperationDN, OperationAllowedRule, OperationDN, Enum, bool> cache; 
+        static AuthCache<RuleOperationDN, OperationAllowedRule, OperationDN, Enum, bool> cache;
+
+        public static bool IsStarted { get { return cache != null; } }
 
         public static void Start(SchemaBuilder sb)
         {

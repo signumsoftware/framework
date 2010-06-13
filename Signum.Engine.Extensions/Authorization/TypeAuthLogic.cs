@@ -21,6 +21,8 @@ namespace Signum.Engine.Authorization
     {
         static AuthCache<RuleTypeDN, TypeAllowedRule, TypeDN, Type, TypeAllowed> cache;
 
+        public static bool IsStarted { get { return cache != null; } }
+
         public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -68,10 +70,29 @@ namespace Signum.Engine.Authorization
 
         public static TypeRulePack GetTypeRules(Lite<RoleDN> roleLite)
         {
+            var rules = cache.GetRules(roleLite, TypeLogic.TypeToDN.Where(t => !t.Key.IsEnumProxy()).Select(a => a.Value)); 
+
+            foreach (var r in rules)
+	        {
+               Type type = TypeLogic.DnToType[r.Resource]; 
+
+                if(OperationAuthLogic.IsStarted)
+                    r.Operations = OperationAuthLogic.GetAllowedThumbnail(roleLite, type); 
+
+                
+                if(PropertyAuthLogic.IsStarted)
+                    r.Properties = PropertyAuthLogic.GetAllowedThumbnail(roleLite, type); 
+
+                
+                if(QueryAuthLogic.IsStarted)
+                    r.Queries = QueryAuthLogic.GetAllowedThumbnail(roleLite, type); 
+
+	        }
+
             return new TypeRulePack
             {
                 Role = roleLite,
-                Rules = cache.GetRules(roleLite, TypeLogic.TypeToDN.Where(t => !t.Key.IsEnumProxy()).Select(a => a.Value)).ToMList()
+                Rules = rules.ToMList()
             };
         }
 
@@ -139,12 +160,5 @@ namespace Signum.Engine.Authorization
                 acum.Value == PropertyAllowed.Read ? AuthThumbnail.Mix : AuthThumbnail.All;
 
         }
-    }
-
-    public enum AuthThumbnail
-    {
-        All,
-        Mix,
-        None,
     }
 }

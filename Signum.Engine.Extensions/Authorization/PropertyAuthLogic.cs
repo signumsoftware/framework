@@ -17,7 +17,9 @@ namespace Signum.Engine.Authorization
 {
     public static class PropertyAuthLogic
     {
-        static AuthCache<RulePropertyDN, PropertyAllowedRule, PropertyDN, PropertyRoute, PropertyAllowed> cache; 
+        static AuthCache<RulePropertyDN, PropertyAllowedRule, PropertyDN, PropertyRoute, PropertyAllowed> cache;
+
+        public static bool IsStarted { get { return cache != null; } }
 
         public static void Start(SchemaBuilder sb, bool queries)
         {

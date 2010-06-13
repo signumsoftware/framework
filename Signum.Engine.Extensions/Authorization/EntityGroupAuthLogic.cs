@@ -24,7 +24,9 @@ namespace Signum.Engine.Authorization
 {
     public static class EntityGroupAuthLogic
     {
-        static AuthCache<RuleEntityGroupDN, EntityGroupAllowedRule, EntityGroupDN, Enum, EntityGroupAllowed> cache; 
+        static AuthCache<RuleEntityGroupDN, EntityGroupAllowedRule, EntityGroupDN, Enum, EntityGroupAllowed> cache;
+
+        public static bool IsStarted { get { return cache != null; } }
 
         public static void Start(SchemaBuilder sb)
         {
@@ -207,19 +209,27 @@ namespace Signum.Engine.Authorization
                 : base(query)
             { }
 
-            public override ResultTable ExecuteQuery(List<UserColumn> userColumns, List<Filter> filters, List<Order> orders, int? limit)
+            public override ResultTable ExecuteQuery(QueryRequest request)
             {
                 using (EntityGroupAuthLogic.DisableQueries())
                 {
-                    return base.ExecuteQuery(userColumns, filters, orders, limit);
+                    return base.ExecuteQuery(request);
                 }
             }
 
-            public override int ExecuteQueryCount(List<Filter> filters)
+            public override Lite ExecuteUniqueEntity(UniqueEntityRequest request)
             {
                 using (EntityGroupAuthLogic.DisableQueries())
                 {
-                    return base.ExecuteQueryCount(filters);
+                    return base.ExecuteUniqueEntity(request);
+                }
+            }
+
+            public override int ExecuteQueryCount(QueryCountRequest request)
+            {
+                using (EntityGroupAuthLogic.DisableQueries())
+                {
+                    return base.ExecuteQueryCount(request);
                 }
             }
         }

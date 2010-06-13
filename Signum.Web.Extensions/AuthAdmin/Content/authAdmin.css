@@ -92,5 +92,31 @@ a.cbDisabled:hover
     background-position: -48px -22px; 
 }
 
+.thumb
+{
+   background-image: url("../images/thumb.png");
+   width:16px;
+   height:16px;
+}
+
+.thumb.none
+{
+    background-position: 0px 0px; 
+}
+
+.thumb.mix
+{
+    background-position: 0px -16px; 
+}
+
+.thumb.all
+{
+    background-position: 0px -32px; 
+}
+
+
+
+
+
 
 

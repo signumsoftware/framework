@@ -20,7 +20,9 @@ namespace Signum.Engine.Authorization
 
     public static class QueryAuthLogic
     {
-        static AuthCache<RuleQueryDN, QueryAllowedRule, QueryDN, object, bool> cache;  
+        static AuthCache<RuleQueryDN, QueryAllowedRule, QueryDN, object, bool> cache;
+
+        public static bool IsStarted { get { return cache != null; } }
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {

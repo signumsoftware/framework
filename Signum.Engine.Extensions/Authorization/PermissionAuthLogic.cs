@@ -32,6 +32,8 @@ namespace Signum.Engine.Authorization
 
         static AuthCache<RulePermissionDN, PermissionAllowedRule, PermissionDN, Enum, bool> cache;
 
+        public static bool IsStarted { get { return cache != null; } }
+
         public static void AssertStarted(SchemaBuilder sb)
         {
             sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null)));

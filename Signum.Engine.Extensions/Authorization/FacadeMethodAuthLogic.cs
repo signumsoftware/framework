@@ -17,7 +17,9 @@ namespace Signum.Engine.Authorization
 {
     public static class FacadeMethodAuthLogic
     {
-        static AuthCache<RuleFacadeMethodDN, FacadeMethodAllowedRule, FacadeMethodDN, string, bool> cache; 
+        static AuthCache<RuleFacadeMethodDN, FacadeMethodAllowedRule, FacadeMethodDN, string, bool> cache;
+
+        public static bool IsStarted { get { return cache != null; } }
 
         public static void Start(SchemaBuilder sb, Type serviceInterface)
         {

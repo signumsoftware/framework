@@ -31,10 +31,15 @@ namespace Signum.Web.Controllers
             if (!Navigator.IsFindable(findOptions.QueryName))
                 throw new UnauthorizedAccessException(Resources.ViewForType0IsNotAllowed.Formato(findOptions.QueryName));
 
-            var filters = findOptions.FilterOptions.Select(fo => fo.ToFilter()).ToList();
-            var orders = findOptions.OrderOptions.Select(fo => fo.ToOrder()).ToList();
+            var request = new QueryRequest
+            { 
+                QueryName =  findOptions.QueryName,
+                Filters =  findOptions.FilterOptions.Select(fo => fo.ToFilter()).ToList(),
+                Orders =  findOptions.OrderOptions.Select(fo => fo.ToOrder()).ToList(),
+                Limit = sfTop  
+            };
 
-            ResultTable queryResult = DynamicQueryManager.Current.ExecuteQuery(findOptions.QueryName, null, filters, orders,sfTop);
+            ResultTable queryResult = DynamicQueryManager.Current.ExecuteQuery( request);
             byte[] binaryFile = PlainExcelGenerator.WritePlainExcel(queryResult);
             
             return File(binaryFile, SignumController.GetMimeType(".xlsx"), Navigator.Manager.QuerySettings[findOptions.QueryName].UrlName + ".xlsx");
