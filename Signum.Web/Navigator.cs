@@ -793,7 +793,7 @@ namespace Signum.Web
             var filters = findOptions.FilterOptions.Select(fo => fo.ToFilter()).ToList();
             var orders = findOptions.OrderOptions.Select(fo => fo.ToOrder()).ToList();
 
-            ResultTable queryResult = DynamicQueryManager.Current.ExecuteQuery(findOptions.QueryName, null, filters, orders, top);
+            ResultTable queryResult = DynamicQueryManager.Current.ExecuteQuery(findOptions.QueryName, new List<UserColumn>(), filters, orders, top);
 
             controller.ViewData.Model = context;
             
