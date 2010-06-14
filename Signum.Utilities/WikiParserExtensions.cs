@@ -11,6 +11,7 @@ namespace Signum.Utilities
         public WikiSettings(bool format)
         {
             Strong = Em = Underlined = Strike = Lists = Titles = LineBreaks = format;
+            AllowRawHtml = false;
         }
 
         public Func<string, string> TokenParser;
@@ -21,20 +22,39 @@ namespace Signum.Utilities
         public bool Lists { get; set; }
         public bool Titles { get; set; }
         public bool LineBreaks { get; set; }
-
+        public bool AllowRawHtml { get; set; }
     }
 
     public static class WikiParserExtensions
     {
+        public static string HtmlSubstitute = "||HTML{0}||";
+
         public static string WikiParse(this string content, WikiSettings settings)
         {
             string result;
+
+            Dictionary<string, string> htmlFragments = null;
+
+            if (settings.AllowRawHtml)
+            {
+                htmlFragments = new Dictionary<string, string>();
+
+                content = Regex.Replace(content, @"<!\[CDATA\[(?<html>.*?)\]\]>", m =>
+                {
+                    var key = HtmlSubstitute.Formato(htmlFragments.Count);
+                    htmlFragments.Add(key, m.Groups["html"].Value);
+                    return key;
+                }, RegexOptions.Singleline);
+            }
 
             //1: Process tokens
             result = ProcessTokens(content, settings);
 
             //2: Process format
             result = ProcessFormat(result, settings);
+
+            if (settings.AllowRawHtml)
+                result = Regex.Replace(result, @"\|\|(?<key>HTML\d+)\|\|", m => htmlFragments[m.Value]);
 
             return result.Trim();
         }
