@@ -37,6 +37,11 @@ namespace Signum.Entities.DynamicQuery
             return column.Token.IsAllowed();
         }
 
+        public override string ToString()
+        {
+            return "CleanMeta( {0} )".Formato(PropertyRoute);
+        }
+
     }
 
     [Serializable]
@@ -54,6 +59,11 @@ namespace Signum.Entities.DynamicQuery
         public override bool IsAllowed()
         {
             return Properties.All(cm => cm.IsAllowed());
+        }
+
+        public override string ToString()
+        {
+            return "DirtyMeta( {0} )".Formato(Properties.Select(a=>a.PropertyRoute).ToString(", "));
         }
     }
 }

@@ -181,6 +181,7 @@ namespace Signum.Windows
         static ValueLineConfigurator()
         {
             Binding b = new Binding() { Mode = BindingMode.OneTime, Converter = Converters.EnumDescriptionConverter };
+            System.Diagnostics.PresentationTraceSources.SetTraceLevel(b, PresentationTraceLevel.High);
             comboDataTemplate = new DataTemplate
             {
                 VisualTree = new FrameworkElementFactory(typeof(TextBlock))

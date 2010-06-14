@@ -96,7 +96,7 @@ namespace Signum.Engine.DynamicQuery
             if (IsEntity)
                 return this.Type.NiceName();
 
-            if (PropertyRoute != null && propertyRoute.PropertyRouteType == PropertyRouteType.Property)
+            if (PropertyRoute != null && propertyRoute.PropertyRouteType == PropertyRouteType.Property && PropertyRoute.PropertyInfo.Name == Name)
                 return propertyRoute.PropertyInfo.NiceName();
 
             return Name.NiceName();
