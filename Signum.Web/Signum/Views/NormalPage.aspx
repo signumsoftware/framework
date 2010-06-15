@@ -1,4 +1,4 @@
-﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Views/Shared/Site.Master" Inherits="System.Web.Mvc.ViewPage" %>
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Views/Shared/Site.Master" Inherits="System.Web.Mvc.ViewPage" ValidateRequest="false" %>
 <%@ Import Namespace="Signum.Web" %>
 <%@ Import Namespace="System.Configuration" %>
 <%@ Import Namespace="Signum.Web.Properties" %>

@@ -8,8 +8,7 @@ $(function() { $('#form input[type=text]').keypress(function(e) { return e.which
 window['Autocompleter.prototype'] = Autocompleter.prototype;
 window['AutocompleteOnSelected'] = AutocompleteOnSelected;*/
 Autocompleter = function(controlId, url, _options) {
-    var self = this;
-    self.options = $.extend({
+    this.options = $.extend({
         minChars: 1,
         limit: 5,
         delay: 200,
@@ -18,26 +17,26 @@ Autocompleter = function(controlId, url, _options) {
         entityIdFieldName: null,
         textField: "text",
         extraParams: {},
-
-        extraResult: null,
-        extraResultClick: null,
-
-        cacheResults: true
+        cacheResults: true,
+        showExtra: false,
+        renderExtra: function($extra, data) {
+            return $extra;
+        }
     }, _options);
 
-    self.timerID = 10;
-    self.$dd = self.currentText = self.request = undefined;
-    self.$control = $("#" + controlId);
-    self.controlId = controlId;
-    self.url = url;
-    self.cacheResults = [];
-    self.currentResults = [];
-    self.currentInput = undefined;
-    self.resultClass = "ddlAuto";
-    self.resultSelectedClass = "ddlAutoOn";
-    self.create();
+    this.timerID = undefined;
+    this.$dd = this.currentText = this.request = undefined;
+    this.$control = $("#" + controlId);
+    this.controlId = controlId;
+    this.url = url;
+    this.cacheResults = [];
+    this.currentResults = [];
+    this.currentInput = undefined;
+    this.resultClass = "ddlAuto";
+    this.resultSelectedClass = "ddlAutoOn";
+    this.create();
 
-    self.extraObj = undefined;  //data object passed to extra div when clicked
+    this.extraObj = undefined;  //data object passed to extra div when clicked
 };
 
 Autocompleter.prototype = {
@@ -65,17 +64,13 @@ Autocompleter.prototype = {
             self.$dd.hide();
         });
 
-        this.$dd = $("<div/>").addClass("AutoCompleteMainDiv");
-        this.$dd.click(function(e) {
-            self.click(e);
-        });
-
-        this.$dd.insertAfter(this.$control);
-        this.$dd.delegate("." + this.resultClass, "mouseenter", function() {
-            self.selectIndex($(this));
-        });
-
-
+        this.$dd = $("<div/>")
+            .addClass("AutoCompleteMainDiv")
+            .click(function(e) { self.click(e); })
+            .delegate("." + this.resultClass, "mouseenter", function() {
+                self.selectIndex($(this))
+            })
+            .insertAfter(this.$control);
     },
     clear: function(e) {
         clearTimeout(this.timerID);
@@ -86,6 +81,8 @@ Autocompleter.prototype = {
         if (key == 37 || key == 39 || key == 38 || key == 40 || key == 13) return;
         var input = this.$control.val();
         if (this.currentText == input) return;
+
+        this.currentInput = input;
 
         if (input != null && input.length < this.options.minChars) {
             this.$dd.html("").hide(); this.currentResults = [];
@@ -117,61 +114,62 @@ Autocompleter.prototype = {
             function(results) {
                 self.request = undefined;
                 if (results) {
+
                     self.showResults(results, input);
                 }
             });
     },
 
     showResults: function(results, input) {
-        var self = this;
-        self.currentInput = input;
-        self.currentText = self.$control.val();
+        this.currentText = this.$control.val();
 
-        var prevCount = self.currentResults.length;
-        if (prevCount == 0) self.$dd.hide();
+        var prevCount = this.currentResults.length;
+        if (prevCount == 0) this.$dd.hide();
 
         var content = "";
         for (var i = 0, l = results.length; i < l; i++) {
-            content += "<div class=\"" + self.resultClass + "\">" + self.process(input, results[i]) + "</div>";
+            content += "<div class=\"" + this.resultClass + "\">" + this.process(input, results[i]) + "</div>";
         }
 
-        self.$dd[0].innerHTML = content;
+        this.$dd[0].innerHTML = content;
 
-        self.currentResults = results;
-        if (self.options.cacheResults)
-            self.cacheResults[input.toLowerCase()] = results;
+        this.currentResults = results;
+        if (this.options.cacheResults)
+            this.cacheResults[input.toLowerCase()] = results;
 
         //add extra result
-        if (self.options.extraResult != null) {
-            var obj = {};
-            obj.input = input;
-            obj.results = results.length;
+        if (this.options.showExtra) {
+            var obj = {
+                input: input,
+                results: results.length
+            };
 
-            var extraDiv = "<div class=\"" + self.resultClass + " " + " extra\">" + self.options.extraResult(obj) + "</div>";
-            self.extraObj = obj;
-            
-            self.$dd[0].innerHTML += extraDiv;
+            var $extra = $("<div/>")
+                            .addClass(this.resultClass + " extra");
+
+            this.options.renderExtra($extra, obj);
+            this.$dd.append($extra);
         }
 
-        var offset = self.$control.position();
-        self.$dd.css({
+        var offset = this.$control.position();
+        this.$dd.css({
             left: offset.left,
-            top: offset.top + self.$control.outerHeight() - 1,
-            width: self.$control.outerWidth() - 2
+            top: offset.top + this.$control.outerHeight() - 1,
+            width: this.$control.outerWidth() - 2
         });
 
-        self.$control.removeClass('loading');
+        this.$control.removeClass('loading');
 
-        if (prevCount == 0)
-            self.$dd.slideDown("fast");
+        if (prevCount == 0 && !this.options.showExtra)
+            this.$dd.slideDown("fast");
         else
-            self.$dd.show();
+            this.$dd.show();
     },
-    
+
     keydown: function(e) {
         var key = e.which ? e.which : e.keyCode;
         if (key == 13 || key == 9) {    //enter or tab
-            var selectedOption = this.$dd.find("." + this.resultSelectedClass);
+            var selectedOption = this._getSelected();
             if (selectedOption.length > 0) {
                 if (selectedOption.hasClass("extra")) selectedOption.click();
                 else this.onOk(selectedOption.index());
@@ -198,7 +196,7 @@ Autocompleter.prototype = {
         }
     },
     moveUp: function() {
-        var current = this.$dd.children("." + this.resultSelectedClass).first();
+        var current = this._getSelected();
         if (!current.length) { //Not yet in the DDL, select the last one		
             this.selectIndex(this.$dd.children().last());
             return;
@@ -206,7 +204,7 @@ Autocompleter.prototype = {
         this.selectIndex(current.prev());
     },
     moveDown: function() {
-        var current = this.$dd.children("." + this.resultSelectedClass).first();
+        var current = this._getSelected();
         if (!current.length) { //Not yet in the DDL, select the first one
             this.selectIndex(this.$dd.children());
             return;
@@ -216,11 +214,12 @@ Autocompleter.prototype = {
     click: function(e) {
         var target = e.srcElement || e.target;
         if (target != null) {
-            if (!$(target).closest(".extra").length)
+            var $extra = $(target).closest(".extra");
+
+            if (!$extra.length)
                 this.onOk($(target).closest("." + this.resultSelectedClass).index());
             else
-                if (this.options.extraResultClick != null)
-                this.options.extraResultClick(this.extraObj);
+                $extra.click();
             this.$dd.hide();
         }
     },
@@ -258,14 +257,19 @@ Autocompleter.prototype = {
             AutocompleteOnSelected(this.controlId, data);
         }
     },
+
     selectIndex: function($option) {
-        this.$dd.children("." + this.resultSelectedClass).removeClass(this.resultSelectedClass);
+        this._getSelected().removeClass(this.resultSelectedClass);
         if ($option == null || $option == undefined) {
             this.$control.val(this.currentText).focus();
             return;
         }
         $option.first().addClass(this.resultSelectedClass);
         this.$control.focus();
+    },
+
+    _getSelected: function() {
+        return this.$dd.children("." + this.resultSelectedClass).first();
     }
 };
 
