@@ -23,6 +23,7 @@ namespace Signum.Web.Operations
     [HandleException, AuthenticationRequired]
     public class OperationController : Controller
     {
+        [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult OperationExecute(string sfOperationFullKey, bool isLite, string prefix, string sfOldPrefix, string sfOnOk, string sfOnCancel)
         {
             IdentifiableEntity entity = null;
@@ -68,6 +69,7 @@ namespace Signum.Web.Operations
             }
         }
 
+        [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult DeleteExecute(string sfOperationFullKey, string prefix, string sfOldPrefix, string sfOnOk, string sfOnCancel)
         {
             RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(Request.Form[TypeContextUtilities.Compose(sfOldPrefix, EntityBaseKeys.RuntimeInfo)]);
@@ -82,6 +84,7 @@ namespace Signum.Web.Operations
             return Content("");
         }
 
+        [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult ConstructFromExecute(string sfOperationFullKey, bool isLite, string prefix, string sfOldPrefix, string sfOnOk, string sfOnCancel)
         {
             IdentifiableEntity entity = null;
@@ -124,6 +127,7 @@ namespace Signum.Web.Operations
             }
         }
 
+        [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult ConstructFromManyExecute(string sfRuntimeType, List<int> sfIds, string sfOperationFullKey, string prefix, string sfOnOk, string sfOnCancel)
         {
             Type type = Navigator.ResolveType(sfRuntimeType);
