@@ -187,6 +187,15 @@ namespace Signum.Web.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Finish Edit.
+        /// </summary>
+        public static string EditColumnsFinishEdit {
+            get {
+                return ResourceManager.GetString("EditColumnsFinishEdit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to EntityCombo cannot have onchange html property, use onEntityChanged instead.
         /// </summary>
         public static string EntityComboCannotHaveOnchangeHtmlPropertyUseOnEntityChangedInstead {
@@ -849,6 +858,15 @@ namespace Signum.Web.Properties {
         public static string TypeWasNotPossibleToExtract {
             get {
                 return ResourceManager.GetString("TypeWasNotPossibleToExtract", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Edit User Columns.
+        /// </summary>
+        public static string UserColumnsEdit {
+            get {
+                return ResourceManager.GetString("UserColumnsEdit", resourceCulture);
             }
         }
         

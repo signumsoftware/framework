@@ -45,6 +45,7 @@
         <input type="button" value="+" class="lineButton create" onclick="<%="SearchCreate({{prefix:'{0}'}});".Formato(context.ControlID)%>" />
     <%} %>
     <%= ButtonBarQueryHelper.GetButtonBarElementsForQuery(this.ViewContext, findOptions.QueryName, entitiesType, context.ControlID).ToString(Html)%> 
+    
 </div>
 <div class="clearall"></div>
 <div id="<%=context.Compose("divResults")%>" class="divResults">

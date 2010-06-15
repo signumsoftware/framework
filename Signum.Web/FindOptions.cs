@@ -47,12 +47,21 @@ namespace Signum.Web
             set { this.orderOptions = value; }
         }
 
+        List<UserColumnOption> userColumnOptions = new List<UserColumnOption>();
+        public List<UserColumnOption> UserColumnOptions
+        {
+            get { return userColumnOptions; }
+            set { this.userColumnOptions = value; }
+        }
+
         public FindOptions() { }
 
         public FindOptions(object queryName)
         {
             this.QueryName = queryName;
         }
+
+        public bool? AllowUserColumns { get; set; }
 
         public bool SearchOnLoad { get; set; }
         
@@ -109,6 +118,7 @@ namespace Signum.Web
             op.Add("create", !Create ? "false" : null);
             op.Add("allowMultiple", AllowMultiple.TrySC(b => b ? "true" : "false"));
             op.Add("filters", filterOptions.Empty() ? null : filterOptions.Select((f, i) => f.ToString(i)).ToString("").SingleQuote());
+            op.Add("allowUserColumns", AllowUserColumns.HasValue ? (AllowUserColumns.Value ? "true" : "false") : null);
         }
     }
 
@@ -258,4 +268,15 @@ namespace Signum.Web
         Hidden,
         AlwaysHidden,
     }
+
+    public class UserColumnOption
+    {
+        public UserColumnOption()
+        {
+        }
+
+        public string DisplayName { get; set; }
+
+        public UserColumn UserColumn { get; set; }
+    }  
 }

@@ -37,8 +37,8 @@ namespace Signum.Web
             fo.QueryName = Navigator.ResolveQueryFromUrlName(queryUrlName);
 
             fo.FilterOptions = ExtractFilterOptions(controllerContext.HttpContext, fo.QueryName);
-
             fo.OrderOptions = ExtractOrderOptions(controllerContext.HttpContext, fo.QueryName);
+            fo.UserColumnOptions = ExtractUserColumnsOptions(controllerContext.HttpContext, fo.QueryName);
 
             if (parameters.AllKeys.Any(k => k == "sfAllowMultiple"))
             {
@@ -88,11 +88,6 @@ namespace Signum.Web
                 string operation = parameters["sel" + index.ToString()];
                 bool frozen = parameters.AllKeys.Any(k => k == "fz" + index.ToString());
 
-                //Type type = queryDescription.StaticColumns
-                //            .SingleOrDefault(c => c.Name == name)
-                //            .ThrowIfNullC(Resources.InvalidFilterColumn0NotFound.Formato(name))
-                //           .Type;
-
                 QueryToken token = QueryToken.Parse(queryDescription, name);
 
                 object valueObject = Convert(value, token.Type);
@@ -131,6 +126,37 @@ namespace Signum.Web
                 {
                     Token = QueryToken.Parse(queryDescription, token),
                     Type = orderType
+                });
+            }
+
+            return result;
+        }
+
+        public static List<UserColumnOption> ExtractUserColumnsOptions(HttpContextBase httpContext, object queryName)
+        {
+            List<UserColumnOption> result = new List<UserColumnOption>();
+
+            QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(queryName);
+
+            NameValueCollection parameters = httpContext.Request.Params;
+            string field = parameters["sfUserColumns"];
+            
+            if (!field.HasText())
+                return result;
+
+            string[] colArray = field.Split(new []{","}, StringSplitOptions.RemoveEmptyEntries);
+            
+            int numStaticCols = queryDescription.StaticColumns.Count;
+
+            for (int i = 0; i < colArray.Length; i++)
+            {
+                string currentColString = colArray[i];
+                result.Add(new UserColumnOption
+                {
+                    UserColumn = new UserColumn(numStaticCols, QueryToken.Parse(queryDescription, currentColString)) 
+                    { 
+                        UserColumnIndex = i,
+                    },
                 });
             }
 

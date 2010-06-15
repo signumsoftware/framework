@@ -643,7 +643,7 @@ namespace Signum.Windows
 
             if (token is ColumnToken)
             {
-                MessageBox.Show("{0} allready in the result columns".Formato(token.NiceName()));
+                MessageBox.Show("{0} already in the result columns".Formato(token.NiceName()));
                 return;
             }
 

@@ -219,6 +219,8 @@
     <Content Include="Signum\Images\fancy_closebox.png" />
     <Content Include="Signum\Images\gray-grad.png" />
     <Content Include="Signum\Images\lineButtons.gif" />
+    <Content Include="Signum\Images\newFilter.png" />
+    <Content Include="Signum\Images\newColumn.png" />
     <Content Include="Signum\Images\popup-header-back.jpg" />
     <Content Include="Signum\Images\sign_error.gif" />
     <Content Include="Signum\Scripts\SF_jquery-ui-datepicker-extension.js" />

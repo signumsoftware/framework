@@ -498,6 +498,8 @@ namespace Signum.Web
         public event Func<Type, bool> GlobalIsReadOnly;
         public event Func<object, bool> GlobalIsFindable;
 
+        public Func<string, bool> AllowUserColumns = s => s.HasText() ? false : true;
+
         public NavigationManager()
         {
             TypesToNames = new Dictionary<Type, string>();
@@ -804,12 +806,12 @@ namespace Signum.Web
                 QueryName = findOptions.QueryName,
                 Filters = findOptions.FilterOptions.Select(fo => fo.ToFilter()).ToList(),
                 Orders = findOptions.OrderOptions.Select(fo => fo.ToOrder()).ToList(),
+                UserColumns =  findOptions.UserColumnOptions.Select(uco => uco.UserColumn).ToList(),
                 Limit = top,
             };
 
-
             ResultTable queryResult = DynamicQueryManager.Current.ExecuteQuery(request);
-
+            
             controller.ViewData.Model = context;
             
             controller.ViewData[ViewDataKeys.FindOptions] = findOptions;

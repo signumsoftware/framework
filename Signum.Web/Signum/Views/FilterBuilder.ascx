@@ -1,4 +1,4 @@
-<%@ Control Language="C#" Inherits="System.Web.Mvc.ViewUserControl" %>
+﻿<%@ Control Language="C#" Inherits="System.Web.Mvc.ViewUserControl" %>
 <%@ Import Namespace="Signum.Web" %>
 <%@ Import Namespace="Signum.Entities" %>
 <%@ Import Namespace="Signum.Entities.DynamicQuery" %>
@@ -30,8 +30,14 @@
                    columns.Insert(0, new SelectListItem { Text = "-", Selected = true, Value = "" });
                 %>
                <%= Html.TokensCombo(columns, context, 0) %>
-               <%= Html.Button(context.Compose("btnAddFilter"), "+", "AddFilter('{0}');".Formato(context.ControlID), "", null)%>
-               <%= Html.Button(context.Compose("btnClearAllFilters"), Html.Encode(Resources.DeleteFilters), "ClearAllFilters('{0}');".Formato(context.ControlID), "", findOptions.FilterOptions.Count == 0 ? new Dictionary<string, object> { { "style", "display:none;" } } : new Dictionary<string, object>())%>
+               <%= Html.Button(context.Compose("btnAddFilter"), "+", "AddFilter('{0}');".Formato(context.ControlID), "addFilter", new Dictionary<string, object> { { "title", "Add Filter" }})%>
+               <% if (findOptions.AllowUserColumns.HasValue ? findOptions.AllowUserColumns.Value : Navigator.Manager.AllowUserColumns(context.ControlID))
+                  { %>
+               <%= Html.Button(context.Compose("btnAddColumn"), "+", "AddColumn('{0}');".Formato(context.ControlID), "addColumn", null)%>
+               <% } %>
+               <%= Html.Button(context.Compose("btnEditColumns"), Html.Encode(Resources.UserColumnsEdit), "EditColumns('{0}');".Formato(context.ControlID), "", findOptions.UserColumnOptions.Any() ? new Dictionary<string, object>() : new Dictionary<string, object> { { "style", "display:none;" } })%>
+               <%= Html.Button(context.Compose("btnEditColumnsFinish"), Html.Encode(Resources.EditColumnsFinishEdit), "EditColumnsFinish('{0}');".Formato(context.ControlID), "", new Dictionary<string, object> { { "style", "display:none;" } })%>
+               <%= Html.Button(context.Compose("btnClearAllFilters"), Html.Encode(Resources.DeleteFilters), "ClearAllFilters('{0}');".Formato(context.ControlID), "", findOptions.FilterOptions.Any() ? new Dictionary<string, object>() : new Dictionary<string, object> { { "style", "display:none;" } })%>
            </div>
     <% List<FilterOption> filterOptions = findOptions.FilterOptions; %>
   

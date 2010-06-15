@@ -408,4 +408,10 @@
   <data name="CalendarToday" xml:space="preserve">
     <value>Hoy</value>
   </data>
+  <data name="EditColumnsFinishEdit" xml:space="preserve">
+    <value>Terminar Edición</value>
+  </data>
+  <data name="UserColumnsEdit" xml:space="preserve">
+    <value>Editar User Columns</value>
+  </data>
 </root>

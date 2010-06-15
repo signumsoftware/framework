@@ -485,6 +485,20 @@ h2 .title {
 
 /* search table */
 
+.addFilter 
+{
+	background-image:url(../images/newFilter.png) !important;
+    background-repeat:no-repeat !important;
+    border:0 !important;
+}
+
+.addColumn 
+{
+	background-image:url(../images/newColumn.png) !important;
+    background-repeat:no-repeat !important;
+    border:0 !important;
+}
+
 .fields-search {
     /*background-color:#eee;
     */width:700px;

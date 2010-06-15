@@ -1,10 +1,14 @@
 ﻿$(function() {
     $(".searchControl th")
         .live('click', function(e) {
+            if ($(this).hasClass("userColumnEditing"))
+                return true;
             Sort(e);
             return false;
         })
         .live('mousedown', function(e) {
+            if ($(this).hasClass("userColumnEditing"))
+                return true;
             this.onselectstart = function() { return false };
             return false;
         });
@@ -22,6 +26,8 @@ var FindNavigator = function(_findOptions) {
         filters: null,
         filterMode: null,
         orders: null, //A Json array like ["columnName1","-columnName2"] => will order by columnname1 asc, then by columnname2 desc
+        userColumns: null, //List of column names "columnName1,columnName2"
+        allowUserColumns: null,
         navigatorControllerUrl: "Signum/PartialFind",
         searchControllerUrl: "Signum/Search",
         onOk: null,
@@ -97,6 +103,8 @@ FindNavigator.prototype = {
     search: function() {
         //	var async = concurrentSearch[prefix + "btnSearch"];
         //	if (async) concurrentSearch[prefix + "btnSearch"]=false;
+        this.editColumnsFinish();
+
         var btnSearch = $(this.pf("btnSearch"));
         btnSearch.toggleClass('loading').val(lang['searching']);
         var self = this;
@@ -148,6 +156,7 @@ FindNavigator.prototype = {
         }
 
         requestData["sfOrderBy"] = empty(this.findOptions.orders) ? this.serializeOrders() : this.findOptions.orders;
+        requestData["sfUserColumns"] = empty(this.findOptions.userColumns) ? this.serializeUserColumns() : this.findOptions.userColumns;
 
         requestData[sfPrefix] = this.findOptions.prefix;
 
@@ -202,7 +211,7 @@ FindNavigator.prototype = {
         var found = false;
         var currIndex;
         var oldOrder = "";
-        for (var currIndex = 0, l = currOrderArray.length; currIndex < l && !found; currIndex++) {
+        for (var currIndex = 0; currIndex < currOrderArray.length && !found; currIndex++) {
             found = currOrderArray[currIndex] == columnName;
             if (found) {
                 oldOrder = "";
@@ -226,17 +235,27 @@ FindNavigator.prototype = {
             else
                 currOrderArray[currOrderArray.length] = newOrder + columnName;
             var currOrderStr = "";
-            for (var i = 0, l = currOrderArray.length; i < l; i++)
+            for (var i = 0; i < currOrderArray.length; i++)
                 currOrderStr = currOrderStr.compose("\"" + currOrderArray[i] + "\"", ",");
             currOrder.val("[" + currOrderStr + "]");
         }
 
         if (newOrder == "-")
-            $(this.pf(columnName)).removeClass("headerSortDown").addClass("headerSortUp");
+            $(this.pf("divSearchControl")).find(".divResults th[id='" + this.findOptions.prefix.compose(columnName) + "']").removeClass("headerSortDown").addClass("headerSortUp");
         else
-            $(this.pf(columnName)).removeClass("headerSortUp").addClass("headerSortDown");
+            $(this.pf("divSearchControl")).find(".divResults th[id='" + this.findOptions.prefix.compose(columnName) + "']").removeClass("headerSortUp").addClass("headerSortDown");
 
         return this;
+    },
+
+    serializeUserColumns: function() {
+        log("FindNavigator serializeUserColumns");
+        var result = "";
+        var self = this;
+        $(this.pf("tblResults thead tr th.userColumn")).each(function() {
+            result = result.compose($(this).find("input:hidden").val(), ",");
+        });
+        return result;
     },
 
     onSearchOk: function() {
@@ -259,13 +278,74 @@ FindNavigator.prototype = {
             this.findOptions.onCancelled();
     },
 
-    newFilterRowIndex: function() {
-        log("FindNavigator newFilterRowIndex");
-        var lastRow = $(this.pf("tblFilters tbody tr:last"));
-        var lastRowIndex = -1;
-        if (lastRow.length == 1)
-            lastRowIndex = lastRow[0].id.substr(lastRow[0].id.lastIndexOf("_") + 1, lastRow[0].id.length);
-        return parseInt(lastRowIndex) + 1;
+    addColumn: function() {
+        log("FindNavigator addColumn");
+
+        if (isFalse(this.findOptions.allowUserColumns) || $(this.pf("tblFilters tbody")).length == 0)
+            throw "Adding columns is not allowed";
+
+        this.editColumnsFinish();
+
+        var tokenName = this.constructTokenName();
+        if (empty(tokenName)) return;
+
+        var prefixedTokenName = this.findOptions.prefix.compose(tokenName);
+        if ($(this.pf("tblResults thead tr th[id=\"" + prefixedTokenName + "\"]")).length > 0) return;
+
+        var $tblHeaders = $(this.pf("tblResults thead tr"));
+        $tblHeaders.append("<th id=\"" + prefixedTokenName + "\" class=\"userColumn\"><input type=\"hidden\" value=\"" + tokenName + "\" />" + tokenName + "</th>");
+        $(this.pf("btnEditColumns")).show();
+    },
+
+    editColumns: function() {
+        log("FindNavigator editColumns");
+
+        var self = this;
+        $(this.pf("tblResults thead tr th.userColumn")).each(function() {
+            var th = $(this);
+            th.addClass("userColumnEditing");
+            var hidden = th.find("input:hidden");
+            th.html("<input type=\"text\" value=\"" + th.text() + "\" />" +
+                    "<br /><a id=\"link-delete-user-col\" onclick=\"DeleteColumn('" + self.findOptions.prefix + "', '" + hidden.val() + "');\">Delete Column</a>")
+              .append(hidden);
+        });
+
+        $(this.pf("btnEditColumnsFinish")).show();
+        $(this.pf("btnEditColumns")).hide();
+    },
+
+    editColumnsFinish: function() {
+        log("FindNavigator editColumnsFinish");
+
+        var $btnFinish = $(this.pf("btnEditColumnsFinish:visible"));
+        if ($btnFinish.length == 0)
+            return;
+
+        var self = this;
+        $(this.pf("tblResults thead tr th.userColumn")).each(function() {
+            var th = $(this);
+            th.removeClass("userColumnEditing");
+            var hidden = th.find("input:hidden");
+            var newColName = th.find("input:text").val();
+            th.html(newColName).append(hidden);
+        });
+
+        $btnFinish.hide();
+        $(this.pf("btnEditColumns")).show();
+    },
+
+    deleteColumn: function(columnName) {
+        log("FindNavigator deleteColumn");
+
+        var self = this;
+        $(this.pf("tblResults thead tr th.userColumn"))
+        .filter(function() { return $(this).find("input:hidden[value='" + columnName + "']").length > 0 })
+        .remove();
+
+        $(this.pf("tblResults tbody")).html("");
+
+        if ($(this.pf("tblResults thead tr th.userColumn")).length == 0)
+            $(this.pf("btnEditColumnsFinish")).hide();
     },
 
     addFilter: function() {
@@ -296,6 +376,15 @@ FindNavigator.prototype = {
         });
     },
 
+    newFilterRowIndex: function() {
+        log("FindNavigator newFilterRowIndex");
+        var lastRow = $(this.pf("tblFilters tbody tr:last"));
+        var lastRowIndex = -1;
+        if (lastRow.length == 1)
+            lastRowIndex = lastRow[0].id.substr(lastRow[0].id.lastIndexOf("_") + 1, lastRow[0].id.length);
+        return parseInt(lastRowIndex) + 1;
+    },
+
     newSubTokensCombo: function(index) {
         log("FindNavigator newSubTokensCombo");
         var selectedColumn = $(this.pf("ddlTokens_" + index));
@@ -303,7 +392,7 @@ FindNavigator.prototype = {
 
         //Clear child subtoken combos
         var self = this;
-        $("select")
+        $("select,span")
         .filter(function() {
             return ($(this).attr("id").indexOf(self.findOptions.prefix.compose("ddlTokens_")) == 0)
             || ($(this).attr("id").indexOf(self.findOptions.prefix.compose("lblddlTokens_")) == 0)
@@ -462,6 +551,22 @@ function HasSelectedItems(_findOptions, onSuccess) {
         return;
     }
     onSuccess(items);
+}
+
+function AddColumn(prefix) {
+    new FindNavigator({ prefix: prefix }).addColumn();
+}
+
+function EditColumns(prefix) {
+    new FindNavigator({ prefix: prefix }).editColumns();
+}
+
+function EditColumnsFinish(prefix) {
+    new FindNavigator({ prefix: prefix }).editColumnsFinish();
+}
+
+function DeleteColumn(prefix, columnName) {
+    new FindNavigator({ prefix: prefix }).deleteColumn(columnName);
 }
 
 function AddFilter(prefix) {
