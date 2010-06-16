@@ -219,9 +219,6 @@
   <data name="Source" xml:space="preserve">
     <value>Fuente</value>
   </data>
-  <data name="StackTrace" xml:space="preserve">
-    <value>StackTrace</value>
-  </data>
   <data name="TargetSite" xml:space="preserve">
     <value>Origen</value>
   </data>
@@ -236,9 +233,6 @@
   </data>
   <data name="UserNameMustHaveAValue" xml:space="preserve">
     <value>Se debe introducir el nombre de usuario</value>
-  </data>
-  <data name="ViewName" xml:space="preserve">
-    <value>View name</value>
   </data>
   <data name="YouMustEnterTheCurrentPassword" xml:space="preserve">
     <value>Debe especificar la contraseña actual</value>
@@ -279,6 +273,9 @@
   <data name="Remember" xml:space="preserve">
     <value>Recordar</value>
   </data>
+  <data name="GoBackToLoginPage" xml:space="preserve">
+    <value>Volver a la página de login</value>
+  </data>
   <data name="TypesAscx_Create" xml:space="preserve">
     <value>Crear</value>
   </data>
@@ -296,9 +293,6 @@
   </data>
   <data name="TypesAscx_Properties" xml:space="preserve">
     <value>Propiedades</value>
-  </data>
-  <data name="TypesAscx_Queries" xml:space="preserve">
-    <value>Queries</value>
   </data>
   <data name="TypesAscx_Read" xml:space="preserve">
     <value>Leer</value>
@@ -411,15 +405,6 @@
   <data name="YouRecentlyRequestedANewPassword" xml:space="preserve">
     <value>Has solicitado recientemente una nueva contraseña</value>
   </data>
-  <data name="ThereHasBeenAnErrorWithYourRequestToResetYourPasswordPleaseEnterYourLogin" xml:space="preserve">
-    <value>Se ha producido un error con tu solicitud de cambio de contraseña. Por favor, introduzca su email.</value>
-  </data>
-  <data name="ThePasswordMustHaveBetween7And15CharactersEachOfThemBeingANumber09OrALetter" xml:space="preserve">
-    <value>La contraseña debe tener entre 7 y 15 caracteres, siendo cada uno de ellos un número del 0 al 9 o una letra</value>
-  </data>
-  <data name="GoBackToLoginPage" xml:space="preserve">
-    <value>Volver a la página de login</value>
-  </data>
   <data name="IHaveForgottenMyPassword" xml:space="preserve">
     <value>He olvidado mi contraseña</value>
   </data>
@@ -440,6 +425,12 @@
   </data>
   <data name="RememberMe" xml:space="preserve">
     <value>Recordarme</value>
+  </data>
+  <data name="ThePasswordMustHaveBetween7And15CharactersEachOfThemBeingANumber09OrALetter" xml:space="preserve">
+    <value>La contraseña debe tener entre 7 y 15 caracteres, siendo cada uno de ellos un número del 0 al 9 o una letra</value>
+  </data>
+  <data name="ThereHasBeenAnErrorWithYourRequestToResetYourPasswordPleaseEnterYourLogin" xml:space="preserve">
+    <value>Se ha producido un error con tu solicitud de cambio de contraseña. Por favor, introduzca su email.</value>
   </data>
   <data name="User" xml:space="preserve">
     <value>Usuario</value>

@@ -117,71 +117,11 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AreYouSureOfDeletingTheEntity012" xml:space="preserve">
-    <value>Are you sure of deleting from the system the entity {0} ({1}:{2})?</value>
-  </data>
-  <data name="ArgumentFilePathIDWasNotPassedToTheController" xml:space="preserve">
-    <value>Argument {filePathID} was not passed to the controller</value>
-  </data>
-  <data name="ConfirmNewPassword" xml:space="preserve">
-    <value>Confirm new password</value>
-  </data>
-  <data name="ConstructFromManyOperation0NeedsSourceIdsAsParameter" xml:space="preserve">
-    <value>Construct From Many Operation {{{0}}} needs source Ids as parameter</value>
-  </data>
-  <data name="ConstructFromManyOperation0NeedsSourceLazies" xml:space="preserve">
-    <value>Construct From Many Operation {{{0}}} needs source Lites</value>
-  </data>
-  <data name="CouldNotCreateLiteWithoutAnIdToCallOperation0" xml:space="preserve">
-    <value>Could not create Lite without an id to call Operation {{{0}}}</value>
-  </data>
-  <data name="CouldntCreateFilePathWithUnknownFileTypeForField0" xml:space="preserve">
-    <value>Couldn't create FilePath with unknown FileType for field {{0}}</value>
-  </data>
-  <data name="CurrentPassword" xml:space="preserve">
-    <value>Current password</value>
-  </data>
-  <data name="ChangePassword" xml:space="preserve">
-    <value>Change password</value>
-  </data>
-  <data name="ChangePasswordExplanation" xml:space="preserve">
-    <value>Use this form to change your password</value>
-  </data>
-  <data name="EmailIsNotValid" xml:space="preserve">
-    <value>The email is different from the stored email</value>
-  </data>
-  <data name="EmailMustHaveAValue" xml:space="preserve">
-    <value>The email must have a value</value>
-  </data>
-  <data name="ErrorSavingFile" xml:space="preserve">
-    <value>Error saving file</value>
-  </data>
-  <data name="FileTypePropertyOfFileLineSettingsMustBeSpecified" xml:space="preserve">
-    <value>FileType property of FileLine settings must be specified for FileLine {0}</value>
-  </data>
-  <data name="HelpDocumentation" xml:space="preserve">
-    <value>Help documentation</value>
-  </data>
-  <data name="InvalidNewPassword" xml:space="preserve">
-    <value>Invalid new password</value>
-  </data>
-  <data name="InvalidOperationType0inTheConstructionOfOperation1" xml:space="preserve">
-    <value>Invalid Operation Type {{0}} in the construction of the operation {{1}}</value>
-  </data>
-  <data name="InvalidUsernameOrPassword" xml:space="preserve">
-    <value>Invalid username or password</value>
-  </data>
-  <data name="Key0NotFound" xml:space="preserve">
-    <value>Key {0} not found</value>
-  </data>
   <data name="MailBody_RememberPassword" xml:space="preserve">
     <value>We send you this email as you have requested to remember your password. For yoyr safety, we have generated a new random passwor, that you will be able to modify later.&lt;br/&gt;&lt;br/&gt;The password is &lt;b&gt;{0}&lt;/b&gt;</value>
   </data>
   <data name="MailSubject_RememberPassword" xml:space="preserve">
     <value>Rappeler mot de passe</value>
-  </data>
-  <data name="Message" xml:space="preserve">
-    <value>Message</value>
   </data>
   <data name="NewPassword" xml:space="preserve">
     <value>Nouveau mot de passe</value>
@@ -195,38 +135,11 @@
   <data name="PasswordHasBeenSent" xml:space="preserve">
     <value>Le mot de passe a été envoyé sur le compte mail {0}</value>
   </data>
-  <data name="PasswordMustHave0orMoreCharacters" xml:space="preserve">
-    <value>The password must have {0} or more characters</value>
-  </data>
   <data name="PasswordMustHaveAValue" xml:space="preserve">
     <value>Le mot de passe doit avoir une valeur</value>
   </data>
-  <data name="Property0DoesNotExistInType1" xml:space="preserve">
-    <value>Property {0} does not exist in type {1}</value>
-  </data>
-  <data name="Property0HasNoValue" xml:space="preserve">
-    <value>Property {0} has no value</value>
-  </data>
-  <data name="Property0NotExistsInType1" xml:space="preserve">
-    <value>Property {0} does not exist in type {1}</value>
-  </data>
   <data name="RememberPassword" xml:space="preserve">
     <value>Rappeler mot de passe</value>
-  </data>
-  <data name="RememberPasswordExplanation" xml:space="preserve">
-    <value>Type your username and your email address to receive an email message with the password</value>
-  </data>
-  <data name="Source" xml:space="preserve">
-    <value>Source</value>
-  </data>
-  <data name="StackTrace" xml:space="preserve">
-    <value>StackTrace</value>
-  </data>
-  <data name="TargetSite" xml:space="preserve">
-    <value>Target site</value>
-  </data>
-  <data name="TheresNotAViewForType0" xml:space="preserve">
-    <value>There's no view registered for type {0}</value>
   </data>
   <data name="TheSpecifiedPasswordsDontMatch" xml:space="preserve">
     <value>Les mots de passe spécifiés ne correspondent pas</value>
@@ -236,9 +149,6 @@
   </data>
   <data name="UserNameMustHaveAValue" xml:space="preserve">
     <value>Le nom d'utilisateur doit avoir une valeur</value>
-  </data>
-  <data name="ViewName" xml:space="preserve">
-    <value>View name</value>
   </data>
   <data name="YouMustEnterTheCurrentPassword" xml:space="preserve">
     <value>Vous devez entrer le mot de passe actuel</value>
@@ -272,9 +182,6 @@
   </data>
   <data name="ChangePasswordAspx_WriteActualPasswordAndNewOne" xml:space="preserve">
     <value>Ecrivez votre mot de passe actuel et le nouveau</value>
-  </data>
-  <data name="ForgotYourPassword" xml:space="preserve">
-    <value>Forgot your password? Enter your login email below. We will send you an email with a link to reset your password.</value>
   </data>
   <data name="Remember" xml:space="preserve">
     <value>Rappeler</value>
@@ -311,9 +218,6 @@
   </data>
   <data name="TypesAscx_Read" xml:space="preserve">
     <value>Lire</value>
-  </data>
-  <data name="TypesAscx_Type" xml:space="preserve">
-    <value>Type</value>
   </data>
   <data name="EntityGroupsAscx_All" xml:space="preserve">
     <value>Tous</value>
@@ -366,9 +270,6 @@
   <data name="PermissionsAscx_Overriden" xml:space="preserve">
     <value>Remplace</value>
   </data>
-  <data name="PermissionsAscx_Permission" xml:space="preserve">
-    <value>Permission</value>
-  </data>
   <data name="PropertiesAscx_Modify" xml:space="preserve">
     <value>Modifier</value>
   </data>
@@ -395,5 +296,8 @@
   </data>
   <data name="QueriesAscx_Query" xml:space="preserve">
     <value>Question</value>
+  </data>
+  <data name="Please0IntoYourAccount" xml:space="preserve">
+    <value>S'il vous plaît, {0} à votre compte</value>
   </data>
 </root>
