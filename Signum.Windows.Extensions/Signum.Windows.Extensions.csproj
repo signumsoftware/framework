@@ -164,6 +164,7 @@
     <Compile Include="Reports\CompositeReport.xaml.cs">
       <DependentUpon>CompositeReport.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Reports\UserQueryClient.cs" />
     <Compile Include="Reports\UserQueryMenuItem.cs" />
     <Compile Include="Reports\UserQuery.xaml.cs">
       <DependentUpon>UserQuery.xaml</DependentUpon>

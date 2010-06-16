@@ -35,17 +35,6 @@ namespace Signum.Windows.Reports
             set { SetValue(QueryDescriptionProperty, value); }
         }
 
-        public static void Start()
-        {
-            if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
-            {
-                QueryClient.Start();
-                Navigator.Manager.Settings.Add(typeof(UserQueryDN), new EntitySettings(EntityType.Default)); 
-                SearchControl.GetCustomMenuItems += (qn, type) => new UserQueryMenuItem();
-                LiteFilterValueConverter.TryParseLite = Server.TryParseLite; 
-            }
-        }
-
         public static UserQueryDN FromSearchControl(SearchControl searchControl)
         {
             return new UserQueryDN
