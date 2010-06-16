@@ -211,7 +211,7 @@ namespace Signum.Entities.Reflection
         public static FieldInfo FindFieldInfo(Type type, PropertyInfo pi, bool throws)
         {
             FieldInfo fi=null;
-            for (Type tempType = type; tempType != typeof(object) && fi == null; tempType = tempType.BaseType)
+            for (Type tempType = type; tempType != null && fi == null; tempType = tempType.BaseType)
             {
                 fi = (tempType.GetField(pi.Name, BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.NonPublic) ??
                 tempType.GetField("m" + pi.Name, BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.NonPublic) ??

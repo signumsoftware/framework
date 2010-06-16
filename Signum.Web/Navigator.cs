@@ -801,7 +801,7 @@ namespace Signum.Web
             if (!Navigator.IsFindable(findOptions.QueryName))
                 throw new UnauthorizedAccessException(Resources.ViewForType0IsNotAllowed.Formato(findOptions.QueryName));
 
-            var request = new QueryRequest
+            var request = new QueryRequest  
             {
                 QueryName = findOptions.QueryName,
                 Filters = findOptions.FilterOptions.Select(fo => fo.ToFilter()).ToList(),

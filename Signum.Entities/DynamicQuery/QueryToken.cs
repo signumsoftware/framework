@@ -8,6 +8,7 @@ using System.Reflection;
 using Signum.Utilities;
 using Signum.Entities.Properties;
 using Signum.Entities.Reflection;
+using System.Text.RegularExpressions;
 
 namespace Signum.Entities.DynamicQuery
 {
@@ -63,12 +64,12 @@ namespace Signum.Entities.DynamicQuery
                 if (implementations != null)
                 {
                     if (implementations.IsByAll)
-                        return new[] { EntityPropertyToken.IdProperty(this) };
+                        return null; // new[] { EntityPropertyToken.IdProperty(this) };
 
-                    var asPropesties = ((ImplementedByAttribute)implementations).ImplementedTypes.Select(t => (QueryToken)new AsTypeToken(this, t)).ToArray();
+                    return ((ImplementedByAttribute)implementations).ImplementedTypes.Select(t => (QueryToken)new AsTypeToken(this, t)).ToArray();
 
-                    return new[] { EntityPropertyToken.IdProperty(this), EntityPropertyToken.ToStrProperty(this) }
-                        .Concat(asPropesties).Concat(EntityProperties(cleanType)).ToArray();
+                    //return new[] { EntityPropertyToken.IdProperty(this), EntityPropertyToken.ToStrProperty(this) }
+                    //    .Concat(asPropesties).Concat(EntityProperties(cleanType)).ToArray();
                 }
 
                 return new[] { EntityPropertyToken.IdProperty(this), EntityPropertyToken.ToStrProperty(this) }
@@ -129,9 +130,15 @@ namespace Signum.Entities.DynamicQuery
             return Parent.FullKey() + "." + Key;
         }
 
+        static Regex regex = new Regex(@"^(?<token>[^\.]+)(\.(?<token>(\([^\)]+\))|([^\.]+)))*$", RegexOptions.ExplicitCapture | RegexOptions.Singleline);
+
         public static QueryToken Parse(QueryDescription queryDescription, string tokenString)
         {
-            string[] tokens = tokenString.Split('.');
+            Match m = regex.Match(tokenString);
+            if (!m.Success)
+                throw new FormatException("Invalid QueryToken string"); 
+
+            string[] tokens = m.Groups["token"].Captures.Cast<Capture>().Select(c=>c.Value).ToArray(); 
 
             string first = tokens.First();
 
@@ -271,8 +278,7 @@ namespace Signum.Entities.DynamicQuery
     public class EntityPropertyToken : QueryToken
     {
         public PropertyInfo PropertyInfo { get; private set; }
-        public Implementations implementations;
-
+        
         public static QueryToken IdProperty(QueryToken parent)
         {
             return new EntityPropertyToken(parent, ReflectionTools.GetPropertyInfo((IdentifiableEntity e) => e.Id));
@@ -349,12 +355,12 @@ namespace Signum.Entities.DynamicQuery
                 return NetPropertyToken.CollectionProperties(this);
             }
 
-            return SubTokensBase(PropertyInfo.PropertyType, implementations);
+            return SubTokensBase(PropertyInfo.PropertyType, Implementations());
         }
 
         public override Implementations Implementations()
         {
-            return implementations;
+            return GetPropertyRoute().GetImplementations();
         }
 
         public override string Format
