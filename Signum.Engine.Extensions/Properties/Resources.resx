@@ -378,4 +378,10 @@
   <data name="NoEmailsToProcessFound" xml:space="preserve">
     <value>No emails to process found</value>
   </data>
+  <data name="SystemUserNotLoadedInitializeToLevel1SimpleEntities" xml:space="preserve">
+    <value>SystemUser not loaded. Initialize to Level1SimpleEntities</value>
+  </data>
+  <data name="AnonymousUserNotLoadedInitializeToLevel1SimpleEntities" xml:space="preserve">
+    <value>AnonymousUser not loaded. Initialize to Level1SimpleEntities</value>
+  </data>
 </root>

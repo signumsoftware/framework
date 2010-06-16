@@ -26,11 +26,22 @@ namespace Signum.Engine.Authorization
 
         public static int MinRequiredPasswordLength = 6;
 
-        public static UserDN SystemUser { get; set; }
         public static string SystemUserName { get; set; }
+        public static UserDN systemUser;
+        public static UserDN SystemUser
+        {
+            get { return systemUser.ThrowIfNullC(Signum.Engine.Extensions.Properties.Resources.SystemUserNotLoadedInitializeToLevel1SimpleEntities); }
+            set { systemUser = value; }
+        }
 
-        public static UserDN AnonymousUser { get; set; }
         public static string AnonymousUserName { get; set; }
+        public static UserDN anonymousUser;
+        public static UserDN AnonymousUser
+        {
+            get { return anonymousUser.ThrowIfNullC(Signum.Engine.Extensions.Properties.Resources.AnonymousUserNotLoadedInitializeToLevel1SimpleEntities); }
+            set { anonymousUser = value; }
+        }
+
 
         static DirectedGraph<Lite<RoleDN>> _roles;
         static DirectedGraph<Lite<RoleDN>> Roles

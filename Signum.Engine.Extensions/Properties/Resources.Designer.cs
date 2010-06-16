@@ -143,6 +143,15 @@ namespace Signum.Engine.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to AnonymousUser not loaded. Initialize to Level1SimpleEntities.
+        /// </summary>
+        internal static string AnonymousUserNotLoadedInitializeToLevel1SimpleEntities {
+            get {
+                return ResourceManager.GetString("AnonymousUserNotLoadedInitializeToLevel1SimpleEntities", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0} belongs to another kind ok Linq Provider.
         /// </summary>
         internal static string BelongsToAnotherKindOkLinqProvider {
@@ -698,6 +707,15 @@ namespace Signum.Engine.Extensions.Properties {
         internal static string SufixNotSet {
             get {
                 return ResourceManager.GetString("SufixNotSet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to SystemUser not loaded. Initialize to Level1SimpleEntities.
+        /// </summary>
+        internal static string SystemUserNotLoadedInitializeToLevel1SimpleEntities {
+            get {
+                return ResourceManager.GetString("SystemUserNotLoadedInitializeToLevel1SimpleEntities", resourceCulture);
             }
         }
         
