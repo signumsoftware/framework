@@ -254,7 +254,7 @@
     <value>Plus petit que ou égal</value>
   </data>
   <data name="FilterOperation_Like" xml:space="preserve">
-    <value>Comme</value>
+    <value>like</value>
   </data>
   <data name="FilterOperation_StartsWith" xml:space="preserve">
     <value>Débute avec</value>

@@ -433,6 +433,9 @@
   <data name="Year" xml:space="preserve">
     <value>Year</value>
   </data>
+  <data name="EntityGroupDN" xml:space="preserve">
+    <value>Entity Group</value>
+  </data>
   <data name="_0IsNotAllowed" xml:space="preserve">
     <value>{0} is not allowed</value>
   </data>
@@ -441,8 +444,5 @@
   </data>
   <data name="RemoteTimeZoneNotSet" xml:space="preserve">
     <value>RemoteTimeZone not set</value>
-  </data>
-  <data name="EntityGroupDN" xml:space="preserve">
-    <value>Entity Group</value>
   </data>
 </root>
