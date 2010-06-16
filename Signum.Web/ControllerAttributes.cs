@@ -148,7 +148,7 @@ namespace Signum.Web
     [AspNetHostingPermission(System.Security.Permissions.SecurityAction.InheritanceDemand, Level = AspNetHostingPermissionLevel.Minimal)]
     public class HandleExceptionAttribute : HandleErrorAttribute
     {
-        public static Action<HandleErrorInfo> LogControllerException;
+        public static Action<HandleErrorInfo, string> LogControllerException;
         public static Action<Exception> LogGlobalException;
 
         public override void OnException(ExceptionContext filterContext)
@@ -158,7 +158,7 @@ namespace Signum.Web
             string actionName = (string)filterContext.RouteData.Values["action"];
             HandleErrorInfo model = new HandleErrorInfo(exception, controllerName, actionName);
 
-            if (LogControllerException != null) LogControllerException(model);
+            if (LogControllerException != null) LogControllerException(model, filterContext.RequestContext.HttpContext.Request.Url.ToString());
 
             
             if (filterContext.HttpContext.Request.IsAjaxRequest())
