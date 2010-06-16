@@ -32,14 +32,16 @@ namespace Signum.Web
         {
             List<QuickLinkItem> links = new List<QuickLinkItem>();
 
-            links.AddRange(globalLinks.SelectMany(a => a(ident, helper, partialViewName).NotNull()));
+            links.AddRange(globalLinks.SelectMany(a => (a(ident, helper, partialViewName)??Empty)).NotNull());
 
             List<Delegate> list = entityLinks.TryGetC(ident.GetType());
             if (list != null)
-                links.AddRange(list.SelectMany(a => (QuickLinkItem[])a.DynamicInvoke(ident, helper, partialViewName)));
+                links.AddRange(list.SelectMany(a => (QuickLinkItem[])a.DynamicInvoke(ident, helper, partialViewName) ?? Empty).NotNull());
 
             return links;
         }
+
+        static QuickLinkItem[] Empty = new QuickLinkItem[0];
 
         public static void Start()
         {
