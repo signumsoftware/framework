@@ -307,19 +307,23 @@ function replaceAll(s, tr) {
     }
     return v;
 }
-function ShowError(XMLHttpRequest, textStatus, errorThrown) {
+
+function GetErrorMessage(response) {
     var error;
-    if (XMLHttpRequest.responseText != null && XMLHttpRequest.responseText != undefined) {
-        var startError = XMLHttpRequest.responseText.indexOf("<title>");
-        var endError = XMLHttpRequest.responseText.indexOf("</title>");
+    if (response != null && response != undefined) {
+        var startError = response.indexOf("<title>");
+        var endError = response.indexOf("</title>");
         if ((startError != -1) && (endError != -1))
-            error = XMLHttpRequest.responseText.substring(startError + 7, endError);
+            error = response.substring(startError + 7, endError);
         else
-            error = XMLHttpRequest.responseText;
+            error = response;
     }
-    else {
-        error = textStatus;
-    }
+    return error;
+}
+
+function ShowError(XMLHttpRequest, textStatus, errorThrown) {
+    var error = GetErrorMessage(XMLHttpRequest.responseText);
+    if (!error) error = textStatus;
     
     var message = error.length > 50 ? error.substring(0,49) + "..." : error;
     NotifyError(lang['error'] + ": " + message, 2000);
