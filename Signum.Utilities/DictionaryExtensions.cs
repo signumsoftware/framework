@@ -10,6 +10,17 @@ namespace Signum.Utilities
 {
     public static class DictionaryExtensions
     {
+        public static V TryGet<K, V>(this IDictionary<K, V> dictionary, K key, V defaultValue)
+        {
+            if (dictionary == null)
+                return defaultValue;
+
+            V result;
+            if (dictionary.TryGetValue(key, out result))
+                return result;
+            return defaultValue;
+        }
+   
         public static V TryGetC<K, V>(this IDictionary<K, V> dictionary, K key) where V : class
         {
             if (dictionary == null)
