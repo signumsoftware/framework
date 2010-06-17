@@ -61,74 +61,6 @@ namespace Signum.Engine.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ADD
-        ///ALL
-        ///ALTER
-        ///AND
-        ///ANY
-        ///AS
-        ///ASC
-        ///AUTHORIZATION
-        ///AVG
-        ///BACKUP
-        ///BEGIN
-        ///BETWEEN
-        ///BREAK
-        ///BROWSE
-        ///BULK
-        ///BY
-        ///CASCADE
-        ///CASE
-        ///CHECK
-        ///CHECKPOINT
-        ///CLOSE
-        ///CLUSTERED
-        ///COALESCE
-        ///COLUMN
-        ///COMMIT
-        ///COMMITTED
-        ///COMPUTE
-        ///CONFIRM
-        ///CONSTRAINT
-        ///CONTAINS
-        ///CONTAINSTABLE
-        ///CONTINUE
-        ///CONTROLROW
-        ///CONVERT
-        ///COUNT
-        ///CREATE
-        ///CROSS
-        ///CURRENT
-        ///CURRENT_DATE
-        ///CURRENT_TIME
-        ///CURRENT_TIMESTAMP
-        ///CURRENT_USER
-        ///CURSOR
-        ///DATABASE
-        ///DBCC
-        ///DEALLOCATE
-        ///DECLARE
-        ///DEFAULT
-        ///DELETE
-        ///DENY
-        ///DESC
-        ///DISK
-        ///DISTINCT
-        ///DISTRIBUTED
-        ///DOUBLE
-        ///DROP
-        ///DUMMY
-        ///DUMP
-        ///ELSE
-        ///END        /// [rest of string was truncated]&quot;;.
-        /// </summary>
-        public static string @__SqlKeywords__ {
-            get {
-                return ResourceManager.GetString("__SqlKeywords__", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to &apos;{0}&apos; has been renamed in {1}?.
         /// </summary>
         public static string _0HasBeenRenamedIn1 {

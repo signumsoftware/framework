@@ -436,4 +436,13 @@
   <data name="EntityGroupDN" xml:space="preserve">
     <value>Groupe d'entité</value>
   </data>
+  <data name="_0IsNotAllowed" xml:space="preserve">
+    <value>{0} n'est pas autorisée</value>
+  </data>
+  <data name="_0IsNecessary" xml:space="preserve">
+    <value>{0} est nécessaire</value>
+  </data>
+  <data name="RemoteTimeZoneNotSet" xml:space="preserve">
+    <value>RemoteTimeZone non définie.</value>
+  </data>
 </root>
