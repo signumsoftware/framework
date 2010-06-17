@@ -18,7 +18,7 @@
     <DockPanel>
         <m:ButtonBar  DockPanel.Dock="Top" SaveClick="btSave_Click" SaveVisible="True" ReloadClick="btReload_Click" ReloadVisible="True"/>
         <m:EntityLine VerticalAlignment="Top" m:Common.Route="Role" DockPanel.Dock="Top"/>
-        <ListView x:Name="listView" IsSynchronizedWithCurrentItem="True" ItemsSource="{Binding Rules}">
+        <ListView x:Name="listView" IsSynchronizedWithCurrentItem="True">
             <ListView.ItemContainerStyle>
                 <Style TargetType="ListViewItem">
                     <Setter Property="HorizontalContentAlignment" Value="Stretch" />
@@ -41,8 +41,8 @@
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Vertical">
-                                    <ToggleButton IsChecked="{Binding Path=In, Converter={x:Static m:EnumBooleanConverter.Instance}, ConverterParameter={x:Static authdn:TypeAllowed.Create}}" Style="{StaticResource SphereRadioButton}" Background="Lime"/>
-                                    <ToggleButton IsChecked="{Binding Path=Out, Converter={x:Static m:EnumBooleanConverter.Instance}, ConverterParameter={x:Static authdn:TypeAllowed.Create}}" Style="{StaticResource SphereRadioButton}" Background="Lime"/>
+                                    <ToggleButton IsChecked="{Binding Path=InGroup, Converter={x:Static m:EnumBooleanConverter.Instance}, ConverterParameter={x:Static authdn:TypeAllowed.Create}}" Style="{StaticResource SphereRadioButton}" Background="Lime"/>
+                                    <ToggleButton IsChecked="{Binding Path=OutGroup, Converter={x:Static m:EnumBooleanConverter.Instance}, ConverterParameter={x:Static authdn:TypeAllowed.Create}}" Style="{StaticResource SphereRadioButton}" Background="Lime"/>
                                 </StackPanel>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
@@ -51,8 +51,8 @@
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Vertical">
-                                    <ToggleButton IsChecked="{Binding Path=In, Converter={x:Static m:EnumBooleanConverter.Instance}, ConverterParameter={x:Static authdn:TypeAllowed.Modify}}" Style="{StaticResource SphereRadioButton}" Background="YellowGreen"/>
-                                    <ToggleButton IsChecked="{Binding Path=Out, Converter={x:Static m:EnumBooleanConverter.Instance}, ConverterParameter={x:Static authdn:TypeAllowed.Modify}}" Style="{StaticResource SphereRadioButton}" Background="YellowGreen"/>
+                                    <ToggleButton IsChecked="{Binding Path=InGroup, Converter={x:Static m:EnumBooleanConverter.Instance}, ConverterParameter={x:Static authdn:TypeAllowed.Modify}}" Style="{StaticResource SphereRadioButton}" Background="YellowGreen"/>
+                                    <ToggleButton IsChecked="{Binding Path=OutGroup, Converter={x:Static m:EnumBooleanConverter.Instance}, ConverterParameter={x:Static authdn:TypeAllowed.Modify}}" Style="{StaticResource SphereRadioButton}" Background="YellowGreen"/>
                                 </StackPanel>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
@@ -61,8 +61,8 @@
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Vertical">
-                                    <ToggleButton IsChecked="{Binding Path=In, Converter={x:Static m:EnumBooleanConverter.Instance}, ConverterParameter={x:Static authdn:TypeAllowed.Read}}" Style="{StaticResource SphereRadioButton}" Background="Yellow" />
-                                    <ToggleButton IsChecked="{Binding Path=Out, Converter={x:Static m:EnumBooleanConverter.Instance}, ConverterParameter={x:Static authdn:TypeAllowed.Read}}" Style="{StaticResource SphereRadioButton}" Background="Yellow" />
+                                    <ToggleButton IsChecked="{Binding Path=InGroup, Converter={x:Static m:EnumBooleanConverter.Instance}, ConverterParameter={x:Static authdn:TypeAllowed.Read}}" Style="{StaticResource SphereRadioButton}" Background="Yellow" />
+                                    <ToggleButton IsChecked="{Binding Path=OutGroup, Converter={x:Static m:EnumBooleanConverter.Instance}, ConverterParameter={x:Static authdn:TypeAllowed.Read}}" Style="{StaticResource SphereRadioButton}" Background="Yellow" />
                                 </StackPanel>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
@@ -71,8 +71,8 @@
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel>
-                                    <ToggleButton IsChecked="{Binding Path=In, Converter={x:Static m:EnumBooleanConverter.Instance}, ConverterParameter={x:Static authdn:TypeAllowed.None}}" Style="{StaticResource SphereRadioButton}" Background="Red" />
-                                    <ToggleButton IsChecked="{Binding Path=Out, Converter={x:Static m:EnumBooleanConverter.Instance}, ConverterParameter={x:Static authdn:TypeAllowed.None}}" Style="{StaticResource SphereRadioButton}" Background="Red" />
+                                    <ToggleButton IsChecked="{Binding Path=InGroup, Converter={x:Static m:EnumBooleanConverter.Instance}, ConverterParameter={x:Static authdn:TypeAllowed.None}}" Style="{StaticResource SphereRadioButton}" Background="Red" />
+                                    <ToggleButton IsChecked="{Binding Path=OutGroup, Converter={x:Static m:EnumBooleanConverter.Instance}, ConverterParameter={x:Static authdn:TypeAllowed.None}}" Style="{StaticResource SphereRadioButton}" Background="Red" />
                                 </StackPanel>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
@@ -80,7 +80,10 @@
                     <GridViewColumn Header="Overriden" Width="60">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <CheckBox  IsEnabled="False" IsChecked="{Binding Path=Overriden,Mode=OneWay}" />
+                                <StackPanel>
+                                    <CheckBox  IsEnabled="False" IsChecked="{Binding Path=InOverriden,Mode=OneWay}" />
+                                    <CheckBox  IsEnabled="False" IsChecked="{Binding Path=OutOverriden,Mode=OneWay}" />
+                                </StackPanel>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>

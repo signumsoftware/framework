@@ -42,21 +42,27 @@ namespace Signum.Windows.Authorization
             Load();
         }
 
+
         private void Load()
         {
-            DataContext = Server.Return((IEntityGroupAuthServer s)=>s.GetEntityGroupAllowedRules(Role)); 
+            var result = Server.Return((IEntityGroupAuthServer s)=>s.GetEntityGroupAllowedRules(Role));
+            DataContext = result;
+            listView.ItemsSource = result.Rules.Select(r => new MutableEntityGroupRule(r)).ToList();
         }
 
         private void btSave_Click(object sender, RoutedEventArgs e)
         {
-            Server.Execute((IEntityGroupAuthServer s) => s.SetEntityGroupAllowedRules((EntityGroupRulePack)DataContext));
+            var result = (EntityGroupRulePack)DataContext;
+
+            result.Rules = ((List<MutableEntityGroupRule>)listView.ItemsSource).Select(m => m.ToRule()).ToMList();
+
+            Server.Execute((IEntityGroupAuthServer s) => s.SetEntityGroupAllowedRules(result));
             Load();
         }
 
         class AllowedRuleProxy
         {
-            public AllowedRule<EntityGroupDN, EntityGroupAllowed> Rule { get; set; }
-
+            public AllowedRule<EntityGroupDN, EntityGroupAllowedDN> Rule { get; set; }
          
         }
 
@@ -70,5 +76,75 @@ namespace Signum.Windows.Authorization
             Load(); 
         }
 
+    }
+
+    public class MutableEntityGroupRule : EmbeddedEntity
+    {
+        TypeAllowed inGroupBase;
+        TypeAllowed outGroupBase;
+
+        TypeAllowed inGroup;
+        public TypeAllowed InGroup
+        {
+            get { return inGroup; }
+            set
+            {
+                if (Set(ref inGroup, value, () => InGroup))
+                {
+                    Notify(() => InOverriden);
+                }
+            }
+        }
+
+        TypeAllowed outGroup;
+        public TypeAllowed OutGroup
+        {
+            get { return outGroup; }
+            set
+            {
+                if (Set(ref outGroup, value, () => OutGroup))
+                {
+                    Notify(() => OutOverriden);
+                }
+            }
+        }
+
+        public bool InOverriden
+        {
+            get { return !inGroupBase.Equals(inGroup); }
+        }
+
+        public bool OutOverriden
+        {
+            get { return !outGroupBase.Equals(outGroup); }
+        }
+
+        EntityGroupDN resource;
+        public EntityGroupDN Resource
+        {
+            get { return resource; }
+            set { Set(ref resource, value, () => Resource); }
+        }
+
+        public MutableEntityGroupRule(EntityGroupAllowedRule rule)
+        {
+            this.inGroupBase = rule.AllowedBase.InGroup;
+            this.outGroupBase = rule.AllowedBase.OutGroup;
+
+            this.inGroup = rule.Allowed.InGroup;
+            this.outGroup = rule.Allowed.OutGroup;
+
+            this.resource = rule.Resource; 
+        }
+
+        public EntityGroupAllowedRule ToRule()
+        {
+            return new EntityGroupAllowedRule
+            {
+                Resource = Resource,
+                AllowedBase = new EntityGroupAllowedDN(inGroupBase, outGroupBase),
+                Allowed = new EntityGroupAllowedDN(inGroup, outGroup)
+            };
+        }
     }
 }
