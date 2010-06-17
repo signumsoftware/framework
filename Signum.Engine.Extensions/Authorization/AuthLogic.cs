@@ -309,5 +309,27 @@ namespace Signum.Engine.Authorization
             OperationAuthLogic.Start(sb);
             PermissionAuthLogic.Start(sb);
         }
+
+        public static void ResetPasswordRequest(UserDN user, string fullyQualifiedApplicationPath)
+        {
+            //Remove old previous requests
+            Database.Query<ResetPasswordRequestDN>()
+                .Where(r => r.User.Is(user) && r.RequestDate < TimeZoneManager.Now.AddMonths(1))
+                .UnsafeDelete();
+
+            ResetPasswordRequestDN rpr = new ResetPasswordRequestDN()
+            {
+                Code = MyRandom.Current.NextString(5),
+                User = user,
+                RequestDate = TimeZoneManager.Now,
+            };
+
+            rpr.Save();
+
+            EmailLogic.Send(user, UserMailTemplate.ResetPassword, new Dictionary<string, string>
+                    { 
+                        {"link", fullyQualifiedApplicationPath  + "Auth/ResetPasswordCode?email=" + user.Email + "&code=" + rpr.Code},
+                    });
+        }
     }
 }
