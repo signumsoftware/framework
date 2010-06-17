@@ -300,4 +300,154 @@
   <data name="Please0IntoYourAccount" xml:space="preserve">
     <value>S'il vous plaît, {0} à votre compte</value>
   </data>
+  <data name="AreYouSureOfDeletingTheEntity012" xml:space="preserve">
+    <value>Veillez à supprimer l'entité système {0} ({1}: {2}) ?</value>
+  </data>
+  <data name="ArgumentFilePathIDWasNotPassedToTheController" xml:space="preserve">
+    <value>Argument {filePathID} n'a pas transmis au contrôleur</value>
+  </data>
+  <data name="ConfirmNewPassword" xml:space="preserve">
+    <value>Confirmer le nouveau mot de passe</value>
+  </data>
+  <data name="ConstructFromManyOperation0NeedsSourceIdsAsParameter" xml:space="preserve">
+    <value>L'opération ConstructFromMany {{{0}}} nécessite la source du paramètre ID</value>
+  </data>
+  <data name="ConstructFromManyOperation0NeedsSourceLazies" xml:space="preserve">
+    <value>L'opération de ConstructFromMany {{{0}}} nécessite la source Lites</value>
+  </data>
+  <data name="CouldNotCreateLiteWithoutAnIdToCallOperation0" xml:space="preserve">
+    <value>Impossible de créer le Lite sans un id pour appeler les opérations {{{0}}}</value>
+  </data>
+  <data name="CouldntCreateFilePathWithUnknownFileTypeForField0" xml:space="preserve">
+    <value>Impossible de créer FilePath avec FileType inconnu pour le champ {{0}}</value>
+  </data>
+  <data name="CurrentPassword" xml:space="preserve">
+    <value>Mot de passe actuel</value>
+  </data>
+  <data name="ChangePassword" xml:space="preserve">
+    <value>Changer mot de passe</value>
+  </data>
+  <data name="ChangePasswordExplanation" xml:space="preserve">
+    <value>Utilisez ce formulaire pour modifier votre mot de passe.</value>
+  </data>
+  <data name="EmailIsNotValid" xml:space="preserve">
+    <value>L'e-mail est différente de la messagerie enregistrée</value>
+  </data>
+  <data name="EmailMustHaveAValue" xml:space="preserve">
+    <value>L'email doit avoir une valeur</value>
+  </data>
+  <data name="ErrorSavingFile" xml:space="preserve">
+    <value>Erreur sauvegarde de fichiers</value>
+  </data>
+  <data name="FileTypePropertyOfFileLineSettingsMustBeSpecified" xml:space="preserve">
+    <value>Propriété FileType de paramètres FileLine doit être spécifiée pour FileLine {0}</value>
+  </data>
+  <data name="HelpDocumentation" xml:space="preserve">
+    <value>Documentation d'aide</value>
+  </data>
+  <data name="InvalidNewPassword" xml:space="preserve">
+    <value>Nouveau mot de passe incorrect</value>
+  </data>
+  <data name="InvalidOperationType0inTheConstructionOfOperation1" xml:space="preserve">
+    <value>Type d'opération non valide {{0}} dans la construction de l'opération {{1}}</value>
+  </data>
+  <data name="InvalidUsernameOrPassword" xml:space="preserve">
+    <value>Mot de passe ou nom d'utilisateur non valide</value>
+  </data>
+  <data name="Key0NotFound" xml:space="preserve">
+    <value>Clé {0} introuvable</value>
+  </data>
+  <data name="Message" xml:space="preserve">
+    <value>Message</value>
+  </data>
+  <data name="PasswordMustHave0orMoreCharacters" xml:space="preserve">
+    <value>Le mot de passe doit avoir {0} ou plus caractères</value>
+  </data>
+  <data name="Property0DoesNotExistInType1" xml:space="preserve">
+    <value>La propriété {0} n'existe pas de type {1}</value>
+  </data>
+  <data name="Property0HasNoValue" xml:space="preserve">
+    <value>La propriété {0} n'a aucune valeur</value>
+  </data>
+  <data name="Property0NotExistsInType1" xml:space="preserve">
+    <value>La propriété {0} n'existe pas de type {1}</value>
+  </data>
+  <data name="RememberPasswordExplanation" xml:space="preserve">
+    <value>Entrez votre nom d'utilisateur et adresse e-mail pour recevoir un message dans votre compte avec un mot de passe.</value>
+  </data>
+  <data name="Source" xml:space="preserve">
+    <value>Source</value>
+  </data>
+  <data name="StackTrace" xml:space="preserve">
+    <value>StackTrace</value>
+  </data>
+  <data name="TargetSite" xml:space="preserve">
+    <value>Source</value>
+  </data>
+  <data name="TheresNotAViewForType0" xml:space="preserve">
+    <value>Il existe une vue associée au type {0}</value>
+  </data>
+  <data name="ViewName" xml:space="preserve">
+    <value>Nom de la vue</value>
+  </data>
+  <data name="ForgotYourPassword" xml:space="preserve">
+    <value>Vous avez oublié votre mot de passe ? Entrez votre email de connexion ci-dessous. Nous vous enverrons un e-mail avec un lien pour réinitialiser votre mot de passe.</value>
+  </data>
+  <data name="TypesAscx_Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="PermissionsAscx_Permission" xml:space="preserve">
+    <value>Autorisation</value>
+  </data>
+  <data name="NoErrorsFound" xml:space="preserve">
+    <value>Aucune erreur trouvée</value>
+  </data>
+  <data name="ThereAreATotalOf0Errors" xml:space="preserve">
+    <value>Il y a un total de {0} erreurs</value>
+  </data>
+  <data name="ViewsChecker" xml:space="preserve">
+    <value>Vues du vérificateur</value>
+  </data>
+  <data name="ThereSNotARegisteredUserWithThatEmailAddress" xml:space="preserve">
+    <value>Il n'est pas un utilisateur inscrit avec cette adresse e-mail</value>
+  </data>
+  <data name="EmailSent" xml:space="preserve">
+    <value>Email envoyé</value>
+  </data>
+  <data name="TheConfirmationCodeThatYouHaveJustSentIsInvalid" xml:space="preserve">
+    <value>Le code de confirmation que vous avez envoyés seulement n'est pas valide</value>
+  </data>
+  <data name="YouCanResetYourPasswordByFollowingTheLinkBelow" xml:space="preserve">
+    <value>Vous pouvez réinitialiser votre mot de passe en suivant le lien ci-dessous :</value>
+  </data>
+  <data name="YouRecentlyRequestedANewPassword" xml:space="preserve">
+    <value>Vous avez demandé récemment un nouveau mot de passe.</value>
+  </data>
+  <data name="IHaveForgottenMyPassword" xml:space="preserve">
+    <value>J'ai oublié mon mot de passe.</value>
+  </data>
+  <data name="IntroduceYourUserNameAndPassword" xml:space="preserve">
+    <value>Introduire votre nom d'utilisateur et le mot de passe</value>
+  </data>
+  <data name="LoginEnter" xml:space="preserve">
+    <value>Login</value>
+  </data>
+  <data name="Password" xml:space="preserve">
+    <value>Mot de passe</value>
+  </data>
+  <data name="PleaseEnterYourChosenNewPassword" xml:space="preserve">
+    <value>Entrez votre nouveau mot de passe</value>
+  </data>
+  <data name="RememberMe" xml:space="preserve">
+    <value>Se souvenir de moi</value>
+  </data>
+  <data name="ThePasswordMustHaveBetween7And15CharactersEachOfThemBeingANumber09OrALetter" xml:space="preserve">
+    <value>Le mot de passe doit avoir entre 7 et 15 caractères, chacun d'eux étant un nombre, 0-9 ou une lettre</value>
+  </data>
+  <data name="ThereHasBeenAnErrorWithYourRequestToResetYourPasswordPleaseEnterYourLogin" xml:space="preserve">
+    <value>Il y a eu une erreur avec votre demande pour réinitialiser votre mot de passe. Entrez votre login.</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>Utilisateur</value>
+  </data>
 </root>

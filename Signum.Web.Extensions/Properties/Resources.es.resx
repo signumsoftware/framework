@@ -435,4 +435,19 @@
   <data name="User" xml:space="preserve">
     <value>Usuario</value>
   </data>
+  <data name="StackTrace" xml:space="preserve">
+    <value>StackTrace</value>
+  </data>
+  <data name="ViewName" xml:space="preserve">
+    <value>Nombre de la vista</value>
+  </data>
+  <data name="PasswordReseted" xml:space="preserve">
+    <value>Su contraseña ha sido restablecida</value>
+  </data>
+  <data name="YourNewPasswordIs0" xml:space="preserve">
+    <value>Su nueva contraseña es {0}</value>
+  </data>
+  <data name="TypesAscx_Queries" xml:space="preserve">
+    <value>Consultas</value>
+  </data>
 </root>

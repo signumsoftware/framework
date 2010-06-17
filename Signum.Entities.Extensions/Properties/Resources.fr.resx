@@ -630,7 +630,4 @@
   <data name="BasicPermissions_AdminRules" xml:space="preserve">
     <value>Administrer règles</value>
   </data>
-  <data name="EntityGroupDN" xml:space="preserve">
-    <value>Groupe d'entités</value>
-  </data>
 </root>

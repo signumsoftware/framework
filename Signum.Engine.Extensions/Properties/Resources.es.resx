@@ -372,4 +372,16 @@
   <data name="ProcessExecution0IsNotRunningAnymore" xml:space="preserve">
     <value>El ProcessExecution {0} ya no está ejecutándose</value>
   </data>
+  <data name="ResetPasswordCode" xml:space="preserve">
+    <value>Código para restablecer la contraseña</value>
+  </data>
+  <data name="NoEmailsToProcessFound" xml:space="preserve">
+    <value>No se encontraron mensajes de correo electrónico para procesar</value>
+  </data>
+  <data name="SystemUserNotLoadedInitializeToLevel1SimpleEntities" xml:space="preserve">
+    <value>SystemUser no cargado. Inicializar a Level1SimpleEntities</value>
+  </data>
+  <data name="AnonymousUserNotLoadedInitializeToLevel1SimpleEntities" xml:space="preserve">
+    <value>AnonymousUser no cargado. Inicialize a nivel Level1SimpleEntities</value>
+  </data>
 </root>

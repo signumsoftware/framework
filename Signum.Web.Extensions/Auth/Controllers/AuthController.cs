@@ -110,24 +110,7 @@ namespace Signum.Web.Authorization
                     if (user == null)
                         throw new ApplicationException(Resources.ThereSNotARegisteredUserWithThatEmailAddress);
 
-                    //Remove old previous requests
-                    Database.Query<ResetPasswordRequestDN>()
-                        .Where(r => r.User.Is(user) && r.RequestDate < TimeZoneManager.Now.AddMonths(1))
-                        .UnsafeDelete();
-
-                    ResetPasswordRequestDN rpr = new ResetPasswordRequestDN()
-                    {
-                        Code = MyRandom.Current.NextString(5),
-                        User = user,
-                        RequestDate = TimeZoneManager.Now,
-                    };
-
-                    rpr.Save();
-
-                    EmailLogic.Send(user, UserMailTemplate.ResetPassword, new Dictionary<string,string>
-                    { 
-                        {"link", HttpContextUtils.FullyQualifiedApplicationPath + "Auth/ResetPasswordCode?email=" + user.Email + "&code=" + rpr.Code},
-                    });
+                    AuthLogic.ResetPasswordRequest(user, HttpContextUtils.FullyQualifiedApplicationPath); 
                 }
 
                 ViewData["email"] = email;
