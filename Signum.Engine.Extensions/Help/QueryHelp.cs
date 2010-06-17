@@ -69,7 +69,7 @@ namespace Signum.Engine.Help
         {
             XElement element = document.Element(_Query);
             string queryName = element.Attribute(_Key).Value;
-            object queryKey = QueryLogic.TryToQueryName(queryName);
+            object queryKey = QueryLogic.ToQueryName(queryName);
             return new QueryHelp
             {
                 Key = queryKey,
