@@ -49,55 +49,55 @@
             <%=Html.Span(null, item.Value.Resource.Name)%>
             <%=Html.HiddenRuntimeInfo(item, i=>i.Resource)%>
         </td>
-        <td>In<%=Html.Hidden(item.Compose("InBase"), item.Value.InBase.ToString())%></td>
+        <td>In<%=Html.Hidden(item.Compose("InBase"), item.Value.AllowedBase.InGroup.ToString())%></td>
+        <td>
+            <a class="cbLink" style="background-image: url(authAdmin/images/radioBlue.png)">
+                <%=Html.RadioButton(item.Compose("In"), "Create", item.Value.Allowed.InGroup == TypeAllowed.Create)%>
+            </a>
+        </td>
         <td>
             <a class="cbLink" style="background-image: url(authAdmin/images/radioGreen.png)">
-                <%=Html.RadioButton(item.Compose("In"), "Create", item.Value.In == TypeAllowed.Create)%>
+                <%=Html.RadioButton(item.Compose("In"), "Modify", item.Value.Allowed.InGroup == TypeAllowed.Modify)%>
             </a>
         </td>
         <td>
             <a class="cbLink" style="background-image: url(authAdmin/images/radioYellow.png)">
-                <%=Html.RadioButton(item.Compose("In"), "Modify", item.Value.In == TypeAllowed.Modify)%>
-            </a>
-        </td>
-        <td>
-            <a class="cbLink" style="background-image: url(authAdmin/images/radioYellow.png)">
-                <%=Html.RadioButton(item.Compose("In"), "Read", item.Value.In == TypeAllowed.Read)%>
+                <%=Html.RadioButton(item.Compose("In"), "Read", item.Value.Allowed.InGroup == TypeAllowed.Read)%>
             </a>
         </td>
         <td>
             <a class="cbLink" style="background-image: url(authAdmin/images/radioRed.png)">
-                <%=Html.RadioButton(item.Compose("In"), "None", item.Value.In == TypeAllowed.None)%>
+                <%=Html.RadioButton(item.Compose("In"), "None", item.Value.Allowed.InGroup == TypeAllowed.None)%>
             </a>
         </td>
         <td>
-            <%= Html.CheckBox(item.Compose("Overriden"), item.Value.Overriden, new { disabled = "disabled", @class = "overriden"})%>
+            <%= Html.CheckBox(item.Compose("InOverriden"), !item.Value.Allowed.InGroup.Equals(item.Value.AllowedBase.InGroup), new { disabled = "disabled", @class = "overriden"})%>
         </td>
     </tr>
     <tr class="second">
-        <td>Out<%=Html.Hidden(item.Compose("OutBase"), item.Value.OutBase.ToString())%></td>
+        <td>Out<%=Html.Hidden(item.Compose("OutBase"), item.Value.AllowedBase.OutGroup.ToString())%></td>
+        <td>
+            <a class="cbLink" style="background-image: url(authAdmin/images/radioBlue.png)">
+                <%=Html.RadioButton(item.Compose("Out"), "Create", item.Value.Allowed.OutGroup == TypeAllowed.Create)%>
+            </a>
+        </td>
         <td>
             <a class="cbLink" style="background-image: url(authAdmin/images/radioGreen.png)">
-                <%=Html.RadioButton(item.Compose("Out"), "Create", item.Value.Out == TypeAllowed.Create)%>
+                <%=Html.RadioButton(item.Compose("Out"), "Modify", item.Value.Allowed.OutGroup == TypeAllowed.Modify)%>
             </a>
         </td>
         <td>
             <a class="cbLink" style="background-image: url(authAdmin/images/radioYellow.png)">
-                <%=Html.RadioButton(item.Compose("Out"), "Modify", item.Value.Out == TypeAllowed.Modify)%>
-            </a>
-        </td>
-        <td>
-            <a class="cbLink" style="background-image: url(authAdmin/images/radioYellow.png)">
-                <%=Html.RadioButton(item.Compose("Out"), "Read", item.Value.Out == TypeAllowed.Read)%>
+                <%=Html.RadioButton(item.Compose("Out"), "Read", item.Value.Allowed.OutGroup == TypeAllowed.Read)%>
             </a>
         </td>
         <td>
             <a class="cbLink" style="background-image: url(authAdmin/images/radioRed.png)">
-                <%=Html.RadioButton(item.Compose("Out"), "None", item.Value.Out == TypeAllowed.None)%>
+                <%=Html.RadioButton(item.Compose("Out"), "None", item.Value.Allowed.OutGroup == TypeAllowed.None)%>
             </a>
         </td>
         <td>
-            <%= Html.CheckBox(item.Compose("Overriden"), item.Value.Overriden, new { disabled = "disabled", @class = "overriden"})%>
+            <%= Html.CheckBox(item.Compose("OutOverriden"), !item.Value.Allowed.OutGroup.Equals(item.Value.AllowedBase.OutGroup), new { disabled = "disabled", @class = "overriden" })%>
         </td>
     </tr>
     <%

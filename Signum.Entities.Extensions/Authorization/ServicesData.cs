@@ -41,24 +41,21 @@ namespace Signum.Entities.Authorization
     [Serializable]
     public abstract class AllowedRule<R, A> : EmbeddedEntity
         where R : IdentifiableEntity
-        where A : struct
     {
         A allowedBase;
         public A AllowedBase
         {
             get { return allowedBase; }
-            internal set { allowedBase = value; }
+            set { allowedBase = value; }
         }
 
-        A? allowedOverride;
+        A allowed;
         public A Allowed
         {
-            get { return allowedOverride ?? allowedBase; }
+            get { return allowed; }
             set
             {
-                A? val = value.Equals(allowedBase) ? (A?)null : value;
-
-                if (Set(ref allowedOverride, val, () => Allowed))
+                if (Set(ref allowed, value, () => Allowed))
                 {
                     Notify();
                 }
@@ -72,7 +69,7 @@ namespace Signum.Entities.Authorization
 
         public bool Overriden
         {
-            get { return allowedOverride.HasValue; }
+            get { return !allowed.Equals(allowedBase); }
         }
 
         R resource;
@@ -90,6 +87,7 @@ namespace Signum.Entities.Authorization
 
     [Serializable]
     public class TypeRulePack : BaseRulePack<TypeAllowedRule> { }
+
     [Serializable]
     public class TypeAllowedRule : AllowedRule<TypeDN, TypeAllowed> 
     {
@@ -153,37 +151,7 @@ namespace Signum.Entities.Authorization
 
     [Serializable]
     public class EntityGroupRulePack : BaseRulePack<EntityGroupAllowedRule> { }
+
     [Serializable]
-    public class EntityGroupAllowedRule : AllowedRule<EntityGroupDN, EntityGroupAllowed>
-    {
-        public TypeAllowed In
-        {
-            get { return EntityGroupAllowedUtils.In(Allowed); }
-            set
-            {
-                Allowed = EntityGroupAllowedUtils.FromInOut(value, EntityGroupAllowedUtils.Out(Allowed));
-                Notify(() => In);
-            }
-        }
-
-        public TypeAllowed Out
-        {
-            get { return EntityGroupAllowedUtils.Out(Allowed); }
-            set
-            {
-                Allowed = EntityGroupAllowedUtils.FromInOut(EntityGroupAllowedUtils.In(Allowed), value);
-                Notify(() => Out);
-            }
-        }
-
-        public TypeAllowed InBase
-        {
-            get { return EntityGroupAllowedUtils.In(AllowedBase); }
-        }
-
-        public TypeAllowed OutBase
-        {
-            get { return EntityGroupAllowedUtils.Out(AllowedBase); }
-        }
-    }
+    public class EntityGroupAllowedRule : AllowedRule<EntityGroupDN, EntityGroupAllowedDN> { }
 }

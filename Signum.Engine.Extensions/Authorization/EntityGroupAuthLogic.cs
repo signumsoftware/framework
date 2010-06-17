@@ -24,7 +24,7 @@ namespace Signum.Engine.Authorization
 {
     public static class EntityGroupAuthLogic
     {
-        static AuthCache<RuleEntityGroupDN, EntityGroupAllowedRule, EntityGroupDN, Enum, EntityGroupAllowed> cache;
+        static AuthCache<RuleEntityGroupDN, EntityGroupAllowedRule, EntityGroupDN, Enum, EntityGroupAllowedDN> cache;
 
         public static bool IsStarted { get { return cache != null; } }
 
@@ -35,18 +35,18 @@ namespace Signum.Engine.Authorization
                 AuthLogic.AssertStarted(sb);
                 EntityGroupLogic.Start(sb);
 
-                cache = new AuthCache<RuleEntityGroupDN, EntityGroupAllowedRule, EntityGroupDN, Enum, EntityGroupAllowed>(sb,
+                cache = new AuthCache<RuleEntityGroupDN, EntityGroupAllowedRule, EntityGroupDN, Enum, EntityGroupAllowedDN>(sb,
                      EnumLogic<EntityGroupDN>.ToEnum,
                      EnumLogic<EntityGroupDN>.ToEntity,
-                     MaxEntityGroupAllowed, EntityGroupAllowed.CreateCreate);
+                     MaxEntityGroupAllowed, new EntityGroupAllowedDN(TypeAllowed.Create, TypeAllowed.Create));
 
                 sb.Schema.Initializing(InitLevel.Level0SyncEntities, Schema_InitializingRegisterEvents);
             }
         }
 
-        static EntityGroupAllowed MaxEntityGroupAllowed(this IEnumerable<EntityGroupAllowed> collection)
+        static EntityGroupAllowedDN MaxEntityGroupAllowed(this IEnumerable<EntityGroupAllowedDN> collection)
         {
-            return collection.Aggregate(EntityGroupAllowed.NoneNone, (a, b) => a | b);
+            return new EntityGroupAllowedDN(collection.Select(a => a.InGroup).Max(), collection.Select(a => a.OutGroup).Max());
         }
 
         static void Schema_InitializingRegisterEvents(Schema sender)
@@ -132,16 +132,14 @@ namespace Signum.Engine.Authorization
 
             return EntityGroupLogic.GroupsFor(ident.GetType()).All(eg =>
                 {
-                    EntityGroupAllowed access = cache.GetAllowed(eg);
-                    TypeAllowed inAllowed = EntityGroupAllowedUtils.In(access);
-                    TypeAllowed outAllowed = EntityGroupAllowedUtils.Out(access);
-                    if (inAllowed >= allowed && outAllowed >= allowed)
+                    EntityGroupAllowedDN access = cache.GetAllowed(eg);
+                    if (access.InGroup >= allowed && access.OutGroup >= allowed)
                         return true;
 
                     if (((IdentifiableEntity)ident).IsInGroup(eg))
-                        return inAllowed >= allowed;
+                        return access.InGroup >= allowed;
                     else
-                        return outAllowed >= allowed;
+                        return access.OutGroup >= allowed;
                 });
         }
 
@@ -157,8 +155,8 @@ namespace Signum.Engine.Authorization
                          select new
                          {
                              Group = eg,
-                             AllowedIn = EntityGroupAllowedUtils.In(allowed) != TypeAllowed.None,
-                             AllowedOut = EntityGroupAllowedUtils.Out(allowed) != TypeAllowed.None,
+                             AllowedIn = allowed.InGroup != TypeAllowed.None,
+                             AllowedOut = allowed.OutGroup != TypeAllowed.None,
                              Expression = EntityGroupLogic.GetInGroupExpression<T>(eg),
                          }).Where(p => !p.AllowedIn || !p.AllowedOut).ToList();
 
@@ -248,17 +246,17 @@ namespace Signum.Engine.Authorization
             cache.SetRules(rules, r => true); 
         }
 
-        public static void SetEntityGroupAllowed(Lite<RoleDN> role, Enum entityGroupKey, EntityGroupAllowed allowed)
+        public static void SetEntityGroupAllowed(Lite<RoleDN> role, Enum entityGroupKey, EntityGroupAllowedDN allowed)
         {
             cache.SetAllowed(role, entityGroupKey, allowed); 
         }
 
-        public static EntityGroupAllowed GetEntityGroupAllowed(Lite<RoleDN> role, Enum entityGroupKey)
+        public static EntityGroupAllowedDN GetEntityGroupAllowed(Lite<RoleDN> role, Enum entityGroupKey)
         {
             return cache.GetAllowed(role, entityGroupKey);
         }
 
-        public static EntityGroupAllowed GetEntityGroupAllowed(Enum entityGroupKey)
+        public static EntityGroupAllowedDN GetEntityGroupAllowed(Enum entityGroupKey)
         {
             return cache.GetAllowed(entityGroupKey);
         }

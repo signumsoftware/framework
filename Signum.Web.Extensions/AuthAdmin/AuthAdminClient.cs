@@ -70,14 +70,15 @@ namespace Signum.Web.Authorization
 
                 if (entityGroups)
                 {
-                    Register<EntityGroupRulePack, EntityGroupAllowedRule, EntityGroupDN, EntityGroupAllowed, EntityGroupDN>("entityGroups", a => a.Resource, "Resource", false);
+                    Register<EntityGroupRulePack, EntityGroupAllowedRule, EntityGroupDN, EntityGroupAllowedDN, EntityGroupDN>("entityGroups", a => a.Resource, "Resource", false);
 
                     Navigator.EntitySettings<EntityGroupRulePack>().MappingAdmin
                         .GetProperty(m => m.Rules, rul =>
                         ((EntityMapping<EntityGroupAllowedRule>)((MListDictionaryMapping<EntityGroupAllowedRule, EntityGroupDN>)rul).ElementMapping)
-                                .RemoveProperty(a => a.Allowed)
-                                .SetProperty(a => a.In, new ValueMapping<TypeAllowed>(), null)
-                                .SetProperty(a => a.Out, new ValueMapping<TypeAllowed>(), null));
+                                .GetProperty(a => a.Allowed, m => m.GetValue = ctx =>
+                                {
+                                    return new EntityGroupAllowedDN(ctx.Parent.Inputs["In"].ToEnum<TypeAllowed>(), ctx.Parent.Inputs["Out"].ToEnum<TypeAllowed>());
+                                }));
                 }
             }
         }
@@ -89,12 +90,12 @@ namespace Signum.Web.Authorization
                 Navigator.EntitySettings<UserDN>().ShowOkSave = admin => false;
 
                 OperationClient.Manager.Settings.AddRange(new Dictionary<Enum, OperationSettings>
-                    {
-                        { UserOperation.SaveNew, new EntityOperationSettings { IsVisible = ctx => ctx.Entity.IsNew }},
-                        { UserOperation.Save, new EntityOperationSettings { IsVisible = ctx => !ctx.Entity.IsNew }},
-                        { UserOperation.Disable, new EntityOperationSettings { IsVisible = ctx => !ctx.Entity.IsNew }},
-                        { UserOperation.Enable, new EntityOperationSettings { IsVisible = ctx => !ctx.Entity.IsNew }}
-                    });
+                {
+                    { UserOperation.SaveNew, new EntityOperationSettings { IsVisible = ctx => ctx.Entity.IsNew }},
+                    { UserOperation.Save, new EntityOperationSettings { IsVisible = ctx => !ctx.Entity.IsNew }},
+                    { UserOperation.Disable, new EntityOperationSettings { IsVisible = ctx => !ctx.Entity.IsNew }},
+                    { UserOperation.Enable, new EntityOperationSettings { IsVisible = ctx => !ctx.Entity.IsNew }}
+                });
             }
         }
 
@@ -102,7 +103,7 @@ namespace Signum.Web.Authorization
             where T : BaseRulePack<AR>
             where AR: AllowedRule<R, A>, new()
             where R : IdentifiableEntity
-            where A : struct
+
         {
             if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(R)))
                 Navigator.AddSetting(new EntitySettings<R>(EntityType.ServerOnly));

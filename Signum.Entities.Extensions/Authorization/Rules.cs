@@ -11,7 +11,6 @@ namespace Signum.Entities.Authorization
     [Serializable]
     public class RuleDN<R, A> : IdentifiableEntity
         where R: IdentifiableEntity
-        where A : struct 
     {
         Lite<RoleDN> role;
         [NotNullValidator]
@@ -29,6 +28,7 @@ namespace Signum.Entities.Authorization
             set { Set(ref resource, value, () => Resource); }
         }
 
+        [NotNullable] //sometimes A is an EmbeddedEntity
         A allowed;
         public A Allowed
         {
@@ -53,50 +53,58 @@ namespace Signum.Entities.Authorization
     public class RulePropertyDN : RuleDN<PropertyDN, PropertyAllowed> { }
 
     [Serializable]
-    public class RuleEntityGroupDN : RuleDN<EntityGroupDN, EntityGroupAllowed> { }
+    public class RuleEntityGroupDN : RuleDN<EntityGroupDN, EntityGroupAllowedDN> { }
 
     [Serializable]
     public class RuleTypeDN : RuleDN<TypeDN, TypeAllowed> { }
 
-    public enum EntityGroupAllowed
+    [Serializable]
+    public class EntityGroupAllowedDN : EmbeddedEntity, IEquatable<EntityGroupAllowedDN>
     {
-        //In - Out
-        NoneNone = 0,
-        NoneRead = 1,
-        NoneModify = 2,
-        NoneCreate = 3,
+        public static readonly EntityGroupAllowedDN CreateCreate = new EntityGroupAllowedDN(TypeAllowed.Create, TypeAllowed.Create);
+        public static readonly EntityGroupAllowedDN NoneNone = new EntityGroupAllowedDN(TypeAllowed.None, TypeAllowed.None);
 
-        ReadNone = 4,
-        ReadRead = 5,
-        ReadModify = 6,
-        ReadCreate = 7,
+        private EntityGroupAllowedDN() { }
 
-        ModifyNone = 8,
-        ModifyRead = 9,
-        ModifyModify = 10,
-        ModifyCreate = 11,
-
-        CreateNone = 12,
-        CreateRead = 13,
-        CreateModify = 14,
-        CreateCreate = 15,
-    }
-
-    public static class EntityGroupAllowedUtils
-    {
-        public static EntityGroupAllowed FromInOut(TypeAllowed inAllowed, TypeAllowed outAllowed)
+        public EntityGroupAllowedDN(TypeAllowed inGroup, TypeAllowed outGroup)
         {
-            return (EntityGroupAllowed)(((int)inAllowed << 2) | (int)outAllowed);
+            this.inGroup = inGroup;
+            this.outGroup = outGroup;
         }
 
-        public static TypeAllowed In(EntityGroupAllowed groupAllowed)
+        TypeAllowed inGroup;
+        public TypeAllowed InGroup
         {
-            return (TypeAllowed)(((int)groupAllowed >> 2) & 0x3);
+            get { return inGroup; }
         }
 
-        public static TypeAllowed Out(EntityGroupAllowed groupAllowed)
+        TypeAllowed outGroup;
+        public TypeAllowed OutGroup
         {
-            return (TypeAllowed)((int)groupAllowed & 0x3);
+            get { return outGroup; }
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is EntityGroupAllowedDN)
+                return Equals((EntityGroupAllowedDN)obj);
+
+            return false;
+        }
+
+        public bool Equals(EntityGroupAllowedDN other)
+        {
+            return this == other || this.InGroup == other.InGroup && this.OutGroup == other.OutGroup;
+        }
+
+        public override int GetHashCode()
+        {
+            return inGroup.GetHashCode() ^ OutGroup.GetHashCode() << 5;
+        }
+
+        public override string ToString()
+        {
+            return "[In = {0}, Out = {1}]".Formato(inGroup, outGroup);
         }
     }
 

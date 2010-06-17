@@ -10,14 +10,13 @@ namespace Signum.Engine.Authorization
 {
     static class AuthUtils
     {
-        public static Dictionary<K, V> OuterCollapseDictionariesS<K, V>(this IEnumerable<Dictionary<K, V>> dictionaries, Func<IEnumerable<V?>, V> mixer)
-            where V : struct
+        public static Dictionary<K, V> OuterCollapseDictionariesS<K, V>(this IEnumerable<Dictionary<K, V>> dictionaries, V defaultValue, Func<IEnumerable<V>, V> mixer)
         {
             var dicList = dictionaries.ToList();
 
             var keys = dicList.NotNull().SelectMany(d => d.Keys).ToHashSet();
 
-            return keys.ToDictionary(k => k, k => mixer(dicList.Select(d => d.TryGetS(k))));
+            return keys.ToDictionary(k => k, k => mixer(dicList.Select(d => d.TryGet(k, defaultValue))));
         }
 
         public static Dictionary<K, V> Override<K, V>(this Dictionary<K, V> dictionary, Dictionary<K, V> newValues)

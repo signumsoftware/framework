@@ -15,7 +15,6 @@ namespace Signum.Entities.Authorization
         where RT : RuleDN<R, A>, new()
         where AR : AllowedRule<R, A>, new()
         where R : IdentifiableEntity
-        where A : struct
     {
         Dictionary<Lite<RoleDN>, Dictionary<K, A>> _runtimeRules;
         Dictionary<Lite<RoleDN>, Dictionary<K, A>> RuntimeRules
@@ -119,8 +118,9 @@ namespace Signum.Entities.Authorization
                 foreach (var role in roles)
                 {
                     var related = AuthLogic.RelatedTo(role);
-                    var permissions = related.Any() ? related.
-                        Select(r => newRules.TryGetC(r)).OuterCollapseDictionariesS(vals => Max(vals.Select(a => a ?? MaxValue))) : null;
+
+                    var permissions = related.Empty() ? null :
+                        related.Select(r => newRules.TryGetC(r)).OuterCollapseDictionariesS(MaxValue, Max);
 
                     permissions = permissions.Override(realRules.TryGetC(role)).Simplify(a => a.Equals(MaxValue));
 
@@ -154,7 +154,7 @@ namespace Signum.Entities.Authorization
 
         internal A GetAllowed(Lite<RoleDN> role, K key)
         {
-            return RuntimeRules.TryGetC(role).TryGetS(key) ?? MaxValue;
+            return RuntimeRules.TryGetC(role).TryGet(key, MaxValue);
         }
 
         A GetBaseAllowed(Lite<RoleDN> role, K key)
