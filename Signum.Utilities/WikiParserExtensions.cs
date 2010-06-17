@@ -10,8 +10,9 @@ namespace Signum.Utilities
     {
         public WikiSettings(bool format)
         {
-            Strong = Em = Underlined = Strike = Lists = Titles = LineBreaks = format;
+            Strong = Em = Underlined = Strike = Lists = Titles = format; 
             AllowRawHtml = false;
+            LineBreaks = MaxTwoLineBreaks = true;
         }
 
         public Func<string, string> TokenParser;
@@ -22,7 +23,10 @@ namespace Signum.Utilities
         public bool Lists { get; set; }
         public bool Titles { get; set; }
         public bool LineBreaks { get; set; }
+
         public bool AllowRawHtml { get; set; }
+        public bool MaxTwoLineBreaks { get; set; }
+
     }
 
     public static class WikiParserExtensions
@@ -153,17 +157,20 @@ namespace Signum.Utilities
                 RegexOptions.Compiled);
 
             //Remove multiple breakline  
-            content = Regex.Replace(content,
-                "(?<content>\n{2,})", settings.LineBreaks ? "\n" : "",
-           RegexOptions.Compiled);
-
+            if (settings.MaxTwoLineBreaks)
+            {
+                content = Regex.Replace(content,
+                    "(?<content>\n{3,})","\n\n", 
+                    RegexOptions.Compiled);
+            }
+      
             content = Regex.Replace(content,
                 "(?<content>\n)", settings.LineBreaks ? "<br/>" : ". ",
-            RegexOptions.Compiled);
+                RegexOptions.Compiled);
 
             content = Regex.Replace(content,
                 "(?<content>\r)", "",
-            RegexOptions.Compiled);
+                RegexOptions.Compiled);
             return content;
         }
 

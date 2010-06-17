@@ -192,4 +192,229 @@
   <data name="CalendarToday" xml:space="preserve">
     <value>Courant</value>
   </data>
+  <data name="ControlID0HasAnInvalidFormat" xml:space="preserve">
+    <value>L'ID de contrôle {0} a un format non valide</value>
+  </data>
+  <data name="IncorrectEntityInSession" xml:space="preserve">
+    <value>Entité incorrecte dans la Session</value>
+  </data>
+  <data name="InvalidFilterColumn0NotFound" xml:space="preserve">
+    <value>Filtre non valide, la colonne {{{0}}} introuvable</value>
+  </data>
+  <data name="InvalidPropertyPrefix" xml:space="preserve">
+    <value>Préfixe de propriété non valide</value>
+  </data>
+  <data name="InvalidPropertyPrefixOrWrongEntityInSession" xml:space="preserve">
+    <value>Préfixe de propriété non valide ou entité incorrecte dans la session</value>
+  </data>
+  <data name="ItsNotPossibleToSaveAnEntityOfType0WithErrors" xml:space="preserve">
+    <value>Il n'est pas possible d'enregistrer une entité de type {{0}} avec des erreurs</value>
+  </data>
+  <data name="LabelTextPropertyOfValueLineOptionsMustBeSpecifiedForManualValueLines" xml:space="preserve">
+    <value>Propriété de LabelText de ValueLineOptions doit être spécifiée pour manuel ValueLines</value>
+  </data>
+  <data name="MenuItem0HasOnClickAndAnotherClickDefined" xml:space="preserve">
+    <value>Le MenuItem {0} ne peut pas avoir SurClic et un autre clic défini</value>
+  </data>
+  <data name="MenuItem0HasOnServerClickAjaxAndAnotherClickDefined" xml:space="preserve">
+    <value>Le MenuItem {0} ne peut pas avoir OnServeClickAjax et un autre clic défini</value>
+  </data>
+  <data name="MenuItem0HasOnServerClickPostAndAnotherClickDefined" xml:space="preserve">
+    <value>Le MenuItem {0} ne peut pas avoir OnServeClickPost et un autre clic défini</value>
+  </data>
+  <data name="MissingQuerySettingsForQueryName0" xml:space="preserve">
+    <value>Il y a un QuerySettings pour le QueryName {0}</value>
+  </data>
+  <data name="MListModificationWithStaticType0" xml:space="preserve">
+    <value>MListModification avec staticType {0}</value>
+  </data>
+  <data name="NamesToTypesDictionaryNotInitialized" xml:space="preserve">
+    <value>Dictionnaire NamesToTypes non initialisé.</value>
+  </data>
+  <data name="NoIdentifiableEntityPropertyInTypeContextPath" xml:space="preserve">
+    <value>Il n'est pas une propriété IdentifiableEntity dans le chemin de TypeContext</value>
+  </data>
+  <data name="NoPropertyWithName0FoundInType1" xml:space="preserve">
+    <value>Aucune propriété avec le nom {{0}} de type {1}</value>
+  </data>
+  <data name="NoQueryWithName0" xml:space="preserve">
+    <value>Il n'y a aucune requête avec le nom {0}</value>
+  </data>
+  <data name="NoTypeForUrlName0" xml:space="preserve">
+    <value>Il n'y a aucun type enregistré pour UrlName {{{0}}}</value>
+  </data>
+  <data name="QueryUrlNameWasNotProvided" xml:space="preserve">
+    <value>{queryUrlName} pour rechercher n'était pas prévu.</value>
+  </data>
+  <data name="RequestDoesntHaveNecessaryTabIdentifier" xml:space="preserve">
+    <value>La demande n'est pas l'identificateur de l'onglet nécessaire</value>
+  </data>
+  <data name="TheresNotAViewForType0" xml:space="preserve">
+    <value>Il existe une vue associée au type {0}</value>
+  </data>
+  <data name="Type0NotFoundInNavigatorNamesToTypes" xml:space="preserve">
+    <value>Tapez {0} est introuvable dans le navigateur NamesToTypes</value>
+  </data>
+  <data name="ValueMustBeSpecifiedFor0" xml:space="preserve">
+    <value>Une valeur doit être spécifiée pour {0}</value>
+  </data>
+  <data name="QuickLinkIsNotInitialized" xml:space="preserve">
+    <value>QuickLink ne dispose pas de son FindOptions initialisée</value>
+  </data>
+  <data name="New" xml:space="preserve">
+    <value>Nouveau</value>
+  </data>
+  <data name="ImposibleConvertObject0From1To2" xml:space="preserve">
+    <value>Impossible de convertir l'objet {0} de type {1} de type {2}</value>
+  </data>
+  <data name="Alerts" xml:space="preserve">
+    <value>Alertes</value>
+  </data>
+  <data name="Checked" xml:space="preserve">
+    <value>Vérifiée</value>
+  </data>
+  <data name="CreateAlert" xml:space="preserve">
+    <value>Créer alerte</value>
+  </data>
+  <data name="CreateNote" xml:space="preserve">
+    <value>Créer note</value>
+  </data>
+  <data name="Future" xml:space="preserve">
+    <value>Avenir</value>
+  </data>
+  <data name="Notes" xml:space="preserve">
+    <value>Notes</value>
+  </data>
+  <data name="Warned" xml:space="preserve">
+    <value>Averti</value>
+  </data>
+  <data name="TypeSubContextCanNotBeCreated0" xml:space="preserve">
+    <value>TypeSubContext ne peut pas être créée: {0}</value>
+  </data>
+  <data name="Query0HasNoUrlName" xml:space="preserve">
+    <value>Requête {0} n'a aucune UrlName</value>
+  </data>
+  <data name="IncorrectEntityInSessionYouMustReloadThePageToContinue" xml:space="preserve">
+    <value>Des données incorrectes dans la session. Vous devez recharger la page pour continuer</value>
+  </data>
+  <data name="No" xml:space="preserve">
+    <value>aucun</value>
+  </data>
+  <data name="Column0NotFoundOnQuery1" xml:space="preserve">
+    <value>La colonne {0} n'est pas trouvée sur requête {1}</value>
+  </data>
+  <data name="Type0HasToBeIIdentifiableAtLeast" xml:space="preserve">
+    <value>type {0} doit être au moins IIdentifiable</value>
+  </data>
+  <data name="Type0HasToBeAbstractNotInTheSchema" xml:space="preserve">
+    <value>type {0} doit être abstract (pas dans le schéma)</value>
+  </data>
+  <data name="Type0HasToBeInTheSchema" xml:space="preserve">
+    <value>type {0} doit se faire dans le schéma.</value>
+  </data>
+  <data name="AbstractContextHasNotRoute" xml:space="preserve">
+    <value>Contexte abstract ne dispose pas d'une route</value>
+  </data>
+  <data name="ExpressionCannotFinishWithAnTypeWithImplementations0" xml:space="preserve">
+    <value>Expression ne peut pas terminer avec un type avec les implémentations {{0}}</value>
+  </data>
+  <data name="EntityComboCanOnlyBeDoneForAnIdentifiableOrALiteNotFor0" xml:space="preserve">
+    <value>EntityCombo ne peut être effectuée pour un identifiable ou une légère, pas pour {0}</value>
+  </data>
+  <data name="InvalidResultTypeForADirectConstructor" xml:space="preserve">
+    <value>Type de résultat non valide pour un constructeur direct</value>
+  </data>
+  <data name="InvalidResultTypeForAConstructor" xml:space="preserve">
+    <value>Type de résultat non valide pour un constructeur.</value>
+  </data>
+  <data name="PartialViewTypeWasNotPossibleToExtract" xml:space="preserve">
+    <value>PartialView : Type n'était pas possible d'extraire</value>
+  </data>
+  <data name="PopupViewCannotBeCalledForEmbeddedType0" xml:space="preserve">
+    <value>PopupView ne peut être appelée à base type {0}</value>
+  </data>
+  <data name="ImplementedByAllTypesAreNotAllowedInEntityCombo" xml:space="preserve">
+    <value>ImplementedByAll types ne sont pas autorisés dans EntityCombo</value>
+  </data>
+  <data name="TypesWithImplementationsMustProvideDataToEntityCombo" xml:space="preserve">
+    <value>Types de mises en œuvre doivent fournir des données à la EntityCombo</value>
+  </data>
+  <data name="EntityComboCannotHaveOnchangeHtmlPropertyUseOnEntityChangedInstead" xml:space="preserve">
+    <value>EntityCombo ne peut pas ont la propriété de html onchange, utilisez plutôt les onEntityChanged</value>
+  </data>
+  <data name="ViewForType0IsNotAllowed" xml:space="preserve">
+    <value>Vue de type {0} n'est pas autorisée.</value>
+  </data>
+  <data name="GetChooserNeedsAListOfOptions" xml:space="preserve">
+    <value>GetChooser a besoin d'une liste d'options</value>
+  </data>
+  <data name="TextNotSetForMenuItem0" xml:space="preserve">
+    <value>Texte non défini pour l'élément de menu {0}</value>
+  </data>
+  <data name="ValueLineBoxType0DoesNotExist" xml:space="preserve">
+    <value>ValueLineBoxType {0} n'existe pas</value>
+  </data>
+  <data name="VisualConstructorDoesnTWorkWithEmbeddedEntities" xml:space="preserve">
+    <value>Générateur visuel ne fonctionne pas avec EmbeddedEntities</value>
+  </data>
+  <data name="TheType0IsNotRegisteredInNavigator" xml:space="preserve">
+    <value>Le type {0} n'est pas enregistré dans le navigateur</value>
+  </data>
+  <data name="TheName0DoesNotCorrespondToAnyTypeInNavigator" xml:space="preserve">
+    <value>Le nom {0} ne correspond pas à n'importe quel type de navigateur</value>
+  </data>
+  <data name="PopupCreateCannotBeCalledForEmbeddedType0" xml:space="preserve">
+    <value>PopupCreate ne peut être appelée à base type {0}</value>
+  </data>
+  <data name="IdentifiableEntityToSave" xml:space="preserve">
+    <value>IdentifiableEntity pour enregistrer</value>
+  </data>
+  <data name="GetTypeChooserNeedsAnImplementedBy" xml:space="preserve">
+    <value>GetTypeChooser a besoin d'un ImplementedBy</value>
+  </data>
+  <data name="TypeWasNotPossibleToExtract" xml:space="preserve">
+    <value>Type n'était pas possible d'extraire</value>
+  </data>
+  <data name="StaticInfoSStaticTypeMustBeSet" xml:space="preserve">
+    <value>StaticType de StaticInfo doit être définie.</value>
+  </data>
+  <data name="InvalidType0ForRuntimeInfoItMustBeLiteOrIdentifiableEntity" xml:space="preserve">
+    <value>Type {0} non valide pour RuntimeInfo. Il doit être Lite ou IdentifiableEntity ou EmbeddedEntity</value>
+  </data>
+  <data name="RuntimeInfoSRuntimeTypeCannotBeOfTypeLiteUseExtractLite" xml:space="preserve">
+    <value>RuntimeType RuntimeInfo ne peut pas être de type Lite. Utilisez ExtractLite ou créez un RuntimeInfo&lt;T&gt; plutôt.</value>
+  </data>
+  <data name="InvalidRuntimeInfoParametersIdOrNull0AndIsNewTrue" xml:space="preserve">
+    <value>RuntimeInfo non valides : IdOrNull = {0} et IsNew = true</value>
+  </data>
+  <data name="IncorrectSfRuntimeInfoFormat0" xml:space="preserve">
+    <value>Format incorrect sfRuntimeInfo: {0}</value>
+  </data>
+  <data name="Type0NotAllowed" xml:space="preserve">
+    <value>Type {0} n'est pas autorisé.</value>
+  </data>
+  <data name="ChangesToEntity0AreNotAllowedBecauseEntityMappingIs" xml:space="preserve">
+    <value>Ne pas autoriser les modifications sur l'entité {0} car EntityMapping est null</value>
+  </data>
+  <data name="Average" xml:space="preserve">
+    <value>Moyenne</value>
+  </data>
+  <data name="ExecutedXTimes" xml:space="preserve">
+    <value>Exécutée x fois</value>
+  </data>
+  <data name="Maximum" xml:space="preserve">
+    <value>Maximum</value>
+  </data>
+  <data name="Type0NotFoundInTheSchema" xml:space="preserve">
+    <value>Type {0} est introuvable dans le schéma.</value>
+  </data>
+  <data name="Excel" xml:space="preserve">
+    <value>Excel</value>
+  </data>
+  <data name="EditColumnsFinishEdit" xml:space="preserve">
+    <value>Edition de fin.</value>
+  </data>
+  <data name="UserColumnsEdit" xml:space="preserve">
+    <value>Modifier les colonnes de l'utilisateur</value>
+  </data>
 </root>

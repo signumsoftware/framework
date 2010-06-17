@@ -414,4 +414,7 @@
   <data name="UserColumnsEdit" xml:space="preserve">
     <value>Editar User Columns</value>
   </data>
+  <data name="Excel" xml:space="preserve">
+    <value>Excel</value>
+  </data>
 </root>

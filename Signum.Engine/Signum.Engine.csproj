@@ -72,6 +72,7 @@
     <Compile Include="DynamicQuery\DynamicQuery.cs" />
     <Compile Include="DynamicQuery\StaticColumnFactory.cs" />
     <Compile Include="DynamicQuery\ManualDynamicQuery.cs" />
+    <Compile Include="Engine\SqlUtils.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="Database.cs" />
     <Compile Include="DynamicQuery\DynamicQueryManager.cs" />

@@ -276,15 +276,37 @@ namespace Signum.Utilities
         public static void SetRange<K, V>(this IDictionary<K, V> dictionary, Dictionary<K, V> other)
         {
             foreach (var item in other)
-            {
                 dictionary[item.Key] = item.Value;
-            }
         }
 
         public static void SetRange<K, V, A>(this IDictionary<K, V> dictionary, IEnumerable<A> collection, Func<A, K> getKey, Func<A, V> getValue)
         {
             foreach (var item in collection)
                 dictionary[getKey(item)] = getValue(item);
+        }
+
+        public static void DefaultRange<K, V>(this IDictionary<K, V> dictionary, IEnumerable<K> keys, IEnumerable<V> values)
+        {
+            foreach (var item in keys.ZipStrict(values))
+                if (!dictionary.ContainsKey(item.First))
+                    dictionary[item.First] = item.Second;
+        }
+
+        public static void DefaultRange<K, V>(this IDictionary<K, V> dictionary, Dictionary<K, V> other)
+        {
+            foreach (var item in other)
+                if (!dictionary.ContainsKey(item.Key))
+                    dictionary[item.Key] = item.Value;
+        }
+
+        public static void DefaultRange<K, V, A>(this IDictionary<K, V> dictionary, IEnumerable<A> collection, Func<A, K> getKey, Func<A, V> getValue)
+        {
+            foreach (var item in collection)
+            {
+                var key = getKey(item);
+                if (!dictionary.ContainsKey(key))
+                    dictionary[key] = getValue(item);
+            }
         }
 
         public static void RemoveRange<K, V>(this IDictionary<K, V> dictionary, IEnumerable<K> keys)
