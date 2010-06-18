@@ -117,14 +117,14 @@ namespace Signum.Utilities
 
             // Replacing lists
             content = Regex.Replace(content,
-     "(?<begin>\\*{1}[ ]{1})(?<content>.+)(?<end>[^*]?)[\\n]*",
+     "^\\s*(?<begin>\\*{1}[ ]?)(?<content>.+)(?<end>[^*]?)[\\n]*",
      settings.Lists ? "<li>${content}</li>" : "${content} ",
-     RegexOptions.Compiled);
+     RegexOptions.Compiled | RegexOptions.Multiline);
 
             content = Regex.Replace(content,
-     "(?<begin>\\#{1}[ ]{1})(?<content>.+)(?<end>[^#]?)[\\n]*",
+     "^\\s*(?<begin>\\#{1}[ ]?)(?<content>.+)(?<end>[^#]?)[\\n]*",
      settings.Lists ? "<oli>${content}</oli>" : "${content} ",
-     RegexOptions.Compiled);
+     RegexOptions.Compiled | RegexOptions.Multiline);
 
             content = Regex.Replace(content,
             "(?<content>\\<li\\>{1}.+\\<\\/li\\>)",
