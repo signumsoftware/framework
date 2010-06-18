@@ -12,5 +12,6 @@
 <p>
 <%= Html.Encode(Resources.YouCanResetYourPasswordByFollowingTheLinkBelow)%>
 </p>
-<%= Html.Href(ViewData["link"].ToString(), ViewData["link"].ToString()) %>
-
+<% if (ViewData.ContainsKey("Link")) { %>
+<%= Html.Href(ViewData["link"].ToString(), ViewData["link"].ToString())%>
+<% } %>
