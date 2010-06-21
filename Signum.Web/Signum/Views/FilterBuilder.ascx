@@ -33,7 +33,7 @@
                <%= Html.Button(context.Compose("btnAddFilter"), "+", "AddFilter('{0}');".Formato(context.ControlID), "addFilter", new Dictionary<string, object> { { "title", "Add Filter" }})%>
                <% if (findOptions.AllowUserColumns.HasValue ? findOptions.AllowUserColumns.Value : Navigator.Manager.AllowUserColumns(context.ControlID))
                   { %>
-               <%= Html.Button(context.Compose("btnAddColumn"), "+", "AddColumn('{0}');".Formato(context.ControlID), "addColumn", null)%>
+               <%= Html.Button(context.Compose("btnAddColumn"), "+", "AddColumn('{0}');".Formato(context.ControlID), "addColumn", new Dictionary<string, object> { { "title", "Add Column" } })%>
                <% } %>
                <%= Html.Button(context.Compose("btnEditColumns"), Html.Encode(Resources.UserColumnsEdit), "EditColumns('{0}');".Formato(context.ControlID), "", findOptions.UserColumnOptions.Any() ? new Dictionary<string, object>() : new Dictionary<string, object> { { "style", "display:none;" } })%>
                <%= Html.Button(context.Compose("btnEditColumnsFinish"), Html.Encode(Resources.EditColumnsFinishEdit), "EditColumnsFinish('{0}');".Formato(context.ControlID), "", new Dictionary<string, object> { { "style", "display:none;" } })%>

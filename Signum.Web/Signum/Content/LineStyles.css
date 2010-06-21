@@ -485,18 +485,23 @@ h2 .title {
 
 /* search table */
 
-.addFilter 
+.addFilter, .addColumn 
 {
-	background-image:url(../images/newFilter.png) !important;
     background-repeat:no-repeat !important;
     border:0 !important;
+    background-position:center center !important;
+    text-indent: -9999px;
+    width:16px;
+}
+
+.addFilter
+{
+	background-image:url(../images/newFilter.png) !important;
 }
 
 .addColumn 
 {
 	background-image:url(../images/newColumn.png) !important;
-    background-repeat:no-repeat !important;
-    border:0 !important;
 }
 
 .fields-search {

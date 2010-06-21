@@ -120,15 +120,14 @@ namespace Signum.Web
             if (IncludeCss != null)
                 IncludeCss(helper, sb);
             else
-                sb.AppendLine(helper.DynamicCssInclude("Scripts/jqueryui/" + jQueryPrefix + "ui.all.css",
-                    "Scripts/jqueryui/" + jQueryPrefix + "ui.base.css",
+                sb.AppendLine(helper.DynamicCssInclude(
                     "Scripts/jqueryui/" + jQueryPrefix + "ui.core.css",
                     "Scripts/jqueryui/" + jQueryPrefix + "ui.datepicker.css",
                     "Scripts/jqueryui/" + jQueryPrefix + "ui.theme.css"));
 
             sb.AppendLine(
                 "<script type=\"text/javascript\">\n" + 
-                "$(document).ready(function(){\n" +
+                "$(function(){\n" +
                 "$(\"#" + elementId + "\").datepicker({ " + OptionsToString(settings) +" });\n" + 
                 "});\n" + 
                 "</script>");

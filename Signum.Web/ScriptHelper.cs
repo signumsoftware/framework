@@ -93,6 +93,8 @@ namespace Signum.Web
             return helper.RegisterCss(notLoadedUrls.ToArray());
         }
 
+       // public static Action RegisterCssScript(this HtmlHelper html, params string[] cssUrls);
+
         public static string RegisterCss(this HtmlHelper html, params string[] cssUrls)
         {
             StringBuilder sb = new StringBuilder();
