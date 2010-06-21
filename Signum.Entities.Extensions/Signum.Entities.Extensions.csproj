@@ -77,7 +77,6 @@
     <Compile Include="Basics\PropertyDN.cs" />
     <Compile Include="Basics\QueryDN.cs" />
     <Compile Include="Basics\FacadeMethodDN.cs" />
-    <Compile Include="Chart\ChartRequest.cs" />
     <Compile Include="Files\EmbeddedFile.cs" />
     <Compile Include="Files\File.cs" />
     <Compile Include="Files\FilePath.cs" />
@@ -158,6 +157,9 @@
     <None Include="Authorization\Authorization.cd" />
     <None Include="Reports\CompositeReport.cd" />
     <None Include="Files\Files.cd" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Chart\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
