@@ -525,6 +525,7 @@
     <Resource Include="Images\word9703.png" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Images\clock.png" />
     <Resource Include="Images\operation.png" />
     <Resource Include="Images\property.png" />
     <Resource Include="Images\query.png" />
