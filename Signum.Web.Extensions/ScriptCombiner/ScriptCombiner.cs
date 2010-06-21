@@ -15,17 +15,20 @@ using Signum.Utilities;
 
 namespace Signum.Web.ScriptCombiner
 {
-    public class CssScriptCombiner : ScriptCombiner {
-        public CssScriptCombiner() {
+    public class CssScriptCombiner : ScriptCombiner
+    {
+        public CssScriptCombiner()
+        {
             this.contentType = "text/css";
             this.cacheable = true;
             this.gzipable = true;
             this.resourcesFolder = "../Content";
         }
 
-        protected override string Minify(string content) {
+        protected override string Minify(string content)
+        {
             content = Regex.Replace(content, "/\\*.+?\\*/", "", RegexOptions.Singleline);
-            content = Regex.Replace(content,"(\\s{2,}|\\t+|\\r+|\\n+)", string.Empty);
+            content = Regex.Replace(content, "(\\s{2,}|\\t+|\\r+|\\n+)", string.Empty);
             content = content.Replace(" {", "{");
             content = content.Replace("{ ", "{");
             content = content.Replace(" :", ":");
@@ -48,6 +51,13 @@ namespace Signum.Web.ScriptCombiner
                     content = content.Replace("#" + coincidencia, ("#" + coincidencia[0] + coincidencia[2] + coincidencia[4]).ToLower());
             }
             return content;
+        }
+
+        public override string ReadFile(string fileName)
+        {
+            string file = context.Server.MapPath((!string.IsNullOrEmpty(resourcesFolder) ? (resourcesFolder + "/") : "") + fileName.Replace("%2f", "/"));
+
+            return ReplaceRelativeImg(File.ReadAllText(file), fileName);
         }
 
         protected override string Extension { get { return "css"; } }
@@ -124,42 +134,7 @@ namespace Signum.Web.ScriptCombiner
             stream.Read(bytes, 0, (int)stream.Length);
             string content = Encoding.UTF8.GetString(bytes);
 
-            string[] parts = fileName.Split('/');
-            //replace relative paths
-
-            Match m = Regex.Match(content, "(?<begin>url\\(\"?)(?<content>.+?)[\"\\)]+");
-
-            StringBuilder sb = new StringBuilder();
-            int firstIndex = 0;
-
-            while (m.Success)
-            {
-                string relativePath = m.Groups["content"].ToString();
-                
-                int partsIndex = parts.Length-1;
-
-                while (relativePath.StartsWith("../")) {
-                    partsIndex--;
-                    relativePath = relativePath.Substring(3);
-                }
-
-                if (partsIndex < 0) break;
-
-                StringBuilder sbPath = new StringBuilder();
-                for (int i = 0; i < partsIndex; i++) {
-                    sbPath.Append(parts[i]);
-                    sbPath.Append("/");
-                }
-                sbPath.Append(relativePath);               
-
-                sb.Append(content.Substring(firstIndex, m.Index - firstIndex));
-                sb.Append("url(\"{0}\")".Formato("../" + sbPath.ToString()));
-                firstIndex = m.Index + m.Length;
-                m = m.NextMatch();
-            }
-           sb.Append(content.Substring(firstIndex, content.Length - firstIndex));
-
-            return sb.ToString();
+            return ReplaceRelativeImg(content, fileName);           
         }
     }
 
@@ -198,7 +173,7 @@ namespace Signum.Web.ScriptCombiner
         protected abstract string Minify(string content);
 
         private readonly static TimeSpan CACHE_DURATION = TimeSpan.FromDays(2);
-        private HttpContextBase context;
+        internal HttpContextBase context;
         string lastModifiedDateKey = "-lmd";
 
         public virtual string ReadFile(string fileName)
@@ -351,6 +326,49 @@ namespace Signum.Web.ScriptCombiner
                  (acceptEncoding.Contains("gzip") || acceptEncoding.Contains("deflate")))
                 return true;
             return false;
+        }
+
+        public string ReplaceRelativeImg(string content, string fileName)
+        {
+
+            string[] parts = fileName.Split('/');
+            //replace relative paths
+
+            Match m = Regex.Match(content, "(?<begin>url\\(\"?)(?<content>.+?)[\"\\)]+");
+
+            StringBuilder sb = new StringBuilder();
+            int firstIndex = 0;
+
+            while (m.Success)
+            {
+                string relativePath = m.Groups["content"].ToString();
+
+                int partsIndex = parts.Length - 1;
+
+                while (relativePath.StartsWith("../"))
+                {
+                    partsIndex--;
+                    relativePath = relativePath.Substring(3);
+                }
+
+                if (partsIndex < 0) break;
+
+                StringBuilder sbPath = new StringBuilder();
+                for (int i = 0; i < partsIndex; i++)
+                {
+                    sbPath.Append(parts[i]);
+                    sbPath.Append("/");
+                }
+                sbPath.Append(relativePath);
+
+                sb.Append(content.Substring(firstIndex, m.Index - firstIndex));
+                sb.Append("url(\"{0}\")".Formato("../" + sbPath.ToString()));
+                firstIndex = m.Index + m.Length;
+                m = m.NextMatch();
+            }
+            sb.Append(content.Substring(firstIndex, content.Length - firstIndex));
+
+            return sb.ToString();
         }
 
 

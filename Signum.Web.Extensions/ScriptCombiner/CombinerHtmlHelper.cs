@@ -13,15 +13,13 @@ namespace Signum.Web
     {   
         public static string CombinedCssUrl(this HtmlHelper html, params string[] files)
         {
-            return "Combine/CSS?f={0}".Formato(String.Join(",", files).Replace("/", "%2f"));
+            return "combine/CSS?f={0}".Formato(String.Join(",", files).Replace("/", "%2f"));
         }
 
         public static string CombinedCssUrlPath(this HtmlHelper html, string path, params string[] files)
         {
-            return "Combine/CSS?f={0}&p={1}".Formato(String.Join(",", files).Replace("/", "%2f"), path.Replace("/", "%2f"));
+            return "combine/CSS?f={0}&p={1}".Formato(String.Join(",", files).Replace("/", "%2f"), path.Replace("/", "%2f"));
         }
-
-
 
         public static void CombinedCss(this HtmlHelper html, string path, params string[] files)
         {
@@ -32,7 +30,7 @@ namespace Signum.Web
             html.ViewContext.HttpContext.Response.Write(content);
             return;
 #endif
-            string cadena = "<link href=\"{0}\" rel='stylesheet' type='text/css' />\n".Formato(CombinedCssUrl(html, files));
+            string cadena = "<link href=\"{0}\" rel='stylesheet' type='text/css' />\n".Formato(CombinedCssUrlPath(html, path.Replace("/", "%2f"), files));
             html.ViewContext.HttpContext.Response.Write(cadena);
         }
 
@@ -44,11 +42,11 @@ namespace Signum.Web
 
         public static string CombinedJsUrlPath(this HtmlHelper html, string path, params string[] files)
         {
-            return "Combine/JS?f={0}&amp;p={1}".Formato(String.Join(",", files).Replace("/", "%2f"), path.Replace("/", "%2f"));
+            return "combine/js?f={0}&amp;p={1}".Formato(String.Join(",", files).Replace("/", "%2f"), path.Replace("/", "%2f"));
         }
         public static string CombinedJsUrl(this HtmlHelper html, params string[] files)
         {
-            return "Combine/JS?f={0}".Formato(String.Join(",", files).Replace("/", "%2f"));
+            return "combine/js?f={0}".Formato(String.Join(",", files).Replace("/", "%2f"));
         }
         public static void CombinedJs(this HtmlHelper html, string path, params string[] files)
         {
@@ -61,7 +59,6 @@ namespace Signum.Web
             content = "<script type='text/javascript' src=\"{0}\"></script>\n".Formato(CombinedJsUrlPath(html, path, files));
             html.ViewContext.HttpContext.Response.Write(content);
         }
-
 
         public static string IncludeAreaJs(params string[] files)
         {
@@ -94,7 +91,7 @@ namespace Signum.Web
 
         static string IncludeAreaCssPath(params string[] files)
         {
-            return "Combine/areacss?f={0}".Formato(String.Join(",", files).Replace("/", "%2f"));
+            return "combine/areacss?f={0}".Formato(String.Join(",", files).Replace("/", "%2f"));
         }
     }
 }
