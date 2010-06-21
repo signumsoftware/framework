@@ -102,10 +102,10 @@ namespace Signum.Web
             sb.AppendLine(EntityBaseHelper.WriteFindButton(helper, entityLine));
             sb.AppendLine(EntityBaseHelper.WriteRemoveButton(helper, entityLine));
 
-            sb.AppendLine(EntityBaseHelper.WriteBreakLine(helper, entityLine));
-
             if (entityLine.ShowFieldDiv)
                 sb.AppendLine("</div>");
+
+            sb.AppendLine(EntityBaseHelper.WriteBreakLine(helper, entityLine));
 
             return sb.ToString();
         }

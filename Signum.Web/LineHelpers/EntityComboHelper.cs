@@ -89,10 +89,10 @@ namespace Signum.Web
             sb.AppendLine(EntityBaseHelper.WriteViewButton(helper, entityCombo));
             sb.AppendLine(EntityBaseHelper.WriteCreateButton(helper, entityCombo));
 
-            sb.AppendLine(EntityBaseHelper.WriteBreakLine(helper, entityCombo));
-
             if (entityCombo.ShowFieldDiv)
                 sb.AppendLine("</div>");
+
+            sb.AppendLine(EntityBaseHelper.WriteBreakLine(helper, entityCombo));
 
             return sb.ToString();
         }

@@ -150,7 +150,7 @@ img.ui-datepicker-trigger:hover
 .field,.EntityLineDetail {
     margin:6px 0;
     clear:both;
-    overflow:auto;
+    float:left;
 }
 .fieldList 
 {
