@@ -460,7 +460,6 @@
     <Resource Include="Images\execute.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\clock.png" />
     <Resource Include="Images\customTask.png" />
     <Resource Include="Images\customTaskExecution.png" />
     <Resource Include="Images\package.png" />
