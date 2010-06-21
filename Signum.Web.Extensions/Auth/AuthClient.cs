@@ -63,10 +63,10 @@ namespace Signum.Web.Authorization
 
                 if (types)
                 {
-                    Navigator.Manager.GlobalIsCreable += type => TypeAuthLogic.GetTypeAllowed(type) == TypeAllowed.Create;
-                    Navigator.Manager.GlobalIsReadOnly += type => TypeAuthLogic.GetTypeAllowed(type) <= TypeAllowed.Read;
-                    Navigator.Manager.GlobalIsNavigable += type => TypeAuthLogic.GetTypeAllowed(type) >= TypeAllowed.Read;
-                    Navigator.Manager.GlobalIsViewable += type => TypeAuthLogic.GetTypeAllowed(type) >= TypeAllowed.Read;
+                    Navigator.Manager.GlobalIsCreable += type => TypeAuthLogic.GetTypeAllowed(type).GetUI() == TypeAllowedBasic.Create;
+                    Navigator.Manager.GlobalIsReadOnly += type => TypeAuthLogic.GetTypeAllowed(type).GetUI() <= TypeAllowedBasic.Read;
+                    Navigator.Manager.GlobalIsNavigable += type => TypeAuthLogic.GetTypeAllowed(type).GetUI() >= TypeAllowedBasic.Read;
+                    Navigator.Manager.GlobalIsViewable += type => TypeAuthLogic.GetTypeAllowed(type).GetUI() >= TypeAllowedBasic.Read;
                 }
 
                 if (queries)

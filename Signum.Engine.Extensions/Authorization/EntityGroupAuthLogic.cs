@@ -38,7 +38,7 @@ namespace Signum.Engine.Authorization
                 cache = new AuthCache<RuleEntityGroupDN, EntityGroupAllowedRule, EntityGroupDN, Enum, EntityGroupAllowedDN>(sb,
                      EnumLogic<EntityGroupDN>.ToEnum,
                      EnumLogic<EntityGroupDN>.ToEntity,
-                     MaxEntityGroupAllowed, new EntityGroupAllowedDN(TypeAllowed.Create, TypeAllowed.Create));
+                     MaxEntityGroupAllowed, EntityGroupAllowedDN.CreateCreate);
 
                 sb.Schema.Initializing(InitLevel.Level0SyncEntities, Schema_InitializingRegisterEvents);
             }
@@ -104,7 +104,7 @@ namespace Signum.Engine.Authorization
             where T:IdentifiableEntity
         {
             if (!retrieveDisabled && isRoot)
-                ident.AssertAllowed(TypeAllowed.Read);
+                ident.AssertAllowed(TypeAllowedBasic.Read, false);
         }
 
         static void EntityGroupAuthLogic_Saved<T>(T ident, bool isRoot, bool isNew)
@@ -113,19 +113,19 @@ namespace Signum.Engine.Authorization
             if (!saveDisabled && ident.Modified)
             {
                 if (isNew)
-                    ident.AssertAllowed(TypeAllowed.Create);
+                    ident.AssertAllowed(TypeAllowedBasic.Create, false);
                 else
-                    ident.AssertAllowed(TypeAllowed.None);
+                    ident.AssertAllowed(TypeAllowedBasic.Modify, false);
             }
         }
 
-        public static void AssertAllowed(this IIdentifiable ident, TypeAllowed allowed)
+        public static void AssertAllowed(this IIdentifiable ident, TypeAllowedBasic allowed, bool userInterface)
         {
-            if (!ident.IsAllowedFor(allowed))
+            if (!ident.IsAllowedFor(allowed, userInterface))
                 throw new UnauthorizedAccessException(Resources.NotAuthorizedToRetrieveThe0WithId1.Formato(ident.GetType().NiceName(), ident.Id));
         }
 
-        public static bool IsAllowedFor(this IIdentifiable ident, TypeAllowed allowed)
+        public static bool IsAllowedFor(this IIdentifiable ident, TypeAllowedBasic allowed, bool userInterface)
         {
             if(!AuthLogic.IsEnabled)
                 return true;
@@ -133,13 +133,15 @@ namespace Signum.Engine.Authorization
             return EntityGroupLogic.GroupsFor(ident.GetType()).All(eg =>
                 {
                     EntityGroupAllowedDN access = cache.GetAllowed(eg);
-                    if (access.InGroup >= allowed && access.OutGroup >= allowed)
+                    TypeAllowedBasic inGroup = access.InGroup.Get(userInterface);
+                    TypeAllowedBasic outGroup = access.OutGroup.Get(userInterface);
+                    if (inGroup >= allowed && outGroup >= allowed)
                         return true;
 
                     if (((IdentifiableEntity)ident).IsInGroup(eg))
-                        return access.InGroup >= allowed;
+                        return inGroup >= allowed;
                     else
-                        return access.OutGroup >= allowed;
+                        return outGroup >= allowed;
                 });
         }
 
@@ -149,14 +151,14 @@ namespace Signum.Engine.Authorization
         {
             if (!AuthLogic.IsEnabled)
                 return query;
-
+           
             var pairs = (from eg in EntityGroupLogic.GroupsFor(typeof(T))
                          let allowed = cache.GetAllowed(eg)
                          select new
                          {
                              Group = eg,
-                             AllowedIn = allowed.InGroup != TypeAllowed.None,
-                             AllowedOut = allowed.OutGroup != TypeAllowed.None,
+                             AllowedIn = allowed.InGroup.Get(DbQueryProvider.UserInterface) != TypeAllowedBasic.None,
+                             AllowedOut = allowed.OutGroup.Get(DbQueryProvider.UserInterface) != TypeAllowedBasic.None,
                              Expression = EntityGroupLogic.GetInGroupExpression<T>(eg),
                          }).Where(p => !p.AllowedIn || !p.AllowedOut).ToList();
 

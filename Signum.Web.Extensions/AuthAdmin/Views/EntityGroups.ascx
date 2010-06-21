@@ -9,6 +9,11 @@
 <%@ Import Namespace="Signum.Web.Extensions.Properties" %>
 
 <%= Html.RegisterCss("authAdmin/Content/authAdmin.css")%>
+<script language="javascript">
+    $(function() {
+    magicCheckBoxes($(document));
+    });
+</script>
 <%
     using (var tc = Html.TypeContext<EntityGroupRulePack>())
     {
@@ -49,25 +54,25 @@
             <%=Html.Span(null, item.Value.Resource.Name)%>
             <%=Html.HiddenRuntimeInfo(item, i=>i.Resource)%>
         </td>
-        <td>In<%=Html.Hidden(item.Compose("InBase"), item.Value.AllowedBase.InGroup.ToString())%></td>
+        <td>In<%=Html.Hidden(item.Compose("InBase"), item.Value.AllowedBase.InGroup.ToStringParts())%></td>
         <td>
             <a class="cbLink" style="background-image: url(authAdmin/images/radioBlue.png)">
-                <%=Html.RadioButton(item.Compose("In"), "Create", item.Value.Allowed.InGroup == TypeAllowed.Create)%>
+                <%=Html.CheckBox(item.Compose("In_Create"), item.Value.Allowed.InGroup.IsActive(TypeAllowedBasic.Create), new { tag = "Create" })%>
             </a>
         </td>
         <td>
             <a class="cbLink" style="background-image: url(authAdmin/images/radioGreen.png)">
-                <%=Html.RadioButton(item.Compose("In"), "Modify", item.Value.Allowed.InGroup == TypeAllowed.Modify)%>
+                <%=Html.CheckBox(item.Compose("In_Modify"), item.Value.Allowed.InGroup.IsActive(TypeAllowedBasic.Modify), new { tag = "Modify" })%>
             </a>
         </td>
         <td>
             <a class="cbLink" style="background-image: url(authAdmin/images/radioYellow.png)">
-                <%=Html.RadioButton(item.Compose("In"), "Read", item.Value.Allowed.InGroup == TypeAllowed.Read)%>
+                <%=Html.CheckBox(item.Compose("In_Read"), item.Value.Allowed.InGroup.IsActive(TypeAllowedBasic.Read), new { tag = "Read" })%>
             </a>
         </td>
         <td>
             <a class="cbLink" style="background-image: url(authAdmin/images/radioRed.png)">
-                <%=Html.RadioButton(item.Compose("In"), "None", item.Value.Allowed.InGroup == TypeAllowed.None)%>
+                <%=Html.CheckBox(item.Compose("In_None"), item.Value.Allowed.InGroup.IsActive(TypeAllowedBasic.None), new { tag = "None" })%>
             </a>
         </td>
         <td>
@@ -75,25 +80,25 @@
         </td>
     </tr>
     <tr class="second">
-        <td>Out<%=Html.Hidden(item.Compose("OutBase"), item.Value.AllowedBase.OutGroup.ToString())%></td>
+        <td>Out<%=Html.Hidden(item.Compose("OutBase"), item.Value.AllowedBase.OutGroup.ToStringParts())%></td>
         <td>
             <a class="cbLink" style="background-image: url(authAdmin/images/radioBlue.png)">
-                <%=Html.RadioButton(item.Compose("Out"), "Create", item.Value.Allowed.OutGroup == TypeAllowed.Create)%>
+                <%=Html.CheckBox(item.Compose("Out_Create"), item.Value.Allowed.OutGroup.IsActive(TypeAllowedBasic.Create), new  { tag = "Create" })%>
             </a>
         </td>
         <td>
             <a class="cbLink" style="background-image: url(authAdmin/images/radioGreen.png)">
-                <%=Html.RadioButton(item.Compose("Out"), "Modify", item.Value.Allowed.OutGroup == TypeAllowed.Modify)%>
+                <%=Html.CheckBox(item.Compose("Out_Modify"), item.Value.Allowed.OutGroup.IsActive(TypeAllowedBasic.Modify), new  { tag = "Modify" })%>
             </a>
         </td>
         <td>
             <a class="cbLink" style="background-image: url(authAdmin/images/radioYellow.png)">
-                <%=Html.RadioButton(item.Compose("Out"), "Read", item.Value.Allowed.OutGroup == TypeAllowed.Read)%>
+                <%=Html.CheckBox(item.Compose("Out_Read"), item.Value.Allowed.OutGroup.IsActive(TypeAllowedBasic.Read), new { tag = "Read" })%>
             </a>
         </td>
         <td>
             <a class="cbLink" style="background-image: url(authAdmin/images/radioRed.png)">
-                <%=Html.RadioButton(item.Compose("Out"), "None", item.Value.Allowed.OutGroup == TypeAllowed.None)%>
+                <%=Html.CheckBox(item.Compose("Out_None"), item.Value.Allowed.OutGroup.IsActive(TypeAllowedBasic.None), new { tag = "None" })%>
             </a>
         </td>
         <td>

@@ -9,6 +9,11 @@
 <%@ Import Namespace="Signum.Web.Extensions.Properties" %>
 
 <%= Html.RegisterCss("authAdmin/Content/authAdmin.css")%>
+<script language="javascript">
+    $(function() {
+        magicRadios($(document));
+    });
+</script>
 <%
     using (var tc = Html.TypeContext<PermissionRulePack>())
     {

@@ -77,6 +77,7 @@
     <Compile Include="Basics\PropertyDN.cs" />
     <Compile Include="Basics\QueryDN.cs" />
     <Compile Include="Basics\FacadeMethodDN.cs" />
+    <Compile Include="Chart\ChartRequest.cs" />
     <Compile Include="Files\EmbeddedFile.cs" />
     <Compile Include="Files\File.cs" />
     <Compile Include="Files\FilePath.cs" />

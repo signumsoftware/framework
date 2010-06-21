@@ -34,7 +34,7 @@ namespace Signum.Engine.Authorization
 
                 cache = new AuthCache<RuleTypeDN, TypeAllowedRule, TypeDN, Type, TypeAllowed>(sb,
                     dn => TypeLogic.DnToType[dn],
-                    type => TypeLogic.TypeToDN[type], MaxTypeAllowed, TypeAllowed.Create);
+                    type => TypeLogic.TypeToDN[type], MaxTypeAllowed, TypeAllowed.DBCreateUICreate);
             }
         }
 
@@ -45,16 +45,16 @@ namespace Signum.Engine.Authorization
 
         static bool Schema_IsAllowedCallback(Type type)
         {
-            return cache.GetAllowed(type) != TypeAllowed.None;
+            return cache.GetAllowed(type).GetDB() != TypeAllowedBasic.None;
         }
 
         static void Schema_Saving(IdentifiableEntity ident, bool isRoot)
         {
             if (ident.Modified)
             {
-                TypeAllowed access = cache.GetAllowed(ident.GetType());
+                TypeAllowedBasic access = cache.GetAllowed(ident.GetType()).GetDB();
 
-                if (access == TypeAllowed.Create || (!ident.IsNew && access == TypeAllowed.Modify))
+                if (access == TypeAllowedBasic.Create || (!ident.IsNew && access == TypeAllowedBasic.Modify))
                     return;
 
                 throw new UnauthorizedAccessException(Resources.NotAuthorizedToSave0.Formato(ident.GetType()));
@@ -63,8 +63,8 @@ namespace Signum.Engine.Authorization
 
         static void Schema_Retrieving(Type type, int id, bool isRoot)
         {
-            TypeAllowed access = cache.GetAllowed(type);
-            if (access < TypeAllowed.Read)
+            TypeAllowedBasic access = cache.GetAllowed(type).GetDB();
+            if (access < TypeAllowedBasic.Read)
                 throw new UnauthorizedAccessException(Resources.NotAuthorizedToRetrieve0.Formato(type));
         }
 

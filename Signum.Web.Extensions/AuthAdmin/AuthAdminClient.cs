@@ -1,5 +1,4 @@
-﻿#region usings
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,7 +18,6 @@ using Signum.Entities.Operations;
 using System.Linq.Expressions;
 using Signum.Engine.Maps;
 using System.Web.Routing;
-#endregion
 
 namespace Signum.Web.Authorization
 {
@@ -51,7 +49,14 @@ namespace Signum.Web.Authorization
                 Navigator.RegisterTypeName<IUserRelatedDN>();
 
                 if (types)
+                {
                     Register<TypeRulePack, TypeAllowedRule, TypeDN, TypeAllowed, TypeDN>("types", a => a.Resource, "Resource", false);
+
+                    Navigator.EntitySettings<TypeRulePack>().MappingAdmin
+                        .GetProperty(m => m.Rules, rul =>
+                        ((EntityMapping<TypeAllowedRule>)((MListDictionaryMapping<TypeAllowedRule, TypeDN>)rul).ElementMapping)
+                                .GetProperty(a => a.Allowed, m => m.GetValue = ctx => ParseTypeAllowed(ctx.Inputs, null)));
+                }
 
                 if (properties)
                     Register<PropertyRulePack, PropertyAllowedRule, PropertyDN, PropertyAllowed, string>("properties", a => a.Resource.Path, "Resource_Path", true);
@@ -76,12 +81,21 @@ namespace Signum.Web.Authorization
                         .GetProperty(m => m.Rules, rul =>
                         ((EntityMapping<EntityGroupAllowedRule>)((MListDictionaryMapping<EntityGroupAllowedRule, EntityGroupDN>)rul).ElementMapping)
                                 .GetProperty(a => a.Allowed, m => m.GetValue = ctx =>
-                                {
-                                    return new EntityGroupAllowedDN(ctx.Parent.Inputs["In"].ToEnum<TypeAllowed>(), ctx.Parent.Inputs["Out"].ToEnum<TypeAllowed>());
-                                }));
+                                    new EntityGroupAllowedDN(ParseTypeAllowed(ctx.Parent.Inputs, "In_"), ParseTypeAllowed(ctx.Parent.Inputs, "Out_"))
+                                ));
                 }
             }
         }
+
+        public static TypeAllowed ParseTypeAllowed(IDictionary<string, string> dic, string inOut)
+        {
+            return TypeAllowedExtensions.Create(
+                ValueMapping.ParseHtmlBool(dic[inOut + "Create"]),
+                ValueMapping.ParseHtmlBool(dic[inOut + "Modify"]),
+                ValueMapping.ParseHtmlBool(dic[inOut + "Read"]),
+                ValueMapping.ParseHtmlBool(dic[inOut + "None"]));
+        }
+
 
         public static void StartUserGraph()
         {

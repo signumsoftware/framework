@@ -61,8 +61,7 @@ namespace Signum.Entities.Authorization
     [Serializable]
     public class EntityGroupAllowedDN : EmbeddedEntity, IEquatable<EntityGroupAllowedDN>
     {
-        public static readonly EntityGroupAllowedDN CreateCreate = new EntityGroupAllowedDN(TypeAllowed.Create, TypeAllowed.Create);
-        public static readonly EntityGroupAllowedDN NoneNone = new EntityGroupAllowedDN(TypeAllowed.None, TypeAllowed.None);
+        public static readonly EntityGroupAllowedDN CreateCreate = new EntityGroupAllowedDN(TypeAllowed.DBCreateUICreate, TypeAllowed.DBCreateUICreate);
 
         private EntityGroupAllowedDN() { }
 
@@ -117,9 +116,86 @@ namespace Signum.Entities.Authorization
 
     public enum TypeAllowed
     {
+        DBNoneUINone =     TypeAllowedBasic.None << 2 | TypeAllowedBasic.None,
+        
+        DBReadUINone =     TypeAllowedBasic.Read << 2 | TypeAllowedBasic.None,
+        DBReadUIRead =     TypeAllowedBasic.Read << 2 | TypeAllowedBasic.Read,
+
+        DBModifyUINone =   TypeAllowedBasic.Modify << 2 | TypeAllowedBasic.None,
+        DBModifyUIRead =   TypeAllowedBasic.Modify << 2 | TypeAllowedBasic.Read,
+        DBModifyUIModify = TypeAllowedBasic.Modify << 2 | TypeAllowedBasic.Modify,
+
+        DBCreateUINone =   TypeAllowedBasic.Create << 2 | TypeAllowedBasic.None,
+        DBCreateUIRead =   TypeAllowedBasic.Create << 2 | TypeAllowedBasic.Read,
+        DBCreateUIModify = TypeAllowedBasic.Create << 2 | TypeAllowedBasic.Modify,
+        DBCreateUICreate = TypeAllowedBasic.Create << 2 | TypeAllowedBasic.Create,
+    }
+
+    public static class TypeAllowedExtensions
+    {
+        public static TypeAllowedBasic GetDB(this TypeAllowed allowed)
+        {
+            return (TypeAllowedBasic)(((int)allowed >> 2) & 0x03);
+        }
+
+        public static TypeAllowedBasic GetUI(this TypeAllowed allowed)
+        {
+            return (TypeAllowedBasic)((int)allowed & 0x03);
+        }
+
+        public static TypeAllowedBasic Get(this TypeAllowed allowed, bool userInterface)
+        {
+            return userInterface ? allowed.GetUI() : allowed.GetDB(); 
+        }
+
+        public static TypeAllowed Create(bool create, bool modify, bool read, bool none)
+        {
+            TypeAllowedBasic[] result = new[]
+            {
+                create? TypeAllowedBasic.Create: (TypeAllowedBasic?)null, 
+                modify? TypeAllowedBasic.Modify: (TypeAllowedBasic?)null, 
+                read? TypeAllowedBasic.Read: (TypeAllowedBasic?)null, 
+                none? TypeAllowedBasic.None: (TypeAllowedBasic?)null, 
+            }.NotNull().OrderByDescending(a=>a).ToArray();
+
+            if (result.Length != 1 && result.Length != 2)
+                throw new FormatException();
+
+            return Create(result.Max(), result.Min());
+        }
+
+        public static TypeAllowed Create(TypeAllowedBasic database, TypeAllowedBasic ui)
+        {
+            TypeAllowed result = (TypeAllowed)(((int)database << 2) | (int)ui);
+            
+            if (!Enum.IsDefined(typeof(TypeAllowed), result))
+                throw new FormatException("Invalid TypeAllowed");
+
+            return result;
+        }
+
+        public static bool IsActive(this TypeAllowed allowed, TypeAllowedBasic basicAllowed)
+        {
+            return allowed.GetDB() == basicAllowed || allowed.GetUI() == basicAllowed; 
+        }
+
+        public static string ToStringParts(this TypeAllowed allowed)
+        {
+            TypeAllowedBasic db = allowed.GetDB();
+            TypeAllowedBasic ui = allowed.GetUI();
+
+            if (db == ui)
+                return db.ToString();
+
+            return "{0},{1}".Formato(db, ui); 
+        }
+    }
+
+    public enum TypeAllowedBasic
+    {
         None = 0,
         Read = 1,
-        Modify = 2,
-        Create = 3,
+        Modify = 2 ,
+        Create = 3
     }
 }
