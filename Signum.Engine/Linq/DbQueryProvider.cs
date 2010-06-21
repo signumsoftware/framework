@@ -25,7 +25,20 @@ namespace Signum.Engine.Linq
     /// Stateless query provider 
     /// </summary>
     public class DbQueryProvider : QueryProvider
-    {       
+    {
+        [ThreadStatic]
+        static bool userInterface;
+
+        public static bool UserInterface { get { return userInterface; } }
+
+        public static IDisposable ForUserInterface()
+        {
+            var oldValue = UserInterface;
+            userInterface = true;
+            return new Disposable(() => userInterface = oldValue); 
+        }
+
+
         public static readonly DbQueryProvider Single = new DbQueryProvider();
 
         private DbQueryProvider()

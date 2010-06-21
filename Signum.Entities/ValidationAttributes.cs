@@ -592,7 +592,7 @@ namespace Signum.Entities
     }
 
     public class StateValidator<E, S> : IEnumerable
-        where E : IdentifiableEntity
+        where E : ModifiableEntity
         where S : struct
     {
         Func<E, S> getState;

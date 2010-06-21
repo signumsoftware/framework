@@ -97,6 +97,15 @@ namespace Signum.Web
         public Action<MappingContext<T>> Validated;
     }
 
+    public class ValueMapping
+    {
+        public static bool ParseHtmlBool(string input)
+        {
+             string[] vals = input.Split(',');
+             return vals[0] == "true" || vals[0] == "True";
+        }
+    }
+
     public class ValueMapping<T> : Mapping<T>
     {
         public override T DefaultGetValue(MappingContext<T> ctx)
@@ -104,8 +113,7 @@ namespace Signum.Web
             Type type = typeof(T).UnNullify();
             if (type == typeof(bool))
             {
-                string[] vals = ctx.Input.Split(',');
-                return (T)(object)(vals[0] == "true" || vals[0] == "True");
+                return (T)(object)ValueMapping.ParseHtmlBool(ctx.Input);
             }
             else if (type == typeof(DateTime))
             {
