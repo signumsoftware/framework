@@ -24,7 +24,7 @@ namespace Signum.Windows.Authorization
     /// </summary>
     public partial class TypeRules : Window
     {
-        public static Type RuleType = typeof(TypeAllowedRule);
+        public static Type RuleType = typeof(MutableTypeAllowedRule);
         public static Type GroupType = typeof(NamespaceNode);
 
         public Lite<RoleDN> Role
@@ -71,7 +71,7 @@ namespace Signum.Windows.Authorization
                                     {
                                         Name = g.Key,
                                         Expanded = expanded.TryGetS(g.Key) ?? false, 
-                                        SubNodes = g.OrderBy(a => a.Resource.ClassName).ToList()
+                                        SubNodes = g.OrderBy(a => a.Resource.ClassName).Select(a=>new MutableTypeAllowedRule(a)).ToList()
                                     }).ToList();
         }
 
@@ -80,7 +80,11 @@ namespace Signum.Windows.Authorization
 
         private void btSave_Click(object sender, RoutedEventArgs e)
         {
-            Server.Execute((ITypeAuthServer s) => s.SetTypesRules((TypeRulePack)DataContext));
+            TypeRulePack trp = (TypeRulePack)DataContext;
+
+            trp.Rules = ((List<NamespaceNode>)treeView.ItemsSource).SelectMany(a => a.SubNodes).Select(a => a.ToRule()).ToMList();
+
+            Server.Execute((ITypeAuthServer s) => s.SetTypesRules(trp));
             Load();
         }
 
@@ -91,7 +95,7 @@ namespace Signum.Windows.Authorization
 
         private void properties_Click(object sender, RoutedEventArgs e)
         {
-            AllowedRule<TypeDN, TypeAllowed> rules = (AllowedRule<TypeDN, TypeAllowed>)((Button)sender).DataContext;
+            MutableTypeAllowedRule rules = (MutableTypeAllowedRule)((Button)sender).DataContext;
 
             new PropertyRules
             {
@@ -103,7 +107,7 @@ namespace Signum.Windows.Authorization
 
         private void operations_Click(object sender, RoutedEventArgs e)
         {
-            AllowedRule<TypeDN, TypeAllowed> rules = (AllowedRule<TypeDN, TypeAllowed>)((Button)sender).DataContext;
+            MutableTypeAllowedRule rules = (MutableTypeAllowedRule)((Button)sender).DataContext;
 
             new OperationRules
             {
@@ -115,7 +119,7 @@ namespace Signum.Windows.Authorization
 
         private void queries_Click(object sender, RoutedEventArgs e)
         {
-            AllowedRule<TypeDN, TypeAllowed> rules = (AllowedRule<TypeDN, TypeAllowed>)((Button)sender).DataContext;
+            MutableTypeAllowedRule rules = (MutableTypeAllowedRule)((Button)sender).DataContext;
 
             new QueryRules
             {
@@ -142,6 +146,43 @@ namespace Signum.Windows.Authorization
         }
 
         public string Name { get; set; }
-        public List<TypeAllowedRule> SubNodes { get; set; } //Will be TypeAccesRule or NamespaceNode
+        public List<MutableTypeAllowedRule> SubNodes { get; set; } //Will be TypeAccesRule or NamespaceNode
+    }
+
+    public class MutableTypeAllowedRule : EmbeddedEntity
+    {
+        public TypeAllowedBuilderDN Allowed { get; private set; }
+
+        public TypeDN Resource { get; set; }
+
+        public AuthThumbnail? Properties { get; set; }
+        public AuthThumbnail? Operations { get; set; }
+        public AuthThumbnail? Queries { get; set; }
+
+        public MutableTypeAllowedRule(TypeAllowedRule rule)
+        {
+            this.Allowed = new TypeAllowedBuilderDN(rule.AllowedBase, rule.Allowed);
+
+            this.Resource = rule.Resource;
+            
+            this.Properties = rule.Properties;
+            this.Operations = rule.Operations;
+            this.Queries = rule.Queries;
+        }
+
+        public TypeAllowedRule ToRule()
+        {
+            return new TypeAllowedRule
+            {
+                Resource = Resource,
+
+                AllowedBase =  Allowed.TypeAllowedBase,
+                Allowed = Allowed.TypeAllowed,
+
+                Properties = Properties,
+                Operations = Operations,
+                Queries = Queries,
+            };
+        }
     }
 }

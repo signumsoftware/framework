@@ -72,9 +72,9 @@ namespace Signum.Windows.Authorization
                 if (types)
                 {
                     typeRules = Server.Return((ITypeAuthServer s) => s.AuthorizedTypes());
-                    Navigator.Manager.GlobalIsCreable += type => GetTypeAllowed(type) == TypeAllowed.Create;
-                    Navigator.Manager.GlobalIsReadOnly += type => GetTypeAllowed(type) <= TypeAllowed.Read;
-                    Navigator.Manager.GlobalIsViewable += type => GetTypeAllowed(type) >= TypeAllowed.Read;
+                    Navigator.Manager.GlobalIsCreable += type => GetTypeAllowed(type).GetUI() == TypeAllowedBasic.Create;
+                    Navigator.Manager.GlobalIsReadOnly += type => GetTypeAllowed(type).GetUI() <= TypeAllowedBasic.Read;
+                    Navigator.Manager.GlobalIsViewable += type => GetTypeAllowed(type).GetUI() >= TypeAllowedBasic.Read;
 
                     MenuManager.Tasks += new Action<MenuItem>(MenuManager_TasksTypes);
                 }
@@ -141,7 +141,7 @@ namespace Signum.Windows.Authorization
 
                 if (type != null && Navigator.Manager.Settings.ContainsKey(type))
                 {
-                    if (GetTypeAllowed(type) == TypeAllowed.None)
+                    if (GetTypeAllowed(type).GetUI() == TypeAllowedBasic.None)
                         menuItem.Visibility = Visibility.Collapsed;
                 }
             }
@@ -171,7 +171,7 @@ namespace Signum.Windows.Authorization
 
         static TypeAllowed GetTypeAllowed(Type type)
         {
-            return typeRules.TryGetS(type) ?? TypeAllowed.Create;
+            return typeRules.TryGetS(type) ?? TypeAllowed.DBCreateUICreate;
         }
 
         static PropertyAllowed GetPropertyAllowed(PropertyRoute route)

@@ -14,6 +14,7 @@ using Signum.Entities.Authorization;
 using Signum.Entities;
 using Signum.Services;
 using Signum.Entities.Basics;
+using System.Windows.Threading;
 
 namespace Signum.Windows.Authorization
 {
@@ -78,63 +79,101 @@ namespace Signum.Windows.Authorization
 
     }
 
+    public class TypeAllowedBuilderDN : Entity
+    {
+        public TypeAllowedBuilderDN(TypeAllowed typeAllowedBase, TypeAllowed typeAllowed)
+        {
+            this.typeAllowedBase = typeAllowedBase;
+            this.typeAllowed = typeAllowed;
+        }
+
+        TypeAllowed typeAllowedBase;
+        public TypeAllowed TypeAllowedBase { get { return typeAllowedBase; } }
+
+
+        TypeAllowed typeAllowed;
+        public TypeAllowed TypeAllowed { get { return typeAllowed; } }
+
+
+        public bool Create
+        {
+            get { return typeAllowed.IsActive(TypeAllowedBasic.Create); }
+            set { Set(TypeAllowedBasic.Create); }
+        }
+
+        public bool Modify
+        {
+            get { return typeAllowed.IsActive(TypeAllowedBasic.Modify); }
+            set { Set(TypeAllowedBasic.Modify); }
+        }
+
+        public bool Read
+        {
+            get { return typeAllowed.IsActive(TypeAllowedBasic.Read); }
+            set { Set(TypeAllowedBasic.Read); }
+        }
+
+        public bool None
+        {
+            get { return typeAllowed.IsActive(TypeAllowedBasic.None); }
+            set { Set(TypeAllowedBasic.None); }
+        }
+
+        public int GetNum()
+        {
+            return (Create ? 1 : 0) + (Modify ? 1 : 0) + (Read ? 1 : 0) + (None ? 1 : 0);
+        }
+
+        private void Set(TypeAllowedBasic typeAllowedBasic)
+        {
+            if ((Keyboard.Modifiers & ModifierKeys.Shift) != ModifierKeys.Shift)
+            {
+                typeAllowed = TypeAllowedExtensions.Create(typeAllowedBasic, typeAllowedBasic);
+            }
+            else
+            {
+                int num = GetNum();
+                if (!typeAllowed.IsActive(typeAllowedBasic) && num == 1)
+                {
+                    var db = typeAllowed.GetDB();
+                    typeAllowed = TypeAllowedExtensions.Create(
+                        db > typeAllowedBasic ? db : typeAllowedBasic,
+                        db < typeAllowedBasic ? db : typeAllowedBasic);
+                }
+                else if (typeAllowed.IsActive(typeAllowedBasic) && num >= 2)
+                {
+                    var other = typeAllowed.GetDB() == typeAllowedBasic ? typeAllowed.GetDB() : typeAllowed.GetUI();
+                    typeAllowed = TypeAllowedExtensions.Create(other, other); 
+                }
+            }
+           
+            Notify(() => Create);
+            Notify(() => Modify);
+            Notify(() => Read);
+            Notify(() => None);
+            Notify(() => Overriden);
+        }
+
+        public bool Overriden
+        {
+            get { return !typeAllowedBase.Equals(typeAllowed); }
+        }
+    }
+
     public class MutableEntityGroupRule : EmbeddedEntity
     {
-        TypeAllowed inGroupBase;
-        TypeAllowed outGroupBase;
+        public TypeAllowedBuilderDN InGroup { get; private set; }
 
-        TypeAllowed inGroup;
-        public TypeAllowed InGroup
-        {
-            get { return inGroup; }
-            set
-            {
-                if (Set(ref inGroup, value, () => InGroup))
-                {
-                    Notify(() => InOverriden);
-                }
-            }
-        }
+        public TypeAllowedBuilderDN OutGroup { get; private set; }
 
-        TypeAllowed outGroup;
-        public TypeAllowed OutGroup
-        {
-            get { return outGroup; }
-            set
-            {
-                if (Set(ref outGroup, value, () => OutGroup))
-                {
-                    Notify(() => OutOverriden);
-                }
-            }
-        }
-
-        public bool InOverriden
-        {
-            get { return !inGroupBase.Equals(inGroup); }
-        }
-
-        public bool OutOverriden
-        {
-            get { return !outGroupBase.Equals(outGroup); }
-        }
-
-        EntityGroupDN resource;
-        public EntityGroupDN Resource
-        {
-            get { return resource; }
-            set { Set(ref resource, value, () => Resource); }
-        }
+        public EntityGroupDN Resource { get; set; }
 
         public MutableEntityGroupRule(EntityGroupAllowedRule rule)
         {
-            this.inGroupBase = rule.AllowedBase.InGroup;
-            this.outGroupBase = rule.AllowedBase.OutGroup;
-
-            this.inGroup = rule.Allowed.InGroup;
-            this.outGroup = rule.Allowed.OutGroup;
-
-            this.resource = rule.Resource; 
+            InGroup = new TypeAllowedBuilderDN(rule.AllowedBase.InGroup, rule.Allowed.InGroup);
+            OutGroup = new TypeAllowedBuilderDN(rule.AllowedBase.OutGroup, rule.Allowed.OutGroup); 
+            
+            this.Resource = rule.Resource; 
         }
 
         public EntityGroupAllowedRule ToRule()
@@ -142,8 +181,8 @@ namespace Signum.Windows.Authorization
             return new EntityGroupAllowedRule
             {
                 Resource = Resource,
-                AllowedBase = new EntityGroupAllowedDN(inGroupBase, outGroupBase),
-                Allowed = new EntityGroupAllowedDN(inGroup, outGroup)
+                AllowedBase = new EntityGroupAllowedDN(InGroup.TypeAllowedBase, OutGroup.TypeAllowedBase),
+                Allowed = new EntityGroupAllowedDN(InGroup.TypeAllowed, OutGroup.TypeAllowed)
             };
         }
     }

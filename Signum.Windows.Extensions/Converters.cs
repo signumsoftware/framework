@@ -6,6 +6,9 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using Signum.Windows.Operations;
 using Signum.Utilities;
+using Signum.Entities.Authorization;
+using System.Windows.Media;
+using System.Windows.Ink;
 
 namespace Signum.Windows.Extensions
 {
@@ -30,5 +33,17 @@ namespace Signum.Windows.Extensions
 
         public static readonly IValueConverter DecimalOrZero =
             ConverterFactory.New((decimal? val) => val ?? 0);
+
+        public static readonly IValueConverter ThumbnailBrush = ConverterFactory.New(
+            (AuthThumbnail? d) =>
+                !d.HasValue ? null :
+                d.Value == AuthThumbnail.All ? Brushes.GreenYellow :
+                d.Value == AuthThumbnail.Mix ? Brushes.Yellow : Brushes.Red);
+
+        public static readonly IValueConverter ThumbnailStroke = ConverterFactory.New(
+            (AuthThumbnail? d) =>
+                !d.HasValue ? null :
+                d.Value == AuthThumbnail.All ? Brushes.Green :
+                d.Value == AuthThumbnail.Mix ? Brushes.Gold : Brushes.DarkRed);
     }
 }
