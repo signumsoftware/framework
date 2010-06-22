@@ -150,6 +150,9 @@
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="AuthAdmin\Images\operation.png" />
+    <Content Include="AuthAdmin\Images\property.png" />
+    <Content Include="AuthAdmin\Images\query.png" />
     <Content Include="AuthAdmin\Images\thumb.png" />
     <Content Include="Captcha\Views\captcha.ascx">
       <SubType>ASPXCodeBehind</SubType>
@@ -221,9 +224,6 @@
     <Content Include="AuthAdmin\Content\authAdmin.css" />
     <Content Include="AuthAdmin\Images\class.png" />
     <Content Include="AuthAdmin\Images\namespace.png" />
-    <Content Include="AuthAdmin\Images\operation.png" />
-    <Content Include="AuthAdmin\Images\property.png" />
-    <Content Include="AuthAdmin\Images\query.png" />
     <Content Include="AuthAdmin\Images\radioBlue.png" />
     <Content Include="AuthAdmin\Images\radioGreen.png" />
     <Content Include="AuthAdmin\Images\radioRed.png" />
