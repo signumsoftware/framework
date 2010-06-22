@@ -104,6 +104,35 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void UpdateEfie()
+        {
+            Starter.Dirty();
+
+            SongDN song = new SongDN
+            {
+                 Name = "Mana Mana",
+                 Duration = 184,
+            };
+
+            int count = Database.Query<AlbumDN>().UnsafeUpdate(a => new AlbumDN { BonusTrack = song });
+
+            Assert.IsFalse(Database.Query<AlbumDN>().Any(a => a.BonusTrack == null));
+            Assert.AreEqual(Database.Query<AlbumDN>().Select(a => a.BonusTrack.Name).Distinct().Single(), "Mana Mana");
+        }
+
+        [TestMethod]
+        public void UpdateEfieNull()
+        {
+            Starter.Dirty();
+
+            int count = Database.Query<AlbumDN>().UnsafeUpdate(a => new AlbumDN { BonusTrack = null });
+
+            Assert.IsTrue(Database.Query<AlbumDN>().All(a => a.BonusTrack == null));
+            Assert.IsTrue(Database.Query<AlbumDN>().All(a => a.BonusTrack.Name == null));
+        }
+
+
+        [TestMethod]
         public void UpdateFie()
         {
             Starter.Dirty();

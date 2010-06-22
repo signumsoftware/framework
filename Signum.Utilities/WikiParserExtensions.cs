@@ -68,13 +68,21 @@ namespace Signum.Utilities
             StringBuilder sb = new StringBuilder();
             int firstIndex = 0;
 
-            Match m = Regex.Match(content, @"\[(.+)\]");
+            Match m = Regex.Match(content, @"\[(.+?)\]");
             while (m.Success)
             {
-                string text = settings.TokenParser
+                string text = m.Value;
+                try
+                {
+                    text = settings.TokenParser
                     .GetInvocationList()
-                    .Cast<Func<string,string>>()
-                    .Select(a=>a(m.Value)).NotNull().First();
+                    .Cast<Func<string, string>>()
+                    .Select(a => a(m.Value)).NotNull().First();
+                }
+                catch (Exception)
+                {
+                }
+
                 sb.Append(content.Substring(firstIndex, m.Index - firstIndex) + ((text != null) ? text : ""));
                 firstIndex = m.Index + m.Length;
                 m = m.NextMatch();

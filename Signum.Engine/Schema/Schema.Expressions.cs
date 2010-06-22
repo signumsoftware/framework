@@ -39,7 +39,7 @@ namespace Signum.Engine.Maps
                             let fi = kvp.Value.FieldInfo
                             select new FieldBinding(fi, kvp.Value.Field.GetExpression(token, tableAlias, binder))).ToReadOnly();
 
-            return new EmbeddedFieldInitExpression(this.Type, null, bindings);
+            return new EmbeddedFieldInitExpression(this.Type, null, bindings, null);
         }
     }
 
@@ -134,7 +134,17 @@ namespace Signum.Engine.Maps
                             select new FieldBinding(fi, kvp.Value.Field.GetExpression(token, tableAlias, binder))).ToReadOnly();
 
             ColumnExpression hasValue = HasValue == null ? null : new ColumnExpression(typeof(bool), tableAlias, HasValue.Name);
-            return new EmbeddedFieldInitExpression(this.FieldType, hasValue, bindings); 
+            return new EmbeddedFieldInitExpression(this.FieldType, hasValue, bindings, this); 
+        }
+
+        internal EmbeddedFieldInitExpression GetConstantExpression(object contant, QueryBinder binder)
+        {
+            var bindings = (from kvp in EmbeddedFields
+                            let fi = kvp.Value.FieldInfo
+                            select new FieldBinding(fi,
+                                binder.VisitConstant(kvp.Value.Getter(contant), kvp.Value.FieldInfo.FieldType))).ToReadOnly();
+
+            return new EmbeddedFieldInitExpression(this.FieldType, Expression.Constant(true), bindings, this); 
         }
     }
 

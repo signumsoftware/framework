@@ -93,7 +93,9 @@ namespace Signum.Engine.Linq
 
         public readonly ReadOnlyCollection<FieldBinding> Bindings;
 
-        public EmbeddedFieldInitExpression(Type type, Expression hasValue, IEnumerable<FieldBinding> bindings)
+        public readonly FieldEmbedded FieldEmbedded; //used for updates
+
+        public EmbeddedFieldInitExpression(Type type, Expression hasValue, IEnumerable<FieldBinding> bindings, FieldEmbedded fieldEmbedded)
             : base(DbExpressionType.EmbeddedFieldInit, type)
         {
             if (bindings == null)
@@ -105,6 +107,8 @@ namespace Signum.Engine.Linq
             HasValue = hasValue;
 
             Bindings = bindings.ToReadOnly();
+
+            FieldEmbedded = fieldEmbedded; 
         }
 
         public Expression GetBinding(FieldInfo fi)
