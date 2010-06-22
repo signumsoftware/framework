@@ -65,6 +65,15 @@ namespace Signum.Web
             }
         }
 
+        public static string InputType(string inputType, string id, string value, IDictionary<string, object> htmlAttributes)
+        {
+            return "<input type=\"{0}\" id=\"{1}\" val=\"{2}\" {3} />".Formato(
+                inputType,
+                id,
+                value,
+                htmlAttributes.ToString(kv => kv.Key + "=\"" + kv.Value.ToString() + "\"", " "));
+        }
+
         /// <summary>
         /// Returns a "label" label that is used to show the name of a field in a form
         /// </summary>
