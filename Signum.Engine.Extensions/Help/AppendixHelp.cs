@@ -99,7 +99,7 @@ namespace Signum.Engine.Help
                 m = regex.Match(Description.RemoveDiacritics());
             if (m.Success)
             {
-                yield return new SearchResult(TypeSearchResult.AppendixDescription, "", Description.Extract(m), null, m, HelpLogic.BaseUrl + "/Appendix/" + Name);
+                yield return new SearchResult(TypeSearchResult.AppendixDescription, Name, Description.Extract(m), null, m, HelpLogic.BaseUrl + "/Appendix/" + Name);
                 yield break;
             }
         }

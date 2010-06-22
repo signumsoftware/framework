@@ -280,17 +280,21 @@ namespace Signum.Engine.Help
             m = regex.Match(Type.NiceName().RemoveDiacritics());
             if (m.Success)
             {
-                yield return new SearchResult(TypeSearchResult.Type, Type.NiceName(), "|".Combine(Type.NiceName(), Description.Etc(etcLength)), Type, m, HelpLogic.EntityUrl(Type));
+                yield return new SearchResult(TypeSearchResult.Type, Type.NiceName(), !string.IsNullOrEmpty(Description) ? Description.Etc(etcLength) : Type.NiceName(), Type, m, HelpLogic.EntityUrl(Type));
                 yield break;
             }
 
+
             //Types description
             if (Description.HasText())
-                m = regex.Match(Description.RemoveDiacritics());
-            if (m.Success)
             {
-                yield return new SearchResult(TypeSearchResult.TypeDescription, "", Extract(Description, m), Type, m, HelpLogic.EntityUrl(Type));
-                yield break;
+                // TODO: Some times the rendered Description does not contain the query term and it looks strange. Description should be
+                // wiki-parsed and then make the search over this string
+                if (m.Success)
+                {
+                    yield return new SearchResult(TypeSearchResult.TypeDescription, Type.NiceName(), Extract(Description, m), Type, m, HelpLogic.EntityUrl(Type));
+                    yield break;
+                }
             }
 
             //Properties (key)
@@ -486,7 +490,11 @@ namespace Signum.Engine.Help
         public string Description { get; set; }
         public string Link { get; set; }
 
-        public string Content { get { return ObjectName + " | " + Description; } }
+        public string Content { get {
+            if (TypeSearchResult == TypeSearchResult.Type || TypeSearchResult == TypeSearchResult.TypeDescription)
+                return Description;
+
+            return ObjectName + " | " + Description; } }
 
         public SearchResult(TypeSearchResult typeSearchResult, string objectName, string description, Type type, Match match, string link)
         {

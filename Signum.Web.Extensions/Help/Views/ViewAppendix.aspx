@@ -4,7 +4,9 @@
 <%@ Import Namespace="Signum.Web.Extensions" %>
 <%@ Import Namespace="Signum.Engine.Help" %>
 <%@ Import Namespace="Signum.Utilities" %>
-
+<asp:Content ID="Content2" ContentPlaceHolderID="head" runat="server">
+    <link href="help/Content/help.css" rel="stylesheet" type="text/css" />
+</asp:Content>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
 <script src="<%=ClientScript.GetWebResourceUrl(typeof(Navigator), "Signum.Web.Scripts.SF_Globals.js")%>" type="text/javascript"></script>

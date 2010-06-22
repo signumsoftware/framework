@@ -146,6 +146,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Help\Views\Web.config" />
     <None Include="ScriptCombiner\csCombiner.cd" />
     <Content Include="Web.config" />
   </ItemGroup>

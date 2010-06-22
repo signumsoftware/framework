@@ -78,18 +78,19 @@ namespace Signum.Web.Help
             Stopwatch sp = new Stopwatch();
             sp.Start();
             Regex regex = new Regex(Regex.Escape(q.RemoveDiacritics()), RegexOptions.IgnoreCase);
-            Dictionary<string, IEnumerable<SearchResult>> results = (from eh in HelpLogic.GetEntitiesHelp()
-                                                                   let result = eh.Value.Search(regex)
-                                                                   where result.Any()
-                                                                   orderby result.First()
-                                                                     select new { eh.Key, result }).ToDictionary(a => a.Key.NiceName(), a => a.result);
+            List<List<SearchResult>> results = (from eh in HelpLogic.GetEntitiesHelp()
+                                               let result = eh.Value.Search(regex)
+                                               where result.Any()
+                                               select result.ToList()).ToList();
 
             //We add the appendices
-            results.AddRange((Dictionary<string, IEnumerable<SearchResult>>)(from a in HelpLogic.GetAppendices()
+            results.AddRange(from a in HelpLogic.GetAppendices()
                              let result = a.Search(regex)
                              where result.Any()
-                             orderby result.First()
-                             select new { a.Title, result }).ToDictionary(a => a.Title, a => a.result));
+                             select result.ToList());
+
+            results.Sort(a => a.First());
+
             sp.Stop();
             ViewData["time"] = sp.ElapsedMilliseconds;
             ViewData[ViewDataKeys.PageTitle] = q + " - Buscador";

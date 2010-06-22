@@ -69,7 +69,7 @@ namespace Signum.Web.Help
 
                 DefaultWikiSettings.TokenParser += ProcessImages;
 
-                NoLinkWikiSettings = new WikiSettings(false) { TokenParser = TokenParser };
+                NoLinkWikiSettings = new WikiSettings(false) { TokenParser = TokenParser, LineBreaks = false };
                 NoLinkWikiSettings.TokenParser += s =>
                 {
                     try
@@ -170,7 +170,7 @@ namespace Signum.Web.Help
         public static WikiLink LinkParser(string content)
         {
             Match m = Regex.Match(content,
-                        @"\[(?<letter>[^:]+):(?<link>[^\|\]]*)(\|(?<text>.*?))?\]");
+                        @"\[(?<letter>[^:]+):(?<link>.*?)(\|(?<text>.*?))?\]");
 
             if (m.Success)
             {
