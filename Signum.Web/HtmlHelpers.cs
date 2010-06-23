@@ -67,7 +67,7 @@ namespace Signum.Web
 
         public static string InputType(string inputType, string id, string value, IDictionary<string, object> htmlAttributes)
         {
-            return "<input type=\"{0}\" id=\"{1}\" val=\"{2}\" {3} />".Formato(
+            return "<input type=\"{0}\" id=\"{1}\" name=\"{1}\" val=\"{2}\" {3} />".Formato(
                 inputType,
                 id,
                 value,
