@@ -41,7 +41,7 @@ input[type=submit]:hover,input[type=button]:hover {
     border:1px solid #aaa;
 }
 
-input[type=submit]:active,input[type=button]:active {
+input[type=submit]:active, input[type=button]:active {
     color:#333;
     top:1px;
     background:-webkit-gradient(linear,left top,left bottom,from(#ededed),to(#fff));
@@ -64,7 +64,9 @@ input[type=submit]:active,input[type=button]:active {
     padding-top:6px;
 }
 
-input[type=text],input[type=password],input[type=button], textarea,select {/* IE will show a border around input radio */
+input[type=text], input[type=password],input[type=button],
+input[type=number], input[type=email],
+input[type=url], input[type=tel], textarea, select {/* IE will show a border around input radio */
     border:1px solid #ccc;
     color:#333;
     padding:3px 4px 4px;
@@ -106,7 +108,11 @@ input[type=checkbox] {
     border:0;
 }
 
-input[type=text]:focus,input[type=password]:focus,textarea:focus,select:focus {
+input[type=text]:focus, input[type=password]:focus, input[type=button]:focus,
+input[type=number]:focus, input[type=email]:focus,
+input[type=url]:focus, input[type=tel]:focus
+
+textarea:focus,select:focus {
     border-color:#76baec;
 }
 
@@ -577,7 +583,7 @@ h2 .title {
     padding:5px 7px;
 }
 
-.search-footer input[type=text] {
+.search-footer input[type=number] {
     margin-right:5px;
 }
 

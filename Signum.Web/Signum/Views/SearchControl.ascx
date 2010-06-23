@@ -34,7 +34,7 @@
 
 <div class="search-footer">
     <label for="<%=context.Compose(ViewDataKeys.Top)%>"><%=Html.Encode(Resources.NumberOfRows) %></label> 
-    <%= Html.TextBox(context.Compose(ViewDataKeys.Top), Navigator.Manager.QuerySettings.GetOrThrow(findOptions.QueryName, Resources.MissingQuerySettingsForQueryName0).Top.TryToString(), new Dictionary<string, object> { { "size", "5" }, { "onkeydown", "return validator.number(event)" } })%>
+    <%= HtmlHelperExtenders.InputType("number", context.Compose(ViewDataKeys.Top), Navigator.Manager.QuerySettings.GetOrThrow(findOptions.QueryName, Resources.MissingQuerySettingsForQueryName0).Top.TryToString(), new Dictionary<string, object> { { "size", "5" }, { "onkeydown", "return validator.number(event)" } })%>
 
     <%= Html.Hidden(context.Compose("OrderBy"), findOptions.OrderOptions == null ? "[]" : 
         ("[" + findOptions.OrderOptions.ToString(oo => "[\"" + oo.Token.FullKey() + "\"," + (oo.Type == OrderType.Ascending ? "0" : "1") + "]", ",") + "]")) %>

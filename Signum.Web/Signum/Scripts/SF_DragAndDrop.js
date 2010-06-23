@@ -57,9 +57,7 @@ function comienzoMovimiento(event, id) {
 
         evitaEventos(e);
 
-    });
-
-    $(document).bind("mouseup", function () {
+    }).bind("mouseup", function () {
         $(document).unbind("mousemove").unbind("mouseup");
         element.style.cursor = "auto";
     });

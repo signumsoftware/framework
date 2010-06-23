@@ -168,17 +168,19 @@ namespace Signum.Web
 
         public static InputType GetInputType(ValueLine valueLine)
         {
+            if (valueLine.PropertyRoute == null) return InputType.Text;
             var pp = Validator.GetOrCreatePropertyPack(valueLine.PropertyRoute);
-            if (pp != null)
-            {
-                if (Validator.GetOrCreatePropertyPack(valueLine.PropertyRoute)
+
+            if (pp == null) return InputType.Text;
+
+            if (Validator.GetOrCreatePropertyPack(valueLine.PropertyRoute)
                     .Validators.OfType<EMailValidatorAttribute>().SingleOrDefault() != null)
                     return InputType.Email;
 
-                if (Validator.GetOrCreatePropertyPack(valueLine.PropertyRoute)
-                    .Validators.OfType<URLValidatorAttribute>().SingleOrDefault() != null)
-                    return InputType.Url;
-            }
+            if (Validator.GetOrCreatePropertyPack(valueLine.PropertyRoute)
+                .Validators.OfType<URLValidatorAttribute>().SingleOrDefault() != null)
+                return InputType.Url;
+
             return InputType.Text;
         }
 
