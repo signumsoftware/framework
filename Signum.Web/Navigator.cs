@@ -274,12 +274,12 @@ namespace Signum.Web
 
         public static void AddSetting(EntitySettings settings)
         {
-            Navigator.Manager.EntitySettings.Add(settings.StaticType, settings);
+            Navigator.Manager.EntitySettings.AddOrThrow(settings.StaticType, settings, "EntitySettings for {0} allready registered");
         }
 
         public static void AddSettings(List<EntitySettings> settings)
         {
-            Navigator.Manager.EntitySettings.AddRange(settings.ToDictionary(s => s.StaticType)); 
+            Navigator.Manager.EntitySettings.AddRange(settings, s => s.StaticType, s => s, "EntitySettings");
         }
 
         public static EntitySettings<T> EntitySettings<T>() where T : ModifiableEntity
