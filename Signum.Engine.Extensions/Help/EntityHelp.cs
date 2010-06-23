@@ -9,7 +9,6 @@ using Signum.Utilities;
 using Signum.Entities.Operations;
 using Signum.Engine.DynamicQuery;
 using Signum.Utilities.Reflection;
-using Signum.Engine.Operations;
 using Signum.Entities.DynamicQuery;
 using Signum.Engine.Maps;
 using System.Text.RegularExpressions;
@@ -17,6 +16,7 @@ using Signum.Entities.Basics;
 using Signum.Entities;
 using System.IO;
 using System.Globalization;
+using Signum.Engine.Operations;
 
 namespace Signum.Engine.Help
 {
