@@ -334,7 +334,7 @@ namespace Signum.Web.ScriptCombiner
             string[] parts = fileName.Split('/');
             //replace relative paths
 
-            Match m = Regex.Match(content, "(?<begin>url\\(\"?)(?<content>.+?)[\"\\)]+");
+            Match m = Regex.Match(content, "(?<begin>url\\([\"\']?)(?<content>.+?)[\"\'\\)]+");
 
             StringBuilder sb = new StringBuilder();
             int firstIndex = 0;
