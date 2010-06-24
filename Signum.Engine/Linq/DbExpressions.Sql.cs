@@ -778,7 +778,7 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            return "SOURCE\r\n{0}\r\nPROJECTION\r\n{1}".Formato(Source.ToString().Indent(4), Projector.NiceToString().Indent(4)); 
+            return "(SOURCE\r\n{0}\r\nPROJECTION\r\n{1})".Formato(Source.ToString().Indent(4), Projector.NiceToString().Indent(4)); 
         }
     }
 
