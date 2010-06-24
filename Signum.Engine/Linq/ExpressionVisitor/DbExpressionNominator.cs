@@ -117,10 +117,17 @@ namespace Signum.Engine.Linq
                 candidates.Add(c);
             return c;
         }
- 
+
         protected override Expression VisitSqlFunction(SqlFunctionExpression sqlFunction)
         {
-            candidates.Add(sqlFunction);
+            //We can not assume allways true because neasted projections
+            ReadOnlyCollection<Expression> args = sqlFunction.Arguments.NewIfChange(a => Visit(a));
+            if (args != sqlFunction.Arguments)
+                sqlFunction = new SqlFunctionExpression(sqlFunction.Type, sqlFunction.SqlFunction, args); ;
+
+            if (args.All(a => candidates.Contains(a)))
+                candidates.Add(sqlFunction);
+
             return sqlFunction;
         }
 
@@ -132,7 +139,15 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitCase(CaseExpression cex)
         {
-            candidates.Add(cex);
+            var newWhens = cex.Whens.NewIfChange(w => VisitWhen(w));
+            var newDefault = Visit(cex.DefaultValue);
+
+            if (newWhens != cex.Whens || newDefault != cex.DefaultValue)
+                cex = new CaseExpression(newWhens, newDefault);
+
+            if (newWhens.All(w => candidates.Contains(w.Condition) && candidates.Contains(w.Value)) && candidates.Contains(newDefault))
+                candidates.Add(cex);
+
             return cex;
         }
 

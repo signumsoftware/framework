@@ -59,13 +59,15 @@ namespace Signum.Engine.Linq
             ProjectionToken newToken = new ProjectionToken(); 
 
             Expression newProj;
+            var candidates = DbExpressionNominator.Nominate(projector, knownAliases, out newProj);
+
             ColumnProjector cp = new ColumnProjector
             {
                 tokens = tokens,
                 newToken = newToken,
                 newAlias = newAlias,
                 knownAliases = knownAliases,
-                candidates = DbExpressionNominator.Nominate(projector, knownAliases, out newProj)
+                candidates = candidates
             };
 
             Expression e = cp.Visit(newProj);
