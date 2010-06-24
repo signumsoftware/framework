@@ -248,7 +248,7 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
-        public void SelectMList()
+        public void SelectBoolExpression()
         {
             ArtistDN michael = Database.Query<ArtistDN>().Single(a => a.Dead);
 
@@ -360,6 +360,24 @@ namespace Signum.Test.LinqProvider
                      a.Name,
                      Friend = (Lite<BandDN>)null
                  }).ToList();
+        }
+
+        [TestMethod]
+        public void SelecteNested()
+        {
+            var neasted = (from b in Database.Query<BandDN>()
+                           select (from a in Database.Query<AlbumDN>()
+                                   where a.Author == b
+                                   select a.ToLite()).ToList()).ToList();
+        }
+
+        [TestMethod]
+        public void SelecteNestedIb()
+        {
+            var neasted = (from l in Database.Query<LabelDN>()
+                           select (from a in Database.Query<AlbumDN>()
+                                   where a.Label == l
+                                   select a.Author.ToLite()).ToList()).ToList();
         }
     }
 
