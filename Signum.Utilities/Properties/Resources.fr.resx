@@ -160,7 +160,7 @@
     <value>{0} Années</value>
   </data>
   <data name="And" xml:space="preserve">
-    <value>et</value>
+    <value> et </value>
   </data>
   <data name="CannotRemoveItemThatIsNotInTree" xml:space="preserve">
     <value>Ne peut supprimer un élément qui n'est pas dans l'arbre</value>

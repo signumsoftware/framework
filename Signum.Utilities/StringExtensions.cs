@@ -382,5 +382,19 @@ namespace Signum.Utilities
             }
             return sb.ToString(0, Math.Max(0, sb.Length - separator.Length));  // Remove at the end is faster
         }
+
+        public static string CombineIfNotEmpty(this string separator, params object[] elements)
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (var item in elements)
+            {
+                if (item != null && item.ToString().HasText())
+                {
+                    sb.Append(item.ToString());
+                    sb.Append(separator);
+                }
+            }
+            return sb.ToString(0, Math.Max(0, sb.Length - separator.Length));  // Remove at the end is faster
+        }
     }
 }
