@@ -19,9 +19,9 @@
 %>
 
 <div id="<%=context.Compose("divSearchControl") %>" class="searchControl">
-<%=Html.Hidden(context.Compose("sfQueryUrlName"), Navigator.Manager.QuerySettings[findOptions.QueryName].UrlName, new { disbled = "disabled" })%>
-<%=Html.Hidden(context.Compose(ViewDataKeys.AllowMultiple), findOptions.AllowMultiple.ToString(), new { disbled = "disabled" })%>
-<%=Html.Hidden(context.Compose(ViewDataKeys.View), viewable, new { disbled = "disabled" })%>
+<%=Html.Hidden(context.Compose("sfQueryUrlName"), Navigator.Manager.QuerySettings[findOptions.QueryName].UrlName, new { disabled = "disabled" })%>
+<%=Html.Hidden(context.Compose(ViewDataKeys.AllowMultiple), findOptions.AllowMultiple.ToString(), new { disabled = "disabled" })%>
+<%=Html.Hidden(context.Compose(ViewDataKeys.View), viewable, new { disabled = "disabled" })%>
 
 <%= (findOptions.SearchOnLoad) ?
     "<script type=\"text/javascript\">$(document).ready(function() {{ SearchOnLoad('{0}'); }});</script>".Formato(context.Compose("btnSearch")) : 
@@ -33,7 +33,7 @@
 </div>
 
 <div class="search-footer">
-    <label for="<%=context.Compose(ViewDataKeys.Top)%>"><%=Html.Encode(Resources.NumberOfRows) %></label> 
+    <%= Html.Label(null, Resources.NumberOfRows, context.Compose(ViewDataKeys.Top), null) %>
     <%= HtmlHelperExtenders.InputType("number", context.Compose(ViewDataKeys.Top), Navigator.Manager.QuerySettings.GetOrThrow(findOptions.QueryName, Resources.MissingQuerySettingsForQueryName0).Top.TryToString(), new Dictionary<string, object> { { "size", "5" }, { "onkeydown", "return validator.number(event)" } })%>
 
     <%= Html.Hidden(context.Compose("OrderBy"), findOptions.OrderOptions == null ? "[]" : 

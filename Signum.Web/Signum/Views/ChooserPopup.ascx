@@ -14,7 +14,7 @@
     <%} %>
     <div id="<%=context.Compose("divPopupDragHandle")%>" class="dragHandle" onmousedown="comienzoMovimiento(event, '<%=context.Compose("panelPopup")%>');">
         <% string pageTitle = (string)ViewData[ViewDataKeys.PageTitle];
-           if (pageTitle != null) { %> <span class="popupEntityName"><%= pageTitle%></span> <%}%>           
+           if (pageTitle != null) { %> <span class="popupEntityName"><%= Html.Encode(pageTitle)%></span> <%}%>           
     </div>
     <%= ViewData[ViewDataKeys.CustomHtml].ToString() %>
 </div>

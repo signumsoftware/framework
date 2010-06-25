@@ -42,8 +42,6 @@ namespace Signum.Web
 
         public virtual string ToString(HtmlHelper helper)
         {
-            HtmlProps.Add("title", AltText ?? "");
-
             if (ImgSrc.HasText())
             {
                 if (HtmlProps.ContainsKey("style"))
@@ -51,7 +49,7 @@ namespace Signum.Web
                 else
                     HtmlProps["style"] = "background:transparent url(" + ImgSrc + ")  no-repeat scroll left top;";
 
-                return helper.Link(Id, "", DivCssClass, HtmlProps);
+                return helper.Href(Id, "", "#", AltText ?? "", DivCssClass, HtmlProps);
             }
             else
             {
@@ -60,8 +58,8 @@ namespace Signum.Web
                     HtmlProps.Add("onclick", OnClick);
                 }
                 else
-                    DivCssClass = DivCssClass + " disabled"; 
-                return helper.Link(Id, Text, DivCssClass, HtmlProps);
+                    DivCssClass = DivCssClass + " disabled";
+                return helper.Href(Id, Text, "#", AltText ?? "", DivCssClass, HtmlProps);
             }
         }
     }

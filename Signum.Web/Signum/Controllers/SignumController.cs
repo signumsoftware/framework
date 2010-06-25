@@ -299,7 +299,15 @@ namespace Signum.Web.Controllers
                 throw new InvalidOperationException(Resources.GetTypeChooserNeedsAnImplementedBy);
 
             string strButtons = ((ImplementedByAttribute)sfImplementations).ImplementedTypes
-                .ToString(type => "<input type='button' id='{0}' name='{0}' value='{1}' /><br />\n".Formato(type.Name, type.NiceName()), "");
+                .ToString(type => {
+                    TagBuilder builder = new TagBuilder("input");
+                    builder.GenerateId(type.Name);
+                    builder.MergeAttribute("type", "button");
+                    builder.MergeAttribute("name", type.Name);
+                    builder.MergeAttribute("value", type.NiceName());
+                    
+                    return builder.ToString(TagRenderMode.SelfClosing);
+                }, "");
 
             ViewData.Model = new Context(null, prefix);
             ViewData[ViewDataKeys.CustomHtml] = strButtons;
@@ -316,8 +324,14 @@ namespace Signum.Web.Controllers
             StringBuilder sb = new StringBuilder();
             int i = 0;
             foreach (string button in buttons) {
-                sb.Append("<input type='button' id='{0}' name='{0}' value='{1}' />"
-                    .Formato(ids != null ? ids[i] : button.Replace(" ", ""), button));
+                TagBuilder builder = new TagBuilder("input");
+                string id = ids != null ? ids[i] : button.Replace(" ", "");
+                builder.GenerateId(id);
+                builder.MergeAttribute("type", "button");
+                builder.MergeAttribute("name", id);
+                builder.MergeAttribute("value", button);
+
+                sb.Append(builder.ToString(TagRenderMode.SelfClosing));
                 i++;
             }
 

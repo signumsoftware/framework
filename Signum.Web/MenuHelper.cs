@@ -43,7 +43,14 @@ namespace Signum.Web
                 throw new InvalidOperationException(Resources.TextNotSetForMenuItem0.Formato(Link.ToString()));
             }
             set { text = value; }
-        } 
+        }
+
+        string html;
+        public string Html
+        {
+            get { return html; }
+            set { html = value; }
+        }
 
         string title;
         public string Title
@@ -88,18 +95,21 @@ namespace Signum.Web
                 return;
 
             if (depth != 0)
-                sb.AppendLine("<li class='l{0}'>".Formato(depth));
-
-            string fullClass = Class != null? " class='{1}'".Formato(Class): "";
+                sb.AppendLine("<li class=\"l{0}\">".Formato(depth));
 
             if (Children.Any())
             {
                 if (depth == 0)
-                    sb.AppendLine("<ul class='{0}'>".Formato(rootClass));
+                    sb.AppendLine("<ul class=\"{0}\">".Formato(rootClass));
                 else
                 {
-                    sb.AppendLine("<span onmouseover=\"\" title='{0}'{1}>{2}</span>".Formato(Title, fullClass, Text));
-                    sb.AppendLine("<ul class='submenu'>");
+                    sb.AppendLine(new FluentTagBuilder("span")
+                                     .MergeAttributes(new {onmouseover = "", title = Title})
+                                     .AddCssClass(Class)
+                                     .SetInnerText(Text)
+                                     .ToString(TagRenderMode.Normal));
+
+                    sb.AppendLine("<ul class=\"submenu\">");
                 }
 
                 foreach (WebMenuItem menu in children)
@@ -114,9 +124,20 @@ namespace Signum.Web
 
                 if (link.HasText() && currentUrl.EndsWith(link)) { sb.Append("<b>"); }
                 if (ManualA == null)
-                    sb.Append("<a href='{0}' title='{1}' {2}>{3}</a>".Formato(link, Title, fullClass, Text));
+                {
+                    FluentTagBuilder tbA = new FluentTagBuilder("a")
+                                .MergeAttributes(new {href = link, title = Title})
+                                .AddCssClass(Class);
+
+                    if (!string.IsNullOrEmpty(html))
+                        tbA.InnerHtml(html);
+                    else
+                        tbA.SetInnerText(Text);
+ 
+                    sb.Append(tbA.ToString(TagRenderMode.Normal));
+                }
                 else
-                    sb.Append(ManualA(link, title, fullClass));
+                    sb.Append(ManualA(link, title, Class));
                 if (link.HasText() && currentUrl.EndsWith(link)) { sb.Append("</b>"); }
             }
 

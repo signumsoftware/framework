@@ -97,10 +97,19 @@ namespace Signum.Web
                 sb.Append(helper.Div(itemTC.Compose(EntityBaseKeys.Entity), "", "", new Dictionary<string, object> { { "style", "display:none" }, {"class", "entityList"}}));
             
             //Note this is added to the sbOptions, not to the result sb
-            sbOptions.AppendLine("<option id='{0}' name='{0}' value='' class='valueLine entityListOption'>{1}</option>".Formato(itemTC.Compose(EntityBaseKeys.ToStr),
-                                (itemTC.Value as IIdentifiable).TryCC(i => i.ToString()) ??
-                                (itemTC.Value as Lite).TryCC(i => i.ToStr) ?? 
-                                (itemTC.Value as EmbeddedEntity).TryCC(i => i.ToString()) ?? ""));
+
+            sbOptions.AppendLine(new FluentTagBuilder("option", itemTC.Compose(EntityBaseKeys.ToStr))
+                                .MergeAttributes(new {
+                                    name    = itemTC.Compose(EntityBaseKeys.ToStr),
+                                    value   = ""                                    
+                                })
+                                .AddCssClass("valueLine")
+                                .AddCssClass("entityListOption")
+                                .SetInnerText(
+                                    (itemTC.Value as IIdentifiable).TryCC(i => i.ToString()) ??
+                                    (itemTC.Value as Lite).TryCC(i => i.ToStr) ?? 
+                                    (itemTC.Value as EmbeddedEntity).TryCC(i => i.ToString()) ?? "")
+                                .ToString(TagRenderMode.Normal));
             
             return sb.ToString();
         }

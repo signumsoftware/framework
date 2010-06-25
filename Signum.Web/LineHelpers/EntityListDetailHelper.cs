@@ -100,11 +100,24 @@ namespace Signum.Web
                 sb.Append(helper.Div(itemTC.Compose(EntityBaseKeys.Entity), "", "", new Dictionary<string, object> { { "style", "display:none" } }));
 
             //Note this is added to the sbOptions, not to the result sb
-            sbOptions.AppendLine("<option id='{0}' name='{0}' value='' class='valueLine entityListOption'{1}>{2}</option>".Formato(itemTC.Compose(EntityBaseKeys.ToStr),
-                (itemTC.Index == 0) ? " selected='selected'" : "",                
-                (itemTC.Value as IIdentifiable).TryCC(i => i.ToString()) ??
-                (itemTC.Value as Lite).TryCC(i => i.ToStr) ??
-                (itemTC.Value as EmbeddedEntity).TryCC(i => i.ToString()) ?? ""));
+            FluentTagBuilder tbOption = new FluentTagBuilder("option", itemTC.Compose(EntityBaseKeys.ToStr))
+                    .MergeAttributes(new
+                    {
+                        name = itemTC.Compose(EntityBaseKeys.ToStr),
+                        value = ""
+                    })
+                    .AddCssClass("valueLine")
+                    .AddCssClass("entityListOption")
+                    .SetInnerText(
+                        (itemTC.Value as IIdentifiable).TryCC(i => i.ToString()) ??
+                        (itemTC.Value as Lite).TryCC(i => i.ToStr) ??
+                        (itemTC.Value as EmbeddedEntity).TryCC(i => i.ToString()) ?? "");
+
+            if (itemTC.Index == 0)
+                tbOption.MergeAttribute("selected", "selected");
+
+            
+            sbOptions.AppendLine(tbOption.ToString(TagRenderMode.Normal));
 
             return sb.ToString();
         }

@@ -15,7 +15,7 @@
     Type entitiesType = Reflector.ExtractLite(queryDescription.StaticColumns.Single(a => a.IsEntity).Type);
     %>
 
-<%= Html.Hidden(context.Compose(ViewDataKeys.EntityTypeName), entitiesType.Name, new { disbled = "disabled" })%>
+<%= Html.Hidden(context.Compose(ViewDataKeys.EntityTypeName), entitiesType.Name, new { disabled = "disabled" })%>
 
 <div id="<%=context.Compose("fields-search")%>">
     <div id="<%=context.Compose("fields-list")%>" class="fields-list">
@@ -35,9 +35,9 @@
                   { %>
                <%= Html.Button(context.Compose("btnAddColumn"), "+", "AddColumn('{0}');".Formato(context.ControlID), "addColumn", new Dictionary<string, object> { { "title", "Add Column" } })%>
                <% } %>
-               <%= Html.Button(context.Compose("btnEditColumns"), Html.Encode(Resources.UserColumnsEdit), "EditColumns('{0}');".Formato(context.ControlID), "", findOptions.UserColumnOptions.Any() ? new Dictionary<string, object>() : new Dictionary<string, object> { { "style", "display:none;" } })%>
-               <%= Html.Button(context.Compose("btnEditColumnsFinish"), Html.Encode(Resources.EditColumnsFinishEdit), "EditColumnsFinish('{0}');".Formato(context.ControlID), "", new Dictionary<string, object> { { "style", "display:none;" } })%>
-               <%= Html.Button(context.Compose("btnClearAllFilters"), Html.Encode(Resources.DeleteFilters), "ClearAllFilters('{0}');".Formato(context.ControlID), "", findOptions.FilterOptions.Any() ? new Dictionary<string, object>() : new Dictionary<string, object> { { "style", "display:none;" } })%>
+               <%= Html.Button(context.Compose("btnEditColumns"), Resources.UserColumnsEdit, "EditColumns('{0}');".Formato(context.ControlID), "", findOptions.UserColumnOptions.Any() ? new Dictionary<string, object>() : new Dictionary<string, object> { { "style", "display:none;" } })%>
+               <%= Html.Button(context.Compose("btnEditColumnsFinish"), Resources.EditColumnsFinishEdit, "EditColumnsFinish('{0}');".Formato(context.ControlID), "", new Dictionary<string, object> { { "style", "display:none;" } })%>
+               <%= Html.Button(context.Compose("btnClearAllFilters"), Resources.DeleteFilters, "ClearAllFilters('{0}');".Formato(context.ControlID), "", findOptions.FilterOptions.Any() ? new Dictionary<string, object>() : new Dictionary<string, object> { { "style", "display:none;" } })%>
            </div>
     <% List<FilterOption> filterOptions = findOptions.FilterOptions; %>
   
