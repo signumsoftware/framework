@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Linq.Expressions;
+using System.Reflection;
+using Signum.Utilities.Reflection;
 
 namespace Signum.Utilities.ExpressionTrees
 {
@@ -27,8 +29,8 @@ namespace Signum.Utilities.ExpressionTrees
         private bool ExpressionHasDependencies(Expression expression)
         {
             return
+                expression.NodeType == ExpressionType.Call && ((MethodCallExpression)expression).Method.DeclaringType == typeof(Queryable) ||
                 expression.NodeType == ExpressionType.Parameter ||
-                (expression.NodeType == ExpressionType.Call && ((MethodCallExpression)expression).Method.DeclaringType == typeof(Queryable)) ||
                 expression.NodeType == ExpressionType.Lambda || // why? 
                 !EnumExtensions.IsDefined(expression.NodeType);
         }
@@ -37,6 +39,11 @@ namespace Signum.Utilities.ExpressionTrees
         {
             if (expression != null)
             {
+                if (expression.NodeType == ExpressionType.Call && ((MethodCallExpression)expression).Method.DeclaringType == typeof(ExpressionNominatorExtensions))
+                {
+                    return expression; 
+                }
+
                 bool saveHasDependencies = this.hasDependencies;
                 this.hasDependencies = false;
                 base.Visit(expression);
@@ -50,6 +57,21 @@ namespace Signum.Utilities.ExpressionTrees
                 this.hasDependencies |= saveHasDependencies;
             }
             return expression;
+        }
+    }
+
+    public static class ExpressionNominatorExtensions
+    {
+        static MethodInfo miInSql = ReflectionTools.GetMethodInfo((int i) => i.InSql()).GetGenericMethodDefinition();
+
+        public static T InSql<T>(this T value)
+        {
+            return value;
+        }
+
+        public static MethodCallExpression InSqlExpression(this Expression expression)
+        {
+            return Expression.Call(null, miInSql.MakeGenericMethod(expression.Type), expression);
         }
     }
 }

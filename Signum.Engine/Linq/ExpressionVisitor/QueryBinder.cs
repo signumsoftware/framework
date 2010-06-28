@@ -1166,6 +1166,11 @@ namespace Signum.Engine.Linq
         protected override Expression VisitTypeIs(TypeBinaryExpression b)
         {
             Expression operand = Visit(b.Expression);
+            if (operand.NodeType == (ExpressionType)DbExpressionType.FieldInit)
+            {
+                FieldInitExpression fie = (FieldInitExpression)operand;
+                return new IsNotNullExpression(fie.ExternalId); //Usefull mainly for Shy<T>
+            }
             if (operand.NodeType == (ExpressionType)DbExpressionType.ImplementedBy)
             {
                 ImplementedByExpression rib = (ImplementedByExpression)operand;

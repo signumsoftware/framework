@@ -573,12 +573,12 @@ namespace Signum.Engine.Linq
                     m.TryGetArgument("a") ?? m.TryGetArgument("d") ?? m.GetArgument("value"),
                     m.TryGetArgument("decimals") ?? m.TryGetArgument("digits") ?? new SqlConstantExpression(0));
 
-                case "LinqProviderExtensions.InSql":
-
+                case "ExpressionNominatorExtensions.InSql":
                     using (ForceFullNominate())
                     {
                         return Visit(m.GetArgument("value"));
                     }
+
                 default: return null; 
             }
         }
@@ -589,21 +589,5 @@ namespace Signum.Engine.Linq
             tempFullNominate = true;
             return new Disposable(() => tempFullNominate = oldTemp); 
         }
-    }
-
-
-    public static class LinqProviderExtensions
-    {
-        static MethodInfo miInSql = ReflectionTools.GetMethodInfo((int i) => i.InSql()).GetGenericMethodDefinition();
-
-        public static T InSql<T>(this T value)
-        {
-            return value;
-        }
-
-        internal static MethodCallExpression InSqlExpression(this Expression expression)
-        {
-            return Expression.Call(null, miInSql.MakeGenericMethod(expression.Type), expression); 
-        }
-    }        
+    }      
 }

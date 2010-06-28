@@ -12,6 +12,7 @@ using Signum.Entities.Reflection;
 using System.ComponentModel;
 using System.Linq.Expressions;
 using Signum.Utilities.Reflection;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities
 {
@@ -113,6 +114,31 @@ namespace Signum.Entities
                 base.GetHashCode() :
                 GetType().FullName.GetHashCode() ^ id.Value;
         }
+
+        /// <summary>
+        /// Sql-nullify an constant expression in order to work on polymorphic member accesses on Linq queries.
+        /// </summary>
+        [MethodExpander(typeof(ShyExpander))]
+        public T Shy<T>(T value)
+        {
+            return value;
+        }
+
+        class ShyExpander : IMethodExpander
+        {
+            public Expression Expand(Expression instance, Expression[] arguments, Type[] typeArguments)
+            {
+                Type t = typeArguments[0];
+
+                Expression ce = (t.IsValueType && !t.IsNullable()) ?
+                    Expression.Convert(Expression.Constant(null, t.Nullify()), t) :
+                    (Expression)Expression.Constant(null, t);
+
+                return ExpressionNominatorExtensions.InSqlExpression(
+                            Expression.Condition(Expression.TypeIs(instance, instance.Type), arguments[0], ce));
+            }
+        }
+
     }
 
     public interface IIdentifiable: INotifyPropertyChanged, IDataErrorInfo, ICloneable
