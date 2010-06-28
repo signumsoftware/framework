@@ -173,10 +173,13 @@ namespace Signum.Web
         public static string Href(this HtmlHelper html, string id, string innerText, string url, string title, string cssClass, IDictionary<string, object> htmlAttributes)
         {
             FluentTagBuilder href = new FluentTagBuilder("a", id)
-                        .MergeAttribute("href", url)
                         .MergeAttributes(htmlAttributes)
                         .AddCssClass(cssClass)
                         .SetInnerText(innerText);
+
+            if (url != "#")
+                href.MergeAttribute("href", url);
+
 
             if (!string.IsNullOrEmpty(title))
                 href.MergeAttribute("title", title);
