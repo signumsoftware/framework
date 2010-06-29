@@ -92,6 +92,8 @@ namespace Signum.Web
 
         public override string ToString()
         {
+            Navigator.SetTokens(QueryName, FilterOptions);
+
             string options = new Sequence<string>
             {
                 SearchOnLoad ? "sfSearchOnLoad=true" : null,
@@ -242,7 +244,7 @@ namespace Signum.Web
                     value = v.ToString();
             }
 
-            result = "&cn{0}={1}&sel{0}={2}&val{0}={3}".Formato(filterIndex, ColumnName, Operation.ToString(), value);
+            result = "cn{0}={1}&sel{0}={2}&val{0}={3}".Formato(filterIndex, ColumnName, Operation.ToString(), value);
             if (Frozen)
                 result += "&fz{0}=true".Formato(filterIndex);
 

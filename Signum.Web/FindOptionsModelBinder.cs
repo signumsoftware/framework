@@ -76,6 +76,9 @@ namespace Signum.Web
             QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(queryName);
 
             NameValueCollection parameters = httpContext.Request.Params;
+            if (parameters.AllKeys.Any(name => !name.HasText()))
+                throw new Exception("Incorrect URL: " + httpContext.Request.Url.ToString());
+
             var names = parameters.AllKeys.Where(k => k.StartsWith("cn"));
             foreach (string nameKey in names)
             {
