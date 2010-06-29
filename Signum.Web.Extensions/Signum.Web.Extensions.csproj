@@ -115,6 +115,7 @@
     <Compile Include="ScriptCombiner\CombinerHtmlHelper.cs" />
     <Compile Include="ScriptCombiner\JavaScriptMinifier.cs" />
     <Compile Include="ScriptCombiner\ScriptCombiner.cs" />
+    <Compile Include="ControllerFilters\UcalendaFilterAttributes.cs" />
     <Compile Include="ViewsChecker\ViewsCheckerClient.cs" />
     <Compile Include="ViewsChecker\ViewError.cs" />
     <Compile Include="ViewsChecker\Controllers\ViewsCheckerController.cs" />
