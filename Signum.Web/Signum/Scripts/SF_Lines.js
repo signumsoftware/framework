@@ -97,7 +97,8 @@ EBaseLine.prototype = {
         var viewOptions = this.viewOptionsForCreating(_viewOptions);
         var template = window[this.options.prefix.compose("sfTemplate")];
         if (!empty(template)) { //Template pre-loaded: In case of a list, it will be created with "_0" itemprefix => replace it with the current one
-            template = template.replace(new RegExp("\"" + this.options.prefix.compose("0"), "gi"), "\"" + viewOptions.prefix).replace(new RegExp("'" + this.options.prefix.compose("0"), "gi"), "'" + viewOptions.prefix);
+            //template = template.replace(new RegExp("\"" + this.options.prefix.compose("0"), "gi"), "\"" + viewOptions.prefix).replace(new RegExp("'" + this.options.prefix.compose("0"), "gi"), "'" + viewOptions.prefix);
+            template = template.replace(new RegExp(this.options.prefix.compose("0"), "gi"), viewOptions.prefix);
             new ViewNavigator(viewOptions).showCreateOk(template);
         }
         else
@@ -694,7 +695,9 @@ var ERep = function(_erepOptions) {
         var viewOptions = this.viewOptionsForCreating(_viewOptions);
         var template = window[this.options.prefix.compose("sfTemplate")];
         if (!empty(template)) { //Template pre-loaded (Embedded Entity): It will be created with "_0" itemprefix => replace it with the current one
-            template = template.replace(new RegExp("\"" + this.options.prefix.compose("0"), "gi"), "\"" + viewOptions.prefix).replace(new RegExp("'" + this.options.prefix.compose("0"), "gi"), "'" + viewOptions.prefix);
+            //template = template.replace(new RegExp("\"" + this.options.prefix.compose("0"), "gi"), "\"" + viewOptions.prefix).replace(new RegExp("'" + this.options.prefix.compose("0"), "gi"), "'" + viewOptions.prefix);
+            template = template.replace(new RegExp(this.options.prefix.compose("0"), "gi"), viewOptions.prefix);
+            
             this.onItemCreated(template, viewOptions);
         }
         else {
@@ -709,7 +712,6 @@ var ERep = function(_erepOptions) {
 
     this.viewOptionsForCreating = function(_viewOptions) {
         log("ERep viewOptionsForCreating");
-        var self = this;
         var newIndex = parseInt(this.getLastIndex()) + 1;
         var itemPrefix = this.options.prefix.compose(newIndex);
         return $.extend({
@@ -844,7 +846,9 @@ var EDList = function(_edlistOptions) {
         var viewOptions = this.viewOptionsForCreating(_viewOptions);
         var template = window[this.options.prefix.compose("sfTemplate")];
         if (!empty(template)) { //Template pre-loaded (Embedded Entity): It will be created with "_0" itemprefix => replace it with the current one
-            template = template.replace(new RegExp("\"" + this.options.prefix.compose("0"), "gi"), "\"" + viewOptions.prefix).replace(new RegExp("'" + this.options.prefix.compose("0"), "gi"), "'" + viewOptions.prefix);
+//            template = template.replace(new RegExp("\"" + this.options.prefix.compose("0"), "gi"), "\"" + viewOptions.prefix).replace(new RegExp("'" + this.options.prefix.compose("0"), "gi"), "'" + viewOptions.prefix);
+            template = template.replace(new RegExp(this.options.prefix.compose("0"), "gi"), viewOptions.prefix);
+
             $('#' + viewOptions.containerDiv).html(template);
         }
         else {
