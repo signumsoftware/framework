@@ -101,12 +101,12 @@ FindNavigator.prototype = {
     },
 
     search: function() {
-        //	var async = concurrentSearch[prefix + "btnSearch"];
-        //	if (async) concurrentSearch[prefix + "btnSearch"]=false;
+
         this.editColumnsFinish();
 
-        var btnSearch = $(this.pf("btnSearch"));
-        btnSearch.toggleClass('loading').val(lang['searching']);
+        var $btnSearch = $(this.pf("btnSearch"));
+        $btnSearch.toggleClass('loading').val(lang['searching']);
+        
         var self = this;
         $.ajax({
             type: "POST",
@@ -114,11 +114,20 @@ FindNavigator.prototype = {
             data: this.requestData(),
             async: this.findOptions.async,
             dataType: "html",
-            success: function(resultsHtml) {
-                $(self.pf("divResults tbody")).html(resultsHtml);
+            success: function(r) {
+                $btnSearch.val(lang['buscar']).toggleClass('loading');
+                if (!empty(r))
+                    $(self.pf("divResults tbody")).html(r);
+                else {
+                    var columns = $(self.pf("divResults th")).length;
+                    $(self.pf("divResults tbody")).html("<tr><td colspan=\"" + columns + "\">" + "No se encontraron resultados" + "</td></tr>")
+                }
+            },
+            error: function() {
+               $btnSearch.val(lang['buscar']).toggleClass('loading');
             }
         });
-        btnSearch.val(lang['buscar']).toggleClass('loading');
+
     },
 
     requestData: function() {

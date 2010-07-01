@@ -64,7 +64,7 @@ namespace Signum.Web
 
         public static string ToString(this List<ToolBarButton> elements, HtmlHelper helper)
         {
-            return elements.ToString(tb => tb.ToString(helper), "\r\n");
+            return elements.ToString(tb => "<li>" + tb.ToString(helper) + "</li>", "\r\n");
         }
     }
 }

@@ -72,7 +72,7 @@ namespace Signum.Web
             sb.AppendLine(EntityBaseHelper.WriteBreakLine(helper, listDetail));
 
             if (listDetail.DetailDiv == defaultDetailDiv)
-                sb.AppendLine(helper.Div(listDetail.DetailDiv, "", ""));
+                sb.AppendLine(helper.Div(listDetail.DetailDiv, "", "detail"));
 
             if (listDetail.UntypedValue != null && ((IList)listDetail.UntypedValue).Count > 0)
                 sb.AppendLine("<script type=\"text/javascript\">\n" +

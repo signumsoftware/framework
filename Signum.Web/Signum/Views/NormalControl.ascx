@@ -24,13 +24,13 @@
             </span>
         <span class="title"><%= ViewData[ViewDataKeys.PageTitle] ?? "" %></span>
      </h2>
-     <div id="divButtonBar" class="operations">
+     <ul class="operations">
         <%if (Model != null && Navigator.Manager.ShowOkSave(modelTC.UntypedValue.GetType(), false))
           { %>
-            <div id="btnSave" class="ButtonDiv" onclick="javascript:TrySave({});"><%= Resources.Save %></div>  
+            <li><a id="btnSave" class="entity-operation save" onclick="javascript:TrySave({});"><%= Resources.Save %></a></li>  
         <%} %>
         <%= ButtonBarEntityHelper.GetForEntity(this.ViewContext, (ModifiableEntity)modelTC.UntypedValue, ViewData[ViewDataKeys.PartialViewName].ToString(), modelTC.ControlID).ToString(Html)%>     
-     </div>
+     </ul>
      <div class="clearall"></div>
      <div class="validationSummaryAjax">
         <%= Html.ValidationSummaryAjax() %> 

@@ -62,7 +62,7 @@
 <% using(Html.BeginForm("DoPostBack","Signum","POST")){ %>
      <h2><%= ViewData[ViewDataKeys.PageTitle] ?? ""%></h2>
         <%if (Model != null && Navigator.Manager.ShowOkSave(Model.GetType(), false)){ %>
-            <input type="button" id="btnSave" class="ButtonDiv" onclick="<%="TrySave({});" %>" value="<%=HttpUtility.HtmlEncode(Resources.Save) %>" />   
+            <input type="button" id="btnSave" class="entity-operation save" onclick="<%="TrySave({});" %>" value="<%=HttpUtility.HtmlEncode(Resources.Save) %>" />   
         <%} %>
         <%= Html.GetButtonBarElements(Model, ViewData[ViewDataKeys.PartialViewName].ToString(), "")%>  
         <br />

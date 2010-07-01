@@ -88,6 +88,7 @@ input[type=url], input[type=tel], textarea, select {/* IE will show a border aro
 .field .fieldList, .field .fieldList table	/* ej.titulares cuenta bancaria */
 {
 	float: left;
+	margin-bottom:0;
 }
 
 .field .entityList
@@ -169,6 +170,8 @@ img.ui-datepicker-trigger:hover
     border-left:2px dotted #bbb;
     margin-left:120px;
 }
+
+.EntityLineDetail tr {vertical-align:top;}
 
 .field .valueFirst .labelLine
 {
@@ -295,6 +298,7 @@ fieldset
     max-height:550px;
     float:left;
     width:100%;
+    padding:0 10px;
 }
 
 .popup-body {
@@ -429,28 +433,42 @@ input.input-validation-error[type=checkbox] {
 }
 
 /* operations */
-.ButtonDiv {
-    float:left;
-    padding:4px 4px 4px 10px;
-    cursor:pointer;
-    border-left:1px solid #ddd;
-	margin-right:6px;
+
+ul.operations  
+{
+	list-style:none;	
+	margin-bottom:20px;
+	overflow:auto;	
 }
 
-.ButtonDiv:first-child {
+.search-footer ul.operations, .popupWindow ul.operations
+{
+	margin-bottom:0;
+}
+
+ul.operations li
+{
+	float:left;
+	border-right:1px dotted #ddd;
+	padding:0 5px;	
+}
+
+.entity-operation {
+    float:left;
+    padding:4px;
+    cursor:pointer;
+}
+
+ul.operations li:last-child {
     border:0;
 }
 
-.ButtonDiv.disabled {
-    color:#aaa;
-}
-
-.ButtonDiv.disabled:hover {
+.entity-operation.disabled:hover {
     text-decoration:none;
     cursor:default;
 }
 
-.ButtonDiv#btnSave {
+#btnSave.entity-operation {
     padding:4px;
     -moz-border-radius:2px;
     -webkit-border-radius:2px;
@@ -461,10 +479,43 @@ input.input-validation-error[type=checkbox] {
     font-weight: bold;
 }
 
-.operations 
+.entity-operation.green 
 {
-	margin-bottom:20px;
-	overflow:auto;
+	background-color:#eeffee;
+}
+
+.entity-operation.green:hover 
+{
+	background-color:#ddffdd;
+}
+
+.entity-operation.yellow 
+{
+    background-color:#ffffee;	
+}
+
+.entity-operation.yellow:hover 
+{
+    background-color:#ffffdd;	
+}
+
+.entity-operation.red 
+{
+	background-color:#ffeeee;
+}
+
+.entity-operation.red:hover 
+{
+	background-color:#ffdddd;
+}
+
+.entity-operation.disabled {
+    color:#aaa;
+    background-color:inherit;
+}
+
+.entity-operation.disabled:hover {
+    background-color:inherit;
 }
 	
 /* entity title */
@@ -588,14 +639,13 @@ h2 .title {
     margin-right:5px;
 }
 
-.search-footer input, .search-footer a.QueryButton
+.search-footer input, .search-footer a.query-operation
 {
     float:left;	
 }
-.search-footer a.QueryButton 
+.search-footer .query-operation
 {
 	padding:5px 10px 5px 1px;
-	margin-left:0;
 }
 
 .tblResults {
@@ -671,7 +721,7 @@ th.headerSortDown {
     padding: 0 5px;
 }
 
-.QueryButton
+.query-operation
 {
 	display:inline;
 	margin-left:10px;

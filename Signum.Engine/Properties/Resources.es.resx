@@ -235,7 +235,7 @@
     <value>Imposible incluir en el Schema:</value>
   </data>
   <data name="ImpossibleToSaveNullOnANotNullableEmbeddedFieldUseNullable" xml:space="preserve">
-    <value>Imposible guardar null en un campo embebido no nulable, utilice Nullable Attriubte sobre el campo</value>
+    <value>Imposible guardar null en un campo embebido no nulable, utilice Nullable Attribute sobre el campo</value>
   </data>
   <data name="IsNewButHasId1AndIdentityIsTrue" xml:space="preserve">
     <value>{0} es nuevo, pero tiene Id ({1}) e Identity es true</value>

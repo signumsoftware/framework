@@ -28,21 +28,18 @@
         <span class="popupEntityName"><%= modelTC.UntypedValue.GetType().NiceName()%></span> <span class="popupTitle"><%= modelTC.UntypedValue.TryToString() %></span>
         <%} %>
     </div>
-    <div id="<%=modelTC.Compose("divButtonBar")%>" class="buttonBar">
+    <ul class="operations">
         <%if (Model != null && Navigator.Manager.ShowOkSave(modelTC.UntypedValue.GetType(), false)){ %>
             <% if(ViewData[ViewDataKeys.OnOk]!=null) { %>
-            <input type="button" id="<%=modelTC.Compose(ViewDataKeys.BtnOk)%>" value="OK" onclick="<%=ViewData[ViewDataKeys.OnOk]%>" />
+            <li><input type="button" id="<%=modelTC.Compose(ViewDataKeys.BtnOk)%>" value="OK" onclick="<%=ViewData[ViewDataKeys.OnOk]%>" /></li>
         <%} else{ %>
-            <input type="button" id="<%=modelTC.Compose(ViewDataKeys.BtnOk)%>" value="OK" />
-         <%} %>    
-            
+            <li><input type="button" id="<%=modelTC.Compose(ViewDataKeys.BtnOk)%>" value="OK" /></li>
+         <%} %>                
         <%} %>
         <%= ButtonBarEntityHelper.GetForEntity(this.ViewContext, (ModifiableEntity)modelTC.UntypedValue, ViewData[ViewDataKeys.PartialViewName].ToString(), modelTC.ControlID).ToString(Html)%>
-    </div>
-    <div class="clearall"></div>
+    </ul>
     <%= Html.ValidationSummaryAjax(modelTC) %>
     <% Html.WritePopupHeader(); %>
-    <div class="clearall"></div>
     <div id="<%=modelTC.Compose("divMainControl")%>" class="divMainControl">
         <%
             Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString(), Model); 
