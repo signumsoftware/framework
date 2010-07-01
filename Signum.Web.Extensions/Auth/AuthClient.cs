@@ -53,7 +53,7 @@ namespace Signum.Web.Authorization
                 if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(UserDN)))
                     Navigator.AddSetting(new EntitySettings<UserDN>(EntityType.Default));
                 if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(RoleDN)))
-                    Navigator.AddSetting(new EntitySettings<RoleDN>(EntityType.Admin));
+                    Navigator.AddSetting(new EntitySettings<RoleDN>(EntityType.Default));
                 
                 if (resetPasswordFeature)
                     Navigator.RegisterTypeName<ResetPasswordRequestDN>();
