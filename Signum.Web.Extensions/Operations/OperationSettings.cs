@@ -18,7 +18,7 @@ namespace Signum.Web.Operations
     {
         public string Text { get; set; }
         public string AltText { get; set; }
-        public string CssClass { get; set; }
+   
 
         public string ControllerUrl { get; set; }
         public string RequestExtraJsonData { get; set; }
@@ -34,6 +34,14 @@ namespace Signum.Web.Operations
 
     public class EntityOperationSettings : OperationSettings
     {
+        static EntityOperationSettings()
+        {
+            CssClass = _ => null;
+        }
+
+        public static Func<Enum, string> CssClass { get; set; }
+        
+        
         public Func<EntityOperationContext, bool> IsVisible { get; set; }
         public Func<EntityOperationContext, JsInstruction> OnClick { get; set; }
     }
