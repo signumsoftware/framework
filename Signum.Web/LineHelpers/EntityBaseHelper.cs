@@ -158,15 +158,18 @@ namespace Signum.Web
 
         internal static void ConfigureEntityBase(EntityBase eb, Type entityType)
         {
+            Common.TaskSetImplementations(eb);
+
             if (eb.Implementations == null && Navigator.Manager.EntitySettings.ContainsKey(entityType))
             {
                 eb.Create = Navigator.IsCreable(entityType, false);
                 eb.View = Navigator.IsViewable(entityType, false);
                 eb.Find = Navigator.IsFindable(entityType);
+
+                EntityLine el = eb as EntityLine;
+                if (el != null)
+                    el.Navigate = Navigator.IsNavigable(entityType, false);
             }
-            EntityLine el = eb as EntityLine;
-            if (el != null)
-                el.Navigate = Navigator.IsNavigable(entityType, false);
         }
     }
 

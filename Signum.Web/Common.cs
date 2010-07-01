@@ -25,7 +25,7 @@ namespace Signum.Web
         {
             CommonTask += new CommonTask(TaskSetLabelText);
             CommonTask += new CommonTask(TaskSetFormatText);
-            CommonTask += new CommonTask(TaskSetImplementations);
+            //CommonTask += new CommonTask(TaskSetImplementations);
             CommonTask += new CommonTask(TaskSetReadOnly);
             CommonTask += new CommonTask(TaskSetHtmlProperties);
             CommonTask += new CommonTask(TaskSetReloadOnChange);

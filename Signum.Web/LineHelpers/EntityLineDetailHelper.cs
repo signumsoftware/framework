@@ -74,9 +74,9 @@ namespace Signum.Web
 
             EntityLineDetail edl = new EntityLineDetail(context.Type, context.Value, context, null, context.PropertyRoute); 
            
-            Common.FireCommonTasks(edl);
-
             EntityBaseHelper.ConfigureEntityBase(edl, edl.CleanRuntimeType ?? edl.Type.CleanType());
+
+            Common.FireCommonTasks(edl);
 
             if (settingsModifier != null)
                 settingsModifier(edl);

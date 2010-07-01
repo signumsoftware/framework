@@ -95,6 +95,7 @@ input[type=url], input[type=tel], textarea, select {/* IE will show a border aro
 	float:left;
 }
 
+.field-inline .field {clear:none;}
 select {
     padding:4px 4px 3px;
 }

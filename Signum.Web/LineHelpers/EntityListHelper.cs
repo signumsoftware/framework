@@ -73,12 +73,12 @@ namespace Signum.Web
                 sb.AppendLine("<table>\n" + sBtns + "</table>");
 
             if (entityList.ShowFieldDiv)
-                sb.Append("</div>");
-
-            sb.AppendLine(EntityBaseHelper.WriteBreakLine(helper, entityList));
+                sb.AppendLine("</div>");
 
             if (entityList.ShowFieldDiv)
                 sb.AppendLine("</div>");
+
+            sb.AppendLine(EntityBaseHelper.WriteBreakLine(helper, entityList));
 
             return sb.ToString();
         }
@@ -125,9 +125,9 @@ namespace Signum.Web
 
             EntityList el = new EntityList(context.Type, context.UntypedValue, context, null, context.PropertyRoute);
 
-            Common.FireCommonTasks(el);
-
             EntityBaseHelper.ConfigureEntityBase(el, Reflector.ExtractLite(typeof(S)) ?? typeof(S));
+
+            Common.FireCommonTasks(el);
 
             if (settingsModifier != null)
                 settingsModifier(el);

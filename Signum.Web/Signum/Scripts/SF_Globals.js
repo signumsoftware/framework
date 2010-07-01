@@ -161,11 +161,14 @@ function RuntimeInfoFor(prefix) {
     return new RuntimeInfo(prefix);
 }
 
-$(function() {
-    $(document).ajaxError(function(event, XMLHttpRequest, ajaxOptions, thrownError) {
-        ShowError(XMLHttpRequest, ajaxOptions, thrownError);
+if (typeof ajaxError === "undefined") {
+    ajaxError = true;
+    $(function() {
+        $(document).ajaxError(function(event, XMLHttpRequest, ajaxOptions, thrownError) {
+            ShowError(XMLHttpRequest, ajaxOptions, thrownError);
+        });
     });
-});
+}
 
 /* show messages on top (info, error...) */
 
@@ -491,55 +494,58 @@ $.cssLoader = function(cond, url) {
 };
 
 /* forms */
-$(function() {
-    $('input[placeholder], textarea[placeholder]').placeholder();
-});
+if (typeof placeholder === "undefined") {
+    placeholder = true;
+    $(function() {
+        $('input[placeholder], textarea[placeholder]').placeholder();
+    });
 
-(function($) {
-    $.fn.placeholder = function() {
-        if ($.fn.placeholder.supported()) {
-            return $(this);
-        } else {
+    (function($) {
+        $.fn.placeholder = function() {
+            if ($.fn.placeholder.supported()) {
+                return $(this);
+            } else {
 
-            $(this).parent('form').submit(function(e) {
-            $('input[placeholder].placeholder, textarea[placeholder].placeholder', this).val('');
+                $(this).parent('form').submit(function(e) {
+                    $('input[placeholder].placeholder, textarea[placeholder].placeholder', this).val('');
+                });
+
+                $(this).each(function() {
+                    $.fn.placeholder.on(this);
+                });
+
+                return $(this)
+
+            .focus(function() {
+                if ($(this).hasClass('placeholder')) {
+                    $.fn.placeholder.off(this);
+                }
+            })
+
+            .blur(function() {
+                if ($(this).val() == '') {
+                    $.fn.placeholder.on(this);
+                }
             });
-
-            $(this).each(function() {
-                $.fn.placeholder.on(this);
-            });
-
-            return $(this)
-
-        .focus(function() {
-            if ($(this).hasClass('placeholder')) {
-                $.fn.placeholder.off(this);
             }
-        })
+        };
 
-        .blur(function() {
-            if ($(this).val() == '') {
-                $.fn.placeholder.on(this);
-            }
-        });
-        }
-    };
+        // Extracted from: http://diveintohtml5.org/detect.html#input-placeholder
+        $.fn.placeholder.supported = function() {
+            var input = document.createElement('input');
+            return !!('placeholder' in input);
+        };
 
-    // Extracted from: http://diveintohtml5.org/detect.html#input-placeholder
-    $.fn.placeholder.supported = function() {
-        var input = document.createElement('input');
-        return !!('placeholder' in input);
-    };
+        $.fn.placeholder.on = function(el) {
+            var $el = $(el);
+            $el.val($el.attr('placeholder')).addClass('placeholder');
+        };
 
-    $.fn.placeholder.on = function(el) {
-        var $el = $(el);
-        $el.val($el.attr('placeholder')).addClass('placeholder');
-    };
-
-    $.fn.placeholder.off = function(el) {
-        $(el).val('').removeClass('placeholder');
-    };
-})(jQuery);
+        $.fn.placeholder.off = function(el) {
+            $(el).val('').removeClass('placeholder');
+        };
+    })(jQuery);
+}
 
 /* functions to read / write cookies */
 function readCookie(name) {

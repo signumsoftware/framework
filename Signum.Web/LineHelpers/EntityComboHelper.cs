@@ -108,9 +108,9 @@ namespace Signum.Web
 
             EntityCombo ec = new EntityCombo(typeof(S), context.Value, context, null, context.PropertyRoute);
 
-            Common.FireCommonTasks(ec);
-
             EntityBaseHelper.ConfigureEntityBase(ec, ec.CleanRuntimeType ?? ec.Type.CleanType());
+
+            Common.FireCommonTasks(ec);
 
             if (settingsModifier != null)
                 settingsModifier(ec);
