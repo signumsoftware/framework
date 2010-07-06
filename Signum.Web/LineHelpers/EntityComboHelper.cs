@@ -36,6 +36,8 @@ namespace Signum.Web
 
             sb.AppendLine(EntityBaseHelper.BaseLineLabel(helper, entityCombo, entityCombo.Compose(EntityComboKeys.Combo)));
 
+            sb.AppendLine("<div class=\"value-container\">");
+
             sb.AppendLine(EntityBaseHelper.WriteImplementations(helper, entityCombo));
 
             sb.AppendLine(helper.HiddenEntityInfo(entityCombo));
@@ -88,6 +90,8 @@ namespace Signum.Web
 
             sb.AppendLine(EntityBaseHelper.WriteViewButton(helper, entityCombo));
             sb.AppendLine(EntityBaseHelper.WriteCreateButton(helper, entityCombo));
+
+            sb.AppendLine("</div>");
 
             if (entityCombo.ShowFieldDiv)
                 sb.AppendLine("</div>");

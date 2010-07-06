@@ -48,6 +48,7 @@ namespace Signum.Web
                 else
                     sb.AppendLine(helper.Label(valueLine.Compose("lbl"), valueLine.LabelText, valueLine.ControlID, TypeContext.CssLineLabel, valueLine.LabelHtmlProps));
             }
+            sb.AppendLine("<div class=\"value-container\">");
 
             ValueLineType vltype = valueLine.ValueLineType ?? Configurator.GetDefaultValueLineType(valueLine.Type);
 
@@ -74,8 +75,11 @@ namespace Signum.Web
 
             if (valueLine.LabelVisible && valueLine.ValueFirst)
                 sb.AppendLine("</div>");
+            
             if (valueLine.ShowFieldDiv)
                 sb.AppendLine("</div>");
+
+            sb.AppendLine("</div>");
 
             if (valueLine.BreakLine)
                 sb.AppendLine(helper.Div("", "", "clearall"));

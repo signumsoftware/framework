@@ -49,7 +49,7 @@ namespace Signum.Web
                                     .InnerHtml(label);
 
             FluentTagBuilder valueLine = new FluentTagBuilder("div")
-                        .AddCssClass("valueLine")
+                        .AddCssClass("value-container")
                         .InnerHtml(value);
 
             string clear = HtmlHelperExtenders.GetClearDiv();
@@ -57,15 +57,16 @@ namespace Signum.Web
             html.Write (field
                         .InnerHtml(labelLine.ToString(TagRenderMode.Normal)
                               + valueLine.ToString(TagRenderMode.Normal)
-                              + clear)
+                              )
                         .ToString(TagRenderMode.Normal));
+            html.Write(clear);
         }
 
         public static string GetClearDiv()
         {
             return new FluentTagBuilder("div")
-                    .AddCssClass("clearll")
-                    .ToString(TagRenderMode.SelfClosing);
+                    .AddCssClass("clearall")
+                    .ToString(TagRenderMode.Normal);
         }
 
         public static string CheckBox(this HtmlHelper html, string name, bool value, bool enabled)

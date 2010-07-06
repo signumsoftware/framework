@@ -17,7 +17,7 @@ Autocompleter = function(controlId, url, _options) {
         entityIdFieldName: null,
         textField: "text",
         extraParams: {},
-        cacheResults: true,
+        cacheEnabled: true,
         showExtra: false,
         renderExtra: function($extra, data) {
             return $extra;
@@ -25,13 +25,11 @@ Autocompleter = function(controlId, url, _options) {
     }, _options);
 
     this.timerID = undefined;
-    this.$dd = this.currentText = this.request = undefined;
+    this.$dd = this.prevInput = this.request = undefined;
     this.$control = $("#" + controlId);
     this.controlId = controlId;
     this.url = url;
-    this.cacheResults = [];
-    this.currentResults = [];
-    this.currentInput = undefined;
+    this.cache = this.currentResults = [];
     this.resultClass = "ddlAuto";
     this.resultSelectedClass = "ddlAutoOn";
     this.create();
@@ -75,14 +73,14 @@ Autocompleter.prototype = {
     clear: function(e) {
         clearTimeout(this.timerID);
         var self = this;
-        this.timerID = setTimeout(function() { self.keyup(e) }, (self.options.cacheResults && self.cacheResults[self.$control.val().toLowerCase()] != null) ? 0 : self.options.delay);
+        this.timerID = setTimeout(function() { self.keyup(e) }, (self.options.cacheEnabled && self.$control.val().toLowerCase() in self.cache) ? 0 : self.options.delay);
     },
     keyup: function(key) {
         if (key == 37 || key == 39 || key == 38 || key == 40 || key == 13) return;
         var input = this.$control.val();
-        if (this.currentText == input) return;
+        if (this.prevInput == input) return;
 
-        this.currentInput = input;
+        this.prevInput = input;
 
         if (input != null && input.length < this.options.minChars) {
             this.$dd.html("").hide(); this.currentResults = [];
@@ -95,17 +93,12 @@ Autocompleter.prototype = {
             q: input, l: this.options.limit
         }, this.options.extraParams);
 
+        if (this.options.cacheEnabled && input.toLowerCase() in this.cache) {
+            this.showResults(this.cache[input.toLowerCase()], input);
+            return;
+        }
+
         var self = this;
-
-        if (self.currentResults == [] && self.currentInput != null && input.indexOf(self.currentInput) == 0) {
-            self.showResults([], input);
-            return;
-        }
-
-        if (self.options.cacheResults && self.cacheResults[input.toLowerCase()] != null) {
-            self.showResults(self.cacheResults[input.toLowerCase()], input);
-            return;
-        }
 
         if (self.request) self.request.abort();
         self.$control.addClass('loading');
@@ -114,15 +107,12 @@ Autocompleter.prototype = {
             function(results) {
                 self.request = undefined;
                 if (results) {
-
                     self.showResults(results, input);
                 }
             });
     },
 
     showResults: function(results, input) {
-        this.currentText = this.$control.val();
-
         var prevCount = this.currentResults.length;
         if (prevCount == 0) this.$dd.hide();
 
@@ -134,8 +124,8 @@ Autocompleter.prototype = {
         this.$dd[0].innerHTML = content;
 
         this.currentResults = results;
-        if (this.options.cacheResults)
-            this.cacheResults[input.toLowerCase()] = results;
+        if (this.options.cacheEnabled)
+            this.cache[input.toLowerCase()] = results;
 
         //add extra result
         if (this.options.showExtra) {

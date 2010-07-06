@@ -52,12 +52,12 @@ input[type=submit]:active, input[type=button]:active {
 /* forms (labels,values) */
 .labelLine {
     float:left;
-    font-weight:bold;
-    margin:0 10px;
-    padding:5px 0 4px;
-    text-align:right;
-    vertical-align:top;
+    margin-right:10px;
+    display:block;
     width:140px;
+    padding:3px 0;
+    text-align:right;
+    font-weight:bold;
 }
 
 .labelLine[for$="sfCombo"] {
@@ -78,7 +78,6 @@ input[type=url], input[type=tel], textarea, select {/* IE will show a border aro
 
 .field input, .field textarea, .field select, .fieldList select 
 {
-    float:left;
 }
 
 .field input[type=radio] {
@@ -87,13 +86,11 @@ input[type=url], input[type=tel], textarea, select {/* IE will show a border aro
 
 .field .fieldList, .field .fieldList table	/* ej.titulares cuenta bancaria */
 {
-	float: left;
 	margin-bottom:0;
 }
 
 .field .entityList
 {
-	float:left;
 }
 
 .field-inline .field {clear:none;}
@@ -103,6 +100,11 @@ select {
 
 select.entityList option {
     padding:3px;
+}
+
+.field
+{
+	clear:both;
 }
 
 input[type=checkbox] {
@@ -118,17 +120,21 @@ textarea:focus,select:focus {
     border-color:#76baec;
 }
 
-a.valueLine {
-    padding:5px 5px 4px 5px;
-    border-radius:2px;
-    -webkit-border-radius:2px;
-    -moz-border-radius:2px;
-    float:left;
+div.value-container
+{
+	overflow:hidden;
 }
 
-span.valueLine {
-    padding:5px 5px 4px 5px;
-    float:left;
+div.value-container .valueLine, div.value-container .entityList {max-width:90%; margin-right:0; display:block;}
+div.value-container .lineButton {overflow:hidden; display:block;}
+
+.valueLine, .entityList{float:left;}
+
+a.valueLine, span.valueLine{
+    padding:3px 0;
+	overflow:hidden;
+	_overflow:visible;
+	zoom:1;
 }
 
 .valueFirst{float:left;margin-bottom:3px;margin-right:2px;}
@@ -157,8 +163,6 @@ img.ui-datepicker-trigger:hover
 
 .field,.EntityLineDetail {
     margin:6px 0;
-    clear:both;
-    float:left;
 }
 .fieldList 
 {
@@ -190,7 +194,7 @@ input.lineButton {
     background-image:url(../images/lineButtons.gif) !important;
     background-repeat:no-repeat;
     text-indent:-9999px;
-    margin:3px 2px 0px 4px;
+    margin:0;
     padding:0;
     text-indent:-9999px;
     width:20px;
@@ -298,7 +302,7 @@ fieldset
     max-height:550px;
     float:left;
     width:100%;
-    padding:0 10px;
+    padding:0;
 }
 
 .popup-body {
@@ -347,7 +351,7 @@ fieldset
     font-size:12px;
     left:50%;
     overflow:hidden;
-    position:absolute;
+    position:fixed;
     top:0;
     z-index:100000;
 }

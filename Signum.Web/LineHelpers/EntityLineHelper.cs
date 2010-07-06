@@ -32,6 +32,8 @@ namespace Signum.Web
 
             sb.AppendLine(EntityBaseHelper.BaseLineLabel(helper, entityLine));
 
+            sb.AppendLine("<div class=\"value-container\">");
+
             sb.AppendLine(helper.HiddenEntityInfo(entityLine));
 
             if (entityLine.Type.IsIIdentifiable() || entityLine.Type.IsLite())
@@ -101,6 +103,8 @@ namespace Signum.Web
             sb.AppendLine(EntityBaseHelper.WriteCreateButton(helper, entityLine));
             sb.AppendLine(EntityBaseHelper.WriteFindButton(helper, entityLine));
             sb.AppendLine(EntityBaseHelper.WriteRemoveButton(helper, entityLine));
+
+            sb.AppendLine("</div>");
 
             if (entityLine.ShowFieldDiv)
                 sb.AppendLine("</div>");
