@@ -158,7 +158,7 @@ namespace Signum.Web
             }
 
             //valueLine.ValueHtmlProps["size"] = (valueLine.Format == "d") ? 10 : 20;
-            valueLine.ValueHtmlProps["size"] = CalendarHelper.FormatToString(valueLine.Format ?? "g").Length;
+            valueLine.ValueHtmlProps["size"] = CalendarHelper.FormatToString(valueLine.Format ?? "g").Length + 1;   //time is often rendered with two digits as hours, but format is represented as "H"
 
             if (valueLine.DatePickerOptions.Format == null)
                 valueLine.DatePickerOptions.Format = valueLine.Format;
