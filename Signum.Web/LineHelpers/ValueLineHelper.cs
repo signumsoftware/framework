@@ -34,21 +34,23 @@ namespace Signum.Web
                 return null;
 
             StringBuilder sb = new StringBuilder();
-            if (valueLine.ShowFieldDiv)
+            if (valueLine.ShowFieldDiv && !valueLine.OnlyValue)
                 sb.AppendLine("<div class='field'>");
 
             long? ticks = EntityInfoHelper.GetTicks(helper, valueLine);
             if (ticks != null)
                 sb.AppendLine(helper.Hidden(valueLine.Compose(TypeContext.Ticks), ticks.Value).ToHtmlString());
 
-            if (valueLine.LabelVisible)
+            if (valueLine.LabelVisible && !valueLine.OnlyValue)
             {
                 if (valueLine.ValueFirst)
                     sb.AppendLine("<div class='valueFirst'>");
                 else
                     sb.AppendLine(helper.Label(valueLine.Compose("lbl"), valueLine.LabelText, valueLine.ControlID, TypeContext.CssLineLabel, valueLine.LabelHtmlProps));
             }
-            sb.AppendLine("<div class=\"value-container\">");
+
+            if (!valueLine.OnlyValue)
+                sb.AppendLine("<div class=\"value-container\">");
 
             ValueLineType vltype = valueLine.ValueLineType ?? Configurator.GetDefaultValueLineType(valueLine.Type);
 
@@ -65,7 +67,7 @@ namespace Signum.Web
                 sb.AppendLine(helper.ValidationMessage(valueLine.ControlID).TryCC(hs => hs.ToHtmlString()));
             }
 
-            if (valueLine.LabelVisible && valueLine.ValueFirst)
+            if (valueLine.LabelVisible && !valueLine.OnlyValue && valueLine.ValueFirst)
             {
                 if (valueLine.LabelHtmlProps != null && valueLine.LabelHtmlProps.Count > 0)
                     sb.AppendLine(helper.Label(valueLine.Compose("lbl"), valueLine.LabelText, valueLine.ControlID, TypeContext.CssLineLabel, valueLine.LabelHtmlProps));
@@ -73,15 +75,16 @@ namespace Signum.Web
                     sb.AppendLine(helper.Label(valueLine.Compose("lbl"), valueLine.LabelText, valueLine.ControlID, TypeContext.CssLineLabel));
             }
 
-            if (valueLine.LabelVisible && valueLine.ValueFirst)
-                sb.AppendLine("</div>");
-            
-            if (valueLine.ShowFieldDiv)
+            if (valueLine.LabelVisible && !valueLine.OnlyValue &&valueLine.ValueFirst)
                 sb.AppendLine("</div>");
 
-            sb.AppendLine("</div>");
+            if (valueLine.ShowFieldDiv && !valueLine.OnlyValue)
+                sb.AppendLine("</div>");
 
-            if (valueLine.BreakLine)
+            if (!valueLine.OnlyValue)
+                sb.AppendLine("</div>");
+
+            if (valueLine.BreakLine && !valueLine.OnlyValue)
                 sb.AppendLine(helper.Div("", "", "clearall"));
 
             helper.Write(sb.ToString());

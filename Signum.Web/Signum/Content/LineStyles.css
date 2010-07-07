@@ -104,7 +104,8 @@ select.entityList option {
 
 .field
 {
-	clear:both;
+	/*clear:both;*/
+	clear:right;
 }
 
 input[type=checkbox] {
@@ -120,13 +121,15 @@ textarea:focus,select:focus {
     border-color:#76baec;
 }
 
-div.value-container
+.value-container
 {
 	overflow:hidden;
 }
 
-div.value-container .valueLine, div.value-container .entityList {max-width:90%; margin-right:0; display:block;}
-div.value-container .lineButton {overflow:hidden; display:block;}
+.value-container .valueLine, .value-container .entityList {max-width:90%; margin-right:0; display:block;}
+.value-container .lineButton {overflow:hidden; display:block;}
+
+.value-ext {float:right; margin-left:10px;}
 
 .valueLine, .entityList{float:left;}
 
@@ -184,7 +187,7 @@ img.ui-datepicker-trigger:hover
 	margin:inherit;
 }
 
-.around .field{ float:left; clear:none;}
+/*.around .field{ float:left; clear:none;}*/
 
 input.lineButton {
     font-size:0px;

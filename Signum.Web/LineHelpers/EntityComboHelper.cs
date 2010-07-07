@@ -31,12 +31,13 @@ namespace Signum.Web
 
             StringBuilder sb = new StringBuilder();
 
-            if (entityCombo.ShowFieldDiv)
+            if (entityCombo.ShowFieldDiv && !entityCombo.OnlyValue)
                 sb.AppendLine("<div class='field'>");
 
             sb.AppendLine(EntityBaseHelper.BaseLineLabel(helper, entityCombo, entityCombo.Compose(EntityComboKeys.Combo)));
 
-            sb.AppendLine("<div class=\"value-container\">");
+            if (!entityCombo.OnlyValue)
+                sb.AppendLine("<div class=\"value-container\">");
 
             sb.AppendLine(EntityBaseHelper.WriteImplementations(helper, entityCombo));
 
@@ -91,12 +92,14 @@ namespace Signum.Web
             sb.AppendLine(EntityBaseHelper.WriteViewButton(helper, entityCombo));
             sb.AppendLine(EntityBaseHelper.WriteCreateButton(helper, entityCombo));
 
-            sb.AppendLine("</div>");
-
-            if (entityCombo.ShowFieldDiv)
+            if (!entityCombo.OnlyValue)
                 sb.AppendLine("</div>");
 
-            sb.AppendLine(EntityBaseHelper.WriteBreakLine(helper, entityCombo));
+            if (entityCombo.ShowFieldDiv && !entityCombo.OnlyValue)
+                sb.AppendLine("</div>");
+
+            if (!entityCombo.OnlyValue)
+                sb.AppendLine(EntityBaseHelper.WriteBreakLine(helper, entityCombo));
 
             return sb.ToString();
         }

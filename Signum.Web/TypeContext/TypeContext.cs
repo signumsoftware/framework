@@ -66,6 +66,7 @@ namespace Signum.Web
             ValueFirst = 16,
             ShowFieldDiv =32,
             ShowTicks = 64,
+            OnlyValue = 128
         }
 
         BoolStyles styleValues;
@@ -105,7 +106,16 @@ namespace Signum.Web
             ValueFirst = false,
             ShowFieldDiv = true,
             ShowTicks = true,
-        }; 
+            OnlyValue = false
+        };
+
+        /* It prints only the value. Useful when used together with Html.Field helper
+         * to join different valueLines in the same line */
+        public bool OnlyValue
+        {
+            get { return this[BoolStyles.OnlyValue] ?? Parent.OnlyValue; }
+            set { this[BoolStyles.OnlyValue] = value; }        
+        }
 
         public bool LabelVisible
         {
@@ -113,7 +123,7 @@ namespace Signum.Web
             set { this[BoolStyles.LabelVisible] = value; }
         }
 
-        public bool BreakLine
+        public bool BreakLine   /* to deprecate */
         {
             get { return this[BoolStyles.BreakLine] ?? Parent.BreakLine; }
             set { this[BoolStyles.BreakLine] = value; }
@@ -143,7 +153,7 @@ namespace Signum.Web
             set { this[BoolStyles.ValueFirst] = value; }
         }
 
-        public bool ShowFieldDiv
+        public bool ShowFieldDiv    /* to deprecate */
         {
             get { return this[BoolStyles.ShowFieldDiv] ?? Parent.ShowFieldDiv; }
             set { this[BoolStyles.ShowFieldDiv] = value; }

@@ -23,7 +23,7 @@ namespace Signum.Web
 
         public static string BaseLineLabel(HtmlHelper helper, BaseLine baseLine, string idLabelFor)
         {
-            return baseLine.LabelVisible ?
+            return baseLine.LabelVisible && !baseLine.OnlyValue ?
                            helper.Label(baseLine.Compose("lbl"), baseLine.LabelText ?? "", idLabelFor, TypeContext.CssLineLabel) :
                            "";
         }
