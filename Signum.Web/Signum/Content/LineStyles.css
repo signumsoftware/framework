@@ -104,6 +104,7 @@ select.entityList option {
 
 .field
 {
+	min-width:350px;	/* a ver */
 	/*clear:both;*/
 	clear:right;
 }
