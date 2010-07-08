@@ -46,7 +46,8 @@
         "operationExecuted": "Operación ejecutada",
         "noElementsSelected": "Debe seleccionar algún elemento",
         "popupErrors": "Hay errores en la entidad, ¿desea continuar?",
-        "popupErrorsStop": "Hay errores en la entidad"
+        "popupErrorsStop": "Hay errores en la entidad",
+        "0results": "No results have been found" 
     };
 
     var SF = {};

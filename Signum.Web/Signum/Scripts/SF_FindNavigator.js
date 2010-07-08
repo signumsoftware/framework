@@ -120,7 +120,7 @@ FindNavigator.prototype = {
                     $(self.pf("divResults tbody")).html(r);
                 else {
                     var columns = $(self.pf("divResults th")).length;
-                    $(self.pf("divResults tbody")).html("<tr><td colspan=\"" + columns + "\">" + "No se encontraron resultados" + "</td></tr>")
+                    $(self.pf("divResults tbody")).html("<tr><td colspan=\"" + columns + "\">" + lang['0results'] + "</td></tr>")
                 }
             },
             error: function() {
