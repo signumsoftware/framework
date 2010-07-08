@@ -94,7 +94,7 @@ namespace Signum.Web
             {
                 sb.AppendLine(
                     helper.Span(entityLine.Compose(EntityBaseKeys.ToStrLink),
-                        entityLine.UntypedValue.TryToString() ?? "&nbsp;",
+                        entityLine.UntypedValue.TryToString() ?? " ",
                         "valueLine",
                         new Dictionary<string, object> { { "style", "display:" + ((entityLine.UntypedValue == null) ? "none" : "block") } }));
             }
