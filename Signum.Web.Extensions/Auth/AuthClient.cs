@@ -108,7 +108,7 @@ namespace Signum.Web.Authorization
             }
         }
 
-        static void AuthClient_Saved(UserDN ident, bool isRoot, bool isNew)
+        static void AuthClient_Saved(UserDN ident, SavedEventArgs args)
         {
             if (ident.Is(UserDN.Current))
                 AuthController.UpdateSessionUser(); 

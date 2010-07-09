@@ -40,7 +40,7 @@ namespace Signum.Engine.Authorization
             }
         }
 
-        static void UserTicketLogic_Saved(UserDN ident, bool isRoot, bool isNew)
+        static void UserTicketLogic_Saved(UserDN ident, SavedEventArgs args)
         {
             CleanExpiredTickets(ident);
         }

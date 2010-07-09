@@ -107,12 +107,12 @@ namespace Signum.Engine.Authorization
                 ident.AssertAllowed(TypeAllowedBasic.Read, false);
         }
 
-        static void EntityGroupAuthLogic_Saved<T>(T ident, bool isRoot, bool isNew)
+        static void EntityGroupAuthLogic_Saved<T>(T ident, SavedEventArgs args)
             where T : IdentifiableEntity
         {
-            if (!saveDisabled && ident.Modified)
+            if (!saveDisabled && args.WasModified)
             {
-                if (isNew)
+                if (args.WasNew)
                     ident.AssertAllowed(TypeAllowedBasic.Create, false);
                 else
                     ident.AssertAllowed(TypeAllowedBasic.Modify, false);
