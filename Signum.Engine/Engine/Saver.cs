@@ -87,8 +87,17 @@ namespace Signum.Engine
 
             EntityCache.Add(identifiables);
 
+            SavedEventArgs args = new SavedEventArgs();
+
             foreach (var node in identifiables)
-                schema.OnSaved(node, roots.Contains(node), newEnities.Contains(node));
+            {
+                args.IsRoot = roots.Contains(node);
+                args.WasNew = newEnities.Contains(node);
+                args.WasModified = !notModified.Contains(node);
+
+                schema.OnSaved(node, args);
+
+            }
         }
 
 

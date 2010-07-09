@@ -123,16 +123,16 @@ namespace Signum.Engine.Maps
             entityEventsGlobal.OnSaving(entity, isRoot);
         }
 
-        internal void OnSaved(IdentifiableEntity entity, bool isRoot, bool isNew)
+        internal void OnSaved(IdentifiableEntity entity, SavedEventArgs args)
         {
             AssertAllowed(entity.GetType()); 
 
             IEntityEvents ee = entityEvents.TryGetC(entity.GetType());
 
             if (ee != null)
-                ee.OnSaved(entity, isRoot, isNew);
+                ee.OnSaved(entity, args);
 
-            entityEventsGlobal.OnSaved(entity, isRoot, isNew); 
+            entityEventsGlobal.OnSaved(entity, args); 
         }
 
         internal void OnRetrieving(Type type, int id, bool isRoot)
@@ -400,7 +400,7 @@ namespace Signum.Engine.Maps
     {
         void OnPreSaving(IdentifiableEntity entity, bool isRoot, ref bool graphModified);
         void OnSaving(IdentifiableEntity entity, bool isRoot);
-        void OnSaved(IdentifiableEntity entity, bool isRoot, bool isCreated);
+        void OnSaved(IdentifiableEntity entity, SavedEventArgs args);
         void OnRetrieving(Type type, int id, bool isRoot);
         void OnRetrieved(IdentifiableEntity entity, bool isRoot);
         void OnDeleting(Type type, int id);
@@ -445,10 +445,10 @@ namespace Signum.Engine.Maps
                 Saving((T)entity, isRoot);
         }
 
-        void IEntityEvents.OnSaved(IdentifiableEntity entity, bool isRoot, bool isNew)
+        void IEntityEvents.OnSaved(IdentifiableEntity entity, SavedEventArgs args)
         {
             if (Saved != null)
-                Saved((T)entity, isRoot, isNew);
+                Saved((T)entity, args);
         }
 
         void IEntityEvents.OnRetrieving(Type type, int id, bool isRoot)
@@ -478,12 +478,19 @@ namespace Signum.Engine.Maps
 
     public delegate void PreSavingEntityEventHandler<T>(T ident, bool isRoot, ref bool graphModified) where T : IdentifiableEntity;
     public delegate void EntityEventHandler<T>(T ident, bool isRoot) where T : IdentifiableEntity;
-    public delegate void SavedEntityEventHandler<T>(T ident, bool isRoot, bool isNew) where T : IdentifiableEntity;
+    public delegate void SavedEntityEventHandler<T>(T ident, SavedEventArgs args) where T : IdentifiableEntity;
     public delegate void RetrivingEntityEventHandler(Type type, int id, bool isRoot);
     public delegate void DeleteEntityEventHandler(Type type, int id);
     public delegate IQueryable<T> FilterQueryEventHandler<T>(IQueryable<T> query);
 
-    public delegate void InitEventHandler(Schema sender); 
+    public delegate void InitEventHandler(Schema sender);
+
+    public class SavedEventArgs
+    {
+        public bool IsRoot { get; set; }
+        public bool WasNew { get; set; }
+        public bool WasModified { get; set; }
+    }
 
     public interface IFieldFinder
     {
