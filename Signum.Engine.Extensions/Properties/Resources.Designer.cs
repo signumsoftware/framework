@@ -432,20 +432,20 @@ namespace Signum.Engine.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Not authorized to {0} the {1} with Id {2}.
+        /// </summary>
+        internal static string NotAuthorizedTo0The1WithId2 {
+            get {
+                return ResourceManager.GetString("NotAuthorizedTo0The1WithId2", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Not authorized to Retrieve &apos;{0}&apos;.
         /// </summary>
         internal static string NotAuthorizedToRetrieve0 {
             get {
                 return ResourceManager.GetString("NotAuthorizedToRetrieve0", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Not authorized to retrieve the {0} with Id {1}.
-        /// </summary>
-        internal static string NotAuthorizedToRetrieveThe0WithId1 {
-            get {
-                return ResourceManager.GetString("NotAuthorizedToRetrieveThe0WithId1", resourceCulture);
             }
         }
         

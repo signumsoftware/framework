@@ -157,8 +157,8 @@
   <data name="AccessToFacadeMethod0IsNotAllowed" xml:space="preserve">
     <value>Access to Facade Method '{0}' is not allowed</value>
   </data>
-  <data name="NotAuthorizedToRetrieveThe0WithId1" xml:space="preserve">
-    <value>Not authorized to retrieve the {0} with Id {1}</value>
+  <data name="NotAuthorizedTo0The1WithId2" xml:space="preserve">
+    <value>Not authorized to {0} the {1} with Id {2}</value>
   </data>
   <data name="_0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships" xml:space="preserve">
     <value>{0} cycles have been found in the graph of Roles due to the relationships:

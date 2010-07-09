@@ -157,8 +157,8 @@
   <data name="AccessToFacadeMethod0IsNotAllowed" xml:space="preserve">
     <value>El acceso a el Método de Fachada '{0}' no está permitido</value>
   </data>
-  <data name="NotAuthorizedToRetrieveThe0WithId1" xml:space="preserve">
-    <value>No autorizado para recuperar la {0} con Id {1}</value>
+  <data name="NotAuthorizedTo0The1WithId2" xml:space="preserve">
+    <value>No autorizado para {0} la {1} con Id {2}</value>
   </data>
   <data name="_0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships" xml:space="preserve">
     <value>Se han encontrado {0} ciclos en el grafo de roles Roles debido a las relaciones:

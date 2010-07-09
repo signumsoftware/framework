@@ -122,7 +122,7 @@ namespace Signum.Engine.Authorization
         public static void AssertAllowed(this IIdentifiable ident, TypeAllowedBasic allowed, bool userInterface)
         {
             if (!ident.IsAllowedFor(allowed, userInterface))
-                throw new UnauthorizedAccessException(Resources.NotAuthorizedToRetrieveThe0WithId1.Formato(ident.GetType().NiceName(), ident.Id));
+                throw new UnauthorizedAccessException(Resources.NotAuthorizedTo0The1WithId2.Formato(allowed.NiceToString().ToLower(), ident.GetType().NiceName(), ident.Id));
         }
 
         public static bool IsAllowedFor(this IIdentifiable ident, TypeAllowedBasic allowed, bool userInterface)
