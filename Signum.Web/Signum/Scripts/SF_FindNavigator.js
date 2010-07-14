@@ -67,22 +67,22 @@ FindNavigator.prototype = {
 
     selectedItems: function() {
         log("FindNavigator selectedItems");
-        var items = new Array();
+        var items = [];
         var selected = $("input:radio[name=" + this.findOptions.prefix.compose("rowSelection") + "]:checked, input:checkbox[name^=" + this.findOptions.prefix.compose("rowSelection") + "]:checked");
         if (selected.length == 0)
             return items;
 
-        var self = this;
-        selected.each(function(i) {
-            var currentItem = this.value;
-            var __index = currentItem.indexOf("__");
-            var __index2 = currentItem.indexOf("__", __index + 2);
-            var item = new Object();
-            item.id = currentItem.substring(0, __index);
-            item.type = currentItem.substring(__index + 2, __index2);
-            item.toStr = currentItem.substring(__index2 + 2, currentItem.length);
-            item.link = $('#' + this.id).parent().next(self.pf('tdResults')).children('a').attr('href');
-            items[i] = item;
+        selected.each(function(i, v) {
+            var __index = v.indexOf("__"),
+                __index2 = v.indexOf("__", __index + 2);
+            
+            var item = {
+                id: v.substring(0, __index),
+                type: v.substring(__index + 2, __index2),
+                toStr: v.substring(__index2 + 2, v.length),
+                link: $('#' + this.id).parent().next(this.pf('tdResults')).children('a').attr('href')
+            };
+            items.push(item);
         });
 
         return items;
@@ -91,13 +91,15 @@ FindNavigator.prototype = {
     splitSelectedIds: function() {
         log("FindNavigator splitSelectedIds");
         var selected = this.selectedItems();
-        var result = "";
+        var result = [];
         $(selected).each(function(i, value) {
-            result += value.id + ",";
+            result.push(value.id + ",");
         });
-        if (!empty(result))
-            result = result.substring(0, result.length - 1);
-        return result;
+        if (result.length) {
+            var result2 = result.join('');
+            return result2.substring(0, result2.length - 1);
+        }
+        return '';
     },
 
     search: function() {
@@ -106,7 +108,7 @@ FindNavigator.prototype = {
 
         var $btnSearch = $(this.pf("btnSearch"));
         $btnSearch.toggleClass('loading').val(lang['searching']);
-        
+
         var self = this;
         $.ajax({
             type: "POST",
@@ -124,7 +126,7 @@ FindNavigator.prototype = {
                 }
             },
             error: function() {
-               $btnSearch.val(lang['buscar']).toggleClass('loading');
+                $btnSearch.val(lang['buscar']).toggleClass('loading');
             }
         });
 

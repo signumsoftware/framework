@@ -41,7 +41,7 @@ function comienzoMovimiento(event, id) {
     lastElemTop = element.offsetTop;
     lastElemLeft = element.offsetLeft;
 
-    $(document).bind("mousemove", function (e) {
+    $(document).bind("mousemove", function(e) {
         var pos = getMousePosition(e);
 
         var left = ((allowInitiallyOutside && !outside) || !allowInitiallyOutside) ? Math.min(Math.max(lastElemLeft + pos.x - lastMouseX, 0), clientWidth - elemWidth) : lastElemLeft + pos.x - lastMouseX;
@@ -54,10 +54,9 @@ function comienzoMovimiento(event, id) {
         element.style.height = elemHeight;
 
         outside = isOutside();
+        return false;
 
-        evitaEventos(e);
-
-    }).bind("mouseup", function () {
+    }).bind("mouseup", function() {
         $(document).unbind("mousemove").unbind("mouseup");
         element.style.cursor = "auto";
     });

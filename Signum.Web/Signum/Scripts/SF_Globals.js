@@ -253,15 +253,15 @@ function GetPathPrefixes(prefix) {
 }
 
 function concat(array, toIndex, firstChar) {
-    var path = "";
+    var path = [];
     var charToWrite = firstChar;
     for (var i = 0; i <= toIndex; i++) {
         if (array[i] != "") {
-            path += charToWrite + array[i];
+            path.push(charToWrite + array[i]);
             charToWrite = "_";
         }
     }
-    return path;
+    return path.join('');
 }
 
 function Submit(urlController, requestExtraJsonData) {

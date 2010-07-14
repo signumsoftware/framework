@@ -23,28 +23,27 @@ Validator.prototype = {
     constructRequestData: function() {
         log("Validator constructRequestData");
         var formChildren = empty(this.valOptions.parentDiv) ?
-            $("form").find("input, select, textarea")
-            : $("#" + this.valOptions.parentDiv)
-                .find("input, select, textarea")
+            $("form :input") : $("#" + this.valOptions.parentDiv + " :input")
                 .add("#" + sfTabId)
                 .add("#" + sfReactive);
 
-        var searchControlInputs = $(".searchControl").find("input, select, textarea");
+        var searchControlInputs = $(".searchControl :input");
         formChildren = formChildren.not(searchControlInputs);
 
-        var requestData = formChildren.serialize();
+        var requestData = [];
+        requestData.push(formChildren.serialize());
 
-        requestData += qp(sfPrefix, this.valOptions.prefix);
+        requestData.push(qp(sfPrefix, this.valOptions.prefix));
 
         if (!empty(this.valOptions.prefixToIgnore))
-            requestData += qp(sfPrefixToIgnore, this.valOptions.prefixToIgnore);
+            requestData.push(qp(sfPrefixToIgnore, this.valOptions.prefixToIgnore));
 
         if (!empty(this.valOptions.requestExtraJsonData)) {
             for (var key in this.valOptions.requestExtraJsonData) {
-                requestData += qp(key, this.valOptions.requestExtraJsonData[key]);
+                requestData.push(qp(key, this.valOptions.requestExtraJsonData[key]));
             }
         }
-        return requestData;
+        return requestData.join('');
     },
 
     trySave: function() {
@@ -118,18 +117,18 @@ Validator.prototype = {
         $('.' + sfInputErrorClass).removeClass(sfInputErrorClass);
         $('.' + sfSummaryErrorClass).replaceWith("");
 
-        var allErrors = "";
+        var allErrors = [];
         var inlineErrorStart = '&nbsp;<span class="' + sfFieldErrorClass + '">';
         var inlineErrorEnd = "</span>";
 
         for (var controlID in modelState) {
             var errorsArray = modelState[controlID];
-            var errorMessage = "";
-            var partialErrors = "";
+            var errorMessage = [];
+            var partialErrors = [];
             for (var j = 0; j < errorsArray.length; j++) {
-                errorMessage += errorsArray[j];
-                partialErrors += "<li>" + errorsArray[j] + "</li>\n";
-                allErrors += partialErrors;
+                errorMessage.push(errorsArray[j]);
+                partialErrors.push("<li>" + errorsArray[j] + "</li>");
+                allErrors.push(partialErrors);
             }
             if (controlID != sfGlobalErrorsKey && controlID != "") {
                 var control = $('#' + controlID);
@@ -137,23 +136,23 @@ Validator.prototype = {
                 if (this.valOptions.showInlineErrors && control.hasClass(sfInlineErrorVal)) {
                     if (control.next().hasClass("ui-datepicker-trigger")) {
                         if (empty(this.valOptions.fixedInlineErrorText))
-                            $('#' + controlID).next().after(inlineErrorStart + errorMessage + inlineErrorEnd);
+                            $('#' + controlID).next().after(inlineErrorStart + errorMessage.join('') + inlineErrorEnd);
                         else
                             $('#' + controlID).next().after(inlineErrorStart + this.valOptions.fixedInlineErrorText + inlineErrorEnd);
                     }
                     else {
                         if (empty(this.valOptions.fixedInlineErrorText))
-                            $('#' + controlID).after(inlineErrorStart + errorMessage + inlineErrorEnd);
+                            $('#' + controlID).after(inlineErrorStart + errorMessage.join('') + inlineErrorEnd);
                         else
                             $('#' + controlID).after(inlineErrorStart + this.valOptions.fixedInlineErrorText + inlineErrorEnd);
                     }
                 }
             }
-            this.setPathErrors(controlID, partialErrors, showPathErrors);
+            this.setPathErrors(controlID, partialErrors.join(''), showPathErrors);
         }
 
-        if (allErrors != "") {
-            log("(Errors Validator showErrors): " + allErrors);
+        if (allErrors.length) {
+            log("(Errors Validator showErrors): " + allErrors.join(''));
             return false;
 
         }
@@ -211,23 +210,25 @@ var PartialValidator = function(_pvalOptions) {
         log("PartialValidator constructRequestDataForSaving");
         var formChildren = $("#" + this.valOptions.parentDiv + " *, #" + sfTabId).add(GetSFInfoParams(this.valOptions.prefix));
         formChildren = formChildren.not(".searchControl *, #" + sfReactive);
-        var requestData = formChildren.serialize();
-
+        var requestData = [];
+        requestData.push(formChildren.serialize());
         if (!empty(this.valOptions.prefix))
-            requestData += qp(sfPrefix, this.valOptions.prefix);
+            requestData.push(qp(sfPrefix, this.valOptions.prefix));
 
         if (formChildren.filter(this.pf(sfRuntimeInfo)).length == 0)
-            requestData += qp(this.valOptions.prefix.compose(sfRuntimeInfo), new RuntimeInfo(this.valOptions.prefix).createValue(this.valOptions.type, '', 'n', ''));
+            requestData.push(
+                qp(this.valOptions.prefix.compose(sfRuntimeInfo),
+                new RuntimeInfo(this.valOptions.prefix).createValue(this.valOptions.type, '', 'n', '')));
 
         if (!empty(this.valOptions.prefixToIgnore))
-            requestData += qp(sfPrefixToIgnore, this.valOptions.prefixToIgnore);
+            requestData.push(qp(sfPrefixToIgnore, this.valOptions.prefixToIgnore));
 
         if (!empty(this.valOptions.requestExtraJsonData)) {
             for (var key in this.valOptions.requestExtraJsonData) {
-                requestData += qp(key, this.valOptions.requestExtraJsonData[key]);
+                requestData.push(qp(key, this.valOptions.requestExtraJsonData[key]));
             }
         }
-        return requestData;
+        return requestData.join('');
     };
 
     this.createValidatorResult = function(ajaxResult) {
@@ -270,10 +271,11 @@ var PartialValidator = function(_pvalOptions) {
         log("PartialValidator constructRequestDataForValidating");
         var isReactive = ($('#' + sfReactive).length > 0);
         //var formChildren = isReactive ? $("form *") : $("#" + this.valOptions.parentDiv + " *, #" + sfTabId + ", #" + sfReactive);
-        var formChildren = $("#" + this.valOptions.parentDiv + " *, #" + sfTabId);
-        formChildren = formChildren.not(".searchControl *, #" + sfReactive);
+        var formChildren = $("#" + this.valOptions.parentDiv + " :input, #" + sfTabId);
+        formChildren = formChildren.not(".searchControl :input, #" + sfReactive);
 
-        var requestData = formChildren.serialize();
+        var requestData = [];
+        requestData.push(formChildren.serialize());
 
         var myRuntimeInfoKey = this.valOptions.prefix.compose(sfRuntimeInfo);
         if (formChildren.filter("[name=" + myRuntimeInfoKey + "]").length == 0) {
@@ -281,13 +283,18 @@ var PartialValidator = function(_pvalOptions) {
             var infoField = info.find();
             if (empty(this.valOptions.type)) {
                 if (empty(info.runtimeType()))
-                    requestData += qp(myRuntimeInfoKey, info.createValue(StaticInfoFor(this.valOptions.prefix).staticType(), info.id(), 'n', ''));
+                    requestData.push(
+                        qp(myRuntimeInfoKey,
+                        info.createValue(StaticInfoFor(this.valOptions.prefix).staticType(), info.id(), 'n', '')));
                 else
-                    requestData += qp(myRuntimeInfoKey, infoField.val());
+                    requestData.push(
+                        qp(myRuntimeInfoKey, infoField.val()));
             }
             else {
                 if (infoField.length == 0)
-                    requestData += qp(myRuntimeInfoKey, info.createValue(this.valOptions.type, empty(!this.valOptions.id) ? this.valOptions.id : '', 'n', ''));
+                    requestData.push(
+                        qp(myRuntimeInfoKey, info.createValue(this.valOptions.type, empty(!this.valOptions.id) ? this.valOptions.id : '', 'n', ''))
+                        );
                 else {
                     var infoVal = infoField.val();
                     var index = infoVal.indexOf(";");
@@ -296,22 +303,24 @@ var PartialValidator = function(_pvalOptions) {
                     var currTicks = (($('#' + sfReactive).length > 0) ? new Date().getTime() : "");
                     var mixedVal = this.valOptions.type + ";" + (!empty(this.valOptions.id) ? this.valOptions.id : '') + infoVal.substring(index2, index3 + 1) + currTicks;
 
-                    requestData += qp(myRuntimeInfoKey, mixedVal);
+                    requestData.push(
+                        qp(myRuntimeInfoKey, mixedVal));
                 }
             }
         }
 
-        requestData += qp(sfPrefix, this.valOptions.prefix);
+        requestData.push(qp(sfPrefix, this.valOptions.prefix));
 
         if (!empty(this.valOptions.prefixToIgnore))
-            requestData += qp(sfPrefixToIgnore, this.valOptions.prefixToIgnore);
+            requestData.push(qp(sfPrefixToIgnore, this.valOptions.prefixToIgnore));
 
         if (!empty(this.valOptions.requestExtraJsonData)) {
             for (var key in this.valOptions.requestExtraJsonData) {
-                requestData += qp(key, this.valOptions.requestExtraJsonData[key]);
+                requestData.push(qp(key, this.valOptions.requestExtraJsonData[key]));
             }
         }
-        return requestData;
+
+        return requestData.join('');
     };
 
     this.validate = function() {

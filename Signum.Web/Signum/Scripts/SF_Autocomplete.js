@@ -116,12 +116,12 @@ Autocompleter.prototype = {
         var prevCount = this.currentResults.length;
         if (prevCount == 0) this.$dd.hide();
 
-        var content = "";
+        var content = [];
         for (var i = 0, l = results.length; i < l; i++) {
-            content += "<div class=\"" + this.resultClass + "\">" + this.process(input, results[i]) + "</div>";
+            content.push("<div class=\"" + this.resultClass + "\">" + this.process(input, results[i]) + "</div>");
         }
 
-        this.$dd[0].innerHTML = content;
+        this.$dd[0].innerHTML = content.join('');
 
         this.currentResults = results;
         if (this.options.cacheEnabled)

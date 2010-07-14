@@ -37,47 +37,51 @@ OperationManager.prototype = {
             formChildren = $('#' + sfTabId);
         }
         formChildren = formChildren.not(".searchControl *");
-        var requestData = formChildren.serialize();
-        
+        var requestData = [];
+        requestData.push(formChildren.serialize());
+
         var info = this.runtimeInfo();
         var runtimeType = info.runtimeType();
 
         var myRuntimeInfoKey = this.options.prefix.compose(sfRuntimeInfo);
-        if (formChildren.filter("[name=" + myRuntimeInfoKey + "]").length  == 0) {
+        if (formChildren.filter("[name=" + myRuntimeInfoKey + "]").length == 0) {
             if (empty(runtimeType))
-                requestData += qp(myRuntimeInfoKey, info.createValue(StaticInfoFor(this.options.prefix).staticType(), info.id(), info.isNew(), info.ticks()));
+                requestData.push(
+                    qp(myRuntimeInfoKey, info.createValue(StaticInfoFor(this.options.prefix).staticType(), info.id(), info.isNew(), info.ticks()))
+                );
             else
-                requestData += qp(myRuntimeInfoKey, info.find().val());
+                requestData.push(
+                    qp(myRuntimeInfoKey, info.find().val())
+                );
         }
-        requestData += qp("isLite", this.options.isLite)
-                     //+ qp("sfRuntimeType", empty(runtimeType) ? StaticInfoFor(this.options.prefix).staticType() : runtimeType)
-                     //+ qp("sfId", info.id())
+        requestData.push(qp("isLite", this.options.isLite)
+        //+ qp("sfRuntimeType", empty(runtimeType) ? StaticInfoFor(this.options.prefix).staticType() : runtimeType)
+        //+ qp("sfId", info.id())
                      + qp("sfOperationFullKey", this.options.operationKey)
                      + qp(sfPrefix, newPrefix)
                      + qp("sfOldPrefix", this.options.prefix)
-                     + qp("sfOnOk", singleQuote(this.options.onOk));
+                     + qp("sfOnOk", singleQuote(this.options.onOk)));
 
         if (!empty(this.options.requestExtraJsonData)) {
             for (var key in this.options.requestExtraJsonData) {
                 if (jQuery.isFunction(this.options.requestExtraJsonData[key]))
-                    requestData += qp(key, this.options.requestExtraJsonData[key]());
+                    requestData.push(qp(key, this.options.requestExtraJsonData[key]()));
                 else
-                    requestData += qp(key, this.options.requestExtraJsonData[key]);
+                    requestData.push(qp(key, this.options.requestExtraJsonData[key]));
             }
         }
-        
-        return requestData;
+
+        return requestData.join('');
     },
 
-    operationAjax: function(newPrefix, onSuccess)
-    {
+    operationAjax: function(newPrefix, onSuccess) {
         log("OperationManager operationAjax");
-    
+
         NotifyInfo(lang['executingOperation']);
-    
+
         if (empty(newPrefix))
             newPrefix = this.options.prefix;
-    
+
         var self = this;
         $.ajax({
             type: "POST",
@@ -90,42 +94,41 @@ OperationManager.prototype = {
                     if (onSuccess != null)
                         onSuccess(newPrefix, operationResult);
                 }
-                else{
+                else {
                     NotifyInfo(lang['error'], 2000);
                     return;
                 }
-             },
-             error:
+            },
+            error:
                 function() { NotifyInfo(lang['error'], 2000); }
         });
     },
-    
-    operationSubmit: function()
-    {
-        log("OperationManager operationSubmit");
-    
-////        var info = this.runtimeInfo();
-////        if (info.find().length > 0)
-////        {
-////            $("form").append(hiddenInput("sfRuntimeType", info.runtimeType()) +
-////                hiddenInput('sfId', info.id()));
-////        }
-        
-//        var info = this.runtimeInfo();
-//        var runtimeType = info.runtimeType();
 
-//        var myRuntimeInfoKey = this.options.prefix.compose(sfRuntimeInfo);
-//        if ($(":input:hidden[name=" + myRuntimeInfoKey + "]").length  == 0) {
-//            if (empty(runtimeType))
-//                hiddenInput(myRuntimeInfoKey, info.createValue(StaticInfoFor(this.options.prefix).staticType(), info.id(), info.isNew(), info.ticks()));
-//            else
-//                hiddenInput(myRuntimeInfoKey, info.find().val());
-//        }
-        
+    operationSubmit: function() {
+        log("OperationManager operationSubmit");
+
+        ////        var info = this.runtimeInfo();
+        ////        if (info.find().length > 0)
+        ////        {
+        ////            $("form").append(hiddenInput("sfRuntimeType", info.runtimeType()) +
+        ////                hiddenInput('sfId', info.id()));
+        ////        }
+
+        //        var info = this.runtimeInfo();
+        //        var runtimeType = info.runtimeType();
+
+        //        var myRuntimeInfoKey = this.options.prefix.compose(sfRuntimeInfo);
+        //        if ($(":input:hidden[name=" + myRuntimeInfoKey + "]").length  == 0) {
+        //            if (empty(runtimeType))
+        //                hiddenInput(myRuntimeInfoKey, info.createValue(StaticInfoFor(this.options.prefix).staticType(), info.id(), info.isNew(), info.ticks()));
+        //            else
+        //                hiddenInput(myRuntimeInfoKey, info.find().val());
+        //        }
+
         $("form").append(hiddenInput('isLite', this.options.isLite) +
             hiddenInput('sfOperationFullKey', this.options.operationKey) +
             hiddenInput("sfOldPrefix", this.options.prefix));
-            
+
         if (!empty(this.options.requestExtraJsonData)) {
             for (var key in this.options.requestExtraJsonData) {
                 if (jQuery.isFunction(this.options.requestExtraJsonData[key]))
@@ -134,7 +137,7 @@ OperationManager.prototype = {
                     $("form").append(hiddenInput(key, this.options.requestExtraJsonData[key]));
             }
         }
-         
+
         Submit(this.options.controllerUrl);
     },
 
@@ -156,13 +159,13 @@ OperationManager.prototype = {
 
     defaultSubmit: function() {
         log("OperationManager defaultSubmit");
-        
+
         if (isTrue(this.options.isLite))
             this.operationSubmit();
         else {
             var onSuccess = function() { this.operationSubmit(); };
             var self = this;
-            if (!EntityIsValid({prefix:this.options.prefix}, function(){onSuccess.call(self)}))
+            if (!EntityIsValid({ prefix: this.options.prefix }, function() { onSuccess.call(self) }))
                 return;
         }
     }
@@ -255,26 +258,27 @@ var ConstructorFromMany = function(_options) {
     this.requestData = function(newPrefix, items) {
         log("ConstructorFromMany requestData");
 
-        var requestData = $('#' + sfTabId).serialize();
-        requestData += qp("sfRuntimeType", $(this.pf(sfEntityTypeName)).val())
+        var requestData = [];
+        requestData.push($('#' + sfTabId).serialize());
+        requestData.push(qp("sfRuntimeType", $(this.pf(sfEntityTypeName)).val())
                      + qp("sfOperationFullKey", this.options.operationKey)
                      + qp(sfPrefix, newPrefix)
                      + qp("sfOldPrefix", this.options.prefix)
-                     + qp("sfOnOk", singleQuote(this.options.onOk));
+                     + qp("sfOnOk", singleQuote(this.options.onOk)));
 
-        for (var i = 0; i < items.length; i++)
-            requestData += qp("sfIds", items[i].id);
+        for (var i = 0, l = items.length; i < l; i++)
+            requestData.push(qp("sfIds", items[i].id));
 
         if (!empty(this.options.requestExtraJsonData)) {
             for (var key in this.options.requestExtraJsonData) {
                 if (jQuery.isFunction(this.options.requestExtraJsonData[key]))
-                    requestData += qp(key, this.options.requestExtraJsonData[key]());
+                    requestData.push(qp(key, this.options.requestExtraJsonData[key]()));
                 else
-                    requestData += qp(key, this.options.requestExtraJsonData[key]);
+                    requestData.push(qp(key, this.options.requestExtraJsonData[key]));
             }
         }
 
-        return requestData;
+        return requestData.join('');
     };
 
     this.operationAjax = function(newPrefix, items, onSuccess) {
@@ -324,7 +328,7 @@ function OperationConstructFromMany(constructorFrom) {
 
 function ReloadEntity(urlController, prefix, parentDiv) {
     var $partialViewName = $('#' + sfPartialViewName);
-    var requestData = $("form *").not(".searchControl *").serialize() + qp(sfPrefix, prefix);
+    var requestData = $("form :input").not(".searchControl :input").serialize() + qp(sfPrefix, prefix);
     if($partialViewName.length == 1)
         requestData += qp(sfPartialViewName, $partialViewName.val());
     $.ajax({

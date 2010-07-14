@@ -597,7 +597,7 @@ var EList = function(_elistOptions) {
         var lastIndex = parseInt(this.getLastIndex());
         for (var i = 0; i < selectedItems.length; i++) {
             var item = selectedItems[i];
-            lastIndex += 1;
+            lastIndex ++;
             var itemPrefix = this.options.prefix.compose(lastIndex);
 
             this.newListItem('', item.type, itemPrefix);
@@ -796,7 +796,7 @@ var ERep = function(_erepOptions) {
                 return;
 
             var item = selectedItems[i];
-            lastIndex += 1;
+            lastIndex ++;
             var itemPrefix = this.options.prefix.compose(lastIndex);
 
             this.newRepItem('', item.type, itemPrefix);
@@ -981,7 +981,7 @@ var EDList = function(_edlistOptions) {
         var lastIndex = parseInt(this.getLastIndex());
         for (var i = 0; i < selectedItems.length; i++) {
             var item = selectedItems[i];
-            lastIndex += 1;
+            lastIndex ++;
             var itemPrefix = this.options.prefix.compose(lastIndex);
 
             this.newListItem('', item.type, itemPrefix);
