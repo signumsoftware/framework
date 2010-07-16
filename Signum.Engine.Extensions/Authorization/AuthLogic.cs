@@ -304,7 +304,10 @@ namespace Signum.Engine.Authorization
         {
             TypeAuthLogic.Start(sb);
             PropertyAuthLogic.Start(sb, true);
-            FacadeMethodAuthLogic.Start(sb, serviceInterface);
+            
+            if (serviceInterface != null)
+                FacadeMethodAuthLogic.Start(sb, serviceInterface);
+            
             QueryAuthLogic.Start(sb, dqm);
             OperationAuthLogic.Start(sb);
             PermissionAuthLogic.Start(sb);
