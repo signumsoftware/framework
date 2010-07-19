@@ -596,6 +596,7 @@ namespace Signum.Utilities.Reflection
                     else
                         return (T)Enum.ToObject(utype, value);
                 }
+
                 else
                     return (T)Convert.ChangeType(value, utype);
             }

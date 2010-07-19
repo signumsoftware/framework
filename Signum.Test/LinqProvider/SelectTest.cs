@@ -11,6 +11,7 @@ using Signum.Engine.Linq;
 using Signum.Utilities;
 using System.Linq.Expressions;
 using System.Data.SqlTypes;
+using System.Reflection;
 
 namespace Signum.Test.LinqProvider
 {
@@ -377,7 +378,7 @@ namespace Signum.Test.LinqProvider
             var neasted = (from l in Database.Query<LabelDN>()
                            select (from a in Database.Query<AlbumDN>()
                                    where a.Label == l
-                                   select a.Author.ToLite()).ToList()).ToList();
+                                   select new { Label = l.ToLite(), Author = a.Author.ToLite(), Album = a.ToLite() }).ToList()).ToList();
         }
     }
 

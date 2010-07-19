@@ -234,6 +234,11 @@ namespace Signum.Utilities
             }
             return date.ToLongDateString();
         }
+        
+        public static DateTime MonthStart(this DateTime dateTime)
+        {
+            return new DateTime(dateTime.Year, dateTime.Month, 1); 
+        }
     }
 
     public enum DateTimePrecision

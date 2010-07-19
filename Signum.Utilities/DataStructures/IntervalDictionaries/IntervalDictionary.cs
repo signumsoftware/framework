@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Linq;
 using Signum.Utilities.Properties;
 using Signum.Utilities;
+using System.Diagnostics;
 
 namespace Signum.Utilities.DataStructures
 {
@@ -37,26 +38,28 @@ namespace Signum.Utilities.DataStructures
             get { return dic.Count; }
         }
 
+        public void Add(K min, K max, V value)
+        {
+            Add(new Interval<K>(min, max), value);
+        }
+
         public void Add(Interval<K> interval, V value)
         {
+            if (interval.IsEmpty)
+                return;
+
             if (dic.Count != 0) // no vacío
             {
-                int index = BinarySearch(interval.Min);
+                int index = PossibleIndex(interval.Min);
 
-                if (index >= 0)
-                    throw new ArgumentException(Resources.Intervalo0OverlapsWithExistingOne1Value2.Formato(interval, dic.Keys[index], value));
-
-                index = ~index;
-
-                int previous = index - 1;
-                if (0 < previous)
+                if (index != -1)
                 {
-                    Interval<K> previousInt = dic.Keys[previous];
+                    Interval<K> previousInt = dic.Keys[index];
                     if (previousInt.Overlap(interval))
                         throw new ArgumentException(Resources.Intervalo0OverlapsWithExistingOne1Value2.Formato(interval, previousInt, value));
                 }
 
-                int next = index;
+                int next = index + 1;
                 if (next < dic.Count)
                 {
                     Interval<K> nextInt = dic.Keys[next];
@@ -68,26 +71,76 @@ namespace Signum.Utilities.DataStructures
             dic.Add(interval, value);
         }
 
-        public void Add(K min, K max, V value)
+        public void Override(Interval<K> interval, V value)
         {
-            Add(new Interval<K>(min, max), value); 
+            if (interval.IsEmpty)
+                return;
+
+            RemoveCutting(interval);
+            Add(interval, value); 
         }
+
+        public void RemoveCutting(Interval<K> interval)
+        {
+            if (interval.IsEmpty)
+                return; 
+
+            var overlapping = Overlapping(interval).ToArray();
+
+            if (overlapping.Length > 0)
+            {
+                Interval<K> first = overlapping[0];
+                V firstValue = dic[first];
+
+                Interval<K> last = overlapping[overlapping.Length-1];
+                V lastValue = dic[last];
+                
+                foreach (var item in overlapping)
+                {
+                    Remove(item);
+                }
+
+                if (first.Min.CompareTo(interval.Min) < 0)
+                {
+                    Add(new Interval<K>(first.Min, interval.Min), firstValue);
+                }
+
+                if (last.Max.CompareTo(interval.Max) > 0)
+                {
+                    Add(new Interval<K>(interval.Max, last.Max), lastValue);
+                }
+            }
+        }
+
+        public IEnumerable<Interval<K>> Overlapping(Interval<K> interval)
+        {
+            int indexMin = PossibleIndex(interval.Min);
+
+            if (indexMin == -1)
+                indexMin = 0;
+            else if (!dic.Keys[indexMin].Overlap(interval))
+                indexMin++;
+
+            int indexMax = PossibleIndex(interval.Max);
+            if (indexMax != -1 && !dic.Keys[indexMax].Overlap(interval))
+                indexMax--;
+
+            for (int i = indexMin; i <= indexMax; i++)
+            {
+                yield return dic.Keys[i];
+            }
+        }
+
 
         public V this[K key]
         {
             get
             {
-                int index = BinarySearch(key);
-                if (index == ~0)
-                    throw new KeyNotFoundException(Resources.DictionaryEmpty);
+                int index = PossibleIndex(key);
+                if (index == -1)
+                    throw new KeyNotFoundException(Resources.NoIntervalFound);
 
-                if (index < 0) // not found
-                {
-                    index = ~index;
-                    index--;
-                }
-
-                if (0 <= index && index < dic.Count && dic.Keys[index].Contains(key))
+                if (dic.Keys[index].Contains(key))
                     return dic.Values[index];
 
                 throw new KeyNotFoundException(Resources.NoIntervalFound);
@@ -97,20 +150,15 @@ namespace Signum.Utilities.DataStructures
 
         public bool TryGetValue(K key, out V value)
         {
-            value = default(V); 
+            value = default(V);
 
-            int index = BinarySearch(key);
-            if (index == ~0)
+            int index = PossibleIndex(key);
+            if (index == -1)
                 return false;
 
-            if (index < 0) // not found
-            {
-                //si no se encuentra solo puede ser del intervalo anterior
-                index = ~index;
-                index--;
-            }
+            Debug.Assert(0 <= index && index < dic.Count);
 
-            if (0 <= index && index < dic.Count && dic.Keys[index].Contains(key))
+            if (dic.Keys[index].Contains(key))
             {
                 value = dic.Values[index];
                 return true;
@@ -131,6 +179,19 @@ namespace Signum.Utilities.DataStructures
         public bool Remove(Interval<K> interval)
         {
             return dic.Remove(interval); 
+        }
+
+
+        int PossibleIndex(K key)
+        {
+            int index = BinarySearch(key);
+            if (index == ~0)
+                return -1;
+
+            if (index < 0) // not found
+                return (~index) - 1;
+
+            return index;
         }
 
         int BinarySearch(K value)

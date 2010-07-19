@@ -8,6 +8,7 @@ using Signum.Utilities.Reflection;
 using System.Reflection.Emit;
 using System.Collections;
 using Signum.Utilities.Properties;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Utilities
 {
@@ -61,6 +62,11 @@ namespace Signum.Utilities
                 throw new ArgumentException(Resources.GenericMethodDefinitionShouldBeAGenericMethodDefinition);
 
             return method.IsGenericMethod && ReflectionTools.MethodEqual(method.GetGenericMethodDefinition(), genericMethodDefinitoin);
+        }
+
+        public static IEnumerable<Type> GetGenericInterfaces(this Type type, Type genericInterfaceDefinition)
+        {
+            return type.GetInterfaces().PreAnd(type).Where(i => i.IsInstantiationOf(genericInterfaceDefinition));
         }
 
         public static bool FieldEquals<S,T>(this FieldInfo fi, Expression<Func<S, T>> field)
