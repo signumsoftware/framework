@@ -1116,7 +1116,7 @@ var FLine = function(_flineOptions) {
     this.upload = function() {
         log("FLine upload");
         $(this.pf(''))[0].setAttribute('value', $(this.pf(''))[0].value);
-        $(this.pf('loading')).show();
+        $(this.pf('') + 'loading').show();
         var mform = $('form');
         var cEncType = mform.attr('enctype');
         var cEncoding = mform.attr('encoding');

@@ -18,6 +18,14 @@ namespace Signum.Utilities
             return new Disposable(() => t.CurrentCulture = old);
         }
 
+        public static IDisposable ChangeCultureUI(string cultureName)
+        {
+            Thread t = Thread.CurrentThread;
+            CultureInfo old = t.CurrentUICulture;
+            t.CurrentUICulture = new CultureInfo(cultureName);
+            return new Disposable(() => t.CurrentUICulture = old);
+        }
+
         public static T Initialize<T>(ref T variable, Func<T> initialize) where T : class
         {
             return variable ?? (variable = initialize());
