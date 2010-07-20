@@ -32,7 +32,6 @@ namespace Signum.Web
             EntityBaseKeys.RuntimeInfo,
             EntityBaseKeys.ToStr, 
             EntityListBaseKeys.Index,
-            EntityComboKeys.Combo,
         }; 
 
         public static Mapping<T> Create<T>()

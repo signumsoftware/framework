@@ -30,6 +30,7 @@ namespace Signum.Web.Controllers
             ModelBinders.Binders[typeof(FindOptions)] = new FindOptionsModelBinder();
         }
 
+        [ValidateInput(false)]  //this is needed since a return content(View...) from an action that doesn't validate will throw here an exception. We suppose that validation has already been performed before getting here
         public ViewResult View(string typeUrlName, int? id)
         {
             Type t = Navigator.ResolveTypeFromUrlName(typeUrlName);

@@ -18,7 +18,6 @@
     sfToStr = "sfToStr",
     sfLink = "sfLink",
     sfIndex = "sfIndex",
-    sfCombo = "sfCombo",
     sfTicks = "sfTicks",
 
     sfItemsContainer = "sfItemsContainer",

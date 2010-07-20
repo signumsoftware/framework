@@ -60,9 +60,9 @@ input[type=submit]:active, input[type=button]:active {
     font-weight:bold;
 }
 
-.labelLine[for$="sfCombo"] {
+/*.labelLine[for$="sfCombo"] {
     padding-top:6px;
-}
+}*/
 
 input[type=text], input[type=password],input[type=button],
 input[type=number], input[type=email],

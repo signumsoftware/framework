@@ -1038,12 +1038,12 @@ var ECombo = function(_ecomboOptions) {
 
     this.updateLinks = function(newToStr, newLink) {
         log("ECombo updateLinks");
-        $(this.pf(sfCombo) + " option:selected").html(newToStr);
+        $("#" + this.options.prefix + " option:selected").html(newToStr);
     };
 
     this.selectedValue = function() {
         log("ECombo selectedValue");
-        var selected = $(this.pf(sfCombo + " > option:selected"));
+        var selected = $("#" + this.options.prefix + " > option:selected");
         if (selected.length == 0)
             return null;
         var fullValue = selected.val();
