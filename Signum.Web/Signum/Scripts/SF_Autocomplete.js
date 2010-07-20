@@ -24,23 +24,24 @@ Autocompleter = function(controlId, url, _options) {
         }
     }, _options);
 
-    this.timerID = undefined;
-    this.$dd = this.prevInput = this.request = undefined;
-    this.$control = $("#" + controlId);
-    this.controlId = controlId;
-    this.url = url;
-    this.cache = this.currentResults = [];
-    this.resultClass = "ddlAuto";
-    this.resultSelectedClass = "ddlAutoOn";
-    this.create();
-
-    this.extraObj = undefined;  //data object passed to extra div when clicked
+ 
 };
 
 Autocompleter.prototype = {
     create: function() {
         var self = this;
 
+        this.timerID = undefined;
+        this.$dd = this.prevInput = this.request = undefined;
+        this.$control = $("#" + controlId);
+        this.controlId = controlId;
+        this.url = url;
+        this.cache = this.currentResults = [];
+        this.resultClass = "ddlAuto";
+        this.resultSelectedClass = "ddlAutoOn";
+        this.create();
+
+        this.extraObj = undefined;  //data object passed to extra div when clicked
         this.$control.bind({
             keyup: function(e) {
                 self.clear(e.which ? e.which : e.keyCode);
