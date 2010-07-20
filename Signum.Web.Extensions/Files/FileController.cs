@@ -121,15 +121,19 @@ namespace Signum.Web.Files
 
             if (fp == null)
                 throw new ArgumentException(Resources.ArgumentFilePathIDWasNotPassedToTheController);
-
+            /*
             byte[] binaryFile;
 
             binaryFile = fp.FullWebPath != null ? new WebClient().DownloadData(fp.FullWebPath)
                 : FilePathLogic.GetByteArray(fp);
 
-            return File(binaryFile, SignumController.GetMimeType(Path.GetExtension(fp.FileName)), fp.FileName);
-        }
+            return File(binaryFile, SignumController.GetMimeType(Path.GetExtension(fp.FileName)), fp.FileName);*/
 
-        
+            string path = fp.FullPhysicalPath;
+            HttpContext.Response.AddHeader("content-disposition", "attachment; filename=" + Path.GetFileName(path));
+            HttpContext.Response.ContentType = SignumController.GetMimeType(Path.GetExtension(path).ToLower());
+            HttpContext.Response.TransmitFile(path);
+            return null;
+        }
     }
 }
