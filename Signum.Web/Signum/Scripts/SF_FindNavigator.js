@@ -383,14 +383,12 @@ FindNavigator.prototype = {
             async: false,
             dataType: "html",
             success: function(filterHtml) {
-                console.time("addFilter");
                 var $filterList = self.$control.find(".filters-list");
                 $filterList.find(".explanation").hide();
                 $filterList.find("table").show();
                 tableFilters.append(filterHtml);
 
                 $(self.pf("btnClearAllFilters"), self.$control).show();
-                console.timeEnd("addFilter");
             }
         });
     },
@@ -507,7 +505,6 @@ FindNavigator.prototype = {
 
     clearAllFilters: function() {
         log("FindNavigator clearAllFilters");
-        console.time("deleteFilter");
 
         this.$control.find(".filters-list")
                      .find(".explanation").show().end()
@@ -516,7 +513,6 @@ FindNavigator.prototype = {
 
         $(this.pf("btnClearAllFilters"), this.$control).hide();
 
-        console.timeEnd("deleteFilter");
     },
 
     requestDataForSearchPopupCreate: function() {
