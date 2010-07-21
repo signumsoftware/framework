@@ -79,7 +79,7 @@ FindNavigator.prototype = {
                 id: parts[0],
                 type: parts[1],
                 toStr: parts[2],
-                link: $('#' + this.id).parent().next(self.pf('tdResults')).children('a').attr('href')
+                link: $(this).parent().next().children('a').attr('href')
             };
             items.push(item);
         });
@@ -91,9 +91,10 @@ FindNavigator.prototype = {
         log("FindNavigator splitSelectedIds");
         var selected = this.selectedItems();
         var result = [];
-        $(selected).each(function(i, value) {
-            result.push(value.id + ",");
-        });
+        for (var i = 0, l = selected.length; i < l; i++) {
+            result.push(selected[i].id + ",");
+        }
+
         if (result.length) {
             var result2 = result.join('');
             return result2.substring(0, result2.length - 1);
