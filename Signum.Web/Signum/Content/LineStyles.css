@@ -724,6 +724,29 @@ th.headerSortDown {
     background-color:#efefef;
 }
 
+.searchCtxMenu {
+	border:1px solid #aaa;
+	position:absolute;
+	background:#fff;	
+	display:none;
+}
+.searchCtxItem span {
+	width:100px;
+	display:block;
+	padding:5px 10px;
+	cursor:pointer
+}
+
+.searchCtxMenuOverlay 
+{
+	left: 0px; 
+	top: 0px;
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	z-index: 100;
+}
+
 #tblFilters td {
     vertical-align:middle;
     padding: 0 5px;

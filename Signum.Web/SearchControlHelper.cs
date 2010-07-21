@@ -151,10 +151,9 @@ namespace Signum.Web
         //    QueryToken token = QueryToken.NewColumn(qd.StaticColumns.Where(c => c.Visible == true).ToList()[visibleColumnIndex]);
         //    FilterOption fo = new FilterOption() { Token = token, ColumnName = null, Operation = FilterOperation.EqualTo, Value = value };
         //    Type type = Reflector.ExtractLite(fo.Token.Type) ?? fo.Token.Type;
-            
+
         //    return NewFilter(controller, type.Name, null, token.FullKey(), filterRowIndex, prefix, suffix, FilterOperation.EqualTo, value);
         //}
-
 
         private static string PrintValueField(HtmlHelper helper, Context parent, FilterOption filterOption)
         {

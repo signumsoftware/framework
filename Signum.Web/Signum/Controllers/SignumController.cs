@@ -268,6 +268,26 @@ namespace Signum.Web.Controllers
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
+        public ContentResult QuickFilter(string sfQueryUrlName, string tokenName, int index, string prefix, bool isLite, string typeUrlName, int? sfId, string sfValue)
+        {
+            object queryName = Navigator.ResolveQueryFromUrlName(sfQueryUrlName);
+
+            FilterOption fo = new FilterOption(tokenName, null);
+            if (fo.Token == null)
+            {
+                QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
+                fo.Token = QueryToken.Parse(qd, tokenName);
+            }
+            fo.Operation = QueryUtils.GetFilterOperations(QueryUtils.GetFilterType(fo.Token.Type)).First();
+            
+            if (isLite)
+                sfValue = sfId.Value + ";" + Navigator.TypesToNames[Navigator.ResolveTypeFromUrlName(typeUrlName)];
+            fo.Value = FindOptionsModelBinder.Convert(sfValue, fo.Token.Type);
+
+            return Content(SearchControlHelper.NewFilter(CreateHtmlHelper(this), queryName, fo, new Context(null, prefix), index));
+        }
+
+        [AcceptVerbs(HttpVerbs.Post)]
         public ContentResult NewSubTokensCombo(string sfQueryUrlName, string tokenName, string prefix, int index)
         { 
             object queryName = Navigator.ResolveQueryFromUrlName(sfQueryUrlName);
@@ -286,14 +306,7 @@ namespace Signum.Web.Controllers
             return Content(SearchControlHelper.TokensCombo(CreateHtmlHelper(this), items, new Context(null, prefix), index + 1));
         }
 
-        //[AcceptVerbs(HttpVerbs.Post)]
-        //public ContentResult QuickFilter(string sfQueryUrlName, bool isLite, string typeUrlName, int? sfId, string sfValue, int sfColIndex, int index, string prefix, string suffix)
-        //{
-        //    object value = (isLite) ? (object)Lite.Create(Navigator.ResolveTypeFromUrlName(typeUrlName), sfId.Value) : (object)sfValue;
-        //    return Content(SearchControlHelper.QuickFilter(this, sfQueryUrlName, sfColIndex, index, value, prefix, suffix));
-        //}
-
-        [AcceptVerbs(HttpVerbs.Post)]
+[AcceptVerbs(HttpVerbs.Post)]
         public PartialViewResult GetTypeChooser(Implementations sfImplementations, string prefix)
         {
             if (sfImplementations == null || sfImplementations.IsByAll)

@@ -12,8 +12,40 @@
             this.onselectstart = function() { return false };
             return false;
         });
+
+        $('.tblResults td:not(.tdRowEntity):not(.tdRowSelection)').live('contextmenu', function(e) {
+        log("contextmenu");
+        if ($(e.target).hasClass("searchCtxMenuOverlay")) {
+            $('.searchCtxMenuOverlay').remove();
+            return false;
+        }
+        var $cmenu = $(divContextualMenu); //$(this).next();
+        $('<div class="searchCtxMenuOverlay"></div>').click(function(e) {
+            log("contextmenu click");
+            var $target = $(e.target);
+            if ($target.hasClass("searchCtxItem") || $target.parent().hasClass("searchCtxItem"))
+                $cmenu.hide();
+            else
+                $('.searchCtxMenuOverlay').remove();
+        }).append($cmenu).appendTo($(this));
+        $cmenu.css({ left: e.pageX, top: e.pageY, zIndex: '101' }).show();
+
+        return false;
+    });
+
+    $('.searchCtxItem').live('click', function() {
+        log("contextmenu item click");
+        var idTD = $(this).parents("td")[0].id;
+        $('.searchCtxMenuOverlay').remove();
+        QuickFilter(idTD);
+    });
 });
 
+var divContextualMenu = "<div class=\"searchCtxMenu\"><div class=\"searchCtxItem\"><span>Add filter</span></div></div>";
+
+
+       
+       
 var FindNavigator = function(_findOptions) {
     this.findOptions = $.extend({
         prefix: "",
@@ -460,23 +492,37 @@ FindNavigator.prototype = {
         var tableFilters = $(this.pf("tblFilters tbody"));
         if (tableFilters.length == 0)
             return;
+        var $idTD = $('#' + idTD);
         var params;
-        var ahref = $('#' + idTD + ' a');
-        if (ahref.length == 0)
-            params = { "isLite": "false", "sfValue": $('#' + idTD).html() };
+        var ahref = $idTD.children('a');
+        if (ahref.length == 0) {
+            var cb = $idTD.find("input:checkbox");
+            if (cb.length == 0)
+                params = { "isLite": "false", "sfValue": $idTD.html().trim() };
+            else
+                params = { "isLite": "false", "sfValue": (cb.filter(":checked").length > 0) };
+        }
         else {
             var route = ahref.attr("href");
             var separator = route.indexOf("/");
             var lastSeparator = route.lastIndexOf("/");
             params = { "isLite": "true", "typeUrlName": route.substring(separator + 1, lastSeparator), "sfId": route.substring(lastSeparator + 1, route.length) };
         }
-        var idTDnoPrefix = idTD.substring(this.findOptions.prefix.length, idTD.length);
-        var colIndex = parseInt(idTDnoPrefix.substring(idTDnoPrefix.indexOf("_") + 1, idTDnoPrefix.length)) - 1
+
+        var cellIndex = $("#" + idTD)[0].cellIndex;
+
+        params = $.extend(params, {
+            "sfQueryUrlName": $(this.pf(sfQueryUrlName)).val(),
+            "tokenName": $($($idTD.parents(".tblResults")[0]).find("th")[cellIndex]).children("input:hidden").val(),
+            "prefix": this.findOptions.prefix,
+            "index": this.newFilterRowIndex()
+        });
+
         var self = this;
         $.ajax({
             type: "POST",
             url: "Signum/QuickFilter",
-            data: $.extend(params, { "sfQueryUrlName": $(this.pf(sfQueryUrlName)).val(), "sfColIndex": colIndex, "prefix": this.findOptions.prefix, "index": this.newFilterRowIndex() }),
+            data: params,
             async: false,
             dataType: "html",
             success: function(filterHtml) {
@@ -484,6 +530,7 @@ FindNavigator.prototype = {
                 $filterList.find(".explanation").hide();
                 $filterList.find("table").show();
                 tableFilters.append(filterHtml);
+                $(self.pf("btnClearAllFilters"), self.$control).show();
             }
         });
     },
@@ -601,7 +648,9 @@ function NewSubTokensCombo(prefix, index) {
     new FindNavigator({ prefix: prefix }).newSubTokensCombo(index);
 }
 
-function QuickFilter(prefix, idTd) {
+function QuickFilter(idTd) {
+    var idtblresults = $("#" + idTd).parents(".tblResults")[0].id;
+    var prefix = idtblresults.substring(0, idtblresults.indexOf("tblResults"));
     new FindNavigator({ prefix: prefix }).quickFilter(idTd);
 }
 

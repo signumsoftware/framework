@@ -1,4 +1,5 @@
-﻿using System;
+﻿#region usings
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,6 +14,8 @@ using System.Web;
 using Signum.Entities.Reflection;
 using Signum.Utilities.Reflection;
 using System.Text.RegularExpressions;
+using Signum.Engine;
+#endregion
 
 namespace Signum.Web
 {
@@ -188,7 +191,7 @@ namespace Signum.Web
                     Type liteType = Navigator.NamesToTypes[vals[1]];
                     if (typeof(Lite).IsAssignableFrom(liteType))
                         liteType = Reflector.ExtractLite(liteType);
-                    return Lite.Create(liteType, intValue);
+                    return Database.RetrieveLite(liteType, intValue);
                 }
                 else
                     return null;

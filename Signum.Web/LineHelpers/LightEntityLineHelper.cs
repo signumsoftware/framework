@@ -19,11 +19,19 @@ namespace Signum.Web
         {
             if (lite == null)
                 return;
-            
-            if (Navigator.IsNavigable(lite.RuntimeType, admin))
-                helper.Write(helper.Href("", lite.ToStr, Navigator.ViewRoute(lite.RuntimeType, lite.Id), HttpUtility.HtmlEncode(Resources.View), "", null));
+
+            bool isNavigable = Navigator.IsNavigable(lite.RuntimeType, admin);
+            string link = helper.Href("",
+                lite.ToStr,
+                Navigator.ViewRoute(lite.RuntimeType, lite.Id),
+                HttpUtility.HtmlEncode(Resources.View),
+                "",
+                isNavigable ? null : new Dictionary<string, object>() { { "style", "display:none"} });
+
+            if (isNavigable)
+                helper.Write(link);
             else
-                helper.Write(helper.Span("", lite.ToStr, ""));
+                helper.Write(link + lite.ToStr);
         }
     }
 }

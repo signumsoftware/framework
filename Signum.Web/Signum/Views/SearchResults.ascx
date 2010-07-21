@@ -12,14 +12,7 @@
    Type entitiesType = Reflector.ExtractLite(queryDescription.StaticColumns.Single(a => a.IsEntity).Type);
    bool viewable = findOptions.View && Navigator.IsNavigable(entitiesType, true);
 
-   //TODO Anto: Habilitar quickfilters: Controlar campos no filtrables  (con este método se pueden crear)
-   //"<script type=\"text/javascript\">" + 
-   //    "$(document).ready(function() {" + 
-   //        "$('.tblResults td').bind('dblclick', function(e) {" + 
-   //            "QuickFilter('" + Html.GlobalName("") + "', this.id);" + 
-   //        "});" + 
-   //    "});" + 
-   //"</script>"
+
 %>
 <%  ResultTable queryResult = (ResultTable)ViewData[ViewDataKeys.Results];
     var entityColumn = (queryResult == null) ? null : queryResult.Columns.OfType<StaticColumn>().Single(c => c.IsEntity);
@@ -54,7 +47,7 @@
             <%} %>
             <% if (viewable)
                { %>
-            <td id="<%=context.Compose("tdResults")%>">
+            <td class="<%=context.Compose("tdRowEntity")%>">
                 <a href="<%= Navigator.ViewRoute(entityField.RuntimeType, entityField.Id) %>" title="<%=Html.Encode(Resources.View) %>">
                     <%=Html.Encode(Resources.View)%></a>
             </td>
