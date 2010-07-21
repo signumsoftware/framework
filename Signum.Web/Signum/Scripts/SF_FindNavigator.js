@@ -72,15 +72,14 @@ FindNavigator.prototype = {
         if (selected.length == 0)
             return items;
 
+        var self = this;
         selected.each(function(i, v) {
-            var __index = v.indexOf("__");
-            var __index2 = v.indexOf("__", __index + 2);
-
+            var parts = v.value.split("__");
             var item = {
-                id: v.substring(0, __index),
-                type: v.substring(__index + 2, __index2),
-                toStr: v.substring(__index2 + 2, v.length),
-                link: $('#' + this.id).parent().next(this.pf('tdResults')).children('a').attr('href')
+                id: parts[0],
+                type: parts[1],
+                toStr: parts[2],
+                link: $('#' + this.id).parent().next(self.pf('tdResults')).children('a').attr('href')
             };
             items.push(item);
         });
