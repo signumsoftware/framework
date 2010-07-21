@@ -73,9 +73,9 @@ FindNavigator.prototype = {
             return items;
 
         selected.each(function(i, v) {
-            var __index = v.indexOf("__"),
-                __index2 = v.indexOf("__", __index + 2);
-            
+            var __index = v.indexOf("__");
+            var __index2 = v.indexOf("__", __index + 2);
+
             var item = {
                 id: v.substring(0, __index),
                 type: v.substring(__index + 2, __index2),
