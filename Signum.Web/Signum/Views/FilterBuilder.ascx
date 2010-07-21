@@ -41,7 +41,7 @@
            </div>
     <% List<FilterOption> filterOptions = findOptions.FilterOptions; %>
   
-    <div id="<%=context.Compose("filters-list")%>" class="filters-list">
+    <div class="filters-list">
         <span class="explanation" style="<%= (filterOptions == null || filterOptions.Count == 0) ? "" : "display:none;" %>"><%=Html.Encode(Resources.NoFiltersSpecified)%></span>
         <table id="<%=context.Compose("tblFilters")%>" style="<%= (filterOptions == null || filterOptions.Count == 0) ? "display:none;" : "" %>">            
             <thead>

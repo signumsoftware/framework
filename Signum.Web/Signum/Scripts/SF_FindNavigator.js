@@ -35,6 +35,8 @@ var FindNavigator = function(_findOptions) {
         onOkClosed: null,
         async: true
     }, _findOptions);
+
+    this.$control = $(this.pf("divSearchControl"));
 };
 
 FindNavigator.prototype = {
@@ -103,7 +105,6 @@ FindNavigator.prototype = {
     },
 
     search: function() {
-
         this.editColumnsFinish();
 
         var $btnSearch = $(this.pf("btnSearch"));
@@ -175,21 +176,24 @@ FindNavigator.prototype = {
     },
 
     serializeFilters: function() {
-        var result = "";
-        var self = this;
+        var result = "", self = this;
         $(this.pf("tblFilters > tbody > tr")).each(function() {
-            result = $.extend(result, self.serializeFilter(this.id.substring(this.id.lastIndexOf("_") + 1, this.id.length)));
+            result = $.extend(result,
+                self.serializeFilter($(this)));
         });
         return result;
     },
 
-    serializeFilter: function(index) {
-        var tds = $(this.pf("trFilter").compose(index) + " td");
-        var columnName = tds[0].id.substring(tds[0].id.indexOf("__") + 2, tds[0].id.length);
-        var selector = $(this.pf("ddlSelector").compose(index) + " option:selected");
-        var value = $(this.pf("value").compose(index)).val();
+    serializeFilter: function($filter) {
 
-        var valBool = $("input:checkbox[id=" + this.findOptions.prefix.compose("value").compose(index) + "]"); //it's a checkbox
+        var id = $filter[0].id;
+        var index = id.substring(id.lastIndexOf("_") + 1, id.length);
+
+        var selector = $(this.pf("ddlSelector").compose(index) + " option:selected", $filter);
+        var value = $(this.pf("value").compose(index), $filter).val();
+
+        var valBool = $("input:checkbox[id=" + this.findOptions.prefix.compose("value").compose(index) + "]", $filter); //it's a checkbox
+
         if (valBool.length > 0) value = valBool[0].checked;
 
         var info = RuntimeInfoFor(this.findOptions.prefix.compose("value").compose(index));
@@ -197,7 +201,7 @@ FindNavigator.prototype = {
             value = info.id() + ";" + info.runtimeType();
 
         var filter = new Object();
-        filter["cn" + index] = columnName;
+        filter["cn" + index] = $filter.find("td")[0].id.split("__")[1];
         filter["sel" + index] = selector.val();
         filter["val" + index] = value;
         return filter;
@@ -379,10 +383,14 @@ FindNavigator.prototype = {
             async: false,
             dataType: "html",
             success: function(filterHtml) {
-                $(self.pf("filters-list .explanation")).hide();
-                $(self.pf("filters-list table")).show('fast');
+                console.time("addFilter");
+                var $filterList = self.$control.find(".filters-list");
+                $filterList.find(".explanation").hide();
+                $filterList.find("table").show();
                 tableFilters.append(filterHtml);
-                $(self.pf("btnClearAllFilters")).show();
+
+                $(self.pf("btnClearAllFilters"), self.$control).show();
+                console.timeEnd("addFilter");
             }
         });
     },
@@ -437,9 +445,9 @@ FindNavigator.prototype = {
         log("FindNavigator constructTokenName");
         var tokenName = "",
             stop = false,
-            $fieldsList = $(".fields-list");
+            $fieldsList = $(".fields-list", this.$control);
 
-        for (i = 0; !stop; i++) {
+        for (var i = 0; !stop; i++) {
             var currSubtoken = $fieldsList.find(this.pf("ddlTokens_" + i));
             if (currSubtoken.length > 0)
                 tokenName = tokenName.compose(currSubtoken.val(), ".");
@@ -474,32 +482,41 @@ FindNavigator.prototype = {
             async: false,
             dataType: "html",
             success: function(filterHtml) {
-                $(self.pf("filters-list .explanation")).hide();
-                $(self.pf("filters-list table")).show('fast');
+                var $filterList = self.$control.find(".filters-list");
+                $filterList.find(".explanation").hide();
+                $filterList.find("table").show();
                 tableFilters.append(filterHtml);
             }
         });
     },
 
-    deleteFilter: function(index) {
-        log("FindNavigator deleteFilter");
-        var tr = $(this.pf("trFilter_" + index))
-        if (tr.length == 0) return;
+    deleteFilter: function(elem) {
+        var $tr = $(elem).closest("tr");
+        if ($tr.find("select[disabled]").length)
+            return;
 
-        if ($(this.pf("trFilter").compose(index) + " select[disabled]").length == 0) tr.remove();
-        if ($(this.pf("tblFilters tbody tr")).length == 0) {
-            $(this.pf("filters-list .explanation")).show();
-            $(this.pf("filters-list table")).hide('fast');
-            $(this.pf("btnClearAllFilters")).hide();
+        if ($tr.siblings().length == 0) {
+            var $filterList = $tr.closest(".filters-list");
+                $filterList.find(".explanation").show();
+                $filterList.find("table").hide();
+            $(this.pf("btnClearAllFilters"), this.$control).hide();
         }
+        
+        $tr.remove();
     },
 
     clearAllFilters: function() {
         log("FindNavigator clearAllFilters");
-        var self = this;
-        $(this.pf("tblFilters > tbody > tr")).each(function(index) {
-            self.deleteFilter(this.id.substring(this.id.lastIndexOf("_") + 1, this.id.length));
-        });
+        console.time("deleteFilter");
+
+        this.$control.find(".filters-list")
+                     .find(".explanation").show().end()
+                     .find("table").hide()
+                        .find("tbody > tr").remove();
+
+        $(this.pf("btnClearAllFilters"), this.$control).hide();
+
+        console.timeEnd("deleteFilter");
     },
 
     requestDataForSearchPopupCreate: function() {
@@ -618,7 +635,7 @@ function Sort(evt) {
     if (empty($target[0].id))
         return;
        
-    var searchControlDiv = $target.parents("div[id$=divSearchControl]");
+    var searchControlDiv = $target.parents(".searchControl");
     
     var prefix = searchControlDiv[0].id;
     prefix = prefix.substring(0, prefix.indexOf("divSearchControl"));

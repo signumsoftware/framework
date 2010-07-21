@@ -113,7 +113,7 @@ namespace Signum.Web
 
             sb.AppendLine("<td>");
             if (!filterOptions.Frozen)
-                sb.AppendLine(helper.Button(context.Compose("btnDelete", index.ToString()), "X", "DeleteFilter('{0}','{1}');".Formato(context.ControlID, index), "", null));
+                sb.AppendLine(helper.Button(context.Compose("btnDelete", index.ToString()), "X", "DeleteFilter('{0}',this);".Formato(context.ControlID), "", null));
             sb.AppendLine("</td>");
 
             sb.AppendLine("</tr>");
