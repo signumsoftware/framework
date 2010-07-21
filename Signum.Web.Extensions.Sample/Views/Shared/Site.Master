@@ -10,61 +10,18 @@
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
     <base href="<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/" ) %>" />
 
-    <script src="<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/Scripts/jquery-1.4.min.js" ) %>" type="text/javascript"></script>    
+    <% Html.CombinedCss("scripts", "jqueryui/ui.merged.css"); %>
+    <% Html.CombinedCss("content", "fluid/fluid.min.css"); %>
+    <% Html.IncludeAreaCss("signum/Content/LineStyles.css"); %>    
+
+    <script type="text/javascript" src="scripts/jquery-1.4.2.min.js"></script>
     <script type='text/javascript' src='http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.min.js'></script>
-
-    <link href="<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/Content/basic.merged.min.css" ) %>" rel="stylesheet" type="text/css" />
-    <link href="<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/Content/LineStyles.css" ) %>" rel="stylesheet" type="text/css" />
-    <link href="<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/Content/results.css" ) %>" rel="stylesheet" type="text/css" />    
-    <link href="<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/Scripts/jqueryui/ui.theme.css" ) %>" rel="stylesheet" type="text/css" />    
-
+    
+    <!--Calendar-->
+    <% Html.IncludeAreaJs("signum/Scripts/SF_jquery-ui-datepicker-extension.js"); %>    
+    <%= CalendarHelper.GetLocalizationVariables() %>
+    
     <asp:ContentPlaceHolder ID="head" runat="server"></asp:ContentPlaceHolder>    
-    <script type="text/javascript">
-    
-    $(function() {
-    
-    if ($.jsLoader) {
-        //Textareas
-        $.jsLoader($("textarea").length>0,
-            "<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/Scripts/jquery.autogrow.js" ) %>"
-            );
-            
-        //Sort tables
-       $.jsLoader($(".tblResults").length > 0 || $(".btnSearch").length > 0,
-            "<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/Scripts/jquery.tablesorter.min.js" ) %>",
-            function() {
-                $(".btnSearch").click(function(){
-                    $(".tblResults").tablesorter({headers: {
-                        0: {sorter:false},
-                        1: {sorter:false}
-                    }});
-                });
-            }
-        );
-        
-        //Widgets - Tooltips
-        if ($('.widget').length>0) {
-            $.jsLoader(true,
-                "<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/Scripts/jquery.qtip-1.0.0-rc3.min.js" ) %>"            
-            );
-            $.jsLoader(true,
-                "<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/Scripts/widget.js" ) %>"            
-            );        
-        }
-        
-        //Tabs        
-        if ($('input.hasDatepicker').length>0 || $('.tabs').length>0) {
-            $.jsLoader(true,
-                "<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/Scripts/jqueryui/jquery-ui-1.7.2.custom.min.js" ) %>",
-                function() {"Llamando a TABS"; $('.tabs').tabs();}
-            );
-            $.cssLoader(true,
-                "<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/Scripts/jqueryui/ui.merged.css" ) %>"    
-            );
-        }
-        }
-    });
-    </script>
 </head>
 
 <body>
