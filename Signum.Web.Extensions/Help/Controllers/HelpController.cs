@@ -89,6 +89,12 @@ namespace Signum.Web.Help
                              where result.Any()
                              select result.ToList());
 
+            //We add the appendices
+            results.AddRange(from a in HelpLogic.GetNamespaces()
+                             let result = a.Search(regex)
+                             where result.Any()
+                             select result.ToList());
+
             results.Sort(a => a.First());
 
             sp.Stop();

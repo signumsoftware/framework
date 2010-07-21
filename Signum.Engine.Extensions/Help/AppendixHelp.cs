@@ -96,11 +96,13 @@ namespace Signum.Engine.Help
 
             //Types description
             if (Description.HasText())
-                m = regex.Match(Description.RemoveDiacritics());
-            if (m.Success)
             {
-                yield return new SearchResult(TypeSearchResult.AppendixDescription, Name, Description.Extract(m), null, m, HelpLogic.BaseUrl + "/Appendix/" + Name);
-                yield break;
+                m = regex.Match(Description.RemoveDiacritics());
+                if (m.Success)
+                {
+                    yield return new SearchResult(TypeSearchResult.AppendixDescription, Name, Description.Extract(m), null, m, HelpLogic.BaseUrl + "/Appendix/" + Name);
+                    yield break;
+                }
             }
         }
     }

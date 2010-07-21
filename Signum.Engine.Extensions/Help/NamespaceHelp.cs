@@ -6,6 +6,7 @@ using System.Xml.Linq;
 using System.Globalization;
 using System.IO;
 using Signum.Utilities;
+using System.Text.RegularExpressions;
 
 namespace Signum.Engine.Help
 {
@@ -95,6 +96,22 @@ namespace Signum.Engine.Help
                 Console.WriteLine();
             }
 
+        }
+
+        public IEnumerable<SearchResult> Search(Regex regex)
+        {
+            Match m = null;
+
+            //Types description
+            if (Description.HasText())
+            {
+                m = regex.Match(Description.RemoveDiacritics());
+                if (m.Success)
+                {
+                    yield return new SearchResult(TypeSearchResult.NamespaceDescription, Name, Description.Extract(m), null, m, HelpLogic.BaseUrl + "/Namespace/" + Name);
+                    yield break;
+                }
+            }
         }
     }
 }

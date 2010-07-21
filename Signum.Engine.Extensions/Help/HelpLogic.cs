@@ -79,6 +79,11 @@ namespace Signum.Engine.Help
             return Namespaces.TryGetC(@namespace);
         }
 
+        public static List<NamespaceHelp> GetNamespaces()
+        {
+            return Namespaces.Select(kvp => kvp.Value).ToList();
+        }
+
         public static List<AppendixHelp> GetAppendices()
         {
             return Appendices.Select(kvp => kvp.Value).ToList();

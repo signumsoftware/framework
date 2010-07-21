@@ -470,7 +470,8 @@ namespace Signum.Engine.Help
         Operation,
         OperationDescription,
         Appendix,
-        AppendixDescription
+        AppendixDescription,
+        NamespaceDescription
     }
 
     public enum MatchType
