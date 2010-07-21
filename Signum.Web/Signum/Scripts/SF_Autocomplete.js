@@ -159,7 +159,8 @@ Autocompleter.prototype = {
     },
 
     keydown: function(e) {
-        var key = e.which ? e.which : e.keyCode;
+        var key = e.which ? e.which : e.keyCode;       
+        
         if (key == 13 || key == 9) {    //enter or tab
             var selectedOption = this._getSelected();
             if (selectedOption.length > 0) {
@@ -185,6 +186,9 @@ Autocompleter.prototype = {
                 this.moveDown();
                 return;
             }
+        }
+        if (key == 27) { //Escape
+            this.$dd.hide();
         }
     },
     moveUp: function() {
