@@ -445,7 +445,7 @@ namespace Signum.Web
             if (runtimeInfo.IdOrNull.Value == lite.IdOrNull && runtimeInfo.RuntimeType == lite.RuntimeType)
                 return TryModifyEntity(ctx, lite);
 
-            return TryModifyEntity(ctx, (Lite<S>)Database.RetrieveLite(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value));
+            return TryModifyEntity(ctx, Database.RetrieveLite<S>(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value));
         }
 
         public Lite<S> TryModifyEntity(MappingContext<Lite<S>> ctx, Lite<S> newLite)
