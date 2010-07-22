@@ -73,6 +73,11 @@
     <Compile Include="Captcha\CaptchaHtmlHelper.cs" />
     <Compile Include="Captcha\CaptchaImage.cs" />
     <Compile Include="Captcha\CaptchaValidationAttribute.cs" />
+    <Compile Include="ControllerFilters\ActionFilter\ActionFilerConfigControllerActionInvoker.cs" />
+    <Compile Include="ControllerFilters\ActionFilter\ActionFilterConfig.cs" />
+    <Compile Include="ControllerFilters\ActionFilter\ActionFilterConfigControllerFactory.cs" />
+    <Compile Include="ControllerFilters\ActionFilter\ConfigActionFilter.cs" />
+    <Compile Include="ControllerFilters\ActionFilter\IActionFilterConfiguration.cs" />
     <Compile Include="Files\FileRepeaterHelper.cs" />
     <Compile Include="Files\FileRepeater.cs" />
     <Compile Include="Files\FileLineHelper.cs" />
@@ -115,7 +120,7 @@
     <Compile Include="ScriptCombiner\CombinerHtmlHelper.cs" />
     <Compile Include="ScriptCombiner\JavaScriptMinifier.cs" />
     <Compile Include="ScriptCombiner\ScriptCombiner.cs" />
-    <Compile Include="ControllerFilters\UcalendaFilterAttributes.cs" />
+    <Compile Include="ControllerFilters\FilterAttributes.cs" />
     <Compile Include="ViewsChecker\ViewsCheckerClient.cs" />
     <Compile Include="ViewsChecker\ViewError.cs" />
     <Compile Include="ViewsChecker\Controllers\ViewsCheckerController.cs" />
