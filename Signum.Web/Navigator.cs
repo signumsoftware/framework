@@ -345,6 +345,19 @@ namespace Signum.Web
             return (Lite<T>)Manager.ExtractLite<T>(controller, prefix);
         }
 
+        public static List<Lite<T>> ExtractLitesList<T>(string commaSeparatedIds, bool retrive) where T : class, IIdentifiable
+        {
+            if (!commaSeparatedIds.HasText())
+                return new List<Lite<T>>();
+
+            var ids = commaSeparatedIds.Split(new[]{','},StringSplitOptions.RemoveEmptyEntries );
+            if (retrive)
+                return Database.RetrieveListLite<T>(ids.Select(i => int.Parse(i)).ToList());
+
+            else
+                return ids.Select(i => new Lite<T>(int.Parse(i))).ToList();
+        }
+
         public static Dictionary<string, Type> URLNamesToTypes
         {
             get { return Manager.URLNamesToTypes; }
