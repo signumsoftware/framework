@@ -26,17 +26,22 @@ namespace Signum.Web
 {
     public class TrackTimeFilter : ActionFilterAttribute
     {
-        Stopwatch stopWatch;
         public override void OnActionExecuting(ActionExecutingContext filterContext)
         {
-            stopWatch = new Stopwatch();
+            Stopwatch stopWatch = new Stopwatch();
+            filterContext.Controller.ViewData["stopWatch"] = stopWatch;
             stopWatch.Start();
         }
 
         public override void OnResultExecuted(ResultExecutedContext filterContext)
         {
-            stopWatch.Stop();
-            Log(filterContext.RouteData, stopWatch.ElapsedMilliseconds);
+            Stopwatch stopWatch = (Stopwatch) filterContext.Controller.ViewData.TryGetC("stopWatch");
+            //It fails if a redirection has been made
+            if (stopWatch != null)
+            {
+                stopWatch.Stop();
+                Log(filterContext.RouteData, stopWatch.ElapsedMilliseconds);
+            }
         }
 
         private void Log(RouteData routeData, long time)
