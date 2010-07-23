@@ -10,6 +10,7 @@ using System.Globalization;
 using System.Web.Security;
 using Signum.Utilities;
 using System.Web.Routing;
+using Signum.Engine.Exceptions;
 
 namespace Signum.Web
 {
@@ -195,8 +196,11 @@ namespace Signum.Web
         {
             int error = new HttpException(null, ex).GetHttpCode();
 
-            if (error == 401) //not authoriozed shows a log-io
+            if (error == 401) //not authorized shows a log-io
                 return 500;
+
+            if (ex.GetType() == typeof(EntityNotFoundException))
+                return 404;
             return error;
         }
 
