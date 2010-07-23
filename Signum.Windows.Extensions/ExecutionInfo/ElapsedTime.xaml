@@ -15,11 +15,11 @@
                     <GridView x:Name="gvTiempos">
                         <GridViewColumn Header="Nombre" DisplayMemberBinding="{Binding Name}" />
                         <GridViewColumn Header="Entidad" DisplayMemberBinding="{Binding EntityName}" />
-                        <GridViewColumn Header="Ejecuciones" DisplayMemberBinding="{Binding ElapsedTimeEnty.Times}" />
-                        <GridViewColumn Header="Último tiempo" DisplayMemberBinding="{Binding ElapsedTimeEnty.LastTime}" />
-                        <GridViewColumn Header="Tiempo mínimo" DisplayMemberBinding="{Binding ElapsedTimeEnty.MinTime}" />
-                        <GridViewColumn Header="Tiempo medio" DisplayMemberBinding="{Binding ElapsedTimeEnty.Average}" />
-                        <GridViewColumn Header="Tiempo máximo" DisplayMemberBinding="{Binding ElapsedTimeEnty.MaxTime}" />
+                        <GridViewColumn Header="Ejecuciones" DisplayMemberBinding="{Binding ElapsedTimeEntry.Times}" />
+                        <GridViewColumn Header="Último tiempo" DisplayMemberBinding="{Binding ElapsedTimeEntry.LastTime}" />
+                        <GridViewColumn Header="Tiempo mínimo" DisplayMemberBinding="{Binding ElapsedTimeEntry.MinTime}" />
+                        <GridViewColumn Header="Tiempo medio" DisplayMemberBinding="{Binding ElapsedTimeEntry.Average}" />
+                        <GridViewColumn Header="Tiempo máximo" DisplayMemberBinding="{Binding ElapsedTimeEntry.MaxTime}" />
                     </GridView>
                 </ListView.View>
                 <ListView.ItemContainerStyle>

@@ -26,13 +26,13 @@ namespace Signum.Windows.ExecutionInfo
 
             List<ElapsedNode> nodes = new List<ElapsedNode>();
 
-            foreach (KeyValuePair<string, ElapsedTimeEntity> pair in Signum.Utilities.ElapsedTime.IdentifiedElapseds.OrderByDescending(p => p.Value.Average))
+            foreach (KeyValuePair<string, ElapsedTimeEntry> pair in Signum.Utilities.ElapsedTime.IdentifiedElapseds.OrderByDescending(p => p.Value.Average))
             {
                 nodes.Add(new ElapsedNode
                 {
                     Name = pair.Key.Split(' ')[0],
                     EntityName = pair.Key.Split(' ')[1],
-                    ElapsedTimeEnty = pair.Value
+                    ElapsedTimeEntry = pair.Value
                 });
             }
             lvTiempos.ItemsSource = nodes;
@@ -43,6 +43,6 @@ namespace Signum.Windows.ExecutionInfo
     {
         public string Name { get; set; }
         public string EntityName { get; set; }
-        public ElapsedTimeEntity ElapsedTimeEnty { get; set; }
+        public ElapsedTimeEntry ElapsedTimeEntry { get; set; }
     }
 }
