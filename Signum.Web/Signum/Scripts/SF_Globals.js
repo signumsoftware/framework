@@ -67,7 +67,7 @@
             return this.value().split(";")
         };
         this.toValue = function(array) {
-            return array.join(";");     //return array[0] + ";" + array[1] + ";" + array[2];
+            return array.join(";");
         };
         this.getValue = function(key) {
             var array = this.toArray();
@@ -111,7 +111,7 @@ var RuntimeInfo = function(_prefix) {
         return this.value().split(";")
     };
     this.toValue = function(array) {
-        return array.join(";"); //return array[0] + ";" + array[1] + ";" + array[2] + ";" + array[3];
+        return array.join(";");
     };
     this.getSet = function(key, val) {
         var array = this.toArray();
