@@ -148,10 +148,10 @@ namespace Signum.Utilities
 
         public static string VerticalEtc(this string str, int maxLines, string etcString)
         {
-            if (str.HasText() && (str.Contains("/r/n")))
+            if (str.HasText() && (str.Contains("\r\n")))
             {
-                string[] arr = str.Split(new string[] { "/r/n" }, maxLines, StringSplitOptions.None);
-                string res = arr.ToString("/r/n");
+                string[] arr = str.Split(new string[] { "\r\n" }, maxLines, StringSplitOptions.None);
+                string res = arr.ToString("\r\n");
                 if (res.Length < str.Length)
                     res += etcString;
                 str = res;
