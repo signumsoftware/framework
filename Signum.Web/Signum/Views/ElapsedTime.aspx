@@ -12,8 +12,8 @@
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
 <ul id="tasks">
-        <%
-            foreach (Pair<string, ElapsedTimeEntity> pair in ElapsedTime.IdentifiedElapseds)
+        <% Html.RenderPartial(
+            foreach (Pair<string, ElapsedTimeEntry> pair in ElapsedTime.IdentifiedElapseds)
             {    
          %>
     <li class="task">

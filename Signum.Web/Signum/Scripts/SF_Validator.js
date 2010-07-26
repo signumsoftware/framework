@@ -7,11 +7,11 @@
         fixedInlineErrorText: "*", //Set to "" for it to be populated from ModelState error messages
         parentDiv: "",
         requestExtraJsonData: null,
-        ajaxError : null
+        ajaxError: null
     }, _valOptions);
 
-    this.savingControllerUrl = (empty(this.valOptions.controllerUrl)) ? "Signum/TrySave" : this.valOptions.controllerUrl;
-    this.validatingControllerUrl = (empty(this.valOptions.controllerUrl)) ? "Signum/Validate" : this.valOptions.controllerUrl;
+    this.savingControllerUrl = this.valOptions.controllerUrl || "Signum/TrySave";
+    this.validatingControllerUrl = this.valOptions.controllerUrl || "Signum/Validate";
 };
 
 Validator.prototype = {
@@ -30,20 +30,18 @@ Validator.prototype = {
         var searchControlInputs = $(".searchControl :input");
         formChildren = formChildren.not(searchControlInputs);
 
-        var requestData = [];
-        requestData.push(formChildren.serialize());
-
-        requestData.push(qp(sfPrefix, this.valOptions.prefix));
+        var requestData = formChildren.serialize();
+        requestData += qp(sfPrefix, this.valOptions.prefix);
 
         if (!empty(this.valOptions.prefixToIgnore))
-            requestData.push(qp(sfPrefixToIgnore, this.valOptions.prefixToIgnore));
+            requestData += qp(sfPrefixToIgnore, this.valOptions.prefixToIgnore);
 
         if (!empty(this.valOptions.requestExtraJsonData)) {
             for (var key in this.valOptions.requestExtraJsonData) {
-                requestData.push(qp(key, this.valOptions.requestExtraJsonData[key]));
+                requestData += qp(key, this.valOptions.requestExtraJsonData[key]);
             }
         }
-        return requestData.join('');
+        return requestData;
     },
 
     trySave: function() {
@@ -131,20 +129,20 @@ Validator.prototype = {
                 allErrors.push(partialErrors);
             }
             if (controlID != sfGlobalErrorsKey && controlID != "") {
-                var control = $('#' + controlID);
-                control.addClass(sfInputErrorClass);
-                if (this.valOptions.showInlineErrors && control.hasClass(sfInlineErrorVal)) {
+                var $control = $('#' + controlID);
+                $control.addClass(sfInputErrorClass);
+                if (this.valOptions.showInlineErrors && $control.hasClass(sfInlineErrorVal)) {
                     if (control.next().hasClass("ui-datepicker-trigger")) {
                         if (empty(this.valOptions.fixedInlineErrorText))
-                            $('#' + controlID).next().after(inlineErrorStart + errorMessage.join('') + inlineErrorEnd);
+                            $control.next().after(inlineErrorStart + errorMessage.join('') + inlineErrorEnd);
                         else
-                            $('#' + controlID).next().after(inlineErrorStart + this.valOptions.fixedInlineErrorText + inlineErrorEnd);
+                            $control.next().after(inlineErrorStart + this.valOptions.fixedInlineErrorText + inlineErrorEnd);
                     }
                     else {
                         if (empty(this.valOptions.fixedInlineErrorText))
-                            $('#' + controlID).after(inlineErrorStart + errorMessage.join('') + inlineErrorEnd);
+                            $control.after(inlineErrorStart + errorMessage.join('') + inlineErrorEnd);
                         else
-                            $('#' + controlID).after(inlineErrorStart + this.valOptions.fixedInlineErrorText + inlineErrorEnd);
+                            $control.after(inlineErrorStart + this.valOptions.fixedInlineErrorText + inlineErrorEnd);
                     }
                 }
             }
@@ -203,8 +201,8 @@ var PartialValidator = function(_pvalOptions) {
         id: null
     }, _pvalOptions));
 
-    this.savingControllerUrl = (empty(this.valOptions.controllerUrl)) ? "Signum/TrySavePartial" : this.valOptions.controllerUrl;
-    this.validatingControllerUrl = (empty(this.valOptions.controllerUrl)) ? "Signum/ValidatePartial" : this.valOptions.controllerUrl;
+    this.savingControllerUrl = this.valOptions.controllerUrl || "Signum/TrySavePartial";
+    this.validatingControllerUrl = this.valOptions.controllerUrl || "Signum/ValidatePartial";
 
     this.constructRequestDataForSaving = function() {
         log("PartialValidator constructRequestDataForSaving");
@@ -231,14 +229,13 @@ var PartialValidator = function(_pvalOptions) {
         return requestData.join('');
     };
 
-    this.createValidatorResult = function(ajaxResult) {
-        log("PartialValidator createValidatorResult");
-        eval('var result=' + ajaxResult);
-        var validatorResult = new Object();
-        validatorResult.modelState = result["ModelState"];
-        validatorResult.isValid = this.isValid(validatorResult.modelState);
-        validatorResult.newToStr = result[sfToStr];
-        validatorResult.newLink = result[sfLink];
+    this.createValidatorResult = function(r) {
+        var validatorResult = {
+            "modelState": r["ModelState"],
+            "isValid": this.isValid(r["ModelState"]),
+            "newToStr": r[sfToStr],
+            "newLink": r[sfLink]
+        };
         return validatorResult;
     };
 
@@ -254,6 +251,7 @@ var PartialValidator = function(_pvalOptions) {
             url: this.savingControllerUrl,
             async: false,
             data: this.constructRequestDataForSaving(),
+            dataType: "JSON",
             success: function(result) {
                 validatorResult = self.createValidatorResult(result);
                 self.showErrors(validatorResult.modelState);
@@ -269,13 +267,12 @@ var PartialValidator = function(_pvalOptions) {
 
     this.constructRequestDataForValidating = function() {
         log("PartialValidator constructRequestDataForValidating");
-        var isReactive = ($('#' + sfReactive).length > 0);
+        //var isReactive = $('#' + sfReactive).length > 0;
         //var formChildren = isReactive ? $("form *") : $("#" + this.valOptions.parentDiv + " *, #" + sfTabId + ", #" + sfReactive);
         var formChildren = $("#" + this.valOptions.parentDiv + " :input, #" + sfTabId);
         formChildren = formChildren.not(".searchControl :input, #" + sfReactive);
 
-        var requestData = [];
-        requestData.push(formChildren.serialize());
+        var requestData = formChildren.serialize();
 
         var myRuntimeInfoKey = this.valOptions.prefix.compose(sfRuntimeInfo);
         if (formChildren.filter("[name=" + myRuntimeInfoKey + "]").length == 0) {
@@ -283,44 +280,40 @@ var PartialValidator = function(_pvalOptions) {
             var infoField = info.find();
             if (empty(this.valOptions.type)) {
                 if (empty(info.runtimeType()))
-                    requestData.push(
+                    requestData +=
                         qp(myRuntimeInfoKey,
-                        info.createValue(StaticInfoFor(this.valOptions.prefix).staticType(), info.id(), 'n', '')));
+                        info.createValue(StaticInfoFor(this.valOptions.prefix).staticType(), info.id(), 'n', ''));
                 else
-                    requestData.push(
-                        qp(myRuntimeInfoKey, infoField.val()));
+                    requestData += qp(myRuntimeInfoKey, infoField.val());
             }
             else {
                 if (infoField.length == 0)
-                    requestData.push(
-                        qp(myRuntimeInfoKey, info.createValue(this.valOptions.type, empty(!this.valOptions.id) ? this.valOptions.id : '', 'n', ''))
-                        );
+                    requestData += qp(myRuntimeInfoKey, info.createValue(this.valOptions.type, empty(!this.valOptions.id) ? this.valOptions.id : '', 'n', ''));
                 else {
                     var infoVal = infoField.val();
-                    var index = infoVal.indexOf(";");
+                    var index = infoVal.indexOf(";"); 			//TODO: Split ;
                     var index2 = infoVal.indexOf(";", index + 1);
                     var index3 = infoVal.indexOf(";", index2 + 1);
                     var currTicks = (($('#' + sfReactive).length > 0) ? new Date().getTime() : "");
                     var mixedVal = this.valOptions.type + ";" + (!empty(this.valOptions.id) ? this.valOptions.id : '') + infoVal.substring(index2, index3 + 1) + currTicks;
 
-                    requestData.push(
-                        qp(myRuntimeInfoKey, mixedVal));
+                    requestData += qp(myRuntimeInfoKey, mixedVal);
                 }
             }
         }
 
-        requestData.push(qp(sfPrefix, this.valOptions.prefix));
+        requestData += qp(sfPrefix, this.valOptions.prefix);
 
         if (!empty(this.valOptions.prefixToIgnore))
-            requestData.push(qp(sfPrefixToIgnore, this.valOptions.prefixToIgnore));
+            requestData += qp(sfPrefixToIgnore, this.valOptions.prefixToIgnore);
 
         if (!empty(this.valOptions.requestExtraJsonData)) {
             for (var key in this.valOptions.requestExtraJsonData) {
-                requestData.push(qp(key, this.valOptions.requestExtraJsonData[key]));
+                requestData += qp(key, this.valOptions.requestExtraJsonData[key]);
             }
         }
 
-        return requestData.join('');
+        return requestData;
     };
 
     this.validate = function() {
@@ -366,7 +359,7 @@ function EntityIsValid(validationOptions, onSuccess) {
         if (onSuccess != null)
             onSuccess();
     }
-    else{
+    else {
         window.alert(lang['popupErrorsStop']);
     }
 };

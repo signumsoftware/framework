@@ -209,7 +209,7 @@ namespace Signum.Web
 		    sb.Append("dayNamesShort: [" + CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedDayNames.ToString(s => "'" + s + "'", ",") + "],");
             sb.Append("dayNamesMin: [" + CultureInfo.CurrentCulture.DateTimeFormat.ShortestDayNames.ToString(s => "'" + s + "'", ",") + "],");
             sb.Append("dateFormat: '" + CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern + " " + CultureInfo.CurrentCulture.DateTimeFormat.ShortTimePattern + "',");
-            sb.Append("firstDay: " + (int)CultureInfo.CurrentCulture.DateTimeFormat.FirstDayOfWeek + ",");
+            sb.Append("firstDay: " + (int)CultureInfo.CurrentCulture.DateTimeFormat.FirstDayOfWeek);
 		    //sb.Append("isRTL: false");
             sb.Append("};");
 	        sb.Append("$.datepicker.setDefaults($.datepicker.regional['" + shortCultureName + "']);");
