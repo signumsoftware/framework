@@ -44,7 +44,6 @@
                 <td>
                 </td>
                 <td>
-                    &nbsp
                     <%if (Request.Browser.Cookies)
                       {
                     %>
@@ -67,10 +66,9 @@
             <%} %>
             <tr>
                 <td>
-                    &nbsp
                 </td>
                 <td>
-                    <input id="login" type="submit" value="<%= Resources.LoginEnter %>" />
+                    <input class="login" type="submit" value="<%= Resources.LoginEnter %>" />
                 </td>
             </tr>
         </table>
