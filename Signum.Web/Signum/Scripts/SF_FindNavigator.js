@@ -140,7 +140,7 @@ FindNavigator.prototype = {
         this.editColumnsFinish();
 
         var $btnSearch = $(this.pf("btnSearch"));
-        $btnSearch.toggleClass('loading').val(lang['searching']);
+            $btnSearch.toggleClass('loading').val(lang['searching']);
 
         var self = this;
         $.ajax({
@@ -152,10 +152,10 @@ FindNavigator.prototype = {
             success: function(r) {
                 $btnSearch.val(lang['buscar']).toggleClass('loading');
                 if (!empty(r))
-                    $(self.pf("divResults tbody")).html(r);
+                    self.$control.find(".divResults tbody").html(r);
                 else {
                     var columns = $(self.pf("divResults th")).length;
-                    $(self.pf("divResults tbody")).html("<tr><td colspan=\"" + columns + "\">" + lang['0results'] + "</td></tr>")
+                    self.$control.find(".divResults tbody").html("<tr><td colspan=\"" + columns + "\">" + lang['0results'] + "</td></tr>")
                 }
             },
             error: function() {
@@ -273,7 +273,7 @@ FindNavigator.prototype = {
         var newOrder = found ? (oldOrder == "" ? "-" : "") : "";
         var currOrder = $(this.pf("OrderBy"));
         if (!multiCol) {
-            $(this.pf("divSearchControl")).find(".divResults th").removeClass("headerSortUp headerSortDown");
+            this.$control.find(".divResults th").removeClass("headerSortUp headerSortDown");
             currOrder.val("[\"" + newOrder + columnName + "\"]");
         }
         else {
@@ -287,10 +287,11 @@ FindNavigator.prototype = {
             currOrder.val("[" + currOrderStr + "]");
         }
 
+        var $header = this.$control.find(".divResults th[id='" + this.findOptions.prefix.compose(columnName) + "']");
         if (newOrder == "-")
-            $(this.pf("divSearchControl")).find(".divResults th[id='" + this.findOptions.prefix.compose(columnName) + "']").removeClass("headerSortDown").addClass("headerSortUp");
+            $header.removeClass("headerSortDown").addClass("headerSortUp");
         else
-            $(this.pf("divSearchControl")).find(".divResults th[id='" + this.findOptions.prefix.compose(columnName) + "']").removeClass("headerSortUp").addClass("headerSortDown");
+            $header.removeClass("headerSortUp").addClass("headerSortDown");
 
         return this;
     },
@@ -556,7 +557,7 @@ FindNavigator.prototype = {
         this.$control.find(".filters-list")
                      .find(".explanation").show().end()
                      .find("table").hide()
-                        .find("tbody > tr").remove();
+                      .find("tbody > tr").remove();
 
         $(this.pf("btnClearAllFilters"), this.$control).hide();
 
