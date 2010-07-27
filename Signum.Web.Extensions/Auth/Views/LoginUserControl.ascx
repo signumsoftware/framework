@@ -11,7 +11,7 @@
     }
     else {
 %> 
-        <%= Html.ActionLink("Login", "Login", null, new {@class = "login" })%>
+        <%= Html.ActionLink("Login", "Login", "Auth", null, new {@class = "login" })%>
 <%
     }
 %>
