@@ -321,6 +321,7 @@ fieldset
     top:0;
     z-index:10000;
     background-color:#eee;
+    -ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
     filter:alpha(opacity=50);
     -moz-opacity:0.5;
     -khtml-opacity:0.5;
@@ -776,4 +777,16 @@ th.headerSortDown {
     display:none;
     position:absolute;
     color: #000;
+}
+
+.EntityLineDetail .field 
+{
+	clear:both;
+/* ej.Persona */
+}
+
+.EntityLineDetail .field-inline .field 
+{
+	clear:inherit;
+/* ej.Persona */
 }
