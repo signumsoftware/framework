@@ -24,8 +24,8 @@ namespace Signum.Web
             return "{{{0}}}".Formato(
                 ", ".Combine(
                 "\"ModelState\": " + this.ModelState.ToJsonData(),
-                NewToStr.TryCC(n => EntityBaseKeys.ToStr + ": " + n.Quote()),
-                NewtoStrLink.TryCC(n => EntityBaseKeys.ToStrLink + ": " + n.Quote())));
+                NewToStr.TryCC(n => "\"" + EntityBaseKeys.ToStr + "\"" + ": " + n.Quote()),
+                NewtoStrLink.TryCC(n => "\"" + EntityBaseKeys.ToStrLink + "\"" + ": " + n.Quote())));
         }
     }
 }

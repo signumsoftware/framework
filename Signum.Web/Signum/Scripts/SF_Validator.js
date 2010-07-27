@@ -325,6 +325,7 @@ var PartialValidator = function(_pvalOptions) {
             url: this.validatingControllerUrl,
             async: false,
             data: this.constructRequestDataForValidating(),
+            dataType: "json",
             success: function(result) {
                 validatorResult = self.createValidatorResult(result);
                 self.showErrors(validatorResult.modelState);
