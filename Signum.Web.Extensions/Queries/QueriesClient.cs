@@ -204,9 +204,9 @@ namespace Signum.Web.Queries
             {
                 new ToolBarButton
                 {
-                    AltText = "New",
-                    Text = "New",
-                    ImgSrc = "../images/lineButtons.gif",
+                    AltText = Signum.Web.Properties.Resources.New,
+                    Text = Signum.Web.Properties.Resources.New,
+                    ImgSrc = "signum/images/lineButtons.gif",
                     OnClick = Js.SubmitOnly("Queries/CreateUserQuery", JsFindNavigator.JsRequestData(new JsFindOptions{Prefix = prefix})).ToJS()
                 },
                 new ToolBarButton
