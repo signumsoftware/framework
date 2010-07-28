@@ -5,6 +5,7 @@ using System.Text;
 using System.Web.Mvc;
 using Signum.Utilities;
 using Signum.Web.ScriptCombiner;
+using System.IO;
 
 namespace Signum.Web
 {
@@ -50,7 +51,7 @@ namespace Signum.Web
             string content = "";
 #if (DEBUG)
             content = files.ToString(f => "<link href=\"{0}\" rel='stylesheet' type='text/css' />\n"
-                .Formato(path + "/" + f), "");
+                .Formato(Path.Combine("content", f)), "");
             html.ViewContext.HttpContext.Response.Write(content);
             return;
 #endif
