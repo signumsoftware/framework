@@ -10,7 +10,31 @@ namespace Signum.Web
 {
     public enum CssMediaType { Screen, Print };
     public static class CombinerHtmlHelper
-    {   
+    {
+        public static void CombinedCss(this HtmlHelper html, List<string> local, List<string> area)
+        {
+
+            string cadena = "<link href=\"{0}\" rel='stylesheet' type='text/css' />\n"
+                .Formato(CombinedCssUrl(html, local, area));
+            html.ViewContext.HttpContext.Response.Write(cadena);
+        }
+
+        public static string CombinedCssUrl(this HtmlHelper html, List<string> local, List<string> area)
+        {
+            string path = "";
+            bool started = false;
+            if (local != null && local.Count > 0) {
+                started = true;
+                path += "l={0}".Formato(String.Join(",", local.ToArray()));
+            }
+            if (area != null && area.Count > 0) {
+                if (started) path += "&";
+                path += "a={0}".Formato(String.Join(",", area.ToArray()));
+            }
+            return "combine/cssmixed?" + path.Replace("/", "%2f");
+        }
+
+
         public static string CombinedCssUrl(this HtmlHelper html, params string[] files)
         {
             return "combine/CSS?f={0}".Formato(String.Join(",", files).Replace("/", "%2f"));
