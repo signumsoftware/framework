@@ -83,7 +83,6 @@
     <Content Include="Default.aspx" />
     <Content Include="Global.asax" />
     <Content Include="Views\Shared\LogOnUserControl.ascx" />
-    <Content Include="Views\Shared\Menu.ascx" />
     <Content Include="Views\Shared\WidgetView.ascx" />
     <Content Include="Web.config" />
     <Content Include="Views\Home\Index.aspx" />
@@ -113,13 +112,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Content\grid.css" />
-    <Content Include="Content\layout.css" />
-    <Content Include="Content\nav.css" />
-    <Content Include="Content\reset.css" />
-    <Content Include="Content\results.css" />
-    <Content Include="Content\Site.css" />
-    <Content Include="Content\text.css" />
     <Content Include="Images\bg-browser.gif" />
     <Content Include="Images\body-fondo.jpg" />
     <Content Include="Images\body-fondo2.jpg" />
@@ -140,48 +132,6 @@
     <Content Include="Images\switch_minus.gif" />
     <Content Include="Images\switch_plus.gif" />
     <Content Include="Images\tab.png" />
-    <Content Include="Scripts\jqueryui\i18n\jquery-ui-i18n.js" />
-    <Content Include="Scripts\jqueryui\i18n\ui.datepicker-ar.js" />
-    <Content Include="Scripts\jqueryui\i18n\ui.datepicker-bg.js" />
-    <Content Include="Scripts\jqueryui\i18n\ui.datepicker-ca.js" />
-    <Content Include="Scripts\jqueryui\i18n\ui.datepicker-cs.js" />
-    <Content Include="Scripts\jqueryui\i18n\ui.datepicker-da.js" />
-    <Content Include="Scripts\jqueryui\i18n\ui.datepicker-de.js" />
-    <Content Include="Scripts\jqueryui\i18n\ui.datepicker-el.js" />
-    <Content Include="Scripts\jqueryui\i18n\ui.datepicker-eo.js" />
-    <Content Include="Scripts\jqueryui\i18n\ui.datepicker-es.js" />
-    <Content Include="Scripts\jqueryui\i18n\ui.datepicker-fa.js" />
-    <Content Include="Scripts\jqueryui\i18n\ui.datepicker-fi.js" />
-    <Content Include="Scripts\jqueryui\i18n\ui.datepicker-fr.js" />
-    <Content Include="Scripts\jqueryui\i18n\ui.datepicker-he.js" />
-    <Content Include="Scripts\jqueryui\i18n\ui.datepicker-hr.js" />
-    <Content Include="Scripts\jqueryui\i18n\ui.datepicker-hu.js" />
-    <Content Include="Scripts\jqueryui\i18n\ui.datepicker-hy.js" />
-    <Content Include="Scripts\jqueryui\i18n\ui.datepicker-id.js" />
-    <Content Include="Scripts\jqueryui\i18n\ui.datepicker-is.js" />
-    <Content Include="Scripts\jqueryui\i18n\ui.datepicker-it.js" />
-    <Content Include="Scripts\jqueryui\i18n\ui.datepicker-ja.js" />
-    <Content Include="Scripts\jqueryui\i18n\ui.datepicker-ko.js" />
-    <Content Include="Scripts\jqueryui\i18n\ui.datepicker-lt.js" />
-    <Content Include="Scripts\jqueryui\i18n\ui.datepicker-lv.js" />
-    <Content Include="Scripts\jqueryui\i18n\ui.datepicker-ms.js" />
-    <Content Include="Scripts\jqueryui\i18n\ui.datepicker-nl.js" />
-    <Content Include="Scripts\jqueryui\i18n\ui.datepicker-no.js" />
-    <Content Include="Scripts\jqueryui\i18n\ui.datepicker-pl.js" />
-    <Content Include="Scripts\jqueryui\i18n\ui.datepicker-pt-BR.js" />
-    <Content Include="Scripts\jqueryui\i18n\ui.datepicker-ro.js" />
-    <Content Include="Scripts\jqueryui\i18n\ui.datepicker-ru.js" />
-    <Content Include="Scripts\jqueryui\i18n\ui.datepicker-sk.js" />
-    <Content Include="Scripts\jqueryui\i18n\ui.datepicker-sl.js" />
-    <Content Include="Scripts\jqueryui\i18n\ui.datepicker-sq.js" />
-    <Content Include="Scripts\jqueryui\i18n\ui.datepicker-sr-SR.js" />
-    <Content Include="Scripts\jqueryui\i18n\ui.datepicker-sr.js" />
-    <Content Include="Scripts\jqueryui\i18n\ui.datepicker-sv.js" />
-    <Content Include="Scripts\jqueryui\i18n\ui.datepicker-th.js" />
-    <Content Include="Scripts\jqueryui\i18n\ui.datepicker-tr.js" />
-    <Content Include="Scripts\jqueryui\i18n\ui.datepicker-uk.js" />
-    <Content Include="Scripts\jqueryui\i18n\ui.datepicker-zh-CN.js" />
-    <Content Include="Scripts\jqueryui\i18n\ui.datepicker-zh-TW.js" />
     <Content Include="Scripts\jqueryui\images\calendar.png" />
     <Content Include="Scripts\jqueryui\images\ui-bg_flat_0_aaaaaa_40x100.png" />
     <Content Include="Scripts\jqueryui\images\ui-bg_glass_55_fbf9ee_1x400.png" />
@@ -196,14 +146,6 @@
     <Content Include="Scripts\jqueryui\images\ui-icons_454545_256x240.png" />
     <Content Include="Scripts\jqueryui\images\ui-icons_888888_256x240.png" />
     <Content Include="Scripts\jqueryui\images\ui-icons_cd0a0a_256x240.png" />
-    <Content Include="Scripts\jqueryui\jquery-ui-1.7.2.custom.min.js" />
-    <Content Include="Scripts\jqueryui\ui.all.css" />
-    <Content Include="Scripts\jqueryui\ui.base.css" />
-    <Content Include="Scripts\jqueryui\ui.core.css" />
-    <Content Include="Scripts\jqueryui\ui.core.js" />
-    <Content Include="Scripts\jqueryui\ui.datepicker.css" />
-    <Content Include="Scripts\jqueryui\ui.datepicker.js" />
-    <Content Include="Scripts\jqueryui\ui.theme.css" />
     <Content Include="Views\Music\Album.ascx" />
     <Content Include="Views\Music\AmericanMusicAward.ascx" />
     <Content Include="Views\Music\Artist.ascx" />
@@ -213,6 +155,7 @@
     <Content Include="Views\Music\Label.ascx" />
     <Content Include="Views\Music\PersonalAward.ascx" />
     <Content Include="Views\Music\Song.ascx" />
+    <Content Include="Views\Shared\Menu.ascx" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Properties\Settings.settings">
@@ -226,6 +169,19 @@
     <Content Include="Scripts\jquery.address-1.2.js" />
     <Content Include="Scripts\jquery.address-1.2.min.js" />
     <Content Include="Scripts\main.js" />
+    <Content Include="Content\fluid\fluid.min.css" />
+    <Content Include="Scripts\jquery-1.4.2.min.js" />
+    <Content Include="Scripts\jqueryui\jquery-ui-1.7.2.custom.min.js" />
+    <Content Include="Scripts\jqueryui\jquery-ui-1.8.1.custom.min.js" />
+    <Content Include="Scripts\jqueryui\jquery-ui-timepicker-addon-0.4.css" />
+    <Content Include="Scripts\jqueryui\ui.all.css" />
+    <Content Include="Scripts\jqueryui\ui.base.css" />
+    <Content Include="Scripts\jqueryui\ui.core.css" />
+    <Content Include="Scripts\jqueryui\ui.core.js" />
+    <Content Include="Scripts\jqueryui\ui.datepicker.css" />
+    <Content Include="Scripts\jqueryui\ui.merged.css" />
+    <Content Include="Scripts\jqueryui\ui.theme.css" />
+    <Content Include="Scripts\menu.js" />
     <Content Include="Views\Shared\Site.Master" />
   </ItemGroup>
   <ItemGroup>

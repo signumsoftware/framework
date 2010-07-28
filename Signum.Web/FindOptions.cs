@@ -276,6 +276,7 @@ namespace Signum.Web
         Visible,
         Hidden,
         AlwaysHidden,
+        OnlyResults
     }
 
     public class UserColumnOption

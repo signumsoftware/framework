@@ -25,7 +25,8 @@ namespace Signum.Web.Sample.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Data Source=localhost;Initial Catalog=SignumTest;Integrated Security=True")]
+        [global::System.Configuration.DefaultSettingValueAttribute("Data Source=localhost;Initial Catalog=SignumTest;MultipleActiveResultSets=true;Us" +
+            "er ID=sa;Password=sa")]
         public string ConnectionString {
             get {
                 return ((string)(this["ConnectionString"]));

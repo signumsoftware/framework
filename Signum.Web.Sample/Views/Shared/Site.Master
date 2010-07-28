@@ -8,35 +8,18 @@
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
     <base href="<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/" ) %>" />
 
-    <script src="<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/Scripts/jquery-1.4.min.js" ) %>" type="text/javascript"></script>    
-    <script src="<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/Scripts/jquery.address-1.1.min.js" )%>" type="text/javascript"></script>    
-    <script src="<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/Scripts/main.js" ) %>" type="text/javascript"></script>    
+    <link href="<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/" ) + "Script/jqueryui/ui.merged.css" %>" rel="stylesheet" type="text/css" />
+    <link href="<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/" ) + "Content/fluid/fluid.min.css" %>" rel="stylesheet" type="text/css" />
+    <link href="<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/" ) + "signum/Content/LineStyles.css" %>" rel="stylesheet" type="text/css" />
     
-    <%= Html.RegisterCss("signum/Content/LineStyles.css")%>
+    <script type="text/javascript" src="Scripts/jquery-1.4.2.min.js"></script>
+    <script type='text/javascript' src='http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.min.js'></script>
     
-    <link href="<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/Scripts/jqueryui/ui.theme.css" ) %>" rel="stylesheet" type="text/css" />    
-
+    <!--Calendar-->
+    <% Html.IncludeAreaJs("signum/Scripts/SF_jquery-ui-datepicker-extension.js"); %>    
+    <%= CalendarHelper.GetLocalizationVariables() %>
+    
     <asp:ContentPlaceHolder ID="head" runat="server"></asp:ContentPlaceHolder>    
-    <script type="text/javascript">
-    
-    $(function() {
-    
-    if ($.jsLoader) {
-      
-        
-        //Tabs        
-        if ($('input.hasDatepicker').length>0 || $('.tabs').length>0) {
-            $.jsLoader(true,
-                "<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/Scripts/jqueryui/jquery-ui-1.7.2.custom.min.js" ) %>",
-                function() {"Llamando a TABS"; $('.tabs').tabs();}
-            );
-            $.cssLoader(true,
-                "<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/Scripts/jqueryui/ui.merged.css" ) %>"    
-            );
-        }
-        }
-    });
-    </script>
 </head>
 
 <body>
@@ -47,42 +30,23 @@
     </div>
   
     <div class="container_16" id="main">
-        <!--<div class="grid_12 suffix_2"></div>   
-        <div class="grid_2 prefix_12">
-        <ul id="admin-menu" class="dropdown">
-            <li>Administrador
-                <ul>
-                    <li>
-                        <a href="/SegurosMVC/Home/Times">Tiempos</a>
-                        <a href="/SegurosMVC/Home/Times2">Tiempos (detallado)</a>
-                    </li>
-                </ul>
-            </li>
-        </ul>
-        </div> -->
+
         <div class="grid_3 prefix_13" id="login">
-           
+            <% //Html.RenderPartial(AuthClient.LoginUserControlUrl); %>
         </div>    
         <div class="clear"></div> 
         
         <div id="title" class="grid_16">
-            <h1><a href="Home/Index">Sample</a></h1>
+            <h1><a href="Home/Index">Signum Extensions Sample</a></h1>
         </div>
         <div class="grid_16">
-        <%
-                  ViewDataDictionary vdd = new ViewDataDictionary(Model)
-                  {
-                    {ViewDataKeys.PartialViewName, ViewData[ViewDataKeys.PartialViewName]}
-                   };
-
-                   Html.RenderPartial("Views/Shared/WidgetView", vdd);
-            %>
-          
         </div>
         
         <div class="clear"></div>
         
         <div class="grid_3" id="menu">
+            <%
+                 %>
             <div class="box menu">
                 <h2>Menú</h2>
                 <%   
@@ -101,12 +65,8 @@
             </div>
             <div class="grid_8">            
             <ul>
-               <!-- <li>Acerca de</li> -->
-                <% //if (Session["colaborador"] == null && Session["entidadSistema"] != null)
-                   //{ %>
-                <li><a href="Help">Documentación de ayuda</a></li>
-                <% //} %>
-                <li><a href="mailto:soporte@signumsoftware.com">Soporte</a></li>
+               <li><a href="Help">Documentación de ayuda</a></li>
+               <li><a href="mailto:soporte@signumsoftware.com">Soporte</a></li>
             </ul>
             </div>
         </div>

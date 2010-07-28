@@ -28,11 +28,11 @@
     ""
 %>
 
-<div id="<%=context.Compose("divFilters") %>" style="display:<%= (findOptions.FilterMode != FilterMode.AlwaysHidden) ? "block" : "none" %>" >
+<div id="<%=context.Compose("divFilters") %>" style="display:<%= (findOptions.FilterMode != FilterMode.AlwaysHidden && findOptions.FilterMode != FilterMode.OnlyResults) ? "block" : "none" %>" >
     <%Html.RenderPartial(Navigator.Manager.FilterBuilderUrl, ViewData); %>
 </div>
 
-<div class="search-footer">
+<div class="search-footer" style="display:<%= (findOptions.FilterMode != FilterMode.OnlyResults) ? "block" : "none" %>">
     <%= Html.Label(null, Resources.NumberOfRows, context.Compose(ViewDataKeys.Top), null) %>
     <% int? top = findOptions.Top ?? Navigator.Manager.QuerySettings.GetOrThrow(findOptions.QueryName, Resources.MissingQuerySettingsForQueryName0).Top; %>
     <%= HtmlHelperExtenders.InputType("number", context.Compose(ViewDataKeys.Top), top.TryToString(), new Dictionary<string, object> { { "size", "5" }, { "onkeydown", "return validator.number(event)" } })%>
@@ -49,7 +49,10 @@
     <%= ButtonBarQueryHelper.GetButtonBarElementsForQuery(this.ViewContext, findOptions.QueryName, entitiesType, context.ControlID).ToString(Html)%> 
     </ul>
 </div>
+<%if (findOptions.FilterMode != FilterMode.OnlyResults)
+  { %>
 <div class="clearall"></div>
+<% } %>
 <div id="<%=context.Compose("divResults")%>" class="divResults">
 
 <table id="<%=context.Compose("tblResults")%>" class="tblResults">
