@@ -15,19 +15,22 @@
 
     $('.tblResults td:not(.tdRowEntity):not(.tdRowSelection)').live('contextmenu', function(e) {
         log("contextmenu");
-        if ($(e.target).hasClass("searchCtxMenuOverlay")) {
+        var $target = $(e.target);
+        
+        if ($target.hasClass("searchCtxMenuOverlay")) {
             $('.searchCtxMenuOverlay').remove();
             return false;
         }
+        
         var $cmenu = $(divContextualMenu); //$(this).next();
         $('<div class="searchCtxMenuOverlay"></div>').click(function(e) {
             log("contextmenu click");
-            var $target = $(e.target);
+
             if ($target.hasClass("searchCtxItem") || $target.parent().hasClass("searchCtxItem"))
                 $cmenu.hide();
             else
                 $('.searchCtxMenuOverlay').remove();
-        }).append($cmenu).appendTo($(this));
+        }).append($cmenu).appendTo(this);
         $cmenu.css({ left: e.pageX, top: e.pageY, zIndex: '101' }).show();
 
         return false;
@@ -40,19 +43,21 @@
         QuickFilter(idTD);
     });
 
-    $('.toolbar-menu').hover(
-        function() {
+    $('.operations .dropdown').live('mouseover mouseout',        
+        function(e) {
             var $this = $(this);
-            var $a = $this.children('a');
-            var offset = $a.position();
-            $this.children('ul').css({
-                left: offset.left,
-                top: offset.top + $a.outerHeight() + 5
+            if (e.type == 'mouseover') {                
+                var offset = $this.position();
+                $this.children('ul').css({
+                    left: offset.left,
+                    top: offset.top + $this.outerHeight(),
+                    minWidth: 80
+                }).show();
             }
-            ).show();
-        },
-        function() { $(this).children('ul').hide(); }
-    );
+            else {
+                $this.children('ul').hide();
+            }
+        });
 });
 
 var divContextualMenu = "<div class=\"searchCtxMenu\"><div class=\"searchCtxItem\"><span>Add filter</span></div></div>";

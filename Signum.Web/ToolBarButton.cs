@@ -16,15 +16,15 @@ namespace Signum.Web
         public string Text { get; set; }
         public string AltText { get; set; }
         public string OnClick { get; set; }
-        
+
         public static string DefaultEntityDivCssClass = "entity-operation";
         public static string DefaultQueryCssClass = "query-operation";
 
         private string divCssClass;
-        public string DivCssClass 
-        { 
-            get { return divCssClass; } 
-            set { divCssClass = value; } 
+        public string DivCssClass
+        {
+            get { return divCssClass; }
+            set { divCssClass = value; }
         }
 
         private bool enabled = true;
@@ -48,19 +48,17 @@ namespace Signum.Web
                     HtmlProps["style"] = "background:transparent url(" + ImgSrc + ")  no-repeat scroll left 11px; text-indent:10px; " + HtmlProps["style"].ToString();
                 else
                     HtmlProps["style"] = "background:transparent url(" + ImgSrc + ")  no-repeat scroll left 11px; text-indent:10px;";
+            }
 
-                return helper.Href(Id, Text, "#", AltText ?? "", DivCssClass, HtmlProps);
+            if (enabled)
+            {
+                HtmlProps.Add("onclick", OnClick);
             }
             else
-            {
-                if (enabled)
-                {
-                    HtmlProps.Add("onclick", OnClick);
-                }
-                else
-                    DivCssClass = DivCssClass + " disabled";
-                return helper.Href(Id, Text, "#", AltText ?? "", DivCssClass, HtmlProps);
-            }
+                DivCssClass = DivCssClass + " disabled";
+
+
+            return helper.Href(Id, Text, "#", AltText ?? "", DivCssClass, HtmlProps);
         }
     }
 }

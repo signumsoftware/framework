@@ -460,7 +460,7 @@ ul.operations li
 {
 	float:left;
 	border-right:1px dotted #ddd;
-	padding:0 5px;	
+	/*padding:0 5px;	*/
 }
 
 .entity-operation {
@@ -649,8 +649,9 @@ h2 .title {
     margin-right:5px;
 }
 
-.search-footer input, .search-footer a.query-operation
+.search-footer input, .search-footer .query-operation
 {
+	font-weight:normal;
     float:left;	
 }
 .search-footer .query-operation
@@ -760,7 +761,7 @@ th.headerSortDown {
 	margin-left:10px;
 }
 
-.menu-operation-ul {
+ul.menu-operation {
     background-color:#fff;
     border:1px solid #ddd;
     border-top-color:#bbb;
@@ -770,7 +771,7 @@ th.headerSortDown {
     list-style:none;
 }
 
-.menu-operation-ul li
+ul.menu-operation > li
 {
 	float:none !important;
 	margin-left:0px !important;

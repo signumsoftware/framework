@@ -17,32 +17,22 @@ namespace Signum.Web
         {
             StringBuilder sb = new StringBuilder();
 
-            sb.Append("<div class='toolbar-menu'>");
-
             if (ImgSrc.HasText())
             {
                 if (HtmlProps.ContainsKey("style"))
                     HtmlProps["style"] = "background:transparent url(" + ImgSrc + ")  no-repeat scroll left 11px; text-indent:10px; " + HtmlProps["style"].ToString();
                 else
                     HtmlProps["style"] = "background:transparent url(" + ImgSrc + ")  no-repeat scroll left 11px; text-indent:10px;";
-
-                sb.Append(helper.Href(Id, Text, "#", AltText ?? "", DivCssClass, HtmlProps));
-            }
-            else
-            {
-                sb.Append(helper.Href(Id, Text, "#", AltText ?? "", DivCssClass, HtmlProps));
             }
 
-            sb.Append("<ul class='menu-operation-ul'>");
+            sb.Append("<ul class='menu-operation'>");
             
             foreach (ToolBarButton tbb in Items)
                 sb.Append("<li>" + tbb.ToString(helper) + "</li>");  
 
-            sb.Append("</u>");
+            sb.Append("</ul>");
 
-            sb.Append("</div>");
-
-            return sb.ToString();
+            return helper.Div(Id, HttpUtility.HtmlEncode(Text) + sb.ToString(), DivCssClass + " dropdown", HtmlProps);
         }
     }
 
