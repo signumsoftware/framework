@@ -32,7 +32,7 @@ namespace Signum.Web
             EntityBaseKeys.RuntimeInfo,
             EntityBaseKeys.ToStr, 
             EntityListBaseKeys.Index,
-        }; 
+        };
 
         public static Mapping<T> Create<T>()
         {
@@ -49,7 +49,7 @@ namespace Signum.Web
         }
     }
 
-    public abstract class Mapping<T>: Mapping
+    public abstract class Mapping<T> : Mapping
     {
         public override Type StaticType
         {
@@ -91,7 +91,7 @@ namespace Signum.Web
 
         public abstract void RecursiveValidation(MappingContext<T> ctx);
 
-        public bool AvoidRecursiveValidation { get; set; } 
+        public bool AvoidRecursiveValidation { get; set; }
 
         public Action<MappingContext<T>> Validated;
     }
@@ -100,8 +100,8 @@ namespace Signum.Web
     {
         public static bool ParseHtmlBool(string input)
         {
-             string[] vals = input.Split(',');
-             return vals[0] == "true" || vals[0] == "True";
+            string[] vals = input.Split(',');
+            return vals[0] == "true" || vals[0] == "True";
         }
     }
 
@@ -201,7 +201,7 @@ namespace Signum.Web
         {
             public readonly Func<T, P> GetValue;
             public readonly Action<T, P> SetValue;
-            public readonly PropertyPack PropertyPack; 
+            public readonly PropertyPack PropertyPack;
 
             public Mapping<P> Mapping { get; set; }
 
@@ -247,7 +247,7 @@ namespace Signum.Web
             }
         }
 
-        Dictionary<string, PropertyMapping> Properties = new Dictionary<string,PropertyMapping>();
+        Dictionary<string, PropertyMapping> Properties = new Dictionary<string, PropertyMapping>();
 
         public EntityMapping(bool fillProperties)
         {
@@ -255,7 +255,7 @@ namespace Signum.Web
             {
                 Properties = Validator.GetPropertyPacks(typeof(T))
                     .Where(kvp => !kvp.Value.PropertyInfo.IsReadOnly())
-                    .ToDictionary(kvp=>kvp.Key, kvp=> PropertyMapping.Create(kvp.Value));
+                    .ToDictionary(kvp => kvp.Key, kvp => PropertyMapping.Create(kvp.Value));
             }
         }
 
@@ -476,7 +476,7 @@ namespace Signum.Web
         }
     }
 
-    public class MListMapping<S> : Mapping<MList<S>> 
+    public class MListMapping<S> : Mapping<MList<S>>
     {
         public Mapping<S> ElementMapping { get; set; }
 

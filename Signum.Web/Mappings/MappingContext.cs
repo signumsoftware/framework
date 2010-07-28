@@ -264,6 +264,11 @@ namespace Signum.Web
             return dicGlobalErrors.SelectMany(a => a.Value.Lines()).Except(Errors.SelectMany(e => e.Value)).ToList();
         }
 
+        public RuntimeInfo GetRuntimeInfo()
+        {
+            string strRuntimeInfo = Inputs[EntityBaseKeys.RuntimeInfo];
+            return RuntimeInfo.FromFormValue(strRuntimeInfo);
+        }
     }
 
     internal class RootContext<T> : MappingContext<T>
