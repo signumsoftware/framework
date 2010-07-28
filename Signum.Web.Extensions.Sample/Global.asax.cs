@@ -14,6 +14,7 @@ using System.Threading;
 using Signum.Engine;
 using Signum.Engine.Authorization;
 using Signum.Entities;
+using Signum.Web.Queries;
 
 namespace Signum.Web.Extensions.Sample
 {
@@ -78,6 +79,8 @@ namespace Signum.Web.Extensions.Sample
             {
                 Settings = new Dictionary<Enum, OperationSettings>()
             });
+
+            QueriesClient.Start();
 
             MusicClient.Start();
 

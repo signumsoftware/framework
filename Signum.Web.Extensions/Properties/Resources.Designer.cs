@@ -61,6 +61,15 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Are you sure of deleting query {0}?.
+        /// </summary>
+        public static string AreYouSureOfDeletingQuery0 {
+            get {
+                return ResourceManager.GetString("AreYouSureOfDeletingQuery0", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Are you sure of deleting from the system the entity {0} ({1}:{2})?.
         /// </summary>
         public static string AreYouSureOfDeletingTheEntity012 {
@@ -192,6 +201,15 @@ namespace Signum.Web.Extensions.Properties {
         public static string CurrentPassword {
             get {
                 return ResourceManager.GetString("CurrentPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Delete.
+        /// </summary>
+        public static string Delete {
+            get {
+                return ResourceManager.GetString("Delete", resourceCulture);
             }
         }
         

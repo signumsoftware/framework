@@ -26,7 +26,7 @@ namespace Signum.Test.Extensions.Properties {
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("Data Source=localhost;Initial Catalog=SignumExtensionsTest;User ID=sa;Password=sa" +
-            "")]
+            ";MultipleActiveResultSets=true")]
         public string ConnectionString {
             get {
                 return ((string)(this["ConnectionString"]));

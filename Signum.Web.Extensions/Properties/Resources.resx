@@ -450,4 +450,10 @@
   <data name="User" xml:space="preserve">
     <value>User</value>
   </data>
+  <data name="AreYouSureOfDeletingQuery0" xml:space="preserve">
+    <value>Are you sure of deleting query {0}?</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
 </root>

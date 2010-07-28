@@ -10,6 +10,8 @@ using Signum.Engine;
 using Signum.Entities.Authorization;
 using Signum.Entities;
 using Signum.Services;
+using Signum.Engine.Basics;
+using Signum.Engine.Reports;
 
 namespace Signum.Test.Extensions
 {
@@ -33,7 +35,10 @@ namespace Signum.Test.Extensions
                 sb.Settings.OverrideTypeAttributes<IUserRelatedDN>(new ImplementedByAttribute());
             
                 OperationLogic.Start(sb, dqm);
-            
+
+                QueryLogic.Start(sb);
+                UserQueryLogic.Start(sb, dqm);
+
                 new AlbumGraph().Register();
             }
         }
