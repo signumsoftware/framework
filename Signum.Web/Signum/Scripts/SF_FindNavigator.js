@@ -42,7 +42,7 @@
         $('.searchCtxMenuOverlay').remove();
         QuickFilter(idTD);
     });
-
+/*
     $('.operations .dropdown').live('mouseover mouseout',        
         function(e) {
             var $this = $(this);
@@ -50,14 +50,14 @@
                 var offset = $this.position();
                 $this.children('ul').css({
                     left: offset.left,
-                    top: offset.top + $this.outerHeight(),
+                    top: offset.top + $this.outerHeight() + 1,
                     minWidth: 80
                 }).show();
             }
             else {
                 $this.children('ul').hide();
             }
-        });
+        });*/
 });
 
 var divContextualMenu = "<div class=\"searchCtxMenu\"><div class=\"searchCtxItem\"><span>Add filter</span></div></div>";

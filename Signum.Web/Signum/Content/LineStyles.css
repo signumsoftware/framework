@@ -761,14 +761,28 @@ th.headerSortDown {
 	margin-left:10px;
 }
 
-ul.menu-operation {
+.operations .dropdown 
+{
+	margin-left:0;
+	padding-left:10px;
+}
+
+.operations .dropdown .menu-operation {
     background-color:#fff;
     border:1px solid #ddd;
     border-top-color:#bbb;
     position:absolute;
-    display:none;
     z-index:2;
+    display:none;
     list-style:none;
+    margin-left:-11px;
+	margin-top:5px;
+	padding-left:10px;
+	padding-right:10px;
+}
+.operations .dropdown:hover .menu-operation
+{
+	display:block;
 }
 
 ul.menu-operation > li
