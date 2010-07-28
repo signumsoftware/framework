@@ -20,7 +20,7 @@ using Signum.Web.Extensions.Properties;
 
 namespace Signum.Web.Queries
 {
-    public class QueriesClient
+    public class UserQueriesClient
     {
         public static Func<object, int, string> UserQueryFindRoute = (queryName, userQueryId) => Navigator.FindRoute(queryName) + "/UQ/" + userQueryId;
 
@@ -31,7 +31,7 @@ namespace Signum.Web.Queries
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 AssemblyResourceManager.RegisterAreaResources(
-                    new AssemblyResourceStore(typeof(QueriesClient), "/queries/", "Signum.Web.Extensions.Queries."));
+                    new AssemblyResourceStore(typeof(UserQueriesClient), "/queries/", "Signum.Web.Extensions.Queries."));
 
                 RouteTable.Routes.InsertRouteAt0("queries/{resourcesFolder}/{*resourceName}",
                     new { controller = "Resources", action = "Index", area = "queries" },
@@ -129,17 +129,23 @@ namespace Signum.Web.Queries
                     },
 
                     new EntitySettings<QueryTokenModel>(EntityType.Default) { PartialViewName = e => ViewPrefix + "QueryToken" },
-                    new EntitySettings<QueryDN>(EntityType.Default),
+                  
                 });
+
+
+
+                if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(QueryDN)))
+                    Navigator.Manager.EntitySettings.Add(typeof(QueryDN), new EntitySettings<QueryDN>(EntityType.Default));
 
                 Navigator.RegisterTypeName<UserQueryDN>();
                 Navigator.RegisterTypeName<QueryFilterDN>();
                 Navigator.RegisterTypeName<QueryColumnDN>();
                 Navigator.RegisterTypeName<QueryTokenDN>();
 
-                ButtonBarQueryHelper.GetButtonBarForQueryName +=new GetToolBarButtonQueryDelegate(ButtonBarQueryHelper_GetButtonBarForQueryName);
+                ButtonBarQueryHelper.GetButtonBarForQueryName += new GetToolBarButtonQueryDelegate(ButtonBarQueryHelper_GetButtonBarForQueryName);
 
-                ButtonBarEntityHelper.RegisterEntityButtons<UserQueryModel>((controllerContext, entity, partialViewName, prefix) => { 
+                ButtonBarEntityHelper.RegisterEntityButtons<UserQueryModel>((controllerContext, entity, partialViewName, prefix) =>
+                {
                     return new ToolBarButton[]
                     {
                         new ToolBarButton 
@@ -180,7 +186,7 @@ namespace Signum.Web.Queries
             string url = (controllerContext.RouteData.Route as Route).TryCC(r => r.Url);
             if (url.HasText() && url.Contains("UQ"))
                 idCurrentUserQuery = int.Parse(controllerContext.RouteData.Values["id"].ToString());
-            
+
             foreach (var uq in UserQueryLogic.GetUserQueries(queryName))
             {
                 items.Add(new ToolBarButton
