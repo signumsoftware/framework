@@ -13,7 +13,7 @@
             return false;
         });
 
-        $('.tblResults td:not(.tdRowEntity):not(.tdRowSelection)').live('contextmenu', function(e) {
+    $('.tblResults td:not(.tdRowEntity):not(.tdRowSelection)').live('contextmenu', function(e) {
         log("contextmenu");
         if ($(e.target).hasClass("searchCtxMenuOverlay")) {
             $('.searchCtxMenuOverlay').remove();
@@ -39,13 +39,24 @@
         $('.searchCtxMenuOverlay').remove();
         QuickFilter(idTD);
     });
+
+    $('.toolbar-menu').hover(
+        function() {
+            var $this = $(this);
+            var $a = $this.children('a');
+            var offset = $a.position();
+            $this.children('ul').css({
+                left: offset.left,
+                top: offset.top + $a.outerHeight() + 5
+            }
+            ).show();
+        },
+        function() { $(this).children('ul').hide(); }
+    );
 });
 
 var divContextualMenu = "<div class=\"searchCtxMenu\"><div class=\"searchCtxItem\"><span>Add filter</span></div></div>";
 
-
-       
-       
 var FindNavigator = function(_findOptions) {
     this.findOptions = $.extend({
         prefix: "",
@@ -243,17 +254,20 @@ FindNavigator.prototype = {
         var currOrder = $(this.pf("OrderBy")).val();
         if (empty(currOrder))
             return "";
-        return currOrder.replace(/"/g, "").replace("[", "").replace("]", "");
+        return currOrder.replace(/"/g, ""); //.replace("[", "").replace("]", "");
     },
 
-    getOrdersAsJson: function() {
-        var currOrder = $(this.pf("OrderBy"));
-        return jQuery.parseJSON(currOrder.val());
-    },
+//    getOrdersAsJson: function() {
+//        var currOrder = $(this.pf("OrderBy"));
+//        return jQuery.parseJSON("[" + currOrder.val() + "]");
+//    },
 
     setNewSortOrder: function(columnName, multiCol) {
         log("FindNavigator sort");
-        var currOrderArray = this.getOrdersAsJson();
+        var currOrderArray = [];
+        var currOrder = $(this.pf("OrderBy")).val();
+        if (!empty(currOrder))
+            currOrderArray = currOrder.split(",");
 
         var found = false;
         var currIndex;
@@ -274,7 +288,7 @@ FindNavigator.prototype = {
         var currOrder = $(this.pf("OrderBy"));
         if (!multiCol) {
             this.$control.find(".divResults th").removeClass("headerSortUp headerSortDown");
-            currOrder.val("[\"" + newOrder + columnName + "\"]");
+            currOrder.val(newOrder + columnName);
         }
         else {
             if (found)
@@ -283,8 +297,8 @@ FindNavigator.prototype = {
                 currOrderArray[currOrderArray.length] = newOrder + columnName;
             var currOrderStr = "";
             for (var i = 0; i < currOrderArray.length; i++)
-                currOrderStr = currOrderStr.compose("\"" + currOrderArray[i] + "\"", ",");
-            currOrder.val("[" + currOrderStr + "]");
+                currOrderStr = currOrderStr.compose(currOrderArray[i], ",");
+            currOrder.val(currOrderStr);
         }
 
         var $header = this.$control.find(".divResults th[id='" + this.findOptions.prefix.compose(columnName) + "']");
@@ -301,7 +315,8 @@ FindNavigator.prototype = {
         var result = "";
         var self = this;
         $(this.pf("tblResults thead tr th.userColumn")).each(function() {
-            result = result.compose($(this).find("input:hidden").val(), ",");
+            var $this = $(this);
+            result = result.compose($this.find("input:hidden").val() + ";" + $this.text().trim(), ",");
         });
         return result;
     },
@@ -353,7 +368,7 @@ FindNavigator.prototype = {
             var th = $(this);
             th.addClass("userColumnEditing");
             var hidden = th.find("input:hidden");
-            th.html("<input type=\"text\" value=\"" + th.text() + "\" />" +
+            th.html("<input type=\"text\" value=\"" + th.text().trim() + "\" />" +
                     "<br /><a id=\"link-delete-user-col\" onclick=\"DeleteColumn('" + self.findOptions.prefix + "', '" + hidden.val() + "');\">Delete Column</a>")
               .append(hidden);
         });
@@ -475,11 +490,11 @@ FindNavigator.prototype = {
     constructTokenName: function() {
         log("FindNavigator constructTokenName");
         var tokenName = "",
-            stop = false,
-            $fieldsList = $(".fields-list", this.$control);
+            stop = false;
+        //var $fieldsList = $(".fields-list", this.$control);
 
         for (var i = 0; !stop; i++) {
-            var currSubtoken = $fieldsList.find(this.pf("ddlTokens_" + i));
+            var currSubtoken = $(this.pf("ddlTokens_" + i));
             if (currSubtoken.length > 0)
                 tokenName = tokenName.compose(currSubtoken.val(), ".");
             else
@@ -543,11 +558,11 @@ FindNavigator.prototype = {
 
         if ($tr.siblings().length == 0) {
             var $filterList = $tr.closest(".filters-list");
-                $filterList.find(".explanation").show();
-                $filterList.find("table").hide();
+            $filterList.find(".explanation").show();
+            $filterList.find("table").hide();
             $(this.pf("btnClearAllFilters"), this.$control).hide();
         }
-        
+
         $tr.remove();
     },
 
@@ -645,8 +660,8 @@ function AddFilter(prefix) {
     new FindNavigator({ prefix: prefix }).addFilter();
 }
 
-function NewSubTokensCombo(prefix, index) {
-    new FindNavigator({ prefix: prefix }).newSubTokensCombo(index);
+function NewSubTokensCombo(_findOptions, index) {
+    new FindNavigator(_findOptions).newSubTokensCombo(index);
 }
 
 function QuickFilter(idTd) {

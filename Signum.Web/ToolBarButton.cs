@@ -45,11 +45,11 @@ namespace Signum.Web
             if (ImgSrc.HasText())
             {
                 if (HtmlProps.ContainsKey("style"))
-                    HtmlProps["style"] = "background:transparent url(" + ImgSrc + ")  no-repeat scroll left top; " + HtmlProps["style"].ToString();
+                    HtmlProps["style"] = "background:transparent url(" + ImgSrc + ")  no-repeat scroll left 11px; text-indent:10px; " + HtmlProps["style"].ToString();
                 else
-                    HtmlProps["style"] = "background:transparent url(" + ImgSrc + ")  no-repeat scroll left top;";
+                    HtmlProps["style"] = "background:transparent url(" + ImgSrc + ")  no-repeat scroll left 11px; text-indent:10px;";
 
-                return helper.Href(Id, "", "#", AltText ?? "", DivCssClass, HtmlProps);
+                return helper.Href(Id, Text, "#", AltText ?? "", DivCssClass, HtmlProps);
             }
             else
             {

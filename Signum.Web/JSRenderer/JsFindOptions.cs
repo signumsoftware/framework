@@ -83,5 +83,10 @@ namespace Signum.Web
             return new JsFindNavigator(() =>
                 "SplitSelectedIds({0})".Formato(options.ToJS()));
         }
+
+        public static JsInstruction JsRequestData(JsFindOptions options)
+        {
+            return new JsInstruction(() => "new FindNavigator({0}).requestData()".Formato(options.ToJS()));
+        }
     }
 }

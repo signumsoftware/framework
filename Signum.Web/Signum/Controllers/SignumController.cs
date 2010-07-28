@@ -25,11 +25,6 @@ namespace Signum.Web.Controllers
     [HandleException, AuthenticationRequired]
     public class SignumController : Controller
     {
-        static SignumController()
-        {
-            ModelBinders.Binders[typeof(FindOptions)] = new FindOptionsModelBinder();
-        }
-
         [ValidateInput(false)]  //this is needed since a return content(View...) from an action that doesn't validate will throw here an exception. We suppose that validation has already been performed before getting here
         public ViewResult View(string typeUrlName, int? id)
         {
@@ -282,7 +277,15 @@ namespace Signum.Web.Controllers
             
             if (isLite)
                 sfValue = sfId.Value + ";" + Navigator.TypesToNames[Navigator.ResolveTypeFromUrlName(typeUrlName)];
-            fo.Value = FindOptionsModelBinder.Convert(sfValue, fo.Token.Type);
+            
+            try
+            {
+                fo.Value = FindOptionsModelBinder.Convert(sfValue, fo.Token.Type);
+            }
+            catch (Exception) 
+            { 
+                //Cell Value must be custom and cannot be parsed automatically: Leave value to null
+            }
 
             return Content(SearchControlHelper.NewFilter(CreateHtmlHelper(this), queryName, fo, new Context(null, prefix), index));
         }
@@ -303,10 +306,10 @@ namespace Signum.Web.Controllers
                 Selected = false
             }).ToList();
             items.Insert(0, new SelectListItem { Text = "-", Selected = true, Value = "" });
-            return Content(SearchControlHelper.TokensCombo(CreateHtmlHelper(this), items, new Context(null, prefix), index + 1));
+            return Content(SearchControlHelper.TokensCombo(CreateHtmlHelper(this), Navigator.Manager.QuerySettings[queryName].UrlName, items, new Context(null, prefix), index + 1, true));
         }
 
-[AcceptVerbs(HttpVerbs.Post)]
+        [AcceptVerbs(HttpVerbs.Post)]
         public PartialViewResult GetTypeChooser(Implementations sfImplementations, string prefix)
         {
             if (sfImplementations == null || sfImplementations.IsByAll)

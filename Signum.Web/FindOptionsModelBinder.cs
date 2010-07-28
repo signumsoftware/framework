@@ -66,6 +66,13 @@ namespace Signum.Web
             if (parameters.AllKeys.Any(k => k == "sfView"))
                 fo.View = bool.Parse(parameters["sfView"]);
 
+            if (parameters.AllKeys.Any(k => k == "sfTop"))
+            {
+                int aux;
+                if (int.TryParse(parameters["sfTop"], out aux))
+                    fo.Top = aux;
+            }
+
             if (parameters.AllKeys.Any(k => k == "sfSearchOnLoad"))
                 fo.SearchOnLoad = bool.Parse(parameters["sfSearchOnLoad"]);
 
@@ -156,10 +163,12 @@ namespace Signum.Web
 
             for (int i = 0; i < colArray.Length; i++)
             {
-                string currentColString = colArray[i];
+                string[] currentColString = colArray[i].Split(';');
+                
                 result.Add(new UserColumnOption
                 {
-                    UserColumn = new UserColumn(numStaticCols, QueryToken.Parse(queryDescription, currentColString)) 
+                    DisplayName = currentColString[1],
+                    UserColumn = new UserColumn(numStaticCols, QueryToken.Parse(queryDescription, currentColString[0])) 
                     { 
                         UserColumnIndex = i,
                     },

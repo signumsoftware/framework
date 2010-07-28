@@ -564,6 +564,7 @@ namespace Signum.Web
 
             ModelBinders.Binders.DefaultBinder = new LiteModelBinder();
             ModelBinders.Binders.Add(typeof(Implementations), new ImplementationsModelBinder());
+            ModelBinders.Binders.Add(typeof(FindOptions), new FindOptionsModelBinder());
 
             HostingEnvironment.RegisterVirtualPathProvider(new AssemblyResourceProvider());
         }

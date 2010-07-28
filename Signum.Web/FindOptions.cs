@@ -54,6 +54,13 @@ namespace Signum.Web
             set { this.userColumnOptions = value; }
         }
 
+        int? top; //If null, use QuerySettings one
+        public int? Top
+        {
+            get { return top; }
+            set { top = value; }
+        }
+
         public FindOptions() { }
 
         public FindOptions(object queryName)

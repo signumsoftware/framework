@@ -121,39 +121,72 @@ namespace Signum.Web
             return sb.ToString();
         }
 
-        public static string TokensCombo(this HtmlHelper helper, IEnumerable<SelectListItem> items, Context context, int index)
+        public static string TokensCombo(this HtmlHelper helper, string queryUrlName, IEnumerable<SelectListItem> items, Context context, int index, bool writeExpander)
         {
             string result = "";
-            if (index > 0)
-            {
-                result = helper.Span(context.Compose("lblddlTokens_" + index), "[...]", "",
-                new Dictionary<string, object>
-                { 
-                    { "style", "cursor:pointer;margin-left:5px" },
-                    { "onclick", "$('#{0}').remove();$('#{1}').show().focus().click();".Formato(context.Compose("lblddlTokens_" + index), context.Compose("ddlTokens_" + index))}
-                });
-            }
-
+            if (writeExpander)
+                result = helper.TokensComboExpander(context, index);
+            
             result += helper.DropDownList(context.Compose("ddlTokens_" + index), items,
                 new
                 {
-                    style = (index > 0) ? "display:none" : "",
-                    onchange = "javascript:NewSubTokensCombo('" + context.ControlID + "'," + index + ");"
+                    style = (writeExpander) ? "display:none" : "",
+                    onchange = "javascript:NewSubTokensCombo({{prefix:\"{0}\",queryUrlName:\"{1}\"}}".Formato(context.ControlID, queryUrlName) + "," + index + ");"
                 }).ToString();
 
             return result;
         }
 
-        //public static string QuickFilter(Controller controller, string queryUrlName, int visibleColumnIndex, int filterRowIndex, object value, string prefix, string suffix)
-        //{
-        //    object queryName = Navigator.ResolveQueryFromUrlName(queryUrlName);
-        //    QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-        //    QueryToken token = QueryToken.NewColumn(qd.StaticColumns.Where(c => c.Visible == true).ToList()[visibleColumnIndex]);
-        //    FilterOption fo = new FilterOption() { Token = token, ColumnName = null, Operation = FilterOperation.EqualTo, Value = value };
-        //    Type type = Reflector.ExtractLite(fo.Token.Type) ?? fo.Token.Type;
+        private static string TokensComboExpander(this HtmlHelper helper, Context context, int index)
+        { 
+            return helper.Span(
+                context.Compose("lblddlTokens_" + index), "[...]", "",
+                new Dictionary<string, object>
+                { 
+                    { "style", "cursor:pointer;margin-left:5px" },
+                    { "onclick", "$('#{0}').remove();$('#{1}').show().focus().click();".Formato(context.Compose("lblddlTokens_" + index), context.Compose("ddlTokens_" + index))}
+                });
+        }
 
-        //    return NewFilter(controller, type.Name, null, token.FullKey(), filterRowIndex, prefix, suffix, FilterOperation.EqualTo, value);
-        //}
+        public static string WriteQueryToken(this HtmlHelper helper, string queryKey, QueryToken queryToken, Context context, int index)
+        {
+            var queryName = Navigator.Manager.ResolveQueryFromToStr(queryKey);
+            QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
+            string queryUrlName = Navigator.Manager.QuerySettings[queryName].UrlName;
+
+            var tokenPath = queryToken.FollowC(qt => qt.Parent).Reverse().NotNull().ToList();
+
+            if (tokenPath.Count > 0)
+                queryToken = tokenPath[0];
+
+            StringBuilder sb = new StringBuilder();
+
+            var items = qd.StaticColumns
+                    .Where(a => a.Filterable)
+                    .Select(c => new SelectListItem { Text = c.DisplayName, Value = c.Name, Selected = queryToken != null && c.Name == queryToken.Key })
+                    .ToList();
+            items.Insert(0, new SelectListItem { Text = "-", Selected = true, Value = "" });
+            sb.AppendLine(SearchControlHelper.TokensCombo(helper, queryUrlName, items, context, 0, false));
+            
+            for (int i = 0; i < tokenPath.Count; i++)
+            {
+                QueryToken t = tokenPath[i];
+                QueryToken[] subtokens = t.SubTokens();
+                if (subtokens != null)
+                {
+                    var subitems = subtokens.Select(qt => new SelectListItem
+                    {
+                        Text = qt.ToString(),
+                        Value = qt.Key,
+                        Selected = i + 1 < tokenPath.Count && qt.Key == tokenPath[i+1].Key
+                    }).ToList();
+                    subitems.Insert(0, new SelectListItem { Text = "-", Selected = true, Value = "" });
+                    sb.AppendLine(SearchControlHelper.TokensCombo(helper, queryUrlName, subitems, context, i + 1, (i + 1 >= tokenPath.Count)));
+                }
+            }
+            
+            return sb.ToString();
+        }
 
         private static string PrintValueField(HtmlHelper helper, Context parent, FilterOption filterOption)
         {

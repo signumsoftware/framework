@@ -73,9 +73,22 @@ namespace Signum.Web
             return new JsInstruction(() => "Submit({0},{1})".Formato(controllerUrl.ToJS(), requestExtraJsonData.ToJS()));
         }
 
+        public static JsInstruction SubmitOnly(JsValue<string> controllerUrl, JsInstruction requestExtraJsonData)
+        {
+            if (requestExtraJsonData == null)
+                throw new ArgumentException("requestExtraJsonData must be given to SubmitOnly. Use Submit otherwise");
+
+            return new JsInstruction(() => "SubmitOnly({0},{1})".Formato(controllerUrl.ToJS(), requestExtraJsonData.ToJS()));
+        }
+
         public static JsInstruction Confirm(JsValue<string> message, JsFunction onSuccess)
         {
             return new JsInstruction(() => "if(confirm({0})){1}()".Formato(message.ToJS(), onSuccess));
+        }
+
+        public static JsInstruction Confirm(JsValue<string> message, JsInstruction onSuccess)
+        {
+            return new JsInstruction(() => "if(confirm({0})) {1}".Formato(message.ToJS(), onSuccess.ToJS()));
         }
 
         public static JsInstruction ReloadEntity(JsValue<string> controllerUrl, JsValue<string> parentDiv)

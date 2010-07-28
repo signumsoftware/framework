@@ -70,11 +70,12 @@ namespace Signum.Web
 
             if (entityRepeater.Remove)
                 sb.AppendLine(
-                    helper.Button(entityRepeater.Compose("btnRemove"),
-                                  "x",
-                                  "ERepOnRemoving({0}, '{1}');".Formato(entityRepeater.ToJS(), itemTC.ControlID),
-                                  "lineButton remove",
-                                  new Dictionary<string, object> { { "title", entityRepeater.RemoveElementLinkText } }));
+                    helper.Href(itemTC.Compose("btnRemove"),
+                                entityRepeater.RemoveElementLinkText,
+                                "javascript:ERepOnRemoving({0}, '{1}');".Formato(entityRepeater.ToJS(), itemTC.ControlID),
+                                entityRepeater.RemoveElementLinkText,
+                                "lineButton remove", 
+                                null));
 
             sb.AppendLine(EntityBaseHelper.RenderTypeContext(helper, itemTC, RenderMode.ContentInVisibleDiv, entityRepeater.PartialViewName, entityRepeater.ReloadOnChange));
 

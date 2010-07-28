@@ -257,6 +257,7 @@ fieldset
 	border-color:#dfdfdf #eee #fff #eee;
 	border-width:1px;
 	border-style:solid;
+	clear:both;
 }
 .repeater a.remove
 {
@@ -757,6 +758,24 @@ th.headerSortDown {
 {
 	display:inline;
 	margin-left:10px;
+}
+
+.menu-operation-ul {
+    background-color:#fff;
+    border:1px solid #ddd;
+    border-top-color:#bbb;
+    position:absolute;
+    display:none;
+    z-index:2;
+    list-style:none;
+}
+
+.menu-operation-ul li
+{
+	float:none !important;
+	margin-left:0px !important;
+	margin-top:2px;
+	margin-bottom:2px;
 }
 
 /* autocomplete */

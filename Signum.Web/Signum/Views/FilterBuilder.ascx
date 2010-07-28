@@ -29,7 +29,7 @@
                         .ToList();
                    columns.Insert(0, new SelectListItem { Text = "-", Selected = true, Value = "" });
                 %>
-               <%= Html.TokensCombo(columns, context, 0) %>
+               <%= Html.TokensCombo(Navigator.Manager.QuerySettings[findOptions.QueryName].UrlName, columns, context, 0, false)%>
                <%= Html.Button(context.Compose("btnAddFilter"), "+", "AddFilter('{0}');".Formato(context.ControlID), "addFilter", new Dictionary<string, object> { { "title", "Add Filter" }})%>
                <% if (findOptions.AllowUserColumns.HasValue ? findOptions.AllowUserColumns.Value : Navigator.Manager.AllowUserColumns(context.ControlID))
                   { %>
