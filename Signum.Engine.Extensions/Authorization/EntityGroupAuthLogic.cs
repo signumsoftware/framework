@@ -64,9 +64,11 @@ namespace Signum.Engine.Authorization
              where T : IdentifiableEntity
         {
             sender.EntityEvents<T>().Retrieved += new EntityEventHandler<T>(EntityGroupAuthLogic_Retrieved);
-            sender.EntityEvents<T>().Saved += new SavedEntityEventHandler<T>(EntityGroupAuthLogic_Saved);
+            sender.EntityEvents<T>().Saving +=new EntityEventHandler<T>(EntityGroupAuthLogic_Saving);
             sender.EntityEvents<T>().FilterQuery +=new FilterQueryEventHandler<T>(EntityGroupAuthLogic_FilterQuery);
         }
+
+      
 
         [ThreadStatic]
         static bool queriesDisabled;
@@ -107,15 +109,15 @@ namespace Signum.Engine.Authorization
                 ident.AssertAllowed(TypeAllowedBasic.Read, false);
         }
 
-        static void EntityGroupAuthLogic_Saved<T>(T ident, SavedEventArgs args)
+        static void EntityGroupAuthLogic_Saving<T>(T ident, bool isRoot)
             where T : IdentifiableEntity
         {
-            if (!saveDisabled && args.WasModified)
+            if (!saveDisabled && ident.Modified)
             {
-                if (args.WasNew)
-                    ident.AssertAllowed(TypeAllowedBasic.Create, false);
+                if (ident.IsNew)
+                    Transaction.PreRealCommit += () => ident.AssertAllowed(TypeAllowedBasic.Create, false);
                 else
-                    ident.AssertAllowed(TypeAllowedBasic.Modify, false);
+                    Transaction.PreRealCommit += () => ident.AssertAllowed(TypeAllowedBasic.Modify, false);
             }
         }
 
