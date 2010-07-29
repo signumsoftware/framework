@@ -61,12 +61,17 @@
             <%if (findOptions.AllowMultiple.HasValue)
               {
             %>
-            <th>
+            <th class="thRowSelection">
+                <%if (findOptions.AllowMultiple.Value)
+                  {
+                  %>
+                    <%= Html.CheckBox(context.Compose("cbSelectAll"), false, new { onclick = "javascript:ToggleSelectAll('{0}');".Formato(context.ControlID) })%>
+                  <% } %>
             </th>
             <%}
               if (viewable)
               {%>
-            <th>
+            <th class="thRowEntity">
             </th>
             <%}
 

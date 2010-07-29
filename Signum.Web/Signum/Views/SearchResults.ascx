@@ -28,7 +28,7 @@
                if (findOptions.AllowMultiple.HasValue)
                {
             %>
-            <td class="<%=context.Compose("tdRowSelection")%>">
+            <td class="tdRowSelection">
                 <%
             if (findOptions.AllowMultiple.Value)
             { 
@@ -47,7 +47,7 @@
             <%} %>
             <% if (viewable)
                { %>
-            <td class="<%=context.Compose("tdRowEntity")%>">
+            <td class="tdRowEntity">
                 <a href="<%= Navigator.ViewRoute(entityField.RuntimeType, entityField.Id) %>" title="<%=Html.Encode(Resources.View) %>">
                     <%=Html.Encode(Resources.View)%></a>
             </td>

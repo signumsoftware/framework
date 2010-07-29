@@ -1,5 +1,5 @@
 ﻿$(function() {
-    $(".searchControl th")
+    $(".searchControl th:not(.thRowEntity):not(.thRowSelection)")
         .live('click', function(e) {
             if ($(this).hasClass("userColumnEditing"))
                 return true;
@@ -155,7 +155,7 @@ FindNavigator.prototype = {
         this.editColumnsFinish();
 
         var $btnSearch = $(this.pf("btnSearch"));
-            $btnSearch.toggleClass('loading').val(lang['searching']);
+        $btnSearch.toggleClass('loading').val(lang['searching']);
 
         var self = this;
         $.ajax({
@@ -260,11 +260,6 @@ FindNavigator.prototype = {
             return "";
         return currOrder.replace(/"/g, ""); //.replace("[", "").replace("]", "");
     },
-
-//    getOrdersAsJson: function() {
-//        var currOrder = $(this.pf("OrderBy"));
-//        return jQuery.parseJSON("[" + currOrder.val() + "]");
-//    },
 
     setNewSortOrder: function(columnName, multiCol) {
         log("FindNavigator sort");
@@ -615,6 +610,13 @@ FindNavigator.prototype = {
             onCancelled: null,
             controllerUrl: empty(this.findOptions.prefix) ? "Signum/Create" : "Signum/PopupCreate"
         }, _viewOptions);
+    },
+
+    toggleSelectAll: function() {
+        log("FindNavigator toggleSelectAll");
+        var select = $(this.pf("cbSelectAll:checked"));
+        $("input:checkbox[name^=" + this.findOptions.prefix.compose("rowSelection") + "]")
+        .attr('checked', (select.length > 0) ? true : false);
     }
 };
 
@@ -692,6 +694,10 @@ function SearchCreate(viewOptions){
         var viewOptions = findNavigator.viewOptionsForSearchPopupCreate(viewOptions);
         new ViewNavigator(viewOptions).createSave();
     }
+}
+
+function ToggleSelectAll(prefix) {
+    var findNavigator = new FindNavigator({ prefix: prefix }).toggleSelectAll();
 }
 
 function Sort(evt) {
