@@ -51,7 +51,7 @@ namespace Signum.Web
             string content = "";
 #if (DEBUG)
             content = files.ToString(f => "<link href=\"{0}\" rel='stylesheet' type='text/css' />\n"
-                .Formato(Path.Combine("content", f)), "");
+                .Formato(Path.Combine("content/", f)), "");
             html.ViewContext.HttpContext.Response.Write(content);
             return;
 #endif
