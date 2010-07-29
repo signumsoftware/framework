@@ -43,6 +43,7 @@ namespace Signum.Engine
         interface ICoreTransaction
         {
             event Action RealCommit;
+            event Action PreRealCommit;
             SqlConnection Connection { get; }
             SqlTransaction Transaction { get; }
             DateTime Time { get; }
@@ -67,6 +68,12 @@ namespace Signum.Engine
             {
                 add { parent.RealCommit += value; }
                 remove { parent.RealCommit -= value; }
+            }
+
+            public event Action PreRealCommit
+            {
+                add { parent.PreRealCommit += value; }
+                remove { parent.PreRealCommit -= value; }
             }
 
             public SqlConnection Connection{ get { return parent.Connection; } }
@@ -98,6 +105,7 @@ namespace Signum.Engine
             public bool RolledBack { get; private set; }
             public bool Started { get; private set; }
             public event Action RealCommit;
+            public event Action PreRealCommit;
 
             IsolationLevel? IsolationLevel;
 
@@ -124,7 +132,11 @@ namespace Signum.Engine
             {
                 if (Started)
                 {
+                    if (PreRealCommit != null)
+                        PreRealCommit(); 
+
                     Transaction.Commit();
+
                     if (RealCommit != null)
                         RealCommit();  
                 }
@@ -175,6 +187,12 @@ namespace Signum.Engine
             {
                 add { parent.RealCommit += value; }
                 remove { parent.RealCommit -= value; }
+            }
+
+            public event Action PreRealCommit
+            {
+                add { parent.PreRealCommit += value; }
+                remove { parent.PreRealCommit -= value; }
             }
 
             public SqlConnection Connection { get { return parent.Connection; } }
@@ -261,6 +279,12 @@ namespace Signum.Engine
         {
             add { GetCurrent().RealCommit += value; }
             remove { GetCurrent().RealCommit -= value; }
+        }
+
+        public static event Action PreRealCommit
+        {
+            add { GetCurrent().PreRealCommit += value; }
+            remove { GetCurrent().PreRealCommit -= value; }
         }
 
         public static bool HasTransaction
