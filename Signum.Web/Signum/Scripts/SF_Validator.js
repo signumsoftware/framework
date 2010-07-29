@@ -132,7 +132,7 @@ Validator.prototype = {
                 var $control = $('#' + controlID);
                 $control.addClass(sfInputErrorClass);
                 if (this.valOptions.showInlineErrors && $control.hasClass(sfInlineErrorVal)) {
-                    if (control.next().hasClass("ui-datepicker-trigger")) {
+                    if ($control.next().hasClass("ui-datepicker-trigger")) {
                         if (empty(this.valOptions.fixedInlineErrorText))
                             $control.next().after(inlineErrorStart + errorMessage.join('') + inlineErrorEnd);
                         else

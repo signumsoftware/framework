@@ -15,9 +15,8 @@
 
     $('.tblResults td:not(.tdRowEntity):not(.tdRowSelection)').live('contextmenu', function(e) {
         log("contextmenu");
-        var $target = $(e.target);
-        
-        if ($target.hasClass("searchCtxMenuOverlay")) {
+
+        if ($(e.target).hasClass("searchCtxMenuOverlay")) {
             $('.searchCtxMenuOverlay').remove();
             return false;
         }
@@ -25,12 +24,12 @@
         var $cmenu = $(divContextualMenu); //$(this).next();
         $('<div class="searchCtxMenuOverlay"></div>').click(function(e) {
             log("contextmenu click");
-
+            var $target = $(e.target);
             if ($target.hasClass("searchCtxItem") || $target.parent().hasClass("searchCtxItem"))
                 $cmenu.hide();
             else
                 $('.searchCtxMenuOverlay').remove();
-        }).append($cmenu).appendTo(this);
+        }).append($cmenu).appendTo($(this));
         $cmenu.css({ left: e.pageX, top: e.pageY, zIndex: '101' }).show();
 
         return false;

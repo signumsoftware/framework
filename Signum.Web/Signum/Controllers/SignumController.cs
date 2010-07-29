@@ -30,6 +30,10 @@ namespace Signum.Web.Controllers
         {
             Type t = Navigator.ResolveTypeFromUrlName(typeUrlName);
 
+            Response.CacheControl = "no-cache";
+            Response.AddHeader("Pragma", "no-cache");
+            Response.Expires = -1;
+
             if (id.HasValue && id.Value > 0)
                 return Navigator.View(this, Database.Retrieve(t, id.Value), true); //Always admin
 
