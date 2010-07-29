@@ -8,7 +8,6 @@ function isOutside() {
     return element.offsetLeft < 0 || element.offsetTop < 0 || element.offsetLeft + elemWidth > clientWidth || element.offsetTop + elemHeight > clientHeight;
 }
 
-
 function getMousePosition(e) {
     var posx = 0;
     var posy = 0;
@@ -36,20 +35,14 @@ function comienzoMovimiento(event, id) {
     clientHeight = document.documentElement.clientHeight;
     outside = isOutside();
 
-    var $elem = $(element);
-
     var pos = getMousePosition(event);
     lastMouseX = pos.x;
     lastMouseY = pos.y;
-
-
-    var elemPos = $elem.offset();
-
-    lastElemTop = elemPos.top;
-    lastElemLeft = elemPos.left;
+    lastElemTop = element.offsetTop;
+    lastElemLeft = element.offsetLeft;
 
     $(document).bind("mousemove", function(e) {
-        var pos = { x: e.pageX, y: e.pageY};
+        var pos = getMousePosition(e);
 
         var left = ((allowInitiallyOutside && !outside) || !allowInitiallyOutside) ? Math.min(Math.max(lastElemLeft + pos.x - lastMouseX, 0), clientWidth - elemWidth) : lastElemLeft + pos.x - lastMouseX;
 
