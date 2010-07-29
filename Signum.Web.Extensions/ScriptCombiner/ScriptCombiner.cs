@@ -53,7 +53,7 @@ namespace Signum.Web.ScriptCombiner
 
             content = Regex.Replace(content, "[^\\}]+\\{\\}", string.Empty);  //Eliminamos reglas vacías
 
-            Regex color = new Regex("#([A-Fa-f0-9]{6})");
+          /*  Regex color = new Regex("#([A-Fa-f0-9]{6})");
             foreach (Match CurrentMatch in color.Matches(content))
             {
                 string coincidencia = CurrentMatch.Groups[1].Value;
@@ -61,7 +61,7 @@ namespace Signum.Web.ScriptCombiner
                     && coincidencia[2] == coincidencia[3]
                     && coincidencia[4] == coincidencia[5])
                     content = content.Replace("#" + coincidencia, ("#" + coincidencia[0] + coincidencia[2] + coincidencia[4]).ToLower());
-            }
+            }*/
             return content;
         }
 
