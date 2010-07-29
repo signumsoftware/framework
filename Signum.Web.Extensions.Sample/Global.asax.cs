@@ -80,7 +80,7 @@ namespace Signum.Web.Extensions.Sample
                 Settings = new Dictionary<Enum, OperationSettings>()
             });
 
-            QueriesClient.Start();
+            UserQueriesClient.Start();
 
             MusicClient.Start();
 
