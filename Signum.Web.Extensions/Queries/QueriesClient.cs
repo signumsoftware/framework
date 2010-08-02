@@ -22,7 +22,8 @@ namespace Signum.Web.Queries
 {
     public class UserQueriesClient
     {
-        public static Func<object, int, string> UserQueryFindRoute = (queryName, userQueryId) => Navigator.FindRoute(queryName) + "/UQ/" + userQueryId;
+        public static Func<object, int, string> UserQueryFindRoute = (queryName, userQueryId) => 
+            "UQ/{0}/{1}".Formato(Navigator.Manager.QuerySettings[queryName].UrlName, userQueryId);
 
         public static string ViewPrefix = "queries/Views/";
 
@@ -37,7 +38,7 @@ namespace Signum.Web.Queries
                     new { controller = "Resources", action = "Index", area = "queries" },
                     new { resourcesFolder = new InArray(new string[] { "Scripts", "Content", "Images" }) });
 
-                RouteTable.Routes.InsertRouteAt0("Find/{queryName}/UQ/{id}",
+                RouteTable.Routes.InsertRouteAt0("UQ/{queryUrlName}/{id}",
                     new { controller = "Queries", action = "ViewUserQuery" });
 
                 Navigator.AddSettings(new List<EntitySettings>{
