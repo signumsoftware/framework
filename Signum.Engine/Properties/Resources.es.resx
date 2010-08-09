@@ -352,9 +352,6 @@
   <data name="ThereAreRecordsIn0PointingToThisTableByColumn1" xml:space="preserve">
     <value>Hay registros en '{0}' que refieren a esta tabla por la columna '{1}'</value>
   </data>
-  <data name="ThereIsADiferentInstanceOfTheSameObjectOnObjectCache" xml:space="preserve">
-    <value>Ya existe un objeto con mismo id y tipo en la caché, pero es una instancia distinta</value>
-  </data>
   <data name="ThereIsASqlPreComandSimpleWithMoreThan0Parameters" xml:space="preserve">
     <value>Existe un SqlPreCommandSimple con más de {0} parámetros</value>
   </data>
@@ -432,5 +429,8 @@
   </data>
   <data name="TheTypeOfColumn0IsASubtypeOfIIdentifiableUseALiteInstead" xml:space="preserve">
     <value>El tipo de columna {0} es un subtipo de IIdentifiable, utilice un Lite en su lugar</value>
+  </data>
+  <data name="ThereIsADiferentInstanceOfTheSameEntityWithType0AndId1" xml:space="preserve">
+    <value>Hay una instancia diferente del de la Entidad con tipo {0} e id {1} en la EntityCache. Considera usar una EntityCache independiente si estás sobreescribiendo PreSaving. </value>
   </data>
 </root>

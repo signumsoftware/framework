@@ -27,7 +27,7 @@ namespace Signum.Engine
                 if (ident == null)
                     dic.Add(ie.Id, ie);
                 else if (ident != ie)
-                    throw new InvalidOperationException(Resources.ThereIsADiferentInstanceOfTheSameObjectOnObjectCache);
+                    throw new InvalidOperationException(Resources.ThereIsADiferentInstanceOfTheSameEntityWithType0AndId1.Formato(ie.GetType().Name, ie.id));
             }
 
             public bool Contains(Type type, int id)

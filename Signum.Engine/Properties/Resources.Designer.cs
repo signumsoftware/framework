@@ -782,11 +782,11 @@ namespace Signum.Engine.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to There is a different instance of the same of object on ObjectCache.
+        ///   Looks up a localized string similar to There is a different instance of the Entity with type {0} and id {1} on EntityCache. Consider using an independent EntityCache if you&apos;re overriding PreSaving. .
         /// </summary>
-        public static string ThereIsADiferentInstanceOfTheSameObjectOnObjectCache {
+        public static string ThereIsADiferentInstanceOfTheSameEntityWithType0AndId1 {
             get {
-                return ResourceManager.GetString("ThereIsADiferentInstanceOfTheSameObjectOnObjectCache", resourceCulture);
+                return ResourceManager.GetString("ThereIsADiferentInstanceOfTheSameEntityWithType0AndId1", resourceCulture);
             }
         }
         

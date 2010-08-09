@@ -352,8 +352,8 @@
   <data name="ThereAreRecordsIn0PointingToThisTableByColumn1" xml:space="preserve">
     <value>There are records in '{0}' pointing to this table by column '{1}'</value>
   </data>
-  <data name="ThereIsADiferentInstanceOfTheSameObjectOnObjectCache" xml:space="preserve">
-    <value>There is a different instance of the same of object on ObjectCache</value>
+  <data name="ThereIsADiferentInstanceOfTheSameEntityWithType0AndId1" xml:space="preserve">
+    <value>There is a different instance of the Entity with type {0} and id {1} on EntityCache. Consider using an independent EntityCache if you're overriding PreSaving. </value>
   </data>
   <data name="ThereIsASqlPreComandSimpleWithMoreThan0Parameters" xml:space="preserve">
     <value>There is a  SqlPreCommandSimple with more than {0} parameters</value>
