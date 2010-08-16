@@ -791,6 +791,7 @@ ul.menu-operation > li
 	margin-left:0px !important;
 	margin-top:2px;
 	margin-bottom:2px;
+	clear:both;
 }
 
 /* autocomplete */

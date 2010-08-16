@@ -237,6 +237,11 @@ namespace Signum.Web
             Manager.SetTokens(queryName, filters);
         }
 
+        public static void SetTokens(object queryName, IEnumerable<OrderOption> orders)
+        {
+            Manager.SetTokens(queryName, orders);
+        }
+
         internal static List<Filter> ExtractFilters(HttpContextBase httpContext, object queryName)
         {
             return Manager.ExtractFilters(httpContext, queryName);
@@ -425,6 +430,11 @@ namespace Signum.Web
         public static ContentResult ModelState(ModelStateDictionary modelState)
         {
             return Manager.ModelState(new ModelStateData(modelState));
+        }
+
+        public static ContentResult RedirectUrl(string url)
+        {
+            return Manager.RedirectUrl(url);
         }
 
         public static string OnPartialViewName(ModifiableEntity entity)
@@ -758,12 +768,8 @@ namespace Signum.Web
         {
             QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(queryName);
 
-            Column entity = queryDescription.StaticColumns.SingleOrDefault(a => a.IsEntity);
-
             foreach (var f in filters)
-            {
                 f.Token = QueryToken.Parse(queryDescription, f.ColumnName);
-            }
         }
 
         public void SetTokens(object queryName, IEnumerable<OrderOption> orders)
@@ -771,9 +777,7 @@ namespace Signum.Web
             QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(queryName);
 
             foreach (var o in orders)
-            {
                 o.Token = QueryToken.Parse(queryDescription, o.ColumnName);
-            }
         }
 
         protected internal virtual PartialViewResult PartialFind(ControllerBase controller, FindOptions findOptions, Context context)
@@ -909,7 +913,6 @@ namespace Signum.Web
             }
             return result;
         }
-
 
         protected internal virtual Type ResolveTypeFromUrlName(string typeUrlName)
         {
@@ -1087,5 +1090,25 @@ namespace Signum.Web
         {
             return new ContentResult { Content = modelStateData.ToString() };
         }
+
+        internal ContentResult RedirectUrl(string url)
+        {
+            var dic = new
+            { 
+                jsonResultType = JsonResultType.Url.ToString(),
+                url = url
+            };
+
+            return new ContentResult 
+            { 
+                Content = dic.ToJSonObject(v => v.ToString().Quote())
+            };
+        }
+    }
+
+    public enum JsonResultType
+    {
+        Url,
+        ModelState
     }
 }

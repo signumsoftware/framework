@@ -55,8 +55,6 @@ OperationManager.prototype = {
                 );
         }
         requestData.push(qp("isLite", this.options.isLite)
-        //+ qp("sfRuntimeType", empty(runtimeType) ? StaticInfoFor(this.options.prefix).staticType() : runtimeType)
-        //+ qp("sfId", info.id())
                      + qp("sfOperationFullKey", this.options.operationKey)
                      + qp(sfPrefix, newPrefix)
                      + qp("sfOldPrefix", this.options.prefix)
@@ -83,7 +81,7 @@ OperationManager.prototype = {
             newPrefix = this.options.prefix;
 
         var self = this;
-        $.ajax({
+        SF.ajax({
             type: "POST",
             url: this.options.controllerUrl,
             data: this.requestData(newPrefix),
@@ -106,24 +104,6 @@ OperationManager.prototype = {
 
     operationSubmit: function() {
         log("OperationManager operationSubmit");
-
-        ////        var info = this.runtimeInfo();
-        ////        if (info.find().length > 0)
-        ////        {
-        ////            $("form").append(hiddenInput("sfRuntimeType", info.runtimeType()) +
-        ////                hiddenInput('sfId', info.id()));
-        ////        }
-
-        //        var info = this.runtimeInfo();
-        //        var runtimeType = info.runtimeType();
-
-        //        var myRuntimeInfoKey = this.options.prefix.compose(sfRuntimeInfo);
-        //        if ($(":input:hidden[name=" + myRuntimeInfoKey + "]").length  == 0) {
-        //            if (empty(runtimeType))
-        //                hiddenInput(myRuntimeInfoKey, info.createValue(StaticInfoFor(this.options.prefix).staticType(), info.id(), info.isNew(), info.ticks()));
-        //            else
-        //                hiddenInput(myRuntimeInfoKey, info.find().val());
-        //        }
 
         $("form").append(hiddenInput('isLite', this.options.isLite) +
             hiddenInput('sfOperationFullKey', this.options.operationKey) +
@@ -231,6 +211,9 @@ var DeleteExecutor = function(_options) {
     this.defaultDelete = function() {
         log("DeleteExecutor defaultDelete");
 
+        if (!empty(this.options.confirmMsg) && !confirm(this.options.confirmMsg))
+            return;
+
         var self = this;
         if (isTrue(this.options.isLite)) {
             NotifyInfo(lang['executingOperation']);
@@ -287,7 +270,7 @@ var ConstructorFromMany = function(_options) {
         NotifyInfo(lang['executingOperation']);
 
         var self = this;
-        $.ajax({
+        SF.ajax({
             type: "POST",
             url: this.options.controllerUrl,
             data: this.requestData(this.newPrefix(), items),
@@ -331,7 +314,7 @@ function ReloadEntity(urlController, prefix, parentDiv) {
     var requestData = $("form :input").not(".searchControl :input").serialize() + qp(sfPrefix, prefix);
     if($partialViewName.length == 1)
         requestData += qp(sfPartialViewName, $partialViewName.val());
-    $.ajax({
+    SF.ajax({
         type: "POST",
         url: urlController,
         data: requestData,
@@ -346,8 +329,29 @@ function ReloadEntity(urlController, prefix, parentDiv) {
     });
 }
 
+function OpOnSuccessDispatcher(prefix, operationResult) {
+    log("OperationExecutor OpDefaultOnSuccess");
+    if (empty(operationResult))
+        return null;
+    if (operationResult.indexOf("jsonResultType") > 0)
+        return null; //ModelState errors should have been handled previously and same with redirections
+
+    var $result = $(operationResult);
+    var newPopupId = prefix.compose("popupWindow");
+    var hasNewPopup = $("#" + newPopupId, $result).length > 0; 
+    //Si el resultado es un normalControl, o es un popup y coincide con alguno de los abiertos => ReloadContent
+    if (!hasNewPopup ||
+            (hasNewPopup &&
+            $(".popupWindow:visible").attr('id').filter(function() { return this == newPopupId }).lengh == 0)) {
+        OpReloadContent(prefix, operationResult)
+    }
+    else {
+        OpOpenPopup(prefix, operationResult)
+    }
+}
+
 function OpReloadContent(prefix, operationResult){
-    log("OperationExecutor defaultOnSuccess");
+    log("OperationExecutor OpReloadContent");
     if (empty(prefix)) //NormalWindow
         $("#divNormalControl").html(operationResult);
     else { //PopupWindow
@@ -359,14 +363,15 @@ function OpReloadContent(prefix, operationResult){
     NotifyInfo(lang['operationExecuted'], 2000); 
 }
 
-function OpOpenPopup(prefix, operationResult)
-{
+function OpOpenPopup(prefix, operationResult) {
+    log("OperationExecutor OpOpenPopup");
     new ViewNavigator({ prefix: prefix }).showCreateSave(operationResult);
     NotifyInfo(lang['operationExecuted'], 2000); 
 }
 
 function OpOpenPopupNoDefaultOk(prefix, operationResult)
 {
+    log("OperationExecutor OpOpenPopupNoDefaultOk");
     new ViewNavigator({ prefix: prefix, onOk: function() { return false; } }).showCreateSave(operationResult);
     NotifyInfo(lang['operationExecuted'], 2000); 
 }

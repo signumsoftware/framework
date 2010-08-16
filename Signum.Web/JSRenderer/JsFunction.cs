@@ -81,6 +81,12 @@ namespace Signum.Web
             return new JsInstruction(() => "SubmitOnly({0},{1})".Formato(controllerUrl.ToJS(), requestExtraJsonData.ToJS()));
         }
 
+        public static JsInstruction AjaxCall(JsValue<string> controllerUrl, JsInstruction requestData, JsFunction onSuccess)
+        {
+            return new JsInstruction(() => "SF.ajax({{type:'POST',url:{0},async:false,data:{1},success:{2}}})"
+                .Formato(controllerUrl.ToJS(), requestData.ToJS(), onSuccess.TryCC(os => os.ToJS()) ?? "null"));
+        }
+
         public static JsInstruction Confirm(JsValue<string> message, JsFunction onSuccess)
         {
             return new JsInstruction(() => "if(confirm({0})){1}()".Formato(message.ToJS(), onSuccess));

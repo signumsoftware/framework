@@ -1,7 +1,7 @@
 ﻿function CallServer(urlController, prefix) {
     var ids = GetSelectedElements(prefix);
     if (ids == "") return;
-    $.ajax({
+    SF.ajax({
         type: "POST",
         url: urlController,
         data: "sfIds=" + ids,
@@ -16,7 +16,7 @@
 function CloseChooser(urlController, onOk, onCancel, prefix) {
     var container = $('#' + prefix.compose("externalPopupDiv")).parent();
     $('#' + prefix.compose(sfBtnCancel)).click();
-    $.ajax({
+    SF.ajax({
         type: "POST",
         url: urlController,
         data: "sfOnOk=" + singleQuote(onOk) + qp("sfOnCancel", singleQuote(onCancel)) + qp(sfPrefix, prefix),
@@ -31,7 +31,7 @@ function CloseChooser(urlController, onOk, onCancel, prefix) {
 
 function QuickLinkClickServerAjax(urlController, findOptionsRaw, prefix) {
     var newPrefix = "New".compose(prefix);
-    $.ajax({
+    SF.ajax({
         type: "POST",
         url: urlController,
         data: findOptionsRaw + qp(sfPrefix, newPrefix),

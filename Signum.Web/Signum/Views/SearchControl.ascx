@@ -24,7 +24,7 @@
 <%=Html.Hidden(context.Compose(ViewDataKeys.View), viewable, new { disabled = "disabled" })%>
 
 <%= (findOptions.SearchOnLoad) ?
-    "<script type=\"text/javascript\">$(document).ready(function() {{ SearchOnLoad('{0}'); }});</script>".Formato(context.Compose("btnSearch")) : 
+    "<script type=\"text/javascript\">$(document).ready(function() {{ SearchOnLoad('{0}'); }});</script>".Formato(context.ControlID) : 
     ""
 %>
 
@@ -43,7 +43,7 @@
     <input class="btnSearch" id="<%=context.Compose("btnSearch")%>" type="button" onclick="<%="Search({{prefix:'{0}'}});".Formato(context.ControlID) %>" value="<%=Html.Encode(Resources.Search) %>" /> 
     <% if (findOptions.Create && Navigator.IsCreable(entitiesType, true) && viewable)
        { %>
-        <input type="button" value="+" class="lineButton create" onclick="<%="SearchCreate({{prefix:'{0}'}});".Formato(context.ControlID)%>" />
+        <input type="button" value="+" class="lineButton create" onclick="<%= findOptions.Creating.HasText() ? findOptions.Creating : "SearchCreate({{prefix:'{0}'}});".Formato(context.ControlID)%>" />
     <%} %>
     <ul class="operations">
     <%= ButtonBarQueryHelper.GetButtonBarElementsForQuery(this.ViewContext, findOptions.QueryName, entitiesType, context.ControlID).ToString(Html)%> 

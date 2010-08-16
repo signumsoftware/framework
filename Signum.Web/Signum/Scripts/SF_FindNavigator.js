@@ -41,22 +41,6 @@
         $('.searchCtxMenuOverlay').remove();
         QuickFilter(idTD);
     });
-/*
-    $('.operations .dropdown').live('mouseover mouseout',        
-        function(e) {
-            var $this = $(this);
-            if (e.type == 'mouseover') {                
-                var offset = $this.position();
-                $this.children('ul').css({
-                    left: offset.left,
-                    top: offset.top + $this.outerHeight() + 1,
-                    minWidth: 80
-                }).show();
-            }
-            else {
-                $this.children('ul').hide();
-            }
-        });*/
 });
 
 var divContextualMenu = "<div class=\"searchCtxMenu\"><div class=\"searchCtxItem\"><span>Add filter</span></div></div>";
@@ -99,7 +83,7 @@ FindNavigator.prototype = {
     openFinder: function() {
         log("FindNavigator openFinder");
         var self = this;
-        $.ajax({
+        SF.ajax({
             type: "POST",
             url: this.findOptions.navigatorControllerUrl,
             data: this.requestData(),
@@ -158,7 +142,7 @@ FindNavigator.prototype = {
         $btnSearch.toggleClass('loading').val(lang['searching']);
 
         var self = this;
-        $.ajax({
+        SF.ajax({
             type: "POST",
             url: this.findOptions.searchControllerUrl,
             data: this.requestData(),
@@ -423,7 +407,7 @@ FindNavigator.prototype = {
         var queryUrlName = ((empty(this.findOptions.queryUrlName)) ? $(this.pf(sfQueryUrlName)).val() : this.findOptions.queryUrlName);
 
         var self = this;
-        $.ajax({
+        SF.ajax({
             type: "POST",
             url: "Signum/AddFilter",
             data: { "sfQueryUrlName": queryUrlName, "tokenName": tokenName, "index": this.newFilterRowIndex(), "prefix": this.findOptions.prefix },
@@ -474,7 +458,7 @@ FindNavigator.prototype = {
         var tokenName = this.constructTokenName();
         var queryUrlName = ((empty(this.findOptions.queryUrlName)) ? $(this.pf(sfQueryUrlName)).val() : this.findOptions.queryUrlName);
 
-        $.ajax({
+        SF.ajax({
             type: "POST",
             url: "Signum/NewSubTokensCombo",
             data: { "sfQueryUrlName": queryUrlName, "tokenName": tokenName, "index": index, "prefix": this.findOptions.prefix },
@@ -534,7 +518,7 @@ FindNavigator.prototype = {
         });
 
         var self = this;
-        $.ajax({
+        SF.ajax({
             type: "POST",
             url: "Signum/QuickFilter",
             data: params,
@@ -684,8 +668,8 @@ function ClearAllFilters(prefix) {
     new FindNavigator({ prefix: prefix }).clearAllFilters();
 }
 
-function SearchCreate(viewOptions){
-    var findNavigator = new FindNavigator({prefix: viewOptions.prefix});
+function SearchCreate(viewOptions) {
+    var findNavigator = new FindNavigator({ prefix: viewOptions.prefix });
     if (empty(viewOptions.prefix)) {
         var viewOptions = findNavigator.viewOptionsForSearchCreate(viewOptions);
         new ViewNavigator(viewOptions).navigate();
@@ -732,7 +716,8 @@ function toggleFilters(elem) {
 }
 
 var asyncSearchFinished = new Array();
-function SearchOnLoad(btnSearchId) {    
+function SearchOnLoad(prefix) {
+    var btnSearchId = prefix.compose("btnSearch");
     var $button = $("#" + btnSearchId);
     var makeSearch = function() {
         if (!asyncSearchFinished[btnSearchId]) {
@@ -740,16 +725,16 @@ function SearchOnLoad(btnSearchId) {
             asyncSearchFinished[btnSearchId] = true;
         }
     };
-    
-    if ($button.is(':visible')) {
+
+    if ($("#" + prefix.compose("divResults")).is(':visible')) {
         makeSearch();
     }
     else {
         var $tabContainer = $button.parents(".tabs").first();
         if ($tabContainer.length) {
             $tabContainer.find("a").click(
-                function() {                    
-                    if ($button.is(':visible')) makeSearch();
+                function() {
+                    if ($("#" + prefix.compose("divResults")).is(':visible')) makeSearch();
                 });
         } else{
             makeSearch();

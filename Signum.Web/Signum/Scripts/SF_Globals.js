@@ -49,8 +49,71 @@
         "0results": "No results have been found" 
     };
 
-    var SF = {};
+    var SF = { };
 
+    SF.ajax = function(jqueryAjaxOptions) {
+        var options = $.extend({
+            type: null,
+            url: null,
+            data: null,
+            async: false,
+            dataType: null,
+            success: null,
+            error: null
+        }, jqueryAjaxOptions);
+
+        $.ajax({
+            type: options.type,
+            url: options.url,
+            data: options.data,
+            async: options.async,
+            dataType: options.dataType,
+            success: function(ajaxResult) {
+                var url = SF.checkRedirection(ajaxResult);
+                if (!empty(url))
+                    window.location.href = $("base").attr("href") + url;
+                else {
+                    if (options.success != null)
+                        options.success(ajaxResult);
+                }
+            },
+            error: options.error
+        });
+    };
+
+    SF.checkRedirection = function(ajaxResult) {
+        if (empty(ajaxResult))
+            return null;
+        if (!SF.isJSON(ajaxResult))
+            return null;
+        var json = $.parseJSON(ajaxResult);
+        if (json.jsonResultType == null)
+            return null;
+        if (json.jsonResultType == 'Url')
+            return json.url;
+        return null;
+    };
+    
+    //Based on jquery-1.4.2 parseJSON function
+    SF.isJSON = function(data) {
+        if (typeof data !== "string" || !data)
+            return null;
+
+        // Make sure leading/trailing whitespace is removed (IE can't handle it)
+        data = jQuery.trim(data);
+
+        // Make sure the incoming data is actual JSON
+        // Logic borrowed from http://json.org/json2.js
+        if (/^[\],:{}\s]*$/.test(data.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g, "@")
+			.replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, "]")
+			.replace(/(?:^|:|,)(?:\s*\[)+/g, ""))) {
+
+            return true;
+        }
+        else
+            return false;
+    };
+    
     var StaticInfo = function(_prefix) {
         this.prefix = _prefix;
         this._staticType = 0;
@@ -261,6 +324,13 @@ function concat(array, toIndex, firstChar) {
         }
     }
     return path.join('');
+}
+
+function Get(url) {
+    document.forms[0].method = "GET";
+    document.forms[0].action = url;
+    document.forms[0].submit();
+    return false;
 }
 
 function Submit(urlController, requestExtraJsonData) {

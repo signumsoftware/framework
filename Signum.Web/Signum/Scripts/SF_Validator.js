@@ -49,7 +49,7 @@ Validator.prototype = {
         NotifyInfo(lang['saving']);
         var returnValue = false;
         var self = this;
-        $.ajax({
+        SF.ajax({
             type: "POST",
             url: this.savingControllerUrl,
             async: false,
@@ -59,7 +59,7 @@ Validator.prototype = {
                     var result = $.parseJSON(msg);  //eval('var result=' + msg);
                     var modelState = result["ModelState"];
                     returnValue = self.showErrors(modelState, true);
-                    NotifyInfo(lang['error'], 2000);
+                    NotifyInfo(lang['error'], 2000); 
                 }
                 else {
                     if (empty(self.valOptions.parentDiv))
@@ -78,7 +78,7 @@ Validator.prototype = {
         log("Validator validate");
         var returnValue = false;
         var self = this;
-        $.ajax({
+        SF.ajax({
             type: "POST",
             url: this.validatingControllerUrl,
             async: false,
@@ -246,7 +246,7 @@ var PartialValidator = function(_pvalOptions) {
         NotifyInfo(lang['saving']);
         var validatorResult = null;
         var self = this;
-        $.ajax({
+        SF.ajax({
             type: "POST",
             url: this.savingControllerUrl,
             async: false,
@@ -320,7 +320,7 @@ var PartialValidator = function(_pvalOptions) {
         log("PartialValidator validate");
         var validatorResult = null;
         var self = this;
-        $.ajax({
+        SF.ajax({
             type: "POST",
             url: this.validatingControllerUrl,
             async: false,

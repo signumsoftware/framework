@@ -43,7 +43,7 @@ namespace Signum.Web.Controllers
                 entity = (IdentifiableEntity)result;
             else
                 throw new InvalidOperationException(Resources.InvalidResultTypeForADirectConstructor);
-
+             
             return Navigator.View(this, entity, true); //Always admin
         }
 
@@ -166,7 +166,12 @@ namespace Signum.Web.Controllers
             Database.Save(ident);
 
             ViewData[ViewDataKeys.ChangeTicks] = context.GetTicksDictionary();
-            return Navigator.View(this, ident, true);
+
+            string newUrl = Navigator.ViewRoute(ident.GetType(), ident.Id);
+            if (HttpContext.Request.UrlReferrer.AbsolutePath.Contains(newUrl))
+                return Navigator.View(this, ident, true);
+            else
+                return Navigator.RedirectUrl(newUrl);
         }
 
         [AcceptVerbs(HttpVerbs.Post)]

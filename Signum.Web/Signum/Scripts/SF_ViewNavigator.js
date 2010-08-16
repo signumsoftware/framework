@@ -190,7 +190,7 @@ ViewNavigator.prototype = {
 
     callServer: function(onSuccess) {
         log("ViewNavigator callServer");
-        $.ajax({
+        SF.ajax({
             type: "POST",
             url: this.viewOptions.controllerUrl,
             data: this.constructRequestData(),
@@ -285,7 +285,7 @@ function openChooser(_prefix, onOptionClicked, jsonOptionsListFormat, onCancelle
     }
     if (chooserOptions && chooserOptions.title) requestData += "&title=" + chooserOptions.title;
     
-    $.ajax({
+    SF.ajax({
         type: "POST",
         url: url,
         data: requestData,

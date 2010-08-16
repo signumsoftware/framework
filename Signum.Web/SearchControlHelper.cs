@@ -24,7 +24,8 @@ namespace Signum.Web
         public static void SearchControl(this HtmlHelper helper, FindOptions findOptions, Context context)
         {
             Navigator.SetTokens(findOptions.QueryName, findOptions.FilterOptions);
-            
+            Navigator.SetTokens(findOptions.QueryName, findOptions.OrderOptions);
+
             helper.ViewData.Model = context;
 
             helper.ViewData[ViewDataKeys.FindOptions] = findOptions;

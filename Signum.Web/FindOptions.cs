@@ -88,6 +88,8 @@ namespace Signum.Web
             set { create = value; }
         }
 
+        public string Creating { get; set; }
+
         bool view = true;
         public bool View
         {

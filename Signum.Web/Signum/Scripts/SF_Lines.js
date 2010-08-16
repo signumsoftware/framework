@@ -1091,7 +1091,7 @@ function EComboOnChanged(_ecombo) {
     _ecombo.setSelected();
 }
 
-//FLineOptions = EBaseOptions
+//FLineOptions = EBaseOptions + asyncUpload
 var FLine = function(_flineOptions) {
     log("FLine");
     EBaseLine.call(this, _flineOptions);
@@ -1111,6 +1111,15 @@ var FLine = function(_flineOptions) {
         log("FLine removeSpecific");
         $(this.pf('DivOld')).hide();
         $(this.pf('DivNew')).show();
+    };
+
+    this.prepareSyncUpload = function() {
+        log("FLine prepareSyncUpload");
+        //New file in FileLine but not to be uploaded asyncronously => prepare form for multipart and set runtimeInfo
+        $(this.pf(''))[0].setAttribute('value', $(this.pf(''))[0].value);
+        var mform = $('form');
+        mform.attr('enctype', 'multipart/form-data').attr('encoding', 'multipart/form-data');
+        this.runtimeInfo().setEntity(this.staticInfo().staticType(), '');
     };
 
     this.upload = function() {
@@ -1138,7 +1147,11 @@ function FLineOnRemoving(_fline) {
 }
 
 function FLineOnChanged(_fline) {
-    _fline.upload();
+    if (_fline.options.asyncUpload)
+        _fline.upload();
+    else { 
+        _fline.prepareSyncUpload();
+    }
 }
 
 function hiddenInput(id, value)
