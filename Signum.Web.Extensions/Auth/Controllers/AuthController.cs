@@ -18,6 +18,7 @@ using System.Text.RegularExpressions;
 using Signum.Entities;
 using Signum.Engine.Mailing;
 using System.Collections.Generic;
+using Signum.Utilities;
 #endregion
 
 namespace Signum.Web.Authorization
@@ -110,7 +111,7 @@ namespace Signum.Web.Authorization
                     if (user == null)
                         throw new ApplicationException(Resources.ThereSNotARegisteredUserWithThatEmailAddress);
 
-                    AuthLogic.ResetPasswordRequest(user, HttpContextUtils.FullyQualifiedApplicationPath); 
+                    AuthLogic.ResetPasswordRequest(user, HttpContextUtils.FullyQualifiedApplicationPath);
                 }
 
                 ViewData["email"] = email;
@@ -210,7 +211,7 @@ namespace Signum.Web.Authorization
                 return RedirectToAction("ResetPasswordSuccess");
             }
             catch (Exception ex)
-            { 
+            {
                 return ResetPasswordSetNewError(request.Id, ViewDataKeys.GlobalErrors, ex.Message);
             }
         }
@@ -309,7 +310,7 @@ namespace Signum.Web.Authorization
             {
                 user = AuthLogic.Login(username, Security.EncodePassword(password));
             }
-            catch (Exception ) { }
+            catch (Exception) { }
 
             if (user == null)
                 return LoginError("_FORM", Resources.InvalidUsernameOrPassword);
@@ -513,7 +514,9 @@ namespace Signum.Web.Authorization
             var newUser = UserDN.Current.ToLite().Retrieve();
 
             Thread.CurrentPrincipal = newUser;
-            System.Web.HttpContext.Current.Session[SessionUserKey] = newUser;
+
+            if (System.Web.HttpContext.Current != null)
+                System.Web.HttpContext.Current.Session[SessionUserKey] = newUser;
         }
 
         public static void AddUserSession(string userName, UserDN user)
