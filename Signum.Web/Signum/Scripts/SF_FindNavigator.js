@@ -37,9 +37,9 @@
 
     $('.searchCtxItem').live('click', function() {
         log("contextmenu item click");
-        var idTD = $(this).parents("td")[0].id;
+        var $elem = $(this).closest("td");
         $('.searchCtxMenuOverlay').remove();
-        QuickFilter(idTD);
+        QuickFilter($elem);
     });
 });
 
@@ -139,7 +139,7 @@ FindNavigator.prototype = {
         this.editColumnsFinish();
 
         var $btnSearch = $(this.pf("btnSearch"));
-        $btnSearch.toggleClass('loading').val(lang['searching']);
+            $btnSearch.toggleClass('loading').val(lang['searching']);
 
         var self = this;
         SF.ajax({
@@ -147,11 +147,15 @@ FindNavigator.prototype = {
             url: this.findOptions.searchControllerUrl,
             data: this.requestData(),
             async: this.findOptions.async,
-            dataType: "html",
+            dataType: "json",
             success: function(r) {
                 $btnSearch.val(lang['buscar']).toggleClass('loading');
-                if (!empty(r))
-                    self.$control.find(".divResults tbody").html(r);
+                if (r.length > 0) {
+                    for (var i = 0, l = r.length; i < l; i++) {
+                        r[i] = "<tr><td>" + r[i].join("</td><td>") + "</td></tr>";
+                    }
+                    self.$control.find(".divResults tbody").html(r.join(''));
+                }
                 else {
                     var columns = $(self.pf("divResults th")).length;
                     self.$control.find(".divResults tbody").html("<tr><td colspan=\"" + columns + "\">" + lang['0results'] + "</td></tr>")
@@ -486,18 +490,17 @@ FindNavigator.prototype = {
         return tokenName;
     },
 
-    quickFilter: function(idTD) {
+    quickFilter: function($elem) {
         log("FindNavigator quickFilter");
         var tableFilters = $(this.pf("tblFilters tbody"));
         if (tableFilters.length == 0)
             return;
-        var $idTD = $('#' + idTD);
         var params;
-        var ahref = $idTD.children('a');
+        var ahref = $elem.children('a');
         if (ahref.length == 0) {
-            var cb = $idTD.find("input:checkbox");
+            var cb = $elem.find("input:checkbox");
             if (cb.length == 0)
-                params = { "isLite": "false", "sfValue": $idTD.html().trim() };
+                params = { "isLite": "false", "sfValue": $elem.html().trim() };
             else
                 params = { "isLite": "false", "sfValue": (cb.filter(":checked").length > 0) };
         }
@@ -508,11 +511,11 @@ FindNavigator.prototype = {
             params = { "isLite": "true", "typeUrlName": route.substring(separator + 1, lastSeparator), "sfId": route.substring(lastSeparator + 1, route.length) };
         }
 
-        var cellIndex = $("#" + idTD)[0].cellIndex;
+        var cellIndex = $elem[0].cellIndex;
 
         params = $.extend(params, {
             "sfQueryUrlName": $(this.pf(sfQueryUrlName)).val(),
-            "tokenName": $($($idTD.parents(".tblResults")[0]).find("th")[cellIndex]).children("input:hidden").val(),
+            "tokenName": $($($elem.closest(".tblResults")).find("th")[cellIndex]).children("input:hidden").val(),
             "prefix": this.findOptions.prefix,
             "index": this.newFilterRowIndex()
         });
@@ -654,10 +657,10 @@ function NewSubTokensCombo(_findOptions, index) {
     new FindNavigator(_findOptions).newSubTokensCombo(index);
 }
 
-function QuickFilter(idTd) {
-    var idtblresults = $("#" + idTd).parents(".tblResults")[0].id;
+function QuickFilter($elem) {
+    var idtblresults = $elem.closest(".tblResults")[0].id;
     var prefix = idtblresults.substring(0, idtblresults.indexOf("tblResults"));
-    new FindNavigator({ prefix: prefix }).quickFilter(idTd);
+    new FindNavigator({ prefix: prefix }).quickFilter($elem);
 }
 
 function DeleteFilter(prefix, index) {

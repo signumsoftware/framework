@@ -15,10 +15,10 @@ namespace Signum.Web
 {
     public static class LightEntityLineHelper
     {
-        public static void LightEntityLine(this HtmlHelper helper, Lite lite, bool admin)
+        public static string LightEntityLine(this HtmlHelper helper, Lite lite, bool admin)
         {
             if (lite == null)
-                return;
+                return "";
 
             bool isNavigable = Navigator.IsNavigable(lite.RuntimeType, admin);
             string link = helper.Href("",
@@ -29,9 +29,9 @@ namespace Signum.Web
                 isNavigable ? null : new Dictionary<string, object>() { { "style", "display:none"} });
 
             if (isNavigable)
-                helper.Write(link);
+                return link;
             else
-                helper.Write(link + lite.ToStr);
+                return link + lite.ToStr;
         }
     }
 }

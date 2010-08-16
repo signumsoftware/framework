@@ -12,57 +12,45 @@
    Type entitiesType = Reflector.ExtractLite(queryDescription.StaticColumns.Single(a => a.IsEntity).Type);
    bool viewable = findOptions.View && Navigator.IsNavigable(entitiesType, true);
 
-
-%>
-<%  ResultTable queryResult = (ResultTable)ViewData[ViewDataKeys.Results];
+    var resultJson = new List<List<string>>();
+    
+    ResultTable queryResult = (ResultTable)ViewData[ViewDataKeys.Results];
     var entityColumn = (queryResult == null) ? null : queryResult.Columns.OfType<StaticColumn>().Single(c => c.IsEntity);
-    Dictionary<int, Action<HtmlHelper, object>> formatters = (Dictionary<int, Action<HtmlHelper, object>>)ViewData[ViewDataKeys.Formatters];
+    Dictionary<int, Func<HtmlHelper, object, string>> formatters = (Dictionary<int, Func<HtmlHelper, object, string>>)ViewData[ViewDataKeys.Formatters];
 
-                foreach (var row in queryResult.Rows)
-                {
-        %>
-        <tr class="<%=(row.Index % 2 == 1) ? "even" : ""%>" id="<%=context.Compose("trResults", row.Index.ToString())%>"
-            name="<%=context.Compose("trResults", row.Index.ToString())%>">
-            <% Lite entityField = (Lite)row[entityColumn];
+    foreach (var row in queryResult.Rows)
+    {
+        var rowJson = new List<string>();
+        
+        Lite entityField = (Lite)row[entityColumn];
 
-               if (findOptions.AllowMultiple.HasValue)
-               {
-            %>
-            <td class="tdRowSelection">
-                <%
+        if (findOptions.AllowMultiple.HasValue)
+        {
             if (findOptions.AllowMultiple.Value)
-            { 
-                %>
-                <input type="checkbox" name="<%=context.Compose("rowSelection", row.Index.ToString())%>"
-                    id="<%=context.Compose("rowSelection", row.Index.ToString())%>" value="<%= entityField.Id.ToString() + "__" + entityField.RuntimeType.Name + "__" + entityField.ToStr %>" />
-                <%}
+            {
+                rowJson.Add(Html.CheckBox(
+                    context.Compose("rowSelection", row.Index.ToString()),
+                    new { value = entityField.Id.ToString() + "__" + entityField.RuntimeType.Name + "__" + entityField.ToStr }).ToHtmlString());
+            }
             else
-            { %>
-                <input type="radio" name="<%=context.Compose("rowSelection")%>" id="<%=context.Compose("radio", row.Index.ToString())%>"
-                    value="<%= entityField.Id.ToString() + "__" + entityField.RuntimeType.Name + "__" + entityField.ToStr %>" />
-                <%
+            {
+                rowJson.Add(Html.RadioButton(
+                    context.Compose("rowSelection"),
+                    entityField.Id.ToString() + "__" + entityField.RuntimeType.Name + "__" + entityField.ToStr).ToHtmlString());
             }
-                %>
-            </td>
-            <%} %>
-            <% if (viewable)
-               { %>
-            <td class="tdRowEntity">
-                <a href="<%= Navigator.ViewRoute(entityField.RuntimeType, entityField.Id) %>" title="<%=Html.Encode(Resources.View) %>">
-                    <%=Html.Encode(Resources.View)%></a>
-            </td>
-            <% } %>
-            <%
-            foreach (var col in queryResult.VisibleColumns)
-            {      
-            %>
-            <td id="<%=context.Compose("row"+row.Index+"td", col.Index.ToString())%>">
-                <%formatters[col.Index](Html, row[col]);%>
-            </td>
-            <%
-            }
-            %>
-        </tr>
-        <%
-            }
-        %>
+               
+        }
+        
+        if (viewable)
+        {
+            rowJson.Add(Html.Href(Navigator.ViewRoute(entityField.RuntimeType, entityField.Id), Html.Encode(Resources.View)));
+        }
+        
+        foreach (var col in queryResult.VisibleColumns)
+        {
+            rowJson.Add(formatters[col.Index](Html, row[col]));
+        }
+        
+        resultJson.Add(rowJson);
+    }%>
+    <%= new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(resultJson) %>

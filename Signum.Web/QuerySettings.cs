@@ -18,13 +18,13 @@ namespace Signum.Web
         public string UrlName { get; set; }
         public Func<bool, bool> ShowOkButton { get; set; }
 
-        private Dictionary<string, Action<HtmlHelper, object>> formatters;
-        public Dictionary<string, Action<HtmlHelper, object>> Formatters
+        private Dictionary<string, Func<HtmlHelper, object, string>> formatters;
+        public Dictionary<string, Func<HtmlHelper, object, string>> Formatters
         {
             get 
             {
                 if (formatters == null)
-                    formatters = new Dictionary<string, Action<HtmlHelper, object>>();
+                    formatters = new Dictionary<string, Func<HtmlHelper, object, string>>();
                 return formatters;
             }
             set 
@@ -41,45 +41,44 @@ namespace Signum.Web
             {
                 new FormatterRule(c=>true, c=> (h,o) =>
                 {
-                    if(o != null)
-                        h.Write(o.ToString());
+                    return o != null ? o.ToString() : "";
                 }),
+
                 new FormatterRule(c => c.Type.UnNullify().IsEnum, c => (h,o) => 
                 {
-                    if (o != null)
-                        h.Write(((Enum)o).NiceToString());
+                    return o != null ? ((Enum)o).NiceToString() : "";
                 }),
                 new FormatterRule(c => c.Type.UnNullify().IsLite(), c => (h,o) => 
                 {
-                    h.LightEntityLine((Lite)o, false);
+                    return h.LightEntityLine((Lite)o, false);
                 }),
                 new FormatterRule(c=>c.Type.UnNullify() == typeof(DateTime), c => (h,o) => 
                 {
-                    if (o != null)
-                        h.Write(((DateTime)o).ToUserInterface().TryToString(c.Format));
+                    return o != null ? ((DateTime)o).ToUserInterface().TryToString(c.Format) : "";
                 }),
                 new FormatterRule(c=> Reflector.IsNumber(c.Type), c => (h,o) => 
                 {
                     if (o != null)
                     {
-                        h.Write(((IFormattable)o).TryToString(c.Format));
+                        string s = ((IFormattable)o).TryToString(c.Format);
                         if (c.Unit.HasText())
-                            h.Write(" " + c.Unit);
+                            s += " " + c.Unit;
+                        return s;
                     }
+                    return "";
                 }),
                 new FormatterRule(c=>c.Type == typeof(bool?), c => (h,o) => 
                 {
-                    if(o!= null)
-                        h.Write("<div style='text-align:center'>"+h.CheckBox("", (bool)o, false)+"</div>");
+                    return o != null ? "<div style='text-align:center'>"+h.CheckBox("", (bool)o, false)+"</div>" : "";
                 }),
                 new FormatterRule(c=>c.Type == typeof(bool), c => (h,o) => 
                 {
-                    h.Write("<div style='text-align:center'>"+h.CheckBox("", (bool)o, false)+"</div>");
+                    return o != null ? "<div style='text-align:center'>"+h.CheckBox("", (bool)o, false)+"</div>" : "" ;
                 })
             };
         }
 
-        public Action<HtmlHelper, object> GetFormatter(Column column)
+        public Func<HtmlHelper, object, string> GetFormatter(Column column)
         {
             return formatters.TryGetC(column.Name) ??
                    FormatRules.Last(cfr => cfr.IsApplyable(column)).Formatter(column);
@@ -88,10 +87,10 @@ namespace Signum.Web
 
     public class FormatterRule
     {
-        public Func<Column, Action<HtmlHelper, object>> Formatter { get; set; }
+        public Func<Column, Func<HtmlHelper, object, string>> Formatter { get; set; }
         public Func<Column, bool> IsApplyable { get; set; }
 
-        public FormatterRule(Func<Column, bool> isApplyable, Func<Column, Action<HtmlHelper, object>> formatter)
+        public FormatterRule(Func<Column, bool> isApplyable, Func<Column, Func<HtmlHelper, object, string>> formatter)
         {
             Formatter = formatter;
             IsApplyable = isApplyable;

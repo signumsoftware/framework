@@ -463,10 +463,11 @@ ul.operations li
 	/*padding:0 5px;	*/
 }
 
-.entity-operation {
+.operations a {
     float:left;
     padding:4px;
     cursor:pointer;
+    font-weight:normal;
 }
 
 ul.operations li:last-child {
@@ -780,9 +781,15 @@ th.headerSortDown {
 	padding-left:10px;
 	padding-right:10px;
 }
+
 .operations .dropdown:hover .menu-operation
 {
 	display:block;
+}
+
+.operations .dropdown .menu-operation:hover
+{
+	background-color:#ffffee;
 }
 
 ul.menu-operation > li
@@ -824,4 +831,10 @@ ul.menu-operation > li
 {
 	clear:inherit;
 /* ej.Persona */
+}
+
+
+.divResults
+{
+	overflow-x:auto;
 }
