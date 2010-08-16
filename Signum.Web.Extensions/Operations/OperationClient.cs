@@ -29,10 +29,7 @@ namespace Signum.Web.Operations
             Constructor.ConstructorManager.VisualGeneralConstructor += new Func<ConstructContext, ActionResult>(Manager.ConstructorManager_VisualGeneralConstructor); 
             ButtonBarQueryHelper.GetButtonBarForQueryName += Manager.ButtonBar_GetButtonBarForQueryName;
         }
-
-
     }
-
 
     public class OperationManager
     {
@@ -47,19 +44,77 @@ namespace Signum.Web.Operations
 
             var list = OperationLogic.ServiceGetEntityOperationInfos(ident);
 
-            return (from oi in list
+            var contexts =
+                    from oi in list
                     let os = (EntityOperationSettings)Settings.TryGetC(oi.Key)
                     let ctx = new EntityOperationContext
                     {
-                        Entity = ident,
-                        OperationSettings = os,
-                        OperationInfo = oi,
-                        PartialViewName = partialViewName,
-                        Prefix = prefix
+                         Entity = ident,
+                         OperationSettings = os,
+                         OperationInfo = oi,
+                         PartialViewName = partialViewName,
+                         Prefix = prefix
                     }
                     where os == null || os.IsVisible == null || os.IsVisible(ctx)
-                    select OperationButtonFactory.Create(ctx)).ToArray();
+                    select ctx;
 
+            List<ToolBarButton> buttons = contexts
+                .Where(oi => oi.OperationInfo.OperationType != OperationType.ConstructorFrom || 
+                            (oi.OperationInfo.OperationType == OperationType.ConstructorFrom && !oi.OperationSettings.GroupInMenu))
+                .Select(ctx => OperationButtonFactory.Create(ctx))
+                .ToList();
+
+            var constructFroms = contexts.Where(oi => oi.OperationInfo.OperationType == OperationType.ConstructorFrom && oi.OperationSettings.GroupInMenu);
+            if (constructFroms.Any())
+            {
+                buttons.Add(new ToolBarMenu
+                {
+                    AltText = Resources.Create,
+                    Text = Resources.Create,
+                    DivCssClass = ToolBarButton.DefaultEntityDivCssClass,
+                    Items = constructFroms.Select(ctx => OperationButtonFactory.Create(ctx)).ToList()
+                });
+            }
+
+            //List<ToolBarButton> buttons = 
+            //        (from oi in list.Where(oi => oi.OperationType != OperationType.ConstructorFrom)
+            //        let os = (EntityOperationSettings)Settings.TryGetC(oi.Key)
+            //        let ctx = new EntityOperationContext
+            //        {
+            //            Entity = ident,
+            //            OperationSettings = os,
+            //            OperationInfo = oi,
+            //            PartialViewName = partialViewName,
+            //            Prefix = prefix
+            //        }
+            //        where os == null || os.IsVisible == null || os.IsVisible(ctx)
+            //        select OperationButtonFactory.Create(ctx)).ToList();
+
+            //var constructFroms = list.Where(oi => oi.OperationType == OperationType.ConstructorFrom);
+            //if (constructFroms.Any())
+            //{
+            //    buttons.Add(new ToolBarMenu
+            //    {
+            //        AltText = Resources.Create,
+            //        Text = Resources.Create,
+            //        DivCssClass = ToolBarButton.DefaultEntityDivCssClass,
+            //        Items = 
+            //            (from oi in constructFroms
+            //            let os = (EntityOperationSettings)Settings.TryGetC(oi.Key)
+            //            let ctx = new EntityOperationContext
+            //            {
+            //                Entity = ident,
+            //                OperationSettings = os,
+            //                OperationInfo = oi,
+            //                PartialViewName = partialViewName,
+            //                Prefix = prefix
+            //            }
+            //            where os == null || os.IsVisible == null || os.IsVisible(ctx)
+            //            select OperationButtonFactory.Create(ctx)).ToList()
+            //    });
+            //}
+
+            return buttons.ToArray();
         }
 
         internal ToolBarButton[] ButtonBar_GetButtonBarForQueryName(ControllerContext controllerContext, object queryName, Type entityType, string prefix)

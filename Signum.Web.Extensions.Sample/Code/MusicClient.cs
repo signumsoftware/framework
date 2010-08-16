@@ -40,7 +40,13 @@ namespace Signum.Web.Extensions.Sample
                 {
                     { AlbumOperation.Save, new EntityOperationSettings { IsVisible = _ => false }},
                     { AlbumOperation.Clone, new EntityOperationSettings { OnClick = ctx => new JsOperationConstructorFrom(ctx.Options()).DefaultSubmit() }},
-                    { AlbumOperation.CreateFromBand, new EntityOperationSettings { ControllerUrl = "Music/CreateAlbumFromBand" }},
+                    { AlbumOperation.CreateFromBand, new EntityOperationSettings 
+                    { 
+                        ControllerUrl = "Music/CreateAlbumFromBand", 
+                        OnClick = ctx => JsValidator.EntityIsValid(ctx.Prefix, 
+                            new JsOperationConstructorFrom(ctx.Options())
+                            .OperationAjax(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk)),
+                    }},
                 });
             }
         }

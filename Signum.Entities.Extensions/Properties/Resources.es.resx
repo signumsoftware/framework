@@ -196,7 +196,7 @@
     <value>Eliminado</value>
   </data>
   <data name="ExcelReportDN_DisplayName" xml:space="preserve">
-    <value>Consultas</value>
+    <value>Nombre del informe</value>
   </data>
   <data name="ExcelReportDN_File" xml:space="preserve">
     <value>Fichero</value>

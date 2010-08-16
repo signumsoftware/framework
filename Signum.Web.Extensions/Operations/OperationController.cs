@@ -63,7 +63,13 @@ namespace Signum.Web.Operations
             else //NormalWindow
             {
                 if (Request.IsAjaxRequest())
-                    return Navigator.NormalControl(this, entity);
+                {
+                    string newUrl = Navigator.ViewRoute(entity.GetType(), entity.Id);
+                    if (HttpContext.Request.UrlReferrer.AbsolutePath.Contains(newUrl))
+                        return Navigator.NormalControl(this, entity);
+                    else
+                        return Navigator.RedirectUrl(newUrl);
+                }
                 else
                     return Navigator.View(this, entity);
             }
@@ -81,6 +87,8 @@ namespace Signum.Web.Operations
             else
                 throw new ArgumentException(Resources.CouldNotCreateLiteWithoutAnIdToCallOperation0.Formato(sfOperationFullKey));
 
+            if (Navigator.Manager.QuerySettings.ContainsKey(runtimeInfo.RuntimeType))
+                return Navigator.RedirectUrl(Navigator.FindRoute(runtimeInfo.RuntimeType));
             return Content("");
         }
 
@@ -121,7 +129,13 @@ namespace Signum.Web.Operations
             else //NormalWindow
             {
                 if (Request.IsAjaxRequest())
-                    return Navigator.NormalControl(this, entity);
+                {
+                    string newUrl = Navigator.ViewRoute(entity.GetType(), entity.Id);
+                    if (HttpContext.Request.UrlReferrer.AbsolutePath.Contains(newUrl))
+                        return Navigator.NormalControl(this, entity);
+                    else
+                        return Navigator.RedirectUrl(newUrl);
+                }
                 else
                     return Navigator.View(this, entity);
             }

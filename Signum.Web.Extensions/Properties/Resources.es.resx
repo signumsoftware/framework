@@ -456,4 +456,28 @@
   <data name="Delete" xml:space="preserve">
     <value>Eliminar</value>
   </data>
+  <data name="PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem" xml:space="preserve">
+    <value>Confirme que desea eliminar la entidad del sistema</value>
+  </data>
+  <data name="Create" xml:space="preserve">
+    <value>Crear</value>
+  </data>
+  <data name="ExcelAdminister" xml:space="preserve">
+    <value>Administrar</value>
+  </data>
+  <data name="ExcelReport" xml:space="preserve">
+    <value>Informe Excel</value>
+  </data>
+  <data name="AreYouSureOfDeletingReport0" xml:space="preserve">
+    <value>¿Está seguro de eliminar el informe {0}?</value>
+  </data>
+  <data name="ReportTemplateMustBeSpecified" xml:space="preserve">
+    <value>Debe especificar el modelo del informe</value>
+  </data>
+  <data name="ExcelTemplateMustHaveExtensionXLSXandCurrentOneHas0" xml:space="preserve">
+    <value>El template Excel debe tener extensión .xlsx, pero el actual tiene extensión {0}</value>
+  </data>
+  <data name="Download" xml:space="preserve">
+    <value>Descargar</value>
+  </data>
 </root>

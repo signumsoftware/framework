@@ -5,7 +5,7 @@
 <script type="text/javascript">
     function solicitarCaptcha() {
         $('#ajax-loader').show();
-        $.ajax({
+        SF.ajax({
             type: "POST",
             url: "Captcha.ashx/Refresh",
             data: "",

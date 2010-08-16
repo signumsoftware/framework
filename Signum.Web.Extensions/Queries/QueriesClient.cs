@@ -130,10 +130,7 @@ namespace Signum.Web.Queries
                     },
 
                     new EntitySettings<QueryTokenModel>(EntityType.Default) { PartialViewName = e => ViewPrefix + "QueryToken" },
-                  
                 });
-
-
 
                 if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(QueryDN)))
                     Navigator.Manager.EntitySettings.Add(typeof(QueryDN), new EntitySettings<QueryDN>(EntityType.Default));
@@ -201,22 +198,23 @@ namespace Signum.Web.Queries
             if (items.Count > 0)
                 items.Add(new ToolBarSeparator());
 
-            items.AddRange(new ToolBarButton[]
+            items.Add(new ToolBarButton
             {
-                new ToolBarButton
-                {
-                    AltText = Signum.Web.Properties.Resources.New,
-                    Text = Signum.Web.Properties.Resources.New,
-                    ImgSrc = "signum/images/lineButtons.gif",
-                    OnClick = Js.SubmitOnly("Queries/CreateUserQuery", JsFindNavigator.JsRequestData(new JsFindOptions{Prefix = prefix})).ToJS()
-                },
-                new ToolBarButton
+                AltText = Signum.Web.Properties.Resources.New,
+                Text = Signum.Web.Properties.Resources.New,
+                ImgSrc = "signum/images/lineButtons.gif",
+                OnClick = Js.SubmitOnly("Queries/CreateUserQuery", JsFindNavigator.JsRequestData(new JsFindOptions{Prefix = prefix})).ToJS()
+            });
+
+            if (idCurrentUserQuery > 0)
+            {
+                items.Add(new ToolBarButton
                 {
                     AltText = "Edit",
                     Text = "Edit",
                     OnClick = Js.SubmitOnly("Queries/EditUserQuery", "{{id:{0}}}".Formato(idCurrentUserQuery)).ToJS()
-                },
-            });
+                });
+            }
 
             return new ToolBarButton[]
             {

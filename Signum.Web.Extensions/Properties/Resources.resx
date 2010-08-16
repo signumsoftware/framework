@@ -456,4 +456,28 @@
   <data name="Delete" xml:space="preserve">
     <value>Delete</value>
   </data>
+  <data name="PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem" xml:space="preserve">
+    <value>Please confirm you'd like to delete the entity from the system</value>
+  </data>
+  <data name="Create" xml:space="preserve">
+    <value>Create</value>
+  </data>
+  <data name="ExcelAdminister" xml:space="preserve">
+    <value>Administer</value>
+  </data>
+  <data name="ExcelReport" xml:space="preserve">
+    <value>Excel Report</value>
+  </data>
+  <data name="AreYouSureOfDeletingReport0" xml:space="preserve">
+    <value>Are you sure of deleting the report {0}</value>
+  </data>
+  <data name="ReportTemplateMustBeSpecified" xml:space="preserve">
+    <value>The report template must be specified</value>
+  </data>
+  <data name="ExcelTemplateMustHaveExtensionXLSXandCurrentOneHas0" xml:space="preserve">
+    <value>Excel template must have .xlsx extension, and the current one has {0}</value>
+  </data>
+  <data name="Download" xml:space="preserve">
+    <value>Download</value>
+  </data>
 </root>

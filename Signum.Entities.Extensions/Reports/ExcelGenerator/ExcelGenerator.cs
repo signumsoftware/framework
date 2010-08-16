@@ -20,22 +20,13 @@ namespace Signum.Entities.Reports
 {
     public static class ExcelGenerator
     {
-        public static byte[] WriteDataInExcelFile(ResultTable results)
-        {
-            using (MemoryStream ms = new MemoryStream())
-            {
-                WriteDataInExcelFile(results, ms);
-                return ms.ToArray(); 
-            }
-        }
-
         public static void WriteDataInExcelFile(ResultTable results, string fileName)
         {
             using (FileStream fs = File.Open(fileName, FileMode.Open, FileAccess.ReadWrite))
                 WriteDataInExcelFile(results, fs);
         }
 
-        static void WriteDataInExcelFile(ResultTable results, Stream stream)
+        public static void WriteDataInExcelFile(ResultTable results, Stream stream)
         {
             if (results == null)
                 throw new ApplicationException(Resources.ThereAreNoResultsToWrite);

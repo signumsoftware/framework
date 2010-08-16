@@ -23,21 +23,27 @@ namespace Signum.Test.Extensions
             if (!started)
             {
                 started = true;
+                
+                AuthLogic.SystemUserName = "System";
 
                 SchemaBuilder sb = new SchemaBuilder();
 
                 DynamicQueryManager dqm = new DynamicQueryManager();
 
                 ConnectionScope.Default = new Connection(connectionString, sb.Schema, dqm);
-                
-                Signum.Test.Starter.InternalStart(sb, dqm);
+
+                sb.Schema.Initializing(InitLevel.Level1SimpleEntities, Schema_InitializingApplication);
 
                 sb.Settings.OverrideTypeAttributes<IUserRelatedDN>(new ImplementedByAttribute());
-            
+
+                Signum.Test.Starter.InternalStart(sb, dqm);
+
                 OperationLogic.Start(sb, dqm);
 
                 QueryLogic.Start(sb);
                 UserQueryLogic.Start(sb, dqm);
+
+                ReportsLogic.Start(sb, dqm, true, false);
 
                 new AlbumGraph().Register();
             }
@@ -51,9 +57,18 @@ namespace Signum.Test.Extensions
 
                 Administrator.TotalGeneration();
 
-                Schema.Current.Initialize();
+                RoleDN superUser = new RoleDN
+                {
+                    Name = "SuperUser"
+                }.Save();
 
-                Signum.Test.Starter.Load();
+                // crear los usuarios base
+                new UserDN
+                {
+                    UserName = AuthLogic.SystemUserName,
+                    PasswordHash = Security.EncodePassword(Guid.NewGuid().ToString()),
+                    Role = superUser
+                }.Save();
 
                 new UserDN
                 {
@@ -61,7 +76,17 @@ namespace Signum.Test.Extensions
                     PasswordHash = Security.EncodePassword("test"),
                     Role = new RoleDN { Name = "ExternalUser" }
                 }.Save();
+
+                Schema.Current.Initialize();
+
+                Signum.Test.Starter.Load();
+
             }
+        }
+
+        static void Schema_InitializingApplication(Schema sender)
+        {
+            AuthLogic.SystemUser = Database.Query<UserDN>().Single(u => u.UserName == AuthLogic.SystemUserName);
         }
     }
 }

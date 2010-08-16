@@ -6,7 +6,7 @@ using System.Web.Mvc;
 using System.Web.Mvc.Html;
 using Signum.Utilities;
 using Signum.Entities;
-using Signum.Web.Properties;
+using Signum.Web.Extensions.Properties;
 
 namespace Signum.Web.Operations
 {
@@ -39,13 +39,13 @@ namespace Signum.Web.Operations
             return new JsInstruction(() => "{0}.operationAjax(\'{1}\',{2},{3})".Formato(this.ToJS(), newPrefix, querySelectedItems, onSuccess.ToJS()));
         }
     }
-
-
-    public static class JsOp
+    
+    public static class JsOpSuccess
     {
+        public static readonly JsFunction DefaultDispatcher = new JsFunction() { Renderer = () => "OpOnSuccessDispatcher" };
         public static readonly JsFunction ReloadContent = new JsFunction() { Renderer = () => "OpReloadContent" };
         public static readonly JsFunction OpenPopup = new JsFunction() { Renderer = () => "OpOpenPopup" };
-        public static readonly JsFunction OpOpenPopupNoDefaultOk = new JsFunction() { Renderer = () => "OpOpenPopupNoDefaultOk" };
+        public static readonly JsFunction OpenPopupNoDefaultOk = new JsFunction() { Renderer = () => "OpOpenPopupNoDefaultOk" };
         public static readonly JsFunction Navigate = new JsFunction() { Renderer = () => "OpNavigate" };
     }
 
@@ -96,12 +96,14 @@ namespace Signum.Web.Operations
         public JsOperationDelete(JsOperationOptions options)
             : base(options)
         {
-            Renderer = () =>"new DeleteExecutor(" + this.options.ToJS() + ")";
+            Renderer = () => "new DeleteExecutor(" + this.options.ToJS() + ")";
         }
 
         public JsInstruction DefaultDelete()
         {
-            return new JsInstruction(() => "{0}.defaultDelete()".Formato(this.ToJS()));
+            return new JsInstruction(() => Js.Confirm(
+                Resources.PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem, 
+                "{0}.defaultDelete()".Formato(this.ToJS())).ToJS());
         }
     }
 }

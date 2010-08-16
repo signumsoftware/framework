@@ -26,9 +26,9 @@ namespace Signum.Web.Extensions.Sample
             AlbumFromBandModel model = new AlbumFromBandModel(band.ToLite());
 
             ViewData[ViewDataKeys.WriteSFInfo] = true;
-            ViewData[ViewDataKeys.OnOk] = new JsOperationExecutor(
+            ViewData[ViewDataKeys.OnOk] = JsValidator.EntityIsValid(prefix, new JsOperationExecutor(
                 new JsOperationOptions { Prefix = prefix, ControllerUrl = "Music/CreateAlbumFromBandOnOk" })
-                .OperationAjax(prefix, JsOp.Navigate);
+                .OperationAjax(prefix, JsOpSuccess.DefaultDispatcher)).ToJS();
             
             return Navigator.PopupView(this, model, prefix);
         }
@@ -39,7 +39,7 @@ namespace Signum.Web.Extensions.Sample
 
             AlbumDN newAlbum = context.Value.Band.ConstructFromLite<AlbumDN>(AlbumOperation.CreateFromBand, new object[] { context.Value.Name, context.Value.Year, context.Value.Label });
 
-            return Content(Navigator.ViewRoute(typeof(AlbumDN), newAlbum.Id));
+            return Navigator.RedirectUrl(Navigator.ViewRoute(typeof(AlbumDN), newAlbum.Id));
         }
     }
 }

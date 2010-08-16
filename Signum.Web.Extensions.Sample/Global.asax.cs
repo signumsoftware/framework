@@ -1,4 +1,5 @@
-﻿using System;
+﻿#region usings
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -15,6 +16,8 @@ using Signum.Engine;
 using Signum.Engine.Authorization;
 using Signum.Entities;
 using Signum.Web.Queries;
+using Signum.Web.Reports;
+#endregion
 
 namespace Signum.Web.Extensions.Sample
 {
@@ -81,6 +84,8 @@ namespace Signum.Web.Extensions.Sample
             });
 
             UserQueriesClient.Start();
+
+            ReportClient.Start(true, true);
 
             MusicClient.Start();
 

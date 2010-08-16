@@ -29,6 +29,13 @@ namespace Signum.Web.Files
 
         public readonly RouteValueDictionary ValueHtmlProps = new RouteValueDictionary();
 
+        bool asyncUpload = true;
+        public bool AsyncUpload
+        {
+            get { return asyncUpload; }
+            set { asyncUpload = value; }
+        }
+
         public bool Download { get; set; }
 
         public string Downloading { get; set; }
@@ -59,6 +66,13 @@ namespace Signum.Web.Files
         public override string ToJS()
         {
             return "new FLine(" + this.OptionsJS() + ")";
+        }
+
+        protected override JsOptionsBuilder OptionsJSInternal()
+        {
+            var result = base.OptionsJSInternal();
+            result.Add("asyncUpload", AsyncUpload ? "true" : "false");
+            return result;
         }
 
         protected override string DefaultRemoving()

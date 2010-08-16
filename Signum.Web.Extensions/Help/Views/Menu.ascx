@@ -101,7 +101,7 @@ String.prototype.replaceAll=function(s1, s2) {return this.split(s1).join(s2)}
                     $(this).val("")
                 }});*/
         $("#save-action").html("Guardando...");
-         $.ajax({
+         SF.ajax({
             type: "POST",
             url: document.getElementById("form-save").action,
             async: false,

@@ -23,7 +23,7 @@ using Signum.Web.Queries.Models;
 using Signum.Engine.Basics;
 #endregion
 
-namespace Signum.Web.Controllers
+namespace Signum.Web.Queries
 {
     [HandleException, AuthenticationRequired]
     public class QueriesController : Controller
