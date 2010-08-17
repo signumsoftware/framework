@@ -149,6 +149,9 @@ FindNavigator.prototype = {
             async: this.findOptions.async,
             dataType: "json",
             success: function(r) {
+                var idBtnSearch = $btnSearch.attr('id');
+                if (asyncSearchFinished[idBtnSearch])
+                    asyncSearchFinished[idBtnSearch] = false;
                 $btnSearch.val(lang['buscar']).toggleClass('loading');
                 if (r.length > 0) {
                     for (var i = 0, l = r.length; i < l; i++) {
