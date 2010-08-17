@@ -10,7 +10,7 @@
 using (var e = Html.TypeContext<QueryTokenModel>()) 
 {
     %>
-    <%= Html.WriteQueryToken(e.Value.QueryUrlName, e.Value.QueryToken.Token, e, 0) %>
+    <%= Html.WriteQueryToken(e.Value.QueryNameToStr, e.Value.QueryToken.Token, e, 0) %>
     <%
     //Html.ValueLine(e, f => f.DisplayName, f => f.ReadOnly = true);
     //Html.EntityRepeater(e, f => f.Filters);

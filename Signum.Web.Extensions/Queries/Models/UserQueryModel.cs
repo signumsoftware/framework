@@ -16,15 +16,17 @@ namespace Signum.Web.Queries.Models
     {
         public UserQueryModel() { }
 
-        public UserQueryModel(UserQueryDN userQuery)
+        public UserQueryModel(UserQueryDN userQuery, object queryName)
         {
+            this.queryName = queryName;
+
             IdUserQuery = userQuery.IdOrNull;
             Query = userQuery.Query;
             DisplayName = userQuery.DisplayName;
 
-            Filters = userQuery.Filters.Select(qf => new QueryFilterModel(qf, userQuery.Query.Key)).ToMList();
-            Columns = userQuery.Columns.Select(qc => new QueryColumnModel(qc, userQuery.Query.Key)).ToMList();
-            Orders = userQuery.Orders.Select(qo => new QueryOrderModel(qo, userQuery.Query.Key)).ToMList();
+            Filters = userQuery.Filters.Select(qf => new QueryFilterModel(qf, queryName.ToString())).ToMList();
+            Columns = userQuery.Columns.Select(qc => new QueryColumnModel(qc, queryName.ToString())).ToMList();
+            Orders = userQuery.Orders.Select(qo => new QueryOrderModel(qo, queryName.ToString())).ToMList();
             Top = userQuery.MaxItems;
         }
 
@@ -34,6 +36,14 @@ namespace Signum.Web.Queries.Models
         {
             get { return idUserQuery; }
             set { Set(ref idUserQuery, value, () => IdUserQuery); }
+        }
+
+        [Ignore]
+        object queryName;
+        public object QueryName
+        {
+            get { return queryName; }
+            set { Set(ref queryName, value, () => QueryName); }
         }
 
         QueryDN query;

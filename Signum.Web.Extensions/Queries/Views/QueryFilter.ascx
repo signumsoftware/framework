@@ -18,7 +18,7 @@ using (var e = Html.TypeContext<QueryFilterModel>())
         using (var queryToken = e.SubContext(f => f.QueryToken))
         {
             Html.WriteEntityInfo(queryToken); %>
-            <%= Html.WriteQueryToken(queryToken.Value.QueryUrlName, queryToken.Value.QueryToken.Token, queryToken, 0)%>
+            <%= Html.WriteQueryToken(queryToken.Value.QueryNameToStr, queryToken.Value.QueryToken.Token, queryToken, 0)%>
     <% } %>
     </div>
     <%

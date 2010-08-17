@@ -13,10 +13,10 @@ namespace Signum.Web.Queries.Models
     {
         public QueryTokenModel() { }
 
-        public QueryTokenModel(QueryTokenDN token, string queryUrlName)
+        public QueryTokenModel(QueryTokenDN token, string queryNameToStr)
         {
             QueryToken = token;
-            QueryUrlName = queryUrlName;
+            QueryNameToStr = queryNameToStr;
         }
 
         QueryTokenDN queryToken;
@@ -27,12 +27,12 @@ namespace Signum.Web.Queries.Models
             set { Set(ref queryToken, value, () => QueryToken); }
         }
 
-        string queryUrlName;
+        string queryNameToStr;
         [StringLengthValidator(AllowNulls=false, Min=1)]
-        public string QueryUrlName
+        public string QueryNameToStr
         {
-            get { return queryUrlName; }
-            set { Set(ref queryUrlName, value, () => QueryUrlName); }
+            get { return queryNameToStr; }
+            set { Set(ref queryNameToStr, value, () => QueryNameToStr); }
         }
     }
 }

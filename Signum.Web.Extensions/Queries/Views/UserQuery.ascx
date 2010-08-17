@@ -32,7 +32,7 @@ using (var e = Html.TypeContext<UserQueryModel>())
             new JsViewOptions
             { 
                 ControllerUrl = "Queries/NewQueryFilter", 
-                RequestExtraJsonData = "{{queryKey:\"{0}\"}}".Formato(e.Value.Query.Key) 
+                RequestExtraJsonData = "{{queryKey:\"{0}\"}}".Formato(e.Value.Query.Key.ToString()) 
             }).ToJS());
 	%>
 	<br />
@@ -43,7 +43,7 @@ using (var e = Html.TypeContext<UserQueryModel>())
             new JsViewOptions
             {
                 ControllerUrl = "Queries/NewQueryColumn",
-                RequestExtraJsonData = "{{queryKey:\"{0}\"}}".Formato(e.Value.Query.Key)
+                RequestExtraJsonData = "{{queryKey:\"{0}\"}}".Formato(e.Value.Query.Key.ToString())
             }).ToJS());
 	%>
 	<br />
@@ -54,7 +54,7 @@ using (var e = Html.TypeContext<UserQueryModel>())
                 new JsViewOptions
                 {
                     ControllerUrl = "Queries/NewQueryOrder",
-                    RequestExtraJsonData = "{{queryKey:\"{0}\"}}".Formato(e.Value.Query.Key)
+                    RequestExtraJsonData = "{{queryKey:\"{0}\"}}".Formato(e.Value.Query.Key.ToString())
                 }).ToJS());
     %>
 	<br />
