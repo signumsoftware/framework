@@ -60,11 +60,12 @@ namespace Signum.Web.Operations
 
             List<ToolBarButton> buttons = contexts
                 .Where(oi => oi.OperationInfo.OperationType != OperationType.ConstructorFrom || 
-                            (oi.OperationInfo.OperationType == OperationType.ConstructorFrom && !oi.OperationSettings.GroupInMenu))
+                            (oi.OperationInfo.OperationType == OperationType.ConstructorFrom && oi.OperationSettings != null && !oi.OperationSettings.GroupInMenu))
                 .Select(ctx => OperationButtonFactory.Create(ctx))
                 .ToList();
 
-            var constructFroms = contexts.Where(oi => oi.OperationInfo.OperationType == OperationType.ConstructorFrom && oi.OperationSettings.GroupInMenu);
+            var constructFroms = contexts.Where(oi => oi.OperationInfo.OperationType == OperationType.ConstructorFrom && 
+                            (oi.OperationSettings == null || (oi.OperationSettings != null && oi.OperationSettings.GroupInMenu)));
             if (constructFroms.Any())
             {
                 buttons.Add(new ToolBarMenu

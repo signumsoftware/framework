@@ -105,7 +105,12 @@ namespace Signum.Web.Authorization
 
                 OperationClient.Manager.Settings.AddRange(new Dictionary<Enum, OperationSettings>
                 {
-                    { UserOperation.SaveNew, new EntityOperationSettings { IsVisible = ctx => ctx.Entity.IsNew }},
+                    { UserOperation.SaveNew, new EntityOperationSettings 
+                    { 
+                        IsVisible = ctx => ctx.Entity.IsNew,
+                        ControllerUrl = "Auth/SaveNewUser",
+                        OnClick = ctx => new JsOperationExecutor(ctx.Options()).OperationAjax(ctx.Prefix, JsOpSuccess.DefaultDispatcher)
+                    }},
                     { UserOperation.Save, new EntityOperationSettings { IsVisible = ctx => !ctx.Entity.IsNew }},
                     { UserOperation.Disable, new EntityOperationSettings { IsVisible = ctx => !ctx.Entity.IsNew }},
                     { UserOperation.Enable, new EntityOperationSettings { IsVisible = ctx => !ctx.Entity.IsNew }}

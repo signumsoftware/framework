@@ -18,7 +18,7 @@ using System.Text.RegularExpressions;
 using Signum.Entities;
 using Signum.Engine.Mailing;
 using System.Collections.Generic;
-using Signum.Utilities;
+using Signum.Engine.Operations;
 #endregion
 
 namespace Signum.Web.Authorization
@@ -84,6 +84,35 @@ namespace Signum.Web.Authorization
         }
 
         #endregion
+
+        [AcceptVerbs(HttpVerbs.Post)]
+        public ActionResult ValidateNewUser()
+        {
+            var context = this.ExtractEntity<UserDN>().ApplyChanges(this.ControllerContext, "", true);
+            context.Value.PasswordHash = "1111111";
+            context.ValidateGlobal();
+
+            this.ModelState.FromContext(context);
+            return Navigator.ModelState(ModelState);
+        }
+
+        [AcceptVerbs(HttpVerbs.Post)]
+        public ActionResult SaveNewUser(string prefix)
+        {
+            var context = this.ExtractEntity<UserDN>(prefix).ApplyChanges(this.ControllerContext, prefix, true);
+            //TODO Anto: Create full process of user creation (send email of confirmation, link to confirm and set pwd, etc)
+            context.Value.PasswordHash = "1111111";
+            context.ValidateGlobal();
+
+            if (context.GlobalErrors.Any())
+            { 
+                this.ModelState.FromContext(context);
+                return Navigator.ModelState(ModelState);
+            }
+
+            context.Value.Execute(UserOperation.SaveNew);
+            return Navigator.RedirectUrl(Navigator.ViewRoute(typeof(UserDN), context.Value.Id));
+        }
 
         #region "Reset"
 

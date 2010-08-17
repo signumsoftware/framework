@@ -480,4 +480,7 @@
   <data name="Download" xml:space="preserve">
     <value>Descargar</value>
   </data>
+  <data name="WeReceivedARequestToCreateAnAccountYouCanCreateItFollowingTheLinkBelow" xml:space="preserve">
+    <value>Ha solicitado crear una cuenta. Para confirmarlo haga click en el siguiente enlace:</value>
+  </data>
 </root>

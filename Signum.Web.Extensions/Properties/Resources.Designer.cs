@@ -1105,6 +1105,15 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to We received a request to create an account. You can create it following the link below:.
+        /// </summary>
+        public static string WeReceivedARequestToCreateAnAccountYouCanCreateItFollowingTheLinkBelow {
+            get {
+                return ResourceManager.GetString("WeReceivedARequestToCreateAnAccountYouCanCreateItFollowingTheLinkBelow", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to You can reset your password by following the link below:.
         /// </summary>
         public static string YouCanResetYourPasswordByFollowingTheLinkBelow {
