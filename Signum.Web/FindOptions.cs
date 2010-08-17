@@ -128,7 +128,7 @@ namespace Signum.Web
             op.Add("filterMode", FilterMode != FilterMode.Visible ? FilterMode.ToString().SingleQuote() : null);
             op.Add("create", !Create ? "false" : null);
             op.Add("allowMultiple", AllowMultiple.TrySC(b => b ? "true" : "false"));
-            op.Add("filters", filterOptions.Empty() ? null : filterOptions.Select((f, i) => f.ToString(i)).ToString("").SingleQuote());
+            op.Add("filters", filterOptions.Empty() ? null : filterOptions.Select((f, i) => f.ToString(i)).ToString("&").SingleQuote());
             op.Add("allowUserColumns", AllowUserColumns.HasValue ? (AllowUserColumns.Value ? "true" : "false") : null);
         }
     }

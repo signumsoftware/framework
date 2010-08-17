@@ -662,7 +662,7 @@ function NewSubTokensCombo(_findOptions, index) {
 
 function QuickFilter($elem) {
     var idtblresults = $elem.closest(".tblResults")[0].id;
-    var prefix = idtblresults.substring(0, idtblresults.indexOf("tblResults"));
+    var prefix = (idtblresults == "tblResults") ? "" : idtblresults.substring(0, idtblresults.indexOf("tblResults")-1);
     new FindNavigator({ prefix: prefix }).quickFilter($elem);
 }
 

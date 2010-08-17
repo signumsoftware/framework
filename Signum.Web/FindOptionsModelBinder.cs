@@ -183,7 +183,7 @@ namespace Signum.Web
             if (type.UnNullify() == typeof(bool))
             {
                 string[] vals = ((string)value).Split(',');
-                return (vals[0] == "true");
+                return (vals[0] == "true" || vals[0] == "True");
             }
             if (type.UnNullify() == typeof(DateTime))
             {
