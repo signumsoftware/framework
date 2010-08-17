@@ -765,7 +765,7 @@ th.headerSortDown {
 .operations .dropdown 
 {
 	margin-left:0;
-	padding-left:10px;
+	padding:4px;
 }
 
 .operations .dropdown .menu-operation {
