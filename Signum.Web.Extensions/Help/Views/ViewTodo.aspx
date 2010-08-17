@@ -10,7 +10,7 @@
 </asp:Content>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
-<script src="<%=ClientScript.GetWebResourceUrl(typeof(Navigator), "Signum.Web.Scripts.SF_Globals.js")%>" type="text/javascript"></script>
+<script src="Signum/Scripts/SF_Globals.js" type="text/javascript"></script>
 <div class="grid_16" id="entityContent">
 <%
     int count = (int)ViewData["EntityCount"];

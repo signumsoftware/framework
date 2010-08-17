@@ -9,7 +9,7 @@
 </asp:Content>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
-<script src="<%=ClientScript.GetWebResourceUrl(typeof(Navigator), "Signum.Web.Scripts.SF_Globals.js")%>" type="text/javascript"></script>
+<script src="Signum/Scripts/SF_Globals.js" type="text/javascript"></script>
     <% Html.RenderPartial(HelpClient.ViewPrefix + HelpClient.Menu); %>
     <%
         AppendixHelp ah = (AppendixHelp)Model;
