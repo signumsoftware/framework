@@ -9,7 +9,7 @@ namespace Signum.Web.ScriptCombiner
     public class CombineController : Controller
     {
         [AcceptVerbs(HttpVerbs.Get)]
-        public void CSS(string f, string p)
+        public void CSS(string f, string p, string v)
         {
             List<IScriptResource> list = new List<IScriptResource>();
             foreach (var local in f.Split(','))
@@ -25,7 +25,7 @@ namespace Signum.Web.ScriptCombiner
         }
 
         [AcceptVerbs(HttpVerbs.Get)]
-        public void AreaCss(string f)
+        public void AreaCss(string f, string v)
         {
             List<IScriptResource> list = new List<IScriptResource>();
 
@@ -40,7 +40,7 @@ namespace Signum.Web.ScriptCombiner
         }
 
         [AcceptVerbs(HttpVerbs.Get)]
-        public void CssMixed(string l, string a)
+        public void CssMixed(string l, string a, string v)
         {
             List<IScriptResource> list = new List<IScriptResource>();
 
@@ -65,14 +65,14 @@ namespace Signum.Web.ScriptCombiner
         }
 
         [AcceptVerbs(HttpVerbs.Get)]
-        public void JS(string f, string p)
+        public void JS(string f, string p, string v)
         {
             new JsScriptCombiner().Process(f.Split(','),p,
                 ControllerContext.RequestContext.HttpContext);
         }
 
         [AcceptVerbs(HttpVerbs.Get)]
-        public void AreaJs(string f)
+        public void AreaJs(string f, string v)
         {
             new AreaJsScriptCombiner()
                 .Process(f.Split(','), null, ControllerContext.RequestContext.HttpContext);

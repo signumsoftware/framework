@@ -282,7 +282,6 @@ namespace Signum.Web.ScriptCombiner
         }
     }
 
-
     public class AreaJsScriptCombiner : JsScriptCombiner
     {
         public AreaJsScriptCombiner()
@@ -311,7 +310,7 @@ namespace Signum.Web.ScriptCombiner
         }
     }
 
-   public abstract class IScriptResource
+    public abstract class IScriptResource
     {
         /// <summary>
         /// Sets the Content-Type HTTP Header
@@ -592,6 +591,19 @@ namespace Signum.Web.ScriptCombiner
 
     public class Common
     {
+        static string version;
+        public static string Version
+        {
+            get {
+                if (version == null) {
+                    System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
+                    System.IO.FileInfo fileInfo = new System.IO.FileInfo(assembly.Location);
+                    DateTime lastModified = fileInfo.LastWriteTime;
+                    version = Base64Encode(DateTime.Now.Ticks / TimeSpan.TicksPerSecond);
+                }
+                return version;
+            }
+        }
         public static string ReplaceRelativeImg(string content, string fileName)
         {
 
@@ -634,5 +646,37 @@ namespace Signum.Web.ScriptCombiner
 
             return sb.ToString();
         }
+
+        public static string Base64Encode(long intNumber)
+        {
+            long intNum = default(long);
+            string strSum = null;
+            long intCarry = default(long);
+            long intConvertBase = 62;
+            strSum = "";
+            intNum = intNumber;
+            do
+            {
+                intCarry = intNum % intConvertBase;
+                if (intCarry > 35)
+                {
+                    strSum = Convert.ToChar(intCarry - 35 + 96) + strSum;
+                }
+
+                else if (intCarry > 9)
+                {
+
+                    strSum = Convert.ToChar(intCarry - 9 + 64) + strSum;
+                }
+                else
+                {
+                    strSum = intCarry + strSum;
+                }
+                intNum = (long)(intNum / intConvertBase);
+            }
+            while (!(intNum == 0));
+            return strSum;
+        }
+
     }
 }

@@ -180,7 +180,7 @@
     <value>Opération {0} n'est pas autorisée pour lites</value>
   </data>
   <data name="Operation0NeedsALite" xml:space="preserve">
-    <value>Opération {0} doit un Lite.</value>
+    <value>Opération {0} a besoin d'un Lite.</value>
   </data>
   <data name="Type0HasToImplement1AtLeast" xml:space="preserve">
     <value>Type {0} doit mettre en œuvre au moins {1}</value>

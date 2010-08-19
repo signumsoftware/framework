@@ -89,17 +89,14 @@ namespace Signum.Web
         {
 
             string content = "";
-#if (DEBUG)
-            content = files.ToString(f => "<script type='text/javascript' src=\"{0}\"></script>\n".Formato(f), "");
-            return content;
-#endif
+
             content = "<script type='text/javascript' src=\"{0}\"></script>\n".Formato(IncludeAreaJsPath(files));
             return content;
         }
 
         static string IncludeAreaJsPath(params string[] files)
         {
-            return "combine/areajs?f={0}".Formato(String.Join(",", files).Replace("/", "%2f"));
+            return "combine/areajs?f={0}&amp;v={1}".Formato(String.Join(",", files).Replace("/", "%2f"), ScriptCombiner.Common.Version);
         }
 
         public static void IncludeAreaCss(this HtmlHelper html, params string[] files)
@@ -116,7 +113,7 @@ namespace Signum.Web
 
         static string IncludeAreaCssPath(params string[] files)
         {
-            return "combine/areacss?f={0}".Formato(String.Join(",", files).Replace("/", "%2f"));
+            return "combine/areacss?f={0}&amp;v={1}".Formato(String.Join(",", files).Replace("/", "%2f"), ScriptCombiner.Common.Version);
         }
     }
 }
