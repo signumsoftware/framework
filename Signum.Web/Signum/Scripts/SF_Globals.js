@@ -79,6 +79,22 @@
             },
             error: options.error
         });
+
+        /*
+        
+           $.ajax($.extend(jqueryAjaxOptions, {
+            success: function(ajaxResult) {
+                var url = SF.checkRedirection(ajaxResult);
+                if (!empty(url))
+                    window.location.href = $("base").attr("href") + url;
+                else {
+                    if (options.success != null)
+                        options.success(ajaxResult);
+                }
+            }
+        }));
+        
+        */
     };
 
     SF.checkRedirection = function(ajaxResult) {

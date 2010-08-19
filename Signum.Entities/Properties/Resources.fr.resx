@@ -151,7 +151,7 @@
     <value>{0} doit être en majuscule</value>
   </data>
   <data name="_0IsNecessaryOnState1" xml:space="preserve">
-    <value>{0} est nécessaire en état{1}</value>
+    <value>{0} est nécessaire en état {1}</value>
   </data>
   <data name="_0IsNewAndHasNoId" xml:space="preserve">
     <value>'{0}' est nouveau et n'a pas d'id</value>
