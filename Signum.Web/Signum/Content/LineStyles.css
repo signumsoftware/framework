@@ -65,7 +65,7 @@ input[type=submit]:active, input[type=button]:active {
 }*/
 
 input[type=text], input[type=password],input[type=button],
-input[type=number], input[type=email],
+input[type=number], input[type=email], input[type=submit],
 input[type=url], input[type=tel], textarea, select {/* IE will show a border around input radio */
     border:1px solid #ccc;
     color:#333;
