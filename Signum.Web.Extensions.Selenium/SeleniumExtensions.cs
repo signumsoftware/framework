@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using Selenium;
 using System.Diagnostics;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Signum.Web.Selenium
 {
@@ -77,6 +78,7 @@ namespace Signum.Web.Selenium
             DateTime now = DateTime.Now;
             while (DateTime.Now < now.AddMilliseconds(timeout) && !condition())
                 Thread.Sleep(1000);
+            Assert.IsTrue(condition());
         }
     }
 }
