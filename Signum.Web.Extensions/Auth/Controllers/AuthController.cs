@@ -560,10 +560,12 @@ namespace Signum.Web.Authorization
         {
             FormsAuthentication.SignOut();
             //Session.RemoveAll();
-            Session.Remove(SessionUserKey);
+            //Session.Remove(SessionUserKey);
             var authCookie = System.Web.HttpContext.Current.Request.Cookies[AuthClient.CookieName];
             if (authCookie != null && authCookie.Value.HasText())
                 Response.Cookies[AuthClient.CookieName].Expires = DateTime.Now.AddDays(-10);
+
+            Session.Abandon();
 
             return RedirectToAction("Index", "Home");
         }

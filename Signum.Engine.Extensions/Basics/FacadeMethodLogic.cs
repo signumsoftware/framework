@@ -30,24 +30,32 @@ namespace Signum.Engine.Basics
         public static List<FacadeMethodDN> RetrieveOrGenerateServiceOperations()
         {
             var current = Database.RetrieveAll<FacadeMethodDN>().ToDictionary(a => a.Name);
-            var total = GenerateServiceOperations().ToDictionary(a => a.Name);
+            var total = GenerateFacadeMethods().ToDictionary(a => a.Name);
 
             total.SetRange(current);
             return total.Values.ToList();
         }
 
-        static List<FacadeMethodDN> GenerateServiceOperations()
+        static List<FacadeMethodDN> GenerateFacadeMethods()
         {
-            return serviceInterface.GetInterfaces()
-                .SelectMany(i => i.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.FlattenHierarchy))
-                .Select(mi => new FacadeMethodDN { Name = mi.Name }).ToList();
+            return GenerateServiceMethodInfo().Select(mi => new FacadeMethodDN { Name = mi.Name }).ToList();
+        }
+
+        public static MethodInfo GenerateServiceMethodInfo(string miName)
+        {
+            return serviceInterface.GetInterfaces().SelectMany(i => i.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.FlattenHierarchy)).Single(m=>m.Name== miName);
+        }
+
+        public static List<MethodInfo> GenerateServiceMethodInfo()
+        {
+            return serviceInterface.GetInterfaces().SelectMany(i => i.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.FlattenHierarchy)).ToList();
         }
 
         const string FacadeMethodKey = "FacadeMethod";
 
         public static SqlPreCommand SyncronizeServiceOperations(Replacements replacements)
         {
-            var should = GenerateServiceOperations();
+            var should = GenerateFacadeMethods();
 
             var current = Administrator.TryRetrieveAll<FacadeMethodDN>(replacements);
 

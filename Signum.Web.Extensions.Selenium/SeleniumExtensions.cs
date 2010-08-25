@@ -15,8 +15,13 @@ namespace Signum.Web.Selenium
         {
             Process seleniumServerProcess = new Process();
             seleniumServerProcess.StartInfo.FileName = "java";
-            seleniumServerProcess.StartInfo.Arguments =
-                "-jar c:/selenium/selenium-server.jar";
+            if (System.IO.Directory.Exists("D:\\Signum\\Selenium"))
+                seleniumServerProcess.StartInfo.Arguments =
+                    "-jar c:/selenium/selenium-server.jar -firefoxProfileTemplate D:\\Signum\\Selenium";
+            else
+                seleniumServerProcess.StartInfo.Arguments =
+                    "-jar c:/selenium/selenium-server.jar";
+
             seleniumServerProcess.Start();
             return seleniumServerProcess;
         }
@@ -58,7 +63,7 @@ namespace Signum.Web.Selenium
         public static void KillSelenium(Process seleniumProcess)
         {
             seleniumProcess.Kill();
-            
+
             //Kill IIS worker process so it frees application folder and the next build can delete it
             foreach (var p in Process.GetProcessesByName("w3wp"))
                 p.Kill();
