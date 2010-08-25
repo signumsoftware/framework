@@ -349,6 +349,9 @@ function ValidatePartial(_partialValOptions) {
 
 function EntityIsValid(validationOptions, onSuccess) {
     log("Validator EntityIsValid");
+
+    NotifyInfo(lang['validating']);
+    
     var isValid = null;
     if (empty(validationOptions.prefix))
         isValid = new Validator(validationOptions).validate();
@@ -356,11 +359,14 @@ function EntityIsValid(validationOptions, onSuccess) {
         var info = RuntimeInfoFor(validationOptions.prefix);
         isValid = new PartialValidator($.extend(validationOptions, { type: info.runtimeType(), id: info.id() })).validate().isValid;
     }
+
     if (isValid) {
+        NotifyInfo('',1);
         if (onSuccess != null)
             onSuccess();
     }
     else {
+        NotifyInfo(lang['error'], 2000);
         window.alert(lang['popupErrorsStop']);
     }
 };

@@ -39,6 +39,7 @@
         "error": "Error",
         "saving": "Guardando...",
         "saved": "Guardado",
+        "validating": "Validando entidad...",
         "searching": "Buscando...",
         "buscar": "Buscar",
         "executingOperation": "Ejecutando operación...",

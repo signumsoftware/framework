@@ -461,9 +461,10 @@ namespace Signum.Web
 
             ctx.AddChild(sc);
 
-            Debug.Assert(sc.SupressChange);
+            if (sc.SupressChange)
+                return newLite;
 
-            return newLite;
+            return sc.Value.ToLite(sc.Value.IsNew);
         }
 
         public override void RecursiveValidation(MappingContext<Lite<S>> ctx)
