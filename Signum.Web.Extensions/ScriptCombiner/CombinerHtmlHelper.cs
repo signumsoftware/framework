@@ -87,11 +87,10 @@ namespace Signum.Web
 
         public static string IncludeAreaJs(params string[] files)
         {
-
-            string content = "";
-
-            content = "<script type='text/javascript' src=\"{0}\"></script>\n".Formato(IncludeAreaJsPath(files));
-            return content;
+            #if (DEBUG)
+                return files.ToString(f => "<script type='text/javascript' src=\"{0}\"></script>\n".Formato(f), "");
+            #endif
+            return "<script type='text/javascript' src=\"{0}\"></script>\n".Formato(IncludeAreaJsPath(files));
         }
 
         static string IncludeAreaJsPath(params string[] files)
