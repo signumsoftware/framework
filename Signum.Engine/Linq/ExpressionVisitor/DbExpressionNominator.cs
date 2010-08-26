@@ -30,6 +30,8 @@ namespace Signum.Engine.Linq
 
         bool IsFullNominate { get { return tempFullNominate || existingAliases == null; } }
 
+        bool isAggresive = false;
+
         HashSet<Expression> candidates = new HashSet<Expression>();
 
         private DbExpressionNominator() { }
@@ -37,6 +39,13 @@ namespace Signum.Engine.Linq
         static internal HashSet<Expression> Nominate(Expression expression, string[] existingAliases, out Expression newExpression)
         {
             DbExpressionNominator n = new DbExpressionNominator { existingAliases = existingAliases };
+            newExpression = n.Visit(expression);
+            return n.candidates;
+        }
+
+        static internal HashSet<Expression> NominateGroupBy(Expression expression, string[] existingAliases, out Expression newExpression)
+        {
+            DbExpressionNominator n = new DbExpressionNominator { existingAliases = existingAliases, isAggresive = true };
             newExpression = n.Visit(expression);
             return n.candidates;
         }
@@ -83,7 +92,7 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitColumn(ColumnExpression column)
         {
-            if (IsFullNominate || existingAliases.Contains(column.Alias))
+            if (IsFullNominate || isAggresive || existingAliases.Contains(column.Alias))
                 candidates.Add(column);
             return column;
         }
@@ -113,9 +122,16 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitConstant(ConstantExpression c)
         {
-            if (IsFullNominate)
+            if ((IsFullNominate || isAggresive) && IsSimpleType(c.Type))
                 candidates.Add(c);
             return c;
+        }
+
+        private bool IsSimpleType(Type type)
+        {
+            type = type.UnNullify();
+
+            return type.IsEnum || Schema.Current.Settings.TypeValues.ContainsKey(type);
         }
 
         protected override Expression VisitSqlFunction(SqlFunctionExpression sqlFunction)
@@ -212,6 +228,36 @@ namespace Signum.Engine.Linq
             return result; 
         }
 
+        private Expression TrySqlDayOftheWeek(Expression expression)
+        {
+            Expression expr = Visit(expression);
+            if (!candidates.Contains(expr))
+                return null;
+
+            Expression result =
+                Expression.Add(
+                    TrySqlFunction(SqlFunction.DATEPART, expr.Type, new SqlEnumExpression(SqlEnums.weekday), expr), 
+                Expression.Constant(1));
+
+            candidates.Add(result);
+            return result;
+        }
+
+        private Expression TrySqlMonthStart(Expression expression)
+        {
+            Expression expr = Visit(expression);
+            if (!candidates.Contains(expr))
+                return null;
+
+            Expression result =
+                TrySqlFunction(SqlFunction.DATEADD, expression.Type, new SqlEnumExpression(SqlEnums.month),
+                      TrySqlFunction(SqlFunction.DATEDIFF, typeof(int), new SqlEnumExpression(SqlEnums.month), new SqlConstantExpression(0), expression),
+                    new SqlConstantExpression(0));
+
+            candidates.Add(result);
+            return result;
+        }
+
         Expression Convert(Expression exp, Type type)
         {
             return new SqlFunctionExpression(type, SqlFunction.CONVERT.ToString(), new[]{exp, 
@@ -227,7 +273,6 @@ namespace Signum.Engine.Linq
         {
             return Expression.Negate(new SqlFunctionExpression(typeof(int), SqlFunction.DATEPART.ToString(), new Expression[] { new SqlEnumExpression(part), dateExpression }));
         }
-
 
         protected override Expression VisitBinary(BinaryExpression b)
         {
@@ -488,6 +533,7 @@ namespace Signum.Engine.Linq
                 case "DateTime.Second": return TrySqlFunction(SqlFunction.DATEPART, m.Type, new SqlEnumExpression(SqlEnums.second), m.Expression);
                 case "DateTime.Millisecond": return TrySqlFunction(SqlFunction.DATEPART, m.Type, new SqlEnumExpression(SqlEnums.millisecond), m.Expression);
                 case "DateTime.Date": return TrySqlDate(m.Expression);
+                case "DateTime.DayOfWeek": return TrySqlDayOftheWeek(m.Expression);
                 case "TimeSpan.TotalDays": return TrySqlDifference(SqlEnums.day, m.Type, m.Expression);
                 case "TimeSpan.TotalHours": return TrySqlDifference(SqlEnums.hour, m.Type, m.Expression);
                 case "TimeSpan.TotalMilliseconds": return TrySqlDifference(SqlEnums.millisecond, m.Type, m.Expression);
@@ -552,7 +598,10 @@ namespace Signum.Engine.Linq
                 case "DateTime.AddMonths": return TrySqlFunction(SqlFunction.DATEADD, m.Type, new SqlEnumExpression(SqlEnums.month), m.GetArgument("months"), m.Object);
                 case "DateTime.AddSeconds": return TrySqlFunction(SqlFunction.DATEADD, m.Type, new SqlEnumExpression(SqlEnums.second), m.GetArgument("value"), m.Object);
                 case "DateTime.AddYears": return TrySqlFunction(SqlFunction.DATEADD, m.Type, new SqlEnumExpression(SqlEnums.year), m.GetArgument("value"), m.Object);
-
+                
+                    //dateadd(month, datediff(month, 0, SomeDate),0);
+                case "DateTimeExtensions.MonthStart": return TrySqlMonthStart(m.GetArgument("dateTime"));
+                    
                 case "Math.Sign": return TrySqlFunction(SqlFunction.SIGN, m.Type, m.GetArgument("value"));
                 case "Math.Abs": return TrySqlFunction(SqlFunction.ABS, m.Type, m.GetArgument("value"));
                 case "Math.Sin": return TrySqlFunction(SqlFunction.SIN, m.Type, m.GetArgument("a"));

@@ -416,6 +416,7 @@ namespace Signum.Engine.Linq
         month,
         day,
         week,
+        weekday,
         hour,
         minute,
         second,

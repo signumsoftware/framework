@@ -31,7 +31,13 @@ namespace Signum.Engine.Linq
         ParameterExpression row = Expression.Parameter(typeof(IProjectionRow), "row");
         static PropertyInfo miReader = ReflectionTools.GetPropertyInfo((IProjectionRow row) => row.Reader);
 
-        List<Expression> parameterExpressions = new List<Expression>(); 
+        class ParameterInfo
+        {
+            internal MethodCallExpression Expression;
+            internal string Name; 
+        }
+
+        Dictionary<Expression, ParameterInfo> parameterExpressions = new Dictionary<Expression, ParameterInfo>(); 
 
         int parameter = 0; 
 
@@ -42,8 +48,10 @@ namespace Signum.Engine.Linq
 
         MethodInfo miUnsafeCreateParameter = ReflectionTools.GetMethodInfo(() => SqlParameterBuilder.UnsafeCreateParameter(null, SqlDbType.BigInt, false, null));
 
-        public Expression CreateParameter(string name, Expression value)
+        ParameterInfo CreateParameter(Expression value)
         {
+            string name = GetNextParamAlias();
+
             bool nullable = value.Type.IsClass || value.Type.IsNullable();
             Type clrType = value.Type.UnNullify();
             if (clrType.IsEnum)
@@ -55,11 +63,18 @@ namespace Signum.Engine.Linq
                 Expression.Coalesce(Expression.Convert(value, typeof(object)), Expression.Constant(DBNull.Value)) :
                 (Expression)Expression.Convert(value, typeof(object));
 
-            return Expression.Call(null, miUnsafeCreateParameter, 
-                Expression.Constant(name), 
-                Expression.Constant(sqlDbType),
-                Expression.Constant(nullable),
-                valExpression);
+            return new ParameterInfo
+            {
+                Expression = Expression.Call(null, miUnsafeCreateParameter,
+                   Expression.Constant(name),
+                   Expression.Constant(sqlDbType),
+                   Expression.Constant(nullable),
+                   valExpression),
+                Name = name
+            };
+                
+                
+               
         }
 
         private QueryFormatter() { }
@@ -71,7 +86,7 @@ namespace Signum.Engine.Linq
             qf.Visit(expression);
 
             getParameters = Expression.Lambda<Func<SqlParameter[]>>(
-                Expression.NewArrayInit(typeof(SqlParameter), qf.parameterExpressions.ToArray()));
+                Expression.NewArrayInit(typeof(SqlParameter), qf.parameterExpressions.Values.Select(pi=>pi.Expression).ToArray()));
 
             return qf.sb.ToString();
         }
@@ -82,7 +97,7 @@ namespace Signum.Engine.Linq
             qf.Visit(expression);
 
             getParameters = Expression.Lambda<Func<IProjectionRow, SqlParameter[]>>(
-                Expression.NewArrayInit(typeof(SqlParameter), qf.parameterExpressions.ToArray()), qf.row);
+                Expression.NewArrayInit(typeof(SqlParameter), qf.parameterExpressions.Values.Select(pi => pi.Expression).ToArray()), qf.row);
 
             return qf.sb.ToString();
         }
@@ -365,11 +380,9 @@ namespace Signum.Engine.Linq
                 if (!IsSupported(c.Value.GetType()))
                     throw new NotSupportedException(string.Format(Resources.TheConstantFor0IsNotSupported, c.Value));
 
-                string paramName = GetNextParamAlias();
+                var pi = parameterExpressions.GetOrCreate(c, ()=> this.CreateParameter(c));
 
-                parameterExpressions.Add(this.CreateParameter(paramName, c));
-
-                sb.Append(paramName);
+                sb.Append(pi.Name);
             }
             return c;
         }
@@ -399,11 +412,9 @@ namespace Signum.Engine.Linq
         {
             if (parentScope != null && parentScope.ContainAlias(column.Alias))
             {
-                string paramName = GetNextParamAlias();
-                parameterExpressions.Add(CreateParameter(paramName,
-                    parentScope.GetExpression(row, column.Alias, column.Name, column.Type))); 
+                var pi = parameterExpressions.GetOrCreate(column, ()=> CreateParameter(parentScope.GetColumnExpression(row, column.Alias, column.Name, column.Type))); 
 
-                sb.Append(paramName);
+                sb.Append(pi.Name);
             }
             else
             {

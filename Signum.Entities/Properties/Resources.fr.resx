@@ -189,8 +189,8 @@
   <data name="BeNotNull" xml:space="preserve">
     <value>doit être non nul</value>
   </data>
-  <data name="Column0NotFoundOnQuery1" xml:space="preserve">
-    <value>Colonne {0} pas trouvé durant la recherche{1}</value>
+  <data name="Column0NotFound" xml:space="preserve">
+    <value>Colonne {0} pas trouvé</value>
   </data>
   <data name="ComparisonType_DistinctTo" xml:space="preserve">
     <value>distinctes de</value>
@@ -316,8 +316,8 @@
   <data name="Month" xml:space="preserve">
     <value>Mois</value>
   </data>
-  <data name="MoreThanOneColumnNamed0OnQuery1" xml:space="preserve">
-    <value>Plus d'une colonne est nommée {0} dans la recherche {1}</value>
+  <data name="MoreThanOneColumnNamed0" xml:space="preserve">
+    <value>Plus d'une colonne est nommée {0}</value>
   </data>
   <data name="MoreThanOneTokenWithKey0FoundOn1" xml:space="preserve">
     <value>Plus d'une saisie avec touche {0} trouvé dans {1}</value>

@@ -59,15 +59,20 @@ namespace Signum.Entities.DynamicQuery
         public QueryToken Token { get; internal set; }
 
         int baseIndex;
-        public UserColumn(int baseIndex, QueryToken token)
+        public UserColumn(int baseIndex, string name, Type type)
         {
             this.baseIndex = baseIndex;
+            this.Name = name;
+            this.Type = type;
+        }
+
+        public UserColumn(int baseIndex, QueryToken token)
+            : this(baseIndex, token.FullKey(), token.Type)
+        {
             this.Token = token;
-            this.Name = token.FullKey();
             this.Implementations = token.Implementations();
             this.Format = token.Format;
             this.Unit = token.Unit;
-            this.Type = token.Type;
         }
 
         public override QueryToken GetQueryToken()
@@ -101,6 +106,8 @@ namespace Signum.Entities.DynamicQuery
 
         public override bool IsAllowed()
         {
+            if (Token == null)
+                return true;
             return Token.IsAllowed();
         }
     }

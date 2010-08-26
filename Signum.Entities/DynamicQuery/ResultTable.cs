@@ -11,6 +11,21 @@ using Signum.Entities.Properties;
 
 namespace Signum.Entities.DynamicQuery
 {
+    public struct ColumnValues
+    {
+        public ColumnValues(Column column, Array values)
+        {
+            this.column = column;
+            this.values = values;
+        }
+
+        Column column;
+        public Column Column { get { return column; } }
+
+        Array values;
+        public Array Values { get { return values; } }
+    }
+
     [Serializable]
     public class ResultTable
     {
@@ -18,25 +33,17 @@ namespace Signum.Entities.DynamicQuery
         public ResultRow[] Rows { get; private set; }
         internal Array[] Values;
 
-        public ResultTable(StaticColumn[] staticColumns, UserColumn[] userColumns, int rows, Func<Column, Array> values)
+        public ResultTable(params ColumnValues[] columns)
         {
-            var columns = staticColumns.Cast<Column>().Concat(userColumns.Cast<Column>()).ToArray();
-            string errors = columns.Where((c, i) => c.Index != i).ToString(c => "{0} ({1})".Formato(c.Name, c.Index), " ");
+            int rows = columns.Select(a=>a.Values.Length).Distinct().Single("Unsyncronized number of rows in the results"); 
+
+            string errors = columns.Where((c, i) => c.Column.Index != i).ToString(c => "{0} ({1})".Formato(c.Column.Name, c.Column.Index), " ");
             if (errors.HasText())
                 throw new InvalidOperationException(Resources.SomeColumnsAreNotCorrectlyNumered0.Formato(errors));
 
-            this.Columns = columns.Where(c => c.IsAllowed()).ToArray();
+            this.Columns = columns.Where(c => c.Column.IsAllowed()).Select(c=>c.Column).ToArray();
             this.Rows = 0.To(rows).Select(i => new ResultRow(i, this)).ToArray();
-            this.Values = columns.Select(c =>
-                {
-                    if (!c.IsAllowed())
-                        return null;
-
-                    Array array = values(c);
-                    if (array.Length != rows)
-                        throw new InvalidOperationException(Resources.ResultsInsteadOf1ForColumn2.Formato(array.Length, rows, c.Name));
-                    return array;
-                }).ToArray();
+            this.Values = columns.Select(c =>!c.Column.IsAllowed()? null: c.Values).ToArray();
         }
    
         public IEnumerable<Column> VisibleColumns
@@ -80,6 +87,21 @@ namespace Signum.Entities.DynamicQuery
         {
             this.Index = index;
             this.Table = table;
+        }
+
+        public T GetValue<T>(string columnName)
+        {
+            return (T)this[Table.Columns.Where(c => c.Name == columnName).Single("column not found")];
+        }
+
+        public T GetValue<T>(int columnIndex)
+        {
+            return (T)this[columnIndex];
+        }
+
+        public T GetValue<T>(Column column)
+        {
+            return (T)this[column];
         }
     }
 }

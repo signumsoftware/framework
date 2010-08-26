@@ -12,7 +12,7 @@ namespace Signum.Engine.DynamicQuery
 {
     public class AutoDynamicQuery<T> : DynamicQuery<T>
     {
-        IQueryable<T> query;
+        public IQueryable<T> Query { get; private set; }
         Dictionary<string, Meta> metas;
 
         public AutoDynamicQuery(IQueryable<T> query)
@@ -20,7 +20,7 @@ namespace Signum.Engine.DynamicQuery
             if (query == null)
                 throw new ArgumentNullException("query");
 
-            this.query = query;
+            this.Query = query;
 
             metas = DynamicQuery.QueryMetadata(query);
 
@@ -29,7 +29,7 @@ namespace Signum.Engine.DynamicQuery
 
         public override ResultTable ExecuteQuery(QueryRequest request)
         {
-            IQueryable<Expandable<T>> result = query.SelectExpandable(request.UserColumns).Where(request.Filters).OrderBy(request.Orders).TryTake(request.Limit);
+            IQueryable<Expandable<T>> result = Query.Where(request.Filters).SelectExpandable(request.UserColumns).OrderBy(request.Orders).TryTake(request.Limit);
 
             Expandable<T>[] list = result.ToArray();
 
@@ -38,17 +38,17 @@ namespace Signum.Engine.DynamicQuery
 
         public override int ExecuteQueryCount(QueryCountRequest request)
         {
-            return query.SelectExpandable(null).Where(request.Filters).Count();
+            return Query.Where(request.Filters).Count();
         }
 
         public override Lite ExecuteUniqueEntity(UniqueEntityRequest request)
         {
-            return query.SelectExpandable(null).Where(request.Filters).OrderBy(request.Orders).SelectEntity().Unique(request.UniqueType);
+            return Query.Where(request.Filters).SelectExpandable(null).OrderBy(request.Orders).SelectEntity().Unique(request.UniqueType);
         }
 
         public override Expression Expression
         {
-            get { return query.Expression; }
+            get { return Query.Expression; }
         }
     }
 }

@@ -31,6 +31,16 @@ namespace Signum.Entities.DynamicQuery
 
         public static FilterType GetFilterType(Type type)
         {
+            FilterType? filterType = TryGetFilterType(type);
+
+            if(filterType == null)
+                throw new NotSupportedException(Resources.Type0NotSupported.Formato(type));
+
+            return filterType.Value;
+        }
+
+        public static FilterType? TryGetFilterType(Type type)
+        {
             if (type.IsEnum)
                 return FilterType.Enum;
 
@@ -41,6 +51,7 @@ namespace Signum.Entities.DynamicQuery
                 case TypeCode.Double:
                 case TypeCode.Decimal:
                 case TypeCode.Single:
+                    return FilterType.DecimalNumber;
                 case TypeCode.Byte:
                 case TypeCode.SByte:
                 case TypeCode.Int16:
@@ -60,14 +71,15 @@ namespace Signum.Entities.DynamicQuery
                         return FilterType.Lite;
 
                     if (typeof(IIdentifiable).IsAssignableFrom(type))
-                        return FilterType.Entity;
+                        return FilterType.Lite;
 
                     if (typeof(EmbeddedEntity).IsAssignableFrom(type))
                         return FilterType.Embedded;
 
                     goto default;
                 default:
-                    throw new NotSupportedException(Resources.Type0NotSupported.Formato(type));
+                    return null;
+
             }
         }
 
@@ -111,6 +123,17 @@ namespace Signum.Entities.DynamicQuery
                 }
             },
             { 
+                FilterType.DecimalNumber, new List<FilterOperation>
+                {
+                    FilterOperation.EqualTo,
+                    FilterOperation.DistinctTo, 
+                    FilterOperation.GreaterThan,
+                    FilterOperation.GreaterThanOrEqual,
+                    FilterOperation.LessThan,
+                    FilterOperation.LessThanOrEqual,
+                }
+            },
+            { 
                 FilterType.Enum, new List<FilterOperation>
                 {
                     FilterOperation.EqualTo,
@@ -119,13 +142,6 @@ namespace Signum.Entities.DynamicQuery
             },
             { 
                 FilterType.Lite, new List<FilterOperation>
-                {
-                    FilterOperation.EqualTo,
-                    FilterOperation.DistinctTo,
-                }
-            },
-            { 
-                FilterType.Entity, new List<FilterOperation>
                 {
                     FilterOperation.EqualTo,
                     FilterOperation.DistinctTo,
@@ -147,5 +163,74 @@ namespace Signum.Entities.DynamicQuery
             },
         };
 
+        public static QueryToken[] SubTokens(QueryToken token, IEnumerable<StaticColumn> staticColumns)
+        {
+            if (token == null)
+                return staticColumns.Select(s => QueryToken.NewColumn(s)).ToArray();
+            else
+                return token.SubTokens();
+        }
+
+        public static QueryToken[] SubTokensFilter(QueryToken token, IEnumerable<StaticColumn> staticColumns)
+        {
+            return SubTokens(token, staticColumns.Where(s => s.Filterable));
+        }
+
+
+        public static QueryToken[] SubTokensOrder(QueryToken token, IEnumerable<StaticColumn> staticColumns)
+        {
+            return SubTokens(token, staticColumns.Where(sc => sc.Sortable));
+        }
+
+
+        public static QueryToken[] SubTokensColumn(QueryToken token, IEnumerable<StaticColumn> staticColumns)
+        {
+            return SubTokens(token, staticColumns);
+        }
+
+        public static QueryToken ParseFilter(string tokenString, QueryDescription description)
+        {
+            return Parse(tokenString, t => SubTokensFilter(t, description.StaticColumns));
+        }
+
+        public static QueryToken ParseOrder(string tokenString, QueryDescription description)
+        {
+            return Parse(tokenString, t => SubTokensOrder(t, description.StaticColumns));
+        }
+
+        public static QueryToken ParseColumn(string tokenString, QueryDescription description)
+        {
+            return Parse(tokenString, t => SubTokensColumn(t, description.StaticColumns));
+        }
+
+        public static QueryToken Parse(string tokenString, Func<QueryToken, QueryToken[]> subTokens)
+        {
+            try
+            {
+                string[] parts = tokenString.Split('.');
+
+                string firstPart = parts.First();
+
+                QueryToken result = subTokens(null).Select(t => t.Match(firstPart)).NotNull().Single(
+                    Resources.Column0NotFound.Formato(firstPart),
+                    Resources.MoreThanOneColumnNamed0.Formato(firstPart));
+
+                foreach (var part in parts.Skip(1))
+                {
+                    result = subTokens(result).Select(t => t.Match(part)).NotNull().Single(
+                          Resources.Token0NotCompatibleWith1.Formato(part, result),
+                          Resources.MoreThanOneTokenWithKey0FoundOn1.Formato(part, result));
+                }
+
+                return result;
+            }
+            catch (Exception e)
+            {
+                throw new FormatException("Invalid QueryToken string", e);
+            }
+        }
+
+
+       
     }
 }

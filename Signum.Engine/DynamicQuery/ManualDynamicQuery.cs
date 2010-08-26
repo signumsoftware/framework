@@ -12,21 +12,21 @@ namespace Signum.Engine.DynamicQuery
 {
     public class ManualDynamicQuery<T> : DynamicQuery<T>
     {
-        Func<QueryRequest, IEnumerable<Expandable<T>>> execute;
+        public Func<QueryRequest, IEnumerable<Expandable<T>>> Execute { get; private set; }
 
         public ManualDynamicQuery(Func<QueryRequest, IEnumerable<Expandable<T>>> execute)
         {
             if (execute == null)
                 throw new ArgumentNullException("execute");
 
-            this.execute = execute;
+            this.Execute = execute;
 
             InitializeColumns(mi => null);
         }
 
         public override ResultTable ExecuteQuery(QueryRequest request)
         {
-            Expandable<T>[] list = execute(request).ToArray();
+            Expandable<T>[] list = Execute(request).ToArray();
 
             return ToQueryResult(list, request.UserColumns);
         }
@@ -39,7 +39,7 @@ namespace Signum.Engine.DynamicQuery
                 Filters = request.Filters,
             };
 
-            return execute(req).Count();
+            return Execute(req).Count();
         }
 
         public override Lite ExecuteUniqueEntity(UniqueEntityRequest request)
@@ -52,7 +52,7 @@ namespace Signum.Engine.DynamicQuery
                 Orders = request.Orders,
             };
 
-            return execute(req).SelectEntity().Unique(request.UniqueType);
+            return Execute(req).SelectEntity().Unique(request.UniqueType);
         }
     }
 }

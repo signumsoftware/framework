@@ -14,44 +14,21 @@ namespace Signum.Windows
     [DefaultProperty("Type")]
     public class EnumValuesExtension : MarkupExtension
     {
-        Type type;
-        public Type Type
-        {
-            get { return type; }
-            set { type = value; }
-        }
-
-        bool sort;
-        public bool Sort
-        {
-            get { return sort; }
-            set { sort = value; }
-        }
-
-        bool nicePairs;
-        public bool NicePairs
-        {
-            get { return nicePairs; }
-            set { nicePairs = value; }
-        }
+        public Type Type {get;set;}
+        public bool Sort { get; set; }
+        public bool Nullable { get; set; }
 
         public override object ProvideValue(IServiceProvider serviceProvider)
         {
             var values = Enum.GetValues(Type).Cast<Enum>();
-            if (nicePairs)
-            {
-                var valuePairs = values.Select(a => new Tuple<Enum, string>(a, a.NiceToString()));
-                if (sort)
-                    valuePairs = valuePairs.OrderBy(a => a.Second);
 
-                return valuePairs.ToArray();
-            }
-            else
-            {
-                if (sort)
-                    values = values.OrderBy(a => a.ToString());
-                return values.ToArray();
-            }
+            if (Sort)
+                values = values.OrderBy(a => a.NiceToString());
+
+            if (Nullable)
+                values = values.PreAndNull(); 
+
+            return values.ToArray();
         }
     }
 }

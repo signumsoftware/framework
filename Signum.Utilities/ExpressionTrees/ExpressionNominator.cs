@@ -41,6 +41,7 @@ namespace Signum.Utilities.ExpressionTrees
             {
                 if (expression.NodeType == ExpressionType.Call && ((MethodCallExpression)expression).Method.DeclaringType == typeof(ExpressionNominatorExtensions))
                 {
+                    this.hasDependencies = true;
                     return expression; 
                 }
 

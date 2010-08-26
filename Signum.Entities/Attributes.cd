@@ -3,56 +3,42 @@
   <Class Name="Signum.Entities.ValidatorAttribute" Collapsed="true">
     <Position X="14" Y="0.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AQUAAAAAAAIAAQEAAAAAAAAAAAAAAAAAAAAAAAAIAAA=</HashCode>
       <FileName>ValidationAttributes.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Signum.Entities.NotNullValidatorAttribute" Collapsed="true">
     <Position X="11.5" Y="1.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAQAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>ValidationAttributes.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Signum.Entities.StringLengthValidatorAttribute" Collapsed="true">
     <Position X="14" Y="1.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAEAAAABAQAQAAkAAAAIAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAQAEAAAABAQAAEAkAAAAIAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>ValidationAttributes.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Signum.Entities.RegexValidatorAttribute" Collapsed="true">
     <Position X="18.5" Y="1.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAQAAAAQAAAAAAAAAAAAAAAAACAAAAAg=</HashCode>
+      <HashCode>AAQAAAAAgAAAAAEAAAQAAAAAAAAAAAAAAACAAAAAAAA=</HashCode>
       <FileName>ValidationAttributes.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Signum.Entities.NumberIsValidatorAttribute" Collapsed="true">
     <Position X="7.25" Y="1.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAABAAAAAQQAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAQAAABAAAAAQAEAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>ValidationAttributes.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Signum.Entities.CountIsValidatorAttribute" Collapsed="true">
     <Position X="9.25" Y="1.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAABAAAAAQQAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>ValidationAttributes.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="Signum.Entities.DateOnlyValidatorAttribute" Collapsed="true">
-    <Position X="16.25" Y="1.75" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>ValidationAttributes.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="Signum.Entities.StringCaseAttribute" Collapsed="true">
-    <Position X="20.75" Y="1.75" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAQAAAAAAAAAAAAAAEAAAABAAAAAAAAA=</HashCode>
+      <HashCode>AAQAAABAAAAAQAEAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>ValidationAttributes.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -60,74 +46,166 @@
     <Position X="2.25" Y="4.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Attributes.cs</FileName>
+      <FileName>FieldAttributes.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Signum.Entities.UniqueIndexAttribute" Collapsed="true">
     <Position X="2.25" Y="5.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAA=</HashCode>
-      <FileName>Attributes.cs</FileName>
+      <FileName>FieldAttributes.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Signum.Entities.MultipleIndexAttribute" Collapsed="true">
     <Position X="0.5" Y="4.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Attributes.cs</FileName>
+      <FileName>FieldAttributes.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Signum.Entities.ImplementedByAttribute" Collapsed="true">
     <Position X="4" Y="3.25" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAACAAAIAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Attributes.cs</FileName>
+      <HashCode>AAAAAAAAAAAAABAACAAAIAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>FieldAttributes.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Signum.Entities.ImplementedByAllAttribute" Collapsed="true">
     <Position X="2.25" Y="3.25" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Attributes.cs</FileName>
+      <HashCode>AAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>FieldAttributes.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Signum.Entities.IgnoreAttribute" Collapsed="true">
     <Position X="0.5" Y="3.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Attributes.cs</FileName>
+      <FileName>FieldAttributes.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Signum.Entities.NotNullableAttribute" Collapsed="true">
     <Position X="5.75" Y="4.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Attributes.cs</FileName>
+      <FileName>FieldAttributes.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Signum.Entities.SqlDbTypeAttribute" Collapsed="true">
     <Position X="0.5" Y="5.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAQgAAAAIIAAEACABABAAAAAACAAAAAAAA=</HashCode>
-      <FileName>Attributes.cs</FileName>
+      <FileName>FieldAttributes.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Signum.Entities.LowPopulationAttribute" Collapsed="true">
     <Position X="5.75" Y="3.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAACAAAAAgAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Attributes.cs</FileName>
+      <FileName>FieldAttributes.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Signum.Entities.NotifyCollectionChangedAttribute" Collapsed="true">
     <Position X="4" Y="4.25" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>CAAAkAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Attributes.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>FieldAttributes.cs</FileName>
     </TypeIdentifier>
   </Class>
+  <Class Name="Signum.Entities.EMailValidatorAttribute" Collapsed="true">
+    <Position X="18.75" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>ValidationAttributes.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Signum.Entities.TelephoneValidatorAttribute" Collapsed="true">
+    <Position X="23.25" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>ValidationAttributes.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Signum.Entities.URLValidatorAttribute" Collapsed="true">
+    <Position X="16.25" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAI=</HashCode>
+      <FileName>ValidationAttributes.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Signum.Entities.FileNameValidatorAttribute" Collapsed="true">
+    <Position X="21" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>ValidationAttributes.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Signum.Entities.DecimalsValidatorAttribute" Collapsed="true">
+    <Position X="36.25" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAAAAAAEAAAAQAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>ValidationAttributes.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Signum.Entities.NumberBetweenValidatorAttribute" Collapsed="true">
+    <Position X="27.25" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAEAAAAAAQAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>ValidationAttributes.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Signum.Entities.NoRepeatValidatorAttribute" Collapsed="true">
+    <Position X="34.25" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>ValidationAttributes.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Signum.Entities.DaysPrecissionValidatorAttribute" Collapsed="true">
+    <Position X="29.5" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>ValidationAttributes.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Signum.Entities.SecondsPrecissionValidatorAttribute" Collapsed="true">
+    <Position X="31.75" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>ValidationAttributes.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Signum.Entities.MinutesPrecissionValidatorAttribute" Collapsed="true">
+    <Position X="34" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>ValidationAttributes.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Signum.Entities.DateTimePrecissionValidatorAttribute" Collapsed="true">
+    <Position X="31.75" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAAAAAAEAAAAAAAAAAAAAAIAAAAAAAAAAEAA=</HashCode>
+      <FileName>ValidationAttributes.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Signum.Entities.StringCaseValidatorAttribute" Collapsed="true">
+    <Position X="29.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAAAAAAEAAAAAAAAAAAAAEAAAABAAAAAAAAA=</HashCode>
+      <FileName>ValidationAttributes.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Signum.Entities.StateValidator&lt;E, S&gt;" Collapsed="true">
+    <Position X="42.25" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QAIAAAAQAACAABBAAAAAAAAEAIAAACAAAAAAAAAABAA=</HashCode>
+      <FileName>ValidationAttributes.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
   <Enum Name="Signum.Entities.Case" Collapsed="true">
-    <Position X="20.75" Y="2.5" Width="1.5" />
+    <Position X="23" Y="4.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAABAAAAA=</HashCode>
       <FileName>ValidationAttributes.cs</FileName>
@@ -137,13 +215,13 @@
     <Position X="0.5" Y="6.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAEAAAABAAgAAAAAAAAAAAAAEAAAA=</HashCode>
-      <FileName>Attributes.cs</FileName>
+      <FileName>FieldAttributes.cs</FileName>
     </TypeIdentifier>
   </Enum>
   <Enum Name="Signum.Entities.ComparisonType" Collapsed="true">
     <Position X="10.25" Y="3.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>ACAAAAAAAAAACAAAgAAAAAAAAAAAAAAAAAAAAQBAACA=</HashCode>
+      <HashCode>ACAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAQBAACA=</HashCode>
       <FileName>ValidationAttributes.cs</FileName>
     </TypeIdentifier>
   </Enum>

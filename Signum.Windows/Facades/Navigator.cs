@@ -487,7 +487,7 @@ namespace Signum.Windows
 
             foreach (var f in filters)
             {
-                f.Token = QueryToken.Parse(description, f.Path); 
+                f.Token = QueryUtils.ParseFilter(f.Path, description); 
                 f.RefreshRealValue();
             }
         }
@@ -498,7 +498,7 @@ namespace Signum.Windows
 
             foreach (var o in orders)
             {
-                o.Token = QueryToken.Parse(description, o.Path);
+                o.Token = QueryUtils.ParseOrder(o.Path, description); 
             }
         }
 
@@ -509,7 +509,7 @@ namespace Signum.Windows
             for (int i = 0; i < userColumns.Count; i++)
             {
                 UserColumnOption uco = userColumns[i];
-                QueryToken token = QueryToken.Parse(description, uco.Path);
+                QueryToken token = QueryUtils.ParseColumn(uco.Path, description);
                 uco.UserColumn = new UserColumn(description.StaticColumns.Count, token)
                 {
                     UserColumnIndex = i,
@@ -518,7 +518,7 @@ namespace Signum.Windows
             }
         }
 
-        internal QueryDescription GetQueryDescription(object queryName)
+        public QueryDescription GetQueryDescription(object queryName)
         {
             QuerySettings settings = GetQuerySettings(queryName);
             return settings.QueryDescription ??
@@ -774,12 +774,12 @@ namespace Signum.Windows
         HashSet<string> loadedModules = new HashSet<string>();
         public bool NotDefined(MethodBase methodBase)
         {
-            return loadedModules.Add(methodBase.DeclaringType.TypeName() + "." + methodBase.Name);
+            return loadedModules.Add(methodBase.DeclaringType.FullName + "." + methodBase.Name);
         }
 
         public void AssertDefined(MethodBase methodBase)
         {
-            string name = methodBase.DeclaringType.TypeName() + "." + methodBase.Name;
+            string name = methodBase.DeclaringType.FullName + "." + methodBase.Name;
 
             if (!loadedModules.Contains(name))
                 throw new InvalidOperationException(Resources.Call0First.Formato(name));

@@ -625,6 +625,15 @@ namespace Signum.Entities
             return Validate(entity, pi, true);
         }
 
+        public bool? IsAllowed(S state, PropertyInfo pi)
+        {
+            int index = propertyNames.IndexOf(pi.Name);
+            if (index == -1)
+                return null;
+
+            return dictionary.GetOrThrow(state, Resources.State0NotRegisteredInStateValidator)[index];
+        }
+
         public string Validate(E entity, PropertyInfo pi, bool showState)
         {
             int index = propertyNames.IndexOf(pi.Name);

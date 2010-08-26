@@ -249,7 +249,7 @@ namespace Signum.Windows
             Description = Navigator.Manager.GetQueryDescription(QueryName);
 
             tokenBuilder.Token = null;
-            tokenBuilder.StaticColumns = Description.StaticColumns.Where(sc => sc.Filterable);
+            tokenBuilder.SubTokensEvent += tokenBuilder_SubTokensEvent;
 
             entityColumn = Description.StaticColumns.SingleOrDefault(a => a.IsEntity);
             if (entityColumn != null)
@@ -300,6 +300,16 @@ namespace Signum.Windows
             }
         }
 
+        QueryToken[] tokenBuilder_SubTokensEvent(QueryToken arg)
+        {
+            if (arg == null)
+                return (from s in Description.StaticColumns
+                        where s.Filterable
+                        select QueryToken.NewColumn(s)).ToArray();
+            else
+                return arg.SubTokens(); 
+        }
+
         private void CompleteOrderColumns()
         {
             for (int i = 0; i < OrderOptions.Count; i++)
@@ -317,24 +327,7 @@ namespace Signum.Windows
 
         private void btCreateFilter_Click(object sender, RoutedEventArgs e)
         {
-            if (tokenBuilder.Token == null)
-            {
-                MessageBox.Show(Properties.Resources.NoFilterSelected);
-                return;
-            }
-
-            FilterType ft = QueryUtils.GetFilterType(tokenBuilder.Token.Type);
-
-            FilterOption f = new FilterOption
-            {
-                Token = tokenBuilder.Token,
-                Value = null,
-                Operation = QueryUtils.GetFilterOperations(ft).First()
-            };
-
-            FilterOptions.Add(f);
-
-            filterBuilder.RefreshFirstColumn();
+            filterBuilder.AddFilter(tokenBuilder.Token);
         }
 
         DispatcherTimer timer;
@@ -382,7 +375,6 @@ namespace Signum.Windows
                 AddListViewColumn(c);
             }
 
-            int num = Description.StaticColumns.Count;
             foreach (var uco in UserColumns)
             {
                 uco.GridViewColumn = AddListViewColumn(uco.UserColumn);
@@ -395,9 +387,7 @@ namespace Signum.Windows
             {
                 for (int i = 0; i < UserColumns.Count; i++)
                 {
-                    UserColumnOption uco = UserColumns[i];
-                    uco.UserColumn.UserColumnIndex = i;
-                    uco.GridViewColumn.CellTemplate = CreateDataTemplate(uco.UserColumn);
+                    UserColumns[i].UserColumn.UserColumnIndex = i;
                 }
             }
         }
@@ -791,18 +781,8 @@ namespace Signum.Windows
             }
         }
 
-        public Image GetImage(ImageSource source)
-        {
-            var result = new Image
-            {
-                Width = 16,
-                Height = 16,
-                SnapsToDevicePixels = true,
-                Source = source
-            };
 
-            RenderOptions.SetBitmapScalingMode(result, BitmapScalingMode.NearestNeighbor);
-            return result;
-        }
     }
+
+   
 }

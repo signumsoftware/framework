@@ -8,6 +8,7 @@ using System.Reflection;
 using Signum.Utilities;
 using Signum.Entities.Properties;
 using Signum.Entities.Reflection;
+using Signum.Utilities.ExpressionTrees; 
 using System.Text.RegularExpressions;
 
 namespace Signum.Entities.DynamicQuery
@@ -28,6 +29,8 @@ namespace Signum.Entities.DynamicQuery
         public abstract PropertyRoute GetPropertyRoute();
         public abstract Implementations Implementations();
         public abstract bool IsAllowed();
+
+        public abstract QueryToken Clone();
 
         public QueryToken Parent { get; private set; }
 
@@ -55,7 +58,7 @@ namespace Signum.Entities.DynamicQuery
         {
             if (type.UnNullify() == typeof(DateTime))
             {
-                return NetPropertyToken.DateTimeProperties(this, DateTimePrecision.Milliseconds);
+                return DateTimeProperties(this, DateTimePrecision.Milliseconds);
             }
 
             Type cleanType = Reflector.ExtractLite(type) ?? type;
@@ -81,6 +84,24 @@ namespace Signum.Entities.DynamicQuery
             }
 
             return null;
+        }
+
+        public static QueryToken[] DateTimeProperties(QueryToken parent, DateTimePrecision precission)
+        {
+            string utc = TimeZoneManager.Mode == TimeZoneMode.Utc ? "Utc - " : "";
+
+            return new QueryToken[]
+            {
+                new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Year), utc + Resources.Year), 
+                new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Month), utc + Resources.Month), 
+                new MonthStartQueryToken(parent), 
+                new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Day), utc + Resources.Day),
+                new DateQueryToken(parent), 
+                precission < DateTimePrecision.Hours ? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Hour), utc + Resources.Hour), 
+                precission < DateTimePrecision.Minutes ? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Minute), utc + Resources.Minute), 
+                precission < DateTimePrecision.Seconds ? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Second), utc + Resources.Second), 
+                precission < DateTimePrecision.Milliseconds? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Millisecond), utc + Resources.Millisecond), 
+            }.NotNull().ToArray();
         }
 
         IEnumerable<QueryToken> EntityProperties(Type type)
@@ -130,32 +151,9 @@ namespace Signum.Entities.DynamicQuery
             return Parent.FullKey() + "." + Key;
         }
 
-        static Regex regex = new Regex(@"^(?<token>[^\.]+)(\.(?<token>(\([^\)]+\))|([^\.]+)))*$", RegexOptions.ExplicitCapture | RegexOptions.Singleline);
-
-        public static QueryToken Parse(QueryDescription queryDescription, string tokenString)
+        public virtual QueryToken Match(string key)
         {
-            Match m = regex.Match(tokenString);
-            if (!m.Success)
-                throw new FormatException("Invalid QueryToken string"); 
-
-            string[] tokens = m.Groups["token"].Captures.Cast<Capture>().Select(c=>c.Value).ToArray(); 
-
-            string first = tokens.First();
-
-            StaticColumn column = queryDescription.StaticColumns.Where(a => a.Name == first).Single(
-                Resources.Column0NotFoundOnQuery1.Formato(first, QueryUtils.GetNiceQueryName(queryDescription.QueryName)),
-                Resources.MoreThanOneColumnNamed0OnQuery1.Formato(first, QueryUtils.GetNiceQueryName(queryDescription.QueryName)));
-
-            var result = QueryToken.NewColumn(column);
-
-            foreach (var token in tokens.Skip(1))
-            {
-                result = result.SubTokensInternal().Where(k => k.Key == token).Single(
-                      Resources.Token0NotCompatibleWith1.Formato(first, result),
-                      Resources.MoreThanOneTokenWithKey0FoundOn1.Formato(first, result));
-            }
-
-            return result;
+            return key == Key ? this : null;
         }
 
         public bool Equals(QueryToken other)
@@ -169,6 +167,12 @@ namespace Signum.Entities.DynamicQuery
     {
         public PropertyInfo PropertyInfo { get; private set; }
         public string DisplayName { get; private set; }
+
+        internal NetPropertyToken(QueryToken parent, Expression<Func<object>> pi, string displayName): 
+            this(parent, ReflectionTools.GetPropertyInfo(pi), displayName)
+        {
+        
+        }
 
         internal NetPropertyToken(QueryToken parent, PropertyInfo pi, string displayName)
             : base(parent)
@@ -204,9 +208,8 @@ namespace Signum.Entities.DynamicQuery
         public override Expression BuildExpression(Expression expression)
         {
             var result = Parent.BuildExpression(expression);
-            if (Nullable.GetUnderlyingType(result.Type) != null)
-                result = Expression.Property(result, "Value");
-            return Expression.Property(result, PropertyInfo);
+
+            return Expression.Property(result.UnNullify(), PropertyInfo);
         }
 
         protected override QueryToken[] SubTokensInternal()
@@ -229,26 +232,6 @@ namespace Signum.Entities.DynamicQuery
             return null;
         }
 
-        static QueryToken NewNetProperty<T, S>(QueryToken parent, Expression<Func<T, S>> property, string propertyName)
-        {
-            return new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo(property), propertyName);
-        }
-
-        public static QueryToken[] DateTimeProperties(QueryToken parent, DateTimePrecision precission)
-        {
-            string utc = TimeZoneManager.Mode == TimeZoneMode.Utc ? "Utc - " : "";
-
-            return new[]
-            {
-                NewNetProperty(parent, (DateTime dt)=>dt.Year,utc + Resources.Year), 
-                NewNetProperty(parent, (DateTime dt)=>dt.Month,utc + Resources.Month), 
-                NewNetProperty(parent, (DateTime dt)=>dt.Day,utc + Resources.Day), 
-                precission < DateTimePrecision.Hours ? null: NewNetProperty(parent, (DateTime dt)=>dt.Hour,utc + Resources.Hour), 
-                precission < DateTimePrecision.Minutes ? null: NewNetProperty(parent, (DateTime dt)=>dt.Minute,utc + Resources.Minute), 
-                precission < DateTimePrecision.Seconds ? null: NewNetProperty(parent, (DateTime dt)=>dt.Second,utc + Resources.Second), 
-                precission < DateTimePrecision.Milliseconds? null: NewNetProperty(parent, (DateTime dt)=>dt.Millisecond,utc + Resources.Millisecond), 
-            }.NotNull().ToArray();
-        }
 
         public static QueryToken[] CollectionProperties(QueryToken parent)
         {
@@ -271,6 +254,11 @@ namespace Signum.Entities.DynamicQuery
         public override string NiceName()
         {
             return DisplayName + Resources.Of + Parent.NiceName();
+        }
+
+        public override QueryToken Clone()
+        {
+            return new NetPropertyToken(Parent.Clone(), PropertyInfo, DisplayName);
         }
     }
 
@@ -345,7 +333,7 @@ namespace Signum.Entities.DynamicQuery
                         pp.Validators.OfType<DateTimePrecissionValidatorAttribute>().SingleOrDefault());
                     if (att != null)
                     {
-                        return NetPropertyToken.DateTimeProperties(this, att.Precision);
+                        return DateTimeProperties(this, att.Precision);
                     }
                 }
             }
@@ -396,6 +384,11 @@ namespace Signum.Entities.DynamicQuery
         public override string NiceName()
         {
             return PropertyInfo.NiceName() + Resources.Of + Parent.NiceName();
+        }
+
+        public override QueryToken Clone()
+        {
+            return new EntityPropertyToken(Parent.Clone(), PropertyInfo);
         }
     }
 
@@ -473,6 +466,11 @@ namespace Signum.Entities.DynamicQuery
         {
             return Resources._0As1.Formato(Parent.NiceName(), type.NiceName());
         }
+
+        public override QueryToken Clone()
+        {
+            return new AsTypeToken(Parent.Clone(), Type); 
+        }
     }
 
     [Serializable]
@@ -529,11 +527,11 @@ namespace Signum.Entities.DynamicQuery
                     var att = Validator.GetOrCreatePropertyPack(Column.PropertyRoute.Parent.Type, Column.PropertyRoute.PropertyInfo.Name)
                         .Validators.OfType<DateTimePrecissionValidatorAttribute>().SingleOrDefault();
                     if (att != null)
-                        return NetPropertyToken.DateTimeProperties(this, att.Precision);
+                        return DateTimeProperties(this, att.Precision);
                 }
 
                 if (Column.Format == "d")
-                    return NetPropertyToken.DateTimeProperties(this, DateTimePrecision.Days);
+                    return DateTimeProperties(this, DateTimePrecision.Days);
 
             }
 
@@ -565,6 +563,158 @@ namespace Signum.Entities.DynamicQuery
         public override string NiceName()
         {
             return Column.DisplayName;
+        }
+
+        public override QueryToken Clone()
+        {
+            return new ColumnToken(Column);
+        }
+    }
+
+    [Serializable]
+    public class MonthStartQueryToken : QueryToken
+    {
+        internal MonthStartQueryToken(QueryToken parent)
+            : base(parent)
+        {
+        }
+
+        public override string ToString()
+        {
+            return Resources.MonthStart;
+        }
+
+        public override string NiceName()
+        {
+            return Resources.MonthStart + Resources.Of + Parent.NiceName();
+        }
+
+        public override string Format
+        {
+            get { return "Y"; }
+        }
+
+        public override string Unit
+        {
+            get { return null; }
+        }
+
+        public override Type Type
+        {
+            get { return typeof(DateTime); }
+        }
+
+        public override string Key
+        {
+            get { return "{0}.MonthStart".Formato(Parent.Key); }
+        }
+
+        protected override QueryToken[] SubTokensInternal()
+        {
+            return null;
+        }
+
+        static MethodInfo miMonthStart = ReflectionTools.GetMethodInfo(() => DateTimeExtensions.MonthStart(DateTime.MinValue));
+
+        public override Expression BuildExpression(Expression expression)
+        {
+            var exp = Parent.BuildExpression(expression);
+            
+            return Expression.Call(miMonthStart, exp.UnNullify());
+        }
+
+        public override PropertyRoute GetPropertyRoute()
+        {
+            return Parent.GetPropertyRoute();
+        }
+
+        public override Implementations Implementations()
+        {
+            return null;
+        }
+
+        public override bool IsAllowed()
+        {
+            return Parent.IsAllowed();
+        }
+
+        public override QueryToken Clone()
+        {
+            return new MonthStartQueryToken(Parent.Clone());
+        }
+    }
+
+
+    [Serializable]
+    public class DateQueryToken : QueryToken
+    {
+        internal DateQueryToken(QueryToken parent)
+            : base(parent)
+        {
+        }
+
+        public override string ToString()
+        {
+            return Resources.Date;
+        }
+
+        public override string NiceName()
+        {
+            return Resources.Date + Resources.Of + Parent.NiceName();
+        }
+
+        public override string Format
+        {
+            get { return "d"; }
+        }
+
+        public override string Unit
+        {
+            get { return null; }
+        }
+
+        public override Type Type
+        {
+            get { return  typeof(DateTime); }
+        }
+
+        public override string Key
+        {
+            get { return "{0}.Date".Formato(Parent.Key); }
+        }
+
+        protected override QueryToken[] SubTokensInternal()
+        {
+            return null;
+        }
+
+        static PropertyInfo miDate = ReflectionTools.GetPropertyInfo((DateTime d) => d.Date);
+
+        public override Expression BuildExpression(Expression expression)
+        {
+            var exp = Parent.BuildExpression(expression);
+
+            return Expression.Property(exp.UnNullify(), miDate);
+        }
+
+        public override PropertyRoute GetPropertyRoute()
+        {
+            return Parent.GetPropertyRoute();
+        }
+
+        public override Implementations Implementations()
+        {
+            return null;
+        }
+
+        public override bool IsAllowed()
+        {
+            return Parent.IsAllowed();
+        }
+
+        public override QueryToken Clone()
+        {
+            return new DateQueryToken(Parent.Clone()); 
         }
     }
 }

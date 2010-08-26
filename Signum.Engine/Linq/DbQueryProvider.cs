@@ -73,15 +73,15 @@ namespace Signum.Engine.Linq
             Expression expand = ExpressionExpander.Expand(expression, Clean);
             Expression eval =  ExpressionEvaluator.PartialEval(expand);
             Expression simplified = OverloadingSimplifier.Simplify(eval);
-
-            return simplified;
+            Expression boolSimplified = BoolSimplifier.Simplify(simplified);
+            return boolSimplified;
         }
 
         internal static Expression Optimize(Expression binded)
         {
             Expression rewrited = AggregateRewriter.Rewrite(binded);
             Expression rebinded = QueryRebinder.Rebind(rewrited);
-            Expression projCleaned = ProjectionCleaner.Clean(rebinded);
+            Expression projCleaned = EntityCleaner.Clean(rebinded);
             Expression replaced = AliasProjectionReplacer.Replace(projCleaned);
             Expression columnCleaned = UnusedColumnRemover.Remove(replaced);
             Expression subqueryCleaned = RedundantSubqueryRemover.Remove(columnCleaned);

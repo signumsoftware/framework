@@ -30,7 +30,8 @@ namespace Signum.Windows
             if (!Connected)
             {
                 current = getServer();
-                ServerTypes = current.ServerTypes(); 
+                if (current != null)
+                    ServerTypes = current.ServerTypes(); 
             }
 
             if (current == null)
@@ -180,10 +181,12 @@ namespace Signum.Windows
             return Return((IBaseServer s)=>s.SaveList(list.Cast<IdentifiableEntity>().ToList()).Cast<T>().ToList()); 
         }
 
+        static Dictionary<PropertyRoute, Implementations> implementations = new Dictionary<PropertyRoute, Implementations>(); 
+
         public static Implementations FindImplementations(PropertyRoute propertyRoute)
         {
             if (Server.ServerTypes.ContainsKey(propertyRoute.IdentifiableType))
-                return Server.Return((IBaseServer s) => s.FindImplementations(propertyRoute));
+                return implementations.GetOrCreate(propertyRoute, () => Server.Return((IBaseServer s) => s.FindImplementations(propertyRoute)));
 
             return null;
         }

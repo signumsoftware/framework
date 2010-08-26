@@ -183,10 +183,17 @@ namespace Signum.Test.LinqProvider
             list = Database.Query<ArtistDN>().Where(a => a.Dead && false).Select(a => a.Name).ToList();
             list = Database.Query<ArtistDN>().Where(a => a.Dead || true).Select(a => a.Name).ToList();
             list = Database.Query<ArtistDN>().Where(a => a.Dead || false).Select(a => a.Name).ToList();
-            list = Database.Query<ArtistDN>().Where(a => !true).Select(a => a.Name).ToList();
-            list = Database.Query<ArtistDN>().Where(a => !false).Select(a => a.Name).ToList();
+            list = Database.Query<ArtistDN>().Where(a => a.Dead == true).Select(a => a.Name).ToList();
+            list = Database.Query<ArtistDN>().Where(a => a.Dead == false).Select(a => a.Name).ToList();
+            list = Database.Query<ArtistDN>().Where(a => a.Dead != true).Select(a => a.Name).ToList();
+            list = Database.Query<ArtistDN>().Where(a => a.Dead != false).Select(a => a.Name).ToList();
             list = Database.Query<ArtistDN>().Where(a => true ? a.Dead : false).Select(a => a.Name).ToList();
             list = Database.Query<ArtistDN>().Where(a => false ? false : a.Dead).Select(a => a.Name).ToList();
+
+            list = Database.Query<ArtistDN>().Where(a => true).Select(a => a.Name).ToList();
+            list = Database.Query<ArtistDN>().Where(a => !false).Select(a => a.Name).ToList();
+            list = Database.Query<ArtistDN>().Where(a => true ? true : false).Select(a => a.Name).ToList();
+            list = Database.Query<ArtistDN>().Where(a => false ? false : true).Select(a => a.Name).ToList();
         }
 
         [TestMethod]

@@ -189,8 +189,8 @@
   <data name="BeNotNull" xml:space="preserve">
     <value>be not null</value>
   </data>
-  <data name="Column0NotFoundOnQuery1" xml:space="preserve">
-    <value>Column {0} not found on query {1}</value>
+  <data name="Column0NotFound" xml:space="preserve">
+    <value>Column {0} not found</value>
   </data>
   <data name="ComparisonType_DistinctTo" xml:space="preserve">
     <value>distinct to</value>
@@ -316,8 +316,8 @@
   <data name="Month" xml:space="preserve">
     <value>Month</value>
   </data>
-  <data name="MoreThanOneColumnNamed0OnQuery1" xml:space="preserve">
-    <value>More than one column named {0} on query {1}</value>
+  <data name="MoreThanOneColumnNamed0" xml:space="preserve">
+    <value>More than one column named {0}</value>
   </data>
   <data name="MoreThanOneTokenWithKey0FoundOn1" xml:space="preserve">
     <value>More than one token with key {0} found on {1}</value>
@@ -363,9 +363,6 @@
   </data>
   <data name="RemovingEntityNotAllowedInNewLazies" xml:space="preserve">
     <value>Removing entity from a new lite is not allowed</value>
-  </data>
-  <data name="ResultsInsteadOf1ForColumn2" xml:space="preserve">
-    <value>{0} results (instead of {1}) for column {2}</value>
   </data>
   <data name="RootHasNotPropertyString" xml:space="preserve">
     <value>Root has not PropertyString</value>
@@ -444,5 +441,11 @@
   </data>
   <data name="RemoteTimeZoneNotSet" xml:space="preserve">
     <value>RemoteTimeZone not set</value>
+  </data>
+  <data name="Date" xml:space="preserve">
+    <value>Date</value>
+  </data>
+  <data name="MonthStart" xml:space="preserve">
+    <value>Month Start </value>
   </data>
 </root>

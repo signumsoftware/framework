@@ -66,6 +66,14 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void GroupCountInterval()
+        {
+            var songsAlbum = (from a in Database.Query<ArtistDN>()
+                              group a by a.Id < 10 ? 0 : 10 into g
+                              select new { Id = g.Key, Count = g.Count() }).ToList();
+        }
+
+        [TestMethod]
         public void GroupWhereCount()
         {
             var songsAlbum = (from a in Database.Query<ArtistDN>()

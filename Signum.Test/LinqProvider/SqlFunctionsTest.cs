@@ -93,10 +93,10 @@ namespace Signum.Test.LinqProvider
             Dump((NoteDN n) => n.CreationTime.Millisecond);
            
 
-            Dump((NoteDN n) => (DateTime.Today - n.CreationTime).TotalDays.InSql());
-            Dump((NoteDN n) => (DateTime.Today - n.CreationTime).TotalHours.InSql());
-            Dump((NoteDN n) => (DateTime.Today - n.CreationTime).TotalMinutes.InSql());
-            Dump((NoteDN n) => (DateTime.Today - n.CreationTime).TotalSeconds.InSql());
+            Dump((NoteDN n) => (n.CreationTime - n.CreationTime).TotalDays.InSql());
+            Dump((NoteDN n) => (n.CreationTime - n.CreationTime).TotalHours.InSql());
+            Dump((NoteDN n) => (n.CreationTime - n.CreationTime).TotalMinutes.InSql());
+            Dump((NoteDN n) => (n.CreationTime - n.CreationTime).TotalSeconds.InSql());
             Dump((NoteDN n) => (n.CreationTime.AddDays(1) - n.CreationTime).TotalMilliseconds.InSql());
         }
 

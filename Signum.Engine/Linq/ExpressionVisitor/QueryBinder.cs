@@ -469,7 +469,11 @@ namespace Signum.Engine.Linq
         private Expression BindWhere(Type resultType, Expression source, LambdaExpression predicate)
         {
             ProjectionExpression projection = this.VisitCastProjection(source);
-            Expression where = DbExpressionNominator.FullNominate(MapAndVisitExpand(predicate, ref projection), true);
+            Expression exp = MapAndVisitExpand(predicate, ref projection);
+            if (exp.NodeType == ExpressionType.Constant && ((bool)((ConstantExpression)exp).Value))
+                return projection;
+
+            Expression where = DbExpressionNominator.FullNominate(exp, true);
 
             string alias = aliasGenerator.GetNextSelectAlias();
             ProjectedColumns pc = ColumnProjector.ProjectColumns(projection, alias);
@@ -583,67 +587,42 @@ namespace Signum.Engine.Linq
         private Expression BindGroupBy(Type resultType, Expression source, LambdaExpression keySelector, LambdaExpression elementSelector)
         {
             ProjectionExpression projection = this.VisitCastProjection(source);
+            ProjectionExpression subqueryProjection = this.VisitCastProjection(source); // make duplicate of source query as basis of element subquery by visiting the source again
 
-            Expression keyExpr = this.MapAndVisitExpand(keySelector, ref projection);
-            // Use ProjectColumns to get group-by expressions from key expression
-            ProjectedColumns keyProjection = ColumnProjector.ProjectColumns(keyExpr, projection.Source.Alias, projection.Source.KnownAliases, new[] { projection.Token });
-            IEnumerable<Expression> groupExprs = keyProjection.Columns.Select(c => c.Expression);
+            string alias = aliasGenerator.GetNextSelectAlias();
 
-            // make duplicate of source query as basis of element subquery by visiting the source again
-            ProjectionExpression subqueryBasis = this.VisitCastProjection(source);
-            // recompute key columns for group expressions relative to subquery (need these for doing the correlation predicate)
-            Expression subqueryKey = MapAndVisitExpand(keySelector, ref subqueryBasis);
-            // use same projection trick to get group-by expressions based on subquery
-            ProjectedColumns subqueryKeyPC = ColumnProjector.ProjectColumns(subqueryKey, subqueryBasis.Source.Alias, subqueryBasis.Source.KnownAliases, new[] { subqueryBasis.Token });
+            Expression key = GroupEntityCleaner.Clean(this.MapAndVisitExpand(keySelector, ref projection));
+            ProjectedColumns keyPC = ColumnProjector.ProjectColumnsGroupBy(key, alias,projection.Source.KnownAliases, new[]{projection.Token});  // Use ProjectColumns to get group-by expressions from key expression
+            Expression elemExpr = elementSelector == null ? projection.Projector : this.MapAndVisitExpand(elementSelector, ref projection);
+           
+            Expression subqueryKey = GroupEntityCleaner.Clean(MapAndVisitExpand(keySelector, ref subqueryProjection));// recompute key columns for group expressions relative to subquery (need these for doing the correlation predicate
+            ProjectedColumns subqueryKeyPC = ColumnProjector.ProjectColumnsGroupBy(subqueryKey, "basura", subqueryProjection.Source.KnownAliases, new[] { subqueryProjection.Token }); // use same projection trick to get group-by expressions based on subquery
+            Expression subqueryElemExpr = elementSelector == null? subqueryProjection.Projector : this.MapAndVisitExpand(elementSelector, ref subqueryProjection); // compute element based on duplicated subquery
 
-            IEnumerable<Expression> subqueryGroupExprs = subqueryKeyPC.Columns.Select(c => c.Expression);
             Expression subqueryCorrelation =
-                subqueryGroupExprs.Zip(groupExprs, (e1, e2) => SmartEqualizer.EqualNullable(e1, e2))
+                keyPC.Columns.Zip(subqueryKeyPC.Columns, (c1, c2) => SmartEqualizer.EqualNullable(new ColumnExpression(c1.Expression.Type, alias, c1.Name), c2.Expression))
                 .Aggregate((a, b) => Expression.And(a, b));
 
-
-            Expression elemExpr = null;
-            if (elementSelector != null)
-                elemExpr = this.MapAndVisitExpand(elementSelector, ref projection);
-            else
-                elemExpr = projection.Projector;
-
-            // compute element based on duplicated subquery
-            Expression subqueryElemExpr = null;
-            if (elementSelector != null)
-                subqueryElemExpr = this.MapAndVisitExpand(elementSelector, ref subqueryBasis);
-            else
-                subqueryElemExpr = subqueryBasis.Projector;
-
             // build subquery that projects the desired element
-            var elementAlias = aliasGenerator.GetNextSelectAlias();
-            ProjectedColumns elementPC = ColumnProjector.ProjectColumns(subqueryElemExpr, elementAlias, subqueryBasis.Source.KnownAliases, new[] { subqueryBasis.Token });
+            string elementAlias = aliasGenerator.GetNextSelectAlias();
+            ProjectedColumns elementPC = ColumnProjector.ProjectColumns(subqueryElemExpr, elementAlias, subqueryProjection.Source.KnownAliases, new[] { subqueryProjection.Token });
             ProjectionExpression elementSubquery =
                 new ProjectionExpression(
-                    new SelectExpression(elementAlias, false, null, elementPC.Columns, subqueryBasis.Source, subqueryCorrelation, null, null),
+                    new SelectExpression(elementAlias, false, null, elementPC.Columns, subqueryProjection.Source, subqueryCorrelation, null, null),
                     elementPC.Projector, null, elementPC.Token);
 
-            var alias = aliasGenerator.GetNextSelectAlias();
+            NewExpression newResult = Expression.New(typeof(Grouping<,>).MakeGenericType(key.Type, subqueryElemExpr.Type).GetConstructors()[1],
+                        new Expression[] { keyPC.Projector, elementSubquery });
 
-            // make it possible to tie aggregates back to this group-by
+            Expression resultExpr = Expression.Convert(newResult
+                , typeof(IGrouping<,>).MakeGenericType(key.Type, subqueryElemExpr.Type));
 
-            //this.groupByMap.Add(elementSubquery, info);
-
-            Expression resultExpr = Expression.Convert(
-                Expression.New(typeof(Grouping<,>).MakeGenericType(keyExpr.Type, subqueryElemExpr.Type).GetConstructors()[1],
-                        new Expression[] { keyExpr, elementSubquery }), typeof(IGrouping<,>).MakeGenericType(keyExpr.Type, subqueryElemExpr.Type));
-
-            ProjectedColumns pc = ColumnProjector.ProjectColumns(resultExpr, alias, projection.Source.KnownAliases, new[] { projection.Token });
-
-            // make it possible to tie aggregates back to this group-by
-            NewExpression newResult = (NewExpression)RemoveGroupByConvert(pc.Projector);
-            GroupByInfo info = new GroupByInfo { Alias = alias, Projection = new ProjectionExpression(projection.Source, elemExpr, null, projection.Token) };
-            
-            this.groupByMap.Add(((ProjectionExpression)newResult.Arguments[1]).Token, info);
+            this.groupByMap.Add(elementSubquery.Token,
+                new GroupByInfo { Alias = alias, Projection = new ProjectionExpression(projection.Source, elemExpr, null, projection.Token) });
 
             return new ProjectionExpression(
-                new SelectExpression(alias, false, null, pc.Columns, projection.Source, null, null, groupExprs),
-                pc.Projector, null, pc.Token);
+                new SelectExpression(alias, false, null, keyPC.Columns, projection.Source, null, null, keyPC.Columns.Select(c => c.Expression)),
+                resultExpr, null, keyPC.Token);
         }
 
    

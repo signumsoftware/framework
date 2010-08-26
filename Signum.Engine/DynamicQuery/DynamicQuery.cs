@@ -85,19 +85,14 @@ namespace Signum.Engine.DynamicQuery
                        memberInfo.Name), pe).Compile();
         }
 
-        static UserColumn[] Empty = new UserColumn[0];
-
         protected ResultTable ToQueryResult(Expandable<T>[] result, List<UserColumn> userColumns)
         {
-            var dic = StaticColumns.ToDictionary(a => a.BuildStaticColumn());
+            var columns = StaticColumns.Select(c => new ColumnValues(c.BuildStaticColumn(), CreateValuesStaticColumn(c, result)));
 
-            return new ResultTable(
-                dic.Keys.ToArray(),
-                userColumns == null ? Empty : userColumns.ToArray(),
-                result.Length,
-                c => c is StaticColumn ?
-                    CreateValuesStaticColumn(dic[(StaticColumn)c], result) :
-                    CreateValuesUserColumn((UserColumn)c, result));
+            if (userColumns != null)
+                columns = columns.Concat(userColumns.Select(c => new ColumnValues(c, CreateValuesUserColumn((UserColumn)c, result))));
+
+            return new ResultTable(columns.ToArray());
         }
 
         static Array CreateValuesUserColumn(UserColumn column, Expandable<T>[] collection)
@@ -159,9 +154,7 @@ namespace Signum.Engine.DynamicQuery
             NewArrayExpression newArray = Expression.NewArrayInit(typeof(object),
                 userColumns.Select(uc =>
                 {
-                    Expression build = uc.Token.BuildExpression(param);
-                    if (build.Type.IsValueType && !build.Type.IsNullable())
-                        build = Expression.Convert(build, build.Type.Nullify());
+                    Expression build = uc.Token.BuildExpression(param).Nullify();
 
                     return (Expression)Expression.Convert(build, typeof(object));
                 }));
@@ -177,61 +170,24 @@ namespace Signum.Engine.DynamicQuery
 	    #endregion
 
         #region Where
-        static MethodInfo miContains = ReflectionTools.GetMethodInfo((string s) => s.Contains(s));
-        static MethodInfo miStartsWith = ReflectionTools.GetMethodInfo((string s) => s.StartsWith(s));
-        static MethodInfo miEndsWith = ReflectionTools.GetMethodInfo((string s) => s.EndsWith(s));
-        static MethodInfo miLike = ReflectionTools.GetMethodInfo((string s) => s.Like(s));
-
-        static Expression<Func<Expandable<T>, bool>> GetWhereExpression<T>(List<Filter> filters)
+        static Expression<Func<T, bool>> GetWhereExpression<T>(List<Filter> filters)
         {
-            ParameterExpression pe = Expression.Parameter(typeof(Expandable<T>), "p");
+            ParameterExpression pe = Expression.Parameter(typeof(T), "p");
 
             if (filters == null || filters.Count == 0)
                 return null;
 
-            Expression body = filters.Select(f => GetCondition(f, pe)).Aggregate((e1, e2) => Expression.And(e1, e2));
+            Expression body = filters.Select(f => f.GetCondition(pe)).Aggregate((e1, e2) => Expression.And(e1, e2));
 
-            return Expression.Lambda<Func<Expandable<T>, bool>>(body, pe);
+            return Expression.Lambda<Func<T,  bool>>(body, pe);
         }
 
-        static Expression GetCondition(Filter f, ParameterExpression pe)
-        {
-            Expression left = f.Token.BuildExpression(Expression.Property(pe, "Value")); 
-            Expression right = Expression.Constant(f.Value, f.Token.Type);
-
-            switch (f.Operation)
-            {
-                case FilterOperation.EqualTo:
-                    return Expression.Equal(left, right);
-                case FilterOperation.DistinctTo:
-                    return Expression.NotEqual(left, right);
-                case FilterOperation.GreaterThan:
-                    return Expression.GreaterThan(left, right);
-                case FilterOperation.GreaterThanOrEqual:
-                    return Expression.GreaterThanOrEqual(left, right);
-                case FilterOperation.LessThan:
-                    return Expression.LessThan(left, right);
-                case FilterOperation.LessThanOrEqual:
-                    return Expression.LessThanOrEqual(left, right);
-                case FilterOperation.Contains:
-                    return Expression.Call(left, miContains, right);
-                case FilterOperation.StartsWith:
-                    return Expression.Call(left, miStartsWith, right);
-                case FilterOperation.EndsWith:
-                    return Expression.Call(left, miEndsWith, right);
-                case FilterOperation.Like:
-                    return Expression.Call(miLike, left, right);
-                default:
-                    throw new NotSupportedException();
-            }
-        }
-
-        public static IQueryable<Expandable<T>> Where<T>(this IQueryable<Expandable<T>> query, params Filter[] filters)
+        public static IQueryable<T> Where<T>(this IQueryable<T> query, params Filter[] filters)
         {
             return Where(query, filters.NotNull().ToList()); 
         }
 
-        public static IQueryable<Expandable<T>> Where<T>(this IQueryable<Expandable<T>> query, List<Filter> filters)
+        public static IQueryable<T> Where<T>(this IQueryable<T> query, List<Filter> filters)
         {
             var where = GetWhereExpression<T>(filters);
 
@@ -240,12 +196,12 @@ namespace Signum.Engine.DynamicQuery
             return query; 
         }
 
-        public static IEnumerable<Expandable<T>> Where<T>(this IEnumerable<Expandable<T>> sequence, params Filter[] filters)
+        public static IEnumerable<T> Where<T>(this IEnumerable<T> sequence, params Filter[] filters)
         {
             return Where(sequence, filters.NotNull().ToList()); 
         }
 
-        public static IEnumerable<Expandable<T>> Where<T>(this IEnumerable<Expandable<T>> sequence, List<Filter> filters)
+        public static IEnumerable<T> Where<T>(this IEnumerable<T> sequence, List<Filter> filters)
         {
             var where = GetWhereExpression<T>(filters);
 

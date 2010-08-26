@@ -21,18 +21,24 @@ namespace Signum.Windows
     {
         public static readonly DependencyProperty TokenProperty =
               DependencyProperty.Register("Token", typeof(QueryToken), typeof(QueryTokenBuilder), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
-                  (d, e) => ((QueryTokenBuilder)d).UpdateTokenList((QueryToken)e.NewValue)));
+                  (d, e) =>
+                  {
+                      QueryTokenBuilder qtb = (QueryTokenBuilder)d;
+                      if (qtb.IsLoaded)
+                          qtb.UpdateTokenList((QueryToken)e.NewValue);
+                  }));
         public QueryToken Token
         {
             get { return (QueryToken)GetValue(TokenProperty); }
             set { SetValue(TokenProperty, value); }
         }
 
+
         List<QueryToken> tokens = new List<QueryToken>(); 
         private void UpdateTokenList(QueryToken queryToken)
         {
-            if (tokens.LastOrDefault() == queryToken)
-                return;
+            //if (tokens.LastOrDefault() == queryToken)
+            //    return;
 
             if (queryToken == null)
                 tokens = new List<QueryToken>();
@@ -41,27 +47,39 @@ namespace Signum.Windows
             UpdateCombo();
         }
 
-
-        public static readonly DependencyProperty StaticColumnsProperty =
-            DependencyProperty.Register("StaticColumns", typeof(IEnumerable<StaticColumn>), typeof(QueryTokenBuilder), new UIPropertyMetadata(null,
-                (d, e) => ((QueryTokenBuilder)d).UpdateCombo()));
-        public IEnumerable<StaticColumn> StaticColumns
+        public void UpdateTokenList()
         {
-            get { return (IEnumerable<StaticColumn>)GetValue(StaticColumnsProperty); }
-            set { SetValue(StaticColumnsProperty, value); }
+            UpdateTokenList(Token);
         }
+
+        public event Func<QueryToken, QueryToken[]> SubTokensEvent;
+
+        QueryToken[] OnSubTokens(QueryToken token)
+        {
+            if (SubTokensEvent != null)
+                return SubTokensEvent(token);
+
+            throw new InvalidOperationException("SubTokensEvent not set"); 
+        }
+
+        // StaticColumns.Select(c => QueryToken.NewColumn(c)).ToArray()
+
+        //public static readonly DependencyProperty StaticColumnsProperty =
+        //    DependencyProperty.Register("StaticColumns", typeof(IEnumerable<StaticColumn>), typeof(QueryTokenBuilder), new UIPropertyMetadata(null,
+        //        (d, e) => ((QueryTokenBuilder)d).UpdateCombo()));
+        //public IEnumerable<StaticColumn> StaticColumns
+        //{
+        //    get { return (IEnumerable<StaticColumn>)GetValue(StaticColumnsProperty); }
+        //    set { SetValue(StaticColumnsProperty, value); }
+        //}
 
 
         void UpdateCombo()
         {
-            if (StaticColumns == null)
-                return; 
-
             sp.Children.Clear(); 
             for (int i = 0; i < tokens.Count + 1; i++)
 			{
-                QueryToken[] subTokens = i == 0 ? StaticColumns.Select(c => QueryToken.NewColumn(c)).ToArray() :
-                                                 tokens[i-1].SubTokens();
+                QueryToken[] subTokens = OnSubTokens(i == 0 ? null : tokens[i - 1]);
 
                 if (i == tokens.Count && subTokens == null || subTokens.Length == 0)
                     break;
@@ -78,12 +96,13 @@ namespace Signum.Windows
 			}
         }
 
+
         void cb_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             ComboBox cb = (ComboBox)e.OriginalSource;
             int index = (int)cb.Tag;
             QueryToken newToken = (QueryToken)cb.SelectedItem;
-            QueryToken[] subTokens = newToken.SubTokens();
+            QueryToken[] subTokens = OnSubTokens(newToken);
 
             sp.Children.RemoveRange(index + 1, sp.Children.Count - (index + 1)); //all
             if (subTokens != null && subTokens.Length != 0)
@@ -109,6 +128,12 @@ namespace Signum.Windows
         {
             InitializeComponent();
             sp.AddHandler(ComboBox.SelectionChangedEvent, new SelectionChangedEventHandler(cb_SelectionChanged));
+            this.Loaded += new RoutedEventHandler(QueryTokenBuilder_Loaded);
+        }
+
+        void QueryTokenBuilder_Loaded(object sender, RoutedEventArgs e)
+        {
+            UpdateTokenList(); 
         }
 
         private void sp_DragOver(object sender, DragEventArgs e)

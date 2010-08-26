@@ -114,7 +114,7 @@ namespace Signum.Engine.Linq
 
             protected override Expression VisitColumn(ColumnExpression column)
             {
-                return scope.GetExpression(row, column.Alias, column.Name, column.Type);
+                return scope.GetColumnExpression(row, column.Alias, column.Name, column.Type);
             }
 
             MethodInfo miExecute = ReflectionTools.GetMethodInfo((ITranslateResult it) => it.Execute(null));
@@ -208,14 +208,14 @@ namespace Signum.Engine.Linq
         static PropertyInfo miParent = ReflectionTools.GetPropertyInfo((IProjectionRow row) => row.Parent);
         static PropertyInfo miReader = ReflectionTools.GetPropertyInfo((IProjectionRow row) => row.Reader);
 
-        public Expression GetExpression(Expression row, string alias, string name, Type type)
+        public Expression GetColumnExpression(Expression row, string alias, string name, Type type)
         {
             if (alias != Alias)
             {
                 if (Parent == null)
                     throw new InvalidOperationException("alias '{0}' not found".Formato(alias));
 
-                return Parent.GetExpression(Expression.Property(row, miParent), alias, name, type);
+                return Parent.GetColumnExpression(Expression.Property(row, miParent), alias, name, type);
             }
 
             return FieldReader.GetExpression(

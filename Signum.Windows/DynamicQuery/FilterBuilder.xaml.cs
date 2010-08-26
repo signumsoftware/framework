@@ -183,5 +183,28 @@ namespace Signum.Windows
             firstColumn.Width = 0;
             firstColumn.Width = double.NaN;
         }
+
+        public void AddFilter(QueryToken queryToken)
+        {
+
+            if (queryToken == null)
+            {
+                MessageBox.Show(Properties.Resources.NoFilterSelected);
+                return;
+            }
+
+            FilterType ft = QueryUtils.GetFilterType(queryToken.Type);
+
+            FilterOption f = new FilterOption
+            {
+                Token = queryToken,
+                Value = null,
+                Operation = QueryUtils.GetFilterOperations(ft).First()
+            };
+
+            Filters.Add(f);
+
+            RefreshFirstColumn();
+        }
     }
 }

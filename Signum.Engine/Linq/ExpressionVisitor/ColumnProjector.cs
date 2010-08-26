@@ -54,6 +54,27 @@ namespace Signum.Engine.Linq
             return ProjectColumns(projector.Projector, newAlias, projector.Source.KnownAliases, new[] { projector.Token });
         }
 
+        static internal ProjectedColumns ProjectColumnsGroupBy(Expression projector, string newAlias, string[] knownAliases, ProjectionToken[] tokens)
+        {
+            ProjectionToken newToken = new ProjectionToken();
+
+            Expression newProj;
+            var candidates = DbExpressionNominator.NominateGroupBy(projector, knownAliases, out newProj);
+
+            ColumnProjector cp = new ColumnProjector
+            {
+                tokens = tokens,
+                newToken = newToken,
+                newAlias = newAlias,
+                knownAliases = knownAliases,
+                candidates = candidates
+            };
+
+            Expression e = cp.Visit(newProj);
+
+            return new ProjectedColumns(e, cp.columns.AsReadOnly(), newToken);
+        }
+
         static internal ProjectedColumns ProjectColumns(Expression projector, string newAlias, string[] knownAliases, ProjectionToken[] tokens)
         {
             ProjectionToken newToken = new ProjectionToken(); 

@@ -30,6 +30,5 @@ namespace Signum.Windows
 
             return parameter;
         }
-
     }
 }
