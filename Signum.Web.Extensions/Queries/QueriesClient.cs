@@ -60,12 +60,11 @@ namespace Signum.Web.Queries
                                 object queryName = Navigator.Manager.QuerySettings.Keys.First(key => QueryUtils.GetQueryName(key) == queryKey);
                                 
                                 QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-                                QueryToken token = QueryToken.Parse(qd, tokenStr);
 
                                 var result = new QueryFilterModel(
                                     new QueryFilterDN 
                                     { 
-                                        Token = token, 
+                                        Token = QueryUtils.ParseFilter(tokenStr, qd), 
                                         Operation = EnumExtensions.ToEnum<FilterOperation>(ctx.Inputs["Operation"]),
                                         ValueString = ctx.Inputs["ValueString"]
                                     }, 
@@ -89,12 +88,11 @@ namespace Signum.Web.Queries
                                 string queryKey = ((MappingContext<UserQueryModel>)ctx.Parent.Parent.Parent).Value.Query.Key;
                                 object queryName = Navigator.Manager.QuerySettings.Keys.First(key => QueryUtils.GetQueryName(key) == queryKey);
                                 QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-                                QueryToken token = QueryToken.Parse(qd, tokenStr);
 
                                 var result = new QueryColumnModel(
                                     new QueryColumnDN 
                                     { 
-                                        Token = token,
+                                        Token = QueryUtils.ParseColumn(tokenStr, qd),
                                         DisplayName = ctx.Inputs["DisplayName"]
                                     }, 
                                     Navigator.Manager.QuerySettings[queryName].UrlName);
@@ -117,7 +115,7 @@ namespace Signum.Web.Queries
                                 string queryKey = ((MappingContext<UserQueryModel>)ctx.Parent.Parent.Parent).Value.Query.Key;
                                 object queryName = Navigator.Manager.QuerySettings.Keys.First(key => QueryUtils.GetQueryName(key) == queryKey);
                                 QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-                                QueryToken token = QueryToken.Parse(qd, tokenStr);
+                                QueryToken token = QueryUtils.ParseOrder(tokenStr, qd);
 
                                 var result = new QueryOrderModel(
                                     new QueryOrderDN 
