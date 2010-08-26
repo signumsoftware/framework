@@ -39,7 +39,8 @@ namespace Signum.Web.Reports
                 QueryName =  findOptions.QueryName,
                 Filters =  findOptions.FilterOptions.Select(fo => fo.ToFilter()).ToList(),
                 Orders =  findOptions.OrderOptions.Select(fo => fo.ToOrder()).ToList(),
-                Limit = findOptions.Top 
+                Limit = findOptions.Top,
+                UserColumns = findOptions.UserColumnOptions.Select(fo => fo.UserColumn).ToList()
             };
 
             ResultTable queryResult = DynamicQueryManager.Current.ExecuteQuery( request);
