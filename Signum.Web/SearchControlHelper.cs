@@ -74,7 +74,7 @@ namespace Signum.Web
             if (filterOptions.Token == null)
             {
                 QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-                filterOptions.Token = QueryToken.Parse(qd, filterOptions.ColumnName);
+                filterOptions.Token = QueryUtils.ParseFilter(filterOptions.ColumnName, qd);
             }
 
             FilterType filterType = QueryUtils.GetFilterType(filterOptions.Token.Type);

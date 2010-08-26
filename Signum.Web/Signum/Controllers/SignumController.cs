@@ -264,7 +264,7 @@ namespace Signum.Web.Controllers
             if (fo.Token == null)
             {
                 QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-                fo.Token = QueryToken.Parse(qd, tokenName);
+                fo.Token = QueryUtils.ParseFilter(tokenName, qd);
             }
             fo.Operation = QueryUtils.GetFilterOperations(QueryUtils.GetFilterType(fo.Token.Type)).First();
 
@@ -280,7 +280,7 @@ namespace Signum.Web.Controllers
             if (fo.Token == null)
             {
                 QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-                fo.Token = QueryToken.Parse(qd, tokenName);
+                fo.Token = QueryUtils.ParseFilter(tokenName, qd); 
             }
             fo.Operation = QueryUtils.GetFilterOperations(QueryUtils.GetFilterType(fo.Token.Type)).First();
             
@@ -304,7 +304,7 @@ namespace Signum.Web.Controllers
         { 
             object queryName = Navigator.ResolveQueryFromUrlName(sfQueryUrlName);
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-            QueryToken[] subtokens = QueryToken.Parse(qd, tokenName).SubTokens();
+            QueryToken[] subtokens = QueryUtils.Parse(tokenName, t => QueryUtils.SubTokens(t, qd.StaticColumns)).SubTokens();
             if (subtokens == null)
                 return Content("");
 

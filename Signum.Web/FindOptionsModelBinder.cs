@@ -101,7 +101,7 @@ namespace Signum.Web
                 string operation = parameters["sel" + index.ToString()];
                 bool frozen = parameters.AllKeys.Any(k => k == "fz" + index.ToString());
 
-                QueryToken token = QueryToken.Parse(queryDescription, name);
+                QueryToken token =   QueryUtils.ParseFilter(name, queryDescription);
 
                 object valueObject = Convert(value, token.Type);
 
@@ -137,7 +137,7 @@ namespace Signum.Web
                 string token = orderType == OrderType.Ascending ? currentOrderString : currentOrderString.Substring(1, currentOrderString.Length-1);
                 result.Add(new OrderOption
                 {
-                    Token = QueryToken.Parse(queryDescription, token),
+                    Token = QueryUtils.ParseOrder(token, queryDescription),
                     Type = orderType
                 });
             }
@@ -168,7 +168,7 @@ namespace Signum.Web
                 result.Add(new UserColumnOption
                 {
                     DisplayName = currentColString[1],
-                    UserColumn = new UserColumn(numStaticCols, QueryToken.Parse(queryDescription, currentColString[0])) 
+                    UserColumn = new UserColumn(numStaticCols, QueryUtils.ParseColumn(currentColString[0], queryDescription)) 
                     { 
                         UserColumnIndex = i,
                     },

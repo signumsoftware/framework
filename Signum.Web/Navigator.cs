@@ -769,7 +769,7 @@ namespace Signum.Web
             QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(queryName);
 
             foreach (var f in filters)
-                f.Token = QueryToken.Parse(queryDescription, f.ColumnName);
+                f.Token = QueryUtils.ParseFilter(f.ColumnName, queryDescription);
         }
 
         public void SetTokens(object queryName, IEnumerable<OrderOption> orders)
@@ -777,7 +777,7 @@ namespace Signum.Web
             QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(queryName);
 
             foreach (var o in orders)
-                o.Token = QueryToken.Parse(queryDescription, o.ColumnName);
+                o.Token = QueryUtils.ParseOrder(o.ColumnName, queryDescription);
         }
 
         protected internal virtual PartialViewResult PartialFind(ControllerBase controller, FindOptions findOptions, Context context)
@@ -906,7 +906,7 @@ namespace Signum.Web
 
                 result.Add(new Filter
                 {
-                    Token = QueryToken.Parse(queryDescription, name),
+                    Token = QueryUtils.ParseFilter(name, queryDescription),
                     Operation = filterOperation,
                     Value = value,
                 });
