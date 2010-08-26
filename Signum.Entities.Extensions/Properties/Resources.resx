@@ -630,4 +630,13 @@
   <data name="BasicPermissions_AdminRules" xml:space="preserve">
     <value>Admin rules</value>
   </data>
+  <data name="ExpressionShouldHaveAContinousAmountOfValues" xml:space="preserve">
+    <value>Expression should have a continous amount of values</value>
+  </data>
+  <data name="ExpressionShouldHaveADiscreteAmountOfValues" xml:space="preserve">
+    <value>Expression should have a discrete amount of values</value>
+  </data>
+  <data name="ExpressionShouldBeSomeKindOfAggregate" xml:space="preserve">
+    <value>Expression should be some kind of aggregate</value>
+  </data>
 </root>

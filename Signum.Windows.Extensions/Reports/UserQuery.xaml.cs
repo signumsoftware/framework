@@ -63,19 +63,20 @@ namespace Signum.Windows.Reports
             };
         }
 
-        private void QueryTokenBuilderOrders_Loaded(object sender, RoutedEventArgs e)
+
+        private QueryToken[] QueryTokenBuilderFilter_SubTokensEvent(QueryToken token)
         {
-            ((QueryTokenBuilder)sender).StaticColumns = QueryDescription.StaticColumns.Where(a => a.Sortable);
+            return QueryUtils.SubTokensFilter(token, QueryDescription.StaticColumns);
         }
 
-        private void QueryTokenBuilderFilters_Loaded(object sender, RoutedEventArgs e)
+        private QueryToken[] QueryTokenBuilderOrder_SubTokensEvent(QueryToken token)
         {
-            ((QueryTokenBuilder)sender).StaticColumns = QueryDescription.StaticColumns.Where(a=>a.Filterable);
+            return QueryUtils.SubTokensOrder(token, QueryDescription.StaticColumns);
         }
 
-        private void QueryTokenBuilderColumns_Loaded(object sender, RoutedEventArgs e)
+        private QueryToken[] QueryTokenBuilderColumn_SubTokensEvent(QueryToken token)
         {
-            ((QueryTokenBuilder)sender).StaticColumns = QueryDescription.StaticColumns;
+            return QueryUtils.SubTokensColumn(token, QueryDescription.StaticColumns);
         }
     }
 }

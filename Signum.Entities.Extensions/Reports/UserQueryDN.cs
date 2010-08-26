@@ -88,7 +88,7 @@ namespace Signum.Entities.Reports
     public abstract class QueryTokenDN : EmbeddedEntity
     {
         [NotNullable, SqlDbType(Size = 100)]
-        string tokenString;
+        protected string tokenString;
         [StringLengthValidator(AllowNulls = false, Min = 1, Max = 100)]
         public string TokenString
         {
@@ -97,12 +97,12 @@ namespace Signum.Entities.Reports
         }
 
         [Ignore]
-        QueryToken token;
-        [NotNullValidator] 
+        protected QueryToken token;
+        [NotNullValidator]
         public QueryToken Token
         {
             get { return token; }
-            set { if(Set(ref token, value, () => Token))TokenChanged(); }
+            set { if (Set(ref token, value, () => Token)) TokenChanged(); }
         }
 
         protected virtual void TokenChanged()
@@ -115,11 +115,7 @@ namespace Signum.Entities.Reports
             tokenString = token.FullKey();
         }
 
-        public virtual void PostRetrieving(QueryDescription queryDescription)
-        {
-            Token = QueryToken.Parse(queryDescription, tokenString);
-            Modified = false;
-        }
+        public abstract void PostRetrieving(QueryDescription queryDescription);
     }
 
     [Serializable]
@@ -138,6 +134,13 @@ namespace Signum.Entities.Reports
             get { return orderType; }
             set { Set(ref orderType, value, () => OrderType); }
         }
+
+        public override void PostRetrieving(QueryDescription queryDescription)
+        {
+            Token = QueryUtils.ParseOrder(tokenString, queryDescription);
+            Modified = false;
+        }
+
     }
 
     [Serializable]
@@ -150,6 +153,13 @@ namespace Signum.Entities.Reports
         {
             get { return displayName; }
             set { SetToStr(ref displayName, value, () => DisplayName); }
+        }
+
+
+        public override void PostRetrieving(QueryDescription queryDescription)
+        {
+            Token = QueryUtils.ParseColumn(tokenString, queryDescription);
+            Modified = false;
         }
     }
 
@@ -182,7 +192,8 @@ namespace Signum.Entities.Reports
 
         public override void PostRetrieving(QueryDescription queryDescription)
         {
-            base.PostRetrieving(queryDescription);
+            Token = QueryUtils.ParseFilter(tokenString, queryDescription);
+            Modified = false;
 
             object val;
             string error = FilterValueConverter.TryParse(ValueString, Token.Type, out val);

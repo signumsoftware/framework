@@ -9,6 +9,7 @@ using Signum.Utilities;
 using Signum.Entities.Authorization;
 using System.Windows.Media;
 using System.Windows.Ink;
+using Signum.Entities.Chart;
 
 namespace Signum.Windows.Extensions
 {

@@ -28,7 +28,7 @@ namespace Signum.Windows.Operations
         {
             base.OnInitialized(e);
             Header = "Construir";
-            Icon = GetImage( ExtensionsImageLoader.GetImageSortName("factory.png"));
+            Icon = ExtensionsImageLoader.GetImageSortName("factory.png").ToSmallImage();
         }
 
         public override void Initialize()

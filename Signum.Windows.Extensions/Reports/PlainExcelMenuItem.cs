@@ -20,7 +20,7 @@ namespace Signum.Windows.Reports
         {
             base.OnInitialized(e);
             Header = Prop.Resources.ExcelReport;
-            Icon = GetImage(ExtensionsImageLoader.GetImageSortName("excelPlain.png"));
+            Icon = ExtensionsImageLoader.GetImageSortName("excelPlain.png").ToSmallImage();
         }
 
         protected override void OnClick()

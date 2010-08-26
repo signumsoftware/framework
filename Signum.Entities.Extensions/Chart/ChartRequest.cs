@@ -7,52 +7,282 @@ using System.Reflection;
 using Signum.Utilities;
 using System.Linq.Expressions;
 using Signum.Utilities.DataStructures;
+using Signum.Entities.Extensions.Properties;
+using System.ComponentModel;
+using Signum.Utilities.Reflection;
+using Signum.Entities.Basics;
+using Signum.Entities.Reports;
 
 namespace Signum.Entities.Chart
 {
-    public enum ChartType
+    [Serializable]
+    public abstract class ChartBase : IdentifiableEntity
     {
-        Column,
-        Bar,
-        Line,
-        Area,
 
-        MultiColumn,
-        MultiBar,
-        MultiLine,
+        public ChartBase()
+        {
+            UpdateTokens();
+        }
 
-        StackedColumn,
-        StackedBar,
-        StackedArea,
+        ChartType chartType;
+        public ChartType ChartType
+        {
+            get { return chartType; }
+            set
+            {
+                if (Set(ref chartType, value, () => ChartType))
+                {
+                    ChartResultType = ChartUtils.GetChartResultType(value);
+                    UpdateTokens();
+                    NotifyChange(false);
+                }
+            }
+        }
+
+        ChartResultType chartResultType;
+        public ChartResultType ChartResultType
+        {
+            get { return chartResultType; }
+            private set
+            {
+                if (Set(ref chartResultType, value, () => ChartResultType))
+                    NotifyChange(true);
+            }
+        }
+
+        bool groupResults;
+        public bool GroupResults
+        {
+            get { return groupResults; }
+            set
+            {
+                if (Set(ref groupResults, value, () => GroupResults))
+                {
+                    UpdateGroup();
+                    NotifyChange(true);
+                }
+            }
+        }
+
+        ChartTokenDN firstDimension;
+        public ChartTokenDN FirstDimension
+        {
+            get { return firstDimension; }
+        }
+
+        ChartTokenDN secondDimension;
+        public ChartTokenDN SecondDimension
+        {
+            get { return secondDimension; }
+        }
+
+        ChartTokenDN firstValue;
+        public ChartTokenDN FirstValue
+        {
+            get { return firstValue; }
+        }
+
+        ChartTokenDN secondValue;
+        public ChartTokenDN SecondValue
+        {
+            get { return secondValue; }
+        }
+
+
+        void UpdateGroup()
+        {
+            UpdateTokenGroup(firstDimension);
+            UpdateTokenGroup(secondDimension);
+            UpdateTokenGroup(firstValue);
+            UpdateTokenGroup(secondValue);
+        }
+
+        void UpdateTokenGroup(ChartTokenDN token)
+        {
+            if (token == null)
+                return;
+
+            if (token.Aggregate != null && !GroupResults)
+                token.Aggregate = null;
+
+            token.NotifyGroup();
+        }
+
+        protected void UpdateTokens()
+        {
+            SetToken(ref firstDimension, ChartUtils.IsVisible(chartResultType, ChartTokenName.FirstDimension), () => FirstDimension);
+            SetToken(ref secondDimension, ChartUtils.IsVisible(chartResultType, ChartTokenName.SecondDimension), () => SecondDimension);
+            SetToken(ref firstValue, ChartUtils.IsVisible(chartResultType, ChartTokenName.FirstValue), () => FirstValue);
+            SetToken(ref secondValue, ChartUtils.IsVisible(chartResultType, ChartTokenName.SecondValue), () => SecondValue);
+        }
+
+        void SetToken(ref ChartTokenDN token, bool should, Expression<Func<ChartTokenDN>> property)
+        {
+            if (token == null)
+            {
+                if (should)
+                {
+                    token = new ChartTokenDN();
+                    token.ChartRequestChanged += NotifyChange;
+                    token.ExternalPropertyValidation += token_ExternalPropertyValidation;
+                    token.ShouldAggregateEvent += token_ShouldAggregateEvent;
+                    token.GroupByVisibleEvent += token_GroupByVisibleEvent;
+                    token.PropertyLabeleEvent += token_PropertyLabeleEvent;
+                }
+                else
+                {
+                    //nothing
+                }
+            }
+            else
+            {
+                if (should)
+                {
+                    token.NotifyAll();
+                }
+                else
+                {
+                    token.ChartRequestChanged -= NotifyChange;
+                    token.ExternalPropertyValidation -= token_ExternalPropertyValidation;
+                    token.ShouldAggregateEvent -= token_ShouldAggregateEvent;
+                    token.GroupByVisibleEvent -= token_GroupByVisibleEvent;
+                    token.PropertyLabeleEvent -= token_PropertyLabeleEvent;
+                    token = null;
+                }
+            }
+
+            Notify(property);
+        }
+
         
-        TotalColumn,
-        TotalBar,
-        TotalArea,
 
-        Points,
-        Bubbles,
+        protected abstract void NotifyChange(bool needNewQuery);
 
-        Pie,
-        Doughnout
-    }
+        bool token_ShouldAggregateEvent(ChartTokenDN token)
+        {
+            return GroupResults && ChartUtils.ShouldAggregate(chartResultType, GetTokenName(token));
+        }
 
-    public enum ChartResultType
-    {
-        TypeValue,
-        TypeTypeValue,
+        string token_PropertyLabeleEvent(ChartTokenDN token)
+        {
+            var chartLavel = ChartUtils.PropertyLabel(chartType, GetTokenName(token));
+            if (chartLavel == null)
+                return null;
 
-        Points,
-        Bubbles,
+            return chartLavel.NiceToString();
+        }
+
+        bool token_GroupByVisibleEvent(ChartTokenDN token)
+        {
+            return ChartUtils.CanGroupBy(chartResultType, GetTokenName(token));
+        }
+
+        string token_ExternalPropertyValidation(ModifiableEntity sender, PropertyInfo pi, object propertyValue)
+        {
+            if (pi.Is((ChartTokenDN ct) => ct.Token))
+            {
+                ChartTokenDN ct = (ChartTokenDN)sender;
+                if (ct.Aggregate == AggregateFunction.Count)
+                {
+                    if (propertyValue != null)
+                        return "Expression should be null if count is selected";
+                    else
+                        return null;
+                }
+                else
+                {
+                    if (propertyValue == null)
+                        return "Expression is null";
+                }
+
+                return ChartUtils.ValidateProperty(chartResultType, GetTokenName(ct), (QueryToken)propertyValue);
+
+            }
+
+            if (pi.Is((ChartTokenDN ct) => ct.Aggregate))
+            {
+                if (groupResults && ChartUtils.ShouldAggregate(chartResultType, GetTokenName((ChartTokenDN)sender)))
+                {
+                    if (propertyValue == null)
+                        return Resources.ExpressionShouldBeSomeKindOfAggregate;
+
+                    ChartTokenDN ct = (ChartTokenDN)sender;
+                    if (ct.Token != null && (ct.Aggregate == AggregateFunction.Sum || ct.Aggregate == AggregateFunction.Average))
+                    {
+                        var ft = QueryUtils.TryGetFilterType(ct.Token.Type);
+
+                        if (ft != FilterType.Number && ft != FilterType.DecimalNumber)
+                            return "{0} is not compatible with {1}".Formato(ct.Aggregate.NiceToString(), ft.NiceToString());
+                    }
+                }
+                else
+                {
+                    if (propertyValue != null)
+                        return "Expression can not be an aggregate";
+                }
+            }
+
+            return null;
+        }
+
+        protected override void RebindEvents()
+        {
+            base.RebindEvents();
+
+            RebindEvents(firstDimension);
+            RebindEvents(firstValue);
+
+            RebindEvents(secondDimension);
+            RebindEvents(secondValue);             
+        }
+
+        private void RebindEvents(ChartTokenDN token)
+        {
+            if (token == null)
+                return;
+
+            token.ChartRequestChanged += NotifyChange;
+            token.ExternalPropertyValidation += token_ExternalPropertyValidation;
+            token.ShouldAggregateEvent += token_ShouldAggregateEvent;
+            token.GroupByVisibleEvent += token_GroupByVisibleEvent;
+            token.PropertyLabeleEvent += token_PropertyLabeleEvent;
+        }
+
+        ChartTokenName GetTokenName(ChartTokenDN token)
+        {
+            if (token == null)
+                throw new ArgumentNullException("token");
+
+            if (token == firstDimension) return ChartTokenName.FirstDimension;
+            if (token == secondDimension) return ChartTokenName.SecondDimension;
+            if (token == firstValue) return ChartTokenName.FirstValue;
+            if (token == secondValue) return ChartTokenName.SecondValue;
+
+            throw new InvalidOperationException("token not found");
+        }
+
+        public ChartTokenDN GetToken(ChartTokenName chartTokenName)
+        {
+            switch (chartTokenName)
+            {
+                case ChartTokenName.FirstDimension: return firstDimension;
+                case ChartTokenName.SecondDimension: return secondDimension;
+                case ChartTokenName.FirstValue: return firstValue;
+                case ChartTokenName.SecondValue: return secondValue;
+            }
+
+            return null;
+        }
     }
 
     [Serializable]
-    public class ChartRequest : EmbeddedEntity
+    public class ChartRequest : ChartBase
     {
         object queryName;
+        [NotNullValidator]
         public object QueryName
         {
             get { return queryName; }
-            set { Set(ref queryName, value, () => QueryName); }
         }
 
         List<Filter> filters;
@@ -62,292 +292,67 @@ namespace Signum.Entities.Chart
             set { Set(ref filters, value, () => Filters); }
         }
 
-        ChartType chartType;
-        public ChartType ChartType
+        public ChartRequest(object queryName)
         {
-            get { return chartType; }
-            set { Set(ref chartType, value, () => ChartType); }
+            this.queryName = queryName;
         }
 
-        ChartResultType chartResultType;
-        public ChartResultType ChartResultType
+        [NonSerialized]
+        bool needNewQuery;
+        public bool NeedNewQuery
         {
-            get { return chartResultType; }
-            internal set { Set(ref chartResultType, value, () => ChartResultType); }
+            get { return needNewQuery; }
+            set { Set(ref needNewQuery, value, () => NeedNewQuery); }
         }
 
-        bool groupResults;
-        public bool GroupResults
+        [field: NonSerialized]
+        public event Action ChartRequestChanged;
+
+        protected override void NotifyChange(bool needNewQuery)
         {
-            get { return groupResults; }
-            set { Set(ref groupResults, value, () => GroupResults); }
-        }
+            if (needNewQuery)
+                this.NeedNewQuery = true;
 
-        QueryToken firstDimension;
-        public QueryToken FirstDimension
-        {
-            get { return firstDimension; }
-            set { Set(ref firstDimension, value, () => FirstDimension); }
-        }
-
-        QueryToken secondDimension;
-        public QueryToken SecondDimension
-        {
-            get { return secondDimension; }
-            set { Set(ref secondDimension, value, () => SecondDimension); }
-        }
-
-        QueryToken firstValue;
-        public QueryToken FirstValue
-        {
-            get { return firstValue; }
-            set { Set(ref firstValue, value, () => FirstValue); }
-        }
-
-        QueryToken secondValue;
-        public QueryToken SecondValue
-        {
-            get { return secondValue; }
-            set { Set(ref secondValue, value, () => SecondValue); }
-        }
-
-        protected override string PropertyValidation(PropertyInfo pi)
-        {
-            string error = staticValidator.Validate(this, pi);
-
-            if (error.HasText())
-                return error;
-
-            switch (chartResultType)
-            {
-                case ChartResultType.TypeValue:
-                    if (!IsDiscrete(FirstDimension))
-                        return "error";
-
-                    if (IsDiscrete(FirstValue))
-                        return "error";
-                    break;
-                case ChartResultType.TypeTypeValue:
-                    if (!IsDiscrete(FirstDimension))
-                        return "error";
-
-                    if (!IsDiscrete(SecondDimension))
-                        return "error";
-
-                    if (IsDiscrete(FirstValue))
-                        return "error";
-                    
-                    break;
-                case ChartResultType.Points:
-                    if (IsDiscrete(FirstDimension))
-                        return "error";
-
-                    if (IsDiscrete(SecondDimension))
-                        return "error";
-
-
-                    //Color could be discrete or not
-                    break;
-                case ChartResultType.Bubbles:
-                    if (IsDiscrete(FirstDimension))
-                        return "error";
-
-                    if (IsDiscrete(SecondDimension))
-                        return "error";
-
-                    //Color could be discrete or not
-
-                    if (IsDiscrete(secondValue))
-                        return "error";
-                        break;
-                default:
-                    break;
-            }
-
-            return base.PropertyValidation(pi);
-        }
-
-        public bool IsDiscrete(QueryToken token)
-        {
-            switch (QueryUtils.GetFilterType(token.Type))
-            {
-                case FilterType.Number:
-                case FilterType.DateTime: return false; 
-
-                case FilterType.String: 
-                case FilterType.Lite:
-                case FilterType.Entity:
-                case FilterType.Embedded:
-                case FilterType.Boolean:
-                case FilterType.Enum: return true;
-            }
-            return false; 
-        }
-
-        static StateValidator<ChartRequest, ChartResultType> staticValidator = new StateValidator<ChartRequest, ChartResultType>
-        (a => a.ChartResultType,          a => a.FirstDimension, a => a.SecondDimension, a => a.FirstValue, a=>a.SecondValue){
-        { ChartResultType.TypeValue,      true,                  false,                  true,             false },
-        { ChartResultType.TypeTypeValue,  true,                  true,                   true,             false },
-        { ChartResultType.Points,         true,                  true,                   true,             false },
-        { ChartResultType.Bubbles,        true,                  true,                   true,             true },
-        };
-
-
-        static Dictionary<ChartType, ChartResultType> resultMapping = new Dictionary<ChartType, ChartResultType>()
-        {
-            { ChartType.Column, ChartResultType.TypeValue },
-            { ChartType.Bar, ChartResultType.TypeValue },
-            { ChartType.Line, ChartResultType.TypeValue },
-            { ChartType.Area, ChartResultType.TypeValue },
-        
-            { ChartType.MultiColumn, ChartResultType.TypeTypeValue },
-            { ChartType.MultiBar, ChartResultType.TypeTypeValue },
-            { ChartType.MultiLine, ChartResultType.TypeTypeValue },
-        
-            { ChartType.StackedColumn, ChartResultType.TypeTypeValue },
-            { ChartType.StackedBar, ChartResultType.TypeTypeValue },
-            { ChartType.StackedArea, ChartResultType.TypeTypeValue },
-
-            { ChartType.TotalColumn, ChartResultType.TypeTypeValue },
-            { ChartType.TotalBar, ChartResultType.TypeTypeValue },
-            { ChartType.TotalArea, ChartResultType.TypeTypeValue },
-
-            { ChartType.Points, ChartResultType.Points},
-            { ChartType.Bubbles, ChartResultType.Bubbles},
-        };
-
-    }
-
-    public enum AggregateFunction
-    {
-        Average,
-        Count,
-        Min,
-        Max,
-        Sum,
-    }
-
-    public static class QueryTokenExtensions
-    {
-
-        public static QueryToken[] SubTokensGroupValue(QueryToken parent)
-        {
-            FilterType ft = QueryUtils.GetFilterType(token.Type);
-
-            switch (ft)
-            {
-                case FilterType.Lite:
-                case FilterType.Entity:
-                case FilterType.Embedded:
-                    return parent.SubTokens();
-                    break;
-                case FilterType.Boolean:
-                case FilterType.Enum:
-                case FilterType.Number:
-                case FilterType.String:
-                case FilterType.DateTime:
-                    return new Sequence<QueryToken>()
-                    {
-                        parent.SubTokens(),
-                        new AggregateQueryToken(parent, AggregateFunction.Average)
-                    }.ToArray();
-                    break;
-                default:
-                    break;
-            }
+            if (ChartRequestChanged != null)
+                ChartRequestChanged();
         }
     }
-
-    public class AggregateQueryToken : QueryToken
+    
+    [Serializable]
+    public class UserChartDN : ChartBase
     {
-        AggregateFunction aggregateFunction;
-
-        public AggregateQueryToken(QueryToken parent, AggregateFunction aggregateFunction): base(parent)
+        QueryDN query;
+        [NotNullValidator]
+        public QueryDN Query
         {
-            if (parent == null && aggregateFunction != AggregateFunction.Count)
-                throw new ArgumentNullException("parent"); 
+            get { return query; }
+            set { Set(ref query, value, () => Query); }
         }
 
+        [NotNullable, SqlDbType(Size = 100)]
+        string displayName;
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        public string DisplayName
+        {
+            get { return displayName; }
+            set { Set(ref displayName, value, () => DisplayName); }
+        }
+
+        [NotNullable]
+        MList<QueryFilterDN> filters;
+        public MList<QueryFilterDN> Filters
+        {
+            get { return filters; }
+            set { Set(ref filters, value, () => Filters); }
+        }
+
+        protected override void NotifyChange(bool needNewQuery)
+        {
+        }
 
         public override string ToString()
         {
-            return aggregateFunction.ToString();
-        }
-
-        public override string NiceName()
-        {
-            return aggregateFunction.NiceToString();
-        }
-
-        public override string Format
-        {
-            get { return Parent.Format; }
-        }
-
-        public override string Unit
-        {
-            get { return Parent.Format; }
-        }
-
-        public override Type Type
-        {
-            get
-            {
-                Type type = Parent.Type.UnNullify();
-                if (type == typeof(int) || type == typeof(long))
-                    return typeof(double?);
-
-                return type.Nullify();
-            }
-        }
-
-        public override string Key
-        {
-            get { return "{0}.[{1}]".Formato(Parent.Key, aggregateFunction); }
-        }
-
-        protected override QueryToken[] SubTokensInternal()
-        {
-            return null;
-        }
-
-        public override Expression BuildExpression(Expression expression)
-        {
-            //g=>g.Sum(a=>"base.BuildExpression(a)");
-
-            Type t = expression.GetType();
-            if(t.IsInstantiationOf(typeof(IGrouping<,>)))
-                throw new InvalidOperationException("expression should be a Grouping expression");
-
-            Type groupType = t.GetGenericArguments()[1];
-
-            if (Parent == null)
-            {
-                return Expression.Call(typeof(Queryable), aggregateFunction.ToString(), new[] { groupType }, new[] { expression });
-            }
-            else
-            {
-                ParameterExpression a = Expression.Parameter(groupType, "a");
-
-                LambdaExpression lambda =  Expression.Lambda(Parent.BuildExpression(a), a);
-
-                return Expression.Call(typeof(Queryable), aggregateFunction.ToString(), new[] { groupType }, new[] { expression, lambda });
-            }
-        }
-
-        public override PropertyRoute GetPropertyRoute()
-        {
-            return Parent == null ? null : Parent.GetPropertyRoute();
-        }
-
-        public override Implementations Implementations()
-        {
-            return null;
-        }
-
-        public override bool IsAllowed()
-        {
-            return Parent == null ? true : Parent.IsAllowed();
+            return displayName;
         }
     }
 }

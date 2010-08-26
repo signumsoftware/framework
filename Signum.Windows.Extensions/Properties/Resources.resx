@@ -219,4 +219,19 @@
   <data name="NoRows" xml:space="preserve">
     <value>No hay filas</value>
   </data>
+  <data name="ChartFor" xml:space="preserve">
+    <value>Chart for</value>
+  </data>
+  <data name="MyCharts" xml:space="preserve">
+    <value>My Charts</value>
+  </data>
+  <data name="Create" xml:space="preserve">
+    <value>Create</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="Remove" xml:space="preserve">
+    <value>Remove</value>
+  </data>
 </root>

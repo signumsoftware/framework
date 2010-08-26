@@ -78,6 +78,9 @@
     <Compile Include="Basics\FacadeMethodLogic.cs" />
     <Compile Include="Basics\PropertyLogic.cs" />
     <Compile Include="Basics\QueryLogic.cs" />
+    <Compile Include="Chart\ChartLogic.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Files\FilePathLogic.cs" />
     <Compile Include="Help\AppendixHelp.cs" />
     <Compile Include="Help\QueryHelp.cs" />

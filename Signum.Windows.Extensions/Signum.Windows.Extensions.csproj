@@ -126,6 +126,20 @@
       <DependentUpon>CalendarStripWithTitles.xaml</DependentUpon>
     </Compile>
     <Compile Include="Calendars\DatePanel.cs" />
+    <Compile Include="Chart\ChartBuilder.xaml.cs">
+      <DependentUpon>ChartBuilder.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Chart\ChartClient.cs" />
+    <Compile Include="Chart\UserChart.xaml.cs">
+      <DependentUpon>UserChart.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Chart\ChartToken.xaml.cs">
+      <DependentUpon>ChartToken.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Chart\ChartWindow.xaml.cs">
+      <DependentUpon>ChartWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Chart\UserChartMenuItem.cs" />
     <Compile Include="Converters.cs" />
     <Compile Include="ExecutionInfo\ElapsedTime.xaml.cs">
       <DependentUpon>ElapsedTime.xaml</DependentUpon>
@@ -233,6 +247,7 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <None Include="Images\charts.psd" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -315,6 +330,22 @@
     <Page Include="Calendars\CalendarStripWithTitles.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Chart\ChartBuilder.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Chart\UserChart.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Chart\ChartToken.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Chart\ChartWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="ExecutionInfo\ElapsedTime.xaml">
       <SubType>Designer</SubType>
@@ -529,6 +560,35 @@
     <Resource Include="Images\operation.png" />
     <Resource Include="Images\property.png" />
     <Resource Include="Images\query.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\charts\bars.png" />
+    <Resource Include="Images\charts\bubbles.png" />
+    <Resource Include="Images\charts\columns.png" />
+    <Resource Include="Images\charts\doughnout.png" />
+    <Resource Include="Images\charts\multibars.png" />
+    <Resource Include="Images\charts\multicolumns.png" />
+    <Resource Include="Images\charts\pie.png" />
+    <Resource Include="Images\charts\points.png" />
+    <Resource Include="Images\charts\stackedbars.png" />
+    <Resource Include="Images\charts\stackedcolumns.png" />
+    <Resource Include="Images\charts\totalbars.png" />
+    <Resource Include="Images\charts\totalcolumns.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\charts\chartIcon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\charts\groupby.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Chart\chartIcon.png" />
+    <Resource Include="Chart\execute.png" />
+    <Resource Include="Chart\query.png" />
+    <Resource Include="Images\charts\lines.png" />
+    <Resource Include="Images\charts\multilines.png" />
+    <Resource Include="Images\charts\stackedareas.png" />
+    <Resource Include="Images\charts\totalareas.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

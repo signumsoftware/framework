@@ -54,7 +54,6 @@ namespace Signum.Engine.Reports
 
             foreach (var o in userQuery.Orders)
                 o.PostRetrieving(description);
-
         }
 
         public static List<Lite<UserQueryDN>> GetUserQueries(object queryName)

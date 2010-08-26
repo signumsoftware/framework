@@ -17,11 +17,14 @@ using Signum.Entities.Operations;
 using Signum.Engine.Operations;
 using Signum.Utilities;
 using Signum.Engine.Basics;
+using Signum.Engine.Extensions.Chart;
+using Signum.Entities.Chart;
+
 
 namespace Signum.Services
 {
-    public abstract class ServerExtensions : ServerBasic, ILoginServer, IOperationServer, IQueryServer,
-        IQueryAuthServer, IPropertyAuthServer, ITypeAuthServer, IFacadeMethodAuthServer, IPermissionAuthServer, IOperationAuthServer 
+    public abstract class ServerExtensions : ServerBasic, ILoginServer, IOperationServer, IQueryServer, IChartServer,
+        IQueryAuthServer, IPropertyAuthServer, ITypeAuthServer, IFacadeMethodAuthServer, IPermissionAuthServer, IOperationAuthServer
     {
         protected UserDN currentUser;
 
@@ -259,5 +262,26 @@ namespace Signum.Services
                () => OperationAuthLogic.SetOperationRules(rules));
         }
         #endregion
-    }
+
+        #region IChartServer
+        public ResultTable ExecuteChart(ChartRequest request)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+               () => ChartLogic.ExecuteChart(request));
+        }
+
+        public List<Lite<UserChartDN>> GetUserCharts(object queryName)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+            () => ChartLogic.GetUserCharts(queryName));
+        }
+
+        public void RemoveUserChart(Lite<UserChartDN> lite)
+        {
+            Execute(MethodInfo.GetCurrentMethod(),
+              () => ChartLogic.RemoveUserChart(lite));
+        }
+
+        #endregion
+    } 
 }

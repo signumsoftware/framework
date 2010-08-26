@@ -210,4 +210,19 @@
   <data name="NoRows" xml:space="preserve">
     <value>No rows</value>
   </data>
+  <data name="MyCharts" xml:space="preserve">
+    <value>Mis Gráficos</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Editar</value>
+  </data>
+  <data name="New" xml:space="preserve">
+    <value>Crear</value>
+  </data>
+  <data name="Remove" xml:space="preserve">
+    <value>Eliminar</value>
+  </data>
+  <data name="ChartFor" xml:space="preserve">
+    <value>Gráfico de</value>
+  </data>
 </root>

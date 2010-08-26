@@ -19,7 +19,7 @@ namespace Signum.Windows.Reports
         {
             base.OnInitialized(e);
             Header = Prop.Resources.Reports;
-            Icon = GetImage(ExtensionsImageLoader.GetImageSortName("excel.png"));
+            Icon = ExtensionsImageLoader.GetImageSortName("excel.png").ToSmallImage();
         }
 
         internal PlainExcelMenuItem PlainExcelMenuItem; 
@@ -49,7 +49,7 @@ namespace Signum.Windows.Reports
                     MenuItem mi = new MenuItem()
                     {
                         Header = report.ToStr,
-                        Icon = GetImage(ExtensionsImageLoader.GetImageSortName("excelDoc.png")),
+                        Icon = ExtensionsImageLoader.GetImageSortName("excelDoc.png").ToSmallImage(),
                         Tag = report,
                     };
                     Items.Add(mi);
@@ -59,7 +59,7 @@ namespace Signum.Windows.Reports
             MenuItem miAdmin = new MenuItem()
             {
                 Header = "Administrar",
-                Icon = GetImage( ExtensionsImageLoader.GetImageSortName("folderedit.png"))
+                Icon = ExtensionsImageLoader.GetImageSortName("folderedit.png").ToSmallImage()
             };
             miAdmin.Click += new RoutedEventHandler(MenuItemAdmin_Clicked);
             Items.Add(miAdmin);

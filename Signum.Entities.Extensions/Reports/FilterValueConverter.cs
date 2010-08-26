@@ -6,9 +6,11 @@ using Signum.Entities.DynamicQuery;
 using Signum.Utilities.Reflection;
 using System.Globalization;
 using Signum.Utilities;
+using Signum.Entities;
 using System.Text.RegularExpressions;
 using Signum.Entities.Reflection;
 using Signum.Services;
+using Signum.Entities.Authorization;
 
 namespace Signum.Entities.Reports
 {
@@ -19,7 +21,7 @@ namespace Signum.Entities.Reports
         public static Dictionary<FilterType, List<IFilterValueConverter>> SpecificFilters = new Dictionary<FilterType, List<IFilterValueConverter>>()
         {
             {FilterType.DateTime, new List<IFilterValueConverter>{ new SmartDateTimeFilterValueConverter()} },
-            {FilterType.Lite, new List<IFilterValueConverter>{ new LiteFilterValueConverter()} }
+            {FilterType.Lite, new List<IFilterValueConverter>{ new LiteFilterValueConverter(), new CurrentUserConverter()} },
         };
 
         public static string ToString(object value, Type type)
@@ -181,7 +183,8 @@ namespace Signum.Entities.Reports
                 hour += Math.DivRem(minute, 60, out minute);
                 day += Math.DivRem(hour, 24, out hour);
 
-                year += Math.DivRem(month, 12, out month);
+
+                year += MonthDivRem(ref month);
 
                 int daysInMonth;
                 while (day > (daysInMonth = DateTime.DaysInMonth(year, month)))
@@ -197,6 +200,25 @@ namespace Signum.Entities.Reports
                 }
 
                 return new DateTime(year, month, day, hour, minute, second);
+            }
+
+            private int MonthDivRem(ref int month)
+            {
+                int year = 0;
+
+                while (12 < month)
+                {
+                    year++;
+                    month -= 12;
+                }
+
+                while (month <= 0)
+                {
+                    year--;
+                    month += 12;
+                }
+
+                return year;
             }
 
             static int Mix(int current, string rule, string pattern)
@@ -331,6 +353,36 @@ namespace Signum.Entities.Reports
         }
 
         public static TryParseLite TryParseLite;
+    }
+
+    public class CurrentUserConverter : IFilterValueConverter
+    {
+        static string CurrentUserKey = "[CurrentUser]";
+
+        public string TryToString(object value, Type type, out string result)
+        {
+            if (value is Lite && ((Lite)value).RuntimeType == typeof(UserDN) && ((Lite)value).IdOrNull == UserDN.Current.Id)
+            {
+                result = CurrentUserKey;
+                return null; 
+            }
+
+            result = null;
+            return FilterValueConverter.Continue;
+            
+        }
+
+        public string TryParse(string value, Type type, out object result)
+        {
+            if (value == CurrentUserKey)
+            {
+                result = UserDN.Current.ToLite();
+                return null;
+            }
+
+            result = null;
+            return FilterValueConverter.Continue;
+        }
     }
 
     public delegate string TryParseLite(Type liteType, string value, out Lite result);

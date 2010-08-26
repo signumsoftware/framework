@@ -49,7 +49,7 @@ namespace Signum.Windows.Reports
         protected override void OnInitialized(EventArgs e)
         {
             base.OnInitialized(e);
-            Icon = GetImage(ExtensionsImageLoader.GetImageSortName("favorite.png"));
+            Icon = ExtensionsImageLoader.GetImageSortName("favorite.png").ToSmallImage();
         }
 
         List<Lite<UserQueryDN>> UserQueries; 
@@ -82,21 +82,21 @@ namespace Signum.Windows.Reports
 
             Items.Add(new MenuItem()
             {
-                Header = "New", 
-                Icon = GetImage(ExtensionsImageLoader.GetImageSortName("add.png"))
+                Header = Signum.Windows.Extensions.Properties.Resources.Create, 
+                Icon = ExtensionsImageLoader.GetImageSortName("add.png").ToSmallImage()
             }.Handle(MenuItem.ClickEvent, New_Clicked));
 
             Items.Add(new MenuItem()
             {
-                Header = "Edit",
-                Icon = GetImage(ExtensionsImageLoader.GetImageSortName("edit.png"))
+                Header = Signum.Windows.Extensions.Properties.Resources.Edit, 
+                Icon = ExtensionsImageLoader.GetImageSortName("edit.png").ToSmallImage()
             }.Handle(MenuItem.ClickEvent, Edit_Clicked)
             .Bind(MenuItem.IsEnabledProperty, this, "CurrentUserQuery", Converters.IsNotNull));
 
             Items.Add(new MenuItem()
             {
-                Header = "Remove",
-                Icon = GetImage(ExtensionsImageLoader.GetImageSortName("remove.png"))
+                Header = Signum.Windows.Extensions.Properties.Resources.Remove, 
+                Icon = ExtensionsImageLoader.GetImageSortName("remove.png").ToSmallImage()
             }.Handle(MenuItem.ClickEvent, Remove_Clicked)
             .Bind(MenuItem.IsEnabledProperty, this, "CurrentUserQuery", Converters.IsNotNull));
         }

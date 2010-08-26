@@ -24,7 +24,7 @@
                             <ColumnDefinition SharedSizeGroup="operation" MinWidth="100" Width="Auto"/>
                             <ColumnDefinition SharedSizeGroup="value" MinWidth="100" Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <m:QueryTokenBuilder Token="{Binding Token}" Loaded="QueryTokenBuilderFilters_Loaded"/>
+                        <m:QueryTokenBuilder SubTokensEvent="QueryTokenBuilderFilter_SubTokensEvent" Token="{Binding Token}" />
                         <ComboBox Grid.Column="1" VerticalAlignment="Center"
                                   SelectedItem="{Binding Operation}" 
                                   ItemsSource="{Binding Token, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={x:Static m:Converters.TokenOperations}}">
@@ -49,7 +49,7 @@
                             <ColumnDefinition SharedSizeGroup="token" MinWidth="100" Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <m:ValueLine m:Common.Route="DisplayName" />
-                        <m:QueryTokenBuilder Token="{Binding Token}" Loaded="QueryTokenBuilderColumns_Loaded" Grid.Column="1"/>
+                        <m:QueryTokenBuilder  SubTokensEvent="QueryTokenBuilderColumn_SubTokensEvent"  Token="{Binding Token}" Grid.Column="1"/>
                     </Grid>
                 </DataTemplate>
             </m:EntityRepeater.EntityTemplate>
@@ -70,7 +70,7 @@
                                 <ColumnDefinition SharedSizeGroup="orderType" MinWidth="100" Width="Auto"/>
                                 <ColumnDefinition SharedSizeGroup="token" MinWidth="100" Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <m:QueryTokenBuilder Token="{Binding Token}" Loaded="QueryTokenBuilderOrders_Loaded"/>
+                            <m:QueryTokenBuilder SubTokensEvent="QueryTokenBuilderOrder_SubTokensEvent"  Token="{Binding Token}"/>
                             <m:ValueLine m:Common.Route="OrderType" Grid.Column="1" VerticalAlignment="Center" />
                         </Grid>
                     </DataTemplate>

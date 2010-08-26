@@ -1,0 +1,70 @@
+﻿<UserControl x:Class="Signum.Windows.Chart.ChartToken"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
+    xmlns:swc="clr-namespace:Signum.Windows.Chart"
+    xmlns:dn="clr-namespace:Signum.Entities.Chart;assembly=Signum.Entities.Extensions"
+    x:Name="me" m:Common.DelayedRoutes="True">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/Signum.Windows;Component/Resources.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <AdornerDecorator>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" SharedSizeGroup="A"/>
+                <ColumnDefinition Width="Auto" SharedSizeGroup="B"/>
+                <ColumnDefinition Width="*" SharedSizeGroup="C"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Label Content="{Binding PropertyLabel}" />
+            <ToggleButton IsChecked="{Binding GroupResults, ElementName=me}" ToolTip="Group results" 
+                      Visibility="{Binding GroupByVisible, Converter={x:Static m:Converters.BoolToVisibility}}" 
+                      HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Column="1">
+                <Image Source="/Signum.Windows.Extensions;Component/Images/charts/groupby.png" Stretch="None" SnapsToDevicePixels="True" />
+            </ToggleButton>
+            <ComboBox SelectedItem="{Binding Aggregate, ValidatesOnDataErrors=true, ValidatesOnExceptions=true, NotifyOnValidationError=true}"
+                  Visibility="{Binding ShouldAggregate, Converter={x:Static m:Converters.BoolToVisibility}}"
+                  ItemsSource="{m:EnumValues Type={x:Type dn:AggregateFunction}, Nullable=true}" 
+                  HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Column="1">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock TextAlignment="Right" Text="{Binding Converter={x:Static m:Converters.EnumDescriptionConverter}}"/>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+
+            <StackPanel Grid.Column="2" Orientation="Horizontal" >
+                <m:QueryTokenBuilder  Style="{StaticResource toolTip}"  x:Name="token"
+                                 Visibility="{Binding Aggregate, Converter={x:Static swc:ChartToken.SumConverter}}"
+                             Token="{Binding Token, ValidatesOnExceptions=true, ValidatesOnDataErrors=true, NotifyOnValidationError=true}"
+                              SubTokensEvent="token_SubTokensEvent"/>
+                <TextBox Visibility="{Binding Token, Converter={x:Static swc:ChartToken.IsInterval}}" Text="{Binding Token.Intervals, ValidatesOnDataErrors=true, NotifyOnValidationError=true }" VerticalAlignment="Center"/>
+            </StackPanel>
+
+            <Expander Grid.Row="1" Style="{StaticResource LineExpander}" Grid.ColumnSpan="3">
+                <Grid m:Common.LabelWidth="70">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <m:ValueLine m:Common.Route="Format" MinWidth="100" />
+                    <m:ValueLine m:Common.Route="Unit" Grid.Column="1" MinWidth="100"/>
+                    <m:ValueLine m:Common.Route="Title" Grid.Row="1" MinWidth="200"/>
+                </Grid>
+            </Expander>
+        </Grid>
+
+
+    </AdornerDecorator>
+</UserControl>
