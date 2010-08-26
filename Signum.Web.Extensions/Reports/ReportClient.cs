@@ -91,19 +91,18 @@ namespace Signum.Web.Reports
 
         static ToolBarButton[] ButtonBarQueryHelper_GetButtonBarForQueryName(ControllerContext controllerContext, object queryName, Type entityType, string prefix)
         {
-            ToolBarButton plain = new ToolBarButton
-            {
-                AltText = Resources.ExcelReport,
-                //ImgSrc = new ScriptManager().ClientScript.GetWebResourceUrl(typeof(ReportClient), "excelPlain.png"), 
-                Text = Resources.ExcelReport,
-                OnClick = "SubmitOnly('{0}', new FindNavigator({{prefix:'{1}'}}).requestData());".Formato(ToExcelPlainControllerUrl, prefix),
-                DivCssClass = ToolBarButton.DefaultQueryCssClass
-            };
-
             int idCurrentUserQuery = 0;
             string url = (controllerContext.RouteData.Route as Route).TryCC(r => r.Url);
             if (url.HasText() && url.Contains("UQ"))
                 idCurrentUserQuery = int.Parse(controllerContext.RouteData.Values["id"].ToString());
+
+            ToolBarButton plain = new ToolBarButton
+            {
+                AltText = Resources.ExcelReport,
+                Text = Resources.ExcelReport,
+                OnClick = "SubmitOnly('{0}', $.extend({{userQuery:'{1}'}},new FindNavigator({{prefix:'{2}'}}).requestData()));".Formato(ToExcelPlainControllerUrl, (idCurrentUserQuery > 0 ? (int?)idCurrentUserQuery : null), prefix),
+                DivCssClass = ToolBarButton.DefaultQueryCssClass
+            };
 
             if (ExcelReport && idCurrentUserQuery == 0) //Excel Reports not allowed for UserQueries yet
             {

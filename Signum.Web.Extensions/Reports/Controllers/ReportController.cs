@@ -29,7 +29,7 @@ namespace Signum.Web.Reports
     public class ReportController : Controller
     {
         [AcceptVerbs(HttpVerbs.Post)]
-        public ActionResult ToExcelPlain(FindOptions findOptions, string prefix)
+        public ActionResult ToExcelPlain(FindOptions findOptions, string prefix, Lite<UserQueryDN> userQuery)
         {
             if (!Navigator.IsFindable(findOptions.QueryName))
                 throw new UnauthorizedAccessException(Signum.Web.Properties.Resources.ViewForType0IsNotAllowed.Formato(findOptions.QueryName));
@@ -42,6 +42,13 @@ namespace Signum.Web.Reports
                 Limit = findOptions.Top,
                 UserColumns = findOptions.UserColumnOptions.Select(fo => fo.UserColumn).ToList()
             };
+
+            if (userQuery != null && request.UserColumns != null && request.UserColumns.Any())
+            {
+                UserQueryDN uq = userQuery.Retrieve();
+                foreach (var uc in request.UserColumns)
+                    uc.DisplayName = uq.Columns[uc.UserColumnIndex].DisplayName;
+            }
 
             ResultTable queryResult = DynamicQueryManager.Current.ExecuteQuery( request);
             byte[] binaryFile = PlainExcelGenerator.WritePlainExcel(queryResult);
