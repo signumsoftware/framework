@@ -27,18 +27,25 @@ namespace Signum.Test.Extensions
                 AuthLogic.SystemUserName = "System";
 
                 SchemaBuilder sb = new SchemaBuilder();
-
                 DynamicQueryManager dqm = new DynamicQueryManager();
-
                 ConnectionScope.Default = new Connection(connectionString, sb.Schema, dqm);
-
-                sb.Schema.Initializing(InitLevel.Level1SimpleEntities, Schema_InitializingApplication);
 
                 sb.Settings.OverrideTypeAttributes<IUserRelatedDN>(new ImplementedByAttribute());
 
+                sb.Schema.Initializing(InitLevel.Level3MainEntities, Schema_InitializingApplication);
+
                 Signum.Test.Starter.InternalStart(sb, dqm);
 
+                AuthLogic.Start(sb, dqm, AuthLogic.SystemUserName, null);
+                UserTicketLogic.Start(sb, dqm);
                 OperationLogic.Start(sb, dqm);
+
+                TypeAuthLogic.Start(sb);
+                PropertyAuthLogic.Start(sb, true);
+                QueryAuthLogic.Start(sb, dqm);
+                OperationAuthLogic.Start(sb);
+                PermissionAuthLogic.Start(sb);
+                EntityGroupAuthLogic.Start(sb);
 
                 QueryLogic.Start(sb);
                 UserQueryLogic.Start(sb, dqm);
@@ -55,38 +62,49 @@ namespace Signum.Test.Extensions
             {
                 Start(connectionString);
 
-                Administrator.TotalGeneration();
-
-                RoleDN superUser = new RoleDN
+                using (AuthLogic.Disable())
                 {
-                    Name = "SuperUser"
-                }.Save();
+                    Schema.Current.Initialize(InitLevel.Level3MainEntities);
 
-                // crear los usuarios base
-                new UserDN
-                {
-                    UserName = AuthLogic.SystemUserName,
-                    PasswordHash = Security.EncodePassword(Guid.NewGuid().ToString()),
-                    Role = superUser
-                }.Save();
+                    RoleDN superUser = Database.Query<RoleDN>().Single(r => r.Name == "SuperUser");
+                    
+                    // crear los usuarios base
+                    new UserDN
+                    {
+                        UserName = AuthLogic.SystemUserName,
+                        PasswordHash = Security.EncodePassword(Guid.NewGuid().ToString()),
+                        Role = superUser
+                    }.Save();
 
-                new UserDN
-                {
-                    UserName = "test",
-                    PasswordHash = Security.EncodePassword("test"),
-                    Role = new RoleDN { Name = "ExternalUser" }
-                }.Save();
+                    new UserDN
+                    {
+                        UserName = "su",
+                        PasswordHash = Security.EncodePassword("su"),
+                        Role = superUser
+                    }.Save();
 
-                Schema.Current.Initialize();
+                    new UserDN
+                    {
+                        UserName = "internal",
+                        PasswordHash = Security.EncodePassword("internal"),
+                        Role = new RoleDN { Name = "InternalUser" }
+                    }.Save();
 
-                Signum.Test.Starter.Load();
+                    new UserDN
+                    {
+                        UserName = "external",
+                        PasswordHash = Security.EncodePassword("external"),
+                        Role = new RoleDN { Name = "ExternalUser" }
+                    }.Save();
 
+                    Signum.Test.Starter.Load();
+                }
             }
         }
 
         static void Schema_InitializingApplication(Schema sender)
         {
-            AuthLogic.SystemUser = Database.Query<UserDN>().Single(u => u.UserName == AuthLogic.SystemUserName);
+            //AuthLogic.SystemUser = Database.Query<UserDN>().Single(u => u.UserName == AuthLogic.SystemUserName);
         }
     }
 }

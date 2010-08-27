@@ -17,6 +17,7 @@ using Signum.Engine.Authorization;
 using Signum.Entities;
 using Signum.Web.Queries;
 using Signum.Web.Reports;
+using Signum.Web.Authorization;
 #endregion
 
 namespace Signum.Web.Extensions.Sample
@@ -56,10 +57,13 @@ namespace Signum.Web.Extensions.Sample
 
             Signum.Test.Extensions.Starter.Start(Settings.Default.ConnectionString);
 
-            Schema.Current.Initialize();
-            LinkTypesAndViews();
+            using (AuthLogic.Disable())
+            {
+                Schema.Current.Initialize();
+                LinkTypesAndViews();
+            }
 
-            AuthenticationRequiredAttribute.Authenticate = null;
+            //AuthenticationRequiredAttribute.Authenticate = null;
         }
 
         private void LinkTypesAndViews()
@@ -83,6 +87,9 @@ namespace Signum.Web.Extensions.Sample
                 Settings = new Dictionary<Enum, OperationSettings>()
             });
 
+            AuthClient.Start(true, true, true, true);
+            AuthAdminClient.Start(true, true, true, true, true, false, true);
+
             UserQueriesClient.Start();
 
             ReportClient.Start(true, true);
@@ -94,7 +101,7 @@ namespace Signum.Web.Extensions.Sample
 
         protected void Application_AcquireRequestState(object sender, EventArgs e)
         {
-            UserDN user = HttpContext.Current.Session == null ? null : (UserDN)HttpContext.Current.Session["usuario"];
+            UserDN user = HttpContext.Current.Session == null ? null : (UserDN)HttpContext.Current.Session[AuthController.SessionUserKey];
 
             if (user != null)
             {
@@ -104,7 +111,7 @@ namespace Signum.Web.Extensions.Sample
             {
                 using (AuthLogic.Disable())
                 {
-                    Thread.CurrentPrincipal = Database.Query<UserDN>().Where(u => u.UserName == "test").Single();
+                    //Thread.CurrentPrincipal = Database.Query<UserDN>().Where(u => u.UserName == "external").Single();
                 }
             }
         }

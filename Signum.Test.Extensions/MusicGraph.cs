@@ -42,6 +42,7 @@ namespace Signum.Test.Extensions
                 new Goto(AlbumOperation.Modify, AlbumState.Saved)
                 { 
                     AllowsNew = false,
+                    FromStates = new [] { AlbumState.Saved },
                     Lite = false,
                     Returns = true,
                     Execute = (album, _) => {},

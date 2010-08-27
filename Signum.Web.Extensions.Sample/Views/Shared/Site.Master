@@ -34,7 +34,7 @@
     <div class="container_16" id="main">
 
         <div class="grid_3 prefix_13" id="login">
-            <% //Html.RenderPartial(AuthClient.LoginUserControlUrl); %>
+            <% Html.RenderPartial(AuthClient.LoginUserControlUrl); %>
         </div>    
         <div class="clear"></div> 
         
