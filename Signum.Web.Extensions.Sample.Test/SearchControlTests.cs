@@ -88,7 +88,7 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.Select("ddlTokens_1", "label=Songs");
             selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#lblddlTokens_2"));
             selenium.Click("lblddlTokens_2");
-            selenium.Select("ddlTokens_2", "label=[Num]");
+            selenium.Select("ddlTokens_2", "value=Count");
             selenium.Click("btnAddFilter");
             selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#ddlSelector_2"));
             selenium.Select("ddlSelector_2", "label=mayor que");
