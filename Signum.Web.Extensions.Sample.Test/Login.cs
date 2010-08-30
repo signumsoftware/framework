@@ -33,7 +33,7 @@ namespace Signum.Web.Extensions.Sample.Test
         {
             seleniumServerProcess = SeleniumExtensions.LaunchSeleniumProcess();
 
-            Signum.Test.Extensions.Starter.Start(Settings.Default.ConnectionString);
+            Signum.Test.Extensions.Starter.Start(UserConnections.Replace(Settings.Default.ConnectionString));
             
             using (AuthLogic.Disable())
                 Schema.Current.Initialize();
