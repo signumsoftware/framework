@@ -19,6 +19,16 @@ namespace Signum.Web.Extensions.Sample
     [HandleError]
     public class MusicController : Controller
     {
+        public ViewResult BandDetail()
+        {
+            return Navigator.View(this, Database.Retrieve<AlbumDN>(1), MusicClient.ViewPrefix + "BandDetail");
+        }
+
+        public ViewResult BandRepeater() 
+        {
+            return Navigator.View(this, Database.Retrieve<AlbumDN>(1), MusicClient.ViewPrefix + "BandRepeater");
+        }
+
         public ActionResult CreateAlbumFromBand(string prefix)
         {
             BandDN band = Navigator.ExtractEntity<BandDN>(this);

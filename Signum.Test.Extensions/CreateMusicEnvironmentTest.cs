@@ -25,7 +25,7 @@ namespace Signum.Test.Extensions
         {
             using (AuthLogic.Disable())
             {
-                Starter.StartAndLoad(Settings.Default.ConnectionString);
+                Starter.StartAndLoad(UserConnections.Replace(Settings.Default.ConnectionString));
             }
         }
     }

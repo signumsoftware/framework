@@ -22,8 +22,8 @@
                 Text = "Others",
                 Children = 
                 {
-                    new WebMenuItem { Text = "Album with details", Link = "Music/AlbumDetail" },
-                    new WebMenuItem { Text = "Album with repeater", Link = "Music/AlbumRepeater" },
+                    new WebMenuItem { Text = "Band with details", Link = "Music/BandDetail" },
+                    new WebMenuItem { Text = "Band with repeater", Link = "Music/BandRepeater" },
                 }
             }
         }

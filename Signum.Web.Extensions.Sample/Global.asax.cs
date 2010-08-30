@@ -55,7 +55,7 @@ namespace Signum.Web.Extensions.Sample
             RegisterRoutes(RouteTable.Routes);
             //RouteDebug.RouteDebugger.RewriteRoutesForTesting(RouteTable.Routes);
 
-            Signum.Test.Extensions.Starter.Start(Settings.Default.ConnectionString);
+            Signum.Test.Extensions.Starter.Start(UserConnections.Replace(Settings.Default.ConnectionString));
 
             using (AuthLogic.Disable())
             {
