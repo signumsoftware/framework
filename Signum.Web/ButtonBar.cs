@@ -7,7 +7,7 @@ using System.Web.Mvc;
 using System.Web;
 using Signum.Web.Properties;
 using Signum.Entities;
-
+ 
 namespace Signum.Web
 {
     public delegate ToolBarButton[] GetToolBarButtonEntityDelegate<T>(ControllerContext controllerContext, T entity, string partialViewName, string prefix);
