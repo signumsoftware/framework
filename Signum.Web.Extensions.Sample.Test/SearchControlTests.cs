@@ -23,6 +23,18 @@ namespace Signum.Web.Extensions.Sample.Test
 
         }
 
+        [ClassInitialize()]
+        public static void LaunchSelenium(TestContext testContext)
+        {
+            Common.LaunchSelenium(testContext);
+        }
+
+        [ClassCleanup]
+        public static void MyTestCleanup()
+        {
+            Common.MyTestCleanup();
+        }
+
         private Func<bool> thereAreNRows(int n)
         {
             return () => selenium.IsElementPresent("jq=#tblResults > tbody > tr:nth-child(" + n + ")") &&
