@@ -62,11 +62,13 @@ namespace Signum.Test.Extensions
             {
                 Start(connectionString);
 
+                Administrator.TotalGeneration();
+
                 using (AuthLogic.Disable())
                 {
                     Schema.Current.Initialize(InitLevel.Level3MainEntities);
 
-                    RoleDN superUser = Database.Query<RoleDN>().Single(r => r.Name == "SuperUser");
+                    RoleDN superUser = new RoleDN { Name = "SuperUser" }.Save();
                     
                     // crear los usuarios base
                     new UserDN

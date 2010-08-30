@@ -9,8 +9,8 @@
 using (var e = Html.TypeContext<BandDN>()) 
 {
 	Html.ValueLine(e, f => f.Name);
-	Html.EntityList(e, f => f.Members);
-    Html.EntityLine(e, f => f.LastAward);
-    Html.EntityList(e, f => f.OtherAwards);
+	Html.EntityListDetail(e, f => f.Members);
+    Html.EntityLineDetail(e, f => f.LastAward);
+    Html.EntityListDetail(e, f => f.OtherAwards);
 }
 %>

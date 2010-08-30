@@ -15,6 +15,15 @@
                     new WebMenuItem { Text = "Bands", Link = new FindOptions(typeof(BandDN)) },
                     new WebMenuItem { Text = "Awards", Link = new FindOptions(typeof(AwardDN)) },
                     new WebMenuItem { Text = "Grammy Awards", Link = new FindOptions(typeof(GrammyAwardDN)) },
+                },
+            },
+            new WebMenuItem
+            {
+                Text = "Others",
+                Children = 
+                {
+                    new WebMenuItem { Text = "Album with details", Link = "Music/AlbumDetail" },
+                    new WebMenuItem { Text = "Album with repeater", Link = "Music/AlbumRepeater" },
                 }
             }
         }

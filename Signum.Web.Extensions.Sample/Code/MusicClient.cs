@@ -38,7 +38,6 @@ namespace Signum.Web.Extensions.Sample
 
                 OperationClient.Manager.Settings.AddRange(new Dictionary<Enum, OperationSettings>
                 {
-                    { AlbumOperation.Save, new EntityOperationSettings { IsVisible = _ => false }},
                     { AlbumOperation.Clone, new EntityOperationSettings { OnClick = ctx => new JsOperationConstructorFrom(ctx.Options()).DefaultSubmit() }},
                     { AlbumOperation.CreateFromBand, new EntityOperationSettings 
                     { 

@@ -20,20 +20,12 @@ namespace Signum.Test.Extensions
     [TestClass]
     public class CreateMusicEnvironmentTest
     {
-        [TestInitialize]
-        public void Initialize()
-        {
-            Starter.StartAndLoad(Settings.Default.ConnectionString);
-
-            //AuthLogic.UnsafeUser("su");
-        }
-
         [TestMethod]
         public void CreateMusicEnvironment()
         {
             using (AuthLogic.Disable())
             {
-
+                Starter.StartAndLoad(Settings.Default.ConnectionString);
             }
         }
     }

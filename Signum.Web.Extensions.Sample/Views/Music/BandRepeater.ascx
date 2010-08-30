@@ -9,8 +9,8 @@
 using (var e = Html.TypeContext<BandDN>()) 
 {
 	Html.ValueLine(e, f => f.Name);
-	Html.EntityList(e, f => f.Members);
+	Html.EntityRepeater(e, f => f.Members);
     Html.EntityLine(e, f => f.LastAward);
-    Html.EntityList(e, f => f.OtherAwards);
+    Html.EntityRepeater(e, f => f.OtherAwards);
 }
 %>
