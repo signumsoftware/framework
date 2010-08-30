@@ -8,5 +8,6 @@
   <TestLinks>
     <TestLink id="fedbc181-1ab4-da70-8a9d-e15656ad4813" name="CreateMusicEnvironment" storage="..\signum.test.extensions\bin\debug\signum.test.extensions.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel,   PublicKeyToken=b03f5f7f11d50a3a" />
     <TestLink id="92e29dbb-f5cf-4331-97ed-c4956fa5cf8f" name="otsearchcontrol" storage="otsearchcontrol.orderedtest" type="Microsoft.VisualStudio.TestTools.TestTypes.Ordered.AutoSuite, Microsoft.VisualStudio.QualityTools.Tips.OrderedTest.ObjectModel,   PublicKeyToken=b03f5f7f11d50a3a" />
+    <TestLink id="6be79e2a-a1ec-4e11-b595-8e3986974468" name="otLines" storage="otlines.orderedtest" type="Microsoft.VisualStudio.TestTools.TestTypes.Ordered.AutoSuite, Microsoft.VisualStudio.QualityTools.Tips.OrderedTest.ObjectModel,   PublicKeyToken=b03f5f7f11d50a3a" />
   </TestLinks>
 </OrderedTest>
