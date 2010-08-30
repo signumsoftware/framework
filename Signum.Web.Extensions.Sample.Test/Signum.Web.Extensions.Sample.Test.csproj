@@ -124,6 +124,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="otTestsIU.orderedtest">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="otSearchControl.orderedtest">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

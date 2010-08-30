@@ -67,6 +67,10 @@ namespace Signum.Web.Selenium
             //Kill IIS worker process so it frees application folder and the next build can delete it
             foreach (var p in Process.GetProcessesByName("w3wp"))
                 p.Kill();
+
+            //Kill java process so it frees application folder and the next build can delete it
+            foreach (var p in Process.GetProcessesByName("java"))
+                p.Kill();
         }
 
         public const string DefaultPageLoadTimeout = "100000"; //1.66666667 minutes
