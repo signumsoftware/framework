@@ -121,6 +121,39 @@ namespace Signum.Web.Extensions.Sample.Test
         [TestMethod]
         public void EntityListInPopup()
         {
+            CheckLoginAndOpen("/Signum.Web.Extensions.Sample/View/Band/1");
+
+            //open popup
+            selenium.Select("jq=#Members", "id=Members_0_sfToStr");
+            selenium.DoubleClick("jq=#Members_0_sfToStr");
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Members_0_panelPopup:visible"));
+            
+            //create
+            selenium.Click("Members_0_Friends_btnCreate");
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #Members_0_Friends_1Temp"));
+
+            selenium.Type("Members_0_Friends_1_Name", "prueba");
+            selenium.Click("Members_0_Friends_1_sfBtnOk");
+            Assert.IsFalse(selenium.IsElementPresent("jq=#divASustituir + #Members_0_Friends_1Temp"));
+            Assert.IsTrue(selenium.IsElementPresent("jq=#Members_0_Friends > option:nth-child(1)"));
+            Assert.IsTrue(selenium.IsElementPresent("jq=#Members_0_Friends_1_sfRuntimeInfo"));
+
+            //find multiple
+            selenium.Click("Members_0_Friends_btnFind");
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #Members_0_Friends_2Temp"));
+            selenium.Click("Members_0_Friends_2_btnSearch");
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Members_0_Friends_2_tblResults > tbody > tr"));
+            selenium.Click("Members_0_Friends_2_rowSelection_4");
+            selenium.Click("Members_0_Friends_2_rowSelection_5");
+            selenium.Click("Members_0_Friends_2_sfBtnOk");
+
+            //delete multiple
+            selenium.Select("Members_0_Friends", "id=Members_0_Friends_1_sfToStr");
+            selenium.AddSelection("Members_0_Friends", "id=Members_0_Friends_2_sfToStr");
+            selenium.Click("Members_0_Friends_btnRemove");
+            selenium.Click("Members_0_Friends_btnRemove");
+            Assert.IsTrue(selenium.IsElementPresent("jq=#Members_0_Friends > option:nth-child(2)"));
+            Assert.IsFalse(selenium.IsElementPresent("jq=#Members_0_Friends > option:nth-child(3)"));
             
         }
     }

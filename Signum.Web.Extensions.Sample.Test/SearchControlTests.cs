@@ -91,7 +91,7 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.Select("ddlTokens_2", "value=Count");
             selenium.Click("btnAddFilter");
             selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#ddlSelector_2"));
-            selenium.Select("ddlSelector_2", "label=mayor que");
+            selenium.Select("ddlSelector_2", "value=GreaterThan");
             selenium.Type("value_2", "1");
             selenium.Click("btnSearch");
             selenium.WaitAjaxFinished(thereAreNRows(1));
@@ -144,7 +144,7 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.ContextMenu("jq=#Members_0_tblResults > tbody > tr:nth-child(4) > td:nth-child(3)");
             selenium.Click("jq=#Members_0_tblResults > tbody > tr:nth-child(4) > td:nth-child(3) span");
             selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Members_0_tblFilters #Members_0_trFilter_2"));
-            selenium.Select("Members_0_ddlSelector_2", "label=mayor que");
+            selenium.Select("Members_0_ddlSelector_2", "value=GreaterThan");
             selenium.Click("Members_0_btnSearch");
             selenium.WaitAjaxFinished(thereAreNRowsInPopup(3));
 
@@ -160,7 +160,7 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Members_0_btnAddFilter"));
             selenium.Click("Members_0_btnAddFilter");
             selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Members_0_value_2"));
-            selenium.Select("Members_0_ddlSelector_2", "label=acaba por");
+            selenium.Select("Members_0_ddlSelector_2", "value=EndsWith");
             selenium.Type("Members_0_value_2", "a");
             selenium.Click("Members_0_btnSearch");
             selenium.WaitAjaxFinished(thereAreNRowsInPopup(1));
