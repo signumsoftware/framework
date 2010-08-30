@@ -66,7 +66,6 @@ namespace Signum.Web.Extensions.Sample.Test
             }
         }
 
-        [TestMethod]
         public void Login()
         {
             Login("internal", "internal");
@@ -101,7 +100,6 @@ namespace Signum.Web.Extensions.Sample.Test
             Assert.IsTrue(selenium.IsElementPresent("jq=a.logout"));
         }
 
-        [TestMethod]
         public void LogOut()
         {
             selenium.Click("jq=a.logout");

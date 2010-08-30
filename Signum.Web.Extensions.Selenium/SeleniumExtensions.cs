@@ -62,7 +62,7 @@ namespace Signum.Web.Selenium
 
         public static void KillSelenium(Process seleniumProcess)
         {
-            if (seleniumProcess != null)
+            if (seleniumProcess != null && !seleniumProcess.HasExited)
                 seleniumProcess.Kill();
 
             //Kill IIS worker process so it frees application folder and the next build can delete it

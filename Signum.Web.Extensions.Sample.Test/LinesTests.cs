@@ -36,6 +36,95 @@ namespace Signum.Web.Extensions.Sample.Test
         }
 
         [TestMethod]
+        public void EntityLine()
+        {
+            CheckLoginAndOpen("/Signum.Web.Extensions.Sample/View/Band/1");
+            
+            //view
+            selenium.Click("LastAward_btnView");
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#LastAward_sfEntity:visible"));
+
+            //cancel 
+            selenium.Click("LastAward_sfBtnCancel");
+            Assert.IsFalse(selenium.IsElementPresent("jq=#LastAward_sfEntity:visible"));
+
+            //delete
+            selenium.Click("LastAward_btnRemove");
+            Assert.IsTrue(selenium.IsElementPresent("jq=#LastAward_sfToStr:visible"));
+            Assert.IsFalse(selenium.IsElementPresent("jq=#LastAward_sfLink:visible"));
+
+            //create with implementations
+            selenium.Click("LastAward_btnCreate");
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #LastAwardTemp"));
+            selenium.Click("GrammyAwardDN");
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#LastAward_Category"));
+            selenium.Type("LastAward_Category", "prueba");
+            selenium.Click("LastAward_sfBtnOk");
+            selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("jq=#divASustituir + #LastAwardTemp"));
+            Assert.IsFalse(selenium.IsElementPresent("jq=#LastAward_sfToStr:visible"));
+            Assert.IsTrue(selenium.IsElementPresent("jq=#LastAward_sfLink:visible"));
+
+            //find with implementations
+            selenium.Click("LastAward_btnRemove");
+            selenium.Click("LastAward_btnFind");
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #LastAwardTemp"));
+            selenium.Click("GrammyAwardDN");
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#LastAward_btnSearch"));
+            selenium.Click("LastAward_btnSearch");
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#LastAward_tblResults > tbody > tr"));
+            selenium.Click("LastAward_rowSelection");
+            selenium.Click("LastAward_sfBtnOk");
+            selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("jq=#LastAward_sfToStr:visible"));
+            Assert.IsTrue(selenium.IsElementPresent("jq=#LastAward_sfLink:visible"));
+        }
+
+        [TestMethod]
+        public void EntityLineInPopup()
+        {
+            CheckLoginAndOpen("/Signum.Web.Extensions.Sample/View/Album/1");
+            
+            //open popup
+            selenium.Click("Author_btnView");
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Author_sfEntity:visible"));
+
+            //view
+            selenium.Click("Author_LastAward_btnView");
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Author_LastAward_sfEntity:visible"));
+            selenium.Click("Author_LastAward_sfBtnOk");
+            selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("jq=#Author_LastAward_sfEntity:visible"));
+
+            //delete
+            selenium.Click("Author_LastAward_btnRemove");
+            Assert.IsTrue(selenium.IsElementPresent("jq=#Author_LastAward_sfToStr:visible"));
+            Assert.IsFalse(selenium.IsElementPresent("jq=#Author_LastAward_sfLink:visible"));
+            
+            //create with implementations
+            selenium.Click("Author_LastAward_btnCreate");
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #Author_LastAwardTemp"));
+            selenium.Click("AmericanMusicAwardDN");
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Author_LastAward_Category"));
+            selenium.Type("Author_LastAward_Category", "prueba");
+            selenium.Click("Author_LastAward_sfBtnOk");
+            selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("jq=#divASustituir + #Author_LastAwardTemp"));
+            Assert.IsFalse(selenium.IsElementPresent("jq=#Author_LastAward_sfToStr:visible"));
+            Assert.IsTrue(selenium.IsElementPresent("jq=#Author_LastAward_sfLink:visible"));
+            
+            //find with implementations
+            selenium.Click("Author_LastAward_btnRemove");
+            selenium.Click("Author_LastAward_btnFind");
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #Author_LastAwardTemp"));
+            selenium.Click("AmericanMusicAwardDN");
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Author_LastAward_btnSearch"));
+            selenium.Click("Author_LastAward_btnSearch");
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Author_LastAward_tblResults > tbody > tr"));
+            selenium.Click("Author_LastAward_rowSelection");
+            selenium.Click("Author_LastAward_sfBtnOk");
+            selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("jq=#divASustituir + #Author_LastAwardTemp"));
+            Assert.IsFalse(selenium.IsElementPresent("jq=#Author_LastAward_sfToStr:visible"));
+            Assert.IsTrue(selenium.IsElementPresent("jq=#Author_LastAward_sfLink:visible"));
+        }
+
+        [TestMethod]
         public void EntityList()
         {
             CheckLoginAndOpen("/Signum.Web.Extensions.Sample/View/Band/1");
