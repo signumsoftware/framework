@@ -31,14 +31,21 @@ namespace Signum.Web.Extensions.Sample.Test
         [ClassInitialize()]
         public static void LaunchSelenium(TestContext testContext)
         {
-            seleniumServerProcess = SeleniumExtensions.LaunchSeleniumProcess();
+            try
+            {
+                seleniumServerProcess = SeleniumExtensions.LaunchSeleniumProcess();
 
-            Signum.Test.Extensions.Starter.Start(UserConnections.Replace(Settings.Default.ConnectionString));
-            
-            using (AuthLogic.Disable())
-                Schema.Current.Initialize();
-            
-            selenium = SeleniumExtensions.InitializeSelenium();
+                Signum.Test.Extensions.Starter.Start(UserConnections.Replace(Settings.Default.ConnectionString));
+
+                using (AuthLogic.Disable())
+                    Schema.Current.Initialize();
+
+                selenium = SeleniumExtensions.InitializeSelenium();
+            }
+            catch (Exception)
+            {
+                MyTestCleanup();
+            }
         }
 
         [TestInitialize()]
