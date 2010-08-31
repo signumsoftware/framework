@@ -28,7 +28,7 @@ namespace Signum.Web.Selenium
 
         public static ISelenium InitializeSelenium()
         {
-            ISelenium selenium = new DefaultSelenium("localhost", 4444, "*chrome", "http://localhost/");
+            ISelenium selenium = new DefaultSelenium("localhost", 4444, "*iexplore", "http://localhost/");
             selenium.Start();
             selenium.SetSpeed("1000");
             selenium.SetTimeout("600000");
