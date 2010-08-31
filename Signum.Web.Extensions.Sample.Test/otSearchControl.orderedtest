@@ -1,13 +1,11 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
-<OrderedTest name="otSearchControl" storage="d:\signum\extensions\signum.web.extensions.sample.test\otsearchcontrol.orderedtest" id="92e29dbb-f5cf-4331-97ed-c4956fa5cf8f" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2006">
+<OrderedTest name="otsearchcontrol" storage="d:\signum\extensions\signum.web.extensions.sample.test\otsearchcontrol.orderedtest" id="92e29dbb-f5cf-4331-97ed-c4956fa5cf8f" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2006">
   <Css projectStructure="" iteration="" />
   <Execution timeOut="2147483647" />
   <Owners>
     <Owner name="" />
   </Owners>
   <TestLinks>
-    <TestLink id="b8e4b99c-92a3-7cc7-5481-8dc9b670e262" name="Login" storage="bin\debug\signum.web.extensions.sample.test.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel,   PublicKeyToken=b03f5f7f11d50a3a" />
-    <TestLink id="1b180f02-cf8f-65a1-a69a-0d784457eb0b" name="LogOut" storage="bin\debug\signum.web.extensions.sample.test.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel,   PublicKeyToken=b03f5f7f11d50a3a" />
     <TestLink id="a60bc918-3569-4128-65c8-87f270ee2463" name="Filters" storage="bin\debug\signum.web.extensions.sample.test.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel,   PublicKeyToken=b03f5f7f11d50a3a" />
     <TestLink id="9df4a96e-b7a2-48ae-8639-9d300efbb994" name="FiltersInPopup" storage="bin\debug\signum.web.extensions.sample.test.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel,   PublicKeyToken=b03f5f7f11d50a3a" />
     <TestLink id="908e088f-2370-6d73-1c60-105df481b1d8" name="Orders" storage="bin\debug\signum.web.extensions.sample.test.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel,   PublicKeyToken=b03f5f7f11d50a3a" />
