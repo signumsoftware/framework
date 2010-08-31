@@ -64,14 +64,21 @@ namespace Signum.Web.Selenium
         {
             if (seleniumProcess != null && !seleniumProcess.HasExited)
                 seleniumProcess.Kill();
-            
-            //Kill java process so it frees application folder and the next build can delete it
-            foreach (var p in Process.GetProcessesByName("java").Where(proc => !proc.HasExited))
-                p.Kill();
 
-            //Kill IIS worker process so it frees application folder and the next build can delete it
-            //foreach (var p in Process.GetProcessesByName("w3wp").Where(proc => !proc.HasExited))
-            //    p.Dispose();
+            if (System.Environment.MachineName.ToLower().Contains("apolo"))
+            {
+                //Kill java process so it frees application folder and the next build can delete it
+                foreach (var p in Process.GetProcessesByName("java").Where(proc => !proc.HasExited))
+                    p.Kill();
+
+                //Kill firefox process so it frees application folder and the next build can delete it
+                foreach (var p in Process.GetProcessesByName("firefox").Where(proc => !proc.HasExited))
+                    p.Kill();
+
+                //Kill IIS worker process so it frees application folder and the next build can delete it
+                //foreach (var p in Process.GetProcessesByName("w3wp").Where(proc => !proc.HasExited))
+                //    p.Dispose();
+            }
         }
 
         public const string DefaultPageLoadTimeout = "100000"; //1.66666667 minutes
