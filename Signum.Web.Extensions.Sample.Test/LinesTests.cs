@@ -79,6 +79,40 @@ namespace Signum.Web.Extensions.Sample.Test
         }
 
         [TestMethod]
+        public void EntityLineDetail()
+        {
+            CheckLoginAndOpen("/Signum.Web.Extensions.Sample/Music/BandDetail");
+
+            //Value is opened by default
+            Assert.IsTrue(selenium.IsElementPresent("jq=#LastAward_sfDetail #LastAward_Category"));
+            
+            //Delete
+            selenium.Click("LastAward_btnRemove");
+            Assert.IsFalse(selenium.IsElementPresent("jq=#LastAward_sfDetail #LastAward_Category"));
+
+            //create with implementations
+            selenium.Click("LastAward_btnCreate");
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #LastAwardTemp"));
+            selenium.Click("AmericanMusicAwardDN");
+            selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("jq=#divASustituir + #LastAwardTemp"));
+            Assert.IsTrue(selenium.IsElementPresent("jq=#LastAward_sfDetail #LastAward_Category"));
+            selenium.Type("LastAward_Category", "prueba");
+
+            //find with implementations
+            selenium.Click("LastAward_btnRemove");
+            selenium.Click("LastAward_btnFind");
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #LastAwardTemp"));
+            selenium.Click("AmericanMusicAwardDN");
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#LastAward_btnSearch"));
+            selenium.Click("LastAward_btnSearch");
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#LastAward_tblResults > tbody > tr"));
+            selenium.Click("LastAward_rowSelection");
+            selenium.Click("LastAward_sfBtnOk");
+            selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("jq=#divASustituir + #LastAwardTemp"));
+            Assert.IsTrue(selenium.IsElementPresent("jq=#LastAward_sfDetail #LastAward_Category"));
+        }
+
+        [TestMethod]
         public void EntityLineInPopup()
         {
             CheckLoginAndOpen("/Signum.Web.Extensions.Sample/View/Album/1");
@@ -315,6 +349,52 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.Select("jq=#OtherAwards", "id=OtherAwards_0_sfToStr");
             selenium.DoubleClick("jq=#OtherAwards > option:nth-child(1)");
             Assert.IsTrue(selenium.IsElementPresent("jq=#OtherAwards_sfDetail #OtherAwards_0_Category"));
+        }
+
+        [TestMethod]
+        public void EntityRepeater()
+        {
+            CheckLoginAndOpen("/Signum.Web.Extensions.Sample/Music/BandRepeater");
+
+            //All elements are shown
+            Assert.IsTrue(selenium.IsElementPresent("jq=#Members_sfItemsContainer > div.repeaterElement:nth-child(4)"));
+            
+            //Create
+            selenium.Click("Members_btnCreate");
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Members_sfItemsContainer > #Members_4_sfRepeaterItem"));
+            selenium.Type("Members_4_Name", "prueba");
+            Assert.IsTrue(selenium.IsElementPresent("jq=#Members_4_sfRuntimeInfo"));
+
+            //delete
+            selenium.Click("Members_4_btnRemove");
+            Assert.IsFalse(selenium.IsElementPresent("jq=#Members_4_sfRuntimeInfo"));
+            Assert.IsFalse(selenium.IsElementPresent("jq=#Members_sfItemsContainer > #Members_4_sfRepeaterItem"));
+
+            //find multiple
+            selenium.Click("Members_btnFind");
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #Members_4Temp"));
+            selenium.Click("Members_4_btnSearch");
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Members_4_tblResults > tbody > tr"));
+            selenium.Click("Members_4_rowSelection_4");
+            selenium.Click("Members_4_rowSelection_5");
+            selenium.Click("Members_4_sfBtnOk");
+            selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("jq=#divASustituir + #Members_4Temp"));
+            Assert.IsTrue(selenium.IsElementPresent("jq=#Members_4_sfRuntimeInfo"));
+            Assert.IsTrue(selenium.IsElementPresent("jq=#Members_sfItemsContainer > #Members_4_sfRepeaterItem"));
+            Assert.IsTrue(selenium.IsElementPresent("jq=#Members_5_sfRuntimeInfo"));
+            Assert.IsTrue(selenium.IsElementPresent("jq=#Members_sfItemsContainer > #Members_5_sfRepeaterItem"));
+
+            //create with implementations
+            selenium.Click("OtherAwards_btnCreate");
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #OtherAwardsTemp"));
+            selenium.Click("GrammyAwardDN");
+            selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("jq=#divASustituir + #OtherAwards_Temp"));
+            Assert.IsTrue(selenium.IsElementPresent("jq=#OtherAwards_sfItemsContainer > #OtherAwards_0_sfRepeaterItem"));
+            Assert.IsTrue(selenium.IsElementPresent("jq=#OtherAwards_0_sfRuntimeInfo"));
+            selenium.Type("OtherAwards_0_Category", "prueba");
+            
+            //find with implementations
+            selenium.Click("OtherAwards_btnFind");
         }
     }
 }
