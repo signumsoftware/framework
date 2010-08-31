@@ -14,6 +14,10 @@ using Signum.Entities;
 using Signum.Engine.Reports;
 using System.Web.Routing;
 using Signum.Web.Files;
+using Signum.Engine;
+using Signum.Entities.DynamicQuery;
+using Signum.Engine.Basics;
+using Signum.Entities.Files;
 #endregion
 
 namespace Signum.Web.Reports
@@ -43,7 +47,30 @@ namespace Signum.Web.Reports
                     new { resourcesFolder = new InArray(new string[] { "Scripts", "Content", "Images" }) });
 
                 Navigator.AddSettings(new List<EntitySettings>{
-                    new EntitySettings<ExcelReportDN>(EntityType.NotSaving) { PartialViewName = _ => ViewPrefix + "ExcelReport" }
+                    new EntitySettings<ExcelReportDN>(EntityType.NotSaving) 
+                    { 
+                        PartialViewName = _ => ViewPrefix + "ExcelReport",
+                        MappingAdmin = new EntityMapping<ExcelReportDN>(true)  
+                        { 
+                            GetEntity = ctx => 
+                            {
+                                RuntimeInfo runtimeInfo = ctx.GetRuntimeInfo();
+                                if (runtimeInfo.IsNew)
+                                {
+                                    ctx.Value = new ExcelReportDN();
+                                    
+                                    string queryKey = ctx.Inputs[TypeContextUtilities.Compose("Query", QueryDN.KeyName)];
+                                    object queryName = Navigator.Manager.QuerySettings.Keys.First(key => QueryUtils.GetQueryName(key) == queryKey);
+                               
+                                    ctx.Value.Query = QueryLogic.RetrieveOrGenerateQuery(queryName);
+                                }
+                                else
+                                    ctx.Value = Database.Retrieve<ExcelReportDN>(runtimeInfo.IdOrNull.Value);
+
+                                return ctx.Value;
+                            }
+                        }
+                    }
                 });
 
                 if (excelReport)
