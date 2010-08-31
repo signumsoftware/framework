@@ -44,4 +44,8 @@ namespace Signum.Entities.Authorization
             }
         }
     }
+    public enum RoleQueries
+    {
+        ReferedBy
+    }
 }

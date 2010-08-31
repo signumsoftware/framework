@@ -61,7 +61,7 @@ namespace Signum.Engine.Authorization
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 SystemUserName = systemUserName;
-                AnonymousUserName = anonymousUserName; 
+                AnonymousUserName = anonymousUserName;
 
                 sb.Include<UserDN>();
                 sb.Include<RoleDN>();
@@ -74,8 +74,19 @@ namespace Signum.Engine.Authorization
                                        {
                                            Entity = r.ToLite(),
                                            r.Id,
-                                           r.Name,                                          
+                                           r.Name,
                                        }).ToDynamic();
+
+                dqm[RoleQueries.ReferedBy] = (from r in Database.Query<RoleDN>()
+                                              from rc in Database.Query<RoleDN>()
+                                              where r.Roles.Contains(rc.ToLite())
+                                              select new
+                                              {
+                                                  Entity = r.ToLite(),
+                                                  r.Id,
+                                                  r.Name,
+                                                  Refered = rc.ToLite(),
+                                              }).ToDynamic();
 
                 dqm[typeof(UserDN)] = (from e in Database.Query<UserDN>()
                                        select new
@@ -112,7 +123,7 @@ namespace Signum.Engine.Authorization
                                                            e.RequestDate,
                                                            e.Code,
                                                            User = e.User.ToLite(),
-                                                           e.User.Email 
+                                                           e.User.Email
                                                        }).ToDynamic();
 
                 EmailLogic.AssertStarted(sb);
@@ -150,7 +161,7 @@ namespace Signum.Engine.Authorization
 
                     DirectedGraph<RoleDN> newRoles = new DirectedGraph<RoleDN>();
 
-                    newRoles.Expand(role, r1 => r1.Roles.Select(a=>a.Retrieve()));
+                    newRoles.Expand(role, r1 => r1.Roles.Select(a => a.Retrieve()));
                     foreach (var r in Database.RetrieveAll<RoleDN>())
                     {
                         newRoles.Expand(r, r1 => r1.Roles.Select(a => a.Retrieve()));
@@ -199,7 +210,7 @@ namespace Signum.Engine.Authorization
 
         public static IDisposable UnsafeUser(string username)
         {
-            UserDN user; 
+            UserDN user;
             using (AuthLogic.Disable())
             {
                 user = Database.Query<UserDN>().SingleOrDefault(u => u.UserName == username);
@@ -216,7 +227,7 @@ namespace Signum.Engine.Authorization
             Thread.CurrentPrincipal = user;
             return new Disposable(() =>
             {
-                Thread.CurrentPrincipal = old; 
+                Thread.CurrentPrincipal = old;
             });
         }
 
@@ -233,12 +244,12 @@ namespace Signum.Engine.Authorization
             if (Roles.IndirectlyRelatedTo(role2).Contains(role1))
                 return -1;
 
-            return 0; 
+            return 0;
         }
 
         public static IEnumerable<Lite<RoleDN>> RelatedTo(Lite<RoleDN> role)
         {
-            return Roles.RelatedTo(role); 
+            return Roles.RelatedTo(role);
         }
 
         static bool gloaballyEnabled = true;
@@ -253,7 +264,7 @@ namespace Signum.Engine.Authorization
 
         public static IDisposable Disable()
         {
-            bool lastValue = temporallyDisabled; 
+            bool lastValue = temporallyDisabled;
             temporallyDisabled = true;
             return new Disposable(() => temporallyDisabled = lastValue);
         }
@@ -304,10 +315,10 @@ namespace Signum.Engine.Authorization
         {
             TypeAuthLogic.Start(sb);
             PropertyAuthLogic.Start(sb, true);
-            
+
             if (serviceInterface != null)
                 FacadeMethodAuthLogic.Start(sb, serviceInterface);
-            
+
             QueryAuthLogic.Start(sb, dqm);
             OperationAuthLogic.Start(sb);
             PermissionAuthLogic.Start(sb);
