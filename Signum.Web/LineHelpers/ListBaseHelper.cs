@@ -23,7 +23,7 @@ namespace Signum.Web
     {
         public static string WriteCreateButton(HtmlHelper helper, EntityListBase listBase, Dictionary<string, object> htmlProperties)
         {
-            if (!listBase.Create && listBase.Implementations == null)
+            if (!listBase.Create)
                 return "";
 
             return helper.Button(listBase.Compose("btnCreate"),
@@ -35,7 +35,7 @@ namespace Signum.Web
 
         public static string WriteFindButton(HtmlHelper helper, EntityListBase listBase)
         {
-            if ((!listBase.Find && listBase.Implementations == null) || typeof(EmbeddedEntity).IsAssignableFrom(listBase.Type.CleanType()))
+            if ((!listBase.Find) || !listBase.ElementType.CleanType().IsIIdentifiable())
                 return "";
 
             return helper.Button(listBase.Compose("btnFind"),
@@ -47,7 +47,7 @@ namespace Signum.Web
 
         public static string WriteRemoveButton(HtmlHelper helper, EntityListBase listBase)
         {
-            if (!listBase.Remove && listBase.Implementations == null)
+            if (!listBase.Remove)
                 return "";
 
             IList list = (IList)listBase.UntypedValue;

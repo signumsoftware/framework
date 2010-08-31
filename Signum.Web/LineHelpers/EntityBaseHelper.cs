@@ -122,7 +122,7 @@ namespace Signum.Web
 
         public static string WriteFindButton(HtmlHelper helper, EntityBase entityBase)
         {
-            if ((!entityBase.Type.IsIIdentifiable() && !entityBase.Type.IsLite()) || (!entityBase.Find && entityBase.Implementations == null))
+            if (!entityBase.Find || !entityBase.Type.CleanType().IsIIdentifiable())
                 return "";
 
             return helper.Button(entityBase.Compose("btnFind"),
@@ -134,7 +134,7 @@ namespace Signum.Web
 
         public static string WriteRemoveButton(HtmlHelper helper, EntityBase entityBase)
         {
-            if (!entityBase.Remove && entityBase.Implementations == null)
+            if (!entityBase.Remove)
                 return "";
 
             return helper.Button(entityBase.Compose("btnRemove"),
