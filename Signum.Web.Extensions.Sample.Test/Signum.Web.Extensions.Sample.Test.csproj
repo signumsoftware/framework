@@ -47,6 +47,7 @@
     <Reference Include="ThoughtWorks.Selenium.UnitTests, Version=0.0.0.0, Culture=neutral" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ReportsTests.cs" />
     <Compile Include="Login.cs" />
     <Compile Include="LinesTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
