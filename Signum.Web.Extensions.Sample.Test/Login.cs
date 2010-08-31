@@ -58,6 +58,7 @@ namespace Signum.Web.Extensions.Sample.Test
             try
             {
                 selenium.Stop();
+                selenium.ShutDownSeleniumServer();
                 SeleniumExtensions.KillSelenium(seleniumServerProcess);
             }
             catch (Exception)
