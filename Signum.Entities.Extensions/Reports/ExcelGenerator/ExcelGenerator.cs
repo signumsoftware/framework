@@ -58,7 +58,7 @@ namespace Signum.Entities.Reports
 
                     from r in results.Rows
                         select (from columnData in columnEquivalences
-                                select cb.Cell(r[columnData.Column], columnData.StyleIndex)).ToRow()
+                                select cb.Cell(r[columnData.Column], cb.GetTemplateCell(columnData.Column.Type), columnData.StyleIndex)).ToRow()
                 }.Cast<OpenXmlElement>());
 
                 var pivotTableParts = workbookPart.PivotTableCacheDefinitionParts
