@@ -28,7 +28,7 @@ namespace Signum.Web.Selenium
 
         public static ISelenium InitializeSelenium()
         {
-            ISelenium selenium = new DefaultSelenium("localhost", 4444, "*iexplore", "http://localhost/");
+            ISelenium selenium = new DefaultSelenium("localhost", 4444, "*chrome", "http://localhost/");
             selenium.Start();
             selenium.SetSpeed("1000");
             selenium.SetTimeout("600000");
@@ -67,11 +67,11 @@ namespace Signum.Web.Selenium
             
             //Kill java process so it frees application folder and the next build can delete it
             foreach (var p in Process.GetProcessesByName("java").Where(proc => !proc.HasExited))
-                p.Dispose();
+                p.Kill();
 
             //Kill IIS worker process so it frees application folder and the next build can delete it
-            foreach (var p in Process.GetProcessesByName("w3wp").Where(proc => !proc.HasExited))
-                p.Dispose();
+            //foreach (var p in Process.GetProcessesByName("w3wp").Where(proc => !proc.HasExited))
+            //    p.Dispose();
         }
 
         public const string DefaultPageLoadTimeout = "100000"; //1.66666667 minutes
