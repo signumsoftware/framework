@@ -66,11 +66,11 @@ namespace Signum.Web.Selenium
                 seleniumProcess.Kill();
 
             //Kill IIS worker process so it frees application folder and the next build can delete it
-            foreach (var p in Process.GetProcessesByName("w3wp"))
+            foreach (var p in Process.GetProcessesByName("w3wp").Where(proc => !proc.HasExited))
                 p.Kill();
 
             //Kill java process so it frees application folder and the next build can delete it
-            foreach (var p in Process.GetProcessesByName("java"))
+            foreach (var p in Process.GetProcessesByName("java").Where(proc => !proc.HasExited))
                 p.Kill();
         }
 

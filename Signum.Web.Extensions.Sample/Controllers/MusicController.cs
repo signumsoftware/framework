@@ -16,17 +16,17 @@ using Signum.Test.Extensions;
 
 namespace Signum.Web.Extensions.Sample
 {
-    [HandleError]
+    [HandleError, AuthenticationRequired]
     public class MusicController : Controller
     {
         public ViewResult BandDetail()
         {
-            return Navigator.View(this, Database.Retrieve<AlbumDN>(1), MusicClient.ViewPrefix + "BandDetail");
+            return Navigator.View(this, Database.Retrieve<BandDN>(1), MusicClient.ViewPrefix + "BandDetail");
         }
 
         public ViewResult BandRepeater() 
         {
-            return Navigator.View(this, Database.Retrieve<AlbumDN>(1), MusicClient.ViewPrefix + "BandRepeater");
+            return Navigator.View(this, Database.Retrieve<BandDN>(1), MusicClient.ViewPrefix + "BandRepeater");
         }
 
         public ActionResult CreateAlbumFromBand(string prefix)

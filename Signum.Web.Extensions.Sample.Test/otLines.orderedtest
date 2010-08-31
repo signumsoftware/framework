@@ -10,5 +10,6 @@
     <TestLink id="c403dc9b-a5fd-4e7b-6712-8bc023f08cf0" name="EntityLineInPopup" storage="bin\debug\signum.web.extensions.sample.test.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel,   PublicKeyToken=b03f5f7f11d50a3a" />
     <TestLink id="64c38172-5668-b88f-c0a9-7daaaaf65128" name="EntityList" storage="bin\debug\signum.web.extensions.sample.test.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel,   PublicKeyToken=b03f5f7f11d50a3a" />
     <TestLink id="09a9dfd0-6efc-3388-0e0e-aed870b3f48c" name="EntityListInPopup" storage="bin\debug\signum.web.extensions.sample.test.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel,   PublicKeyToken=b03f5f7f11d50a3a" />
+    <TestLink id="b1d469db-a24f-a132-de3d-9cb6abf0f1e5" name="EntityListDetail" storage="bin\debug\signum.web.extensions.sample.test.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel,   PublicKeyToken=b03f5f7f11d50a3a" />
   </TestLinks>
 </OrderedTest>

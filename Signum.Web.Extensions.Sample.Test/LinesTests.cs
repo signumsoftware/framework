@@ -243,7 +243,78 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.Click("Members_0_Friends_btnRemove");
             Assert.IsTrue(selenium.IsElementPresent("jq=#Members_0_Friends > option:nth-child(2)"));
             Assert.IsFalse(selenium.IsElementPresent("jq=#Members_0_Friends > option:nth-child(3)"));
+        }
+
+        [TestMethod]
+        public void EntityListDetail()
+        {
+            CheckLoginAndOpen("/Signum.Web.Extensions.Sample/Music/BandDetail");
+
+            //1st element is shown by default
+            Assert.IsTrue(selenium.IsElementPresent("jq=#Members_sfDetail #Members_0_Name"));
             
+            //create
+            selenium.Click("Members_btnCreate");
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Members_sfDetail #Members_4_Name"));
+            selenium.Type("Members_4_Name", "prueba");
+            Assert.IsTrue(selenium.IsElementPresent("jq=#Members_4_sfRuntimeInfo"));
+            Assert.IsTrue(selenium.IsElementPresent("jq=#Members > option:nth-child(5)"));
+            Assert.IsTrue(selenium.IsElementPresent("jq=#Members_sfDetail #Members_4_Name"));
+
+            //delete
+            selenium.Click("Members_btnRemove");
+            Assert.IsFalse(selenium.IsElementPresent("jq=#Members_4_sfRuntimeInfo"));
+            Assert.IsFalse(selenium.IsElementPresent("jq=#Members > option:nth-child(5)"));
+            Assert.IsFalse(selenium.IsElementPresent("jq=#Members_sfDetail #Members_4_Name"));
+
+            //find multiple
+            selenium.Click("Members_btnFind");
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #Members_4Temp"));
+            selenium.Click("Members_4_btnSearch");
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Members_4_tblResults > tbody > tr"));
+            selenium.Click("Members_4_rowSelection_4");
+            selenium.Click("Members_4_rowSelection_5");
+            selenium.Click("Members_4_sfBtnOk");
+            selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("jq=#divASustituir + #Members_4Temp"));
+            Assert.IsTrue(selenium.IsElementPresent("jq=#Members_4_sfRuntimeInfo"));
+            Assert.IsTrue(selenium.IsElementPresent("jq=#Members > option:nth-child(5)"));
+            Assert.IsTrue(selenium.IsElementPresent("jq=#Members_5_sfRuntimeInfo"));
+            Assert.IsTrue(selenium.IsElementPresent("jq=#Members > option:nth-child(6)"));
+            Assert.IsTrue(selenium.IsElementPresent("jq=#Members_sfDetail #Members_5_Name"));
+
+            //create with implementations
+            selenium.Click("OtherAwards_btnCreate");
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #OtherAwardsTemp"));
+            selenium.Click("GrammyAwardDN");
+            selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("jq=#divASustituir + #OtherAwards_Temp"));
+            Assert.IsTrue(selenium.IsElementPresent("jq=#OtherAwards_sfDetail #OtherAwards_0_Category"));
+            Assert.IsTrue(selenium.IsElementPresent("jq=#OtherAwards_0_sfRuntimeInfo"));
+            selenium.Type("OtherAwards_0_Category", "prueba");
+
+            //find with implementations
+            selenium.Click("OtherAwards_btnFind");
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #OtherAwardsTemp"));
+            selenium.Click("GrammyAwardDN");
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #OtherAwards_1Temp"));
+            Assert.IsFalse(selenium.IsElementPresent("jq=#divASustituir + #OtherAwards_Temp"));
+            selenium.Click("OtherAwards_1_btnSearch");
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#OtherAwards_1_tblResults > tbody > tr"));
+            selenium.Click("OtherAwards_1_rowSelection_0");
+            selenium.Click("OtherAwards_1_sfBtnOk");
+            selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("jq=#divASustituir + #OtherAwards_1Temp"));
+            Assert.IsTrue(selenium.IsElementPresent("jq=#OtherAwards_1_sfRuntimeInfo"));
+            Assert.IsTrue(selenium.IsElementPresent("jq=#OtherAwards > option:nth-child(2)"));
+            Assert.IsTrue(selenium.IsElementPresent("jq=#OtherAwards_sfDetail #OtherAwards_1_Category"));
+
+            //Delete
+            selenium.Click("OtherAwards_btnRemove");
+            Assert.IsFalse(selenium.IsElementPresent("jq=#OtherAwards_1_sfRuntimeInfo"));
+            Assert.IsFalse(selenium.IsElementPresent("jq=#OtherAwards > option:nth-child(2)"));
+
+            //View detail
+            selenium.Select("jq=#OtherAwards", "id=OtherAwards_0_sfToStr");
+            selenium.DoubleClick("jq=#OtherAwards > option:nth-child(1)");
+            Assert.IsTrue(selenium.IsElementPresent("jq=#OtherAwards_sfDetail #OtherAwards_0_Category"));
         }
     }
 }
