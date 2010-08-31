@@ -370,7 +370,7 @@ namespace Signum.Web.Extensions.Sample.Test
             Assert.IsFalse(selenium.IsElementPresent("jq=#Members_4_sfRuntimeInfo"));
             Assert.IsFalse(selenium.IsElementPresent("jq=#Members_sfItemsContainer > #Members_4_sfRepeaterItem"));
 
-            //find multiple
+            //find multiple: it exists because Find is overriden to true in this EntityRepeater
             selenium.Click("Members_btnFind");
             selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #Members_4Temp"));
             selenium.Click("Members_4_btnSearch");
@@ -393,8 +393,8 @@ namespace Signum.Web.Extensions.Sample.Test
             Assert.IsTrue(selenium.IsElementPresent("jq=#OtherAwards_0_sfRuntimeInfo"));
             selenium.Type("OtherAwards_0_Category", "prueba");
             
-            //find with implementations
-            selenium.Click("OtherAwards_btnFind");
+            //find does not exist by default
+            Assert.IsFalse(selenium.IsElementPresent("jq=#OtherAwards_btnFind"));
         }
     }
 }
