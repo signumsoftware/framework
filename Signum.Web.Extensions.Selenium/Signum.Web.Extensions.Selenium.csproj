@@ -55,6 +55,7 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SeleniumExtensions.cs" />
+    <Compile Include="SeleniumTestClass.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Selenium\ThoughtWorks.Selenium.Core.dll">

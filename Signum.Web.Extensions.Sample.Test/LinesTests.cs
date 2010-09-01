@@ -18,21 +18,15 @@ namespace Signum.Web.Extensions.Sample.Test
     [TestClass]
     public class LinesTests : Common
     {
-        public LinesTests() : base()
+        public LinesTests()
         {
 
         }
 
-        [ClassInitialize()]
-        public static void LaunchSelenium(TestContext testContext)
+        [ClassInitialize]
+        public static void ClassInitialize(TestContext testContext)
         {
-            Common.LaunchSelenium(testContext);
-        }
-
-        [ClassCleanup]
-        public static void MyTestCleanup()
-        {
-            Common.MyTestCleanup();
+            Common.Start(testContext);
         }
 
         [TestMethod]

@@ -13,6 +13,9 @@ using Signum.Web.Extensions.Sample.Test.Properties;
 using Signum.Engine.Maps;
 using Signum.Engine.Authorization;
 using System.Text.RegularExpressions;
+using Signum.Utilities;
+using System.Resources;
+using Signum.Web.Operations;
 
 namespace Signum.Web.Extensions.Sample.Test
 {
@@ -20,21 +23,14 @@ namespace Signum.Web.Extensions.Sample.Test
     public class ReportsTests : Common
     {
         public ReportsTests()
-            : base()
         {
 
         }
 
-        [ClassInitialize()]
-        public static void LaunchSelenium(TestContext testContext)
+        [ClassInitialize]
+        public static void ClassInitialize(TestContext testContext)
         {
-            Common.LaunchSelenium(testContext);
-        }
-
-        [ClassCleanup]
-        public static void MyTestCleanup()
-        {
-            Common.MyTestCleanup();
+            Common.Start(testContext);
         }
 
         [TestMethod]
@@ -42,18 +38,22 @@ namespace Signum.Web.Extensions.Sample.Test
         {
             CheckLoginAndOpen("/Signum.Web.Extensions.Sample/Find/Album");
 
+            string administerLocator = "jq=div.query-operation:last a.query-operation:last";
+            string saveLocator = "jq=.operations > li:first > a";
+            string deleteLocator = "jq=.operations > li:nth-child(2) > a";
+
             //create when there's no query created => direct navigation to create page
-            selenium.Click("link=Administrar");
+            selenium.Click(administerLocator);
             selenium.WaitForPageToLoad(PageLoadTimeout);
             selenium.Type("DisplayName", "prueba");
             selenium.Type("File", "D:\\Signum\\Pruebas\\Albumchulo.xlsx");
-            selenium.Click("link=Guardar");
+            selenium.Click(saveLocator);
             selenium.WaitForPageToLoad(PageLoadTimeout);
             Assert.IsTrue(selenium.IsElementPresent("jq=.entityId span"));
 
             //modify
             selenium.Type("DisplayName", "prueba 2");
-            selenium.Click("link=Guardar");
+            selenium.Click(saveLocator);
             selenium.WaitForPageToLoad(PageLoadTimeout);
 
             //created appears modified in menu
@@ -62,13 +62,14 @@ namespace Signum.Web.Extensions.Sample.Test
             Assert.IsTrue(selenium.IsElementPresent("link=prueba 2"));
             
             //delete
-            selenium.Click("link=Administrar");
+            selenium.Click(administerLocator);
             selenium.WaitForPageToLoad(PageLoadTimeout);
             selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=a[href=View/ExcelReport/1]"));
             selenium.Click("jq=a[href=View/ExcelReport/1]");
             selenium.WaitForPageToLoad(PageLoadTimeout);
-            selenium.Click("link=Eliminar");
-            Assert.IsTrue(Regex.IsMatch(selenium.GetConfirmation(), "^¿Está seguro de eliminar el informe prueba 2[\\s\\S]$"));
+            selenium.Click(deleteLocator);
+            //Assert.IsTrue(Regex.IsMatch(selenium.GetConfirmation(), "^¿" + extensionsManager.GetString("AreYouSureOfDeletingReport0").Formato("prueba 2") + "[\\s\\S]$"));
+            Assert.IsTrue(Regex.IsMatch(selenium.GetConfirmation(), ".*"));
             selenium.WaitForPageToLoad(PageLoadTimeout);
             
             //deleted does not appear in menu
@@ -77,13 +78,13 @@ namespace Signum.Web.Extensions.Sample.Test
             Assert.IsFalse(selenium.IsElementPresent("link=prueba 2"));
 
             //create when there are already others
-            selenium.Click("link=Administrar");
+            selenium.Click(administerLocator);
             selenium.WaitForPageToLoad(PageLoadTimeout);
             selenium.Click("jq=input.create");
             selenium.WaitForPageToLoad(PageLoadTimeout);
             selenium.Type("DisplayName", "prueba 3");
             selenium.Type("File", "D:\\Signum\\Pruebas\\Albumchulo.xlsx");
-            selenium.Click("link=Guardar");
+            selenium.Click(saveLocator);
             selenium.WaitForPageToLoad(PageLoadTimeout);
             
             //created appears modified in menu

@@ -16,61 +16,22 @@ using Signum.Engine.Authorization;
 namespace Signum.Web.Extensions.Sample.Test
 {
     [TestClass]
-    public class Common
+    public class Common : SeleniumTestClass
     {
-        protected static ISelenium selenium;
-        protected static Process seleniumServerProcess;
-
-        protected const string PageLoadTimeout = SeleniumExtensions.DefaultPageLoadTimeout; //1.66666667 minutes
-
-        public Common()
-        {
-
-        }
-
-        [ClassInitialize()]
-        public static void LaunchSelenium(TestContext testContext)
+        public static void Start(TestContext testContext)
         {
             try
             {
-                seleniumServerProcess = SeleniumExtensions.LaunchSeleniumProcess();
-
                 Signum.Test.Extensions.Starter.Start(UserConnections.Replace(Settings.Default.ConnectionString));
 
                 using (AuthLogic.Disable())
                     Schema.Current.Initialize();
 
-                selenium = SeleniumExtensions.InitializeSelenium();
+                SeleniumTestClass.LaunchSelenium();
             }
             catch (Exception)
             {
                 MyTestCleanup();
-            }
-        }
-
-        [TestInitialize()]
-        public void MyTestInitialize()
-        {
-        }
-
-        [TestCleanup]
-        public void StopSelenium()
-        {
-            //selenium.Stop();
-        }
-        
-        [ClassCleanup]
-        public static void MyTestCleanup()
-        {
-            try
-            {
-                selenium.Stop();
-                selenium.ShutDownSeleniumServer();
-                SeleniumExtensions.KillSelenium(seleniumServerProcess);
-            }
-            catch (Exception)
-            {
-                // Ignore errors if unable to close the browser
             }
         }
 
@@ -79,7 +40,7 @@ namespace Signum.Web.Extensions.Sample.Test
             Login("internal", "internal");
         }
 
-        private void Login(string username, string pwd)
+        public void Login(string username, string pwd)
         {
             selenium.Open("/Signum.Web.Extensions.Sample/");
 

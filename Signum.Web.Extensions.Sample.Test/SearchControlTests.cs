@@ -23,16 +23,10 @@ namespace Signum.Web.Extensions.Sample.Test
 
         }
 
-        [ClassInitialize()]
-        public static void LaunchSelenium(TestContext testContext)
+        [ClassInitialize]
+        public static void ClassInitialize(TestContext testContext)
         {
-            Common.LaunchSelenium(testContext);
-        }
-
-        [ClassCleanup]
-        public static void MyTestCleanup()
-        {
-            Common.MyTestCleanup();
+            Common.Start(testContext);
         }
 
         private Func<bool> thereAreNRows(int n)
