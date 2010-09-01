@@ -105,6 +105,7 @@ namespace Signum.Web
 
             string options = new Sequence<string>
             {
+                Top.HasValue ? "sfTop=" + Top.Value : null,
                 SearchOnLoad ? "sfSearchOnLoad=true" : null,
                 !Create ? "sfCreate=false": null, 
                 !View ? "sfView=false": null, 
