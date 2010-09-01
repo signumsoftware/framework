@@ -39,6 +39,12 @@ namespace Signum.Web.Authorization
             return GetNewPassword(ctx, NewPasswordKey, NewPasswordBisKey);
         });
 
+        public static EntityMapping<UserDN> NewUser = new EntityMapping<UserDN>(true)
+        .SetProperty(u => u.PasswordHash, new ValueMapping<string>(), m => m.GetValue = ctx =>
+        {
+            return GetNewPassword(ctx, NewPasswordKey, NewPasswordBisKey);
+        });
+
         public static string GetNewPassword(MappingContext<string> ctx, string newPasswordKey, string newPasswordBisKey)
         {
 

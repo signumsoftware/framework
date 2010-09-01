@@ -18,6 +18,7 @@ using System.Reflection;
 using Signum.Engine.Extensions.Properties;
 using Signum.Entities.Extensions.Properties;
 using Signum.Engine.Mailing;
+using Signum.Engine.Operations;
 
 namespace Signum.Engine.Authorization
 {
@@ -105,6 +106,11 @@ namespace Signum.Engine.Authorization
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 new UserGraph().Register();
+                OperationLogic.Register(new BasicExecute<UserDN>(UserOperation.NewPassword)
+                {
+                    Lite = false,
+                    Execute = (u, _) => { throw new InvalidOperationException("This is an IU operation, not meant to be called in logic"); }
+                });
             }
         }
 

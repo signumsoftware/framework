@@ -119,6 +119,7 @@ namespace Signum.Entities.Authorization
         Save,
         Enable,
         Disable,
+        NewPassword
     }
 
     public enum UserMailTemplate
