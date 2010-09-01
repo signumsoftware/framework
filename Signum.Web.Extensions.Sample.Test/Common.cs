@@ -32,6 +32,7 @@ namespace Signum.Web.Extensions.Sample.Test
             catch (Exception)
             {
                 MyTestCleanup();
+                throw;
             }
         }
 
