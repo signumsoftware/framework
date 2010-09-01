@@ -37,7 +37,7 @@ namespace Signum.Entities.Authorization
             sb.Include<RT>();
 
             sb.Schema.Initializing(InitLevel.Level1SimpleEntities, Schema_InitializingCache);
-            sb.Schema.EntityEvents<RT>().Saved += Schema_Saved;
+            sb.Schema.EntityEvents<RT>().Saving += Schema_Saving;
             AuthLogic.RolesModified += UserAndRoleLogic_RolesModified;
         }
 
@@ -132,7 +132,7 @@ namespace Signum.Entities.Authorization
             }
         }
 
-        void Schema_Saved(RT rule, SavedEventArgs args)
+        void Schema_Saving(RT rule, bool isRoot)
         {
             Transaction.RealCommit += () => InvalidateCache();
         }

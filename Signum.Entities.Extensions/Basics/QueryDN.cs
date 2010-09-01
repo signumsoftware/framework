@@ -5,6 +5,7 @@ using System.Text;
 using Signum.Utilities;
 using System.ServiceModel;
 using Signum.Services;
+using Signum.Entities.Basics;
 
 namespace Signum.Entities.Basics
 {
@@ -37,6 +38,12 @@ namespace Signum.Entities.Basics
         }
     }
 
+   
+}
+
+
+namespace Signum.Services
+{
     [ServiceContract]
     public interface IQueryServer
     {

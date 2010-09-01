@@ -23,10 +23,7 @@ namespace Signum.Test.Extensions
         [TestMethod]
         public void CreateMusicEnvironment()
         {
-            using (AuthLogic.Disable())
-            {
-                Starter.StartAndLoad(UserConnections.Replace(Settings.Default.ConnectionString));
-            }
+            Starter.StartAndLoad(Settings.Default.ConnectionString);
         }
     }
 }

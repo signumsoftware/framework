@@ -10,7 +10,7 @@ using Signum.Engine.Maps;
 using Signum.Engine.Authorization;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine;
-using Signum.Test.Properties;
+using Signum.Test.Extensions.Properties;
 using Signum.Services;
 using Signum.Engine.Basics;
 using Signum.Utilities;
@@ -20,77 +20,39 @@ namespace Signum.Test.Extensions
     [TestClass]
     public class EntityGroupsTest
     {
-        static Connection connection;
+
+        [ClassInitialize()]
+        public static void MyClassInitialize(TestContext testContext)
+        {
+            Starter.StartAndLoad(Settings.Default.ConnectionString);
+        }
+
+
         [TestInitialize]
         public void Initialize()
         {
-            if (connection != null && connection == ConnectionScope.Current)
-                return;
-
-            DynamicQueryManager dqm = new DynamicQueryManager();
-            SchemaBuilder sb = new SchemaBuilder();
-            sb.Settings.OverrideTypeAttributes<IUserRelatedDN>(new ImplementedByAttribute());
-            AuthLogic.Start(sb, dqm, "System", "Anonymous");
-            sb.Include<ResourceDN>();
-            EntityGroupAuthLogic.Start(sb);
-
-            EntityGroupLogic.Register<ResourceDN>(EntityGroups.UserResources, r => r.Propietary.Is(UserDN.Current));
-            EntityGroupLogic.Register<SubResourceDN>(EntityGroups.UserResources, sr => Database.Query<ResourceDN>().Where(r => r.Propietary.Is(UserDN.Current)).SelectMany(a => a.SubResources).Contains(sr));
-
-            ConnectionScope.Default = new Connection(Settings.Default.SignumTest, sb.Schema, dqm);
-
-            Administrator.TotalGeneration();
-
-            sb.Schema.Initialize(InitLevel.Level0SyncEntities);
-
-            RoleDN role = new RoleDN { Name = "Plain User" }.Save();
-
-            UserDN lisa = new UserDN { UserName = "lisa", PasswordHash = Security.EncodePassword("lisa"), Role = role }.Save();
-            UserDN bart = new UserDN { UserName = "bart", PasswordHash = Security.EncodePassword("bart"), Role = role }.Save();
-
-            new ResourceDN
-            {
-                Name = "Saxo",
-                Propietary = lisa,
-                SubResources = new MList<SubResourceDN> 
-                { 
-                    new SubResourceDN{ Name = "Key"},
-                    new SubResourceDN{ Name = "Mouthpiece"}
-                }
-            }.Save();
-
-            new ResourceDN
-            {
-                Name = "Skate",
-                Propietary = bart,
-                SubResources = new MList<SubResourceDN>
-                { 
-                    new SubResourceDN{ Name = "Board"},
-                    new SubResourceDN{ Name = "Wheel"}
-                }
-            }.Save();
-
-            sb.Schema.Initialize();
-
-            EntityGroupAuthLogic.SetEntityGroupAllowed(role.ToLite(), EntityGroups.UserResources, new EntityGroupAllowedDN(TypeAllowed.DBNoneUINone, TypeAllowed.DBNoneUINone));
-
             Connection.CurrentLog = new DebugTextWriter();
-
-            connection = (Connection)ConnectionScope.Default;
         }
+
+        const int JapLab = 2;
+        const int AllLab = 7;
+
+        const int JapAlb = 5;
+        const int AllAlb = 12; 
+
 
         [TestMethod]
         public void EntityGroupsAuthDisable()
         {
             using (AuthLogic.Disable())
             {
-                Assert.AreEqual(2, Database.Query<ResourceDN>().Count());
-                Assert.AreEqual(0, Database.Query<ResourceDN>().Count(r => r.IsInGroup(EntityGroups.UserResources)));
+                Assert.AreEqual(AllLab, Database.Query<LabelDN>().Count());
+                Assert.AreEqual(JapLab, Database.Query<LabelDN>().Count(r => r.IsInGroup(MusicGroups.JapanEntities)));
 
-                Assert.AreEqual(2, Database.RetrieveAll<ResourceDN>().Count);
-                Assert.AreEqual(2, Database.RetrieveAllLite<ResourceDN>().Count);
+                Assert.AreEqual(AllLab, Database.RetrieveAll<LabelDN>().Count);
+                Assert.AreEqual(AllLab, Database.RetrieveAllLite<LabelDN>().Count);
 
-                Assert.AreEqual(2, Database.Query<ResourceDN>().WhereAllowed().Count());
+                Assert.AreEqual(AllLab, Database.Query<LabelDN>().WhereAllowed().Count());
             }
         }
 
@@ -99,34 +61,32 @@ namespace Signum.Test.Extensions
         {
             using (AuthLogic.Disable())
             {
-                Assert.AreEqual(4, Database.Query<SubResourceDN>().Count());
-                Assert.AreEqual(0, Database.Query<SubResourceDN>().Count(r => r.IsInGroup(EntityGroups.UserResources)));
+                Assert.AreEqual(AllAlb, Database.Query<AlbumDN>().Count());
+                Assert.AreEqual(JapAlb, Database.Query<AlbumDN>().Count(r => r.IsInGroup(MusicGroups.JapanEntities)));
 
-                Assert.AreEqual(4, Database.RetrieveAll<SubResourceDN>().Count);
-                Assert.AreEqual(4, Database.RetrieveAllLite<SubResourceDN>().Count);
+                Assert.AreEqual(AllAlb, Database.RetrieveAll<AlbumDN>().Count);
+                Assert.AreEqual(AllAlb, Database.RetrieveAllLite<AlbumDN>().Count);
 
-                Assert.AreEqual(4, Database.Query<SubResourceDN>().WhereAllowed().Count());
+                Assert.AreEqual(AllAlb, Database.Query<AlbumDN>().WhereAllowed().Count());
             }
         }
 
         [TestMethod]
         public void EntityGroupsBart()
         {
-            using (AuthLogic.UnsafeUser("bart"))
+            using (AuthLogic.UnsafeUser("external"))
             {
-                Assert.AreEqual(1, Database.Query<ResourceDN>().Count());
-                Assert.AreEqual(1, Database.Query<ResourceDN>().Count(r => r.IsInGroup(EntityGroups.UserResources)));
+                Assert.AreEqual(JapLab, Database.Query<LabelDN>().Count());
+                Assert.AreEqual(JapLab, Database.Query<LabelDN>().Count(r => r.IsInGroup(MusicGroups.JapanEntities)));
 
-                Assert.AreEqual(1, Database.RetrieveAll<ResourceDN>().Count);
-                Assert.AreEqual(1, Database.RetrieveAllLite<ResourceDN>().Count);
-
-                var resource = Database.RetrieveAll<ResourceDN>().Single();
+                Assert.AreEqual(JapLab, Database.RetrieveAll<LabelDN>().Count);
+                Assert.AreEqual(JapLab, Database.RetrieveAllLite<LabelDN>().Count);
 
                 using (EntityGroupAuthLogic.DisableQueries())
                 {
-                    Assert.AreEqual(2, Database.Query<ResourceDN>().Count());
-                    Assert.AreEqual(2, Database.RetrieveAllLite<ResourceDN>().Count);
-                    Assert.AreEqual(1, Database.Query<ResourceDN>().WhereAllowed().Count());
+                    Assert.AreEqual(AllLab, Database.Query<LabelDN>().Count());
+                    Assert.AreEqual(AllLab, Database.RetrieveAllLite<LabelDN>().Count);
+                    Assert.AreEqual(JapLab, Database.Query<LabelDN>().WhereAllowed().Count());
                 }
             }
         }
@@ -134,19 +94,19 @@ namespace Signum.Test.Extensions
         [TestMethod]
         public void EntityGroupsBartQueryable()
         {
-            using (AuthLogic.UnsafeUser("bart"))
+            using (AuthLogic.UnsafeUser("external"))
             {
-                Assert.AreEqual(2, Database.Query<SubResourceDN>().Count());
-                Assert.AreEqual(2, Database.Query<SubResourceDN>().Count(r => r.IsInGroup(EntityGroups.UserResources)));
+                Assert.AreEqual(JapAlb, Database.Query<AlbumDN>().Count());
+                Assert.AreEqual(JapAlb, Database.Query<AlbumDN>().Count(r => r.IsInGroup(MusicGroups.JapanEntities)));
 
-                Assert.AreEqual(2, Database.RetrieveAll<SubResourceDN>().Count);
-                Assert.AreEqual(2, Database.RetrieveAllLite<SubResourceDN>().Count);
+                Assert.AreEqual(JapAlb, Database.RetrieveAll<AlbumDN>().Count);
+                Assert.AreEqual(JapAlb, Database.RetrieveAllLite<AlbumDN>().Count);
 
                 using (EntityGroupAuthLogic.DisableQueries())
                 {
-                    Assert.AreEqual(4, Database.Query<SubResourceDN>().Count());
-                    Assert.AreEqual(4, Database.RetrieveAllLite<SubResourceDN>().Count);
-                    Assert.AreEqual(2, Database.Query<SubResourceDN>().WhereAllowed().Count());
+                    Assert.AreEqual(AllAlb, Database.Query<AlbumDN>().Count());
+                    Assert.AreEqual(AllAlb, Database.RetrieveAllLite<AlbumDN>().Count);
+                    Assert.AreEqual(JapAlb, Database.Query<AlbumDN>().WhereAllowed().Count());
                 }
             }
         }
@@ -154,12 +114,12 @@ namespace Signum.Test.Extensions
         [TestMethod]
         public void EntityGroupRetrieve()
         {
-            using (AuthLogic.UnsafeUser("bart"))
+            using (AuthLogic.UnsafeUser("external"))
             {
-                Assert2.Throws<UnauthorizedAccessException>(() => Database.Retrieve<ResourceDN>(1)); //Saxo
+                Assert2.Throws<UnauthorizedAccessException>(() => Database.Retrieve<LabelDN>(1));
                 using (EntityGroupAuthLogic.DisableQueries())
                 {
-                    Assert2.Throws<UnauthorizedAccessException>(() => Database.Query<ResourceDN>().Single(r => r.Name == "Saxo"));
+                    Assert2.Throws<UnauthorizedAccessException>(() => Database.Query<LabelDN>().Single(r => r.Name == "Virgin"));
                 }
             }
         }
@@ -167,12 +127,12 @@ namespace Signum.Test.Extensions
         [TestMethod]
         public void EntityGroupRetrieveQueryable()
         {
-            using (AuthLogic.UnsafeUser("bart"))
+            using (AuthLogic.UnsafeUser("external"))
             {
-                Assert2.Throws<UnauthorizedAccessException>(() => Database.Retrieve<SubResourceDN>(1)); //Saxo Key
+                Assert2.Throws<UnauthorizedAccessException>(() => Database.Retrieve<AlbumDN>(1)); 
                 using (EntityGroupAuthLogic.DisableQueries())
                 {
-                    Assert2.Throws<UnauthorizedAccessException>(() => Database.Query<SubResourceDN>().Single(r => r.Name == "Key"));
+                    Assert2.Throws<UnauthorizedAccessException>(() => Database.Query<AlbumDN>().Single(r => r.Name == "Siamese Dream"));
                 }
             }
         }
@@ -180,79 +140,82 @@ namespace Signum.Test.Extensions
         [TestMethod]
         public void EntityGroupUpdate()
         {
-            using (AuthLogic.UnsafeUser("bart"))
+            using (AuthLogic.UnsafeUser("external"))
+            using (Transaction tr = new Transaction())
             {
-                Assert.AreEqual(1, Database.Query<ResourceDN>().UnsafeUpdate(r => new ResourceDN { Name = r.Name + r.Name }));
-                Assert.AreEqual(2, Database.Query<SubResourceDN>().UnsafeUpdate(r => new SubResourceDN { Name = r.Name + r.Name }));
+                Assert.AreEqual(JapLab, Database.Query<LabelDN>().UnsafeUpdate(r => new LabelDN { Name = r.Name + r.Name }));
+                Assert.AreEqual(JapAlb, Database.Query<AlbumDN>().UnsafeUpdate(r => new AlbumDN { Name = r.Name + r.Name }));
+
+                //tr.Commit();
             }
         }
 
         [TestMethod]
         public void EntityGroupDelete()
         {
-            using (AuthLogic.UnsafeUser("bart"))
+            using (AuthLogic.UnsafeUser("external"))
+            using (Transaction tr = new Transaction())
             {
-                Assert.AreEqual(1, Database.Query<ResourceDN>().UnsafeDelete());
-                Assert.AreEqual(2, Database.Query<SubResourceDN>().UnsafeDelete());
+                Assert.AreEqual(JapAlb, Database.Query<AlbumDN>().UnsafeDelete());
+                Assert.AreEqual(JapLab, Database.Query<LabelDN>().UnsafeDelete());
+                
+                //tr.Commit();
             }
         }
 
         [TestMethod]
         public void EntityGroupJoin()
         {
-            using (AuthLogic.UnsafeUser("bart"))
+            using (AuthLogic.UnsafeUser("external"))
             {
-                int coutFast = Database.Query<ResourceDN>().SelectMany(r => r.SubResources).Count();
-                int coutSlow = (from sr1 in Database.Query<ResourceDN>().SelectMany(r => r.SubResources)
-                               join sr2 in Database.Query<SubResourceDN>() on sr1 equals sr2
-                               select sr1).Count();
+                int coutFast = Database.Query<AlbumDN>().Count();
+                int coutSlow = (from lab in Database.Query<LabelDN>()
+                                join alb in Database.Query<AlbumDN>() on lab equals alb.Label
+                                select lab).Count();
                 Assert.AreEqual(coutFast, coutSlow);
             }
         }
-    }
 
-    public enum EntityGroups
-    {
-        UserResources
-    }
-
-    [Serializable]
-	public class ResourceDN: Entity
-    {
-        UserDN propietary;
-        public UserDN Propietary
+        [TestMethod]
+        public void EntityGroupSaveOut()
         {
-            get { return propietary; }
-            set { Set(ref propietary, value, () => Propietary); }
-        }
+            using (AuthLogic.UnsafeUser("external"))
+            using (EntityGroupAuthLogic.DisableQueries())
+            using (EntityGroupAuthLogic.DisableRetrieve())
+            {
+                //Because of target
+                {
+                    var label = Database.Query<LabelDN>().Single(l => l.Name == "MJJ");
+                    label.Owner.Retrieve().Country.Name = "Spain";
+                    Assert2.Throws<UnauthorizedAccessException>(() => label.Save());
+                }
 
-        [NotNullable, SqlDbType( Size = 100)]
-        string name;
-        [StringLengthValidator(AllowNulls=false, Min = 3, Max = 100)]
-        public string Name
-        {
-            get { return name; }
-            set { Set(ref name, value, () => Name); }
-        }
+                {
+                    var label = Database.Query<LabelDN>().Single(l => l.Name == "MJJ");
+                    label.Owner = Database.Query<LabelDN>().Where(l => l.Name == "Virgin").Select(a => a.ToLite()).Single();
+                    Assert2.Throws<UnauthorizedAccessException>(() => label.Save());
+                }
 
-        MList<SubResourceDN> subResources;
-        public MList<SubResourceDN> SubResources
-        {
-            get { return subResources; }
-            set { Set(ref subResources, value, () => SubResources); }
-        }
-    }
 
-    [Serializable]
-    public class SubResourceDN : Entity
-    {
-        [NotNullable, SqlDbType(Size = 100)]
-        string name;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string Name
-        {
-            get { return name; }
-            set { Set(ref name, value, () => Name); }
+                //Because of origin
+                {
+                    var label = Database.Query<LabelDN>().Single(l => l.Name == "Virgin");
+                    label.Country.Name = "Japan";
+                    Assert2.Throws<UnauthorizedAccessException>(() => label.Save());
+                }
+
+                {
+                    var label = Database.Query<LabelDN>().Single(l => l.Name == "WEA International");
+                    label.Owner.Retrieve().Name = "Japan";
+                    Assert2.Throws<UnauthorizedAccessException>(() => label.Save());
+                }
+
+                {
+                    var label = Database.Query<LabelDN>().Single(l => l.Name == "WEA International");
+                    label.Owner = Database.Query<LabelDN>().Where(l => l.Name == "Sony").Select(a => a.ToLite()).Single();
+                    Assert2.Throws<UnauthorizedAccessException>(() => label.Save());
+                }
+            }
         }
     }
 }

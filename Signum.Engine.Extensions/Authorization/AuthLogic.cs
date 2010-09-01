@@ -67,7 +67,6 @@ namespace Signum.Engine.Authorization
                 sb.Include<RoleDN>();
                 sb.Schema.Initializing(InitLevel.Level1SimpleEntities, Schema_Initializing);
                 sb.Schema.EntityEvents<RoleDN>().Saving += Schema_Saving;
-                sb.Schema.EntityEvents<RoleDN>().Saved += Schema_Saved;
 
                 dqm[typeof(RoleDN)] = (from r in Database.Query<RoleDN>()
                                        select new
@@ -175,15 +174,22 @@ namespace Signum.Engine.Authorization
                             problems.ToString("\r\n"));
                 }
             }
+
+            if (role.Modified)
+            {
+                Transaction.RealCommit -= InvalidateRoles;
+                Transaction.RealCommit += InvalidateRoles;
+            }
         }
 
-        static void Schema_Saved(RoleDN role, SavedEventArgs args)
+        static void InvalidateRoles()
         {
-            Transaction.RealCommit += () => _roles = null;
+            _roles = null;
 
             if (RolesModified != null)
                 RolesModified();
         }
+
 
         static DirectedGraph<Lite<RoleDN>> Cache()
         {

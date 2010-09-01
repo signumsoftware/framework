@@ -65,7 +65,7 @@ namespace Signum.Engine.Processes
                 });
 
                 sb.Schema.Initializing(InitLevel.Level4BackgroundProcesses, Schema_InitializingApplication);
-                sb.Schema.EntityEvents<ProcessExecutionDN>().Saved += ProcessExecution_Saved;
+                sb.Schema.EntityEvents<ProcessExecutionDN>().Saving += ProcessExecution_Saving;
 
                 dqm[typeof(ProcessDN)] =
                              (from p in Database.Query<ProcessDN>()
@@ -149,26 +149,30 @@ namespace Signum.Engine.Processes
             }
         }
 
-        static void ProcessExecution_Saved(ProcessExecutionDN pe, SavedEventArgs args)
+        static void ProcessExecution_Saving(ProcessExecutionDN pe, bool isRoot)
         {
-            switch (pe.State)
-            {
-                case ProcessState.Created:
-                case ProcessState.Suspended:
-                case ProcessState.Finished:
-                case ProcessState.Executing:
-                    break;
-                case ProcessState.Planned:
-                case ProcessState.Canceled:
-                    RefreshPlan();
-                    break;
-                case ProcessState.Suspending:
-                    Suspend(pe.Id);
-                    break;
-                case ProcessState.Queued:
-                    Transaction.RealCommit += () => Execute(pe);
-                    break;
-            }
+            if (pe.Modified)
+                Transaction.RealCommit += () =>
+                {
+                    switch (pe.State)
+                    {
+                        case ProcessState.Created:
+                        case ProcessState.Suspended:
+                        case ProcessState.Finished:
+                        case ProcessState.Executing:
+                            break;
+                        case ProcessState.Planned:
+                        case ProcessState.Canceled:
+                            RefreshPlan();
+                            break;
+                        case ProcessState.Suspending:
+                            Suspend(pe.Id);
+                            break;
+                        case ProcessState.Queued:
+                            Execute(pe);
+                            break;
+                    }
+                };
         }
 
         static void Execute(ProcessExecutionDN pe)

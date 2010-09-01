@@ -54,7 +54,7 @@ namespace Signum.Engine.Scheduler
                 CustomTaskLogic.Start(sb, dqm);
                 sb.Include<ScheduledTaskDN>();
                 sb.Schema.Initializing(InitLevel.Level4BackgroundProcesses, Schema_InitializingApplicaton);
-                sb.Schema.EntityEvents<ScheduledTaskDN>().Saved += Schema_Saved;
+                sb.Schema.EntityEvents<ScheduledTaskDN>().Saving += Schema_Saving;
 
                 dqm[typeof(ScheduledTaskDN)] =
                     (from st in Database.Query<ScheduledTaskDN>()
@@ -76,9 +76,9 @@ namespace Signum.Engine.Scheduler
             ReloadPlan();
         }
 
-        static void Schema_Saved(ScheduledTaskDN task, SavedEventArgs args)
+        static void Schema_Saving(ScheduledTaskDN task, bool isRoot)
         {
-            if (!isSafeSave)
+            if (!isSafeSave && task.Modified)
             {
                 Transaction.RealCommit -= Transaction_RealCommit;
                 Transaction.RealCommit += Transaction_RealCommit;

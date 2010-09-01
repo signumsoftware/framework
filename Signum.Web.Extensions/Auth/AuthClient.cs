@@ -86,7 +86,7 @@ namespace Signum.Web.Authorization
                     }
                 };
 
-                Schema.Current.EntityEvents<UserDN>().Saved += new SavedEntityEventHandler<UserDN>(AuthClient_Saved);
+                Schema.Current.EntityEvents<UserDN>().Saving += AuthClient_Saving;
             }
         }
 
@@ -108,10 +108,13 @@ namespace Signum.Web.Authorization
             }
         }
 
-        static void AuthClient_Saved(UserDN ident, SavedEventArgs args)
+        static void AuthClient_Saving(UserDN ident, bool isRoot)
         {
-            if (ident.Is(UserDN.Current))
-                AuthController.UpdateSessionUser(); 
+            Transaction.RealCommit += () =>
+            {
+                if (ident.Is(UserDN.Current))
+                    AuthController.UpdateSessionUser();
+            };
         }
     }
 }

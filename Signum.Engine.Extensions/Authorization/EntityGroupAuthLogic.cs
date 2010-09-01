@@ -112,8 +112,12 @@ namespace Signum.Engine.Authorization
         static void EntityGroupAuthLogic_Saving<T>(T ident, bool isRoot)
             where T : IdentifiableEntity
         {
-            if (!saveDisabled && ident.Modified)
+            if (!saveDisabled && AuthLogic.IsEnabled)
             {
+                if (!ident.IsNew && !ident.InDB().WhereAllowed().Any()) //Previous state in the database
+                    throw new UnauthorizedAccessException(Resources.NotAuthorizedTo0The1WithId2.Formato(TypeAllowedBasic.Modify.NiceToString().ToLower(), ident.GetType().NiceName(), ident.Id));
+ 
+
                 if (ident.IsNew)
                     Transaction.PreRealCommit += () => ident.AssertAllowed(TypeAllowedBasic.Create, false);
                 else
