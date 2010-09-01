@@ -42,61 +42,68 @@ namespace Signum.Web.Extensions.Sample.Test
         [TestMethod]
         public void ExcelReport()
         {
-            CheckLoginAndOpen("/Signum.Web.Extensions.Sample/Find/Album");
+            try
+            {
+                CheckLoginAndOpen("/Signum.Web.Extensions.Sample/Find/Album");
 
-            string administerLocator = "jq=div.query-operation:last a.query-operation:last";
-            string saveLocator = "jq=.operations > li:first > a";
-            string deleteLocator = "jq=.operations > li:nth-child(2) > a";
+                string administerLocator = "jq=div.query-operation:last a.query-operation:last";
+                string saveLocator = "jq=.operations > li:first > a";
+                string deleteLocator = "jq=.operations > li:nth-child(2) > a";
 
-            //create when there's no query created => direct navigation to create page
-            selenium.Click(administerLocator);
-            selenium.WaitForPageToLoad(PageLoadTimeout);
-            selenium.Type("DisplayName", "prueba");
-            selenium.Type("File", "D:\\Signum\\Pruebas\\Albumchulo.xlsx");
-            selenium.Click(saveLocator);
-            selenium.WaitForPageToLoad(PageLoadTimeout);
-            Assert.IsTrue(selenium.IsElementPresent("jq=.entityId span"));
+                //create when there's no query created => direct navigation to create page
+                selenium.Click(administerLocator);
+                selenium.WaitForPageToLoad(PageLoadTimeout);
+                selenium.Type("DisplayName", "prueba");
+                selenium.Type("File", "D:\\Signum\\Pruebas\\Albumchulo.xlsx");
+                selenium.Click(saveLocator);
+                selenium.WaitForPageToLoad(PageLoadTimeout);
+                Assert.IsTrue(selenium.IsElementPresent("jq=.entityId span"));
 
-            //modify
-            selenium.Type("DisplayName", "prueba 2");
-            selenium.Click(saveLocator);
-            selenium.WaitForPageToLoad(PageLoadTimeout);
+                //modify
+                selenium.Type("DisplayName", "prueba 2");
+                selenium.Click(saveLocator);
+                selenium.WaitForPageToLoad(PageLoadTimeout);
 
-            //created appears modified in menu
-            selenium.Click("link=Albums");
-            selenium.WaitForPageToLoad(PageLoadTimeout);
-            Assert.IsTrue(selenium.IsElementPresent("link=prueba 2"));
-            
-            //delete
-            selenium.Click(administerLocator);
-            selenium.WaitForPageToLoad(PageLoadTimeout);
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=a[href=View/ExcelReport/1]"));
-            selenium.Click("jq=a[href=View/ExcelReport/1]");
-            selenium.WaitForPageToLoad(PageLoadTimeout);
-            selenium.Click(deleteLocator);
-            //Assert.IsTrue(Regex.IsMatch(selenium.GetConfirmation(), "^¿" + extensionsManager.GetString("AreYouSureOfDeletingReport0").Formato("prueba 2") + "[\\s\\S]$"));
-            Assert.IsTrue(Regex.IsMatch(selenium.GetConfirmation(), ".*"));
-            selenium.WaitForPageToLoad(PageLoadTimeout);
-            
-            //deleted does not appear in menu
-            selenium.Click("link=Albums");
-            selenium.WaitForPageToLoad(PageLoadTimeout);
-            Assert.IsFalse(selenium.IsElementPresent("link=prueba 2"));
+                //created appears modified in menu
+                selenium.Click("link=Albums");
+                selenium.WaitForPageToLoad(PageLoadTimeout);
+                Assert.IsTrue(selenium.IsElementPresent("link=prueba 2"));
 
-            //create when there are already others
-            selenium.Click(administerLocator);
-            selenium.WaitForPageToLoad(PageLoadTimeout);
-            selenium.Click("jq=input.create");
-            selenium.WaitForPageToLoad(PageLoadTimeout);
-            selenium.Type("DisplayName", "prueba 3");
-            selenium.Type("File", "D:\\Signum\\Pruebas\\Albumchulo.xlsx");
-            selenium.Click(saveLocator);
-            selenium.WaitForPageToLoad(PageLoadTimeout);
-            
-            //created appears modified in menu
-            selenium.Click("link=Albums");
-            selenium.WaitForPageToLoad(PageLoadTimeout);
-            Assert.IsTrue(selenium.IsElementPresent("link=prueba 3"));
+                //delete
+                selenium.Click(administerLocator);
+                selenium.WaitForPageToLoad(PageLoadTimeout);
+                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=a[href=View/ExcelReport/1]"));
+                selenium.Click("jq=a[href=View/ExcelReport/1]");
+                selenium.WaitForPageToLoad(PageLoadTimeout);
+                selenium.Click(deleteLocator);
+                //Assert.IsTrue(Regex.IsMatch(selenium.GetConfirmation(), "^¿" + extensionsManager.GetString("AreYouSureOfDeletingReport0").Formato("prueba 2") + "[\\s\\S]$"));
+                Assert.IsTrue(Regex.IsMatch(selenium.GetConfirmation(), ".*"));
+                selenium.WaitForPageToLoad(PageLoadTimeout);
+
+                //deleted does not appear in menu
+                selenium.Click("link=Albums");
+                selenium.WaitForPageToLoad(PageLoadTimeout);
+                Assert.IsFalse(selenium.IsElementPresent("link=prueba 2"));
+
+                //create when there are already others
+                selenium.Click(administerLocator);
+                selenium.WaitForPageToLoad(PageLoadTimeout);
+                selenium.Click("jq=input.create");
+                selenium.WaitForPageToLoad(PageLoadTimeout);
+                selenium.Type("DisplayName", "prueba 3");
+                selenium.Type("File", "D:\\Signum\\Pruebas\\Albumchulo.xlsx");
+                selenium.Click(saveLocator);
+                selenium.WaitForPageToLoad(PageLoadTimeout);
+
+                //created appears modified in menu
+                selenium.Click("link=Albums");
+                selenium.WaitForPageToLoad(PageLoadTimeout);
+                Assert.IsTrue(selenium.IsElementPresent("link=prueba 3"));
+            }
+            catch (Exception)
+            {
+                Common.MyTestCleanup();
+            }
         }
     }
 }
