@@ -33,6 +33,12 @@ namespace Signum.Web.Extensions.Sample.Test
             Common.Start(testContext);
         }
 
+        [ClassCleanup]
+        public static void ClassCleanup()
+        {
+            Common.MyTestCleanup();
+        }
+
         [TestMethod]
         public void ExcelReport()
         {
