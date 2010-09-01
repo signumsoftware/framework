@@ -111,9 +111,20 @@ namespace Signum.Web.Authorization
                         ControllerUrl = "Auth/SaveNewUser",
                         OnClick = ctx => new JsOperationExecutor(ctx.Options()).OperationAjax(ctx.Prefix, JsOpSuccess.DefaultDispatcher)
                     }},
-                    { UserOperation.Save, new EntityOperationSettings { IsVisible = ctx => !ctx.Entity.IsNew }},
+                    { UserOperation.Save, new EntityOperationSettings 
+                    { 
+                        IsVisible = ctx => !ctx.Entity.IsNew,
+                        ControllerUrl = "Auth/SaveUser",
+                        OnClick = ctx => new JsOperationExecutor(ctx.Options()).OperationAjax(ctx.Prefix, JsOpSuccess.DefaultDispatcher)
+                    }},
                     { UserOperation.Disable, new EntityOperationSettings { IsVisible = ctx => !ctx.Entity.IsNew }},
-                    { UserOperation.Enable, new EntityOperationSettings { IsVisible = ctx => !ctx.Entity.IsNew }}
+                    { UserOperation.Enable, new EntityOperationSettings { IsVisible = ctx => !ctx.Entity.IsNew }},
+                    { UserOperation.NewPassword, new EntityOperationSettings 
+                    { 
+                        IsVisible = ctx => !ctx.Entity.IsNew,
+                        ControllerUrl = "Auth/SaveUserWithNewPwd",
+                        OnClick = ctx => new JsOperationExecutor(ctx.Options()).OperationAjax(ctx.Prefix, JsOpSuccess.DefaultDispatcher)
+                    }},
                 });
             }
         }
