@@ -56,12 +56,12 @@ namespace Signum.Utilities
             return type.IsGenericType && type.GetGenericTypeDefinition() == genericTypeDefinition;
         }
 
-        public static bool IsInstantiationOf(this MethodInfo method, MethodInfo genericMethodDefinitoin)
+        public static bool IsInstantiationOf(this MethodInfo method, MethodInfo genericMethodDefinition)
         {
-            if (!genericMethodDefinitoin.IsGenericMethodDefinition)
+            if (!genericMethodDefinition.IsGenericMethodDefinition)
                 throw new ArgumentException(Resources.GenericMethodDefinitionShouldBeAGenericMethodDefinition);
 
-            return method.IsGenericMethod && ReflectionTools.MethodEqual(method.GetGenericMethodDefinition(), genericMethodDefinitoin);
+            return method.IsGenericMethod && ReflectionTools.MethodEqual(method.GetGenericMethodDefinition(), genericMethodDefinition);
         }
 
         public static IEnumerable<Type> GetGenericInterfaces(this Type type, Type genericInterfaceDefinition)

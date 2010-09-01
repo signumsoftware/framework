@@ -38,17 +38,17 @@ namespace Signum.Test
             started = false;
         }
 
-        public static void Start(string connectionString)
+        static void Start(string connectionString)
         {
             SchemaBuilder sb = new SchemaBuilder();
             DynamicQueryManager dqm = new DynamicQueryManager();
             ConnectionScope.Default = new Connection(connectionString, sb.Schema, dqm);
 
-            InternalStart(sb, dqm);
+            StartMusic(sb, dqm);
 
         }
 
-        public static void InternalStart(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void StartMusic(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             sb.Include<AlbumDN>();
             sb.Include<NoteDN>();
@@ -135,6 +135,8 @@ namespace Signum.Test
                                                 a.Result
                                             }).ToDynamic();
         }
+
+        public const string Japan = "Japan";
         
         public static void Load()
         {
@@ -147,7 +149,7 @@ namespace Signum.Test
             };
 
             CountryDN usa = new CountryDN { Name = "USA" };
-            CountryDN japan = new CountryDN { Name = "Japan" };
+            CountryDN japan = new CountryDN { Name = Japan };
 
             smashingPumpkins.Members.ForEach(m => m.Friends = smashingPumpkins.Members.Where(a => a.Sex != m.Sex).Select(a => a.ToLiteFat()).ToMList());
 
@@ -238,7 +240,7 @@ namespace Signum.Test
                 Label = sony
             }.Save();
 
-            LabelDN mjj = new LabelDN { Name = "MJJ", Country = usa };
+            LabelDN mjj = new LabelDN { Name = "MJJ", Country = usa, Owner = sony.ToLite() };
 
             new AlbumDN
             {

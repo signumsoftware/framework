@@ -124,10 +124,9 @@ namespace Signum.Engine.Linq
         {
             return columns.NewIfChange(c =>
                 {
-                    var col = (ColumnExpression)Visit(c.Column);
                     var exp = Visit(c.Expression);
-                    if (col != c.Column || exp != c.Expression)
-                        return new ColumnAssignment(col, exp);
+                    if (exp != c.Expression)
+                        return new ColumnAssignment(c.Column, exp);
                     return c;
                 });
         }

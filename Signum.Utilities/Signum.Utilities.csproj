@@ -55,7 +55,9 @@
     <Compile Include="ArrayExtensions.cs" />
     <Compile Include="ConsoleSwitch.cs" />
     <Compile Include="DataStructures\MinMax.cs" />
+    <Compile Include="DataStructures\ScopedDictionary.cs" />
     <Compile Include="DescriptionAttributes.cs" />
+    <Compile Include="ExpressionTrees\ExpressionComparer.cs" />
     <Compile Include="ExpressionTrees\ExpressionReplacer.cs" />
     <Compile Include="ExpressionTrees\Linq.cs" />
     <Compile Include="FileExtensions.cs" />

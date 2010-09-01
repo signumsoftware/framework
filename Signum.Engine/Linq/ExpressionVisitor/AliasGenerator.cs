@@ -7,12 +7,12 @@ using Signum.Utilities;
 
 namespace Signum.Engine.Linq
 {
-    class AliasGenerator
+    public class AliasGenerator
     {
         Dictionary<string, int> tablesCount = new Dictionary<string, int>() { { "s", 0 } };
         Dictionary<Type, string> baseAlias = new Dictionary<Type, string>();
 
-        public string GenerateBaseAlias(Type type)
+        string GenerateBaseAlias(Type type)
         {
             string cleanName = Reflector.CleanTypeName(type);
 
@@ -30,7 +30,7 @@ namespace Signum.Engine.Linq
             int count = 1;
             while (true)
             {
-                result = cleanName + new string('_', count++);
+                result = cleanName.ToLower() + new string('_', count++);
                 if (!tablesCount.ContainsKey(result))
                     return result;
             }

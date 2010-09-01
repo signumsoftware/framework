@@ -22,8 +22,6 @@ namespace Signum.Engine
             SqlPreCommand comando = DeleteCommand(type, id);
 
             int result = Executor.ExecuteNonQuery(comando.ToSimple());
-
-            Schema.Current.OnDeleted(type, new List<int> { id }); 
         }
 
         internal static SqlPreCommand DeleteCommand(Type type, int id)
@@ -45,8 +43,6 @@ namespace Signum.Engine
 
             if (Executor.ExecuteNonQuery(comando.ToSimple()) != ids.Count)
                 throw new InvalidOperationException(Resources.NotAllEntitiesOfType0AndIds1Removed.Formato(type.Name, ids.ToString(", ")));
-
-            Schema.Current.OnDeleted(type, ids); 
         }
 
         internal static SqlPreCommand DeleteCommand(Type type, List<int> ids)

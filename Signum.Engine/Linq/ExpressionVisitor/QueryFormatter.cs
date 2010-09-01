@@ -663,7 +663,7 @@ namespace Signum.Engine.Linq
                     sb.Append(",");
                     this.AppendNewLine(Indentation.Same);
                 }
-                sb.Append(assignment.Column.Name);
+                sb.Append(assignment.Column);
                 sb.Append(" = ");
                 this.Visit(assignment.Expression);
             }

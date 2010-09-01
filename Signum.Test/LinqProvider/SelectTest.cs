@@ -241,6 +241,13 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void SelectUpCast()
+        {
+            var list = (from n in Database.Query<ArtistDN>()
+                        select (IAuthorDN)n).ToList(); //Just to full-nominate
+        }
+
+        [TestMethod]
         public void SelectEntityEquals()
         {
             ArtistDN michael = Database.Query<ArtistDN>().Single(a => a.Dead);

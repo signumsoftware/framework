@@ -51,7 +51,8 @@ namespace Signum.Engine
             //colapsa modifiables (collections and embeddeds) keeping indentifiables only
             DirectedGraph<IdentifiableEntity> identifiables = GraphExplorer.ColapseIdentifiables(modifiables);
 
-            List<IdentifiableEntity> newEnities = identifiables.Where(i => i.IsNew).ToList();
+            foreach (var node in identifiables)
+                schema.OnSaving(node, roots.Contains(node));
 
             //Remove all the edges that doesn't mean a dependency
             identifiables.RemoveAll(identifiables.Edges.Where(e=>!e.To.IsNew).ToList());
@@ -61,18 +62,10 @@ namespace Signum.Engine
 
             notModified.ForEach(node=>identifiables.RemoveFullNode(node, None));
 
-  
-
-            ////calculate saving dependencies (edges to new identifiables)
-            //DirectedGraph<IdentifiableEntity> dependencies = identifiables.WhereEdges(e => e.To.IsNew);
-
             //separa las conexiones 'prohibidas' de las buenas
             DirectedGraph<IdentifiableEntity> backEdges = identifiables.FeedbackEdgeSet();
 
             identifiables.RemoveAll(backEdges.Edges);
-
-            foreach (var node in identifiables)
-                schema.OnSaving(node, roots.Contains(node));
 
             IEnumerable<HashSet<IdentifiableEntity>> groups = identifiables.CompilationOrderGroups();
 
@@ -86,18 +79,7 @@ namespace Signum.Engine
             SaveGroup(postSavings, schema, null);
 
             EntityCache.Add(identifiables);
-
-            SavedEventArgs args = new SavedEventArgs();
-
-            foreach (var node in identifiables)
-            {
-                args.IsRoot = roots.Contains(node);
-                args.WasNew = newEnities.Contains(node);
-                args.WasModified = !notModified.Contains(node);
-
-                schema.OnSaved(node, args);
-
-            }
+            EntityCache.Add(notModified); 
         }
 
 

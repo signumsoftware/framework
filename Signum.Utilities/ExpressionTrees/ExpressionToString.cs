@@ -11,6 +11,109 @@ namespace Signum.Utilities.ExpressionTrees
     //This class wouldnt be neccessayr if Expression.BuildString where 'protected internal' instead of 'internal'
     internal class ExpressionToString: ExpressionVisitor
     {
+        public enum Precedence
+        {
+            Primary, 
+            Unary, 
+            Multiplicative,
+            Additive,
+            Shift,
+            RelationalTypeChecking,
+            Equality,
+            LAnd,
+            LXor,
+            LOr,
+            CAnd,
+            COr,
+            NullCoalesce,
+            Conditional,
+            AssignmentLambda
+        }
+
+
+        public static Precedence? GetPrecedence(ExpressionType nodeType)
+        {
+            switch (nodeType)
+            {
+                case ExpressionType.MemberAccess:
+                case ExpressionType.Call:
+                case ExpressionType.Invoke:
+                case ExpressionType.ArrayIndex:
+                case ExpressionType.ArrayLength:
+                case ExpressionType.New:
+                case ExpressionType.NewArrayBounds:
+                case ExpressionType.NewArrayInit:
+                case ExpressionType.MemberInit:
+                case ExpressionType.ListInit:
+                case ExpressionType.Constant:
+                case ExpressionType.Parameter:
+                    return Precedence.Primary;
+
+                case ExpressionType.Negate:
+                case ExpressionType.NegateChecked:
+                case ExpressionType.UnaryPlus:
+                case ExpressionType.Convert:
+                case ExpressionType.ConvertChecked:
+                case ExpressionType.Quote:
+                case ExpressionType.Not:
+                    return Precedence.Unary;
+
+                case ExpressionType.Modulo:
+                case ExpressionType.Multiply:
+                case ExpressionType.MultiplyChecked:
+                case ExpressionType.Divide:
+                    return Precedence.Multiplicative;
+
+                case ExpressionType.Add:
+                case ExpressionType.AddChecked:
+                case ExpressionType.Subtract:
+                case ExpressionType.SubtractChecked:
+                    return Precedence.Additive;
+
+                case ExpressionType.LeftShift:
+                case ExpressionType.RightShift:
+                    return Precedence.Shift;
+
+                case ExpressionType.GreaterThan:
+                case ExpressionType.GreaterThanOrEqual:
+                case ExpressionType.LessThan:
+                case ExpressionType.LessThanOrEqual:
+                case ExpressionType.TypeAs:
+                case ExpressionType.TypeIs:
+                    return Precedence.RelationalTypeChecking;
+
+                case ExpressionType.Equal:
+                case ExpressionType.NotEqual:
+                    return Precedence.Equality;
+
+                case ExpressionType.And:
+                    return Precedence.LOr;
+
+                case ExpressionType.ExclusiveOr:
+                    return Precedence.LXor;
+
+                case ExpressionType.Or:
+                    return Precedence.LOr;
+
+                case ExpressionType.AndAlso:
+                    return Precedence.CAnd;
+
+                case ExpressionType.OrElse:
+                    return Precedence.COr;
+
+                case ExpressionType.Coalesce:
+                    return Precedence.NullCoalesce;
+
+                case ExpressionType.Conditional:
+                    return Precedence.Conditional;
+
+                case ExpressionType.Lambda:
+                    return Precedence.AssignmentLambda;
+            }
+
+            return null;
+        }
+
         StringBuilder builder = new StringBuilder();
 
         public static string NiceToString(Expression exp)
@@ -18,6 +121,24 @@ namespace Signum.Utilities.ExpressionTrees
             ExpressionToString ets = new ExpressionToString();
             ets.Visit(exp);
             return ets.builder.ToString(); 
+        }
+
+        protected Expression VisitParenthesis(Expression exp, Expression parent, bool associativePreference)
+        {
+            Precedence? pExp = GetPrecedence(exp.NodeType);
+            Precedence? pParent = GetPrecedence(parent.NodeType);
+
+            bool needParent = pExp.HasValue && pParent.HasValue && (associativePreference ? pExp.Value > pParent.Value : pExp.Value >= pParent.Value);
+
+            if (needParent)
+                builder.Append("(");
+
+            Visit(exp);
+
+            if (needParent)
+                builder.Append(")");
+
+            return exp;
         }
 
         protected override Expression Visit(Expression exp)
@@ -34,7 +155,7 @@ namespace Signum.Utilities.ExpressionTrees
         {
             if (b.NodeType == ExpressionType.ArrayIndex)
             {
-                Visit(b.Left);
+                VisitParenthesis(b.Left, b, true);
                 builder.Append("[");
                 Visit(b.Right);
                 builder.Append("]");
@@ -44,13 +165,11 @@ namespace Signum.Utilities.ExpressionTrees
                 string @operator = GetOperator(b);
                 if (@operator != null)
                 {
-                    builder.Append("(");
-                    Visit(b.Left);
+                    VisitParenthesis(b.Left, b, true);
                     builder.Append(" ");
                     builder.Append(@operator);
                     builder.Append(" ");
-                    Visit(b.Right);
-                    builder.Append(")");
+                    VisitParenthesis(b.Right, b, false);
                 }
                 else
                 {
@@ -71,11 +190,11 @@ namespace Signum.Utilities.ExpressionTrees
             {
                 case ExpressionType.Add:
                 case ExpressionType.AddChecked: return "+";
-                case ExpressionType.And: return (b.Type != typeof(bool) && b.Type != typeof(bool?)) ? "&" : "And";
+                case ExpressionType.And: return "&";
                 case ExpressionType.AndAlso:return "&&";
                 case ExpressionType.Coalesce:return "??";
                 case ExpressionType.Divide:return "/";
-                case ExpressionType.Equal:return "=";
+                case ExpressionType.Equal:return "==";
                 case ExpressionType.ExclusiveOr:return "^";
                 case ExpressionType.GreaterThan:return ">";
                 case ExpressionType.GreaterThanOrEqual:return ">=";
@@ -86,7 +205,7 @@ namespace Signum.Utilities.ExpressionTrees
                 case ExpressionType.Multiply:
                 case ExpressionType.MultiplyChecked:return "*";
                 case ExpressionType.NotEqual:return "!=";
-                case ExpressionType.Or: return (b.Type != typeof(bool) && b.Type != typeof(bool?)) ? "|" : "Or";
+                case ExpressionType.Or: return  "|" ;
                 case ExpressionType.OrElse:return "||";
                 case ExpressionType.Power:return "^";
                 case ExpressionType.RightShift:return ">>";
@@ -98,13 +217,11 @@ namespace Signum.Utilities.ExpressionTrees
 
         protected override Expression VisitConditional(ConditionalExpression c)
         {
-            builder.Append("IIF(");
-            Visit(c.Test);
-            builder.Append(", ");
-            Visit(c.IfTrue);
-            builder.Append(", ");
-            Visit(c.IfFalse);
-            builder.Append(")");
+            VisitParenthesis(c.Test, c, false);
+            builder.Append(" ? ");
+            VisitParenthesis(c.IfTrue, c, true);
+            builder.Append(" : ");
+            VisitParenthesis(c.IfFalse, c, true);
             return c;
         }
 
@@ -159,13 +276,14 @@ namespace Signum.Utilities.ExpressionTrees
 
         protected override Expression VisitInvocation(InvocationExpression iv)
         {
-            builder.Append("Invoke(");
-            Visit(iv.Expression);
+            VisitParenthesis(iv.Expression, iv, true);
+            builder.Append("(");
             int num = 0;
             int count = iv.Arguments.Count;
             while (num < count)
             {
-                builder.Append(",");
+                if (num != 0)
+                    builder.Append(",");
                 Visit(iv.Arguments[num]);
                 num++;
             }
@@ -462,27 +580,26 @@ namespace Signum.Utilities.ExpressionTrees
                 case ExpressionType.Negate:
                 case ExpressionType.NegateChecked:
                     builder.Append("-");
-                    Visit(u.Operand);
+                    VisitParenthesis(u.Operand, u, false);
                     break;
                 case ExpressionType.UnaryPlus:
                     builder.Append("+");
-                    Visit(u.Operand);
+                    VisitParenthesis(u.Operand, u, false);
                     break;
                 case ExpressionType.Not:
-                    builder.Append("Not");
-                    builder.Append("(");
-                    Visit(u.Operand);
-                    builder.Append(")");
+                    if (u.Type.UnNullify() == typeof(bool))
+                        builder.Append("!");
+                    else
+                        builder.Append("~");
+                    VisitParenthesis(u.Operand, u, false);
                     break;
                 case ExpressionType.Quote:
                     Visit(u.Operand);
                     break;
                 case ExpressionType.TypeAs:
-                    builder.Append("(");
-                    Visit(u.Operand);
-                    builder.Append(" As ");
-                    builder.Append(u.Type.Name);
-                    builder.Append(")");
+                    VisitParenthesis(u.Operand, u, false);
+                    builder.Append(" as ");
+                    builder.Append(u.Type.TypeName());
                     break;
                 default:
                     builder.Append(u.NodeType);
@@ -491,16 +608,16 @@ namespace Signum.Utilities.ExpressionTrees
                     builder.Append(")");
                     break;
             }
+
+
             return u;
         }
 
         protected override Expression VisitTypeIs(TypeBinaryExpression b)
         {
-            builder.Append("(");
-            Visit(b.Expression);
-            builder.Append(" Is ");
+            VisitParenthesis(b.Expression, b, false);
+            builder.Append(" is ");
             builder.Append(b.TypeOperand.TypeName());
-            builder.Append(")");
             return b;
         } 
     }

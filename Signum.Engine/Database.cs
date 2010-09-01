@@ -330,11 +330,36 @@ namespace Signum.Engine
             return new Query<T>(DbQueryProvider.Single);
         }
 
-        public static IQueryable<T> Query<T, S>(this S entity, Expression<Func<S, IEnumerable<T>>> collection)
+        public static IQueryable<S> InDB<S>(this S entity)
             where S:IdentifiableEntity
         {
-            return Database.Query<S>().Where(s => s == entity).SelectMany(collection); 
+            return Database.Query<S>().Where(s => s == entity); 
         }
+
+        static MethodInfo miInDB = ReflectionTools.GetMethodInfo(() => InDB<IdentifiableEntity, IdentifiableEntity>((IdentifiableEntity)null)).GetGenericMethodDefinition();
+
+        static IQueryable<S> InDB<S, RT>(S entity)
+            where S : class, IIdentifiable
+            where RT : IdentifiableEntity, S
+        {
+            return Database.Query<RT>().Where(rt => rt == entity).Select(rt => (S)rt);
+        }
+
+        public static IQueryable<S> InDB<S>(this Lite<S> lite)
+           where S : class, IIdentifiable
+        {
+            return (IQueryable<S>)miInDBLite.GenericInvoke(new[] { typeof(S), lite.RuntimeType }, null, new[] { lite });
+        }
+
+        static MethodInfo miInDBLite = ReflectionTools.GetMethodInfo(() => InDB<IdentifiableEntity, IdentifiableEntity>((Lite<IdentifiableEntity>)null)).GetGenericMethodDefinition();
+
+        static IQueryable<S> InDB<S, RT>(Lite<S> lite)
+            where S : class, IIdentifiable
+            where RT : IdentifiableEntity, S
+        {
+            return Database.Query<RT>().Where(rt => rt.ToLite() == lite.ToLite<RT>()).Select(rt => (S)rt);
+        }
+
 
         public static IQueryable<T> View<T>()
             where T : IView

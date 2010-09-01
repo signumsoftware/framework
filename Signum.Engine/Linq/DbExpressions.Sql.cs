@@ -842,10 +842,10 @@ namespace Signum.Engine.Linq
 
     internal class ColumnAssignment
     {
-        public readonly ColumnExpression Column;
+        public readonly string Column;
         public readonly Expression Expression;
 
-        public ColumnAssignment(ColumnExpression column, Expression expression)
+        public ColumnAssignment(string column, Expression expression)
         {
             this.Column = column;
             this.Expression = expression;

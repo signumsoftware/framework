@@ -15,6 +15,7 @@ using Signum.Engine.Maps;
 using Signum.Entities.Reflection;
 using Signum.Engine.Properties;
 using Signum.Entities.DynamicQuery;
+using System.Collections.ObjectModel;
 
 namespace Signum.Engine.Linq
 {
@@ -1183,17 +1184,19 @@ namespace Signum.Engine.Linq
 
                     if (imp == null)
                     {
-                       int idType = Schema.Current.IDsForType.GetOrThrow(u.Type, Resources.TheType0IsNotInTheTypesTable.Formato(u.Type.TypeName()));
+                        int idType = Schema.Current.IDsForType.GetOrThrow(u.Type, Resources.TheType0IsNotInTheTypesTable.Formato(u.Type.TypeName()));
 
-                       Expression other = SmartEqualizer.EqualNullable(riba.TypeId, Expression.Constant(idType));
+                        Expression other = SmartEqualizer.EqualNullable(riba.TypeId, Expression.Constant(idType));
 
-                       FieldInitExpression result = new FieldInitExpression(u.Type, null, TypeSqlConstant(u.Type), riba.Id, other, riba.Token); //Delay riba.TypeID to FillFie to make the SQL more clean
-                       riba.Implementations.Add(new ImplementationColumnExpression(u.Type, result));
-                       return result;
+                        FieldInitExpression result = new FieldInitExpression(u.Type, null, TypeSqlConstant(u.Type), riba.Id, other, riba.Token); //Delay riba.TypeID to FillFie to make the SQL more clean
+                        riba.Implementations.Add(new ImplementationColumnExpression(u.Type, result));
+                        return result;
                     }
                     else
                         return imp.Field;
                 }
+                else if (operand.NodeType == (ExpressionType)DbExpressionType.FieldInit)
+                    return new ImplementedByExpression(u.Type, new[] { new ImplementationColumnExpression(operand.Type, (FieldInitExpression)operand) }.ToReadOnly());
                 else if (operand != u.Operand)
                     return Expression.MakeUnary(u.NodeType, operand, u.Type, u.Method);
                 else
@@ -1300,10 +1303,12 @@ namespace Signum.Engine.Linq
 
         ColumnAssignment AssignColumn(Expression column, Expression expression)
         {
-            if (!(column is ColumnExpression))
+            var col = column as ColumnExpression;
+
+            if (col == null)
                 throw new InvalidOperationException(Resources.DoesNotRepresentAColumn.Formato(column.NiceToString()));
 
-            return new ColumnAssignment((ColumnExpression)column, DbExpressionNominator.FullNominate(expression, false));
+            return new ColumnAssignment(col.Name, DbExpressionNominator.FullNominate(expression, false));
         }
 
         private ColumnAssignment[] Assign(Expression colExpression, Expression expression)
@@ -1443,7 +1448,7 @@ namespace Signum.Engine.Linq
                 if (efie.HasValue == null)
                     throw new InvalidOperationException("The EmbeddedField doesn't accept null values");
 
-                var setNull = new ColumnAssignment((ColumnExpression)efie.HasValue, Expression.Constant(false));
+                var setNull = AssignColumn(efie.HasValue, Expression.Constant(false));
 
                 return efie.Bindings.SelectMany(b => AssignNull(b.Binding)).PreAnd(setNull).ToArray();
             }

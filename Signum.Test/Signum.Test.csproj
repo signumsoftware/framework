@@ -50,7 +50,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assert2.cs" />
+    <Compile Include="LinqProvider\Assert2.cs" />
     <Compile Include="Entities.cs" />
     <Compile Include="LinqProvider\AllAnyContainsTest.cs" />
     <Compile Include="LinqProvider\DistinctTest.cs" />
