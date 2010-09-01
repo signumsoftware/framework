@@ -23,7 +23,7 @@ namespace Signum.Test.Extensions
         [TestMethod]
         public void CreateMusicEnvironment()
         {
-            Starter.StartAndLoad(Settings.Default.ConnectionString);
+            Starter.StartAndLoad(UserConnections.Replace(Settings.Default.ConnectionString));
         }
     }
 }

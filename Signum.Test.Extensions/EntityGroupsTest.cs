@@ -24,7 +24,7 @@ namespace Signum.Test.Extensions
         [ClassInitialize()]
         public static void MyClassInitialize(TestContext testContext)
         {
-            Starter.StartAndLoad(Settings.Default.ConnectionString);
+            Starter.StartAndLoad(UserConnections.Replace(Settings.Default.ConnectionString));
         }
 
 
