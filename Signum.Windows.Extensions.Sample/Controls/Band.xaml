@@ -1,0 +1,18 @@
+﻿<UserControl x:Class="Signum.Windows.Extensions.Sample.Controls.Band"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
+    xmlns:d="clr-namespace:Signum.Test;assembly=Signum.Test"
+    m:Common.TypeContext="d:BandDN"
+    MinWidth="300">
+    <StackPanel>
+        <m:ValueLine m:Common.Route="Name" />
+        <GroupBox Header="Members">
+            <m:EntityList m:Common.Route="Members" />
+        </GroupBox>
+        <m:EntityLine m:Common.Route="LastAward" />
+        <GroupBox Header="OtherAwards">
+            <m:EntityList m:Common.Route="OtherAwards" />
+        </GroupBox>
+    </StackPanel>
+</UserControl>

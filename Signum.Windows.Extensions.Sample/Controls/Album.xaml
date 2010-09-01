@@ -1,0 +1,34 @@
+﻿<UserControl x:Class="Signum.Windows.Extensions.Sample.Controls.Album"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:s="clr-namespace:Signum.Windows.Extensions.Sample.Controls"
+    xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
+    xmlns:d="clr-namespace:Signum.Test;assembly=Signum.Test"
+    m:Common.TypeContext="d:AlbumDN"
+    MinWidth="300">
+    <StackPanel>
+        <m:ValueLine m:Common.Route="Name" />
+        <m:ValueLine m:Common.Route="Year" />
+        <m:EntityLine m:Common.Route="Label" />
+        <m:EntityCombo m:Common.Route="Author" />
+        <GroupBox Header="Songs">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <m:EntityList m:Common.Route="Songs" ViewOnCreate="False" Grid.Column="0" />
+                <m:DataBorder m:Common.Route="Songs/" Grid.Column="1">
+                    <s:Song />
+                </m:DataBorder>
+            </Grid>
+        </GroupBox>
+        <m:EntityDetail m:Common.Route="BonusTrack">
+            <m:EntityDetail.EntityTemplate>
+                <DataTemplate>
+                    <s:Song />
+                </DataTemplate>
+            </m:EntityDetail.EntityTemplate>
+        </m:EntityDetail>
+    </StackPanel>
+</UserControl>

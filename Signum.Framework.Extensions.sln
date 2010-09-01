@@ -39,9 +39,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Signum.Web.Extensions.Selen
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Signum.Web.Extensions.Sample.Test", "Signum.Web.Extensions.Sample.Test\Signum.Web.Extensions.Sample.Test.csproj", "{9DFB2234-A70C-4583-8674-EC33619BC25E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Signum.Windows.Extensions.Sample", "Signum.Windows.Extensions.Sample\Signum.Windows.Extensions.Sample.csproj", "{5658AD7A-C9F7-4359-96A6-9EBC8CB1DCC8}"
+EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 15
+		SccNumberOfProjects = 16
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = http://andromeda:8080/
 		SccLocalPath0 = .
@@ -54,7 +56,6 @@ Global
 		SccProjectName2 = ../Framework/Signum.Entities
 		SccLocalPath2 = ..\\Framework\\Signum.Entities
 		SccProjectUniqueName3 = ..\\Framework\\Signum.Test\\Signum.Test.csproj
-		SccProjectTopLevelParentUniqueName3 = Signum.Framework.Extensions.sln
 		SccProjectName3 = ../Framework/Signum.Test
 		SccLocalPath3 = ..\\Framework\\Signum.Test
 		SccProjectUniqueName4 = ..\\Framework\\Signum.Utilities\\Signum.Utilities.csproj
@@ -74,7 +75,6 @@ Global
 		SccProjectName7 = Signum.Entities.Extensions
 		SccLocalPath7 = Signum.Entities.Extensions
 		SccProjectUniqueName8 = Signum.Test.Extensions\\Signum.Test.Extensions.csproj
-		SccProjectTopLevelParentUniqueName8 = Signum.Framework.Extensions.sln
 		SccProjectName8 = Signum.Test.Extensions
 		SccLocalPath8 = Signum.Test.Extensions
 		SccProjectUniqueName9 = Signum.Web.Extensions\\Signum.Web.Extensions.csproj
@@ -93,12 +93,14 @@ Global
 		SccProjectName12 = ../Framework/Signum.Windows
 		SccLocalPath12 = ..\\Framework\\Signum.Windows
 		SccProjectUniqueName13 = Signum.Web.Extensions.Selenium\\Signum.Web.Extensions.Selenium.csproj
-		SccProjectTopLevelParentUniqueName13 = Signum.Framework.Extensions.sln
 		SccProjectName13 = Signum.Web.Extensions.Selenium
 		SccLocalPath13 = Signum.Web.Extensions.Selenium
 		SccProjectUniqueName14 = Signum.Web.Extensions.Sample.Test\\Signum.Web.Extensions.Sample.Test.csproj
 		SccProjectName14 = Signum.Web.Extensions.Sample.Test
 		SccLocalPath14 = Signum.Web.Extensions.Sample.Test
+		SccProjectUniqueName15 = Signum.Windows.Extensions.Sample\\Signum.Windows.Extensions.Sample.csproj
+		SccProjectName15 = Signum.Windows.Extensions.Sample
+		SccLocalPath15 = Signum.Windows.Extensions.Sample
 	EndGlobalSection
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = Signum.Framework.Extensions.vsmdi
@@ -193,22 +195,25 @@ Global
 		{9DFB2234-A70C-4583-8674-EC33619BC25E}.Partial|Any CPU.Build.0 = Release|Any CPU
 		{9DFB2234-A70C-4583-8674-EC33619BC25E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9DFB2234-A70C-4583-8674-EC33619BC25E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5658AD7A-C9F7-4359-96A6-9EBC8CB1DCC8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5658AD7A-C9F7-4359-96A6-9EBC8CB1DCC8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5658AD7A-C9F7-4359-96A6-9EBC8CB1DCC8}.Partial|Any CPU.ActiveCfg = Release|Any CPU
+		{5658AD7A-C9F7-4359-96A6-9EBC8CB1DCC8}.Partial|Any CPU.Build.0 = Release|Any CPU
+		{5658AD7A-C9F7-4359-96A6-9EBC8CB1DCC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5658AD7A-C9F7-4359-96A6-9EBC8CB1DCC8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{F2B51D08-498D-4C9F-8112-9521A7762B02} = {C091CA76-1473-476F-961B-A209A4B4D74A}
-		{DE565EB3-EE44-469D-B6B9-C8F3CA0712EF} = {C091CA76-1473-476F-961B-A209A4B4D74A}
 		{F7D3F72D-741D-4F67-8CF8-CD41B9035FED} = {C091CA76-1473-476F-961B-A209A4B4D74A}
 		{61898D02-521F-49AB-928B-F80615D55CA3} = {C091CA76-1473-476F-961B-A209A4B4D74A}
 		{7F2DB6FE-C109-4057-B207-C62A767F905D} = {C091CA76-1473-476F-961B-A209A4B4D74A}
 		{76278145-7CCD-4411-9B8A-078708128571} = {C091CA76-1473-476F-961B-A209A4B4D74A}
 		{BA7FA363-61A1-41B1-945B-9B9C7BBCD357} = {A5D15760-64E5-4522-B298-0249AAE6E124}
 		{7D851227-5294-4BEB-990E-56B4FBB7A148} = {A5D15760-64E5-4522-B298-0249AAE6E124}
-		{4D7D1542-2C5B-45D3-BC62-0D7290899EF7} = {A5D15760-64E5-4522-B298-0249AAE6E124}
 		{86EE7792-96CF-4420-997B-8C811E2B166D} = {A5D15760-64E5-4522-B298-0249AAE6E124}
 		{CAFD6D4D-E5FB-4A6E-84FC-3185854CCD9D} = {A5D15760-64E5-4522-B298-0249AAE6E124}
-		{18048DCC-7069-4BC1-8BE0-99010C7D9082} = {A5D15760-64E5-4522-B298-0249AAE6E124}
 	EndGlobalSection
 EndGlobal
