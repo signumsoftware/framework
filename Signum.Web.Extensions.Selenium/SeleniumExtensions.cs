@@ -21,7 +21,7 @@ namespace Signum.Web.Selenium
             else
                 seleniumServerProcess.StartInfo.Arguments =
                     "-jar c:/selenium/selenium-server.jar";
-
+            Thread.Sleep(2000);
             seleniumServerProcess.Start();
             return seleniumServerProcess;
         }
