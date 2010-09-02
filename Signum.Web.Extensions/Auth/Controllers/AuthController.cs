@@ -338,10 +338,8 @@ namespace Signum.Web.Authorization
                 if (referrer != null && referrer != current)
                     ViewData["referrer"] = System.Web.HttpContext.Current.Request.UrlReferrer.AbsolutePath;
             }
-            if (Request.IsAjaxRequest())
-                return Navigator.RedirectUrl(AuthClient.LoginUrl);
-            else
-                return View(AuthClient.LoginUrl);
+
+            return View(AuthClient.LoginUrl);
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
