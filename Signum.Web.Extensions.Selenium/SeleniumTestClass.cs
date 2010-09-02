@@ -40,8 +40,11 @@ namespace Signum.Web.Selenium
         {
             try
             {
-                selenium.Stop();
-                selenium.ShutDownSeleniumServer();
+                if (selenium != null)
+                {
+                    selenium.Stop();
+                    selenium.ShutDownSeleniumServer();
+                }
                 SeleniumExtensions.KillSelenium(seleniumServerProcess);
             }
             catch (Exception)
