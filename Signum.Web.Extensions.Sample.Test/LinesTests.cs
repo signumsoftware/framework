@@ -40,7 +40,6 @@ namespace Signum.Web.Extensions.Sample.Test
         {
             try
             {
-                throw new ApplicationException("hola");
                 CheckLoginAndOpen("/Signum.Web.Extensions.Sample/View/Band/1");
 
                 //view
