@@ -9,5 +9,14 @@
         <GroupBox Header="Sub-Roles">
             <m:EntityList m:Common.Route="Roles" Height="100" />
         </GroupBox>
+        <GroupBox  Header="Refered By" >
+            <StackPanel>
+                <m:SearchControl x:Name="ReferedBySc"  SearchOnLoad="True" QueryName="{x:Static d:RoleQueries.ReferedBy}"   >
+                    <m:SearchControl.FilterOptions>
+                        <m:FilterOption Path="Refered" Operation="EqualTo" Value="{Binding DataContext, ElementName=ReferedBySc}"  Frozen="True"/>
+                    </m:SearchControl.FilterOptions>
+                </m:SearchControl>
+            </StackPanel>
+        </GroupBox>
     </StackPanel>
 </UserControl>
