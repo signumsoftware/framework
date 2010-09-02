@@ -155,5 +155,29 @@ namespace Signum.Web.Extensions.Sample.Test
                 throw;
             }
         }
+
+        [TestMethod]
+        public void Delete()
+        {
+            try
+            {
+                //Album.Clone
+                CheckLoginAndOpen("/Signum.Web.Extensions.Sample/View/Album/13");
+
+                selenium.Click("AlbumOperation_Delete");
+                Assert.IsTrue(Regex.IsMatch(selenium.GetConfirmation(), ".*"));
+                selenium.WaitForPageToLoad(PageLoadTimeout);
+                
+                //It doesn't exist any more
+                selenium.Click("btnSearch");
+                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#tblResults > tbody > tr"));
+                Assert.IsFalse(selenium.IsElementPresent("jq=a[href=View/Album/13]"));
+            }
+            catch (Exception)
+            {
+                Common.MyTestCleanup();
+                throw;
+            }
+        }
     }
 }
