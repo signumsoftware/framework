@@ -125,7 +125,7 @@ namespace Signum.Web.Extensions.Sample.Test
             catch (Exception ex)
             {
                 Common.MyTestCleanup();
-                throw;
+                throw ex;
             }
         }
 
