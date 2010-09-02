@@ -14,6 +14,7 @@ namespace Signum.Web.Selenium
     {
         protected static ISelenium selenium;
         protected static Process seleniumServerProcess;
+        private static bool Cleaned = false;
 
         protected const string PageLoadTimeout = SeleniumExtensions.DefaultPageLoadTimeout; //1.66666667 minutes
 
@@ -42,12 +43,16 @@ namespace Signum.Web.Selenium
         {
             try
             {
-                if (selenium != null)
+                if (!Cleaned)
                 {
-                    selenium.Stop();
-                    selenium.ShutDownSeleniumServer();
+                    if (selenium != null)
+                    {
+                        selenium.Stop();
+                        selenium.ShutDownSeleniumServer();
+                    }
+                    SeleniumExtensions.KillSelenium(seleniumServerProcess);
                 }
-                SeleniumExtensions.KillSelenium(seleniumServerProcess);
+                Cleaned = true;
             }
             catch (Exception)
             {
