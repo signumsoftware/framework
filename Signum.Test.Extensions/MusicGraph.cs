@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Signum.Engine.Operations;
 using Signum.Engine;
+using Signum.Entities;
 
 namespace Signum.Test.Extensions
 {
@@ -36,7 +37,7 @@ namespace Signum.Test.Extensions
                     Lite = false,
                     FromStates = new [] { AlbumState.New },
                     Returns = true,
-                    Execute = (album, _) => {},
+                    Execute = (album, _) => { album.Save(); },
                 },
 
                 new Goto(AlbumOperation.Modify, AlbumState.Saved)

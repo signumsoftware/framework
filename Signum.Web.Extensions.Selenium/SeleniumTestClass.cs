@@ -31,6 +31,7 @@ namespace Signum.Web.Selenium
             catch (Exception)
             {
                 MyTestCleanup();
+                throw;
             }
         }
 
@@ -46,6 +47,7 @@ namespace Signum.Web.Selenium
             catch (Exception)
             {
                 // Ignore errors if unable to close the browser
+                throw;
             }
         }
     }

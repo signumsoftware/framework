@@ -114,6 +114,7 @@ namespace Signum.Web.Extensions.Sample.Test
             catch (Exception)
             {
                 Common.MyTestCleanup();
+                throw;
             }
         }
 
@@ -190,6 +191,7 @@ namespace Signum.Web.Extensions.Sample.Test
             catch (Exception)
             {
                 Common.MyTestCleanup();
+                throw;
             }
         }
 
@@ -230,6 +232,7 @@ namespace Signum.Web.Extensions.Sample.Test
             catch (Exception)
             {
                 Common.MyTestCleanup();
+                throw;
             }
         }
 
@@ -280,6 +283,7 @@ namespace Signum.Web.Extensions.Sample.Test
             catch (Exception)
             {
                 Common.MyTestCleanup();
+                throw;
             }
         }
 
@@ -329,6 +333,7 @@ namespace Signum.Web.Extensions.Sample.Test
             catch (Exception)
             {
                 Common.MyTestCleanup();
+                throw;
             }
         }
 
@@ -349,6 +354,7 @@ namespace Signum.Web.Extensions.Sample.Test
             catch (Exception)
             {
                 Common.MyTestCleanup();
+                throw;
             }
         }
     }

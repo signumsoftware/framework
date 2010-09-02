@@ -48,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Common.cs" />
+    <Compile Include="OperationsTests.cs" />
     <Compile Include="ReportsTests.cs" />
     <Compile Include="LinesTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -118,6 +119,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="otOperations.orderedtest">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="otLines.orderedtest">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
