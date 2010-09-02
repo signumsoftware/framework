@@ -161,17 +161,17 @@ namespace Signum.Web.Extensions.Sample.Test
         {
             try
             {
-                //Album.Clone
+                //Album.Delete
                 CheckLoginAndOpen("/Signum.Web.Extensions.Sample/View/Album/13");
-
+                
+                Assert.IsTrue(selenium.IsElementPresent("AlbumOperation_Delete"));
                 selenium.Click("AlbumOperation_Delete");
                 Assert.IsTrue(Regex.IsMatch(selenium.GetConfirmation(), ".*"));
-                //Assert.IsTrue(Regex.IsMatch(selenium.GetConfirmation(), ".*"));
                 //Assert.AreEqual("Confirme que desea eliminar la entidad del sistema", selenium.GetConfirmation());
 
                 selenium.WaitForPageToLoad(PageLoadTimeout);
                 
-                //It doesn't exist any more
+                //Delete has redirected to search window => Check deleted album doesn't exist any more
                 selenium.Click("btnSearch");
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#tblResults > tbody > tr"));
                 Assert.IsFalse(selenium.IsElementPresent("jq=a[href=View/Album/13]"));
