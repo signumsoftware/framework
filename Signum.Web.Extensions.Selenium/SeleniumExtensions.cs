@@ -30,6 +30,7 @@ namespace Signum.Web.Selenium
         {
             ISelenium selenium = new DefaultSelenium("localhost", 4444, "*chrome", "http://localhost/");
             selenium.Start();
+            selenium.SetSpeed("100");
 #if (DEBUG)
             selenium.SetSpeed("1000");
 #endif
