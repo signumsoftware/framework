@@ -5,6 +5,7 @@ using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Selenium;
 using System.Diagnostics;
+using System.Threading;
 
 namespace Signum.Web.Selenium
 {
@@ -26,6 +27,7 @@ namespace Signum.Web.Selenium
             try
             {
                 seleniumServerProcess = SeleniumExtensions.LaunchSeleniumProcess();
+                Thread.Sleep(5000);
                 selenium = SeleniumExtensions.InitializeSelenium();
             }
             catch (Exception)
