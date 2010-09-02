@@ -5,6 +5,7 @@ using System.Text;
 using Signum.Engine.Operations;
 using Signum.Engine;
 using Signum.Entities;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Signum.Test.Extensions
 {
@@ -20,7 +21,8 @@ namespace Signum.Test.Extensions
         Modify,
         CreateFromBand,
         Delete,
-        Clone
+        Clone,
+        CreateGreatestHitsAlbum
     }
 
     public class AlbumGraph : Graph<AlbumDN, AlbumState>
@@ -78,6 +80,23 @@ namespace Signum.Test.Extensions
                         {
                             Author = g.Author,
                             Label = g.Label,
+                        };
+                    }
+                },
+
+                new ConstructFromMany<AlbumDN>(AlbumOperation.CreateGreatestHitsAlbum, AlbumState.New)
+                {
+                    Constructor = (albumLites, _) => 
+                    {
+                        List<AlbumDN> albums = albumLites.Select(a => a.Retrieve()).ToList();
+                        if (albums.Select(a => a.Author).Distinct().Count() > 1)
+                            throw new ArgumentException("All album authors must be the same in order to create a Greatest Hits Album");
+
+                        return new AlbumDN()
+                        {
+                            Author = albums.First().Author,
+                            Year = DateTime.Now.Year,
+                            Songs = albums.SelectMany(a => a.Songs).ToMList()
                         };
                     }
                 }
