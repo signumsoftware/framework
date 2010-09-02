@@ -1201,3 +1201,20 @@ function AutocompleteOnSelected(controlId, data) {
 	$('#' + prefix.compose(sfLink)).html($('#' + controlId).val());
     new ELine({ prefix: prefix }).fireOnEntityChangedWithTicks(true);	
 }
+
+//used by dropdown buttons. it would be best to set these functions as live ones
+//but sf-globals it's not the best place
+function ToggleDropdown(elem) {
+    var $elem = $(elem),
+        clss = "open",
+        opened = $elem.hasClass(clss);
+
+    SF.dropdowns.closeOpened();     //close opened
+    
+    if (opened)       //was opened, close
+        $elem.removeClass(clss);
+    else {
+        SF.dropdowns.register($elem);
+        $elem.addClass(clss);
+    }       
+}

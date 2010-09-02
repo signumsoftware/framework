@@ -32,7 +32,11 @@ namespace Signum.Web
 
             sb.Append("</ul>");
 
-            return helper.Div(Id, HttpUtility.HtmlEncode(Text) + sb.ToString(), DivCssClass + " dropdown", HtmlProps);
+            HtmlProps["onclick"] = "ToggleDropdown(this); return false;";
+            return helper.Div(Id,
+                HttpUtility.HtmlEncode(Text)
+                + helper.Div(null, null, "indicator", null)
+                + sb.ToString(), DivCssClass + " dropdown", HtmlProps);
         }
     }
 

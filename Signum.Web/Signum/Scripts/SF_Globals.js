@@ -47,129 +47,153 @@
         "noElementsSelected": "Debe seleccionar algún elemento",
         "popupErrors": "Hay errores en la entidad, ¿desea continuar?",
         "popupErrorsStop": "Hay errores en la entidad",
-        "0results": "No results have been found" 
+        "0results": "No results have been found"
     };
 
-    var SF = { };
+String.prototype.startsWith = function(str) {
+    return (this.indexOf(str) === 0);
+}
 
-    SF.ajax = function(jqueryAjaxOptions) {
-        var options = $.extend({
-            type: null,
-            url: null,
-            data: null,
-            async: false,
-            dataType: null,
-            success: null,
-            error: null
-        }, jqueryAjaxOptions);
+function isAbsoluteUrl(s) {
+    return s.toLowerCase().indexOf("http") === 0;
+}
+var SF = {};
 
-        $.ajax({
-            type: options.type,
-            url: options.url,
-            data: options.data,
-            async: options.async,
-            dataType: options.dataType,
-            success: function(ajaxResult) {
-                var url = SF.checkRedirection(ajaxResult);
-                if (!empty(url))
-                    window.location.href = $("base").attr("href") + url;
-                else {
-                    if (options.success != null)
-                        options.success(ajaxResult);
-                }
-            },
-            error: options.error
-        });
+SF.ajax = function(jqueryAjaxOptions) {
+    var options = $.extend({
+        type: null,
+        url: null,
+        data: null,
+        async: false,
+        dataType: null,
+        success: null,
+        error: null
+    }, jqueryAjaxOptions);
 
-        /*
-        
-           $.ajax($.extend(jqueryAjaxOptions, {
-            success: function(ajaxResult) {
-                var url = SF.checkRedirection(ajaxResult);
-                if (!empty(url))
-                    window.location.href = $("base").attr("href") + url;
-                else {
-                    if (options.success != null)
-                        options.success(ajaxResult);
-                }
+    $.ajax({
+        type: options.type,
+        url: options.url,
+        data: options.data,
+        async: options.async,
+        dataType: options.dataType,
+        success: function(ajaxResult) {
+            var url = SF.checkRedirection(ajaxResult);
+            if (!empty(url))
+                window.location.href = isAbsoluteUrl(url) ? url : $("base").attr("href") + url;
+            else {
+                if (options.success != null)
+                    options.success(ajaxResult);
             }
-        }));
-        
-        */
-    };
+        },
+        error: options.error
+    });
 
-    SF.checkRedirection = function(ajaxResult) {
-        if (empty(ajaxResult))
-            return null;
+    /*
+        
+    $.ajax($.extend(jqueryAjaxOptions, {
+    success: function(ajaxResult) {
+    var url = SF.checkRedirection(ajaxResult);
+    if (!empty(url))
+    window.location.href = $("base").attr("href") + url;
+    else {
+    if (options.success != null)
+    options.success(ajaxResult);
+    }
+    }
+    }));
+        
+    */
+};
+
+SF.checkRedirection = function(ajaxResult) {
+    if (empty(ajaxResult))
+        return null;
+    var json;
+
+    if (typeof ajaxResult !== "object") {
+        //suppose that if is already an object it will be a json Object            
         if (!SF.isJSON(ajaxResult))
             return null;
-        var json = $.parseJSON(ajaxResult);
-        if (json.jsonResultType == null)
-            return null;
-        if (json.jsonResultType == 'Url')
-            return json.url;
+        json = $.parseJSON(ajaxResult);
+    } else {
+        json = ajaxResult;
+    }
+
+    if (json.jsonResultType == null)
         return null;
-    };
-    
-    //Based on jquery-1.4.2 parseJSON function
-    SF.isJSON = function(data) {
-        if (typeof data !== "string" || !data)
-            return null;
+    if (json.jsonResultType == 'Url')
+        return json.url;
+    return null;
+};
 
-        // Make sure leading/trailing whitespace is removed (IE can't handle it)
-        data = jQuery.trim(data);
+//Based on jquery-1.4.2 parseJSON function
+SF.isJSON = function(data) {
 
-        // Make sure the incoming data is actual JSON
-        // Logic borrowed from http://json.org/json2.js
-        if (/^[\],:{}\s]*$/.test(data.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g, "@")
+    if (typeof data !== "string" || !data)
+        return null;
+
+    // Make sure leading/trailing whitespace is removed (IE can't handle it)
+    data = jQuery.trim(data);
+
+    // Make sure the incoming data is actual JSON
+    // Logic borrowed from http://json.org/json2.js
+    if (/^[\],:{}\s]*$/.test(data.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g, "@")
 			.replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, "]")
 			.replace(/(?:^|:|,)(?:\s*\[)+/g, ""))) {
 
-            return true;
-        }
-        else
-            return false;
-    };
-    
-    var StaticInfo = function(_prefix) {
-        this.prefix = _prefix;
-        this._staticType = 0;
-        this._isEmbedded = 1;
-        this._isReadOnly = 2;
-
-        this.find = function() {
-            return $('#' + this.prefix.compose(sfStaticInfo));
-        };
-        this.value = function() {
-            return this.find().val();
-        };
-        this.toArray = function() {
-            return this.value().split(";")
-        };
-        this.toValue = function(array) {
-            return array.join(";");
-        };
-        this.getValue = function(key) {
-            var array = this.toArray();
-            return array[key];
-        };
-        this.staticType = function() {
-            return this.getValue(this._staticType);
-        };
-        this.isEmbedded = function() {
-            return this.getValue(this._isEmbedded);
-        };
-        this.isReadOnly = function() {
-            return this.getValue(this._isReadOnly);
-        };
-        this.createValue = function(staticType, isEmbedded, isReadOnly) {
-            var array = new Array();
-            array[this._staticType] = staticType;
-            array[this._isEmbedded] = isEmbedded;
-            array[this._isReadOnly] = isReadOnly;
-            return this.toValue(array);
-        };
+        return true;
     }
+    else
+        return false;
+};
+
+function isAbsoluteUrl(s) {
+    return s.toLowerCase().startsWith("http");
+}
+
+String.prototype.startsWith = function(str) {
+    return (this.indexOf(str) === 0);
+}
+
+var StaticInfo = function(_prefix) {
+    this.prefix = _prefix;
+    this._staticType = 0;
+    this._isEmbedded = 1;
+    this._isReadOnly = 2;
+
+    this.find = function() {
+        return $('#' + this.prefix.compose(sfStaticInfo));
+    };
+    this.value = function() {
+        return this.find().val();
+    };
+    this.toArray = function() {
+        return this.value().split(";")
+    };
+    this.toValue = function(array) {
+        return array.join(";");
+    };
+    this.getValue = function(key) {
+        var array = this.toArray();
+        return array[key];
+    };
+    this.staticType = function() {
+        return this.getValue(this._staticType);
+    };
+    this.isEmbedded = function() {
+        return this.getValue(this._isEmbedded);
+    };
+    this.isReadOnly = function() {
+        return this.getValue(this._isReadOnly);
+    };
+    this.createValue = function(staticType, isEmbedded, isReadOnly) {
+        var array = new Array();
+        array[this._staticType] = staticType;
+        array[this._isEmbedded] = isEmbedded;
+        array[this._isReadOnly] = isReadOnly;
+        return this.toValue(array);
+    };
+}
 function StaticInfoFor(prefix) {
     return new StaticInfo(prefix);
 }
@@ -182,7 +206,7 @@ var RuntimeInfo = function(_prefix) {
     this._ticks = 3;
 
     this.find = function() {
-    return $('#' + this.prefix.compose(sfRuntimeInfo));
+        return $('#' + this.prefix.compose(sfRuntimeInfo));
     };
     this.value = function() {
         return this.find().val();
@@ -319,7 +343,7 @@ function GetPathPrefixes(prefix) {
     var pathNoReps = new Array();
 
     var hasEmpty = false;
-    for (var i = 0, l = path.length; i < l; i++) { 
+    for (var i = 0, l = path.length; i < l; i++) {
         if ($.inArray(path[i], pathNoReps) == -1) {
             pathNoReps[i] = path[i];
             if (path[i] == "")
@@ -355,7 +379,7 @@ function Submit(urlController, requestExtraJsonData) {
         var $form = $("form");
         for (var key in requestExtraJsonData) {
             var str = $.isFunction(requestExtraJsonData[key]) ? requestExtraJsonData[key]() : requestExtraJsonData[key];
-            
+
             $form.append(hiddenInput(key, str));
         }
     }
@@ -370,7 +394,7 @@ function SubmitOnly(urlController, requestExtraJsonData) {
         throw "SubmitOnly needs requestExtraJsonData. Use Submit instead";
 
     var $form = $("<form method='post' action='" + urlController + "'></form>");
-    
+
     if (!empty(requestExtraJsonData)) {
         for (var key in requestExtraJsonData) {
             var str = $.isFunction(requestExtraJsonData[key]) ? requestExtraJsonData[key]() : requestExtraJsonData[key];
@@ -383,7 +407,7 @@ function SubmitOnly(urlController, requestExtraJsonData) {
 
     $form.submit()
         .remove();
-    
+
     return false;
 }
 
@@ -416,8 +440,8 @@ function GetErrorMessage(response) {
 function ShowError(XMLHttpRequest, textStatus, errorThrown) {
     var error = GetErrorMessage(XMLHttpRequest.responseText);
     if (!error) error = textStatus;
-    
-    var message = error.length > 50 ? error.substring(0,49) + "..." : error;
+
+    var message = error.length > 50 ? error.substring(0, 49) + "..." : error;
     NotifyError(lang['error'] + ": " + message, 2000);
 
     alert("Error: " + error);
@@ -547,36 +571,36 @@ function() {
 }
 
 
-$.getScript = function(url, callback, cache, async){ $.ajax({ type: "GET", url: url, cache:true, success: callback, async: async, dataType: "script", cache: cache }); }; 
+$.getScript = function(url, callback, cache, async) { $.ajax({ type: "GET", url: url, cache: true, success: callback, async: async, dataType: "script", cache: cache }); };
 
 var resourcesLoaded = new Array();
 $.jsLoader = function(cond, url, callback, async) {
     var a = (async != undefined) ? async : true;
     log("Retrieving from " + url + " " + (a ? "a" : "") + "synchronuosly");
     if (!resourcesLoaded[url] && cond) {
-         log("Getting js " + url);
-         $.getScript(url, function() {
-            resourcesLoaded[url]=true;
+        log("Getting js " + url);
+        $.getScript(url, function() {
+            resourcesLoaded[url] = true;
             if (callback) callback();
-            },
+        },
             true,
             a);
-        }
+    }
 };
 $.cssLoader = function(cond, url) {
     if (!resourcesLoaded[url] && cond) {
-      //   console.log("Getting css " + url);
-      /*   jQuery( document.createElement('link') ).attr({
-                href: url,
-                media: media || 'screen',
-                type: 'text/css',
-                rel: 'stylesheet'
-                }).appendTo($('head')); */
+        //   console.log("Getting css " + url);
+        /*   jQuery( document.createElement('link') ).attr({
+        href: url,
+        media: media || 'screen',
+        type: 'text/css',
+        rel: 'stylesheet'
+        }).appendTo($('head')); */
         var head = document.getElementsByTagName('head')[0];
         $(document.createElement('link'))
-            .attr({type: 'text/css', href: url, rel: 'stylesheet', media: 'screen'})
-            .appendTo(head);                 
-        resourcesLoaded[url]=true;
+            .attr({ type: 'text/css', href: url, rel: 'stylesheet', media: 'screen' })
+            .appendTo(head);
+        resourcesLoaded[url] = true;
     }
 };
 
@@ -658,20 +682,41 @@ function createCookie(name, value, days) {
 
 SF.userSettings = {
     hasLocalStorage: typeof (localStorage) != 'undefined',
-    
+
     read: function(key) {
-            if (this.hasLocalStorage) {
-                try { return localStorage.getItem(key); }
-                catch (e) {}
-            }
-            return readCookie(key);
+        if (this.hasLocalStorage) {
+            try { return localStorage.getItem(key); }
+            catch (e) { }
+        }
+        return readCookie(key);
     },
 
     store: function(key, value, days) {
-            if (this.hasLocalStorage) {
-                try { localStorage.setItem(key, value); return true; }
-                catch (e) {}
-            }
-            createCookie(key, value, days ? days : 30);
+        if (this.hasLocalStorage) {
+            try { localStorage.setItem(key, value); return true; }
+            catch (e) { }
+        }
+        createCookie(key, value, days ? days : 30);
     }
 };
+
+SF.dropdowns =
+    {
+        opened: [], 
+        register: function(elem) {
+            this.opened.push(elem);
+        },
+        closeOpened: function() {
+            //close open dropdowns except elem, if it is being opened
+            for (var i = 0; i < this.opened.length; i++)
+                this.opened[i].toggleClass("open");
+            this.opened = [];
+        }
+    };
+
+    $(function() {
+        $("body").click(function(e) {
+            //manages close of dropdown different than current
+            $(e.target).closest(".dropdown").length == 0 && SF.dropdowns.closeOpened();
+        });
+    });
