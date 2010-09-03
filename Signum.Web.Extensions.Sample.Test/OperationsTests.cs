@@ -16,6 +16,7 @@ using System.Text.RegularExpressions;
 using Signum.Utilities;
 using System.Resources;
 using Signum.Web.Operations;
+using System.Threading;
 
 namespace Signum.Web.Extensions.Sample.Test
 {
@@ -166,7 +167,8 @@ namespace Signum.Web.Extensions.Sample.Test
                 
                 Assert.IsTrue(selenium.IsElementPresent("AlbumOperation_Delete"));
                 selenium.Click("AlbumOperation_Delete");
-                //Assert.IsTrue(Regex.IsMatch(selenium.GetConfirmation(), ".*"));
+                Thread.Sleep(1000);
+                Assert.IsTrue(Regex.IsMatch(selenium.GetConfirmation(), ".*"));
                 //Assert.AreEqual("Confirme que desea eliminar la entidad del sistema", selenium.GetConfirmation());
 
                 selenium.WaitForPageToLoad(PageLoadTimeout);
