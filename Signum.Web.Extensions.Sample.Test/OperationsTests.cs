@@ -168,7 +168,8 @@ namespace Signum.Web.Extensions.Sample.Test
                 Assert.IsTrue(selenium.IsElementPresent("AlbumOperation_Delete"));
                 selenium.Click("AlbumOperation_Delete");
                 Thread.Sleep(1000);
-                Assert.IsTrue(Regex.IsMatch(selenium.GetConfirmation(), ".*"));
+                string confirmation = selenium.GetConfirmation();
+                Assert.IsTrue(Regex.IsMatch(confirmation, ".*"));
                 //Assert.AreEqual("Confirme que desea eliminar la entidad del sistema", selenium.GetConfirmation());
 
                 selenium.WaitForPageToLoad(PageLoadTimeout);
