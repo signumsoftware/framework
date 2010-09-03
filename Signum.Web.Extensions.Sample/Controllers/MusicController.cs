@@ -13,6 +13,7 @@ using Signum.Engine;
 using Signum.Entities;
 using Signum.Engine.Operations;
 using Signum.Test.Extensions;
+using Signum.Engine.Basics;
 
 namespace Signum.Web.Extensions.Sample
 {
@@ -50,6 +51,18 @@ namespace Signum.Web.Extensions.Sample
             AlbumDN newAlbum = context.Value.Band.ConstructFromLite<AlbumDN>(AlbumOperation.CreateFromBand, new object[] { context.Value.Name, context.Value.Year, context.Value.Label });
 
             return Navigator.RedirectUrl(Navigator.ViewRoute(typeof(AlbumDN), newAlbum.Id));
+        }
+
+        public ActionResult CreateGreatestHitsAlbum(List<int> sfIds, string prefix)
+        {
+            if (sfIds == null || sfIds.Count == 0)
+                throw new ArgumentException("You need to specify source albums");
+
+            List<Lite> sourceAlbums = sfIds.Select(idstr => Lite.Create(typeof(AlbumDN), idstr)).ToList();
+            
+            IdentifiableEntity entity = OperationLogic.ServiceConstructFromMany(sourceAlbums, typeof(AlbumDN), AlbumOperation.CreateGreatestHitsAlbum);
+
+            return Navigator.View(this, entity);
         }
     }
 }

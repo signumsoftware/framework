@@ -60,7 +60,7 @@ namespace Signum.Web.Extensions.Sample.Test
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #LastAwardTemp"));
                 selenium.Click("GrammyAwardDN");
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#LastAward_Category"));
-                selenium.Type("LastAward_Category", "prueba");
+                selenium.Type("LastAward_Category", "test");
                 selenium.Click("LastAward_sfBtnOk");
                 selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("jq=#divASustituir + #LastAwardTemp"));
                 Assert.IsFalse(selenium.IsElementPresent("jq=#LastAward_sfToStr:visible"));
@@ -106,7 +106,7 @@ namespace Signum.Web.Extensions.Sample.Test
                 selenium.Click("AmericanMusicAwardDN");
                 selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("jq=#divASustituir + #LastAwardTemp"));
                 Assert.IsTrue(selenium.IsElementPresent("jq=#LastAward_sfDetail #LastAward_Category"));
-                selenium.Type("LastAward_Category", "prueba");
+                selenium.Type("LastAward_Category", "test");
 
                 //find with implementations
                 selenium.Click("LastAward_btnRemove");
@@ -155,7 +155,7 @@ namespace Signum.Web.Extensions.Sample.Test
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #Author_LastAwardTemp"));
                 selenium.Click("AmericanMusicAwardDN");
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Author_LastAward_Category"));
-                selenium.Type("Author_LastAward_Category", "prueba");
+                selenium.Type("Author_LastAward_Category", "test");
                 selenium.Click("Author_LastAward_sfBtnOk");
                 selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("jq=#divASustituir + #Author_LastAwardTemp"));
                 Assert.IsFalse(selenium.IsElementPresent("jq=#Author_LastAward_sfToStr:visible"));
@@ -201,7 +201,7 @@ namespace Signum.Web.Extensions.Sample.Test
                 //Create and ok
                 selenium.Click("Members_btnCreate");
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #Members_4Temp"));
-                selenium.Type("Members_4_Name", "prueba");
+                selenium.Type("Members_4_Name", "test");
                 selenium.Click("Members_4_sfBtnOk");
                 selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("jq=#divASustituir + #Members_4Temp"));
                 Assert.IsTrue(selenium.IsElementPresent("jq=#Members_4_sfEntity"));
@@ -233,7 +233,7 @@ namespace Signum.Web.Extensions.Sample.Test
                 selenium.Click("GrammyAwardDN");
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #OtherAwards_0Temp"));
                 Assert.IsFalse(selenium.IsElementPresent("jq=#divASustituir + #OtherAwards_Temp"));
-                selenium.Type("OtherAwards_0_Category", "prueba");
+                selenium.Type("OtherAwards_0_Category", "test");
                 selenium.Click("OtherAwards_0_sfBtnOk");
                 selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("jq=#OtherAwards_0Temp"));
                 Assert.IsTrue(selenium.IsElementPresent("jq=#OtherAwards_0_sfEntity"));
@@ -289,7 +289,7 @@ namespace Signum.Web.Extensions.Sample.Test
                 selenium.Click("Members_0_Friends_btnCreate");
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #Members_0_Friends_1Temp"));
 
-                selenium.Type("Members_0_Friends_1_Name", "prueba");
+                selenium.Type("Members_0_Friends_1_Name", "test");
                 selenium.Click("Members_0_Friends_1_sfBtnOk");
                 Assert.IsFalse(selenium.IsElementPresent("jq=#divASustituir + #Members_0_Friends_1Temp"));
                 Assert.IsTrue(selenium.IsElementPresent("jq=#Members_0_Friends > option:nth-child(1)"));
@@ -332,7 +332,7 @@ namespace Signum.Web.Extensions.Sample.Test
                 //create
                 selenium.Click("Members_btnCreate");
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Members_sfDetail #Members_4_Name"));
-                selenium.Type("Members_4_Name", "prueba");
+                selenium.Type("Members_4_Name", "test");
                 Assert.IsTrue(selenium.IsElementPresent("jq=#Members_4_sfRuntimeInfo"));
                 Assert.IsTrue(selenium.IsElementPresent("jq=#Members > option:nth-child(5)"));
                 Assert.IsTrue(selenium.IsElementPresent("jq=#Members_sfDetail #Members_4_Name"));
@@ -365,7 +365,7 @@ namespace Signum.Web.Extensions.Sample.Test
                 selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("jq=#divASustituir + #OtherAwards_Temp"));
                 Assert.IsTrue(selenium.IsElementPresent("jq=#OtherAwards_sfDetail #OtherAwards_0_Category"));
                 Assert.IsTrue(selenium.IsElementPresent("jq=#OtherAwards_0_sfRuntimeInfo"));
-                selenium.Type("OtherAwards_0_Category", "prueba");
+                selenium.Type("OtherAwards_0_Category", "test");
 
                 //find with implementations
                 selenium.Click("OtherAwards_btnFind");
@@ -412,7 +412,7 @@ namespace Signum.Web.Extensions.Sample.Test
                 //Create
                 selenium.Click("Members_btnCreate");
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Members_sfItemsContainer > #Members_4_sfRepeaterItem"));
-                selenium.Type("Members_4_Name", "prueba");
+                selenium.Type("Members_4_Name", "test");
                 Assert.IsTrue(selenium.IsElementPresent("jq=#Members_4_sfRuntimeInfo"));
 
                 //delete
@@ -441,7 +441,7 @@ namespace Signum.Web.Extensions.Sample.Test
                 selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("jq=#divASustituir + #OtherAwards_Temp"));
                 Assert.IsTrue(selenium.IsElementPresent("jq=#OtherAwards_sfItemsContainer > #OtherAwards_0_sfRepeaterItem"));
                 Assert.IsTrue(selenium.IsElementPresent("jq=#OtherAwards_0_sfRuntimeInfo"));
-                selenium.Type("OtherAwards_0_Category", "prueba");
+                selenium.Type("OtherAwards_0_Category", "test");
 
                 //find does not exist by default
                 Assert.IsFalse(selenium.IsElementPresent("jq=#OtherAwards_btnFind"));

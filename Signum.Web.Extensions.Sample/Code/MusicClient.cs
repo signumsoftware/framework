@@ -46,6 +46,11 @@ namespace Signum.Web.Extensions.Sample
                             new JsOperationConstructorFrom(ctx.Options())
                             .OperationAjax(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk)),
                     }},
+                    { AlbumOperation.CreateGreatestHitsAlbum, new QueryOperationSettings
+                    {
+                        ControllerUrl = "Music/CreateGreatestHitsAlbum",
+                        OnClick = ctx => new JsOperationConstructorFromMany(ctx.Options()).DefaultSubmit()
+                    }},
                 });
             }
         }

@@ -22,7 +22,8 @@ namespace Signum.Test.Extensions
         CreateFromBand,
         Delete,
         Clone,
-        CreateGreatestHitsAlbum
+        CreateGreatestHitsAlbum,
+        CreateEmptyGreatestHitsAlbum
     }
 
     public class AlbumGraph : Graph<AlbumDN, AlbumState>
@@ -99,7 +100,24 @@ namespace Signum.Test.Extensions
                             Songs = albums.SelectMany(a => a.Songs).ToMList()
                         };
                     }
-                }
+                },
+
+                
+                new ConstructFromMany<AlbumDN>(AlbumOperation.CreateEmptyGreatestHitsAlbum, AlbumState.New)
+                {
+                    Constructor = (albumLites, _) => 
+                    {
+                        List<AlbumDN> albums = albumLites.Select(a => a.Retrieve()).ToList();
+                        if (albums.Select(a => a.Author).Distinct().Count() > 1)
+                            throw new ArgumentException("All album authors must be the same in order to create a Greatest Hits Album");
+
+                        return new AlbumDN()
+                        {
+                            Author = albums.First().Author,
+                            Year = DateTime.Now.Year,
+                        };
+                    }
+                },                
             };
         }
     }

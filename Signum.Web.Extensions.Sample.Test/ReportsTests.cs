@@ -53,21 +53,21 @@ namespace Signum.Web.Extensions.Sample.Test
                 //create when there's no query created => direct navigation to create page
                 selenium.Click(administerLocator);
                 selenium.WaitForPageToLoad(PageLoadTimeout);
-                selenium.Type("DisplayName", "prueba");
+                selenium.Type("DisplayName", "test");
                 selenium.Type("File", "D:\\Signum\\Pruebas\\Albumchulo.xlsx");
                 selenium.Click(saveLocator);
                 selenium.WaitForPageToLoad(PageLoadTimeout);
                 Assert.IsTrue(selenium.IsElementPresent("jq=.entityId span"));
 
                 //modify
-                selenium.Type("DisplayName", "prueba 2");
+                selenium.Type("DisplayName", "test 2");
                 selenium.Click(saveLocator);
                 selenium.WaitForPageToLoad(PageLoadTimeout);
 
                 //created appears modified in menu
                 selenium.Click("link=Albums");
                 selenium.WaitForPageToLoad(PageLoadTimeout);
-                Assert.IsTrue(selenium.IsElementPresent("link=prueba 2"));
+                Assert.IsTrue(selenium.IsElementPresent("link=test 2"));
 
                 //delete
                 selenium.Click(administerLocator);
@@ -83,14 +83,14 @@ namespace Signum.Web.Extensions.Sample.Test
                 //deleted does not appear in menu
                 selenium.Click("link=Albums");
                 selenium.WaitForPageToLoad(PageLoadTimeout);
-                Assert.IsFalse(selenium.IsElementPresent("link=prueba 2"));
+                Assert.IsFalse(selenium.IsElementPresent("link=test 2"));
 
                 //create when there are already others
                 selenium.Click(administerLocator);
                 selenium.WaitForPageToLoad(PageLoadTimeout);
                 selenium.Click("jq=input.create");
                 selenium.WaitForPageToLoad(PageLoadTimeout);
-                selenium.Type("DisplayName", "prueba 3");
+                selenium.Type("DisplayName", "test 3");
                 selenium.Type("File", "D:\\Signum\\Pruebas\\Albumchulo.xlsx");
                 selenium.Click(saveLocator);
                 selenium.WaitForPageToLoad(PageLoadTimeout);
@@ -98,7 +98,7 @@ namespace Signum.Web.Extensions.Sample.Test
                 //created appears modified in menu
                 selenium.Click("link=Albums");
                 selenium.WaitForPageToLoad(PageLoadTimeout);
-                Assert.IsTrue(selenium.IsElementPresent("link=prueba 3"));
+                Assert.IsTrue(selenium.IsElementPresent("link=test 3"));
             }
             catch (Exception)
             {
