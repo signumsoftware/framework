@@ -77,44 +77,6 @@ namespace Signum.Web.Operations
                 });
             }
 
-            //List<ToolBarButton> buttons = 
-            //        (from oi in list.Where(oi => oi.OperationType != OperationType.ConstructorFrom)
-            //        let os = (EntityOperationSettings)Settings.TryGetC(oi.Key)
-            //        let ctx = new EntityOperationContext
-            //        {
-            //            Entity = ident,
-            //            OperationSettings = os,
-            //            OperationInfo = oi,
-            //            PartialViewName = partialViewName,
-            //            Prefix = prefix
-            //        }
-            //        where os == null || os.IsVisible == null || os.IsVisible(ctx)
-            //        select OperationButtonFactory.Create(ctx)).ToList();
-
-            //var constructFroms = list.Where(oi => oi.OperationType == OperationType.ConstructorFrom);
-            //if (constructFroms.Any())
-            //{
-            //    buttons.Add(new ToolBarMenu
-            //    {
-            //        AltText = Resources.Create,
-            //        Text = Resources.Create,
-            //        DivCssClass = ToolBarButton.DefaultEntityDivCssClass,
-            //        Items = 
-            //            (from oi in constructFroms
-            //            let os = (EntityOperationSettings)Settings.TryGetC(oi.Key)
-            //            let ctx = new EntityOperationContext
-            //            {
-            //                Entity = ident,
-            //                OperationSettings = os,
-            //                OperationInfo = oi,
-            //                PartialViewName = partialViewName,
-            //                Prefix = prefix
-            //            }
-            //            where os == null || os.IsVisible == null || os.IsVisible(ctx)
-            //            select OperationButtonFactory.Create(ctx)).ToList()
-            //    });
-            //}
-
             return buttons.ToArray();
         }
 
@@ -124,16 +86,38 @@ namespace Signum.Web.Operations
                 return null;
 
             var list = OperationLogic.ServiceGetQueryOperationInfos(entityType);
-            return (from oi in list
-                    let os = (QueryOperationSettings)Settings.TryGetC(oi.Key)
-                    let ctx = new QueryOperationContext
-                    {
-                        OperationSettings = os,
-                        OperationInfo = oi,
-                        Prefix = prefix
-                    }
-                    where os == null || os.IsVisible == null || os.IsVisible(ctx)
-                    select OperationButtonFactory.Create(ctx)).ToArray();
+            var contexts = (from oi in list
+                           let os = (QueryOperationSettings)Settings.TryGetC(oi.Key)
+                           let ctx = new QueryOperationContext
+                           {
+                               OperationSettings = os,
+                               OperationInfo = oi,
+                               Prefix = prefix
+                           }
+                           where os == null || os.IsVisible == null || os.IsVisible(ctx)
+                           select ctx).ToList();
+
+            if (contexts.Count == 1)
+                return new ToolBarButton[] { OperationButtonFactory.Create(contexts[0]) };
+            
+            List<ToolBarButton> buttons = contexts
+                .Where(oi => oi.OperationSettings != null && !oi.OperationSettings.GroupInMenu)
+                .Select(ctx => OperationButtonFactory.Create(ctx))
+                .ToList();
+
+            var groupedConstructs = contexts.Where(oi => oi.OperationSettings == null || (oi.OperationSettings != null && oi.OperationSettings.GroupInMenu));
+            if (groupedConstructs.Any())
+            {
+                buttons.Add(new ToolBarMenu
+                {
+                    AltText = Resources.Create,
+                    Text = Resources.Create,
+                    DivCssClass = ToolBarButton.DefaultQueryCssClass,
+                    Items = groupedConstructs.Select(ctx => OperationButtonFactory.Create(ctx)).ToList()
+                });
+            }
+
+            return buttons.ToArray();
         }
 
         internal ModifiableEntity ConstructorManager_GeneralConstructor(Type type)

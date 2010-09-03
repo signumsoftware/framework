@@ -59,6 +59,16 @@ namespace Signum.Web.Operations
     {
         public Func<QueryOperationContext, bool> IsVisible { get; set; }
         public Func<QueryOperationContext, JsInstruction> OnClick { get; set; }
+
+        bool groupInMenu = true;
+        /// <summary>
+        /// Set to false if this operation is not to be grouped in a Constructors menu
+        /// </summary>
+        public bool GroupInMenu
+        {
+            get { return groupInMenu; }
+            set { groupInMenu = value; }
+        }
     }
 
     public abstract class OperationContext
