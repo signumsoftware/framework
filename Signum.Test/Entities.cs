@@ -247,7 +247,7 @@ namespace Signum.Test
         }
     }
 
-    [Serializable]
+    [Serializable, UseSessionWhenNew]
     public class AlbumDN : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]

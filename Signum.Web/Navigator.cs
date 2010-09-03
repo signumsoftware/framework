@@ -659,7 +659,10 @@ namespace Signum.Web
             if (Navigator.IsReadOnly(type))
                 tc.ReadOnly = true;
 
-            if (controller.IsReactive() || GraphExplorer.FromRoot(entity).Any(m => m.GetType().HasAttribute<Reactive>()))
+            bool useSessionWhenNew = GraphExplorer.FromRoot(entity).Any(m => (m as IIdentifiable).TryCS(i => i.IsNew) == true && m.GetType().HasAttribute<UseSessionWhenNew>());
+            bool isReactive = GraphExplorer.FromRoot(entity).Any(m => m.GetType().HasAttribute<Reactive>());
+
+            if (useSessionWhenNew || isReactive)
             {
                 controller.ViewData[ViewDataKeys.Reactive] = true;
                 controller.ControllerContext.HttpContext.Session[tabID] = entity;

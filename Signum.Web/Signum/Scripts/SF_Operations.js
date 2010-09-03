@@ -301,6 +301,19 @@ var ConstructorFromMany = function(_options) {
         var self = this;
         HasSelectedItems({ prefix: this.options.prefix }, function(items) { onSuccess.call(self, items) });
     };
+
+    this.defaultSubmit = function() {
+        log("ConstructorFromMany defaultSubmit");
+
+        var onSuccess = function(items) {
+            for (var i = 0, l = items.length; i < l; i++)
+                $("form").append(hiddenInput('sfIds', items[i].id));
+            this.operationSubmit();
+        };
+
+        var self = this;
+        HasSelectedItems({ prefix: this.options.prefix }, function(items) { onSuccess.call(self, items) });
+    }
 };
 
 ConstructorFromMany.prototype = new OperationManager();

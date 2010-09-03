@@ -17,6 +17,12 @@ namespace Signum.Entities
 
     }
 
+    [AttributeUsage(AttributeTargets.Class)]
+    public sealed class UseSessionWhenNew : Attribute
+    {
+
+    }
+
     [AttributeUsage(AttributeTargets.Property)]
     public sealed class QueryablePropertyAttribute : Attribute
     {
