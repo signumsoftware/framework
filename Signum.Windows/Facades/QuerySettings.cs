@@ -17,8 +17,13 @@ namespace Signum.Windows
 {
     public class QuerySettings
     {
+        public object QueryName { get; private set; }
+
         public int? Top { get; set; }
         public ImageSource Icon { get; set; }
+
+        public Func<object, bool> IsFindable { set { IsFindableEvent += value; } }
+        public event Func<object, bool> IsFindableEvent;
 
         Dictionary<string, Func<Binding, DataTemplate>> formatters;
         public Dictionary<string, Func<Binding, DataTemplate>> Formatters
@@ -79,6 +84,23 @@ namespace Signum.Windows
             FormatterRule fr = FormatRules.Where(cfr => cfr.IsApplyable(column)).WithMax(a=>a.Priority); 
 
             return fr.Formatter(column); 
+        }
+
+        public QuerySettings(object queryName)
+        {
+            this.QueryName = queryName; 
+        }
+
+        internal bool OnIsFindable()
+        {
+            if (IsFindableEvent != null)
+                foreach (Func<object, bool> isFindable in IsFindableEvent.GetInvocationList())
+                {
+                    if (!isFindable(QueryName))
+                        return false;
+                }
+
+            return true;
         }
     }
 

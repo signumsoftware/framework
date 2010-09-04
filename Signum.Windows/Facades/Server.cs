@@ -20,6 +20,13 @@ namespace Signum.Windows
         
         static IBaseServer current;
 
+        public static event Action Connecting;
+
+        static Server()
+        {
+            Connecting += () => ServerTypes = current.ServerTypes();
+        }
+
         public static void SetNewServerCallback(Func<IBaseServer> server)
         {
             getServer = server;
@@ -30,12 +37,13 @@ namespace Signum.Windows
             if (!Connected)
             {
                 current = getServer();
-                if (current != null)
-                    ServerTypes = current.ServerTypes(); 
-            }
 
-            if (current == null)
-                throw new InvalidOperationException(Properties.Resources.AConnectionWithTheServerIsNecessaryToContinue);
+                if (current == null)
+                    throw new InvalidOperationException(Properties.Resources.AConnectionWithTheServerIsNecessaryToContinue);
+
+                if (Connecting != null)
+                    Connecting();                     
+            }
         }
 
         public static bool Connected

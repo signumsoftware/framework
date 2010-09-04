@@ -11,6 +11,7 @@ using Signum.Engine;
 using Signum.Engine.Maps;
 using Signum.Entities.Basics;
 using Signum.Utilities;
+using Signum.Engine.Linq;
 
 namespace Signum.Services
 {
@@ -59,13 +60,21 @@ namespace Signum.Services
         public List<Lite> RetrieveAllLite(Type liteType, Implementations implementations)
         {
             return Return(MethodInfo.GetCurrentMethod(), "RetrieveAllLite {0}".Formato(liteType),
-                 () => AutoCompleteUtils.RetriveAllLite(liteType, implementations));
+                 () =>
+                 {
+                     using (DbQueryProvider.ForUserInterface())
+                         return AutoCompleteUtils.RetriveAllLite(liteType, implementations);
+                 });
         }
 
         public List<Lite> FindLiteLike(Type liteType, Implementations implementations, string subString, int count)
         {
             return Return(MethodInfo.GetCurrentMethod(), "FindLiteLike {0}".Formato(liteType),
-                () => AutoCompleteUtils.FindLiteLike(liteType, implementations, subString, count));
+                 () =>
+                 {
+                     using (DbQueryProvider.ForUserInterface())
+                         return AutoCompleteUtils.FindLiteLike(liteType, implementations, subString, count);
+                 });
         }
 
         public Implementations FindImplementations(PropertyRoute entityPath)
@@ -77,7 +86,11 @@ namespace Signum.Services
         public List<IdentifiableEntity> RetrieveAll(Type type)
         {
             return Return(MethodInfo.GetCurrentMethod(), "RetrieveAll {0}".Formato(type),
-            () => Database.RetrieveAll(type));
+            () =>
+            {
+                using (DbQueryProvider.ForUserInterface())
+                    return Database.RetrieveAll(type);
+            });
         }
 
         public List<IdentifiableEntity> SaveList(List<IdentifiableEntity> list)

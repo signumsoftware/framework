@@ -33,8 +33,13 @@ namespace Signum.Windows.Basics
             WidgetPanel.GetWidgets += (obj, mainControl) => obj is IdentifiableEntity && !(obj is IAlertDN || ((IdentifiableEntity)obj).IsNew) ? new AlertsWidget() : null;
 
             AlertsWidget.CreateAlert = ei => ei.IsNew ? null : new Signum.Entities.Basics.AlertDN { Entity = ei.ToLite() };
-        
-            Navigator.Manager.Settings.Add(typeof(Alert), new EntitySettings(EntityType.Default) { View = e => new Alert(), IsCreable = admin => false, Icon = BitmapFrame.Create(PackUriHelper.Reference("/Images/alert.png", typeof(AlertsWidget))) });
+
+            Navigator.AddSetting(new EntitySettings<AlertDN>(EntityType.Default)
+            {
+                View = e => new Alert(),
+                IsCreable = admin => false,
+                Icon = BitmapFrame.Create(PackUriHelper.Reference("/Images/alert.png", typeof(AlertsWidget)))
+            });
         }
     }
 }
