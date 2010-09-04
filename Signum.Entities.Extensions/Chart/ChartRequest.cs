@@ -329,6 +329,14 @@ namespace Signum.Entities.Chart
             set { Set(ref query, value, () => Query); }
         }
 
+        [ImplementedBy()]
+        Lite<IdentifiableEntity> related;
+        public Lite<IdentifiableEntity> Related
+        {
+            get { return related; }
+            set { Set(ref related, value, () => Related); }
+        }
+
         [NotNullable, SqlDbType(Size = 100)]
         string displayName;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]

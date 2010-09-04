@@ -116,9 +116,9 @@ namespace Signum.Engine.Authorization
             cache.SetAllowed(role, type, allowed);
         }
 
-        public static Dictionary<Type, TypeAllowed> AuthorizedTypes()
+        public static Dictionary<Type, TypeAllowedBasic> AuthorizedTypes()
         {
-            return cache.GetCleanDictionary();
+            return cache.GetCleanDictionary().ToDictionary(k => k.Key, k => k.Value.GetUI());
         }
     }
 

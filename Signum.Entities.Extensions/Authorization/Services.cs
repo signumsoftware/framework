@@ -5,6 +5,7 @@ using System.Text;
 using System.ServiceModel;
 using Signum.Entities.Authorization;
 using Signum.Entities;
+using Signum.Utilities.DataStructures;
 
 namespace Signum.Services
 {
@@ -31,7 +32,7 @@ namespace Signum.Services
         void SetTypesRules(TypeRulePack rules);
 
         [OperationContract, NetDataContract]
-        Dictionary<Type, TypeAllowed> AuthorizedTypes(); 
+        Dictionary<Type, TypeAllowedBasic> AuthorizedTypes(); 
     }
 
     [ServiceContract]
@@ -101,5 +102,11 @@ namespace Signum.Services
 
         [OperationContract, NetDataContract]
         void SetEntityGroupAllowedRules(EntityGroupRulePack rules);
+
+        [OperationContract, NetDataContract]
+        Dictionary<Type, MinMax<TypeAllowedBasic>> GetEntityGroupTypesAllowed();
+
+        [OperationContract, NetDataContract]
+        bool IsAllowedFor(Lite lite, TypeAllowedBasic allowed);
     }
 }

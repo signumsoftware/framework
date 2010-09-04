@@ -19,12 +19,13 @@ using Signum.Utilities;
 using Signum.Engine.Basics;
 using Signum.Engine.Extensions.Chart;
 using Signum.Entities.Chart;
+using Signum.Utilities.DataStructures;
 
 
 namespace Signum.Services
 {
     public abstract class ServerExtensions : ServerBasic, ILoginServer, IOperationServer, IQueryServer, IChartServer,
-        IQueryAuthServer, IPropertyAuthServer, ITypeAuthServer, IFacadeMethodAuthServer, IPermissionAuthServer, IOperationAuthServer
+        IQueryAuthServer, IPropertyAuthServer, ITypeAuthServer, IFacadeMethodAuthServer, IPermissionAuthServer, IOperationAuthServer, IEntityGroupAuthServer
     {
         protected UserDN currentUser;
 
@@ -181,7 +182,7 @@ namespace Signum.Services
               () => TypeAuthLogic.SetTypeRules(rules));
         }
 
-        public Dictionary<Type, TypeAllowed> AuthorizedTypes()
+        public Dictionary<Type, TypeAllowedBasic> AuthorizedTypes()
         {
             return Return(MethodInfo.GetCurrentMethod(),
               () => TypeAuthLogic.AuthorizedTypes());
@@ -260,6 +261,33 @@ namespace Signum.Services
         {
             Execute(MethodInfo.GetCurrentMethod(),
                () => OperationAuthLogic.SetOperationRules(rules));
+        }
+        #endregion
+
+        #region IEntityGroupAuthServer Members
+
+        public EntityGroupRulePack GetEntityGroupAllowedRules(Lite<RoleDN> role)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+             () => EntityGroupAuthLogic.GetEntityGroupRules(role));
+        }
+
+        public void SetEntityGroupAllowedRules(EntityGroupRulePack rules)
+        {
+            Execute(MethodInfo.GetCurrentMethod(),
+               () => EntityGroupAuthLogic.SetEntityGroupRules(rules));
+        }
+
+        public Dictionary<Type, MinMax<TypeAllowedBasic>> GetEntityGroupTypesAllowed()
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+           () => EntityGroupAuthLogic.GetEntityGroupTypesAllowed(true));
+        }
+
+        public bool IsAllowedFor(Lite lite, TypeAllowedBasic allowed)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+             () => EntityGroupAuthLogic.IsAllowedFor(lite, allowed, true));
         }
         #endregion
 

@@ -24,8 +24,8 @@ namespace Signum.Windows.Processes
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                Navigator.Manager.Settings.Add(typeof(ProcessDN), new EntitySettings(EntityType.ServerOnly) { View = e => new ProcessUI(), IsReadOnly = a => true, IsCreable = a => false, Icon = Image("process.png") });
-                Navigator.Manager.Settings.Add(typeof(ProcessExecutionDN), new EntitySettings(EntityType.ServerOnly) { View = e => new ProcessExecution(), Icon = Image("processExecution.png") });
+                Navigator.AddSetting(new EntitySettings<ProcessDN>(EntityType.ServerOnly) { View = e => new ProcessUI(), IsReadOnly = (_, a) => true, IsCreable = a => false, Icon = Image("process.png") });
+                Navigator.AddSetting(new EntitySettings<ProcessExecutionDN>(EntityType.ServerOnly) { View = e => new ProcessExecution(), Icon = Image("processExecution.png") });
 
                 OperationClient.Manager.Settings.Add(ProcessOperation.FromProcess, new EntityOperationSettings { Icon = Image("execute.png") });
                 OperationClient.Manager.Settings.Add(ProcessOperation.Plan, new EntityOperationSettings { Icon = Image("plan.png"), Click = ProcessOperation_Plan });
@@ -33,8 +33,8 @@ namespace Signum.Windows.Processes
                 OperationClient.Manager.Settings.Add(ProcessOperation.Execute, new EntityOperationSettings { Icon = Image("play.png") });
                 OperationClient.Manager.Settings.Add(ProcessOperation.Suspend, new EntityOperationSettings { Icon = Image("pause.png") });
 
-                Navigator.Manager.Settings.Add(typeof(PackageDN), new EntitySettings(EntityType.ServerOnly) { View = e => new Package(), Icon = Image("package.png") });
-                Navigator.Manager.Settings.Add(typeof(PackageLineDN), new EntitySettings(EntityType.ServerOnly) { View = e => new PackageLine(), IsReadOnly = a => true, IsCreable = a => false, Icon = Image("packageLine.png") }); 
+                Navigator.AddSetting(new EntitySettings<PackageDN>(EntityType.ServerOnly) { View = e => new Package(), Icon = Image("package.png") });
+                Navigator.AddSetting(new EntitySettings<PackageLineDN>(EntityType.ServerOnly) { View = e => new PackageLine(), IsReadOnly = (_, a) => true, IsCreable = a => false, Icon = Image("packageLine.png") }); 
             }
         }
 

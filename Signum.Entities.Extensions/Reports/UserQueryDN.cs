@@ -22,6 +22,14 @@ namespace Signum.Entities.Reports
             set { Set(ref query, value, () => Query); }
         }
 
+        [ImplementedBy()]
+        Lite<IdentifiableEntity> related;
+        public Lite<IdentifiableEntity> Related
+        {
+            get { return related; }
+            set { Set(ref related, value, () => Related); }
+        }
+
         [NotNullable]
         string displayName;
         [StringLengthValidator(Min = 1)]
@@ -29,7 +37,7 @@ namespace Signum.Entities.Reports
         {
             get { return displayName; }
             set { SetToStr(ref displayName, value, () => DisplayName); }
-        }
+        } 
 
         [NotNullable]
         MList<QueryFilterDN> filters;

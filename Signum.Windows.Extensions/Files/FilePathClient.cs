@@ -21,10 +21,10 @@ namespace Signum.Windows.Files
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                Navigator.Manager.Settings.AddRange(new Dictionary<Type, EntitySettings>() 
+                Navigator.AddSettings(new List<EntitySettings>
                 {
-                    { typeof(FileRepositoryDN), new EntitySettings(EntityType.Default) { View = e => new FileRepository() }},
-                    { typeof(FilePathDN), new EntitySettings(EntityType.Default) {View = e => new FilePath() }},
+                    new EntitySettings<FileRepositoryDN>(EntityType.Default) { View = e => new FileRepository() },
+                    new EntitySettings<FilePathDN>(EntityType.Default) {View = e => new FilePath() },
                 });
             }
         }

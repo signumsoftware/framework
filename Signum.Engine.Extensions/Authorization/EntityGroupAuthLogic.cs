@@ -151,20 +151,54 @@ namespace Signum.Engine.Authorization
                 });
         }
 
+        public static void AssertAllowed(this Lite lite, TypeAllowedBasic allowed, bool userInterface)
+        {
+            if (lite.IdOrNull == null)
+                AssertAllowed(lite.UntypedEntityOrNull, allowed, userInterface);
+
+            if (!lite.IsAllowedFor(allowed, userInterface))
+                throw new UnauthorizedAccessException(Resources.NotAuthorizedTo0The1WithId2.Formato(allowed.NiceToString().ToLower(), lite.RuntimeType.NiceName(), lite.Id));
+        }
+
+        public static bool IsAllowedFor(this Lite lite, TypeAllowedBasic allowed, bool userInterface)
+        {
+            return (bool)miIsAllowedFor.GenericInvoke(new[] { lite.RuntimeType }, null, new object[] { lite, allowed, userInterface });
+        }
+
+        static MethodInfo miIsAllowedFor = ReflectionTools.GetMethodInfo(() => IsAllowedFor<IdentifiableEntity>(null, TypeAllowedBasic.Create, true)).GetGenericMethodDefinition();
+
+        static bool IsAllowedFor<T>(this Lite lite, TypeAllowedBasic allowed, bool userInterface)
+            where T: IdentifiableEntity
+        {
+            if (!AuthLogic.IsEnabled)
+                return true;
+
+            return lite.ToLite<T>().InDB().WhereIsAllowedFor(allowed, userInterface).Any(); 
+        }
+
+
         [MethodExpander(typeof(WhereAllowedExpander))]
         public static IQueryable<T> WhereAllowed<T>(this IQueryable<T> query)
             where T : IdentifiableEntity
         {
             if (!AuthLogic.IsEnabled)
                 return query;
-           
+
+            return WhereIsAllowedFor<T>(query, TypeAllowedBasic.Read, DbQueryProvider.UserInterface);
+        }
+
+        private static IQueryable<T> WhereIsAllowedFor<T>(this IQueryable<T> query, TypeAllowedBasic allowed, bool userInterface) where T : IdentifiableEntity
+        {
+            if (!Schema.Current.Tables.ContainsKey(typeof(T)))
+                throw new InvalidOperationException("{0} is not included in the schema".Formato(typeof(T))); 
+
             var pairs = (from eg in EntityGroupLogic.GroupsFor(typeof(T))
-                         let allowed = cache.GetAllowed(eg)
+                         let allowedDN = cache.GetAllowed(eg)
                          select new
                          {
                              Group = eg,
-                             AllowedIn = allowed.InGroup.Get(DbQueryProvider.UserInterface) != TypeAllowedBasic.None,
-                             AllowedOut = allowed.OutGroup.Get(DbQueryProvider.UserInterface) != TypeAllowedBasic.None,
+                             AllowedIn = allowedDN.InGroup.Get(userInterface) >= allowed,
+                             AllowedOut = allowedDN.OutGroup.Get(userInterface) >= allowed,
                              Expression = EntityGroupLogic.GetInGroupExpression<T>(eg),
                          }).Where(p => !p.AllowedIn || !p.AllowedOut).ToList();
 
@@ -268,5 +302,15 @@ namespace Signum.Engine.Authorization
         {
             return cache.GetAllowed(entityGroupKey);
         }
+
+        public static Dictionary<Type, MinMax<TypeAllowedBasic>> GetEntityGroupTypesAllowed(bool userInterface)
+        {
+            return EntityGroupLogic.Types.ToDictionary(t => t,
+                t => EntityGroupLogic.GroupsFor(t).SelectMany(eg =>
+                {
+                    EntityGroupAllowedDN access = cache.GetAllowed(eg);
+                    return new[] { access.InGroup.Get(userInterface), access.OutGroup.Get(userInterface) };
+                }).WithMinMaxPair(a => (int)a));
+        }      
     }
 }

@@ -12,29 +12,42 @@ using Signum.Windows;
 using System.Windows.Controls;
 using Signum.Entities.Basics;
 using Signum.Entities;
+using Signum.Utilities.Reflection;
+using Signum.Utilities.DataStructures;
 
 namespace Signum.Windows.Authorization
 {
     public static class AuthClient
     {
         static HashSet<object> authorizedQueries; 
-        static Dictionary<Type, TypeAllowed> typeRules; 
+        static Dictionary<Type, TypeAllowedBasic> typeRules; 
         static Dictionary<PropertyRoute, PropertyAllowed> propertyRules;
-        static Dictionary<Enum, bool> permissionRules; 
+        static Dictionary<Enum, bool> permissionRules;
+        static Dictionary<Type, MinMax<TypeAllowedBasic>> typesGroupsAllowed;
+
+        public static bool Types { get; private set; }
+        public static bool Properties { get; private set; }
+        public static bool Queries { get; private set; }
+        public static bool Permissions { get; private set; }
+        public static bool EntityGroups { get; private set; }
+        public static bool FacadeMethods { get; private set; }
 
         public static void UpdateCache()
         {
-            if (propertyRules != null)
-                propertyRules = Server.Return((IPropertyAuthServer s) => s.AuthorizedProperties());
-
-            if (authorizedQueries != null)
-                authorizedQueries = Server.Return((IQueryAuthServer s) => s.AuthorizedQueries()); 
-
-            if (typeRules != null)
+            if (Types)
                 typeRules = Server.Return((ITypeAuthServer s) => s.AuthorizedTypes());
 
-            if (permissionRules != null)
+            if (Properties)
+                propertyRules = Server.Return((IPropertyAuthServer s) => s.AuthorizedProperties());
+
+            if (Queries)
+                authorizedQueries = Server.Return((IQueryAuthServer s) => s.AuthorizedQueries()); 
+
+            if (Permissions)
                 permissionRules = Server.Return((IPermissionAuthServer s) => s.PermissionRules());
+
+            if (EntityGroups)
+                typesGroupsAllowed = Server.Return((IEntityGroupAuthServer s) => s.GetEntityGroupTypesAllowed());
         }
 
         public static bool? TryIsAuthorized(this Enum permissionKey)
@@ -54,16 +67,26 @@ namespace Signum.Windows.Authorization
             return result;
         }
 
-        public static void Start(bool types, bool property, bool queries, bool permissions)
+        public static void Start(bool types, bool property, bool queries, bool permissions, bool facadeMethods, bool entityGroups)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                Navigator.Manager.Settings.Add(typeof(UserDN), new EntitySettings(EntityType.Admin) { View = e => new User() });
-                Navigator.Manager.Settings.Add(typeof(RoleDN), new EntitySettings(EntityType.Default) { View = e => new Role() });
+                Types = types;
+                Properties = property;
+                Queries = queries;
+                Permissions = permissions;
+                FacadeMethods = facadeMethods;
+                EntityGroups = entityGroups;
+
+                Server.Connecting += UpdateCache;
+
+                UpdateCache();
+
+                Navigator.AddSetting(new EntitySettings<UserDN>(EntityType.Admin) { View = e => new User() });
+                Navigator.AddSetting(new EntitySettings<RoleDN>(EntityType.Default) { View = e => new Role() });
 
                 if (property)
                 {
-                    propertyRules = Server.Return((IPropertyAuthServer s)=>s.AuthorizedProperties()); 
                     Common.RouteTask += Common_RouteTask;
                     Common.PseudoRouteTask += Common_RouteTask;
                     PropertyRoute.SetIsAllowedCallback(pr => GetPropertyAllowed(pr) >= PropertyAllowed.Read);
@@ -71,25 +94,41 @@ namespace Signum.Windows.Authorization
 
                 if (types)
                 {
-                    typeRules = Server.Return((ITypeAuthServer s) => s.AuthorizedTypes());
-                    Navigator.Manager.GlobalIsCreable += type => GetTypeAllowed(type).GetUI() == TypeAllowedBasic.Create;
-                    Navigator.Manager.GlobalIsReadOnly += type => GetTypeAllowed(type).GetUI() <= TypeAllowedBasic.Read;
-                    Navigator.Manager.GlobalIsViewable += type => GetTypeAllowed(type).GetUI() >= TypeAllowedBasic.Read;
-
                     MenuManager.Tasks += new Action<MenuItem>(MenuManager_TasksTypes);
+
+                    Navigator.Manager.Initializing += () =>
+                    {
+                        foreach (EntitySettings es in Navigator.Manager.EntitySettings.Values)
+                        {
+                            if (typeof(IdentifiableEntity).IsAssignableFrom(es.StaticType))
+                                miAttachTypeEvent.GenericInvoke(new Type[] { es.StaticType }, null, new object[] { es });
+                        }
+                    };                   
                 }
 
                 if (queries)
                 {
-                    authorizedQueries = Server.Return((IQueryAuthServer s)=>s.AuthorizedQueries()); 
-                    Navigator.Manager.GlobalIsFindable += qn => GetQueryAceess(qn);
+                    Navigator.Manager.Initializing += () =>
+                    {
+                        foreach (QuerySettings qs in Navigator.Manager.QuerySetting.Values)
+                        {
+                            qs.IsFindableEvent += qn=> GetQueryAceess(qn);
+                        }
+                    };
 
                     MenuManager.Tasks += new Action<MenuItem>(MenuManager_TasksQueries);
                 }
 
-                if (permissions)
+
+                if (entityGroups)
                 {
-                    permissionRules = Server.Return((IPermissionAuthServer s) => s.PermissionRules());
+                    Navigator.Manager.Initializing += () =>
+                    {
+                        foreach (var es in Navigator.Manager.EntitySettings.Values.Where(es => typesGroupsAllowed.ContainsKey(es.StaticType)))
+                        {
+                            miAttachEntityGroupsEvent.GenericInvoke(new Type[] { es.StaticType }, null, new object[] { es });
+                        }
+                    };
                 }
 
                 Links.RegisterEntityLinks<RoleDN>((r, c) =>
@@ -111,15 +150,15 @@ namespace Signum.Windows.Authorization
                          },
                          new QuickLinkAction("Permission Rules", () => new PermissionRules { Role = r.ToLite(), Owner = c.FindCurrentWindow() }.Show())
                          {
-                             IsVisible = authorized && permissions
+                             IsVisible = authorized && Permissions
                          },
                          new QuickLinkAction("Facade Method Rules", () => new FacadeMethodRules { Role = r.ToLite(), Owner = c.FindCurrentWindow() }.Show())
                          { 
-                             IsVisible = authorized && Server.Implements<IFacadeMethodAuthServer>()
+                             IsVisible = authorized && FacadeMethods
                          },
                          new QuickLinkAction("Entity Groups", () => new EntityGroupRules { Role = r.ToLite(), Owner = c.FindCurrentWindow() }.Show())
                          {
-                             IsVisible = authorized && Server.Implements<IEntityGroupAuthServer>(),
+                             IsVisible = authorized && EntityGroups,
                          }
                      };
                 }); 
@@ -127,6 +166,38 @@ namespace Signum.Windows.Authorization
         }
 
 
+        static MethodInfo miAttachTypeEvent = ReflectionTools.GetMethodInfo(() => AttachTypeEvent<IdentifiableEntity>(null)).GetGenericMethodDefinition();
+
+        private static void AttachTypeEvent<T>(EntitySettings<T> settings) where T:IdentifiableEntity
+        {
+            settings.IsCreableEvent += admin => GetTypeAllowed(typeof(T)) == TypeAllowedBasic.Create;
+            settings.IsReadOnlyEvent += (entity, admin) => GetTypeAllowed(typeof(T)) <= TypeAllowedBasic.Read;
+            settings.IsViewableEvent += (entity, admin) => GetTypeAllowed(typeof(T)) >= TypeAllowedBasic.Read;
+        }
+
+        static MethodInfo miAttachEntityGroupsEvent = ReflectionTools.GetMethodInfo(() => AttachEntityGroupsEvent<IdentifiableEntity>(null)).GetGenericMethodDefinition();
+
+        private static void AttachEntityGroupsEvent<T>(EntitySettings<T> settings) where T : IdentifiableEntity
+        {
+            settings.IsReadOnlyEvent += (entity, admin) => entity == null? false: !IsEntityGroupAllowedFor(entity, TypeAllowedBasic.Modify);
+            settings.IsViewableEvent += (entity, admin) => entity == null ? true : IsEntityGroupAllowedFor(entity, TypeAllowedBasic.Read);
+        }
+
+        private static bool IsEntityGroupAllowedFor(IdentifiableEntity entity, TypeAllowedBasic allowed)
+        {
+            if (entity.IsNew)
+                return true;
+
+            MinMax<TypeAllowedBasic> minMax = typesGroupsAllowed[entity.GetType()];
+
+            if (minMax.Min >= allowed)
+                return true;
+
+            if (minMax.Max < allowed)
+                return false;
+
+            return Server.Return((IEntityGroupAuthServer s) => s.IsAllowedFor(entity.ToLite(), allowed));
+        }
 
         static void MenuManager_TasksTypes(MenuItem menuItem)
         {
@@ -139,9 +210,9 @@ namespace Signum.Windows.Authorization
 
                 Type type = tag as Type ?? (tag as AdminOptions).TryCC(a => a.Type);
 
-                if (type != null && Navigator.Manager.Settings.ContainsKey(type))
+                if (type != null && Navigator.Manager.EntitySettings.ContainsKey(type))
                 {
-                    if (GetTypeAllowed(type).GetUI() == TypeAllowedBasic.None)
+                    if (GetTypeAllowed(type) == TypeAllowedBasic.None)
                         menuItem.Visibility = Visibility.Collapsed;
                 }
             }
@@ -169,9 +240,9 @@ namespace Signum.Windows.Authorization
             }
         }
 
-        static TypeAllowed GetTypeAllowed(Type type)
+        static TypeAllowedBasic GetTypeAllowed(Type type)
         {
-            return typeRules.TryGetS(type) ?? TypeAllowed.DBCreateUICreate;
+            return typeRules.TryGetS(type) ?? TypeAllowedBasic.Create;
         }
 
         static PropertyAllowed GetPropertyAllowed(PropertyRoute route)

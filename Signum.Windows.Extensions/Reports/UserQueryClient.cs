@@ -16,7 +16,7 @@ namespace Signum.Windows.Reports
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 QueryClient.Start();
-                Navigator.Manager.Settings.Add(typeof(UserQueryDN), new EntitySettings(EntityType.Default));
+                Navigator.AddSetting(new EntitySettings<UserQueryDN>(EntityType.Default));
                 SearchControl.GetCustomMenuItems += (qn, type) => new UserQueryMenuItem();
                 LiteFilterValueConverter.TryParseLite = Server.TryParseLite;
             }

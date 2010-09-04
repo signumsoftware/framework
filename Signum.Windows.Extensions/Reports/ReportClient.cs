@@ -25,11 +25,11 @@ namespace Signum.Windows.Reports
 
                     QueryClient.Start();
 
-                    Navigator.Manager.Settings.Add(typeof(ExcelReportDN), new EntitySettings(EntityType.Default) { View = e => new ExcelReport() });
+                    Navigator.AddSetting(new EntitySettings<ExcelReportDN>(EntityType.Default) { View = e => new ExcelReport() });
 
                     if (compositeReport)
                     {
-                        Navigator.Manager.Settings.Add(typeof(CompositeReportDN), new EntitySettings(EntityType.Default) { View = e => new CompositeReport() });
+                        Navigator.AddSetting(new EntitySettings<CompositeReportDN>(EntityType.Default) { View = e => new CompositeReport() });
                     }
                 }
                 else

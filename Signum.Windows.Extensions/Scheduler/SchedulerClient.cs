@@ -18,19 +18,19 @@ namespace Signum.Windows.Scheduler
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                Navigator.Manager.Settings.Add(typeof(ScheduledTaskDN), new EntitySettings(EntityType.Default) { View = e => new ScheduledTask(), Icon = Image("clock.png") });
+                Navigator.AddSetting(new EntitySettings<ScheduledTaskDN>(EntityType.Default) { View = e => new ScheduledTask(), Icon = Image("clock.png") });
 
                 OperationClient.Manager.Settings.Add(TaskOperation.ExecutePrivate, new EntityOperationSettings { IsVisible = entity => false });
 
-                Navigator.Manager.Settings.Add(typeof(CustomTaskDN), new EntitySettings(EntityType.ServerOnly) { View = e => new CustomTask(), Icon = Image("customTask.png") });
-                Navigator.Manager.Settings.Add(typeof(CustomTaskExecutionDN), new EntitySettings(EntityType.ServerOnly) { View = e => new CustomTaskExecution(), Icon = Image("customTaskExecution.png") });
+                Navigator.AddSetting(new EntitySettings<CustomTaskDN>(EntityType.ServerOnly) { View = e => new CustomTask(), Icon = Image("customTask.png") });
+                Navigator.AddSetting(new EntitySettings<CustomTaskExecutionDN>(EntityType.ServerOnly) { View = e => new CustomTaskExecution(), Icon = Image("customTaskExecution.png") });
 
                 OperationClient.Manager.Settings.Add(CustomTaskOperation.Execute, new EntityOperationSettings { Icon = Image("execute.png") });
 
-                Navigator.Manager.Settings.Add(typeof(ScheduleRuleDailyDN), new EntitySettings(EntityType.Default) { View = e => new ScheduleRuleDaily() });
-                Navigator.Manager.Settings.Add(typeof(ScheduleRuleWeeklyDN), new EntitySettings(EntityType.Default) { View = e => new ScheduleRuleWeekly() });
-                Navigator.Manager.Settings.Add(typeof(ScheduleRuleWeekDaysDN), new EntitySettings(EntityType.Default) { View = e => new ScheduleRuleWeekDays() });
-                Navigator.Manager.Settings.Add(typeof(CalendarDN), new EntitySettings(EntityType.Default) { View = e => new Calendar() });
+                Navigator.AddSetting(new EntitySettings<ScheduleRuleDailyDN>(EntityType.Default) { View = e => new ScheduleRuleDaily() });
+                Navigator.AddSetting(new EntitySettings<ScheduleRuleWeeklyDN>(EntityType.Default) { View = e => new ScheduleRuleWeekly() });
+                Navigator.AddSetting(new EntitySettings<ScheduleRuleWeekDaysDN>(EntityType.Default) { View = e => new ScheduleRuleWeekDays() });
+                Navigator.AddSetting(new EntitySettings<CalendarDN>(EntityType.Default) { View = e => new Calendar() });
             }
         }
 

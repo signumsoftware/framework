@@ -25,7 +25,7 @@ namespace Signum.Windows.Chart
 
                 QueryClient.Start();
 
-                Navigator.Manager.Settings.Add(typeof(UserChartDN), new EntitySettings(EntityType.Default) { View = e => new UserChart() });
+                Navigator.AddSetting(new EntitySettings<UserChartDN>(EntityType.Default) { View = e => new UserChart() });
                 SearchControl.GetCustomMenuItems += new MenuItemForQueryName(SearchControl_GetCustomMenuItems);
             
                 LiteFilterValueConverter.TryParseLite = Server.TryParseLite;
