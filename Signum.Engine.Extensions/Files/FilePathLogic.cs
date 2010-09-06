@@ -117,33 +117,36 @@ namespace Signum.Engine.Files
         {
             if (fp.IsNew && !unsafeMode)
             {
-                //set typedn from enum
-                if (fp.FileType == null)
-                    fp.FileType = EnumLogic<FileTypeDN>.ToEntity(fp.FileTypeEnum);
-
-                //set enum from typedn
-                if (fp.FileTypeEnum == null)
-                    fp.SetFileTypeEnum(EnumLogic<FileTypeDN>.ToEnum(fp.FileType));
-
-                FileTypeAlgorithm alg = fileTypes[fp.FileTypeEnum];
-                string sufix = alg.CalculateSufix(fp);
-                if (!sufix.HasText())
-                    throw new ApplicationException(Resources.SufixNotSet);
-
-                do
+                using (new EntityCache(true))
                 {
-                    fp.Repository = alg.GetRepository(fp);
-                    if (fp.Repository == null)
-                        throw new ApplicationException(Resources.RepositoryNotSet);
-                    int i = 2;
-                    fp.Sufix = sufix;
-                    while (File.Exists(fp.FullPhysicalPath) && alg.RenameOnCollision)
+                    //set typedn from enum
+                    if (fp.FileType == null)
+                        fp.FileType = EnumLogic<FileTypeDN>.ToEntity(fp.FileTypeEnum);
+
+                    //set enum from typedn
+                    if (fp.FileTypeEnum == null)
+                        fp.SetFileTypeEnum(EnumLogic<FileTypeDN>.ToEnum(fp.FileType));
+
+                    FileTypeAlgorithm alg = fileTypes[fp.FileTypeEnum];
+                    string sufix = alg.CalculateSufix(fp);
+                    if (!sufix.HasText())
+                        throw new ApplicationException(Resources.SufixNotSet);
+
+                    do
                     {
-                        fp.Sufix = alg.RenameAlgorithm(sufix, i);
-                        i++;
+                        fp.Repository = alg.GetRepository(fp);
+                        if (fp.Repository == null)
+                            throw new ApplicationException(Resources.RepositoryNotSet);
+                        int i = 2;
+                        fp.Sufix = sufix;
+                        while (File.Exists(fp.FullPhysicalPath) && alg.RenameOnCollision)
+                        {
+                            fp.Sufix = alg.RenameAlgorithm(sufix, i);
+                            i++;
+                        }
                     }
+                    while (!SaveFile(fp)); 
                 }
-                while (!SaveFile(fp));
             }
         }
 
