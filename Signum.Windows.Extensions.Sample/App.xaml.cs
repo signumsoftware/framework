@@ -59,22 +59,9 @@ namespace Signum.Windows.Extensions.Sample
         {
             Navigator.Start(new NavigationManager
             {
-                Settings = new Dictionary<Type, EntitySettings>()
+                EntitySettings = new Dictionary<Type, EntitySettings>()
                 {
-                    {typeof(AlbumDN), new EntitySettings(EntityType.Default){ View = e => new Album() } },
-
-                    {typeof(LabelDN), new EntitySettings(EntityType.Admin){ View = e => new Label() } },
-                    {typeof(ArtistDN), new EntitySettings(EntityType.Default){ View = e => new Artist() } },
-                    {typeof(BandDN), new EntitySettings(EntityType.Default){ View = e => new Band() } },
-
-                    {typeof(AmericanMusicAwardDN), new EntitySettings(EntityType.Default){ View = e => new AmericanMusicAward() } },
-                    {typeof(GrammyAwardDN), new EntitySettings(EntityType.Default){ View = e => new GrammyAward() } },
-                    {typeof(PersonalAwardDN), new EntitySettings(EntityType.Default){ View = e => new PersonalAward() } },
-
-                    {typeof(CountryDN), new EntitySettings(EntityType.Admin){ View = e => new Country() } },
-
-                    {typeof(Signum.Test.NoteDN), new EntitySettings(EntityType.Default){ View = e => new Note() } },
-                },
+                }
             });
 
             Constructor.Start(new ConstructorManager
@@ -92,7 +79,7 @@ namespace Signum.Windows.Extensions.Sample
                 }
             });
 
-            AuthClient.Start(true, true, true, true);
+            AuthClient.Start(true, true, true, true, true, true);
 
             //ProcessClient.Start();
             //SchedulerClient.Start();
@@ -108,7 +95,24 @@ namespace Signum.Windows.Extensions.Sample
                                     })
             });
 
+            Navigator.AddSettings(new List<EntitySettings>()
+            {
+                new EntitySettings<AlbumDN>(EntityType.Default){ View = e => new Album() },
 
+                new EntitySettings<LabelDN>(EntityType.Admin) { View = e => new Label() },
+                new EntitySettings<ArtistDN>(EntityType.Default) { View = e => new Artist() },
+                new EntitySettings<BandDN>(EntityType.Default) { View = e => new Band() },
+
+                new EntitySettings<AmericanMusicAwardDN>(EntityType.Default) { View = e => new AmericanMusicAward() },
+                new EntitySettings<GrammyAwardDN>(EntityType.Default) { View = e => new GrammyAward() },
+                new EntitySettings<PersonalAwardDN>(EntityType.Default) { View = e => new PersonalAward() },
+
+                new EntitySettings<CountryDN>(EntityType.Admin) { View = e => new Country() },
+
+                new EntitySettings<Signum.Test.NoteDN>(EntityType.Default) { View = e => new Note() },
+            });
+
+            Navigator.Initialize();
         }
     }
 }
