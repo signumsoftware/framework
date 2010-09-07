@@ -87,12 +87,15 @@ namespace Signum.Engine.Authorization
         }
 
         [ThreadStatic]
-        static bool saveDisabled;
-        public static IDisposable DisableSave()
+        static DisableSaveOptions saveDisabled = 0;
+        public static IDisposable DisableSave(DisableSaveOptions mode)
         {
-            saveDisabled = true;
-            return new Disposable(() => saveDisabled = false);
+            DisableSaveOptions saveDisabledOld = saveDisabled;
+            saveDisabled = mode;
+            return new Disposable(() => saveDisabled = saveDisabledOld);
         }
+
+        
 
         static IQueryable<T> EntityGroupAuthLogic_FilterQuery<T>(IQueryable<T> query)
             where T:IdentifiableEntity
@@ -112,16 +115,21 @@ namespace Signum.Engine.Authorization
         static void EntityGroupAuthLogic_Saving<T>(T ident, bool isRoot)
             where T : IdentifiableEntity
         {
-            if (!saveDisabled && AuthLogic.IsEnabled)
+            if (AuthLogic.IsEnabled)
             {
-                if (!ident.IsNew && !ident.InDB().WhereAllowed().Any()) //Previous state in the database
-                    throw new UnauthorizedAccessException(Resources.NotAuthorizedTo0The1WithId2.Formato(TypeAllowedBasic.Modify.NiceToString().ToLower(), ident.GetType().NiceName(), ident.Id));
- 
+                if (!saveDisabled.HasFlag(DisableSaveOptions.Origin))
+                {
+                    if (!ident.IsNew && !ident.InDB().WhereAllowed().Any()) //Previous state in the database
+                        throw new UnauthorizedAccessException(Resources.NotAuthorizedTo0The1WithId2.Formato(TypeAllowedBasic.Modify.NiceToString().ToLower(), ident.GetType().NiceName(), ident.Id));
+                }
 
-                if (ident.IsNew)
-                    Transaction.PreRealCommit += () => ident.AssertAllowed(TypeAllowedBasic.Create, false);
-                else
-                    Transaction.PreRealCommit += () => ident.AssertAllowed(TypeAllowedBasic.Modify, false);
+                if (!saveDisabled.HasFlag(DisableSaveOptions.Destiny))
+                {
+                    if (ident.IsNew)
+                        Transaction.PreRealCommit += () => ident.AssertAllowed(TypeAllowedBasic.Create, false);
+                    else
+                        Transaction.PreRealCommit += () => ident.AssertAllowed(TypeAllowedBasic.Modify, false);
+                }
             }
         }
 
@@ -312,5 +320,13 @@ namespace Signum.Engine.Authorization
                     return new[] { access.InGroup.Get(userInterface), access.OutGroup.Get(userInterface) };
                 }).WithMinMaxPair(a => (int)a));
         }      
+    }
+
+    public enum DisableSaveOptions
+    {
+        Origin = 1,
+        Destiny = 2,
+        Both = Origin | Destiny,
+        ReEnabled = 0, 
     }
 }
