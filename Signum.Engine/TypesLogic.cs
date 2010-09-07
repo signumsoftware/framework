@@ -54,7 +54,7 @@ namespace Signum.Engine
         public static Dictionary<TypeDN, Type> TryDNToType(Replacements replacements)
         {
             return (from dn in Administrator.TryRetrieveAll<TypeDN>(replacements)
-                    join t in Schema.Current.Tables.Keys on dn.FullClassName equals (Reflector.ExtractEnumProxy(t) ?? t).Name
+                    join t in Schema.Current.Tables.Keys on dn.FullClassName equals (Reflector.ExtractEnumProxy(t) ?? t).FullName
                     select new { dn, t }).ToDictionary(a => a.dn, a => a.t);
         }
 

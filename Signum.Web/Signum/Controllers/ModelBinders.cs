@@ -31,6 +31,24 @@ namespace Signum.Web.Controllers
         }
     }
 
+    public class DateModelBinder : DefaultModelBinder
+    {
+        public override object BindModel(ControllerContext controllerContext, ModelBindingContext bindingContext)
+        {
+            string value = controllerContext.HttpContext.Request[bindingContext.ModelName];
+            Match m = Regex.Match(value, @"^(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})$");
+
+            if (m == null) return base.BindModel(controllerContext, bindingContext);
+
+            return new DateTime(
+                int.Parse(m.Groups["year"].Value),
+                int.Parse(m.Groups["month"].Value),
+                int.Parse(m.Groups["day"].Value),
+                0,0,0,                    
+                TimeZoneManager.Mode == TimeZoneMode.Local ? DateTimeKind.Local : DateTimeKind.Utc);
+        }
+    }
+
 
     public class ImplementationsModelBinder : IModelBinder
     {
