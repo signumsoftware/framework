@@ -954,6 +954,7 @@ namespace Signum.Web
             if (type == null)
                 throw new ArgumentException(Resources.Type0NotFoundInNavigatorNamesToTypes.Formato(typeName));
 
+            
             return type;
         }
 
