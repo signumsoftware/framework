@@ -52,12 +52,12 @@ namespace Signum.Web
             return TypeContextUtilities.Compose("New", prefix);
         }
 
-        public static JsInstruction OpenChooser(JsValue<string> prefix, string[] optionNames, JsFunction onOptionChosen)
+        public static JsInstruction OpenChooser(JsValue<string> prefix, JsFunction onOptionChosen, string[] optionNames)
         {
-            return "openChooser({0}, [{1}], {2});".Formato(
+            return "openChooser({0}, {1}, [{2}]);".Formato(
                     prefix.ToJS(),
-                    optionNames.ToString(on => "'{0}'".Formato(on), ","),
-                    onOptionChosen);
+                    onOptionChosen.ToJS(),
+                    optionNames.ToString(on => "'{0}'".Formato(on), ","));
         }
 
         public static JsInstruction Submit(JsValue<string> controllerUrl)

@@ -34,7 +34,10 @@ namespace Signum.Web
             if (entityCombo.ShowFieldDiv && !entityCombo.OnlyValue)
                 sb.AppendLine("<div class='field'>");
 
-            sb.AppendLine(EntityBaseHelper.BaseLineLabel(helper, entityCombo, entityCombo.ControlID));
+            if (entityCombo.ValueFirst)
+                sb.AppendLine("<div class='valueFirst'>");
+            else
+                sb.AppendLine(EntityBaseHelper.BaseLineLabel(helper, entityCombo, entityCombo.ControlID));
 
             if (!entityCombo.OnlyValue)
                 sb.AppendLine("<div class=\"value-container\">");
@@ -94,6 +97,12 @@ namespace Signum.Web
 
             if (!entityCombo.OnlyValue)
                 sb.AppendLine("</div>");
+
+            if (entityCombo.ValueFirst)
+            {
+                sb.AppendLine(EntityBaseHelper.BaseLineLabel(helper, entityCombo, entityCombo.ControlID));
+                sb.AppendLine("</div>");
+            }
 
             if (entityCombo.ShowFieldDiv && !entityCombo.OnlyValue)
                 sb.AppendLine("</div>");

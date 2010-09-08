@@ -62,9 +62,8 @@ namespace Signum.Web
             };
 
            return includeLink ?
-               "<a class=\"count-search valueLine\" onclick=\"javascript:OpenFinder({0});\">{1}</a>"
-               .Formato(foptions.ToJS(), count)
-               : "<span class=\"count-search valueLine\">{0}</span>".Formato(count);
+               "<a class=\"count-search valueLine\" onclick=\"javascript:OpenFinder({0});\">{1}</a>".Formato(foptions.ToJS(), count) :
+               "<span class=\"count-search valueLine\">{0}</span>".Formato(count);
         }
 
         public static string NewFilter(this HtmlHelper helper, object queryName, FilterOption filterOptions, Context context, int index)

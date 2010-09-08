@@ -78,7 +78,12 @@ namespace Signum.Web
         public FilterMode FilterMode
         {
             get { return filterMode; }
-            set { this.filterMode = value; }
+            set 
+            { 
+                this.filterMode = value;
+                if (value == FilterMode.OnlyResults)
+                    SearchOnLoad = true;
+            }
         }
 
         bool create = true;

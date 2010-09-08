@@ -77,6 +77,8 @@ namespace Signum.Web
                                 "lineButton remove", 
                                 null));
 
+            sb.AppendLine(helper.Div("", "", "clearall", null)); //To keep remove button space
+
             sb.AppendLine(EntityBaseHelper.RenderTypeContext(helper, itemTC, RenderMode.ContentInVisibleDiv, entityRepeater.PartialViewName, entityRepeater.ReloadOnChange));
 
             sb.AppendLine("</div>");

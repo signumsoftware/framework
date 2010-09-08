@@ -30,7 +30,10 @@ namespace Signum.Web
             if (entityLine.ShowFieldDiv)
                 sb.AppendLine("<div class='field'>");
 
-            sb.AppendLine(EntityBaseHelper.BaseLineLabel(helper, entityLine));
+            if (entityLine.ValueFirst)
+                sb.AppendLine("<div class='valueFirst'>");
+            else
+                sb.AppendLine(EntityBaseHelper.BaseLineLabel(helper, entityLine));
 
             sb.AppendLine("<div class=\"value-container\">");
 
@@ -105,6 +108,12 @@ namespace Signum.Web
             sb.AppendLine(EntityBaseHelper.WriteRemoveButton(helper, entityLine));
 
             sb.AppendLine("</div>");
+
+            if (entityLine.ValueFirst)
+            {
+                sb.AppendLine(EntityBaseHelper.BaseLineLabel(helper, entityLine));
+                sb.AppendLine("</div>");
+            }
 
             if (entityLine.ShowFieldDiv)
                 sb.AppendLine("</div>");

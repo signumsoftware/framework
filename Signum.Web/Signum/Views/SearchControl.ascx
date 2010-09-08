@@ -84,7 +84,7 @@
                     orderType = order.Type;
                   }
             %>
-            <th id="<%= context.Compose(sc.Name) %>" class="<%= (orderType == null) ? "" : (orderType == OrderType.Ascending ? "headerSortUp" : "headerSortDown") %>">
+            <th id="<%= context.Compose(sc.Name) %>" class="<%= (orderType == null) ? "" : (orderType == OrderType.Ascending ? "headerSortDown" : "headerSortUp") %>">
                 <input type="hidden" value="<%= sc.Name %>" />
                 <%= sc.DisplayName %>
             </th>

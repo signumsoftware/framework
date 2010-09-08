@@ -738,6 +738,7 @@ var ERep = function(_erepOptions) {
         $(this.pf(sfItemsContainer)).append("\n" +
         "<div id='" + itemPrefix.compose(sfRepeaterItem) + "' name='" + itemPrefix.compose(sfRepeaterItem) + "' class='repeaterElement'>\n" +
         "<a id='" + itemPrefix.compose("btnRemove") + "' title='" + this.options.removeItemLinkText + "' href=\"javascript:ERepOnRemoving(new ERep({prefix:'" + this.options.prefix + "', onEntityChanged:" + (empty(this.options.onEntityChanged) ? "''" : this.options.onEntityChanged) + "}), '" + itemPrefix + "');\" class='lineButton remove'>" + this.options.removeItemLinkText + "</a>\n" +
+        "<div class='clearall'></div>" +
         hiddenInput(itemPrefix.compose(sfRuntimeInfo), itemInfoValue) +
         "<div id='" + itemPrefix.compose(sfEntity) + "' name='" + itemPrefix.compose(sfEntity) + "'>\n" +
         newHtml + "\n" +
