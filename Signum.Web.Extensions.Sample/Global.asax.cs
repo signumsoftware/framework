@@ -18,6 +18,7 @@ using Signum.Entities;
 using Signum.Web.Queries;
 using Signum.Web.Reports;
 using Signum.Web.Authorization;
+using Signum.Web.ControlPanel;
 #endregion
 
 namespace Signum.Web.Extensions.Sample
@@ -91,6 +92,7 @@ namespace Signum.Web.Extensions.Sample
             AuthAdminClient.Start(true, true, true, true, true, false, true);
 
             UserQueriesClient.Start();
+            ControlPanelClient.Start();
 
             ReportClient.Start(true, true);
 

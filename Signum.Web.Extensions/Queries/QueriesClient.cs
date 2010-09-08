@@ -132,12 +132,13 @@ namespace Signum.Web.Queries
                     },
 
                     new EntitySettings<QueryTokenModel>(EntityType.Default) { PartialViewName = e => ViewPrefix + "QueryToken" },
+                    new EntitySettings<UserQueryDN>(EntityType.NotSaving)
                 });
 
                 if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(QueryDN)))
                     Navigator.Manager.EntitySettings.Add(typeof(QueryDN), new EntitySettings<QueryDN>(EntityType.Default));
 
-                Navigator.RegisterTypeName<UserQueryDN>();
+                
                 Navigator.RegisterTypeName<QueryFilterDN>();
                 Navigator.RegisterTypeName<QueryColumnDN>();
                 Navigator.RegisterTypeName<QueryTokenDN>();

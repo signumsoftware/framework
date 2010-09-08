@@ -12,6 +12,8 @@ using Signum.Entities;
 using Signum.Services;
 using Signum.Engine.Basics;
 using Signum.Engine.Reports;
+using Signum.Engine.ControlPanel;
+using Signum.Entities.ControlPanel;
 
 namespace Signum.Test.Extensions
 {
@@ -55,6 +57,8 @@ namespace Signum.Test.Extensions
             ConnectionScope.Default = new Connection(connectionString, sb.Schema, dqm);
 
             sb.Settings.OverrideTypeAttributes<IUserRelatedDN>(new ImplementedByAttribute());
+            sb.Settings.OverrideFieldAttributes<ControlPanelDN, IIdentifiable>(cp => cp.Related, new ImplementedByAttribute(typeof(UserDN), typeof(RoleDN)));
+            //sb.Settings.OverrideTypeAttributes<PanelPart>(new ImplementedByAttribute(typeof(SearchControlPartDN), typeof(CountSearchControlPartDN)));
 
             AuthLogic.Start(sb, dqm, AuthLogic.SystemUserName, null);
             UserTicketLogic.Start(sb, dqm);
@@ -70,6 +74,7 @@ namespace Signum.Test.Extensions
 
             QueryLogic.Start(sb);
             UserQueryLogic.Start(sb, dqm);
+            ControlPanelLogic.Start(sb, dqm);
 
             ReportsLogic.Start(sb, dqm, true, false);
 

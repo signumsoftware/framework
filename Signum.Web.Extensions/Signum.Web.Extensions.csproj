@@ -78,6 +78,9 @@
     <Compile Include="ControllerFilters\ActionFilter\ActionFilterConfigControllerFactory.cs" />
     <Compile Include="ControllerFilters\ActionFilter\ConfigActionFilter.cs" />
     <Compile Include="ControllerFilters\ActionFilter\IActionFilterConfiguration.cs" />
+    <Compile Include="ControlPanel\Controllers\ControlPanelController.cs" />
+    <Compile Include="ControlPanel\ControlPanelClient.cs" />
+    <Compile Include="ControlPanel\PanelPartRenderer.cs" />
     <Compile Include="Files\FileRepeaterHelper.cs" />
     <Compile Include="Files\FileRepeater.cs" />
     <Compile Include="Files\FileLineHelper.cs" />
@@ -210,6 +213,13 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <Content Include="Basic\Views\DateSpanIU.ascx" />
+    <Content Include="ControlPanel\Views\ControlPanel.aspx" />
+    <Content Include="ControlPanel\Views\ControlPanelAdmin.ascx" />
+    <Content Include="ControlPanel\Views\LinkElement.ascx" />
+    <Content Include="ControlPanel\Views\LinkListPart.ascx" />
+    <Content Include="ControlPanel\Views\CountUserQueryElement.ascx" />
+    <Content Include="ControlPanel\Views\CountSearchControlPart.ascx" />
+    <Content Include="ControlPanel\Views\PanelPart.ascx" />
     <Content Include="Help\Content\help.css" />
     <Content Include="Help\Images\favicon.ico" />
     <Content Include="Help\Images\icon-warning.png" />

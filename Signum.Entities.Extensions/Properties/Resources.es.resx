@@ -630,4 +630,13 @@
   <data name="BasicPermissions_AdminRules" xml:space="preserve">
     <value>Administrar reglas</value>
   </data>
+  <data name="ControlPanelDN_Part0IsInColumn1ButPanelHasOnly2Columns" xml:space="preserve">
+    <value>La parte {0} está en la columna {1} pero el panel sólo tiene {2} columnas</value>
+  </data>
+  <data name="ControlPanelDN_Part0IsInColumn1WhichAlreadyHasOtherParts" xml:space="preserve">
+    <value>La parte {0} está en la columna {1} de la fila {2} que ya contiene otras partes</value>
+  </data>
+  <data name="ControlPanelDN_Rows0DontHaveAnyParts" xml:space="preserve">
+    <value>No hay ninguna parte en las filas {{{0}}}</value>
+  </data>
 </root>

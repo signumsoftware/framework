@@ -48,6 +48,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Common.cs" />
+    <Compile Include="ControlPanelTests.cs" />
+    <Compile Include="UserQueriesTests.cs" />
     <Compile Include="OperationsTests.cs" />
     <Compile Include="ReportsTests.cs" />
     <Compile Include="LinesTests.cs" />
@@ -119,6 +121,15 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="OrderedTest1.orderedtest">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="otControlPanel.orderedtest">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="otUserQueries.orderedtest">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="otOperations.orderedtest">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using Signum.Entities.Authorization;
+using Signum.Engine.ControlPanel;
+using Signum.Web.ControlPanel;
 
 namespace Signum.Web.Extensions.Sample.Controllers
 {
@@ -11,9 +14,14 @@ namespace Signum.Web.Extensions.Sample.Controllers
     {
         public ActionResult Index()
         {
-            ViewData["Message"] = "Welcome to ASP.NET MVC!";
+            if (UserDN.Current == null)
+                return View();
 
-            return View();
+            var panel = ControlPanelLogic.GetHomePageControlPanel();
+            if (panel != null)
+                return View(ControlPanelClient.ViewPrefix + "ControlPanel", panel);
+            else
+                return View();
         }
 
         public ActionResult About()

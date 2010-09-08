@@ -639,4 +639,13 @@
   <data name="ExpressionShouldBeSomeKindOfAggregate" xml:space="preserve">
     <value>Expression should be some kind of aggregate</value>
   </data>
+  <data name="ControlPanelDN_Part0IsInColumn1ButPanelHasOnly2Columns" xml:space="preserve">
+    <value>Part {0} is in column {1} but panel has only {2} columns</value>
+  </data>
+  <data name="ControlPanelDN_Part0IsInColumn1WhichAlreadyHasOtherParts" xml:space="preserve">
+    <value>Part {0} is in column {1} of row {2} which already has other parts</value>
+  </data>
+  <data name="ControlPanelDN_Rows0DontHaveAnyParts" xml:space="preserve">
+    <value>There are not any parts in rows {{{0}}}</value>
+  </data>
 </root>
