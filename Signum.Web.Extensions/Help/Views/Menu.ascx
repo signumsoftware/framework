@@ -58,21 +58,24 @@ String.prototype.replaceAll=function(s1, s2) {return this.split(s1).join(s2)}
     }
     function Edit() 
     {
-        $(".editable").each(function(){
-            var self = $(this);
-             self.bind('click', function(event) {
+        $(".editable").each(function() {
+           /* $(this).change(function() {
                 $(this).addClass("modified");
-             });
-        /*if (empty($(this).val())) {
+            });*/
+            var self = $(this);
+            self.bind('click', function(event) {
+                $(this).addClass("modified");
+            });
+            /*if (empty($(this).val())) {
             $(this).addClass("default").val(defaultString);                   
-        }
-        else {
+            }
+            else {
             $(this).addClass("default");
-        }
-        $("#" + this.id + "-editor").hide();*/
-        $("dd").addClass("editing");
-        $("#entityName").addClass("editing");
-      });
+            }
+            $("#" + this.id + "-editor").hide();*/
+            $("dd").addClass("editing");
+            $("#entityName").addClass("editing");
+        });
       $(".shortcut").css("display", "block");
       $("#edit-action").hide();
       $("#syntax-action").show();
