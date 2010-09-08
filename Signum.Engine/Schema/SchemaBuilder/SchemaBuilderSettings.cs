@@ -84,10 +84,10 @@ namespace Signum.Engine.Maps
             types.GetOrCreate(type).TypeAttributes = attributes;
         }
 
-        public bool IsFieldAttributesOverriden<T, R>(Expression<Func<T, R>> lambda)
+        public bool IsFieldAttributesOverriden<T, R>(Expression<Func<T, R>> propertyOrField)
         {
-            MemberInfo mi = ReflectionTools.GetMemberInfo(lambda);
-            Type type = ReflectionTools.GetReceiverType(lambda);
+            MemberInfo mi = ReflectionTools.GetMemberInfo(propertyOrField);
+            Type type = ReflectionTools.GetReceiverType(propertyOrField);
             FieldInfo fi = Reflector.FindFieldInfo(type, mi, true);
             return IsFieldAttributesOverriden(typeof(T), fi.Name);
         }
@@ -126,10 +126,10 @@ namespace Signum.Engine.Maps
             return types.TryGetC(type).TryCC(a => a.TypeAttributes) ?? type.GetCustomAttributes(false).Cast<Attribute>().ToArray(); 
         }
 
-        public Attribute[] FieldInfoAttributes<T, R>(Expression<Func<T, R>> lambda)
+        public Attribute[] FieldInfoAttributes<T, R>(Expression<Func<T, R>> propertyOrField)
         {
-            MemberInfo mi = ReflectionTools.GetMemberInfo(lambda);
-            Type type = ReflectionTools.GetReceiverType(lambda);
+            MemberInfo mi = ReflectionTools.GetMemberInfo(propertyOrField);
+            Type type = ReflectionTools.GetReceiverType(propertyOrField);
             FieldInfo fi = Reflector.FindFieldInfo(type, mi, true);
             return FieldInfoAttributes(type, fi);
         }
@@ -176,6 +176,33 @@ namespace Signum.Engine.Maps
             else
                 return Index.Unique;
         }
+
+         public bool ImplementedBy<T, R>(Expression<Func<T, R>> propertyOrField, Type typeToImplement)
+         {
+             var imp = GetImplementations(propertyOrField);
+             return imp != null && imp.ImplementedBy(typeToImplement); 
+         }
+
+         public void AssertImplementedBy<T, R>(Expression<Func<T, R>> propertyOrField, Type typeToImplement)
+         {
+             MemberInfo mi = ReflectionTools.GetMemberInfo(propertyOrField);
+             Type type = ReflectionTools.GetReceiverType(propertyOrField);
+             FieldInfo fi = Reflector.FindFieldInfo(type, mi, true);
+             var imp = GetImplementations(type, fi);
+
+             if (imp == null || !imp.ImplementedBy(type))
+             {
+                 throw new InvalidOperationException("Field {0} from {1} is not ImplementedBy {2}".Formato(fi.Name, type.Name, typeToImplement.Name));
+             }
+         }
+
+         public Implementations GetImplementations<T, R>(Expression<Func<T, R>> propertyOrField)
+         {
+             MemberInfo mi = ReflectionTools.GetMemberInfo(propertyOrField);
+             Type type = ReflectionTools.GetReceiverType(propertyOrField);
+             FieldInfo fi = Reflector.FindFieldInfo(type, mi, true);
+             return GetImplementations(type, fi);
+         }
 
         internal Implementations GetImplementations(Type type, FieldInfo fi)
         {

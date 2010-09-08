@@ -45,6 +45,7 @@ namespace Signum.Entities
     public abstract class Implementations : Attribute
     {
         public abstract bool IsByAll { get; }
+        public abstract bool ImplementedBy(Type type);
     }
 
     [Serializable, AttributeUsage(AttributeTargets.Field | AttributeTargets.Class | AttributeTargets.Interface)]
@@ -66,6 +67,11 @@ namespace Signum.Entities
         {
             get { return false; }
         }
+
+        public override bool ImplementedBy(Type type)
+        {
+            return implementedTypes.Contains(type); 
+        }
     }
 
     [Serializable, AttributeUsage(AttributeTargets.Field | AttributeTargets.Class | AttributeTargets.Interface)]
@@ -78,6 +84,11 @@ namespace Signum.Entities
         public override bool IsByAll
         {
             get { return true; }
+        }
+
+        public override bool ImplementedBy(Type type)
+        {
+            return false;
         }
     }
 
