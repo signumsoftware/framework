@@ -357,5 +357,15 @@ namespace Signum.Engine.Authorization
                         {"link", fullyQualifiedApplicationPath  + "Auth/ResetPasswordCode?email=" + user.Email + "&code=" + rpr.Code},
                     });
         }
+
+        internal static Lite<RoleDN>[] CurrentRoles()
+        {
+            return Roles.IndirectlyRelatedTo(RoleDN.Current.ToLite()).And(RoleDN.Current.ToLite()).ToArray();
+        }
+
+        internal static int Rank(Lite<RoleDN> role)
+        {
+            return Roles.IndirectlyRelatedTo(role).Count; 
+        }
     }
 }

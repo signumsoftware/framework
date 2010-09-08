@@ -10,6 +10,8 @@ using Signum.Entities.ControlPanel;
 using Signum.Entities;
 using Signum.Entities.Authorization;
 using Signum.Utilities;
+using Signum.Engine.Authorization;
+using Signum.Engine.Basics;
 
 namespace Signum.Engine.ControlPanel
 {
@@ -28,7 +30,7 @@ namespace Signum.Engine.ControlPanel
                                             {
                                                 Entity = cp.ToLite(),
                                                 cp.DisplayName,
-                                                Related = cp.Related.ToLite(),
+                                                cp.Related,
                                             }).ToDynamic();
 
                 dqm[typeof(LinkListPartDN)] = (from cp in Database.Query<LinkListPartDN>()
@@ -55,11 +57,28 @@ namespace Signum.Engine.ControlPanel
             if (currentUser == null)
                 return null;
 
-            var panel = Database.Query<ControlPanelDN>().FirstOrDefault(cp => cp.Related == currentUser && cp.HomePage);
+            var panel = Database.Query<ControlPanelDN>().FirstOrDefault(cp => cp.Related.RefersTo(currentUser) && cp.HomePage);
             if (panel != null)
                 return panel;
 
-            return Database.Query<ControlPanelDN>().FirstOrDefault(cp => cp.Related == currentUser.Role && cp.HomePage);
+            var panels = Database.Query<ControlPanelDN>().Where(cp => cp.Related.Entity is RoleDN)
+                .Select(cp => new { ControlPanel = cp.ToLite(), Role = ((RoleDN)cp.Related.Entity).ToLite() }).ToList();
+
+            return panels.OrderByDescending(p => AuthLogic.Rank(p.Role)).FirstOrDefault().TryCC(p => p.ControlPanel.Retrieve());
+        }
+
+        public static void RegisterUserEntityGroup(SchemaBuilder sb, Enum newEntityGroupKey)
+        {
+            sb.Schema.Settings.AssertImplementedBy((ControlPanelDN uq) => uq.Related, typeof(UserDN));
+
+            EntityGroupLogic.Register<ControlPanelDN>(newEntityGroupKey, uq => uq.Related.RefersTo(UserDN.Current));
+        }
+
+        public static void RegisterRoleEntityGroup(SchemaBuilder sb, Enum newEntityGroupKey)
+        {
+            sb.Schema.Settings.AssertImplementedBy((ControlPanelDN uq) => uq.Related, typeof(RoleDN));
+
+            EntityGroupLogic.Register<ControlPanelDN>(newEntityGroupKey, uq => AuthLogic.CurrentRoles().Contains(uq.Related.ToLite<RoleDN>()));
         }
     }
 }

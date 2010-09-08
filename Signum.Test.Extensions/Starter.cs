@@ -57,8 +57,7 @@ namespace Signum.Test.Extensions
             ConnectionScope.Default = new Connection(connectionString, sb.Schema, dqm);
 
             sb.Settings.OverrideTypeAttributes<IUserRelatedDN>(new ImplementedByAttribute());
-            sb.Settings.OverrideFieldAttributes<ControlPanelDN, IIdentifiable>(cp => cp.Related, new ImplementedByAttribute(typeof(UserDN), typeof(RoleDN)));
-            //sb.Settings.OverrideTypeAttributes<PanelPart>(new ImplementedByAttribute(typeof(SearchControlPartDN), typeof(CountSearchControlPartDN)));
+            sb.Settings.OverrideFieldAttributes<ControlPanelDN, Lite<IIdentifiable>>(cp => cp.Related, new ImplementedByAttribute(typeof(UserDN), typeof(RoleDN)));
 
             AuthLogic.Start(sb, dqm, AuthLogic.SystemUserName, null);
             UserTicketLogic.Start(sb, dqm);
@@ -74,7 +73,11 @@ namespace Signum.Test.Extensions
 
             QueryLogic.Start(sb);
             UserQueryLogic.Start(sb, dqm);
+            UserQueryLogic.RegisterUserEntityGroup(sb, MusicGroups.UserEntities);
+            UserQueryLogic.RegisterRoleEntityGroup(sb, MusicGroups.RoleEntities);
             ControlPanelLogic.Start(sb, dqm);
+            ControlPanelLogic.RegisterUserEntityGroup(sb, MusicGroups.UserEntities);
+            ControlPanelLogic.RegisterRoleEntityGroup(sb, MusicGroups.RoleEntities);
 
             ReportsLogic.Start(sb, dqm, true, false);
 
@@ -83,7 +86,6 @@ namespace Signum.Test.Extensions
             new AlbumGraph().Register();
 
             EntityGroupLogic.Register<LabelDN>(MusicGroups.JapanEntities, l => l.Country.Name == Signum.Test.Starter.Japan || l.Owner != null && l.Owner.SmartRetrieve().Country.Name == Signum.Test.Starter.Japan);
-
             EntityGroupLogic.Register<AlbumDN>(MusicGroups.JapanEntities, a => a.Label.IsInGroup(MusicGroups.JapanEntities));
         }
 
@@ -138,6 +140,8 @@ namespace Signum.Test.Extensions
 
     public enum MusicGroups
     {
-        JapanEntities
+        JapanEntities,
+        RoleEntities,
+        UserEntities
     }
 }

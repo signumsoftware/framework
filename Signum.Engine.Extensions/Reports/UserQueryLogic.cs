@@ -9,6 +9,8 @@ using Signum.Engine.DynamicQuery;
 using Signum.Engine.Basics;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
+using Signum.Entities.Authorization;
+using Signum.Engine.Authorization;
 
 namespace Signum.Engine.Reports
 {
@@ -66,6 +68,20 @@ namespace Signum.Engine.Reports
         public static void RemoveUserQuery(Lite<UserQueryDN> lite)
         {
             Database.Delete(lite);
+        }
+
+        public static void RegisterUserEntityGroup(SchemaBuilder sb, Enum newEntityGroupKey)
+        {
+            sb.Schema.Settings.AssertImplementedBy((UserQueryDN uq) => uq.Related, typeof(UserDN));
+
+            EntityGroupLogic.Register<UserQueryDN>(newEntityGroupKey, uq => uq.Related.RefersTo(UserDN.Current)); 
+        }
+
+        public static void RegisterRoleEntityGroup(SchemaBuilder sb, Enum newEntityGroupKey)
+        {
+            sb.Schema.Settings.AssertImplementedBy((UserQueryDN uq) => uq.Related, typeof(RoleDN));
+
+            EntityGroupLogic.Register<UserQueryDN>(newEntityGroupKey, uq => AuthLogic.CurrentRoles().Contains(uq.Related.ToLite<RoleDN>()));
         }
     }
 }

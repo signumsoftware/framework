@@ -15,6 +15,8 @@ using Signum.Entities;
 using Signum.Engine.Maps;
 using Signum.Engine.Basics;
 using Signum.Entities.Reports;
+using Signum.Entities.Authorization;
+using Signum.Engine.Authorization;
 
 namespace Signum.Engine.Extensions.Chart
 {
@@ -375,6 +377,20 @@ namespace Signum.Engine.Extensions.Chart
         public static void RemoveUserChart(Lite<UserChartDN> lite)
         {
             Database.Delete(lite);
+        }
+
+        public static void RegisterUserEntityGroup(SchemaBuilder sb, Enum newEntityGroupKey)
+        {
+            sb.Schema.Settings.AssertImplementedBy((UserChartDN uq) => uq.Related, typeof(UserDN));
+
+            EntityGroupLogic.Register<UserChartDN>(newEntityGroupKey, uq => uq.Related.RefersTo(UserDN.Current));
+        }
+
+        public static void RegisterRoleEntityGroup(SchemaBuilder sb, Enum newEntityGroupKey)
+        {
+            sb.Schema.Settings.AssertImplementedBy((UserChartDN uq) => uq.Related, typeof(RoleDN));
+
+            EntityGroupLogic.Register<UserChartDN>(newEntityGroupKey, uq => AuthLogic.CurrentRoles().Contains(uq.Related.ToLite<RoleDN>()));
         }
     }
 
