@@ -262,21 +262,44 @@ namespace Signum.Engine
             {
                 string field = fieldNames.Single(Resources.UniqueMultiNullsWorksWithOnlyOneFieldUseAdministrator);
 
-                string triggerName = "UT_{0}_{1}".Formato(table, fieldNames.ToString("_"));
+                string triggerName = "v_{0}_{1}".Formato(table, fieldNames.ToString("_"));
 
-                return new SqlPreCommandSimple(
-@"CREATE  trigger {0} on {1} for insert, update as 
-BEGIN  
-    IF (select max(cnt) from 
-            (select count(i.{2}) as cnt from {1}, inserted i where {1}.{2}=i.{2} group by i.{2}) x) > 1 
-    raiserror('{3}',16,1) 
-END".Formato(triggerName.SqlScape(), table.SqlScape(), fieldNames.Single().SqlScape(), Resources._0RepeatedOnTable1.Formato(fieldNames.Single(), table)));
+                //                return new SqlPreCommandSimple(
+                //@"CREATE  trigger {0} on {1} for insert, update as 
+                //BEGIN  
+                //    IF (select max(cnt) from 
+                //            (select count(i.{2}) as cnt from {1}, inserted i where {1}.{2}=i.{2} group by i.{2}) x) > 1 
+                //    raiserror('{3}',16,1) 
+                //END".Formato(triggerName.SqlScape(), table.SqlScape(), fieldNames.Single().SqlScape(), Resources._0RepeatedOnTable1.Formato(fieldNames.Single(), table)));
+
+
+
+                string sql1 = @" CREATE VIEW {0} WITH SCHEMABINDING
+                                AS
+                                SELECT {2}
+                                FROM dbo.{1}
+                                WHERE {2} IS NOT NULL;
+                                ".Formato(triggerName.SqlScape(), table.SqlScape(), fieldNames.Single().SqlScape());
+
+                string sql2 = @"CREATE UNIQUE CLUSTERED INDEX  UT_{0} ON {0}({2});
+                                ".Formato(triggerName.SqlScape(), table.SqlScape(), fieldNames.Single().SqlScape());
+
+                System.Diagnostics.Debug.WriteLine(sql1);
+                System.Diagnostics.Debug.WriteLine(sql2);
+
+               return SqlPreCommand.Combine(Spacing.Simple, new SqlPreCommandSimple(sql1),new SqlPreCommandSimple(sql2)   );
+         
+
+              
+
+
+
             }
 
             return null;
         }
 
-        public static SqlPreCommand CreateMultiColumnUniqueTriggerNullable(string table, string[] nullableFields, 
+        public static SqlPreCommand CreateMultiColumnUniqueTriggerNullable(string table, string[] nullableFields,
             string[] notNullableFields)
         {
             if (nullableFields == null)
@@ -287,8 +310,8 @@ END".Formato(triggerName.SqlScape(), table.SqlScape(), fieldNames.Single().SqlSc
             if (nullableFields.Count() == 0)
             {
                 throw new ArgumentNullException(Resources.AtLessOneNullableFieldMustBePassed);
-            }            
-            
+            }
+
             string tableName = table.SqlScape();
 
             IEnumerable<string> allCols = nullableFields.Union(notNullableFields);
@@ -301,10 +324,10 @@ END".Formato(triggerName.SqlScape(), table.SqlScape(), fieldNames.Single().SqlSc
 
             string columns = allCols.ToString(c => "i.{0} = p.{0}".Formato(c.SqlScape()), " AND ");
 
-            string nullableColumns = nullableFields.ToString(c => 
+            string nullableColumns = nullableFields.ToString(c =>
                 "i.{0} IS NOT NULL ".Formato(c.SqlScape()), " AND ");
 
-            string trigger = 
+            string trigger =
 @"CREATE TRIGGER {0}
    ON  {1}
    AFTER INSERT
@@ -324,7 +347,7 @@ BEGIN
 END".Formato(triggerName.SqlScape(), tableName, columns, nullableColumns,
    Resources.CannotInsertDuplicatedFields0On1Table.Formato(allCols.ToString(c => c.SqlScape(), ", "), tableName));
 
-            return new SqlPreCommandSimple(trigger);        
+            return new SqlPreCommandSimple(trigger);
         }
 
         public static string IndexName(string table, params string[] fieldNames)
@@ -368,12 +391,12 @@ END".Formato(triggerName.SqlScape(), tableName, columns, nullableColumns,
         internal static SqlPreCommandSimple SetIdentityInsert(string table, bool value)
         {
             return new SqlPreCommandSimple("SET IDENTITY_INSERT {0} {1}".Formato(
-                table.SqlScape(), value?"ON": "OFF"));
+                table.SqlScape(), value ? "ON" : "OFF"));
         }
 
         internal static SqlPreCommand ShrinkDatabase(string schemaName)
         {
-            return new []{
+            return new[]{
                 new SqlPreCommandSimple("BACKUP LOG {0} WITH TRUNCATE_ONLY".Formato(schemaName)),
                 new SqlPreCommandSimple("DBCC SHRINKDATABASE ( {0} , TRUNCATEONLY )".Formato(schemaName))
             }.Combine(Spacing.Simple);
