@@ -368,10 +368,12 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitUnary(UnaryExpression u)
         {
-            if (u.NodeType == ExpressionType.Convert && u.Type.IsNullable() && u.Type.UnNullify().IsEnum &&
-                u.Operand.NodeType == ExpressionType.Convert && u.Operand.Type.IsEnum)
+            if (u.NodeType == ExpressionType.Convert && u.Type.IsNullable() && u.Type.UnNullify().IsEnum)
             {
-                u = Expression.Convert(Expression.Convert(((UnaryExpression)u.Operand).Operand, typeof(int?)), u.Type); //Expand nullability
+                if (u.Operand.NodeType == ExpressionType.Convert && u.Operand.Type.IsEnum)
+                    u = Expression.Convert(Expression.Convert(((UnaryExpression)u.Operand).Operand, typeof(int?)), u.Type); //Expand nullability
+                else if (u.Operand.Type == typeof(int))
+                    u = Expression.Convert(Expression.Convert(u.Operand, typeof(int?)), u.Type); //Expand nullability
             }
 
             Expression operand = this.Visit(u.Operand);
