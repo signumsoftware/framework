@@ -41,6 +41,8 @@ namespace Signum.Web.ControlPanel
                     new EntitySettings<LinkListPartDN>(EntityType.Default) { PartialViewName = e => ViewPrefix + "LinkListPart" },
                     new EntitySettings<LinkElement>(EntityType.NotSaving) { PartialViewName = e => ViewPrefix + "LinkElement" },
                 });
+
+
             }
         }
     }

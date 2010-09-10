@@ -10,7 +10,7 @@
 <% 
     using (var tc = Html.TypeContext<ControlPanelDN>())
     {
-        Html.EntityLine(tc, cp => cp.Related);
+        Html.EntityLine(tc, cp => cp.Related, el => el.Create = false);
         Html.ValueLine(tc, cp => cp.DisplayName);
         Html.ValueLine(tc, cp => cp.HomePage);
         Html.ValueLine(tc, cp => cp.NumberOfColumns);

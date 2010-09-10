@@ -11,9 +11,9 @@ namespace Signum.Entities.ControlPanel
     [Serializable]
     public class ControlPanelDN : Entity
     {
-        Lite<IIdentifiable> related;
+        Lite<IdentifiableEntity> related;
         [NotNullValidator]
-        public Lite<IIdentifiable> Related
+        public Lite<IdentifiableEntity> Related
         {
             get { return related; }
             set { Set(ref related, value, () => Related); }

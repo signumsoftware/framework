@@ -19,6 +19,7 @@ using Signum.Web.Queries;
 using Signum.Web.Reports;
 using Signum.Web.Authorization;
 using Signum.Web.ControlPanel;
+using Signum.Entities.ControlPanel;
 #endregion
 
 namespace Signum.Web.Extensions.Sample
@@ -80,6 +81,7 @@ namespace Signum.Web.Extensions.Sample
             {
                 Constructors = new Dictionary<Type, Func<ModifiableEntity>>
                 {
+                    { typeof(ControlPanelDN), () => new ControlPanelDN { Related = RoleDN.Current.ToLite<IdentifiableEntity>() } }
                 }
             });
 

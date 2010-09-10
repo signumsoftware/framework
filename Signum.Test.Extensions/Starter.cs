@@ -14,6 +14,7 @@ using Signum.Engine.Basics;
 using Signum.Engine.Reports;
 using Signum.Engine.ControlPanel;
 using Signum.Entities.ControlPanel;
+using Signum.Entities.Reports;
 
 namespace Signum.Test.Extensions
 {
@@ -57,7 +58,8 @@ namespace Signum.Test.Extensions
             ConnectionScope.Default = new Connection(connectionString, sb.Schema, dqm);
 
             sb.Settings.OverrideTypeAttributes<IUserRelatedDN>(new ImplementedByAttribute());
-            sb.Settings.OverrideFieldAttributes<ControlPanelDN, Lite<IIdentifiable>>(cp => cp.Related, new ImplementedByAttribute(typeof(UserDN), typeof(RoleDN)));
+            sb.Settings.OverrideFieldAttributes<UserQueryDN, Lite<IdentifiableEntity>>(cp => cp.Related, new ImplementedByAttribute(typeof(RoleDN)));
+            sb.Settings.OverrideFieldAttributes<ControlPanelDN, Lite<IdentifiableEntity>>(cp => cp.Related, new ImplementedByAttribute(typeof(RoleDN)));
 
             AuthLogic.Start(sb, dqm, AuthLogic.SystemUserName, null);
             UserTicketLogic.Start(sb, dqm);
@@ -73,11 +75,11 @@ namespace Signum.Test.Extensions
 
             QueryLogic.Start(sb);
             UserQueryLogic.Start(sb, dqm);
-            UserQueryLogic.RegisterUserEntityGroup(sb, MusicGroups.UserEntities);
-            UserQueryLogic.RegisterRoleEntityGroup(sb, MusicGroups.RoleEntities);
+            //UserQueryLogic.RegisterUserEntityGroup(sb, MusicGroups.UserEntities);
+            //UserQueryLogic.RegisterRoleEntityGroup(sb, MusicGroups.RoleEntities);
             ControlPanelLogic.Start(sb, dqm);
-            ControlPanelLogic.RegisterUserEntityGroup(sb, MusicGroups.UserEntities);
-            ControlPanelLogic.RegisterRoleEntityGroup(sb, MusicGroups.RoleEntities);
+            //ControlPanelLogic.RegisterUserEntityGroup(sb, MusicGroups.UserEntities);
+            //ControlPanelLogic.RegisterRoleEntityGroup(sb, MusicGroups.RoleEntities);
 
             ReportsLogic.Start(sb, dqm, true, false);
 
@@ -134,6 +136,18 @@ namespace Signum.Test.Extensions
 
                 EntityGroupAuthLogic.SetEntityGroupAllowed(externalUser.ToLite(), MusicGroups.JapanEntities,
                     new EntityGroupAllowedDN(TypeAllowed.DBCreateUICreate, TypeAllowed.DBNoneUINone));
+
+                //EntityGroupAuthLogic.SetEntityGroupAllowed(externalUser.ToLite(), MusicGroups.UserEntities,
+                //    new EntityGroupAllowedDN(TypeAllowed.DBCreateUICreate, TypeAllowed.DBNoneUINone));
+                //EntityGroupAuthLogic.SetEntityGroupAllowed(externalUser.ToLite(), MusicGroups.RoleEntities,
+                //    new EntityGroupAllowedDN(TypeAllowed.DBReadUIRead, TypeAllowed.DBNoneUINone));
+
+                //EntityGroupAuthLogic.SetEntityGroupAllowed(internalUser.ToLite(), MusicGroups.UserEntities,
+                //    new EntityGroupAllowedDN(TypeAllowed.DBCreateUICreate, TypeAllowed.DBNoneUINone));
+                //EntityGroupAuthLogic.SetEntityGroupAllowed(internalUser.ToLite(), MusicGroups.RoleEntities,
+                //    new EntityGroupAllowedDN(TypeAllowed.DBReadUIRead, TypeAllowed.DBNoneUINone));
+
+                AuthLogic.InvalidateCache(); 
             }
         }
     }

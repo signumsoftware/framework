@@ -12,7 +12,6 @@ namespace Signum.Entities.Basics
     [Serializable]
     public class QueryDN : IdentifiableEntity
     {
-        public static string DisplayNameName = "DisplayName";
         [NotNullable, SqlDbType(Size = 100)]
         string displayName;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
@@ -22,7 +21,6 @@ namespace Signum.Entities.Basics
             set { SetToStr(ref displayName, value, () => DisplayName); }
         }
 
-        public const string KeyName = "Key";
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
         string key;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]

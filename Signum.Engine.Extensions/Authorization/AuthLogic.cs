@@ -183,12 +183,14 @@ namespace Signum.Engine.Authorization
 
             if (role.Modified)
             {
-                Transaction.RealCommit -= InvalidateRoles;
-                Transaction.RealCommit += InvalidateRoles;
+                Transaction.RealCommit -= InvalidateCache;
+                Transaction.RealCommit += InvalidateCache;
             }
         }
 
-        static void InvalidateRoles()
+
+
+        public static void InvalidateCache()
         {
             _roles = null;
 

@@ -2,6 +2,7 @@
 <%@ Import Namespace="Signum.Web" %>
 <%@ Import Namespace="Signum.Test" %>
 <%@ Import Namespace="Signum.Entities.ControlPanel" %>
+<%@ Import Namespace="Signum.Entities.Authorization" %>
 
     <%=new WebMenuItem
     {
@@ -25,6 +26,15 @@
                 {
                     new WebMenuItem { Text = "Band with details", Link = "Music/BandDetail" },
                     new WebMenuItem { Text = "Band with repeater", Link = "Music/BandRepeater" },
+                }
+            },
+            new WebMenuItem
+            {
+                Text = "Auth",
+                Children = 
+                {
+                    new WebMenuItem { Link = new FindOptions(typeof(UserDN)) },
+                    new WebMenuItem { Link = new FindOptions(typeof(RoleDN)) },
                 }
             },
             new WebMenuItem { Link = new FindOptions(typeof(ControlPanelDN)) }

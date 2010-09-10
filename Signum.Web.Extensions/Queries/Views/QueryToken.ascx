@@ -4,18 +4,12 @@
 <%@ Import Namespace="Signum.Entities" %>
 <%@ Import Namespace="Signum.Utilities" %>
 <%@ Import Namespace="Signum.Entities.Reports" %>
-<%@ Import Namespace="Signum.Web.Queries.Models" %>
 
 <%
-using (var e = Html.TypeContext<QueryTokenModel>()) 
+using (var e = Html.TypeContext<QueryTokenDN>()) 
 {
     %>
-    <%= Html.WriteQueryToken(e.Value.QueryNameToStr, e.Value.QueryToken.Token, e, 0) %>
+    <%= Html.WriteQueryToken(e.Value.Token, e)%>
     <%
-    //Html.ValueLine(e, f => f.DisplayName, f => f.ReadOnly = true);
-    //Html.EntityRepeater(e, f => f.Filters);
-    //Html.EntityRepeater(e, f => f.Columns);
-    //Html.EntityList(e, f => f.Orders);
-    //Html.ValueLine(e, f => f.MaxItems);
 }
 %>

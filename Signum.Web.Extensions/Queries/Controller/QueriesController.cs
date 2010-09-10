@@ -19,8 +19,8 @@ using System.Collections.Specialized;
 using System.IO;
 using Signum.Entities.Reports;
 using Signum.Entities.Basics;
-using Signum.Web.Queries.Models;
 using Signum.Engine.Basics;
+using Signum.Entities.Authorization;
 #endregion
 
 namespace Signum.Web.Queries
@@ -33,7 +33,6 @@ namespace Signum.Web.Queries
             UserQueryDN uq = Database.Retrieve<UserQueryDN>(id);
 
             object queryName = Navigator.Manager.QuerySettings.Keys.First(k => QueryUtils.GetQueryName(k) == uq.Query.Key);
-                // Navigator.ResolveQueryFromToStr(uq.Query.Key);
 
             FindOptions fo = new FindOptions(queryName)
             { 
@@ -53,6 +52,7 @@ namespace Signum.Web.Queries
 
             var userQuery = new UserQueryDN
             {
+                Related = RoleDN.Current.ToLite<IdentifiableEntity>(), //User UserDN.Current when possible
                 Query = QueryLogic.RetrieveOrGenerateQuery(findOptions.QueryName),
                 Filters = findOptions.FilterOptions.Select(fo => new QueryFilterDN { Token = fo.Token, Operation = fo.Operation, Value = fo.Value, ValueString = FilterValueConverter.ToString(fo.Value, fo.Token.Type) }).ToMList(),
                 Columns = findOptions.UserColumnOptions.Select(uco => new QueryColumnDN { Token = uco.UserColumn.Token, DisplayName = uco.DisplayName }).ToMList(),
@@ -60,16 +60,18 @@ namespace Signum.Web.Queries
                 MaxItems = findOptions.Top
             };
 
-            return Navigator.View(this, new UserQueryModel(userQuery, findOptions.QueryName));
+            ViewData[ViewDataKeys.QueryName] = findOptions.QueryName;
+
+            return Navigator.View(this, userQuery);
         }
 
         public ActionResult EditUserQuery(int id)
         {
             UserQueryDN uq = Database.Retrieve<UserQueryDN>(id);
 
-            object queryName = Navigator.Manager.QuerySettings.First(kvp => QueryUtils.GetQueryName(kvp.Key) == uq.Query.Key).Key;
+            ViewData[ViewDataKeys.QueryName] = Navigator.Manager.QuerySettings.First(kvp => QueryUtils.GetQueryName(kvp.Key) == uq.Query.Key).Key;
 
-            return Navigator.View(this, new UserQueryModel(uq, queryName));
+            return Navigator.View(this, uq);
         }
 
         public ActionResult DeleteUserQuery(int id)
@@ -83,40 +85,13 @@ namespace Signum.Web.Queries
 
         public ActionResult SaveUserQuery()
         {
-            var context = this.ExtractEntity<UserQueryModel>().ApplyChanges(this.ControllerContext, null, true).ValidateGlobal();
+            var context = this.ExtractEntity<UserQueryDN>().ApplyChanges(this.ControllerContext, null, true).ValidateGlobal();
 
-            var userQuery = context.Value.ToUserQueryDN().Save();
+            var userQuery = context.Value.Save();
 
-            object queryName = Navigator.Manager.QuerySettings.First(kvp => QueryUtils.GetQueryName(kvp.Key) == userQuery.Query.Key).Key;
+            ViewData[ViewDataKeys.QueryName] = Navigator.Manager.QuerySettings.First(kvp => QueryUtils.GetQueryName(kvp.Key) == userQuery.Query.Key).Key;
 
-            return Navigator.View(this, new UserQueryModel(userQuery, queryName));
-        }
-
-        public ActionResult NewQueryFilter(string prefix, string queryKey)
-        {
-            var query = Database.Query<QueryDN>().FirstOrDefault(q => q.Key == queryKey) ?? new QueryDN { Key = queryKey };
-
-            var filterModel = new QueryFilterModel(new QueryFilterDN(), Navigator.Manager.QuerySettings.First(kvp => QueryUtils.GetQueryName(kvp.Key) == queryKey).Key.ToString());
-
-            return Navigator.PartialView(this, filterModel, prefix);
-        }
-
-        public ActionResult NewQueryColumn(string prefix, string queryKey)
-        {
-            var query = Database.Query<QueryDN>().FirstOrDefault(q => q.Key == queryKey) ?? new QueryDN { Key = queryKey };
-
-            var columnModel = new QueryColumnModel(new QueryColumnDN(), Navigator.Manager.QuerySettings.First(kvp => QueryUtils.GetQueryName(kvp.Key) == queryKey).Key.ToString());
-
-            return Navigator.PartialView(this, columnModel, prefix);
-        }
-
-        public ActionResult NewQueryOrder(string prefix, string queryKey)
-        {
-            var query = Database.Query<QueryDN>().FirstOrDefault(q => q.Key == queryKey) ?? new QueryDN { Key = queryKey };
-
-            var orderModel = new QueryOrderModel(new QueryOrderDN(), Navigator.Manager.QuerySettings.First(kvp => QueryUtils.GetQueryName(kvp.Key) == queryKey).Key.ToString());
-
-            return Navigator.PartialView(this, orderModel, prefix);
+            return Navigator.View(this, userQuery);
         }
     }
 }

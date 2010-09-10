@@ -4,61 +4,41 @@
 <%@ Import Namespace="Signum.Entities" %>
 <%@ Import Namespace="Signum.Utilities" %>
 <%@ Import Namespace="Signum.Entities.Reports" %>
-<%@ Import Namespace="Signum.Web.Queries.Models" %>
 <%@ Import Namespace="Signum.Entities.Basics" %>
 
 <%
-using (var e = Html.TypeContext<UserQueryModel>()) 
+using (var e = Html.TypeContext<UserQueryDN>()) 
 {
-    %>
-    <%= Html.Hidden(e.Compose(UserQueryModel.IdUserQueryKey), e.Value.IdUserQuery) %>
-    <%
+    Html.EntityLine(e, f => f.Related, el => el.Create = false);
     using (var query = e.SubContext(f => f.Query))
     {
         Html.WriteEntityInfo(query);
-        Html.ValueLine(query, f => f.DisplayName, f => f.ReadOnly = true);
-    %>
-        <%= Html.Hidden(query.Compose(QueryDN.KeyName), query.Value.Key)%>
-        <%= Html.Hidden(query.Compose(QueryDN.DisplayNameName), query.Value.DisplayName)%>
+        %>
+        <%= Html.Span("Query", "Query", "labelLine") %>
+        <%= Html.Href("hrefQuery", query.Value.DisplayName, Navigator.FindRoute(ViewData[ViewDataKeys.QueryName]), "", "valueLine", null) %>
+        
+        <div class="clearall"></div>
+        
+        <%= Html.Hidden(query.Compose("Key"), query.Value.Key)%>
+        <%= Html.Hidden(query.Compose("DisplayName"), query.Value.DisplayName)%>
     <%
     }
     Html.ValueLine(e, f => f.DisplayName);
 	%>
 	<br />
 	<%    
-    Html.EntityRepeater(e, f => f.Filters, er => er.Creating = 
-        EntityRepeater.JsCreating(
-            er, 
-            new JsViewOptions
-            { 
-                ControllerUrl = "Queries/NewQueryFilter", 
-                RequestExtraJsonData = "{{queryKey:\"{0}\"}}".Formato(e.Value.Query.Key.ToString()) 
-            }).ToJS());
-	%>
+        Html.EntityRepeater(e, f => f.Filters, er => { er.PreserveViewData = true; er.ForceNewInUI = true; });
+    %>
 	<br />
 	<%    
-    Html.EntityRepeater(e, f => f.Columns, er => er.Creating = 
-        EntityRepeater.JsCreating(
-            er, 
-            new JsViewOptions
-            {
-                ControllerUrl = "Queries/NewQueryColumn",
-                RequestExtraJsonData = "{{queryKey:\"{0}\"}}".Formato(e.Value.Query.Key.ToString())
-            }).ToJS());
-	%>
+        Html.EntityRepeater(e, f => f.Columns, er => { er.PreserveViewData = true; er.ForceNewInUI = true; });
+    %>
 	<br />
 	<%    
-        Html.EntityRepeater(e, f => f.Orders, er => er.Creating =
-            EntityRepeater.JsCreating(
-                er,
-                new JsViewOptions
-                {
-                    ControllerUrl = "Queries/NewQueryOrder",
-                    RequestExtraJsonData = "{{queryKey:\"{0}\"}}".Formato(e.Value.Query.Key.ToString())
-                }).ToJS());
+        Html.EntityRepeater(e, f => f.Orders, er => { er.PreserveViewData = true; er.ForceNewInUI = true; });
     %>
 	<br />
 	<%   
-    Html.ValueLine(e, f => f.Top);
+    Html.ValueLine(e, f => f.MaxItems);
 }
 %>

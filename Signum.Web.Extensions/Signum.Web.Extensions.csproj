@@ -118,12 +118,7 @@
       <DependentUpon>Resources.fr.resx</DependentUpon>
     </Compile>
     <Compile Include="Queries\Controller\QueriesController.cs" />
-    <Compile Include="Queries\Models\QueryOrderModel.cs" />
-    <Compile Include="Queries\Models\QueryColumnModel.cs" />
-    <Compile Include="Queries\Models\UserQueryModel.cs" />
-    <Compile Include="Queries\Models\QueryFilterModel.cs" />
-    <Compile Include="Queries\Models\QueryTokenModel.cs" />
-    <Compile Include="Queries\QueriesClient.cs" />
+    <Compile Include="Queries\UserQueriesClient.cs" />
     <Compile Include="Queries\UserQueriesHelper.cs" />
     <Compile Include="Reports\ReportClient.cs" />
     <Compile Include="Reports\Controllers\ReportController.cs" />
@@ -274,9 +269,9 @@
     <Content Include="Processes\Views\PackageLine.ascx" />
     <Content Include="Processes\Views\Process.ascx" />
     <Content Include="Processes\Views\ProcessExecution.ascx" />
-    <Content Include="Queries\Views\QueryOrder.ascx" />
     <Content Include="Queries\Views\QueryColumn.ascx" />
-    <Content Include="Queries\Views\QueryFilter.ascx" />
+    <Content Include="Queries\Views\QueryFilterIU.ascx" />
+    <Content Include="Queries\Views\QueryOrder.ascx" />
     <Content Include="Queries\Views\QueryToken.ascx" />
     <Content Include="Queries\Views\UserQuery.ascx" />
     <Content Include="Reports\Views\ExcelReport.ascx" />

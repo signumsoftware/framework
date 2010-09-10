@@ -59,7 +59,7 @@ namespace Signum.Web.Reports
                                 {
                                     ctx.Value = new ExcelReportDN();
                                     
-                                    string queryKey = ctx.Inputs[TypeContextUtilities.Compose("Query", QueryDN.KeyName)];
+                                    string queryKey = ctx.Inputs[TypeContextUtilities.Compose("Query", "Key")];
                                     object queryName = Navigator.Manager.QuerySettings.Keys.First(key => QueryUtils.GetQueryName(key) == queryKey);
                                
                                     ctx.Value.Query = QueryLogic.RetrieveOrGenerateQuery(queryName);

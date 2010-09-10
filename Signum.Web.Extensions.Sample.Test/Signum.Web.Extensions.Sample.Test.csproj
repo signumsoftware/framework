@@ -121,9 +121,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="OrderedTest1.orderedtest">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Include="otControlPanel.orderedtest">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

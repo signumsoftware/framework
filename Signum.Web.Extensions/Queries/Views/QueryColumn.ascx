@@ -4,23 +4,17 @@
 <%@ Import Namespace="Signum.Entities" %>
 <%@ Import Namespace="Signum.Utilities" %>
 <%@ Import Namespace="Signum.Entities.Reports" %>
-<%@ Import Namespace="Signum.Web.Queries.Models" %>
 
 <%
-using (var e = Html.TypeContext<QueryColumnModel>()) 
+using (var e = Html.TypeContext<QueryColumnDN>()) 
 {
     using (var style = e.SubContext())
     {
         style.OnlyValue = true;
-        Html.ValueLine(style, f => f.DisplayName);
+        Html.ValueLine(style, f => f.DisplayName, vl => vl.ValueHtmlProps["size"] = 20);
     %>
     <div style="float:left">
-    <%
-        using (var queryToken = e.SubContext(f => f.QueryToken))
-        {
-            Html.WriteEntityInfo(queryToken); %>
-            <%= Html.WriteQueryToken(queryToken.Value.QueryNameToStr, queryToken.Value.QueryToken.Token, queryToken, 0)%>
-    <% } %>
+    <%= Html.WriteQueryToken(e.Value.Token, e)%>
     </div>
     <%  
     }

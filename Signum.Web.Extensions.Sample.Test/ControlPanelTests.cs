@@ -45,16 +45,7 @@ namespace Signum.Web.Extensions.Sample.Test
                 selenium.Click("jq=input.create");
                 selenium.WaitForPageToLoad(PageLoadTimeout);
 
-                //Related: User "internal"
-                selenium.Click("Related_btnFind");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #RelatedTemp"));
-                selenium.Click("UserDN");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("Related_btnSearch"));
-                selenium.Click("Related_btnSearch");
-                selenium.Click("jq=#Related_tblResults > tbody > tr:nth-child(3) input:radio");
-                selenium.Click("Related_sfBtnOk");
-                selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("jq=#divASustituir + #RelatedTemp"));
-
+                //Related is RoleDN.Current, and when available UserDN.Current
                 selenium.Type("DisplayName", "Control Panel Home Page");
                 selenium.Click("HomePage");
                 selenium.Type("NumberOfColumns", "2");
@@ -124,8 +115,8 @@ namespace Signum.Web.Extensions.Sample.Test
                 //view
                 selenium.Open("/Signum.Web.Extensions.Sample/");
                 Assert.IsTrue(selenium.IsElementPresent("jq=table > tbody > tr:first > td:first #r1c1_divSearchControl"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=table > tbody > tr:first > td:first #lblr2c1 + a.count-search"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=table > tbody > tr:first > td:nth-child(2) a:nth-child(2)"));
+                Assert.IsTrue(selenium.IsElementPresent("jq=table > tbody > tr:nth-child(2) > td:first #lblr2c1 + a.count-search"));
+                Assert.IsTrue(selenium.IsElementPresent("jq=table > tbody > tr:nth-child(2) > td:nth-child(2) a:nth-child(2)"));
             }
             catch (Exception)
             {
