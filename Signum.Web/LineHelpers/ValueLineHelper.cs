@@ -219,7 +219,7 @@ namespace Signum.Web
 
             valueLine.ValueHtmlProps.Add("onkeydown", Reflector.IsDecimalNumber(valueLine.Type) ? "return validator.decimalNumber(event);" : "return validator.number(event);");
 
-            return helper.TextboxInLine(valueLine, InputType.Number);
+            return helper.TextboxInLine(valueLine, InputType.Text);
         }
 
         public static string TextAreaInLine(this HtmlHelper helper, ValueLine valueLine)
