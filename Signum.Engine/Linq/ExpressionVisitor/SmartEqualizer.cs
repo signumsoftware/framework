@@ -56,7 +56,9 @@ namespace Signum.Engine.Linq
             if(newItem is LiteReferenceExpression)
                 return EntityIn(((LiteReferenceExpression)newItem).Reference, expression.Cast<LiteReferenceExpression>().Select(l=>l.Reference).ToArray()); 
 
-            Dictionary<Type, object[]> entityIDs = expression.Cast<FieldInitExpression>().AgGroupToDictionary(a=>a.Type, gr=> gr.Select(a=>((ConstantExpression)a.ExternalId).Value??int.MaxValue).ToArray()); 
+            var fies = expression.Select(t=> t as FieldInitExpression ?? ((ImplementedByExpression)t).Implementations.Single().Field); 
+
+            Dictionary<Type, object[]> entityIDs = fies.AgGroupToDictionary(a=>a.Type, gr=> gr.Select(a=>((ConstantExpression)a.ExternalId).Value??int.MaxValue).ToArray()); 
 
             FieldInitExpression fie = newItem as FieldInitExpression;
             if (fie != null)

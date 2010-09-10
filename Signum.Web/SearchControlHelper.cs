@@ -148,9 +148,9 @@ namespace Signum.Web
                 });
         }
 
-        public static string WriteQueryToken(this HtmlHelper helper, string queryKey, QueryToken queryToken, Context context, int index)
+        public static string WriteQueryToken(this HtmlHelper helper, QueryToken queryToken, Context context)
         {
-            var queryName = Navigator.Manager.ResolveQueryFromToStr(queryKey);
+            var queryName = helper.ViewData[ViewDataKeys.QueryName];
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
             string queryUrlName = Navigator.Manager.QuerySettings[queryName].UrlName;
 

@@ -40,7 +40,7 @@ namespace Signum.Web
             if (listDetail.ElementType.IsEmbeddedEntity())
             {
                 TypeElementContext<T> templateTC = new TypeElementContext<T>((T)(object)Constructor.Construct(typeof(T)), (TypeContext)listDetail.Parent, 0);
-                sb.AppendLine(EntityBaseHelper.EmbeddedTemplate(listDetail, EntityBaseHelper.RenderTypeContext(helper, templateTC, RenderMode.Content, listDetail.PartialViewName, listDetail.ReloadOnChange)));
+                sb.AppendLine(EntityBaseHelper.EmbeddedTemplate(listDetail, EntityBaseHelper.RenderTypeContext(helper, templateTC, RenderMode.Content, listDetail)));
             }
 
             if (listDetail.ShowFieldDiv)
@@ -89,13 +89,14 @@ namespace Signum.Web
         private static string InternalListDetailElement<T>(this HtmlHelper helper, StringBuilder sbOptions, TypeElementContext<T> itemTC, EntityListDetail listDetail)
         {
             StringBuilder sb = new StringBuilder();
-            
-            sb.AppendLine(helper.Hidden(itemTC.Compose(EntityListBaseKeys.Index), itemTC.Index.ToString()).ToHtmlString());
+
+            if (!listDetail.ForceNewInUI)
+                sb.AppendLine(helper.Hidden(itemTC.Compose(EntityListBaseKeys.Index), itemTC.Index.ToString()).ToHtmlString());
 
             sb.AppendLine(helper.HiddenRuntimeInfo(itemTC));
 
             if (typeof(T).IsEmbeddedEntity() || EntityBaseHelper.RequiresLoadAll(helper, listDetail))
-                sb.AppendLine(EntityBaseHelper.RenderTypeContext(helper, itemTC, RenderMode.ContentInInvisibleDiv, listDetail.PartialViewName, listDetail.ReloadOnChange));
+                sb.AppendLine(EntityBaseHelper.RenderTypeContext(helper, itemTC, RenderMode.ContentInInvisibleDiv, listDetail));
             else if (itemTC.Value != null)
                 sb.Append(helper.Div(itemTC.Compose(EntityBaseKeys.Entity), "", "", new Dictionary<string, object> { { "style", "display:none" } }));
 

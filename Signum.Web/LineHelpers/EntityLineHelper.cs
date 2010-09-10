@@ -44,7 +44,7 @@ namespace Signum.Web
                 sb.AppendLine(EntityBaseHelper.WriteImplementations(helper, entityLine));
 
                 if (EntityBaseHelper.RequiresLoadAll(helper, entityLine))
-                    sb.AppendLine(EntityBaseHelper.RenderTypeContext(helper, (TypeContext)entityLine.Parent, RenderMode.PopupInDiv, entityLine.PartialViewName, entityLine.ReloadOnChange));
+                    sb.AppendLine(EntityBaseHelper.RenderTypeContext(helper, (TypeContext)entityLine.Parent, RenderMode.PopupInDiv, entityLine));
                 else if (entityLine.UntypedValue != null)
                     sb.AppendLine(helper.Div(entityLine.Compose(EntityBaseKeys.Entity), "", "", new Dictionary<string, object> { { "style", "display:none" } }));
                 
@@ -76,11 +76,11 @@ namespace Signum.Web
                 if (entityLine.UntypedValue == null)
                 {
                     TypeContext templateTC = ((TypeContext)entityLine.Parent).Clone((object)Constructor.Construct(entityLine.Type.CleanType()));
-                    sb.AppendLine(EntityBaseHelper.EmbeddedTemplate(entityLine, EntityBaseHelper.RenderTypeContext(helper, templateTC, RenderMode.Popup, entityLine.PartialViewName, entityLine.ReloadOnChange)));
+                    sb.AppendLine(EntityBaseHelper.EmbeddedTemplate(entityLine, EntityBaseHelper.RenderTypeContext(helper, templateTC, RenderMode.Popup, entityLine)));
                 }
 
                 if (entityLine.UntypedValue != null)
-                    sb.AppendLine(EntityBaseHelper.RenderTypeContext(helper, (TypeContext)entityLine.Parent, RenderMode.PopupInDiv, entityLine.PartialViewName, entityLine.ReloadOnChange));
+                    sb.AppendLine(EntityBaseHelper.RenderTypeContext(helper, (TypeContext)entityLine.Parent, RenderMode.PopupInDiv, entityLine));
 
                 sb.AppendLine(helper.Span(entityLine.Compose(EntityBaseKeys.ToStrLink), entityLine.UntypedValue.TryToString(), "valueLine"));
             }

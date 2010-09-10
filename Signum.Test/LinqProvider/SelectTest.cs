@@ -111,6 +111,35 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void SelectLiteUpcast()
+        {
+            var list = Database.Query<ArtistDN>()
+                .Select(a => a.ToLite<IAuthorDN>()).ToList();
+        }
+
+        [TestMethod]
+        public void SelectLiteCastUpcast()
+        {
+            var list = Database.Query<ArtistDN>()
+                .SelectMany(a => a.Friends).Select(a=>a.ToLite<IAuthorDN>()).ToList();
+        }
+
+        [TestMethod]
+        public void SelectLiteCastNocast()
+        {
+            var list = Database.Query<ArtistDN>()
+                .SelectMany(a => a.Friends).Select(a => a.ToLite<ArtistDN>()).ToList();
+        }
+
+        [TestMethod]
+        public void SelectLiteCastDowncast()
+        {
+            var list = Database.Query<AlbumDN>()
+                .Select(a => a.Author.ToLite().ToLite<ArtistDN>()).ToList();
+        }
+
+
+        [TestMethod]
         public void SelectLiteGenericUpcast()
         {
             var list = SelectAuthorsLite<ArtistDN, IAuthorDN>();

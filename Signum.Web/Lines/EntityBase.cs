@@ -42,6 +42,26 @@ namespace Signum.Web
         public bool Find { get; set; }
         public bool Remove { get; set; }
         public bool ReadOnlyEntity { get; set; }
+        
+        bool preserveViewData = false; 
+        /// <summary>
+        /// When rendering the line content, it will preserve the ViewData values except the Model
+        /// </summary>
+        public bool PreserveViewData
+        {
+            get { return preserveViewData; }
+            set { preserveViewData = value; }
+        }
+
+        bool forceNewInUI;
+        /// <summary>
+        /// If set to true and the line value is new, RuntimeInfo will be rendered as "n" instead of "o"
+        /// </summary>
+        public bool ForceNewInUI
+        {
+            get { return forceNewInUI; }
+            set { forceNewInUI = value; }
+        }
 
         public string OnEntityChanged { get; set; }
         

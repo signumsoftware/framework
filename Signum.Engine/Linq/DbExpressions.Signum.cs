@@ -264,7 +264,7 @@ namespace Signum.Engine.Linq
             {
                 Type cleanType = Reflector.ExtractLite(type);
 
-                if (!cleanType.IsAssignableFrom(reference.Type) && !(cleanType == typeof(IdentifiableEntity) && reference.Type.IsInterface))
+                if (cleanType != reference.Type)
                     throw new ArgumentException(Resources.TheType0IsNotTheLiteVersionOf1.Formato(type.TypeName(), reference.Type.TypeName()));
             }
 

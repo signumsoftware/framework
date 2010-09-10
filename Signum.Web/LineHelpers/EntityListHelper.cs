@@ -38,7 +38,7 @@ namespace Signum.Web
             if (entityList.ElementType.IsEmbeddedEntity())
             {
                 TypeElementContext<T> templateTC = new TypeElementContext<T>((T)(object)Constructor.Construct(typeof(T)), (TypeContext)entityList.Parent, 0);
-                sb.AppendLine(EntityBaseHelper.EmbeddedTemplate(entityList, EntityBaseHelper.RenderTypeContext(helper, templateTC, RenderMode.Popup, entityList.PartialViewName, entityList.ReloadOnChange)));
+                sb.AppendLine(EntityBaseHelper.EmbeddedTemplate(entityList, EntityBaseHelper.RenderTypeContext(helper, templateTC, RenderMode.Popup, entityList)));
             }
 
             if (entityList.ShowFieldDiv)
@@ -87,12 +87,13 @@ namespace Signum.Web
         {
             StringBuilder sb = new StringBuilder();
 
-            sb.AppendLine(helper.Hidden(itemTC.Compose(EntityListBaseKeys.Index), itemTC.Index.ToString()).ToHtmlString());
+            if (!entityList.ForceNewInUI)
+                sb.AppendLine(helper.Hidden(itemTC.Compose(EntityListBaseKeys.Index), itemTC.Index.ToString()).ToHtmlString());
 
             sb.AppendLine(helper.HiddenRuntimeInfo(itemTC));
 
             if (typeof(T).IsEmbeddedEntity() || EntityBaseHelper.RequiresLoadAll(helper, entityList))
-                sb.AppendLine(EntityBaseHelper.RenderTypeContext(helper, itemTC, RenderMode.PopupInDiv, entityList.PartialViewName, entityList.ReloadOnChange));
+                sb.AppendLine(EntityBaseHelper.RenderTypeContext(helper, itemTC, RenderMode.PopupInDiv, entityList));
             else if (itemTC.Value != null)
                 sb.Append(helper.Div(itemTC.Compose(EntityBaseKeys.Entity), "", "", new Dictionary<string, object> { { "style", "display:none" }, {"class", "entityList"}}));
             

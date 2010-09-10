@@ -36,7 +36,7 @@ namespace Signum.Web
             else
             {
                 TypeContext templateTC = ((TypeContext)entityDetail.Parent).Clone((object)Constructor.Construct(entityDetail.Type.CleanType()));
-                sb.AppendLine(EntityBaseHelper.EmbeddedTemplate(entityDetail, EntityBaseHelper.RenderTypeContext(helper, templateTC, RenderMode.Content, entityDetail.PartialViewName, entityDetail.ReloadOnChange)));
+                sb.AppendLine(EntityBaseHelper.EmbeddedTemplate(entityDetail, EntityBaseHelper.RenderTypeContext(helper, templateTC, RenderMode.Content, entityDetail)));
             }
 
             sb.AppendLine(EntityBaseHelper.WriteCreateButton(helper, entityDetail));
@@ -47,7 +47,7 @@ namespace Signum.Web
 
             string controlHtml = null;
             if (entityDetail.UntypedValue != null)
-                controlHtml = EntityBaseHelper.RenderTypeContext(helper, (TypeContext)entityDetail.Parent, RenderMode.Content, entityDetail.PartialViewName, entityDetail.ReloadOnChange);
+                controlHtml = EntityBaseHelper.RenderTypeContext(helper, (TypeContext)entityDetail.Parent, RenderMode.Content, entityDetail);
             
             if (entityDetail.DetailDiv == entityDetail.DefaultDetailDiv)
                 sb.AppendLine(helper.Div(entityDetail.DetailDiv, controlHtml ?? "", ""));

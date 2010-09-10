@@ -25,6 +25,7 @@ namespace Signum.Web
         public const string NavigationButtons = "sfNavigationButtons";
         public const string FindOptions = "sfFindOptions";
         public const string QueryDescription = "sfQueryDescription";
+        public const string QueryName = "sfQueryName";
         public const string Top = "sfTop";
         public const string Results = "sfResults";
         public const string EntityColumnIndex = "sfEntityColumnIndex";
@@ -36,6 +37,7 @@ namespace Signum.Web
         public const string ChangeTicks = "sfChangeTicks";
         public const string Reactive = "sfReactive";
         public const string TabId = "sfTabId";
+        public const string ForceNewInUI = "sfForceNewInUI";
 
         public static string WindowPrefix(this HtmlHelper helper)
         {

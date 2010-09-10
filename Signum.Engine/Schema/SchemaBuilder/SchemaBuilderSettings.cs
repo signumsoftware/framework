@@ -190,7 +190,7 @@ namespace Signum.Engine.Maps
              FieldInfo fi = Reflector.FindFieldInfo(type, mi, true);
              var imp = GetImplementations(type, fi);
 
-             if (imp == null || !imp.ImplementedBy(type))
+             if (imp == null || !imp.ImplementedBy(typeToImplement))
              {
                  throw new InvalidOperationException("Field {0} from {1} is not ImplementedBy {2}".Formato(fi.Name, type.Name, typeToImplement.Name));
              }

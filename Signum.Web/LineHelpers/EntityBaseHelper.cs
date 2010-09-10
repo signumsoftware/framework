@@ -40,7 +40,7 @@ namespace Signum.Web
                    (eb.UntypedValue != null && hasChanged && propertyHasChanged);
         }
 
-        public static string RenderTypeContext(HtmlHelper helper, TypeContext typeContext, RenderMode mode, string partialViewName, bool reloadOnChange)
+        public static string RenderTypeContext(HtmlHelper helper, TypeContext typeContext, RenderMode mode, EntityBase line)
         {
             Type cleanRuntimeType = (typeContext.UntypedValue as Lite).TryCC(l => l.RuntimeType) ?? typeContext.UntypedValue.GetType();
 
@@ -48,12 +48,25 @@ namespace Signum.Web
 
             TypeContext tc = TypeContextUtilities.CleanTypeContext((TypeContext)typeContext);
 
-            ViewDataDictionary vdd = new ViewDataDictionary(tc);
+            ViewDataDictionary vdd;
+            if (line.PreserveViewData)
+            {
+                vdd = helper.ViewData;
+                vdd.Model = tc;
+            }
+            else
+            {
+                vdd = new ViewDataDictionary(tc);
+                helper.PropagateSFKeys(vdd);
+            }
 
-            helper.PropagateSFKeys(vdd);
-            if (reloadOnChange)
+            if (line.ForceNewInUI)
+                vdd[ViewDataKeys.ForceNewInUI] = true;
+
+            if (line.ReloadOnChange)
                 vdd[ViewDataKeys.Reactive] = true;
-            
+
+            string partialViewName = line.PartialViewName;
             if (string.IsNullOrEmpty(partialViewName))
                 partialViewName = es.OnPartialViewName((ModifiableEntity)tc.UntypedValue);
 

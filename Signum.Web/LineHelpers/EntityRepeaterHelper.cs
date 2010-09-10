@@ -37,7 +37,7 @@ namespace Signum.Web
             if (entityRepeater.ElementType.IsEmbeddedEntity())
             {
                 TypeElementContext<T> templateTC = new TypeElementContext<T>((T)(object)Constructor.Construct(typeof(T)), (TypeContext)entityRepeater.Parent, 0);
-                sb.AppendLine(EntityBaseHelper.EmbeddedTemplate(entityRepeater, EntityBaseHelper.RenderTypeContext(helper, templateTC, RenderMode.Content, entityRepeater.PartialViewName, entityRepeater.ReloadOnChange)));
+                sb.AppendLine(EntityBaseHelper.EmbeddedTemplate(entityRepeater, EntityBaseHelper.RenderTypeContext(helper, templateTC, RenderMode.Content, entityRepeater)));
             } 
             
             sb.AppendLine(ListBaseHelper.WriteCreateButton(helper, entityRepeater, new Dictionary<string, object>{{"title", entityRepeater.AddElementLinkText}}));
@@ -64,7 +64,8 @@ namespace Signum.Web
 
             sb.AppendLine("<div id='{0}' name='{0}' class='repeaterElement'>".Formato(itemTC.Compose(EntityRepeaterKeys.RepeaterElement)));
 
-            sb.AppendLine(helper.Hidden(itemTC.Compose(EntityListBaseKeys.Index), itemTC.Index.ToString()).ToHtmlString());
+            if (!entityRepeater.ForceNewInUI)
+                sb.AppendLine(helper.Hidden(itemTC.Compose(EntityListBaseKeys.Index), itemTC.Index.ToString()).ToHtmlString());
 
             sb.AppendLine(helper.HiddenRuntimeInfo(itemTC));
 
@@ -79,7 +80,7 @@ namespace Signum.Web
 
             sb.AppendLine(helper.Div("", "", "clearall", null)); //To keep remove button space
 
-            sb.AppendLine(EntityBaseHelper.RenderTypeContext(helper, itemTC, RenderMode.ContentInVisibleDiv, entityRepeater.PartialViewName, entityRepeater.ReloadOnChange));
+            sb.AppendLine(EntityBaseHelper.RenderTypeContext(helper, itemTC, RenderMode.ContentInVisibleDiv, entityRepeater));
 
             sb.AppendLine("</div>");
 

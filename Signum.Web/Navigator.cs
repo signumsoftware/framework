@@ -533,6 +533,7 @@ namespace Signum.Web
             Navigator.AddSetting(new EntitySettings<ValueLineBoxModel>(EntityType.Default) { PartialViewName = _ => ValueLineBoxUrl });
 
             Navigator.RegisterTypeName<IIdentifiable>();
+            Navigator.RegisterTypeName<IdentifiableEntity>();
 
             TypesToURLNames = EntitySettings.SelectDictionary(k => k, (k, v) => v.UrlName ?? Reflector.CleanTypeName(k));
             URLNamesToTypes = TypesToURLNames.Inverse(StringComparer.InvariantCultureIgnoreCase, "URLNamesToTypes");

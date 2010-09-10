@@ -9,7 +9,7 @@ using System.Diagnostics;
 using System.IO;
 using Signum.Utilities;
 
-namespace Signum.Test.LinqProvider
+namespace Signum.Test.LinqProviderUpdateDelete
 {
     /// <summary>
     /// Summary description for LinqProvider
