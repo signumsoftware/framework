@@ -16,8 +16,8 @@ using (var e = Html.TypeContext<ExcelReportDN>())
         Html.WriteEntityInfo(query);
         Html.ValueLine(query, f => f.DisplayName, f => { f.ReadOnly = true; f.LabelText = "Query"; });
     %>
-        <%= Html.Hidden(query.Compose(QueryDN.KeyName), query.Value.Key)%>
-        <%= Html.Hidden(query.Compose(QueryDN.DisplayNameName), query.Value.DisplayName)%>
+        <%= Html.Hidden(query.Compose("Key"), query.Value.Key)%>
+        <%= Html.Hidden(query.Compose("DisplayName"), query.Value.DisplayName)%>
     <%
     }
 
