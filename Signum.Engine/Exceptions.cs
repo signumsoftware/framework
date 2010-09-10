@@ -26,7 +26,7 @@ namespace Signum.Engine.Exceptions
         public UniqueKeyException(SqlException inner) : base(null, inner) 
         {
             Match m = indexRegex.Match(inner.Message);
-            if (m != null)
+            if (m.Success)
             {
                 TableName = m.Groups["table"].Value;
                 Fields = m.Groups["field"].Captures.Cast<Capture>().Select(a => a.Value).ToArray();
