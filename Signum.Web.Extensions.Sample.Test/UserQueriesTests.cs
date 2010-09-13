@@ -46,7 +46,7 @@ namespace Signum.Web.Extensions.Sample.Test
                 selenium.Select("ddlTokens_0", "label=Year");
                 selenium.Click("btnAddFilter");
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("ddlSelector_0"));
-                selenium.Select("ddlSelector_0", "label=mayor que");
+                selenium.Select("ddlSelector_0", "value=GreaterThan");
                 selenium.Type("value_0", "2000");
 
                 //add user column
