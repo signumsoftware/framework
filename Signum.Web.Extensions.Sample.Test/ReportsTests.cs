@@ -96,7 +96,7 @@ namespace Signum.Web.Extensions.Sample.Test
                 selenium.WaitForPageToLoad(PageLoadTimeout);
 
                 //created appears modified in menu
-                selenium.Click("/Signum.Web.Extensions.Sample/Find/Album");
+                selenium.Open("/Signum.Web.Extensions.Sample/Find/Album");
                 selenium.WaitForPageToLoad(PageLoadTimeout);
                 Assert.IsTrue(selenium.IsElementPresent("link=test 3"));
             }
