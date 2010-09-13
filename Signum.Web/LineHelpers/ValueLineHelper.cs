@@ -25,7 +25,8 @@ namespace Signum.Web
             Text,
             Number,
             Email,
-            Url
+            Url,
+            Hidden
         }
 
         private static string InternalValueLine(this HtmlHelper helper, ValueLine valueLine)
@@ -191,6 +192,14 @@ namespace Signum.Web
             return InputType.Text;
         }
 
+        public static string Hidden(this HtmlHelper helper, ValueLine valueLine)
+        {
+            if (valueLine.ReadOnly)
+                return helper.Span(valueLine.ControlID, valueLine.UntypedValue.TryToString() ?? "", "valueLine");
+
+            return HtmlHelperExtenders.InputType("hidden", valueLine.ControlID, valueLine.UntypedValue.TryToString() ?? "", valueLine.ValueHtmlProps);
+        }
+
         public static string TextboxInLine(this HtmlHelper helper, ValueLine valueLine, InputType inputType)
         {
             if (valueLine.ReadOnly)
@@ -309,6 +318,25 @@ namespace Signum.Web
                 settingsModifier(vl);
 
             return InternalValueLine(helper, vl);
+        }
+
+        public static void HiddenLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property)
+        {
+            helper.HiddenLine(tc, property, null);
+        }
+
+        public static void HiddenLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property, Action<ValueLine> settingsModifier)
+        {
+            TypeContext<S> context = (TypeContext<S>)Common.WalkExpression(tc, property);
+
+            ValueLine hl = new ValueLine(typeof(S), context.Value, context, null, context.PropertyRoute);
+
+            Common.FireCommonTasks(hl);
+
+            if (settingsModifier != null)
+                settingsModifier(hl);
+
+            helper.Write(Hidden(helper, hl));
         }
 
         private static string SetTicksFunction(HtmlHelper helper, ValueLine valueLine)
