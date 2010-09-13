@@ -208,6 +208,7 @@ namespace Signum.Web.Queries
             {
                 new ToolBarMenu
                 { 
+                    Id = TypeContextUtilities.Compose(prefix, "uqmenu"),
                     AltText = "User Queries", 
                     Text = "User Queries",
                     DivCssClass = ToolBarButton.DefaultQueryCssClass,

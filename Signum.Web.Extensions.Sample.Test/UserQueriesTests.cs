@@ -64,7 +64,7 @@ namespace Signum.Web.Extensions.Sample.Test
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=th.headerSortUp"));
                 
                 //create user query
-                selenium.Click("link=Nuevo");
+                selenium.Click("jq=#uqmenu li:first > a");
                 selenium.WaitForPageToLoad(PageLoadTimeout);
                 selenium.Type("DisplayName", "Last albums");
                 selenium.Click("link=Guardar");
