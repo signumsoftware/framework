@@ -65,7 +65,7 @@ namespace Signum.Web.Extensions.Sample.Test
                 selenium.WaitForPageToLoad(PageLoadTimeout);
 
                 //created appears modified in menu
-                selenium.Click("link=Albums");
+                selenium.Open("/Signum.Web.Extensions.Sample/Find/Album");
                 selenium.WaitForPageToLoad(PageLoadTimeout);
                 Assert.IsTrue(selenium.IsElementPresent("link=test 2"));
 
@@ -81,14 +81,14 @@ namespace Signum.Web.Extensions.Sample.Test
                 selenium.WaitForPageToLoad(PageLoadTimeout);
 
                 //deleted does not appear in menu
-                selenium.Click("link=Albums");
+                selenium.Open("/Signum.Web.Extensions.Sample/Find/Album");
                 selenium.WaitForPageToLoad(PageLoadTimeout);
                 Assert.IsFalse(selenium.IsElementPresent("link=test 2"));
 
                 //create when there are already others
                 selenium.Click(administerLocator);
                 selenium.WaitForPageToLoad(PageLoadTimeout);
-                selenium.Click("jq=input.create");
+                selenium.Click("jq=#btnSearch + input.create");
                 selenium.WaitForPageToLoad(PageLoadTimeout);
                 selenium.Type("DisplayName", "test 3");
                 selenium.Type("File", "D:\\Signum\\Pruebas\\Albumchulo.xlsx");
@@ -96,7 +96,7 @@ namespace Signum.Web.Extensions.Sample.Test
                 selenium.WaitForPageToLoad(PageLoadTimeout);
 
                 //created appears modified in menu
-                selenium.Click("link=Albums");
+                selenium.Click("/Signum.Web.Extensions.Sample/Find/Album");
                 selenium.WaitForPageToLoad(PageLoadTimeout);
                 Assert.IsTrue(selenium.IsElementPresent("link=test 3"));
             }
