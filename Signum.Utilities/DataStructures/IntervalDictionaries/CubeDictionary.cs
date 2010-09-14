@@ -21,7 +21,7 @@ namespace Signum.Utilities.DataStructures
 
         public CubeDictionary(IEnumerable<Tuple<Cube<K1, K2, K3>, V>> dic)
         {
-            IEnumerable<Cube<K1, K2, K3>> cubes = dic.Select(p=>p.First); 
+            IEnumerable<Cube<K1, K2, K3>> cubes = dic.Select(p=>p.Item1); 
 
             xDimension = cubes.ToIndexIntervalDictinary(c =>c.XInterval.Elements());
             yDimension = cubes.ToIndexIntervalDictinary(c =>c.YInterval.Elements());
@@ -32,7 +32,7 @@ namespace Signum.Utilities.DataStructures
 
 
             foreach (var item in dic)
-                Add(item.First, item.Second);
+                Add(item.Item1, item.Item2);
         }
 
         void Add(Cube<K1, K2, K3> cube, V value)

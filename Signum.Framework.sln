@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Signum.Engine", "Signum.Engine\Signum.Engine.csproj", "{7F2DB6FE-C109-4057-B207-C62A767F905D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Signum.Entities", "Signum.Entities\Signum.Entities.csproj", "{F2B51D08-498D-4C9F-8112-9521A7762B02}"
@@ -19,7 +19,7 @@ Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
 		SccNumberOfProjects = 8
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
-		SccTeamFoundationServer = http://andromeda:8080/
+		SccTeamFoundationServer = http://192.168.0.8:8080/
 		SccLocalPath0 = .
 		SccProjectUniqueName1 = Signum.Engine\\Signum.Engine.csproj
 		SccProjectName1 = Signum.Engine
@@ -75,8 +75,8 @@ Global
 		{F7D3F72D-741D-4F67-8CF8-CD41B9035FED}.Release|Any CPU.Build.0 = Release|Any CPU
 		{61898D02-521F-49AB-928B-F80615D55CA3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{61898D02-521F-49AB-928B-F80615D55CA3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{61898D02-521F-49AB-928B-F80615D55CA3}.Partial|Any CPU.ActiveCfg = Partial|Any CPU
-		{61898D02-521F-49AB-928B-F80615D55CA3}.Partial|Any CPU.Build.0 = Partial|Any CPU
+		{61898D02-521F-49AB-928B-F80615D55CA3}.Partial|Any CPU.ActiveCfg = Release|Any CPU
+		{61898D02-521F-49AB-928B-F80615D55CA3}.Partial|Any CPU.Build.0 = Release|Any CPU
 		{61898D02-521F-49AB-928B-F80615D55CA3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{61898D02-521F-49AB-928B-F80615D55CA3}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C6E52C42-F9BB-4CEE-B0F4-B5743CD96C19}.Debug|Any CPU.ActiveCfg = Debug|Any CPU

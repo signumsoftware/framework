@@ -20,7 +20,7 @@ namespace Signum.Utilities.DataStructures
 
         public SquareDictionary(IEnumerable<Tuple<Square<K1, K2>, V>> dictionary)
         {
-            IEnumerable<Square<K1, K2>> squares = dictionary.Select(p => p.First);
+            IEnumerable<Square<K1, K2>> squares = dictionary.Select(p => p.Item1);
 
             xDimension = squares.ToIndexIntervalDictinary(s => s.XInterval.Elements());
             yDimension = squares.ToIndexIntervalDictinary(s => s.YInterval.Elements());
@@ -29,7 +29,7 @@ namespace Signum.Utilities.DataStructures
             used = new bool[xDimension.Count, yDimension.Count]; 
 
             foreach (var item in dictionary)
-                Add(item.First, item.Second);
+                Add(item.Item1, item.Item2);
         }
 
         void Add(Square<K1, K2> square, V value)

@@ -17,7 +17,7 @@ namespace Signum.Engine.Linq
     /// <summary>
     ///  returns the set of all aliases produced by a query source
     /// </summary>
-    internal class OverloadingSimplifier : ExpressionVisitor
+    internal class OverloadingSimplifier : SimpleExpressionVisitor
     {
         static MethodInfo miSelectQ = ReflectionTools.GetMethodInfo(() => Queryable.Select((IQueryable<string>)null, s => s)).GetGenericMethodDefinition();
         static MethodInfo miSelectE = ReflectionTools.GetMethodInfo(() => Enumerable.Select((IEnumerable<string>)null, s => s)).GetGenericMethodDefinition();

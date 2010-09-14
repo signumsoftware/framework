@@ -24,7 +24,7 @@ namespace Signum.Utilities.DataStructures
         {
             foreach (var item in pairs)
             {
-                Add(item.First, item.Second);
+                Add(item.Item1, item.Item2);
             }
         }
 
@@ -301,8 +301,8 @@ namespace Signum.Utilities.DataStructures
         public static IntervalDictionary<K, VR> AggregateIntervalDictionary<K, V, VR>(this IEnumerable<Tuple<Interval<K>, V>> collection, Func<Interval<K>, IEnumerable<V>, VR> mixer)
            where K : struct, IComparable<K>, IEquatable<K>
         {
-            Interval<K>[] keys = collection.SelectMany(a => a.First.Elements()).Distinct().Order().BiSelect((min, max) => new Interval<K>(min, max)).ToArray();
-            return new IntervalDictionary<K, VR>(keys.Select(k => new Tuple<Interval<K>, VR>(k, mixer(k, collection.Where(a => a.First.Subset(k)).Select(a => a.Second)))));
+            Interval<K>[] keys = collection.SelectMany(a => a.Item1.Elements()).Distinct().Order().BiSelect((min, max) => new Interval<K>(min, max)).ToArray();
+            return new IntervalDictionary<K, VR>(keys.Select(k => new Tuple<Interval<K>, VR>(k, mixer(k, collection.Where(a => a.Item1.Subset(k)).Select(a => a.Item2)))));
         }
 
         public static IntervalDictionary<K, VR> Filter<K, V, VR>(this IntervalDictionary<K, V> me, Interval<K> filter, Func<Interval<K>, V, VR> mapper)

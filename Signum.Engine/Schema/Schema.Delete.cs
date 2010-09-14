@@ -12,13 +12,25 @@ namespace Signum.Engine.Maps
     public partial class Table
     {
         public SqlPreCommand DeleteSql(int id)
-        {   
-            var collectionFields = Fields.Values.Select(a=>a.Field).OfType<FieldMList>();
+        {
+            SqlParameter pid = SqlParameterBuilder.CreateReferenceParameter(SqlBuilder.PrimaryKeyName, false, id);
 
-            return SqlPreCommand.Combine(Spacing.Simple, 
-                        SqlBuilder.RestoreLastId(id),  
-                        collectionFields.Select(c=>c.RelationalTable.DeleteSql()).Combine(Spacing.Simple),
-                        SqlBuilder.DeleteSql(Name));
+            var collectionFields = Fields.Values.Select(a => a.Field).OfType<FieldMList>();
+
+            return SqlPreCommand.Combine(Spacing.Simple,
+                        collectionFields.Select(c => c.RelationalTable.DeleteSql(pid)).Combine(Spacing.Simple),
+                        SqlBuilder.DeleteSql(Name, pid));
+        }
+
+        public SqlPreCommand DeleteSql(List<int> ids)
+        {
+            List<SqlParameter> pids = ids.Select((id, i) => SqlParameterBuilder.CreateReferenceParameter(SqlBuilder.PrimaryKeyName + i, false, id)).ToList();
+
+            var collectionFields = Fields.Values.Select(a => a.Field).OfType<FieldMList>();
+
+            return SqlPreCommand.Combine(Spacing.Simple,
+                        collectionFields.Select(c => c.RelationalTable.DeleteSql(pids)).Combine(Spacing.Simple),
+                        SqlBuilder.DeleteSql(Name, pids));
         }
 
         public SqlPreCommand DeleteSqlSync(IdentifiableEntity ident)
@@ -29,9 +41,14 @@ namespace Signum.Engine.Maps
 
     public partial class RelationalTable
     {
-        internal SqlPreCommand DeleteSql()
+        internal SqlPreCommand DeleteSql(SqlParameter pid)
         {
-            return SqlBuilder.RelationalDeleteScope(Name, BackReference.Name);         
+            return SqlBuilder.RelationalDelete(Name, BackReference.Name, pid);         
+        }
+
+        internal SqlPreCommand DeleteSql(List<SqlParameter> pids)
+        {
+            return SqlBuilder.RelationalDelete(Name, BackReference.Name, pids);
         }
     }
 

@@ -6,7 +6,7 @@ using System.Linq.Expressions;
 
 namespace Signum.Utilities.ExpressionTrees
 {
-    public class ExpressionReplacer: ExpressionVisitor
+    public class ExpressionReplacer: SimpleExpressionVisitor
     {
         Dictionary<ParameterExpression, Expression> replacements = new Dictionary<ParameterExpression, Expression>();
 

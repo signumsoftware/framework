@@ -328,11 +328,6 @@ namespace Signum.Windows
         public Dictionary<Type, EntitySettings> EntitySettings { get; set; }
         public Dictionary<object, QuerySettings> QuerySetting { get; set; }
 
-        //public event Func<Type, bool> GlobalIsCreable;
-        //public event Func<Type, bool> GlobalIsReadOnly; //IsNew
-        //public event Func<Type, bool> GlobalIsViewable;
-        //public event Func<object, bool> GlobalIsFindable;
-
         public event Action<AdminWindow, Type> TaskAdminWindow;
         public event Action<NormalWindow, ModifiableEntity> TaskNormalWindow;
         public event Action<SearchWindow, object> TaskSearchWindow;

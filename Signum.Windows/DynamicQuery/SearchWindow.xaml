@@ -5,7 +5,7 @@
 	x:Class="Signum.Windows.SearchWindow"
 	x:Name="me"
     SizeToContent="WidthAndHeight"
-	ResizeMode="CanResizeWithGrip" 
+	ResizeMode="CanResizeWithGrip"
 	WindowStartupLocation="CenterScreen"
     m:Monitors.AdjustToMonitor="true">
     <Window.Resources>

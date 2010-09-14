@@ -10,9 +10,9 @@ using Signum.Utilities.Properties;
 namespace Signum.Utilities.ExpressionTrees
 {
 
-    public abstract class ExpressionVisitor
+    public abstract class SimpleExpressionVisitor
     {
-        protected ExpressionVisitor()
+        protected SimpleExpressionVisitor()
         {
         }
 

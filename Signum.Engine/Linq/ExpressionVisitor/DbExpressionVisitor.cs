@@ -15,7 +15,7 @@ namespace Signum.Engine.Linq
     /// <summary>
     /// An extended expression visitor including custom DbExpression nodes
     /// </summary>
-    internal class DbExpressionVisitor : ExpressionVisitor
+    internal class DbExpressionVisitor : SimpleExpressionVisitor
     {
         protected override Expression Visit(Expression exp)
         {

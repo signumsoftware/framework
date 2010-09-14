@@ -6,8 +6,9 @@
 	x:Name="Window"
 	SizeToContent="WidthAndHeight"
 	ResizeMode="CanResizeWithGrip" 
-    m:Monitors.AdjustToMonitor="true"
 	WindowStartupLocation="CenterScreen" 
+    m:Monitors.AdjustToMonitor="true"
+
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Title="{Binding ToStringMethod}">

@@ -2,7 +2,6 @@
 					xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="/Signum.Windows;component/Themes/PickerBase.generic.xaml" />
-        <ResourceDictionary Source="/Signum.Windows;component/Themes/MonthCalendar.generic.xaml" />
         <ResourceDictionary Source="/Signum.Windows;component/Themes/DateTimePicker.generic.xaml" />
         <ResourceDictionary Source="/Signum.Windows;component/Themes/ToolBarButton.generic.xaml" />
         <ResourceDictionary Source="/Signum.Windows;component/Themes/NumericTextBox.generic.xaml" />

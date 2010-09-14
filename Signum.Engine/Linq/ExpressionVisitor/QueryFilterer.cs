@@ -12,7 +12,7 @@ using Signum.Utilities.Reflection;
 
 namespace Signum.Engine.Linq
 {
-    public class QueryFilterer : ExpressionVisitor
+    public class QueryFilterer : SimpleExpressionVisitor
     {
         static MethodInfo miFilter = ReflectionTools.GetMethodInfo(() => Filter<TypeDN>(null)).GetGenericMethodDefinition();
 

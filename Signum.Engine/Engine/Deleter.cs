@@ -21,7 +21,7 @@ namespace Signum.Engine
 
             SqlPreCommand comando = DeleteCommand(type, id);
 
-            int result = Executor.ExecuteNonQuery(comando.ToSimple());
+            int result = (int)Executor.ExecuteScalar(comando.ToSimple());
         }
 
         internal static SqlPreCommand DeleteCommand(Type type, int id)
@@ -29,9 +29,9 @@ namespace Signum.Engine
             Table table = ConnectionScope.Current.Schema.Table(type);
 
             SqlPreCommand comando = SqlPreCommand.Combine(Spacing.Double,
-                SqlBuilder.DeclareLastEntityID(),
                 table.DeleteSql(id),
-                new SqlPreCommandSimple("SELECT @@rowcount"));
+                SqlBuilder.SelectRowCount()
+                );
             return comando;
         }
 
@@ -41,7 +41,9 @@ namespace Signum.Engine
 
             SqlPreCommand comando = DeleteCommand(type, ids);
 
-            if (Executor.ExecuteNonQuery(comando.ToSimple()) != ids.Count)
+            int result = (int)Executor.ExecuteScalar(comando.ToSimple());
+
+            if (result != ids.Count)
                 throw new InvalidOperationException(Resources.NotAllEntitiesOfType0AndIds1Removed.Formato(type.Name, ids.ToString(", ")));
         }
 
@@ -50,14 +52,9 @@ namespace Signum.Engine
             Table table = ConnectionScope.Current.Schema.Table(type);
 
             SqlPreCommand comando = SqlPreCommand.Combine(Spacing.Double,
-                SqlBuilder.DeclareLastEntityID(),
-                new SqlPreCommandSimple("DECLARE @Acumulator int"),
-                new SqlPreCommandSimple("SET @Acumulator = 0"),
-                ids.SelectMany(id => new []{
-                    table.DeleteSql(id),
-                    new SqlPreCommandSimple("SET @Acumulator = @@rowcount + @Acumulator")}
-                    ).Combine(Spacing.Simple),
-                new SqlPreCommandSimple("select @Acumulator"));
+                table.DeleteSql(ids),
+                SqlBuilder.SelectRowCount()
+                );
             return comando;
         }
     }

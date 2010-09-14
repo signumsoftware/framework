@@ -38,5 +38,3 @@ using System.Security;
 [assembly: System.Web.UI.WebResource("Signum.Web.Scripts.SF_Popup.js", "text/javascript")]
 [assembly: System.Web.UI.WebResource("Signum.Web.Scripts.SF_Validator.js", "text/javascript")]
 [assembly: System.Web.UI.WebResource("Signum.Web.Scripts.SF_ViewNavigator.js", "text/javascript")]
-
-[assembly: AllowPartiallyTrustedCallers]

@@ -14,11 +14,11 @@ namespace Signum.Engine
     public static class SqlParameterBuilder
     {
         [ThreadStatic]
-        static int contadorParametro;
+        static int parameterCounter;
 
         static string GetParameterName(string name)
         {
-            return "@" + name + (contadorParametro++).ToString();
+            return "@" + name + (parameterCounter++).ToString();
         }
 
         public static SqlParameter CreateReferenceParameter(string name, bool nullable, int? id)

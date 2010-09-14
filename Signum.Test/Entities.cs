@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Signum.Entities;
-using System.Windows;
 using System.Linq.Expressions;
 using Signum.Utilities;
 
@@ -76,6 +75,14 @@ namespace Signum.Test
             set { Set(ref sex, value, () => Sex); }
         }
 
+        Status? status;
+        public Status? Status
+        {
+            get { return status; }
+            set { Set(ref status, value, () => Status); }
+        }
+
+
         static Expression<Func<ArtistDN, bool>> IsMaleExpression = a => a.Sex == Sex.Male;
         public bool IsMale
         {
@@ -107,6 +114,12 @@ namespace Signum.Test
     {
         Male,
         Female
+    }
+
+    public enum Status
+    {
+        Single,
+        Married, 
     }
 
     [Serializable]

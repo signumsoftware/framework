@@ -12,7 +12,7 @@ namespace Signum.Utilities.ExpressionTrees
     /// Performs bottom-up analysis to determine which nodes can possibly
     /// be part of an evaluated sub-tree.
     /// </summary>
-    public class ExpressionNominator : ExpressionVisitor
+    public class ExpressionNominator : SimpleExpressionVisitor
     {
         HashSet<Expression> candidates = new HashSet<Expression>();
         bool hasDependencies;

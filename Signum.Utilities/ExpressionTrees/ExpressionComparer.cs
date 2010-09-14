@@ -109,7 +109,7 @@ namespace Signum.Utilities.ExpressionTrees
         protected virtual bool CompareUnary(UnaryExpression a, UnaryExpression b)
         {
             return a.NodeType == b.NodeType
-                && a.Method == b.Method
+                && ReflectionTools.MethodEqual(a.Method, b.Method)
                 && a.IsLifted == b.IsLifted
                 && a.IsLiftedToNull == b.IsLiftedToNull
                 && this.Compare(a.Operand, b.Operand);
@@ -118,7 +118,7 @@ namespace Signum.Utilities.ExpressionTrees
         protected virtual bool CompareBinary(BinaryExpression a, BinaryExpression b)
         {
             return a.NodeType == b.NodeType
-                && a.Method == b.Method
+                && ReflectionTools.MethodEqual(a.Method, b.Method)
                 && a.IsLifted == b.IsLifted
                 && a.IsLiftedToNull == b.IsLiftedToNull
                 && this.Compare(a.Left, b.Left)
@@ -156,13 +156,13 @@ namespace Signum.Utilities.ExpressionTrees
 
         protected virtual bool CompareMemberAccess(MemberExpression a, MemberExpression b)
         {
-            return a.Member == b.Member
+            return ReflectionTools.MemeberEquals(a.Member, b.Member)
                 && this.Compare(a.Expression, b.Expression);
         }
 
         protected virtual bool CompareMethodCall(MethodCallExpression a, MethodCallExpression b)
         {
-            return a.Method == b.Method
+            return ReflectionTools.MethodEqual(a.Method, b.Method)
                 && this.Compare(a.Object, b.Object)
                 && this.CompareExpressionList(a.Arguments, b.Arguments);
         }
@@ -196,7 +196,7 @@ namespace Signum.Utilities.ExpressionTrees
 
         protected virtual bool CompareNew(NewExpression a, NewExpression b)
         {
-            return a.Constructor == b.Constructor
+            return ReflectionTools.MemeberEquals(a.Constructor, b.Constructor)
                 && this.CompareExpressionList(a.Arguments, b.Arguments)
                 && this.CompareMemberList(a.Members, b.Members);
         }
@@ -274,7 +274,7 @@ namespace Signum.Utilities.ExpressionTrees
                 return false;
             if (a.BindingType != b.BindingType)
                 return false;
-            if (a.Member != b.Member)
+            if (!ReflectionTools.MemeberEquals(a.Member, b.Member))
                 return false;
             switch (a.BindingType)
             {
@@ -291,19 +291,19 @@ namespace Signum.Utilities.ExpressionTrees
 
         protected virtual bool CompareMemberAssignment(MemberAssignment a, MemberAssignment b)
         {
-            return a.Member == b.Member
+            return ReflectionTools.MemeberEquals(a.Member, b.Member)
                 && this.Compare(a.Expression, b.Expression);
         }
 
         protected virtual bool CompareMemberListBinding(MemberListBinding a, MemberListBinding b)
         {
-            return a.Member == b.Member
+            return ReflectionTools.MemeberEquals(a.Member, b.Member)
                 && this.CompareElementInitList(a.Initializers, b.Initializers);
         }
 
         protected virtual bool CompareMemberMemberBinding(MemberMemberBinding a, MemberMemberBinding b)
         {
-            return a.Member == b.Member
+            return ReflectionTools.MemeberEquals(a.Member, b.Member)
                 && this.CompareBindingList(a.Bindings, b.Bindings);
         }
 
@@ -331,7 +331,7 @@ namespace Signum.Utilities.ExpressionTrees
 
         protected virtual bool CompareElementInit(ElementInit a, ElementInit b)
         {
-            return a.AddMethod == b.AddMethod
+            return  ReflectionTools.MethodEqual(a.AddMethod, b.AddMethod)
                 && this.CompareExpressionList(a.Arguments, b.Arguments);
         }
     }

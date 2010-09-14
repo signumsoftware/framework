@@ -12,7 +12,7 @@ namespace Signum.Engine.Linq
     /// <summary>
     /// Evaluates & replaces sub-trees when first candidate is reached (top-down)
     /// </summary>
-    public class MetaEvaluator : ExpressionVisitor
+    public class MetaEvaluator : SimpleExpressionVisitor
     {
 
         public static Expression Clean(Expression expression)

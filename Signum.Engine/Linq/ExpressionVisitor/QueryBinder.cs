@@ -23,7 +23,7 @@ namespace Signum.Engine.Linq
     /// QueryBinder is a visitor that converts method calls to LINQ operations into 
     /// custom DbExpression nodes and references to class members into references to columns
     /// </summary>
-    internal class QueryBinder : ExpressionVisitor
+    internal class QueryBinder : SimpleExpressionVisitor
     {
         Dictionary<ParameterExpression, Expression> map = new Dictionary<ParameterExpression, Expression>();
         Dictionary<ProjectionToken, GroupByInfo> groupByMap = new Dictionary<ProjectionToken, GroupByInfo>();
@@ -878,18 +878,18 @@ namespace Signum.Engine.Linq
                         .OfType<MemberAssignment>()
                         .Single(a => ReflectionTools.MemeberEquals(a.Member, m.Member)).Expression;
                 case ExpressionType.New:
-                {
-                    NewExpression nex = (NewExpression)source;
+                    {
+                        NewExpression nex = (NewExpression)source;
 
-                    if (nex.Type.IsInstantiationOf(typeof(Grouping<,>)) && m.Member.Name == "Key")
-                        return nex.Arguments[0];
+                        if (nex.Type.IsInstantiationOf(typeof(Grouping<,>)) && m.Member.Name == "Key")
+                            return nex.Arguments[0];
 
-                    if (nex.Type.IsInstantiationOf(typeof(Expandable<>)) && m.Member.Name == "Value")
-                        return nex.Arguments[0];
+                        if (nex.Type.IsInstantiationOf(typeof(Expandable<>)) && m.Member.Name == "Value")
+                            return nex.Arguments[0];
 
-                    MethodInfo mi = ((PropertyInfo)m.Member).GetGetMethod();
-                    return nex.Members.Zip(nex.Arguments).Single(p => ReflectionTools.MethodEqual((MethodInfo)p.First, mi)).Second;
-                }
+                        PropertyInfo pi = (PropertyInfo)m.Member;
+                        return nex.Members.Zip(nex.Arguments).Single(p => ReflectionTools.PropertyEquals((PropertyInfo)p.Item1, pi)).Item2;
+                    }
                 case (ExpressionType)DbExpressionType.FieldInit:
                 {
                     FieldInitExpression fie = (FieldInitExpression)source;

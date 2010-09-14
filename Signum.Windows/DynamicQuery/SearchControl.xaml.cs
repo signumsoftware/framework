@@ -426,16 +426,7 @@ namespace Signum.Windows
 
             btFind.IsEnabled = false;
 
-            AssertUserColumnIndexes();
-
-            var request = new QueryRequest
-            {
-                QueryName = QueryName, 
-                Filters = FilterOptions.Select(f => f.ToFilter()).ToList(),
-                Orders = OrderOptions.Select(o => o.ToOrder()).ToList(),
-                UserColumns = UserColumns.Select(c => c.UserColumn).ToList(),
-                Limit = MaxItemsCount
-            };
+            var request = GetQueryRequest();
 
             Async.Do(this.FindCurrentWindow(),
                 () => resultTable = Server.Return((IDynamicQueryServer s) => s.ExecuteQuery(request)),
@@ -447,6 +438,22 @@ namespace Signum.Windows
                     }
                 },
                 () => { btFind.IsEnabled = true; });
+        }
+
+        public QueryRequest GetQueryRequest()
+        {
+            AssertUserColumnIndexes();
+
+            var request = new QueryRequest
+            {
+                QueryName = QueryName,
+                Filters = FilterOptions.Select(f => f.ToFilter()).ToList(),
+                Orders = OrderOptions.Select(o => o.ToOrder()).ToList(),
+                UserColumns = UserColumns.Select(c => c.UserColumn).ToList(),
+                Limit = MaxItemsCount
+            };
+
+            return request;
         }
 
         private void SetResults()

@@ -329,25 +329,38 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelectIntNullable()
         {
-            Database.Query<AlbumDN>().Select(a => (int?)((ArtistDN)a.Author).Id).ToArray();
+            var list = Database.Query<AlbumDN>().Select(a => (int?)((ArtistDN)a.Author).Id).ToArray();
         }
 
         [TestMethod]
         public void SelectBoolNullable()
         {
-            Database.Query<AlbumDN>().Select(a => (bool?)((ArtistDN)a.Author).Dead).ToArray();
+            var list = Database.Query<AlbumDN>().Select(a => (bool?)((ArtistDN)a.Author).Dead).ToArray();
         }
 
         [TestMethod]
         public void SelectEnumNullable()
         {
-            Database.Query<AlbumDN>().Select(a => (Sex?)((ArtistDN)a.Author).Sex).ToArray();
+            var list = Database.Query<ArtistDN>().Select(a => a.Status).ToArray();
+        }
+
+        [TestMethod]
+        public void SelectEnumNullableNullable()
+        {
+            var list = Database.Query<AlbumDN>().Select(a => ((ArtistDN)a.Author).Status).ToArray();
+        }
+
+
+        [TestMethod]
+        public void SelectEnumNullableBullableCast()
+        {
+            var list = Database.Query<AlbumDN>().Select(a => (Sex?)((ArtistDN)a.Author).Sex).ToArray();
         }
 
         [TestMethod]
         public void SelectEnumNullableValue()
         {
-            Database.Query<AlbumDN>().Where(a => a.Author is ArtistDN)
+            var list = Database.Query<AlbumDN>().Where(a => a.Author is ArtistDN)
                 .Select(a => ((Sex?)((ArtistDN)a.Author).Sex).Value).ToArray();
         }
 

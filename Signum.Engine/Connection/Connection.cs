@@ -14,6 +14,12 @@ using Signum.Engine.DynamicQuery;
 
 namespace Signum.Engine
 {
+    public enum DBMS
+    {
+        SqlServer2005, 
+        SqlServer2008
+    }
+
     public abstract class BaseConnection
     {
         public BaseConnection(Schema schema, DynamicQueryManager dqm)
@@ -21,6 +27,8 @@ namespace Signum.Engine
             this.Schema = schema;
             this.DynamicQueryManager = dqm;
         }
+
+        public DBMS DBMS { get; set; }
 
         public Schema Schema { get; private set; }
         public DynamicQueryManager DynamicQueryManager { get; private set; }

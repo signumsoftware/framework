@@ -24,7 +24,7 @@ namespace Signum.Engine.Linq
     /// QueryBinder is a visitor that converts method calls to LINQ operations into 
     /// custom DbExpression nodes and references to class members into references to columns
     /// </summary>
-    internal class MetadataVisitor : ExpressionVisitor
+    internal class MetadataVisitor : SimpleExpressionVisitor
     {
         Dictionary<ParameterExpression, Expression> map = new Dictionary<ParameterExpression, Expression>();
 
@@ -371,8 +371,8 @@ namespace Signum.Engine.Linq
 
                     if (nex.Members != null)
                     {
-                        MethodInfo mi = ((PropertyInfo)member).GetGetMethod();
-                        return nex.Members.Zip(nex.Arguments).Single(p => ReflectionTools.MethodEqual((MethodInfo)p.First, mi)).Second;
+                        PropertyInfo pi = (PropertyInfo)member;
+                        return nex.Members.Zip(nex.Arguments).Single(p => ReflectionTools.PropertyEquals((PropertyInfo)p.Item1, pi)).Item2;
                     }
 
                     break;

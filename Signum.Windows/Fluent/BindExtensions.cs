@@ -69,7 +69,7 @@ namespace Signum.Windows
         }
     }
 
-    public class RouteVisitor : ExpressionVisitor
+    public class RouteVisitor : SimpleExpressionVisitor
     {
         StringBuilder sb = new StringBuilder();
 

@@ -298,7 +298,7 @@ namespace Signum.Web
         public override IDictionary<string, List<string>> Errors { get { return errors; } }
 
         // Ticks => ControlID, Action
-        SortedList<long, Tuple<string, Action>> actions = new SortedList<long, Tuple<string, Action>>();
+        SortedList<long, System.Tuple<string, Action>> actions = new SortedList<long, Tuple<string, Action>>();
 
         public RootContext(string prefix, Mapping<T> mapping, SortedList<string, string> globalInputs, ControllerContext controllerContext) :
             base(prefix, mapping, null)
@@ -320,7 +320,7 @@ namespace Signum.Web
         public void Finish()
         {
             foreach (var pair in actions.Values)
-                pair.Second();
+                pair.Item2();
         }
 
         public override void AddOnFinish(Action action)
@@ -341,7 +341,7 @@ namespace Signum.Web
 
         public override Dictionary<string, long> GetTicksDictionary()
         {
-            return actions.ToDictionary(kvp => kvp.Value.First, kvp => kvp.Key);
+            return actions.ToDictionary(kvp => kvp.Value.Item1, kvp => kvp.Key);
         }
     }
 

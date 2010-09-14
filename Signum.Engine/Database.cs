@@ -302,23 +302,23 @@ namespace Signum.Engine
             Delete(ident.GetType(), ident.Id);
         }
 
-        public static void Delete<T>(IEnumerable<T> collection)
+        public static void DeleteList<T>(IEnumerable<T> collection)
             where T : IdentifiableEntity
         {
             if (collection.Empty()) return;
 
             Delete(
-                collection.Select(a => a.GetType()).Single(Resources.ThereAreEntitiesOfDifferentTypes), 
+                collection.Select(a => a.GetType()).Distinct().Single(Resources.ThereAreEntitiesOfDifferentTypes), 
                 collection.Select(i => i.Id));
         }
 
-        public static void Delete<T>(IEnumerable<Lite<T>> collection)
+        public static void DeleteList<T>(IEnumerable<Lite<T>> collection)
             where T : class, IIdentifiable
         {
             if (collection.Empty()) return;
 
             Delete(
-                collection.Select(a => a.RuntimeType).Single(Resources.ThereAreEntitiesOfDifferentTypes),
+                collection.Select(a => a.RuntimeType).Distinct().Single(Resources.ThereAreEntitiesOfDifferentTypes),
                 collection.Select(i => i.Id));
         }
         #endregion
@@ -331,9 +331,9 @@ namespace Signum.Engine
         }
 
         public static IQueryable<S> InDB<S>(this S entity)
-            where S:IdentifiableEntity
+            where S: IIdentifiable
         {
-            return Database.Query<S>().Where(s => s == entity); 
+            return (IQueryable<S>)miInDB.GenericInvoke(new[] { typeof(S), entity.GetType()}, null, new object[] { entity});
         }
 
         static MethodInfo miInDB = ReflectionTools.GetMethodInfo(() => InDB<IdentifiableEntity, IdentifiableEntity>((IdentifiableEntity)null)).GetGenericMethodDefinition();
@@ -348,7 +348,7 @@ namespace Signum.Engine
         public static IQueryable<S> InDB<S>(this Lite<S> lite)
            where S : class, IIdentifiable
         {
-            return (IQueryable<S>)miInDBLite.GenericInvoke(new[] { typeof(S), lite.RuntimeType }, null, new[] { lite });
+            return (IQueryable<S>)miInDBLite.GenericInvoke(new[] { typeof(S), lite.RuntimeType }, null, new object[] { lite });
         }
 
         static MethodInfo miInDBLite = ReflectionTools.GetMethodInfo(() => InDB<IdentifiableEntity, IdentifiableEntity>((Lite<IdentifiableEntity>)null)).GetGenericMethodDefinition();

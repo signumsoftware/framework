@@ -17,7 +17,7 @@ namespace Signum.Engine.Linq
     /// <summary>
     ///  returns the set of all aliases produced by a query source
     /// </summary>
-    internal class BoolSimplifier : ExpressionVisitor
+    internal class BoolSimplifier : SimpleExpressionVisitor
     {
         public static Expression Simplify(Expression expression)
         {

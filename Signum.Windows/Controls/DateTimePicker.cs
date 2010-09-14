@@ -15,7 +15,7 @@ using System.Windows.Input;
 using System.Windows.Media;     
 using System.Windows.Threading; // DispatcherPriority
 using Signum.Utilities; 
-using Signum.Windows.DateUtils;
+using System.Windows.Controls;
 using Signum.Windows;
 
 
@@ -28,7 +28,7 @@ namespace Signum.Windows
     /// if you need custom date formatting and limit the selection to just one date.
     /// </summary>
     [TemplatePart(Name = "PART_EditableTextBox", Type = typeof(TextBox))]
-    [TemplatePart(Name = "PART_DatePickerCalendar", Type = typeof(MonthCalendar))]
+    [TemplatePart(Name = "PART_DatePickerCalendar", Type = typeof(System.Windows.Controls.Calendar))]
     public class DateTimePicker: Control
     {
         public static readonly DependencyProperty IsEditableProperty =
@@ -105,8 +105,8 @@ namespace Signum.Windows
         }
 
         TextBox textBox;
-        MonthCalendar monthCalendar;
-        PickerBase pickerBase; 
+        System.Windows.Controls.Calendar monthCalendar;
+        PickerBase pickerBase;
 
         public override void OnApplyTemplate()
         {
@@ -114,16 +114,17 @@ namespace Signum.Windows
             pickerBase = (PickerBase)GetTemplateChild("PART_PickerBase");
 
             if (monthCalendar != null)
-                monthCalendar.SelectedDateChanged -= new RoutedPropertyChangedEventHandler<DateTime?>(monthCalendar_SelectedDateChanged);
-            monthCalendar = (MonthCalendar)GetTemplateChild("PART_DatePickerCalendar");
-             if (monthCalendar != null) 
-                monthCalendar.SelectedDateChanged +=new RoutedPropertyChangedEventHandler<DateTime?>(monthCalendar_SelectedDateChanged);
-            
+                monthCalendar.SelectedDatesChanged -= monthCalendar_SelectedDatesChanged;
+            monthCalendar = (System.Windows.Controls.Calendar)GetTemplateChild("PART_DatePickerCalendar");
+            if (monthCalendar != null)
+                monthCalendar.SelectedDatesChanged += monthCalendar_SelectedDatesChanged;
+
 
             UpdateVisibility();
         }
 
-        void monthCalendar_SelectedDateChanged(object sender, RoutedPropertyChangedEventArgs<DateTime?> e)
+
+        void monthCalendar_SelectedDatesChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
             pickerBase.IsDropDownOpen = false;
         }

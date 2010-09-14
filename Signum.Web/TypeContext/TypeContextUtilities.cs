@@ -23,7 +23,7 @@ namespace Signum.Web
             }
         }
 
-        static MethodInfo mi = ReflectionTools.GetMethodInfo((Lite<TypeDN> l) => l.Retrieve()).GetGenericMethodDefinition();
+        static MethodInfo miRetrieve = ReflectionTools.GetMethodInfo((Lite<TypeDN> l) => l.Retrieve()).GetGenericMethodDefinition();
         public static TypeContext CleanTypeContext(TypeContext typeContext)
         {
             if (typeContext == null)
@@ -42,7 +42,7 @@ namespace Signum.Web
                 Lite lite = typeContext.UntypedValue as Lite;
                 Type liteType = Reflector.ExtractLite(typeContext.Type);
 
-                body = Expression.Call(pe, mi.MakeGenericMethod(liteType), pe);
+                body = Expression.Call(miRetrieve.MakeGenericMethod(liteType), pe);
                 if (lite.RuntimeType != liteType)
                     body = Expression.Convert(body, lite.RuntimeType);
             }

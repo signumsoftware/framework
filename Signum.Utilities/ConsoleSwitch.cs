@@ -25,12 +25,12 @@ namespace Signum.Utilities
 
         public void Add(K key, V value)
         {
-            dictionary.Add(key.ToString(), Tuple.New(value, ToString(value)));
+            dictionary.Add(key.ToString(), Tuple.Create(value, ToString(value)));
         }
 
         public void Add(K key, V value, string str)
         {
-            dictionary.Add(key.ToString(), Tuple.New(value, str));
+            dictionary.Add(key.ToString(), Tuple.Create(value, str));
         }
 
         private string ToString(object value)
@@ -55,7 +55,7 @@ namespace Signum.Utilities
             try
             {
                 Console.WriteLine(welcomeMessage);
-                dictionary.ToConsole(kvp => " {0} - {1}".Formato(kvp.Key, kvp.Value.Second));
+                dictionary.ToConsole(kvp => " {0} - {1}".Formato(kvp.Key, kvp.Value.Item2));
 
                 Console.Write(endMessage);
                 string line = Console.ReadLine();
@@ -82,7 +82,7 @@ namespace Signum.Utilities
             try
             {
                 Console.WriteLine(welcomeMessage);
-                dictionary.ToConsole(kvp => " {0} - {1}".Formato(kvp.Key, kvp.Value.Second));
+                dictionary.ToConsole(kvp => " {0} - {1}".Formato(kvp.Key, kvp.Value.Item2));
 
                 Console.Write(endMessage);
                 string line = Console.ReadLine();
@@ -104,13 +104,13 @@ namespace Signum.Utilities
         public V GetValue(string line)
         {
             return dictionary.Where(kvp => string.Equals(kvp.Key.ToString(), line, StringComparison.InvariantCultureIgnoreCase)).Single(Resources.NoOptionWithKey0Found.Formato(line))
-                .Value.First;
+                .Value.Item1;
         }
 
    
         public IEnumerator<V> GetEnumerator()
         {
-            return dictionary.Values.Select(p=>p.First).GetEnumerator();
+            return dictionary.Values.Select(p=>p.Item1).GetEnumerator();
         }
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()

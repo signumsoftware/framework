@@ -9,7 +9,7 @@ using System.Reflection;
 namespace Signum.Utilities.ExpressionTrees
 {
     //This class wouldnt be neccessayr if Expression.BuildString where 'protected internal' instead of 'internal'
-    internal class ExpressionToString: ExpressionVisitor
+    internal class ExpressionToString: SimpleExpressionVisitor
     {
         public enum Precedence
         {

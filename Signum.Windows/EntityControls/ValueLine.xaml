@@ -7,13 +7,13 @@
     x:Name="me" xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     mc:Ignorable="d" d:DesignWidth="540.993" d:DesignHeight="140" Style="{DynamicResource toolTip}">
-	<UserControl.Resources>
+    <m:LineBase.Resources>
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>
 				<ResourceDictionary Source="../Resources.xaml"/>
 			</ResourceDictionary.MergedDictionaries>
 		</ResourceDictionary>
-	</UserControl.Resources>
+    </m:LineBase.Resources>
 	<Grid>
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition Width="Auto"/>

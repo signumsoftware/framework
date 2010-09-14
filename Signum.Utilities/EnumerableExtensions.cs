@@ -544,6 +544,19 @@ namespace Signum.Utilities
             }
         }
 
+        public static IEnumerable<IEnumerable<T>> CartesianProduct<T>(this IEnumerable<IEnumerable<T>> sequences)
+        {
+            IEnumerable<ImmutableStack<T>> emptyProduct = new[] { ImmutableStack<T>.Empty };
+            var result = sequences.Aggregate(
+              emptyProduct,
+              (accumulator, sequence) =>
+                from accseq in accumulator
+                from item in sequence
+                select accseq.Push(item));
+
+            return result.Select(a => a.Reverse());
+        }
+
         public static List<IGrouping<T, T>> GroupWhen<T>(this IEnumerable<T> collection, Func<T, bool> isGroupKey)
         {
             List<IGrouping<T, T>> result = new List<IGrouping<T, T>>();
@@ -612,18 +625,6 @@ namespace Signum.Utilities
                 while (enumA.MoveNext() && enumB.MoveNext())
                 {
                     yield return new Tuple<A, B>(enumA.Current, enumB.Current);
-                }
-            }
-        }
-
-        public static IEnumerable<R> Zip<A, B, R>(this IEnumerable<A> colA, IEnumerable<B> colB, Func<A, B, R> mixer)
-        {
-            using (var enumA = colA.GetEnumerator())
-            using (var enumB = colB.GetEnumerator())
-            {
-                while (enumA.MoveNext() && enumB.MoveNext())
-                {
-                    yield return mixer(enumA.Current, enumB.Current);
                 }
             }
         }

@@ -54,6 +54,16 @@ namespace Signum.Test.LinqProviderUpdateDelete
             int count = Database.Query<AlbumDN>().Where(a => ((ArtistDN)a.Author).Dead).UnsafeDelete();
         }
 
+        [TestMethod]
+        public void DeleteManual()
+        {
+            Starter.Dirty();
+
+            var list = Database.Query<AlbumDN>().Where(a => ((ArtistDN)a.Author).Dead).Select(a => a.ToLite()).ToList();
+
+            Database.DeleteList(list);
+        }
+
 
         [TestMethod]
         public void UpdateValue()
@@ -114,10 +124,16 @@ namespace Signum.Test.LinqProviderUpdateDelete
                  Duration = 184,
             };
 
-            int count = Database.Query<AlbumDN>().UnsafeUpdate(a => new AlbumDN { BonusTrack = song });
+            using (Transaction tr = new Transaction())
+            {
+                int count = Database.Query<AlbumDN>().UnsafeUpdate(a => new AlbumDN { BonusTrack = song });
 
-            Assert.IsFalse(Database.Query<AlbumDN>().Any(a => a.BonusTrack == null));
-            Assert.AreEqual(Database.Query<AlbumDN>().Select(a => a.BonusTrack.Name).Distinct().Single(), "Mana Mana");
+                Assert.IsFalse(Database.Query<AlbumDN>().Any(a => a.BonusTrack == null));
+                Assert.AreEqual(Database.Query<AlbumDN>().Select(a => a.BonusTrack.Name).Distinct().Single(), "Mana Mana");
+
+                tr.Commit();
+            }
+
         }
 
         [TestMethod]

@@ -42,7 +42,7 @@ namespace Signum.Web
         }
     }
 
-    internal class MemberAccessGatherer : ExpressionVisitor
+    internal class MemberAccessGatherer : SimpleExpressionVisitor
     {
         public Dictionary<ParameterExpression, TypeContextExpression> replacements = new Dictionary<ParameterExpression, TypeContextExpression>();
 

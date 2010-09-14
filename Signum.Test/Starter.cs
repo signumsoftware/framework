@@ -38,7 +38,7 @@ namespace Signum.Test
             started = false;
         }
 
-        static void Start(string connectionString)
+        public static void Start(string connectionString)
         {
             SchemaBuilder sb = new SchemaBuilder();
             DynamicQueryManager dqm = new DynamicQueryManager();
@@ -66,15 +66,16 @@ namespace Signum.Test
                                         a.Year
                                     }).ToDynamic();
 
-            dqm[typeof(AmericanMusicAwardDN)] = (from a in Database.Query<AmericanMusicAwardDN>()
-                                                 select new
-                                                 {
-                                                     Entity = a.ToLite(),
-                                                     a.Id,
-                                                     a.Year,
-                                                     a.Category,
-                                                     a.Result,
-                                                 }).ToDynamic();
+
+            dqm[typeof(NoteDN)] = (from a in Database.Query<NoteDN>()
+                                    select new
+                                    {
+                                        Entity = a.ToLite(),
+                                        a.Id,
+                                        a.Text,
+                                        Target = a.Target.ToLite(),
+                                        a.CreationTime,
+                                    }).ToDynamic();
 
             dqm[typeof(ArtistDN)] = (from a in Database.Query<ArtistDN>()
                                      select new
@@ -88,16 +89,6 @@ namespace Signum.Test
                                          LastAward = a.LastAward.ToLite(),
                                      }).ToDynamic();
 
-            dqm[typeof(AwardDN)] = (from a in Database.Query<AwardDN>()
-                                    select new
-                                    {
-                                        Entity = a.ToLite(),
-                                        a.Id,
-                                        a.Year,
-                                        a.Category,
-                                        a.Result
-                                    }).ToDynamic();
-
             dqm[typeof(BandDN)] = (from a in Database.Query<BandDN>()
                                    select new
                                    {
@@ -106,6 +97,26 @@ namespace Signum.Test
                                        a.Name,
                                        LastAward = a.LastAward.ToLite(),
                                    }).ToDynamic();
+
+
+            dqm[typeof(LabelDN)] = (from a in Database.Query<LabelDN>()
+                                    select new
+                                    {
+                                        Entity = a.ToLite(),
+                                        a.Id,
+                                        a.Name,
+                                    }).ToDynamic();
+
+
+            dqm[typeof(AmericanMusicAwardDN)] = (from a in Database.Query<AmericanMusicAwardDN>()
+                                                 select new
+                                                 {
+                                                     Entity = a.ToLite(),
+                                                     a.Id,
+                                                     a.Year,
+                                                     a.Category,
+                                                     a.Result,
+                                                 }).ToDynamic();
 
             dqm[typeof(GrammyAwardDN)] = (from a in Database.Query<GrammyAwardDN>()
                                           select new
@@ -116,14 +127,6 @@ namespace Signum.Test
                                               a.Category,
                                               a.Result
                                           }).ToDynamic();
-
-            dqm[typeof(LabelDN)] = (from a in Database.Query<LabelDN>()
-                                    select new
-                                    {
-                                        Entity = a.ToLite(),
-                                        a.Id,
-                                        a.Name,
-                                    }).ToDynamic();
 
             dqm[typeof(PersonalAwardDN)] = (from a in Database.Query<PersonalAwardDN>()
                                             select new
@@ -144,7 +147,7 @@ namespace Signum.Test
             {
                 Name = "Smashing Pumpkins",
                 Members = "Billy Corgan, James Iha, D'arcy Wretzky, Jimmy Chamberlin"
-                .Split(',').Select(s => new ArtistDN { Name = s.Trim(), Sex = s.Contains("Wretzky") ? Sex.Female : Sex.Male }).ToMList(),
+                .Split(',').Select(s => new ArtistDN { Name = s.Trim(), Sex = s.Contains("Wretzky") ? Sex.Female : Sex.Male, Status = s.Contains("Wretzky") ? Status.Married: (Status?)null }).ToMList(),
                 LastAward = new AmericanMusicAwardDN { Category = "Indie Rock", Year = 1991, Result = AwardResult.Nominated }
             };
 
@@ -210,7 +213,8 @@ namespace Signum.Test
             {
                 Name = "Michael Jackson",
                 Dead = true,
-                LastAward = new PersonalAwardDN { Category = "Best Artist", Year = 1983, Result = AwardResult.Won }
+                LastAward = new PersonalAwardDN { Category = "Best Artist", Year = 1983, Result = AwardResult.Won },
+                Status = Status.Single,
             };
 
             new NoteDN { CreationTime = new DateTime(2009, 6, 25, 0, 0, 0), Text = "Death on June, 25th", Target = michael }.Save();

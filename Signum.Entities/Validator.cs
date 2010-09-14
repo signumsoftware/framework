@@ -5,7 +5,6 @@ using System.Text;
 using Signum.Utilities;
 using Signum.Utilities.Reflection;
 using System.Reflection;
-using System.Windows;
 using System.Linq.Expressions;
 
 namespace Signum.Entities

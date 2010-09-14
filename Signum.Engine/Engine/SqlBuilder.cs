@@ -95,14 +95,29 @@ namespace Signum.Engine
             return new SqlPreCommandSimple("SET @LastEntityID = {0}".Formato(pid.ParameterName), new List<SqlParameter> { pid });
         }
 
-        internal static SqlPreCommand DeleteSql(string table)
+        internal static SqlPreCommand DeleteSql(string table, SqlParameter backId)
         {
-            return new SqlPreCommandSimple("DELETE {0} WHERE id = @LastEntityID".Formato(table.SqlScape()));
+            return new SqlPreCommandSimple("DELETE {0} WHERE id = {1}".Formato(table.SqlScape(), backId.ParameterName), new List<SqlParameter> { backId });
+        }
+
+        internal static SqlPreCommand DeleteSql(string table, List<SqlParameter> backIds)
+        {
+            return new SqlPreCommandSimple("DELETE {0} WHERE id IN ({1})".Formato(table.SqlScape(), backIds.ToString(p => p.ParameterName, ", ")), backIds);
         }
 
         internal static SqlPreCommand DeleteSql(string table, int id, string oldToStr)
         {
             return new SqlPreCommandSimple("DELETE {0} WHERE id = {1} --{2}".Formato(table.SqlScape(), id, oldToStr));
+        }
+
+        internal static SqlPreCommand RelationalDelete(string table, string backIdColumn, SqlParameter backId)
+        {
+            return new SqlPreCommandSimple("DELETE {0} WHERE {1} = {2}".Formato(table.SqlScape(), backIdColumn, backId.ParameterName));
+        }
+
+        internal static SqlPreCommand RelationalDelete(string table, string backIdColumn, List<SqlParameter> backIds)
+        {
+            return new SqlPreCommandSimple("DELETE {0} WHERE {1} IN ({2})".Formato(table.SqlScape(), backIdColumn, backIds.ToString(p => p.ParameterName, ", ")));
         }
 
         internal static SqlPreCommand DeclareIDsMemoryTable()
@@ -396,10 +411,23 @@ END".Formato(triggerName.SqlScape(), tableName, columns, nullableColumns,
 
         internal static SqlPreCommand ShrinkDatabase(string schemaName)
         {
-            return new[]{
-                new SqlPreCommandSimple("BACKUP LOG {0} WITH TRUNCATE_ONLY".Formato(schemaName)),
-                new SqlPreCommandSimple("DBCC SHRINKDATABASE ( {0} , TRUNCATEONLY )".Formato(schemaName))
-            }.Combine(Spacing.Simple);
+            return  
+                new[]{
+                    ConnectionScope.Current.DBMS == DBMS.SqlServer2005 ?  
+                        new SqlPreCommandSimple("BACKUP LOG {0} WITH TRUNCATE_ONLY".Formato(schemaName)):
+                        new []
+                        {
+                            new SqlPreCommandSimple("ALTER DATABASE {0} SET RECOVERY SIMPLE WITH NO_WAIT".Formato(schemaName)),
+                            new[]{
+                                new SqlPreCommandSimple("DECLARE @fileID BIGINT"),
+                                new SqlPreCommandSimple("SET @fileID = (SELECT FILE_IDEX((SELECT TOP(1)name FROM sys.database_files WHERE type = 1)))"),
+                                new SqlPreCommandSimple("DBCC SHRINKFILE(@fileID, 1)"),
+                            }.Combine(Spacing.Simple).ToSimple(),
+                            new SqlPreCommandSimple("ALTER DATABASE {0} SET RECOVERY FULL WITH NO_WAIT".Formato(schemaName)),                  
+                        }.Combine(Spacing.Simple),
+                    new SqlPreCommandSimple("DBCC SHRINKDATABASE ( {0} , TRUNCATEONLY )".Formato(schemaName))
+                }.Combine(Spacing.Simple); 
+            
         }
 
         internal static SqlPreCommandSimple SetSnapshotIsolation(string schemaName, bool value)
@@ -410,6 +438,11 @@ END".Formato(triggerName.SqlScape(), tableName, columns, nullableColumns,
         internal static SqlPreCommandSimple MakeSnapshotIsolationDefault(string schemaName, bool value)
         {
             return new SqlPreCommandSimple("ALTER DATABASE {0} SET READ_COMMITTED_SNAPSHOT {1}".Formato(schemaName, value ? "ON" : "OFF"));
+        }
+
+        internal static SqlPreCommandSimple SelectRowCount()
+        {
+            return new SqlPreCommandSimple("select @@rowcount;"); 
         }
     }
 }

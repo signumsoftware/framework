@@ -289,7 +289,7 @@ namespace Signum.Utilities
         public static void SetRange<K, V>(this IDictionary<K, V> dictionary, IEnumerable<K> keys, IEnumerable<V> values)
         {
             foreach (var item in keys.ZipStrict(values))
-                dictionary[item.First] = item.Second;
+                dictionary[item.Item1] = item.Item2;
         }
 
         public static void SetRange<K, V>(this IDictionary<K, V> dictionary, Dictionary<K, V> other)
@@ -307,8 +307,8 @@ namespace Signum.Utilities
         public static void DefaultRange<K, V>(this IDictionary<K, V> dictionary, IEnumerable<K> keys, IEnumerable<V> values)
         {
             foreach (var item in keys.ZipStrict(values))
-                if (!dictionary.ContainsKey(item.First))
-                    dictionary[item.First] = item.Second;
+                if (!dictionary.ContainsKey(item.Item1))
+                    dictionary[item.Item1] = item.Item2;
         }
 
         public static void DefaultRange<K, V>(this IDictionary<K, V> dictionary, Dictionary<K, V> other)

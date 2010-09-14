@@ -12,7 +12,7 @@ namespace Signum.Utilities.ExpressionTrees
     /// <summary>
     /// Evaluates & replaces sub-trees when first candidate is reached (top-down)
     /// </summary>
-    public class ExpressionEvaluator : ExpressionVisitor
+    public class ExpressionEvaluator : SimpleExpressionVisitor
     {
         HashSet<Expression> candidates;
 

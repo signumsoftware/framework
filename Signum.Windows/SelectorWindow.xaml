@@ -5,6 +5,8 @@
     Title="SelectorWindow" 
     WindowStartupLocation="CenterOwner"
     SizeToContent="WidthAndHeight"
+    TextOptions.TextFormattingMode="Display"
+    UseLayoutRounding="True" 
     x:Name="win">
     <Grid>
         <Grid.RowDefinitions>
