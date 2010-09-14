@@ -112,10 +112,10 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Deleted" xml:space="preserve">
     <value>(Eliminado)</value>
@@ -566,15 +566,6 @@
   </data>
   <data name="ProcessStartIsNullButProcessEndIsNot" xml:space="preserve">
     <value>Process Start es nulo, pero Process End no</value>
-  </data>
-  <data name="ThereAreNoResultsToWrite" xml:space="preserve">
-    <value>No hay resultados que exportar al informe</value>
-  </data>
-  <data name="Data" xml:space="preserve">
-    <value>Datos</value>
-  </data>
-  <data name="TheExcelTemplateHasAColumn0NotPresentInTheFindWindow" xml:space="preserve">
-    <value>La plantilla Excel tiene una columna {0} que no está presente en el buscador</value>
   </data>
   <data name="EmailMessageDN" xml:space="preserve">
     <value>Mensaje de e-mail</value>

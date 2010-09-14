@@ -63,31 +63,18 @@ namespace Signum.Web.Reports
                 throw new UnauthorizedAccessException(Signum.Web.Properties.Resources.ViewForType0IsNotAllowed.Formato(findOptions.QueryName));
 
             var request = new QueryRequest
-            { 
-                QueryName =  findOptions.QueryName,
-                Filters =  findOptions.FilterOptions.Select(fo => fo.ToFilter()).ToList(),
-                Orders =  findOptions.OrderOptions.Select(fo => fo.ToOrder()).ToList(),
-                Limit = findOptions.Top  
+            {
+                QueryName = findOptions.QueryName,
+                Filters = findOptions.FilterOptions.Select(fo => fo.ToFilter()).ToList(),
+                Orders = findOptions.OrderOptions.Select(fo => fo.ToOrder()).ToList(),
+                Limit = findOptions.Top
             };
 
-            ResultTable queryResult = DynamicQueryManager.Current.ExecuteQuery(request);
+            byte[] file = ReportsLogic.ExecuteExcelReport(excelReport, request);
 
-            ExcelReportDN report = excelReport.RetrieveAndForget();
-            string extension = Path.GetExtension(report.File.FileName);
-            if (extension != ".xlsx")
-                throw new ApplicationException(Resources.ExcelTemplateMustHaveExtensionXLSXandCurrentOneHas0.Formato(extension));
-
-            using (MemoryStream ms = new MemoryStream())
-            {
-                ms.WriteAllBytes(report.File.BinaryFile);
-                ms.Seek(0, SeekOrigin.Begin); 
-
-                ExcelGenerator.WriteDataInExcelFile(queryResult, ms);
-
-                //Known Bug in IE: When the file dialog is shown, if Open is chosen the Excel will be broken as a result of IE automatically adding [1] to the name. 
-                //There's not workaround for this, so either click on Save instead of Open, or use Firefox or Chrome
-                return File(ms.ToArray(), Signum.Web.Controllers.SignumController.GetMimeType(".xlsx"), Navigator.Manager.QuerySettings[findOptions.QueryName].UrlName + "-" + DateTime.Now.ToString("yyyyMMdd-HHmmss") + ".xlsx");
-            }
+            return File(file, Signum.Web.Controllers.SignumController.GetMimeType(".xlsx"), Navigator.Manager.QuerySettings[findOptions.QueryName].UrlName + "-" + DateTime.Now.ToString("yyyyMMdd-HHmmss") + ".xlsx");
+            //Known Bug in IE: When the file dialog is shown, if Open is chosen the Excel will be broken as a result of IE automatically adding [1] to the name. 
+            //There's not workaround for this, so either click on Save instead of Open, or use Firefox or Chrome
         }
 
         [AcceptVerbs(HttpVerbs.Post)]

@@ -215,8 +215,8 @@ namespace Signum.Engine.Extensions.Chart
             }
 
             return new ResultTable(
-               new ColumnValues(GetUserColumn(0, request.FirstDimension), dic.Select(a => a.Key.First).ToArray()),
-               new ColumnValues(GetUserColumn(1, request.SecondDimension), dic.Select(a => a.Key.Second).ToArray()),
+               new ColumnValues(GetUserColumn(0, request.FirstDimension), dic.Select(a => a.Key.Item1).ToArray()),
+               new ColumnValues(GetUserColumn(1, request.SecondDimension), dic.Select(a => a.Key.Item2).ToArray()),
                new ColumnValues(GetUserColumn(2, request.FirstValue), dic.Select(a => a.Value).ToArray()));   
         }
 

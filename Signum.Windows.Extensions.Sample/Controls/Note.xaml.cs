@@ -26,5 +26,10 @@ namespace Signum.Windows.Extensions.Sample.Controls
         {
             InitializeComponent();
         }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }

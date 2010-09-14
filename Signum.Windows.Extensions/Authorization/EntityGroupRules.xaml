@@ -5,6 +5,8 @@
     xmlns:auth="clr-namespace:Signum.Windows.Authorization"
     xmlns:authdn="clr-namespace:Signum.Entities.Authorization;assembly=Signum.Entities.Extensions"
     m:Monitors.AdjustToMonitor="true"
+    TextOptions.TextFormattingMode="Display"
+    UseLayoutRounding="True" 
     WindowStartupLocation="CenterOwner"
     SizeToContent="WidthAndHeight"
     Title="Entity Group Rules" x:Name="me" MinWidth="300" MinHeight="300" m:Common.TypeContext="authdn:EntityGroupRulePack">

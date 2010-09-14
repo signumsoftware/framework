@@ -13,6 +13,8 @@ using Signum.Engine.Basics;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml;
+using Signum.Utilities;
+using System.IO;
 
 namespace Signum.Engine.Reports
 {
@@ -58,6 +60,25 @@ namespace Signum.Engine.Reports
             return (from er in Database.Query<ExcelReportDN>()
                     where er.Query.Key == QueryUtils.GetQueryName(queryName) && !er.Deleted
                     select er.ToLite()).ToList();
+        }
+
+        public static byte[] ExecuteExcelReport(Lite<ExcelReportDN> excelReport, QueryRequest request)
+        {
+            ResultTable queryResult = DynamicQueryManager.Current.ExecuteQuery(request);
+            
+            ExcelReportDN report = excelReport.RetrieveAndForget();
+            string extension = Path.GetExtension(report.File.FileName);
+            if (extension != ".xlsx")
+                throw new ApplicationException(Resources.ExcelTemplateMustHaveExtensionXLSXandCurrentOneHas0.Formato(extension));
+
+            return ExcelGenerator.WriteDataInExcelFile(queryResult, report.File.BinaryFile);
+        }
+
+        public static byte[] ExecutePlainExcel(QueryRequest request)
+        {
+            ResultTable queryResult = DynamicQueryManager.Current.ExecuteQuery(request);
+
+            return PlainExcelGenerator.WritePlainExcel(queryResult);
         }
     }
 }

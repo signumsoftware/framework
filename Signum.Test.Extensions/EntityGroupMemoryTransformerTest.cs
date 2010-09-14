@@ -48,7 +48,7 @@ namespace Signum.Test.Extensions
 
         void AssertTrans(Expression<Func<PersonDN, bool>> expr, Expression<Func<PersonDN, bool>> expectedResult)
         {
-            Expression result = EntityGroupLogic.MemoryTransformer.ToDatabase(expr);
+            Expression result = EntityGroupLogic.MemoryTransformer.ToMemory(expr);
 
             ExpressionAsserter.AreEqual(result, expectedResult); 
         }
@@ -114,6 +114,22 @@ namespace Signum.Test.Extensions
                                 p.Coche.EntityOrNull == null ? p.Coche.InDB().Any(c => m == c.Marca.Entity) :
                                 p.Coche.Entity.Marca.EntityOrNull == null ? p.Coche.Entity.Marca.InDB().Any(m2 => m == m2) :
                                 m == p.Coche.Entity.Marca.Entity));
+        }
+
+        [TestMethod]
+        public void SimpleSmartTypeIs()
+        {
+            AssertTrans(p => p.Coche.SmartTypeIs<CocheDN>(),
+                        p => p.Coche.RuntimeType == typeof(CocheDN));
+        }
+
+
+        [TestMethod]
+        public void SimpleSRSmartTypeIs()
+        {
+            AssertTrans(p => p.Coche.SmartRetrieve().Marca.SmartTypeIs<MarcaDN>() ,
+                        p => p.Coche.EntityOrNull == null ? p.Coche.InDB().Any(c => c.Marca.Entity is MarcaDN) :
+                             p.Coche.Entity.Marca.RuntimeType == typeof(MarcaDN));
         }
 
     }

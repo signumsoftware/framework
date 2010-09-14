@@ -14,5 +14,11 @@ namespace Signum.Services
     {
         [OperationContract, NetDataContract]
         List<Lite<ExcelReportDN>> GetExcelReports(object queryName);
+
+        [OperationContract, NetDataContract]
+        byte[] ExecuteExcelReport(Lite<ExcelReportDN> excelReport, QueryRequest request);
+
+        [OperationContract, NetDataContract]
+        byte[] ExecutePlainExcel(QueryRequest request);
     }
 }

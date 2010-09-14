@@ -12,11 +12,11 @@ using System.IO;
 using Signum.Utilities.DataStructures;
 using Signum.Utilities;
 using System.Globalization;
-using Signum.Entities.Extensions.Properties;
 using Signum.Entities.Reflection;
+using Signum.Engine.Extensions.Properties;
 #endregion
 
-namespace Signum.Entities.Reports
+namespace Signum.Engine.Reports
 {
     public static class PlainExcelGenerator
     {
@@ -25,7 +25,7 @@ namespace Signum.Entities.Reports
 
         static PlainExcelGenerator()
         {
-            SetTemplate(typeof(PlainExcelGenerator).Assembly.GetManifestResourceStream("Signum.Entities.Extensions.Reports.PlainGenerator.plainExcelTemplate.xlsx"));
+            SetTemplate(typeof(PlainExcelGenerator).Assembly.GetManifestResourceStream("Signum.Engine.Extensions.Reports.plainExcelTemplate.xlsx"));
         }
 
         public static void SetTemplate(Stream templateStream)

@@ -82,10 +82,10 @@ namespace Signum.Engine.Authorization
             {
                 Tuple<int, string> pair = UserTicketDN.ParseTicket(ticket);
 
-                UserDN result = Database.Retrieve<UserDN>(pair.First);
+                UserDN result = Database.Retrieve<UserDN>(pair.Item1);
                 CleanExpiredTickets(result); 
                 
-                UserTicketDN userTicket = result.Tickets().SingleOrDefault(t => t.Ticket == pair.Second);
+                UserTicketDN userTicket = result.Tickets().SingleOrDefault(t => t.Ticket == pair.Item2);
                 if (userTicket == null)
                     throw new UnauthorizedAccessException("User attempted to log in with an invalid ticket");
 
@@ -114,7 +114,7 @@ namespace Signum.Engine.Authorization
 
             if (tooMuch.Empty()) return result;
 
-            Database.Delete<UserTicketDN>(tooMuch);
+            Database.DeleteList<UserTicketDN>(tooMuch);
 
             return result + tooMuch.Count; 
         }

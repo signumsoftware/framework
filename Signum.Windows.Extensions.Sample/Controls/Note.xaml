@@ -9,5 +9,8 @@
         <m:ValueLine m:Common.Route="Text" />
         <m:EntityCombo m:Common.Route="Target" />
         <m:ValueLine m:Common.Route="CreationTime" />
+        <m:DateTimePicker SelectedDate="{Binding CreationTime}"/>
+        <DatePicker SelectedDate="{Binding CreationTime}"/>
+        <Button Click="Button_Click"/>
     </StackPanel>
 </UserControl>

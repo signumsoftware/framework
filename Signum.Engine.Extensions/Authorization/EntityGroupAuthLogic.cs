@@ -60,15 +60,14 @@ namespace Signum.Engine.Authorization
             }
         }
 
+
         static void RegisterSchemaEvent<T>(Schema sender)
              where T : IdentifiableEntity
         {
             sender.EntityEvents<T>().Retrieved += new EntityEventHandler<T>(EntityGroupAuthLogic_Retrieved);
-            sender.EntityEvents<T>().Saving +=new EntityEventHandler<T>(EntityGroupAuthLogic_Saving);
-            sender.EntityEvents<T>().FilterQuery +=new FilterQueryEventHandler<T>(EntityGroupAuthLogic_FilterQuery);
+            sender.EntityEvents<T>().Saving += new EntityEventHandler<T>(EntityGroupAuthLogic_Saving);
+            sender.EntityEvents<T>().FilterQuery += new FilterQueryEventHandler<T>(EntityGroupAuthLogic_FilterQuery);
         }
-
-      
 
         [ThreadStatic]
         static bool queriesDisabled;
@@ -144,18 +143,26 @@ namespace Signum.Engine.Authorization
             if(!AuthLogic.IsEnabled)
                 return true;
 
+            IdentifiableEntity ent = (IdentifiableEntity)ident; 
+
             return EntityGroupLogic.GroupsFor(ident.GetType()).All(eg =>
                 {
                     EntityGroupAllowedDN access = cache.GetAllowed(eg);
-                    TypeAllowedBasic inGroup = access.InGroup.Get(userInterface);
-                    TypeAllowedBasic outGroup = access.OutGroup.Get(userInterface);
-                    if (inGroup >= allowed && outGroup >= allowed)
+                    bool allowedIn = access.InGroup.Get(userInterface) >= allowed;
+                    bool allowedOut = access.OutGroup.Get(userInterface) >= allowed;
+                    if (allowedIn && allowedOut)
                         return true;
 
-                    if (((IdentifiableEntity)ident).IsInGroup(eg))
-                        return inGroup >= allowed;
+                    if (!ent.IsApplicable(eg))
+                        return true; 
+
+                    if (!allowedIn && !allowedOut)
+                        return false;
+
+                    if (ent.IsInGroup(eg))
+                        return allowedIn;
                     else
-                        return outGroup >= allowed;
+                        return allowedOut;
                 });
         }
 
@@ -195,7 +202,10 @@ namespace Signum.Engine.Authorization
             return WhereIsAllowedFor<T>(query, TypeAllowedBasic.Read, DbQueryProvider.UserInterface);
         }
 
-        private static IQueryable<T> WhereIsAllowedFor<T>(this IQueryable<T> query, TypeAllowedBasic allowed, bool userInterface) where T : IdentifiableEntity
+
+        [MethodExpander(typeof(WhereAllowedExpander))]
+        private static IQueryable<T> WhereIsAllowedFor<T>(this IQueryable<T> query, TypeAllowedBasic allowed, bool userInterface) 
+            where T : IdentifiableEntity
         {
             if (!Schema.Current.Tables.ContainsKey(typeof(T)))
                 throw new InvalidOperationException("{0} is not included in the schema".Formato(typeof(T))); 
@@ -204,22 +214,37 @@ namespace Signum.Engine.Authorization
                          let allowedDN = cache.GetAllowed(eg)
                          select new
                          {
-                             Group = eg,
+                             Key = eg,
                              AllowedIn = allowedDN.InGroup.Get(userInterface) >= allowed,
                              AllowedOut = allowedDN.OutGroup.Get(userInterface) >= allowed,
-                             Expression = EntityGroupLogic.GetInGroupExpression<T>(eg),
-                         }).Where(p => !p.AllowedIn || !p.AllowedOut).ToList();
+                             EntityGroup = EntityGroupLogic.GetEntityGroupInfo<T>(eg),
+                         }).ToList();
+
+            pairs.RemoveAll(p=>p.AllowedIn && p.AllowedOut);
 
             if (pairs.Count == 0)
                 return query;
 
-            if (pairs.Any(p => !p.AllowedIn && !p.AllowedOut))
-                return query.Where(p => false);
+            if(pairs.Any(p=>p.EntityGroup.IsApplicableExpression == null && !p.AllowedIn && !p.AllowedOut))
+                return query.Where(_ => false);
 
             ParameterExpression e = Expression.Parameter(typeof(T), "e");
-            Expression body = pairs.Select(p =>
-                            p.AllowedIn ? (Expression)Expression.Invoke(p.Expression, e) :
-                            Expression.Not(Expression.Invoke(p.Expression, e))).Aggregate((a, b) => Expression.And(a, b));
+            Expression body = pairs.Select(p => 
+                {
+                    if (p.EntityGroup.IsApplicableExpression == null)
+                    {
+                        return p.AllowedIn? p.EntityGroup.IsInGroupExpression.InvokeLambda(e):
+                                            Expression.Not(p.EntityGroup.IsInGroupExpression.InvokeLambda(e));
+                    }
+                    else
+                    {
+                        var notApplicable = (Expression)Expression.Not(p.EntityGroup.IsApplicableExpression.InvokeLambda(e));
+
+                        return p.AllowedIn ? Expression.Or(notApplicable, p.EntityGroup.IsInGroupExpression.InvokeLambda(e)) :
+                               p.AllowedOut ? Expression.Or(notApplicable, Expression.Not(p.EntityGroup.IsInGroupExpression.InvokeLambda(e))) :
+                               notApplicable;
+                    }
+                }).Aggregate((a, b) => Expression.And(a, b));
 
             Expression cleanBody = DbQueryProvider.Clean(body);
 
@@ -228,13 +253,18 @@ namespace Signum.Engine.Authorization
             return result;
         }
 
+        static Expression InvokeLambda(this LambdaExpression lambda, ParameterExpression p)
+        {
+            return (Expression)Expression.Invoke(lambda, p);
+        }
+
         class WhereAllowedExpander : IMethodExpander
         {
-            static MethodInfo mi = ReflectionTools.GetMethodInfo(() => CallWhereAllowed<TypeDN>(null)).GetGenericMethodDefinition();
+            static MethodInfo miCallWhereAllowed = ReflectionTools.GetMethodInfo(() => CallWhereAllowed<TypeDN>(null)).GetGenericMethodDefinition();
 
             public Expression Expand(Expression instance, Expression[] arguments, Type[] typeArguments)
             {
-                return (Expression)mi.GenericInvoke(typeArguments, null, new object[] { arguments[0] });
+                return (Expression)miCallWhereAllowed.GenericInvoke(typeArguments, null, new object[] { arguments[0] });
             }
 
             static Expression CallWhereAllowed<T>(Expression expression)
@@ -242,6 +272,27 @@ namespace Signum.Engine.Authorization
             {
                 IQueryable<T> query = new Query<T>(DbQueryProvider.Single, expression);
                 IQueryable<T> result = WhereAllowed(query);
+                return result.Expression;
+            }
+        }
+
+        class WhereIsAllowedForExpander : IMethodExpander
+        {
+            static MethodInfo miCallWhereIsAllowedFor = ReflectionTools.GetMethodInfo(() => CallWhereIsAllowedFor<TypeDN>(null, TypeAllowedBasic.Create, true)).GetGenericMethodDefinition();
+
+            public Expression Expand(Expression instance, Expression[] arguments, Type[] typeArguments)
+            {
+                TypeAllowedBasic allowed = (TypeAllowedBasic)ExpressionEvaluator.Eval(arguments[1]);
+                bool userInterface = (bool)ExpressionEvaluator.Eval(arguments[2]);
+
+                return (Expression)miCallWhereIsAllowedFor.GenericInvoke(typeArguments, null, new object[] { arguments[0], allowed, userInterface });
+            }
+
+            static Expression CallWhereIsAllowedFor<T>(Expression expression, TypeAllowedBasic allowed, bool userInterface)
+                where T : IdentifiableEntity
+            {
+                IQueryable<T> query = new Query<T>(DbQueryProvider.Single, expression);
+                IQueryable<T> result = WhereIsAllowedFor(query, allowed, userInterface);
                 return result.Expression;
             }
         }
@@ -314,12 +365,36 @@ namespace Signum.Engine.Authorization
         public static Dictionary<Type, MinMax<TypeAllowedBasic>> GetEntityGroupTypesAllowed(bool userInterface)
         {
             return EntityGroupLogic.Types.ToDictionary(t => t,
-                t => EntityGroupLogic.GroupsFor(t).SelectMany(eg =>
-                {
-                    EntityGroupAllowedDN access = cache.GetAllowed(eg);
-                    return new[] { access.InGroup.Get(userInterface), access.OutGroup.Get(userInterface) };
-                }).WithMinMaxPair(a => (int)a));
-        }      
+                t => EntityGroupLogic.GroupsFor(t)
+                    .Select(eg => Possibilities(t, eg, userInterface))
+                    .CartesianProduct()
+                    .Select(col => col.MinAllowed())
+                    .WithMinMaxPair(a => (int)a));
+        }
+
+        //returns Create insted of extension when not null
+        static TypeAllowedBasic MinAllowed(this IEnumerable<TypeAllowedBasic?> collection)
+        {
+            TypeAllowedBasic min = TypeAllowedBasic.Create;
+
+            foreach (var item in collection.NotNull())
+            {
+                if (item < min)
+                    min = item;
+            }
+
+            return min;
+        }
+
+        static IEnumerable<TypeAllowedBasic?> Possibilities(Type type, Enum entityGroup, bool userInterface)
+        {
+            EntityGroupAllowedDN access = cache.GetAllowed(entityGroup);
+            yield return access.InGroup.Get(userInterface);
+            yield return access.OutGroup.Get(userInterface);
+
+            if (EntityGroupLogic.GetEntityGroupInfo(entityGroup, type).IsApplicableUntypedExpression != null)
+                yield return null;
+        }
     }
 
     public enum DisableSaveOptions

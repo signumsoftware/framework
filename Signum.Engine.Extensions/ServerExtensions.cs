@@ -20,11 +20,13 @@ using Signum.Engine.Basics;
 using Signum.Engine.Extensions.Chart;
 using Signum.Entities.Chart;
 using Signum.Utilities.DataStructures;
+using Signum.Entities.Reports;
+using Signum.Engine.Reports;
 
 
 namespace Signum.Services
 {
-    public abstract class ServerExtensions : ServerBasic, ILoginServer, IOperationServer, IQueryServer, IChartServer,
+    public abstract class ServerExtensions : ServerBasic, ILoginServer, IOperationServer, IQueryServer, IChartServer, IExcelReportServer,
         IQueryAuthServer, IPropertyAuthServer, ITypeAuthServer, IFacadeMethodAuthServer, IPermissionAuthServer, IOperationAuthServer, IEntityGroupAuthServer
     {
         protected UserDN currentUser;
@@ -308,6 +310,28 @@ namespace Signum.Services
         {
             Execute(MethodInfo.GetCurrentMethod(),
               () => ChartLogic.RemoveUserChart(lite));
+        }
+
+        #endregion
+
+        #region IExcelReportServer Members
+
+        public List<Lite<ExcelReportDN>> GetExcelReports(object queryName)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+                () => ReportsLogic.GetExcelReports(queryName));
+        }
+
+        public byte[] ExecuteExcelReport(Lite<ExcelReportDN> excelReport, QueryRequest request)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+                () => ReportsLogic.ExecuteExcelReport(excelReport, request));
+        }
+
+        public byte[] ExecutePlainExcel(QueryRequest request)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+                () => ReportsLogic.ExecutePlainExcel(request));
         }
 
         #endregion

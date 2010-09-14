@@ -112,10 +112,10 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="TheEntity0IsNew" xml:space="preserve">
     <value>The entity {0} is new</value>
@@ -383,5 +383,17 @@
   </data>
   <data name="AnonymousUserNotLoadedInitializeToLevel1SimpleEntities" xml:space="preserve">
     <value>AnonymousUser not loaded. Initialize to Level1SimpleEntities</value>
+  </data>
+  <data name="ExcelTemplateMustHaveExtensionXLSXandCurrentOneHas0" xml:space="preserve">
+    <value>Excel template must have .xlsx extension, and the current one has {0}</value>
+  </data>
+  <data name="ThereAreNoResultsToWrite" xml:space="preserve">
+    <value>There are no results to write</value>
+  </data>
+  <data name="Data" xml:space="preserve">
+    <value>Data</value>
+  </data>
+  <data name="TheExcelTemplateHasAColumn0NotPresentInTheFindWindow" xml:space="preserve">
+    <value>The Excel Template has a column {0} not present in the Find Window</value>
   </data>
 </root>

@@ -112,10 +112,10 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AreYouSureOfDeletingTheEntity012" xml:space="preserve">
     <value>¿Está seguro de eliminar del sistema la entidad {0} ({1}:{2})?</value>
@@ -473,9 +473,6 @@
   </data>
   <data name="ReportTemplateMustBeSpecified" xml:space="preserve">
     <value>Debe especificar el modelo del informe</value>
-  </data>
-  <data name="ExcelTemplateMustHaveExtensionXLSXandCurrentOneHas0" xml:space="preserve">
-    <value>El template Excel debe tener extensión .xlsx, pero el actual tiene extensión {0}</value>
   </data>
   <data name="Download" xml:space="preserve">
     <value>Descargar</value>

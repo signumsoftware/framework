@@ -35,26 +35,26 @@ namespace Signum.Windows.Reports
             set { SetValue(QueryDescriptionProperty, value); }
         }
 
-        public static UserQueryDN FromSearchControl(SearchControl searchControl)
+        public static UserQueryDN FromQueryRequest(QueryRequest request)
         {
             return new UserQueryDN
             {
-                 Query = QueryClient.GetQuery(searchControl.QueryName),
+                Query = QueryClient.GetQuery(request.QueryName),
 
-                 Filters = searchControl.FilterOptions.Select(fo => new QueryFilterDN
+                Filters = request.Filters.Select(fo => new QueryFilterDN
                  {
                      Token = fo.Token,
                      Operation = fo.Operation,
-                     ValueString = FilterValueConverter.ToString(fo.RealValue, fo.Token.Type),
+                     ValueString = FilterValueConverter.ToString(fo.Value, fo.Token.Type),
                  }).ToMList(),
 
-                 Columns = searchControl.UserColumns.Select(uco=>new QueryColumnDN
+                Columns = request.UserColumns.Select(uco => new QueryColumnDN
                  { 
-                     DisplayName = uco.UserColumn.DisplayName,
-                     Token = uco.UserColumn.Token,
+                     DisplayName = uco.DisplayName,
+                     Token = uco.Token,
                  }).ToMList(),
 
-                 Orders = searchControl.OrderOptions.Select((fo,i) => new QueryOrderDN
+                Orders = request.Orders.Select((fo, i) => new QueryOrderDN
                  {
                      Index = i,
                      Token = fo.Token,

@@ -18,35 +18,61 @@ namespace Signum.Engine.Basics
 {
     public static class EntityGroupLogic
     {
-        interface IEntityGroupInfo
+        internal interface IEntityGroupInfo
         {
             bool IsInGroup(IdentifiableEntity entity);
-            LambdaExpression UntypedExpression { get; }
+            LambdaExpression IsInGroupUntypedExpression { get; }
+
+            bool IsApplicable(IdentifiableEntity entity);
+            LambdaExpression IsApplicableUntypedExpression { get; }
         }
 
-        class EntityGroupInfo<T> : IEntityGroupInfo
+        internal class EntityGroupInfo<T> : IEntityGroupInfo
             where T : IdentifiableEntity
         {
-            public EntityGroupInfo(Expression<Func<T, bool>> expression)
+            public EntityGroupInfo(Expression<Func<T, bool>> isInGroup, Expression<Func<T, bool>> isApplicable)
             {
-                Expression = (Expression<Func<T, bool>>)DataBaseTransformer.ToDatabase(expression);
-                FuncExpression = (Expression<Func<T, bool>>)MemoryTransformer.ToDatabase(expression);
-                Func = FuncExpression.Compile(); 
+                IsInGroupExpression = (Expression<Func<T, bool>>)DataBaseTransformer.ToDatabase(isInGroup);
+                IsInGroupFuncExpression = (Expression<Func<T, bool>>)MemoryTransformer.ToMemory(isInGroup);
+                IsInGroupFunc = IsInGroupFuncExpression.Compile();
+
+                if (isApplicable != null)
+                {
+                    IsApplicableExpression = (Expression<Func<T, bool>>)DataBaseTransformer.ToDatabase(isApplicable);
+                    IsApplicableFuncExpression = (Expression<Func<T, bool>>)MemoryTransformer.ToMemory(isApplicable);
+                    IsApplicableFunc = IsApplicableFuncExpression.Compile();
+                }
             }
 
-            public readonly Expression<Func<T, bool>> Expression;
-            
-            readonly Expression<Func<T, bool>> FuncExpression; //debugging purposes only
-            public readonly Func<T, bool> Func;
+            public readonly Expression<Func<T, bool>> IsInGroupExpression;
+            readonly Expression<Func<T, bool>> IsInGroupFuncExpression; //debugging purposes only
+            readonly Func<T, bool> IsInGroupFunc;
+
+            public readonly Expression<Func<T, bool>> IsApplicableExpression;
+            readonly Expression<Func<T, bool>> IsApplicableFuncExpression; //debugging purposes only
+            readonly Func<T, bool> IsApplicableFunc;
 
             public bool IsInGroup(IdentifiableEntity entity)
             {
-                return Func((T)entity);
+                return IsInGroupFunc((T)entity);
             }
 
-            public LambdaExpression UntypedExpression
+            public bool IsApplicable(IdentifiableEntity entity)
             {
-                get { return Expression; }
+                if (IsApplicableFunc == null)
+                    return true;
+
+                return IsApplicableFunc((T)entity);
+            }
+
+            public LambdaExpression IsInGroupUntypedExpression
+            {
+                get { return IsInGroupExpression; }
+            }
+
+            public LambdaExpression IsApplicableUntypedExpression
+            {
+                get { return IsInGroupExpression; }
             }
         }
 
@@ -74,7 +100,13 @@ namespace Signum.Engine.Basics
         public static void Register<T>(Enum entityGroupKey, Expression<Func<T, bool>> isInGroup)
             where T : IdentifiableEntity
         {
-            infos.GetOrCreate(typeof(T))[entityGroupKey] = new EntityGroupInfo<T>(isInGroup);
+            infos.GetOrCreate(typeof(T))[entityGroupKey] = new EntityGroupInfo<T>(isInGroup, null);
+        }
+
+        public static void Register<T>(Enum entityGroupKey, Expression<Func<T, bool>> isInGroup, Expression<Func<T, bool>> isApplicable)
+            where T : IdentifiableEntity
+        {
+            infos.GetOrCreate(typeof(T))[entityGroupKey] = new EntityGroupInfo<T>(isInGroup, isApplicable);
         }
 
         [MethodExpander(typeof(IsInGroupExpander))]
@@ -85,6 +117,7 @@ namespace Signum.Engine.Basics
             return info.IsInGroup(entity);
         }
 
+
         class IsInGroupExpander : IMethodExpander
         {
             public Expression Expand(Expression instance, Expression[] arguments, Type[] typeArguments)
@@ -92,7 +125,28 @@ namespace Signum.Engine.Basics
                 Expression entity = arguments[0];
                 Enum eg = (Enum)ExpressionEvaluator.Eval(arguments[1]);
 
-                return Expression.Invoke(GetInGroupExpression(entity.Type, eg), entity);
+                return Expression.Invoke(GetEntityGroupInfo(eg, entity.Type).IsInGroupUntypedExpression, entity);
+            }
+        }
+
+
+        [MethodExpander(typeof(IsApplicableExpander))]
+        public static bool IsApplicable(this IdentifiableEntity entity, Enum entityGroupKey)
+        {
+            IEntityGroupInfo info = GetEntityGroupInfo(entityGroupKey, entity.GetType());
+
+            return info.IsApplicable(entity);
+        }
+
+
+        class IsApplicableExpander : IMethodExpander
+        {
+            public Expression Expand(Expression instance, Expression[] arguments, Type[] typeArguments)
+            {
+                Expression entity = arguments[0];
+                Enum eg = (Enum)ExpressionEvaluator.Eval(arguments[1]);
+
+                return Expression.Invoke(GetEntityGroupInfo(eg, entity.Type).IsApplicableUntypedExpression, entity);
             }
         }
 
@@ -102,7 +156,7 @@ namespace Signum.Engine.Basics
         {
             EntityGroupInfo<T> info = (EntityGroupInfo<T>)GetEntityGroupInfo(entityGroupKey, typeof(T));
 
-            return query.Where(info.Expression);
+            return query.Where(info.IsInGroupExpression);
         }
 
         class WhereInGroupExpander : IMethodExpander
@@ -119,7 +173,7 @@ namespace Signum.Engine.Basics
 
                 IEntityGroupInfo info = GetEntityGroupInfo((Enum)((ConstantExpression)group).Value, type);
 
-                return Expression.Call(null, miWhere.MakeGenericMethod(type), arguments[0], info.UntypedExpression);
+                return Expression.Call(null, miWhere.MakeGenericMethod(type), arguments[0], info.IsInGroupUntypedExpression);
             }
         }
 
@@ -133,7 +187,7 @@ namespace Signum.Engine.Basics
 
         static readonly Enum[] NoGroups = new Enum[0];
 
-        static IEntityGroupInfo GetEntityGroupInfo(Enum entityGroupKey, Type type)
+        internal static IEntityGroupInfo GetEntityGroupInfo(Enum entityGroupKey, Type type)
         {
             IEntityGroupInfo info = infos
                .GetOrThrow(type, "There's no expression registered for type {{0}} on group {0}".Formato(entityGroupKey))
@@ -141,18 +195,11 @@ namespace Signum.Engine.Basics
             return info;
         }
 
-        public static Expression<Func<T, bool>> GetInGroupExpression<T>(Enum entityGroupKey)
+        internal static EntityGroupInfo<T> GetEntityGroupInfo<T>(Enum entityGroupKey)
             where T : IdentifiableEntity
         {
-            var expression = ((EntityGroupInfo<T>)GetEntityGroupInfo(entityGroupKey, typeof(T))).Expression;
-            return expression;
+            return (EntityGroupInfo<T>)GetEntityGroupInfo(entityGroupKey, typeof(T));
         }
-
-        public static LambdaExpression GetInGroupExpression(Type type, Enum entityGroupKey)
-        {
-            return GetEntityGroupInfo(entityGroupKey, type).UntypedExpression;
-        }
-
 
         static MethodInfo miSmartRetrieve = ReflectionTools.GetMethodInfo(() => SmartRetrieve<IdentifiableEntity>(null)).GetGenericMethodDefinition();
 
@@ -161,7 +208,14 @@ namespace Signum.Engine.Basics
             throw new InvalidOperationException("This methid is ment to be used only in declaration of entity groups"); 
         }
 
-        internal class DataBaseTransformer : ExpressionVisitor
+        static MethodInfo miSmartTypeIs = ReflectionTools.GetMethodInfo(() => SmartTypeIs<IdentifiableEntity>(null)).GetGenericMethodDefinition();
+
+        public static bool SmartTypeIs<T>(this Lite lite)
+        {
+            throw new InvalidOperationException("This methid is ment to be used only in declaration of entity groups");
+        }
+
+        internal class DataBaseTransformer : SimpleExpressionVisitor
         {
             public static Expression ToDatabase(Expression exp)
             {
@@ -174,6 +228,10 @@ namespace Signum.Engine.Basics
                 if (m.Method.IsInstantiationOf(miSmartRetrieve))
                 {
                     return Expression.Property(base.Visit(m.Arguments[0]), "Entity");
+                }
+                else if (m.Method.IsInstantiationOf(miSmartTypeIs))
+                {
+                    return Expression.TypeIs(Expression.Property(base.Visit(m.Arguments[0]), "Entity"), m.Method.GetGenericArguments()[0]);
                 }
 
                 return base.VisitMethodCall(m);
@@ -192,7 +250,7 @@ namespace Signum.Engine.Basics
             public readonly SrChain Parent; 
         }
 
-        class MemoryNominator : ExpressionVisitor
+        class MemoryNominator : SimpleExpressionVisitor
         {
             class NominatorResult
             {
@@ -273,12 +331,34 @@ namespace Signum.Engine.Basics
 
         }
 
+        internal class MemoryOnlyTransformer : SimpleExpressionVisitor
+        {
+            public static Expression ToMemory(Expression exp)
+            {
+                MemoryOnlyTransformer dbt = new MemoryOnlyTransformer();
+                return dbt.Visit(exp);
+            }
 
-        internal class MemoryTransformer : ExpressionVisitor
+            protected override Expression VisitMethodCall(MethodCallExpression m)
+            {
+                if (m.Method.IsInstantiationOf(miSmartRetrieve))
+                {
+                    return Expression.Property(base.Visit(m.Arguments[0]), "Entity");
+                }
+                else if (m.Method.IsInstantiationOf(miSmartTypeIs))
+                {
+                    return Expression.Equal(Expression.Property(base.Visit(m.Arguments[0]), "RuntimeType"), Expression.Constant(m.Method.GetGenericArguments()[0], typeof(Type)));
+                }
+
+                return base.VisitMethodCall(m);
+            }
+        }
+
+        internal class MemoryTransformer : SimpleExpressionVisitor
         {
             Dictionary<Expression, List<SrChain>> nominations;
 
-            public static Expression ToDatabase(Expression exp)
+            public static Expression ToMemory(Expression exp)
             {
                 MemoryTransformer tr = new MemoryTransformer(){ nominations =  MemoryNominator.Nominate(exp)};
 
@@ -295,6 +375,16 @@ namespace Signum.Engine.Basics
                     return Dispatch(exp, ImmutableStack<MethodCallExpression>.Empty, chains);
 
                 return base.Visit(exp);
+            }
+
+            protected override Expression VisitMethodCall(MethodCallExpression m)
+            {
+                if (m.Method.IsInstantiationOf(miSmartTypeIs))
+                {
+                    return Expression.Equal(Expression.Property(base.Visit(m.Arguments[0]), "RuntimeType"), Expression.Constant(m.Method.GetGenericArguments()[0], typeof(Type)));
+                }
+
+                return base.VisitMethodCall(m);
             }
 
             static Expression Dispatch(Expression exp, ImmutableStack<MethodCallExpression> liteAssumptions,  IEnumerable<SrChain> chains)
@@ -320,11 +410,14 @@ namespace Signum.Engine.Basics
 
             static Expression CaseBody(Expression exp, ImmutableStack<MethodCallExpression> liteAsumptions)
             {
+                if (liteAsumptions.Empty())
+                    return MemoryOnlyTransformer.ToMemory(exp);
+
                 AliasGenerator ag = new AliasGenerator();
 
-                var dict = liteAsumptions.ToDictionary(sr => sr, sr => Expression.Parameter(sr.Type, ag.GetNextTableAlias(sr.Type))); 
+                var dict = liteAsumptions.ToDictionary(sr => sr, sr => Expression.Parameter(sr.Type, ag.GetNextTableAlias(sr.Type)));
 
-                var body = DataBaseTransformer.ToDatabase(SrReplacer.Replace(exp,dict)); 
+                var body = DataBaseTransformer.ToDatabase(SrReplacer.Replace(exp, dict)); // The only difference is the way SmartTypeIs works
 
                 return dict.Aggregate(body, (acum, kvp)=>
                     Expression.Call(miAny.MakeGenericMethod(kvp.Key.Type),
@@ -334,7 +427,7 @@ namespace Signum.Engine.Basics
             }
         }
 
-        public class SrReplacer : ExpressionVisitor
+        public class SrReplacer : SimpleExpressionVisitor
         {
             Dictionary<MethodCallExpression, ParameterExpression> replacements = new Dictionary<MethodCallExpression, ParameterExpression>();
 
@@ -352,38 +445,6 @@ namespace Signum.Engine.Basics
             {
                 return replacements.TryGetC(m) ?? base.VisitMethodCall(m);
             }
-        }
-
-// Ej 1
-// p => p.Coche.SR().Color == Rojo
-// p => p.Coche.EoN == null? p.Coche.InDB().Any(c=>c.Color == Rojo)
-//      p.Coche.E.Color == Rojo
-
-// Ej 2
-// p => p.Coche.SR().Color == Rojo && IsWeekend()
-// p => (p.Coche.EoN == null ? p.Coche.InDB().Any(c=>c.Color == Rojo)
-//       p.Coche.E.Color == Rojo) && && IsWeekend()
-
-// Ej 3
-// p => p.Coche.SR().Marca.SR().Nombre == "M"
-// p => p.Coche.EoN == null? p.Coche.InDB().Any(c=>c.Marca.E.Nombre == "M")
-//      p.Coche.E.Marca.EoN == null? p.Coche.E.Marca.InDB().Any(m=>m.Nombre == "M")
-//      p.Coche.E.Marca.E.Nombre == "M"
-
-// Ej 4
-// p => p.Coche.SR().Marca.SR().Nombre == "M"
-// p => p.Coche.EoN == null? p.Coche.InDB().Any(c=>c.Marca.E.Nombre == "M")
-//      p.Coche.E.Marca.EoN == null? p.Coche.E.Marca.InDB().Any(m=>m.Nombre == "M")
-//      p.Coche.E.Marca.E.Nombre == "M"
-
-// Ej 5
-// p => p.Coche.SR().Marca == Yo.Coche.SR().Marca
-// p => p.Coche.EoN == null? (Yo.Coche.EoN == null ? p.Coche.InDB().SM(Yo.Coche.InDB(),(c1, c2)=>c1.Marca == c2.Marca).Any()
-//              p.Coche.InDb().Any(c=>c.Marca == yo.Coche.E.Marca)) : 
-//             (Yo.Coche.Eon == null ? Yo.Coche.InDB().Any(c => c.Marca == p.Coche.E.Marca)
-//                      p.Coche.E.Marca == Yo.Coche.E.Marca)   
-
-
-      
+        }      
     }
 }

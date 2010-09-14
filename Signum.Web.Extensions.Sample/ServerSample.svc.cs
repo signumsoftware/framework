@@ -15,31 +15,13 @@ using Signum.Utilities;
 using System.Threading;
 using System.Globalization;
 using Signum.Test.Extensions;
+using Signum.Utilities.DataStructures;
+using Signum.Entities.DynamicQuery;
 
 namespace Signum.Web.Extensions.Sample
 {
     public class ServerSample: ServerExtensions, IServerSample
     {
-        public List<Lite<ExcelReportDN>> GetExcelReports(object queryName)
-        {
-            return Return(MethodInfo.GetCurrentMethod(), 
-                () => ReportsLogic.GetExcelReports(queryName));
-        }
-
-        #region IEntityGroupAuthServer Members
-
-        public EntityGroupRulePack GetEntityGroupAllowedRules(Lite<RoleDN> role)
-        {
-            return Return(MethodInfo.GetCurrentMethod(),
-             () => EntityGroupAuthLogic.GetEntityGroupRules(role));
-        }
-
-        public void SetEntityGroupAllowedRules(EntityGroupRulePack rules)
-        {
-            Execute(MethodInfo.GetCurrentMethod(),
-               () => EntityGroupAuthLogic.SetEntityGroupRules(rules));
-        }
-
-        #endregion
+     
     }
 }

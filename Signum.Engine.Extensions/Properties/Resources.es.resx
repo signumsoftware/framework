@@ -112,10 +112,10 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="TheEntity0IsNew" xml:space="preserve">
     <value>La entidad {0} es nueva</value>
@@ -383,5 +383,17 @@
   </data>
   <data name="AnonymousUserNotLoadedInitializeToLevel1SimpleEntities" xml:space="preserve">
     <value>AnonymousUser no cargado. Inicialize a nivel Level1SimpleEntities</value>
+  </data>
+  <data name="ExcelTemplateMustHaveExtensionXLSXandCurrentOneHas0" xml:space="preserve">
+    <value>El template Excel debe tener extensión .xlsx, pero el actual tiene extensión {0}</value>
+  </data>
+  <data name="ThereAreNoResultsToWrite" xml:space="preserve">
+    <value>No hay resultados que exportar al informe</value>
+  </data>
+  <data name="Data" xml:space="preserve">
+    <value>Datos</value>
+  </data>
+  <data name="TheExcelTemplateHasAColumn0NotPresentInTheFindWindow" xml:space="preserve">
+    <value>La plantilla Excel tiene una columna {0} que no está presente en el buscador</value>
   </data>
 </root>

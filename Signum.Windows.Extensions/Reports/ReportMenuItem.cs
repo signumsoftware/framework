@@ -74,26 +74,21 @@ namespace Signum.Windows.Reports
                 MenuItem b = (MenuItem)e.OriginalSource;
                 Lite<ExcelReportDN> reportLite = (Lite<ExcelReportDN>)b.Tag;
 
-                ExcelReportDN report = reportLite.RetrieveAndForget();
-                string extension = Path.GetExtension(report.File.FileName);
-                if (extension != ".xlsx")
-                    throw new ApplicationException("El template de los ficheros Excel personalizados debe tener la extensión .xlsx, y el fichero seleccionado tiene " + extension);
-
                 SaveFileDialog sfd = new SaveFileDialog()
                 {
                     AddExtension = true,
-                    DefaultExt = extension, //".xlsx",
+                    DefaultExt = ".xlsx",
                     Filter = Prop.Resources.Excel2007Spreadsheet,
-                    FileName = report.DisplayName + " - " + DateTime.Now.ToString("yyyyMMddhhmmss") + extension,
+                    FileName = reportLite.ToStr + " - " + DateTime.Now.ToString("yyyyMMddhhmmss") + ".xlsx",
                     OverwritePrompt = true,
                     Title = Prop.Resources.FindLocationFoExcelReport
                 };
 
                 if (sfd.ShowDialog(this.FindCurrentWindow()) == true)
                 {
-                    File.WriteAllBytes(sfd.FileName, report.File.BinaryFile);
+                    byte[] result = Server.Return((IExcelReportServer r) => r.ExecuteExcelReport(reportLite, SearchControl.GetQueryRequest()));
 
-                    ExcelGenerator.WriteDataInExcelFile(SearchControl.ResultTable, sfd.FileName);
+                    File.WriteAllBytes(sfd.FileName, result);
 
                     System.Diagnostics.Process.Start(sfd.FileName);
                 }

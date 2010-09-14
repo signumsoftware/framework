@@ -58,8 +58,9 @@ namespace Signum.Test.Extensions
             ConnectionScope.Default = new Connection(connectionString, sb.Schema, dqm);
 
             sb.Settings.OverrideTypeAttributes<IUserRelatedDN>(new ImplementedByAttribute());
-            sb.Settings.OverrideFieldAttributes<UserQueryDN, Lite<IdentifiableEntity>>(cp => cp.Related, new ImplementedByAttribute(typeof(RoleDN)));
-            sb.Settings.OverrideFieldAttributes<ControlPanelDN, Lite<IdentifiableEntity>>(cp => cp.Related, new ImplementedByAttribute(typeof(RoleDN)));
+            sb.Settings.OverrideFieldAttributes((ControlPanelDN cp) => cp.Related, new ImplementedByAttribute(typeof(UserDN), typeof(RoleDN)));
+            sb.Settings.OverrideFieldAttributes((UserQueryDN uq) => uq.Related, new ImplementedByAttribute(typeof(UserDN), typeof(RoleDN)));
+
 
             AuthLogic.Start(sb, dqm, AuthLogic.SystemUserName, null);
             UserTicketLogic.Start(sb, dqm);

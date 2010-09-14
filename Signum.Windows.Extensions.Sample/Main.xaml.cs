@@ -13,9 +13,6 @@ using Signum.Utilities;
 using Signum.Windows;
 using Signum.Windows.Authorization;
 
-
-
-
 namespace Signum.Windows.Extensions.Sample
 {
     /// <summary>

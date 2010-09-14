@@ -191,7 +191,7 @@ namespace Signum.Windows.Calendars
 
             icDays.ItemsSource = days.Select(a => new Day { Value = a }).ToList();
             
-            icWeeks.ItemsSource = days.GroupCount(d => GetWeek(d)).Select(p => new WeekGroup { Min = p.Key.First.Day, Max = p.Key.Second.Day, Count = p.Value }).ToList();
+            icWeeks.ItemsSource = days.GroupCount(d => GetWeek(d)).Select(p => new WeekGroup { Min = p.Key.Item1.Day, Max = p.Key.Item2.Day, Count = p.Value }).ToList();
         }
 
         public Binding BindingToDayWidth<T>(Func<double,T> converter )

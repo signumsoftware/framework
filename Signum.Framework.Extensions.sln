@@ -1,6 +1,16 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Framework", "Framework", "{C091CA76-1473-476F-961B-A209A4B4D74A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Extensions", "Extensions", "{A5D15760-64E5-4522-B298-0249AAE6E124}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{94AFC767-70E0-4E8D-879B-19A49B9C9DAF}"
+	ProjectSection(SolutionItems) = preProject
+		LocalTestRun.testrunconfig = LocalTestRun.testrunconfig
+		Signum.Framework.Extensions.vsmdi = Signum.Framework.Extensions.vsmdi
+	EndProjectSection
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Signum.Web.Extensions.Sample", "Signum.Web.Extensions.Sample\Signum.Web.Extensions.Sample.csproj", "{4E8F08F7-6EA9-4D06-A2F5-CFAD4C1364E8}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Signum.Engine", "..\Framework\Signum.Engine\Signum.Engine.csproj", "{7F2DB6FE-C109-4057-B207-C62A767F905D}"
@@ -13,10 +23,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Signum.Utilities", "..\Fram
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Signum.Web", "..\Framework\Signum.Web\Signum.Web.csproj", "{61898D02-521F-49AB-928B-F80615D55CA3}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Framework", "Framework", "{C091CA76-1473-476F-961B-A209A4B4D74A}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Extensions", "Extensions", "{A5D15760-64E5-4522-B298-0249AAE6E124}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Signum.Engine.Extensions", "Signum.Engine.Extensions\Signum.Engine.Extensions.csproj", "{BA7FA363-61A1-41B1-945B-9B9C7BBCD357}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Signum.Entities.Extensions", "Signum.Entities.Extensions\Signum.Entities.Extensions.csproj", "{7D851227-5294-4BEB-990E-56B4FBB7A148}"
@@ -24,12 +30,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Signum.Test.Extensions", "Signum.Test.Extensions\Signum.Test.Extensions.csproj", "{4D7D1542-2C5B-45D3-BC62-0D7290899EF7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Signum.Web.Extensions", "Signum.Web.Extensions\Signum.Web.Extensions.csproj", "{86EE7792-96CF-4420-997B-8C811E2B166D}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{94AFC767-70E0-4E8D-879B-19A49B9C9DAF}"
-	ProjectSection(SolutionItems) = preProject
-		LocalTestRun.testrunconfig = LocalTestRun.testrunconfig
-		Signum.Framework.Extensions.vsmdi = Signum.Framework.Extensions.vsmdi
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Signum.Windows.Extensions", "Signum.Windows.Extensions\Signum.Windows.Extensions.csproj", "{CAFD6D4D-E5FB-4A6E-84FC-3185854CCD9D}"
 EndProject
@@ -45,7 +45,7 @@ Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
 		SccNumberOfProjects = 16
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
-		SccTeamFoundationServer = http://andromeda:8080/
+		SccTeamFoundationServer = http://192.168.0.8:8080/
 		SccLocalPath0 = .
 		SccProjectUniqueName1 = ..\\Framework\\Signum.Engine\\Signum.Engine.csproj
 		SccProjectTopLevelParentUniqueName1 = Signum.Framework.Extensions.sln
@@ -206,10 +206,10 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{7F2DB6FE-C109-4057-B207-C62A767F905D} = {C091CA76-1473-476F-961B-A209A4B4D74A}
 		{F2B51D08-498D-4C9F-8112-9521A7762B02} = {C091CA76-1473-476F-961B-A209A4B4D74A}
 		{F7D3F72D-741D-4F67-8CF8-CD41B9035FED} = {C091CA76-1473-476F-961B-A209A4B4D74A}
 		{61898D02-521F-49AB-928B-F80615D55CA3} = {C091CA76-1473-476F-961B-A209A4B4D74A}
-		{7F2DB6FE-C109-4057-B207-C62A767F905D} = {C091CA76-1473-476F-961B-A209A4B4D74A}
 		{76278145-7CCD-4411-9B8A-078708128571} = {C091CA76-1473-476F-961B-A209A4B4D74A}
 		{BA7FA363-61A1-41B1-945B-9B9C7BBCD357} = {A5D15760-64E5-4522-B298-0249AAE6E124}
 		{7D851227-5294-4BEB-990E-56B4FBB7A148} = {A5D15760-64E5-4522-B298-0249AAE6E124}

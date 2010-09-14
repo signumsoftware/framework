@@ -112,10 +112,10 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Deleted" xml:space="preserve">
     <value>(Effacé)</value>
@@ -566,12 +566,6 @@
   </data>
   <data name="ProcessStartIsNullButProcessEndIsNot" xml:space="preserve">
     <value>Le début du procéssus est nul mais pas sa fin</value>
-  </data>
-  <data name="ThereAreNoResultsToWrite" xml:space="preserve">
-    <value>Il en n'est pas ressorti qu'exporter au rapport</value>
-  </data>
-  <data name="Data" xml:space="preserve">
-    <value>Données</value>
   </data>
   <data name="TheExcelTemplateHasAColumn0NotPresentInTheFindWindow" xml:space="preserve">
     <value>Le Mòdel Excel a une colonne {0} qui n'est pas présent chez le chercheur</value>

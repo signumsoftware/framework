@@ -22,9 +22,8 @@
                 <MenuItem Tag="{m:Explore QueryName={x:Type st:AlbumDN}}"/>
 
                 <MenuItem Tag="{m:Explore QueryName={x:Type st:ArtistDN}}"/>
-                <MenuItem Tag="{m:Explore QueryName={x:Type st:AwardDN}}"/>
                 <MenuItem Tag="{m:Explore QueryName={x:Type st:BandDN}}"/>
-
+                <MenuItem Tag="{m:Explore QueryName={x:Type st:NoteDN}}"/>
                 <MenuItem Tag="{m:Explore QueryName={x:Type st:LabelDN}}"/>
 
                 <MenuItem Header="Awards">

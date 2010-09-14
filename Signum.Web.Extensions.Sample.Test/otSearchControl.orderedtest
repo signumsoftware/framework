@@ -1,5 +1,5 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
-<OrderedTest name="otsearchcontrol" storage="d:\signum\extensions\signum.web.extensions.sample.test\otsearchcontrol.orderedtest" id="92e29dbb-f5cf-4331-97ed-c4956fa5cf8f" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2006">
+﻿<?xml version="1.0" encoding="utf-8"?>
+<OrderedTest name="otsearchcontrol" storage="d:\signum\extensions\signum.web.extensions.sample.test\otsearchcontrol.orderedtest" id="92e29dbb-f5cf-4331-97ed-c4956fa5cf8f" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
   <Css projectStructure="" iteration="" />
   <Execution timeOut="2147483647" />
   <Owners>

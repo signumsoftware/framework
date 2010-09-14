@@ -30,7 +30,8 @@ namespace Signum.Windows.Reports
         private void btGenerar_Click(object sender, RoutedEventArgs e)
         {
             CompositeReportDN cr = (CompositeReportDN)this.DataContext;
-            ExcelCompositeReportGenerator.GenerateCompositeReport(cr);
+            throw new NotImplementedException("Ahora se hace en servidor, descargar zip o hacer un bucle?"); 
+            //ExcelCompositeReportGenerator.GenerateCompositeReport(cr);
         }
     }
 }

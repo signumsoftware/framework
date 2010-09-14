@@ -11,6 +11,7 @@ using System.Windows.Media;
 using Prop = Signum.Windows.Extensions.Properties;
 using Signum.Utilities;
 using System.IO;
+using Signum.Services;
 
 namespace Signum.Windows.Reports
 {
@@ -37,7 +38,13 @@ namespace Signum.Windows.Reports
 
             if (sfd.ShowDialog(this.FindCurrentWindow()) == true)
             {
-                PlainExcelGenerator.WritePlainExcel(SearchControl.ResultTable, sfd.FileName);
+
+                var request = SearchControl.GetQueryRequest();
+
+                byte[] file = Server.Return((IExcelReportServer s) => s.ExecutePlainExcel(request));
+
+                File.WriteAllBytes(sfd.FileName, file);
+
                 System.Diagnostics.Process.Start(sfd.FileName);
             }
         }

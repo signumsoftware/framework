@@ -146,7 +146,7 @@ namespace Signum.Windows.Reports
         {
             e.Handled = true;
 
-            UserQueryDN userQuery = UserQuery.FromSearchControl(this.SearchControl);
+            UserQueryDN userQuery = UserQuery.FromQueryRequest(this.SearchControl.GetQueryRequest());
 
             userQuery = Navigator.View(userQuery, new ViewOptions
             {

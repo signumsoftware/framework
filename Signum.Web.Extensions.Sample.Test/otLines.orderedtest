@@ -1,5 +1,5 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
-<OrderedTest name="otLines" storage="d:\signum\extensions\signum.web.extensions.sample.test\otlines.orderedtest" id="6be79e2a-a1ec-4e11-b595-8e3986974468" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2006">
+﻿<?xml version="1.0" encoding="utf-8"?>
+<OrderedTest name="otLines" storage="d:\signum\extensions\signum.web.extensions.sample.test\otlines.orderedtest" id="6be79e2a-a1ec-4e11-b595-8e3986974468" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
   <Css projectStructure="" iteration="" />
   <Execution timeOut="2147483647" />
   <Owners>

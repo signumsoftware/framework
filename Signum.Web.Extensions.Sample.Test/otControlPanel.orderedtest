@@ -1,5 +1,5 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
-<OrderedTest name="otControlPanel" storage="d:\signum\extensions\signum.web.extensions.sample.test\otcontrolpanel.orderedtest" id="7745224e-b953-4e63-aa93-a3ccd1d96bff" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2006">
+﻿<?xml version="1.0" encoding="utf-8"?>
+<OrderedTest name="otControlPanel" storage="d:\signum\extensions\signum.web.extensions.sample.test\otcontrolpanel.orderedtest" id="7745224e-b953-4e63-aa93-a3ccd1d96bff" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
   <Css projectStructure="" iteration="" />
   <Execution timeOut="2147483647" />
   <Owners>

@@ -110,15 +110,26 @@ namespace Signum.Entities.Files
 
         static Expression<Func<FilePathDN, string>> FullWebPathExpression = fp => 
             fp.Repository != null && fp.Repository.WebPrefix.HasText() ?
-                fp.Repository.WebPrefix + "/" + HttpUtility.UrlPathEncode(fp.Sufix.Replace("\\", "/")) :
+                fp.Repository.WebPrefix + "/" + UrlPathEncode(fp.Sufix.Replace("\\", "/")) :
                 null;
+        [Ignore]
+        string fullWebPath;
         public string FullWebPath
         {
             get
             {
-                return FullWebPathExpression.Invoke(this);
+                return fullWebPath;
             }
         }
+
+        protected override void PostRetrieving()
+        {
+            this.fullWebPath = FullWebPathExpression.Invoke(this);
+
+            base.PostRetrieving();
+        }
+
+        public static Func<string, string> UrlPathEncode;
 
         public override string ToString()
         {

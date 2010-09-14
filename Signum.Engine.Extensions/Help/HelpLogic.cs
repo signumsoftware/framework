@@ -264,13 +264,13 @@ namespace Signum.Engine.Help
             List<Tuple<XmlSchemaException, string>> exceptions = new List<Tuple<XmlSchemaException, string>>();
             foreach (var doc in documents)
             {
-                doc.Document.Validate(schemas, (s, e) => exceptions.Add(Tuple.New(e.Exception, doc.File)));
+                doc.Document.Validate(schemas, (s, e) => exceptions.Add(Tuple.Create(e.Exception, doc.File)));
             }
 
             if (exceptions.Count != 0)
             {
                 string errorText = Resources.ErrorParsingXMLHelpFiles + exceptions.ToString(e => "{0} ({1}:{2}): {3}".Formato(
-                    e.Second, e.First.LineNumber, e.First.LinePosition, e.First.Message), "\r\n").Indent(3);
+                    e.Item2, e.Item1.LineNumber, e.Item1.LinePosition, e.Item1.Message), "\r\n").Indent(3);
 
                 throw new InvalidOperationException(errorText);
             }

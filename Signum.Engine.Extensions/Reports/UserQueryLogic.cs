@@ -74,16 +74,18 @@ namespace Signum.Engine.Reports
         {
             sb.Schema.Settings.AssertImplementedBy((UserQueryDN uq) => uq.Related, typeof(UserDN));
 
-            EntityGroupLogic.Register<UserQueryDN>(newEntityGroupKey, uq => uq.Related.RefersTo(UserDN.Current)); 
+            EntityGroupLogic.Register<UserQueryDN>(newEntityGroupKey, 
+                uq => uq.Related.RefersTo(UserDN.Current), 
+                uq => uq.Related != null && uq.Related.SmartTypeIs<UserDN>()); 
         }
 
         public static void RegisterRoleEntityGroup(SchemaBuilder sb, Enum newEntityGroupKey)
         {
             sb.Schema.Settings.AssertImplementedBy((UserQueryDN uq) => uq.Related, typeof(RoleDN));
 
-            EntityGroupLogic.Register<UserQueryDN>(newEntityGroupKey, uq =>
-                    AuthLogic.CurrentRoles().Contains(uq.Related.ToLite<RoleDN>())
-            );
+            EntityGroupLogic.Register<UserQueryDN>(newEntityGroupKey, 
+                uq => AuthLogic.CurrentRoles().Contains(uq.Related.ToLite<RoleDN>()),
+                uq => uq.Related != null && uq.Related.SmartTypeIs<RoleDN>());
         }
     }
 }

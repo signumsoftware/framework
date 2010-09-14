@@ -14,7 +14,7 @@ using Signum.Utilities;
 using System.Globalization;
 #endregion
 
-namespace Signum.Entities.Reports
+namespace Signum.Engine.Reports
 {
     public static class ExcelExtensions
     {

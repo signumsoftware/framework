@@ -3,8 +3,12 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:c="clr-namespace:Signum.Windows.Chart"
     xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
-         xmlns:dn="clr-namespace:Signum.Entities.Chart;assembly=Signum.Entities.Extensions"
-    Title="ChartWindow" SizeToContent="WidthAndHeight" m:Common.TypeContext="dn:ChartRequest">
+    xmlns:dn="clr-namespace:Signum.Entities.Chart;assembly=Signum.Entities.Extensions"
+    Title="ChartWindow" SizeToContent="WidthAndHeight" 
+    TextOptions.TextFormattingMode="Display"
+    UseLayoutRounding="True" 
+    m:Monitors.AdjustToMonitor="True"
+    m:Common.TypeContext="dn:ChartRequest">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -61,7 +65,7 @@
                     </StackPanel>
                 </TabItem.Header>
                 <Grid x:Name="rendererPlaceHolder">
-                    
+
                     <Border Background="SteelBlue" Opacity="50" MouseDown="Border_MouseDown" Visibility="{Binding NeedNewQuery, Converter={x:Static m:Converters.BoolToVisibility}}">
                         <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" FontSize="20">Generate Chart</TextBlock>
                     </Border>

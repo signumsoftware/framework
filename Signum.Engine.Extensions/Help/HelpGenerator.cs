@@ -190,7 +190,7 @@ namespace Signum.Engine.Help
         }
     }
 
-    internal class TableGatherer : ExpressionVisitor
+    internal class TableGatherer : SimpleExpressionVisitor
     {
         List<Type> result = new List<Type>();
 

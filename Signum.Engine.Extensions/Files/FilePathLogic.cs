@@ -12,6 +12,7 @@ using Signum.Engine.Extensions.Properties;
 using Signum.Engine.DynamicQuery;
 using System.Reflection;
 using System.Diagnostics;
+using System.Web;
 
 namespace Signum.Engine.Files
 {
@@ -60,6 +61,8 @@ namespace Signum.Engine.Files
                                                Entity = f.ToLite(),
                                                f.Name
                                            }).ToDynamic();
+
+                FilePathDN.UrlPathEncode = HttpUtility.UrlPathEncode;
 
                 sb.Schema.Generating += new Func<SqlPreCommand>(Schema_Generating);
             }
