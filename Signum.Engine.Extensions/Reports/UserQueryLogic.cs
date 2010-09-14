@@ -82,8 +82,6 @@ namespace Signum.Engine.Reports
             sb.Schema.Settings.AssertImplementedBy((UserQueryDN uq) => uq.Related, typeof(RoleDN));
 
             EntityGroupLogic.Register<UserQueryDN>(newEntityGroupKey, uq =>
-                    uq.Related == null ||
-                    !(uq.Related.SmartRetrieve() is RoleDN) ||
                     AuthLogic.CurrentRoles().Contains(uq.Related.ToLite<RoleDN>())
             );
         }

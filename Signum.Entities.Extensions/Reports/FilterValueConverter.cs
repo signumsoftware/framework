@@ -21,7 +21,7 @@ namespace Signum.Entities.Reports
         public static Dictionary<FilterType, List<IFilterValueConverter>> SpecificFilters = new Dictionary<FilterType, List<IFilterValueConverter>>()
         {
             {FilterType.DateTime, new List<IFilterValueConverter>{ new SmartDateTimeFilterValueConverter()} },
-            {FilterType.Lite, new List<IFilterValueConverter>{ new LiteFilterValueConverter(), new CurrentUserConverter()} },
+            {FilterType.Lite, new List<IFilterValueConverter>{ new CurrentUserConverter(), new LiteFilterValueConverter() } },
         };
 
         public static string ToString(object value, Type type)
@@ -115,10 +115,10 @@ namespace Signum.Entities.Reports
 
             public static string TryParse(string str, out SmartSpan result)
             {
-                if (str == null)
+                if (string.IsNullOrEmpty(str))
                 {
                     result = null;
-                    return "Invalid Format: yyyy/mm/dd hh:mm:ss";
+                    return FilterValueConverter.Continue;
                 }
 
                 Match match = regex.Match(str);
@@ -331,7 +331,7 @@ namespace Signum.Entities.Reports
             if (string.IsNullOrEmpty(value))
             {
                 result = null;
-                return null;
+                return FilterValueConverter.Continue;
             }
 
             if (TryParseLite == null)

@@ -62,7 +62,7 @@ namespace Signum.Entities.ControlPanel
 
         public override string ToString()
         {
-            return UserQueries.ToString(uq => uq.Label, ",");
+            return UserQueries.ToString(uq => uq.Label, ", ");
         }
     }
 
@@ -97,7 +97,7 @@ namespace Signum.Entities.ControlPanel
 
         public override string ToString()
         {
-            return Links.ToString(uq => uq.Label, ",");
+            return Links.ToString(uq => uq.Label, ", ");
         }
     }
 

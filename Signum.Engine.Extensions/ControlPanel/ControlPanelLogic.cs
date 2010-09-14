@@ -79,7 +79,8 @@ namespace Signum.Engine.ControlPanel
         {
             sb.Schema.Settings.AssertImplementedBy((ControlPanelDN uq) => uq.Related, typeof(RoleDN));
 
-            EntityGroupLogic.Register<ControlPanelDN>(newEntityGroupKey, uq => AuthLogic.CurrentRoles().Contains(uq.Related.ToLite<RoleDN>()));
+            EntityGroupLogic.Register<ControlPanelDN>(newEntityGroupKey, 
+                uq => AuthLogic.CurrentRoles().Contains(uq.Related.ToLite<RoleDN>()));
         }
     }
 }
