@@ -43,7 +43,7 @@
     {
         PanelPart pp = cp.Parts.SingleOrDefault(p => p.Row == i + 1 && (p.Column == j + 1 || p.Fill));
         %>
-        <td style="vertical-align:top" <%= (pp != null && pp.Fill) ? ("colspan=\""+ cp.NumberOfColumns + "\"") : "" %>>
+        <td style="vertical-align:top;padding-right:20px" <%= (pp != null && pp.Fill) ? ("colspan=\""+ cp.NumberOfColumns + "\"") : "" %>>
         <%
         if (pp != null)
         {

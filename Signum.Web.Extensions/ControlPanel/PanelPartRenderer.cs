@@ -8,6 +8,7 @@ using Signum.Entities;
 using System.Web.Mvc;
 using Signum.Entities.Reports;
 using Signum.Web.Queries;
+using Signum.Entities.DynamicQuery;
 
 namespace Signum.Web.ControlPanel
 {
@@ -38,7 +39,8 @@ namespace Signum.Web.ControlPanel
         public override void RenderPart(HtmlHelper helper, PanelPart part)
         {
             UserQueryDN uq = ((UserQueryDN)part.Content);
-            FindOptions fo = new FindOptions(Navigator.ResolveQueryFromToStr(uq.Query.Key))
+            object queryName = Navigator.Manager.QuerySettings.Keys.First(k => QueryUtils.GetQueryName(k) == uq.Query.Key);
+            FindOptions fo = new FindOptions(queryName)
             {
                 FilterMode = FilterMode.OnlyResults
             };
@@ -61,7 +63,8 @@ namespace Signum.Web.ControlPanel
 
             foreach (CountUserQueryElement uq in uqList)
             { 
-                FindOptions fo = new FindOptions(Navigator.ResolveQueryFromToStr(uq.UserQuery.Query.Key))
+                object queryName = Navigator.Manager.QuerySettings.Keys.First(k => QueryUtils.GetQueryName(k) == uq.UserQuery.Query.Key);
+                FindOptions fo = new FindOptions(queryName)
                 {
                     FilterMode = FilterMode.OnlyResults
                 };
