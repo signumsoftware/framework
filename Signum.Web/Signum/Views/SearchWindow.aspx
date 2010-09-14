@@ -4,13 +4,13 @@
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">    
    <%
         Html.IncludeAreaJs("signum/Scripts/SF_Globals.js",
-            "signum/Scripts/SF_Popup.js",   //maybe useless
+            "signum/Scripts/SF_Popup.js",   
             "signum/Scripts/SF_Lines.js",
             "signum/Scripts/SF_ViewNavigator.js",
             "signum/Scripts/SF_FindNavigator.js",
-            "signum/Scripts/SF_Validator.js",   //maybe useless
+            "signum/Scripts/SF_Validator.js",   
             "signum/Scripts/SF_Operations.js",
-            "signum/Scripts/SF_DragAndDrop.js",   //maybe useless
+            "signum/Scripts/SF_DragAndDrop.js",   
             "signum/Scripts/SF_Autocomplete.js");        
     %>
 </asp:Content>
