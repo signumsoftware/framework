@@ -27,6 +27,11 @@ namespace Signum.Engine.Basics
             }
         }
 
+        public static bool IsEnabled
+        {
+            get { return serviceInterface != null; }
+        }
+
         public static List<FacadeMethodDN> RetrieveOrGenerateServiceOperations()
         {
             var current = Database.RetrieveAll<FacadeMethodDN>().ToDictionary(a => a.Name);
@@ -43,7 +48,7 @@ namespace Signum.Engine.Basics
 
         public static MethodInfo GenerateServiceMethodInfo(string miName)
         {
-            return serviceInterface.GetInterfaces().SelectMany(i => i.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.FlattenHierarchy)).Single(m=>m.Name== miName);
+            return serviceInterface.GetInterfaces().SelectMany(i => i.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.FlattenHierarchy)).Single(m => m.Name == miName);
         }
 
         public static List<MethodInfo> GenerateServiceMethodInfo()
