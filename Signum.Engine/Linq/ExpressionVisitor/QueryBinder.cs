@@ -1202,9 +1202,9 @@ namespace Signum.Engine.Linq
                 {
                     int idType = Schema.Current.IDsForType.GetOrThrow(uType, Resources.TheType0IsNotInTheTypesTable.Formato(uType.TypeName()));
 
-                    Expression other = SmartEqualizer.EqualNullable(riba.TypeId, Expression.Constant(idType));
+                    Expression other = SmartEqualizer.EqualNullable(riba.TypeId, new SqlConstantExpression(idType));
 
-                    FieldInitExpression result = new FieldInitExpression(uType, null, TypeSqlConstant(uType), riba.Id, other, riba.Token); //Delay riba.TypeID to FillFie to make the SQL more clean
+                    FieldInitExpression result = new FieldInitExpression(uType, null, riba.Id, TypeSqlConstant(uType), other, riba.Token); //Delay riba.TypeID to FillFie to make the SQL more clean
                     riba.Implementations.Add(new ImplementationColumnExpression(uType, result));
                     return result;
                 }

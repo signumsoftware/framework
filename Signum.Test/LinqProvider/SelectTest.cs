@@ -249,7 +249,8 @@ namespace Signum.Test.LinqProvider
                         select 
                         ((ArtistDN)n.Target).Name ??
                         ((AlbumDN)n.Target).Name ??
-                        ((BandDN)n.Target).Name).ToList();               
+                        ((BandDN)n.Target).Name).ToList();
+
         }
 
         [TestMethod]
