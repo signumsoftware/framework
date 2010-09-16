@@ -19,8 +19,14 @@ namespace Signum.Web.Controllers
              Type cleanType = Reflector.ExtractLite(bindingContext.ModelType);
              if (cleanType != null)
              {
-                 string value = controllerContext.HttpContext.Request[bindingContext.ModelName] ?? (string)controllerContext.RouteData.Values[bindingContext.ModelName];
-
+                 string value = controllerContext.HttpContext.Request[bindingContext.ModelName];
+                 if (value == null)
+                 {
+                     if (controllerContext.RouteData.Values[bindingContext.ModelName] is Lite)
+                         return controllerContext.RouteData.Values[bindingContext.ModelName];
+                     else
+                         value = (string)controllerContext.RouteData.Values[bindingContext.ModelName];
+                 }
                  int id;
                  if (int.TryParse(value, out id))
                      return Database.RetrieveLite(cleanType, id);

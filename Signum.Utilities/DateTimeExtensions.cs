@@ -234,10 +234,31 @@ namespace Signum.Utilities
             }
             return date.ToLongDateString();
         }
+
+        public static string ToAgoString(this DateTime dateTime)
+        {
+            DateTime now = DateTime.Now;
+
+            //convert it to kind being used by parameter dateTime
+            DateTime converted = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, now.Second, dateTime.Kind);
+
+            if (DateTime.Compare(converted, dateTime) < 0)
+                throw new ApplicationException("Not possible to return a 'ago' string for a future date");
+
+            TimeSpan ts = converted.Subtract(dateTime);
+            if (ts.Days > 0)
+                return Resources.Ago.Formato((ts.Days == 1 ? Resources._0Day : Resources._0Days).Formato(ts.Days));
+            if (ts.Hours > 0)
+                return Resources.Ago.Formato((ts.Hours == 1 ? Resources._0Hour : Resources._0Hours).Formato(ts.Hours));
+            if (ts.Minutes > 0)
+                return Resources.Ago.Formato((ts.Minutes == 1 ? Resources._0Minute : Resources._0Minutes).Formato(ts.Minutes));
+
+            return Resources.Ago.Formato((ts.Seconds == 1 ? Resources._0Second : Resources._0Seconds).Formato(ts.Seconds));
+        }
         
         public static DateTime MonthStart(this DateTime dateTime)
         {
-            return new DateTime(dateTime.Year, dateTime.Month, 1); 
+            return new DateTime(dateTime.Year, dateTime.Month, 1, 0, 0, 0, dateTime.Kind); 
         }
     }
 

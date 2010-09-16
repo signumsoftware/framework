@@ -187,6 +187,15 @@ namespace Signum.Utilities.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} ago .
+        /// </summary>
+        public static string Ago {
+            get {
+                return ResourceManager.GetString("Ago", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to  and .
         /// </summary>
         public static string And {
