@@ -16,7 +16,9 @@ namespace Signum.Web.ScriptCombiner
             {
                 string path = local;
                 if (!string.IsNullOrEmpty(p)) path = p.Replace("%2f", "/") + (p.EndsWith("/") ? "" : "/") + path;
-                list.Add(new CssScriptResource(path));
+                var r = new CssScriptResource(path);
+                if (!string.IsNullOrEmpty(p)) r.resourcesFolder = "../";
+                list.Add(r);
             }
 
             //list.AddRange(f.Split(',').Select(local => new CssScriptResource(local)));
