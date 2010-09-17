@@ -4,6 +4,7 @@ using System.IO;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Mvc.Html;
+using System.Linq.Expressions;
 
 namespace Signum.Web
 {
@@ -85,6 +86,41 @@ namespace Signum.Web
     //    }
     //}
 
+    public static class RenderActionExtenders
+    {
+        public static string RenderActionToString<TController>(this HtmlHelper helper, HttpRequest request, Expression<Action<TController>> action)
+            where TController : Controller
+        {
+            //Create memory writer
+            var sb = new StringBuilder();
+            var memWriter = new StringWriter(sb);
+
+            //Create fake http context to render the view
+            var fakeResponse = new HttpResponse(memWriter);
+            var fakeContext = new HttpContext(request, fakeResponse);
+            var fakeControllerContext = new ControllerContext(
+                new HttpContextWrapper(fakeContext),
+                helper.ViewContext.RouteData,
+                helper.ViewContext.Controller);
+
+            var oldContext = HttpContext.Current;
+            HttpContext.Current = fakeContext;
+
+            //Use HtmlHelper to render partial view to fake context
+            var html = new HtmlHelper(new ViewContext(fakeControllerContext,
+                new Signum.Web.RenderPartialExtenders.FakeView(), new ViewDataDictionary(), new TempDataDictionary(), memWriter),
+                new ViewPage());
+            html.RenderAction<TController>(action);
+
+            //Restore context
+            HttpContext.Current = oldContext;
+
+            //Flush memory and return output
+            memWriter.Flush();
+            return sb.ToString();
+        }
+    }
+
     public static class RenderPartialExtenders
     {
         public static string RenderPartialToString(this HtmlHelper helper,
@@ -107,10 +143,10 @@ namespace Signum.Web
 
             //Use HtmlHelper to render partial view to fake context
             var html = new HtmlHelper(new ViewContext(fakeControllerContext,
-                new FakeView(), new ViewDataDictionary(), new TempDataDictionary(),memWriter),
+                new FakeView(), new ViewDataDictionary(), new TempDataDictionary(), memWriter),
                 new ViewPage());
             html.RenderPartial(viewName, viewData);
-            
+
             //Restore context
             HttpContext.Current = oldContext;
 

@@ -78,6 +78,14 @@
     <Compile Include="Common.cs" />
     <Compile Include="Constructor.cs" />
     <Compile Include="AreaResourceHelper.cs" />
+    <Compile Include="Futures\ExpressionHelper.cs" />
+    <Compile Include="Futures\LinkBuilder.cs" />
+    <Compile Include="Futures\MvcResources.Designer.cs">
+      <DependentUpon>MvcResources.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Futures\ViewExtensions.cs" />
     <Compile Include="ToolBarMenu.cs" />
     <Compile Include="FluentTagBuilder.cs" />
     <Compile Include="JSRenderer\JsFunction.cs" />
@@ -229,6 +237,11 @@
     <Content Include="Signum\Views\NormalControl.ascx">
       <SubType>ASPXCodeBehind</SubType>
     </Content>
+    <EmbeddedResource Include="Futures\MvcResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>MvcResources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.fr.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.fr.Designer.cs</LastGenOutput>

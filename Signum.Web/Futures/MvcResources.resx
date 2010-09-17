@@ -1,0 +1,213 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ActionMethodSelector_AmbiguousActionMatch" xml:space="preserve">
+    <value>The current request for action '{0}' on controller type '{1}' is ambiguous between the following action methods:{2}</value>
+  </data>
+  <data name="ActionMethodSelector_AmbiguousMatchType" xml:space="preserve">
+    <value>{0} on type {1}</value>
+  </data>
+  <data name="ActionMethodSelector_AmbiguousMethodMatch" xml:space="preserve">
+    <value>Lookup for method '{0}' on controller type '{1}' failed because of an ambiguity between the following methods:{2}</value>
+  </data>
+  <data name="ActionMethodSelector_CouldNotFindMethod" xml:space="preserve">
+    <value>Could not locate a method named '{0}' on controller type '{1}'.</value>
+  </data>
+  <data name="AsyncActionDescriptor_CannotBeCalledSynchronously" xml:space="preserve">
+    <value>The action '{0}' cannot be called synchronously.</value>
+  </data>
+  <data name="AsyncActionDescriptor_CannotCallInstanceMethodOnNonControllerType" xml:space="preserve">
+    <value>Cannot create a descriptor for instance method '{0}' on type '{1}' since the type does not subclass ControllerBase.</value>
+  </data>
+  <data name="AsyncActionDescriptor_CannotCallMethodsWithOutOrRefParameters" xml:space="preserve">
+    <value>Cannot call action method '{0}' on controller '{1}' since the parameter '{2}' is passed by reference.</value>
+  </data>
+  <data name="AsyncActionDescriptor_CannotCallOpenGenericMethods" xml:space="preserve">
+    <value>Cannot call action method '{0}' on controller '{1}' since it is a generic method.</value>
+  </data>
+  <data name="AsyncActionDescriptor_EndExecuteCalledPrematurely" xml:space="preserve">
+    <value>EndExecute() was called prematurely.</value>
+  </data>
+  <data name="AsyncActionDescriptor_ParameterCannotBeNull" xml:space="preserve">
+    <value>The parameters dictionary contains a null entry for parameter '{0}' of non-nullable type '{1}' for method '{2}' in '{3}'. To make a parameter optional its type should be either a reference type or a Nullable type.</value>
+  </data>
+  <data name="AsyncActionDescriptor_ParameterNotInDictionary" xml:space="preserve">
+    <value>The parameters dictionary does not contain an entry for parameter '{0}' of type '{1}' for method '{2}' in '{3}'. The dictionary must contain an entry for each parameter, even parameters with null values.</value>
+  </data>
+  <data name="AsyncActionDescriptor_ParameterValueHasWrongType" xml:space="preserve">
+    <value>The parameters dictionary contains an invalid entry for parameter '{0}' for method '{1}' in '{2}'. The dictionary contains a value of type '{3}', but the parameter requires a value of type '{4}'.</value>
+  </data>
+  <data name="AsyncCommon_ControllerMustImplementIAsyncManagerContainer" xml:space="preserve">
+    <value>The controller of type '{0}' must subclass AsyncController or implement the IAsyncManagerContainer interface.</value>
+  </data>
+  <data name="AsyncCommon_InvalidAsyncResult" xml:space="preserve">
+    <value>The provided IAsyncResult is not valid for this method.</value>
+  </data>
+  <data name="AsyncCommon_ResultAlreadyExecuted" xml:space="preserve">
+    <value>The provided IAsyncResult has already been consumed.</value>
+  </data>
+  <data name="AsyncCommon_TimeoutMustBeNonNegativeOrInfinite" xml:space="preserve">
+    <value>The timeout period must be a non-negative number or Timeout.Infinite.</value>
+  </data>
+  <data name="Common_ModelBinderDoesNotSupportModelType" xml:space="preserve">
+    <value>This model binder does not support the model type '{0}'.</value>
+  </data>
+  <data name="Common_NullOrEmpty" xml:space="preserve">
+    <value>Value cannot be null or empty.</value>
+  </data>
+  <data name="ControllerBuilder_FactoryReturnedNull" xml:space="preserve">
+    <value>The IControllerFactory '{0}' did not return a controller for a controller named '{1}'.</value>
+  </data>
+  <data name="ExpressionHelper_CannotRouteToController" xml:space="preserve">
+    <value>Cannot route to class named 'Controller'.</value>
+  </data>
+  <data name="ExpressionHelper_MustBeMethodCall" xml:space="preserve">
+    <value>Expression must be a method call.</value>
+  </data>
+  <data name="ExpressionHelper_TargetMustEndInController" xml:space="preserve">
+    <value>Controller name must end in 'Controller'.</value>
+  </data>
+  <data name="HtmlHelper_MissingSelectData" xml:space="preserve">
+    <value>There is no ViewData item with the key '{0}' of type '{1}'.</value>
+  </data>
+  <data name="HtmlHelper_WrongSelectDataType" xml:space="preserve">
+    <value>The ViewData item with the key '{0}' is of type '{1}' but needs to be of type '{2}'.</value>
+  </data>
+  <data name="ReflectedAsyncPatternActionDescriptor_BeginMethodHasWrongSignature" xml:space="preserve">
+    <value>Method '{0}' is not a valid begin method. A begin method must take an AsyncCallback and Object as its last two parameters, and it must return an IAsyncResult.</value>
+  </data>
+  <data name="ReflectedAsyncPatternActionDescriptor_EndMethodHasWrongSignature" xml:space="preserve">
+    <value>Method '{0}' is not a valid end method. An end method must take an IAsyncResult as its only parameter.</value>
+  </data>
+  <data name="ReflectedDelegatePatternActionDescriptor_MethodHasWrongReturnType" xml:space="preserve">
+    <value>Method '{0}' is not valid for this descriptor. The method must return a parameterless delegate type.</value>
+  </data>
+  <data name="ReflectedDelegatePatternActionDescriptor_MethodReturnedNull" xml:space="preserve">
+    <value>Method '{0}' returned null. The method must return a value.</value>
+  </data>
+  <data name="AsyncTimeoutAttribute_DurationMustBeNonNegative" xml:space="preserve">
+    <value>The timeout duration cannot be negative.</value>
+  </data>
+  <data name="RequireSslAttribute_MustUseSsl" xml:space="preserve">
+    <value>Access forbidden. The requested resource requires an SSL connection.</value>
+  </data>
+  <data name="CommonControls_NameRequired" xml:space="preserve">
+    <value>The 'Name' property must be set.</value>
+  </data>
+</root>
