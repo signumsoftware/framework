@@ -66,6 +66,8 @@ namespace Signum.Web
             if (string.IsNullOrEmpty(acceptEncoding)) return;
             acceptEncoding = acceptEncoding.ToUpperInvariant();
 
+            if (response.Filter == null) return;
+
             if (acceptEncoding.Contains("GZIP"))
             {
                 response.AppendHeader("Content-encoding", "gzip");
