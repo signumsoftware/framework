@@ -121,13 +121,15 @@ namespace Signum.Web
             else if (Link != null)
             {
                 string link = Link.ToString();
+                
+                bool active = false;
 
-                if (link.HasText() && currentUrl.EndsWith(link)) { sb.Append("<b>"); }
+                if (link.HasText() && currentUrl.EndsWith(link)) { active = true; }
                 if (ManualA == null)
                 {
-                    FluentTagBuilder tbA = new FluentTagBuilder("a")
-                                .MergeAttributes(new {href = link, title = Title})
-                                .AddCssClass(Class);
+                    FluentTagBuilder tbA = active ? new FluentTagBuilder("span").AddCssClass("selected") : new FluentTagBuilder("a")
+                            .MergeAttributes(new {href = link, title = Title})
+                            .AddCssClass(Class);
 
                     if (!string.IsNullOrEmpty(html))
                         tbA.InnerHtml(html);
@@ -137,8 +139,7 @@ namespace Signum.Web
                     sb.Append(tbA.ToString(TagRenderMode.Normal));
                 }
                 else
-                    sb.Append(ManualA(link, title, Class));
-                if (link.HasText() && currentUrl.EndsWith(link)) { sb.Append("</b>"); }
+                    sb.Append(ManualA(link, title, " ".CombineIfNotEmpty(Class, "selected")));
             }
 
             if (depth != 0)

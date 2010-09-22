@@ -246,6 +246,9 @@ namespace Signum.Utilities
                 throw new ApplicationException("Not possible to return a 'ago' string for a future date");
 
             TimeSpan ts = converted.Subtract(dateTime);
+            int months = ts.Days / 30;
+            if (months > 0)
+                return Resources.Ago.Formato((months == 1 ? Resources._0Month : Resources._0Months).Formato(months));
             if (ts.Days > 0)
                 return Resources.Ago.Formato((ts.Days == 1 ? Resources._0Day : Resources._0Days).Formato(ts.Days));
             if (ts.Hours > 0)
