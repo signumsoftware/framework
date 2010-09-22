@@ -370,23 +370,44 @@ namespace Signum.Web.Controllers
         [AcceptVerbs(HttpVerbs.Post)]
         public PartialViewResult ReloadEntity(string prefix, string sfPartialViewName)
         {
-            MappingContext context = this.UntypedExtractEntity(prefix)
-                .ThrowIfNullC(Resources.TypeWasNotPossibleToExtract)
-                .UntypedApplyChanges(this.ControllerContext, prefix, true);
+            bool isReactive = this.IsReactive();
 
-            IdentifiableEntity entity = (IdentifiableEntity)context.UntypedValue;
+            IdentifiableEntity entity = (IdentifiableEntity)this.UntypedExtractEntity(prefix);
+            MappingContext context = null;
 
-            if (this.IsReactive())
+            if (isReactive && prefix.HasText() && !prefix.StartsWith("New"))
             {
-                Session[this.TabID()] = entity;
-                this.ViewData[ViewDataKeys.Reactive] = true;
-                if (prefix.HasText() && !prefix.StartsWith("New"))
-                    entity = (IdentifiableEntity)MappingContext.FindSubentity(entity, prefix);
+                IdentifiableEntity subentity = (IdentifiableEntity)MappingContext.FindSubentity(entity, prefix);
+
+                if (subentity == null)
+                {
+                    Type type = MappingContext.FindSubentityType(entity, prefix);
+                    subentity = (IdentifiableEntity)Constructor.Construct(type);
+                }
+                
+                context = subentity.UntypedApplyChanges(this.ControllerContext, prefix, true);
+                entity = subentity;
+            }
+            else
+            {
+                context = this.UntypedExtractEntity(prefix)
+                    .ThrowIfNullC(Resources.TypeWasNotPossibleToExtract)
+                    .UntypedApplyChanges(this.ControllerContext, prefix, true);
+
+                entity = (IdentifiableEntity)context.UntypedValue;
             }
 
             this.ViewData[ViewDataKeys.ChangeTicks] = context.GetTicksDictionary();
+
+            if (isReactive)
+            {
+                if (!prefix.HasText())
+                    Session[this.TabID()] = entity;
+                this.ViewData[ViewDataKeys.Reactive] = true;
+            }
+
             if (prefix.HasText())
-                return Navigator.PartialView(this, entity, prefix, sfPartialViewName);
+                return Navigator.PartialView(this, entity, prefix);
             else
                 return Navigator.NormalControl(this, entity, sfPartialViewName);
         }

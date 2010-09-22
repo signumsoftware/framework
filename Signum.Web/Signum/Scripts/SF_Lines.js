@@ -203,6 +203,7 @@ var ELine = function(_elineOptions) {
         log("ELine view");
         var viewOptions = this.viewOptionsForViewing(_viewOptions);
         new ViewNavigator(viewOptions).viewOk();
+        this.setTicks();
     };
 
     this.viewOptionsForViewing = function(_viewOptions) {
@@ -212,6 +213,7 @@ var ELine = function(_elineOptions) {
         return $.extend({
             containerDiv: this.options.prefix.compose(sfEntity),
             onOk: function() { return self.onViewingOk(defaultValidateUrl); },
+            onOkClosed: function() { self.fireOnEntityChanged(true); },
             onCancelled: null,
             controllerUrl: defaultViewUrl,
             type: info.runtimeType(),
@@ -324,6 +326,7 @@ var EDLine = function(_edlineOptions) {
             new ViewNavigator(viewOptions).viewEmbedded();
         }
         this.onCreated(viewOptions.type);
+        this.setTicks();
     };
 
     this.viewOptionsForCreating = function(_viewOptions) {
@@ -406,18 +409,18 @@ function EDLineOnRemoving(_edline) {
 }
 
 //EListOptions = EBaseLineOptions
-var EList = function(_elistOptions) {
+var EList = function (_elistOptions) {
     EBaseLine.call(this, _elistOptions);
 
     var defaultViewUrl = "Signum/PopupView";
     var defaultValidateUrl = "Signum/ValidatePartial";
 
-    this.updateLinks = function(newToStr, newLink, itemPrefix) {
+    this.updateLinks = function (newToStr, newLink, itemPrefix) {
         log("EList updateLinks");
         $('#' + itemPrefix.compose(sfToStr)).html(newToStr);
     };
 
-    this.extraJsonParams = function(itemPrefix) {
+    this.extraJsonParams = function (itemPrefix) {
         log("EList extraJsonParams");
         var extraParams = new Object();
 
@@ -445,24 +448,24 @@ var EList = function(_elistOptions) {
         return extraParams;
     };
 
-    this.setTicks = function() {
-    log("EList setTicks");
-    if ($('#' + sfReactive).length > 0)
-        $(this.pf(sfTicks)).val(new Date().getTime());
+    this.setTicks = function () {
+        log("EList setTicks");
+        if ($('#' + sfReactive).length > 0)
+            $(this.pf(sfTicks)).val(new Date().getTime());
     };
 
-    this.setItemTicks = function(itemPrefix) {
-    log("EList setItemTicks");
-    if ($('#' + sfReactive).length > 0)
-        this.itemRuntimeInfo(itemPrefix).ticks(new Date().getTime());
+    this.setItemTicks = function (itemPrefix) {
+        log("EList setItemTicks");
+        if ($('#' + sfReactive).length > 0)
+            this.itemRuntimeInfo(itemPrefix).ticks(new Date().getTime());
         //$('#' + itemPrefix.compose(sfTicks)).val(new Date().getTime());
     };
 
-    this.itemRuntimeInfo = function(itemPrefix) {
+    this.itemRuntimeInfo = function (itemPrefix) {
         return RuntimeInfoFor(itemPrefix);
     };
 
-    this.selectedItemPrefix = function() {
+    this.selectedItemPrefix = function () {
         log("EList getSelected");
         var selected = $('#' + this.options.prefix + " > option:selected");
         if (selected.length == 0)
@@ -472,7 +475,7 @@ var EList = function(_elistOptions) {
         return nameSelected.substr(0, nameSelected.indexOf(sfToStr) - 1);
     };
 
-    this.getLastIndex = function() {
+    this.getLastIndex = function () {
         log("EList getLastIndex");
         var lastElement = $('#' + this.options.prefix + " > option:last");
         var lastIndex = -1;
@@ -483,7 +486,7 @@ var EList = function(_elistOptions) {
         return lastIndex;
     };
 
-    this.checkValidation = function(validateUrl, runtimeType, itemPrefix) {
+    this.checkValidation = function (validateUrl, runtimeType, itemPrefix) {
         log("EList checkValidation"); //Receives url as parameter so it can be overriden when setting viewOptions onOk
         var info = this.itemRuntimeInfo(itemPrefix);
         var id = (info.find().length > 0) ? info.id() : '';
@@ -499,14 +502,14 @@ var EList = function(_elistOptions) {
         return true;
     };
 
-    this.viewOptionsForCreating = function(_viewOptions) {
+    this.viewOptionsForCreating = function (_viewOptions) {
         log("EList viewOptionsForCreating");
         var self = this;
         var newIndex = parseInt(this.getLastIndex()) + 1;
         var itemPrefix = this.options.prefix.compose(newIndex);
         return $.extend({
-            onOk: function(clonedElements) { return self.onCreatingOk(clonedElements, defaultValidateUrl, _viewOptions.type, itemPrefix); },
-            onOkClosed: function() { self.fireOnEntityChanged(); },
+            onOk: function (clonedElements) { return self.onCreatingOk(clonedElements, defaultValidateUrl, _viewOptions.type, itemPrefix); },
+            onOkClosed: function () { self.fireOnEntityChanged(); },
             onCancelled: null,
             controllerUrl: defaultViewUrl,
             prefix: itemPrefix,
@@ -514,7 +517,7 @@ var EList = function(_elistOptions) {
         }, _viewOptions);
     };
 
-    this.onCreatingOk = function(clonedElements, validateUrl, runtimeType, itemPrefix) {
+    this.onCreatingOk = function (clonedElements, validateUrl, runtimeType, itemPrefix) {
         log("EList onCreatingOK"); //Receives url as parameter so it can be overriden when setting viewOptions onOk
         var acceptChanges = this.checkValidation(validateUrl, runtimeType, itemPrefix);
         if (acceptChanges) {
@@ -524,7 +527,7 @@ var EList = function(_elistOptions) {
         return acceptChanges;
     };
 
-    this.newListItem = function(clonedElements, runtimeType, itemPrefix) {
+    this.newListItem = function (clonedElements, runtimeType, itemPrefix) {
         log("EList newListItem");
         var listInfo = this.staticInfo();
         var itemInfoValue = new RuntimeInfo(itemPrefix).createValue(runtimeType, '', 'n', '');
@@ -539,7 +542,7 @@ var EList = function(_elistOptions) {
         select.children('option:last').attr('selected', true);
     };
 
-    this.view = function(_viewOptions) {
+    this.view = function (_viewOptions) {
         log("EList view");
         var selectedItemPrefix = this.selectedItemPrefix();
         if (empty(selectedItemPrefix))
@@ -547,19 +550,22 @@ var EList = function(_elistOptions) {
         this.viewInIndex(_viewOptions, selectedItemPrefix);
     };
 
-    this.viewInIndex = function(_viewOptions, selectedItemPrefix) {
+    this.viewInIndex = function (_viewOptions, selectedItemPrefix) {
         log("EList viewInIndex");
         var viewOptions = this.viewOptionsForViewing(_viewOptions, selectedItemPrefix);
         new ViewNavigator(viewOptions).viewOk();
+        this.setTicks();
+        this.setItemTicks(selectedItemPrefix);
     };
 
-    this.viewOptionsForViewing = function(_viewOptions, itemPrefix) {
+    this.viewOptionsForViewing = function (_viewOptions, itemPrefix) {
         log("EList viewOptionsForViewing");
         var self = this;
         var info = this.itemRuntimeInfo(itemPrefix);
         return $.extend({
             containerDiv: itemPrefix.compose(sfEntity),
-            onOk: function() { return self.onViewingOk(defaultValidateUrl, itemPrefix); },
+            onOk: function () { return self.onViewingOk(defaultValidateUrl, itemPrefix); },
+            onOkClosed: function () { self.fireOnEntityChanged(); },
             onCancelled: null,
             controllerUrl: defaultViewUrl,
             type: info.runtimeType(),
@@ -569,35 +575,35 @@ var EList = function(_elistOptions) {
         }, _viewOptions);
     };
 
-    this.onViewingOk = function(validateUrl, itemPrefix) {
+    this.onViewingOk = function (validateUrl, itemPrefix) {
         log("EList onViewingOk"); //Receives url as parameter so it can be overriden when setting viewOptions onOk
         var acceptChanges = this.checkValidation(validateUrl, this.itemRuntimeInfo(itemPrefix).runtimeType(), itemPrefix);
-//        if (acceptChanges)
-//            this.setItemTicks(itemPrefix);
+        //        if (acceptChanges)
+        //            this.setItemTicks(itemPrefix);
         return acceptChanges;
     };
 
-    this.createFindOptions = function(_findOptions) {
+    this.createFindOptions = function (_findOptions) {
         log("EList createFindOptions");
         var newIndex = parseInt(this.getLastIndex()) + 1;
         var itemPrefix = this.options.prefix.compose(newIndex);
         var self = this;
         return $.extend({
             prefix: itemPrefix,
-            onOk: function(selectedItems) { return self.onFindingOk(selectedItems); },
-            onOkClosed: function() { self.fireOnEntityChanged(); },
+            onOk: function (selectedItems) { return self.onFindingOk(selectedItems); },
+            onOkClosed: function () { self.fireOnEntityChanged(); },
             allowMultiple: true
         }, _findOptions);
     };
 
-    this.onFindingOk = function(selectedItems) {
+    this.onFindingOk = function (selectedItems) {
         log("EList onFindingOk");
         if (selectedItems == null || selectedItems.length == 0)
             throw "No item was returned from Find Window";
         var lastIndex = parseInt(this.getLastIndex());
         for (var i = 0; i < selectedItems.length; i++) {
             var item = selectedItems[i];
-            lastIndex ++;
+            lastIndex++;
             var itemPrefix = this.options.prefix.compose(lastIndex);
 
             this.newListItem('', item.type, itemPrefix);
@@ -609,7 +615,7 @@ var EList = function(_elistOptions) {
         return true;
     };
 
-    this.remove = function() {
+    this.remove = function () {
         log("EList remove");
         var selectedItemPrefix = this.selectedItemPrefix();
         if (empty(selectedItemPrefix))
@@ -617,7 +623,7 @@ var EList = function(_elistOptions) {
         this.removeInIndex(selectedItemPrefix);
     };
 
-    this.removeInIndex = function(selectedItemPrefix) {
+    this.removeInIndex = function (selectedItemPrefix) {
         log("EList removeInIndex");
         $('#' + selectedItemPrefix.compose(sfRuntimeInfo)).remove();
         $('#' + selectedItemPrefix.compose(sfToStr)).remove();
@@ -626,7 +632,7 @@ var EList = function(_elistOptions) {
         this.fireOnEntityChangedWithTicks();
     };
 
-    this.updateButtonsDisplay = function() {
+    this.updateButtonsDisplay = function () {
         log("EList updateButtonsDisplay");
         var btnRemove = $(this.pf("btnRemove"));
         if ($('#' + this.options.prefix + " > option").length > 0)
@@ -917,6 +923,8 @@ var EDList = function(_edlistOptions) {
             var viewOptions = this.viewOptionsForViewing(_viewOptions, selectedItemPrefix);
             new ViewNavigator(viewOptions).viewEmbedded();
         }
+        this.setTicks();
+        this.setItemTicks(selectedItemPrefix);
     };
 
     this.viewOptionsForViewing = function(_viewOptions, itemPrefix) {
