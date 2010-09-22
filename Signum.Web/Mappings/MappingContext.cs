@@ -156,6 +156,51 @@ namespace Signum.Web
 
             return (ModifiableEntity)currentEntity;
         }
+
+        public static Type FindSubentityType(IdentifiableEntity entity, string prefix)
+        {
+            if (!prefix.HasText())
+                throw new ApplicationException("Route cannot be null to find subentity");
+
+            string[] properties = prefix.Split(new string[] { TypeContext.Separator }, StringSplitOptions.RemoveEmptyEntries);
+            if (properties == null || properties.Length == 0)
+                throw new ArgumentException(Resources.InvalidPropertyPrefix);
+
+            Modifiable currentEntity = entity;
+            PropertyInfo pi = null;
+            try
+            {
+                foreach (string property in properties)
+                {    
+                    int index;
+                    if (int.TryParse(property, out index))
+                    {
+                        IList list = (IList)currentEntity;
+                        if (list.Count <= index)
+                            return list.GetType().ElementType();
+                        currentEntity = (Modifiable)list[index];
+                    }
+                    else
+                    {
+                        Type cleanType = (currentEntity as Lite).TryCC(t => t.RuntimeType) ?? currentEntity.GetType();
+                        pi = cleanType.GetProperty(property);
+                        currentEntity = (Modifiable)pi.GetValue(currentEntity, null);
+                    }
+               
+                    if (currentEntity is Lite)
+                        currentEntity = Database.Retrieve((Lite)currentEntity);
+
+                    if (currentEntity == null)
+                        return pi.DeclaringType;
+                }
+            }
+            catch (Exception)
+            {
+                throw new InvalidOperationException(Resources.InvalidPropertyPrefixOrWrongEntityInSession);
+            }
+
+            return pi.DeclaringType;
+        }
     }
 
     public abstract class MappingContext<T> : MappingContext

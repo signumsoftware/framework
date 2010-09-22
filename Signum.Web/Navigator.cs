@@ -970,7 +970,6 @@ namespace Signum.Web
         protected internal virtual ModifiableEntity ExtractEntity(ControllerBase controller, string prefix)
         {
             NameValueCollection form = controller.ControllerContext.HttpContext.Request.Form;
-            RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(form[TypeContextUtilities.Compose(prefix ?? "", EntityBaseKeys.RuntimeInfo)]);
             
             if (form.AllKeys.Any(s => s == ViewDataKeys.Reactive) && (string.IsNullOrEmpty(prefix) || !prefix.StartsWith("New")))
             {
@@ -991,6 +990,7 @@ namespace Signum.Web
                     throw new InvalidOperationException(Resources.IncorrectEntityInSessionYouMustReloadThePageToContinue);
             }
 
+            RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(form[TypeContextUtilities.Compose(prefix ?? "", EntityBaseKeys.RuntimeInfo)]);
             if (runtimeInfo.IdOrNull != null)
                 return Database.Retrieve(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value);
             else

@@ -333,11 +333,15 @@ function ReloadEntity(urlController, prefix, parentDiv) {
         data: requestData,
         async: false,
         dataType: "html",
-        success: function(msg) {
-           if (!empty(parentDiv))
-               $('#' + parentDiv).html(msg);
-           else
-               $('#' + prefix.compose("divNormalControl")).html(msg);
+        success: function (msg) {
+            if (!empty(parentDiv))
+                $('#' + parentDiv).html(msg);
+            else {
+                if (empty(prefix))
+                    $('#divNormalControl').html(msg);
+                else
+                    $('#' + prefix.compose("divMainControl")).html(msg);
+            }
         }
     });
 }
