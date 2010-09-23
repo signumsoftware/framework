@@ -19,6 +19,8 @@ namespace Signum.Engine.Authorization
     {
         static AuthCache<RuleFacadeMethodDN, FacadeMethodAllowedRule, FacadeMethodDN, string, bool> cache;
 
+        public static IManualAuth<string, bool> Manual { get { return cache; } }
+
         public static bool IsStarted { get { return cache != null; } }
 
         public static void Start(SchemaBuilder sb, Type serviceInterface)
@@ -30,18 +32,17 @@ namespace Signum.Engine.Authorization
 
                 cache = new AuthCache<RuleFacadeMethodDN, FacadeMethodAllowedRule, FacadeMethodDN, string, bool>(sb,
                      fm => fm.Name,
-                     n => FacadeMethodLogic.RetrieveOrGenerateServiceOperations().Single(fm => fm.Name == n),
-                     AuthUtils.MaxAllowed, true); 
+                     n => FacadeMethodLogic.RetrieveOrGenerateServiceOperation(n),
+                     AuthUtils.MaxBool,
+                     AuthUtils.MinBool); 
             }
         }
 
         public static FacadeMethodRulePack GetFacadeMethodRules(Lite<RoleDN> roleLite)
         {
-            return new FacadeMethodRulePack
-            {
-                 Role = roleLite,
-                 Rules = cache.GetRules(roleLite, FacadeMethodLogic.RetrieveOrGenerateServiceOperations()).ToMList()
-            };
+            FacadeMethodRulePack result = new FacadeMethodRulePack { Role = roleLite }; 
+            cache.GetRules(result, FacadeMethodLogic.RetrieveOrGenerateServiceOperations()) ;
+            return result; 
         }
 
         public static void SetFacadeMethodRules(FacadeMethodRulePack rules)
@@ -49,11 +50,7 @@ namespace Signum.Engine.Authorization
             cache.SetRules(rules, r => true);
         }
 
-        public static void SetFacadeMethodAllowed(Lite<RoleDN> role, MethodInfo mi, bool allowed)
-        {
-            cache.SetAllowed(role, mi.Name, allowed);
-        }
-
+      
         public static bool SetFacadeMethodAllowed(Lite<RoleDN> role, MethodInfo mi)
         {
             return cache.GetAllowed(role, mi.Name);

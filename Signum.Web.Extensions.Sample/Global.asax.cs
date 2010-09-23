@@ -91,7 +91,7 @@ namespace Signum.Web.Extensions.Sample
             });
 
             AuthClient.Start(true, true, true, true);
-            AuthAdminClient.Start(true, true, true, true, true, false, true);
+            AuthAdminClient.Start(true, true, true, true, true, true, true);
 
             UserQueriesClient.Start();
             ControlPanelClient.Start();

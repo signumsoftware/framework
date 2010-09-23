@@ -10,45 +10,86 @@ namespace Signum.Engine.Authorization
 {
     static class AuthUtils
     {
-        public static Dictionary<K, V> OuterCollapseDictionariesS<K, V>(this IEnumerable<Dictionary<K, V>> dictionaries, V defaultValue, Func<IEnumerable<V>, V> mixer)
+        public static readonly DefaultBehaviour<bool> MaxBool = new DefaultBehaviour<bool>(true, col => col.Any(a => a));
+        public static readonly DefaultBehaviour<bool> MinBool = new DefaultBehaviour<bool>(false, col => col.All(a => a));
+
+        public static readonly DefaultBehaviour<PropertyAllowed> MaxProperty = new DefaultBehaviour<PropertyAllowed>(PropertyAllowed.Modify, MaxPropertyAllowed);
+        public static readonly DefaultBehaviour<PropertyAllowed> MinProperty = new DefaultBehaviour<PropertyAllowed>(PropertyAllowed.None, MinPropertyAllowed);
+
+        public static readonly DefaultBehaviour<TypeAllowed> MaxType = new DefaultBehaviour<TypeAllowed>(TypeAllowed.DBCreateUICreate, MaxTypeAllowed);
+        public static readonly DefaultBehaviour<TypeAllowed> MinType = new DefaultBehaviour<TypeAllowed>(TypeAllowed.DBNoneUINone, MinTypeAllowed);
+
+        public static readonly DefaultBehaviour<EntityGroupAllowedDN> MaxEntityGroup = new DefaultBehaviour<EntityGroupAllowedDN>(EntityGroupAllowedDN.CreateCreate,
+            col => new EntityGroupAllowedDN(
+                MaxTypeAllowed(col.Select(a => a.InGroup)),
+                MaxTypeAllowed(col.Select(a => a.OutGroup))));
+        public static readonly DefaultBehaviour<EntityGroupAllowedDN> MinEntityGroup = new DefaultBehaviour<EntityGroupAllowedDN>(EntityGroupAllowedDN.NoneNone,
+               col => new EntityGroupAllowedDN(
+                MinTypeAllowed(col.Select(a => a.InGroup)),
+                MinTypeAllowed(col.Select(a => a.OutGroup))));
+
+        static TypeAllowed MaxTypeAllowed(this IEnumerable<TypeAllowed> collection)
         {
-            var dicList = dictionaries.ToList();
+            TypeAllowed result = TypeAllowed.DBNoneUINone;
 
-            var keys = dicList.NotNull().SelectMany(d => d.Keys).ToHashSet();
+            foreach (var item in collection)
+            {
+                if (item > result)
+                    result = item;
 
-            return keys.ToDictionary(k => k, k => mixer(dicList.Select(d => d.TryGet(k, defaultValue))));
+                if (result == TypeAllowed.DBCreateUICreate)
+                    return result;
+                
+            }
+            return result;
         }
 
-        public static Dictionary<K, V> Override<K, V>(this Dictionary<K, V> dictionary, Dictionary<K, V> newValues)
+        static TypeAllowed MinTypeAllowed(this IEnumerable<TypeAllowed> collection)
         {
-            if (newValues == null)
-                return dictionary;
+            TypeAllowed result = TypeAllowed.DBCreateUICreate;
 
-            if (dictionary == null)
-                return newValues;
+            foreach (var item in collection)
+            {
+                if (item < result)
+                    result = item;
 
-            dictionary.SetRange(newValues);
+                if (result == TypeAllowed.DBNoneUINone)
+                    return result;
 
-            return dictionary; 
+            }
+            return result;
         }
 
-
-        public static Dictionary<K, V> Simplify<K, V>(this Dictionary<K, V> dictionary, Func<V, bool> func)
+        static PropertyAllowed MaxPropertyAllowed(this IEnumerable<PropertyAllowed> collection)
         {
-            if (dictionary == null || dictionary.Count == 0)
-                return null;
+            PropertyAllowed result = PropertyAllowed.None;
 
-            dictionary.RemoveRange(dictionary.Where(p => func(p.Value)).Select(p => p.Key).ToList());
+            foreach (var item in collection)
+            {
+                if (item > result)
+                    result = item;
 
-            if (dictionary.Count == 0)
-                return null;
+                if (result == PropertyAllowed.Modify)
+                    return result;
 
-            return dictionary;
+            }
+            return result;
         }
 
-        public static bool MaxAllowed(this IEnumerable<bool> collection)
+        static PropertyAllowed MinPropertyAllowed(this IEnumerable<PropertyAllowed> collection)
         {
-            return collection.Any(a => a);
+            PropertyAllowed result = PropertyAllowed.Modify;
+
+            foreach (var item in collection)
+            {
+                if (item < result)
+                    result = item;
+
+                if (result == PropertyAllowed.None)
+                    return result;
+
+            }
+            return result;
         }
 
     }

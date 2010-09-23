@@ -13,6 +13,7 @@
     using (var tc = Html.TypeContext<QueryRulePack>())
     {
         Html.EntityLine(tc, f => f.Role);
+        Html.ValueLine(tc, f => f.DefaultRule, vl => { vl.UnitText = tc.Value.DefaultLabel; });        
         Html.EntityLine(tc, f => f.Type);
 %>
 

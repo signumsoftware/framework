@@ -32,6 +32,11 @@ namespace Signum.Engine.Basics
             get { return serviceInterface != null; }
         }
 
+        public static FacadeMethodDN RetrieveOrGenerateServiceOperation(string name)
+        {
+            return Database.Query<FacadeMethodDN>().SingleOrDefault(a => a.Name == name) ?? GenerateFacadeMethod(name);
+        }
+
         public static List<FacadeMethodDN> RetrieveOrGenerateServiceOperations()
         {
             var current = Database.RetrieveAll<FacadeMethodDN>().ToDictionary(a => a.Name);
@@ -43,7 +48,12 @@ namespace Signum.Engine.Basics
 
         static List<FacadeMethodDN> GenerateFacadeMethods()
         {
-            return GenerateServiceMethodInfo().Select(mi => new FacadeMethodDN { Name = mi.Name }).ToList();
+            return GenerateServiceMethodInfos().Select(mi => new FacadeMethodDN { Name = mi.Name }).ToList();
+        }
+
+        static FacadeMethodDN GenerateFacadeMethod(string name)
+        {
+            return new FacadeMethodDN { Name = GenerateServiceMethodInfo(name).Name };
         }
 
         public static MethodInfo GenerateServiceMethodInfo(string miName)
@@ -51,7 +61,7 @@ namespace Signum.Engine.Basics
             return serviceInterface.GetInterfaces().SelectMany(i => i.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.FlattenHierarchy)).Single(m => m.Name == miName);
         }
 
-        public static List<MethodInfo> GenerateServiceMethodInfo()
+        public static List<MethodInfo> GenerateServiceMethodInfos()
         {
             return serviceInterface.GetInterfaces().SelectMany(i => i.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.FlattenHierarchy)).ToList();
         }

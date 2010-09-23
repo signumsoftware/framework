@@ -32,7 +32,7 @@ namespace Signum.Services
         void SetTypesRules(TypeRulePack rules);
 
         [OperationContract, NetDataContract]
-        Dictionary<Type, TypeAllowedBasic> AuthorizedTypes(); 
+        DefaultDictionary<Type, TypeAllowed> AuthorizedTypes(); 
     }
 
     [ServiceContract]
@@ -55,7 +55,7 @@ namespace Signum.Services
         void SetPermissionRules(PermissionRulePack rules);
 
         [OperationContract, NetDataContract]
-        Dictionary<Enum, bool> PermissionRules();
+        DefaultDictionary<Enum, bool> PermissionRules();
     }
 
     [ServiceContract]
@@ -68,7 +68,7 @@ namespace Signum.Services
         void SetPropertyRules(PropertyRulePack rules);
 
         [OperationContract, NetDataContract]
-        Dictionary<PropertyRoute, PropertyAllowed> AuthorizedProperties(); 
+        DefaultDictionary<PropertyRoute, PropertyAllowed> AuthorizedProperties(); 
     }
 
     [ServiceContract]
@@ -81,7 +81,7 @@ namespace Signum.Services
         void SetQueryRules(QueryRulePack rules);
 
         [OperationContract, NetDataContract]
-        HashSet<object> AuthorizedQueries();
+        DefaultDictionary<object, bool> QueriesRules();
     }
 
     [ServiceContract]

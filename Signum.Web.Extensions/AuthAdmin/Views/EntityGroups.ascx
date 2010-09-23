@@ -18,6 +18,7 @@
     using (var tc = Html.TypeContext<EntityGroupRulePack>())
     {
         Html.EntityLine(tc, f => f.Role);
+        Html.ValueLine(tc, f => f.DefaultRule, vl => { vl.UnitText = tc.Value.DefaultLabel; });
 %>
 
 <script type="text/javascript" src="authAdmin/Scripts/authAdmin.js"></script>

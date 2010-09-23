@@ -9,6 +9,33 @@ using Signum.Entities.Operations;
 
 namespace Signum.Entities.Authorization
 {
+    [Serializable]
+    public class DefaultDictionary<K, A>
+    {
+        public DefaultDictionary(A defaultAllowed, Dictionary<K, A> dictionary)
+        {
+            this.DefaultAllowed = defaultAllowed;
+            this.dictionary = dictionary;
+        }
+
+        readonly Dictionary<K, A> dictionary;
+        public readonly A DefaultAllowed;
+
+        public A GetAllowed(K key)
+        {
+            return dictionary.TryGet(key, DefaultAllowed);
+        }
+
+        public IEnumerable<K> ExplicitKeys
+        {
+            get
+            {
+                return dictionary == null ? Enumerable.Empty<K>() : dictionary.Keys;
+            }
+        }
+    }
+
+
     //Only for client-side communication
     [Serializable]
     public abstract class BaseRulePack<T> : IdentifiableEntity
@@ -21,6 +48,25 @@ namespace Signum.Entities.Authorization
             get { return role; }
             internal set { Set(ref role, value, () => Role); }
         }
+
+        List<Lite<RoleDN>> subRoles;
+        public List<Lite<RoleDN>> SubRoles
+        {
+            get { return subRoles; }
+            set { Set(ref subRoles, value, () => SubRoles); }
+        }
+
+        public string DefaultLabel
+        {
+            get { return subRoles == null || subRoles.Empty() ? "Value" : "of " + subRoles.CommaAnd(); }
+        }
+
+        DefaultRule defaultRule;
+        public DefaultRule DefaultRule
+        {
+            get { return defaultRule; }
+            set { Set(ref defaultRule, value, () => DefaultRule); }
+        } 
 
         TypeDN type;
         [NotNullValidator]
@@ -36,6 +82,12 @@ namespace Signum.Entities.Authorization
             get { return rules; }
             set { Set(ref rules, value, () => Rules); }
         }
+    }
+
+    public enum DefaultRule
+    {
+        Max, 
+        Min,
     }
 
     [Serializable]

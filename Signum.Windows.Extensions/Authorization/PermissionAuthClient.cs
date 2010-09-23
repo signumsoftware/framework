@@ -15,7 +15,7 @@ namespace Signum.Windows.Authorization
     {
         public static bool Started { get; private set; }
 
-        static Dictionary<Enum, bool> permissionRules;
+        static DefaultDictionary<Enum, bool> permissionRules;
 
         internal static void Start()
         {
@@ -43,7 +43,10 @@ namespace Signum.Windows.Authorization
 
         public static bool? TryIsAuthorized(this Enum permissionKey)
         {
-            return permissionRules.TryGetS(permissionKey);
+            if (permissionRules == null)
+                return null;
+
+            return permissionRules.GetAllowed(permissionKey);
         }
 
         public static bool IsAuthorized(this Enum permissionKey)
@@ -51,11 +54,7 @@ namespace Signum.Windows.Authorization
             if (permissionRules == null)
                 throw new InvalidOperationException("Permissions not enabled in AuthClient");
 
-            bool result;
-            if (!permissionRules.TryGetValue(permissionKey, out result))
-                throw new ArgumentException("{0} is not a permissionKey registered in the server".Formato(permissionKey));
-
-            return result;
+            return permissionRules.GetAllowed(permissionKey);
         }
     }
 

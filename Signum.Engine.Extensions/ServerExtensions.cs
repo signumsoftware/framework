@@ -162,7 +162,7 @@ namespace Signum.Services
              () => PropertyAuthLogic.SetPropertyRules(rules));
         }
 
-        public Dictionary<PropertyRoute, PropertyAllowed> AuthorizedProperties()
+        public DefaultDictionary<PropertyRoute, PropertyAllowed> AuthorizedProperties()
         {
             return Return(MethodInfo.GetCurrentMethod(),
               () => PropertyAuthLogic.AuthorizedProperties());
@@ -184,7 +184,7 @@ namespace Signum.Services
               () => TypeAuthLogic.SetTypeRules(rules));
         }
 
-        public Dictionary<Type, TypeAllowedBasic> AuthorizedTypes()
+        public DefaultDictionary<Type, TypeAllowed> AuthorizedTypes()
         {
             return Return(MethodInfo.GetCurrentMethod(),
               () => TypeAuthLogic.AuthorizedTypes());
@@ -222,10 +222,10 @@ namespace Signum.Services
                () => QueryAuthLogic.SetQueryRules(rules));
         }
 
-        public HashSet<object> AuthorizedQueries()
+        public DefaultDictionary<object, bool> QueriesRules()
         {
             return Return(MethodInfo.GetCurrentMethod(),
-            () => QueryAuthLogic.AuthorizedQueryNames());
+            () => QueryAuthLogic.QueryRules());
         }
 
         #endregion
@@ -244,7 +244,7 @@ namespace Signum.Services
             () => PermissionAuthLogic.SetPermissionRules(rules));
         }
 
-        public Dictionary<Enum, bool> PermissionRules()
+        public DefaultDictionary<Enum, bool> PermissionRules()
         {
             return Return(MethodInfo.GetCurrentMethod(),
            () => PermissionAuthLogic.ServicePermissionRules());

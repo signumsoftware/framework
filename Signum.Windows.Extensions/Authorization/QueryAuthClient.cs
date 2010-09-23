@@ -5,12 +5,13 @@ using System.Text;
 using Signum.Services;
 using System.Windows.Controls;
 using System.Windows;
+using Signum.Entities.Authorization;
 
 namespace Signum.Windows.Authorization
 {
     public static class QueryAuthClient
     {
-        static HashSet<object> authorizedQueries; 
+        static DefaultDictionary<object, bool> authorizedQueries; 
 
         public static bool Started { get; private set; }
 
@@ -33,12 +34,12 @@ namespace Signum.Windows.Authorization
 
         static void AuthClient_UpdateCacheEvent()
         {
-            authorizedQueries = Server.Return((IQueryAuthServer s) => s.AuthorizedQueries()); 
+            authorizedQueries = Server.Return((IQueryAuthServer s) => s.QueriesRules()); 
         }
 
         static bool GetQueryAceess(object queryName)
         {
-            return authorizedQueries.Contains(queryName);
+            return authorizedQueries.GetAllowed(queryName);
         }
 
         static void MenuManager_TasksQueries(MenuItem menuItem)

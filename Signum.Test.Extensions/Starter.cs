@@ -71,7 +71,7 @@ namespace Signum.Test.Extensions
             QueryAuthLogic.Start(sb, dqm);
             OperationAuthLogic.Start(sb);
             PermissionAuthLogic.Start(sb);
-            EntityGroupAuthLogic.Start(sb);
+            EntityGroupAuthLogic.Start(sb, true);
             FacadeMethodAuthLogic.Start(sb, typeof(IServerSample));
 
             QueryLogic.Start(sb);
@@ -135,7 +135,7 @@ namespace Signum.Test.Extensions
 
                 Signum.Test.Starter.Load();
 
-                EntityGroupAuthLogic.SetEntityGroupAllowed(externalUser.ToLite(), MusicGroups.JapanEntities,
+                EntityGroupAuthLogic.Manual.SetAllowed(externalUser.ToLite(), MusicGroups.JapanEntities,
                     new EntityGroupAllowedDN(TypeAllowed.DBCreateUICreate, TypeAllowed.DBNoneUINone));
 
                 //EntityGroupAuthLogic.SetEntityGroupAllowed(externalUser.ToLite(), MusicGroups.UserEntities,

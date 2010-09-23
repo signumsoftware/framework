@@ -24,7 +24,6 @@ namespace Signum.Engine.Authorization
 {
     public static class AuthLogic
     {
-
         public static int MinRequiredPasswordLength = 6;
 
         public static string SystemUserName { get; set; }

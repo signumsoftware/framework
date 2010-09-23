@@ -113,7 +113,7 @@ namespace Signum.Engine.Help
                     (x, pp) => new KeyValuePair<string, PropertyHelp>(
                          pp.PropertyString(),
                          new PropertyHelp(pp, x.Attribute(_Info).Value, x.Value)),
-                    "Loading Properties for {0} Help file ({1})".Formato(type.Name, sourceFile)).CollapseDictionary(),
+                    "loading Properties for {0} Help file ({1})".Formato(type.Name, sourceFile)).CollapseDictionary(),
 
                 Operations = EnumerableExtensions.JoinStrict(
                     element.Element(_Operations).TryCC(os => os.Elements(_Operation)) ?? new XElement[0],
@@ -123,7 +123,7 @@ namespace Signum.Engine.Help
                     (x, oi) => new KeyValuePair<Enum, OperationHelp>(
                         oi.Key, 
                         new OperationHelp(oi.Key,x.Attribute(_Info).Value, x.Value)),
-                    "Loading Operations for {0} Help file ({1})".Formato(type.Name, sourceFile)).CollapseDictionary(),
+                    "loading Operations for {0} Help file ({1})".Formato(type.Name, sourceFile)).CollapseDictionary(),
 
                 /*Queries = EnumerableExtensions.JoinStrict(
                     element.Element(_Queries).TryCC(qs => qs.Elements(_Query)) ?? new XElement[0],

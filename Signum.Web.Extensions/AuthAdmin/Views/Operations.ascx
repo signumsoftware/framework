@@ -13,7 +13,9 @@
     using (var tc = Html.TypeContext<OperationRulePack>())
     {
         Html.EntityLine(tc, f => f.Role);
+        Html.ValueLine(tc, f => f.DefaultRule, vl => { vl.UnitText = tc.Value.DefaultLabel; }); 
         Html.EntityLine(tc, f => f.Type);
+        
 %>
 
 <table class="ruleTable" id="operations">

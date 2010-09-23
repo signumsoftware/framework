@@ -44,7 +44,7 @@ namespace Signum.Engine.Basics
                      Keys,
                      a => a.Key,
                      k => EnumDN.UniqueKey(k),
-                     (a, k) => new { a, k }, "Caching {0}".Formato(typeof(T).Name)).ToDictionary(p => p.k, p => p.a);
+                     (a, k) => new { a, k }, "loading {0}".Formato(typeof(T).Name)).ToDictionary(p => p.k, p => p.a);
 
                 toEnum = toEntity.Keys.ToDictionary(k => EnumDN.UniqueKey(k));
             }

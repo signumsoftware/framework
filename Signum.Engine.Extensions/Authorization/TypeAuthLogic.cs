@@ -21,31 +21,31 @@ namespace Signum.Engine.Authorization
     {
         static AuthCache<RuleTypeDN, TypeAllowedRule, TypeDN, Type, TypeAllowed> cache;
 
+        public static IManualAuth<Type, TypeAllowed> Manual { get { return cache; } }
+
         public static bool IsStarted { get { return cache != null; } }
 
         public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                AuthLogic.AssertStarted(sb);
+                AuthLogic.AssertStarted(sb);              
+
                 sb.Schema.EntityEventsGlobal.Saving += Schema_Saving; //because we need Modifications propagated
                 sb.Schema.EntityEventsGlobal.Retrieving += Schema_Retrieving;
-                sb.Schema.IsAllowedCallback += new Func<Type, bool>(Schema_IsAllowedCallback);
+                sb.Schema.IsAllowedCallback += Schema_IsAllowedCallback;
 
                 cache = new AuthCache<RuleTypeDN, TypeAllowedRule, TypeDN, Type, TypeAllowed>(sb,
                     dn => TypeLogic.DnToType[dn],
-                    type => TypeLogic.TypeToDN[type], MaxTypeAllowed, TypeAllowed.DBCreateUICreate);
+                    type => TypeLogic.TypeToDN[type],
+                    AuthUtils.MaxType, 
+                    AuthUtils.MinType);
             }
         }
 
-        static TypeAllowed MaxTypeAllowed(this IEnumerable<TypeAllowed> collection)
+        static string Schema_IsAllowedCallback(Type type)
         {
-            return collection.Max();
-        }
-
-        static bool Schema_IsAllowedCallback(Type type)
-        {
-            return cache.GetAllowed(type).GetDB() != TypeAllowedBasic.None;
+            return cache.GetAllowed(type).GetDB() != TypeAllowedBasic.None ? null : "Type '{0}' is set to None".Formato(type.NiceName());
         }
 
         static void Schema_Saving(IdentifiableEntity ident, bool isRoot)
@@ -70,30 +70,26 @@ namespace Signum.Engine.Authorization
 
         public static TypeRulePack GetTypeRules(Lite<RoleDN> roleLite)
         {
-            var rules = cache.GetRules(roleLite, TypeLogic.TypeToDN.Where(t => !t.Key.IsEnumProxy()).Select(a => a.Value)); 
+            var result = new TypeRulePack { Role = roleLite };
 
-            foreach (var r in rules)
+            cache.GetRules(result, TypeLogic.TypeToDN.Where(t => !t.Key.IsEnumProxy()).Select(a => a.Value));
+
+            foreach (TypeAllowedRule r in result.Rules)
 	        {
                Type type = TypeLogic.DnToType[r.Resource]; 
 
                 if(OperationAuthLogic.IsStarted)
                     r.Operations = OperationAuthLogic.GetAllowedThumbnail(roleLite, type); 
-
                 
                 if(PropertyAuthLogic.IsStarted)
                     r.Properties = PropertyAuthLogic.GetAllowedThumbnail(roleLite, type); 
-
                 
                 if(QueryAuthLogic.IsStarted)
                     r.Queries = QueryAuthLogic.GetAllowedThumbnail(roleLite, type); 
-
 	        }
 
-            return new TypeRulePack
-            {
-                Role = roleLite,
-                Rules = rules.ToMList()
-            };
+            return result;
+
         }
 
         public static void SetTypeRules(TypeRulePack rules)
@@ -111,14 +107,9 @@ namespace Signum.Engine.Authorization
             return cache.GetAllowed(role, type);
         }
 
-        public static void SetTypeAllowed(Lite<RoleDN> role, Type type, TypeAllowed allowed)
+        public static DefaultDictionary<Type, TypeAllowed> AuthorizedTypes()
         {
-            cache.SetAllowed(role, type, allowed);
-        }
-
-        public static Dictionary<Type, TypeAllowedBasic> AuthorizedTypes()
-        {
-            return cache.GetCleanDictionary().ToDictionary(k => k.Key, k => k.Value.GetUI());
+            return cache.GetCleanDictionary();
         }
     }
 

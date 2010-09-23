@@ -20,8 +20,12 @@
     </Window.Resources>
     <DockPanel>
         <m:ButtonBar  DockPanel.Dock="Top" SaveClick="btSave_Click" SaveVisible="True" ReloadClick="btReload_Click" ReloadVisible="True"/>
-        <m:EntityLine VerticalAlignment="Top"  m:Common.Route="Role" DockPanel.Dock="Top"/>
-        <m:EntityLine VerticalAlignment="Top"  m:Common.Route="Type" DockPanel.Dock="Top"/>
+        <m:EntityLine m:Common.Route="Role" DockPanel.Dock="Top"/>
+        <m:EntityLine m:Common.Route="Type" DockPanel.Dock="Top"/>
+        <StackPanel Orientation="Horizontal" DockPanel.Dock="Top">
+            <m:ValueLine m:Common.Route="DefaultRule" />
+            <TextBlock Text="{Binding DefaultLabel}" VerticalAlignment="Center" Margin="5"/>
+        </StackPanel>
         <ListView x:Name="listView" IsSynchronizedWithCurrentItem="True" ItemsSource="{Binding Rules}">
             <ListView.ItemContainerStyle>
                 <Style TargetType="ListViewItem">

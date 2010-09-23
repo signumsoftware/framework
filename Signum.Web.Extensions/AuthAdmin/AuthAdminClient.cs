@@ -145,12 +145,13 @@ namespace Signum.Web.Authorization
             {
                 PartialViewName = e => ViewPrefix + partialViewName,
                 MappingAdmin = new EntityMapping<T>(false)
+                    .CreateProperty(m => m.DefaultRule)
                     .SetProperty(m => m.Rules,
-                    new MListDictionaryMapping<AR, K>(getKey, getKeyRoute)
-                    {
-                        ElementMapping = new EntityMapping<AR>(false)
-                                .SetProperty(p => p.Allowed, new ValueMapping<A>(), null)
-                    }, null)
+                        new MListDictionaryMapping<AR, K>(getKey, getKeyRoute)
+                        {
+                            ElementMapping = new EntityMapping<AR>(false)
+                                    .SetProperty(p => p.Allowed, new ValueMapping<A>(), null)
+                        }, null)
             });
 
             ButtonBarEntityHelper.RegisterEntityButtons<T>((ControllerContext controllerContext, T entity, string viewName, string prefix) =>

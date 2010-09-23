@@ -21,7 +21,6 @@ namespace Signum.Entities.Authorization
         }
 
         R resource;
-        [NotNullValidator]
         public R Resource
         {
             get { return resource; }
@@ -62,6 +61,7 @@ namespace Signum.Entities.Authorization
     public class EntityGroupAllowedDN : EmbeddedEntity, IEquatable<EntityGroupAllowedDN>
     {
         public static readonly EntityGroupAllowedDN CreateCreate = new EntityGroupAllowedDN(TypeAllowed.DBCreateUICreate, TypeAllowed.DBCreateUICreate);
+        public static readonly EntityGroupAllowedDN NoneNone = new EntityGroupAllowedDN(TypeAllowed.DBNoneUINone, TypeAllowed.DBNoneUINone);
 
         private EntityGroupAllowedDN() { }
 

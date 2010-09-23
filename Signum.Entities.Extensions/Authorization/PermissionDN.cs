@@ -15,6 +15,7 @@ namespace Signum.Entities.Authorization
 
     public enum BasicPermissions
     {
-        AdminRules
+        AdminRules,
+        EntitiesWithNoGroup, 
     }
 }

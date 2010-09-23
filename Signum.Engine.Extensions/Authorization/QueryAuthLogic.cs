@@ -22,6 +22,8 @@ namespace Signum.Engine.Authorization
     {
         static AuthCache<RuleQueryDN, QueryAllowedRule, QueryDN, object, bool> cache;
 
+        public static IManualAuth<object, bool> Manual { get { return cache; } }
+
         public static bool IsStarted { get { return cache != null; } }
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
@@ -35,7 +37,9 @@ namespace Signum.Engine.Authorization
 
                 cache = new AuthCache<RuleQueryDN, QueryAllowedRule, QueryDN, object, bool>(sb,
                     qn => QueryLogic.ToQueryName(qn.Key),
-                    QueryLogic.RetrieveOrGenerateQuery, AuthUtils.MaxAllowed, true);
+                    QueryLogic.RetrieveOrGenerateQuery,
+                    AuthUtils.MaxBool,
+                    AuthUtils.MinBool);
             }
         }
 
@@ -44,20 +48,16 @@ namespace Signum.Engine.Authorization
             return cache.GetAllowed(queryName);
         }
 
-        public static HashSet<object> AuthorizedQueryNames()
+        public static DefaultDictionary<object, bool> QueryRules()
         {
-            return DynamicQueryManager.Current.GetQueryNames().Where(q => cache.GetAllowed(q)).ToHashSet();
+            return cache.GetCleanDictionary();
         }
-
 
         public static QueryRulePack GetQueryRules(Lite<RoleDN> roleLite, TypeDN typeDN)
         {
-            return new QueryRulePack
-            {
-                Role = roleLite,
-                Type = typeDN,
-                Rules = cache.GetRules(roleLite, QueryLogic.RetrieveOrGenerateQueries(typeDN)).ToMList()
-            };
+            var result = new QueryRulePack { Role = roleLite, Type = typeDN };
+            cache.GetRules(result, QueryLogic.RetrieveOrGenerateQueries(typeDN));
+            return result;
         }
 
         public static void SetQueryRules(QueryRulePack rules)
@@ -75,11 +75,6 @@ namespace Signum.Engine.Authorization
         public static bool GetQueryAllowed(Lite<RoleDN> role, object queryName)
         {
             return cache.GetAllowed(role, queryName);
-        }
-
-        public static void SetQueryAllowed(Lite<RoleDN> role, object queryName, bool allowed)
-        {
-            cache.SetAllowed(role, queryName, allowed);
         }
 
         public static AuthThumbnail? GetAllowedThumbnail(Lite<RoleDN> role, Type entityType)

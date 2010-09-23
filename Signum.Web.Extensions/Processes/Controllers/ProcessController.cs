@@ -37,7 +37,7 @@ namespace Signum.Web.Processes
         public PartialViewResult FinishProcessNormalPage()
         {
             ProcessExecutionDN process = this.ExtractEntity<ProcessExecutionDN>()
-                .ThrowIfNullC(Signum.Web.Properties.Resources.TypeWasNotPossibleToExtract);
+                .ThrowIfNullC("Entity was not possible to Extract");
 
             return Navigator.NormalControl(this, process);
         }

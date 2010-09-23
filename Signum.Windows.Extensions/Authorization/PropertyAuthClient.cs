@@ -12,7 +12,7 @@ namespace Signum.Windows.Authorization
 {
     public static class PropertyAuthClient
     {
-        static Dictionary<PropertyRoute, PropertyAllowed> propertyRules;
+        static DefaultDictionary<PropertyRoute, PropertyAllowed> propertyRules;
 
         public static bool Started { get; private set; }
 
@@ -38,7 +38,7 @@ namespace Signum.Windows.Authorization
             if (route.PropertyRouteType == PropertyRouteType.MListItems || route.PropertyRouteType == PropertyRouteType.LiteEntity)
                 return GetPropertyAllowed(route.Parent);
 
-            return propertyRules.TryGetS(route) ?? PropertyAllowed.Modify;
+            return propertyRules.GetAllowed(route);
         }
 
 

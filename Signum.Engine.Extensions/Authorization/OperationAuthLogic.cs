@@ -22,6 +22,8 @@ namespace Signum.Engine.Authorization
     {
         static AuthCache<RuleOperationDN, OperationAllowedRule, OperationDN, Enum, bool> cache;
 
+        public static IManualAuth<Enum, bool> Manual { get { return cache; } }
+
         public static bool IsStarted { get { return cache != null; } }
 
         public static void Start(SchemaBuilder sb)
@@ -36,7 +38,8 @@ namespace Signum.Engine.Authorization
                 cache = new AuthCache<RuleOperationDN, OperationAllowedRule, OperationDN, Enum, bool>(sb,
                      EnumLogic<OperationDN>.ToEnum,
                      EnumLogic<OperationDN>.ToEntity,
-                     AuthUtils.MaxAllowed, true);
+                     AuthUtils.MaxBool,
+                     AuthUtils.MinBool);
             }
         }
 
@@ -52,14 +55,10 @@ namespace Signum.Engine.Authorization
 
         public static OperationRulePack GetOperationRules(Lite<RoleDN> roleLite, TypeDN typeDN)
         {
-
             var resources = OperationLogic.GetAllOperationInfos(TypeLogic.DnToType[typeDN]).Select(a => EnumLogic<OperationDN>.ToEntity(a.Key));
-            return new OperationRulePack
-            {
-                Role = roleLite,
-                Type = typeDN,
-                Rules = cache.GetRules(roleLite, resources).ToMList()
-            };
+            var result = new OperationRulePack { Role = roleLite, Type = typeDN, };
+            cache.GetRules(result, resources);
+            return result;
         }
 
         public static void SetOperationRules(OperationRulePack rules)
@@ -68,11 +67,6 @@ namespace Signum.Engine.Authorization
                 .Select(a => OperationDN.UniqueKey(a.Key)).ToArray();
 
             cache.SetRules(rules, r => keys.Contains(r.Key));
-        }
-
-        public static void SetOperationAllowed(Lite<RoleDN> role, Enum operationKey, bool allowed)
-        {
-            cache.SetAllowed(role, operationKey, allowed);
         }
 
         public static bool GetOperationAllowed(Lite<RoleDN> role, Enum operationKey)

@@ -26,40 +26,44 @@ namespace Signum.Engine.Authorization
     {
         static AuthCache<RuleEntityGroupDN, EntityGroupAllowedRule, EntityGroupDN, Enum, EntityGroupAllowedDN> cache;
 
+        public static IManualAuth<Enum, EntityGroupAllowedDN> Manual { get { return cache; } }
+
         public static bool IsStarted { get { return cache != null; } }
 
-        public static void Start(SchemaBuilder sb)
+        public static void Start(SchemaBuilder sb, bool registerEntitiesWithNoGroup)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 AuthLogic.AssertStarted(sb);
                 EntityGroupLogic.Start(sb);
+                if (registerEntitiesWithNoGroup)
+                {
+                    PermissionAuthLogic.RegisterPermissions(BasicPermissions.EntitiesWithNoGroup);
+
+                    Schema.Current.IsAllowedCallback += t => BasicPermissions.EntitiesWithNoGroup.IsAuthorized() || EntityGroupLogic.GroupsFor(t).Any() ? null :
+                        "The entity '{0}' has no EntityGroups registered and the permission '{1}' is denied".Formato(t.NiceName(), BasicPermissions.EntitiesWithNoGroup.NiceToString());
+                }
 
                 cache = new AuthCache<RuleEntityGroupDN, EntityGroupAllowedRule, EntityGroupDN, Enum, EntityGroupAllowedDN>(sb,
                      EnumLogic<EntityGroupDN>.ToEnum,
                      EnumLogic<EntityGroupDN>.ToEntity,
-                     MaxEntityGroupAllowed, EntityGroupAllowedDN.CreateCreate);
+                     AuthUtils.MaxEntityGroup,
+                     AuthUtils.MinEntityGroup);
 
                 sb.Schema.Initializing(InitLevel.Level0SyncEntities, Schema_InitializingRegisterEvents);
             }
         }
 
-        static EntityGroupAllowedDN MaxEntityGroupAllowed(this IEnumerable<EntityGroupAllowedDN> collection)
-        {
-            return new EntityGroupAllowedDN(collection.Select(a => a.InGroup).Max(), collection.Select(a => a.OutGroup).Max());
-        }
+
+        static MethodInfo miRegister = ReflectionTools.GetMethodInfo(() =>EntityGroupAuthLogic.RegisterSchemaEvent<TypeDN>(null)).GetGenericMethodDefinition();
 
         static void Schema_InitializingRegisterEvents(Schema sender)
         {
-            MethodInfo miRegister = ReflectionTools.GetMethodInfo(() => 
-                EntityGroupAuthLogic.RegisterSchemaEvent<TypeDN>(null)).GetGenericMethodDefinition();
-
             foreach (var type in EntityGroupLogic.Types)
             {
                 miRegister.GenericInvoke(new[] { type }, null, new object[] { sender });
             }
         }
-
 
         static void RegisterSchemaEvent<T>(Schema sender)
              where T : IdentifiableEntity
@@ -335,21 +339,14 @@ namespace Signum.Engine.Authorization
 
         public static EntityGroupRulePack GetEntityGroupRules(Lite<RoleDN> roleLite)
         {
-            return new EntityGroupRulePack
-            {
-                Role = roleLite,
-                Rules = cache.GetRules(roleLite, EnumLogic<EntityGroupDN>.AllEntities()).ToMList()
-            };
+            EntityGroupRulePack result = new EntityGroupRulePack { Role = roleLite };
+            cache.GetRules(result, EnumLogic<EntityGroupDN>.AllEntities());
+            return result;
         }
 
         public static void SetEntityGroupRules(EntityGroupRulePack rules)
         {
             cache.SetRules(rules, r => true); 
-        }
-
-        public static void SetEntityGroupAllowed(Lite<RoleDN> role, Enum entityGroupKey, EntityGroupAllowedDN allowed)
-        {
-            cache.SetAllowed(role, entityGroupKey, allowed); 
         }
 
         public static EntityGroupAllowedDN GetEntityGroupAllowed(Lite<RoleDN> role, Enum entityGroupKey)

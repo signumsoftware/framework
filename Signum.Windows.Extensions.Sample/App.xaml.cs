@@ -68,7 +68,7 @@ namespace Signum.Windows.Extensions.Sample
             {
                 Constructors = new Dictionary<Type, Func<Window, object>>()
                 {
-
+              
                 }
             });
 

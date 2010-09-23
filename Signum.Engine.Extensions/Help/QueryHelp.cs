@@ -85,7 +85,7 @@ namespace Signum.Engine.Help
                     (x, pp) => new KeyValuePair<string, QueryColumnHelp>(
                          pp.Name,
                          new QueryColumnHelp{Name = x.Attribute(_Name).Value, Info = x.Attribute(_Info).Value, UserDescription = x.Value}),
-                    "Loading Columns for {0} Query file ({1})".Formato(queryName, sourceFile)).CollapseDictionary(),
+                    "loading Columns for {0} Query file ({1})".Formato(queryName, sourceFile)).CollapseDictionary(),
             }; 
         }
 

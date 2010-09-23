@@ -19,18 +19,31 @@ namespace Signum.Engine.Authorization
 
     public static class PermissionAuthLogic
     {
-        static List<Type> permissionTypes = new List<Type>();
+        static List<Enum> permissions = new List<Enum>();
+        public static void RegisterPermissions(params Enum[] type)
+        {
+            permissions.AddRange(type.NotNull()); 
+        }
+
         public static void RegisterTypes(params Type[] types)
         {
-            permissionTypes.AddRange(types);
+            foreach (var t in types.NotNull())
+            {
+                if (!t.IsEnum)
+                    throw new ArgumentException("{0} is not an Enum".Formato(t.Name));
+
+                permissions.AddRange(Enum.GetValues(t).Cast<Enum>()); 
+            }
         }
 
         public static IEnumerable<Enum> RegisteredPermission
         {
-            get { return permissionTypes.SelectMany<Type, Enum>(t => Enum.GetValues(t).Cast<Enum>()); }
+            get { return permissions; }
         }
 
         static AuthCache<RulePermissionDN, PermissionAllowedRule, PermissionDN, Enum, bool> cache;
+
+        public static IManualAuth<Enum, bool> Manual { get { return cache; } }
 
         public static bool IsStarted { get { return cache != null; } }
 
@@ -52,9 +65,10 @@ namespace Signum.Engine.Authorization
                 cache = new AuthCache<RulePermissionDN, PermissionAllowedRule, PermissionDN, Enum, bool>(sb,
                     EnumLogic<PermissionDN>.ToEnum,
                     EnumLogic<PermissionDN>.ToEntity,
-                    AuthUtils.MaxAllowed, true);
+                    AuthUtils.MaxBool,
+                    AuthUtils.MinBool);
 
-                RegisterTypes(typeof(BasicPermissions));
+                RegisterPermissions(BasicPermissions.AdminRules);
             }
         }
 
@@ -64,37 +78,31 @@ namespace Signum.Engine.Authorization
                 throw new UnauthorizedAccessException("Permission '{0}' is denied".Formato(permissionKey));
         }
 
-        public static Dictionary<Enum, bool> ServicePermissionRules()
-        {
-            RoleDN role = RoleDN.Current;
-
-            return EnumLogic<PermissionDN>.Keys.ToDictionary(a => a, a => cache.GetAllowed(a));
-        }
-
         public static bool IsAuthorized(this Enum permissionKey)
         {
             return cache.GetAllowed(permissionKey);
         }
 
+        internal static bool IsAuthorizedFor(this Enum permissionKey, Lite<RoleDN> role)
+        {
+            return cache.GetAllowed(role, permissionKey);
+        }
+
+        public static DefaultDictionary<Enum, bool> ServicePermissionRules()
+        {
+            return cache.GetCleanDictionary();
+        }
+
         public static PermissionRulePack GetPermissionRules(Lite<RoleDN> roleLite)
         {
-            var role = roleLite.Retrieve();
-
-            return new PermissionRulePack
-            {
-                Role = roleLite,
-                Rules = cache.GetRules(roleLite, EnumLogic<PermissionDN>.AllEntities()).ToMList()
-            };
+            var result = new PermissionRulePack { Role = roleLite };
+            cache.GetRules(result, EnumLogic<PermissionDN>.AllEntities());
+            return result;
         }
 
         public static void SetPermissionRules(PermissionRulePack rules)
         {
             cache.SetRules(rules, r => true);
-        }
-
-        public static void SetPermissionAllowed(Lite<RoleDN> role, Enum permissionKey, bool allowed)
-        {
-            cache.SetAllowed(role, permissionKey, allowed);
         }
 
         public static bool GetPermissionAllowed(Lite<RoleDN> role, Enum permissionKey)

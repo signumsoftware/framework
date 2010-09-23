@@ -15,7 +15,7 @@ namespace Signum.Windows.Authorization
 {
     public static class TypeAuthClient
     {
-        static Dictionary<Type, TypeAllowedBasic> typeRules; 
+        static DefaultDictionary<Type, TypeAllowed> typeRules; 
 
         public static bool Started { get; private set; }
 
@@ -68,7 +68,7 @@ namespace Signum.Windows.Authorization
 
         static TypeAllowedBasic GetTypeAllowed(Type type)
         {
-            return typeRules.TryGetS(type) ?? TypeAllowedBasic.Create;
+            return typeRules.GetAllowed(type).GetUI();
         }
 
         static void AuthClient_UpdateCacheEvent()
