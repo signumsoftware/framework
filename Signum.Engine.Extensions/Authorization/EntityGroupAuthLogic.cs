@@ -154,6 +154,11 @@ namespace Signum.Engine.Authorization
                     EntityGroupAllowedDN access = cache.GetAllowed(eg);
                     bool allowedIn = access.InGroup.Get(userInterface) >= allowed;
                     bool allowedOut = access.OutGroup.Get(userInterface) >= allowed;
+                    var egi = EntityGroupLogic.GetEntityGroupInfo(eg, ident.GetType());
+
+                    if (egi.NeverApplicable)
+                        return true;
+                    
                     if (allowedIn && allowedOut)
                         return true;
 
@@ -212,16 +217,18 @@ namespace Signum.Engine.Authorization
             where T : IdentifiableEntity
         {
             if (!Schema.Current.Tables.ContainsKey(typeof(T)))
-                throw new InvalidOperationException("{0} is not included in the schema".Formato(typeof(T))); 
+                throw new InvalidOperationException("{0} is not included in the schema".Formato(typeof(T)));
 
             var pairs = (from eg in EntityGroupLogic.GroupsFor(typeof(T))
                          let allowedDN = cache.GetAllowed(eg)
+                         let entityGroup = EntityGroupLogic.GetEntityGroupInfo(eg, typeof(T))
+                         where !entityGroup.NeverApplicable
                          select new
                          {
                              Key = eg,
                              AllowedIn = allowedDN.InGroup.Get(userInterface) >= allowed,
                              AllowedOut = allowedDN.OutGroup.Get(userInterface) >= allowed,
-                             EntityGroup = EntityGroupLogic.GetEntityGroupInfo<T>(eg),
+                             EntityGroup = (EntityGroupLogic.EntityGroupInfo<T>)entityGroup,
                          }).ToList();
 
             pairs.RemoveAll(p=>p.AllowedIn && p.AllowedOut);
@@ -385,11 +392,19 @@ namespace Signum.Engine.Authorization
 
         static IEnumerable<TypeAllowedBasic?> Possibilities(Type type, Enum entityGroup, bool userInterface)
         {
+            IEntityGroupInfo egi = EntityGroupLogic.GetEntityGroupInfo(entityGroup, type);
+
+            if(egi.NeverApplicable)
+            {
+                yield return null;
+                yield break; 
+            }
+
             EntityGroupAllowedDN access = cache.GetAllowed(entityGroup);
             yield return access.InGroup.Get(userInterface);
             yield return access.OutGroup.Get(userInterface);
 
-            if (EntityGroupLogic.GetEntityGroupInfo(entityGroup, type).IsApplicableUntypedExpression != null)
+            if (egi.IsApplicableUntypedExpression != null)
                 yield return null;
         }
     }

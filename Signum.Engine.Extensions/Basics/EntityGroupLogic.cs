@@ -18,26 +18,17 @@ namespace Signum.Engine.Basics
 {
     public static class EntityGroupLogic
     {
-        internal interface IEntityGroupInfo
-        {
-            bool IsInGroup(IdentifiableEntity entity);
-            LambdaExpression IsInGroupUntypedExpression { get; }
-
-            bool IsApplicable(IdentifiableEntity entity);
-            LambdaExpression IsApplicableUntypedExpression { get; }
-        }
-
         internal class EntityGroupInfo<T> : IEntityGroupInfo
             where T : IdentifiableEntity
         {
             public EntityGroupInfo(Expression<Func<T, bool>> isInGroup, Expression<Func<T, bool>> isApplicable)
             {
-                if (isInGroup != null)
-                {
-                    IsInGroupExpression = (Expression<Func<T, bool>>)DataBaseTransformer.ToDatabase(isInGroup);
-                    IsInGroupFuncExpression = (Expression<Func<T, bool>>)MemoryTransformer.ToMemory(isInGroup);
-                    IsInGroupFunc = IsInGroupFuncExpression.Compile();
-                }
+                if (isInGroup == null)
+                    throw new ArgumentNullException("isInGroup"); 
+
+                IsInGroupExpression = (Expression<Func<T, bool>>)DataBaseTransformer.ToDatabase(isInGroup);
+                IsInGroupFuncExpression = (Expression<Func<T, bool>>)MemoryTransformer.ToMemory(isInGroup);
+                IsInGroupFunc = IsInGroupFuncExpression.Compile();
 
                 if (isApplicable != null)
                 {
@@ -57,9 +48,6 @@ namespace Signum.Engine.Basics
 
             public bool IsInGroup(IdentifiableEntity entity)
             {
-                if (IsInGroupFunc == null)
-                    return true;
-
                 return IsInGroupFunc((T)entity);
             }
 
@@ -79,6 +67,46 @@ namespace Signum.Engine.Basics
             public LambdaExpression IsApplicableUntypedExpression
             {
                 get { return IsInGroupExpression; }
+            }
+
+            public bool NeverApplicable
+            {
+                get { return true; }
+            }
+        }
+
+        internal class NeverApplicableEntityGroupInfo: IEntityGroupInfo
+        {
+            private NeverApplicableEntityGroupInfo()
+            {
+
+            }
+
+            public static readonly NeverApplicableEntityGroupInfo Instance = new NeverApplicableEntityGroupInfo(); 
+
+            public bool IsInGroup(IdentifiableEntity entity)
+            {
+                throw new NotImplementedException();
+            }
+
+            public LambdaExpression IsInGroupUntypedExpression
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            public LambdaExpression IsApplicableUntypedExpression
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            public bool IsApplicable(IdentifiableEntity entity)
+            {
+                return false;
+            }
+
+            public bool NeverApplicable
+            {
+                get { return true; }
             }
         }
 
@@ -113,6 +141,12 @@ namespace Signum.Engine.Basics
             where T : IdentifiableEntity
         {
             infos.GetOrCreate(typeof(T))[entityGroupKey] = new EntityGroupInfo<T>(isInGroup, isApplicable);
+        }
+
+        public static void RegisterNeverApplicable<T>(Enum entityGroupKey)
+            where T : IdentifiableEntity
+        {
+            infos.GetOrCreate(typeof(T))[entityGroupKey] = NeverApplicableEntityGroupInfo.Instance;
         }
 
         [MethodExpander(typeof(IsInGroupExpander))]
@@ -160,9 +194,12 @@ namespace Signum.Engine.Basics
         public static IQueryable<T> WhereInGroup<T>(this IQueryable<T> query, Enum entityGroupKey)
             where T : IdentifiableEntity
         {
-            EntityGroupInfo<T> info = (EntityGroupInfo<T>)GetEntityGroupInfo(entityGroupKey, typeof(T));
+            IEntityGroupInfo info = GetEntityGroupInfo(entityGroupKey, typeof(T));
 
-            return query.Where(info.IsInGroupExpression);
+            if (info.NeverApplicable)
+                return query;
+
+            return query.Where(((EntityGroupInfo<T>)info).IsInGroupExpression);
         }
 
         class WhereInGroupExpander : IMethodExpander
@@ -201,24 +238,18 @@ namespace Signum.Engine.Basics
             return info;
         }
 
-        internal static EntityGroupInfo<T> GetEntityGroupInfo<T>(Enum entityGroupKey)
-            where T : IdentifiableEntity
-        {
-            return (EntityGroupInfo<T>)GetEntityGroupInfo(entityGroupKey, typeof(T));
-        }
-
         static MethodInfo miSmartRetrieve = ReflectionTools.GetMethodInfo(() => SmartRetrieve<IdentifiableEntity>(null)).GetGenericMethodDefinition();
 
         public static T SmartRetrieve<T>(this Lite<T> lite) where T : class, IIdentifiable
         {
-            throw new InvalidOperationException("This methid is ment to be used only in declaration of entity groups"); 
+            throw new InvalidOperationException("This method is ment to be used only in declaration of entity groups"); 
         }
 
         static MethodInfo miSmartTypeIs = ReflectionTools.GetMethodInfo(() => SmartTypeIs<IdentifiableEntity>(null)).GetGenericMethodDefinition();
 
         public static bool SmartTypeIs<T>(this Lite lite)
         {
-            throw new InvalidOperationException("This methid is ment to be used only in declaration of entity groups");
+            throw new InvalidOperationException("This method is ment to be used only in declaration of entity groups");
         }
 
         internal class DataBaseTransformer : SimpleExpressionVisitor
@@ -452,5 +483,16 @@ namespace Signum.Engine.Basics
                 return replacements.TryGetC(m) ?? base.VisitMethodCall(m);
             }
         }      
+    }
+
+    internal interface IEntityGroupInfo
+    {
+        bool IsInGroup(IdentifiableEntity entity);
+        LambdaExpression IsInGroupUntypedExpression { get; }
+
+        bool IsApplicable(IdentifiableEntity entity);
+        LambdaExpression IsApplicableUntypedExpression { get; }
+
+        bool NeverApplicable { get; }
     }
 }
