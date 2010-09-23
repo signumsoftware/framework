@@ -34,7 +34,7 @@ namespace Signum.Entities.DynamicQuery
             FilterType? filterType = TryGetFilterType(type);
 
             if(filterType == null)
-                throw new NotSupportedException(Resources.Type0NotSupported.Formato(type));
+                throw new NotSupportedException("Type {0} not supported".Formato(type));
 
             return filterType.Value;
         }

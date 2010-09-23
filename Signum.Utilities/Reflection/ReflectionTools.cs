@@ -89,11 +89,11 @@ namespace Signum.Utilities.Reflection
 
             MemberExpression ex = body as MemberExpression;
             if (ex == null)
-                throw new ArgumentException(Resources.PropertyShouldBeAnExpressionAccessingAProperty);
+                throw new ArgumentException("The lambda 'property' should be an expression accessing a property");
 
             PropertyInfo pi = ex.Member as PropertyInfo;
             if (pi == null)
-                throw new ArgumentException(Resources.PropertyShouldBeAnExpressionAccessingAProperty);
+                throw new ArgumentException("The lambda 'property' should be an expression accessing a property");
 
             return pi;
         }
@@ -120,11 +120,11 @@ namespace Signum.Utilities.Reflection
 
             MemberExpression ex = body as MemberExpression;
             if (ex == null)
-                throw new ArgumentException(Resources.FieldShouldBeAnExpressionAccessingAField);
+                throw new ArgumentException("The lambda 'field' should be an expression accessing a field");
 
             FieldInfo pi = ex.Member as FieldInfo;
             if (pi == null)
-                throw new ArgumentException(Resources.FieldShouldBeAnExpressionAccessingAField);
+                throw new ArgumentException("The lambda 'field' should be an expression accessing a field");
 
             return pi;
         }
@@ -151,7 +151,7 @@ namespace Signum.Utilities.Reflection
 
             MemberExpression ex = body as MemberExpression;
             if (ex == null)
-                throw new ArgumentException(Resources.MemberShouldBeAnExpressionAccessingAMember);
+                throw new ArgumentException("The lambda 'member' should be an expression accessing a member");
 
             return  ex.Member;
         }
@@ -183,7 +183,7 @@ namespace Signum.Utilities.Reflection
 
             MethodCallExpression ex = body as MethodCallExpression;
             if (ex == null)
-                throw new ArgumentException(Resources.MethodShouldBeAnExpressionCallingAMethod);
+                throw new ArgumentException("The lambda 'method' should be an expression calling a method");
 
             return ex.Method;
         }
@@ -191,7 +191,7 @@ namespace Signum.Utilities.Reflection
         public static object GenericInvoke(this MethodInfo mi, Type[] typeArguments, object obj, object[] parameters)
         {
             if (!mi.IsGenericMethodDefinition)
-                throw new ArgumentException(Resources.MiShouldBeAGenericMethodDefinition);
+                throw new ArgumentException("Argument mi should be a generic method definition");
 
             try
             {

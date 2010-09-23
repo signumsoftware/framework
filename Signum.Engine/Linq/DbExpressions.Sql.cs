@@ -231,10 +231,11 @@ namespace Signum.Engine.Linq
     {
         Where = 1,
         GroupBy = 2,
-        OrderBy = 4, 
-        Select = 8, 
-        Distinct = 16,
-        Top = 32,
+        Select = 4, 
+        Distinct = 8,
+        OrderBy = 16,
+        Skip = 32,
+        Top = 64
     }
 
     /// <summary>
@@ -260,7 +261,7 @@ namespace Signum.Engine.Linq
             : base(DbExpressionType.Select, alias)
         {
             this.Distinct = distinct;
-            this.Top = top; 
+            this.Top = top;
             this.Columns = columns.ToReadOnly();
             this.From = from;
             this.Where = where;

@@ -162,18 +162,6 @@
   <data name="And" xml:space="preserve">
     <value> and </value>
   </data>
-  <data name="CannotRemoveItemThatIsNotInTree" xml:space="preserve">
-    <value>Cannot remove item that is not in tree.</value>
-  </data>
-  <data name="CellHasQuotesInAnUnexpectedPosition" xml:space="preserve">
-    <value>Cell has  " in an unexpected position: {0}</value>
-  </data>
-  <data name="CellStartsByQuotesButNotEndsLikeThis" xml:space="preserve">
-    <value>Cell starts by " but do not ends like this: {0}</value>
-  </data>
-  <data name="CubeNotFound" xml:space="preserve">
-    <value>Cube not found</value>
-  </data>
   <data name="DateLast" xml:space="preserve">
     <value>Last {0}</value>
   </data>
@@ -198,120 +186,14 @@
   <data name="DateTimePrecision_Seconds" xml:space="preserve">
     <value>Seconds</value>
   </data>
-  <data name="DictionaryEmpty" xml:space="preserve">
-    <value>Dictionary Empty</value>
-  </data>
-  <data name="EmptyList" xml:space="preserve">
-    <value>Empty List</value>
-  </data>
-  <data name="EmptyPriorityQueue" xml:space="preserve">
-    <value>Empty Priority Queue</value>
-  </data>
-  <data name="EmptyQueue" xml:space="preserve">
-    <value>Empty queue</value>
-  </data>
-  <data name="EmptyStack" xml:space="preserve">
-    <value>Empty stack</value>
-  </data>
-  <data name="EmptyTree" xml:space="preserve">
-    <value>Empty tree</value>
-  </data>
   <data name="EnterYourSelection" xml:space="preserve">
     <value>Enter your selection: </value>
   </data>
   <data name="EnterYoutSelectionsSeparatedByComma" xml:space="preserve">
     <value>Enter yout selections separated by comma: </value>
   </data>
-  <data name="Error0Extra1" xml:space="preserve">
-    <value>Error {0}:
- Extra: {1}</value>
-  </data>
-  <data name="Error0Lacking1" xml:space="preserve">
-    <value>Error {0}:
- Lacking: {1}</value>
-  </data>
-  <data name="Error0Lacking1Extra2" xml:space="preserve">
-    <value>Error {0}:
- Lacking: {1}
- Extra: {2}</value>
-  </data>
-  <data name="ExpansionFailed0DoesNotImplementIMethodExpander" xml:space="preserve">
-    <value>Expansion failed! '{0}' does not implement IMethodExpander</value>
-  </data>
-  <data name="FieldShouldBeAnExpressionAccessingAField" xml:space="preserve">
-    <value>field should be an expression accessing a field</value>
-  </data>
-  <data name="FirstCollectionIsShorter" xml:space="preserve">
-    <value>The first collecton is shorter</value>
-  </data>
-  <data name="GenericMethodDefinitionShouldBeAGenericMethodDefinition" xml:space="preserve">
-    <value>genericMethodDefinition should be a Generic Method Definition</value>
-  </data>
-  <data name="GenericTypeDefinitionShouldBeAGenericTypeDefinition" xml:space="preserve">
-    <value>genericTypeDefinition should be a Generic Type Definition</value>
-  </data>
-  <data name="InconsistenceFoundCube012CouldHaveValues34" xml:space="preserve">
-    <value>Inconsistence found, cube {0} x {1} x {2} could have values {3} ó {4}</value>
-  </data>
-  <data name="InconsistenceFoundOnSquare01CouldHaveValues23" xml:space="preserve">
-    <value>Inconsistence found, square {0} x {1} could have values {2} ó {3}</value>
-  </data>
-  <data name="Interval0OverlapsWithTheExisting1" xml:space="preserve">
-    <value>Interval {0} overlaps with the exisisting {1}</value>
-  </data>
-  <data name="IntervalLimitsDoNotExistOnDictionary" xml:space="preserve">
-    <value>Interval limits do not exisit on dictionary</value>
-  </data>
-  <data name="Intervalo0OverlapsWithExistingOne1Value2" xml:space="preserve">
-    <value>Interval {0} overlaps with the existing {1}, value : {2}</value>
-  </data>
-  <data name="IsNotAnEnum" xml:space="preserve">
-    <value>{0} is not an Enum</value>
-  </data>
-  <data name="Key0NotFound" xml:space="preserve">
-    <value>Key {0} not found</value>
-  </data>
-  <data name="MaxShouldBeGreaterOrEqualThanMin" xml:space="preserve">
-    <value>max should be greater or equal than min</value>
-  </data>
-  <data name="MemberShouldBeAnExpressionAccessingAMember" xml:space="preserve">
-    <value>member should be an expression accessing a member</value>
-  </data>
-  <data name="Method0NotFoundOnType1" xml:space="preserve">
-    <value>Method {0} not found on type {1}</value>
-  </data>
-  <data name="MethodShouldBeAnExpressionCallingAMethod" xml:space="preserve">
-    <value>method should be an expression calling a method</value>
-  </data>
-  <data name="MinAndMaxShouldBeGreaterThan0" xml:space="preserve">
-    <value>min and max should be greater than 0</value>
-  </data>
-  <data name="MinIsGreaterThanMax" xml:space="preserve">
-    <value>Min is greater than Max</value>
-  </data>
-  <data name="MiShouldBeAGenericMethodDefinition" xml:space="preserve">
-    <value>mi should be a Generic Method Definition</value>
-  </data>
-  <data name="MoreThanOneMemberNamed0" xml:space="preserve">
-    <value>There is more than one member named '{0}'</value>
-  </data>
-  <data name="NoElementExistWithKey0" xml:space="preserve">
-    <value>No element exist with key: {0}</value>
-  </data>
-  <data name="NoIntervalFound" xml:space="preserve">
-    <value>No interval found</value>
-  </data>
-  <data name="NoMatchInA01Switch" xml:space="preserve">
-    <value>No match in a {0} -&gt; {1} switch</value>
-  </data>
-  <data name="NoMemberNamed0" xml:space="preserve">
-    <value>There is no member with name '{0}'</value>
-  </data>
   <data name="NoOptionWithKey0Found" xml:space="preserve">
     <value>No option with key {0} found</value>
-  </data>
-  <data name="NotSupported0" xml:space="preserve">
-    <value>Not supported {0}</value>
   </data>
   <data name="Or" xml:space="preserve">
     <value> or </value>
@@ -319,38 +201,8 @@
   <data name="OS_Unknown0" xml:space="preserve">
     <value>Unknown ({0})</value>
   </data>
-  <data name="PropertyShouldBeAnExpressionAccessingAProperty" xml:space="preserve">
-    <value>property should be an expression accessing a property</value>
-  </data>
-  <data name="SecondCollectionsIsShorter" xml:space="preserve">
-    <value>The second collection is shorter</value>
-  </data>
   <data name="SelectOneOfTheFollowingOptions" xml:space="preserve">
     <value>Select one of the following options:</value>
-  </data>
-  <data name="SquareNotFound" xml:space="preserve">
-    <value>Square not found</value>
-  </data>
-  <data name="String0IsTooShort" xml:space="preserve">
-    <value>String '{0}' is too short</value>
-  </data>
-  <data name="TheCollectionHasNoElements" xml:space="preserve">
-    <value>The collection has no elements</value>
-  </data>
-  <data name="TheDateHasSomeValueInTheHourMinuteSecondOrMillisecond" xml:space="preserve">
-    <value>The date has some value in the hour, minutes, seconds or milliseconds</value>
-  </data>
-  <data name="TheNode0IsNotInTheGraph" xml:space="preserve">
-    <value>The node {0} is not in the graph</value>
-  </data>
-  <data name="TheNodeType0IsNotSupportedAsUnaryExpression" xml:space="preserve">
-    <value>The nodeType {0} is not supported as unary expression</value>
-  </data>
-  <data name="ThereAreSomeRepeated01" xml:space="preserve">
-    <value>There are some repeated {0}: {1}</value>
-  </data>
-  <data name="ThereIsMoreThanOneElementWithKey0" xml:space="preserve">
-    <value>There is more than one element with key: {0}</value>
   </data>
   <data name="Today" xml:space="preserve">
     <value>Today</value>
@@ -360,12 +212,6 @@
   </data>
   <data name="Unavailable" xml:space="preserve">
     <value>Unavailable</value>
-  </data>
-  <data name="UnhandledBindingType0" xml:space="preserve">
-    <value>Unhandled binding type '{0}'</value>
-  </data>
-  <data name="UnhandledExpressionType0" xml:space="preserve">
-    <value>Unhandled expression type: '{0}'</value>
   </data>
   <data name="Yesterday" xml:space="preserve">
     <value>Yesterday</value>

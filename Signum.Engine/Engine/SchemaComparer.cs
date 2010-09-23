@@ -73,7 +73,7 @@ namespace Signum.Engine
                           where g.Count() > 1
                           select g).ToList();
             if (errors.Count > 0)
-                throw new InvalidOperationException(Resources.MultipleIndexOnTheFollowingColumns + " " + errors.ToString(g => " - {0}({1}): {2}".Formato(g.Key.ColumnName, g.Key.Table, g.ToString(a => a.IndexName, ", ")), "\r\n"));
+                throw new InvalidOperationException("Multiple indexes in the following columns: " + errors.ToString(g => " - {0}({1}): {2}".Formato(g.Key.ColumnName, g.Key.Table, g.ToString(a => a.IndexName, ", ")), "\r\n"));
 
 
             var groups = rawIndexes.AgGroupToDictionary(a => a.Table, g => g.ToDictionary(a => a.ColumnName, a => new { a.Unique, a.IndexName, a.Identity }));

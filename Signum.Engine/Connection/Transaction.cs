@@ -31,7 +31,7 @@ namespace Signum.Engine
 
         static void NotifyRollback()
         {
-            UnexpectedBehaviourCallback(Resources.TransactionRollbacked, new StackTrace(2, true));
+            UnexpectedBehaviourCallback("TRANSACTION ROLLBACKED!", new StackTrace(2, true));
         }
 
         [ThreadStatic]
@@ -228,6 +228,8 @@ namespace Signum.Engine
 
         public Transaction(bool forceNew) : this(forceNew, null) { }
 
+        const string connectionError = "ConnectionScope.Current not established. User ConnectionScope.Default to do it.";
+
         public Transaction(bool forceNew, IsolationLevel? isolationLevel)
         {
             if (currents == null)
@@ -236,7 +238,7 @@ namespace Signum.Engine
             BaseConnection bc = ConnectionScope.Current;
 
             if (bc == null)
-                throw new InvalidOperationException(Resources.NoCurrentConnectionEstablishedUseConnectionScopeDefaultToDoIt);
+                throw new InvalidOperationException(connectionError);
 
             ICoreTransaction parent = currents.TryGetC(bc);
             if (parent == null || forceNew)
@@ -258,7 +260,7 @@ namespace Signum.Engine
             BaseConnection bc = ConnectionScope.Current;
 
             if (bc == null)
-                throw new InvalidOperationException(Resources.NoCurrentConnectionEstablishedUseConnectionScopeDefaultToDoIt);
+                throw new InvalidOperationException(connectionError);
 
             ICoreTransaction parent = GetCurrent();
             currents[bc] = coreTransaction = new NamedTransaction(parent, savePointName);
@@ -267,7 +269,7 @@ namespace Signum.Engine
         void AssertTransaction()
         {
             if (GetCurrent().RolledBack)
-                throw new InvalidOperationException(Resources.TheTransactionIsRolledBack);
+                throw new InvalidOperationException("The transation is RolledBack");
         }
 
         static ICoreTransaction GetCurrent()

@@ -40,50 +40,60 @@ namespace Signum.Engine.Maps
             get { return tables; }
         }
 
+        const string errorType = "TypeDN table not cached. Remember to call TypeLogic.Start in your Starter and call Schema.Current.Initialize";
+
         Dictionary<Type, int> idsForType;
         internal Dictionary<Type, int> IDsForType
         {
-            get { return idsForType.ThrowIfNullC(Resources.TypeDNTableNotCached); }
+            get { return idsForType.ThrowIfNullC(errorType); }
             set { idsForType = value; }
         }
 
         Dictionary<int, Table> tablesForID;
         internal Dictionary<int, Table> TablesForID
         {
-            get { return tablesForID.ThrowIfNullC(Resources.TypeDNTableNotCached); }
+            get { return tablesForID.ThrowIfNullC(errorType); }
             set { tablesForID = value; }
         }
 
         Dictionary<Type, TypeDN> typeToDN;
         internal Dictionary<Type, TypeDN> TypeToDN
         {
-            get { return typeToDN.ThrowIfNullC(Resources.TypeDNTableNotCached); }
+            get { return typeToDN.ThrowIfNullC(errorType); }
             set { typeToDN = value; }
         }
 
         Dictionary<TypeDN, Type> dnToType;
         internal Dictionary<TypeDN, Type> DnToType
         {
-            get { return dnToType.ThrowIfNullC(Resources.TypeDNTableNotCached); }
+            get { return dnToType.ThrowIfNullC(errorType); }
             set { dnToType = value; }
         }
 
         #region Events
 
-        public event Func<Type, bool> IsAllowedCallback;
+        public event Func<Type, string> IsAllowedCallback;
 
-        public bool IsAllowed(Type type)
+        public string IsAllowed(Type type)
         {
             if (IsAllowedCallback != null)
-                return IsAllowedCallback(type);
+                foreach (Func<Type, string> f in IsAllowedCallback.GetInvocationList())
+                {
+                    string result = f(type);
 
-            return true;
+                    if (result != null)
+                        return result;
+                }
+
+            return null;
         }
 
         public void AssertAllowed(Type type)
         {
-            if (!IsAllowed(type))
-                throw new UnauthorizedAccessException(Resources.UnauthorizedAccessTo0.Formato(type.NiceName()));
+            string error = IsAllowed(type);
+
+            if (error != null)
+                throw new UnauthorizedAccessException(Resources.UnauthorizedAccessTo0Because1.Formato(type.NiceName(), error));
         }
 
         readonly IEntityEvents entityEventsGlobal = new EntityEvents<IdentifiableEntity>(); 
@@ -165,6 +175,8 @@ namespace Signum.Engine.Maps
         internal IQueryable<T> OnFilterQuery<T>(IQueryable<T> query)
             where T: IdentifiableEntity
         {
+            AssertAllowed(typeof(T)); 
+
             EntityEvents<T> ee = (EntityEvents<T>)entityEvents.TryGetC(typeof(T));
             if (ee == null)
                 return query;
@@ -190,7 +202,7 @@ namespace Signum.Engine.Maps
                     }
                     catch (Exception ex)
                     {
-                        return new SqlPreCommandSimple(Resources.ExceptionOn01.Formato(e.Method, ex.Message));
+                        return new SqlPreCommandSimple("Exception on {0}".Formato(e.Method, ex.Message));
                     }
                 })
                 .Combine(Spacing.Triple);
@@ -271,7 +283,7 @@ namespace Signum.Engine.Maps
                     sw.Start();
                     pair.Handler(this);
                     sw.Stop();
-                    Debug.WriteLine(Resources.MsInitializing0.Formato(pair.Handler.Method.DeclaringType.TypeName(), sw.Elapsed.TotalMilliseconds));
+                    Debug.WriteLine("{0} ms initializing {1}".Formato(pair.Handler.Method.DeclaringType.TypeName(), sw.Elapsed.TotalMilliseconds));
                 }
             }
         }
@@ -312,7 +324,7 @@ namespace Signum.Engine.Maps
 
         public Table Table(Type type)
         {
-            return Tables.GetOrThrow(type, Resources.Table0NotLoadedInSchema);
+            return Tables.GetOrThrow(type, "Table {0} not loaded in schema");
         }
 
         static Field FindField(IFieldFinder fieldFinder, MemberInfo[] members, bool throws)
@@ -508,7 +520,7 @@ namespace Signum.Engine.Maps
 
             if (field == null)
                 if (throws)
-                    throw new InvalidOperationException(Resources.Field0NotInType1.Formato(value.Name, Type.TypeName()));
+                    throw new InvalidOperationException("Field {0} not in type {1}".Formato(value.Name, Type.TypeName()));
                 else
                     return null;
 
@@ -567,7 +579,7 @@ namespace Signum.Engine.Maps
         public static void AssertImplements(this Field field, Type type)
         {
             if (!Implements(field, type))
-                throw new InvalidOperationException(Resources.DoesNotImplement1.Formato(field.ToString(), type.Name)); 
+                throw new InvalidOperationException("{0} does not implement {1}".Formato(field.ToString(), type.Name)); 
         }
     }
 
@@ -703,7 +715,7 @@ namespace Signum.Engine.Maps
 
             if (field == null)
                 if (throws)
-                    throw new InvalidOperationException(Resources.Field0NotInType1.Formato(value.Name, FieldType.TypeName()));
+                    throw new InvalidOperationException("Field {0} not in type {1}".Formato(value.Name, FieldType.TypeName()));
                 else
                     return null;
 
@@ -824,7 +836,7 @@ namespace Signum.Engine.Maps
                 return RelationalTable.Field;
 
             if (throws)
-                throw new InvalidOperationException(Resources.MemberInfo0NotSupportedByCollectionField.Formato(value));
+                throw new InvalidOperationException("MemberInfo {0} not supported by MList field".Formato(value));
 
             return null;
         }

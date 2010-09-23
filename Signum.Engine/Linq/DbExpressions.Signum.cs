@@ -102,7 +102,7 @@ namespace Signum.Engine.Linq
                 throw new ArgumentNullException("bindings");
 
             if (hasValue != null && hasValue.Type != typeof(bool))
-                throw new ArgumentException(Resources.HasValueShouldBeABoolExpression);
+                throw new ArgumentException("hasValue should be a boolean expression");
 
             HasValue = hasValue;
 
@@ -136,7 +136,7 @@ namespace Signum.Engine.Linq
         public FieldBinding(FieldInfo fieldInfo, Expression binding)
         {
             if (!fieldInfo.FieldType.IsAssignableFrom(binding.Type))
-                throw new ArgumentException(Resources.TypeOfExpressionIs0ButTypeOfFieldIs1.Formato(binding.Type.TypeName(), fieldInfo.FieldType.TypeName()));
+                throw new ArgumentException("Type of expression is {0} but type of field is {1}".Formato(binding.Type.TypeName(), fieldInfo.FieldType.TypeName()));
             
             this.FieldInfo = fieldInfo;
             this.Binding = binding;
@@ -156,7 +156,7 @@ namespace Signum.Engine.Linq
         public PropertyBinding(PropertyInfo propertyInfo, Expression binding)
         {
             if (!propertyInfo.PropertyType.UnNullify().IsAssignableFrom(binding.Type.UnNullify()))
-                throw new ArgumentException(Resources.TypeOfExpressionIs0ButTypeOfFieldIs1.Formato(binding.Type.TypeName(), propertyInfo.PropertyType.TypeName()));
+                throw new ArgumentException("Type of expression is {0} but type of field is {1}".Formato(binding.Type.TypeName(), propertyInfo.PropertyType.TypeName()));
 
             //if (Reflector.FindFieldInfo(propertyInfo.DeclaringType, (PropertyInfo)propertyInfo, false) != null)
             //    throw new ArgumentException("{0} is a PropertyInfo, when a FieldInfo is available".Formato(propertyInfo.Name));
@@ -265,7 +265,7 @@ namespace Signum.Engine.Linq
                 Type cleanType = Reflector.ExtractLite(type);
 
                 if (cleanType != reference.Type)
-                    throw new ArgumentException(Resources.TheType0IsNotTheLiteVersionOf1.Formato(type.TypeName(), reference.Type.TypeName()));
+                    throw new ArgumentException("The type {0} is not the Lite version of {1}".Formato(type.TypeName(), reference.Type.TypeName()));
             }
 
             this.Reference = reference;

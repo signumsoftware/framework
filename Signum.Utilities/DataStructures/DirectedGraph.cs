@@ -151,7 +151,7 @@ namespace Signum.Utilities.DataStructures
         {
             var result = adjacency.TryGetC(node);
             if (result == null)
-                throw new InvalidOperationException(Resources.TheNode0IsNotInTheGraph.Formato(node));
+                throw new InvalidOperationException("The node {0} is not in the graph".Formato(node));
             return result;
         }
 

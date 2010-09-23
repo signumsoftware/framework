@@ -40,7 +40,7 @@ namespace Signum.Entities
                 if (OverrideTimeZone == null)
                     return dbDateTime.ToLocalTime();
                 else
-                    return TimeZoneInfo.ConvertTimeFromUtc(dbDateTime, overrideTimeZone.ThrowIfNullC(Properties.Resources.RemoteTimeZoneNotSet));
+                    return TimeZoneInfo.ConvertTimeFromUtc(dbDateTime, OverrideTimeZone);
         }
 
         public static DateTime FromUserInterface(this DateTime uiDateTime)
@@ -51,7 +51,7 @@ namespace Signum.Entities
                 if (OverrideTimeZone == null)
                     return uiDateTime.ToUniversalTime();
                 else
-                    return TimeZoneInfo.ConvertTimeToUtc(uiDateTime, overrideTimeZone.ThrowIfNullC(Properties.Resources.RemoteTimeZoneNotSet));
+                    return TimeZoneInfo.ConvertTimeToUtc(uiDateTime, OverrideTimeZone);
         }
     }
 

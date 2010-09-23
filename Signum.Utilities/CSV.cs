@@ -194,13 +194,13 @@ namespace Signum.Utilities
             if (s.StartsWith("\""))
             {
                 if (!s.EndsWith("\""))
-                    throw new FormatException(Resources.CellStartsByQuotesButNotEndsLikeThis.Formato(s));
+                    throw new FormatException("Cell starts by quotes but not ends with quotes".Formato(s));
 
                 return s.Substring(1, s.Length - 2).Replace("\"\"", "\"");
             }
 
             if (s.Contains("\""))
-                throw new FormatException(Resources.CellHasQuotesInAnUnexpectedPosition.Formato(s));
+                throw new FormatException("Cell has quotes ina unexpected position".Formato(s));
 
             return s;
         }

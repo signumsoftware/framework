@@ -71,10 +71,10 @@ namespace Signum.Engine.Maps
         Table PreCreate(Type type)
         {
             if (type.IsAbstract)
-                throw new InvalidOperationException(Resources.ImpossibleToIncludeInTheSchema + " " + Resources.Type0IsAbstract.Formato(type));
+                throw new InvalidOperationException("Impossible to include in the Schema the type {0} because is abstract".Formato(type));
 
             if (!Reflector.IsIdentifiableEntity(type) && !type.IsEnum)
-                throw new InvalidOperationException(Resources.ImpossibleToIncludeInTheSchema + " " + Resources.Type0IsNotAnIdentifiableEntityOrAnEnum.Formato(type));
+                throw new InvalidOperationException("Impossible to include in the Schema the type {0} because is not and IdentifiableEntity or an Enum".Formato(type));
             
             return new Table(type);
         }
@@ -111,7 +111,7 @@ namespace Signum.Engine.Maps
                 if (!Settings.FieldInfoAttributes(type, fi).Any(a=>a is IgnoreAttribute))
                 {
                     if (!SilentMode() && Reflector.FindPropertyInfo(fi) == null)
-                        Debug.WriteLine(Resources.Field0OfTipe1HasNoCompatibleProperty.Formato(fi.Name, type.Name));
+                        Debug.WriteLine("Field {0} of type {1} has no property".Formato(fi.Name, type.Name));
 
                     Field campo = GenerateField(type, fi, fi.FieldType, contexto, table, preName, forceNull);
                     result.Add(fi.Name, new EntityField(type, fi) { Field = campo });
@@ -130,10 +130,10 @@ namespace Signum.Engine.Maps
             //fieldType: Va variando segun se entra en colecciones o contenidos
             //fi.Type: el tipo del campo asociado
 
-            KindOfField kof = GetKindOfField(type, fi, fieldType).ThrowIfNullS(Resources.Field0OfType1HasNoDatabaseRepresentation.Formato(fi.Name, type.Name));
+            KindOfField kof = GetKindOfField(type, fi, fieldType).ThrowIfNullS("Field {0} of type {1} has no database representation".Formato(fi.Name, type.Name));
 
             if ((allowedContexts[kof] & contexto) != contexto)
-                throw new InvalidOperationException(Resources.Field0OfType1ShouldBeMappedAs2ButItIsIncompatibleWithContext3.Formato(fi.Name, type.Name, fieldType, contexto));
+                throw new InvalidOperationException("Field {0} of Type {1} should be mapped as {2} but is incompatible with context {3}".Formato(fi.Name, type.Name, fieldType, contexto));
 
             //generacion del nombre del campo
             NameSequence name = preName;
@@ -256,7 +256,7 @@ namespace Signum.Engine.Maps
             Type cleanType = Reflector.ExtractLite(fieldType) ?? fieldType;
             string erroneos = ib.ImplementedTypes.Where(t => !cleanType.IsAssignableFrom(t)).ToString(t => t.TypeName(), ", ");
             if (erroneos.Length != 0)
-                throw new InvalidOperationException(Resources.Types0DoNotImplement1.Formato(erroneos, cleanType));
+                throw new InvalidOperationException("Type {0} do not implement {1}".Formato(erroneos, cleanType));
 
             Index indice = Settings.IndexType(type, fi) ?? DefaultReferenceIndex();
 
@@ -364,7 +364,7 @@ namespace Signum.Engine.Maps
                 case KindOfField.Reference:
                     return "id" + TypeName(type);
                 default:
-                    throw new NotImplementedException(Resources.NoNameForType0Defined.Formato(type));
+                    throw new NotImplementedException("No field name for type {0} defined".Formato(type));
             }
         }
 
@@ -383,7 +383,7 @@ namespace Signum.Engine.Maps
                 case KindOfField.Enum:
                     return "id" + name;
                 default:
-                    throw new NotImplementedException(Resources.NoNameForField0Defined.Formato(fi.Name));
+                    throw new NotImplementedException("No name for {0} defined".Formato(fi.Name));
             }
         }
 

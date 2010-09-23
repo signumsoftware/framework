@@ -33,10 +33,23 @@ namespace Signum.Test.LinqProvider
             var artistsInBands = Database.Query<BandDN>().SelectMany(b => b.Members).Select(a => new { Artist = a.ToLite() }).ToList();
         }
 
+
+        [TestMethod]
+        public void SelectManyIndex()
+        {
+            var artistsInBands = Database.Query<BandDN>().SelectMany((b, i) => b.Members.Select(m => new { Artist = m.ToLite(), i })).ToList();
+        }
+
         [TestMethod]
         public void SelectMany2()
         {
             var artistsInBands = Database.Query<BandDN>().SelectMany(b => b.Members, (b, a) => new { Artist = a.ToLite(), Band = b.ToLite() }).ToList();
+        }
+
+        [TestMethod]
+        public void SelectMany2Index()
+        {
+            var artistsInBands = Database.Query<BandDN>().SelectMany((b, i) => b.Members.Select(m => new { Artist = m.ToLite(), i }), (b, a) => new { a.Artist, a.i, Band = b.ToLite() }).ToList();
         }
 
         [TestMethod]

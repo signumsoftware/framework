@@ -44,7 +44,7 @@ namespace Signum.Engine.Linq
                     var groupBy = (selectRole & SelectRoles.GroupBy) != 0 ? newSelect.GroupBy : fromSelect.GroupBy;
                     var orderBy = (selectRole & SelectRoles.OrderBy) != 0 ? newSelect.OrderBy : fromSelect.OrderBy;
 
-                    return new SelectExpression(newSelect.Alias, distinct, top, newSelect.Columns, newSelect.From, where, orderBy, groupBy); 
+                    return new SelectExpression(newSelect.Alias, distinct, top, newSelect.Columns, newSelect.From, where, orderBy, groupBy);
                 }
             }
 
@@ -90,7 +90,7 @@ namespace Signum.Engine.Linq
                 var result =  (DeleteExpression)SubqueryRemover.Remove(delete, new[] { select });
                 TableExpression table = result.Source as TableExpression;
                 if (table != null && table.Name == result.Table.Name)
-                    return new DeleteExpression(result.Table, result.Source, null); //remove where cos SQL is Oks language
+                    return new DeleteExpression(result.Table, result.Source, null); //remove where cos SQL is Orks language
             }
 
             return delete;
@@ -106,7 +106,7 @@ namespace Signum.Engine.Linq
                 var result = (UpdateExpression)SubqueryRemover.Remove(update, new[] { select });
                 TableExpression table = result.Source as TableExpression;
                 if (table != null && table.Name == result.Table.Name)
-                    return new UpdateExpression(result.Table, result.Source, null, result.Assigments); //remove where cos SQL is Oks language
+                    return new UpdateExpression(result.Table, result.Source, null, result.Assigments); //remove where cos SQL is Orks language
             }
 
             return update;

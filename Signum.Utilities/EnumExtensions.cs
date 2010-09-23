@@ -122,7 +122,7 @@ namespace Signum.Utilities
         public static Dictionary<Enum, FieldInfo> Get(Type type)
         {
             if (!type.IsEnum)
-                throw new ArgumentException(Resources.IsNotAnEnum.Formato(type));
+                throw new ArgumentException("{0} is not an Enum".Formato(type));
 
             lock (enumCache)
                 return enumCache.GetOrCreate(type, () => type.GetFields().Skip(1).ToDictionary(

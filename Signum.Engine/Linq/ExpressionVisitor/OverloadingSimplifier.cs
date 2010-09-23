@@ -52,6 +52,9 @@ namespace Signum.Engine.Linq
         static MethodInfo miWhereQ = ReflectionTools.GetMethodInfo(() => Queryable.Where((IQueryable<string>)null, a => false)).GetGenericMethodDefinition();
         static MethodInfo miWhereE = ReflectionTools.GetMethodInfo(() => Enumerable.Where((IEnumerable<string>)null, a=>false)).GetGenericMethodDefinition();
 
+        static MethodInfo miWhereIndexQ = ReflectionTools.GetMethodInfo(() => Queryable.Where((IQueryable<string>)null, (a, i) => false)).GetGenericMethodDefinition();
+        static MethodInfo miWhereIndexE = ReflectionTools.GetMethodInfo(() => Enumerable.Where((IEnumerable<string>)null, (a, i) => false)).GetGenericMethodDefinition();
+
         static MethodInfo miContainsQ = ReflectionTools.GetMethodInfo(() => Queryable.Contains((IQueryable<string>)null, null)).GetGenericMethodDefinition();
         static MethodInfo miContainsE = ReflectionTools.GetMethodInfo(() => Enumerable.Contains((IEnumerable<string>)null, null)).GetGenericMethodDefinition();
 
@@ -63,6 +66,9 @@ namespace Signum.Engine.Linq
 
         static MethodInfo miSkipQ = ReflectionTools.GetMethodInfo(() => Queryable.Skip((IQueryable<string>)null, 0)).GetGenericMethodDefinition();
         static MethodInfo miSkipE = ReflectionTools.GetMethodInfo(() => Enumerable.Skip((IEnumerable<string>)null, 0)).GetGenericMethodDefinition();
+
+        static MethodInfo miTakeQ = ReflectionTools.GetMethodInfo(() => Queryable.Take((IQueryable<string>)null, 0)).GetGenericMethodDefinition();
+        static MethodInfo miTakeE = ReflectionTools.GetMethodInfo(() => Enumerable.Take((IEnumerable<string>)null, 0)).GetGenericMethodDefinition();
 
         static MethodInfo miFirstQ = ReflectionTools.GetMethodInfo(() => Queryable.First((IQueryable<string>)null)).GetGenericMethodDefinition();
         static MethodInfo miFirstE = ReflectionTools.GetMethodInfo(() => Enumerable.First((IEnumerable<string>)null)).GetGenericMethodDefinition();
@@ -80,8 +86,10 @@ namespace Signum.Engine.Linq
         protected override Expression VisitMethodCall(MethodCallExpression m)
         {
             Type decType = m.Method.DeclaringType; 
-            if (m.Method.IsGenericMethod && ( decType == typeof(Queryable) || decType == typeof(Enumerable) || decType == typeof(Database)))
+            if (m.Method.IsGenericMethod && (decType == typeof(Queryable) || decType == typeof(Enumerable)))
             {
+                bool query = decType == typeof(Queryable);
+
                 Type[] paramTypes = m.Method.GetGenericArguments();
                 MethodInfo mi = m.Method.GetGenericMethodDefinition();
 
@@ -93,7 +101,7 @@ namespace Signum.Engine.Linq
                     var source = Visit(m.GetArgument("source"));
                     var keySelector = (LambdaExpression)Visit(m.GetArgument("keySelector").StripQuotes());
 
-                    MethodInfo miG = (decType == typeof(Queryable) ? miGroupByNQ : miGroupByNE)
+                    MethodInfo miG = (query ? miGroupByNQ : miGroupByNE)
                         .MakeGenericMethod(paramTypes[0], paramTypes[1], paramTypes[0]);
 
                     ParameterExpression p = Expression.Parameter(paramTypes[0], "p" + i++);
@@ -112,10 +120,10 @@ namespace Signum.Engine.Linq
 
                     Type groupingType = typeof(IGrouping<,>).MakeGenericType(paramTypes[1], paramTypes[0]);
 
-                    MethodInfo miG = (decType == typeof(Queryable) ? miGroupByNQ : miGroupByNE)
+                    MethodInfo miG = (query ? miGroupByNQ : miGroupByNE)
                         .MakeGenericMethod(paramTypes[0], paramTypes[1], paramTypes[0]);
 
-                    MethodInfo miS = (decType == typeof(Queryable) ? miSelectQ : miSelectE)
+                    MethodInfo miS = (query ? miSelectQ : miSelectE)
                         .MakeGenericMethod(groupingType, paramTypes[2]);
 
                     ParameterExpression g = Expression.Parameter(groupingType, "g" + i++);
@@ -148,10 +156,10 @@ namespace Signum.Engine.Linq
 
                     Type groupingType = typeof(IGrouping<,>).MakeGenericType(paramTypes[1], paramTypes[2]);
 
-                    MethodInfo miG = (decType == typeof(Queryable) ? miGroupByNQ : miGroupByNE)
+                    MethodInfo miG = (query ? miGroupByNQ : miGroupByNE)
                         .MakeGenericMethod(paramTypes[0], paramTypes[1], paramTypes[2]);
 
-                    MethodInfo miS = (decType == typeof(Queryable) ? miSelectQ : miSelectE)
+                    MethodInfo miS = (query ? miSelectQ : miSelectE)
                         .MakeGenericMethod(groupingType, paramTypes[3]);
 
                     ParameterExpression g = Expression.Parameter(groupingType, "g" + i++);
@@ -191,7 +199,7 @@ namespace Signum.Engine.Linq
 
                     Type groupingType = typeof(IGrouping<,>).MakeGenericType(tK, tI);
 
-                    MethodInfo miG = (decType == typeof(Queryable) ? miGroupByNQ : miGroupByNQ)
+                    MethodInfo miG = (query ? miGroupByNQ : miGroupByNQ)
                         .MakeGenericMethod(tI,tK, tI);
 
                     ParameterExpression p = Expression.Parameter(tI, "p" + i++);
@@ -199,7 +207,7 @@ namespace Signum.Engine.Linq
 
                     if (hasDefaultIfEmpty)
                     {
-                        var method = (decType == typeof(Queryable) ? miDefaultIfEmptyQ : miDefaultIfEmptyE)
+                        var method = (query ? miDefaultIfEmptyQ : miDefaultIfEmptyE)
                             .MakeGenericMethod(groupingType); 
                      
                         group = Expression.Call(method, group);
@@ -207,7 +215,7 @@ namespace Signum.Engine.Linq
 
                     //IQueryable<R> Join<TOuter, TInner, TKey, R>(this IQueryable<TOuter> outer, IEnumerable<TInner> inner, Expression<Func<TOuter, TKey>> outerKeySelector, Expression<Func<TInner, TKey>> innerKeySelector, Expression<Func<TOuter, TInner, R>> resultSelector);
 
-                    MethodInfo mij = (decType == typeof(Queryable) ? miJoinQ : miJoinE)
+                    MethodInfo mij = (query ? miJoinQ : miJoinE)
                         .MakeGenericMethod(tO, groupingType, tK, tR);
 
                     ParameterExpression g = Expression.Parameter(groupingType, "g" + i++);
@@ -229,8 +237,8 @@ namespace Signum.Engine.Linq
                     var source = Visit(m.GetArgument("source"));
                     var predicate = (LambdaExpression)Visit(m.GetArgument("predicate").StripQuotes());
 
-                    MethodInfo mWhere = (decType == typeof(Queryable) ? miWhereQ : miWhereE).MakeGenericMethod(paramTypes[0]);
-                    MethodInfo mCount = (decType == typeof(Queryable) ? miCountQ : miCountE).MakeGenericMethod(paramTypes[0]);
+                    MethodInfo mWhere = (query ? miWhereQ : miWhereE).MakeGenericMethod(paramTypes[0]);
+                    MethodInfo mCount = (query ? miCountQ : miCountE).MakeGenericMethod(paramTypes[0]);
                     
                     return Expression.Call(mCount, Expression.Call(mWhere, source, predicate)); 
                 }                
@@ -240,16 +248,66 @@ namespace Signum.Engine.Linq
                    ReflectionTools.MethodEqual(mi, miElementAtQ) || ReflectionTools.MethodEqual(mi, miElementAtOrDefaultQ))
                 {
                     bool def = ReflectionTools.MethodEqual(mi, miElementAtOrDefaultE) || ReflectionTools.MethodEqual(mi, miElementAtOrDefaultQ);
-                    bool query = ReflectionTools.MethodEqual(mi, miElementAtQ) || ReflectionTools.MethodEqual(mi, miElementAtOrDefaultQ);
-
 
                     var source = Visit(m.GetArgument("source"));
                     var index = Visit(m.GetArgument("index"));
 
-                    MethodInfo first = (def ? (query ? miFirstOrDefaultQ : miFirstOrDefaultE) : (query ? miFirstQ : miFirstE)).MakeGenericMethod(paramTypes[0]);
+                    MethodInfo first = (def ? (query ? miFirstOrDefaultQ : miFirstOrDefaultE) : 
+                                       (query ? miFirstQ : miFirstE)).MakeGenericMethod(paramTypes[0]);
+
                     MethodInfo skip = (query ? miSkipQ : miSkipE).MakeGenericMethod(paramTypes[0]);
-                    return Expression.Call(first, Expression.Call(skip, source, index));
+                    return Visit(Expression.Call(first, Expression.Call(skip, source, index)));
                 }
+
+
+                if(ReflectionTools.MethodEqual(mi, miSkipE) ||ReflectionTools.MethodEqual(mi, miSkipQ))
+                {
+                    var source = Visit(m.GetArgument("source"));
+                    var count = Visit(m.GetArgument("count"));
+
+                    ParameterExpression pi = Expression.Parameter(typeof(int), "i"); 
+                    ParameterExpression pa = Expression.Parameter(paramTypes[0], "a"); 
+                    Expression lambda = Expression.Lambda(Expression.LessThanOrEqual(count, pi), pa, pi);
+
+                    MethodInfo miWhereIndex = (query ? miWhereIndexQ : miWhereIndexE).MakeGenericMethod(paramTypes[0]);
+
+                    return Expression.Call(miWhereIndex, source, lambda); 
+                }
+
+
+                if (ReflectionTools.MethodEqual(mi, miTakeE) || ReflectionTools.MethodEqual(mi, miTakeQ))
+                {
+                    var m2 = m.GetArgument("source") as MethodCallExpression;
+
+                    if(m2 != null)
+                    {
+                        var mi2 = (((MethodCallExpression)m2).Method).GetGenericMethodDefinition();
+
+                        if(ReflectionTools.MethodEqual(mi2, miSkipE) ||ReflectionTools.MethodEqual(mi2, miSkipQ))
+                        {
+
+                            var source = Visit(m2.GetArgument("source"));
+                            var skip = Visit(m2.GetArgument("count"));
+                            var take = Visit(m.GetArgument("count"));
+
+                            ParameterExpression pi = Expression.Parameter(typeof(int), "i");
+                            ParameterExpression pa = Expression.Parameter(paramTypes[0], "a");
+                            Expression lambda = Expression.Lambda(
+                                Expression.And(
+                                    Expression.LessThanOrEqual(skip, pi),
+                                    Expression.LessThan(pi, Expression.Add(skip, take))
+                                ), pa, pi);
+
+                            MethodInfo miWhereIndex = (query ? miWhereIndexQ : miWhereIndexE).MakeGenericMethod(paramTypes[0]);
+
+                            return Expression.Call(miWhereIndex, source, lambda); 
+
+                        }                       
+
+                    }
+                    
+                }
+
             }
 
             return base.VisitMethodCall(m); 
@@ -286,6 +344,17 @@ namespace Signum.Engine.Linq
 
             expression = mce.GetArgument("source");
             return true;
+        }
+
+        public static bool ExtractDefaultIfEmpty(ref LambdaExpression lambda)
+        {
+            Expression body = lambda.Body;
+            if (ExtractDefaultIfEmpty(ref body))
+            {
+                lambda = Expression.Lambda(body, lambda.Parameters); 
+                return true; 
+            }
+            return false;
         }
     }
 }

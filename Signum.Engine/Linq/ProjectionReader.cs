@@ -151,7 +151,7 @@ namespace Signum.Engine.Linq
         public IEnumerator<T> GetEnumerator()
         {
             return Interlocked.Exchange(ref enumerator, null)
-                .ThrowIfNullC(Signum.Engine.Properties.Resources.CannotEnumerateMoreThanOnce);
+                .ThrowIfNullC("Cannot enumerate more than once");
         }
 
         IEnumerator IEnumerable.GetEnumerator()

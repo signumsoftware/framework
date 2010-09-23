@@ -110,6 +110,7 @@ namespace Signum.Test
         }
     }
 
+    [Flags]
     public enum Sex
     {
         Male,

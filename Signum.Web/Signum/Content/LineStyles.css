@@ -60,6 +60,13 @@ input[type=submit]:active, input[type=button]:active {
     font-weight:bold;
 }
 
+.unitLine {
+    float:left;
+    margin-right:10px;
+    display:block;
+    padding:3px 0;
+}
+
 /*.labelLine[for$="sfCombo"] {
     padding-top:6px;
 }*/

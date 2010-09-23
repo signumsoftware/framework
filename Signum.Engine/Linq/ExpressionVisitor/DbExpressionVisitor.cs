@@ -346,7 +346,7 @@ namespace Signum.Engine.Linq
             ReadOnlyCollection<Expression> groupBy = this.VisitGroupBy(select.GroupBy);
 
             if (top != select.Top || from != select.From || where != select.Where || columns != select.Columns || orderBy != select.OrderBy || groupBy != select.GroupBy)
-                return new SelectExpression(select.Alias, select.Distinct, top, columns, from, where, orderBy, groupBy);
+                return new SelectExpression(select.Alias, select.Distinct, top,  columns, from, where, orderBy, groupBy);
 
             return select;
         }

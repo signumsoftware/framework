@@ -138,12 +138,9 @@ namespace Signum.Web
         {
             NameValueCollection form = controller.ControllerContext.HttpContext.Request.Form;
 
-            if (!form.AllKeys.Contains(ViewDataKeys.TabId))
-                throw new InvalidOperationException(Resources.RequestDoesntHaveNecessaryTabIdentifier);
-            
-            string tabID = (string)form[ViewDataKeys.TabId];
-            if (!tabID.HasText())
-                throw new InvalidOperationException(Resources.RequestDoesntHaveNecessaryTabIdentifier);
+            string tabID;
+            if (!form.AllKeys.Contains(ViewDataKeys.TabId) || !(tabID = (string)form[ViewDataKeys.TabId]).HasText())
+                throw new InvalidOperationException("The Request doesn't have the necessary tab identifier");           
             
             return tabID;
         }
@@ -240,11 +237,6 @@ namespace Signum.Web
         public static void SetTokens(object queryName, IEnumerable<OrderOption> orders)
         {
             Manager.SetTokens(queryName, orders);
-        }
-
-        internal static List<Filter> ExtractFilters(HttpContextBase httpContext, object queryName)
-        {
-            return Manager.ExtractFilters(httpContext, queryName);
         }
 
         public static SortedList<string, string> ToSortedList(this NameValueCollection form, string prefixFilter, string prefixToIgnore)
@@ -439,7 +431,7 @@ namespace Signum.Web
 
         public static string OnPartialViewName(ModifiableEntity entity)
         {
-            return Manager.EntitySettings.GetOrThrow(entity.GetType(), Resources.TheresNotAViewForType0).OnPartialViewName(entity); 
+            return Manager.EntitySettings.GetOrThrow(entity.GetType(), "There's no EntitySettings registered for type {0}").OnPartialViewName(entity); 
         }
 
         internal static bool AnyDelegate<T>(this Func<T, bool> func, T val)
@@ -475,7 +467,7 @@ namespace Signum.Web
                 return null;
 
             return Lite.ParseLite(staticType, value, typeName =>
-                Navigator.NamesToTypes.GetOrThrow(typeName, Resources.TheName0DoesNotCorrespondToAnyTypeInNavigator));
+                Navigator.NamesToTypes.GetOrThrow(typeName, "The name {0} does not correspond to any type in navigator"));
         }
 
         public static string Key(this Lite lite)
@@ -483,7 +475,7 @@ namespace Signum.Web
             if (lite == null)
                 return null;
 
-            return lite.Key(rt => Navigator.TypesToNames.GetOrThrow(rt, Resources.TheType0IsNotRegisteredInNavigator));
+            return lite.Key(rt => Navigator.TypesToNames.GetOrThrow(rt, "The type {0} is not registered in navigator"));
         }
     }
     
@@ -860,69 +852,10 @@ namespace Signum.Web
             };
         }
 
-        protected internal virtual List<Filter> ExtractFilters(HttpContextBase httpContext, object queryName)
-        {
-            List<Filter> result = new List<Filter>();
-
-            QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(queryName);
-
-            int index = 0;
-            string name;
-            object value;
-            string operation;
-            Type type;
-            NameValueCollection parameters = httpContext.Request.Params;
-            var names = parameters.AllKeys.Where(k => k.StartsWith("cn"));
-            foreach(string nameKey in names)
-            {
-                if (!int.TryParse(nameKey.RemoveLeft(2), out index))
-                    continue;
-
-                name = parameters[nameKey];
-                value = parameters["val" + index.ToString()];
-                operation = parameters["sel" + index.ToString()];
-                type = queryDescription.StaticColumns
-                           .SingleOrDefault(c => c.Name == name)
-                           .ThrowIfNullC(Resources.InvalidFilterColumn0NotFound.Formato(name))
-                           .Type;
-
-                if (type == typeof(bool))
-                {
-                    string[] vals = ((string)value).Split(',');
-                    value = (vals[0] == "true") ? true : false;
-                }
-
-                if (typeof(Lite).IsAssignableFrom(type))
-                {
-                    string[] vals = ((string)value).Split(';');
-                    int intValue;
-                    if (vals[0].HasText() && int.TryParse(vals[0], out intValue))
-                    {
-                        Type liteType = Navigator.NamesToTypes[vals[1]];
-                        if (typeof(Lite).IsAssignableFrom(liteType))
-                            liteType = Reflector.ExtractLite(liteType);
-                        value = Lite.Create(liteType, intValue);
-                    }
-                    else
-                        value = null;
-                }
-                FilterOperation filterOperation = ((FilterOperation[])Enum.GetValues(typeof(FilterOperation))).SingleOrDefault(op => op.ToString() == operation);
-
-                result.Add(new Filter
-                {
-                    Token = QueryUtils.ParseFilter(name, queryDescription),
-                    Operation = filterOperation,
-                    Value = value,
-                });
-            }
-            return result;
-        }
 
         protected internal virtual Type ResolveTypeFromUrlName(string typeUrlName)
         {
-            return URLNamesToTypes
-                .TryGetC(typeUrlName)
-                .ThrowIfNullC(Resources.NoTypeForUrlName0.Formato(typeUrlName));
+            return URLNamesToTypes.GetOrThrow(typeUrlName, "No Type for url name {0}");
         }
 
         protected internal virtual object ResolveQueryFromUrlName(string queryUrlName)
@@ -933,19 +866,20 @@ namespace Signum.Web
             //If it's the name of a Type
             if (Navigator.NamesToTypes.ContainsKey(queryUrlName))
             {
-                string urlName = TypesToURLNames[Navigator.NamesToTypes[queryUrlName]];
-                if (!string.IsNullOrEmpty(urlName))
-                    return UrlQueryNames[urlName].ThrowIfNullC(Resources.NoQueryWithName0.Formato(queryUrlName));
+                return NamesToTypes[queryUrlName];
+                //string urlName = TypesToURLNames[];
+                //if (!string.IsNullOrEmpty(urlName))
+                //    return UrlQueryNames[urlName].ThrowIfNullC("There's no query with name {0}".Formato(queryUrlName));
             }
 
-            throw new ArgumentException(Resources.NoQueryWithName0.Formato(queryUrlName));
+            throw new ArgumentException("There's no query with name {0}".Formato(queryUrlName));
         }
 
         protected internal virtual object ResolveQueryFromToStr(string queryNameToStr)
         {
             return DynamicQueryManager.Current.GetQueryNames()
                 .SingleOrDefault(qn => qn.ToString() == queryNameToStr)
-                .ThrowIfNullC(Resources.NoQueryWithName0.Formato(queryNameToStr));
+                .ThrowIfNullC("No query with name {0}".Formato(queryNameToStr));
         }
 
         protected internal virtual Type ResolveType(string typeName)
@@ -953,7 +887,7 @@ namespace Signum.Web
             Type type = Navigator.NamesToTypes.TryGetC(typeName) ?? Type.GetType(typeName, false);
 
             if (type == null)
-                throw new ArgumentException(Resources.Type0NotFoundInNavigatorNamesToTypes.Formato(typeName));
+                throw new ArgumentException("Type {0} not found Navigator.NamesToTypes".Formato(typeName));
 
             
             return type;

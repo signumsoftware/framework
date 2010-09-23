@@ -104,7 +104,7 @@ namespace Signum.Utilities.DataStructures
                     MoveToHead(value);
                     return value.Value;
                 }
-                throw new KeyNotFoundException(Resources.Key0NotFound.Formato(key));
+                throw new KeyNotFoundException("Key {0} not found".Formato(key));
             }
             set
             {

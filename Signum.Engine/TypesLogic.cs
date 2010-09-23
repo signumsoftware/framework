@@ -41,7 +41,7 @@ namespace Signum.Engine
             var dict = EnumerableExtensions.JoinStrict(
                 types, sender.Tables.Keys, t => t.FullClassName, t => (Reflector.ExtractEnumProxy(t) ?? t).FullName,
                 (typeDN, type) => new { typeDN, type },
-                Resources.CachingTypesTableFrom0.Formato(sender.Table(typeof(TypeDN)).Name)
+                "caching types table from {0}".Formato(sender.Table(typeof(TypeDN)).Name)
                 ).ToDictionary(a => a.type, a => a.typeDN);
 
             sender.IDsForType = dict.SelectDictionary(k => k, v => v.Id);
@@ -126,7 +126,7 @@ namespace Signum.Engine
 
         static Type GetType(string typeName)
         {
-            return Schema.Current.TypeToDN.Keys.Where(t => t.Name == typeName).Single(Resources.Type0NotFoundInTheSchema.Formato(typeName));
+            return Schema.Current.TypeToDN.Keys.Where(t => t.Name == typeName).Single("Type {0} not found in the schema".Formato(typeName));
         }
 
         static Type TryGetType(string typeName)

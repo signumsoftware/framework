@@ -42,7 +42,7 @@ namespace Signum.Web.Controllers
             if (typeof(IdentifiableEntity).IsAssignableFrom(result.GetType()))
                 entity = (IdentifiableEntity)result;
             else
-                throw new InvalidOperationException(Resources.InvalidResultTypeForADirectConstructor);
+                throw new InvalidOperationException("Invalid result type for a Constructor");
              
             return Navigator.View(this, entity, true); //Always admin
         }
@@ -63,10 +63,10 @@ namespace Signum.Web.Controllers
                 return (PartialViewResult)result;
 
             if (typeof(EmbeddedEntity).IsAssignableFrom(result.GetType()))
-                throw new InvalidOperationException(Resources.PopupCreateCannotBeCalledForEmbeddedType0.Formato(result.GetType()));
+                throw new InvalidOperationException("PopupCreate cannot be called for EmbeddedEntity {0}".Formato(result.GetType()));
 
             if (!typeof(IdentifiableEntity).IsAssignableFrom(result.GetType()))
-                throw new InvalidOperationException(Resources.InvalidResultTypeForAConstructor);
+                throw new InvalidOperationException("Invalid result type for a Constructor");
 
             IdentifiableEntity entity = (IdentifiableEntity)result;
 
@@ -82,7 +82,7 @@ namespace Signum.Web.Controllers
             IdentifiableEntity entity = null;
             if (isReactive)
             {
-                IdentifiableEntity parent = (IdentifiableEntity)this.UntypedExtractEntity().ThrowIfNullC(Resources.PartialViewTypeWasNotPossibleToExtract);
+                IdentifiableEntity parent = (IdentifiableEntity)this.UntypedExtractEntity().ThrowIfNullC("PopupView: Entity was not possible to extract");
                 entity = (IdentifiableEntity)MappingContext.FindSubentity(parent, prefix);
             }
             if (entity == null || entity.GetType() != type || sfId != (entity as IIdentifiable).TryCS(e => e.IdOrNull))
@@ -95,7 +95,7 @@ namespace Signum.Web.Controllers
                     if (result is PartialViewResult)
                         return (PartialViewResult)result;
                     else
-                        throw new InvalidOperationException(Resources.InvalidResultTypeForAConstructor);
+                        throw new InvalidOperationException("Invalid result type for a Constructor");
                 }
             }
 
@@ -120,7 +120,7 @@ namespace Signum.Web.Controllers
             if (isReactive)
             {
                 IdentifiableEntity parent = (IdentifiableEntity)this.UntypedExtractEntity()
-                    .ThrowIfNullC(Resources.PartialViewTypeWasNotPossibleToExtract);
+                    .ThrowIfNullC("PartialView: Entity was not possible to extract");
                 entity = (IdentifiableEntity)MappingContext.FindSubentity(parent, prefix);
             }
             if (entity == null || entity.GetType() != type || sfId != (entity as IIdentifiable).TryCS(e => e.IdOrNull))
@@ -133,7 +133,7 @@ namespace Signum.Web.Controllers
                     if (result is PartialViewResult)
                         return (PartialViewResult)result;
                     else
-                        throw new InvalidOperationException(Resources.InvalidResultTypeForAConstructor);
+                        throw new InvalidOperationException("Invalid result type for a Constructor");
                 }
             }
 
@@ -161,7 +161,7 @@ namespace Signum.Web.Controllers
 
             IdentifiableEntity ident = context.UntypedValue as IdentifiableEntity;
             if (ident == null)
-                throw new ArgumentNullException(Resources.IdentifiableEntityToSave);
+                throw new ArgumentNullException("No IdentifiableEntity to save");
 
             Database.Save(ident);
 
@@ -322,7 +322,7 @@ namespace Signum.Web.Controllers
         public PartialViewResult GetTypeChooser(Implementations sfImplementations, string prefix)
         {
             if (sfImplementations == null || sfImplementations.IsByAll)
-                throw new InvalidOperationException(Resources.GetTypeChooserNeedsAnImplementedBy);
+                throw new InvalidOperationException("GetTypeChooser needs an ImplementedBy");
 
             string strButtons = ((ImplementedByAttribute)sfImplementations).ImplementedTypes
                 .ToString(type => {
@@ -345,7 +345,7 @@ namespace Signum.Web.Controllers
         public PartialViewResult GetChooser(List<string> buttons, List<string> ids, string prefix, string title)
         {
             if (buttons == null || buttons.Count == 0)
-                throw new InvalidOperationException(Resources.GetChooserNeedsAListOfOptions);
+                throw new InvalidOperationException("GetChooser needs a list of options");
 
             StringBuilder sb = new StringBuilder();
             int i = 0;
@@ -391,7 +391,7 @@ namespace Signum.Web.Controllers
             else
             {
                 context = this.UntypedExtractEntity(prefix)
-                    .ThrowIfNullC(Resources.TypeWasNotPossibleToExtract)
+                    .ThrowIfNullC("Entity was not possible to extract")
                     .UntypedApplyChanges(this.ControllerContext, prefix, true);
 
                 entity = (IdentifiableEntity)context.UntypedValue;

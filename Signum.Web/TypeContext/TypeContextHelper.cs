@@ -25,7 +25,7 @@ namespace Signum.Web
             if (element != null)
                 return new TypeContext<T>(element, null);
 
-            throw new InvalidCastException(Resources.ImposibleConvertObject0From1To2.Formato(
+            throw new InvalidCastException("Impossible to convert object {0} from {1} to {2}".Formato(
                 helper.ViewData.Model,
                 helper.ViewData.Model.GetType().TypeName(),
                 typeof(TypeContext<T>).TypeName()));

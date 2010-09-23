@@ -283,7 +283,7 @@ namespace Signum.Utilities
             }
 
             if (repetitions.Count > 0)
-                throw new ArgumentException(Resources.ThereAreSomeRepeated01.Formato(errorContext, repetitions.ToString(", ")));
+                throw new ArgumentException("There are some repeated {0}: {1}".Formato(errorContext, repetitions.ToString(", ")));
         }
 
         public static void SetRange<K, V>(this IDictionary<K, V> dictionary, IEnumerable<K> keys, IEnumerable<V> values)

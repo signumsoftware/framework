@@ -67,7 +67,7 @@ namespace Signum.Engine.Linq
         {
             Expression result = base.Visit(exp);
             if(IsFullNominate && result != null && !candidates.Contains(result) && !IsExcluded(exp.NodeType))
-                throw new InvalidOperationException(Resources.TheExpressionCanTBeTranslatedToSQL + result.NiceToString());
+                throw new InvalidOperationException("The expression can not be translated to SQL: " + result.NiceToString());
 
             return result;
         }

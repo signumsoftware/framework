@@ -58,13 +58,13 @@ namespace Signum.Utilities.DataStructures
         private ImmutableQueue() { }
 
         public virtual bool IsEmpty { get { return true; } }
-        public virtual T Peek() { throw new InvalidOperationException(Resources.EmptyQueue); }
+        public virtual T Peek() { throw new InvalidOperationException("Empty queue"); }
         public virtual ImmutableQueue<T> Enqueue(T value)
         {
             return new ImmutableFullQueue(ImmutableStack<T>.Empty.Push(value), ImmutableStack<T>.Empty);
         }
 
-        public virtual ImmutableQueue<T> Dequeue() { throw new InvalidOperationException(Resources.EmptyQueue); }
+        public virtual ImmutableQueue<T> Dequeue() { throw new InvalidOperationException("Empty queue"); }
         public virtual IEnumerator<T> GetEnumerator() { yield break; }
         public override string ToString() { return "[]"; }
 

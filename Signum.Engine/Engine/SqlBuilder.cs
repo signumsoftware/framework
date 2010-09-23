@@ -275,7 +275,7 @@ namespace Signum.Engine
 
             if (index == Index.UniqueMultiNulls)
             {
-                string field = fieldNames.Single(Resources.UniqueMultiNullsWorksWithOnlyOneFieldUseAdministrator);
+                string field = fieldNames.Single("UniqueMultiNulls works with one field only. Use Administrator.AddMultiColumnUniqueTriggerNullable instead.");
 
                 string triggerName = "v_{0}_{1}".Formato(table, fieldNames.ToString("_"));
 
@@ -324,7 +324,7 @@ namespace Signum.Engine
 
             if (nullableFields.Count() == 0)
             {
-                throw new ArgumentNullException(Resources.AtLessOneNullableFieldMustBePassed);
+                throw new ArgumentNullException("At least one nullable field must be passed");
             }
 
             string tableName = table.SqlScape();
@@ -332,7 +332,7 @@ namespace Signum.Engine
             IEnumerable<string> allCols = nullableFields.Union(notNullableFields);
             if (allCols.Count() < 2)
             {
-                throw new ArgumentNullException(Resources.ThereMustBeMoreThanOneFieldPassedForTheMultiColumnTrigger);
+                throw new ArgumentNullException("There must be more than one field for the MultiColumn trigger");
             }
 
             string triggerName = "UT_{0}_{1}".Formato(tableName, allCols.Select(c => c.SqlScape()).ToString("_"));

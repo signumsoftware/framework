@@ -44,7 +44,8 @@ namespace Signum.Web
         {
             Type cleanRuntimeType = (typeContext.UntypedValue as Lite).TryCC(l => l.RuntimeType) ?? typeContext.UntypedValue.GetType();
 
-            EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(cleanRuntimeType).ThrowIfNullC(Resources.TheresNotAViewForType0.Formato(cleanRuntimeType));
+            EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(cleanRuntimeType)
+                .ThrowIfNullC("There's no EntitySettings registered for type {0}".Formato(cleanRuntimeType));
 
             TypeContext tc = TypeContextUtilities.CleanTypeContext((TypeContext)typeContext);
 

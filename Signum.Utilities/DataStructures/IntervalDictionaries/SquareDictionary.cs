@@ -41,7 +41,7 @@ namespace Signum.Utilities.DataStructures
                 for (int y = ys.Min; y < ys.Max; y++)
                 {
                     if (used[x, y])
-                        throw new InvalidOperationException(string.Format(Resources.InconsistenceFoundOnSquare01CouldHaveValues23, xDimension.Intervals[x], yDimension.Intervals[y], values[x, y], value));
+                        throw new InvalidOperationException(string.Format("Inconsistende found on square [{0},{1}] could have values '{2}' or '{3}'", xDimension.Intervals[x], yDimension.Intervals[y], values[x, y], value));
 
                     values[x,y] = value;
 
@@ -56,7 +56,7 @@ namespace Signum.Utilities.DataStructures
                 int ix, iy;
                 if (!xDimension.TryGetValue(x, out ix) ||
                     !yDimension.TryGetValue(y, out iy) || !used[ix, iy])
-                    throw new KeyNotFoundException(Resources.SquareNotFound); 
+                    throw new KeyNotFoundException("Square not found"); 
 
                 return values[ix, iy];
             }

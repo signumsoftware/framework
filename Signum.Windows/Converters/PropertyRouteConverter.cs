@@ -41,7 +41,7 @@ namespace Signum.Windows
             }
             catch (Exception e)
             {
-                throw new Exception(Resources.ConvertingToTypeContext + e.Message);
+                throw new Exception("Converting to TypeContext: " + e.Message);
             }
         } 
     }

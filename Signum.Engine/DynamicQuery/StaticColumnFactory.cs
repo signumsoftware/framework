@@ -71,11 +71,11 @@ namespace Signum.Engine.DynamicQuery
             Meta = meta;
 
             if (typeof(IIdentifiable).IsAssignableFrom(Type))
-                throw new InvalidOperationException(Resources.TheTypeOfColumn0IsASubtypeOfIIdentifiableUseALiteInstead.Formato(mi.MemberName()));
+                throw new InvalidOperationException("The Type of column {0} is a subtype of IIdentifiable, use a Lite instead".Formato(mi.MemberName()));
 
             Type cleanType = Reflector.ExtractLite(Type);
             if (IsEntity && cleanType == null)
-                throw new InvalidOperationException(Resources.EntityMustBeALite);
+                throw new InvalidOperationException("Entity must be a Lite");
 
             if (meta is CleanMeta && ((CleanMeta)meta).PropertyRoute.PropertyRouteType != PropertyRouteType.Root)
             {

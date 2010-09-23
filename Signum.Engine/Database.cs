@@ -308,7 +308,7 @@ namespace Signum.Engine
             if (collection.Empty()) return;
 
             Delete(
-                collection.Select(a => a.GetType()).Distinct().Single(Resources.ThereAreEntitiesOfDifferentTypes), 
+                collection.Select(a => a.GetType()).Distinct().Single("There are entities of different types"), 
                 collection.Select(i => i.Id));
         }
 
@@ -318,7 +318,7 @@ namespace Signum.Engine
             if (collection.Empty()) return;
 
             Delete(
-                collection.Select(a => a.RuntimeType).Distinct().Single(Resources.ThereAreEntitiesOfDifferentTypes),
+                collection.Select(a => a.RuntimeType).Distinct().Single("There are entities of different types"),
                 collection.Select(i => i.Id));
         }
         #endregion

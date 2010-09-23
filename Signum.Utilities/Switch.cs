@@ -161,7 +161,7 @@ namespace Signum.Utilities
         {
             if (!consumed)
             {
-                throw new InvalidOperationException(Resources.NoMatchInA01Switch.Formato(typeof(T).TypeName(), typeof(R).TypeName()));                 
+                throw new InvalidOperationException("No match in {0} -> {1} switch".Formato(typeof(T).TypeName(), typeof(R).TypeName()));                 
             }
 
             return this.result;

@@ -133,15 +133,6 @@ namespace Signum.Windows.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to An EmbeddedEntity needs TypeContext.
-        /// </summary>
-        internal static string AnEmbeddedEntityNeedsTypeContext {
-            get {
-                return ResourceManager.GetString("AnEmbeddedEntityNeedsTypeContext", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Call {0} first.
         /// </summary>
         internal static string Call0First {
@@ -196,29 +187,11 @@ namespace Signum.Windows.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to CollapseIfNull has to be set before Route.
-        /// </summary>
-        internal static string CollapseIfNullHasToBeSetBeforeRoute {
-            get {
-                return ResourceManager.GetString("CollapseIfNullHasToBeSetBeforeRoute", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Column.
         /// </summary>
         internal static string Column {
             get {
                 return ResourceManager.GetString("Column", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Context is only possible with IdentifiableEntities.
-        /// </summary>
-        internal static string ContextItsOnlyPossibleWithIdentifiableEntities {
-            get {
-                return ResourceManager.GetString("ContextItsOnlyPossibleWithIdentifiableEntities", resourceCulture);
             }
         }
         
@@ -237,15 +210,6 @@ namespace Signum.Windows.Properties {
         internal static string ContinueWithErrors {
             get {
                 return ResourceManager.GetString("ContinueWithErrors", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Converting to TypeContext: .
-        /// </summary>
-        internal static string ConvertingToTypeContext {
-            get {
-                return ResourceManager.GetString("ConvertingToTypeContext", resourceCulture);
             }
         }
         
@@ -277,20 +241,11 @@ namespace Signum.Windows.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Entities of type {0} are not allowed.
+        ///   Looks up a localized string similar to Entities of type {0} are not visible from a {1} window.
         /// </summary>
-        internal static string EntitiesOfType0AreNotAllowed {
+        internal static string EntitiesOfType0AreNotVisibleFromA1Window {
             get {
-                return ResourceManager.GetString("EntitiesOfType0AreNotAllowed", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Entities of type {0} are not visible from a {0} window.
-        /// </summary>
-        internal static string EntitiesOfType0AreNotVisibleFromA0Window {
-            get {
-                return ResourceManager.GetString("EntitiesOfType0AreNotVisibleFromA0Window", resourceCulture);
+                return ResourceManager.GetString("EntitiesOfType0AreNotVisibleFromA1Window", resourceCulture);
             }
         }
         
@@ -363,15 +318,6 @@ namespace Signum.Windows.Properties {
         internal static string FutureAlerts {
             get {
                 return ResourceManager.GetString("FutureAlerts", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Impossible to convert objet {0} from type {1} to type {2}.
-        /// </summary>
-        internal static string ImposibleConvertObject0From1To2 {
-            get {
-                return ResourceManager.GetString("ImposibleConvertObject0From1To2", resourceCulture);
             }
         }
         
@@ -541,20 +487,11 @@ namespace Signum.Windows.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to There are no Direct Errors.
+        ///   Looks up a localized string similar to No direct errors.
         /// </summary>
         internal static string NoDirectErrors {
             get {
                 return ResourceManager.GetString("NoDirectErrors", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to There is no EntitySetting for {0}.
-        /// </summary>
-        internal static string NoEntitySettingsForType0 {
-            get {
-                return ResourceManager.GetString("NoEntitySettingsForType0", resourceCulture);
             }
         }
         
@@ -564,15 +501,6 @@ namespace Signum.Windows.Properties {
         internal static string NoFilterSelected {
             get {
                 return ResourceManager.GetString("NoFilterSelected", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to There is no navigation target for type {0}.
-        /// </summary>
-        internal static string NoNavigationDestinyForType {
-            get {
-                return ResourceManager.GetString("NoNavigationDestinyForType", resourceCulture);
             }
         }
         
@@ -631,24 +559,6 @@ namespace Signum.Windows.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to parent can not be a Property with a type that implements IIdentifiabe.
-        /// </summary>
-        internal static string ParentCanNotBeAPropertyWithATypeThatImplementsIIdentifiabe {
-            get {
-                return ResourceManager.GetString("ParentCanNotBeAPropertyWithATypeThatImplementsIIdentifiabe", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Parent window not found.
-        /// </summary>
-        internal static string ParentWindowNotFound {
-            get {
-                return ResourceManager.GetString("ParentWindowNotFound", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Please, choose a value to continue:.
         /// </summary>
         internal static string PleaseChooseAValueToContinue {
@@ -663,15 +573,6 @@ namespace Signum.Windows.Properties {
         internal static string PleaseSelectAType {
             get {
                 return ResourceManager.GetString("PleaseSelectAType", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Property {0} do not exist on type {1}.
-        /// </summary>
-        internal static string Property0DoNotExistOnType1 {
-            get {
-                return ResourceManager.GetString("Property0DoNotExistOnType1", resourceCulture);
             }
         }
         
@@ -739,24 +640,6 @@ namespace Signum.Windows.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Root TypeContext has to be an IdentifiableEntity.
-        /// </summary>
-        internal static string RootTypeContextHasToBeAnIdentifiableEntity {
-            get {
-                return ResourceManager.GetString("RootTypeContextHasToBeAnIdentifiableEntity", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Route property can not be applied with null TypeContext.
-        /// </summary>
-        internal static string RoutePropertyCanNotBeAppliedWithNullTypeContext {
-            get {
-                return ResourceManager.GetString("RoutePropertyCanNotBeAppliedWithNullTypeContext", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Save.
         /// </summary>
         internal static string Save {
@@ -795,16 +678,7 @@ namespace Signum.Windows.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Server {0} does not implement {1}.
-        /// </summary>
-        internal static string Server0DoesNotImplement1 {
-            get {
-                return ResourceManager.GetString("Server0DoesNotImplement1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Session expired.
+        ///   Looks up a localized string similar to Sesion Expired.
         /// </summary>
         internal static string SessionExpired {
             get {
@@ -819,15 +693,6 @@ namespace Signum.Windows.Properties {
         internal static string The0HasErrors1 {
             get {
                 return ResourceManager.GetString("The0HasErrors1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The DataContext is a {0} but TypeContext is {1}.
-        /// </summary>
-        internal static string TheDataContextIsA0ButTypeContextIs1 {
-            get {
-                return ResourceManager.GetString("TheDataContextIsA0ButTypeContextIs1", resourceCulture);
             }
         }
         
@@ -870,51 +735,6 @@ namespace Signum.Windows.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Type {0} is not a collection.
-        /// </summary>
-        internal static string Type0IsNotAColection {
-            get {
-                return ResourceManager.GetString("Type0IsNotAColection", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to type argument must inherit {0}.
-        /// </summary>
-        internal static string TypeArgumentMustInherit0 {
-            get {
-                return ResourceManager.GetString("TypeArgumentMustInherit0", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Type for TextArea {0} should be string.
-        /// </summary>
-        internal static string TypeForTextArea0ShouldBeString {
-            get {
-                return ResourceManager.GetString("TypeForTextArea0ShouldBeString", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to ValueType for ValueLine with label {0} is not determined.
-        /// </summary>
-        internal static string TypeForValueLineNotDetermined {
-            get {
-                return ResourceManager.GetString("TypeForValueLineNotDetermined", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Type Property is not determined for control with Label {0}.
-        /// </summary>
-        internal static string TypePropertyItsNotDeterminedForControl0 {
-            get {
-                return ResourceManager.GetString("TypePropertyItsNotDeterminedForControl0", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Type Selector.
         /// </summary>
         internal static string TypeSelector {
@@ -947,15 +767,6 @@ namespace Signum.Windows.Properties {
         internal static string ViewFile {
             get {
                 return ResourceManager.GetString("ViewFile", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to View not defined in EntitySettings.
-        /// </summary>
-        internal static string ViewNotDefinedInEntitySettings {
-            get {
-                return ResourceManager.GetString("ViewNotDefinedInEntitySettings", resourceCulture);
             }
         }
         

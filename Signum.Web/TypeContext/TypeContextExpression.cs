@@ -62,14 +62,14 @@ namespace Signum.Web
 
         protected override Expression VisitParameter(ParameterExpression p)
         {
-            return replacements.GetOrThrow(p, Properties.Resources.TypeSubContextCanNotBeCreated0.Formato(p.NiceToString()));
+            return replacements.GetOrThrow(p, "TypeSubContext can not be created: {0}".Formato(p.NiceToString()));
         }
 
         static TypeContextExpression Cast(Expression expression)
         {
             var result = expression as TypeContextExpression;
             if (result == null)
-                throw new InvalidOperationException(Properties.Resources.TypeSubContextCanNotBeCreated0.Formato(expression == null ? null : expression.NiceToString()));
+                throw new InvalidOperationException("TypeSubContext can not be created: {0}".Formato(expression == null ? null : expression.NiceToString()));
             return result;
         }
 

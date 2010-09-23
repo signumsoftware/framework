@@ -35,7 +35,7 @@ namespace Signum.Web
                 queryUrlName = (string)rawValue;
 
             if (!queryUrlName.HasText())
-                throw new InvalidOperationException(Resources.QueryUrlNameWasNotProvided);
+                throw new InvalidOperationException("queryUrlName not provided");
 
             fo.QueryName = Navigator.ResolveQueryFromUrlName(queryUrlName);
 

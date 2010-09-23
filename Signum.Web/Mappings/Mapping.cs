@@ -231,7 +231,7 @@ namespace Signum.Web
                 }
                 catch (Exception)
                 {
-                    ctx.Error.Add(Resources.NotPossibleToAssign0.Formato(PropertyPack.PropertyInfo.NiceName()));
+                    ctx.Error.Add("Not possible to assign {0}".Formato(PropertyPack.PropertyInfo.NiceName()));
                 }
 
                 if (!ctx.Empty())
@@ -454,7 +454,7 @@ namespace Signum.Web
                 return newLite; // If form does not contains changes to the entity
 
             if (EntityMapping == null)
-                throw new InvalidOperationException(Resources.ChangesToEntity0AreNotAllowedBecauseEntityMappingIs.Formato(newLite.TryToString()));
+                throw new InvalidOperationException("Changes to Entity {0} are not allowed because EntityMapping is null".Formato(newLite.TryToString()));
 
             var sc = new SubContext<S>(ctx.ControlID, EntityMapping, null, ctx) { Value = newLite.Retrieve() };
             EntityMapping.OnGetValue(sc);

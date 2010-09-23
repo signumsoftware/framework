@@ -159,7 +159,7 @@ namespace Signum.Engine.Linq
                     this.Visit(u.Operand);
                     break;
                 default:
-                    throw new NotSupportedException(string.Format(Resources.TheUnaryOperator0IsNotSupported, u.NodeType));
+                    throw new NotSupportedException(string.Format("The unary perator {0} is not supported", u.NodeType));
             }
             return u;
         }
@@ -238,7 +238,7 @@ namespace Signum.Engine.Linq
                         sb.Append(" % ");
                         break;
                     default:
-                        throw new NotSupportedException(string.Format(Resources.TheBinaryOperator0IsNotSupported, b.NodeType));
+                        throw new NotSupportedException(string.Format("The binary operator {0} is not supported", b.NodeType));
                 }
                 this.Visit(b.Right);
                 sb.Append(")");
@@ -378,7 +378,7 @@ namespace Signum.Engine.Linq
             else
             {
                 if (!IsSupported(c.Value.GetType()))
-                    throw new NotSupportedException(string.Format(Resources.TheConstantFor0IsNotSupported, c.Value));
+                    throw new NotSupportedException(string.Format("The constant for {0} is not supported", c.Value));
 
                 var pi = parameterExpressions.GetOrCreate(c, ()=> this.CreateParameter(c));
 
@@ -394,7 +394,7 @@ namespace Signum.Engine.Linq
             else
             {
                 if (!IsSupported(c.Value.GetType()))
-                    throw new NotSupportedException(string.Format(Resources.TheConstantFor0IsNotSupported, c.Value));
+                    throw new NotSupportedException(string.Format("The constant for {0} is not supported", c.Value));
 
                 if (c.Value.Equals(true))
                     sb.Append("1");

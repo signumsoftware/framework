@@ -115,7 +115,7 @@ namespace Signum.Web
         public override string ToString()
         {
             if (StaticType == null)
-                throw new ArgumentException(Resources.StaticInfoSStaticTypeMustBeSet);
+                throw new ArgumentException("StaticInfo.StaticType must be set");
 
             Type cleanStaticType = Reflector.ExtractLite(StaticType) ?? StaticType;
 
@@ -166,7 +166,7 @@ namespace Signum.Web
                 IsNew = identifiable.IdOrNull == null;
             }
             else
-                throw new ArgumentException(Resources.InvalidType0ForRuntimeInfoItMustBeLiteOrIdentifiableEntity.Formato(value.GetType()));
+                throw new ArgumentException("Invalid type {0} for RuntimeInfo. It must be Lite, IdentifiableEntity or EmbeddedEntity".Formato(value.GetType()));
         }
 
         private string RuntimeTypeStr
@@ -176,7 +176,7 @@ namespace Signum.Web
                 if (RuntimeType == null)
                     return "";
                 if (typeof(Lite).IsAssignableFrom(RuntimeType))
-                    throw new ArgumentException(Resources.RuntimeInfoSRuntimeTypeCannotBeOfTypeLiteUseExtractLite);
+                    throw new ArgumentException("RuntimeInfo's RuntimeType cannot be of type Lite. Use ExtractLite or construct a RuntimeInfo<T> instead");
                 return RuntimeType.Name;
             }
         }
@@ -184,7 +184,7 @@ namespace Signum.Web
         public override string ToString()
         {
             if (IdOrNull != null && IsNew)
-                throw new ArgumentException(Resources.InvalidRuntimeInfoParametersIdOrNull0AndIsNewTrue.Formato(IdOrNull));
+                throw new ArgumentException("Invalid RuntimeInfo parameters: IdOrNull={0} and IsNew=true".Formato(IdOrNull));
 
             return "{0};{1};{2};{3}".Formato(
                 RuntimeTypeStr,
@@ -198,7 +198,7 @@ namespace Signum.Web
         {
             string[] parts = formValue.Split(new[] { ";" }, StringSplitOptions.None);
             if (parts.Length != 4)
-                throw new ArgumentException(Resources.IncorrectSfRuntimeInfoFormat0.Formato(formValue));
+                throw new ArgumentException("Incorrect sfRuntimeInfo format: {0}".Formato(formValue));
 
             return new RuntimeInfo
             {

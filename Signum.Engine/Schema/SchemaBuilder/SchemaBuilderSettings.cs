@@ -118,7 +118,7 @@ namespace Signum.Engine.Maps
             var incorrects = attributes.Where(a => a.GetType().SingleAttribute<AttributeUsageAttribute>().TryCS(au => (au.ValidOn & attributeTargets) == 0) ?? false);
 
             if (incorrects.Count() > 0)
-                throw new InvalidOperationException(Resources.TheFollowingAttributesAreNotCompatibleWithTargets01.Formato(attributeTargets, incorrects.ToString(a => a.GetType().Name, ", ")));
+                throw new InvalidOperationException("The following attributes ar not compatible with targets {0}: {1}".Formato(attributeTargets, incorrects.ToString(a => a.GetType().Name, ", ")));
         }
 
         public Attribute[] TypeAttributes(Type type)
@@ -212,7 +212,7 @@ namespace Signum.Engine.Maps
             ImplementedByAllAttribute iba = fieldAtt.OfType<ImplementedByAllAttribute>().SingleOrDefault();
 
             if (ib != null && iba != null)
-                throw new NotSupportedException(Resources.Field0ContainsBoth1And2.Formato(fi, ib.GetType(), iba.GetType()));
+                throw new NotSupportedException("Field {0} contains both {1} and {2}".Formato(fi, ib.GetType(), iba.GetType()));
 
             if (ib != null) return ib;
             if (iba != null) return iba;
@@ -227,7 +227,7 @@ namespace Signum.Engine.Maps
             iba = typeAtt.OfType<ImplementedByAllAttribute>().SingleOrDefault();
 
             if (ib != null && iba != null)
-                throw new NotSupportedException(Resources.Type0ContainsBoth1And2.Formato(entityType, ib.GetType(), iba.GetType()));
+                throw new NotSupportedException("Type {0} contains both {1} and {2}".Formato(entityType, ib.GetType(), iba.GetType()));
 
             if (ib != null) return ib;
             if (iba != null) return iba;

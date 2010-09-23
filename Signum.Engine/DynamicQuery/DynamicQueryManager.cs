@@ -29,7 +29,7 @@ namespace Signum.Engine.DynamicQuery
             get
             {
                 AssertQueryAllowed(queryName);
-                return queries.GetOrThrow(queryName, Resources.TheView0IsNotOnQueryManager);
+                return queries.GetOrThrow(queryName, "The query {0} is not on registered");
             }
             set
             {
@@ -86,7 +86,7 @@ namespace Signum.Engine.DynamicQuery
         public void AssertQueryAllowed(object queryName)
         {
             if(!QueryAllowed(queryName))
-                throw new UnauthorizedAccessException(Resources.AccessToQuery0IsNotAllowed.Formato(queryName));
+                throw new UnauthorizedAccessException("Access to query {0} not allowed".Formato(queryName));
         }
 
         public List<object> GetAllowedQueryNames()
@@ -119,16 +119,16 @@ namespace Signum.Engine.DynamicQuery
                 ResultTable result = dq.ExecuteQuery(new QueryRequest { QueryName = queryName, Limit = 100 });
 
                 if(result.Rows.Length == 0)
-                    return Resources.Warning0NoResults.Formato(queryName);
+                    return "Warning {0}: No Results".Formato(queryName);
 
                 if (Connection.CommandCount != 1)
-                    return Resources.Error0N1QueryProblem.Formato(queryName);
+                    return "Error {0}: N + 1 query problem".Formato(queryName);
 
                 return null;
             }
             catch (Exception e)
             {
-                return Resources.Error01.Formato(queryName, e.Message);
+                return "Error {0}: {1}".Formato(queryName, e.Message);
             }
         }
     }

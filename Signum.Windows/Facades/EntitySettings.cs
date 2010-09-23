@@ -101,7 +101,7 @@ namespace Signum.Windows
         public override Control CreateView(ModifiableEntity entity, PropertyRoute typeContext)
         {
             if (View == null)
-                throw new InvalidOperationException(Properties.Resources.ViewNotDefinedInEntitySettings);
+                throw new InvalidOperationException("View not defined in EntitySettings");
 
             return View((T)entity);
         }
@@ -184,10 +184,10 @@ namespace Signum.Windows
         public override Control CreateView(ModifiableEntity entity, PropertyRoute typeContext)
         {
             if (View == null)
-                throw new InvalidOperationException(Properties.Resources.ViewNotDefinedInEntitySettings);
+                throw new InvalidOperationException("View not defined in EntitySettings");
 
             if (typeContext == null)
-                throw new ArgumentException(Properties.Resources.AnEmbeddedEntityNeedsTypeContext);
+                throw new ArgumentException("An EmbeddedEntity neeed TypeContext");
 
             return View((T)entity, typeContext);
         }

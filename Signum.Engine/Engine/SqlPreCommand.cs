@@ -60,7 +60,7 @@ namespace Signum.Engine
                 int remainingParams = numParams;
                 SqlPreCommand.SqlPair pair = rem.Split(ref remainingParams);
                 if (pair.New == null)
-                    throw new InvalidOperationException(Resources.ThereIsASqlPreComandSimpleWithMoreThan0Parameters.Formato(numParams));
+                    throw new InvalidOperationException("There is a SqlPreComandSimple with more than {0} parameters".Formato(numParams));
 
                 yield return pair.New;
 

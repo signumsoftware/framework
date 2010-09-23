@@ -53,7 +53,7 @@ namespace Signum.Windows
         public AdminWindow(Type adminType)
         {
             if (!typeof(IdentifiableEntity).IsAssignableFrom(adminType))
-                throw new ArgumentException(Properties.Resources.TypeArgumentMustInherit0.Formato(typeof(IdentifiableEntity).Name));
+                throw new ArgumentException("adminType argument should inherit {0}".Formato(typeof(IdentifiableEntity).Name));
 
             this.type = adminType;
 

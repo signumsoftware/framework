@@ -24,7 +24,7 @@ namespace Signum.Engine.DynamicQuery
             if (implementations == null)
                 types = new[] { liteType };
             else if (implementations.IsByAll)
-                throw new InvalidOperationException(Resources.ImplementedByAllIsNotSupportedForFindLiteLike);
+                throw new InvalidOperationException("ImplementedByAll not supported for FindLiteLike");
             else
                 types = ((ImplementedByAttribute)implementations).ImplementedTypes;
 
@@ -58,7 +58,7 @@ namespace Signum.Engine.DynamicQuery
             }
 
             if (implementations.IsByAll)
-                throw new InvalidOperationException(Resources.ImplementedByAllIsNotSupportedForRetriveAllLite);
+                throw new InvalidOperationException("ImplementedByAll is not supported for RetrieAllLite");
 
             return (from type in ((ImplementedByAttribute)implementations).ImplementedTypes
                     from l in (List<Lite>)miAllLite.GenericInvoke(new[] { liteType, type }, null, null)

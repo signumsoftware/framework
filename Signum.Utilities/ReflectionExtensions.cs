@@ -51,7 +51,7 @@ namespace Signum.Utilities
         public static bool IsInstantiationOf(this Type type, Type genericTypeDefinition)
         {
             if (!genericTypeDefinition.IsGenericTypeDefinition)
-                throw new ArgumentException(Resources.GenericTypeDefinitionShouldBeAGenericTypeDefinition);
+                throw new ArgumentException("Parameter 'genericTypeDefinition' should be a generic type definition");
 
             return type.IsGenericType && type.GetGenericTypeDefinition() == genericTypeDefinition;
         }
@@ -59,7 +59,7 @@ namespace Signum.Utilities
         public static bool IsInstantiationOf(this MethodInfo method, MethodInfo genericMethodDefinition)
         {
             if (!genericMethodDefinition.IsGenericMethodDefinition)
-                throw new ArgumentException(Resources.GenericMethodDefinitionShouldBeAGenericMethodDefinition);
+                throw new ArgumentException("Parameter 'genericMethodDefinition' should be a generic method definition");
 
             return method.IsGenericMethod && ReflectionTools.MethodEqual(method.GetGenericMethodDefinition(), genericMethodDefinition);
         }

@@ -743,10 +743,10 @@ namespace Signum.Windows
         {
             EntitySettings es = EntitySettings.TryGetC(entity.GetType());
             if (es == null)
-                throw new InvalidOperationException(Resources.NoEntitySettingsForType0.Formato(entity.GetType().NiceName()));
+                throw new InvalidOperationException("No EntitySettings for type {0}".Formato(entity.GetType().NiceName()));
 
             if (!es.OnIsViewable(entity, isAdmin))
-                throw new InvalidOperationException(Resources.EntitiesOfType0AreNotVisibleFromA0Window.Formato(isAdmin ? "admin" : "normal"));
+                throw new InvalidOperationException(Resources.EntitiesOfType0AreNotVisibleFromA1Window.Formato(entity.GetType().NiceName(), isAdmin ? "admin" : "normal"));
         }
 
         internal protected virtual bool ShowSave(Type type)
@@ -781,7 +781,7 @@ namespace Signum.Windows
         {
             Type type = adminOptions.Type;
 
-            EntitySettings es = EntitySettings.GetOrThrow(type, Resources.NoEntitySettingsForType0);
+            EntitySettings es = EntitySettings.GetOrThrow(type, "No EntitySettings for type {0}");
 
             AdminWindow nw = CreateAdminWindow(type, es);
 

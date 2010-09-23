@@ -76,7 +76,7 @@ namespace Signum.Engine.Linq
                     EqualNullable(Expression.Constant(Schema.Current.IDsForType[kvp.Key]), iba.TypeId),
                     InExpression.FromValues(iba.Id, kvp.Value))).Aggregate((a, b) => Expression.Or(a, b));
 
-            throw new InvalidOperationException(Resources.EntityInNotDefinedForNewItemOfType0.Formato(newItem.Type.Name));
+            throw new InvalidOperationException("EntityIn not defined for newItem of type {0}".Formato(newItem.Type.Name));
         }
 
         public static Expression EntityEquals(Expression e1, Expression e2)

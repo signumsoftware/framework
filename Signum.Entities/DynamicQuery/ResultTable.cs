@@ -39,7 +39,7 @@ namespace Signum.Entities.DynamicQuery
 
             string errors = columns.Where((c, i) => c.Column.Index != i).ToString(c => "{0} ({1})".Formato(c.Column.Name, c.Column.Index), " ");
             if (errors.HasText())
-                throw new InvalidOperationException(Resources.SomeColumnsAreNotCorrectlyNumered0.Formato(errors));
+                throw new InvalidOperationException("Some columns are not correctly numbered: {0}".Formato(errors));
 
             this.Columns = columns.Where(c => c.Column.IsAllowed()).Select(c=>c.Column).ToArray();
             this.Rows = 0.To(rows).Select(i => new ResultRow(i, this)).ToArray();

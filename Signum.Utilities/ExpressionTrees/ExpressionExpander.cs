@@ -75,7 +75,7 @@ namespace Signum.Utilities.ExpressionTrees
 			{
                 IMethodExpander expander = Activator.CreateInstance(attribute.ExpanderType) as IMethodExpander;
 				if (expander == null) 
-                    throw new InvalidOperationException(Resources.ExpansionFailed0DoesNotImplementIMethodExpander.Formato(attribute.ExpanderType.Name));
+                    throw new InvalidOperationException("Expansion failed, {0} does not implement IMethodExpander".Formato(attribute.ExpanderType.Name));
 
                 Expression exp = expander.Expand(
                     Visit(m.Object), 

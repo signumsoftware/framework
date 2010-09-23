@@ -62,7 +62,7 @@ namespace Signum.Windows
 
             S server = current as S;
             if (server == null)
-                throw new InvalidOperationException(Properties.Resources.Server0DoesNotImplement1.Formato(server.GetType(), typeof(S)));
+                throw new InvalidOperationException("Server {0} does not implement {1}".Formato(server.GetType(), typeof(S)));
             
             try
             {
@@ -84,7 +84,7 @@ namespace Signum.Windows
 
             S server = current as S;
             if (server == null)
-                throw new InvalidOperationException(Properties.Resources.Server0DoesNotImplement1.Formato(current.GetType(), typeof(S)));
+                throw new InvalidOperationException("Server {0} does not implement {1}".Formato(current.GetType(), typeof(S)));
 
             try
             {
@@ -236,7 +236,7 @@ namespace Signum.Windows
                 }
             }
 
-            throw new InvalidCastException(Properties.Resources.ImposibleConvertObject0From1To2.Formato(obj, objType, type));
+            throw new InvalidCastException("Impossible to convert objet {0} from type {1} to type {2}".Formato(obj, objType, type));
         }
 
         public static bool CanConvert(object obj, Type type)

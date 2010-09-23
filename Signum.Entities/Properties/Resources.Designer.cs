@@ -79,24 +79,6 @@ namespace Signum.Entities.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} is not a sublass of IdentifiableEntity.
-        /// </summary>
-        public static string _0DoesNotInheritFromIdentifiableEntity {
-            get {
-                return ResourceManager.GetString("_0DoesNotInheritFromIdentifiableEntity", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to {0} has hours, minutes and seconds.
-        /// </summary>
-        public static string _0HasHoursMinutesAndSeconds {
-            get {
-                return ResourceManager.GetString("_0HasHoursMinutesAndSeconds", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to {{0}} has more than {0} decimal places.
         /// </summary>
         public static string _0HasMoreThan0DecimalPlaces {
@@ -178,15 +160,6 @@ namespace Signum.Entities.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &apos;{0}&apos; is New and has no id.
-        /// </summary>
-        public static string _0IsNewAndHasNoId {
-            get {
-                return ResourceManager.GetString("_0IsNewAndHasNoId", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to {0} is not allowed.
         /// </summary>
         public static string _0IsNotAllowed {
@@ -214,11 +187,11 @@ namespace Signum.Entities.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} not supported.
+        ///   Looks up a localized string similar to &quot;{0} is not set&quot;.
         /// </summary>
-        public static string _0NotSupported {
+        public static string _0IsNotSet {
             get {
-                return ResourceManager.GetString("_0NotSupported", resourceCulture);
+                return ResourceManager.GetString("_0IsNotSet", resourceCulture);
             }
         }
         
@@ -237,33 +210,6 @@ namespace Signum.Entities.Properties {
         public static string As0 {
             get {
                 return ResourceManager.GetString("As0", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Attempt to make a property route on a {0}. Cast first..
-        /// </summary>
-        public static string AttemptToMakeAPropertyRouteOnA0CastFirst {
-            get {
-                return ResourceManager.GetString("AttemptToMakeAPropertyRouteOnA0CastFirst", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Attempt to modify {0} when the entity is not new.
-        /// </summary>
-        public static string AttemptToModify0WhenTheEntityIsNotNew {
-            get {
-                return ResourceManager.GetString("AttemptToModify0WhenTheEntityIsNotNew", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Attempt to save a not new modified ImmutableEntity.
-        /// </summary>
-        public static string AttemptToSaveANotNewModifiedImmutableEntity {
-            get {
-                return ResourceManager.GetString("AttemptToSaveANotNewModifiedImmutableEntity", resourceCulture);
             }
         }
         
@@ -381,43 +327,6 @@ namespace Signum.Entities.Properties {
         public static string Day {
             get {
                 return ResourceManager.GetString("Day", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to {0} Different instances of the same entity ({1}) have been found:
-        ///{2}.
-        /// </summary>
-        public static string DifferentInstancesOfTheSameEntity1HaveBeenFound2 {
-            get {
-                return ResourceManager.GetString("DifferentInstancesOfTheSameEntity1HaveBeenFound2", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Entity do not Match with the Lite.
-        /// </summary>
-        public static string EntitiesDoNotMatch {
-            get {
-                return ResourceManager.GetString("EntitiesDoNotMatch", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Entity Group.
-        /// </summary>
-        public static string EntityGroupDN {
-            get {
-                return ResourceManager.GetString("EntityGroupDN", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Field not found for property {0}.
-        /// </summary>
-        public static string FieldForPropertyNotFound {
-            get {
-                return ResourceManager.GetString("FieldForPropertyNotFound", resourceCulture);
             }
         }
         
@@ -647,15 +556,6 @@ namespace Signum.Entities.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Modification not allowed: the object is locked.
-        /// </summary>
-        public static string LockedModificationException {
-            get {
-                return ResourceManager.GetString("LockedModificationException", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to lowercase.
         /// </summary>
         public static string Lowercase {
@@ -728,29 +628,11 @@ namespace Signum.Entities.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to New entities are not allowed.
-        /// </summary>
-        public static string NewEntitiesAreNotAllowed {
-            get {
-                return ResourceManager.GetString("NewEntitiesAreNotAllowed", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to  of .
         /// </summary>
         public static string Of {
             get {
                 return ResourceManager.GetString("Of", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Only extension methods of one argument are allowed.
-        /// </summary>
-        public static string OnlyOneArgumentAllowed {
-            get {
-                return ResourceManager.GetString("OnlyOneArgumentAllowed", resourceCulture);
             }
         }
         
@@ -764,119 +646,11 @@ namespace Signum.Entities.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to parent can not be an non-Root Identifiable.
-        /// </summary>
-        public static string ParentCanNotBeAnNonRootIdentifiable {
-            get {
-                return ResourceManager.GetString("ParentCanNotBeAnNonRootIdentifiable", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Properties of type {0} not supported.
-        /// </summary>
-        public static string PropertiesOfType0NotSupported {
-            get {
-                return ResourceManager.GetString("PropertiesOfType0NotSupported", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Property {0} has no value.
-        /// </summary>
-        public static string Property0HasNoValue {
-            get {
-                return ResourceManager.GetString("Property0HasNoValue", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to propertyInfo &apos;{0}&apos; not found on {1}.
-        /// </summary>
-        public static string PropertyInfo0NotFoundOn1 {
-            get {
-                return ResourceManager.GetString("PropertyInfo0NotFoundOn1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to {0} PropertyInfo is not supported.
-        /// </summary>
-        public static string PropertyInfoIsNotSupported {
-            get {
-                return ResourceManager.GetString("PropertyInfoIsNotSupported", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to PropertyRoute.FindImplementations not set.
-        /// </summary>
-        public static string PropertyRouteFindImplementationsNotSet {
-            get {
-                return ResourceManager.GetString("PropertyRouteFindImplementationsNotSet", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to property should be an expression accessing a property.
-        /// </summary>
-        public static string PropertyShouldBeAnExpressionAccessingAProperty {
-            get {
-                return ResourceManager.GetString("PropertyShouldBeAnExpressionAccessingAProperty", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to QueryUtils.FindImplementations callback not set.
-        /// </summary>
-        public static string QueryUtilsFindImplementationsCallbackNotSet {
-            get {
-                return ResourceManager.GetString("QueryUtilsFindImplementationsCallbackNotSet", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to RemoteTimeZone not set.
-        /// </summary>
-        public static string RemoteTimeZoneNotSet {
-            get {
-                return ResourceManager.GetString("RemoteTimeZoneNotSet", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Removing entity from a new lite is not allowed.
-        /// </summary>
-        public static string RemovingEntityNotAllowedInNewLazies {
-            get {
-                return ResourceManager.GetString("RemovingEntityNotAllowedInNewLazies", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Root has not PropertyString.
-        /// </summary>
-        public static string RootHasNotPropertyString {
-            get {
-                return ResourceManager.GetString("RootHasNotPropertyString", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Second.
         /// </summary>
         public static string Second {
             get {
                 return ResourceManager.GetString("Second", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Some columns are not correctly numered: {0}.
-        /// </summary>
-        public static string SomeColumnsAreNotCorrectlyNumered0 {
-            get {
-                return ResourceManager.GetString("SomeColumnsAreNotCorrectlyNumered0", resourceCulture);
             }
         }
         
@@ -926,33 +700,6 @@ namespace Signum.Entities.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The Lite {0} is not loaded, use Database.Retrieve or consider rewriting your query.
-        /// </summary>
-        public static string TheLite0IsNotLoadedUseDatabaseRetrieveOrConsiderRewritingYourQuery {
-            get {
-                return ResourceManager.GetString("TheLite0IsNotLoadedUseDatabaseRetrieveOrConsiderRewritingYourQuery", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The lite is pointing to a new entity and has no id yet.
-        /// </summary>
-        public static string TheLiteIsPointingToANewEntityAndHasNoIdYet {
-            get {
-                return ResourceManager.GetString("TheLiteIsPointingToANewEntityAndHasNoIdYet", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The number of elements has to be {0} {1}.
-        /// </summary>
-        public static string TheNumberOfElementsHasToBe01 {
-            get {
-                return ResourceManager.GetString("TheNumberOfElementsHasToBe01", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The number of elements of {{0}} has to be {0} {1}.
         /// </summary>
         public static string TheNumberOfElementsOf0HasToBe01 {
@@ -962,65 +709,11 @@ namespace Signum.Entities.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The property is not registered.
-        /// </summary>
-        public static string ThePropertyIsNotRegistered {
-            get {
-                return ResourceManager.GetString("ThePropertyIsNotRegistered", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The state Validator {0} for state {1} has {2} values instead of {3}.
-        /// </summary>
-        public static string TheStateValidator0ForState1Has2ValuesInsteadOf3 {
-            get {
-                return ResourceManager.GetString("TheStateValidator0ForState1Has2ValuesInsteadOf3", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Token {0} not compatible with {1}.
         /// </summary>
         public static string Token0NotCompatibleWith1 {
             get {
                 return ResourceManager.GetString("Token0NotCompatibleWith1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to ToLiteLight not allowed for new entities.
-        /// </summary>
-        public static string ToLiteLightNotAllowedForNewEntities {
-            get {
-                return ResourceManager.GetString("ToLiteLightNotAllowedForNewEntities", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Type {0} is not supported.
-        /// </summary>
-        public static string Type0NotSupported {
-            get {
-                return ResourceManager.GetString("Type0NotSupported", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Type {0} is not smaller than {1}.
-        /// </summary>
-        public static string TypeIsNotSmallerThan {
-            get {
-                return ResourceManager.GetString("TypeIsNotSmallerThan", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to type must be a Type inheriting IdentitiableEntity.
-        /// </summary>
-        public static string TypeMustBeATypeInheritingIdentitiableEntity {
-            get {
-                return ResourceManager.GetString("TypeMustBeATypeInheritingIdentitiableEntity", resourceCulture);
             }
         }
         

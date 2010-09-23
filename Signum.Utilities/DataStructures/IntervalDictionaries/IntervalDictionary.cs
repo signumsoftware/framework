@@ -56,7 +56,7 @@ namespace Signum.Utilities.DataStructures
                 {
                     Interval<K> previousInt = dic.Keys[index];
                     if (previousInt.Overlap(interval))
-                        throw new ArgumentException(Resources.Intervalo0OverlapsWithExistingOne1Value2.Formato(interval, previousInt, value));
+                        throw new ArgumentException("Interval {0} overlaps with the exisiting one {1} (value {2})".Formato(interval, previousInt, value));
                 }
 
                 int next = index + 1;
@@ -64,7 +64,7 @@ namespace Signum.Utilities.DataStructures
                 {
                     Interval<K> nextInt = dic.Keys[next];
                     if (nextInt.Overlap(interval))
-                        throw new ArgumentException(String.Format(Resources.Interval0OverlapsWithTheExisting1, interval, nextInt));
+                        throw new ArgumentException(String.Format("Interval {0} overlaps with the exisiting one {1}", interval, nextInt));
                 }
             }
 
@@ -138,12 +138,12 @@ namespace Signum.Utilities.DataStructures
             {
                 int index = PossibleIndex(key);
                 if (index == -1)
-                    throw new KeyNotFoundException(Resources.NoIntervalFound);
+                    throw new KeyNotFoundException("No interval found");
 
                 if (dic.Keys[index].Contains(key))
                     return dic.Values[index];
 
-                throw new KeyNotFoundException(Resources.NoIntervalFound);
+                throw new KeyNotFoundException("No interval found");
             }
             
         }
@@ -226,7 +226,7 @@ namespace Signum.Utilities.DataStructures
             if (max == ~Count) max = ~max;
 
             if (min < 0 || max < 0)
-                throw new InvalidOperationException(Resources.IntervalLimitsDoNotExistOnDictionary);
+                throw new InvalidOperationException("Interval limits do not exist on dictionary");
 
             return new Interval<int>(min, max);
         }

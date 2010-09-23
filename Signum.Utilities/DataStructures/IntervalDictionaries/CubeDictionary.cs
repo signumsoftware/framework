@@ -46,7 +46,7 @@ namespace Signum.Utilities.DataStructures
                     for (int z = zs.Min; z < zs.Max; z++)
                     {
                         if (used[x, y, z])
-                            throw new InvalidOperationException(string.Format(Resources.InconsistenceFoundCube012CouldHaveValues34, xDimension.Intervals[x], yDimension.Intervals[y], zDimension.Intervals[z], values[x, y, z], value));
+                            throw new InvalidOperationException(string.Format("Inconsistence found on cube [{0}, {1}, {2}], could have values '{3}' or '{4}'", xDimension.Intervals[x], yDimension.Intervals[y], zDimension.Intervals[z], values[x, y, z], value));
 
                         values[x, y, z] = value;
 
@@ -62,7 +62,7 @@ namespace Signum.Utilities.DataStructures
                 if (!xDimension.TryGetValue(x, out ix) ||
                     !yDimension.TryGetValue(y, out iy) ||
                     !zDimension.TryGetValue(z, out iz) || !used[ix, iy, iz])
-                    throw new KeyNotFoundException(Resources.CubeNotFound);
+                    throw new KeyNotFoundException("Cube not found");
 
                 return values[ix, iy, iz];
             }

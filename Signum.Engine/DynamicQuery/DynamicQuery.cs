@@ -43,7 +43,7 @@ namespace Signum.Engine.DynamicQuery
             this.StaticColumns = MemberEntryFactory.GenerateList<T>(MemberOptions.Properties | MemberOptions.Fields)
               .Select((e, i) => new StaticColumnFactory(i, e.MemberInfo, getMeta(e.MemberInfo), CreateGetter(e.MemberInfo))).ToArray();
 
-            StaticColumns.Where(a => a.IsEntity).Single(Resources.EntityColumnNotFound, Resources.MoreThanOneEntityColumn); 
+            StaticColumns.Where(a => a.IsEntity).Single("Entity column not found"); 
         }
 
         public QueryDescription GetDescription(object queryName)
@@ -68,7 +68,7 @@ namespace Signum.Engine.DynamicQuery
 
         public StaticColumnFactory EntityColumn()
         {
-            return StaticColumns.Where(c => c.IsEntity).Single(Resources.ThereIsNoEntityColumn, Resources.ThereAreMoreThanOneEntityColumn);
+            return StaticColumns.Where(c => c.IsEntity).Single("There's no Entity column");
         }
 
         public virtual Expression Expression

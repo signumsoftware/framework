@@ -114,7 +114,7 @@ namespace Signum.Web
                         return error;
                     break;
                 default:
-                    throw new ArgumentException(Resources.ValueLineBoxType0DoesNotExist.Formato(boxType));
+                    throw new ArgumentException("ValueLineBoxType {0} does not exist".Formato(boxType));
             }
             return null;
         }

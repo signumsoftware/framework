@@ -157,15 +157,15 @@ namespace Signum.Utilities.DataStructures
         private ImmutableAVLTree() { }
 
         public virtual bool IsEmpty { get { return true; } }
-        public virtual K Key { get { throw new InvalidOperationException(Resources.EmptyTree); } }
-        public virtual V Value { get { throw new InvalidOperationException(Resources.EmptyTree); } }
+        public virtual K Key { get { throw new InvalidOperationException("Empty Tree"); } }
+        public virtual V Value { get { throw new InvalidOperationException("Empty Tree"); } }
         public virtual int Height { get { return 0; } }
 
-        public virtual ImmutableAVLTree<K, V> Left { get { throw new InvalidOperationException(Resources.EmptyTree); } }
-        public virtual ImmutableAVLTree<K, V> Right { get { throw new InvalidOperationException(Resources.EmptyTree); } }
+        public virtual ImmutableAVLTree<K, V> Left { get { throw new InvalidOperationException("Empty Tree"); } }
+        public virtual ImmutableAVLTree<K, V> Right { get { throw new InvalidOperationException("Empty Tree"); } }
 
         public virtual ImmutableAVLTree<K, V> Add(K key, V value) { return new ImmutableFullAVLTree(key, value, this, this); }
-        public virtual ImmutableAVLTree<K, V> Remove(K key) { throw new InvalidOperationException(Resources.CannotRemoveItemThatIsNotInTree); }
+        public virtual ImmutableAVLTree<K, V> Remove(K key) { throw new InvalidOperationException("Cannot remove item that is not in tree."); }
 
         public virtual ImmutableAVLTree<K, V> Search(K key) { return this; }
         public virtual bool Contains(K key) { return false; }
@@ -180,7 +180,7 @@ namespace Signum.Utilities.DataStructures
             {
                 ImmutableAVLTree<K, V> tree = Search(key);
                 if (tree.IsEmpty)
-                    throw new KeyNotFoundException(Resources.Key0NotFound.Formato(key));
+                    throw new KeyNotFoundException("Key {0} not found".Formato(key));
                 return tree.Value;
             }
         }

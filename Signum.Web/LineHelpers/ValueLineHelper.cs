@@ -62,6 +62,11 @@ namespace Signum.Web
             
             sb.AppendLine(Configurator.Constructor[vltype](helper, valueLine));
 
+            if (valueLine.UnitText.HasText())
+            {
+                sb.AppendLine(helper.Span(valueLine.Compose("unit"), valueLine.UnitText, TypeContext.CssLineUnit));
+            }
+
             if (valueLine.ShowValidationMessage)
             {
                 sb.Append("&nbsp;");
@@ -105,7 +110,13 @@ namespace Signum.Web
             if (items == null)
             {
                 items = new List<SelectListItem>();
-                items.Add(new SelectListItem() { Text = "-", Value = "" });
+
+                if (valueLine.Type.IsNullable() &&
+                   (!Validator.GetOrCreatePropertyPack(valueLine.PropertyRoute).Validators.OfType<NotNullValidatorAttribute>().Any() || valueLine.UntypedValue == null))
+                {
+                    items.Add(new SelectListItem() { Text = "-", Value = "" });
+                }
+                
                 items.AddRange(
                     Enum.GetValues(valueLine.Type.UnNullify())
                         .Cast<Enum>()

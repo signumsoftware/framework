@@ -28,7 +28,7 @@ namespace Signum.Entities
             get
             {
                 if (id == null)
-                    throw new InvalidOperationException(Resources._0IsNewAndHasNoId.Formato(this.GetType().Name));
+                    throw new InvalidOperationException("{0} is new and has no Id".Formato(this.GetType().Name));
                 return id.Value;
             }
             internal set { id = value; }
@@ -65,7 +65,7 @@ namespace Signum.Entities
             if (!IsNew)
             {
                 PropertyInfo pi = ReflectionTools.BasePropertyInfo(property);
-                throw new InvalidOperationException(Resources.AttemptToModify0WhenTheEntityIsNotNew.Formato(pi.Name));
+                throw new InvalidOperationException("Attempt to modify '{0}' when the entity is not new".Formato(pi.Name));
             }
 
             return base.Set<T>(ref field, value, property);

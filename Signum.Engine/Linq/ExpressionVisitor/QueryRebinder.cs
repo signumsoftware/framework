@@ -121,7 +121,7 @@ namespace Signum.Engine.Linq
             ReadOnlyCollection<OrderExpression> orderBy = this.VisitOrderBy(select.OrderBy);
             ReadOnlyCollection<Expression> groupBy = this.VisitGroupBy(select.GroupBy);
             ReadOnlyCollection<ColumnDeclaration> columns = this.VisitColumnDeclarations(select.Columns);
-                
+
             columns = AnswerAndExpand(columns, select.Alias, askedColumns);
 
             var externals = CurrentScope.Where(kvp => !select.KnownAliases.Contains(kvp.Key.Alias) && kvp.Value == null).ToDictionary();

@@ -106,8 +106,6 @@ namespace Signum.Engine.Linq
                         return BindDistinct(m.Type, m.GetArgument("source")); 
                     case "Take":
                         return BindTake(m.Type, m.GetArgument("source"), m.GetArgument("count"));
-                    case "Skip":
-                        return BindSkip(m.Type, m.GetArgument("source"), m.GetArgument("count"));
                 }
             }
             else if (m.Method.DeclaringType == typeof(LiteUtils) && m.Method.Name == "ToLite")
@@ -169,6 +167,39 @@ namespace Signum.Engine.Linq
             p = ApplyExpansions(p);
 
             map.Remove(lambda.Parameters[0]);
+
+            return result;
+        }
+
+        private Expression MapAndVisitExpandWithIndex(LambdaExpression lambda, ref ProjectionExpression p, out ReadOnlyCollection<OrderExpression> orderExpression)
+        {
+            bool hasOrder = p.Source.OrderBy != null && !p.Source.OrderBy.Empty(); 
+
+            RowNumberExpression rne = new RowNumberExpression(p.Source.OrderBy); //if its null should be filled in a later stage
+
+            if(hasOrder) // remove order
+                p = new ProjectionExpression(new SelectExpression(p.Source.Alias, p.Source.Distinct, p.Source.Top, p.Source.Columns, p.Source.From, p.Source.Where, null, p.Source.GroupBy), 
+                    p.Projector, p.UniqueFunction, p.Token);
+
+            ColumnDeclaration cd = new ColumnDeclaration("_rowNum", Expression.Subtract(rne, new SqlConstantExpression(1)));
+
+            string alias = aliasGenerator.GetNextSelectAlias();
+
+            ColumnExpression ce = new ColumnExpression(cd.Expression.Type, alias, cd.Name);
+
+            map.Add(lambda.Parameters[1], ce);
+
+            Expression result = MapAndVisitExpand(lambda, ref p);
+
+            map.Remove(lambda.Parameters[1]);
+
+            ProjectedColumns pc = ColumnProjector.ProjectColumns(p.Projector, alias, new[] { p.Source.Alias }, new ProjectionToken[0]); //Do not replace tokens
+
+            p = new ProjectionExpression(
+                    new SelectExpression(alias, false, null, pc.Columns.PreAnd(cd), p.Source, null, null, null),
+                    pc.Projector, null, p.Token);
+
+            orderExpression = hasOrder ? new[] { new OrderExpression(OrderType.Ascending, ce) }.ToReadOnly() : null;
 
             return result;
         }
@@ -267,29 +298,6 @@ namespace Signum.Engine.Linq
                 pc.Projector, null, pc.Token);
         }
 
-        private Expression BindSkip(Type resultType, Expression source, Expression count)
-        {
-            ProjectionExpression projection = this.VisitCastProjection(source);
-            string alias = aliasGenerator.GetNextSelectAlias();
-            ProjectedColumns pc = ColumnProjector.ProjectColumns(projection, alias);
-
-            RowNumberExpression rne = new RowNumberExpression(
-                pc.Columns.Select((c, i) =>
-                    new OrderExpression(OrderType.Ascending, c.Expression)));
-
-            ColumnDeclaration cd = new ColumnDeclaration("RowNumber", rne);
-
-            SelectExpression se = new SelectExpression(alias, false, null, pc.Columns.PreAnd(cd), projection.Source, null, null, null);
-
-            string alias2 = aliasGenerator.GetNextSelectAlias();
-            ProjectedColumns pc2 = ColumnProjector.ProjectColumns(pc.Projector, alias2, new[] { alias }, new[] { pc.Token });
-
-            Expression where = Expression.GreaterThan(new ColumnExpression(cd.Expression.Type, alias, cd.Name), count);
-
-            return new ProjectionExpression(
-                new SelectExpression(alias2, false, null, pc2.Columns, se, where, null, null),
-                pc2.Projector, null, pc2.Token);
-        }
 
         private Expression BindUniqueRow(Type resultType, UniqueFunction function, Expression source, LambdaExpression predicate)
         {
@@ -299,11 +307,11 @@ namespace Signum.Engine.Linq
                 where = DbExpressionNominator.FullNominate(MapAndVisitExpand(predicate, ref projection), true);
 
             string alias = aliasGenerator.GetNextSelectAlias();
-            Expression top = function == UniqueFunction.First || function ==  UniqueFunction.FirstOrDefault? Expression.Constant(1):null;
+            Expression top = function == UniqueFunction.First || function == UniqueFunction.FirstOrDefault ? Expression.Constant(1) : null;
 
             ProjectedColumns pc = ColumnProjector.ProjectColumns(projection , alias);
             return new ProjectionExpression(
-                new SelectExpression(alias, false, top, pc.Columns, projection.Source, where, null, null),
+                new SelectExpression(alias, false, top,  pc.Columns, projection.Source, where, null, null),
                 pc.Projector, function, pc.Token);
         }
 
@@ -472,7 +480,10 @@ namespace Signum.Engine.Linq
         private Expression BindWhere(Type resultType, Expression source, LambdaExpression predicate)
         {
             ProjectionExpression projection = this.VisitCastProjection(source);
-            Expression exp = MapAndVisitExpand(predicate, ref projection);
+            ReadOnlyCollection<OrderExpression> order = null;
+            Expression exp = predicate.Parameters.Count == 1 ? MapAndVisitExpand(predicate, ref projection) :
+                                                               MapAndVisitExpandWithIndex(predicate, ref projection, out order);
+
             if (exp.NodeType == ExpressionType.Constant && ((bool)((ConstantExpression)exp).Value))
                 return projection;
 
@@ -481,19 +492,21 @@ namespace Signum.Engine.Linq
             string alias = aliasGenerator.GetNextSelectAlias();
             ProjectedColumns pc = ColumnProjector.ProjectColumns(projection, alias);
             return new ProjectionExpression(
-                new SelectExpression(alias, false, null, pc.Columns, projection.Source, where, null, null),
+                new SelectExpression(alias, false, null, pc.Columns, projection.Source, where, order, null),
                 pc.Projector, null, pc.Token);
         }
 
         private Expression BindSelect(Type resultType, Expression source, LambdaExpression selector)
         {
             ProjectionExpression projection = this.VisitCastProjection(source);
-            Expression expression = MapAndVisitExpand(selector, ref projection);
+            ReadOnlyCollection<OrderExpression> order = null; 
+            Expression expression = selector.Parameters.Count == 1 ? MapAndVisitExpand(selector, ref projection) :
+                                                                     MapAndVisitExpandWithIndex(selector, ref projection, out order);
 
             string alias = aliasGenerator.GetNextSelectAlias();
             ProjectedColumns pc = ColumnProjector.ProjectColumns(expression, alias, projection.Source.KnownAliases, new[] { projection.Token });
             return new ProjectionExpression(
-                new SelectExpression(alias, false, null, pc.Columns, projection.Source, null, null, null),
+                new SelectExpression(alias, false, null, pc.Columns, projection.Source, null, order, null),
                 pc.Projector, null, pc.Token);
         }
 
@@ -501,14 +514,11 @@ namespace Signum.Engine.Linq
         {
             ProjectionExpression projection = this.VisitCastProjection(source);
 
-            map.Add(collectionSelector.Parameters[0], projection.Projector);
-
-            Expression collectionBody = collectionSelector.Body;
-            bool outer = OverloadingSimplifier.ExtractDefaultIfEmpty(ref collectionBody);
-            Expression collectionExpression = Visit(collectionBody);
-            projection = ApplyExpansions(projection);
-
-            map.Remove(collectionSelector.Parameters[0]);
+            bool outer = OverloadingSimplifier.ExtractDefaultIfEmpty(ref collectionSelector);
+            ReadOnlyCollection<OrderExpression> order = null; 
+            Expression collectionExpression = collectionSelector.Parameters.Count == 1 ?
+                MapAndVisitExpand(collectionSelector, ref projection) :
+                MapAndVisitExpandWithIndex(collectionSelector, ref projection, out order); 
 
             ProjectionExpression collectionProjection = AsProjection(collectionExpression);
 
@@ -539,7 +549,7 @@ namespace Signum.Engine.Linq
             JoinExpression join = new JoinExpression(joinType, projection.Source, collectionProjection.Source, null);
 
             return new ProjectionExpression(
-                new SelectExpression(alias, false, null, pc.Columns, join, null, null, null),
+                new SelectExpression(alias, false, null, pc.Columns, join, null, order, null),
                 pc.Projector, null, pc.Token);
         }
 
@@ -709,10 +719,10 @@ namespace Signum.Engine.Linq
             IQueryable query = (IQueryable)value;
 
             if (!type.IsInstantiationOf(typeof(Query<>)))
-                throw new InvalidOperationException(Resources.BelongsToAnotherKindOkLinqProvider.Formato(type.TypeName()));
+                throw new InvalidOperationException("{0} belongs to another kind of Linq Provider".Formato(type.TypeName()));
 
             if (!query.IsBase())
-                throw new InvalidOperationException(Resources.ConstantExpressionWithAComplexIQueryableUnexpectedAt);
+                throw new InvalidOperationException("Cosntant Expression with complex IQueryable not expected at this stage");
 
             return query.ElementType;
         }
@@ -911,7 +921,7 @@ namespace Signum.Engine.Linq
                     }
 
                     if (fi == null)
-                        throw new InvalidOperationException(Resources.TheMember0Of1IsNoAccesibleOnQueries.Formato(m.Member.Name, fie.Type.TypeName()));
+                        throw new InvalidOperationException("The member {0} of {1} is not accesible on queries".Formato(m.Member.Name, fie.Type.TypeName()));
 
                     Expression result = fie.GetOrCreateFieldBinding(fie.Token, fi, this);
                     return result;
@@ -922,7 +932,7 @@ namespace Signum.Engine.Linq
                     FieldInfo fi = Reflector.FindFieldInfo(efie.Type, m.Member, true);
 
                     if (fi == null)
-                        throw new InvalidOperationException(Resources.TheMember0Of1IsNoAccesibleOnQueries.Formato(m.Member.Name, efie.Type.TypeName()));
+                        throw new InvalidOperationException("The member {0} of {1} is not accesible on queries".Formato(m.Member.Name, efie.Type.TypeName()));
 
                     Expression result = efie.GetBinding(fi);
                     return result;
@@ -940,12 +950,12 @@ namespace Signum.Engine.Linq
                         if (pi.Name == "ToStr")
                         {
                             if (liteRef.ToStr == null)
-                                throw new InvalidOperationException(Resources.ToStrIsNoAccesibleOnQueriesInImplementedByAll);
+                                throw new InvalidOperationException("ToStr is not accesible on queries for ImplementedByAll");
                             return liteRef.ToStr;
                         }
                     }
 
-                    throw new InvalidOperationException(Resources.TheMember0OfLiteIsNoAccesibleOnQueriesUseEntityInstead.Formato(m.Member));
+                    throw new InvalidOperationException("The member {0} of Lite is not accessible on queries".Formato(m.Member));
                 }
                 case (ExpressionType)DbExpressionType.ImplementedBy:
                 {
@@ -974,7 +984,7 @@ namespace Signum.Engine.Linq
                     if (fi != null && fi.FieldEquals((IdentifiableEntity ie) => ie.id))
                         return iba.Id;
 
-                    throw new InvalidOperationException(Resources.TheMember0OfImplementedByAllIsNoAccesibleOnQueries.Formato(m.Member));
+                    throw new InvalidOperationException("The member {0} of ImplementedByAll is not accesible on queries".Formato(m.Member));
                 }
             }
       
@@ -1044,8 +1054,8 @@ namespace Signum.Engine.Linq
                     groups.Select(k => new FieldBinding(k.Key, Coalesce(k.Key.FieldType.Nullify(), k.Value))), fe);
             }
 
-            if(list.Any(e=>e is MListExpression))
-                throw new InvalidOperationException(Resources.MListOnImplementedByAreNotSupportedYet);
+            if (list.Any(e => e is MListExpression))
+                throw new InvalidOperationException("MList on implementedBy are not supported yet");
 
             return Coalesce(returnType.Nullify(), list);
         }
@@ -1150,13 +1160,13 @@ namespace Signum.Engine.Linq
             if (operand.NodeType == (ExpressionType)DbExpressionType.ImplementedBy)
             {
                 ImplementedByExpression rib = (ImplementedByExpression)operand;
-                FieldInitExpression fie = rib.Implementations.Where(ri => ri.Type == b.TypeOperand).Single(Resources.TheFieldHasNoImplementationForType0.Formato(b.TypeOperand.TypeName())).Field;
+                FieldInitExpression fie = rib.Implementations.Where(ri => ri.Type == b.TypeOperand).Single("The field has no implementation for type {0}".Formato(b.TypeOperand.TypeName())).Field;
                 return new IsNotNullExpression(fie.ExternalId);
             }
             else if (operand.NodeType == (ExpressionType)DbExpressionType.ImplementedByAll)
             {
                 ImplementedByAllExpression riba = (ImplementedByAllExpression)operand;
-                int idType = Schema.Current.IDsForType.GetOrThrow(b.TypeOperand, Resources.TheType0IsNotInTheTypesTable.Formato(b.TypeOperand.TypeName()));
+                int idType = Schema.Current.IDsForType.GetOrThrow(b.TypeOperand, "The type {0} is not registered in types table".Formato(b.TypeOperand.TypeName()));
                 return SmartEqualizer.EqualNullable(riba.TypeId, Expression.Constant(idType));
             }
             return base.VisitTypeIs(b); 
@@ -1191,7 +1201,7 @@ namespace Signum.Engine.Linq
             if (operand.NodeType == (ExpressionType)DbExpressionType.ImplementedBy)
             {
                 ImplementedByExpression rib = (ImplementedByExpression)operand;
-                return rib.Implementations.Where(ri => ri.Type == uType).Single(Resources.TheFieldHasNoImplementationForType0.Formato(uType.TypeName())).Field;
+                return rib.Implementations.Where(ri => ri.Type == uType).Single("The field has no implementation for type {0}".Formato(uType.TypeName())).Field;
             }
             else if (operand.NodeType == (ExpressionType)DbExpressionType.ImplementedByAll)
             {
@@ -1200,7 +1210,7 @@ namespace Signum.Engine.Linq
 
                 if (imp == null)
                 {
-                    int idType = Schema.Current.IDsForType.GetOrThrow(uType, Resources.TheType0IsNotInTheTypesTable.Formato(uType.TypeName()));
+                    int idType = Schema.Current.IDsForType.GetOrThrow(uType, "Type {0} is not in the registered in the types table".Formato(uType.TypeName()));
 
                     Expression other = SmartEqualizer.EqualNullable(riba.TypeId, new SqlConstantExpression(idType));
 
@@ -1306,7 +1316,7 @@ namespace Signum.Engine.Linq
             {
                 MemberMemberBinding mmb = (MemberMemberBinding)m;
                 if(!typeof(EmbeddedEntity).IsAssignableFrom(m.Member.ReturningType()))
-                    throw new InvalidOperationException(Resources.DoesNotInheritFromEmbeddedEntity.Formato(m.Member.ReturningType()));
+                    throw new InvalidOperationException("{0} does not inherit from EmbeddedEntity".Formato(m.Member.ReturningType()));
 
                 Expression obj2 = Expression.MakeMemberAccess(obj, mmb.Member);
 
@@ -1321,7 +1331,7 @@ namespace Signum.Engine.Linq
             var col = column as ColumnExpression;
 
             if (col == null)
-                throw new InvalidOperationException(Resources.DoesNotRepresentAColumn.Formato(column.NiceToString()));
+                throw new InvalidOperationException("{0} does not represent a column".Formato(column.NiceToString()));
 
             return new ColumnAssignment(col.Name, DbExpressionNominator.FullNominate(expression, false));
         }
@@ -1332,7 +1342,7 @@ namespace Signum.Engine.Linq
                 return AssignNull(colExpression);
 
             if (expression is FieldInitExpression && IsNewId(((FieldInitExpression)expression).ExternalId))
-                throw new InvalidOperationException(Resources.TheEntityIsNew);
+                throw new InvalidOperationException("The entity is new");
 
             if (colExpression is ColumnExpression)
             {
@@ -1383,7 +1393,7 @@ namespace Signum.Engine.Linq
                     FieldInitExpression fie = (FieldInitExpression)expression;
 
                     if (!colIb.Implementations.Any(i => i.Type == fie.Type))
-                        throw new InvalidOperationException(Resources.Type0IsNotIn1.Formato(fie.Type.Name, colIb.Implementations.ToString(i => i.Type.Name, ", ")));
+                        throw new InvalidOperationException("Type {0} is not in {1}".Formato(fie.Type.Name, colIb.Implementations.ToString(i => i.Type.Name, ", ")));
 
                     return colIb.Implementations.Select(imp => (AssignColumn(imp.Field.ExternalId,
                        imp.Type == fie.Type ? fie.ExternalId : NullId))).ToArray();
@@ -1394,7 +1404,7 @@ namespace Signum.Engine.Linq
 
                     Type[] types = ib.Implementations.Select(i => i.Type).Except(colIb.Implementations.Select(i => i.Type)).ToArray();
                     if (types.Any())
-                        throw new InvalidOperationException(Resources.NoImplementationForTypeS0.Formato(types.ToString(t => t.Name, ", ")));
+                        throw new InvalidOperationException("No implementation for type(s) {0} found".Formato(types.ToString(t => t.Name, ", ")));
 
                     return colIb.Implementations.Select(cImp => AssignColumn(cImp.Field.ExternalId,
                             ib.Implementations.SingleOrDefault(imp => imp.Type == cImp.Type).TryCC(imp => imp.Field.ExternalId) ?? NullId)).ToArray();
@@ -1437,7 +1447,7 @@ namespace Signum.Engine.Linq
                 }
             }
 
-            throw new NotImplementedException(Resources.CanNotBeAssignedFrom1.Formato(colExpression.Type.Name, expression.Type.Name)); 
+            throw new NotImplementedException("{0} can not be assigned from {1}".Formato(colExpression.Type.Name, expression.Type.Name)); 
         }
 
         private ColumnAssignment[] AssignNull(Expression colExpression)
@@ -1494,7 +1504,7 @@ namespace Signum.Engine.Linq
                 return colEfie.Bindings.SelectMany(fb => AssignNull(fb.Binding)).PreAnd(ca).ToArray();
             }
 
-            throw new NotImplementedException(Resources.CanNotBeAssignedToNull.Formato(colExpression.Type.Name)); 
+            throw new NotImplementedException("{0} can not be assigned to null".Formato(colExpression.Type.Name)); 
         }
     }
 }

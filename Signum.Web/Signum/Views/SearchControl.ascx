@@ -34,7 +34,7 @@
 
 <div class="search-footer" style="display:<%= (findOptions.FilterMode != FilterMode.OnlyResults) ? "block" : "none" %>">
     <%= Html.Label(null, Resources.NumberOfRows, context.Compose(ViewDataKeys.Top), null) %>
-    <% int? top = findOptions.Top ?? Navigator.Manager.QuerySettings.GetOrThrow(findOptions.QueryName, Resources.MissingQuerySettingsForQueryName0).Top; %>
+    <% int? top = findOptions.Top ?? Navigator.Manager.QuerySettings.GetOrThrow(findOptions.QueryName, "Missing QuerySettings for QueryName {0}").Top; %>
     <%= HtmlHelperExtenders.InputType("text", context.Compose(ViewDataKeys.Top), top.TryToString(), new Dictionary<string, object> { { "size", "5" }, { "onkeydown", "return validator.number(event)" } })%>
 
     <%= Html.Hidden(context.Compose("OrderBy"), findOptions.OrderOptions == null ? "" : 

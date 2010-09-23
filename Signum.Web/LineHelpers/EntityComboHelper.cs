@@ -27,7 +27,7 @@ namespace Signum.Web
                 return "";
 
             if (!entityCombo.Type.IsIIdentifiable() && !entityCombo.Type.IsLite())
-                throw new InvalidOperationException(Resources.EntityComboCanOnlyBeDoneForAnIdentifiableOrALiteNotFor0.Formato(entityCombo.Type.CleanType()));
+                throw new InvalidOperationException("EntityCombo can only be done for an identifiable or a lite, not for {0}".Formato(entityCombo.Type.CleanType()));
 
             StringBuilder sb = new StringBuilder();
 

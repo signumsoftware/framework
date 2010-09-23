@@ -112,19 +112,16 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="File" xml:space="preserve">
     <value>File</value>
   </data>
   <data name="Note" xml:space="preserve">
     <value>Note:</value>
-  </data>
-  <data name="NoDirectErrors" xml:space="preserve">
-    <value>There are no Direct Errors</value>
   </data>
   <data name="_1Error" xml:space="preserve">
     <value>1 Error: {0}</value>
@@ -137,9 +134,6 @@
   </data>
   <data name="NoFilterSelected" xml:space="preserve">
     <value>No filter selected</value>
-  </data>
-  <data name="NoEntitySettingsForType0" xml:space="preserve">
-    <value>There is no EntitySetting for {0}</value>
   </data>
   <data name="NoAdminControlFor0" xml:space="preserve">
     <value>There is no AdminControl for {0}</value>
@@ -243,41 +237,17 @@
   <data name="NewNote" xml:space="preserve">
     <value>New Note</value>
   </data>
-  <data name="RoutePropertyCanNotBeAppliedWithNullTypeContext" xml:space="preserve">
-    <value>Route property can not be applied with null TypeContext</value>
-  </data>
-  <data name="Type0IsNotAColection" xml:space="preserve">
-    <value>Type {0} is not a collection</value>
-  </data>
-  <data name="Property0DoNotExistOnType1" xml:space="preserve">
-    <value>Property {0} do not exist on type {1}</value>
-  </data>
-  <data name="ParentWindowNotFound" xml:space="preserve">
-    <value>Parent window not found</value>
-  </data>
   <data name="FinderOf0" xml:space="preserve">
     <value>Finder of {0}</value>
   </data>
   <data name="Finder" xml:space="preserve">
     <value>Finder</value>
   </data>
-  <data name="NoNavigationDestinyForType" xml:space="preserve">
-    <value>There is no navigation target for type {0}</value>
-  </data>
-  <data name="ImposibleConvertObject0From1To2" xml:space="preserve">
-    <value>Impossible to convert objet {0} from type {1} to type {2}</value>
-  </data>
-  <data name="TypeForValueLineNotDetermined" xml:space="preserve">
-    <value>ValueType for ValueLine with label {0} is not determined</value>
-  </data>
   <data name="Value" xml:space="preserve">
     <value>Value</value>
   </data>
   <data name="Create" xml:space="preserve">
     <value>Create</value>
-  </data>
-  <data name="ContextItsOnlyPossibleWithIdentifiableEntities" xml:space="preserve">
-    <value>Context is only possible with IdentifiableEntities</value>
   </data>
   <data name="PleaseSelectAType" xml:space="preserve">
     <value>Please select one of the following types: </value>
@@ -291,9 +261,6 @@
   <data name="InvalidDateFormat" xml:space="preserve">
     <value>Invalid date format</value>
   </data>
-  <data name="TypeArgumentMustInherit0" xml:space="preserve">
-    <value>type argument must inherit {0}</value>
-  </data>
   <data name="Results" xml:space="preserve">
     <value>Results.</value>
   </data>
@@ -302,9 +269,6 @@
   </data>
   <data name="Field" xml:space="preserve">
     <value>Field</value>
-  </data>
-  <data name="TypePropertyItsNotDeterminedForControl0" xml:space="preserve">
-    <value>Type Property is not determined for control with Label {0}</value>
   </data>
   <data name="Alert" xml:space="preserve">
     <value>Alert</value>
@@ -336,47 +300,20 @@
   <data name="SelectAnElement" xml:space="preserve">
     <value>Select an element</value>
   </data>
-  <data name="RootTypeContextHasToBeAnIdentifiableEntity" xml:space="preserve">
-    <value>Root TypeContext has to be an IdentifiableEntity</value>
-  </data>
   <data name="Query0NotAllowed" xml:space="preserve">
     <value>Query {0} is not allowed</value>
   </data>
   <data name="Query0NotRegistered" xml:space="preserve">
     <value>Query {0} is not registered in the DynamicQueryManager</value>
   </data>
-  <data name="TypeForTextArea0ShouldBeString" xml:space="preserve">
-    <value>Type for TextArea {0} should be string</value>
-  </data>
-  <data name="Server0DoesNotImplement1" xml:space="preserve">
-    <value>Server {0} does not implement {1}</value>
-  </data>
   <data name="AConnectionWithTheServerIsNecessaryToContinue" xml:space="preserve">
     <value>A connection with the server is necessary to continue</value>
   </data>
-  <data name="SessionExpired" xml:space="preserve">
-    <value>Session expired</value>
-  </data>
-  <data name="EntitiesOfType0AreNotAllowed" xml:space="preserve">
-    <value>Entities of type {0} are not allowed</value>
-  </data>
-  <data name="EntitiesOfType0AreNotVisibleFromA0Window" xml:space="preserve">
-    <value>Entities of type {0} are not visible from a {0} window</value>
+  <data name="EntitiesOfType0AreNotVisibleFromA1Window" xml:space="preserve">
+    <value>Entities of type {0} are not visible from a {1} window</value>
   </data>
   <data name="Call0First" xml:space="preserve">
     <value>Call {0} first</value>
-  </data>
-  <data name="ViewNotDefinedInEntitySettings" xml:space="preserve">
-    <value>View not defined in EntitySettings</value>
-  </data>
-  <data name="AnEmbeddedEntityNeedsTypeContext" xml:space="preserve">
-    <value>An EmbeddedEntity needs TypeContext</value>
-  </data>
-  <data name="ConvertingToTypeContext" xml:space="preserve">
-    <value>Converting to TypeContext: </value>
-  </data>
-  <data name="CollapseIfNullHasToBeSetBeforeRoute" xml:space="preserve">
-    <value>CollapseIfNull has to be set before Route</value>
   </data>
   <data name="ChooseAValue" xml:space="preserve">
     <value>Choose a value</value>
@@ -389,9 +326,6 @@
   </data>
   <data name="_notes" xml:space="preserve">
     <value>notes</value>
-  </data>
-  <data name="ParentCanNotBeAPropertyWithATypeThatImplementsIIdentifiabe" xml:space="preserve">
-    <value>parent can not be a Property with a type that implements IIdentifiabe</value>
   </data>
   <data name="NewColumn" xml:space="preserve">
     <value>New Column</value>
@@ -413,19 +347,22 @@ Lose changes?</value>
   <data name="ContinueAnyway" xml:space="preserve">
     <value>Continue anyway?</value>
   </data>
-  <data name="TheDataContextIsA0ButTypeContextIs1" xml:space="preserve">
-    <value>The DataContext is a {0} but TypeContext is {1}</value>
-  </data>
   <data name="Rename" xml:space="preserve">
     <value>Rename</value>
   </data>
   <data name="NewColumnSName" xml:space="preserve">
     <value>New Column's Name</value>
   </data>
+  <data name="Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
   <data name="ChooseTheDisplayNameOfTheNewColumn" xml:space="preserve">
     <value>Choose the display name of the new column</value>
   </data>
-  <data name="Name" xml:space="preserve">
-    <value>Name</value>
+  <data name="NoDirectErrors" xml:space="preserve">
+    <value>No direct errors</value>
+  </data>
+  <data name="SessionExpired" xml:space="preserve">
+    <value>Sesion Expired</value>
   </data>
 </root>

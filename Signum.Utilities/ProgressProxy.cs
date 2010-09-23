@@ -75,10 +75,10 @@ namespace Signum.Utilities
         public void Start(int min, int max, string currentTask)
         {
             if (min < 0 || max < 0)
-                throw new ArgumentException(Resources.MinAndMaxShouldBeGreaterThan0);
+                throw new ArgumentException("Min and Max should be greater than 0");
 
             if(max < min)
-                throw new ArgumentException(Resources.MaxShouldBeGreaterOrEqualThanMin);
+                throw new ArgumentException("Max should be greater or equal than min");
 
             this.currentTask = currentTask; 
             this.min = this.position = min;

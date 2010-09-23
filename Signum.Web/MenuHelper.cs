@@ -40,7 +40,7 @@ namespace Signum.Web
                 if (findOptions != null)
                     return QueryUtils.GetNiceQueryName(findOptions.QueryName);
 
-                throw new InvalidOperationException(Resources.TextNotSetForMenuItem0.Formato(Link.ToString()));
+                throw new InvalidOperationException("Text not set for menu item {0}".Formato(Link.ToString()));
             }
             set { text = value; }
         }

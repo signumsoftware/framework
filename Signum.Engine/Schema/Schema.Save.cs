@@ -67,7 +67,7 @@ namespace Signum.Engine.Maps
             if (Identity)
             {
                 if (ident.IdOrNull != null)
-                    throw new InvalidOperationException(Resources.IsNewButHasId1AndIdentityIsTrue.Formato(ident, ident.IdOrNull)); 
+                    throw new InvalidOperationException("{0} is new, but has Id {1}".Formato(ident, ident.IdOrNull)); 
 
                 return SqlBuilder.InsertSaveId(Name, parameters, ident);
             }
@@ -246,7 +246,7 @@ namespace Signum.Engine.Maps
                 if (HasValue != null)
                     parameters.Add(HasValueParameter(false));
                 else
-                    throw new InvalidOperationException(Resources.ImpossibleToSaveNullOnANotNullableEmbeddedFieldUseNullable);
+                    throw new InvalidOperationException("Impossible to save null on a not-nullable embedded field");
                 
                 foreach (var v in EmbeddedFields.Values)
                     v.Field.CreateParameter(parameters, null, type, forbidden);
@@ -274,7 +274,7 @@ namespace Signum.Engine.Maps
                 value.GetType();
 
             if (valType != null && !ImplementationColumns.ContainsKey(valType))
-                throw new InvalidOperationException(Resources.Type0IsNotAMappedType1.Formato(valType, ImplementationColumns.Keys.ToString(k => k.Name, ", ")));
+                throw new InvalidOperationException("Type {0} is not a mapped type ({1})".Formato(valType, ImplementationColumns.Keys.ToString(k => k.Name, ", ")));
 
             var param = ImplementationColumns.Select(p =>
                 SqlParameterBuilder.CreateReferenceParameter(p.Value.Name, true,

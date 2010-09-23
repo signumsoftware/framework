@@ -40,6 +40,12 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void SelectIndex()
+        {
+            var list = Database.Query<AlbumDN>().Select((a, i) =>  a.Name + i).ToList();
+        }
+
+        [TestMethod]
         public void SelectExpansion()
         {
             var list = Database.Query<AlbumDN>().Select(a => a.Label.Name).ToList();

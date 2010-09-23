@@ -28,8 +28,8 @@ namespace Signum.Utilities
         public static T AssertSingle<T>(this IEnumerable<T> collection, object key)
         {
             int c = collection.Count();
-            if (c == 0) throw new InvalidOperationException(Resources.NoElementExistWithKey0.Formato(key));
-            if (c > 1) throw new InvalidOperationException(Resources.ThereIsMoreThanOneElementWithKey0.Formato(key));
+            if (c == 0) throw new InvalidOperationException("No element exists with key '{0}'".Formato(key));
+            if (c > 1) throw new InvalidOperationException("There's more than one element with key '{0}'".Formato(key));
             return collection.Single();
         }
 

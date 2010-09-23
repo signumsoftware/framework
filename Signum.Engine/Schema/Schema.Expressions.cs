@@ -26,7 +26,7 @@ namespace Signum.Engine.Maps
         {
             EntityField field = Fields.TryGetC(fi.Name);
             if (field == null)
-                throw new InvalidOperationException(Resources.TheField0IsNotIncluded.Formato(fi.Name));
+                throw new InvalidOperationException("The field {0} is not included".Formato(fi.Name));
 
             Expression result = field.Field.GetExpression(token, tableAlias, binder);
 

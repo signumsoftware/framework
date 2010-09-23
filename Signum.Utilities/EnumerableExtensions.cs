@@ -162,7 +162,7 @@ namespace Signum.Utilities
             using (IEnumerator<T> enumerator = collection.GetEnumerator())
             {
                 if (!enumerator.MoveNext())
-                    throw new InvalidOperationException(Resources.TheCollectionHasNoElements);
+                    throw new InvalidOperationException("The collection has no elements");
 
                 T current = enumerator.Current;
 
@@ -681,9 +681,9 @@ namespace Signum.Utilities
         {
             if (nextA != nextB)
                 if (nextA)
-                    throw new InvalidOperationException(Resources.SecondCollectionsIsShorter);
+                    throw new InvalidOperationException("Second collection is shorter");
                 else
-                    throw new InvalidOperationException(Resources.FirstCollectionIsShorter);
+                    throw new InvalidOperationException("First collection is shorter");
             else
                 return nextA;
         }
@@ -761,12 +761,12 @@ namespace Signum.Utilities
 
             if (oldOnly.Count != 0)
                 if (newOnly.Count != 0)
-                    throw new InvalidOperationException(Resources.Error0Lacking1Extra2.Formato(action, newOnly.ToString(", "), oldOnly.ToString(", ")));
+                    throw new InvalidOperationException("Error {0}\r\n Extra: {1}\r\n Lacking: {2}".Formato(action, newOnly.ToString(", "), oldOnly.ToString(", ")));
                 else
-                    throw new InvalidOperationException(Resources.Error0Extra1.Formato(action, oldOnly.ToString(", ")));
+                    throw new InvalidOperationException("Error {0}\r\n Extra: {1}".Formato(action, oldOnly.ToString(", ")));
             else
                 if (newOnly.Count != 0)
-                    throw new InvalidOperationException(Resources.Error0Lacking1.Formato(action, newOnly.ToString(", ")));
+                    throw new InvalidOperationException("Error {0}\r\n Lacking: {1}".Formato(action, newOnly.ToString(", ")));
 
             return oldDictionary.Select(p => resultSelector(p.Value, newDictionary[p.Key]));
         }

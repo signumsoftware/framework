@@ -185,6 +185,7 @@ namespace Signum.Web
         //public const string RuntimeType = "sfRuntimeType";
         public const string Ticks = "sfTicks";
         public const string CssLineLabel = "labelLine";
+        public const string CssLineUnit = "unitLine";
 
         public abstract object UntypedValue { get; }
 

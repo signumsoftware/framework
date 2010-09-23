@@ -71,7 +71,7 @@ namespace Signum.Windows
                 Type type = Common.GetTypeContext(MainControl).Type;
                 Type entityType = e.NewDataContext.GetType();
                 if (type != null && !type.IsAssignableFrom(entityType))
-                    throw new InvalidCastException(Properties.Resources.TheDataContextIsA0ButTypeContextIs1.Formato(entityType.Name, type.Name));
+                    throw new InvalidCastException("The DataContext is a {0} but TypeContext is {1}".Formato(entityType.Name, type.Name));
 
                 DataContext = null;
                 DataContext = e.NewDataContext;

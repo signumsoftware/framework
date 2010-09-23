@@ -82,7 +82,7 @@ namespace Signum.Engine.Maps
             int? id = reader.GetNullableInt32(Position);
 
             if (!id.HasValue)
-                if(!Nullable)throw new InvalidOperationException(Resources.Field0HasNullAndOsNotNullable.Formato(Name));
+                if (!Nullable) throw new InvalidOperationException("Field {0} has null but is not nullable".Formato(Name));
                 else return null;
 
             if (IsLite)
@@ -98,7 +98,7 @@ namespace Signum.Engine.Maps
         {
             int? id = reader.GetNullableInt32(Position);
             if (!id.HasValue)
-                if (!Nullable) throw new InvalidOperationException(Resources.Field0HasNullAndOsNotNullable.Formato(Name));
+                if (!Nullable) throw new InvalidOperationException("Field {0} has null value but is not nullable".Formato(Name));
                 else return null;
 
             return Enum.ToObject(FieldType.UnNullify(), id);
@@ -146,7 +146,7 @@ namespace Signum.Engine.Maps
                 return null;
             
             if (columns.Length > 1)
-                throw new InvalidOperationException(Resources.Fields0AreSetAtTheSameTime.Formato(columns.ToString(c => c.Value.Name, ", ")));
+                throw new InvalidOperationException("Fields {0} are set at the same time".Formato(columns.ToString(c => c.Value.Name, ", ")));
 
             ImplementationColumn col = columns[0].Value;
 
@@ -167,7 +167,9 @@ namespace Signum.Engine.Maps
             int? idTipo = reader.GetNullableInt32(ColumnTypes.Position);
 
             if (id.HasValue != idTipo.HasValue)
-                throw new InvalidOperationException(Resources.ImplementedByAll01But23.Formato(Column.Name, id, ColumnTypes.Name, idTipo));
+                throw new InvalidOperationException("ImplementedByAll {0} = {1} pero {2} = {3}".Formato(
+                    Column.Name, id.TryToString() ?? "[null]", 
+                    ColumnTypes.Name, idTipo.TryToString() ?? "[null]"));
 
             if (id == null)
                 return null;

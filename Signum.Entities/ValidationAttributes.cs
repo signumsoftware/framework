@@ -73,7 +73,7 @@ namespace Signum.Entities
         protected override string OverrideError(object obj)
         {
             if (obj == null)
-                return Resources.Property0HasNoValue;
+                return Resources._0IsNotSet;
 
             return null;
         }
@@ -113,7 +113,7 @@ namespace Signum.Entities
             string val = (string)value;
 
             if (string.IsNullOrEmpty(val))
-                return allowNulls ? null : Resources.Property0HasNoValue;
+                return allowNulls ? null : Resources._0IsNotSet;
 
             if (min == max && min != -1 && val.Length != min)
                 return Resources.TheLenghtOf0HasToBeEqualTo0.Formato(min);
@@ -614,7 +614,7 @@ namespace Signum.Entities
         public void Add(S state, params bool?[] necessary)
         {
             if (necessary != null && necessary.Length != propertyNames.Length)
-                throw new ArgumentException(Resources.TheStateValidator0ForState1Has2ValuesInsteadOf3
+                throw new ArgumentException("The StateValidator {0} for state {1} has {2} values instead of {3}"
                     .Formato(GetType().TypeName(), state, necessary.Length, propertyNames.Length));
 
             dictionary.Add(state, necessary);
@@ -666,7 +666,7 @@ namespace Signum.Entities
         {
             int index = propertyNames.IndexOf(pi.Name);
             if (index == -1)
-                throw new ArgumentException(Resources.ThePropertyIsNotRegistered);
+                throw new ArgumentException("The property is not registered");
 
             return dictionary[state][index];
         }

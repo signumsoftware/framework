@@ -190,10 +190,10 @@ namespace Signum.Utilities.ExpressionTrees
 
             int prevIndex = precedence.IndexOf(nodeType);
             if (prevIndex == -1)
-                throw new NotImplementedException(Resources.NotSupported0.Formato(nodeType));
+                throw new NotImplementedException("Not supported {0}".Formato(nodeType));
             int newIndex = precedence.IndexOf(exp.NodeType);
             if (newIndex == -1)
-                throw new NotImplementedException(Resources.NotSupported0.Formato(exp.NodeType));
+                throw new NotImplementedException("Not supported {0}".Formato(exp.NodeType));
 
             if (prevIndex < newIndex)
                 return "({0})".Formato(result);
@@ -219,7 +219,7 @@ namespace Signum.Utilities.ExpressionTrees
             if (u.NodeType == ExpressionType.TypeAs)
                 return "{0} as {1}".Formato(Visit(u.Operand, u.NodeType), u.Type.Name);
             else
-                return unarySymbol.GetOrThrow(u.NodeType, Resources.TheNodeType0IsNotSupportedAsUnaryExpression)
+                return unarySymbol.GetOrThrow(u.NodeType, "The node type {0} is not supported in unary expressions")
                     .Formato(Visit(u.Operand, u.NodeType));
         }
 
@@ -257,7 +257,7 @@ namespace Signum.Utilities.ExpressionTrees
 
         string VisitBinary(BinaryExpression b)
         {
-            return binarySymbol.GetOrThrow(b.NodeType, Resources.TheNodeType0IsNotSupportedAsUnaryExpression)
+            return binarySymbol.GetOrThrow(b.NodeType, "The node type {0} is not supported as a binary expression")
                 .Formato(Visit(b.Left, b.NodeType), Visit(b.Right, b.NodeType));
         }
 

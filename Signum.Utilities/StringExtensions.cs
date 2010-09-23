@@ -70,7 +70,7 @@ namespace Signum.Utilities
             if (numChars > str.Length)
             {
                 if (throws)
-                    throw new InvalidOperationException(Resources.String0IsTooShort.Formato(str));
+                    throw new InvalidOperationException("String '{0}' is too short".Formato(str));
                 return str;
             }
 
@@ -87,7 +87,7 @@ namespace Signum.Utilities
             if (numChars > str.Length)
             {
                 if (throws)
-                    throw new InvalidOperationException(Resources.String0IsTooShort.Formato(str));
+                    throw new InvalidOperationException("String '{0}' is too short".Formato(str));
                 return str;
             }
 
@@ -104,7 +104,7 @@ namespace Signum.Utilities
             if (numChars > str.Length)
             {
                 if (throws)
-                    throw new InvalidOperationException(Resources.String0IsTooShort.Formato(str));
+                    throw new InvalidOperationException("String '{0}' is too short".Formato(str));
                 return "";
             }
 
@@ -121,7 +121,7 @@ namespace Signum.Utilities
             if (numChars > str.Length)
             {
                 if (throws)
-                    throw new InvalidOperationException(Resources.String0IsTooShort.Formato(str));
+                    throw new InvalidOperationException("String '{0}' is too short".Formato(str));
                 return "";
             }
 

@@ -36,7 +36,7 @@ namespace Signum.Engine.Linq
         public static bool IsSqlCondition(Expression expression)
         {
             if (!IsBooleanExpression(expression))
-                throw new InvalidOperationException(Resources.TestingSqlConditionessForNonBooleanExpression0.Formato(expression.ToString()));
+                throw new InvalidOperationException("Expected boolean expression: {0}".Formato(expression.ToString()));
 
             switch (expression.NodeType)
             {
@@ -81,7 +81,7 @@ namespace Signum.Engine.Linq
                     return false;
             }
 
-            throw new InvalidOperationException(Resources.TestingSqlConditionessForNonBooleanExpression0.Formato(expression.ToString()));
+            throw new InvalidOperationException("Expected expression: {0}".Formato(expression.ToString()));
         }
 
         protected override Expression VisitUnary(UnaryExpression u)

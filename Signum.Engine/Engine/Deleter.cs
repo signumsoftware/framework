@@ -44,7 +44,7 @@ namespace Signum.Engine
             int result = (int)Executor.ExecuteScalar(comando.ToSimple());
 
             if (result != ids.Count)
-                throw new InvalidOperationException(Resources.NotAllEntitiesOfType0AndIds1Removed.Formato(type.Name, ids.ToString(", ")));
+                throw new InvalidOperationException("Not all entities with Type '{0}' and Id(s) {1} removed".Formato(type.Name, ids.ToString(", ")));
         }
 
         internal static SqlPreCommand DeleteCommand(Type type, List<int> ids)

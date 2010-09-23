@@ -35,7 +35,7 @@
                     Html.ValueLine(e, f => f.StringValue, vl => vl.LabelText = e.Value.FieldName);
                     break;
                 default:
-                    throw new ArgumentException(Resources.ValueLineBoxType0DoesNotExist.Formato(e.Value.BoxType));
+                    throw new InvalidOperationException("ValueLineBoxType {0} does not exist".Formato(e.Value.BoxType));
             }
 }
 %>

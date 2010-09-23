@@ -69,7 +69,7 @@ namespace Signum.Utilities.DataStructures
         public T Pop()
         {
             if (Empty)
-                throw new InvalidOperationException(Resources.EmptyPriorityQueue);
+                throw new InvalidOperationException("Empty PriorityQueue");
 
             int p = 0;
             T result = list[0];
@@ -97,7 +97,7 @@ namespace Signum.Utilities.DataStructures
         public T Peek()
         {
             if (Empty)
-                throw new InvalidOperationException(Resources.EmptyPriorityQueue);
+                throw new InvalidOperationException("Empty PriorityQueue");
 
             return list[0];
         }

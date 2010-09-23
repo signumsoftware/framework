@@ -88,7 +88,7 @@ namespace Signum.Windows
         static object CollapseIfNullChanged(FrameworkElement frameworkElement)
         {
             if (GetRoute(frameworkElement) != null)
-                throw new InvalidOperationException(Resources.CollapseIfNullHasToBeSetBeforeRoute);
+                throw new InvalidOperationException("CollapseIfNull has to be set before Route");
             return null;
         }
 
@@ -187,7 +187,7 @@ namespace Signum.Windows
             PropertyRoute parentContext = GetTypeContext(fe.Parent);
 
             if (parentContext == null)
-                throw new InvalidOperationException(Properties.Resources.RoutePropertyCanNotBeAppliedWithNullTypeContext + ": '{0}'".Formato(route));
+                throw new InvalidOperationException("Route attached property can not be set with null TypeContext: '{0}'".Formato(route));
 
             bool pseudoRoute = route.StartsWith("$");
             if (pseudoRoute)
@@ -224,6 +224,7 @@ namespace Signum.Windows
             RouteTask += TaskSetIsReadonly;
             RouteTask += TaskSetImplementations;
             RouteTask += TaskSetCollaspeIfNull;
+            RouteTask += TaskSetNotNullItemsSource;
 
             PseudoRouteTask += TaskSetLabelText;
         }
@@ -335,6 +336,20 @@ namespace Signum.Windows
                 fe.SetBinding(FrameworkElement.VisibilityProperty, b);
             }
         }
+        
+        static void TaskSetNotNullItemsSource(FrameworkElement fe, string route, PropertyRoute context)
+        {
+            ValueLine vl = fe as ValueLine;
+            if (vl != null && vl.NotSet(ValueLine.ItemSourceProperty) && context.PropertyRouteType == PropertyRouteType.Property)
+            {
+                if(context.Type.IsNullable() && context.Type.UnNullify().IsEnum &&
+                   Validator.GetOrCreatePropertyPack(context).Validators.OfType<NotNullableAttribute>().Any())
+                {
+                    vl.ItemSource = EnumExtensions.UntypedGetValues(vl.Type.UnNullify());
+                }
+            }
+        }
+
         #endregion
 
         public static readonly RoutedEvent ChangeDataContextEvent = EventManager.RegisterRoutedEvent("ChangeDataContext", RoutingStrategy.Bubble, typeof(ChangeDataContextHandler), typeof(Common));
@@ -361,7 +376,7 @@ namespace Signum.Windows
         public static Window FindCurrentWindow(this FrameworkElement fe)
         {
             return fe.FollowC(a => (FrameworkElement)(a.Parent ?? a.TemplatedParent))
-                      .Select(a => Common.GetCurrentWindow(a) ?? a as Window).NotNull().First(Properties.Resources.ParentWindowNotFound);
+                      .Select(a => Common.GetCurrentWindow(a) ?? a as Window).NotNull().First("Parent window not found");
         }
 
         public static IDisposable OverrideCursor(System.Windows.Input.Cursor cursor)

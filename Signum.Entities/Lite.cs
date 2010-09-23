@@ -33,7 +33,7 @@ namespace Signum.Entities
             : base(runtimeType, id)
         {
             if (!typeof(T).IsAssignableFrom(runtimeType))
-                throw new InvalidOperationException(Resources.TypeIsNotSmallerThan.Formato(runtimeType, typeof(T)));
+                throw new InvalidOperationException("Type {0} is not smaller than {1}".Formato(runtimeType, typeof(T)));
         }
 
         internal Lite(T entity)
@@ -58,7 +58,7 @@ namespace Signum.Entities
             get
             {
                 if (entityOrNull == null)
-                    throw new InvalidOperationException(Resources.TheLite0IsNotLoadedUseDatabaseRetrieveOrConsiderRewritingYourQuery.Formato(this));
+                    throw new InvalidOperationException("The lite {0} is not loaded, use DataBase.Retrieve or consider rewriting your query".Formato(this));
                 return entityOrNull;
             }
         }
@@ -78,7 +78,7 @@ namespace Signum.Entities
         protected Lite(Type runtimeType, int id)
         {
             if (runtimeType == null || !typeof(IdentifiableEntity).IsAssignableFrom(runtimeType))
-                throw new InvalidOperationException(Resources.TypeIsNotSmallerThan.Formato(runtimeType, typeof(IIdentifiable)));
+                throw new InvalidOperationException("Type {0} does not implement {1}".Formato(runtimeType, typeof(IIdentifiable)));
 
             this.runtimeType = runtimeType;
             this.id = id;
@@ -117,7 +117,7 @@ namespace Signum.Entities
             get
             {
                 if (id == null)
-                    throw new InvalidOperationException(Resources.TheLiteIsPointingToANewEntityAndHasNoIdYet);
+                    throw new InvalidOperationException("The Lite is pointing to a new entity and has no Id yet");
                 return id.Value;
             }
         }
@@ -136,10 +136,10 @@ namespace Signum.Entities
         public void SetEntity(IdentifiableEntity ei)
         {
             if (id == null)
-                throw new InvalidOperationException(Resources.NewEntitiesAreNotAllowed);
+                throw new InvalidOperationException("New entities are not allowed");
 
             if (id != ei.id || RuntimeType != ei.GetType())
-                throw new InvalidOperationException(Resources.EntitiesDoNotMatch);
+                throw new InvalidOperationException("Entities do not match");
 
             this.UntypedEntityOrNull = ei;
             if (ei != null && this.ToStr == null)
@@ -149,7 +149,7 @@ namespace Signum.Entities
         public void ClearEntity()
         {
             if (id == null)
-                throw new InvalidOperationException(Resources.RemovingEntityNotAllowedInNewLazies);
+                throw new InvalidOperationException("Removing entity not allowed in new Lite");
 
             this.UntypedEntityOrNull = null;
         }
@@ -310,7 +310,7 @@ namespace Signum.Entities
                 return null;
 
             if (entity.IsNew)
-                throw new InvalidOperationException(Resources.ToLiteLightNotAllowedForNewEntities);
+                throw new InvalidOperationException("ToLite is not allowed for new entities, use ToLiteFat instead");
 
             return new Lite<T>(entity.GetType(), entity.Id) { ToStr = entity.ToString() };
         }
@@ -322,7 +322,7 @@ namespace Signum.Entities
                 return null;
 
             if (entity.IsNew)
-                throw new InvalidOperationException(Resources.ToLiteLightNotAllowedForNewEntities);
+                throw new InvalidOperationException("ToLite is not allowed for new entities, use ToLiteFat instead");
 
             return new Lite<T>(entity.GetType(), entity.Id) { ToStr = toStr };
         }

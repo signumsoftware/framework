@@ -165,12 +165,12 @@ namespace Signum.Entities.Reflection
                         if (mce.Method.DeclaringType == typeof(MListExtensions) && mce.Method.Name == "Element")
                             return mce.Arguments.Single();
 
-                        return ((MethodCallExpression)e).Arguments.Single(Resources.OnlyOneArgumentAllowed);
+                        return ((MethodCallExpression)e).Arguments.Single("Only one argument allowed");
 
                     }
                 case ExpressionType.Convert: return ((UnaryExpression)e).Operand;
                 case ExpressionType.Parameter: return null;
-                default: throw new InvalidCastException(Resources._0NotSupported.Formato(e.NodeType));
+                default: throw new InvalidCastException("Not supported {0}".Formato(e.NodeType));
             }
         }
 
@@ -199,7 +199,7 @@ namespace Signum.Entities.Reflection
                     }
                 case ExpressionType.Convert: return ((UnaryExpression)e).Type;
                 case ExpressionType.Parameter: return null;
-                default: throw new InvalidCastException(Resources._0NotSupported.Formato(e.NodeType)); 
+                default: throw new InvalidCastException("Not supported {0}".Formato(e.NodeType)); 
             }
         }
 
@@ -219,7 +219,7 @@ namespace Signum.Entities.Reflection
             }
 
             if (throws && fi == null)
-                throw new NullReferenceException(Resources.FieldForPropertyNotFound.Formato(pi.Name));
+                throw new NullReferenceException("Field for property '{0}' not found".Formato(pi.Name));
 
             return fi;
         }
@@ -266,7 +266,7 @@ namespace Signum.Entities.Reflection
         public static bool IsLowPopulation(Type type)
         {
             if (!typeof(IIdentifiable).IsAssignableFrom(type))
-                throw new ArgumentException(Resources._0DoesNotInheritFromIdentifiableEntity.Formato(type));
+                throw new ArgumentException("0 does not inherit from IdentifiableEntity".Formato(type));
 
             LowPopulationAttribute lpa = type.SingleAttribute<LowPopulationAttribute>();
             if (lpa != null)
@@ -399,7 +399,7 @@ namespace Signum.Entities.Reflection
         public static void AssertValidIdentifier(string step)
         {
             if (!ValidIdentifier(step))
-                throw new FormatException(Resources._0IsNotAValidIdentifier.Formato(step));
+                throw new FormatException("'{0}' is not a valid identifier".Formato(step));
         }
     }
 }

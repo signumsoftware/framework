@@ -43,9 +43,9 @@ namespace Signum.Utilities.DataStructures
         private ImmutableStack(){}
 
         public virtual bool IsEmpty { get { return true; } }
-        public virtual T Peek() { throw new InvalidOperationException(Resources.EmptyStack); }
+        public virtual T Peek() { throw new InvalidOperationException("Empty Stack"); }
         public virtual ImmutableStack<T> Push(T value) { return new ImmutableFullStack(value, this); }
-        public virtual ImmutableStack<T> Pop() { throw new InvalidOperationException(Resources.EmptyStack); }
+        public virtual ImmutableStack<T> Pop() { throw new InvalidOperationException("Empty Stack"); }
         public virtual IEnumerator<T> GetEnumerator() { yield break; }
         public override string ToString() { return "[]"; }
 

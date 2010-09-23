@@ -112,10 +112,10 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="_0HasBeenRenamedIn1" xml:space="preserve">
     <value>¿Se ha renombrado '{0}' en {1}?</value>
@@ -409,9 +409,6 @@
   <data name="Types0DoNotImplement1" xml:space="preserve">
     <value>Los tipos {0} no implementan {1}</value>
   </data>
-  <data name="UnauthorizedAccessTo0" xml:space="preserve">
-    <value>Acceso denegado a {0}</value>
-  </data>
   <data name="UniqueMultiNullsWorksWithOnlyOneFieldUseAdministrator" xml:space="preserve">
     <value>UniqueMultiNulls trabaja sólo con un campo. Utilice Administrator.AddMultiColumnUniqueTriggerNullable en su lugar.</value>
   </data>
@@ -432,5 +429,11 @@
   </data>
   <data name="ThereIsADiferentInstanceOfTheSameEntityWithType0AndId1" xml:space="preserve">
     <value>Hay una instancia diferente del de la Entidad con tipo {0} e id {1} en la EntityCache. Considera usar una EntityCache independiente si estás sobreescribiendo PreSaving. </value>
+  </data>
+  <data name="UnauthorizedAccessTo0" xml:space="preserve">
+    <value>Acceso denegado a {0}</value>
+  </data>
+  <data name="UnauthorizedAccessTo0Because1" xml:space="preserve">
+    <value>Acceso denegado a {0} porque {1}</value>
   </data>
 </root>

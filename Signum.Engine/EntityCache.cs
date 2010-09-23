@@ -27,7 +27,7 @@ namespace Signum.Engine
                 if (ident == null)
                     dic.Add(ie.Id, ie);
                 else if (ident != ie)
-                    throw new InvalidOperationException(Resources.ThereIsADiferentInstanceOfTheSameEntityWithType0AndId1.Formato(ie.GetType().Name, ie.id));
+                    throw new InvalidOperationException("There's a different instance of the same entity with Type '{0}' and Id '{1}'".Formato(ie.GetType().Name, ie.id));
             }
 
             public bool Contains(Type type, int id)
@@ -69,7 +69,7 @@ namespace Signum.Engine
             get
             {
                 if (stack.IsEmpty)
-                    throw new InvalidOperationException(Resources.NoEntityCacheContextHasBeenCreated);
+                    throw new InvalidOperationException("No EntityCache context has been created");
 
                 return stack.Peek(); 
             }
