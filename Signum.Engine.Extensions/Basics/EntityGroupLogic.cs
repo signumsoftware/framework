@@ -32,9 +32,12 @@ namespace Signum.Engine.Basics
         {
             public EntityGroupInfo(Expression<Func<T, bool>> isInGroup, Expression<Func<T, bool>> isApplicable)
             {
-                IsInGroupExpression = (Expression<Func<T, bool>>)DataBaseTransformer.ToDatabase(isInGroup);
-                IsInGroupFuncExpression = (Expression<Func<T, bool>>)MemoryTransformer.ToMemory(isInGroup);
-                IsInGroupFunc = IsInGroupFuncExpression.Compile();
+                if (isInGroup != null)
+                {
+                    IsInGroupExpression = (Expression<Func<T, bool>>)DataBaseTransformer.ToDatabase(isInGroup);
+                    IsInGroupFuncExpression = (Expression<Func<T, bool>>)MemoryTransformer.ToMemory(isInGroup);
+                    IsInGroupFunc = IsInGroupFuncExpression.Compile();
+                }
 
                 if (isApplicable != null)
                 {
@@ -54,6 +57,9 @@ namespace Signum.Engine.Basics
 
             public bool IsInGroup(IdentifiableEntity entity)
             {
+                if (IsInGroupFunc == null)
+                    return true;
+
                 return IsInGroupFunc((T)entity);
             }
 
@@ -190,8 +196,8 @@ namespace Signum.Engine.Basics
         internal static IEntityGroupInfo GetEntityGroupInfo(Enum entityGroupKey, Type type)
         {
             IEntityGroupInfo info = infos
-               .GetOrThrow(type, "There's no expression registered for type {{0}} on group {0}".Formato(entityGroupKey))
-               .GetOrThrow(entityGroupKey, "There's no EntityGroup registered with key {0}");
+               .GetOrThrow(type, "There's no EntityGroup expression registered for type {0}")
+               .GetOrThrow(entityGroupKey, "There's no EntityGroup expression registered for type {0} with key {{0}}".Formato(type));
             return info;
         }
 
