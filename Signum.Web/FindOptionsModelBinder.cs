@@ -171,6 +171,7 @@ namespace Signum.Web
                     UserColumn = new UserColumn(numStaticCols, QueryUtils.ParseColumn(currentColString[0], queryDescription)) 
                     { 
                         UserColumnIndex = i,
+                        DisplayName = currentColString[1]
                     },
                 });
             }

@@ -130,7 +130,7 @@ namespace Signum.Web
                 if (context.HttpContext.Request.IsAjaxRequest())
                     context.Result = Navigator.RedirectUrl(loginUrl.Formato(context.HttpContext.Request.UrlReferrer.PathAndQuery));
                 else
-                    context.HttpContext.Response.Redirect(HttpContextUtils.FullyQualifiedApplicationPath + loginUrl.Formato(context.HttpContext.Request.Url.PathAndQuery), true);
+                    context.Result = new RedirectResult(HttpContextUtils.FullyQualifiedApplicationPath + loginUrl.Formato(context.HttpContext.Request.Url.PathAndQuery));
             }
         };
 
@@ -172,7 +172,7 @@ namespace Signum.Web
                 };
             }
             else
-            {
+            { 
                 filterContext.Result = new ViewResult
                 {
                     ViewName = Navigator.Manager.ErrorPageUrl,
@@ -184,7 +184,7 @@ namespace Signum.Web
                             model.Exception.Message}
                     },
                 };
-            }
+            } 
             filterContext.ExceptionHandled = true;
             filterContext.HttpContext.Response.Clear();
             filterContext.HttpContext.Response.StatusCode = GetHttpError(exception);

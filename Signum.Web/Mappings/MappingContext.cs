@@ -164,7 +164,7 @@ namespace Signum.Web
 
             string[] properties = prefix.Split(new string[] { TypeContext.Separator }, StringSplitOptions.RemoveEmptyEntries);
             if (properties == null || properties.Length == 0)
-                throw new ArgumentException(Resources.InvalidPropertyPrefix);
+                throw new ArgumentException("Invalid property prefix");
 
             Modifiable currentEntity = entity;
             PropertyInfo pi = null;
@@ -196,7 +196,7 @@ namespace Signum.Web
             }
             catch (Exception)
             {
-                throw new InvalidOperationException(Resources.InvalidPropertyPrefixOrWrongEntityInSession);
+                throw new InvalidOperationException("Invalid property prefix or wrong entity in Session");
             }
 
             return pi.DeclaringType;
