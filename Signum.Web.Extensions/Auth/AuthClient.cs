@@ -73,16 +73,15 @@ namespace Signum.Web.Authorization
                     Navigator.Manager.GlobalIsFindable += type => QueryAuthLogic.GetQueryAllowed(type);
 
                 AuthenticationRequiredAttribute.Authenticate = context =>
-                {
+                { 
                     if (UserDN.Current == null)
                     {
                         //send them off to the login page
-
                         string loginUrl = "Auth/Login?ReturnUrl={0}";
                         if (context.HttpContext.Request.IsAjaxRequest())
                             context.Result = Navigator.RedirectUrl(loginUrl.Formato(context.HttpContext.Request.UrlReferrer.PathAndQuery));
                         else
-                            context.HttpContext.Response.Redirect(HttpContextUtils.FullyQualifiedApplicationPath + loginUrl.Formato(context.HttpContext.Request.Url.PathAndQuery), true);
+                            context.Result = new RedirectResult(HttpContextUtils.FullyQualifiedApplicationPath + loginUrl.Formato(context.HttpContext.Request.Url.PathAndQuery));
                     }
                 };
 

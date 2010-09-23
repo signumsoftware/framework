@@ -114,9 +114,10 @@ namespace Signum.Web.Extensions.Sample.Test
 
                 //view
                 selenium.Open("/Signum.Web.Extensions.Sample/");
+                selenium.WaitForPageToLoad(PageLoadTimeout);
                 Assert.IsTrue(selenium.IsElementPresent("jq=table > tbody > tr:first > td:first #r1c1_divSearchControl"));
                 Assert.IsTrue(selenium.IsElementPresent("jq=table > tbody > tr:nth-child(2) > td:first #lblr2c1 + a.count-search"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=table > tbody > tr:nth-child(2) > td:nth-child(2) a:nth-child(2)"));
+                Assert.IsTrue(selenium.IsElementPresent("jq=table > tbody > tr:nth-child(2) > td:nth-child(2) li:nth-child(2) > a"));
             }
             catch (Exception)
             {
