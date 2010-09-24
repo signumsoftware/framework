@@ -186,7 +186,7 @@ deallocate cur");
         #region MultiColumnIndex
         public static SqlPreCommand AddMultiColumnIndexScript<T>(bool unique, params Expression<Func<T, object>>[] columns) where T : IdentifiableEntity
         {
-            Schema schema = ConnectionScope.Current.Schema;
+            Schema schema = Schema.Current;
 
             return AddMultiColumnIndexScript(schema.Table<T>(), unique, columns.Select(fun => (IColumn)schema.Field<T>(fun)).ToArray());
         }
@@ -199,7 +199,7 @@ deallocate cur");
         public static SqlPreCommand AddMultiColumnUniqueTriggerNullable<T>(Expression<Func<T, object>>[] nullableColumns,
             Expression<Func<T, object>>[] notNullableColumns) where T : IdentifiableEntity
         {
-            Schema schema = ConnectionScope.Current.Schema;
+            Schema schema = Schema.Current;
 
             return AddMultiColumnUniqueTriggerNullable(schema.Table<T>(),
                 nullableColumns.TryCC(col => col.Select(fun => (IColumn)schema.Field<T>(fun)).ToArray()),
