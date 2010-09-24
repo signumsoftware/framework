@@ -158,7 +158,7 @@ namespace Signum.Entities.Authorization
             public ManualResourceCache(R resource, DefaultBehaviour<A> min, DefaultBehaviour<A> max)
             {
                 var list = (from r in Database.Query<RT>()
-                            where r.Resource == resource && r.Resource == null
+                            where r.Resource == resource || r.Resource == null
                             select new { Default = r.Resource == null, r.Role, r.Allowed }).ToList();
 
                 defaultRules = list.Where(a => a.Default).ToDictionary(a => a.Role, a => a.Allowed);
