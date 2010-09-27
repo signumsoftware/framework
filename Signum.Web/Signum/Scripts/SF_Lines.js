@@ -493,13 +493,16 @@ var EList = function (_elistOptions) {
         var validator = new PartialValidator({ controllerUrl: validateUrl, prefix: itemPrefix, id: id, type: runtimeType });
         var validatorResult = validator.validate();
         if (!validatorResult.isValid) {
-            if (!confirm(lang['popupErrors']))
-                return false;
+            if (!confirm(lang['popupErrors'])) {
+                $.extend(validatorResult, { acceptChanges: false });
+                return validatorResult;
+            }
             else
                 validator.showErrors(validatorResult.modelState, true);
         }
         this.updateLinks(validatorResult.newToStr, validatorResult.newLink, itemPrefix);
-        return true;
+        $.extend(validatorResult, { acceptChanges: true });
+        return validatorResult;
     };
 
     this.viewOptionsForCreating = function (_viewOptions) {
@@ -519,15 +522,15 @@ var EList = function (_elistOptions) {
 
     this.onCreatingOk = function (clonedElements, validateUrl, runtimeType, itemPrefix) {
         log("EList onCreatingOK"); //Receives url as parameter so it can be overriden when setting viewOptions onOk
-        var acceptChanges = this.checkValidation(validateUrl, runtimeType, itemPrefix);
-        if (acceptChanges) {
-            this.newListItem(clonedElements, runtimeType, itemPrefix);
+        var validatorResult = this.checkValidation(validateUrl, runtimeType, itemPrefix);
+        if (validatorResult.acceptChanges) {
+            this.newListItem(clonedElements, runtimeType, itemPrefix, validatorResult.newToStr);
             this.setItemTicks(itemPrefix);
         }
-        return acceptChanges;
+        return validatorResult.acceptChanges;
     };
 
-    this.newListItem = function (clonedElements, runtimeType, itemPrefix) {
+    this.newListItem = function (clonedElements, runtimeType, itemPrefix, newToStr) {
         log("EList newListItem");
         var listInfo = this.staticInfo();
         var itemInfoValue = new RuntimeInfo(itemPrefix).createValue(runtimeType, '', 'n', '');
@@ -536,8 +539,9 @@ var EList = function (_elistOptions) {
         $('#' + itemPrefix.compose(sfEntity)).append(clonedElements);
 
         var select = $(this.pf(''));
-        //TODO Anto: When validation returns also toStr: put it in the option
-        select.append("\n<option id='" + itemPrefix.compose(sfToStr) + "' name='" + itemPrefix.compose(sfToStr) + "' value='' class='valueLine'>&nbsp;</option>");
+        if (empty(newToStr))
+            newToStr = "&nbsp;";
+        select.append("\n<option id='" + itemPrefix.compose(sfToStr) + "' name='" + itemPrefix.compose(sfToStr) + "' value='' class='valueLine'>"+newToStr+"</option>");
         select.children('option').attr('selected', false); //Fix for Firefox: Set selected after retrieving the html of the select
         select.children('option:last').attr('selected', true);
     };
@@ -603,10 +607,10 @@ var EList = function (_elistOptions) {
         var lastIndex = parseInt(this.getLastIndex());
         for (var i = 0; i < selectedItems.length; i++) {
             var item = selectedItems[i];
-            lastIndex++;
+            lastIndex++; 
             var itemPrefix = this.options.prefix.compose(lastIndex);
 
-            this.newListItem('', item.type, itemPrefix);
+            this.newListItem('', item.type, itemPrefix, item.toStr);
             this.itemRuntimeInfo(itemPrefix).setEntity(item.type, item.id);
             $('#' + itemPrefix.compose(sfToStr)).html(item.toStr);
 
@@ -993,7 +997,7 @@ var EDList = function(_edlistOptions) {
             lastIndex ++;
             var itemPrefix = this.options.prefix.compose(lastIndex);
 
-            this.newListItem('', item.type, itemPrefix);
+            this.newListItem('', item.type, itemPrefix, item.toStr);
             this.itemRuntimeInfo(itemPrefix).setEntity(item.type, item.id);
             $('#' + itemPrefix.compose(sfToStr)).html(item.toStr);
 
