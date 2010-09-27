@@ -99,6 +99,9 @@ namespace Signum.Engine.Authorization
 
         public static TypeAllowed GetTypeAllowed(Type type)
         {
+            if (!TypeLogic.TypeToDN.ContainsKey(type))
+                return TypeAllowed.DBCreateUICreate;
+
             return cache.GetAllowed(type);
         }
 
