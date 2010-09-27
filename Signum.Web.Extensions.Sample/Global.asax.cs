@@ -81,7 +81,6 @@ namespace Signum.Web.Extensions.Sample
             {
                 Constructors = new Dictionary<Type, Func<ModifiableEntity>>
                 {
-                    { typeof(ControlPanelDN), () => new ControlPanelDN { Related = RoleDN.Current.ToLite<IdentifiableEntity>() } }
                 }
             });
 

@@ -9,6 +9,7 @@ using Signum.Entities.Authorization;
 using System.Reflection;
 using System.Web.Routing;
 using Signum.Web.Queries;
+using Signum.Entities;
 
 namespace Signum.Web.ControlPanel
 {
@@ -42,7 +43,7 @@ namespace Signum.Web.ControlPanel
                     new EntitySettings<LinkElement>(EntityType.NotSaving) { PartialViewName = e => ViewPrefix + "LinkElement" },
                 });
 
-
+                Constructor.ConstructorManager.Constructors.Add(typeof(ControlPanelDN), () => new ControlPanelDN { Related = UserDN.Current.ToLite<IdentifiableEntity>() });
             }
         }
     }
