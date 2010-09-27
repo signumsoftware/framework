@@ -231,13 +231,11 @@ namespace Signum.Engine.Linq
     {
         Where = 1,
         GroupBy = 2,
-        Select = 4, 
-        Distinct = 8,
-        OrderBy = 16,
-        Skip = 32,
-        Top = 64
+        OrderBy = 4,
+        Select = 8,
+        Distinct = 16,
+        Top = 32
     }
-
     /// <summary>
     /// A custom expression node used to represent a SQL SELECT expression
     /// </summary>
