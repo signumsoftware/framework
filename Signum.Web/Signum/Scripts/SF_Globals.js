@@ -445,6 +445,9 @@ function ShowError(XMLHttpRequest, textStatus, errorThrown) {
     NotifyError(lang['error'] + ": " + message, 2000);
 
     alert("Error: " + error);
+
+    uiBlocked = false;
+    $(".uiBlocker").remove();
 }
 
 var debug = true;

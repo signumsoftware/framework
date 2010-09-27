@@ -1,12 +1,14 @@
 ﻿var uiBlocked = false;
 
 $(function () {
-    $('.entity-operation').live('click', function () {
-        uiBlocked = true;
-        var $divblocker = $("<div class='uiBlocker'></div>").width('300%').height('300%');
-        $('body').append($divblocker);
-    });
+    //$('.entity-operation').live('click', blockUI);
 });
+
+function blockUI() { 
+    uiBlocked = true;
+    var $divblocker = $("<div class='uiBlocker'></div>").width('300%').height('300%');
+    $('body').append($divblocker);
+}
 
 var OperationManager = function(_options) {
     this.options = $.extend({
@@ -87,6 +89,8 @@ OperationManager.prototype = {
 
         if (uiBlocked)
             return false;
+        else
+            blockUI();
 
         NotifyInfo(lang['executingOperation']);
 
@@ -147,7 +151,7 @@ OperationManager.prototype = {
 
     executedSuccessfully: function (operationResult) {
         log("OperationManager executedSuccessfully");
-        
+
         if (operationResult.indexOf("ModelState") < 0)
             return true;
 

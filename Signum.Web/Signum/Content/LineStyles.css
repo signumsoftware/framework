@@ -327,7 +327,7 @@ fieldset
     display:block;
     position:fixed;
     top:0;
-    z-index:10000;
+    z-index:20000;
     background-color:#eee;
     -ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
     filter:alpha(opacity=50);
