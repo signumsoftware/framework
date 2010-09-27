@@ -19,6 +19,18 @@ using Signum.Engine.DynamicQuery;
 
 namespace Signum.Web
 {
+    public class CountSearchControlOptions
+    {
+        public CountSearchControlOptions()
+        {
+            Navigate = true;
+            PopupView = false;
+        }
+
+        public bool Navigate { get; set; }
+        public bool PopupView { get; set; }
+    }
+
     public static class SearchControlHelper
     {
         public static void SearchControl(this HtmlHelper helper, FindOptions findOptions, Context context)
@@ -45,11 +57,14 @@ namespace Signum.Web
 
         public static string CountSearchControl(this HtmlHelper helper, FindOptions findOptions, string prefix)
         {
-            return CountSearchControl(helper, findOptions, prefix, true);
+            return CountSearchControl(helper, findOptions, prefix, null);
         }
 
-         public static string CountSearchControl(this HtmlHelper helper, FindOptions findOptions, string prefix, bool includeLink)
+        public static string CountSearchControl(this HtmlHelper helper, FindOptions findOptions, string prefix, CountSearchControlOptions options)
         {
+            if (options == null)
+                options = new CountSearchControlOptions();
+
             int count = Navigator.QueryCount(new CountOptions(findOptions.QueryName)
             {
                 FilterOptions = findOptions.FilterOptions
@@ -61,9 +76,17 @@ namespace Signum.Web
                 FindOptions = findOptions
             };
 
-           return includeLink ?
-               "<a class=\"count-search valueLine\" onclick=\"javascript:OpenFinder({0});\">{1}</a>".Formato(foptions.ToJS(), count) :
+           string result = options.Navigate ?
+               "<a class=\"count-search valueLine\" href=\"{0}\">{1}</a>".Formato(foptions.FindOptions.ToString(), count) :
                "<span class=\"count-search valueLine\">{0}</span>".Formato(count);
+
+           if (options.PopupView)
+               result += helper.Button(prefix + "csbtnView",
+                  "->",
+                  "javascript:OpenFinder({0});".Formato(foptions.ToJS()),
+                  "lineButton go", null);
+
+           return result;
         }
 
         public static string NewFilter(this HtmlHelper helper, object queryName, FilterOption filterOptions, Context context, int index)

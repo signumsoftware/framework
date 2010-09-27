@@ -323,6 +323,19 @@ fieldset
 	overflow:auto;	/*important when a popup contains a search control */
 }
 
+.uiBlocker {
+    display:block;
+    position:fixed;
+    top:0;
+    z-index:10000;
+    background-color:#eee;
+    -ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
+    filter:alpha(opacity=50);
+    -moz-opacity:0.5;
+    -khtml-opacity:0.5;
+    opacity:0.5;
+}
+
 .popupBackground {
     display:block;
     position:fixed;

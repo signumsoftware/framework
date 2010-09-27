@@ -1,4 +1,14 @@
-﻿var OperationManager = function(_options) {
+﻿var uiBlocked = false;
+
+$(function () {
+    $('.entity-operation').live('click', function () {
+        uiBlocked = true;
+        var $divblocker = $("<div class='uiBlocker'></div>").width('300%').height('300%');
+        $('body').append($divblocker);
+    });
+});
+
+var OperationManager = function(_options) {
     this.options = $.extend({
         prefix: "",
         operationKey: null,
@@ -12,19 +22,19 @@
 
 OperationManager.prototype = {
 
-    runtimeInfo: function() {
+    runtimeInfo: function () {
         return RuntimeInfoFor(this.options.prefix);
     },
 
-    pf: function(s) {
+    pf: function (s) {
         return "#" + this.options.prefix.compose(s);
     },
 
-    newPrefix: function() {
+    newPrefix: function () {
         return "New".compose(this.options.prefix);
     },
 
-    requestData: function(newPrefix) {
+    requestData: function (newPrefix) {
         log("OperationManager requestData");
         var formChildren = "";
         if (isFalse(this.options.isLite)) {
@@ -72,8 +82,11 @@ OperationManager.prototype = {
         return requestData.join('');
     },
 
-    operationAjax: function(newPrefix, onSuccess) {
+    operationAjax: function (newPrefix, onSuccess) {
         log("OperationManager operationAjax");
+
+        if (uiBlocked)
+            return false;
 
         NotifyInfo(lang['executingOperation']);
 
@@ -85,12 +98,16 @@ OperationManager.prototype = {
             type: "POST",
             url: this.options.controllerUrl,
             data: this.requestData(newPrefix),
-            async: false,
+            async: true,
             dataType: "html",
-            success: function(operationResult) {
+            success: function (operationResult) {
+                uiBlocked = false;
+                $(".uiBlocker").remove();
+
                 if (self.executedSuccessfully(operationResult)) {
-                    if (onSuccess != null)
+                    if (onSuccess != null) {
                         onSuccess(newPrefix, operationResult);
+                    }
                 }
                 else {
                     NotifyInfo(lang['error'], 2000);
@@ -98,12 +115,19 @@ OperationManager.prototype = {
                 }
             },
             error:
-                function() { NotifyInfo(lang['error'], 2000); }
+                function () {
+                    uiBlocked = false;
+                    $(".uiBlocker").remove();
+                    NotifyInfo(lang['error'], 2000);
+                }
         });
     },
 
-    operationSubmit: function() {
+    operationSubmit: function () {
         log("OperationManager operationSubmit");
+
+        if (uiBlocked)
+            return false;
 
         $("form").append(hiddenInput('isLite', this.options.isLite) +
             hiddenInput('sfOperationFullKey', this.options.operationKey) +
@@ -121,8 +145,9 @@ OperationManager.prototype = {
         Submit(this.options.controllerUrl);
     },
 
-    executedSuccessfully: function(operationResult) {
+    executedSuccessfully: function (operationResult) {
         log("OperationManager executedSuccessfully");
+        
         if (operationResult.indexOf("ModelState") < 0)
             return true;
 
@@ -137,30 +162,35 @@ OperationManager.prototype = {
         return false;
     },
 
-    defaultSubmit: function() {
+    defaultSubmit: function () {
         log("OperationManager defaultSubmit");
+
+        if (uiBlocked)
+            return false;
 
         if (isTrue(this.options.isLite))
             this.operationSubmit();
         else {
-            var onSuccess = function() { this.operationSubmit(); };
+            var onSuccess = function () { this.operationSubmit(); };
             var self = this;
-            if (!EntityIsValid({ prefix: this.options.prefix }, function() { onSuccess.call(self) }))
+            if (!EntityIsValid({ prefix: this.options.prefix }, function () { onSuccess.call(self) }))
                 return;
         }
     }
 };
 
-var OperationExecutor = function(_options) {
+var OperationExecutor = function (_options) {
     OperationManager.call(this, $.extend({
         controllerUrl: "Operation/OperationExecute"
     }, _options));
 
-    this.defaultExecute = function() {
+    this.defaultExecute = function () {
         log("OperationExecutor defaultExecute");
-        
-        var onSuccess = function() 
-        { 
+
+        if (uiBlocked)
+            return false;
+
+        var onSuccess = function () {
             this.operationAjax(null, OpReloadContent);
         };
 
@@ -168,7 +198,7 @@ var OperationExecutor = function(_options) {
         if (isTrue(this.options.isLite))
             onSuccess.call(this);
         else {
-            if (!EntityIsValid({ prefix: this.options.prefix }, function() { onSuccess.call(self) }))
+            if (!EntityIsValid({ prefix: this.options.prefix }, function () { onSuccess.call(self) }))
                 return;
         }
     };
@@ -186,7 +216,10 @@ var ConstructorFrom = function(_options) {
     this.defaultConstruct = function() {
         log("ConstructorFrom construct");
 
-        var onSuccess = function() 
+        if (uiBlocked)
+            return false;
+
+        var onSuccess = function () 
         { 
             this.operationAjax(this.newPrefix(), OpOpenPopup);
         }
@@ -210,6 +243,9 @@ var DeleteExecutor = function(_options) {
 
     this.defaultDelete = function() {
         log("DeleteExecutor defaultDelete");
+
+        if (uiBlocked)
+            return false;
 
         if (!empty(this.options.confirmMsg) && !confirm(this.options.confirmMsg))
             return;
@@ -269,14 +305,20 @@ var ConstructorFromMany = function(_options) {
 
         NotifyInfo(lang['executingOperation']);
 
+        if (uiBlocked)
+            return false;
+
         var self = this;
         SF.ajax({
             type: "POST",
             url: this.options.controllerUrl,
             data: this.requestData(this.newPrefix(), items),
-            async: false,
+            async: true,
             dataType: "html",
             success: function(operationResult) {
+                uiBlocked = false;
+                $(".uiBlocker").remove();
+
                 if (self.executedSuccessfully(operationResult)) {
                     if (onSuccess != null)
                         onSuccess(newPrefix, operationResult);
@@ -287,14 +329,22 @@ var ConstructorFromMany = function(_options) {
                 }
             },
             error:
-                function() { NotifyInfo(lang['error'], 2000); }
+                function () {
+                    uiBlocked = false;
+                    $(".uiBlocker").remove();
+
+                    NotifyInfo(lang['error'], 2000);
+                }
         });
     };
 
     this.defaultConstruct = function() {
         log("ConstructorFromMany defaultConstruct");
 
-        var onSuccess = function(items) {
+        if (uiBlocked)
+            return false;
+
+        var onSuccess = function (items) {
             this.operationAjax(this.newPrefix(), items, OpOpenPopup);
         }
 
@@ -305,7 +355,10 @@ var ConstructorFromMany = function(_options) {
     this.defaultSubmit = function() {
         log("ConstructorFromMany defaultSubmit");
 
-        var onSuccess = function(items) {
+        if (uiBlocked)
+            return false;
+
+        var onSuccess = function (items) {
             for (var i = 0, l = items.length; i < l; i++)
                 $("form").append(hiddenInput('sfIds', items[i].id));
             this.operationSubmit();
