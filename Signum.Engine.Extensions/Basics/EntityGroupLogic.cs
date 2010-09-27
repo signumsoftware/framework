@@ -16,97 +16,77 @@ using Signum.Engine.Linq;
 
 namespace Signum.Engine.Basics
 {
+    internal interface IEntityGroupInfo
+    {
+        IPolyLambda IsInGroup { get; }
+        IPolyLambda IsApplicable { get; }
+    }
+
+    internal interface IPolyLambda
+    {
+        bool Evaluate(IdentifiableEntity entity);
+        LambdaExpression UntypedExpression { get; } 
+        bool? Resume { get; }
+    }
+
     public static class EntityGroupLogic
     {
         internal class EntityGroupInfo<T> : IEntityGroupInfo
             where T : IdentifiableEntity
         {
+            public readonly PolyLambda IsInGroup;
+            public readonly PolyLambda IsApplicable;
+
+            IPolyLambda IEntityGroupInfo.IsInGroup { get { return IsInGroup; } }
+            IPolyLambda IEntityGroupInfo.IsApplicable { get { return IsApplicable; } }
+
             public EntityGroupInfo(Expression<Func<T, bool>> isInGroup, Expression<Func<T, bool>> isApplicable)
             {
                 if (isInGroup == null)
-                    throw new ArgumentNullException("isInGroup"); 
+                    throw new ArgumentNullException("isInGroup");
 
-                IsInGroupExpression = (Expression<Func<T, bool>>)DataBaseTransformer.ToDatabase(isInGroup);
-                IsInGroupFuncExpression = (Expression<Func<T, bool>>)MemoryTransformer.ToMemory(isInGroup);
-                IsInGroupFunc = IsInGroupFuncExpression.Compile();
+                IsInGroup = new PolyLambda(isInGroup);
 
                 if (isApplicable != null)
+                    IsApplicable = new PolyLambda(isApplicable);
+            }
+
+            internal class PolyLambda : IPolyLambda
+            {
+                public readonly Expression<Func<T, bool>> Expression;
+                readonly Expression<Func<T, bool>> FuncExpression; //debugging purposes only
+                readonly Func<T, bool> Func;
+                public bool? Resume { get; private set; }
+
+                public PolyLambda(Expression<Func<T, bool>> expression)
                 {
-                    IsApplicableExpression = (Expression<Func<T, bool>>)DataBaseTransformer.ToDatabase(isApplicable);
-                    IsApplicableFuncExpression = (Expression<Func<T, bool>>)MemoryTransformer.ToMemory(isApplicable);
-                    IsApplicableFunc = IsApplicableFuncExpression.Compile();
+                    Resume = MakeResume(expression);
+                    Expression = (Expression<Func<T, bool>>)DataBaseTransformer.ToDatabase(expression);
+
+                    if (Resume == null)
+                    {
+                        FuncExpression = (Expression<Func<T, bool>>)MemoryTransformer.ToMemory(expression);
+                        Func = FuncExpression.Compile();
+                    }
                 }
-            }
 
-            public readonly Expression<Func<T, bool>> IsInGroupExpression;
-            readonly Expression<Func<T, bool>> IsInGroupFuncExpression; //debugging purposes only
-            readonly Func<T, bool> IsInGroupFunc;
+                static bool? MakeResume(LambdaExpression expression)
+                {
+                    if (expression.Body.NodeType == ExpressionType.Constant)
+                        return (bool)((ConstantExpression)expression.Body).Value;
 
-            public readonly Expression<Func<T, bool>> IsApplicableExpression;
-            readonly Expression<Func<T, bool>> IsApplicableFuncExpression; //debugging purposes only
-            readonly Func<T, bool> IsApplicableFunc;
+                    return null;
+                }
 
-            public bool IsInGroup(IdentifiableEntity entity)
-            {
-                return IsInGroupFunc((T)entity);
-            }
+                public bool Evaluate(IdentifiableEntity entity)
+                {
+                    return Resume ?? Func((T)entity);
+                }
 
-            public bool IsApplicable(IdentifiableEntity entity)
-            {
-                if (IsApplicableFunc == null)
-                    return true;
-
-                return IsApplicableFunc((T)entity);
-            }
-
-            public LambdaExpression IsInGroupUntypedExpression
-            {
-                get { return IsInGroupExpression; }
-            }
-
-            public LambdaExpression IsApplicableUntypedExpression
-            {
-                get { return IsInGroupExpression; }
-            }
-
-            public bool NeverApplicable
-            {
-                get { return true; }
-            }
-        }
-
-        internal class NeverApplicableEntityGroupInfo: IEntityGroupInfo
-        {
-            private NeverApplicableEntityGroupInfo()
-            {
-
-            }
-
-            public static readonly NeverApplicableEntityGroupInfo Instance = new NeverApplicableEntityGroupInfo(); 
-
-            public bool IsInGroup(IdentifiableEntity entity)
-            {
-                throw new NotImplementedException();
-            }
-
-            public LambdaExpression IsInGroupUntypedExpression
-            {
-                get { throw new NotImplementedException(); }
-            }
-
-            public LambdaExpression IsApplicableUntypedExpression
-            {
-                get { throw new NotImplementedException(); }
-            }
-
-            public bool IsApplicable(IdentifiableEntity entity)
-            {
-                return false;
-            }
-
-            public bool NeverApplicable
-            {
-                get { return true; }
+                public LambdaExpression UntypedExpression
+                {
+                    get { return Expression; }
+                }
             }
         }
 
@@ -143,18 +123,13 @@ namespace Signum.Engine.Basics
             infos.GetOrCreate(typeof(T))[entityGroupKey] = new EntityGroupInfo<T>(isInGroup, isApplicable);
         }
 
-        public static void RegisterNeverApplicable<T>(Enum entityGroupKey)
-            where T : IdentifiableEntity
-        {
-            infos.GetOrCreate(typeof(T))[entityGroupKey] = NeverApplicableEntityGroupInfo.Instance;
-        }
 
         [MethodExpander(typeof(IsInGroupExpander))]
         public static bool IsInGroup(this IdentifiableEntity entity, Enum entityGroupKey)
         {
             IEntityGroupInfo info = GetEntityGroupInfo(entityGroupKey, entity.GetType());
 
-            return info.IsInGroup(entity);
+            return info.IsInGroup.Evaluate(entity);
         }
 
 
@@ -165,7 +140,7 @@ namespace Signum.Engine.Basics
                 Expression entity = arguments[0];
                 Enum eg = (Enum)ExpressionEvaluator.Eval(arguments[1]);
 
-                return Expression.Invoke(GetEntityGroupInfo(eg, entity.Type).IsInGroupUntypedExpression, entity);
+                return Expression.Invoke(GetEntityGroupInfo(eg, entity.Type).IsInGroup.UntypedExpression, entity);
             }
         }
 
@@ -175,7 +150,7 @@ namespace Signum.Engine.Basics
         {
             IEntityGroupInfo info = GetEntityGroupInfo(entityGroupKey, entity.GetType());
 
-            return info.IsApplicable(entity);
+            return info.IsApplicable.Evaluate(entity);
         }
 
 
@@ -186,7 +161,7 @@ namespace Signum.Engine.Basics
                 Expression entity = arguments[0];
                 Enum eg = (Enum)ExpressionEvaluator.Eval(arguments[1]);
 
-                return Expression.Invoke(GetEntityGroupInfo(eg, entity.Type).IsApplicableUntypedExpression, entity);
+                return Expression.Invoke(GetEntityGroupInfo(eg, entity.Type).IsApplicable.UntypedExpression, entity);
             }
         }
 
@@ -194,12 +169,12 @@ namespace Signum.Engine.Basics
         public static IQueryable<T> WhereInGroup<T>(this IQueryable<T> query, Enum entityGroupKey)
             where T : IdentifiableEntity
         {
-            IEntityGroupInfo info = GetEntityGroupInfo(entityGroupKey, typeof(T));
+            EntityGroupInfo<T> info = (EntityGroupInfo<T>)GetEntityGroupInfo(entityGroupKey, typeof(T));
 
-            if (info.NeverApplicable)
+            if (info.IsInGroup.Resume == true)
                 return query;
 
-            return query.Where(((EntityGroupInfo<T>)info).IsInGroupExpression);
+            return query.Where(info.IsInGroup.Expression);
         }
 
         class WhereInGroupExpander : IMethodExpander
@@ -211,12 +186,52 @@ namespace Signum.Engine.Basics
                 Expression group = arguments[1];
                 if (group.NodeType == ExpressionType.Convert)
                     group = ((UnaryExpression)group).Operand;
- 
+
                 Type type = typeArguments[0];
+
+                Expression query = arguments[0]; 
 
                 IEntityGroupInfo info = GetEntityGroupInfo((Enum)((ConstantExpression)group).Value, type);
 
-                return Expression.Call(null, miWhere.MakeGenericMethod(type), arguments[0], info.IsInGroupUntypedExpression);
+                if (info.IsInGroup.Resume == true)
+                    return query;
+
+                return Expression.Call(null, miWhere.MakeGenericMethod(type), query, info.IsInGroup.UntypedExpression);
+            }
+        }
+
+        [MethodExpander(typeof(WhereIsApplicableExpander))]
+        public static IQueryable<T> WhereIsApplicable<T>(this IQueryable<T> query, Enum entityGroupKey)
+            where T : IdentifiableEntity
+        {
+            EntityGroupInfo<T> info = (EntityGroupInfo<T>)GetEntityGroupInfo(entityGroupKey, typeof(T));
+
+            if (info.IsApplicable.Resume == true)
+                return query;
+
+            return query.Where(info.IsApplicable.Expression);
+        }
+
+        class WhereIsApplicableExpander : IMethodExpander
+        {
+            static MethodInfo miWhere = ReflectionTools.GetMethodInfo(() => Queryable.Where<int>(null, i => i == 0)).GetGenericMethodDefinition();
+
+            public Expression Expand(Expression instance, Expression[] arguments, Type[] typeArguments)
+            {
+                Expression group = arguments[1];
+                if (group.NodeType == ExpressionType.Convert)
+                    group = ((UnaryExpression)group).Operand;
+
+                Type type = typeArguments[0];
+
+                Expression query = arguments[0];
+
+                IEntityGroupInfo info = GetEntityGroupInfo((Enum)((ConstantExpression)group).Value, type);
+
+                if (info.IsApplicable.Resume == true)
+                    return query;
+
+                return Expression.Call(null, miWhere.MakeGenericMethod(type), query, info.IsApplicable.UntypedExpression);
             }
         }
 
@@ -485,14 +500,5 @@ namespace Signum.Engine.Basics
         }      
     }
 
-    internal interface IEntityGroupInfo
-    {
-        bool IsInGroup(IdentifiableEntity entity);
-        LambdaExpression IsInGroupUntypedExpression { get; }
-
-        bool IsApplicable(IdentifiableEntity entity);
-        LambdaExpression IsApplicableUntypedExpression { get; }
-
-        bool NeverApplicable { get; }
-    }
+    
 }

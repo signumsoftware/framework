@@ -155,20 +155,17 @@ namespace Signum.Engine.Authorization
                     bool allowedIn = access.InGroup.Get(userInterface) >= allowed;
                     bool allowedOut = access.OutGroup.Get(userInterface) >= allowed;
                     var egi = EntityGroupLogic.GetEntityGroupInfo(eg, ident.GetType());
-
-                    if (egi.NeverApplicable)
-                        return true;
-                    
+                   
                     if (allowedIn && allowedOut)
                         return true;
 
-                    if (!ent.IsApplicable(eg))
+                    if (egi.IsApplicable != null && !egi.IsApplicable.Evaluate(ent))
                         return true; 
-
+                   
                     if (!allowedIn && !allowedOut)
                         return false;
 
-                    if (ent.IsInGroup(eg))
+                    if (egi.IsInGroup.Evaluate(ent))
                         return allowedIn;
                     else
                         return allowedOut;
@@ -213,7 +210,7 @@ namespace Signum.Engine.Authorization
 
 
         [MethodExpander(typeof(WhereAllowedExpander))]
-        private static IQueryable<T> WhereIsAllowedFor<T>(this IQueryable<T> query, TypeAllowedBasic allowed, bool userInterface) 
+        public static IQueryable<T> WhereIsAllowedFor<T>(this IQueryable<T> query, TypeAllowedBasic allowed, bool userInterface) 
             where T : IdentifiableEntity
         {
             if (!Schema.Current.Tables.ContainsKey(typeof(T)))
@@ -222,7 +219,6 @@ namespace Signum.Engine.Authorization
             var pairs = (from eg in EntityGroupLogic.GroupsFor(typeof(T))
                          let allowedDN = cache.GetAllowed(eg)
                          let entityGroup = EntityGroupLogic.GetEntityGroupInfo(eg, typeof(T))
-                         where !entityGroup.NeverApplicable
                          select new
                          {
                              Key = eg,
@@ -231,28 +227,29 @@ namespace Signum.Engine.Authorization
                              EntityGroup = (EntityGroupLogic.EntityGroupInfo<T>)entityGroup,
                          }).ToList();
 
-            pairs.RemoveAll(p=>p.AllowedIn && p.AllowedOut);
+            pairs.RemoveAll(p => p.AllowedIn && p.AllowedOut);
+            pairs.RemoveAll(p => p.EntityGroup.IsApplicable != null && p.EntityGroup.IsApplicable.Resume == false); 
 
             if (pairs.Count == 0)
                 return query;
 
-            if(pairs.Any(p=>p.EntityGroup.IsApplicableExpression == null && !p.AllowedIn && !p.AllowedOut))
+            if (pairs.Any(p => (p.EntityGroup.IsApplicable == null || p.EntityGroup.IsApplicable.Resume == true) && !p.AllowedIn && !p.AllowedOut))
                 return query.Where(_ => false);
 
             ParameterExpression e = Expression.Parameter(typeof(T), "e");
             Expression body = pairs.Select(p => 
                 {
-                    if (p.EntityGroup.IsApplicableExpression == null)
+                    if (p.EntityGroup.IsApplicable == null || p.EntityGroup.IsApplicable.Resume == true)
                     {
-                        return p.AllowedIn? p.EntityGroup.IsInGroupExpression.InvokeLambda(e):
-                                            Expression.Not(p.EntityGroup.IsInGroupExpression.InvokeLambda(e));
+                        return p.AllowedIn? p.EntityGroup.IsInGroup.Expression.InvokeLambda(e):
+                                            Expression.Not(p.EntityGroup.IsInGroup.Expression.InvokeLambda(e));
                     }
                     else
                     {
-                        var notApplicable = (Expression)Expression.Not(p.EntityGroup.IsApplicableExpression.InvokeLambda(e));
+                        var notApplicable = (Expression)Expression.Not(p.EntityGroup.IsApplicable.Expression.InvokeLambda(e));
 
-                        return p.AllowedIn ? Expression.Or(notApplicable, p.EntityGroup.IsInGroupExpression.InvokeLambda(e)) :
-                               p.AllowedOut ? Expression.Or(notApplicable, Expression.Not(p.EntityGroup.IsInGroupExpression.InvokeLambda(e))) :
+                        return p.AllowedIn ? Expression.Or(notApplicable, p.EntityGroup.IsInGroup.Expression.InvokeLambda(e)) :
+                               p.AllowedOut ? Expression.Or(notApplicable, Expression.Not(p.EntityGroup.IsInGroup.Expression.InvokeLambda(e))) :
                                notApplicable;
                     }
                 }).Aggregate((a, b) => Expression.And(a, b));
@@ -394,18 +391,22 @@ namespace Signum.Engine.Authorization
         {
             IEntityGroupInfo egi = EntityGroupLogic.GetEntityGroupInfo(entityGroup, type);
 
-            if(egi.NeverApplicable)
+            if(egi.IsApplicable != null)
             {
-                yield return null;
-                yield break; 
+                if (egi.IsApplicable.Resume == false)
+                {
+                    yield return null;
+                    yield break;
+                }
+                else if (egi.IsApplicable.Resume == null)
+                    yield return null;
             }
 
             EntityGroupAllowedDN access = cache.GetAllowed(entityGroup);
-            yield return access.InGroup.Get(userInterface);
-            yield return access.OutGroup.Get(userInterface);
-
-            if (egi.IsApplicableUntypedExpression != null)
-                yield return null;
+            if ((egi.IsInGroup.Resume ?? true) == true)
+                yield return access.InGroup.Get(userInterface);
+            if ((egi.IsInGroup.Resume ?? false) == false)
+                yield return access.OutGroup.Get(userInterface);
         }
     }
 
