@@ -61,7 +61,6 @@ namespace Signum.Test.Extensions
             sb.Settings.OverrideFieldAttributes((ControlPanelDN cp) => cp.Related, new ImplementedByAttribute(typeof(UserDN), typeof(RoleDN)));
             sb.Settings.OverrideFieldAttributes((UserQueryDN uq) => uq.Related, new ImplementedByAttribute(typeof(UserDN), typeof(RoleDN)));
 
-
             AuthLogic.Start(sb, dqm, AuthLogic.SystemUserName, null);
             UserTicketLogic.Start(sb, dqm);
             OperationLogic.Start(sb, dqm);
@@ -76,11 +75,11 @@ namespace Signum.Test.Extensions
 
             QueryLogic.Start(sb);
             UserQueryLogic.Start(sb, dqm);
-            //UserQueryLogic.RegisterUserEntityGroup(sb, MusicGroups.UserEntities);
-            //UserQueryLogic.RegisterRoleEntityGroup(sb, MusicGroups.RoleEntities);
+            UserQueryLogic.RegisterUserEntityGroup(sb, MusicGroups.UserEntities);
+            UserQueryLogic.RegisterRoleEntityGroup(sb, MusicGroups.RoleEntities);
             ControlPanelLogic.Start(sb, dqm);
-            //ControlPanelLogic.RegisterUserEntityGroup(sb, MusicGroups.UserEntities);
-            //ControlPanelLogic.RegisterRoleEntityGroup(sb, MusicGroups.RoleEntities);
+            ControlPanelLogic.RegisterUserEntityGroup(sb, MusicGroups.UserEntities);
+            ControlPanelLogic.RegisterRoleEntityGroup(sb, MusicGroups.RoleEntities);
 
             ReportsLogic.Start(sb, dqm, true, false);
 
@@ -138,15 +137,15 @@ namespace Signum.Test.Extensions
                 EntityGroupAuthLogic.Manual.SetAllowed(externalUser.ToLite(), MusicGroups.JapanEntities,
                     new EntityGroupAllowedDN(TypeAllowed.DBCreateUICreate, TypeAllowed.DBNoneUINone));
 
-                //EntityGroupAuthLogic.SetEntityGroupAllowed(externalUser.ToLite(), MusicGroups.UserEntities,
-                //    new EntityGroupAllowedDN(TypeAllowed.DBCreateUICreate, TypeAllowed.DBNoneUINone));
-                //EntityGroupAuthLogic.SetEntityGroupAllowed(externalUser.ToLite(), MusicGroups.RoleEntities,
-                //    new EntityGroupAllowedDN(TypeAllowed.DBReadUIRead, TypeAllowed.DBNoneUINone));
+                EntityGroupAuthLogic.Manual.SetAllowed(externalUser.ToLite(), MusicGroups.UserEntities,
+                    new EntityGroupAllowedDN(TypeAllowed.DBCreateUICreate, TypeAllowed.DBNoneUINone));
+                EntityGroupAuthLogic.Manual.SetAllowed(externalUser.ToLite(), MusicGroups.RoleEntities,
+                    new EntityGroupAllowedDN(TypeAllowed.DBReadUIRead, TypeAllowed.DBNoneUINone));
 
-                //EntityGroupAuthLogic.SetEntityGroupAllowed(internalUser.ToLite(), MusicGroups.UserEntities,
-                //    new EntityGroupAllowedDN(TypeAllowed.DBCreateUICreate, TypeAllowed.DBNoneUINone));
-                //EntityGroupAuthLogic.SetEntityGroupAllowed(internalUser.ToLite(), MusicGroups.RoleEntities,
-                //    new EntityGroupAllowedDN(TypeAllowed.DBReadUIRead, TypeAllowed.DBNoneUINone));
+                EntityGroupAuthLogic.Manual.SetAllowed(internalUser.ToLite(), MusicGroups.UserEntities,
+                    new EntityGroupAllowedDN(TypeAllowed.DBCreateUICreate, TypeAllowed.DBNoneUINone));
+                EntityGroupAuthLogic.Manual.SetAllowed(internalUser.ToLite(), MusicGroups.RoleEntities,
+                    new EntityGroupAllowedDN(TypeAllowed.DBReadUIRead, TypeAllowed.DBNoneUINone));
 
                 AuthLogic.InvalidateCache(); 
             }

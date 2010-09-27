@@ -53,14 +53,14 @@ namespace Signum.Engine.ControlPanel
 
         public static ControlPanelDN GetHomePageControlPanel()
         {
-            //UserDN currentUser = UserDN.Current;
-            //if (currentUser == null)
-            //    return null;
+            UserDN currentUser = UserDN.Current;
+            if (currentUser == null)
+                return null;
 
-            //var panel = Database.Query<ControlPanelDN>()
-            //    .FirstOrDefault(cp => cp.Related.Entity is UserDN && cp.Related.ToLite<UserDN>().RefersTo(currentUser) && cp.HomePage);
-            //if (panel != null)
-            //    return panel;
+            var panel = Database.Query<ControlPanelDN>()
+                .FirstOrDefault(cp => cp.Related.Entity is UserDN && cp.Related.ToLite<UserDN>().RefersTo(currentUser) && cp.HomePage);
+            if (panel != null)
+                return panel;
 
             var panels = Database.Query<ControlPanelDN>().Where(cp => cp.Related.Entity is RoleDN && cp.HomePage)
                 .Select(cp => new { ControlPanel = cp.ToLite(), Role = ((RoleDN)cp.Related.Entity).ToLite() }).ToList();
@@ -72,15 +72,18 @@ namespace Signum.Engine.ControlPanel
         {
             sb.Schema.Settings.AssertImplementedBy((ControlPanelDN uq) => uq.Related, typeof(UserDN));
 
-            EntityGroupLogic.Register<ControlPanelDN>(newEntityGroupKey, uq => uq.Related.RefersTo(UserDN.Current));
+            EntityGroupLogic.Register<ControlPanelDN>(newEntityGroupKey,
+                uq => uq.Related.RefersTo(UserDN.Current),
+                uq => uq.Related != null && uq.Related.SmartTypeIs<UserDN>());
         }
 
         public static void RegisterRoleEntityGroup(SchemaBuilder sb, Enum newEntityGroupKey)
         {
             sb.Schema.Settings.AssertImplementedBy((ControlPanelDN uq) => uq.Related, typeof(RoleDN));
 
-            EntityGroupLogic.Register<ControlPanelDN>(newEntityGroupKey, 
-                uq => AuthLogic.CurrentRoles().Contains(uq.Related.ToLite<RoleDN>()));
+            EntityGroupLogic.Register<ControlPanelDN>(newEntityGroupKey,
+                uq => AuthLogic.CurrentRoles().Contains(uq.Related.ToLite<RoleDN>()),
+                uq => uq.Related != null && uq.Related.SmartTypeIs<RoleDN>());
         }
     }
 }

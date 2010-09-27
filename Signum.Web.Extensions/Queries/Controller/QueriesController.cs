@@ -52,7 +52,7 @@ namespace Signum.Web.Queries
 
             var userQuery = new UserQueryDN
             {
-                Related = RoleDN.Current.ToLite<IdentifiableEntity>(), //User UserDN.Current when possible
+                Related = UserDN.Current.ToLite<IdentifiableEntity>(), 
                 Query = QueryLogic.RetrieveOrGenerateQuery(findOptions.QueryName),
                 Filters = findOptions.FilterOptions.Select(fo => new QueryFilterDN { Token = fo.Token, Operation = fo.Operation, Value = fo.Value, ValueString = FilterValueConverter.ToString(fo.Value, fo.Token.Type) }).ToMList(),
                 Columns = findOptions.UserColumnOptions.Select(uco => new QueryColumnDN { Token = uco.UserColumn.Token, DisplayName = uco.DisplayName }).ToMList(),
