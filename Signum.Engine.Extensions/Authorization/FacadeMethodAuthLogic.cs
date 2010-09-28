@@ -23,7 +23,7 @@ namespace Signum.Engine.Authorization
 
         public static bool IsStarted { get { return cache != null; } }
 
-        public static void Start(SchemaBuilder sb, Type serviceInterface)
+        public static void Start(SchemaBuilder sb, params Type[] serviceInterface)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -31,8 +31,8 @@ namespace Signum.Engine.Authorization
                 FacadeMethodLogic.Start(sb, serviceInterface);
 
                 cache = new AuthCache<RuleFacadeMethodDN, FacadeMethodAllowedRule, FacadeMethodDN, string, bool>(sb,
-                     fm => fm.Name,
-                     n => FacadeMethodLogic.RetrieveOrGenerateServiceOperation(n),
+                     fm => fm.ToString(),
+                     n =>  FacadeMethodLogic.RetrieveOrGenerateFacadeMethod(n),
                      AuthUtils.MaxBool,
                      AuthUtils.MinBool); 
             }
@@ -40,8 +40,8 @@ namespace Signum.Engine.Authorization
 
         public static FacadeMethodRulePack GetFacadeMethodRules(Lite<RoleDN> roleLite)
         {
-            FacadeMethodRulePack result = new FacadeMethodRulePack { Role = roleLite }; 
-            cache.GetRules(result, FacadeMethodLogic.RetrieveOrGenerateServiceOperations()) ;
+            FacadeMethodRulePack result = new FacadeMethodRulePack { Role = roleLite };
+            cache.GetRules(result, FacadeMethodLogic.RetrieveOrGenerateFacadeMethods().OrderBy(a => a.InterfaceName).ThenBy(a => a.MethodName));
             return result; 
         }
 
@@ -50,20 +50,19 @@ namespace Signum.Engine.Authorization
             cache.SetRules(rules, r => true);
         }
 
-      
         public static bool SetFacadeMethodAllowed(Lite<RoleDN> role, MethodInfo mi)
         {
-            return cache.GetAllowed(role, mi.Name);
+            return cache.GetAllowed(role, FacadeMethodLogic.Normalize(mi).Key());
         }
 
         public static bool SetFacadeMethodAllowed(MethodInfo mi)
         {
-            return cache.GetAllowed(mi.Name);
+            return cache.GetAllowed(FacadeMethodLogic.Normalize(mi).Key());
         }
 
         public static void AuthorizeAccess(MethodInfo mi)
         {
-            if (!cache.GetAllowed(mi.Name))
+            if (!cache.GetAllowed(FacadeMethodLogic.Normalize(mi).Key()))
                 throw new UnauthorizedAccessException(Resources.AccessToFacadeMethod0IsNotAllowed.Formato(mi.Name));
         }
     }

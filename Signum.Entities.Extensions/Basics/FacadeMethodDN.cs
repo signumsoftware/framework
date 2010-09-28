@@ -2,24 +2,52 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Signum.Utilities;
+using System.Reflection;
+using System.Linq.Expressions;
 
 namespace Signum.Entities.Basics
 {
     [Serializable]
     public class FacadeMethodDN : IdentifiableEntity
     {
-        [NotNullable, SqlDbType(Size = 100), UniqueIndex]
-        string name;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string Name
+        private FacadeMethodDN() { }
+
+        public FacadeMethodDN(MethodInfo mi)
         {
-            get { return name; }
-            set { SetToStr(ref name, value, () => Name); }
+            InterfaceName = mi.DeclaringType.Name;
+            MethodName = mi.Name;
+        }
+
+        [NotNullable, SqlDbType(Size = 100)]
+        string interfaceName;
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        public string InterfaceName
+        {
+            get { return interfaceName; }
+            set { Set(ref interfaceName, value, () => InterfaceName); }
+        }
+
+        [NotNullable, SqlDbType(Size = 100)]
+        string methodName;
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        public string MethodName
+        {
+            get { return methodName; }
+            set { Set(ref methodName, value, () => MethodName); }
         }
 
         public override string ToString()
         {
-            return name;
+            return "{0}.{1}".Formato(interfaceName, methodName);
         }
+
+        static Expression<Func<FacadeMethodDN, MethodInfo, bool>> MatchExpression =
+            (fm, mi) => mi.DeclaringType.Name == fm.InterfaceName && mi.Name == fm.MethodName;
+        public bool Match(MethodInfo mi)
+        {
+            return MatchExpression.Invoke(this, mi);
+        }
+
     }
 }

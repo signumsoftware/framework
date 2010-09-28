@@ -10,60 +10,86 @@ using Signum.Utilities;
 using Signum.Engine.DynamicQuery;
 using Signum.Entities.Reflection;
 using Signum.Entities;
+using System.Collections.Concurrent;
+using Signum.Utilities.Reflection;
+using System.Diagnostics;
 
 namespace Signum.Engine.Basics
 {
     public static class FacadeMethodLogic
     {
-        static Type serviceInterface;
-        public static void Start(SchemaBuilder sb, Type serviceInterface)
+        static HashSet<MethodInfo> methods = new HashSet<MethodInfo>();
+
+        public static IEnumerable<MethodInfo> ServiceMethodInfos { get { return methods;  } }
+
+        public static void Start(SchemaBuilder sb, params Type[] serviceInterface)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                FacadeMethodLogic.serviceInterface = serviceInterface;
                 sb.Include<FacadeMethodDN>();
-
                 sb.Schema.Synchronizing += SyncronizeServiceOperations;
+
+                if (serviceInterface != null)
+                    foreach (var t in serviceInterface)
+                        Register(t);
             }
         }
 
-        public static bool IsEnabled
+        public static void Register(Type serviceInterface)
         {
-            get { return serviceInterface != null; }
+            var meth = serviceInterface.GetInterfaces().PreAnd(serviceInterface).SelectMany(a => a.GetMethods()).ToArray();
+
+            methods.AddRange(meth.Select(mi => Normalize(mi)));
         }
 
-        public static FacadeMethodDN RetrieveOrGenerateServiceOperation(string name)
+        public static string Key(this MethodInfo mi)
         {
-            return Database.Query<FacadeMethodDN>().SingleOrDefault(a => a.Name == name) ?? GenerateFacadeMethod(name);
+            return mi.DeclaringType.Name + "." + mi.Name;
         }
 
-        public static List<FacadeMethodDN> RetrieveOrGenerateServiceOperations()
+        public static FacadeMethodDN RetrieveOrGenerateFacadeMethod(string facadeMethod)
         {
-            var current = Database.RetrieveAll<FacadeMethodDN>().ToDictionary(a => a.Name);
-            var total = GenerateFacadeMethods().ToDictionary(a => a.Name);
+            MethodInfo mi = ServiceMethodInfos.Where(m => m.Key() == facadeMethod)
+                .Single("Method not found in registered Service Interfaces");
+
+            return Database.Query<FacadeMethodDN>().SingleOrDefault(a => a.Match(mi)) ?? new FacadeMethodDN(mi);
+        }
+
+        public static List<FacadeMethodDN> RetrieveOrGenerateFacadeMethods()
+        {
+            var current = Database.RetrieveAll<FacadeMethodDN>().ToDictionary(a => a.ToString());
+            var total = GenerateFacadeMethods().ToDictionary(a => a.ToString());
 
             total.SetRange(current);
             return total.Values.ToList();
         }
 
-        static List<FacadeMethodDN> GenerateFacadeMethods()
+        private static IEnumerable<FacadeMethodDN> GenerateFacadeMethods()
         {
-            return GenerateServiceMethodInfos().Select(mi => new FacadeMethodDN { Name = mi.Name }).ToList();
+            return methods.Select(m => new FacadeMethodDN(m));
         }
 
-        static FacadeMethodDN GenerateFacadeMethod(string name)
+        static ConcurrentDictionary<MethodInfo, MethodInfo> normalizationCache = new ConcurrentDictionary<MethodInfo, MethodInfo>();
+        public static MethodInfo Normalize(MethodInfo mi)
         {
-            return new FacadeMethodDN { Name = GenerateServiceMethodInfo(name).Name };
-        }
+            return normalizationCache.GetOrAdd(mi, mi2 =>
+                {
+                    var decType = mi2.DeclaringType;
 
-        public static MethodInfo GenerateServiceMethodInfo(string miName)
-        {
-            return serviceInterface.GetInterfaces().SelectMany(i => i.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.FlattenHierarchy)).Single(m => m.Name == miName);
-        }
+                    if (mi2.DeclaringType.IsInterface)
+                    {
+                        Debug.Assert(mi2.DeclaringType == mi2.ReflectedType);
+                        return mi2;
+                    }
 
-        public static List<MethodInfo> GenerateServiceMethodInfos()
-        {
-            return serviceInterface.GetInterfaces().SelectMany(i => i.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.FlattenHierarchy)).ToList();
+                    return (from inter in decType.GetInterfaces()
+                            let map = decType.GetInterfaceMap(inter)
+                            let index = map.TargetMethods.IndexOf(m => ReflectionTools.MethodEqual(m, mi2))
+                            where index != -1
+                            select map.InterfaceMethods[index]).Single(
+                                "{0} is not an implementation of any interface".Formato(mi2.Name),
+                                "{0} is implementing many interfaces".Formato(mi2.Name));
+                });
         }
 
         const string FacadeMethodKey = "FacadeMethod";
@@ -77,15 +103,21 @@ namespace Signum.Engine.Basics
             Table table = Schema.Current.Table<FacadeMethodDN>();
 
             return Synchronizer.SynchronizeReplacing(replacements, FacadeMethodKey,
-                current.ToDictionary(a => a.Name),
-                should.ToDictionary(a => a.Name),
+                current.ToDictionary(a => a.ToString()),
+                should.ToDictionary(a => a.ToString()),
                 (n, c) => table.DeleteSqlSync(c),
                 null,
                 (fn, c, s) =>
                 {
-                    c.Name = s.Name;
+                    c.InterfaceName = s.InterfaceName;
+                    c.MethodName = s.MethodName;
                     return table.UpdateSqlSync(c);
                 }, Spacing.Double);
+        }
+
+        public static MethodInfo FindMethodInfo(FacadeMethodDN fm)
+        {
+            return methods.Single(mi => fm.Match(mi));
         }
     }
 }

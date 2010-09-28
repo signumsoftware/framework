@@ -46,8 +46,8 @@
     %>
     <tr>
         <td>
-            <%=Html.Span(null, item.Value.Resource.Name)%>
-            <%=Html.Hidden(item.Compose("Resource_Name"),  item.Value.Resource.Name)%>
+            <%=Html.Span(null, item.Value.Resource.ToString())%>
+            <%=Html.Hidden(item.Compose("Resource_Key"), item.Value.Resource.ToString())%>
             <%=Html.Hidden(item.Compose("AllowedBase"), item.Value.AllowedBase)%>
         </td>
         <td>

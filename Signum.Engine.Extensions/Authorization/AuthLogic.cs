@@ -324,13 +324,13 @@ namespace Signum.Engine.Authorization
             return user;
         }
 
-        public static void StartAllModules(SchemaBuilder sb, Type serviceInterface, DynamicQueryManager dqm)
+        public static void StartAllModules(SchemaBuilder sb, DynamicQueryManager dqm, params Type[] serviceInterfaces)
         {
             TypeAuthLogic.Start(sb);
             PropertyAuthLogic.Start(sb, true);
 
-            if (serviceInterface != null)
-                FacadeMethodAuthLogic.Start(sb, serviceInterface);
+            if (serviceInterfaces != null)
+                FacadeMethodAuthLogic.Start(sb, serviceInterfaces);
 
             QueryAuthLogic.Start(sb, dqm);
             OperationAuthLogic.Start(sb);
