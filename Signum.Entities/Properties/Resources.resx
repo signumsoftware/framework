@@ -343,6 +343,6 @@
     <value>Month Start </value>
   </data>
   <data name="_0IsNotSet" xml:space="preserve">
-    <value>"{0} is not set"</value>
+    <value>{0} is not set</value>
   </data>
 </root>

@@ -187,7 +187,7 @@ namespace Signum.Entities.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &quot;{0} is not set&quot;.
+        ///   Looks up a localized string similar to {0} is not set.
         /// </summary>
         public static string _0IsNotSet {
             get {
