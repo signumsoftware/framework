@@ -28,53 +28,6 @@
             helper.RenderRoute(rvd);
         }
 
-        public static void RenderAction(this HtmlHelper helper, string actionName, string controllerName, object routeValues)
-        {
-            helper.RenderAction(actionName, controllerName, new RouteValueDictionary(routeValues));
-        }
-
-        public static void RenderAction(this HtmlHelper helper, string actionName, string controllerName, RouteValueDictionary routeValues)
-        {
-            RouteValueDictionary rvd = null;
-            if (routeValues != null)
-            {
-                rvd = new RouteValueDictionary(routeValues);
-            }
-            else
-            {
-                rvd = new RouteValueDictionary();
-            }
-
-            foreach (var entry in helper.ViewContext.RouteData.Values)
-            {
-                if (!rvd.ContainsKey(entry.Key))
-                {
-                    rvd.Add(entry.Key, entry.Value);
-                }
-            }
-
-            if (!string.IsNullOrEmpty(actionName))
-            {
-                rvd["action"] = actionName;
-            }
-            if (!string.IsNullOrEmpty(controllerName))
-            {
-                rvd["controller"] = controllerName;
-            }
-
-            helper.RenderRoute(rvd);
-        }
-
-        public static void RenderAction(this HtmlHelper helper, string actionName, string controllerName)
-        {
-            helper.RenderAction(actionName, controllerName, null);
-        }
-
-        public static void RenderAction(this HtmlHelper helper, string actionName)
-        {
-            helper.RenderAction(actionName, null);
-        }
-
         private class RenderActionMvcHandler : MvcHandler
         {
             public RenderActionMvcHandler(RequestContext context)

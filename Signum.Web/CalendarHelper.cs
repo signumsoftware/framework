@@ -125,13 +125,20 @@ namespace Signum.Web
                     "Scripts/jqueryui/" + jQueryPrefix + "ui.datepicker.css",
                     "Scripts/jqueryui/" + jQueryPrefix + "ui.theme.css"));
 
+            var context = helper.ViewContext.HttpContext;
+
+            if (context.Items["jqCalendar"] == null){
+                helper.Write(GetLocalizationVariables());
+                helper.IncludeAreaJs("signum/Scripts/SF_jquery-ui-datepicker-extension.js");
+                context.Items["jqCalendar"] = true;
+            }
+
             sb.AppendLine(
                 "<script type=\"text/javascript\">\n" + 
                 "$(function(){\n" +
                 "$(\"#" + elementId + "\").datepicker({ " + OptionsToString(settings) +" });\n" + 
                 "});\n" + 
                 "</script>");
-
             return sb.ToString();
         }
 

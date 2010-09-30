@@ -39,45 +39,45 @@ Autocompleter = function(controlId, url, _options) {
 };
 
 Autocompleter.prototype = {
-    create: function() {
+    create: function () {
         var self = this;
 
         this.extraObj = undefined;  //data object passed to extra div when clicked
         this.$control.bind({
-            keyup: function(e) {
+            keyup: function (e) {
                 self.clear(e.which ? e.which : e.keyCode);
             },
-            keydown: function(e) {
+            keydown: function (e) {
                 return self.keydown(e);
             },
-            click: function() {
+            click: function () {
                 return false;
             },
-            focusin: function() {
-                if (self.currentResults.length) {
+            focusin: function () {
+                if (self.currentResults.length && self.$control.val() == self.prevInput) {
                     self.$dd.show();
                 }
             }
         });
 
-        $("body").click(function() {
+        $("body").click(function () {
             self.$dd.hide();
         });
 
         this.$dd = $("<div/>")
             .addClass("AutoCompleteMainDiv")
-            .click(function(e) { self.click(e); })
-            .delegate("." + this.resultClass, "mouseenter", function() {
+            .click(function (e) { self.click(e); })
+            .delegate("." + this.resultClass, "mouseenter", function () {
                 self.selectIndex($(this))
             })
             .insertAfter(this.$control);
     },
-    clear: function(e) {
+    clear: function (e) {
         clearTimeout(this.timerID);
         var self = this;
-        this.timerID = setTimeout(function() { self.keyup(e) }, (self.options.cacheEnabled && self.$control.val().toLowerCase() in self.cache) ? 0 : self.options.delay);
+        this.timerID = setTimeout(function () { self.keyup(e) }, (self.options.cacheEnabled && self.$control.val().toLowerCase() in self.cache) ? 0 : self.options.delay);
     },
-    keyup: function(key) {
+    keyup: function (key) {
         if (key == 37 || key == 39 || key == 38 || key == 40 || key == 13) return;
         var input = this.$control.val();
         if (this.prevInput == input) return;
@@ -93,7 +93,7 @@ Autocompleter.prototype = {
 
         var data = $.extend({
             q: input, l: this.options.limit
-        }, this.options.extraParams);
+        }, ($.isFunction(this.options.extraParams) ? this.options.extraParams() : {}));
 
         if (this.options.cacheEnabled && input.toLowerCase() in this.cache) {
             this.showResults(this.cache[input.toLowerCase()], input);
@@ -106,7 +106,7 @@ Autocompleter.prototype = {
         self.$control.addClass('loading');
         self.request = $.getJSON(
             self.url, data,
-            function(results) {
+            function (results) {
                 self.request = undefined;
                 if (results) {
                     self.showResults(results, input);
@@ -114,7 +114,7 @@ Autocompleter.prototype = {
             });
     },
 
-    showResults: function(results, input) {
+    showResults: function (results, input) {
         var prevCount = this.currentResults.length;
         if (prevCount == 0) this.$dd.hide();
 
@@ -157,10 +157,13 @@ Autocompleter.prototype = {
         else
             this.$dd.show();
     },
+    clean: function () {
+        this.currentResults = [];
+        this.$control.val() = "";
+    },
+    keydown: function (e) {
+        var key = e.which ? e.which : e.keyCode;
 
-    keydown: function(e) {
-        var key = e.which ? e.which : e.keyCode;       
-        
         if (key == 13 || key == 9) {    //enter or tab
             var selectedOption = this._getSelected();
             if (selectedOption.length > 0) {
@@ -191,7 +194,7 @@ Autocompleter.prototype = {
             this.$dd.hide();
         }
     },
-    moveUp: function() {
+    moveUp: function () {
         var current = this._getSelected();
         if (!current.length) { //Not yet in the DDL, select the last one		
             this.selectIndex(this.$dd.children().last());
@@ -199,7 +202,7 @@ Autocompleter.prototype = {
         }
         this.selectIndex(current.prev());
     },
-    moveDown: function() {
+    moveDown: function () {
         var current = this._getSelected();
         if (!current.length) { //Not yet in the DDL, select the first one
             this.selectIndex(this.$dd.children());
@@ -207,7 +210,7 @@ Autocompleter.prototype = {
         }
         this.selectIndex(current.next());
     },
-    click: function(e) {
+    click: function (e) {
         var target = e.srcElement || e.target;
         if (target != null) {
             var $extra = $(target).closest(".extra");
@@ -219,11 +222,11 @@ Autocompleter.prototype = {
             this.$dd.hide();
         }
     },
-    process: function(i, s) {
+    process: function (i, s) {
         if (this.options.process != null) return this.options.process(i, s);
         return this.highlight(i, s[this.options.textField]);
     },
-    highlight: function(i, s) {
+    highlight: function (i, s) {
         var pre_s = s;
         s = s.replace(new RegExp("(" + i + ")", "gi"), '<strong>$1</strong>');
 
@@ -237,7 +240,7 @@ Autocompleter.prototype = {
         }
         return s;
     },
-    onOk: function(index) {
+    onOk: function (index) {
         this.$dd.hide();
 
         var data = this.currentResults[index];
@@ -254,7 +257,7 @@ Autocompleter.prototype = {
         }
     },
 
-    selectIndex: function($option) {
+    selectIndex: function ($option) {
         this._getSelected().removeClass(this.resultSelectedClass);
         if ($option == null || $option == undefined) {
             this.$control.val(this.currentText).focus();
@@ -264,7 +267,7 @@ Autocompleter.prototype = {
         this.$control.focus();
     },
 
-    _getSelected: function() {
+    _getSelected: function () {
         return this.$dd.children("." + this.resultSelectedClass).first();
     }
 };

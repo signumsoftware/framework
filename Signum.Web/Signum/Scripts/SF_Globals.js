@@ -54,9 +54,6 @@ String.prototype.startsWith = function(str) {
     return (this.indexOf(str) === 0);
 }
 
-function isAbsoluteUrl(s) {
-    return s.toLowerCase().indexOf("http") === 0;
-}
 var SF = {};
 
 SF.ajax = function(jqueryAjaxOptions) {
