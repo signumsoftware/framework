@@ -93,7 +93,7 @@ Autocompleter.prototype = {
 
         var data = $.extend({
             q: input, l: this.options.limit
-        }, ($.isFunction(this.options.extraParams) ? this.options.extraParams() : {}));
+        }, ($.isFunction(this.options.extraParams) ? this.options.extraParams() : this.options.extraParams));
 
         if (this.options.cacheEnabled && input.toLowerCase() in this.cache) {
             this.showResults(this.cache[input.toLowerCase()], input);
