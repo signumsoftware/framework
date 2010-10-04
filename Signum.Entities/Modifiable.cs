@@ -13,28 +13,24 @@ namespace Signum.Entities
     public abstract class Modifiable
     {
         [Ignore]
-        bool modified = false;
+        bool? modified;
 
         [HiddenProperty]
-        public bool Modified
+        public bool? Modified
         {
-            get { return modified || SelfModified; }
-            set
+            get { return modified; }
+            internal set
             {
-                if (value)
-                    modified = true;
-                else
-                {
+                if (value == null)
                     CleanSelfModified();
-                    modified = false;
-                }
+                modified = value;
             }
         }
 
         [HiddenProperty]
         public abstract bool SelfModified { get; }
 
-        public abstract void CleanSelfModified();
+        protected abstract void CleanSelfModified();
 
         protected internal virtual void PreSaving(ref bool graphModified)
         {

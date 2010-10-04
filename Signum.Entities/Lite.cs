@@ -169,7 +169,7 @@ namespace Signum.Entities
             get { return false; }
         }
 
-        public override void CleanSelfModified()
+        protected override void CleanSelfModified()
         {
         }
 

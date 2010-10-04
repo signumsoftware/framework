@@ -74,7 +74,7 @@ namespace Signum.Entities
             }
         }
 
-        public override void CleanSelfModified()
+        protected override void CleanSelfModified()
         {
             hashCode = HashCodeSum();
         }

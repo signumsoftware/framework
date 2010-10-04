@@ -266,7 +266,7 @@ deallocate cur");
             where T : IdentifiableEntity
         {
             ident.IsNew = true;
-            ident.Modified = true;
+            ident.SetSelfModified();
             return ident;
         }
 

@@ -23,7 +23,7 @@ namespace Signum.Entities
     public abstract class ModifiableEntity : Modifiable, INotifyPropertyChanged, IDataErrorInfo, ICloneable
     {
         [Ignore]
-        protected bool selfModified = true;
+        bool selfModified = true;
 
         [HiddenProperty]
         public override bool SelfModified
@@ -31,7 +31,12 @@ namespace Signum.Entities
             get { return selfModified; }
         }
 
-        public override void CleanSelfModified()
+        protected internal virtual void SetSelfModified()
+        {
+            selfModified = true; 
+        }
+
+        protected override void CleanSelfModified()
         {
             selfModified = false;
         }
@@ -95,7 +100,7 @@ namespace Signum.Entities
                     mod.ExternalPropertyValidation += ChildPropertyValidation;
             }
 
-            selfModified = true;
+            SetSelfModified();
             NotifyPrivate(pi.Name);
             NotifyPrivate("Error");
 

@@ -129,7 +129,7 @@ namespace Signum.Engine.Maps
                 ef.Setter(result, ef.Field.GenerateValue(reader, retriever));
             }
 
-            result.Modified = false;
+            result.Modified = null;
             retriever.PostRetrieving.Add(result); 
 
             return result; 

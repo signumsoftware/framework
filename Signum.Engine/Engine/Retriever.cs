@@ -91,7 +91,7 @@ namespace Signum.Engine
 
                     table.Fill(reader, ie, this);
 
-                    ie.Modified = false;
+                    ie.Modified = null;
                     ie.IsNew = false; 
 
                     EntityCache.Add(ie);
@@ -125,7 +125,7 @@ namespace Signum.Engine
                     foreach (var lite in lites)
                     {
                         lite.ToStr = reader.GetString(1);
-                        lite.Modified = false;
+                        lite.Modified = null;
                         PostRetrieving.Add(lite);
                     }
                     dic.Remove(id);
@@ -159,7 +159,7 @@ namespace Signum.Engine
 
                 foreach (var id in requested)
                 {
-                    ((Modifiable)dic[id]).Modified = false;
+                    ((Modifiable)dic[id]).Modified = null;
                 }
 
                 dic.RemoveRange(requested);

@@ -34,7 +34,7 @@ namespace Signum.Engine.Maps
                                   select ((FieldMList)ef.Field).RelationalTable.RelationalInserts((Modifiable)ef.Getter(ident), ident.IsNew, forbidden)).Combine(Spacing.Simple);
 
             if (forbidden.Count == 0)
-                ident.Modified = false;
+                ident.Modified = null;
 
             return SqlPreCommand.Combine(Spacing.Double, entity, cols);
         }
@@ -125,11 +125,11 @@ namespace Signum.Engine.Maps
             if (collection == null)
                 return newEntity? null: SqlBuilder.RelationalDeleteScope(Name, BackReference.Name); 
 
-            if (!collection.Modified) // no es modificado ??
+            if (collection.Modified == false) // no es modificado ??
                 return null;
 
             if (forbidden.Count == 0)
-                collection.Modified = false;
+                collection.Modified = null;
 
             var clean = newEntity ? null : SqlBuilder.RelationalDeleteScope(Name, BackReference.Name);
 
@@ -258,7 +258,7 @@ namespace Signum.Engine.Maps
 
                 EmbeddedEntity ec = (EmbeddedEntity)value;
                 if (forbidden.Count == 0)
-                    ec.Modified = false;
+                    ec.Modified = null;
                 foreach (var v in EmbeddedFields.Values)
                     v.Field.CreateParameter(parameters, v.Getter(value), type, forbidden);
             }

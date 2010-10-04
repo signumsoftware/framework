@@ -14,8 +14,7 @@ namespace Signum.Entities
     {
         public EnumProxy()
         {
-            selfModified = false; 
-
+            CleanSelfModified();
         }
 
         public EnumProxy(string name)

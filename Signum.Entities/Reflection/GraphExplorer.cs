@@ -18,30 +18,24 @@ namespace Signum.Entities.Reflection
                 throw new ArgumentNullException("inverseGraph");
 
             foreach (Modifiable item in inverseGraph)
-                if (item.SelfModified && !(item is IdentifiableEntity))
+                item.Modified = false;
+
+            foreach (Modifiable item in inverseGraph)
+                if (item.SelfModified)
                     Propagate(item, inverseGraph); 
         }
 
-        private static void Propagate(Modifiable item, DirectedGraph<Modifiable> inverseGraph)
+        static void Propagate(Modifiable item, DirectedGraph<Modifiable> inverseGraph)
         {
+            if (item.Modified.Value)
+                return;
+
             item.Modified = true;
-            if (!(item is IdentifiableEntity))
-                foreach (var other in inverseGraph.RelatedTo(item))
-                    Propagate(other, inverseGraph);
+            foreach (var other in inverseGraph.RelatedTo(item))
+                Propagate(other, inverseGraph);
         }
 
-        //public static string GraphIntegrityCheck(this Modifiable modifiable, Func<Modifiable, IEnumerable<Modifiable>> explorer)
-        //{
-        //    DirectedGraph<Modifiable> eg = DirectedGraph<Modifiable>.Generate(modifiable, explorer);
-
-        //    string result = eg.Select(m => new { m, Error = m.IntegrityCheck() })
-        //        .Where(p => p.Error.HasText())
-        //        .ToString(p => "{0}\r\n{1}".Formato(eg.ShortestPath(modifiable, p.m).PreAnd(modifiable).ToString(e=>e.ToString().DefaultText("[...]"), "->"), p.Error.Indent(3)), "\r\n");
-
-        //    return result;
-        //}
-
-
+  
 
         public static DirectedGraph<Modifiable> FromRootIdentifiable(Modifiable root)
         {
@@ -152,7 +146,7 @@ namespace Signum.Entities.Reflection
                 Fillcolor =  n is Lite? "white": color(n.GetType()),
                 Color = 
                     n is Lite ? color(Reflector.ExtractLite(n.GetType())):
-                    (n.SelfModified ? "red" : n.Modified ? "red4" :"black"),
+                    (n.SelfModified ? "red" : n.Modified == true ? "red4" :"black"),
 
                 Shape = n is Lite ? "ellipse" :
                         n is IdentifiableEntity ? "ellipse" :
