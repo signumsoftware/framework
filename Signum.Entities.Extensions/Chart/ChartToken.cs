@@ -204,7 +204,7 @@ namespace Signum.Entities.Chart
         public override void PostRetrieving(QueryDescription queryDescription)
         {
             Token = tokenString.HasText() ? QueryUtils.Parse(tokenString, token => SubTokensChart(token, queryDescription.StaticColumns)) : null;
-            Modified = false;
+            CleanSelfModified();
         }
 
         static readonly QueryToken[] Empty = new QueryToken[0];

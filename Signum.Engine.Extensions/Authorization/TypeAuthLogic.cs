@@ -50,7 +50,7 @@ namespace Signum.Engine.Authorization
 
         static void Schema_Saving(IdentifiableEntity ident, bool isRoot)
         {
-            if (ident.Modified)
+            if (ident.Modified.Value)
             {
                 TypeAllowedBasic access = cache.GetAllowed(ident.GetType()).GetDB();
 

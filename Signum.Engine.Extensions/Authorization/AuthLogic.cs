@@ -157,7 +157,7 @@ namespace Signum.Engine.Authorization
 
         static void Schema_Saving(RoleDN role, bool isRoot)
         {
-            if (!role.IsNew && role.Roles != null && role.Roles.Modified)
+            if (!role.IsNew && role.Roles != null && role.Roles.SelfModified)
             {
                 using (new EntityCache())
                 {
@@ -180,7 +180,7 @@ namespace Signum.Engine.Authorization
                 }
             }
 
-            if (role.Modified)
+            if (role.Modified.Value)
             {
                 Transaction.RealCommit -= InvalidateCache;
                 Transaction.RealCommit += InvalidateCache;

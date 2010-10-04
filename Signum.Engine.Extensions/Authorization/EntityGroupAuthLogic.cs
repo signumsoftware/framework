@@ -118,7 +118,7 @@ namespace Signum.Engine.Authorization
         static void EntityGroupAuthLogic_Saving<T>(T ident, bool isRoot)
             where T : IdentifiableEntity
         {
-            if (AuthLogic.IsEnabled)
+            if (AuthLogic.IsEnabled && ident.Modified.Value)
             {
                 if (!saveDisabled.HasFlag(DisableSaveOptions.Origin))
                 {

@@ -146,7 +146,7 @@ namespace Signum.Entities.Reports
         public override void PostRetrieving(QueryDescription queryDescription)
         {
             Token = QueryUtils.ParseOrder(tokenString, queryDescription);
-            Modified = false;
+            CleanSelfModified();
         }
 
     }
@@ -167,7 +167,7 @@ namespace Signum.Entities.Reports
         public override void PostRetrieving(QueryDescription queryDescription)
         {
             Token = QueryUtils.ParseColumn(tokenString, queryDescription);
-            Modified = false;
+            CleanSelfModified();
         }
     }
 
@@ -201,14 +201,13 @@ namespace Signum.Entities.Reports
         public override void PostRetrieving(QueryDescription queryDescription)
         {
             Token = QueryUtils.ParseFilter(tokenString, queryDescription);
-            Modified = false;
 
             object val;
             string error = FilterValueConverter.TryParse(ValueString, Token.Type, out val);
             if (string.IsNullOrEmpty(error))
                 Value = val; //Executed on server only
 
-            Modified = false;
+            CleanSelfModified();
         }
 
         protected override void TokenChanged()

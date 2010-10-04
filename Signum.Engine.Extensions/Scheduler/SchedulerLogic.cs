@@ -78,7 +78,7 @@ namespace Signum.Engine.Scheduler
 
         static void Schema_Saving(ScheduledTaskDN task, bool isRoot)
         {
-            if (!isSafeSave && task.Modified)
+            if (!isSafeSave && task.Modified.Value)
             {
                 Transaction.RealCommit -= Transaction_RealCommit;
                 Transaction.RealCommit += Transaction_RealCommit;
