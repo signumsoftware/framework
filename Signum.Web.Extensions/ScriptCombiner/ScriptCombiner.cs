@@ -17,7 +17,7 @@ namespace Signum.Web.ScriptCombiner
 {
     public class MixedCssScriptCombiner
     {
-        private readonly static TimeSpan CACHE_DURATION = TimeSpan.FromDays(1); //1 day to avoid 304 during a session
+        private readonly static TimeSpan CACHE_DURATION = TimeSpan.FromDays(10); //avoid 304 during a session
 
         /// <summary>
         /// Indicates if the output file should be cached
@@ -108,10 +108,12 @@ namespace Signum.Web.ScriptCombiner
             else
                 response.AppendHeader("Content-Encoding", "utf-8");
 
+            //response.Cache.SetVaryByCustom("Accept-Encoding");
+            response.AppendHeader("Vary", "Accept-Encoding");
             response.Cache.SetCacheability(HttpCacheability.Public);
             response.Cache.SetExpires(DateTime.Now.Add(CACHE_DURATION));
             response.Cache.SetMaxAge(CACHE_DURATION);
-            response.Cache.AppendCacheExtension("must-revalidate, proxy-revalidate");
+            //response.Cache.AppendCacheExtension("must-revalidate, proxy-revalidate");
             response.ContentEncoding = Encoding.Unicode;
             response.OutputStream.Write(bytes, 0, bytes.Length);
             response.Flush();
@@ -152,7 +154,7 @@ namespace Signum.Web.ScriptCombiner
                     context.Response.Cache.SetCacheability(HttpCacheability.Public);
                     context.Response.Cache.SetExpires(DateTime.Now.Add(CACHE_DURATION));    //F5 will make the browser re-check the files
                     context.Response.Cache.SetMaxAge(CACHE_DURATION);
-                    context.Response.Cache.AppendCacheExtension("must-revalidate, proxy-revalidate");
+                    //context.Response.Cache.AppendCacheExtension("must-revalidate, proxy-revalidate");
                     return;
                 }
             }
@@ -338,7 +340,7 @@ namespace Signum.Web.ScriptCombiner
         /// </summary>
         public string fileName;
 
-        private readonly static TimeSpan CACHE_DURATION = TimeSpan.FromDays(1); //1 day to avoid 304 during a session
+        private readonly static TimeSpan CACHE_DURATION = TimeSpan.FromDays(10); //1 day to avoid 304 during a session
        
 
         public virtual string ReadFile(HttpContextBase context)
@@ -406,7 +408,7 @@ namespace Signum.Web.ScriptCombiner
 
         protected abstract string Minify(string content);
 
-        private readonly static TimeSpan CACHE_DURATION = TimeSpan.FromDays(1); //1 day to avoid 304 during a session
+        private readonly static TimeSpan CACHE_DURATION = TimeSpan.FromDays(10); //1 day to avoid 304 during a session
         internal HttpContextBase context;
         string lastModifiedDateKey = "-lmd";
 
@@ -446,7 +448,7 @@ namespace Signum.Web.ScriptCombiner
                     context.Response.Cache.SetCacheability(HttpCacheability.Public);
                     context.Response.Cache.SetExpires(DateTime.Now.Add(CACHE_DURATION));    //F5 will make the browser re-check the files
                     context.Response.Cache.SetMaxAge(CACHE_DURATION);
-                    context.Response.Cache.AppendCacheExtension("must-revalidate, proxy-revalidate");
+                    //context.Response.Cache.AppendCacheExtension("must-revalidate, proxy-revalidate");
                     return;
                 }
             }
@@ -538,10 +540,12 @@ namespace Signum.Web.ScriptCombiner
             else
                 response.AppendHeader("Content-Encoding", "utf-8");
 
+            response.AppendHeader("Vary", "Accept-Encoding");
+            //response.Cache.SetVaryByCustom("Accept-Encoding");
             response.Cache.SetCacheability(HttpCacheability.Public);
             response.Cache.SetExpires(DateTime.Now.Add(CACHE_DURATION));
             response.Cache.SetMaxAge(CACHE_DURATION);
-            response.Cache.AppendCacheExtension("must-revalidate, proxy-revalidate");
+            //response.Cache.AppendCacheExtension("must-revalidate, proxy-revalidate");
             response.ContentEncoding = Encoding.Unicode;
             response.OutputStream.Write(bytes, 0, bytes.Length);
             response.Flush();
