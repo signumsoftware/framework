@@ -11,12 +11,14 @@
             "signum/Scripts/SF_Validator.js",   
             "signum/Scripts/SF_Operations.js",
             "signum/Scripts/SF_DragAndDrop.js",   
-            "signum/Scripts/SF_Autocomplete.js");        
+            "signum/Scripts/SF_Autocomplete.js");
+        //string s = Html.GetContextualItemListForQuery(((FindOptions)ViewData[ViewDataKeys.FindOptions]).QueryName).ContextualItemsToString();
     %>
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
-<% using(Html.BeginForm("DoPostBack","Signum","POST")){ %>
+<%  
+    using(Html.BeginForm("DoPostBack","Signum","POST")){ %>
      <h2><%= ViewData[ViewDataKeys.PageTitle] ?? ""%></h2>
         <%Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString()); %>
         <%= Html.ValidationSummaryAjax() %>

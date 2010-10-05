@@ -754,6 +754,15 @@ th.headerSortDown {
 	position:absolute;
 	background:#fff;	
 	display:none;
+	padding: 2px;
+}
+.searchCtxMenu ul {
+    list-style-type:none;
+    margin:0;
+}
+.searchCtxMenu ul li {
+    margin:2px;
+    clear: both;
 }
 .searchCtxItem span {
 	width:100px;
@@ -761,15 +770,22 @@ th.headerSortDown {
 	padding:5px 10px;
 	cursor:pointer
 }
-
 .searchCtxMenuOverlay 
 {
 	left: 0px; 
 	top: 0px;
 	position: absolute;
-	width: 100%;
-	height: 100%;
+	height: 200%;
+	width: 200%;
+	min-height: 800px;
+	min-width: 1024px;
 	z-index: 100;
+}
+.entityCtxMenuSuccess a {
+    color: green;    
+}
+.entityCtxMenuError {
+    border:'1px solid red';  
 }
 
 #tblFilters td {

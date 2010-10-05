@@ -255,6 +255,7 @@ namespace Signum.Web.Controllers
         {
             return Navigator.Search(this, findOptions, sfTop, prefix);
         }
+
 		[AcceptVerbs(HttpVerbs.Post)]
         public ContentResult AddFilter(string sfQueryUrlName, string tokenName, int index, string prefix)
         {
@@ -269,6 +270,25 @@ namespace Signum.Web.Controllers
             fo.Operation = QueryUtils.GetFilterOperations(QueryUtils.GetFilterType(fo.Token.Type)).First();
 
             return Content(SearchControlHelper.NewFilter(CreateHtmlHelper(this), queryName, fo, new Context(null, prefix), index));
+        }
+
+        [AcceptVerbs(HttpVerbs.Post)]
+        public ContentResult GetContextualPanel(string liteUrl, string sfQueryUrlName, string prefix)
+        {
+            string[] urlParts = liteUrl.Split(new string[] { "/" }, StringSplitOptions.RemoveEmptyEntries);
+
+            Type t = Navigator.ResolveTypeFromUrlName(urlParts[1]);
+            int id = int.Parse(urlParts[2]);
+            Lite lite = Lite.Create(t, id);
+
+            object queryName = Navigator.ResolveQueryFromUrlName(sfQueryUrlName);
+            
+            string result = ContextualItemsHelper.GetContextualItemListForLite(this.ControllerContext, lite, queryName, prefix).ToString("");
+
+            if (string.IsNullOrEmpty(result))
+                result = Resources.NoResults;
+
+            return Content(result);
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
@@ -372,33 +392,47 @@ namespace Signum.Web.Controllers
         {
             bool isReactive = this.IsReactive();
 
-            IdentifiableEntity entity = (IdentifiableEntity)this.UntypedExtractEntity(prefix);
-            MappingContext context = null;
+            var ctx = this.UntypedExtractEntity(prefix)
+                          .UntypedApplyChanges(this.ControllerContext, prefix, true);
+
+            IdentifiableEntity entity = (IdentifiableEntity)ctx.UntypedValue;
+
+            var ticksDic = ctx.GetTicksDictionary();
 
             if (isReactive && prefix.HasText() && !prefix.StartsWith("New"))
             {
-                IdentifiableEntity subentity = (IdentifiableEntity)MappingContext.FindSubentity(entity, prefix);
+                ModifiableEntity subentity = (ModifiableEntity)MappingContext.FindSubentity(entity, prefix);
 
+                //If subentity == null, it's a new entity => create it and apply changes partially
                 if (subentity == null)
                 {
-                    Type type = MappingContext.FindSubentityType(entity, prefix);
-                    subentity = (IdentifiableEntity)Constructor.Construct(type);
+                    string runtimeInfoKey = TypeContextUtilities.Compose(prefix ?? "", EntityBaseKeys.RuntimeInfo);
+                    if (Request.Form.AllKeys.Contains(runtimeInfoKey))
+                    { // If there's runtimeInfo in the form => use it to create subentity
+                        RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(Request.Form[runtimeInfoKey]);
+                        if (runtimeInfo.IdOrNull != null)
+                            subentity = Database.Retrieve(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value);
+                        else
+                            subentity = (ModifiableEntity)Constructor.Construct(runtimeInfo.RuntimeType);
+                    }
+                    else
+                    { // Try to create subentity from the string route => will fail if there are interfaces
+                        Type type = MappingContext.FindSubentityType(entity, prefix);
+                        subentity = (ModifiableEntity)Constructor.Construct(type);
+                    }
+
+                    var subctx = subentity.UntypedApplyChanges(this.ControllerContext, prefix, true);
+
+                    ticksDic.AddRange(subctx.GetTicksDictionary());
+
+                    subentity = (ModifiableEntity)subctx.UntypedValue;
                 }
-                
-                context = subentity.UntypedApplyChanges(this.ControllerContext, prefix, true);
-                entity = subentity;
-            }
-            else
-            {
-                context = this.UntypedExtractEntity(prefix)
-                    .ThrowIfNullC("Entity was not possible to extract")
-                    .UntypedApplyChanges(this.ControllerContext, prefix, true);
 
-                entity = (IdentifiableEntity)context.UntypedValue;
+                entity = (IdentifiableEntity)subentity;
             }
 
-            this.ViewData[ViewDataKeys.ChangeTicks] = context.GetTicksDictionary();
-
+            this.ViewData[ViewDataKeys.ChangeTicks] = ticksDic;
+            
             if (isReactive)
             {
                 if (!prefix.HasText())
@@ -441,11 +475,6 @@ namespace Signum.Web.Controllers
                             c.TempData,
                             c.Response.Output
                         ),
-                        //new ViewContext(
-                        //    c.ControllerContext,
-                        //    new WebFormView(c.ControllerContext.RequestContext.HttpContext.Request.FilePath),
-                        //    c.ViewData,
-                        //    c.TempData),
                         new ViewPage());
         }
 

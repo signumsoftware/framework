@@ -18,10 +18,10 @@ namespace Signum.Utilities
             if (s == null || s.Length == 0)
                 return "\"\"";
 
-            return "\"" + s.Escape() + "\"";
+            return "\"" + s.Escape(true) + "\"";
         }
 
-        private static string Escape(this string s)
+        private static string Escape(this string s, bool forDoubleQuote)
         {
             if (s == null || s.Length == 0)
                 return "";
@@ -34,8 +34,21 @@ namespace Signum.Utilities
                 char c = s[i];
                 switch (c)
                 {
-                    case '\\':
                     case '"':
+                        if (forDoubleQuote)
+                        {
+                            sb.Append('\\');
+                        }
+                        sb.Append(c);
+                        break;
+                    case '\'':
+                        if (!forDoubleQuote)
+                        {
+                            sb.Append('\\');
+                        }
+                        sb.Append(c);
+                        break;
+                    case '\\':
                     case '>':
                         sb.Append('\\');
                         sb.Append(c);
@@ -69,7 +82,7 @@ namespace Signum.Utilities
             if (s == null || s.Length == 0)
                 return "\'\'";
 
-            return "\'" + s.Escape() + "\'";
+            return "\'" + s.Escape(false) + "\'";
         }
 
         public static string Unquote(this string obj)

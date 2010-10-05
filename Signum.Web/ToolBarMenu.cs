@@ -26,9 +26,12 @@ namespace Signum.Web
             }
 
             sb.Append("<ul class='menu-operation'>");
-            
-            foreach (ToolBarButton tbb in Items)
-                sb.Append("<li>" + tbb.ToString(helper) + "</li>");  
+
+            if (Items != null)
+            {
+                foreach (ToolBarButton tbb in Items)
+                    sb.Append("<li>" + tbb.ToString(helper) + "</li>");
+            }
 
             sb.Append("</ul>");
 

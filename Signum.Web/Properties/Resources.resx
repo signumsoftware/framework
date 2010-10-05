@@ -243,4 +243,7 @@
   <data name="UserColumnsEdit" xml:space="preserve">
     <value>Edit User Columns</value>
   </data>
+  <data name="NoResults" xml:space="preserve">
+    <value>No results</value>
+  </data>
 </root>

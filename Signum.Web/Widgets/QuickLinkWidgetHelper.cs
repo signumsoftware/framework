@@ -65,8 +65,6 @@ namespace Signum.Web
 
         private static JsFindOptions JsFindOptions(QuickLinkItem quickLinkItem)
         {
-
-
             JsFindOptions foptions = new JsFindOptions
             {
                 FindOptions = new FindOptions

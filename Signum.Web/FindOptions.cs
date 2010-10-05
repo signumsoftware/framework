@@ -104,6 +104,13 @@ namespace Signum.Web
 
         public bool Async { get; set; }
 
+        bool entityContextMenu = ContextualItemsHelper.EntityCtxMenuInSearchWindow;
+        public bool EntityContextMenu
+        {
+            get { return entityContextMenu; }
+            set { entityContextMenu = value; }
+        }
+
         public override string ToString()
         {
             Navigator.SetTokens(QueryName, FilterOptions);

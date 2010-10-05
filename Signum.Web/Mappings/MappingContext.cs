@@ -177,8 +177,9 @@ namespace Signum.Web
                     {
                         IList list = (IList)currentEntity;
                         if (list.Count <= index)
-                            return list.GetType().ElementType();
-                        currentEntity = (Modifiable)list[index];
+                            currentEntity = (Modifiable)Constructor.Construct(list.GetType().ElementType());
+                        else
+                            currentEntity = (Modifiable)list[index];
                     }
                     else
                     {
@@ -191,7 +192,7 @@ namespace Signum.Web
                         currentEntity = Database.Retrieve((Lite)currentEntity);
 
                     if (currentEntity == null)
-                        return pi.DeclaringType;
+                        currentEntity = (Modifiable)Constructor.Construct(pi.PropertyType);
                 }
             }
             catch (Exception)
@@ -199,7 +200,7 @@ namespace Signum.Web
                 throw new InvalidOperationException("Invalid property prefix or wrong entity in Session");
             }
 
-            return pi.DeclaringType;
+            return currentEntity.GetType();
         }
     }
 

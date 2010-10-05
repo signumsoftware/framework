@@ -22,6 +22,11 @@
 <%=Html.Hidden(context.Compose("sfQueryUrlName"), Navigator.Manager.QuerySettings[findOptions.QueryName].UrlName, new { disabled = "disabled" })%>
 <%=Html.Hidden(context.Compose(ViewDataKeys.AllowMultiple), findOptions.AllowMultiple.ToString(), new { disabled = "disabled" })%>
 <%=Html.Hidden(context.Compose(ViewDataKeys.View), viewable, new { disabled = "disabled" })%>
+<% if (findOptions.EntityContextMenu)
+   {
+       Response.Write("<script type=\"text/javascript\">var " + context.Compose("EntityContextMenu") + " = true;</script>");
+   }
+%>
 
 <%= (findOptions.SearchOnLoad) ?
     "<script type=\"text/javascript\">$(document).ready(function() {{ SearchOnLoad('{0}'); }});</script>".Formato(context.ControlID) : 
@@ -70,7 +75,8 @@
             </th>
             <%}
               if (viewable)
-              {%>
+              {
+             %>
             <th class="thRowEntity">
             </th>
             <%}

@@ -18,7 +18,8 @@ var OperationManager = function(_options) {
         controllerUrl: null,
         onOk: null,
         onCancelled: null,
-        requestExtraJsonData: null
+        contextual: false,
+        requestExtraJsonData: null,
     }, _options);
 };
 
@@ -84,6 +85,27 @@ OperationManager.prototype = {
         return requestData.join('');
     },
 
+    contextualRequestData: function (newPrefix) {
+        log("OperationManager contextualRequestData");
+        var requestData = [];
+        requestData.push("isLite=" + this.options.isLite
+                     + qp("sfOperationFullKey", this.options.operationKey)
+                     + qp(sfPrefix, newPrefix)
+                     + qp("sfOldPrefix", this.options.prefix)
+                     + qp("sfOnOk", singleQuote(this.options.onOk)));
+
+        if (!empty(this.options.requestExtraJsonData)) {
+            for (var key in this.options.requestExtraJsonData) {
+                if (jQuery.isFunction(this.options.requestExtraJsonData[key]))
+                    requestData.push(qp(key, this.options.requestExtraJsonData[key]()));
+                else
+                    requestData.push(qp(key, this.options.requestExtraJsonData[key]));
+            }
+        }
+
+        return requestData.join('');
+    },
+
     operationAjax: function (newPrefix, onSuccess) {
         log("OperationManager operationAjax");
 
@@ -101,7 +123,7 @@ OperationManager.prototype = {
         SF.ajax({
             type: "POST",
             url: this.options.controllerUrl,
-            data: this.requestData(newPrefix),
+            data: this.options.contextual ? this.contextualRequestData(newPrefix) : this.requestData(newPrefix),
             async: true,
             dataType: "html",
             success: function (operationResult) {
@@ -206,6 +228,15 @@ var OperationExecutor = function (_options) {
                 return;
         }
     };
+
+    this.contextualExecute = function (runtimeType, id) {
+        log("OperationExecutor contextualExecute");
+
+        if (uiBlocked)
+            return false;
+        
+        this.operationAjax(null, OpMarkCellOnSuccess);
+    };
 };
 
 OperationExecutor.prototype = new OperationManager();
@@ -236,6 +267,15 @@ var ConstructorFrom = function(_options) {
                 return;
         }
     };
+
+    this.contextualConstruct = function (runtimeType, id) {
+        log("ConstructorFrom contextualConstruct");
+
+        if (uiBlocked)
+            return false;
+
+        this.operationAjax(this.newPrefix(), OpContextualOnSuccess);
+    };
 };
 
 ConstructorFrom.prototype = new OperationManager();
@@ -251,17 +291,24 @@ var DeleteExecutor = function(_options) {
         if (uiBlocked)
             return false;
 
-        if (!empty(this.options.confirmMsg) && !confirm(this.options.confirmMsg))
-            return;
-
         var self = this;
         if (isTrue(this.options.isLite)) {
             NotifyInfo(lang['executingOperation']);
-            this.operationAjax(this.newPrefix(), function() { NotifyInfo(lang['operationExecuted'], 2000); });
+            this.operationAjax(this.options.prefix, function() { NotifyInfo(lang['operationExecuted'], 2000); });
         }
         else {
             throw "Delete operation must be Lite";
         }
+    };
+
+    this.contextualDelete = function(runtimeType, id) {
+        log("DeleteExecutor contextualDelete");
+
+        if (uiBlocked)
+            return false;
+
+        NotifyInfo(lang['executingOperation']);
+        this.operationAjax(this.options.prefix, function() { NotifyInfo(lang['operationExecuted'], 2000); });
     };
 };
 
@@ -405,18 +452,19 @@ function ReloadEntity(urlController, prefix, parentDiv) {
 
 function OpOnSuccessDispatcher(prefix, operationResult) {
     log("OperationExecutor OpDefaultOnSuccess");
+    $(".contextmenu-active").removeClass("contextmenu-active");
     if (empty(operationResult))
         return null;
     if (operationResult.indexOf("jsonResultType") > 0)
         return null; //ModelState errors should have been handled previously and same with redirections
 
     var $result = $(operationResult);
-    var newPopupId = prefix.compose("popupWindow");
+    var newPopupId = prefix.compose("panelPopup");
     var hasNewPopup = $("#" + newPopupId, $result).length > 0; 
     //Si el resultado es un normalControl, o es un popup y coincide con alguno de los abiertos => ReloadContent
     if (!hasNewPopup ||
             (hasNewPopup &&
-            $(".popupWindow:visible").attr('id').filter(function() { return this == newPopupId }).lengh == 0)) {
+            $(".popupWindow:visible").attr('id').filter(function() { return this == newPopupId }).length == 0)) {
         OpReloadContent(prefix, operationResult)
     }
     else {
@@ -426,6 +474,7 @@ function OpOnSuccessDispatcher(prefix, operationResult) {
 
 function OpReloadContent(prefix, operationResult){
     log("OperationExecutor OpReloadContent");
+    $(".contextmenu-active").removeClass("contextmenu-active");
     if (empty(prefix)) //NormalWindow
         $("#divNormalControl").html(operationResult);
     else { //PopupWindow
@@ -439,20 +488,52 @@ function OpReloadContent(prefix, operationResult){
 
 function OpOpenPopup(prefix, operationResult) {
     log("OperationExecutor OpOpenPopup");
+    $(".contextmenu-active").removeClass("contextmenu-active");
     new ViewNavigator({ prefix: prefix }).showCreateSave(operationResult);
     NotifyInfo(lang['operationExecuted'], 2000); 
 }
 
-function OpOpenPopupNoDefaultOk(prefix, operationResult)
-{
+function OpOpenPopupNoDefaultOk(prefix, operationResult) {
     log("OperationExecutor OpOpenPopupNoDefaultOk");
+    $(".contextmenu-active").removeClass("contextmenu-active");
     new ViewNavigator({ prefix: prefix, onOk: function() { return false; } }).showCreateSave(operationResult);
     NotifyInfo(lang['operationExecuted'], 2000); 
 }
 
 function OpNavigate(prefix, operationResult)
 {
-    Submit(operationResult); 
+    Submit(operationResult);
 }
 
+function OpMarkCellOnSuccess(prefix, operationResult){
+   log("OperationExecutor OpMarkCellOnSuccess");
+   var $td = $(".contextmenu-active");
+    if (empty(operationResult)) {
+        $td.addClass('entityCtxMenuSuccess');
+    }
+    else
+        $td.addClass('entityCtxMenuError');
+    $td.removeClass("contextmenu-active");
+    NotifyInfo(lang['operationExecuted'], 2000); 
+}
 
+function OpContextualOnSuccess(prefix, operationResult) {
+    log("OperationExecutor OpContextualOnSuccess");
+    $(".contextmenu-active").removeClass("contextmenu-active");
+    if (empty(operationResult))
+        return null;
+    if (operationResult.indexOf("jsonResultType") > 0)
+        return null; //ModelState errors should have been handled previously and same with redirections
+
+    var $result = $(operationResult);
+    var newPopupId = prefix.compose("panelPopup");
+    var hasNewPopup = $("#" + newPopupId, $result).length > 0;
+    //If result is a NormalControl => Load it
+    if (hasNewPopup)
+        OpOpenPopup(prefix, operationResult)
+    else
+    {
+       $("form").html(operationResult);
+       NotifyInfo(lang['operationExecuted'], 2000); 
+    }
+}

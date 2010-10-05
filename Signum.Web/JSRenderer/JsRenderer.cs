@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Signum.Utilities;
 using System.Web.Mvc;
+using System.Web;
 
 namespace Signum.Web
 {
@@ -62,7 +63,7 @@ namespace Signum.Web
             if (obj is bool)
                 return new JsValue<T>() { Renderer = () => ((bool)obj) ? "true" : "false" };
             else if (obj is string)
-                return new JsValue<T>() { Renderer = () => ((string)obj).SingleQuote() };
+                return new JsValue<T>() { Renderer = () => ((string)obj).Replace("'", "\'").SingleQuote() };
             else
                 return new JsValue<T>() { Renderer = () => value.ToString() }; //numbers an other
         }

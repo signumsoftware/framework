@@ -78,6 +78,7 @@
     <Compile Include="Common.cs" />
     <Compile Include="Constructor.cs" />
     <Compile Include="AreaResourceHelper.cs" />
+    <Compile Include="ContextualItem.cs" />
     <Compile Include="Futures\ExpressionHelper.cs" />
     <Compile Include="Futures\LinkBuilder.cs" />
     <Compile Include="Futures\MvcResources.Designer.cs">

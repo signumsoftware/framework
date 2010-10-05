@@ -1,41 +1,37 @@
-﻿$(function() {
+﻿$(function () {
     $(".searchControl th:not(.thRowEntity):not(.thRowSelection)")
-        .live('click', function(e) {
+        .live('click', function (e) {
             if ($(this).hasClass("userColumnEditing"))
                 return true;
             Sort(e);
             return false;
         })
-        .live('mousedown', function(e) {
+        .live('mousedown', function (e) {
             if ($(this).hasClass("userColumnEditing"))
                 return true;
-            this.onselectstart = function() { return false };
+            this.onselectstart = function () { return false };
             return false;
         });
 
-    $('.tblResults td:not(.tdRowEntity):not(.tdRowSelection)').live('contextmenu', function(e) {
-        log("contextmenu");
-
-        if ($(e.target).hasClass("searchCtxMenuOverlay")) {
+    $(".tblResults td").live('contextmenu', function (e) {
+        if ($(e.target).hasClass("searchCtxMenuOverlay") || $(e.target).parents().hasClass("searchCtxMenuOverlay")) {
             $('.searchCtxMenuOverlay').remove();
             return false;
         }
-        
-        var $cmenu = $(divContextualMenu); //$(this).next();
-        $('<div class="searchCtxMenuOverlay"></div>').click(function(e) {
-            log("contextmenu click");
-            var $target = $(e.target);
-            if ($target.hasClass("searchCtxItem") || $target.parent().hasClass("searchCtxItem"))
-                $cmenu.hide();
-            else
-                $('.searchCtxMenuOverlay').remove();
-        }).append($cmenu).appendTo($(this));
-        $cmenu.css({ left: e.pageX, top: e.pageY, zIndex: '101' }).show();
 
+        var $this = $(this);
+        var index = $this.index();
+        var $th = $this.closest("table").find("th").eq(index);
+        if ($th.hasClass('thRowSelection'))
+            return false;
+        if ($th.hasClass('thRowEntity'))
+            EntityCellContextMenu(e);
+        else
+            CellContextMenu(e);
         return false;
     });
 
-    $('.searchCtxItem').live('click', function() {
+    $('.searchCtxItem.quickFilter').live('click', function () {
         log("contextmenu item click");
         var $elem = $(this).closest("td");
         $('.searchCtxMenuOverlay').remove();
@@ -43,7 +39,70 @@
     });
 });
 
-var divContextualMenu = "<div class=\"searchCtxMenu\"><div class=\"searchCtxItem\"><span>Add filter</span></div></div>";
+function EntityCellContextMenu(e) {
+    log("entity contextmenu");
+    
+    var $target = $(e.target);
+
+    var hiddenQueryName = $target.closest(".searchControl").children("input:hidden[id$=sfQueryUrlName]");
+    var idHiddenQueryName = hiddenQueryName.attr('id');
+    var prefix = idHiddenQueryName.substring(0, idHiddenQueryName.indexOf("sfQueryUrlName"));
+    if (prefix.charAt(prefix.length-1) == "_")
+        prefix = prefix.substring(0, prefix.length - 1);
+
+    var showCtx = window[prefix.compose("EntityContextMenu")];
+    if (showCtx == undefined || isFalse(showCtx))
+        return false; //EntityContextMenu not active
+
+    var $cmenu = $("<div class='searchCtxMenu'></div>");
+    $('<div class="searchCtxMenuOverlay"></div>').click(function (e) {
+        log("contextmenu click");
+        var $target = $(e.target);
+        if ($target.hasClass("searchCtxItem") || $target.parent().hasClass("searchCtxItem"))
+            $cmenu.hide();
+        else
+            $('.searchCtxMenuOverlay').remove();
+    }).append($cmenu).appendTo($target);
+    $cmenu.css({
+        left: $target.position().left + ($target.outerWidth() / 2),
+        top: $target.position().top + ($target.outerHeight() / 2),
+        zIndex: '101'
+    }).show();
+
+    $target.addClass("contextmenu-active");
+    SF.ajax({
+        url: 'Signum/GetContextualPanel',
+        type: "POST",
+        async: true,
+        dataType: "html",
+        data: { liteUrl: $target.children('a').attr('href'), sfQueryUrlName: hiddenQueryName.val(), prefix: prefix },
+        success: function (items) { $cmenu.html(items); }
+    });
+
+    return false;
+}
+
+function CellContextMenu(e) {
+    log("contextmenu");
+    var $target = $(e.target);
+
+    var $cmenu = $("<div class='searchCtxMenu'><div class='searchCtxItem quickFilter'><span>Add filter</span></div></div>");
+    $('<div class="searchCtxMenuOverlay"></div>').click(function (e) {
+        log("contextmenu click");
+        var $target = $(e.target);
+        if ($target.hasClass("searchCtxItem") || $target.parent().hasClass("searchCtxItem"))
+            $cmenu.hide();
+        else
+            $('.searchCtxMenuOverlay').remove();
+    }).append($cmenu).appendTo($target);
+    $cmenu.css({
+        left: $target.position().left + ($target.outerWidth() / 2),
+        top: $target.position().top + ($target.outerHeight() / 2),
+        zIndex: '101'
+    }).show();
+
+    return false;
+}
 
 var FindNavigator = function(_findOptions) {
     this.findOptions = $.extend({
