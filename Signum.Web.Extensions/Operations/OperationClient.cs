@@ -19,7 +19,7 @@ namespace Signum.Web.Operations
     {
         public static OperationManager Manager { get; private set; }
 
-        public static void Start(OperationManager operationManager)
+        public static void Start(OperationManager operationManager, bool contextualMenuInSearchWindow)
         {
             Manager = operationManager;
 
@@ -28,6 +28,9 @@ namespace Signum.Web.Operations
             Constructor.ConstructorManager.GeneralConstructor += new Func<Type, ModifiableEntity>(Manager.ConstructorManager_GeneralConstructor);
             Constructor.ConstructorManager.VisualGeneralConstructor += new Func<ConstructContext, ActionResult>(Manager.ConstructorManager_VisualGeneralConstructor); 
             ButtonBarQueryHelper.GetButtonBarForQueryName += Manager.ButtonBar_GetButtonBarForQueryName;
+
+            if (contextualMenuInSearchWindow)
+                OperationsContextualItemsHelper.Start();
         }
     }
 

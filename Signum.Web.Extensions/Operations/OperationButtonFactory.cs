@@ -30,7 +30,27 @@ namespace Signum.Web.Operations
                 Enabled = ctx.OperationInfo.CanExecute == null,
 
                 Text = ctx.OperationSettings.TryCC(o => o.Text) ?? ctx.OperationInfo.Key.NiceToString(),
-                OnClick = (ctx.OperationSettings != null && ctx.OperationSettings.OnClick != null ? ctx.OperationSettings.OnClick(ctx) : DefaultClick(ctx)).ToJS(),
+                OnClick = ((ctx.OperationSettings != null && ctx.OperationSettings.OnClick != null) ? ctx.OperationSettings.OnClick(ctx) : DefaultClick(ctx)).ToJS(),
+            };
+        }
+
+        public static OperationsContextualItem Create(ContextualOperationContext ctx, EntityOperationContext entityCtx)
+        {
+            return new OperationsContextualItem
+            {
+                Id = EnumDN.UniqueKey(ctx.OperationInfo.Key),
+
+                DivCssClass = " ".CombineIfNotEmpty(
+                    ToolBarButton.DefaultEntityDivCssClass,
+                    EntityOperationSettings.CssClass(ctx.OperationInfo.Key)),
+
+                AltText = ctx.OperationSettings.TryCC(o => o.AltText) ?? ctx.OperationInfo.CanExecute,
+                Enabled = ctx.OperationInfo.CanExecute == null,
+
+                Text = ctx.OperationSettings.TryCC(o => o.Text) ?? ctx.OperationInfo.Key.NiceToString(),
+                OnClick = (ctx.OperationSettings != null && ctx.OperationSettings.OnContextualClick != null) ? ctx.OperationSettings.OnContextualClick(ctx).ToJS()
+                        : (entityCtx.OperationSettings != null && entityCtx.OperationSettings.OnClick != null) ? entityCtx.OperationSettings.OnClick(entityCtx).ToJS()
+                        : DefaultContextualClick(ctx).ToJS()
             };
         }
 
@@ -51,7 +71,6 @@ namespace Signum.Web.Operations
             };
         }
 
-
         static JsInstruction DefaultClick(EntityOperationContext ctx)
         {
             switch (ctx.OperationInfo.OperationType)
@@ -59,9 +78,24 @@ namespace Signum.Web.Operations
                 case OperationType.Execute:
                     return new JsOperationExecutor(ctx.Options()).DefaultExecute();
                 case OperationType.Delete:
-                    return new JsOperationDelete(ctx.Options()).DefaultDelete();
+                    return new JsOperationDelete(ctx.Options()).DefaultDelete(ctx.Entity);
                 case OperationType.ConstructorFrom:
                     return new JsOperationConstructorFrom(ctx.Options()).DefaultConstruct();                    
+                default:
+                    throw new InvalidOperationException(Resources.InvalidOperationType0inTheConstructionOfOperation1.Formato(ctx.OperationInfo.OperationType.ToString(), EnumDN.UniqueKey(ctx.OperationInfo.Key)));
+            }
+        }
+
+        static JsInstruction DefaultContextualClick(ContextualOperationContext ctx)
+        {
+            switch (ctx.OperationInfo.OperationType)
+            {
+                case OperationType.Execute:
+                    return new JsOperationExecutor(ctx.Options()).ContextualExecute(ctx.Entity, ctx.OperationSettings.TryCC(o => o.Text) ?? ctx.OperationInfo.Key.NiceToString());
+                case OperationType.Delete:
+                    return new JsOperationDelete(ctx.Options()).ContextualDelete(ctx.Entity);
+                case OperationType.ConstructorFrom:
+                    return new JsOperationConstructorFrom(ctx.Options()).ContextualConstruct(ctx.Entity, ctx.OperationSettings.TryCC(o => o.Text) ?? ctx.OperationInfo.Key.NiceToString());
                 default:
                     throw new InvalidOperationException(Resources.InvalidOperationType0inTheConstructionOfOperation1.Formato(ctx.OperationInfo.OperationType.ToString(), EnumDN.UniqueKey(ctx.OperationInfo.Key)));
             }

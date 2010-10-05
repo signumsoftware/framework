@@ -480,4 +480,7 @@
   <data name="WeReceivedARequestToCreateAnAccountYouCanCreateItFollowingTheLinkBelow" xml:space="preserve">
     <value>We received a request to create an account. You can create it following the link below:</value>
   </data>
+  <data name="PleaseConfirmYouDLikeToExecuteTheOperation0ToTheEntity123" xml:space="preserve">
+    <value>Please confirm you'd like to execute the operation {0} to the entity {1} ({2}-{3})</value>
+  </data>
 </root>

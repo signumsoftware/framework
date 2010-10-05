@@ -691,6 +691,15 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Please confirm you&apos;d like to execute the operation {0} to the entity {1} ({2}-{3}).
+        /// </summary>
+        public static string PleaseConfirmYouDLikeToExecuteTheOperation0ToTheEntity123 {
+            get {
+                return ResourceManager.GetString("PleaseConfirmYouDLikeToExecuteTheOperation0ToTheEntity123", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Please, enter your chosen new password.
         /// </summary>
         public static string PleaseEnterYourChosenNewPassword {

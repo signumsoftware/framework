@@ -47,6 +47,8 @@ namespace Signum.Web.Operations
         public static readonly JsFunction OpenPopup = new JsFunction() { Renderer = () => "OpOpenPopup" };
         public static readonly JsFunction OpenPopupNoDefaultOk = new JsFunction() { Renderer = () => "OpOpenPopupNoDefaultOk" };
         public static readonly JsFunction Navigate = new JsFunction() { Renderer = () => "OpNavigate" };
+        public static readonly JsFunction DefaultContextualDispatcher = new JsFunction() { Renderer = () => "OpContextualOnSuccess" };
+        public static readonly JsFunction MarkCellOnSuccess = new JsFunction() { Renderer = () => "OpMarkCellOnSuccess" };
     }
 
     public class JsOperationExecutor : JsOperationBase
@@ -61,6 +63,13 @@ namespace Signum.Web.Operations
         {
             return new JsInstruction(() => "{0}.defaultExecute()".Formato(this.ToJS()));
         }
+
+        public JsInstruction ContextualExecute(IdentifiableEntity entity, string operationName)
+        {
+            return new JsInstruction(() => Js.Confirm(
+                Resources.PleaseConfirmYouDLikeToExecuteTheOperation0ToTheEntity123.Formato(operationName, entity.ToStr, entity.GetType().NiceName(), entity.Id),
+                "{0}.contextualExecute()".Formato(this.ToJS())).ToJS());
+        }
     }
 
     public class JsOperationConstructorFrom : JsOperationBase
@@ -74,6 +83,13 @@ namespace Signum.Web.Operations
         public JsInstruction DefaultConstruct()
         {
             return new JsInstruction(() => "{0}.defaultConstruct()".Formato(this.ToJS()));
+        }
+
+        public JsInstruction ContextualConstruct(IdentifiableEntity entity, string operationName)
+        {
+            return new JsInstruction(() => Js.Confirm(
+                Resources.PleaseConfirmYouDLikeToExecuteTheOperation0ToTheEntity123.Formato(operationName, entity.ToStr, entity.GetType().NiceName(), entity.Id),
+                "{0}.contextualConstruct()".Formato(this.ToJS())).ToJS());
         }
     }
 
@@ -99,11 +115,18 @@ namespace Signum.Web.Operations
             Renderer = () => "new DeleteExecutor(" + this.options.ToJS() + ")";
         }
 
-        public JsInstruction DefaultDelete()
+        public JsInstruction DefaultDelete(IdentifiableEntity entity)
         {
             return new JsInstruction(() => Js.Confirm(
-                Resources.PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem, 
+                Resources.PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem + ": {0} ({1}-{2})".Formato(entity.ToStr, entity.GetType().NiceName(), entity.Id), 
                 "{0}.defaultDelete()".Formato(this.ToJS())).ToJS());
+        }
+
+        public JsInstruction ContextualDelete(IdentifiableEntity entity)
+        {
+            return new JsInstruction(() => Js.Confirm(
+                Resources.PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem + ": {0} ({1}-{2})".Formato(entity.ToStr, entity.GetType().NiceName(), entity.Id),
+                "{0}.contextualDelete()".Formato(this.ToJS())).ToJS());
         }
     }
 }

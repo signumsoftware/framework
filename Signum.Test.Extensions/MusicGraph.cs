@@ -121,4 +121,9 @@ namespace Signum.Test.Extensions
             };
         }
     }
+
+    public enum ArtistOperation
+    { 
+        AssignPersonalAward
+    }
 }

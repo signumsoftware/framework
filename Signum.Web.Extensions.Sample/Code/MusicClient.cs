@@ -38,13 +38,21 @@ namespace Signum.Web.Extensions.Sample
 
                 OperationClient.Manager.Settings.AddRange(new Dictionary<Enum, OperationSettings>
                 {
-                    { AlbumOperation.Clone, new EntityOperationSettings { OnClick = ctx => new JsOperationConstructorFrom(ctx.Options()).DefaultSubmit() }},
+                    { AlbumOperation.Clone, new EntityOperationSettings 
+                    { 
+                        OnClick = ctx => new JsOperationConstructorFrom(ctx.Options()).DefaultSubmit(),
+                        OnContextualClick = ctx => Js.Confirm("Do you wish to clone album {0}".Formato(ctx.Entity.ToStr),
+                            new JsOperationConstructorFrom(ctx.Options()).OperationAjax(ctx.Prefix, JsOpSuccess.DefaultContextualDispatcher)),
+                        IsVisible = ctx => true,
+                    }},
                     { AlbumOperation.CreateFromBand, new EntityOperationSettings 
                     { 
                         ControllerUrl = "Music/CreateAlbumFromBand", 
                         OnClick = ctx => JsValidator.EntityIsValid(ctx.Prefix, 
                             new JsOperationConstructorFrom(ctx.Options())
                             .OperationAjax(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk)),
+                        OnContextualClick = ctx => Js.Confirm("Do you wish to create an album for band {0}".Formato(ctx.Entity.ToStr),
+                            new JsOperationConstructorFrom(ctx.Options()).OperationAjax(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk)),
                     }},
                     { AlbumOperation.CreateGreatestHitsAlbum, new QueryOperationSettings
                     {

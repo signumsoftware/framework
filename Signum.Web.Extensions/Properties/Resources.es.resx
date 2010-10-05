@@ -480,4 +480,7 @@
   <data name="WeReceivedARequestToCreateAnAccountYouCanCreateItFollowingTheLinkBelow" xml:space="preserve">
     <value>Ha solicitado crear una cuenta. Para confirmarlo haga click en el siguiente enlace:</value>
   </data>
+  <data name="PleaseConfirmYouDLikeToExecuteTheOperation0ToTheEntity123" xml:space="preserve">
+    <value>Confirme que desea ejecutar la operación {0} a la entidad {1} ({2}-{3})</value>
+  </data>
 </root>

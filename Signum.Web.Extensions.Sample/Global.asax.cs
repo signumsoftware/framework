@@ -87,11 +87,12 @@ namespace Signum.Web.Extensions.Sample
             OperationClient.Start(new OperationManager
             {
                 Settings = new Dictionary<Enum, OperationSettings>()
-            });
+            }, true);
 
             AuthClient.Start(true, true, true, true);
             AuthAdminClient.Start(true, true, true, true, true, true, true);
 
+            ContextualItemsHelper.Start();
             UserQueriesClient.Start();
             ControlPanelClient.Start();
 
@@ -117,6 +118,11 @@ namespace Signum.Web.Extensions.Sample
                     //Thread.CurrentPrincipal = Database.Query<UserDN>().Where(u => u.UserName == "external").Single();
                 }
             }
+        }
+
+        protected void Session_Start(object sender, EventArgs e)
+        {
+            AuthController.LoginFromCookie();
         }
     }
 }

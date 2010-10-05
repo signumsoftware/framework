@@ -64,6 +64,9 @@ namespace Signum.Web.Operations
             {
                 if (Request.IsAjaxRequest())
                 {
+                    if (entity.IsNew)
+                        return Navigator.NormalControl(this, entity);
+
                     string newUrl = Navigator.ViewRoute(entity.GetType(), entity.Id);
                     if (HttpContext.Request.UrlReferrer.AbsolutePath.Contains(newUrl))
                         return Navigator.NormalControl(this, entity);
@@ -73,6 +76,22 @@ namespace Signum.Web.Operations
                 else
                     return Navigator.View(this, entity);
             }
+        }
+
+        [AcceptVerbs(HttpVerbs.Post)]
+        public ActionResult ContextualExecute(string sfOperationFullKey, string sfOldPrefix)
+        {
+            IdentifiableEntity entity = null;
+            RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(Request.Form[TypeContextUtilities.Compose(sfOldPrefix, EntityBaseKeys.RuntimeInfo)]);
+            if (runtimeInfo.IdOrNull.HasValue)
+            {
+                Lite lite = Lite.Create(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value);
+                entity = OperationLogic.ServiceExecuteLite(lite, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey));
+            }
+            else
+                throw new ArgumentException(Resources.CouldNotCreateLiteWithoutAnIdToCallOperation0.Formato(sfOperationFullKey));
+
+            return Content("");
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
@@ -98,7 +117,7 @@ namespace Signum.Web.Operations
             IdentifiableEntity entity = null;
             if (isLite)
             {
-                RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(Request.Form[TypeContextUtilities.Compose(sfOldPrefix, EntityBaseKeys.RuntimeInfo)]);
+                RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(Request.Form[TypeContextUtilities.Compose(sfOldPrefix ?? "", EntityBaseKeys.RuntimeInfo)]);
                 if (runtimeInfo.IdOrNull.HasValue)
                 {
                     Lite lite = Lite.Create(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value);
@@ -130,6 +149,9 @@ namespace Signum.Web.Operations
             {
                 if (Request.IsAjaxRequest())
                 {
+                    if (entity.IsNew)
+                        return Navigator.NormalControl(this, entity);
+
                     string newUrl = Navigator.ViewRoute(entity.GetType(), entity.Id);
                     if (HttpContext.Request.UrlReferrer.AbsolutePath.Contains(newUrl))
                         return Navigator.NormalControl(this, entity);

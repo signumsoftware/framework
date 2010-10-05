@@ -18,7 +18,6 @@ namespace Signum.Web.Operations
     {
         public string Text { get; set; }
         public string AltText { get; set; }
-   
 
         public string ControllerUrl { get; set; }
         public string RequestExtraJsonData { get; set; }
@@ -53,6 +52,8 @@ namespace Signum.Web.Operations
 
         public Func<EntityOperationContext, bool> IsVisible { get; set; }
         public Func<EntityOperationContext, JsInstruction> OnClick { get; set; }
+        public Func<ContextualOperationContext, bool> IsContextualVisible { get; set; }
+        public Func<ContextualOperationContext, JsInstruction> OnContextualClick { get; set; }
     }
 
     public class QueryOperationSettings : OperationSettings
@@ -98,6 +99,27 @@ namespace Signum.Web.Operations
                 Prefix = this.Prefix,
                 ControllerUrl = OperationSettings.TryCC(s => s.ControllerUrl).TryCC(c => (JsValue<string>)c),
                 RequestExtraJsonData = OperationSettings.TryCC(opt => opt.RequestExtraJsonData),
+            };
+        }
+    }
+
+    public class ContextualOperationContext : OperationContext
+    { 
+        public IdentifiableEntity Entity { get; internal set; }
+        public object QueryName { get; internal set; }
+        public EntityOperationSettings OperationSettings { get; internal set; }
+
+        public JsOperationOptions Options()
+        {
+            return new JsOperationOptions
+            {
+                OperationKey = EnumDN.UniqueKey(OperationInfo.Key),
+                IsLite = OperationInfo.Lite,
+                Prefix = this.Prefix,
+                IsContextual = true,
+                ControllerUrl = OperationSettings.TryCC(s => s.ControllerUrl).TryCC(c => (JsValue<string>)c) ?? (OperationInfo.OperationType == OperationType.Execute ? (JsValue<string>)"Operation/ContextualExecute" : null),
+                RequestExtraJsonData = OperationSettings.TryCC(opt => opt.RequestExtraJsonData) ?? 
+                                       "{{{0}:'{1}'}}".Formato(EntityBaseKeys.RuntimeInfo, new RuntimeInfo(Entity).ToString())
             };
         }
     }

@@ -12,6 +12,7 @@ using Signum.Test;
 using Signum.Web.Extensions.Sample.Test.Properties;
 using Signum.Engine.Maps;
 using Signum.Engine.Authorization;
+using System.Text.RegularExpressions;
 
 namespace Signum.Web.Extensions.Sample.Test
 {
@@ -350,6 +351,145 @@ namespace Signum.Web.Extensions.Sample.Test
 
                 //User columns are not present in popup
                 Assert.IsFalse(selenium.IsElementPresent("jq=#Members_0_divFilters .addColumn"));
+            }
+            catch (Exception)
+            {
+                Common.MyTestCleanup();
+                throw;
+            }
+        }
+
+        [TestMethod]
+        public void EntityCtxMenu_OpExecute()
+        {
+            try
+            {
+                CheckLoginAndOpen("/Signum.Web.Extensions.Sample/Find/Artist");
+
+                //Search
+                selenium.Click("btnSearch");
+                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#tblResults > tbody > tr"));
+
+                //ArtistOperations.AssignPersonalAward
+                selenium.ContextMenu("jq=#tblResults > tbody > tr:first > td:first");
+                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#tblResults > tbody > tr:first > td:first .searchCtxMenu a"));
+                selenium.Click("jq=#tblResults > tbody > tr:first > td:first .searchCtxMenu a");
+                
+                Assert.IsTrue(Regex.IsMatch(selenium.GetConfirmation(), ".*"));
+                selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("jq=#tblResults > tbody > tr:first > td:first > a.entityCtxMenuSuccess"));
+                Assert.IsFalse(selenium.IsElementPresent("jq=#tblResults > tbody > tr:first > td:first .searchCtxMenu .searchCtxMenuOverlay"));
+
+                //For Michael Jackson there are no operations enabled
+                selenium.ContextMenu("jq=#tblResults > tbody > tr:nth-child(5) > td:first");
+                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#tblResults > tbody > tr:nth-child(5) > td:first .searchCtxMenu"));
+                //There's not a menu with hrefs => only some text saying there are no operations
+                Assert.IsFalse(selenium.IsElementPresent("jq=#tblResults > tbody > tr:first > td:first .searchCtxMenu a"));
+            }
+            catch (Exception)
+            {
+                Common.MyTestCleanup();
+                throw;
+            }
+        }
+
+        [TestMethod]
+        public void EntityCtxMenu_OpConstructFrom_OpenPopup()
+        {
+            try
+            {
+                CheckLoginAndOpen("/Signum.Web.Extensions.Sample/Find/Band");
+
+                //Search
+                selenium.Click("btnSearch");
+                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#tblResults > tbody > tr"));
+
+                //Band.CreateFromBand
+                selenium.ContextMenu("jq=#tblResults > tbody > tr:first > td:first");
+                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#tblResults > tbody > tr:first > td:first .searchCtxMenu a"));
+                selenium.Click("jq=#tblResults > tbody > tr:first > td:first .searchCtxMenu a");
+                
+                Assert.IsTrue(Regex.IsMatch(selenium.GetConfirmation(), ".*"));
+                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #NewTemp"));
+
+                selenium.Type("New_Name", "ctxtest");
+                selenium.Type("New_Year", DateTime.Now.Year.ToString());
+                selenium.Click("New_Label_btnFind");
+                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #New_LabelTemp"));
+                selenium.Click("New_Label_btnSearch");
+                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#New_LabelTemp .tblResults > tbody > tr"));
+                selenium.Click("New_Label_rowSelection");
+                selenium.Click("New_Label_sfBtnOk");
+                
+                selenium.Click("New_sfBtnOk");
+                selenium.WaitForPageToLoad(PageLoadTimeout);
+                Assert.IsTrue(selenium.IsElementPresent("jq=.entityId > span"));
+            }
+            catch (Exception)
+            {
+                Common.MyTestCleanup();
+                throw;
+            }
+        }
+
+        [TestMethod]
+        public void EntityCtxMenu_OpConstructFrom_Navigate()
+        {
+            try
+            {
+                CheckLoginAndOpen("/Signum.Web.Extensions.Sample/Find/Album");
+
+                //Search
+                selenium.Click("btnSearch");
+                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#tblResults > tbody > tr"));
+
+                //Album.Clone
+                selenium.ContextMenu("jq=#tblResults > tbody > tr:first > td:first");
+                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#tblResults > tbody > tr:first > td:first .operation-ctx-menu"));
+                selenium.Click("jq=#tblResults > tbody > tr:first > td:first .operation-ctx-menu li:nth-child(2) > a");
+
+                Assert.IsTrue(Regex.IsMatch(selenium.GetConfirmation(), ".*"));
+                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#AlbumOperation_Save"));
+
+                selenium.Type("Name", "ctxtest2");
+                selenium.Type("Year", DateTime.Now.Year.ToString());
+                
+                selenium.Click("AlbumOperation_Save");
+                selenium.WaitForPageToLoad(PageLoadTimeout);
+                Assert.IsTrue(selenium.IsElementPresent("jq=.entityId > span"));
+            }
+            catch (Exception)
+            {
+                Common.MyTestCleanup();
+                throw;
+            }
+        }
+
+        [TestMethod]
+        public void EntityCtxMenu_OpDelete()
+        {
+            try
+            {
+                CheckLoginAndOpen("/Signum.Web.Extensions.Sample/Find/Album");
+
+                //Album.Delete
+                //Order by Id descending so we delete the last cloned album
+                selenium.Click("jq=th#Id");
+                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#tblResults > tbody > tr"));
+                selenium.Click("jq=th#Id");
+                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#tblResults > tbody > tr"));
+
+                Assert.IsTrue(selenium.IsElementPresent("jq=#tblResults > tbody > tr:nth-child(14)"));
+                Assert.IsFalse(selenium.IsElementPresent("jq=#tblResults > tbody > tr:nth-child(15)"));
+
+                selenium.ContextMenu("jq=#tblResults > tbody > tr:first > td:first");
+                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#tblResults > tbody > tr:first > td:first .operation-ctx-menu"));
+                selenium.Click("jq=#tblResults > tbody > tr:first > td:first .operation-ctx-menu li:first > a");
+
+                Assert.IsTrue(Regex.IsMatch(selenium.GetConfirmation(), ".*"));
+                selenium.WaitForPageToLoad(PageLoadTimeout);
+
+                Assert.IsTrue(selenium.IsElementPresent("jq=#tblResults > tbody > tr:nth-child(13)"));
+                Assert.IsFalse(selenium.IsElementPresent("jq=#tblResults > tbody > tr:nth-child(14)"));
             }
             catch (Exception)
             {

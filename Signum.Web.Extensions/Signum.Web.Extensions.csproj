@@ -101,6 +101,7 @@
     <Compile Include="Operations\JsOperations.cs" />
     <Compile Include="Operations\JsOperationOptions.cs" />
     <Compile Include="Operations\OperationButtonFactory.cs" />
+    <Compile Include="Operations\OperationContextItem.cs" />
     <Compile Include="Operations\OperationController.cs" />
     <Compile Include="Operations\OperationClient.cs" />
     <Compile Include="Operations\OperationSettings.cs" />

@@ -10,7 +10,6 @@
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
     <base href="<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/" ) %>" />
 
-    <% Html.CombinedCss("scripts", "jqueryui/ui.merged.css"); %>
     <% Html.CombinedCss("content", "fluid/fluid.min.css"); %>
     <% Html.IncludeAreaCss("signum/Content/LineStyles.css"); %>    
 

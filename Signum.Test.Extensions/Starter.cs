@@ -86,6 +86,13 @@ namespace Signum.Test.Extensions
             Signum.Test.Starter.StartMusic(sb, dqm);
 
             new AlbumGraph().Register();
+            OperationLogic.Register(new BasicExecute<ArtistDN>(ArtistOperation.AssignPersonalAward)
+            {
+                Lite = true,
+                AllowsNew = false,
+                CanExecute = a => a.LastAward != null ? "Artist cannot have already an award" : null,
+                Execute = (a,para) => a.LastAward = new PersonalAwardDN() { Category = "Best Artist", Year = DateTime.Now.Year, Result = AwardResult.Won }
+            });
 
             EntityGroupLogic.Register<LabelDN>(MusicGroups.JapanEntities, l => l.Country.Name == Signum.Test.Starter.Japan || l.Owner != null && l.Owner.SmartRetrieve().Country.Name == Signum.Test.Starter.Japan);
             EntityGroupLogic.Register<AlbumDN>(MusicGroups.JapanEntities, a => a.Label.IsInGroup(MusicGroups.JapanEntities));

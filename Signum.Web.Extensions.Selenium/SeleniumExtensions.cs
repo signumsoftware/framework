@@ -9,13 +9,22 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Signum.Web.Selenium
 {
+    public enum WebExplorer
+    { 
+        IE,
+        Chrome,
+        Firefox
+    }
+
     public static class SeleniumExtensions
     {
+        public static WebExplorer Explorer = WebExplorer.Firefox;
+
         public static Process LaunchSeleniumProcess()
         {
             Process seleniumServerProcess = new Process();
             seleniumServerProcess.StartInfo.FileName = "java";
-            if (System.IO.Directory.Exists("D:\\Signum\\Selenium"))
+            if (Explorer == WebExplorer.Firefox && System.IO.Directory.Exists("D:\\Signum\\Selenium"))
                 seleniumServerProcess.StartInfo.Arguments =
                     "-jar c:/selenium/selenium-server.jar -firefoxProfileTemplate D:\\Signum\\Selenium";
             else
@@ -28,7 +37,11 @@ namespace Signum.Web.Selenium
 
         public static ISelenium InitializeSelenium()
         {
-            ISelenium selenium = new DefaultSelenium("localhost", 4444, "*chrome", "http://localhost/");
+            ISelenium selenium =  new DefaultSelenium("localhost", 
+                4444,
+                Explorer == WebExplorer.Firefox ? "*chrome" : Explorer == WebExplorer.IE ? "*iexplore" : "*googlechrome", 
+                "http://localhost/");
+
             selenium.Start();
             selenium.SetSpeed("100");
 #if (DEBUG)
