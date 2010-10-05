@@ -130,7 +130,9 @@
     <Compile Include="Reports\Controllers\ReportController.cs" />
     <Compile Include="ScriptCombiner\CombineController.cs" />
     <Compile Include="ScriptCombiner\CombinerHtmlHelper.cs" />
+    <Compile Include="ScriptCombiner\GoogleClosure.cs" />
     <Compile Include="ScriptCombiner\JavaScriptMinifier.cs" />
+    <Compile Include="ScriptCombiner\Logger.cs" />
     <Compile Include="ScriptCombiner\ScriptCombiner.cs" />
     <Compile Include="ControllerFilters\FilterAttributes.cs" />
     <Compile Include="ViewsChecker\ViewsCheckerClient.cs" />

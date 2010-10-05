@@ -280,7 +280,11 @@ namespace Signum.Web.ScriptCombiner
         protected override string Minify(string content)
         {
             var minifier = new JavaScriptMinifier();
-            return minifier.Minify(content);
+            string minified = minifier.Minify(content);
+            string closure = GoogleClosure.CompressSourceCode(minified);
+            if (closure.HasText())
+                return closure;
+            return minified;
         }
     }
 
