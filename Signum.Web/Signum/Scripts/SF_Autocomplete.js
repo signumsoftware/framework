@@ -104,7 +104,14 @@ Autocompleter.prototype = {
 
         if (self.request) self.request.abort();
         self.$control.addClass('loading');
-        self.request = $.getJSON(
+
+        if ($.isFunction(self.url)) {
+            //we pass the input cleaned
+            var cleaned = replaceDiacritics(input).toLowerCase();
+            var results = self.url(cleaned);
+            self.showResults(results, input);
+        } else {
+            self.request = $.getJSON(
             self.url, data,
             function (results) {
                 self.request = undefined;
@@ -112,6 +119,7 @@ Autocompleter.prototype = {
                     self.showResults(results, input);
                 }
             });
+        }
     },
 
     showResults: function (results, input) {
