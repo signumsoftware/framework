@@ -5,6 +5,7 @@ using System.Text;
 using Signum.Utilities;
 using System.Reflection;
 using Signum.Entities.Extensions.Properties;
+using System.Linq.Expressions;
 
 namespace Signum.Entities.ControlPanel
 {
@@ -27,7 +28,7 @@ namespace Signum.Entities.ControlPanel
         }
 
         string displayName;
-        [StringLengthValidator(AllowNulls=false, Min=2)]
+        [StringLengthValidator(AllowNulls = false, Min = 2)]
         public string DisplayName
         {
             get { return displayName; }
@@ -50,11 +51,18 @@ namespace Signum.Entities.ControlPanel
             set { Set(ref parts, value, () => Parts); }
         }
 
+        static Expression<Func<ControlPanelDN, IIdentifiable, bool>> ContainsContentExpression =
+            (cp, content) => cp.Parts.Any(p => p.Content.Is(content));
+        public bool ContainsContent(IIdentifiable content)
+        {
+            return ContainsContentExpression.Invoke(this, content);
+        }
+
         protected override string ChildPropertyValidation(ModifiableEntity sender, PropertyInfo pi, object propertyValue)
         {
-            if(sender is PanelPart)
+            if (sender is PanelPart)
             {
-                PanelPart part =(PanelPart)sender;
+                PanelPart part = (PanelPart)sender;
 
                 int index = Parts.IndexOf(part);
 
@@ -79,7 +87,7 @@ namespace Signum.Entities.ControlPanel
             {
                 var rows = Parts.Select(p => p.Row).Distinct().ToList();
                 int maxRow = rows.Max();
-                var numbers = 1.To(maxRow+1);
+                var numbers = 1.To(maxRow + 1);
                 if (maxRow != rows.Count)
                     return Resources.ControlPanelDN_Rows0DontHaveAnyParts.Formato(numbers.Where(n => !rows.Contains(n)).ToString(n => n.ToString(), ", "));
             }
