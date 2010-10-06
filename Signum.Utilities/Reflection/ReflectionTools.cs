@@ -195,7 +195,7 @@ namespace Signum.Utilities.Reflection
 
             try
             {
-                MethodInfo methodInfo = mi.MakeGenericMethod(typeArguments);
+               MethodInfo methodInfo = mi.MakeGenericMethod(typeArguments);
                 return methodInfo.Invoke(obj, parameters); 
             }
             catch (TargetInvocationException ex)
