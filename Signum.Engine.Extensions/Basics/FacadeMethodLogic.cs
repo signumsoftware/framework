@@ -103,8 +103,8 @@ namespace Signum.Engine.Basics
             Table table = Schema.Current.Table<FacadeMethodDN>();
 
             return Synchronizer.SynchronizeReplacing(replacements, FacadeMethodKey,
-                current.ToDictionary(a => a.ToString()),
-                should.ToDictionary(a => a.ToString()),
+                current.ToDictionary(a => a.ToString(),"FacadeMethods in Database"),
+                should.ToDictionary(a => a.ToString(), "FacadeMethods in Service Interface"),
                 (n, c) => table.DeleteSqlSync(c),
                 null,
                 (fn, c, s) =>
