@@ -270,6 +270,9 @@ deallocate cur");
             return ident;
         }
 
+        /// <summary>
+        /// Disables Identity in a table for the current transaction
+        /// </summary>
         public static IDisposable DisableIdentity<T>()
             where T : IdentifiableEntity
         {
@@ -282,6 +285,17 @@ deallocate cur");
                 table.Identity = true;
                 SqlBuilder.SetIdentityInsert(table.Name, false).ExecuteNonQuery();
             });
+        }
+
+        public static void SaveDisableIdentity<T>(T entities)
+            where T : IdentifiableEntity
+        {
+            using (Transaction tr = new Transaction())
+            using (Administrator.DisableIdentity<T>())
+            {
+                Database.Save(entities);
+                tr.Commit();
+            }
         }
 
         public static void SaveListDisableIdentity<T>(IEnumerable<T> entities)
