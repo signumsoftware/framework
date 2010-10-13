@@ -16,6 +16,7 @@ using System.Windows;
 using System.Windows.Controls;
 using Signum.Entities.Reflection;
 using Signum.Windows.Extensions.Properties;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Windows.Operations
 {
@@ -69,6 +70,16 @@ namespace Signum.Windows.Operations
         {
             return Manager.GetText(key, Manager.Settings.TryGetC(key));
         }
+
+        public static void AddSetting(OperationSettings setting)
+        {
+            Manager.Settings.AddOrThrow(setting.Key, setting, "EntitySettings {0} repeated");
+        }
+
+        public static void AddSettings(List<OperationSettings> settings)
+        {
+            Manager.Settings.AddRange(settings, s => s.Key, s => s, "EntitySettings");
+        }
     }
 
     public class OperationManager
@@ -84,16 +95,41 @@ namespace Signum.Windows.Operations
 
             var list = Server.Return((IOperationServer s)=>s.GetEntityOperationInfos(ident)); 
 
-            var result = list.Select(oi => GenerateButton(oi, ident, entityControl, viewButtons)).NotNull().ToList();
+            var result = list.Select(oi => 
+            {
+                Type type  = ident.GetType();
+                OperationSettings settings = Settings.TryGetC(oi.Key);
+                if(settings != null)
+                {
+                    if(settings.GetType().IsInstantiationOf(typeof(EntityOperationSettings<>)))
+                        throw new InvalidOperationException("OperationSettings for {0} should be a {1} instead of {2}".Formato(
+                            settings, oi.Key, typeof(EntityOperationSettings<>).MakeGenericType(type).TypeName(), settings.GetType()));
+ 
+                    Type supraType = settings.GetType().GetGenericArguments()[0]; 
+                    if(!supraType.IsAssignableFrom(type))
+                        throw new InvalidOperationException("{0} is not a subclass of {1}".Formato(type, supraType)); 
+
+                    type = supraType; 
+                }
+                return (FrameworkElement)miGenerateButton.GenericInvoke(new []{type}, this, new object[]{oi, ident, entityControl, viewButtons, settings});
+            }).NotNull().ToList();
 
             return result;
         }
 
-        protected internal virtual Win.FrameworkElement GenerateButton(OperationInfo operationInfo, IdentifiableEntity entity, Win.FrameworkElement entityControl, ViewButtons viewButtons)
-        {
-            EntityOperationSettings os = (EntityOperationSettings)Settings.TryGetC(operationInfo.Key);
+        static MethodInfo miGenerateButton = ReflectionTools.GetMethodInfo(() => ((OperationManager)null).GenerateButton<IdentifiableEntity>(null, null, null, ViewButtons.Ok, null)).GetGenericMethodDefinition();
 
-            if (os != null && os.IsVisible != null && !os.IsVisible(entity))
+        protected internal virtual Win.FrameworkElement GenerateButton<T>(OperationInfo operationInfo, T entity, Win.FrameworkElement entityControl, ViewButtons viewButtons, EntityOperationSettings<T> os)
+            where T:class, IIdentifiable
+        {
+            EntityOperationEventArgs<T> args = new EntityOperationEventArgs<T>
+            {
+                Entity = entity,
+                EntityControl = entityControl,
+                OperationInfo = operationInfo,
+            };
+
+            if (os != null && os.IsVisible != null && !os.IsVisible(args))
                 return null;
 
             if (viewButtons == ViewButtons.Ok && (os == null || !os.VisibleOnOk))
@@ -108,14 +144,33 @@ namespace Signum.Windows.Operations
                 ToolTip = operationInfo.CanExecute,
             };
 
+            args.SenderButton = button;
+
             if (operationInfo.CanExecute != null)
             {
                 button.ToolTip = operationInfo.CanExecute;
                 button.IsEnabled = false;
                 ToolTipService.SetShowOnDisabled(button, true);
             }
+            else
+            {
+                button.Click += (_ , __) =>
+                {
+                    if (args.OperationInfo.CanExecute != null)
+                        throw new ApplicationException("Operation {0} is disabled: {1}".Formato(args.OperationInfo.Key, args.OperationInfo.CanExecute));
 
-            button.Click += (sender, args) => ButtonClick((ToolBarButton)sender, operationInfo, entityControl, os.TryCC(o => o.Click));
+                    if (os != null && os.Click != null)
+                    {
+                        IIdentifiable newIdent = os.Click(args);
+                        if (newIdent != null)
+                            args.EntityControl.RaiseEvent(new ChangeDataContextEventArgs(newIdent));
+                    }
+                    else
+                    {
+                        DefaultOperationExecute(args);
+                    }
+                }; 
+            }
 
             return button;
         }
@@ -147,71 +202,54 @@ namespace Signum.Windows.Operations
             return key.NiceToString();
         }
 
-        private static void ButtonClick(ToolBarButton sender, OperationInfo operationInfo, Win.FrameworkElement entityControl, Func<EntityOperationEventArgs, IIdentifiable> handler)
+        private static void DefaultOperationExecute<T>(EntityOperationEventArgs<T> args)
+            where T: class, IIdentifiable
         {
-            if (operationInfo.CanExecute != null)
-                throw new ApplicationException("Action {0} is disabled: {1}".Formato(operationInfo.Key, operationInfo.CanExecute));
-
-            IdentifiableEntity ident = (IdentifiableEntity)entityControl.DataContext;
-
-            if (handler != null)
+            IdentifiableEntity ident = (IdentifiableEntity)(IIdentifiable)args.Entity;
+            if (args.OperationInfo.OperationType == OperationType.Execute)
             {
-                EntityOperationEventArgs oea = new EntityOperationEventArgs
+                if (args.OperationInfo.Lite.Value)
                 {
-                    Entity = ident,
-                    EntityControl = entityControl,
-                    OperationInfo = operationInfo,
-                    SenderButton = sender
-                };
-
-                IIdentifiable newIdent = handler(oea);
-                if (newIdent != null)
-                    entityControl.RaiseEvent(new ChangeDataContextEventArgs(newIdent));
-            }
-            else if (operationInfo.OperationType == OperationType.Execute)
-            {
-                if (operationInfo.Lite.Value)
-                {
-                    if (entityControl.LooseChangesIfAny())
+                    if (args.EntityControl.LooseChangesIfAny())
                     {
                         Lite<IdentifiableEntity> lite = ident.ToLite();
-                        IIdentifiable newIdent = Server.Return((IOperationServer s)=>s.ExecuteOperationLite(lite, operationInfo.Key, null)); 
-                        if (operationInfo.Returns)
-                            entityControl.RaiseEvent(new ChangeDataContextEventArgs(newIdent));
+                        IIdentifiable newIdent = Server.Return((IOperationServer s) => s.ExecuteOperationLite(lite, args.OperationInfo.Key, null));
+                        if (args.OperationInfo.Returns)
+                            args.EntityControl.RaiseEvent(new ChangeDataContextEventArgs(newIdent));
                     }
                 }
                 else
                 {
-                    IIdentifiable newIdent = Server.Return((IOperationServer s)=>s.ExecuteOperation(ident, operationInfo.Key, null)); 
-                    if (operationInfo.Returns)
-                        entityControl.RaiseEvent(new ChangeDataContextEventArgs(newIdent));
+                    IIdentifiable newIdent = Server.Return((IOperationServer s) => s.ExecuteOperation(ident, args.OperationInfo.Key, null));
+                    if (args.OperationInfo.Returns)
+                        args.EntityControl.RaiseEvent(new ChangeDataContextEventArgs(newIdent));
                 }
             }
-            else if (operationInfo.OperationType == OperationType.ConstructorFrom)
+            else if (args.OperationInfo.OperationType == OperationType.ConstructorFrom)
             {
-                if (operationInfo.Lite.Value)
+                if (args.OperationInfo.Lite.Value)
                 {
-                    if (entityControl.LooseChangesIfAny())
+                    if (args.EntityControl.LooseChangesIfAny())
                     {
                         Lite lite = Lite.Create(ident.GetType(), ident);
-                        IIdentifiable newIdent = Server.Return((IOperationServer s)=>s.ConstructFromLite(lite, operationInfo.Key, null)); 
-                        if (operationInfo.Returns)
+                        IIdentifiable newIdent = Server.Return((IOperationServer s) => s.ConstructFromLite(lite, args.OperationInfo.Key, null));
+                        if (args.OperationInfo.Returns)
                             Navigator.Navigate(newIdent);
                     }
                 }
                 else
                 {
-                    IIdentifiable newIdent = Server.Return((IOperationServer s)=>s.ConstructFrom(ident, operationInfo.Key, null)); 
-                    if (operationInfo.Returns)
+                    IIdentifiable newIdent = Server.Return((IOperationServer s) => s.ConstructFrom(ident, args.OperationInfo.Key, null));
+                    if (args.OperationInfo.Returns)
                         Navigator.Navigate(newIdent);
                 }
             }
-            else if (operationInfo.OperationType == OperationType.Delete)
+            else if (args.OperationInfo.OperationType == OperationType.Delete)
             {
                 if (MessageBox.Show("Are you sure of deleting the entity?", "Delete?", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                 {
                     Lite lite = Lite.Create(ident.GetType(), ident);
-                    Server.Return((IOperationServer s)=>s.Delete(lite, operationInfo.Key, null)); 
+                    Server.Return((IOperationServer s) => s.Delete(lite, args.OperationInfo.Key, null));
                 }
             }
         }

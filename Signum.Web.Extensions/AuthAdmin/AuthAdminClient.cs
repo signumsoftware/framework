@@ -104,7 +104,7 @@ namespace Signum.Web.Authorization
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                Navigator.EntitySettings<UserDN>().ShowOkSave = admin => false;
+                Navigator.EntitySettings<UserDN>().ShowSave = false;
 
                 OperationClient.Manager.Settings.AddRange(new Dictionary<Enum, OperationSettings>
                 {

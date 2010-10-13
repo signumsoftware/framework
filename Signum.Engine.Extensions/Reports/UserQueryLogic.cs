@@ -36,7 +36,7 @@ namespace Signum.Engine.Reports
                                                 Filters = uq.Filters.Count,
                                                 Columns = uq.Columns.Count,
                                                 Orders = uq.Orders.Count,
-                                            }).ToDynamic().Column(a => a.Query, c => c.Visible = false); 
+                                            }).ToDynamic(); 
 
                 sb.Schema.EntityEvents<UserQueryDN>().Retrieved += new EntityEventHandler<UserQueryDN>(UserQueryLogic_Retrieved);
             }

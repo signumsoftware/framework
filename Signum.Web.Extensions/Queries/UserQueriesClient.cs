@@ -1,5 +1,4 @@
-﻿#region usings
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +7,7 @@ using System.Web.Mvc;
 using Signum.Utilities;
 using System.Web.UI;
 using System.Web.Routing;
+using Signum.Entities;
 using Signum.Entities.Reports;
 using Signum.Entities.Basics;
 using Signum.Entities.DynamicQuery;
@@ -15,11 +15,11 @@ using Signum.Engine.DynamicQuery;
 using Signum.Engine.Reports;
 using Signum.Engine;
 using Signum.Web.Extensions.Properties;
-#endregion
+using Signum.Engine.Basics;
 
 namespace Signum.Web.Queries
 {
-    public class UserQueriesClient
+    public static class UserQueriesClient
     {
         public static Func<object, int, string> UserQueryFindRoute = (queryName, userQueryId) => 
             "UQ/{0}/{1}".Formato(Navigator.Manager.QuerySettings[queryName].UrlName, userQueryId);
@@ -59,8 +59,8 @@ namespace Signum.Web.Queries
                                 QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
 
                                 var result = new QueryFilterDN
-                                    { 
-                                        Token = QueryUtils.ParseFilter(tokenStr, qd), 
+                                    {
+                                        Token = QueryUtils.Parse(tokenStr, qd), 
                                         Operation = EnumExtensions.ToEnum<FilterOperation>(ctx.Inputs["Operation"]),
                                         ValueString = ctx.Inputs["ValueString"]
                                     };
@@ -86,7 +86,7 @@ namespace Signum.Web.Queries
 
                                 var result = new QueryColumnDN 
                                     { 
-                                        Token = QueryUtils.ParseColumn(tokenStr, qd),
+                                        Token = QueryUtils.Parse(tokenStr, qd),
                                         DisplayName = ctx.Inputs["DisplayName"]
                                     }; 
                                     
@@ -108,7 +108,7 @@ namespace Signum.Web.Queries
                                 string queryKey = ((MappingContext<UserQueryDN>)ctx.Parent.Parent.Parent).Inputs[TypeContextUtilities.Compose("Query", "Key")];
                                 object queryName = Navigator.Manager.QuerySettings.Keys.First(key => QueryUtils.GetQueryName(key) == queryKey);
                                 QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-                                QueryToken token = QueryUtils.ParseOrder(tokenStr, qd);
+                                QueryToken token = QueryUtils.Parse(tokenStr, qd);
 
                                 var result = new QueryOrderDN 
                                     { 
@@ -214,6 +214,64 @@ namespace Signum.Web.Queries
                     DivCssClass = ToolBarButton.DefaultQueryCssClass,
                     Items = items
                 }
+            };
+        }
+
+        public static void ApplyUserQuery(this FindOptions findOptions, UserQueryDN userQuery)
+        {
+            findOptions.FilterOptions.RemoveAll(fo => !fo.Frozen);
+            findOptions.FilterOptions.AddRange(userQuery.Filters.Select(qf => new FilterOption
+            {
+                Token = qf.Token,
+                ColumnName = qf.TokenString,
+                Operation = qf.Operation,
+                Value = qf.Value
+            }));
+
+            findOptions.ColumnOptionsMode = userQuery.ColumnsMode;
+
+            findOptions.ColumnOptions.Clear();
+            findOptions.ColumnOptions.AddRange(userQuery.Columns.Select(qc => new ColumnOption
+            {
+                ColumnName = qc.TokenString,                
+                DisplayName = qc.DisplayName,
+            }));
+
+            findOptions.OrderOptions.Clear();
+            findOptions.OrderOptions.AddRange(userQuery.Orders.Select(qo => new OrderOption
+            {
+                Token = qo.Token,
+                ColumnName = qo.TokenString,
+                OrderType = qo.OrderType
+            }));
+
+            findOptions.Top = userQuery.MaxItems;
+        }
+
+        public static FindOptions ToFindOptions(this UserQueryDN userQuery)
+        {
+            object queryName = Navigator.ResolveQueryFromKey(userQuery.Query.Key); //.ToStr); ;
+
+            var result = new FindOptions(queryName);
+            result.ApplyUserQuery(userQuery);
+            return result;
+        }
+
+        public static UserQueryDN ToUserQuery(this FindOptions findOptions, Lite<IdentifiableEntity> related)
+        {
+
+            QueryDescription qd = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
+            var tuple = QueryColumnDN.SmartColumns(findOptions.ColumnOptions.Select(co => co.ToColumn(qd)).ToList(), qd.Columns);
+
+            return new UserQueryDN
+            {
+                Related = related,
+                Query = QueryLogic.RetrieveOrGenerateQuery(findOptions.QueryName),
+                Filters = findOptions.FilterOptions.Where(fo => !fo.Frozen).Select(fo => new QueryFilterDN { Token = fo.Token, Operation = fo.Operation, Value = fo.Value, ValueString = FilterValueConverter.ToString(fo.Value, fo.Token.Type) }).ToMList(),
+                ColumnsMode = tuple.Item1,
+                Columns = tuple.Item2,
+                Orders = findOptions.OrderOptions.Select(oo => new QueryOrderDN { Token = oo.Token, OrderType = oo.OrderType }).ToMList(),
+                MaxItems = findOptions.Top
             };
         }
     }

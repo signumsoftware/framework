@@ -14,6 +14,7 @@
     </UserControl.Resources>
     <StackPanel>
         <m:EntityLine m:Common.Route="Query"  m:Common.IsReadOnly="true" />
+        <m:EntityLine m:Common.Route="Related"  />
         <m:ValueLine m:Common.Route="DisplayName" />
         <m:EntityRepeater m:Common.Route="Filters" Grid.IsSharedSizeScope="true" Margin="4" Icon="../Images/filter.png">
             <m:EntityRepeater.EntityTemplate>
@@ -24,7 +25,7 @@
                             <ColumnDefinition SharedSizeGroup="operation" MinWidth="100" Width="Auto"/>
                             <ColumnDefinition SharedSizeGroup="value" MinWidth="100" Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <m:QueryTokenBuilder SubTokensEvent="QueryTokenBuilderFilter_SubTokensEvent" Token="{Binding Token}" />
+                        <m:QueryTokenBuilder SubTokensEvent="QueryTokenBuilder_SubTokensEvent" Token="{Binding Token}" />
                         <ComboBox Grid.Column="1" VerticalAlignment="Center"
                                   SelectedItem="{Binding Operation}" 
                                   ItemsSource="{Binding Token, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={x:Static m:Converters.TokenOperations}}">
@@ -40,7 +41,9 @@
             </m:EntityRepeater.EntityTemplate>
         </m:EntityRepeater>
         
-        <m:EntityRepeater m:Common.Route="Columns" Grid.IsSharedSizeScope="true" Margin="4" Icon="../Images/column.png">
+        <m:ValueLine m:Common.Route="ColumnsMode"/>
+        
+        <m:EntityRepeater  m:Common.Route="Columns" Grid.IsSharedSizeScope="true" Margin="4" Icon="../Images/column.png">
             <m:EntityRepeater.EntityTemplate>
                 <DataTemplate>
                     <Grid m:Common.LabelVisible="False">
@@ -49,7 +52,7 @@
                             <ColumnDefinition SharedSizeGroup="token" MinWidth="100" Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <m:ValueLine m:Common.Route="DisplayName" />
-                        <m:QueryTokenBuilder  SubTokensEvent="QueryTokenBuilderColumn_SubTokensEvent"  Token="{Binding Token}" Grid.Column="1"/>
+                        <m:QueryTokenBuilder  SubTokensEvent="QueryTokenBuilder_SubTokensEvent"  Token="{Binding Token}" Grid.Column="1"/>
                     </Grid>
                 </DataTemplate>
             </m:EntityRepeater.EntityTemplate>
@@ -70,7 +73,7 @@
                                 <ColumnDefinition SharedSizeGroup="orderType" MinWidth="100" Width="Auto"/>
                                 <ColumnDefinition SharedSizeGroup="token" MinWidth="100" Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <m:QueryTokenBuilder SubTokensEvent="QueryTokenBuilderOrder_SubTokensEvent"  Token="{Binding Token}"/>
+                            <m:QueryTokenBuilder SubTokensEvent="QueryTokenBuilder_SubTokensEvent"  Token="{Binding Token}"/>
                             <m:ValueLine m:Common.Route="OrderType" Grid.Column="1" VerticalAlignment="Center" />
                         </Grid>
                     </DataTemplate>

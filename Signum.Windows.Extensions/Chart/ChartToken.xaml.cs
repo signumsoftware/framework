@@ -40,7 +40,7 @@ namespace Signum.Windows.Chart
             set { SetValue(GroupResultsProperty, value); }
         }
 
-        public IEnumerable<StaticColumn> StaticColumns { get; set; }
+        public IEnumerable<ColumnDescription> ColumnDescriptions { get; set; }
 
         public ChartToken()
         {
@@ -50,7 +50,7 @@ namespace Signum.Windows.Chart
 
         private QueryToken[] token_SubTokensEvent(QueryToken token)
         {
-            return ChartTokenDN.SubTokensChart(token, StaticColumns);
+            return ChartTokenDN.SubTokensChart(token, ColumnDescriptions);
         }
 
         private void UpdateGroup()

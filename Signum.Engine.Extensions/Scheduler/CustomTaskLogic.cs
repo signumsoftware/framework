@@ -65,8 +65,7 @@ namespace Signum.Engine.Scheduler
                           cte.EndTime,
                           cte.Exception,
                           CustomTask = cte.CustomTask.ToLite(),
-                      }).ToDynamic()
-                      .Column(p => p.CustomTask, c => c.Visible = false);
+                      }).ToDynamic();
             }
         }
 

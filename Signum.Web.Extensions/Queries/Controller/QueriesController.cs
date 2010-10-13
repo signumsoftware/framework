@@ -32,16 +32,8 @@ namespace Signum.Web.Queries
         {
             UserQueryDN uq = Database.Retrieve<UserQueryDN>(id);
 
-            object queryName = Navigator.Manager.QuerySettings.Keys.First(k => QueryUtils.GetQueryName(k) == uq.Query.Key);
-
-            FindOptions fo = new FindOptions(queryName)
-            { 
-                FilterOptions = uq.Filters.Select(qf => new FilterOption { ColumnName = qf.TokenString, Token = qf.Token, Operation = qf.Operation, Value = qf.Value }).ToList(),
-                UserColumnOptions = uq.Columns.Select((qc, index) => new UserColumnOption { DisplayName = qc.DisplayName, UserColumn = new UserColumn(index, qc.Token) }).ToList(),
-                OrderOptions = uq.Orders.Select(qo => new OrderOption { Token = qo.Token, ColumnName = qo.TokenString, Type = qo.OrderType }).ToList(),
-                Top = uq.MaxItems
-            };
-
+            FindOptions fo = uq.ToFindOptions();
+           
             return Navigator.Find(this, fo);
         }
 
@@ -50,15 +42,7 @@ namespace Signum.Web.Queries
             if (!Navigator.IsFindable(findOptions.QueryName))
                 throw new UnauthorizedAccessException(Resources.ViewForType0IsNotAllowed.Formato(findOptions.QueryName));
 
-            var userQuery = new UserQueryDN
-            {
-                Related = UserDN.Current.ToLite<IdentifiableEntity>(), 
-                Query = QueryLogic.RetrieveOrGenerateQuery(findOptions.QueryName),
-                Filters = findOptions.FilterOptions.Select(fo => new QueryFilterDN { Token = fo.Token, Operation = fo.Operation, Value = fo.Value, ValueString = FilterValueConverter.ToString(fo.Value, fo.Token.Type) }).ToMList(),
-                Columns = findOptions.UserColumnOptions.Select(uco => new QueryColumnDN { Token = uco.UserColumn.Token, DisplayName = uco.DisplayName }).ToMList(),
-                Orders = findOptions.OrderOptions.Select((oo, index) => new QueryOrderDN { Token = oo.Token, OrderType = oo.Type, Index = index }).ToMList(),
-                MaxItems = findOptions.Top
-            };
+            var userQuery = findOptions.ToUserQuery(UserDN.Current.ToLite<IdentifiableEntity>());
 
             ViewData[ViewDataKeys.QueryName] = findOptions.QueryName;
 
@@ -80,7 +64,7 @@ namespace Signum.Web.Queries
 
             Database.Delete<UserQueryDN>(id);
 
-            return Redirect(HttpContextUtils.FullyQualifiedApplicationPath + Navigator.FindRoute(Navigator.ResolveQueryFromToStr(uq.Query.Key)));
+            return Redirect(HttpContextUtils.FullyQualifiedApplicationPath + Navigator.FindRoute(Navigator.ResolveQueryFromKey(uq.Query.Key)));
         }
 
         public ActionResult SaveUserQuery()

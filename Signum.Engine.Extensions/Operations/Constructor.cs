@@ -85,5 +85,10 @@ namespace Signum.Engine.Operations
             if (Constructor == null)
                 throw new InvalidOperationException(Resources.Operation0DoesNotHaveConstructorInitialized.Formato(Key));
         }
+
+        public override string ToString()
+        {
+            return "{0} Construct {1}".Formato(Key, typeof(T));
+        }
     }
 }

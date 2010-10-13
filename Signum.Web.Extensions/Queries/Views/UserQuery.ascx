@@ -30,7 +30,8 @@ using (var e = Html.TypeContext<UserQueryDN>())
         Html.EntityRepeater(e, f => f.Filters, er => { er.PreserveViewData = true; er.ForceNewInUI = true; });
     %>
 	<br />
-	<%    
+	<%
+        Html.ValueLine(e, f => f.ColumnsMode);
         Html.EntityRepeater(e, f => f.Columns, er => { er.PreserveViewData = true; er.ForceNewInUI = true; });
     %>
 	<br />

@@ -57,10 +57,13 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     <m:ValueLine m:Common.Route="Format" MinWidth="100" />
                     <m:ValueLine m:Common.Route="Unit" Grid.Column="1" MinWidth="100"/>
-                    <m:ValueLine m:Common.Route="Title" Grid.Row="1" MinWidth="200"/>
+                    <m:ValueLine m:Common.Route="DisplayName" Grid.Row="1" MinWidth="200"/>
+                    <m:ValueLine m:Common.Route="OrderPriority" Grid.Row="2" MinWidth="100" />
+                    <m:ValueLine m:Common.Route="OrderType" Grid.Row="2" Grid.Column="1" MinWidth="100"/>
                 </Grid>
             </Expander>
         </Grid>

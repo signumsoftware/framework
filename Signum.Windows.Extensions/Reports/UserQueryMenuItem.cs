@@ -112,29 +112,7 @@ namespace Signum.Windows.Reports
 
                 var uq = userQuery.Retrieve();
 
-                var filters = uq.Filters.Select(qf => new FilterOption
-                {
-                    Path = qf.Token.FullKey(),
-                    Operation = qf.Operation,
-                    Value = qf.Value
-                });
-
-                var columns = uq.Columns.Select(qc => new UserColumnOption
-                {
-                    Path = qc.Token.FullKey(),
-                    DisplayName = qc.DisplayName
-                });
-
-                var orders = uq.Orders.Select(of => new OrderOption
-                {
-                    Path = of.Token.FullKey(),
-                    OrderType = of.OrderType,
-                });
-
-                if (!SearchControl.NotSet(SearchControl.MaxItemsCountProperty))
-                    uq.MaxItems = SearchControl.MaxItemsCount;
-
-                SearchControl.Reinitialize(filters, columns, orders);
+                UserQueryClient.ToSearchControl(uq, SearchControl);
 
                 CurrentUserQuery = uq;
 
@@ -146,7 +124,7 @@ namespace Signum.Windows.Reports
         {
             e.Handled = true;
 
-            UserQueryDN userQuery = UserQuery.FromQueryRequest(this.SearchControl.GetQueryRequest());
+            UserQueryDN userQuery = UserQueryClient.FromSearchControl(this.SearchControl);
 
             userQuery = Navigator.View(userQuery, new ViewOptions
             {

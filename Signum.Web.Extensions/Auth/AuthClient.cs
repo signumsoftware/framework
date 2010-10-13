@@ -20,6 +20,7 @@ using System.Linq.Expressions;
 using Signum.Engine.Maps;
 using System.Web.Routing;
 using System.Web;
+using Signum.Utilities.Reflection;
 #endregion
 
 namespace Signum.Web.Authorization
@@ -63,14 +64,26 @@ namespace Signum.Web.Authorization
 
                 if (types)
                 {
-                    Navigator.Manager.GlobalIsCreable += type => TypeAuthLogic.GetTypeAllowed(type).GetUI() == TypeAllowedBasic.Create;
-                    Navigator.Manager.GlobalIsReadOnly += type => TypeAuthLogic.GetTypeAllowed(type).GetUI() <= TypeAllowedBasic.Read;
-                    Navigator.Manager.GlobalIsNavigable += type => TypeAuthLogic.GetTypeAllowed(type).GetUI() >= TypeAllowedBasic.Read;
-                    Navigator.Manager.GlobalIsViewable += type => TypeAuthLogic.GetTypeAllowed(type).GetUI() >= TypeAllowedBasic.Read;
+                    Navigator.Manager.Initializing += () =>
+                    {
+                        foreach (EntitySettings item in Navigator.Manager.EntitySettings.Values)
+                        {
+                            miAttachEvents.GenericInvoke(item.GetType().GetGenericArguments(), null, new object[] { item }); 
+                        }
+
+                    };
                 }
 
                 if (queries)
-                    Navigator.Manager.GlobalIsFindable += type => QueryAuthLogic.GetQueryAllowed(type);
+                {
+                    Navigator.Manager.Initializing += () =>
+                    {
+                        foreach (QuerySettings qs in Navigator.Manager.QuerySettings.Values)
+                        {
+                            qs.IsFindable += QueryAuthLogic.GetQueryAllowed;
+                        }
+                    };
+                }
 
                 AuthenticationRequiredAttribute.Authenticate = context =>
                 { 
@@ -87,6 +100,15 @@ namespace Signum.Web.Authorization
 
                 Schema.Current.EntityEvents<UserDN>().Saving += AuthClient_Saving;
             }
+        }
+
+        static MethodInfo miAttachEvents = ReflectionTools.GetMethodInfo(() => AttachEvents<Entity>(null)).GetGenericMethodDefinition(); 
+        static void AttachEvents<T>(EntitySettings<T> settings) where T : ModifiableEntity
+        {
+            settings.IsCreable += admin => TypeAuthLogic.GetTypeAllowed(typeof(T)).GetUI() == TypeAllowedBasic.Create;
+            settings.IsReadOnly += (_, admin) => TypeAuthLogic.GetTypeAllowed(typeof(T)).GetUI() <= TypeAllowedBasic.Read;
+            settings.IsNavigable += (_, admin) => TypeAuthLogic.GetTypeAllowed(typeof(T)).GetUI() >= TypeAllowedBasic.Read;
+            settings.IsViewable += (_, admin) => TypeAuthLogic.GetTypeAllowed(typeof(T)).GetUI() >= TypeAllowedBasic.Read;
         }
 
         static void TaskAuthorizeProperties(BaseLine bl)

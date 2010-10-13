@@ -23,7 +23,7 @@ namespace Signum.Windows.Authorization
             {
                 foreach (QuerySettings qs in Navigator.Manager.QuerySetting.Values)
                 {
-                    qs.IsFindableEvent += qn => GetQueryAceess(qn);
+                    qs.IsFindable += qn => GetQueryAceess(qn);
                 }
             };
 

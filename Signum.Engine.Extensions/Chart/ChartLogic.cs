@@ -17,13 +17,12 @@ using Signum.Engine.Basics;
 using Signum.Entities.Reports;
 using Signum.Entities.Authorization;
 using Signum.Engine.Authorization;
+using Signum.Entities.Reflection;
 
 namespace Signum.Engine.Extensions.Chart
 {
     public static class ChartLogic
     {
-        static MethodInfo mi = ReflectionTools.GetMethodInfo(() => DynamicQuery.DynamicQuery.Where<int>(null, new List<Filter>())).GetGenericMethodDefinition();
-
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -45,7 +44,7 @@ namespace Signum.Engine.Extensions.Chart
                                                 uq.ChartType,
                                                 uq.ChartResultType,
                                                 uq.GroupResults,
-                                            }).ToDynamic().Column(a => a.Query, c => c.Visible = false);
+                                            }).ToDynamic();
 
                 sb.Schema.EntityEvents<UserChartDN>().Retrieved += new EntityEventHandler<UserChartDN>(UserQueryLogic_Retrieved);
             }
@@ -73,299 +72,6 @@ namespace Signum.Engine.Extensions.Chart
                 userQuery.SecondValue.PostRetrieving(description);
         }
 
-        public static ResultTable ExecuteChart(ChartRequest request)
-        {
-            IDynamicQuery dq = DynamicQueryManager.Current[request.QueryName];
-
-            if (dq.GetType().FollowC(t => t.BaseType).Any(t => t.IsInstantiationOf(typeof(DynamicQuery<>))))
-            {
-                switch (request.ChartResultType)
-                {
-                    case ChartResultType.TypeValue:
-                        return (ResultTable)miExecuteChartAutoTypeValue.GenericInvoke(
-                            new[] { dq.GetType().GetGenericArguments()[0], request.FirstDimension.Token.Type.Nullify(), request.FirstValue.Type.Nullify() }, null,
-                            new object[] { request, dq });
-                    case ChartResultType.TypeTypeValue:
-                        return (ResultTable)miExecuteChartAutoTypeTypeValue.GenericInvoke(
-                          new[] { dq.GetType().GetGenericArguments()[0], request.FirstDimension.Type.Nullify(), request.SecondDimension.Type.Nullify(), request.FirstValue.Type.Nullify() }, null,
-                          new object[] { request, dq });
-                    case ChartResultType.Points:
-                        return (ResultTable)miExecuteChartPoints.GenericInvoke(
-                          new[] { dq.GetType().GetGenericArguments()[0], request.FirstDimension.Type.Nullify(), request.SecondDimension.Type.Nullify(), request.FirstValue.Type.Nullify() }, null,
-                            new object[] { request, dq });
-                    case ChartResultType.Bubbles:
-                        return (ResultTable)miExecuteChartBubbles.GenericInvoke(
-                        new[] { dq.GetType().GetGenericArguments()[0], request.FirstDimension.Type.Nullify(), request.SecondDimension.Type.Nullify(), request.FirstValue.Type.Nullify(), request.SecondValue.Type.Nullify() }, null,
-                          new object[] { request, dq });
-                }
-            }
-
-            throw new NotImplementedException(); 
-        }
-
-
-        static MethodInfo miExecuteChartAutoTypeValue = ReflectionTools.GetMethodInfo(() => ExecuteChartAutoTypeValue<int, int, int>(null, null)).GetGenericMethodDefinition();
-        static ResultTable ExecuteChartAutoTypeValue<T, T1, V1>(ChartRequest request, DynamicQuery<T> dq)
-        {
-            IEnumerable<T> collection;
-            if (dq is AutoDynamicQuery<T>)
-            {
-                IQueryable<T> query = ((AutoDynamicQuery<T>)dq).Query;
-
-                if (request.Filters != null && request.Filters.Count != 0)
-                    query = DynamicQuery.DynamicQuery.Where(query, request.Filters);
-
-                collection = query;
-            }
-            else
-            {
-                collection = ((ManualDynamicQuery<T>)dq).Execute(new QueryRequest { QueryName = request.QueryName, Filters = request.Filters }).Select(a => a.Value); 
-            }
-
-            ParameterExpression pe = Expression.Parameter(typeof(T), "e");
-
-            ConstructorInfo ci = typeof(KeyValuePair<T1, V1>).GetConstructor(new[] { typeof(T1), typeof(V1) });
-            
-            List<KeyValuePair<T1, V1>> dic;
-            if (!request.GroupResults)
-            {
-                var selector = Expression.Lambda<Func<T, KeyValuePair<T1, V1>>>(
-                    Expression.New(ci,
-                        request.FirstDimension.BuildExpression(pe).Nullify(),
-                        request.FirstValue.BuildExpression(pe).Nullify()), pe);
-
-                dic = (collection is IQueryable ?
-                    ((IQueryable<T>)collection).Select(selector) :
-                    collection.Select(selector.Compile())).AssertToDictionary();
-            }
-            else
-            {
-                ParameterExpression p = Expression.Parameter(typeof(T1), "p");
-                ParameterExpression ge = Expression.Parameter(typeof(IEnumerable<T>), "g");
-
-                var keySelector = Expression.Lambda<Func<T, T1>>(request.FirstDimension.BuildExpression(pe).Nullify(), pe);
-
-                var selector = Expression.Lambda<Func<T1, IEnumerable<T>, KeyValuePair<T1, V1>>>(Expression.New(ci,
-                          p, request.FirstValue.BuildExpression(ge).Nullify()), p, ge);
-
-                dic = (collection is IQueryable ?
-                   ((IQueryable<T>)collection).GroupBy(keySelector, selector) :
-                   collection.GroupBy(keySelector.Compile(), selector.Compile())).AssertToDictionary();
-            }
-
-            return new ResultTable(
-                new ColumnValues(GetUserColumn(0, request.FirstDimension), dic.Select(a=>a.Key).ToArray()),
-                new ColumnValues(GetUserColumn(1, request.FirstValue), dic.Select(a => a.Value).ToArray()));   
-        }
-
-        static MethodInfo miExecuteChartAutoTypeTypeValue = ReflectionTools.GetMethodInfo(() => ExecuteChartAutoTypeTypeValue<int, int, int, int>(null, null)).GetGenericMethodDefinition();
-        static ResultTable ExecuteChartAutoTypeTypeValue<T, T1, T2, V1>(ChartRequest request, DynamicQuery<T> dq)
-        {
-            IEnumerable<T> collection;
-            if (dq is AutoDynamicQuery<T>)
-            {
-                IQueryable<T> query = ((AutoDynamicQuery<T>)dq).Query;
-
-                if (request.Filters != null && request.Filters.Count != 0)
-                    query = DynamicQuery.DynamicQuery.Where(query, request.Filters);
-
-                collection = query;
-            }
-            else
-            {
-                collection = ((ManualDynamicQuery<T>)dq).Execute(new QueryRequest { QueryName = request.QueryName, Filters = request.Filters }).Select(a => a.Value);
-            }
-
-
-            ParameterExpression pe = Expression.Parameter(typeof(T), "e");
-
-            ConstructorInfo ci = typeof(KeyValuePair<Tuple<T1, T2>, V1>).GetConstructor(new[] { typeof(Tuple<T1, T2>), typeof(V1) });
-            ConstructorInfo cit = typeof(Tuple<T1, T2>).GetConstructor(new[] { typeof(T1), typeof(T2) });
-
-            List<KeyValuePair<Tuple<T1, T2>, V1>> dic; 
-
-            if (!request.GroupResults)
-            {
-                var selector = Expression.Lambda<Func<T, KeyValuePair<Tuple<T1, T2>, V1>>>(
-                    Expression.New(ci,
-                        Expression.New(cit,
-                            request.FirstDimension.BuildExpression(pe).Nullify(),
-                            request.SecondDimension.BuildExpression(pe).Nullify()),
-                        request.FirstValue.BuildExpression(pe).Nullify()), pe);
-
-                dic = (collection is IQueryable ?
-                    ((IQueryable<T>)collection).Select(selector) :
-                    collection.Select(selector.Compile())).AssertToDictionary();
-            }
-            else
-            {
-                ParameterExpression p = Expression.Parameter(typeof(Tuple<T1, T2>), "p");
-                ParameterExpression ge = Expression.Parameter(typeof(IEnumerable<T>), "g");
-
-                var keySelector = Expression.Lambda<Func<T, Tuple<T1, T2>>>(Expression.New(cit,
-                            request.FirstDimension.BuildExpression(pe).Nullify(),
-                            request.SecondDimension.BuildExpression(pe).Nullify()), pe);
-
-                var selector = Expression.Lambda<Func<Tuple<T1, T2>, IEnumerable<T>, KeyValuePair<Tuple<T1, T2>, V1>>>(Expression.New(ci,
-                          p, request.FirstValue.BuildExpression(ge).Nullify()), p, ge);
-
-                dic = (collection is IQueryable ?
-                    ((IQueryable<T>)collection).GroupBy(keySelector, selector) :
-                    collection.GroupBy(keySelector.Compile(), selector.Compile())).AssertToDictionary(); 
-            }
-
-            return new ResultTable(
-               new ColumnValues(GetUserColumn(0, request.FirstDimension), dic.Select(a => a.Key.Item1).ToArray()),
-               new ColumnValues(GetUserColumn(1, request.SecondDimension), dic.Select(a => a.Key.Item2).ToArray()),
-               new ColumnValues(GetUserColumn(2, request.FirstValue), dic.Select(a => a.Value).ToArray()));   
-        }
-
-        static MethodInfo miExecuteChartPoints = ReflectionTools.GetMethodInfo(() => ExecuteChartPoints<int, int, int, int>(null, null)).GetGenericMethodDefinition();
-        static ResultTable ExecuteChartPoints<T, X, Y, C>(ChartRequest request, DynamicQuery<T> dq)
-        {
-            IEnumerable<T> collection;
-            if (dq is AutoDynamicQuery<T>)
-            {
-                IQueryable<T> query = ((AutoDynamicQuery<T>)dq).Query;
-
-                if (request.Filters != null && request.Filters.Count != 0)
-                    query = DynamicQuery.DynamicQuery.Where(query, request.Filters);
-
-                collection = query;
-            }
-            else
-            {
-                collection = ((ManualDynamicQuery<T>)dq).Execute(new QueryRequest { QueryName = request.QueryName, Filters = request.Filters }).Select(a => a.Value);
-            }
-
-            ParameterExpression pe = Expression.Parameter(typeof(T), "e");
-
-            ConstructorInfo ci = typeof(Point<X, Y, C>).GetConstructor(new[] { typeof(X), typeof(Y), typeof(C) });
-
-            List<Point<X, Y, C>> list;
-
-            if (!request.GroupResults)
-            {
-                var selector = Expression.Lambda<Func<T, Point<X, Y, C>>>(
-                    Expression.New(ci,
-                        request.FirstDimension.BuildExpression(pe).Nullify(),
-                        request.SecondDimension.BuildExpression(pe).Nullify(),
-                        request.FirstValue.BuildExpression(pe).Nullify()), pe);
-
-                list = (collection is IQueryable ? ((IQueryable<T>)collection).Select(selector) : collection.Select(selector.Compile())).ToList();
-
-            
-            }
-            else
-            {
-                ParameterExpression ge = Expression.Parameter(typeof(IEnumerable<T>), "g");
-                ParameterExpression k = Expression.Parameter(typeof(C), "k");
-
-                var keySelector = Expression.Lambda<Func<T, C>>(request.FirstValue.BuildExpression(pe).Nullify(), pe);
-
-                var selector = Expression.Lambda<Func<C, IEnumerable<T>, Point<X, Y, C>>>(Expression.New(ci,
-                         request.FirstDimension.BuildExpression(ge).Nullify(),
-                         request.SecondDimension.BuildExpression(ge).Nullify(),
-                         k), k, ge);
-
-                list = (collection is IQueryable ?
-                    ((IQueryable<T>)collection).GroupBy(keySelector, selector) :
-                    collection.GroupBy(keySelector.Compile(), selector.Compile())).ToList();
-            }
-
-            return new ResultTable(
-                new ColumnValues(GetUserColumn(0, request.FirstDimension), list.Select(a => a.XValue).ToArray()),
-                new ColumnValues(GetUserColumn(1, request.SecondDimension), list.Select(a => a.YValue).ToArray()),
-                new ColumnValues(GetUserColumn(2, request.FirstValue), list.Select(a => a.Color).ToArray()));  
-        }
-
-
-        static MethodInfo miExecuteChartBubbles = ReflectionTools.GetMethodInfo(() => ExecuteChartBubbles<int, int, int, int, int>(null, null)).GetGenericMethodDefinition();
-        static ResultTable ExecuteChartBubbles<T, X, Y, C, S>(ChartRequest request, DynamicQuery<T> dq)
-        {
-            IEnumerable<T> collection;
-            if (dq is AutoDynamicQuery<T>)
-            {
-                IQueryable<T> query = ((AutoDynamicQuery<T>)dq).Query;
-
-                if (request.Filters != null && request.Filters.Count != 0)
-                    query = DynamicQuery.DynamicQuery.Where(query, request.Filters);
-
-                collection = query;
-            }
-            else
-            {
-                collection = ((ManualDynamicQuery<T>)dq).Execute(new QueryRequest { QueryName = request.QueryName, Filters = request.Filters }).Select(a => a.Value);
-            }
-
-            ParameterExpression pe = Expression.Parameter(typeof(T), "e");
-
-            ConstructorInfo ci = typeof(Bubble<X, Y, C, S>).GetConstructor(new[] { typeof(X), typeof(Y), typeof(C), typeof(S) });
-
-            List<Bubble<X, Y, C, S>> list;
-
-            if (!request.GroupResults)
-            {
-                var selector = Expression.Lambda<Func<T, Bubble<X, Y, C, S>>>(
-                    Expression.New(ci,
-                        request.FirstDimension.BuildExpression(pe).Nullify(),
-                        request.SecondDimension.BuildExpression(pe).Nullify(),
-                        request.FirstValue.BuildExpression(pe).Nullify(),
-                        request.SecondValue.BuildExpression(pe).Nullify()), pe);
-
-                list = (collection is IQueryable ? ((IQueryable<T>)collection).Select(selector) : collection.Select(selector.Compile())).ToList();
-
-            }
-            else
-            {
-                ParameterExpression ge = Expression.Parameter(typeof(IEnumerable<T>), "g");
-                ParameterExpression k = Expression.Parameter(typeof(C), "k");
-
-                var keySelector = Expression.Lambda<Func<T, C>>(request.FirstValue.BuildExpression(pe).Nullify(), pe);
-
-                var selector = Expression.Lambda<Func<C, IEnumerable<T>, Bubble<X, Y, C, S>>>(Expression.New(ci,
-                         request.FirstDimension.BuildExpression(ge).Nullify(),
-                         request.SecondDimension.BuildExpression(ge).Nullify(),
-                         k,
-                         request.SecondValue.BuildExpression(ge).Nullify()), k, ge);
-
-                list = (collection is IQueryable ?
-                    ((IQueryable<T>)collection).GroupBy(keySelector, selector) :
-                    collection.GroupBy(keySelector.Compile(), selector.Compile())).ToList();
-            }
-
-            return new ResultTable(
-                new ColumnValues(GetUserColumn(0, request.FirstDimension), list.Select(a => a.XValue).ToArray()),
-                new ColumnValues(GetUserColumn(1, request.SecondDimension), list.Select(a => a.YValue).ToArray()),
-                new ColumnValues(GetUserColumn(2, request.FirstValue), list.Select(a => a.Color).ToArray()),
-                new ColumnValues(GetUserColumn(3, request.SecondValue), list.Select(a => a.Size).ToArray()));
-        }
-
-        static UserColumn GetUserColumn(int baseIndex, ChartTokenDN token)
-        {
-            if (token.Aggregate == AggregateFunction.Count)
-                return new UserColumn(baseIndex, "Count", token.Type)
-                {
-                    DisplayName = "Count",
-                };
-
-            return new UserColumn(baseIndex, token.Token)
-            {
-                DisplayName = token.Title,
-            };
-        }
-
-        static List<KeyValuePair<K, V>> AssertToDictionary<K, V>(this IEnumerable<KeyValuePair<K, V>> collection)
-        {
-            var result = collection.ToList();
-
-            var keys = new HashSet<K>(result.Select(a => a.Key));
-
-            if (result.Count != keys.Count)
-                throw new ApplicationException("There are repeated keys, try grouping");
-
-            return result; 
-        }
 
         public static List<Lite<UserChartDN>> GetUserCharts(object queryName)
         {
@@ -392,47 +98,144 @@ namespace Signum.Engine.Extensions.Chart
 
             EntityGroupLogic.Register<UserChartDN>(newEntityGroupKey, uq => AuthLogic.CurrentRoles().Contains(uq.Related.ToLite<RoleDN>()));
         }
-    }
 
-    internal struct Point<X,Y,C>
-    {
-        X x;
-        public X XValue { get { return x; } }
 
-        Y y;
-        public Y YValue { get { return y; } }
-
-        C color;
-        public C Color { get { return color; } }
-
-        public Point(X x, Y y, C color)
+        public static ResultTable ExecuteChart(ChartRequest request)
         {
-            this.x = x;
-            this.y = y;
-            this.color = color;
+            IDynamicQuery dq = DynamicQueryManager.Current[request.QueryName];
+
+            if (dq.GetType().FollowC(t => t.BaseType).Any(t => t.IsInstantiationOf(typeof(DynamicQuery<>))))
+            {
+                return (ResultTable)miExecuteChart.GenericInvoke(new[] { dq.GetType().GetGenericArguments()[0] }, null,
+                            new object[] { request, dq });
+            }
+
+            throw new NotImplementedException(); 
         }
-    }
 
-    internal struct Bubble<X, Y, C, S>
-    {
-        X x;
-        public X XValue { get { return x; } }
-
-        Y y;
-        public Y YValue { get { return y; } }
-
-        C color;
-        public C Color { get { return color; } }
-
-        S size;
-        public S Size { get { return size; } }
-
-        public Bubble(X x, Y y, C color, S size)
+        static MethodInfo miGroupByE = ReflectionTools.GetMethodInfo(() => Enumerable.GroupBy<string, int, double>((IEnumerable<string>)null, (Func<string, int>)null, (Func<int, IEnumerable<string>, double>)null)).GetGenericMethodDefinition();
+        static IEnumerable<object> GroupBy(this IEnumerable<object> collection, LambdaExpression keySelector, LambdaExpression resultSelector)
         {
-            this.x = x;
-            this.y = y;
-            this.color = color;
-            this.size = size;
+            return (IEnumerable<object>)miGroupByE.GenericInvoke(new[] { typeof(object), keySelector.Body.Type, typeof(object) }, null,
+                new object[] { collection, keySelector.Compile(), resultSelector.Compile() });
         }
+
+        static MethodInfo miGroupByQ = ReflectionTools.GetMethodInfo(() => Queryable.GroupBy<string, int, double>((IQueryable<string>)null, (Expression<Func<string, int>>)null, (Expression<Func<int, IEnumerable<string>, double>>)null)).GetGenericMethodDefinition();
+        static IQueryable<object> GroupBy(this IQueryable<object> query, LambdaExpression keySelector, LambdaExpression resultSelector)
+        {
+            return (IQueryable<object>)query.Provider.CreateQuery<object>(Expression.Call(null, miGroupByQ.MakeGenericMethod(typeof(object), keySelector.Body.Type, typeof(object)),
+                new Expression[] { query.Expression, Expression.Quote(keySelector), Expression.Quote(resultSelector) }));
+        }
+
+        static LambdaExpression BuildKeySelector(IDynamicInfo dinamicInfo, ChartTokenDN[] groupTokens)
+        {
+            ParameterExpression p = Expression.Parameter(typeof(object), "e");
+            var cast = Expression.Convert(p, dinamicInfo.TupleType);
+
+            return Expression.Lambda(
+                TupleReflection.TupleChainConstructor(
+                      groupTokens.Select(a => TupleReflection.TupleChainProperty(cast, dinamicInfo.TokenIndices[a.Token]))), p);
+        }
+
+        static LambdaExpression BuildResultSelector(ChartTokenDN[] chartTokens, ChartTokenDN[] groupTokens, IDynamicInfo dinamicInfo, Type keyTupleType, out Type resultSelectorTypleType)
+        {
+            ParameterExpression pk = Expression.Parameter(keyTupleType, "key");
+            ParameterExpression pg = Expression.Parameter(typeof(IEnumerable<object>), "e");
+
+            var list = chartTokens.Select(ct => ct.Aggregate == null ?
+                TupleReflection.TupleChainProperty(pk, groupTokens.IndexOf(ct)) :
+                BuildAggregateExpression(pg, ct.Aggregate.Value, dinamicInfo.TupleType, dinamicInfo.TokenIndices[ct.Token])).ToArray();
+
+            var constructor = TupleReflection.TupleChainConstructor(list);
+
+            resultSelectorTypleType = constructor.Type;
+
+            return Expression.Lambda(Expression.Convert(constructor, typeof(object)), pk, pg);
+        }
+
+        static Expression BuildAggregateExpression(Expression collection, AggregateFunction aggregate, Type tupleType, int index)
+        {
+            Type groupType = collection.Type.GetGenericInterfaces(typeof(IEnumerable<>)).Single("expression should be a IEnumerable").GetGenericArguments()[0];
+
+            if (aggregate == AggregateFunction.Count)
+                return Expression.Call(typeof(Enumerable), "Count", new[] { groupType }, new[] { collection });
+
+            ParameterExpression a = Expression.Parameter(groupType, "a");
+            LambdaExpression lambda = Expression.Lambda(TupleReflection.TupleChainProperty(Expression.Convert(a, tupleType), index), a);
+
+            if (aggregate == AggregateFunction.Min || aggregate == AggregateFunction.Max)
+                return Expression.Call(typeof(Enumerable), aggregate.ToString(), new[] { groupType, lambda.Body.Type }, new[] { collection, lambda });
+            else
+                return Expression.Call(typeof(Enumerable), aggregate.ToString(), new[] { groupType }, new[] { collection, lambda });
+        }
+
+        static MethodInfo miExecuteChart = ReflectionTools.GetMethodInfo(() => ExecuteChart<int>(null, null)).GetGenericMethodDefinition();
+        static ResultTable ExecuteChart<T>(ChartRequest request, DynamicQuery<T> dq)
+        {
+            ChartTokenDN[] chartTokens = request.ChartTokens().ToArray(); 
+            List<Column> columns = chartTokens.Select(t=>t.CreateSimpleColumn()).ToList();
+
+            if (!request.GroupResults)
+                columns.Add(new _EntityColumn(dq.EntityColumn().BuildColumnDescription()));
+
+            IDynamicInfo collection;
+            if (dq is AutoDynamicQuery<T>)
+            {
+                collection = ((AutoDynamicQuery<T>)dq).Query.Where(request.Filters).SelectDynamic(columns, null);
+            }
+            else
+            {
+                collection = ((ManualDynamicQuery<T>)dq).Execute(new QueryRequest 
+                { 
+                    Columns = columns, 
+                    Filters = request.Filters, 
+                    QueryName = request.QueryName 
+                });
+            }
+
+            if (!request.GroupResults)
+            {
+                var orders = (from ct in chartTokens
+                              where ct.OrderPriority.HasValue
+                              orderby ct.OrderPriority.Value
+                              select new Order(ct.Token, ct.OrderType.Value)).ToList();
+
+                DEnumerable<T> result;
+                if (collection is DQueryable<T>)
+                    result = ((DQueryable<T>)collection).OrderBy(orders).ToArray();
+                else
+                    result = ((DEnumerable<T>)collection).OrderBy(orders).ToArray();
+
+                return result.ToResultTable(columns);
+            }
+            else
+            {
+                ChartTokenDN[] groupTokens = chartTokens.Where(t => t.Aggregate == null).ToArray();
+                LambdaExpression keySelector = BuildKeySelector(collection, groupTokens);
+
+                Type resultType;
+                LambdaExpression resultSelector = BuildResultSelector(chartTokens, groupTokens, collection, keySelector.Body.Type, out resultType);
+
+                var orders = (from t in chartTokens.Select((ct, i) => new { ct, i })
+                              where t.ct.OrderPriority.HasValue
+                              orderby t.ct.OrderPriority.Value
+                              select Tuple.Create(
+                                  TupleReflection.TupleChainPropertyLambda(resultType, t.i),
+                                  t.ct.OrderType.Value)).ToList();
+
+                object[] result;
+                if (collection is DQueryable<T>)
+                    result = ((DQueryable<T>)collection).Query.GroupBy(keySelector, resultSelector).OrderBy(orders).ToArray();
+                else
+                    result = ((DEnumerable<T>)collection).Collection.GroupBy(keySelector, resultSelector).OrderBy(orders).ToArray();
+
+                var cols = columns.Select((c, i) =>
+                    Tuple.Create(c, TupleReflection.TupleChainPropertyLambda(resultType, i))).ToList();
+
+                return result.ToResultTable(cols);
+            }
+        }
+
     }
+
 }

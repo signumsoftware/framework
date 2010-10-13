@@ -52,15 +52,14 @@ namespace Signum.Web
 
         public static void CombinedCss(this HtmlHelper html, string path, params string[] files)
         {
-            string content = "";
 #if (DEBUG)
-            content = files.ToString(f => "<link href=\"{0}\" rel='stylesheet' type='text/css' />\n"
+            string content = files.ToString(f => "<link href=\"{0}\" rel='stylesheet' type='text/css' />\n"
                 .Formato(Path.Combine("content/", f) + "?v=" + ScriptCombiner.Common.Version ), "");
             html.ViewContext.HttpContext.Response.Write(content);
-            return;
-#endif
+#else
             string cadena = "<link href=\"{0}\" rel='stylesheet' type='text/css' />\n".Formato(CombinedCssUrlPath(html, path.Replace("/", "%2f"), files));
             html.ViewContext.HttpContext.Response.Write(cadena);
+#endif
         }
 
         public static void CombinedCss(this HtmlHelper html, CssMediaType media, params string[] files)
@@ -79,22 +78,22 @@ namespace Signum.Web
         }
         public static void CombinedJs(this HtmlHelper html, string path, params string[] files)
         {
-            string content = "";
-            #if (DEBUG)
-                content = files.ToString(f => "<script type='text/javascript' src=\"{0}\"></script>\n".Formato(path + "/" + f + "?v=" + ScriptCombiner.Common.Version), "");
-                html.ViewContext.HttpContext.Response.Write(content);
-                return;
-#endif
-            content = "<script type='text/javascript' src=\"{0}\"></script>\n".Formato(CombinedJsUrlPath(html, path, files));
+#if (DEBUG)
+            string content = files.ToString(f => "<script type='text/javascript' src=\"{0}\"></script>\n".Formato(path + "/" + f + "?v=" + ScriptCombiner.Common.Version), "");
             html.ViewContext.HttpContext.Response.Write(content);
+#else
+            string content = "<script type='text/javascript' src=\"{0}\"></script>\n".Formato(CombinedJsUrlPath(html, path, files));
+            html.ViewContext.HttpContext.Response.Write(content);
+#endif
         }
 
         public static string IncludeAreaJs(params string[] files)
         {
-            #if (DEBUG)
-                return files.ToString(f => "<script type='text/javascript' src=\"{0}\"></script>\n".Formato(f + "?v=" + ScriptCombiner.Common.Version), "");
-#endif
+#if (DEBUG)
+            return files.ToString(f => "<script type='text/javascript' src=\"{0}\"></script>\n".Formato(f + "?v=" + ScriptCombiner.Common.Version), "");
+#else
             return "<script type='text/javascript' src=\"{0}\"></script>\n".Formato(IncludeAreaJsPath(files));
+#endif
         }
 
         static string IncludeAreaJsPath(params string[] files)
@@ -104,14 +103,13 @@ namespace Signum.Web
 
         public static void IncludeAreaCss(this HtmlHelper html, params string[] files)
         {
-            string content = "";
 #if (DEBUG)
-            content = files.ToString(f => "<link href=\"{0}\" rel='stylesheet' type='text/css' />\n".Formato(f + "?v=" + ScriptCombiner.Common.Version), "");
+            string content = files.ToString(f => "<link href=\"{0}\" rel='stylesheet' type='text/css' />\n".Formato(f + "?v=" + ScriptCombiner.Common.Version), "");
             html.ViewContext.HttpContext.Response.Write(content);
-            return;
+#else
+            string content = "<link href=\"{0}\" rel='stylesheet' type='text/css' />\n".Formato(IncludeAreaCssPath(files));
+            html.ViewContext.HttpContext.Response.Write(content);
 #endif
-            content = "<link href=\"{0}\" rel='stylesheet' type='text/css' />\n".Formato(IncludeAreaCssPath(files));
-            html.ViewContext.HttpContext.Response.Write(content);
         }
 
         static string IncludeAreaCssPath(params string[] files)

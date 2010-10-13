@@ -61,10 +61,10 @@ namespace Signum.Windows.Chart
              
             Description = Navigator.Manager.GetQueryDescription(queryName);
 
-            qtbFirstDimesion.StaticColumns = Description.StaticColumns;
-            qtbSecondDimension.StaticColumns = Description.StaticColumns;
-            qtbFirstValue.StaticColumns = Description.StaticColumns;
-            qtbSecondValue.StaticColumns = Description.StaticColumns;           
+            qtbFirstDimesion.ColumnDescriptions = Description.Columns;
+            qtbSecondDimension.ColumnDescriptions = Description.Columns;
+            qtbFirstValue.ColumnDescriptions = Description.Columns;
+            qtbSecondValue.ColumnDescriptions = Description.Columns;           
         }
     }
 

@@ -45,8 +45,8 @@ namespace Signum.Windows.Authorization
 
         private static void AttachEntityGroupsEvent<T>(EntitySettings<T> settings) where T : IdentifiableEntity
         {
-            settings.IsReadOnlyEvent += (entity, admin) => entity == null ? false : !IsEntityGroupAllowedFor(entity, TypeAllowedBasic.Modify);
-            settings.IsViewableEvent += (entity, admin) => entity == null ? true : IsEntityGroupAllowedFor(entity, TypeAllowedBasic.Read);
+            settings.IsReadOnly += (entity, admin) => entity == null ? false : !IsEntityGroupAllowedFor(entity, TypeAllowedBasic.Modify);
+            settings.IsViewable += (entity, admin) => entity == null ? true : IsEntityGroupAllowedFor(entity, TypeAllowedBasic.Read);
         }
 
         private static bool IsEntityGroupAllowedFor(IdentifiableEntity entity, TypeAllowedBasic allowed)

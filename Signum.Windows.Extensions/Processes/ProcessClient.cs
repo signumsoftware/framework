@@ -27,18 +27,21 @@ namespace Signum.Windows.Processes
                 Navigator.AddSetting(new EntitySettings<ProcessDN>(EntityType.ServerOnly) { View = e => new ProcessUI(), IsReadOnly = (_, a) => true, IsCreable = a => false, Icon = Image("process.png") });
                 Navigator.AddSetting(new EntitySettings<ProcessExecutionDN>(EntityType.ServerOnly) { View = e => new ProcessExecution(), Icon = Image("processExecution.png") });
 
-                OperationClient.Manager.Settings.Add(ProcessOperation.FromProcess, new EntityOperationSettings { Icon = Image("execute.png") });
-                OperationClient.Manager.Settings.Add(ProcessOperation.Plan, new EntityOperationSettings { Icon = Image("plan.png"), Click = ProcessOperation_Plan });
-                OperationClient.Manager.Settings.Add(ProcessOperation.Cancel, new EntityOperationSettings { Icon = Image("stop.png") });
-                OperationClient.Manager.Settings.Add(ProcessOperation.Execute, new EntityOperationSettings { Icon = Image("play.png") });
-                OperationClient.Manager.Settings.Add(ProcessOperation.Suspend, new EntityOperationSettings { Icon = Image("pause.png") });
+                OperationClient.AddSettings(new List<OperationSettings>()
+                {
+                    new EntityOperationSettings<ProcessExecutionDN>(ProcessOperation.FromProcess){ Icon = Image("execute.png") },
+                    new EntityOperationSettings<ProcessExecutionDN>(ProcessOperation.Plan){ Icon = Image("plan.png"), Click = ProcessOperation_Plan },
+                    new EntityOperationSettings<ProcessExecutionDN>(ProcessOperation.Cancel){ Icon = Image("stop.png") },
+                    new EntityOperationSettings<ProcessExecutionDN>(ProcessOperation.Execute){ Icon = Image("play.png") },
+                    new EntityOperationSettings<ProcessExecutionDN>(ProcessOperation.Suspend){ Icon = Image("pause.png") },
+                }); 
 
                 Navigator.AddSetting(new EntitySettings<PackageDN>(EntityType.ServerOnly) { View = e => new Package(), Icon = Image("package.png") });
                 Navigator.AddSetting(new EntitySettings<PackageLineDN>(EntityType.ServerOnly) { View = e => new PackageLine(), IsReadOnly = (_, a) => true, IsCreable = a => false, Icon = Image("packageLine.png") }); 
             }
         }
 
-        static IIdentifiable ProcessOperation_Plan(EntityOperationEventArgs args)
+        static ProcessExecutionDN ProcessOperation_Plan(EntityOperationEventArgs<ProcessExecutionDN> args)
         {
             DateTime plan = TimeZoneManager.Now;
             if (ValueLineBox.Show(ref plan, "Choose planned date", "Please, choose the date you want the process to start", "Planned date", null, null, args.SenderButton.FindCurrentWindow()))

@@ -36,17 +36,9 @@ namespace Signum.Windows.Chart
             set { SetValue(QueryDescriptionProperty, value); }
         }
 
-        QueryToken[] SubTokens(QueryToken token, Func<StaticColumn, bool> filter)
-        {
-            if (token == null)
-                return QueryDescription.StaticColumns.Where(filter).Select(s => QueryToken.NewColumn(s)).ToArray();
-            else
-                return token.SubTokens();
-        }
-
         private QueryToken[] QueryTokenBuilderFilter_SubTokensEvent(QueryToken token)
         {
-            return SubTokens(token, a => a.Filterable);
+            return QueryUtils.SubTokens(token, QueryDescription.Columns);
         }
 
         internal static UserChartDN FromRequest(ChartRequest request)
@@ -87,7 +79,10 @@ namespace Signum.Windows.Chart
 
             result.Unit = request.Unit;
             result.Format = request.Format;
-            result.Title = request.Title;
+            result.DisplayName = request.DisplayName;
+
+            result.OrderPriority = request.OrderPriority;
+            result.OrderType = request.OrderType; 
         }
 
         internal static ChartRequest ToRequest(UserChartDN uq)

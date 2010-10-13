@@ -71,11 +71,11 @@ namespace Signum.Engine.Reports
                 sheetData.Append(new Sequence<Row>()
                 {
                     (from columnData in columnEquivalences
-                        select cb.Cell(columnData.Column.DisplayName, headerStyleIndex)).ToRow(),
+                        select cb.Cell(columnData.Column.Column.DisplayName, headerStyleIndex)).ToRow(),
 
                     from r in results.Rows
                         select (from columnData in columnEquivalences
-                                select cb.Cell(r[columnData.Column], cb.GetTemplateCell(columnData.Column.Type), columnData.StyleIndex)).ToRow()
+                                select cb.Cell(r[columnData.Column], cb.GetTemplateCell(columnData.Column.Column.Type), columnData.StyleIndex)).ToRow()
                 }.Cast<OpenXmlElement>());
 
                 var pivotTableParts = workbookPart.PivotTableCacheDefinitionParts
@@ -100,7 +100,7 @@ namespace Signum.Engine.Reports
 
         private static List<ColumnData> GetColumnsEquivalences(this SpreadsheetDocument document, SheetData sheetData, ResultTable results)
         {
-            var resultsCols = results.VisibleColumns.ToDictionary(c => c.DisplayName);
+            var resultsCols = results.Columns.ToDictionary(c => c.Column.DisplayName);
 
             var headerCells = sheetData.Descendants<Row>().First().Descendants<Cell>().ToList();
             var templateCols = headerCells.ToDictionary(c => document.GetCellValue(c));
@@ -158,7 +158,7 @@ namespace Signum.Engine.Reports
             /// <summary>
             /// Column Data
             /// </summary>
-            public Signum.Entities.DynamicQuery.Column Column { get; set; }
+            public Signum.Entities.DynamicQuery.ResultColumn Column { get; set; }
 
             /// <summary>
             /// Indicates the column is not present in the template excel

@@ -11,25 +11,38 @@ namespace Signum.Windows.Operations
 {
     public abstract class OperationSettings
     {
+        public Enum Key { get; set; }
         public string Text { get; set; }
         public ImageSource Icon { get; set; }
         public Color? Color { get; set; }
+
+        public OperationSettings(Enum key)
+        {
+            this.Key = key;
+        }
+
     }
 
     //Execute & ConstructorFrom
-    public class EntityOperationSettings : OperationSettings
+    public class EntityOperationSettings<T> : OperationSettings
+        where T : class, IIdentifiable
     {
-        public Func<EntityOperationEventArgs, IIdentifiable> Click { get; set; }
-        public Func<IIdentifiable, bool> IsVisible { get; set; }
+        public Func<EntityOperationEventArgs<T>, T> Click { get; set; }
+        public Func<EntityOperationEventArgs<T>, bool> IsVisible { get; set; }
         public bool VisibleOnOk { get; set; }
+
+        public EntityOperationSettings(Enum key): base(key)
+        {
+        }
     }
 
-    public class EntityOperationEventArgs : EventArgs
+    public class EntityOperationEventArgs<T> : EventArgs
+        where T : class, IIdentifiable
     {
-        public IIdentifiable Entity { get; internal set; }
+        public T Entity { get; internal set; }
         public FrameworkElement EntityControl { get; internal set; }
-        public FrameworkElement SenderButton { get; internal set; }
-        public OperationInfo OperationInfo { get; internal set; } 
+        public ToolBarButton SenderButton { get; internal set; }
+        public OperationInfo OperationInfo { get; internal set; }
     }
 
     //Constructor
@@ -37,13 +50,23 @@ namespace Signum.Windows.Operations
     {
         public Func<OperationInfo, Window, IdentifiableEntity> Constructor { get; set; }
         public Func<OperationInfo, bool> IsVisible { get; set; } 
+
+        public ConstructorSettings(Enum key)
+            : base(key)
+        {
+        }
     }
 
     //ConsturctorFromMany
     public class ConstructorFromManySettings : OperationSettings
     {
         public Func<ConstructorFromManyEventArgs, IdentifiableEntity> Constructor { get; set; }
-        public Func<object, OperationInfo, bool> IsVisible { get; set; } 
+        public Func<object, OperationInfo, bool> IsVisible { get; set; }
+
+        public ConstructorFromManySettings(Enum key)
+            : base(key)
+        {
+        }
     }
 
     public class ConstructorFromManyEventArgs : EventArgs

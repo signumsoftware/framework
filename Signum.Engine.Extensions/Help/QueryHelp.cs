@@ -96,11 +96,11 @@ namespace Signum.Engine.Help
             return null;
         }
 
-        public static IEnumerable<StaticColumnFactory> GenerateColumns(object key)
+        public static IEnumerable<ColumnDescriptionFactory> GenerateColumns(object key)
         {
             using (AuthLogic.Disable())
             {
-                StaticColumnFactory[] columns = null;
+                ColumnDescriptionFactory[] columns = null;
                 if (key as Enum != null)
                 {
                     Enum query = (Enum)key;

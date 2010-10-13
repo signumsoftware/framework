@@ -181,22 +181,9 @@ namespace Signum.Entities.Chart
         {
             if (pi.Is((ChartTokenDN ct) => ct.Token))
             {
-                ChartTokenDN ct = (ChartTokenDN)sender;
-                if (ct.Aggregate == AggregateFunction.Count)
-                {
-                    if (propertyValue != null)
-                        return "Expression should be null if count is selected";
-                    else
-                        return null;
-                }
-                else
-                {
-                    if (propertyValue == null)
-                        return "Expression is null";
-                }
+                ChartTokenDN ct = (ChartTokenDN)sender;              
 
                 return ChartUtils.ValidateProperty(chartResultType, GetTokenName(ct), (QueryToken)propertyValue);
-
             }
 
             if (pi.Is((ChartTokenDN ct) => ct.Aggregate))
@@ -315,6 +302,21 @@ namespace Signum.Entities.Chart
 
             if (ChartRequestChanged != null)
                 ChartRequestChanged();
+        }
+
+        public IEnumerable<ChartTokenDN> ChartTokens()
+        {
+            if(FirstDimension != null)
+                yield return FirstDimension;
+
+            if (SecondDimension != null)
+                yield return SecondDimension;
+
+            if (FirstValue != null)
+                yield return FirstValue;
+
+            if (SecondValue != null)
+                yield return SecondValue;
         }
     }
     

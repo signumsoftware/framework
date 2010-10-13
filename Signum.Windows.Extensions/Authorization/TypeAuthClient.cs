@@ -61,9 +61,9 @@ namespace Signum.Windows.Authorization
 
         private static void AttachTypeEvent<T>(EntitySettings<T> settings) where T : IdentifiableEntity
         {
-            settings.IsCreableEvent += admin => GetTypeAllowed(typeof(T)) == TypeAllowedBasic.Create;
-            settings.IsReadOnlyEvent += (entity, admin) => GetTypeAllowed(typeof(T)) <= TypeAllowedBasic.Read;
-            settings.IsViewableEvent += (entity, admin) => GetTypeAllowed(typeof(T)) >= TypeAllowedBasic.Read;
+            settings.IsCreable += admin => GetTypeAllowed(typeof(T)) == TypeAllowedBasic.Create;
+            settings.IsReadOnly += (entity, admin) => GetTypeAllowed(typeof(T)) <= TypeAllowedBasic.Read;
+            settings.IsViewable += (entity, admin) => GetTypeAllowed(typeof(T)) >= TypeAllowedBasic.Read;
         }
 
         static TypeAllowedBasic GetTypeAllowed(Type type)

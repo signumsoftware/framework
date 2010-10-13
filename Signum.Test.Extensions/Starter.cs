@@ -15,6 +15,8 @@ using Signum.Engine.Reports;
 using Signum.Engine.ControlPanel;
 using Signum.Entities.ControlPanel;
 using Signum.Entities.Reports;
+using Signum.Engine.Extensions.Chart;
+using Signum.Entities.Chart;
 
 namespace Signum.Test.Extensions
 {
@@ -60,6 +62,7 @@ namespace Signum.Test.Extensions
             sb.Settings.OverrideTypeAttributes<IUserRelatedDN>(new ImplementedByAttribute());
             sb.Settings.OverrideFieldAttributes((ControlPanelDN cp) => cp.Related, new ImplementedByAttribute(typeof(UserDN), typeof(RoleDN)));
             sb.Settings.OverrideFieldAttributes((UserQueryDN uq) => uq.Related, new ImplementedByAttribute(typeof(UserDN), typeof(RoleDN)));
+            sb.Settings.OverrideFieldAttributes((UserChartDN uq) => uq.Related, new ImplementedByAttribute(typeof(UserDN), typeof(RoleDN)));
 
             AuthLogic.Start(sb, dqm, AuthLogic.SystemUserName, null);
             UserTicketLogic.Start(sb, dqm);
@@ -80,6 +83,9 @@ namespace Signum.Test.Extensions
             ControlPanelLogic.Start(sb, dqm);
             ControlPanelLogic.RegisterUserEntityGroup(sb, MusicGroups.UserEntities);
             ControlPanelLogic.RegisterRoleEntityGroup(sb, MusicGroups.RoleEntities);
+            ChartLogic.Start(sb, dqm);
+            ChartLogic.RegisterUserEntityGroup(sb, MusicGroups.UserEntities);
+            ChartLogic.RegisterRoleEntityGroup(sb, MusicGroups.RoleEntities);
 
             ReportsLogic.Start(sb, dqm, true, false);
 

@@ -29,28 +29,14 @@ namespace Signum.Web.Reports
     public class ReportController : Controller
     {
         [AcceptVerbs(HttpVerbs.Post)]
-        public ActionResult ToExcelPlain(FindOptions findOptions, string prefix, Lite<UserQueryDN> userQuery)
+        public ActionResult ToExcelPlain(FindOptions findOptions, string prefix)
         {
             if (!Navigator.IsFindable(findOptions.QueryName))
                 throw new UnauthorizedAccessException(Signum.Web.Properties.Resources.ViewForType0IsNotAllowed.Formato(findOptions.QueryName));
 
-            var request = new QueryRequest
-            { 
-                QueryName =  findOptions.QueryName,
-                Filters =  findOptions.FilterOptions.Select(fo => fo.ToFilter()).ToList(),
-                Orders =  findOptions.OrderOptions.Select(fo => fo.ToOrder()).ToList(),
-                Limit = findOptions.Top,
-                UserColumns = findOptions.UserColumnOptions.Select(fo => fo.UserColumn).ToList()
-            };
+            QueryRequest request = findOptions.ToQueryRequest();
 
-            if (userQuery != null && request.UserColumns != null && request.UserColumns.Any())
-            {
-                UserQueryDN uq = userQuery.Retrieve();
-                foreach (var uc in request.UserColumns)
-                    uc.DisplayName = uq.Columns[uc.UserColumnIndex].DisplayName;
-            }
-
-            ResultTable queryResult = DynamicQueryManager.Current.ExecuteQuery( request);
+            ResultTable queryResult = DynamicQueryManager.Current.ExecuteQuery(request);
             byte[] binaryFile = PlainExcelGenerator.WritePlainExcel(queryResult);
 
             return File(binaryFile, Signum.Web.Controllers.SignumController.GetMimeType(".xlsx"), Navigator.Manager.QuerySettings[findOptions.QueryName].UrlName + ".xlsx");
@@ -62,14 +48,8 @@ namespace Signum.Web.Reports
             if (!Navigator.IsFindable(findOptions.QueryName))
                 throw new UnauthorizedAccessException(Signum.Web.Properties.Resources.ViewForType0IsNotAllowed.Formato(findOptions.QueryName));
 
-            var request = new QueryRequest
-            {
-                QueryName = findOptions.QueryName,
-                Filters = findOptions.FilterOptions.Select(fo => fo.ToFilter()).ToList(),
-                Orders = findOptions.OrderOptions.Select(fo => fo.ToOrder()).ToList(),
-                Limit = findOptions.Top
-            };
-
+            QueryRequest request = findOptions.ToQueryRequest();
+           
             byte[] file = ReportsLogic.ExecuteExcelReport(excelReport, request);
 
             return File(file, Signum.Web.Controllers.SignumController.GetMimeType(".xlsx"), Navigator.Manager.QuerySettings[findOptions.QueryName].UrlName + "-" + DateTime.Now.ToString("yyyyMMdd-HHmmss") + ".xlsx");

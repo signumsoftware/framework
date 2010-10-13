@@ -15,6 +15,8 @@ using Signum.Engine.Authorization;
 using Signum.Utilities.Reflection;
 using Signum.Utilities.DataStructures;
 using Signum.Engine.Extensions.Properties;
+using System.Xml.Linq;
+using System.ComponentModel;
 
 namespace Signum.Engine.Operations
 {
@@ -112,6 +114,11 @@ namespace Signum.Engine.Operations
 
                 return result;
             }
+
+            public override string ToString()
+            {
+                return base.ToString() + " in state " + TargetState;
+            }
         }
 
         public class ConstructFrom<F> : BasicConstructorFrom<F, E>, IGraphInnerOperation
@@ -134,6 +141,11 @@ namespace Signum.Engine.Operations
 
                 return result;
             }
+
+            public override string ToString()
+            {
+                return base.ToString() + " in state " + TargetState;
+            }
         }
 
         public class ConstructFromMany<F> : BasicConstructorFromMany<F, E>, IGraphInnerOperation
@@ -155,6 +167,11 @@ namespace Signum.Engine.Operations
                 Graph.AssertEnterState(result, this);
 
                 return result;
+            }
+
+            public override string ToString()
+            {
+                return base.ToString() + " in state " + TargetState;
             }
         }
 
@@ -188,22 +205,61 @@ namespace Signum.Engine.Operations
 	        }
         }
 
-        public DirectedEdgedGraph<string, Enum> ToDirectedGraph()
+       
+
+        public DirectedEdgedGraph<string, string> ToDirectedGraph()
         {
 
-            DirectedEdgedGraph<string, Enum> result = new DirectedEdgedGraph<string, Enum>();
+            DirectedEdgedGraph<string, string> result = new DirectedEdgedGraph<string, string>();
+
+            Action<string, string, Enum> Add = (from, to, key) =>
+                {
+                    Dictionary<string, string> dic = result.TryRelatedTo(from);
+                    if (dic == null || !dic.ContainsKey(to))
+                        result.Add(from, to, key.ToString());
+                    else
+                        result.Add(from, to, dic[to] + ", " + key.ToString()); 
+                }; 
+            
             foreach (var item in Operations)
             {
                 switch (item.OperationType)
                 {
                     case OperationType.Execute:
-                        foreach (var s in ((Goto)item).FromStates)
-                            result.Add(s.ToString(), ((Goto)item).TargetState.ToString(), item.Key);
-                        break;
-                    case OperationType.Delete: result.Add("[Delete]", "", item.Key); break;
-                    case OperationType.Constructor: result.Add("[New]", ((IGraphInnerOperation)item).TargetState.ToString(), item.Key); break;
-                    case OperationType.ConstructorFrom: result.Add("[From {0}]".Formato(item.GetType().GetGenericArguments()[2].TypeName()), ((IGraphInnerOperation)item).TargetState.ToString(), item.Key); break;
-                    case OperationType.ConstructorFromMany: result.Add("[FromMany {0}]".Formato(item.GetType().GetGenericArguments()[2].TypeName()), ((IGraphInnerOperation)item).TargetState.ToString(), item.Key); break;
+                        {
+                            Goto gOp = (Goto)item;
+
+                            if (gOp.FromStates == null)
+                                Add("[All States]", gOp.TargetState.ToString(), item.Key);
+                            else
+                                foreach (var s in gOp.FromStates)
+                                    Add(s.ToString(), gOp.TargetState.ToString(), item.Key);
+
+
+                        } break;
+                    case OperationType.Delete:
+                        {
+                            Delete dOp = (Delete)item;
+                            if (dOp.FromStates == null)
+                                Add("[All States]", "[Deleted]", item.Key);
+                            else
+                                foreach (var s in dOp.FromStates)
+                                    Add(s.ToString(), "[Deleted]", dOp.Key);
+
+
+                        } break;
+                    case OperationType.Constructor:
+                    case OperationType.ConstructorFrom:
+                    case OperationType.ConstructorFromMany:
+                        {
+                            string from = item.OperationType == OperationType.Constructor ? "[New]" :
+                                          item.OperationType == OperationType.ConstructorFrom ? "[From {0}]".Formato(item.GetType().GetGenericArguments()[2].TypeName()) :
+                                          item.OperationType == OperationType.ConstructorFromMany ? "[FromMany {0}]".Formato(item.GetType().GetGenericArguments()[2].TypeName()) : "";
+
+                            Add(from, ((IGraphInnerOperation)item).TargetState.ToString(), item.Key);
+
+
+                        } break;
                 }
             }
 

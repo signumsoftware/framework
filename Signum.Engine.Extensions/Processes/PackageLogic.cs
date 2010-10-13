@@ -53,8 +53,7 @@ namespace Signum.Engine.Processes
                          pl.Target,
                          pl.FinishTime,
                          pl.Exception
-                     }).ToDynamic()
-                     .Column(a => a.Package, c => c.Visible = false);
+                     }).ToDynamic();
             }
         }
     }

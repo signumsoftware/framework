@@ -133,5 +133,10 @@ namespace Signum.Engine.Operations
             if (Execute == null)
                 throw new InvalidOperationException(Resources.Operation0DoesNotHaveExecuteInitialized.Formato(Key));
         }
+
+        public override string ToString()
+        {
+            return "{0} Execute on {1}".Formato(Key, typeof(T));
+        }
     }
 }

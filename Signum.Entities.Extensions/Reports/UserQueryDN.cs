@@ -55,6 +55,13 @@ namespace Signum.Entities.Reports
             set { Set(ref orders, value, () => Orders); }
         }
 
+        ColumnOptionsMode columnsMode;
+        public ColumnOptionsMode ColumnsMode
+        {
+            get { return columnsMode; }
+            set { Set(ref columnsMode, value, () => ColumnsMode); }
+        }
+
         [NotNullable]
         MList<QueryColumnDN> columns;
         public MList<QueryColumnDN>  Columns
@@ -145,7 +152,7 @@ namespace Signum.Entities.Reports
 
         public override void PostRetrieving(QueryDescription queryDescription)
         {
-            Token = QueryUtils.ParseOrder(tokenString, queryDescription);
+            Token = QueryUtils.Parse(tokenString, queryDescription);
             CleanSelfModified();
         }
 
@@ -154,9 +161,18 @@ namespace Signum.Entities.Reports
     [Serializable]
     public class QueryColumnDN : QueryTokenDN
     {
-        [NotNullable, SqlDbType(Size = 100)]
+        public QueryColumnDN(){}
+
+        public QueryColumnDN(Column col)
+        {
+            Token = col.Token;
+            if(col.DisplayName != col.Token.NiceName())
+                DisplayName = col.DisplayName;
+        }
+
+        [SqlDbType(Size = 100)]
         string displayName;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
         public string DisplayName
         {
             get { return displayName; }
@@ -166,8 +182,39 @@ namespace Signum.Entities.Reports
 
         public override void PostRetrieving(QueryDescription queryDescription)
         {
-            Token = QueryUtils.ParseColumn(tokenString, queryDescription);
+            Token = QueryUtils.Parse(tokenString, queryDescription);
             CleanSelfModified();
+        }
+
+        public static Tuple<ColumnOptionsMode, MList<QueryColumnDN>> SmartColumns(List<Column> current, List<ColumnDescription> descriptions)
+        {
+            var ideal = (from cd in descriptions
+                         where !cd.IsEntity
+                         select new Column(cd)).ToList();
+
+            if(current.Count < ideal.Count)
+            {
+                List<Column> toRemove = new List<Column>(); 
+                int j = 0;
+                for (int i = 0; i < ideal.Count; i++)
+			    {
+                    if (j < current.Count && current[j].Equals(ideal[i]))
+                        j++;
+                    else
+                        toRemove.Add(ideal[i]); 			 
+			    }
+
+                if(toRemove.Count + current.Count == ideal.Count)
+                    return Tuple.Create(ColumnOptionsMode.Remove, toRemove.Select(c=> new QueryColumnDN{ Token = c.Token }).ToMList());
+            }
+            else
+            {
+                if(current.Zip(ideal).All(t=>t.Item1.Equals(t.Item2)))
+                    return Tuple.Create(ColumnOptionsMode.Add, current.Skip(ideal.Count).Select(c=> new QueryColumnDN(c)).ToMList()); 
+
+            }
+
+            return Tuple.Create(ColumnOptionsMode.Replace, current.Select(c=> new QueryColumnDN(c)).ToMList()); 
         }
     }
 
@@ -200,7 +247,7 @@ namespace Signum.Entities.Reports
 
         public override void PostRetrieving(QueryDescription queryDescription)
         {
-            Token = QueryUtils.ParseFilter(tokenString, queryDescription);
+            Token = QueryUtils.Parse(tokenString, queryDescription);
 
             object val;
             string error = FilterValueConverter.TryParse(ValueString, Token.Type, out val);

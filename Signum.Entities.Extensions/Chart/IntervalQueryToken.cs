@@ -32,11 +32,11 @@ namespace Signum.Entities.Chart
             if (ft != FilterType.Number && ft != FilterType.DecimalNumber)
                 throw new ArgumentException("parent should be a Number");
 
+            isDecimal = ft == FilterType.DecimalNumber;
+
             Type t = parent.Type.UnNullify();
 
-            isDecimal = t == typeof(float) || t == typeof(double) || t == typeof(decimal);
-
-            Intervals = (isDecimal ? "... {0:0.0} {1:0.0} ..." : "... {0} {1} ...").Formato(0, 10);
+            Intervals = (ft == FilterType.DecimalNumber ? "... {0:0.0} {1:0.0} ..." : "... {0} {1} ...").Formato(0, 10);
         }
 
         //0,5,6.5,8
@@ -183,7 +183,7 @@ namespace Signum.Entities.Chart
 
         static Regex reg = new Regex(@"^Interval\((?<pattern>.*?)\)$");
 
-        public override QueryToken Match(string key)
+        public override QueryToken MatchPart(string key)
         {
             Match m = reg.Match(key);
 
@@ -250,12 +250,12 @@ namespace Signum.Entities.Chart
                     Expression.Add(
                         Expression.Multiply(
                             Expression.Constant(Convert.ChangeType(intervals.LastStep, t)),
-                            Cast(Expression.Subtract(index, Expression.Constant(intervals.Splits.Length - 2)), t)),
+                            Cast(Expression.Subtract(index, Expression.Constant(intervals.Splits.Length - 1)), t)),
                         Expression.Constant(Convert.ChangeType(intervals.Last, t))).Nullify(),
                     Expression.Add(
                         Expression.Multiply(
                             Expression.Constant(Convert.ChangeType(intervals.LastStep, t)),
-                            Cast(Expression.Subtract(index, Expression.Constant(intervals.Splits.Length - 3)), t)),
+                            Cast(Expression.Subtract(index, Expression.Constant(intervals.Splits.Length - 2)), t)),
                         Expression.Constant(Convert.ChangeType(intervals.Last, t))).Nullify());
 
             Expression bodyProjector = end;
@@ -294,15 +294,15 @@ namespace Signum.Entities.Chart
             Expression sqlExpression;
             Expression init = !intervals.RepeatInitial ? (Expression)Expression.Constant(-1) :
                     Floor(Expression.Divide(
-                            Expression.Subtract(exp, Expression.Constant(Convert.ChangeType(intervals.First, t))),
-                            Expression.Constant(Convert.ChangeType(intervals.FirstStep, t))));
+                            Expression.Subtract(Cast(exp, typeof(decimal)), Expression.Constant(intervals.First)),
+                            Expression.Constant(intervals.FirstStep)));
 
             Expression end = !intervals.RepeatFinal ? (Expression)Expression.Constant(intervals.Splits.Length - 1) :
                 Expression.Add(
                     Expression.Constant(intervals.Splits.Length - 1),
                     Floor(Expression.Divide(
-                            Expression.Subtract(exp, Expression.Constant(Convert.ChangeType(intervals.Last, t))),
-                            Expression.Constant(Convert.ChangeType(intervals.LastStep, t)))));
+                            Expression.Subtract(Cast(exp, typeof(decimal)), Expression.Constant(intervals.Last)),
+                            Expression.Constant(intervals.LastStep))));
 
             sqlExpression = end;
 
@@ -354,6 +354,72 @@ namespace Signum.Entities.Chart
         public override QueryToken Clone()
         {
             return new IntervalQueryToken(Parent.Clone()) { Intervals = Intervals };
+        }
+    }
+
+    [Serializable]
+    public class CountAllToken: QueryToken
+    {
+        public CountAllToken() : base(null) { }
+
+        public override string ToString()
+        {
+            return "All"; 
+        }
+
+        public override string NiceName()
+        {
+            return "All";
+        }
+
+        public override string Format
+        {
+            get { return null; }
+        }
+
+        public override string Unit
+        {
+            get { return null; }
+        }
+
+        public override Type Type
+        {
+            get { return typeof(int); }
+        }
+
+        public override string Key
+        {
+            get { return "All"; }
+        }
+
+        protected override QueryToken[] SubTokensInternal()
+        {
+            return null;
+        }
+
+        public override Expression BuildExpression(Expression expression)
+        {
+            return Expression.Constant(1); 
+        }
+
+        public override PropertyRoute GetPropertyRoute()
+        {
+            return null;
+        }
+
+        public override Implementations Implementations()
+        {
+            return null;
+        }
+
+        public override bool IsAllowed()
+        {
+            return true; 
+        }
+
+        public override QueryToken Clone()
+        {
+            return new CountAllToken(); 
         }
     }
 }

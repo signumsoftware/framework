@@ -95,23 +95,23 @@ namespace Signum.Engine.Reports
                 
                 worksheetPart.Worksheet = new Worksheet();
 
-                worksheetPart.Worksheet.Append(new Columns(results.VisibleColumns.Select(c => new spreadsheet.Column()
+                worksheetPart.Worksheet.Append(new Columns(results.Columns.Select((c, i) => new spreadsheet.Column()
                     {
-                        Min = (uint)c.Index,
-                        Max = (uint)c.Index,
-                        Width = GetColumnWidth(c.Type),
+                        Min = (uint)i + 1,
+                        Max = (uint)i + 1,
+                        Width = GetColumnWidth(c.Column.Type),
                         BestFit = true,
                         CustomWidth = true
                     }).ToArray()));
 
                 worksheetPart.Worksheet.Append(new Sequence<Row>()
                 {
-                    (from c in results.VisibleColumns
-                    select CellBuilder.Cell(c.DisplayName, TemplateCells.Header)).ToRow(),
+                    (from c in results.Columns
+                    select CellBuilder.Cell(c.Column.DisplayName, TemplateCells.Header)).ToRow(),
 
                     from r in results.Rows
-                    select (from c in results.VisibleColumns
-                            let template = c.Format == "d" ? TemplateCells.Date : CellBuilder.GetTemplateCell(c.Type)
+                    select (from c in results.Columns
+                            let template = c.Column.Format == "d" ? TemplateCells.Date : CellBuilder.GetTemplateCell(c.Column.Type)
                             select CellBuilder.Cell(r[c], template)).ToRow()
                 }.ToSheetData());
 

@@ -43,7 +43,8 @@ namespace Signum.Web.ControlPanel
                     new EntitySettings<LinkElement>(EntityType.NotSaving) { PartialViewName = e => ViewPrefix + "LinkElement" },
                 });
 
-                Constructor.ConstructorManager.Constructors.Add(typeof(ControlPanelDN), () => new ControlPanelDN { Related = UserDN.Current.ToLite<IdentifiableEntity>() });
+                Constructor.ConstructorManager.Constructors.Add(
+                    typeof(ControlPanelDN), () => new ControlPanelDN { Related = UserDN.Current.ToLite<IdentifiableEntity>() });
             }
         }
     }

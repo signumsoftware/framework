@@ -86,9 +86,19 @@
                               VirtualizingStackPanel.IsVirtualizing="True">
                         <ListView.View>
                             <GridView x:Name="gvResults" AllowsColumnReorder="False">
+                                <GridView.ColumnHeaderContainerStyle>
+                                    <Style TargetType="{x:Type GridViewColumnHeader}">
+                                        <EventSetter Event="Click" Handler="GridViewColumnHeader_Click"/>
+                                    </Style>
+                                </GridView.ColumnHeaderContainerStyle>
                             </GridView>
                         </ListView.View>
-
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="{x:Type ListViewItem}">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                <EventSetter Event="Control.MouseDoubleClick" Handler="lvResult_MouseDoubleClick"/>
+                            </Style>
+                        </ListView.ItemContainerStyle>
                     </ListView>
                 </Grid>
             </TabItem>

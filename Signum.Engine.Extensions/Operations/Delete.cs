@@ -129,5 +129,10 @@ namespace Signum.Engine.Operations
             if (Delete == null)
                 throw new InvalidOperationException(Resources.Operation0DoesNotHaveDeleteInitialized.Formato(Key));
         }
+
+        public override string ToString()
+        {
+            return "{0} Delete {1}".Formato(Key, typeof(T));
+        }
     }
 }
