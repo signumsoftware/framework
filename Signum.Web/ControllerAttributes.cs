@@ -207,7 +207,7 @@ namespace Signum.Web
 
         public static void HandlerApplication_Error(HttpContext context)
         {
-            if (Navigator.Manager == null || !Navigator.Manager.Started)
+            if (Navigator.Manager == null || !Navigator.Manager.Initialized)
                 return;
 
             Exception ex = context.Server.GetLastError().FollowC(a => a.InnerException).Last();

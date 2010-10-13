@@ -16,7 +16,8 @@ namespace Signum.Web
         public string Title { get; set; }
         public int? Top { get; set; }
         public string UrlName { get; set; }
-        public Func<bool, bool> ShowOkButton { get; set; }
+
+        public Func<object, bool> IsFindable; 
 
         private Dictionary<string, Func<HtmlHelper, object, string>> formatters;
         public Dictionary<string, Func<HtmlHelper, object, string>> Formatters

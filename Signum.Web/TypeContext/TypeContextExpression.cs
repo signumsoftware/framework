@@ -21,17 +21,28 @@ namespace Signum.Web
 
     class TypeContextExpression : Expression
     {
-        PropertyRoute route;
+        readonly PropertyRoute route;
         public PropertyRoute Route
         {
             get { return route; }
         }
 
+        readonly Type type; 
+        public override Type Type
+        {
+            get { return type; }
+        }
+
+        public override ExpressionType NodeType
+        {
+            get{return (ExpressionType)TypeContextNodeType.TypeContext; }
+        }
+
         public readonly PropertyInfo[] Properties;
 
         internal TypeContextExpression(PropertyInfo[] properties, Type type, PropertyRoute route)
-            : base((ExpressionType)TypeContextNodeType.TypeContext, type)
         {
+            this.type = type;
             this.Properties = properties;
             this.route = route;
         }

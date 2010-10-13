@@ -150,16 +150,9 @@ namespace Signum.Windows.Widgets
             {
                 ShowFilters = false,
                 SearchOnLoad = true,
-                FilterOptions = new List<FilterOption>() 
-                { 
-                    new FilterOption() 
-                    { 
-                        Path = AlertsQueryColumn, 
-                        Operation = FilterOperation.EqualTo, 
-                        Value = entity,
-                        Frozen = true 
-                    },
-                },
+                FilterOptions = { new FilterOption(AlertsQueryColumn, entity) { Frozen = true } },
+                ColumnOptions = { new ColumnOption(AlertsQueryColumn)},
+                ColumnOptionsMode = ColumnOptionsMode.Remove,
                 Closed = (o, ea) => ReloadAlerts(),
             });
         }

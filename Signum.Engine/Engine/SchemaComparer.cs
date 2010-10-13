@@ -16,7 +16,86 @@ namespace Signum.Engine
     {
         public static SqlPreCommand SynchronizeSchema(Replacements replacements)
         {
+            Dictionary<string, DiffTable> database = GetDatabaseDescription();
 
+            Dictionary<string, ITable> model = Schema.Current.Tables.Values.SelectMany(t => t.Fields.Values.Select(a=>a.Field).OfType<FieldMList>().Select(f => (ITable)f.RelationalTable).PreAnd(t)).ToDictionary(a => a.Name);
+
+            //use database without replacements to just remove indexes
+            SqlPreCommand dropIndices =
+                 Synchronizer.SynchronizeScript(database, model,
+                 (tn, table) => table.Colums.Values.Select(c => c.IndexName != null && !c.PrimaryKey ? SqlBuilder.DropIndex(table.Name, c.IndexName) : null).Combine(Spacing.Simple),
+                 null,
+                 (tn, dif, tab) => Synchronizer.SynchronizeScript(dif.Colums, tab.Columns,
+                     (cn, col) => col.IndexName != null ? SqlBuilder.DropIndex(tn, col.IndexName) : null, 
+                     null,
+                     (cn, coldb, colModel) => coldb.EqualsIndex(tn, colModel) || coldb.IndexName == null ? null : SqlBuilder.DropIndex(tn, coldb.IndexName), 
+                     Spacing.Simple),
+                 Spacing.Double);
+
+            SqlPreCommand dropForeignKeys =
+                 Synchronizer.SynchronizeScript(database, model, 
+                 (tn, table) => table.Colums.Values.Select(c => c.ForeingKeyName != null ? SqlBuilder.AlterTableDropConstraint(table.Name, c.ForeingKeyName) : null).Combine(Spacing.Simple),
+                 null,
+                 (tn, dif, tab) => Synchronizer.SynchronizeScript(dif.Colums, tab.Columns,
+                     (cn, col) => col.ForeingKeyName != null ? SqlBuilder.AlterTableDropConstraint(tn, col.ForeingKeyName) : null,
+                     null,
+                     (cn, coldb, colModel) => coldb.EqualForeignKey(tn, colModel) || coldb.ForeingKeyName == null ? null : SqlBuilder.AlterTableDropConstraint(tn, coldb.ForeingKeyName),
+                     Spacing.Simple),
+                 Spacing.Double);
+
+            SqlPreCommand tables =
+                Synchronizer.SynchronizeReplacing(replacements, Replacements.KeyTables,
+                database,
+                model,
+                (tn, dif) => SqlBuilder.DropTable(tn),
+                (tn, tab) => SqlBuilder.CreateTableSql(tab),
+                (tn, dif, tab) =>
+                    SqlPreCommand.Combine(Spacing.Simple,
+                    dif.Name != tab.Name ? SqlBuilder.RenameTable(dif.Name, tab.Name) : null,
+                    Synchronizer.SynchronizeReplacing(replacements, Replacements.KeyColumnsForTable(tn),
+                    dif.Colums,
+                    tab.Columns,
+                    (cn, difCol) => SqlPreCommand.Combine(Spacing.Simple, 
+                                    difCol.DefaultConstraintName.HasText() ?  SqlBuilder.AlterTableDropConstraint(tn, difCol.DefaultConstraintName) : null, 
+                                    SqlBuilder.AlterTableDropColumn(tn, cn)),
+                    (cn, tabCol) => SqlBuilder.AlterTableAddColumn(tn, tabCol),
+                    (cn, difCol, tabCol) =>
+                        SqlPreCommand.Combine(Spacing.Simple,
+                        difCol.Name == tabCol.Name ? null : SqlBuilder.RenameColumn(tn, difCol.Name, tabCol.Name),
+                        difCol.Equals(tabCol) ? null : SqlBuilder.AlterTableAlterColumn(tn, tabCol)),
+                    Spacing.Simple)), Spacing.Double);
+
+            var tableReplacements = replacements.TryGetC(Replacements.KeyTables);
+            if (tableReplacements != null)
+                replacements[Replacements.KeyTablesInverse] = tableReplacements.Inverse();
+
+            SqlPreCommand addForeingKeys =
+                 Synchronizer.SynchronizeScript(database, model,
+                 null,
+                 (tn, table) => SqlBuilder.AlterTableForeignKeys(table),
+                 (tn, dif, tab) => Synchronizer.SynchronizeScript(dif.Colums, tab.Columns,
+                     null,
+                     (cn, colModel) => colModel.ReferenceTable != null ? SqlBuilder.AlterTableAddConstraintForeignKey(tn, colModel.Name, colModel.ReferenceTable.Name) : null,
+                     (cn, coldb, colModel) => coldb.EqualForeignKey(tn, colModel) || colModel.ReferenceTable == null ? null : SqlBuilder.AlterTableAddConstraintForeignKey(tn, colModel.Name, colModel.ReferenceTable.Name),
+                     Spacing.Simple),
+                 Spacing.Double);
+
+            SqlPreCommand addIndices =
+                 Synchronizer.SynchronizeScript(database, model, 
+                 null,
+                 (tn, table) => SqlBuilder.CreateIndicesSql(table), 
+                 (tn, dif, tab) => Synchronizer.SynchronizeScript(dif.Colums, tab.Columns,
+                     null,
+                     (cn, colModel) => colModel.Index != Index.None ? SqlBuilder.CreateIndex(colModel.Index, tn, colModel.Name) : null,
+                     (cn, coldb, colModel) => coldb.EqualsIndex(tn, colModel) || colModel.Index == Index.None ? null : SqlBuilder.CreateIndex(colModel.Index, tn, colModel.Name),
+                     Spacing.Simple),
+                 Spacing.Double);
+
+            return SqlPreCommand.Combine(Spacing.Triple, dropIndices, dropForeignKeys, tables, addForeingKeys, addIndices);
+        }
+
+        static Dictionary<string, DiffTable> GetDatabaseDescription()
+        {
             var rawTables = (from t in Database.View<SchemaTables>()
                              where t.TABLE_TYPE == "BASE TABLE"
                              join c in Database.View<SchemaColumns>().DefaultIfEmpty() on t.TABLE_NAME equals c.TABLE_NAME
@@ -53,10 +132,20 @@ namespace Signum.Engine
                                 }).ToDictionary(c => c.Name),
                             }).ToDictionary(c => c.Name);
 
+
+            AddIndexes(database);
+
+            AddDefaultContraints(database); 
+
+            return database;
+        }
+
+        static void AddIndexes(Dictionary<string, DiffTable> database)
+        {
             var rawIndexes = (from t in Database.View<SysTables>()
-                              join c in Database.View<SysColumns>().DefaultIfEmpty() on t.object_id equals c.object_id
-                              join ic in Database.View<SysIndexColumn>().DefaultIfEmpty() on new { t.object_id, c.column_id } equals new { ic.object_id, ic.column_id }
-                              join i in Database.View<SysIndexes>().DefaultIfEmpty() on new { ic.index_id, ic.object_id } equals new { i.index_id, i.object_id }
+                              join c in Database.View<SysColumns>() on t.object_id equals c.object_id
+                              join ic in Database.View<SysIndexColumn>() on new { t.object_id, c.column_id } equals new { ic.object_id, ic.column_id }
+                              join i in Database.View<SysIndexes>() on new { ic.index_id, ic.object_id } equals new { i.index_id, i.object_id }
                               select new
                               {
                                   Table = t.name,
@@ -80,86 +169,35 @@ namespace Signum.Engine
 
 
             database.JoinDictionaryForeach(groups, (table, d1, d2) =>
-                 d1.Colums.JoinDictionaryForeach(d2, (column, col, bla) =>
-                    {
-                        col.Index = bla.Unique == null ? Index.None :
-                                    bla.Unique == true ? Index.Unique : Index.Multiple;
-                        col.IndexName = bla.IndexName;
-                        col.Identity = bla.Identity;
-                    }));
+                 d1.Colums.JoinDictionaryForeach(d2, (column, col, index) =>
+                 {
+                     col.Index = index.Unique == null ? Index.None :
+                                 index.Unique == true ? Index.Unique : Index.Multiple;
+                     col.IndexName = index.IndexName;
+                     col.Identity = index.Identity;
+                 }));
+        }
 
-            var model = Schema.Current.Tables.Values.SelectMany(t => t.Fields.Values.Select(a=>a.Field).OfType<FieldMList>().Select(f => (ITable)f.RelationalTable).PreAnd(t)).ToDictionary(a => a.Name);
+        static void AddDefaultContraints(Dictionary<string, DiffTable> database)
+        {
+            var rawConstraints = (from t in Database.View<SysTables>()
+                                  join c in Database.View<SysColumns>() on t.object_id equals c.object_id
+                                  join o in Database.View<SysObjects>() on c.default_object_id equals o.id
+                                  select new
+                                  {
+                                      Table = t.name,
+                                      ColumnName = c.name,
+                                      ConstraintName = o.name,
+                                  }).ToList();
 
-            //use database without replacements to just remove indexes
-            SqlPreCommand dropIndices =
-                 Synchronizer.SynchronizeScript(database, model,
-                 (tn, table) => table.Colums.Values.Select(c => c.IndexName != null && !c.PrimaryKey ? SqlBuilder.DropIndex(table.Name, c.IndexName) : null).Combine(Spacing.Simple),
-                 null,
-                 (tn, dif, tab) => Synchronizer.SynchronizeScript(dif.Colums, tab.Columns,
-                     (cn, col) => col.IndexName != null ? SqlBuilder.DropIndex(tn, col.IndexName) : null, 
-                     null,
-                     (cn, coldb, colModel) => coldb.EqualsIndex(tn, colModel) || coldb.IndexName == null ? null : SqlBuilder.DropIndex(tn, coldb.IndexName), 
-                     Spacing.Simple),
-                 Spacing.Double);
+            var groups = rawConstraints.AgGroupToDictionary(a => a.Table, g => g.ToDictionary(a => a.ColumnName, a => a.ConstraintName));
 
-            SqlPreCommand dropForeignKeys =
-                 Synchronizer.SynchronizeScript(database, model, 
-                 (tn, table) => table.Colums.Values.Select(c => c.ForeingKeyName != null ? SqlBuilder.AlterTableDropForeignKey(table.Name, c.ForeingKeyName) : null).Combine(Spacing.Simple),
-                 null,
-                 (tn, dif, tab) => Synchronizer.SynchronizeScript(dif.Colums, tab.Columns,
-                     (cn, col) => col.ForeingKeyName != null ? SqlBuilder.AlterTableDropForeignKey(tn, col.ForeingKeyName) : null,
-                     null,
-                     (cn, coldb, colModel) => coldb.EqualForeignKey(tn, colModel) || coldb.ForeingKeyName == null ? null : SqlBuilder.AlterTableDropForeignKey(tn, coldb.ForeingKeyName),
-                     Spacing.Simple),
-                 Spacing.Double);
 
-            SqlPreCommand tables =
-                Synchronizer.SynchronizeReplacing(replacements, Replacements.KeyTables,
-                database,
-                model,
-                (tn, dif) => SqlBuilder.DropTable(tn),
-                (tn, tab) => SqlBuilder.CreateTableSql(tab),
-                (tn, dif, tab) =>
-                    SqlPreCommand.Combine(Spacing.Simple,
-                    dif.Name != tab.Name ? SqlBuilder.RenameTable(dif.Name, tab.Name) : null,
-                    Synchronizer.SynchronizeReplacing(replacements, Replacements.KeyColumnsForTable(tn),
-                    dif.Colums,
-                    tab.Columns,
-                    (cn, difCol) => SqlBuilder.AlterTableDropColumn(tn, cn),
-                    (cn, tabCol) => SqlBuilder.AlterTableAddColumn(tn, tabCol),
-                    (cn, difCol, tabCol) =>
-                        SqlPreCommand.Combine(Spacing.Simple,
-                        difCol.Name == tabCol.Name ? null : SqlBuilder.RenameColumn(tn, difCol.Name, tabCol.Name),
-                        difCol.Equals(tabCol) ? null : SqlBuilder.AlterTableAlterColumn(tn, tabCol)),
-                    Spacing.Simple)), Spacing.Double);
-
-            var tableReplacements = replacements.TryGetC(Replacements.KeyTables);
-            if (tableReplacements != null)
-                replacements[Replacements.KeyTablesInverse] = tableReplacements.Inverse();
-
-            SqlPreCommand addForeingKeys =
-                 Synchronizer.SynchronizeScript(database, model,
-                 null,
-                 (tn, table) => SqlBuilder.AlterTableForeignKeys(table),
-                 (tn, dif, tab) => Synchronizer.SynchronizeScript(dif.Colums, tab.Columns,
-                     null,
-                     (cn, colModel) => colModel.ReferenceTable != null ? SqlBuilder.AlterTableAddForeignKey(tn, colModel.Name, colModel.ReferenceTable.Name) : null,
-                     (cn, coldb, colModel) => coldb.EqualForeignKey(tn, colModel) || colModel.ReferenceTable == null ? null : SqlBuilder.AlterTableAddForeignKey(tn, colModel.Name, colModel.ReferenceTable.Name),
-                     Spacing.Simple),
-                 Spacing.Double);
-
-            SqlPreCommand addIndices =
-                 Synchronizer.SynchronizeScript(database, model, 
-                 null,
-                 (tn, table) => SqlBuilder.CreateIndicesSql(table), 
-                 (tn, dif, tab) => Synchronizer.SynchronizeScript(dif.Colums, tab.Columns,
-                     null,
-                     (cn, colModel) => colModel.Index != Index.None ? SqlBuilder.CreateIndex(colModel.Index, tn, colModel.Name) : null,
-                     (cn, coldb, colModel) => coldb.EqualsIndex(tn, colModel) || colModel.Index == Index.None ? null : SqlBuilder.CreateIndex(colModel.Index, tn, colModel.Name),
-                     Spacing.Simple),
-                 Spacing.Double);
-
-            return SqlPreCommand.Combine(Spacing.Triple, dropIndices, dropForeignKeys, tables, addForeingKeys, addIndices);
+            database.JoinDictionaryForeach(groups, (table, d1, d2) =>
+                 d1.Colums.JoinDictionaryForeach(d2, (column, col, constraintName) =>
+                 {
+                     col.DefaultConstraintName = constraintName;
+                 }));
         }
 
         public static SqlDbType ToSqlDbType(string str)
@@ -193,10 +231,13 @@ namespace Signum.Engine
         public int? Scale;
         public bool Identity;
         public bool PrimaryKey;
+
         public string ForeingKeyName; 
         
         public Index Index;
         public string IndexName;
+
+        public string DefaultConstraintName;
 
         public bool Equals(IColumn other)
         {

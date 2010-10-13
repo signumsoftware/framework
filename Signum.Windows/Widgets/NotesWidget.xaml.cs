@@ -70,19 +70,13 @@ namespace Signum.Windows
 
         private void btnExploreNotes_Click(object sender, RoutedEventArgs e)
         {
-
-
             Navigator.Explore(new ExploreOptions(NotesQuery)
             {
                 ShowFilters = false,
                 SearchOnLoad = true,
-                FilterOptions = new List<FilterOption>
-                {
-                    new FilterOption( NotesQueryColumn, DataContext)
-                    {
-                        Frozen = true
-                    }
-                },
+                FilterOptions = { new FilterOption(NotesQueryColumn, DataContext) { Frozen = true } },
+                ColumnOptions  = { new ColumnOption(NotesQueryColumn) },
+                ColumnOptionsMode = ColumnOptionsMode.Remove,
                 Closed = (_, __) => ReloadNotes() 
             });
         }
@@ -109,7 +103,7 @@ namespace Signum.Windows
 
             int count = Navigator.QueryCount(new CountOptions(NotesQuery)
             {
-                FilterOptions = new List<FilterOption>{ new FilterOption( NotesQueryColumn, DataContext) }
+                FilterOptions = { new FilterOption( NotesQueryColumn, DataContext) }
             }); 
 
             if (count == 0)

@@ -16,14 +16,12 @@ namespace Signum.Web
 
         public abstract Mapping UntypedMappingDefault { get; }
         public abstract Mapping UntypedMappingAdmin { get; }
-        
-        public Func<bool, bool> IsCreable { get; set; }
-        public Func<bool, bool> IsViewable { get; set; }
-        public Func<bool, bool> IsNavigable { get; set; }
-        public bool IsReadOnly { get; set; }
-        public Func<bool, bool> ShowOkSave { get; set; }
 
-        public abstract bool HasPartialViewName { get; }
+        public abstract bool OnIsReadOnly(ModifiableEntity entity, bool isAdmin);
+        public abstract bool OnIsViewable(ModifiableEntity entity, bool isAdmin);
+        public abstract bool OnIsNavigable(ModifiableEntity entity, bool isAdmin);
+        public abstract bool OnIsCreable(bool isAdmin);
+        public abstract bool OnShowSave(); 
 
         public abstract string OnPartialViewName(ModifiableEntity entity);
     }
@@ -40,13 +38,75 @@ namespace Signum.Web
 
         public override Mapping UntypedMappingDefault { get { return MappingDefault; } }
         public override Mapping UntypedMappingAdmin { get { return MappingAdmin; } }
-   
-        public Func<T, string> PartialViewName { get; set; }
-        public override bool HasPartialViewName
+
+        public override bool OnIsReadOnly(ModifiableEntity entity, bool isAdmin)
         {
-            get { return PartialViewName == null; }
+            if (IsReadOnly != null)
+                foreach (Func<T, bool, bool> item in IsReadOnly.GetInvocationList())
+                {
+                    if (item((T)entity, isAdmin))
+                        return true;
+                }
+
+            return false;
         }
 
+        public override bool OnIsViewable(ModifiableEntity entity, bool isAdmin)
+        {
+            if (PartialViewName == null)
+                return false;
+
+            if (IsViewable != null)
+                foreach (Func<T, bool, bool> item in IsViewable.GetInvocationList())
+                {
+                    if (!item((T)entity, isAdmin))
+                        return false;
+                }
+
+            return true;
+        }
+
+        public override bool OnIsNavigable(ModifiableEntity entity, bool isAdmin)
+        {
+            if (PartialViewName == null)
+                return false;
+
+            if (IsNavigable != null)
+                foreach (Func<T, bool, bool> item in IsNavigable.GetInvocationList())
+                {
+                    if (!item((T)entity, isAdmin))
+                        return false;
+                }
+
+            return true;
+        }
+
+        public override bool OnIsCreable(bool isAdmin)
+        {
+            if (IsCreable != null)
+                foreach (Func<bool, bool> item in IsCreable.GetInvocationList())
+                {
+                    if (!item(isAdmin))
+                        return false;
+                }
+
+            return true;
+        }
+
+        public override bool OnShowSave()
+        {
+            return ShowSave;
+        }
+
+        public Func<bool, bool> IsCreable { get; set; }
+        public Func<T, bool, bool> IsReadOnly { get; set; }
+        public Func<T, bool, bool> IsViewable { get; set; }
+        public Func<T, bool, bool> IsNavigable{ get; set; }      
+
+        public bool ShowSave { get; set; }
+   
+        public Func<T, string> PartialViewName { get; set; }
+        
         public override string OnPartialViewName(ModifiableEntity entity)
         {
             return PartialViewName((T)entity);
@@ -57,33 +117,33 @@ namespace Signum.Web
             switch (entityType)
             {
                 case EntityType.Default:
-                    ShowOkSave = _ => true;
+                    ShowSave = true;
                     MappingAdmin = MappingDefault = new EntityMapping<T>(true);
                     break;
                 case EntityType.Admin:
-                    ShowOkSave = _ => true;
+                    ShowSave = true;
                     //IsReadOnly = admin => !admin;
                     IsCreable = admin => admin;
-                    IsViewable = admin => admin;
-                    IsNavigable = admin => admin;
+                    IsViewable = (_, admin) => admin;
+                    IsNavigable = (_, admin) => admin;
                     MappingAdmin = new EntityMapping<T>(true);
                     MappingDefault = new EntityMapping<T>(false);
                     break;
                 case EntityType.NotSaving:
-                    ShowOkSave = _ => false;
+                    ShowSave = false;
                     MappingAdmin = MappingDefault = new EntityMapping<T>(true);
                     break;
                 case EntityType.ServerOnly:
-                    ShowOkSave = _ => false;
-                    IsReadOnly = true;
+                    ShowSave = false;
+                    IsReadOnly = (_, admin) => true;
                     IsCreable = admin => false;
                     MappingAdmin = MappingDefault = new EntityMapping<T>(false);
                     break;
                 case EntityType.Content:
-                    ShowOkSave = _ => false;
+                    ShowSave = false;
                     IsCreable = admin => false;
-                    IsViewable = admin => false;
-                    IsNavigable = admin => false;
+                    IsViewable = (_, admin) => false;
+                    IsNavigable = (_, admin) => false;
                     MappingAdmin = null;
                     MappingDefault = new EntityMapping<T>(true);
                     break;

@@ -33,9 +33,8 @@ namespace Signum.Engine.Linq
                 List<ColumnDeclaration> aggColumns = new List<ColumnDeclaration>(select.Columns);
                 foreach (AggregateSubqueryExpression ae in lookup[select.Alias])
                 {
-                    string name = "agg" + aggColumns.Count;
-                    ColumnDeclaration cd = new ColumnDeclaration(name, ae.AggregateInGroupSelect);
-                    this.map.Add(ae, new ColumnExpression(ae.Type, ae.GroupByAlias, name));
+                    ColumnDeclaration cd = new ColumnDeclaration("agg" + aggColumns.Count, ae.AggregateInGroupSelect);
+                    this.map.Add(ae, cd.GetReference(ae.GroupByAlias));
                     aggColumns.Add(cd);
                 }
                 return new SelectExpression(select.Alias, select.Distinct, select.Top, aggColumns, select.From, select.Where, select.OrderBy, select.GroupBy);

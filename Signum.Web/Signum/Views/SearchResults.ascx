@@ -9,48 +9,62 @@
 <% Context context = (Context)Model;
    FindOptions findOptions = (FindOptions)ViewData[ViewDataKeys.FindOptions];
    QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
-   Type entitiesType = Reflector.ExtractLite(queryDescription.StaticColumns.Single(a => a.IsEntity).Type);
+   Type entitiesType = Reflector.ExtractLite(queryDescription.Columns.Single(a => a.IsEntity).Type);
    bool viewable = findOptions.View && Navigator.IsNavigable(entitiesType, true);
-
-    var resultJson = new List<List<string>>();
-    
+ 
     ResultTable queryResult = (ResultTable)ViewData[ViewDataKeys.Results];
-    var entityColumn = (queryResult == null) ? null : queryResult.Columns.OfType<StaticColumn>().Single(c => c.IsEntity);
     Dictionary<int, Func<HtmlHelper, object, string>> formatters = (Dictionary<int, Func<HtmlHelper, object, string>>)ViewData[ViewDataKeys.Formatters];
 
     foreach (var row in queryResult.Rows)
     {
-        var rowJson = new List<string>();
-        
-        Lite entityField = (Lite)row[entityColumn];
+      %>
+      <tr>
+      <%
+        Lite entityField = row.Entity;
 
         if (findOptions.AllowMultiple.HasValue)
         {
+            %>
+            <td>
+            <%
             if (findOptions.AllowMultiple.Value)
             {
-                rowJson.Add(Html.CheckBox(
+                Response.Write(Html.CheckBox(
                     context.Compose("rowSelection", row.Index.ToString()),
-                    new { value = entityField.Id.ToString() + "__" + entityField.RuntimeType.Name + "__" + entityField.ToStr }).ToHtmlString());
+                    new { value = entityField.Id.ToString() + "__" + entityField.RuntimeType.Name + "__" + entityField.ToStr }));
+
             }
             else
             {
-                rowJson.Add(Html.RadioButton(
+                Response.Write(Html.RadioButton(
                     context.Compose("rowSelection"),
                     entityField.Id.ToString() + "__" + entityField.RuntimeType.Name + "__" + entityField.ToStr).ToHtmlString());
-            }
-               
+            }  
+             %>
+            </td>
+            <%
         }
         
         if (viewable)
         {
-            rowJson.Add(Html.Href(Navigator.ViewRoute(entityField.RuntimeType, entityField.Id), Html.Encode(Resources.View)));
+             %>
+            <td>
+            <%
+                Response.Write(Html.Href(Navigator.ViewRoute(entityField.RuntimeType, entityField.Id), Html.Encode(Resources.View)));
+             %>
+            </td>
+            <%
         }
-        
-        foreach (var col in queryResult.VisibleColumns)
+
+        foreach (var col in queryResult.Columns)
         {
-            rowJson.Add(formatters[col.Index](Html, row[col]));
+             %>
+            <td>
+            <%= formatters[col.Index](Html, row[col]) %>
+            </td>
+            <%
         }
-        
-        resultJson.Add(rowJson);
+        %>
+        </tr>
+        <%
     }%>
-    <%= new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(resultJson) %>

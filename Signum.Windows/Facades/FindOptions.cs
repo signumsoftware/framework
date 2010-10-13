@@ -47,11 +47,18 @@ namespace Signum.Windows
             set { this.orderOptions = value; }
         }
 
-        List<UserColumnOption> userColumnOptions = new List<UserColumnOption>();
-        public List<UserColumnOption> UserColumnOptions
+        ColumnOptionsMode columnOptionsMode = ColumnOptionsMode.Add;
+        public ColumnOptionsMode ColumnOptionsMode
         {
-            get { return userColumnOptions; }
-            set { this.userColumnOptions = value; }
+            get { return columnOptionsMode; }
+            set { this.columnOptionsMode = value; }
+        }        
+
+        List<ColumnOption> columnOptions = new List<ColumnOption>();
+        public List<ColumnOption> ColumnOptions
+        {
+            get { return columnOptions; }
+            set { this.columnOptions = value; }
         }
 
         public FindOptionsBase()
@@ -277,13 +284,13 @@ namespace Signum.Windows
         }
     }
 
-    public class UserColumnOption : Freezable
+    public class ColumnOption : Freezable
     {
-        public UserColumnOption()
+        public ColumnOption()
         {
         }
 
-        public UserColumnOption(string path)
+        public ColumnOption(string path)
         {
             this.Path = path;
         }
@@ -293,11 +300,9 @@ namespace Signum.Windows
             throw new NotImplementedException();
         }
 
+
+        //For temporaly XAML only
         public string Path { get; set; }
         public string DisplayName { get; set; }
-
-        public UserColumn UserColumn { get; set; }
-
-        internal GridViewColumn GridViewColumn;
-    }  
+    }
 }

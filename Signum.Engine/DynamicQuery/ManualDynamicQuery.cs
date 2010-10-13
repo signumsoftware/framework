@@ -12,9 +12,9 @@ namespace Signum.Engine.DynamicQuery
 {
     public class ManualDynamicQuery<T> : DynamicQuery<T>
     {
-        public Func<QueryRequest, IEnumerable<Expandable<T>>> Execute { get; private set; }
+        public Func<QueryRequest, DEnumerable<T>> Execute { get; private set; }
 
-        public ManualDynamicQuery(Func<QueryRequest, IEnumerable<Expandable<T>>> execute)
+        public ManualDynamicQuery(Func<QueryRequest, DEnumerable<T>> execute)
         {
             if (execute == null)
                 throw new ArgumentNullException("execute");
@@ -26,9 +26,11 @@ namespace Signum.Engine.DynamicQuery
 
         public override ResultTable ExecuteQuery(QueryRequest request)
         {
-            Expandable<T>[] list = Execute(request).ToArray();
+            request.Columns.Insert(0, new _EntityColumn(EntityColumn().BuildColumnDescription()));
 
-            return ToQueryResult(list, request.UserColumns);
+            DEnumerable<T> manualResult = Execute(request);
+
+            return manualResult.ToResultTable(request.Columns); 
         }
 
         public override int ExecuteQueryCount(QueryCountRequest request)
@@ -39,7 +41,7 @@ namespace Signum.Engine.DynamicQuery
                 Filters = request.Filters,
             };
 
-            return Execute(req).Count();
+            return Execute(req).Collection.Count();
         }
 
         public override Lite ExecuteUniqueEntity(UniqueEntityRequest request)
@@ -48,11 +50,17 @@ namespace Signum.Engine.DynamicQuery
             {
                 QueryName = request.QueryName,
                 Filters = request.Filters,
-                Limit = 1,
+                Limit = 2,
                 Orders = request.Orders,
+                Columns = new List<Column> { new Column(this.EntityColumn().BuildColumnDescription()) }
             };
 
-            return Execute(req).SelectEntity().Unique(request.UniqueType);
+            DEnumerable<T> mr = Execute(req);
+
+            ParameterExpression pe = Expression.Parameter(typeof(object), "p");
+            Func<object, Lite> entitySelector = Expression.Lambda<Func<object, Lite>>(TupleReflection.TupleChainProperty(pe, 0), pe).Compile();
+
+            return mr.Collection.Select(entitySelector).Unique(request.UniqueType);
         }
     }
 }

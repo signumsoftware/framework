@@ -82,7 +82,7 @@
     <Compile Include="..\Signum.Utilities\Properties\Version.cs">
       <Link>Properties\Version.cs</Link>
     </Compile>
-    <Compile Include="DynamicQuery\ExpandableResult.cs" />
+    <Compile Include="DynamicQuery\Column.cs" />
     <Compile Include="DynamicQuery\Filter.cs" />
     <Compile Include="DynamicQuery\Requests.cs" />
     <Compile Include="DynamicQuery\ResultTable.cs" />

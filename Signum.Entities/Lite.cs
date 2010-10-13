@@ -65,7 +65,7 @@ namespace Signum.Entities
     }
 
     [Serializable]
-    public abstract class Lite : Modifiable
+    public abstract class Lite : Modifiable, IComparable, IComparable<Lite>
     {
         Type runtimeType;
         int? id;
@@ -296,6 +296,19 @@ namespace Signum.Entities
         public string KeyLong(Func<Type, string> typeName)
         {
             return "{0};{1};{2}".Formato(typeName(this.RuntimeType), this.Id, this.ToStr);
+        }
+
+        public int CompareTo(Lite other)
+        {
+            return ToString().CompareTo(other.ToString()); 
+        }
+
+        public int CompareTo(object obj)
+        {
+            if (obj is Lite)
+                return CompareTo((Lite)obj);
+
+            throw new InvalidOperationException("obj is not a Lite"); 
         }
     }
 

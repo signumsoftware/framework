@@ -4,6 +4,7 @@ using System.Linq;
 using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Utilities;
+using Signum.Entities.DynamicQuery;
 
 namespace Signum.Web
 {
@@ -65,10 +66,9 @@ namespace Signum.Web
                     Create = false,
                     SearchOnLoad = true,
                     FilterMode = FilterMode.AlwaysHidden,
-                    FilterOptions =
-                    {
-                        new FilterOption(AlertsQueryColumn,identifiable.ToLite())
-                    }
+                    FilterOptions = { new FilterOption(AlertsQueryColumn, identifiable.ToLite()) },
+                    ColumnOptions = { new ColumnOption( AlertsQueryColumn) },
+                    ColumnOptionsMode = ColumnOptionsMode.Remove,
                 }
             };
             return foptions;
@@ -78,10 +78,7 @@ namespace Signum.Web
         {
             int count = Navigator.QueryCount(new CountOptions(queryName)
             {
-                FilterOptions =
-                {
-                    new FilterOption(AlertsQueryColumn, identifiable)
-                }
+                FilterOptions = { new FilterOption(AlertsQueryColumn, identifiable) },
             });
             return count;
         }

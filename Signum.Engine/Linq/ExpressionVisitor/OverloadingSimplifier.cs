@@ -310,6 +310,23 @@ namespace Signum.Engine.Linq
 
             }
 
+            if (m.Method.DeclaringType == typeof(Tuple) && m.Method.Name == "Create")
+            {
+                var types = m.Arguments.Select(e => e.Type).ToArray();
+                if (types.Length < 8)
+                {
+                    return Expression.New(m.Method.ReturnType.GetConstructor(types), m.Arguments.ToArray());
+                }
+                else
+                {
+                    Type lastType = types[7];
+                    types[7] = typeof(Tuple<>).MakeGenericType(lastType);
+
+                    return Expression.New(m.Method.ReturnType.GetConstructor(types), m.Arguments.Take(7).And(
+                        Expression.New(types[7].GetConstructor(new[] { lastType }), m.Arguments[7])).ToArray());
+                }
+            }
+
             return base.VisitMethodCall(m); 
         }
 

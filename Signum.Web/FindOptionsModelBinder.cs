@@ -41,39 +41,42 @@ namespace Signum.Web
 
             fo.FilterOptions = ExtractFilterOptions(controllerContext.HttpContext, fo.QueryName);
             fo.OrderOptions = ExtractOrderOptions(controllerContext.HttpContext, fo.QueryName);
-            fo.UserColumnOptions = ExtractUserColumnsOptions(controllerContext.HttpContext, fo.QueryName);
+            fo.ColumnOptions = ExtractColumnsOptions(controllerContext.HttpContext, fo.QueryName);
 
-            if (parameters.AllKeys.Any(k => k == "sfAllowMultiple"))
+            if (parameters.AllKeys.Contains("sfAllowMultiple"))
             {
                 bool aux;
                 if (bool.TryParse(parameters["sfAllowMultiple"], out aux))
                     fo.AllowMultiple = aux;
             }
 
-            if (parameters.AllKeys.Any(k => k == "sfAsync"))
+            if (parameters.AllKeys.Contains("sfAsync"))
             {
                 bool aux;
                 if (bool.TryParse(parameters["sfAsync"], out aux))
                     fo.Async = aux;
             }
 
-            if (parameters.AllKeys.Any(k => k == "sfFilterMode"))
-                fo.FilterMode = (FilterMode)Enum.Parse(typeof(FilterMode), parameters["sfFilterMode"]);
+            if (parameters.AllKeys.Contains("sfFilterMode"))
+                fo.FilterMode = parameters["sfFilterMode"].ToEnum<FilterMode>();
 
-            if (parameters.AllKeys.Any(k => k == "sfCreate"))
+            if (parameters.AllKeys.Contains("sfColumnMode"))
+                fo.ColumnOptionsMode = parameters["sfColumnMode"].ToEnum<ColumnOptionsMode>();
+
+            if (parameters.AllKeys.Contains("sfCreate"))
                 fo.Create = bool.Parse(parameters["sfCreate"]);
 
-            if (parameters.AllKeys.Any(k => k == "sfView"))
+            if (parameters.AllKeys.Contains("sfView"))
                 fo.View = bool.Parse(parameters["sfView"]);
 
-            if (parameters.AllKeys.Any(k => k == "sfTop"))
+            if (parameters.AllKeys.Contains("sfTop"))
             {
                 int aux;
                 if (int.TryParse(parameters["sfTop"], out aux))
                     fo.Top = aux;
             }
 
-            if (parameters.AllKeys.Any(k => k == "sfSearchOnLoad"))
+            if (parameters.AllKeys.Contains("sfSearchOnLoad"))
                 fo.SearchOnLoad = bool.Parse(parameters["sfSearchOnLoad"]);
 
             return fo;
@@ -99,9 +102,9 @@ namespace Signum.Web
                 string name = parameters[nameKey];
                 string value = parameters["val" + index.ToString()];
                 string operation = parameters["sel" + index.ToString()];
-                bool frozen = parameters.AllKeys.Any(k => k == "fz" + index.ToString());
+                bool frozen = parameters.AllKeys.Contains("fz" + index.ToString());
 
-                QueryToken token =   QueryUtils.ParseFilter(name, queryDescription);
+                QueryToken token = QueryUtils.Parse(name, queryDescription);
 
                 object valueObject = Convert(value, token.Type);
 
@@ -137,42 +140,38 @@ namespace Signum.Web
                 string token = orderType == OrderType.Ascending ? currentOrderString : currentOrderString.Substring(1, currentOrderString.Length-1);
                 result.Add(new OrderOption
                 {
-                    Token = QueryUtils.ParseOrder(token, queryDescription),
-                    Type = orderType
+                    Token = QueryUtils.Parse(token, queryDescription),
+                    OrderType = orderType
                 });
             }
 
             return result;
         }
 
-        public static List<UserColumnOption> ExtractUserColumnsOptions(HttpContextBase httpContext, object queryName)
+        public static List<ColumnOption> ExtractColumnsOptions(HttpContextBase httpContext, object queryName)
         {
-            List<UserColumnOption> result = new List<UserColumnOption>();
+            List<ColumnOption> result = new List<ColumnOption>();
 
             QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(queryName);
 
             NameValueCollection parameters = httpContext.Request.Params;
-            string field = parameters["sfUserColumns"];
+            string field = parameters["sfColumns"];
             
             if (!field.HasText())
                 return result;
 
             string[] colArray = field.Split(new []{","}, StringSplitOptions.RemoveEmptyEntries);
             
-            int numStaticCols = queryDescription.StaticColumns.Count;
+            int numStaticCols = queryDescription.Columns.Count;
 
             for (int i = 0; i < colArray.Length; i++)
             {
                 string[] currentColString = colArray[i].Split(';');
-                
-                result.Add(new UserColumnOption
+
+                result.Add(new ColumnOption
                 {
+                    ColumnName = currentColString[0],
                     DisplayName = currentColString[1],
-                    UserColumn = new UserColumn(numStaticCols, QueryUtils.ParseColumn(currentColString[0], queryDescription)) 
-                    { 
-                        UserColumnIndex = i,
-                        DisplayName = currentColString[1]
-                    },
                 });
             }
 

@@ -22,11 +22,13 @@ using System.Threading;
 using System.Windows.Threading;
 using System.Windows.Documents;
 using Signum.Windows.DynamicQuery;
+using System.Diagnostics;
 
 namespace Signum.Windows
 {
     public partial class SearchControl
     {
+
         public static readonly DependencyProperty QueryNameProperty =
             DependencyProperty.Register("QueryName", typeof(object), typeof(SearchControl), new UIPropertyMetadata(null));
         public object QueryName
@@ -51,12 +53,20 @@ namespace Signum.Windows
             set { SetValue(FilterOptionsProperty, value); }
         }
 
-        public static readonly DependencyProperty UserColumnsProperty =
-            DependencyProperty.Register("UserColumns", typeof(ObservableCollection<UserColumnOption>), typeof(SearchControl), new UIPropertyMetadata(null));
-        public ObservableCollection<UserColumnOption> UserColumns
+        public static readonly DependencyProperty ColumnOptionsModeProperty =
+            DependencyProperty.Register("ColumnOptionsMode", typeof(ColumnOptionsMode), typeof(SearchControl), new UIPropertyMetadata(ColumnOptionsMode.Add));
+        public ColumnOptionsMode ColumnOptionsMode
         {
-            get { return (ObservableCollection<UserColumnOption>)GetValue(UserColumnsProperty); }
-            set { SetValue(UserColumnsProperty, value); }
+            get { return (ColumnOptionsMode)GetValue(ColumnOptionsModeProperty); }
+            set { SetValue(ColumnOptionsModeProperty, value); }
+        }
+
+        public static readonly DependencyProperty ColumnsOptionsProperty =
+            DependencyProperty.Register("ColumnOptions", typeof(ObservableCollection<ColumnOption>), typeof(SearchControl), new UIPropertyMetadata(null));
+        public ObservableCollection<ColumnOption> ColumnOptions
+        {
+            get { return (ObservableCollection<ColumnOption>)GetValue(ColumnsOptionsProperty); }
+            set { SetValue(ColumnsOptionsProperty, value); }
         }
 
         public static readonly DependencyProperty AllowUserColumnsProperty =
@@ -179,12 +189,14 @@ namespace Signum.Windows
             set { SetValue(ViewOnCreateProperty, value); }
         }
 
-        private static readonly DependencyPropertyKey EntityTypeKey =
-         DependencyProperty.RegisterReadOnly("EntityType", typeof(Type), typeof(SearchControl), new UIPropertyMetadata(null));
-        public static readonly DependencyProperty EntityTypeProperty = EntityTypeKey.DependencyProperty;
         public Type EntityType
         {
-            get { return (Type)GetValue(EntityTypeProperty); }
+            get { return Reflector.ExtractLite(entityColumn.Type); }
+        }
+
+        public Implementations Implementations
+        {
+            get { return entityColumn.Implementations; }
         }
 
         public static readonly DependencyProperty CollapseOnNoResultsProperty =
@@ -194,8 +206,6 @@ namespace Signum.Windows
             get { return (bool)GetValue(CollapseOnNoResultsProperty); }
             set { SetValue(CollapseOnNoResultsProperty, value); }
         }
-
-        public DragController ColumnDragController { get; set; } 
 
         private void UpdateVisibility()
         {
@@ -209,13 +219,13 @@ namespace Signum.Windows
 
         public SearchControl()
         {
-            ColumnDragController = new DragController(col => CreateFilter((GridViewColumnHeader)col), DragDropEffects.Copy);
+            //ColumnDragController = new DragController(col => CreateFilter((GridViewColumnHeader)col), DragDropEffects.Copy);
 
             this.InitializeComponent();
 
             FilterOptions = new FreezableCollection<FilterOption>();
             OrderOptions = new ObservableCollection<OrderOption>();
-            UserColumns = new ObservableCollection<UserColumnOption>();
+            ColumnOptions = new ObservableCollection<ColumnOption>();
           
             this.Loaded += new RoutedEventHandler(SearchControl_Loaded);
             timer = new DispatcherTimer();
@@ -223,7 +233,18 @@ namespace Signum.Windows
             timer.Tick += new EventHandler(timer_Tick);
         }
 
-        Column entityColumn;
+        ColumnDescription entityColumn;
+
+        IEnumerable<ColumnInfo> ColumnInfos
+        {
+            get { return gvResults.Columns.Select(gvc => (ColumnInfo)((GridViewColumnHeader)gvc.Header).Tag); }
+        }
+
+        public IEnumerable<Column> CurrentColumns
+        {
+            get { return ColumnInfos.Select(a => a.Column);  }
+        }  
+
         ResultTable resultTable;
         public ResultTable ResultTable { get { return resultTable; } }
         public QuerySettings Settings { get; private set; }
@@ -251,19 +272,15 @@ namespace Signum.Windows
             tokenBuilder.Token = null;
             tokenBuilder.SubTokensEvent += tokenBuilder_SubTokensEvent;
 
-            entityColumn = Description.StaticColumns.SingleOrDefault(a => a.IsEntity);
-            if (entityColumn != null)
-            {
-                SetValue(EntityTypeKey, Reflector.ExtractLite(entityColumn.Type));
+            entityColumn = Description.Columns.SingleOrDefault(a => a.IsEntity);
+            if (entityColumn == null)
+                throw new InvalidOperationException("Entity Column not found"); 
 
-                if (this.NotSet(ViewProperty) && View && entityColumn.Implementations == null)
-                    View = Navigator.IsViewable(EntityType, IsAdmin);
+            if (this.NotSet(ViewProperty) && View && entityColumn.Implementations == null)
+                View = Navigator.IsViewable(EntityType, IsAdmin);
 
-                if (this.NotSet(CreateProperty) && Create && entityColumn.Implementations == null)
-                    Create = Navigator.IsCreable(EntityType, IsAdmin);
-            }
-
-            Navigator.Manager.SetUserColumns(QueryName, UserColumns);
+            if (this.NotSet(CreateProperty) && Create && entityColumn.Implementations == null)
+                Create = Navigator.IsCreable(EntityType, IsAdmin);
 
             GenerateListViewColumns();
 
@@ -279,7 +296,6 @@ namespace Signum.Windows
             Navigator.Manager.SetOrderTokens(QueryName, OrderOptions);
 
             CompleteOrderColumns();
-
 
             if (GetCustomMenuItems != null)
             {
@@ -302,12 +318,7 @@ namespace Signum.Windows
 
         QueryToken[] tokenBuilder_SubTokensEvent(QueryToken arg)
         {
-            if (arg == null)
-                return (from s in Description.StaticColumns
-                        where s.Filterable
-                        select QueryToken.NewColumn(s)).ToArray();
-            else
-                return arg.SubTokens(); 
+            return QueryUtils.SubTokens(arg, Description.Columns);
         }
 
         private void CompleteOrderColumns()
@@ -319,7 +330,7 @@ namespace Signum.Windows
 
                 GridViewColumnHeader header = gvResults.Columns
                     .Select(c => (GridViewColumnHeader)c.Header)
-                    .FirstOrDefault(c => ((Column)c.Tag).GetQueryToken().FullKey() == token.FullKey());
+                    .FirstOrDefault(c => ((ColumnInfo)c.Tag).Column.Name  == token.FullKey());
                 if (header != null)
                     item.ColumnOrderInfo = new ColumnOrderInfo(header, item.OrderType, i);
             }
@@ -359,59 +370,58 @@ namespace Signum.Windows
         {
             btView.Visibility = lvResult.SelectedItem != null && View ? Visibility.Visible : Visibility.Collapsed;
 
-            SelectedItem = ((ResultRow)lvResult.SelectedItem).TryCC(a => (Lite)a[entityColumn]);
+            SelectedItem = ((ResultRow)lvResult.SelectedItem).TryCC(r => r.Entity);
             if (MultiSelection)
-                SelectedItems = lvResult.SelectedItems.Cast<ResultRow>().Select(a => (Lite)a[entityColumn]).ToArray();
+                SelectedItems = lvResult.SelectedItems.Cast<ResultRow>().Select(r => r.Entity).ToArray();
             else
                 SelectedItems = null;
         }
 
         void GenerateListViewColumns()
-        {
+        {   
+            List<ColumnInfo> columnInfo = MergeColumnInfo();
+
             gvResults.Columns.Clear();
 
-            foreach (var c in Description.StaticColumns.Where(c => c.Visible))
+            foreach (var ci in columnInfo)
             {
-                AddListViewColumn(c);
-            }
-
-            foreach (var uco in UserColumns)
-            {
-                uco.GridViewColumn = AddListViewColumn(uco.UserColumn);
+                AddListViewColumn(ci);
             }
         }
 
-        void AssertUserColumnIndexes()
+        private List<ColumnInfo> MergeColumnInfo()
         {
-            if (UserColumns.Where((c, i) => c.UserColumn.UserColumnIndex != i).Any())
+            switch (ColumnOptionsMode)
             {
-                for (int i = 0; i < UserColumns.Count; i++)
-                {
-                    UserColumns[i].UserColumn.UserColumnIndex = i;
-                }
+                case ColumnOptionsMode.Add:
+                    return Description.Columns.Where(cd=>!cd.IsEntity).Select(cd => new ColumnInfo(new Column(cd))).Concat(ColumnOptions.Select(co => new ColumnInfo(co, Description))).ToList();
+                case ColumnOptionsMode.Remove:
+                    return Description.Columns.Where(cd => !cd.IsEntity && !ColumnOptions.Any(co => co.Path == cd.Name)).Select(cd => new ColumnInfo(new Column(cd))).ToList();
+                case ColumnOptionsMode.Replace:
+                    return ColumnOptions.Select(co => new ColumnInfo(co, Description)).ToList();
+                default:
+                    throw new InvalidOperationException("{0} is not a valid ColumnOptionMode".Formato(ColumnOptionsMode));
             }
         }
 
-        GridViewColumn AddListViewColumn(Column c)
+        void AddListViewColumn(ColumnInfo ci)
         {
-            GridViewColumn column = new GridViewColumn
+            ci.GridViewColumn = new GridViewColumn
             {
                 Header = new GridViewColumnHeader
                 {
-                    Content = c.DisplayName,
-                    Tag = c,
-                    ContextMenu = c is UserColumn ? (ContextMenu)FindResource("contextMenu") : null
+                    Content = ci.Column.DisplayName,
+                    Tag = ci,
+                    ContextMenu = (ContextMenu)FindResource("contextMenu")
                 },
-                CellTemplate = CreateDataTemplate(c),
             };
-            gvResults.Columns.Add(column);
-            return column;
+            gvResults.Columns.Add(ci.GridViewColumn);
         }
 
-        DataTemplate CreateDataTemplate(Column c)
+        DataTemplate CreateDataTemplate(ResultColumn c)
         {
             Binding b = new Binding("[{0}]".Formato(c.Index)) { Mode = BindingMode.OneTime };
-            DataTemplate dt = Settings.GetFormatter(c)(b);
+            DataTemplate dt = Settings.GetFormatter(c.Column)(b);
             return dt;
         }
 
@@ -442,14 +452,12 @@ namespace Signum.Windows
 
         public QueryRequest GetQueryRequest()
         {
-            AssertUserColumnIndexes();
-
             var request = new QueryRequest
             {
                 QueryName = QueryName,
                 Filters = FilterOptions.Select(f => f.ToFilter()).ToList(),
                 Orders = OrderOptions.Select(o => o.ToOrder()).ToList(),
-                UserColumns = UserColumns.Select(c => c.UserColumn).ToList(),
+                Columns = CurrentColumns.ToList(),
                 Limit = MaxItemsCount
             };
 
@@ -458,12 +466,23 @@ namespace Signum.Windows
 
         private void SetResults()
         {
+            ColumnInfos.ZipForeach(resultTable.Columns, (ci, rc) =>
+            {
+                Debug.Assert(rc.Column.Token.Equals(ci.Column.Token));
+
+                if (ci.ResultColumn == null || ci.ResultColumn.Index != rc.Index)
+                    ci.GridViewColumn.CellTemplate = CreateDataTemplate(rc);
+
+                ci.ResultColumn = rc; 
+            });             
+
             lvResult.ItemsSource = resultTable.Rows;
+
             if (resultTable.Rows.Length > 0)
             {
                 lvResult.SelectedIndex = 0;
                 lvResult.ScrollIntoView(resultTable.Rows.First());
-            }
+            }            
             ItemsCount = lvResult.Items.Count;
             lvResult.Background = Brushes.White;
             lvResult.Focus();
@@ -501,9 +520,7 @@ namespace Signum.Windows
             if (row == null)
                 return;
 
-            Lite lite = (Lite)row[entityColumn];
-
-            IdentifiableEntity entity = (IdentifiableEntity)Server.Convert(lite, EntityType);
+            IdentifiableEntity entity = (IdentifiableEntity)Server.Convert(row.Entity, EntityType);
 
             OnViewing(entity);
         }
@@ -556,10 +573,13 @@ namespace Signum.Windows
 
         void GridViewColumnHeader_Click(object sender, RoutedEventArgs e)
         {
-            GridViewColumnHeader header = sender as GridViewColumnHeader;
-            Column column = header.Tag as Column;
+            GridViewColumnHeader header = (GridViewColumnHeader)sender;
+            ColumnInfo ci = (ColumnInfo)header.Tag;
 
-            if ((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift || (OrderOptions.Count == 1 && OrderOptions[0].ColumnOrderInfo.Header == header))
+            if (ci == null)
+                return;
+
+            if ((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift || (OrderOptions.Count == 1 && OrderOptions[0].ColumnOrderInfo.TryCC(coi=>coi.Header) == header))
             {
 
             }
@@ -574,20 +594,17 @@ namespace Signum.Windows
                 OrderOptions.Clear();
             }
 
-
             OrderOption order = OrderOptions.SingleOrDefault(oo => oo.ColumnOrderInfo != null && oo.ColumnOrderInfo.Header == header);
             if (order != null)
             {
                 order.ColumnOrderInfo.Flip();
-                order.OrderType = order.ColumnOrderInfo.Adorner.OrderType;
+                order.OrderType = order.ColumnOrderInfo.OrderType;
             }
             else
             {
-                QueryToken token = column is StaticColumn ? QueryToken.NewColumn((StaticColumn)column) : ((UserColumn)column).Token;
-
                 OrderOptions.Add(new OrderOption()
                 {
-                    Token = token,
+                    Token = ci.Column.Token,
                     OrderType = OrderType.Ascending,
                     ColumnOrderInfo = new ColumnOrderInfo(header, OrderType.Ascending, OrderOptions.Count)
                 });
@@ -600,18 +617,18 @@ namespace Signum.Windows
 
         FilterOption CreateFilter(GridViewColumnHeader header)
         {
-            Column column = (Column)header.Tag;
+            ColumnInfo column = (ColumnInfo)header.Tag;
 
             if (resultTable != null)
             {
                 ResultRow row = (ResultRow)lvResult.SelectedItem;
                 if (row != null)
                 {
-                    object value = row[column];
+                    object value = row[column.ResultColumn];
 
                     return new FilterOption
                     {
-                        Token = column.GetQueryToken(),
+                        Token = column.Column.Token,
                         Operation = FilterOperation.EqualTo,
                         Value = value is EmbeddedEntity ? null : value
                     };
@@ -620,9 +637,9 @@ namespace Signum.Windows
 
             return new FilterOption
             {
-                Token = column.GetQueryToken(),
+                Token = column.Column.Token,
                 Operation = FilterOperation.EqualTo,
-                Value = FilterOption.DefaultValue(column.Type),
+                Value = FilterOption.DefaultValue(column.Column.Type),
             };
         }
 
@@ -638,32 +655,14 @@ namespace Signum.Windows
             if (!AllowUserColumns)
                 return;
 
-            if (token is ColumnToken)
-            {
-                MessageBox.Show("{0} already in the result columns".Formato(token.NiceName()));
-                return;
-            }
-
             string result = token.NiceName();
             if (ValueLineBox.Show<string>(ref result, Properties.Resources.NewColumnSName, Properties.Resources.ChooseTheDisplayNameOfTheNewColumn, Properties.Resources.Name, null, null, this.FindCurrentWindow()))
             {
                 ClearResults();
 
-                UserColumn col = new UserColumn(Description.StaticColumns.Count, token)
-                {
-                    UserColumnIndex = UserColumns.Count,
-                    DisplayName = result
-                };
+                ColumnInfo ci = new ColumnInfo(new Column(token, result)); 
 
-                var gridViewColumn = AddListViewColumn(col);
-
-                UserColumnOption uco = new UserColumnOption
-                {
-                    UserColumn = col,
-                    GridViewColumn = gridViewColumn,
-                };
-
-                UserColumns.Add(uco);
+                AddListViewColumn(ci);
             }
         }
 
@@ -688,11 +687,11 @@ namespace Signum.Windows
         {
             GridViewColumnHeader gvch = (GridViewColumnHeader)((ContextMenu)(((MenuItem)sender).Parent)).PlacementTarget;
 
-            UserColumn col = (UserColumn)gvch.Tag; 
-            string result = col.DisplayName;
+            ColumnInfo col = (ColumnInfo)gvch.Tag;
+            string result = col.Column.DisplayName;
             if (ValueLineBox.Show<string>(ref result, Properties.Resources.NewColumnSName, Properties.Resources.ChooseTheDisplayNameOfTheNewColumn, Properties.Resources.Name, null, null, this.FindCurrentWindow()))
             {
-                col.DisplayName = result;
+                col.Column.DisplayName = result;
                 gvch.Content = result;
             }
         }
@@ -701,17 +700,23 @@ namespace Signum.Windows
         {
             GridViewColumnHeader gvch = (GridViewColumnHeader)((ContextMenu)(((MenuItem)sender).Parent)).PlacementTarget;
 
-            GridViewColumn column = gvResults.Columns.Single(a => a.Header == gvch);
+            ColumnInfo co = (ColumnInfo)gvch.Tag;
 
-            gvResults.Columns.Remove(column);
-            UserColumns.Remove(UserColumns.Single(a => a.GridViewColumn == column));
+            gvResults.Columns.Remove(co.GridViewColumn);
         }
 
-        public void Reinitialize(IEnumerable<FilterOption> filters, IEnumerable<UserColumnOption> columns, IEnumerable<OrderOption> orders)
+        private void filter_Click(object sender, RoutedEventArgs e)
         {
-            UserColumns.Clear();
-            UserColumns.AddRange(columns);
-            Navigator.Manager.SetUserColumns(QueryName, UserColumns);
+            GridViewColumnHeader gvch = (GridViewColumnHeader)((ContextMenu)(((MenuItem)sender).Parent)).PlacementTarget;
+
+            FilterOptions.Add(CreateFilter(gvch)); 
+        }
+
+        public void Reinitialize(List<FilterOption> filters, List<ColumnOption> columns, ColumnOptionsMode columnOptionsMode, List<OrderOption> orders)
+        {
+            ColumnOptions.Clear();
+            ColumnOptions.AddRange(columns);
+            ColumnOptionsMode = columnOptionsMode; 
             GenerateListViewColumns();
 
             FilterOptions.Clear();
@@ -728,6 +733,8 @@ namespace Signum.Windows
         {
             rowFilters.Height = new GridLength(); //Auto
         }
+
+
     }
 
     public delegate SearchControlMenuItem MenuItemForQueryName(object queryName, Type entityType);

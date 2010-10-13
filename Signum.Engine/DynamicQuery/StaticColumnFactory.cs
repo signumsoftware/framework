@@ -13,13 +13,10 @@ using System.Linq.Expressions;
 
 namespace Signum.Engine.DynamicQuery
 {
-    public class StaticColumnFactory
+    public class ColumnDescriptionFactory
     {
-        readonly internal Delegate Getter;
         readonly internal Meta Meta;
         public Func<string> OverrideDisplayName { get; set; }
-
-        public int Index { get; private set; }
 
         public string Name { get; internal set; }
         public Type Type { get; internal set; }
@@ -27,12 +24,6 @@ namespace Signum.Engine.DynamicQuery
         public string Format { get; set; }
         public string Unit { get; set; }
         public Implementations Implementations { get; set; }
-
-
-        public bool Filterable { get; set; }
-        public bool Visible { get; set; }
-        public bool Sortable { get; set; }
-
 
         PropertyRoute propertyRoute;
         public PropertyRoute PropertyRoute
@@ -61,11 +52,9 @@ namespace Signum.Engine.DynamicQuery
             }
         }
 
-        public StaticColumnFactory(int index, MemberInfo mi, Meta meta, Delegate getter)
+        public ColumnDescriptionFactory(int index, MemberInfo mi, Meta meta)
         {
-            this.Index = index;
             Name = mi.Name;
-            Getter = getter;
 
             Type = mi.ReturningType();
             Meta = meta;
@@ -82,10 +71,6 @@ namespace Signum.Engine.DynamicQuery
                 PropertyRoute = ((CleanMeta)meta).PropertyRoute;
                 Implementations = PropertyRoute.GetImplementations();
             }
-
-            Sortable = true;
-            Filterable = true;
-            Visible = !IsEntity;
         }
 
         protected string DisplayName()
@@ -110,7 +95,7 @@ namespace Signum.Engine.DynamicQuery
 
         public bool IsEntity
         {
-            get { return this.Name == StaticColumn.Entity; }
+            get { return this.Name == ColumnDescription.Entity; }
         }
 
         public bool IsAllowed()
@@ -118,22 +103,16 @@ namespace Signum.Engine.DynamicQuery
             return Meta == null || Meta.IsAllowed();
         }
 
-        public StaticColumn BuildStaticColumn()
+        public ColumnDescription BuildColumnDescription()
         {
-            return new StaticColumn(Index, Name, Type)
+            return new ColumnDescription(Name, Type)
             {
                 PropertyRoute = propertyRoute,
                 Implementations = Implementations,
 
-                Visible = Visible,
-                Filterable = Filterable,
-                Sortable = Sortable,
-
                 DisplayName = DisplayName(),
                 Format = Format,
                 Unit = Unit,
-
-                Allowed = Meta == null || Meta.IsAllowed()
             };
         }
 

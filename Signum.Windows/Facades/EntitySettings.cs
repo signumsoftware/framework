@@ -40,15 +40,9 @@ namespace Signum.Windows
 
         public Func<T, Control> View { get; set; }
 
-        public Func<bool, bool> IsCreable { set { IsCreableEvent += value; } }
-        public Func<T, bool, bool> IsReadOnly { set { IsReadOnlyEvent += value; } }
-        public Func<T, bool, bool> IsViewable { set { IsViewableEvent += value; } }
-
-        public event Func<bool, bool> IsCreableEvent;
-        public event Func<T, bool, bool> IsReadOnlyEvent;
-        public event Func<T, bool, bool> IsViewableEvent;
-
-       
+        public Func<bool, bool> IsCreable { get; set; }
+        public Func<T, bool, bool> IsReadOnly { get; set; }
+        public Func<T, bool, bool> IsViewable { get; set; }      
 
         public bool ShowSave { get; set; }
 
@@ -114,8 +108,8 @@ namespace Signum.Windows
 
         public override bool OnIsReadOnly(ModifiableEntity entity, bool isAdmin)
         {
-            if(IsReadOnlyEvent != null)
-                foreach (Func<T, bool, bool> isReadOnly in IsReadOnlyEvent.GetInvocationList())
+            if(IsReadOnly != null)
+                foreach (Func<T, bool, bool> isReadOnly in IsReadOnly.GetInvocationList())
                 {
                     if (isReadOnly((T)entity, isAdmin))
                         return true;
@@ -126,8 +120,8 @@ namespace Signum.Windows
 
         public override bool OnIsViewable(ModifiableEntity entity, bool isAdmin)
         {
-            if (IsViewableEvent != null)
-                foreach (Func<T, bool, bool> isViewable in IsViewableEvent.GetInvocationList())
+            if (IsViewable != null)
+                foreach (Func<T, bool, bool> isViewable in IsViewable.GetInvocationList())
                 {
                     if (!isViewable((T)entity, isAdmin))
                         return false;
@@ -138,8 +132,8 @@ namespace Signum.Windows
 
         public override bool OnIsCreable(bool isAdmin)
         {
-            if (IsCreableEvent != null)
-                foreach (Func<bool, bool> isCreable in IsCreableEvent.GetInvocationList())
+            if (IsCreable != null)
+                foreach (Func<bool, bool> isCreable in IsCreable.GetInvocationList())
                 {
                     if (!isCreable(isAdmin))
                         return false;

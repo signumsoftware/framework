@@ -33,14 +33,15 @@ namespace Signum.Engine.Linq
     /// </summary>
     internal class ColumnProjector : DbExpressionVisitor
     {
+        ColumnGenerator generator = new ColumnGenerator();
+
         Dictionary<ColumnExpression, ColumnExpression> map = new Dictionary<ColumnExpression, ColumnExpression>();
-        List<ColumnDeclaration> columns = new List<ColumnDeclaration>();
         HashSet<Expression> candidates;
         ProjectionToken[] tokens;
         ProjectionToken newToken;
         string[] knownAliases;
         string newAlias;
-        int iColumn;
+
 
         private ColumnProjector() { }
 
@@ -72,7 +73,7 @@ namespace Signum.Engine.Linq
 
             Expression e = cp.Visit(newProj);
 
-            return new ProjectedColumns(e, cp.columns.AsReadOnly(), newToken);
+            return new ProjectedColumns(e, cp.generator.columns.AsReadOnly(), newToken);
         }
 
         static internal ProjectedColumns ProjectColumns(Expression projector, string newAlias, string[] knownAliases, ProjectionToken[] tokens)
@@ -93,7 +94,7 @@ namespace Signum.Engine.Linq
 
             Expression e = cp.Visit(newProj);
 
-            return new ProjectedColumns(e, cp.columns.AsReadOnly(), newToken);
+            return new ProjectedColumns(e, cp.generator.columns.AsReadOnly(), newToken);
         }
 
         protected override Expression Visit(Expression expression)
@@ -110,10 +111,7 @@ namespace Signum.Engine.Linq
                     }
                     if (this.knownAliases.Contains(column.Alias))
                     {
-                        int ordinal = this.columns.Count;
-                        string columnName = this.GetUniqueColumnName(column.Name);
-                        this.columns.Add(new ColumnDeclaration(columnName, column));
-                        mapped = new ColumnExpression(column.Type, this.newAlias, columnName);
+                        mapped = generator.MapColumn(column).GetReference(newAlias);
                         this.map[column] = mapped;
                         return mapped;
                     }
@@ -122,12 +120,10 @@ namespace Signum.Engine.Linq
                 }
                 else
                 {
-                    string columnName = this.GetNextColumnName();
-                    int ordinal = this.columns.Count;
                     if (ConditionsRewriter.IsBooleanExpression(expression))
                         expression = ConditionsRewriter.MakeSqlValue(expression);
-                    this.columns.Add(new ColumnDeclaration(columnName, expression));
-                    return new ColumnExpression(expression.Type, this.newAlias, columnName);
+                   
+                    return generator.NewColumn(expression).GetReference(newAlias); ;
                 }
             }
             else
@@ -136,7 +132,22 @@ namespace Signum.Engine.Linq
             }
         }
 
-        private string GetUniqueColumnName(string name)
+
+        protected override ProjectionToken VisitProjectionToken(ProjectionToken token)
+        {
+            if (token != null && tokens.Contains(token))
+                return newToken;
+
+            return token;
+        }
+    }
+
+    internal class ColumnGenerator
+    {
+        public List<ColumnDeclaration> columns = new List<ColumnDeclaration>();
+        int iColumn;
+        
+        public string GetUniqueColumnName(string name)
         {
             string baseName = name;
             int suffix = 1;
@@ -145,17 +156,25 @@ namespace Signum.Engine.Linq
             return name;
         }
 
-        private string GetNextColumnName()
+        public string GetNextColumnName()
         {
             return this.GetUniqueColumnName("c" + (iColumn++));
         }
 
-        protected override ProjectionToken VisitProjectionToken(ProjectionToken token)
+        public ColumnDeclaration MapColumn(ColumnExpression ce)
         {
-            if (token != null && tokens.Contains(token))
-                return newToken;
+            string columnName = GetUniqueColumnName(ce.Name);
+            var result = new ColumnDeclaration(columnName, ce);
+            columns.Add(result);
+            return result; 
+        }
 
-            return token;
+        public ColumnDeclaration NewColumn(Expression exp)
+        {
+            string columnName = GetNextColumnName();
+            var result = new ColumnDeclaration(columnName, exp);
+            columns.Add(result);
+            return result; 
         }
     }
 }

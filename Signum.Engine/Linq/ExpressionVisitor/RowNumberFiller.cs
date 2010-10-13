@@ -49,9 +49,7 @@ namespace Signum.Engine.Linq
             {
                 SelectExpression inner = (SelectExpression)innerSource;
 
-                var cols = from cr in inner.Columns
-                           select new OrderExpression(OrderType.Ascending,
-                                new ColumnExpression(cr.Expression.Type, inner.Alias, cr.Name));
+                var cols = inner.Columns.Select(cd => new OrderExpression(OrderType.Ascending, cd.GetReference(inner.Alias)));
 
                 return new RowNumberExpression(cols.ToReadOnly());
             }

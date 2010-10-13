@@ -163,61 +163,37 @@ namespace Signum.Entities.DynamicQuery
             },
         };
 
-        public static QueryToken[] SubTokens(QueryToken token, IEnumerable<StaticColumn> staticColumns)
+        public static QueryToken[] SubTokens(QueryToken token, IEnumerable<ColumnDescription> columnDescriptions)
         {
             if (token == null)
-                return staticColumns.Select(s => QueryToken.NewColumn(s)).ToArray();
+                return columnDescriptions.Select(s => QueryToken.NewColumn(s)).ToArray();
             else
                 return token.SubTokens();
         }
 
-        public static QueryToken[] SubTokensFilter(QueryToken token, IEnumerable<StaticColumn> staticColumns)
+        public static QueryToken Parse(string tokenString, QueryDescription description)
         {
-            return SubTokens(token, staticColumns.Where(s => s.Filterable));
-        }
-
-
-        public static QueryToken[] SubTokensOrder(QueryToken token, IEnumerable<StaticColumn> staticColumns)
-        {
-            return SubTokens(token, staticColumns.Where(sc => sc.Sortable));
-        }
-
-
-        public static QueryToken[] SubTokensColumn(QueryToken token, IEnumerable<StaticColumn> staticColumns)
-        {
-            return SubTokens(token, staticColumns);
-        }
-
-        public static QueryToken ParseFilter(string tokenString, QueryDescription description)
-        {
-            return Parse(tokenString, t => SubTokensFilter(t, description.StaticColumns));
-        }
-
-        public static QueryToken ParseOrder(string tokenString, QueryDescription description)
-        {
-            return Parse(tokenString, t => SubTokensOrder(t, description.StaticColumns));
-        }
-
-        public static QueryToken ParseColumn(string tokenString, QueryDescription description)
-        {
-            return Parse(tokenString, t => SubTokensColumn(t, description.StaticColumns));
+            return Parse(tokenString, t => SubTokens(t, description.Columns));
         }
 
         public static QueryToken Parse(string tokenString, Func<QueryToken, QueryToken[]> subTokens)
         {
             try
             {
+                if (string.IsNullOrEmpty(tokenString))
+                    throw new ArgumentNullException("tokenString"); 
+
                 string[] parts = tokenString.Split('.');
 
                 string firstPart = parts.First();
 
-                QueryToken result = subTokens(null).Select(t => t.Match(firstPart)).NotNull().Single(
+                QueryToken result = subTokens(null).Select(t => t.MatchPart(firstPart)).NotNull().Single(
                     Resources.Column0NotFound.Formato(firstPart),
                     Resources.MoreThanOneColumnNamed0.Formato(firstPart));
 
                 foreach (var part in parts.Skip(1))
                 {
-                    result = subTokens(result).Select(t => t.Match(part)).NotNull().Single(
+                    result = subTokens(result).Select(t => t.MatchPart(part)).NotNull().Single(
                           Resources.Token0NotCompatibleWith1.Formato(part, result),
                           Resources.MoreThanOneTokenWithKey0FoundOn1.Formato(part, result));
                 }

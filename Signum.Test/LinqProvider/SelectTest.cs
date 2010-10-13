@@ -419,22 +419,34 @@ namespace Signum.Test.LinqProvider
                  }).ToList();
         }
 
+
         [TestMethod]
-        public void SelecteNested()
+        public void SelectSingleCellAggregate()
         {
-            var neasted = (from b in Database.Query<BandDN>()
-                           select (from a in Database.Query<AlbumDN>()
-                                   where a.Author == b
-                                   select a.ToLite()).ToList()).ToList();
+            var list = Database.Query<BandDN>()
+                .Select(b => new
+                {
+                    Count = b.Members.Count,
+                    AnyDead = b.Members.Any(m => m.Dead),
+                    DeadCount = b.Members.Count(m => m.Dead),
+                    MinId = b.Members.Min(m => m.Id),
+                    MaxId = b.Members.Max(m => m.Id),
+                    AvgId = b.Members.Average(m => m.Id),
+                    SumId = b.Members.Sum(m => m.Id),
+                }).ToList();
         }
 
         [TestMethod]
-        public void SelecteNestedIb()
+        public void SelectSingleCellSingle()
         {
-            var neasted = (from l in Database.Query<LabelDN>()
-                           select (from a in Database.Query<AlbumDN>()
-                                   where a.Label == l
-                                   select new { Label = l.ToLite(), Author = a.Author.ToLite(), Album = a.ToLite() }).ToList()).ToList();
+            var list = Database.Query<BandDN>()
+                .Select(b => new
+                {
+                    FirstName = b.Members.Select(m => m.Name).First(),
+                    FirstOrDefaultName = b.Members.Select(m => m.Name).FirstOrDefault(),
+                    SingleName = b.Members.Take(1).Select(m => m.Name).Single(),
+                    SingleOrDefaultName = b.Members.Take(1).Select(m => m.Name).SingleOrDefault(),
+                }).ToList();
         }
     }
 

@@ -39,7 +39,7 @@ namespace Signum.Entities.DynamicQuery
             this.Parent = parent;
         }
 
-        public static QueryToken NewColumn(StaticColumn column)
+        public static QueryToken NewColumn(ColumnDescription column)
         {
             return new ColumnToken(column);
         }
@@ -151,7 +151,7 @@ namespace Signum.Entities.DynamicQuery
             return Parent.FullKey() + "." + Key;
         }
 
-        public virtual QueryToken Match(string key)
+        public virtual QueryToken MatchPart(string key)
         {
             return key == Key ? this : null;
         }
@@ -476,9 +476,9 @@ namespace Signum.Entities.DynamicQuery
     [Serializable]
     public class ColumnToken : QueryToken
     {
-        public StaticColumn Column { get; private set; }
+        public ColumnDescription Column { get; private set; }
 
-        internal ColumnToken(StaticColumn column)
+        internal ColumnToken(ColumnDescription column)
             : base(null)
         {
             if (column == null)
@@ -494,7 +494,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string ToString()
         {
-            return Column.DisplayName;
+            return Column.ToString();
         }
 
         public override Type Type

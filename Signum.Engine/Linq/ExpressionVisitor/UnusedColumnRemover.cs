@@ -89,7 +89,7 @@ namespace Signum.Engine.Linq
             SelectExpression source = (SelectExpression)this.Visit(projection.Source);
             if (projector != projection.Projector || source != projection.Source)
             {
-                return new ProjectionExpression(source, projector, projection.UniqueFunction, null);
+                return new ProjectionExpression(source, projector, projection.UniqueFunction, projection.Token);
             }
             return projection;
         }
@@ -142,6 +142,18 @@ namespace Signum.Engine.Linq
             if (orderBys != rowNumber.OrderBy)
                 return new RowNumberExpression(orderBys);
             return rowNumber;
+        }
+
+        protected override Expression VisitChildProjection(ChildProjectionExpression child)
+        {
+            Expression key = this.Visit(child.OuterKey);
+            ProjectionExpression proj = (ProjectionExpression)UnusedColumnRemover.Remove(child.Projection);
+         
+            if (proj != child.Projection || key != child.OuterKey)
+            {
+                return new ChildProjectionExpression(proj, key);
+            }
+            return child;
         }
     }
 }

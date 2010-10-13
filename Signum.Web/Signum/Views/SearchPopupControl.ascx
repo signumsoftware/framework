@@ -16,7 +16,6 @@
     <div id="<%=context.Compose("divPopupDragHandle")%>" onmousedown="comienzoMovimiento(event, '<%=context.Compose("panelPopup")%>');" class="dragHandle">
         <span class="popupTitle"><%= (string)ViewData[ViewDataKeys.PageTitle] ?? "" %></span>
     </div>    
-    <% if (Navigator.Manager.ShowSearchOkButton(findOptions.QueryName, false) && findOptions.AllowMultiple != null) { %>
         <div id="<%=context.Compose("divButtonBar")%>" class="buttonBar">
             <% 
               if(ViewData[ViewDataKeys.OnOk]!=null) { %>
@@ -24,8 +23,7 @@
         <%} else{ %>
             <input type="button" id="<%=context.Compose(ViewDataKeys.BtnOk)%>" value="OK" />
          <%} %>               
-    </div>  
-    <%} %>
+    </div> 
     <div class="popup-body">
         <%Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString(), Model); %>
         <%= Html.ValidationSummaryAjax(context) %>

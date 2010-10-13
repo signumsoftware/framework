@@ -35,6 +35,8 @@ namespace Signum.Engine.Linq
                     return this.VisitJoin((JoinExpression)exp);
                 case DbExpressionType.Projection:
                     return this.VisitProjection((ProjectionExpression)exp);
+                case DbExpressionType.ChildProjection:
+                    return this.VisitChildProjection((ChildProjectionExpression)exp);
                 case DbExpressionType.Aggregate:
                     return this.VisitAggregate((AggregateExpression)exp);
                 case DbExpressionType.AggregateSubquery:
@@ -88,6 +90,7 @@ namespace Signum.Engine.Linq
             }
         }
 
+      
         protected virtual Expression VisitCommandAggregate(CommandAggregateExpression cea)
         {
             var commands = VisitCommands(cea.Commands);
@@ -379,6 +382,18 @@ namespace Signum.Engine.Linq
                 return new ProjectionExpression(source, projector, proj.UniqueFunction, token);
             }
             return proj;
+        }
+
+        protected virtual Expression VisitChildProjection(ChildProjectionExpression child)
+        {
+            ProjectionExpression proj = (ProjectionExpression)this.Visit(child.Projection);
+            Expression key = this.Visit(child.OuterKey);
+
+            if (proj != child.Projection || key != child.OuterKey)
+            {
+                return new ChildProjectionExpression(proj, key);
+            }
+            return child;
         }
 
         protected virtual Expression VisitSqlFunction(SqlFunctionExpression sqlFunction)

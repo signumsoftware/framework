@@ -86,7 +86,7 @@ namespace Signum.Web
 
         public static JsInstruction JsRequestData(JsFindOptions options)
         {
-            return new JsInstruction(() => "new FindNavigator({0}).requestData()".Formato(options.ToJS()));
+            return new JsInstruction(() => "new FindNavigator({0}).requestDataForSearch()".Formato(options.ToJS()));
         }
     }
 }

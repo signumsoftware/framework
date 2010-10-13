@@ -354,7 +354,7 @@ namespace Signum.Engine.Linq
             SelectExpression select = new SelectExpression(alias, false, null, new[] { cd }, projection.Source, null, null, null);
 
             if (isRoot)
-                return new ProjectionExpression(select, ColumnProjector.SingleProjection(cd, alias, resultType), UniqueFunction.Single, null);
+                return new ProjectionExpression(select, ColumnProjector.SingleProjection(cd, alias, resultType), UniqueFunction.Single, new ProjectionToken());
 
             ScalarExpression subquery = new ScalarExpression(resultType, select);
 
@@ -463,7 +463,7 @@ namespace Signum.Engine.Linq
             var alias = aliasGenerator.GetNextSelectAlias();
             Expression exprAsValue = ConditionsRewriter.MakeSqlValue(expr);
             SelectExpression select = new SelectExpression(alias, false, null, new[] { new ColumnDeclaration("value", exprAsValue) }, null, null, null, null);
-            return new ProjectionExpression(select, new ColumnExpression(expr.Type, alias, "value"), uniqueFunction, null);
+            return new ProjectionExpression(select, new ColumnExpression(expr.Type, alias, "value"), uniqueFunction, new ProjectionToken());
         }
 
         class GroupByInfo
@@ -763,7 +763,7 @@ namespace Signum.Engine.Linq
             string selectAlias = aliasGenerator.GetNextSelectAlias();
 
             ProjectedColumns pc = ColumnProjector.ProjectColumns(exp, selectAlias, new[] { tableAlias }, new[] { token });
-            var projection = new ProjectionExpression(
+            ProjectionExpression projection = new ProjectionExpression(
                 new SelectExpression(selectAlias, false, null, pc.Columns, tableExpression, null, null, null),
             pc.Projector, null, pc.Token);
 
@@ -891,14 +891,22 @@ namespace Signum.Engine.Linq
                     {
                         NewExpression nex = (NewExpression)source;
 
-                        if (nex.Type.IsInstantiationOf(typeof(Grouping<,>)) && m.Member.Name == "Key")
-                            return nex.Arguments[0];
-
-                        if (nex.Type.IsInstantiationOf(typeof(Expandable<>)) && m.Member.Name == "Value")
-                            return nex.Arguments[0];
-
-                        PropertyInfo pi = (PropertyInfo)m.Member;
-                        return nex.Members.Zip(nex.Arguments).Single(p => ReflectionTools.PropertyEquals((PropertyInfo)p.Item1, pi)).Item2;
+                        if (nex.Type.IsInstantiationOf(typeof(Grouping<,>)))
+                        {
+                            if (m.Member.Name == "Key")
+                                return nex.Arguments[0];
+                        }
+                        else if (TupleReflection.IsTuple(nex.Type))
+                        {
+                            int index = TupleReflection.TupleIndex((PropertyInfo)m.Member);
+                            return nex.Arguments[index];
+                        }
+                        else
+                        {
+                            PropertyInfo pi = (PropertyInfo)m.Member;
+                            return nex.Members.Zip(nex.Arguments).Single(p => ReflectionTools.PropertyEquals((PropertyInfo)p.Item1, pi)).Item2;
+                        }
+                        break; 
                     }
                 case (ExpressionType)DbExpressionType.FieldInit:
                 {
@@ -1180,14 +1188,25 @@ namespace Signum.Engine.Linq
 
                 var result = EntityCasting(operand, u.Type);
                 if (result != null)
-                    return result; 
+                    return result;
                 else if (operand != u.Operand)
-                    return Expression.MakeUnary(u.NodeType, operand, u.Type, u.Method);
+                    return SimplifyRedundandConverts(Expression.MakeUnary(u.NodeType, operand, u.Type, u.Method));
                 else
-                    return u;
+                    return SimplifyRedundandConverts(u);
             }
 
             return base.VisitUnary(u); 
+        }
+
+        public Expression SimplifyRedundandConverts(UnaryExpression unary)
+        {
+            //(int)(object)3 --> 3
+
+            if (unary.NodeType == ExpressionType.Convert && unary.Operand.NodeType == ExpressionType.Convert &&
+                unary.Type == (((UnaryExpression)unary.Operand).Operand).Type)
+                return ((UnaryExpression)unary.Operand).Operand;
+
+            return unary;
         }
 
         private static Expression EntityCasting(Expression operand, Type uType)

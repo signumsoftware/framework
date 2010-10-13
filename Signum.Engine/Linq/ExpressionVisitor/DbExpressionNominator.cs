@@ -32,6 +32,8 @@ namespace Signum.Engine.Linq
 
         bool isAggresive = false;
 
+        bool innerProjection = false; 
+
         HashSet<Expression> candidates = new HashSet<Expression>();
 
         private DbExpressionNominator() { }
@@ -92,8 +94,10 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitColumn(ColumnExpression column)
         {
-            if (IsFullNominate || isAggresive || existingAliases.Contains(column.Alias))
+            if (((IsFullNominate || isAggresive) && !innerProjection) ||
+                existingAliases.Contains(column.Alias))
                 candidates.Add(column);
+            
             return column;
         }
 
@@ -122,7 +126,7 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitConstant(ConstantExpression c)
         {
-            if ((IsFullNominate || isAggresive) && IsSimpleType(c.Type))
+            if (!innerProjection && (IsFullNominate || isAggresive) && IsSimpleType(c.Type))
                 candidates.Add(c);
             return c;
         }
@@ -149,7 +153,8 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitSqlConstant(SqlConstantExpression sqlConstant)
         {
-            candidates.Add(sqlConstant);
+            if (!innerProjection)
+                candidates.Add(sqlConstant);
             return sqlConstant;
         }
 
@@ -174,6 +179,9 @@ namespace Signum.Engine.Linq
 
         protected Expression TrySqlFunction(string sqlFunction, Type type, params Expression[] expression)
         {
+            if (innerProjection)
+                return null;
+
             expression = expression.NotNull().ToArray();
             Expression[] newExpressions = new Expression[expression.Length];
 
@@ -191,6 +199,9 @@ namespace Signum.Engine.Linq
 
         private SqlFunctionExpression TrySqlDifference(SqlEnums sqlEnums, Type type, Expression expression)
         {
+            if (innerProjection)
+                return null;
+
             BinaryExpression be = expression as BinaryExpression;
 
             if (be == null || be.NodeType != ExpressionType.Subtract)
@@ -215,7 +226,7 @@ namespace Signum.Engine.Linq
         private Expression TrySqlDate(Expression expression)
         {
             Expression expr = Visit(expression);
-            if (!candidates.Contains(expr))
+            if (innerProjection || !candidates.Contains(expr))
                 return null;
 
             Expression result =
@@ -231,7 +242,7 @@ namespace Signum.Engine.Linq
         private Expression TrySqlDayOftheWeek(Expression expression)
         {
             Expression expr = Visit(expression);
-            if (!candidates.Contains(expr))
+            if (innerProjection || !candidates.Contains(expr))
                 return null;
 
             Expression result =
@@ -246,7 +257,7 @@ namespace Signum.Engine.Linq
         private Expression TrySqlMonthStart(Expression expression)
         {
             Expression expr = Visit(expression);
-            if (!candidates.Contains(expr))
+            if (innerProjection || !candidates.Contains(expr))
                 return null;
 
             Expression result =
@@ -383,15 +394,25 @@ namespace Signum.Engine.Linq
             if (candidates.Contains(operand) &&
                 (u.NodeType == ExpressionType.Not ||
                  u.NodeType == ExpressionType.Negate ||
-                 u.NodeType == ExpressionType.Convert && (u.Operand.Type.UnNullify() == u.Type.UnNullify() || IsFullNominate))) //Expand nullability
+                 u.NodeType == ExpressionType.Convert && (/*u.Operand.Type.UnNullify() == u.Type.UnNullify() ||*/ IsFullNominate))) //Expand nullability
                 candidates.Add(result);
 
+            return result;
+
+            
+        }
+
+        protected override Expression VisitProjection(ProjectionExpression proj)
+        {
+            bool oldInnerProjection = this.innerProjection;
+            innerProjection = true;
+            var result = base.VisitProjection(proj);
+            innerProjection = oldInnerProjection;
             return result;
         }
 
         protected override Expression VisitIn(InExpression inExp)
         {
-
             Expression exp = this.Visit(inExp.Expression);
             SelectExpression select = (SelectExpression)this.Visit(inExp.Select);
             Expression result = inExp;
@@ -399,7 +420,7 @@ namespace Signum.Engine.Linq
                 result = select == null ? InExpression.FromValues(exp, inExp.Values) :
                                          new InExpression(exp, select);
 
-            if (candidates.Contains(exp))
+            if (!innerProjection && candidates.Contains(exp))
                 candidates.Add(result);
 
             return inExp;
@@ -411,7 +432,8 @@ namespace Signum.Engine.Linq
             if (select != exists.Select)
                 exists = new ExistsExpression(select);
 
-            candidates.Add(exists);
+            if(!innerProjection)
+                candidates.Add(exists);
 
             return exists;
         }
@@ -422,7 +444,8 @@ namespace Signum.Engine.Linq
             if (select != scalar.Select)
                 scalar = new ScalarExpression(scalar.Type, select);
 
-            candidates.Add(scalar);
+            if (!innerProjection)
+                candidates.Add(scalar);
 
             return scalar;
         }
@@ -433,7 +456,8 @@ namespace Signum.Engine.Linq
             if (source != aggregate.Source)
                 aggregate = new AggregateExpression(aggregate.Type, source, aggregate.AggregateFunction);
 
-            candidates.Add(aggregate);
+            if (!innerProjection)
+                candidates.Add(aggregate);
 
             return aggregate;
         }
@@ -444,7 +468,8 @@ namespace Signum.Engine.Linq
             if (subquery != aggregate.AggregateAsSubquery)
                 aggregate = new AggregateSubqueryExpression(aggregate.GroupByAlias, aggregate.AggregateInGroupSelect, subquery);
 
-            candidates.Add(aggregate);
+            if (!innerProjection) 
+                candidates.Add(aggregate);
 
             return aggregate;
         }
@@ -476,7 +501,8 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitSqlEnum(SqlEnumExpression sqlEnum)
         {
-            candidates.Add(sqlEnum);
+            if (!innerProjection)
+                candidates.Add(sqlEnum);
             return sqlEnum;
         }
 

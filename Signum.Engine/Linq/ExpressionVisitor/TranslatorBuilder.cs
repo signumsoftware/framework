@@ -19,32 +19,44 @@ namespace Signum.Engine.Linq
 {  
     internal static class TranslatorBuilder
     {
-        static internal ITranslateResult Build(ProjectionExpression proj, Scope previousScope)
+        internal static ITranslateResult Build(ProjectionExpression proj)
         {
             Type type = proj.UniqueFunction == null ? proj.Type.ElementType() : proj.Type;
 
-            return (ITranslateResult)miBuildPrivate.GenericInvoke(new[] { type }, null, new object[] { proj, previousScope });
+            return (ITranslateResult)miBuildPrivate.GenericInvoke(new[] { type }, null, new object[] { proj});
         }
 
-        static MethodInfo miBuildPrivate = ReflectionTools.GetMethodInfo(() => BuildTranslateResult<int>(null, null)).GetGenericMethodDefinition();
+        static MethodInfo miBuildPrivate = ReflectionTools.GetMethodInfo(() => BuildPrivate<int>(null)).GetGenericMethodDefinition();
 
-        static internal TranslateResult<T> BuildTranslateResult<T>(ProjectionExpression proj, Scope previousScope)
+        static TranslateResult<T> BuildPrivate<T>(ProjectionExpression proj)
         {
+            var childs = ProjectionGatherer.Gatherer(proj); 
+            List<IChildProjection> childProjections = null;
+            if (childs.Count > 0)
+            {
+                childProjections = new List<IChildProjection>();
+                foreach (var pChild in childs)
+                {
+                    IChildProjection item = BuildChild(pChild.Projection);
+                    childProjections.Add(item);
+                }
+            }
+
             Scope scope = new Scope
             {
                 Alias = proj.Source.Alias,
-                Parent = previousScope,
-                Positions = proj.Source.Columns.Select((c, i) => new { c.Name, i }).ToDictionary(p => p.Name, p => p.i)
+                Positions = proj.Source.Columns.Select((c, i) => new { c.Name, i }).ToDictionary(p => p.Name, p => p.i),
             };
-
 
             Expression<Func<IProjectionRow, T>> lambda = ProjectionBuilder.Build<T>(proj.Projector, scope);
 
-            Expression<Func<IProjectionRow, SqlParameter[]>> createParams;
-            string sql = QueryFormatter.Format(proj.Source, previousScope, out createParams);
+            Expression<Func<SqlParameter[]>> createParams;
+            string sql = QueryFormatter.Format(proj.Source, out createParams);
 
             var result = new TranslateResult<T>
             {
+                ChildProjections = childProjections,   
+
                 CommandText = sql,
 
                 ProjectorExpression = lambda,
@@ -53,6 +65,46 @@ namespace Signum.Engine.Linq
                 GetParametersExpression = createParams,
 
                 Unique = proj.UniqueFunction,
+            };
+
+            return result;
+        }
+
+        static IChildProjection BuildChild(ProjectionExpression proj)
+        {
+            Type type = proj.UniqueFunction == null ? proj.Type.ElementType() : proj.Type;
+
+            if(!type.IsInstantiationOf(typeof(KeyValuePair<,>)))
+                throw new InvalidOperationException("All child projections should create KeyValuePairs"); 
+
+            return (IChildProjection)miBuildChildPrivate.GenericInvoke(type.GetGenericArguments(), null, new object[] { proj });
+        }
+
+        static MethodInfo miBuildChildPrivate = ReflectionTools.GetMethodInfo(() => BuildChildPrivate<int, bool>(null)).GetGenericMethodDefinition();
+
+
+        static ChildProjection<K, V> BuildChildPrivate<K, V>(ProjectionExpression proj)
+        {
+            Scope scope = new Scope
+            {
+                Alias = proj.Source.Alias,
+                Positions = proj.Source.Columns.Select((c, i) => new { c.Name, i }).ToDictionary(p => p.Name, p => p.i),
+            };
+
+            Expression<Func<IProjectionRow, KeyValuePair<K, V>>> lambda = ProjectionBuilder.Build<KeyValuePair<K, V>>(proj.Projector, scope);
+
+            Expression<Func<SqlParameter[]>> createParams;
+            string sql = QueryFormatter.Format(proj.Source, out createParams);
+
+            var result = new ChildProjection<K, V>
+            {
+                Name = proj.Token,
+
+                CommandText = sql,
+                ProjectorExpression = lambda,
+
+                GetParameters = createParams.Compile(),
+                GetParametersExpression = createParams,
             };
 
             return result;
@@ -69,6 +121,30 @@ namespace Signum.Engine.Linq
                 GetParametersExpression = createParams,
                 CommandText = sql,
             }; 
+        }
+
+        public class ProjectionGatherer : DbExpressionVisitor
+        {
+            List<ChildProjectionExpression> list = new List<ChildProjectionExpression>();
+
+            public static List<ChildProjectionExpression> Gatherer(ProjectionExpression proj)
+            {
+                ProjectionGatherer pg = new ProjectionGatherer();
+
+                pg.Visit(proj);
+
+
+                return pg.list; 
+            }
+
+            protected override Expression VisitChildProjection(ChildProjectionExpression child)
+            {
+                var result =  base.VisitChildProjection(child);
+
+                list.Add(child);
+
+                return result;
+            }
         }
 
         /// <summary>
@@ -112,23 +188,42 @@ namespace Signum.Engine.Linq
                 return new ColumnExpression(ce.Type.Nullify(), ce.Alias, ce.Name);
             }
 
+            protected override Expression VisitUnary(UnaryExpression u)
+            {
+                if (u.NodeType == ExpressionType.Convert && u.Operand is ColumnExpression && DiffersInNullability(u.Type, u.Operand.Type))
+                {
+                    ColumnExpression column = (ColumnExpression)u.Operand;
+                    return scope.GetColumnExpression(row, column.Alias, column.Name, u.Type);
+                }
+
+                return base.VisitUnary(u);
+            }
+
+            bool DiffersInNullability(Type a, Type b)
+            {
+                return
+                    a.IsValueType && a.Nullify() == b ||
+                    b.IsValueType && b.Nullify() == a;
+            }
+
             protected override Expression VisitColumn(ColumnExpression column)
             {
                 return scope.GetColumnExpression(row, column.Alias, column.Name, column.Type);
             }
 
-            MethodInfo miExecute = ReflectionTools.GetMethodInfo((ITranslateResult it) => it.Execute(null));
+            protected override Expression VisitChildProjection(ChildProjectionExpression child)
+            {
+                Expression outer = Visit(child.OuterKey);
+
+                if (outer != child.OuterKey)
+                    child = new ChildProjectionExpression(child.Projection, outer); 
+
+                return scope.Lookup(row, child);
+            }
 
             protected override Expression VisitProjection(ProjectionExpression proj)
             {
-                ITranslateResult tr = TranslatorBuilder.Build(proj, scope);
-
-                Expression call = Expression.Call(Expression.Constant(tr), miExecute, this.row);
-
-                if (typeof(IEnumerable).IsAssignableFrom(proj.Type))
-                    return Expression.Convert(call, typeof(IEnumerable<>).MakeGenericType(proj.Type.ElementType()));
-                else
-                    return call;
+                throw new InvalidOperationException("No ProjectionExpressions expected at this stage"); 
             }
 
             protected override Expression VisitFieldInit(FieldInitExpression fieldInit)
@@ -199,32 +294,53 @@ namespace Signum.Engine.Linq
 
     internal class Scope
     {
-        public Scope Parent;
-
         public string Alias;
 
-        public Dictionary<string, int> Positions = new Dictionary<string, int>();
+        public Dictionary<string, int> Positions;
 
-        static PropertyInfo miParent = ReflectionTools.GetPropertyInfo((IProjectionRow row) => row.Parent);
         static PropertyInfo miReader = ReflectionTools.GetPropertyInfo((IProjectionRow row) => row.Reader);
-
+ 
         public Expression GetColumnExpression(Expression row, string alias, string name, Type type)
         {
             if (alias != Alias)
-            {
-                if (Parent == null)
                     throw new InvalidOperationException("alias '{0}' not found".Formato(alias));
 
-                return Parent.GetColumnExpression(Expression.Property(row, miParent), alias, name, type);
-            }
-
             return FieldReader.GetExpression(
-                Expression.Property(row, miReader), Expression.Constant(Positions.GetOrThrow(name, "column name '{0'} not found in alias '" + alias + "'")), type);
+                Expression.Property(row, miReader), Expression.Constant(Positions.GetOrThrow(name, "column name '{0}' not found in alias '" + alias + "'")), type);
         }
 
-        internal bool ContainAlias(string alias)
+        static MethodInfo miLookup = ReflectionTools.GetMethodInfo((IProjectionRow row) => row.Lookup<int, double>(null, 0)).GetGenericMethodDefinition();
+        
+        public Expression Lookup(Expression row, ChildProjectionExpression cProj)
         {
-            return alias == Alias || (Parent != null && Parent.ContainAlias(alias));
+            MethodInfo mi = miLookup.MakeGenericMethod(cProj.OuterKey.Type, cProj.Type.ElementType());
+
+            Expression call = Expression.Call(row, mi, Expression.Constant(cProj.Projection.Token), cProj.OuterKey);
+
+            if (cProj.Projection.UniqueFunction == null)
+                return call;
+
+            MethodInfo miUnique = UniqueMethod(cProj.Projection.UniqueFunction.Value); 
+            return Expression.Call(miUnique.MakeGenericMethod(call.Type.ElementType()), call);
+        }
+
+
+        static MethodInfo miSingle = ReflectionTools.GetMethodInfo(() => Enumerable.Single<int>(null)).GetGenericMethodDefinition();
+        static MethodInfo miSingleOrDefault = ReflectionTools.GetMethodInfo(() => Enumerable.SingleOrDefault<int>(null)).GetGenericMethodDefinition();
+        static MethodInfo miFirst = ReflectionTools.GetMethodInfo(() => Enumerable.First<int>(null)).GetGenericMethodDefinition();
+        static MethodInfo miFirstOrDefault = ReflectionTools.GetMethodInfo(() => Enumerable.FirstOrDefault<int>(null)).GetGenericMethodDefinition();
+
+        internal MethodInfo UniqueMethod(UniqueFunction uniqueFunction)
+        {
+            switch (uniqueFunction)
+            {
+                case UniqueFunction.First: return miFirst;
+                case UniqueFunction.FirstOrDefault: return miFirstOrDefault;
+                case UniqueFunction.Single: return miSingle;
+                case UniqueFunction.SingleOrDefault: return miSingleOrDefault;
+                default:
+                    throw new InvalidOperationException();
+            }
         }
     }
 }

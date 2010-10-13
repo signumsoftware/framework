@@ -47,25 +47,25 @@ namespace Signum.Engine.Linq
     
         public override string GetQueryText(Expression expression)
         {
-            return this.Translate(expression).CleanCommandText();
+            return this.Translate(expression, tr => tr.CleanCommandText());
         }
         
         public override object Execute(Expression expression)
         {
-            ITranslateResult tr = this.Translate(expression);
-
-            return tr.Execute(null);
+            return this.Translate(expression, tr=>tr.Execute());
         }
-     
-        ITranslateResult Translate(Expression expression)
+
+        T Translate<T>(Expression expression, Func<ITranslateResult, T> continuation) //For debugging purposes
         {
             Expression cleaned = Clean(expression);
             Expression filtered = QueryFilterer.Filter(cleaned);
             ProjectionExpression binded = (ProjectionExpression)QueryBinder.Bind(filtered);
             ProjectionExpression optimized = (ProjectionExpression)Optimize(binded);
 
-            ITranslateResult result = TranslatorBuilder.Build(optimized, null);
-            return result; 
+            ProjectionExpression flat = ChildProjectionFlattener.Flatten(optimized);
+
+            ITranslateResult result = TranslatorBuilder.Build(flat);
+            return continuation(result);
         }
 
         public static Expression Clean(Expression expression)

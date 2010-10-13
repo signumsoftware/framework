@@ -154,6 +154,7 @@ namespace Signum.Utilities
             }
         }
 
+        //Throws exception if 0, returns if one, returns default if many
         public static T SingleOrMany<T>(this IEnumerable<T> collection)
         {
             if (collection == null)
@@ -173,6 +174,7 @@ namespace Signum.Utilities
             }
         }
 
+        //returns default if 0 or many, returns if one
         public static T Only<T>(this IEnumerable<T> collection)
         {
             if (collection == null)

@@ -6,32 +6,55 @@ using System.Windows.Documents;
 using System.Windows.Media;
 using System.ComponentModel;
 using System.Globalization;
-using System.Windows.Controls;
 using Signum.Entities.DynamicQuery;
+using System.Windows.Controls;
+using Signum.Utilities;
 using System.Windows;
 
 namespace Signum.Windows.DynamicQuery
 {
-    internal class ColumnOrderInfo
+    internal class ColumnInfo
+    {        
+        public ColumnInfo(Column column)
+        {
+            Column = column;
+        }
+
+        public ColumnInfo(ColumnOption co, QueryDescription description)
+        {
+            QueryToken token = QueryUtils.Parse(co.Path, description);
+            Column = new Column(token, co.DisplayName.DefaultText(token.NiceName()));
+        }
+
+        public Column Column;
+        public ResultColumn ResultColumn;
+        public GridViewColumn GridViewColumn;
+    }
+
+    public class ColumnOrderInfo
     {
-        public SortAdorner Adorner { get; private set; }
+        public OrderType OrderType { get { return adorner.OrderType; } }
+        SortAdorner adorner;
         public GridViewColumnHeader Header { get; set; }
 
         public void Clean()
         {
-            AdornerLayer.GetAdornerLayer(Header).Remove(Adorner);
+            var layer = AdornerLayer.GetAdornerLayer(Header);
+
+            if (layer != null)
+                layer.Remove(adorner);
         }
 
         public void Flip()
         {
-            Adorner.OrderType = Adorner.OrderType == OrderType.Ascending ? OrderType.Descending : OrderType.Ascending;
+            adorner.OrderType = adorner.OrderType == OrderType.Ascending ? OrderType.Descending : OrderType.Ascending;
             AdornerLayer.GetAdornerLayer(Header).Update();
         }
 
         public ColumnOrderInfo(GridViewColumnHeader header, OrderType orderType, int order)
         {
             Header = header;
-            Adorner = new SortAdorner(header, orderType, order);
+            adorner = new SortAdorner(header, orderType, order) { IsHitTestVisible = false };
             if (Header.IsVisible)
                 CreateAdorner(null, new DependencyPropertyChangedEventArgs());
             else
@@ -43,7 +66,7 @@ namespace Signum.Windows.DynamicQuery
             Header.IsVisibleChanged -= CreateAdorner;
             
             AdornerLayer layer = AdornerLayer.GetAdornerLayer(Header);
-            layer.Add(Adorner);
+            layer.Add(adorner);
         }
     }
 
@@ -67,7 +90,6 @@ namespace Signum.Windows.DynamicQuery
         protected override void OnRender(DrawingContext drawingContext)
         {
             base.OnRender(drawingContext);
-
 
             drawingContext.PushTransform(new TranslateTransform(AdornedElement.RenderSize.Width / 2 - 5, 1));
 

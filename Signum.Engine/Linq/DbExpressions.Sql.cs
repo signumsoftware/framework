@@ -29,6 +29,7 @@ namespace Signum.Engine.Linq
         Column,
         Select,
         Projection,
+        ChildProjection, 
         Join,
         Aggregate,
         AggregateSubquery,
@@ -58,9 +59,23 @@ namespace Signum.Engine.Linq
 
     internal abstract class DbExpression : Expression
     {
+        readonly Type type;
+        public override Type Type
+        {
+            get { return type; }
+        }
+
+        readonly DbExpressionType nodeType;
+        public override ExpressionType NodeType
+        {
+            get { return (ExpressionType)nodeType; }
+        }
+
         protected DbExpression(DbExpressionType nodeType, Type type)
-            : base((ExpressionType)nodeType, type)
-        {}
+        {
+            this.type = type;
+            this.nodeType = nodeType;
+        }
 
         public abstract override string ToString();
     }
@@ -134,7 +149,7 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            return "[{0}].[{1}]".Formato(Alias, Name);
+            return "{0}.{1}".Formato(Alias, Name);
         }
 
         public override bool Equals(object obj)
@@ -173,6 +188,11 @@ namespace Signum.Engine.Linq
         {
             return Name.HasText()? "{0} AS {1}".Formato(Expression.NiceToString(), Name):
                                    Expression.NiceToString();
+        }
+
+        public ColumnExpression GetReference(string alias)
+        {
+            return new ColumnExpression(Expression.Type, alias, Name); 
         }
     }
 
@@ -222,7 +242,7 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            return "OrderType: {0} Expression: {1}".Formato(OrderType, Expression.NiceToString());
+            return "{0} {1}".Formato(Expression.NiceToString(), OrderType == OrderType.Ascending ? "ASC": "DESC");
         }
     }
 
@@ -765,6 +785,15 @@ namespace Signum.Engine.Linq
             uniqueFunction == null ? typeof(IEnumerable<>).MakeGenericType(projector.Type) :
             projector.Type)
         {
+            if (source == null)
+                throw new ArgumentNullException("source");
+
+            if (projector == null)
+                throw new ArgumentNullException("projector");
+
+            if (token == null)
+                throw new ArgumentNullException("token");
+
             this.Source = source;
             this.Projector = projector;
             this.UniqueFunction = uniqueFunction;
@@ -779,6 +808,32 @@ namespace Signum.Engine.Linq
         public override string ToString()
         {
             return "(SOURCE\r\n{0}\r\nPROJECTION\r\n{1})".Formato(Source.ToString().Indent(4), Projector.NiceToString().Indent(4)); 
+        }
+    }
+
+    internal class ChildProjectionExpression : DbExpression
+    {
+        public readonly ProjectionExpression Projection;
+        public readonly Expression OuterKey;
+
+        internal ChildProjectionExpression(ProjectionExpression projection, Expression outerKey)
+            : base(DbExpressionType.ChildProjection, ProjectionClientType(projection))
+        {
+            this.Projection = projection;
+            this.OuterKey = outerKey;
+        }
+
+        static Type ProjectionClientType(ProjectionExpression projection)
+        {
+            if (!projection.Projector.Type.IsInstantiationOf(typeof(KeyValuePair<,>)))
+                throw new InvalidOperationException("projection's projector should create KeyValuePairs");
+
+            return typeof(IEnumerable<>).MakeGenericType(new Type[] { projection.Projector.Type.GetGenericArguments()[1] }); 
+        }
+
+        public override string ToString()
+        {
+            return "{0}.InLookup({1})".Formato(Projection.NiceToString(), OuterKey.NiceToString());
         }
     }
 

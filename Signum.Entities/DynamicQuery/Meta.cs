@@ -32,11 +32,6 @@ namespace Signum.Entities.DynamicQuery
             return PropertyRoute.IsAllowed();
         }
 
-        static bool ColumnIsAllowed(UserColumn column)
-        {
-            return column.Token.IsAllowed();
-        }
-
         public override string ToString()
         {
             return "CleanMeta( {0} )".Formato(PropertyRoute);

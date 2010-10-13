@@ -15,7 +15,6 @@ using System.Windows.Input;
 using System.Windows.Media;     
 using System.Windows.Threading; // DispatcherPriority
 using Signum.Utilities; 
-using System.Windows.Controls;
 using Signum.Windows;
 
 

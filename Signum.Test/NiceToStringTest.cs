@@ -56,9 +56,8 @@ namespace Signum.Test
 
         class MyExpression: Expression
         {
-            public MyExpression() : 
-                base((ExpressionType)101, typeof(int)) 
-            { }
+            public override Type Type { get{ return typeof(int);} }
+            public override ExpressionType NodeType { get{ return (ExpressionType)101;} }
 
             public override string ToString()
             {

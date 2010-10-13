@@ -23,6 +23,11 @@ namespace Signum.Entities.DynamicQuery
         public QueryToken Token { get; set; }
 
         public OrderType OrderType { get; set; }
+
+        public override string ToString()
+        {
+            return "{0} {1}".Formato(Token.FullKey(), OrderType);
+        }
     }
 
     /// <summary>

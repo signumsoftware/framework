@@ -245,7 +245,7 @@ namespace Signum.Engine
         public static SqlPreCommand AlterTableForeignKeys(ITable t)
         {
             return t.Columns.Values.Select(c =>
-                c.ReferenceTable == null ? null : SqlBuilder.AlterTableAddForeignKey(t.Name, c.Name, c.ReferenceTable.Name)).Combine(Spacing.Simple);
+                c.ReferenceTable == null ? null : SqlBuilder.AlterTableAddConstraintForeignKey(t.Name, c.Name, c.ReferenceTable.Name)).Combine(Spacing.Simple);
         }
 
         public static SqlPreCommand CreateIndicesSql(ITable t)
@@ -287,10 +287,7 @@ namespace Signum.Engine
                 //    raiserror('{3}',16,1) 
                 //END".Formato(triggerName.SqlScape(), table.SqlScape(), fieldNames.Single().SqlScape(), Resources._0RepeatedOnTable1.Formato(fieldNames.Single(), table)));
 
-
-
-                string sql1 = @" CREATE VIEW {0} WITH SCHEMABINDING
-                                AS
+                string sql1 = @" CREATE VIEW {0} WITH SCHEMABINDING AS
                                 SELECT {2}
                                 FROM dbo.{1}
                                 WHERE {2} IS NOT NULL;
@@ -302,13 +299,7 @@ namespace Signum.Engine
                 System.Diagnostics.Debug.WriteLine(sql1);
                 System.Diagnostics.Debug.WriteLine(sql2);
 
-               return SqlPreCommand.Combine(Spacing.Simple, new SqlPreCommandSimple(sql1),new SqlPreCommandSimple(sql2)   );
-         
-
-              
-
-
-
+                return SqlPreCommand.Combine(Spacing.Simple, new SqlPreCommandSimple(sql1), new SqlPreCommandSimple(sql2));
             }
 
             return null;
@@ -370,14 +361,14 @@ END".Formato(triggerName.SqlScape(), tableName, columns, nullableColumns,
             return "IX_{0}_{1}".Formato(table, fieldNames.ToString("_")).SqlScape();
         }
 
-        public static SqlPreCommand AlterTableDropForeignKey(string table, string foreingKeyName)
+        public static SqlPreCommand AlterTableDropConstraint(string table, string constraintName)
         {
             return new SqlPreCommandSimple("ALTER TABLE {0} DROP CONSTRAINT {1} ".Formato(
                 table.SqlScape(),
-                foreingKeyName.SqlScape()));
+                constraintName.SqlScape()));
         }
 
-        public static SqlPreCommand AlterTableAddForeignKey(string table, string fieldName, string foreignTable)
+        public static SqlPreCommand AlterTableAddConstraintForeignKey(string table, string fieldName, string foreignTable)
         {
             return new SqlPreCommandSimple("ALTER TABLE {0} ADD CONSTRAINT {1} FOREIGN KEY ({2}) REFERENCES {3}({4})".Formato(
                 table.SqlScape(),

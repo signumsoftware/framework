@@ -8,6 +8,7 @@ using Signum.Entities;
 using Signum.Entities.Reflection;
 using Signum.Engine;
 using Signum.Utilities.DataStructures;
+using Signum.Engine.DynamicQuery;
 
 namespace Signum.Web
 {
@@ -47,11 +48,18 @@ namespace Signum.Web
             set { this.orderOptions = value; }
         }
 
-        List<UserColumnOption> userColumnOptions = new List<UserColumnOption>();
-        public List<UserColumnOption> UserColumnOptions
+        ColumnOptionsMode columnOptionsMode = ColumnOptionsMode.Add;
+        public ColumnOptionsMode ColumnOptionsMode
         {
-            get { return userColumnOptions; }
-            set { this.userColumnOptions = value; }
+            get { return columnOptionsMode; }
+            set { this.columnOptionsMode = value; }
+        }
+
+        List<ColumnOption> columnOptions = new List<ColumnOption>();
+        public List<ColumnOption> ColumnOptions
+        {
+            get { return columnOptions; }
+            set { this.columnOptions = value; }
         }
 
         int? top; //If null, use QuerySettings one
@@ -143,6 +151,37 @@ namespace Signum.Web
             op.Add("allowMultiple", AllowMultiple.TrySC(b => b ? "true" : "false"));
             op.Add("filters", filterOptions.Empty() ? null : filterOptions.Select((f, i) => f.ToString(i)).ToString("&").SingleQuote());
             op.Add("allowUserColumns", AllowUserColumns.HasValue ? (AllowUserColumns.Value ? "true" : "false") : null);
+            op.Add("columnMode", ColumnOptionsMode != ColumnOptionsMode.Add ? ColumnOptionsMode.ToString().SingleQuote() : null);
+        }
+
+        public QueryRequest ToQueryRequest()
+        {
+            var qd = DynamicQueryManager.Current.QueryDescription(QueryName);
+            return new QueryRequest
+            {
+                QueryName = QueryName,
+                Filters = FilterOptions.Select(fo => fo.ToFilter()).ToList(),
+                Orders = OrderOptions.Select(fo => fo.ToOrder()).ToList(),
+                Columns = ColumnOptions.Select(co => co.ToColumn(qd)).ToList(),
+                Limit = top,
+            };
+        }
+
+        public List<Column> MergeColumns()
+        {
+            QueryDescription qd = DynamicQueryManager.Current.QueryDescription(QueryName);
+
+            switch (ColumnOptionsMode)
+            {
+                case ColumnOptionsMode.Add:
+                    return qd.Columns.Where(cd => !cd.IsEntity).Select(cd => new Column(cd)).Concat(ColumnOptions.Select(co => co.ToColumn(qd))).ToList();
+                case ColumnOptionsMode.Remove:
+                    return qd.Columns.Where(cd => !cd.IsEntity && !ColumnOptions.Any(co => co.ColumnName == cd.Name)).Select(cd => new Column(cd)).ToList();
+                case ColumnOptionsMode.Replace:
+                    return ColumnOptions.Select(co => co.ToColumn(qd)).ToList();
+                default:
+                    throw new InvalidOperationException("{0} is not a valid ColumnOptionMode".Formato(ColumnOptionsMode));
+            }
         }
     }
 
@@ -237,13 +276,28 @@ namespace Signum.Web
 
     public class OrderOption
     {
+        public OrderOption()
+        {
+        }
+
+        public OrderOption(string columnName)
+        {
+            this.ColumnName = columnName;
+        }
+
+        public OrderOption(string columnName, OrderType orderType)
+        {
+            this.ColumnName = columnName;
+            this.OrderType = orderType;
+        }
+
         public QueryToken Token{ get; set; }
         public string ColumnName { get; set; }
-        public OrderType Type { get; set; }
+        public OrderType OrderType { get; set; }
 
         public Order ToOrder()
         {
-            return new Order(Token, Type);
+            return new Order(Token, OrderType);
         }
     }
 
@@ -255,14 +309,24 @@ namespace Signum.Web
         OnlyResults
     }
 
-    public class UserColumnOption
+    public class ColumnOption
     {
-        public UserColumnOption()
+        public ColumnOption()
         {
         }
 
+        public ColumnOption(string columnName)
+        {
+            this.ColumnName = columnName;
+        }
+
+        public string ColumnName { get; set; }
         public string DisplayName { get; set; }
 
-        public UserColumn UserColumn { get; set; }
+        public Column ToColumn(QueryDescription qd)
+        {
+            var token = QueryUtils.Parse(ColumnName, qd);
+            return new Column(token, DisplayName.DefaultText(token.NiceName()));
+        }
     }  
 }

@@ -145,11 +145,13 @@ namespace Signum.Windows
     {
         public ExploreOptions Options {get; set;} 
 
-        public QuickLinkExplore(object queryName, string columnName, object value):
+        public QuickLinkExplore(object queryName, string columnName, object value, bool hideColumn):
             this(new ExploreOptions(queryName)
             { 
                 ShowFilters = false,
                 SearchOnLoad = true,
+                ColumnOptionsMode = hideColumn ? ColumnOptionsMode.Remove: ColumnOptionsMode.Add,
+                ColumnOptions = hideColumn ? new List<ColumnOption>{new ColumnOption(columnName)}: new List<ColumnOption>(),
                 FilterOptions = new List<FilterOption>
                 {
                     new FilterOption(columnName, value),

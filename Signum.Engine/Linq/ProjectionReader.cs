@@ -14,13 +14,15 @@ using System.Data.SqlClient;
 
 namespace Signum.Engine.Linq
 {
+    
+
     internal interface IProjectionRow
     {
         FieldReader Reader { get; }
 
-        IProjectionRow Parent { get; }
-
         Retriever Retriever { get; }
+
+        IEnumerable<S> Lookup<K, S>(ProjectionToken token, K key); 
 
         MList<S> GetList<S>(RelationalTable tr, int id);
 
@@ -45,16 +47,17 @@ namespace Signum.Engine.Linq
         Expression<Func<IProjectionRow, T>> projectorExpression;
 
         Retriever retriever;
+        Dictionary<ProjectionToken, IEnumerable> lookups;
 
-        internal ProjectionRowEnumerator(SqlDataReader reader, Expression<Func<IProjectionRow, T>> projectorExpression, IProjectionRow parent, Retriever retriever)
+        internal ProjectionRowEnumerator(SqlDataReader reader, Expression<Func<IProjectionRow, T>> projectorExpression, Retriever retriever, Dictionary<ProjectionToken, IEnumerable> lookups)
         {
             this.reader = reader;
             this.Reader = new FieldReader(reader);
 
             this.projectorExpression = projectorExpression;
             this.projector = projectorExpression.Compile();
-            this.Parent = parent;
             this.retriever = retriever;
+            this.lookups = lookups;
         }
 
         public T Current
@@ -84,11 +87,6 @@ namespace Signum.Engine.Linq
         public void Dispose()
         {
             reader.Dispose();
-
-            if (retriever != null)
-            {
-                retriever.ProcessAll();
-            }
         }
 
         public Retriever Retriever
@@ -136,6 +134,17 @@ namespace Signum.Engine.Linq
             if (id == null) return null; 
             Table table = Schema.Current.TablesForID[idType.Value];
             return (Lite<S>)Retriever.GetLite(table, typeof(S), id.Value);
+        }
+
+
+        public IEnumerable<S> Lookup<K, S>(ProjectionToken token, K key)
+        {
+            Lookup<K, S> lookup = (Lookup<K, S>)lookups[token];
+
+            if (!lookup.Contains(key))
+                return Enumerable.Empty<S>();
+            else
+                return lookup[key];
         }
     }
 

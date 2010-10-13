@@ -29,11 +29,16 @@ namespace Signum.Engine.DynamicQuery
 
         public override ResultTable ExecuteQuery(QueryRequest request)
         {
-            IQueryable<Expandable<T>> result = Query.Where(request.Filters).SelectExpandable(request.UserColumns).OrderBy(request.Orders).TryTake(request.Limit);
+            request.Columns.Insert(0, new _EntityColumn(EntityColumn().BuildColumnDescription()));
 
-            Expandable<T>[] list = result.ToArray();
+            DQueryable<T> result = Query
+                .Where(request.Filters)
+                .SelectDynamic(request.Columns, request.Orders)
+                .OrderBy(request.Orders).TryTake(request.Limit);
 
-            return ToQueryResult(list, request.UserColumns);
+            DEnumerable<T> array = result.ToArray();
+
+            return array.ToResultTable(request.Columns);
         }
 
         public override int ExecuteQueryCount(QueryCountRequest request)
@@ -43,7 +48,12 @@ namespace Signum.Engine.DynamicQuery
 
         public override Lite ExecuteUniqueEntity(UniqueEntityRequest request)
         {
-            return Query.Where(request.Filters).SelectExpandable(null).OrderBy(request.Orders).SelectEntity().Unique(request.UniqueType);
+            var columns = new List<Column> { new _EntityColumn(EntityColumn().BuildColumnDescription()) };
+            DQueryable<T> orderQuery = Query.Where(request.Filters).SelectDynamic(columns, request.Orders).OrderBy(request.Orders);
+
+            var entitySelect = (Expression<Func<object, Lite>>)TupleReflection.TupleChainPropertyLambda(orderQuery.TupleType, 0);
+
+            return (Lite)orderQuery.Query.Select(entitySelect).Unique(request.UniqueType);
         }
 
         public override Expression Expression

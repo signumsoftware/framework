@@ -202,6 +202,11 @@ namespace Signum.Web
                 .ToString(TagRenderMode.Normal);
         }
 
+        public static string Button(this HtmlHelper html, string id, string value, string onclick, string cssClass)
+        {
+            return html.Button(id, value, onclick, cssClass, null);
+        }
+
         public static string Button(this HtmlHelper html, string id, string value, string onclick, string cssClass, IDictionary<string, object> htmlAttributes)
         {
             return new FluentTagBuilder("input", id)

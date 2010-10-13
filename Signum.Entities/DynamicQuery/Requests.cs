@@ -10,7 +10,7 @@ namespace Signum.Entities.DynamicQuery
     {
         public object QueryName { get; set; }
 
-        public List<UserColumn> UserColumns { get; set; }
+        public List<Column> Columns { get; set; }
 
         public List<Filter> Filters { get; set; }
 

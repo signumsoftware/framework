@@ -20,136 +20,40 @@ namespace Signum.Entities.DynamicQuery
     public class QueryDescription
     {
         public object QueryName { get; set; }
-        public List<StaticColumn> StaticColumns { get; set; }
+        public List<ColumnDescription> Columns { get; set; }
     }
 
-
     [Serializable]
-    public abstract class Column
+    public class ColumnDescription
     {
-        public abstract int Index { get; }
+        public const string Entity = "Entity";
 
         public string Name { get; internal set; }
         public Type Type { get; internal set; }
 
-        public string Format { get; set; }
-        public string Unit { get; set; }
-        public Implementations Implementations { get; set; }
+        public string Unit { get; internal set; }
+        public string Format { get; internal set; }
 
-        public string DisplayName{get;set;}
-
-        public abstract bool Filterable { get; set; }
-        public abstract bool Visible { get; set; }
-        public abstract bool Sortable { get; set; }
-
-        public override string ToString()
-        {
-            return "{0} {1}".Formato(Type.TypeName(), Name);
-        }
-
-        public abstract QueryToken GetQueryToken();
-
-        public abstract bool IsAllowed();
-    }
-
-    [Serializable]
-    public class UserColumn : Column
-    {
-        public int UserColumnIndex { get; set; }
-        public QueryToken Token { get; internal set; }
-
-        int baseIndex;
-        public UserColumn(int baseIndex, string name, Type type)
-        {
-            this.baseIndex = baseIndex;
-            this.Name = name;
-            this.Type = type;
-        }
-
-        public UserColumn(int baseIndex, QueryToken token)
-            : this(baseIndex, token.FullKey(), token.Type)
-        {
-            this.Token = token;
-            this.Implementations = token.Implementations();
-            this.Format = token.Format;
-            this.Unit = token.Unit;
-        }
-
-        public override QueryToken GetQueryToken()
-        {
-            return Token;
-        }
-
-        public override bool Visible
-        {
-            get { return true;  }
-            set { throw new InvalidOperationException(); }
-        }
-
-        public override bool Filterable
-        {
-            get { return false; }
-            set { throw new InvalidOperationException(); }
-
-        }
-
-        public override bool Sortable
-        {
-            get { return true; }
-            set { throw new InvalidOperationException(); }
-        }
-
-        public override int Index
-        {
-            get { return baseIndex + UserColumnIndex; }
-        }
-
-        public override bool IsAllowed()
-        {
-            if (Token == null)
-                return true;
-            return Token.IsAllowed();
-        }
-    }
-
-    [Serializable]
-    public class StaticColumn : Column
-    {
-        int index;
-        public override int Index
-        {
-            get { return index; }
-        }
-
-        public StaticColumn(int index, string name, Type type)
-        {
-            this.index = index;
-            this.Name = name;
-            this.Type = type;
-        }
-
-        public override bool Visible { get; set; }
-        public override bool Filterable { get; set; }
-        public override bool Sortable { get; set; }
-
-        public bool Allowed { get; set; }
+        public Implementations Implementations { get; internal set; }
 
         public PropertyRoute PropertyRoute { get; set; }
 
-        public const string Entity = "Entity";
+        public string DisplayName { get; set; }
+
+        public ColumnDescription(string name, Type type)
+        {
+            this.Name = name;
+            this.Type = type;
+        }
+
         public bool IsEntity
         {
-            get { return this.Name == Entity; }
+            get { return Name == Entity;  }
         }
 
-        public override QueryToken GetQueryToken()
+        public override string ToString()
         {
-            return QueryToken.NewColumn(this);
+            return DisplayName;
         }
-
-        public override bool IsAllowed()
-        {
-            return Allowed;
-        }
-    }
+    }    
 }

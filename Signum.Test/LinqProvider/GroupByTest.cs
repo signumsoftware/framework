@@ -234,6 +234,14 @@ namespace Signum.Test.LinqProvider
 
 
         [TestMethod]
+        public void GroupByEntity()
+        {
+            var list = (from a in Database.Query<AlbumDN>()
+                        group a by a.Label into g
+                        select g.Key.ToLite()).ToList();
+        }
+
+        [TestMethod]
         public void GroupByEntityExpand()
         {
             var list = (from a in Database.Query<AlbumDN>()

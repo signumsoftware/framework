@@ -56,6 +56,15 @@ namespace Signum.Windows
             set { SetValue(QueryNameProperty, value); }
         }
 
+
+        public static readonly DependencyProperty OrderOptionsProperty =
+          DependencyProperty.Register("OrderOptions", typeof(ObservableCollection<OrderOption>), typeof(CountSearchControl), new UIPropertyMetadata(null));
+        public ObservableCollection<OrderOption> OrderOptions
+        {
+            get { return (ObservableCollection<OrderOption>)GetValue(OrderOptionsProperty); }
+            set { SetValue(OrderOptionsProperty, value); }
+        }
+
         public static readonly DependencyProperty FilterOptionsProperty =
           DependencyProperty.Register("FilterOptions", typeof(FreezableCollection<FilterOption>), typeof(CountSearchControl), new UIPropertyMetadata(null));
         public FreezableCollection<FilterOption> FilterOptions
@@ -63,6 +72,24 @@ namespace Signum.Windows
             get { return (FreezableCollection<FilterOption>)GetValue(FilterOptionsProperty); }
             set { SetValue(FilterOptionsProperty, value); }
         }
+
+
+        public static readonly DependencyProperty ColumnOptionsModeProperty =
+            DependencyProperty.Register("ColumnOptionsMode", typeof(ColumnOptionsMode), typeof(CountSearchControl), new UIPropertyMetadata(ColumnOptionsMode.Add));
+        public ColumnOptionsMode ColumnOptionsMode
+        {
+            get { return (ColumnOptionsMode)GetValue(ColumnOptionsModeProperty); }
+            set { SetValue(ColumnOptionsModeProperty, value); }
+        }
+
+        public static readonly DependencyProperty ColumnsOptionsProperty =
+            DependencyProperty.Register("ColumnOptions", typeof(ObservableCollection<ColumnOption>), typeof(CountSearchControl), new UIPropertyMetadata(null));
+        public ObservableCollection<ColumnOption> ColumnOptions
+        {
+            get { return (ObservableCollection<ColumnOption>)GetValue(ColumnsOptionsProperty); }
+            set { SetValue(ColumnsOptionsProperty, value); }
+        }
+
 
         public static readonly DependencyProperty ItemsCountProperty =
         DependencyProperty.Register("ItemsCount", typeof(int), typeof(CountSearchControl), new UIPropertyMetadata(0));
@@ -79,6 +106,8 @@ namespace Signum.Windows
             this.InitializeComponent();
 
             FilterOptions = new FreezableCollection<FilterOption>();
+            ColumnOptions = new ObservableCollection<ColumnOption>();
+            OrderOptions = new ObservableCollection<OrderOption>();
             this.Loaded += new RoutedEventHandler(SearchControl_Loaded);
         }
 
@@ -134,10 +163,12 @@ namespace Signum.Windows
                 LinkClick(this, EventArgs.Empty);
             else
             {
-                Navigator.Explore(new ExploreOptions
+                Navigator.Explore(new ExploreOptions(QueryName)
                 {
+                    OrderOptions = OrderOptions.ToList(),
                     FilterOptions = FilterOptions.ToList(),
-                    QueryName = QueryName
+                    ColumnOptions = ColumnOptions.ToList(),
+                    ColumnOptionsMode = ColumnOptionsMode,
                 });
             }
 

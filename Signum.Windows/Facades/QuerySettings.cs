@@ -22,8 +22,7 @@ namespace Signum.Windows
         public int? Top { get; set; }
         public ImageSource Icon { get; set; }
 
-        public Func<object, bool> IsFindable { set { IsFindableEvent += value; } }
-        public event Func<object, bool> IsFindableEvent;
+        public Func<object, bool> IsFindable;
 
         Dictionary<string, Func<Binding, DataTemplate>> formatters;
         public Dictionary<string, Func<Binding, DataTemplate>> Formatters
@@ -56,7 +55,7 @@ namespace Signum.Windows
                     c=>c.Type.UnNullify() == typeof(bool), 
                     c=> b => FormatTools.CheckBoxTemplate(b, c.Format == null ? null : ConverterFactory.New(Reflector.GetPropertyFormatter(c.Format, null)))),
 
-                    new FormatterRule(FormatterPriority.Type, "Enum",
+                new FormatterRule(FormatterPriority.Type, "Enum",
                     c=>c.Type.UnNullify().IsEnum, 
                     c=> b => FormatTools.TextBlockTemplate(b, TextAlignment.Left, Converters.EnumDescriptionConverter)),
                 new FormatterRule(FormatterPriority.Type, "Number",
@@ -81,7 +80,7 @@ namespace Signum.Windows
             if(result != null)
                 return result;
 
-            FormatterRule fr = FormatRules.Where(cfr => cfr.IsApplyable(column)).WithMax(a=>a.Priority); 
+            FormatterRule fr = FormatRules.Where(cfr => cfr.IsApplicable(column)).WithMax(a=>a.Priority); 
 
             return fr.Formatter(column); 
         }
@@ -93,8 +92,8 @@ namespace Signum.Windows
 
         internal bool OnIsFindable()
         {
-            if (IsFindableEvent != null)
-                foreach (Func<object, bool> isFindable in IsFindableEvent.GetInvocationList())
+            if (IsFindable != null)
+                foreach (Func<object, bool> isFindable in IsFindable.GetInvocationList())
                 {
                     if (!isFindable(QueryName))
                         return false;
@@ -117,13 +116,13 @@ namespace Signum.Windows
         public string Name { get; set; }
 
         public Func<Column, Func<Binding, DataTemplate>> Formatter { get; set; }
-        public Func<Column, bool> IsApplyable { get; set; }
+        public Func<Column, bool> IsApplicable { get; set; }
 
-        public FormatterRule(int priority, string name, Func<Column, bool> isApplyable, Func<Column, Func<Binding, DataTemplate>> formatter)
+        public FormatterRule(int priority, string name, Func<Column, bool> isApplicable, Func<Column, Func<Binding, DataTemplate>> formatter)
         {
             Priority = priority;
             Name = name;
-            IsApplyable = isApplyable;
+            IsApplicable = isApplicable;
             Formatter = formatter;
         }
 

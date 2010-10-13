@@ -28,7 +28,6 @@ namespace Signum.Web
         public const string QueryName = "sfQueryName";
         public const string Top = "sfTop";
         public const string Results = "sfResults";
-        public const string EntityColumnIndex = "sfEntityColumnIndex";
         public const string EntityTypeName = "sfEntityTypeName";
         public const string AllowMultiple = "sfAllowMultiple";
         public const string Create = "sfCreate";

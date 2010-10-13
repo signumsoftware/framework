@@ -1,15 +1,15 @@
-﻿$(function () {
+﻿$(function() {
     $(".searchControl th:not(.thRowEntity):not(.thRowSelection)")
-        .live('click', function (e) {
-            if ($(this).hasClass("userColumnEditing"))
+        .live('click', function(e) {
+            if ($(this).hasClass("columnEditing"))
                 return true;
             Sort(e);
             return false;
         })
-        .live('mousedown', function (e) {
-            if ($(this).hasClass("userColumnEditing"))
+        .live('mousedown', function(e) {
+            if ($(this).hasClass("columnEditing"))
                 return true;
-            this.onselectstart = function () { return false };
+            this.onselectstart = function() { return false };
             return false;
         });
 
@@ -18,7 +18,7 @@
             $('.searchCtxMenuOverlay').remove();
             return false;
         }
-
+        
         var $this = $(this);
         var index = $this.index();
         var $th = $this.closest("table").find("th").eq(index);
@@ -55,13 +55,13 @@ function EntityCellContextMenu(e) {
         return false; //EntityContextMenu not active
 
     var $cmenu = $("<div class='searchCtxMenu'></div>");
-    $('<div class="searchCtxMenuOverlay"></div>').click(function (e) {
-        log("contextmenu click");
-        var $target = $(e.target);
-        if ($target.hasClass("searchCtxItem") || $target.parent().hasClass("searchCtxItem"))
-            $cmenu.hide();
-        else
-            $('.searchCtxMenuOverlay').remove();
+        $('<div class="searchCtxMenuOverlay"></div>').click(function(e) {
+            log("contextmenu click");
+            var $target = $(e.target);
+            if ($target.hasClass("searchCtxItem") || $target.parent().hasClass("searchCtxItem"))
+                $cmenu.hide();
+            else
+                $('.searchCtxMenuOverlay').remove();
     }).append($cmenu).appendTo($target);
     $cmenu.css({
         left: $target.position().left + ($target.outerWidth() / 2),
@@ -79,7 +79,7 @@ function EntityCellContextMenu(e) {
         success: function (items) { $cmenu.html(items); }
     });
 
-    return false;
+        return false;
 }
 
 function CellContextMenu(e) {
@@ -93,7 +93,7 @@ function CellContextMenu(e) {
         if ($target.hasClass("searchCtxItem") || $target.parent().hasClass("searchCtxItem"))
             $cmenu.hide();
         else
-            $('.searchCtxMenuOverlay').remove();
+        $('.searchCtxMenuOverlay').remove();
     }).append($cmenu).appendTo($target);
     $cmenu.css({
         left: $target.position().left + ($target.outerWidth() / 2),
@@ -116,7 +116,8 @@ var FindNavigator = function(_findOptions) {
         filters: null,
         filterMode: null,
         orders: null, //A Json array like ["columnName1","-columnName2"] => will order by columnname1 asc, then by columnname2 desc
-        userColumns: null, //List of column names "columnName1,columnName2"
+        columns: null, //List of column names "columnName1,columnName2"
+        columnMode: null,
         allowUserColumns: null,
         navigatorControllerUrl: "Signum/PartialFind",
         searchControllerUrl: "Signum/Search",
@@ -145,7 +146,7 @@ FindNavigator.prototype = {
         SF.ajax({
             type: "POST",
             url: this.findOptions.navigatorControllerUrl,
-            data: this.requestData(),
+            data: this.requestDataForOpenFinder(),
             async: false,
             dataType: "html",
             success: function(popupHtml) {
@@ -204,20 +205,16 @@ FindNavigator.prototype = {
         SF.ajax({
             type: "POST",
             url: this.findOptions.searchControllerUrl,
-            data: this.requestData(),
+            data: this.requestDataForSearch(),
             async: this.findOptions.async,
-            dataType: "json",
+            dataType: "html",
             success: function(r) {
                 var idBtnSearch = $btnSearch.attr('id');
                 if (asyncSearchFinished[idBtnSearch])
                     asyncSearchFinished[idBtnSearch] = false;
                 $btnSearch.val(lang['buscar']).toggleClass('loading');
-                if (r.length > 0) {
-                    for (var i = 0, l = r.length; i < l; i++) {
-                        r[i] = "<tr><td>" + r[i].join("</td><td>") + "</td></tr>";
-                    }
-                    self.$control.find(".divResults tbody").html(r.join(''));
-                }
+                if (!empty(r))
+                    self.$control.find(".divResults tbody").html(r);
                 else {
                     var columns = $(self.pf("divResults th")).length;
                     self.$control.find(".divResults tbody").html("<tr><td colspan=\"" + columns + "\">" + lang['0results'] + "</td></tr>")
@@ -230,14 +227,34 @@ FindNavigator.prototype = {
 
     },
 
-    requestData: function() {
+    requestDataForSearch: function () {
         var requestData = new Object();
-        requestData[sfQueryUrlName] = ((empty(this.findOptions.queryUrlName)) ? $(this.pf(sfQueryUrlName)).val() : this.findOptions.queryUrlName);
-        requestData[sfTop] = empty(this.findOptions.top) ? $(this.pf(sfTop)).val() : this.findOptions.top;
-        requestData[sfAllowMultiple] = (this.findOptions.allowMultiple == undefined) ? $(this.pf(sfAllowMultiple)).val() : this.findOptions.allowMultiple;
+        requestData[sfQueryUrlName] = $(this.pf(sfQueryUrlName)).val();
+        requestData[sfTop] = $(this.pf(sfTop)).val();
+        requestData[sfAllowMultiple] = $(this.pf(sfAllowMultiple)).val();
 
         var canView = $(this.pf(sfView)).val();
-        requestData[sfView] = (!this.findOptions.view) ? false : (empty(canView) ? this.findOptions.view : canView);
+        requestData[sfView] = (empty(canView) ? true : canView);
+        
+        var currentfilters = this.serializeFilters();
+        if (!empty(currentfilters))
+            $.extend(requestData, currentfilters);
+        
+        requestData["sfOrderBy"] = this.serializeOrders();
+        requestData["sfColumns"] = this.serializeColumns();
+        requestData["sfColumnMode"] = 'Replace';
+
+        requestData[sfPrefix] = this.findOptions.prefix;
+
+        return requestData;
+    },
+
+    requestDataForOpenFinder: function () {
+        var requestData = new Object();
+        requestData[sfQueryUrlName] = this.findOptions.queryUrlName;
+        requestData[sfTop] = this.findOptions.top;
+        requestData[sfAllowMultiple] = this.findOptions.allowMultiple;
+        requestData[sfView] = this.findOptions.view;
         requestData["sfSearchOnLoad"] = this.findOptions.searchOnLoad;
 
         if (this.findOptions.async)
@@ -249,10 +266,7 @@ FindNavigator.prototype = {
         if (!this.findOptions.create)
             requestData["sfCreate"] = this.findOptions.create;
 
-        var currentfilters = this.serializeFilters();
-        if (!empty(currentfilters))
-            $.extend(requestData, currentfilters);
-        else if (!empty(this.findOptions.filters)) {
+        if (!empty(this.findOptions.filters)) {
             var filterArray = this.findOptions.filters.split("&");
             for (var i = 0, l = filterArray.length; i < l; i++) {
                 var pair = filterArray[i];
@@ -264,8 +278,10 @@ FindNavigator.prototype = {
             }
         }
 
-        requestData["sfOrderBy"] = empty(this.findOptions.orders) ? this.serializeOrders() : this.findOptions.orders;
-        requestData["sfUserColumns"] = empty(this.findOptions.userColumns) ? this.serializeUserColumns() : this.findOptions.userColumns;
+        requestData["sfOrderBy"] = this.findOptions.orders;
+        requestData["sfColumns"] = this.findOptions.columns;
+        if (this.findOptions.columnMode != null)
+            requestData["sfColumnMode"] = this.findOptions.columnMode;
 
         requestData[sfPrefix] = this.findOptions.prefix;
 
@@ -308,7 +324,7 @@ FindNavigator.prototype = {
         var currOrder = $(this.pf("OrderBy")).val();
         if (empty(currOrder))
             return "";
-        return currOrder.replace(/"/g, ""); //.replace("[", "").replace("]", "");
+        return currOrder.replace(/"/g, "");
     },
 
     setNewSortOrder: function(columnName, multiCol) {
@@ -359,11 +375,11 @@ FindNavigator.prototype = {
         return this;
     },
 
-    serializeUserColumns: function() {
-        log("FindNavigator serializeUserColumns");
+    serializeColumns: function() {
+        log("FindNavigator serializeColumns");
         var result = "";
         var self = this;
-        $(this.pf("tblResults thead tr th.userColumn")).each(function() {
+        $(this.pf("tblResults thead tr th:not(.thRowEntity):not(.thRowSelection)")).each(function () {
             var $this = $(this);
             result = result.compose($this.find("input:hidden").val() + ";" + $this.text().trim(), ",");
         });
@@ -405,7 +421,7 @@ FindNavigator.prototype = {
         if ($(this.pf("tblResults thead tr th[id=\"" + prefixedTokenName + "\"]")).length > 0) return;
 
         var $tblHeaders = $(this.pf("tblResults thead tr"));
-        $tblHeaders.append("<th id=\"" + prefixedTokenName + "\" class=\"userColumn\"><input type=\"hidden\" value=\"" + tokenName + "\" />" + tokenName + "</th>");
+        $tblHeaders.append("<th id=\"" + prefixedTokenName + "\"><input type=\"hidden\" value=\"" + tokenName + "\" />" + tokenName + "</th>");
         $(this.pf("btnEditColumns")).show();
     },
 
@@ -413,9 +429,9 @@ FindNavigator.prototype = {
         log("FindNavigator editColumns");
 
         var self = this;
-        $(this.pf("tblResults thead tr th.userColumn")).each(function() {
+        $(this.pf("tblResults thead tr th:not(.thRowEntity):not(.thRowSelection)")).each(function () {
             var th = $(this);
-            th.addClass("userColumnEditing");
+            th.addClass("columnEditing");
             var hidden = th.find("input:hidden");
             th.html("<input type=\"text\" value=\"" + th.text().trim() + "\" />" +
                     "<br /><a id=\"link-delete-user-col\" onclick=\"DeleteColumn('" + self.findOptions.prefix + "', '" + hidden.val() + "');\">Delete Column</a>")
@@ -434,9 +450,9 @@ FindNavigator.prototype = {
             return;
 
         var self = this;
-        $(this.pf("tblResults thead tr th.userColumn")).each(function() {
+        $(this.pf("tblResults thead tr th:not(.thRowEntity):not(.thRowSelection)")).each(function () {
             var th = $(this);
-            th.removeClass("userColumnEditing");
+            th.removeClass("columnEditing");
             var hidden = th.find("input:hidden");
             var newColName = th.find("input:text").val();
             th.html(newColName).append(hidden);
@@ -450,13 +466,13 @@ FindNavigator.prototype = {
         log("FindNavigator deleteColumn");
 
         var self = this;
-        $(this.pf("tblResults thead tr th.userColumn"))
+        $(this.pf("tblResults thead tr th"))
         .filter(function() { return $(this).find("input:hidden[value='" + columnName + "']").length > 0 })
         .remove();
 
         $(this.pf("tblResults tbody")).html("");
 
-        if ($(this.pf("tblResults thead tr th.userColumn")).length == 0)
+        if ($(this.pf("tblResults thead tr th")).length == 0)
             $(this.pf("btnEditColumnsFinish")).hide();
     },
 

@@ -5,6 +5,7 @@ using System.Text;
 using Signum.Utilities;
 using System.Collections;
 using Signum.Utilities.Properties;
+using System.Xml.Linq;
 
 namespace Signum.Utilities.DataStructures
 {
@@ -319,26 +320,53 @@ namespace Signum.Utilities.DataStructures
                 "\r\n"); ;
         }
 
-        public string Graphviz()
+        public string ToGraphviz()
         {
-            return Graphviz(typeof(E).Name, a => a.ToString(), e => e.ToString());
+            return ToGraphviz(typeof(E).Name, a => a.ToString(), e => e.ToString());
         }
 
-        public string Graphviz(string name)
+        public string ToGraphviz(string name)
         {
-            return Graphviz(name, a => a.ToString(), e => e.ToString());
+            return ToGraphviz(name, a => a.ToString(), e => e.ToString());
         }
 
-        public string Graphviz(string name, Func<T, string> getNodeName, Func<E, string> getEdgeName)
+        public string ToGraphviz(string name, Func<T, string> getNodeLabel, Func<E, string> getEdgeLabel)
         {
             int num = 0;
             Dictionary<T, int> nodeDic = Nodes.ToDictionary(n => n, n => num++, Comparer);
 
-            string nodes = Nodes.ToString(e => "   {0} [ label =\"{1}\"];".Formato(nodeDic[e], getNodeName(e)), "\r\n");
+            string nodes = Nodes.ToString(e => "   {0} [ label =\"{1}\"];".Formato(nodeDic[e], getNodeLabel(e)), "\r\n");
 
-            string edges = EdgesWithValue.ToString(e => "   {0} -> {1} [ label =\"{2}\"];".Formato(nodeDic[e.From], nodeDic[e.To], getEdgeName(e.Value)), "\r\n");
+            string edges = EdgesWithValue.ToString(e => "   {0} -> {1} [ label =\"{2}\"];".Formato(nodeDic[e.From], nodeDic[e.To], getEdgeLabel(e.Value)), "\r\n");
 
             return "digraph \"{0}\"\r\n{{\r\n{1}\r\n{2}\r\n}}".Formato(name, nodes, edges);
+        }
+
+        public XDocument ToDGML()
+        {
+            return ToDGML(a => a.ToString(), e => e.ToString());
+        }
+
+        public XDocument ToDGML(Func<T, string> getNodeLabel, Func<E, string> getEdgeLabel)
+        {
+            int num = 0;
+            Dictionary<T, int> nodeDic = Nodes.ToDictionary(n => n, n => num++, Comparer);
+
+            XNamespace ns = "http://schemas.microsoft.com/vs/2009/dgml";
+
+            return new XDocument(
+                new XElement(ns + "DirectedGraph",
+                    new XElement(ns + "Nodes",
+                        Nodes.Select(n => new XElement(ns + "Node",
+                            new XAttribute("Id", nodeDic[n]),
+                            new XAttribute("Label", getNodeLabel(n))))),
+                    new XElement(ns + "Links",
+                        EdgesWithValue.Select(e => new XElement(ns + "Link",
+                            new XAttribute("Source", nodeDic[e.From]),
+                            new XAttribute("Target", nodeDic[e.To]),
+                            new XAttribute("Label", getEdgeLabel(e.Value)))))
+                 )
+            );
         }
 
         public IEnumerator<T> GetEnumerator()

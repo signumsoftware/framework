@@ -24,6 +24,9 @@ namespace Signum.Engine
         public static void SaveList<T>(this IEnumerable<T> entities)
             where T : class, IIdentifiable
         {
+            if (entities == null || entities.Any(e => e == null))
+                throw new ArgumentNullException("entity");
+
             using (new EntityCache())
             using (Transaction tr = new Transaction())
             {
@@ -35,6 +38,9 @@ namespace Signum.Engine
 
         public static void SaveParams(params IIdentifiable[] entities)
         {
+            if (entities == null || entities.Any(e => e == null))
+                throw new ArgumentNullException("entity");
+
             using (new EntityCache())
             using (Transaction tr = new Transaction())
             {
@@ -44,15 +50,18 @@ namespace Signum.Engine
             }
         }
 
-        public static T Save<T>(this T obj)
+        public static T Save<T>(this T entity)
             where T : class, IIdentifiable
         {
+            if (entity == null)
+                throw new ArgumentNullException("entity");
+
             using (new EntityCache())
             using (Transaction tr = new Transaction())
             {
-                Saver.Save((IdentifiableEntity)(IIdentifiable)obj);
+                Saver.Save((IdentifiableEntity)(IIdentifiable)entity);
 
-                return tr.Commit(obj);
+                return tr.Commit(entity);
             }
         }
         #endregion
@@ -60,6 +69,9 @@ namespace Signum.Engine
         #region Retrieve
         public static T Retrieve<T>(this Lite<T> lite) where T : class, IIdentifiable
         {
+            if (lite == null)
+                throw new ArgumentNullException("lite");
+
             if (lite.EntityOrNull == null)
                 lite.SetEntity(Retrieve(lite.RuntimeType, lite.Id));
 
@@ -68,11 +80,17 @@ namespace Signum.Engine
 
         public static T RetrieveAndForget<T>(this Lite<T> lite) where T : class, IIdentifiable
         {
+            if (lite == null)
+                throw new ArgumentNullException("lite");
+
             return (T)(object)Retrieve(lite.RuntimeType, lite.Id);
         }
 
         public static IdentifiableEntity Retrieve(Lite lite)
         {
+            if (lite == null)
+                throw new ArgumentNullException("lite");
+
             if (lite.UntypedEntityOrNull == null)
                 lite.SetEntity(Retrieve(lite.RuntimeType, lite.Id));
 
@@ -81,6 +99,9 @@ namespace Signum.Engine
 
         public static IdentifiableEntity RetrieveAndForget(Lite lite)
         {
+            if (lite == null)
+                throw new ArgumentNullException("lite");
+
             return Retrieve(lite.RuntimeType, lite.Id);
         }
 
@@ -91,6 +112,9 @@ namespace Signum.Engine
 
         public static IdentifiableEntity Retrieve(Type type, int id)
         {
+            if (type == null)
+                throw new ArgumentNullException("type");
+
             using (new EntityCache())
             using (Transaction tr = new Transaction())
             {
@@ -106,6 +130,9 @@ namespace Signum.Engine
 
         public static Lite RetrieveLite(Type type, Type runtimeType, int id)
         {
+            if (type == null)
+                throw new ArgumentNullException("type");
+
             using (new EntityCache())
             using (Transaction tr = new Transaction())
             {
@@ -121,11 +148,17 @@ namespace Signum.Engine
 
         public static Lite RetrieveLite(Type type, int id)
         {
+            if (type == null)
+                throw new ArgumentNullException("type");
+
             return RetrieveLite(type, type, id); 
         }
 
         public static Lite<T> RetrieveLite<T>(Type runtimeType, int id) where T : class, IIdentifiable
         {
+            if (runtimeType == null)
+                throw new ArgumentNullException("runtimeType");
+
             return (Lite<T>)RetrieveLite(typeof(T), runtimeType, id);
         }
 
@@ -167,6 +200,9 @@ namespace Signum.Engine
         static readonly MethodInfo miRetrieveAll = ReflectionTools.GetMethodInfo(()=>RetrieveAll<TypeDN>()).GetGenericMethodDefinition();
         public static List<IdentifiableEntity> RetrieveAll(Type type)
         {
+            if (type == null)
+                throw new ArgumentNullException("type");
+
             IList list = (IList)miRetrieveAll.GenericInvoke(new[] { type }, null, null);
             return list.Cast<IdentifiableEntity>().ToList();
         }
@@ -180,6 +216,9 @@ namespace Signum.Engine
         static readonly MethodInfo miRetrieveAllLite = ReflectionTools.GetMethodInfo(() => Database.RetrieveAllLite<TypeDN>()).GetGenericMethodDefinition();
         public static List<Lite> RetrieveAllLite(Type type)
         {
+            if (type == null)
+                throw new ArgumentNullException("type");
+
             IList list = (IList)miRetrieveAllLite.GenericInvoke(new[] { type }, null, null);
             return list.Cast<Lite>().ToList();
         }
@@ -187,11 +226,20 @@ namespace Signum.Engine
         public static List<T> RetrieveList<T>(List<int> ids)
             where T : class, IIdentifiable
         {
+            if (ids == null)
+                throw new ArgumentNullException("ids");
+
             return RetrieveList(typeof(T), ids).Cast<T>().ToList();
         }
 
         public static List<IdentifiableEntity> RetrieveList(Type type, List<int> ids)
         {
+            if (type == null)
+                throw new ArgumentNullException("type");
+
+            if (ids == null)
+                throw new ArgumentNullException("ids");
+
             using (new EntityCache())
             using (Transaction tr = new Transaction())
             {
@@ -209,11 +257,20 @@ namespace Signum.Engine
         public static List<Lite<T>> RetrieveListLite<T>(List<int> ids)
             where T : class, IIdentifiable
         {
+            if (ids == null)
+                throw new ArgumentNullException("ids");
+
             return RetrieveListLite(typeof(T), ids).Cast<Lite<T>>().ToList();
         }
 
         public static List<Lite> RetrieveListLite(Type type, List<int> ids)
         {
+            if (type == null)
+                throw new ArgumentNullException("type");
+
+            if (ids == null)
+                throw new ArgumentNullException("ids");
+
             using (new EntityCache())
             using (Transaction tr = new Transaction())
             {
@@ -231,6 +288,9 @@ namespace Signum.Engine
         public static List<T> RetrieveFromListOfLite<T>(this IEnumerable<Lite<T>> lites)
          where T : class, IIdentifiable
         {
+            if (lites == null)
+                throw new ArgumentNullException("lites");
+
             using (new EntityCache())
             using (Transaction tr = new Transaction())
             {
@@ -246,6 +306,9 @@ namespace Signum.Engine
 
         public static List<IdentifiableEntity> RetrieveFromListOfLite(IEnumerable<Lite> lites)
         {
+            if (lites == null)
+                throw new ArgumentNullException("lites");
+
             using (new EntityCache())
             using (Transaction tr = new Transaction())
             {
@@ -264,6 +327,9 @@ namespace Signum.Engine
         #region Delete
         public static void Delete(Type type, int id)
         {
+            if (type == null)
+                throw new ArgumentNullException("type");
+
             using (Transaction tr = new Transaction())
             {
                 Deleter.Delete(type, id);
@@ -274,6 +340,12 @@ namespace Signum.Engine
 
         public static void Delete(Type type, IEnumerable<int> ids)
         {
+            if (type == null)
+                throw new ArgumentNullException("type");
+
+            if (ids == null)
+                throw new ArgumentNullException("ids");
+
             using (Transaction tr = new Transaction())
             {
                 Deleter.Delete(type, ids.ToList());
@@ -293,18 +365,27 @@ namespace Signum.Engine
         public static void Delete<T>(Lite<T> lite)
             where T : class, IIdentifiable
         {
+            if (lite == null)
+                throw new ArgumentNullException("lite");
+
             Delete(lite.RuntimeType, lite.Id);
         }
 
         public static void Delete<T>(this T ident)
             where T : IdentifiableEntity
         {
+            if (ident == null)
+                throw new ArgumentNullException("ident");
+
             Delete(ident.GetType(), ident.Id);
         }
 
         public static void DeleteList<T>(IEnumerable<T> collection)
             where T : IdentifiableEntity
         {
+            if (collection == null)
+                throw new ArgumentNullException("collection");
+
             if (collection.Empty()) return;
 
             Delete(
@@ -315,6 +396,9 @@ namespace Signum.Engine
         public static void DeleteList<T>(IEnumerable<Lite<T>> collection)
             where T : class, IIdentifiable
         {
+            if (collection == null)
+                throw new ArgumentNullException("collection");
+
             if (collection.Empty()) return;
 
             Delete(
@@ -333,6 +417,9 @@ namespace Signum.Engine
         public static IQueryable<S> InDB<S>(this S entity)
             where S: IIdentifiable
         {
+            if (entity == null)
+                throw new ArgumentNullException("entity");
+
             return (IQueryable<S>)miInDB.GenericInvoke(new[] { typeof(S), entity.GetType()}, null, new object[] { entity});
         }
 
@@ -342,12 +429,18 @@ namespace Signum.Engine
             where S : class, IIdentifiable
             where RT : IdentifiableEntity, S
         {
+            if (entity == null)
+                throw new ArgumentNullException("entity");
+
             return Database.Query<RT>().Where(rt => rt == entity).Select(rt => (S)rt);
         }
 
         public static IQueryable<S> InDB<S>(this Lite<S> lite)
            where S : class, IIdentifiable
         {
+            if (lite == null)
+                throw new ArgumentNullException("lite");
+
             return (IQueryable<S>)miInDBLite.GenericInvoke(new[] { typeof(S), lite.RuntimeType }, null, new object[] { lite });
         }
 
@@ -357,6 +450,9 @@ namespace Signum.Engine
             where S : class, IIdentifiable
             where RT : IdentifiableEntity, S
         {
+            if (lite == null)
+                throw new ArgumentNullException("lite");
+
             return Database.Query<RT>().Where(rt => rt.ToLite() == lite.ToLite<RT>()).Select(rt => (S)rt);
         }
 

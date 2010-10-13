@@ -96,7 +96,7 @@ namespace Signum.Web
             if (filterOptions.Token == null)
             {
                 QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-                filterOptions.Token = QueryUtils.ParseFilter(filterOptions.ColumnName, qd);
+                filterOptions.Token = QueryUtils.Parse(filterOptions.ColumnName, qd);
             }
 
             FilterType filterType = QueryUtils.GetFilterType(filterOptions.Token.Type);
@@ -184,10 +184,13 @@ namespace Signum.Web
 
             StringBuilder sb = new StringBuilder();
 
-            var items = qd.StaticColumns
-                    .Where(a => a.Filterable)
-                    .Select(c => new SelectListItem { Text = c.DisplayName, Value = c.Name, Selected = queryToken != null && c.Name == queryToken.Key })
-                    .ToList();
+            var items = qd.Columns.Select(c => new SelectListItem
+            {
+                Text = c.DisplayName,
+                Value = c.Name,
+                Selected = queryToken != null && c.Name == queryToken.Key
+            }).ToList();
+
             items.Insert(0, new SelectListItem { Text = "-", Selected = true, Value = "" });
             sb.AppendLine(SearchControlHelper.TokensCombo(helper, queryUrlName, items, context, 0, false));
             

@@ -6,62 +6,112 @@ using System.Linq.Expressions;
 using System.Data.SqlClient;
 using System.Data;
 using Signum.Utilities;
+using System.Collections;
+using Signum.Engine.DynamicQuery;
 
 namespace Signum.Engine.Linq
 {
     interface ITranslateResult
     {
-        Type ElementType { get; }
         string CommandText { get; }
         UniqueFunction? Unique { get; }
 
         string CleanCommandText();
 
-        object Execute(IProjectionRow pr); 
+        object Execute();
     }
+
+    interface IChildProjection
+    {
+        ProjectionToken Name { get; }
+
+        void Fill(Dictionary<ProjectionToken, IEnumerable> lookups, Retriever retriever);
+
+        SqlPreCommandSimple PreCommand();
+    }
+
+
+
+    class ChildProjection<K, V> : IChildProjection
+    {
+        public ProjectionToken Name { get; set; }
+
+        public string CommandText { get; set; }
+        internal Expression<Func<SqlParameter[]>> GetParametersExpression;
+        internal Func<SqlParameter[]> GetParameters;
+        internal Expression<Func<IProjectionRow, KeyValuePair<K, V>>> ProjectorExpression;
+
+        public void Fill(Dictionary<ProjectionToken, IEnumerable> lookups, Retriever retriever)
+        {
+            SqlPreCommandSimple command = new SqlPreCommandSimple(CommandText, GetParameters().ToList());
+            using (SqlDataReader reader = Executor.UnsafeExecuteDataReader(command))
+            {
+                ProjectionRowEnumerator<KeyValuePair<K, V>> enumerator = new ProjectionRowEnumerator<KeyValuePair<K, V>>(reader, ProjectorExpression, retriever, lookups);
+
+                IEnumerable<KeyValuePair<K, V>> enumerabe = new ProjectionRowEnumerable<KeyValuePair<K, V>>(enumerator);
+
+                lookups.Add(Name, enumerabe.ToLookup(a => a.Key, a => a.Value));
+            }
+        }
+
+
+        public SqlPreCommandSimple PreCommand()
+        {
+            return new SqlPreCommandSimple(CommandText, GetParameters().ToList());
+        }
+    };
 
     class TranslateResult<T> : ITranslateResult
     {
-        public string CommandText { get; set; }
         public UniqueFunction? Unique { get; set; }
-        public Type ElementType { get { return typeof(T); } }
 
-        internal Expression<Func<IProjectionRow, SqlParameter[]>> GetParametersExpression;
-        internal Func<IProjectionRow, SqlParameter[]> GetParameters;
+        internal List<IChildProjection> ChildProjections { get; set; }
+
+        Dictionary<ProjectionToken, IEnumerable> lookups;
+
+        public string CommandText { get; set; }
+        internal Expression<Func<SqlParameter[]>> GetParametersExpression;
+        internal Func<SqlParameter[]> GetParameters;
         internal Expression<Func<IProjectionRow, T>> ProjectorExpression;
 
-        public object Execute(IProjectionRow pr)
+        public object Execute()
         {
+            using (new EntityCache())
             using (Transaction tr = new Transaction())
-            using (EntityCache cache = new EntityCache())
             {
-                SqlPreCommandSimple command = new SqlPreCommandSimple(CommandText, GetParameters(pr).ToList());
+                Retriever retriever = new Retriever();
 
-                object result; 
+                if (ChildProjections != null)
+                {
+                    lookups = new Dictionary<ProjectionToken, IEnumerable>();
+                    foreach (var chils in ChildProjections)
+                        chils.Fill(lookups, retriever);
+                }
+
+                SqlPreCommandSimple command = new SqlPreCommandSimple(CommandText, GetParameters().ToList());
+
+                object result;
                 using (SqlDataReader reader = Executor.UnsafeExecuteDataReader(command))
                 {
-                    Retriever retriever = pr != null ? pr.Retriever : new Retriever();
-
-                    ProjectionRowEnumerator<T> enumerator = new ProjectionRowEnumerator<T>(reader, ProjectorExpression, pr, retriever);
+                    ProjectionRowEnumerator<T> enumerator = new ProjectionRowEnumerator<T>(reader, ProjectorExpression, retriever, lookups);
 
                     IEnumerable<T> enumerable = new ProjectionRowEnumerable<T>(enumerator);
 
-                    result = Result(enumerable);
-
-                    if (pr == null)
-                        retriever.ProcessAll();
+                    if (Unique == null)
+                        result = enumerable.ToList();
+                    else
+                        result = UniqueMethod(enumerable, Unique.Value);
                 }
+
+                retriever.ProcessAll();
 
                 return tr.Commit(result);
             }
         }
 
-        private object Result(IEnumerable<T> enumerable)
+        internal T UniqueMethod(IEnumerable<T> enumerable, UniqueFunction uniqueFunction)
         {
-            if (Unique == null)
-                return enumerable.ToList();
-
-            switch (Unique.Value)
+            switch (uniqueFunction)
             {
                 case UniqueFunction.First: return enumerable.First();
                 case UniqueFunction.FirstOrDefault: return enumerable.FirstOrDefault();
@@ -71,7 +121,6 @@ namespace Signum.Engine.Linq
                     throw new InvalidOperationException();
             }
         } 
-        
 
         #region ITranslateResult Members
 
@@ -80,7 +129,12 @@ namespace Signum.Engine.Linq
         {
             try
             {
-                return new SqlPreCommandSimple(CommandText, GetParameters(null).ToList()).PlainSql();
+                SqlPreCommand main = new SqlPreCommandSimple(CommandText, GetParameters().ToList());
+
+                if (ChildProjections != null)
+                    return ChildProjections.Select(c => c.PreCommand()).And(main).Combine(Spacing.Double).PlainSql();
+
+                return main.PlainSql();
             }
             catch
             {
@@ -89,6 +143,8 @@ namespace Signum.Engine.Linq
         }
 
         #endregion
+
+        public object DynamiQuery { get; set; }
     }
 
     class CommandResult

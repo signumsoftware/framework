@@ -66,6 +66,11 @@ namespace Signum.Entities.DynamicQuery
                     throw new NotSupportedException();
             }
         }
+
+        public override string ToString()
+        {
+            return "{0} {1} {2}".Formato(Token.FullKey(), Operation, Value);
+        }
     }
     
     public enum FilterOperation

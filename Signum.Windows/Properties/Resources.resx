@@ -365,4 +365,7 @@ Lose changes?</value>
   <data name="SessionExpired" xml:space="preserve">
     <value>Sesion Expired</value>
   </data>
+  <data name="RestoreAll" xml:space="preserve">
+    <value>Restore all</value>
+  </data>
 </root>

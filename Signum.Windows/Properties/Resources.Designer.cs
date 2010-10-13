@@ -631,6 +631,15 @@ namespace Signum.Windows.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Restore all.
+        /// </summary>
+        internal static string RestoreAll {
+            get {
+                return ResourceManager.GetString("RestoreAll", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Results..
         /// </summary>
         internal static string Results {

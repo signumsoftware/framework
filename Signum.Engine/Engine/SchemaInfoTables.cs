@@ -39,12 +39,20 @@ namespace Signum.Engine.SchemaInfoTables
         public int column_id;
     }
 
+    [SqlViewName("sys.sysobjects")]
+    public class SysObjects : IView
+    {
+        public int id;
+        public string name;
+    }
+
     [SqlViewName("sys.columns")]
     public class SysColumns : IView
     {
         public string name;
         public int object_id;
         public int column_id;
+        public int default_object_id; 
     }
 
     [SqlViewName("sys.tables")]

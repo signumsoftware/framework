@@ -26,8 +26,6 @@ namespace Signum.Engine.Linq
         int indent = 2;
         int depth;
 
-        Scope parentScope; 
-
         ParameterExpression row = Expression.Parameter(typeof(IProjectionRow), "row");
         static PropertyInfo miReader = ReflectionTools.GetPropertyInfo((IProjectionRow row) => row.Reader);
 
@@ -82,22 +80,11 @@ namespace Signum.Engine.Linq
 
         static internal string Format(Expression expression, out Expression<Func<SqlParameter[]>> getParameters)
         {
-            QueryFormatter qf = new QueryFormatter() { parentScope = null };
+            QueryFormatter qf = new QueryFormatter();
             qf.Visit(expression);
 
             getParameters = Expression.Lambda<Func<SqlParameter[]>>(
                 Expression.NewArrayInit(typeof(SqlParameter), qf.parameterExpressions.Values.Select(pi=>pi.Expression).ToArray()));
-
-            return qf.sb.ToString();
-        }
-
-        static internal string Format(Expression expression, Scope parentScope, out Expression<Func<IProjectionRow, SqlParameter[]>> getParameters)
-        {
-            QueryFormatter qf = new QueryFormatter() { parentScope = parentScope };
-            qf.Visit(expression);
-
-            getParameters = Expression.Lambda<Func<IProjectionRow, SqlParameter[]>>(
-                Expression.NewArrayInit(typeof(SqlParameter), qf.parameterExpressions.Values.Select(pi => pi.Expression).ToArray()), qf.row);
 
             return qf.sb.ToString();
         }
@@ -407,24 +394,16 @@ namespace Signum.Engine.Linq
             return c;
         }
 
-    
+
         protected override Expression VisitColumn(ColumnExpression column)
         {
-            if (parentScope != null && parentScope.ContainAlias(column.Alias))
+            if (column.Alias.HasText())
             {
-                var pi = parameterExpressions.GetOrCreate(column, ()=> CreateParameter(parentScope.GetColumnExpression(row, column.Alias, column.Name, column.Type))); 
+                sb.Append(column.Alias.SqlScape());
+                sb.Append(".");
+            }
+            sb.Append(column.Name.SqlScape());
 
-                sb.Append(pi.Name);
-            }
-            else
-            {
-                if (column.Alias.HasText())
-                {
-                    sb.Append(column.Alias.SqlScape());
-                    sb.Append(".");
-                }
-                sb.Append(column.Name.SqlScape());
-            }
             return column;
         }
 

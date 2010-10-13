@@ -46,13 +46,20 @@ namespace Signum.Windows
             set { SetValue(OrderOptionsProperty, value); }
         }
 
-
-        public static readonly DependencyProperty UserColumnsProperty =
-            DependencyProperty.Register("UserColumns", typeof(ObservableCollection<UserColumnOption>), typeof(SearchWindow), new UIPropertyMetadata(null));
-        public ObservableCollection<UserColumnOption> UserColumns
+        public static readonly DependencyProperty ColumnOptionsModeProperty =
+          DependencyProperty.Register("ColumnOptionsMode", typeof(ColumnOptionsMode), typeof(SearchWindow), new UIPropertyMetadata(ColumnOptionsMode.Add));
+        public ColumnOptionsMode ColumnOptionsMode
         {
-            get { return (ObservableCollection<UserColumnOption>)GetValue(UserColumnsProperty); }
-            set { SetValue(UserColumnsProperty, value); }
+            get { return (ColumnOptionsMode)GetValue(ColumnOptionsModeProperty); }
+            set { SetValue(ColumnOptionsModeProperty, value); }
+        }
+
+        public static readonly DependencyProperty ColumnOptionsProperty =
+            DependencyProperty.Register("ColumnOptions", typeof(ObservableCollection<ColumnOption>), typeof(SearchWindow), new UIPropertyMetadata(null));
+        public ObservableCollection<ColumnOption> ColumnOptions
+        {
+            get { return (ObservableCollection<ColumnOption>)GetValue(ColumnOptionsProperty); }
+            set { SetValue(ColumnOptionsProperty, value); }
         }
 
         public static readonly DependencyProperty AllowUserColumnsProperty =

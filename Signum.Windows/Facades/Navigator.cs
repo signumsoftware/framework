@@ -26,39 +26,15 @@ namespace Signum.Windows
     {
         public static NavigationManager Manager { get; private set; }
 
-        public static void Start(NavigationManager navigator)
+        public static void Start(NavigationManager manager)
         {
-            navigator.Start();
-
-            Manager = navigator;
-
-            //Looking for a better place to do this
-            PropertyRoute.SetFindImplementationsCallback(Server.FindImplementations);
-            EventManager.RegisterClassHandler(typeof(TextBox), TextBox.GotFocusEvent, new RoutedEventHandler(TextBox_GotFocus));
+            Manager = manager;
         }
-
-        static void TextBox_GotFocus(object sender, RoutedEventArgs e)
-        {
-            Dispatcher.CurrentDispatcher.BeginInvoke
-            (
-                DispatcherPriority.ContextIdle,
-                new Action
-                (
-                    () =>
-                    {
-                        (sender as TextBox).SelectAll();
-                        (sender as TextBox).ReleaseMouseCapture();
-                    }
-                )
-            );
-        }
-
 
         public static void Explore(ExploreOptions options)
         {
             Manager.Explore(options);
         }
-
 
         public static Lite<T> FindUnique<T>(string columnName, object value, UniqueType uniqueType)
             where T:class, IIdentifiable
@@ -332,32 +308,67 @@ namespace Signum.Windows
         public event Action<NormalWindow, ModifiableEntity> TaskNormalWindow;
         public event Action<SearchWindow, object> TaskSearchWindow;
 
+        public NavigationManager()
+        {
+            EntitySettings = new Dictionary<Type, EntitySettings>();
+            QuerySetting = new Dictionary<object, QuerySettings>();
+        }
+
         public event Action Initializing;
         bool initialized;
         internal void Initialize()
         {
             if (!initialized)
             {
+                //Looking for a better place to do this
+                PropertyRoute.SetFindImplementationsCallback(Server.FindImplementations);
+                EventManager.RegisterClassHandler(typeof(TextBox), TextBox.GotFocusEvent, new RoutedEventHandler(TextBox_GotFocus));
+
+                CompleteQuerySettings();
+
+                TaskAdminWindow += TaskSetIconAdminWindow;
+                TaskNormalWindow += TaskSetIconNormalWindow;
+                TaskSearchWindow += TaskSetIconSearchWindow;
+
+                TaskAdminWindow += TaskSetLabelAdminWindow;
+                TaskNormalWindow += TaskSetLabelNormalWindow;    
+
                 if (Initializing != null)
-                    Initializing(); 
+                    Initializing();
 
                 initialized = true;
             }
         }
 
+        void CompleteQuerySettings()
+        {
+            var dic = Server.Return((IDynamicQueryServer s) => s.GetQueryNames()).ToDictionary(a => a, a => new QuerySettings(a));
+            foreach (var kvp in dic)
+            {
+                if (!QuerySetting.ContainsKey(kvp.Key))
+                    QuerySetting.Add(kvp.Key, kvp.Value);
+            }
+        }
+
+        static void TextBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            Dispatcher.CurrentDispatcher.BeginInvoke
+            (
+                DispatcherPriority.ContextIdle,
+                new Action
+                (
+                    () =>
+                    {
+                        (sender as TextBox).SelectAll();
+                        (sender as TextBox).ReleaseMouseCapture();
+                    }
+                )
+            );
+        }
+
         public ImageSource DefaultFindIcon = ImageLoader.GetImageSortName("find.png");
         public ImageSource DefaultAdminIcon = ImageLoader.GetImageSortName("admin.png");
         public ImageSource DefaultEntityIcon = ImageLoader.GetImageSortName("entity.png");
-
-        public NavigationManager()
-        {
-            TaskAdminWindow += TaskSetIconAdminWindow;
-            TaskNormalWindow += TaskSetIconNormalWindow;
-            TaskSearchWindow += TaskSetIconSearchWindow;
-
-            TaskAdminWindow += TaskSetLabelAdminWindow;
-            TaskNormalWindow += TaskSetLabelNormalWindow;    
-        }
 
         void TaskSetIconSearchWindow(SearchWindow sw, object qn)
         {
@@ -417,17 +428,6 @@ namespace Signum.Windows
                 return es.Icon;
 
             return useDefault ? DefaultAdminIcon : null;
-        }
-
-        internal void Start()
-        {
-            if (EntitySettings == null)
-                EntitySettings = new Dictionary<Type, EntitySettings>();
-
-            var dic = Server.Return((IDynamicQueryServer s) => s.GetQueryNames()).ToDictionary(a => a, a => new QuerySettings(a)); 
-            if (QuerySetting != null)
-                dic.SetRange(QuerySetting);
-            QuerySetting = dic;
         }
 
         public virtual string SearchTitle(object queryName)
@@ -542,7 +542,7 @@ namespace Signum.Windows
 
             foreach (var f in filters)
             {
-                f.Token = QueryUtils.ParseFilter(f.Path, description); 
+                f.Token = QueryUtils.Parse(f.Path, description); 
                 f.RefreshRealValue();
             }
         }
@@ -553,23 +553,7 @@ namespace Signum.Windows
 
             foreach (var o in orders)
             {
-                o.Token = QueryUtils.ParseOrder(o.Path, description); 
-            }
-        }
-
-        public void SetUserColumns(object queryName, IList<UserColumnOption> userColumns)
-        {
-            QueryDescription description = GetQueryDescription(queryName);
-
-            for (int i = 0; i < userColumns.Count; i++)
-            {
-                UserColumnOption uco = userColumns[i];
-                QueryToken token = QueryUtils.ParseColumn(uco.Path, description);
-                uco.UserColumn = new UserColumn(description.StaticColumns.Count, token)
-                {
-                    UserColumnIndex = i,
-                    DisplayName = uco.DisplayName.DefaultText(token.FullKey())
-                };
+                o.Token = QueryUtils.Parse(o.Path, description); 
             }
         }
 
@@ -587,7 +571,8 @@ namespace Signum.Windows
                 QueryName = options.QueryName,
                 FilterOptions = new FreezableCollection<FilterOption>(options.FilterOptions),
                 OrderOptions = new ObservableCollection<OrderOption>(options.OrderOptions),
-                UserColumns = new ObservableCollection<UserColumnOption>(options.UserColumnOptions),
+                ColumnOptions = new ObservableCollection<ColumnOption>(options.ColumnOptions),
+                ColumnOptionsMode = options.ColumnOptionsMode,
                 ShowFilters = options.ShowFilters,
                 ShowFilterButton = options.ShowFilterButton,
                 ShowFooter = options.ShowFooter,

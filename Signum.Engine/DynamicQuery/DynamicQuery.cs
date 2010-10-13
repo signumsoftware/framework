@@ -21,18 +21,18 @@ namespace Signum.Engine.DynamicQuery
 {
     public interface IDynamicQuery
     {
-        StaticColumnFactory EntityColumn();
+        ColumnDescriptionFactory EntityColumn();
         QueryDescription GetDescription(object queryName);
         ResultTable ExecuteQuery(QueryRequest request);
         int ExecuteQueryCount(QueryCountRequest request);
         Lite ExecuteUniqueEntity(UniqueEntityRequest request);
         Expression Expression { get; } //Optional
-        StaticColumnFactory[] StaticColumns { get; } 
+        ColumnDescriptionFactory[] StaticColumns { get; } 
     }
 
     public abstract class DynamicQuery<T> : IDynamicQuery
     {
-        public StaticColumnFactory[] StaticColumns { get; private set; } 
+        public ColumnDescriptionFactory[] StaticColumns { get; private set; } 
 
         public abstract ResultTable ExecuteQuery(QueryRequest request);
         public abstract int ExecuteQueryCount(QueryCountRequest request);
@@ -41,7 +41,7 @@ namespace Signum.Engine.DynamicQuery
         protected void InitializeColumns(Func<MemberInfo, Meta> getMeta)
         {
             this.StaticColumns = MemberEntryFactory.GenerateList<T>(MemberOptions.Properties | MemberOptions.Fields)
-              .Select((e, i) => new StaticColumnFactory(i, e.MemberInfo, getMeta(e.MemberInfo), CreateGetter(e.MemberInfo))).ToArray();
+              .Select((e, i) => new ColumnDescriptionFactory(i, e.MemberInfo, getMeta(e.MemberInfo))).ToArray();
 
             StaticColumns.Where(a => a.IsEntity).Single("Entity column not found"); 
         }
@@ -51,22 +51,20 @@ namespace Signum.Engine.DynamicQuery
             return new QueryDescription
             {
                 QueryName = queryName,
-                StaticColumns = StaticColumns.Where(a => a.IsAllowed()).Select(a => a.BuildStaticColumn()).ToList()
+                Columns = StaticColumns.Where(f => f.IsAllowed()).Select(f => f.BuildColumnDescription()).ToList()
             };
         }
 
-      
-
-        public DynamicQuery<T> Column<S>(Expression<Func<T, S>> column, Action<StaticColumnFactory> change)
+        public DynamicQuery<T> Column<S>(Expression<Func<T, S>> column, Action<ColumnDescriptionFactory> change)
         {
             MemberInfo member = ReflectionTools.GetMemberInfo(column);
-            StaticColumnFactory col = StaticColumns.Single(a => a.Name == member.Name);
+            ColumnDescriptionFactory col = StaticColumns.Single(a => a.Name == member.Name);
             change(col);
 
             return this;
         }
 
-        public StaticColumnFactory EntityColumn()
+        public ColumnDescriptionFactory EntityColumn()
         {
             return StaticColumns.Where(c => c.IsEntity).Single("There's no Entity column");
         }
@@ -75,48 +73,41 @@ namespace Signum.Engine.DynamicQuery
         {
             get { return null; }
         }
-
-        protected static Delegate CreateGetter(MemberInfo memberInfo)
-        {
-            ParameterExpression pe = Expression.Parameter(typeof(Expandable<T>), "e");
-            return Expression.Lambda(
-                      Expression.PropertyOrField(
-                         Expression.PropertyOrField(pe, "Value"),
-                       memberInfo.Name), pe).Compile();
-        }
-
-        protected ResultTable ToQueryResult(Expandable<T>[] result, List<UserColumn> userColumns)
-        {
-            var columns = StaticColumns.Select(c => new ColumnValues(c.BuildStaticColumn(), CreateValuesStaticColumn(c, result)));
-
-            if (userColumns != null)
-                columns = columns.Concat(userColumns.Select(c => new ColumnValues(c, CreateValuesUserColumn((UserColumn)c, result))));
-
-            return new ResultTable(columns.ToArray());
-        }
-
-        static Array CreateValuesUserColumn(UserColumn column, Expandable<T>[] collection)
-        {
-            ParameterExpression pe = Expression.Parameter(typeof(Expandable<T>), "e");
-
-            Delegate getter = Expression.Lambda(Expression.Convert(
-                 Expression.ArrayIndex(Expression.Property(pe, "Expansions"), Expression.Constant(column.UserColumnIndex)), column.Type), pe).Compile();
-
-            return (Array)miCreateValues.GenericInvoke(new[] { column.Type }, null, new object[] { getter, collection });
-        }
-       
-        static Array CreateValuesStaticColumn(StaticColumnFactory column, Expandable<T>[] collection)
-        {
-            return (Array)miCreateValues.GenericInvoke(new[] { column.Type }, null, new object[] { column.Getter, collection });
-        }
-
-        static MethodInfo miCreateValues = ReflectionTools.GetMethodInfo(() => CreateValues<int>(null, null)).GetGenericMethodDefinition();
-        static Array CreateValues<S>(Func<Expandable<T>, S> getter, Expandable<T>[] collection)
-        {
-            return collection.Select(getter).ToArray();
-        }
     }
 
+    public interface IDynamicInfo
+    {
+        Type TupleType { get;  }
+        Dictionary<QueryToken, int> TokenIndices { get; }
+    }
+
+    public class DQueryable<T> : IDynamicInfo
+    {
+        public DQueryable(IQueryable<object> query, Type tupletype, Dictionary<QueryToken, int> tokenIndices)
+        {
+            this.Query= query;
+            this.TupleType = tupletype;
+            this.TokenIndices = tokenIndices; 
+        }
+
+        public IQueryable<object> Query{ get; private set; }
+        public Type TupleType { get; private set; }
+        public Dictionary<QueryToken, int> TokenIndices { get; private set; }
+    }
+
+    public class DEnumerable<T> : IDynamicInfo
+    {
+        public DEnumerable(IEnumerable<object> collection, Type tupletype, Dictionary<QueryToken, int> tokenIndices)
+        {
+            this.Collection = collection;
+            this.TupleType = tupletype;
+            this.TokenIndices = tokenIndices; 
+        }
+
+        public IEnumerable<object> Collection{ get; private set; }
+        public Type TupleType { get; private set; }
+        public Dictionary<QueryToken, int> TokenIndices { get; private set; }
+    }
 
     public static class DynamicQuery
     {
@@ -125,57 +116,76 @@ namespace Signum.Engine.DynamicQuery
             return new AutoDynamicQuery<T>(query); 
         }
 
-        public static DynamicQuery<T> Manual<T>(Func<QueryRequest, IEnumerable<Expandable<T>>> execute)
+        public static DynamicQuery<T> Manual<T>(Func<QueryRequest, DEnumerable<T>> execute)
         {
             return new ManualDynamicQuery<T>(execute); 
         }
 
         #region SelectExpandable
-        public static IQueryable<Expandable<T>> SelectExpandable<T>(this IQueryable<T> query, List<UserColumn> userColumns)
-        {
-            if (userColumns == null || userColumns.Count == 0)
-                return query.Select(a => new Expandable<T>(a));
 
-            return query.Select(GetExpansions<T>(userColumns));
+        public static DQueryable<T> SelectDynamic<T>(this IQueryable<T> query, List<Column> columns, List<Order> orders)
+        {
+            HashSet<QueryToken> tokens = new HashSet<QueryToken>(columns.Select(c => c.Token));
+            if (orders != null)
+                tokens.AddRange(orders.Select(o => o.Token));
+
+            TupleResult<T> result = TupleConstructor<T>(tokens);
+
+            return new DQueryable<T>(query.Select(result.TupleConstructor), result.TupleType, result.TokenIndices);
         }
 
-        public static IEnumerable<Expandable<T>> SelectExpandable<T>(this IEnumerable<T> query, List<UserColumn> userColumns)
+        public static DEnumerable<T> SelectExpandable<T>(this IEnumerable<T> query, List<Column> columns, List<Order> orders)
         {
-            if (userColumns == null || userColumns.Count == 0)
-                return query.Select(a => new Expandable<T>(a));
+            HashSet<QueryToken> tokens = new HashSet<QueryToken>(columns.Select(c => c.Token));
+              if (orders != null)
+                tokens.AddRange(orders.Select(o => o.Token));
 
-            return query.Select(GetExpansions<T>(userColumns).Compile());
+              TupleResult<T> result = TupleConstructor<T>(tokens);
+
+              return new DEnumerable<T>(query.Select(result.TupleConstructor.Compile()), result.TupleType, result.TokenIndices);
         }
 
-        static Expression<Func<T, Expandable<T>>> GetExpansions<T>(List<UserColumn> userColumns)
+        class TupleResult<T>
+        {
+            public Expression<Func<T, object>> TupleConstructor;
+            public Type TupleType;
+            public Dictionary<QueryToken, int> TokenIndices;
+        }
+
+        static TupleResult<T> TupleConstructor<T>(HashSet<QueryToken> tokens)
         {
             ParameterExpression param = Expression.Parameter(typeof(T), "p");
+            List<Expression> expressions = tokens.Select(c => c.BuildExpression(param)).ToList();
+            Expression ctor = TupleReflection.TupleChainConstructor(expressions);
 
-            NewArrayExpression newArray = Expression.NewArrayInit(typeof(object),
-                userColumns.Select(uc =>
-                {
-                    Expression build = uc.Token.BuildExpression(param).Nullify();
-
-                    return (Expression)Expression.Convert(build, typeof(object));
-                }));
-
-            var ctor = typeof(Expandable<T>).GetConstructor(new[] { typeof(T), typeof(object[]) });
-
-            return Expression.Lambda<Func<T, Expandable<T>>>(
-                Expression.New(ctor, param, newArray),
-                param);
+            return new TupleResult<T>
+            {
+                TupleType = ctor.Type,
+                TokenIndices = tokens.Select((t, i) => new { t, i }).ToDictionary(t => t.t, t => t.i),
+                TupleConstructor = Expression.Lambda<Func<T, object>>(
+                    (Expression)Expression.Convert(ctor, typeof(object)), param),
+            };
         }
 
+        public static DEnumerable<T> Concat<T>(this DEnumerable<T> enumerable, DEnumerable<T> other)
+        {
+            if (enumerable.TupleType != other.TupleType)
+                throw new InvalidOperationException("Enumerable's TupleType does not match Other's one.\r\n Enumerable: {0}: \r\n Other:  {1}".Formato(
+                    enumerable.TupleType.TypeName(),
+                    other.TupleType.TypeName()));
+
+            return new DEnumerable<T>(enumerable.Collection.Concat(other.Collection), enumerable.TupleType, other.TokenIndices); 
+        }
         
 	    #endregion
 
         #region Where
         static Expression<Func<T, bool>> GetWhereExpression<T>(List<Filter> filters)
         {
-            ParameterExpression pe = Expression.Parameter(typeof(T), "p");
-
             if (filters == null || filters.Count == 0)
                 return null;
+
+            ParameterExpression pe = Expression.Parameter(typeof(T), "p");
 
             Expression body = filters.Select(f => f.GetCondition(pe)).Aggregate((e1, e2) => Expression.And(e1, e2));
 
@@ -193,6 +203,7 @@ namespace Signum.Engine.DynamicQuery
 
             if (where != null)
                 return query.Where(where);
+
             return query; 
         }
 
@@ -214,133 +225,95 @@ namespace Signum.Engine.DynamicQuery
 
         #region OrederBy
 
-        static MethodInfo miOrderByQueryable = ReflectionTools.GetMethodInfo(() => Database.Query<TypeDN>().OrderBy(t => t.Id)).GetGenericMethodDefinition();
-        static MethodInfo miThenByQueryable = ReflectionTools.GetMethodInfo(() => Database.Query<TypeDN>().OrderBy(t => t.Id).ThenBy(t => t.Id)).GetGenericMethodDefinition();
-        static MethodInfo miOrderByQueryableDescending = ReflectionTools.GetMethodInfo(() => Database.Query<TypeDN>().OrderByDescending(t => t.Id)).GetGenericMethodDefinition();
-        static MethodInfo miThenByQueryableDescending = ReflectionTools.GetMethodInfo(() => Database.Query<TypeDN>().OrderBy(t => t.Id).ThenByDescending(t => t.Id)).GetGenericMethodDefinition();
+        static MethodInfo miOrderByQ = ReflectionTools.GetMethodInfo(() => Database.Query<TypeDN>().OrderBy(t => t.Id)).GetGenericMethodDefinition();
+        static MethodInfo miThenByQ = ReflectionTools.GetMethodInfo(() => Database.Query<TypeDN>().OrderBy(t => t.Id).ThenBy(t => t.Id)).GetGenericMethodDefinition();
+        static MethodInfo miOrderByDescendingQ = ReflectionTools.GetMethodInfo(() => Database.Query<TypeDN>().OrderByDescending(t => t.Id)).GetGenericMethodDefinition();
+        static MethodInfo miThenByDescendingQ = ReflectionTools.GetMethodInfo(() => Database.Query<TypeDN>().OrderBy(t => t.Id).ThenByDescending(t => t.Id)).GetGenericMethodDefinition();
 
-        public static IQueryable<Expandable<T>> OrderBy<T>(this IQueryable<Expandable<T>> query, List<Order> orders)
+        public static DQueryable<T> OrderBy<T>(this DQueryable<T> query, List<Order> orders)
+        {
+            var pairs = orders.Select(o => Tuple.Create(
+                    TupleReflection.TupleChainPropertyLambda(query.TupleType, query.TokenIndices[o.Token]),
+                    o.OrderType)).ToList();
+
+            return new DQueryable<T>(query.Query.OrderBy(pairs), query.TupleType, query.TokenIndices);
+        }
+
+        public static IQueryable<object> OrderBy(this IQueryable<object> query, List<Tuple<LambdaExpression, OrderType>> orders)
         {
             if (orders == null || orders.Count == 0)
                 return query;
 
-            IOrderedQueryable<Expandable<T>> result = query.OrderBy(orders.First());
+            IOrderedQueryable<object> result = query.OrderBy(orders[0].Item1, orders[0].Item2);
 
             foreach (var order in orders.Skip(1))
             {
-                result = result.ThenBy(order);
+                result = result.ThenBy(order.Item1, order.Item2);
             }
 
             return result;
         }
 
-        static IOrderedQueryable<Expandable<T>> OrderBy<T>(this IQueryable<Expandable<T>> query, Order order)
+        static IOrderedQueryable<object> OrderBy(this IQueryable<object> query, LambdaExpression lambda, OrderType orderType)
         {
-            LambdaExpression lambda = CreateLambda<T>(order);
+            MethodInfo mi = (orderType == OrderType.Ascending ? miOrderByQ : miOrderByDescendingQ).MakeGenericMethod(lambda.Type.GetGenericArguments());
 
-            MethodInfo mi = (order.OrderType == OrderType.Ascending? miOrderByQueryable: miOrderByQueryableDescending).MakeGenericMethod(lambda.Type.GetGenericArguments());
-
-            return (IOrderedQueryable<Expandable<T>>)query.Provider.CreateQuery<Expandable<T>>(Expression.Call(null, mi, new Expression[] { query.Expression, Expression.Quote(lambda) }));
+            return (IOrderedQueryable<object>)query.Provider.CreateQuery<object>(Expression.Call(null, mi, new Expression[] { query.Expression, Expression.Quote(lambda) }));
         }
 
-        static IOrderedQueryable<Expandable<T>> ThenBy<T>(this IOrderedQueryable<Expandable<T>> query, Order order)
+        static IOrderedQueryable<object> ThenBy(this IOrderedQueryable<object> query, LambdaExpression lambda, OrderType orderType)
         {
-            LambdaExpression lambda = CreateLambda<T>(order);
+            MethodInfo mi = (orderType == OrderType.Ascending ? miThenByQ : miThenByDescendingQ).MakeGenericMethod(lambda.Type.GetGenericArguments());
 
-            MethodInfo mi = (order.OrderType == OrderType.Ascending ? miThenByQueryable : miThenByQueryableDescending).MakeGenericMethod(lambda.Type.GetGenericArguments());
-
-            return (IOrderedQueryable<Expandable<T>>)query.Provider.CreateQuery<Expandable<T>>(Expression.Call(null, mi, new Expression[] { query.Expression, Expression.Quote(lambda) }));
+            return (IOrderedQueryable<object>)query.Provider.CreateQuery<object>(Expression.Call(null, mi, new Expression[] { query.Expression, Expression.Quote(lambda) }));
         }
 
-        static MethodInfo miOrderByEnumerable = ReflectionTools.GetMethodInfo(() => Database.Query<TypeDN>().ToList().OrderBy(t => t.Id)).GetGenericMethodDefinition();
-        static MethodInfo miThenByEnumerable = ReflectionTools.GetMethodInfo(() => Database.Query<TypeDN>().ToList().OrderBy(t => t.Id).ThenBy(t => t.Id)).GetGenericMethodDefinition();
-        static MethodInfo miOrderByEnumerableDescending = ReflectionTools.GetMethodInfo(() => Database.Query<TypeDN>().ToList().OrderByDescending(t => t.Id)).GetGenericMethodDefinition();
-        static MethodInfo miThenByEnumerableDescending = ReflectionTools.GetMethodInfo(() => Database.Query<TypeDN>().ToList().OrderBy(t => t.Id).ThenByDescending(t => t.Id)).GetGenericMethodDefinition();
+        static MethodInfo miOrderByE = ReflectionTools.GetMethodInfo(() => Database.Query<TypeDN>().ToList().OrderBy(t => t.Id)).GetGenericMethodDefinition();
+        static MethodInfo miThenByE = ReflectionTools.GetMethodInfo(() => Database.Query<TypeDN>().ToList().OrderBy(t => t.Id).ThenBy(t => t.Id)).GetGenericMethodDefinition();
+        static MethodInfo miOrderByDescendingE = ReflectionTools.GetMethodInfo(() => Database.Query<TypeDN>().ToList().OrderByDescending(t => t.Id)).GetGenericMethodDefinition();
+        static MethodInfo miThenByDescendingE = ReflectionTools.GetMethodInfo(() => Database.Query<TypeDN>().ToList().OrderBy(t => t.Id).ThenByDescending(t => t.Id)).GetGenericMethodDefinition();
 
-        public static IEnumerable<Expandable<T>> OrderBy<T>(this IEnumerable<Expandable<T>> collection, List<Order> orders)
+        public static DEnumerable<T> OrderBy<T>(this DEnumerable<T> collection, List<Order> orders)
+        {
+            var pairs = orders.Select(o => Tuple.Create(
+                 TupleReflection.TupleChainPropertyLambda(collection.TupleType, collection.TokenIndices[o.Token]),
+                 o.OrderType)).ToList();
+
+            return new DEnumerable<T>(collection.Collection.OrderBy(pairs), collection.TupleType, collection.TokenIndices);
+        }
+
+        public static IEnumerable<object> OrderBy(this IEnumerable<object> collection, List<Tuple<LambdaExpression, OrderType>> orders)
         {
             if (orders == null || orders.Count == 0)
                 return collection;
 
-            IOrderedEnumerable<Expandable<T>> result = collection.OrderBy(orders.First());
+            IOrderedEnumerable<object> result = collection.OrderBy(orders[0].Item1, orders[0].Item2);
 
             foreach (var order in orders.Skip(1))
             {
-                result = result.ThenBy(order);
+                result = result.ThenBy(order.Item1, order.Item2);
             }
 
             return result;
         }
 
-        static IOrderedEnumerable<Expandable<T>> OrderBy<T>(this IEnumerable<Expandable<T>> collection, Order order)
+        static IOrderedEnumerable<object> OrderBy(this IEnumerable<object> collection, LambdaExpression lambda, OrderType orderType)
         {
-            LambdaExpression lambda = CreateLambda<T>(order);
+            MethodInfo mi = orderType == OrderType.Ascending ? miOrderByE : miOrderByDescendingE;
 
-            MethodInfo mi = order.OrderType == OrderType.Ascending ? miOrderByEnumerable : miOrderByEnumerableDescending;
-
-            return (IOrderedEnumerable<Expandable<T>>)mi.GenericInvoke(lambda.Type.GetGenericArguments(), null, new object[] { collection, lambda.Compile() });
+            return (IOrderedEnumerable<object>)mi.GenericInvoke(lambda.Type.GetGenericArguments(), null, new object[] { collection, lambda.Compile() });
         }
 
-        static IOrderedEnumerable<Expandable<T>> ThenBy<T>(this IOrderedEnumerable<Expandable<T>> collection, Order order)
+        static IOrderedEnumerable<object> ThenBy(this IOrderedEnumerable<object> collection, LambdaExpression lambda, OrderType orderType)
         {
-            LambdaExpression lambda = CreateLambda<T>(order);
+            MethodInfo mi = orderType == OrderType.Ascending ? miThenByE : miThenByDescendingE;
 
-            MethodInfo mi = order.OrderType == OrderType.Ascending ? miThenByEnumerable : miThenByEnumerableDescending;
-
-            return (IOrderedEnumerable<Expandable<T>>)mi.GenericInvoke(lambda.Type.GetGenericArguments(), null, new object[] { collection, lambda.Compile() });
+            return (IOrderedEnumerable<object>)mi.GenericInvoke(lambda.Type.GetGenericArguments(), null, new object[] { collection, lambda.Compile() });
         }
 
-        static LambdaExpression CreateLambda<T>(Order order)
-        {
-            ParameterExpression a = Expression.Parameter(typeof(Expandable<T>), "a");
-
-            return Expression.Lambda(order.Token.BuildExpression(Expression.Property(a, "Value")), a);
-        }
-
-        #endregion
-
-        #region SelectEntity
-        static Expression<Func<Expandable<T>, Lite>> GetSelectEntityExpression<T>()
-        {
-            ParameterExpression e = Expression.Parameter(typeof(Expandable<T>), "e");
-
-            return Expression.Lambda<Func<Expandable<T>, Lite>>(
-                Expression.Convert(
-                    Expression.Property(
-                        Expression.Property(e, "Value"),
-                     StaticColumn.Entity),
-                 typeof(Lite)), e);
-        }
-
-        public static IQueryable<Lite> SelectEntity<T>(this IQueryable<Expandable<T>> query)
-        {
-            Expression<Func<Expandable<T>, Lite>> select = GetSelectEntityExpression<T>();
-
-            return query.Select(select);
-        }
-
-        public static IEnumerable<Lite> SelectEntity<T>(this IEnumerable<Expandable<T>> query)
-        {
-            Func<Expandable<T>, Lite> select = GetSelectEntityExpression<T>().Compile();
-
-            return query.Select(select);
-        }
         #endregion
 
         #region Unique
-        public static T Unique<T>(this IQueryable<T> query, UniqueType uniqueType)
-        {
-            switch (uniqueType)
-            {
-                case UniqueType.First: return query.First();
-                case UniqueType.FirstOrDefault: return query.FirstOrDefault();
-                case UniqueType.Single: return query.Single();
-                case UniqueType.SingleOrDefault: return query.SingleOrDefault();
-                case UniqueType.SingleOrMany: return query.SingleOrMany();
-                case UniqueType.Only: return query.Only();
-                default: throw new InvalidOperationException();
-            }
-        }
 
         public static T Unique<T>(this IEnumerable<T> collection, UniqueType uniqueType)
         {
@@ -372,11 +345,69 @@ namespace Signum.Engine.DynamicQuery
                 return sequence.Take(num.Value);
             return sequence;
         }
+
+        public static DQueryable<T> TryTake<T>(this DQueryable<T> query, int? num)
+        {
+            if (num.HasValue)
+                return new DQueryable<T>(query.Query.Take(num.Value), query.TupleType, query.TokenIndices);
+            return query;
+        }
+
+        public static DEnumerable<T> TryTake<T>(this DEnumerable<T> sequence, int? num)
+        {
+            if (num.HasValue)
+                return new DEnumerable<T>(sequence.Collection.Take(num.Value), sequence.TupleType, sequence.TokenIndices);
+            return sequence;
+        }
         #endregion
 
         public static Dictionary<string, Meta> QueryMetadata(IQueryable query)
         {
             return MetadataVisitor.GatherMetadata(query.Expression); 
+        }
+
+        public static DEnumerable<T> AsEnumerable<T>(this DQueryable<T> query)
+        {
+            return new DEnumerable<T>(query.Query.AsEnumerable(), query.TupleType, query.TokenIndices);
+        }
+
+        public static DEnumerable<T> ToArray<T>(this DQueryable<T> query)
+        {
+            return new DEnumerable<T>(query.Query.ToArray(), query.TupleType, query.TokenIndices);
+        }
+
+        public static DEnumerable<T> ToArray<T>(this DEnumerable<T> query)
+        {
+            return new DEnumerable<T>(query.Collection.ToArray(), query.TupleType, query.TokenIndices);
+        }
+
+        public static ResultTable ToResultTable<T>(this DEnumerable<T> collection, List<Column> columns)
+        {
+            object[] array = collection.Collection as object[] ?? collection.Collection.ToArray();
+
+            return ToResultTable(array, columns.Select(c => Tuple.Create(c, 
+                TupleReflection.TupleChainPropertyLambda(collection.TupleType, collection.TokenIndices[c.Token]))).ToList());
+        }
+
+        public static ResultTable ToResultTable(this object[] result, List<Tuple<Column, LambdaExpression>> columnAccesors)
+        {
+            var columnValues = columnAccesors.Select(c => new ResultColumn(
+                c.Item1,
+                (Array)miGetValues.GenericInvoke(new[] { c.Item1.Type }, null, new object[] { result, c.Item2.Compile() }))
+             ).ToArray();
+
+            return new ResultTable(columnValues);
+        }
+
+        static MethodInfo miGetValues = ReflectionTools.GetMethodInfo(() => GetValues<int>(null, null)).GetGenericMethodDefinition();
+        static Array GetValues<S>(object[] collection, Func<object, S> getter)
+        {
+            S[] array = new S[collection.Length];
+            for (int i = 0; i < collection.Length; i++)
+            {
+                array[i] = getter(collection[i]);
+            }
+            return array;
         }
     }
 }

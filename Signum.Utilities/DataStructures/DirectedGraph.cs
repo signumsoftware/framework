@@ -5,6 +5,7 @@ using System.Text;
 using Signum.Utilities;
 using System.Collections;
 using Signum.Utilities.Properties;
+using System.Xml.Linq;
 
 namespace Signum.Utilities.DataStructures
 {
@@ -330,6 +331,32 @@ namespace Signum.Utilities.DataStructures
             string edges = Edges.ToString(e => "   {0} -> {1};".Formato(nodeDic[e.From], nodeDic[e.To]), "\r\n");
 
             return "digraph \"{0}\"\r\n{{\r\n{1}\r\n{2}\r\n}}".Formato(name, nodes, edges);
+        }
+
+        public XDocument ToDGML()
+        {
+            return ToDGML(a => a.ToString());
+        }
+
+        public XDocument ToDGML(Func<T, string> getNodeLabel)
+        {
+            int num = 0;
+            Dictionary<T, int> nodeDic = Nodes.ToDictionary(n => n, n => num++, Comparer);
+
+            XNamespace ns = "http://schemas.microsoft.com/vs/2009/dgml";
+
+            return new XDocument(
+                new XElement(ns + "DirectedGraph",
+                    new XElement(ns + "Nodes",
+                        Nodes.Select(n => new XElement(ns + "Node",
+                            new XAttribute("Id", nodeDic[n]),
+                            new XAttribute("Label", getNodeLabel(n))))),
+                    new XElement(ns + "Links",
+                        Edges.Select(e => new XElement(ns + "Link",
+                            new XAttribute("Source", nodeDic[e.From]),
+                            new XAttribute("Target", nodeDic[e.To]))))
+                 )
+            );
         }
 
         #region IEnumerable<T> Members

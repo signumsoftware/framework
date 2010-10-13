@@ -222,5 +222,17 @@ namespace Signum.Test.LinqProvider
         {
             var albumsWithBonusTrack = Database.Query<AlbumDN>().Where(a => a.BonusTrack != null).ToList();
         }
+
+        [TestMethod]
+        public void WhereBindTuple()
+        {
+            var albums = Database.Query<AlbumDN>().Select(a => Tuple.Create(a.Name, a.Label)).Where(t => t.Item2 == null).ToList(); 
+        }
+
+        [TestMethod]
+        public void WhereBindBigTuple()
+        {
+            var albums = Database.Query<AlbumDN>().Select(a => Tuple.Create(a.Name, a.Name, a.Name, a.Name, a.Name, a.Name, a.Name, a.Label)).Where(t => t.Rest.Item1 == null).ToList();
+        }
     }
 }

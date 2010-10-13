@@ -22,7 +22,6 @@ namespace Signum.Web
         public static void Start(ConstructorManager constructorManager)
         {
             ConstructorManager = constructorManager;
-            constructorManager.Initialize();
         }
 
         public static ModifiableEntity Construct(Type type)
@@ -52,18 +51,10 @@ namespace Signum.Web
     public class ConstructorManager
     {
         public event Func<Type, ModifiableEntity> GeneralConstructor;
-        public Dictionary<Type, Func<ModifiableEntity>> Constructors;
+        public Dictionary<Type, Func<ModifiableEntity>> Constructors = new Dictionary<Type, Func<ModifiableEntity>>();
 
         public event Func<ConstructContext, ActionResult> VisualGeneralConstructor;
-        public Dictionary<Type, Func<ConstructContext, ActionResult>> VisualConstructors;
-
-        internal void Initialize()
-        {
-            if (Constructors == null)
-                Constructors = new Dictionary<Type, Func<ModifiableEntity>>();
-            if (VisualConstructors == null)
-                VisualConstructors = new Dictionary<Type, Func<ConstructContext, ActionResult>>();
-        }
+        public Dictionary<Type, Func<ConstructContext, ActionResult>> VisualConstructors = new Dictionary<Type, Func<ConstructContext, ActionResult>>();
 
         public virtual ModifiableEntity Construct(Type type)
         {

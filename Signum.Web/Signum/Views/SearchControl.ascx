@@ -14,7 +14,7 @@
     Context context = (Context)Model;
     FindOptions findOptions = (FindOptions)ViewData[ViewDataKeys.FindOptions];
     QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
-    Type entitiesType = Reflector.ExtractLite(queryDescription.StaticColumns.Single(a => a.IsEntity).Type);
+    Type entitiesType = Reflector.ExtractLite(queryDescription.Columns.Single(a => a.IsEntity).Type);
     bool viewable = findOptions.View && Navigator.IsNavigable(entitiesType, true);
 %>
 
@@ -22,6 +22,7 @@
 <%=Html.Hidden(context.Compose("sfQueryUrlName"), Navigator.Manager.QuerySettings[findOptions.QueryName].UrlName, new { disabled = "disabled" })%>
 <%=Html.Hidden(context.Compose(ViewDataKeys.AllowMultiple), findOptions.AllowMultiple.ToString(), new { disabled = "disabled" })%>
 <%=Html.Hidden(context.Compose(ViewDataKeys.View), viewable, new { disabled = "disabled" })%>
+<%= Html.Hidden(context.Compose(ViewDataKeys.EntityTypeName), entitiesType.Name, new { disabled = "disabled" })%>
 <% if (findOptions.EntityContextMenu)
    {
        Response.Write("<script type=\"text/javascript\">var " + context.Compose("EntityContextMenu") + " = true;</script>");
@@ -42,8 +43,8 @@
     <% int? top = findOptions.Top ?? Navigator.Manager.QuerySettings.GetOrThrow(findOptions.QueryName, "Missing QuerySettings for QueryName {0}").Top; %>
     <%= HtmlHelperExtenders.InputType("text", context.Compose(ViewDataKeys.Top), top.TryToString(), new Dictionary<string, object> { { "size", "5" }, { "onkeydown", "return validator.number(event)" } })%>
 
-    <%= Html.Hidden(context.Compose("OrderBy"), findOptions.OrderOptions == null ? "" : 
-        (findOptions.OrderOptions.ToString(oo => (oo.Type == OrderType.Ascending ? "" : "-") + oo.Token.FullKey(), ","))) %>
+    <%= Html.Hidden(context.Compose("OrderBy"), findOptions.OrderOptions == null ? "" :
+                (findOptions.OrderOptions.ToString(oo => (oo.OrderType == OrderType.Ascending ? "" : "-") + oo.Token.FullKey(), ",")))%>
 
     <input class="btnSearch" id="<%=context.Compose("btnSearch")%>" type="button" onclick="<%="Search({{prefix:'{0}'}});".Formato(context.ControlID) %>" value="<%=Html.Encode(Resources.Search) %>" /> 
     <% if (findOptions.Create && Navigator.IsCreable(entitiesType, true) && viewable)
@@ -81,33 +82,18 @@
             </th>
             <%}
 
-              foreach (StaticColumn sc in queryDescription.StaticColumns.Where(sc => sc.Visible))
+              foreach (var col in findOptions.MergeColumns())
               {
-                  var order = findOptions.OrderOptions.SingleOrDefault(oo => oo.Token.FullKey() == sc.Name);
+                  var order = findOptions.OrderOptions.FirstOrDefault(oo => oo.Token.FullKey() == col.Name);
                   OrderType? orderType = null;
                   if (order != null)
                   {
-                    orderType = order.Type;
+                    orderType = order.OrderType;
                   }
             %>
-            <th id="<%= context.Compose(sc.Name) %>" class="<%= (orderType == null) ? "" : (orderType == OrderType.Ascending ? "headerSortDown" : "headerSortUp") %>">
-                <input type="hidden" value="<%= sc.Name %>" />
-                <%= sc.DisplayName %>
-            </th>
-            <%
-                }
-              foreach (UserColumnOption uco in findOptions.UserColumnOptions.Where(uc => uc.UserColumn.Visible).OrderBy(uc => uc.UserColumn.Index))
-              {
-                  var order = findOptions.OrderOptions.SingleOrDefault(oo => oo.Token.FullKey() == uco.UserColumn.Token.FullKey());
-                  OrderType? orderType = null;
-                  if (order != null)
-                  {
-                      orderType = order.Type;
-                  }
-              %>
-            <th id="<%= context.Compose(uco.UserColumn.Name) %>" class="userColumn<%= (orderType == null) ? "" : (orderType == OrderType.Ascending ? " headerSortDown" : " headerSortUp") %>">
-                <input type="hidden" value="<%= uco.UserColumn.Name %>" />
-                <%= uco.DisplayName %>
+            <th id="<%= context.Compose(col.Name) %>" class="<%= (orderType == null) ? "" : (orderType == OrderType.Ascending ? "headerSortDown" : "headerSortUp") %>">
+                <input type="hidden" value="<%= col.Name %>" />
+                <%= col.DisplayName%>
             </th>
             <%
               }

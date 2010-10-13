@@ -22,9 +22,20 @@ namespace Signum.Engine.Linq
     {
         public readonly Expression Projector;
 
-        public MetaProjectorExpression(Type type, Expression projector)
-            : base((ExpressionType)MetaExpressionType.MetaProjector, type)
+        readonly Type type;
+        public override Type Type
         {
+            get { return type; }
+        }
+
+        public override ExpressionType NodeType
+        {
+            get { return (ExpressionType)MetaExpressionType.MetaProjector; }
+        }
+
+        public MetaProjectorExpression(Type type, Expression projector)
+        {
+            this.type = type;
             this.Projector = projector;
         }
     }
@@ -33,17 +44,25 @@ namespace Signum.Engine.Linq
     {
         public bool IsEntity
         {
-            get
-            {
-                return typeof(ModifiableEntity).IsAssignableFrom(Type);
-            }
+            get { return typeof(ModifiableEntity).IsAssignableFrom(Type); }
+        }
+
+        readonly Type type;
+        public override Type Type
+        {
+            get { return type; }
+        }
+
+        public override ExpressionType NodeType
+        {
+            get { return (ExpressionType)MetaExpressionType.MetaExpression; }
         }
 
         public readonly Meta Meta;
 
         public MetaExpression(Type type, Meta meta)
-            : base((ExpressionType)MetaExpressionType.MetaExpression, type)
         {
+            this.type = type;
             this.Meta = meta;
         }
     }   

@@ -13,6 +13,8 @@
                 <ResourceDictionary Source="..\BlueMenu.xaml"/>
             </ResourceDictionary.MergedDictionaries>
             <ContextMenu x:Key="contextMenu">
+                <MenuItem Header="{m:Loc NewFilter}"  Click="filter_Click"/>
+                <Separator/>
                 <MenuItem Header="{m:Loc Rename}" Click="renameMenu_Click"/>
                 <MenuItem Header="{m:Loc Remove}" Click="removeMenu_Click"/>
             </ContextMenu>
@@ -147,10 +149,9 @@
                   DragOver="lvResult_DragOver"
                   Drop="lvResult_Drop">
             <ListView.View>
-                <GridView x:Name="gvResults" AllowsColumnReorder="False">
+                <GridView x:Name="gvResults" AllowsColumnReorder="True">
                     <GridView.ColumnHeaderContainerStyle>
-                        <Style TargetType="{x:Type GridViewColumnHeader}">
-                            <Setter Property="m:DragController.DragController" Value="{Binding ColumnDragController, ElementName=me}"/>
+                        <Style TargetType="{x:Type GridViewColumnHeader}">                           
                             <EventSetter Event="Click" Handler="GridViewColumnHeader_Click"/>
                         </Style>
                     </GridView.ColumnHeaderContainerStyle>
