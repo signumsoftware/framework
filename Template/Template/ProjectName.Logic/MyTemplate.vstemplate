@@ -19,11 +19,11 @@
         <ProjectItem ReplaceParameters="true" TargetFileName="AssemblyInfo.cs">AssemblyInfo.cs</ProjectItem>
       </Folder>
       <ProjectItem ReplaceParameters="true" TargetFileName="Starter.cs">Starter.cs</ProjectItem>
-      <ProjectItem ReplaceParameters="true" TargetFileName="Queries.cs">Queries.cs</ProjectItem>
+      <ProjectItem ReplaceParameters="true" TargetFileName="MyEntityLogic.cs">MyEntityLogic.cs</ProjectItem>
     </Project>
   </TemplateContent>
   <WizardExtension>
-    <Assembly>WizardProjectName, Version=1.0.1.0, Culture=Neutral, PublicKeyToken=b6f529cd3458096d</Assembly>
+    <Assembly>WizardProjectName, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=b6f529cd3458096d</Assembly>
     <FullClassName>WizardProjectName.Wizard</FullClassName>
   </WizardExtension>
 </VSTemplate>

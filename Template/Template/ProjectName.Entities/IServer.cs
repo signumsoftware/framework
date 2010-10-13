@@ -13,7 +13,6 @@ namespace $custommessage$.Services
     [ServiceContract(SessionMode = SessionMode.Required)]
     public interface IServer$custommessage$ : IBaseServer, IDynamicQueryServer //ILoginServer, 
     {
-        [OperationContract, NetDataContract]
-        List<Lite<INoteDN>> RetrieveNotes(Lite<IdentifiableEntity> lite);
+
     }
 }

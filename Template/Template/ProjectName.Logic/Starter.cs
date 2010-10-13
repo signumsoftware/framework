@@ -19,16 +19,9 @@ namespace $custommessage$.Logic
         {
             SchemaBuilder sb = new SchemaBuilder();
             DynamicQueryManager dqm = new DynamicQueryManager();
-
-            sb.Include<MyEntityDN>();
-
-            TypeLogic.Start(sb);
-            sb.Include<NoteDN>();  
-            Schema s = sb.Schema;
-
-            Queries.Initialize(dqm); 
-
             ConnectionScope.Default = new Connection(connectionString, sb.Schema, dqm);
+
+            MyEntityLogic.Start(sb, dqm);
         }
     }
 }

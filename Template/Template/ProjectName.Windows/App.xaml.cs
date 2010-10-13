@@ -51,15 +51,14 @@ namespace $custommessage$.Windows
         {
             Navigator.Start(new NavigationManager
             {
-                Settings = new Dictionary<Type, EntitySettings>()
-                {
-                    {typeof(MyEntityDN), new EntitySettings(EntityType.Default){ View = e => new MyEntity() } },
-                },            
+                EntitySettings = new Dictionary<Type, EntitySettings>(),
             });
+
+            Navigator.AddSetting(new EntitySettings<MyEntityDN>(EntityType.Default) { View = e => new MyEntity() }); 
 
             Constructor.Start(new ConstructorManager());
 
-            Note.Start();
+            Navigator.Initialize();
         }
     }
 }

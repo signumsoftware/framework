@@ -13,7 +13,7 @@
     <ProjectItem SubType="Code" TargetFileName="$newname$.xaml.cs" ReplaceParameters="true">MyEntity.xaml.cs</ProjectItem>
   </TemplateContent>
   <WizardExtension>
-    <Assembly>WizardProjectName, Version=1.0.1.0, Culture=Neutral, PublicKeyToken=b6f529cd3458096d</Assembly>
+    <Assembly>WizardProjectName, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=b6f529cd3458096d</Assembly>
     <FullClassName>WizardProjectName.ControlWizard</FullClassName>
   </WizardExtension>
 </VSTemplate>

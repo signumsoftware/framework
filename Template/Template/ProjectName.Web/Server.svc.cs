@@ -30,13 +30,5 @@ namespace $custommessage$.Web
                 throw new FaultException(e.Message);
             }
         }
-
-        public List<Lite<INoteDN>> RetrieveNotes(Lite<IdentifiableEntity> lite)
-        {
-            return Return(MethodInfo.GetCurrentMethod(),
-            () => (from n in Database.Query<NoteDN>()
-                   where n.Target == lite
-                   select n.ToLite<INoteDN>()).ToList());
-        }
     }
 }

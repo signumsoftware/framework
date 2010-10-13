@@ -59,6 +59,7 @@ namespace $custommessage$.Windows
             if (channelFactory == null)
                 channelFactory = new ChannelFactory<IServer$custommessage$>("server");
 
+            //Add Login here
             IServer$custommessage$ result = channelFactory.CreateChannel();
 
             return result; 

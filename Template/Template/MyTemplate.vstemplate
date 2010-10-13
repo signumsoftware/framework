@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0"?>
 <VSTemplate xmlns="http://schemas.microsoft.com/developer/vstemplate/2005" Version="2.0.0" Type="ProjectGroup">
   <TemplateData>
-    <Name>Signum Framework Client - Server</Name>
+    <Name>Signum Framework 2.0 Client - Server</Name>
     <Description>Full Signum Framework Architecture for a client - server application</Description>
     <Icon>__TemplateIcon.ico</Icon>
     <ProjectType>CSharp</ProjectType>

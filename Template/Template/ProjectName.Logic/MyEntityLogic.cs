@@ -1,29 +1,29 @@
 ﻿using System;
-using System.Data;
-using System.Configuration;
+using System.Collections.Generic;
 using System.Linq;
-using System.Xml.Linq;
-using Signum;
+using System.Text;
+using Signum.Engine.Maps;
 using Signum.Entities;
-using Signum.Utilities;
-using Signum.Engine.DynamicQuery;
+using Signum.Entities.Basics;
 using Signum.Engine;
-using Signum.Entities.DynamicQuery;
+using Signum.Engine.DynamicQuery;
 using $custommessage$.Entities;
 
 namespace $custommessage$.Logic
 {
-    public static class Queries
+    public static class MyEntityLogic
     {
-        public static void Initialize(DynamicQueryManager dqm)
-        {
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        {        
+            sb.Include<MyEntityDN>();
+
             dqm[typeof(MyEntityDN)] = (from e in Database.Query<MyEntityDN>()
                                        select new
                                        {
                                              Entity = e.ToLite(),
                                              e.Id,
                                              e.Name
-                                       }).ToDynamic();
+                                       }).ToDynamic();          
         }
     }
 }
