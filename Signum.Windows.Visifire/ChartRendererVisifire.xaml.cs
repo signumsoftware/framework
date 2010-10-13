@@ -66,10 +66,6 @@ namespace Signum.Windows.Chart
                     {
                         var list = ResultTable.Rows.Select(r => new { Key = r[0] ?? NullValue, Value = r[1] }).ToList();
 
-                        Comparison<object> comparer = GetComparer(ChartRequest.FirstDimension.Type);
-
-                        list.Sort((a, b) => comparer(a.Key, b.Key));
-
                         return new[]
                         {
                             new DataSeries 
@@ -87,20 +83,21 @@ namespace Signum.Windows.Chart
                     }
                 case ChartResultType.TypeTypeValue:
                     {
-                        List<object> series = ResultTable.Rows.Select(r => r[0] ?? NullValue).Distinct().ToList();
-                        series.Sort(GetComparer(ResultTable.Columns[0].Type));
+                        List<object> series = ResultTable.Rows.Select(r => r[0] ?? NullValue).Distinct().ToList();                     
 
                         List<object> subSeries = ResultTable.Rows.Select(r => r[1] ?? NullValue).Distinct().ToList();
-                        subSeries.Sort(GetComparer(ResultTable.Columns[1].Type));
 
-                        double?[,] array = ResultTable.Rows.ToArray(r => (double?)ToDouble(r[2], ChartTokenName.FirstValue), r => series.IndexOf(r[0] ?? NullValue), r => subSeries.IndexOf(r[1] ?? NullValue), series.Count, subSeries.Count);
+                        double?[,] array = ResultTable.Rows.ToArray(
+                            r => (double?)ToDouble(r[2], ChartTokenName.FirstValue), 
+                            r => series.IndexOf(r[0] ?? NullValue), 
+                            r => subSeries.IndexOf(r[1] ?? NullValue), series.Count, subSeries.Count);
 
                         return subSeries.Select((ss, j) =>
                             new DataSeries
                             {
                                 LegendText = ss.ToString(),
                                 RenderAs = ToRenderAs(ChartRequest.ChartType),
-                                YValueFormatString = ChartRequest.FirstValue.Format
+                                //YValueFormatString = ChartRequest.FirstValue.Format
                             }.AddPoints(series.Select((s, i) =>
                             {
                                 double? d = array[i, j];
@@ -121,8 +118,8 @@ namespace Signum.Windows.Chart
                     return new[]{ new DataSeries
                     { 
                         RenderAs = ToRenderAs(ChartRequest.ChartType),
-                        XValueFormatString = ChartRequest.FirstDimension.Format,
-                        YValueFormatString = ChartRequest.SecondDimension.Format,
+                        //XValueFormatString = ChartRequest.FirstDimension.Format,
+                        //YValueFormatString = ChartRequest.SecondDimension.Format,
                     }
                     .AddPoints(ResultTable.Rows.Select(r => new DataPoint
                     {
@@ -135,9 +132,9 @@ namespace Signum.Windows.Chart
                     return new[]{ new DataSeries
                     { 
                         RenderAs = ToRenderAs(ChartRequest.ChartType),
-                        XValueFormatString = ChartRequest.FirstDimension.Format,
-                        YValueFormatString = ChartRequest.SecondDimension.Format,
-                        ZValueFormatString = ChartRequest.SecondValue.Format,
+                        //XValueFormatString = ChartRequest.FirstDimension.Format,
+                        //YValueFormatString = ChartRequest.SecondDimension.Format,
+                        //ZValueFormatString = ChartRequest.SecondValue.Format,
                     }
                     .AddPoints(ResultTable.Rows.Select(r => new DataPoint
                     {
@@ -164,18 +161,18 @@ namespace Signum.Windows.Chart
             return val.ToString();
         }
 
-        Comparison<object> GetComparer(Type type)
-        {
-            type = type.UnNullify();
+        //Comparison<object> GetComparer(Type type)
+        //{
+        //    type = type.UnNullify();
 
-            if(typeof(IComparable).IsAssignableFrom(type))
-                return Nullify((IComparable c)=>c); 
+        //    if(typeof(IComparable).IsAssignableFrom(type))
+        //        return Nullify((IComparable c)=>c); 
 
-            if (typeof(Lite).IsAssignableFrom(type))
-                return Nullify((Lite b) => b.ToStr);
+        //    if (typeof(Lite).IsAssignableFrom(type))
+        //        return Nullify((Lite b) => b.ToStr);
 
-            return Nullify((object o) => o.ToString());
-        }
+        //    return Nullify((object o) => o.ToString());
+        //}
 
         Comparison<object> Nullify<T>(Func<T, IComparable> f)
         {

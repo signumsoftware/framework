@@ -41,11 +41,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Signum.Web.Extensions.Sampl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Signum.Windows.Extensions.Sample", "Signum.Windows.Extensions.Sample\Signum.Windows.Extensions.Sample.csproj", "{5658AD7A-C9F7-4359-96A6-9EBC8CB1DCC8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Signum.Windows.Visifire", "Signum.Windows.Visifire\Signum.Windows.Visifire.csproj", "{FCC8FE70-1452-4860-9062-8F570B59DCA3}"
+EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 16
+		SccNumberOfProjects = 17
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
-		SccTeamFoundationServer = http://andromeda:8080/
+		SccTeamFoundationServer = http://192.168.0.8:8080/
 		SccLocalPath0 = .
 		SccProjectUniqueName1 = ..\\Framework\\Signum.Engine\\Signum.Engine.csproj
 		SccProjectTopLevelParentUniqueName1 = Signum.Framework.Extensions.sln
@@ -101,6 +103,10 @@ Global
 		SccProjectUniqueName15 = Signum.Windows.Extensions.Sample\\Signum.Windows.Extensions.Sample.csproj
 		SccProjectName15 = Signum.Windows.Extensions.Sample
 		SccLocalPath15 = Signum.Windows.Extensions.Sample
+		SccProjectUniqueName16 = Signum.Windows.Visifire\\Signum.Windows.Visifire.csproj
+		SccProjectTopLevelParentUniqueName16 = Signum.Framework.Extensions.sln
+		SccProjectName16 = Signum.Windows.Visifire
+		SccLocalPath16 = Signum.Windows.Visifire
 	EndGlobalSection
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = Signum.Framework.Extensions.vsmdi
@@ -201,6 +207,12 @@ Global
 		{5658AD7A-C9F7-4359-96A6-9EBC8CB1DCC8}.Partial|Any CPU.Build.0 = Release|Any CPU
 		{5658AD7A-C9F7-4359-96A6-9EBC8CB1DCC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5658AD7A-C9F7-4359-96A6-9EBC8CB1DCC8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FCC8FE70-1452-4860-9062-8F570B59DCA3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FCC8FE70-1452-4860-9062-8F570B59DCA3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FCC8FE70-1452-4860-9062-8F570B59DCA3}.Partial|Any CPU.ActiveCfg = Release|Any CPU
+		{FCC8FE70-1452-4860-9062-8F570B59DCA3}.Partial|Any CPU.Build.0 = Release|Any CPU
+		{FCC8FE70-1452-4860-9062-8F570B59DCA3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FCC8FE70-1452-4860-9062-8F570B59DCA3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -215,5 +227,6 @@ Global
 		{7D851227-5294-4BEB-990E-56B4FBB7A148} = {A5D15760-64E5-4522-B298-0249AAE6E124}
 		{86EE7792-96CF-4420-997B-8C811E2B166D} = {A5D15760-64E5-4522-B298-0249AAE6E124}
 		{CAFD6D4D-E5FB-4A6E-84FC-3185854CCD9D} = {A5D15760-64E5-4522-B298-0249AAE6E124}
+		{FCC8FE70-1452-4860-9062-8F570B59DCA3} = {A5D15760-64E5-4522-B298-0249AAE6E124}
 	EndGlobalSection
 EndGlobal

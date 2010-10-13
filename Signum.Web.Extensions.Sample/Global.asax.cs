@@ -70,24 +70,9 @@ namespace Signum.Web.Extensions.Sample
 
         private void LinkTypesAndViews()
         {
-            Navigator.Manager = new NavigationManager
-            {
-                EntitySettings = new Dictionary<Type, EntitySettings>
-                {
-                }
-            };
-
-            Constructor.Start(new ConstructorManager
-            {
-                Constructors = new Dictionary<Type, Func<ModifiableEntity>>
-                {
-                }
-            });
-
-            OperationClient.Start(new OperationManager
-            {
-                Settings = new Dictionary<Enum, OperationSettings>()
-            }, true);
+            Navigator.Start(new NavigationManager());
+            Constructor.Start(new ConstructorManager(), true);
+            OperationClient.Start(new OperationManager());
 
             AuthClient.Start(true, true, true, true);
             AuthAdminClient.Start(true, true, true, true, true, true, true);
@@ -100,7 +85,7 @@ namespace Signum.Web.Extensions.Sample
 
             MusicClient.Start();
 
-            Navigator.Start();
+            Navigator.Initialize();
         }
 
         protected void Application_AcquireRequestState(object sender, EventArgs e)

@@ -18,6 +18,8 @@ using Signum.Windows.Files;
 using System.Threading;
 using Signum.Test;
 using Signum.Windows.Extensions.Sample.Controls;
+using Signum.Entities.DynamicQuery;
+using Signum.Windows.Chart;
 
 namespace Signum.Windows.Extensions.Sample
 {
@@ -91,9 +93,14 @@ namespace Signum.Windows.Extensions.Sample
                 new QuickLinkExplore(new ExploreOptions(typeof(LogOperationDN) )
                                     {
                                         FilterOptions = { new FilterOption("Target", r) },
-                                        OrderOptions = { new OrderOption("Start") }
+                                        OrderOptions = { new OrderOption("Start") },
+                                        ColumnOptionsMode = ColumnOptionsMode.Remove,
+                                        ColumnOptions = { new ColumnOption("Target") }
                                     })
             });
+
+            UserQueryClient.Start();
+            ChartClient.Start(() => new ChartRendererVisifire());
 
             Navigator.AddSettings(new List<EntitySettings>()
             {
