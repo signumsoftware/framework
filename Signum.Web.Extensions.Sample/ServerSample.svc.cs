@@ -23,16 +23,5 @@ namespace Signum.Web.Extensions.Sample
     public class ServerSample: ServerExtensions, IServerSample
     {
 
-        public List<Lite<UserQueryDN>> GetUserQueries(object queryName)
-        {
-            return Return(MethodInfo.GetCurrentMethod(),
-                () => UserQueryLogic.GetUserQueries(queryName)); 
-        }
-
-        public void RemoveUserQuery(Lite<UserQueryDN> lite)
-        {
-            Execute(MethodInfo.GetCurrentMethod(),
-             () => UserQueryLogic.RemoveUserQuery(lite)); 
-        }
     }
 }

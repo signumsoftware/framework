@@ -71,8 +71,8 @@ namespace Signum.Web.Extensions.Sample
         private void LinkTypesAndViews()
         {
             Navigator.Start(new NavigationManager());
-            Constructor.Start(new ConstructorManager(), true);
-            OperationClient.Start(new OperationManager());
+            Constructor.Start(new ConstructorManager());
+            OperationClient.Start(new OperationManager(), true);
 
             AuthClient.Start(true, true, true, true);
             AuthAdminClient.Start(true, true, true, true, true, true, true);

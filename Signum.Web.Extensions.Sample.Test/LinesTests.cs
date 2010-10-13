@@ -175,7 +175,7 @@ namespace Signum.Web.Extensions.Sample.Test
                 Assert.IsFalse(selenium.IsElementPresent("jq=#Author_LastAward_sfToStr:visible"));
                 Assert.IsTrue(selenium.IsElementPresent("jq=#Author_LastAward_sfLink:visible"));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 Common.MyTestCleanup();
                 throw;
@@ -266,7 +266,7 @@ namespace Signum.Web.Extensions.Sample.Test
                 selenium.Click("jq=#OtherAwards_0_sfBtnCancel");
                 Assert.IsFalse(selenium.IsElementPresent("jq=#OtherAwards_0_sfEntity:visible"));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 Common.MyTestCleanup();
                 throw;
@@ -312,7 +312,7 @@ namespace Signum.Web.Extensions.Sample.Test
                 Assert.IsTrue(selenium.IsElementPresent("jq=#Members_0_Friends > option:nth-child(2)"));
                 Assert.IsFalse(selenium.IsElementPresent("jq=#Members_0_Friends > option:nth-child(3)"));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 Common.MyTestCleanup();
                 throw;
@@ -392,7 +392,7 @@ namespace Signum.Web.Extensions.Sample.Test
                 selenium.DoubleClick("jq=#OtherAwards > option:nth-child(1)");
                 Assert.IsTrue(selenium.IsElementPresent("jq=#OtherAwards_sfDetail #OtherAwards_0_Category"));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 Common.MyTestCleanup();
                 throw;
@@ -446,7 +446,7 @@ namespace Signum.Web.Extensions.Sample.Test
                 //find does not exist by default
                 Assert.IsFalse(selenium.IsElementPresent("jq=#OtherAwards_btnFind"));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 Common.MyTestCleanup();
                 throw;
