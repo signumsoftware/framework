@@ -44,9 +44,9 @@ namespace WizardProjectName
 
                 string post = postNames.SingleOrDefault(a => project.Name.EndsWith(a));
                 
-                string post2 = post.Replace(".", "guid"); 
+                string post2 = post.Replace(".", "guid");
 
-                projectGuids.Add(post2, projectGuid.ToString()); 
+                projectGuids[post2] = projectGuid.ToString(); 
 
                 //StringBuilder sb = new StringBuilder();
                 //sb.AppendLine(string.Format("{0}: {1}", post2, projectGuid.ToString()));

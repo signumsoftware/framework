@@ -59,6 +59,8 @@ namespace Signum.Web.Sample
 
         private void LinkTypesAndViews()
         {
+            Navigator.Start(new NavigationManager());
+
             Navigator.Manager = new NavigationManager
             {
                 EntitySettings = new Dictionary<Type, EntitySettings>
@@ -78,7 +80,7 @@ namespace Signum.Web.Sample
             MusicClient.Start();
 
             //Navigator.Manager.NormalPageUrl = "Views/Shared/NormalPage";
-            Navigator.Start();
+            
         }
 
     }
