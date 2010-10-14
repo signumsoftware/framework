@@ -94,7 +94,8 @@ namespace Signum.Web
 
         public static bool GetForceNewInUI(HtmlHelper helper, TypeContext tc)
         {
-            return helper.ViewData.ContainsKey(ViewDataKeys.ForceNewInUI);
+            return (tc as EntityBase).TryCS(eb => eb.ForceNewInUI) == true 
+                || helper.ViewData.ContainsKey(ViewDataKeys.ForceNewInUI);
         }
     }
 

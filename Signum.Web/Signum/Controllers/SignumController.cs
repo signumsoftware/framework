@@ -393,7 +393,7 @@ namespace Signum.Web.Controllers
             bool isReactive = this.IsReactive();
 
             var ctx = this.UntypedExtractEntity(prefix)
-                          .UntypedApplyChanges(this.ControllerContext, prefix, true);
+                .UntypedApplyChanges(this.ControllerContext, isReactive ? "" : prefix, true);
 
             IdentifiableEntity entity = (IdentifiableEntity)ctx.UntypedValue;
 

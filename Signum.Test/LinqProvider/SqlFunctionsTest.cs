@@ -107,6 +107,13 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void DayOfWeekFunction()
+        {
+            var list = Database.Query<NoteDN>().Where(n => n.CreationTime.DayOfWeek != DayOfWeek.Sunday)
+                .Select(n => n.CreationTime.DayOfWeek).ToList();
+        }
+
+        [TestMethod]
         public void MathFunctions()
         {
             Dump((AlbumDN a) => Math.Sign(a.Year));

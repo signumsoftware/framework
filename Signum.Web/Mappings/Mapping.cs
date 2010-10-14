@@ -526,7 +526,8 @@ namespace Signum.Web
                 ElementMapping.OnGetValue(itemCtx);
 
                 ctx.AddChild(itemCtx);
-                newList.Add(itemCtx.Value);
+                if (itemCtx.Value != null)
+                    newList.Add(itemCtx.Value);
             }
             return newList;
         }

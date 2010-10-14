@@ -427,6 +427,8 @@ function OperationConstructFromMany(constructorFrom) {
 }
 
 function ReloadEntity(urlController, prefix, parentDiv) {
+    console.log(arguments.callee.caller.toString());
+    console.log(document.activeElement.id);
     var $partialViewName = $('#' + sfPartialViewName);
     var requestData = $("form :input").not(".searchControl :input").serialize() + qp(sfPrefix, prefix);
     if($partialViewName.length == 1)
@@ -438,13 +440,17 @@ function ReloadEntity(urlController, prefix, parentDiv) {
         async: false,
         dataType: "html",
         success: function (msg) {
-            if (!empty(parentDiv))
+            if (!empty(parentDiv)) {
+                $('#' + parentDiv + ' input[onblur]').attr('onblur',''); // To avoid Chrome to fire onblur when replacing parentdiv content
                 $('#' + parentDiv).html(msg);
+                }
             else {
                 if (empty(prefix))
                     $('#divNormalControl').html(msg);
-                else
+                else {
+                    $('#' + prefix.compose("divMainControl") + ' input[onblur]').attr('onblur',''); // To avoid Chrome to fire onblur when replacing popup content
                     $('#' + prefix.compose("divMainControl")).html(msg);
+                }
             }
         }
     });

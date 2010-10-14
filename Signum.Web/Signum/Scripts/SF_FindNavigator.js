@@ -254,8 +254,11 @@ FindNavigator.prototype = {
         requestData[sfQueryUrlName] = this.findOptions.queryUrlName;
         requestData[sfTop] = this.findOptions.top;
         requestData[sfAllowMultiple] = this.findOptions.allowMultiple;
-        requestData[sfView] = this.findOptions.view;
-        requestData["sfSearchOnLoad"] = this.findOptions.searchOnLoad;
+
+        if (this.findOptions.view == false)
+            requestData[sfView] = this.findOptions.view;
+        if (this.findOptions.searchOnLoad == true)
+            requestData["sfSearchOnLoad"] = this.findOptions.searchOnLoad;
 
         if (this.findOptions.async)
             requestData["sfAsync"] = this.findOptions.async;
@@ -277,9 +280,11 @@ FindNavigator.prototype = {
                 }
             }
         }
-
-        requestData["sfOrderBy"] = this.findOptions.orders;
-        requestData["sfColumns"] = this.findOptions.columns;
+        
+        if (this.findOptions.orders != null)
+            requestData["sfOrderBy"] = this.findOptions.orders;
+        if (this.findOptions.columns != null)
+            requestData["sfColumns"] = this.findOptions.columns;
         if (this.findOptions.columnMode != null)
             requestData["sfColumnMode"] = this.findOptions.columnMode;
 

@@ -241,16 +241,19 @@ namespace Signum.Engine.Linq
 
         private Expression TrySqlDayOftheWeek(Expression expression)
         {
+            if (!IsFullNominate)
+                return null;
+
             Expression expr = Visit(expression);
             if (innerProjection || !candidates.Contains(expr))
                 return null;
 
-            Expression result =
-                Expression.Add(
-                    TrySqlFunction(SqlFunction.DATEPART, expr.Type, new SqlEnumExpression(SqlEnums.weekday), expr), 
-                Expression.Constant(1));
+            Expression result = Expression.Convert(Expression.Add(
+                    TrySqlFunction(SqlFunction.DATEPART, typeof(int), new SqlEnumExpression(SqlEnums.weekday), expr),
+                    Expression.Constant(1)), typeof(DayOfWeek));
 
             candidates.Add(result);
+
             return result;
         }
 
