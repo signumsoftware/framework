@@ -999,7 +999,7 @@ namespace Signum.Web
         public virtual bool ShowOkSave(Type type, bool admin)
         {
             EntitySettings es = EntitySettings.TryGetC(type);
-            if (es != null && es.OnShowSave())
+            if (es != null)
                 return es.OnShowSave();
 
             return true;
