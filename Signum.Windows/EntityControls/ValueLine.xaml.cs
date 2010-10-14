@@ -92,7 +92,6 @@ namespace Signum.Windows
             return ValueProperty;
         }
 
-
         public static ValueLineConfigurator Configurator = new ValueLineConfigurator(); 
 
    

@@ -328,11 +328,11 @@ namespace Signum.Windows
         {
             if (GetCollapseIfNull(fe) && fe.NotSet(UIElement.VisibilityProperty))
             {
-                Binding b = new Binding(route)
-                {
-                    Mode = BindingMode.OneWay,
-                    Converter = Converters.NullToVisibility
-                };
+                Binding b = fe is ValueLine ? new Binding(route) : new Binding();
+
+                b.Mode = BindingMode.OneWay;
+                b.Converter = Converters.NullToVisibility;
+
                 fe.SetBinding(FrameworkElement.VisibilityProperty, b);
             }
         }

@@ -273,12 +273,12 @@ namespace Signum.Windows
 
         public static void AddQuerySettings(List<QuerySettings> settings)
         {
-            Navigator.Manager.QuerySetting.AddRange(settings, s => s.QueryName, s => s, "QuerySettings");
+            Navigator.Manager.QuerySettings.AddRange(settings, s => s.QueryName, s => s, "QuerySettings");
         }
 
         public static void AddQuerySetting(QuerySettings setting)
         {
-            Navigator.Manager.QuerySetting.AddOrThrow(setting.QueryName, setting, "QuerySettings {0} repeated");
+            Navigator.Manager.QuerySettings.AddOrThrow(setting.QueryName, setting, "QuerySettings {0} repeated");
         }
 
         public static void Initialize()
@@ -302,7 +302,7 @@ namespace Signum.Windows
     public class NavigationManager
     {
         public Dictionary<Type, EntitySettings> EntitySettings { get; set; }
-        public Dictionary<object, QuerySettings> QuerySetting { get; set; }
+        public Dictionary<object, QuerySettings> QuerySettings { get; set; }
 
         public event Action<AdminWindow, Type> TaskAdminWindow;
         public event Action<NormalWindow, ModifiableEntity> TaskNormalWindow;
@@ -311,7 +311,7 @@ namespace Signum.Windows
         public NavigationManager()
         {
             EntitySettings = new Dictionary<Type, EntitySettings>();
-            QuerySetting = new Dictionary<object, QuerySettings>();
+            QuerySettings = new Dictionary<object, QuerySettings>();
         }
 
         public event Action Initializing;
@@ -345,8 +345,8 @@ namespace Signum.Windows
             var dic = Server.Return((IDynamicQueryServer s) => s.GetQueryNames()).ToDictionary(a => a, a => new QuerySettings(a));
             foreach (var kvp in dic)
             {
-                if (!QuerySetting.ContainsKey(kvp.Key))
-                    QuerySetting.Add(kvp.Key, kvp.Value);
+                if (!QuerySettings.ContainsKey(kvp.Key))
+                    QuerySettings.Add(kvp.Key, kvp.Value);
             }
         }
 
@@ -407,7 +407,7 @@ namespace Signum.Windows
 
         public ImageSource GetFindIcon(object queryName, bool useDefault)
         {
-            var qs = QuerySetting.TryGetC(queryName);
+            var qs = QuerySettings.TryGetC(queryName);
             if (qs != null && qs.Icon != null)
                 return qs.Icon;
 
@@ -745,7 +745,7 @@ namespace Signum.Windows
 
         internal protected virtual bool IsFindable(object queryName)
         {
-            QuerySettings es = QuerySetting.TryGetC(queryName);
+            QuerySettings es = QuerySettings.TryGetC(queryName);
             if (es == null)
                 return false;
 
@@ -754,7 +754,7 @@ namespace Signum.Windows
 
         internal protected virtual void AssertFindable(object queryName)
         {      
-            QuerySettings es = QuerySetting.TryGetC(queryName);
+            QuerySettings es = QuerySettings.TryGetC(queryName);
             if (es == null)
                 throw new InvalidOperationException(Properties.Resources.Query0NotRegistered.Formato(queryName));
 
@@ -808,7 +808,7 @@ namespace Signum.Windows
 
         public QuerySettings GetQuerySettings(object queryName)
         {
-            return QuerySetting.TryGetC(queryName);
+            return QuerySettings.TryGetC(queryName);
         }
 
         HashSet<string> loadedModules = new HashSet<string>();

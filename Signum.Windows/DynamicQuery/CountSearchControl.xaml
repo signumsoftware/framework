@@ -13,8 +13,8 @@
         </ResourceDictionary>
     </UserControl.Resources>
     <TextBlock>
-        <Hyperlink>
-            <TextBlock Name="tb" FontWeight="Bold" Margin="5,2,2,2" Text="{Binding Path=FormattedText, ElementName=me, Mode=Default}" MouseLeftButtonUp="tb_MouseLeftButtonUp"/>
+        <Hyperlink Click="Hyperlink_Click" >
+            <TextBlock Name="tb" Margin="5,2,2,2" Text="{Binding Path=FormattedText, ElementName=me, Mode=Default}"/>
         </Hyperlink>
     </TextBlock>
 </UserControl>

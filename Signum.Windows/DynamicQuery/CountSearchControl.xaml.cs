@@ -146,33 +146,40 @@ namespace Signum.Windows
                     {
                         FormattedText = (TextZeroItems ?? Properties.Resources.ThereIsNo0)
                             .Formato(QueryUtils.GetNiceQueryName(QueryName));
-                        //tb.FontWeight = FontWeights.Bold;
+                        tb.FontWeight = FontWeights.Regular;
                     }
                     else
                     {
                         FormattedText = (Text ?? "{1}: {0}")
                             .Formato(ItemsCount, QueryUtils.GetNiceQueryName(QueryName));
+                        tb.FontWeight = FontWeights.Bold;
+
                     }
                 },
                 () => { });
         }
 
-        private void tb_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+
+        private void Hyperlink_Click(object sender, RoutedEventArgs e)
         {
             if (LinkClick != null)
                 LinkClick(this, EventArgs.Empty);
             else
-            {
-                Navigator.Explore(new ExploreOptions(QueryName)
-                {
-                    OrderOptions = OrderOptions.ToList(),
-                    FilterOptions = FilterOptions.ToList(),
-                    ColumnOptions = ColumnOptions.ToList(),
-                    ColumnOptionsMode = ColumnOptionsMode,
-                });
-            }
+                DefaultClick();
 
             e.Handled = true;
+        }
+
+        public void DefaultClick()
+        {
+            Navigator.Explore(new ExploreOptions(QueryName)
+            {
+                OrderOptions = OrderOptions.ToList(),
+                FilterOptions = FilterOptions.ToList(),
+                ColumnOptions = ColumnOptions.ToList(),
+                ColumnOptionsMode = ColumnOptionsMode,
+                SearchOnLoad = true,
+            });
         }
     }
 }
