@@ -21,7 +21,7 @@ namespace Signum.Windows.Authorization
 
             Navigator.Manager.Initializing += () =>
             {
-                foreach (QuerySettings qs in Navigator.Manager.QuerySetting.Values)
+                foreach (QuerySettings qs in Navigator.Manager.QuerySettings.Values)
                 {
                     qs.IsFindable += qn => GetQueryAceess(qn);
                 }
@@ -56,7 +56,7 @@ namespace Signum.Windows.Authorization
                     tag is FindOptionsBase ? ((FindOptionsBase)tag).QueryName :
                     tag;
 
-                if (queryName != null && Navigator.Manager.QuerySetting.ContainsKey(queryName))
+                if (queryName != null && Navigator.Manager.QuerySettings.ContainsKey(queryName))
                 {
                     if (!GetQueryAceess(queryName))
                         menuItem.Visibility = Visibility.Collapsed;

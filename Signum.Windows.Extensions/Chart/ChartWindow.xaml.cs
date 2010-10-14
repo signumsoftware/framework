@@ -190,12 +190,14 @@ namespace Signum.Windows.Chart
 
             if (Request.GroupResults)
             {
-                var charTokens = Request.ChartTokens().Select(t => new { t.Token, t.Aggregate }).ToArray(); //so the values don't get affected till next SetResults
+                //so the values don't get affected till next SetResults
+                var filters = Request.Filters.Select(f => new FilterOption { Path = f.Token.FullKey(), Value = f.Value, Operation = f.Operation }).ToList();
+                var charTokens = Request.ChartTokens().Select(t => new { t.Token, t.Aggregate }).ToArray();
 
                 getFilters =
-                    rr => charTokens.Zip(resultTable.Columns)
+                    rr => filters.Concat(charTokens.Zip(resultTable.Columns)
                     .Where(t => t.Item1.Aggregate == null)
-                    .SelectMany(t => GetTokenFilters(t.Item1.Token, rr[t.Item2])).ToList();
+                    .SelectMany(t => GetTokenFilters(t.Item1.Token, rr[t.Item2]))).ToList();
             }
             else getFilters = null;
 

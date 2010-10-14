@@ -110,7 +110,6 @@ namespace Signum.Windows.Chart
                                 else if (ChartRequest.ChartType == ChartType.StackedAreas || ChartRequest.ChartType == ChartType.TotalAreas)
                                     p.YValue = 0;
 
-
                                 return p;
                             }))).ToArray();
                     }

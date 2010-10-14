@@ -101,9 +101,9 @@ namespace Signum.Windows.Operations
                 OperationSettings settings = Settings.TryGetC(oi.Key);
                 if(settings != null)
                 {
-                    if(settings.GetType().IsInstantiationOf(typeof(EntityOperationSettings<>)))
+                    if(!settings.GetType().IsInstantiationOf(typeof(EntityOperationSettings<>)))
                         throw new InvalidOperationException("OperationSettings for {0} should be a {1} instead of {2}".Formato(
-                            settings, oi.Key, typeof(EntityOperationSettings<>).MakeGenericType(type).TypeName(), settings.GetType()));
+                            oi.Key, typeof(EntityOperationSettings<>).MakeGenericType(type).TypeName(), settings.GetType()));
  
                     Type supraType = settings.GetType().GetGenericArguments()[0]; 
                     if(!supraType.IsAssignableFrom(type))
