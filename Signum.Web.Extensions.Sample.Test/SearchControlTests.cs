@@ -301,13 +301,13 @@ namespace Signum.Web.Extensions.Sample.Test
                 selenium.Click("lblddlTokens_1");
                 selenium.Select("ddlTokens_1", "label=Id");
                 selenium.Click("btnAddColumn");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#tblResults > thead > tr > th.userColumn[id=Label.Id]"));
+                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#tblResults > thead > tr > th[id=Label.Id]"));
 
                 Assert.IsTrue(selenium.IsElementPresent("jq=#btnEditColumns:visible"));
 
                 selenium.Select("ddlTokens_1", "label=Name");
                 selenium.Click("btnAddColumn");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#tblResults > thead > tr > th.userColumn[id=Label.Name]"));
+                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#tblResults > thead > tr > th[id=Label.Name]"));
 
                 //Edit names
                 selenium.Click("btnEditColumns");

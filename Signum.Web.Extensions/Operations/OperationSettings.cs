@@ -119,7 +119,7 @@ namespace Signum.Web.Operations
                 IsContextual = true,
                 ControllerUrl = OperationSettings.TryCC(s => s.ControllerUrl).TryCC(c => (JsValue<string>)c) ?? (OperationInfo.OperationType == OperationType.Execute ? (JsValue<string>)"Operation/ContextualExecute" : null),
                 RequestExtraJsonData = OperationSettings.TryCC(opt => opt.RequestExtraJsonData) ?? 
-                                       "{{{0}:'{1}'}}".Formato(EntityBaseKeys.RuntimeInfo, new RuntimeInfo(Entity).ToString())
+                                       "{{{0}:'{1}'}}".Formato(TypeContextUtilities.Compose(Prefix, EntityBaseKeys.RuntimeInfo), new RuntimeInfo(Entity).ToString())
             };
         }
     }

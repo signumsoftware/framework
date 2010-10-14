@@ -68,13 +68,14 @@ namespace Signum.Test.Extensions
             UserTicketLogic.Start(sb, dqm);
             OperationLogic.Start(sb, dqm);
 
-            TypeAuthLogic.Start(sb);
-            PropertyAuthLogic.Start(sb, true);
-            QueryAuthLogic.Start(sb, dqm);
-            OperationAuthLogic.Start(sb);
-            PermissionAuthLogic.Start(sb);
+            //TypeAuthLogic.Start(sb);
+            //PropertyAuthLogic.Start(sb, true);
+            //QueryAuthLogic.Start(sb, dqm);
+            //OperationAuthLogic.Start(sb);
+            //PermissionAuthLogic.Start(sb);
             EntityGroupAuthLogic.Start(sb, true);
-            FacadeMethodAuthLogic.Start(sb, typeof(IServerSample));
+            AuthLogic.StartAllModules(sb, dqm);
+            //FacadeMethodAuthLogic.Start(sb, typeof(IServerSample));
 
             QueryLogic.Start(sb);
             UserQueryLogic.Start(sb, dqm);

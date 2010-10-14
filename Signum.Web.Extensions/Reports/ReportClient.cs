@@ -131,7 +131,7 @@ namespace Signum.Web.Reports
                 DivCssClass = ToolBarButton.DefaultQueryCssClass
             };
 
-            if (ExcelReport && idCurrentUserQuery == 0) //Excel Reports not allowed for UserQueries yet
+            if (ExcelReport) 
             {
                 var items = new List<ToolBarButton>();
                 

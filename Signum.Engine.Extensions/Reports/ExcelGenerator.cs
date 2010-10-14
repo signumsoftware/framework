@@ -105,7 +105,9 @@ namespace Signum.Engine.Reports
             var headerCells = sheetData.Descendants<Row>().First().Descendants<Cell>().ToList();
             var templateCols = headerCells.ToDictionary(c => document.GetCellValue(c));
 
-            var firstDataRowCells = sheetData.Descendants<Row>().First(r => r.RowIndex == 2).Descendants<Cell>().ToList();
+            var rowDataCellTemplates = sheetData.Descendants<Row>()
+                .First(r => IsValidRowDataTemplate(r, headerCells))
+                .Descendants<Cell>().ToList();
 
             var dic = templateCols.OuterJoinDictionaryCC(resultsCols, (name, cell, resultCol) =>
             {
@@ -117,7 +119,7 @@ namespace Signum.Engine.Reports
                     return new ColumnData
                     {
                         IsNew = false,
-                        StyleIndex = firstDataRowCells[headerCells.IndexOf(cell)].StyleIndex,
+                        StyleIndex = rowDataCellTemplates[headerCells.IndexOf(cell)].StyleIndex,
                         Column = resultCol,
                     };
                 }
@@ -127,7 +129,7 @@ namespace Signum.Engine.Reports
                     return new ColumnData
                     {
                         IsNew = true,
-                        StyleIndex = 0, //cb.DefaultStyles[resultCol.Format == "d" ? TemplateCells.Date : cb.GetTemplateCell(resultCol.Type)],
+                        StyleIndex = 0, 
                         Column = resultCol,
                     };
                 }
@@ -136,7 +138,25 @@ namespace Signum.Engine.Reports
             return dic.Values.ToList();
         }
 
-    
+        private static bool IsValidRowDataTemplate(Row row, List<Cell> headerCells)
+        { 
+            if (row.RowIndex <= 1) //At least greater than 1 (row 1 must be the header one)
+                return false;
+
+            var cells = row.Descendants<Cell>().ToList();
+
+            if (cells.Count < headerCells.Count) //Must have at least as many cells as the header row to have a template cell for all data columns
+                return false;
+
+            string headerLastCellReference = headerCells[headerCells.Count - 1].CellReference;
+            string dataCellReference = cells[headerCells.Count - 1].CellReference;
+            
+            //they must be in the same column
+            //If cellReferences of HeaderCell and DataCell differ only in the number they are on the same column
+            var firstDifferentCharacter = headerLastCellReference.Zip(dataCellReference).First(t => t.Item1 != t.Item2);
+            int number;
+            return int.TryParse(firstDifferentCharacter.Item1.ToString(), out number);
+        }
 
         private static string GetExcelColumn(int columnNumberBase0)
         {

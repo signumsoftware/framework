@@ -55,7 +55,7 @@ namespace Signum.Web.Extensions.Sample.Test
                 selenium.Click("lblddlTokens_1");
                 selenium.Select("ddlTokens_1", "label=Owner");
                 selenium.Click("btnAddColumn");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=th.userColumn"));
+                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=th[id=Label\\.Owner]"));
 
                 //add order
                 selenium.Click("jq=th#Year");
@@ -79,7 +79,7 @@ namespace Signum.Web.Extensions.Sample.Test
                 selenium.Click("//a[text()='Last albums']");
                 selenium.WaitForPageToLoad(PageLoadTimeout);
                 Assert.IsTrue(selenium.IsElementPresent("value_0"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=th.userColumn"));
+                Assert.IsTrue(selenium.IsElementPresent("jq=th[id=Label\\.Owner]"));
                 Assert.IsTrue(selenium.IsElementPresent("jq=th#Year.headerSortUp"));
             }
             catch (Exception)

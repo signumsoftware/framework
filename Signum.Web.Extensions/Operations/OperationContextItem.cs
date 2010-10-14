@@ -10,6 +10,7 @@ using System.Text;
 using Signum.Entities;
 using Signum.Engine;
 using Signum.Web.Controllers;
+using Signum.Web.Extensions.Properties;
 
 namespace Signum.Web.Operations
 {
@@ -117,6 +118,23 @@ namespace Signum.Web.Operations
             return contexts
                    .Select(pair => OperationButtonFactory.Create(pair.ContextualContext, pair.EntityContext))
                    .ToList();
+        }
+    }
+
+    public static class JsOp
+    {
+        public static JsInstruction ConfirmOperation(ContextualOperationContext ctx, JsFunction onSuccess)
+        {
+            return Js.Confirm(
+                Resources.PleaseConfirmYouDLikeToExecuteTheOperation0ToTheEntity123.Formato(ctx.OperationInfo.Key, ctx.Entity.ToStr, ctx.Entity.GetType().NiceName(), ctx.Entity.Id),
+                onSuccess);
+        }
+
+        public static JsInstruction ConfirmOperation(ContextualOperationContext ctx, JsInstruction onSuccess)
+        {
+            return Js.Confirm(
+                Resources.PleaseConfirmYouDLikeToExecuteTheOperation0ToTheEntity123.Formato(ctx.OperationInfo.Key, ctx.Entity.ToStr, ctx.Entity.GetType().NiceName(), ctx.Entity.Id), 
+                onSuccess);
         }
     }
 }
