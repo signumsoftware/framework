@@ -828,7 +828,12 @@ namespace Signum.Engine.Linq
             if (!projection.Projector.Type.IsInstantiationOf(typeof(KeyValuePair<,>)))
                 throw new InvalidOperationException("projection's projector should create KeyValuePairs");
 
-            return typeof(IEnumerable<>).MakeGenericType(new Type[] { projection.Projector.Type.GetGenericArguments()[1] }); 
+            Type type = projection.Projector.Type.GetGenericArguments()[1];
+
+            if (projection.UniqueFunction != null)
+                return type;
+
+            return typeof(IEnumerable<>).MakeGenericType(new Type[] { type });
         }
 
         public override string ToString()

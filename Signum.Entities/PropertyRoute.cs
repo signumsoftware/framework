@@ -34,7 +34,12 @@ namespace Signum.Entities
 
         public PropertyRoute Add(string propertyName)
         {
-            return Add(Type.GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance));
+            PropertyInfo pi = Type.GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
+
+            if (pi == null)
+                throw new InvalidOperationException("{0} of {1} does not exist".Formato(propertyName, this));
+
+            return Add(pi);
         }
 
         public PropertyRoute Add(PropertyInfo propertyInfo)

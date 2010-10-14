@@ -313,7 +313,9 @@ namespace Signum.Engine.Linq
         
         public Expression Lookup(Expression row, ChildProjectionExpression cProj)
         {
-            MethodInfo mi = miLookup.MakeGenericMethod(cProj.OuterKey.Type, cProj.Type.ElementType());
+            Type t = cProj.Projection.UniqueFunction == null ? cProj.Type.ElementType() : cProj.Type;
+
+            MethodInfo mi = miLookup.MakeGenericMethod(cProj.OuterKey.Type, t);
 
             Expression call = Expression.Call(row, mi, Expression.Constant(cProj.Projection.Token), cProj.OuterKey);
 
@@ -321,7 +323,7 @@ namespace Signum.Engine.Linq
                 return call;
 
             MethodInfo miUnique = UniqueMethod(cProj.Projection.UniqueFunction.Value); 
-            return Expression.Call(miUnique.MakeGenericMethod(call.Type.ElementType()), call);
+            return Expression.Call(miUnique.MakeGenericMethod(t), call);
         }
 
 
