@@ -230,7 +230,7 @@
         },
 
         requestDataForSearch: function () {
-            var requestData = [];
+            var requestData = new Object();
             requestData[sfQueryUrlName] = $(this.pf(sfQueryUrlName)).val();
             requestData[sfTop] = $(this.pf(sfTop)).val();
             requestData[sfAllowMultiple] = $(this.pf(sfAllowMultiple)).val();
@@ -247,18 +247,18 @@
             requestData["sfColumnMode"] = 'Replace';
 
             requestData[sfPrefix] = this.findOptions.prefix;
-            return requestData;
-        },
+	return requestData;
+	},
 
-        requestDataForOpenFinder: function () {
-            var requestData = new Object();
-            requestData[sfQueryUrlName] = this.findOptions.queryUrlName;
-            requestData[sfTop] = this.findOptions.top;
-            requestData[sfAllowMultiple] = this.findOptions.allowMultiple;
-            if (this.findOptions.view == false)
-                requestData[sfView] = this.findOptions.view;
-            if (this.findOptions.searchOnLoad == true)
-                requestData["sfSearchOnLoad"] = this.findOptions.searchOnLoad;
+    requestDataForOpenFinder: function () {
+        var requestData = new Object();
+        requestData[sfQueryUrlName] = this.findOptions.queryUrlName;
+        requestData[sfTop] = this.findOptions.top;
+        requestData[sfAllowMultiple] = this.findOptions.allowMultiple;
+        if (this.findOptions.view == false)
+            requestData[sfView] = this.findOptions.view;
+        if (this.findOptions.searchOnLoad == true)
+            requestData["sfSearchOnLoad"] = this.findOptions.searchOnLoad;
 
             if (this.findOptions.async)
                 requestData["sfAsync"] = this.findOptions.async;
@@ -280,11 +280,11 @@
                     }
                 }
             }
-
-            if (this.findOptions.orders != null)
-                requestData["sfOrderBy"] = this.findOptions.orders;
-            if (this.findOptions.columns != null)
-                requestData["sfColumns"] = this.findOptions.columns;
+        
+        if (this.findOptions.orders != null)
+            requestData["sfOrderBy"] = this.findOptions.orders;
+        if (this.findOptions.columns != null)
+            requestData["sfColumns"] = this.findOptions.columns;
             if (this.findOptions.columnMode != null)
                 requestData["sfColumnMode"] = this.findOptions.columnMode;
 
@@ -318,7 +318,7 @@
             if (info.find().length > 0) //If it's a Lite, the value is the Id
                 value = info.id() + ";" + info.runtimeType();
 
-            var filter = [];
+            var filter = new Object();
             filter["cn" + index] = $filter.find("td")[0].id.split("__")[1];
             filter["sel" + index] = selector.val();
             filter["val" + index] = value;

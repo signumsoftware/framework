@@ -130,7 +130,7 @@
 
         extraJsonParams: function (_prefix) {
             log("EBaseLine extraJsonParams");
-            var extraParams = [];
+            var extraParams = new Object();
 
             var staticInfo = this.staticInfo();
 
@@ -429,7 +429,7 @@
 
         this.extraJsonParams = function (itemPrefix) {
             log("EList extraJsonParams");
-            var extraParams = [];
+            var extraParams = new Object();
 
             //If Embedded Entity => send path of runtimes and ids to be able to construct a typecontext
             var staticInfo = this.staticInfo();
@@ -1068,7 +1068,7 @@
                 return null;
             var fullValue = selected.val();
             var separator = fullValue.indexOf(";");
-            var value = [];
+            var value = new Object();
             if (separator == -1) {
                 value.runtimeType = this.staticInfo().staticType();
                 value.id = fullValue;
