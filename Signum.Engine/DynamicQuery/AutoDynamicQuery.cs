@@ -51,9 +51,18 @@ namespace Signum.Engine.DynamicQuery
             var columns = new List<Column> { new _EntityColumn(EntityColumn().BuildColumnDescription()) };
             DQueryable<T> orderQuery = Query.Where(request.Filters).SelectDynamic(columns, request.Orders).OrderBy(request.Orders);
 
-            var entitySelect = (Expression<Func<object, Lite>>)TupleReflection.TupleChainPropertyLambda(orderQuery.TupleType, 0);
+            var entitySelect = GetEntitySelector(orderQuery.TupleType);
 
             return (Lite)orderQuery.Query.Select(entitySelect).Unique(request.UniqueType);
+        }
+
+        private static Expression<Func<object, Lite>> GetEntitySelector(Type tupleType)
+        {
+            ParameterExpression p = Expression.Parameter(typeof(object), "p");
+            return Expression.Lambda<Func<object, Lite>>(
+                Expression.Convert(
+                    TupleReflection.TupleChainProperty(Expression.Convert(p, tupleType), 0),
+                typeof(Lite)), p);
         }
 
         public override Expression Expression

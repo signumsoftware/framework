@@ -107,10 +107,10 @@ namespace Signum.Utilities.Reflection
             return Expression.Property(expression, TupleProperty(expression.Type, index));
         }
 
-        public static LambdaExpression TupleChainPropertyLambda(Type lambdaType, int index)
+        public static LambdaExpression TupleChainPropertyLambda(Type tupleType, int index)
         {
             ParameterExpression p = Expression.Parameter(typeof(object), "p");
-            return Expression.Lambda(TupleChainProperty(Expression.Convert(p, lambdaType), index), p);
+            return Expression.Lambda(TupleChainProperty(Expression.Convert(p, tupleType), index), p);
         }
     }
 }
