@@ -233,7 +233,7 @@
         return (this.indexOf(str) === 0);
     }
 
-    var StaticInfo = (function (_prefix) {
+    var StaticInfo = function (_prefix) {
         var prefix = _prefix,
 			_staticType = 0,
 			_isEmbedded = 1,
@@ -288,7 +288,7 @@
 			createValue: createValue,
             find: find
 		};
-    })();
+    };
 
     function StaticInfoFor(prefix) {
         return new StaticInfo(prefix);
