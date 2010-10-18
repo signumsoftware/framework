@@ -68,7 +68,9 @@ namespace Signum.Web
 
             if (response.Filter == null) return;
 
-            if (acceptEncoding.Contains("GZIP"))
+            if (response.Filter.GetType() == typeof(GZipStream) || response.Filter.GetType() == typeof(DeflateStream)) return;
+
+            if (acceptEncoding.Contains("GZIP") )
             {
                 response.AppendHeader("Content-encoding", "gzip");
                 response.Filter = new GZipStream(response.Filter, CompressionMode.Compress);
