@@ -127,7 +127,7 @@ namespace Signum.Web.Reports
             {
                 AltText = Resources.ExcelReport,
                 Text = Resources.ExcelReport,
-                OnClick = "SubmitOnly('{0}', $.extend({{userQuery:'{1}'}},new FindNavigator({{prefix:'{2}'}}).requestData()));".Formato(ToExcelPlainControllerUrl, (idCurrentUserQuery > 0 ? (int?)idCurrentUserQuery : null), prefix),
+                OnClick = "SubmitOnly('{0}', $.extend({{userQuery:'{1}'}},new FindNavigator({{prefix:'{2}'}}).requestDataForSearch()));".Formato(ToExcelPlainControllerUrl, (idCurrentUserQuery > 0 ? (int?)idCurrentUserQuery : null), prefix),
                 DivCssClass = ToolBarButton.DefaultQueryCssClass
             };
 
@@ -151,7 +151,7 @@ namespace Signum.Web.Reports
                         {
                             AltText = report.ToStr,
                             Text = report.ToStr,
-                            OnClick = "SubmitOnly('{0}', $.extend({{excelReport:'{1}'}},new FindNavigator({{prefix:'{2}'}}).requestData()));".Formato(ExcelReportControllerUrl, report.Id, prefix),
+                            OnClick = "SubmitOnly('{0}', $.extend({{excelReport:'{1}'}},new FindNavigator({{prefix:'{2}'}}).requestDataForSearch()));".Formato(ExcelReportControllerUrl, report.Id, prefix),
                             DivCssClass = ToolBarButton.DefaultQueryCssClass
                         });
                     }
