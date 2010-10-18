@@ -10,22 +10,16 @@ using System.Reflection;
 using System.IO;
 namespace Signum.Web
 {
-
     public static class AreaResourceHelper
     {
-        public static Func<string[], string> InternalAreaJs;
-        
+        public static Func<string[], string> InternalAreaJs
+           = files => (files.ToString(f => "<script type='text/javascript' src=\"{0}\"></script>\n".Formato(f), ""));
+
         public static void IncludeAreaJs(this HtmlHelper html, params string[] files)
         {
-            string include = "";
-            if (InternalAreaJs != null)
-                include = InternalAreaJs(files);
-            else{
-                include = files.ToString(f => "<script type='text/javascript' src=\"{0}\"></script>\n".Formato(f), "");
-            }
-          
+            string include = InternalAreaJs(files);
             html.ViewContext.HttpContext.Response.Write(include);
         }
-   }
+    }
 }
 

@@ -1,13 +1,6 @@
-﻿/*window['Autocompleter'] = Autocompleter;
-window['Autocompleter.prototype'] = Autocompleter.prototype;
-window['AutocompleteOnSelected'] = AutocompleteOnSelected;*/
+﻿if (!SF.Autocompleter && typeof SF.Autocompleter == "undefined") {
 
-$(function() { $('#form input[type=text]').keypress(function(e) { return e.which != 13 }) })
-
-/*window['Autocompleter'] = Autocompleter;
-window['Autocompleter.prototype'] = Autocompleter.prototype;
-window['AutocompleteOnSelected'] = AutocompleteOnSelected;*/
-Autocompleter = function(controlId, url, _options) {
+Autocompleter = function (controlId, url, _options) {
     this.options = $.extend({
         minChars: 1,
         limit: 5,
@@ -19,7 +12,7 @@ Autocompleter = function(controlId, url, _options) {
         extraParams: {},
         cacheEnabled: true,
         showExtra: false,
-        renderExtra: function($extra, data) {
+        renderExtra: function ($extra, data) {
             return $extra;
         }
     }, _options);
@@ -35,7 +28,7 @@ Autocompleter = function(controlId, url, _options) {
     this.create();
 
     this.extraObj = undefined;  //data object passed to extra div when clicked
- 
+
 };
 
 Autocompleter.prototype = {
@@ -296,4 +289,7 @@ function replaceDiacritics(s) {
         s = s.replace(diacritics[i], chars[i]);
     }
     return (s);
+}
+
+    SF.Autocompleter = Autocompleter;
 }

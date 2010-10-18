@@ -113,6 +113,7 @@ namespace Signum.Web
         public static Action<HtmlHelper, StringBuilder> IncludeCss;
         public static string jQueryPrefix = "";
         //jQuery ui DatePicker
+
         public static string Calendar(this HtmlHelper helper, string elementId, DatePickerOptions settings)
         {
             StringBuilder sb = new StringBuilder();

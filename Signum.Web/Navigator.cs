@@ -277,6 +277,16 @@ namespace Signum.Web
             Navigator.Manager.EntitySettings.AddRange(settings, s => s.StaticType, s => s, "EntitySettings");
         }
 
+        public static void AddQuerySettings(List<QuerySettings> settings)
+        {
+            Navigator.Manager.QuerySettings.AddRange(settings, s => s.QueryName, s => s, "QuerySettings");
+        }
+
+        public static void AddQuerySetting(QuerySettings setting)
+        {
+            Navigator.Manager.QuerySettings.AddOrThrow(setting.QueryName, setting, "QuerySettings {0} repeated");
+        }
+
         public static EntitySettings<T> EntitySettings<T>() where T : ModifiableEntity
         {
             return (EntitySettings<T>)Manager.EntitySettings[typeof(T)];
@@ -539,7 +549,7 @@ namespace Signum.Web
                     foreach (object o in DynamicQueryManager.Current.GetQueryNames())
                     {
                         if (!QuerySettings.ContainsKey(o))
-                            QuerySettings.Add(o, new QuerySettings() { Top = 50 });
+                            QuerySettings.Add(o, new QuerySettings(o) { Top = 50 });
                         if (!QuerySettings[o].UrlName.HasText())
                             QuerySettings[o].UrlName = GetQueryName(o);
                     }
@@ -990,10 +1000,15 @@ namespace Signum.Web
 
         protected internal virtual bool IsFindable(object queryName)
         {
-            if (QuerySettings == null)
+            QuerySettings qs = QuerySettings.TryGetC(queryName);
+
+            if (qs == null)
                 return false;
 
-            return QuerySettings.ContainsKey(queryName);
+            if (qs.IsFindable == null)
+                return true; 
+
+            return qs.OnIsFindable();
         }
 
         public virtual bool ShowOkSave(Type type, bool admin)

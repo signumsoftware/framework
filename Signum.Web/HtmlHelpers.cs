@@ -249,12 +249,15 @@ namespace Signum.Web
         public static string AutoCompleteExtender(this HtmlHelper html, string ddlName, string entityTypeName, string implementations, string entityIdFieldName,
                                                   string controllerUrl, string onSuccess)
         {                   
-            return  @"<script type=""text/javascript"">
-                        new Autocompleter(""{0}"", ""{1}"", {{
-	                        entityIdFieldName: ""{2}"",
-	                        extraParams: {{typeName: ""{3}"", implementations : ""{4}""}}}});
+
+            return @"<script type=""text/javascript"">
+                        SF.loadJs(""{0}"", function () {{
+                            new SF.Autocompleter(""{1}"", ""{2}"", {{
+	                            entityIdFieldName: ""{3}"",
+	                            extraParams: {{typeName: ""{4}"", implementations : ""{5}""}}}});
+                        }});
                      </script>"
-                    .Formato(ddlName, controllerUrl, entityIdFieldName, entityTypeName, implementations); 
+                    .Formato(ModuleResources.ResourceForModule("autocomplete"), ddlName, controllerUrl, entityIdFieldName, entityTypeName, implementations); 
         }
    }
 }

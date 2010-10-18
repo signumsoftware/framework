@@ -13,7 +13,7 @@
     <%} else { %>
         <div class="closebox" id="<%=context.Compose(ViewDataKeys.BtnCancel)%>"></div>
     <%} %>
-    <div id="<%=context.Compose("divPopupDragHandle")%>" onmousedown="comienzoMovimiento(event, '<%=context.Compose("panelPopup")%>');" class="dragHandle">
+    <div id="<%=context.Compose("divPopupDragHandle")%>" class="dragHandle">
         <span class="popupTitle"><%= (string)ViewData[ViewDataKeys.PageTitle] ?? "" %></span>
     </div>    
         <div id="<%=context.Compose("divButtonBar")%>" class="buttonBar">
@@ -31,3 +31,9 @@
 </div>
 </div>
 
+<script>
+    SF.loadJs("<%= ModuleResources.ResourceForModule("draganddrop") %>", function () {
+        SF.DragAndDrop(document.getElementById("<%=context.Compose("divPopupDragHandle")%>"),
+                    document.getElementById("<%=context.Compose("panelPopup")%>"));
+    });
+</script>

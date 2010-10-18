@@ -122,12 +122,12 @@ namespace Signum.Web
             {
                 string link = Link.ToString();
                 
-                bool active = false;
+           /*     bool active = false;
 
-                if (link.HasText() && currentUrl.EndsWith(link)) { active = true; }
+                if (link.HasText() && currentUrl.EndsWith(link)) { active = true; }*/
                 if (ManualA == null)
                 {
-                    FluentTagBuilder tbA = active ? new FluentTagBuilder("span").AddCssClass("selected") : new FluentTagBuilder("a")
+                    FluentTagBuilder tbA = /*active ? new FluentTagBuilder("span").AddCssClass("selected") :*/ new FluentTagBuilder("a")
                             .MergeAttributes(new {href = link, title = Title})
                             .AddCssClass(Class);
 

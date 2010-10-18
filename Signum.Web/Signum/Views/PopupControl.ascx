@@ -15,7 +15,7 @@
     <%} else { %>
         <div class="closebox" id="<%=modelTC.Compose(ViewDataKeys.BtnCancel)%>"></div>
     <%} %>
-    <div class="dragHandle" onmousedown="comienzoMovimiento(event, '<%=modelTC.Compose("panelPopup")%>');">
+    <div id="<%=modelTC.Compose("divPopupDragHandle")%>" class="dragHandle">
         <%
             string pageTitle = (string)ViewData[ViewDataKeys.PageTitle];
             if (pageTitle != null)
@@ -48,3 +48,9 @@
 </div>
 </div>
 
+<script>
+    SF.loadJs("<%= ModuleResources.ResourceForModule("draganddrop") %>", function () {
+        SF.DragAndDrop(document.getElementById("<%=modelTC.Compose("divPopupDragHandle")%>"),
+                    document.getElementById("<%=modelTC.Compose("panelPopup")%>"));
+    });
+</script>

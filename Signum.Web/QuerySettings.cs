@@ -13,6 +13,13 @@ namespace Signum.Web
 {
     public class QuerySettings
     {
+        public QuerySettings(object queryName)
+        {
+            this.QueryName = queryName; 
+        }
+
+        public object QueryName { get; private set; }
+
         public string Title { get; set; }
         public int? Top { get; set; }
         public string UrlName { get; set; }
@@ -83,6 +90,18 @@ namespace Signum.Web
         {
             return formatters.TryGetC(column.Name) ??
                    FormatRules.Last(cfr => cfr.IsApplyable(column)).Formatter(column);
+        }
+
+        public bool OnIsFindable()
+        {
+            if (IsFindable != null)
+                foreach (Func<object, bool> item in IsFindable.GetInvocationList())
+                {
+                    if (!item(QueryName))
+                        return false;
+                }
+
+            return true;
         }
     }
 

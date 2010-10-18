@@ -12,11 +12,16 @@
     <%} else { %>
         <div class="closebox" id="<%=context.Compose(ViewDataKeys.BtnCancel)%>"></div>
     <%} %>
-    <div id="<%=context.Compose("divPopupDragHandle")%>" class="dragHandle" onmousedown="comienzoMovimiento(event, '<%=context.Compose("panelPopup")%>');">
+    <div id="<%=context.Compose("divPopupDragHandle")%>" class="dragHandle"">
         <% string pageTitle = (string)ViewData[ViewDataKeys.PageTitle];
            if (pageTitle != null) { %> <span class="popupEntityName"><%= Html.Encode(pageTitle)%></span> <%}%>           
     </div>
     <%= ViewData[ViewDataKeys.CustomHtml].ToString() %>
 </div>
 </div>
-
+<script>
+    SF.loadJs("<%= ModuleResources.ResourceForModule("draganddrop") %>", function () {
+        SF.DragAndDrop(document.getElementById("<%=context.Compose("divPopupDragHandle")%>"),
+                    document.getElementById("<%=context.Compose("panelPopup")%>"));
+    });
+</script>

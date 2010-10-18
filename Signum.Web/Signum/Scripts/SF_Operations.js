@@ -1,8 +1,6 @@
-﻿var uiBlocked = false;
+﻿if (!OperationManager && typeof OperationManager == "undefined") {
 
-$(function () {
-    //$('.entity-operation').live('click', blockUI);
-});
+var uiBlocked = false;
 
 function blockUI() { 
     uiBlocked = true;
@@ -19,7 +17,7 @@ var OperationManager = function(_options) {
         onOk: null,
         onCancelled: null,
         contextual: false,
-        requestExtraJsonData: null,
+        requestExtraJsonData: null
     }, _options);
 };
 
@@ -542,4 +540,5 @@ function OpContextualOnSuccess(prefix, operationResult) {
        $("form").html(operationResult);
        NotifyInfo(lang['operationExecuted'], 2000); 
     }
+}
 }

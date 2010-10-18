@@ -87,6 +87,7 @@
       <DesignTime>True</DesignTime>
     </Compile>
     <Compile Include="Futures\ViewExtensions.cs" />
+    <Compile Include="ModuleResources.cs" />
     <Compile Include="ToolBarMenu.cs" />
     <Compile Include="FluentTagBuilder.cs" />
     <Compile Include="JSRenderer\JsFunction.cs" />
@@ -252,7 +253,7 @@
     </Content>
     <Content Include="Signum\Scripts\SF_FindNavigator.js" />
     <Content Include="Signum\Scripts\SF_Lines.js" />
-    <Content Include="Signum\Scripts\SF_Mixin.js" />
+    <Content Include="SF_Mixin.js" />
     <Content Include="Signum\Scripts\SF_Operations.js" />
     <Content Include="Signum\Scripts\SF_Popup.js" />
     <Content Include="Signum\Scripts\SF_Validator.js" />

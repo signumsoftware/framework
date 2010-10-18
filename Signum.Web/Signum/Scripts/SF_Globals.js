@@ -1,4 +1,78 @@
-﻿var sfSeparator = "_",
+﻿if (!SF && typeof SF == "undefined") {
+
+    var SF = function () {
+
+        var _added = [];
+        var _jsloaded = [];
+
+        /*  function _scriptForModule(name) {
+        //return "combine/areajs?f=signum/scripts/sf_" + name + ".js";
+        return "signum/scripts/sf_" + name + ".js";
+        }*/
+
+        function add(name, fn) {
+            if (!_added[name]) {
+                _added[name] = true;
+                fn(this);
+            }
+        }
+
+        /*  function use(name, fn) {
+        if (!_added[name]) {
+        _added[name] = true;
+        var src = _scriptForModule(name);
+        Loader.loadJs(src, fn);
+        } else {
+        fn();
+        }
+        }*/
+
+        function use(name, fn) {
+            fn();
+        }
+
+
+        function loadJs(src, fn) {
+            if (!_jsloaded[src]) {
+                _jsloaded[src] = true;
+                Loader.loadJs(src, fn);
+            } else {
+                fn();
+            }
+        }
+
+        return ({
+            add: add,
+            use: use,
+            loadJs: loadJs
+        });
+    } ();
+
+    var Loader = (function () {
+        var d = document,
+        head = d.getElementsByTagName("head")[0];
+
+        var loadJs = function (url, cb) {
+            var script = d.createElement('script');
+            script.setAttribute('src', url);
+            script.setAttribute('type', 'text/javascript');
+
+            var loaded = false;
+            var loadFunction = function () {
+                if (loaded) return;
+                loaded = true;
+                cb && cb();
+            };
+            script.onload = loadFunction;
+            script.onreadystatechange = loadFunction;
+            head.appendChild(script);
+        };
+
+        return { loadJs: loadJs };
+
+    })();
+
+    var sfSeparator = "_",
     sfPrefix = "prefix",
     sfPrefixToIgnore = "prefixToIgnore",
     sfTabId = "sfTabId",
@@ -17,23 +91,13 @@
     sfEntity = "sfEntity",
     sfToStr = "sfToStr",
     sfLink = "sfLink",
-    sfIndex = "sfIndex",
-    sfTicks = "sfTicks",
 
-    sfItemsContainer = "sfItemsContainer",
-    sfRepeaterItem = "sfRepeaterItem",
 
-    sfBtnCancel = "sfBtnCancel",
-    sfBtnOk = "sfBtnOk",
+    sfBtnCancel = "sfBtnCancel",            //viewNavigator, findNavigator, mixin
+    sfBtnOk = "sfBtnOk",                    //viewNavigator, findNavigator
 
-    sfQueryUrlName = "sfQueryUrlName",
-    sfTop = "sfTop",
-    sfAllowMultiple = "sfAllowMultiple",
-    sfView = "sfView",
-    sfEntityTypeName = "sfEntityTypeName",
+    sfEntityTypeName = "sfEntityTypeName",  //operations, findNavigator
 
-    sfIdRelated = "sfIdRelated",
-    sfRuntimeTypeRelated = "sfRuntimeTypeRelated",
 
     lang = {
         "error": "Error",
@@ -50,424 +114,453 @@
         "0results": "No results have been found"
     };
 
-String.prototype.startsWith = function(str) {
-    return (this.indexOf(str) === 0);
-}
+    String.prototype.startsWith = function (str) {
+        return (this.indexOf(str) === 0);
+    }
 
-var SF = {};
 
-SF.ajax = function(jqueryAjaxOptions) {
-    var options = $.extend({
-        type: null,
-        url: null,
-        data: null,
-        async: false,
-        dataType: null,
-        success: null,
-        error: null
-    }, jqueryAjaxOptions);
+    SF.ajax = function (jqueryAjaxOptions) {
+        var options = $.extend({
+            type: null,
+            url: null,
+            data: null,
+            async: false,
+            dataType: null,
+            success: null,
+            error: null
+        }, jqueryAjaxOptions);
 
-    $.ajax({
-        type: options.type,
-        url: options.url,
-        data: options.data,
-        async: options.async,
-        dataType: options.dataType,
+        $.ajax({
+            type: options.type,
+            url: options.url,
+            data: options.data,
+            async: options.async,
+            dataType: options.dataType,
+            success: function (ajaxResult) {
+                var url = SF.checkRedirection(ajaxResult);
+                if (!empty(url))
+                    window.location.href = isAbsoluteUrl(url) ? url : $("base").attr("href") + url;
+                else {
+                    if (options.success != null)
+                        options.success(ajaxResult);
+                }
+            },
+            error: options.error
+        });
+
+        /*
+        
+        $.ajax($.extend(jqueryAjaxOptions, {
         success: function(ajaxResult) {
-            var url = SF.checkRedirection(ajaxResult);
-            if (!empty(url))
-                window.location.href = isAbsoluteUrl(url) ? url : $("base").attr("href") + url;
-            else {
-                if (options.success != null)
-                    options.success(ajaxResult);
-            }
-        },
-        error: options.error
-    });
-
-    /*
+        var url = SF.checkRedirection(ajaxResult);
+        if (!empty(url))
+        window.location.href = $("base").attr("href") + url;
+        else {
+        if (options.success != null)
+        options.success(ajaxResult);
+        }
+        }
+        }));
         
-    $.ajax($.extend(jqueryAjaxOptions, {
-    success: function(ajaxResult) {
-    var url = SF.checkRedirection(ajaxResult);
-    if (!empty(url))
-    window.location.href = $("base").attr("href") + url;
-    else {
-    if (options.success != null)
-    options.success(ajaxResult);
-    }
-    }
-    }));
-        
-    */
-};
+        */
+    };
 
-SF.checkRedirection = function(ajaxResult) {
-    if (empty(ajaxResult))
-        return null;
-    var json;
-
-    if (typeof ajaxResult !== "object") {
-        //suppose that if is already an object it will be a json Object            
-        if (!SF.isJSON(ajaxResult))
+    SF.checkRedirection = function (ajaxResult) {
+        if (empty(ajaxResult))
             return null;
-        json = $.parseJSON(ajaxResult);
-    } else {
-        json = ajaxResult;
-    }
+        var json;
 
-    if (json.jsonResultType == null)
+        if (typeof ajaxResult !== "object") {
+            //suppose that if is already an object it will be a json Object            
+            if (!SF.isJSON(ajaxResult))
+                return null;
+            json = $.parseJSON(ajaxResult);
+        } else {
+            json = ajaxResult;
+        }
+
+        if (json.jsonResultType == null)
+            return null;
+        if (json.jsonResultType == 'Url')
+            return json.url;
         return null;
-    if (json.jsonResultType == 'Url')
-        return json.url;
-    return null;
-};
+    };
 
-//Based on jquery-1.4.2 parseJSON function
-SF.isJSON = function(data) {
+    //Based on jquery-1.4.2 parseJSON function
+    SF.isJSON = function (data) {
 
-    if (typeof data !== "string" || !data)
-        return null;
+        if (typeof data !== "string" || !data)
+            return null;
 
-    // Make sure leading/trailing whitespace is removed (IE can't handle it)
-    data = jQuery.trim(data);
+        // Make sure leading/trailing whitespace is removed (IE can't handle it)
+        data = jQuery.trim(data);
 
-    // Make sure the incoming data is actual JSON
-    // Logic borrowed from http://json.org/json2.js
-    if (/^[\],:{}\s]*$/.test(data.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g, "@")
+        // Make sure the incoming data is actual JSON
+        // Logic borrowed from http://json.org/json2.js
+        if (/^[\],:{}\s]*$/.test(data.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g, "@")
 			.replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, "]")
 			.replace(/(?:^|:|,)(?:\s*\[)+/g, ""))) {
 
-        return true;
-    }
-    else
-        return false;
-};
-
-function isAbsoluteUrl(s) {
-    return s.toLowerCase().startsWith("http");
-}
-
-String.prototype.startsWith = function(str) {
-    return (this.indexOf(str) === 0);
-}
-
-var StaticInfo = function(_prefix) {
-    this.prefix = _prefix;
-    this._staticType = 0;
-    this._isEmbedded = 1;
-    this._isReadOnly = 2;
-
-    this.find = function() {
-        return $('#' + this.prefix.compose(sfStaticInfo));
-    };
-    this.value = function() {
-        return this.find().val();
-    };
-    this.toArray = function() {
-        return this.value().split(";")
-    };
-    this.toValue = function(array) {
-        return array.join(";");
-    };
-    this.getValue = function(key) {
-        var array = this.toArray();
-        return array[key];
-    };
-    this.staticType = function() {
-        return this.getValue(this._staticType);
-    };
-    this.isEmbedded = function() {
-        return this.getValue(this._isEmbedded);
-    };
-    this.isReadOnly = function() {
-        return this.getValue(this._isReadOnly);
-    };
-    this.createValue = function(staticType, isEmbedded, isReadOnly) {
-        var array = new Array();
-        array[this._staticType] = staticType;
-        array[this._isEmbedded] = isEmbedded;
-        array[this._isReadOnly] = isReadOnly;
-        return this.toValue(array);
-    };
-}
-function StaticInfoFor(prefix) {
-    return new StaticInfo(prefix);
-}
-
-var RuntimeInfo = function(_prefix) {
-    this.prefix = _prefix;
-    this._runtimeType = 0;
-    this._id = 1;
-    this._isNew = 2;
-    this._ticks = 3;
-
-    this.find = function() {
-        return $('#' + this.prefix.compose(sfRuntimeInfo));
-    };
-    this.value = function() {
-        return this.find().val();
-    };
-    this.toArray = function() {
-        return this.value().split(";")
-    };
-    this.toValue = function(array) {
-        return array.join(";");
-    };
-    this.getSet = function(key, val) {
-        var array = this.toArray();
-        if (val == undefined)
-            return array[key];
-
-        array[key] = val;
-        this.find().val(this.toValue(array));
-        return this;
-    };
-    this.runtimeType = function() {
-        return this.getSet(this._runtimeType, null);
-    };
-    this.id = function() {
-        return this.getSet(this._id, null);
-    };
-    this.isNew = function() {
-        return this.getSet(this._isNew, null);
-    };
-    this.ticks = function(val) {
-        return this.getSet(this._ticks, val);
-    };
-    this.setEntity = function(runtimeType, id) {
-        this.getSet(this._runtimeType, runtimeType);
-        if (empty(id))
-            this.getSet(this._id, '').getSet(this._isNew, 'n');
+            return true;
+        }
         else
-            this.getSet(this._id, id).getSet(this._isNew, 'o');
-        return this;
+            return false;
     };
-    this.removeEntity = function() {
-        this.getSet(this._runtimeType, '');
-        this.getSet(this._id, '');
-        this.getSet(this._isNew, 'o');
-        return this;
-    };
-    this.createValue = function(runtimeType, id, isNew, ticks) {
-        var array = new Array();
-        array[this._runtimeType] = runtimeType;
-        array[this._id] = id;
-        array[this._isNew] = isNew;
-        array[this._ticks] = ticks;
-        return this.toValue(array);
-    };
-}
-function RuntimeInfoFor(prefix) {
-    return new RuntimeInfo(prefix);
-}
 
-if (typeof ajaxError === "undefined") {
-    ajaxError = true;
-    $(function() {
-        $(document).ajaxError(function(event, XMLHttpRequest, ajaxOptions, thrownError) {
-            ShowError(XMLHttpRequest, ajaxOptions, thrownError);
-        });
-    });
-}
-
-/* show messages on top (info, error...) */
-
-function NotifyError(s, t) {
-    NotifyInfo(s, t, 'error');
-}
-
-function NotifyInfo(s, t, cssClass) {
-    var $messageArea = $("#message-area"), cssClass = (cssClass != undefined ? cssClass : "info");
-    if ($messageArea.length == 0) {
-        //create the message container
-        $messageArea = $("<div id=\"message-area\"><div class=\"message-area-text-container\"><span></span></div></div>").hide().prependTo($("body"));
+    function isAbsoluteUrl(s) {
+        return s.toLowerCase().startsWith("http");
     }
 
-    $messageArea.find("span").html(s);  //write message
-    $messageArea.children().first().addClass(cssClass != undefined ? cssClass : "info");    //set class
-    $messageArea.css({ marginLeft: -parseInt($messageArea.outerWidth() / 2), top: 0 }).show();
+    String.prototype.startsWith = function (str) {
+        return (this.indexOf(str) === 0);
+    }
 
-    if (t != undefined) {
-        var timer = setTimeout(function() {
-            $messageArea.animate({ top: -30 }, "slow")
+    var StaticInfo = (function (_prefix) {
+        var prefix = _prefix,
+			_staticType = 0,
+			_isEmbedded = 1,
+			_isReadOnly = 2,
+			$elem;				//cache for the element
+        
+        var find = function () {
+			if (!$elem) $elem = $('#' + prefix.compose(sfStaticInfo));
+			return $elem;
+        };
+		
+        var value = function () {
+            return find().val();
+        };
+        
+		var toArray = function () {
+            return value().split(";")
+        };
+        var toValue = function (array) {
+            return array.join(";");
+        };
+		
+        var getValue = function (key) {
+            var array = toArray();
+            return array[key];
+        };
+        
+		var staticType = function () {
+            return getValue(_staticType);
+        };
+        
+		var isEmbedded = function () {
+            return getValue(_isEmbedded);
+        };
+        
+		var isReadOnly = function () {
+            return getValue(_isReadOnly);
+        };
+		
+        var createValue = function (staticType, isEmbedded, isReadOnly) {
+            var array = [];
+            array[_staticType] = staticType;
+            array[_isEmbedded] = isEmbedded;
+            array[_isReadOnly] = isReadOnly;
+            return toValue(array);
+        };
+		
+		return{
+			staticType: staticType,
+			isEmbedded: isEmbedded,
+			isReadOnly: isReadOnly,
+			createValue: createValue
+		};
+    })();
+
+    function StaticInfoFor(prefix) {
+        return new StaticInfo(prefix);
+    }
+
+    var RuntimeInfo = function (_prefix) {
+        var prefix = _prefix;
+        var _runtimeType = 0;
+        var _id = 1;
+        var _isNew = 2;
+        var _ticks = 3;
+        var $elem; 			//cache for the element
+
+        var find = function () {
+            if (!$elem) { $elem = $('#' + prefix.compose(sfRuntimeInfo)); }
+            return $elem;
+        };
+        var value = function () {
+            return find().val();
+        };
+        var toArray = function () {
+            return value().split(";");
+        };
+        var toValue = function (array) {
+            return array.join(";");
+        };
+        var getSet = function (key, val) {
+            var array = toArray();
+            if (val == undefined)
+                return array[key];
+
+            array[key] = val;
+            find().val(toValue(array));
+            return this;
+        };
+        var runtimeType = function () {
+            return getSet(_runtimeType);
+        };
+        var id = function () {
+            return getSet(_id);
+        };
+        var isNew = function () {
+            return getSet(_isNew);
+        };
+        var ticks = function (val) {
+            return getSet(_ticks, val);
+        };
+        var setEntity = function (runtimeType, id) {
+            getSet(_runtimeType, runtimeType);
+            if (empty(id))
+                getSet(_id, '').getSet(_isNew, 'n');
+            else
+                getSet(_id, id).getSet(_isNew, 'o');
+            return this;
+        };
+        var removeEntity = function () {
+            getSet(_runtimeType, '');
+            getSet(_id, '');
+            getSet(_isNew, 'o');
+            return this;
+        };
+        var createValue = function (runtimeType, id, isNew, ticks) {
+            var array = [];
+            array[_runtimeType] = runtimeType;
+            array[_id] = id;
+            array[_isNew] = isNew;
+            array[_ticks] = ticks;
+            return toValue(array);
+        };
+
+        return {
+            runtimeType: runtimeType,
+            id: id,
+            isNew: isNew,
+            ticks: ticks,
+            setEntity: setEntity,
+            removeEntity: removeEntity,
+            createValue: createValue
+        };
+    };
+
+    function RuntimeInfoFor(prefix) {
+        return new RuntimeInfo(prefix);
+    }
+
+    if (typeof ajaxError === "undefined") {
+        ajaxError = true;
+        $(function () {
+            $(document).ajaxError(function (event, XMLHttpRequest, ajaxOptions, thrownError) {
+                ShowError(XMLHttpRequest, ajaxOptions, thrownError);
+            });
+        });
+    }
+
+    /* show messages on top (info, error...) */
+
+    function NotifyError(s, t) {
+        NotifyInfo(s, t, 'error');
+    }
+
+    function NotifyInfo(s, t, cssClass) {
+        var $messageArea = $("#message-area"), cssClass = (cssClass != undefined ? cssClass : "info");
+        if ($messageArea.length == 0) {
+            //create the message container
+            $messageArea = $("<div id=\"message-area\"><div class=\"message-area-text-container\"><span></span></div></div>").hide().prependTo($("body"));
+        }
+
+        $messageArea.find("span").html(s);  //write message
+        $messageArea.children().first().addClass(cssClass != undefined ? cssClass : "info");    //set class
+        $messageArea.css({ marginLeft: -parseInt($messageArea.outerWidth() / 2), top: 0 }).show();
+
+        if (t != undefined) {
+            var timer = setTimeout(function () {
+                $messageArea.animate({ top: -30 }, "slow")
                 .hide()
                 .children().first().removeClass(cssClass);
-            clearTimeout(timer);
-            timer = null;
-        }, t);
-    }
-}
-
-function qp(name, value) {
-    return "&" + name + "=" + value;
-}
-
-function empty(myString) {
-    return (myString == undefined || myString == null || myString === "" || myString.toString() == "");
-}
-
-String.prototype.hasText = function() { return (this == null || this == undefined || this == '') ? false : true; }
-
-String.prototype.compose = function(name, separator) {
-    if (empty(this))
-        return name;
-    if (empty(name))
-        return this.toString();
-    if (empty(separator))
-        separator = sfSeparator;
-    return this.toString() + separator + name.toString();
-}
-
-function isFalse(value) {
-    return value == false || value == "false" || value == "False";
-}
-
-function isTrue(value) {
-    return value == true || value == "true" || value == "True";
-}
-
-function GetPathPrefixes(prefix) {
-    var path = new Array();
-    var pathSplit = prefix.split("_");
-
-    for (var i = 0, l = pathSplit.length; i < l; i++)
-        path[i] = concat(pathSplit, i, "_");
-
-    for (var i = 0, l = pathSplit.length; i < l; i++)
-        path[l + i] = concat(pathSplit, i, "");
-
-    var pathNoReps = new Array();
-
-    var hasEmpty = false;
-    for (var i = 0, l = path.length; i < l; i++) {
-        if ($.inArray(path[i], pathNoReps) == -1) {
-            pathNoReps[i] = path[i];
-            if (path[i] == "")
-                hasEmpty = true;
-        }
-    }
-    if (!hasEmpty)
-        pathNoReps[pathNoReps.length] = "";
-    return pathNoReps;
-}
-
-function concat(array, toIndex, firstChar) {
-    var path = [];
-    var charToWrite = firstChar;
-    for (var i = 0; i <= toIndex; i++) {
-        if (array[i] != "") {
-            path.push(charToWrite + array[i]);
-            charToWrite = "_";
-        }
-    }
-    return path.join('');
-}
-
-function Get(url) {
-    document.forms[0].method = "GET";
-    document.forms[0].action = url;
-    document.forms[0].submit();
-    return false;
-}
-
-function Submit(urlController, requestExtraJsonData) {
-    if (!empty(requestExtraJsonData)) {
-        var $form = $("form");
-        for (var key in requestExtraJsonData) {
-            var str = $.isFunction(requestExtraJsonData[key]) ? requestExtraJsonData[key]() : requestExtraJsonData[key];
-
-            $form.append(hiddenInput(key, str));
+                clearTimeout(timer);
+                timer = null;
+            }, t);
         }
     }
 
-    document.forms[0].action = urlController;
-    document.forms[0].submit();
-    return false;
-}
+    function qp(name, value) {
+        return "&" + name + "=" + value;
+    }
 
-function SubmitOnly(urlController, requestExtraJsonData) {
-    if (requestExtraJsonData == null)
-        throw "SubmitOnly needs requestExtraJsonData. Use Submit instead";
+    function empty(myString) {
+        return (myString == undefined || myString == null || myString === "" || myString.toString() == "");
+    }
 
-    var $form = $("<form method='post' action='" + urlController + "'></form>");
+    String.prototype.hasText = function () { return (this == null || this == undefined || this == '') ? false : true; }
 
-    if (!empty(requestExtraJsonData)) {
-        for (var key in requestExtraJsonData) {
-            var str = $.isFunction(requestExtraJsonData[key]) ? requestExtraJsonData[key]() : requestExtraJsonData[key];
-            $form.append(hiddenInput(key, str));
+    String.prototype.compose = function (name, separator) {
+        if (empty(this))
+            return name;
+        if (empty(name))
+            return this.toString();
+        if (empty(separator))
+            separator = sfSeparator;
+        return this.toString() + separator + name.toString();
+    }
+
+    function isFalse(value) {
+        return value == false || value == "false" || value == "False";
+    }
+
+    function isTrue(value) {
+        return value == true || value == "true" || value == "True";
+    }
+
+    function GetPathPrefixes(prefix) {
+        var path = [],
+            pathSplit = prefix.split("_");
+
+        for (var i = 0, l = pathSplit.length; i < l; i++)
+            path[i] = concat(pathSplit, i, "_");
+
+        for (var i = 0, l = pathSplit.length; i < l; i++)
+            path[l + i] = concat(pathSplit, i, "");
+
+        var pathNoReps = new Array();
+
+        var hasEmpty = false;
+        for (var i = 0, l = path.length; i < l; i++) {
+            if ($.inArray(path[i], pathNoReps) == -1) {
+                pathNoReps[i] = path[i];
+                if (path[i] == "")
+                    hasEmpty = true;
+            }
+        }
+        if (!hasEmpty)
+            pathNoReps[pathNoReps.length] = "";
+        return pathNoReps;
+    }
+
+    function concat(array, toIndex, firstChar) {
+        var path = [];
+        var charToWrite = firstChar;
+        for (var i = 0; i <= toIndex; i++) {
+            if (array[i] != "") {
+                path.push(charToWrite + array[i]);
+                charToWrite = "_";
+            }
+        }
+        return path.join('');
+    }
+
+    function Get(url) {
+        document.forms[0].method = "GET";
+        document.forms[0].action = url;
+        document.forms[0].submit();
+        return false;
+    }
+
+    function Submit(urlController, requestExtraJsonData) {
+        if (!empty(requestExtraJsonData)) {
+            var $form = $("form");
+            for (var key in requestExtraJsonData) {
+                var str = $.isFunction(requestExtraJsonData[key]) ? requestExtraJsonData[key]() : requestExtraJsonData[key];
+
+                $form.append(hiddenInput(key, str));
+            }
+        }
+
+        document.forms[0].action = urlController;
+        document.forms[0].submit();
+        return false;
+    }
+
+    function SubmitOnly(urlController, requestExtraJsonData) {
+        if (requestExtraJsonData == null)
+            throw "SubmitOnly needs requestExtraJsonData. Use Submit instead";
+
+        var $form = $("<form method='post' action='" + urlController + "'></form>");
+
+        if (!empty(requestExtraJsonData)) {
+            for (var key in requestExtraJsonData) {
+                var str = $.isFunction(requestExtraJsonData[key]) ? requestExtraJsonData[key]() : requestExtraJsonData[key];
+                $form.append(hiddenInput(key, str));
+            }
+        }
+
+        var currentForm = $("form");
+        currentForm.after($form);
+
+        $form.submit()
+            .remove();
+
+        return false;
+    }
+
+    /*
+    s : string to replace
+    tr: dictionary of translations
+    */
+    function replaceAll(s, tr) {
+        var v = s;
+        for (var t in tr) {
+            v = v.split(t).join(tr[t]);
+            //v=v.replace(new RegExp(t,'g'),tr[t]); //alternativa
+        }
+        return v;
+    }
+
+    function GetErrorMessage(response) {
+        var error;
+        if (response != null && response != undefined) {
+            var startError = response.indexOf("<title>");
+            var endError = response.indexOf("</title>");
+            if ((startError != -1) && (endError != -1))
+                error = response.substring(startError + 7, endError);
+            else
+                error = response;
+        }
+        return error;
+    }
+
+    function ShowError(XMLHttpRequest, textStatus, errorThrown) {
+        var error = GetErrorMessage(XMLHttpRequest.responseText);
+        if (!error) error = textStatus;
+
+        var message = error.length > 50 ? error.substring(0, 49) + "..." : error;
+        NotifyError(lang['error'] + ": " + message, 2000);
+
+        alert("Error: " + error);
+
+        uiBlocked = false;
+        $(".uiBlocker").remove();
+    }
+
+    var debug = true;
+    function log(s) {
+        if (debug) {
+            if (typeof console != "undefined" && typeof console.debug != "undefined")
+                console.log(s);
+
         }
     }
 
-    var currentForm = $("form");
-    currentForm.after($form);
-
-    $form.submit()
-        .remove();
-
-    return false;
-}
-
-/*
-s : string to replace
-tr: dictionary of translations
-*/
-function replaceAll(s, tr) {
-    var v = s;
-    for (var t in tr) {
-        v = v.split(t).join(tr[t]);
-        //v=v.replace(new RegExp(t,'g'),tr[t]); //alternativa
-    }
-    return v;
-}
-
-function GetErrorMessage(response) {
-    var error;
-    if (response != null && response != undefined) {
-        var startError = response.indexOf("<title>");
-        var endError = response.indexOf("</title>");
-        if ((startError != -1) && (endError != -1))
-            error = response.substring(startError + 7, endError);
+    function singleQuote(myfunction) {
+        if (myfunction != null)
+            return myfunction.toString().replace(/"/g, "'");
         else
-            error = response;
+            return '';
     }
-    return error;
-}
 
-function ShowError(XMLHttpRequest, textStatus, errorThrown) {
-    var error = GetErrorMessage(XMLHttpRequest.responseText);
-    if (!error) error = textStatus;
-
-    var message = error.length > 50 ? error.substring(0, 49) + "..." : error;
-    NotifyError(lang['error'] + ": " + message, 2000);
-
-    alert("Error: " + error);
-
-    uiBlocked = false;
-    $(".uiBlocker").remove();
-}
-
-var debug = true;
-function log(s) {
-    if (debug) {
-        if (typeof console != "undefined" && typeof console.debug != "undefined")
-            console.log(s);
-
-    }
-}
-
-function singleQuote(myfunction) {
-    if (myfunction != null)
-        return myfunction.toString().replace(/"/g, "'");
-    else
-        return '';
-}
-
-//Performs input validation
-var validator = new function() {
-    this.number = function(e) {
-        var c = e.keyCode;
-        return (
+    //Performs input validation
+    var validator = new function () {
+        this.number = function (e) {
+            var c = e.keyCode;
+            return (
 			(c >= 48 && c <= 57) || //0-9
 			(c >= 96 && c <= 105) ||  //NumPad 0-9
 			(c == 8) || //BackSpace
@@ -482,68 +575,68 @@ var validator = new function() {
 			(c == 109) || //NumPad -
 			(c == 189)
 		);
-    };
-    this.decimalNumber = function(e) {
-        var c = e.keyCode;
-        return (
+        };
+        this.decimalNumber = function (e) {
+            var c = e.keyCode;
+            return (
 			this.number(e) ||
 			(c == 110) ||  //NumPad Decimal
             (c == 190) || //.
 			(c == 188) //,
 		);
-    };
-};
-
-String.prototype.format = function(values) {
-    var regex = /\{([\w-]+)(?:\:([\w\.]*)(?:\((.*?)?\))?)?\}/g;
-
-    var getValue = function(key) {
-        if (values == null || typeof values === 'undefined')
-            return null;
-
-        var value = values[key];
-        var type = typeof value;
-
-        return type === 'string' || type === 'number' ? value : null;
+        };
     };
 
-    return this.replace(regex, function(match) {
-        //match will look like {sample-match}
-        //key will be 'sample-match';
-        var key = match.substr(1, match.length - 2);
+    String.prototype.format = function (values) {
+        var regex = /\{([\w-]+)(?:\:([\w\.]*)(?:\((.*?)?\))?)?\}/g;
 
-        var value = getValue(key);
+        var getValue = function (key) {
+            if (values == null || typeof values === 'undefined')
+                return null;
 
-        return value != null ? value : match;
-    });
-};
+            var value = values[key];
+            var type = typeof value;
 
-if (typeof String.prototype.trim !== 'function') {
-    String.prototype.trim = function() {
-        return this.replace(/^\s+|\s+$/, '');
+            return type === 'string' || type === 'number' ? value : null;
+        };
+
+        return this.replace(regex, function (match) {
+            //match will look like {sample-match}
+            //key will be 'sample-match';
+            var key = match.substr(1, match.length - 2);
+
+            var value = getValue(key);
+
+            return value != null ? value : match;
+        });
+    };
+
+    if (typeof String.prototype.trim !== 'function') {
+        String.prototype.trim = function () {
+            return this.replace(/^\s+|\s+$/, '');
+        }
     }
-}
 
-var toggler = new 
-function() {
-    this.divName = function(name) {
+    var toggler = new 
+function () {
+    this.divName = function (name) {
         return "div" + name;
     };
-    this.option = function(elem) {
+    this.option = function (elem) {
         var value = ((elem.type == 'checkbox') ? elem.checked : elem.value === 'true');
         this.optionValue(this.divName(elem.name), value);
-        if (!value) $('#' + this.divName(elem.name) + ' :input:text').each(function() {
+        if (!value) $('#' + this.divName(elem.name) + ' :input:text').each(function () {
             this.value = "";
         });
     };
-    this.optionInverse = function(elem) {
+    this.optionInverse = function (elem) {
         var value = ((elem.type == 'checkbox') ? !elem.checked : elem.value === 'false');
         this.optionValue(this.divName(elem.name), value);
-        if (!value) $('#' + this.divName(elem.name) + ' :input:text').each(function() {
+        if (!value) $('#' + this.divName(elem.name) + ' :input:text').each(function () {
             this.value = "";
         });
     };
-    this.numeric = function(id, max) {
+    this.numeric = function (id, max) {
         var name = this.divName(id);
         var value = $("#" + id).val();
         if (value == "") {
@@ -554,7 +647,7 @@ function() {
         }
         this.optionValue(name, (value > max));
     };
-    this.numericCombo = function(id, max) {
+    this.numericCombo = function (id, max) {
         var name = this.divName(id);
         var option = $("#" + combo + " option:selected");
         if (option.val() == "") {
@@ -565,148 +658,148 @@ function() {
         if (html.length == 1 && html <= max.toString()) this.optionValue(name, false);
         else this.optionValue(name, true);
     };
-    this.optionValue = function(name, value) {
+    this.optionValue = function (name, value) {
         value ? $("#" + name).show() : $("#" + name).hide();
     };
 }
 
 
-$.getScript = function(url, callback, cache, async) { $.ajax({ type: "GET", url: url, cache: true, success: callback, async: async, dataType: "script", cache: cache }); };
+    $.getScript = function (url, callback, cache, async) { $.ajax({ type: "GET", url: url, cache: true, success: callback, async: async, dataType: "script", cache: cache }); };
 
-var resourcesLoaded = new Array();
-$.jsLoader = function(cond, url, callback, async) {
-    var a = (async != undefined) ? async : true;
-    log("Retrieving from " + url + " " + (a ? "a" : "") + "synchronuosly");
-    if (!resourcesLoaded[url] && cond) {
-        log("Getting js " + url);
-        $.getScript(url, function() {
-            resourcesLoaded[url] = true;
-            if (callback) callback();
-        },
+    var resourcesLoaded = new Array();
+    $.jsLoader = function (cond, url, callback, async) {
+        var a = (async != undefined) ? async : true;
+        log("Retrieving from " + url + " " + (a ? "a" : "") + "synchronuosly");
+        if (!resourcesLoaded[url] && cond) {
+            log("Getting js " + url);
+            $.getScript(url, function () {
+                resourcesLoaded[url] = true;
+                if (callback) callback();
+            },
             true,
             a);
-    }
-};
-$.cssLoader = function(cond, url) {
-    if (!resourcesLoaded[url] && cond) {
-        //   console.log("Getting css " + url);
-        /*   jQuery( document.createElement('link') ).attr({
-        href: url,
-        media: media || 'screen',
-        type: 'text/css',
-        rel: 'stylesheet'
-        }).appendTo($('head')); */
-        var head = document.getElementsByTagName('head')[0];
-        $(document.createElement('link'))
+        }
+    };
+    $.cssLoader = function (cond, url) {
+        if (!resourcesLoaded[url] && cond) {
+            //   console.log("Getting css " + url);
+            /*   jQuery( document.createElement('link') ).attr({
+            href: url,
+            media: media || 'screen',
+            type: 'text/css',
+            rel: 'stylesheet'
+            }).appendTo($('head')); */
+            var head = document.getElementsByTagName('head')[0];
+            $(document.createElement('link'))
             .attr({ type: 'text/css', href: url, rel: 'stylesheet', media: 'screen' })
             .appendTo(head);
-        resourcesLoaded[url] = true;
-    }
-};
+            resourcesLoaded[url] = true;
+        }
+    };
 
-/* forms */
-if (typeof placeholder === "undefined") {
-    placeholder = true;
-    $(function() {
-        $('input[placeholder], textarea[placeholder]').placeholder();
-    });
+    /* forms */
+    if (typeof placeholder === "undefined") {
+        placeholder = true;
+        $(function () {
+            $('input[placeholder], textarea[placeholder]').placeholder();
+        });
 
-    (function($) {
-        $.fn.placeholder = function() {
-            if ($.fn.placeholder.supported()) {
-                return $(this);
-            } else {
+        (function ($) {
+            $.fn.placeholder = function () {
+                if ($.fn.placeholder.supported()) {
+                    return $(this);
+                } else {
 
-                $(this).parent('form').submit(function(e) {
-                    $('input[placeholder].placeholder, textarea[placeholder].placeholder', this).val('');
-                });
+                    $(this).parent('form').submit(function (e) {
+                        $('input[placeholder].placeholder, textarea[placeholder].placeholder', this).val('');
+                    });
 
-                $(this).each(function() {
-                    $.fn.placeholder.on(this);
-                });
+                    $(this).each(function () {
+                        $.fn.placeholder.on(this);
+                    });
 
-                return $(this)
+                    return $(this)
 
-            .focus(function() {
+            .focus(function () {
                 if ($(this).hasClass('placeholder')) {
                     $.fn.placeholder.off(this);
                 }
             })
 
-            .blur(function() {
+            .blur(function () {
                 if ($(this).val() == '') {
                     $.fn.placeholder.on(this);
                 }
             });
+                }
+            };
+
+            // Extracted from: http://diveintohtml5.org/detect.html#input-placeholder
+            $.fn.placeholder.supported = function () {
+                var input = document.createElement('input');
+                return !!('placeholder' in input);
+            };
+
+            $.fn.placeholder.on = function (el) {
+                var $el = $(el);
+                $el.val($el.attr('placeholder')).addClass('placeholder');
+            };
+
+            $.fn.placeholder.off = function (el) {
+                $(el).val('').removeClass('placeholder');
+            };
+        })(jQuery);
+    }
+
+    /* functions to read / write cookies */
+    function readCookie(name) {
+        var nameEQ = name + "=";
+        var ca = document.cookie.split(';');
+        for (var i = 0; i < ca.length; i++) {
+            var c = ca[i];
+            while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+            if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+        }
+        return null;
+    }
+
+    function createCookie(name, value, days) {
+        if (days) {
+            var date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            var expires = "; expires=" + date.toGMTString();
+        }
+        else var expires = "";
+        document.cookie = name + "=" + value + expires + "; path=/";
+    }
+
+    SF.userSettings = {
+        hasLocalStorage: typeof (localStorage) != 'undefined',
+
+        read: function (key) {
+            if (this.hasLocalStorage) {
+                try { return localStorage.getItem(key); }
+                catch (e) { }
             }
-        };
+            return readCookie(key);
+        },
 
-        // Extracted from: http://diveintohtml5.org/detect.html#input-placeholder
-        $.fn.placeholder.supported = function() {
-            var input = document.createElement('input');
-            return !!('placeholder' in input);
-        };
-
-        $.fn.placeholder.on = function(el) {
-            var $el = $(el);
-            $el.val($el.attr('placeholder')).addClass('placeholder');
-        };
-
-        $.fn.placeholder.off = function(el) {
-            $(el).val('').removeClass('placeholder');
-        };
-    })(jQuery);
-}
-
-/* functions to read / write cookies */
-function readCookie(name) {
-    var nameEQ = name + "=";
-    var ca = document.cookie.split(';');
-    for (var i = 0; i < ca.length; i++) {
-        var c = ca[i];
-        while (c.charAt(0) == ' ') c = c.substring(1, c.length);
-        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
-    }
-    return null;
-}
-
-function createCookie(name, value, days) {
-    if (days) {
-        var date = new Date();
-        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-        var expires = "; expires=" + date.toGMTString();
-    }
-    else var expires = "";
-    document.cookie = name + "=" + value + expires + "; path=/";
-}
-
-SF.userSettings = {
-    hasLocalStorage: typeof (localStorage) != 'undefined',
-
-    read: function(key) {
-        if (this.hasLocalStorage) {
-            try { return localStorage.getItem(key); }
-            catch (e) { }
+        store: function (key, value, days) {
+            if (this.hasLocalStorage) {
+                try { localStorage.setItem(key, value); return true; }
+                catch (e) { }
+            }
+            createCookie(key, value, days ? days : 30);
         }
-        return readCookie(key);
-    },
+    };
 
-    store: function(key, value, days) {
-        if (this.hasLocalStorage) {
-            try { localStorage.setItem(key, value); return true; }
-            catch (e) { }
-        }
-        createCookie(key, value, days ? days : 30);
-    }
-};
-
-SF.dropdowns =
+    SF.dropdowns =
     {
-        opened: [], 
-        register: function(elem) {
+        opened: [],
+        register: function (elem) {
             this.opened.push(elem);
         },
-        closeOpened: function() {
+        closeOpened: function () {
             //close open dropdowns except elem, if it is being opened
             for (var i = 0; i < this.opened.length; i++)
                 this.opened[i].toggleClass("open");
@@ -714,9 +807,14 @@ SF.dropdowns =
         }
     };
 
-    $(function() {
-        $("body").click(function(e) {
+    $(function () {
+        $("body").click(function (e) {
             //manages close of dropdown different than current
             $(e.target).closest(".dropdown").length == 0 && SF.dropdowns.closeOpened();
         });
     });
+
+    $(function () { $('#form input[type=text]').keypress(function (e) { return e.which != 13 }) })
+
+
+}

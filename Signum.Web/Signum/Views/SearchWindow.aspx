@@ -9,9 +9,7 @@
             "signum/Scripts/SF_ViewNavigator.js",
             "signum/Scripts/SF_FindNavigator.js",
             "signum/Scripts/SF_Validator.js",   
-            "signum/Scripts/SF_Operations.js",
-            "signum/Scripts/SF_DragAndDrop.js",   
-            "signum/Scripts/SF_Autocomplete.js");
+            "signum/Scripts/SF_Operations.js");
         //string s = Html.GetContextualItemListForQuery(((FindOptions)ViewData[ViewDataKeys.FindOptions]).QueryName).ContextualItemsToString();
     %>
 </asp:Content>
