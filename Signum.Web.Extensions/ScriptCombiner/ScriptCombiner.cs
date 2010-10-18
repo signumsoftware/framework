@@ -17,7 +17,7 @@ namespace Signum.Web.ScriptCombiner
 {
     public class MixedCssScriptCombiner
     {
-        private readonly static TimeSpan CACHE_DURATION = TimeSpan.FromDays(10); //avoid 304 during a session
+        private readonly static TimeSpan CACHE_DURATION = TimeSpan.FromDays(30); //avoid 304 during a session
 
         /// <summary>
         /// Indicates if the output file should be cached
@@ -53,15 +53,6 @@ namespace Signum.Web.ScriptCombiner
 
             content = Regex.Replace(content, "[^\\}]+\\{\\}", string.Empty);  //Eliminamos reglas vacías
 
-          /*  Regex color = new Regex("#([A-Fa-f0-9]{6})");
-            foreach (Match CurrentMatch in color.Matches(content))
-            {
-                string coincidencia = CurrentMatch.Groups[1].Value;
-                if (coincidencia[0] == coincidencia[1]
-                    && coincidencia[2] == coincidencia[3]
-                    && coincidencia[4] == coincidencia[5])
-                    content = content.Replace("#" + coincidencia, ("#" + coincidencia[0] + coincidencia[2] + coincidencia[4]).ToLower());
-            }*/
             return content;
         }
 
@@ -344,7 +335,7 @@ namespace Signum.Web.ScriptCombiner
         /// </summary>
         public string fileName;
 
-        private readonly static TimeSpan CACHE_DURATION = TimeSpan.FromDays(10); //1 day to avoid 304 during a session
+        private readonly static TimeSpan CACHE_DURATION = TimeSpan.FromDays(30); //1 day to avoid 304 during a session
        
 
         public virtual string ReadFile(HttpContextBase context)
@@ -412,7 +403,7 @@ namespace Signum.Web.ScriptCombiner
 
         protected abstract string Minify(string content);
 
-        private readonly static TimeSpan CACHE_DURATION = TimeSpan.FromDays(10); //1 day to avoid 304 during a session
+        private readonly static TimeSpan CACHE_DURATION = TimeSpan.FromDays(30); //1 day to avoid 304 during a session
         internal HttpContextBase context;
         string lastModifiedDateKey = "-lmd";
 
@@ -432,6 +423,8 @@ namespace Signum.Web.ScriptCombiner
             if (!string.IsNullOrEmpty(path)) resourcesFolder = "../" + path.Replace("%2f", "/");
 
             this.context = context;
+
+            // Get last modification date of the set of requested files
             DateTime lmServer = DateTime.MinValue;
             foreach (string fileName in files)
             {
@@ -439,21 +432,30 @@ namespace Signum.Web.ScriptCombiner
                 if (fileLastModified > lmServer) lmServer = fileLastModified;
             }
 
-            //check dates
+            // If HTTP_IF_MODIFIED_SINCE header is present the browser has a previous version of the set
+            // We check if the date it is sending is the same or after the las modification date, so we
+            // do not need to resend the file, just tell the browser it has not been modified
             if (context.Request["HTTP_IF_MODIFIED_SINCE"] != null)
             {
-                DateTime lmBrowser = DateTime.Parse(context.Request["HTTP_IF_MODIFIED_SINCE"].ToString()).ToUniversalTime();
-
-                if (lmServer.Date == lmBrowser.Date && Math.Truncate(lmServer.TimeOfDay.TotalSeconds) <= lmBrowser.TimeOfDay.TotalSeconds)
+                try
                 {
-                    context.Response.Clear();
-                    context.Response.StatusCode = (int)HttpStatusCode.NotModified;
-                    context.Response.SuppressContent = true;
-                    context.Response.Cache.SetCacheability(HttpCacheability.Public);
-                    context.Response.Cache.SetExpires(DateTime.Now.Add(CACHE_DURATION));    //F5 will make the browser re-check the files
-                    context.Response.Cache.SetMaxAge(CACHE_DURATION);
-                    //context.Response.Cache.AppendCacheExtension("must-revalidate, proxy-revalidate");
-                    return;
+                    DateTime lmBrowser = DateTime.Parse(context.Request["HTTP_IF_MODIFIED_SINCE"].ToString()).ToUniversalTime();
+
+                    if (lmServer.Date == lmBrowser.Date && Math.Truncate(lmServer.TimeOfDay.TotalSeconds) <= lmBrowser.TimeOfDay.TotalSeconds)
+                    {
+                        context.Response.Clear();
+                        context.Response.StatusCode = (int)HttpStatusCode.NotModified;
+                        context.Response.SuppressContent = true;
+                        context.Response.Cache.SetCacheability(HttpCacheability.Public);
+                        context.Response.Cache.SetExpires(DateTime.Now.Add(CACHE_DURATION));    //F5 will make the browser re-check the files
+                        context.Response.Cache.SetMaxAge(CACHE_DURATION);
+                        //context.Response.Cache.AppendCacheExtension("must-revalidate, proxy-revalidate");
+                        return;
+                    }
+                }
+                catch (ApplicationException)
+                {
+                    //usually, datetime string couldn't be parsed to a datetime instance
                 }
             }
 
@@ -501,11 +503,11 @@ namespace Signum.Web.ScriptCombiner
                     byte[] responseBytes = memoryStream.ToArray();
                     if (cacheable)
                     {
-                        context.Cache.Insert(GetCacheKey(version),
+                        context.Cache.Insert(GetCacheKey(),
                         responseBytes, null, System.Web.Caching.Cache.NoAbsoluteExpiration,
                         CACHE_DURATION);
 
-                        context.Cache.Insert(GetCacheKey(version) + lastModifiedDateKey,
+                        context.Cache.Insert(GetCacheKey() + lastModifiedDateKey,
                         lmServer, null, System.Web.Caching.Cache.NoAbsoluteExpiration,
                         CACHE_DURATION);
                     }
@@ -607,7 +609,7 @@ namespace Signum.Web.ScriptCombiner
                     System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
                     System.IO.FileInfo fileInfo = new System.IO.FileInfo(assembly.Location);
                     DateTime lastModified = fileInfo.LastWriteTime;
-                    version = Base64Encode(DateTime.Now.Ticks / TimeSpan.TicksPerSecond);
+                    version = Base64Encode(lastModified.Ticks / TimeSpan.TicksPerSecond);
                 }
                 return version;
             }

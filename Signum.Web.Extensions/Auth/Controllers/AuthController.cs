@@ -327,6 +327,8 @@ namespace Signum.Web.Authorization
         #endregion
 
         #region Login
+
+        [AcceptVerbs(HttpVerbs.Get)]
         public ActionResult Login(string referrer)
         {
             //We store the url referrer so that we can go back when logged in
@@ -338,6 +340,8 @@ namespace Signum.Web.Authorization
                 if (referrer != null && referrer != current)
                     ViewData["referrer"] = System.Web.HttpContext.Current.Request.UrlReferrer.AbsolutePath;
             }
+
+            ViewData[ViewDataKeys.PageTitle] = "Login";
 
             return View(AuthClient.LoginUrl);
         }

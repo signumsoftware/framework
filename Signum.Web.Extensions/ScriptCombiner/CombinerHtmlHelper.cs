@@ -9,16 +9,21 @@ using System.IO;
 
 namespace Signum.Web
 {
-    public enum CssMediaType { Screen, Print };
     public static class CombinerHtmlHelper
     {
+
+        //useful for loading static resources such as JS and CSS files
+        //from a different subdomain (real or virtual)
         public static Func<string, string> Subdomain = (s) => s;
+
+        static string cssElement = "<link href=\"{0}\" rel='stylesheet' type='text/css' />";
+        static string jsElement = "<script type='text/javascript' src=\"{0}\"></script>";
+
+        static string version = ScriptCombiner.Common.Version;
 
         public static void CombinedCss(this HtmlHelper html, List<string> local, List<string> area)
         {
-
-            string cadena = "<link href=\"{0}\" rel='stylesheet' type='text/css' />\n"
-                .Formato(CombinedCssUrl(html, local, area));
+            string cadena = cssElement.Formato(CombinedCssUrl(html, local, area));
             html.ViewContext.HttpContext.Response.Write(cadena);
         }
 
@@ -35,86 +40,80 @@ namespace Signum.Web
                 path += "a={0}".Formato(String.Join(",", area.ToArray()));
             }
             return Subdomain("combine/cssmixed?v={0}&{1}"
-                .Formato(ScriptCombiner.Common.Version,
+                .Formato(version,
                         path.Replace("/", "%2f")));
         }
 
 
-        public static string CombinedCssUrl(this HtmlHelper html, params string[] files)
+        public static string CombinedCssUrl(params string[] files)
         {
-            return Subdomain("combine/CSS?f={0}&v={1}".Formato(String.Join(",", files).Replace("/", "%2f"), ScriptCombiner.Common.Version));
+            return Subdomain("combine/CSS?f={0}&v={1}".Formato(String.Join(",", files).Replace("/", "%2f"), version));
         }
 
-        public static string CombinedCssUrlPath(this HtmlHelper html, string path, params string[] files)
+        public static string CombinedCssUrlPath(string path, params string[] files)
         {
-            return Subdomain("combine/CSS?f={0}&p={1}&v={2}".Formato(String.Join(",", files).Replace("/", "%2f"), path.Replace("/", "%2f"), ScriptCombiner.Common.Version));
+            return Subdomain("combine/CSS?f={0}&p={1}&v={2}".Formato(String.Join(",", files).Replace("/", "%2f"), path.Replace("/", "%2f"), version));
         }
 
         public static void CombinedCss(this HtmlHelper html, string path, params string[] files)
         {
 #if (DEBUG)
-            string content = files.ToString(f => "<link href=\"{0}\" rel='stylesheet' type='text/css' />\n"
-                .Formato(Path.Combine("content/", f) + "?v=" + ScriptCombiner.Common.Version ), "");
+            string content = files.ToString(f => cssElement.Formato(Path.Combine("content/", f) + "?v=" + version), "");
             html.ViewContext.HttpContext.Response.Write(content);
 #else
-            string cadena = "<link href=\"{0}\" rel='stylesheet' type='text/css' />\n".Formato(CombinedCssUrlPath(html, path.Replace("/", "%2f"), files));
+            string cadena =  cssElement.Formato(CombinedCssUrlPath(path.Replace("/", "%2f"), files));
             html.ViewContext.HttpContext.Response.Write(cadena);
 #endif
         }
 
-        public static void CombinedCss(this HtmlHelper html, CssMediaType media, params string[] files)
+        public static string CombinedJsUrlPath(string path, params string[] files)
         {
-            string cadena = "<link href=\"{0}\" rel='stylesheet' type='text/css' media='{1}' />\n".Formato(CombinedCssUrl(html, files), media.ToString().ToLower());
-            html.ViewContext.HttpContext.Response.Write(cadena);
+            return Subdomain("combine/js?f={0}&amp;p={1}&v={2}".Formato(String.Join(",", files).Replace("/", "%2f"), path.Replace("/", "%2f"), version));
         }
-
-        public static string CombinedJsUrlPath(this HtmlHelper html, string path, params string[] files)
+        public static string CombinedJsUrl(params string[] files)
         {
-            return Subdomain("combine/js?f={0}&amp;p={1}&v={2}".Formato(String.Join(",", files).Replace("/", "%2f"), path.Replace("/", "%2f"), ScriptCombiner.Common.Version));
-        }
-        public static string CombinedJsUrl(this HtmlHelper html, params string[] files)
-        {
-            return Subdomain("combine/js?f={0}&v={1}".Formato(String.Join(",", files).Replace("/", "%2f"), ScriptCombiner.Common.Version));
+            return Subdomain("combine/js?f={0}&v={1}".Formato(String.Join(",", files).Replace("/", "%2f"), version));
         }
         public static void CombinedJs(this HtmlHelper html, string path, params string[] files)
         {
 #if (DEBUG)
-            string content = files.ToString(f => "<script type='text/javascript' src=\"{0}\"></script>\n".Formato(path + "/" + f + "?v=" + ScriptCombiner.Common.Version), "");
+            string content = files.ToString(f => jsElement.Formato(path + "/" + f + "?v=" + ScriptCombiner.Common.Version), "");
             html.ViewContext.HttpContext.Response.Write(content);
 #else
-            string content = "<script type='text/javascript' src=\"{0}\"></script>\n".Formato(CombinedJsUrlPath(html, path, files));
+            string content = jsElement.Formato(CombinedJsUrlPath(path, files));
             html.ViewContext.HttpContext.Response.Write(content);
 #endif
+
         }
 
         public static string IncludeAreaJs(params string[] files)
         {
 #if (DEBUG)
-            return files.ToString(f => "<script type='text/javascript' src=\"{0}\"></script>\n".Formato(f + "?v=" + ScriptCombiner.Common.Version), "");
+                return files.ToString(f => jsElement.Formato(f + "?v=" + ScriptCombiner.Common.Version), "");
 #else
-            return "<script type='text/javascript' src=\"{0}\"></script>\n".Formato(IncludeAreaJsPath(files));
-#endif
-        }
+            return jsElement.Formato(IncludeAreaJsUrl(files));
+#endif        
+            }
 
-        static string IncludeAreaJsPath(params string[] files)
+        public static string IncludeAreaJsUrl(params string[] files)
         {
-            return Subdomain("combine/areajs?f={0}&amp;v={1}".Formato(String.Join(",", files).Replace("/", "%2f"), ScriptCombiner.Common.Version));
+            return Subdomain("combine/areajs?f={0}&amp;v={1}".Formato(String.Join(",", files).Replace("/", "%2f"), version));
         }
 
         public static void IncludeAreaCss(this HtmlHelper html, params string[] files)
         {
 #if (DEBUG)
-            string content = files.ToString(f => "<link href=\"{0}\" rel='stylesheet' type='text/css' />\n".Formato(f + "?v=" + ScriptCombiner.Common.Version), "");
+            string content = files.ToString(f => cssElement.Formato(f + "?v=" + version), "");
             html.ViewContext.HttpContext.Response.Write(content);
 #else
-            string content = "<link href=\"{0}\" rel='stylesheet' type='text/css' />\n".Formato(IncludeAreaCssPath(files));
+            string content = cssElement.Formato(IncludeAreaCssPath(files));
             html.ViewContext.HttpContext.Response.Write(content);
 #endif
         }
 
         static string IncludeAreaCssPath(params string[] files)
         {
-            return Subdomain("combine/areacss?f={0}&amp;v={1}".Formato(String.Join(",", files).Replace("/", "%2f"), ScriptCombiner.Common.Version));
+            return Subdomain("combine/areacss?f={0}&amp;v={1}".Formato(String.Join(",", files).Replace("/", "%2f"), version));
         }
     }
 }
