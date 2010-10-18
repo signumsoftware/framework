@@ -92,6 +92,24 @@
     sfToStr = "sfToStr",
     sfLink = "sfLink",
 
+    /*potentially movable */
+
+    sfIndex = "sfIndex",
+    sfTicks = "sfTicks",
+
+    sfItemsContainer = "sfItemsContainer",
+    sfRepeaterItem = "sfRepeaterItem",
+
+    sfQueryUrlName = "sfQueryUrlName",
+    sfTop = "sfTop",
+    sfAllowMultiple = "sfAllowMultiple",
+    sfView = "sfView",
+
+    sfIdRelated = "sfIdRelated",
+    sfRuntimeTypeRelated = "sfRuntimeTypeRelated",
+
+    /* end movable */
+
 
     sfBtnCancel = "sfBtnCancel",            //viewNavigator, findNavigator, mixin
     sfBtnOk = "sfBtnOk",                    //viewNavigator, findNavigator
@@ -267,7 +285,8 @@
 			staticType: staticType,
 			isEmbedded: isEmbedded,
 			isReadOnly: isReadOnly,
-			createValue: createValue
+			createValue: createValue,
+            find: find
 		};
     })();
 
@@ -347,7 +366,8 @@
             ticks: ticks,
             setEntity: setEntity,
             removeEntity: removeEntity,
-            createValue: createValue
+            createValue: createValue,
+            find: find
         };
     };
 
