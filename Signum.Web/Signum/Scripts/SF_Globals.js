@@ -302,6 +302,7 @@
         var _ticks = 3;
         var $elem; 			//cache for the element
 
+
         var find = function () {
             if (!$elem) { $elem = $('#' + prefix.compose(sfRuntimeInfo)); }
             return $elem;
@@ -322,7 +323,7 @@
 
             array[key] = val;
             find().val(toValue(array));
-            return this;
+            return self;
         };
         var runtimeType = function () {
             return getSet(_runtimeType);
@@ -342,13 +343,13 @@
                 getSet(_id, '').getSet(_isNew, 'n');
             else
                 getSet(_id, id).getSet(_isNew, 'o');
-            return this;
+            return self;
         };
         var removeEntity = function () {
             getSet(_runtimeType, '');
             getSet(_id, '');
             getSet(_isNew, 'o');
-            return this;
+            return self;
         };
         var createValue = function (runtimeType, id, isNew, ticks) {
             var array = [];
@@ -359,7 +360,7 @@
             return toValue(array);
         };
 
-        return {
+        var self = {
             runtimeType: runtimeType,
             id: id,
             isNew: isNew,
@@ -367,8 +368,11 @@
             setEntity: setEntity,
             removeEntity: removeEntity,
             createValue: createValue,
-            find: find
+            find: find,
+            getSet: getSet
         };
+
+        return self;
     };
 
     function RuntimeInfoFor(prefix) {
