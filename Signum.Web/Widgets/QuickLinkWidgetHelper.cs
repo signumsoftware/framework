@@ -74,7 +74,8 @@ namespace Signum.Web
                     SearchOnLoad = true,
                     FilterMode = FilterMode.Hidden,
                     FilterOptions = quickLinkItem.FindOptions.FilterOptions
-                }
+                },
+                Prefix = Js.NewPrefix("")
             };
             return foptions;
         }
