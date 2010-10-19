@@ -507,6 +507,8 @@ namespace Signum.Engine.Maps
             {
                 col.Position = i++;
             }
+
+            CompleteRetrieve(); 
         }
 
         public Field GetField(MemberInfo value, bool throws)
@@ -533,13 +535,13 @@ namespace Signum.Engine.Maps
         public Field Field { get; set; }
         public FieldInfo FieldInfo { get; private set; }
         public Func<object, object> Getter { get; private set; }
-        public Action<object, object> Setter { get; private set; }
+        //public Action<object, object> Setter { get; private set; }
 
         public EntityField(Type type, FieldInfo fi)
         {
             FieldInfo = fi;
             Getter = ReflectionTools.CreateGetterUntyped(type, fi);
-            Setter = ReflectionTools.CreateSetterUntyped(type, fi);
+            //Setter = ReflectionTools.CreateSetterUntyped(type, fi);
         }
 
         public override string ToString()
@@ -599,7 +601,8 @@ namespace Signum.Engine.Maps
 
     public interface IFieldReference
     {
-        bool IsLite { get; set; }
+        bool IsLite { get; }
+        Type FieldType { get; }
     }
 
     public partial class FieldPrimaryKey : Field, IColumn
@@ -649,11 +652,7 @@ namespace Signum.Engine.Maps
         public FieldValue(Type fieldType)
             : base(fieldType)
         {
-            ParameterExpression reader = Expression.Parameter(typeof(FieldReader), "reader");
-            ParameterExpression ordinal = Expression.Parameter(typeof(int), "ordinal");
-            func = Expression.Lambda<Func<FieldReader, int, object>>(
-                Expression.Convert(
-                FieldReader.GetExpression(reader, ordinal, fieldType), typeof(object)), reader, ordinal).Compile();
+           
         }
 
         public override string ToString()
@@ -696,7 +695,6 @@ namespace Signum.Engine.Maps
 
         public FieldEmbedded(Type fieldType) : base(fieldType) 
         {
-            Constructor = ReflectionTools.CreateConstructor<EmbeddedEntity>(fieldType); 
         }
 
         public override string ToString()
@@ -907,6 +905,8 @@ namespace Signum.Engine.Maps
             {
                 col.Position = i++;
             }
+
+            CompleteRetrieve();
         }
     }
 

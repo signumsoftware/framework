@@ -14,7 +14,7 @@ namespace Signum.Engine
 {
     public class FieldReader
     {
-        public SqlDataReader reader;
+        SqlDataReader reader;
         TypeCode[] typeCodes;
 
         private const TypeCode tcGuid = (TypeCode)20;
@@ -48,6 +48,10 @@ namespace Signum.Engine
                 typeCodes[i] = GetTypeCode(i);
         }
 
+        public bool IsNull(int ordinal)
+        {
+            return reader.IsDBNull(ordinal);
+        }
 
         public string GetString(int ordinal)
         {
@@ -480,15 +484,22 @@ namespace Signum.Engine
 
         static Dictionary<Type, MethodInfo> methods =
             typeof(FieldReader).GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
-            .Where(m => m.Name != "GetExpression")
+            .Where(m => m.Name != "GetExpression" && m.Name != "IsNull")
             .ToDictionary(a => a.ReturnType);
 
 
-        public static Expression GetExpression(Expression reader, Expression ordinal, Type type)
+        public static Expression GetExpression(Expression reader, int ordinal, Type type)
         {
             MethodInfo mi = methods.GetOrThrow(type, "Type {0} not supported");
 
-            return Expression.Call(reader, mi, ordinal);
+            return Expression.Call(reader, mi, Expression.Constant(ordinal));
+        }
+
+        static MethodInfo miIsNull = ReflectionTools.GetMethodInfo((FieldReader r) => r.IsNull(0)); 
+
+        public static Expression GetIsNull(Expression reader, int ordinal)
+        {
+            return Expression.Call(reader, miIsNull, Expression.Constant(ordinal));
         }
     }
 }

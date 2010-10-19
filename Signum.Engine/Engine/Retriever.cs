@@ -89,7 +89,7 @@ namespace Signum.Engine
                     int id = (int)reader.GetInt32(0); //SqlBuilder.PrimaryKeyName
                     IdentifiableEntity ie = dic[id];
 
-                    table.Fill(reader, ie, this);
+                    table.Fill(ie, reader, this);
 
                     ie.Modified = null;
                     ie.IsNew = false; 
@@ -152,9 +152,7 @@ namespace Signum.Engine
                     int id = reader.GetInt32(1);
                     IList list = dic[id];
 
-                    object value = relationalTable.GenerateValue(reader, this);
-
-                    list.Add(value);
+                    relationalTable.AddInList(list, reader, this);
                 });
 
                 foreach (var id in requested)

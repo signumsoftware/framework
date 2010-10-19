@@ -256,15 +256,11 @@ namespace Signum.Utilities.Reflection
             if ((m as PropertyInfo).TryCS(a => !a.CanWrite) ?? false)
                 return null;
 
-            DynamicMethod setter = new DynamicMethod(
-                "{0}_Setter".Formato(m.Name),
-                    typeof(void), new[] { typeof(T), typeof(P) },
-                    m.DeclaringType);
-
-            ILGenerator generator = setter.GetILGenerator();
-            GenerateSetterIL(generator, m, null, null);
-
-            return (Action<T, P>)setter.CreateDelegate(typeof(Action<T, P>));
+            ParameterExpression t = Expression.Parameter(typeof(T), "t");
+            ParameterExpression  p = Expression.Parameter(typeof(P), "p");
+            var exp = Expression.Lambda(typeof(Action<T, P>), 
+                Expression.Assign(Expression.MakeMemberAccess(t, m), p), t,p);
+            return (Action<T, P>)exp.Compile();
         }
 
         //Replace when C# 4.0 is available
@@ -273,16 +269,11 @@ namespace Signum.Utilities.Reflection
             if ((m as PropertyInfo).TryCS(a => !a.CanWrite) ?? false)
                 return null;
 
-            DynamicMethod setter = new DynamicMethod(
-                "{0}_Setter".Formato(m.Name),
-                    typeof(void), new[] { typeof(T), typeof(object) },
-                    m.DeclaringType);
-
-            ILGenerator generator = setter.GetILGenerator();
-            GenerateSetterIL(generator, m, null, m.ReturningType());
-
-            return (Action<T, object>)setter.CreateDelegate(typeof(Action<T, object>));
-
+            ParameterExpression t = Expression.Parameter(typeof(T), "t");
+            ParameterExpression p = Expression.Parameter(typeof(object), "p");
+            var exp = Expression.Lambda(typeof(Action<T, object>),
+                Expression.Assign(Expression.MakeMemberAccess(t, m), Expression.Convert(p, m.ReturningType())), t, p);
+            return (Action<T, object>)exp.Compile();
         }
 
         static Module module = ((Expression<Func<int>>)(() => 2)).Compile().Method.Module;
@@ -293,40 +284,11 @@ namespace Signum.Utilities.Reflection
             if ((m as PropertyInfo).TryCS(a => !a.CanWrite) ?? false)
                 return null;
 
-            DynamicMethod setter = new DynamicMethod(
-                "{0}_Setter".Formato(m.Name),
-                    typeof(void), new[] { typeof(object), typeof(object) },
-                    m.DeclaringType);
-
-            ILGenerator generator = setter.GetILGenerator();
-            GenerateSetterIL(generator, m, type, m.ReturningType());
-
-            return (Action<object, object>)setter.CreateDelegate(typeof(Action<object, object>));
-        }
-
-        static void GenerateSetterIL(ILGenerator generator, MemberInfo m, Type castEntityType, Type castPropertyType)
-        {
-            generator.Emit(OpCodes.Ldarg_0);
-
-            if (castEntityType != null)
-                generator.Emit(OpCodes.Castclass, castEntityType);
-
-            generator.Emit(OpCodes.Ldarg_1);
-
-            if (castPropertyType != null)
-            {
-                if (castPropertyType.IsClass)
-                    generator.Emit(OpCodes.Castclass, castPropertyType);
-                else
-                    generator.Emit(OpCodes.Unbox_Any, castPropertyType);
-            }
-
-            if (m is PropertyInfo)
-                generator.Emit(OpCodes.Callvirt, ((PropertyInfo)m).GetSetMethod(true));
-            else
-                generator.Emit(OpCodes.Stfld, (FieldInfo)m);
-
-            generator.Emit(OpCodes.Ret);
+            ParameterExpression t = Expression.Parameter(typeof(object), "t");
+            ParameterExpression p = Expression.Parameter(typeof(object), "p");
+            var exp = Expression.Lambda(typeof(Action<object, object>),
+                Expression.Assign(Expression.MakeMemberAccess(Expression.Convert(t, type), m), Expression.Convert(p, m.ReturningType())), t, p);
+            return (Action<object, object>)exp.Compile();
         }
 
         public static Func<T> CreateConstructor<T>(Type type)

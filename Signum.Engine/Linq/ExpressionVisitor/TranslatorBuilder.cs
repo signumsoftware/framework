@@ -299,14 +299,15 @@ namespace Signum.Engine.Linq
         public Dictionary<string, int> Positions;
 
         static PropertyInfo miReader = ReflectionTools.GetPropertyInfo((IProjectionRow row) => row.Reader);
- 
+
         public Expression GetColumnExpression(Expression row, string alias, string name, Type type)
         {
             if (alias != Alias)
-                    throw new InvalidOperationException("alias '{0}' not found".Formato(alias));
+                throw new InvalidOperationException("alias '{0}' not found".Formato(alias));
 
-            return FieldReader.GetExpression(
-                Expression.Property(row, miReader), Expression.Constant(Positions.GetOrThrow(name, "column name '{0}' not found in alias '" + alias + "'")), type);
+            int position = Positions.GetOrThrow(name, "column name '{0}' not found in alias '" + alias + "'");
+
+            return FieldReader.GetExpression(Expression.Property(row, miReader), position, type);
         }
 
         static MethodInfo miLookup = ReflectionTools.GetMethodInfo((IProjectionRow row) => row.Lookup<int, double>(null, 0)).GetGenericMethodDefinition();

@@ -87,11 +87,6 @@ namespace Signum.Engine.Maps
         }
     }
 
-    public static partial class ReferenceFieldExtensions
-    {  
-    }
-
-
     public partial class FieldReference
     {
         internal override Expression GetExpression(ProjectionToken token, string tableAlias, QueryBinder binder)

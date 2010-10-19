@@ -304,20 +304,24 @@ namespace Signum.Engine.Maps
         {
             Type elementType = fi.FieldType.ElementType();
 
+            RelationalTable relationalTable = new RelationalTable(fi.FieldType)
+            {
+                Name = GenerateTableNameCollection(type, name),
+                BackReference = new RelationalTable.BackReferenceColumn
+                {
+                    Name = GenerateBackReferenceName(type),
+                    Index = DefaultReferenceIndex(),
+                    ReferenceTable = table
+                },
+                PrimaryKey = new RelationalTable.PrimaryKeyColumn(),
+                Field = GenerateField(type, fi, elementType, Contexts.MList, null, NameSequence.Void, false) 
+            };
+
+            relationalTable.GenerateColumns(); 
+
             return new FieldMList(fi.FieldType)
             {
-                RelationalTable = new RelationalTable(fi.FieldType)
-                {
-                    Name = GenerateTableNameCollection(type, name),
-                    BackReference = new RelationalTable.BackReferenceColumn
-                    {
-                        Name = GenerateBackReferenceName(type),
-                        Index = DefaultReferenceIndex(),
-                        ReferenceTable = table
-                    },
-                    PrimaryKey = new RelationalTable.PrimaryKeyColumn(),
-                    Field = GenerateField(type, fi, elementType, Contexts.MList, null, NameSequence.Void, false) 
-                }.Do(t => t.GenerateColumns())
+                RelationalTable = relationalTable,
             };
         }
 
