@@ -369,7 +369,8 @@
             removeEntity: removeEntity,
             createValue: createValue,
             find: find,
-            getSet: getSet
+            getSet: getSet,
+            value: value
         };
 
         return self;
