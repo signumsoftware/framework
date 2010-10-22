@@ -9,8 +9,7 @@ namespace Signum.Utilities
     public static class ElapsedTime
     {
         public static bool ShowDebug = false;
-        public static Dictionary<string, ElapsedTimeEntry> IdentifiedElapseds =
-            new Dictionary<string, ElapsedTimeEntry>();
+        public static Dictionary<string, ElapsedTimeEntry> IdentifiedElapseds = new Dictionary<string, ElapsedTimeEntry>();
 
         public static T Start<T>(string identifier, Func<T> func)
         {
@@ -24,6 +23,19 @@ namespace Signum.Utilities
             sp.Start();
 
             return new Disposable(() => { sp.Stop(); InsertEntity(sp.ElapsedMilliseconds, identifier); });
+        }
+
+        public static string GetTableString()
+        {
+            return IdentifiedElapseds.Select(kvp => new
+            {
+                Identified = kvp.Key,
+                kvp.Value.LastTime,
+                kvp.Value.MinTime,
+                kvp.Value.Average,
+                kvp.Value.MaxTime,
+                kvp.Value.Count
+            }).ToStringTable().FormatTable();
         }
 
         public static void InsertEntity(long milliseconds, string identifier)
