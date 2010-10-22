@@ -54,23 +54,48 @@ namespace Signum.Engine.Exceptions
     {
         public string TableName { get; private set; }
         public string Field { get; private set; }
-        public Type RelatedType { get; private set; }
+        public Type TableType { get; private set; }
 
-        static Regex indexRegex = new Regex(@"""FK_(?<table>[^_]+)_(?<field>[^_""]+)"""); 
+        public string ReferedTableName { get; private set; }
+        public Type ReferedTableType { get; private set; }
+
+        public bool IsInsert { get; private set; }
+
+        static Regex indexRegex = new Regex(@"""FK_(?<table>[^_]+)_(?<field>[^_""]+)""");
+
+        static Regex referedTable = new Regex(@"table ""(?<referedTable>.+?)""");
 
         protected ForeignKeyException(SerializationInfo info, StreamingContext context) : base(info, context) { }
        
         public ForeignKeyException(SqlException inner) : base(null, inner) 
         {
             Match m = indexRegex.Match(inner.Message);
-            if (m != null)
+            
+            if (m.Success)
             {
                 TableName = m.Groups["table"].Value;
                 Field = m.Groups["field"].Value;
-                RelatedType = Schema.Current.Tables
+                TableType = Schema.Current.Tables
                     .Where(kvp => kvp.Value.Name == TableName)
                     .Select(p => p.Key)
                     .SingleOrDefault();
+            }
+
+            if(inner.Message.Contains("INSERT"))
+            {
+                IsInsert = true;
+
+                Match m2 = referedTable.Match(inner.Message);
+                if (m2.Success)
+                {
+                    ReferedTableName = m2.Groups["referedTable"].Value.Split('.').Last();
+                    ReferedTableType = Schema.Current.Tables
+                                    .Where(kvp => kvp.Value.Name == ReferedTableName)
+                                    .Select(p => p.Key)
+                                    .SingleOrDefault();
+
+                    ReferedTableType = Reflector.ExtractEnumProxy(ReferedTableType) ?? ReferedTableType; 
+                }
             }
         }
 
@@ -81,9 +106,14 @@ namespace Signum.Engine.Exceptions
                 if (TableName == null)
                     return InnerException.Message;
 
-                return (RelatedType == null) ?
-                    Resources.ThereAreRecordsIn0PointingToThisTableByColumn1.Formato(TableName, Field) :
-                    Resources.ThereAre0ThatReferThisEntity.Formato(RelatedType.NicePluralName());
+                if (IsInsert)
+                    return (TableType == null || ReferedTableType == null) ?
+                        "The column {0} on table {1} does not reference {2}".Formato(Field, TableName, ReferedTableName) :
+                        "The column {0} of the {1} does not refer to a valid {2}".Formato(Field, TableType.NiceName(), ReferedTableType.NiceName());
+                else
+                    return (TableType == null) ?
+                        Resources.ThereAreRecordsIn0PointingToThisTableByColumn1.Formato(TableName, Field) :
+                        Resources.ThereAre0ThatReferThisEntity.Formato(TableType.NicePluralName());
             }
         }
     }
