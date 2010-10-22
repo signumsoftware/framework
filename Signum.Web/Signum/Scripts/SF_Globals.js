@@ -384,6 +384,12 @@
         ajaxError = true;
         $(function () {
             $(document).ajaxError(function (event, XMLHttpRequest, ajaxOptions, thrownError) {
+
+                //check request status
+                //request.abort() has status 0, so we don't show this "error", since we have
+                //explicitly aborted the request.
+                //this error is documented on http://bugs.jquery.com/ticket/7189
+                if (XMLHttpRequest.status === 0) return;
                 ShowError(XMLHttpRequest, ajaxOptions, thrownError);
             });
         });
@@ -558,6 +564,10 @@
 
         var message = error.length > 50 ? error.substring(0, 49) + "..." : error;
         NotifyError(lang['error'] + ": " + message, 2000);
+
+        log(error);
+        log(XMLHttpRequest);
+        log(errorThrown);
 
         alert("Error: " + error);
 
