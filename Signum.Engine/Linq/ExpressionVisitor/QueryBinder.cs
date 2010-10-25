@@ -961,8 +961,12 @@ namespace Signum.Engine.Linq
                                 throw new InvalidOperationException("ToStr is not accesible on queries for ImplementedByAll");
                             return liteRef.ToStr;
                         }
+
                     }
 
+                    if (pi.Name == "RuntimeType")
+                        break;
+                    
                     throw new InvalidOperationException("The member {0} of Lite is not accessible on queries".Formato(m.Member));
                 }
                 case (ExpressionType)DbExpressionType.ImplementedBy:
