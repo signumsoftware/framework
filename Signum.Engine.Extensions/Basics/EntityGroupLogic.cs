@@ -497,8 +497,6 @@ namespace Signum.Engine.Basics
             {
                 return replacements.TryGetC(m) ?? base.VisitMethodCall(m);
             }
-        }      
+        }
     }
-
-    
 }

@@ -127,7 +127,7 @@ namespace Signum.Entities.Authorization
         ResetPassword,
     }
 
-    public interface IUserRelatedDN:IIdentifiable
+    public interface IUserRelatedDN : IIdentifiable
     {
 
     }
