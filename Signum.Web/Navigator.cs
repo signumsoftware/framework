@@ -1022,6 +1022,8 @@ namespace Signum.Web
 
         internal ContentResult ModelState(ModelStateData modelStateData)
         {
+            System.Diagnostics.Debug.WriteLine(modelStateData.ToString());
+
             return new ContentResult { Content = modelStateData.ToString() };
         }
 
