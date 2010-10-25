@@ -108,9 +108,15 @@ namespace Signum.Web.Selenium
 
         public static void WaitAjaxFinished(this ISelenium selenium, Func<bool> condition, int timeout)
         {
-            DateTime now = DateTime.Now;
-            while (DateTime.Now < now.AddMilliseconds(timeout) && !condition())
-                Thread.Sleep(1000);
+            DateTime limit = DateTime.Now.AddMilliseconds(timeout);
+            Debug.WriteLine(timeout);
+            Debug.WriteLine(condition());
+            while (DateTime.Now < limit && !condition())
+            {
+                Debug.WriteLine(DateTime.Now < limit);
+                Debug.WriteLine(condition());
+                Thread.Sleep(10000);
+            }
             Assert.IsTrue(condition());
         }
     }
