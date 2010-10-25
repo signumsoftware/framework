@@ -6,6 +6,7 @@ using Signum.Entities.Basics;
 using Signum.Entities;
 using Signum.Entities.Processes;
 using Signum.Utilities;
+using Signum.Entities.Authorization;
 
 namespace Signum.Entities.Scheduler
 {
@@ -38,6 +39,15 @@ namespace Signum.Entities.Scheduler
         {
             get { return customTask; }
             set { Set(ref customTask, value, () => CustomTask); }
+        }
+
+
+        Lite<UserDN> User;
+        [NotNullValidator]
+        public Lite<UserDN> user
+        {
+            get { return User; }
+            set { Set(ref User, value, () => user); }
         }
 
         DateTime startTime;

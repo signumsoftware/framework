@@ -19,6 +19,7 @@ using Signum.Engine.Extensions.Properties;
 using Signum.Entities.Scheduler;
 using System.Reflection;
 using Signum.Utilities.Reflection;
+using Signum.Entities.Authorization;
 
 namespace Signum.Engine.Processes
 {
@@ -283,7 +284,8 @@ namespace Signum.Engine.Processes
 
         static void DoWork(object number)
         {
-            using (AuthLogic.User(AuthLogic.SystemUser))
+
+            using (AuthLogic.User(UserDN.Current != null ? UserDN.Current : AuthLogic.SystemUser))
             {
                 foreach (var ep in processQueue)
                 {
@@ -293,7 +295,8 @@ namespace Signum.Engine.Processes
                     }
                     finally
                     {
-                        Sync.SafeUpdate(ref currentProcesses, tree => tree.Remove(ep.Execution.Id));
+                        using (AuthLogic.User(AuthLogic.SystemUser))
+                            Sync.SafeUpdate(ref currentProcesses, tree => tree.Remove(ep.Execution.Id));
                     }
                 }
             }
@@ -316,6 +319,7 @@ namespace Signum.Engine.Processes
 
                 return new ProcessExecutionDN(process)
                 {
+                    User = UserDN.Current.ToLite(),
                     State = ProcessState.Created,
                     ProcessData = data
                 }.Save();
@@ -434,7 +438,6 @@ namespace Signum.Engine.Processes
                 Algorithm = registeredProcesses[EnumLogic<ProcessDN>.ToEnum(pe.Process.Key)],
                 Data = pe.ProcessData,
                 Execution = pe,
-
             };
 
             ep.Execute();
@@ -449,6 +452,7 @@ namespace Signum.Engine.Processes
 
     public interface IExecutingProcess
     {
+        Lite<UserDN> User { get; }
         IProcessDataDN Data { get; }
         bool Suspended { get; }
         void ProgressChanged(decimal progress);
@@ -468,6 +472,12 @@ namespace Signum.Engine.Processes
 
         public bool Suspended { get; private set; }
 
+        public Lite<UserDN> User
+        {
+            get { return Execution.User; }
+        }
+
+
         public void ProgressChanged(decimal progress)
         {
             Execution.Progress = progress;
@@ -476,15 +486,17 @@ namespace Signum.Engine.Processes
 
         public void Execute()
         {
-            Execution.State = ProcessState.Executing;
-            Execution.ExecutionStart = TimeZoneManager.Now;
-            Execution.Progress = 0;
-            Execution.Save();
+            using (AuthLogic.User(AuthLogic.SystemUser))
+            {
+                Execution.State = ProcessState.Executing;
+                Execution.ExecutionStart = TimeZoneManager.Now;
+                Execution.Progress = 0;
+                Execution.Save();
+            }
 
             try
             {
                 FinalState state = Algorithm.Execute(this);
-
                 if (state == FinalState.Finished)
                 {
                     Execution.ExecutionEnd = TimeZoneManager.Now;
@@ -501,12 +513,10 @@ namespace Signum.Engine.Processes
             }
             catch (Exception e)
             {
-
                 Execution.State = ProcessState.Error;
                 Execution.ExceptionDate = DateTime.Today;
                 Execution.Exception = e.Message;
                 Execution.Save();
-
             }
         }
 
@@ -514,5 +524,10 @@ namespace Signum.Engine.Processes
         {
             Suspended = true;
         }
+
+
+
+
+
     }
 }

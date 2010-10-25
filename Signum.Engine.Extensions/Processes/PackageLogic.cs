@@ -13,6 +13,7 @@ using System.Reflection;
 using Signum.Entities.Scheduler;
 using Signum.Utilities.Reflection;
 using Signum.Engine.Extensions.Properties;
+using Signum.Engine.Authorization;
 
 namespace Signum.Engine.Processes
 {
@@ -118,7 +119,9 @@ namespace Signum.Engine.Processes
                 {
                     using (Transaction tr = new Transaction(true))
                     {
+                        using (AuthLogic.User(executingProcess.User.Retrieve()))
                         ExecuteLine(pl, package);
+
                         pl.FinishTime = TimeZoneManager.Now;
                         pl.Save();
                         tr.Commit();

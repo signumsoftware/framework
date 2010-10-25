@@ -13,6 +13,7 @@ using Signum.Entities;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Extensions.Properties;
 using System.Reflection;
+using Signum.Entities.Authorization;
 
 namespace Signum.Engine.Scheduler
 {
@@ -73,6 +74,7 @@ namespace Signum.Engine.Scheduler
         {
             CustomTaskExecutionDN cte = new CustomTaskExecutionDN
             {
+                user=UserDN.Current.ToLite(),
                 CustomTask = EnumLogic<CustomTaskDN>.ToEntity(key),
                 StartTime = TimeZoneManager.Now,
             };

@@ -12,6 +12,7 @@ using System.ComponentModel;
 using Signum.Entities.Extensions.Properties;
 using Signum.Entities.Basics;
 using Signum.Entities.Scheduler;
+using Signum.Entities.Authorization;
 
 namespace Signum.Entities.Processes
 {
@@ -28,6 +29,14 @@ namespace Signum.Entities.Processes
         public ProcessExecutionDN(ProcessDN process)
         {
             this.process = process;
+        }
+
+        Lite<UserDN> user;
+        [NotNullValidator]
+        public Lite<UserDN> User
+        {
+            get { return user; }
+            set { Set(ref user, value, () => User); }
         }
 
         ProcessDN process;
@@ -83,14 +92,14 @@ namespace Signum.Entities.Processes
         public DateTime? ExecutionStart
         {
             get { return executionStart; }
-            set { if (Set(ref executionStart, value, () => ExecutionStart))Notify(()=>ExecutionEnd); }
+            set { if (Set(ref executionStart, value, () => ExecutionStart))Notify(() => ExecutionEnd); }
         }
 
         DateTime? executionEnd;
         public DateTime? ExecutionEnd
         {
             get { return executionEnd; }
-            set { if (Set(ref executionEnd, value, () => ExecutionEnd))Notify(()=>ExecutionStart); }
+            set { if (Set(ref executionEnd, value, () => ExecutionEnd))Notify(() => ExecutionStart); }
         }
 
         DateTime? suspendDate;
@@ -139,7 +148,7 @@ namespace Signum.Entities.Processes
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if (pi.Is(()=>ExecutionStart) || pi.Is(()=>ExecutionEnd))
+            if (pi.Is(() => ExecutionStart) || pi.Is(() => ExecutionEnd))
             {
                 if (this.ExecutionEnd < this.ExecutionStart)
                     return Resources.ProcessStartIsGreaterThanProcessEnd;
