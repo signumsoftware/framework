@@ -27,7 +27,8 @@ namespace Signum.Web
         public WriteAHref ManualA { get; set; } //Specify all the tag string (href, title, text)=>"<a href='{0}' title={1}>{2}</a>".Formato(href,title,text); 
         
         public object Link {get; set; }
-        
+
+        public string Id { get; set; }
         string text;
         public string Text
         {
@@ -85,11 +86,18 @@ namespace Signum.Web
         public string ToString(string currentUrl, string rootClass) 
         {
             StringBuilder sb = new StringBuilder();
-            this.Write(sb, currentUrl, rootClass, 0);
+            this.Write(sb, currentUrl, rootClass, 0, "");
             return sb.ToString();
         }
 
-        void Write(StringBuilder sb, string currentUrl,  string rootClass, int depth)
+        public string ToString(string currentUrl, string rootClass, string selectedRoute)
+        {
+            StringBuilder sb = new StringBuilder();
+            this.Write(sb, currentUrl, rootClass, 0, selectedRoute);
+            return sb.ToString();
+        }
+
+        void Write(StringBuilder sb, string currentUrl,  string rootClass, int depth, string selectedRoute)
         {
             if(!Visible)
                 return;
@@ -97,24 +105,48 @@ namespace Signum.Web
             if (depth != 0)
                 sb.AppendLine("<li class=\"l{0}\">".Formato(depth));
 
+            bool selectedSubmenu = false;
+            if (Id != null && selectedRoute != null && selectedRoute.Split(' ').Contains(Id))
+            {
+                Class += " selected";
+                selectedSubmenu = true;
+            }
+
             if (Children.Any())
             {
                 if (depth == 0)
                     sb.AppendLine("<ul class=\"{0}\">".Formato(rootClass));
                 else
                 {
-                    sb.AppendLine(new FluentTagBuilder("span")
-                                     .MergeAttributes(new {onmouseover = "", title = Title})
-                                     .AddCssClass(Class)
-                                     .SetInnerText(Text)
-                                     .ToString(TagRenderMode.Normal));
+                    //if the element is a link, write an A element
+                    //otherwise, a span
 
-                    sb.AppendLine("<ul class=\"submenu\">");
+                    if (Link != null)
+                    {
+                        sb.AppendLine(new FluentTagBuilder("a")
+                                         .MergeAttributes(new { onmouseover = "", title = Title, href = Link.ToString(), id = Id })
+                                         .AddCssClass(Class)
+                                         .SetInnerText(Text)
+                                         .ToString(TagRenderMode.Normal));
+                    }
+                    else
+                    {
+                        sb.AppendLine(new FluentTagBuilder("span")
+                                         .MergeAttributes(new { onmouseover = "", title = Title, id = Id })
+                                         .AddCssClass(Class)
+                                         .SetInnerText(Text)
+                                         .ToString(TagRenderMode.Normal));
+                    }
+
+                    if (selectedSubmenu)
+                        sb.AppendLine("<ul class=\"submenu\" style=\"display:block\">");
+                    else
+                        sb.AppendLine("<ul class=\"submenu\">");
                 }
 
                 foreach (WebMenuItem menu in children)
                 {
-                    menu.Write(sb, currentUrl, rootClass, depth + 1);
+                    menu.Write(sb, currentUrl, rootClass, depth + 1, selectedRoute);
                 }
                 sb.Append("</ul>");
             }
