@@ -59,6 +59,13 @@ namespace Signum.Web.Extensions.Sample
 
             Signum.Test.Extensions.Starter.Start(UserConnections.Replace(Settings.Default.ConnectionString));
 
+            ModuleResources.ResourceToUrl = (file, area) =>
+            {
+                if (area) return CombinerHtmlHelper.IncludeAreaJsUrl(new[] { file });
+                else return CombinerHtmlHelper.CombinedJsUrl(new[] { file });
+            };
+            ModuleResources.RegisterBasics();
+
             using (AuthLogic.Disable())
             {
                 Schema.Current.Initialize();
