@@ -496,17 +496,16 @@
     }
 
     function Submit(urlController, requestExtraJsonData) {
-        if (!empty(requestExtraJsonData)) {
-            var $form = $("form");
+        var $form = $("form");
+        if (!empty(requestExtraJsonData)) {            
             for (var key in requestExtraJsonData) {
                 var str = $.isFunction(requestExtraJsonData[key]) ? requestExtraJsonData[key]() : requestExtraJsonData[key];
-
                 $form.append(hiddenInput(key, str));
             }
         }
 
-        document.forms[0].action = urlController;
-        document.forms[0].submit();
+        $form.attr("action", urlController).submit();
+        var $submitInputs = $form.find("input:submit").click();
         return false;
     }
 
