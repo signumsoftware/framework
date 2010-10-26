@@ -22,7 +22,7 @@ namespace Signum.Web
     {
         public const string Separator = "_";
 
-        public string ControlID { get; private set; }
+        public string ControlID { get; set; }
 
         public Context Parent { get; private set; } 
 
