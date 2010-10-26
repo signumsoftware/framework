@@ -505,7 +505,6 @@
         }
 
         $form.attr("action", urlController).submit();
-        var $submitInputs = $form.find("input:submit").click();
         return false;
     }
 
