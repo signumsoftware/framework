@@ -48,7 +48,7 @@ namespace Signum.Engine.Operations
                     {
                         Operation = EnumLogic<OperationDN>.ToEntity(Key),
                         Start = TimeZoneManager.Now,
-                        User = UserDN.Current
+                        User = UserDN.Current.ToLite()
                     };
 
                     OperationLogic.OnBeginOperation(this, null);

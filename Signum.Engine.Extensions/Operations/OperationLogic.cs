@@ -67,7 +67,7 @@ namespace Signum.Engine.Operations
                                                    lo.Id,
                                                    Target = lo.Target,
                                                    Operation = lo.Operation.ToLite(),
-                                                   User = lo.User.ToLite(),
+                                                   User = lo.User,
                                                    lo.Start,
                                                    lo.End,
                                                    lo.Exception

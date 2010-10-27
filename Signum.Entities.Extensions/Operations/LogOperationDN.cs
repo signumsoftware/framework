@@ -27,9 +27,9 @@ namespace Signum.Entities.Operations
             set { SetToStr(ref operation, value, () => Operation); }
         }
 
-        UserDN user;
+        Lite<UserDN> user;
         [NotNullValidator]
-        public UserDN User
+        public Lite<UserDN> User
         {
             get { return user; }
             set { SetToStr(ref user, value, () => User); }

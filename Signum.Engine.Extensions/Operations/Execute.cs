@@ -72,7 +72,7 @@ namespace Signum.Engine.Operations
                     {
                         Operation = EnumLogic<OperationDN>.ToEntity(Key),
                         Start = TimeZoneManager.Now,
-                        User = UserDN.Current
+                        User = UserDN.Current.ToLite()
                     };
 
                     OperationLogic.OnBeginOperation(this, (IdentifiableEntity)entity);
@@ -105,7 +105,7 @@ namespace Signum.Engine.Operations
                             Start = TimeZoneManager.Now,
                             Target = entity.ToLite<IIdentifiable>(),
                             Exception = ex.Message,
-                            User = UserDN.Current
+                            User = UserDN.Current.ToLite()
                         };
 
                         using (AuthLogic.User(AuthLogic.SystemUser))
