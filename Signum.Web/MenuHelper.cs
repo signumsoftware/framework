@@ -160,7 +160,7 @@ namespace Signum.Web
                 if (ManualA == null)
                 {
                     FluentTagBuilder tbA = /*active ? new FluentTagBuilder("span").AddCssClass("selected") :*/ new FluentTagBuilder("a")
-                            .MergeAttributes(new {href = link, title = Title})
+                            .MergeAttributes(new {href = link, title = Title, id = Id})
                             .AddCssClass(Class);
 
                     if (!string.IsNullOrEmpty(html))
