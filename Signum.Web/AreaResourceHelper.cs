@@ -18,7 +18,7 @@ namespace Signum.Web
         public static void IncludeAreaJs(this HtmlHelper html, params string[] files)
         {
             string include = InternalAreaJs(files);
-            html.ViewContext.HttpContext.Response.Write(include);
+            html.Write(include);
         }
     }
 }
