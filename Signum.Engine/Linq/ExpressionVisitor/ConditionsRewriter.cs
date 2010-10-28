@@ -5,6 +5,8 @@ using System.Text;
 using System.Linq.Expressions;
 using Signum.Utilities;
 using Signum.Engine.Properties;
+using System.Collections.ObjectModel;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.Linq
 {
@@ -56,8 +58,8 @@ namespace Signum.Engine.Linq
 
                 case ExpressionType.Convert:
                 case ExpressionType.ConvertChecked:
-                    Expression o = ((UnaryExpression)expression).Operand;
-                    return IsBooleanExpression(o) && IsSqlCondition(o);
+                    Expression operand = ((UnaryExpression)expression).Operand;
+                    return IsBooleanExpression(operand) && IsSqlCondition(operand);
 
                 case ExpressionType.Constant:
                 case ExpressionType.Coalesce:
@@ -142,6 +144,14 @@ namespace Signum.Engine.Linq
             }
 
             return base.VisitBinary(b);
+        }
+
+        protected override Expression VisitSqlFunction(SqlFunctionExpression sqlFunction)
+        {
+            ReadOnlyCollection<Expression> args = sqlFunction.Arguments.NewIfChange(a => MakeSqlValue(Visit(a)));
+            if (args != sqlFunction.Arguments)
+                return new SqlFunctionExpression(sqlFunction.Type, sqlFunction.SqlFunction, args);
+            return sqlFunction;
         }
     }
 }

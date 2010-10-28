@@ -11,11 +11,10 @@ using Signum.Utilities;
 using Signum.Utilities.Reflection;
 using Signum.Engine.Properties;
 using System.Data.SqlClient;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.Linq
 {
-    
-
     internal interface IProjectionRow
     {
         FieldReader Reader { get; }
@@ -54,7 +53,7 @@ namespace Signum.Engine.Linq
             this.reader = reader;
             this.Reader = new FieldReader(reader);
 
-            this.projectorExpression = projectorExpression;
+            this.projectorExpression = ExpressionCompilableAsserter.Assert(projectorExpression);
             this.projector = projectorExpression.Compile();
             this.retriever = retriever;
             this.lookups = lookups;
@@ -145,6 +144,28 @@ namespace Signum.Engine.Linq
                 return Enumerable.Empty<S>();
             else
                 return lookup[key];
+        }
+    }
+
+    internal class ExpressionCompilableAsserter : SimpleExpressionVisitor
+    {
+        protected override Expression Visit(Expression exp)
+        {
+            try
+            {
+                return base.Visit(exp);
+            }
+            catch (InvalidOperationException e)
+            {
+                if (e.Message.StartsWith("Unhandled Expression"))
+                    throw new NotSupportedException("The expression can not be compiled:\r\n{0}".Formato(exp.NiceToString()));
+                throw;
+            }
+        }
+
+        internal static Expression<Func<IProjectionRow, T>> Assert<T>(Expression<Func<IProjectionRow, T>> projectorExpression)
+        {
+            return (Expression<Func<IProjectionRow, T>>)new ExpressionCompilableAsserter().Visit(projectorExpression);
         }
     }
 

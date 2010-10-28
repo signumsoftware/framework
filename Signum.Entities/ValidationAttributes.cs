@@ -191,12 +191,12 @@ namespace Signum.Entities
 
     public class EMailValidatorAttribute : RegexValidatorAttribute
     {
-        const string EmailRegex = @"^([a-zA-Z0-9_\-\.]+)@((\[[0-9]{1,3}" +
+        public static readonly Regex EmailRegex = new Regex(@"^([a-zA-Z0-9_\-\.]+)@((\[[0-9]{1,3}" +
                           @"\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\" +
-                          @".)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$";
+                          @".)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$", RegexOptions.IgnoreCase);
 
         public EMailValidatorAttribute()
-            : base(new Regex(EmailRegex, RegexOptions.IgnoreCase))
+            : base(EmailRegex)
         {
             this.FormatName = "e-Mail";
         }
@@ -204,10 +204,10 @@ namespace Signum.Entities
 
     public class TelephoneValidatorAttribute : RegexValidatorAttribute
     {
-        const string TelephoneRegex = @"^((\+|00)\d\d)? *(\([ 0-9]+\))? *[0-9][ \-0-9]+$";
+        public static readonly Regex TelephoneRegex = new Regex(@"^((\+|00)\d\d)? *(\([ 0-9]+\))? *[0-9][ \-0-9]+$");
 
         public TelephoneValidatorAttribute()
-            : base(new Regex(TelephoneRegex))
+            : base(TelephoneRegex)
         {
             this.FormatName = Resources.Telephone;
         }
@@ -215,7 +215,7 @@ namespace Signum.Entities
 
     public class URLValidatorAttribute : RegexValidatorAttribute
     {
-        const string URLRegex =
+        public static readonly Regex URLRegex = new Regex(
               "^(https?://)"
             + "?(([0-9a-z_!~*'().&=+$%-]+: )?[0-9a-z_!~*'().&=+$%-]+@)?" //user@ 
             + @"(([0-9]{1,3}\.){3}[0-9]{1,3}" // IP- 199.194.52.184 
@@ -225,10 +225,10 @@ namespace Signum.Entities
             + "[a-z]{2,6})" // first level domain- .com or .museum 
             + "(:[0-9]{1,4})?" // port number- :80 
             + "((/?)|" // a slash isn't required if there is no file name 
-            + "(/[0-9a-z_!~*'().;?:@&=+$,%#-]+)+/?)$";
+            + "(/[0-9a-z_!~*'().;?:@&=+$,%#-]+)+/?)$", RegexOptions.IgnoreCase);
 
         public URLValidatorAttribute()
-            : base(new Regex(URLRegex, RegexOptions.IgnoreCase))
+            : base(URLRegex)
         {
             this.FormatName = "URL";
         }
@@ -236,9 +236,9 @@ namespace Signum.Entities
 
     public class FileNameValidatorAttribute : RegexValidatorAttribute
     {
-        const string FileNameRegex = @"^(?!^(PRN|AUX|CLOCK\$|NUL|CON|COM\d|LPT\d|\..*)(\..+)?$)[^\x00-\x1f\\?*:\"";|/]+$";
+        public static readonly Regex FileNameRegex = new Regex(@"^(?!^(PRN|AUX|CLOCK\$|NUL|CON|COM\d|LPT\d|\..*)(\..+)?$)[^\x00-\x1f\\?*:\"";|/]+$");
         public FileNameValidatorAttribute()
-            : base(new Regex(FileNameRegex))
+            : base(FileNameRegex)
         {
             this.FormatName = Resources.FileName;
         }

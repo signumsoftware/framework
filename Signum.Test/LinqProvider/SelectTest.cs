@@ -311,6 +311,18 @@ namespace Signum.Test.LinqProvider
             var list = Database.Query<ArtistDN>().Select(a => new { a.Name, Count = a.AlbumCount() }).ToArray();
         }
 
+        [TestMethod]
+        public void SelectPolyExpressionProperty()
+        {
+            var list = Database.Query<AlbumDN>().Select(a => a.Author.FullName).ToArray();
+        }
+
+        [TestMethod]
+        public void SelectPolyExpressionMethod()
+        {
+            var list2 = Database.Query<AlbumDN>().Select(a => a.Author is BandDN ? ((BandDN)a.Author).Members.Count : ((ArtistDN)a.Author).Friends.Count).ToArray();
+            var list = Database.Query<AlbumDN>().Select(a => a.Author.Lonely()).ToArray();
+        }
 
         [TestMethod]
         public void SelectThrowIntNullable()

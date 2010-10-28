@@ -47,6 +47,10 @@ namespace Signum.Test
         string Name { get; }
 
         AwardDN LastAward { get; }
+
+        string FullName { get; }
+
+        bool Lonely();
     }
 
     [Serializable]
@@ -104,6 +108,20 @@ namespace Signum.Test
             set { Set(ref friends, value, () => Friends); }
         }
 
+        static Expression<Func<ArtistDN, string>> FullNameExpression =
+             a => a.Shy(a.Name + (a.Dead ? " Dead" : "") + (a.IsMale ? " Male" : " Female"));
+        public string FullName
+        {
+            get{ return FullNameExpression.Invoke(this); }
+        }
+
+        static Expression<Func<ArtistDN, bool>> LonelyExpression =
+            a => a.Shy(!a.Friends.Any());
+        public bool Lonely()
+        {
+            return LonelyExpression.Invoke(this);
+        }
+
         public override string ToString()
         {
             return name;
@@ -154,6 +172,20 @@ namespace Signum.Test
         {
             get { return otherAwards; }
             set { Set(ref otherAwards, value, () => OtherAwards); }
+        }
+
+        static Expression<Func<BandDN, string>> FullNameExpression =
+            b => b.Shy(b.Name + " (" + b.Members.Count + " members )");
+        public string FullName
+        {
+            get { return FullNameExpression.Invoke(this); }
+        }
+
+        static Expression<Func<BandDN, bool>> LonelyExpression =
+            b => b.Shy(!b.Members.Any());
+        public bool Lonely()
+        {
+            return LonelyExpression.Invoke(this);
         }
 
         public override string ToString()

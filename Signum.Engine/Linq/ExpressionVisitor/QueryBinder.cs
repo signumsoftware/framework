@@ -142,8 +142,10 @@ namespace Signum.Engine.Linq
                 return this.BindContains(m.Type, m.Object, m.Arguments[0], m == root);
             }
 
-            return base.VisitMethodCall(m);
+            MethodCallExpression result = (MethodCallExpression)base.VisitMethodCall(m);
+            return BindMethodCall(result);
         }
+
 
         internal Expression Coalesce(Type type, IEnumerable<Expression> exp)
         {
@@ -851,6 +853,42 @@ namespace Signum.Engine.Linq
             return binded;
         }
 
+        private Expression BindMethodCall(MethodCallExpression m)
+        {
+            Expression source = m.Object;
+
+            if (source == null)
+                return m;
+
+            LambdaExpression lambda = ExpressionExpander.GetExpansion(source.Type, m.Method);
+            if (lambda != null) //new expansions discovered
+            {
+                int i= 0;  
+                var dic = m.Arguments.PreAnd(m.Object).ToDictionary(a=>Expression.Parameter(a.Type, "temp" + (i++)));
+
+                Expression cleanedLambda = DbQueryProvider.Clean(Expression.Invoke(lambda, dic.Keys));
+
+                map.AddRange(dic); 
+                Expression result = Visit(cleanedLambda);
+                map.RemoveRange(dic.Keys); 
+
+                return result;
+            }
+
+            if (source.NodeType == (ExpressionType)DbExpressionType.ImplementedBy)
+            {
+                ImplementedByExpression ib = (ImplementedByExpression)source;
+
+
+                List<Expression> list = ib.Implementations
+                    .Select(imp => BindMethodCall(Expression.Call(imp.Field, m.Method, m.Arguments))).ToList();
+
+                return Collapse(list, m.Type);
+            }
+
+            return m;
+        }
+
         public Expression BindMemberAccess(MemberExpression m)
         {
             Expression source = m.Expression; 
@@ -860,7 +898,7 @@ namespace Signum.Engine.Linq
             {
                 ParameterExpression temp = Expression.Parameter(source.Type, "temp");
 
-                Expression cleanedLambda = DbQueryProvider.Clean( Expression.Invoke(lambda, temp));
+                Expression cleanedLambda = DbQueryProvider.Clean(Expression.Invoke(lambda, temp));
 
                 map.Add(temp, source);
                 Expression result = Visit(cleanedLambda);
@@ -1069,7 +1107,7 @@ namespace Signum.Engine.Linq
             if (list.Any(e => e is MListExpression))
                 throw new InvalidOperationException("MList on implementedBy are not supported yet");
 
-            return Coalesce(returnType.Nullify(), list);
+            return Coalesce(returnType, list);
         }
 
         Expression GetId(Expression expression)

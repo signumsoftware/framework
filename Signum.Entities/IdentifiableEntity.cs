@@ -130,12 +130,9 @@ namespace Signum.Entities
             {
                 Type t = typeArguments[0];
 
-                Expression ce = (t.IsValueType && !t.IsNullable()) ?
-                    Expression.Convert(Expression.Constant(null, t.Nullify()), t) :
-                    (Expression)Expression.Constant(null, t);
+                Expression ce =  Expression.Constant(null, t.Nullify());
 
-                return ExpressionNominatorExtensions.InSqlExpression(
-                            Expression.Condition(Expression.TypeIs(instance, instance.Type), arguments[0], ce));
+                return Expression.Condition(Expression.NotEqual(instance, Expression.Constant(null, instance.Type)), arguments[0].Nullify(), ce);
             }
         }
 

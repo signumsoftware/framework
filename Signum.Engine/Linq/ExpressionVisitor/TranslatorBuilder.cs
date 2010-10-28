@@ -289,6 +289,20 @@ namespace Signum.Engine.Linq
             {
                 return Expression.Constant(sce.Value, sce.Type);
             }
+
+            protected override Expression VisitSqlFunction(SqlFunctionExpression sqlFunction)
+            {
+                if (sqlFunction.SqlFunction == SqlFunction.COALESCE.ToString())
+                {
+                    var result = sqlFunction.Arguments.Select(a => Visit(a.Nullify())).Aggregate((a, b) => Expression.Coalesce(a, b));
+
+                    if (!sqlFunction.Type.IsNullable())
+                        return result.UnNullify();
+                    return result; 
+                }
+
+                return base.VisitSqlFunction(sqlFunction);
+            }
         }
     }
 

@@ -83,7 +83,7 @@ namespace Signum.Utilities.ExpressionTrees
                 case ExpressionType.ListInit:
                     return this.VisitListInit((ListInitExpression)exp);
                 default:
-                    throw new Exception(string.Format("Unhandled Expression of type {0}", exp.NodeType));
+                    throw new InvalidOperationException(string.Format("Unhandled Expression of type {0}", exp.NodeType));
             }
         }
 
