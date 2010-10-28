@@ -128,9 +128,10 @@ namespace Signum.Web
 
             var context = helper.ViewContext.HttpContext;
 
-            if (context.Items["jqCalendar"] == null){
-                helper.Write(GetLocalizationVariables());
-                helper.IncludeAreaJs("signum/Scripts/SF_jquery-ui-datepicker-extension.js");
+            if (context.Items["jqCalendar"] == null)
+            {
+                sb.AppendLine(GetLocalizationVariables());
+                sb.AppendLine(AreaResourceHelper.InternalAreaJs(new string[]{"signum/Scripts/SF_jquery-ui-datepicker-extension.js"}));
                 context.Items["jqCalendar"] = true;
             }
 
