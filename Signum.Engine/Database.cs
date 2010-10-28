@@ -475,6 +475,8 @@ namespace Signum.Engine
             return DbQueryProvider.Single.Delete<T>(query);
         }
 
+
+        /// <param name="update">Use a object initializer to make the update (no entity will be created)</param>
         public static int UnsafeUpdate<T>(this IQueryable<T> query, Expression<Func<T, T>> update)
             where T : IdentifiableEntity
         {
