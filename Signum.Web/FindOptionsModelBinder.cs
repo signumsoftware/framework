@@ -58,7 +58,15 @@ namespace Signum.Web
             }
 
             if (parameters.AllKeys.Contains("sfFilterMode"))
-                fo.FilterMode = parameters["sfFilterMode"].ToEnum<FilterMode>();
+            {
+                FilterMode mode = parameters["sfFilterMode"].ToEnum<FilterMode>();
+                if (mode == FilterMode.AlwaysHidden || mode == FilterMode.OnlyResults)
+                {
+                    if (controllerContext.HttpContext.Request.QueryString.AllKeys.Contains("sfFilterMode"))
+                        throw new InvalidOperationException("QueryString cannot contain FilterMode set to Always Hidden or Only Results");
+                }
+                fo.FilterMode = mode;
+            }
 
             if (parameters.AllKeys.Contains("sfColumnMode"))
                 fo.ColumnOptionsMode = parameters["sfColumnMode"].ToEnum<ColumnOptionsMode>();

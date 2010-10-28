@@ -131,7 +131,9 @@ namespace Signum.Web
                 !View ? "sfView=false": null, 
                 Async ? "sfAsync=true": null, 
                 AllowMultiple.HasValue ? "sfAllowMultiple=" + AllowMultiple.ToString() : null,
+                FilterMode != FilterMode.Visible ? "sfFilterMode=" + FilterMode.ToString() : null,
                 FilterOptions.Select((fi,i)=>fi.ToString(i)),
+                (OrderOptions != null && OrderOptions.Count > 0) ? ("sfOrderBy=" + OrderOptions.ToString(oo => (oo.OrderType == OrderType.Descending ? "-" : "") + oo.ColumnName, ",")) : ""
             }.NotNull().ToString("&");
 
             if (options.HasText())
