@@ -336,8 +336,4 @@ if (!ViewNavigator && typeof ViewNavigator == "undefined") {
 
         return $clone;
     }
-
-    function hiddenInput(id, value) {
-        return "<input type='hidden' id='" + id + "' name='" + id + "' value='" + value + "' />\n";
-    }
 }

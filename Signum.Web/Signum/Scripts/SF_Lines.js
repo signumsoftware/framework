@@ -1174,14 +1174,6 @@
         }
     }
 
-    function hiddenInput(id, value) {
-        return "<input type='hidden' id='" + id + "' name='" + id + "' value='" + value + "' />\n";
-    };
-
-    function hiddenDiv(id, innerHTML) {
-        return "<div id='" + id + "' name='" + id + "' style='display:none'>" + innerHTML + "</div>\n";
-    };
-
     function FullPathNodesSelector(prefix) {
         var pathPrefixes = GetPathPrefixes(prefix);
         var nodes = $("#" + sfRuntimeInfo);

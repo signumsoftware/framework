@@ -8,6 +8,7 @@ using Signum.Entities;
 using System.Web;
 using System.Web.Mvc;
 using Signum.Entities.Reflection;
+using Signum.Web.Properties;
 
 namespace Signum.Web
 {
@@ -42,6 +43,7 @@ namespace Signum.Web
         }
 
         public static List<FormatterRule> FormatRules { get; set; }
+        public static List<EntityFormatterRule> EntityFormatRules { get; set; }
 
         static QuerySettings()
         {
@@ -84,6 +86,14 @@ namespace Signum.Web
                     return o != null ? "<div style='text-align:center'>"+h.CheckBox("", (bool)o, false)+"</div>" : "" ;
                 })
             };
+
+            EntityFormatRules = new List<EntityFormatterRule>
+            {
+                new EntityFormatterRule(l => true, (h,l) => 
+                {
+                    return h.Href(Navigator.ViewRoute(l.RuntimeType, l.Id), h.Encode(Resources.View));
+                }),
+            };
         }
 
         public Func<HtmlHelper, object, string> GetFormatter(Column column)
@@ -111,6 +121,18 @@ namespace Signum.Web
         public Func<Column, bool> IsApplyable { get; set; }
 
         public FormatterRule(Func<Column, bool> isApplyable, Func<Column, Func<HtmlHelper, object, string>> formatter)
+        {
+            Formatter = formatter;
+            IsApplyable = isApplyable;
+        }
+    }
+
+    public class EntityFormatterRule
+    {
+        public Func<HtmlHelper, Lite, string> Formatter { get; set; }
+        public Func<Lite, bool> IsApplyable { get; set; }
+
+        public EntityFormatterRule(Func<Lite, bool> isApplyable, Func<HtmlHelper, Lite, string> formatter)
         {
             Formatter = formatter;
             IsApplyable = isApplyable;

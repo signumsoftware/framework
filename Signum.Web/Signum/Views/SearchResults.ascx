@@ -49,9 +49,7 @@
         {
              %>
             <td>
-            <%
-                Response.Write(Html.Href(Navigator.ViewRoute(entityField.RuntimeType, entityField.Id), Html.Encode(Resources.View)));
-             %>
+            <%= QuerySettings.EntityFormatRules.Last(fr => fr.IsApplyable(entityField)).Formatter(Html, entityField) %>
             </td>
             <%
         }
