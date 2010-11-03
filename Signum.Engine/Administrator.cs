@@ -39,7 +39,7 @@ namespace Signum.Engine
 
         public static bool ExistTable(string tableName)
         {
-            return Database.View<SchemaTables>().Any(a => a.TABLE_NAME == tableName);
+            return Database.View<SysTables>().Any(a => a.name == tableName);
         }
 
         public static List<T> TryRetrieveAll<T>(Replacements replacements)

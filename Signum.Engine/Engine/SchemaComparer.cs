@@ -120,40 +120,31 @@ namespace Signum.Engine
 
         static Dictionary<string, DiffTable> GetDatabaseDescription()
         {
-            var rawTables = (from t in Database.View<SchemaTables>()
-                             where t.TABLE_TYPE == "BASE TABLE"
-                             join c in Database.View<SchemaColumns>().DefaultIfEmpty() on t.TABLE_NAME equals c.TABLE_NAME
-                             join kc in Database.View<SchemaKeyColumnUsage>().DefaultIfEmpty() on new { c.TABLE_NAME, c.COLUMN_NAME } equals new { kc.TABLE_NAME, kc.COLUMN_NAME }
-                             join k in Database.View<SchemaTableConstraints>().DefaultIfEmpty() on kc.CONSTRAINT_NAME equals k.CONSTRAINT_NAME
-                             select new
-                             {
-                                 t.TABLE_NAME,
-                                 c.COLUMN_NAME,
-                                 c.DATA_TYPE,
-                                 c.IS_NULLABLE,
-                                 c.CHARACTER_MAXIMUM_LENGTH,
-                                 c.NUMERIC_SCALE,
-                                 c.NUMERIC_PRECISION,
-                                 kc.CONSTRAINT_NAME,
-                                 k.CONSTRAINT_TYPE,
-                             }).ToList();
-
-
-            var database = (from t in rawTables
-                            group t by t.TABLE_NAME into g
+            var database = (from t in Database.View<SysTables>()
                             select new DiffTable
                             {
-                                Name = g.Key,
-                                Colums = g.Select(c => new DiffColumn
-                                {
-                                    Name = c.COLUMN_NAME,
-                                    DbType = ToSqlDbType(c.DATA_TYPE),
-                                    Nullable = c.IS_NULLABLE == "YES",
-                                    Size = c.CHARACTER_MAXIMUM_LENGTH ?? c.NUMERIC_PRECISION,
-                                    Scale = c.NUMERIC_SCALE,
-                                    PrimaryKey = c.CONSTRAINT_TYPE == "PRIMARY KEY",
-                                    ForeingKeyName = c.CONSTRAINT_TYPE == "FOREIGN KEY" ? c.CONSTRAINT_NAME : null,
-                                }).ToDictionary(c => c.Name),
+                                Name = t.name,
+                                Colums = (from c in Database.View<SysColumns>().Where(c => c.object_id == t.object_id)
+                                          join type in Database.View<SysTypes>() on c.user_type_id equals type.user_type_id
+                                          select new DiffColumn
+                                          {
+                                              Name = c.name,
+                                              DbType = ToSqlDbType(type.name),
+                                              Nullable = c.is_nullable,
+                                              Length = c.max_length,
+                                              Precission = c.precision,
+                                              Scale = c.scale,
+                                              Identity = c.is_identity,
+                                              PrimaryKey = (from i in Database.View<SysIndexes>()
+                                                            where i.object_id == c.object_id && i.is_primary_key
+                                                            join ic in Database.View<SysIndexColumn>() on new { i.object_id, i.index_id } equals new { ic.object_id, ic.index_id }
+                                                            where ic.column_id == c.column_id
+                                                            select i.name).Any(),
+                                              ForeingKeyName = (from fkc in Database.View<SysForeignKeyColumns>()
+                                                                where fkc.parent_object_id == c.object_id && fkc.parent_column_id == c.column_id
+                                                                join fk in Database.View<SysForeignKeys>().DefaultIfEmpty() on fkc.constraint_object_id equals fk.object_id
+                                                                select fk.name).SingleOrDefault(),
+                                          }).ToDictionary(a => a.Name)
                             }).ToDictionary(c => c.Name);
 
 
@@ -204,24 +195,13 @@ namespace Signum.Engine
                                }).GroupToDictionary(t => t.Table, t => new DiffFreeIndex { IndexName = t.IndexName, Columns = t.Columns });
 
             database.JoinDictionaryForeach(freeIndices, (tableName, diffTable, ind) => diffTable.FreeIndices = ind);
-
-             var identities = (from t in Database.View<SysTables>()
-                           join c in Database.View<SysColumns>() on t.object_id equals c.object_id
-                           where SqlMethods.ColumnProperty(t.object_id, c.name, "IsIdentity") == 1
-                           select new
-                           {
-                               Table = t.name,
-                               Column = c.name
-                           }).ToDictionary(a=>a.Table, a=>a.Column);
-
-             database.JoinDictionaryForeach(identities, (tn, difTable, identColumn) => difTable.Colums[identColumn].Identity = true);
         }
 
         static void AddDefaultContraints(Dictionary<string, DiffTable> database)
         {
             var rawConstraints = (from t in Database.View<SysTables>()
                                   join c in Database.View<SysColumns>() on t.object_id equals c.object_id
-                                  join o in Database.View<SysObjects>() on c.default_object_id equals o.id
+                                  join o in Database.View<SysObjects>() on c.default_object_id equals o.object_id
                                   select new
                                   {
                                       Table = t.name,
@@ -308,8 +288,9 @@ namespace Signum.Engine
         public string Name;
         public SqlDbType DbType;
         public bool Nullable;
-        public int? Size;
-        public int? Scale;
+        public int Length; 
+        public int Precission;
+        public int Scale;
         public bool Identity;
         public bool PrimaryKey;
 
@@ -322,17 +303,12 @@ namespace Signum.Engine
             var result = 
                    DbType == other.SqlDbType
                 && Nullable == other.Nullable
-                && NullOrEqual(Size == -1? int.MaxValue: Size, other.Size)
-                && NullOrEqual(Scale,other.Scale) 
+                && (other.Size == null || other.Size.Value == Precission || other.Size.Value == Length / 2 || other.Size.Value == int.MaxValue && Length == -1)
+                && (other.Scale == null || other.Scale.Value == Scale) 
                 && Identity == other.Identity
                 && PrimaryKey == other.PrimaryKey;
 
             return result;
-        }
-
-        private bool NullOrEqual(int? a, int? b)
-        {
-            return a == null || b == null || a.Value == b.Value;
         }
  
         internal bool EqualForeignKey(string tableName, IColumn colModel)
