@@ -88,15 +88,20 @@ namespace Signum.Entities.Reflection
             return result;
         }
 
+        public static PropertyInfo[] PublicInstanceDeclaredPropertiesInOrder(Type type)
+        {
+            return type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
+                       .Where(p => !p.HasAttribute<HiddenPropertyAttribute>())
+                       .OrderBy(f => f.MetadataToken).ToArray(); 
+        }
+
         public static PropertyInfo[] PublicInstancePropertiesInOrder(Type type)
         {
             var result = type.FollowC(t => t.BaseType)
                 .Reverse()
-                .SelectMany(t => t.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
-                                .Where(p => !p.HasAttribute<HiddenPropertyAttribute>())
-                                .OrderBy(f => f.MetadataToken))
-                 .Distinct(a => a.Name) //Overriden properties
-                 .ToArray();
+                .SelectMany(t => PublicInstanceDeclaredPropertiesInOrder(t))
+                .Distinct(a => a.Name) //Overriden properties
+                .ToArray();
 
             return result;
         }

@@ -120,318 +120,38 @@
   <data name="_0HasBeenRenamedIn1" xml:space="preserve">
     <value>¿Se ha renombrado '{0}' en {1}?</value>
   </data>
-  <data name="_0ObjectsInsertedButOnly1IdsAreGenerated" xml:space="preserve">
-    <value>Se han insertado {0} objetos pero solo se han generado {1} ids</value>
-  </data>
-  <data name="_0RepeatedOnTable1" xml:space="preserve">
-    <value>{0} repetido en la tabla {1}</value>
-  </data>
-  <data name="AccessToQuery0IsNotAllowed" xml:space="preserve">
-    <value>El acceso a la Query '{0}' no está permitido</value>
-  </data>
-  <data name="AtLessOneNullableFieldMustBePassed" xml:space="preserve">
-    <value>Como mínimo debe pasarse un campo nulable</value>
-  </data>
-  <data name="BelongsToAnotherKindOkLinqProvider" xml:space="preserve">
-    <value>{0} peretenece a otro tipo de Linq Provider</value>
-  </data>
-  <data name="CachingTypesTableFrom0" xml:space="preserve">
-    <value>cacheando la tabla de tipos desde {0}</value>
-  </data>
-  <data name="CanNotBeAssignedFrom1" xml:space="preserve">
-    <value>{0} no puede ser asignado desde {1}</value>
-  </data>
-  <data name="CanNotBeAssignedToNull" xml:space="preserve">
-    <value>{0} no puede ser establecido a nulo</value>
-  </data>
-  <data name="CannotEnumerateMoreThanOnce" xml:space="preserve">
-    <value>No se puede enumerar más de una vez</value>
-  </data>
   <data name="CannotInsertDuplicatedFields0On1Table" xml:space="preserve">
     <value>No se pueden insertar duplicados en el campo {0} de la tabla {1}</value>
   </data>
   <data name="ConcurrencyErrorOnDatabaseTable0Id1" xml:space="preserve">
     <value>Error de concurrencia en la base de datos, Tabla = {0}, Id = {1}</value>
   </data>
-  <data name="ConstantExpressionWithAComplexIQueryableUnexpectedAt" xml:space="preserve">
-    <value>ConstantExpression con un IQueryable complejo no esperado en este punto</value>
-  </data>
-  <data name="DoesNotImplement1" xml:space="preserve">
-    <value>{0} no implementa {1}</value>
-  </data>
-  <data name="DoesNotInheritFromEmbeddedEntity" xml:space="preserve">
-    <value>{0} no hereda de EmbeddedEntity</value>
-  </data>
-  <data name="DoesNotRepresentAColumn" xml:space="preserve">
-    <value>{0} no representa una columna</value>
-  </data>
   <data name="EndOfSyncScript" xml:space="preserve">
     <value>--- FIN DEL SCRIPT DE SINCRONIZACION</value>
-  </data>
-  <data name="EntityColumnNotFound" xml:space="preserve">
-    <value>Columna de entidad no encontrada</value>
-  </data>
-  <data name="EntityInNotDefinedForNewItemOfType0" xml:space="preserve">
-    <value>EntityIn no definido para el nuevo elemento del tipo {0}</value>
-  </data>
-  <data name="EntityOfType0AndId1NotFound" xml:space="preserve">
-    <value>No se ha encontrado la entidad de tipo {0} e Id {1}</value>
   </data>
   <data name="EntityWithType0AndId1NotFound" xml:space="preserve">
     <value>No se han encontrado {0} con Id {1}</value>
   </data>
-  <data name="Error01" xml:space="preserve">
-    <value>Error {0}: {1}</value>
-  </data>
-  <data name="Error0N1QueryProblem" xml:space="preserve">
-    <value>Error {0}: probelma en la query de N + 1</value>
-  </data>
-  <data name="ExceptionOn01" xml:space="preserve">
-    <value>Excepción en {0}: {1}</value>
-  </data>
-  <data name="ExpressionTypeIsNotIQueryable" xml:space="preserve">
-    <value>la expresión Type no está en el IQueryable</value>
-  </data>
-  <data name="Field0ContainsBoth1And2" xml:space="preserve">
-    <value>El campo {0} contiene tanto un atributo {1} como uno {2}</value>
-  </data>
-  <data name="Field0HasNullAndOsNotNullable" xml:space="preserve">
-    <value>El campo {0} tiene una valor nulo y no es nullable</value>
-  </data>
-  <data name="Field0NotInType1" xml:space="preserve">
-    <value>El campo {0} no se encuentra en el tipo {1}</value>
-  </data>
-  <data name="Field0OfTipe1HasNoCompatibleProperty" xml:space="preserve">
-    <value>&lt;=!=&gt; El Campo {0} del tipo {1} no tiene una propiedad compatible</value>
-  </data>
-  <data name="Field0OfType1HasNoDatabaseRepresentation" xml:space="preserve">
-    <value>El campo {0} de la clase {1} no tiene una manera de representarse en la base de datos</value>
-  </data>
-  <data name="Field0OfType1ShouldBeMappedAs2ButItIsIncompatibleWithContext3" xml:space="preserve">
-    <value>El campo {0} de la clase {1} deberia ser mapeado como un {2} pero es incompatible en un contexto {3}</value>
-  </data>
-  <data name="FieldInitExpressionBindingsShouldBeEmpty" xml:space="preserve">
-    <value>FieldInitExpression binding debe estar vacío</value>
-  </data>
-  <data name="Fields0AreSetAtTheSameTime" xml:space="preserve">
-    <value>Los campos {0} están establecidos al mismo tiempo</value>
-  </data>
-  <data name="HasValueShouldBeABoolExpression" xml:space="preserve">
-    <value>hasValue debería ser una expresión booleana</value>
-  </data>
-  <data name="ImplementedByAll01But23" xml:space="preserve">
-    <value>ImplementedByAll {0} = {1} pero {2} = {3}</value>
-  </data>
-  <data name="ImplementedByAllIsNotSupportedForFindLiteLike" xml:space="preserve">
-    <value>ImplementedByAll no está soportado par FindLiteLike</value>
-  </data>
-  <data name="ImplementedByAllIsNotSupportedForRetriveAllLite" xml:space="preserve">
-    <value>ImplementedByAll no está soportado para RetriveAllLite</value>
-  </data>
-  <data name="ImpossibleToConvertTheValueOf012To3" xml:space="preserve">
-    <value>Imposible convertir el valor de {0}.{1} ({2}) a {3}</value>
-  </data>
-  <data name="ImpossibleToIncludeInTheSchema" xml:space="preserve">
-    <value>Imposible incluir en el Schema:</value>
-  </data>
-  <data name="ImpossibleToSaveNullOnANotNullableEmbeddedFieldUseNullable" xml:space="preserve">
-    <value>Imposible guardar null en un campo embebido no nulable, utilice Nullable Attribute sobre el campo</value>
-  </data>
-  <data name="IsNewButHasId1AndIdentityIsTrue" xml:space="preserve">
-    <value>{0} es nuevo, pero tiene Id ({1}) e Identity es true</value>
-  </data>
-  <data name="MemberInfo0NotSupportedByCollectionField" xml:space="preserve">
-    <value>El MemberInfo {0} no está soportado por CampoColeccion</value>
-  </data>
-  <data name="MListOnImplementedByAreNotSupportedYet" xml:space="preserve">
-    <value>Los MList en ImplementedBy no están soportados aún</value>
-  </data>
-  <data name="MoreThanOneEntityColumn" xml:space="preserve">
-    <value>Más de un Entity column</value>
-  </data>
-  <data name="MsInitializing0" xml:space="preserve">
-    <value>{1:0.00} ms inicializando {0}</value>
-  </data>
-  <data name="MultipleIndexOnTheFollowingColumns" xml:space="preserve">
-    <value>Índices múltiples en las siguientes columnas:</value>
-  </data>
   <data name="NNone" xml:space="preserve">
     <value>- n: Ninguno</value>
-  </data>
-  <data name="NoCurrentConnectionEstablishedUseConnectionScopeDefaultToDoIt" xml:space="preserve">
-    <value>No se ha establecido ninguna conexión actual. Utiliza ConnectionScope.Default para hacerlo</value>
-  </data>
-  <data name="NoEntityCacheContextHasBeenCreated" xml:space="preserve">
-    <value>No se ha creado un contexto de EntityCache</value>
-  </data>
-  <data name="NoFieldWasGiven" xml:space="preserve">
-    <value>No se ha proporcionado ningún campo</value>
-  </data>
-  <data name="NoImplementationForTypeS0" xml:space="preserve">
-    <value>No existe implementación para el/los tipo/s {0}</value>
-  </data>
-  <data name="NoNameForField0Defined" xml:space="preserve">
-    <value>No está definido el nombre para {0} en este caso</value>
-  </data>
-  <data name="NoNameForType0Defined" xml:space="preserve">
-    <value>No está definido el nombre para {0} en este caso</value>
-  </data>
-  <data name="NoStackFoundForThisKey" xml:space="preserve">
-    <value>No hay una pila para esta clave</value>
-  </data>
-  <data name="NotAllEntitiesOfType0AndIds1Removed" xml:space="preserve">
-    <value>No se han eliminado todas las entidades de tipo {0} e ids: {1}</value>
   </data>
   <data name="NoWayOfMappingType0Found" xml:space="preserve">
     <value>No se ha encontrado manera de mapear el tipo {0}</value>
   </data>
-  <data name="ReferenceToUndefinedColumn" xml:space="preserve">
-    <value>Referencia a columna no definida</value>
-  </data>
-  <data name="SetOperationsAreNotAllowedOnQueriesWithNonSingleCellProjections" xml:space="preserve">
-    <value>Operaciones de conjuntos no están permitidas en consultas de más de una celda</value>
-  </data>
   <data name="StartOfSyncScriptGeneratedOn0" xml:space="preserve">
     <value>--- INICIO DEL SCRIPT DE SINCRONIZACION GENERADO EL {0}</value>
-  </data>
-  <data name="SubqueryWith0Columns" xml:space="preserve">
-    <value>¡subquery con {0} columnas!</value>
-  </data>
-  <data name="Table0NotLoadedInSchema" xml:space="preserve">
-    <value>La tabla para el tipo {0} no está cargada en el Esquema actual</value>
-  </data>
-  <data name="TableForType0NotInSchema" xml:space="preserve">
-    <value>No se ha encontrado la tabla para el tipo {0} en el Esquema</value>
-  </data>
-  <data name="TestingSqlConditionessForNonBooleanExpression0" xml:space="preserve">
-    <value>Probando condiciones sql para expresiones no booleanas: {0}</value>
-  </data>
-  <data name="TheBinaryOperator0IsNotSupported" xml:space="preserve">
-    <value>El operador binario '{0}' no está soportado</value>
-  </data>
-  <data name="TheConstantFor0IsNotSupported" xml:space="preserve">
-    <value>La constante '{0}' no está soportada</value>
-  </data>
-  <data name="TheEntityIsNew" xml:space="preserve">
-    <value>La entidad es nueva</value>
-  </data>
-  <data name="TheExpressionCanTBeTranslatedToSQL" xml:space="preserve">
-    <value>La expresión no se puede traducir a SQL:
-</value>
-  </data>
-  <data name="TheField0IsNotIncluded" xml:space="preserve">
-    <value>El campo {0} no está incluido</value>
-  </data>
-  <data name="TheFieldHasNoImplementationForType0" xml:space="preserve">
-    <value>El campo no tiene una implementación para el tipo {0}</value>
-  </data>
-  <data name="TheFollowingAttributesAreNotCompatibleWithTargets01" xml:space="preserve">
-    <value>Los siguientes atributos no son compatibles con Targets {0}: {1}</value>
-  </data>
-  <data name="TheMember0Of1IsNoAccesibleOnQueries" xml:space="preserve">
-    <value>El miembro {0} de {1} no es accesible en queries</value>
-  </data>
-  <data name="TheMember0OfImplementedByAllIsNoAccesibleOnQueries" xml:space="preserve">
-    <value>El miembro {0} de ImplementedByAll no es accesible en queries</value>
-  </data>
-  <data name="TheMember0OfLiteIsNoAccesibleOnQueriesUseEntityInstead" xml:space="preserve">
-    <value>El miembro {0} de Lite no es accesible en queries, utilice Entity en su lugar</value>
-  </data>
-  <data name="TheProperty0ForType1IsnotFound" xml:space="preserve">
-    <value>No se ha encontrado la propiedad {0} para el tipo {1}</value>
   </data>
   <data name="ThereAre0ThatReferThisEntity" xml:space="preserve">
     <value>Hay '{0}' que refieren a esta entidad</value>
   </data>
-  <data name="ThereAreEntitiesOfDifferentTypes" xml:space="preserve">
-    <value>Hay entidades de diferentes tipos</value>
-  </data>
-  <data name="ThereAreMoreThanOneEntityColumn" xml:space="preserve">
-    <value>Hay más de un Entity column</value>
-  </data>
   <data name="ThereAreRecordsIn0PointingToThisTableByColumn1" xml:space="preserve">
     <value>Hay registros en '{0}' que refieren a esta tabla por la columna '{1}'</value>
-  </data>
-  <data name="ThereIsASqlPreComandSimpleWithMoreThan0Parameters" xml:space="preserve">
-    <value>Existe un SqlPreCommandSimple con más de {0} parámetros</value>
-  </data>
-  <data name="ThereIsNoEntityColumn" xml:space="preserve">
-    <value>No hay Entity column</value>
-  </data>
-  <data name="ThereMustBeMoreThanOneFieldPassedForTheMultiColumnTrigger" xml:space="preserve">
-    <value>Debe pasarse más de un campo al MultiColumnTrigger</value>
-  </data>
-  <data name="TheTransactionIsRolledBack" xml:space="preserve">
-    <value>Se ha hecho Rollback de la transacción (un Transaction previo no se ha confirmado)</value>
-  </data>
-  <data name="TheType0IsNotInTheTypesTable" xml:space="preserve">
-    <value>El tipo {0} no está en la tabla de tipos</value>
-  </data>
-  <data name="TheType0IsNotTheLiteVersionOf1" xml:space="preserve">
-    <value>El tipo {0} no es la versiona Lite de {1}</value>
-  </data>
-  <data name="TheUnaryOperator0IsNotSupported" xml:space="preserve">
-    <value>El operador unario '{0}' no está soportado</value>
-  </data>
-  <data name="TheView0IsNotOnQueryManager" xml:space="preserve">
-    <value>La vista {0} no ha sido dada de alta en el QueryManager</value>
-  </data>
-  <data name="ToStrIsNoAccesibleOnQueriesInImplementedByAll" xml:space="preserve">
-    <value>ToStr no es accesible en queries en ImplementedByAll</value>
-  </data>
-  <data name="TransactionRollbacked" xml:space="preserve">
-    <value>¡Se ha hecho un ROLLBACK!</value>
-  </data>
-  <data name="Type0ContainsBoth1And2" xml:space="preserve">
-    <value>El tipo {0} contiene tanto un atributo {1} como uno {2}</value>
-  </data>
-  <data name="Type0IsAbstract" xml:space="preserve">
-    <value>El tipo {0} es abstract</value>
-  </data>
-  <data name="Type0IsNotAMappedType1" xml:space="preserve">
-    <value>El tipo {0} no es de ninguno de los tipos mapeados: {1}</value>
-  </data>
-  <data name="Type0IsNotAnIdentifiableEntityOrAnEnum" xml:space="preserve">
-    <value>El tipo {0} no es una Entidad ni un enumerado</value>
-  </data>
-  <data name="Type0IsNotIn1" xml:space="preserve">
-    <value>El tipo {0} no está en {1}</value>
-  </data>
-  <data name="Type0NotFoundInTheSchema" xml:space="preserve">
-    <value>El tipo {0} no se encuentra en el esquema</value>
-  </data>
-  <data name="TypeDNTableNotCached" xml:space="preserve">
-    <value>Tabla TypeDN no cacheada. Recuerda llamar a TypeLogic.Start en tu Starter y llamar a Administrator.InitializeCurrentSchema </value>
-  </data>
-  <data name="TypeOfExpressionIs0ButTypeOfFieldIs1" xml:space="preserve">
-    <value>El tipo de la expresion es {0} pero el del campo es {1}</value>
-  </data>
-  <data name="Types0DoNotImplement1" xml:space="preserve">
-    <value>Los tipos {0} no implementan {1}</value>
-  </data>
-  <data name="UniqueMultiNullsWorksWithOnlyOneFieldUseAdministrator" xml:space="preserve">
-    <value>UniqueMultiNulls trabaja sólo con un campo. Utilice Administrator.AddMultiColumnUniqueTriggerNullable en su lugar.</value>
-  </data>
-  <data name="UserConnectionsFileFoundOn0" xml:space="preserve">
-    <value>Archivo de conexiones de usuario encontrado en {0}</value>
   </data>
   <data name="Warning0NoResults" xml:space="preserve">
     <value>Advertencia {0}: No hay resultados</value>
   </data>
-  <data name="EntityMustBeALite" xml:space="preserve">
-    <value>Entity debe ser un Lite</value>
-  </data>
   <data name="PropertyRouteCanNotBeOfTypeRoot" xml:space="preserve">
     <value>PropertyRoute no puede ser del tipo Root</value>
-  </data>
-  <data name="TheTypeOfColumn0IsASubtypeOfIIdentifiableUseALiteInstead" xml:space="preserve">
-    <value>El tipo de columna {0} es un subtipo de IIdentifiable, utilice un Lite en su lugar</value>
-  </data>
-  <data name="ThereIsADiferentInstanceOfTheSameEntityWithType0AndId1" xml:space="preserve">
-    <value>Hay una instancia diferente del de la Entidad con tipo {0} e id {1} en la EntityCache. Considera usar una EntityCache independiente si estás sobreescribiendo PreSaving. </value>
-  </data>
-  <data name="UnauthorizedAccessTo0" xml:space="preserve">
-    <value>Acceso denegado a {0}</value>
   </data>
   <data name="UnauthorizedAccessTo0Because1" xml:space="preserve">
     <value>Acceso denegado a {0} porque {1}</value>
