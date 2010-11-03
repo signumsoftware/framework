@@ -64,13 +64,8 @@ namespace Signum.Engine.Files
 
                 FilePathDN.UrlPathEncode = HttpUtility.UrlPathEncode;
 
-                sb.Schema.Generating += new Func<SqlPreCommand>(Schema_Generating);
+                sb.AddUniqueIndex<FilePathDN>(f => new { f.Sufix, f.Repository }); 
             }
-        }
-
-        static SqlPreCommand Schema_Generating()
-        {
-            return Administrator.AddMultiColumnIndexScript<FilePathDN>(true, f => f.Sufix, f => f.Repository);
         }
 
         static void FilePath_Deleting(Type type, int id)
