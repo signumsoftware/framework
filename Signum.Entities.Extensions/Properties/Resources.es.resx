@@ -630,4 +630,415 @@
   <data name="ControlPanelDN_Rows0DontHaveAnyParts" xml:space="preserve">
     <value>No hay ninguna parte en las filas {{{0}}}</value>
   </data>
+  <data name="AggregateFunction_Average" xml:space="preserve">
+    <value>Media</value>
+  </data>
+  <data name="AggregateFunction_Count" xml:space="preserve">
+    <value>Recuento</value>
+  </data>
+  <data name="AggregateFunction_Max" xml:space="preserve">
+    <value>Max </value>
+  </data>
+  <data name="AggregateFunction_Min" xml:space="preserve">
+    <value>Min </value>
+  </data>
+  <data name="AggregateFunction_Sum" xml:space="preserve">
+    <value>Suma </value>
+  </data>
+  <data name="ChartBase_ChartResultType" xml:space="preserve">
+    <value>Tipo resultado del gráfico </value>
+  </data>
+  <data name="ChartBase_ChartType" xml:space="preserve">
+    <value>Tipo de gráfico </value>
+  </data>
+  <data name="ChartBase_FirstDimension" xml:space="preserve">
+    <value>Primera dimensión </value>
+  </data>
+  <data name="ChartBase_FirstValue" xml:space="preserve">
+    <value>Primer valor </value>
+  </data>
+  <data name="ChartBase_GroupResults" xml:space="preserve">
+    <value>Agrupar resultados</value>
+  </data>
+  <data name="ChartBase_SecondDimension" xml:space="preserve">
+    <value>Segunda dimensión </value>
+  </data>
+  <data name="ChartBase_SecondValue" xml:space="preserve">
+    <value>Segundo valor </value>
+  </data>
+  <data name="ChartRequest_Filters" xml:space="preserve">
+    <value>Filtros </value>
+  </data>
+  <data name="ChartRequest_QueryName" xml:space="preserve">
+    <value>Nombre consulta </value>
+  </data>
+  <data name="ChartResultType_Bubbles" xml:space="preserve">
+    <value>Burbujas </value>
+  </data>
+  <data name="ChartResultType_Points" xml:space="preserve">
+    <value>Puntos </value>
+  </data>
+  <data name="ChartResultType_TypeTypeValue" xml:space="preserve">
+    <value>Tipo Tipo Valor</value>
+  </data>
+  <data name="ChartResultType_TypeValue" xml:space="preserve">
+    <value>Tipo Valor</value>
+  </data>
+  <data name="ChartTokenDN" xml:space="preserve">
+    <value>Token de gráfico</value>
+  </data>
+  <data name="ChartTokenDN_Aggregate" xml:space="preserve">
+    <value>Agregado </value>
+  </data>
+  <data name="ChartTokenDN_DisplayName" xml:space="preserve">
+    <value>Nombre</value>
+  </data>
+  <data name="ChartTokenDN_OrderPriority" xml:space="preserve">
+    <value>Prioridad orden</value>
+  </data>
+  <data name="ChartTokenDN_OrderType" xml:space="preserve">
+    <value>Tipo de orden </value>
+  </data>
+  <data name="ChartTokenDN_PropertyLabel" xml:space="preserve">
+    <value>Etiqueta</value>
+  </data>
+  <data name="ChartTokenDN_Type" xml:space="preserve">
+    <value>Tipo </value>
+  </data>
+  <data name="ChartTokenDN_Unit" xml:space="preserve">
+    <value>Unidad </value>
+  </data>
+  <data name="ChartType_Bars" xml:space="preserve">
+    <value>Barras </value>
+  </data>
+  <data name="ChartType_Bubbles" xml:space="preserve">
+    <value>Burbujas </value>
+  </data>
+  <data name="ChartType_Columns" xml:space="preserve">
+    <value>Columnas </value>
+  </data>
+  <data name="ChartType_Doughnout" xml:space="preserve">
+    <value>Doughnout </value>
+  </data>
+  <data name="ChartType_Lines" xml:space="preserve">
+    <value>Líneas </value>
+  </data>
+  <data name="ChartType_MultiBars" xml:space="preserve">
+    <value>Múltiples barras</value>
+  </data>
+  <data name="ChartType_MultiColumns" xml:space="preserve">
+    <value>Múltiples columnas </value>
+  </data>
+  <data name="ChartType_MultiLines" xml:space="preserve">
+    <value>Múltiples líneas </value>
+  </data>
+  <data name="ChartType_Pie" xml:space="preserve">
+    <value>Tarta</value>
+  </data>
+  <data name="ChartType_Points" xml:space="preserve">
+    <value>Puntos </value>
+  </data>
+  <data name="ChartType_StackedAreas" xml:space="preserve">
+    <value>Áreas apiladas </value>
+  </data>
+  <data name="ChartType_StackedBars" xml:space="preserve">
+    <value>Barras apiladas </value>
+  </data>
+  <data name="ChartType_StackedColumns" xml:space="preserve">
+    <value>Columnas apiladas </value>
+  </data>
+  <data name="ChartType_TotalAreas" xml:space="preserve">
+    <value>Áreas totales </value>
+  </data>
+  <data name="ChartType_TotalBars" xml:space="preserve">
+    <value>Barras totales</value>
+  </data>
+  <data name="ChartType_TotalColumns" xml:space="preserve">
+    <value>Columnas totales </value>
+  </data>
+  <data name="ColumnOptionsMode_Add" xml:space="preserve">
+    <value>Añadir </value>
+  </data>
+  <data name="ColumnOptionsMode_Remove" xml:space="preserve">
+    <value>Quitar </value>
+  </data>
+  <data name="ColumnOptionsMode_Replace" xml:space="preserve">
+    <value>Reemplazar </value>
+  </data>
+  <data name="ControlPanelDN" xml:space="preserve">
+    <value>Panel de control </value>
+  </data>
+  <data name="ControlPanelDN_DisplayName" xml:space="preserve">
+    <value>Nombre</value>
+  </data>
+  <data name="ControlPanelDN_HomePage" xml:space="preserve">
+    <value>Página de inicio </value>
+  </data>
+  <data name="ControlPanelDN_NumberOfColumns" xml:space="preserve">
+    <value>Número de columnas </value>
+  </data>
+  <data name="ControlPanelDN_Parts" xml:space="preserve">
+    <value>Partes </value>
+  </data>
+  <data name="ControlPanelDN_Related" xml:space="preserve">
+    <value>Relacionado</value>
+  </data>
+  <data name="CountSearchControlPartDN_UserQueries" xml:space="preserve">
+    <value>Consultas de usuario </value>
+  </data>
+  <data name="CountUserQueryElement_Label" xml:space="preserve">
+    <value>Etiqueta </value>
+  </data>
+  <data name="CountUserQueryElement_UserQuery" xml:space="preserve">
+    <value>Consulta de usuario </value>
+  </data>
+  <data name="DateSpanDN" xml:space="preserve">
+    <value>Intervalo de fecha </value>
+  </data>
+  <data name="EmailMessageDN_Body" xml:space="preserve">
+    <value>Cuerpo </value>
+  </data>
+  <data name="EmailPackageDN_Name" xml:space="preserve">
+    <value>Nombre </value>
+  </data>
+  <data name="EmailState_Composed" xml:space="preserve">
+    <value>Construido</value>
+  </data>
+  <data name="EmailState_ComposedError" xml:space="preserve">
+    <value>Construido con error </value>
+  </data>
+  <data name="EmailState_Empty" xml:space="preserve">
+    <value>Vacío </value>
+  </data>
+  <data name="EmailState_Received" xml:space="preserve">
+    <value>Recibido </value>
+  </data>
+  <data name="EmailState_Sent" xml:space="preserve">
+    <value>Enviado </value>
+  </data>
+  <data name="EmailState_SentError" xml:space="preserve">
+    <value>Error de envío </value>
+  </data>
+  <data name="EmailTemplateDN" xml:space="preserve">
+    <value>Plantillas de email</value>
+  </data>
+  <data name="EmbeddedFileDN" xml:space="preserve">
+    <value>Archivo incrustado </value>
+  </data>
+  <data name="EmbeddedFileDN_BinaryFile" xml:space="preserve">
+    <value>Archivo binario </value>
+  </data>
+  <data name="EmbeddedFileDN_FileName" xml:space="preserve">
+    <value>Nombre de archivo </value>
+  </data>
+  <data name="EmbeddedFileDN_FullWebPath" xml:space="preserve">
+    <value>Ruta web completa</value>
+  </data>
+  <data name="ExpressionShouldBeSomeKindOfAggregate" xml:space="preserve">
+    <value>Expresión debería ser algún tipo de agregado </value>
+  </data>
+  <data name="ExpressionShouldHaveAContinousAmountOfValues" xml:space="preserve">
+    <value>Expresión debe tener una cantidad continua de valores </value>
+  </data>
+  <data name="ExpressionShouldHaveADiscreteAmountOfValues" xml:space="preserve">
+    <value>Expresión debe tener una cantidad discreta de valores </value>
+  </data>
+  <data name="FacadeMethodDN" xml:space="preserve">
+    <value>Método de fachada </value>
+  </data>
+  <data name="FileDN" xml:space="preserve">
+    <value>Archivo </value>
+  </data>
+  <data name="FileDN_BinaryFile" xml:space="preserve">
+    <value>Archivo binario </value>
+  </data>
+  <data name="FileDN_FileName" xml:space="preserve">
+    <value>Nombre</value>
+  </data>
+  <data name="FileDN_FullWebPath" xml:space="preserve">
+    <value>Ruta web completa</value>
+  </data>
+  <data name="FileDN_WebPath" xml:space="preserve">
+    <value>Ruta web </value>
+  </data>
+  <data name="FilePathDN" xml:space="preserve">
+    <value>Ruta archivo </value>
+  </data>
+  <data name="FilePathDN_BinaryFile" xml:space="preserve">
+    <value>Archivo binario </value>
+  </data>
+  <data name="FilePathDN_FileLength" xml:space="preserve">
+    <value>Longitud</value>
+  </data>
+  <data name="FilePathDN_FileTypeEnum" xml:space="preserve">
+    <value>Tipo de archivo </value>
+  </data>
+  <data name="FileRepositoryDN_FullPhysicalPrefix" xml:space="preserve">
+    <value>Prefijo físico</value>
+  </data>
+  <data name="FileTypeDN" xml:space="preserve">
+    <value>Tipo de archivo </value>
+  </data>
+  <data name="HourMinuteDN" xml:space="preserve">
+    <value>Hora y minutos</value>
+  </data>
+  <data name="LogOperationDN" xml:space="preserve">
+    <value>Log de operación</value>
+  </data>
+  <data name="OperationAllowedRule" xml:space="preserve">
+    <value>Operación permitida la regla </value>
+  </data>
+  <data name="OperationDN" xml:space="preserve">
+    <value>Operación </value>
+  </data>
+  <data name="OrderType_Ascending" xml:space="preserve">
+    <value>Ascendente </value>
+  </data>
+  <data name="OrderType_Descending" xml:space="preserve">
+    <value>Descendente </value>
+  </data>
+  <data name="PackageDN_NumErrors" xml:space="preserve">
+    <value>Núm. Errores</value>
+  </data>
+  <data name="PackageDN_NumLines" xml:space="preserve">
+    <value>Núm. Lineas</value>
+  </data>
+  <data name="PackageLineDN_Result" xml:space="preserve">
+    <value>Resultado </value>
+  </data>
+  <data name="PanelPart" xml:space="preserve">
+    <value>Elemento de panel </value>
+  </data>
+  <data name="PanelPart_Column" xml:space="preserve">
+    <value>Columna </value>
+  </data>
+  <data name="PanelPart_Content" xml:space="preserve">
+    <value>Contenido </value>
+  </data>
+  <data name="PanelPart_Fill" xml:space="preserve">
+    <value>Llenar</value>
+  </data>
+  <data name="PanelPart_Row" xml:space="preserve">
+    <value>Fila </value>
+  </data>
+  <data name="PanelPart_Title" xml:space="preserve">
+    <value>Título </value>
+  </data>
+  <data name="PermissionDN" xml:space="preserve">
+    <value>Permiso </value>
+  </data>
+  <data name="ProcessExecutionDN_ExceptionDate" xml:space="preserve">
+    <value>Fecha de excepción </value>
+  </data>
+  <data name="ProcessState_Error" xml:space="preserve">
+    <value>Error </value>
+  </data>
+  <data name="PropertyDN" xml:space="preserve">
+    <value>Propiedad </value>
+  </data>
+  <data name="PropertyDN_Path" xml:space="preserve">
+    <value>Ruta de acceso </value>
+  </data>
+  <data name="PropertyDN_Route" xml:space="preserve">
+    <value>Ruta </value>
+  </data>
+  <data name="PropertyDN_Type" xml:space="preserve">
+    <value>Tipo </value>
+  </data>
+  <data name="QueryAllowedRule" xml:space="preserve">
+    <value>Consulta permitido de regla </value>
+  </data>
+  <data name="QueryColumnDN" xml:space="preserve">
+    <value>Columna de consulta </value>
+  </data>
+  <data name="QueryColumnDN_DisplayName" xml:space="preserve">
+    <value>Nombre</value>
+  </data>
+  <data name="QueryFilterDN" xml:space="preserve">
+    <value>Filtro de consulta </value>
+  </data>
+  <data name="QueryFilterDN_Operation" xml:space="preserve">
+    <value>Operación </value>
+  </data>
+  <data name="QueryFilterDN_Value" xml:space="preserve">
+    <value>Valor </value>
+  </data>
+  <data name="QueryFilterDN_ValueString" xml:space="preserve">
+    <value>Valor cadena</value>
+  </data>
+  <data name="QueryOrderDN" xml:space="preserve">
+    <value>Orden de consulta</value>
+  </data>
+  <data name="QueryOrderDN_Index" xml:space="preserve">
+    <value>Índice </value>
+  </data>
+  <data name="QueryOrderDN_OrderType" xml:space="preserve">
+    <value>Tipo de orden </value>
+  </data>
+  <data name="QueryTokenDN_Token" xml:space="preserve">
+    <value>Token</value>
+  </data>
+  <data name="ResetPasswordRequestDN" xml:space="preserve">
+    <value>Solicitud nueva contraseña</value>
+  </data>
+  <data name="ResetPasswordRequestDN_Code" xml:space="preserve">
+    <value>Código </value>
+  </data>
+  <data name="ResetPasswordRequestDN_RequestDate" xml:space="preserve">
+    <value>Fecha de solicitud </value>
+  </data>
+  <data name="ResetPasswordRequestDN_User" xml:space="preserve">
+    <value>Usuario </value>
+  </data>
+  <data name="UserChartDN" xml:space="preserve">
+    <value>Gráfico de usuario </value>
+  </data>
+  <data name="UserChartDN_DisplayName" xml:space="preserve">
+    <value>Nombre para mostrar </value>
+  </data>
+  <data name="UserChartDN_Filters" xml:space="preserve">
+    <value>Filtros </value>
+  </data>
+  <data name="UserChartDN_Query" xml:space="preserve">
+    <value>Consulta </value>
+  </data>
+  <data name="UserChartDN_Related" xml:space="preserve">
+    <value>Relacionado</value>
+  </data>
+  <data name="UserDN_AnulationDate" xml:space="preserve">
+    <value>Fecha de Anulation </value>
+  </data>
+  <data name="UserDN_PasswordHash" xml:space="preserve">
+    <value>Hash de la contraseña </value>
+  </data>
+  <data name="UserQueryDN_ColumnsMode" xml:space="preserve">
+    <value>Modo columnas </value>
+  </data>
+  <data name="UserQueryDN_Query" xml:space="preserve">
+    <value>Consulta </value>
+  </data>
+  <data name="UserQueryDN_Related" xml:space="preserve">
+    <value>Relacionado</value>
+  </data>
+  <data name="UserState_Created" xml:space="preserve">
+    <value>Creado </value>
+  </data>
+  <data name="UserState_Disabled" xml:space="preserve">
+    <value>Desabilitado</value>
+  </data>
+  <data name="UserTicketDN" xml:space="preserve">
+    <value>Ticket usuario</value>
+  </data>
+  <data name="UserTicketDN_ConnectionDate" xml:space="preserve">
+    <value>Fecha de conexión </value>
+  </data>
+  <data name="UserTicketDN_Device" xml:space="preserve">
+    <value>Dispositivo </value>
+  </data>
+  <data name="UserTicketDN_Ticket" xml:space="preserve">
+    <value>Ticket</value>
+  </data>
+  <data name="UserTicketDN_User" xml:space="preserve">
+    <value>Usuario </value>
+  </data>
 </root>
