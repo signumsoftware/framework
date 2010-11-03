@@ -92,17 +92,17 @@ namespace Signum.Engine
         {
             Schema schema = Schema.Current;
 
-            SqlPreCommand createTables = schema.Tables.Select(t => SqlBuilder.CreateTableSql(t.Value)).Combine(Spacing.Double);
+            List<ITable> tables = schema.Tables.SelectMany(t => t.Value.Fields.OfType<FieldMList>().Select(f => (ITable)f.RelationalTable).PreAnd((ITable)t.Value)).ToList();
 
-            SqlPreCommand foreignKeys = schema.Tables.Select(t => SqlBuilder.AlterTableForeignKeys(t.Value)).Combine(Spacing.Double);
+            SqlPreCommand createTables = tables.Select(t => SqlBuilder.CreateTableSql(t)).Combine(Spacing.Double);
 
-            SqlPreCommand indices = schema.Tables.Select(t => SqlBuilder.CreateIndicesSql(t.Value)).NotNull().Combine(Spacing.Double);
+            SqlPreCommand foreignKeys = tables.Select(t => SqlBuilder.AlterTableForeignKeys(t)).Combine(Spacing.Double);
 
-            SqlPreCommand collectionTables = schema.Tables.Select(t => t.Value.CreateCollectionTables()).Combine(Spacing.Triple);
+            SqlPreCommand indices = tables.Select(t => SqlBuilder.CreateAllIndices(t)).NotNull().Combine(Spacing.Double);
 
-            return SqlPreCommand.Combine(Spacing.Triple, createTables, foreignKeys, indices, collectionTables);
+            return SqlPreCommand.Combine(Spacing.Triple, createTables, foreignKeys, indices);
         }
-
+     
         public static SqlPreCommand InsertEnumValuesScript()
         {
             return (from t in Schema.Current.Tables.Values
@@ -179,39 +179,6 @@ deallocate cur");
         public static SqlPreCommand ShrinkDataBase()
         {
             return SqlBuilder.ShrinkDatabase(ConnectionScope.Current.SchemaName());
-        }
-
-        #endregion
-
-        #region MultiColumnIndex
-        public static SqlPreCommand AddMultiColumnIndexScript<T>(bool unique, params Expression<Func<T, object>>[] columns) where T : IdentifiableEntity
-        {
-            Schema schema = Schema.Current;
-
-            return AddMultiColumnIndexScript(schema.Table<T>(), unique, columns.Select(fun => (IColumn)schema.Field<T>(fun)).ToArray());
-        }
-
-        public static SqlPreCommand AddMultiColumnIndexScript(ITable table, bool unique, params IColumn[] columns)
-        {
-            return SqlBuilder.CreateIndex(unique ? Index.Unique : Index.Multiple, table.Name, columns.Select(c => c.Name).ToArray());
-        }
-
-        public static SqlPreCommand AddMultiColumnUniqueTriggerNullable<T>(Expression<Func<T, object>>[] nullableColumns,
-            Expression<Func<T, object>>[] notNullableColumns) where T : IdentifiableEntity
-        {
-            Schema schema = Schema.Current;
-
-            return AddMultiColumnUniqueTriggerNullable(schema.Table<T>(),
-                nullableColumns.TryCC(col => col.Select(fun => (IColumn)schema.Field<T>(fun)).ToArray()),
-                notNullableColumns.TryCC(col => col.Select(fun => (IColumn)schema.Field<T>(fun)).ToArray()));
-        }
-
-        public static SqlPreCommand AddMultiColumnUniqueTriggerNullable(ITable table, IColumn[] nullableColumns, 
-            IColumn[] notNullableColumns)
-        {
-            return SqlBuilder.CreateMultiColumnUniqueTriggerNullable(table.Name, 
-                nullableColumns.TryCC(col => col.Select(c => c.Name).ToArray()), 
-                notNullableColumns.TryCC(col => col.Select(c => c.Name).ToArray()));
         }
 
         #endregion
@@ -317,6 +284,11 @@ deallocate cur");
         public static void MakeSnapshotIsolationDefault(bool value)
         {
             Executor.ExecuteNonQuery(SqlBuilder.MakeSnapshotIsolationDefault(ConnectionScope.Current.SchemaName(), value));
+        }
+
+        public static SqlPreCommand RenameFreeIndexesScript()
+        {
+            return SchemaComparer.RenameFreeIndexes();
         }
     }
 }

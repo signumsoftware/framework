@@ -187,6 +187,18 @@ namespace Signum.Engine
             return new SqlPreCommandSimple("DROP TABLE {0}".Formato(table.SqlScape()));
         }
 
+        internal static SqlPreCommand DropView(string view)
+        {
+            return new SqlPreCommandSimple("DROP VIEW {0}".Formato(view.SqlScape()));
+        }
+
+        public static SqlPreCommand DropViewIndex(string view, string index)
+        {
+            return new[]{
+                 DropIndex(view, index),
+                 DropView(view)}.Combine(Spacing.Simple);
+        }
+
         internal static SqlPreCommand AlterTableDropColumn(string table, string columnName)
         {
             return new SqlPreCommandSimple("ALTER TABLE {0} DROP COLUMN {1}".Formato(table.SqlScape(), columnName.SqlScape()));
@@ -248,9 +260,18 @@ namespace Signum.Engine
                 c.ReferenceTable == null ? null : SqlBuilder.AlterTableAddConstraintForeignKey(t.Name, c.Name, c.ReferenceTable.Name)).Combine(Spacing.Simple);
         }
 
-        public static SqlPreCommand CreateIndicesSql(ITable t)
+        public static SqlPreCommand CreateAllIndices(ITable t)
         {
-            return t.Columns.Values.Select(c => SqlBuilder.CreateIndex(c.Index, t.Name, c.Name)).Combine(Spacing.Simple);
+            return CreateAllIndices(t, t.GeneratUniqueIndexes()); 
+        }
+
+        public static SqlPreCommand CreateAllIndices(ITable t, IEnumerable<UniqueIndex> tableIndexes)
+        {
+            var uniqueIndices = tableIndexes.Select(ix => CreateUniqueIndex(ix)).Combine(Spacing.Simple); 
+
+            var freeIndexes = t.Columns.Values.Where(c=>c.ReferenceTable != null).Select(c=>CreateMultipleIndex(t, c)).Combine(Spacing.Simple); 
+
+            return new []{uniqueIndices, freeIndexes}.Combine(Spacing.Simple); 
         }
 
         internal static SqlPreCommand DropIndex(string table, string indexName)
@@ -258,107 +279,52 @@ namespace Signum.Engine
             return new SqlPreCommandSimple("DROP INDEX {0}.{1}".Formato(table.SqlScape(), indexName.SqlScape()));
         }
 
-        public static SqlPreCommand CreateIndex(Index index, string table, params string[] fieldNames)
+        internal static SqlPreCommand DropIndexCommented(string table, string indexName)
         {
-            if (index == Index.None)
-                return null;
+            return new SqlPreCommandSimple("-- DROP INDEX {0}.{1}".Formato(table.SqlScape(), indexName.SqlScape()));
+        }
+        
+        public static SqlPreCommand CreateMultipleIndex(ITable table, IColumn column)
+        {
+            string indexName = "FIX_{0}_{1}".Formato(table.Name, column.Name);
 
-
-            if (index == Index.Multiple || index == Index.Unique)
-            {
-                return new SqlPreCommandSimple("CREATE {0}INDEX {1} ON {2}({3})".Formato(
-                    index == Index.Unique ? "UNIQUE " : "",
-                    IndexName(table, fieldNames),
-                    table.SqlScape(),
-                    fieldNames.ToString(a => a.SqlScape(), ", ")));
-            }
-
-            if (index == Index.UniqueMultiNulls)
-            {
-                string field = fieldNames.Single("UniqueMultiNulls works with one field only. Use Administrator.AddMultiColumnUniqueTriggerNullable instead.");
-
-                string triggerName = "v_{0}_{1}".Formato(table, fieldNames.ToString("_"));
-
-                //                return new SqlPreCommandSimple(
-                //@"CREATE  trigger {0} on {1} for insert, update as 
-                //BEGIN  
-                //    IF (select max(cnt) from 
-                //            (select count(i.{2}) as cnt from {1}, inserted i where {1}.{2}=i.{2} group by i.{2}) x) > 1 
-                //    raiserror('{3}',16,1) 
-                //END".Formato(triggerName.SqlScape(), table.SqlScape(), fieldNames.Single().SqlScape(), Resources._0RepeatedOnTable1.Formato(fieldNames.Single(), table)));
-
-                string sql1 = @" CREATE VIEW {0} WITH SCHEMABINDING AS
-                                SELECT {2}
-                                FROM dbo.{1}
-                                WHERE {2} IS NOT NULL;
-                                ".Formato(triggerName.SqlScape(), table.SqlScape(), fieldNames.Single().SqlScape());
-
-                string sql2 = @"CREATE UNIQUE CLUSTERED INDEX  UT_{0} ON {0}({2});
-                                ".Formato(triggerName.SqlScape(), table.SqlScape(), fieldNames.Single().SqlScape());
-
-                System.Diagnostics.Debug.WriteLine(sql1);
-                System.Diagnostics.Debug.WriteLine(sql2);
-
-                return SqlPreCommand.Combine(Spacing.Simple, new SqlPreCommandSimple(sql1), new SqlPreCommandSimple(sql2));
-            }
-
-            return null;
+            return new SqlPreCommandSimple("CREATE INDEX {0} ON {1}({2})".Formato(
+                 indexName,
+                 table.Name.SqlScape(),
+                 column.Name.SqlScape()));
         }
 
-        public static SqlPreCommand CreateMultiColumnUniqueTriggerNullable(string table, string[] nullableFields,
-            string[] notNullableFields)
+        public static SqlPreCommand CreateUniqueIndex(UniqueIndex index)
         {
-            if (nullableFields == null)
-                nullableFields = new string[0];
-            if (notNullableFields == null)
-                notNullableFields = new string[0];
+            string columns = index.Columns.ToString(c => c.Name.SqlScape(), ", ");
 
-            if (nullableFields.Count() == 0)
+            if (string.IsNullOrEmpty(index.Where))
             {
-                throw new ArgumentNullException("At least one nullable field must be passed");
+                return new SqlPreCommandSimple("CREATE UNIQUE INDEX {0} ON {1}({2})".Formato(
+                    index.IndexName,
+                    index.Table.Name.SqlScape(),
+                    columns));
             }
 
-            string tableName = table.SqlScape();
-
-            IEnumerable<string> allCols = nullableFields.Union(notNullableFields);
-            if (allCols.Count() < 2)
+            if (index.ViewName != null)
             {
-                throw new ArgumentNullException("There must be more than one field for the MultiColumn trigger");
+                string viewName = index.ViewName;
+
+                SqlPreCommandSimple viewSql = new SqlPreCommandSimple(@"CREATE VIEW {0} WITH SCHEMABINDING AS SELECT {1} FROM dbo.{2} WHERE {3}"
+                    .Formato(viewName.SqlScape(), columns, index.Table.Name.SqlScape(), index.Where));
+
+                SqlPreCommandSimple indexSql = new SqlPreCommandSimple(@"CREATE UNIQUE CLUSTERED INDEX {0} ON {1}({2})"
+                    .Formato(index.IndexName, viewName.SqlScape(), index.Columns.ToString(c => c.Name.SqlScape(), ", ")));
+
+                return SqlPreCommand.Combine(Spacing.Simple , viewSql, indexSql);
             }
-
-            string triggerName = "UT_{0}_{1}".Formato(tableName, allCols.Select(c => c.SqlScape()).ToString("_"));
-
-            string columns = allCols.ToString(c => "i.{0} = p.{0}".Formato(c.SqlScape()), " AND ");
-
-            string nullableColumns = nullableFields.ToString(c =>
-                "i.{0} IS NOT NULL ".Formato(c.SqlScape()), " AND ");
-
-            string trigger =
-@"CREATE TRIGGER {0}
-   ON  {1}
-   AFTER INSERT
-AS 
-BEGIN
-    SET NOCOUNT ON
-
-    IF EXISTS(SELECT 1
-        FROM {1} p
-            JOIN INSERTED i On {2}
-        WHERE {3} 
-    ) 
-    BEGIN
-        RAISERROR ('{4}', 16, 1)
-        ROLLBACK TRANSACTION
-    END 
-END".Formato(triggerName.SqlScape(), tableName, columns, nullableColumns,
-   Resources.CannotInsertDuplicatedFields0On1Table.Formato(allCols.ToString(c => c.SqlScape(), ", "), tableName));
-
-            return new SqlPreCommandSimple(trigger);
-        }
-
-        public static string IndexName(string table, params string[] fieldNames)
-        {
-            return "IX_{0}_{1}".Formato(table, fieldNames.ToString("_")).SqlScape();
+            else
+            {
+                return new SqlPreCommandSimple("CREATE UNIQUE INDEX {0} ON {1}({2}) WHERE {3}".Formato(
+                      index.IndexName,
+                      index.Table.Name.SqlScape(),
+                      columns, index.Where));
+            }
         }
 
         public static SqlPreCommand AlterTableDropConstraint(string table, string constraintName)
@@ -391,6 +357,11 @@ END".Formato(triggerName.SqlScape(), tableName, columns, nullableColumns,
         internal static SqlPreCommand RenameColumn(string tableName, string oldName, string newName)
         {
             return new SqlPreCommandSimple("EXEC SP_RENAME '{0}.{1}' , '{2}', 'COLUMN' ".Formato(tableName, oldName, newName));
+        }
+
+        internal static SqlPreCommand RenameIndex(string tableName, string oldName, string newName)
+        {
+            return new SqlPreCommandSimple("EXEC SP_RENAME '{0}.{1}' , '{2}', 'INDEX' ".Formato(tableName, oldName, newName));
         }
         #endregion
 

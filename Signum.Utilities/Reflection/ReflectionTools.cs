@@ -296,11 +296,6 @@ namespace Signum.Utilities.Reflection
             return Expression.Lambda<Func<T>>(Expression.Convert(Expression.New(type), typeof(T))).Compile();
         }
 
-        public static Func<object> CreateConstructorUntyped(Type type)
-        {
-            return Expression.Lambda<Func<object>>(Expression.Convert(Expression.New(type), typeof(object))).Compile();
-        }
-
         public static T Parse<T>(string value)
         {
             if (typeof(T) == typeof(string))

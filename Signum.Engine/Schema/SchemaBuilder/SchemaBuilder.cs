@@ -51,6 +51,60 @@ namespace Signum.Engine.Maps
             return Include(typeof(T));
         }
 
+        public void AddUniqueIndex<T>(Expression<Func<T, object>> fields) where T : IdentifiableEntity
+        {
+            AddUniqueIndex<T>(fields, null); 
+        }
+
+        public void AddUniqueIndex<T>(Expression<Func<T, object>> fields, Expression<Func<T, object>> fieldsNotNull) where T : IdentifiableEntity
+        {
+            Schema schema = Schema.Current;
+
+            Expression<Func<T, object>>[] fieldLambdas = Split(fields);
+            Expression<Func<T, object>>[] fieldsNotNullLambdas = Split(fieldsNotNull);
+
+            Field[] colFields = fieldLambdas.Select(fun => schema.Field<T>(fun)).ToArray();
+            Field[] collFieldsNotNull = fieldsNotNullLambdas.Select(fun => schema.Field<T>(fun)).ToArray();
+
+            AddUniqueIndex(new UniqueIndex(schema.Table<T>(), colFields).WhereNotNull(collFieldsNotNull));
+        }
+
+        Expression<Func<T, object>>[] Split<T>(Expression<Func<T, object>> columns)
+            where T : IdentifiableEntity
+        {
+            if (columns == null)
+                return new Expression<Func<T, object>>[0];
+
+            if (columns.Body.NodeType == ExpressionType.New)
+            {
+                return ((NewExpression)columns.Body).Arguments
+                    .Select(a => Expression.Lambda<Func<T, object>>(Expression.Convert(a, typeof(object)), columns.Parameters))
+                    .ToArray();
+            }
+
+            return new[] { columns };
+        }
+
+        public void AddUniqueIndex(ITable table, Field[] fields, Field[] notNullFields)
+        {
+            AddUniqueIndex(new UniqueIndex(table, fields).WhereNotNull(notNullFields));
+        }
+
+        public void AddUniqueIndex(ITable table, IColumn[] columns, IColumn[] notNullColumns)
+        {
+            AddUniqueIndex(new UniqueIndex(table, columns).WhereNotNull(notNullColumns));
+        }
+
+        private void AddUniqueIndex(UniqueIndex uniqueIndex)
+        {
+            ITable table = uniqueIndex.Table;
+
+            if (table.MultiIndexes == null)
+                table.MultiIndexes = new List<UniqueIndex>();
+
+            table.MultiIndexes.Add(uniqueIndex);
+        }
+
         /// <summary>
         /// Includes a type in the Schema
         /// </summary>
@@ -73,8 +127,8 @@ namespace Signum.Engine.Maps
             if (type.IsAbstract)
                 throw new InvalidOperationException("Impossible to include in the Schema the type {0} because is abstract".Formato(type));
 
-            if (!Reflector.IsIdentifiableEntity(type) && !type.IsEnum)
-                throw new InvalidOperationException("Impossible to include in the Schema the type {0} because is not and IdentifiableEntity or an Enum".Formato(type));
+            if (!Reflector.IsIdentifiableEntity(type))
+                throw new InvalidOperationException("Impossible to include in the Schema the type {0} because is not and IdentifiableEntity".Formato(type));
             
             return new Table(type);
         }
@@ -202,11 +256,6 @@ namespace Signum.Engine.Maps
             return null;
         }
 
-        public virtual Index DefaultReferenceIndex()
-        {
-            return Index.Multiple;
-        }
-
         private static Field GenerateFieldPrimaryKey(Type type, FieldInfo fi, Table table, NameSequence name)
         {
             return new FieldPrimaryKey(fi.FieldType, table);
@@ -223,7 +272,7 @@ namespace Signum.Engine.Maps
                 Nullable = Settings.IsNullable(type, fi, fieldType, forceNull),
                 Size = Settings.GetSqlSize(type, fi, sqlDbType),
                 Scale = Settings.GetSqlScale(type, fi, sqlDbType),
-                Index = Settings.IndexType(type, fi) ?? Index.None
+                IndexType = Settings.GetIndexType(type, fi)
             };
         }
 
@@ -234,7 +283,7 @@ namespace Signum.Engine.Maps
                 Name = name.ToString(),
                 Nullable = Settings.IsNullable(type, fi, fieldType, forceNull),
                 IsLite = false,
-                Index = Settings.IndexType(type, fi) ?? Index.None,
+                IndexType = Settings.GetIndexType(type, fi),
                 ReferenceTable = Include(Reflector.GenerateEnumProxy(fieldType.UnNullify())),
             };
         }
@@ -244,7 +293,7 @@ namespace Signum.Engine.Maps
             return new FieldReference(fieldType)
             {
                 Name = name.ToString(),
-                Index = Settings.IndexType(type, fi) ?? DefaultReferenceIndex(),
+                IndexType = Settings.GetIndexType(type, fi),
                 Nullable = Settings.IsNullable(type, fi, fieldType, forceNull),
                 IsLite  = Reflector.ExtractLite(fieldType) != null,
                 ReferenceTable = Include(Reflector.ExtractLite(fieldType) ?? fieldType),
@@ -258,17 +307,15 @@ namespace Signum.Engine.Maps
             if (erroneos.Length != 0)
                 throw new InvalidOperationException("Type {0} do not implement {1}".Formato(erroneos, cleanType));
 
-            Index indice = Settings.IndexType(type, fi) ?? DefaultReferenceIndex();
-
             bool nullable = Settings.IsNullable(type, fi, fieldType, forceNull) || ib.ImplementedTypes.Length > 1;
 
             return new FieldImplementedBy(fieldType)
             {
+                IndexType = Settings.GetIndexType(type, fi),
                 ImplementationColumns = ib.ImplementedTypes.ToDictionary(t => t, t => new ImplementationColumn
                 {
                     ReferenceTable = Include(t),
                     Name = name.Add(t.Name).ToString(),
-                    Index = indice,
                     Nullable = nullable,
                 }),
                 IsLite  = Reflector.ExtractLite(fieldType) != null
@@ -277,22 +324,20 @@ namespace Signum.Engine.Maps
 
         protected virtual Field GenerateFieldImplmentedByAll(Type type, FieldInfo fi, Type fieldType, NameSequence preName, bool forceNull, ImplementedByAllAttribute iba)
         {
-            Index indice = Settings.IndexType(type, fi) ?? DefaultReferenceIndex();
             bool nullable = Settings.IsNullable(type, fi, fieldType, forceNull);
 
             return new FieldImplementedByAll(fieldType)
             {
+                IndexType = Settings.GetIndexType(type, fi),
                 Column = new ImplementationColumn
                 {
                     Name = preName.ToString(),
-                    Index = indice,
                     Nullable = nullable,
                     ReferenceTable = null,
                 },
                 ColumnTypes = new ImplementationColumn
                 {
                     Name = preName.Add("Type").ToString(),
-                    Index = indice,
                     Nullable = nullable,
                     ReferenceTable = Include(typeof(TypeDN))
                 },
@@ -307,10 +352,9 @@ namespace Signum.Engine.Maps
             RelationalTable relationalTable = new RelationalTable(fi.FieldType)
             {
                 Name = GenerateTableNameCollection(type, name),
-                BackReference = new RelationalTable.BackReferenceColumn
+                BackReference = new RelationalTable.BackReferenceColumn(table.Type)
                 {
                     Name = GenerateBackReferenceName(type),
-                    Index = DefaultReferenceIndex(),
                     ReferenceTable = table
                 },
                 PrimaryKey = new RelationalTable.PrimaryKeyColumn(),

@@ -163,7 +163,6 @@
     <Compile Include="Schema\Schema.Delete.cs" />
     <Compile Include="Schema\Schema.Expressions.cs" />
     <Compile Include="Schema\Schema.Basics.cs" />
-    <Compile Include="Schema\Schema.CreateTables.cs" />
     <Compile Include="Schema\Schema.Save.cs" />
     <Compile Include="Schema\Schema.Retrieve.cs" />
     <Compile Include="Schema\SchemaBuilder\SchemaBuilder.cs" />

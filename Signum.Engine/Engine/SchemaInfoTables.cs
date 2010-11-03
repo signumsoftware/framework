@@ -29,6 +29,7 @@ namespace Signum.Engine.SchemaInfoTables
         public string name;
         public int object_id;
         public bool is_unique;
+        public bool is_primary_key;
     }
 
     [SqlViewName("sys.index_columns")]
@@ -57,6 +58,13 @@ namespace Signum.Engine.SchemaInfoTables
 
     [SqlViewName("sys.tables")]
     public class SysTables : IView
+    {
+        public string name;
+        public int object_id;
+    }
+
+    [SqlViewName("sys.views")]
+    public class SysViews : IView
     {
         public string name;
         public int object_id;

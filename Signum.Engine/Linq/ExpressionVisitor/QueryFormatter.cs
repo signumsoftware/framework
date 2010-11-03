@@ -600,7 +600,17 @@ namespace Signum.Engine.Linq
                     sb.Append("OUTER APPLY ");
                     break;
             }
+
+            bool needsMoreParenthesis = (join.JoinType == JoinType.CrossApply || join.JoinType == JoinType.OuterApply) && join.Right is JoinExpression;
+
+            if (needsMoreParenthesis)
+                sb.Append("(");
+
             this.VisitSource(join.Right);
+
+            if (needsMoreParenthesis)
+                sb.Append(")");
+
             if (join.Condition != null)
             {
                 this.AppendNewLine(Indentation.Inner);

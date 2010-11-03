@@ -39,8 +39,8 @@ namespace Signum.Engine.Maps
         {
             get { return tables; }
         }
-
-        const string errorType = "TypeDN table not cached. Remember to call TypeLogic.Start in your Starter and call Schema.Current.Initialize";
+        
+        const string errorType = "TypeDN table not cached. Remember to call Schema.Current.Initialize";
 
         Dictionary<Type, int> idsForType;
         internal Dictionary<Type, int> IDsForType
@@ -467,10 +467,134 @@ namespace Signum.Engine.Maps
         Field GetField(MemberInfo value, bool throws); 
     }
 
+    public class UniqueIndex
+    {
+        public ITable Table { get; private set; }
+        public IColumn[] Columns { get; private set; }
+        public string Where { get; set; }
+
+        public UniqueIndex(ITable table, params Field[] fields)
+        {
+            if (table == null)
+                throw new ArgumentNullException("table"); 
+
+            if (fields == null || fields.Empty())
+                throw new InvalidOperationException("No fields");
+
+            if (fields.OfType<FieldEmbedded>().Any())
+                throw new InvalidOperationException("Embedded fields not supported for indexes");
+
+            this.Table = table; 
+            this.Columns = fields.SelectMany(f => f.Columns()).ToArray();
+        }
+
+
+        public UniqueIndex(ITable table, params IColumn[] columns)
+        {
+            if (table == null)
+                throw new ArgumentNullException("table"); 
+
+            if (columns == null || columns.Empty())
+                throw new ArgumentNullException("columns");
+
+            this.Table = table; 
+            this.Columns = columns;
+        }
+
+        public string IndexName
+        {
+            get { return "IX_{0}_{1}".Formato(Table.Name, ColumnSignature()); }
+        }
+
+        public string ViewName
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(Where) || ConnectionScope.Current.DBMS != DBMS.SqlServer2005)
+                    return null;
+
+                return "VIX_{0}_{1}".Formato(Table.Name, ColumnSignature()); 
+            }
+        }
+
+        string ColumnSignature()
+        {
+            string columns = Columns.ToString(c => c.Name, "_");
+            if (string.IsNullOrEmpty(Where))
+                return columns;
+
+            return columns + "_" + Encode(Where);
+        }
+
+        static readonly string letters = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
+
+        static string Encode(string str)
+        {
+            int hash = str.GetHashCode();
+
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < 32; i+=5)
+            {
+                sb.Append(letters[hash & 31]);
+                hash >>= 5; 
+            }
+
+            return sb.ToString(); 
+        }
+
+        public UniqueIndex WhereNotNull(params IColumn[] notNullColumns)
+        {
+            if (notNullColumns == null || notNullColumns.Empty())
+            {
+                Where = null;
+                return this;
+            }
+
+            this.Where = notNullColumns.ToString(c => c.Name.SqlScape() + " IS NOT NULL", " AND ");
+            return this; 
+        }
+
+        public UniqueIndex WhereNotNull(params Field[] notNullFields)
+        {
+            if (notNullFields == null || notNullFields.Empty())
+            {
+                Where = null;
+                return this;
+            }
+
+            if(notNullFields.OfType<FieldEmbedded>().Any())
+                throw new InvalidOperationException("Embedded fields not supported for indexes");
+
+            this.WhereNotNull(notNullFields.Where(a => !IsComplexIB(a)).SelectMany(a => a.Columns()).ToArray());
+
+            if (notNullFields.Any(IsComplexIB))
+                this.Where += " AND " + notNullFields.Where(IsComplexIB).ToString(f => "({0})".Formato(f.Columns().ToString(c => c.Name.SqlScape() + " IS NOT NULL", " OR ")), " AND ");
+
+            return this;
+        }
+
+        static bool IsComplexIB(Field field)
+        {
+            return field is FieldImplementedBy && ((FieldImplementedBy)field).ImplementationColumns.Count > 1;
+        }
+
+        public override string ToString()
+        {
+            return IndexName;
+        }
+
+        static readonly IColumn[] Empty = new IColumn[0]; 
+    }
+
     public interface ITable
     {
         string Name { get; }
         Dictionary<string, IColumn> Columns { get; }
+
+        List<UniqueIndex> MultiIndexes { get; set; }
+
+        List<UniqueIndex> GeneratUniqueIndexes();
+
         void GenerateColumns();
     }
 
@@ -485,12 +609,14 @@ namespace Signum.Engine.Maps
         public Dictionary<string, EntityField> Fields { get; set; }
         public Dictionary<string, IColumn> Columns { get; set; }
 
+        public List<UniqueIndex> MultiIndexes { get; set; }
+
         public Func<object> Constructor { get; private set; }
 
         public Table(Type type)
         {
             this.Type = type;
-            this.Constructor = ReflectionTools.CreateConstructorUntyped(type);
+            this.Constructor = ReflectionTools.CreateConstructor<object>(type);
         }
                   
         public override string ToString()
@@ -528,6 +654,16 @@ namespace Signum.Engine.Maps
 
             return field.Field;
         }
+
+        public List<UniqueIndex> GeneratUniqueIndexes()
+        {
+            var result = Fields.SelectMany(f => f.Value.Field.GeneratUniqueIndexes(this)).ToList();
+
+            if (MultiIndexes != null)
+                result.AddRange(MultiIndexes);
+
+            return result; 
+        }
     }
 
     public class EntityField
@@ -553,13 +689,32 @@ namespace Signum.Engine.Maps
     public abstract partial class Field
     {
         public Type FieldType { get; private set; }
+        public IndexType IndexType { get; set; }
 
         public Field(Type fieldType)
         {
             FieldType = fieldType;
         }
-        
+
         public abstract IEnumerable<IColumn> Columns();
+
+        public virtual IEnumerable<UniqueIndex> GeneratUniqueIndexes(ITable table)
+        {
+            switch (IndexType)
+            {
+                case IndexType.None: return Enumerable.Empty<UniqueIndex>();
+                case IndexType.Unique: return new[] { new UniqueIndex(table, this) };
+                case IndexType.UniqueMultipleNulls: return new[] { new UniqueIndex(table, this).WhereNotNull(this) };
+            }
+            throw new NotImplementedException();
+        }
+    }
+
+    public enum IndexType
+    {
+        None,
+        Unique,
+        UniqueMultipleNulls
     }
 
     public static class FieldExtensions
@@ -589,7 +744,6 @@ namespace Signum.Engine.Maps
     {
         string Name { get; }
         bool Nullable{get;}
-        Index Index { get; }
         int Position { get; set; }
         SqlDbType SqlDbType { get; }
         bool PrimaryKey { get; }
@@ -609,7 +763,6 @@ namespace Signum.Engine.Maps
     {
         public string Name { get { return SqlBuilder.PrimaryKeyName; } }
         bool IColumn.Nullable { get { return false; } }
-        Index IColumn.Index { get { return Index.None; } }
         SqlDbType IColumn.SqlDbType { get { return SqlBuilder.PrimaryKeyType; } }
         bool IColumn.PrimaryKey { get { return true; } }
         bool IColumn.Identity { get { return table.Identity; } }
@@ -634,13 +787,19 @@ namespace Signum.Engine.Maps
             return new[] { this };
         }
 
+        public override IEnumerable<UniqueIndex> GeneratUniqueIndexes(ITable table)
+        {
+            if (IndexType != Maps.IndexType.None)
+                throw new InvalidOperationException("Changing IndexType is not allowed for FieldPrimaryKey"); 
+
+            return Enumerable.Empty<UniqueIndex>(); 
+        }
     }
 
     public partial class FieldValue : Field, IColumn
     {
         public string Name { get; set; }
         public bool Nullable { get; set; }
-        public Index Index { get; set; }
         public SqlDbType SqlDbType { get; set; }
         bool IColumn.PrimaryKey { get { return false; } }
         bool IColumn.Identity { get { return false; } }
@@ -652,19 +811,19 @@ namespace Signum.Engine.Maps
         public FieldValue(Type fieldType)
             : base(fieldType)
         {
-           
         }
 
         public override string ToString()
         {
             return "{0} {1} ({2},{3},{4}) {5}".Formato(
-                Name, 
-                SqlDbType, 
-                Nullable? "Nullable": "", 
-                Size, 
+                Name,
+                SqlDbType,
+                Nullable ? "Nullable" : "",
+                Size,
                 Scale,
-                Index == Index.None ? "": Index.ToString()); 
+                IndexType.DefaultToNull().ToString()); 
         }
+
         public override IEnumerable<IColumn> Columns()
         {
             return new[] { this };
@@ -677,7 +836,6 @@ namespace Signum.Engine.Maps
         {
             public string Name { get; set; }
             public bool Nullable { get { return false; } } //even on neasted embeddeds
-            public Index Index { get; set; }
             public SqlDbType SqlDbType { get { return SqlDbType.Bit; } }
             bool IColumn.PrimaryKey { get { return false; } }
             bool IColumn.Identity { get { return false; } }
@@ -731,13 +889,17 @@ namespace Signum.Engine.Maps
 
             return result;
         }
+
+        public override IEnumerable<UniqueIndex> GeneratUniqueIndexes(ITable table)
+        {
+            return this.EmbeddedFields.Values.SelectMany(f => f.Field.GeneratUniqueIndexes(table));
+        }
     }
 
     public partial class FieldReference : Field, IColumn, IFieldReference
     {
         public string Name { get; set; }
         public bool Nullable { get; set; }
-        public Index Index { get; set; }
         SqlDbType IColumn.SqlDbType { get { return SqlBuilder.PrimaryKeyType; } }
         bool IColumn.PrimaryKey { get { return false; } }
         bool IColumn.Identity { get { return false; } }
@@ -757,7 +919,7 @@ namespace Signum.Engine.Maps
                 ReferenceTable.Name,
                 IsLite ? "Lite" : "",
                 Nullable ? "Nullable" : "",
-                Index == Index.None ? "" : Index.ToString());
+                IndexType.DefaultToNull().ToString());
         }
 
         public override IEnumerable<IColumn> Columns()
@@ -808,7 +970,6 @@ namespace Signum.Engine.Maps
     {
         public string Name { get; set; }
         public bool Nullable { get; set; }
-        public Index Index { get; set; }
         SqlDbType IColumn.SqlDbType { get { return SqlBuilder.PrimaryKeyType; } }
         bool IColumn.PrimaryKey { get { return false; } }
         bool IColumn.Identity { get { return false; } }
@@ -843,6 +1004,14 @@ namespace Signum.Engine.Maps
         {
             return new IColumn[0];
         }
+
+        public override IEnumerable<UniqueIndex> GeneratUniqueIndexes(ITable table)
+        {
+            if (IndexType != Maps.IndexType.None)
+                throw new InvalidOperationException("Changing IndexType is not allowed for FieldMList"); 
+
+            return Enumerable.Empty<UniqueIndex>();
+        }
     }
 
     public partial class RelationalTable: ITable
@@ -851,7 +1020,6 @@ namespace Signum.Engine.Maps
         {
             string IColumn.Name { get { return SqlBuilder.PrimaryKeyName; } }
             bool IColumn.Nullable { get { return false; } }
-            Index IColumn.Index { get { return Index.None; } }
             SqlDbType IColumn.SqlDbType { get { return SqlBuilder.PrimaryKeyType; } }
             bool IColumn.PrimaryKey { get { return true; } }
             bool IColumn.Identity { get { return true; } }
@@ -861,11 +1029,15 @@ namespace Signum.Engine.Maps
             public int Position { get; set; }
         }
 
-        public partial class BackReferenceColumn : IColumn
+        public partial class BackReferenceColumn : Field, IColumn
         {
+            public BackReferenceColumn(Type fieldType)
+                : base(fieldType)
+            {
+            }
+
             public string Name { get; set; }
             bool IColumn.Nullable { get { return false; } }
-            public Index Index { get; set; }
             SqlDbType IColumn.SqlDbType { get { return SqlBuilder.PrimaryKeyType; } }
             bool IColumn.PrimaryKey { get { return false; } }
             bool IColumn.Identity { get { return false; } }
@@ -873,9 +1045,30 @@ namespace Signum.Engine.Maps
             int? IColumn.Scale { get { return null; } }
             public Table ReferenceTable { get; set; }
             public int Position { get; set; }
+
+            public override IEnumerable<IColumn> Columns()
+            {
+                yield return this; 
+            }
+
+            public override IEnumerable<UniqueIndex> GeneratUniqueIndexes(ITable table)
+            {
+                throw new NotImplementedException();
+            }
+
+            internal override Expression GetExpression(ProjectionToken token, string tableAlias, QueryBinder binder)
+            {
+                throw new NotImplementedException();
+            }
+
+            internal override Expression GenerateValue(ParameterExpression reader, ParameterExpression retriever)
+            {
+                throw new NotImplementedException();
+            }
         }
 
         public Dictionary<string, IColumn> Columns { get; set; }
+        public List<UniqueIndex> MultiIndexes { get; set; }
 
         public string Name { get; set; }
         public PrimaryKeyColumn PrimaryKey { get; set; }
@@ -898,7 +1091,7 @@ namespace Signum.Engine.Maps
 
         public void GenerateColumns()
         {
-            Columns = new IColumn[] { PrimaryKey, BackReference}.Union(Field.Columns()).ToDictionary(a => a.Name);
+            Columns = new IColumn[] { PrimaryKey, BackReference}.Concat(Field.Columns()).ToDictionary(a => a.Name);
 
             int i = 0;
             foreach (var col in Columns.Values)
@@ -907,6 +1100,16 @@ namespace Signum.Engine.Maps
             }
 
             CompleteRetrieve();
+        }
+
+        public List<UniqueIndex> GeneratUniqueIndexes()
+        {
+            var result = Field.GeneratUniqueIndexes(this).ToList();
+
+            if (MultiIndexes != null)
+                result.AddRange(MultiIndexes);
+
+            return result; 
         }
     }
 

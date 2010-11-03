@@ -9,7 +9,7 @@ namespace Signum.Entities
     [Serializable]
     public class TypeDN : IdentifiableEntity
     {
-        [UniqueIndex]
+        [NotNullable, UniqueIndex]
         string fullClassName;
         public string FullClassName
         {
@@ -17,7 +17,7 @@ namespace Signum.Entities
             set { Set(ref fullClassName, value, () => FullClassName); }
         }
 
-        [UniqueIndex]
+        [NotNullable, UniqueIndex]
         string tableName;
         public string TableName
         {

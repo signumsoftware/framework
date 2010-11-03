@@ -18,27 +18,9 @@ using System.Collections;
 namespace Signum.Entities
 {
     [AttributeUsage(AttributeTargets.Field)]
-    public sealed class NoIndexAttribute : Attribute
-    {
-    }
-
-    [AttributeUsage(AttributeTargets.Field)]
     public sealed class UniqueIndexAttribute : Attribute
     {
         public bool AllowMultipleNulls { get; set; }
-    }
-
-    [AttributeUsage(AttributeTargets.Field)]
-    public sealed class MultipleIndexAttribute : Attribute
-    {
-    }
-
-    public enum Index
-    {
-        None = 0,
-        Unique,
-        Multiple,
-        UniqueMultiNulls
     }
 
     [Serializable]

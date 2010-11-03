@@ -157,24 +157,15 @@ namespace Signum.Engine.Maps
             return fieldType.IsValueType ? Nullable.GetUnderlyingType(fieldType) != null : true;
         }
 
-        internal Index? IndexType(Type type, FieldInfo fi)
+        internal IndexType GetIndexType(Type type, FieldInfo fi)
         {
             var att = FieldInfoAttributes(type, fi);
 
-            if (att.OfType<NoIndexAttribute>().Any())
-                return Index.None;
+            UniqueIndexAttribute at = att.OfType<UniqueIndexAttribute>().SingleOrDefault();
 
-            if (att.OfType<MultipleIndexAttribute>().Any())
-                return Index.Multiple;
-
-            UniqueIndexAttribute unique = att.OfType<UniqueIndexAttribute>().SingleOrDefault();
-            if (unique == null)
-                return null;
-
-            if (unique.AllowMultipleNulls)
-                return Index.UniqueMultiNulls;
-            else
-                return Index.Unique;
+            return at == null ? IndexType.None :
+                at.AllowMultipleNulls ? IndexType.UniqueMultipleNulls :
+                IndexType.Unique; 
         }
 
          public bool ImplementedBy<T, R>(Expression<Func<T, R>> propertyOrField, Type typeToImplement)
