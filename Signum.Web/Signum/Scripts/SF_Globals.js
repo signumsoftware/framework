@@ -783,7 +783,7 @@ function () {
 
             $.fn.placeholder.on = function (el) {
                 var $el = $(el);
-                $el.val($el.attr('placeholder')).addClass('placeholder');
+                if ($el.val() == '') $el.val($el.attr('placeholder')).addClass('placeholder');
             };
 
             $.fn.placeholder.off = function (el) {
