@@ -382,6 +382,13 @@ namespace Signum.Engine.Maps
         {
             return tables.Values.ToString(t=>t.Type.TypeName(),"\r\n\r\n"); 
         }
+
+        internal Dictionary<string, ITable> GetDatabaseTables()
+        {
+            return Schema.Current.Tables.Values.SelectMany(t => 
+                t.Fields.Values.Select(a => a.Field).OfType<FieldMList>().Select(f => (ITable)f.RelationalTable).PreAnd(t))
+                .ToDictionary(a => a.Name);
+        }
     }
 
     internal interface IEntityEvents

@@ -90,10 +90,8 @@ namespace Signum.Engine
 
         public static SqlPreCommand CreateTablesScript()
         {
-            Schema schema = Schema.Current;
-
-            List<ITable> tables = schema.Tables.SelectMany(t => t.Value.Fields.OfType<FieldMList>().Select(f => (ITable)f.RelationalTable).PreAnd((ITable)t.Value)).ToList();
-
+            IEnumerable<ITable> tables = Schema.Current.GetDatabaseTables().Values;
+                
             SqlPreCommand createTables = tables.Select(t => SqlBuilder.CreateTableSql(t)).Combine(Spacing.Double);
 
             SqlPreCommand foreignKeys = tables.Select(t => SqlBuilder.AlterTableForeignKeys(t)).Combine(Spacing.Double);

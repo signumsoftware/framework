@@ -20,7 +20,9 @@ namespace Signum.Engine
         {
             Dictionary<string, DiffTable> database = GetDatabaseDescription();
 
-            Dictionary<string, ITable> model = Schema.Current.Tables.Values.SelectMany(t => t.Fields.Values.Select(a=>a.Field).OfType<FieldMList>().Select(f => (ITable)f.RelationalTable).PreAnd(t)).ToDictionary(a => a.Name);
+            Dictionary<string, ITable> model = Schema.Current.GetDatabaseTables(); 
+                
+               
 
             Dictionary<ITable, Dictionary<string, UniqueIndex>> modelIndices = model.Values.ToDictionary(t => t, t =>t.GeneratUniqueIndexes().ToDictionary(a=>a.IndexName, "Indexes for {0}".Formato(t.Name)));
 
