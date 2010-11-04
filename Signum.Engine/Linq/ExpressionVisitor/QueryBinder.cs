@@ -164,7 +164,7 @@ namespace Signum.Engine.Linq
         {
             map.Add(lambda.Parameters[0], p.Projector);
 
-            Expression result = Visit(lambda.Body).TryConvert(lambda.Body.Type);
+            Expression result = Visit(lambda.Body);
 
             p = ApplyExpansions(p);
 
