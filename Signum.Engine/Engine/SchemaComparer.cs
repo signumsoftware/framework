@@ -126,6 +126,7 @@ namespace Signum.Engine
                                 Name = t.name,
                                 Colums = (from c in Database.View<SysColumns>().Where(c => c.object_id == t.object_id)
                                           join type in Database.View<SysTypes>() on c.user_type_id equals type.user_type_id
+                                          join ctr in Database.View<SysObjects>().DefaultIfEmpty() on c.default_object_id equals ctr.object_id
                                           select new DiffColumn
                                           {
                                               Name = c.name,
@@ -135,6 +136,7 @@ namespace Signum.Engine
                                               Precission = c.precision,
                                               Scale = c.scale,
                                               Identity = c.is_identity,
+                                              DefaultConstraintName = ctr.name,
                                               PrimaryKey = (from i in Database.View<SysIndexes>()
                                                             where i.object_id == c.object_id && i.is_primary_key
                                                             join ic in Database.View<SysIndexColumn>() on new { i.object_id, i.index_id } equals new { ic.object_id, ic.index_id }
@@ -144,80 +146,33 @@ namespace Signum.Engine
                                                                 where fkc.parent_object_id == c.object_id && fkc.parent_column_id == c.column_id
                                                                 join fk in Database.View<SysForeignKeys>().DefaultIfEmpty() on fkc.constraint_object_id equals fk.object_id
                                                                 select fk.name).SingleOrDefault(),
-                                          }).ToDictionary(a => a.Name)
+                                          }).ToDictionary(a => a.Name),
+
+                                Indices = (from i in Database.View<SysIndexes>()
+                                           where i.object_id == t.object_id && !i.is_primary_key && i.is_unique && i.name.StartsWith("IX_")
+                                           select new DiffViewIndex { IndexName = i.name }).ToList().Concat(
+                                           (from v in Database.View<SysViews>()
+                                            where v.name.StartsWith("VIX_" + t.name + "_")
+                                            join i in Database.View<SysIndexes>() on v.object_id equals i.object_id
+                                            where !i.is_primary_key && i.is_unique && i.name.StartsWith("IX_")
+                                            select new DiffViewIndex { IndexName = i.name, ViewName = v.name }).ToList()).ToDictionary(a=>a.IndexName),
+
+
+                                FreeIndices = (from i in Database.View<SysIndexes>()
+                                               where i.object_id == t.object_id && !i.is_primary_key && !(i.is_unique && i.name.StartsWith("IX_"))
+                                               select new DiffFreeIndex
+                                               {
+                                                   IndexName = i.name,
+                                                   Columns = (from ic in Database.View<SysIndexColumn>().Where(ic => ic.object_id == t.object_id && ic.index_id == i.index_id)
+                                                              join c in Database.View<SysColumns>().Where(ic => ic.object_id == t.object_id)
+                                                                 on ic.column_id equals c.column_id
+                                                              select c.name).ToList()
+                                               }).ToList()
                             }).ToDictionary(c => c.Name);
-
-
-            AddIndexes(database);
-
-            AddDefaultContraints(database); 
 
             return database;
         }
 
-        static void AddIndexes(Dictionary<string, DiffTable> database)
-        {
-            var indices = (from t in Database.View<SysTables>()
-                           join i in Database.View<SysIndexes>() on t.object_id equals i.object_id
-                           where !i.is_primary_key && i.is_unique && i.name.StartsWith("IX_")
-                           select new
-                           {
-                               Table = t.name,
-                               Index = new DiffViewIndex { IndexName = i.name },
-                           }).ToList();
-
-            var viewIndexes = (from t in Database.View<SysTables>()
-                               from v in Database.View<SysViews>()
-                               where v.name.StartsWith("VIX_" + t.name + "_")
-                               join i in Database.View<SysIndexes>() on v.object_id equals i.object_id
-                               where !i.is_primary_key && i.is_unique && i.name.StartsWith("IX_")
-                               select new
-                               {
-                                   Table = t.name,
-                                   Index = new DiffViewIndex { IndexName = i.name, ViewName = v.name }
-                               }).ToList();
-
-            var dicIndices = indices.Concat(viewIndexes).AgGroupToDictionary(a => a.Table, gr => gr.ToDictionary(a => a.Index.IndexName, a => a.Index));
-
-            database.JoinDictionaryForeach(dicIndices, (tableName, diffTable, ind) => diffTable.Indices = ind);
-
-            var freeIndices = (from t in Database.View<SysTables>()
-                               join i in Database.View<SysIndexes>() on t.object_id equals i.object_id
-                               where !i.is_primary_key && !(i.is_unique && i.name.StartsWith("IX_"))
-                               select new
-                               {
-                                   Table = t.name,
-                                   IndexName = i.name,
-                                   Columns = (from ic in Database.View<SysIndexColumn>().Where(ic => ic.object_id == t.object_id && ic.index_id == i.index_id)
-                                              join c in Database.View<SysColumns>().Where(ic => ic.object_id == t.object_id)
-                                                 on ic.column_id equals c.column_id
-                                              select c.name).ToList()
-                               }).GroupToDictionary(t => t.Table, t => new DiffFreeIndex { IndexName = t.IndexName, Columns = t.Columns });
-
-            database.JoinDictionaryForeach(freeIndices, (tableName, diffTable, ind) => diffTable.FreeIndices = ind);
-        }
-
-        static void AddDefaultContraints(Dictionary<string, DiffTable> database)
-        {
-            var rawConstraints = (from t in Database.View<SysTables>()
-                                  join c in Database.View<SysColumns>() on t.object_id equals c.object_id
-                                  join o in Database.View<SysObjects>() on c.default_object_id equals o.object_id
-                                  select new
-                                  {
-                                      Table = t.name,
-                                      ColumnName = c.name,
-                                      ConstraintName = o.name,
-                                  }).ToList();
-
-            var groups = rawConstraints.AgGroupToDictionary(a => a.Table, g => g.ToDictionary(a => a.ColumnName, a => a.ConstraintName));
-
-
-            database.JoinDictionaryForeach(groups, (table, d1, d2) =>
-                 d1.Colums.JoinDictionaryForeach(d2, (column, col, constraintName) =>
-                 {
-                     col.DefaultConstraintName = constraintName;
-                 }));
-        }
 
         public static SqlDbType ToSqlDbType(string str)
         {
