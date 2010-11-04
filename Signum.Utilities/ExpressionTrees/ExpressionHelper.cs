@@ -5,6 +5,8 @@ using System.Text;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq.Expressions;
+using System.Reflection;
+using Signum.Utilities.Reflection;
 
 namespace Signum.Utilities.ExpressionTrees
 {
@@ -63,12 +65,22 @@ namespace Signum.Utilities.ExpressionTrees
             return alternate ?? collection; 
         }
 
+        static MethodInfo miAsQueryable = ReflectionTools.GetMethodInfo(() => Queryable.AsQueryable<int>(null)).GetGenericMethodDefinition();
+
         [DebuggerStepThrough]
         public static Expression TryConvert(this Expression expression, Type type)
         {
-            if (!type.IsAssignableFrom(expression.Type))
-                return Expression.Convert(expression, type);
-            return expression;
+            if (type == expression.Type)
+                return expression;
+
+            if (type.IsInstantiationOf(typeof(IQueryable<>)) && expression.Type.IsInstantiationOf(typeof(IEnumerable<>))
+                && expression.Type.GetGenericArguments().Single() == type.GetGenericArguments().Single())
+            {
+                MethodInfo mi =  miAsQueryable.MakeGenericMethod(type.GetGenericArguments().Single());
+                return Expression.Call(mi, expression);
+            }
+
+            return Expression.Convert(expression, type);
         }
 
         [DebuggerStepThrough]
