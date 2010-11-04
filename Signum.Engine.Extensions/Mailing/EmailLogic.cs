@@ -19,6 +19,7 @@ using Signum.Engine.Extensions.Properties;
 using System.Net;
 using Signum.Engine.Authorization;
 using Signum.Utilities.Reflection;
+using System.ComponentModel;
 
 namespace Signum.Engine.Mailing
 {
@@ -32,6 +33,8 @@ namespace Signum.Engine.Mailing
 
     public static class EmailLogic
     {
+        public static string OverrideEmailToAddress; 
+
         public static BodyRenderer BodyRenderer;
 
         public static Func<SmtpClient> SmtpClientBuilder;
@@ -180,13 +183,7 @@ namespace Signum.Engine.Mailing
 
             try
             {
-                MailMessage message = new MailMessage()
-                {
-                    To = { emailMessage.Recipient.Retrieve().Email },
-                    Subject = emailMessage.Subject,
-                    Body = emailMessage.Body,
-                    IsBodyHtml = true,
-                };
+                MailMessage message = CreateMailMessage(emailMessage);
 
                 SmtpClient client = SmtpClientBuilder == null ? new SmtpClient() : SmtpClientBuilder();
                 client.Send(message);
@@ -201,18 +198,14 @@ namespace Signum.Engine.Mailing
             }
         }
 
+        
+
         public static void SendMailAsync(EmailMessageDN emailMessage)
         {
             emailMessage.Sent = TimeZoneManager.Now;
             emailMessage.Received = null;
 
-            MailMessage message = new MailMessage()
-            {
-                To = { emailMessage.Recipient.Retrieve().Email },
-                Subject = emailMessage.Subject,
-                Body = emailMessage.Body,
-                IsBodyHtml = true,
-            };
+            MailMessage message = CreateMailMessage(emailMessage); 
 
             SmtpClient client = SmtpClientBuilder == null ? new SmtpClient() : SmtpClientBuilder();
             client.SendCompleted += new SendCompletedEventHandler(client_SendCompleted);
@@ -221,7 +214,7 @@ namespace Signum.Engine.Mailing
             emailMessage.Save();
         }
 
-        static void client_SendCompleted(object sender, System.ComponentModel.AsyncCompletedEventArgs e)
+        static void client_SendCompleted(object sender, AsyncCompletedEventArgs e)
         {
             EmailMessageDN emailMessage = (EmailMessageDN)e.UserState;
             if (e.Error != null)
@@ -232,10 +225,22 @@ namespace Signum.Engine.Mailing
             else
             {
                 emailMessage.State = EmailState.Sent;
-                emailMessage.Sent = DateTime.Now;
+                emailMessage.Sent = TimeZoneManager.Now;
             }
             using (AuthLogic.Disable())
                 emailMessage.Save();
+        }
+
+        static MailMessage CreateMailMessage(EmailMessageDN emailMessage)
+        {
+            MailMessage message = new MailMessage()
+            {
+                To = { emailMessage.Recipient.Retrieve().Email },
+                Subject = emailMessage.Subject,
+                Body = emailMessage.Body,
+                IsBodyHtml = true,
+            };
+            return message;
         }
 
         internal static void AssertStarted(SchemaBuilder sb)
