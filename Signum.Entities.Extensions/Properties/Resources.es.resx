@@ -1041,4 +1041,10 @@
   <data name="UserTicketDN_User" xml:space="preserve">
     <value>Usuario </value>
   </data>
+  <data name="CountSearchControlPartDN" xml:space="preserve">
+    <value>Lista de contadores</value>
+  </data>
+  <data name="CountUserQueryElement" xml:space="preserve">
+    <value>Contador</value>
+  </data>
 </root>

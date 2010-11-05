@@ -639,4 +639,10 @@
   <data name="ControlPanelDN_Rows0DontHaveAnyParts" xml:space="preserve">
     <value>There are not any parts in rows {{{0}}}</value>
   </data>
+  <data name="CountSearchControlPartDN" xml:space="preserve">
+    <value>Counter list</value>
+  </data>
+  <data name="CountUserQueryElement" xml:space="preserve">
+    <value>Counter</value>
+  </data>
 </root>

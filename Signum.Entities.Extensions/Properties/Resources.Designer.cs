@@ -151,6 +151,24 @@ namespace Signum.Entities.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Counter list.
+        /// </summary>
+        public static string CountSearchControlPartDN {
+            get {
+                return ResourceManager.GetString("CountSearchControlPartDN", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Counter.
+        /// </summary>
+        public static string CountUserQueryElement {
+            get {
+                return ResourceManager.GetString("CountUserQueryElement", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Custom Task.
         /// </summary>
         public static string CustomTaskDN {
