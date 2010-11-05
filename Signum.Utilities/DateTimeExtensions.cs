@@ -237,15 +237,12 @@ namespace Signum.Utilities
 
         public static string ToAgoString(this DateTime dateTime)
         {
-            DateTime now = DateTime.Now;
+            DateTime now = dateTime.Kind == DateTimeKind.Utc ? DateTime.UtcNow : DateTime.Now;
 
-            //convert it to kind being used by parameter dateTime
-            DateTime converted = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, now.Second, dateTime.Kind);
-
-            if (DateTime.Compare(converted, dateTime) < 0)
+            TimeSpan ts = now.Subtract(dateTime);
+            if (ts.TotalMilliseconds < 0)
                 throw new ApplicationException("Not possible to return a 'ago' string for a future date");
 
-            TimeSpan ts = converted.Subtract(dateTime);
             int months = ts.Days / 30;
             if (months > 0)
                 return Resources.Ago.Formato((months == 1 ? Resources._0Month : Resources._0Months).Formato(months));
