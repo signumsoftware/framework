@@ -472,7 +472,8 @@ namespace Signum.Engine
             if (query == null)
                 throw new ArgumentNullException("query");
 
-            return DbQueryProvider.Single.Delete<T>(query);
+            int rows = DbQueryProvider.Single.Delete<T>(query);
+            return rows;
         }
 
 
@@ -483,7 +484,8 @@ namespace Signum.Engine
             if (query == null)
                 throw new ArgumentNullException("query");
 
-            return DbQueryProvider.Single.Update<T>(query, update);
+            int rows = DbQueryProvider.Single.Update<T>(query, update);
+            return rows;
         }
     }
 }
