@@ -279,10 +279,10 @@ namespace Signum.Engine.Linq
                     return Expression.Constant(null, lite.Type);
                 else if (toStr == null)
                 {
-                    return Expression.Call(row, miGetLiteImplementedByAll.MakeGenericMethod(liteType), id, typeId.Nullify());
+                    return Expression.Call(row, miGetLiteImplementedByAll.MakeGenericMethod(liteType), id.Nullify(), typeId.Nullify());
                 }
                 else
-                    return Expression.Call(row, miGetLiteIdentifiable.MakeGenericMethod(liteType), id, typeId, toStr);
+                    return Expression.Call(row, miGetLiteIdentifiable.MakeGenericMethod(liteType), id.Nullify(), typeId.Nullify(), toStr);
             }
 
             protected override Expression VisitSqlConstant(SqlConstantExpression sce)
