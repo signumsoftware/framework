@@ -38,6 +38,7 @@ namespace Signum.Web.Authorization
 
         public static event Action OnUserLogged;
         public static event Action<Controller, UserDN> OnUserPreLogin;
+        public static event Func<Controller, string> OnUserLoggedDefaultReturn;
         public const string SessionUserKey = "user";
 
         #region "Change password"
@@ -396,7 +397,11 @@ namespace Signum.Web.Authorization
                 {
                     return Redirect(System.Web.HttpContext.Current.Request.Params["referrer"]);
                 }
-            return RedirectToAction("Index", "Home");
+
+            if (OnUserLoggedDefaultReturn != null)
+                return RedirectToAction("Index", "Home");
+            else
+                return Redirect(OnUserLoggedDefaultReturn(this));
         }
 
         ViewResult LoginError(string key, string error)
