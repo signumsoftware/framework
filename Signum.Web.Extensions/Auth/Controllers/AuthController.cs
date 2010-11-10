@@ -303,8 +303,8 @@ namespace Signum.Web.Authorization
 
                 new ResetPasswordMail
                 {
-                     To = user,
-                     NewPassord = randomPassword
+                    To = user,
+                    NewPassord = randomPassword
                 }.Send();
 
                 ViewData["email"] = email;
@@ -403,9 +403,9 @@ namespace Signum.Web.Authorization
                 }
 
             if (OnUserLoggedDefaultReturn != null)
-                return RedirectToAction("Index", "Home");
-            else
                 return Redirect(OnUserLoggedDefaultReturn(this));
+
+            return RedirectToAction("Index", "Home");
         }
 
         ViewResult LoginError(string key, string error)
