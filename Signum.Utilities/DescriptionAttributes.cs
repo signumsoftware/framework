@@ -43,6 +43,16 @@ namespace Signum.Utilities
     {
 
     }
+    
+    [AttributeUsage(AttributeTargets.All, Inherited = true)]
+    public class ForceLocalization : Attribute
+    {
+    }  
+
+    [AttributeUsage(AttributeTargets.All, Inherited = true)]
+    public class AvoidLocalization : Attribute
+    {
+    }
 
     public static class DescriptionManager
     {

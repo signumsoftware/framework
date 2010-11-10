@@ -117,106 +117,43 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="_0Day" xml:space="preserve">
-    <value>{0} Day</value>
+  <data name="_0HasBeenRenamedIn1" xml:space="preserve">
+    <value>'{0}' wurde in ' {1} umbenannt? </value>
   </data>
-  <data name="_0Days" xml:space="preserve">
-    <value>{0} Days</value>
+  <data name="CannotInsertDuplicatedFields0On1Table" xml:space="preserve">
+    <value>Kann nicht dupliziert einfügen auf Feld {0} von {1}-Tabelle Werte </value>
   </data>
-  <data name="_0HasNoFreeBits" xml:space="preserve">
-    <value>{0:X} has no free bits</value>
+  <data name="ConcurrencyErrorOnDatabaseTable0Id1" xml:space="preserve">
+    <value>Parallelitätsfehler auf die Databe, Table = {0}, ID = {1} </value>
   </data>
-  <data name="_0Hour" xml:space="preserve">
-    <value>{0} Hour</value>
+  <data name="EndOfSyncScript" xml:space="preserve">
+    <value>--- ENDE DAS SYNCHRONISIERUNGSSKRIPT </value>
   </data>
-  <data name="_0Hours" xml:space="preserve">
-    <value>{0} Hours</value>
+  <data name="EntityWithType0AndId1NotFound" xml:space="preserve">
+    <value>Keine gefunden {0} mit der ID {1} </value>
   </data>
-  <data name="_0Minute" xml:space="preserve">
-    <value>{0} Minute</value>
+  <data name="NNone" xml:space="preserve">
+    <value>-n: keine </value>
   </data>
-  <data name="_0Minutes" xml:space="preserve">
-    <value>{0} Minutes</value>
+  <data name="NoWayOfMappingType0Found" xml:space="preserve">
+    <value>Keine Möglichkeit der Zuordnungstyp {0} gefunden </value>
   </data>
-  <data name="_0Month" xml:space="preserve">
-    <value>{0} Month</value>
+  <data name="PropertyRouteCanNotBeOfTypeRoot" xml:space="preserve">
+    <value>PropertyRoute kann nicht vom Typ Root sein. </value>
   </data>
-  <data name="_0Months" xml:space="preserve">
-    <value>{0} Months</value>
+  <data name="StartOfSyncScriptGeneratedOn0" xml:space="preserve">
+    <value>---ANFANG DES SYNCHRONISATIONSSKRIPTS GENERIERT AUF {0} </value>
   </data>
-  <data name="_0Second" xml:space="preserve">
-    <value>{0} Second</value>
+  <data name="ThereAre0ThatReferThisEntity" xml:space="preserve">
+    <value>Es gibt '{0}', die zu dieser Entität verweisen </value>
   </data>
-  <data name="_0Seconds" xml:space="preserve">
-    <value>{0} Seconds</value>
+  <data name="ThereAreRecordsIn0PointingToThisTableByColumn1" xml:space="preserve">
+    <value>Es gibt Datensätze in '{0}', die auf diese Tabelle verweisen, von Spalte '{1}' </value>
   </data>
-  <data name="_0Year" xml:space="preserve">
-    <value>{0} Year</value>
+  <data name="UnauthorizedAccessTo0Because1" xml:space="preserve">
+    <value>Hinausgehende Zugang zu {0}, weil {1} </value>
   </data>
-  <data name="_0Year1Month2Day" xml:space="preserve">
-    <value>{0} Year(s), {1} Month(s), {2} Day(s)</value>
-  </data>
-  <data name="_0Years" xml:space="preserve">
-    <value>{0} Years</value>
-  </data>
-  <data name="And" xml:space="preserve">
-    <value> and </value>
-  </data>
-  <data name="DateLast" xml:space="preserve">
-    <value>Last {0}</value>
-  </data>
-  <data name="DateSeparators" xml:space="preserve">
-    <value>,</value>
-  </data>
-  <data name="DateThis" xml:space="preserve">
-    <value>This {0}</value>
-  </data>
-  <data name="DateTimePrecision_Days" xml:space="preserve">
-    <value>Days</value>
-  </data>
-  <data name="DateTimePrecision_Hours" xml:space="preserve">
-    <value>Hours</value>
-  </data>
-  <data name="DateTimePrecision_Milliseconds" xml:space="preserve">
-    <value>Milliseconds</value>
-  </data>
-  <data name="DateTimePrecision_Minutes" xml:space="preserve">
-    <value>Minutes</value>
-  </data>
-  <data name="DateTimePrecision_Seconds" xml:space="preserve">
-    <value>Seconds</value>
-  </data>
-  <data name="EnterYourSelection" xml:space="preserve">
-    <value>Enter your selection: </value>
-  </data>
-  <data name="EnterYoutSelectionsSeparatedByComma" xml:space="preserve">
-    <value>Enter your selections separated by comma: </value>
-  </data>
-  <data name="NoOptionWithKey0Found" xml:space="preserve">
-    <value>No option with key {0} found</value>
-  </data>
-  <data name="Or" xml:space="preserve">
-    <value> or </value>
-  </data>
-  <data name="OS_Unknown0" xml:space="preserve">
-    <value>Unknown ({0})</value>
-  </data>
-  <data name="SelectOneOfTheFollowingOptions" xml:space="preserve">
-    <value>Select one of the following options:</value>
-  </data>
-  <data name="Today" xml:space="preserve">
-    <value>Today</value>
-  </data>
-  <data name="Tomorrow" xml:space="preserve">
-    <value>Tomorrow</value>
-  </data>
-  <data name="Unavailable" xml:space="preserve">
-    <value>Unavailable</value>
-  </data>
-  <data name="Yesterday" xml:space="preserve">
-    <value>Yesterday</value>
-  </data>
-  <data name="Ago" xml:space="preserve">
-    <value>{0} ago </value>
+  <data name="Warning0NoResults" xml:space="preserve">
+    <value>Warnung {0}: keine Ergebnisse </value>
   </data>
 </root>

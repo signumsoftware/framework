@@ -286,7 +286,7 @@ namespace Signum.Utilities.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Enter yout selections separated by comma: .
+        ///   Looks up a localized string similar to Enter your selections separated by comma: .
         /// </summary>
         public static string EnterYoutSelectionsSeparatedByComma {
             get {

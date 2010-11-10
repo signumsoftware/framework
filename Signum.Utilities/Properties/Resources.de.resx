@@ -118,105 +118,105 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="_0Day" xml:space="preserve">
-    <value>{0} Day</value>
+    <value>{0} Tag </value>
   </data>
   <data name="_0Days" xml:space="preserve">
-    <value>{0} Days</value>
+    <value>{0} Tage </value>
   </data>
   <data name="_0HasNoFreeBits" xml:space="preserve">
-    <value>{0:X} has no free bits</value>
+    <value>{0:X} Hat keine kostenlose bits </value>
   </data>
   <data name="_0Hour" xml:space="preserve">
-    <value>{0} Hour</value>
+    <value>{0} Stunden </value>
   </data>
   <data name="_0Hours" xml:space="preserve">
-    <value>{0} Hours</value>
+    <value>{0} Stunden </value>
   </data>
   <data name="_0Minute" xml:space="preserve">
-    <value>{0} Minute</value>
+    <value>{0} Minuten </value>
   </data>
   <data name="_0Minutes" xml:space="preserve">
-    <value>{0} Minutes</value>
+    <value>{0} Minuten </value>
   </data>
   <data name="_0Month" xml:space="preserve">
-    <value>{0} Month</value>
+    <value>{0} Monat </value>
   </data>
   <data name="_0Months" xml:space="preserve">
-    <value>{0} Months</value>
+    <value>{0} Monaten </value>
   </data>
   <data name="_0Second" xml:space="preserve">
-    <value>{0} Second</value>
+    <value>{0} Sekunde</value>
   </data>
   <data name="_0Seconds" xml:space="preserve">
-    <value>{0} Seconds</value>
+    <value>{0} Sekunden </value>
   </data>
   <data name="_0Year" xml:space="preserve">
-    <value>{0} Year</value>
+    <value>{0} Jahr </value>
   </data>
   <data name="_0Year1Month2Day" xml:space="preserve">
-    <value>{0} Year(s), {1} Month(s), {2} Day(s)</value>
+    <value>{0} Jahr(e), {1} Monat(e), {2} Tag(e) </value>
   </data>
   <data name="_0Years" xml:space="preserve">
-    <value>{0} Years</value>
-  </data>
-  <data name="And" xml:space="preserve">
-    <value> and </value>
-  </data>
-  <data name="DateLast" xml:space="preserve">
-    <value>Last {0}</value>
-  </data>
-  <data name="DateSeparators" xml:space="preserve">
-    <value>,</value>
-  </data>
-  <data name="DateThis" xml:space="preserve">
-    <value>This {0}</value>
-  </data>
-  <data name="DateTimePrecision_Days" xml:space="preserve">
-    <value>Days</value>
-  </data>
-  <data name="DateTimePrecision_Hours" xml:space="preserve">
-    <value>Hours</value>
-  </data>
-  <data name="DateTimePrecision_Milliseconds" xml:space="preserve">
-    <value>Milliseconds</value>
-  </data>
-  <data name="DateTimePrecision_Minutes" xml:space="preserve">
-    <value>Minutes</value>
-  </data>
-  <data name="DateTimePrecision_Seconds" xml:space="preserve">
-    <value>Seconds</value>
-  </data>
-  <data name="EnterYourSelection" xml:space="preserve">
-    <value>Enter your selection: </value>
-  </data>
-  <data name="EnterYoutSelectionsSeparatedByComma" xml:space="preserve">
-    <value>Enter your selections separated by comma: </value>
-  </data>
-  <data name="NoOptionWithKey0Found" xml:space="preserve">
-    <value>No option with key {0} found</value>
-  </data>
-  <data name="Or" xml:space="preserve">
-    <value> or </value>
-  </data>
-  <data name="OS_Unknown0" xml:space="preserve">
-    <value>Unknown ({0})</value>
-  </data>
-  <data name="SelectOneOfTheFollowingOptions" xml:space="preserve">
-    <value>Select one of the following options:</value>
-  </data>
-  <data name="Today" xml:space="preserve">
-    <value>Today</value>
-  </data>
-  <data name="Tomorrow" xml:space="preserve">
-    <value>Tomorrow</value>
-  </data>
-  <data name="Unavailable" xml:space="preserve">
-    <value>Unavailable</value>
-  </data>
-  <data name="Yesterday" xml:space="preserve">
-    <value>Yesterday</value>
+    <value>{0} Jahre </value>
   </data>
   <data name="Ago" xml:space="preserve">
-    <value>{0} ago </value>
+    <value>{0} vor </value>
+  </data>
+  <data name="And" xml:space="preserve">
+    <value>und </value>
+  </data>
+  <data name="DateLast" xml:space="preserve">
+    <value>Letzte {0} </value>
+  </data>
+  <data name="DateSeparators" xml:space="preserve">
+    <value>. </value>
+  </data>
+  <data name="DateThis" xml:space="preserve">
+    <value>Dieser {0}</value>
+  </data>
+  <data name="DateTimePrecision_Days" xml:space="preserve">
+    <value>Tage </value>
+  </data>
+  <data name="DateTimePrecision_Hours" xml:space="preserve">
+    <value>Stunden </value>
+  </data>
+  <data name="DateTimePrecision_Milliseconds" xml:space="preserve">
+    <value>Millisekunden </value>
+  </data>
+  <data name="DateTimePrecision_Minutes" xml:space="preserve">
+    <value>Minuten </value>
+  </data>
+  <data name="DateTimePrecision_Seconds" xml:space="preserve">
+    <value>Sekunden </value>
+  </data>
+  <data name="EnterYourSelection" xml:space="preserve">
+    <value>Geben Sie Ihre Auswahl: </value>
+  </data>
+  <data name="EnterYoutSelectionsSeparatedByComma" xml:space="preserve">
+    <value>Geben Sie Ihre Auswahl durch Komma getrennt: </value>
+  </data>
+  <data name="NoOptionWithKey0Found" xml:space="preserve">
+    <value>Keine Option mit Schlüssel {0} gefunden </value>
+  </data>
+  <data name="Or" xml:space="preserve">
+    <value>oder </value>
+  </data>
+  <data name="OS_Unknown0" xml:space="preserve">
+    <value>Unbekannt ({0}) </value>
+  </data>
+  <data name="SelectOneOfTheFollowingOptions" xml:space="preserve">
+    <value>Wählen Sie eine der folgenden Optionen: </value>
+  </data>
+  <data name="Today" xml:space="preserve">
+    <value>Heute </value>
+  </data>
+  <data name="Tomorrow" xml:space="preserve">
+    <value>Morgen </value>
+  </data>
+  <data name="Unavailable" xml:space="preserve">
+    <value>Nicht verfügbar </value>
+  </data>
+  <data name="Yesterday" xml:space="preserve">
+    <value>Gestern </value>
   </data>
 </root>
