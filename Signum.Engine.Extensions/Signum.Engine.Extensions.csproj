@@ -175,6 +175,8 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Help\SignumFrameworkHelp.xsd" />
+    <EmbeddedResource Include="Properties\Resources.pt.resx" />
+    <EmbeddedResource Include="Properties\Resources.de.resx" />
     <None Include="Operations\Operations.cd" />
     <EmbeddedResource Include="Reports\plainExcelTemplate.xlsx" />
   </ItemGroup>

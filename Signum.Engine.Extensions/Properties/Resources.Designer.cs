@@ -152,7 +152,7 @@ namespace Signum.Engine.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} belongs to another kind ok Linq Provider.
+        ///   Looks up a localized string similar to {0} belongs to another kind of Linq Provider.
         /// </summary>
         internal static string BelongsToAnotherKindOkLinqProvider {
             get {

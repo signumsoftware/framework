@@ -104,7 +104,7 @@ namespace Signum.Entities.Reports
     {
         [NotNullable, SqlDbType(Size = 100)]
         protected string tokenString;
-        [StringLengthValidator(AllowNulls = false, Min = 1, Max = 100)]
+        [StringLengthValidator(AllowNulls = false, Min = 1, Max = 100), AvoidLocalization]
         public string TokenString
         {
             get { return tokenString; }

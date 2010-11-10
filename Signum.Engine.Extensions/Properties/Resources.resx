@@ -343,7 +343,7 @@
     <value>Call {0} over {1} of the {2}</value>
   </data>
   <data name="BelongsToAnotherKindOkLinqProvider" xml:space="preserve">
-    <value>{0} belongs to another kind ok Linq Provider</value>
+    <value>{0} belongs to another kind of Linq Provider</value>
   </data>
   <data name="ConstantExpressionWithAComplexIQueryableUnexpectedAt" xml:space="preserve">
     <value>ConstantExpression with a complex IQueryable unexpected at this stage</value>

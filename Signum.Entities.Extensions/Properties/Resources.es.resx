@@ -699,8 +699,8 @@
   <data name="ChartTokenDN_OrderType" xml:space="preserve">
     <value>Tipo de orden </value>
   </data>
-  <data name="ChartTokenDN_PropertyLabel" xml:space="preserve">
-    <value>Etiqueta</value>
+  <data name="LinkListPartDN_Links" xml:space="preserve">
+    <value>Enlaces </value>
   </data>
   <data name="ChartTokenDN_Type" xml:space="preserve">
     <value>Tipo </value>
@@ -756,14 +756,14 @@
   <data name="ChartType_TotalColumns" xml:space="preserve">
     <value>Columnas totales </value>
   </data>
-  <data name="ColumnOptionsMode_Add" xml:space="preserve">
-    <value>Añadir </value>
+  <data name="LinkElement_Link" xml:space="preserve">
+    <value>Enlace </value>
   </data>
-  <data name="ColumnOptionsMode_Remove" xml:space="preserve">
-    <value>Quitar </value>
+  <data name="LinkElement_Label" xml:space="preserve">
+    <value>Etiqueta </value>
   </data>
-  <data name="ColumnOptionsMode_Replace" xml:space="preserve">
-    <value>Reemplazar </value>
+  <data name="LinkElement" xml:space="preserve">
+    <value>Enlace</value>
   </data>
   <data name="ControlPanelDN" xml:space="preserve">
     <value>Panel de control </value>
@@ -885,17 +885,17 @@
   <data name="LogOperationDN" xml:space="preserve">
     <value>Log de operación</value>
   </data>
-  <data name="OperationAllowedRule" xml:space="preserve">
-    <value>Operación permitida la regla </value>
+  <data name="EntityGroupDN" xml:space="preserve">
+    <value>Grupo de entidades </value>
   </data>
   <data name="OperationDN" xml:space="preserve">
     <value>Operación </value>
   </data>
-  <data name="OrderType_Ascending" xml:space="preserve">
-    <value>Ascendente </value>
+  <data name="CustomTaskExecutionDN_user" xml:space="preserve">
+    <value>usuario </value>
   </data>
-  <data name="OrderType_Descending" xml:space="preserve">
-    <value>Descendente </value>
+  <data name="ChartTokenDN_Format" xml:space="preserve">
+    <value>Formato </value>
   </data>
   <data name="PackageDN_NumErrors" xml:space="preserve">
     <value>Núm. Errores</value>
@@ -945,8 +945,8 @@
   <data name="PropertyDN_Type" xml:space="preserve">
     <value>Tipo </value>
   </data>
-  <data name="QueryAllowedRule" xml:space="preserve">
-    <value>Consulta permitido de regla </value>
+  <data name="ChartRequest" xml:space="preserve">
+    <value>Solicitud de gráfico </value>
   </data>
   <data name="QueryColumnDN" xml:space="preserve">
     <value>Columna de consulta </value>
@@ -1046,5 +1046,8 @@
   </data>
   <data name="CountUserQueryElement" xml:space="preserve">
     <value>Contador</value>
+  </data>
+  <data name="ProcessExecutionDN_User" xml:space="preserve">
+    <value>Usuario </value>
   </data>
 </root>

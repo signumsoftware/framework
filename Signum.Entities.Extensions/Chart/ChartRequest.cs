@@ -286,6 +286,7 @@ namespace Signum.Entities.Chart
 
         [NonSerialized]
         bool needNewQuery;
+        [AvoidLocalization]
         public bool NeedNewQuery
         {
             get { return needNewQuery; }

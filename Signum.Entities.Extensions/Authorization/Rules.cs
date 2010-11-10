@@ -8,7 +8,7 @@ using Signum.Entities.Operations;
 
 namespace Signum.Entities.Authorization
 {
-    [Serializable]
+    [Serializable, AvoidLocalization]
     public class RuleDN<R, A> : IdentifiableEntity
         where R: IdentifiableEntity
     {
@@ -57,7 +57,7 @@ namespace Signum.Entities.Authorization
     [Serializable]
     public class RuleTypeDN : RuleDN<TypeDN, TypeAllowed> { }
 
-    [Serializable]
+    [Serializable, AvoidLocalization]
     public class EntityGroupAllowedDN : EmbeddedEntity, IEquatable<EntityGroupAllowedDN>
     {
         public static readonly EntityGroupAllowedDN CreateCreate = new EntityGroupAllowedDN(TypeAllowed.DBCreateUICreate, TypeAllowed.DBCreateUICreate);

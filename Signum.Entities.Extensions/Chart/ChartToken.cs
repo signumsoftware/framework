@@ -130,14 +130,17 @@ namespace Signum.Entities.Chart
 
         [field: NonSerialized, Ignore]
         internal event Func<ChartTokenDN, bool> GroupByVisibleEvent;
+        [AvoidLocalization]
         public bool GroupByVisible { get { return GroupByVisibleEvent(this); } }
 
         [field: NonSerialized, Ignore]
         internal event Func<ChartTokenDN, bool> ShouldAggregateEvent;
+        [AvoidLocalization]
         public bool ShouldAggregate { get { return ShouldAggregateEvent(this); } }
 
         [field: NonSerialized, Ignore]
         internal event Func<ChartTokenDN, string> PropertyLabeleEvent;
+        [AvoidLocalization]
         public string PropertyLabel { get { return PropertyLabeleEvent(this); } }
 
         [field: NonSerialized, Ignore]

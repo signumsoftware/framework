@@ -140,7 +140,7 @@
     <value>tu versión</value>
   </data>
   <data name="RemovesThe0FromTheDatabase" xml:space="preserve">
-    <value>Elimona {0} de la base de datos</value>
+    <value>Elimina {0} de la base de datos</value>
   </data>
   <data name="ConstructsANew0_f" xml:space="preserve">
     <value>Construye una nueva {0}</value>

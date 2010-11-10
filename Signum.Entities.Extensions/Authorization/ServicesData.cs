@@ -37,7 +37,7 @@ namespace Signum.Entities.Authorization
 
 
     //Only for client-side communication
-    [Serializable]
+    [Serializable, AvoidLocalization]
     public abstract class BaseRulePack<T> : IdentifiableEntity
         where T : EmbeddedEntity
     {
@@ -90,7 +90,7 @@ namespace Signum.Entities.Authorization
         Min,
     }
 
-    [Serializable]
+    [Serializable, AvoidLocalization]
     public abstract class AllowedRule<R, A> : EmbeddedEntity
         where R : IdentifiableEntity
     {
