@@ -70,17 +70,9 @@ namespace Signum.Utilities.ExpressionTrees
         [DebuggerStepThrough]
         public static Expression TryConvert(this Expression expression, Type type)
         {
-            if (type == expression.Type)
-                return expression;
-
-            if (type.IsInstantiationOf(typeof(IQueryable<>)) && expression.Type.IsInstantiationOf(typeof(IEnumerable<>))
-                && expression.Type.GetGenericArguments().Single() == type.GetGenericArguments().Single())
-            {
-                MethodInfo mi =  miAsQueryable.MakeGenericMethod(type.GetGenericArguments().Single());
-                return Expression.Call(mi, expression);
-            }
-
-            return Expression.Convert(expression, type);
+            if (!type.IsAssignableFrom(expression.Type))
+                return Expression.Convert(expression, type);
+            return expression;
         }
 
         [DebuggerStepThrough]

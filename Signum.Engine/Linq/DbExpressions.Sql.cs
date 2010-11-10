@@ -782,7 +782,7 @@ namespace Signum.Engine.Linq
 
         internal ProjectionExpression(SelectExpression source, Expression projector, UniqueFunction? uniqueFunction, ProjectionToken token)
             : base(DbExpressionType.Projection,
-            uniqueFunction == null ? typeof(IEnumerable<>).MakeGenericType(projector.Type) :
+            uniqueFunction == null ? typeof(IQueryable<>).MakeGenericType(projector.Type) :
             projector.Type)
         {
             if (source == null)

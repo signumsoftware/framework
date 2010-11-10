@@ -1170,7 +1170,6 @@ namespace Signum.Engine.Linq
             throw new NotSupportedException();
         }
 
-
         internal Expression MakeLite(Type type, Expression entity, Expression toStr)
         {
             if (toStr == null && !(entity is ImplementedByAllExpression))
@@ -1205,18 +1204,26 @@ namespace Signum.Engine.Linq
             if (operand.NodeType == (ExpressionType)DbExpressionType.FieldInit)
             {
                 FieldInitExpression fie = (FieldInitExpression)operand;
+                if (!b.TypeOperand.IsAssignableFrom(fie.Type))
+                    throw new InvalidCastException("A concrete {0} can not be a {1}".Formato(fie.Type.TypeName(), b.TypeOperand.TypeName()));
+
                 return new IsNotNullExpression(fie.ExternalId); //Usefull mainly for Shy<T>
             }
             if (operand.NodeType == (ExpressionType)DbExpressionType.ImplementedBy)
             {
-                ImplementedByExpression rib = (ImplementedByExpression)operand;
-                FieldInitExpression fie = rib.Implementations.Where(ri => ri.Type == b.TypeOperand).Single("The field has no implementation for type {0}".Formato(b.TypeOperand.TypeName())).Field;
-                return new IsNotNullExpression(fie.ExternalId);
+                ImplementedByExpression ib = (ImplementedByExpression)operand;
+
+                FieldInitExpression[] fies = ib.Implementations.Where(imp => b.TypeOperand.IsAssignableFrom(imp.Type)).Select(imp=>imp.Field).ToArray();
+                    
+                if(fies.Empty())
+                    throw new InvalidCastException("No implementation ({0}) can be a {1}".Formato(fies.ToString(f=>f.Type.TypeName(), ", "), b.TypeOperand.TypeName()));
+
+                return fies.Select(f => (Expression)new IsNotNullExpression(f.ExternalId)).Aggregate((f1, f2) => Expression.Or(f1, f2));
             }
             else if (operand.NodeType == (ExpressionType)DbExpressionType.ImplementedByAll)
             {
                 ImplementedByAllExpression riba = (ImplementedByAllExpression)operand;
-                int idType = Schema.Current.IDsForType.GetOrThrow(b.TypeOperand, "The type {0} is not registered in types table".Formato(b.TypeOperand.TypeName()));
+                int idType = Schema.Current.IDsForType.GetOrThrow(b.TypeOperand, "The type {0} is not registered in the database as a concrete table".Formato(b.TypeOperand.TypeName()));
                 return SmartEqualizer.EqualNullable(riba.TypeId, Expression.Constant(idType));
             }
             return base.VisitTypeIs(b); 
@@ -1259,36 +1266,50 @@ namespace Signum.Engine.Linq
             if (operand.Type == uType)
                 return operand;
 
-            if (operand.NodeType == (ExpressionType)DbExpressionType.ImplementedBy)
-            {
-                ImplementedByExpression rib = (ImplementedByExpression)operand;
-                return rib.Implementations.Where(ri => ri.Type == uType).Single("The field has no implementation for type {0}".Formato(uType.TypeName())).Field;
-            }
-            else if (operand.NodeType == (ExpressionType)DbExpressionType.ImplementedByAll)
-            {
-                ImplementedByAllExpression riba = (ImplementedByAllExpression)operand;
-                ImplementationColumnExpression imp = riba.Implementations.SingleOrDefault(ri => ri.Type == uType);
-
-                if (imp == null)
-                {
-                    int idType = Schema.Current.IDsForType.GetOrThrow(uType, "Type {0} is not in the registered in the types table".Formato(uType.TypeName()));
-
-                    Expression other = SmartEqualizer.EqualNullable(riba.TypeId, new SqlConstantExpression(idType));
-
-                    FieldInitExpression result = new FieldInitExpression(uType, null, riba.Id, TypeSqlConstant(uType), other, riba.Token); //Delay riba.TypeID to FillFie to make the SQL more clean
-                    riba.Implementations.Add(new ImplementationColumnExpression(uType, result));
-                    return result;
-                }
-                else
-                    return imp.Field;
-            }
-            else if (operand.NodeType == (ExpressionType)DbExpressionType.FieldInit)
+            if (operand.NodeType == (ExpressionType)DbExpressionType.FieldInit)
             {
                 if (!uType.IsAssignableFrom(operand.Type))
                     throw new InvalidCastException("Impossible to convert {0} to {1}".Formato(uType, operand.Type));
 
                 return new ImplementedByExpression(uType, new[] { new ImplementationColumnExpression(operand.Type, (FieldInitExpression)operand) }.ToReadOnly());
             }
+            if (operand.NodeType == (ExpressionType)DbExpressionType.ImplementedBy)
+            {
+                ImplementedByExpression ib = (ImplementedByExpression)operand;
+
+                FieldInitExpression[] fies = ib.Implementations.Where(imp => uType.IsAssignableFrom(imp.Type)).Select(imp => imp.Field).ToArray();
+
+                if (fies.Empty())
+                    throw new InvalidCastException("No implementation ({0}) can be a {1}".Formato(fies.ToString(f => f.Type.TypeName(), ", "), uType.TypeName()));
+
+                if (fies.Length == 1 && fies[0].Type == uType)
+                    return fies[0];
+
+                return new ImplementedByExpression(uType, fies.Select(f => new ImplementationColumnExpression(f.Type, f)).ToReadOnly()); 
+            }
+            else if (operand.NodeType == (ExpressionType)DbExpressionType.ImplementedByAll)
+            {
+                ImplementedByAllExpression iba = (ImplementedByAllExpression)operand;
+
+                if (uType.IsAssignableFrom(iba.Type))
+                    return new ImplementedByAllExpression(uType, iba.Id, iba.TypeId, iba.Token); 
+
+                ImplementationColumnExpression imp = iba.Implementations.SingleOrDefault(ri => ri.Type == uType);
+
+                if (imp == null)
+                {
+                    int idType = Schema.Current.IDsForType.GetOrThrow(uType, "The type {0} is not registered in the database as a concrete table".Formato(uType.TypeName()));
+
+                    Expression other = SmartEqualizer.EqualNullable(iba.TypeId, new SqlConstantExpression(idType));
+
+                    FieldInitExpression result = new FieldInitExpression(uType, null, iba.Id, TypeSqlConstant(uType), other, iba.Token); //Delay riba.TypeID to FillFie to make the SQL more clean
+                    iba.Implementations.Add(new ImplementationColumnExpression(uType, result));
+                    return result;
+                }
+                else
+                    return imp.Field;
+            }
+            
             return null;
         }
 

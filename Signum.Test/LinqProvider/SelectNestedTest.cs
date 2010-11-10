@@ -196,23 +196,23 @@ namespace Signum.Test.LinqProvider
                             select b.Members.Where(a=>a.Name.StartsWith("a")).Select(a => (Sex?)a.Sex).FirstOrDefault())).ToList();
         }
 
-        [TestMethod]
-        public void SelecteNestedAsQeryable()
-        {
-            var neasted = (from l in Database.Query<LabelDN>()
-                           select (from a in Database.Query<AlbumDN>()
-                                   where a.Label == l
-                                   select a.ToLite())).ToList();
-        }
+        //[TestMethod]
+        //public void SelecteNestedAsQueryable()
+        //{
+        //    var neasted = (from l in Database.Query<LabelDN>()
+        //                   select (from a in Database.Query<AlbumDN>()
+        //                           where a.Label == l
+        //                           select a.ToLite())).ToList();
+        //}
 
-        [TestMethod]
-        public void SelecteNestedAsQeryableAnonymous()
-        {
-            var neasted = (from l in Database.Query<LabelDN>()
-                           select new { Elements = (from a in Database.Query<AlbumDN>()
-                                   where a.Label == l
-                                   select a.ToLite())} ).ToList();
-        }
+        //[TestMethod]
+        //public void SelecteNestedAsQueryableAnonymous()
+        //{
+        //    var neasted = (from l in Database.Query<LabelDN>()
+        //                   select new { Elements = (from a in Database.Query<AlbumDN>()
+        //                           where a.Label == l
+        //                           select a.ToLite())} ).ToList();
+        //}
 
       
     }
