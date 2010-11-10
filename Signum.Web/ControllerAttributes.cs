@@ -148,19 +148,28 @@ namespace Signum.Web
     [AspNetHostingPermission(System.Security.Permissions.SecurityAction.InheritanceDemand, Level = AspNetHostingPermissionLevel.Minimal)]
     public class HandleExceptionAttribute : HandleErrorAttribute
     {
+        public static Action<ExceptionContext> OnExceptionHandled;
         public static Action<HandleErrorInfo> LogControllerException;
         public static Action<Exception> LogGlobalException;
 
         public override void OnException(ExceptionContext filterContext)
+        {
+            if (OnExceptionHandled != null)
+                OnExceptionHandled(filterContext);
+            else
+                DefaultOnException(filterContext);
+        }
+
+        public static void DefaultOnException(ExceptionContext filterContext)
         {
             Exception exception = filterContext.Exception.FollowC(a => a.InnerException).Last();
             string controllerName = (string)filterContext.RouteData.Values["controller"];
             string actionName = (string)filterContext.RouteData.Values["action"];
             HandleErrorInfo model = new HandleErrorInfo(exception, controllerName, actionName);
 
-            if (LogControllerException != null) LogControllerException(model);
+            if (LogControllerException != null) 
+                LogControllerException(model);
 
-            
             if (filterContext.HttpContext.Request.IsAjaxRequest())
             {
                 //we do not want to use a master page, just render a control with the error string
@@ -172,7 +181,7 @@ namespace Signum.Web
                 };
             }
             else
-            { 
+            {
                 filterContext.Result = new ViewResult
                 {
                     ViewName = Navigator.Manager.ErrorPageUrl,
@@ -184,7 +193,7 @@ namespace Signum.Web
                             model.Exception.Message}
                     },
                 };
-            } 
+            }
             filterContext.ExceptionHandled = true;
             filterContext.HttpContext.Response.Clear();
             filterContext.HttpContext.Response.StatusCode = GetHttpError(exception);
