@@ -31,15 +31,17 @@ namespace Signum.Web.Mailing
             {
                 AssemblyResourceManager.RegisterAreaResources(
                     new AssemblyResourceStore(typeof(EmailClient), "/email/", "Signum.Web.Extensions.Mailing."));
-                
+
                 RouteTable.Routes.InsertRouteAt0("email/{resourcesFolder}/{*resourceName}",
                     new { controller = "Resources", action = "Index", area = "email" },
                     new { resourcesFolder = new InArray(new string[] { "Scripts", "Content", "Images" }) });
 
-                Navigator.AddSettings(new List<EntitySettings>{
+                Navigator.AddSettings(new List<EntitySettings>
+                {
                     new EntitySettings<EmailMessageDN>(EntityType.Default){ PartialViewName = e => ViewPrefix + "EmailMessage"},
-                    new EntitySettings<EmailPackageDN>(EntityType.Default){ PartialViewName = e => ViewPrefix + "EmailPackage"},                    
-               });
+                    new EntitySettings<EmailPackageDN>(EntityType.Default){ PartialViewName = e => ViewPrefix + "EmailPackage"},
+                    new EntitySettings<EmailTemplateDN>(EntityType.ServerOnly)
+                });
 
                 Navigator.RegisterTypeName<IEmailOwnerDN>();
             }
