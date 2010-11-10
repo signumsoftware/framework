@@ -96,7 +96,6 @@
     <Compile Include="Help\Controllers\HelpController.cs" />
     <Compile Include="Help\HelpModels.cs" />
     <Compile Include="HttpModules\WhitespaceModule.cs" />
-    <Compile Include="Mailing\Controllers\EmailTemplateController.cs" />
     <Compile Include="Mailing\EmailClient.cs" />
     <Compile Include="Operations\JsOperations.cs" />
     <Compile Include="Operations\JsOperationOptions.cs" />
@@ -197,7 +196,6 @@
     <Content Include="Auth\Views\RememberPassword.aspx" />
     <Content Include="Auth\Views\RememberPasswordSuccess.aspx" />
     <Content Include="Auth\Views\ResetPassword.aspx" />
-    <Content Include="Auth\Views\ResetPasswordMail.ascx" />
     <Content Include="Auth\Views\ResetPasswordSend.aspx" />
     <Content Include="Auth\Views\ResetPasswordSuccess.aspx" />
     <Content Include="Auth\Views\ResetPasswordSetNew.aspx" />
@@ -270,8 +268,6 @@
     <Content Include="AuthAdmin\Views\User.ascx" />
     <Content Include="Mailing\Views\EmailMessage.ascx" />
     <Content Include="Mailing\Views\EmailPackage.ascx" />
-    <Content Include="Mailing\Views\EmailTemplate.ascx" />
-    <Content Include="Mailing\Views\EmailTemplateView.aspx" />
     <Content Include="Processes\Content\Processes.css" />
     <Content Include="Processes\Views\Package.ascx" />
     <Content Include="Processes\Views\PackageLine.ascx" />

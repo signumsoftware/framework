@@ -10,6 +10,7 @@ using System.ComponentModel;
 using System.Reflection;
 using Signum.Entities.Extensions.Properties;
 using Signum.Entities.Mailing;
+using Signum.Entities.Extensions.Authorization;
 
 namespace Signum.Entities.Authorization
 {
@@ -120,11 +121,6 @@ namespace Signum.Entities.Authorization
         Enable,
         Disable,
         NewPassword
-    }
-
-    public enum UserMailTemplate
-    {
-        ResetPassword,
     }
 
     public interface IUserRelatedDN : IIdentifiable

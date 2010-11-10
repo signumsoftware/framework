@@ -1114,15 +1114,6 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to You can reset your password by following the link below:.
-        /// </summary>
-        public static string YouCanResetYourPasswordByFollowingTheLinkBelow {
-            get {
-                return ResourceManager.GetString("YouCanResetYourPasswordByFollowingTheLinkBelow", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to You must enter the current password.
         /// </summary>
         public static string YouMustEnterTheCurrentPassword {
@@ -1137,15 +1128,6 @@ namespace Signum.Web.Extensions.Properties {
         public static string YouMustRepeatTheNewPassword {
             get {
                 return ResourceManager.GetString("YouMustRepeatTheNewPassword", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to You recently requested a new password.
-        /// </summary>
-        public static string YouRecentlyRequestedANewPassword {
-            get {
-                return ResourceManager.GetString("YouRecentlyRequestedANewPassword", resourceCulture);
             }
         }
         

@@ -883,6 +883,24 @@ namespace Signum.Engine.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to You can reset your password by following the link below:.
+        /// </summary>
+        internal static string YouCanResetYourPasswordByFollowingTheLinkBelow {
+            get {
+                return ResourceManager.GetString("YouCanResetYourPasswordByFollowingTheLinkBelow", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You recently requested a new password.
+        /// </summary>
+        internal static string YouRecentlyRequestedANewPassword {
+            get {
+                return ResourceManager.GetString("YouRecentlyRequestedANewPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to your version.
         /// </summary>
         internal static string YourVersion {

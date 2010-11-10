@@ -399,12 +399,6 @@
   <data name="TheConfirmationCodeThatYouHaveJustSentIsInvalid" xml:space="preserve">
     <value>El código de confirmación proporcionado es inválido</value>
   </data>
-  <data name="YouCanResetYourPasswordByFollowingTheLinkBelow" xml:space="preserve">
-    <value>Puedes crear una nueva contraseña haciendo click en el siguiente enlace:</value>
-  </data>
-  <data name="YouRecentlyRequestedANewPassword" xml:space="preserve">
-    <value>Has solicitado recientemente una nueva contraseña</value>
-  </data>
   <data name="IHaveForgottenMyPassword" xml:space="preserve">
     <value>He olvidado mi contraseña</value>
   </data>

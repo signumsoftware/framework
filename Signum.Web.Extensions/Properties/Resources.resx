@@ -414,12 +414,6 @@
   <data name="TheConfirmationCodeThatYouHaveJustSentIsInvalid" xml:space="preserve">
     <value>The confirmation code that you have just sent is invalid</value>
   </data>
-  <data name="YouCanResetYourPasswordByFollowingTheLinkBelow" xml:space="preserve">
-    <value>You can reset your password by following the link below:</value>
-  </data>
-  <data name="YouRecentlyRequestedANewPassword" xml:space="preserve">
-    <value>You recently requested a new password</value>
-  </data>
   <data name="IHaveForgottenMyPassword" xml:space="preserve">
     <value>I have forgotten my password</value>
   </data>

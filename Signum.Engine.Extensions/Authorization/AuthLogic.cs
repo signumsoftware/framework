@@ -16,7 +16,6 @@ using Signum.Services;
 using Signum.Utilities.Reflection;
 using System.Reflection;
 using Signum.Engine.Extensions.Properties;
-using Signum.Entities.Extensions.Properties;
 using Signum.Engine.Mailing;
 using Signum.Engine.Operations;
 
@@ -30,7 +29,7 @@ namespace Signum.Engine.Authorization
         public static UserDN systemUser;
         public static UserDN SystemUser
         {
-            get { return systemUser.ThrowIfNullC(Signum.Engine.Extensions.Properties.Resources.SystemUserNotLoadedInitializeToLevel1SimpleEntities); }
+            get { return systemUser.ThrowIfNullC(Resources.SystemUserNotLoadedInitializeToLevel1SimpleEntities); }
             set { systemUser = value; }
         }
 
@@ -38,7 +37,7 @@ namespace Signum.Engine.Authorization
         public static UserDN anonymousUser;
         public static UserDN AnonymousUser
         {
-            get { return anonymousUser.ThrowIfNullC(Signum.Engine.Extensions.Properties.Resources.AnonymousUserNotLoadedInitializeToLevel1SimpleEntities); }
+            get { return anonymousUser.ThrowIfNullC(Resources.AnonymousUserNotLoadedInitializeToLevel1SimpleEntities); }
             set { anonymousUser = value; }
         }
 
@@ -113,7 +112,7 @@ namespace Signum.Engine.Authorization
             }
         }
 
-        public static void StartResetPasswordFeature(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void StartResetPasswordRequest(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -132,10 +131,32 @@ namespace Signum.Engine.Authorization
 
                 EmailLogic.AssertStarted(sb);
 
-                EmailLogic.RegisterTemplate(UserMailTemplate.ResetPassword, (eo, args) =>
+                EmailLogic.RegisterTemplate<ResetPasswordRequestMail>(model => 
                 {
-                    return EmailLogic.RenderWebMail(Signum.Engine.Extensions.Properties.Resources.ResetPasswordCode,
-                        "auth/Views/ResetPasswordMail", eo, args);
+                    return new EmailContent
+                    {
+                         Subject = Resources.ResetPasswordCode,
+                         Body = EmailRenderer.Replace(EmailRenderer.ReadFromResourceStream(typeof(AuthLogic).Assembly,
+                            "Signum.Engine.Extensions.Authorization.ResetPasswordRequestMail.htm"), 
+                                model, null, Resources.ResourceManager)
+                    }; 
+                });
+            }
+        }
+
+        public static void StartSimpleResetPassword(SchemaBuilder sb, DynamicQueryManager dqm)
+        {
+            if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+            {
+                EmailLogic.RegisterTemplate<ResetPasswordMail>(model =>
+                {
+                    return new EmailContent
+                    {
+                        Subject = Resources.ResetPasswordCode,
+                        Body = EmailRenderer.Replace(EmailRenderer.ReadFromResourceStream(typeof(AuthLogic).Assembly, 
+                            "Signum.Engine.Extensions.Authorization.ResetPasswordMail.htm"),
+                               model, null, Resources.ResourceManager)
+                    };
                 });
             }
         }
@@ -349,14 +370,14 @@ namespace Signum.Engine.Authorization
                 Code = MyRandom.Current.NextString(5),
                 User = user,
                 RequestDate = TimeZoneManager.Now,
-            };
+            }.Save();
 
-            rpr.Save();
 
-            EmailLogic.Send(user, UserMailTemplate.ResetPassword, new Dictionary<string, string>
-                    { 
-                        {"link", fullyQualifiedApplicationPath  + "Auth/ResetPasswordCode?email=" + user.Email + "&code=" + rpr.Code},
-                    });
+            new ResetPasswordRequestMail
+            {
+                To = user, 
+                Link = fullyQualifiedApplicationPath  + "Auth/ResetPasswordCode?email=" + user.Email + "&code=" + rpr.Code, 
+            }.Send();
         }
 
         internal static Lite<RoleDN>[] CurrentRoles()
@@ -368,5 +389,15 @@ namespace Signum.Engine.Authorization
         {
             return Roles.IndirectlyRelatedTo(role).Count; 
         }
+    }
+
+    public class ResetPasswordMail : EmailModel<UserDN>
+    {
+        public string NewPassord;
+    }
+
+    public class ResetPasswordRequestMail : EmailModel<UserDN>
+    {
+        public string Link;
     }
 }

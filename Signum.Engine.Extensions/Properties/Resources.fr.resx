@@ -390,4 +390,10 @@
   <data name="Data" xml:space="preserve">
     <value>Données</value>
   </data>
+  <data name="YouCanResetYourPasswordByFollowingTheLinkBelow" xml:space="preserve">
+    <value>Vous pouvez réinitialiser votre mot de passe en suivant le lien ci-dessous :</value>
+  </data>
+  <data name="YouRecentlyRequestedANewPassword" xml:space="preserve">
+    <value>Vous avez demandé récemment un nouveau mot de passe.</value>
+  </data>
 </root>

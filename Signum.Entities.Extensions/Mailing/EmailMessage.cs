@@ -22,12 +22,19 @@ namespace Signum.Entities.Mailing
             set { Set(ref recipient, value, () => Recipient); }
         }
 
-        EmailTemplateDN template;
+        Lite<EmailTemplateDN> template;
         [NotNullValidator]
-        public EmailTemplateDN Template
+        public Lite<EmailTemplateDN> Template
         {
             get { return template; }
             set { Set(ref template, value, () => Template); }
+        }
+
+        DateTime fechaCreacion = TimeZoneManager.Now;
+        public DateTime FechaCreacion
+        {
+            get { return fechaCreacion; }
+            private set { Set(ref fechaCreacion, value, () => FechaCreacion); }
         }
 
         DateTime? sent;
@@ -44,9 +51,9 @@ namespace Signum.Entities.Mailing
             set { Set(ref received, value, () => Received); }
         }
 
-        [SqlDbType(Size = 100)]
+        [SqlDbType(Size = 400)]
         string subject;
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 400)]
         public string Subject
         {
             get { return subject; }
@@ -55,7 +62,7 @@ namespace Signum.Entities.Mailing
 
         [SqlDbType(Size = int.MaxValue)]
         string body;
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = int.MaxValue)]
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = int.MaxValue)]
         public string Body
         {
             get { return body; }
@@ -85,23 +92,19 @@ namespace Signum.Entities.Mailing
         }
 
         static StateValidator<EmailMessageDN, EmailState> validator = new StateValidator<EmailMessageDN, EmailState>(
-            m => m.State, m => m.Body, m => m.Subject, m => m.Exception, m => m.Sent, m => m.Received, m => m.Package)
+            m => m.State, m => m.Exception, m => m.Sent, m => m.Received, m => m.Package)
             {
-{EmailState.Empty,        false,       false,         false,             false,      false,         true },
-{EmailState.Composed,     true,        true,          false,             false,      false,         true },
-{EmailState.ComposedError,false,       false,         true,              false,      false,         true },
-{EmailState.Sent,         true,        true,          false,             true,       false,         null },
-{EmailState.SentError,    true,        true,          true,              true,       false,         null },
-{EmailState.Received,     true,        true,          false,             true,       true,          null },
+{EmailState.Created,      false,             false,      false,         null },
+{EmailState.Sent,         false,             true,       false,         null },
+{EmailState.SentError,    true,              true,       false,         null },
+{EmailState.Received,     false,             true,       true,          null },
             };
     }
 
 
     public enum EmailState
     {
-        Empty,
-        Composed,
-        ComposedError,
+        Created,
         Sent,
         SentError,
         Received
@@ -115,7 +118,7 @@ namespace Signum.Entities.Mailing
 
     public enum EmailProcesses
     {
-        ReSendEmails
+        SendEmails
     }
 
     public enum EmailOperations
@@ -135,13 +138,6 @@ namespace Signum.Entities.Mailing
             set { SetToStr(ref name, value, () => Name); }
         }
 
-        EmailTemplateDN template;
-        public EmailTemplateDN Template
-        {
-            get { return template; }
-            set { SetToStr(ref template, value, () => Template); }
-        }
-
         int numLines;
         public int NumLines
         {
@@ -158,7 +154,7 @@ namespace Signum.Entities.Mailing
 
         public override string ToString()
         {
-            return "{0} {1} ({2} lines{3})".Formato(Template, Name, numLines, numErrors == 0 ? "" : ", {0} errors".Formato(numErrors));
+            return "{0} ({1} lines{2})".Formato(Name, numLines, numErrors == 0 ? "" : ", {0} errors".Formato(numErrors));
         }
     }
 }

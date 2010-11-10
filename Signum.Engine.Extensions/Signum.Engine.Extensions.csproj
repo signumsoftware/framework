@@ -116,6 +116,8 @@
     <Compile Include="Help\HelpUtilities.cs" />
     <Compile Include="Help\NamespaceHelp.cs" />
     <Compile Include="Mailing\EmailLogic.cs" />
+    <Compile Include="Mailing\EmailRenderer.cs" />
+    <Compile Include="Mailing\SendEmailProcessAlgorithm.cs" />
     <Compile Include="Operations\Constructor.cs" />
     <Compile Include="Operations\ConstructorFrom.cs" />
     <Compile Include="Operations\ConstructorFromMany.cs" />
@@ -196,6 +198,9 @@
     <None Include="Help\Sample.xml" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Authorization\ResetPasswordMail.htm" />
+    <EmbeddedResource Include="Authorization\ResetPasswordRequestMail.htm" />
+    <EmbeddedResource Include="Mailing\DefaultEmailTemplate.htm" />
     <Content Include="Reports\DocumentFormat.OpenXml.dll" />
     <Content Include="Reports\DocumentFormat.OpenXml.xml" />
   </ItemGroup>

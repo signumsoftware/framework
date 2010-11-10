@@ -112,10 +112,10 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="MailBody_RememberPassword" xml:space="preserve">
     <value>We send you this email as you have requested to remember your password. For yoyr safety, we have generated a new random passwor, that you will be able to modify later.&lt;br/&gt;&lt;br/&gt;The password is &lt;b&gt;{0}&lt;/b&gt;</value>
@@ -416,12 +416,6 @@
   </data>
   <data name="TheConfirmationCodeThatYouHaveJustSentIsInvalid" xml:space="preserve">
     <value>Le code de confirmation que vous avez envoyés seulement n'est pas valide</value>
-  </data>
-  <data name="YouCanResetYourPasswordByFollowingTheLinkBelow" xml:space="preserve">
-    <value>Vous pouvez réinitialiser votre mot de passe en suivant le lien ci-dessous :</value>
-  </data>
-  <data name="YouRecentlyRequestedANewPassword" xml:space="preserve">
-    <value>Vous avez demandé récemment un nouveau mot de passe.</value>
   </data>
   <data name="IHaveForgottenMyPassword" xml:space="preserve">
     <value>J'ai oublié mon mot de passe.</value>

@@ -9,7 +9,6 @@
 using (var e = Html.TypeContext<EmailPackageDN>()) 
 {
 	Html.ValueLine(e, f => f.Name, f => f.ReadOnly = true);
-	Html.EntityLine(e, f => f.Template, f => f.ReadOnly = true);
 	Html.ValueLine(e, f => f.NumLines, f => f.ReadOnly = true);
 	Html.ValueLine(e, f => f.NumErrors, f => f.ReadOnly = true);
 %>

@@ -25,15 +25,10 @@ namespace Signum.Web.Mailing
     {
         public static string ViewPrefix = "email/Views/";
 
-        public static string EmailTemplateUrl = "email/Views/EmailTemplate";
-        public static string EmailTemplateViewUrl = "email/Views/EmailTemplateView";
-
         public static void Start()
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                EmailLogic.BodyRenderer += new BodyRenderer(EmailLogic_WebMailRenderer);
-
                 AssemblyResourceManager.RegisterAreaResources(
                     new AssemblyResourceStore(typeof(EmailClient), "/email/", "Signum.Web.Extensions.Mailing."));
                 
@@ -47,33 +42,7 @@ namespace Signum.Web.Mailing
                });
 
                 Navigator.RegisterTypeName<IEmailOwnerDN>();
-
             }
         }
-
-        static string EmailLogic_WebMailRenderer(string viewName, Dictionary<string, string> args)
-        {
-            if (viewName != null)
-                args["viewName"] = viewName;
-
-            return EmailClient.RenderView(HttpContextUtils.FullyQualifiedApplicationPath + "EmailTemplate/EmailTemplateView", args);
-        }
-
-        public static string RenderView(string templateAbsoluteUrl, IDictionary<string, string> args)
-        {
-            System.Net.WebClient wc = new System.Net.WebClient();
-            wc.Headers["Method"] = "Post";
-            wc.Headers.Add("Content-Type", "application/x-www-form-urlencoded");
-            byte[] postData = null;
-            if (args != null && args.Count > 0)
-                postData = System.Text.Encoding.UTF8.GetBytes(args.ToString(kvp => "{0}={1}".Formato(kvp.Key, HttpUtility.UrlEncode(kvp.Value)), "&"));
-
-            byte[] requestedHTML = wc.UploadData(templateAbsoluteUrl, postData);
-
-            return encoding.GetString(requestedHTML);
-        }
-
-        private static UTF8Encoding encoding = new UTF8Encoding();
-
     }
 }

@@ -301,7 +301,11 @@ namespace Signum.Web.Authorization
                     user.Save();
                 }
 
-                user.Send(UserMailTemplate.ResetPassword, new Dictionary<string, string>() { { "password", randomPassword } });
+                new ResetPasswordMail
+                {
+                     To = user,
+                     NewPassord = randomPassword
+                }.Send();
 
                 ViewData["email"] = email;
                 return RedirectToAction("RememberPasswordSuccess");

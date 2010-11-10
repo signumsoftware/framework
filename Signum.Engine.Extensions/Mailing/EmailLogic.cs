@@ -20,6 +20,7 @@ using System.Net;
 using Signum.Engine.Authorization;
 using Signum.Utilities.Reflection;
 using System.ComponentModel;
+using System.Web;
 
 namespace Signum.Engine.Mailing
 {
@@ -27,50 +28,53 @@ namespace Signum.Engine.Mailing
     {
         public string Subject { get; set; }
         public string Body { get; set; }
+        bool IsPlainText { get; set; }
     }
 
-    public delegate string BodyRenderer(string viewName, Dictionary<string, string> args);
+    public interface IEmailModel
+    {
+        IEmailOwnerDN To { get; set; }
+    }
+
+    public class EmailModel<T> : IEmailModel
+        where T : IEmailOwnerDN
+    {
+        public T To;
+
+        IEmailOwnerDN IEmailModel.To
+        {
+            get { return To; }
+            set { To = (T)value; }
+        }
+    }
 
     public static class EmailLogic
     {
         public static string OverrideEmailToAddress; 
 
-        public static BodyRenderer BodyRenderer;
-
         public static Func<SmtpClient> SmtpClientBuilder;
 
-        public static EmailContent RenderWebMail(string subject, string viewName, IEmailOwnerDN owner, Dictionary<string, string> args)
+        static Dictionary<Type, Func<IEmailModel, EmailContent>> templates = new Dictionary<Type, Func<IEmailModel, EmailContent>>();
+        static Dictionary<Type, Lite<EmailTemplateDN>> templateToDN; 
+
+        internal static void AssertStarted(SchemaBuilder sb)
         {
-            string body = BodyRenderer != null ?
-                BodyRenderer(viewName, args) :
-                "An email rendering view {0} for entity {1}".Formato(viewName, owner);
-
-            return new EmailContent
-            {
-                Body = body,
-                Subject = subject
-            };
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => EmailLogic.Start(null, null)));
         }
-
-        static Dictionary<Enum, Func<IEmailOwnerDN, Dictionary<string, string>, EmailContent>> EmailTemplates
-            = new Dictionary<Enum, Func<IEmailOwnerDN, Dictionary<string, string>, EmailContent>>();
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-
                 sb.Include<EmailMessageDN>();
-
-                EnumLogic<EmailTemplateDN>.Start(sb, () => EmailTemplates.Keys.ToHashSet());
 
                 dqm[typeof(EmailTemplateDN)] = (from e in Database.Query<EmailTemplateDN>()
                                                 select new
                                                 {
                                                     Entity = e.ToLite(),
                                                     e.Id,
-                                                    e.Name,
-                                                    e.Key,
+                                                    e.FullClassName,
+                                                    e.FriendlyName,
                                                 }).ToDynamic();
 
                 dqm[typeof(EmailMessageDN)] = (from e in Database.Query<EmailMessageDN>()
@@ -82,15 +86,75 @@ namespace Signum.Engine.Mailing
                                                    e.State,
                                                    e.Subject,
                                                    e.Body,
-                                                   Template = e.Template.ToLite(),
+                                                   Template = e.Template,
                                                    e.Sent,
                                                    e.Received,
                                                    e.Package,
                                                    e.Exception,
                                                }).ToDynamic();
 
+                sb.Schema.Initializing(InitLevel.Level2NormalEntities, Schema_Initializing);
+                sb.Schema.Generating += Schema_Generating;
+                sb.Schema.Synchronizing += Schema_Synchronizing; 
             }
         }
+
+        #region database management
+        static void Schema_Initializing(Schema sender)
+        {
+            List<EmailTemplateDN> dbTemplates = Administrator.UnsafeRetrieveAll<EmailTemplateDN>();
+
+            templateToDN = EnumerableExtensions.JoinStrict(
+                dbTemplates, templates.Keys, t => t.FullClassName, t => t.FullName,
+                (typeDN, type) => new { typeDN, type }, "caching EmailTemplates").ToDictionary(a => a.type, a => a.typeDN.ToLite());
+        }
+
+        static readonly string EmailReplacements = "EmailReplacements";
+
+
+        static SqlPreCommand Schema_Synchronizing(Replacements replacements)
+        {
+            Table table = Schema.Current.Table<EmailTemplateDN>();
+
+            Dictionary<string, EmailTemplateDN> should = GenerateTemplates().ToDictionary(s => s.FullClassName);
+            Dictionary<string, EmailTemplateDN> old = Administrator.TryRetrieveAll<EmailTemplateDN>(replacements).ToDictionary(c => c.FullClassName);
+
+            replacements.AskForReplacements(old, should, EmailReplacements); 
+
+            Dictionary<string, EmailTemplateDN> current = replacements.ApplyReplacements(old , EmailReplacements);
+
+            return Synchronizer.SynchronizeScript(
+                current,
+                should,
+                (tn, c) => table.DeleteSqlSync(c),
+                (tn, s) => table.InsertSqlSync(s),
+                (tn, c, s) =>
+                {
+                    c.FullClassName = s.FullClassName;
+                    c.FriendlyName = s.FriendlyName;
+                    return table.UpdateSqlSync(c);
+                }, Spacing.Double);
+        }
+
+        static SqlPreCommand Schema_Generating()
+        {
+            Table table = Schema.Current.Table<EmailTemplateDN>();
+
+            return (from ei in GenerateTemplates()
+                    select table.InsertSqlSync(ei)).Combine(Spacing.Simple);
+        }
+
+        internal static List<EmailTemplateDN> GenerateTemplates()
+        {
+            var lista = (from type in templates.Keys
+                         select new EmailTemplateDN
+                         {
+                             FullClassName = type.FullName,
+                             FriendlyName = type.NiceName()
+                         }).ToList();
+            return lista;
+        } 
+        #endregion
 
         public static void StarProcesses(SchemaBuilder sb, DynamicQueryManager dqm)
         {
@@ -99,11 +163,11 @@ namespace Signum.Engine.Mailing
                 sb.Include<EmailPackageDN>();
 
                 ProcessLogic.AssertStarted(sb);
-                ProcessLogic.Register(EmailProcesses.ReSendEmails, new ReSendEmailProcessAlgorithm());
+                ProcessLogic.Register(EmailProcesses.SendEmails, new SendEmailProcessAlgorithm());
 
                 OperationLogic.Register(new BasicConstructorFromMany<EmailMessageDN, ProcessExecutionDN>(EmailOperations.ReSendEmails)
                 {
-                    Constructor = (messages, args) => ProcessLogic.Create(EmailProcesses.ReSendEmails, messages)
+                    Constructor = (messages, args) => ProcessLogic.Create(EmailProcesses.SendEmails, messages)
                 });
 
                 dqm[typeof(EmailPackageDN)] = (from e in Database.Query<EmailPackageDN>()
@@ -111,98 +175,77 @@ namespace Signum.Engine.Mailing
                                                { 
                                                     Entity = e.ToLite(),
                                                     e.Id,
+                                                    e.Error,
                                                     e.NumLines,
                                                     e.NumErrors,
-                                                    Template = e.Template.ToLite(),
                                                }).ToDynamic();
-
             }
         }
 
-        public static void RegisterTemplate(Enum templateKey, Func<IEmailOwnerDN, Dictionary<string, string>, EmailContent> template)
+        public static void RegisterTemplate<T>(Func<T, EmailContent> template)
+            where T : IEmailModel
         {
-            EmailTemplates[templateKey] = template;
+            templates[typeof(T)] = et=>template((T)et);
         }
 
-        public static EmailMessageDN Send(this IEmailOwnerDN recipient, Enum templateKey, Dictionary<string, string> args)
+        public static Lite<EmailTemplateDN> GetTemplateDN(Type type)
         {
-            EmailContent content = EmailTemplates.GetOrThrow(templateKey, Resources.NotRegisteredInEmailLogic)(recipient, args);
+            return templateToDN.GetOrThrow(type, Resources.NotRegisteredInEmailLogic);
+        }
+
+        public static Func<IEmailModel, EmailContent> GetTemplate(Type type)
+        {
+            return templates.GetOrThrow(type, Resources.NotRegisteredInEmailLogic);
+        }
+
+        public static EmailMessageDN CreateEmailMessage(IEmailModel model, Lite<EmailPackageDN> package)
+        {
+            EmailContent content = GetTemplate(model.GetType())(model);
 
             var result = new EmailMessageDN
             {
-                Recipient = recipient.ToLite(),
-                Template = EnumLogic<EmailTemplateDN>.ToEntity(templateKey),
+                State = EmailState.Created,
+                Recipient = model.To.ToLite(),
+                Template = GetTemplateDN(model.GetType()),
                 Subject = content.Subject,
                 Body = content.Body,
+                Package = package
             };
+            return result;
+        }
 
-            SendMail(result, true);
+        public static EmailMessageDN Send(this IEmailModel model)
+        {
+            EmailMessageDN result = CreateEmailMessage(model, null);
+
+            SendMail(result);
 
             return result;
         }
 
-        public static void SendAsync(this IEmailOwnerDN recipient, Enum templateKey, Dictionary<string, string> args)
-        {
-            EmailContent content = EmailTemplates.GetOrThrow(templateKey, Resources.NotRegisteredInEmailLogic)(recipient, args);
-
-            var result = new EmailMessageDN
-            {
-                Recipient = recipient.ToLite(),
-                Template = EnumLogic<EmailTemplateDN>.ToEntity(templateKey),
-                Subject = content.Subject,
-                Body = content.Body,
-            };
-
-            SendMailAsync(result);
-        }
-
-        public static EmailMessageDN ComposeMail(this EmailMessageDN emailMessage, bool throws)
-        {
-            try
-            {
-                EmailContent content = EmailTemplates.GetOrThrow(
-                    EnumLogic<EmailTemplateDN>.ToEnum(emailMessage.Template), Resources.NotRegistered)(emailMessage.Recipient.Retrieve(), null);
-                emailMessage.Subject = content.Subject;
-                emailMessage.Body = content.Body;
-            }
-            catch (Exception ex)
-            {
-                emailMessage.Exception = ex.Message;
-                emailMessage.State = EmailState.ComposedError;
-                if (throws)
-                    throw;
-            }
-            return emailMessage;
-        }
-
-        public static void SendMail(EmailMessageDN emailMessage, bool throws)
+        public static void SendMail(EmailMessageDN emailMessage)
         {
             emailMessage.State = EmailState.Sent;
             emailMessage.Sent = TimeZoneManager.Now;
             emailMessage.Received = null;
 
-            try
-            {
-                MailMessage message = CreateMailMessage(emailMessage);
+            MailMessage message = CreateMailMessage(emailMessage);
 
-                SmtpClient client = SmtpClientBuilder == null ? new SmtpClient() : SmtpClientBuilder();
-                client.Send(message);
-                emailMessage.Save();
-            }
-            catch (Exception e)
-            {
-                emailMessage.Exception = e.Message;
-                emailMessage.State = EmailState.SentError;
-                if (throws)
-                    throw;
-            }
+            SmtpClient client = SmtpClientBuilder == null ? new SmtpClient() : SmtpClientBuilder();
+            client.Send(message);
+            emailMessage.Save();
         }
 
-        
+        public static void SendAsync(this IEmailModel model)
+        {
+            EmailMessageDN message = CreateEmailMessage(model, null);
+
+            SendMailAsync(message);
+        }
 
         public static void SendMailAsync(EmailMessageDN emailMessage)
         {
-            emailMessage.Sent = TimeZoneManager.Now;
+            emailMessage.Sent = null;
             emailMessage.Received = null;
 
             MailMessage message = CreateMailMessage(emailMessage); 
@@ -233,9 +276,13 @@ namespace Signum.Engine.Mailing
 
         static MailMessage CreateMailMessage(EmailMessageDN emailMessage)
         {
+            MailAddress to = OverrideEmailToAddress.HasText() ? new MailAddress(OverrideEmailToAddress) :
+                new MailAddress(emailMessage.Recipient.Retrieve().Email); 
+
+
             MailMessage message = new MailMessage()
             {
-                To = { emailMessage.Recipient.Retrieve().Email },
+                To = { to },
                 Subject = emailMessage.Subject,
                 Body = emailMessage.Body,
                 IsBodyHtml = true,
@@ -243,166 +290,92 @@ namespace Signum.Engine.Mailing
             return message;
         }
 
-        internal static void AssertStarted(SchemaBuilder sb)
+        public static ProcessExecutionDN SendAll<T>(List<T> emails)
+            where T : IEmailModel
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => EmailLogic.Start(null, null)));
-        }
-    }
-
-    public abstract class BaseEmailProcessAlgorithm : IProcessAlgorithm
-    {
-        public FinalState Execute(IExecutingProcess executingProcess)
-        {
-            EmailPackageDN package = (EmailPackageDN)executingProcess.Data;
-
-            List<Lite<EmailMessageDN>> emails = GetEmailsToProcess(package);
-
-
-            int lastPercentage = 0;
-            for (int i = 0; i < emails.Count; i++)
+            EmailPackageDN package = new EmailPackageDN
             {
-                if (executingProcess.Suspended)
-                    return FinalState.Suspended;
+                NumLines = emails.Count,
+            }.Save();
 
-                EmailMessageDN ml = emails[i].RetrieveAndForget();
+            var packLite = package.ToLite();
 
+            emails.Select(e => CreateEmailMessage(e, packLite)).SaveList();
+
+            var process = ProcessLogic.Create(EmailProcesses.SendEmails, package);
+
+            process.ToLite().ExecuteLite(ProcessOperation.Execute);
+
+            return process;
+        }
+
+        public static ProcessExecutionDN SendToMany<T>(EmailModel<T> model, List<T> recipientList)
+            where T : class, IEmailOwnerDN
+        {
+            if (model.To != null)
+                throw new InvalidOperationException("model should have no To");
+
+            EmailContent content = GetTemplate(model.GetType())(model);
+            var template = GetTemplateDN(model.GetType());
+
+            EmailPackageDN package = new EmailPackageDN
+            {
+                NumLines = recipientList.Count,
+            }.Save();
+
+            var lite = package.ToLite();
+
+            recipientList.Select(to => new EmailMessageDN
+            {
+                State = EmailState.Created,
+                Recipient = to.ToLite<IEmailOwnerDN>(),
+                Template = template,
+                Subject = content.Subject,
+                Body = content.Body,
+                Package = lite
+            }).SaveList();
+
+            var process = ProcessLogic.Create(EmailProcesses.SendEmails, package);
+
+            process.ToLite().ExecuteLite(ProcessOperation.Execute);
+
+            return process;
+        }
+
+        public static Dictionary<Type, Exception> GetAllErrors()
+        {
+            Dictionary<Type, Exception> exceptions = new Dictionary<Type, Exception>();
+
+            foreach (var item in templates)
+            {
                 try
                 {
-                    using (Transaction tr = new Transaction(true))
-                    {
-                        ProcessMail(ml);
-                        tr.Commit();
-                    }
+                    item.Value((IEmailModel)Activator.CreateInstance(item.Key));
                 }
                 catch (Exception e)
                 {
-                    using (Transaction tr = new Transaction(true))
-                    {
-                        ml.Exception = e.Message;
-                        ml.Save();
-                        tr.Commit();
-
-                        package.NumErrors++;
-                        package.Save();
-                    }
-                }
-
-                int percentage = (NotificationSteps * i) / emails.Count;
-                if (percentage != lastPercentage)
-                {
-                    executingProcess.ProgressChanged(percentage * 100 / NotificationSteps);
-                    lastPercentage = percentage;
+                    exceptions.Add(item.Key, e);
                 }
             }
 
-            return FinalState.Finished;
-        }
-
-        protected abstract List<Lite<EmailMessageDN>> GetEmailsToProcess(EmailPackageDN packege);
-
-        public abstract void ProcessMail(EmailMessageDN ml);
-
-        public int NotificationSteps = 100;
-
-        public abstract IProcessDataDN CreateData(object[] args);
-    }
-
-    public class EmailProcessAlgorithm : BaseEmailProcessAlgorithm
-    {
-        Func<List<Lite<IEmailOwnerDN>>> getLazies;
-        Enum EmailTemplateKey;
-        public EmailProcessAlgorithm(Enum emailTemplateKey)
-        {
-            this.EmailTemplateKey = emailTemplateKey;
-        }
-
-        public EmailProcessAlgorithm(Enum emailTemplateKey, Func<List<Lite<IEmailOwnerDN>>> getLazies)
-        {
-            this.getLazies = getLazies;
-            this.EmailTemplateKey = emailTemplateKey;
-        }
-
-        public override IProcessDataDN CreateData(object[] args)
-        {
-            EmailPackageDN package = new EmailPackageDN { Template = EnumLogic<EmailTemplateDN>.ToEntity(EmailTemplateKey) };
-
-            package.Save();
-
-            List<Lite<IEmailOwnerDN>> lites =
-                args != null && args.Length > 0 ? args.GetArg<List<Lite<IEmailOwnerDN>>>(0) :
-                getLazies != null ? getLazies() : null;
-
-            if (lites == null)
-                throw new InvalidOperationException(Resources.NoUsersToProcessFound);
-
-            package.NumLines = lites.Count;
-
-            lites.Select(lite => new EmailMessageDN
-            {
-                Package = package.ToLite(),
-                Recipient = lite,
-                Template = package.Template,
-                State = EmailState.Empty
-            }).SaveList();
-
-            return package;
-        }
-
-        protected override List<Lite<EmailMessageDN>> GetEmailsToProcess(EmailPackageDN package)
-        {
-            return (from email in Database.Query<EmailMessageDN>()
-             where email.Package == package.ToLite() && email.State == EmailState.Empty
-             select email.ToLite()).ToList();
-        }
-
-        public override void ProcessMail(EmailMessageDN ml)
-        {
-            ml.ComposeMail(true);
-            System.Threading.Thread.Sleep(3000);
-            EmailLogic.SendMail(ml, true);
+            return exceptions;
         }
     }
 
-
-    public class ReSendEmailProcessAlgorithm : BaseEmailProcessAlgorithm
+    public struct Link
     {
-        public override IProcessDataDN CreateData(object[] args)
+        public readonly string Url;
+        public readonly string Content; 
+
+        public Link(string url, string content)
         {
-            EmailPackageDN package = new EmailPackageDN();
-            package.Save();
-            List<Lite<EmailMessageDN>> lites = args.GetArg<List<Lite<EmailMessageDN>>>(0);
-            package.NumLines = lites.Count;
-            List<Lite<EmailMessageDN>> messages = args != null && args.Length > 0 ?
-                args.GetArg<List<Lite<EmailMessageDN>>>(0) : null;
-
-            if (messages == null)
-                throw new InvalidOperationException(Resources.NoEmailsToProcessFound);
-
-            package.NumLines = messages.Count;
-
-            messages.Select(m => m.RetrieveAndForget()).Select(m => new EmailMessageDN()
-            {
-                Package = package.ToLite(),
-                Recipient = m.Recipient,
-                Body = m.Body,
-                Subject = m.Subject,
-                Template = m.Template,
-                State = EmailState.Composed
-            }).SaveList();
-
-            return package;
+            this.Url = url;
+            this.Content = content;
         }
 
-        protected override List<Lite<EmailMessageDN>> GetEmailsToProcess(EmailPackageDN package)
+        public override string ToString()
         {
-            return (from email in Database.Query<EmailMessageDN>()
-                    where email.Package == package.ToLite() && email.State == EmailState.Composed
-                    select email.ToLite()).ToList();
-        }
-
-        public override void ProcessMail(EmailMessageDN ml)
-        {
-            EmailLogic.SendMail(ml, true);
+            return @"<a href='{0}'>{1}</a>".Formato(Url, HttpUtility.HtmlEncode(Content));
         }
     }
 }
