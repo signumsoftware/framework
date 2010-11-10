@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Deleted" xml:space="preserve">
-    <value>(Eliminado)</value>
+    <value>Eliminado</value>
   </data>
   <data name="ProcessOperation_Cancel" xml:space="preserve">
     <value>Cancelar</value>
@@ -718,7 +718,7 @@
     <value>Columnas </value>
   </data>
   <data name="ChartType_Doughnout" xml:space="preserve">
-    <value>Doughnout </value>
+    <value>Donut</value>
   </data>
   <data name="ChartType_Lines" xml:space="preserve">
     <value>Líneas </value>
@@ -1024,7 +1024,7 @@
     <value>Creado </value>
   </data>
   <data name="UserState_Disabled" xml:space="preserve">
-    <value>Desabilitado</value>
+    <value>Deshabilitado</value>
   </data>
   <data name="UserTicketDN" xml:space="preserve">
     <value>Ticket usuario</value>
