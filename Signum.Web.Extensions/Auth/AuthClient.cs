@@ -99,6 +99,42 @@ namespace Signum.Web.Authorization
                 };
 
                 Schema.Current.EntityEvents<UserDN>().Saving += AuthClient_Saving;
+
+                HandleExceptionAttribute.OnExceptionHandled = ctx =>
+                {
+                    if (ctx.Exception is UnauthorizedAccessException)
+                    {
+                        Exception exception = ctx.Exception.FollowC(a => a.InnerException).Last();
+                        string controllerName = (string)ctx.RouteData.Values["controller"];
+                        string actionName = (string)ctx.RouteData.Values["action"];
+                        HandleErrorInfo model = new HandleErrorInfo(exception, controllerName, actionName);
+
+                        if (HandleExceptionAttribute.LogControllerException != null)
+                            HandleExceptionAttribute.LogControllerException(model);
+
+                        if (UserDN.Current == null || UserDN.Current == AuthLogic.AnonymousUser)
+                        {
+                            //send them off to the login page
+                            string loginUrl = "Auth/Login?ReturnUrl={0}";
+                            if (ctx.HttpContext.Request.IsAjaxRequest())
+                                ctx.Result = Navigator.RedirectUrl(loginUrl.Formato(ctx.HttpContext.Request.UrlReferrer.PathAndQuery));
+                            else
+                                ctx.Result = new RedirectResult(HttpContextUtils.FullyQualifiedApplicationPath + loginUrl.Formato(ctx.HttpContext.Request.Url.PathAndQuery));
+
+                            ctx.ExceptionHandled = true;
+                            ctx.HttpContext.Response.Clear();
+                            ctx.HttpContext.Response.TrySkipIisCustomErrors = true;
+                        }
+                        else
+                        {
+                            HandleExceptionAttribute.DefaultOnException(ctx);
+                        }
+                    }
+                    else
+                    {
+                        HandleExceptionAttribute.DefaultOnException(ctx);
+                    }
+                };
             }
         }
 
