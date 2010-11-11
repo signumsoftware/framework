@@ -158,14 +158,20 @@ namespace Signum.Engine.Maps
 
     public partial class FieldEmbedded
     {
+        PropertyInfo piModified = ReflectionTools.GetPropertyInfo((EmbeddedEntity ee) => ee.Modified); 
+
         internal override Expression GenerateValue(ParameterExpression reader, ParameterExpression retriever)
         {
             ParameterExpression entity = Expression.Variable(this.FieldType, "entity");
 
-            List<Expression> assigments = EmbeddedFields.Values.Select(f =>
-                (Expression)Expression.Assign(Expression.Field(entity, f.FieldInfo), f.Field.GenerateValue(reader, retriever))).ToList();
+            List<Expression> assigments = new List<Expression>();
+            assigments.Add(Expression.Assign(entity, Expression.New(this.FieldType)));
 
-            assigments.Insert(0, Expression.Assign(entity, Expression.New(this.FieldType)));
+            assigments.AddRange(EmbeddedFields.Values.Select(f =>
+                Expression.Assign(Expression.Field(entity, f.FieldInfo), f.Field.GenerateValue(reader, retriever))));
+
+            assigments.Add(Expression.Assign(Expression.Property(entity, piModified), Expression.Constant(null, typeof(bool?))));
+
             assigments.Add(entity);
 
             Expression result = Expression.Block(new[] { entity }, assigments);
