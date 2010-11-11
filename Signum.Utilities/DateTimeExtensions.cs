@@ -253,7 +253,7 @@ namespace Signum.Utilities
             if (ts.Minutes > 0)
                 return Resources.Ago.Formato((ts.Minutes == 1 ? Resources._0Minute : Resources._0Minutes).Formato(ts.Minutes));
 
-            return Resources.Ago.Formato((ts.Seconds == 1 ? Resources._0Second : Resources._0Seconds).Formato(ts.Seconds));
+            return Resources.Ago.Formato((ts.Seconds == 1 ? Resources._0Second : Resources._0Seconds).Formato(ts.Seconds)).ToLower();
         }
         
         public static DateTime MonthStart(this DateTime dateTime)
