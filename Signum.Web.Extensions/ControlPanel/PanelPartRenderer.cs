@@ -66,7 +66,7 @@ namespace Signum.Web.ControlPanel
                 object queryName = Navigator.Manager.QuerySettings.Keys.First(k => QueryUtils.GetQueryName(k) == uq.UserQuery.Query.Key);
                 FindOptions fo = new FindOptions(queryName)
                 {
-                    FilterMode = FilterMode.OnlyResults
+                    FilterMode = FilterMode.Hidden
                 };
 
                 helper.Write(
