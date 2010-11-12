@@ -53,8 +53,8 @@ namespace Signum.Test.Extensions
 
         public static void Start(string connectionString)
         {
-            AuthLogic.SystemUserName = "System";
-            AuthLogic.AnonymousUserName = "Anonymous";
+            //AuthLogic.SystemUserName = "System";
+            //AuthLogic.AnonymousUserName = "Anonymous";
 
             SchemaBuilder sb = new SchemaBuilder();
             DynamicQueryManager dqm = new DynamicQueryManager();
@@ -65,7 +65,7 @@ namespace Signum.Test.Extensions
             sb.Settings.OverrideFieldAttributes((UserQueryDN uq) => uq.Related, new ImplementedByAttribute(typeof(UserDN), typeof(RoleDN)));
             sb.Settings.OverrideFieldAttributes((UserChartDN uq) => uq.Related, new ImplementedByAttribute(typeof(UserDN), typeof(RoleDN)));
 
-            AuthLogic.Start(sb, dqm, AuthLogic.SystemUserName, null);
+            AuthLogic.Start(sb, dqm, "System", "Anonymous");
             UserTicketLogic.Start(sb, dqm);
             OperationLogic.Start(sb, dqm);
 
@@ -114,8 +114,10 @@ namespace Signum.Test.Extensions
             {
                 Schema.Current.Initialize(InitLevel.Level3MainEntities);
 
-                RoleDN superUser = new RoleDN { Name = "SuperUser" }.Save();
+                //RoleDN systemUser = new RoleDN { Name = "System" }.Save();
                 RoleDN anonymousUser = new RoleDN { Name = "Anonymous" }.Save();
+                
+                RoleDN superUser = new RoleDN { Name = "SuperUser" }.Save();
                 RoleDN internalUser = new RoleDN { Name = "InternalUser" }.Save();
                 RoleDN externalUser = new RoleDN { Name = "ExternalUser" }.Save();
 
