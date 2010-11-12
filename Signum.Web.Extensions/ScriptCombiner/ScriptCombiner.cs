@@ -27,7 +27,6 @@ namespace Signum.Web.ScriptCombiner
 
         static string Extension = "css";
 
-        static string lastModifiedDateKey = "-lmd";
         static string contentType = "text/css";
 
         HttpContextBase context;
@@ -80,7 +79,7 @@ namespace Signum.Web.ScriptCombiner
                 return false;
 
             //Compare with the date of the server cache content
-            DateTime lmd = (DateTime)context.Cache[GetCacheKey() + lastModifiedDateKey];
+            DateTime lmd = (DateTime)context.Cache[GetCacheKey()];
             if (lmd != lastModificationDate) return false;
 
             this.WriteBytes(responseBytes, isCompressed);
@@ -196,10 +195,6 @@ namespace Signum.Web.ScriptCombiner
                     {
                         context.Cache.Insert(GetCacheKey(),
                         responseBytes, null, System.Web.Caching.Cache.NoAbsoluteExpiration,
-                        CACHE_DURATION);
-
-                        context.Cache.Insert(GetCacheKey() + lastModifiedDateKey,
-                        lmServer, null, System.Web.Caching.Cache.NoAbsoluteExpiration,
                         CACHE_DURATION);
                     }
 
@@ -504,10 +499,6 @@ namespace Signum.Web.ScriptCombiner
                     if (cacheable)
                     {
                         context.Cache.Insert(GetCacheKey(),
-                        responseBytes, null, System.Web.Caching.Cache.NoAbsoluteExpiration,
-                        CACHE_DURATION);
-
-                        context.Cache.Insert(GetCacheKey() + lastModifiedDateKey,
                         lmServer, null, System.Web.Caching.Cache.NoAbsoluteExpiration,
                         CACHE_DURATION);
                     }
@@ -527,7 +518,7 @@ namespace Signum.Web.ScriptCombiner
                 return false;
 
             //Compare with the date of the server cache content
-            DateTime lmd = (DateTime)context.Cache[GetCacheKey() + lastModifiedDateKey];
+            DateTime lmd = (DateTime)context.Cache[GetCacheKey()];
             if (lmd != lastModificationDate) return false;
 
             this.WriteBytes(responseBytes, isCompressed);
