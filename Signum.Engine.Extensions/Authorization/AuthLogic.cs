@@ -170,8 +170,8 @@ namespace Signum.Engine.Authorization
                 using (new EntityCache())
                 using (AuthLogic.Disable())
                 {
-                    SystemUser = Database.Query<UserDN>().SingleOrDefault(a => a.UserName == SystemUserName);
-                    AnonymousUser = Database.Query<UserDN>().SingleOrDefault(a => a.UserName == AnonymousUserName);
+                    SystemUser = Database.Query<UserDN>().Single(a => a.UserName == SystemUserName);
+                    AnonymousUser = Database.Query<UserDN>().Single(a => a.UserName == AnonymousUserName);
                 }
             }
         }
