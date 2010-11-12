@@ -356,11 +356,11 @@ namespace Signum.Web.Authorization
         {
             // Basic parameter validation
             if (!username.HasText())
-                return LoginError("username", Resources.UserNameMustHaveAValue);
-
+                return LoginErrorAjaxOrForm("username", Resources.UserNameMustHaveAValue);
+            
             if (string.IsNullOrEmpty(password))
-                return LoginError("password", Resources.PasswordMustHaveAValue);
-
+                return LoginErrorAjaxOrForm("password", Resources.PasswordMustHaveAValue);
+            
             // Attempt to login
             UserDN user = null;
             try
@@ -369,8 +369,8 @@ namespace Signum.Web.Authorization
             }
             catch (Exception) { }
 
-            if (user == null)
-                return LoginError("_FORM", Resources.InvalidUsernameOrPassword);
+            if (user == null) //if it's an ajax request the error will match the password field
+                return LoginErrorAjaxOrForm(Request.IsAjaxRequest() ? "password" : "_FORM", Resources.InvalidUsernameOrPassword);
 
             if (OnUserPreLogin != null)
                 OnUserPreLogin(this, user);
@@ -393,19 +393,39 @@ namespace Signum.Web.Authorization
 
             AddUserSession(user.UserName, user);
 
-
             if (!string.IsNullOrEmpty(returnUrl))
-                return Redirect(returnUrl);
+                LoginRedirectAjaxOrForm(returnUrl);
             else
-                if (System.Web.HttpContext.Current.Request.Params["referrer"] != null)
-                {
-                    return Redirect(System.Web.HttpContext.Current.Request.Params["referrer"]);
-                }
+            {
+                string referrer = Request.Params["referrer"];
+                if (referrer.HasText())
+                    LoginRedirectAjaxOrForm(referrer);
+            }
 
             if (OnUserLoggedDefaultReturn != null)
-                return Redirect(OnUserLoggedDefaultReturn(this));
+                return LoginRedirectAjaxOrForm(OnUserLoggedDefaultReturn(this));
 
             return RedirectToAction("Index", "Home");
+        }
+
+        private ActionResult LoginErrorAjaxOrForm(string key, string message)
+        {
+            if (Request.IsAjaxRequest())
+            {
+                ModelState.Clear();
+                ModelState.AddModelError(key, message, "");
+                return Navigator.ModelState(ModelState);
+            }
+            else
+                return LoginError(key, message);
+        }
+
+        public ActionResult LoginRedirectAjaxOrForm(string url)
+        {
+            if (Request.IsAjaxRequest())
+                return Navigator.RedirectUrl(url);
+            else
+                return Redirect(url);
         }
 
         ViewResult LoginError(string key, string error)
