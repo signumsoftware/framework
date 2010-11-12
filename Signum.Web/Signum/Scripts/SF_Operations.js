@@ -468,7 +468,7 @@ function OpOnSuccessDispatcher(prefix, operationResult) {
     //Si el resultado es un normalControl, o es un popup y coincide con alguno de los abiertos => ReloadContent
     if (!hasNewPopup ||
             (hasNewPopup &&
-            $(".popupWindow:visible").attr('id').filter(function() { return this == newPopupId }).length == 0)) {
+            $(".popupWindow:visible").filter(function() { return this.id == newPopupId }).length > 0)) {
         OpReloadContent(prefix, operationResult)
     }
     else {
