@@ -115,6 +115,7 @@ namespace Signum.Test.Extensions
                 Schema.Current.Initialize(InitLevel.Level3MainEntities);
 
                 RoleDN superUser = new RoleDN { Name = "SuperUser" }.Save();
+                RoleDN anonymousUser = new RoleDN { Name = "Anonymous" }.Save();
                 RoleDN internalUser = new RoleDN { Name = "InternalUser" }.Save();
                 RoleDN externalUser = new RoleDN { Name = "ExternalUser" }.Save();
 
@@ -124,6 +125,14 @@ namespace Signum.Test.Extensions
                     UserName = AuthLogic.SystemUserName,
                     PasswordHash = Security.EncodePassword(Guid.NewGuid().ToString()),
                     Role = superUser
+                }.Save();
+
+                new UserDN
+                {
+                    UserName = AuthLogic.AnonymousUserName,
+                    PasswordHash = Security.EncodePassword(Guid.NewGuid().ToString()),
+                    Role = anonymousUser,
+                    AnulationDate = DateTime.Now
                 }.Save();
 
                 new UserDN
