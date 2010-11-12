@@ -112,7 +112,7 @@ namespace Signum.Test.Extensions
 
             using (AuthLogic.Disable())
             {
-                Schema.Current.Initialize(InitLevel.Level3MainEntities);
+                //Schema.Current.Initialize(InitLevel.Level1SimpleEntities);
 
                 //RoleDN systemUser = new RoleDN { Name = "System" }.Save();
                 RoleDN anonymousUser = new RoleDN { Name = "Anonymous" }.Save();
@@ -133,8 +133,7 @@ namespace Signum.Test.Extensions
                 {
                     UserName = AuthLogic.AnonymousUserName,
                     PasswordHash = Security.EncodePassword(Guid.NewGuid().ToString()),
-                    Role = anonymousUser,
-                    AnulationDate = DateTime.Now
+                    Role = anonymousUser
                 }.Save();
 
                 new UserDN
@@ -158,6 +157,7 @@ namespace Signum.Test.Extensions
                     Role = externalUser
                 }.Save();
 
+                Schema.Current.Initialize(InitLevel.Level3MainEntities);
                 Signum.Test.Starter.Load();
 
                 EntityGroupAuthLogic.Manual.SetAllowed(externalUser.ToLite(), MusicGroups.JapanEntities,
