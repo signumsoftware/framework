@@ -54,6 +54,7 @@ namespace Signum.Test.Extensions
         public static void Start(string connectionString)
         {
             AuthLogic.SystemUserName = "System";
+            AuthLogic.AnonymousUserName = "Anonymous";
 
             SchemaBuilder sb = new SchemaBuilder();
             DynamicQueryManager dqm = new DynamicQueryManager();
