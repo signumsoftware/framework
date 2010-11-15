@@ -804,14 +804,21 @@ function () {
         return null;
     }
 
-    function createCookie(name, value, days) {
+    function createCookie(name, value, days, domain) {
+        var expires = null,
+            path = "/";
+
         if (days) {
             var date = new Date();
             date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-            var expires = "; expires=" + date.toGMTString();
+            expires = date;
         }
-        else var expires = "";
-        document.cookie = name + "=" + value + expires + "; path=/";
+
+        document.cookie = name + "=" +escape( value ) +
+        ( ( expires ) ? ";expires=" + expires.toGMTString() : "" ) +
+        ( ( path ) ? ";path=" + path : "" ) +
+        ( ( domain ) ? ";domain=" + domain : "" );
+
     }
 
     SF.userSettings = {
