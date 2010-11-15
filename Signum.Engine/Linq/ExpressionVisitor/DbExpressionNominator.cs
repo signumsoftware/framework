@@ -509,6 +509,20 @@ namespace Signum.Engine.Linq
             return sqlEnum;
         }
 
+        protected override Expression VisitLike(LikeExpression like)
+        {
+            Expression exp = Visit(like.Expression);
+            Expression pattern = Visit(like.Pattern);
+            if (exp != like.Expression || pattern != like.Pattern)
+                like = new LikeExpression(exp, pattern);
+
+            if (candidates.Contains(exp) && candidates.Contains(pattern))
+                candidates.Add(like);
+
+            return like;
+        }
+        
+
          private LikeExpression TryLike(Expression expression, Expression pattern)
         {
              //pattern = ExpressionEvaluator.PartialEval(pattern);
