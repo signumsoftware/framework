@@ -27,6 +27,8 @@ namespace Signum.Web.Authorization
 {
     public static class AuthClient
     {
+        public static string PublicLoginUrl = "Auth/Login?ReturnUrl={0}";
+
         public static string ViewPrefix = "auth/Views/";
          
         public static string CookieName = "sfUser";
@@ -90,11 +92,11 @@ namespace Signum.Web.Authorization
                     if (UserDN.Current == null)
                     {
                         //send them off to the login page
-                        string loginUrl = "Auth/Login?ReturnUrl={0}";
+                        string loginUrl = PublicLoginUrl.Formato(context.HttpContext.Request.UrlReferrer.PathAndQuery);
                         if (context.HttpContext.Request.IsAjaxRequest())
-                            context.Result = Navigator.RedirectUrl(loginUrl.Formato(context.HttpContext.Request.UrlReferrer.PathAndQuery));
+                            context.Result = Navigator.RedirectUrl(loginUrl);
                         else
-                            context.Result = new RedirectResult(HttpContextUtils.FullyQualifiedApplicationPath + loginUrl.Formato(context.HttpContext.Request.Url.PathAndQuery));
+                            context.Result = new RedirectResult(HttpContextUtils.FullyQualifiedApplicationPath + loginUrl);
                     }
                 };
 
