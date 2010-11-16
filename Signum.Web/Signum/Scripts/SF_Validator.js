@@ -273,7 +273,9 @@
             log("PartialValidator constructRequestDataForValidating");
             //var isReactive = $('#' + sfReactive).length > 0;
             //var formChildren = isReactive ? $("form *") : $("#" + this.valOptions.parentDiv + " *, #" + sfTabId + ", #" + sfReactive);
-            var formChildren = $("#" + this.valOptions.parentDiv + " :input, #" + sfTabId);
+            var formChildren = empty(this.valOptions.parentDiv) ?
+                               $("form :input, #" + sfTabId) :
+                               $("#" + this.valOptions.parentDiv + " :input, #" + sfTabId);
             formChildren = formChildren.not(".searchControl :input, #" + sfReactive);
 
             var requestData = formChildren.serialize();
