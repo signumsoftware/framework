@@ -63,7 +63,9 @@ namespace Signum.Engine
         protected internal abstract SqlDataReader UnsafeExecuteDataReader(SqlPreCommandSimple sqlPreCommandSimple);
         protected internal abstract DataSet ExecuteDataSet(SqlPreCommandSimple sqlPreCommandSimple);
 
-        public abstract string SchemaName();
+        public abstract string DatabaseName();
+
+        public abstract string DataSourceName();
     }
 
 
@@ -289,9 +291,14 @@ namespace Signum.Engine
             }
         }
 
-        public override string SchemaName()
+        public override string DatabaseName()
         {
             return new SqlConnection(connectionString).Database;
+        }
+
+        public override string DataSourceName()
+        {
+            return new SqlConnection(connectionString).DataSource;
         }
     }
 }

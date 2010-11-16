@@ -176,14 +176,14 @@ deallocate cur");
 
         public static SqlPreCommand ShrinkDataBase()
         {
-            return SqlBuilder.ShrinkDatabase(ConnectionScope.Current.SchemaName());
+            return SqlBuilder.ShrinkDatabase(ConnectionScope.Current.DatabaseName());
         }
 
         #endregion
 
         public static SqlPreCommand TotalSynchronizeScript()
         {
-            return Schema.Current.SynchronizationScript(ConnectionScope.Current.SchemaName()); 
+            return Schema.Current.SynchronizationScript(ConnectionScope.Current.DatabaseName()); 
         }
 
         public static SqlPreCommand SynchronizeSchemaScript(Replacements replacements)
@@ -276,12 +276,12 @@ deallocate cur");
 
         public static void SetSnapshotIsolation(bool value)
         {
-            Executor.ExecuteNonQuery(SqlBuilder.SetSnapshotIsolation(ConnectionScope.Current.SchemaName(), value));
+            Executor.ExecuteNonQuery(SqlBuilder.SetSnapshotIsolation(ConnectionScope.Current.DatabaseName(), value));
         }
 
         public static void MakeSnapshotIsolationDefault(bool value)
         {
-            Executor.ExecuteNonQuery(SqlBuilder.MakeSnapshotIsolationDefault(ConnectionScope.Current.SchemaName(), value));
+            Executor.ExecuteNonQuery(SqlBuilder.MakeSnapshotIsolationDefault(ConnectionScope.Current.DatabaseName(), value));
         }
 
         public static SqlPreCommand RenameFreeIndexesScript()

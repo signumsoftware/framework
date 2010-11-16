@@ -18,6 +18,7 @@ using Signum.Utilities.DataStructures;
 using System.Diagnostics;
 using Signum.Engine.Linq;
 using System.Data.SqlClient;
+using Signum.Services;
 
 namespace Signum.Engine.Maps
 {
@@ -207,6 +208,8 @@ namespace Signum.Engine.Maps
                 })
                 .Combine(Spacing.Triple);
 
+            if (command == null)
+                return null; 
 
             return SqlPreCommand.Combine(Spacing.Double,
                 new SqlPreCommandSimple(Resources.StartOfSyncScriptGeneratedOn0.Formato(DateTime.Now)),
@@ -537,7 +540,7 @@ namespace Signum.Engine.Maps
 
         static string Encode(string str)
         {
-            int hash = str.GetHashCode();
+            int hash = GetHashCode32(str);
 
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < 32; i+=5)
@@ -548,6 +551,22 @@ namespace Signum.Engine.Maps
 
             return sb.ToString(); 
         }
+
+        static int GetHashCode32(string value)
+        {
+            int num = 0x15051505;
+            int num2 = num;
+            for (int i = 0; i < value.Length; i++)
+            {
+                if ((i & 0x1) == 0)
+                    num = (((num << 5) + num) + (num >> 0x1b)) ^ value[i];
+                else
+                    num2 = (((num2 << 5) + num2) + (num2 >> 0x1b)) ^ value[i];
+            }
+           
+            return (num + (num2 * 0x5d588b65));
+        }
+
 
         public UniqueIndex WhereNotNull(params IColumn[] notNullColumns)
         {
