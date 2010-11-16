@@ -172,7 +172,9 @@
                         $('#' + currPrefix.compose(sfLink)).addClass(sfInputErrorClass);
                     }
                     if ((isMoreInner || isEqual) && $('#' + currPrefix.compose(sfGlobalValidationSummary)).length > 0 && !empty(partialErrors)) {
-                        var currentSummary = $('#' + currPrefix.compose(sfGlobalValidationSummary));
+                        var currentSummary = empty(this.valOptions.parentDiv) ? 
+                                             $('#' + currPrefix.compose(sfGlobalValidationSummary)) :
+                                             $('#' + this.valOptions.parentDiv + " #" + currPrefix.compose(sfGlobalValidationSummary));
                         var summaryUL = currentSummary.children('.' + sfSummaryErrorClass);
                         if (summaryUL.length == 0)
                             currentSummary.append('<ul class="' + sfSummaryErrorClass + '">\n' + partialErrors + '</ul>');

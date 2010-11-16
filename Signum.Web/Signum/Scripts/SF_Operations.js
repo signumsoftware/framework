@@ -11,6 +11,7 @@ function blockUI() {
 var OperationManager = function(_options) {
     this.options = $.extend({
         prefix: "",
+        parentDiv: "",
         operationKey: null,
         isLite: false,
         controllerUrl: null,
@@ -40,7 +41,7 @@ OperationManager.prototype = {
         var formChildren = "";
         if (isFalse(this.options.isLite)) {
             if (empty(this.options.prefix)) //NormalWindow 
-                formChildren = $("form *");
+                formChildren = empty(this.options.parentDiv) ? $("form :input") : $("#" + this.options.parentDiv + " :input");
             else //PopupWindow
                 formChildren = $(this.pf("panelPopup *") + ", #" + sfReactive + ", #" + sfTabId);
         }
@@ -130,7 +131,7 @@ OperationManager.prototype = {
 
                 if (self.executedSuccessfully(operationResult)) {
                     if (onSuccess != null) {
-                        onSuccess(newPrefix, operationResult);
+                        onSuccess(newPrefix, operationResult, self.options.parentDiv);
                     }
                 }
                 else {
@@ -197,7 +198,7 @@ OperationManager.prototype = {
         else {
             var onSuccess = function () { this.operationSubmit(); };
             var self = this;
-            if (!EntityIsValid({ prefix: this.options.prefix }, function () { onSuccess.call(self) }))
+            if (!EntityIsValid({ parentDiv: this.options.parentDiv, prefix: this.options.prefix }, function () { onSuccess.call(self) }))
                 return;
         }
     }
@@ -222,7 +223,7 @@ var OperationExecutor = function (_options) {
         if (isTrue(this.options.isLite))
             onSuccess.call(this);
         else {
-            if (!EntityIsValid({ prefix: this.options.prefix }, function () { onSuccess.call(self) }))
+            if (!EntityIsValid({ parentDiv: this.options.parentDiv, prefix: this.options.prefix }, function () { onSuccess.call(self) }))
                 return;
         }
     };
@@ -261,7 +262,7 @@ var ConstructorFrom = function(_options) {
         if (isTrue(this.options.isLite))
             onSuccess.call(this);
         else {
-            if (!EntityIsValid({ prefix: this.options.prefix }, function() { onSuccess.call(self) }))
+            if (!EntityIsValid({ parentDiv: this.options.parentDiv, prefix: this.options.prefix }, function () { onSuccess.call(self) }))
                 return;
         }
     };
@@ -454,7 +455,7 @@ function ReloadEntity(urlController, prefix, parentDiv) {
     });
 }
 
-function OpOnSuccessDispatcher(prefix, operationResult) {
+function OpOnSuccessDispatcher(prefix, operationResult, parentDiv) {
     log("OperationExecutor OpDefaultOnSuccess");
     $(".contextmenu-active").removeClass("contextmenu-active");
     if (empty(operationResult))
@@ -469,18 +470,23 @@ function OpOnSuccessDispatcher(prefix, operationResult) {
     if (!hasNewPopup ||
             (hasNewPopup &&
             $(".popupWindow:visible").filter(function() { return this.id == newPopupId }).length > 0)) {
-        OpReloadContent(prefix, operationResult)
+        OpReloadContent(prefix, operationResult, parentDiv)
     }
     else {
         OpOpenPopup(prefix, operationResult)
     }
 }
 
-function OpReloadContent(prefix, operationResult){
+function OpReloadContent(prefix, operationResult, parentDiv){
     log("OperationExecutor OpReloadContent");
     $(".contextmenu-active").removeClass("contextmenu-active");
     if (empty(prefix)) //NormalWindow
-        $("#divNormalControl").html(operationResult);
+    {
+        if (empty(parentDiv))
+            $("#divNormalControl").html(operationResult);
+        else
+            $("#" + parentDiv).html(operationResult);
+    }
     else { //PopupWindow
         new ViewNavigator({
             prefix: prefix,
