@@ -106,6 +106,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ControlPanel\ControlPanelLogic.cs" />
+    <Compile Include="DeploymentLog\DeploymentLogLogic.cs" />
     <Compile Include="Files\FilePathLogic.cs" />
     <Compile Include="Help\AppendixHelp.cs" />
     <Compile Include="Help\QueryHelp.cs" />
