@@ -138,7 +138,7 @@ namespace Signum.Entities
 
     }
 
-    public interface IIdentifiable: INotifyPropertyChanged, IDataErrorInfo, ICloneable
+    public interface IIdentifiable : INotifyPropertyChanged, IDataErrorInfo, ICloneable
     {
         int Id { get; }
         int? IdOrNull { get; }

@@ -48,13 +48,23 @@ namespace Signum.Services
         public IdentifiableEntity Retrieve(Type type, int id)
         {
             return Return(MethodInfo.GetCurrentMethod(), "Retrieve {0}".Formato(type.Name),
-             () => Database.Retrieve(type, id));
+             () =>
+             {
+                 using (Database.ForUserInterface())
+                     return Database.Retrieve(type, id);
+             });
         }
 
         public IdentifiableEntity Save(IdentifiableEntity entidad)
         {
             return Return(MethodInfo.GetCurrentMethod(), "Save {0}".Formato(entidad.GetType()),
-             () => { Database.Save(entidad); return entidad; });
+             () =>
+             {
+                 using (Database.ForUserInterface())
+                     Database.Save(entidad);
+
+                 return entidad;
+             });
         }
 
         public List<Lite> RetrieveAllLite(Type liteType, Implementations implementations)
@@ -62,7 +72,7 @@ namespace Signum.Services
             return Return(MethodInfo.GetCurrentMethod(), "RetrieveAllLite {0}".Formato(liteType),
                  () =>
                  {
-                     using (DbQueryProvider.ForUserInterface())
+                     using (Database.ForUserInterface())
                          return AutoCompleteUtils.RetriveAllLite(liteType, implementations);
                  });
         }
@@ -72,7 +82,7 @@ namespace Signum.Services
             return Return(MethodInfo.GetCurrentMethod(), "FindLiteLike {0}".Formato(liteType),
                  () =>
                  {
-                     using (DbQueryProvider.ForUserInterface())
+                     using (Database.ForUserInterface())
                          return AutoCompleteUtils.FindLiteLike(liteType, implementations, subString, count);
                  });
         }
@@ -88,7 +98,7 @@ namespace Signum.Services
             return Return(MethodInfo.GetCurrentMethod(), "RetrieveAll {0}".Formato(type),
             () =>
             {
-                using (DbQueryProvider.ForUserInterface())
+                using (Database.ForUserInterface())
                     return Database.RetrieveAll(type);
             });
         }
@@ -96,7 +106,11 @@ namespace Signum.Services
         public List<IdentifiableEntity> SaveList(List<IdentifiableEntity> list)
         {
             Execute(MethodInfo.GetCurrentMethod(),
-            () => Database.SaveList(list));
+            () =>
+            {
+                using (Database.ForUserInterface())
+                    Database.SaveList(list);
+            });
             return list;
         }
 

@@ -487,5 +487,23 @@ namespace Signum.Engine
             int rows = DbQueryProvider.Single.Update<T>(query, update);
             return rows;
         }
+
+
+        [ThreadStatic]
+        static bool userInterface;
+
+        public static bool UserInterface { get { return userInterface; } }
+
+        public static IDisposable ForUserInterface()
+        {
+            var oldValue = UserInterface;
+            userInterface = true;
+            return new Disposable(() => userInterface = oldValue);
+        }
+
+        public static void SetUserInterface(bool value)
+        {
+            userInterface = value; 
+        }
     }
 }

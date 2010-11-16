@@ -79,6 +79,12 @@
     <Compile Include="Constructor.cs" />
     <Compile Include="AreaResourceHelper.cs" />
     <Compile Include="ContextualItem.cs" />
+    <Compile Include="ControllerAttributes\UserInterfaceAttribute.cs" />
+    <Compile Include="ControllerAttributes\HandleExceptionAttribute.cs" />
+    <Compile Include="ControllerAttributes\AuthenticationRequiredAttribute.cs" />
+    <Compile Include="ControllerAttributes\NavigationButtonsAttribute.cs" />
+    <Compile Include="ControllerAttributes\RedirectToUrl.cs" />
+    <Compile Include="ControllerAttributes\RequireSslAttribute.cs" />
     <Compile Include="Futures\ExpressionHelper.cs" />
     <Compile Include="Futures\LinkBuilder.cs" />
     <Compile Include="Futures\MvcResources.Designer.cs">
@@ -93,7 +99,6 @@
     <Compile Include="JSRenderer\JsFunction.cs" />
     <Compile Include="JSRenderer\JsOptions.cs" />
     <Compile Include="Lines\EntityListBase.cs" />
-    <Compile Include="ControllerAttributes.cs" />
     <Compile Include="PortableAreas\AssemblyResourceManager.cs" />
     <Compile Include="PortableAreas\AssemblyResourceProvider.cs" />
     <Compile Include="PortableAreas\AssemblyResourceStore.cs" />
