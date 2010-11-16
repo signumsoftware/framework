@@ -10,6 +10,7 @@ namespace Signum.Web.Operations
     public class JsOperationOptions : JsRenderer
     {
         public JsValue<string> Prefix { get; set; }
+        public JsValue<string> ParentDiv { get; set; }
         public JsValue<string> OperationKey { get; set; }
         public JsValue<bool?> IsLite { get; set; }
         public JsValue<bool?> IsContextual { get; set; }
@@ -24,6 +25,7 @@ namespace Signum.Web.Operations
                 var builder = new JsOptionsBuilder(false)
                 {
                     {"prefix", Prefix.TryCC(a=>a.ToJS())},
+                    {"parentDiv", ParentDiv.TryCC(a => a.ToJS())},
                     {"operationKey", OperationKey.TryCC(a=>a.ToJS())},
                     {"isLite", IsLite.TryCC(a=>a.ToJS())},
                     {"contextual", IsContextual.TryCC(a=>a.ToJS())},
