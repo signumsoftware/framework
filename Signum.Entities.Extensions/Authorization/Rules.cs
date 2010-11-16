@@ -105,6 +105,11 @@ namespace Signum.Entities.Authorization
         {
             return "[In = {0}, Out = {1}]".Formato(inGroup, outGroup);
         }
+
+        public bool IsActive
+        {
+            get { return !this.Equals(CreateCreate); }
+        }
     }
 
     public enum PropertyAllowed

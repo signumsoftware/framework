@@ -112,7 +112,7 @@ namespace Signum.Engine.Authorization
             where T:IdentifiableEntity
         {
             if (!retrieveDisabled && isRoot)
-                ident.AssertAllowed(TypeAllowedBasic.Read, false);
+                ident.AssertAllowed(TypeAllowedBasic.Read, Database.UserInterface);
         }
 
         static void EntityGroupAuthLogic_Saving<T>(T ident, bool isRoot)
@@ -129,9 +129,9 @@ namespace Signum.Engine.Authorization
                 if (!saveDisabled.HasFlag(DisableSaveOptions.Destiny))
                 {
                     if (ident.IsNew)
-                        Transaction.PreRealCommit += () => ident.AssertAllowed(TypeAllowedBasic.Create, false);
+                        Transaction.PreRealCommit += () => ident.AssertAllowed(TypeAllowedBasic.Create, Database.UserInterface);
                     else
-                        Transaction.PreRealCommit += () => ident.AssertAllowed(TypeAllowedBasic.Modify, false);
+                        Transaction.PreRealCommit += () => ident.AssertAllowed(TypeAllowedBasic.Modify, Database.UserInterface);
                 }
             }
         }
@@ -205,7 +205,7 @@ namespace Signum.Engine.Authorization
             if (!AuthLogic.IsEnabled)
                 return query;
 
-            return WhereIsAllowedFor<T>(query, TypeAllowedBasic.Read, DbQueryProvider.UserInterface);
+            return WhereIsAllowedFor<T>(query, TypeAllowedBasic.Read, Database.UserInterface);
         }
 
 
