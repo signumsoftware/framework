@@ -16,8 +16,8 @@ namespace Signum.Web
         //from a different subdomain (real or virtual)
         public static Func<string, string> Subdomain = s => "";
 
-        static string cssElement = "<link href=\"{0}\" rel='stylesheet' type='text/css' />";
-        static string jsElement = "<script type='text/javascript' src=\"{0}\"></script>";
+        static string cssElement = "<link href=\"{0}\" rel=\"stylesheet\" type=\"text/css\" />";
+        static string jsElement  = "<script type=\"text/javascript\" src=\"{0}\"></script>";
 
         static string version = ScriptCombiner.Common.Version;
 
