@@ -182,6 +182,30 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void SelecteNestedDoubleOrder()
+        {
+            var neasted = (from l in Database.Query<LabelDN>()
+                           orderby l.Name
+                           select (from a in Database.Query<AlbumDN>()
+                                   where a.Label == l
+                                   orderby a.Name
+                                   select a.Name).ToList()).ToList();
+        }
+
+
+        [TestMethod]
+        public void SelecteDoubleNestedDoubleOrder()
+        {
+            var neasted = (from l in Database.Query<LabelDN>()
+                           orderby l.Name
+                           select (from a in Database.Query<AlbumDN>()
+                                   where a.Label == l
+                                   orderby a.Name
+                                   select (from s in a.Songs
+                                           select "{0} - {1} - {2}".Formato(l.Name, a.Name, s.Name)).ToList()).ToList()).ToList();
+        }
+
+        [TestMethod]
         public void SelecteNestedFirstOrDefault()
         {
             var neasted = ((from b in Database.Query<BandDN>()
