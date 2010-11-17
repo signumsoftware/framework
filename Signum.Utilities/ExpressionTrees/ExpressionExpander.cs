@@ -106,17 +106,19 @@ namespace Signum.Utilities.ExpressionTrees
         protected override Expression VisitMemberAccess(MemberExpression m)
         {
             PropertyInfo pi = m.Member as PropertyInfo;
-            if(pi == null)
-                 return base.VisitMemberAccess(m);
-
-            LambdaExpression lambda = GetExpansion(m.Expression.TryCC(c => c.Type), pi);
-            if(lambda ==null)
+            if (pi == null)
                 return base.VisitMemberAccess(m);
 
-            if(m.Expression == null)
-                return Visit(lambda.Body);
-            else
-                return Visit(Expression.Invoke(lambda, Visit(m.Expression)));
+            LambdaExpression lambda = GetExpansion(m.Expression.TryCC(c => c.Type), pi);
+            if (lambda != null)
+            {
+                if (m.Expression == null)
+                    return Visit(lambda.Body);
+                else
+                    return Visit(Expression.Invoke(lambda, Visit(m.Expression)));
+            }
+
+            return base.VisitMemberAccess(m);
         }
 
 
