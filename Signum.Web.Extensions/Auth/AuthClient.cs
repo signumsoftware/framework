@@ -92,7 +92,8 @@ namespace Signum.Web.Authorization
                     if (UserDN.Current == null)
                     {
                         //send them off to the login page
-                        string loginUrl = PublicLoginUrl.Formato(context.HttpContext.Request.UrlReferrer.PathAndQuery);
+                        var referrer = context.HttpContext.Request.UrlReferrer;
+                        string loginUrl = PublicLoginUrl.Formato(referrer == null ? "" : referrer.PathAndQuery);
                         if (context.HttpContext.Request.IsAjaxRequest())
                             context.Result = Navigator.RedirectUrl(loginUrl);
                         else
