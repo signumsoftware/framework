@@ -102,11 +102,11 @@ namespace Signum.Engine.Linq
                             @internal, null), null, innerOrders, null);
 
                     SelectExpression old = currentSource;
-                    currentSource = selectMany;
+                    currentSource = WithoutOrder(selectMany);
 
-                         var selectManyReplacements = selectMany.Columns.ToDictionary(
-                                cd => (ColumnExpression)cd.Expression,
-                                cd => cd.GetReference(aliasSM));
+                    var selectManyReplacements = selectMany.Columns.ToDictionary(
+                           cd => (ColumnExpression)cd.Expression,
+                           cd => cd.GetReference(aliasSM));
 
                     Expression projector = ColumnReplacer.Replace(proj.Projector, selectManyReplacements);
 
