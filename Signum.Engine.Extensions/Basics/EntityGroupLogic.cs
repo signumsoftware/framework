@@ -13,6 +13,7 @@ using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
 using Signum.Utilities.DataStructures;
 using Signum.Engine.Linq;
+using Signum.Engine.Authorization;
 
 namespace Signum.Engine.Basics
 {
@@ -80,7 +81,11 @@ namespace Signum.Engine.Basics
 
                 public bool Evaluate(IdentifiableEntity entity)
                 {
-                    return Resume ?? Func((T)entity);
+                    if (Resume.HasValue)
+                        return Resume.Value;
+
+                    using (EntityGroupAuthLogic.DisableQueries())
+                        return Func((T)entity);
                 }
 
                 public LambdaExpression UntypedExpression

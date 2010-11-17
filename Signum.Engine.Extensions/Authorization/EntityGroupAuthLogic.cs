@@ -122,6 +122,7 @@ namespace Signum.Engine.Authorization
             {
                 if (!saveDisabled.HasFlag(DisableSaveOptions.Origin))
                 {
+                    using(DisableQueries())
                     if (!ident.IsNew && !ident.InDB().WhereAllowed().Any()) //Previous state in the database
                         throw new UnauthorizedAccessException(Resources.NotAuthorizedTo0The1WithId2.Formato(TypeAllowedBasic.Modify.NiceToString().ToLower(), ident.GetType().NiceName(), ident.Id));
                 }
