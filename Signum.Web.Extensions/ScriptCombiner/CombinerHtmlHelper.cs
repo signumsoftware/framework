@@ -14,7 +14,7 @@ namespace Signum.Web
 
         //useful for loading static resources such as JS and CSS files
         //from a different subdomain (real or virtual)
-        public static Func<string, string> Subdomain = (s) => s;
+        public static Func<string, string> Subdomain = s => "";
 
         static string cssElement = "<link href=\"{0}\" rel='stylesheet' type='text/css' />";
         static string jsElement = "<script type='text/javascript' src=\"{0}\"></script>";
@@ -58,7 +58,7 @@ namespace Signum.Web
         public static void CombinedCss(this HtmlHelper html, string path, params string[] files)
         {
 #if (DEBUG)
-            string content = files.ToString(f => cssElement.Formato(Path.Combine("content/", f) + "?v=" + version), "");
+            string content = files.ToString(f => cssElement.Formato(Subdomain(Path.Combine("content/", f) + "?v=" + version)), "");
             html.ViewContext.HttpContext.Response.Write(content);
 #else
             string cadena =  cssElement.Formato(CombinedCssUrlPath(path.Replace("/", "%2f"), files));
@@ -77,7 +77,7 @@ namespace Signum.Web
         public static void CombinedJs(this HtmlHelper html, string path, params string[] files)
         {
 #if (DEBUG)
-            string content = files.ToString(f => jsElement.Formato(path + "/" + f + "?v=" + ScriptCombiner.Common.Version), "");
+            string content = files.ToString(f => jsElement.Formato(Subdomain(path + "/" + f + "?v=" + ScriptCombiner.Common.Version)), "");
             html.ViewContext.HttpContext.Response.Write(content);
 #else
             string content = jsElement.Formato(CombinedJsUrlPath(path, files));
@@ -89,7 +89,7 @@ namespace Signum.Web
         public static string IncludeAreaJs(params string[] files)
         {
 #if (DEBUG)
-                return files.ToString(f => jsElement.Formato(f + "?v=" + ScriptCombiner.Common.Version), "");
+            return files.ToString(f => jsElement.Formato(Subdomain(f + "?v=" + ScriptCombiner.Common.Version)), "");
 #else
             return jsElement.Formato(IncludeAreaJsUrl(files));
 #endif        
@@ -103,7 +103,7 @@ namespace Signum.Web
         public static void IncludeAreaCss(this HtmlHelper html, params string[] files)
         {
 #if (DEBUG)
-            string content = files.ToString(f => cssElement.Formato(f + "?v=" + version), "");
+            string content = files.ToString(f => Subdomain(cssElement.Formato(f + "?v=" + version)), "");
             html.ViewContext.HttpContext.Response.Write(content);
 #else
             string content = cssElement.Formato(IncludeAreaCssPath(files));

@@ -112,21 +112,13 @@ namespace Signum.Entities.Files
             fp.Repository != null && fp.Repository.WebPrefix.HasText() ?
                 fp.Repository.WebPrefix + "/" + UrlPathEncode(fp.Sufix.Replace("\\", "/")) :
                 null;
-        [Ignore]
-        string fullWebPath;
+
         public string FullWebPath
         {
             get
             {
-                return fullWebPath;
+                return FullWebPathExpression.Invoke(this);
             }
-        }
-
-        protected override void PostRetrieving()
-        {
-            this.fullWebPath = FullWebPathExpression.Invoke(this);
-
-            base.PostRetrieving();
         }
 
         public static Func<string, string> UrlPathEncode;
