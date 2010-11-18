@@ -123,8 +123,7 @@ input[type=checkbox] {
 
 input[type=text]:focus, input[type=password]:focus, input[type=button]:focus,
 input[type=number]:focus, input[type=email]:focus,
-input[type=url]:focus, input[type=tel]:focus
-
+input[type=url]:focus, input[type=tel]:focus,
 textarea:focus,select:focus {
     border-color:#76baec;
 }
