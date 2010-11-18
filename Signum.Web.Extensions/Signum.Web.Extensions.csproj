@@ -67,8 +67,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AuthAdmin\Controllers\AuthAdminController.cs" />
     <Compile Include="AuthAdmin\AuthAdminClient.cs" />
+    <Compile Include="AuthAdmin\Controllers\AuthAdminController.cs" />
     <Compile Include="Auth\AuthClient.cs" />
     <Compile Include="Auth\UserMapping.cs" />
     <Compile Include="Auth\Controllers\AuthController.cs" />
@@ -165,15 +165,33 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="AuthAdmin\Content\authAdmin.css" />
+    <Content Include="AuthAdmin\Images\class.png" />
+    <Content Include="AuthAdmin\Images\namespace.png" />
+    <Content Include="AuthAdmin\Images\operation.png" />
+    <Content Include="AuthAdmin\Images\property.png" />
+    <Content Include="AuthAdmin\Images\query.png" />
+    <Content Include="AuthAdmin\Images\radioBlue.png" />
+    <Content Include="AuthAdmin\Images\radioGreen.png" />
+    <Content Include="AuthAdmin\Images\radioRed.png" />
+    <Content Include="AuthAdmin\Images\radioYellow.png" />
+    <Content Include="AuthAdmin\Images\thumb.png" />
+    <Content Include="AuthAdmin\Images\treeView.png" />
+    <Content Include="AuthAdmin\Scripts\authAdmin.js" />
+    <Content Include="AuthAdmin\Views\EntityGroups.ascx" />
+    <Content Include="AuthAdmin\Views\FacadeMethods.ascx" />
+    <Content Include="AuthAdmin\Views\Operations.ascx" />
+    <Content Include="AuthAdmin\Views\Permissions.ascx" />
+    <Content Include="AuthAdmin\Views\Properties.ascx" />
+    <Content Include="AuthAdmin\Views\Queries.ascx" />
+    <Content Include="AuthAdmin\Views\Role.ascx" />
+    <Content Include="AuthAdmin\Views\Types.ascx" />
+    <Content Include="AuthAdmin\Views\User.ascx" />
     <Content Include="Help\Views\Web.config" />
     <None Include="ScriptCombiner\csCombiner.cd" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="AuthAdmin\Images\operation.png" />
-    <Content Include="AuthAdmin\Images\property.png" />
-    <Content Include="AuthAdmin\Images\query.png" />
-    <Content Include="AuthAdmin\Images\thumb.png" />
     <Content Include="Auth\Views\CreateUserAccount.ascx" />
     <Content Include="Captcha\Views\captcha.ascx">
       <SubType>ASPXCodeBehind</SubType>
@@ -248,24 +266,6 @@
     <Content Include="Help\Views\ViewTodo.aspx">
       <SubType>ASPXCodeBehind</SubType>
     </Content>
-    <Content Include="AuthAdmin\Content\authAdmin.css" />
-    <Content Include="AuthAdmin\Images\class.png" />
-    <Content Include="AuthAdmin\Images\namespace.png" />
-    <Content Include="AuthAdmin\Images\radioBlue.png" />
-    <Content Include="AuthAdmin\Images\radioGreen.png" />
-    <Content Include="AuthAdmin\Images\radioRed.png" />
-    <Content Include="AuthAdmin\Images\radioYellow.png" />
-    <Content Include="AuthAdmin\Images\treeView.png" />
-    <Content Include="AuthAdmin\Scripts\authAdmin.js" />
-    <Content Include="AuthAdmin\Views\EntityGroups.ascx" />
-    <Content Include="AuthAdmin\Views\FacadeMethods.ascx" />
-    <Content Include="AuthAdmin\Views\Operations.ascx" />
-    <Content Include="AuthAdmin\Views\Permissions.ascx" />
-    <Content Include="AuthAdmin\Views\Properties.ascx" />
-    <Content Include="AuthAdmin\Views\Queries.ascx" />
-    <Content Include="AuthAdmin\Views\Role.ascx" />
-    <Content Include="AuthAdmin\Views\Types.ascx" />
-    <Content Include="AuthAdmin\Views\User.ascx" />
     <Content Include="Mailing\Views\EmailMessage.ascx" />
     <Content Include="Mailing\Views\EmailPackage.ascx" />
     <Content Include="Processes\Content\Processes.css" />
@@ -286,6 +286,7 @@
     <EmbeddedResource Include="Properties\Resources.pt.resx" />
     <EmbeddedResource Include="Properties\Resources.de.resx" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" />
   <Target Name="BeforeBuild">
