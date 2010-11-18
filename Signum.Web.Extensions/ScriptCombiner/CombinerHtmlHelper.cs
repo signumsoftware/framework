@@ -103,7 +103,7 @@ namespace Signum.Web
         public static void IncludeAreaCss(this HtmlHelper html, params string[] files)
         {
 #if (DEBUG)
-            string content = files.ToString(f => Subdomain(cssElement.Formato(f + "?v=" + version)), "");
+            string content = files.ToString(f => cssElement.Formato(Subdomain(f + "?v=" + version)), "");
             html.ViewContext.HttpContext.Response.Write(content);
 #else
             string content = cssElement.Formato(IncludeAreaCssPath(files));

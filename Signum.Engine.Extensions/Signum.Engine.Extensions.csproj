@@ -155,6 +155,7 @@
     <Compile Include="Scheduler\SchedulerLogic.cs" />
     <Compile Include="Scheduler\CustomTaskLogic.cs" />
     <Compile Include="ServerExtensions.cs" />
+    <Compile Include="WikiMarkup\WikiParserExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Framework\Signum.Engine\Signum.Engine.csproj">

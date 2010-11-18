@@ -18,6 +18,7 @@ using Signum.Engine.Operations;
 using Signum.Engine.DynamicQuery;
 using Signum.Entities.DynamicQuery;
 using Signum.Engine.Basics;
+using Signum.Engine;
 #endregion
 
 namespace Signum.Web.Help
