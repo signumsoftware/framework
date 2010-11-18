@@ -166,6 +166,25 @@ namespace Signum.Engine
         {
             return (Lite<T>)RetrieveLite(typeof(T), typeof(T), id);
         }
+
+        public static Lite<T> FillToStr<T>(Lite<T> lite)where T : class, IIdentifiable
+        {
+            return (Lite<T>)FillToStr((Lite)lite);
+        }
+
+        public static Lite FillToStr(Lite lite)
+        {
+            using (Transaction tr = new Transaction())
+            {
+                Table t = Schema.Current.Table(lite.RuntimeType);
+
+                SqlPreCommand command = SqlBuilder.SelectToStr(t.Name, lite.Id);
+
+                lite.ToStr = (string)Executor.ExecuteScalar(command.ToSimple());
+
+                return tr.Commit(lite);
+            }
+        }
         #endregion
 
         #region Exists

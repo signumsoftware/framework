@@ -29,7 +29,7 @@ namespace Signum.Web.Controllers
                  }
                  int id;
                  if (int.TryParse(value, out id))
-                     return Database.RetrieveLite(cleanType, id);
+                     return Lite.Create(cleanType, id);
 
                  return Navigator.ParseLite(cleanType, value);
              }

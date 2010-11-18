@@ -144,7 +144,7 @@ namespace Signum.Entities
             this.UntypedEntityOrNull = ei;
             if (ei != null && this.ToStr == null)
                 this.ToStr = ei.ToString();
-        }
+        } 
 
         public void ClearEntity()
         {

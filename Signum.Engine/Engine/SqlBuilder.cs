@@ -168,6 +168,13 @@ namespace Signum.Engine
             return new SqlPreCommandSimple("SELECT COUNT(id) FROM {0} WHERE  id = {1}".Formato(table.SqlScape(), idParam.ParameterName), new List<SqlParameter> { idParam });
         }
 
+        internal static SqlPreCommand SelectToStr(string table, int id)
+        {
+            SqlParameter idParam = SqlParameterBuilder.CreateReferenceParameter("id", false, id);
+
+            return new SqlPreCommandSimple("SELECT ToStr FROM {0} WHERE  id = {1}".Formato(table.SqlScape(), idParam.ParameterName), new List<SqlParameter> { idParam });
+        }
+
         internal static SqlPreCommandSimple SelectAll(string table, string[] columns)
         {
             return new SqlPreCommandSimple("SELECT {0} FROM {1}".Formato(
