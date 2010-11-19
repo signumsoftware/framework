@@ -94,6 +94,7 @@
     </Compile>
     <Compile Include="Futures\ViewExtensions.cs" />
     <Compile Include="ModuleResources.cs" />
+    <Compile Include="Properties\Resources.fr.Designer.cs" />
     <Compile Include="ToolBarMenu.cs" />
     <Compile Include="FluentTagBuilder.cs" />
     <Compile Include="JSRenderer\JsFunction.cs" />
@@ -115,11 +116,6 @@
     <Compile Include="Mappings\MappingContext.cs" />
     <Compile Include="ModelStateData.cs" />
     <Compile Include="ModelStateExtensions.cs" />
-    <Compile Include="Properties\Resources.fr.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.fr.resx</DependentUpon>
-    </Compile>
     <Compile Include="HttpContextUtils.cs" />
     <Compile Include="ToolBarButton.cs" />
     <Compile Include="TypeContext\TypeContext.cs" />
@@ -249,10 +245,6 @@
       <LastGenOutput>MvcResources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.fr.resx">
-      <Generator>PublicResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.fr.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
     <Content Include="Signum\Views\ValueLineBox.ascx">
       <SubType>ASPXCodeBehind</SubType>
     </Content>
@@ -272,6 +264,7 @@
       <LastGenOutput>Resources.es.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.fr.resx" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -283,6 +276,8 @@
     <Content Include="Signum\Views\SearchPopupControl.ascx">
       <SubType>ASPXCodeBehind</SubType>
     </Content>
+    <EmbeddedResource Include="Properties\Resources.de.resx" />
+    <EmbeddedResource Include="Properties\Resources.pt.resx" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="obj\" />

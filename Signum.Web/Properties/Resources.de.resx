@@ -118,58 +118,58 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Alerts" xml:space="preserve">
-    <value>Alertes </value>
+    <value>Warnungen </value>
   </data>
   <data name="Average" xml:space="preserve">
-    <value>Moyenne </value>
+    <value>Medium </value>
   </data>
   <data name="CalendarClose" xml:space="preserve">
-    <value>Fait </value>
+    <value>Schließen </value>
   </data>
   <data name="CalendarNext" xml:space="preserve">
-    <value>Suiv</value>
+    <value>Nächste </value>
   </data>
   <data name="CalendarPrevious" xml:space="preserve">
-    <value>Pré</value>
+    <value>Zurück</value>
   </data>
   <data name="CalendarToday" xml:space="preserve">
-    <value>Aujourd'hui </value>
+    <value>Heute </value>
   </data>
   <data name="Checked" xml:space="preserve">
-    <value>Vérifié </value>
+    <value>Bewährte </value>
   </data>
   <data name="CreateAlert" xml:space="preserve">
-    <value>Créer l'alerte </value>
+    <value>Benachrichtigung erstellen </value>
   </data>
   <data name="CreateNote" xml:space="preserve">
-    <value>Créer note </value>
+    <value>Notiz erstellen </value>
   </data>
   <data name="DeleteFilters" xml:space="preserve">
-    <value>Supprimer les filtres </value>
+    <value>Filter löschen </value>
   </data>
   <data name="EditColumnsFinishEdit" xml:space="preserve">
-    <value>Édition complète </value>
+    <value>Fertig bearbeiten </value>
   </data>
   <data name="Excel" xml:space="preserve">
     <value>Excel </value>
   </data>
   <data name="ExecutedXTimes" xml:space="preserve">
-    <value>Exécutés x fois </value>
+    <value>X-Mal ausgeführt </value>
   </data>
   <data name="Field" xml:space="preserve">
-    <value>Champ </value>
+    <value>Feld </value>
   </data>
   <data name="FilterByField" xml:space="preserve">
-    <value>Filtrer par champ </value>
+    <value>Filtern von Feld </value>
   </data>
   <data name="Future" xml:space="preserve">
-    <value>Avenir </value>
+    <value>Zukunft </value>
   </data>
   <data name="HideFilters" xml:space="preserve">
-    <value>Masquer les filtres </value>
+    <value>Filter ausblenden </value>
   </data>
   <data name="IncorrectEntityInSessionYouMustReloadThePageToContinue" xml:space="preserve">
-    <value>Les données de session sont incorrectes. Actualisez la page pour continuer </value>
+    <value>Sitzungsdaten ist falsch. Aktualisieren Sie die Seite weiter </value>
   </data>
   <data name="Maximum" xml:space="preserve">
     <value>Maximum </value>
@@ -178,72 +178,72 @@
     <value>Minimum </value>
   </data>
   <data name="Name" xml:space="preserve">
-    <value>Nom </value>
+    <value>Name </value>
   </data>
   <data name="New" xml:space="preserve">
-    <value>Nouveau </value>
+    <value>Neu </value>
   </data>
   <data name="No" xml:space="preserve">
-    <value>ne </value>
+    <value>nein </value>
   </data>
   <data name="NoFiltersSpecified" xml:space="preserve">
-    <value>Les filtres ne sont pas spécifiés </value>
+    <value>Keine Filter angegeben </value>
   </data>
   <data name="NoResults" xml:space="preserve">
-    <value>Aucun résultat </value>
+    <value>Keine Ergebnisse </value>
   </data>
   <data name="Notes" xml:space="preserve">
-    <value>Notes </value>
+    <value>Notizen </value>
   </data>
   <data name="NumberOfRows" xml:space="preserve">
-    <value>Nombre de lignes </value>
+    <value>No. Datensätze </value>
   </data>
   <data name="Operation" xml:space="preserve">
-    <value>Opération </value>
+    <value>Betrieb </value>
   </data>
   <data name="Remove" xml:space="preserve">
-    <value>Supprimer </value>
+    <value>Löschen </value>
   </data>
   <data name="Save" xml:space="preserve">
-    <value>Enregistrez </value>
+    <value>Speichern </value>
   </data>
   <data name="Search" xml:space="preserve">
-    <value>Recherche </value>
+    <value>Suche </value>
   </data>
   <data name="ShowCalendar" xml:space="preserve">
-    <value>Afficher le calendrier </value>
+    <value>Kalender anzeigen </value>
   </data>
   <data name="ShowFilters" xml:space="preserve">
-    <value>Afficher les filtres </value>
+    <value>Anzeigefilter </value>
   </data>
   <data name="Type0NotAllowed" xml:space="preserve">
-    <value>Type {0} non autorisé </value>
+    <value>Typ {0} nicht zulässig </value>
   </data>
   <data name="UserColumnsEdit" xml:space="preserve">
-    <value>Modifier les colonnes de l'utilisateur </value>
+    <value>Edit User Spalten </value>
   </data>
   <data name="Value" xml:space="preserve">
-    <value>Valeur </value>
+    <value>Wert </value>
   </data>
   <data name="ValueMustBeSpecifiedFor0" xml:space="preserve">
-    <value>Une valeur doit être spécifiée pour {0} </value>
+    <value>Sie müssen einen Wert für {0} angeben. </value>
   </data>
   <data name="View" xml:space="preserve">
-    <value>Vue </value>
+    <value>Ansicht </value>
   </data>
   <data name="ViewForType0IsNotAllowed" xml:space="preserve">
-    <value>Affichage de type {0} n'est pas autorisé. </value>
+    <value>Ansicht für Typ {0} ist nicht zulässig. </value>
   </data>
   <data name="ViewNotes" xml:space="preserve">
-    <value>Notes de vue </value>
+    <value>Anzeigen von Notizen </value>
   </data>
   <data name="Warned" xml:space="preserve">
-    <value>Averti </value>
+    <value>Gewarnt </value>
   </data>
   <data name="Yes" xml:space="preserve">
-    <value>Oui </value>
+    <value>Ja </value>
   </data>
   <data name="YourSessionHasTimedOutClickF5ToReloadTheEntity" xml:space="preserve">
-    <value>Votre session a expiré, cliquez sur la touche F5 pour recharger l'entité de la base de données </value>
+    <value>Ihre Sitzung ist abgelaufen, klicken Sie auf F5, um die Entität aus der Datenbank neu laden </value>
   </data>
 </root>
