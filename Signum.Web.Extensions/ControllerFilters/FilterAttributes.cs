@@ -28,27 +28,24 @@ namespace Signum.Web
     {
         public override void OnActionExecuting(ActionExecutingContext filterContext)
         {
-            Stopwatch stopWatch = new Stopwatch();
-            filterContext.Controller.ViewData["stopWatch"] = stopWatch;
-            stopWatch.Start();
+            var action = filterContext.RouteData.Values["controller"] + "." + filterContext.RouteData.Values["action"];
+
+            filterContext.Controller.ViewData["elapsed"] = ElapsedTime.Start(action);
+
+            IDisposable profiler = Signum.Utilities.Profiler.Log(aditionalData: action);
+            if (profiler != null)
+                filterContext.Controller.ViewData["profiler"] = profiler;
         }
 
         public override void OnResultExecuted(ResultExecutedContext filterContext)
         {
-            Stopwatch stopWatch = (Stopwatch) filterContext.Controller.ViewData.TryGetC("stopWatch");
-            //It fails if a redirection has been made
-            if (stopWatch != null)
-            {
-                stopWatch.Stop();
-                Log(filterContext.RouteData, stopWatch.ElapsedMilliseconds);
-            }
-        }
+            IDisposable elapsed = (IDisposable)filterContext.Controller.ViewData.TryGetC("elapsed");
+            if (elapsed != null)
+                elapsed.Dispose();
 
-        private void Log(RouteData routeData, long time)
-        {
-            var controllerName = routeData.Values["controller"];
-            var actionName = routeData.Values["action"];
-            ElapsedTime.InsertEntity(time, controllerName + "." + actionName);
+            IDisposable profiler = (IDisposable)filterContext.Controller.ViewData.TryGetC("profiler");
+            if (profiler != null)
+                profiler.Dispose();
         }
     }
 
