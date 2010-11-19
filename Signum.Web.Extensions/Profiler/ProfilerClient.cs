@@ -41,7 +41,7 @@ namespace Signum.Web.Profiler
 
         public static MvcHtmlString ProfilerEntry(this HtmlHelper htmlHelper, string linkText,  IEnumerable<int> indices)
         {
-            return htmlHelper.ActionLink(linkText, "ViewRoute", new { indices = indices.ToString(",") }); 
+            return htmlHelper.ActionLink(linkText, "HeavyRoute", new { indices = indices.ToString(",") }); 
         }
     }
 }

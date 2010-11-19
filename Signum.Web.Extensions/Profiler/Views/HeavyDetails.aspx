@@ -7,14 +7,12 @@
 <asp:Content ID="registerContent" ContentPlaceHolderID="MainContent" runat="server">
     <h2>
         Profiler Entry (<%
-                            ProfilerEntryDetails details = (ProfilerEntryDetails)Model;
+        HeavyProfilerDetails details = (HeavyProfilerDetails)Model;
 
-
-                            for (int i = 0; i < details.Indices.Length; i++)
-                            {
-        %><%= Html.ProfilerEntry(details.Indices[i].ToString(), details.Indices.Take(i + 1))%>
-        <% 
-}
+        for (int i = 0; i < details.Indices.Length; i++)
+        {
+        %><%= i == details.Indices.Length - 1 ? details.Indices[i].ToString() : Html.ProfilerEntry(details.Indices[i].ToString(), details.Indices.Take(i + 1)).ToHtmlString()%><% 
+        }
         %>)</h2>
     <%=Html.ActionLink("(View all)", "ViewAll") %>
     <table class="tblResults">
@@ -55,7 +53,7 @@
                 Time
             </th>
             <td>
-                <%=details.Entry.Stopwatch.Elapsed.NiceToString()%>
+                <%=details.Entry.Elapsed.NiceToString()%>
             </td>
         </tr>
          <tr>

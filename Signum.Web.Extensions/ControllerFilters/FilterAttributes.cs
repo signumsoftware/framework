@@ -30,14 +30,14 @@ namespace Signum.Web
         {
             var action = filterContext.RouteData.Values["controller"] + "." + filterContext.RouteData.Values["action"];
 
-            filterContext.Controller.ViewData["elapsed"] = ElapsedTime.Start(action);
+            filterContext.Controller.ViewData["elapsed"] = TimeTracker.Start(action);
 
-            IDisposable profiler = Signum.Utilities.Profiler.Log(aditionalData: action);
+            IDisposable profiler = HeavyProfiler.Log(aditionalData: action);
             if (profiler != null)
                 filterContext.Controller.ViewData["profiler"] = profiler;
         }
 
-        public override void OnResultExecuted(ResultExecutedContext filterContext)
+        public override void OnActionExecuted(ActionExecutedContext filterContext)
         {
             IDisposable elapsed = (IDisposable)filterContext.Controller.ViewData.TryGetC("elapsed");
             if (elapsed != null)

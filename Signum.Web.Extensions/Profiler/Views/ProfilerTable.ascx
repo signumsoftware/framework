@@ -3,7 +3,7 @@
 <%@ Import Namespace="Signum.Utilities.ExpressionTrees" %>
 <%@ Import Namespace="Signum.Web.Profiler" %>
 <%
-    List<ProfilerEntry> entries = (List<ProfilerEntry>)Model;
+    List<HeavyProfilerEntry> entries = (List<HeavyProfilerEntry>)Model;
     int[] indices = (int[])ViewData["indices"] ?? new int[0];
 
     var roles = entries.Select(a => a.GetDescendantRoles()).ToList();
@@ -70,7 +70,7 @@
                 <%:entry.Role%>
             </td>
             <td align="right">
-                <%:entry.Stopwatch.Elapsed.NiceToString()%>
+                <%:entry.Elapsed.NiceToString()%>
             </td>
             <td align="right">
                 <%:entry.GetEntriesResume().TryCC(r=>r.ToString(entry))%>
@@ -85,9 +85,9 @@
             <%        
                 }
             %>
-            <th>
+            <td>
                 <%:entry.AditionalData.TryCC(o => o.ToString().Left(50, false))%>
-            </th>
+            </td>
         </tr>
     
     <% } %>

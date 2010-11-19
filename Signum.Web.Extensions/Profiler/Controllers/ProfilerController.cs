@@ -16,6 +16,7 @@ using System.Linq;
 using Signum.Entities;
 using Signum.Web.Controllers;
 using System.Collections.Generic;
+using Signum.Entities.Profiler;
 
 namespace Signum.Web.Profiler
 {
@@ -23,24 +24,28 @@ namespace Signum.Web.Profiler
     public class ProfilerController : Controller
     {
         [AcceptVerbs(HttpVerbs.Get)]
-        public ActionResult ViewAll()
+        public ActionResult Heavy()
         {
-            return View(ProfileClient.ViewPath + "ProfilerList", Signum.Utilities.Profiler.Entries); 
+            ProfilerPermissions.ViewHeavyProfiler.Authorize();
+
+            return View(ProfileClient.ViewPath + "HeavyList", Signum.Utilities.HeavyProfiler.Entries); 
         }
 
         [AcceptVerbs(HttpVerbs.Get)]
-        public ActionResult ViewRoute(string indices)
+        public ActionResult HeavyRoute(string indices)
         {
+            ProfilerPermissions.ViewHeavyProfiler.Authorize();
+
             int[] ind = indices.Split(',').Select(a => int.Parse(a)).ToArray(); 
 
-            ProfilerEntryDetails details = new ProfilerEntryDetails
+            HeavyProfilerDetails details = new HeavyProfilerDetails
             {
                 Indices = ind,
-                Previous = new List<ProfilerEntry>(),
+                Previous = new List<HeavyProfilerEntry>(),
                 Entry = null, 
             };
 
-            List<ProfilerEntry> currentList = Signum.Utilities.Profiler.Entries;
+            List<HeavyProfilerEntry> currentList = Signum.Utilities.HeavyProfiler.Entries;
             for (int i = 0; i < ind.Length; i++)
             {
                 if (i != 0)
@@ -56,35 +61,65 @@ namespace Signum.Web.Profiler
                 currentList = details.Entry.Entries;
             }
 
-            return View(ProfileClient.ViewPath + "ProfilerDetails", details);
+            return View(ProfileClient.ViewPath + "HeavyDetails", details);
         }
 
         [AcceptVerbs(HttpVerbs.Get)]
         public ActionResult Enable()
         {
-            Signum.Utilities.Profiler.Enabled = true;
-            return RedirectToAction("ViewAll");
+            ProfilerPermissions.ViewHeavyProfiler.Authorize();
+
+            Signum.Utilities.HeavyProfiler.Enabled = true;
+            return RedirectToAction("Heavy");
         }
 
         [AcceptVerbs(HttpVerbs.Get)]
         public ActionResult Disable()
         {
-            Signum.Utilities.Profiler.Enabled = false;
-            return RedirectToAction("ViewAll");
+            ProfilerPermissions.ViewHeavyProfiler.Authorize();
+
+            Signum.Utilities.HeavyProfiler.Enabled = false;
+            return RedirectToAction("Heavy");
         }
 
         [AcceptVerbs(HttpVerbs.Get)]
         public ActionResult Clean()
         {
-            Signum.Utilities.Profiler.Clean();
-            return RedirectToAction("ViewAll");
+            ProfilerPermissions.ViewHeavyProfiler.Authorize();
+
+            Signum.Utilities.HeavyProfiler.Clean();
+            return RedirectToAction("Heavy");
+        }
+
+
+
+        [AcceptVerbs(HttpVerbs.Get)]
+        public ActionResult Times(int? clear)
+        {
+            ProfilerPermissions.ViewTimeTracker.Authorize();
+
+            if (clear != null && clear == 1)
+                Signum.Utilities.TimeTracker.IdentifiedElapseds = new Dictionary<string, Signum.Utilities.TimeTrackerEntry>();
+            ViewData[ViewDataKeys.PageTitle] = "Times";
+            return View(ProfileClient.ViewPath + "Times");
+        }
+
+        [AcceptVerbs(HttpVerbs.Get)]
+        public ActionResult TimeTable(int? clear)
+        {
+            ProfilerPermissions.ViewTimeTracker.Authorize();
+
+            if (clear != null && clear == 1)
+                Signum.Utilities.TimeTracker.IdentifiedElapseds = new Dictionary<string, Signum.Utilities.TimeTrackerEntry>();
+            ViewData[ViewDataKeys.PageTitle] = "Table Times";
+            return View(ProfileClient.ViewPath + "TimeTable");
         }
     }
 
-    public class ProfilerEntryDetails
+    public class HeavyProfilerDetails
     {
         public int[] Indices; 
-        public ProfilerEntry Entry;
-        public List<ProfilerEntry> Previous;  
+        public HeavyProfilerEntry Entry;
+        public List<HeavyProfilerEntry> Previous;  
     }
 }

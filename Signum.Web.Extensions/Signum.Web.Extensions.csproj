@@ -190,11 +190,13 @@
     <Content Include="AuthAdmin\Views\Types.ascx" />
     <Content Include="AuthAdmin\Views\User.ascx" />
     <Content Include="Help\Views\Web.config" />
-    <Content Include="Profiler\Views\ProfilerDetails.aspx">
+    <Content Include="Profiler\Views\Times.aspx" />
+    <Content Include="Profiler\Views\TimeTable.aspx" />
+    <Content Include="Profiler\Views\HeavyDetails.aspx">
       <SubType>ASPXCodeBehind</SubType>
     </Content>
     <None Include="ScriptCombiner\csCombiner.cd" />
-    <Content Include="Profiler\Views\ProfilerList.aspx">
+    <Content Include="Profiler\Views\HeavyList.aspx">
       <SubType>ASPXCodeBehind</SubType>
     </Content>
     <Content Include="Profiler\Views\ProfilerTable.ascx" />

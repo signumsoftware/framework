@@ -6,10 +6,10 @@
 <%@ Import Namespace="Signum.Web.Profiler" %>
 <asp:Content ID="registerContent" ContentPlaceHolderID="MainContent" runat="server">
     <h2>
-        Profiler Results</h2>
+        Heavy Profiler</h2>
     <div>
         <%  
-            if (Profiler.Enabled)
+            if (HeavyProfiler.Enabled)
             {
         %><%=Html.ActionLink("Disable", "Disable")%><%
                                                         }
