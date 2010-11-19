@@ -104,9 +104,6 @@ namespace Signum.Utilities.ExpressionTrees
 
         public static string TypeName(this Type type)
         {
-            if (type.IsGenericTypeDefinition)
-                throw new NotImplementedException();
-
             if (type == typeof(object))
                 return "object";
 
@@ -125,7 +122,13 @@ namespace Signum.Utilities.ExpressionTrees
                 return "{0}?".Formato(ut.TypeName());
 
             if (type.IsGenericType)
+            {
+                if (type.IsGenericTypeDefinition)
+                    return "{0}<{1}>".Formato(type.Name.Split('`')[0], type.GetGenericArguments().ToString(_ => "", ","));
+
                 return "{0}<{1}>".Formato(type.Name.Split('`')[0], type.GetGenericArguments().ToString(t => TypeName(t), ","));
+
+            }
 
             return type.Name;
         }

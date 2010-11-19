@@ -260,6 +260,42 @@ namespace Signum.Utilities
         {
             return new DateTime(dateTime.Year, dateTime.Month, 1, 0, 0, 0, dateTime.Kind); 
         }
+
+        public static string NiceToString(this TimeSpan timeSpan)
+        {
+            StringBuilder sb = new StringBuilder();
+            bool any = false;
+            if (timeSpan.Days != 0)
+            {
+                sb.AppendFormat("{0}d", timeSpan.Days);
+                any = true; 
+            }
+
+            if (any || timeSpan.Hours != 0)
+            {
+                sb.AppendFormat("{0,-2}h ", timeSpan.Hours);
+                any = true; 
+            }
+
+            if (any || timeSpan.Minutes != 0)
+            {
+                sb.AppendFormat("{0,-2}m ", timeSpan.Minutes);
+                any = true; 
+            }
+
+            if (any || timeSpan.Seconds != 0)
+            {
+                sb.AppendFormat("{0,-2}s ", timeSpan.Seconds);
+                any = true; 
+            }
+
+            if (any || timeSpan.Milliseconds != 0)
+            {
+                sb.AppendFormat("{0,-3}ms", timeSpan.Milliseconds);
+            }
+
+            return sb.ToString();
+        }
     }
 
     public enum DateTimePrecision

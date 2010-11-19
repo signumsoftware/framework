@@ -39,7 +39,8 @@ namespace Signum.Engine.Linq
         
         public override object Execute(Expression expression)
         {
-            return this.Translate(expression, tr=>tr.Execute());
+            using (Profiler.Log("DB"))
+                return this.Translate(expression, tr => tr.Execute());
         }
 
         T Translate<T>(Expression expression, Func<ITranslateResult, T> continuation) //For debugging purposes

@@ -28,6 +28,7 @@ namespace Signum.Engine
                 throw new ArgumentNullException("entity");
 
             using (new EntityCache())
+            using (Profiler.Log("DB"))
             using (Transaction tr = new Transaction())
             {
                 Saver.SaveAll(entities.Cast<IdentifiableEntity>().ToArray());
@@ -57,6 +58,7 @@ namespace Signum.Engine
                 throw new ArgumentNullException("entity");
 
             using (new EntityCache())
+            using (Profiler.Log("DB"))
             using (Transaction tr = new Transaction())
             {
                 Saver.Save((IdentifiableEntity)(IIdentifiable)entity);
@@ -116,6 +118,7 @@ namespace Signum.Engine
                 throw new ArgumentNullException("type");
 
             using (new EntityCache())
+            using (Profiler.Log("DB"))
             using (Transaction tr = new Transaction())
             {
                 Retriever rec = new Retriever();
@@ -134,6 +137,7 @@ namespace Signum.Engine
                 throw new ArgumentNullException("type");
 
             using (new EntityCache())
+            using (Profiler.Log("DB"))
             using (Transaction tr = new Transaction())
             {
                 Retriever rec = new Retriever();
@@ -196,6 +200,7 @@ namespace Signum.Engine
 
         public static bool Exists(Type type, int id)
         {
+            using (Profiler.Log("DB"))
             using (Transaction tr = new Transaction())
             {
                 Table t = Schema.Current.Table(type);
@@ -260,6 +265,7 @@ namespace Signum.Engine
                 throw new ArgumentNullException("ids");
 
             using (new EntityCache())
+            using (Profiler.Log("DB"))
             using (Transaction tr = new Transaction())
             {
                 Retriever rec = new Retriever();
@@ -291,6 +297,7 @@ namespace Signum.Engine
                 throw new ArgumentNullException("ids");
 
             using (new EntityCache())
+            using (Profiler.Log("DB"))
             using (Transaction tr = new Transaction())
             {
                 Retriever rec = new Retriever();
@@ -311,6 +318,7 @@ namespace Signum.Engine
                 throw new ArgumentNullException("lites");
 
             using (new EntityCache())
+            using (Profiler.Log("DB"))
             using (Transaction tr = new Transaction())
             {
                 Retriever rec = new Retriever();
@@ -329,6 +337,7 @@ namespace Signum.Engine
                 throw new ArgumentNullException("lites");
 
             using (new EntityCache())
+            using (Profiler.Log("DB"))
             using (Transaction tr = new Transaction())
             {
                 Retriever rec = new Retriever();
@@ -349,6 +358,7 @@ namespace Signum.Engine
             if (type == null)
                 throw new ArgumentNullException("type");
 
+            using (Profiler.Log("DB"))
             using (Transaction tr = new Transaction())
             {
                 Deleter.Delete(type, id);
@@ -365,6 +375,7 @@ namespace Signum.Engine
             if (ids == null)
                 throw new ArgumentNullException("ids");
 
+            using (Profiler.Log("DB"))
             using (Transaction tr = new Transaction())
             {
                 Deleter.Delete(type, ids.ToList());

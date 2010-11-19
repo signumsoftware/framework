@@ -17,6 +17,11 @@ namespace Signum.Engine
 {
     internal class Retriever
     {
+        public Retriever()
+        {
+
+        }
+
         Dictionary<Table, Dictionary<int, IdentifiableEntity>> reqIdentifiables = new Dictionary<Table, Dictionary<int, IdentifiableEntity>>();
         
         // no se garantiza unicidad para lites ni colecciones

@@ -44,6 +44,7 @@ namespace Signum.Engine.Linq
         public void Fill(Dictionary<ProjectionToken, IEnumerable> lookups, Retriever retriever)
         {
             SqlPreCommandSimple command = new SqlPreCommandSimple(CommandText, GetParameters().ToList());
+            using (Profiler.Log("SQL", command.Sql))
             using (SqlDataReader reader = Executor.UnsafeExecuteDataReader(command))
             {
                 ProjectionRowEnumerator<KeyValuePair<K, V>> enumerator = new ProjectionRowEnumerator<KeyValuePair<K, V>>(reader, ProjectorExpression, retriever, lookups);
@@ -91,7 +92,8 @@ namespace Signum.Engine.Linq
                 SqlPreCommandSimple command = new SqlPreCommandSimple(CommandText, GetParameters().ToList());
 
                 object result;
-                using (SqlDataReader reader = Executor.UnsafeExecuteDataReader(command))
+                using (Profiler.Log("SQL", command.Sql))
+                using (SqlDataReader reader = Executor.UnsafeExecuteDataReader(command))                
                 {
                     ProjectionRowEnumerator<T> enumerator = new ProjectionRowEnumerator<T>(reader, ProjectorExpression, retriever, lookups);
 

@@ -39,7 +39,7 @@ namespace Signum.Engine.Linq
 
         public IProjectionRow Parent { get; private set; }
 
-        SqlDataReader reader;
+        SqlDataReader dataReader;
 
         T current;
         Func<IProjectionRow, T> projector; 
@@ -48,10 +48,10 @@ namespace Signum.Engine.Linq
         Retriever retriever;
         Dictionary<ProjectionToken, IEnumerable> lookups;
 
-        internal ProjectionRowEnumerator(SqlDataReader reader, Expression<Func<IProjectionRow, T>> projectorExpression, Retriever retriever, Dictionary<ProjectionToken, IEnumerable> lookups)
+        internal ProjectionRowEnumerator(SqlDataReader dataReader, Expression<Func<IProjectionRow, T>> projectorExpression, Retriever retriever, Dictionary<ProjectionToken, IEnumerable> lookups)
         {
-            this.reader = reader;
-            this.Reader = new FieldReader(reader);
+            this.dataReader = dataReader;
+            this.Reader = new FieldReader(dataReader);
 
             this.projectorExpression = ExpressionCompilableAsserter.Assert(projectorExpression);
             this.projector = projectorExpression.Compile();
@@ -71,7 +71,7 @@ namespace Signum.Engine.Linq
 
         public bool MoveNext()
         {
-            if (reader.Read())
+            if (dataReader.Read())
             {
                 this.current = this.projector(this);
                 return true;
@@ -85,7 +85,7 @@ namespace Signum.Engine.Linq
 
         public void Dispose()
         {
-            reader.Dispose();
+            dataReader.Dispose();
         }
 
         public Retriever Retriever
