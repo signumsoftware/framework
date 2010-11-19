@@ -111,7 +111,7 @@
     <Compile Include="DateTimeExtensions.cs" />
     <Compile Include="DebugTextWriter.cs" />
     <Compile Include="DictionaryExtensions.cs" />
-    <Compile Include="ElapsedTime.cs" />
+    <Compile Include="Profiler.cs" />
     <Compile Include="EnumerableExtensions.cs" />
     <Compile Include="EnumExtensions.cs" />
     <Compile Include="DataStructures\DirectedEdgedGraph.cs" />

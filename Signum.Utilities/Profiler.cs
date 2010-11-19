@@ -8,11 +8,11 @@ using System.Reflection;
 
 namespace Signum.Utilities
 {
-    public static class ElapsedTime
+    public static class TimeTracker
     {
         public static bool ShowDebug = false;
-        public static Dictionary<string, ElapsedTimeEntry> IdentifiedElapseds = new Dictionary<string, ElapsedTimeEntry>();
-
+        public static Dictionary<string, TimeTrackerEntry> IdentifiedElapseds = new Dictionary<string, TimeTrackerEntry>();
+        
         public static T Start<T>(string identifier, Func<T> func)
         {
             using (Start(identifier))
@@ -44,10 +44,10 @@ namespace Signum.Utilities
         {
             lock (IdentifiedElapseds)
             {
-                ElapsedTimeEntry entry;
+                TimeTrackerEntry entry;
                 if (!IdentifiedElapseds.TryGetValue(identifier, out entry))
                 {
-                    entry = new ElapsedTimeEntry();
+                    entry = new TimeTrackerEntry();
                     IdentifiedElapseds.Add(identifier, entry);
                 }
 
@@ -65,7 +65,7 @@ namespace Signum.Utilities
         }
     }
 
-    public class ElapsedTimeEntry
+    public class TimeTrackerEntry
     {
         public long LastTime = 0;
         public long TotalTime = 0;
@@ -85,31 +85,29 @@ namespace Signum.Utilities
         public override string ToString()
         {
             return "Last: {0}ms, Min: {1}ms, Avg: {2}ms, Max: {3}ms, Count: {4}".Formato(
-                LastTime,
-                MinTime,
-                Average,
-                MaxTime,
-                Count);
-            ;
+                LastTime, MinTime, Average, MaxTime, Count);
         }
     }
 
-    public static class Profiler
+    public static class HeavyProfiler
     {
-        
         public static int MaxTotalEntriesCount = 1000;
 
         public static int TotalEntriesCount { get; private set; }
 
         public static bool Enabled { get; set; }
 
-        static ProfilerEntry current;
-        public static readonly List<ProfilerEntry> Entries = new List<ProfilerEntry>();
+        [ThreadStatic]
+        static HeavyProfilerEntry current;
+        public static readonly List<HeavyProfilerEntry> Entries = new List<HeavyProfilerEntry>();
 
         public static void Clean()
         {
-            Entries.Clear();
-            TotalEntriesCount = 0;
+            lock (Entries)
+            {
+                Entries.Clear();
+                TotalEntriesCount = 0;
+            }
         }
 
         public static IDisposable Log(string role = null, object aditionalData = null)
@@ -123,45 +121,50 @@ namespace Signum.Utilities
                 return null;
             }
 
-            if (current != null)
-                current.Stopwatch.Stop();
+            Stopwatch discount = Stopwatch.StartNew();
 
-            ProfilerEntry entry = new ProfilerEntry()
+            var saveCurrent = current;
+
+            current = new HeavyProfilerEntry()
             {
+                Discount = discount,
                 Role = role,
                 AditionalData = aditionalData,
                 StackTrace = new StackTrace(1, true),
             };
 
-            TotalEntriesCount++;
-
-            if (current == null)
-            {
-                Entries.Add(entry);
-            }
-            else
-            {
-                if (current.Entries == null)
-                    current.Entries = new List<ProfilerEntry>();
-
-                current.Entries.Add(entry);
-            }
-
-            var saveCurrent = current;
-            current = entry;
-
-            if (saveCurrent != null)
-                saveCurrent.Stopwatch.Restart();
-
-            current.Stopwatch.Start();
+            discount.Stop(); 
+            
+            current.Stopwatch = Stopwatch.StartNew();
             return new Disposable(() =>
+            {
+                current.Stopwatch.Stop();
+
+                TotalEntriesCount++;
+
+                if (saveCurrent == null)
                 {
-                    current.Stopwatch.Stop(); 
-                    current = saveCurrent;
-                });
+                    lock (Entries)
+                        Entries.Add(current);
+                }
+                else
+                {
+                    if (saveCurrent.Entries == null)
+                        saveCurrent.Entries = new List<HeavyProfilerEntry>();
+
+                    saveCurrent.Entries.Add(current);
+                }
+
+                current = saveCurrent;
+            });
         }
 
-        public static IEnumerable<ProfilerEntry> AllEntries()
+        public static void CleanCurrent() //To fix possible non-dispossed ones
+        {
+            current = null; 
+        }
+
+        public static IEnumerable<HeavyProfilerEntry> AllEntries()
         {
             return from pe in Entries
                    from p in pe.Descendants().PreAnd(pe)
@@ -179,17 +182,26 @@ namespace Signum.Utilities
         }
     }
 
-    public class ProfilerEntry
+    public class HeavyProfilerEntry
     {
-        public List<ProfilerEntry> Entries;
+        public List<HeavyProfilerEntry> Entries;
         public string Role;
 
         public object AditionalData;
 
-        public Stopwatch Stopwatch = new Stopwatch();
+        internal Stopwatch Stopwatch;
+        internal Stopwatch Discount;
 
         public StackTrace StackTrace;
 
+        public TimeSpan Elapsed
+        {
+            get
+            {
+                return Stopwatch.Elapsed - new TimeSpan(Descendants().Sum(a => a.Discount.Elapsed.Ticks));
+            }
+        }
+     
         public Type Type { get { return StackTrace.GetFrame(0).GetMethod().TryCC(m=>m.DeclaringType); } }
         public MethodBase Method { get { return StackTrace.GetFrame(0).GetMethod(); } }
 
@@ -208,10 +220,10 @@ namespace Signum.Utilities
                 .AgGroupToDictionary(a => a.Role, gr => new ProfileResume(gr));
         }
 
-        public IEnumerable<ProfilerEntry> Descendants()
+        public IEnumerable<HeavyProfilerEntry> Descendants()
         {
             if (Entries == null)
-                return Enumerable.Empty<ProfilerEntry>();
+                return Enumerable.Empty<HeavyProfilerEntry>();
 
             return from pe in Entries
                    from p in pe.Descendants().PreAnd(pe)
@@ -224,10 +236,10 @@ namespace Signum.Utilities
         int Count;
         TimeSpan Time;
 
-        public ProfileResume(IEnumerable<ProfilerEntry> entries)
+        public ProfileResume(IEnumerable<HeavyProfilerEntry> entries)
         {
             Count = entries.Count();
-            Time = new TimeSpan(entries.Sum(a => a.Stopwatch.Elapsed.Ticks)); 
+            Time = new TimeSpan(entries.Sum(a => a.Elapsed.Ticks)); 
         }
 
         public override string ToString()
@@ -235,7 +247,7 @@ namespace Signum.Utilities
             return "{0} ({1})".Formato(Time.NiceToString(), Count);
         }
 
-        public string ToString(ProfilerEntry parent)
+        public string ToString(HeavyProfilerEntry parent)
         {
             return "{0} {1:00}% ({2})".Formato(Time.NiceToString(), (Time.Ticks * 100.0) / parent.Stopwatch.Elapsed.Ticks,  Count);
         }

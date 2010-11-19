@@ -763,7 +763,7 @@ namespace Signum.Utilities
 
             if (oldOnly.Count != 0)
                 if (newOnly.Count != 0)
-                    throw new InvalidOperationException("Error {0}\r\n Extra: {1}\r\n Lacking: {2}".Formato(action, newOnly.ToString(", "), oldOnly.ToString(", ")));
+                    throw new InvalidOperationException("Error {0}\r\n Extra: {1}\r\n Lacking: {2}".Formato(action, oldOnly.ToString(", "), newOnly.ToString(", ")));
                 else
                     throw new InvalidOperationException("Error {0}\r\n Extra: {1}".Formato(action, oldOnly.ToString(", ")));
             else
