@@ -145,7 +145,7 @@
     <value>Les mots de passe spécifiés ne correspondent pas</value>
   </data>
   <data name="UserNameAlreadyExists" xml:space="preserve">
-    <value>Le nom d'utilisateur est déjà enregistré, s'il vous plaît choisir un autre.</value>
+    <value>Le nom d'utilisateur est déjà enregistré, s'il vous plaît choisir un autre</value>
   </data>
   <data name="UserNameMustHaveAValue" xml:space="preserve">
     <value>Le nom d'utilisateur doit avoir une valeur</value>
@@ -328,7 +328,7 @@
     <value>Changer mot de passe</value>
   </data>
   <data name="ChangePasswordExplanation" xml:space="preserve">
-    <value>Utilisez ce formulaire pour modifier votre mot de passe.</value>
+    <value>Utilisez ce formulaire pour modifier votre mot de passe</value>
   </data>
   <data name="EmailIsNotValid" xml:space="preserve">
     <value>L'e-mail est différente de la messagerie enregistrée</value>
@@ -373,7 +373,7 @@
     <value>La propriété {0} n'existe pas de type {1}</value>
   </data>
   <data name="RememberPasswordExplanation" xml:space="preserve">
-    <value>Entrez votre nom d'utilisateur et adresse e-mail pour recevoir un message dans votre compte avec un mot de passe.</value>
+    <value>Entrez votre nom d'utilisateur et adresse e-mail pour recevoir un message dans votre compte avec un mot de passe</value>
   </data>
   <data name="Source" xml:space="preserve">
     <value>Source</value>
@@ -418,7 +418,7 @@
     <value>Le code de confirmation que vous avez envoyés seulement n'est pas valide</value>
   </data>
   <data name="IHaveForgottenMyPassword" xml:space="preserve">
-    <value>J'ai oublié mon mot de passe.</value>
+    <value>J'ai oublié mon mot de passe</value>
   </data>
   <data name="IntroduceYourUserNameAndPassword" xml:space="preserve">
     <value>Introduire votre nom d'utilisateur et le mot de passe</value>
@@ -445,36 +445,36 @@
     <value>Utilisateur</value>
   </data>
   <data name="AreYouSureOfDeletingQuery0" xml:space="preserve">
-    <value>Est-ce que vous assurer de la suppression de requête {0} ? </value>
+    <value>Est-ce que vous assurer de la suppression de requête {0} ?</value>
   </data>
   <data name="AreYouSureOfDeletingReport0" xml:space="preserve">
-    <value>Étes-vous de supprimer le rapport {0} </value>
+    <value>Étes-vous de supprimer le rapport {0}</value>
   </data>
   <data name="Create" xml:space="preserve">
-    <value>Créer </value>
+    <value>Créer</value>
   </data>
   <data name="Delete" xml:space="preserve">
-    <value>Supprimer </value>
+    <value>Supprimer</value>
   </data>
   <data name="Download" xml:space="preserve">
-    <value>Télécharger </value>
+    <value>Télécharger</value>
   </data>
   <data name="ExcelAdminister" xml:space="preserve">
-    <value>Administrer </value>
+    <value>Administrer</value>
   </data>
   <data name="ExcelReport" xml:space="preserve">
-    <value>Rapport Excel </value>
+    <value>Rapport Excel</value>
   </data>
   <data name="PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem" xml:space="preserve">
-    <value>Confirmez que vous désirez supprimer l'entité du système </value>
+    <value>Confirmez que vous désirez supprimer l'entité du système</value>
   </data>
   <data name="PleaseConfirmYouDLikeToExecuteTheOperation0ToTheEntity123" xml:space="preserve">
-    <value>Veuillez confirmer que vous souhaitez exécuter l'opération {0} à l'entité {1} ({2}-{3}) </value>
+    <value>Veuillez confirmer que vous souhaitez exécuter l'opération {0} à l'entité {1} ({2}-{3})</value>
   </data>
   <data name="ReportTemplateMustBeSpecified" xml:space="preserve">
-    <value>Vous devez spécifier le modèle de rapport </value>
+    <value>Vous devez spécifier le modèle de rapport</value>
   </data>
   <data name="WeReceivedARequestToCreateAnAccountYouCanCreateItFollowingTheLinkBelow" xml:space="preserve">
-    <value>Nous avons reçu une demande de créer un compte. Vous pouvez créer le lien ci-dessous : </value>
+    <value>Nous avons reçu une demande de créer un compte. Vous pouvez créer le lien ci-dessous:</value>
   </data>
 </root>

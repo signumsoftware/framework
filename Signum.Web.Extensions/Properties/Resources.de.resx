@@ -118,369 +118,369 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AreYouSureOfDeletingQuery0" xml:space="preserve">
-    <value>Sind Sie sicher, dass Löschen von {0} Abfragen? </value>
+    <value>Sind Sie sicher, dass Löschen von {0} Abfragen?</value>
   </data>
   <data name="AreYouSureOfDeletingReport0" xml:space="preserve">
-    <value>Sind Sie sicher, dass den Bericht {0} löschen? </value>
+    <value>Sind Sie sicher, dass den Bericht {0} löschen?</value>
   </data>
   <data name="AreYouSureOfDeletingTheEntity012" xml:space="preserve">
-    <value>Sicher löschen Systementität {0} ({1}: {2})? </value>
+    <value>Sicher löschen Systementität {0} ({1}: {2})?</value>
   </data>
   <data name="ArgumentFilePathIDWasNotPassedToTheController" xml:space="preserve">
-    <value>Argument {FilePathID} wurde nicht an den Controller übergeben. </value>
+    <value>Argument {FilePathID} wurde nicht an den Controller übergeben</value>
   </data>
   <data name="ChangePassword" xml:space="preserve">
-    <value>Passwort ändern </value>
+    <value>Passwort ändern</value>
   </data>
   <data name="ChangePasswordAspx_ActualPassword" xml:space="preserve">
-    <value>Aktuelle Kennwort </value>
+    <value>Aktuelle Kennwort</value>
   </data>
   <data name="ChangePasswordAspx_ChangePassword" xml:space="preserve">
-    <value>Passwort ändern </value>
+    <value>Passwort ändern</value>
   </data>
   <data name="ChangePasswordAspx_ConfirmNewPassword" xml:space="preserve">
-    <value>Kennwort bestätigen </value>
+    <value>Kennwort bestätigen</value>
   </data>
   <data name="ChangePasswordAspx_NewPassword" xml:space="preserve">
-    <value>Neues Passwort </value>
+    <value>Neues Passwort</value>
   </data>
   <data name="ChangePasswordAspx_WriteActualPasswordAndNewOne" xml:space="preserve">
-    <value>Schreiben Sie Ihr aktuelles Kennwort ein und die neue </value>
+    <value>Schreiben Sie Ihr aktuelles Kennwort ein und die neue</value>
   </data>
   <data name="ChangePasswordExplanation" xml:space="preserve">
-    <value>Verwenden Sie dieses Formular, um Ihr Passwort zu ändern </value>
+    <value>Verwenden Sie dieses Formular, um Ihr Passwort zu ändern</value>
   </data>
   <data name="ConfirmNewPassword" xml:space="preserve">
-    <value>Neues Kennwort bestätigen </value>
+    <value>Neues Kennwort bestätigen</value>
   </data>
   <data name="ConstructFromManyOperation0NeedsSourceIdsAsParameter" xml:space="preserve">
-    <value>Konstruieren von viele Operation {{{0}}} braucht Quelle-IDs als parameter </value>
+    <value>Konstruieren von viele Operation {{{0}}} braucht Quelle-IDs als parameter</value>
   </data>
   <data name="ConstructFromManyOperation0NeedsSourceLazies" xml:space="preserve">
-    <value>Konstruieren von viele Operation {{{0}}} muss Lites Quelle </value>
+    <value>Konstruieren von viele Operation {{{0}}} muss Lites Quelle</value>
   </data>
   <data name="CouldNotCreateLiteWithoutAnIdToCallOperation0" xml:space="preserve">
-    <value>Lite konnte nicht ohne eine Id aufrufen, Operation {{{0}}} erstellt werden. </value>
+    <value>Lite konnte nicht ohne eine Id aufrufen, Operation {{{0}}} erstellt werden</value>
   </data>
   <data name="CouldntCreateFilePathWithUnknownFileTypeForField0" xml:space="preserve">
-    <value>FilePath konnte nicht mit unbekannten FileType für Feld {{0}} erstellt werden. </value>
+    <value>FilePath konnte nicht mit unbekannten FileType für Feld {{0}} erstellt werden</value>
   </data>
   <data name="Create" xml:space="preserve">
-    <value>Erstellen </value>
+    <value>Erstellen</value>
   </data>
   <data name="CurrentPassword" xml:space="preserve">
-    <value>Aktuelle Kennwort </value>
+    <value>Aktuelle Kennwort</value>
   </data>
   <data name="Delete" xml:space="preserve">
-    <value>Löschen </value>
+    <value>Löschen</value>
   </data>
   <data name="Download" xml:space="preserve">
-    <value>Download </value>
+    <value>Download</value>
   </data>
   <data name="EmailIsNotValid" xml:space="preserve">
-    <value>E-Mail unterscheidet sich von der gespeicherten e-Mail </value>
+    <value>E-Mail unterscheidet sich von der gespeicherten e-Mail</value>
   </data>
   <data name="EmailMustHaveAValue" xml:space="preserve">
-    <value>Die e-Mail muss einen Wert haben. </value>
+    <value>Die e-Mail muss einen Wert haben</value>
   </data>
   <data name="EmailNotExistsDatabase" xml:space="preserve">
-    <value>Die mitgelieferte e-Mail gehört nicht zu jeder registrierte Benutzer </value>
+    <value>Die mitgelieferte e-Mail gehört nicht zu jeder registrierte Benutzer</value>
   </data>
   <data name="EmailSent" xml:space="preserve">
-    <value>E-Mail gesendet </value>
+    <value>E-Mail gesendet</value>
   </data>
   <data name="EntityGroupsAscx_All" xml:space="preserve">
-    <value>Alle </value>
+    <value>Alle</value>
   </data>
   <data name="EntityGroupsAscx_EntityGroup" xml:space="preserve">
-    <value>Entität-Gruppe </value>
+    <value>Entität-Gruppe</value>
   </data>
   <data name="EntityGroupsAscx_In" xml:space="preserve">
-    <value>In </value>
+    <value>In</value>
   </data>
   <data name="EntityGroupsAscx_None" xml:space="preserve">
-    <value>None </value>
+    <value>None</value>
   </data>
   <data name="EntityGroupsAscx_Out" xml:space="preserve">
-    <value>Out </value>
+    <value>Out</value>
   </data>
   <data name="EntityGroupsAscx_Overriden" xml:space="preserve">
-    <value>Überschrieben </value>
+    <value>Überschrieben</value>
   </data>
   <data name="ErrorSavingFile" xml:space="preserve">
-    <value>Fehler beim Speichern der Datei </value>
+    <value>Fehler beim Speichern der Datei</value>
   </data>
   <data name="ExcelAdminister" xml:space="preserve">
-    <value>Verwalten </value>
+    <value>Verwalten</value>
   </data>
   <data name="ExcelReport" xml:space="preserve">
-    <value>Excel-Bericht </value>
+    <value>Excel-Bericht</value>
   </data>
   <data name="FacadeMethodsAscx_Allow" xml:space="preserve">
-    <value>Ermöglichen </value>
+    <value>Ermöglichen</value>
   </data>
   <data name="FacadeMethodsAscx_Deny" xml:space="preserve">
-    <value>Verweigern </value>
+    <value>Verweigern</value>
   </data>
   <data name="FacadeMethodsAscx_FacadeMethod" xml:space="preserve">
-    <value>Fassade-Methode </value>
+    <value>Fassade-Methode</value>
   </data>
   <data name="FacadeMethodsAscx_Overriden" xml:space="preserve">
-    <value>Überschrieben </value>
+    <value>Überschrieben</value>
   </data>
   <data name="FileTypePropertyOfFileLineSettingsMustBeSpecified" xml:space="preserve">
-    <value>FileType-Eigenschaft des FileLine-Einstellungen muss für FileLine {0} angegeben werden </value>
+    <value>FileType-Eigenschaft des FileLine-Einstellungen muss für FileLine {0} angegeben werden</value>
   </data>
   <data name="ForgotYourPassword" xml:space="preserve">
-    <value>Passwort vergessen? Geben Sie Ihre Login-Email unten ein. Wir senden Ihnen eine e-Mail mit einem Link zum Zurücksetzen Ihres Passworts. </value>
+    <value>Passwort vergessen? Geben Sie Ihre Login-Email unten ein. Wir senden Ihnen eine e-Mail mit einem Link zum Zurücksetzen Ihres Passworts.</value>
   </data>
   <data name="GoBackToLoginPage" xml:space="preserve">
-    <value>Zurück zur Login-Seite </value>
+    <value>Zurück zur Login-Seite</value>
   </data>
   <data name="HelpDocumentation" xml:space="preserve">
-    <value>Hilfedokumentation </value>
+    <value>Hilfedokumentation</value>
   </data>
   <data name="IHaveForgottenMyPassword" xml:space="preserve">
-    <value>Ich habe mein Passwort vergessen </value>
+    <value>Ich habe mein Passwort vergessen</value>
   </data>
   <data name="IntroduceYourUserNameAndPassword" xml:space="preserve">
-    <value>Geben Sie Ihren Benutzernamen und Passwort </value>
+    <value>Geben Sie Ihren Benutzernamen und Passwort</value>
   </data>
   <data name="InvalidNewPassword" xml:space="preserve">
-    <value>Ungültiges neues Kennwort </value>
+    <value>Ungültiges neues Kennwort</value>
   </data>
   <data name="InvalidOperationType0inTheConstructionOfOperation1" xml:space="preserve">
-    <value>Der Typ des Vorgangs {{0}} ist ungültig für Operation {{1}} </value>
+    <value>Der Typ des Vorgangs {{0}} ist ungültig für Operation {{1}}</value>
   </data>
   <data name="InvalidUsernameOrPassword" xml:space="preserve">
-    <value>Ungültiger Benutzername oder Kennwort </value>
+    <value>Ungültiger Benutzername oder Kennwort</value>
   </data>
   <data name="Key0NotFound" xml:space="preserve">
-    <value>Schlüssel {0} wurde nicht gefunden </value>
+    <value>Schlüssel {0} wurde nicht gefunden</value>
   </data>
   <data name="LoginEnter" xml:space="preserve">
-    <value>Login </value>
+    <value>Login</value>
   </data>
   <data name="MailBody_RememberPassword" xml:space="preserve">
-    <value>Wir senden Ihnen diese e-Mail, haben uns gebeten, Ihr Kennwort merken. Aus Sicherheitsgründen haben wir ein zufälliges Kennwort, erzeugt, die Sie dann ändern können.&lt;br&gt;&lt;br&gt; Das Kennwort ist &lt;b&gt;{0}&lt;/b&gt; </value>
+    <value>Wir senden Ihnen diese e-Mail, haben uns gebeten, Ihr Kennwort merken. Aus Sicherheitsgründen haben wir ein zufälliges Kennwort, erzeugt, die Sie dann ändern können.&lt;br&gt;&lt;br&gt; Das Kennwort ist &lt;b&gt;{0}&lt;/b&gt;</value>
   </data>
   <data name="MailSubject_RememberPassword" xml:space="preserve">
-    <value>Passwort-Erinnerung </value>
+    <value>Passwort-Erinnerung</value>
   </data>
   <data name="Message" xml:space="preserve">
-    <value>Nachricht </value>
+    <value>Nachricht</value>
   </data>
   <data name="NewPassword" xml:space="preserve">
-    <value>Neues Passwort </value>
+    <value>Neues Passwort</value>
   </data>
   <data name="NoErrorsFound" xml:space="preserve">
-    <value>Keine Fehler gefunden </value>
+    <value>Keine Fehler gefunden</value>
   </data>
   <data name="OperationsAscx_Allow" xml:space="preserve">
-    <value>Ermöglichen </value>
+    <value>Ermöglichen</value>
   </data>
   <data name="OperationsAscx_Deny" xml:space="preserve">
-    <value>Verweigern </value>
+    <value>Verweigern</value>
   </data>
   <data name="OperationsAscx_Operation" xml:space="preserve">
-    <value>Betrieb </value>
+    <value>Betrieb</value>
   </data>
   <data name="OperationsAscx_Overriden" xml:space="preserve">
-    <value>Überschrieben </value>
+    <value>Überschrieben</value>
   </data>
   <data name="Password" xml:space="preserve">
-    <value>Kennwort </value>
+    <value>Kennwort</value>
   </data>
   <data name="PasswordDoesNotMatchCurrent" xml:space="preserve">
-    <value>Das angegebene Kennwort stimmt nicht mit den aktuellen überein. </value>
+    <value>Das angegebene Kennwort stimmt nicht mit den aktuellen überein</value>
   </data>
   <data name="PasswordHasBeenChangedSuccessfully" xml:space="preserve">
-    <value>Das Kennwort wurde erfolgreich geändert </value>
+    <value>Das Kennwort wurde erfolgreich geändert</value>
   </data>
   <data name="PasswordHasBeenSent" xml:space="preserve">
-    <value>Das Kennwort wurde an die angegebene e-Mail-Konto {0} gesendet </value>
+    <value>Das Kennwort wurde an die angegebene e-Mail-Konto {0} gesendet</value>
   </data>
   <data name="PasswordMustHave0orMoreCharacters" xml:space="preserve">
-    <value>Das Kennwort muss bei {0} oder mehr Zeichen sein. </value>
+    <value>Das Kennwort muss bei {0} oder mehr Zeichen sein</value>
   </data>
   <data name="PasswordMustHaveAValue" xml:space="preserve">
-    <value>Das Kennwort muss angegeben werden </value>
+    <value>Das Kennwort muss angegeben werden</value>
   </data>
   <data name="PasswordReseted" xml:space="preserve">
-    <value>Ihr Passwort wurde zurückgesetzt </value>
+    <value>Ihr Passwort wurde zurückgesetzt</value>
   </data>
   <data name="PermissionsAscx_Allow" xml:space="preserve">
-    <value>Ermöglichen </value>
+    <value>Ermöglichen</value>
   </data>
   <data name="PermissionsAscx_Deny" xml:space="preserve">
-    <value>Verweigern </value>
+    <value>Verweigern</value>
   </data>
   <data name="PermissionsAscx_Overriden" xml:space="preserve">
-    <value>Überschrieben </value>
+    <value>Überschrieben</value>
   </data>
   <data name="PermissionsAscx_Permission" xml:space="preserve">
-    <value>Berechtigung </value>
+    <value>Berechtigung</value>
   </data>
   <data name="Please0IntoYourAccount" xml:space="preserve">
-    <value>Bitte, {0} in Ihr Konto </value>
+    <value>Bitte, {0} in Ihr Konto</value>
   </data>
   <data name="PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem" xml:space="preserve">
-    <value>Möchten Sie das Entität-System löschen </value>
+    <value>Möchten Sie das Entität-System löschen</value>
   </data>
   <data name="PleaseConfirmYouDLikeToExecuteTheOperation0ToTheEntity123" xml:space="preserve">
-    <value>Möchten Sie den Vorgang {0} mit Entität {1} ({2}-{3}) ausführen </value>
+    <value>Möchten Sie den Vorgang {0} mit Entität {1} ({2}-{3}) ausführen</value>
   </data>
   <data name="PleaseEnterYourChosenNewPassword" xml:space="preserve">
-    <value>Bitte geben Sie Ihr neue Passwort </value>
+    <value>Bitte geben Sie Ihr neue Passwort</value>
   </data>
   <data name="PropertiesAscx_Modify" xml:space="preserve">
-    <value>Bearbeiten </value>
+    <value>Bearbeiten</value>
   </data>
   <data name="PropertiesAscx_None" xml:space="preserve">
-    <value>None </value>
+    <value>None</value>
   </data>
   <data name="PropertiesAscx_Overriden" xml:space="preserve">
-    <value>Überschrieben </value>
+    <value>Überschrieben</value>
   </data>
   <data name="PropertiesAscx_Property" xml:space="preserve">
-    <value>Eigenschaft </value>
+    <value>Eigenschaft</value>
   </data>
   <data name="PropertiesAscx_Read" xml:space="preserve">
-    <value>Lesen </value>
+    <value>Lesen</value>
   </data>
   <data name="Property0DoesNotExistInType1" xml:space="preserve">
-    <value>Die Eigenschaft {0} ist in Typ {1} nicht vorhanden. </value>
+    <value>Die Eigenschaft {0} ist in Typ {1} nicht vorhanden</value>
   </data>
   <data name="Property0HasNoValue" xml:space="preserve">
-    <value>Die Eigenschaft {0} hat kein Wert </value>
+    <value>Die Eigenschaft {0} hat kein Wert</value>
   </data>
   <data name="Property0NotExistsInType1" xml:space="preserve">
-    <value>Die Eigenschaft {0} ist in Typ {1} nicht vorhanden. </value>
+    <value>Die Eigenschaft {0} ist in Typ {1} nicht vorhanden</value>
   </data>
   <data name="QueriesAscx_Allow" xml:space="preserve">
-    <value>Ermöglichen </value>
+    <value>Ermöglichen</value>
   </data>
   <data name="QueriesAscx_Deny" xml:space="preserve">
-    <value>Verweigern </value>
+    <value>Verweigern</value>
   </data>
   <data name="QueriesAscx_Overriden" xml:space="preserve">
-    <value>Überschrieben </value>
+    <value>Überschrieben</value>
   </data>
   <data name="QueriesAscx_Query" xml:space="preserve">
-    <value>Abfrage </value>
+    <value>Abfrage</value>
   </data>
   <data name="Remember" xml:space="preserve">
-    <value>Denken Sie daran </value>
+    <value>Denken Sie daran</value>
   </data>
   <data name="RememberMe" xml:space="preserve">
-    <value>An mich erinnern </value>
+    <value>An mich erinnern</value>
   </data>
   <data name="RememberPassword" xml:space="preserve">
-    <value>An Kennwort erinnern </value>
+    <value>An Kennwort erinnern</value>
   </data>
   <data name="RememberPasswordExplanation" xml:space="preserve">
-    <value>Geben Sie Ihren Benutzernamen und Ihre e-Mail-Adresse eine e-Mail-Nachricht mit dem Kennwort erhalten </value>
+    <value>Geben Sie Ihren Benutzernamen und Ihre e-Mail-Adresse eine e-Mail-Nachricht mit dem Kennwort erhalten</value>
   </data>
   <data name="ReportTemplateMustBeSpecified" xml:space="preserve">
-    <value>Sie müssen das Berichtsmodell angeben. </value>
+    <value>Sie müssen das Berichtsmodell angeben</value>
   </data>
   <data name="ResetPassword" xml:space="preserve">
-    <value>Passwort zurücksetzen </value>
+    <value>Passwort zurücksetzen</value>
   </data>
   <data name="ResetPasswordCodeHasBeenSent" xml:space="preserve">
-    <value>Ein Bestätigungs-Code zum Zurücksetzen Ihres Passworts wurde an das e-Mail-Konto {0} gesendet </value>
+    <value>Ein Bestätigungs-Code zum Zurücksetzen Ihres Passworts wurde an das e-Mail-Konto {0} gesendet</value>
   </data>
   <data name="ResetPasswordSuccess" xml:space="preserve">
-    <value>Ihr Kennwort wurde erfolgreich geändert </value>
+    <value>Ihr Kennwort wurde erfolgreich geändert</value>
   </data>
   <data name="Source" xml:space="preserve">
-    <value>Quelle </value>
+    <value>Quelle</value>
   </data>
   <data name="StackTrace" xml:space="preserve">
-    <value>StackTrace </value>
+    <value>StackTrace</value>
   </data>
   <data name="TargetSite" xml:space="preserve">
-    <value>Quelle </value>
+    <value>Quelle</value>
   </data>
   <data name="TheConfirmationCodeThatYouHaveJustSentIsInvalid" xml:space="preserve">
-    <value>Der Bestätigungs-Code, den Sie gerade gesendet haben ist ungültig </value>
+    <value>Der Bestätigungs-Code, den Sie gerade gesendet haben ist ungültig</value>
   </data>
   <data name="ThePasswordMustHaveBetween7And15CharactersEachOfThemBeingANumber09OrALetter" xml:space="preserve">
-    <value>Das Kennwort muss zwischen 7 und 15 Charaktere, jeder von Ihnen wird eine Zahl 0-9 oder einen Brief haben. </value>
+    <value>Das Kennwort muss zwischen 7 und 15 Charaktere, jeder von Ihnen wird eine Zahl 0-9 oder einen Brief haben</value>
   </data>
   <data name="ThereAreATotalOf0Errors" xml:space="preserve">
-    <value>Es gibt insgesamt {0} Fehlern </value>
+    <value>Es gibt insgesamt {0} Fehlern</value>
   </data>
   <data name="ThereHasBeenAnErrorWithYourRequestToResetYourPasswordPleaseEnterYourLogin" xml:space="preserve">
-    <value>Es wurde ein Fehler mit Ihrer Anfrage zum Zurücksetzen Ihres Passworts. Bitte geben Sie Ihre Login-Daten. </value>
+    <value>Es wurde ein Fehler mit Ihrer Anfrage zum Zurücksetzen Ihres Passworts. Bitte geben Sie Ihre Login-Daten.</value>
   </data>
   <data name="ThereSNotARegisteredUserWithThatEmailAddress" xml:space="preserve">
-    <value>Kein Benutzer ist mit dieser e-Mail-Adresse registriert. </value>
+    <value>Kein Benutzer ist mit dieser e-Mail-Adresse registriert</value>
   </data>
   <data name="TheresNotAViewForType0" xml:space="preserve">
-    <value>Es gibt keinen Blick für Typ {0} registriert </value>
+    <value>Es gibt keinen Blick für Typ {0} registriert</value>
   </data>
   <data name="TheSpecifiedPasswordsDontMatch" xml:space="preserve">
-    <value>Die angegebenen Kennwörter stimmen nicht überein </value>
+    <value>Die angegebenen Kennwörter stimmen nicht überein</value>
   </data>
   <data name="TypesAscx_Create" xml:space="preserve">
-    <value>Erstellen </value>
+    <value>Erstellen</value>
   </data>
   <data name="TypesAscx_Modify" xml:space="preserve">
-    <value>Ändern </value>
+    <value>Ändern</value>
   </data>
   <data name="TypesAscx_None" xml:space="preserve">
-    <value>None </value>
+    <value>None</value>
   </data>
   <data name="TypesAscx_Operations" xml:space="preserve">
-    <value>Operationen </value>
+    <value>Operationen</value>
   </data>
   <data name="TypesAscx_Overriden" xml:space="preserve">
-    <value>Überschrieben </value>
+    <value>Überschrieben</value>
   </data>
   <data name="TypesAscx_Properties" xml:space="preserve">
-    <value>Eigenschaften </value>
+    <value>Eigenschaften</value>
   </data>
   <data name="TypesAscx_Queries" xml:space="preserve">
-    <value>Abfragen </value>
+    <value>Abfragen</value>
   </data>
   <data name="TypesAscx_Read" xml:space="preserve">
-    <value>Lesen </value>
+    <value>Lesen</value>
   </data>
   <data name="TypesAscx_Type" xml:space="preserve">
-    <value>Typ </value>
+    <value>Typ</value>
   </data>
   <data name="User" xml:space="preserve">
-    <value>Benutzer </value>
+    <value>Benutzer</value>
   </data>
   <data name="UserNameAlreadyExists" xml:space="preserve">
-    <value>Die bereitgestellten User-Name bereits registriert ist, bitte wählen Sie ein anderes </value>
+    <value>Die bereitgestellten User-Name bereits registriert ist, bitte wählen Sie ein anderes</value>
   </data>
   <data name="UserNameMustHaveAValue" xml:space="preserve">
-    <value>Sie müssen den Benutzernamen eingeben. </value>
+    <value>Sie müssen den Benutzernamen eingeben</value>
   </data>
   <data name="ViewName" xml:space="preserve">
-    <value>Sichtname </value>
+    <value>Sichtname</value>
   </data>
   <data name="ViewsChecker" xml:space="preserve">
-    <value>Ansichten-Checker </value>
+    <value>Ansichten-Checker</value>
   </data>
   <data name="WeReceivedARequestToCreateAnAccountYouCanCreateItFollowingTheLinkBelow" xml:space="preserve">
-    <value>Aufgefordert, ein Konto zu erstellen. Um dieses bitte klicken Sie unten auf den Link bestätigen: </value>
+    <value>Aufgefordert, ein Konto zu erstellen. Um dieses bitte klicken Sie unten auf den Link bestätigen:</value>
   </data>
   <data name="YouCanResetYourPasswordByFollowingTheLinkBelow" xml:space="preserve">
-    <value>Sie können ein neues Kennwort erstellen, indem Sie auf den Link unten klicken: </value>
+    <value>Sie können ein neues Kennwort erstellen, indem Sie auf den Link unten klicken</value>
   </data>
   <data name="YouMustEnterTheCurrentPassword" xml:space="preserve">
-    <value>Sie müssen Ihr aktuelle Passwort eingeben. </value>
+    <value>Sie müssen Ihr aktuelle Passwort eingeben</value>
   </data>
   <data name="YouMustRepeatTheNewPassword" xml:space="preserve">
-    <value>Sie müssen das neue Kennwort wiederholen. </value>
+    <value>Sie müssen das neue Kennwort wiederholen</value>
   </data>
   <data name="YouRecentlyRequestedANewPassword" xml:space="preserve">
-    <value>Sie verlangt vor kurzem ein neues Passwort </value>
+    <value>Sie verlangt vor kurzem ein neues Passwort</value>
   </data>
   <data name="YourNewPasswordIs0" xml:space="preserve">
-    <value>Ihr neues Passwort ist {0} </value>
+    <value>Ihr neues Passwort ist {0}</value>
   </data>
 </root>

@@ -229,7 +229,7 @@
     <value>check</value>
   </data>
   <data name="Should" xml:space="preserve">
-    <value>. Debe </value>
+    <value>. Debe  </value>
   </data>
   <data name="_0IsA1_f" xml:space="preserve">
     <value>{0} es una {1}</value>
@@ -319,7 +319,7 @@
     <value>Construye un nuevo {0}</value>
   </data>
   <data name="From0OfThe1" xml:space="preserve">
-    <value>desde {0} del {1}</value>
+    <value>desde {0} del {1} </value>
   </data>
   <data name="TheOperationNeedsA0InTheArgumentNumber1" xml:space="preserve">
     <value>La operación necesita un {0} en el argumento número {1}</value>

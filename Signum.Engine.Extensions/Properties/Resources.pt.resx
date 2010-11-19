@@ -118,88 +118,90 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="_0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships" xml:space="preserve">
-    <value>Encontrado {0} ciclos nos papéis papéis devido ao gráfico relacionamentos: </value>
+    <value>Encontrado {0} ciclos nos papéis papéis devido ao gráfico relacionamentos:
+</value>
   </data>
   <data name="_0IsA1" xml:space="preserve">
-    <value>{0} é um {1} </value>
+    <value>{0} é um {1}</value>
   </data>
   <data name="_0IsA1_f" xml:space="preserve">
-    <value>{0} é {1} </value>
+    <value>{0} é {1}</value>
   </data>
   <data name="_0IsA1_m" xml:space="preserve">
-    <value>{0} é {1} </value>
+    <value>{0} é {1}</value>
   </data>
   <data name="_0IsACollectionOfElements1" xml:space="preserve">
-    <value>{0} é uma coleção de elementos {1} </value>
+    <value>{0} é uma coleção de elementos {1}</value>
   </data>
   <data name="AccessToFacadeMethod0IsNotAllowed" xml:space="preserve">
-    <value>Acesso ao método de fachada '{0}' não é permitido. </value>
+    <value>Acesso ao método de fachada '{0}' não é permitido</value>
   </data>
   <data name="AfterTheOperationTheStateShouldBe0ButIs1" xml:space="preserve">
-    <value>Após a operação {0} o Estado deveria ser {1} mas é {2} </value>
+    <value>Após a operação {0} o Estado deveria ser {1} mas é {2}</value>
   </data>
   <data name="AmbiguityBetweenInterfaces0" xml:space="preserve">
-    <value>Ambigüidade entre interfaces: {0} </value>
+    <value>Ambigüidade entre interfaces: {0}</value>
   </data>
   <data name="Amount" xml:space="preserve">
-    <value>montante </value>
+    <value>montante</value>
   </data>
   <data name="AnonymousUserNotLoadedInitializeToLevel1SimpleEntities" xml:space="preserve">
-    <value>AnonymousUser não carregado. Inicializar para Level1SimpleEntities </value>
+    <value>AnonymousUser não carregado. Inicializar para Level1SimpleEntities</value>
   </data>
   <data name="BelongsToAnotherKindOkLinqProvider" xml:space="preserve">
     <value>{0} pertence a outro tipo de Linq Provider</value>
   </data>
   <data name="Call0Over1OfThe2" xml:space="preserve">
-    <value>Executar {0} em {1} {2} </value>
+    <value>Executar {0} em {1} {2}</value>
   </data>
   <data name="Call0Over1OfThe2_f" xml:space="preserve">
-    <value>Executar {0} em {1} {2} </value>
+    <value>Executar {0} em {1} {2}</value>
   </data>
   <data name="Call0Over1OfThe2_m" xml:space="preserve">
-    <value>Executar {0} em {1} {2} </value>
+    <value>Executar {0} em {1} {2}</value>
   </data>
   <data name="Character" xml:space="preserve">
     <value>caráter</value>
   </data>
   <data name="Check" xml:space="preserve">
-    <value>seleção </value>
+    <value>seleção</value>
   </data>
   <data name="ConstantExpressionWithAComplexIQueryableUnexpectedAt" xml:space="preserve">
-    <value>ConstantExpression com um IQueryable complexo não se espera que neste momento </value>
+    <value>ConstantExpression com um IQueryable complexo não se espera que neste momento</value>
   </data>
   <data name="ConstructsANew0" xml:space="preserve">
-    <value>Constrói um novo {0} </value>
+    <value>Constrói um novo {0}</value>
   </data>
   <data name="ConstructsANew0_f" xml:space="preserve">
-    <value>Constrói um novo {0} </value>
+    <value>Constrói um novo {0}</value>
   </data>
   <data name="ConstructsANew0_m" xml:space="preserve">
-    <value>Constrói um novo {0} </value>
+    <value>Constrói um novo {0}</value>
   </data>
   <data name="Data" xml:space="preserve">
-    <value>Dados </value>
+    <value>Dados</value>
   </data>
   <data name="Date" xml:space="preserve">
-    <value>Data </value>
+    <value>Data</value>
   </data>
   <data name="DateTime" xml:space="preserve">
-    <value>Data e hora </value>
+    <value>Data e hora</value>
   </data>
   <data name="EmailIsNotValid" xml:space="preserve">
-    <value>O e-mail é diferente do e-mail armazenado </value>
+    <value>O e-mail é diferente do e-mail armazenado</value>
   </data>
   <data name="ErrorParsingXMLHelpFiles" xml:space="preserve">
-    <value>Erro ao ler arquivos de ajuda do XML: </value>
+    <value>Erro ao ler arquivos de ajuda do XML:
+</value>
   </data>
   <data name="ExcelReportArgumentIsNecessaryForCompositeReports" xml:space="preserve">
-    <value>excelReport argumento é necessário para compositeReports </value>
+    <value>excelReport argumento é necessário para compositeReports</value>
   </data>
   <data name="ExcelTemplateMustHaveExtensionXLSXandCurrentOneHas0" xml:space="preserve">
-    <value>Modelo do Excel deve ter a extensão. xlsx, e atual tem {0} </value>
+    <value>Modelo do Excel deve ter a extensão. xlsx, e atual tem {0}</value>
   </data>
   <data name="Executions" xml:space="preserve">
-    <value>Execuções </value>
+    <value>Execuções</value>
   </data>
   <data name="ExpressedIn" xml:space="preserve">
     <value>expresso em </value>
@@ -208,189 +210,195 @@
     <value>a partir de {0} {1} </value>
   </data>
   <data name="From0OfThe1_f" xml:space="preserve">
-    <value>a partir de {0} {1} </value>
+    <value>a partir de {0} {1}</value>
   </data>
   <data name="From0OfThe1_m" xml:space="preserve">
-    <value>a partir de {0} {1} </value>
+    <value>a partir de {0} {1}</value>
   </data>
   <data name="FromMany0" xml:space="preserve">
-    <value>de muitos {0} </value>
+    <value>de muitos {0}</value>
   </data>
   <data name="FromMany0_f" xml:space="preserve">
-    <value>de muitos {0} </value>
+    <value>de muitos {0}</value>
   </data>
   <data name="FromMany0_m" xml:space="preserve">
-    <value>de muitos {0} </value>
+    <value>de muitos {0}</value>
   </data>
   <data name="HelpNotLoaded" xml:space="preserve">
-    <value>Ajuda não carregada </value>
+    <value>Ajuda não carregada</value>
   </data>
   <data name="ImpossibleToExecute0FromState1" xml:space="preserve">
-    <value>Impossível executar {0} de Estado {1} </value>
+    <value>Impossível executar {0} de Estado {1}</value>
   </data>
   <data name="IncorrectPassword" xml:space="preserve">
-    <value>Senha incorreta </value>
+    <value>Senha incorreta</value>
   </data>
   <data name="Integer" xml:space="preserve">
-    <value>número inteiro </value>
+    <value>número inteiro</value>
   </data>
   <data name="LastExecution" xml:space="preserve">
-    <value>Última execução </value>
+    <value>Última execução</value>
   </data>
   <data name="NoEmailsToProcessFound" xml:space="preserve">
-    <value>Não encontrado nenhum e-mails para processar </value>
+    <value>Não encontrado nenhum e-mails para processar</value>
   </data>
   <data name="NoEntitiesToProcessFound" xml:space="preserve">
-    <value>Nenhuma entidade para processar encontrado </value>
+    <value>Nenhuma entidade para processar encontrado</value>
   </data>
   <data name="NoHelpFor0" xml:space="preserve">
-    <value>Nenhuma ajuda para {0} </value>
+    <value>Nenhuma ajuda para {0}</value>
   </data>
   <data name="NotAuthorizedTo0The1WithId2" xml:space="preserve">
-    <value>Não autorizado para {0} {1} com a ID {2} </value>
+    <value>Não autorizado para {0} {1} com a ID {2}</value>
   </data>
   <data name="NotAuthorizedToRetrieve0" xml:space="preserve">
-    <value>Não autorizado para a recuperação de '{0}' </value>
+    <value>Não autorizado para a recuperação de '{0}'</value>
   </data>
   <data name="NotAuthorizedToSave0" xml:space="preserve">
-    <value>Não autorizado a salvar '{0}' </value>
+    <value>Não autorizado a salvar '{0}'</value>
   </data>
   <data name="NotRegistered" xml:space="preserve">
-    <value>{0} não está registrado </value>
+    <value>{0} não está registrado</value>
   </data>
   <data name="NotRegisteredInEmailLogic" xml:space="preserve">
-    <value>{0} não registrado no EmailLogic </value>
+    <value>{0} não registrado no EmailLogic</value>
   </data>
   <data name="NotValueFor0IsNotFoundIn1Table" xml:space="preserve">
-    <value>Não tem nenhum valor para {0} da tabela {1} </value>
+    <value>Não tem nenhum valor para {0} da tabela {1}</value>
   </data>
   <data name="NoTypeWithFullName0FoundInTheSchema" xml:space="preserve">
-    <value>Nenhum tipo com o nome {0} encontrado no esquema </value>
+    <value>Nenhum tipo com o nome {0} encontrado no esquema</value>
   </data>
   <data name="NoUsersToProcessFound" xml:space="preserve">
-    <value>Nenhum usuário para processar encontrado </value>
+    <value>Nenhum usuário para processar encontrado</value>
   </data>
   <data name="OfThe0" xml:space="preserve">
-    <value>o {0} </value>
+    <value>o {0}</value>
   </data>
   <data name="OfThe0_f" xml:space="preserve">
-    <value>o {0} </value>
+    <value>o {0}</value>
   </data>
   <data name="OfThe0_m" xml:space="preserve">
-    <value>o {0} </value>
+    <value>o {0}</value>
   </data>
   <data name="Operation0DoesNotHaveConstructInitialized" xml:space="preserve">
-    <value>Operação {0} não tem Construct inicializado </value>
+    <value>Operação {0} não tem Construct inicializado</value>
   </data>
   <data name="Operation0DoesNotHaveConstructorInitialized" xml:space="preserve">
-    <value>Operação {0} não tem construtor inicializado </value>
+    <value>Operação {0} não tem construtor inicializado</value>
   </data>
   <data name="Operation0DoesNotHaveDeleteInitialized" xml:space="preserve">
-    <value>Operação {0} não tem excluir inicializado </value>
+    <value>Operação {0} não tem excluir inicializado</value>
   </data>
   <data name="Operation0DoesNotHaveExecuteInitialized" xml:space="preserve">
-    <value>Operação {0} não tem executar inicializado </value>
+    <value>Operação {0} não tem executar inicializado</value>
   </data>
   <data name="Operation0HasNoConstruct" xml:space="preserve">
-    <value>Operação {0} não tem Construct inicializado </value>
+    <value>Operação {0} não tem Construct inicializado</value>
   </data>
   <data name="Operation0IsA1NotA2Use3Instead" xml:space="preserve">
-    <value>Operação {0} é um {1} não um {2}, utilizar '{3}' em vez disso </value>
+    <value>Operação {0} é um {1} não um {2}, utilizar '{3}' em vez disso</value>
   </data>
   <data name="Operation0IsNotAllowedForLites" xml:space="preserve">
-    <value>Não é permitida a operação {0} para lites </value>
+    <value>Não é permitida a operação {0} para lites</value>
   </data>
   <data name="Operation0IsNotAuthorized" xml:space="preserve">
-    <value>Não está autorizada a operação {0} </value>
+    <value>Não está autorizada a operação {0}</value>
   </data>
   <data name="Operation0NeedsALite" xml:space="preserve">
-    <value>Operação {0} precisa um Lite </value>
+    <value>Operação {0} precisa um Lite</value>
   </data>
   <data name="Operation0NotFoundForType1" xml:space="preserve">
-    <value>Operação {0} não foi encontrado para o tipo {1} </value>
+    <value>Operação {0} não foi encontrado para o tipo {1}</value>
   </data>
   <data name="OrNull" xml:space="preserve">
-    <value>ou nulo </value>
+    <value>ou nulo</value>
   </data>
   <data name="ProcessExecution0IsNotRunningAnymore" xml:space="preserve">
-    <value>ProcessExecution {0} já não está funcionando. </value>
+    <value>ProcessExecution {0} já não está funcionando</value>
   </data>
   <data name="QueryOf0" xml:space="preserve">
-    <value>Consulta de {0} </value>
+    <value>Consulta de {0}</value>
   </data>
   <data name="QueryOf0Connecting1" xml:space="preserve">
-    <value>Consulta de conexão {1} {0} </value>
+    <value>Consulta de conexão {1} {0}</value>
   </data>
   <data name="RemovesThe0FromTheDatabase" xml:space="preserve">
-    <value>Remove o {0} do banco de dados </value>
+    <value>Remove o {0} do banco de dados</value>
   </data>
   <data name="RepositoryNotSet" xml:space="preserve">
-    <value>O repositório para o arquivo não foi estabelecido. </value>
+    <value>O repositório para o arquivo não foi estabelecido</value>
   </data>
   <data name="ResetPasswordCode" xml:space="preserve">
-    <value>Código para redefinir sua senha </value>
+    <value>Código para redefinir sua senha</value>
   </data>
   <data name="Should" xml:space="preserve">
-    <value>. Deve </value>
+    <value>. Deve  </value>
   </data>
   <data name="String" xml:space="preserve">
-    <value>Cadeia de caracteres </value>
+    <value>Cadeia de caracteres</value>
   </data>
   <data name="SufixNotSet" xml:space="preserve">
-    <value>O sufixo para o arquivo não foi estabelecido. </value>
+    <value>O sufixo para o arquivo não foi estabelecido</value>
   </data>
   <data name="SystemUserNotLoadedInitializeToLevel1SimpleEntities" xml:space="preserve">
-    <value>SystemUser não carregado. Inicializar Level1SimpleEntities </value>
+    <value>SystemUser não carregado. Inicializar Level1SimpleEntities</value>
   </data>
   <data name="The0" xml:space="preserve">
-    <value>O {0} </value>
+    <value>O {0}</value>
   </data>
   <data name="The0_f" xml:space="preserve">
-    <value>o {0} </value>
+    <value>o {0}</value>
   </data>
   <data name="The0_m" xml:space="preserve">
-    <value>O {0} </value>
+    <value>O {0}</value>
   </data>
   <data name="TheDatabaseVersion" xml:space="preserve">
-    <value>a versão de banco de dados </value>
+    <value>a versão de banco de dados</value>
   </data>
   <data name="TheEntity0IsNew" xml:space="preserve">
-    <value>A entidade {0} é nova </value>
+    <value>A entidade {0} é nova</value>
   </data>
   <data name="TheExcelTemplateHasAColumn0NotPresentInTheFindWindow" xml:space="preserve">
-    <value>O modelo do Excel tem uma coluna {0} não está presente no motor de busca </value>
+    <value>O modelo do Excel tem uma coluna {0} não está presente no motor de busca</value>
   </data>
   <data name="TheFollowingKeysHaveBeenRepeatedIn01" xml:space="preserve">
-    <value>As seguintes chaves são repetidas em {0}: {1} </value>
+    <value>As seguintes chaves são repetidas em {0}: {1}</value>
   </data>
   <data name="TheKey0IsNotFoundIn1Table" xml:space="preserve">
-    <value>Chave {0} não encontrado na tabela {1} </value>
+    <value>Chave {0} não encontrado na tabela {1}</value>
   </data>
   <data name="TheOperationNeedsA0InTheArgumentNumber1" xml:space="preserve">
-    <value>A operação precisa um {0} no número argumento {1} </value>
+    <value>A operação precisa um {0} no número argumento {1}</value>
   </data>
   <data name="TheOperationNeedsA0InTheArgumentNumber1_f" xml:space="preserve">
-    <value>A operação precisa um {0} no argumento {1} </value>
+    <value>A operação precisa um {0} no argumento {1}</value>
   </data>
   <data name="TheOperationNeedsA0InTheArgumentNumber1_m" xml:space="preserve">
-    <value>A operação precisa um {0} no argumento {1} </value>
+    <value>A operação precisa um {0} no argumento {1}</value>
   </data>
   <data name="ThereAreNoResultsToWrite" xml:space="preserve">
-    <value>Não há resultados para gravar </value>
+    <value>Não há resultados para gravar</value>
   </data>
   <data name="Type0HasToImplement1AtLeast" xml:space="preserve">
-    <value>Tipo {0} deve implementar pelo menos {1} </value>
+    <value>Tipo {0} deve implementar pelo menos {1}</value>
   </data>
   <data name="Username0IsNotValid" xml:space="preserve">
-    <value>O nome de usuário {0} não é válido </value>
+    <value>O nome de usuário {0} não é válido</value>
   </data>
   <data name="Value" xml:space="preserve">
-    <value>valor </value>
+    <value>valor</value>
   </data>
   <data name="ValueLike0" xml:space="preserve">
-    <value>valor entre {0} </value>
+    <value>valor entre {0}</value>
   </data>
   <data name="YourVersion" xml:space="preserve">
-    <value>sua versão </value>
+    <value>sua versão</value>
+  </data>
+  <data name="YouCanResetYourPasswordByFollowingTheLinkBelow" xml:space="preserve">
+    <value>Você pode redefinir sua senha, seguindo o link abaixo:</value>
+  </data>
+  <data name="YouRecentlyRequestedANewPassword" xml:space="preserve">
+    <value>Você solicitou recentemente uma nova senha</value>
   </data>
 </root>
