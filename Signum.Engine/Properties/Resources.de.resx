@@ -118,42 +118,42 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="_0HasBeenRenamedIn1" xml:space="preserve">
-    <value>'{0}' wurde in ' {1} umbenannt? </value>
+    <value>'{0}' wurde in ' {1} umbenannt?</value>
   </data>
   <data name="CannotInsertDuplicatedFields0On1Table" xml:space="preserve">
-    <value>Kann nicht dupliziert einfügen auf Feld {0} von {1}-Tabelle Werte </value>
+    <value>Kann nicht dupliziert einfügen auf Feld {0} von {1}-Tabelle Werte</value>
   </data>
   <data name="ConcurrencyErrorOnDatabaseTable0Id1" xml:space="preserve">
-    <value>Parallelitätsfehler auf die Databe, Table = {0}, ID = {1} </value>
+    <value>Parallelitätsfehler auf die Databe, Table = {0}, ID = {1}</value>
   </data>
   <data name="EndOfSyncScript" xml:space="preserve">
-    <value>--- ENDE DAS SYNCHRONISIERUNGSSKRIPT </value>
+    <value>--- ENDE DAS SYNCHRONISIERUNGSSKRIPT</value>
   </data>
   <data name="EntityWithType0AndId1NotFound" xml:space="preserve">
-    <value>Keine gefunden {0} mit der ID {1} </value>
+    <value>Keine gefunden {0} mit der ID {1}</value>
   </data>
   <data name="NNone" xml:space="preserve">
-    <value>-n: keine </value>
+    <value>- n: keine</value>
   </data>
   <data name="NoWayOfMappingType0Found" xml:space="preserve">
-    <value>Keine Möglichkeit der Zuordnungstyp {0} gefunden </value>
+    <value>Keine Möglichkeit der Zuordnungstyp {0} gefunden</value>
   </data>
   <data name="PropertyRouteCanNotBeOfTypeRoot" xml:space="preserve">
-    <value>PropertyRoute kann nicht vom Typ Root sein. </value>
+    <value>PropertyRoute kann nicht vom Typ Root sein</value>
   </data>
   <data name="StartOfSyncScriptGeneratedOn0" xml:space="preserve">
-    <value>---ANFANG DES SYNCHRONISATIONSSKRIPTS GENERIERT AUF {0} </value>
+    <value>--- ANFANG DES SYNCHRONISATIONSSKRIPTS GENERIERT AUF {0}</value>
   </data>
   <data name="ThereAre0ThatReferThisEntity" xml:space="preserve">
-    <value>Es gibt '{0}', die zu dieser Entität verweisen </value>
+    <value>Es gibt '{0}', die zu dieser Entität verweisen</value>
   </data>
   <data name="ThereAreRecordsIn0PointingToThisTableByColumn1" xml:space="preserve">
-    <value>Es gibt Datensätze in '{0}', die auf diese Tabelle verweisen, von Spalte '{1}' </value>
+    <value>Es gibt Datensätze in '{0}', die auf diese Tabelle verweisen, von Spalte '{1}'</value>
   </data>
   <data name="UnauthorizedAccessTo0Because1" xml:space="preserve">
-    <value>Hinausgehende Zugang zu {0}, weil {1} </value>
+    <value>Hinausgehende Zugang zu {0}, weil {1}</value>
   </data>
   <data name="Warning0NoResults" xml:space="preserve">
-    <value>Warnung {0}: keine Ergebnisse </value>
+    <value>Warnung {0}: keine Ergebnisse</value>
   </data>
 </root>

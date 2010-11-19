@@ -118,76 +118,76 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="_0Day" xml:space="preserve">
-    <value>{0} dia </value>
+    <value>{0} dia</value>
   </data>
   <data name="_0Days" xml:space="preserve">
-    <value>{0} dias </value>
+    <value>{0} dias</value>
   </data>
   <data name="_0HasNoFreeBits" xml:space="preserve">
-    <value>{0: X} não tem nenhum bits livre </value>
+    <value>{0: X} não tem nenhum bits livre</value>
   </data>
   <data name="_0Hour" xml:space="preserve">
-    <value>{0} hora </value>
+    <value>{0} hora</value>
   </data>
   <data name="_0Hours" xml:space="preserve">
-    <value>{0} horas </value>
+    <value>{0} horas</value>
   </data>
   <data name="_0Minute" xml:space="preserve">
-    <value>{0} minuto </value>
+    <value>{0} minuto</value>
   </data>
   <data name="_0Minutes" xml:space="preserve">
-    <value>{0} minutos </value>
+    <value>{0} minutos</value>
   </data>
   <data name="_0Month" xml:space="preserve">
-    <value>{0} mês </value>
+    <value>{0} mês</value>
   </data>
   <data name="_0Months" xml:space="preserve">
-    <value>{0} meses </value>
+    <value>{0} meses</value>
   </data>
   <data name="_0Second" xml:space="preserve">
-    <value>{0} segundo </value>
+    <value>{0} segundo</value>
   </data>
   <data name="_0Seconds" xml:space="preserve">
-    <value>{0} segundos </value>
+    <value>{0} segundos</value>
   </data>
   <data name="_0Year" xml:space="preserve">
-    <value>{0} ano </value>
+    <value>{0} ano</value>
   </data>
   <data name="_0Year1Month2Day" xml:space="preserve">
     <value>{0} anos, {1} meses, {2} dias</value>
   </data>
   <data name="_0Years" xml:space="preserve">
-    <value>{0} anos </value>
+    <value>{0} anos</value>
   </data>
   <data name="Ago" xml:space="preserve">
     <value>há {0} </value>
   </data>
   <data name="And" xml:space="preserve">
-    <value>e </value>
+    <value> e </value>
   </data>
   <data name="DateLast" xml:space="preserve">
-    <value>Último {0} </value>
+    <value>Último {0}</value>
   </data>
   <data name="DateSeparators" xml:space="preserve">
-    <value>. </value>
+    <value>,,</value>
   </data>
   <data name="DateThis" xml:space="preserve">
-    <value>Este {0} </value>
+    <value>Este {0}</value>
   </data>
   <data name="DateTimePrecision_Days" xml:space="preserve">
-    <value>Dias </value>
+    <value>Dias</value>
   </data>
   <data name="DateTimePrecision_Hours" xml:space="preserve">
-    <value>Horas </value>
+    <value>Horas</value>
   </data>
   <data name="DateTimePrecision_Milliseconds" xml:space="preserve">
-    <value>Milissegundos </value>
+    <value>Milissegundos</value>
   </data>
   <data name="DateTimePrecision_Minutes" xml:space="preserve">
-    <value>Minutos </value>
+    <value>Minutos</value>
   </data>
   <data name="DateTimePrecision_Seconds" xml:space="preserve">
-    <value>Segundos </value>
+    <value>Segundos</value>
   </data>
   <data name="EnterYourSelection" xml:space="preserve">
     <value>Insira sua seleção: </value>
@@ -196,27 +196,27 @@
     <value>Insira suas seleções separadas por vírgulas: </value>
   </data>
   <data name="NoOptionWithKey0Found" xml:space="preserve">
-    <value>Nenhuma opção com chave {0} encontrado </value>
+    <value>Nenhuma opção com chave {0} encontrado</value>
   </data>
   <data name="Or" xml:space="preserve">
-    <value>ou </value>
+    <value> ou </value>
   </data>
   <data name="OS_Unknown0" xml:space="preserve">
-    <value>Desconhecido {{0}} </value>
+    <value>Desconhecido {{0}}</value>
   </data>
   <data name="SelectOneOfTheFollowingOptions" xml:space="preserve">
-    <value>Escolha uma das seguintes opções: </value>
+    <value>Escolha uma das seguintes opções:</value>
   </data>
   <data name="Today" xml:space="preserve">
-    <value>Hoje </value>
+    <value>Hoje</value>
   </data>
   <data name="Tomorrow" xml:space="preserve">
-    <value>Manhã </value>
+    <value>Manhã</value>
   </data>
   <data name="Unavailable" xml:space="preserve">
-    <value>Não disponível </value>
+    <value>Não disponível</value>
   </data>
   <data name="Yesterday" xml:space="preserve">
-    <value>Ontem </value>
+    <value>Ontem</value>
   </data>
 </root>

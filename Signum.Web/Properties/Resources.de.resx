@@ -118,132 +118,132 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Alerts" xml:space="preserve">
-    <value>Warnungen </value>
+    <value>Warnungen</value>
   </data>
   <data name="Average" xml:space="preserve">
-    <value>Medium </value>
+    <value>Medium</value>
   </data>
   <data name="CalendarClose" xml:space="preserve">
-    <value>Schließen </value>
+    <value>Schließen</value>
   </data>
   <data name="CalendarNext" xml:space="preserve">
-    <value>Nächste </value>
+    <value>Nächste</value>
   </data>
   <data name="CalendarPrevious" xml:space="preserve">
     <value>Zurück</value>
   </data>
   <data name="CalendarToday" xml:space="preserve">
-    <value>Heute </value>
+    <value>Heute</value>
   </data>
   <data name="Checked" xml:space="preserve">
-    <value>Bewährte </value>
+    <value>Bewährte</value>
   </data>
   <data name="CreateAlert" xml:space="preserve">
-    <value>Benachrichtigung erstellen </value>
+    <value>Benachrichtigung erstellen</value>
   </data>
   <data name="CreateNote" xml:space="preserve">
-    <value>Notiz erstellen </value>
+    <value>Notiz erstellen</value>
   </data>
   <data name="DeleteFilters" xml:space="preserve">
-    <value>Filter löschen </value>
+    <value>Filter löschen</value>
   </data>
   <data name="EditColumnsFinishEdit" xml:space="preserve">
-    <value>Fertig bearbeiten </value>
+    <value>Fertig bearbeiten</value>
   </data>
   <data name="Excel" xml:space="preserve">
-    <value>Excel </value>
+    <value>Excel</value>
   </data>
   <data name="ExecutedXTimes" xml:space="preserve">
-    <value>X-Mal ausgeführt </value>
+    <value>X-Mal ausgeführt</value>
   </data>
   <data name="Field" xml:space="preserve">
-    <value>Feld </value>
+    <value>Feld</value>
   </data>
   <data name="FilterByField" xml:space="preserve">
-    <value>Filtern von Feld </value>
+    <value>Filtern von Feld</value>
   </data>
   <data name="Future" xml:space="preserve">
-    <value>Zukunft </value>
+    <value>Zukunft</value>
   </data>
   <data name="HideFilters" xml:space="preserve">
-    <value>Filter ausblenden </value>
+    <value>Filter ausblenden</value>
   </data>
   <data name="IncorrectEntityInSessionYouMustReloadThePageToContinue" xml:space="preserve">
-    <value>Sitzungsdaten ist falsch. Aktualisieren Sie die Seite weiter </value>
+    <value>Sitzungsdaten ist falsch. Aktualisieren Sie die Seite weiter</value>
   </data>
   <data name="Maximum" xml:space="preserve">
-    <value>Maximum </value>
+    <value>Maximum</value>
   </data>
   <data name="Minimum" xml:space="preserve">
-    <value>Minimum </value>
+    <value>Minimum</value>
   </data>
   <data name="Name" xml:space="preserve">
-    <value>Name </value>
+    <value>Name</value>
   </data>
   <data name="New" xml:space="preserve">
-    <value>Neu </value>
+    <value>Neu</value>
   </data>
   <data name="No" xml:space="preserve">
-    <value>nein </value>
+    <value>nein</value>
   </data>
   <data name="NoFiltersSpecified" xml:space="preserve">
-    <value>Keine Filter angegeben </value>
+    <value>Keine Filter angegeben</value>
   </data>
   <data name="NoResults" xml:space="preserve">
-    <value>Keine Ergebnisse </value>
+    <value>Keine Ergebnisse</value>
   </data>
   <data name="Notes" xml:space="preserve">
-    <value>Notizen </value>
+    <value>Notizen</value>
   </data>
   <data name="NumberOfRows" xml:space="preserve">
-    <value>No. Datensätze </value>
+    <value>No. Datensätze</value>
   </data>
   <data name="Operation" xml:space="preserve">
-    <value>Betrieb </value>
+    <value>Betrieb</value>
   </data>
   <data name="Remove" xml:space="preserve">
-    <value>Löschen </value>
+    <value>Löschen</value>
   </data>
   <data name="Save" xml:space="preserve">
-    <value>Speichern </value>
+    <value>Speichern</value>
   </data>
   <data name="Search" xml:space="preserve">
-    <value>Suche </value>
+    <value>Suche</value>
   </data>
   <data name="ShowCalendar" xml:space="preserve">
-    <value>Kalender anzeigen </value>
+    <value>Kalender anzeigen</value>
   </data>
   <data name="ShowFilters" xml:space="preserve">
-    <value>Anzeigefilter </value>
+    <value>Anzeigefilter</value>
   </data>
   <data name="Type0NotAllowed" xml:space="preserve">
-    <value>Typ {0} nicht zulässig </value>
+    <value>Typ {0} nicht zulässig</value>
   </data>
   <data name="UserColumnsEdit" xml:space="preserve">
-    <value>Edit User Spalten </value>
+    <value>Edit User Spalten</value>
   </data>
   <data name="Value" xml:space="preserve">
-    <value>Wert </value>
+    <value>Wert</value>
   </data>
   <data name="ValueMustBeSpecifiedFor0" xml:space="preserve">
-    <value>Sie müssen einen Wert für {0} angeben. </value>
+    <value>Sie müssen einen Wert für {0} angeben</value>
   </data>
   <data name="View" xml:space="preserve">
-    <value>Ansicht </value>
+    <value>Ansicht</value>
   </data>
   <data name="ViewForType0IsNotAllowed" xml:space="preserve">
-    <value>Ansicht für Typ {0} ist nicht zulässig. </value>
+    <value>Ansicht für Typ {0} ist nicht zulässig</value>
   </data>
   <data name="ViewNotes" xml:space="preserve">
-    <value>Anzeigen von Notizen </value>
+    <value>Anzeigen von Notizen</value>
   </data>
   <data name="Warned" xml:space="preserve">
-    <value>Gewarnt </value>
+    <value>Gewarnt</value>
   </data>
   <data name="Yes" xml:space="preserve">
-    <value>Ja </value>
+    <value>Ja</value>
   </data>
   <data name="YourSessionHasTimedOutClickF5ToReloadTheEntity" xml:space="preserve">
-    <value>Ihre Sitzung ist abgelaufen, klicken Sie auf F5, um die Entität aus der Datenbank neu laden </value>
+    <value>Ihre Sitzung ist abgelaufen, klicken Sie auf F5, um die Entität aus der Datenbank neu laden</value>
   </data>
 </root>

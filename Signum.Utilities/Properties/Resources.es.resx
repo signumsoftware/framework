@@ -163,7 +163,7 @@
     <value> y </value>
   </data>
   <data name="CannotRemoveItemThatIsNotInTree" xml:space="preserve">
-    <value>Imposible eliminar un elemento que no está en el arbol.</value>
+    <value>Imposible eliminar un elemento que no está en el arbol</value>
   </data>
   <data name="CellHasQuotesInAnUnexpectedPosition" xml:space="preserve">
     <value>La celda contiene " en una posición inesperada: {0}</value>
@@ -178,7 +178,7 @@
     <value>Último {0}</value>
   </data>
   <data name="DateSeparators" xml:space="preserve">
-    <value>.</value>
+    <value>,,</value>
   </data>
   <data name="DateThis" xml:space="preserve">
     <value>Este {0}</value>

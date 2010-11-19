@@ -154,13 +154,13 @@
     <value>'{0}' n'est pas un identifiant valide</value>
   </data>
   <data name="And" xml:space="preserve">
-    <value>et </value>
+    <value> et </value>
   </data>
   <data name="As0" xml:space="preserve">
     <value>Comme {0}</value>
   </data>
   <data name="Be" xml:space="preserve">
-    <value>être</value>
+    <value>être </value>
   </data>
   <data name="BeBetween0And1" xml:space="preserve">
     <value>Doit être entre {0} et {1}</value>
@@ -235,7 +235,7 @@
     <value>A nombre d'éléments{0} {1}</value>
   </data>
   <data name="HaveAPrecisionOf" xml:space="preserve">
-    <value>A une précision</value>
+    <value>A une précision </value>
   </data>
   <data name="HaveBetween0And1Characters" xml:space="preserve">
     <value>A entre {0} et {1} caractère</value>
@@ -292,7 +292,7 @@
     <value>Nouveau</value>
   </data>
   <data name="Of" xml:space="preserve">
-    <value>de</value>
+    <value> de </value>
   </data>
   <data name="OrBeNull" xml:space="preserve">
     <value>ou doit être nul</value>
@@ -340,7 +340,7 @@
     <value>{0} est nécessaire</value>
   </data>
   <data name="Date" xml:space="preserve">
-    <value>Date </value>
+    <value>Date</value>
   </data>
   <data name="_0IsNotSet" xml:space="preserve">
     <value>Champ {0} non établie</value>

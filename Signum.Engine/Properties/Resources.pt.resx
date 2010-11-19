@@ -118,42 +118,42 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="_0HasBeenRenamedIn1" xml:space="preserve">
-    <value>'{0}' foi renomeada em {1}? </value>
+    <value>'{0}' foi renomeada em {1}?</value>
   </data>
   <data name="CannotInsertDuplicatedFields0On1Table" xml:space="preserve">
-    <value>Não é possível inserir duplicado valores no campo {0} da tabela {1} </value>
+    <value>Não é possível inserir duplicado valores no campo {0} da tabela {1}</value>
   </data>
   <data name="ConcurrencyErrorOnDatabaseTable0Id1" xml:space="preserve">
-    <value>Erro de concorrência em databe, tabela = {0}, ID = {1} </value>
+    <value>Erro de concorrência em databe, tabela = {0}, ID = {1}</value>
   </data>
   <data name="EndOfSyncScript" xml:space="preserve">
-    <value>---FINAL DO SCRIPT DE SINCRONIZAÇÃO </value>
+    <value>--- FINAL DO SCRIPT DE SINCRONIZAÇÃO</value>
   </data>
   <data name="EntityWithType0AndId1NotFound" xml:space="preserve">
-    <value>Entidade com tipo {0} e identificação {1} não encontrado </value>
+    <value>Entidade com tipo {0} e identificação {1} não encontrado</value>
   </data>
   <data name="NNone" xml:space="preserve">
-    <value>-n: Nenhum </value>
+    <value>- n: Nenhum</value>
   </data>
   <data name="NoWayOfMappingType0Found" xml:space="preserve">
-    <value>Não foi encontrado como mapear o tipo {0} </value>
+    <value>Não foi encontrado como mapear o tipo {0}</value>
   </data>
   <data name="PropertyRouteCanNotBeOfTypeRoot" xml:space="preserve">
     <value>PropertyRoute não pode ser do tipo Root</value>
   </data>
   <data name="StartOfSyncScriptGeneratedOn0" xml:space="preserve">
-    <value>---INÍCIO DA SINCRONIZAÇÃO SCRIPT GERADO EM {0} </value>
+    <value>--- INÍCIO DA SINCRONIZAÇÃO SCRIPT GERADO EM {0}</value>
   </data>
   <data name="ThereAre0ThatReferThisEntity" xml:space="preserve">
-    <value>Existem '{0}' que se referem a esta entidade </value>
+    <value>Existem '{0}' que se referem a esta entidade</value>
   </data>
   <data name="ThereAreRecordsIn0PointingToThisTableByColumn1" xml:space="preserve">
-    <value>Existem registros em '{0}' que se referem a esta tabela por coluna '{1}' </value>
+    <value>Existem registros em '{0}' que se referem a esta tabela por coluna '{1}'</value>
   </data>
   <data name="UnauthorizedAccessTo0Because1" xml:space="preserve">
-    <value>Acesso negado para {0} porque {1} </value>
+    <value>Acesso negado para {0} porque {1}</value>
   </data>
   <data name="Warning0NoResults" xml:space="preserve">
-    <value>Aviso {0}: nenhum resultado </value>
+    <value>Aviso {0}: nenhum resultado</value>
   </data>
 </root>

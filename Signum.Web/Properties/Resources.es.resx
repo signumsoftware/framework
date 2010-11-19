@@ -331,10 +331,10 @@
     <value>Debe establecer el Static Type del StaticInfo</value>
   </data>
   <data name="InvalidType0ForRuntimeInfoItMustBeLiteOrIdentifiableEntity" xml:space="preserve">
-    <value>Tipo {0} inválido para RuntimeInfo. Debe ser un Lite o un IdentifiableEntity </value>
+    <value>Tipo {0} inválido para RuntimeInfo. Debe ser un Lite o un IdentifiableEntity</value>
   </data>
   <data name="RuntimeInfoSRuntimeTypeCannotBeOfTypeLiteUseExtractLite" xml:space="preserve">
-    <value>El RuntimeType de RuntimeInfo no puede ser de tipo Lite. Utilice ExtractLite o cree un RuntimeInfo&lt;T&gt; en su lugar.</value>
+    <value>El RuntimeType de RuntimeInfo no puede ser de tipo Lite. Utilice ExtractLite o cree un RuntimeInfo&lt;T&gt; en su lugar</value>
   </data>
   <data name="InvalidRuntimeInfoParametersIdOrNull0AndIsNewTrue" xml:space="preserve">
     <value>Parámetros de RuntimeInfo inválidos: IdOrNull={0} e IsNew=true</value>

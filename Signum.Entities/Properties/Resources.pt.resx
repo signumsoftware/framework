@@ -118,231 +118,231 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="_0As1" xml:space="preserve">
-    <value>({0} como {1}) </value>
+    <value>({0} como {1})</value>
   </data>
   <data name="_0DoesNotHaveAValid0Format" xml:space="preserve">
-    <value>{{0}} não tem um formato {0} válido  </value>
+    <value>{{0}} não tem um formato {0} válido</value>
   </data>
   <data name="_0HasMoreThan0DecimalPlaces" xml:space="preserve">
-    <value>{{0}} possui mais de {0} decimais </value>
+    <value>{{0}} possui mais de {0} decimais</value>
   </data>
   <data name="_0HasNoCorrectFormat" xml:space="preserve">
-    <value>{0} não tem o formato correto </value>
+    <value>{0} não tem o formato correto</value>
   </data>
   <data name="_0HasSomeRepeatedElements0" xml:space="preserve">
-    <value>{{0}} tem alguns elementos repetidos: {0} </value>
+    <value>{{0}} tem alguns elementos repetidos: {0}</value>
   </data>
   <data name="_0HasToBe0Than1" xml:space="preserve">
-    <value>{{0}} deve ser {0} {1} </value>
+    <value>{{0}} deve ser {0} {1}</value>
   </data>
   <data name="_0HasToBeBetween0And1" xml:space="preserve">
-    <value>{{0}} deve estar entre {0} e {1} </value>
+    <value>{{0}} deve estar entre {0} e {1}</value>
   </data>
   <data name="_0HasToBeLowercase" xml:space="preserve">
-    <value>{0} deve ser todas as minúsculas </value>
+    <value>{0} deve ser todas as minúsculas</value>
   </data>
   <data name="_0HasToBeUppercase" xml:space="preserve">
-    <value>{0} deve ser todas maiúsculas </value>
+    <value>{0} deve ser todas maiúsculas</value>
   </data>
   <data name="_0IsNecessary" xml:space="preserve">
-    <value>{0} é necessário </value>
+    <value>{0} é necessário</value>
   </data>
   <data name="_0IsNecessaryOnState1" xml:space="preserve">
-    <value>{0} é necessária no Estado {1} </value>
+    <value>{0} é necessária no Estado {1}</value>
   </data>
   <data name="_0IsNotAllowed" xml:space="preserve">
-    <value>{0} não é permitido </value>
+    <value>{0} não é permitido</value>
   </data>
   <data name="_0IsNotAllowedOnState1" xml:space="preserve">
-    <value>{0} não é permitida no Estado {1} </value>
+    <value>{0} não é permitida no Estado {1}</value>
   </data>
   <data name="_0IsNotAValidIdentifier" xml:space="preserve">
-    <value>'{0}' não é um identificador válido </value>
+    <value>'{0}' não é um identificador válido</value>
   </data>
   <data name="_0IsNotSet" xml:space="preserve">
-    <value>Campo {0} não estabelecido </value>
+    <value>Campo {0} não estabelecido</value>
   </data>
   <data name="And" xml:space="preserve">
-    <value>e </value>
+    <value> e </value>
   </data>
   <data name="As0" xml:space="preserve">
-    <value>Como {0} </value>
+    <value>Como {0}</value>
   </data>
   <data name="Be" xml:space="preserve">
     <value>ser </value>
   </data>
   <data name="BeBetween0And1" xml:space="preserve">
-    <value>estar entre {0} e {1} </value>
+    <value>estar entre {0} e {1}</value>
   </data>
   <data name="BeNotNull" xml:space="preserve">
-    <value>não pode ser nula </value>
+    <value>não pode ser nula</value>
   </data>
   <data name="Column0NotFound" xml:space="preserve">
-    <value>Coluna {0} não encontrado </value>
+    <value>Coluna {0} não encontrado</value>
   </data>
   <data name="ComparisonType_DistinctTo" xml:space="preserve">
-    <value>diferente do </value>
+    <value>diferente do</value>
   </data>
   <data name="ComparisonType_EqualTo" xml:space="preserve">
-    <value>igual a </value>
+    <value>igual a</value>
   </data>
   <data name="ComparisonType_GreaterThan" xml:space="preserve">
-    <value>maior que </value>
+    <value>maior que</value>
   </data>
   <data name="ComparisonType_GreaterThanOrEqual" xml:space="preserve">
-    <value>maior ou igual a </value>
+    <value>maior ou igual a</value>
   </data>
   <data name="ComparisonType_LessThan" xml:space="preserve">
-    <value>menos de </value>
+    <value>menos de</value>
   </data>
   <data name="ComparisonType_LessThanOrEqual" xml:space="preserve">
-    <value>menor ou igual a </value>
+    <value>menor ou igual a</value>
   </data>
   <data name="Count" xml:space="preserve">
-    <value>[Número] </value>
+    <value>[Número]</value>
   </data>
   <data name="Date" xml:space="preserve">
-    <value>Data </value>
+    <value>Data</value>
   </data>
   <data name="Day" xml:space="preserve">
-    <value>Dia </value>
+    <value>Dia</value>
   </data>
   <data name="FileName" xml:space="preserve">
-    <value>Nome do arquivo </value>
+    <value>Nome do arquivo</value>
   </data>
   <data name="FilterOperation_Contains" xml:space="preserve">
-    <value>contém </value>
+    <value>contém</value>
   </data>
   <data name="FilterOperation_DistinctTo" xml:space="preserve">
-    <value>diferente de </value>
+    <value>diferente de</value>
   </data>
   <data name="FilterOperation_EndsWith" xml:space="preserve">
-    <value>termina com </value>
+    <value>termina com</value>
   </data>
   <data name="FilterOperation_EqualTo" xml:space="preserve">
-    <value>igual a </value>
+    <value>igual a</value>
   </data>
   <data name="FilterOperation_GreaterThan" xml:space="preserve">
-    <value>maior que </value>
+    <value>maior que</value>
   </data>
   <data name="FilterOperation_GreaterThanOrEqual" xml:space="preserve">
-    <value>maior ou igual a </value>
+    <value>maior ou igual a</value>
   </data>
   <data name="FilterOperation_LessThan" xml:space="preserve">
-    <value>menos de </value>
+    <value>menos de</value>
   </data>
   <data name="FilterOperation_LessThanOrEqual" xml:space="preserve">
-    <value>menor ou igual a </value>
+    <value>menor ou igual a</value>
   </data>
   <data name="FilterOperation_Like" xml:space="preserve">
-    <value>como </value>
+    <value>como</value>
   </data>
   <data name="FilterOperation_StartsWith" xml:space="preserve">
-    <value>começa por </value>
+    <value>começa por</value>
   </data>
   <data name="Have0Decimals" xml:space="preserve">
-    <value>tem {0} decimal </value>
+    <value>tem {0} decimal</value>
   </data>
   <data name="HaveANumberOfElements01" xml:space="preserve">
-    <value>tem um número de elementos {0} {1} </value>
+    <value>tem um número de elementos {0} {1}</value>
   </data>
   <data name="HaveAPrecisionOf" xml:space="preserve">
     <value>ter uma precisão de </value>
   </data>
   <data name="HaveBetween0And1Characters" xml:space="preserve">
-    <value>têm entre {0} e {1} caracteres </value>
+    <value>têm entre {0} e {1} caracteres</value>
   </data>
   <data name="HaveMaximun0Characters" xml:space="preserve">
-    <value>ter máxima {0} caracteres </value>
+    <value>ter máxima {0} caracteres</value>
   </data>
   <data name="HaveMinimum0Characters" xml:space="preserve">
-    <value>ter mínimo {0} caracteres </value>
+    <value>ter mínimo {0} caracteres</value>
   </data>
   <data name="HaveNoRepeatedElements" xml:space="preserve">
-    <value>não deve ter elementos repetidos </value>
+    <value>não deve ter elementos repetidos</value>
   </data>
   <data name="HaveValid0Format" xml:space="preserve">
-    <value>tem um formato {0} válido </value>
+    <value>tem um formato {0} válido</value>
   </data>
   <data name="Hour" xml:space="preserve">
-    <value>Hora </value>
+    <value>Hora</value>
   </data>
   <data name="IdentifiableEntity_ToStr" xml:space="preserve">
-    <value>[Texto] </value>
+    <value>[Texto]</value>
   </data>
   <data name="IdNotValid" xml:space="preserve">
-    <value>ID inválido </value>
+    <value>ID inválido</value>
   </data>
   <data name="ImmutableEntity_AllowChange" xml:space="preserve">
-    <value>Permitir alterações </value>
+    <value>Permitir alterações</value>
   </data>
   <data name="InvalidFormat" xml:space="preserve">
-    <value>Formato inválido </value>
+    <value>Formato inválido</value>
   </data>
   <data name="LockeableEntity_Locked" xml:space="preserve">
-    <value>Bloqueado </value>
+    <value>Bloqueado</value>
   </data>
   <data name="Lowercase" xml:space="preserve">
-    <value>Minúsculas </value>
+    <value>Minúsculas</value>
   </data>
   <data name="Millisecond" xml:space="preserve">
-    <value>Milissegundo </value>
+    <value>Milissegundo</value>
   </data>
   <data name="Minute" xml:space="preserve">
-    <value>Minuto </value>
+    <value>Minuto</value>
   </data>
   <data name="Month" xml:space="preserve">
-    <value>Mês </value>
+    <value>Mês</value>
   </data>
   <data name="MonthStart" xml:space="preserve">
     <value>Início de mês </value>
   </data>
   <data name="MoreThanOneColumnNamed0" xml:space="preserve">
-    <value>Mais de uma coluna chamada {0} </value>
+    <value>Mais de uma coluna chamada {0}</value>
   </data>
   <data name="MoreThanOneTokenWithKey0FoundOn1" xml:space="preserve">
-    <value>Mais que um token com chave {0} encontrado em {1} </value>
+    <value>Mais que um token com chave {0} encontrado em {1}</value>
   </data>
   <data name="New" xml:space="preserve">
-    <value>Novo </value>
+    <value>Novo</value>
   </data>
   <data name="Of" xml:space="preserve">
-    <value>de </value>
+    <value> de </value>
   </data>
   <data name="OrBeNull" xml:space="preserve">
-    <value>ou ser nulo </value>
+    <value>ou ser nulo</value>
   </data>
   <data name="Second" xml:space="preserve">
-    <value>Segundo </value>
+    <value>Segundo</value>
   </data>
   <data name="State0NotRegisteredInStateValidator" xml:space="preserve">
-    <value>Estado {0} não registrado no StateValidator </value>
+    <value>Estado {0} não registrado no StateValidator</value>
   </data>
   <data name="Telephone" xml:space="preserve">
-    <value>Telefone </value>
+    <value>Telefone</value>
   </data>
   <data name="TheLenghtOf0HasToBeEqualTo0" xml:space="preserve">
-    <value>O comprimento de {{0}} deve ser igual a {0} </value>
+    <value>O comprimento de {{0}} deve ser igual a {0}</value>
   </data>
   <data name="TheLengthOf0HasToBeGreaterOrEqualTo0" xml:space="preserve">
-    <value>O comprimento de {{0}} deve ser maior ou igual a {0} </value>
+    <value>O comprimento de {{0}} deve ser maior ou igual a {0}</value>
   </data>
   <data name="TheLengthOf0HasToBeLesserOrEqualTo0" xml:space="preserve">
-    <value>O comprimento de {{0}} deve ser menor ou igual a {0} </value>
+    <value>O comprimento de {{0}} deve ser menor ou igual a {0}</value>
   </data>
   <data name="TheNumberOfElementsOf0HasToBe01" xml:space="preserve">
-    <value>O número de elementos de {{0}} deve ser {0} {1} </value>
+    <value>O número de elementos de {{0}} deve ser {0} {1}</value>
   </data>
   <data name="Token0NotCompatibleWith1" xml:space="preserve">
-    <value>Token {0} não é compatível com {1} </value>
+    <value>Token {0} não é compatível com {1}</value>
   </data>
   <data name="TypeNotFound" xml:space="preserve">
-    <value>Tipo não encontrado </value>
+    <value>Tipo não encontrado</value>
   </data>
   <data name="Uppercase" xml:space="preserve">
-    <value>Maiúsculas </value>
+    <value>Maiúsculas</value>
   </data>
   <data name="Year" xml:space="preserve">
-    <value>Ano </value>
+    <value>Ano</value>
   </data>
 </root>

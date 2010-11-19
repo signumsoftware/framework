@@ -178,7 +178,7 @@
     <value>Dernier {0}</value>
   </data>
   <data name="DateSeparators" xml:space="preserve">
-    <value>,</value>
+    <value>,,</value>
   </data>
   <data name="DateThis" xml:space="preserve">
     <value>{0} prochain</value>
@@ -314,7 +314,7 @@
     <value>Pas supporté {0}</value>
   </data>
   <data name="Or" xml:space="preserve">
-    <value>ou</value>
+    <value> ou </value>
   </data>
   <data name="OS_Unknown0" xml:space="preserve">
     <value>Inconnu({0})</value>

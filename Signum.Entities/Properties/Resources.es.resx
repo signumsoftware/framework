@@ -235,7 +235,7 @@
     <value>tiene un número de elementos {0} {1}</value>
   </data>
   <data name="HaveAPrecisionOf" xml:space="preserve">
-    <value>tener una precisión de</value>
+    <value>tener una precisión de </value>
   </data>
   <data name="HaveBetween0And1Characters" xml:space="preserve">
     <value>tener entre {0} y {1} caracteres</value>
@@ -340,7 +340,7 @@
     <value>{0} es necesario</value>
   </data>
   <data name="Date" xml:space="preserve">
-    <value>Fecha </value>
+    <value>Fecha</value>
   </data>
   <data name="_0IsNotSet" xml:space="preserve">
     <value>Campo {0} no establecido</value>
