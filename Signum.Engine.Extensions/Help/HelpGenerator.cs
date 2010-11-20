@@ -176,7 +176,7 @@ namespace Signum.Engine.Help
                 }
                 catch (Exception)
                 {
-                    return null;
+                    expression = MetaEvaluator.Clean(dynamicQuery.Expression);
                 }
 
                 List<Type> types = TableGatherer.GatherTables(expression);
