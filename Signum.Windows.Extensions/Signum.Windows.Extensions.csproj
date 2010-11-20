@@ -171,9 +171,6 @@
     </Compile>
     <Compile Include="Chart\UserChartMenuItem.cs" />
     <Compile Include="Converters.cs" />
-    <Compile Include="ExecutionInfo\ElapsedTime.xaml.cs">
-      <DependentUpon>ElapsedTime.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Files\FileLine.xaml.cs">
       <DependentUpon>FileLine.xaml</DependentUpon>
     </Compile>
@@ -418,12 +415,6 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Chart\ChartWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="ExecutionInfo\ElapsedTime.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
       <Generator>MSBuild:Compile</Generator>
