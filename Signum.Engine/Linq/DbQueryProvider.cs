@@ -58,7 +58,7 @@ namespace Signum.Engine.Linq
 
         public static Expression Clean(Expression expression)
         {
-            Expression clean = ExpressionCleaner.Clean(expression);
+            Expression clean = ExpressionCleaner.Clean(expression, ExpressionEvaluator.PartialEval);
             Expression simplified = OverloadingSimplifier.Simplify(clean);
             return simplified;
         }

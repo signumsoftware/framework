@@ -49,11 +49,18 @@ namespace Signum.Utilities.ExpressionTrees
 	/// </summary>
 	public class ExpressionCleaner: SimpleExpressionVisitor
 	{
+        Func<Expression, Expression> partialEval;
+
         public static Expression Clean(Expression expr)
         {
-            ExpressionCleaner ee = new ExpressionCleaner();
+            return Clean(expr, ExpressionEvaluator.PartialEval);
+        }
+
+        public static Expression Clean(Expression expr, Func<Expression, Expression> partialEval)
+        {
+            ExpressionCleaner ee = new ExpressionCleaner() { partialEval = partialEval }; 
             var result = ee.Visit(expr);
-            return ExpressionEvaluator.PartialEval(result);
+            return partialEval(result);
         }
 
         protected override Expression VisitInvocation(InvocationExpression iv)
@@ -150,7 +157,7 @@ namespace Signum.Utilities.ExpressionTrees
         {
             if (b.NodeType == ExpressionType.Coalesce)
             {
-                Expression left = ExpressionEvaluator.PartialEval(this.Visit(b.Left));
+                Expression left = partialEval(this.Visit(b.Left));
 
                 if (left.NodeType == ExpressionType.Constant)
                 {
@@ -175,11 +182,11 @@ namespace Signum.Utilities.ExpressionTrees
 
             if (b.NodeType == ExpressionType.And || b.NodeType == ExpressionType.AndAlso)
             {
-                Expression left = ExpressionEvaluator.PartialEval(this.Visit(b.Left));
+                Expression left = partialEval(this.Visit(b.Left));
                 if (left.NodeType == ExpressionType.Constant)
                     return GetBool(left) ? Visit(b.Right) : Expression.Constant(false);
 
-                Expression right = ExpressionEvaluator.PartialEval(this.Visit(b.Right));
+                Expression right = partialEval(this.Visit(b.Right));
                 if (right.NodeType == ExpressionType.Constant)
                     return GetBool(right) ? left : Expression.Constant(false);
 
@@ -187,11 +194,11 @@ namespace Signum.Utilities.ExpressionTrees
             }
             else if (b.NodeType == ExpressionType.Or || b.NodeType == ExpressionType.OrElse)
             {
-                Expression left = ExpressionEvaluator.PartialEval(this.Visit(b.Left));
+                Expression left = partialEval(this.Visit(b.Left));
                 if (left.NodeType == ExpressionType.Constant)
                     return GetBool(left) ? Expression.Constant(true) : Visit(b.Right);
 
-                Expression right = ExpressionEvaluator.PartialEval(this.Visit(b.Right));
+                Expression right = partialEval(this.Visit(b.Right));
                 if (right.NodeType == ExpressionType.Constant)
                     return GetBool(right) ? Expression.Constant(true) : left;
 
@@ -203,11 +210,11 @@ namespace Signum.Utilities.ExpressionTrees
 
             if (b.NodeType == ExpressionType.Equal)
             {
-                Expression left = ExpressionEvaluator.PartialEval(this.Visit(b.Left));
+                Expression left = partialEval(this.Visit(b.Left));
                 if (left.NodeType == ExpressionType.Constant)
                     return GetBool(left) ? Visit(b.Right) : Visit(Expression.Not(b.Right));
 
-                Expression right = ExpressionEvaluator.PartialEval(this.Visit(b.Right));
+                Expression right = partialEval(this.Visit(b.Right));
                 if (right.NodeType == ExpressionType.Constant)
                     return GetBool(right) ? left : Expression.Not(left);
 
@@ -215,11 +222,11 @@ namespace Signum.Utilities.ExpressionTrees
             }
             else if (b.NodeType == ExpressionType.NotEqual)
             {
-                Expression left = ExpressionEvaluator.PartialEval(this.Visit(b.Left));
+                Expression left = partialEval(this.Visit(b.Left));
                 if (left.NodeType == ExpressionType.Constant)
                     return GetBool(left) ? Visit(Expression.Not(b.Right)) : Visit(b.Right);
 
-                Expression right = ExpressionEvaluator.PartialEval(this.Visit(b.Right));
+                Expression right = partialEval(this.Visit(b.Right));
                 if (right.NodeType == ExpressionType.Constant)
                     return GetBool(right) ? Expression.Not(left) : left;
 
@@ -231,7 +238,7 @@ namespace Signum.Utilities.ExpressionTrees
 
         protected override Expression VisitConditional(ConditionalExpression c)
         {
-            Expression test = ExpressionEvaluator.PartialEval(this.Visit(c.Test));
+            Expression test = partialEval(this.Visit(c.Test));
             if (test.NodeType == ExpressionType.Constant)
             {
                 if (GetBool(test))

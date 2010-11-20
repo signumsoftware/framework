@@ -16,6 +16,7 @@ namespace Signum.Engine.Linq
     {
         MetaProjector = 2000,
         MetaExpression,
+        MetaConstant
     }
 
     internal class MetaProjectorExpression : Expression
@@ -64,6 +65,25 @@ namespace Signum.Engine.Linq
         {
             this.type = type;
             this.Meta = meta;
+        }
+    }
+
+    internal class MetaConstant : Expression
+    {
+        readonly Type type;
+        public override Type Type
+        {
+            get { return type; }
+        }
+
+        public override ExpressionType NodeType
+        {
+            get { return (ExpressionType)MetaExpressionType.MetaConstant; }
+        }
+
+        public MetaConstant(Type type)
+        {
+            this.type = type;
         }
     }   
 }
