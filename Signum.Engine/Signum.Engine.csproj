@@ -110,7 +110,6 @@
     <Compile Include="Linq\ExpressionVisitor\AliasReplacer.cs" />
     <Compile Include="Linq\ExpressionVisitor\ColumnProjector.cs" />
     <Compile Include="Linq\ExpressionVisitor\ConditionsRewriter.cs" />
-    <Compile Include="Linq\ExpressionVisitor\BoolSimplifier.cs" />
     <Compile Include="Linq\ExpressionVisitor\ChildProjectionFlattener.cs" />
     <Compile Include="Linq\ExpressionVisitor\RowNumberFiller.cs" />
     <Compile Include="Linq\ExpressionVisitor\QueryFilterer.cs" />

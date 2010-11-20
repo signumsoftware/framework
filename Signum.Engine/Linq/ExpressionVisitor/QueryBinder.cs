@@ -860,7 +860,7 @@ namespace Signum.Engine.Linq
             if (source == null)
                 return m;
 
-            LambdaExpression lambda = ExpressionExpander.GetExpansion(source.Type, m.Method);
+            LambdaExpression lambda = ExpressionCleaner.GetExpansion(source.Type, m.Method);
             if (lambda != null) //new expansions discovered
             {
                 int i= 0;  
@@ -893,7 +893,7 @@ namespace Signum.Engine.Linq
         {
             Expression source = m.Expression; 
 
-            LambdaExpression lambda = ExpressionExpander.GetExpansion(source.Type, m.Member);
+            LambdaExpression lambda = ExpressionCleaner.GetExpansion(source.Type, m.Member);
             if (lambda != null) //new expansions discovered
             {
                 ParameterExpression temp = Expression.Parameter(source.Type, "temp");

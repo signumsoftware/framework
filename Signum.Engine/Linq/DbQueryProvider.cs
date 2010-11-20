@@ -58,11 +58,9 @@ namespace Signum.Engine.Linq
 
         public static Expression Clean(Expression expression)
         {
-            Expression expand = ExpressionExpander.Expand(expression, Clean);
-            Expression eval =  ExpressionEvaluator.PartialEval(expand);
-            Expression simplified = OverloadingSimplifier.Simplify(eval);
-            Expression boolSimplified = BoolSimplifier.Simplify(simplified);
-            return boolSimplified;
+            Expression clean = ExpressionCleaner.Clean(expression);
+            Expression simplified = OverloadingSimplifier.Simplify(clean);
+            return simplified;
         }
 
         internal static Expression Optimize(Expression binded)

@@ -262,7 +262,7 @@ namespace Signum.Entities.Reflection
             if (fi != null && !fi.HasAttribute<IgnoreAttribute>())
                 return true;
 
-            if (ExpressionExpander.GetExpansion(type, pi) != null)
+            if (ExpressionCleaner.GetExpansion(type, pi) != null)
                 return true;
 
             return false;

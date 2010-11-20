@@ -25,12 +25,12 @@ namespace Signum.Utilities.ExpressionTrees
 
 		public object Execute(Expression expression)
 		{
-			return _item.Provider.Execute(ExpressionExpander.Expand(expression));
+			return _item.Provider.Execute(ExpressionCleaner.Clean(expression));
 		}
 
 		public IQueryable<S> CreateQuery<S>(Expression expression)
 		{
-			Expression res = ExpressionExpander.Expand(expression);
+            Expression res = ExpressionCleaner.Clean(expression);
 			return new ExpandableQueryProvider<S>(_item.Provider.CreateQuery<S>(res));
 		}
 

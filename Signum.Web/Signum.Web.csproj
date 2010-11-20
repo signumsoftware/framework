@@ -94,7 +94,11 @@
     </Compile>
     <Compile Include="Futures\ViewExtensions.cs" />
     <Compile Include="ModuleResources.cs" />
-    <Compile Include="Properties\Resources.fr.Designer.cs" />
+    <Compile Include="Properties\Resources.es.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.es.resx</DependentUpon>
+    </Compile>
     <Compile Include="ToolBarMenu.cs" />
     <Compile Include="FluentTagBuilder.cs" />
     <Compile Include="JSRenderer\JsFunction.cs" />
@@ -145,11 +149,6 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-    <Compile Include="Properties\Resources.es.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.es.resx</DependentUpon>
     </Compile>
     <Compile Include="Widgets\AlertWidgetHelper.cs" />
     <Compile Include="Widgets\QuickLinkWidgetHelper.cs" />

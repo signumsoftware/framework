@@ -26,10 +26,15 @@ namespace Signum.Utilities.ExpressionTrees
         /// <returns>A new tree with sub-trees evaluated and replaced.</returns>
         public static Expression PartialEval(Expression exp)
         {
+            if (exp.NodeType == ExpressionType.Constant)
+                return exp; 
+
             var candidates = ExpressionNominator.Nominate(exp);
 
             return new ExpressionEvaluator { candidates = candidates }.Visit(exp);
         }
+
+
 
         public static object Eval(Expression expression)
         {

@@ -80,7 +80,6 @@
     <Compile Include="DataStructures\MinMax.cs" />
     <Compile Include="DataStructures\ScopedDictionary.cs" />
     <Compile Include="DescriptionAttributes.cs" />
-    <Compile Include="ExpressionTrees\BoolSimplifier.cs" />
     <Compile Include="ExpressionTrees\ExpressionComparer.cs" />
     <Compile Include="ExpressionTrees\ExpressionReplacer.cs" />
     <Compile Include="ExpressionTrees\Linq.cs" />
@@ -129,7 +128,7 @@
     <Compile Include="ExpressionTrees\ExpressionHelper.cs" />
     <Compile Include="ExpressionTrees\ExpressionNominator.cs" />
     <Compile Include="ExpressionTrees\ExpressionToString.cs" />
-    <Compile Include="ExpressionTrees\ExpressionVisitor.cs">
+    <Compile Include="ExpressionTrees\SimpleExpressionVisitor.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ExpressionTrees\Query.cs" />
@@ -143,7 +142,7 @@
     <Compile Include="ExpressionTrees\CSharpTreeVisitor.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="GroupExtensions.cs" />
-    <Compile Include="ExpressionTrees\ExpressionExpander.cs" />
+    <Compile Include="ExpressionTrees\ExpressionCleaner.cs" />
     <Compile Include="ExpressionTrees\ExpandableQueryProvider.cs" />
     <Compile Include="ExpressionTrees\ExpressionExpanderSamples.cs" />
     <Compile Include="ListExtensions.cs" />

@@ -14,15 +14,6 @@ namespace Signum.Engine.Linq
     /// </summary>
     public class MetaEvaluator : SimpleExpressionVisitor
     {
-
-        public static Expression Clean(Expression expression)
-        {
-            Expression expand = ExpressionExpander.Expand(expression);
-            Expression partialEval = MetaEvaluator.PartialEval(expand);
-            Expression simplified = OverloadingSimplifier.Simplify(partialEval);
-            return simplified;
-        }
-
         HashSet<Expression> candidates;
 
         private MetaEvaluator() { }

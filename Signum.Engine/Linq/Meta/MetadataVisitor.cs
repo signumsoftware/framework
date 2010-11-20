@@ -38,7 +38,7 @@ namespace Signum.Engine.Linq
             if (!typeof(IQueryable).IsAssignableFrom(expression.Type))
                 throw new InvalidOperationException("Expression type is not IQueryable");
 
-            Expression simplified = MetaEvaluator.Clean(expression);
+            Expression simplified = DbQueryProvider.Clean(expression);
 
             MetaProjectorExpression meta = new MetadataVisitor().Visit(simplified) as MetaProjectorExpression;
 

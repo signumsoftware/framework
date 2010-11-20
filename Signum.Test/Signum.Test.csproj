@@ -74,6 +74,7 @@
     <Compile Include="LinqProvider\Assert2.cs" />
     <Compile Include="Entities.cs" />
     <Compile Include="LinqProvider\AllAnyContainsTest.cs" />
+    <Compile Include="LinqProvider\SelectSortCirtuitTest.cs" />
     <Compile Include="LinqProvider\SelectNestedTest.cs" />
     <Compile Include="LinqProvider\DistinctTest.cs" />
     <Compile Include="LinqProvider\SelectManyTest.cs" />
