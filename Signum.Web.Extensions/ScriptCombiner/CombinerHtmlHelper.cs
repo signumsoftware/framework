@@ -14,7 +14,7 @@ namespace Signum.Web
 
         //useful for loading static resources such as JS and CSS files
         //from a different subdomain (real or virtual)
-        public static Func<string, string> Subdomain = s => "";
+        public static Func<string, string> Subdomain = s => s;
 
         static string cssElement = "<link href=\"{0}\" rel=\"stylesheet\" type=\"text/css\" />";
         static string jsElement  = "<script type=\"text/javascript\" src=\"{0}\"></script>";
