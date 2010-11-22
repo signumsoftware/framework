@@ -245,13 +245,13 @@ namespace Signum.Utilities
 
             int months = ts.Days / 30;
             if (months > 0)
-                return Resources.Ago.Formato((months == 1 ? Resources._0Month : Resources._0Months).Formato(months));
+                return Resources.Ago.Formato((months == 1 ? Resources._0Month : Resources._0Months).Formato(months)).ToLower();
             if (ts.Days > 0)
-                return Resources.Ago.Formato((ts.Days == 1 ? Resources._0Day : Resources._0Days).Formato(ts.Days));
+                return Resources.Ago.Formato((ts.Days == 1 ? Resources._0Day : Resources._0Days).Formato(ts.Days)).ToLower();
             if (ts.Hours > 0)
-                return Resources.Ago.Formato((ts.Hours == 1 ? Resources._0Hour : Resources._0Hours).Formato(ts.Hours));
+                return Resources.Ago.Formato((ts.Hours == 1 ? Resources._0Hour : Resources._0Hours).Formato(ts.Hours)).ToLower();
             if (ts.Minutes > 0)
-                return Resources.Ago.Formato((ts.Minutes == 1 ? Resources._0Minute : Resources._0Minutes).Formato(ts.Minutes));
+                return Resources.Ago.Formato((ts.Minutes == 1 ? Resources._0Minute : Resources._0Minutes).Formato(ts.Minutes)).ToLower();
 
             return Resources.Ago.Formato((ts.Seconds == 1 ? Resources._0Second : Resources._0Seconds).Formato(ts.Seconds)).ToLower();
         }

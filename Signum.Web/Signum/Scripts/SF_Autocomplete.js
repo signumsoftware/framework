@@ -248,7 +248,7 @@ Autocompleter.prototype = {
         this.$control.val(data[this.options.textField]);
 
         if (this.options.onSuccess != null) {
-            this.options.onSuccess(this.$control, data);
+            this.options.onSuccess(this.$control, data, this.prevInput, index);
             return;
         }
         var id = data.id;
