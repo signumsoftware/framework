@@ -51,14 +51,20 @@ namespace Signum.Utilities.ExpressionTrees
 	{
         Func<Expression, Expression> partialEval;
 
+        bool shortCircuit;
+
         public static Expression Clean(Expression expr)
         {
-            return Clean(expr, ExpressionEvaluator.PartialEval);
+            return Clean(expr, ExpressionEvaluator.PartialEval, true);
         }
 
-        public static Expression Clean(Expression expr, Func<Expression, Expression> partialEval)
+        public static Expression Clean(Expression expr, Func<Expression, Expression> partialEval, bool shortCircuit)
         {
-            ExpressionCleaner ee = new ExpressionCleaner() { partialEval = partialEval }; 
+            ExpressionCleaner ee = new ExpressionCleaner()
+            {
+                partialEval = partialEval,
+                shortCircuit = shortCircuit
+            }; 
             var result = ee.Visit(expr);
             return partialEval(result);
         }
@@ -155,6 +161,9 @@ namespace Signum.Utilities.ExpressionTrees
 
         protected override Expression VisitBinary(BinaryExpression b)
         {
+            if (!shortCircuit)
+                return base.VisitBinary(b); 
+
             if (b.NodeType == ExpressionType.Coalesce)
             {
                 Expression left = partialEval(this.Visit(b.Left));
@@ -238,6 +247,9 @@ namespace Signum.Utilities.ExpressionTrees
 
         protected override Expression VisitConditional(ConditionalExpression c)
         {
+            if (!shortCircuit)
+                return base.VisitConditional(c); 
+
             Expression test = partialEval(this.Visit(c.Test));
             if (test.NodeType == ExpressionType.Constant)
             {

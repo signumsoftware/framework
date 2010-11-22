@@ -67,23 +67,4 @@ namespace Signum.Engine.Linq
             this.Meta = meta;
         }
     }
-
-    internal class MetaConstant : Expression
-    {
-        readonly Type type;
-        public override Type Type
-        {
-            get { return type; }
-        }
-
-        public override ExpressionType NodeType
-        {
-            get { return (ExpressionType)MetaExpressionType.MetaConstant; }
-        }
-
-        public MetaConstant(Type type)
-        {
-            this.type = type;
-        }
-    }   
 }

@@ -16,7 +16,7 @@ namespace Signum.Engine.Linq
     {
         public static Expression Clean(Expression expression)
         {
-            Expression expand = ExpressionCleaner.Clean(expression, MetaEvaluator.PartialEval);
+            Expression expand = ExpressionCleaner.Clean(expression, MetaEvaluator.PartialEval, false);
             Expression simplified = OverloadingSimplifier.Simplify(expand);
             return simplified;
         }
@@ -44,9 +44,18 @@ namespace Signum.Engine.Linq
             }
             if (this.candidates.Contains(exp) && exp.NodeType != ExpressionType.Constant)
             {
-                return new MetaConstant(exp.Type ); 
+                if (exp.Type.IsAssignableFrom(typeof(IQueryable<>)))
+                    return ExpressionEvaluator.PartialEval(exp); 
+
+                return (ConstantExpression)miConstant.GenericInvoke(new[] { exp.Type }, null, null);
             }
             return base.Visit(exp);
+        }
+
+        static MethodInfo miConstant = ReflectionTools.GetMethodInfo(() => Constant<int>()).GetGenericMethodDefinition();
+        static ConstantExpression Constant<T>()
+        {
+            return Expression.Constant(default(T), typeof(T)); 
         }
     }
 }

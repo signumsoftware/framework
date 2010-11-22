@@ -322,7 +322,7 @@ namespace Signum.Engine.Linq
             return AsProjection(Visit(source)); 
         }
 
-        private Type TableType(object value)
+        public Type TableType(object value)
         {
             if (value == null)
                 return null;
