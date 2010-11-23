@@ -70,7 +70,7 @@ namespace Signum.Web.Authorization
                     {
                         foreach (EntitySettings item in Navigator.Manager.EntitySettings.Values)
                         {
-                            miAttachEvents.GenericInvoke(item.GetType().GetGenericArguments(), null, new object[] { item }); 
+                            miAttachEvents.GetInvoker(item.GetType().GetGenericArguments())(item); 
                         }
 
                     };
@@ -141,7 +141,7 @@ namespace Signum.Web.Authorization
             }
         }
 
-        static MethodInfo miAttachEvents = ReflectionTools.GetMethodInfo(() => AttachEvents<Entity>(null)).GetGenericMethodDefinition(); 
+        static GenericInvoker miAttachEvents = GenericInvoker.Create(() => AttachEvents<Entity>(null)); 
         static void AttachEvents<T>(EntitySettings<T> settings) where T : ModifiableEntity
         {
             settings.IsCreable += admin => TypeAuthLogic.GetTypeAllowed(typeof(T)).GetUI() == TypeAllowedBasic.Create;

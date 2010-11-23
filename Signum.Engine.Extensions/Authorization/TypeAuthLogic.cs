@@ -32,7 +32,7 @@ namespace Signum.Engine.Authorization
                 AuthLogic.AssertStarted(sb);              
 
                 sb.Schema.EntityEventsGlobal.Saving += Schema_Saving; //because we need Modifications propagated
-                sb.Schema.EntityEventsGlobal.Retrieving += Schema_Retrieving;
+                sb.Schema.EntityEventsGlobal.Retrieving += EntityEventsGlobal_Retrieving;
                 sb.Schema.IsAllowedCallback += Schema_IsAllowedCallback;
 
                 cache = new AuthCache<RuleTypeDN, TypeAllowedRule, TypeDN, Type, TypeAllowed>(sb,
@@ -61,11 +61,11 @@ namespace Signum.Engine.Authorization
             }
         }
 
-        static void Schema_Retrieving(Type type, int id, bool isRoot)
+        static void EntityEventsGlobal_Retrieving(Type type, int[] ids, bool inQuery)
         {
             TypeAllowedBasic access = cache.GetAllowed(type).GetDB();
             if (access < TypeAllowedBasic.Read)
-                throw new UnauthorizedAccessException(Resources.NotAuthorizedToRetrieve0.Formato(type));
+                throw new UnauthorizedAccessException(Resources.NotAuthorizedToRetrieve0.Formato(type.NicePluralName()));
         }
 
         public static TypeRulePack GetTypeRules(Lite<RoleDN> roleLite)

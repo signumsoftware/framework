@@ -106,18 +106,16 @@ namespace Signum.Engine.Extensions.Chart
 
             if (dq.GetType().FollowC(t => t.BaseType).Any(t => t.IsInstantiationOf(typeof(DynamicQuery<>))))
             {
-                return (ResultTable)miExecuteChart.GenericInvoke(new[] { dq.GetType().GetGenericArguments()[0] }, null,
-                            new object[] { request, dq });
+                return (ResultTable)miExecuteChart.GetInvoker(dq.GetType().GetGenericArguments()[0])(request, dq);
             }
 
             throw new NotImplementedException(); 
         }
 
-        static MethodInfo miGroupByE = ReflectionTools.GetMethodInfo(() => Enumerable.GroupBy<string, int, double>((IEnumerable<string>)null, (Func<string, int>)null, (Func<int, IEnumerable<string>, double>)null)).GetGenericMethodDefinition();
+        static GenericInvoker giGroupByE = GenericInvoker.Create(() => Enumerable.GroupBy<string, int, double>((IEnumerable<string>)null, (Func<string, int>)null, (Func<int, IEnumerable<string>, double>)null)); 
         static IEnumerable<object> GroupBy(this IEnumerable<object> collection, LambdaExpression keySelector, LambdaExpression resultSelector)
         {
-            return (IEnumerable<object>)miGroupByE.GenericInvoke(new[] { typeof(object), keySelector.Body.Type, typeof(object) }, null,
-                new object[] { collection, keySelector.Compile(), resultSelector.Compile() });
+            return (IEnumerable<object>)giGroupByE.GetInvoker(typeof(object), keySelector.Body.Type, typeof(object))(collection, keySelector.Compile(), resultSelector.Compile()); 
         }
 
         static MethodInfo miGroupByQ = ReflectionTools.GetMethodInfo(() => Queryable.GroupBy<string, int, double>((IQueryable<string>)null, (Expression<Func<string, int>>)null, (Expression<Func<int, IEnumerable<string>, double>>)null)).GetGenericMethodDefinition();
@@ -169,7 +167,7 @@ namespace Signum.Engine.Extensions.Chart
                 return Expression.Call(typeof(Enumerable), aggregate.ToString(), new[] { groupType }, new[] { collection, lambda });
         }
 
-        static MethodInfo miExecuteChart = ReflectionTools.GetMethodInfo(() => ExecuteChart<int>(null, null)).GetGenericMethodDefinition();
+        static GenericInvoker miExecuteChart = GenericInvoker.Create(() => ExecuteChart<int>(null, null));
         static ResultTable ExecuteChart<T>(ChartRequest request, DynamicQuery<T> dq)
         {
             ChartTokenDN[] chartTokens = request.ChartTokens().ToArray(); 

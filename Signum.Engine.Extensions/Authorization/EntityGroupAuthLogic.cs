@@ -18,7 +18,7 @@ using Signum.Utilities.Reflection;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Engine.Linq;
 using Signum.Engine.Extensions.Properties;
-using Signum.Entities.Operations; 
+using Signum.Entities.Operations;
 
 namespace Signum.Engine.Authorization
 {
@@ -54,22 +54,20 @@ namespace Signum.Engine.Authorization
             }
         }
 
-
-        static MethodInfo miRegister = ReflectionTools.GetMethodInfo(() =>EntityGroupAuthLogic.RegisterSchemaEvent<TypeDN>(null)).GetGenericMethodDefinition();
-
         static void Schema_InitializingRegisterEvents(Schema sender)
         {
             foreach (var type in EntityGroupLogic.Types)
             {
-                miRegister.GenericInvoke(new[] { type }, null, new object[] { sender });
+                miRegister.GetInvoker(type)(sender);
             }
         }
 
+        static GenericInvoker miRegister = GenericInvoker.Create(() => EntityGroupAuthLogic.RegisterSchemaEvent<TypeDN>(null));
         static void RegisterSchemaEvent<T>(Schema sender)
              where T : IdentifiableEntity
         {
-            sender.EntityEvents<T>().Retrieved += new EntityEventHandler<T>(EntityGroupAuthLogic_Retrieved);
             sender.EntityEvents<T>().Saving += new EntityEventHandler<T>(EntityGroupAuthLogic_Saving);
+            sender.EntityEvents<T>().Retrieving += new RetrivingEntitiesEventHandler(EntityGroupAuthLogic_Retrieving);
             sender.EntityEvents<T>().FilterQuery += new FilterQueryEventHandler<T>(EntityGroupAuthLogic_FilterQuery);
         }
 
@@ -77,62 +75,139 @@ namespace Signum.Engine.Authorization
         static bool queriesDisabled;
         public static IDisposable DisableQueries()
         {
+            bool oldQueriesDisabled = queriesDisabled;
             queriesDisabled = true;
-            return new Disposable(() => queriesDisabled = false);
+            return new Disposable(() => queriesDisabled = oldQueriesDisabled);
         }
 
         [ThreadStatic]
         static bool retrieveDisabled;
         public static IDisposable DisableRetrieve()
         {
+            bool oldRetrieveDisabled = retrieveDisabled;
             retrieveDisabled = true;
-            return new Disposable(() => retrieveDisabled = false);
+            return new Disposable(() => retrieveDisabled = oldRetrieveDisabled);
         }
 
         [ThreadStatic]
-        static DisableSaveOptions saveDisabled = 0;
-        public static IDisposable DisableSave(DisableSaveOptions mode)
+        static bool saveDisabled;
+        public static IDisposable DisableSave()
         {
-            DisableSaveOptions saveDisabledOld = saveDisabled;
-            saveDisabled = mode;
-            return new Disposable(() => saveDisabled = saveDisabledOld);
+            bool oldSaveDisabled = saveDisabled; 
+            saveDisabled = true;
+            return new Disposable(() => saveDisabled = oldSaveDisabled);
         }
 
-        
-
         static IQueryable<T> EntityGroupAuthLogic_FilterQuery<T>(IQueryable<T> query)
-            where T:IdentifiableEntity
+            where T : IdentifiableEntity
         {
             if (!queriesDisabled)
                 return WhereAllowed<T>(query);
-            return query; 
+            return query;
         }
 
-        static void EntityGroupAuthLogic_Retrieved<T>(T ident, bool isRoot)
-            where T:IdentifiableEntity
+        static void EntityGroupAuthLogic_Retrieving(Type type, int[] ids, bool inQuery)
         {
-            if (!retrieveDisabled && isRoot)
-                ident.AssertAllowed(TypeAllowedBasic.Read, Database.UserInterface);
+            if (AuthLogic.IsEnabled && !retrieveDisabled && (!inQuery || queriesDisabled)  && !IsAllwaysAllowed(type, TypeAllowedBasic.Read))
+            {
+                miAssertAllowed.GetInvoker(type)(ids, TypeAllowedBasic.Read); 
+            }
         }
+
+        const string CreatedKey = "Created";
+        const string ModifiedKey = "Modified"; 
 
         static void EntityGroupAuthLogic_Saving<T>(T ident, bool isRoot)
             where T : IdentifiableEntity
         {
-            if (AuthLogic.IsEnabled && ident.Modified.Value)
+            if (AuthLogic.IsEnabled && !saveDisabled && ident.Modified.Value)
             {
-                if (!saveDisabled.HasFlag(DisableSaveOptions.Origin))
+                if (ident.IsNew)
                 {
-                    using(DisableQueries())
-                    if (!ident.IsNew && !ident.InDB().WhereAllowed().Any()) //Previous state in the database
-                        throw new UnauthorizedAccessException(Resources.NotAuthorizedTo0The1WithId2.Formato(TypeAllowedBasic.Modify.NiceToString().ToLower(), ident.GetType().NiceName(), ident.Id));
+                    if (IsAllwaysAllowed(typeof(T), TypeAllowedBasic.Create))
+                        return;
+
+                    var created = (List<IdentifiableEntity>)Transaction.UserData.GetOrCreate(ModifiedKey, () => new List<IdentifiableEntity>());
+                    if (created.Contains(ident))
+                        return;
+
+                    created.Add(ident);
+                }
+                else
+                {
+                    if (IsAllwaysAllowed(typeof(T), TypeAllowedBasic.Modify))
+                        return;
+
+                    var modified = (List<IdentifiableEntity>)Transaction.UserData.GetOrCreate(ModifiedKey, () => new List<IdentifiableEntity>());
+                    if (modified.Contains(ident))
+                        return;
+
+                    var created = (List<IdentifiableEntity>)Transaction.UserData.TryGetC(CreatedKey);
+                    if (created != null && created.Contains(ident))
+                        return;
+
+                    modified.Add(ident);
                 }
 
-                if (!saveDisabled.HasFlag(DisableSaveOptions.Destiny))
+                Transaction.PreRealCommit -= Transaction_PreRealCommit;
+                Transaction.PreRealCommit += Transaction_PreRealCommit;
+            }
+        }
+
+
+        static void Transaction_PreRealCommit()
+        {
+            var modified = (List<IdentifiableEntity>)Transaction.UserData.TryGetC(ModifiedKey);
+
+            if (modified != null)
+            {
+                var groups = modified.GroupBy(e => e.GetType(), e => e.Id);
+
+                //Assert before
+                using (Transaction tr = new Transaction(true))
                 {
-                    if (ident.IsNew)
-                        Transaction.PreRealCommit += () => ident.AssertAllowed(TypeAllowedBasic.Create, Database.UserInterface);
-                    else
-                        Transaction.PreRealCommit += () => ident.AssertAllowed(TypeAllowedBasic.Modify, Database.UserInterface);
+                    foreach (var gr in groups)
+                        miAssertAllowed.GetInvoker(gr.Key)(gr.ToArray(), TypeAllowedBasic.Modify);
+
+                    tr.Commit();
+                }
+
+                //Assert after
+                foreach (var gr in groups)
+                {
+                    miAssertAllowed.GetInvoker(gr.Key)(gr.ToArray(), TypeAllowedBasic.Modify);
+                }
+            }
+
+            var created = (List<IdentifiableEntity>)Transaction.UserData.TryGetC(CreatedKey);
+
+            if (created != null)
+            {
+                var groups = created.GroupBy(e => e.GetType(), e => e.Id);
+
+                //Assert after
+                foreach (var gr in groups)
+                    miAssertAllowed.GetInvoker(gr.Key)(gr.ToArray(), TypeAllowedBasic.Create);
+            }
+        }
+
+
+        static GenericInvoker miAssertAllowed = GenericInvoker.Create(() => AssertAllowed<IdentifiableEntity>(null, TypeAllowedBasic.Create));
+        static void AssertAllowed<T>(int[] requested, TypeAllowedBasic typeAllowed)
+            where T : IdentifiableEntity
+        {
+            using (DisableQueries())
+            {
+                int[] found = Database.Query<T>().Where(a => requested.Contains(a.Id)).WhereIsAllowedFor(typeAllowed, Database.UserInterface).Select(a => a.Id).ToArray();
+
+                if (found.Length != requested.Length)
+                {
+                    int[] notFound = requested.Except(found).ToArray();
+
+                    throw new UnauthorizedAccessException(Resources.NotAuthorizedTo0The1WithId2.Formato(
+                        typeAllowed.NiceToString(),
+                        notFound.Length == 1 ? typeof(T).NiceName() : typeof(T).NicePluralName(),
+                        notFound.Length == 1 ? notFound[0].ToString() : notFound.CommaAnd()));
                 }
             }
         }
@@ -143,34 +218,24 @@ namespace Signum.Engine.Authorization
                 throw new UnauthorizedAccessException(Resources.NotAuthorizedTo0The1WithId2.Formato(allowed.NiceToString().ToLower(), ident.GetType().NiceName(), ident.Id));
         }
 
+        [MethodExpander(typeof(IsAllowedForExpander))]
         public static bool IsAllowedFor(this IIdentifiable ident, TypeAllowedBasic allowed, bool userInterface)
         {
-            if(!AuthLogic.IsEnabled)
+            return (bool)miIsAllowedForEntity.GetInvoker(ident.GetType()).Invoke(ident, allowed, userInterface);
+        }
+
+        static GenericInvoker miIsAllowedForEntity = GenericInvoker.Create(() => IsAllowedFor<IdentifiableEntity>((IdentifiableEntity)null, TypeAllowedBasic.Create, true));
+        static bool IsAllowedFor<T>(this T entity, TypeAllowedBasic allowed, bool userInterface)
+            where T : IdentifiableEntity
+        {
+            if (!AuthLogic.IsEnabled)
                 return true;
 
-            IdentifiableEntity ent = (IdentifiableEntity)ident; 
+            if (entity.IsNew)
+                throw new InvalidOperationException("The entity {0} is new");
 
-            return EntityGroupLogic.GroupsFor(ident.GetType()).All(eg =>
-                {
-                    EntityGroupAllowedDN access = cache.GetAllowed(eg);
-                    bool allowedIn = access.InGroup.Get(userInterface) >= allowed;
-                    bool allowedOut = access.OutGroup.Get(userInterface) >= allowed;
-                    var egi = EntityGroupLogic.GetEntityGroupInfo(eg, ident.GetType());
-                   
-                    if (allowedIn && allowedOut)
-                        return true;
-
-                    if (egi.IsApplicable != null && !egi.IsApplicable.Evaluate(ent))
-                        return true; 
-                   
-                    if (!allowedIn && !allowedOut)
-                        return false;
-
-                    if (egi.IsInGroup.Evaluate(ent))
-                        return allowedIn;
-                    else
-                        return allowedOut;
-                });
+            using (DisableQueries())
+                return entity.InDB().WhereIsAllowedFor(allowed, userInterface).Any();
         }
 
         public static void AssertAllowed(this Lite lite, TypeAllowedBasic allowed, bool userInterface)
@@ -182,20 +247,35 @@ namespace Signum.Engine.Authorization
                 throw new UnauthorizedAccessException(Resources.NotAuthorizedTo0The1WithId2.Formato(allowed.NiceToString().ToLower(), lite.RuntimeType.NiceName(), lite.Id));
         }
 
+        [MethodExpander(typeof(IsAllowedForExpander))]
         public static bool IsAllowedFor(this Lite lite, TypeAllowedBasic allowed, bool userInterface)
         {
-            return (bool)miIsAllowedFor.GenericInvoke(new[] { lite.RuntimeType }, null, new object[] { lite, allowed, userInterface });
+            return (bool)miIsAllowedForLite.GetInvoker(lite.RuntimeType).Invoke(lite, allowed, userInterface);
         }
 
-        static MethodInfo miIsAllowedFor = ReflectionTools.GetMethodInfo(() => IsAllowedFor<IdentifiableEntity>(null, TypeAllowedBasic.Create, true)).GetGenericMethodDefinition();
+        static GenericInvoker miIsAllowedForLite = GenericInvoker.Create(() => IsAllowedFor<IdentifiableEntity>((Lite)null, TypeAllowedBasic.Create, true));
 
         static bool IsAllowedFor<T>(this Lite lite, TypeAllowedBasic allowed, bool userInterface)
-            where T: IdentifiableEntity
+            where T : IdentifiableEntity
         {
             if (!AuthLogic.IsEnabled)
                 return true;
 
-            return lite.ToLite<T>().InDB().WhereIsAllowedFor(allowed, userInterface).Any(); 
+            using (DisableQueries())
+                return lite.ToLite<T>().InDB().WhereIsAllowedFor(allowed, userInterface).Any();
+        }
+
+        class IsAllowedForExpander : IMethodExpander
+        {
+            public Expression Expand(Expression instance, Expression[] arguments, Type[] typeArguments)
+            {
+                TypeAllowedBasic allowed = (TypeAllowedBasic)ExpressionEvaluator.Eval(arguments[1]);
+                bool userInterface = (bool)ExpressionEvaluator.Eval(arguments[2]);
+
+                Expression exp = arguments[0].Type.IsLite() ? Expression.Property(arguments[0], "Entity") : arguments[0];
+
+                return IsAllowedExpression(exp, allowed, userInterface);
+            }
         }
 
 
@@ -210,72 +290,103 @@ namespace Signum.Engine.Authorization
         }
 
 
-        [MethodExpander(typeof(WhereAllowedExpander))]
-        public static IQueryable<T> WhereIsAllowedFor<T>(this IQueryable<T> query, TypeAllowedBasic allowed, bool userInterface) 
+        [MethodExpander(typeof(WhereIsAllowedForExpander))]
+        public static IQueryable<T> WhereIsAllowedFor<T>(this IQueryable<T> query, TypeAllowedBasic allowed, bool userInterface)
             where T : IdentifiableEntity
         {
-            if (!Schema.Current.Tables.ContainsKey(typeof(T)))
-                throw new InvalidOperationException("{0} is not included in the schema".Formato(typeof(T)));
+            ParameterExpression e = Expression.Parameter(typeof(T), "e");
 
-            var pairs = (from eg in EntityGroupLogic.GroupsFor(typeof(T))
+            Expression body = IsAllowedExpression(e, allowed, userInterface);
+
+            if (body == null)
+                return query;
+
+            IQueryable<T> result = query.Where(Expression.Lambda<Func<T, bool>>(body, e));
+
+            return result;
+        }
+        
+        class EntityGroupTuple
+        {
+            public Enum Key;
+            public bool AllowedIn;
+            public bool AllowedOut;
+            public IEntityGroupInfo EntityGroup;
+        }
+
+        private static List<EntityGroupTuple> GetPairs(Type type, TypeAllowedBasic allowed, bool userInterface)
+        {
+            if (!Schema.Current.Tables.ContainsKey(type))
+                throw new InvalidOperationException("{0} is not included in the schema".Formato(type));
+
+            var pairs = (from eg in EntityGroupLogic.GroupsFor(type)
                          let allowedDN = cache.GetAllowed(eg)
-                         let entityGroup = EntityGroupLogic.GetEntityGroupInfo(eg, typeof(T))
-                         select new
+                         let entityGroup = EntityGroupLogic.GetEntityGroupInfo(eg, type)
+                         select new EntityGroupTuple
                          {
                              Key = eg,
                              AllowedIn = allowedDN.InGroup.Get(userInterface) >= allowed,
                              AllowedOut = allowedDN.OutGroup.Get(userInterface) >= allowed,
-                             EntityGroup = (EntityGroupLogic.EntityGroupInfo<T>)entityGroup,
+                             EntityGroup = entityGroup,
                          }).ToList();
 
             pairs.RemoveAll(p => p.AllowedIn && p.AllowedOut);
-            pairs.RemoveAll(p => p.EntityGroup.IsApplicable != null && p.EntityGroup.IsApplicable.Resume == false); 
+            pairs.RemoveAll(p => p.EntityGroup.IsApplicable != null && p.EntityGroup.IsApplicable.Resume == false);
+            return pairs;
+        }
+
+        static bool IsAllwaysAllowed(Type type, TypeAllowedBasic allowed)
+        {
+            return GetPairs(type, allowed, Database.UserInterface).Empty(); 
+        }
+
+        internal static Expression IsAllowedExpression(Expression entity, TypeAllowedBasic allowed, bool userInterface)
+        {
+            var pairs = GetPairs(entity.Type, allowed, userInterface);
 
             if (pairs.Count == 0)
-                return query;
+                return null;
 
             if (pairs.Any(p => (p.EntityGroup.IsApplicable == null || p.EntityGroup.IsApplicable.Resume == true) && !p.AllowedIn && !p.AllowedOut))
-                return query.Where(_ => false);
+                return Expression.Constant(false);
 
-            ParameterExpression e = Expression.Parameter(typeof(T), "e");
-            Expression body = pairs.Select(p => 
+            Expression body = pairs.Select(p =>
+            {
+                if (p.EntityGroup.IsApplicable == null || p.EntityGroup.IsApplicable.Resume == true)
                 {
-                    if (p.EntityGroup.IsApplicable == null || p.EntityGroup.IsApplicable.Resume == true)
-                    {
-                        return p.AllowedIn? p.EntityGroup.IsInGroup.Expression.InvokeLambda(e):
-                                            Expression.Not(p.EntityGroup.IsInGroup.Expression.InvokeLambda(e));
-                    }
-                    else
-                    {
-                        var notApplicable = (Expression)Expression.Not(p.EntityGroup.IsApplicable.Expression.InvokeLambda(e));
+                    return p.AllowedIn ? p.EntityGroup.IsInGroup.UntypedExpression.InvokeLambda(entity) :
+                                        Expression.Not(p.EntityGroup.IsInGroup.UntypedExpression.InvokeLambda(entity));
+                }
+                else
+                {
+                    var notApplicable = (Expression)Expression.Not(p.EntityGroup.IsApplicable.UntypedExpression.InvokeLambda(entity));
 
-                        return p.AllowedIn ? Expression.Or(notApplicable, p.EntityGroup.IsInGroup.Expression.InvokeLambda(e)) :
-                               p.AllowedOut ? Expression.Or(notApplicable, Expression.Not(p.EntityGroup.IsInGroup.Expression.InvokeLambda(e))) :
-                               notApplicable;
-                    }
-                }).Aggregate((a, b) => Expression.And(a, b));
+                    return p.AllowedIn ? Expression.Or(notApplicable, p.EntityGroup.IsInGroup.UntypedExpression.InvokeLambda(entity)) :
+                           p.AllowedOut ? Expression.Or(notApplicable, Expression.Not(p.EntityGroup.IsInGroup.UntypedExpression.InvokeLambda(entity))) :
+                           notApplicable;
+                }
+            }).Aggregate((a, b) => Expression.And(a, b));
 
             Expression cleanBody = DbQueryProvider.Clean(body);
 
-            IQueryable<T> result = query.Where(Expression.Lambda<Func<T, bool>>(cleanBody, e));
-
-            return result;
+            return cleanBody;
         }
 
-        static Expression InvokeLambda(this LambdaExpression lambda, ParameterExpression p)
+        
+
+        static Expression InvokeLambda(this LambdaExpression lambda, Expression p)
         {
             return (Expression)Expression.Invoke(lambda, p);
         }
 
         class WhereAllowedExpander : IMethodExpander
         {
-            static MethodInfo miCallWhereAllowed = ReflectionTools.GetMethodInfo(() => CallWhereAllowed<TypeDN>(null)).GetGenericMethodDefinition();
-
             public Expression Expand(Expression instance, Expression[] arguments, Type[] typeArguments)
             {
-                return (Expression)miCallWhereAllowed.GenericInvoke(typeArguments, null, new object[] { arguments[0] });
+                return (Expression)miCallWhereAllowed.GetInvoker(typeArguments).Invoke(arguments[0]);
             }
 
+            static GenericInvoker miCallWhereAllowed = GenericInvoker.Create(() => CallWhereAllowed<TypeDN>(null));
             static Expression CallWhereAllowed<T>(Expression expression)
                 where T : IdentifiableEntity
             {
@@ -287,16 +398,16 @@ namespace Signum.Engine.Authorization
 
         class WhereIsAllowedForExpander : IMethodExpander
         {
-            static MethodInfo miCallWhereIsAllowedFor = ReflectionTools.GetMethodInfo(() => CallWhereIsAllowedFor<TypeDN>(null, TypeAllowedBasic.Create, true)).GetGenericMethodDefinition();
 
             public Expression Expand(Expression instance, Expression[] arguments, Type[] typeArguments)
             {
                 TypeAllowedBasic allowed = (TypeAllowedBasic)ExpressionEvaluator.Eval(arguments[1]);
                 bool userInterface = (bool)ExpressionEvaluator.Eval(arguments[2]);
 
-                return (Expression)miCallWhereIsAllowedFor.GenericInvoke(typeArguments, null, new object[] { arguments[0], allowed, userInterface });
+                return (Expression)miCallWhereIsAllowedFor.GetInvoker(typeArguments)(arguments[0], allowed, userInterface);
             }
 
+            static GenericInvoker miCallWhereIsAllowedFor = GenericInvoker.Create(() => CallWhereIsAllowedFor<TypeDN>(null, TypeAllowedBasic.Create, true));
             static Expression CallWhereIsAllowedFor<T>(Expression expression, TypeAllowedBasic allowed, bool userInterface)
                 where T : IdentifiableEntity
             {
@@ -351,7 +462,7 @@ namespace Signum.Engine.Authorization
 
         public static void SetEntityGroupRules(EntityGroupRulePack rules)
         {
-            cache.SetRules(rules, r => true); 
+            cache.SetRules(rules, r => true);
         }
 
         public static EntityGroupAllowedDN GetEntityGroupAllowed(Lite<RoleDN> role, Enum entityGroupKey)
@@ -392,7 +503,7 @@ namespace Signum.Engine.Authorization
         {
             IEntityGroupInfo egi = EntityGroupLogic.GetEntityGroupInfo(entityGroup, type);
 
-            if(egi.IsApplicable != null)
+            if (egi.IsApplicable != null)
             {
                 if (egi.IsApplicable.Resume == false)
                 {
@@ -411,11 +522,11 @@ namespace Signum.Engine.Authorization
         }
     }
 
-    public enum DisableSaveOptions
-    {
-        Origin = 1,
-        Destiny = 2,
-        Both = Origin | Destiny,
-        ReEnabled = 0, 
-    }
+    //public enum DisableSaveOptions
+    //{
+    //    Origin = 1,
+    //    Destiny = 2,
+    //    Both = Origin | Destiny,
+    //    ReEnabled = 0, 
+    //}
 }

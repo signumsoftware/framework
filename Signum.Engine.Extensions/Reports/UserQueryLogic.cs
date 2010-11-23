@@ -76,7 +76,7 @@ namespace Signum.Engine.Reports
 
             EntityGroupLogic.Register<UserQueryDN>(newEntityGroupKey, 
                 uq => uq.Related.RefersTo(UserDN.Current), 
-                uq => uq.Related != null && uq.Related.SmartTypeIs<UserDN>()); 
+                uq => uq.Related != null && uq.Related.Entity is UserDN); 
         }
 
         public static void RegisterRoleEntityGroup(SchemaBuilder sb, Enum newEntityGroupKey)
@@ -85,7 +85,7 @@ namespace Signum.Engine.Reports
 
             EntityGroupLogic.Register<UserQueryDN>(newEntityGroupKey, 
                 uq => AuthLogic.CurrentRoles().Contains(uq.Related.ToLite<RoleDN>()),
-                uq => uq.Related != null && uq.Related.SmartTypeIs<RoleDN>());
+                uq => uq.Related != null && uq.Related.Entity is RoleDN);
         }
     }
 }

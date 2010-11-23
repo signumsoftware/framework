@@ -74,7 +74,7 @@ namespace Signum.Engine.ControlPanel
 
             EntityGroupLogic.Register<ControlPanelDN>(newEntityGroupKey,
                 uq => uq.Related.RefersTo(UserDN.Current),
-                uq => uq.Related != null && uq.Related.SmartTypeIs<UserDN>());
+                uq => uq.Related != null && uq.Related.Entity is UserDN);
 
             EntityGroupLogic.Register<CountSearchControlPartDN>(newEntityGroupKey,
                  uq => Database.Query<ControlPanelDN>().WhereInGroup(newEntityGroupKey).Any(cp => cp.ContainsContent(uq)),
@@ -92,7 +92,7 @@ namespace Signum.Engine.ControlPanel
 
             EntityGroupLogic.Register<ControlPanelDN>(newEntityGroupKey,
                 uq => AuthLogic.CurrentRoles().Contains(uq.Related.ToLite<RoleDN>()),
-                uq => uq.Related != null && uq.Related.SmartTypeIs<RoleDN>());
+                uq => uq.Related != null && uq.Related.Entity is RoleDN);
 
             EntityGroupLogic.Register<CountSearchControlPartDN>(newEntityGroupKey,
                  uq => Database.Query<ControlPanelDN>().WhereInGroup(newEntityGroupKey).Any(cp => cp.ContainsContent(uq)),

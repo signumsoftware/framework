@@ -33,7 +33,6 @@ namespace Signum.Test.Extensions
 
                 using (AuthLogic.Disable())
                 {
-
                     Schema.Current.Initialize(InitLevel.Level0SyncEntities);
 
                     Load();
@@ -102,13 +101,16 @@ namespace Signum.Test.Extensions
                 Execute = (a,para) => a.LastAward = new PersonalAwardDN() { Category = "Best Artist", Year = DateTime.Now.Year, Result = AwardResult.Won }
             });
 
-            EntityGroupLogic.Register<LabelDN>(MusicGroups.JapanEntities, l => l.Country.Name == Signum.Test.Starter.Japan || l.Owner != null && l.Owner.SmartRetrieve().Country.Name == Signum.Test.Starter.Japan);
-            EntityGroupLogic.Register<AlbumDN>(MusicGroups.JapanEntities, a => a.Label.IsInGroup(MusicGroups.JapanEntities));
+            EntityGroupLogic.Register<LabelDN>(MusicGroups.JapanEntities, l => l.Country.Name.StartsWith(Signum.Test.Starter.Japan) || l.Owner != null && l.Owner.Entity.Country.Name.StartsWith(Signum.Test.Starter.Japan));
+            EntityGroupLogic.Register<AlbumDN>(MusicGroups.JapanEntities, a => a.Label.IsInGroupG(MusicGroups.JapanEntities));
         }
 
         public static void Load()
         {
             Administrator.TotalGeneration();
+
+            Administrator.SetSnapshotIsolation(true);
+            Administrator.MakeSnapshotIsolationDefault(true); 
 
             using (AuthLogic.Disable())
             {
