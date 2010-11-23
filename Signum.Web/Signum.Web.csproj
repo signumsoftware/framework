@@ -72,35 +72,25 @@
     <Compile Include="..\Signum.Utilities\Properties\Version.cs">
       <Link>Properties\Version.cs</Link>
     </Compile>
-    <Compile Include="AppSettings.cs" />
-    <Compile Include="ButtonBar.cs" />
-    <Compile Include="CalendarHelper.cs" />
+    <Compile Include="ButtonBar\ButtonBar.cs" />
+    <Compile Include="HtmlHelpers\CalendarHelper.cs" />
     <Compile Include="Common.cs" />
-    <Compile Include="Constructor.cs" />
-    <Compile Include="AreaResourceHelper.cs" />
-    <Compile Include="ContextualItem.cs" />
+    <Compile Include="Facades\Constructor.cs" />
+    <Compile Include="PortableAreas\AreaResourceHelper.cs" />
+    <Compile Include="ButtonBar\ContextualItem.cs" />
     <Compile Include="ControllerAttributes\UserInterfaceAttribute.cs" />
     <Compile Include="ControllerAttributes\HandleExceptionAttribute.cs" />
     <Compile Include="ControllerAttributes\AuthenticationRequiredAttribute.cs" />
-    <Compile Include="ControllerAttributes\NavigationButtonsAttribute.cs" />
     <Compile Include="ControllerAttributes\RedirectToUrl.cs" />
     <Compile Include="ControllerAttributes\RequireSslAttribute.cs" />
-    <Compile Include="Futures\ExpressionHelper.cs" />
-    <Compile Include="Futures\LinkBuilder.cs" />
-    <Compile Include="Futures\MvcResources.Designer.cs">
-      <DependentUpon>MvcResources.resx</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
-    <Compile Include="Futures\ViewExtensions.cs" />
     <Compile Include="ModuleResources.cs" />
     <Compile Include="Properties\Resources.es.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.es.resx</DependentUpon>
     </Compile>
-    <Compile Include="ToolBarMenu.cs" />
-    <Compile Include="FluentTagBuilder.cs" />
+    <Compile Include="ButtonBar\ToolBarMenu.cs" />
+    <Compile Include="HtmlHelpers\FluentTagBuilder.cs" />
     <Compile Include="JSRenderer\JsFunction.cs" />
     <Compile Include="JSRenderer\JsOptions.cs" />
     <Compile Include="Lines\EntityListBase.cs" />
@@ -108,7 +98,7 @@
     <Compile Include="PortableAreas\AssemblyResourceProvider.cs" />
     <Compile Include="PortableAreas\AssemblyResourceStore.cs" />
     <Compile Include="PortableAreas\AssemblyResourceVirtualFile.cs" />
-    <Compile Include="RouteExtensions.cs" />
+    <Compile Include="PortableAreas\RouteExtensions.cs" />
     <Compile Include="Signum\Controllers\ResourcesController.cs" />
     <Compile Include="Signum\Controllers\ModelBinders.cs" />
     <Compile Include="Signum\Controllers\SignumController.cs" />
@@ -120,14 +110,13 @@
     <Compile Include="Mappings\MappingContext.cs" />
     <Compile Include="ModelStateData.cs" />
     <Compile Include="ModelStateExtensions.cs" />
-    <Compile Include="HttpContextUtils.cs" />
-    <Compile Include="ToolBarButton.cs" />
+    <Compile Include="ButtonBar\ToolBarButton.cs" />
     <Compile Include="TypeContext\TypeContext.cs" />
     <Compile Include="TypeContext\TypeContextExpression.cs" />
     <Compile Include="TypeContext\TypeContextHelper.cs" />
     <Compile Include="TypeContext\TypeContextUtilities.cs" />
-    <Compile Include="ValueLineBoxModel.cs" />
-    <Compile Include="EntityInfo.cs" />
+    <Compile Include="Signum\Models\ValueLineBoxModel.cs" />
+    <Compile Include="LineHelpers\EntityInfo.cs" />
     <Compile Include="JSRenderer\JsValidatorOptions.cs" />
     <Compile Include="JSRenderer\JsFindOptions.cs" />
     <Compile Include="JSRenderer\JsViewOptions.cs" />
@@ -142,8 +131,8 @@
     <Compile Include="LineHelpers\ListBaseHelper.cs" />
     <Compile Include="LineHelpers\EntityListDetailHelper.cs" />
     <Compile Include="LineHelpers\EntityLineDetailHelper.cs" />
-    <Compile Include="EmbeddedControlHelper.cs" />
-    <Compile Include="FindOptionsModelBinder.cs" />
+    <Compile Include="LineHelpers\EmbeddedControlHelper.cs" />
+    <Compile Include="Facades\FindOptionsModelBinder.cs" />
     <Compile Include="JSRenderer\JsRenderer.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -154,28 +143,26 @@
     <Compile Include="Widgets\QuickLinkWidgetHelper.cs" />
     <Compile Include="Widgets\NoteWidgetHelper.cs" />
     <Compile Include="Widgets\WidgetsHelper.cs" />
-    <Compile Include="WwwRedirectAttributes.cs" />
-    <Compile Include="MenuHelper.cs" />
+    <Compile Include="ControllerAttributes\WwwRedirectAttributes.cs" />
+    <Compile Include="HtmlHelpers\MenuHelper.cs" />
     <Compile Include="LineHelpers\LightEntityLineHelper.cs" />
-    <Compile Include="DictionaryExtensions.cs" />
     <Compile Include="LineHelpers\EntityRepeaterHelper.cs" />
     <Compile Include="LineHelpers\EntityComboHelper.cs" />
     <Compile Include="Lines\EntityBase.cs" />
     <Compile Include="LineHelpers\EntityLineHelper.cs" />
     <Compile Include="LineHelpers\EntityListHelper.cs" />
-    <Compile Include="EntitySettings.cs" />
-    <Compile Include="FindOptions.cs" />
-    <Compile Include="HtmlHelpers.cs" />
-    <Compile Include="Navigator.cs" />
+    <Compile Include="Facades\EntitySettings.cs" />
+    <Compile Include="Facades\FindOptions.cs" />
+    <Compile Include="HtmlHelpers\HtmlHelpers.cs" />
+    <Compile Include="Facades\Navigator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="QuerySettings.cs" />
-    <Compile Include="ScriptHelper.cs">
+    <Compile Include="Facades\QuerySettings.cs" />
+    <Compile Include="HtmlHelpers\ScriptHelper.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="SearchControlHelper.cs" />
+    <Compile Include="HtmlHelpers\SearchControlHelper.cs" />
     <Compile Include="SignumViewEngine.cs" />
-    <Compile Include="StringResponseFilter.cs" />
-    <Compile Include="Utils.cs" />
+    <Compile Include="RenderActionExtenders.cs" />
     <Compile Include="LineHelpers\ValueLineHelper.cs" />
     <Compile Include="ViewDataKeys.cs" />
   </ItemGroup>
@@ -197,7 +184,6 @@
     <Content Include="Signum\Views\NormalPage.aspx" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="ClassDiagram1.cd" />
     <None Include="SignumFramework.pfx" />
     <Content Include="Web.config" />
     <Content Include="Signum\Views\Web.config" />
@@ -239,17 +225,11 @@
     <Content Include="Signum\Views\NormalControl.ascx">
       <SubType>ASPXCodeBehind</SubType>
     </Content>
-    <EmbeddedResource Include="Futures\MvcResources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>MvcResources.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
     <Content Include="Signum\Views\ValueLineBox.ascx">
       <SubType>ASPXCodeBehind</SubType>
     </Content>
     <Content Include="Signum\Scripts\SF_FindNavigator.js" />
     <Content Include="Signum\Scripts\SF_Lines.js" />
-    <Content Include="SF_Mixin.js" />
     <Content Include="Signum\Scripts\SF_Operations.js" />
     <Content Include="Signum\Scripts\SF_Popup.js" />
     <Content Include="Signum\Scripts\SF_Validator.js" />

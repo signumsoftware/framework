@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 
 namespace Signum.Web
 {
@@ -10,9 +11,10 @@ namespace Signum.Web
     /// </summary>
     public class AssemblyResourceStore
     {
-        private readonly Dictionary<string, string> resources;
-        public readonly Type typeToLocateAssembly;
-        private readonly string namespaceName;
+        public readonly Assembly Assembly;
+
+        readonly Dictionary<string, string> resources;
+        readonly string namespaceName;
 
         public string VirtualPath { get; private set; }
 
@@ -24,12 +26,12 @@ namespace Signum.Web
 
         public AssemblyResourceStore(Type typeToLocateAssembly, string virtualPath, string namespaceName)
         {
-            this.typeToLocateAssembly = typeToLocateAssembly;
+            this.Assembly = typeToLocateAssembly.Assembly;
             // should we disallow an empty virtual path?
             this.VirtualPath = virtualPath.ToLower();
             this.namespaceName = namespaceName.ToLower();
 
-            resources = this.typeToLocateAssembly.Assembly.GetManifestResourceNames()
+            resources = this.Assembly.GetManifestResourceNames()
                 .Where(name => name.StartsWith(namespaceName))
                 .ToDictionary(name => name.ToLower());
         }
@@ -40,7 +42,7 @@ namespace Signum.Web
             string actualResourceName = null;
             if (resources.TryGetValue(fullResourceName, out actualResourceName))
             {
-                return this.typeToLocateAssembly.Assembly.GetManifestResourceStream(actualResourceName);
+                return this.Assembly.GetManifestResourceStream(actualResourceName);
             }
             else
             {

@@ -152,7 +152,7 @@ namespace Signum.Web
                         select new { pi, fo };
 
             foreach (var p in pairs)
-                p.pi.SetValue(obj, Utils.Convert(p.fo.Value, p.pi.PropertyType), null);
+                p.pi.SetValue(obj, Common.Convert(p.fo.Value, p.pi.PropertyType), null);
         }
 
        

@@ -22,7 +22,6 @@ namespace Signum.Web
         public const string OnCancel = "sfOnCancel";
         public const string BtnOk = "sfBtnOk";
         public const string BtnCancel = "sfBtnCancel";
-        public const string NavigationButtons = "sfNavigationButtons";
         public const string FindOptions = "sfFindOptions";
         public const string QueryDescription = "sfQueryDescription";
         public const string QueryName = "sfQueryName";

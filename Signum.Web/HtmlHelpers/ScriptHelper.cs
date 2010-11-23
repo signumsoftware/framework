@@ -42,7 +42,6 @@ namespace Signum.Web
         public static string DynamicScriptInclude(this HtmlHelper helper, params string[] url)
         {
             var tracker = new ResourceTracker(helper.ViewContext.HttpContext);
-            bool print = (!AppSettings.ReadBoolean(AppSettingsKeys.MergeScriptsBottom,false));
             
             var notLoadedUrls = new List<string>();
             foreach (var item in url)
@@ -50,8 +49,7 @@ namespace Signum.Web
                 if (!tracker.Contains(item))
                 {
                     tracker.Add(item);
-                    if (print)
-                        notLoadedUrls.Add(item);
+                    notLoadedUrls.Add(item);
                 }
             }
             return helper.RegisterScripts(notLoadedUrls.ToArray());
@@ -78,22 +76,18 @@ namespace Signum.Web
         public static string DynamicCssInclude(this HtmlHelper helper, params string[] url)
         {
             var tracker = new ResourceTracker(helper.ViewContext.HttpContext);
-            bool print = (!AppSettings.ReadBoolean(AppSettingsKeys.MergeScriptsBottom, false));
-
+            
             var notLoadedUrls = new List<string>();
             foreach (var item in url)
             {
                 if (!tracker.Contains(item))
                 {
                     tracker.Add(item);
-                    if (print)
-                        notLoadedUrls.Add(item);
+                    notLoadedUrls.Add(item);
                 }
             }
             return helper.RegisterCss(notLoadedUrls.ToArray());
         }
-
-       // public static Action RegisterCssScript(this HtmlHelper html, params string[] cssUrls);
 
         public static string RegisterCss(this HtmlHelper html, params string[] cssUrls)
         {

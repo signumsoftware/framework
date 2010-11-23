@@ -244,7 +244,7 @@ namespace Signum.Web
                 Operation = Operation,                
             };
 
-            f.Value = Utils.Convert(Value, f.Token.Type);
+            f.Value = Common.Convert(Value, f.Token.Type);
 
             return f;
         }
@@ -256,7 +256,7 @@ namespace Signum.Web
             
             string value = "";
 
-            object v = Utils.Convert(Value, Token.Type);
+            object v = Common.Convert(Value, Token.Type);
             if (v != null)
             {
                 if (typeof(Lite).IsAssignableFrom(v.GetType()))

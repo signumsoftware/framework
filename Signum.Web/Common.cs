@@ -12,6 +12,7 @@ using Signum.Entities.Reflection;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.DataStructures;
 using Signum.Engine;
+using System.Web;
 
 namespace Signum.Web
 {
@@ -126,7 +127,7 @@ namespace Signum.Web
         }
 #endregion
 
-       
+        #region TypeContext
         internal static TypeContext UntypedWalkExpression(TypeContext tc, LambdaExpression lambda)
         {
             Type returnType = lambda.Body.Type;
@@ -137,6 +138,70 @@ namespace Signum.Web
         public static TypeContext<S> WalkExpression<T, S>(TypeContext<T> tc, Expression<Func<T, S>> lambda)
         {
             return MemberAccessGatherer.WalkExpression(tc, lambda);
+        }
+        #endregion
+
+        #region HttpContext
+        public static string FullyQualifiedApplicationPath
+        {
+            get
+            {
+                HttpContext context = HttpContext.Current;
+                if (context == null)
+                    return null;
+
+                string appPath = "{0}://{1}{2}{3}".Formato(
+                      context.Request.Url.Scheme,
+                      context.Request.Url.Host,
+                      context.Request.Url.Port == 80 ? string.Empty : ":" + context.Request.Url.Port,
+                      context.Request.ApplicationPath);
+
+                if (!appPath.EndsWith("/"))
+                    appPath += "/";
+
+                return appPath;
+            }
+        }
+        #endregion
+
+        public static object Convert(object obj, Type type)
+        {
+            if (obj == null) return null;
+
+            Type objType = obj.GetType();
+
+            if (type.IsAssignableFrom(objType))
+                return obj;
+
+            if (typeof(Lite).IsAssignableFrom(objType) && type.IsAssignableFrom(((Lite)obj).RuntimeType))
+            {
+                Lite lite = (Lite)obj;
+                return lite.UntypedEntityOrNull ?? Database.RetrieveAndForget(lite);
+            }
+
+            if (typeof(Lite).IsAssignableFrom(type))
+            {
+                Type liteType = Reflector.ExtractLite(type);
+
+                if (typeof(Lite).IsAssignableFrom(objType))
+                {
+                    Lite lite = (Lite)obj;
+                    if (liteType.IsAssignableFrom(lite.RuntimeType))
+                    {
+                        if (lite.UntypedEntityOrNull != null)
+                            return Lite.Create(liteType, lite.UntypedEntityOrNull);
+                        else
+                            return Lite.Create(liteType, lite.Id, lite.RuntimeType, lite.ToStr);
+                    }
+                }
+
+                else if (liteType.IsAssignableFrom(objType))
+                {
+                    return Lite.Create(liteType, (IdentifiableEntity)obj);
+                }
+            }
+
+            throw new InvalidCastException("Impossible to convert objet {0} from type {1} to type {2}".Formato(obj, objType, type));
         }
     }
 }

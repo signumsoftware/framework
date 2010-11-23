@@ -19,8 +19,7 @@ namespace Signum.Web
             }
 
             if (!filterContext.HttpContext.Request.Url.Host.StartsWith("www")
-                    && !filterContext.HttpContext.Request.Url.Host.StartsWith("localhost")
-                    && !AppSettings.ReadBoolean(AppSettingsKeys.Development,false))
+                    && !filterContext.HttpContext.Request.Url.Host.StartsWith("localhost"))
             {
 
                 // form new URL
@@ -35,7 +34,8 @@ namespace Signum.Web
             }
         }
 
-        public void OnActionExecuted(ActionExecutedContext filterContext) {
+        public void OnActionExecuted(ActionExecutedContext filterContext)
+        {
         }
     }
 }

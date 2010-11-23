@@ -29,7 +29,7 @@ namespace Signum.Web
                 if (context.HttpContext.Request.IsAjaxRequest())
                     context.Result = Navigator.RedirectUrl(loginUrl.Formato(context.HttpContext.Request.UrlReferrer.PathAndQuery));
                 else
-                    context.Result = new RedirectResult(HttpContextUtils.FullyQualifiedApplicationPath + loginUrl.Formato(context.HttpContext.Request.Url.PathAndQuery));
+                    context.Result = new RedirectResult(Common.FullyQualifiedApplicationPath + loginUrl.Formato(context.HttpContext.Request.Url.PathAndQuery));
             }
         };
 
