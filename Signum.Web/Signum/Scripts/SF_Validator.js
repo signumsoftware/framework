@@ -9,7 +9,8 @@
             fixedInlineErrorText: "*", //Set to "" for it to be populated from ModelState error messages
             parentDiv: "",
             requestExtraJsonData: null,
-            ajaxError: null
+            ajaxError: null,
+            errorSummaryId : null,
         }, _valOptions);
 
         this.savingControllerUrl = this.valOptions.controllerUrl || "Signum/TrySave";
@@ -172,9 +173,11 @@
                         $('#' + currPrefix.compose(sfLink)).addClass(sfInputErrorClass);
                     }
                     if ((isMoreInner || isEqual) && $('#' + currPrefix.compose(sfGlobalValidationSummary)).length > 0 && !empty(partialErrors)) {
-                        var currentSummary = empty(this.valOptions.parentDiv) ? 
-                                             $('#' + currPrefix.compose(sfGlobalValidationSummary)) :
-                                             $('#' + this.valOptions.parentDiv + " #" + currPrefix.compose(sfGlobalValidationSummary));
+                        var currentSummary = !empty(this.valOptions.errorSummaryId) ?
+                                             $('#' + this.valOptions.errorSummaryId) :
+                                             empty(this.valOptions.parentDiv) ? 
+                                                $('#' + currPrefix.compose(sfGlobalValidationSummary)) :
+                                                $('#' + this.valOptions.parentDiv + " #" + currPrefix.compose(sfGlobalValidationSummary));
                         var summaryUL = currentSummary.children('.' + sfSummaryErrorClass);
                         if (summaryUL.length == 0)
                             currentSummary.append('<ul class="' + sfSummaryErrorClass + '">\n' + partialErrors + '</ul>');

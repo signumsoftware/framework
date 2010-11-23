@@ -20,7 +20,7 @@ namespace Signum.Web
         /// <summary>
         /// HTML5 Input types
         /// </summary>
-        public enum InputType   
+        public enum InputType
         {
             Text,
             Number,
@@ -59,7 +59,7 @@ namespace Signum.Web
 
             if (valueLine.ShowValidationMessage)
                 valueLine.ValueHtmlProps.AddCssClass("inlineVal"); //inlineVal class tells Javascript code to show Inline Error
-            
+
             sb.AppendLine(Configurator.Constructor[vltype](helper, valueLine));
 
             if (valueLine.UnitText.HasText())
@@ -81,7 +81,7 @@ namespace Signum.Web
                     sb.AppendLine(helper.Label(valueLine.Compose("lbl"), valueLine.LabelText, valueLine.ControlID, TypeContext.CssLineLabel));
             }
 
-            if (valueLine.LabelVisible && !valueLine.OnlyValue &&valueLine.ValueFirst)
+            if (valueLine.LabelVisible && !valueLine.OnlyValue && valueLine.ValueFirst)
                 sb.AppendLine("</div>");
 
             if (valueLine.ShowFieldDiv && !valueLine.OnlyValue)
@@ -98,13 +98,13 @@ namespace Signum.Web
             return valueLine.ControlID;
         }
 
-        public static string EnumComboBox(this HtmlHelper helper, ValueLine valueLine) 
+        public static string EnumComboBox(this HtmlHelper helper, ValueLine valueLine)
         {
             Enum value = (Enum)valueLine.UntypedValue;
 
             if (valueLine.ReadOnly)
                 return helper.Span(valueLine.ControlID, value != null ? value.NiceToString() : "", "valueLine");
-            
+
             StringBuilder sb = new StringBuilder();
             List<SelectListItem> items = valueLine.EnumComboItems;
             if (items == null)
@@ -116,7 +116,7 @@ namespace Signum.Web
                 {
                     items.Add(new SelectListItem() { Text = "-", Value = "" });
                 }
-                
+
                 items.AddRange(
                     Enum.GetValues(valueLine.Type.UnNullify())
                         .Cast<Enum>()
@@ -128,6 +128,10 @@ namespace Signum.Web
                             })
                     );
             }
+            else
+                if (value != null)         
+                    items.Where(e => e.Value == value.ToString()).Single("Not value present in ValueLine", "More than one values present in ValueLine").Selected=true;
+
 
             string setTicks = SetTicksFunction(helper, valueLine);
             string reloadOnChangeFunction = GetReloadFunction(helper, valueLine);
@@ -146,15 +150,15 @@ namespace Signum.Web
 
             if (valueLine.DatePickerOptions == null)
                 valueLine.DatePickerOptions = new DatePickerOptions();
-    
+
             if (value.HasValue)
                 value = value.Value.ToUserInterface();
 
             if (valueLine.ReadOnly)
                 return helper.Span(valueLine.ControlID, value.TryToString(valueLine.Format), "valueLine");
-    
+
             valueLine.ValueHtmlProps.AddCssClass("maskedEdit");
-            
+
             if (valueLine.DatePickerOptions.ShowAge)
                 valueLine.ValueHtmlProps.AddCssClass("hasAge");
 
@@ -194,7 +198,7 @@ namespace Signum.Web
 
             if (Validator.GetOrCreatePropertyPack(valueLine.PropertyRoute)
                     .Validators.OfType<EMailValidatorAttribute>().SingleOrDefault() != null)
-                    return InputType.Email;
+                return InputType.Email;
 
             if (Validator.GetOrCreatePropertyPack(valueLine.PropertyRoute)
                 .Validators.OfType<URLValidatorAttribute>().SingleOrDefault() != null)
@@ -223,7 +227,7 @@ namespace Signum.Web
                 valueLine.ValueHtmlProps.Add("autocomplete", "off");
             else
                 valueLine.ValueHtmlProps.Remove("autocomplete");
-            
+
             if (valueLine.ValueHtmlProps.ContainsKey("onblur"))
                 valueLine.ValueHtmlProps["onblur"] = "this.setAttribute('value', this.value); " + setTicks + valueLine.ValueHtmlProps["onblur"] + reloadOnChangeFunction;
             else
@@ -276,7 +280,7 @@ namespace Signum.Web
                         valueLine.ValueHtmlProps.Add("onclick", setTicks + reloadOnChangeFunction);
                 }
             }
-            
+
             bool? value = (bool?)valueLine.UntypedValue;
             return HtmlHelperExtenders.CheckBox(helper, valueLine.ControlID, value.HasValue ? value.Value : false, !valueLine.ReadOnly, valueLine.ValueHtmlProps);
         }
@@ -288,7 +292,7 @@ namespace Signum.Web
 
             if (valueLine.ReadOnly)
                 valueLine.ValueHtmlProps.Add("disabled", "disabled");
-            
+
             valueLine.ValueHtmlProps.Add("name", valueLine.ControlID);
 
             valueLine.ValueHtmlProps.AddCssClass("rbValueLine");
@@ -303,7 +307,7 @@ namespace Signum.Web
             sb.AppendLine(rb);
 
             sb.AppendLine(helper.Span("", valueLine.RadioButtonLabelFalse, "lblRadioFalse"));
-            
+
             return sb.ToString();
         }
 
@@ -322,9 +326,9 @@ namespace Signum.Web
             TypeContext<S> context = (TypeContext<S>)Common.WalkExpression(tc, property);
 
             ValueLine vl = new ValueLine(typeof(S), context.Value, context, null, context.PropertyRoute);
-            
+
             Common.FireCommonTasks(vl);
-            
+
             if (settingsModifier != null)
                 settingsModifier(vl);
 
@@ -352,8 +356,8 @@ namespace Signum.Web
 
         private static string SetTicksFunction(HtmlHelper helper, ValueLine valueLine)
         {
-            return (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || valueLine.ReloadOnChange || valueLine.ReloadFunction.HasText()) ? 
-                "$('#{0}').val(new Date().getTime()); ".Formato(valueLine.Compose(TypeContext.Ticks)) : 
+            return (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || valueLine.ReloadOnChange || valueLine.ReloadFunction.HasText()) ?
+                "$('#{0}').val(new Date().getTime()); ".Formato(valueLine.Compose(TypeContext.Ticks)) :
                 "";
         }
 
