@@ -241,9 +241,7 @@ namespace Signum.Windows.Chart
         {
             if (queryToken is IntervalQueryToken)
             {
-                var filters = (IEnumerable<FilterOption>)miGetIntervalFilters.GenericInvoke(
-                    new[] { queryToken.Type.GetGenericArguments()[0] }, null,
-                    new object[] { queryToken.Parent, p });
+                var filters = (IEnumerable<FilterOption>)miGetIntervalFilters.GetInvoker(queryToken.Type.GetGenericArguments())(queryToken.Parent, p);
 
                 return filters.ToArray();
             }
@@ -251,7 +249,7 @@ namespace Signum.Windows.Chart
                 return new[] { new FilterOption(queryToken.FullKey(), p) };
         }
 
-        static MethodInfo miGetIntervalFilters = ReflectionTools.GetMethodInfo(() => GetIntervalFilters<int>(null, new NullableInterval<int>())).GetGenericMethodDefinition();
+        static GenericInvoker miGetIntervalFilters = GenericInvoker.Create(() => GetIntervalFilters<int>(null, new NullableInterval<int>()));
         static IEnumerable<FilterOption> GetIntervalFilters<T>(QueryToken queryToken, NullableInterval<T> interval)
             where T: struct, IComparable<T>, IEquatable<T>
         {

@@ -111,13 +111,13 @@ namespace Signum.Windows.Operations
 
                     type = supraType; 
                 }
-                return (FrameworkElement)miGenerateButton.GenericInvoke(new []{type}, this, new object[]{oi, ident, entityControl, viewButtons, settings});
+                return (FrameworkElement)miGenerateButton.GetInvoker(type)(this, oi, ident, entityControl, viewButtons, settings);
             }).NotNull().ToList();
 
             return result;
         }
 
-        static MethodInfo miGenerateButton = ReflectionTools.GetMethodInfo(() => ((OperationManager)null).GenerateButton<IdentifiableEntity>(null, null, null, ViewButtons.Ok, null)).GetGenericMethodDefinition();
+        static GenericInvoker miGenerateButton = GenericInvoker.Create(() => ((OperationManager)null).GenerateButton<IdentifiableEntity>(null, null, null, ViewButtons.Ok, null));
 
         protected internal virtual Win.FrameworkElement GenerateButton<T>(OperationInfo operationInfo, T entity, Win.FrameworkElement entityControl, ViewButtons viewButtons, EntityOperationSettings<T> os)
             where T:class, IIdentifiable

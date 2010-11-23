@@ -30,7 +30,7 @@ namespace Signum.Windows.Authorization
                 foreach (EntitySettings es in Navigator.Manager.EntitySettings.Values)
                 {
                     if (typeof(IdentifiableEntity).IsAssignableFrom(es.StaticType))
-                        miAttachTypeEvent.GenericInvoke(new Type[] { es.StaticType }, null, new object[] { es });
+                        miAttachTypeEvent.GetInvoker(es.StaticType)(es);
                 }
             };
 
@@ -57,8 +57,7 @@ namespace Signum.Windows.Authorization
             AuthClient.UpdateCacheEvent += new Action(AuthClient_UpdateCacheEvent);
         }
 
-        static MethodInfo miAttachTypeEvent = ReflectionTools.GetMethodInfo(() => AttachTypeEvent<IdentifiableEntity>(null)).GetGenericMethodDefinition();
-
+        static GenericInvoker miAttachTypeEvent = GenericInvoker.Create(() => AttachTypeEvent<IdentifiableEntity>(null));
         private static void AttachTypeEvent<T>(EntitySettings<T> settings) where T : IdentifiableEntity
         {
             settings.IsCreable += admin => GetTypeAllowed(typeof(T)) == TypeAllowedBasic.Create;
