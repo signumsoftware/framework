@@ -161,16 +161,13 @@ namespace Signum.Engine.Basics
             static MethodInfo miWhere = ReflectionTools.GetMethodInfo(() => Queryable.Where<int>(null, i => i == 0)).GetGenericMethodDefinition();
 
             public Expression Expand(Expression instance, Expression[] arguments, Type[] typeArguments)
-            {
-                Expression group = arguments[1];
-                if (group.NodeType == ExpressionType.Convert)
-                    group = ((UnaryExpression)group).Operand;
-
+            {  
                 Type type = typeArguments[0];
 
-                Expression query = arguments[0]; 
-
-                IEntityGroupInfo info = GetEntityGroupInfo((Enum)((ConstantExpression)group).Value, type);
+                Expression query = arguments[0];
+                Enum group = (Enum)ExpressionEvaluator.Eval(arguments[1]);
+                
+                IEntityGroupInfo info = GetEntityGroupInfo(group, type);
 
                 if (info.IsInGroup.Resume == true)
                     return query;
@@ -197,15 +194,12 @@ namespace Signum.Engine.Basics
 
             public Expression Expand(Expression instance, Expression[] arguments, Type[] typeArguments)
             {
-                Expression group = arguments[1];
-                if (group.NodeType == ExpressionType.Convert)
-                    group = ((UnaryExpression)group).Operand;
-
                 Type type = typeArguments[0];
 
                 Expression query = arguments[0];
+                Enum group = (Enum)ExpressionEvaluator.Eval(arguments[1]);
 
-                IEntityGroupInfo info = GetEntityGroupInfo((Enum)((ConstantExpression)group).Value, type);
+                IEntityGroupInfo info = GetEntityGroupInfo(group, type);
 
                 if (info.IsApplicable.Resume == true)
                     return query;
