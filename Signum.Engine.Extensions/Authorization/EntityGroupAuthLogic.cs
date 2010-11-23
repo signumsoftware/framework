@@ -127,7 +127,7 @@ namespace Signum.Engine.Authorization
                     if (IsAllwaysAllowed(typeof(T), TypeAllowedBasic.Create))
                         return;
 
-                    var created = (List<IdentifiableEntity>)Transaction.UserData.GetOrCreate(ModifiedKey, () => new List<IdentifiableEntity>());
+                    var created = (List<IdentifiableEntity>)Transaction.UserData.GetOrCreate(CreatedKey, () => new List<IdentifiableEntity>());
                     if (created.Contains(ident))
                         return;
 
