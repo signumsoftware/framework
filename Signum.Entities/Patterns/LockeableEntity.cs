@@ -10,7 +10,7 @@ using Signum.Utilities;
 namespace Signum.Entities.Patterns
 {
     [Serializable]
-    public abstract class LockeableEntity : Entity
+    public abstract class LockableEntity : Entity
     {
         bool locked;
         public bool Locked
