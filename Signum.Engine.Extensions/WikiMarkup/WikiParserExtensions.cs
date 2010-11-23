@@ -53,14 +53,15 @@ namespace Signum.Engine
                 }, RegexOptions.Singleline);
             }
 
+
+            //3: Encode
+            result = HttpUtility.HtmlEncode(content);
+
             //1: Process tokens
-            result = ProcessTokens(content, settings);
+            result = ProcessTokens(result, settings);
 
             //2: Process format
             result = ProcessFormat(result, settings);
-
-            //3: Encode
-            result = HttpUtility.HtmlEncode(result);
            
             if (settings.AllowRawHtml)
                 result = Regex.Replace(result, @"\|\|(?<key>HTML\d+)\|\|", m => htmlFragments[m.Value]);
