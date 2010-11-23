@@ -145,13 +145,19 @@ namespace Signum.Utilities
                 if (saveCurrent == null)
                 {
                     lock (Entries)
+                    {
+                        current.Index = Entries.Count;
+                        current.Parent = null;
                         Entries.Add(current);
+                    }
                 }
                 else
                 {
                     if (saveCurrent.Entries == null)
                         saveCurrent.Entries = new List<HeavyProfilerEntry>();
 
+                    current.Index = saveCurrent.Entries.Count;
+                    current.Parent = saveCurrent; 
                     saveCurrent.Entries.Add(current);
                 }
 
@@ -180,12 +186,43 @@ namespace Signum.Utilities
 
             return fileName.Right(50, false) + " ({0})".Formato(frame.GetFileLineNumber());
         }
+
+        public static HeavyProfilerEntry Find(string indices)
+        {
+            var array = indices.Split('.').Select(a => int.Parse(a)).ToArray();
+
+            HeavyProfilerEntry entry = null;
+
+            List<HeavyProfilerEntry> currentList = Signum.Utilities.HeavyProfiler.Entries;
+
+            for (int i = 0; i < array.Length; i++)
+            {
+                int index = array[i];
+
+                if (currentList == null || currentList.Count <= index)
+                    throw new InvalidOperationException("The ProfileEntry is not available");
+
+                entry = currentList[index];
+
+                currentList = entry.Entries;
+            }
+
+            return entry;
+        }
     }
 
     public class HeavyProfilerEntry
     {
         public List<HeavyProfilerEntry> Entries;
+        public HeavyProfilerEntry Parent; 
         public string Role;
+
+        public int Index;
+
+        public string FullIndex()
+        {
+            return this.FollowC(a => a.Parent).Reverse().ToString(a => a.Index.ToString(), ".");
+        }
 
         public object AditionalData;
 
