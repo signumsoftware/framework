@@ -28,7 +28,21 @@ namespace Signum.Web.Profiler
         {
             ProfilerPermissions.ViewHeavyProfiler.Authorize();
 
+            ViewData[ViewDataKeys.PageTitle] = "Root entries";
+
             return View(ProfileClient.ViewPath + "HeavyList", Signum.Utilities.HeavyProfiler.Entries); 
+        }
+
+        [AcceptVerbs(HttpVerbs.Get)]
+        public ActionResult HeavySlowest(int? top)
+        {
+            ProfilerPermissions.ViewHeavyProfiler.Authorize();
+
+            var list = Signum.Utilities.HeavyProfiler.AllEntries().Where(a => a.Role == "SQL").OrderByDescending(a => a.Elapsed).Take(top ?? 50).ToList();
+
+            ViewData[ViewDataKeys.PageTitle] = "Slowest SQL entries"; 
+
+            return View(ProfileClient.ViewPath + "HeavyList", list);
         }
 
         [AcceptVerbs(HttpVerbs.Get)]
@@ -36,32 +50,12 @@ namespace Signum.Web.Profiler
         {
             ProfilerPermissions.ViewHeavyProfiler.Authorize();
 
-            int[] ind = indices.Split(',').Select(a => int.Parse(a)).ToArray(); 
+            var entry = HeavyProfiler.Find(indices);
 
-            HeavyProfilerDetails details = new HeavyProfilerDetails
-            {
-                Indices = ind,
-                Previous = new List<HeavyProfilerEntry>(),
-                Entry = null, 
-            };
+            ViewData[ViewDataKeys.PageTitle] = "Entry " + entry.FullIndex(); 
 
-            List<HeavyProfilerEntry> currentList = Signum.Utilities.HeavyProfiler.Entries;
-            for (int i = 0; i < ind.Length; i++)
-            {
-                if (i != 0)
-                    details.Previous.Add(details.Entry);
 
-                int index = ind[i];
-
-                if (currentList == null || currentList.Count <= index)
-                    throw new InvalidOperationException("The ProfileEntry is not available"); 
-
-                details.Entry = currentList[index];
-
-                currentList = details.Entry.Entries;
-            }
-
-            return View(ProfileClient.ViewPath + "HeavyDetails", details);
+            return View(ProfileClient.ViewPath + "HeavyDetails", entry);
         }
 
         [AcceptVerbs(HttpVerbs.Get)]
@@ -98,10 +92,17 @@ namespace Signum.Web.Profiler
         {
             ProfilerPermissions.ViewTimeTracker.Authorize();
 
-            if (clear != null && clear == 1)
-                Signum.Utilities.TimeTracker.IdentifiedElapseds = new Dictionary<string, Signum.Utilities.TimeTrackerEntry>();
             ViewData[ViewDataKeys.PageTitle] = "Times";
             return View(ProfileClient.ViewPath + "Times");
+        }
+
+        [AcceptVerbs(HttpVerbs.Get)]
+        public ActionResult ClearTimes()
+        {
+            ProfilerPermissions.ViewTimeTracker.Authorize();
+
+            Signum.Utilities.TimeTracker.IdentifiedElapseds.Clear();
+            return RedirectToAction("Times"); 
         }
 
         [AcceptVerbs(HttpVerbs.Get)]
@@ -109,17 +110,17 @@ namespace Signum.Web.Profiler
         {
             ProfilerPermissions.ViewTimeTracker.Authorize();
 
-            if (clear != null && clear == 1)
-                Signum.Utilities.TimeTracker.IdentifiedElapseds = new Dictionary<string, Signum.Utilities.TimeTrackerEntry>();
             ViewData[ViewDataKeys.PageTitle] = "Table Times";
             return View(ProfileClient.ViewPath + "TimeTable");
         }
-    }
 
-    public class HeavyProfilerDetails
-    {
-        public int[] Indices; 
-        public HeavyProfilerEntry Entry;
-        public List<HeavyProfilerEntry> Previous;  
+        [AcceptVerbs(HttpVerbs.Get)]
+        public ActionResult ClearTimesTable()
+        {
+            ProfilerPermissions.ViewTimeTracker.Authorize();
+
+            Signum.Utilities.TimeTracker.IdentifiedElapseds.Clear();
+            return RedirectToAction("Times");
+        }
     }
 }

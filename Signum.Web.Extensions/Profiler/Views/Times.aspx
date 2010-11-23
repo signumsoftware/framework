@@ -55,7 +55,7 @@
 	background-color: #FFCCCC;
 }
 </style>
-<a href="home/times?clear=1">Limpiar resultados</a>
+<%=Html.ActionLink("Clear", "ClearTimes")%>
 <ul id="tasks">
         <%
             

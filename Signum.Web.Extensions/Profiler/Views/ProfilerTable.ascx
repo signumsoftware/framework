@@ -4,8 +4,7 @@
 <%@ Import Namespace="Signum.Web.Profiler" %>
 <%
     List<HeavyProfilerEntry> entries = (List<HeavyProfilerEntry>)Model;
-    int[] indices = (int[])ViewData["indices"] ?? new int[0];
-
+   
     var roles = entries.Select(a => a.GetDescendantRoles()).ToList();
 
     var allKeys = roles.SelectMany(a => a.Keys).Distinct().Order().ToList();
@@ -58,7 +57,7 @@
         %>
         <tr>
             <td>
-                <%=Html.ProfilerEntry("View", indices.And(i))%>
+                <%=Html.ProfilerEntry("View", entry.FullIndex())%>
             </td>
             <td>
                 <%:entry.Type.TypeName()%>

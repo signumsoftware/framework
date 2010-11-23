@@ -39,9 +39,9 @@ namespace Signum.Web.Profiler
             }
         }
 
-        public static MvcHtmlString ProfilerEntry(this HtmlHelper htmlHelper, string linkText,  IEnumerable<int> indices)
+        public static MvcHtmlString ProfilerEntry(this HtmlHelper htmlHelper, string linkText,  string indices)
         {
-            return htmlHelper.ActionLink(linkText, "HeavyRoute", new { indices = indices.ToString(",") }); 
+            return htmlHelper.ActionLink(linkText, "HeavyRoute", new { indices }); 
         }
     }
 }

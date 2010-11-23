@@ -7,13 +7,14 @@
 <asp:Content ID="registerContent" ContentPlaceHolderID="MainContent" runat="server">
     <h2>
         Profiler Entry (<%
-        HeavyProfilerDetails details = (HeavyProfilerDetails)Model;
+        HeavyProfilerEntry entry = (HeavyProfilerEntry)Model;
 
-        for (int i = 0; i < details.Indices.Length; i++)
-        {
-        %><%= i == details.Indices.Length - 1 ? details.Indices[i].ToString() : Html.ProfilerEntry(details.Indices[i].ToString(), details.Indices.Take(i + 1)).ToHtmlString()%><% 
-        }
-        %>)</h2>
+       foreach (var e in entry.FollowC(a=>a.Parent).Skip(1).Reverse())
+	    {
+           %><%=Html.ProfilerEntry(e.Index.ToString(), e.FullIndex())%>.<%    
+	    }
+        %>
+        <%=entry.Index.ToString()%>)</h2>
     <%=Html.ActionLink("(View all)", "ViewAll") %>
     <table class="tblResults">
         <tr>
@@ -21,7 +22,7 @@
                 Type
             </th>
             <td>
-                <%=details.Entry.Type.TryCC(t=>t.TypeName())%>
+                <%=entry.Type.TryCC(t => t.TypeName())%>
             </td>
         </tr>
         <tr>
@@ -29,7 +30,7 @@
                 Method
             </th>
             <td>
-                <%=details.Entry.Method.Name%>
+                <%=entry.Method.Name%>
             </td>
         </tr>
         <tr>
@@ -37,7 +38,7 @@
                 File Line
             </th>
             <td>
-                <%=details.Entry.StackTrace.GetFrame(0).GetFileLineAndNumber()%>
+                <%=entry.StackTrace.GetFrame(0).GetFileLineAndNumber()%>
             </td>
         </tr>
         <tr>
@@ -45,7 +46,7 @@
                 Role
             </th>
             <td>
-                <%=details.Entry.Role%>
+                <%=entry.Role%>
             </td>
         </tr>
         <tr>
@@ -53,7 +54,7 @@
                 Time
             </th>
             <td>
-                <%=details.Entry.Elapsed.NiceToString()%>
+                <%=entry.Elapsed.NiceToString()%>
             </td>
         </tr>
          <tr>
@@ -61,12 +62,12 @@
                 Childs
             </th>
             <td>
-                <%:details.Entry.GetEntriesResume().TryToString()%>
+                <%:entry.GetEntriesResume().TryToString()%>
             </td>
         </tr>
         
         <%
-            foreach (var kvp in details.Entry.GetDescendantRoles())
+            foreach (var kvp in entry.GetDescendantRoles())
             {
                %> 
                <tr>
@@ -74,7 +75,7 @@
                 <%:kvp.Key %> Childs 
             </th>
             <td>
-                <%:kvp.Value.ToString(details.Entry)%>
+                <%:kvp.Value.ToString(entry)%>
             </td>
         </tr>
                <% 
@@ -85,18 +86,18 @@
 
     </table>
     <br />
-    <% if (details.Entry.Entries != null)
+    <% if (entry.Entries != null)
        {%>
     <h3>
         Childs</h3>
-    <%Html.RenderPartial(ProfileClient.ViewPath + "ProfilerTable", details.Entry.Entries, new ViewDataDictionary { { "indices", details.Indices } });%>
+    <%Html.RenderPartial(ProfileClient.ViewPath + "ProfilerTable", entry.Entries);%>
     <%} %>
     <h3>
         Aditional Data</h3>
     <div>
         <code>
             <pre>
-        <%=details.Entry.AditionalData%>
+        <%=entry.AditionalData%>
     </pre>
         </code>
     </div>
@@ -119,9 +120,9 @@
         </thead>
         <tbody>
             <%            
-                for (int i = 0; i < details.Entry.StackTrace.FrameCount; i++)
+                for (int i = 0; i < entry.StackTrace.FrameCount; i++)
                 {
-                    var frame = details.Entry.StackTrace.GetFrame(i);
+                    var frame = entry.StackTrace.GetFrame(i);
             %>
             <tr>
                 <td>

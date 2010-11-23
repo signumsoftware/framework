@@ -9,7 +9,8 @@
         $(".tblResults").tablesorter();
     });
 </script>
-<a href="home/times2?clear=1">Limpiar resultados</a>
+<%=Html.ActionLink("Clear", "ClearTimesTable")%>
+
 <table class="tblResults">
     <thead>
         <tr>
