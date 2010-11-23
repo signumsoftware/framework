@@ -156,4 +156,7 @@
   <data name="UnauthorizedAccessTo0Because1" xml:space="preserve">
     <value>Unautorized access to {0} because {1}</value>
   </data>
+  <data name="NotAuthorizedToRetrieve01" xml:space="preserve">
+    <value>Not authorized to retrieve {0} {1}</value>
+  </data>
 </root>

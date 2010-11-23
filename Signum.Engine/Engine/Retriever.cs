@@ -12,11 +12,15 @@ using System.Collections;
 using Signum.Engine.Maps;
 using Signum.Engine.Properties;
 using Signum.Engine.Exceptions;
+using System.Reflection;
+using Signum.Utilities.Reflection;
 
 namespace Signum.Engine
 {
     internal class Retriever
     {
+        public bool InQuery; 
+
         public Retriever()
         {
 
@@ -24,7 +28,7 @@ namespace Signum.Engine
 
         Dictionary<Table, Dictionary<int, IdentifiableEntity>> reqIdentifiables = new Dictionary<Table, Dictionary<int, IdentifiableEntity>>();
         
-        // no se garantiza unicidad para lites ni colecciones
+        // unity not guaranteed for lites
         Dictionary<Table, Dictionary<int, List<Lite>>> reqLite = new Dictionary<Table, Dictionary<int, List<Lite>>>(); 
         Dictionary<RelationalTable, Dictionary<int, IList>> reqList = new Dictionary<RelationalTable, Dictionary<int, IList>>();
 
@@ -79,7 +83,6 @@ namespace Signum.Engine
         }
 
 
-
         void ProcessIdentifiables(Table table)
         {
             Dictionary<int, IdentifiableEntity> dic = reqIdentifiables[table];
@@ -87,6 +90,9 @@ namespace Signum.Engine
             while (dic.Count > 0)
             {
                 int[] requested = dic.Keys.Take(SqlBuilder.MaxParametersInSQL).ToArray();
+
+                Schema.Current.OnRetrieving(table.Type, requested, InQuery); 
+
                 List<int> found = new List<int>(requested.Length);
                 SqlPreCommandSimple preComand = table.BatchSelect(requested).ToSimple();
                 Executor.ExecuteDataReader(preComand, reader =>
@@ -97,7 +103,7 @@ namespace Signum.Engine
                     table.Fill(ie, reader, this);
 
                     ie.Modified = null;
-                    ie.IsNew = false; 
+                    ie.IsNew = false;
 
                     EntityCache.Add(ie);
                     PostRetrieving.Add(ie);
@@ -112,6 +118,9 @@ namespace Signum.Engine
             //if (dic.Count == 0) //alquien podria haber metido referencias de hermanos
             reqIdentifiables.Remove(table);
         }
+
+
+     
 
         void ProcessLazies(Table table)
         {
@@ -188,7 +197,6 @@ namespace Signum.Engine
                 {
                     var ie = (IdentifiableEntity)table.Constructor();
                     ie.id = id;
-                    Schema.Current.OnRetrieving(table.Type, id, isRoot);
                     if (isRoot)
                         roots.Add(ie); 
                     return ie; 

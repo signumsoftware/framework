@@ -157,10 +157,10 @@ namespace Signum.Web
                 return (T)(object)null;
             }
 
-            return (T)miGetRuntimeValue.GenericInvoke(new[] { runtimeInfo.RuntimeType }, this, new object[] { ctx });
+            return (T)miGetRuntimeValue.GetInvoker(runtimeInfo.RuntimeType)(this, ctx);
         }
 
-        static MethodInfo miGetRuntimeValue = typeof(AutoEntityMapping<T>).GetMethod("GetRuntimeValue", BindingFlags.Instance | BindingFlags.Public);
+        static GenericInvoker miGetRuntimeValue = GenericInvoker.Create(typeof(AutoEntityMapping<T>).GetMethod("GetRuntimeValue", BindingFlags.Instance | BindingFlags.Public));
 
         public R GetRuntimeValue<R>(MappingContext<T> tc)
             where R : ModifiableEntity, T

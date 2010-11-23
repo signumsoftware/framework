@@ -80,7 +80,7 @@ namespace Signum.Engine.Linq
             using (new EntityCache())
             using (Transaction tr = new Transaction())
             {
-                Retriever retriever = new Retriever();
+                Retriever retriever = new Retriever() { InQuery = true };
 
                 if (ChildProjections != null)
                 {

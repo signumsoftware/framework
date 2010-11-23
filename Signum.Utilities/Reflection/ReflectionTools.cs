@@ -10,6 +10,7 @@ using System.ComponentModel;
 using System.Resources;
 using System.Globalization;
 using Signum.Utilities.Properties;
+using System.Collections.Concurrent;
 
 namespace Signum.Utilities.Reflection
 {
@@ -162,6 +163,11 @@ namespace Signum.Utilities.Reflection
             return BaseMethodInfo(method);
         }
 
+        public static MethodInfo GetMethodInfo<T>(Expression<Action<T>> method)
+        {
+            return BaseMethodInfo(method);
+        }
+
         public static MethodInfo GetMethodInfo<R>(Expression<Func<R>> method)
         {
             return BaseMethodInfo(method);
@@ -187,28 +193,6 @@ namespace Signum.Utilities.Reflection
 
             return ex.Method;
         }
-
-        public static object GenericInvoke(this MethodInfo mi, Type[] typeArguments, object obj, object[] parameters)
-        {
-            if (!mi.IsGenericMethodDefinition)
-                throw new ArgumentException("Argument mi should be a generic method definition");
-
-            try
-            {
-               MethodInfo methodInfo = mi.MakeGenericMethod(typeArguments);
-                return methodInfo.Invoke(obj, parameters); 
-            }
-            catch (TargetInvocationException ex)
-            {
-                Action savestack = Delegate.CreateDelegate(typeof(Action), ex.InnerException, "InternalPreserveStackTrace", false, false) as Action;
-
-                if (savestack != null)
-                    savestack();
-
-                throw ex.InnerException;
-            }
-        }
-
 
         public static Type GetReceiverType<T, R>(Expression<Func<T, R>> lambda)
         {
@@ -582,4 +566,7 @@ namespace Signum.Utilities.Reflection
             }
         }
     }
+
+
+    
 }

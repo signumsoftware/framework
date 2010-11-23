@@ -30,11 +30,11 @@ namespace Signum.Engine.DynamicQuery
 
             return (from mi in new[] { miLiteStarting, miLiteContaining }
                     from type in types
-                    from lite in (List<Lite>)mi.GenericInvoke(new[] { liteType, type }, null, new object[] { subString, count })
+                    from lite in (List<Lite>)mi.GetInvoker(liteType, type)(subString, count)
                     select lite).Take(count).ToList();
         }
 
-        static MethodInfo miLiteStarting = ReflectionTools.GetMethodInfo(()=>LiteStarting<TypeDN,TypeDN>(null, 1)).GetGenericMethodDefinition();
+        static GenericInvoker miLiteStarting = GenericInvoker.Create(() => LiteStarting<TypeDN, TypeDN>(null, 1));
         static List<Lite> LiteStarting<LT, RT>(string subString, int count)
             where LT : class, IIdentifiable
             where RT : IdentifiableEntity, LT
@@ -42,7 +42,7 @@ namespace Signum.Engine.DynamicQuery
             return Database.Query<RT>().Where(a => a.ToStr.StartsWith(subString)).Select(a => a.ToLite<LT>()).Take(count).AsEnumerable().OrderBy(l=>l.ToStr).Cast<Lite>().ToList();
         }
 
-        static MethodInfo miLiteContaining = ReflectionTools.GetMethodInfo(() => LiteContaining<TypeDN, TypeDN>(null, 1)).GetGenericMethodDefinition();
+        static GenericInvoker miLiteContaining = GenericInvoker.Create(() => LiteContaining<TypeDN, TypeDN>(null, 1));
         static List<Lite> LiteContaining<LT, RT>(string subString, int count)
             where LT : class, IIdentifiable
             where RT : IdentifiableEntity, LT
@@ -54,18 +54,18 @@ namespace Signum.Engine.DynamicQuery
         {
             if (implementations == null)
             {
-                return (List<Lite>)miAllLite.GenericInvoke(new[] { liteType, liteType }, null, null);
+                return (List<Lite>)miAllLite.GetInvoker(liteType, liteType)();
             }
 
             if (implementations.IsByAll)
                 throw new InvalidOperationException("ImplementedByAll is not supported for RetrieAllLite");
 
             return (from type in ((ImplementedByAttribute)implementations).ImplementedTypes
-                    from l in (List<Lite>)miAllLite.GenericInvoke(new[] { liteType, type }, null, null)
+                    from l in (List<Lite>)miAllLite.GetInvoker(liteType, type)()
                     select l).ToList();
         }
 
-        static MethodInfo miAllLite = ReflectionTools.GetMethodInfo(() => AllLite<TypeDN, TypeDN>()).GetGenericMethodDefinition();
+        static GenericInvoker miAllLite = GenericInvoker.Create(() => AllLite<TypeDN, TypeDN>());
         static List<Lite> AllLite<LT, RT>()
             where LT : class, IIdentifiable
             where RT : IdentifiableEntity, LT

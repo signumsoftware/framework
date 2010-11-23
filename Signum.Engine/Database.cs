@@ -221,13 +221,13 @@ namespace Signum.Engine
             return Database.Query<T>().ToList();
         }
 
-        static readonly MethodInfo miRetrieveAll = ReflectionTools.GetMethodInfo(()=>RetrieveAll<TypeDN>()).GetGenericMethodDefinition();
+        static readonly GenericInvoker miRetrieveAll = GenericInvoker.Create(() => RetrieveAll<TypeDN>());
         public static List<IdentifiableEntity> RetrieveAll(Type type)
         {
             if (type == null)
                 throw new ArgumentNullException("type");
 
-            IList list = (IList)miRetrieveAll.GenericInvoke(new[] { type }, null, null);
+            IList list = (IList)miRetrieveAll.GetInvoker(type)();
             return list.Cast<IdentifiableEntity>().ToList();
         }
 
@@ -237,13 +237,13 @@ namespace Signum.Engine
             return Database.Query<T>().Select(e => e.ToLite()).ToList(); 
         }
 
-        static readonly MethodInfo miRetrieveAllLite = ReflectionTools.GetMethodInfo(() => Database.RetrieveAllLite<TypeDN>()).GetGenericMethodDefinition();
+        static readonly GenericInvoker miRetrieveAllLite = GenericInvoker.Create(() => Database.RetrieveAllLite<TypeDN>());
         public static List<Lite> RetrieveAllLite(Type type)
         {
             if (type == null)
                 throw new ArgumentNullException("type");
 
-            IList list = (IList)miRetrieveAllLite.GenericInvoke(new[] { type }, null, null);
+            IList list = (IList)miRetrieveAllLite.GetInvoker(type)();
             return list.Cast<Lite>().ToList();
         }
 
@@ -450,10 +450,10 @@ namespace Signum.Engine
             if (entity == null)
                 throw new ArgumentNullException("entity");
 
-            return (IQueryable<S>)miInDB.GenericInvoke(new[] { typeof(S), entity.GetType()}, null, new object[] { entity});
+            return (IQueryable<S>)miInDB.GetInvoker(typeof(S), entity.GetType()).Invoke(entity);
         }
 
-        static MethodInfo miInDB = ReflectionTools.GetMethodInfo(() => InDB<IdentifiableEntity, IdentifiableEntity>((IdentifiableEntity)null)).GetGenericMethodDefinition();
+        static GenericInvoker miInDB = GenericInvoker.Create(() => InDB<IdentifiableEntity, IdentifiableEntity>((IdentifiableEntity)null));
 
         static IQueryable<S> InDB<S, RT>(S entity)
             where S : class, IIdentifiable
@@ -471,10 +471,10 @@ namespace Signum.Engine
             if (lite == null)
                 throw new ArgumentNullException("lite");
 
-            return (IQueryable<S>)miInDBLite.GenericInvoke(new[] { typeof(S), lite.RuntimeType }, null, new object[] { lite });
+            return (IQueryable<S>)miInDBLite.GetInvoker(typeof(S), lite.RuntimeType).Invoke(lite);
         }
 
-        static MethodInfo miInDBLite = ReflectionTools.GetMethodInfo(() => InDB<IdentifiableEntity, IdentifiableEntity>((Lite<IdentifiableEntity>)null)).GetGenericMethodDefinition();
+        static GenericInvoker miInDBLite = GenericInvoker.Create(() => InDB<IdentifiableEntity, IdentifiableEntity>((Lite<IdentifiableEntity>)null));
 
         static IQueryable<S> InDB<S, RT>(Lite<S> lite)
             where S : class, IIdentifiable

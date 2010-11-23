@@ -294,10 +294,10 @@ namespace Signum.Web
 
         public static MappingContext UntypedApplyChanges(this ModifiableEntity entity, ControllerContext controllerContext, string prefix, bool admin)
         {
-            return (MappingContext)miApplyChanges.GenericInvoke(new Type[] { entity.GetType() }, null, new object[] { entity, controllerContext, prefix, admin });
+            return (MappingContext)miApplyChanges.GetInvoker(entity.GetType()).Invoke(entity, controllerContext, prefix, admin);
         }
 
-        static MethodInfo miApplyChanges = ReflectionTools.GetMethodInfo(()=>new TypeDN().ApplyChanges(null, null, true)).GetGenericMethodDefinition();
+        static GenericInvoker miApplyChanges = GenericInvoker.Create(()=>new TypeDN().ApplyChanges(null, null, true));
         public static MappingContext<T> ApplyChanges<T>(this T entity, ControllerContext controllerContext, string prefix, bool admin) where T : ModifiableEntity
         {
             SortedList<string, string> inputs = controllerContext.HttpContext.Request.Form.ToSortedList(prefix, null);

@@ -45,14 +45,14 @@ namespace Signum.Engine.Linq
             if (this.candidates.Contains(exp) && exp.NodeType != ExpressionType.Constant)
             {
                 if (exp.Type.IsAssignableFrom(typeof(IQueryable<>)))
-                    return ExpressionEvaluator.PartialEval(exp); 
+                    return ExpressionEvaluator.PartialEval(exp);
 
-                return (ConstantExpression)miConstant.GenericInvoke(new[] { exp.Type }, null, null);
+                return (ConstantExpression)miConstant.GetInvoker(exp.Type)();
             }
             return base.Visit(exp);
         }
 
-        static MethodInfo miConstant = ReflectionTools.GetMethodInfo(() => Constant<int>()).GetGenericMethodDefinition();
+        static GenericInvoker miConstant = GenericInvoker.Create(() => Constant<int>());
         static ConstantExpression Constant<T>()
         {
             return Expression.Constant(default(T), typeof(T)); 

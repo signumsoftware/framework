@@ -23,10 +23,10 @@ namespace Signum.Engine.Linq
         {
             Type type = proj.UniqueFunction == null ? proj.Type.ElementType() : proj.Type;
 
-            return (ITranslateResult)miBuildPrivate.GenericInvoke(new[] { type }, null, new object[] { proj});
+            return (ITranslateResult)miBuildPrivate.GetInvoker(type)(proj);
         }
 
-        static MethodInfo miBuildPrivate = ReflectionTools.GetMethodInfo(() => BuildPrivate<int>(null)).GetGenericMethodDefinition();
+        static GenericInvoker miBuildPrivate = GenericInvoker.Create(() => BuildPrivate<int>(null));
 
         static TranslateResult<T> BuildPrivate<T>(ProjectionExpression proj)
         {
@@ -75,12 +75,12 @@ namespace Signum.Engine.Linq
             Type type = proj.UniqueFunction == null ? proj.Type.ElementType() : proj.Type;
 
             if(!type.IsInstantiationOf(typeof(KeyValuePair<,>)))
-                throw new InvalidOperationException("All child projections should create KeyValuePairs"); 
+                throw new InvalidOperationException("All child projections should create KeyValuePairs");
 
-            return (IChildProjection)miBuildChildPrivate.GenericInvoke(type.GetGenericArguments(), null, new object[] { proj });
+            return (IChildProjection)miBuildChildPrivate.GetInvoker(type.GetGenericArguments())(proj);
         }
 
-        static MethodInfo miBuildChildPrivate = ReflectionTools.GetMethodInfo(() => BuildChildPrivate<int, bool>(null)).GetGenericMethodDefinition();
+        static GenericInvoker miBuildChildPrivate = GenericInvoker.Create(() => BuildChildPrivate<int, bool>(null));
 
 
         static ChildProjection<K, V> BuildChildPrivate<K, V>(ProjectionExpression proj)

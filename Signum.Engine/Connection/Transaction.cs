@@ -53,6 +53,8 @@ namespace Signum.Engine
             void Commit();
             ICoreTransaction Finish();
             void Start();
+
+            Dictionary<string, object> UserData { get; }
         }
      
         class FakedTransaction : ICoreTransaction
@@ -92,7 +94,11 @@ namespace Signum.Engine
             public void Commit(){ }
 
             public ICoreTransaction Finish() { return parent; }
-            
+
+            public Dictionary<string, object> UserData
+            {
+                get { return parent.UserData; }
+            }
         }
 
         class RealTransaction : ICoreTransaction
@@ -168,6 +174,12 @@ namespace Signum.Engine
 
                 return parent;
             }
+
+            Dictionary<string, object> userData;
+            public Dictionary<string, object> UserData
+            {
+                get { return userData ?? (userData = new Dictionary<string, object>());  }
+            }
         }
 
         class NamedTransaction : ICoreTransaction
@@ -222,6 +234,11 @@ namespace Signum.Engine
             public void Commit() { }
 
             public ICoreTransaction Finish() { return parent; }
+
+            public Dictionary<string, object> UserData
+            {
+                get { return parent.UserData; }
+            }
         }
 
         public Transaction() : this(false, null) { }
@@ -287,6 +304,11 @@ namespace Signum.Engine
         {
             add { GetCurrent().PreRealCommit += value; }
             remove { GetCurrent().PreRealCommit -= value; }
+        }
+
+        public static Dictionary<string, object> UserData
+        {
+            get { return GetCurrent().UserData; }
         }
 
         public static bool HasTransaction

@@ -126,13 +126,14 @@ namespace Signum.Web
         }
 #endregion
 
-        static MethodInfo mi = ReflectionTools.GetMethodInfo(() => Common.WalkExpression<TypeDN, TypeDN>(null, null)).GetGenericMethodDefinition();
+       
         internal static TypeContext UntypedWalkExpression(TypeContext tc, LambdaExpression lambda)
         {
             Type returnType = lambda.Body.Type;
-            return (TypeContext)mi.GenericInvoke(new[] { tc.Type, returnType }, null, new object[] { tc, lambda });
+            return (TypeContext)miWalkExpression.GetInvoker(tc.Type, returnType)(tc, lambda);
         }
 
+        static GenericInvoker miWalkExpression = GenericInvoker.Create(() => Common.WalkExpression<TypeDN, TypeDN>(null, null));
         public static TypeContext<S> WalkExpression<T, S>(TypeContext<T> tc, Expression<Func<T, S>> lambda)
         {
             return MemberAccessGatherer.WalkExpression(tc, lambda);

@@ -20,7 +20,7 @@ namespace Signum.Utilities.Reflection
             return genericTypeDefinition == TupleOf(genericTypeDefinition.GetGenericArguments().Length);
         }
 
-        private static Type TupleOf(int numParameters)
+        public static Type TupleOf(int numParameters)
         {
             switch (numParameters)
             {

@@ -268,10 +268,10 @@ namespace Signum.Engine.DynamicQuery
             return (IOrderedQueryable<object>)query.Provider.CreateQuery<object>(Expression.Call(null, mi, new Expression[] { query.Expression, Expression.Quote(lambda) }));
         }
 
-        static MethodInfo miOrderByE = ReflectionTools.GetMethodInfo(() => Database.Query<TypeDN>().ToList().OrderBy(t => t.Id)).GetGenericMethodDefinition();
-        static MethodInfo miThenByE = ReflectionTools.GetMethodInfo(() => Database.Query<TypeDN>().ToList().OrderBy(t => t.Id).ThenBy(t => t.Id)).GetGenericMethodDefinition();
-        static MethodInfo miOrderByDescendingE = ReflectionTools.GetMethodInfo(() => Database.Query<TypeDN>().ToList().OrderByDescending(t => t.Id)).GetGenericMethodDefinition();
-        static MethodInfo miThenByDescendingE = ReflectionTools.GetMethodInfo(() => Database.Query<TypeDN>().ToList().OrderBy(t => t.Id).ThenByDescending(t => t.Id)).GetGenericMethodDefinition();
+        static GenericInvoker miOrderByE = GenericInvoker.Create(() => Database.Query<TypeDN>().ToList().OrderBy(t => t.Id));
+        static GenericInvoker miThenByE = GenericInvoker.Create(() => Database.Query<TypeDN>().ToList().OrderBy(t => t.Id).ThenBy(t => t.Id));
+        static GenericInvoker miOrderByDescendingE = GenericInvoker.Create(() => Database.Query<TypeDN>().ToList().OrderByDescending(t => t.Id));
+        static GenericInvoker miThenByDescendingE = GenericInvoker.Create(() => Database.Query<TypeDN>().ToList().OrderBy(t => t.Id).ThenByDescending(t => t.Id));
 
         public static DEnumerable<T> OrderBy<T>(this DEnumerable<T> collection, List<Order> orders)
         {
@@ -299,16 +299,16 @@ namespace Signum.Engine.DynamicQuery
 
         static IOrderedEnumerable<object> OrderBy(this IEnumerable<object> collection, LambdaExpression lambda, OrderType orderType)
         {
-            MethodInfo mi = orderType == OrderType.Ascending ? miOrderByE : miOrderByDescendingE;
+            GenericInvoker mi = orderType == OrderType.Ascending ? miOrderByE : miOrderByDescendingE;
 
-            return (IOrderedEnumerable<object>)mi.GenericInvoke(lambda.Type.GetGenericArguments(), null, new object[] { collection, lambda.Compile() });
+            return (IOrderedEnumerable<object>)mi.GetInvoker(lambda.Type.GetGenericArguments())(collection, lambda.Compile());
         }
 
         static IOrderedEnumerable<object> ThenBy(this IOrderedEnumerable<object> collection, LambdaExpression lambda, OrderType orderType)
         {
-            MethodInfo mi = orderType == OrderType.Ascending ? miThenByE : miThenByDescendingE;
+            GenericInvoker mi = orderType == OrderType.Ascending ? miThenByE : miThenByDescendingE;
 
-            return (IOrderedEnumerable<object>)mi.GenericInvoke(lambda.Type.GetGenericArguments(), null, new object[] { collection, lambda.Compile() });
+            return (IOrderedEnumerable<object>)mi.GetInvoker(lambda.Type.GetGenericArguments())(collection, lambda.Compile());
         }
 
         #endregion
@@ -393,13 +393,13 @@ namespace Signum.Engine.DynamicQuery
         {
             var columnValues = columnAccesors.Select(c => new ResultColumn(
                 c.Item1,
-                (Array)miGetValues.GenericInvoke(new[] { c.Item1.Type }, null, new object[] { result, c.Item2.Compile() }))
+                (Array)miGetValues.GetInvoker(c.Item1.Type)(result, c.Item2.Compile()))
              ).ToArray();
 
             return new ResultTable(columnValues);
         }
 
-        static MethodInfo miGetValues = ReflectionTools.GetMethodInfo(() => GetValues<int>(null, null)).GetGenericMethodDefinition();
+        static GenericInvoker miGetValues = GenericInvoker.Create(() => GetValues<int>(null, null));
         static Array GetValues<S>(object[] collection, Func<object, S> getter)
         {
             S[] array = new S[collection.Length];

@@ -20,10 +20,10 @@ namespace Signum.Utilities.Reflection
         }
 
         //Each element in the IList is a MemberEntry<T> with typeof(T) == type. 
-        //You can acces them in a untypef fashion using IMemberEntry 
+        //You can acces them in a untyped fashion using IMemberEntry 
         public static IList GenerateIList(Type type, MemberOptions options)
         {
-            return (IList)mi1.GenericInvoke(new[] { type }, null, new object[] { options });
+            return (IList)mi1.GetInvoker(type).Invoke(options);
         }
 
         public static List<MemberEntry<T>> GenerateList<T>()
@@ -33,8 +33,7 @@ namespace Signum.Utilities.Reflection
 
         static BindingFlags bf = BindingFlags.Public | BindingFlags.Instance;
 
-        static MethodInfo mi1 = ReflectionTools.GetMethodInfo(() => GenerateList<int>(MemberOptions.Default)).GetGenericMethodDefinition();
-        
+        static GenericInvoker mi1 = GenericInvoker.Create(() => GenerateList<int>(MemberOptions.Default));
         public static List<MemberEntry<T>> GenerateList<T>(MemberOptions options)
         {
             PropertyInfo[] properties = (options & MemberOptions.Properties) == 0 ? new PropertyInfo[0] : typeof(T).GetProperties(bf);

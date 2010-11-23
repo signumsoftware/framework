@@ -115,6 +115,15 @@ namespace Signum.Engine.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Not authorized to retrieve {0} {1}.
+        /// </summary>
+        public static string NotAuthorizedToRetrieve01 {
+            get {
+                return ResourceManager.GetString("NotAuthorizedToRetrieve01", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No way of mapping type {0} found.
         /// </summary>
         public static string NoWayOfMappingType0Found {

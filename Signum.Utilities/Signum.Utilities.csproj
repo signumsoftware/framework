@@ -91,6 +91,7 @@
       <DependentUpon>Resources.fr.resx</DependentUpon>
     </Compile>
     <Compile Include="QueryableExtensions.cs" />
+    <Compile Include="Reflection\GenericInvoker.cs" />
     <Compile Include="Reflection\TupleExtensions.cs" />
     <Compile Include="TimeSpanExtensions.cs" />
     <Compile Include="CSV.cs" />
