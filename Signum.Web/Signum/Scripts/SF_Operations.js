@@ -426,8 +426,6 @@ function OperationConstructFromMany(constructorFrom) {
 }
 
 function ReloadEntity(urlController, prefix, parentDiv) {
-    console.log(arguments.callee.caller.toString());
-    console.log(document.activeElement.id);
     var $partialViewName = $('#' + sfPartialViewName);
     var requestData = $("form :input").not(".searchControl :input").serialize() + qp(sfPrefix, prefix);
     if($partialViewName.length == 1)
