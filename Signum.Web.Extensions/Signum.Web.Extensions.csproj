@@ -133,7 +133,6 @@
     <Compile Include="ScriptCombiner\CombinerHtmlHelper.cs" />
     <Compile Include="ScriptCombiner\GoogleClosure.cs" />
     <Compile Include="ScriptCombiner\JavaScriptMinifier.cs" />
-    <Compile Include="ScriptCombiner\Logger.cs" />
     <Compile Include="ScriptCombiner\ScriptCombiner.cs" />
     <Compile Include="ControllerFilters\FilterAttributes.cs" />
     <Compile Include="ViewsChecker\ViewsCheckerClient.cs" />
@@ -195,7 +194,6 @@
     <Content Include="Profiler\Views\HeavyDetails.aspx">
       <SubType>ASPXCodeBehind</SubType>
     </Content>
-    <None Include="ScriptCombiner\csCombiner.cd" />
     <Content Include="Profiler\Views\HeavyList.aspx">
       <SubType>ASPXCodeBehind</SubType>
     </Content>
@@ -290,7 +288,6 @@
     <Content Include="Queries\Views\QueryToken.ascx" />
     <Content Include="Queries\Views\UserQuery.ascx" />
     <Content Include="Reports\Views\ExcelReport.ascx" />
-    <Content Include="ScriptCombiner\ICSharpCode.SharpZipLib.dll" />
     <Content Include="ViewsChecker\Views\ViewsChecker.aspx">
       <SubType>ASPXCodeBehind</SubType>
     </Content>

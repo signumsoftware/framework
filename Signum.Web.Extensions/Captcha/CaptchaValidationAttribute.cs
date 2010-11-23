@@ -32,7 +32,7 @@ namespace Signum.Web.Captcha
 	[AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
     public sealed class CaptchaValidationAttribute : ActionFilterAttribute
 	{
-		/// <summary>
+        /// <summary>
 		/// Initializes a new instance of the <see cref="CaptchaCheckAttribute"/> class.
 		/// </summary>
 		public CaptchaValidationAttribute()
@@ -59,12 +59,12 @@ namespace Signum.Web.Captcha
 		/// <param name="filterContext">The filter filterContext.</param>
 		public override void OnActionExecuting(ActionExecutingContext filterContext)
 		{
-            //skip if captcha is disabled in App Settings
-            if (!AppSettings.ReadBoolean(AppSettingsKeys.UseCaptcha, true))
-            {
-                filterContext.ActionParameters["captchaValid"] = true;
-                return;
-            }
+            ////skip if captcha is disabled in App Settings
+            //if (IsActive)
+            //{
+            //    filterContext.ActionParameters["captchaValid"] = true;
+            //    return;
+            //}
 
 			// make sure no values are getting sent in from the outside
 			if (filterContext.ActionParameters.ContainsKey("captchaValid"))

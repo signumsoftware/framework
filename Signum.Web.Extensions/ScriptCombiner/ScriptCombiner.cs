@@ -241,7 +241,7 @@ namespace Signum.Web.ScriptCombiner
         {
             AssemblyResourceStore ars = AssemblyResourceManager.GetResourceStoreFromVirtualPath("~/" + fileName);
 
-            FileInfo fileInfo = new FileInfo(ars.typeToLocateAssembly.Assembly.Location);
+            FileInfo fileInfo = new FileInfo(ars.Assembly.Location);
             return fileInfo.LastWriteTimeUtc;
         }
 
@@ -293,7 +293,7 @@ namespace Signum.Web.ScriptCombiner
         {
             AssemblyResourceStore ars = AssemblyResourceManager.GetResourceStoreFromVirtualPath("~/" + fileName);
 
-            FileInfo fileInfo = new FileInfo(ars.typeToLocateAssembly.Assembly.Location);
+            FileInfo fileInfo = new FileInfo(ars.Assembly.Location);
             return fileInfo.LastWriteTimeUtc;
         }
 

@@ -97,7 +97,7 @@ namespace Signum.Web.Authorization
                         if (context.HttpContext.Request.IsAjaxRequest())
                             context.Result = Navigator.RedirectUrl(loginUrl);
                         else
-                            context.Result = new RedirectResult(HttpContextUtils.FullyQualifiedApplicationPath + loginUrl);
+                            context.Result = new RedirectResult(Common.FullyQualifiedApplicationPath + loginUrl);
                     }
                 };
 
@@ -122,7 +122,7 @@ namespace Signum.Web.Authorization
                             if (ctx.HttpContext.Request.IsAjaxRequest())
                                 ctx.Result = Navigator.RedirectUrl(loginUrl.Formato(ctx.HttpContext.Request.UrlReferrer.PathAndQuery));
                             else
-                                ctx.Result = new RedirectResult(HttpContextUtils.FullyQualifiedApplicationPath + loginUrl.Formato(ctx.HttpContext.Request.Url.PathAndQuery));
+                                ctx.Result = new RedirectResult(Common.FullyQualifiedApplicationPath + loginUrl.Formato(ctx.HttpContext.Request.Url.PathAndQuery));
 
                             ctx.ExceptionHandled = true;
                             ctx.HttpContext.Response.Clear();

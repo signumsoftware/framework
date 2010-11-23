@@ -109,7 +109,7 @@ namespace Signum.Web.Reports
             Database.Save(report);
 
             string newUrl = Navigator.ViewRoute(typeof(ExcelReportDN), report.Id);
-            this.HttpContext.Response.Redirect(HttpContextUtils.FullyQualifiedApplicationPath + newUrl, true);
+            this.HttpContext.Response.Redirect(Common.FullyQualifiedApplicationPath + newUrl, true);
             return null;
         }
         

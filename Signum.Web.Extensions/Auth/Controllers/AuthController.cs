@@ -162,7 +162,7 @@ namespace Signum.Web.Authorization
                     if (user == null)
                         throw new ApplicationException(Resources.ThereSNotARegisteredUserWithThatEmailAddress);
 
-                    AuthLogic.ResetPasswordRequest(user, HttpContextUtils.FullyQualifiedApplicationPath);
+                    AuthLogic.ResetPasswordRequest(user, Common.FullyQualifiedApplicationPath);
                 }
 
                 ViewData["email"] = email;
