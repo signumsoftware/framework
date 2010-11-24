@@ -610,16 +610,23 @@ namespace Signum.Web.Authorization
 
         public ActionResult Logout()
         {
+            LogoutDo();
+
+            return RedirectToAction("Index", "Home");
+        }
+
+        public static void LogoutDo()
+        {
             FormsAuthentication.SignOut();
             //Session.RemoveAll();
             //Session.Remove(SessionUserKey);
             var authCookie = System.Web.HttpContext.Current.Request.Cookies[AuthClient.CookieName];
             if (authCookie != null && authCookie.Value.HasText())
-                Response.Cookies[AuthClient.CookieName].Expires = DateTime.Now.AddDays(-10);
+                System.Web.HttpContext.Current.Response.Cookies[AuthClient.CookieName].Expires = DateTime.Now.AddDays(-10);
 
-            Session.Abandon();
+            System.Web.HttpContext.Current.Session.Abandon();
+       
 
-            return RedirectToAction("Index", "Home");
         }
 
     }
