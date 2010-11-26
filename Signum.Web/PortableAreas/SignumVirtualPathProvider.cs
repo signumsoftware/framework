@@ -7,11 +7,15 @@ using System.IO;
 
 namespace Signum.Web
 {
-	public class AssemblyResourceProvider : VirtualPathProvider
+	public class SignumVirtualPathProvider : VirtualPathProvider
 	{
         public override bool FileExists(string virtualPath)
         {
-            return base.FileExists(virtualPath) || AssemblyResourceManager.GetResourceStoreFromVirtualPath(virtualPath) != null;
+            if(base.FileExists(virtualPath))
+            return true;
+            
+            AssemblyResourceStore store = AssemblyResourceManager.GetResourceStoreFromVirtualPath(virtualPath);
+            return store != null;
         }
 
         public override VirtualFile GetFile(string virtualPath)
@@ -33,8 +37,7 @@ namespace Signum.Web
                 return null;
             }
 
-            string[] dependencies = virtualPathDependencies.OfType<string>().Where(s => !s.ToLower().Contains("/views/inputbuilders")).ToArray();
-            return base.GetCacheDependency(virtualPath, dependencies, utcStart);
+            return base.GetCacheDependency(virtualPath, virtualPathDependencies, utcStart);
         }
 
         public override string GetCacheKey(string virtualPath)

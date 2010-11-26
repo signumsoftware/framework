@@ -582,7 +582,7 @@ namespace Signum.Web
             ModelBinders.Binders.Add(typeof(Implementations), new ImplementationsModelBinder());
             ModelBinders.Binders.Add(typeof(FindOptions), new FindOptionsModelBinder());
 
-            HostingEnvironment.RegisterVirtualPathProvider(new AssemblyResourceProvider());
+            HostingEnvironment.RegisterVirtualPathProvider(new SignumVirtualPathProvider());
         }
 
         HashSet<string> loadedModules = new HashSet<string>();

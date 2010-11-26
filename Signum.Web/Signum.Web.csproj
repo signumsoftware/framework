@@ -94,7 +94,7 @@
     <Compile Include="JSRenderer\JsOptions.cs" />
     <Compile Include="Lines\EntityListBase.cs" />
     <Compile Include="PortableAreas\AssemblyResourceManager.cs" />
-    <Compile Include="PortableAreas\AssemblyResourceProvider.cs" />
+    <Compile Include="PortableAreas\SignumVirtualPathProvider.cs" />
     <Compile Include="PortableAreas\AssemblyResourceStore.cs" />
     <Compile Include="PortableAreas\RouteExtensions.cs" />
     <Compile Include="Signum\Controllers\ResourcesController.cs" />
