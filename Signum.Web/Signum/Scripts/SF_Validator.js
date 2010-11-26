@@ -10,7 +10,7 @@
             parentDiv: "",
             requestExtraJsonData: null,
             ajaxError: null,
-            errorSummaryId : null,
+            errorSummaryId : null
         }, _valOptions);
 
         this.savingControllerUrl = this.valOptions.controllerUrl || "Signum/TrySave";
