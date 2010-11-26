@@ -48,9 +48,6 @@
 </div>
 </div>
 
-<script>
-    SF.loadJs("<%= ModuleResources.ResourceForModule("draganddrop") %>", function () {
-        SF.DragAndDrop(document.getElementById("<%=modelTC.Compose("divPopupDragHandle")%>"),
-                    document.getElementById("<%=modelTC.Compose("panelPopup")%>"));
-    });
-</script>
+<%: Html.DynamicJs("~/signum/Scripts/SF_DragAndDrop.js").Callback(@"function () {{
+     SF.DragAndDrop(document.getElementById(""{0}""), document.getElementById(""{1}""));}}"
+                .Formato(modelTC.Compose("divPopupDragHandle"), modelTC.Compose("panelPopup")))%> 

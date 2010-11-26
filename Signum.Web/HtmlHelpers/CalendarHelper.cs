@@ -114,24 +114,24 @@ namespace Signum.Web
         public static string jQueryPrefix = "";
         //jQuery ui DatePicker
 
-        public static string Calendar(this HtmlHelper helper, string elementId, DatePickerOptions settings)
+        public static MvcHtmlString Calendar(this HtmlHelper helper, string elementId, DatePickerOptions settings)
         {
             StringBuilder sb = new StringBuilder();
 
             if (IncludeCss != null)
                 IncludeCss(helper, sb);
             else
-                sb.AppendLine(helper.DynamicCssInclude(
-                    "Scripts/jqueryui/" + jQueryPrefix + "ui.core.css",
-                    "Scripts/jqueryui/" + jQueryPrefix + "ui.datepicker.css",
-                    "Scripts/jqueryui/" + jQueryPrefix + "ui.theme.css"));
+                sb.AppendLine(helper.ScriptCss(
+                    "~/scripts/jqueryui/" + jQueryPrefix + "ui.core.css",
+                    "~/scripts/jqueryui/" + jQueryPrefix + "ui.datepicker.css",
+                    "~/scripts/jqueryui/" + jQueryPrefix + "ui.theme.css").ToHtmlString());
 
             var context = helper.ViewContext.HttpContext;
 
             if (context.Items["jqCalendar"] == null)
             {
                 sb.AppendLine(GetLocalizationVariables());
-                sb.AppendLine(AreaResourceHelper.InternalAreaJs(new string[]{"signum/Scripts/SF_jquery-ui-datepicker-extension.js"}));
+                sb.AppendLine(ScriptHtmlHelper.ScriptsJs(helper, "~/signum/scripts/SF_jquery-ui-datepicker-extension.js").ToHtmlString());
                 context.Items["jqCalendar"] = true;
             }
 
@@ -141,10 +141,11 @@ namespace Signum.Web
                 "$(\"#" + elementId + "\").datepicker({ " + OptionsToString(settings) +" });\n" + 
                 "});\n" + 
                 "</script>");
-            return sb.ToString();
+
+            return MvcHtmlString.Create(sb.ToString());
         }
 
-        private static string OptionsToString(DatePickerOptions settings)
+        static string OptionsToString(DatePickerOptions settings)
         {
             return "changeMonth:{0}, changeYear:{1}, firstDay:{2}, yearRange:'{3}', showOn:'{4}', buttonImageOnly:{5}, buttonText:'{6}', buttonImage:'{7}', constrainInput: {8}{9}{10}{11}".Formato(
                 settings.ChangeMonth ? "true" : "false",
@@ -162,7 +163,7 @@ namespace Signum.Web
                 );
         }
 
-        public static string FormatToString(string dateFormat)
+        internal static string FormatToString(string dateFormat)
         {
             switch (dateFormat)
             { 
@@ -201,7 +202,7 @@ namespace Signum.Web
             return dateFormat;
         }
 
-        public static string GetLocalizationVariables()
+        static string GetLocalizationVariables()
         {
             string shortCultureName = DatePickerOptions.DefaultCulture;
 
@@ -223,6 +224,7 @@ namespace Signum.Web
             sb.Append("};");
 	        sb.Append("$.datepicker.setDefaults($.datepicker.regional['" + shortCultureName + "']);");
             sb.Append("</script>");
+
             return sb.ToString();
         }
     }

@@ -67,7 +67,7 @@ namespace Signum.Web
                                      Navigator.GetName(entityLine.Type.CleanType()),
                                      ImplementationsModelBinder.Render(entityLine.Implementations),
                                      entityLine.Compose("sfId"),
-                                     "Signum/Autocomplete", entityLine.OnChangedTotal.HasText() ? entityLine.OnChangedTotal : "''"));
+                                     "Signum/Autocomplete", entityLine.OnChangedTotal.HasText() ? entityLine.OnChangedTotal : "''").ToHtmlString());
 
                 }
             }

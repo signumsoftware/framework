@@ -3,7 +3,8 @@
     var SF = function () {
 
         var _added = [];
-        var _jsloaded = [];
+        var _jsloaded = [],
+            _cssloaded = [];
 
         /*  function _scriptForModule(name) {
         //return "combine/areajs?f=signum/scripts/sf_" + name + ".js";
@@ -41,10 +42,20 @@
             }
         }
 
+        function loadCss(src, fn) {
+            if (!_cssloaded[src]) {
+                _cssloaded[src] = true;
+                Loader.loadCss(src, fn);
+            } else {
+                fn();
+            }
+        }
+
         return ({
             add: add,
             use: use,
-            loadJs: loadJs
+            loadJs: loadJs,
+            loadCss: loadCss
         });
     } ();
 
@@ -68,7 +79,51 @@
             head.appendChild(script);
         };
 
-        return { loadJs: loadJs };
+        var cachedBrowser;
+
+        var browser = function () {
+            if (!cachedBrowser) {
+                var ua = navigator.userAgent.toLowerCase();
+                var match = /(webkit)[ \/]([\w.]+)/.exec(ua) ||
+               /(opera)(?:.*version)?[ \/]([\w.]+)/.exec(ua) ||
+               /(msie) ([\w.]+)/.exec(ua) ||
+               !/compatible/.test(ua) && /(mozilla)(?:.*? rv:([\w.]+))?/.exec(ua) ||
+               [];
+                cachedBrowser = match[1];
+            }
+            return cachedBrowser;
+        };
+
+        var loadCss = function (url, cb) {
+            var link = d.createElement("link");
+            link.type = "text/css";
+            link.rel = "stylesheet";
+            link.href = url;
+
+            if (cb) {
+
+                if (browser() == "msie")
+                    link.onreadystatechange = function () {
+                        /loaded|complete/.test(link.readyState) && cb();
+                    }
+                else if (browser() == "opera")
+                    link.onload = cb;
+                else
+                //FF, Safari, Chrome
+                    (function () {
+                        try {
+                            link.sheet.cssRule;
+                        } catch (e) {
+                            setTimeout(arguments.callee, 20);
+                            return;
+                        };
+                        cb();
+                    })();
+            }
+            head.appendChild(link);
+        };
+
+        return { loadCss: loadCss, loadJs: loadJs };
 
     })();
 

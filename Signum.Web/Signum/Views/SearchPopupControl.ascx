@@ -1,5 +1,6 @@
 ﻿<%@ Control Language="C#" Inherits="System.Web.Mvc.ViewUserControl" %>
 <%@ Import Namespace="Signum.Web" %>
+<%@ Import Namespace="Signum.Utilities" %>
 <%
     Context context = (Context)Model;
     FindOptions findOptions = (FindOptions)ViewData[ViewDataKeys.FindOptions];
@@ -31,9 +32,6 @@
 </div>
 </div>
 
-<script>
-    SF.loadJs("<%= ModuleResources.ResourceForModule("draganddrop") %>", function () {
-        SF.DragAndDrop(document.getElementById("<%=context.Compose("divPopupDragHandle")%>"),
-                    document.getElementById("<%=context.Compose("panelPopup")%>"));
-    });
-</script>
+<%: Html.DynamicJs("~/signum/Scripts/SF_DragAndDrop.js").Callback(@"function () {{
+     SF.DragAndDrop(document.getElementById(""{0}""), document.getElementById(""{1}""));}}"
+        .Formato(context.Compose("divPopupDragHandle"), context.Compose("panelPopup"))) %> 

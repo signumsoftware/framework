@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Web;
+using System.Linq;
 
 namespace Signum.Web
 {
@@ -10,30 +11,18 @@ namespace Signum.Web
     /// </summary>
     public static class AssemblyResourceManager
     {
-        private static Dictionary<string, AssemblyResourceStore> assemblyResourceStores = new Dictionary<string, AssemblyResourceStore>();
+        private static List<AssemblyResourceStore> assemblyResourceStores = new List<AssemblyResourceStore>();
 
         public static AssemblyResourceStore GetResourceStoreFromVirtualPath(string virtualPath)
         {
             var checkPath = VirtualPathUtility.ToAppRelative(virtualPath).ToLower();
-            foreach (var resourceStore in assemblyResourceStores)
-            {
-                if (checkPath.Contains(resourceStore.Key) && resourceStore.Value.IsPathResourceStream(checkPath))
-                {
-                    return resourceStore.Value;
-                }
-            }
-            return null;
-        }
 
-        public static bool IsEmbeddedViewResourcePath(string virtualPath)
-        {
-            var resourceStore = GetResourceStoreFromVirtualPath(virtualPath);
-            return (resourceStore != null);
+            return assemblyResourceStores.SingleOrDefault(rs=> rs.IsPathResourceStream(checkPath)); 
         }
 
         public static void RegisterAreaResources(AssemblyResourceStore assemblyResourceStore)
         {
-            assemblyResourceStores.Add(assemblyResourceStore.VirtualPath, assemblyResourceStore);
+            assemblyResourceStores.Add(assemblyResourceStore);
         }
     }
 }

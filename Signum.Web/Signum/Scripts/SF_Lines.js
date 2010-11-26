@@ -1124,7 +1124,7 @@
             var id = this.runtimeInfo().id();
             if (empty(id))
                 return;
-            window.open($("base").attr("href") + downloadControllerUrl + "?filePathID=" + id);
+            window.ope(n$("base").attr("href") + downloadControllerUrl + "?filePathID=" + id);
         };
 
         this.removeSpecific = function () {

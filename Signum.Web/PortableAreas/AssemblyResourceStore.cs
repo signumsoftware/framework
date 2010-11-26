@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using Signum.Utilities;
 
 namespace Signum.Web
 {
@@ -12,22 +13,30 @@ namespace Signum.Web
     public class AssemblyResourceStore
     {
         public readonly Assembly Assembly;
+        readonly string namespaceName;
+        public readonly string VirtualPath;
 
         readonly Dictionary<string, string> resources;
-        readonly string namespaceName;
 
-        public string VirtualPath { get; private set; }
 
         public AssemblyResourceStore(Type typeToLocateAssembly, string virtualPath) : 
             this(typeToLocateAssembly, virtualPath, typeToLocateAssembly.Namespace)
         {
-          
         }
 
         public AssemblyResourceStore(Type typeToLocateAssembly, string virtualPath, string namespaceName)
         {
+            if (typeToLocateAssembly == null)
+                throw new ArgumentNullException("typeToLocateAssembly"); 
+            
+            if(string.IsNullOrEmpty(virtualPath))
+                throw new ArgumentNullException("virtualPath");
+
+            if(string.IsNullOrEmpty(namespaceName))
+                throw new ArgumentNullException("namespaceName");
+
             this.Assembly = typeToLocateAssembly.Assembly;
-            // should we disallow an empty virtual path?
+
             this.VirtualPath = virtualPath.ToLower();
             this.namespaceName = namespaceName.ToLower();
 
@@ -39,29 +48,26 @@ namespace Signum.Web
         public Stream GetResourceStream(string resourceName)
         {
             var fullResourceName = GetFullyQualifiedTypeFromPath(resourceName);
-            string actualResourceName = null;
-            if (resources.TryGetValue(fullResourceName, out actualResourceName))
-            {
-                return this.Assembly.GetManifestResourceStream(actualResourceName);
-            }
-            else
-            {
+
+            string actualResourceName = resources.TryGetC(fullResourceName);
+
+            if (actualResourceName == null)
                 return null;
-            }
+
+            return this.Assembly.GetManifestResourceStream(actualResourceName);
         }
 
         public string GetFullyQualifiedTypeFromPath(string path)
         {
-            string resourceName = path.ToLower().Replace("~", this.namespaceName);
-            // we can make this more succinct if we don't have to check for emtpy virtual path (by preventing in constuctor)
-            if (!string.IsNullOrEmpty(VirtualPath))
-                resourceName = resourceName.Replace(VirtualPath, "");
-            return resourceName.Replace("/", ".");
+            return path.ToLower().Replace("~", this.namespaceName).Replace(VirtualPath, "").Replace("/", ".");
         }
 
         public bool IsPathResourceStream(string path)
         {
-            var fullResourceName = GetFullyQualifiedTypeFromPath(path);
+            if (!path.Contains(VirtualPath))
+                return false;
+
+            string fullResourceName = GetFullyQualifiedTypeFromPath(path);
             return resources.ContainsKey(fullResourceName);
         }
     }

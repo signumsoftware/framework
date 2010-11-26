@@ -246,18 +246,16 @@ namespace Signum.Web
         }
         #endregion    
 
-        public static string AutoCompleteExtender(this HtmlHelper html, string ddlName, string entityTypeName, string implementations, string entityIdFieldName,
+        public static IHtmlString AutoCompleteExtender(this HtmlHelper html, string ddlName, string entityTypeName, string implementations, string entityIdFieldName,
                                                   string controllerUrl, string onSuccess)
-        {                   
+        {
 
-            return @"<script type=""text/javascript"">
-                        SF.loadJs(""{0}"", function () {{
-                            new SF.Autocompleter(""{1}"", ""{2}"", {{
-	                            entityIdFieldName: ""{3}"",
-	                            extraParams: {{typeName: ""{4}"", implementations : ""{5}""}}}});
-                        }});
-                     </script>"
-                    .Formato(ModuleResources.ResourceForModule("autocomplete"), ddlName, controllerUrl, entityIdFieldName, entityTypeName, implementations); 
+            return html.DynamicJs("~/signum/Scripts/SF_autocomplete.js").Callback(@"function () {{
+                            new SF.Autocompleter(""{0}"", ""{1}"", {{
+	                            entityIdFieldName: ""{2}"",
+	                            extraParams: {{typeName: ""{3}"", implementations : ""{4}""}}}});
+                        }}"
+                    .Formato(ddlName, controllerUrl, entityIdFieldName, entityTypeName, implementations)); 
         }
    }
 }

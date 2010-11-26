@@ -6,6 +6,7 @@ using System.Web.Mvc;
 using Signum.Web;
 using System.Reflection;
 using Signum.Utilities;
+using System.IO;
 
 namespace Signum.Web.Controllers
 {
@@ -15,11 +16,11 @@ namespace Signum.Web.Controllers
         {
             string resourceAreaName = "~/{0}/{1}/{2}".Formato(area, resourcesFolder, resourceName);
 
-            var contentType = GetContentType(resourceAreaName);
-//            var resourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName);
-            var resourceStore = AssemblyResourceManager.GetResourceStoreFromVirtualPath(resourceAreaName);
-            var stream = resourceStore.GetResourceStream(resourceAreaName);
-            //AssemblyResourceVirtualFile virtualFile = new AssemblyResourceVirtualFile(resourceName, resourceStore);
+            string contentType = GetContentType(resourceAreaName);
+
+            AssemblyResourceStore resourceStore = AssemblyResourceManager.GetResourceStoreFromVirtualPath(resourceAreaName);
+
+            Stream stream = resourceStore.GetResourceStream(resourceAreaName);
 
             return this.File(stream, contentType);
         }
@@ -39,8 +40,6 @@ namespace Signum.Web.Controllers
                     return "text/html";
             }
         }
-
-
     }
 
     public static class ResourcesUrlHelperExtensions
