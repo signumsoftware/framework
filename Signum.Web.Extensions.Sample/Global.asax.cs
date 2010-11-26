@@ -20,6 +20,7 @@ using Signum.Web.Reports;
 using Signum.Web.Authorization;
 using Signum.Web.ControlPanel;
 using Signum.Entities.ControlPanel;
+using Signum.Web.ScriptCombiner;
 #endregion
 
 namespace Signum.Web.Extensions.Sample
@@ -59,12 +60,6 @@ namespace Signum.Web.Extensions.Sample
 
             Signum.Test.Extensions.Starter.Start(UserConnections.Replace(Settings.Default.ConnectionString));
 
-            ModuleResources.ResourceToUrl = (file, area) =>
-            {
-                if (area) return CombinerHtmlHelper.IncludeAreaJsUrl(new[] { file });
-                else return CombinerHtmlHelper.CombinedJsUrl(new[] { file });
-            };
-            ModuleResources.RegisterBasics();
 
             using (AuthLogic.Disable())
             {
@@ -91,6 +86,9 @@ namespace Signum.Web.Extensions.Sample
             ReportClient.Start(true, true);
 
             MusicClient.Start();
+
+            Combiner.Start();
+            ScriptHtmlHelper.Manager.MainAssembly = typeof(MusicClient).Assembly;
 
             Navigator.Initialize();
         }

@@ -10,26 +10,17 @@
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
     <base href="<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/" ) %>" />
 
-    <% Html.CombinedCss("content", "fluid/fluid.min.css"); %>
-    <% Html.IncludeAreaCss("signum/Content/LineStyles.css"); %>    
-
-    <script type="text/javascript" src="scripts/jquery-1.4.2.min.js"></script>
+    <%: Html.ScriptCss("~/content/fluid/fluid.min.css", "~/signum/Content/LineStyles.css") %>    
+    <%: Html.ScriptsJs("~/scripts/jquery-1.4.2.min.js")%>    
     <script type='text/javascript' src='http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.min.js'></script>
     
     <!--Calendar-->
-    <% Html.IncludeAreaJs("signum/Scripts/SF_jquery-ui-datepicker-extension.js"); %>    
-    <%= CalendarHelper.GetLocalizationVariables() %>
+    <%: Html.ScriptsJs("~/signum/Scripts/SF_Globals.js", "~/signum/Scripts/SF_jquery-ui-datepicker-extension.js") %>    
     
     <asp:ContentPlaceHolder ID="head" runat="server"></asp:ContentPlaceHolder>    
 </head>
 
-<body>
-    <div id="loading-area" class="message-area" style="display:none;">
-        <div class="message-area-text-container">
-            <span id="loading-area-text" class="message-area-text">Cargando...</span>
-        </div>
-    </div>
-  
+<body> 
     <div class="container_16" id="main">
 
         <div class="grid_3 prefix_13" id="login">
