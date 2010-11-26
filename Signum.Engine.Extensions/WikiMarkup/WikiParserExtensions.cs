@@ -53,14 +53,19 @@ namespace Signum.Engine
                 }, RegexOptions.Singleline);
             }
 
+            //1: Replace token delimiters which are different from their encoded string so that they are not encoded
+            result = Regex.Replace(content, "'{2,}", m => "####" + m.Length + "####");
 
-            //3: Encode
-            result = HttpUtility.HtmlEncode(content);
+            //2: Encode all text
+            result = HttpUtility.HtmlEncode(result);
 
-            //1: Process tokens
+            //3: Replace encrypted tokens to original tokens 
+            result = Regex.Replace(content, "####(?<count>\\d+)####", m => new string('\'', m.Groups["count"].Length));
+            
+            //4: Process tokens
             result = ProcessTokens(result, settings);
 
-            //2: Process format
+            //5: Process format
             result = ProcessFormat(result, settings);
            
             if (settings.AllowRawHtml)
