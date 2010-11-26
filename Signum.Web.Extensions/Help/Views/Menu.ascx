@@ -197,7 +197,7 @@ String.prototype.replaceAll=function(s1, s2) {return this.split(s1).join(s2)}
 </div>
 <div class="clear"></div>
 <div class="grid_12" style="min-height:1px;">
-    <div id="saving-error"><img src="help/Images/icon-warning.png" /><span class="text"></span></a></div> 
+    <div id="saving-error"><img src="<%: Url.Content("~/help/Images/icon-warning.png") %>" /><span class="text"></span></div> 
 </div>
 <div class="grid_4">
    <!-- <a id="refresh" href="javascript:location.reload(true);">Refresca la página para wikificar correctamente el texto modificado</a> -->

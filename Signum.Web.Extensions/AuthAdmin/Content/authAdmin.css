@@ -13,6 +13,24 @@ table.ruleTable a:hover
 	cursor:pointer;
 }
 
+table.ruleTable .property
+{
+    background-image: url(../images/property.png);
+    background-repeat: no-repeat;
+}
+
+table.ruleTable .operation
+{
+    background-image: url(../images/operation.png);
+    background-repeat: no-repeat;
+}
+
+table.ruleTable .query
+{
+    background-image: url(../images/query.png);
+    background-repeat: no-repeat;
+}
+
 a.cbLink
 {
     display: block;
@@ -39,6 +57,27 @@ a.cbDisabled:hover
 {
     background-position: 0 -16px; 
 }
+
+a.cbLink.read 
+{
+    background-image: url(../images/radioYellow.png);
+}
+
+a.cbLink.modify, a.cbLink.allowed
+{
+    background-image: url(../images/radioGreen.png);
+}
+
+a.cbLink.create
+{
+    background-image: url(../images/radioBlue.png);
+}
+
+a.cbLink.none, a.cbLink.not-allowed
+{
+    background-image: url(../images/radioRed.png);
+}
+
 
 
 .treeView

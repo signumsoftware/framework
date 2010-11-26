@@ -8,8 +8,10 @@
 <%@ Import Namespace="Signum.Web.Authorization" %>
 <%@ Import Namespace="Signum.Web.Extensions.Properties" %>
 
-<%= Html.RegisterCss("authAdmin/Content/authAdmin.css")%>
-<script language="javascript">
+<%: Html.DynamicCss("~/authAdmin/Content/authAdmin.css") %>
+<%: Html.ScriptsJs("~/authAdmin/Scripts/authAdmin.js") %>
+
+<script>
     $(function() {
     magicCheckBoxes($(document));
     });
@@ -20,8 +22,6 @@
         Html.EntityLine(tc, f => f.Role);
         Html.ValueLine(tc, f => f.DefaultRule, vl => { vl.UnitText = tc.Value.DefaultLabel; });
 %>
-
-<script type="text/javascript" src="authAdmin/Scripts/authAdmin.js"></script>
 
 <table class="ruleTable">
     <thead>
@@ -57,22 +57,22 @@
         </td>
         <td>In<%=Html.Hidden(item.Compose("InBase"), item.Value.AllowedBase.InGroup.ToStringParts())%></td>
         <td>
-            <a class="cbLink" style="background-image: url(authAdmin/images/radioBlue.png)">
+            <a class="cbLink create">
                 <%=Html.CheckBox(item.Compose("In_Create"), item.Value.Allowed.InGroup.IsActive(TypeAllowedBasic.Create), new { tag = "Create" })%>
             </a>
         </td>
         <td>
-            <a class="cbLink" style="background-image: url(authAdmin/images/radioGreen.png)">
+            <a class="cbLink modify">
                 <%=Html.CheckBox(item.Compose("In_Modify"), item.Value.Allowed.InGroup.IsActive(TypeAllowedBasic.Modify), new { tag = "Modify" })%>
             </a>
         </td>
         <td>
-            <a class="cbLink" style="background-image: url(authAdmin/images/radioYellow.png)">
+            <a class="cbLink read">
                 <%=Html.CheckBox(item.Compose("In_Read"), item.Value.Allowed.InGroup.IsActive(TypeAllowedBasic.Read), new { tag = "Read" })%>
             </a>
         </td>
         <td>
-            <a class="cbLink" style="background-image: url(authAdmin/images/radioRed.png)">
+            <a class="cbLink none">
                 <%=Html.CheckBox(item.Compose("In_None"), item.Value.Allowed.InGroup.IsActive(TypeAllowedBasic.None), new { tag = "None" })%>
             </a>
         </td>
@@ -83,22 +83,22 @@
     <tr class="second">
         <td>Out<%=Html.Hidden(item.Compose("OutBase"), item.Value.AllowedBase.OutGroup.ToStringParts())%></td>
         <td>
-            <a class="cbLink" style="background-image: url(authAdmin/images/radioBlue.png)">
+            <a class="cbLink create">
                 <%=Html.CheckBox(item.Compose("Out_Create"), item.Value.Allowed.OutGroup.IsActive(TypeAllowedBasic.Create), new  { tag = "Create" })%>
             </a>
         </td>
         <td>
-            <a class="cbLink" style="background-image: url(authAdmin/images/radioGreen.png)">
+            <a class="cbLink modify">
                 <%=Html.CheckBox(item.Compose("Out_Modify"), item.Value.Allowed.OutGroup.IsActive(TypeAllowedBasic.Modify), new  { tag = "Modify" })%>
             </a>
         </td>
         <td>
-            <a class="cbLink" style="background-image: url(authAdmin/images/radioYellow.png)">
+            <a class="cbLink read">
                 <%=Html.CheckBox(item.Compose("Out_Read"), item.Value.Allowed.OutGroup.IsActive(TypeAllowedBasic.Read), new { tag = "Read" })%>
             </a>
         </td>
         <td>
-            <a class="cbLink" style="background-image: url(authAdmin/images/radioRed.png)">
+            <a class="cbLink none">
                 <%=Html.CheckBox(item.Compose("Out_None"), item.Value.Allowed.OutGroup.IsActive(TypeAllowedBasic.None), new { tag = "None" })%>
             </a>
         </td>

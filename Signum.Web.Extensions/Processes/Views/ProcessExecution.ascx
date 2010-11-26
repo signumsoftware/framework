@@ -4,7 +4,7 @@
 <%@ Import Namespace="Signum.Entities" %>
 <%@ Import Namespace="Signum.Utilities" %>
 <%@ Import Namespace="Signum.Entities.Processes" %>
-<%=Html.RegisterCss("process/Content/Processes.css") %>
+<%: Html.DynamicCss("~/process/Content/Processes.css") %>
 <%
     using (var e = Html.TypeContext<ProcessExecutionDN>())
     {

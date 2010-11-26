@@ -40,10 +40,13 @@ namespace Signum.Web.Help
         public static string ViewEntityPropertyUrl = "EntityProperty";
         public static string NamespaceControlUrl = "NamespaceControl";
 
-        public static void Start()
+        public static void Start(string wikiUrl, string imagesFolder)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
+                WikiUrl = wikiUrl;
+                ImagesFolder = imagesFolder;
+
                 AssemblyResourceManager.RegisterAreaResources(
                     new AssemblyResourceStore(typeof(HelpClient), "/help/", "Signum.Web.Extensions.Help."));
 
@@ -101,8 +104,8 @@ namespace Signum.Web.Help
             RouteTable.Routes.InsertRouteAt0("Help", new { controller = "Help", action = "Index", });
         }
 
-        public static string WikiUrl = "http://192.168.0.5:8085/";
-        public static string ImagesFolder = "HelpImagenes/";
+        public static string WikiUrl;
+        public static string ImagesFolder;
 
         public class WikiLink
         {

@@ -58,9 +58,7 @@
                 <td>
                 </td>
                 <td>
-                <div id="login-others">
-                    <a href="Auth/ResetPassword"><%= Resources.IHaveForgottenMyPassword %></a><br />
-                </div>
+                <div id="login-others"><%: Html.ActionLink(Resources.IHaveForgottenMyPassword, "resetPassword", "auth") %></div>
                 </td>
             </tr>
             <%} %>

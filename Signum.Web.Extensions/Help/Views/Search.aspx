@@ -3,12 +3,15 @@
 <%@ Import Namespace="Signum.Utilities" %>
 <%@ Import Namespace="Signum.Entities.Reflection" %>
 <%@ Import Namespace="Signum.Engine.Help" %>
+<%@ Import Namespace="Signum.Engine" %>
 <%@ Import Namespace="Signum.Web.Help" %>
 <%@ Import Namespace="Signum.Web.Extensions" %>
+<%@ Import Namespace="Signum.Web" %>
 
-<asp:Content ID="Content2" ContentPlaceHolderID="head" runat="server">
-    <link href="help/Content/help.css" rel="stylesheet" type="text/css" />
+<asp:Content ContentPlaceHolderID="head" runat="server">
+ <%: Html.ScriptCss("~/help/Content/help.css") %>
 </asp:Content>
+
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
 
 <script type="text/javascript">

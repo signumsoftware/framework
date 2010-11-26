@@ -8,8 +8,10 @@
 <%@ Import Namespace="Signum.Web.Authorization" %>
 <%@ Import Namespace="Signum.Web.Extensions.Properties" %>
 
-<%= Html.RegisterCss("authAdmin/Content/authAdmin.css")%>
-<script language="javascript">
+<%: Html.DynamicCss("~/authAdmin/Content/authAdmin.css") %>
+<%: Html.ScriptsJs("~/authAdmin/Scripts/authAdmin.js") %>
+
+<script>
     $(function() {
         magicRadios($(document));
     });
@@ -21,7 +23,6 @@
         Html.ValueLine(tc, f => f.DefaultRule, vl => { vl.UnitText = tc.Value.DefaultLabel; });        
 %>
 
-<script type="text/javascript" src="authAdmin/Scripts/authAdmin.js"></script>
 
 <table class="ruleTable">
     <thead>
@@ -50,12 +51,12 @@
             <%=Html.Hidden(item.Compose("AllowedBase"), item.Value.AllowedBase)%>
         </td>
         <td>
-            <a class="cbLink" style="background-image: url(authAdmin/images/radioGreen.png)" >
+            <a class="cbLink allowed">
             <%=Html.RadioButton(item.Compose("Allowed"), "True", item.Value.Allowed)%>
             </a>
         </td>
         <td>
-            <a class="cbLink" style="background-image: url(authAdmin/images/radioRed.png)" >
+            <a class="cbLink not-allowed">
             <%=Html.RadioButton(item.Compose("Allowed"), "False", !item.Value.Allowed)%>
             </a>
         </td>

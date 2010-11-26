@@ -8,7 +8,8 @@
 <%@ Import Namespace="Signum.Web.Authorization" %>
 <%@ Import Namespace="Signum.Web.Extensions.Properties" %>
 
-<%= Html.RegisterCss("authAdmin/Content/authAdmin.css")%>
+<%: Html.DynamicCss("~/authAdmin/Content/authAdmin.css") %>
+
 <%
     using (var tc = Html.TypeContext<PropertyRulePack>())
     {
@@ -48,17 +49,17 @@
             <%=Html.Hidden(item.Compose("AllowedBase"), item.Value.AllowedBase)%>
         </td>
         <td>
-            <a class="cbLink" style="background-image: url(authAdmin/images/radioGreen.png)" >
+            <a class="cbLink modify">
             <%=Html.RadioButton(item.Compose("Allowed"), "Modify", item.Value.Allowed == PropertyAllowed.Modify)%>
             </a>
         </td>
         <td>
-            <a class="cbLink" style="background-image: url(authAdmin/images/radioYellow.png)">
+            <a class="cbLink read">
             <%=Html.RadioButton(item.Compose("Allowed"), "Read", item.Value.Allowed == PropertyAllowed.Read)%>
             </a>
         </td>
         <td>
-            <a class="cbLink" style="background-image: url(authAdmin/images/radioRed.png)">
+            <a class="cbLink none">
             <%=Html.RadioButton(item.Compose("Allowed"), "None", item.Value.Allowed == PropertyAllowed.None)%>
             </a>
         </td>

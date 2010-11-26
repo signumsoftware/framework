@@ -8,9 +8,11 @@
 <%@ Import Namespace="Signum.Engine.Operations" %>
 <%@ Import Namespace="Signum.Engine.DynamicQuery" %>
 <%@ Import Namespace="Signum.Web.Extensions.Properties" %>
-<%= Html.RegisterCss("authAdmin/Content/authAdmin.css")%>
-<script type="text/javascript" src="authAdmin/Scripts/authAdmin.js"></script>
-<script language="javascript">
+
+<%: Html.DynamicCss("~/authAdmin/Content/authAdmin.css") %>
+<%: Html.ScriptsJs("~/authAdmin/Scripts/authAdmin.js") %>
+
+<script>
     $(function() {
     magicCheckBoxes($(document));
         treeView();
@@ -76,7 +78,7 @@
             <a class="namespace">
                 <div class="treeView <%=iter.IsLast?"tvExpandedLast": "tvExpanded" %>">
                 </div>
-                <img src="authAdmin/Images/namespace.png" />
+                <img src="<%: Url.Content("~/authAdmin/Images/namespace.png") %>" />
                 <%=Html.Span(null, iter.Value.Key, "namespace") %>
             </a>
         </td>
@@ -93,29 +95,29 @@
             </div>
             <div class="treeView <%=iter2.IsLast?"tvLeafLast": "tvLeaf" %>">
             </div>
-            <img src="authAdmin/Images/class.png" />
+            <img src="<%: Url.Content("~/authAdmin/Images/class.png") %>" />
             <%=Html.Span(null, item.Value.Resource.FriendlyName)%>
             <%=Html.HiddenRuntimeInfo(item, i => i.Resource)%>
             <%=Html.Hidden(item.Compose("AllowedBase"), item.Value.AllowedBase.ToStringParts())%>
             <%=Html.Span(null, iter.Value.Key, "namespace", new Dictionary<string, object> { {"style", "display:none"}})%>
         </td>
         <td>
-            <a class="cbLink" style="background-image: url(authAdmin/images/radioBlue.png)">
+            <a class="cbLink create">
                 <%=Html.CheckBox(item.Compose("Allowed_Create"), item.Value.Allowed.IsActive(TypeAllowedBasic.Create), new { tag = "Create" })%>
             </a>
         </td>
         <td>
-            <a class="cbLink" style="background-image: url(authAdmin/images/radioGreen.png)">
+            <a class="cbLink modify">
                 <%=Html.CheckBox(item.Compose("Allowed_Modify"), item.Value.Allowed.IsActive(TypeAllowedBasic.Modify), new { tag = "Modify" })%>
             </a>
         </td>
         <td>
-            <a class="cbLink" style="background-image: url(authAdmin/images/radioYellow.png)">
+            <a class="cbLink read">
                 <%=Html.CheckBox(item.Compose("Allowed_Read"), item.Value.Allowed.IsActive(TypeAllowedBasic.Read), new { tag = "Read" })%>
             </a>
         </td>
         <td>
-            <a class="cbLink" style="background-image: url(authAdmin/images/radioRed.png)">
+            <a class="cbLink none">
                 <%=Html.CheckBox(item.Compose("Allowed_None"), item.Value.Allowed.IsActive(TypeAllowedBasic.None), new { tag = "None" })%>
             </a>
         </td>
@@ -129,7 +131,7 @@
             <%if (item.Value.Properties.HasValue)
               {%>
             <a href="javascript:openDialog('AuthAdmin/Properties', {role:<%=tc.Value.Role.Id%>, type:<%=item.Value.Resource.Id%>});">
-                <div style="background-image: url(authAdmin/images/property.png); background-repeat: no-repeat">
+                <div class="property">
                     <div class="thumb <%=item.Value.Properties.ToString().ToLower()%>">
                     </div>
                 </div>
@@ -144,7 +146,7 @@
             <%if (item.Value.Operations.HasValue)
               {%>
             <a href="javascript:openDialog('AuthAdmin/Operations', {role:<%=tc.Value.Role.Id%>, type:<%=item.Value.Resource.Id%>});">
-                <div style="background-image: url(authAdmin/images/operation.png); background-repeat: no-repeat">
+                <div class="operation">
                     <div class="thumb <%=item.Value.Operations.ToString().ToLower()%>">
                     </div>
                 </div>
@@ -159,7 +161,7 @@
             <%if (item.Value.Queries.HasValue)
               {%>
             <a href="javascript:openDialog('AuthAdmin/Queries', {role:<%=tc.Value.Role.Id%>, type:<%=item.Value.Resource.Id%>});">
-                <div style="background-image: url(authAdmin/images/query.png); background-repeat: no-repeat">
+                <div class="query">
                     <div class="thumb <%=item.Value.Queries.ToString().ToLower()%>">
                     </div>
                 </div>
