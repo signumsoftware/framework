@@ -133,7 +133,7 @@ namespace Signum.Web.ScriptCombiner
         byte[] compressed;
         byte[] uncompressed; 
 
-        public override void  ExecuteResult(ControllerContext context)
+        public override void ExecuteResult(ControllerContext context)
         {
             HttpResponseBase response = context.HttpContext.Response;
 
@@ -147,8 +147,9 @@ namespace Signum.Web.ScriptCombiner
             response.AppendHeader("Vary", "Accept-Encoding");
 
             response.Cache.SetCacheability(HttpCacheability.Public);
-            response.Cache.SetExpires(DateTime.Now.Add(CacheDuration));
+            //response.Cache.SetExpires(DateTime.Now.Add(CacheDuration));   //redundant
             response.Cache.SetMaxAge(CacheDuration);
+            //TODO: Add Last-Modified http://code.google.com/intl/es-ES/speed/page-speed/docs/caching.html#LeverageBrowserCaching
 
             response.ContentEncoding = Encoding.Unicode;
             response.ContentType = ContentType;
