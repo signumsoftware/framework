@@ -10,6 +10,7 @@ using System.Text;
 using System.Collections;
 using System.Resources;
 using System.Collections.Concurrent;
+using System.Web;
 
 namespace Signum.Web
 {
@@ -50,14 +51,16 @@ namespace Signum.Web
 
         static string GetPrefix(string virtualPath)
         {
-            if (!virtualPath.StartsWith("/"))
+            var vp = VirtualPathUtility.ToAppRelative(virtualPath);
+
+            if (!vp.StartsWith("~/"))
                 return null;
 
-            int index = virtualPath.IndexOf('/', 1);
+            int index = vp.IndexOf('/', 2);
             if (index == -1)
                 return null;
 
-            return virtualPath.Substring(0, index + 1);
+            return vp.Substring(0, index + 1);
         }
 
         public static void RegisterAreaResources(LocalizeResourceStore store)
@@ -95,7 +98,7 @@ namespace Signum.Web
         readonly ConcurrentDictionary<CultureInfo, byte[]> cachedFiles = new ConcurrentDictionary<CultureInfo,byte[]>();
 
         public LocalizeResourceStore(ResourceManager resourceManager, string areaName)
-            : this(resourceManager, "/" + areaName + "/", "resources/", areaName + "_", areaName)
+            : this(resourceManager, "~/" + areaName + "/", "resources/", areaName + "_", areaName)
         {
         }
 
@@ -178,7 +181,7 @@ namespace Signum.Web
 
         private CultureInfo GetCultureInfo(string virtualPath)
         {
-            virtualPath = virtualPath.ToLower();
+            virtualPath = VirtualPathUtility.ToAppRelative(virtualPath).ToLower();
 
             if (!virtualPath.StartsWith(VirtualPath))
                 throw new InvalidOperationException("virtualPath is not from this store");

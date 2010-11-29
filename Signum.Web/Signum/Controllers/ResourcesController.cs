@@ -17,7 +17,7 @@ namespace Signum.Web.Controllers
         {
             string contentType = GetContentType(resourceName);
 
-            var file = HostingEnvironment.VirtualPathProvider.GetFile("/{0}/{1}/{2}".Formato(area, resourcesFolder, resourceName));
+            var file = HostingEnvironment.VirtualPathProvider.GetFile("~/{0}/{1}/{2}".Formato(area, resourcesFolder, resourceName));
 
             return this.File(file.Open(), contentType);
         }

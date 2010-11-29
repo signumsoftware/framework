@@ -11,15 +11,22 @@ namespace Signum.Web
 	{
         public override bool FileExists(string virtualPath)
         {
-            return base.FileExists(virtualPath) || 
-                   AssemblyResourceManager.FileExist(virtualPath) || 
-                   LocalizeResourceManager.FileExist(virtualPath);
+            if (base.FileExists(virtualPath))
+                return true;
+
+            if (AssemblyResourceManager.FileExist(virtualPath))
+                return true;
+
+            if (LocalizeResourceManager.FileExist(virtualPath))
+                return true;
+
+            return false;
         }
 
         public override VirtualFile GetFile(string virtualPath)
         {
             if (base.FileExists(virtualPath))
-                return base.GetFile(virtualPath); 
+                return base.GetFile(virtualPath);
 
             VirtualFile file = AssemblyResourceManager.GetVirtualFile(virtualPath);
             if (file != null)

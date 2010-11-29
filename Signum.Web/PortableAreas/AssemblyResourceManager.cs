@@ -51,14 +51,16 @@ namespace Signum.Web
 
         static string GetPrefix(string virtualPath)
         {
-            if (!virtualPath.StartsWith("/"))
+            var vp = VirtualPathUtility.ToAppRelative(virtualPath);
+
+            if (!vp.StartsWith("~/"))
                 return null;
 
-            int index = virtualPath.IndexOf('/', 1);
+            int index = vp.IndexOf('/', 2);
             if (index == -1)
                 return null;
 
-            return virtualPath.Substring(0, index + 1);
+            return vp.Substring(0, index + 1);
         }
 
         public static void RegisterAreaResources(AssemblyResourceStore store)
@@ -78,7 +80,9 @@ namespace Signum.Web
 
             public override Stream Open()
             {
-                return this.store.GetResourceStream(this.VirtualPath);
+                string vp = VirtualPathUtility.IsAbsolute(this.VirtualPath) ? VirtualPathUtility.ToAppRelative(this.VirtualPath) : this.VirtualPath; 
+
+                return this.store.GetResourceStream(vp);
             }
         }
     }
@@ -134,7 +138,7 @@ namespace Signum.Web
 
         private string GetResourceName(string virtualPath)
         {
-            virtualPath = virtualPath.ToLower();
+            virtualPath = VirtualPathUtility.ToAppRelative(virtualPath).ToLower();
 
             if (!virtualPath.StartsWith(VirtualPath))
                 throw new InvalidOperationException("virtualPath is not from this store");

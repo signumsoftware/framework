@@ -112,10 +112,10 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Alerts" xml:space="preserve">
     <value>Alertas</value>
@@ -124,13 +124,13 @@
     <value>Média</value>
   </data>
   <data name="CalendarClose" xml:space="preserve">
-    <value>Feito</value>
+    <value>Fechar</value>
   </data>
   <data name="CalendarNext" xml:space="preserve">
-    <value>Próx</value>
+    <value>Próximo</value>
   </data>
   <data name="CalendarPrevious" xml:space="preserve">
-    <value>Ant</value>
+    <value>Anterior</value>
   </data>
   <data name="CalendarToday" xml:space="preserve">
     <value>Hoje</value>
@@ -148,7 +148,7 @@
     <value>Excluir filtros</value>
   </data>
   <data name="EditColumnsFinishEdit" xml:space="preserve">
-    <value>Edição completa</value>
+    <value>Terminar Editar</value>
   </data>
   <data name="Excel" xml:space="preserve">
     <value>Excel</value>
@@ -169,7 +169,7 @@
     <value>Ocultar os filtros</value>
   </data>
   <data name="IncorrectEntityInSessionYouMustReloadThePageToContinue" xml:space="preserve">
-    <value>Dados incorretos na sessão. Você deve recarregar a página para continuar</value>
+    <value>Dados incorretos na sessão. Recarregar a página para continuar</value>
   </data>
   <data name="Maximum" xml:space="preserve">
     <value>No máximo</value>
@@ -190,7 +190,7 @@
     <value>Nenhum filtro especificado</value>
   </data>
   <data name="NoResults" xml:space="preserve">
-    <value>Não há resultados</value>
+    <value>Sem resultados</value>
   </data>
   <data name="Notes" xml:space="preserve">
     <value>Notas</value>
@@ -205,7 +205,7 @@
     <value>Remover</value>
   </data>
   <data name="Save" xml:space="preserve">
-    <value>Salvar</value>
+    <value>Guardar</value>
   </data>
   <data name="Search" xml:space="preserve">
     <value>Pesquisa</value>
@@ -217,33 +217,33 @@
     <value>Mostrar filtros</value>
   </data>
   <data name="Type0NotAllowed" xml:space="preserve">
-    <value>Tipo {0} não é permitido</value>
+    <value>Tipo {0} não permitido</value>
   </data>
   <data name="UserColumnsEdit" xml:space="preserve">
-    <value>Editar colunas User</value>
+    <value>Editar colunas de utilizador</value>
   </data>
   <data name="Value" xml:space="preserve">
     <value>Valor</value>
   </data>
   <data name="ValueMustBeSpecifiedFor0" xml:space="preserve">
-    <value>Deve ser especificado um valor para {0}</value>
+    <value>Tem de ser especificado um valor para {0}</value>
   </data>
   <data name="View" xml:space="preserve">
-    <value>Veja</value>
+    <value>Ver</value>
   </data>
   <data name="ViewForType0IsNotAllowed" xml:space="preserve">
-    <value>View para o tipo {0} não é permitido</value>
+    <value>Ver para o tipo {0} não é permitido</value>
   </data>
   <data name="ViewNotes" xml:space="preserve">
     <value>Ver notas</value>
   </data>
   <data name="Warned" xml:space="preserve">
-    <value>Advertiu</value>
+    <value>Advertido</value>
   </data>
   <data name="Yes" xml:space="preserve">
     <value>Sim</value>
   </data>
   <data name="YourSessionHasTimedOutClickF5ToReloadTheEntity" xml:space="preserve">
-    <value>A sessão expirou, pressione F5 para recarregar a entidade do banco de dados</value>
+    <value>A sessão expirou, pressiona F5 para recarregar dados</value>
   </data>
 </root>

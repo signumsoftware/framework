@@ -572,7 +572,7 @@ namespace Signum.Web
             ViewEngines.Engines.Add(new SignumViewEngine());
 
             AssemblyResourceManager.RegisterAreaResources(
-                new AssemblyResourceStore(typeof(Navigator), "/signum/", "Signum.Web.Signum."));
+                new AssemblyResourceStore(typeof(Navigator), "~/signum/", "Signum.Web.Signum."));
 
             LocalizeResourceManager.RegisterAreaResources(
                 new LocalizeResourceStore(Resources.ResourceManager, "signum"));

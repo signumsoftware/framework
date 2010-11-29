@@ -112,10 +112,10 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="_0Day" xml:space="preserve">
     <value>{0} dia</value>
@@ -124,7 +124,7 @@
     <value>{0} dias</value>
   </data>
   <data name="_0HasNoFreeBits" xml:space="preserve">
-    <value>{0: X} não tem nenhum bits livre</value>
+    <value>{0: X} não tem nenhuns bits livre</value>
   </data>
   <data name="_0Hour" xml:space="preserve">
     <value>{0} hora</value>
@@ -154,13 +154,13 @@
     <value>{0} ano</value>
   </data>
   <data name="_0Year1Month2Day" xml:space="preserve">
-    <value>{0} anos, {1} meses, {2} dias</value>
+    <value>{0} ano, {1} mês, {2} dia</value>
   </data>
   <data name="_0Years" xml:space="preserve">
     <value>{0} anos</value>
   </data>
   <data name="Ago" xml:space="preserve">
-    <value>há {0} </value>
+    <value>à {0} </value>
   </data>
   <data name="And" xml:space="preserve">
     <value> e </value>
@@ -190,13 +190,13 @@
     <value>Segundos</value>
   </data>
   <data name="EnterYourSelection" xml:space="preserve">
-    <value>Insira sua seleção: </value>
+    <value>Introduz a tua selecção: </value>
   </data>
   <data name="EnterYoutSelectionsSeparatedByComma" xml:space="preserve">
-    <value>Insira suas seleções separadas por vírgulas: </value>
+    <value>Introduz as tuas selecções separadas por vírgulas: </value>
   </data>
   <data name="NoOptionWithKey0Found" xml:space="preserve">
-    <value>Nenhuma opção com chave {0} encontrado</value>
+    <value>Nenhuma opção com a chave {0} encontrada</value>
   </data>
   <data name="Or" xml:space="preserve">
     <value> ou </value>
@@ -211,10 +211,10 @@
     <value>Hoje</value>
   </data>
   <data name="Tomorrow" xml:space="preserve">
-    <value>Manhã</value>
+    <value>Amanhã</value>
   </data>
   <data name="Unavailable" xml:space="preserve">
-    <value>Não disponível</value>
+    <value>Indisponível</value>
   </data>
   <data name="Yesterday" xml:space="preserve">
     <value>Ontem</value>
