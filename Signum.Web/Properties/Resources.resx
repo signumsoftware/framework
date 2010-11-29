@@ -246,4 +246,37 @@
   <data name="NoResults" xml:space="preserve">
     <value>No results</value>
   </data>
+  <data name="Signum_noResults" xml:space="preserve">
+    <value>No results found</value>
+  </data>
+  <data name="Signum_error" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="Signum_executingOperation" xml:space="preserve">
+    <value>Executing operation...</value>
+  </data>
+  <data name="Signum_noElementsSelected" xml:space="preserve">
+    <value>No elements selected</value>
+  </data>
+  <data name="Signum_operationExecuted" xml:space="preserve">
+    <value>Operation exécutée</value>
+  </data>
+  <data name="Signum_popupErrors" xml:space="preserve">
+    <value>There are errors in the entity, you want to continue?</value>
+  </data>
+  <data name="Signum_popupErrorsStop" xml:space="preserve">
+    <value>There are errors in the entity</value>
+  </data>
+  <data name="Signum_saved" xml:space="preserve">
+    <value>Saved</value>
+  </data>
+  <data name="Signum_saving" xml:space="preserve">
+    <value>Saving</value>
+  </data>
+  <data name="Signum_search" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="Signum_searching" xml:space="preserve">
+    <value>Searching...</value>
+  </data>
 </root>

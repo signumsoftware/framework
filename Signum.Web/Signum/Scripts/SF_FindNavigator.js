@@ -201,7 +201,7 @@
             this.editColumnsFinish();
 
             var $btnSearch = $(this.pf("btnSearch"));
-            $btnSearch.toggleClass('loading').val(lang['searching']);
+            $btnSearch.toggleClass('loading').val(lang.signum.searching);
 
             var self = this;
             SF.ajax({
@@ -214,16 +214,16 @@
                     var idBtnSearch = $btnSearch.attr('id');
                     if (asyncSearchFinished[idBtnSearch])
                         asyncSearchFinished[idBtnSearch] = false;
-                    $btnSearch.val(lang['buscar']).toggleClass('loading');
+                    $btnSearch.val(lang.signum.search).toggleClass('loading');
                     if (!empty(r))
                         self.$control.find(".divResults tbody").html(r);
                     else {
                         var columns = $(self.pf("divResults th")).length;
-                        self.$control.find(".divResults tbody").html("<tr><td colspan=\"" + columns + "\">" + lang['0results'] + "</td></tr>")
+                        self.$control.find(".divResults tbody").html("<tr><td colspan=\"" + columns + "\">" + lang.signum.noResults + "</td></tr>")
                     }
                 },
                 error: function () {
-                    $btnSearch.val(lang['buscar']).toggleClass('loading');
+                    $btnSearch.val(lang.signum.search).toggleClass('loading');
                 }
             });
 
@@ -710,7 +710,7 @@
         log("FindNavigator HasSelectedItems");
         var items = SelectedItems(_findOptions);
         if (items.length == 0) {
-            NotifyInfo(lang['noElementsSelected']);
+            NotifyInfo(lang.signum.noElementsSelected);
             return;
         }
         onSuccess(items);

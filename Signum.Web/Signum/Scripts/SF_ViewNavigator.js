@@ -237,7 +237,7 @@ if (!ViewNavigator && typeof ViewNavigator == "undefined") {
             if (doDefault != false) {
                 var validatorResult = new PartialValidator({ prefix: this.viewOptions.prefix, type: this.viewOptions.type }).trySave();
                 if (!validatorResult.isValid) {
-                    window.alert(lang['popupErrorsStop']);
+                    window.alert(lang.signum.popupErrorsStop);
                     return;
                 }
                 if (empty(this.viewOptions.containerDiv))

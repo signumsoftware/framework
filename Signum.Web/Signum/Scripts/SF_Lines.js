@@ -39,7 +39,7 @@
             var validator = new PartialValidator({ controllerUrl: validateUrl, prefix: this.options.prefix, id: id, type: runtimeType });
             var result = validator.validate();
             if (!result.isValid) {
-                if (!confirm(lang['popupErrors'])) return false;
+                if (!confirm(lang.signum.popupErrors)) return false;
                 validator.showErrors(result.modelState, true);
             }
             this.updateLinks(result.newToStr, result.newLink);
@@ -500,7 +500,7 @@
             var validator = new PartialValidator({ controllerUrl: validateUrl, prefix: itemPrefix, id: id, type: runtimeType });
             var validatorResult = validator.validate();
             if (!validatorResult.isValid) {
-                if (!confirm(lang['popupErrors'])) {
+                if (!confirm(lang.signum.popupErrors)) {
                     $.extend(validatorResult, { acceptChanges: false });
                     return validatorResult;
                 }

@@ -95,7 +95,7 @@
     <Compile Include="Lines\EntityListBase.cs" />
     <Compile Include="PortableAreas\AssemblyResourceManager.cs" />
     <Compile Include="PortableAreas\SignumVirtualPathProvider.cs" />
-    <Compile Include="PortableAreas\AssemblyResourceStore.cs" />
+    <Compile Include="PortableAreas\LocalizeResourceManager.cs" />
     <Compile Include="PortableAreas\RouteExtensions.cs" />
     <Compile Include="Signum\Controllers\ResourcesController.cs" />
     <Compile Include="Signum\Controllers\ModelBinders.cs" />

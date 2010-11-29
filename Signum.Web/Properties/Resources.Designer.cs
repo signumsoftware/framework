@@ -358,6 +358,105 @@ namespace Signum.Web.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Error.
+        /// </summary>
+        public static string Signum_error {
+            get {
+                return ResourceManager.GetString("Signum_error", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Executing operation....
+        /// </summary>
+        public static string Signum_executingOperation {
+            get {
+                return ResourceManager.GetString("Signum_executingOperation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No elements selected.
+        /// </summary>
+        public static string Signum_noElementsSelected {
+            get {
+                return ResourceManager.GetString("Signum_noElementsSelected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No results found.
+        /// </summary>
+        public static string Signum_noResults {
+            get {
+                return ResourceManager.GetString("Signum_noResults", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Operation exécutée.
+        /// </summary>
+        public static string Signum_operationExecuted {
+            get {
+                return ResourceManager.GetString("Signum_operationExecuted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There are errors in the entity, you want to continue?.
+        /// </summary>
+        public static string Signum_popupErrors {
+            get {
+                return ResourceManager.GetString("Signum_popupErrors", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There are errors in the entity.
+        /// </summary>
+        public static string Signum_popupErrorsStop {
+            get {
+                return ResourceManager.GetString("Signum_popupErrorsStop", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Saved.
+        /// </summary>
+        public static string Signum_saved {
+            get {
+                return ResourceManager.GetString("Signum_saved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Saving.
+        /// </summary>
+        public static string Signum_saving {
+            get {
+                return ResourceManager.GetString("Signum_saving", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Search.
+        /// </summary>
+        public static string Signum_search {
+            get {
+                return ResourceManager.GetString("Signum_search", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Searching....
+        /// </summary>
+        public static string Signum_searching {
+            get {
+                return ResourceManager.GetString("Signum_searching", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Type {0} not allowed.
         /// </summary>
         public static string Type0NotAllowed {

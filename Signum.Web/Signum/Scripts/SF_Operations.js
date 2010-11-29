@@ -113,7 +113,7 @@ OperationManager.prototype = {
         else
             blockUI();
 
-        NotifyInfo(lang['executingOperation']);
+        NotifyInfo(lang.signum.executingOperation);
 
         if (empty(newPrefix))
             newPrefix = this.options.prefix;
@@ -135,7 +135,7 @@ OperationManager.prototype = {
                     }
                 }
                 else {
-                    NotifyInfo(lang['error'], 2000);
+                    NotifyInfo(lang.signum.error, 2000);
                     return;
                 }
             },
@@ -143,7 +143,7 @@ OperationManager.prototype = {
                 function () {
                     uiBlocked = false;
                     $(".uiBlocker").remove();
-                    NotifyInfo(lang['error'], 2000);
+                    NotifyInfo(lang.signum.error, 2000);
                 }
         });
     },
@@ -292,8 +292,8 @@ var DeleteExecutor = function(_options) {
 
         var self = this;
         if (isTrue(this.options.isLite)) {
-            NotifyInfo(lang['executingOperation']);
-            this.operationAjax(this.options.prefix, function() { NotifyInfo(lang['operationExecuted'], 2000); });
+            NotifyInfo(lang.signum.executingOperation);
+            this.operationAjax(this.options.prefix, function() { NotifyInfo(lang.signum.operationExecuted, 2000); });
         }
         else {
             throw "Delete operation must be Lite";
@@ -306,8 +306,8 @@ var DeleteExecutor = function(_options) {
         if (uiBlocked)
             return false;
 
-        NotifyInfo(lang['executingOperation']);
-        this.operationAjax(this.options.prefix, function() { NotifyInfo(lang['operationExecuted'], 2000); });
+        NotifyInfo(lang.signum.executingOperation);
+        this.operationAjax(this.options.prefix, function() { NotifyInfo(lang.signum.operationExecuted, 2000); });
     };
 };
 
@@ -353,7 +353,7 @@ var ConstructorFromMany = function(_options) {
     this.operationAjax = function(newPrefix, items, onSuccess) {
         log("ConstructorFromMany operationAjax");
 
-        NotifyInfo(lang['executingOperation']);
+        NotifyInfo(lang.signum.executingOperation);
 
         if (uiBlocked)
             return false;
@@ -374,7 +374,7 @@ var ConstructorFromMany = function(_options) {
                         onSuccess(newPrefix, operationResult);
                 }
                 else {
-                    NotifyInfo(lang['error'], 2000);
+                    NotifyInfo(lang.signum.error, 2000);
                     return;
                 }
             },
@@ -383,7 +383,7 @@ var ConstructorFromMany = function(_options) {
                     uiBlocked = false;
                     $(".uiBlocker").remove();
 
-                    NotifyInfo(lang['error'], 2000);
+                    NotifyInfo(lang.signum.error, 2000);
                 }
         });
     };
@@ -491,21 +491,21 @@ function OpReloadContent(prefix, operationResult, parentDiv){
             containerDiv: prefix.compose("externalPopupDiv")
         }).viewSave(operationResult);
     }
-    NotifyInfo(lang['operationExecuted'], 2000); 
+    NotifyInfo(lang.signum.operationExecuted, 2000); 
 }
 
 function OpOpenPopup(prefix, operationResult) {
     log("OperationExecutor OpOpenPopup");
     $(".contextmenu-active").removeClass("contextmenu-active");
     new ViewNavigator({ prefix: prefix }).showCreateSave(operationResult);
-    NotifyInfo(lang['operationExecuted'], 2000); 
+    NotifyInfo(lang.signum.operationExecuted, 2000); 
 }
 
 function OpOpenPopupNoDefaultOk(prefix, operationResult) {
     log("OperationExecutor OpOpenPopupNoDefaultOk");
     $(".contextmenu-active").removeClass("contextmenu-active");
     new ViewNavigator({ prefix: prefix, onOk: function() { return false; } }).showCreateSave(operationResult);
-    NotifyInfo(lang['operationExecuted'], 2000); 
+    NotifyInfo(lang.signum.operationExecuted, 2000); 
 }
 
 function OpNavigate(prefix, operationResult)
@@ -522,7 +522,7 @@ function OpMarkCellOnSuccess(prefix, operationResult){
     else
         $td.addClass('entityCtxMenuError');
     $td.removeClass("contextmenu-active");
-    NotifyInfo(lang['operationExecuted'], 2000); 
+    NotifyInfo(lang.signum.operationExecuted, 2000); 
 }
 
 function OpContextualOnSuccess(prefix, operationResult) {
@@ -542,7 +542,7 @@ function OpContextualOnSuccess(prefix, operationResult) {
     else
     {
        $("form").html(operationResult);
-       NotifyInfo(lang['operationExecuted'], 2000); 
+       NotifyInfo(lang.signum.operationExecuted, 2000); 
     }
 }
 }

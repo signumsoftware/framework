@@ -11,11 +11,9 @@ namespace Signum.Web
 	{
         public override bool FileExists(string virtualPath)
         {
-            if(base.FileExists(virtualPath))
-            return true;
-            
-            AssemblyResourceStore store = AssemblyResourceManager.GetResourceStoreFromVirtualPath(virtualPath);
-            return store != null;
+            return base.FileExists(virtualPath) || 
+                   AssemblyResourceManager.FileExist(virtualPath) || 
+                   LocalizeResourceManager.FileExist(virtualPath);
         }
 
         public override VirtualFile GetFile(string virtualPath)
@@ -23,16 +21,20 @@ namespace Signum.Web
             if (base.FileExists(virtualPath))
                 return base.GetFile(virtualPath); 
 
-            AssemblyResourceStore store = AssemblyResourceManager.GetResourceStoreFromVirtualPath(virtualPath);
-            if (store != null)
-                return new AssemblyResourceVirtualFile(virtualPath, store);
+            VirtualFile file = AssemblyResourceManager.GetVirtualFile(virtualPath);
+            if (file != null)
+                return file;
+
+            file = LocalizeResourceManager.GetVirtualFile(virtualPath);
+            if (file != null)
+                return file;
 
             return null;
         }
 
         public override System.Web.Caching.CacheDependency GetCacheDependency(string virtualPath, System.Collections.IEnumerable virtualPathDependencies, DateTime utcStart)
         {
-            if (AssemblyResourceManager.GetResourceStoreFromVirtualPath(virtualPath) != null)
+            if (AssemblyResourceManager.GetVirtualFile(virtualPath) != null)
             {
                 return null;
             }
@@ -43,25 +45,6 @@ namespace Signum.Web
         public override string GetCacheKey(string virtualPath)
         {
             return null;
-        }
-
-        class AssemblyResourceVirtualFile : VirtualFile
-        {
-            private readonly AssemblyResourceStore resourceStore;
-            private readonly string path;
-
-            public AssemblyResourceVirtualFile(string virtualPath, AssemblyResourceStore resourceStore)
-                : base(virtualPath)
-            {
-                this.resourceStore = resourceStore;
-                path = VirtualPathUtility.ToAppRelative(virtualPath);
-            }
-
-            public override Stream Open()
-            {
-                Trace.WriteLine("Opening " + path);
-                return this.resourceStore.GetResourceStream(this.path);
-            }
         }
 	}
 }

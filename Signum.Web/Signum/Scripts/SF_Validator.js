@@ -49,7 +49,7 @@
 
         trySave: function () {
             log("Validator trySave");
-            NotifyInfo(lang['saving']);
+            NotifyInfo(lang.signum.saving);
             var returnValue = false;
             var self = this;
             SF.ajax({
@@ -62,7 +62,7 @@
                         var result = $.parseJSON(msg);  //eval('var result=' + msg);
                         var modelState = result["ModelState"];
                         returnValue = self.showErrors(modelState, true);
-                        NotifyInfo(lang['error'], 2000);
+                        NotifyInfo(lang.signum.error, 2000);
                     }
                     else {
                         if (empty(self.valOptions.parentDiv))
@@ -70,7 +70,7 @@
                         else
                             $("#" + self.valOptions.parentDiv).html(msg.substring(msg.indexOf("<form"), msg.indexOf("</form>") + 7));
                         returnValue = true;
-                        NotifyInfo(lang['saved'], 2000);
+                        NotifyInfo(lang.signum.saved, 2000);
                     }
                 }
             });
@@ -250,7 +250,7 @@
             log("PartialValidator trySave");
             //        if (empty(this.valOptions.type))
             //            throw "Type must be specified in PartialValidatorOptions for TrySavePartial";
-            NotifyInfo(lang['saving']);
+            NotifyInfo(lang.signum.saving);
             var validatorResult = null;
             var self = this;
             SF.ajax({
@@ -265,10 +265,10 @@
                 }
             });
             if (validatorResult != null && validatorResult.isValid) {
-                NotifyInfo(lang['saved'], 2000);
+                NotifyInfo(lang.signum.saved, 2000);
             }
             else
-                NotifyInfo(lang['error'], 2000);
+                NotifyInfo(lang.signum.error, 2000);
             return validatorResult;
         };
 
@@ -359,7 +359,7 @@
     function EntityIsValid(validationOptions, onSuccess) {
         log("Validator EntityIsValid");
 
-        NotifyInfo(lang['validating']);
+        NotifyInfo(lang.signum.validating);
 
         var isValid = null;
         if (empty(validationOptions.prefix))
@@ -375,8 +375,8 @@
                 onSuccess();
         }
         else {
-            NotifyInfo(lang['error'], 2000);
-            window.alert(lang['popupErrorsStop']);
+            NotifyInfo(lang.signum.error, 2000);
+            window.alert(lang.signum.popupErrorsStop);
         }
     };
 }

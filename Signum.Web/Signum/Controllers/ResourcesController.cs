@@ -7,6 +7,7 @@ using Signum.Web;
 using System.Reflection;
 using Signum.Utilities;
 using System.IO;
+using System.Web.Hosting;
 
 namespace Signum.Web.Controllers
 {
@@ -14,15 +15,11 @@ namespace Signum.Web.Controllers
     {
         public ActionResult Index(string area, string resourcesFolder, string resourceName)
         {
-            string resourceAreaName = "~/{0}/{1}/{2}".Formato(area, resourcesFolder, resourceName);
+            string contentType = GetContentType(resourceName);
 
-            string contentType = GetContentType(resourceAreaName);
+            var file = HostingEnvironment.VirtualPathProvider.GetFile("/{0}/{1}/{2}".Formato(area, resourcesFolder, resourceName));
 
-            AssemblyResourceStore resourceStore = AssemblyResourceManager.GetResourceStoreFromVirtualPath(resourceAreaName);
-
-            Stream stream = resourceStore.GetResourceStream(resourceAreaName);
-
-            return this.File(stream, contentType);
+            return this.File(file.Open(), contentType);
         }
 
         private static string GetContentType(string resourceName)

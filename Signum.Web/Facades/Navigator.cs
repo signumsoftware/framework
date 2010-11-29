@@ -574,9 +574,13 @@ namespace Signum.Web
             AssemblyResourceManager.RegisterAreaResources(
                 new AssemblyResourceStore(typeof(Navigator), "/signum/", "Signum.Web.Signum."));
 
+            LocalizeResourceManager.RegisterAreaResources(
+                new LocalizeResourceStore(Resources.ResourceManager, "signum"));
+
+
             RouteTable.Routes.InsertRouteAt0("signum/{resourcesFolder}/{*resourceName}",
                     new { controller = "Resources", action = "Index", area = "signum" },
-                    new { resourcesFolder = new InArray(new string[] { "Scripts", "Content", "Images" }) });
+                    new { resourcesFolder = new InArray(new string[] { "Scripts", "Content", "Images", "Resources" }) });
 
             ModelBinders.Binders.DefaultBinder = new LiteModelBinder();
             ModelBinders.Binders.Add(typeof(Implementations), new ImplementationsModelBinder());

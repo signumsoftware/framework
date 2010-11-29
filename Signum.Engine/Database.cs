@@ -171,7 +171,7 @@ namespace Signum.Engine
             return (Lite<T>)RetrieveLite(typeof(T), typeof(T), id);
         }
 
-        public static Lite<T> FillToStr<T>(Lite<T> lite)where T : class, IIdentifiable
+        public static Lite<T> FillToStr<T>(this Lite<T> lite)where T : class, IIdentifiable
         {
             return (Lite<T>)FillToStr((Lite)lite);
         }

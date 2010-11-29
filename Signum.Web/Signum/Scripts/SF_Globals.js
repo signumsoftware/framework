@@ -169,23 +169,7 @@
     sfBtnCancel = "sfBtnCancel",            //viewNavigator, findNavigator, mixin
     sfBtnOk = "sfBtnOk",                    //viewNavigator, findNavigator
 
-    sfEntityTypeName = "sfEntityTypeName",  //operations, findNavigator
-
-
-    lang = {
-        "error": "Error",
-        "saving": "Guardando...",
-        "saved": "Guardado",
-        "validating": "Validando entidad...",
-        "searching": "Buscando...",
-        "buscar": "Buscar",
-        "executingOperation": "Ejecutando operación...",
-        "operationExecuted": "Operación ejecutada",
-        "noElementsSelected": "Debe seleccionar algún elemento",
-        "popupErrors": "Hay errores en la entidad, ¿desea continuar?",
-        "popupErrorsStop": "Hay errores en la entidad",
-        "0results": "No results have been found"
-    };
+    sfEntityTypeName = "sfEntityTypeName";   //operations, findNavigator
 
     String.prototype.startsWith = function (str) {
         return (this.indexOf(str) === 0);
@@ -624,7 +608,7 @@
         if (!error) error = textStatus;
 
         var message = error.length > 50 ? error.substring(0, 49) + "..." : error;
-        NotifyError(lang['error'] + ": " + message, 2000);
+        NotifyError(lang.signum.error + ": " + message, 2000);
 
         log(error);
         log(XMLHttpRequest);
