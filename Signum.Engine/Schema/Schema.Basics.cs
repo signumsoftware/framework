@@ -533,7 +533,7 @@ namespace Signum.Engine.Maps
             if (string.IsNullOrEmpty(Where))
                 return columns;
 
-            return columns + "_" + Security.EncodeCleanUnsafe(Where);
+            return columns + "__" + Security.EncodeCleanUnsafe(Where);
         }
 
         
