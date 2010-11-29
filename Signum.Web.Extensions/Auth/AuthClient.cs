@@ -51,7 +51,7 @@ namespace Signum.Web.Authorization
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 AssemblyResourceManager.RegisterAreaResources(
-                    new AssemblyResourceStore(typeof(AuthClient), "/auth/", "Signum.Web.Extensions.Auth."));
+                    new AssemblyResourceStore(typeof(AuthClient), "~/auth/", "Signum.Web.Extensions.Auth."));
 
                 if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(UserDN)))
                     Navigator.AddSetting(new EntitySettings<UserDN>(EntityType.Default));

@@ -27,7 +27,7 @@ namespace Signum.Web.Files
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 AssemblyResourceManager.RegisterAreaResources(
-                    new AssemblyResourceStore(typeof(FilesClient), "/files/", "Signum.Web.Extensions.Files."));
+                    new AssemblyResourceStore(typeof(FilesClient), "~/files/", "Signum.Web.Extensions.Files."));
                 
                 RouteTable.Routes.InsertRouteAt0("files/{resourcesFolder}/{*resourceName}",
                     new { controller = "Resources", action = "Index", area = "files" },

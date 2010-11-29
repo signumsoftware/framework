@@ -31,7 +31,7 @@ namespace Signum.Web.Profiler
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 AssemblyResourceManager.RegisterAreaResources(
-                    new AssemblyResourceStore(typeof(ProfileClient), "/profiler/", "Signum.Web.Extensions.Profiler."));
+                    new AssemblyResourceStore(typeof(ProfileClient), "~/profiler/", "Signum.Web.Extensions.Profiler."));
 
                 RouteTable.Routes.InsertRouteAt0("profiler/{resourcesFolder}/{*resourceName}",
                     new { controller = "Resources", action = "Index", area = "profiler" },

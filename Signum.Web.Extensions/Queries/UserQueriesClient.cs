@@ -32,7 +32,7 @@ namespace Signum.Web.Queries
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 AssemblyResourceManager.RegisterAreaResources(
-                    new AssemblyResourceStore(typeof(UserQueriesClient), "/queries/", "Signum.Web.Extensions.Queries."));
+                    new AssemblyResourceStore(typeof(UserQueriesClient), "~/queries/", "Signum.Web.Extensions.Queries."));
 
                 RouteTable.Routes.InsertRouteAt0("queries/{resourcesFolder}/{*resourceName}",
                     new { controller = "Resources", action = "Index", area = "queries" },

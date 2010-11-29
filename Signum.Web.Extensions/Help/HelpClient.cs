@@ -48,7 +48,7 @@ namespace Signum.Web.Help
                 ImagesFolder = imagesFolder;
 
                 AssemblyResourceManager.RegisterAreaResources(
-                    new AssemblyResourceStore(typeof(HelpClient), "/help/", "Signum.Web.Extensions.Help."));
+                    new AssemblyResourceStore(typeof(HelpClient), "~/help/", "Signum.Web.Extensions.Help."));
 
                 RouteTable.Routes.InsertRouteAt0("help/{resourcesFolder}/{*resourceName}",
                     new { controller = "Resources", action = "Index", area = "help" },

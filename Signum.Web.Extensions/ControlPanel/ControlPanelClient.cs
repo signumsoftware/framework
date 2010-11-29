@@ -24,7 +24,7 @@ namespace Signum.Web.ControlPanel
                 UserQueriesClient.Start();
 
                 AssemblyResourceManager.RegisterAreaResources(
-                    new AssemblyResourceStore(typeof(ControlPanelClient), "/controlPanel/", "Signum.Web.Extensions.ControlPanel."));
+                    new AssemblyResourceStore(typeof(ControlPanelClient), "~/controlPanel/", "Signum.Web.Extensions.ControlPanel."));
 
                 RouteTable.Routes.InsertRouteAt0("controlPanel/{resourcesFolder}/{*resourceName}",
                     new { controller = "Resources", action = "Index", area = "controlPanel" },

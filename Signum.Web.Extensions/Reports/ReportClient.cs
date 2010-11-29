@@ -40,7 +40,7 @@ namespace Signum.Web.Reports
                 ExcelReport = excelReport;
 
                 AssemblyResourceManager.RegisterAreaResources(
-                    new AssemblyResourceStore(typeof(ReportClient), "/reports/", "Signum.Web.Extensions.Reports."));
+                    new AssemblyResourceStore(typeof(ReportClient), "~/reports/", "Signum.Web.Extensions.Reports."));
 
                 RouteTable.Routes.InsertRouteAt0("reports/{resourcesFolder}/{*resourceName}",
                     new { controller = "Resources", action = "Index", area = "reports" },

@@ -30,7 +30,7 @@ namespace Signum.Web.Mailing
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 AssemblyResourceManager.RegisterAreaResources(
-                    new AssemblyResourceStore(typeof(EmailClient), "/email/", "Signum.Web.Extensions.Mailing."));
+                    new AssemblyResourceStore(typeof(EmailClient), "~/email/", "Signum.Web.Extensions.Mailing."));
 
                 RouteTable.Routes.InsertRouteAt0("email/{resourcesFolder}/{*resourceName}",
                     new { controller = "Resources", action = "Index", area = "email" },

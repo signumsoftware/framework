@@ -1,5 +1,4 @@
-﻿#region usings
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -21,7 +20,6 @@ using Signum.Web.Authorization;
 using Signum.Web.ControlPanel;
 using Signum.Entities.ControlPanel;
 using Signum.Web.ScriptCombiner;
-#endregion
 
 namespace Signum.Web.Extensions.Sample
 {

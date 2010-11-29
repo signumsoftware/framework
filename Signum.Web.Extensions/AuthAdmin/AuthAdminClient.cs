@@ -30,7 +30,7 @@ namespace Signum.Web.Authorization
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 AssemblyResourceManager.RegisterAreaResources(
-                    new AssemblyResourceStore(typeof(AuthClient), "/authAdmin/", "Signum.Web.Extensions.AuthAdmin."));
+                    new AssemblyResourceStore(typeof(AuthClient), "~/authAdmin/", "Signum.Web.Extensions.AuthAdmin."));
 
                 RouteTable.Routes.InsertRouteAt0("authAdmin/{resourcesFolder}/{*resourceName}",
                     new { controller = "Resources", action = "Index", area = "authAdmin" },

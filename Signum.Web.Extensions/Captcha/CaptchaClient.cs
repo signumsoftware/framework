@@ -17,7 +17,7 @@ namespace Signum.Web.Captcha
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 AssemblyResourceManager.RegisterAreaResources(
-                    new AssemblyResourceStore(typeof(CaptchaClient), "/captcha/", "Signum.Web.Extensions.Captcha."));
+                    new AssemblyResourceStore(typeof(CaptchaClient), "~/captcha/", "Signum.Web.Extensions.Captcha."));
             }
         }
 

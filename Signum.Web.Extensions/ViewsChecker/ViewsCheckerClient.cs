@@ -20,7 +20,7 @@ namespace Signum.Web.ViewsChecker
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 AssemblyResourceManager.RegisterAreaResources(
-                    new AssemblyResourceStore(typeof(ViewsCheckerClient), "/viewsChecker/", "Signum.Web.Extensions.ViewsChecker."));
+                    new AssemblyResourceStore(typeof(ViewsCheckerClient), "~/viewsChecker/", "Signum.Web.Extensions.ViewsChecker."));
             }
             #endif
         }

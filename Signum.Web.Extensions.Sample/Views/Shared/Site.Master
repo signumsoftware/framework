@@ -14,7 +14,8 @@
     <%: Html.ScriptsJs("~/scripts/jquery-1.4.2.min.js")%>    
     <script type='text/javascript' src='http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.min.js'></script>
     
-    <!--Calendar-->
+
+    <%: Html.ScriptsJs("~/signum/Resources/" +System.Globalization.CultureInfo.CurrentCulture.Name + ".js")%>
     <%: Html.ScriptsJs("~/signum/Scripts/SF_Globals.js", "~/signum/Scripts/SF_jquery-ui-datepicker-extension.js") %>    
     
     <asp:ContentPlaceHolder ID="head" runat="server"></asp:ContentPlaceHolder>    

@@ -44,10 +44,7 @@ namespace Signum.Web
             }
         }
 
-
-        private void AddFiltersToFilterList(
-                                    IEnumerable<FilterAttribute> actionFilters,
-                                    FilterInfo filters)
+        private void AddFiltersToFilterList(IEnumerable<FilterAttribute> actionFilters, FilterInfo filters)
         {
             if (actionFilters != null)
             {
@@ -61,10 +58,7 @@ namespace Signum.Web
             }
         }
 
-
-        private static void AddFilterToFilterList<TFilter>(
-                                                FilterAttribute filter,
-                                                IList<TFilter> filterList) where TFilter : class
+        private static void AddFilterToFilterList<TFilter>(FilterAttribute filter, IList<TFilter> filterList) where TFilter : class
         {
             TFilter item = filter as TFilter;
             if (item != null)

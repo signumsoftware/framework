@@ -33,7 +33,7 @@ namespace Signum.Web.Processes
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 AssemblyResourceManager.RegisterAreaResources(
-                    new AssemblyResourceStore(typeof(ProcessClient), "/process/", "Signum.Web.Extensions.Processes."));
+                    new AssemblyResourceStore(typeof(ProcessClient), "~/process/", "Signum.Web.Extensions.Processes."));
                 
                 RouteTable.Routes.InsertRouteAt0("process/{resourcesFolder}/{*resourceName}",
                     new { controller = "Resources", action = "Index", area = "process" },
