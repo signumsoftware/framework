@@ -280,7 +280,7 @@ namespace Signum.Entities.Authorization
 
         internal A GetAllowed(Lite<RoleDN> role, K key)
         {
-            return RuntimeRules[RoleDN.Current.ToLite()].GetAllowed(key);
+            return RuntimeRules[role].GetAllowed(key);
         }
       
         internal DefaultDictionary<K, A> GetCleanDictionary()

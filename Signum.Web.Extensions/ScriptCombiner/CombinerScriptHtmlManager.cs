@@ -6,6 +6,7 @@ using System.Web.Mvc;
 using Signum.Utilities;
 using System.IO;
 using System.Reflection;
+using System.Web;
 
 namespace Signum.Web.ScriptCombiner
 {
@@ -19,13 +20,15 @@ namespace Signum.Web.ScriptCombiner
             if (files.Empty())
                 return null;
 
-            string contollerScriptRoute = scriptType == ScriptType.Css ? controllerCssRoute : controllerJsRoute;
-            string scriptElement = scriptType == ScriptType.Css ? cssElement : jsElement;
+            var key = GetKey(files, scriptType); 
 
-            var urlHelper = new UrlHelper(html.ViewContext.RequestContext);
+            string url = (scriptType == ScriptType.Css ? controllerCssRoute : controllerJsRoute).Formato(key);
+            return (scriptType == ScriptType.Css ? cssElement : jsElement).Formato(Subdomain(url));
+        }
 
-            string url = contollerScriptRoute.Formato(Combiner.GetKey(new ScriptRequest(files.Select(urlHelper.Content).ToArray(), scriptType, Version)));
-            return scriptElement.Formato(Subdomain(url));
+        private string GetKey(string[] files, ScriptType scriptType)
+        {   
+            return Combiner.GetKey(new ScriptRequest(files.Select(VirtualPathUtility.ToAbsolute).ToArray(), scriptType, Version));
         }
 
         public override string[] GerUrlsFor(string[] files, ScriptType scriptType)
@@ -33,8 +36,11 @@ namespace Signum.Web.ScriptCombiner
             if (files.Empty())
                 return null;
 
-            string route = scriptType == ScriptType.Css ? controllerCssRoute : controllerJsRoute;
-            return new string[] { Subdomain(route.Formato(Combiner.GetKey(new ScriptRequest(files.Select(Subdomain).ToArray(), scriptType, Version)))) };
+            string key = GetKey(files, scriptType);
+
+            string route = (scriptType == ScriptType.Css ? controllerCssRoute : controllerJsRoute).Formato(key);
+            
+            return new string[] { Subdomain(route) };
         }
     }
 }

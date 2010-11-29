@@ -28,7 +28,7 @@ namespace Signum.Web.Authorization
 
         public ViewResult Permissions(Lite<RoleDN> role)
         {
-            return Navigator.View(this, PermissionAuthLogic.GetPermissionRules(role), true);
+            return Navigator.View(this, PermissionAuthLogic.GetPermissionRules(role.FillToStr()), true);
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
@@ -46,7 +46,7 @@ namespace Signum.Web.Authorization
 
         public ViewResult FacadeMethods(Lite<RoleDN> role)
         {
-            return Navigator.View(this, FacadeMethodAuthLogic.GetFacadeMethodRules(role), true);
+            return Navigator.View(this, FacadeMethodAuthLogic.GetFacadeMethodRules(role.FillToStr()), true);
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
@@ -64,7 +64,7 @@ namespace Signum.Web.Authorization
 
         public ViewResult EntityGroups(Lite<RoleDN> role)
         {
-            return Navigator.View(this, EntityGroupAuthLogic.GetEntityGroupRules(role), true);
+            return Navigator.View(this, EntityGroupAuthLogic.GetEntityGroupRules(role.FillToStr()), true);
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
@@ -82,7 +82,7 @@ namespace Signum.Web.Authorization
 
         public ViewResult Types(Lite<RoleDN> role)
         {
-            return Navigator.View(this, TypeAuthLogic.GetTypeRules(role), true);
+            return Navigator.View(this, TypeAuthLogic.GetTypeRules(role.FillToStr()), true);
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
@@ -101,7 +101,7 @@ namespace Signum.Web.Authorization
         public ActionResult Properties(Lite<RoleDN> role, Lite<TypeDN> type, string prefix)
         {
             ViewData[ViewDataKeys.WriteSFInfo] = true;
-            return Navigator.PopupView(this, PropertyAuthLogic.GetPropertyRules(role, type.Retrieve()), prefix);
+            return Navigator.PopupView(this, PropertyAuthLogic.GetPropertyRules(role.FillToStr(), type.Retrieve()), prefix);
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
@@ -121,7 +121,7 @@ namespace Signum.Web.Authorization
         public ActionResult Queries(Lite<RoleDN> role, Lite<TypeDN> type, string prefix)
         {
             ViewData[ViewDataKeys.WriteSFInfo] = true;
-            return Navigator.PopupView(this, QueryAuthLogic.GetQueryRules(role, type.Retrieve()), prefix);
+            return Navigator.PopupView(this, QueryAuthLogic.GetQueryRules(role.FillToStr(), type.Retrieve()), prefix);
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
@@ -142,7 +142,7 @@ namespace Signum.Web.Authorization
         public ActionResult Operations(Lite<RoleDN> role, Lite<TypeDN> type, string prefix)
         {
             ViewData[ViewDataKeys.WriteSFInfo] = true;
-            return Navigator.PopupView(this, OperationAuthLogic.GetOperationRules(role, type.Retrieve()), prefix);
+            return Navigator.PopupView(this, OperationAuthLogic.GetOperationRules(role.FillToStr(), type.Retrieve()), prefix);
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
