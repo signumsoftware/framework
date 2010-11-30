@@ -94,7 +94,7 @@ namespace Signum.Web.Authorization
                         string returnUrl = context.HttpContext.Request.Url.PathAndQuery;
                                             
                         //send them off to the login page
-                        string loginUrl = VirtualPathUtility.Combine(Common.FullyQualifiedApplicationPath, PublicLoginUrl.Formato(returnUrl));
+                        string loginUrl = Common.FullyQualifiedApplicationPath + PublicLoginUrl.Formato(returnUrl);
                         if (context.HttpContext.Request.IsAjaxRequest())
                             context.Result = Navigator.RedirectUrl(loginUrl);
                         else
@@ -109,7 +109,7 @@ namespace Signum.Web.Authorization
                     if (ctx.Exception is UnauthorizedAccessException)
                     {
                         string returnUrl = ctx.HttpContext.Request.Url.PathAndQuery;
-                        string loginUrl = VirtualPathUtility.Combine(Common.FullyQualifiedApplicationPath, AuthClient.PublicLoginUrl.Formato(returnUrl));
+                        string loginUrl = Common.FullyQualifiedApplicationPath + AuthClient.PublicLoginUrl.Formato(returnUrl);
 
                         HandleAnonymousNotAutorizedException(ctx, loginUrl);
                     }

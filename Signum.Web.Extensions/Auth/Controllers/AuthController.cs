@@ -397,11 +397,11 @@ namespace Signum.Web.Authorization
 
             AddUserSession(user.UserName, user);
 
-            if (referrer.HasText())
-                LoginRedirectAjaxOrForm(referrer);
-
             if (OnUserLoggedDefaultReturn != null)
                 return LoginRedirectAjaxOrForm(OnUserLoggedDefaultReturn(this));
+
+            if (referrer.HasText())
+                return LoginRedirectAjaxOrForm(referrer);
 
             return RedirectToAction("Index", "Home");
         }
