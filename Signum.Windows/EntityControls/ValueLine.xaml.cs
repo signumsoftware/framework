@@ -124,7 +124,7 @@ namespace Signum.Windows
                 {
                     Path = new PropertyPath(ValueLine.ValueProperty),
                     Source = this,
-                    UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
+                    UpdateSourceTrigger = Configurator.GetUpdateSourceTrigger(this),
                     Mode = BindingMode.TwoWay,
                 };
             }
@@ -314,7 +314,7 @@ namespace Signum.Windows
 
         public virtual UpdateSourceTrigger GetUpdateSourceTrigger(ValueLine vl)
         {
-            return UpdateSourceTrigger.PropertyChanged;
+            return UpdateSourceTrigger.LostFocus;
         }
 
         public virtual IValueConverter GetReadOnlyConverter(ValueLine vl)

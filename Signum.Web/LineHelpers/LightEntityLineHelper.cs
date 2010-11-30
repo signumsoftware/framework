@@ -23,7 +23,7 @@ namespace Signum.Web
             bool isNavigable = Navigator.IsNavigable(lite.RuntimeType, admin);
             string link = helper.Href("",
                 lite.ToStr,
-                Navigator.ViewRoute(lite.RuntimeType, lite.Id),
+                isNavigable ? Navigator.ViewRoute(lite.RuntimeType, lite.Id) : "",
                 HttpUtility.HtmlEncode(Resources.View),
                 "",
                 isNavigable ? null : new Dictionary<string, object>() { { "style", "display:none"} });

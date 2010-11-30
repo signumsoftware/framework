@@ -963,6 +963,9 @@ namespace Signum.Web
             if (es == null)
                 return false;
 
+            if (!Navigator.TypesToURLNames.ContainsKey(type))
+                return false;
+
             return es.OnIsNavigable(null, admin);
         }
 
@@ -970,6 +973,9 @@ namespace Signum.Web
         {
             EntitySettings es = EntitySettings.TryGetC(entity.GetType());
             if (es == null)
+                return false;
+
+            if (!Navigator.TypesToURLNames.ContainsKey(entity.GetType()))
                 return false;
 
             return es.OnIsNavigable(entity, admin);
