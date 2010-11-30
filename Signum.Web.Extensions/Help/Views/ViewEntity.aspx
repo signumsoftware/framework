@@ -8,6 +8,7 @@
 <%@ Import Namespace="Signum.Web.Extensions" %>
 <%@ Import Namespace="Signum.Entities.DynamicQuery" %>
 <%@ Import Namespace="Signum.Entities.Operations" %>
+<%@ Import Namespace="Signum.Engine" %>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="head" runat="server">
     <%: Html.ScriptCss("~/signum/help/Content/help.css") %>

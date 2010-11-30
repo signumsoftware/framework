@@ -1,6 +1,7 @@
 <%@ Control Language="C#" Inherits="System.Web.Mvc.ViewUserControl" %>
 <%@ Import Namespace="Signum.Utilities" %>
 <%@ Import Namespace="Signum.Entities.Reflection" %>
+<%@ Import Namespace="Signum.Engine" %>
 <%@ Import Namespace="Signum.Engine.Help" %>
 <%@ Import Namespace="Signum.Web.Help" %>
 <%@ Import Namespace="System.Reflection" %>

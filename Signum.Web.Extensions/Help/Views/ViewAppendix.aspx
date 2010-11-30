@@ -5,6 +5,7 @@
 <%@ Import Namespace="Signum.Engine" %>
 <%@ Import Namespace="Signum.Engine.Help" %>
 <%@ Import Namespace="Signum.Utilities" %>
+<%@ Import Namespace="Signum.Engine" %>
 <asp:Content ID="Content2" ContentPlaceHolderID="head" runat="server">
     <%: Html.ScriptCss("~/signum/help/Content/help.css") %>
 </asp:Content>
