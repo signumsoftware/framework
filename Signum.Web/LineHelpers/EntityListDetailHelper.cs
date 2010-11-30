@@ -95,7 +95,8 @@ namespace Signum.Web
 
             sb.AppendLine(helper.HiddenRuntimeInfo(itemTC));
 
-            if (typeof(T).IsEmbeddedEntity() || EntityBaseHelper.RequiresLoadAll(helper, listDetail))
+            //TODO: Anto - RequestLoadAll con ItemTC
+            if (typeof(T).IsEmbeddedEntity() || ((IdentifiableEntity)(object)itemTC.Value).IsNew || EntityBaseHelper.RequiresLoadAll(helper, listDetail) || listDetail.ForceNewInUI)
                 sb.AppendLine(EntityBaseHelper.RenderTypeContext(helper, itemTC, RenderMode.ContentInInvisibleDiv, listDetail));
             else if (itemTC.Value != null)
                 sb.Append(helper.Div(itemTC.Compose(EntityBaseKeys.Entity), "", "", new Dictionary<string, object> { { "style", "display:none" } }));

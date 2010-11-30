@@ -43,6 +43,15 @@ namespace Signum.Engine
             {
                 return this.TryGetC(type).TryGetC(id);
             }
+
+            public void AddFullGraph(IdentifiableEntity ie)
+            {
+                DirectedGraph<Modifiable> modifiables = GraphExplorer.FromRoot(ie);
+
+                foreach (var ident in modifiables.OfType<IdentifiableEntity>().Where(ident => !ident.IsNew))
+                    if (Get(ident.GetType(), ident.Id) != ident)
+                        Add(ident);
+            }
         }
 
 
@@ -98,14 +107,7 @@ namespace Signum.Engine
 
         public static void AddFullGraph(IdentifiableEntity ie)
         {
-            DirectedGraph<Modifiable> modifiables = GraphExplorer.FromRoot(ie);
-
-            //colapsa los modificables (colecciones y contenidos) dejando solo identificables
-            DirectedGraph<IdentifiableEntity> identifiables = GraphExplorer.ColapseIdentifiables(modifiables);
-
-            foreach (var ident in identifiables)
-                Add(ident);
-
+            Current.AddFullGraph(ie);
         }
 
         public static void Add(IdentifiableEntity ie)

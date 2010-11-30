@@ -126,6 +126,6 @@ namespace Signum.Web
         Boolean,
         Integer,
         Decimal,
-        DateTime
+        DateTime,
     }
 }
