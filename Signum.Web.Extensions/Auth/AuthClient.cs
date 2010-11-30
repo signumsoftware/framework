@@ -27,7 +27,7 @@ namespace Signum.Web.Authorization
 {
     public static class AuthClient
     {
-        public static string PublicLoginUrl = "Auth/Login?ReturnUrl={0}";
+        public static string PublicLoginUrl = "Auth/Login?referrer={0}";
 
         public static string ViewPrefix = "auth/Views/";
          
@@ -91,13 +91,14 @@ namespace Signum.Web.Authorization
                 { 
                     if (UserDN.Current == null)
                     {
+                        string returnUrl = context.HttpContext.Request.Url.PathAndQuery;
+                                            
                         //send them off to the login page
-                        var referrer = context.HttpContext.Request.UrlReferrer;
-                        string loginUrl = PublicLoginUrl.Formato(referrer == null ? "" : referrer.PathAndQuery);
+                        string loginUrl = VirtualPathUtility.Combine(Common.FullyQualifiedApplicationPath, PublicLoginUrl.Formato(returnUrl));
                         if (context.HttpContext.Request.IsAjaxRequest())
                             context.Result = Navigator.RedirectUrl(loginUrl);
                         else
-                            context.Result = new RedirectResult(Common.FullyQualifiedApplicationPath + loginUrl);
+                            context.Result = new RedirectResult(loginUrl);
                     }
                 };
 
@@ -107,37 +108,45 @@ namespace Signum.Web.Authorization
                 {
                     if (ctx.Exception is UnauthorizedAccessException)
                     {
-                        Exception exception = ctx.Exception.FollowC(a => a.InnerException).Last();
-                        string controllerName = (string)ctx.RouteData.Values["controller"];
-                        string actionName = (string)ctx.RouteData.Values["action"];
-                        HandleErrorInfo model = new HandleErrorInfo(exception, controllerName, actionName);
+                        string returnUrl = ctx.HttpContext.Request.Url.PathAndQuery;
+                        string loginUrl = VirtualPathUtility.Combine(Common.FullyQualifiedApplicationPath, AuthClient.PublicLoginUrl.Formato(returnUrl));
 
-                        if (HandleExceptionAttribute.LogControllerException != null)
-                            HandleExceptionAttribute.LogControllerException(model);
-
-                        if (UserDN.Current == null || UserDN.Current == AuthLogic.AnonymousUser)
-                        {
-                            //send them off to the login page
-                            string loginUrl = "Auth/Login?ReturnUrl={0}";
-                            if (ctx.HttpContext.Request.IsAjaxRequest())
-                                ctx.Result = Navigator.RedirectUrl(loginUrl.Formato(ctx.HttpContext.Request.UrlReferrer.PathAndQuery));
-                            else
-                                ctx.Result = new RedirectResult(Common.FullyQualifiedApplicationPath + loginUrl.Formato(ctx.HttpContext.Request.Url.PathAndQuery));
-
-                            ctx.ExceptionHandled = true;
-                            ctx.HttpContext.Response.Clear();
-                            ctx.HttpContext.Response.TrySkipIisCustomErrors = true;
-                        }
-                        else
-                        {
-                            HandleExceptionAttribute.DefaultOnException(ctx);
-                        }
+                        HandleAnonymousNotAutorizedException(ctx, loginUrl);
                     }
                     else
                     {
                         HandleExceptionAttribute.DefaultOnException(ctx);
                     }
                 };
+            }
+        }
+
+        public static void HandleAnonymousNotAutorizedException(ExceptionContext ctx, string absoluteLoginUrl)
+        { 
+            Exception exception = ctx.Exception.FollowC(a => a.InnerException).Last();
+            string controllerName = (string)ctx.RouteData.Values["controller"];
+            string actionName = (string)ctx.RouteData.Values["action"];
+            HandleErrorInfo model = new HandleErrorInfo(exception, controllerName, actionName);
+
+            if (HandleExceptionAttribute.LogControllerException != null)
+                HandleExceptionAttribute.LogControllerException(model);
+
+            if (UserDN.Current == null || UserDN.Current == AuthLogic.AnonymousUser)
+            {
+                //send them off to the login page
+                
+                if (ctx.HttpContext.Request.IsAjaxRequest())
+                    ctx.Result = Navigator.RedirectUrl(absoluteLoginUrl);
+                else
+                    ctx.Result = new RedirectResult(absoluteLoginUrl);
+
+                ctx.ExceptionHandled = true;
+                ctx.HttpContext.Response.Clear();
+                ctx.HttpContext.Response.TrySkipIisCustomErrors = true;
+            }
+            else
+            {
+                HandleExceptionAttribute.DefaultOnException(ctx);
             }
         }
 

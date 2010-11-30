@@ -340,10 +340,14 @@ namespace Signum.Web.Authorization
             //If passed by parameter, it would be appended in the URL and we do not need to append it in the ViewData
             if (referrer == null)
             {
-                referrer = System.Web.HttpContext.Current.Request.UrlReferrer.TryCC(r => r.AbsolutePath);
-                string current = System.Web.HttpContext.Current.Request.RawUrl;
-                if (referrer != null && referrer != current)
-                    ViewData["referrer"] = System.Web.HttpContext.Current.Request.UrlReferrer.AbsolutePath;
+                if (TempData.ContainsKey("referrer") && TempData["referrer"] != null)
+                    ViewData["referrer"] = TempData["referrer"].ToString();
+                else
+                {
+                    referrer = HttpContext.Request.Url.PathAndQuery;
+                    if (referrer.HasText())
+                        ViewData["referrer"] = Common.FullyQualifiedApplicationPath + referrer;
+                }
             }
 
             ViewData[ViewDataKeys.PageTitle] = "Login";
@@ -352,7 +356,7 @@ namespace Signum.Web.Authorization
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public ActionResult Login(string username, string password, bool rememberMe, string returnUrl)
+        public ActionResult Login(string username, string password, bool rememberMe, string referrer)
         {
             // Basic parameter validation
             if (!username.HasText())
@@ -393,14 +397,8 @@ namespace Signum.Web.Authorization
 
             AddUserSession(user.UserName, user);
 
-            if (!string.IsNullOrEmpty(returnUrl))
-                LoginRedirectAjaxOrForm(returnUrl);
-            else
-            {
-                string referrer = Request.Params["referrer"];
-                if (referrer.HasText())
-                    LoginRedirectAjaxOrForm(referrer);
-            }
+            if (referrer.HasText())
+                LoginRedirectAjaxOrForm(referrer);
 
             if (OnUserLoggedDefaultReturn != null)
                 return LoginRedirectAjaxOrForm(OnUserLoggedDefaultReturn(this));
