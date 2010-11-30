@@ -112,10 +112,10 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="_0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships" xml:space="preserve">
     <value>{0} Ciclos foram encontrados no gráfico dos papéis devido aos relacionamentos:
@@ -125,10 +125,10 @@
     <value>{0} é um {1}</value>
   </data>
   <data name="_0IsA1_f" xml:space="preserve">
-    <value>{0} é {1} _f</value>
+    <value>{0} é uma {1}</value>
   </data>
   <data name="_0IsA1_m" xml:space="preserve">
-    <value>{0} é {1} _m</value>
+    <value>{0} é um {1}</value>
   </data>
   <data name="_0IsACollectionOfElements1" xml:space="preserve">
     <value>{0} é uma colecção de elementos {1}</value>
@@ -155,10 +155,10 @@
     <value>Executar {0} em {1} do {2}</value>
   </data>
   <data name="Call0Over1OfThe2_f" xml:space="preserve">
-    <value>Executar {0} em {1} do {2}_f</value>
+    <value>Executar {0} em {1} do {2}</value>
   </data>
   <data name="Call0Over1OfThe2_m" xml:space="preserve">
-    <value>Executar {0} em {1} do {2}_m</value>
+    <value>Executar {0} em {1} da {2}</value>
   </data>
   <data name="Character" xml:space="preserve">
     <value>caracter</value>
@@ -173,10 +173,10 @@
     <value>Constrói um novo {0}</value>
   </data>
   <data name="ConstructsANew0_f" xml:space="preserve">
-    <value>Constrói um novo {0} _f</value>
+    <value>Constrói uma nova {0}</value>
   </data>
   <data name="ConstructsANew0_m" xml:space="preserve">
-    <value>Constrói um novo {0} _m</value>
+    <value>Constrói um novo {0}</value>
   </data>
   <data name="Data" xml:space="preserve">
     <value>Dados</value>
@@ -210,19 +210,19 @@
     <value>A partir de {0} do {1} </value>
   </data>
   <data name="From0OfThe1_f" xml:space="preserve">
-    <value>A partir de {0} do {1} _f</value>
+    <value>A partir de {0} da {1}</value>
   </data>
   <data name="From0OfThe1_m" xml:space="preserve">
-    <value>A partir de {0} do {1} _m</value>
+    <value>A partir de {0} do {1}</value>
   </data>
   <data name="FromMany0" xml:space="preserve">
     <value>De vários {0}</value>
   </data>
   <data name="FromMany0_f" xml:space="preserve">
-    <value>De vários {0} _f</value>
+    <value>De várias {0}</value>
   </data>
   <data name="FromMany0_m" xml:space="preserve">
-    <value>De vários {0} _m</value>
+    <value>De vários {0}</value>
   </data>
   <data name="HelpNotLoaded" xml:space="preserve">
     <value>Ajuda não carregada</value>
@@ -276,10 +276,10 @@
     <value>Do {0}</value>
   </data>
   <data name="OfThe0_f" xml:space="preserve">
-    <value>Do {0} _f</value>
+    <value>Da {0}</value>
   </data>
   <data name="OfThe0_m" xml:space="preserve">
-    <value>Do {0} _m</value>
+    <value>Do {0}</value>
   </data>
   <data name="Operation0DoesNotHaveConstructInitialized" xml:space="preserve">
     <value>Operação {0} não tem construção inicializada</value>
@@ -348,10 +348,10 @@
     <value>O {0}</value>
   </data>
   <data name="The0_f" xml:space="preserve">
-    <value>O {0} _f</value>
+    <value>A {0}</value>
   </data>
   <data name="The0_m" xml:space="preserve">
-    <value>O {0} _m</value>
+    <value>O {0}</value>
   </data>
   <data name="TheDatabaseVersion" xml:space="preserve">
     <value>Versão base de dados</value>
@@ -372,10 +372,10 @@
     <value>A operação precisa de um {0} no argumento número {1}</value>
   </data>
   <data name="TheOperationNeedsA0InTheArgumentNumber1_f" xml:space="preserve">
-    <value>A operação precisa de um {0} no argumento número {1} _f</value>
+    <value>A operação precisa de uma {0} no argumento número {1}</value>
   </data>
   <data name="TheOperationNeedsA0InTheArgumentNumber1_m" xml:space="preserve">
-    <value>A operação precisa de um {0} no argumento número {1} _m</value>
+    <value>A operação precisa de um {0} no argumento número {1}</value>
   </data>
   <data name="ThereAreNoResultsToWrite" xml:space="preserve">
     <value>Não há resultados para escrever</value>
