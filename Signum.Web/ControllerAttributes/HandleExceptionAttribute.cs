@@ -87,7 +87,7 @@ namespace Signum.Web
 
         public static string ErrorSessionKey = "sfError";
 
-        public static void HandlerApplication_Error(HttpContext context)
+        public static void HandlerApplication_Error(HttpContext context, bool isWebRequest)
         {
             if (Navigator.Manager == null || !Navigator.Manager.Initialized)
                 return;
@@ -100,16 +100,19 @@ namespace Signum.Web
 
             if (LogGlobalException != null) LogGlobalException(ex);
 
-            context.Session[ErrorSessionKey] = ex;
+            if (isWebRequest)
+            {
+                context.Session[ErrorSessionKey] = ex;
 
-            var httpContext = HttpContext.Current;
+                var httpContext = HttpContext.Current;
 
-            UrlHelper helper = new UrlHelper(new RequestContext(new HttpContextWrapper(HttpContext.Current),
-                RouteTable.Routes.GetRouteData(new HttpContextWrapper(HttpContext.Current))));  //Change in ASP.Net MVC 2
+                UrlHelper helper = new UrlHelper(new RequestContext(new HttpContextWrapper(HttpContext.Current),
+                    RouteTable.Routes.GetRouteData(new HttpContextWrapper(HttpContext.Current))));  //Change in ASP.Net MVC 2
 
-            httpContext.RewritePath(helper.Action("Error", "Signum"), false);
-            IHttpHandler httpHandler = new MvcHttpHandler();
-            httpHandler.ProcessRequest(HttpContext.Current);
+                httpContext.RewritePath(helper.Action("Error", "Signum"), false);
+                IHttpHandler httpHandler = new MvcHttpHandler();
+                httpHandler.ProcessRequest(HttpContext.Current);
+            }
         }
     }
 }
