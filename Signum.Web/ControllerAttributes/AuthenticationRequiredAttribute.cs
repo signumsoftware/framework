@@ -25,11 +25,12 @@ namespace Signum.Web
             if (!context.HttpContext.User.Identity.IsAuthenticated)
             {
                 //send them off to the login page
-                string loginUrl = "Auth/Login?ReturnUrl={0}";
+                string returnUrl = context.HttpContext.Request.Url.PathAndQuery;
+                string loginUrl = Common.FullyQualifiedApplicationPath + "Auth/Login?ReturnUrl={0}".Formato(returnUrl);
                 if (context.HttpContext.Request.IsAjaxRequest())
-                    context.Result = Navigator.RedirectUrl(loginUrl.Formato(context.HttpContext.Request.UrlReferrer.PathAndQuery));
+                    context.Result = Navigator.RedirectUrl(loginUrl);
                 else
-                    context.Result = new RedirectResult(Common.FullyQualifiedApplicationPath + loginUrl.Formato(context.HttpContext.Request.Url.PathAndQuery));
+                    context.Result = new RedirectResult(loginUrl);
             }
         };
 
