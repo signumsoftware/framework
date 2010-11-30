@@ -108,7 +108,7 @@ namespace Signum.Engine.Basics
 
 
         [MethodExpander(typeof(IsInGroupExpander))]
-        public static bool IsInGroupG(this IdentifiableEntity entity, Enum entityGroupKey)
+        public static bool IsInGroup(this IdentifiableEntity entity, Enum entityGroupKey)
         {
             throw new InvalidProgramException("IsInGroup is meant to be used in database only");
         }
@@ -127,7 +127,7 @@ namespace Signum.Engine.Basics
 
 
         [MethodExpander(typeof(IsApplicableExpander))]
-        public static bool IsApplicableG(this IdentifiableEntity entity, Enum entityGroupKey)
+        public static bool IsApplicable(this IdentifiableEntity entity, Enum entityGroupKey)
         {
             throw new InvalidOperationException("IsApplicable is meant to be used in database only"); 
         }

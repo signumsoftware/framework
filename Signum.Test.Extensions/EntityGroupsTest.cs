@@ -47,7 +47,7 @@ namespace Signum.Test.Extensions
             using (AuthLogic.Disable())
             {
                 Assert.AreEqual(AllLab, Database.Query<LabelDN>().Count());
-                Assert.AreEqual(JapLab, Database.Query<LabelDN>().Count(r => r.IsInGroupG(MusicGroups.JapanEntities)));
+                Assert.AreEqual(JapLab, Database.Query<LabelDN>().Count(r => r.IsInGroup(MusicGroups.JapanEntities)));
 
                 Assert.AreEqual(AllLab, Database.RetrieveAll<LabelDN>().Count);
                 Assert.AreEqual(AllLab, Database.RetrieveAllLite<LabelDN>().Count);
@@ -62,7 +62,7 @@ namespace Signum.Test.Extensions
             using (AuthLogic.Disable())
             {
                 Assert.AreEqual(AllAlb, Database.Query<AlbumDN>().Count());
-                Assert.AreEqual(JapAlb, Database.Query<AlbumDN>().Count(r => r.IsInGroupG(MusicGroups.JapanEntities)));
+                Assert.AreEqual(JapAlb, Database.Query<AlbumDN>().Count(r => r.IsInGroup(MusicGroups.JapanEntities)));
 
                 Assert.AreEqual(AllAlb, Database.RetrieveAll<AlbumDN>().Count);
                 Assert.AreEqual(AllAlb, Database.RetrieveAllLite<AlbumDN>().Count);
@@ -77,7 +77,7 @@ namespace Signum.Test.Extensions
             using (AuthLogic.UnsafeUser("external"))
             {
                 Assert.AreEqual(JapLab, Database.Query<LabelDN>().Count());
-                Assert.AreEqual(JapLab, Database.Query<LabelDN>().Count(r => r.IsInGroupG(MusicGroups.JapanEntities)));
+                Assert.AreEqual(JapLab, Database.Query<LabelDN>().Count(r => r.IsInGroup(MusicGroups.JapanEntities)));
 
                 Assert.AreEqual(JapLab, Database.RetrieveAll<LabelDN>().Count);
                 Assert.AreEqual(JapLab, Database.RetrieveAllLite<LabelDN>().Count);
@@ -97,7 +97,7 @@ namespace Signum.Test.Extensions
             using (AuthLogic.UnsafeUser("external"))
             {
                 Assert.AreEqual(JapAlb, Database.Query<AlbumDN>().Count());
-                Assert.AreEqual(JapAlb, Database.Query<AlbumDN>().Count(r => r.IsInGroupG(MusicGroups.JapanEntities)));
+                Assert.AreEqual(JapAlb, Database.Query<AlbumDN>().Count(r => r.IsInGroup(MusicGroups.JapanEntities)));
 
                 Assert.AreEqual(JapAlb, Database.RetrieveAll<AlbumDN>().Count);
                 Assert.AreEqual(JapAlb, Database.RetrieveAllLite<AlbumDN>().Count);
