@@ -152,7 +152,7 @@ namespace Signum.Web
 
         public HtmlCallbackString(Func<string, string> render)
         {
-            this.render =render; 
+            this.render = render; 
         }
 
         public string ToHtmlString()
