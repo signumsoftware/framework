@@ -7,6 +7,9 @@ using Signum.Utilities;
 using Signum.Utilities.DataStructures;
 using Signum.Entities;
 using System.Linq;
+using System.Xml.Linq;
+using Signum.Utilities.Reflection;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Reflection
 {
@@ -177,6 +180,72 @@ namespace Signum.Entities.Reflection
                 result.Add(item, modifiables.RelatedTo(item).OfType<IdentifiableEntity>());
             }
             return result;
+        }
+
+        public static XDocument SuperDGML(ModifiableEntity graph)
+        {
+            return FromRoot(graph).SuperDGML(); 
+        }
+
+        public static XDocument SuperDGML(this DirectedGraph<Modifiable> graph)
+        {
+            return graph.ToDGML(n =>
+                n is IdentifiableEntity ? GetAttributes((IdentifiableEntity)n): 
+                n is Lite ? GetAttributes((Lite)n):
+                n is EmbeddedEntity ? GetAttributes((EmbeddedEntity)n):
+                n.GetType().IsMList() ? GetAttributes((IList)n) : 
+                new []
+                {
+                    new XAttribute("Label", n.ToString() ?? "[null]"),
+                    new XAttribute("TypeName", n.GetType().TypeName()), 
+                    new XAttribute("Background", ColorGenerator.ColorFor(n.GetType().FullName.GetHashCode()))
+                });
+        }
+
+        private static XAttribute[] GetAttributes(IdentifiableEntity ie)
+        {
+            return new[]
+            {
+               new XAttribute("Label", ie.ToString() ?? "[null]"),
+               new XAttribute("TypeName", ie.GetType().TypeName()), 
+               new XAttribute("Background", ColorGenerator.ColorFor(ie.GetType().FullName.GetHashCode())),
+               new XAttribute("Description", ie.IdOrNull.TryToString() ?? "New")
+            };
+        }
+
+        private static XAttribute[] GetAttributes(Lite lite)
+        {
+            return new[]
+            {
+               new XAttribute("Label", lite.ToString() ?? "[null]"),
+               new XAttribute("TypeName", lite.GetType().TypeName()), 
+               new XAttribute("Stroke", ColorGenerator.ColorFor(Reflector.ExtractLite(lite.GetType()).FullName.GetHashCode())),
+               new XAttribute("StrokeThickness", "2"),
+               new XAttribute("Background", ColorGenerator.ColorFor(lite.RuntimeType.FullName.GetHashCode()).Replace("#", "#44")),
+               new XAttribute("Description", " ".Combine((lite.RuntimeType == Reflector.ExtractLite(lite.GetType())? "":  lite.RuntimeType.TypeName() ),   lite.IdOrNull.TryToString() ?? "New"))
+            };
+        }
+
+        private static XAttribute[] GetAttributes(EmbeddedEntity ee)
+        {
+            return new[]
+            {
+               new XAttribute("Label", ee.ToString() ?? "[null]"),
+               new XAttribute("TypeName", ee.GetType().TypeName()), 
+               new XAttribute("NodeRadius", 0),
+               new XAttribute("Background", ColorGenerator.ColorFor(ee.GetType().FullName.GetHashCode())),
+            };
+        }
+
+        private static XAttribute[] GetAttributes(IList list)
+        {
+            return new[]
+            {
+               new XAttribute("Label", list.ToString() ?? "[null]"),
+               new XAttribute("TypeName", list.GetType().TypeName()), 
+               new XAttribute("NodeRadius", 2),
+               new XAttribute("Background", ColorGenerator.ColorFor(list.GetType().ElementType().FullName.GetHashCode())),
+            };
         }
     }
 }

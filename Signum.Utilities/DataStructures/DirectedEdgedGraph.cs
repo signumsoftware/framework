@@ -344,10 +344,25 @@ namespace Signum.Utilities.DataStructures
 
         public XDocument ToDGML()
         {
-            return ToDGML(a => a.ToString(), e => e.ToString());
+            return ToDGML(
+                a => a.ToString() ?? "[null]",
+                a => ColorGenerator.ColorFor(a.GetType().FullName.GetHashCode()),
+                e => e.ToString() ?? "[null]");
         }
 
-        public XDocument ToDGML(Func<T, string> getNodeLabel, Func<E, string> getEdgeLabel)
+        public XDocument ToDGML(Func<T, string> getNodeLabel, Func<T, string> getColor, Func<E, string> getEdgeLabel)
+        {
+            return ToDGML(n => new[]
+            {
+                new XAttribute("Label", getNodeLabel(n)),
+                new XAttribute("Background", getColor(n))
+            }, e=> new []
+            {
+                new XAttribute("Label", getEdgeLabel(e))
+            });
+        }
+            
+        public XDocument ToDGML(Func<T, XAttribute[]> getNodeAttributes, Func<E, XAttribute[]> getEdgeAttributes)
         {
             int num = 0;
             Dictionary<T, int> nodeDic = Nodes.ToDictionary(n => n, n => num++, Comparer);
@@ -359,12 +374,12 @@ namespace Signum.Utilities.DataStructures
                     new XElement(ns + "Nodes",
                         Nodes.Select(n => new XElement(ns + "Node",
                             new XAttribute("Id", nodeDic[n]),
-                            new XAttribute("Label", getNodeLabel(n))))),
+                            getNodeAttributes(n)))),
                     new XElement(ns + "Links",
                         EdgesWithValue.Select(e => new XElement(ns + "Link",
                             new XAttribute("Source", nodeDic[e.From]),
                             new XAttribute("Target", nodeDic[e.To]),
-                            new XAttribute("Label", getEdgeLabel(e.Value)))))
+                            getEdgeAttributes(e.Value))))
                  )
             );
         }

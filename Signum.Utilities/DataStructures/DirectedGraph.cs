@@ -335,15 +335,19 @@ namespace Signum.Utilities.DataStructures
 
         public XDocument ToDGML()
         {
-            Dictionary<Type, string> colorCache = new Dictionary<Type, string>();
-
-            Func<T, string> getColor = elem => colorCache.GetOrCreate(elem.GetType(),
-                () => "#" + (elem.GetType().FullName.GetHashCode() & 0xffffff).ToString("X6"));
-
-            return ToDGML(a => a.ToString(), getColor);
+            return ToDGML(a => a.ToString() ?? "[null]", a => ColorGenerator.ColorFor(a.GetType().FullName.GetHashCode()));
         }
 
         public XDocument ToDGML(Func<T, string> getNodeLabel, Func<T, string> getColor)
+        {
+            return ToDGML(n => new[]
+            {
+                new XAttribute("Label", getNodeLabel(n)),
+                new XAttribute("Background", getColor(n))
+            });
+        }
+            
+        public XDocument ToDGML(Func<T, XAttribute[]> attributes)
         {
             int num = 0;
             Dictionary<T, int> nodeDic = Nodes.ToDictionary(n => n, n => num++, Comparer);
@@ -355,8 +359,7 @@ namespace Signum.Utilities.DataStructures
                     new XElement(ns + "Nodes",
                         Nodes.Select(n => new XElement(ns + "Node",
                             new XAttribute("Id", nodeDic[n]),
-                            new XAttribute("Label", getNodeLabel(n)),
-                            new XAttribute("Background", getColor(n))))),
+                            attributes(n)))),
                     new XElement(ns + "Links",
                         Edges.Select(e => new XElement(ns + "Link",
                             new XAttribute("Source", nodeDic[e.From]),
@@ -535,4 +538,12 @@ namespace Signum.Utilities.DataStructures
             return "{0}->{1}".Formato(From, To);
         }
     };
+
+    public static class ColorGenerator
+    {
+        public static string ColorFor(int value)
+        {
+            return "#" + (value & 0xffffff).ToString("X6");
+        }
+    }
 }
