@@ -6,6 +6,7 @@ using System.Web.Mvc;
 using Signum.Utilities;
 using Signum.Web.Properties;
 using System.Globalization;
+using System.Web.Script.Serialization;
 
 namespace Signum.Web
 {
@@ -208,20 +209,25 @@ namespace Signum.Web
 
             StringBuilder sb = new StringBuilder();
             sb.Append("<script type=\"text/javascript\">");
-            sb.Append("$.datepicker.regional['" + shortCultureName + "'] = {");
-		    sb.Append("closeText: '" + Resources.CalendarClose + "',");
-		    sb.Append("prevText: '" + Resources.CalendarPrevious + "',");
-		    sb.Append("nextText: '" + Resources.CalendarNext + "',");
-		    sb.Append("currentText: '" + Resources.CalendarToday + "',");
-		    sb.Append("monthNames: [" + CultureInfo.CurrentCulture.DateTimeFormat.MonthNames.ToString(s => "'" + s + "'", ",") + "],");
-		    sb.Append("monthNamesShort: [" + CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedMonthNames.ToString(s => "'" + s + "'", ",") + "],");
-		    sb.Append("dayNames: [" + CultureInfo.CurrentCulture.DateTimeFormat.DayNames.ToString(s => "'" + s + "'", ",") + "],");
-		    sb.Append("dayNamesShort: [" + CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedDayNames.ToString(s => "'" + s + "'", ",") + "],");
-            sb.Append("dayNamesMin: [" + CultureInfo.CurrentCulture.DateTimeFormat.ShortestDayNames.ToString(s => "'" + s + "'", ",") + "],");
-            sb.Append("dateFormat: '" + CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern + " " + CultureInfo.CurrentCulture.DateTimeFormat.ShortTimePattern + "',");
-            sb.Append("firstDay: " + (int)CultureInfo.CurrentCulture.DateTimeFormat.FirstDayOfWeek);
-		    //sb.Append("isRTL: false");
-            sb.Append("};");
+            sb.Append("$.datepicker.regional['" + shortCultureName + "'] = ");
+
+            var config = new {
+                closeText = Resources.CalendarClose,
+                prevText = Resources.CalendarPrevious,
+                nextText = Resources.CalendarNext,
+                currentText = Resources.CalendarToday,
+                monthNames = CultureInfo.CurrentCulture.DateTimeFormat.MonthNames,
+                monthNamesShort = CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedMonthNames,
+                dayNames = CultureInfo.CurrentCulture.DateTimeFormat.DayNames,
+                dayNamesShort = CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedDayNames,
+                dayNamesMin = CultureInfo.CurrentCulture.DateTimeFormat.ShortestDayNames,
+                dateFormat = CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern + " " + CultureInfo.CurrentCulture.DateTimeFormat.ShortTimePattern,
+                firstDay = (int)CultureInfo.CurrentCulture.DateTimeFormat.FirstDayOfWeek
+            };
+
+            sb.Append(new JavaScriptSerializer().Serialize(config));
+
+            sb.Append(";");
 	        sb.Append("$.datepicker.setDefaults($.datepicker.regional['" + shortCultureName + "']);");
             sb.Append("</script>");
 
