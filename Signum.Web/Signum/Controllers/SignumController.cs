@@ -457,14 +457,6 @@ namespace Signum.Web.Controllers
             return Navigator.View(this, (IdentifiableEntity)context.UntypedValue);
         }
 
-        public ActionResult Error()
-        {
-            Exception ex = HttpContext.Session[HandleExceptionAttribute.ErrorSessionKey] as Exception;
-            HttpContext.Application.Remove(Request.UserHostAddress);
-            ViewData.Model = ex;
-            return View(Navigator.Manager.ErrorPageUrl);
-        }
-
         public static HtmlHelper CreateHtmlHelper(Controller c)
         {
             return new HtmlHelper(

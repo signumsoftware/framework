@@ -109,7 +109,7 @@ namespace Signum.Web
                 UrlHelper helper = new UrlHelper(new RequestContext(new HttpContextWrapper(HttpContext.Current),
                     RouteTable.Routes.GetRouteData(new HttpContextWrapper(HttpContext.Current))));  //Change in ASP.Net MVC 2
 
-                httpContext.RewritePath(helper.Action("Error", "Signum"), false);
+                httpContext.RewritePath(helper.Action("Error", "Error"), false);
                 IHttpHandler httpHandler = new MvcHttpHandler();
                 httpHandler.ProcessRequest(HttpContext.Current);
             }
