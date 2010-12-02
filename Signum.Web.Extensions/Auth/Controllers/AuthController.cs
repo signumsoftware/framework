@@ -342,12 +342,12 @@ namespace Signum.Web.Authorization
             {
                 if (TempData.ContainsKey("referrer") && TempData["referrer"] != null)
                     ViewData["referrer"] = TempData["referrer"].ToString();
-                else
-                {
-                    referrer = HttpContext.Request.Url.PathAndQuery;
-                    if (referrer.HasText())
-                        ViewData["referrer"] = Common.FullyQualifiedApplicationPath + referrer;
-                }
+                //else
+                //{
+                //    referrer = HttpContext.Request.Url.PathAndQuery;
+                //    if (referrer.HasText())
+                //        ViewData["referrer"] = Common.FullyQualifiedApplicationPath + referrer;
+                //}
             }
 
             ViewData[ViewDataKeys.PageTitle] = "Login";

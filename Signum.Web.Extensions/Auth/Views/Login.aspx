@@ -17,7 +17,8 @@
         <%= Resources.IntroduceYourUserNameAndPassword %>
     </p>
     <%= Html.ValidationSummary() %>
-    <% using (Html.BeginForm())
+    <% 
+        using (Html.BeginForm())
        {
      %>
     <div>
@@ -70,7 +71,8 @@
                 </td>
             </tr>
         </table>
-        <% if (ViewData.ContainsKey("referrer")) { %> 
+        <%
+           if (ViewData.ContainsKey("referrer")) { %> 
                <%=Html.Hidden("referrer", ViewData["referrer"])%> 
         <% } %>
     </div>
