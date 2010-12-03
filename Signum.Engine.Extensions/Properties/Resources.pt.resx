@@ -191,7 +191,7 @@
     <value>Email inválido</value>
   </data>
   <data name="ErrorParsingXMLHelpFiles" xml:space="preserve">
-    <value>Erro ao separar arquivos de ajuda XML
+    <value>Erro ao separar arquivos de ajuda XML:
 </value>
   </data>
   <data name="ExcelReportArgumentIsNecessaryForCompositeReports" xml:space="preserve">
@@ -303,7 +303,7 @@
     <value>Operação {0} não é permitida para lites</value>
   </data>
   <data name="Operation0IsNotAuthorized" xml:space="preserve">
-    <value>Operação {0} não está autorizada </value>
+    <value>Operação {0} não está autorizada</value>
   </data>
   <data name="Operation0NeedsALite" xml:space="preserve">
     <value>Operação {0} precisa de um Lite</value>
@@ -333,7 +333,7 @@
     <value>Restaurar password</value>
   </data>
   <data name="Should" xml:space="preserve">
-    <value>Deve  </value>
+    <value>. Deve  </value>
   </data>
   <data name="String" xml:space="preserve">
     <value>Cadeia</value>

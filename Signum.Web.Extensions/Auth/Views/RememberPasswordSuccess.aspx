@@ -4,5 +4,5 @@
 <asp:Content ContentPlaceHolderID="MainContent" runat="server">
     <h2><%=ViewData["Title"]%></h2>
     <p><%=ViewData["Message"]%></p>
-    <a href="Auth/Login"><%= Html.Encode(Resources.GoBackToLoginPage) %></a>
+    <a href="Auth/Login"><%:Resources.GoBackToLoginPage %></a>
 </asp:Content>

@@ -28,16 +28,16 @@
     <thead>
         <tr>
             <th>
-                <%=Html.Encode(Resources.PermissionsAscx_Permission) %>
+                <%: Resources.PermissionsAscx_Permission %>
             </th>
             <th>
-                <%=Html.Encode(Resources.PermissionsAscx_Allow) %>
+                <%: Resources.PermissionsAscx_Allow %>
             </th>
             <th>
-                <%=Html.Encode(Resources.PermissionsAscx_Deny) %>
+                <%: Resources.PermissionsAscx_Deny %>
             </th>
             <th>
-                <%=Html.Encode(Resources.PermissionsAscx_Overriden) %>
+                <%: Resources.PermissionsAscx_Overriden %>
             </th>
         </tr>
     </thead>

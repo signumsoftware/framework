@@ -57,7 +57,7 @@ namespace Signum.Web.Operations
             };
         }
 
-        private static string IndividualOperationToString(this OperationsContextualItem oci)
+        private static MvcHtmlString IndividualOperationToString(this OperationsContextualItem oci)
         {
             if (oci.ImgSrc.HasText())
             {
@@ -70,12 +70,12 @@ namespace Signum.Web.Operations
             if (oci.Enabled)
                 oci.HtmlProps.Add("onclick", oci.OnClick);
 
-            return new FluentTagBuilder("a", oci.Id)
-                        .MergeAttributes(oci.HtmlProps)
-                        .MergeAttribute("title", oci.AltText ?? "")
-                        .AddCssClass(oci.DivCssClass)
+            return new HtmlTag("a", oci.Id)
+                        .Attrs(oci.HtmlProps)
+                        .Attr("title", oci.AltText ?? "")
+                        .Class(oci.DivCssClass)
                         .SetInnerText(oci.Text)
-                        .ToString(TagRenderMode.Normal);
+                        .ToHtml();
         }
 
         static OperationsContextualItem[] Empty = new OperationsContextualItem[0];

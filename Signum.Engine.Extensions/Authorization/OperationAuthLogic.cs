@@ -40,6 +40,9 @@ namespace Signum.Engine.Authorization
                      EnumLogic<OperationDN>.ToEntity,
                      AuthUtils.MaxBool,
                      AuthUtils.MinBool);
+
+                AuthLogic.ExportToXml += () => cache.ExportXml("Operations", "Operation", p => p.Key, b => b.ToString());
+                AuthLogic.ImportFromXml += (x, roles) => cache.ImportXml(x, "Operations", "Operation", roles, EnumLogic<OperationDN>.ToEntity, bool.Parse);
             }
         }
 

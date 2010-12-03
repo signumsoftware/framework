@@ -22,19 +22,19 @@
     <thead>
         <tr>
             <th>
-                <%=Html.Encode(Resources.PropertiesAscx_Property) %>
+                <%: Resources.PropertiesAscx_Property %>
             </th>
             <th>
-                <%=Html.Encode(Resources.PropertiesAscx_Modify) %>
+                <%: Resources.PropertiesAscx_Modify %>
             </th>
             <th>
-                <%=Html.Encode(Resources.PropertiesAscx_Read) %>
+                <%: Resources.PropertiesAscx_Read %>
             </th>
             <th>
-                <%=Html.Encode(Resources.PropertiesAscx_None) %>
+                <%: Resources.PropertiesAscx_None %>
             </th>
             <th>
-                <%=Html.Encode(Resources.PropertiesAscx_Overriden) %>
+                <%: Resources.PropertiesAscx_Overriden %>
             </th>
         </tr>
     </thead>

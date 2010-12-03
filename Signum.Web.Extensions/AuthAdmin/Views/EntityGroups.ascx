@@ -27,23 +27,23 @@
     <thead>
         <tr>
             <th>
-                <%=Html.Encode(Resources.EntityGroupsAscx_EntityGroup) %>
+                <%: Resources.EntityGroupsAscx_EntityGroup %>
             </th>
             <th></th>
             <th>
-                <%=Html.Encode(Resources.TypesAscx_Create) %>
+                <%: Resources.TypesAscx_Create %>
             </th>
             <th>
-                <%=Html.Encode(Resources.TypesAscx_Modify) %>
+                <%: Resources.TypesAscx_Modify %>
             </th>
             <th>
-                <%=Html.Encode(Resources.TypesAscx_Read) %>
+                <%: Resources.TypesAscx_Read %>
             </th>
             <th>
-                 <%=Html.Encode(Resources.TypesAscx_None) %>
+                 <%: Resources.TypesAscx_None %>
             </th>
             <th>
-                 <%=Html.Encode(Resources.EntityGroupsAscx_Overriden) %>
+                 <%: Resources.EntityGroupsAscx_Overriden %>
             </th>
         </tr>
     </thead>

@@ -51,6 +51,9 @@ namespace Signum.Engine.Authorization
                      AuthUtils.MinEntityGroup);
 
                 sb.Schema.Initializing(InitLevel.Level0SyncEntities, Schema_InitializingRegisterEvents);
+
+                AuthLogic.ExportToXml += () => cache.ExportXml("EntityGroups", "EntityGroup", p => p.Key, b => b.ToString());
+                AuthLogic.ImportFromXml += (x, roles) => cache.ImportXml(x, "EntityGroups", "EntityGroup", roles, EnumLogic<EntityGroupDN>.ToEntity, EntityGroupAllowedDN.Parse);
             }
         }
 

@@ -13,6 +13,7 @@ using System.Threading;
 using Signum.Entities;
 using System.Reflection;
 using Signum.Utilities.Reflection;
+using System.Xml.Linq;
 
 namespace Signum.Engine.Authorization
 {
@@ -69,9 +70,12 @@ namespace Signum.Engine.Authorization
                     AuthUtils.MinBool);
 
                 RegisterPermissions(BasicPermissions.AdminRules);
+
+                AuthLogic.ExportToXml += () => cache.ExportXml("Permissions", "Permission", p => p.Key, b => b.ToString());
+                AuthLogic.ImportFromXml += (x, roles) => cache.ImportXml(x, "Permissions", "Permission", roles, EnumLogic<PermissionDN>.ToEntity, bool.Parse);
             }
         }
-
+ 
         public static void Authorize(this Enum permissionKey)
         {
             if (!cache.GetAllowed(permissionKey))

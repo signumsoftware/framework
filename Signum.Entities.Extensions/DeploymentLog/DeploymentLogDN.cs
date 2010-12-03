@@ -33,7 +33,6 @@ namespace Signum.Entities.DeploymentLog
             set { Set(ref description, value, () => Description); }
         }
 
-
         [NotNullable, SqlDbType(Size = 100)]
         string machineName;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
@@ -46,10 +45,10 @@ namespace Signum.Entities.DeploymentLog
         [NotNullable, SqlDbType(Size = 100)]
         string databaseName;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string DataBaseName
+        public string DatabaseName
         {
             get { return databaseName; }
-            set { Set(ref databaseName, value, () => DataBaseName); }
+            set { Set(ref databaseName, value, () => DatabaseName); }
         }
 
         [NotNullable, SqlDbType(Size = 100)]

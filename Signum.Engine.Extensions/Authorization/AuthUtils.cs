@@ -16,8 +16,8 @@ namespace Signum.Engine.Authorization
         public static readonly DefaultBehaviour<PropertyAllowed> MaxProperty = new DefaultBehaviour<PropertyAllowed>(PropertyAllowed.Modify, MaxPropertyAllowed);
         public static readonly DefaultBehaviour<PropertyAllowed> MinProperty = new DefaultBehaviour<PropertyAllowed>(PropertyAllowed.None, MinPropertyAllowed);
 
-        public static readonly DefaultBehaviour<TypeAllowed> MaxType = new DefaultBehaviour<TypeAllowed>(TypeAllowed.DBCreateUICreate, MaxTypeAllowed);
-        public static readonly DefaultBehaviour<TypeAllowed> MinType = new DefaultBehaviour<TypeAllowed>(TypeAllowed.DBNoneUINone, MinTypeAllowed);
+        public static readonly DefaultBehaviour<TypeAllowed> MaxType = new DefaultBehaviour<TypeAllowed>(TypeAllowed.Create, MaxTypeAllowed);
+        public static readonly DefaultBehaviour<TypeAllowed> MinType = new DefaultBehaviour<TypeAllowed>(TypeAllowed.None, MinTypeAllowed);
 
         public static readonly DefaultBehaviour<EntityGroupAllowedDN> MaxEntityGroup = new DefaultBehaviour<EntityGroupAllowedDN>(EntityGroupAllowedDN.CreateCreate,
             col => new EntityGroupAllowedDN(
@@ -30,14 +30,14 @@ namespace Signum.Engine.Authorization
 
         static TypeAllowed MaxTypeAllowed(this IEnumerable<TypeAllowed> collection)
         {
-            TypeAllowed result = TypeAllowed.DBNoneUINone;
+            TypeAllowed result = TypeAllowed.None;
 
             foreach (var item in collection)
             {
                 if (item > result)
                     result = item;
 
-                if (result == TypeAllowed.DBCreateUICreate)
+                if (result == TypeAllowed.Create)
                     return result;
                 
             }
@@ -46,14 +46,14 @@ namespace Signum.Engine.Authorization
 
         static TypeAllowed MinTypeAllowed(this IEnumerable<TypeAllowed> collection)
         {
-            TypeAllowed result = TypeAllowed.DBCreateUICreate;
+            TypeAllowed result = TypeAllowed.Create;
 
             foreach (var item in collection)
             {
                 if (item < result)
                     result = item;
 
-                if (result == TypeAllowed.DBNoneUINone)
+                if (result == TypeAllowed.None)
                     return result;
 
             }

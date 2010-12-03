@@ -18,6 +18,7 @@ using System.Reflection;
 using Signum.Engine.Extensions.Properties;
 using Signum.Engine.Mailing;
 using Signum.Engine.Operations;
+using System.Xml.Linq;
 
 namespace Signum.Engine.Authorization
 {
@@ -388,6 +389,46 @@ namespace Signum.Engine.Authorization
         internal static int Rank(Lite<RoleDN> role)
         {
             return Roles.IndirectlyRelatedTo(role).Count; 
+        }
+
+        public static event Func<XElement> ExportToXml;
+        public static event Action<XElement, Dictionary<string, Lite<RoleDN>>> ImportFromXml;
+
+        public static XDocument ExportRules()
+        {
+            return new XDocument(
+                new XElement("Auth",
+                    new XElement("Roles", 
+                        RolesInOrder().Select(r=>new XElement("Role", 
+                            new XAttribute("Name", r.ToStr),  
+                            new XAttribute("Contains",  Roles.RelatedTo(r).ToString(","))))),
+                     ExportToXml == null ? null : ExportToXml.GetInvocationList().Cast<Func<XElement>>().Select(a => a()).NotNull()));
+        }
+
+        public static void ImportRules(XDocument doc)
+        {
+            using (Transaction tr = new Transaction())
+            {
+                EnumerableExtensions.JoinStrict(
+                    Roles,
+                    doc.Root.Element("Roles").Elements("Role"),
+                    r => r.ToStr,
+                    x => x.Attribute("Name").Value,
+                    (r, x) => EnumerableExtensions.JoinStrict(
+                                Roles.RelatedTo(r),
+                                x.Attribute("Contains").Value.Split(','),
+                                sr => sr.ToStr,
+                                s => s,
+                                (sr, s) => 0,
+                                "Checking SubRoles of {0}".Formato(r)),
+                    "Checking Roles");
+
+                var rolesDic = Roles.ToDictionary(a => a.ToStr);
+
+                ImportFromXml(doc.Root, rolesDic);
+
+                tr.Commit();
+            }
         }
     }
 

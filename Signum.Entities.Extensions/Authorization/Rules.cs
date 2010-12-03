@@ -5,6 +5,7 @@ using System.Text;
 using Signum.Utilities;
 using Signum.Entities.Basics;
 using Signum.Entities.Operations;
+using System.Text.RegularExpressions;
 
 namespace Signum.Entities.Authorization
 {
@@ -60,8 +61,8 @@ namespace Signum.Entities.Authorization
     [Serializable, AvoidLocalization]
     public class EntityGroupAllowedDN : EmbeddedEntity, IEquatable<EntityGroupAllowedDN>
     {
-        public static readonly EntityGroupAllowedDN CreateCreate = new EntityGroupAllowedDN(TypeAllowed.DBCreateUICreate, TypeAllowed.DBCreateUICreate);
-        public static readonly EntityGroupAllowedDN NoneNone = new EntityGroupAllowedDN(TypeAllowed.DBNoneUINone, TypeAllowed.DBNoneUINone);
+        public static readonly EntityGroupAllowedDN CreateCreate = new EntityGroupAllowedDN(TypeAllowed.Create, TypeAllowed.Create);
+        public static readonly EntityGroupAllowedDN NoneNone = new EntityGroupAllowedDN(TypeAllowed.None, TypeAllowed.None);
 
         private EntityGroupAllowedDN() { }
 
@@ -110,6 +111,17 @@ namespace Signum.Entities.Authorization
         {
             get { return !this.Equals(CreateCreate); }
         }
+
+        public static EntityGroupAllowedDN Parse(string str)
+        {
+            Match m = Regex.Match(str, @"^\[In = (?<in>.*?), Out = (?<out>.*?)\]$");
+
+            if (!m.Success)
+                throw new FormatException("'{0}' is not a valid {1}".Formato(str, typeof(EntityGroupAllowedDN).Name));
+
+            return new EntityGroupAllowedDN(EnumExtensions.ToEnum<TypeAllowed>(m.Groups["in"].Value), 
+                                            EnumExtensions.ToEnum<TypeAllowed>(m.Groups["out"].Value)); 
+        }
     }
 
     public enum PropertyAllowed
@@ -121,19 +133,19 @@ namespace Signum.Entities.Authorization
 
     public enum TypeAllowed
     {
-        DBNoneUINone =     TypeAllowedBasic.None << 2 | TypeAllowedBasic.None,
+        None =             TypeAllowedBasic.None << 2 | TypeAllowedBasic.None,
         
         DBReadUINone =     TypeAllowedBasic.Read << 2 | TypeAllowedBasic.None,
-        DBReadUIRead =     TypeAllowedBasic.Read << 2 | TypeAllowedBasic.Read,
+        Read =             TypeAllowedBasic.Read << 2 | TypeAllowedBasic.Read,
 
         DBModifyUINone =   TypeAllowedBasic.Modify << 2 | TypeAllowedBasic.None,
         DBModifyUIRead =   TypeAllowedBasic.Modify << 2 | TypeAllowedBasic.Read,
-        DBModifyUIModify = TypeAllowedBasic.Modify << 2 | TypeAllowedBasic.Modify,
+        Modify =           TypeAllowedBasic.Modify << 2 | TypeAllowedBasic.Modify,
 
         DBCreateUINone =   TypeAllowedBasic.Create << 2 | TypeAllowedBasic.None,
         DBCreateUIRead =   TypeAllowedBasic.Create << 2 | TypeAllowedBasic.Read,
         DBCreateUIModify = TypeAllowedBasic.Create << 2 | TypeAllowedBasic.Modify,
-        DBCreateUICreate = TypeAllowedBasic.Create << 2 | TypeAllowedBasic.Create,
+        Create =           TypeAllowedBasic.Create << 2 | TypeAllowedBasic.Create,
     }
 
     public static class TypeAllowedExtensions

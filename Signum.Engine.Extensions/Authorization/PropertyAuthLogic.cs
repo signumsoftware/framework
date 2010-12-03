@@ -40,6 +40,14 @@ namespace Signum.Engine.Authorization
                 {
                     PropertyRoute.SetIsAllowedCallback(pp => GetPropertyAllowed(pp) > PropertyAllowed.None);
                 }
+
+                AuthLogic.ExportToXml += () => cache.ExportXml("Properties", "Property", p => p.Type.ClassName + "|" + p.Path, pa => pa.ToString());
+                AuthLogic.ImportFromXml += (x, roles) => cache.ImportXml(x, "Properties", "Property", roles, s =>
+                {
+                    var arr = s.Split('|');
+                    Type type = TypeLogic.GetType(arr[0]);
+                    return PropertyLogic.GetEntity(PropertyRoute.Parse(type, arr[1]));
+                }, EnumExtensions.ToEnum<PropertyAllowed>);
             }
         }
 

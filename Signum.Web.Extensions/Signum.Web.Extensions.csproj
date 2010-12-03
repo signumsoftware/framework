@@ -20,6 +20,7 @@
     </FileUpgradeFlags>
     <OldToolsVersion>4.0</OldToolsVersion>
     <UpgradeBackupLocation />
+    <MvcBuildViews>true</MvcBuildViews>
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -219,9 +220,6 @@
     <Content Include="Auth\Views\Register.aspx">
       <SubType>ASPXCodeBehind</SubType>
     </Content>
-    <Content Include="Auth\Views\UserControlPwdUI.ascx">
-      <SubType>ASPXCodeBehind</SubType>
-    </Content>
     <Content Include="Auth\Views\RememberPassword.aspx" />
     <Content Include="Auth\Views\RememberPasswordSuccess.aspx" />
     <Content Include="Auth\Views\ResetPassword.aspx" />
@@ -272,9 +270,6 @@
       <SubType>ASPXCodeBehind</SubType>
     </Content>
     <Content Include="Help\Views\ViewNamespace.aspx">
-      <SubType>ASPXCodeBehind</SubType>
-    </Content>
-    <Content Include="Help\Views\ViewTodo.aspx">
       <SubType>ASPXCodeBehind</SubType>
     </Content>
     <Content Include="Mailing\Views\EmailMessage.ascx" />

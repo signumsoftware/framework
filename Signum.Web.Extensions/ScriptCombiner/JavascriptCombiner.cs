@@ -21,7 +21,6 @@ namespace Signum.Web.ScriptCombiner
 
         internal static ScriptContentResult Combine(string[] virtualFiles)
         {
-
             string combineComment = "/* {0} */".Formato(virtualFiles.ToString(",")) + "\r\n";
 
             StringBuilder sb = new StringBuilder();
@@ -30,9 +29,12 @@ namespace Signum.Web.ScriptCombiner
                 sb.AppendLine(Combiner.ReadVirtualFile(vf));
             }
 
-
-            return new ScriptContentResult { Content = combineComment + Minify(sb.ToString()), CacheDuration = TimeSpan.FromDays(10), ContentType = "application/x-javascript" };
-
+            return new ScriptContentResult
+            {
+                Content = combineComment + Minify(sb.ToString()),
+                CacheDuration = TimeSpan.FromDays(10),
+                ContentType = "application/x-javascript"
+            };
         }
     }
 }

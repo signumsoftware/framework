@@ -6,8 +6,8 @@
     <script type="text/javascript"> $(function() { $("#email").focus(); }); </script>
 
     <div id="reset-password-container">    
-        <h2><%=Html.Encode(Resources.ResetPassword) %></h2>
-        <p><%=Html.Encode(Resources.ForgotYourPassword) %></p>
+        <h2><%: Resources.ResetPassword %></h2>
+        <p><%: Resources.ForgotYourPassword %></p>
         
         <%= Html.ValidationSummary() %>
         <% using (Html.BeginForm()) { %>

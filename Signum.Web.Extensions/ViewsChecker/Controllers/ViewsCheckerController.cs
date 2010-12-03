@@ -45,7 +45,7 @@ namespace Signum.Web.ViewsChecker
                     continue; //If it doesn't have an associated file, continue with the next type
                 }
 
-                string result = "";
+                MvcHtmlString result = null;
                 try
                 {
                     Response.Clear();

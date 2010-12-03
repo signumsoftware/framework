@@ -84,7 +84,7 @@ namespace Signum.Web.ControlPanel
                 helper.Write(
                     helper.Div(
                         "divr{0}c{1}".Formato(part.Row, part.Column),
-                        "",
+                        null,
                         "clearall"));
             }
         }
@@ -99,15 +99,15 @@ namespace Signum.Web.ControlPanel
         {
             var linkList = ((LinkListPartDN)part.Content).Links;
 
-            helper.Write("<ul id='ulr{0}c{1}'>".Formato(part.Row, part.Column));
+            helper.Write(MvcHtmlString.Create("<ul id='ulr{0}c{1}'>".Formato(part.Row, part.Column)));
             foreach (LinkElement link in linkList)
             {
-                helper.Write("<li>");
+                helper.Write(MvcHtmlString.Create("<li>"));
                 helper.Write(
                     helper.Href(link.Link, link.Label));
-                helper.Write("</li>");
+                helper.Write(MvcHtmlString.Create("</li>"));
             }
-            helper.Write("</ul>");
+            helper.Write(MvcHtmlString.Create("</ul>"));
         }
     }
 }

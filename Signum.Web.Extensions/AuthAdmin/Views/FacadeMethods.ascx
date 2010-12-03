@@ -28,16 +28,16 @@
     <thead>
         <tr>
             <th>
-                <%=Html.Encode(Resources.FacadeMethodsAscx_FacadeMethod) %>
+                <%: Resources.FacadeMethodsAscx_FacadeMethod %>
             </th>
             <th>
-                <%=Html.Encode(Resources.FacadeMethodsAscx_Allow) %>
+                <%: Resources.FacadeMethodsAscx_Allow %>
             </th>
             <th>
-                <%=Html.Encode(Resources.FacadeMethodsAscx_Deny) %>
+                <%: Resources.FacadeMethodsAscx_Deny %>
             </th>
             <th>
-                <%=Html.Encode(Resources.FacadeMethodsAscx_Overriden) %>
+                <%: Resources.FacadeMethodsAscx_Overriden %>
             </th>
         </tr>
     </thead>

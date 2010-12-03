@@ -7,7 +7,7 @@
 <%@ Import Namespace="Signum.Web.Extensions.Properties" %>
 
 <p>
-<%= Html.Encode(Resources.WeReceivedARequestToCreateAnAccountYouCanCreateItFollowingTheLinkBelow)%>
+<%: Resources.WeReceivedARequestToCreateAnAccountYouCanCreateItFollowingTheLinkBelow %>
 </p>
 <% if (ViewData.ContainsKey("Link")) { %>
 <%= Html.Href(ViewData["link"].ToString(), ViewData["link"].ToString())%>

@@ -14,7 +14,7 @@ using (var e = Html.TypeContext<QueryColumnDN>())
         Html.ValueLine(style, f => f.DisplayName, vl => vl.ValueHtmlProps["size"] = 20);
     %>
     <div style="float:left">
-    <%= Html.WriteQueryToken(e.Value.Token, e)%>
+    <%: Html.QueryTokenCombo(e.Value.Token, e)%>
     </div>
     <%  
     }

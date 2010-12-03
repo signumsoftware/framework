@@ -72,7 +72,7 @@
             </tr>
         </table>
         <%
-           if (ViewData.ContainsKey("referrer")) { %> 
+            if (ViewData.ContainsKey("referrer")) { %> 
                <%=Html.Hidden("referrer", ViewData["referrer"])%> 
         <% } %>
     </div>

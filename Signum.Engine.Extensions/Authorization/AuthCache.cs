@@ -8,6 +8,8 @@ using Signum.Engine.Authorization;
 using Signum.Engine;
 using System.Windows;
 using System.Linq.Expressions;
+using System.Xml.Linq;
+using System.IO;
 
 namespace Signum.Entities.Authorization
 {
@@ -48,6 +50,7 @@ namespace Signum.Entities.Authorization
             get { return Sync.Initialize(ref _runtimeRules, () => NewCache()); }
         }
 
+         
         Func<R, K> ToKey;
         Func<K, R> ToEntity;
         DefaultBehaviour<A> Min;
@@ -365,6 +368,69 @@ namespace Signum.Entities.Authorization
             {
                 return this.rules;
             }
+        }
+
+        internal XElement ExportXml(XName rootName, XName elementName, Func<R, string> resourceToString, Func<A, string> allowedToString)
+        {
+            var list = Database.RetrieveAll<RT>();
+
+            var defaultRules = list.Where(a => a.Resource == null).ToDictionary(a => a.Role, a => a.Allowed);
+            var specificRules = list.Where(a => a.Resource != null).AgGroupToDictionary(a => a.Role, gr => gr.ToDictionary(a => a.Resource, a => a.Allowed));
+
+            return new XElement(rootName,
+                (from r in AuthLogic.RolesInOrder()
+                 let max = defaultRules.TryGet(r, Max.BaseAllowed).Equals(Max.BaseAllowed)
+                 select new XElement("Role",
+                     new XAttribute("Name", r.ToStr),
+                     max ? null : new XAttribute("Default", "Min"),
+                     specificRules[r].Select(kvp => new XElement(elementName,
+                         new XAttribute("Resource", resourceToString(kvp.Key)),
+                         new XAttribute("Allowed", allowedToString(kvp.Value))
+                     ))
+                 )));
+        }
+
+
+        internal void ImportXml(XElement element, XName rootName, XName elementName, Dictionary<string, Lite<RoleDN>> roles, Func<string, R> toResource, Func<string, A> parseAllowed)
+        {
+            var current = Database.RetrieveAll<RT>().GroupToDictionary(a => a.Role);
+            var should = element.Element(rootName).Elements("Role").ToDictionary(x => roles[x.Attribute("Name").Value]);
+
+            current.JoinDictionaryForeach(should, (role, list, x)=>
+                {
+                    var def =  list.SingleOrDefault(a=>a.Resource == null);
+                    var max =  x.Attribute("Default") == null || x.Attribute("Default").Value != "Min";
+                    SetDefault(def, max);
+
+                    Synchronizer.Synchronize(
+                        list.Where(a=>a.Resource != null).ToDictionary(a=>a.Resource), 
+                        x.Elements(elementName).ToDictionary(a=>toResource(a.Attribute("Resource").Value)),
+                        (r, rt)=>rt.Delete(),
+                        (r, xr) => new RT { Resource = r, Role = role, Allowed = parseAllowed(xr.Attribute("Allowed").Value)}.Save(),
+                        (r, pr, xr) => { pr.Allowed = parseAllowed(xr.Attribute("Allowed").Value); pr.Save(); });
+                });
+        }
+
+        private void SetDefault(RT def, bool max)
+        {
+            if (max)
+            {
+                if (def != null)
+                    def.Delete();
+            }
+            else
+            {
+                if (!def.Allowed.Equals(Min.BaseAllowed))
+                {
+                    def.Allowed = Min.BaseAllowed;
+                    def.Save();
+                }
+            }
+        }
+
+        internal XElement ExportXml(string p, string p_2, Func<Basics.PropertyDN, string> func, Func<PropertyAllowed, string> func_2)
+        {
+            throw new NotImplementedException();
         }
     }
 }

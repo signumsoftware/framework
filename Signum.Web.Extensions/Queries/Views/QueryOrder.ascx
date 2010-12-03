@@ -13,7 +13,7 @@ using (var e = Html.TypeContext<QueryOrderDN>())
         style.OnlyValue = true;
     %>
     <div style="float:left">
-        <%= Html.WriteQueryToken(e.Value.Token, e)%>
+        <%: Html.QueryTokenCombo(e.Value.Token, e)%>
     </div>
     <%  
         Html.ValueLine(style, f => f.OrderType);

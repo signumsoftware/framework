@@ -29,7 +29,7 @@ namespace Signum.Engine.DeploymentLog
                                                     r.Version,
                                                     r.Description,
                                                     DatabaseHost = r.DataSourceName,
-                                                    r.DataBaseName,
+                                                    DataBaseName = r.DatabaseName,
                                                     r.MachineName,
                                                 }).ToDynamic(); 
             }
@@ -43,7 +43,7 @@ namespace Signum.Engine.DeploymentLog
                 Version = GetCurrentVersion(),
                 Description = description,
                 DataSourceName = ConnectionScope.Current.DataSourceName(),
-                DataBaseName = ConnectionScope.Current.DatabaseName(),
+                DatabaseName = ConnectionScope.Current.DatabaseName(),
                 MachineName = Environment.MachineName,
             }.Save(); 
         }

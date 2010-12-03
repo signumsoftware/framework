@@ -31,7 +31,6 @@ namespace Signum.Web.ScriptCombiner
 
         internal static ScriptContentResult Combine(string[] virtualFiles)
         {
-
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("/* {0} */".Formato(virtualFiles.ToString(",")));
             foreach (var vf in virtualFiles)
@@ -42,7 +41,6 @@ namespace Signum.Web.ScriptCombiner
             }
 
             return new ScriptContentResult { Content = sb.ToString(), CacheDuration = TimeSpan.FromDays(10), ContentType = "text/css" };
-
         }
 
         static string ReplaceRelativeImg(string content, string virtualFile)

@@ -5,7 +5,7 @@
     if (Session[AuthController.SessionUserKey] != null) 
     {
 %>
-        Usuario: <span class="username"><%=Html.Encode(Session[AuthController.SessionUserKey])%></span>
+        Usuario: <span class="username"><%: Session[AuthController.SessionUserKey] %></span>
         <span class="separator">|</span><%= Html.ActionLink("Logout", "Logout", "Auth", null, new {@class = "logout" })%>
 <%
     }

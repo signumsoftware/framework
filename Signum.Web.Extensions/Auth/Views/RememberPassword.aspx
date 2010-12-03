@@ -5,15 +5,15 @@
 <asp:Content ContentPlaceHolderID="MainContent" runat="server">
     <script type="text/javascript"> $(function(){$("#username").focus();}); </script>
     <div id="remember-login-form">
-    <h2><%=Html.Encode(Resources.RememberPassword) %></h2>
-    <p><%=Html.Encode(Resources.RememberPasswordExplanation) %></p>
+    <h2><%: Resources.RememberPassword %></h2>
+    <p><%: Resources.RememberPasswordExplanation %></p>
 
     <%= Html.ValidationSummary() %>
     <% using (Html.BeginForm()) { %>
     <table id="remember">
             <tr>
                 <td>
-                    <label for="username"><%=Html.Encode(Signum.Entities.Extensions.Properties.Resources.UserDN_UserName) %></label>:
+                    <label for="username"><%: Signum.Entities.Extensions.Properties.Resources.UserDN_UserName %></label>:
                 </td>
                 <td>
                     <%= Html.TextBox("username", "", new { size = 30 })%>
@@ -31,7 +31,7 @@
             </tr>
             <tr>
             <td colspan="2" class="submit-container">
-                <input type="submit" value="<%=Html.Encode(Resources.Remember) %>" />
+                <input type="submit" value="<%: Resources.Remember %>" />
             </td>
             </tr>
         </table>            

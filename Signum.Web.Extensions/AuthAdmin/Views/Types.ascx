@@ -32,39 +32,39 @@
     <thead>
         <tr>
             <th>
-                <%=Html.Encode(Resources.TypesAscx_Type) %>
+                <%: Resources.TypesAscx_Type %>
             </th>
             <th>
-                <%=Html.Encode(Resources.TypesAscx_Create) %>
+                <%: Resources.TypesAscx_Create %>
             </th>
             <th>
-                <%=Html.Encode(Resources.TypesAscx_Modify) %>
+                <%: Resources.TypesAscx_Modify %>
             </th>
             <th>
-                <%=Html.Encode(Resources.TypesAscx_Read) %>
+                <%: Resources.TypesAscx_Read %>
             </th>
             <th>
-                <%=Html.Encode(Resources.TypesAscx_None) %>
+                <%: Resources.TypesAscx_None %>
             </th>
             <th>
-                <%=Html.Encode(Resources.TypesAscx_Overriden) %>
+                <%: Resources.TypesAscx_Overriden %>
             </th>
             <% if (Navigator.Manager.EntitySettings.ContainsKey(typeof(PermissionRulePack)))
                { %>
             <th>
-                <%=Html.Encode(Resources.TypesAscx_Properties) %>
+                <%: Resources.TypesAscx_Properties %>
             </th>
             <%} %>
             <% if (Navigator.Manager.EntitySettings.ContainsKey(typeof(OperationRulePack)))
                { %>
             <th>
-                <%=Html.Encode(Resources.TypesAscx_Operations) %>
+                <%: Resources.TypesAscx_Operations %>
             </th>
             <%} %>
             <% if (Navigator.Manager.EntitySettings.ContainsKey(typeof(QueryRulePack)))
                { %>
             <th>
-                <%=Html.Encode(Resources.TypesAscx_Queries) %>
+                <%: Resources.TypesAscx_Queries %>
             </th>
             <%} %>
         </tr>

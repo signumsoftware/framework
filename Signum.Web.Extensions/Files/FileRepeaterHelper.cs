@@ -20,60 +20,59 @@ namespace Signum.Web.Files
 {
     public static class FileRepeaterHelper
     {
-        private static string InternalFileRepeater(this HtmlHelper helper, FileRepeater fileRepeater)
+        private static MvcHtmlString InternalFileRepeater(this HtmlHelper helper, FileRepeater fileRepeater)
         {
             if (!fileRepeater.Visible)
-                return "";
+                return MvcHtmlString.Empty;
 
-            StringBuilder sb = new StringBuilder();
+            HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            sb.AppendLine(EntityBaseHelper.BaseLineLabel(helper, fileRepeater));
+            sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, fileRepeater));
 
-            sb.AppendLine(helper.Hidden(fileRepeater.Compose(EntityBaseKeys.StaticInfo), new StaticInfo(fileRepeater.ElementType.CleanType()) { IsReadOnly = fileRepeater.ReadOnly }.ToString(), new { disabled = "disabled" }).ToHtmlString());
-            sb.AppendLine(helper.Hidden(fileRepeater.Compose(TypeContext.Ticks), EntityInfoHelper.GetTicks(helper, fileRepeater).TryToString() ?? "").ToHtmlString());
+            sb.AddLine(helper.Hidden(fileRepeater.Compose(EntityBaseKeys.StaticInfo), new StaticInfo(fileRepeater.ElementType.CleanType()) { IsReadOnly = fileRepeater.ReadOnly }.ToString(), new { disabled = "disabled" }));
+            sb.AddLine(helper.Hidden(fileRepeater.Compose(TypeContext.Ticks), EntityInfoHelper.GetTicks(helper, fileRepeater).TryToString() ?? ""));
 
-            sb.AppendLine(ListBaseHelper.WriteCreateButton(helper, fileRepeater, new Dictionary<string, object> { { "title", fileRepeater.AddElementLinkText } }));
-
-            sb.AppendLine("<div id='{0}' name='{0}'>".Formato(fileRepeater.Compose(EntityRepeaterKeys.ItemsContainer)));
-            if (fileRepeater.UntypedValue != null)
+            sb.AddLine(ListBaseHelper.CreateButton(helper, fileRepeater, new Dictionary<string, object> { { "title", fileRepeater.AddElementLinkText } }));
+            using (sb.Surround(new HtmlTag("div").IdName(fileRepeater.Compose(EntityRepeaterKeys.ItemsContainer))))
             {
-                foreach (var itemTC in TypeContextUtilities.TypeElementContext((TypeContext<MList<FilePathDN>>)fileRepeater.Parent))
-                    sb.Append(InternalRepeaterElement(helper, itemTC, fileRepeater));
+                if (fileRepeater.UntypedValue != null)
+                {
+                    foreach (var itemTC in TypeContextUtilities.TypeElementContext((TypeContext<MList<FilePathDN>>)fileRepeater.Parent))
+                        sb.Add(InternalRepeaterElement(helper, itemTC, fileRepeater));
+                }
             }
-            sb.AppendLine("</div>");
 
-            sb.AppendLine(EntityBaseHelper.WriteBreakLine(helper, fileRepeater));
+            sb.AddLine(EntityBaseHelper.BreakLineDiv(helper, fileRepeater));
 
-            return sb.ToString();
+            return sb.ToHtml();
         }
 
-        private static string InternalRepeaterElement(this HtmlHelper helper, TypeElementContext<FilePathDN> itemTC, FileRepeater fileRepeater)
+        private static MvcHtmlString InternalRepeaterElement(this HtmlHelper helper, TypeElementContext<FilePathDN> itemTC, FileRepeater fileRepeater)
         {
-            StringBuilder sb = new StringBuilder();
+            HtmlStringBuilder sb = new HtmlStringBuilder();
+            using (sb.Surround(new HtmlTag("div").IdName(itemTC.Compose(EntityRepeaterKeys.RepeaterElement)).Attr("class","repeaterElement")))
+            {
+                sb.AddLine(helper.Hidden(itemTC.Compose(EntityListBaseKeys.Index), itemTC.Index.ToString()));
 
-            sb.AppendLine("<div id='{0}' name='{0}' class='repeaterElement'>".Formato(itemTC.Compose(EntityRepeaterKeys.RepeaterElement)));
+                if (fileRepeater.Remove)
+                    sb.AddLine(
+                        helper.Button(itemTC.Compose("btnRemove"),
+                                      "x",
+                                      "ERepOnRemoving({0}, '{1}');".Formato(fileRepeater.ToJS(), itemTC.ControlID),
+                                      "lineButton remove",
+                                      new Dictionary<string, object> { { "title", fileRepeater.RemoveElementLinkText } }));
 
-            sb.AppendLine(helper.Hidden(itemTC.Compose(EntityListBaseKeys.Index), itemTC.Index.ToString()).ToHtmlString());
+                //Render FileLine for the current item
+                using (sb.Surround(new HtmlTag("div").IdName(itemTC.Compose(EntityBaseKeys.Entity))))
+                {
+                    TypeContext<FilePathDN> tc = (TypeContext<FilePathDN>)TypeContextUtilities.CleanTypeContext(itemTC);
 
-            if (fileRepeater.Remove)
-                sb.AppendLine(
-                    helper.Button(itemTC.Compose("btnRemove"),
-                                  "x",
-                                  "ERepOnRemoving({0}, '{1}');".Formato(fileRepeater.ToJS(), itemTC.ControlID),
-                                  "lineButton remove",
-                                  new Dictionary<string, object> { { "title", fileRepeater.RemoveElementLinkText } }));
+                    using (FileLine fl = new FileLine(typeof(FilePathDN), tc.Value, itemTC, "", tc.PropertyRoute) { Remove = false })
+                        sb.AddLine(helper.InternalFileLine(fl));
+                }
+            }
 
-            //Render FileLine for the current item
-            sb.AppendLine("<div id='{0}' name='{0}'>".Formato(itemTC.Compose(EntityBaseKeys.Entity)));
-            TypeContext<FilePathDN> tc = (TypeContext<FilePathDN>)TypeContextUtilities.CleanTypeContext(itemTC);
-
-            using (FileLine fl = new FileLine(typeof(FilePathDN), tc.Value, itemTC, "", tc.PropertyRoute) { Remove = false })
-                sb.AppendLine(helper.InternalFileLine(fl));
-            sb.AppendLine("</div>");
-
-            sb.AppendLine("</div>");
-
-            return sb.ToString();
+            return sb.ToHtml();
         }
 
         public static void FileRepeater<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, MList<S>>> property)

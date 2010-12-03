@@ -339,9 +339,6 @@
   <data name="DateSpanDN_Years" xml:space="preserve">
     <value>Jahre</value>
   </data>
-  <data name="Deleted" xml:space="preserve">
-    <value>(Gelöscht)</value>
-  </data>
   <data name="EmailMessageDN" xml:space="preserve">
     <value>E-Mail Message</value>
   </data>
@@ -1064,5 +1061,8 @@
   </data>
   <data name="LinkListPartDN" xml:space="preserve">
     <value>Link-Listenelement</value>
+  </data>
+  <data name="Deleted" xml:space="preserve">
+    <value>(Gelöscht)</value>
   </data>
 </root>

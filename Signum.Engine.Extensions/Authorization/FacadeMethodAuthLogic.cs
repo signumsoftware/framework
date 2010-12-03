@@ -32,9 +32,17 @@ namespace Signum.Engine.Authorization
 
                 cache = new AuthCache<RuleFacadeMethodDN, FacadeMethodAllowedRule, FacadeMethodDN, string, bool>(sb,
                      fm => fm.ToString(),
-                     n =>  FacadeMethodLogic.RetrieveOrGenerateFacadeMethod(n),
+                     n => FacadeMethodLogic.RetrieveOrGenerateFacadeMethod(n),
                      AuthUtils.MaxBool,
-                     AuthUtils.MinBool); 
+                     AuthUtils.MinBool);
+
+
+                AuthLogic.ExportToXml += () => cache.ExportXml("FacadeMethods", "FacadeMethod", fm => fm.ToString(), b => b.ToString());
+                AuthLogic.ImportFromXml += (x, roles) =>
+                    {
+                        var methods = FacadeMethodLogic.RetrieveOrGenerateFacadeMethods().ToDictionary(a => a.ToString());
+                        cache.ImportXml(x, "FacadeMethods", "FacadeMethod", roles, str => methods[str], bool.Parse);
+                    };
             }
         }
 

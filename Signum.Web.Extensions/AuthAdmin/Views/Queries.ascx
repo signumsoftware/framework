@@ -22,16 +22,16 @@
     <thead>
         <tr>
             <th>
-                <%=Html.Encode(Resources.QueriesAscx_Query) %>
+                <%: Resources.QueriesAscx_Query %>
             </th>
             <th>
-                <%=Html.Encode(Resources.QueriesAscx_Allow) %>
+                <%: Resources.QueriesAscx_Allow %>
             </th>
             <th>
-                <%=Html.Encode(Resources.QueriesAscx_Deny) %>
+                <%: Resources.QueriesAscx_Deny %>
             </th>
             <th>
-                <%=Html.Encode(Resources.QueriesAscx_Overriden) %>
+                <%: Resources.QueriesAscx_Overriden %>
             </th>
         </tr>
     </thead>

@@ -468,17 +468,11 @@
   <data name="WeReceivedARequestToCreateAnAccountYouCanCreateItFollowingTheLinkBelow" xml:space="preserve">
     <value>Aufgefordert, ein Konto zu erstellen. Um dieses bitte klicken Sie unten auf den Link bestätigen:</value>
   </data>
-  <data name="YouCanResetYourPasswordByFollowingTheLinkBelow" xml:space="preserve">
-    <value>Sie können ein neues Kennwort erstellen, indem Sie auf den Link unten klicken</value>
-  </data>
   <data name="YouMustEnterTheCurrentPassword" xml:space="preserve">
     <value>Sie müssen Ihr aktuelle Passwort eingeben</value>
   </data>
   <data name="YouMustRepeatTheNewPassword" xml:space="preserve">
     <value>Sie müssen das neue Kennwort wiederholen</value>
-  </data>
-  <data name="YouRecentlyRequestedANewPassword" xml:space="preserve">
-    <value>Sie verlangt vor kurzem ein neues Passwort</value>
   </data>
   <data name="YourNewPasswordIs0" xml:space="preserve">
     <value>Ihr neues Passwort ist {0}</value>

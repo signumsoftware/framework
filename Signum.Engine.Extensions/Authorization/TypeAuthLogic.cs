@@ -40,6 +40,9 @@ namespace Signum.Engine.Authorization
                     type => TypeLogic.TypeToDN[type],
                     AuthUtils.MaxType, 
                     AuthUtils.MinType);
+
+                AuthLogic.ExportToXml += () => cache.ExportXml("Types", "Type", t => t.ClassName, ta => ta.ToString());
+                AuthLogic.ImportFromXml += (x, roles) => cache.ImportXml(x, "Types", "Type", roles, s => TypeLogic.TypeToDN[TypeLogic.GetType(s)], EnumExtensions.ToEnum<TypeAllowed>);
             }
         }
 
@@ -100,7 +103,7 @@ namespace Signum.Engine.Authorization
         public static TypeAllowed GetTypeAllowed(Type type)
         {
             if (!TypeLogic.TypeToDN.ContainsKey(type))
-                return TypeAllowed.DBCreateUICreate;
+                return TypeAllowed.Create;
 
             return cache.GetAllowed(type);
         }

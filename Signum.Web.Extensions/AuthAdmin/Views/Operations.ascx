@@ -23,16 +23,16 @@
     <thead>
         <tr>
             <th>
-                <%=Html.Encode(Resources.OperationsAscx_Operation) %>
+                <%: Resources.OperationsAscx_Operation %>
             </th>
             <th>
-                <%=Html.Encode(Resources.OperationsAscx_Allow) %>
+                <%: Resources.OperationsAscx_Allow %>
             </th>
             <th>
-                <%=Html.Encode(Resources.OperationsAscx_Deny) %>
+                <%: Resources.OperationsAscx_Deny %>
             </th>
             <th>
-                <%=Html.Encode(Resources.OperationsAscx_Overriden) %>
+                <%: Resources.OperationsAscx_Overriden %>
             </th>
         </tr>
     </thead>

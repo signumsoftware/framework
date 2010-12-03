@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" MasterPageFile="~/Views/Shared/Site.Master" AutoEventWireup="true"%>
+﻿<%@ Page Language="C#" MasterPageFile="~/Views/Shared/Site.Master" AutoEventWireup="true" Inherits="System.Web.Mvc.ViewPage"%>
 
 <asp:Content ID="registerContent" ContentPlaceHolderID="MainContent" runat="server">
     <h2>Account Creation</h2>
@@ -6,7 +6,7 @@
         Use the form below to create a new account. 
     </p>
     <p>
-        Passwords are required to be a minimum of <%=Html.Encode(ViewData["PasswordLength"])%> characters in length.
+        Passwords are required to be a minimum of <%: ViewData["PasswordLength"]%> characters in length.
     </p>
     <%= Html.ValidationSummary() %>
 

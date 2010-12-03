@@ -9,7 +9,7 @@
 using (var e = Html.TypeContext<QueryTokenDN>()) 
 {
     %>
-    <%= Html.WriteQueryToken(e.Value.Token, e)%>
+    <%: Html.QueryTokenCombo(e.Value.Token, e)%>
     <%
 }
 %>

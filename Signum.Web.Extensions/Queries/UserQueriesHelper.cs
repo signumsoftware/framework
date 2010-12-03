@@ -28,7 +28,7 @@ namespace Signum.Web.Queries
         }
 
 
-        public static string CountSearchControl(this HtmlHelper helper, UserQueryDN userQuery, FindOptions findOptions, string prefix)
+        public static MvcHtmlString CountSearchControl(this HtmlHelper helper, UserQueryDN userQuery, FindOptions findOptions, string prefix)
         {
             if (findOptions == null)
                 throw new ArgumentNullException("findOptions");
@@ -38,7 +38,7 @@ namespace Signum.Web.Queries
             return helper.CountSearchControl(findOptions, prefix);
         }
 
-        public static string CountSearchControl(this HtmlHelper helper, UserQueryDN userQuery, string prefix)
+        public static MvcHtmlString CountSearchControl(this HtmlHelper helper, UserQueryDN userQuery, string prefix)
         {
             FindOptions findOptions = userQuery.ToFindOptions();
 

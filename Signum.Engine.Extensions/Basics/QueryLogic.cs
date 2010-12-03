@@ -61,6 +61,15 @@ namespace Signum.Engine.Basics
             return DynamicQueryManager.Current.GetQueryNames().ToDictionary(qn => QueryUtils.GetQueryName(qn));
         }
 
+        public static Dictionary<string, QueryDN> RetrieveOrGenerateQueries()
+        {
+            var current = Database.RetrieveAll<QueryDN>().ToDictionary(a => a.Key);
+            var total = DynamicQueryManager.Current.GetQueries().Keys.ToDictionary(qn => QueryUtils.GetQueryName(qn), qn => CreateQuery(qn));
+
+            total.SetRange(current);
+            return total;
+        }
+
         public static List<QueryDN> RetrieveOrGenerateQueries(TypeDN typeDN)
         {
             Type type = TypeLogic.DnToType[typeDN];

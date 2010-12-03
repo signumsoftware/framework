@@ -20,16 +20,16 @@ namespace Signum.Web.Files
 {
     public static class FileLineHelper
     {
-        internal static string InternalFileLine(this HtmlHelper helper, FileLine fileLine)
+        internal static MvcHtmlString InternalFileLine(this HtmlHelper helper, FileLine fileLine)
         {
             if (!fileLine.Visible)
-                return "";
+                return MvcHtmlString.Empty;
 
             IFile value = (IFile)fileLine.UntypedValue;
 
-            StringBuilder sb = new StringBuilder();
+            HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            sb.AppendLine(helper.HiddenEntityInfo(fileLine));
+            sb.AddLine(helper.HiddenEntityInfo(fileLine));
 
             FilePathDN filePath = value as FilePathDN;
             if (filePath != null)
@@ -39,14 +39,14 @@ namespace Signum.Web.Files
                 if (fileLine.FileType == null)
                     throw new ArgumentException(Resources.FileTypePropertyOfFileLineSettingsMustBeSpecified.Formato(fileLine.ControlID));
 
-                sb.AppendLine(helper.Hidden(fileLine.Compose(FileLineKeys.FileType),
+                sb.AddLine(helper.Hidden(fileLine.Compose(FileLineKeys.FileType),
                     EnumDN.UniqueKey((value != null) ?
                         filePath.FileTypeEnum ?? EnumLogic<FileTypeDN>.ToEnum(filePath.FileType) :
-                        fileLine.FileType)).ToHtmlString());
+                        fileLine.FileType)));
             }
 
             if (value != null)
-                sb.AppendLine(helper.Div(fileLine.Compose(EntityBaseKeys.Entity), "", "", new Dictionary<string, object> { { "style", "display:none" } }));
+                sb.AddLine(helper.Div(fileLine.Compose(EntityBaseKeys.Entity), null, "", new Dictionary<string, object> { { "style", "display:none" } }));
 
             fileLine.ValueHtmlProps.AddCssClass("valueLine");
             if (fileLine.ShowValidationMessage)
@@ -54,45 +54,46 @@ namespace Signum.Web.Files
 
             bool hasEntity = value != null && value.FileName.HasText();
 
-            sb.AppendLine("<div id='{0}' style='display:{1}'>".Formato(fileLine.Compose("DivOld"), hasEntity ? "block" : "none"));
-
-            sb.AppendLine(EntityBaseHelper.BaseLineLabel(helper, fileLine, 
-                fileLine.Download ? fileLine.Compose(EntityBaseKeys.ToStrLink) : fileLine.Compose(EntityBaseKeys.ToStr)));
-
-            if (fileLine.Download && !(value is EmbeddedEntity))
+            using (sb.Surround(new HtmlTag("div", fileLine.Compose("DivOld")).Attr("style", "display:" + (hasEntity ? "block" : "none"))))
             {
-                sb.AppendLine(
-                        helper.Href(fileLine.Compose(EntityBaseKeys.ToStrLink),
-                            value.TryCC(f => f.FileName) ?? "",
-                            fileLine.GetDownloading(),
-                            "Download",
-                            "valueLine",
-                            null));
+
+                sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, fileLine,
+                    fileLine.Download ? fileLine.Compose(EntityBaseKeys.ToStrLink) : fileLine.Compose(EntityBaseKeys.ToStr)));
+
+                if (fileLine.Download && !(value is EmbeddedEntity))
+                {
+                    sb.AddLine(
+                            helper.Href(fileLine.Compose(EntityBaseKeys.ToStrLink),
+                                value.TryCC(f => f.FileName) ?? "",
+                                fileLine.GetDownloading(),
+                                "Download",
+                                "valueLine",
+                                null));
+                }
+                else
+                    sb.AddLine(helper.Span(fileLine.Compose(EntityBaseKeys.ToStr), value.TryCC(f => f.FileName) ?? "", "valueLine", null));
+
+                sb.AddLine(EntityBaseHelper.RemoveButton(helper, fileLine));
             }
-            else
-                sb.AppendLine(helper.Span(fileLine.Compose(EntityBaseKeys.ToStr), value.TryCC(f => f.FileName) ?? "", "valueLine", null));
 
-            sb.AppendLine(EntityBaseHelper.WriteRemoveButton(helper, fileLine));
-            sb.AppendLine("</div>");
+            using (sb.Surround(new HtmlTag("div", fileLine.Compose("DivNew")).Attr("style", "display:" + (hasEntity ? "block" : "none"))))
+            {
+                sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, fileLine, fileLine.ControlID));
 
-            sb.AppendLine("<div id='{0}' style='display:{1}'>".Formato(fileLine.Compose("DivNew"), hasEntity ? "none" : "block"));
-            
-            sb.AppendLine(EntityBaseHelper.BaseLineLabel(helper, fileLine, fileLine.ControlID));
-
-            sb.AppendLine("<input type='file' onchange=\"FLineOnChanged({0});\" id='{1}' name='{1}' class='valueLine'/>".Formato(fileLine.ToJS(), fileLine.ControlID));
-            sb.AppendLine("<img src='Images/loading.gif' id='{0}loading' alt='loading' style='display:none'/>".Formato(fileLine.ControlID));
-            sb.AppendLine("<iframe id='frame{0}' name='frame{0}' src='about:blank' style='position:absolute;left:-1000px;top:-1000px'></iframe>".Formato(fileLine.ControlID));
-            sb.AppendLine("</div>");
+                sb.AddLine(MvcHtmlString.Create("<input type='file' onchange=\"FLineOnChanged({0});\" id='{1}' name='{1}' class='valueLine'/>".Formato(fileLine.ToJS(), fileLine.ControlID)));
+                sb.AddLine(MvcHtmlString.Create("<img src='Images/loading.gif' id='{0}loading' alt='loading' style='display:none'/>".Formato(fileLine.ControlID)));
+                sb.AddLine(MvcHtmlString.Create("<iframe id='frame{0}' name='frame{0}' src='about:blank' style='position:absolute;left:-1000px;top:-1000px'></iframe>".Formato(fileLine.ControlID)));
+            }
 
             if (fileLine.ShowValidationMessage)
             {
-                sb.Append("&nbsp;");
-                sb.AppendLine(helper.ValidationMessage(fileLine.ControlID).TryCC(hs => hs.ToHtmlString()));
+                sb.Add(MvcHtmlString.Create("&nbsp;"));
+                sb.AddLine(helper.ValidationMessage(fileLine.ControlID));
             }
 
-            sb.AppendLine(EntityBaseHelper.WriteBreakLine(helper, fileLine));
+            sb.AddLine(EntityBaseHelper.BreakLineDiv(helper, fileLine));
 
-            return sb.ToString();
+            return sb.ToHtml();
         }
 
         public static void FileLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property)

@@ -344,9 +344,9 @@ namespace Signum.Web.Authorization
                     ViewData["referrer"] = TempData["referrer"].ToString();
                 //else
                 //{
-                //    referrer = HttpContext.Request.Url.PathAndQuery;
+                //    referrer = HttpContext.Request.Url.ToString(); //.PathAndQuery;
                 //    if (referrer.HasText())
-                //        ViewData["referrer"] = Common.FullyQualifiedApplicationPath + referrer;
+                //        ViewData["referrer"] = referrer;
                 //}
             }
 
