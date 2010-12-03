@@ -25,81 +25,89 @@ namespace Signum.Web
 
     public static class HtmlHelperExtenders
     {
-        public static string ValidationSummaryAjax(this HtmlHelper html)
+        public static MvcHtmlString ValidationSummaryAjax(this HtmlHelper html)
         {
-            return new FluentTagBuilder("div")
-                    .GenerateId("sfGlobalValidationSummary")
-                    .ToString(TagRenderMode.Normal);
+            return new HtmlTag("div")
+                    .Id("sfGlobalValidationSummary")
+                    .ToHtml();
         }
 
-        public static string ValidationSummaryAjax(this HtmlHelper html, Context context)
+        public static MvcHtmlString ValidationSummaryAjax(this HtmlHelper html, Context context)
         {
-            return new FluentTagBuilder("div")
-                .GenerateId(context.Compose("sfGlobalValidationSummary"))
-                .ToString(TagRenderMode.Normal);
+            return new HtmlTag("div")
+                .Id(context.Compose("sfGlobalValidationSummary"))
+                .ToHtml();
         }
 
-        public static void Field(this HtmlHelper html, string label, string value)
+        public static MvcHtmlString HiddenAnonymous(this HtmlHelper html, object value)
         {
-            FluentTagBuilder field = new FluentTagBuilder("div")
-                                    .AddCssClass("field");
+            return new HtmlTag("input").Attrs(new
+            {
+                type="hidden",
+                value=value.ToString()
+            }).ToHtmlSelf();
+        }
 
-            FluentTagBuilder labelLine = new FluentTagBuilder("div")
-                                    .AddCssClass("labelLine")
-                                    .InnerHtml(label);
+        public static void Field(this HtmlHelper html, string label, MvcHtmlString value)
+        {
+            HtmlTag field = new HtmlTag("div")
+                                    .Class("field");
 
-            FluentTagBuilder valueLine = new FluentTagBuilder("div")
-                        .AddCssClass("value-container")
+            HtmlTag labelLine = new HtmlTag("div")
+                                    .Class("labelLine")
+                                    .SetInnerText(label);
+
+            HtmlTag valueLine = new HtmlTag("div")
+                        .Class("value-container")
                         .InnerHtml(value);
 
-            string clear = HtmlHelperExtenders.GetClearDiv();
+            MvcHtmlString clear = HtmlHelperExtenders.GetClearDiv();
 
-            html.Write (field
-                        .InnerHtml(labelLine.ToString(TagRenderMode.Normal)
-                              + valueLine.ToString(TagRenderMode.Normal)
-                              )
-                        .ToString(TagRenderMode.Normal));
+            field.InnerHtml(labelLine.ToHtml().Concat(valueLine.ToHtml()));
+
+            html.Write(field.ToHtml());
+
             html.Write(clear);
         }
 
-        public static string GetClearDiv()
+        public static MvcHtmlString GetClearDiv()
         {
-            return new FluentTagBuilder("div")
-                    .AddCssClass("clearall")
-                    .ToString(TagRenderMode.Normal);
+            return new HtmlTag("div")
+                    .Class("clearall")
+                    .ToHtml();
         }
 
-        public static string CheckBox(this HtmlHelper html, string name, bool value, bool enabled)
+        public static MvcHtmlString CheckBox(this HtmlHelper html, string name, bool value, bool enabled)
         {
             return CheckBox(html, name, value, enabled, null);
         }
 
-        public static string CheckBox(this HtmlHelper html, string name, bool value, bool enabled, IDictionary<string, object> htmlAttributes)
+        public static MvcHtmlString CheckBox(this HtmlHelper html, string name, bool value, bool enabled, IDictionary<string, object> htmlAttributes)
         {
             if (htmlAttributes == null)
                 htmlAttributes = new Dictionary<string, object>();
 
             if (enabled)
-                return html.CheckBox(name, value, htmlAttributes).ToHtmlString();
+                return html.CheckBox(name, value, htmlAttributes);
             else 
             {
-                FluentTagBuilder checkbox = new FluentTagBuilder("input")
-                                        .GenerateId(name)
-                                        .MergeAttributes(new
+                HtmlTag checkbox = new HtmlTag("input")
+                                        .Id(name)
+                                        .Attrs(new
                                         {
                                             type = "checkbox",
                                             name = name,
                                             value = (value ? "true" : "false"),
                                             disabled = "disabled"
                                         })
-                                        .MergeAttributes(htmlAttributes);
+                                        .Attrs(htmlAttributes);
 
                 if (value)
-                    checkbox.MergeAttribute("checked", "checked");
+                    checkbox.Attr("checked", "checked");
 
-                FluentTagBuilder hidden = new FluentTagBuilder("input")
-                        .GenerateId(name)
-                        .MergeAttributes(new
+                HtmlTag hidden = new HtmlTag("input")
+                        .Id(name)
+                        .Attrs(new
                         {
                             type = "hidden",
                             name = name,
@@ -107,18 +115,17 @@ namespace Signum.Web
                             disabled = "disabled"
                         });
 
-                return checkbox.ToString(TagRenderMode.SelfClosing)
-                        + hidden.ToString(TagRenderMode.SelfClosing);
+                return checkbox.ToHtmlSelf().Concat(hidden.ToHtmlSelf());
             }
         }
 
-        public static string InputType(string inputType, string id, string value, IDictionary<string, object> htmlAttributes)
+        public static MvcHtmlString InputType(string inputType, string id, string value, IDictionary<string, object> htmlAttributes)
         {
-            return new FluentTagBuilder("input")
-                            .GenerateId(id)
-                            .MergeAttributes(new { type = inputType, name = id, value = value })
-                            .MergeAttributes(htmlAttributes)
-                            .ToString(TagRenderMode.SelfClosing);
+            return new HtmlTag("input")
+                            .Id(id)
+                            .Attrs(new { type = inputType, name = id, value = value })
+                            .Attrs(htmlAttributes)
+                            .ToHtmlSelf();
         }
 
         /// <summary>
@@ -130,95 +137,96 @@ namespace Signum.Web
         /// <param name="idField">The id of the field that the label is describing</param>
         /// <param name="cssClass">The class that will be appended to the label</param>
         /// <returns>An HTML string representing a "label" label</returns>
-        public static string Label(this HtmlHelper html, string id, string innerText, string idField, string cssClass, IDictionary<string, object> htmlAttributes)
+        public static MvcHtmlString Label(this HtmlHelper html, string id, string innerText, string idField, string cssClass, IDictionary<string, object> htmlAttributes)
         {
-            return new FluentTagBuilder("label", id)
-                                    .MergeAttribute("for", idField)
-                                    .MergeAttributes(htmlAttributes)
-                                    .AddCssClass(cssClass)
+            return new HtmlTag("label", id)
+                                    .Attr("for", idField)
+                                    .Attrs(htmlAttributes)
+                                    .Class(cssClass)
                                     .SetInnerText(innerText)
-                                    .ToString(TagRenderMode.Normal);
+                                    .ToHtml();
         }
 
-        public static string Label(this HtmlHelper html, string id, string innerText, string idField, string cssClass)
+        public static MvcHtmlString Label(this HtmlHelper html, string id, string innerText, string idField, string cssClass)
         {
             return html.Label(id, innerText, idField, cssClass, null);
         }
 
-        public static string Span(this HtmlHelper html, string id, string innerText, string cssClass, IDictionary<string, object> htmlAttributes)
+        public static MvcHtmlString Span(this HtmlHelper html, string id, string innerText, string cssClass, IDictionary<string, object> htmlAttributes)
         {
-            return new FluentTagBuilder("span", id)
-                        .MergeAttributes(htmlAttributes)
-                        .AddCssClass(cssClass)
+            return new HtmlTag("span", id)
+                        .Attrs(htmlAttributes)
+                        .Class(cssClass)
                         .SetInnerText(innerText)
-                        .ToString(TagRenderMode.Normal);
+                        .ToHtml();
         }
 
-        public static string Span(this HtmlHelper html, string name, string value, string cssClass)
+        public static MvcHtmlString Span(this HtmlHelper html, string name, string value, string cssClass)
         {
             return Span(html, name, value, cssClass, null);
         }
 
-        public static string Span(this HtmlHelper html, string name, string value)
+        public static MvcHtmlString Span(this HtmlHelper html, string name, string value)
         {
             return Span(html, name, value, null, null);
         }
 
-        public static string Href(this HtmlHelper html, string url, string text) {
-            return new FluentTagBuilder("a")
-                        .MergeAttribute("href", url)
+        public static MvcHtmlString Href(this HtmlHelper html, string url, string text)
+        {
+            return new HtmlTag("a")
+                        .Attr("href", url)
                         .SetInnerText(text)
-                        .ToString(TagRenderMode.Normal);
+                        .ToHtml();
         }
 
-        public static string Href(this HtmlHelper html, string id, string innerText, string url, string title, string cssClass, IDictionary<string, object> htmlAttributes)
+        public static MvcHtmlString Href(this HtmlHelper html, string id, string innerText, string url, string title, string cssClass, IDictionary<string, object> htmlAttributes)
         {
-            FluentTagBuilder href = new FluentTagBuilder("a", id)
-                        .MergeAttributes(htmlAttributes)
-                        .AddCssClass(cssClass)
+            HtmlTag href = new HtmlTag("a", id)
+                        .Attrs(htmlAttributes)
+                        .Class(cssClass)
                         .SetInnerText(innerText);
 
             if (url != "#")
-                href.MergeAttribute("href", url);
+                href.Attr("href", url);
 
 
             if (!string.IsNullOrEmpty(title))
-                href.MergeAttribute("title", title);
+                href.Attr("title", title);
 
-            return href.ToString(TagRenderMode.Normal);
+            return href.ToHtml();
         }
 
-        public static string Div(this HtmlHelper html, string id, string innerHTML, string cssClass)
+        public static MvcHtmlString Div(this HtmlHelper html, string id, MvcHtmlString innerHTML, string cssClass)
         {
             return html.Div(id, innerHTML, cssClass, null);
         }
 
-        public static string Div(this HtmlHelper html, string id, string innerHTML, string cssClass, IDictionary<string, object> htmlAttributes)
+        public static MvcHtmlString Div(this HtmlHelper html, string id, MvcHtmlString innerHTML, string cssClass, IDictionary<string, object> htmlAttributes)
         {
-            return new FluentTagBuilder("div", id)
-                .MergeAttributes(htmlAttributes)
-                .AddCssClass(cssClass)
+            return new HtmlTag("div", id)
+                .Attrs(htmlAttributes)
+                .Class(cssClass)
                 .InnerHtml(innerHTML)
-                .ToString(TagRenderMode.Normal);
+                .ToHtml();
         }
 
-        public static string Button(this HtmlHelper html, string id, string value, string onclick, string cssClass)
+        public static MvcHtmlString Button(this HtmlHelper html, string id, string value, string onclick, string cssClass)
         {
             return html.Button(id, value, onclick, cssClass, null);
         }
 
-        public static string Button(this HtmlHelper html, string id, string value, string onclick, string cssClass, IDictionary<string, object> htmlAttributes)
+        public static MvcHtmlString Button(this HtmlHelper html, string id, string value, string onclick, string cssClass, IDictionary<string, object> htmlAttributes)
         {
-            return new FluentTagBuilder("input", id)
-                .MergeAttributes(new { type = "button", value = value, onclick = onclick })
-                .MergeAttributes(htmlAttributes)
-                .AddCssClass(cssClass)
-                .ToString(TagRenderMode.SelfClosing);
+            return new HtmlTag("input", id)
+                .Attrs(new { type = "button", value = value, onclick = onclick })
+                .Attrs(htmlAttributes)
+                .Class(cssClass)
+                .ToHtmlSelf();
         }
 
-        public static void Write(this HtmlHelper html, string text)
+        public static void Write(this HtmlHelper html, MvcHtmlString htmlText)
         {
-            html.ViewContext.HttpContext.Response.Write(text);
+            html.ViewContext.HttpContext.Response.Write(htmlText.ToHtmlString());
         }
 
         #region Message
@@ -231,25 +239,25 @@ namespace Signum.Web
         }
 
         public static void Message(this HtmlHelper html, string title, string content, MessageType type, object attributeList) {
-            FluentTagBuilder div = new FluentTagBuilder("div")
-                        .AddCssClass("message" + Enum.GetName(typeof(MessageType), type))
-                        .MergeAttributes(attributeList);
+            HtmlTag div = new HtmlTag("div")
+                        .Class("message" + Enum.GetName(typeof(MessageType), type))
+                        .Attrs(attributeList);
 
-            FluentTagBuilder tbTitle = new FluentTagBuilder("p")
-                        .AddCssClass(title);
+            HtmlTag tbTitle = new HtmlTag("p")
+                        .Class(title);
 
-            FluentTagBuilder tbContent = new FluentTagBuilder("p")
-                        .AddCssClass(content);
+            HtmlTag tbContent = new HtmlTag("p")
+                        .Class(content);
 
-            div.InnerHtml(tbTitle.ToString(TagRenderMode.Normal) + tbContent.ToString(TagRenderMode.Normal));
-            html.ViewContext.HttpContext.Response.Write(div.ToString(TagRenderMode.Normal));
+            div.InnerHtml(tbTitle.ToHtml().Concat(tbContent.ToHtml()));
+
+            html.ViewContext.HttpContext.Response.Write(div.ToHtml());
         }
         #endregion    
 
         public static IHtmlString AutoCompleteExtender(this HtmlHelper html, string ddlName, string entityTypeName, string implementations, string entityIdFieldName,
                                                   string controllerUrl, string onSuccess)
         {
-
             return html.DynamicJs("~/signum/Scripts/SF_autocomplete.js").Callback(@"function () {{
                             new SF.Autocompleter(""{0}"", ""{1}"", {{
 	                            entityIdFieldName: ""{2}"",

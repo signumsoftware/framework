@@ -13,7 +13,7 @@
    bool viewable = findOptions.View && Navigator.IsNavigable(entitiesType, true);
  
     ResultTable queryResult = (ResultTable)ViewData[ViewDataKeys.Results];
-    Dictionary<int, Func<HtmlHelper, object, string>> formatters = (Dictionary<int, Func<HtmlHelper, object, string>>)ViewData[ViewDataKeys.Formatters];
+    Dictionary<int, Func<HtmlHelper, object, MvcHtmlString>> formatters = (Dictionary<int, Func<HtmlHelper, object, MvcHtmlString>>)ViewData[ViewDataKeys.Formatters];
 
     foreach (var row in queryResult.Rows)
     {
@@ -58,7 +58,7 @@
         {
              %>
             <td>
-            <%= formatters[col.Index](Html, row[col]) %>
+            <%: formatters[col.Index](Html, row[col]) %>
             </td>
             <%
         }

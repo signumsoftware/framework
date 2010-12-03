@@ -16,16 +16,16 @@
             {
         %>
         <h1>
-            <%=Html.Encode(ex.Message)%></h1>
+            <%: ex.Message %></h1>
         <%
             }
             else
             {
         %>
         <h1>
-            <%=Html.Encode("Error " + this.ViewContext.HttpContext.Response.StatusCode)%></h1>
+            <%: "Error " + this.ViewContext.HttpContext.Response.StatusCode%></h1>
         <h2>
-            <%=Html.Encode("Error thrown")%></h2>
+            <%: "Error thrown"%></h2>
         <% } 
             if (hei != null)
             {

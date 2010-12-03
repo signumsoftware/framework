@@ -156,4 +156,7 @@
   <data name="Warning0NoResults" xml:space="preserve">
     <value>Warnung {0}: keine Ergebnisse</value>
   </data>
+  <data name="NotAuthorizedToRetrieve01" xml:space="preserve">
+    <value>Keine Berechtigung zum Abrufen von {0} {1}</value>
+  </data>
 </root>

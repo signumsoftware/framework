@@ -21,10 +21,10 @@ namespace Signum.Web
 {
     public static class ListBaseHelper
     {
-        public static string WriteCreateButton(HtmlHelper helper, EntityListBase listBase, Dictionary<string, object> htmlProperties)
+        public static MvcHtmlString CreateButton(HtmlHelper helper, EntityListBase listBase, Dictionary<string, object> htmlProperties)
         {
             if (!listBase.Create)
-                return "";
+                return MvcHtmlString.Empty;
 
             return helper.Button(listBase.Compose("btnCreate"),
                   "+",
@@ -33,10 +33,10 @@ namespace Signum.Web
                   htmlProperties);
         }
 
-        public static string WriteFindButton(HtmlHelper helper, EntityListBase listBase)
+        public static MvcHtmlString FindButton(HtmlHelper helper, EntityListBase listBase)
         {
             if ((!listBase.Find) || !listBase.ElementType.CleanType().IsIIdentifiable())
-                return "";
+                return MvcHtmlString.Empty;
 
             return helper.Button(listBase.Compose("btnFind"),
                   "O",
@@ -45,10 +45,10 @@ namespace Signum.Web
                   null);
         }
 
-        public static string WriteRemoveButton(HtmlHelper helper, EntityListBase listBase)
+        public static MvcHtmlString RemoveButton(HtmlHelper helper, EntityListBase listBase)
         {
             if (!listBase.Remove)
-                return "";
+                return MvcHtmlString.Empty;
 
             IList list = (IList)listBase.UntypedValue;
             return helper.Button(listBase.Compose("btnRemove"),

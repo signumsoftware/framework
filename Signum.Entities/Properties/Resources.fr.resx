@@ -190,7 +190,7 @@
     <value>Plus petit que ou égal</value>
   </data>
   <data name="Count" xml:space="preserve">
-    <value>[Compte]</value>
+    <value>Compte</value>
   </data>
   <data name="Day" xml:space="preserve">
     <value>Jour</value>
@@ -256,7 +256,7 @@
     <value>Heur</value>
   </data>
   <data name="IdentifiableEntity_ToStr" xml:space="preserve">
-    <value>[Texte]</value>
+    <value>Texte</value>
   </data>
   <data name="IdNotValid" xml:space="preserve">
     <value>Id invalide</value>

@@ -246,4 +246,37 @@
   <data name="YourSessionHasTimedOutClickF5ToReloadTheEntity" xml:space="preserve">
     <value>Votre session a expiré, cliquez sur la touche F5 pour recharger l'entité de la base de données</value>
   </data>
+  <data name="Signum_error" xml:space="preserve">
+    <value>Erreur</value>
+  </data>
+  <data name="Signum_executingOperation" xml:space="preserve">
+    <value>En cours d'exécution de l'opération...</value>
+  </data>
+  <data name="Signum_noElementsSelected" xml:space="preserve">
+    <value>Aucun élément sélectionné</value>
+  </data>
+  <data name="Signum_noResults" xml:space="preserve">
+    <value>Aucun résultat trouvé</value>
+  </data>
+  <data name="Signum_operationExecuted" xml:space="preserve">
+    <value>Opération exécutée</value>
+  </data>
+  <data name="Signum_popupErrors" xml:space="preserve">
+    <value>Il existe des erreurs dans l'entité, veut continuer ?</value>
+  </data>
+  <data name="Signum_popupErrorsStop" xml:space="preserve">
+    <value>Il existe des erreurs dans l'entité</value>
+  </data>
+  <data name="Signum_saved" xml:space="preserve">
+    <value>Enregistré</value>
+  </data>
+  <data name="Signum_saving" xml:space="preserve">
+    <value>Sauver</value>
+  </data>
+  <data name="Signum_search" xml:space="preserve">
+    <value>Recherche</value>
+  </data>
+  <data name="Signum_searching" xml:space="preserve">
+    <value>Recherche...</value>
+  </data>
 </root>

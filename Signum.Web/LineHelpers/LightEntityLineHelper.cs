@@ -15,23 +15,23 @@ namespace Signum.Web
 {
     public static class LightEntityLineHelper
     {
-        public static string LightEntityLine(this HtmlHelper helper, Lite lite, bool admin)
+        public static MvcHtmlString LightEntityLine(this HtmlHelper helper, Lite lite, bool admin)
         {
             if (lite == null)
-                return "";
+                return null;
 
             bool isNavigable = Navigator.IsNavigable(lite.RuntimeType, admin);
-            string link = helper.Href("",
+            MvcHtmlString link = helper.Href("",
                 lite.ToStr,
                 isNavigable ? Navigator.ViewRoute(lite.RuntimeType, lite.Id) : "",
                 HttpUtility.HtmlEncode(Resources.View),
                 "",
-                isNavigable ? null : new Dictionary<string, object>() { { "style", "display:none"} });
+                isNavigable ? null : new Dictionary<string, object>() { { "style", "display:none" } });
 
             if (isNavigable)
                 return link;
             else
-                return link + lite.ToStr;
+                return link.Concat(lite.ToStr.EncodeHtml());
         }
     }
 }

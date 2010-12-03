@@ -108,9 +108,8 @@ namespace Signum.Entities.DynamicQuery
         {
             return Reflector.PublicInstancePropertiesInOrder(type)
                   .Where(p => Reflector.QueryableProperty(type, p))
-                  .Select(p => (QueryToken)new EntityPropertyToken(this, p));
+                  .Select(p => (QueryToken)new EntityPropertyToken(this, p)).OrderBy(a => a.ToString());
         }
-
 
         static MethodInfo miToLite = ReflectionTools.GetMethodInfo((IdentifiableEntity ident) => ident.ToLite()).GetGenericMethodDefinition();
         protected static Expression ExtractEntity(Expression expression, bool idAndToStr)
@@ -253,7 +252,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string NiceName()
         {
-            return DisplayName + Resources.Of + Parent.NiceName();
+            return DisplayName + Resources.Of + Parent.ToString();
         }
 
         public override QueryToken Clone()
@@ -266,6 +265,7 @@ namespace Signum.Entities.DynamicQuery
     public class EntityPropertyToken : QueryToken
     {
         public PropertyInfo PropertyInfo { get; private set; }
+        public bool IsSpecial { get; private set; }
         
         public static QueryToken IdProperty(QueryToken parent)
         {
@@ -277,13 +277,15 @@ namespace Signum.Entities.DynamicQuery
             return new EntityPropertyToken(parent, ReflectionTools.GetPropertyInfo((IdentifiableEntity e) => e.ToStr));
         }
 
-        internal EntityPropertyToken(QueryToken parent, PropertyInfo pi)
+        internal EntityPropertyToken(QueryToken parent, PropertyInfo pi, bool isSpecial = false)
             : base(parent)
         {
             if (pi == null)
                 throw new ArgumentNullException("pi");
 
             this.PropertyInfo = pi;
+
+            this.IsSpecial = isSpecial;
         }
 
         public override Type Type
@@ -293,6 +295,9 @@ namespace Signum.Entities.DynamicQuery
 
         public override string ToString()
         {
+            if (IsSpecial)
+                return "[{0}]".Formato(PropertyInfo.NiceName());
+
             return PropertyInfo.NiceName();
         }
 
@@ -383,7 +388,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string NiceName()
         {
-            return PropertyInfo.NiceName() + Resources.Of + Parent.NiceName();
+            return PropertyInfo.NiceName() + Resources.Of + Parent.ToString();
         }
 
         public override QueryToken Clone()
@@ -420,7 +425,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string Key
         {
-            get { return "({0})".Formato(type); }
+            get { return "({0})".Formato(type.FullName.Replace(".", ":")); }
         }
 
         public override Expression BuildExpression(Expression expression)
@@ -464,7 +469,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string NiceName()
         {
-            return Resources._0As1.Formato(Parent.NiceName(), type.NiceName());
+            return Resources._0As1.Formato(Parent.ToString(), type.NiceName());
         }
 
         public override QueryToken Clone()
@@ -586,7 +591,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string NiceName()
         {
-            return Resources.MonthStart + Resources.Of + Parent.NiceName();
+            return Resources.MonthStart + Resources.Of + Parent.ToString();
         }
 
         public override string Format
@@ -660,7 +665,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string NiceName()
         {
-            return Resources.Date + Resources.Of + Parent.NiceName();
+            return Resources.Date + Resources.Of + Parent.ToString();
         }
 
         public override string Format

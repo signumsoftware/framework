@@ -46,8 +46,8 @@ namespace Signum.Web
             set { text = value; }
         }
 
-        string html;
-        public string Html
+        MvcHtmlString html;
+        public MvcHtmlString Html
         {
             get { return html; }
             set { html = value; }
@@ -123,19 +123,19 @@ namespace Signum.Web
 
                     if (Link != null)
                     {
-                        sb.AppendLine(new FluentTagBuilder("a")
-                                         .MergeAttributes(new { onmouseover = "", title = Title, href = Link.ToString(), id = Id })
-                                         .AddCssClass(Class)
+                        sb.AppendLine(new HtmlTag("a")
+                                         .Attrs(new { onmouseover = "", title = Title, href = Link.ToString(), id = Id })
+                                         .Class(Class)
                                          .SetInnerText(Text)
-                                         .ToString(TagRenderMode.Normal));
+                                         .ToHtml().ToHtmlString());
                     }
                     else
                     {
-                        sb.AppendLine(new FluentTagBuilder("span")
-                                         .MergeAttributes(new { onmouseover = "", title = Title, id = Id })
-                                         .AddCssClass(Class)
+                        sb.AppendLine(new HtmlTag("span")
+                                         .Attrs(new { onmouseover = "", title = Title, id = Id })
+                                         .Class(Class)
                                          .SetInnerText(Text)
-                                         .ToString(TagRenderMode.Normal));
+                                         .ToHtml().ToHtmlString());
                     }
 
                     if (selectedSubmenu)
@@ -159,16 +159,16 @@ namespace Signum.Web
                 if (link.HasText() && currentUrl.EndsWith(link)) { active = true; }*/
                 if (ManualA == null)
                 {
-                    FluentTagBuilder tbA = /*active ? new FluentTagBuilder("span").AddCssClass("selected") :*/ new FluentTagBuilder("a")
-                            .MergeAttributes(new {href = link, title = Title, id = Id})
-                            .AddCssClass(Class);
+                    HtmlTag tbA = /*active ? new FluentTagBuilder("span").AddCssClass("selected") :*/ new HtmlTag("a")
+                            .Attrs(new {href = link, title = Title, id = Id})
+                            .Class(Class);
 
-                    if (!string.IsNullOrEmpty(html))
+                    if (!MvcHtmlString.IsNullOrEmpty(html))
                         tbA.InnerHtml(html);
                     else
                         tbA.SetInnerText(Text);
  
-                    sb.Append(tbA.ToString(TagRenderMode.Normal));
+                    sb.Append(tbA.ToHtml().ToHtmlString());
                 }
                 else
                     sb.Append(ManualA(link, title, " ".CombineIfNotEmpty(Class, "selected")));

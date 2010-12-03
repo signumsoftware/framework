@@ -21,7 +21,7 @@ namespace Signum.Web.Controllers
             return Navigator.PopupView(this, NoteWidgetHelper.CreateNote(entity), prefix, sfUrl);
         }
 
-        public string RefreshNotes(string sfRuntimeTypeRelated, int? sfIdRelated)
+        public MvcHtmlString RefreshNotes(string sfRuntimeTypeRelated, int? sfIdRelated)
         {
             IdentifiableEntity entity = Database.Retrieve(Navigator.NamesToTypes[sfRuntimeTypeRelated], sfIdRelated.Value);
 
@@ -40,7 +40,7 @@ namespace Signum.Web.Controllers
             return Navigator.PopupView(this, AlertWidgetHelper.CreateAlert(entity), prefix, sfUrl);
         }
 
-        public string RefreshAlerts(string sfRuntimeTypeRelated, int? sfIdRelated)
+        public MvcHtmlString RefreshAlerts(string sfRuntimeTypeRelated, int? sfIdRelated)
         {
             IdentifiableEntity entity = Database.Retrieve(Navigator.NamesToTypes[sfRuntimeTypeRelated], sfIdRelated.Value);
 

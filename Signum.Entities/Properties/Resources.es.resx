@@ -256,7 +256,7 @@
     <value>Hora</value>
   </data>
   <data name="IdentifiableEntity_ToStr" xml:space="preserve">
-    <value>[Texto]</value>
+    <value>Texto</value>
   </data>
   <data name="IdNotValid" xml:space="preserve">
     <value>Id no válido</value>

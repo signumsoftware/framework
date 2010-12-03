@@ -121,7 +121,7 @@
     <value>--- FIN DU SCRIPT DE SYNCHRONISATION</value>
   </data>
   <data name="EntityWithType0AndId1NotFound" xml:space="preserve">
-    <value>Pas trouvé {0} avec l'ID {1}</value>
+    <value>Entité {0} avec l'ID {1} non trouvé</value>
   </data>
   <data name="NNone" xml:space="preserve">
     <value>- n: Aucun</value>
@@ -142,7 +142,7 @@
     <value>Erreur de simultanéité sur la databe, la table = {0}, ID = {1}</value>
   </data>
   <data name="CannotInsertDuplicatedFields0On1Table" xml:space="preserve">
-    <value>Ne peut pas insérer dupliqué valeurs sur le champ {0} de la table {1}</value>
+    <value>Ne peut pas insérer valeurs dupliquées sur le champ {0} de la table {1}</value>
   </data>
   <data name="_0HasBeenRenamedIn1" xml:space="preserve">
     <value>'{0}' a été renommé dans {1} ?</value>
@@ -155,5 +155,8 @@
   </data>
   <data name="UnauthorizedAccessTo0Because1" xml:space="preserve">
     <value>Accès refusé à {0} car {1}</value>
+  </data>
+  <data name="NotAuthorizedToRetrieve01" xml:space="preserve">
+    <value>Pas autorisé à récupérer {0} {1}</value>
   </data>
 </root>

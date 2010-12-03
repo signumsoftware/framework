@@ -269,7 +269,16 @@ namespace Signum.Web.Controllers
             }
             fo.Operation = QueryUtils.GetFilterOperations(QueryUtils.GetFilterType(fo.Token.Type)).First();
 
-            return Content(SearchControlHelper.NewFilter(CreateHtmlHelper(this), queryName, fo, new Context(null, prefix), index));
+            return Content(SearchControlHelper.NewFilter(CreateHtmlHelper(this), queryName, fo, new Context(null, prefix), index).ToHtmlString());
+        }
+
+        [HttpPost]
+        public ContentResult GetColumnName(string sfQueryUrlName, string tokenName)
+        {
+            object queryName = Navigator.ResolveQueryFromUrlName(sfQueryUrlName);
+            QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
+            QueryToken token = QueryUtils.Parse(tokenName, qd);
+            return Content(token.NiceName());
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
@@ -316,7 +325,7 @@ namespace Signum.Web.Controllers
                 //Cell Value must be custom and cannot be parsed automatically: Leave value to null
             }
 
-            return Content(SearchControlHelper.NewFilter(CreateHtmlHelper(this), queryName, fo, new Context(null, prefix), index));
+            return Content(SearchControlHelper.NewFilter(CreateHtmlHelper(this), queryName, fo, new Context(null, prefix), index).ToHtmlString());
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
@@ -335,7 +344,7 @@ namespace Signum.Web.Controllers
                 Selected = false
             }).ToList();
             items.Insert(0, new SelectListItem { Text = "-", Selected = true, Value = "" });
-            return Content(SearchControlHelper.TokensCombo(CreateHtmlHelper(this), Navigator.Manager.QuerySettings[queryName].UrlName, items, new Context(null, prefix), index + 1, true));
+            return Content(SearchControlHelper.TokensCombo(CreateHtmlHelper(this), Navigator.Manager.QuerySettings[queryName].UrlName, items, new Context(null, prefix), index + 1, true).ToHtmlString());
         }
 
         [AcceptVerbs(HttpVerbs.Post)]

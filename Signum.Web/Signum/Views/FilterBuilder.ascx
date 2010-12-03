@@ -1,4 +1,4 @@
-﻿<%@ Control Language="C#" Inherits="System.Web.Mvc.ViewUserControl" %>
+<%@ Control Language="C#" Inherits="System.Web.Mvc.ViewUserControl" %>
 <%@ Import Namespace="Signum.Web" %>
 <%@ Import Namespace="Signum.Entities" %>
 <%@ Import Namespace="Signum.Entities.DynamicQuery" %>
@@ -19,7 +19,7 @@
         <a onclick="toggleFilters(this)" class="filters-header<%= visible ? "" : " close" %>" rev="filters-body"><%= visible ? Html.Encode(Resources.HideFilters) : Html.Encode(Resources.ShowFilters) %></a>
         <div class="filters" <%= visible ? "" : "style='display:none'"%>>
             <div id="<%=context.Compose("filters-body")%>" class="filters-body">
-                <label for="<%=context.Compose("ddlTokens_0")%>"><%=Html.Encode(Resources.FilterByField) %></label>
+                <label for="<%=context.Compose("ddlTokens_0")%>"><%: Resources.FilterByField %></label>
                 <% var columns = queryDescription.Columns
                         .Select(c => new SelectListItem { Text = c.DisplayName, Value = c.Name, Selected = false })
                         .ToList();
@@ -38,13 +38,13 @@
     <% List<FilterOption> filterOptions = findOptions.FilterOptions; %>
   
     <div class="filters-list">
-        <span class="explanation" style="<%= (filterOptions == null || filterOptions.Count == 0) ? "" : "display:none;" %>"><%=Html.Encode(Resources.NoFiltersSpecified)%></span>
+        <span class="explanation" style="<%= (filterOptions == null || filterOptions.Count == 0) ? "" : "display:none;" %>"><%: Resources.NoFiltersSpecified %></span>
         <table id="<%=context.Compose("tblFilters")%>" style="<%= (filterOptions == null || filterOptions.Count == 0) ? "display:none;" : "" %>">            
             <thead>
                 <tr>
-                    <th><%=Html.Encode(Resources.Field)%></th>
-                    <th><%=Html.Encode(Resources.Operation)%></th>
-                    <th><%=Html.Encode(Resources.Value)%></th>
+                    <th><%: Resources.Field %></th>
+                    <th><%: Resources.Operation %></th>
+                    <th><%: Resources.Value %></th>
                     <th></th>
                 </tr>  
             </thead>  

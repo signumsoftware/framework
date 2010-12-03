@@ -255,9 +255,6 @@
   <data name="Hour" xml:space="preserve">
     <value>Hour</value>
   </data>
-  <data name="IdentifiableEntity_ToStr" xml:space="preserve">
-    <value>[Text]</value>
-  </data>
   <data name="IdNotValid" xml:space="preserve">
     <value>Id not valid</value>
   </data>
@@ -344,5 +341,8 @@
   </data>
   <data name="_0IsNotSet" xml:space="preserve">
     <value>{0} is not set</value>
+  </data>
+  <data name="IdentifiableEntity_ToStr" xml:space="preserve">
+    <value>Text</value>
   </data>
 </root>

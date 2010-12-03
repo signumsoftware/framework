@@ -199,7 +199,7 @@
     <value>kleiner oder gleich</value>
   </data>
   <data name="Count" xml:space="preserve">
-    <value>[NUM]</value>
+    <value>Num</value>
   </data>
   <data name="Date" xml:space="preserve">
     <value>Datum</value>
@@ -268,7 +268,7 @@
     <value>Zeit</value>
   </data>
   <data name="IdentifiableEntity_ToStr" xml:space="preserve">
-    <value>[Text]</value>
+    <value>Text</value>
   </data>
   <data name="IdNotValid" xml:space="preserve">
     <value>ID ungültig</value>

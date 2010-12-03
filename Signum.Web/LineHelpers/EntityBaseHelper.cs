@@ -15,17 +15,17 @@ using Signum.Entities.Reflection;
 namespace Signum.Web
 {
     public static class EntityBaseHelper
-    { 
-        public static string BaseLineLabel(HtmlHelper helper, BaseLine baseLine)
+    {
+        public static MvcHtmlString BaseLineLabel(HtmlHelper helper, BaseLine baseLine)
         {
             return BaseLineLabel(helper, baseLine, baseLine.Compose(EntityBaseKeys.ToStr));
         }
 
-        public static string BaseLineLabel(HtmlHelper helper, BaseLine baseLine, string idLabelFor)
+        public static MvcHtmlString BaseLineLabel(HtmlHelper helper, BaseLine baseLine, string idLabelFor)
         {
             return baseLine.LabelVisible && !baseLine.OnlyValue ?
                            helper.Label(baseLine.Compose("lbl"), baseLine.LabelText ?? "", idLabelFor, TypeContext.CssLineLabel) :
-                           "";
+                           MvcHtmlString.Empty;
         }
 
         public static bool RequiresLoadAll(HtmlHelper helper, EntityBase eb)
@@ -40,7 +40,7 @@ namespace Signum.Web
                    (eb.UntypedValue != null && hasChanged && propertyHasChanged);
         }
 
-        public static string RenderTypeContext(HtmlHelper helper, TypeContext typeContext, RenderMode mode, EntityBase line)
+        public static MvcHtmlString RenderTypeContext(HtmlHelper helper, TypeContext typeContext, RenderMode mode, EntityBase line)
         {
             Type cleanRuntimeType = (typeContext.UntypedValue as Lite).TryCC(l => l.RuntimeType) ?? typeContext.UntypedValue.GetType();
 
@@ -87,8 +87,7 @@ namespace Signum.Web
                 case RenderMode.ContentInVisibleDiv:
                 case RenderMode.ContentInInvisibleDiv:
                     return helper.Div(typeContext.Compose(EntityBaseKeys.Entity),
-                        helper.RenderPartialToString(partialViewName, vdd),
-                        "",
+                        helper.RenderPartialToString(partialViewName, vdd), "",
                         (mode == RenderMode.ContentInInvisibleDiv) ? new Dictionary<string, object> { { "style", "display:none" } } : null);
                 default:
                     throw new InvalidOperationException();
@@ -100,20 +99,20 @@ namespace Signum.Web
             return input.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("/", "\\/").Replace("\r\n", "").Replace("\n", "");
         }
 
-        public static string WriteImplementations(HtmlHelper helper, EntityBase entityBase)
+        public static MvcHtmlString HiddenImplementations(HtmlHelper helper, EntityBase entityBase)
         {
             if (entityBase.Implementations == null)
-                return "";
+                return MvcHtmlString.Empty;
 
             string implementations = ImplementationsModelBinder.Render(entityBase.Implementations);
 
-            return helper.Hidden(entityBase.Compose(EntityBaseKeys.Implementations), implementations, new { disabled = "disabled" }).ToHtmlString();
+            return helper.Hidden(entityBase.Compose(EntityBaseKeys.Implementations), implementations, new { disabled = "disabled" });
         }
 
-        public static string WriteViewButton(HtmlHelper helper, EntityBase entityBase)
+        public static MvcHtmlString ViewButton(HtmlHelper helper, EntityBase entityBase)
         {
             if (!entityBase.View)
-                return "";
+                return MvcHtmlString.Empty;
 
             return helper.Button(entityBase.Compose("btnView"),
                   "->",
@@ -122,10 +121,10 @@ namespace Signum.Web
                   (entityBase.UntypedValue == null) ? new Dictionary<string, object>() { { "style", "display:none" } } : new Dictionary<string, object>());
         }
 
-        public static string WriteCreateButton(HtmlHelper helper, EntityBase entityBase)
+        public static MvcHtmlString CreateButton(HtmlHelper helper, EntityBase entityBase)
         {
             if (!entityBase.Create)
-                return "";
+                return MvcHtmlString.Empty;
 
             return helper.Button(entityBase.Compose("btnCreate"),
                   "+",
@@ -134,10 +133,10 @@ namespace Signum.Web
                   (entityBase.UntypedValue == null) ? new Dictionary<string, object>() : new Dictionary<string, object>() { { "style", "display:none" } });
         }
 
-        public static string WriteFindButton(HtmlHelper helper, EntityBase entityBase)
+        public static MvcHtmlString FindButton(HtmlHelper helper, EntityBase entityBase)
         {
             if (!entityBase.Find || !entityBase.Type.CleanType().IsIIdentifiable())
-                return "";
+                return MvcHtmlString.Empty;
 
             return helper.Button(entityBase.Compose("btnFind"),
                  "O",
@@ -146,10 +145,10 @@ namespace Signum.Web
                  (entityBase.UntypedValue == null) ? new Dictionary<string, object>() : new Dictionary<string, object>() { { "style", "display:none" } });
         }
 
-        public static string WriteRemoveButton(HtmlHelper helper, EntityBase entityBase)
+        public static MvcHtmlString RemoveButton(HtmlHelper helper, EntityBase entityBase)
         {
             if (!entityBase.Remove)
-                return "";
+                return MvcHtmlString.Empty;
 
             return helper.Button(entityBase.Compose("btnRemove"),
                   "x",
@@ -158,16 +157,16 @@ namespace Signum.Web
                   (entityBase.UntypedValue == null) ? new Dictionary<string, object>() { { "style", "display:none" } } : new Dictionary<string, object>());        
         }
 
-        public static string WriteBreakLine(HtmlHelper helper, EntityBase entityBase)
+        public static MvcHtmlString BreakLineDiv(HtmlHelper helper, EntityBase entityBase)
         {
-            return entityBase.BreakLine ? helper.Div("", "", "clearall") : "";
+            return entityBase.BreakLine ? helper.Div("", null, "clearall") : MvcHtmlString.Empty;
         }
 
-        internal static string EmbeddedTemplate(EntityBase entityBase, string template)
+        internal static MvcHtmlString EmbeddedTemplate(EntityBase entityBase, MvcHtmlString template)
         {
-            return "<script type=\"text/javascript\">var {0} = \"{1}\"</script>".Formato(
+            return MvcHtmlString.Create("<script type=\"text/javascript\">var {0} = \"{1}\"</script>".Formato(
                                 entityBase.Compose(EntityBaseKeys.Template),
-                                EntityBaseHelper.JsEscape(template));
+                                EntityBaseHelper.JsEscape(template.ToHtmlString())));
         }
 
         internal static void ConfigureEntityBase(EntityBase eb, Type entityType)

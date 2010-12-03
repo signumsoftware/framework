@@ -124,14 +124,14 @@ namespace Signum.Engine
             return Database.RetrieveLite(liteType, lite.RuntimeType, lite.Id);
         }
 
-        static Type GetType(string typeName)
+        public static Type GetType(string className)
         {
-            return Schema.Current.TypeToDN.Keys.Where(t => t.Name == typeName).Single("Type {0} not found in the schema".Formato(typeName));
+            return Schema.Current.DnToType.Where(t => t.Key.ClassName == className).Select(a => a.Value).Single("Type {0} not found in the schema".Formato(className));
         }
 
-        static Type TryGetType(string typeName)
+        public static Type TryGetType(string className)
         {
-            return Schema.Current.TypeToDN.Keys.Where(t => t.Name == typeName).SingleOrDefault();
+            return Schema.Current.DnToType.Where(t => t.Key.ClassName == className).Select(a => a.Value).SingleOrDefault();
         }
     }
 }

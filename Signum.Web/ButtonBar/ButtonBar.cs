@@ -62,9 +62,9 @@ namespace Signum.Web
             return elements;
         }
 
-        public static string ToString(this List<ToolBarButton> elements, HtmlHelper helper)
+        public static MvcHtmlString ToString(this List<ToolBarButton> elements, HtmlHelper helper)
         {
-            return elements.ToString(tb => "<li>" + tb.ToString(helper) + "</li>", "\r\n");
+            return MvcHtmlString.Create(elements.ToString(tb => "<li>" + tb.ToHtml(helper).ToHtmlString() + "</li>", "\r\n"));
         }
     }
 }

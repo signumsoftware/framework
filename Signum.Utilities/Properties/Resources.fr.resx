@@ -162,18 +162,6 @@
   <data name="And" xml:space="preserve">
     <value> et </value>
   </data>
-  <data name="CannotRemoveItemThatIsNotInTree" xml:space="preserve">
-    <value>Ne peut supprimer un élément qui n'est pas dans l'arbre</value>
-  </data>
-  <data name="CellHasQuotesInAnUnexpectedPosition" xml:space="preserve">
-    <value>La cellule a  " dans un endroit inapproprié: {0}</value>
-  </data>
-  <data name="CellStartsByQuotesButNotEndsLikeThis" xml:space="preserve">
-    <value>La celule débute par " mais ne termine pas de la même façon: {0}</value>
-  </data>
-  <data name="CubeNotFound" xml:space="preserve">
-    <value>Cube pas trouvé</value>
-  </data>
   <data name="DateLast" xml:space="preserve">
     <value>Dernier {0}</value>
   </data>
@@ -198,120 +186,14 @@
   <data name="DateTimePrecision_Seconds" xml:space="preserve">
     <value>Secondes</value>
   </data>
-  <data name="DictionaryEmpty" xml:space="preserve">
-    <value>Dictionnaire vide</value>
-  </data>
-  <data name="EmptyList" xml:space="preserve">
-    <value>Liste vide</value>
-  </data>
-  <data name="EmptyPriorityQueue" xml:space="preserve">
-    <value>Priority Queue vide</value>
-  </data>
-  <data name="EmptyQueue" xml:space="preserve">
-    <value>Queue vide</value>
-  </data>
-  <data name="EmptyStack" xml:space="preserve">
-    <value>Stack vide</value>
-  </data>
-  <data name="EmptyTree" xml:space="preserve">
-    <value>Arbre vide</value>
-  </data>
   <data name="EnterYourSelection" xml:space="preserve">
     <value>Entrez votre sélection: </value>
   </data>
   <data name="EnterYoutSelectionsSeparatedByComma" xml:space="preserve">
     <value>Entrez votre sélection séparé par une virgule: </value>
   </data>
-  <data name="Error0Extra1" xml:space="preserve">
-    <value>Erreur {0}:
- Excèdant: {1}</value>
-  </data>
-  <data name="Error0Lacking1" xml:space="preserve">
-    <value>Erreur {0}:
- Manquant: {1}</value>
-  </data>
-  <data name="Error0Lacking1Extra2" xml:space="preserve">
-    <value>Erreur {0}:
- Manquant: {1}
- Excèdant: {2}</value>
-  </data>
-  <data name="ExpansionFailed0DoesNotImplementIMethodExpander" xml:space="preserve">
-    <value>L'expansion a échoué! '{0}' n'implémante pas le IMethodExpander</value>
-  </data>
-  <data name="FieldShouldBeAnExpressionAccessingAField" xml:space="preserve">
-    <value>Le champ doit être une expression accédant à un champ</value>
-  </data>
-  <data name="FirstCollectionIsShorter" xml:space="preserve">
-    <value>La première collection est plus courte</value>
-  </data>
-  <data name="GenericMethodDefinitionShouldBeAGenericMethodDefinition" xml:space="preserve">
-    <value>genericMethodDefinition ne devrait pas être une Generic Method Definition</value>
-  </data>
-  <data name="GenericTypeDefinitionShouldBeAGenericTypeDefinition" xml:space="preserve">
-    <value>genericTypeDefinition ne devrait pas être une Generic Type Definition</value>
-  </data>
-  <data name="InconsistenceFoundCube012CouldHaveValues34" xml:space="preserve">
-    <value>Inconsistances trouvées, cube {0} x {1} x {2} peut avoir les valeurs{3} ó {4}</value>
-  </data>
-  <data name="InconsistenceFoundOnSquare01CouldHaveValues23" xml:space="preserve">
-    <value>Inconsistances trouvées, carré {0} x {1} peut avoir les valeurs {2} ó {3}</value>
-  </data>
-  <data name="Interval0OverlapsWithTheExisting1" xml:space="preserve">
-    <value>Intervalle {0} chevauche  les existantes {1}</value>
-  </data>
-  <data name="IntervalLimitsDoNotExistOnDictionary" xml:space="preserve">
-    <value>La limite de l'intervalle n'existe pas dans le dictionnaire</value>
-  </data>
-  <data name="Intervalo0OverlapsWithExistingOne1Value2" xml:space="preserve">
-    <value>L'intervalle {0} chevauche l'existant {1}, valeur : {2}</value>
-  </data>
-  <data name="IsNotAnEnum" xml:space="preserve">
-    <value>{0} n'est pas un Enum</value>
-  </data>
-  <data name="Key0NotFound" xml:space="preserve">
-    <value>Clé {0} pas trouvée</value>
-  </data>
-  <data name="MaxShouldBeGreaterOrEqualThanMin" xml:space="preserve">
-    <value>Le max doit être plus grand ou égal au min</value>
-  </data>
-  <data name="MemberShouldBeAnExpressionAccessingAMember" xml:space="preserve">
-    <value>Le membre doit être une expression accédant à un membre</value>
-  </data>
-  <data name="Method0NotFoundOnType1" xml:space="preserve">
-    <value>Methode {0} pas trouvée dans le type {1}</value>
-  </data>
-  <data name="MethodShouldBeAnExpressionCallingAMethod" xml:space="preserve">
-    <value>La méthode doit être une expression appelant une méthode</value>
-  </data>
-  <data name="MinAndMaxShouldBeGreaterThan0" xml:space="preserve">
-    <value>min et max doivent être plus grand que 0</value>
-  </data>
-  <data name="MinIsGreaterThanMax" xml:space="preserve">
-    <value>Min est plus grand que Max</value>
-  </data>
-  <data name="MiShouldBeAGenericMethodDefinition" xml:space="preserve">
-    <value>mi devrait être une Generic Method Definition</value>
-  </data>
-  <data name="MoreThanOneMemberNamed0" xml:space="preserve">
-    <value>Il y a plus qu'un membre nommé '{0}'</value>
-  </data>
-  <data name="NoElementExistWithKey0" xml:space="preserve">
-    <value>Pas d'éléments existants avec la touche: {0}</value>
-  </data>
-  <data name="NoIntervalFound" xml:space="preserve">
-    <value>Intervalles introuvables</value>
-  </data>
-  <data name="NoMatchInA01Switch" xml:space="preserve">
-    <value>Pas de correspondance dans {0} -&gt; {1} interrupteur</value>
-  </data>
-  <data name="NoMemberNamed0" xml:space="preserve">
-    <value>Il n'y a pas de membre avec le nom '{0}'</value>
-  </data>
   <data name="NoOptionWithKey0Found" xml:space="preserve">
     <value>Pas d'option avec la touche {0} trouvée</value>
-  </data>
-  <data name="NotSupported0" xml:space="preserve">
-    <value>Pas supporté {0}</value>
   </data>
   <data name="Or" xml:space="preserve">
     <value> ou </value>
@@ -319,38 +201,8 @@
   <data name="OS_Unknown0" xml:space="preserve">
     <value>Inconnu({0})</value>
   </data>
-  <data name="PropertyShouldBeAnExpressionAccessingAProperty" xml:space="preserve">
-    <value>La propriété doit être une expression accédant à une propriété</value>
-  </data>
-  <data name="SecondCollectionsIsShorter" xml:space="preserve">
-    <value>La deuxième collection est plus courte</value>
-  </data>
   <data name="SelectOneOfTheFollowingOptions" xml:space="preserve">
     <value>Choisissez une des options:</value>
-  </data>
-  <data name="SquareNotFound" xml:space="preserve">
-    <value>Carré introuvable</value>
-  </data>
-  <data name="String0IsTooShort" xml:space="preserve">
-    <value>La chaîne '{0}' est trop courte</value>
-  </data>
-  <data name="TheCollectionHasNoElements" xml:space="preserve">
-    <value>La collection n'a pas d'étélements</value>
-  </data>
-  <data name="TheDateHasSomeValueInTheHourMinuteSecondOrMillisecond" xml:space="preserve">
-    <value>La date a des valeurs dans l'heure, minutes, secondes ou millisecondes</value>
-  </data>
-  <data name="TheNode0IsNotInTheGraph" xml:space="preserve">
-    <value>Le noeud {0} n'est pas sur le graph</value>
-  </data>
-  <data name="TheNodeType0IsNotSupportedAsUnaryExpression" xml:space="preserve">
-    <value>Le type de noeud {0} n'est pas supporté comme expression unaire</value>
-  </data>
-  <data name="ThereAreSomeRepeated01" xml:space="preserve">
-    <value>Il y a des {0} répétés: {1}</value>
-  </data>
-  <data name="ThereIsMoreThanOneElementWithKey0" xml:space="preserve">
-    <value>Il y a plus d'un éléments avec la touche(clé): {0}</value>
   </data>
   <data name="Today" xml:space="preserve">
     <value>Aujourd'hui</value>
@@ -360,12 +212,6 @@
   </data>
   <data name="Unavailable" xml:space="preserve">
     <value>Indisponible</value>
-  </data>
-  <data name="UnhandledBindingType0" xml:space="preserve">
-    <value>Type de liaison pas prise en charge '{0}'</value>
-  </data>
-  <data name="UnhandledExpressionType0" xml:space="preserve">
-    <value>Type d'expression pas prise en charge: '{0}'</value>
   </data>
   <data name="Yesterday" xml:space="preserve">
     <value>Hier</value>

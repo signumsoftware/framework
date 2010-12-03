@@ -12,11 +12,9 @@ namespace Signum.Web
     public class ToolBarMenu : ToolBarButton
     {
         public List<ToolBarButton> Items { get; set; }
-        
-        public override string ToString(HtmlHelper helper)
-        {
-            StringBuilder sb = new StringBuilder();
 
+        public override MvcHtmlString ToHtml(HtmlHelper helper)
+        {
             if (ImgSrc.HasText())
             {
                 if (HtmlProps.ContainsKey("style"))
@@ -25,21 +23,21 @@ namespace Signum.Web
                     HtmlProps["style"] = "background:transparent url(" + ImgSrc + ")  no-repeat scroll -4px top; text-indent:12px;";
             }
 
-            sb.Append("<ul class='menu-operation'>");
+            HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            if (Items != null)
-            {
-                foreach (ToolBarButton tbb in Items)
-                    sb.Append("<li>" + tbb.ToString(helper) + "</li>");
-            }
+            using (sb.Surround(new HtmlTag("ul").Class("menu-operation")))
+                if (Items != null)
+                {
+                    foreach (ToolBarButton tbb in Items)
+                        sb.Add(tbb.ToHtml(helper).Surround("li"));
+                }
 
-            sb.Append("</ul>");
+
 
             HtmlProps["onclick"] = "ToggleDropdown(this); return false;";
             return helper.Div(Id,
-                HttpUtility.HtmlEncode(Text)
-                + helper.Div(null, null, "indicator", null)
-                + sb.ToString(), DivCssClass + " dropdown", HtmlProps);
+                Text.EncodeHtml().Concat(helper.Div(null, null, "indicator", null)).Concat(sb.ToHtml())
+                , DivCssClass + " dropdown", HtmlProps);
         }
     }
 
@@ -47,9 +45,9 @@ namespace Signum.Web
     {
         public static string DefaultMenuSeparatorCssClass = "toolbar-menu-separator";
 
-        public override string ToString(HtmlHelper helper)
+        public override MvcHtmlString ToHtml(HtmlHelper helper)
         {
-            return helper.Div("", "", DivCssClass.HasText() ? DivCssClass : DefaultMenuSeparatorCssClass);
+            return helper.Div("", null, DivCssClass.HasText() ? DivCssClass : DefaultMenuSeparatorCssClass);
         }
     }
 }

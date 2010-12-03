@@ -16,39 +16,40 @@ namespace Signum.Web
 {
     public static class EntityInfoHelper
     {
-        public static string HiddenLite(this HtmlHelper helper, string name, Lite lite)
+        public static MvcHtmlString HiddenLite(this HtmlHelper helper, string name, Lite lite)
         {
-            return helper.Hidden(name, lite.Key()).ToHtmlString();
+            return helper.Hidden(name, lite.Key());
         }
 
-        public static string HiddenEntityInfo(this HtmlHelper helper, TypeContext tc)
+        public static MvcHtmlString HiddenEntityInfo(this HtmlHelper helper, TypeContext tc)
         {
-            return helper.HiddenRuntimeInfo(tc) + helper.HiddenStaticInfo(tc);
+            return helper.HiddenRuntimeInfo(tc).Concat(helper.HiddenStaticInfo(tc));
         }
 
-        public static string HiddenRuntimeInfo(this HtmlHelper helper, TypeContext tc)
+        public static MvcHtmlString HiddenRuntimeInfo(this HtmlHelper helper, TypeContext tc)
         {
-            return helper.Hidden(tc.Compose(EntityBaseKeys.RuntimeInfo), new RuntimeInfo(tc.UntypedValue) { Ticks = GetTicks(helper, tc), ForceNewInUI = GetForceNewInUI(helper, tc) }.ToString()).ToHtmlString();
+            return helper.Hidden(tc.Compose(EntityBaseKeys.RuntimeInfo), 
+                new RuntimeInfo(tc.UntypedValue) { Ticks = GetTicks(helper, tc), ForceNewInUI = GetForceNewInUI(helper, tc) }.ToString());
         }
 
-        public static string HiddenStaticInfo(this HtmlHelper helper, TypeContext tc)
+        public static MvcHtmlString HiddenStaticInfo(this HtmlHelper helper, TypeContext tc)
         {
-            return helper.Hidden(tc.Compose(EntityBaseKeys.StaticInfo), new StaticInfo(tc.UntypedValue.TryCC(uv=>uv.GetType()) ?? tc.Type) { IsReadOnly = tc.ReadOnly }.ToString(), new { disabled = "disabled" }).ToHtmlString();
+            return helper.Hidden(tc.Compose(EntityBaseKeys.StaticInfo), new StaticInfo(tc.UntypedValue.TryCC(uv=>uv.GetType()) ?? tc.Type) { IsReadOnly = tc.ReadOnly }.ToString(), new { disabled = "disabled" });
         }
 
-        public static string HiddenEntityInfo<T, S>(this HtmlHelper helper, TypeContext<T> parent, Expression<Func<T, S>> property)
+        public static MvcHtmlString HiddenEntityInfo<T, S>(this HtmlHelper helper, TypeContext<T> parent, Expression<Func<T, S>> property)
         {
             TypeContext<S> typeContext = (TypeContext<S>)Common.WalkExpression(parent, property);
-            return helper.HiddenRuntimeInfo(typeContext) + helper.HiddenStaticInfo(typeContext);
+            return helper.HiddenRuntimeInfo(typeContext).Concat(helper.HiddenStaticInfo(typeContext));
         }
 
-        public static string HiddenRuntimeInfo<T, S>(this HtmlHelper helper, TypeContext<T> parent, Expression<Func<T, S>> property)
+        public static MvcHtmlString HiddenRuntimeInfo<T, S>(this HtmlHelper helper, TypeContext<T> parent, Expression<Func<T, S>> property)
         {
             TypeContext<S> typeContext = (TypeContext<S>)Common.WalkExpression(parent, property);
             return helper.HiddenRuntimeInfo(typeContext);
         }
 
-        public static string HiddenStaticInfo<T, S>(this HtmlHelper helper, TypeContext<T> parent, Expression<Func<T, S>> property)
+        public static MvcHtmlString HiddenStaticInfo<T, S>(this HtmlHelper helper, TypeContext<T> parent, Expression<Func<T, S>> property)
         {
             TypeContext<S> typeContext = (TypeContext<S>)Common.WalkExpression(parent, property);
             return helper.HiddenStaticInfo(typeContext);

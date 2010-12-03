@@ -18,101 +18,87 @@ namespace Signum.Web
 {
     public static class EntityListHelper
     {
-        private static string InternalEntityList<T>(this HtmlHelper helper, EntityList entityList)
+        private static MvcHtmlString InternalEntityList<T>(this HtmlHelper helper, EntityList entityList)
         {
             if (!entityList.Visible || entityList.HideIfNull && entityList.UntypedValue == null)
-                return "";
-            
-            StringBuilder sb = new StringBuilder();
-            if (entityList.ShowFieldDiv)
-                sb.AppendLine("<div class='field'>");
+                return MvcHtmlString.Empty;
 
-            sb.AppendLine(EntityBaseHelper.BaseLineLabel(helper, entityList));
-
-            sb.AppendLine(helper.Hidden(entityList.Compose(EntityBaseKeys.StaticInfo), new StaticInfo(entityList.ElementType.CleanType()) { IsReadOnly = entityList.ReadOnly }.ToString(), new { disabled = "disabled" }).ToHtmlString());
-            sb.AppendLine(helper.Hidden(entityList.Compose(TypeContext.Ticks), EntityInfoHelper.GetTicks(helper, entityList).TryToString() ?? "").ToHtmlString());
-            
-            sb.AppendLine(EntityBaseHelper.WriteImplementations(helper, entityList));
-
-            //If it's an embeddedEntity write an empty template with index 0 to be used when creating a new item
-            if (entityList.ElementType.IsEmbeddedEntity())
+            HtmlStringBuilder sb = new HtmlStringBuilder();
+            using (entityList.ShowFieldDiv ? sb.Surround(new HtmlTag("div").Class("field")) : null)
             {
-                TypeElementContext<T> templateTC = new TypeElementContext<T>((T)(object)Constructor.Construct(typeof(T)), (TypeContext)entityList.Parent, 0);
-                sb.AppendLine(EntityBaseHelper.EmbeddedTemplate(entityList, EntityBaseHelper.RenderTypeContext(helper, templateTC, RenderMode.Popup, entityList)));
+                sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, entityList));
+
+                sb.AddLine(helper.Hidden(entityList.Compose(EntityBaseKeys.StaticInfo), new StaticInfo(entityList.ElementType.CleanType()) { IsReadOnly = entityList.ReadOnly }.ToString(), new { disabled = "disabled" }));
+                sb.AddLine(helper.Hidden(entityList.Compose(TypeContext.Ticks), EntityInfoHelper.GetTicks(helper, entityList).TryToString() ?? ""));
+
+                sb.AddLine(EntityBaseHelper.HiddenImplementations(helper, entityList));
+
+                //If it's an embeddedEntity write an empty template with index 0 to be used when creating a new item
+                if (entityList.ElementType.IsEmbeddedEntity())
+                {
+                    TypeElementContext<T> templateTC = new TypeElementContext<T>((T)(object)Constructor.Construct(typeof(T)), (TypeContext)entityList.Parent, 0);
+                    sb.AddLine(EntityBaseHelper.EmbeddedTemplate(entityList, EntityBaseHelper.RenderTypeContext(helper, templateTC, RenderMode.Popup, entityList)));
+                }
+
+                using (entityList.ShowFieldDiv ? sb.Surround(new HtmlTag("div").Class("fieldlist")) : null)
+                {
+                    HtmlStringBuilder sbSelect = new HtmlStringBuilder();
+                    using (sbSelect.Surround(new HtmlTag("select").IdName(entityList.ControlID).Attr("multiple", "multiple").Attr("ondblclick", entityList.GetViewing()).Class("entityList")))
+                    {
+                        if (entityList.UntypedValue != null)
+                        {
+                            foreach (var itemTC in TypeContextUtilities.TypeElementContext((TypeContext<MList<T>>)entityList.Parent))
+                                sb.Add(InternalListElement(helper, sbSelect, itemTC, entityList));
+                        }
+                    }
+
+                    sb.Add(sbSelect.ToHtml());
+
+                    HtmlStringBuilder sbBtns = new HtmlStringBuilder();
+                    sbBtns.AddLine(ListBaseHelper.CreateButton(helper, entityList, null).Surround("td").Surround("tr"));
+                    sbBtns.AddLine(ListBaseHelper.FindButton(helper, entityList).Surround("td").Surround("tr"));
+                    sbBtns.AddLine(ListBaseHelper.RemoveButton(helper, entityList).Surround("td").Surround("tr"));
+
+                    sb.AddLine(sbBtns.ToHtml().Surround("table"));
+                }
             }
 
-            if (entityList.ShowFieldDiv)
-                sb.AppendLine("<div class='fieldList'>");
+            sb.AddLine(EntityBaseHelper.BreakLineDiv(helper, entityList));
 
-            StringBuilder sbSelect = new StringBuilder();
-            sbSelect.AppendLine("<select id='{0}' name='{0}' multiple='multiple' ondblclick=\"{1}\" class='entityList'>".Formato(entityList.ControlID, entityList.GetViewing()));
-            if (entityList.UntypedValue != null)
-            {
-                foreach (var itemTC in TypeContextUtilities.TypeElementContext((TypeContext<MList<T>>)entityList.Parent))
-                    sb.Append(InternalListElement(helper, sbSelect, itemTC, entityList));
-            }
-            sbSelect.AppendLine("</select>");
-
-            sb.Append(sbSelect);
-
-            StringBuilder sbBtns = new StringBuilder();
-            string buttonContent = ListBaseHelper.WriteCreateButton(helper, entityList, null);
-            if (buttonContent.HasText())
-                sbBtns.AppendLine("<tr><td>" + buttonContent + "</td></tr>");
-
-            buttonContent = ListBaseHelper.WriteFindButton(helper, entityList);
-            if (buttonContent.HasText())
-                sbBtns.AppendLine("<tr><td>" + buttonContent + "</td></tr>");
-
-            buttonContent = ListBaseHelper.WriteRemoveButton(helper, entityList);
-            if (buttonContent.HasText())
-                sbBtns.AppendLine("<tr><td>" + buttonContent + "</td></tr>");
-            
-            string sBtns = sbBtns.ToString();
-            if (sBtns.HasText())
-                sb.AppendLine("<table>\n" + sBtns + "</table>");
-
-            if (entityList.ShowFieldDiv)
-                sb.AppendLine("</div>");
-
-            if (entityList.ShowFieldDiv)
-                sb.AppendLine("</div>");
-
-            sb.AppendLine(EntityBaseHelper.WriteBreakLine(helper, entityList));
-
-            return sb.ToString();
+            return sb.ToHtml();
         }
 
-        private static string InternalListElement<T>(this HtmlHelper helper, StringBuilder sbOptions, TypeElementContext<T> itemTC, EntityList entityList)
+        private static MvcHtmlString InternalListElement<T>(this HtmlHelper helper, HtmlStringBuilder sbOptions, TypeElementContext<T> itemTC, EntityList entityList)
         {
-            StringBuilder sb = new StringBuilder();
+            HtmlStringBuilder sb = new HtmlStringBuilder();
 
             if (!entityList.ForceNewInUI)
-                sb.AppendLine(helper.Hidden(itemTC.Compose(EntityListBaseKeys.Index), itemTC.Index.ToString()).ToHtmlString());
+                sb.AddLine(helper.Hidden(itemTC.Compose(EntityListBaseKeys.Index), itemTC.Index.ToString()));
 
-            sb.AppendLine(helper.HiddenRuntimeInfo(itemTC));
+            sb.AddLine(helper.HiddenRuntimeInfo(itemTC));
 
             if (typeof(T).IsEmbeddedEntity() || EntityBaseHelper.RequiresLoadAll(helper, entityList))
-                sb.AppendLine(EntityBaseHelper.RenderTypeContext(helper, itemTC, RenderMode.PopupInDiv, entityList));
+                sb.AddLine(EntityBaseHelper.RenderTypeContext(helper, itemTC, RenderMode.PopupInDiv, entityList));
             else if (itemTC.Value != null)
-                sb.Append(helper.Div(itemTC.Compose(EntityBaseKeys.Entity), "", "", new Dictionary<string, object> { { "style", "display:none" }, {"class", "entityList"}}));
+                sb.Add(helper.Div(itemTC.Compose(EntityBaseKeys.Entity), null, "", new Dictionary<string, object> { { "style", "display:none" }, {"class", "entityList"}}));
             
             //Note this is added to the sbOptions, not to the result sb
 
-            sbOptions.AppendLine(new FluentTagBuilder("option", itemTC.Compose(EntityBaseKeys.ToStr))
-                                .MergeAttributes(new {
-                                    name    = itemTC.Compose(EntityBaseKeys.ToStr),
-                                    value   = ""                                    
+            sbOptions.Add(new HtmlTag("option", itemTC.Compose(EntityBaseKeys.ToStr))
+                                .Attrs(new
+                                {
+                                    name = itemTC.Compose(EntityBaseKeys.ToStr),
+                                    value = ""
                                 })
-                                .AddCssClass("valueLine")
-                                .AddCssClass("entityListOption")
+                                .Class("valueLine")
+                                .Class("entityListOption")
                                 .SetInnerText(
                                     (itemTC.Value as IIdentifiable).TryCC(i => i.ToString()) ??
-                                    (itemTC.Value as Lite).TryCC(i => i.ToStr) ?? 
+                                    (itemTC.Value as Lite).TryCC(i => i.ToStr) ??
                                     (itemTC.Value as EmbeddedEntity).TryCC(i => i.ToString()) ?? "")
-                                .ToString(TagRenderMode.Normal));
+                                .ToHtml(TagRenderMode.Normal));
             
-            return sb.ToString();
+            return sb.ToHtml();
         }
 
         public static void EntityList<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, MList<S>>> property)

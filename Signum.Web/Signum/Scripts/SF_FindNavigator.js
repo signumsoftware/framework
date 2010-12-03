@@ -247,18 +247,18 @@
             requestData["sfColumnMode"] = 'Replace';
 
             requestData[sfPrefix] = this.findOptions.prefix;
-	return requestData;
-	},
+            return requestData;
+        },
 
-    requestDataForOpenFinder: function () {
-        var requestData = new Object();
-        requestData[sfQueryUrlName] = this.findOptions.queryUrlName;
-        requestData[sfTop] = this.findOptions.top;
-        requestData[sfAllowMultiple] = this.findOptions.allowMultiple;
-        if (this.findOptions.view == false)
-            requestData[sfView] = this.findOptions.view;
-        if (this.findOptions.searchOnLoad == true)
-            requestData["sfSearchOnLoad"] = this.findOptions.searchOnLoad;
+        requestDataForOpenFinder: function () {
+            var requestData = new Object();
+            requestData[sfQueryUrlName] = this.findOptions.queryUrlName;
+            requestData[sfTop] = this.findOptions.top;
+            requestData[sfAllowMultiple] = this.findOptions.allowMultiple;
+            if (this.findOptions.view == false)
+                requestData[sfView] = this.findOptions.view;
+            if (this.findOptions.searchOnLoad == true)
+                requestData["sfSearchOnLoad"] = this.findOptions.searchOnLoad;
 
             if (this.findOptions.async)
                 requestData["sfAsync"] = this.findOptions.async;
@@ -280,11 +280,11 @@
                     }
                 }
             }
-        
-        if (this.findOptions.orders != null)
-            requestData["sfOrderBy"] = this.findOptions.orders;
-        if (this.findOptions.columns != null)
-            requestData["sfColumns"] = this.findOptions.columns;
+
+            if (this.findOptions.orders != null)
+                requestData["sfOrderBy"] = this.findOptions.orders;
+            if (this.findOptions.columns != null)
+                requestData["sfColumns"] = this.findOptions.columns;
             if (this.findOptions.columnMode != null)
                 requestData["sfColumnMode"] = this.findOptions.columnMode;
 
@@ -319,7 +319,7 @@
                 value = info.id() + ";" + info.runtimeType();
 
             var filter = new Object();
-            filter["cn" + index] = $filter.find("td")[0].id.split("__")[1];
+            filter["cn" + index] = $filter.find("td:nth-child(1) > :hidden").val();
             filter["sel" + index] = selector.val();
             filter["val" + index] = value;
             return filter;
@@ -332,8 +332,10 @@
             return currOrder.replace(/"/g, "");
         },
 
-        setNewSortOrder: function (columnName, multiCol) {
+        setNewSortOrder: function ($th, multiCol) {
             log("FindNavigator sort");
+            var columnName = $th.find("input:hidden").val();
+
             var currOrderArray = [];
             var currOrder = $(this.pf("OrderBy")).val();
             if (!empty(currOrder))
@@ -371,11 +373,10 @@
                 currOrder.val(currOrderStr);
             }
 
-            var $header = this.$control.find(".divResults th[id='" + this.findOptions.prefix.compose(columnName) + "']");
             if (newOrder == "-")
-                $header.removeClass("headerSortDown").addClass("headerSortUp");
+                $th.removeClass("headerSortDown").addClass("headerSortUp");
             else
-                $header.removeClass("headerSortUp").addClass("headerSortDown");
+                $th.removeClass("headerSortUp").addClass("headerSortDown");
 
             return this;
         },
@@ -426,8 +427,20 @@
             if ($(this.pf("tblResults thead tr th[id=\"" + prefixedTokenName + "\"]")).length > 0) return;
 
             var $tblHeaders = $(this.pf("tblResults thead tr"));
-            $tblHeaders.append("<th id=\"" + prefixedTokenName + "\"><input type=\"hidden\" value=\"" + tokenName + "\" />" + tokenName + "</th>");
-            $(this.pf("btnEditColumns")).show();
+
+            var queryUrlName = ((empty(this.findOptions.queryUrlName)) ? $(this.pf(sfQueryUrlName)).val() : this.findOptions.queryUrlName);
+            var self = this;
+            SF.ajax({
+                type: "POST",
+                url: "Signum/GetColumnName",
+                data: { "sfQueryUrlName": queryUrlName, "tokenName": tokenName },
+                async: false,
+                dataType: "html",
+                success: function (columnNiceName) {
+                    $tblHeaders.append("<th><input type=\"hidden\" value=\"" + tokenName + "\" />" + columnNiceName + "</th>");
+                    $(self.pf("btnEditColumns")).show();
+                }
+            });
         },
 
         editColumns: function () {
@@ -772,10 +785,6 @@
 
     function Sort(evt) {
         var $target = $(evt.target);
-        var columnName = $target.find("input:hidden").val();
-        if (empty($target[0].id))
-            return;
-
         var searchControlDiv = $target.parents(".searchControl");
 
         var prefix = searchControlDiv[0].id;
@@ -786,7 +795,7 @@
 
         var multiCol = evt.shiftKey;
 
-        findNavigator.setNewSortOrder(columnName, multiCol).search();
+        findNavigator.setNewSortOrder($target, multiCol).search();
     }
 
     function toggleVisibility(elementId) {

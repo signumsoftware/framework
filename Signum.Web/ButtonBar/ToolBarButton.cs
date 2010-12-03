@@ -40,7 +40,7 @@ namespace Signum.Web
             get { return htmlProps; }
         }
 
-        public virtual string ToString(HtmlHelper helper)
+        public virtual MvcHtmlString ToHtml(HtmlHelper helper)
         {
             if (ImgSrc.HasText())
             {

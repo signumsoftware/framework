@@ -46,7 +46,7 @@
     <%= Html.Hidden(context.Compose("OrderBy"), findOptions.OrderOptions == null ? "" :
                 (findOptions.OrderOptions.ToString(oo => (oo.OrderType == OrderType.Ascending ? "" : "-") + oo.Token.FullKey(), ",")))%>
 
-    <input class="btnSearch" id="<%=context.Compose("btnSearch")%>" type="button" onclick="<%="Search({{prefix:'{0}'}});".Formato(context.ControlID) %>" value="<%=Html.Encode(Resources.Search) %>" /> 
+    <input class="btnSearch" id="<%=context.Compose("btnSearch")%>" type="button" onclick="<%="Search({{prefix:'{0}'}});".Formato(context.ControlID) %>" value="<%: Resources.Search %>" /> 
     <% if (findOptions.Create && Navigator.IsCreable(entitiesType, true) && viewable)
        { %>
         <input type="button" value="+" class="lineButton create" onclick="<%= findOptions.Creating.HasText() ? findOptions.Creating : "SearchCreate({{prefix:'{0}'}});".Formato(context.ControlID)%>" />
@@ -91,7 +91,7 @@
                     orderType = order.OrderType;
                   }
             %>
-            <th id="<%= context.Compose(col.Name) %>" class="<%= (orderType == null) ? "" : (orderType == OrderType.Ascending ? "headerSortDown" : "headerSortUp") %>">
+            <th class="<%= (orderType == null) ? "" : (orderType == OrderType.Ascending ? "headerSortDown" : "headerSortUp") %>">
                 <input type="hidden" value="<%= col.Name %>" />
                 <%= col.DisplayName%>
             </th>

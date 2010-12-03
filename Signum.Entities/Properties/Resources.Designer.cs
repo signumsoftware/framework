@@ -511,7 +511,7 @@ namespace Signum.Entities.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to [Text].
+        ///   Looks up a localized string similar to Text.
         /// </summary>
         public static string IdentifiableEntity_ToStr {
             get {

@@ -18,49 +18,49 @@ namespace Signum.Web
 {
     public static class EntityLineDetailHelper
     {
-        internal static string InternalEntityLineDetail(this HtmlHelper helper, EntityLineDetail entityDetail)
+        internal static MvcHtmlString InternalEntityLineDetail(this HtmlHelper helper, EntityLineDetail entityDetail)
         {
             if (!entityDetail.Visible || entityDetail.HideIfNull && entityDetail.UntypedValue == null)
-                return "";
+                return MvcHtmlString.Empty;
 
-            StringBuilder sb = new StringBuilder();
+            HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            sb.AppendLine("<div class='EntityLineDetail'>");
-
-            sb.AppendLine(EntityBaseHelper.BaseLineLabel(helper, entityDetail));
-
-            sb.AppendLine(helper.HiddenEntityInfo(entityDetail));
-
-            if (entityDetail.Type.IsIIdentifiable() || entityDetail.Type.IsLite())
-                sb.AppendLine(EntityBaseHelper.WriteImplementations(helper, entityDetail));
-            else
+            using (sb.Surround(new HtmlTag("div").Class("EntityLineDetail")))
             {
-                TypeContext templateTC = ((TypeContext)entityDetail.Parent).Clone((object)Constructor.Construct(entityDetail.Type.CleanType()));
-                sb.AppendLine(EntityBaseHelper.EmbeddedTemplate(entityDetail, EntityBaseHelper.RenderTypeContext(helper, templateTC, RenderMode.Content, entityDetail)));
+                sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, entityDetail));
+
+                sb.AddLine(helper.HiddenEntityInfo(entityDetail));
+
+                if (entityDetail.Type.IsIIdentifiable() || entityDetail.Type.IsLite())
+                    sb.AddLine(EntityBaseHelper.HiddenImplementations(helper, entityDetail));
+                else
+                {
+                    TypeContext templateTC = ((TypeContext)entityDetail.Parent).Clone((object)Constructor.Construct(entityDetail.Type.CleanType()));
+                    sb.AddLine(EntityBaseHelper.EmbeddedTemplate(entityDetail, EntityBaseHelper.RenderTypeContext(helper, templateTC, RenderMode.Content, entityDetail)));
+                }
+
+                sb.AddLine(EntityBaseHelper.CreateButton(helper, entityDetail));
+                sb.AddLine(EntityBaseHelper.FindButton(helper, entityDetail));
+                sb.AddLine(EntityBaseHelper.RemoveButton(helper, entityDetail));
+
+                sb.AddLine(EntityBaseHelper.BreakLineDiv(helper, entityDetail));
+
+                MvcHtmlString controlHtml = null;
+                if (entityDetail.UntypedValue != null)
+                    controlHtml = EntityBaseHelper.RenderTypeContext(helper, (TypeContext)entityDetail.Parent, RenderMode.Content, entityDetail);
+
+                if (entityDetail.DetailDiv == entityDetail.DefaultDetailDiv)
+                    sb.AddLine(helper.Div(entityDetail.DetailDiv, controlHtml, ""));
+                else if (controlHtml != null)
+                    sb.AddLine(MvcHtmlString.Create("<script type=\"text/javascript\">\n" +
+                            "$(document).ready(function() {\n" +
+                            "$('#" + entityDetail.DetailDiv + "').html(" + controlHtml + ");\n" +
+                            "});\n" +
+                            "</script>"));
+
             }
 
-            sb.AppendLine(EntityBaseHelper.WriteCreateButton(helper, entityDetail));
-            sb.AppendLine(EntityBaseHelper.WriteFindButton(helper, entityDetail));
-            sb.AppendLine(EntityBaseHelper.WriteRemoveButton(helper, entityDetail));
-
-            sb.AppendLine(EntityBaseHelper.WriteBreakLine(helper, entityDetail));
-
-            string controlHtml = null;
-            if (entityDetail.UntypedValue != null)
-                controlHtml = EntityBaseHelper.RenderTypeContext(helper, (TypeContext)entityDetail.Parent, RenderMode.Content, entityDetail);
-            
-            if (entityDetail.DetailDiv == entityDetail.DefaultDetailDiv)
-                sb.AppendLine(helper.Div(entityDetail.DetailDiv, controlHtml ?? "", ""));
-            else if (controlHtml != null)
-                sb.AppendLine("<script type=\"text/javascript\">\n" +
-                        "$(document).ready(function() {\n" +
-                        "$('#" + entityDetail.DetailDiv + "').html(" + controlHtml + ");\n" +
-                        "});\n" +
-                        "</script>");
-
-            sb.AppendLine("</div>"); //Closing tag of <div class='EntityLineDetail'>
-
-            return sb.ToString();
+            return sb.ToHtml();
         }
 
         public static void EntityLineDetail<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property) 

@@ -12,7 +12,7 @@ namespace Signum.Web
 {
     public static class RenderActionExtenders
     {
-        public static string RenderActionToString<TController>(this HtmlHelper helper, HttpRequest request, Expression<Action<TController>> action)
+        public static MvcHtmlString RenderActionToString<TController>(this HtmlHelper helper, HttpRequest request, Expression<Action<TController>> action)
             where TController : Controller
         {
             //Create memory writer
@@ -41,7 +41,7 @@ namespace Signum.Web
 
             //Flush memory and return output
             memWriter.Flush();
-            return sb.ToString();
+            return MvcHtmlString.Create(sb.ToString());
         }
 
         public static void RenderRoute(this HtmlHelper helper, RouteValueDictionary routeValues)
@@ -84,7 +84,7 @@ namespace Signum.Web
 
     public static class RenderPartialExtenders
     {
-        public static string RenderPartialToString(this HtmlHelper helper,
+        public static MvcHtmlString RenderPartialToString(this HtmlHelper helper,
                                         string viewName, ViewDataDictionary viewData)
         {
             //Create memory writer
@@ -113,7 +113,7 @@ namespace Signum.Web
 
             //Flush memory and return output
             memWriter.Flush();
-            return sb.ToString();
+            return MvcHtmlString.Create(sb.ToString());
         }
 
         public class FakeView : IView
