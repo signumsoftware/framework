@@ -32,7 +32,7 @@ namespace Signum.Web
         private static MvcHtmlString InternalValueLine(this HtmlHelper helper, ValueLine valueLine)
         {
             if (!valueLine.Visible || (valueLine.HideIfNull && valueLine.UntypedValue == null))
-                return null;
+                return MvcHtmlString.Empty;
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
             if (valueLine.OnlyValue)
