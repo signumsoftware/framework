@@ -29,16 +29,16 @@
             <%
             if (findOptions.AllowMultiple.Value)
             {
-                Response.Write(Html.CheckBox(
+                Html.Write(Html.CheckBox(
                     context.Compose("rowSelection", row.Index.ToString()),
                     new { value = entityField.Id.ToString() + "__" + entityField.RuntimeType.Name + "__" + entityField.ToStr }));
 
             }
             else
             {
-                Response.Write(Html.RadioButton(
+                Html.Write(Html.RadioButton(
                     context.Compose("rowSelection"),
-                    entityField.Id.ToString() + "__" + entityField.RuntimeType.Name + "__" + entityField.ToStr).ToHtmlString());
+                    entityField.Id.ToString() + "__" + entityField.RuntimeType.Name + "__" + entityField.ToStr));
             }  
              %>
             </td>
