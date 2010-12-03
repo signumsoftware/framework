@@ -99,6 +99,7 @@
     <Compile Include="PortableAreas\LocalizeResourceManager.cs" />
     <Compile Include="PortableAreas\RouteExtensions.cs" />
     <Compile Include="Signum\Controllers\ErrorController.cs" />
+    <Compile Include="RouteCollectionExtensions.cs" />
     <Compile Include="Signum\Controllers\ResourcesController.cs" />
     <Compile Include="Signum\Controllers\ModelBinders.cs" />
     <Compile Include="Signum\Controllers\SignumController.cs" />
