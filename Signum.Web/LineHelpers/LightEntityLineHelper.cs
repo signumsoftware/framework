@@ -18,7 +18,7 @@ namespace Signum.Web
         public static MvcHtmlString LightEntityLine(this HtmlHelper helper, Lite lite, bool admin)
         {
             if (lite == null)
-                return null;
+                return MvcHtmlString.Empty;
 
             bool isNavigable = Navigator.IsNavigable(lite.RuntimeType, admin);
             MvcHtmlString link = helper.Href("",

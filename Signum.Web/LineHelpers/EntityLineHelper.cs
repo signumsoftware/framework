@@ -24,7 +24,7 @@ namespace Signum.Web
         internal static MvcHtmlString InternalEntityLine(this HtmlHelper helper, EntityLine entityLine)
         {
             if (!entityLine.Visible || (entityLine.HideIfNull && entityLine.UntypedValue == null))
-                return null;
+                return MvcHtmlString.Empty;
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
             using (entityLine.ShowFieldDiv ? sb.Surround(new HtmlTag("div").Class("field")) : null)
