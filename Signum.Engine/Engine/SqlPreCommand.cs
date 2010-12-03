@@ -111,6 +111,17 @@ namespace Signum.Engine
             OpenSqlFile(command, "Sync {0:dd-MM-yyyy}.sql".Formato(DateTime.Now));
         }
 
+        public static void OpenSqlFileRetry(this SqlPreCommand command)
+        {
+            command.OpenSqlFile();
+            Console.WriteLine("Open again?");
+            string val = Console.ReadLine();
+            if (!val.StartsWith("y") && !val.StartsWith("Y"))
+                return;
+
+            command.OpenSqlFile();
+        }
+
         public static void OpenSqlFile(this SqlPreCommand command, string fileName)
         {
             string content = command.PlainSql(); 

@@ -73,6 +73,7 @@ namespace Signum.Entities
                     mod.ExternalPropertyValidation -= ChildPropertyValidation;
             }
 
+            SetSelfModified();
             field = value;
 
             col = field as INotifyCollectionChanged;
@@ -100,7 +101,6 @@ namespace Signum.Entities
                     mod.ExternalPropertyValidation += ChildPropertyValidation;
             }
 
-            SetSelfModified();
             NotifyPrivate(pi.Name);
             NotifyPrivate("Error");
 

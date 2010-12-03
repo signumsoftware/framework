@@ -20,7 +20,7 @@ namespace Signum.Entities
     public abstract class IdentifiableEntity : ModifiableEntity, IIdentifiable
     {
         internal int? id = null; //primary key
-        internal string toStr; //no value for new entities
+        protected internal string toStr; //no value for new entities
 
         [HiddenProperty, Description("Id")]
         public int Id
