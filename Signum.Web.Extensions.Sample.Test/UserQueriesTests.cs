@@ -55,12 +55,13 @@ namespace Signum.Web.Extensions.Sample.Test
                 selenium.Click("lblddlTokens_1");
                 selenium.Select("ddlTokens_1", "label=Owner");
                 selenium.Click("btnAddColumn");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=th[id=Label\\.Owner]"));
+                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=th > :hidden[value=Label.Owner]"));
 
                 //add order
-                selenium.Click("jq=th#Year");
+                string yearth = "jq=th:nth-child(6)";
+                selenium.Click(yearth); //Year
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=th.headerSortDown"));
-                selenium.Click("jq=th#Year");
+                selenium.Click(yearth);
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=th.headerSortUp"));
                 
                 //create user query
@@ -79,8 +80,8 @@ namespace Signum.Web.Extensions.Sample.Test
                 selenium.Click("//a[text()='Last albums']");
                 selenium.WaitForPageToLoad(PageLoadTimeout);
                 Assert.IsTrue(selenium.IsElementPresent("value_0"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=th[id=Label\\.Owner]"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=th#Year.headerSortUp"));
+                Assert.IsTrue(selenium.IsElementPresent("jq=th > :hidden[value=Label.Owner]"));
+                Assert.IsTrue(selenium.IsElementPresent(yearth + ".headerSortUp"));
             }
             catch (Exception)
             {

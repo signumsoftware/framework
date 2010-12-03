@@ -204,31 +204,33 @@ namespace Signum.Web.Extensions.Sample.Test
                 CheckLoginAndOpen("/Signum.Web.Extensions.Sample/Find/Album");
 
                 //Ascending
-                selenium.Click("Author");
+                string authorth = "jq=#tblResults > thead > tr > th:nth-child(3)";
+                selenium.Click(authorth); //Author
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#tblResults > tbody > tr:first > td:nth-child(3) a[href='View/Artist/5']"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=#Author.headerSortDown"));
+                Assert.IsTrue(selenium.IsElementPresent(authorth + ".headerSortDown"));
 
                 //Multiple orders
+                string labelth = "jq=#tblResults > thead > tr > th:nth-child(4)";
                 selenium.ShiftKeyDown();
-                selenium.Click("Label");
+                selenium.Click(labelth); //Label
                 selenium.ShiftKeyUp();
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#tblResults > tbody > tr:first > td:nth-child(4) a[href='View/Label/5']"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=#Author.headerSortDown"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=#Label.headerSortDown"));
+                Assert.IsTrue(selenium.IsElementPresent(authorth + ".headerSortDown"));
+                Assert.IsTrue(selenium.IsElementPresent(labelth + ".headerSortDown"));
 
                 //Multiple orders: change column order type to descending
                 selenium.ShiftKeyDown();
-                selenium.Click("Label");
+                selenium.Click(labelth); //Label
                 selenium.ShiftKeyUp();
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#tblResults > tbody > tr:first > td:nth-child(4) a[href='View/Label/3']"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=##Author.headerSortDown"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=#Label.headerSortUp"));
+                Assert.IsTrue(selenium.IsElementPresent(authorth + ".headerSortDown"));
+                Assert.IsTrue(selenium.IsElementPresent(labelth + ".headerSortUp"));
 
                 //Cancel multiple clicking a new order without Shift
-                selenium.Click("Label");
+                selenium.Click(labelth); //Label
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#tblResults > tbody > tr:first > td:nth-child(4) a[href='View/Label/7']"));
-                Assert.IsFalse(selenium.IsElementPresent("jq=#Author.headerSortDown"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=#Label.headerSortDown"));
+                Assert.IsFalse(selenium.IsElementPresent(authorth + ".headerSortDown"));
+                Assert.IsTrue(selenium.IsElementPresent(labelth + ".headerSortDown"));
             }
             catch (Exception)
             {
@@ -249,37 +251,40 @@ namespace Signum.Web.Extensions.Sample.Test
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Members_0_btnSearch"));
 
                 //Ascending
-                selenium.Click("Members_0_IsMale");
+                string ismaleth = "jq=#Members_0_tblResults > thead > tr > th:nth-child(5)";
+                selenium.Click(ismaleth);
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Members_0_tblResults > tbody > tr:first > td:nth-child(5) input:checkbox[value=false]"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=#Members_0_IsMale.headerSortDown"));
+                Assert.IsTrue(selenium.IsElementPresent(ismaleth + ".headerSortDown"));
 
                 //Descending
-                selenium.Click("Members_0_IsMale");
+                selenium.Click(ismaleth); 
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Members_0_tblResults > tbody > tr:first > td:nth-child(5) input:checkbox[value=true]"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=#Members_0_IsMale.headerSortUp"));
+                Assert.IsTrue(selenium.IsElementPresent(ismaleth + ".headerSortUp"));
 
                 //Multiple orders
+                string nameth = "jq=#Members_0_tblResults > thead > tr > th:nth-child(4)";
                 selenium.ShiftKeyDown();
-                selenium.Click("Members_0_Name");
+                selenium.Click(nameth); 
                 selenium.ShiftKeyUp();
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Members_0_tblResults > tbody > tr:first > td:nth-child(2) a[href='View/Artist/1']"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=#Members_0_IsMale.headerSortUp"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=#Members_0_Name.headerSortDown"));
+                Assert.IsTrue(selenium.IsElementPresent(ismaleth + ".headerSortUp"));
+                Assert.IsTrue(selenium.IsElementPresent(nameth + ".headerSortDown"));
 
                 //Multiple orders: change column order type to descending
                 selenium.ShiftKeyDown();
-                selenium.Click("Members_0_Name");
+                selenium.Click(nameth); 
                 selenium.ShiftKeyUp();
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Members_0_tblResults > tbody > tr:first > td:nth-child(2) a[href='View/Artist/8']"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=#Members_0_IsMale.headerSortUp"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=#Members_0_Name.headerSortUp"));
+                Assert.IsTrue(selenium.IsElementPresent(ismaleth + ".headerSortUp"));
+                Assert.IsTrue(selenium.IsElementPresent(nameth + ".headerSortUp"));
 
                 //Cancel multiple clicking a new order without Shift
-                selenium.Click("Members_0_Id");
+                string idth = "jq=#Members_0_tblResults > thead > tr > th:nth-child(3)";
+                selenium.Click(idth);
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Members_0_tblResults > tbody > tr:first > td:nth-child(2) a[href='View/Artist/1']"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=#Members_0_Id.headerSortDown"));
-                Assert.IsFalse(selenium.IsElementPresent("jq=#Members_0_IsMale.headerSortUp"));
-                Assert.IsFalse(selenium.IsElementPresent("jq=#Members_0_Name.headerSortUp"));
+                Assert.IsTrue(selenium.IsElementPresent(idth + ".headerSortDown"));
+                Assert.IsFalse(selenium.IsElementPresent(ismaleth + ".headerSortUp"));
+                Assert.IsFalse(selenium.IsElementPresent(nameth + ".headerSortUp"));
             }
             catch (Exception)
             {
@@ -301,19 +306,19 @@ namespace Signum.Web.Extensions.Sample.Test
                 selenium.Click("lblddlTokens_1");
                 selenium.Select("ddlTokens_1", "label=Id");
                 selenium.Click("btnAddColumn");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#tblResults > thead > tr > th[id=Label.Id]"));
+                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#tblResults > thead > tr > th > :hidden[value=Label.Id]"));
 
                 Assert.IsTrue(selenium.IsElementPresent("jq=#btnEditColumns:visible"));
 
                 selenium.Select("ddlTokens_1", "label=Name");
                 selenium.Click("btnAddColumn");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#tblResults > thead > tr > th[id=Label.Name]"));
+                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#tblResults > thead > tr > th > :hidden[value=Label.Name]"));
 
                 //Edit names
                 selenium.Click("btnEditColumns");
                 Assert.IsTrue(selenium.IsElementPresent("jq=#btnEditColumnsFinish:visible"));
-                selenium.Type("//input[@value='Label.Id']", "Label Id");
-                selenium.Type("//input[@value='Label.Name']", "Label Name");
+                selenium.Type("jq=#tblResults > thead > tr > th:nth-child(7) > :text", "Label Id");
+                selenium.Type("jq=#tblResults > thead > tr > th:nth-child(8) > :text", "Label Name");
                 selenium.Click("btnEditColumnsFinish");
 
                 Assert.IsTrue(selenium.IsElementPresent("jq=#btnEditColumns:visible"));
@@ -325,7 +330,7 @@ namespace Signum.Web.Extensions.Sample.Test
 
                 //Delete one of the usercolumns
                 selenium.Click("btnEditColumns");
-                selenium.Click("jq=#Label\\.Id > a#link-delete-user-col");
+                selenium.Click("jq=#tblResults > thead > tr > th:nth-child(7) > a#link-delete-user-col");
                 selenium.Click("btnEditColumnsFinish");
                 selenium.Click("btnSearch");
                 selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("jq=#tblResults > tbody > tr:first > td:nth-child(8)"));

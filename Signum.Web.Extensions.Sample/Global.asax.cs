@@ -85,7 +85,7 @@ namespace Signum.Web.Extensions.Sample
 
             MusicClient.Start();
 
-            Combiner.Start();
+            //Combiner.Start();
             ScriptHtmlHelper.Manager.MainAssembly = typeof(MusicClient).Assembly;
 
             Navigator.Initialize();

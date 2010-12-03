@@ -43,10 +43,9 @@ namespace Signum.Web.Selenium
                 "http://localhost/");
 
             selenium.Start();
+            //selenium.SetSpeed("200");
             selenium.SetSpeed("1000");
-//#if (DEBUG)
-//            selenium.SetSpeed("1000");
-//#endif
+
             selenium.SetTimeout("600000");
 
             selenium.AddLocationStrategy("jq",
