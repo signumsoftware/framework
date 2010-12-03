@@ -55,6 +55,7 @@ namespace Signum.Web
         {
             HttpRequestBase request = filterContext.HttpContext.Request;
             HttpResponseBase response = filterContext.HttpContext.Response;
+            Debug.WriteLine("Applying Gzip to request " + filterContext.HttpContext.Request.Url.ToString());
 
             if (response.IsRequestBeingRedirected)
                 return; //avoid send headers once headers have already been sent
@@ -84,10 +85,6 @@ namespace Signum.Web
     {
         public override void OnActionExecuting(ActionExecutingContext filterContext)
         {
-            HttpRequestBase request = filterContext.HttpContext.Request;
-            string acceptEncoding = request.Headers["Accept-Encoding"];
-            if (string.IsNullOrEmpty(acceptEncoding)) return;
-            acceptEncoding = acceptEncoding.ToUpperInvariant();
             HttpResponseBase response = filterContext.HttpContext.Response;
             response.Filter = new WhitespaceFilter(response.Filter);                                      
         }
