@@ -251,7 +251,7 @@ namespace Signum.Web
 
             div.InnerHtml(tbTitle.ToHtml().Concat(tbContent.ToHtml()));
 
-            html.ViewContext.HttpContext.Response.Write(div.ToHtml());
+            html.Write(div.ToHtml());
         }
         #endregion    
 
