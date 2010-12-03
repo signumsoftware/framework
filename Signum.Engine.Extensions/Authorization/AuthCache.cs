@@ -383,32 +383,34 @@ namespace Signum.Entities.Authorization
                  select new XElement("Role",
                      new XAttribute("Name", r.ToStr),
                      max ? null : new XAttribute("Default", "Min"),
-                     specificRules[r].Select(kvp => new XElement(elementName,
+                     specificRules.TryGetC(r).TryCC(dic => dic.Select(kvp => new XElement(elementName,
                          new XAttribute("Resource", resourceToString(kvp.Key)),
                          new XAttribute("Allowed", allowedToString(kvp.Value))
-                     ))
+                     )))
                  )));
         }
 
 
-        internal void ImportXml(XElement element, XName rootName, XName elementName, Dictionary<string, Lite<RoleDN>> roles, Func<string, R> toResource, Func<string, A> parseAllowed)
+        internal SqlPreCommand ImportXml(XElement element, XName rootName, XName elementName, Dictionary<string, Lite<RoleDN>> roles, Func<string, R> toResource, Func<string, A> parseAllowed)
         {
             var current = Database.RetrieveAll<RT>().GroupToDictionary(a => a.Role);
             var should = element.Element(rootName).Elements("Role").ToDictionary(x => roles[x.Attribute("Name").Value]);
 
-            current.JoinDictionaryForeach(should, (role, list, x)=>
+            Table table = Schema.Current.Table(typeof(RT));
+
+            return current.JoinDictionary(should, (role, list, x) =>
                 {
-                    var def =  list.SingleOrDefault(a=>a.Resource == null);
-                    var max =  x.Attribute("Default") == null || x.Attribute("Default").Value != "Min";
+                    var def = list.SingleOrDefault(a => a.Resource == null);
+                    var max = x.Attribute("Default") == null || x.Attribute("Default").Value != "Min";
                     SetDefault(def, max);
 
-                    Synchronizer.Synchronize(
-                        list.Where(a=>a.Resource != null).ToDictionary(a=>a.Resource), 
-                        x.Elements(elementName).ToDictionary(a=>toResource(a.Attribute("Resource").Value)),
-                        (r, rt)=>rt.Delete(),
-                        (r, xr) => new RT { Resource = r, Role = role, Allowed = parseAllowed(xr.Attribute("Allowed").Value)}.Save(),
-                        (r, pr, xr) => { pr.Allowed = parseAllowed(xr.Attribute("Allowed").Value); pr.Save(); });
-                });
+                    return Synchronizer.SynchronizeScript(
+                        list.Where(a => a.Resource != null).ToDictionary(a => a.Resource),
+                        x.Elements(elementName).ToDictionary(a => toResource(a.Attribute("Resource").Value)),
+                        (r, rt) => table.DeleteSqlSync(rt),
+                        (r, xr) => table.InsertSqlSync(new RT { Resource = r, Role = role, Allowed = parseAllowed(xr.Attribute("Allowed").Value) }),
+                        (r, pr, xr) => { pr.Allowed = parseAllowed(xr.Attribute("Allowed").Value); return table.UpdateSqlSync(pr); }, Spacing.Simple);
+                }).Values.Combine(Spacing.Double);
         }
 
         private void SetDefault(RT def, bool max)
@@ -426,11 +428,6 @@ namespace Signum.Entities.Authorization
                     def.Save();
                 }
             }
-        }
-
-        internal XElement ExportXml(string p, string p_2, Func<Basics.PropertyDN, string> func, Func<PropertyAllowed, string> func_2)
-        {
-            throw new NotImplementedException();
         }
     }
 }

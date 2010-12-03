@@ -35,6 +35,11 @@ namespace Signum.Entities.Authorization
             get { return allowed; }
             set { Set(ref allowed, value, () => Allowed); }
         }
+
+        protected override void PreSaving(ref bool graphModified)
+        {
+            this.toStr = this.ToString();
+        }
     }
 
     [Serializable]

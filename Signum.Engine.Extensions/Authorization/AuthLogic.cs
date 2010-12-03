@@ -392,11 +392,12 @@ namespace Signum.Engine.Authorization
         }
 
         public static event Func<XElement> ExportToXml;
-        public static event Action<XElement, Dictionary<string, Lite<RoleDN>>> ImportFromXml;
+        public static event Func<XElement, Dictionary<string, Lite<RoleDN>>, SqlPreCommand> ImportFromXml;
 
         public static XDocument ExportRules()
         {
             return new XDocument(
+                new XDeclaration("1.0", "utf-8", "yes"),
                 new XElement("Auth",
                     new XElement("Roles", 
                         RolesInOrder().Select(r=>new XElement("Role", 
@@ -405,29 +406,61 @@ namespace Signum.Engine.Authorization
                      ExportToXml == null ? null : ExportToXml.GetInvocationList().Cast<Func<XElement>>().Select(a => a()).NotNull()));
         }
 
-        public static void ImportRules(XDocument doc)
+        public static SqlPreCommand ImportRules(XDocument doc)
         {
-            using (Transaction tr = new Transaction())
+            EnumerableExtensions.JoinStrict(
+                Roles,
+                doc.Root.Element("Roles").Elements("Role"),
+                r => r.ToStr,
+                x => x.Attribute("Name").Value,
+                (r, x) => EnumerableExtensions.JoinStrict(
+                            Roles.RelatedTo(r),
+                            x.Attribute("Contains").Value.Split(','),
+                            sr => sr.ToStr,
+                            s => s,
+                            (sr, s) => 0,
+                            "Checking SubRoles of {0}".Formato(r)),
+                "Checking Roles");
+
+            var rolesDic = Roles.ToDictionary(a => a.ToStr);
+
+            var result = ImportFromXml.GetInvocationList()
+                .Cast<Func<XElement, Dictionary<string, Lite<RoleDN>>, SqlPreCommand>>()
+                .Select(inv => inv(doc.Root, rolesDic)).Combine(Spacing.Triple);
+
+            return SqlPreCommand.Combine(Spacing.Triple,
+                new SqlPreCommandSimple("-- BEGIN AUTH SYNC SCRIPT"),
+                result,
+                new SqlPreCommandSimple("-- END AUTH SYNC SCRIPT")); 
+        }
+
+        public static void ImportExportAuthRules()
+        {
+            ImportExportAuthRules("AuthRules.xml");
+        }
+
+        public static void ImportExportAuthRules(string fileName)
+        {
+            Console.WriteLine("You want to export (e), import (i) or exit (nothing) {0}?".Formato(fileName));
+
+            string answer = Console.ReadLine();
+
+            if (answer.ToLower() == "e")
             {
-                EnumerableExtensions.JoinStrict(
-                    Roles,
-                    doc.Root.Element("Roles").Elements("Role"),
-                    r => r.ToStr,
-                    x => x.Attribute("Name").Value,
-                    (r, x) => EnumerableExtensions.JoinStrict(
-                                Roles.RelatedTo(r),
-                                x.Attribute("Contains").Value.Split(','),
-                                sr => sr.ToStr,
-                                s => s,
-                                (sr, s) => 0,
-                                "Checking SubRoles of {0}".Formato(r)),
-                    "Checking Roles");
+                var doc = ExportRules();
+                doc.Save(fileName);
+                Console.WriteLine("Sucesfully exported to {0}".Formato(fileName)); 
+            }
+            else if (answer.ToLower() == "i")
+            {
+                Console.Write("Reading {0}...".Formato(fileName));
+                var doc = XDocument.Load(fileName);
+                Console.WriteLine("Ok");
+                Console.Write("Importing...");
+                SqlPreCommand command = ImportRules(doc);
+                Console.WriteLine("Ok");
 
-                var rolesDic = Roles.ToDictionary(a => a.ToStr);
-
-                ImportFromXml(doc.Root, rolesDic);
-
-                tr.Commit();
+                command.OpenSqlFileRetry();
             }
         }
     }
