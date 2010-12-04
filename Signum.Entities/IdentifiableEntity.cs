@@ -45,7 +45,8 @@ namespace Signum.Entities
         public string ToStr
         {
             get { return toStr; }
-            protected set { Set(ref toStr, value, () => ToStr); }
+            //protected set { Set(ref toStr, value, () => ToStr); }
+               protected set { toStr= value; }// TODO: olmo revisar
         }
 
         [Ignore]

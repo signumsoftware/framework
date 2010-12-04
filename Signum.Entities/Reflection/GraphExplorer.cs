@@ -206,18 +206,23 @@ namespace Signum.Entities.Reflection
         {
             return new[]
             {
-               new XAttribute("Label", ie.ToString() ?? "[null]"),
+               new XAttribute("Label", (ie.ToString() ?? "[null]")  + Modified(ie)),
                new XAttribute("TypeName", ie.GetType().TypeName()), 
                new XAttribute("Background", ColorGenerator.ColorFor(ie.GetType().FullName.GetHashCode())),
                new XAttribute("Description", ie.IdOrNull.TryToString() ?? "New")
             };
         }
 
+        private static string Modified(Modifiable ie)
+        {
+            return " [{0}/{1}]".Formato(ie.Modified, ie.SelfModified);
+        }
+
         private static XAttribute[] GetAttributes(Lite lite)
         {
             return new[]
             {
-               new XAttribute("Label", lite.ToString() ?? "[null]"),
+               new XAttribute("Label", (lite.ToString() ?? "[null]") + Modified(lite)),
                new XAttribute("TypeName", lite.GetType().TypeName()), 
                new XAttribute("Stroke", ColorGenerator.ColorFor(Reflector.ExtractLite(lite.GetType()).FullName.GetHashCode())),
                new XAttribute("StrokeThickness", "2"),
@@ -230,7 +235,7 @@ namespace Signum.Entities.Reflection
         {
             return new[]
             {
-               new XAttribute("Label", ee.ToString() ?? "[null]"),
+               new XAttribute("Label", (ee.ToString() ?? "[null]")+  Modified(ee)),
                new XAttribute("TypeName", ee.GetType().TypeName()), 
                new XAttribute("NodeRadius", 0),
                new XAttribute("Background", ColorGenerator.ColorFor(ee.GetType().FullName.GetHashCode())),
