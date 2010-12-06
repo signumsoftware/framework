@@ -128,6 +128,7 @@ namespace Signum.Engine
                 {
                     Connection con = (Connection)ConnectionScope.Current;
                     Connection = new SqlConnection(con.ConnectionString);
+                    
                     Connection.Open();
                     Transaction = Connection.BeginTransaction(IsolationLevel ?? con.IsolationLevel);
                     Started = true;
