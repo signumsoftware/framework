@@ -78,10 +78,6 @@ namespace Signum.Engine
         public Connection(string connectionString, Schema schema, DynamicQueryManager dqm)
             : base(schema, dqm)
         {
-            var builder = new SqlConnectionStringBuilder(connectionString);
-            if (!builder.MultipleActiveResultSets)
-                throw new InvalidOperationException("Set MultipleActiveResultSets=true in your connection string"); 
-
             this.connectionString = connectionString;
         }
 
