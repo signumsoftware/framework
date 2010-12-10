@@ -40,7 +40,7 @@ namespace Signum.Web
             {
                 if (version == null)
                     version = new FileInfo(MainAssembly.Location).LastWriteTime.Ticks.ToString();
-
+                
                 return version;
             }
         }

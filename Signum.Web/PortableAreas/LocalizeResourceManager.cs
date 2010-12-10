@@ -143,10 +143,9 @@ namespace Signum.Web
                     sw.WriteLine("if(typeof lang == 'undefined' || lang == null) lang = {};");
                     sw.WriteLine("lang.{0} =".Formato(JavaScriptVariableName));
                     sw.WriteLine("{");
-                    foreach (var p in dic)
-                    {
-                        sw.WriteLine("   {0}: {1},".Formato(p.Key, p.Value.Quote()));
-                    }
+
+                    sw.WriteLine(string.Join(",\r\n", dic.Select(p => "   {0}: {1}".Formato(p.Key, p.Value.Quote()))));
+
                     sw.WriteLine("};");
                 }
 
