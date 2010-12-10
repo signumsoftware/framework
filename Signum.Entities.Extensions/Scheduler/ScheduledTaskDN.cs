@@ -6,6 +6,7 @@ using System.Text;
 using Signum.Entities;
 using Signum.Utilities;
 using Signum.Entities.Extensions.Properties;
+using Signum.Utilities.Reflection;
 
 namespace Signum.Entities.Scheduler
 {
@@ -55,7 +56,7 @@ namespace Signum.Entities.Scheduler
 
         public override string ToString()
         {
-            return "{0} {1}".Formato(task, rule) + (suspended ? " [{0}]".Formato(Resources.ScheduledTaskDN_Suspended) : "");
+            return "{0} {1}".Formato(task, rule) + (suspended ? " [{0}]".Formato(ReflectionTools.GetPropertyInfo(() => Suspended).NiceName()) : "");
         }
     }
 }

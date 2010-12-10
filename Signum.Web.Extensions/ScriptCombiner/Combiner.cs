@@ -11,6 +11,8 @@ using System.IO.Compression;
 using System.Text;
 using System.Reflection;
 using System.Web.Routing;
+using Signum.Web.Controllers;
+using Signum.Web.PortableAreas;
 
 
 namespace Signum.Web.ScriptCombiner
@@ -122,61 +124,6 @@ namespace Signum.Web.ScriptCombiner
 
             RouteTable.Routes.InsertRouteAt0("combine/js/{key}",
                new { controller = "Combine", action = "JS", key = "" });
-        }
-    }
-
-    public class ScriptContentResult: ActionResult
-    {
-        public string Content;
-        public string ContentType;
-        public TimeSpan CacheDuration;
-        byte[] compressed;
-        byte[] uncompressed; 
-
-        public override void ExecuteResult(ControllerContext context)
-        {
-            HttpResponseBase response = context.HttpContext.Response;
-
-            bool canGZip = CanGZip(context.HttpContext.Request);
-
-            byte[] bytes = canGZip ? (compressed ?? (compressed = GetBytes(true))) :
-                                     (uncompressed ?? (uncompressed = GetBytes(false)));
-
-            response.AppendHeader("Content-Length", bytes.Length.ToString());
-            response.AppendHeader("Content-Encoding", canGZip ? "gzip": "utf-8");
-            response.AppendHeader("Vary", "Accept-Encoding");
-
-            response.Cache.SetCacheability(HttpCacheability.Public);
-            //response.Cache.SetExpires(DateTime.Now.Add(CacheDuration));   //redundant
-            response.Cache.SetMaxAge(CacheDuration);
-            //TODO: Add Last-Modified http://code.google.com/intl/es-ES/speed/page-speed/docs/caching.html#LeverageBrowserCaching
-
-            response.ContentEncoding = Encoding.Unicode;
-            response.ContentType = ContentType;
-            response.OutputStream.Write(bytes, 0, bytes.Length);
-            response.Flush();
-        }
-
-        private byte[] GetBytes(bool isCompressed)
-        {
-            using (MemoryStream memoryStream = new MemoryStream(8092))
-            {
-                using (Stream stream = isCompressed ? (Stream)(new GZipStream(memoryStream, CompressionMode.Compress)) : memoryStream)
-                using (StreamWriter writer = new StreamWriter(stream, Encoding.UTF8))
-                {
-                    writer.Write(Content);
-                }
-                return memoryStream.ToArray();
-            }
-        }
-
-        private bool CanGZip(HttpRequestBase request)
-        {
-            string acceptEncoding = request.Headers["Accept-Encoding"];
-            if (!string.IsNullOrEmpty(acceptEncoding) &&
-                 (acceptEncoding.Contains("gzip") || acceptEncoding.Contains("deflate")))
-                return true;
-            return false;
         }
     }
 }

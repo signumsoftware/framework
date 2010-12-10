@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Signum.Utilities;
+using Signum.Web.PortableAreas;
 
 namespace Signum.Web.ScriptCombiner
 {
@@ -29,12 +30,7 @@ namespace Signum.Web.ScriptCombiner
                 sb.AppendLine(Combiner.ReadVirtualFile(vf));
             }
 
-            return new ScriptContentResult
-            {
-                Content = combineComment + Minify(sb.ToString()),
-                CacheDuration = TimeSpan.FromDays(10),
-                ContentType = "application/x-javascript"
-            };
+            return new ScriptContentResult(combineComment + Minify(sb.ToString()), "application/x-javascript");
         }
     }
 }

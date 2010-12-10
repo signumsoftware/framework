@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Web.Mvc;
 using Signum.Utilities;
+using Signum.Web.PortableAreas;
 
 namespace Signum.Web.ScriptCombiner
 {

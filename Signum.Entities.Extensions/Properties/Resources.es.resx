@@ -256,13 +256,13 @@
     <value>Ejecución proceso</value>
   </data>
   <data name="ProcessExecutionDN_CancelationDate" xml:space="preserve">
-    <value>F. cancelación</value>
+    <value>F. Cancelación</value>
   </data>
   <data name="ProcessExecutionDN_CreationDate" xml:space="preserve">
-    <value>F. creación</value>
+    <value>F. Creación</value>
   </data>
   <data name="ProcessExecutionDN_ErrorDate" xml:space="preserve">
-    <value>F. error</value>
+    <value>F. Error</value>
   </data>
   <data name="ProcessExecutionDN_Exception" xml:space="preserve">
     <value>Excepción</value>

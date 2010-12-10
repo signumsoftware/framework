@@ -91,9 +91,14 @@ namespace Signum.Engine.Basics
 
         static QueryDN CreateQuery(object queryName)
         {
-            return new QueryDN { 
-                Key = QueryUtils.GetQueryName(queryName), 
-                DisplayName = QueryUtils.GetNiceQueryName(queryName) };
+            using (Sync.ChangeCulture(Schema.Current.ForceCultureInfo))
+            {
+                return new QueryDN
+                {
+                    Key = QueryUtils.GetQueryName(queryName),
+                    DisplayName = QueryUtils.GetNiceQueryName(queryName)
+                };
+            }
         }
 
         const string QueriesKey = "Queries";

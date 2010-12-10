@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Signum.Utilities;
 using System.Web;
+using Signum.Web.PortableAreas;
 
 namespace Signum.Web.ScriptCombiner
 {
@@ -40,7 +41,7 @@ namespace Signum.Web.ScriptCombiner
                 sb.AppendLine(Minify(content));
             }
 
-            return new ScriptContentResult { Content = sb.ToString(), CacheDuration = TimeSpan.FromDays(10), ContentType = "text/css" };
+            return new ScriptContentResult(sb.ToString(), "text/css");
         }
 
         static string ReplaceRelativeImg(string content, string virtualFile)
