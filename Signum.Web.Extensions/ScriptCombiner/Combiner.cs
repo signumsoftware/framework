@@ -17,32 +17,32 @@ using Signum.Web.PortableAreas;
 
 namespace Signum.Web.ScriptCombiner
 {
-    public class ScriptRequest: IEquatable<ScriptRequest>
+    public class ScriptRequest : IEquatable<ScriptRequest>
     {
-        public readonly ScriptType ScriptType; 
+        public readonly ScriptType ScriptType;
         public readonly string[] VirtualFiles;
-        readonly string toString; 
+        readonly string toString;
 
         public ScriptRequest(string[] files, ScriptType scriptType, string version)
         {
-            this.VirtualFiles = files; 
+            this.VirtualFiles = files;
             this.ScriptType = scriptType;
-            this.toString = string.Join(",", VirtualFiles ) + "," + version;
-        }
-        
-        public bool Equals(ScriptRequest other)
-        {
-           return other.toString == toString;
+            this.toString = string.Join(",", VirtualFiles) + "," + version;
         }
 
-        public override string  ToString()
+        public bool Equals(ScriptRequest other)
         {
- 	         return toString;
-        }   
+            return other.toString == toString;
+        }
+
+        public override string ToString()
+        {
+            return toString;
+        }
 
         public override int GetHashCode()
         {
- 	        return toString.GetHashCode();
+            return toString.GetHashCode();
         }
     }
 
@@ -68,28 +68,28 @@ namespace Signum.Web.ScriptCombiner
 
         public static string GetKey(ScriptRequest request)
         {
-            return Elements.GetOrAdd(request, r=> 
+            return Elements.GetOrAdd(request, r =>
+            {
+                var elem = new ScriptElement
                 {
-                    var elem = new ScriptElement
-                    {
-                         Request = r,
-                         Content = null, 
-                         Key =  Signum.Services.Security.EncodeCleanUnsafe(request.ToString())
-                    };
+                    Request = r,
+                    Content = null,
+                    Key = Signum.Services.Security.EncodeCleanUnsafe(request.ToString())
+                };
 
-                    return ElementsByKey.GetOrAdd(elem.Key, elem);
-                }
+                return ElementsByKey.GetOrAdd(elem.Key, elem);
+            }
             ).Key;
         }
 
         public static ScriptContentResult GetContent(string key)
         {
-            ScriptElement elem; 
-            if(!ElementsByKey.TryGetValue(key, out elem))
+            ScriptElement elem;
+            if (!ElementsByKey.TryGetValue(key, out elem))
                 throw new KeyNotFoundException("Script '{0}' not found".Formato(key));
 
-           if(elem.Content != null)
-               return elem.Content; 
+            if (elem.Content != null)
+                return elem.Content;
 
             elem.Content = Generate(elem.Request);
 
@@ -98,20 +98,20 @@ namespace Signum.Web.ScriptCombiner
 
         private static ScriptContentResult Generate(ScriptRequest scriptRequest)
         {
- 	        switch (scriptRequest.ScriptType)
-	        {
+            switch (scriptRequest.ScriptType)
+            {
                 case ScriptType.Css: return CssCombiner.Combine(scriptRequest.VirtualFiles);
                 case ScriptType.Javascript: return JavascriptCombiner.Combine(scriptRequest.VirtualFiles);
-                default: throw new InvalidOperationException(); 
-	        }
+                default: throw new InvalidOperationException();
+            }
         }
 
         public static string ReadVirtualFile(string virtualPath)
         {
             VirtualFile vf = HostingEnvironment.VirtualPathProvider.GetFile(virtualPath);
-            using(Stream str = vf.Open())
-            using(StreamReader reader = new StreamReader(str))
-                return reader.ReadToEnd(); 
+            using (Stream str = vf.Open())
+            using (StreamReader reader = new StreamReader(str))
+                return reader.ReadToEnd();
 
         }
 

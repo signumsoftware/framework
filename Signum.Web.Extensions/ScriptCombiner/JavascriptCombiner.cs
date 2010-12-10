@@ -9,7 +9,7 @@ namespace Signum.Web.ScriptCombiner
 {
     public static class JavascriptCombiner
     {
-        public static bool UseGoogleClosure; 
+        public static bool UseGoogleClosure;
 
         static string Minify(string content)
         {
