@@ -178,6 +178,9 @@ namespace Signum.Engine
 
         public static Lite FillToStr(Lite lite)
         {
+            if (lite == null)
+                return null; 
+
             using (Transaction tr = new Transaction())
             {
                 Table t = Schema.Current.Table(lite.RuntimeType);

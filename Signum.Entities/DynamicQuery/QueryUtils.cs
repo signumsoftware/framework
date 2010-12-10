@@ -8,6 +8,7 @@ using Signum.Entities.Properties;
 using System.Reflection;
 using Signum.Utilities.Reflection;
 using System.Linq.Expressions;
+using System.Globalization;
 
 namespace Signum.Entities.DynamicQuery
 {
@@ -21,7 +22,13 @@ namespace Signum.Entities.DynamicQuery
                 queryKey.ToString();
         }
 
+
         public static string GetNiceQueryName(object queryKey)
+        {
+            return GetNiceQueryName(queryKey, null); 
+        }
+
+        public static string GetNiceQueryName(object queryKey, CultureInfo ci)
         {
             return
                 queryKey is Type ? ((Type)queryKey).NicePluralName() :

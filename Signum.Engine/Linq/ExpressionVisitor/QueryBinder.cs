@@ -1223,7 +1223,7 @@ namespace Signum.Engine.Linq
             else if (operand.NodeType == (ExpressionType)DbExpressionType.ImplementedByAll)
             {
                 ImplementedByAllExpression riba = (ImplementedByAllExpression)operand;
-                int idType = Schema.Current.IDsForType.GetOrThrow(b.TypeOperand, "The type {0} is not registered in the database as a concrete table".Formato(b.TypeOperand.TypeName()));
+                int idType = Schema.Current.TypeToId.GetOrThrow(b.TypeOperand, "The type {0} is not registered in the database as a concrete table".Formato(b.TypeOperand.TypeName()));
                 return SmartEqualizer.EqualNullable(riba.TypeId, Expression.Constant(idType));
             }
             return base.VisitTypeIs(b); 
@@ -1298,7 +1298,7 @@ namespace Signum.Engine.Linq
 
                 if (imp == null)
                 {
-                    int idType = Schema.Current.IDsForType.GetOrThrow(uType, "The type {0} is not registered in the database as a concrete table".Formato(uType.TypeName()));
+                    int idType = Schema.Current.TypeToId.GetOrThrow(uType, "The type {0} is not registered in the database as a concrete table".Formato(uType.TypeName()));
 
                     Expression other = SmartEqualizer.EqualNullable(iba.TypeId, new SqlConstantExpression(idType));
 
@@ -1315,12 +1315,12 @@ namespace Signum.Engine.Linq
 
         internal static SqlConstantExpression TypeSqlConstant(Type type)
         {
-            return new SqlConstantExpression(Schema.Current.IDsForType[type], typeof(int?));
+            return new SqlConstantExpression(Schema.Current.TypeToId[type], typeof(int?));
         }
 
         internal static ConstantExpression TypeConstant(Type type)
         {
-            return Expression.Constant(Schema.Current.IDsForType[type], typeof(int?));
+            return Expression.Constant(Schema.Current.TypeToId[type], typeof(int?));
         }
 
         //On Sql, nullability has no sense

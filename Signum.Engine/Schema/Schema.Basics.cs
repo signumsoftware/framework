@@ -19,6 +19,7 @@ using System.Diagnostics;
 using Signum.Engine.Linq;
 using System.Data.SqlClient;
 using Signum.Services;
+using System.Globalization;
 
 namespace Signum.Engine.Maps
 {
@@ -30,6 +31,8 @@ namespace Signum.Engine.Maps
             get { return silentMode; }
             set { this.silentMode = value; }
         }
+
+        public CultureInfo ForceCultureInfo { get; set; }
 
         public TimeZoneMode TimeZoneMode { get; set; }
 
@@ -43,18 +46,18 @@ namespace Signum.Engine.Maps
         
         const string errorType = "TypeDN table not cached. Remember to call Schema.Current.Initialize";
 
-        Dictionary<Type, int> idsForType;
-        internal Dictionary<Type, int> IDsForType
+        Dictionary<Type, int> typeToId;
+        internal Dictionary<Type, int> TypeToId
         {
-            get { return idsForType.ThrowIfNullC(errorType); }
-            set { idsForType = value; }
+            get { return typeToId.ThrowIfNullC(errorType); }
+            set { typeToId = value; }
         }
 
-        Dictionary<int, Table> tablesForID;
-        internal Dictionary<int, Table> TablesForID
+        Dictionary<int, Table> idToTable;
+        internal Dictionary<int, Table> IdToTable
         {
-            get { return tablesForID.ThrowIfNullC(errorType); }
-            set { tablesForID = value; }
+            get { return idToTable.ThrowIfNullC(errorType); }
+            set { idToTable = value; }
         }
 
         Dictionary<Type, TypeDN> typeToDN;
@@ -71,6 +74,20 @@ namespace Signum.Engine.Maps
             set { dnToType = value; }
         }
 
+        Dictionary<string, Type> nameToType;
+        internal Dictionary<string, Type> NameToType
+        {
+            get { return nameToType.ThrowIfNullC(errorType); }
+            set { nameToType = value; }
+        }
+
+        Dictionary<Type, string> typeToName;
+        internal Dictionary<Type, string> TypeToName
+        {
+            get { return typeToName.ThrowIfNullC(errorType); }
+            set { typeToName = value; }
+        }
+        
         #region Events
 
         public event Func<Type, string> IsAllowedCallback;
@@ -191,31 +208,34 @@ namespace Signum.Engine.Maps
             if (Synchronizing == null)
                 return null;
 
-            Replacements replacements = new Replacements();
-            SqlPreCommand command = Synchronizing
-                .GetInvocationList()
-                .Cast<Func<Replacements, SqlPreCommand>>()
-                .Select(e =>
-                {
-                    try
+            using (Sync.ChangeCulture(ForceCultureInfo))
+            {
+                Replacements replacements = new Replacements();
+                SqlPreCommand command = Synchronizing
+                    .GetInvocationList()
+                    .Cast<Func<Replacements, SqlPreCommand>>()
+                    .Select(e =>
                     {
-                        return e(replacements);
-                    }
-                    catch (Exception ex)
-                    {
-                        return new SqlPreCommandSimple("Exception on {0}".Formato(e.Method, ex.Message));
-                    }
-                })
-                .Combine(Spacing.Triple);
+                        try
+                        {
+                            return e(replacements);
+                        }
+                        catch (Exception ex)
+                        {
+                            return new SqlPreCommandSimple("Exception on {0}".Formato(e.Method, ex.Message));
+                        }
+                    })
+                    .Combine(Spacing.Triple);
 
-            if (command == null)
-                return null; 
+                if (command == null)
+                    return null;
 
-            return SqlPreCommand.Combine(Spacing.Double,
-                new SqlPreCommandSimple(Resources.StartOfSyncScriptGeneratedOn0.Formato(DateTime.Now)),
-                new SqlPreCommandSimple("use {0}".Formato(schemaName)),
-                command,
-                new SqlPreCommandSimple(Resources.EndOfSyncScript)); 
+                return SqlPreCommand.Combine(Spacing.Double,
+                    new SqlPreCommandSimple(Resources.StartOfSyncScriptGeneratedOn0.Formato(DateTime.Now)),
+                    new SqlPreCommandSimple("use {0}".Formato(schemaName)),
+                    command,
+                    new SqlPreCommandSimple(Resources.EndOfSyncScript));
+            }
         }
 
         public event Func<SqlPreCommand> Generating;
@@ -224,11 +244,14 @@ namespace Signum.Engine.Maps
             if (Generating == null)
                 return null;
 
-            return Generating
-                .GetInvocationList()
-                .Cast<Func<SqlPreCommand>>()
-                .Select(e => e())
-                .Combine(Spacing.Triple);
+            using (Sync.ChangeCulture(ForceCultureInfo))
+            {
+                return Generating
+                    .GetInvocationList()
+                    .Cast<Func<SqlPreCommand>>()
+                    .Select(e => e())
+                    .Combine(Spacing.Triple);
+            }
         }
         
         class InitPair
@@ -601,6 +624,7 @@ namespace Signum.Engine.Maps
         public string Name { get; set; }
         public bool Identity {get; set;}
         public bool IsView { get; internal set; }
+        public string CleanTypeName { get; set; }
 
         public Dictionary<string, EntityField> Fields { get; set; }
         public Dictionary<string, IColumn> Columns { get; set; }

@@ -8,6 +8,10 @@ using System.Reflection;
 using Signum.Utilities;
 using System.IO;
 using System.Web.Hosting;
+using System.Web.UI;
+using System.Web;
+using System.IO.Compression;
+using Signum.Web.PortableAreas;
 
 namespace Signum.Web.Controllers
 {
@@ -18,8 +22,10 @@ namespace Signum.Web.Controllers
             string contentType = GetContentType(resourceName);
 
             var file = HostingEnvironment.VirtualPathProvider.GetFile("~/{0}/{1}/{2}".Formato(area, resourcesFolder, resourceName));
-
-            return this.File(file.Open(), contentType);
+            using (var str = file.Open())
+            {
+                return new ScriptContentResult(str.ReadAllBytes(), contentType);
+            }
         }
 
         private static string GetContentType(string resourceName)

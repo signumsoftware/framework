@@ -24,6 +24,16 @@ namespace Signum.Engine
             get { return Schema.Current.DnToType; }
         }
 
+        public static Dictionary<string, Type> NameToType
+        {
+            get { return Schema.Current.NameToType; }
+        }
+
+        public static Dictionary<Type, string> TypeToName
+        {
+            get { return Schema.Current.TypeToName; }
+        }
+
         public static Type ToType(this TypeDN type)
         {
             return DnToType[type];
@@ -44,11 +54,15 @@ namespace Signum.Engine
                 "caching types table from {0}".Formato(sender.Table(typeof(TypeDN)).Name)
                 ).ToDictionary(a => a.type, a => a.typeDN);
 
-            sender.IDsForType = dict.SelectDictionary(k => k, v => v.Id);
-            sender.TablesForID = sender.IDsForType.ToDictionary(p => p.Value, p => sender.Table(p.Key));
+            sender.TypeToId = dict.SelectDictionary(k => k, v => v.Id);
+            sender.IdToTable = sender.TypeToId.ToDictionary(p => p.Value, p => sender.Table(p.Key));
 
             sender.TypeToDN = dict;
             sender.DnToType = dict.Inverse();
+
+            sender.TypeToName = sender.Tables.SelectDictionary(k => k, v => v.CleanTypeName);
+            sender.NameToType = sender.TypeToName.Inverse("CleanTypeNames");
+
         }
 
         public static Dictionary<TypeDN, Type> TryDNToType(Replacements replacements)
@@ -76,6 +90,7 @@ namespace Signum.Engine
                     c.FullClassName = s.FullClassName;
                     c.TableName = s.TableName;
                     c.FriendlyName = s.FriendlyName;
+                    c.CleanName = s.CleanName; 
                     return table.UpdateSqlSync(c);
                 }, Spacing.Double);
         }
@@ -96,7 +111,8 @@ namespace Signum.Engine
                          {
                              FullClassName = type.FullName,
                              TableName = tab.Name,
-                             FriendlyName = type.NiceName()
+                             FriendlyName = type.NiceName(), 
+                             CleanName = Reflector.CleanTypeName(type)
                          }).ToList();
             return lista;
         }
@@ -106,32 +122,32 @@ namespace Signum.Engine
             return Schema.Current.TypeToDN.Where(a => type.IsAssignableFrom(a.Key)).Select(a => a.Value.ToLite()).ToList();
         }
 
+        public static Lite ParseLite(Type staticType, string value)
+        {
+            return Lite.ParseLite(staticType, value, TryGetType);
+        }
 
         public static string TryParseLite(Type liteType, string liteKey, out Lite lite)
         {
-            string error = Lite.TryParseLite(liteType, liteKey, TryGetType, out lite);
-            if (error != null)
-                return error;
-
-            lite = Database.RetrieveLite(liteType, lite.RuntimeType, lite.Id);
-            return null;
+            return Lite.TryParseLite(liteType, liteKey, TryGetType, out lite);
         }
 
-        public static Lite ParseLite(Type liteType, string liteKey)
+        public static Type GetType(string cleanName)
         {
-            Lite lite = Lite.ParseLite(liteType, liteKey, TryGetType);
-
-            return Database.RetrieveLite(liteType, lite.RuntimeType, lite.Id);
+            return Schema.Current.NameToType.GetOrThrow(cleanName, "Type {0} not found in the schema");
         }
 
-        public static Type GetType(string className)
+        public static Type TryGetType(string cleanName)
         {
-            return Schema.Current.DnToType.Where(t => t.Key.ClassName == className).Select(a => a.Value).Single("Type {0} not found in the schema".Formato(className));
+            return Schema.Current.NameToType.TryGetC(cleanName);
         }
 
-        public static Type TryGetType(string className)
+        public static string Key(this Lite lite)
         {
-            return Schema.Current.DnToType.Where(t => t.Key.ClassName == className).Select(a => a.Value).SingleOrDefault();
+            if (lite == null)
+                return null;
+
+            return lite.Key(rt => TypeToName.GetOrThrow(rt, "The type {0} is not registered in the Schema"));
         }
     }
 }

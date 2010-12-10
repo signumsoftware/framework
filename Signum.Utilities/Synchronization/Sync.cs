@@ -12,17 +12,39 @@ namespace Signum.Utilities
     {
         public static IDisposable ChangeCulture(string cultureName)
         {
+            if (string.IsNullOrEmpty(cultureName))
+                return null;
+
+            return ChangeCulture(new CultureInfo(cultureName));
+        }
+
+        public static IDisposable ChangeCulture(CultureInfo ci)
+        {
+            if (ci == null)
+                return null;
+
             Thread t = Thread.CurrentThread;
             CultureInfo old = t.CurrentCulture;
-            t.CurrentCulture = new CultureInfo(cultureName);
+            t.CurrentCulture = ci;
             return new Disposable(() => t.CurrentCulture = old);
         }
 
         public static IDisposable ChangeCultureUI(string cultureName)
         {
+            if (string.IsNullOrEmpty(cultureName))
+                return null;
+
+            return ChangeCultureUI(new CultureInfo(cultureName));
+        }
+
+        public static IDisposable ChangeCultureUI(CultureInfo ci)
+        {
+            if (ci == null)
+                return null;
+
             Thread t = Thread.CurrentThread;
             CultureInfo old = t.CurrentUICulture;
-            t.CurrentUICulture = new CultureInfo(cultureName);
+            t.CurrentUICulture = ci;
             return new Disposable(() => t.CurrentUICulture = old);
         }
 

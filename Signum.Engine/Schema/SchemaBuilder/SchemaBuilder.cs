@@ -138,9 +138,12 @@ namespace Signum.Engine.Maps
             Type type = table.Type;
             table.Identity = Reflector.ExtractEnumProxy(type) == null;
             table.Name = GenerateTableName(type);
+            table.CleanTypeName = GenerateCleanTypeName(type);
             table.Fields = GenerateFields(type, Contexts.Normal, table, NameSequence.Void, false);
             table.GenerateColumns();
         }
+
+        
 
         HashSet<string> loadedModules = new HashSet<string>();
         public bool NotDefined(MethodBase methodBase)
@@ -389,20 +392,30 @@ namespace Signum.Engine.Maps
 
         public virtual string GenerateTableName(Type type)
         {
-            return TypeName(type);
+            return CleanType(type).Name;
         }
 
-        public virtual string TypeName(Type type)
+        public virtual string GenerateCleanTypeName(Type type)
+        {
+            type = CleanType(type);
+
+            CleanTypeNameAttribute ctn = Settings.TypeAttributes(type).OfType<CleanTypeNameAttribute>().SingleOrDefault();
+            if (ctn != null)
+                return ctn.Name;
+
+            return Reflector.CleanTypeName(type);
+        }
+
+        protected static Type CleanType(Type type)
         {
             type = Reflector.ExtractLite(type) ?? type;
             type = Reflector.ExtractEnumProxy(type) ?? type;
-
-            return type.Name;
+            return type;
         }
 
         public virtual string GenerateTableNameCollection(Type type, NameSequence name)
         {
-            return TypeName(type) + name.ToString();
+            return CleanType(type).Name + name.ToString();
         }
 
         public virtual string GenerateFieldName(Type type, KindOfField tipoCampo)
@@ -414,7 +427,7 @@ namespace Signum.Engine.Maps
                     return type.Name.FirstUpper();
                 case KindOfField.Enum:
                 case KindOfField.Reference:
-                    return "id" + TypeName(type);
+                    return "id" + CleanType(type).Name;
                 default:
                     throw new NotImplementedException("No field name for type {0} defined".Formato(type));
             }
@@ -481,7 +494,7 @@ namespace Signum.Engine.Maps
             if (vn != null)
                 return vn.Name;
 
-            return TypeName(type);
+            return CleanType(type).Name;
         }
 
         public override string GenerateFieldName(Type type, FieldInfo fi, KindOfField tipoCampo)

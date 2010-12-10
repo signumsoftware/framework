@@ -84,6 +84,7 @@
     <Compile Include="ControllerAttributes\AuthenticationRequiredAttribute.cs" />
     <Compile Include="ControllerAttributes\RedirectToUrl.cs" />
     <Compile Include="ControllerAttributes\RequireSslAttribute.cs" />
+    <Compile Include="PortableAreas\ScriptContentResult.cs" />
     <Compile Include="Properties\Resources.es.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

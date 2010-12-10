@@ -116,7 +116,7 @@ namespace Signum.Engine.Linq
             where S :  IIdentifiable
         {
             if (id == null) return default(S); 
-            Table table = Schema.Current.TablesForID[idType.Value];
+            Table table = Schema.Current.IdToTable[idType.Value];
             return (S)(object)Retriever.GetIdentifiable(table, id.Value, true);
         }
 
@@ -124,14 +124,14 @@ namespace Signum.Engine.Linq
         {
             if (id == null) return null;
 
-            Type runtimeType = Schema.Current.TablesForID[idType.Value].Type;
+            Type runtimeType = Schema.Current.IdToTable[idType.Value].Type;
             return new Lite<S>(runtimeType, id.Value) { ToStr = str }; 
         }
 
         public Lite<S> GetLiteImplementedByAll<S>(int? id, int? idType) where S : class, IIdentifiable
         {
             if (id == null) return null; 
-            Table table = Schema.Current.TablesForID[idType.Value];
+            Table table = Schema.Current.IdToTable[idType.Value];
             return (Lite<S>)Retriever.GetLite(table, typeof(S), id.Value);
         }
 

@@ -25,6 +25,14 @@ namespace Signum.Entities
             set { Set(ref tableName, value, () => TableName); }
         }
 
+        [NotNullable, UniqueIndex]
+        string cleanName;
+        public string CleanName
+        {
+            get { return cleanName; }
+            set { Set(ref cleanName, value, () => CleanName); }
+        }
+
         [NotNullable]
         string friendlyName;
         [StringLengthValidator(Min=1)]
@@ -33,6 +41,8 @@ namespace Signum.Entities
             get { return friendlyName; }
             set { Set(ref friendlyName, value, () => FriendlyName); }
         }
+
+        
 
         public override string ToString()
         {

@@ -73,7 +73,7 @@ namespace Signum.Engine.Linq
             ImplementedByAllExpression iba = newItem as ImplementedByAllExpression;
             if (iba != null)
                 return entityIDs.Select(kvp => Expression.And(
-                    EqualNullable(Expression.Constant(Schema.Current.IDsForType[kvp.Key]), iba.TypeId),
+                    EqualNullable(Expression.Constant(Schema.Current.TypeToId[kvp.Key]), iba.TypeId),
                     InExpression.FromValues(iba.Id, kvp.Value))).Aggregate((a, b) => Expression.Or(a, b));
 
             throw new InvalidOperationException("EntityIn not defined for newItem of type {0}".Formato(newItem.Type.Name));

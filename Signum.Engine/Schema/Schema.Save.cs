@@ -294,7 +294,7 @@ namespace Signum.Engine.Maps
         protected internal override void CreateParameter(List<SqlParameter> parameters, object value, SqlCommandType type, Forbidden forbidden)
         {
             parameters.Add(SqlParameterBuilder.CreateReferenceParameter(Column.Name, Column.Nullable, this.GetIdForLite(value, forbidden)));
-            parameters.Add(SqlParameterBuilder.CreateReferenceParameter(ColumnTypes.Name, ColumnTypes.Nullable, this.GetTypeForLite(value, forbidden).TryCS(t => Schema.Current.IDsForType[t])));
+            parameters.Add(SqlParameterBuilder.CreateReferenceParameter(ColumnTypes.Name, ColumnTypes.Nullable, this.GetTypeForLite(value, forbidden).TryCS(t => Schema.Current.TypeToId[t])));
         }
     }
 

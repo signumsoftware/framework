@@ -21,6 +21,18 @@ namespace Signum.Web
     {
         public Assembly MainAssembly;
 
+        DateTime? lastModified;
+        public DateTime LastModified
+        {
+            get
+            {
+                if (lastModified == null)
+                    lastModified = new DateTime(new FileInfo(MainAssembly.Location).LastWriteTime.Ticks).TrimToSeconds();
+
+                return lastModified.Value; 
+            }
+        }
+
         string version;
         public string Version
         {

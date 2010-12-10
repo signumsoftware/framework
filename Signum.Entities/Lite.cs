@@ -270,6 +270,9 @@ namespace Signum.Entities
         public static string TryParseLite(Type liteType, string liteKey, Func<string, Type> resolveType, out Lite result)
         {
             result = null;
+            if (string.IsNullOrEmpty(liteKey))
+                return null; 
+            
             Match match = regex.Match(liteKey);
             if (!match.Success)
                 return Resources.InvalidFormat;

@@ -204,7 +204,7 @@ namespace Signum.Engine.Maps
 
     public partial class FieldImplementedByAll
     {
-        static Expression<Func<int, Table>> getTable = i=> Schema.Current.TablesForID[i];
+        static Expression<Func<int, Table>> getTable = i=> Schema.Current.IdToTable[i];
 
         internal override Expression GenerateValue(ParameterExpression reader, ParameterExpression retriever)
         {

@@ -133,23 +133,6 @@ namespace Signum.Entities
         }
     }
 
-    [AttributeUsage(AttributeTargets.Class)]
-    public sealed class LowPopulationAttribute : Attribute
-    {
-        bool low = true;
-
-        public bool Low
-        {
-            get { return low; }
-            set { low = value; }
-        }
-
-        public LowPopulationAttribute(bool low)
-        {
-            this.Low = low;
-        }
-    }
-
     [AttributeUsage(AttributeTargets.Field)]
     public sealed class NotifyCollectionChangedAttribute : Attribute
     {
