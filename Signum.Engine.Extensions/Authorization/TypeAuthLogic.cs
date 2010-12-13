@@ -41,7 +41,7 @@ namespace Signum.Engine.Authorization
                     AuthUtils.MaxType, 
                     AuthUtils.MinType);
 
-                AuthLogic.ExportToXml += () => cache.ExportXml("Types", "Type", t => t.ClassName, ta => ta.ToString());
+                AuthLogic.ExportToXml += () => cache.ExportXml("Types", "Type", t => t.CleanName, ta => ta.ToString());
                 AuthLogic.ImportFromXml += (x, roles) => cache.ImportXml(x, "Types", "Type", roles, s => TypeLogic.TypeToDN[TypeLogic.GetType(s)], EnumExtensions.ToEnum<TypeAllowed>);
             }
         }
