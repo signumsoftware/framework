@@ -112,10 +112,10 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Alerts" xml:space="preserve">
     <value>Alertes</value>
@@ -127,10 +127,10 @@
     <value>Fait</value>
   </data>
   <data name="CalendarNext" xml:space="preserve">
-    <value>Suiv</value>
+    <value>Suivant</value>
   </data>
   <data name="CalendarPrevious" xml:space="preserve">
-    <value>Pré</value>
+    <value>Précédent</value>
   </data>
   <data name="CalendarToday" xml:space="preserve">
     <value>Aujourd'hui</value>
@@ -148,7 +148,7 @@
     <value>Supprimer les filtres</value>
   </data>
   <data name="EditColumnsFinishEdit" xml:space="preserve">
-    <value>Édition complète</value>
+    <value>Finir édition</value>
   </data>
   <data name="Excel" xml:space="preserve">
     <value>Excel</value>
@@ -163,7 +163,7 @@
     <value>Filtrer par champ</value>
   </data>
   <data name="Future" xml:space="preserve">
-    <value>Avenir</value>
+    <value>Futur</value>
   </data>
   <data name="HideFilters" xml:space="preserve">
     <value>Masquer les filtres</value>
@@ -184,7 +184,7 @@
     <value>Nouveau</value>
   </data>
   <data name="No" xml:space="preserve">
-    <value>ne</value>
+    <value>non</value>
   </data>
   <data name="NoFiltersSpecified" xml:space="preserve">
     <value>Les filtres ne sont pas spécifiés</value>
@@ -232,10 +232,10 @@
     <value>Vue</value>
   </data>
   <data name="ViewForType0IsNotAllowed" xml:space="preserve">
-    <value>Affichage de type {0} n'est pas autorisé</value>
+    <value>Affichage pour le type {0} n'est pas autorisé</value>
   </data>
   <data name="ViewNotes" xml:space="preserve">
-    <value>Notes de vue</value>
+    <value>Voir les notes</value>
   </data>
   <data name="Warned" xml:space="preserve">
     <value>Averti</value>
@@ -250,7 +250,7 @@
     <value>Erreur</value>
   </data>
   <data name="Signum_executingOperation" xml:space="preserve">
-    <value>En cours d'exécution de l'opération...</value>
+    <value>Execution de l'opération...</value>
   </data>
   <data name="Signum_noElementsSelected" xml:space="preserve">
     <value>Aucun élément sélectionné</value>
@@ -262,7 +262,7 @@
     <value>Opération exécutée</value>
   </data>
   <data name="Signum_popupErrors" xml:space="preserve">
-    <value>Il existe des erreurs dans l'entité, veut continuer ?</value>
+    <value>Il existe des erreurs dans l'entité, voulez-vous continuer ?</value>
   </data>
   <data name="Signum_popupErrorsStop" xml:space="preserve">
     <value>Il existe des erreurs dans l'entité</value>
@@ -271,7 +271,7 @@
     <value>Enregistré</value>
   </data>
   <data name="Signum_saving" xml:space="preserve">
-    <value>Sauver</value>
+    <value>Entrain de sauvegarder</value>
   </data>
   <data name="Signum_search" xml:space="preserve">
     <value>Recherche</value>

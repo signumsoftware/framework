@@ -112,10 +112,10 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="_0Day" xml:space="preserve">
     <value>{0} Tag</value>
@@ -124,16 +124,16 @@
     <value>{0} Tage</value>
   </data>
   <data name="_0HasNoFreeBits" xml:space="preserve">
-    <value>{0:X} Hat keine kostenlose bits</value>
+    <value>{0:X} Hat keine freien Bits</value>
   </data>
   <data name="_0Hour" xml:space="preserve">
-    <value>{0} Stunden</value>
+    <value>{0} Stunde</value>
   </data>
   <data name="_0Hours" xml:space="preserve">
     <value>{0} Stunden</value>
   </data>
   <data name="_0Minute" xml:space="preserve">
-    <value>{0} Minuten</value>
+    <value>{0} Minute</value>
   </data>
   <data name="_0Minutes" xml:space="preserve">
     <value>{0} Minuten</value>
@@ -142,7 +142,7 @@
     <value>{0} Monat</value>
   </data>
   <data name="_0Months" xml:space="preserve">
-    <value>{0} Monaten</value>
+    <value>{0} Monate</value>
   </data>
   <data name="_0Second" xml:space="preserve">
     <value>{0} Sekunde</value>
@@ -190,10 +190,10 @@
     <value>Sekunden</value>
   </data>
   <data name="EnterYourSelection" xml:space="preserve">
-    <value>Geben Sie Ihre Auswahl: </value>
+    <value>Geben Sie Ihre Auswahl ein: </value>
   </data>
   <data name="EnterYoutSelectionsSeparatedByComma" xml:space="preserve">
-    <value>Geben Sie Ihre Auswahl durch Komma getrennt: </value>
+    <value>Geben Sie Ihre Auswahl durch Kommata getrennt ein: </value>
   </data>
   <data name="NoOptionWithKey0Found" xml:space="preserve">
     <value>Keine Option mit Schlüssel {0} gefunden</value>

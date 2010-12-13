@@ -112,10 +112,10 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="_0As1" xml:space="preserve">
     <value>({0} comme {1})</value>
@@ -172,7 +172,7 @@
     <value>Colonne {0} pas trouvé</value>
   </data>
   <data name="ComparisonType_DistinctTo" xml:space="preserve">
-    <value>distinctes de</value>
+    <value>différent de</value>
   </data>
   <data name="ComparisonType_EqualTo" xml:space="preserve">
     <value>Egale à</value>
@@ -190,7 +190,7 @@
     <value>Plus petit que ou égal</value>
   </data>
   <data name="Count" xml:space="preserve">
-    <value>Compte</value>
+    <value>[Count]</value>
   </data>
   <data name="Day" xml:space="preserve">
     <value>Jour</value>
@@ -202,7 +202,7 @@
     <value>Contient</value>
   </data>
   <data name="FilterOperation_DistinctTo" xml:space="preserve">
-    <value>Distinct de</value>
+    <value>différenr de</value>
   </data>
   <data name="FilterOperation_EndsWith" xml:space="preserve">
     <value>Termine avec</value>
@@ -232,19 +232,19 @@
     <value>A {0} décimales</value>
   </data>
   <data name="HaveANumberOfElements01" xml:space="preserve">
-    <value>A nombre d'éléments{0} {1}</value>
+    <value>A un nombre d'éléments{0} {1}</value>
   </data>
   <data name="HaveAPrecisionOf" xml:space="preserve">
-    <value>A une précision </value>
+    <value>A une précision de </value>
   </data>
   <data name="HaveBetween0And1Characters" xml:space="preserve">
-    <value>A entre {0} et {1} caractère</value>
+    <value>A entre {0} et {1} caractères</value>
   </data>
   <data name="HaveMaximun0Characters" xml:space="preserve">
-    <value>A maximum {0}caractères</value>
+    <value>A au maximum {0}caractères</value>
   </data>
   <data name="HaveMinimum0Characters" xml:space="preserve">
-    <value>A minimum {0} caractères</value>
+    <value>A au minimum {0} caractères</value>
   </data>
   <data name="HaveNoRepeatedElements" xml:space="preserve">
     <value>N'a pas d'éléments répétés</value>
@@ -259,13 +259,13 @@
     <value>Texte</value>
   </data>
   <data name="IdNotValid" xml:space="preserve">
-    <value>Id invalide</value>
+    <value>Id non valide</value>
   </data>
   <data name="ImmutableEntity_AllowChange" xml:space="preserve">
-    <value>Accepter changements</value>
+    <value>Permettre les changements</value>
   </data>
   <data name="InvalidFormat" xml:space="preserve">
-    <value>Format Invalide</value>
+    <value>Format non valide</value>
   </data>
   <data name="LockeableEntity_Locked" xml:space="preserve">
     <value>Vérouillé</value>
@@ -304,7 +304,7 @@
     <value>Etat {0} n'est pas enrigistré dans le StateValidator</value>
   </data>
   <data name="Telephone" xml:space="preserve">
-    <value>Telephone</value>
+    <value>Téléphone</value>
   </data>
   <data name="TheLenghtOf0HasToBeEqualTo0" xml:space="preserve">
     <value>La longueur de {{0}} doit être égal à {0}</value>
@@ -313,7 +313,7 @@
     <value>La longueur de{{0}} doit être plus grand ou égal à{0}</value>
   </data>
   <data name="TheLengthOf0HasToBeLesserOrEqualTo0" xml:space="preserve">
-    <value>La longueur de {{0}} doit être moins ou égal à {0}</value>
+    <value>La longueur de {{0}} doit être plus petit ou égal à {0}</value>
   </data>
   <data name="TheNumberOfElementsOf0HasToBe01" xml:space="preserve">
     <value>Le nombre d'éléments de {{0}} doit être de {0} {1}</value>
@@ -325,13 +325,13 @@
     <value>Type introuvé</value>
   </data>
   <data name="Uppercase" xml:space="preserve">
-    <value>minuscule</value>
+    <value>majuscule</value>
   </data>
   <data name="Year" xml:space="preserve">
     <value>Année</value>
   </data>
   <data name="MonthStart" xml:space="preserve">
-    <value>Début de mois </value>
+    <value>Début du mois </value>
   </data>
   <data name="_0IsNotAllowed" xml:space="preserve">
     <value>{0} n'est pas autorisée</value>

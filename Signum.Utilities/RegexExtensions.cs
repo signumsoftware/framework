@@ -43,7 +43,7 @@ namespace Signum.Utilities
         public static T MostSimilar<T>(this IEnumerable<T> collection, Func<T, string> stringSelector, string pattern)
         {
             StringDistance sd = new StringDistance();
-            return collection.WithMin(item => sd.Distance(stringSelector(item), pattern));
+            return collection.WithMin(item => sd.LevenshteinDistance(stringSelector(item), pattern));
         }
     }
 }

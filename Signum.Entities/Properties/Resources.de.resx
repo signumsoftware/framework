@@ -112,91 +112,91 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="_0As1" xml:space="preserve">
-    <value>({0} als {1})</value>
+    <value>({0} wie {1}) ??</value>
   </data>
   <data name="_0DoesNotHaveAValid0Format" xml:space="preserve">
-    <value>{{0}} hat nicht eine gültige {0}-Format</value>
+    <value>{{0}} hat nicht ein nicht gültiges Format von {0}</value>
   </data>
   <data name="_0HasMoreThan0DecimalPlaces" xml:space="preserve">
     <value>{{0}} hat mehr als {0} Dezimalstellen</value>
   </data>
   <data name="_0HasNoCorrectFormat" xml:space="preserve">
-    <value>{0} hat keine richtigen format</value>
+    <value>{0} hat nicht das richtige Format</value>
   </data>
   <data name="_0HasSomeRepeatedElements0" xml:space="preserve">
     <value>{{0}} hat einige wiederholte Elemente: {0}</value>
   </data>
   <data name="_0HasToBe0Than1" xml:space="preserve">
-    <value>{{0}} hat {0} {1} sein</value>
+    <value>{{0}} muss {0} {1} sein</value>
   </data>
   <data name="_0HasToBeBetween0And1" xml:space="preserve">
-    <value>{{0}} muss zwischen {0} und {1}</value>
+    <value>{{0}} muss zwischen {0} und {1} sein</value>
   </data>
   <data name="_0HasToBeLowercase" xml:space="preserve">
-    <value>{0} muss Kleinbuchstaben sein</value>
+    <value>{0} muss in Kleinbuchstaben geschrieben sein</value>
   </data>
   <data name="_0HasToBeUppercase" xml:space="preserve">
-    <value>{0} muss in Großbuchstaben geschrieben werden</value>
+    <value>{0} muss in Großbuchstaben geschrieben sein</value>
   </data>
   <data name="_0IsNecessary" xml:space="preserve">
     <value>{0} ist notwendig</value>
   </data>
   <data name="_0IsNecessaryOnState1" xml:space="preserve">
-    <value>{0} ist notwendig auf Status {1}</value>
+    <value>{0} ist notwendig im Status {1} ??</value>
   </data>
   <data name="_0IsNotAllowed" xml:space="preserve">
     <value>{0} ist nicht zulässig</value>
   </data>
   <data name="_0IsNotAllowedOnState1" xml:space="preserve">
-    <value>{0} ist auf Status {1} nicht zulässig</value>
+    <value>{0} ist nicht zulässig im Status {1} ??</value>
   </data>
   <data name="_0IsNotAValidIdentifier" xml:space="preserve">
-    <value>'{0}' ist kein gültiger Bezeichner</value>
+    <value>'{0}' ist kein gültiger Bezeichner ??</value>
   </data>
   <data name="_0IsNotSet" xml:space="preserve">
-    <value>{0} ist nicht festgelegt</value>
+    <value>Feld {0} ist nicht festgelegt</value>
   </data>
   <data name="And" xml:space="preserve">
     <value> und </value>
   </data>
   <data name="As0" xml:space="preserve">
-    <value>Als {0}</value>
+    <value>Als {0} ??</value>
   </data>
   <data name="Be" xml:space="preserve">
-    <value>werden </value>
+    <value>sein</value>
   </data>
   <data name="BeBetween0And1" xml:space="preserve">
-    <value>zwischen Sie {0} und {1}</value>
+    <value>zwischen {0} und {1} sein</value>
   </data>
   <data name="BeNotNull" xml:space="preserve">
     <value>nicht null sein</value>
   </data>
   <data name="Column0NotFound" xml:space="preserve">
-    <value>Spalte {0} wurde nicht gefunden</value>
+    <value>Die Spalte {0} wurde nicht gefunden</value>
   </data>
   <data name="ComparisonType_DistinctTo" xml:space="preserve">
     <value>anders als</value>
   </data>
   <data name="ComparisonType_EqualTo" xml:space="preserve">
-    <value>gleich</value>
+    <value>gleich </value>
   </data>
   <data name="ComparisonType_GreaterThan" xml:space="preserve">
     <value>größer als</value>
   </data>
   <data name="ComparisonType_GreaterThanOrEqual" xml:space="preserve">
-    <value>größer als oder gleich</value>
+    <value>größer als oder gleich </value>
   </data>
   <data name="ComparisonType_LessThan" xml:space="preserve">
     <value>weniger als</value>
   </data>
   <data name="ComparisonType_LessThanOrEqual" xml:space="preserve">
-    <value>kleiner oder gleich</value>
+    <value>kleiner oder gleich </value>
   </data>
   <data name="Count" xml:space="preserve">
     <value>Num</value>
@@ -214,25 +214,25 @@
     <value>enthält</value>
   </data>
   <data name="FilterOperation_DistinctTo" xml:space="preserve">
-    <value>distinct</value>
+    <value>anders als</value>
   </data>
   <data name="FilterOperation_EndsWith" xml:space="preserve">
     <value>endet mit</value>
   </data>
   <data name="FilterOperation_EqualTo" xml:space="preserve">
-    <value>gleich</value>
+    <value>gleich </value>
   </data>
   <data name="FilterOperation_GreaterThan" xml:space="preserve">
     <value>größer als</value>
   </data>
   <data name="FilterOperation_GreaterThanOrEqual" xml:space="preserve">
-    <value>größer als oder gleich</value>
+    <value>größer als oder gleich </value>
   </data>
   <data name="FilterOperation_LessThan" xml:space="preserve">
     <value>weniger als</value>
   </data>
   <data name="FilterOperation_LessThanOrEqual" xml:space="preserve">
-    <value>kleiner oder gleich</value>
+    <value>kleiner als oder gleich </value>
   </data>
   <data name="FilterOperation_Like" xml:space="preserve">
     <value>wie</value>
@@ -241,28 +241,28 @@
     <value>beginnt mit</value>
   </data>
   <data name="Have0Decimals" xml:space="preserve">
-    <value>haben Sie {0} decimal</value>
+    <value>haben {0} Dezimalstellen</value>
   </data>
   <data name="HaveANumberOfElements01" xml:space="preserve">
-    <value>haben Sie eine Reihe von Elementen {0} {1}</value>
+    <value>hat eine Nummer von Elementen {0} {1}</value>
   </data>
   <data name="HaveAPrecisionOf" xml:space="preserve">
-    <value>haben Sie eine Genauigkeit von </value>
+    <value>haben eine Genauigkeit von </value>
   </data>
   <data name="HaveBetween0And1Characters" xml:space="preserve">
-    <value>zwischen Sie {0} und {1} Zeichen</value>
+    <value>haben zwischen {0} und {1} Zeichen ??</value>
   </data>
   <data name="HaveMaximun0Characters" xml:space="preserve">
-    <value>Maximun {0} Zeichen haben</value>
+    <value>haben maximal {0} Zeichen ??</value>
   </data>
   <data name="HaveMinimum0Characters" xml:space="preserve">
-    <value>haben Sie mindestens {0} Zeichen</value>
+    <value>haben mindestens {0} Zeichen ??</value>
   </data>
   <data name="HaveNoRepeatedElements" xml:space="preserve">
-    <value>haben Sie keine wiederholte Elemente</value>
+    <value>darf keine wiederholten Elementen haben</value>
   </data>
   <data name="HaveValid0Format" xml:space="preserve">
-    <value>haben Sie eine gültige {0}-format</value>
+    <value>muss ein gültiges {0}-Format haben</value>
   </data>
   <data name="Hour" xml:space="preserve">
     <value>Zeit</value>
@@ -274,10 +274,10 @@
     <value>ID ungültig</value>
   </data>
   <data name="ImmutableEntity_AllowChange" xml:space="preserve">
-    <value>Ermöglichen ändern</value>
+    <value>Änderungen erlauben</value>
   </data>
   <data name="InvalidFormat" xml:space="preserve">
-    <value>Ungültiges format</value>
+    <value>Ungültiges Format</value>
   </data>
   <data name="LockeableEntity_Locked" xml:space="preserve">
     <value>Blockiert</value>
@@ -295,19 +295,19 @@
     <value>Monat</value>
   </data>
   <data name="MonthStart" xml:space="preserve">
-    <value>Monat Start </value>
+    <value>Monatsbeginn</value>
   </data>
   <data name="MoreThanOneColumnNamed0" xml:space="preserve">
     <value>Mehr als eine Spalte mit dem Namen {0}</value>
   </data>
   <data name="MoreThanOneTokenWithKey0FoundOn1" xml:space="preserve">
-    <value>Mehr als ein Token mit Schlüssel {0} gefunden am {1}</value>
+    <value>Mehr als ein Token mit dem Schlüssel {0} in {1}</value>
   </data>
   <data name="New" xml:space="preserve">
     <value>Neu</value>
   </data>
   <data name="Of" xml:space="preserve">
-    <value> der </value>
+    <value>von</value>
   </data>
   <data name="OrBeNull" xml:space="preserve">
     <value>oder null sein</value>
@@ -316,13 +316,13 @@
     <value>Sekunde</value>
   </data>
   <data name="State0NotRegisteredInStateValidator" xml:space="preserve">
-    <value>Status {0} nicht registriert in StateValidator</value>
+    <value>Der Status {0} ist nicht in StateValidator registriert</value>
   </data>
   <data name="Telephone" xml:space="preserve">
     <value>Telefon</value>
   </data>
   <data name="TheLenghtOf0HasToBeEqualTo0" xml:space="preserve">
-    <value>Die Länge von {{0}} hat gleich {0} sein</value>
+    <value>Die Länge von {{0}} muss gleich {0} sein</value>
   </data>
   <data name="TheLengthOf0HasToBeGreaterOrEqualTo0" xml:space="preserve">
     <value>Die Länge von {{0}} muss größer als oder gleich {0}</value>
@@ -331,10 +331,10 @@
     <value>Die Länge von {{0}} muss kleiner als oder gleich {0} sein</value>
   </data>
   <data name="TheNumberOfElementsOf0HasToBe01" xml:space="preserve">
-    <value>Die Anzahl der Elemente von {{0}} hat zu {0} {1} werden</value>
+    <value>Die Anzahl der Elemente von {{0}} muss {0} {1} sein</value>
   </data>
   <data name="Token0NotCompatibleWith1" xml:space="preserve">
-    <value>Token {0} nicht kompatibel mit {1}</value>
+    <value>Token {0} nicht mit {1} kompatibel</value>
   </data>
   <data name="TypeNotFound" xml:space="preserve">
     <value>Typ nicht gefunden</value>

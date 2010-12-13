@@ -147,7 +147,7 @@ namespace Signum.Engine
             {
                 string old = oldOnly[0];
 
-                List<string> sms = newOnly.OrderBy(n => sd.Distance(old, n)).ToList();
+                List<string> sms = newOnly.OrderByDescending(n => sd.LongestCommonSubsequence(old, n)).ToList();
             retry:
                 Console.WriteLine(Properties.Resources._0HasBeenRenamedIn1.Formato(old, replacementsKey));
                 sms.Select((s, i) => "- {0}: {1} ".Formato(i, s)).ToConsole();

@@ -112,111 +112,171 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="_0Day" xml:space="preserve">
-    <value>{0} Jour</value>
+  <data name="Alerts" xml:space="preserve">
+    <value>Avvisi</value>
   </data>
-  <data name="_0Days" xml:space="preserve">
-    <value>{0} Jours</value>
+  <data name="Average" xml:space="preserve">
+    <value>Media</value>
   </data>
-  <data name="_0HasNoFreeBits" xml:space="preserve">
-    <value>{0:X} n'a pas de bits libres</value>
+  <data name="CalendarClose" xml:space="preserve">
+    <value>Chiudere</value>
   </data>
-  <data name="_0Hour" xml:space="preserve">
-    <value>{0} Heure</value>
+  <data name="CalendarNext" xml:space="preserve">
+    <value>Successivo</value>
   </data>
-  <data name="_0Hours" xml:space="preserve">
-    <value>{0} Heures</value>
+  <data name="CalendarPrevious" xml:space="preserve">
+    <value>Precedente</value>
   </data>
-  <data name="_0Minute" xml:space="preserve">
-    <value>{0} Minute</value>
+  <data name="CalendarToday" xml:space="preserve">
+    <value>Oggi</value>
   </data>
-  <data name="_0Minutes" xml:space="preserve">
-    <value>{0} Minutes</value>
+  <data name="Checked" xml:space="preserve">
+    <value>Controllato</value>
   </data>
-  <data name="_0Month" xml:space="preserve">
-    <value>{0} Mois</value>
+  <data name="CreateAlert" xml:space="preserve">
+    <value>Crea un avviso</value>
   </data>
-  <data name="_0Months" xml:space="preserve">
-    <value>{0} Mois</value>
+  <data name="CreateNote" xml:space="preserve">
+    <value>Crea una nota</value>
   </data>
-  <data name="_0Second" xml:space="preserve">
-    <value>{0} Seconde</value>
+  <data name="DeleteFilters" xml:space="preserve">
+    <value>Eliminare filtri</value>
   </data>
-  <data name="_0Seconds" xml:space="preserve">
-    <value>{0} Secondes</value>
+  <data name="EditColumnsFinishEdit" xml:space="preserve">
+    <value>Completare la modifica</value>
   </data>
-  <data name="_0Year" xml:space="preserve">
-    <value>{0} Année</value>
+  <data name="Excel" xml:space="preserve">
+    <value>Excel</value>
   </data>
-  <data name="_0Year1Month2Day" xml:space="preserve">
-    <value>{0} Année(s), {1} Mois, {2} Jour(s)</value>
+  <data name="ExecutedXTimes" xml:space="preserve">
+    <value>Eseguito x volte</value>
   </data>
-  <data name="_0Years" xml:space="preserve">
-    <value>{0} Années</value>
+  <data name="Field" xml:space="preserve">
+    <value>Campo</value>
   </data>
-  <data name="And" xml:space="preserve">
-    <value> et </value>
+  <data name="FilterByField" xml:space="preserve">
+    <value>Filtra per campo</value>
   </data>
-  <data name="DateLast" xml:space="preserve">
-    <value>Dernier {0}</value>
+  <data name="Future" xml:space="preserve">
+    <value>Prossimo</value>
   </data>
-  <data name="DateSeparators" xml:space="preserve">
-    <value>,</value>
+  <data name="HideFilters" xml:space="preserve">
+    <value>Nascondi filtri</value>
   </data>
-  <data name="DateThis" xml:space="preserve">
-    <value>Ce {0}</value>
+  <data name="IncorrectEntityInSessionYouMustReloadThePageToContinue" xml:space="preserve">
+    <value>I dati della sessione non sono corretti. Ricarica la pagina per continuare</value>
   </data>
-  <data name="DateTimePrecision_Days" xml:space="preserve">
-    <value>Jours</value>
+  <data name="Maximum" xml:space="preserve">
+    <value>Massimo</value>
   </data>
-  <data name="DateTimePrecision_Hours" xml:space="preserve">
-    <value>Heures</value>
+  <data name="Minimum" xml:space="preserve">
+    <value>Minimo</value>
   </data>
-  <data name="DateTimePrecision_Milliseconds" xml:space="preserve">
-    <value>Millisecondes</value>
+  <data name="Name" xml:space="preserve">
+    <value>Nome</value>
   </data>
-  <data name="DateTimePrecision_Minutes" xml:space="preserve">
-    <value>Minutes</value>
+  <data name="New" xml:space="preserve">
+    <value>Nuovo</value>
   </data>
-  <data name="DateTimePrecision_Seconds" xml:space="preserve">
-    <value>Secondes</value>
+  <data name="No" xml:space="preserve">
+    <value>no</value>
   </data>
-  <data name="EnterYourSelection" xml:space="preserve">
-    <value>Entrez votre sélection: </value>
+  <data name="NoFiltersSpecified" xml:space="preserve">
+    <value>Nessun filtro specificato</value>
   </data>
-  <data name="EnterYoutSelectionsSeparatedByComma" xml:space="preserve">
-    <value>Entrez votre sélection séparé par une virgule: </value>
+  <data name="NoResults" xml:space="preserve">
+    <value>Nessun risultato</value>
   </data>
-  <data name="NoOptionWithKey0Found" xml:space="preserve">
-    <value>Pas d'option avec la touche {0} trouvée</value>
+  <data name="Notes" xml:space="preserve">
+    <value>Note</value>
   </data>
-  <data name="Or" xml:space="preserve">
-    <value> ou </value>
+  <data name="NumberOfRows" xml:space="preserve">
+    <value>Numero di righe</value>
   </data>
-  <data name="OS_Unknown0" xml:space="preserve">
-    <value>Inconnu({0})</value>
+  <data name="Operation" xml:space="preserve">
+    <value>Operazione</value>
   </data>
-  <data name="SelectOneOfTheFollowingOptions" xml:space="preserve">
-    <value>Choisissez une des options suivantes:</value>
+  <data name="Remove" xml:space="preserve">
+    <value>Elimina</value>
   </data>
-  <data name="Today" xml:space="preserve">
-    <value>Aujourd'hui</value>
+  <data name="Save" xml:space="preserve">
+    <value>Salva</value>
   </data>
-  <data name="Tomorrow" xml:space="preserve">
-    <value>Demain</value>
+  <data name="Search" xml:space="preserve">
+    <value>Cerca</value>
   </data>
-  <data name="Unavailable" xml:space="preserve">
-    <value>Indisponible</value>
+  <data name="ShowCalendar" xml:space="preserve">
+    <value>Mostra calendario</value>
   </data>
-  <data name="Yesterday" xml:space="preserve">
-    <value>Hier</value>
+  <data name="ShowFilters" xml:space="preserve">
+    <value>Mostra filtri</value>
   </data>
-  <data name="Ago" xml:space="preserve">
-    <value>Il y a {0} </value>
+  <data name="Signum_error" xml:space="preserve">
+    <value>Errore</value>
+  </data>
+  <data name="Signum_executingOperation" xml:space="preserve">
+    <value>Operazione in corso...</value>
+  </data>
+  <data name="Signum_noElementsSelected" xml:space="preserve">
+    <value>Nessun elemento selezionato</value>
+  </data>
+  <data name="Signum_noResults" xml:space="preserve">
+    <value>Nessun risultato trovato</value>
+  </data>
+  <data name="Signum_operationExecuted" xml:space="preserve">
+    <value>Operazione eseguita</value>
+  </data>
+  <data name="Signum_popupErrors" xml:space="preserve">
+    <value>Ci sono errori nell'entità, continuare?</value>
+  </data>
+  <data name="Signum_popupErrorsStop" xml:space="preserve">
+    <value>Ci sono errori nell'entità</value>
+  </data>
+  <data name="Signum_saved" xml:space="preserve">
+    <value>Salvato</value>
+  </data>
+  <data name="Signum_saving" xml:space="preserve">
+    <value>Salvando</value>
+  </data>
+  <data name="Signum_search" xml:space="preserve">
+    <value>Cerca</value>
+  </data>
+  <data name="Signum_searching" xml:space="preserve">
+    <value>Ricerca in corso...</value>
+  </data>
+  <data name="Type0NotAllowed" xml:space="preserve">
+    <value>Tipo {0} non consentito</value>
+  </data>
+  <data name="UserColumnsEdit" xml:space="preserve">
+    <value>Modificare le colonne utente</value>
+  </data>
+  <data name="Value" xml:space="preserve">
+    <value>Valore</value>
+  </data>
+  <data name="ValueMustBeSpecifiedFor0" xml:space="preserve">
+    <value>È necessario specificare un valore per {0}</value>
+  </data>
+  <data name="View" xml:space="preserve">
+    <value>Visualizza</value>
+  </data>
+  <data name="ViewForType0IsNotAllowed" xml:space="preserve">
+    <value>Non è consentita la visualizzazione del tipo {0}</value>
+  </data>
+  <data name="ViewNotes" xml:space="preserve">
+    <value>Visualizza note</value>
+  </data>
+  <data name="Warned" xml:space="preserve">
+    <value>Avvisato</value>
+  </data>
+  <data name="Yes" xml:space="preserve">
+    <value>si</value>
+  </data>
+  <data name="YourSessionHasTimedOutClickF5ToReloadTheEntity" xml:space="preserve">
+    <value>La sessione è scaduta, fare clic su F5 per ricaricare l'entità dal database</value>
   </data>
 </root>

@@ -112,22 +112,22 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Alerts" xml:space="preserve">
     <value>Warnungen</value>
   </data>
   <data name="Average" xml:space="preserve">
-    <value>Medium</value>
+    <value>Durchschnitt</value>
   </data>
   <data name="CalendarClose" xml:space="preserve">
     <value>Schließen</value>
   </data>
   <data name="CalendarNext" xml:space="preserve">
-    <value>Nächste</value>
+    <value>Nächster</value>
   </data>
   <data name="CalendarPrevious" xml:space="preserve">
     <value>Zurück</value>
@@ -136,10 +136,10 @@
     <value>Heute</value>
   </data>
   <data name="Checked" xml:space="preserve">
-    <value>Bewährte</value>
+    <value>Geprüfte</value>
   </data>
   <data name="CreateAlert" xml:space="preserve">
-    <value>Benachrichtigung erstellen</value>
+    <value>Warnungen erstellen</value>
   </data>
   <data name="CreateNote" xml:space="preserve">
     <value>Notiz erstellen</value>
@@ -160,16 +160,16 @@
     <value>Feld</value>
   </data>
   <data name="FilterByField" xml:space="preserve">
-    <value>Filtern von Feld</value>
+    <value>Filtern von Feldern</value>
   </data>
   <data name="Future" xml:space="preserve">
-    <value>Zukunft</value>
+    <value>Zukünftige</value>
   </data>
   <data name="HideFilters" xml:space="preserve">
     <value>Filter ausblenden</value>
   </data>
   <data name="IncorrectEntityInSessionYouMustReloadThePageToContinue" xml:space="preserve">
-    <value>Sitzungsdaten ist falsch. Aktualisieren Sie die Seite weiter</value>
+    <value>Sitzungsdaten sind falsch. Aktualisieren Sie die Seite, um fortzufahren.</value>
   </data>
   <data name="Maximum" xml:space="preserve">
     <value>Maximum</value>
@@ -196,7 +196,7 @@
     <value>Notizen</value>
   </data>
   <data name="NumberOfRows" xml:space="preserve">
-    <value>No. Datensätze</value>
+    <value>Anzahl der Datensätze</value>
   </data>
   <data name="Operation" xml:space="preserve">
     <value>Betrieb</value>
@@ -214,13 +214,13 @@
     <value>Kalender anzeigen</value>
   </data>
   <data name="ShowFilters" xml:space="preserve">
-    <value>Anzeigefilter</value>
+    <value>Filter anzeigen</value>
   </data>
   <data name="Type0NotAllowed" xml:space="preserve">
-    <value>Typ {0} nicht zulässig</value>
+    <value>Der Typ {0} ist nicht zulässig</value>
   </data>
   <data name="UserColumnsEdit" xml:space="preserve">
-    <value>Edit User Spalten</value>
+    <value>User Spalten bearbeiten</value>
   </data>
   <data name="Value" xml:space="preserve">
     <value>Wert</value>
@@ -229,13 +229,13 @@
     <value>Sie müssen einen Wert für {0} angeben</value>
   </data>
   <data name="View" xml:space="preserve">
-    <value>Ansicht</value>
+    <value>Anzeigen</value>
   </data>
   <data name="ViewForType0IsNotAllowed" xml:space="preserve">
-    <value>Ansicht für Typ {0} ist nicht zulässig</value>
+    <value>Anzeigen des Typs {0} ist nicht zulässig</value>
   </data>
   <data name="ViewNotes" xml:space="preserve">
-    <value>Anzeigen von Notizen</value>
+    <value>Notizen anzeigen </value>
   </data>
   <data name="Warned" xml:space="preserve">
     <value>Gewarnt</value>
@@ -244,13 +244,13 @@
     <value>Ja</value>
   </data>
   <data name="YourSessionHasTimedOutClickF5ToReloadTheEntity" xml:space="preserve">
-    <value>Ihre Sitzung ist abgelaufen, klicken Sie auf F5, um die Entität aus der Datenbank neu laden</value>
+    <value>Ihre Sitzung ist abgelaufen, drücken Sie auf F5, um die Entität aus der Datenbank neu zu laden</value>
   </data>
   <data name="Signum_error" xml:space="preserve">
     <value>Fehler</value>
   </data>
   <data name="Signum_executingOperation" xml:space="preserve">
-    <value>Laufenden Betrieb...</value>
+    <value>Operation wird ausgeführt...</value>
   </data>
   <data name="Signum_noElementsSelected" xml:space="preserve">
     <value>Keine Elemente ausgewählt</value>
@@ -259,13 +259,13 @@
     <value>Keine Ergebnisse gefunden</value>
   </data>
   <data name="Signum_operationExecuted" xml:space="preserve">
-    <value>Operation exécutée</value>
+    <value>Operation ausgeführt</value>
   </data>
   <data name="Signum_popupErrors" xml:space="preserve">
-    <value>Es sind Fehler in der Entität, fortfahren möchte?</value>
+    <value>Es sind Fehler in der Entität, möchten Sie fortfahren?</value>
   </data>
   <data name="Signum_popupErrorsStop" xml:space="preserve">
-    <value>Fehler sind in der Entität vorhanden</value>
+    <value>Es sind Fehler in der Entität </value>
   </data>
   <data name="Signum_saved" xml:space="preserve">
     <value>Gespeichert</value>

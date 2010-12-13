@@ -8,40 +8,118 @@ namespace Signum.Utilities
     {
         int[][] num;
 
-        public int Distance(string s, string t)
+        public int LevenshteinDistance(string str1, string str2)
         {
-            int Ms = s.Length + 1;
-            int Mt = t.Length + 1;
+            if (string.IsNullOrEmpty(str1) || string.IsNullOrEmpty(str2))
+                return 0;
 
+            int M1 = str1.Length + 1;
+            int M2 = str2.Length + 1;
 
-            if (num == null || Ms > num.Length || Mt > num[0].Length)
+            ResizeArray(M1, M2);
+
+            for (int i = 0; i < M1; i++)
+                num[i][0] = i;
+            for (int j = 0; j < M2; j++)
+                num[0][j] = j;
+
+            for (int i = 1; i < M1; i++)
             {
-
-                num = new int[Ms][];
-
-                for (int i = 0; i < Ms; i++)
-                {
-                    num[i] = new int[Mt];
-                    num[i][0] = i;
-                }
-
-                for (int j = 0; j < Mt; j++)
-                    num[0][j] = j;
-            }
-
-            for (int i = 1; i < Ms; i++)
-            {
-                char cs = s[i - 1];
+                char cs = str1[i - 1];
                 int[] numim1 = num[i - 1];
                 int[] numi = num[i];
-                for (int j = 1; j < Mt; j++)
+                for (int j = 1; j < M2; j++)
                 {
-                    num[i][j] = Math.Min(Math.Min(numim1[j] + 1, numi[j - 1] + 1), numim1[j - 1] + ((cs == t[j - 1]) ? 0 : 1));
+                    if (cs == str2[j - 1])
+                        numi[j] = numim1[j - 1];
+                    else
+                        numi[j] = Math.Min(Math.Min(
+                                        numim1[j] + 1,     //deletion
+                                        numi[j - 1] + 1),  //insertion
+                                        numim1[j - 1] + 1);//substitution
                 }
             }
 
-            return num[Ms - 1][Mt - 1];
+            return num[M1 - 1][M2 - 1];
+        }
 
+        public int LongestCommonSubstring(string str1, string str2)
+        {
+            if (string.IsNullOrEmpty(str1) || string.IsNullOrEmpty(str2))
+                return 0;
+
+            ResizeArray(str1.Length, str2.Length);
+
+            int maxlen = 0;
+
+            for (int i = 0; i < str1.Length; i++)
+            {
+                for (int j = 0; j < str2.Length; j++)
+                {
+                    if (str1[i] != str2[j])
+                        num[i][j] = 0;
+                    else
+                    {
+                        if ((i == 0) || (j == 0))
+                            num[i][j] = 1;
+                        else
+                            num[i][j] = 1 + num[i - 1][j - 1];
+
+                        if (num[i][j] > maxlen)
+                        {
+                            maxlen = num[i][j];
+                        }
+                    }
+                }
+            }
+            return maxlen;
+        }
+
+        public int LongestCommonSubsequence(string str1, string str2)
+        {
+            if (string.IsNullOrEmpty(str1) || string.IsNullOrEmpty(str2))
+                return 0;
+
+            int M1 = str1.Length + 1;
+            int M2 = str2.Length + 1;
+
+            ResizeArray(M1, M2);
+
+            for (int i = 0; i < M1; i++)
+                num[i][0] = 0;
+            for (int j = 0; j < M2; j++)
+                num[0][j] = 0;
+
+            for (int i = 1; i < M1; i++)
+            {
+                for (int j = 1; j < M2; j++)
+                {
+                    if (str1[i - 1] == str2[j - 1])
+                        num[i][j] = num[i - 1][j - 1] + 1;
+                    else
+                    {
+                        if (num[i][j - 1] > num[i - 1][j])
+                            num[i][j] = num[i][j - 1];
+                        else
+                            num[i][j] = num[i - 1][j];
+                    }
+                }
+            }
+
+            return num[str1.Length][str2.Length];
+        }
+
+        private void ResizeArray(int M1, int M2)
+        {
+            if (num == null || M1 > num.Length || M2 > num[0].Length)
+            {
+                num = new int[M1][];
+
+                for (int i = 0; i < M1; i++)
+                {
+                    num[i] = new int[M2];
+                }
+            }
         }
     }
 }
