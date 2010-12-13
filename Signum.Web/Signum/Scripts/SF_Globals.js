@@ -32,11 +32,14 @@
             fn();
         }
 
+        function setLoaded(src)
+        {
+            _jsloaded[src] = true;
+        }
 
         function loadJs(src, fn) {
             if (!_jsloaded[src]) {
-                _jsloaded[src] = true;
-                Loader.loadJs(src, fn);
+                Loader.loadJs(src, fn, function() {setLoaded(src);});
             } else {
                 fn();
             }
@@ -63,7 +66,7 @@
         var d = document,
         head = d.getElementsByTagName("head")[0];
 
-        var loadJs = function (url, cb) {
+        var loadJs = function (url, cb, sl) {
             var script = d.createElement('script');
             script.setAttribute('src', url);
             script.setAttribute('type', 'text/javascript');
@@ -72,6 +75,7 @@
             var loadFunction = function () {
                 if (loaded) return;
                 loaded = true;
+                sl && sl(); //set as loaded
                 cb && cb();
             };
             script.onload = loadFunction;
