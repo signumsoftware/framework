@@ -48,6 +48,13 @@ namespace Signum.Web
             }).ToHtmlSelf();
         }
 
+        public static void FieldString(this HtmlHelper html, string label, string value)
+        {
+
+            var span = new HtmlTag("span").InnerHtml( MvcHtmlString.Create( value)).Class("valueLine").ToHtml();
+             Field(html, label, span);
+        }
+
         public static void Field(this HtmlHelper html, string label, MvcHtmlString value)
         {
             HtmlTag field = new HtmlTag("div")
