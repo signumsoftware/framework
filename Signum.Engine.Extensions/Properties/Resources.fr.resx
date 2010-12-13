@@ -112,16 +112,16 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="TheEntity0IsNew" xml:space="preserve">
     <value>L'entité {0} est nouveau</value>
   </data>
   <data name="Operation0DoesNotHaveDeleteInitialized" xml:space="preserve">
-    <value>Opération {0} n'a pas supprimer initialisé</value>
+    <value>Opération {0} n'a pas initialisé la suppresion</value>
   </data>
   <data name="ErrorParsingXMLHelpFiles" xml:space="preserve">
     <value>Erreur lors de l'analyse des fichiers d'aide de XML:
@@ -202,10 +202,10 @@
 {1}</value>
   </data>
   <data name="AfterTheOperationTheStateShouldBe0ButIs1" xml:space="preserve">
-    <value>Après l'opération {0}, l'État devrait être {1} mais est {2}</value>
+    <value>Après l'opération {0}, l'état devrait être {1} mais est {2}</value>
   </data>
   <data name="Operation0DoesNotHaveExecuteInitialized" xml:space="preserve">
-    <value>Opération {0} n'a pas exécuter initialisé</value>
+    <value>Opération {0} n'a pas Execute initialisé</value>
   </data>
   <data name="ExcelReportArgumentIsNecessaryForCompositeReports" xml:space="preserve">
     <value>argument excelReport est nécessaire pour compositeReports</value>
@@ -253,13 +253,13 @@
     <value>Le nom du fichier physique n'a pas été défini</value>
   </data>
   <data name="IncorrectPassword" xml:space="preserve">
-    <value>Mot de passe incorrect</value>
+    <value>Mot de passe incorrecte</value>
   </data>
   <data name="Username0IsNotValid" xml:space="preserve">
     <value>Nom d'utilisateur {0} n'est pas valide</value>
   </data>
   <data name="ImpossibleToExecute0FromState1" xml:space="preserve">
-    <value>Impossible d'exécuter {0} d'état {1}</value>
+    <value>Impossible d'exécuter {0} depuis l'état {1}</value>
   </data>
   <data name="Operation0IsNotAuthorized" xml:space="preserve">
     <value>Opération {0} n'est pas autorisée</value>
@@ -286,10 +286,10 @@
     <value>{0} est un {1}</value>
   </data>
   <data name="OfThe0_f" xml:space="preserve">
-    <value>de la {0}</value>
+    <value>du {0}</value>
   </data>
   <data name="OfThe0_m" xml:space="preserve">
-    <value>le {0}</value>
+    <value>du {0}</value>
   </data>
   <data name="The0_f" xml:space="preserve">
     <value>le {0}</value>
@@ -307,19 +307,19 @@
     <value>valeur comme {0}</value>
   </data>
   <data name="OrNull" xml:space="preserve">
-    <value>ou la valeur null</value>
+    <value>ou la valeur nulle</value>
   </data>
   <data name="_0IsACollectionOfElements1" xml:space="preserve">
     <value>{0} est une collection d'éléments {1}</value>
   </data>
   <data name="EmailIsNotValid" xml:space="preserve">
-    <value>L'e-mail est différente de l'e-mail stockée</value>
+    <value>L'email est différent de l'email stockée</value>
   </data>
   <data name="ConstructsANew0" xml:space="preserve">
     <value>Construit un nouveau {0}</value>
   </data>
   <data name="From0OfThe1" xml:space="preserve">
-    <value>à partir de {0} {1} </value>
+    <value>à partir de {0} du {1} </value>
   </data>
   <data name="TheOperationNeedsA0InTheArgumentNumber1" xml:space="preserve">
     <value>L'opération nécessite un {0} dans le nombre d'argument {1}</value>
@@ -337,7 +337,7 @@
     <value>de nombreux {0}</value>
   </data>
   <data name="OfThe0" xml:space="preserve">
-    <value>le {0}</value>
+    <value>du {0}</value>
   </data>
   <data name="Call0Over1OfThe2" xml:space="preserve">
     <value>Call {0} sur {1} de la {2}</value>
@@ -355,7 +355,7 @@
     <value>Aucune aide pour {0}</value>
   </data>
   <data name="NoTypeWithFullName0FoundInTheSchema" xml:space="preserve">
-    <value>Pas type avec FullName {0} trouvée dans le schéma</value>
+    <value>Pas de type avec FullName {0} trouvée dans le schéma</value>
   </data>
   <data name="NotRegisteredInEmailLogic" xml:space="preserve">
     <value>{0} non enregistré dans EmailLogic</value>
@@ -364,19 +364,19 @@
     <value>{0} non enregistré</value>
   </data>
   <data name="NoUsersToProcessFound" xml:space="preserve">
-    <value>Aucun utilisateur ne traiter</value>
+    <value>Aucun utilisateur de procéssus trouvé</value>
   </data>
   <data name="NoEntitiesToProcessFound" xml:space="preserve">
     <value>Ne trouvent aucune entités à traiter</value>
   </data>
   <data name="ProcessExecution0IsNotRunningAnymore" xml:space="preserve">
-    <value>ProcessExecution {0} n'est pas exécuté plus</value>
+    <value>ProcessExecution {0} n'est plus exécuté </value>
   </data>
   <data name="ResetPasswordCode" xml:space="preserve">
-    <value>Code pour réinitialiser le mot de passe</value>
+    <value>Réinitialiser le mot de passe</value>
   </data>
   <data name="NoEmailsToProcessFound" xml:space="preserve">
-    <value>Aucun message électronique n'a été trouvé au processus</value>
+    <value>Aucun email n'a été trouvé au processus</value>
   </data>
   <data name="SystemUserNotLoadedInitializeToLevel1SimpleEntities" xml:space="preserve">
     <value>SystemUser non chargé. Initialiser à Level1SimpleEntities</value>
@@ -385,7 +385,7 @@
     <value>AnonymousUser non chargé. Initialiser à Level1SimpleEntities</value>
   </data>
   <data name="ThereAreNoResultsToWrite" xml:space="preserve">
-    <value>Il en n'est pas ressorti qu'exporter au rapport</value>
+    <value>Il n'y a pas de réusltast à écrire</value>
   </data>
   <data name="Data" xml:space="preserve">
     <value>Données</value>

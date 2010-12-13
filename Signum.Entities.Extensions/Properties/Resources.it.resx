@@ -1,0 +1,648 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="BasicPermissions_AdminRules" xml:space="preserve">
+    <value>Gestire le regole</value>
+  </data>
+  <data name="CalendarDN" xml:space="preserve">
+    <value>Calendario</value>
+  </data>
+  <data name="CalendarDN_Holidays" xml:space="preserve">
+    <value>Vacanze</value>
+  </data>
+  <data name="CalendarDN_Name" xml:space="preserve">
+    <value>Nome</value>
+  </data>
+  <data name="CompositeReportDN" xml:space="preserve">
+    <value>Rapporto composito</value>
+  </data>
+  <data name="CompositeReportDN_ExcelReports" xml:space="preserve">
+    <value>Relazioni</value>
+  </data>
+  <data name="CompositeReportDN_Name" xml:space="preserve">
+    <value>Nome</value>
+  </data>
+  <data name="ControlPanelDN_Part0IsInColumn1ButPanelHasOnly2Columns" xml:space="preserve">
+    <value>La parte {0} è nella colonna {1} ma il pannello ha solo {2} colonne</value>
+  </data>
+  <data name="ControlPanelDN_Part0IsInColumn1WhichAlreadyHasOtherParts" xml:space="preserve">
+    <value>La parte {0} è nella colonna {1} della riga {2} che ha già altre parti</value>
+  </data>
+  <data name="ControlPanelDN_Rows0DontHaveAnyParts" xml:space="preserve">
+    <value>Non ci sono parti nelle righe {{{0}}}</value>
+  </data>
+  <data name="CountSearchControlPartDN" xml:space="preserve">
+    <value>Elenco dei contatori</value>
+  </data>
+  <data name="CountUserQueryElement" xml:space="preserve">
+    <value>Contatore</value>
+  </data>
+  <data name="CustomTaskDN" xml:space="preserve">
+    <value>Attività personalizzata</value>
+  </data>
+  <data name="CustomTaskExecutionDN" xml:space="preserve">
+    <value>Esecuzione attività personalizzata</value>
+  </data>
+  <data name="CustomTaskExecutionDN_CustomTask" xml:space="preserve">
+    <value>Attività</value>
+  </data>
+  <data name="CustomTaskExecutionDN_EndTime" xml:space="preserve">
+    <value>Fine</value>
+  </data>
+  <data name="CustomTaskExecutionDN_Exception" xml:space="preserve">
+    <value>Eccezione</value>
+  </data>
+  <data name="CustomTaskExecutionDN_StartTime" xml:space="preserve">
+    <value>Inizio</value>
+  </data>
+  <data name="CustomTaskOperation_Execute" xml:space="preserve">
+    <value>Nuova esecuzione</value>
+  </data>
+  <data name="DateSpanDN_Days" xml:space="preserve">
+    <value>Giorni</value>
+  </data>
+  <data name="DateSpanDN_Months" xml:space="preserve">
+    <value>Mesi</value>
+  </data>
+  <data name="DateSpanDN_Years" xml:space="preserve">
+    <value>Anni</value>
+  </data>
+  <data name="Deleted" xml:space="preserve">
+    <value>(Cancellato)</value>
+  </data>
+  <data name="EmailMessageDN" xml:space="preserve">
+    <value>Messaggio di posta elettronica</value>
+  </data>
+  <data name="EmailMessageDN_Exception" xml:space="preserve">
+    <value>Errore</value>
+  </data>
+  <data name="EmailMessageDN_Package" xml:space="preserve">
+    <value>Pacchetto</value>
+  </data>
+  <data name="EmailMessageDN_Received" xml:space="preserve">
+    <value>Ricevuto</value>
+  </data>
+  <data name="EmailMessageDN_Recipient" xml:space="preserve">
+    <value>Destinatario</value>
+  </data>
+  <data name="EmailMessageDN_Sent" xml:space="preserve">
+    <value>Inviato</value>
+  </data>
+  <data name="EmailMessageDN_State" xml:space="preserve">
+    <value>Stato</value>
+  </data>
+  <data name="EmailMessageDN_Subject" xml:space="preserve">
+    <value>Oggetto</value>
+  </data>
+  <data name="EmailMessageDN_Template" xml:space="preserve">
+    <value>Modello</value>
+  </data>
+  <data name="EmailOperations_ReSendEmails" xml:space="preserve">
+    <value>Reinvia email</value>
+  </data>
+  <data name="EmailPackageDN" xml:space="preserve">
+    <value>Pacchetto di posta elettronica</value>
+  </data>
+  <data name="EmailPackageDN_NumErrors" xml:space="preserve">
+    <value>Num errori</value>
+  </data>
+  <data name="EmailPackageDN_NumLines" xml:space="preserve">
+    <value>Num linee</value>
+  </data>
+  <data name="EmailPackageDN_Template" xml:space="preserve">
+    <value>Modello</value>
+  </data>
+  <data name="EnumDN_Key" xml:space="preserve">
+    <value>Key</value>
+  </data>
+  <data name="EnumDN_Name" xml:space="preserve">
+    <value>Nome</value>
+  </data>
+  <data name="ExcelReportDN" xml:space="preserve">
+    <value>Report di Excel</value>
+  </data>
+  <data name="ExcelReportDN_Deleted" xml:space="preserve">
+    <value>Eliminato</value>
+  </data>
+  <data name="ExcelReportDN_DisplayName" xml:space="preserve">
+    <value>Nome del report</value>
+  </data>
+  <data name="ExcelReportDN_File" xml:space="preserve">
+    <value>File</value>
+  </data>
+  <data name="ExcelReportDN_Query" xml:space="preserve">
+    <value>Query</value>
+  </data>
+  <data name="ExpressionShouldBeSomeKindOfAggregate" xml:space="preserve">
+    <value>Espressione dovrebbe essere una sorta di aggregazione</value>
+  </data>
+  <data name="ExpressionShouldHaveAContinousAmountOfValues" xml:space="preserve">
+    <value>Espressione dovrebbe avere una quantità costante di valori</value>
+  </data>
+  <data name="ExpressionShouldHaveADiscreteAmountOfValues" xml:space="preserve">
+    <value>Espressione dovrebbe avere una quantità discreta di valori</value>
+  </data>
+  <data name="FilePathDN_FileLengthString" xml:space="preserve">
+    <value>Dimensioni</value>
+  </data>
+  <data name="FilePathDN_FileName" xml:space="preserve">
+    <value>Nome del file</value>
+  </data>
+  <data name="FilePathDN_FileType" xml:space="preserve">
+    <value>Tipo di file</value>
+  </data>
+  <data name="FilePathDN_FullPhysicalPath" xml:space="preserve">
+    <value>Percorso fisico</value>
+  </data>
+  <data name="FilePathDN_FullWebPath" xml:space="preserve">
+    <value>URL</value>
+  </data>
+  <data name="FilePathDN_Repository" xml:space="preserve">
+    <value>Repository</value>
+  </data>
+  <data name="FilePathDN_Sufix" xml:space="preserve">
+    <value>Suffisso</value>
+  </data>
+  <data name="FileRepositoryDN" xml:space="preserve">
+    <value>File repository</value>
+  </data>
+  <data name="FileRepositoryDN_Active" xml:space="preserve">
+    <value>Attivo</value>
+  </data>
+  <data name="FileRepositoryDN_FileTypes" xml:space="preserve">
+    <value>Tipi di file</value>
+  </data>
+  <data name="FileRepositoryDN_Name" xml:space="preserve">
+    <value>Nome</value>
+  </data>
+  <data name="FileRepositoryDN_PhysicalPrefix" xml:space="preserve">
+    <value>Prefisso fisico</value>
+  </data>
+  <data name="FileRepositoryDN_WebPrefix" xml:space="preserve">
+    <value>Prefisso web</value>
+  </data>
+  <data name="HolidayDN" xml:space="preserve">
+    <value>Vacanze</value>
+  </data>
+  <data name="HolidayDN_Date" xml:space="preserve">
+    <value>Data</value>
+  </data>
+  <data name="HolidayDN_Name" xml:space="preserve">
+    <value>Nome</value>
+  </data>
+  <data name="Holidayhavetobenullwhennocalendarisset" xml:space="preserve">
+    <value>Le vacanze devono essere nulle quando non è impostato nessun calendario</value>
+  </data>
+  <data name="Holidayhavetobetrueorfalsewhenacalendarisset" xml:space="preserve">
+    <value>Le vacanze devono essere vero o falso quando è impostato un calendario</value>
+  </data>
+  <data name="HourMinuteDN_Hour" xml:space="preserve">
+    <value>Ora</value>
+  </data>
+  <data name="HourMinuteDN_Minute" xml:space="preserve">
+    <value>Minuto</value>
+  </data>
+  <data name="LogOperationDN_End" xml:space="preserve">
+    <value>Fine</value>
+  </data>
+  <data name="LogOperationDN_Exception" xml:space="preserve">
+    <value>Eccezione</value>
+  </data>
+  <data name="LogOperationDN_Operation" xml:space="preserve">
+    <value>Operazione</value>
+  </data>
+  <data name="LogOperationDN_Plural" xml:space="preserve">
+    <value>Registri operazioni</value>
+  </data>
+  <data name="LogOperationDN_Start" xml:space="preserve">
+    <value>Inizio</value>
+  </data>
+  <data name="LogOperationDN_Target" xml:space="preserve">
+    <value>Destinazione</value>
+  </data>
+  <data name="LogOperationDN_User" xml:space="preserve">
+    <value>Utente</value>
+  </data>
+  <data name="LogOperationQueries_All" xml:space="preserve">
+    <value>Tutti</value>
+  </data>
+  <data name="LogOperationQueries_Completed" xml:space="preserve">
+    <value>Completato</value>
+  </data>
+  <data name="LogOperationQueries_InProcess" xml:space="preserve">
+    <value>Nel processo</value>
+  </data>
+  <data name="NotUserLogged" xml:space="preserve">
+    <value>Utente non registrato</value>
+  </data>
+  <data name="PackageDN" xml:space="preserve">
+    <value>Pacchetto</value>
+  </data>
+  <data name="PackageDN_Lines" xml:space="preserve">
+    <value>Linee</value>
+  </data>
+  <data name="PackageDN_Name" xml:space="preserve">
+    <value>Nome</value>
+  </data>
+  <data name="PackageDN_Operation" xml:space="preserve">
+    <value>Operazione</value>
+  </data>
+  <data name="PackageLineDN" xml:space="preserve">
+    <value>Pacchetto linea</value>
+  </data>
+  <data name="PackageLineDN_Exception" xml:space="preserve">
+    <value>Eccezione</value>
+  </data>
+  <data name="PackageLineDN_FinishTime" xml:space="preserve">
+    <value>Finr</value>
+  </data>
+  <data name="PackageLineDN_Package" xml:space="preserve">
+    <value>Pacchetto</value>
+  </data>
+  <data name="PackageLineDN_Target" xml:space="preserve">
+    <value>Destinazione</value>
+  </data>
+  <data name="ProcessDN" xml:space="preserve">
+    <value>Processo</value>
+  </data>
+  <data name="ProcessExecutionDN" xml:space="preserve">
+    <value>Processo di esecuzione</value>
+  </data>
+  <data name="ProcessExecutionDN_CancelationDate" xml:space="preserve">
+    <value>Data di cancellazione</value>
+  </data>
+  <data name="ProcessExecutionDN_CreationDate" xml:space="preserve">
+    <value>Data di creazione</value>
+  </data>
+  <data name="ProcessExecutionDN_ErrorDate" xml:space="preserve">
+    <value>Data di errore</value>
+  </data>
+  <data name="ProcessExecutionDN_Exception" xml:space="preserve">
+    <value>Eccezione</value>
+  </data>
+  <data name="ProcessExecutionDN_ExecutionEnd" xml:space="preserve">
+    <value>Data di fine esecuzione</value>
+  </data>
+  <data name="ProcessExecutionDN_ExecutionStart" xml:space="preserve">
+    <value>Data di avvio esecuzione</value>
+  </data>
+  <data name="ProcessExecutionDN_PlannedDate" xml:space="preserve">
+    <value>Data prevista</value>
+  </data>
+  <data name="ProcessExecutionDN_Process" xml:space="preserve">
+    <value>Processo</value>
+  </data>
+  <data name="ProcessExecutionDN_ProcessData" xml:space="preserve">
+    <value>Dati</value>
+  </data>
+  <data name="ProcessExecutionDN_Progress" xml:space="preserve">
+    <value>Progressi</value>
+  </data>
+  <data name="ProcessExecutionDN_QueuedDate" xml:space="preserve">
+    <value>Data richiesta esecuzione</value>
+  </data>
+  <data name="ProcessExecutionDN_State" xml:space="preserve">
+    <value>Stato</value>
+  </data>
+  <data name="ProcessExecutionDN_SuspendDate" xml:space="preserve">
+    <value>Data di sospensione</value>
+  </data>
+  <data name="ProcessOperation_Cancel" xml:space="preserve">
+    <value>Annullare</value>
+  </data>
+  <data name="ProcessOperation_Execute" xml:space="preserve">
+    <value>Eseguire</value>
+  </data>
+  <data name="ProcessOperation_FromProcess" xml:space="preserve">
+    <value>Nuova esecuzione</value>
+  </data>
+  <data name="ProcessOperation_Plan" xml:space="preserve">
+    <value>Pianificare</value>
+  </data>
+  <data name="ProcessOperation_Save" xml:space="preserve">
+    <value>Salvare</value>
+  </data>
+  <data name="ProcessOperation_Suspend" xml:space="preserve">
+    <value>Sospendere</value>
+  </data>
+  <data name="ProcessQueries_CurrentExecutions" xml:space="preserve">
+    <value>Esecuzioni in corso</value>
+  </data>
+  <data name="ProcessQueries_ErrorExecutions" xml:space="preserve">
+    <value>Errori</value>
+  </data>
+  <data name="ProcessStartIsGreaterThanProcessEnd" xml:space="preserve">
+    <value>Avvio del processo maggiore di fine processo</value>
+  </data>
+  <data name="ProcessStartIsNullButProcessEndIsNot" xml:space="preserve">
+    <value>Avvio del processo nullo, ma processo finale non lo è</value>
+  </data>
+  <data name="ProcessState_Canceled" xml:space="preserve">
+    <value>Annullato</value>
+  </data>
+  <data name="ProcessState_Created" xml:space="preserve">
+    <value>Creato</value>
+  </data>
+  <data name="ProcessState_Executing" xml:space="preserve">
+    <value>In esecuzione</value>
+  </data>
+  <data name="ProcessState_Finished" xml:space="preserve">
+    <value>Completato</value>
+  </data>
+  <data name="ProcessState_Planned" xml:space="preserve">
+    <value>Pianificato</value>
+  </data>
+  <data name="ProcessState_Queued" xml:space="preserve">
+    <value>In coda</value>
+  </data>
+  <data name="ProcessState_Suspended" xml:space="preserve">
+    <value>Sospeso</value>
+  </data>
+  <data name="ProcessState_Suspending" xml:space="preserve">
+    <value>In sospensione</value>
+  </data>
+  <data name="QueryDN" xml:space="preserve">
+    <value>Query</value>
+  </data>
+  <data name="QueryDN_DisplayName" xml:space="preserve">
+    <value>Nome visualizzato</value>
+  </data>
+  <data name="QueryDN_Key" xml:space="preserve">
+    <value>Key</value>
+  </data>
+  <data name="RoleDN" xml:space="preserve">
+    <value>Ruolo</value>
+  </data>
+  <data name="RoleDN_Name" xml:space="preserve">
+    <value>Nome</value>
+  </data>
+  <data name="RoleDN_Roles" xml:space="preserve">
+    <value>Ruoli</value>
+  </data>
+  <data name="ScheduledTaskDN" xml:space="preserve">
+    <value>Attività pianificata</value>
+  </data>
+  <data name="ScheduledTaskDN_NextDate" xml:space="preserve">
+    <value>Data successiva </value>
+  </data>
+  <data name="ScheduledTaskDN_Rule" xml:space="preserve">
+    <value>Regola</value>
+  </data>
+  <data name="ScheduledTaskDN_Suspended" xml:space="preserve">
+    <value>Sospeso</value>
+  </data>
+  <data name="ScheduledTaskDN_Task" xml:space="preserve">
+    <value>Attività</value>
+  </data>
+  <data name="ScheduleRuleDailyDN" xml:space="preserve">
+    <value>Giornaliero</value>
+  </data>
+  <data name="ScheduleRuleDailyDN_Everydayat" xml:space="preserve">
+    <value>Ogni giorno alle </value>
+  </data>
+  <data name="ScheduleRuleDayDN_Hour" xml:space="preserve">
+    <value>Ora</value>
+  </data>
+  <data name="ScheduleRuleDayDN_Minute" xml:space="preserve">
+    <value>Minuto</value>
+  </data>
+  <data name="ScheduleRuleDayDN_StartingOn" xml:space="preserve">
+    <value>Partenza il</value>
+  </data>
+  <data name="ScheduleRuleWeekDaysDN" xml:space="preserve">
+    <value>Giorni della settimana</value>
+  </data>
+  <data name="ScheduleRuleWeekDaysDN_AndHoliday" xml:space="preserve">
+    <value>e nei giorni festivi</value>
+  </data>
+  <data name="ScheduleRuleWeekDaysDN_At" xml:space="preserve">
+    <value>a</value>
+  </data>
+  <data name="ScheduleRuleWeekDaysDN_ButHoliday" xml:space="preserve">
+    <value>festivi esclusi</value>
+  </data>
+  <data name="ScheduleRuleWeekDaysDN_Calendar" xml:space="preserve">
+    <value>Calendario</value>
+  </data>
+  <data name="ScheduleRuleWeekDaysDN_F" xml:space="preserve">
+    <value>V</value>
+  </data>
+  <data name="ScheduleRuleWeekDaysDN_Friday" xml:space="preserve">
+    <value>Venerdì</value>
+  </data>
+  <data name="ScheduleRuleWeekDaysDN_Holiday" xml:space="preserve">
+    <value>Festivo</value>
+  </data>
+  <data name="ScheduleRuleWeekDaysDN_M" xml:space="preserve">
+    <value>L</value>
+  </data>
+  <data name="ScheduleRuleWeekDaysDN_Monday" xml:space="preserve">
+    <value>Lunedì</value>
+  </data>
+  <data name="ScheduleRuleWeekDaysDN_S" xml:space="preserve">
+    <value>D</value>
+  </data>
+  <data name="ScheduleRuleWeekDaysDN_Sa" xml:space="preserve">
+    <value>S</value>
+  </data>
+  <data name="ScheduleRuleWeekDaysDN_Saturday" xml:space="preserve">
+    <value>Sabato</value>
+  </data>
+  <data name="ScheduleRuleWeekDaysDN_Sunday" xml:space="preserve">
+    <value>Domenica</value>
+  </data>
+  <data name="ScheduleRuleWeekDaysDN_T" xml:space="preserve">
+    <value>Ma</value>
+  </data>
+  <data name="ScheduleRuleWeekDaysDN_Th" xml:space="preserve">
+    <value>G</value>
+  </data>
+  <data name="ScheduleRuleWeekDaysDN_Thursday" xml:space="preserve">
+    <value>Giovedì</value>
+  </data>
+  <data name="ScheduleRuleWeekDaysDN_Tuesday" xml:space="preserve">
+    <value>Martedì</value>
+  </data>
+  <data name="ScheduleRuleWeekDaysDN_W" xml:space="preserve">
+    <value>Me</value>
+  </data>
+  <data name="ScheduleRuleWeekDaysDN_Wednesday" xml:space="preserve">
+    <value>Mercoledì</value>
+  </data>
+  <data name="ScheduleRuleWeeklyDN" xml:space="preserve">
+    <value>Settimanale</value>
+  </data>
+  <data name="ScheduleRuleWeeklyDN_DayOfTheWeek" xml:space="preserve">
+    <value>Giorno della settimana</value>
+  </data>
+  <data name="TheUserStateMustBeDisabled" xml:space="preserve">
+    <value>Lo stato dell'utente deve essere disabilitato</value>
+  </data>
+  <data name="UserDN" xml:space="preserve">
+    <value>Utente</value>
+  </data>
+  <data name="UserDN_Email" xml:space="preserve">
+    <value>e-Mail</value>
+  </data>
+  <data name="UserDN_Related" xml:space="preserve">
+    <value>Correlati</value>
+  </data>
+  <data name="UserDN_Role" xml:space="preserve">
+    <value>Ruolo</value>
+  </data>
+  <data name="UserDN_State" xml:space="preserve">
+    <value>Stato</value>
+  </data>
+  <data name="UserDN_UserName" xml:space="preserve">
+    <value>Nome utente</value>
+  </data>
+  <data name="UserOperation_Create" xml:space="preserve">
+    <value>Creare</value>
+  </data>
+  <data name="UserOperation_Disable" xml:space="preserve">
+    <value>Disabilitare</value>
+  </data>
+  <data name="UserOperation_Enable" xml:space="preserve">
+    <value>Abilitare</value>
+  </data>
+  <data name="UserOperation_Save" xml:space="preserve">
+    <value>Salvare</value>
+  </data>
+  <data name="UserOperation_SaveNew" xml:space="preserve">
+    <value>Salvare</value>
+  </data>
+  <data name="UserQueryDN" xml:space="preserve">
+    <value>Query utente</value>
+  </data>
+  <data name="UserQueryDN_Columns" xml:space="preserve">
+    <value>Colonne</value>
+  </data>
+  <data name="UserQueryDN_DisplayName" xml:space="preserve">
+    <value>Nome visualizzato</value>
+  </data>
+  <data name="UserQueryDN_Filters" xml:space="preserve">
+    <value>Filtri</value>
+  </data>
+  <data name="UserQueryDN_MaxItems" xml:space="preserve">
+    <value>Max. Risultati</value>
+  </data>
+  <data name="UserQueryDN_Orders" xml:space="preserve">
+    <value>Ordini</value>
+  </data>
+</root>

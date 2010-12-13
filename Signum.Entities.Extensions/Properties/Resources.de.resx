@@ -112,22 +112,22 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AggregateFunction_Average" xml:space="preserve">
     <value>Durchschnitt</value>
   </data>
   <data name="AggregateFunction_Count" xml:space="preserve">
-    <value>Graf</value>
+    <value>Zählung </value>
   </data>
   <data name="AggregateFunction_Max" xml:space="preserve">
-    <value>Max</value>
+    <value>Max. </value>
   </data>
   <data name="AggregateFunction_Min" xml:space="preserve">
-    <value>Min</value>
+    <value>Min. </value>
   </data>
   <data name="AggregateFunction_Sum" xml:space="preserve">
     <value>Summe</value>
@@ -151,19 +151,19 @@
     <value>Diagrammtyp</value>
   </data>
   <data name="ChartBase_FirstDimension" xml:space="preserve">
-    <value>Erste dimension</value>
+    <value>Erste Dimension </value>
   </data>
   <data name="ChartBase_FirstValue" xml:space="preserve">
-    <value>Erste Wert</value>
+    <value>Erster Wert</value>
   </data>
   <data name="ChartBase_GroupResults" xml:space="preserve">
-    <value>Gruppieren von Ergebnissen</value>
+    <value>Zusammenstellen von Ergebnissen </value>
   </data>
   <data name="ChartBase_SecondDimension" xml:space="preserve">
-    <value>Zweite dimension</value>
+    <value>Zweite Dimension </value>
   </data>
   <data name="ChartBase_SecondValue" xml:space="preserve">
-    <value>Zweiten Wert</value>
+    <value>Zweiter Wert</value>
   </data>
   <data name="ChartRequest" xml:space="preserve">
     <value>Diagramm-Anfrage</value>
@@ -175,7 +175,7 @@
     <value>Abfrage-Name</value>
   </data>
   <data name="ChartResultType_Bubbles" xml:space="preserve">
-    <value>Blasen</value>
+    <value>Blasen </value>
   </data>
   <data name="ChartResultType_Points" xml:space="preserve">
     <value>Punkte</value>
@@ -193,16 +193,16 @@
     <value>Aggregat</value>
   </data>
   <data name="ChartTokenDN_DisplayName" xml:space="preserve">
-    <value>Anzeigename</value>
+    <value>Name</value>
   </data>
   <data name="ChartTokenDN_Format" xml:space="preserve">
     <value>Format</value>
   </data>
   <data name="ChartTokenDN_OrderPriority" xml:space="preserve">
-    <value>Prioritätsreihenfolge</value>
+    <value>Prioritätsfolge</value>
   </data>
   <data name="ChartTokenDN_OrderType" xml:space="preserve">
-    <value>Sortierreihenfolge</value>
+    <value>Typreihenfolge</value>
   </data>
   <data name="ChartTokenDN_Type" xml:space="preserve">
     <value>Typ</value>
@@ -211,7 +211,7 @@
     <value>Einheit</value>
   </data>
   <data name="ChartType_Bars" xml:space="preserve">
-    <value>Bars</value>
+    <value>Leiste </value>
   </data>
   <data name="ChartType_Bubbles" xml:space="preserve">
     <value>Blasen</value>
@@ -226,40 +226,40 @@
     <value>Linien</value>
   </data>
   <data name="ChartType_MultiBars" xml:space="preserve">
-    <value>Multi-Bars</value>
+    <value>Multiple Leisten</value>
   </data>
   <data name="ChartType_MultiColumns" xml:space="preserve">
-    <value>Multi-Spalten</value>
+    <value>Multiple Spalten</value>
   </data>
   <data name="ChartType_MultiLines" xml:space="preserve">
-    <value>Multi-Linien</value>
+    <value>Multiple Linien</value>
   </data>
   <data name="ChartType_Pie" xml:space="preserve">
-    <value>Pie</value>
+    <value>Torte</value>
   </data>
   <data name="ChartType_Points" xml:space="preserve">
     <value>Punkte</value>
   </data>
   <data name="ChartType_StackedAreas" xml:space="preserve">
-    <value>Gestapeltes Flächendiagramm</value>
+    <value>Gestapelte Flächen</value>
   </data>
   <data name="ChartType_StackedBars" xml:space="preserve">
-    <value>Gestapelte Bars</value>
+    <value>Gestapelte Leisten</value>
   </data>
   <data name="ChartType_StackedColumns" xml:space="preserve">
     <value>Gestapelte Spalten</value>
   </data>
   <data name="ChartType_TotalAreas" xml:space="preserve">
-    <value>Total Gebiete</value>
+    <value>Flächen total</value>
   </data>
   <data name="ChartType_TotalBars" xml:space="preserve">
-    <value>Insgesamt Bars</value>
+    <value>Leisten total</value>
   </data>
   <data name="ChartType_TotalColumns" xml:space="preserve">
-    <value>Total Spalten</value>
+    <value>Spalten total</value>
   </data>
   <data name="CompositeReportDN" xml:space="preserve">
-    <value>Composite Bericht</value>
+    <value>Zusammengesetzter Bericht</value>
   </data>
   <data name="CompositeReportDN_ExcelReports" xml:space="preserve">
     <value>Berichte</value>
@@ -268,10 +268,10 @@
     <value>Name</value>
   </data>
   <data name="ControlPanelDN" xml:space="preserve">
-    <value>Control panel</value>
+    <value>Steuerung des Systems</value>
   </data>
   <data name="ControlPanelDN_DisplayName" xml:space="preserve">
-    <value>Anzeigename</value>
+    <value>Name</value>
   </data>
   <data name="ControlPanelDN_HomePage" xml:space="preserve">
     <value>Homepage</value>
@@ -280,10 +280,10 @@
     <value>Anzahl der Spalten</value>
   </data>
   <data name="ControlPanelDN_Part0IsInColumn1ButPanelHasOnly2Columns" xml:space="preserve">
-    <value>Teil {0} ist in Spalte {1} aber Panel hat nur {2} Spalten</value>
+    <value>Teil {0} ist in Spalte {1} aber Feld hat nur {2} Spalten</value>
   </data>
   <data name="ControlPanelDN_Part0IsInColumn1WhichAlreadyHasOtherParts" xml:space="preserve">
-    <value>Teil {0} ist in Spalte {1} der Zeile {2} hat bereits andere Teile</value>
+    <value>Teil {0} ist in Spalte {1} der Zeile {2}, die bereits andere Teile enthält</value>
   </data>
   <data name="ControlPanelDN_Parts" xml:space="preserve">
     <value>Teile</value>
@@ -292,7 +292,7 @@
     <value>Im Zusammenhang mit</value>
   </data>
   <data name="ControlPanelDN_Rows0DontHaveAnyParts" xml:space="preserve">
-    <value>Es gibt keine Teile in Zeilen {{{0}}}</value>
+    <value>Es gibt keine Teile in den Zeilen {{{0}}}</value>
   </data>
   <data name="CountSearchControlPartDN_UserQueries" xml:space="preserve">
     <value>Benutzerabfragen</value>
@@ -313,7 +313,7 @@
     <value>Benutzerdefinierte Task</value>
   </data>
   <data name="CustomTaskExecutionDN_EndTime" xml:space="preserve">
-    <value>End Time</value>
+    <value>Zeitende</value>
   </data>
   <data name="CustomTaskExecutionDN_Exception" xml:space="preserve">
     <value>Ausnahme</value>
@@ -325,7 +325,7 @@
     <value>Benutzer</value>
   </data>
   <data name="CustomTaskOperation_Execute" xml:space="preserve">
-    <value>Neue ausführen</value>
+    <value>Neue Ausführung</value>
   </data>
   <data name="DateSpanDN" xml:space="preserve">
     <value>Zeitraum</value>
@@ -334,13 +334,13 @@
     <value>Tage</value>
   </data>
   <data name="DateSpanDN_Months" xml:space="preserve">
-    <value>Monaten</value>
+    <value>Monate</value>
   </data>
   <data name="DateSpanDN_Years" xml:space="preserve">
     <value>Jahre</value>
   </data>
   <data name="EmailMessageDN" xml:space="preserve">
-    <value>E-Mail Message</value>
+    <value>E-Mail Nachricht</value>
   </data>
   <data name="EmailMessageDN_Body" xml:space="preserve">
     <value>Körper</value>
@@ -361,7 +361,7 @@
     <value>Gesendet</value>
   </data>
   <data name="EmailMessageDN_State" xml:space="preserve">
-    <value>Zustand</value>
+    <value>Status</value>
   </data>
   <data name="EmailMessageDN_Subject" xml:space="preserve">
     <value>Betreff</value>
@@ -370,7 +370,7 @@
     <value>Vorlage</value>
   </data>
   <data name="EmailOperations_ReSendEmails" xml:space="preserve">
-    <value>Forward emails</value>
+    <value>E-Mail weiterleiten</value>
   </data>
   <data name="EmailPackageDN" xml:space="preserve">
     <value>E-Mail-Paket</value>
@@ -379,22 +379,22 @@
     <value>Name</value>
   </data>
   <data name="EmailPackageDN_NumErrors" xml:space="preserve">
-    <value>NUM-Fehler</value>
+    <value>Anzahl der Fehler</value>
   </data>
   <data name="EmailPackageDN_NumLines" xml:space="preserve">
-    <value>NUM-Linien</value>
+    <value>Anzahl der Linien</value>
   </data>
   <data name="EmailPackageDN_Template" xml:space="preserve">
     <value>Vorlage</value>
   </data>
   <data name="DeploymentLogDN" xml:space="preserve">
-    <value>Bereitstellung Log</value>
+    <value>Registrierung der Bereitstellung</value>
   </data>
   <data name="CountUserQueryElement" xml:space="preserve">
     <value>Zähler</value>
   </data>
   <data name="CountSearchControlPartDN" xml:space="preserve">
-    <value>Indikatorliste</value>
+    <value>Zählerliste</value>
   </data>
   <data name="EmailState_Received" xml:space="preserve">
     <value>Empfangen</value>
@@ -403,7 +403,7 @@
     <value>Gesendet</value>
   </data>
   <data name="EmailState_SentError" xml:space="preserve">
-    <value>Gesendete Fehler</value>
+    <value>Fehler beim Senden</value>
   </data>
   <data name="EmailTemplateDN" xml:space="preserve">
     <value>E-Mail-Vorlage</value>
@@ -436,7 +436,7 @@
     <value>Gelöscht</value>
   </data>
   <data name="ExcelReportDN_DisplayName" xml:space="preserve">
-    <value>Anzeigename</value>
+    <value>Berichtname</value>
   </data>
   <data name="ExcelReportDN_File" xml:space="preserve">
     <value>Datei</value>
@@ -445,16 +445,16 @@
     <value>Abfrage</value>
   </data>
   <data name="ExpressionShouldBeSomeKindOfAggregate" xml:space="preserve">
-    <value>Ausdruck sollte eine Art von Aggregat</value>
+    <value>Ausdruck sollte eine Art von Aggregat sein</value>
   </data>
   <data name="ExpressionShouldHaveAContinousAmountOfValues" xml:space="preserve">
-    <value>Ausdruck sollte eine Menge kontinuierliche Werte haben</value>
+    <value>Ausdruck sollte eine fortlaufende Menge von Werte haben</value>
   </data>
   <data name="ExpressionShouldHaveADiscreteAmountOfValues" xml:space="preserve">
-    <value>Ausdruck sollte eine diskrete Menge der Werte haben</value>
+    <value>Ausdruck sollte eine diskrete Menge von Werte haben</value>
   </data>
   <data name="FacadeMethodDN" xml:space="preserve">
-    <value>Fassade-Methode</value>
+    <value>Fassaden-Methode</value>
   </data>
   <data name="FileDN" xml:space="preserve">
     <value>Datei</value>
@@ -478,10 +478,10 @@
     <value>Binärdatei</value>
   </data>
   <data name="FilePathDN_FileLength" xml:space="preserve">
-    <value>Datei Länge</value>
+    <value>Dateilänge</value>
   </data>
   <data name="FilePathDN_FileLengthString" xml:space="preserve">
-    <value>Datei Länge</value>
+    <value>Dateigröße</value>
   </data>
   <data name="FilePathDN_FileName" xml:space="preserve">
     <value>Dateiname</value>
@@ -499,7 +499,7 @@
     <value>URL</value>
   </data>
   <data name="FilePathDN_Repository" xml:space="preserve">
-    <value>Repository</value>
+    <value>Ablage</value>
   </data>
   <data name="FilePathDN_Sufix" xml:space="preserve">
     <value>Suffix</value>
@@ -508,13 +508,13 @@
     <value>Datei-Repository</value>
   </data>
   <data name="FileRepositoryDN_Active" xml:space="preserve">
-    <value>Aktive</value>
+    <value>Aktiv</value>
   </data>
   <data name="FileRepositoryDN_FileTypes" xml:space="preserve">
     <value>Dateitypen</value>
   </data>
   <data name="FileRepositoryDN_FullPhysicalPrefix" xml:space="preserve">
-    <value>Physische Präfix</value>
+    <value>Physisches Präfix</value>
   </data>
   <data name="FileRepositoryDN_Name" xml:space="preserve">
     <value>Name</value>
@@ -529,7 +529,7 @@
     <value>Dateityp</value>
   </data>
   <data name="HolidayDN" xml:space="preserve">
-    <value>Festlich</value>
+    <value>Feiertag</value>
   </data>
   <data name="HolidayDN_Date" xml:space="preserve">
     <value>Datum</value>
@@ -538,10 +538,10 @@
     <value>Name</value>
   </data>
   <data name="Holidayhavetobenullwhennocalendarisset" xml:space="preserve">
-    <value>Feiertage sollten null, wenn kein Zeitplan werden</value>
+    <value>Feiertage sollten null sein, wenn es keinen Kalender gibt.</value>
   </data>
   <data name="Holidayhavetobetrueorfalsewhenacalendarisset" xml:space="preserve">
-    <value>Urlaub müssen true oder false sein, wenn es ein Kalender</value>
+    <value>Feiertage müssen wahr oder falsch sein, wenn es einen Kalender gibt.</value>
   </data>
   <data name="HourMinuteDN" xml:space="preserve">
     <value>Stunden und Minuten</value>
@@ -556,7 +556,7 @@
     <value>Link</value>
   </data>
   <data name="LinkElement_Label" xml:space="preserve">
-    <value>Tag</value>
+    <value>Bezeichnung</value>
   </data>
   <data name="LinkElement_Link" xml:space="preserve">
     <value>Link</value>
@@ -565,7 +565,7 @@
     <value>Links</value>
   </data>
   <data name="LogOperationDN" xml:space="preserve">
-    <value>Operation log</value>
+    <value>Operationslog</value>
   </data>
   <data name="LogOperationDN_End" xml:space="preserve">
     <value>Ende</value>
@@ -574,10 +574,10 @@
     <value>Ausnahme</value>
   </data>
   <data name="LogOperationDN_Operation" xml:space="preserve">
-    <value>Betrieb</value>
+    <value>Operation</value>
   </data>
   <data name="LogOperationDN_Plural" xml:space="preserve">
-    <value>Operationen log</value>
+    <value>Operationslogs</value>
   </data>
   <data name="LogOperationDN_Start" xml:space="preserve">
     <value>Start</value>
@@ -598,10 +598,10 @@
     <value>Im Prozess</value>
   </data>
   <data name="NotUserLogged" xml:space="preserve">
-    <value>Nicht angemeldeten Benutzers</value>
+    <value>Kein angemeldeter Benutzer</value>
   </data>
   <data name="OperationDN" xml:space="preserve">
-    <value>Betrieb</value>
+    <value>Operation</value>
   </data>
   <data name="PackageDN" xml:space="preserve">
     <value>Paket</value>
@@ -613,22 +613,22 @@
     <value>Name</value>
   </data>
   <data name="PackageDN_NumErrors" xml:space="preserve">
-    <value>No. Fehler</value>
+    <value>Anzahl der Fehler</value>
   </data>
   <data name="PackageDN_NumLines" xml:space="preserve">
-    <value>No. Linien</value>
+    <value>Anzahl der Linien</value>
   </data>
   <data name="PackageDN_Operation" xml:space="preserve">
     <value>Betrieb</value>
   </data>
   <data name="PackageLineDN" xml:space="preserve">
-    <value>Paket Line</value>
+    <value>Packagelinie</value>
   </data>
   <data name="PackageLineDN_Exception" xml:space="preserve">
     <value>Ausnahme</value>
   </data>
   <data name="PackageLineDN_FinishTime" xml:space="preserve">
-    <value>Zeit zu beenden</value>
+    <value>Zeitende</value>
   </data>
   <data name="PackageLineDN_Package" xml:space="preserve">
     <value>Paket</value>
@@ -640,7 +640,7 @@
     <value>Ziel</value>
   </data>
   <data name="PanelPart" xml:space="preserve">
-    <value>Panelelement</value>
+    <value>Feldelement</value>
   </data>
   <data name="PanelPart_Column" xml:space="preserve">
     <value>Spalte</value>
@@ -667,28 +667,28 @@
     <value>Ausführungsprozess</value>
   </data>
   <data name="ProcessExecutionDN_CancelationDate" xml:space="preserve">
-    <value>Cancelation Date</value>
+    <value>Abbruchsdatum</value>
   </data>
   <data name="ProcessExecutionDN_CreationDate" xml:space="preserve">
     <value>Erstellungsdatum</value>
   </data>
   <data name="ProcessExecutionDN_ErrorDate" xml:space="preserve">
-    <value>Fehler-Datum</value>
+    <value>Fehlerdatum</value>
   </data>
   <data name="ProcessExecutionDN_Exception" xml:space="preserve">
     <value>Ausnahme</value>
   </data>
   <data name="ProcessExecutionDN_ExceptionDate" xml:space="preserve">
-    <value>Ausnahme-Datum</value>
+    <value>Ausnahmedatum</value>
   </data>
   <data name="ProcessExecutionDN_ExecutionEnd" xml:space="preserve">
-    <value>Ausführung End</value>
+    <value>Ausführungsdatum </value>
   </data>
   <data name="ProcessExecutionDN_ExecutionStart" xml:space="preserve">
-    <value>Ausführung starten</value>
+    <value>Ausführungsstart</value>
   </data>
   <data name="ProcessExecutionDN_PlannedDate" xml:space="preserve">
-    <value>Geplante Datum</value>
+    <value>Geplantes Datum</value>
   </data>
   <data name="ProcessExecutionDN_Process" xml:space="preserve">
     <value>Prozess</value>
@@ -697,13 +697,13 @@
     <value>Daten</value>
   </data>
   <data name="ProcessExecutionDN_Progress" xml:space="preserve">
-    <value>Fortschritte</value>
+    <value>Fortschritt</value>
   </data>
   <data name="ProcessExecutionDN_QueuedDate" xml:space="preserve">
-    <value>In der Warteschlange Date</value>
+    <value>Warteschlangendatum</value>
   </data>
   <data name="ProcessExecutionDN_State" xml:space="preserve">
-    <value>Zustand</value>
+    <value>Status</value>
   </data>
   <data name="ProcessExecutionDN_SuspendDate" xml:space="preserve">
     <value>Datum aussetzen</value>
@@ -721,7 +721,7 @@
     <value>Neue Ausführung</value>
   </data>
   <data name="ProcessOperation_Plan" xml:space="preserve">
-    <value>Zeitplan</value>
+    <value>Plan</value>
   </data>
   <data name="ProcessOperation_Save" xml:space="preserve">
     <value>Speichern</value>
@@ -733,13 +733,13 @@
     <value>Aktuelle Ausführungen</value>
   </data>
   <data name="ProcessQueries_ErrorExecutions" xml:space="preserve">
-    <value>Fehler Executons</value>
+    <value>Ausführungsfehler</value>
   </data>
   <data name="ProcessStartIsGreaterThanProcessEnd" xml:space="preserve">
-    <value>Prozess-Start ist größer als Prozess End</value>
+    <value>Prozessstart ist größer als Prozessende</value>
   </data>
   <data name="ProcessStartIsNullButProcessEndIsNot" xml:space="preserve">
-    <value>Prozess-Start ist null aber Process End ist nicht</value>
+    <value>Prozessstart ist null aber Prozessende nicht</value>
   </data>
   <data name="ProcessState_Canceled" xml:space="preserve">
     <value>Abgebrochen</value>
@@ -751,7 +751,7 @@
     <value>Fehler</value>
   </data>
   <data name="ProcessState_Executing" xml:space="preserve">
-    <value>Ausführung</value>
+    <value>Ausführen</value>
   </data>
   <data name="ProcessState_Finished" xml:space="preserve">
     <value>Fertig</value>
@@ -760,13 +760,13 @@
     <value>Geplant</value>
   </data>
   <data name="ProcessState_Queued" xml:space="preserve">
-    <value>Kleben</value>
+    <value>In Warteschlange</value>
   </data>
   <data name="ProcessState_Suspended" xml:space="preserve">
     <value>Ausgesetzt</value>
   </data>
   <data name="ProcessState_Suspending" xml:space="preserve">
-    <value>Aussetzung</value>
+    <value>Aussetzen</value>
   </data>
   <data name="PropertyDN" xml:space="preserve">
     <value>Eigenschaft</value>
@@ -784,13 +784,13 @@
     <value>Abfrage-Spalte</value>
   </data>
   <data name="QueryColumnDN_DisplayName" xml:space="preserve">
-    <value>Anzeigename</value>
+    <value>Angezeigter Name</value>
   </data>
   <data name="QueryDN" xml:space="preserve">
     <value>Abfrage</value>
   </data>
   <data name="QueryDN_DisplayName" xml:space="preserve">
-    <value>Anzeigename</value>
+    <value>Angezeigter Name</value>
   </data>
   <data name="QueryDN_Key" xml:space="preserve">
     <value>Key</value>
@@ -808,25 +808,25 @@
     <value>Wert String</value>
   </data>
   <data name="QueryOrderDN" xml:space="preserve">
-    <value>Abfrage-Order</value>
+    <value>Abfragereihenfolge</value>
   </data>
   <data name="QueryOrderDN_Index" xml:space="preserve">
     <value>Index</value>
   </data>
   <data name="QueryOrderDN_OrderType" xml:space="preserve">
-    <value>Order Type</value>
+    <value>Reihenfolgentyp</value>
   </data>
   <data name="QueryTokenDN_Token" xml:space="preserve">
     <value>Token</value>
   </data>
   <data name="ResetPasswordRequestDN" xml:space="preserve">
-    <value>Reset Passwortanforderung</value>
+    <value>Neues Passwort beantragen</value>
   </data>
   <data name="ResetPasswordRequestDN_Code" xml:space="preserve">
     <value>Code</value>
   </data>
   <data name="ResetPasswordRequestDN_RequestDate" xml:space="preserve">
-    <value>Datum anfordern</value>
+    <value>Datum der Anfrage</value>
   </data>
   <data name="ResetPasswordRequestDN_User" xml:space="preserve">
     <value>Benutzer</value>
@@ -841,10 +841,10 @@
     <value>Rollen</value>
   </data>
   <data name="ScheduledTaskDN" xml:space="preserve">
-    <value>Geplanten Task</value>
+    <value>Geplante Aufgabe</value>
   </data>
   <data name="ScheduledTaskDN_NextDate" xml:space="preserve">
-    <value>Next Date </value>
+    <value>Nächstes Datum</value>
   </data>
   <data name="ScheduledTaskDN_Rule" xml:space="preserve">
     <value>Regel</value>
@@ -853,10 +853,10 @@
     <value>Ausgesetzt</value>
   </data>
   <data name="ScheduledTaskDN_Task" xml:space="preserve">
-    <value>Aufgabe</value>
+    <value>Geplante Aufgabe</value>
   </data>
   <data name="ScheduleRuleDailyDN" xml:space="preserve">
-    <value>Tägliche</value>
+    <value>Täglich</value>
   </data>
   <data name="ScheduleRuleDailyDN_Everydayat" xml:space="preserve">
     <value>Jeden Tag um </value>
@@ -877,7 +877,7 @@
     <value>und Feiertage</value>
   </data>
   <data name="ScheduleRuleWeekDaysDN_At" xml:space="preserve">
-    <value>bei</value>
+    <value>um</value>
   </data>
   <data name="ScheduleRuleWeekDaysDN_ButHoliday" xml:space="preserve">
     <value>außer an Feiertagen</value>
@@ -886,25 +886,25 @@
     <value>Kalender</value>
   </data>
   <data name="ScheduleRuleWeekDaysDN_F" xml:space="preserve">
-    <value>FR</value>
+    <value>Fr</value>
   </data>
   <data name="ScheduleRuleWeekDaysDN_Friday" xml:space="preserve">
     <value>Freitag</value>
   </data>
   <data name="ScheduleRuleWeekDaysDN_Holiday" xml:space="preserve">
-    <value>Festlich</value>
+    <value>Feiertag</value>
   </data>
   <data name="ScheduleRuleWeekDaysDN_M" xml:space="preserve">
-    <value>MO</value>
+    <value>Mo</value>
   </data>
   <data name="ScheduleRuleWeekDaysDN_Monday" xml:space="preserve">
     <value>Montag</value>
   </data>
   <data name="ScheduleRuleWeekDaysDN_S" xml:space="preserve">
-    <value>ZO</value>
+    <value>So</value>
   </data>
   <data name="ScheduleRuleWeekDaysDN_Sa" xml:space="preserve">
-    <value>ZA</value>
+    <value>Sa</value>
   </data>
   <data name="ScheduleRuleWeekDaysDN_Saturday" xml:space="preserve">
     <value>Samstag</value>
@@ -913,10 +913,10 @@
     <value>Sonntag</value>
   </data>
   <data name="ScheduleRuleWeekDaysDN_T" xml:space="preserve">
-    <value>DI</value>
+    <value>Di</value>
   </data>
   <data name="ScheduleRuleWeekDaysDN_Th" xml:space="preserve">
-    <value>DO</value>
+    <value>Do</value>
   </data>
   <data name="ScheduleRuleWeekDaysDN_Thursday" xml:space="preserve">
     <value>Donnerstag</value>
@@ -925,25 +925,25 @@
     <value>Dienstag</value>
   </data>
   <data name="ScheduleRuleWeekDaysDN_W" xml:space="preserve">
-    <value>MI</value>
+    <value>Mi</value>
   </data>
   <data name="ScheduleRuleWeekDaysDN_Wednesday" xml:space="preserve">
     <value>Mittwoch</value>
   </data>
   <data name="ScheduleRuleWeeklyDN" xml:space="preserve">
-    <value>Pro</value>
+    <value>wöchentlich</value>
   </data>
   <data name="ScheduleRuleWeeklyDN_DayOfTheWeek" xml:space="preserve">
     <value>Tag der Woche</value>
   </data>
   <data name="TheUserStateMustBeDisabled" xml:space="preserve">
-    <value>Der Benutzerzustand muss deaktiviert sein</value>
+    <value>Der Benutzerstatus muss deaktiviert sein</value>
   </data>
   <data name="UserChartDN" xml:space="preserve">
     <value>Benutzer-Diagramm</value>
   </data>
   <data name="UserChartDN_DisplayName" xml:space="preserve">
-    <value>Anzeigename</value>
+    <value>Angezeigter Name</value>
   </data>
   <data name="UserChartDN_Filters" xml:space="preserve">
     <value>Filter</value>
@@ -958,10 +958,10 @@
     <value>Benutzer</value>
   </data>
   <data name="UserDN_AnulationDate" xml:space="preserve">
-    <value>Anulation Datum</value>
+    <value>Datum der Abmeldung</value>
   </data>
   <data name="UserDN_Email" xml:space="preserve">
-    <value>e-Mail</value>
+    <value>E-Mail</value>
   </data>
   <data name="UserDN_PasswordHash" xml:space="preserve">
     <value>Passwort-Hash</value>
@@ -973,10 +973,10 @@
     <value>Rolle</value>
   </data>
   <data name="UserDN_State" xml:space="preserve">
-    <value>Zustand</value>
+    <value>Status</value>
   </data>
   <data name="UserDN_UserName" xml:space="preserve">
-    <value>UserName</value>
+    <value>Benutzername</value>
   </data>
   <data name="UserOperation_Create" xml:space="preserve">
     <value>Erstellen</value>
@@ -1003,16 +1003,16 @@
     <value>Spalten-Modus</value>
   </data>
   <data name="UserQueryDN_DisplayName" xml:space="preserve">
-    <value>Anzeigename</value>
+    <value>Angezeigter Name</value>
   </data>
   <data name="UserQueryDN_Filters" xml:space="preserve">
     <value>Filter</value>
   </data>
   <data name="UserQueryDN_MaxItems" xml:space="preserve">
-    <value>Max Elemente</value>
+    <value>Max. Elemente</value>
   </data>
   <data name="UserQueryDN_Orders" xml:space="preserve">
-    <value>Bestellungen</value>
+    <value>Reihenfolge</value>
   </data>
   <data name="UserQueryDN_Query" xml:space="preserve">
     <value>Abfrage</value>
@@ -1030,7 +1030,7 @@
     <value>Benutzer-Ticket</value>
   </data>
   <data name="UserTicketDN_ConnectionDate" xml:space="preserve">
-    <value>Verbindung Date</value>
+    <value>Verbindungsdatum</value>
   </data>
   <data name="UserTicketDN_Device" xml:space="preserve">
     <value>Gerät</value>
@@ -1051,13 +1051,10 @@
     <value>Version</value>
   </data>
   <data name="EmailMessageDN_FechaCreacion" xml:space="preserve">
-    <value>Datum der Erstellung</value>
+    <value>Erstellungsdatum</value>
   </data>
   <data name="EmailState_Created" xml:space="preserve">
     <value>Erstellt</value>
-  </data>
-  <data name="EmailTemplateDN_FriendlyName" xml:space="preserve">
-    <value>Anzeigename</value>
   </data>
   <data name="LinkListPartDN" xml:space="preserve">
     <value>Link-Listenelement</value>

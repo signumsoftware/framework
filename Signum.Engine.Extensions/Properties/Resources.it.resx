@@ -112,293 +112,294 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="_0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships" xml:space="preserve">
-    <value>In dem Diagramm wurden {0} Zyklen der Rollen aufgrund der Beziehungen gefunden:
+    <value>Trovati {0} cycles nel grafico Roles a causa dei rapporti:
 </value>
   </data>
   <data name="_0IsA1" xml:space="preserve">
-    <value>{0} ist ein {1}</value>
+    <value>{0} è un {1}</value>
   </data>
   <data name="_0IsA1_f" xml:space="preserve">
-    <value>{0} ist eine {1}</value>
+    <value>{0} è una {1}</value>
   </data>
   <data name="_0IsA1_m" xml:space="preserve">
-    <value>{0} ist ein {1}</value>
+    <value>{0} è un {1}</value>
   </data>
   <data name="_0IsACollectionOfElements1" xml:space="preserve">
-    <value>{0} ist eine Sammlung von Elementen {1}</value>
+    <value>{0} è un insieme di elementi {1}</value>
   </data>
   <data name="AccessToFacadeMethod0IsNotAllowed" xml:space="preserve">
-    <value>Der Zugriff auf die Fassaden-Methode '{0}' ist nicht zulässig</value>
+    <value>Accesso al Facade Method '{0}' non consentito</value>
   </data>
   <data name="AfterTheOperationTheStateShouldBe0ButIs1" xml:space="preserve">
-    <value>Nach der Operation {0} sollte der Status {1} statt {2} sein</value>
+    <value>Dopo l'operazione {0}, lo stato dovrebbe essere {1} invece di {2}</value>
   </data>
   <data name="AmbiguityBetweenInterfaces0" xml:space="preserve">
-    <value>Mehrdeutigkeit zwischen den Schnittstellen: {0}</value>
+    <value>Ambiguità tra interfacce: {0}</value>
   </data>
   <data name="Amount" xml:space="preserve">
-    <value>Betrag</value>
+    <value>importo</value>
   </data>
   <data name="AnonymousUserNotLoadedInitializeToLevel1SimpleEntities" xml:space="preserve">
-    <value>AnonymousUser, die nicht geladen werden. Inicialize Ebene Level1SimpleEntities ??</value>
+    <value>AnonymousUser non caricato. Inizializzazione di Level1SimpleEntities</value>
   </data>
   <data name="BelongsToAnotherKindOkLinqProvider" xml:space="preserve">
-    <value>{0} gehört zu einem anderen Typ des Linq-Anbieter</value>
+    <value>{0} appartiene a un altro tipo di Linq Provider</value>
   </data>
   <data name="Call0Over1OfThe2" xml:space="preserve">
-    <value>Führt {0} auf {1} von {2} </value>
+    <value>Eseguire {0} in {1} di {2}</value>
   </data>
   <data name="Call0Over1OfThe2_f" xml:space="preserve">
-    <value>Führt {0} auf {1} von der {2} </value>
+    <value>Eseguire {0} in {1} di {2}</value>
   </data>
   <data name="Call0Over1OfThe2_m" xml:space="preserve">
-    <value>Führt {0} auf {1} dem {2} </value>
+    <value>Eseguire {0} in {1} di {2}</value>
   </data>
   <data name="Character" xml:space="preserve">
-    <value>Zeichen</value>
+    <value>carattere</value>
   </data>
   <data name="Check" xml:space="preserve">
-    <value>Überprüfen Sie</value>
+    <value>verifica</value>
   </data>
   <data name="ConstantExpressionWithAComplexIQueryableUnexpectedAt" xml:space="preserve">
-    <value>ConstantExpression mit einer komplexen IQueryable unerwartet in diesem Stadium</value>
+    <value>ConstantExpression con un complesso IQueryable non previsto in questa fase</value>
   </data>
   <data name="ConstructsANew0" xml:space="preserve">
-    <value>Erstellt eine neue {0}</value>
+    <value>Costruisce un nuovo {0}</value>
   </data>
   <data name="ConstructsANew0_f" xml:space="preserve">
-    <value>Erstellt eine neue {0}</value>
+    <value>Costruisce una nuovo {0}</value>
   </data>
   <data name="ConstructsANew0_m" xml:space="preserve">
-    <value>Erstellt eine neue {0}</value>
+    <value>Costruisce un nuovo {0}</value>
   </data>
   <data name="Data" xml:space="preserve">
-    <value>Daten</value>
+    <value>Dati</value>
   </data>
   <data name="Date" xml:space="preserve">
-    <value>Datum</value>
+    <value>Data</value>
   </data>
   <data name="DateTime" xml:space="preserve">
-    <value>Datum und Uhrzeit</value>
+    <value>Data e ora</value>
   </data>
   <data name="EmailIsNotValid" xml:space="preserve">
-    <value>Die E-Mail unterscheidet sich von der Speicherung im System ??</value>
+    <value>L'indirizzo email è diverso da quello memorizzato nel sistema</value>
   </data>
   <data name="ErrorParsingXMLHelpFiles" xml:space="preserve">
-    <value>Fehler beim Lesen der XML-Hilfe-Dateien:
+    <value>Errore di lettura dei file XML della Guida:
 </value>
   </data>
   <data name="ExcelReportArgumentIsNecessaryForCompositeReports" xml:space="preserve">
-    <value>ExcelReport-Argument ist erforderlich für compositeReports ??</value>
+    <value>excelReport argument necessario per compositeReports</value>
   </data>
   <data name="ExcelTemplateMustHaveExtensionXLSXandCurrentOneHas0" xml:space="preserve">
-    <value>Die Excel-Vorlage muss eine xlsx-Erweiterung haben, und die Aktuelle hat eine {0}-Erweiterung</value>
+    <value>Il modello Excel deve avere estensione xlsx, ma quello corrente ha estensione {0}</value>
   </data>
   <data name="Executions" xml:space="preserve">
-    <value>Ausführungen</value>
+    <value>Esecuzioni</value>
   </data>
   <data name="ExpressedIn" xml:space="preserve">
-    <value>ausgedrückt in </value>
+    <value>espresso in </value>
   </data>
   <data name="From0OfThe1" xml:space="preserve">
-    <value>von {0} von {1}</value>
+    <value>da {0} del {1} </value>
   </data>
   <data name="From0OfThe1_f" xml:space="preserve">
-    <value>von {0} von der {1}</value>
+    <value>da {0} della {1}</value>
   </data>
   <data name="From0OfThe1_m" xml:space="preserve">
-    <value>von {0} von dem {1}</value>
+    <value>da {0} del {1}</value>
   </data>
   <data name="FromMany0" xml:space="preserve">
-    <value>von vielen {0}</value>
+    <value>da molti {0}</value>
   </data>
   <data name="FromMany0_f" xml:space="preserve">
-    <value>von vielen {0}</value>
+    <value>da molte {0}</value>
   </data>
   <data name="FromMany0_m" xml:space="preserve">
-    <value>von vielen {0}</value>
+    <value>da molti {0}</value>
   </data>
   <data name="HelpNotLoaded" xml:space="preserve">
-    <value>Hilfe nicht geladen</value>
+    <value>Aiuto non caricato</value>
   </data>
   <data name="ImpossibleToExecute0FromState1" xml:space="preserve">
-    <value>Unmöglich, {0} vom Zustand {1} auzuführen</value>
+    <value>Impossibile eseguire {0} dallo stato {1}</value>
   </data>
   <data name="IncorrectPassword" xml:space="preserve">
-    <value>Falsches Passwort</value>
+    <value>Password errata</value>
   </data>
   <data name="Integer" xml:space="preserve">
-    <value>ganze Zahl ??</value>
+    <value>valore intero</value>
   </data>
   <data name="LastExecution" xml:space="preserve">
-    <value>Letzte Ausführung</value>
+    <value>Ultima esecuzione</value>
   </data>
   <data name="NoEmailsToProcessFound" xml:space="preserve">
-    <value>Keine E-Mails zur Verarbeitung gefunden</value>
+    <value>Non è stato trovato nessun messaggio di posta da elaborare</value>
   </data>
   <data name="NoEntitiesToProcessFound" xml:space="preserve">
-    <value>Keine Entitäten zur Verarbeitung gefunden</value>
+    <value>Non è stata trovata nessuna entità da elaborare</value>
   </data>
   <data name="NoHelpFor0" xml:space="preserve">
-    <value>Keine Hilfe für {0}</value>
+    <value>Nessun aiuto per {0}</value>
   </data>
   <data name="NotAuthorizedTo0The1WithId2" xml:space="preserve">
-    <value>Nicht autorisiert für {0} die {1} mit ID {2}</value>
+    <value>{1} con ID {2} non autorizzato a {0}</value>
   </data>
   <data name="NotAuthorizedToRetrieve0" xml:space="preserve">
-    <value>Nicht autorisiert zum Abrufen von '{0}' </value>
+    <value>Non autorizzato al recupero di '{0}'</value>
   </data>
   <data name="NotAuthorizedToSave0" xml:space="preserve">
-    <value>Nicht autorisiertt '{0}' zu speichern</value>
+    <value>Non autorizzato a salvare '{0}'</value>
   </data>
   <data name="NotRegistered" xml:space="preserve">
-    <value>{0} ist nicht registriert</value>
+    <value>{0} non registrato</value>
   </data>
   <data name="NotRegisteredInEmailLogic" xml:space="preserve">
-    <value>{0} ist nicht registriert in EmailLogic</value>
+    <value>{0} non registrato in EmailLogic</value>
   </data>
   <data name="NotValueFor0IsNotFoundIn1Table" xml:space="preserve">
-    <value>Es wurde kein Wert für {0} in Tabelle {1} gefunden</value>
+    <value>Non è stato trovato nessun valore per {0} nella tabella {1}</value>
   </data>
   <data name="NoTypeWithFullName0FoundInTheSchema" xml:space="preserve">
-    <value>Es wurde kein Typ mit dem FullName {0} im Schema gefunden</value>
+    <value>Nessun Type con nome completo {0} trovato nello schema</value>
   </data>
   <data name="NoUsersToProcessFound" xml:space="preserve">
-    <value>Es wurden keine Benutzer zur Verarbeitung gefunden</value>
+    <value>Non sono stati trovati utenti da elaborare</value>
   </data>
   <data name="OfThe0" xml:space="preserve">
-    <value>der {0}</value>
+    <value>della {0}</value>
   </data>
   <data name="OfThe0_f" xml:space="preserve">
-    <value>der {0}</value>
+    <value>della {0}</value>
   </data>
   <data name="OfThe0_m" xml:space="preserve">
-    <value>der {0}</value>
+    <value>del {0}</value>
   </data>
   <data name="Operation0DoesNotHaveConstructInitialized" xml:space="preserve">
-    <value>Der Vorgang {0} hat kein Konstrukt initialisiert ??</value>
+    <value>L'operazione {0} non dispone di Construct inizializzato</value>
   </data>
   <data name="Operation0DoesNotHaveConstructorInitialized" xml:space="preserve">
-    <value>Der Vorgang {0} hat keinen Konstruktor initialisiert</value>
+    <value>L'operazione {0} non dispone di Construct inizializzato</value>
   </data>
   <data name="Operation0DoesNotHaveDeleteInitialized" xml:space="preserve">
-    <value>Der Vorgang {0} hat kein Löschen initialisiert</value>
+    <value>L'operazione {0} non dispone di Delete inizializzato</value>
   </data>
   <data name="Operation0DoesNotHaveExecuteInitialized" xml:space="preserve">
-    <value>Der Vorgang {0} hat kein Execute initialisiert ??</value>
+    <value>L'operazione {0} non dispone di Execute inizializzato</value>
   </data>
   <data name="Operation0HasNoConstruct" xml:space="preserve">
-    <value>Der Vorgang {0} hat kein Konstrukt initialisiert</value>
+    <value>L'operazione {0} non dispone di Construct inizializzato</value>
   </data>
   <data name="Operation0IsA1NotA2Use3Instead" xml:space="preserve">
-    <value>Der Vorgang {0} ist eine {1} keine {2}, verwenden Sie stattdessen '{3}' </value>
+    <value>L'operazione {0} è un {1} non un {2}, utilizzare '{3}'</value>
   </data>
   <data name="Operation0IsNotAllowedForLites" xml:space="preserve">
-    <value>Der Vorgang {0} ist nicht zulässig für lites</value>
+    <value>L'operazione {0} non consente Lites</value>
   </data>
   <data name="Operation0IsNotAuthorized" xml:space="preserve">
-    <value>Der Vorgang {0} ist nicht autorisiert</value>
+    <value>Operazione {0} non consentita</value>
   </data>
   <data name="Operation0NeedsALite" xml:space="preserve">
-    <value>Der Vorgang {0} benötigt ein Lite</value>
+    <value>L'operazione {0} richiede un Lite</value>
   </data>
   <data name="Operation0NotFoundForType1" xml:space="preserve">
-    <value>Der Vorgang {0} wurde für Typ {1} nicht gefunden</value>
+    <value>Operazione {0} per il tipo {1} non trovata</value>
   </data>
   <data name="OrNull" xml:space="preserve">
-    <value>oder null</value>
+    <value>o nullo</value>
   </data>
   <data name="ProcessExecution0IsNotRunningAnymore" xml:space="preserve">
-    <value>ProcessExecution {0} wird nicht mehr ausgeführt</value>
+    <value>Il ProcessExecution {0} non è più in esecuzione</value>
   </data>
   <data name="QueryOf0" xml:space="preserve">
-    <value>Abfrage von {0} ??</value>
+    <value>Query di {0}</value>
   </data>
   <data name="QueryOf0Connecting1" xml:space="preserve">
-    <value>Abfrage von {0} Herstellen einer Verbindung mit {1} ??</value>
+    <value>Query di {0} in connessione a {1}</value>
   </data>
   <data name="RemovesThe0FromTheDatabase" xml:space="preserve">
-    <value>Entfernt {0} aus der Datenbank</value>
+    <value>Rimuovi l'elemento {0} dal database</value>
   </data>
   <data name="RepositoryNotSet" xml:space="preserve">
-    <value>Das Dateirepository wurde nicht eingerichtet</value>
+    <value>Il file repository non è stato impostato</value>
   </data>
   <data name="ResetPasswordCode" xml:space="preserve">
-    <value>Code für die Wiederherstellung des Passworts</value>
+    <value>Codice di reimpostazione password</value>
   </data>
   <data name="Should" xml:space="preserve">
-    <value>. Sollte  </value>
+    <value>. Dovrebbe  </value>
   </data>
   <data name="String" xml:space="preserve">
-    <value>Textzeichenfolge ??</value>
+    <value>stringa di testo</value>
   </data>
   <data name="SufixNotSet" xml:space="preserve">
-    <value>Das Suffix für die Datei wurde nicht eingerichtet ??</value>
+    <value>Non è stato impostato il nome del file fisico</value>
   </data>
   <data name="SystemUserNotLoadedInitializeToLevel1SimpleEntities" xml:space="preserve">
-    <value>Multiswitch-SystemBenutzer nicht geladen. Level1SimpleEntities initialisieren ??</value>
+    <value>SystemUser non caricato. Inizializzare Level1SimpleEntities</value>
   </data>
   <data name="The0" xml:space="preserve">
-    <value>Der {0}</value>
+    <value>Il {0}</value>
   </data>
   <data name="The0_f" xml:space="preserve">
-    <value>Die {0}</value>
+    <value>La {0}</value>
   </data>
   <data name="The0_m" xml:space="preserve">
-    <value>Der {0}</value>
+    <value>Il {0}</value>
   </data>
   <data name="TheDatabaseVersion" xml:space="preserve">
-    <value>die Version der Datenbank</value>
+    <value>la versione del database</value>
   </data>
   <data name="TheEntity0IsNew" xml:space="preserve">
-    <value>Die Entität {0} ist neu</value>
+    <value>L'entità {0} è nuova</value>
   </data>
   <data name="TheExcelTemplateHasAColumn0NotPresentInTheFindWindow" xml:space="preserve">
-    <value>Die Excel-Vorlage hat eine Spalte {0}, die nicht in der Suche vorhanden ist</value>
+    <value>Il modello Excel ha una colonna {0} non presente nel motore di ricerca</value>
   </data>
   <data name="TheFollowingKeysHaveBeenRepeatedIn01" xml:space="preserve">
-    <value>Die folgenden Schlüssel werden in {0}:{1} wiederholt</value>
+    <value>I seguenti tasti sono stati ripetuti in {0}:
+{1}</value>
   </data>
   <data name="TheKey0IsNotFoundIn1Table" xml:space="preserve">
-    <value>Der Schlüssel {0} wurde nicht in Tabelle {1} gefunden</value>
+    <value>La chiave {0} non si trova nella tabella {1}</value>
   </data>
   <data name="TheOperationNeedsA0InTheArgumentNumber1" xml:space="preserve">
-    <value>Der Vorgang braucht ein {0} in die Argumentnummer {1} ??</value>
+    <value>L'operazione richiede un {0}  {1} il numero dell'argomento</value>
   </data>
   <data name="TheOperationNeedsA0InTheArgumentNumber1_f" xml:space="preserve">
-    <value>Der Vorgang braucht ein {0} im Argument {1} ??</value>
+    <value>L'operazione richiede un {0} nell'argomento {1}</value>
   </data>
   <data name="TheOperationNeedsA0InTheArgumentNumber1_m" xml:space="preserve">
-    <value>Der Vorgang braucht ein {0} im Argument {1} ??</value>
+    <value>L'operazione richiede un {0} nell'argomento {1}</value>
   </data>
   <data name="ThereAreNoResultsToWrite" xml:space="preserve">
-    <value>Es gibt keine Ergebnisse für den Bericht zu exportieren</value>
+    <value>Nessun risultato da scrivere</value>
   </data>
   <data name="Type0HasToImplement1AtLeast" xml:space="preserve">
-    <value>Der Typ {0} muss mindestens {1} implementieren</value>
+    <value>Il tipo {0} deve adempiere almeno {1}</value>
   </data>
   <data name="Username0IsNotValid" xml:space="preserve">
-    <value>Anwendername {0} ist ungültig</value>
+    <value>Il nome dell'utente {0} non è valido</value>
   </data>
   <data name="Value" xml:space="preserve">
-    <value>Wert</value>
+    <value>valore</value>
   </data>
   <data name="ValueLike0" xml:space="preserve">
-    <value>Wert wie {0}</value>
-  </data>
-  <data name="YourVersion" xml:space="preserve">
-    <value>Ihre Version</value>
+    <value>valore come {0}</value>
   </data>
   <data name="YouCanResetYourPasswordByFollowingTheLinkBelow" xml:space="preserve">
-    <value>Sie können Ihr Kennwort zurücksetzen, indem Sie dem unten stehenden Link folgen:</value>
+    <value>È possibile creare una nuova password cliccando sul link qui sotto:</value>
   </data>
   <data name="YouRecentlyRequestedANewPassword" xml:space="preserve">
-    <value>Sie verlangt vor kurzem ein neues Passwort</value>
+    <value>È stata richiesta una nuova password</value>
+  </data>
+  <data name="YourVersion" xml:space="preserve">
+    <value>la tua versione</value>
   </data>
 </root>

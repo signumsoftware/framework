@@ -112,10 +112,10 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ProcessOperation_Cancel" xml:space="preserve">
     <value>Annuler</value>
@@ -148,7 +148,7 @@
     <value>Planifié</value>
   </data>
   <data name="ProcessState_Queued" xml:space="preserve">
-    <value>Mise en queu</value>
+    <value>Mise en queue</value>
   </data>
   <data name="ProcessState_Suspended" xml:space="preserve">
     <value>Suspendu</value>
@@ -193,7 +193,7 @@
     <value>Effacé</value>
   </data>
   <data name="ExcelReportDN_DisplayName" xml:space="preserve">
-    <value>Nom affiché</value>
+    <value>Afficher le nom</value>
   </data>
   <data name="ExcelReportDN_File" xml:space="preserve">
     <value>Fichier</value>
@@ -280,7 +280,7 @@
     <value>Processus</value>
   </data>
   <data name="ProcessExecutionDN_ProcessData" xml:space="preserve">
-    <value>Donnés</value>
+    <value>Donnée</value>
   </data>
   <data name="ProcessExecutionDN_Progress" xml:space="preserve">
     <value>Avancement</value>
@@ -304,7 +304,7 @@
     <value>Roles</value>
   </data>
   <data name="ScheduledTaskDN" xml:space="preserve">
-    <value>Tâches planifié</value>
+    <value>Tâches planifiées</value>
   </data>
   <data name="ScheduledTaskDN_NextDate" xml:space="preserve">
     <value>Prochaine date </value>
@@ -322,7 +322,7 @@
     <value>Journalier</value>
   </data>
   <data name="ScheduleRuleDayDN_Hour" xml:space="preserve">
-    <value>Heur</value>
+    <value>Heure</value>
   </data>
   <data name="ScheduleRuleDayDN_Minute" xml:space="preserve">
     <value>Minute</value>
@@ -370,10 +370,10 @@
     <value>Je</value>
   </data>
   <data name="ScheduleRuleWeekDaysDN_Thursday" xml:space="preserve">
-    <value>Mardi</value>
+    <value>Jeudi</value>
   </data>
   <data name="ScheduleRuleWeekDaysDN_Tuesday" xml:space="preserve">
-    <value>Jeudi</value>
+    <value>Mardi</value>
   </data>
   <data name="ScheduleRuleWeekDaysDN_W" xml:space="preserve">
     <value>Me</value>
@@ -391,7 +391,7 @@
     <value>Utilisateur</value>
   </data>
   <data name="UserDN_Email" xml:space="preserve">
-    <value>e-Mail</value>
+    <value>Email</value>
   </data>
   <data name="UserDN_Related" xml:space="preserve">
     <value>Lié</value>
@@ -412,16 +412,16 @@
     <value>Chaque jour à </value>
   </data>
   <data name="Holidayhavetobetrueorfalsewhenacalendarisset" xml:space="preserve">
-    <value>Les vancances doivent être véridiques ou fausses quand le calendrier est défini</value>
+    <value>Les vancances doivent être vraies ou fausses quand le calendrier est défini</value>
   </data>
   <data name="Holidayhavetobenullwhennocalendarisset" xml:space="preserve">
-    <value>Les vacances doivent être fausse quand aucun calendrier n'est défini</value>
+    <value>Les vacances doivent être nulles quand aucun calendrier n'est défini</value>
   </data>
   <data name="CustomTaskDN" xml:space="preserve">
     <value>Tâche paramétrable</value>
   </data>
   <data name="CustomTaskExecutionDN" xml:space="preserve">
-    <value>Execution de Tâche paramètré</value>
+    <value>Execution de Tâche paramétré</value>
   </data>
   <data name="CustomTaskExecutionDN_CustomTask" xml:space="preserve">
     <value>Tâche paramétrable</value>
@@ -433,7 +433,7 @@
     <value>Exception</value>
   </data>
   <data name="CustomTaskExecutionDN_StartTime" xml:space="preserve">
-    <value>Heur de commencement</value>
+    <value>Heur de début</value>
   </data>
   <data name="ScheduleRuleDayDN_StartingOn" xml:space="preserve">
     <value>Débute à</value>
@@ -442,7 +442,7 @@
     <value>Nouvelle execution</value>
   </data>
   <data name="FilePathDN_FileName" xml:space="preserve">
-    <value>Nom de fichier</value>
+    <value>Nom du fichier</value>
   </data>
   <data name="FilePathDN_FileType" xml:space="preserve">
     <value>Type de fichier</value>
@@ -457,7 +457,7 @@
     <value>Dépôt de fichier</value>
   </data>
   <data name="FileRepositoryDN_Active" xml:space="preserve">
-    <value>Activer</value>
+    <value>Activé</value>
   </data>
   <data name="FileRepositoryDN_Name" xml:space="preserve">
     <value>Nom</value>
@@ -478,10 +478,10 @@
     <value>Activer</value>
   </data>
   <data name="UserOperation_Save" xml:space="preserve">
-    <value>Sauver</value>
+    <value>Sauvegarder</value>
   </data>
   <data name="UserOperation_SaveNew" xml:space="preserve">
-    <value>Sauver</value>
+    <value>Sauvegarder</value>
   </data>
   <data name="LogOperationQueries_All" xml:space="preserve">
     <value>Tous</value>
@@ -493,7 +493,7 @@
     <value>En traitement</value>
   </data>
   <data name="FileRepositoryDN_FileTypes" xml:space="preserve">
-    <value>Type de fichier</value>
+    <value>Types de fichiers</value>
   </data>
   <data name="DateSpanDN_Days" xml:space="preserve">
     <value>Jours</value>
@@ -523,7 +523,7 @@
     <value>Colonne</value>
   </data>
   <data name="UserQueryDN_DisplayName" xml:space="preserve">
-    <value>Nom affiché</value>
+    <value>Afficher le nom</value>
   </data>
   <data name="UserQueryDN_Filters" xml:space="preserve">
     <value>Filtres</value>
@@ -568,16 +568,16 @@
     <value>Moyenne</value>
   </data>
   <data name="EmailMessageDN" xml:space="preserve">
-    <value>Message d'e-mail</value>
+    <value>Message d'email</value>
   </data>
   <data name="EmailPackageDN" xml:space="preserve">
-    <value>Paquet d'e-mail</value>
+    <value>Paquet d'email</value>
   </data>
   <data name="UserDN_State" xml:space="preserve">
     <value>État</value>
   </data>
   <data name="EmailMessageDN_Exception" xml:space="preserve">
-    <value>Erreur</value>
+    <value>Exception</value>
   </data>
   <data name="EmailMessageDN_Package" xml:space="preserve">
     <value>Paquet</value>
@@ -601,7 +601,7 @@
     <value>Modèle</value>
   </data>
   <data name="EmailOperations_ReSendEmails" xml:space="preserve">
-    <value>Renvoyer emails</value>
+    <value>Renvoyer les emails</value>
   </data>
   <data name="EmailPackageDN_NumErrors" xml:space="preserve">
     <value>Nombre d'erreurs</value>
@@ -760,10 +760,10 @@
     <value>Nombre de colonnes</value>
   </data>
   <data name="ControlPanelDN_Part0IsInColumn1ButPanelHasOnly2Columns" xml:space="preserve">
-    <value>Partie {0} est dans la colonne {1} mais panneau uniquement les colonnes {2}</value>
+    <value>Partie {0} est dans la colonne {1} mais le panneau à uniquement {2} colonnes</value>
   </data>
   <data name="ControlPanelDN_Part0IsInColumn1WhichAlreadyHasOtherParts" xml:space="preserve">
-    <value>Partie {0} se trouve dans la colonne {1} de ligne {2} qui dispose déjà d'autres parties</value>
+    <value>Partie {0} se trouve dans la colonne {1}  ligne {2} qui dispose déjà d'autres parties</value>
   </data>
   <data name="ControlPanelDN_Parts" xml:space="preserve">
     <value>Pièces</value>
@@ -835,7 +835,7 @@
     <value>Expression doit être une sorte d'agrégat</value>
   </data>
   <data name="ExpressionShouldHaveAContinousAmountOfValues" xml:space="preserve">
-    <value>Expression devrait avoir une quantité continu des valeurs</value>
+    <value>Expression devrait avoir une quantité continu de valeurs</value>
   </data>
   <data name="ExpressionShouldHaveADiscreteAmountOfValues" xml:space="preserve">
     <value>Expression devrait avoir une quantité discrète de valeurs</value>

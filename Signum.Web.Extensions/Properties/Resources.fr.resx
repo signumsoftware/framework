@@ -112,369 +112,171 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="MailBody_RememberPassword" xml:space="preserve">
-    <value>We send you this email as you have requested to remember your password. For yoyr safety, we have generated a new random passwor, that you will be able to modify later.&lt;br/&gt;&lt;br/&gt;The password is &lt;b&gt;{0}&lt;/b&gt;</value>
+  <data name="Alerts" xml:space="preserve">
+    <value>Alertes</value>
   </data>
-  <data name="MailSubject_RememberPassword" xml:space="preserve">
-    <value>Rappeler mot de passe</value>
+  <data name="Average" xml:space="preserve">
+    <value>Moyenne</value>
   </data>
-  <data name="NewPassword" xml:space="preserve">
-    <value>Nouveau mot de passe</value>
+  <data name="CalendarClose" xml:space="preserve">
+    <value>Fait</value>
   </data>
-  <data name="PasswordDoesNotMatchCurrent" xml:space="preserve">
-    <value>Le mot de passe ne correspond pas à celui en cours</value>
+  <data name="CalendarNext" xml:space="preserve">
+    <value>Suivant</value>
   </data>
-  <data name="PasswordHasBeenChangedSuccessfully" xml:space="preserve">
-    <value>Le mot de passe a été changé avec succès</value>
+  <data name="CalendarPrevious" xml:space="preserve">
+    <value>Précédent</value>
   </data>
-  <data name="PasswordHasBeenSent" xml:space="preserve">
-    <value>Le mot de passe a été envoyé sur le compte mail {0}</value>
+  <data name="CalendarToday" xml:space="preserve">
+    <value>Aujourd'hui</value>
   </data>
-  <data name="PasswordMustHaveAValue" xml:space="preserve">
-    <value>Le mot de passe doit avoir une valeur</value>
+  <data name="Checked" xml:space="preserve">
+    <value>Vérifié</value>
   </data>
-  <data name="RememberPassword" xml:space="preserve">
-    <value>Rappeler mot de passe</value>
+  <data name="CreateAlert" xml:space="preserve">
+    <value>Créer l'alerte</value>
   </data>
-  <data name="TheSpecifiedPasswordsDontMatch" xml:space="preserve">
-    <value>Les mots de passe spécifiés ne correspondent pas</value>
+  <data name="CreateNote" xml:space="preserve">
+    <value>Créer note</value>
   </data>
-  <data name="UserNameAlreadyExists" xml:space="preserve">
-    <value>Le nom d'utilisateur est déjà enregistré, s'il vous plaît choisir un autre</value>
+  <data name="DeleteFilters" xml:space="preserve">
+    <value>Supprimer les filtres</value>
   </data>
-  <data name="UserNameMustHaveAValue" xml:space="preserve">
-    <value>Le nom d'utilisateur doit avoir une valeur</value>
+  <data name="EditColumnsFinishEdit" xml:space="preserve">
+    <value>Finir édition</value>
   </data>
-  <data name="YouMustEnterTheCurrentPassword" xml:space="preserve">
-    <value>Vous devez entrer le mot de passe actuel</value>
+  <data name="Excel" xml:space="preserve">
+    <value>Excel</value>
   </data>
-  <data name="YouMustRepeatTheNewPassword" xml:space="preserve">
-    <value>Vous devez répéter le nouveau mot de passe</value>
+  <data name="ExecutedXTimes" xml:space="preserve">
+    <value>Exécutés x fois</value>
   </data>
-  <data name="EmailNotExistsDatabase" xml:space="preserve">
-    <value>L'adresse mail donnée n'appartient à aucun utilisateur enrigistré</value>
+  <data name="Field" xml:space="preserve">
+    <value>Champ</value>
   </data>
-  <data name="ResetPassword" xml:space="preserve">
-    <value>Reinitialisation du mot de passe</value>
+  <data name="FilterByField" xml:space="preserve">
+    <value>Filtrer par champ</value>
   </data>
-  <data name="ResetPasswordCodeHasBeenSent" xml:space="preserve">
-    <value>Un code de confirmation pour réinitialiser votre mot de passe a été envoyé sur votre compte mail {0}</value>
+  <data name="Future" xml:space="preserve">
+    <value>Futur</value>
   </data>
-  <data name="ResetPasswordSuccess" xml:space="preserve">
-    <value>Votre mot de passe a été modifié avec succès</value>
+  <data name="HideFilters" xml:space="preserve">
+    <value>Masquer les filtres</value>
   </data>
-  <data name="ChangePasswordAspx_ActualPassword" xml:space="preserve">
-    <value>Mot de passe actuel</value>
+  <data name="IncorrectEntityInSessionYouMustReloadThePageToContinue" xml:space="preserve">
+    <value>Les données de session sont incorrectes. Actualisez la page pour continuer</value>
   </data>
-  <data name="ChangePasswordAspx_ChangePassword" xml:space="preserve">
-    <value>Changer mot de passe</value>
+  <data name="Maximum" xml:space="preserve">
+    <value>Maximum</value>
   </data>
-  <data name="ChangePasswordAspx_ConfirmNewPassword" xml:space="preserve">
-    <value>Confirmer nouveau mot de passe</value>
+  <data name="Minimum" xml:space="preserve">
+    <value>Minimum</value>
   </data>
-  <data name="ChangePasswordAspx_NewPassword" xml:space="preserve">
-    <value>Nouveau mot de passe</value>
+  <data name="Name" xml:space="preserve">
+    <value>Nom</value>
   </data>
-  <data name="ChangePasswordAspx_WriteActualPasswordAndNewOne" xml:space="preserve">
-    <value>Ecrivez votre mot de passe actuel et le nouveau</value>
+  <data name="New" xml:space="preserve">
+    <value>Nouveau</value>
   </data>
-  <data name="Remember" xml:space="preserve">
-    <value>Rappeler</value>
+  <data name="No" xml:space="preserve">
+    <value>non</value>
   </data>
-  <data name="GoBackToLoginPage" xml:space="preserve">
-    <value>Tourner à la page de connexion</value>
+  <data name="NoFiltersSpecified" xml:space="preserve">
+    <value>Les filtres ne sont pas spécifiés</value>
   </data>
-  <data name="PasswordReseted" xml:space="preserve">
-    <value>Votre mot de passe a été réinitialisé</value>
+  <data name="NoResults" xml:space="preserve">
+    <value>Aucun résultat</value>
   </data>
-  <data name="YourNewPasswordIs0" xml:space="preserve">
-    <value>Votre nouveau mot de passe est {0}</value>
+  <data name="Notes" xml:space="preserve">
+    <value>Notes</value>
   </data>
-  <data name="TypesAscx_Create" xml:space="preserve">
-    <value>Créer</value>
+  <data name="NumberOfRows" xml:space="preserve">
+    <value>Nombre de lignes</value>
   </data>
-  <data name="TypesAscx_Modify" xml:space="preserve">
-    <value>Modifier</value>
-  </data>
-  <data name="TypesAscx_None" xml:space="preserve">
-    <value>Aucun</value>
-  </data>
-  <data name="TypesAscx_Operations" xml:space="preserve">
-    <value>Opérations</value>
-  </data>
-  <data name="TypesAscx_Overriden" xml:space="preserve">
-    <value>Remplace</value>
-  </data>
-  <data name="TypesAscx_Properties" xml:space="preserve">
-    <value>Propriétés</value>
-  </data>
-  <data name="TypesAscx_Queries" xml:space="preserve">
-    <value>Questions</value>
-  </data>
-  <data name="TypesAscx_Read" xml:space="preserve">
-    <value>Lire</value>
-  </data>
-  <data name="EntityGroupsAscx_All" xml:space="preserve">
-    <value>Tous</value>
-  </data>
-  <data name="EntityGroupsAscx_EntityGroup" xml:space="preserve">
-    <value>Groupe d'entités</value>
-  </data>
-  <data name="EntityGroupsAscx_In" xml:space="preserve">
-    <value>Dedans</value>
-  </data>
-  <data name="EntityGroupsAscx_None" xml:space="preserve">
-    <value>Aucun</value>
-  </data>
-  <data name="EntityGroupsAscx_Out" xml:space="preserve">
-    <value>Dehors</value>
-  </data>
-  <data name="EntityGroupsAscx_Overriden" xml:space="preserve">
-    <value>Remplace</value>
-  </data>
-  <data name="FacadeMethodsAscx_Allow" xml:space="preserve">
-    <value>Authoriser</value>
-  </data>
-  <data name="FacadeMethodsAscx_Deny" xml:space="preserve">
-    <value>Interdire</value>
-  </data>
-  <data name="FacadeMethodsAscx_FacadeMethod" xml:space="preserve">
-    <value>Méthode de façade</value>
-  </data>
-  <data name="FacadeMethodsAscx_Overriden" xml:space="preserve">
-    <value>Supplanté</value>
-  </data>
-  <data name="OperationsAscx_Allow" xml:space="preserve">
-    <value>Authoriser</value>
-  </data>
-  <data name="OperationsAscx_Deny" xml:space="preserve">
-    <value>Interdire</value>
-  </data>
-  <data name="OperationsAscx_Operation" xml:space="preserve">
+  <data name="Operation" xml:space="preserve">
     <value>Opération</value>
   </data>
-  <data name="OperationsAscx_Overriden" xml:space="preserve">
-    <value>Remplace</value>
-  </data>
-  <data name="PermissionsAscx_Allow" xml:space="preserve">
-    <value>Authoriser</value>
-  </data>
-  <data name="PermissionsAscx_Deny" xml:space="preserve">
-    <value>Interdire</value>
-  </data>
-  <data name="PermissionsAscx_Overriden" xml:space="preserve">
-    <value>Remplace</value>
-  </data>
-  <data name="PropertiesAscx_Modify" xml:space="preserve">
-    <value>Modifier</value>
-  </data>
-  <data name="PropertiesAscx_None" xml:space="preserve">
-    <value>Aucun</value>
-  </data>
-  <data name="PropertiesAscx_Overriden" xml:space="preserve">
-    <value>Surchargé</value>
-  </data>
-  <data name="PropertiesAscx_Property" xml:space="preserve">
-    <value>Propriété</value>
-  </data>
-  <data name="PropertiesAscx_Read" xml:space="preserve">
-    <value>Lire</value>
-  </data>
-  <data name="QueriesAscx_Allow" xml:space="preserve">
-    <value>Authoriser</value>
-  </data>
-  <data name="QueriesAscx_Deny" xml:space="preserve">
-    <value>Interdire</value>
-  </data>
-  <data name="QueriesAscx_Overriden" xml:space="preserve">
-    <value>Remplace</value>
-  </data>
-  <data name="QueriesAscx_Query" xml:space="preserve">
-    <value>Question</value>
-  </data>
-  <data name="Please0IntoYourAccount" xml:space="preserve">
-    <value>S'il vous plaît, {0} à votre compte</value>
-  </data>
-  <data name="AreYouSureOfDeletingTheEntity012" xml:space="preserve">
-    <value>Veillez à supprimer l'entité système {0} ({1}: {2}) ?</value>
-  </data>
-  <data name="ArgumentFilePathIDWasNotPassedToTheController" xml:space="preserve">
-    <value>Argument {filePathID} n'a pas transmis au contrôleur</value>
-  </data>
-  <data name="ConfirmNewPassword" xml:space="preserve">
-    <value>Confirmer le nouveau mot de passe</value>
-  </data>
-  <data name="ConstructFromManyOperation0NeedsSourceIdsAsParameter" xml:space="preserve">
-    <value>L'opération ConstructFromMany {{{0}}} nécessite la source du paramètre ID</value>
-  </data>
-  <data name="ConstructFromManyOperation0NeedsSourceLazies" xml:space="preserve">
-    <value>L'opération de ConstructFromMany {{{0}}} nécessite la source Lites</value>
-  </data>
-  <data name="CouldNotCreateLiteWithoutAnIdToCallOperation0" xml:space="preserve">
-    <value>Impossible de créer le Lite sans un id pour appeler les opérations {{{0}}}</value>
-  </data>
-  <data name="CouldntCreateFilePathWithUnknownFileTypeForField0" xml:space="preserve">
-    <value>Impossible de créer FilePath avec FileType inconnu pour le champ {{0}}</value>
-  </data>
-  <data name="CurrentPassword" xml:space="preserve">
-    <value>Mot de passe actuel</value>
-  </data>
-  <data name="ChangePassword" xml:space="preserve">
-    <value>Changer mot de passe</value>
-  </data>
-  <data name="ChangePasswordExplanation" xml:space="preserve">
-    <value>Utilisez ce formulaire pour modifier votre mot de passe</value>
-  </data>
-  <data name="EmailIsNotValid" xml:space="preserve">
-    <value>L'e-mail est différente de la messagerie enregistrée</value>
-  </data>
-  <data name="EmailMustHaveAValue" xml:space="preserve">
-    <value>L'email doit avoir une valeur</value>
-  </data>
-  <data name="ErrorSavingFile" xml:space="preserve">
-    <value>Erreur sauvegarde de fichiers</value>
-  </data>
-  <data name="FileTypePropertyOfFileLineSettingsMustBeSpecified" xml:space="preserve">
-    <value>Propriété FileType de paramètres FileLine doit être spécifiée pour FileLine {0}</value>
-  </data>
-  <data name="HelpDocumentation" xml:space="preserve">
-    <value>Documentation d'aide</value>
-  </data>
-  <data name="InvalidNewPassword" xml:space="preserve">
-    <value>Nouveau mot de passe incorrect</value>
-  </data>
-  <data name="InvalidOperationType0inTheConstructionOfOperation1" xml:space="preserve">
-    <value>Type d'opération non valide {{0}} dans la construction de l'opération {{1}}</value>
-  </data>
-  <data name="InvalidUsernameOrPassword" xml:space="preserve">
-    <value>Mot de passe ou nom d'utilisateur non valide</value>
-  </data>
-  <data name="Key0NotFound" xml:space="preserve">
-    <value>Clé {0} introuvable</value>
-  </data>
-  <data name="Message" xml:space="preserve">
-    <value>Message</value>
-  </data>
-  <data name="PasswordMustHave0orMoreCharacters" xml:space="preserve">
-    <value>Le mot de passe doit avoir {0} ou plus caractères</value>
-  </data>
-  <data name="Property0DoesNotExistInType1" xml:space="preserve">
-    <value>La propriété {0} n'existe pas de type {1}</value>
-  </data>
-  <data name="Property0HasNoValue" xml:space="preserve">
-    <value>La propriété {0} n'a aucune valeur</value>
-  </data>
-  <data name="Property0NotExistsInType1" xml:space="preserve">
-    <value>La propriété {0} n'existe pas de type {1}</value>
-  </data>
-  <data name="RememberPasswordExplanation" xml:space="preserve">
-    <value>Entrez votre nom d'utilisateur et adresse e-mail pour recevoir un message dans votre compte avec un mot de passe</value>
-  </data>
-  <data name="Source" xml:space="preserve">
-    <value>Source</value>
-  </data>
-  <data name="StackTrace" xml:space="preserve">
-    <value>StackTrace</value>
-  </data>
-  <data name="TargetSite" xml:space="preserve">
-    <value>Source</value>
-  </data>
-  <data name="TheresNotAViewForType0" xml:space="preserve">
-    <value>Il existe une vue associée au type {0}</value>
-  </data>
-  <data name="ViewName" xml:space="preserve">
-    <value>Nom de la vue</value>
-  </data>
-  <data name="ForgotYourPassword" xml:space="preserve">
-    <value>Vous avez oublié votre mot de passe ? Entrez votre email de connexion ci-dessous. Nous vous enverrons un e-mail avec un lien pour réinitialiser votre mot de passe.</value>
-  </data>
-  <data name="TypesAscx_Type" xml:space="preserve">
-    <value>Type</value>
-  </data>
-  <data name="PermissionsAscx_Permission" xml:space="preserve">
-    <value>Autorisation</value>
-  </data>
-  <data name="NoErrorsFound" xml:space="preserve">
-    <value>Aucune erreur trouvée</value>
-  </data>
-  <data name="ThereAreATotalOf0Errors" xml:space="preserve">
-    <value>Il y a un total de {0} erreurs</value>
-  </data>
-  <data name="ViewsChecker" xml:space="preserve">
-    <value>Vues du vérificateur</value>
-  </data>
-  <data name="ThereSNotARegisteredUserWithThatEmailAddress" xml:space="preserve">
-    <value>Il n'est pas un utilisateur inscrit avec cette adresse e-mail</value>
-  </data>
-  <data name="EmailSent" xml:space="preserve">
-    <value>Email envoyé</value>
-  </data>
-  <data name="TheConfirmationCodeThatYouHaveJustSentIsInvalid" xml:space="preserve">
-    <value>Le code de confirmation que vous avez envoyés seulement n'est pas valide</value>
-  </data>
-  <data name="IHaveForgottenMyPassword" xml:space="preserve">
-    <value>J'ai oublié mon mot de passe</value>
-  </data>
-  <data name="IntroduceYourUserNameAndPassword" xml:space="preserve">
-    <value>Introduire votre nom d'utilisateur et le mot de passe</value>
-  </data>
-  <data name="LoginEnter" xml:space="preserve">
-    <value>Login</value>
-  </data>
-  <data name="Password" xml:space="preserve">
-    <value>Mot de passe</value>
-  </data>
-  <data name="PleaseEnterYourChosenNewPassword" xml:space="preserve">
-    <value>Entrez votre nouveau mot de passe</value>
-  </data>
-  <data name="RememberMe" xml:space="preserve">
-    <value>Se souvenir de moi</value>
-  </data>
-  <data name="ThePasswordMustHaveBetween7And15CharactersEachOfThemBeingANumber09OrALetter" xml:space="preserve">
-    <value>Le mot de passe doit avoir entre 7 et 15 caractères, chacun d'eux étant un nombre, 0-9 ou une lettre</value>
-  </data>
-  <data name="ThereHasBeenAnErrorWithYourRequestToResetYourPasswordPleaseEnterYourLogin" xml:space="preserve">
-    <value>Il y a eu une erreur avec votre demande pour réinitialiser votre mot de passe. Entrez votre login.</value>
-  </data>
-  <data name="User" xml:space="preserve">
-    <value>Utilisateur</value>
-  </data>
-  <data name="AreYouSureOfDeletingQuery0" xml:space="preserve">
-    <value>Est-ce que vous assurer de la suppression de requête {0} ?</value>
-  </data>
-  <data name="AreYouSureOfDeletingReport0" xml:space="preserve">
-    <value>Étes-vous de supprimer le rapport {0}</value>
-  </data>
-  <data name="Create" xml:space="preserve">
-    <value>Créer</value>
-  </data>
-  <data name="Delete" xml:space="preserve">
+  <data name="Remove" xml:space="preserve">
     <value>Supprimer</value>
   </data>
-  <data name="Download" xml:space="preserve">
-    <value>Télécharger</value>
+  <data name="Save" xml:space="preserve">
+    <value>Enregistrez</value>
   </data>
-  <data name="ExcelAdminister" xml:space="preserve">
-    <value>Administrer</value>
+  <data name="Search" xml:space="preserve">
+    <value>Recherche</value>
   </data>
-  <data name="ExcelReport" xml:space="preserve">
-    <value>Rapport Excel</value>
+  <data name="ShowCalendar" xml:space="preserve">
+    <value>Afficher le calendrier</value>
   </data>
-  <data name="PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem" xml:space="preserve">
-    <value>Confirmez que vous désirez supprimer l'entité du système</value>
+  <data name="ShowFilters" xml:space="preserve">
+    <value>Afficher les filtres</value>
   </data>
-  <data name="PleaseConfirmYouDLikeToExecuteTheOperation0ToTheEntity123" xml:space="preserve">
-    <value>Veuillez confirmer que vous souhaitez exécuter l'opération {0} à l'entité {1} ({2}-{3})</value>
+  <data name="Type0NotAllowed" xml:space="preserve">
+    <value>Type {0} non autorisé</value>
   </data>
-  <data name="ReportTemplateMustBeSpecified" xml:space="preserve">
-    <value>Vous devez spécifier le modèle de rapport</value>
+  <data name="UserColumnsEdit" xml:space="preserve">
+    <value>Modifier les colonnes de l'utilisateur</value>
   </data>
-  <data name="WeReceivedARequestToCreateAnAccountYouCanCreateItFollowingTheLinkBelow" xml:space="preserve">
-    <value>Nous avons reçu une demande de créer un compte. Vous pouvez créer le lien ci-dessous:</value>
+  <data name="Value" xml:space="preserve">
+    <value>Valeur</value>
+  </data>
+  <data name="ValueMustBeSpecifiedFor0" xml:space="preserve">
+    <value>Une valeur doit être spécifiée pour {0}</value>
+  </data>
+  <data name="View" xml:space="preserve">
+    <value>Vue</value>
+  </data>
+  <data name="ViewForType0IsNotAllowed" xml:space="preserve">
+    <value>Affichage pour le type {0} n'est pas autorisé</value>
+  </data>
+  <data name="ViewNotes" xml:space="preserve">
+    <value>Voir les notes</value>
+  </data>
+  <data name="Warned" xml:space="preserve">
+    <value>Averti</value>
+  </data>
+  <data name="Yes" xml:space="preserve">
+    <value>Oui</value>
+  </data>
+  <data name="YourSessionHasTimedOutClickF5ToReloadTheEntity" xml:space="preserve">
+    <value>Votre session a expiré, cliquez sur la touche F5 pour recharger l'entité de la base de données</value>
+  </data>
+  <data name="Signum_error" xml:space="preserve">
+    <value>Erreur</value>
+  </data>
+  <data name="Signum_executingOperation" xml:space="preserve">
+    <value>Execution de l'opération...</value>
+  </data>
+  <data name="Signum_noElementsSelected" xml:space="preserve">
+    <value>Aucun élément sélectionné</value>
+  </data>
+  <data name="Signum_noResults" xml:space="preserve">
+    <value>Aucun résultat trouvé</value>
+  </data>
+  <data name="Signum_operationExecuted" xml:space="preserve">
+    <value>Opération exécutée</value>
+  </data>
+  <data name="Signum_popupErrors" xml:space="preserve">
+    <value>Il existe des erreurs dans l'entité, voulez-vous continuer ?</value>
+  </data>
+  <data name="Signum_popupErrorsStop" xml:space="preserve">
+    <value>Il existe des erreurs dans l'entité</value>
+  </data>
+  <data name="Signum_saved" xml:space="preserve">
+    <value>Enregistré</value>
+  </data>
+  <data name="Signum_saving" xml:space="preserve">
+    <value>Entrain de sauvegarder</value>
+  </data>
+  <data name="Signum_search" xml:space="preserve">
+    <value>Recherche</value>
+  </data>
+  <data name="Signum_searching" xml:space="preserve">
+    <value>Recherche...</value>
   </data>
 </root>
