@@ -402,7 +402,7 @@ namespace Signum.Entities.Authorization
                 {
                     var def = list.SingleOrDefault(a => a.Resource == null);
                     var max = x.Attribute("Default") == null || x.Attribute("Default").Value != "Min";
-                    SetDefault(def, max);
+                    SetDefault(def, max, role);
 
                     return Synchronizer.SynchronizeScript(
                         list.Where(a => a.Resource != null).ToDictionary(a => a.Resource),
@@ -413,7 +413,7 @@ namespace Signum.Entities.Authorization
                 }).Values.Combine(Spacing.Double);
         }
 
-        private void SetDefault(RT def, bool max)
+        private void SetDefault(RT def, bool max, Lite<RoleDN> role)
         {
             if (max)
             {
@@ -422,7 +422,16 @@ namespace Signum.Entities.Authorization
             }
             else
             {
-                if (!def.Allowed.Equals(Min.BaseAllowed))
+                if (def == null)
+                {
+                    new RT()
+                    {
+                        Role = role,
+                        Resource = null,
+                        Allowed = Min.BaseAllowed
+                    }.Save();
+                }
+                else if (!def.Allowed.Equals(Min.BaseAllowed))
                 {
                     def.Allowed = Min.BaseAllowed;
                     def.Save();
