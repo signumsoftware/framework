@@ -116,6 +116,20 @@ namespace Signum.Utilities.ExpressionTrees
 
         StringBuilder builder = new StringBuilder();
 
+        int spaces = 0;
+
+        public IDisposable Ident()
+        {
+            spaces += 3;
+            return new Disposable(() => spaces -= 3); 
+        }
+
+        void AppendLine()
+        {
+            builder.AppendLine();
+            builder.Append(new string(' ', spaces));
+        }
+
         public static string NiceToString(Expression exp)
         {
             ExpressionToString ets = new ExpressionToString();
@@ -370,19 +384,25 @@ namespace Signum.Utilities.ExpressionTrees
             {
                 Visit(init.NewExpression);
             }
-            builder.Append(" {");
+
+            AppendLine();
+            builder.Append("{");
             int num = 0;
             int count = init.Bindings.Count;
-            while (num < count)
-            {
-                MemberBinding binding = init.Bindings[num];
-                if (num > 0)
+            using (Ident())
+                while (num < count)
                 {
-                    builder.Append(", ");
+                    MemberBinding binding = init.Bindings[num];
+                    if (num > 0)
+                    {
+                        builder.Append(", ");
+                    }
+                    AppendLine();
+                    VisitBinding(binding);
+                    num++;
                 }
-                VisitBinding(binding);
-                num++;
-            }
+
+            AppendLine();
             builder.Append("}");
             return init;
         }
