@@ -32,26 +32,35 @@
             fn();
         }
 
-        function setLoaded(src)
-        {
+        function setLoaded(src) {
             _jsloaded[src] = true;
         }
 
         function loadJs(src, fn) {
             if (!_jsloaded[src]) {
-                Loader.loadJs(src, fn, function() {setLoaded(src);});
+                Loader.loadJs(src, fn, function () { setLoaded(src); });
             } else {
                 fn();
             }
         }
 
-        function loadCss(src, fn) {
+        function _loadCss(src) {
             if (!_cssloaded[src]) {
                 _cssloaded[src] = true;
-                Loader.loadCss(src, fn);
-            } else {
-                fn();
+                Loader.loadCss(src);
             }
+        }
+
+        function loadCss(src, fn) {
+            if (typeof src == "object") {
+                for (var i in src) {
+                    _loadCss(src[i]);
+                }
+            } else {
+                 _loadCss(src);
+            }
+
+            if (fn) fn();
         }
 
         return ({

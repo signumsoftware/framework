@@ -93,6 +93,12 @@ namespace Signum.Web
                     sb.AddLine(EntityBaseHelper.ViewButton(helper, entityCombo));
                     sb.AddLine(EntityBaseHelper.CreateButton(helper, entityCombo));
 
+                    if (entityCombo.ShowValidationMessage)
+                    {
+                        sb.Add(MvcHtmlString.Create("&nbsp;"));
+                        sb.AddLine(helper.ValidationMessage(entityCombo.ControlID));
+                    }
+
                 }
 
                 if (entityCombo.ValueFirst)

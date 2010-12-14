@@ -229,7 +229,9 @@ namespace Signum.Web
             else
                 valueLine.ValueHtmlProps.Add("onblur", "this.setAttribute('value', this.value); " + setTicks + reloadOnChangeFunction);
 
-            return HtmlHelperExtenders.InputType(inputType.ToString().ToLower(), valueLine.ControlID, valueLine.UntypedValue.TryToString() ?? "", valueLine.ValueHtmlProps);
+            valueLine.ValueHtmlProps["type"] = inputType.ToString().ToLower();
+
+            return helper.TextBox(valueLine.ControlID, valueLine.UntypedValue.TryToString() ?? "", valueLine.ValueHtmlProps);
         }
 
         public static MvcHtmlString NumericTextbox(this HtmlHelper helper, ValueLine valueLine)

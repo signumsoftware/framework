@@ -97,7 +97,7 @@ namespace Signum.Web
         {
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("<script type=\"text/javascript\">");
-            sb.AppendLine("SF.loadCss({0});".Formato(
+            sb.AppendLine("SF.loadCss([{0}]);".Formato(
                     UrlCss(files).ToString(f => '"' + f + '"', ",")
             ));
             sb.AppendLine("</script>");

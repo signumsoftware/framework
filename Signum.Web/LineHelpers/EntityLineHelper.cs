@@ -107,6 +107,12 @@ namespace Signum.Web
                     sb.AddLine(EntityBaseHelper.FindButton(helper, entityLine));
                     sb.AddLine(EntityBaseHelper.RemoveButton(helper, entityLine));
 
+                    if (entityLine.ShowValidationMessage)
+                    {
+                        sb.Add(MvcHtmlString.Create("&nbsp;"));
+                        sb.AddLine(helper.ValidationMessage(entityLine.ControlID));
+                    }
+
                 }
 
                 if (entityLine.ValueFirst)
