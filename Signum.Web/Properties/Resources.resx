@@ -279,4 +279,10 @@
   <data name="Signum_searching" xml:space="preserve">
     <value>Searching...</value>
   </data>
+  <data name="NotPossibleToaAssign0" xml:space="preserve">
+    <value>Not possible to assign {0}</value>
+  </data>
+  <data name="_0HasAnInvalidFormat" xml:space="preserve">
+    <value>{0} has an invalid format</value>
+  </data>
 </root>

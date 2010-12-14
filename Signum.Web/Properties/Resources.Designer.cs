@@ -61,6 +61,15 @@ namespace Signum.Web.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} has an invalid format.
+        /// </summary>
+        public static string _0HasAnInvalidFormat {
+            get {
+                return ResourceManager.GetString("_0HasAnInvalidFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Alerts.
         /// </summary>
         public static string Alerts {
@@ -291,6 +300,15 @@ namespace Signum.Web.Properties {
         public static string Notes {
             get {
                 return ResourceManager.GetString("Notes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Not possible to assign {0}.
+        /// </summary>
+        public static string NotPossibleToaAssign0 {
+            get {
+                return ResourceManager.GetString("NotPossibleToaAssign0", resourceCulture);
             }
         }
         

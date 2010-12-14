@@ -229,9 +229,11 @@ namespace Signum.Web
                             SetValue(parent.Value, ctx.Value);
                     }
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
-                    ctx.Error.Add("Not possible to assign {0}".Formato(PropertyPack.PropertyInfo.NiceName()));
+                    string error = e is FormatException ? Resources._0HasAnInvalidFormat : Resources.NotPossibleToaAssign0;
+
+                    ctx.Error.Add(error.Formato(PropertyPack.PropertyInfo.NiceName()));
                 }
 
                 if (!ctx.Empty())
