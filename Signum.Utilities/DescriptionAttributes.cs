@@ -114,7 +114,7 @@ namespace Signum.Utilities
             if (assembly.HasAttribute<LocalizeDescriptionsAttribute>())
             {
                 string key = memberInfo.DeclaringType.TryCC(d => d.Name).Add(memberInfo.Name, "_");
-                string result = assembly.GetDefaultResourceManager().GetString(key, CultureInfo.CurrentCulture);
+                string result = assembly.GetDefaultResourceManager().GetString(key);
                 if (result != null)
                     return result;
             }
@@ -134,7 +134,7 @@ namespace Signum.Utilities
             if (assembly.HasAttribute<LocalizeDescriptionsAttribute>())
             {
                 string key = type.Name + "_Plural";
-                string result = assembly.GetDefaultResourceManager().GetString(key, CultureInfo.CurrentCulture);
+                string result = assembly.GetDefaultResourceManager().GetString(key);
                 if (result != null)
                     return result;
             }
@@ -154,7 +154,7 @@ namespace Signum.Utilities
             if (assembly.HasAttribute<LocalizeDescriptionsAttribute>())
             {
                 string key = type.Name + "_Gender";
-                string gender = assembly.GetDefaultResourceManager().GetString(key, CultureInfo.CurrentCulture);
+                string gender = assembly.GetDefaultResourceManager().GetString(key);
                 if (gender != null)
                     return ParseGender(gender);
             }

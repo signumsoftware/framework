@@ -268,7 +268,7 @@ namespace Signum.Utilities
 
         public static string SpacePascal(this string pascalStr)
         {
-            return SpacePascal(pascalStr, CultureInfo.CurrentCulture.TwoLetterISOLanguageName == "en");
+            return SpacePascal(pascalStr, CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en");
         }
 
         public static string SpacePascal(this string pascalStr, bool preserveUppercase)

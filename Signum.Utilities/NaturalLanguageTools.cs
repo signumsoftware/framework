@@ -23,7 +23,7 @@ namespace Signum.Utilities
 
         public static Gender GetGender(string name)
         {
-            IGenderDetector detector = GenderDetectors.TryGetC(CultureInfo.CurrentCulture.TwoLetterISOLanguageName);
+            IGenderDetector detector = GenderDetectors.TryGetC(CultureInfo.CurrentUICulture.TwoLetterISOLanguageName);
             if (detector != null)
                 return detector.GetGender(name);
 
@@ -32,7 +32,7 @@ namespace Signum.Utilities
 
         public static string Pluralize(string singularName)
         {
-            IPluralizer pluralizer = Pluralizers.TryGetC(CultureInfo.CurrentCulture.TwoLetterISOLanguageName);
+            IPluralizer pluralizer = Pluralizers.TryGetC(CultureInfo.CurrentUICulture.TwoLetterISOLanguageName);
             if (pluralizer != null)
                 return pluralizer.MakePlural(singularName);
 

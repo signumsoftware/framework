@@ -52,7 +52,7 @@ namespace Signum.Entities
             if (assembly.HasAttribute<LocalizeDescriptionsAttribute>())
             {
                 string key = property.DeclaringType.Name.Add(property.Name, "_").Add(validator.GetType().Name, "_");
-                string result = assembly.GetDefaultResourceManager().GetString(key, CultureInfo.CurrentCulture);
+                string result = assembly.GetDefaultResourceManager().GetString(key);
                 if (result != null)
                     return result;
             }
