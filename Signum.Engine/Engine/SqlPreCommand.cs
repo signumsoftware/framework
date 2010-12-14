@@ -126,7 +126,7 @@ namespace Signum.Engine
         {
             string content = command.PlainSql(); 
 
-            File.WriteAllText(fileName, content);
+            File.WriteAllText(fileName, content, Encoding.GetEncoding(1252));
 
             Thread.Sleep(1000);
 
