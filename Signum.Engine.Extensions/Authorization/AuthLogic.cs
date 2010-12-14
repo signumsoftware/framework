@@ -436,7 +436,7 @@ namespace Signum.Engine.Authorization
 
         public static void ImportExportAuthRules()
         {
-            ImportExportAuthRules("AuthRules.xml");
+            ImportExportAuthRules("../../AuthRules.xml");
         }
 
         public static void ImportExportAuthRules(string fileName)

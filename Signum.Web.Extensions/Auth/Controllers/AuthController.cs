@@ -57,6 +57,7 @@ namespace Signum.Web.Authorization
             {
                 ViewData["Title"] = Resources.ChangePassword;
                 ModelState.FromContext(context);
+                RestoreCleanCurrentUser();
                 return View(AuthClient.ChangePasswordUrl);
             }
 
@@ -64,8 +65,8 @@ namespace Signum.Web.Authorization
             if (errorPasswordValidation.HasText())
             {
                 ModelState.AddModelError("password", errorPasswordValidation);
+                RestoreCleanCurrentUser();
                 return View(AuthClient.ChangePasswordUrl);
-                //return LoginError("password", errorPasswordValidation);
             }
 
             using (AuthLogic.Disable())
@@ -74,6 +75,13 @@ namespace Signum.Web.Authorization
             }
 
             return RedirectToAction("ChangePasswordSuccess");
+        }
+
+        private void RestoreCleanCurrentUser()
+        {
+            //Restore clean UserDN from database
+            Thread.CurrentPrincipal = Database.Query<UserDN>().Where(u => u.Is(UserDN.Current)).Single();
+            Session[AuthController.SessionUserKey] = Thread.CurrentPrincipal;
         }
 
         public ActionResult ChangePasswordSuccess()
