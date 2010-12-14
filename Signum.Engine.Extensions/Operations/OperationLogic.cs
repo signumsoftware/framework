@@ -111,7 +111,7 @@ namespace Signum.Engine.Operations
         public static void AssertOperationAllowed(Enum operationKey)
         {
             if (!OperationAllowed(operationKey))
-                throw new UnauthorizedAccessException(Resources.Operation0IsNotAuthorized.Formato(operationKey));
+                throw new UnauthorizedAccessException(Resources.Operation0IsNotAuthorized.Formato(operationKey.NiceToString()));
         }
         #endregion
 
