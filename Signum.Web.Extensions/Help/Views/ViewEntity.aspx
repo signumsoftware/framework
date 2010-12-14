@@ -11,7 +11,7 @@
 <%@ Import Namespace="Signum.Engine" %>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="head" runat="server">
-    <%: Html.ScriptCss("~/signum/help/Content/help.css") %>
+    <%: Html.ScriptCss("~/help/Content/help.css") %>
 </asp:Content>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
