@@ -215,10 +215,20 @@ namespace Signum.Engine.Authorization
             }
         }
 
+        public static void AssertAllowed(this IIdentifiable ident, TypeAllowedBasic allowed)
+        {
+            AssertAllowed(ident, allowed, Database.UserInterface); 
+        }
+
         public static void AssertAllowed(this IIdentifiable ident, TypeAllowedBasic allowed, bool userInterface)
         {
             if (!ident.IsAllowedFor(allowed, userInterface))
                 throw new UnauthorizedAccessException(Resources.NotAuthorizedTo0The1WithId2.Formato(allowed.NiceToString().ToLower(), ident.GetType().NiceName(), ident.Id));
+        }
+
+        public static bool IsAllowedFor(this IIdentifiable ident, TypeAllowedBasic allowed)
+        {
+            return IsAllowedFor(ident, allowed, Database.UserInterface); 
         }
 
         [MethodExpander(typeof(IsAllowedForExpander))]
@@ -241,6 +251,11 @@ namespace Signum.Engine.Authorization
                 return entity.InDB().WhereIsAllowedFor(allowed, userInterface).Any();
         }
 
+        public static void AssertAllowed(this Lite lite, TypeAllowedBasic allowed)
+        {
+            AssertAllowed(lite, allowed, Database.UserInterface);
+        }
+
         public static void AssertAllowed(this Lite lite, TypeAllowedBasic allowed, bool userInterface)
         {
             if (lite.IdOrNull == null)
@@ -248,6 +263,11 @@ namespace Signum.Engine.Authorization
 
             if (!lite.IsAllowedFor(allowed, userInterface))
                 throw new UnauthorizedAccessException(Resources.NotAuthorizedTo0The1WithId2.Formato(allowed.NiceToString().ToLower(), lite.RuntimeType.NiceName(), lite.Id));
+        }
+
+        public static bool IsAllowedFor(this Lite lite, TypeAllowedBasic allowed)
+        {
+            return IsAllowedFor(lite, allowed, Database.UserInterface); 
         }
 
         [MethodExpander(typeof(IsAllowedForExpander))]
