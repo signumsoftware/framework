@@ -19,7 +19,7 @@ namespace Signum.Engine.Mailing
             List<Lite<EmailMessageDN>> messages = args.TryGetArgC<List<Lite<EmailMessageDN>>>(0);
          
             if (messages == null)
-                throw new InvalidOperationException(Resources.NoEmailsToProcessFound);
+                throw new InvalidOperationException("No EmailMessageDN to process found");
 
             EmailPackageDN package = new EmailPackageDN()
             {

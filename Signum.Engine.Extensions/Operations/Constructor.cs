@@ -83,7 +83,7 @@ namespace Signum.Engine.Operations
         public void AssertIsValid()
         {
             if (Constructor == null)
-                throw new InvalidOperationException(Resources.Operation0DoesNotHaveConstructorInitialized.Formato(Key));
+                throw new InvalidOperationException("Operation {0} does not have Constructor initialized".Formato(Key));
         }
 
         public override string ToString()

@@ -109,7 +109,7 @@ namespace Signum.Engine.Mailing
                 (typeDN, type) => new { typeDN, type }, "caching EmailTemplates").ToDictionary(a => a.type, a => a.typeDN.ToLite());
         }
 
-        static readonly string EmailReplacements = "EmailReplacements";
+        static readonly string EmailTemplates = "EmailTemplates";
 
 
         static SqlPreCommand Schema_Synchronizing(Replacements replacements)
@@ -119,9 +119,9 @@ namespace Signum.Engine.Mailing
             Dictionary<string, EmailTemplateDN> should = GenerateTemplates().ToDictionary(s => s.FullClassName);
             Dictionary<string, EmailTemplateDN> old = Administrator.TryRetrieveAll<EmailTemplateDN>(replacements).ToDictionary(c => c.FullClassName);
 
-            replacements.AskForReplacements(old, should, EmailReplacements); 
+            replacements.AskForReplacements(old, should, EmailTemplates); 
 
-            Dictionary<string, EmailTemplateDN> current = replacements.ApplyReplacements(old , EmailReplacements);
+            Dictionary<string, EmailTemplateDN> current = replacements.ApplyReplacements(old , EmailTemplates);
 
             return Synchronizer.SynchronizeScript(
                 current,

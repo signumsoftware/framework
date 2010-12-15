@@ -127,7 +127,7 @@ namespace Signum.Engine.Operations
         public void AssertIsValid()
         {
             if (Delete == null)
-                throw new InvalidOperationException(Resources.Operation0DoesNotHaveDeleteInitialized.Formato(Key));
+                throw new InvalidOperationException("Operation {0} does not have Delete initialized".Formato(Key));
         }
 
         public override string ToString()

@@ -14,10 +14,10 @@
     <% 
         List<ViewError> errors = (List<ViewError>)Model;
         if (errors == null || errors.Count == 0)
-            Response.Write("<h2>" + Resources.NoErrorsFound + "</h2>");
+            Response.Write("<h2>" + "No errors found" + "</h2>");
         else
         {
-            Response.Write("<h2>" + Resources.ThereAreATotalOf0Errors.Formato(errors.Count) + "</h2>");
+            Response.Write("<h2>" + "There are a total of {0} errors".Formato(errors.Count) + "</h2>");
         %>
      <div>
         <table border="solid 1px black" cellpadding="5px" cellspacing="1">

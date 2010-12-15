@@ -88,15 +88,6 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Argument {filePathID} was not passed to the controller.
-        /// </summary>
-        public static string ArgumentFilePathIDWasNotPassedToTheController {
-            get {
-                return ResourceManager.GetString("ArgumentFilePathIDWasNotPassedToTheController", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Change password.
         /// </summary>
         public static string ChangePassword {
@@ -394,15 +385,6 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to FileType property of FileLine settings must be specified for FileLine {0}.
-        /// </summary>
-        public static string FileTypePropertyOfFileLineSettingsMustBeSpecified {
-            get {
-                return ResourceManager.GetString("FileTypePropertyOfFileLineSettingsMustBeSpecified", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Forgot your password? Enter your login email below. We will send you an email with a link to reset your password..
         /// </summary>
         public static string ForgotYourPassword {
@@ -525,15 +507,6 @@ namespace Signum.Web.Extensions.Properties {
         public static string NewPassword {
             get {
                 return ResourceManager.GetString("NewPassword", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to No errors found.
-        /// </summary>
-        public static string NoErrorsFound {
-            get {
-                return ResourceManager.GetString("NoErrorsFound", resourceCulture);
             }
         }
         
@@ -853,15 +826,6 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The report template must be specified.
-        /// </summary>
-        public static string ReportTemplateMustBeSpecified {
-            get {
-                return ResourceManager.GetString("ReportTemplateMustBeSpecified", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Reset Password.
         /// </summary>
         public static string ResetPassword {
@@ -957,15 +921,6 @@ namespace Signum.Web.Extensions.Properties {
         public static string ThereSNotARegisteredUserWithThatEmailAddress {
             get {
                 return ResourceManager.GetString("ThereSNotARegisteredUserWithThatEmailAddress", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to There&apos;s no view registered for type {0}.
-        /// </summary>
-        public static string TheresNotAViewForType0 {
-            get {
-                return ResourceManager.GetString("TheresNotAViewForType0", resourceCulture);
             }
         }
         

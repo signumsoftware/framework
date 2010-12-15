@@ -128,13 +128,13 @@ namespace Signum.Engine.Files
                     FileTypeAlgorithm alg = fileTypes[fp.FileTypeEnum];
                     string sufix = alg.CalculateSufix(fp);
                     if (!sufix.HasText())
-                        throw new ApplicationException(Resources.SufixNotSet);
+                        throw new InvalidOperationException("Sufix not set");
 
                     do
                     {
                         fp.Repository = alg.GetRepository(fp);
                         if (fp.Repository == null)
-                            throw new ApplicationException(Resources.RepositoryNotSet);
+                            throw new InvalidOperationException("Repository not set");
                         int i = 2;
                         fp.Sufix = sufix;
                         while (File.Exists(fp.FullPhysicalPath) && alg.RenameOnCollision)

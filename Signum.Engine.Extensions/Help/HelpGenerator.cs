@@ -225,7 +225,7 @@ namespace Signum.Engine.Help
                 throw new InvalidOperationException(Resources.BelongsToAnotherKindOkLinqProvider);
 
             if (!query.IsBase())
-                throw new InvalidOperationException(Resources.ConstantExpressionWithAComplexIQueryableUnexpectedAt);
+                throw new InvalidOperationException("ConstantExpression with complex IQueryable unexpected");
 
             return query.ElementType;
         }

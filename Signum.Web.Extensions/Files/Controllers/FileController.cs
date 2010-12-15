@@ -115,12 +115,12 @@ namespace Signum.Web.Files
         public FileResult Download(int? filePathID)
         {
             if (filePathID == null)
-                throw new ArgumentException(Resources.ArgumentFilePathIDWasNotPassedToTheController);
+                throw new ArgumentException("Argument 'filePathID' was not passed to the controller");
 
             FilePathDN fp = Database.Retrieve<FilePathDN>(filePathID.Value);
 
             if (fp == null)
-                throw new ArgumentException(Resources.ArgumentFilePathIDWasNotPassedToTheController);
+                throw new ArgumentException("Argument 'filePathID' was not passed to the controller");
             /*
             byte[] binaryFile;
 

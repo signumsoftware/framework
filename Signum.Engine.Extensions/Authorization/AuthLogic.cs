@@ -30,7 +30,7 @@ namespace Signum.Engine.Authorization
         public static UserDN systemUser;
         public static UserDN SystemUser
         {
-            get { return systemUser.ThrowIfNullC(Resources.SystemUserNotLoadedInitializeToLevel1SimpleEntities); }
+            get { return systemUser.ThrowIfNullC("SystemUser not loaded, Initialize to Level1SimpleEntities"); }
             set { systemUser = value; }
         }
 
@@ -38,7 +38,7 @@ namespace Signum.Engine.Authorization
         public static UserDN anonymousUser;
         public static UserDN AnonymousUser
         {
-            get { return anonymousUser.ThrowIfNullC(Resources.AnonymousUserNotLoadedInitializeToLevel1SimpleEntities); }
+            get { return anonymousUser.ThrowIfNullC("AnonymousUser not loaded, Initialize to Level1SimpleEntities"); }
             set { anonymousUser = value; }
         }
 
@@ -196,7 +196,7 @@ namespace Signum.Engine.Authorization
                     var problems = newRoles.FeedbackEdgeSet().Edges.ToList();
 
                     if (problems.Count > 0)
-                        throw new InvalidOperationException(
+                        throw new ApplicationException(
                             Signum.Engine.Extensions.Properties.Resources._0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships.Formato(problems.Count) +
                             problems.ToString("\r\n"));
                 }
@@ -235,7 +235,7 @@ namespace Signum.Engine.Authorization
                 var problems = newRoles.FeedbackEdgeSet().Edges.ToList();
 
                 if (problems.Count > 0)
-                    throw new InvalidOperationException(
+                    throw new ApplicationException(
                         Signum.Engine.Extensions.Properties.Resources._0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships.Formato(problems.Count) +
                         problems.ToString("\r\n"));
 

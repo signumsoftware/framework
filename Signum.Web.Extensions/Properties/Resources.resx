@@ -120,9 +120,6 @@
   <data name="AreYouSureOfDeletingTheEntity012" xml:space="preserve">
     <value>Are you sure of deleting from the system the entity {0} ({1}:{2})?</value>
   </data>
-  <data name="ArgumentFilePathIDWasNotPassedToTheController" xml:space="preserve">
-    <value>Argument {filePathID} was not passed to the controller</value>
-  </data>
   <data name="ConfirmNewPassword" xml:space="preserve">
     <value>Confirm new password</value>
   </data>
@@ -155,9 +152,6 @@
   </data>
   <data name="ErrorSavingFile" xml:space="preserve">
     <value>Error saving file</value>
-  </data>
-  <data name="FileTypePropertyOfFileLineSettingsMustBeSpecified" xml:space="preserve">
-    <value>FileType property of FileLine settings must be specified for FileLine {0}</value>
   </data>
   <data name="HelpDocumentation" xml:space="preserve">
     <value>Help documentation</value>
@@ -224,9 +218,6 @@
   </data>
   <data name="TargetSite" xml:space="preserve">
     <value>Target site</value>
-  </data>
-  <data name="TheresNotAViewForType0" xml:space="preserve">
-    <value>There's no view registered for type {0}</value>
   </data>
   <data name="TheSpecifiedPasswordsDontMatch" xml:space="preserve">
     <value>The specified passwords don't match</value>
@@ -396,9 +387,6 @@
   <data name="QueriesAscx_Query" xml:space="preserve">
     <value>Query</value>
   </data>
-  <data name="NoErrorsFound" xml:space="preserve">
-    <value>No errors found</value>
-  </data>
   <data name="ThereAreATotalOf0Errors" xml:space="preserve">
     <value>There are a total of {0} errors</value>
   </data>
@@ -464,9 +452,6 @@
   </data>
   <data name="AreYouSureOfDeletingReport0" xml:space="preserve">
     <value>Are you sure of deleting the report {0}</value>
-  </data>
-  <data name="ReportTemplateMustBeSpecified" xml:space="preserve">
-    <value>The report template must be specified</value>
   </data>
   <data name="Download" xml:space="preserve">
     <value>Download</value>

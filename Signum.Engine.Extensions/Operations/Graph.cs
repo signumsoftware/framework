@@ -195,7 +195,7 @@ namespace Signum.Engine.Operations
             var errors = Operations.GroupCount(a => a.Key).Where(kvp => kvp.Value > 1).ToList();
 
             if (errors.Count != 0)
-                throw new InvalidOperationException(Resources.TheFollowingKeysHaveBeenRepeatedIn01.Formato(GetType(), errors.ToString(a => " - {0} ({1})".Formato(a.Key, a.Value), "\r\n")));
+                throw new InvalidOperationException("The following keys have been repeated in {0}: {1}".Formato(GetType(), errors.ToString(a => " - {0} ({1})".Formato(a.Key, a.Value), "\r\n")));
 
             foreach (var operation in Operations)
 	        {
@@ -291,7 +291,7 @@ namespace Signum.Engine.Operations
             S state = GetState(entity);
 
             if (!state.Equals(operation.TargetState))
-                throw new InvalidOperationException(Resources.AfterTheOperationTheStateShouldBe0ButIs1.Formato(operation.Key ,operation.TargetState, state));
+                throw new InvalidOperationException("After executing {0} the state should be {1}, but is {2}".Formato(operation.Key ,operation.TargetState, state));
 
             OnEnterState(state, entity);
         }

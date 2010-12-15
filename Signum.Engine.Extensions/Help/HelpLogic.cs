@@ -204,7 +204,7 @@ namespace Signum.Engine.Help
                 var typeHelpInfo = from doc in entitiesDocuments
                                    let typeName = EntityHelp.GetEntityFullName(doc.Document)
                                    where typeName != null
-                                   select EntityHelp.Load(typesDic.GetOrThrow(typeName, Resources.NoTypeWithFullName0FoundInTheSchema), doc.Document, doc.File);
+                                   select EntityHelp.Load(typesDic.GetOrThrow(typeName, "Not type with FullName {0} found in the schema"), doc.Document, doc.File);
 
 
                 //tipo a entityHelp
@@ -269,7 +269,7 @@ namespace Signum.Engine.Help
 
             if (exceptions.Count != 0)
             {
-                string errorText = Resources.ErrorParsingXMLHelpFiles + exceptions.ToString(e => "{0} ({1}:{2}): {3}".Formato(
+                string errorText = "Error Parsing XML Help Files: " + exceptions.ToString(e => "{0} ({1}:{2}): {3}".Formato(
                     e.Item2, e.Item1.LineNumber, e.Item1.LinePosition, e.Item1.Message), "\r\n").Indent(3);
 
                 throw new InvalidOperationException(errorText);

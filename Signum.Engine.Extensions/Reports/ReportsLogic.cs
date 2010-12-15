@@ -52,7 +52,7 @@ namespace Signum.Engine.Reports
 
             }
             else if (compositeReport)
-                throw new InvalidOperationException(Resources.ExcelReportArgumentIsNecessaryForCompositeReports);
+                throw new InvalidOperationException("excelReport is necessary for compositeReport");
         }
 
         public static List<Lite<ExcelReportDN>> GetExcelReports(object queryName)

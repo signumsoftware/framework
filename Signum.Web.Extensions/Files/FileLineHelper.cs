@@ -37,7 +37,7 @@ namespace Signum.Web.Files
                 if (fileLine.FileType == null)
                     fileLine.FileType = FileLineHelper.GetFileTypeFromValue(filePath);
                 if (fileLine.FileType == null)
-                    throw new ArgumentException(Resources.FileTypePropertyOfFileLineSettingsMustBeSpecified.Formato(fileLine.ControlID));
+                    throw new ArgumentException("FileType property of FileLine settings must be specified for FileLine {0}".Formato(fileLine.ControlID));
 
                 sb.AddLine(helper.Hidden(fileLine.Compose(FileLineKeys.FileType),
                     EnumDN.UniqueKey((value != null) ?

@@ -131,7 +131,7 @@ namespace Signum.Engine.Operations
         public void AssertIsValid()
         {
             if (Execute == null)
-                throw new InvalidOperationException(Resources.Operation0DoesNotHaveExecuteInitialized.Formato(Key));
+                throw new InvalidOperationException("Operation {0} does not have Execute initialized".Formato(Key));
         }
 
         public override string ToString()

@@ -116,38 +116,11 @@ namespace Signum.Engine.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to After the operation {0} the state should be {1} but is {2}.
-        /// </summary>
-        internal static string AfterTheOperationTheStateShouldBe0ButIs1 {
-            get {
-                return ResourceManager.GetString("AfterTheOperationTheStateShouldBe0ButIs1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Ambiguity between interfaces: {0}.
-        /// </summary>
-        internal static string AmbiguityBetweenInterfaces0 {
-            get {
-                return ResourceManager.GetString("AmbiguityBetweenInterfaces0", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to amount.
         /// </summary>
         internal static string Amount {
             get {
                 return ResourceManager.GetString("Amount", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to AnonymousUser not loaded. Initialize to Level1SimpleEntities.
-        /// </summary>
-        internal static string AnonymousUserNotLoadedInitializeToLevel1SimpleEntities {
-            get {
-                return ResourceManager.GetString("AnonymousUserNotLoadedInitializeToLevel1SimpleEntities", resourceCulture);
             }
         }
         
@@ -202,15 +175,6 @@ namespace Signum.Engine.Extensions.Properties {
         internal static string Check {
             get {
                 return ResourceManager.GetString("Check", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to ConstantExpression with a complex IQueryable unexpected at this stage.
-        /// </summary>
-        internal static string ConstantExpressionWithAComplexIQueryableUnexpectedAt {
-            get {
-                return ResourceManager.GetString("ConstantExpressionWithAComplexIQueryableUnexpectedAt", resourceCulture);
             }
         }
         
@@ -274,25 +238,6 @@ namespace Signum.Engine.Extensions.Properties {
         internal static string EmailIsNotValid {
             get {
                 return ResourceManager.GetString("EmailIsNotValid", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Error parsing XML Help files:
-        ///.
-        /// </summary>
-        internal static string ErrorParsingXMLHelpFiles {
-            get {
-                return ResourceManager.GetString("ErrorParsingXMLHelpFiles", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to excelReport argument is necessary for compositeReports.
-        /// </summary>
-        internal static string ExcelReportArgumentIsNecessaryForCompositeReports {
-            get {
-                return ResourceManager.GetString("ExcelReportArgumentIsNecessaryForCompositeReports", resourceCulture);
             }
         }
         
@@ -423,24 +368,6 @@ namespace Signum.Engine.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No emails to process found.
-        /// </summary>
-        internal static string NoEmailsToProcessFound {
-            get {
-                return ResourceManager.GetString("NoEmailsToProcessFound", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to No entities to process found.
-        /// </summary>
-        internal static string NoEntitiesToProcessFound {
-            get {
-                return ResourceManager.GetString("NoEntitiesToProcessFound", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to No help for {0}.
         /// </summary>
         internal static string NoHelpFor0 {
@@ -495,33 +422,6 @@ namespace Signum.Engine.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Not value for {0} is not found in {1} table.
-        /// </summary>
-        internal static string NotValueFor0IsNotFoundIn1Table {
-            get {
-                return ResourceManager.GetString("NotValueFor0IsNotFoundIn1Table", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to No Type with FullName {0} found in the schema.
-        /// </summary>
-        internal static string NoTypeWithFullName0FoundInTheSchema {
-            get {
-                return ResourceManager.GetString("NoTypeWithFullName0FoundInTheSchema", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to No users to process found.
-        /// </summary>
-        internal static string NoUsersToProcessFound {
-            get {
-                return ResourceManager.GetString("NoUsersToProcessFound", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to of the {0}.
         /// </summary>
         internal static string OfThe0 {
@@ -549,92 +449,11 @@ namespace Signum.Engine.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Operation {0} does not have Construct initialized.
-        /// </summary>
-        internal static string Operation0DoesNotHaveConstructInitialized {
-            get {
-                return ResourceManager.GetString("Operation0DoesNotHaveConstructInitialized", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Operation {0} does not have Constructor initialized.
-        /// </summary>
-        internal static string Operation0DoesNotHaveConstructorInitialized {
-            get {
-                return ResourceManager.GetString("Operation0DoesNotHaveConstructorInitialized", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Operation {0} does not have Delete initialized.
-        /// </summary>
-        internal static string Operation0DoesNotHaveDeleteInitialized {
-            get {
-                return ResourceManager.GetString("Operation0DoesNotHaveDeleteInitialized", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Operation {0} does not have Execute initialized.
-        /// </summary>
-        internal static string Operation0DoesNotHaveExecuteInitialized {
-            get {
-                return ResourceManager.GetString("Operation0DoesNotHaveExecuteInitialized", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Operation {0} does not have Construct initialized.
-        /// </summary>
-        internal static string Operation0HasNoConstruct {
-            get {
-                return ResourceManager.GetString("Operation0HasNoConstruct", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Operation {0} is a {1} not a {2}, use &apos;{3}&apos; instead.
-        /// </summary>
-        internal static string Operation0IsA1NotA2Use3Instead {
-            get {
-                return ResourceManager.GetString("Operation0IsA1NotA2Use3Instead", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Operation {0} is not allowed for lites.
-        /// </summary>
-        internal static string Operation0IsNotAllowedForLites {
-            get {
-                return ResourceManager.GetString("Operation0IsNotAllowedForLites", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Operation {0} is not Authorized.
         /// </summary>
         internal static string Operation0IsNotAuthorized {
             get {
                 return ResourceManager.GetString("Operation0IsNotAuthorized", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Operation {0} needs a Lite.
-        /// </summary>
-        internal static string Operation0NeedsALite {
-            get {
-                return ResourceManager.GetString("Operation0NeedsALite", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Operation {0} not found for Type {1}.
-        /// </summary>
-        internal static string Operation0NotFoundForType1 {
-            get {
-                return ResourceManager.GetString("Operation0NotFoundForType1", resourceCulture);
             }
         }
         
@@ -684,15 +503,6 @@ namespace Signum.Engine.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The file repository has not been set.
-        /// </summary>
-        internal static string RepositoryNotSet {
-            get {
-                return ResourceManager.GetString("RepositoryNotSet", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Reset password code.
         /// </summary>
         internal static string ResetPasswordCode {
@@ -716,24 +526,6 @@ namespace Signum.Engine.Extensions.Properties {
         internal static string String {
             get {
                 return ResourceManager.GetString("String", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The physical filename has not been set.
-        /// </summary>
-        internal static string SufixNotSet {
-            get {
-                return ResourceManager.GetString("SufixNotSet", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to SystemUser not loaded. Initialize to Level1SimpleEntities.
-        /// </summary>
-        internal static string SystemUserNotLoadedInitializeToLevel1SimpleEntities {
-            get {
-                return ResourceManager.GetString("SystemUserNotLoadedInitializeToLevel1SimpleEntities", resourceCulture);
             }
         }
         
@@ -792,66 +584,11 @@ namespace Signum.Engine.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The Following Keys have been repeated in {0}:
-        ///{1}.
-        /// </summary>
-        internal static string TheFollowingKeysHaveBeenRepeatedIn01 {
-            get {
-                return ResourceManager.GetString("TheFollowingKeysHaveBeenRepeatedIn01", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The key {0} is not found in {1} table.
-        /// </summary>
-        internal static string TheKey0IsNotFoundIn1Table {
-            get {
-                return ResourceManager.GetString("TheKey0IsNotFoundIn1Table", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The operation needs a {0} in the argument number {1}.
-        /// </summary>
-        internal static string TheOperationNeedsA0InTheArgumentNumber1 {
-            get {
-                return ResourceManager.GetString("TheOperationNeedsA0InTheArgumentNumber1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The operation needs a {0} in the argument {1}.
-        /// </summary>
-        internal static string TheOperationNeedsA0InTheArgumentNumber1_f {
-            get {
-                return ResourceManager.GetString("TheOperationNeedsA0InTheArgumentNumber1_f", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The operation needs a {0} in the argument {1}.
-        /// </summary>
-        internal static string TheOperationNeedsA0InTheArgumentNumber1_m {
-            get {
-                return ResourceManager.GetString("TheOperationNeedsA0InTheArgumentNumber1_m", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to There are no results to write.
         /// </summary>
         internal static string ThereAreNoResultsToWrite {
             get {
                 return ResourceManager.GetString("ThereAreNoResultsToWrite", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to type {0} has to implement {1} at least.
-        /// </summary>
-        internal static string Type0HasToImplement1AtLeast {
-            get {
-                return ResourceManager.GetString("Type0HasToImplement1AtLeast", resourceCulture);
             }
         }
         

@@ -90,7 +90,7 @@ namespace Signum.Engine.Basics
 
         public static T ToEntity(Enum key)
         {
-            return toEntity.GetOrThrow(key, Resources.TheKey0IsNotFoundIn1Table.Formato(key, typeof(T).Name));
+            return toEntity.GetOrThrow(key, "The key '{0}' is not found on {1}".Formato(key, typeof(T).Name));
         }
 
         public static T ToEntity(string keyName)
@@ -120,7 +120,7 @@ namespace Signum.Engine.Basics
 
         public static Enum ToEnum(string keyName)
         {
-            return toEnum.GetOrThrow(keyName, Resources.NotValueFor0IsNotFoundIn1Table.Formato(keyName, typeof(T).Name));
+            return toEnum.GetOrThrow(keyName, "The key '{0}' is not found on {1}".Formato(keyName, typeof(T).Name));
         }
 
         public static Enum TryToEnum(string keyName)
