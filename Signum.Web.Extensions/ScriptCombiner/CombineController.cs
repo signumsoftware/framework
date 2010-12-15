@@ -8,6 +8,8 @@ using Signum.Web.PortableAreas;
 
 namespace Signum.Web.ScriptCombiner
 {
+    //TODO: Convert to sessionless controller
+    //http://www.lostechies.com/blogs/dahlbyk/archive/2010/12/06/renderaction-with-asp-net-mvc-3-sessionless-controllers.aspx
     public class CombineController : Controller
     {  
         [AcceptVerbs(HttpVerbs.Get)]
