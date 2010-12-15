@@ -50,7 +50,8 @@ namespace Signum.Utilities
             string str = FormatString(format, parameters);
             lock (SyncKey)
             {
-                Console.WriteLine(str);
+                Console.WriteLine(str.PadChopRight(Console.WindowWidth));
+          
                 Console.SetCursorPosition(Console.CursorLeft, Console.CursorTop - 1);
                 needToClear = true;
             }

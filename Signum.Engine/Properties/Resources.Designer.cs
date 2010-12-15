@@ -133,15 +133,6 @@ namespace Signum.Engine.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to PropertyRoute can not be of type Root.
-        /// </summary>
-        public static string PropertyRouteCanNotBeOfTypeRoot {
-            get {
-                return ResourceManager.GetString("PropertyRouteCanNotBeOfTypeRoot", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to --- START OF SYNC SCRIPT GENERATED ON {0}.
         /// </summary>
         public static string StartOfSyncScriptGeneratedOn0 {
@@ -174,15 +165,6 @@ namespace Signum.Engine.Properties {
         public static string UnauthorizedAccessTo0Because1 {
             get {
                 return ResourceManager.GetString("UnauthorizedAccessTo0Because1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Warning {0}: No results.
-        /// </summary>
-        public static string Warning0NoResults {
-            get {
-                return ResourceManager.GetString("Warning0NoResults", resourceCulture);
             }
         }
     }

@@ -132,12 +132,6 @@
   <data name="StartOfSyncScriptGeneratedOn0" xml:space="preserve">
     <value>--- START OF SYNC SCRIPT GENERATED ON {0}</value>
   </data>
-  <data name="Warning0NoResults" xml:space="preserve">
-    <value>Warning {0}: No results</value>
-  </data>
-  <data name="PropertyRouteCanNotBeOfTypeRoot" xml:space="preserve">
-    <value>PropertyRoute can not be of type Root</value>
-  </data>
   <data name="ConcurrencyErrorOnDatabaseTable0Id1" xml:space="preserve">
     <value>Concurrency error on the databe, Table = {0}, Id = {1}</value>
   </data>

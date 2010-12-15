@@ -38,7 +38,7 @@ namespace Signum.Engine.DynamicQuery
                     {
                         case PropertyRouteType.LiteEntity:
                         case PropertyRouteType.Root:
-                            throw new InvalidOperationException(Resources.PropertyRouteCanNotBeOfTypeRoot);
+                            throw new InvalidOperationException("PropertyRoute can not be of RouteType Root");
                         case PropertyRouteType.Property:
                             PropertyInfo pi = propertyRoute.PropertyInfo;
                             Format = Reflector.FormatString(propertyRoute);
