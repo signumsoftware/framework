@@ -430,13 +430,14 @@ namespace Signum.Engine.Authorization
 
             return SqlPreCommand.Combine(Spacing.Triple,
                 new SqlPreCommandSimple("-- BEGIN AUTH SYNC SCRIPT"),
+                new SqlPreCommandSimple("use {0}".Formato(ConnectionScope.Current.DatabaseName())),
                 result,
                 new SqlPreCommandSimple("-- END AUTH SYNC SCRIPT")); 
         }
 
         public static void ImportExportAuthRules()
         {
-            ImportExportAuthRules("../../AuthRules.xml");
+            ImportExportAuthRules("AuthRules.xml");
         }
 
         public static void ImportExportAuthRules(string fileName)
