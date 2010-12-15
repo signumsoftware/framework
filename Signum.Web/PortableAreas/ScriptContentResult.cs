@@ -17,7 +17,6 @@ namespace Signum.Web.PortableAreas
         public TimeSpan CacheDuration = TimeSpan.FromDays(10);
         public byte[] Compressed { get; private set; }
         public byte[] Uncompressed { get; private set; }
-        public DateTime? LastModifiedSince { get; set; }
         public bool IsText;
 
         public ScriptContentResult(byte[] uncompressedContent, string contentMimeType)
@@ -42,7 +41,6 @@ namespace Signum.Web.PortableAreas
                 response.Cache.SetCacheability(HttpCacheability.Public);
                 //response.Cache.SetExpires(DateTime.Now.Add(CacheDuration));   //redundant
                 response.Cache.SetMaxAge(CacheDuration);
-                //TODO: Add Last-Modified http://code.google.com/intl/es-ES/speed/page-speed/docs/caching.html#LeverageBrowserCaching
 
                 if (!VersionChanged(request, ScriptHtmlHelper.Manager.LastModified))
                 {

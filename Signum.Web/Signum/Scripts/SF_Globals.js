@@ -32,15 +32,39 @@
             fn();
         }
 
-        function setLoaded(src) {
+        function setLoaded(src, position) {
             _jsloaded[src] = true;
+            _jsSet[position].count--;
+
+            if (_jsSet[position].count == 0) {
+                _jsSet[position].func();
+                delete _jsSet[position];
+            }
+
         }
 
-        function loadJs(src, fn) {
+        function _loadJs(src, position) {
             if (!_jsloaded[src]) {
-                Loader.loadJs(src, fn, function () { setLoaded(src); });
+                Loader.loadJs(src, function () { setLoaded(src, position); });
+            }
+            else {
+                setLoaded(src, position);
+            }
+        }
+
+        var _jsSet = [];
+
+        function loadJs(src, fn) {
+            if (typeof src == "object") {
+                var position = _jsSet.length;
+
+                _jsSet[position] = { count: src.length, func: fn };
+
+                for (var i in src) {
+                    _loadJs(src[i], position);
+                }
             } else {
-                fn();
+                _loadJs(src, position);
             }
         }
 
@@ -57,7 +81,7 @@
                     _loadCss(src[i]);
                 }
             } else {
-                 _loadCss(src);
+                _loadCss(src);
             }
 
             if (fn) fn();
@@ -75,21 +99,21 @@
         var d = document,
         head = d.getElementsByTagName("head")[0];
 
-        var loadJs = function (url, cb, sl) {
-            var script = d.createElement('script');
+        var loadJs = function (url, cb) {
+            /*var script = d.createElement('script');
             script.setAttribute('src', url);
             script.setAttribute('type', 'text/javascript');
 
             var loaded = false;
             var loadFunction = function () {
-                if (loaded) return;
-                loaded = true;
-                sl && sl(); //set as loaded
-                cb && cb();
+            if (loaded) return;
+            loaded = true;
+            cb && cb();
             };
             script.onload = loadFunction;
             script.onreadystatechange = loadFunction;
-            head.appendChild(script);
+            head.appendChild(script);*/
+            $.getScript(url, cb);
         };
 
         var cachedBrowser;
