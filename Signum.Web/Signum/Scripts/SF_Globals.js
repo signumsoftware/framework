@@ -37,7 +37,7 @@
             _jsSet[position].count--;
 
             if (_jsSet[position].count == 0) {
-                _jsSet[position].func();
+                _jsSet[position].func && _jsSet[position].func();
                 delete _jsSet[position];
             }
 
