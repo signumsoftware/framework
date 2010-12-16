@@ -179,7 +179,7 @@ namespace Signum.Engine
         public static Lite FillToStr(Lite lite)
         {
             if (lite == null)
-                return null; 
+                return null;
 
             using (Transaction tr = new Transaction())
             {
@@ -187,7 +187,9 @@ namespace Signum.Engine
 
                 SqlPreCommand command = SqlBuilder.SelectToStr(t.Name, lite.Id);
 
-                lite.ToStr = (string)Executor.ExecuteScalar(command.ToSimple());
+                object val = Executor.ExecuteScalar(command.ToSimple());
+
+                lite.ToStr = DBNull.Value == val ? null : (string)val;
 
                 return tr.Commit(lite);
             }
