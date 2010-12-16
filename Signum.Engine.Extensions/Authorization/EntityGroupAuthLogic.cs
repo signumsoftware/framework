@@ -226,6 +226,7 @@ namespace Signum.Engine.Authorization
                 throw new UnauthorizedAccessException(Resources.NotAuthorizedTo0The1WithId2.Formato(allowed.NiceToString().ToLower(), ident.GetType().NiceName(), ident.Id));
         }
 
+        [MethodExpander(typeof(IsAllowedForExpander))]
         public static bool IsAllowedFor(this IIdentifiable ident, TypeAllowedBasic allowed)
         {
             return IsAllowedFor(ident, allowed, Database.UserInterface); 
@@ -265,6 +266,7 @@ namespace Signum.Engine.Authorization
                 throw new UnauthorizedAccessException(Resources.NotAuthorizedTo0The1WithId2.Formato(allowed.NiceToString().ToLower(), lite.RuntimeType.NiceName(), lite.Id));
         }
 
+        [MethodExpander(typeof(IsAllowedForExpander))]
         public static bool IsAllowedFor(this Lite lite, TypeAllowedBasic allowed)
         {
             return IsAllowedFor(lite, allowed, Database.UserInterface); 
@@ -293,7 +295,9 @@ namespace Signum.Engine.Authorization
             public Expression Expand(Expression instance, Expression[] arguments, Type[] typeArguments)
             {
                 TypeAllowedBasic allowed = (TypeAllowedBasic)ExpressionEvaluator.Eval(arguments[1]);
-                bool userInterface = (bool)ExpressionEvaluator.Eval(arguments[2]);
+
+                bool userInterface = arguments.Length == 3 ? (bool)ExpressionEvaluator.Eval(arguments[2]) :
+                    Database.UserInterface; 
 
                 Expression exp = arguments[0].Type.IsLite() ? Expression.Property(arguments[0], "Entity") : arguments[0];
 
