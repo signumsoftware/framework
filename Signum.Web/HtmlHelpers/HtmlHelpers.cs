@@ -10,6 +10,7 @@ using System.Reflection;
 using System.IO;
 using System.Web;
 using System.Web.Routing;
+using Signum.Utilities.Reflection;
 
 namespace Signum.Web
 {
@@ -50,9 +51,8 @@ namespace Signum.Web
 
         public static void FieldString(this HtmlHelper html, string label, string value)
         {
-
-            var span = new HtmlTag("span").InnerHtml( MvcHtmlString.Create( value)).Class("valueLine").ToHtml();
-             Field(html, label, span);
+            var span = new HtmlTag("span").InnerHtml(MvcHtmlString.Create(value)).Class("valueLine").ToHtml();
+            Field(html, label, span);
         }
 
         public static void Field(this HtmlHelper html, string label, MvcHtmlString value)
@@ -271,6 +271,16 @@ namespace Signum.Web
 	                            extraParams: {{typeName: ""{3}"", implementations : ""{4}""}}}});
                         }}"
                     .Formato(ddlName, controllerUrl, entityIdFieldName, entityTypeName, implementations)); 
+        }
+
+        public static string PropertyNiceName<R>(this HtmlHelper html, Expression<Func<R>> property)
+        {
+            return ReflectionTools.BasePropertyInfo(property).NiceName();
+        }
+
+        public static string PropertyNiceName<T, R>(this HtmlHelper html, Expression<Func<T, R>> property)
+        {
+            return ReflectionTools.BasePropertyInfo(property).NiceName();
         }
    }
 }
