@@ -112,10 +112,10 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="_0As1" xml:space="preserve">
     <value>({0} comme {1})</value>
@@ -344,5 +344,68 @@
   </data>
   <data name="_0IsNotSet" xml:space="preserve">
     <value>Champ {0} non établie</value>
+  </data>
+  <data name="AlertDN" xml:space="preserve">
+    <value>Alerte</value>
+  </data>
+  <data name="AlertDN_AlertDate" xml:space="preserve">
+    <value>Date d'alerte</value>
+  </data>
+  <data name="AlertDN_CheckDate" xml:space="preserve">
+    <value>Date vérification</value>
+  </data>
+  <data name="AlertDN_Entity" xml:space="preserve">
+    <value>Entité</value>
+  </data>
+  <data name="AlertDN_Text" xml:space="preserve">
+    <value>Texte</value>
+  </data>
+  <data name="ColorDN" xml:space="preserve">
+    <value>Couleur</value>
+  </data>
+  <data name="ColorDN_Hex" xml:space="preserve">
+    <value>Hex</value>
+  </data>
+  <data name="CorruptEntity" xml:space="preserve">
+    <value>Entité corrompue</value>
+  </data>
+  <data name="CorruptEntity_Corrupt" xml:space="preserve">
+    <value>Corrompu</value>
+  </data>
+  <data name="ImmutableEntity" xml:space="preserve">
+    <value>Entité immuable</value>
+  </data>
+  <data name="LockableEntity_Locked" xml:space="preserve">
+    <value>Bloqué</value>
+  </data>
+  <data name="NoteDN" xml:space="preserve">
+    <value>Note</value>
+  </data>
+  <data name="NoteDN_Target" xml:space="preserve">
+    <value>Cible</value>
+  </data>
+  <data name="NoteDN_Text" xml:space="preserve">
+    <value>Texte</value>
+  </data>
+  <data name="TypeDN" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="TypeDN_ClassName" xml:space="preserve">
+    <value>Class Name</value>
+  </data>
+  <data name="TypeDN_CleanName" xml:space="preserve">
+    <value>Clean Name</value>
+  </data>
+  <data name="TypeDN_FriendlyName" xml:space="preserve">
+    <value>Friendly Name</value>
+  </data>
+  <data name="TypeDN_FullClassName" xml:space="preserve">
+    <value>Full Class Name</value>
+  </data>
+  <data name="TypeDN_Namespace" xml:space="preserve">
+    <value>Namespace</value>
+  </data>
+  <data name="TypeDN_TableName" xml:space="preserve">
+    <value>Table Name</value>
   </data>
 </root>

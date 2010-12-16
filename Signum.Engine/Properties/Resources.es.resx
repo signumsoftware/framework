@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="_0HasBeenRenamedIn1" xml:space="preserve">
-    <value>¿Se ha renombrado '{0}' en {1}?</value>
+    <value>¿Se ha renombrado '{0}' en {1}??</value>
   </data>
   <data name="CannotInsertDuplicatedFields0On1Table" xml:space="preserve">
     <value>No se pueden insertar duplicados en el campo {0} de la tabla {1}</value>
@@ -146,12 +146,6 @@
   </data>
   <data name="ThereAreRecordsIn0PointingToThisTableByColumn1" xml:space="preserve">
     <value>Hay registros en '{0}' que refieren a esta tabla por la columna '{1}'</value>
-  </data>
-  <data name="Warning0NoResults" xml:space="preserve">
-    <value>Advertencia {0}: No hay resultados</value>
-  </data>
-  <data name="PropertyRouteCanNotBeOfTypeRoot" xml:space="preserve">
-    <value>PropertyRoute no puede ser del tipo Root</value>
   </data>
   <data name="UnauthorizedAccessTo0Because1" xml:space="preserve">
     <value>Acceso denegado a {0} porque {1}</value>

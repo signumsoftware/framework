@@ -112,13 +112,13 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="_0As1" xml:space="preserve">
-    <value>({0} wie {1}) ??</value>
+    <value>({0} als {1})</value>
   </data>
   <data name="_0DoesNotHaveAValid0Format" xml:space="preserve">
     <value>{{0}} hat nicht ein nicht gültiges Format von {0}</value>
@@ -148,16 +148,16 @@
     <value>{0} ist notwendig</value>
   </data>
   <data name="_0IsNecessaryOnState1" xml:space="preserve">
-    <value>{0} ist notwendig im Status {1} ??</value>
+    <value>{0} ist notwendig im Status {1}</value>
   </data>
   <data name="_0IsNotAllowed" xml:space="preserve">
     <value>{0} ist nicht zulässig</value>
   </data>
   <data name="_0IsNotAllowedOnState1" xml:space="preserve">
-    <value>{0} ist nicht zulässig im Status {1} ??</value>
+    <value>{0} ist nicht zulässig im Status {1}</value>
   </data>
   <data name="_0IsNotAValidIdentifier" xml:space="preserve">
-    <value>'{0}' ist kein gültiger Bezeichner ??</value>
+    <value>'{0}' ist kein gültiger Identifier</value>
   </data>
   <data name="_0IsNotSet" xml:space="preserve">
     <value>Feld {0} ist nicht festgelegt</value>
@@ -166,10 +166,10 @@
     <value> und </value>
   </data>
   <data name="As0" xml:space="preserve">
-    <value>Als {0} ??</value>
+    <value>Als {0}</value>
   </data>
   <data name="Be" xml:space="preserve">
-    <value>sein</value>
+    <value>sein </value>
   </data>
   <data name="BeBetween0And1" xml:space="preserve">
     <value>zwischen {0} und {1} sein</value>
@@ -184,19 +184,19 @@
     <value>anders als</value>
   </data>
   <data name="ComparisonType_EqualTo" xml:space="preserve">
-    <value>gleich </value>
+    <value>gleich</value>
   </data>
   <data name="ComparisonType_GreaterThan" xml:space="preserve">
     <value>größer als</value>
   </data>
   <data name="ComparisonType_GreaterThanOrEqual" xml:space="preserve">
-    <value>größer als oder gleich </value>
+    <value>größer als oder gleich</value>
   </data>
   <data name="ComparisonType_LessThan" xml:space="preserve">
     <value>weniger als</value>
   </data>
   <data name="ComparisonType_LessThanOrEqual" xml:space="preserve">
-    <value>kleiner oder gleich </value>
+    <value>kleiner oder gleich</value>
   </data>
   <data name="Count" xml:space="preserve">
     <value>Num</value>
@@ -220,19 +220,19 @@
     <value>endet mit</value>
   </data>
   <data name="FilterOperation_EqualTo" xml:space="preserve">
-    <value>gleich </value>
+    <value>gleich</value>
   </data>
   <data name="FilterOperation_GreaterThan" xml:space="preserve">
     <value>größer als</value>
   </data>
   <data name="FilterOperation_GreaterThanOrEqual" xml:space="preserve">
-    <value>größer als oder gleich </value>
+    <value>größer als oder gleich</value>
   </data>
   <data name="FilterOperation_LessThan" xml:space="preserve">
     <value>weniger als</value>
   </data>
   <data name="FilterOperation_LessThanOrEqual" xml:space="preserve">
-    <value>kleiner als oder gleich </value>
+    <value>kleiner als oder gleich</value>
   </data>
   <data name="FilterOperation_Like" xml:space="preserve">
     <value>wie</value>
@@ -250,13 +250,13 @@
     <value>haben eine Genauigkeit von </value>
   </data>
   <data name="HaveBetween0And1Characters" xml:space="preserve">
-    <value>haben zwischen {0} und {1} Zeichen ??</value>
+    <value>haben zwischen {0} und {1} Zeichen</value>
   </data>
   <data name="HaveMaximun0Characters" xml:space="preserve">
-    <value>haben maximal {0} Zeichen ??</value>
+    <value>haben maximal {0} Zeichen</value>
   </data>
   <data name="HaveMinimum0Characters" xml:space="preserve">
-    <value>haben mindestens {0} Zeichen ??</value>
+    <value>haben mindestens {0} Zeichen</value>
   </data>
   <data name="HaveNoRepeatedElements" xml:space="preserve">
     <value>darf keine wiederholten Elementen haben</value>
@@ -295,7 +295,7 @@
     <value>Monat</value>
   </data>
   <data name="MonthStart" xml:space="preserve">
-    <value>Monatsbeginn</value>
+    <value>Monatsbeginn </value>
   </data>
   <data name="MoreThanOneColumnNamed0" xml:space="preserve">
     <value>Mehr als eine Spalte mit dem Namen {0}</value>
@@ -307,7 +307,7 @@
     <value>Neu</value>
   </data>
   <data name="Of" xml:space="preserve">
-    <value>von</value>
+    <value> von </value>
   </data>
   <data name="OrBeNull" xml:space="preserve">
     <value>oder null sein</value>
@@ -344,5 +344,68 @@
   </data>
   <data name="Year" xml:space="preserve">
     <value>Jahr</value>
+  </data>
+  <data name="AlertDN" xml:space="preserve">
+    <value>Alarmieren</value>
+  </data>
+  <data name="AlertDN_CheckDate" xml:space="preserve">
+    <value>Datum check</value>
+  </data>
+  <data name="AlertDN_Entity" xml:space="preserve">
+    <value>Entität</value>
+  </data>
+  <data name="AlertDN_Text" xml:space="preserve">
+    <value>Text</value>
+  </data>
+  <data name="ColorDN" xml:space="preserve">
+    <value>Farbe</value>
+  </data>
+  <data name="ColorDN_Hex" xml:space="preserve">
+    <value>Hex</value>
+  </data>
+  <data name="CorruptEntity" xml:space="preserve">
+    <value>Korrupte Entity</value>
+  </data>
+  <data name="CorruptEntity_Corrupt" xml:space="preserve">
+    <value>Beschädigt</value>
+  </data>
+  <data name="ImmutableEntity" xml:space="preserve">
+    <value>Unveränderlich Entität</value>
+  </data>
+  <data name="LockableEntity_Locked" xml:space="preserve">
+    <value>Blockiert</value>
+  </data>
+  <data name="NoteDN" xml:space="preserve">
+    <value>Hinweis</value>
+  </data>
+  <data name="NoteDN_Target" xml:space="preserve">
+    <value>Ziel</value>
+  </data>
+  <data name="NoteDN_Text" xml:space="preserve">
+    <value>Text</value>
+  </data>
+  <data name="TypeDN" xml:space="preserve">
+    <value>Typ</value>
+  </data>
+  <data name="TypeDN_ClassName" xml:space="preserve">
+    <value>Klasse-Name</value>
+  </data>
+  <data name="TypeDN_CleanName" xml:space="preserve">
+    <value>Clean Name</value>
+  </data>
+  <data name="TypeDN_FriendlyName" xml:space="preserve">
+    <value>Friendly Name</value>
+  </data>
+  <data name="TypeDN_FullClassName" xml:space="preserve">
+    <value>Full Class Name</value>
+  </data>
+  <data name="TypeDN_Namespace" xml:space="preserve">
+    <value>Namespace</value>
+  </data>
+  <data name="TypeDN_TableName" xml:space="preserve">
+    <value>Table Name</value>
+  </data>
+  <data name="AlertDN_AlertDate" xml:space="preserve">
+    <value>Alert Date</value>
   </data>
 </root>

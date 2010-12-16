@@ -279,4 +279,10 @@
   <data name="YourSessionHasTimedOutClickF5ToReloadTheEntity" xml:space="preserve">
     <value>La sessione è scaduta, fare clic su F5 per ricaricare l'entità dal database</value>
   </data>
+  <data name="_0HasAnInvalidFormat" xml:space="preserve">
+    <value>{0} ha un formato non valido</value>
+  </data>
+  <data name="NotPossibleToaAssign0" xml:space="preserve">
+    <value>Non è possibile assegnare {0}</value>
+  </data>
 </root>

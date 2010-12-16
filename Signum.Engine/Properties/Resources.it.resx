@@ -121,10 +121,10 @@
     <value>'{0}' è stata rinominata in {1}?</value>
   </data>
   <data name="CannotInsertDuplicatedFields0On1Table" xml:space="preserve">
-    <value>Impossibile inserire un campo duplicati {0} {1} tabella</value>
+    <value>Impossibile inserire duplicati nel campo {0} della tabella {1}</value>
   </data>
   <data name="NotAuthorizedToRetrieve01" xml:space="preserve">
-    <value>Non autorizzato per recuperare {0} {1}</value>
+    <value>Non autorizzato a recuperare {0} {1}</value>
   </data>
   <data name="ConcurrencyErrorOnDatabaseTable0Id1" xml:space="preserve">
     <value>Concorrenza nel database, tabella errore = {0} ID = {1}</value>
@@ -141,9 +141,6 @@
   <data name="NoWayOfMappingType0Found" xml:space="preserve">
     <value>Mappatura {0} non trovata</value>
   </data>
-  <data name="PropertyRouteCanNotBeOfTypeRoot" xml:space="preserve">
-    <value>PropertyRoute non può essere di tipo principale</value>
-  </data>
   <data name="StartOfSyncScriptGeneratedOn0" xml:space="preserve">
     <value>--- INIZIO DELLO SCRIPT DI SINCRONIZZAZIONE GENERATO SU {0}</value>
   </data>
@@ -155,8 +152,5 @@
   </data>
   <data name="UnauthorizedAccessTo0Because1" xml:space="preserve">
     <value>Accesso negato a {0} a causa di {1}</value>
-  </data>
-  <data name="Warning0NoResults" xml:space="preserve">
-    <value>Avviso {0}: nessun risultato</value>
   </data>
 </root>

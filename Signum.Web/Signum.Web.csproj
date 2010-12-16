@@ -85,11 +85,6 @@
     <Compile Include="ControllerAttributes\RedirectToUrl.cs" />
     <Compile Include="ControllerAttributes\RequireSslAttribute.cs" />
     <Compile Include="PortableAreas\ScriptContentResult.cs" />
-    <Compile Include="Properties\Resources.es.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.es.resx</DependentUpon>
-    </Compile>
     <Compile Include="ButtonBar\ToolBarMenu.cs" />
     <Compile Include="HtmlHelpers\HtmlTag.cs" />
     <Compile Include="JSRenderer\JsFunction.cs" />
@@ -237,11 +232,7 @@
       <SubType>ASPXCodeBehind</SubType>
     </Content>
     <Content Include="Signum\Views\Error.aspx" />
-    <EmbeddedResource Include="Properties\Resources.es.resx">
-      <Generator>PublicResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.es.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.es.resx" />
     <EmbeddedResource Include="Properties\Resources.fr.resx" />
     <EmbeddedResource Include="Properties\Resources.it.resx" />
     <EmbeddedResource Include="Properties\Resources.resx">

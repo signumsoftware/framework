@@ -345,4 +345,67 @@
   <data name="_0IsNotSet" xml:space="preserve">
     <value>Campo {0} no establecido</value>
   </data>
+  <data name="AlertDN" xml:space="preserve">
+    <value>Alerta</value>
+  </data>
+  <data name="AlertDN_AlertDate" xml:space="preserve">
+    <value>Fecha de alerta</value>
+  </data>
+  <data name="AlertDN_CheckDate" xml:space="preserve">
+    <value>Fecha verificación</value>
+  </data>
+  <data name="AlertDN_Entity" xml:space="preserve">
+    <value>Entidad</value>
+  </data>
+  <data name="AlertDN_Text" xml:space="preserve">
+    <value>Texto</value>
+  </data>
+  <data name="ColorDN" xml:space="preserve">
+    <value>Color</value>
+  </data>
+  <data name="ColorDN_Hex" xml:space="preserve">
+    <value>Hex</value>
+  </data>
+  <data name="CorruptEntity" xml:space="preserve">
+    <value>Entidad corruptible</value>
+  </data>
+  <data name="CorruptEntity_Corrupt" xml:space="preserve">
+    <value>Corrupta</value>
+  </data>
+  <data name="ImmutableEntity" xml:space="preserve">
+    <value>Entidad inmutable</value>
+  </data>
+  <data name="LockableEntity_Locked" xml:space="preserve">
+    <value>Bloqueado</value>
+  </data>
+  <data name="NoteDN" xml:space="preserve">
+    <value>Nota</value>
+  </data>
+  <data name="NoteDN_Target" xml:space="preserve">
+    <value>Destino</value>
+  </data>
+  <data name="NoteDN_Text" xml:space="preserve">
+    <value>Texto</value>
+  </data>
+  <data name="TypeDN" xml:space="preserve">
+    <value>Tipo</value>
+  </data>
+  <data name="TypeDN_ClassName" xml:space="preserve">
+    <value>Class Name</value>
+  </data>
+  <data name="TypeDN_CleanName" xml:space="preserve">
+    <value>Clean Name</value>
+  </data>
+  <data name="TypeDN_FriendlyName" xml:space="preserve">
+    <value>Friendly Name</value>
+  </data>
+  <data name="TypeDN_FullClassName" xml:space="preserve">
+    <value>Full Class Name</value>
+  </data>
+  <data name="TypeDN_Namespace" xml:space="preserve">
+    <value>Namespace</value>
+  </data>
+  <data name="TypeDN_TableName" xml:space="preserve">
+    <value>Table Name</value>
+  </data>
 </root>

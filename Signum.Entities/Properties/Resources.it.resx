@@ -274,7 +274,7 @@
     <value>Id non valido</value>
   </data>
   <data name="ImmutableEntity_AllowChange" xml:space="preserve">
-    <value>Consenti modifiche</value>
+    <value>Consentire modifiche</value>
   </data>
   <data name="InvalidFormat" xml:space="preserve">
     <value>Formato non valido</value>
@@ -322,7 +322,7 @@
     <value>Telefono</value>
   </data>
   <data name="TheLenghtOf0HasToBeEqualTo0" xml:space="preserve">
-    <value>La lunghezza del {{0}} deve essere uguale a {0}</value>
+    <value>La lunghezza di {{0}} deve essere uguale a {0}</value>
   </data>
   <data name="TheLengthOf0HasToBeGreaterOrEqualTo0" xml:space="preserve">
     <value>La lunghezza di {{0}} deve essere maggiore o uguale a {0}</value>
@@ -344,5 +344,68 @@
   </data>
   <data name="Year" xml:space="preserve">
     <value>Anno</value>
+  </data>
+  <data name="AlertDN" xml:space="preserve">
+    <value>Avviso</value>
+  </data>
+  <data name="AlertDN_AlertDate" xml:space="preserve">
+    <value>Data di avviso</value>
+  </data>
+  <data name="AlertDN_CheckDate" xml:space="preserve">
+    <value>Data di controllo</value>
+  </data>
+  <data name="AlertDN_Entity" xml:space="preserve">
+    <value>Entità</value>
+  </data>
+  <data name="AlertDN_Text" xml:space="preserve">
+    <value>Testo</value>
+  </data>
+  <data name="ColorDN" xml:space="preserve">
+    <value>Colore</value>
+  </data>
+  <data name="ColorDN_Hex" xml:space="preserve">
+    <value>Hex</value>
+  </data>
+  <data name="CorruptEntity_Corrupt" xml:space="preserve">
+    <value>Danneggiato</value>
+  </data>
+  <data name="ImmutableEntity" xml:space="preserve">
+    <value>Entità immutabile</value>
+  </data>
+  <data name="LockableEntity_Locked" xml:space="preserve">
+    <value>Bloccato</value>
+  </data>
+  <data name="NoteDN" xml:space="preserve">
+    <value>Nota</value>
+  </data>
+  <data name="NoteDN_Target" xml:space="preserve">
+    <value>Destinazione</value>
+  </data>
+  <data name="NoteDN_Text" xml:space="preserve">
+    <value>Testo</value>
+  </data>
+  <data name="TypeDN" xml:space="preserve">
+    <value>Tipo</value>
+  </data>
+  <data name="TypeDN_ClassName" xml:space="preserve">
+    <value>Class Name</value>
+  </data>
+  <data name="TypeDN_CleanName" xml:space="preserve">
+    <value>Clean Name</value>
+  </data>
+  <data name="TypeDN_FriendlyName" xml:space="preserve">
+    <value>Friendly Name</value>
+  </data>
+  <data name="TypeDN_FullClassName" xml:space="preserve">
+    <value>Full Class Name</value>
+  </data>
+  <data name="TypeDN_Namespace" xml:space="preserve">
+    <value>Namespace</value>
+  </data>
+  <data name="TypeDN_TableName" xml:space="preserve">
+    <value>Table Name</value>
+  </data>
+  <data name="CorruptEntity" xml:space="preserve">
+    <value>Entità corruttibili</value>
   </data>
 </root>

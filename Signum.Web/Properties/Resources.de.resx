@@ -112,10 +112,10 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Alerts" xml:space="preserve">
     <value>Warnungen</value>
@@ -169,7 +169,7 @@
     <value>Filter ausblenden</value>
   </data>
   <data name="IncorrectEntityInSessionYouMustReloadThePageToContinue" xml:space="preserve">
-    <value>Sitzungsdaten sind falsch. Aktualisieren Sie die Seite, um fortzufahren.</value>
+    <value>Sitzungsdaten sind falsch. Aktualisieren Sie die Seite, um fortzufahren</value>
   </data>
   <data name="Maximum" xml:space="preserve">
     <value>Maximum</value>
@@ -235,7 +235,7 @@
     <value>Anzeigen des Typs {0} ist nicht zulässig</value>
   </data>
   <data name="ViewNotes" xml:space="preserve">
-    <value>Notizen anzeigen </value>
+    <value>Notizen anzeigen</value>
   </data>
   <data name="Warned" xml:space="preserve">
     <value>Gewarnt</value>
@@ -265,7 +265,7 @@
     <value>Es sind Fehler in der Entität, möchten Sie fortfahren?</value>
   </data>
   <data name="Signum_popupErrorsStop" xml:space="preserve">
-    <value>Es sind Fehler in der Entität </value>
+    <value>Es sind Fehler in der Entität</value>
   </data>
   <data name="Signum_saved" xml:space="preserve">
     <value>Gespeichert</value>
@@ -278,5 +278,11 @@
   </data>
   <data name="Signum_searching" xml:space="preserve">
     <value>Suche...</value>
+  </data>
+  <data name="_0HasAnInvalidFormat" xml:space="preserve">
+    <value>{0} hat ein ungültiges Format</value>
+  </data>
+  <data name="NotPossibleToaAssign0" xml:space="preserve">
+    <value>Es ist nicht möglich {0} zuzuweisen</value>
   </data>
 </root>

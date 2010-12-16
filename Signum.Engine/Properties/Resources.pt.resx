@@ -138,9 +138,6 @@
   <data name="NoWayOfMappingType0Found" xml:space="preserve">
     <value>Sem possibilidade de mapear o tipo {0} encontrado</value>
   </data>
-  <data name="PropertyRouteCanNotBeOfTypeRoot" xml:space="preserve">
-    <value>Caminho de propriedade não pode ser do tipo Raíz</value>
-  </data>
   <data name="StartOfSyncScriptGeneratedOn0" xml:space="preserve">
     <value>--- INÍCIO DA SINCRONIZAÇÃO SCRIPT GERADO EM {0}</value>
   </data>
@@ -152,9 +149,6 @@
   </data>
   <data name="UnauthorizedAccessTo0Because1" xml:space="preserve">
     <value>Acesso negado a {0} porque {1}</value>
-  </data>
-  <data name="Warning0NoResults" xml:space="preserve">
-    <value>Aviso {0} nenhum resultado</value>
   </data>
   <data name="NotAuthorizedToRetrieve01" xml:space="preserve">
     <value>Não autorizado a recuperar {0} {1}</value>
