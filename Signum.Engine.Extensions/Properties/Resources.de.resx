@@ -112,10 +112,10 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="_0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships" xml:space="preserve">
     <value>In dem Diagramm wurden {0} Zyklen der Rollen aufgrund der Beziehungen gefunden:
@@ -136,38 +136,26 @@
   <data name="AccessToFacadeMethod0IsNotAllowed" xml:space="preserve">
     <value>Der Zugriff auf die Fassaden-Methode '{0}' ist nicht zulässig</value>
   </data>
-  <data name="AfterTheOperationTheStateShouldBe0ButIs1" xml:space="preserve">
-    <value>Nach der Operation {0} sollte der Status {1} statt {2} sein</value>
-  </data>
-  <data name="AmbiguityBetweenInterfaces0" xml:space="preserve">
-    <value>Mehrdeutigkeit zwischen den Schnittstellen: {0}</value>
-  </data>
   <data name="Amount" xml:space="preserve">
     <value>Betrag</value>
-  </data>
-  <data name="AnonymousUserNotLoadedInitializeToLevel1SimpleEntities" xml:space="preserve">
-    <value>AnonymousUser, die nicht geladen werden. Inicialize Ebene Level1SimpleEntities ??</value>
   </data>
   <data name="BelongsToAnotherKindOkLinqProvider" xml:space="preserve">
     <value>{0} gehört zu einem anderen Typ des Linq-Anbieter</value>
   </data>
   <data name="Call0Over1OfThe2" xml:space="preserve">
-    <value>Führt {0} auf {1} von {2} </value>
+    <value>Führt {0} auf {1} von {2}</value>
   </data>
   <data name="Call0Over1OfThe2_f" xml:space="preserve">
-    <value>Führt {0} auf {1} von der {2} </value>
+    <value>Führt {0} auf {1} von der {2}</value>
   </data>
   <data name="Call0Over1OfThe2_m" xml:space="preserve">
-    <value>Führt {0} auf {1} dem {2} </value>
+    <value>Führt {0} auf {1} dem {2}</value>
   </data>
   <data name="Character" xml:space="preserve">
     <value>Zeichen</value>
   </data>
   <data name="Check" xml:space="preserve">
     <value>Überprüfen Sie</value>
-  </data>
-  <data name="ConstantExpressionWithAComplexIQueryableUnexpectedAt" xml:space="preserve">
-    <value>ConstantExpression mit einer komplexen IQueryable unerwartet in diesem Stadium</value>
   </data>
   <data name="ConstructsANew0" xml:space="preserve">
     <value>Erstellt eine neue {0}</value>
@@ -188,14 +176,7 @@
     <value>Datum und Uhrzeit</value>
   </data>
   <data name="EmailIsNotValid" xml:space="preserve">
-    <value>Die E-Mail unterscheidet sich von der Speicherung im System ??</value>
-  </data>
-  <data name="ErrorParsingXMLHelpFiles" xml:space="preserve">
-    <value>Fehler beim Lesen der XML-Hilfe-Dateien:
-</value>
-  </data>
-  <data name="ExcelReportArgumentIsNecessaryForCompositeReports" xml:space="preserve">
-    <value>ExcelReport-Argument ist erforderlich für compositeReports ??</value>
+    <value>Die E-Mail unterscheidet sich von der im Sysmtem gespeicherten</value>
   </data>
   <data name="ExcelTemplateMustHaveExtensionXLSXandCurrentOneHas0" xml:space="preserve">
     <value>Die Excel-Vorlage muss eine xlsx-Erweiterung haben, und die Aktuelle hat eine {0}-Erweiterung</value>
@@ -207,7 +188,7 @@
     <value>ausgedrückt in </value>
   </data>
   <data name="From0OfThe1" xml:space="preserve">
-    <value>von {0} von {1}</value>
+    <value>von {0} von {1} </value>
   </data>
   <data name="From0OfThe1_f" xml:space="preserve">
     <value>von {0} von der {1}</value>
@@ -234,16 +215,10 @@
     <value>Falsches Passwort</value>
   </data>
   <data name="Integer" xml:space="preserve">
-    <value>ganze Zahl ??</value>
+    <value>ganze Zahl </value>
   </data>
   <data name="LastExecution" xml:space="preserve">
     <value>Letzte Ausführung</value>
-  </data>
-  <data name="NoEmailsToProcessFound" xml:space="preserve">
-    <value>Keine E-Mails zur Verarbeitung gefunden</value>
-  </data>
-  <data name="NoEntitiesToProcessFound" xml:space="preserve">
-    <value>Keine Entitäten zur Verarbeitung gefunden</value>
   </data>
   <data name="NoHelpFor0" xml:space="preserve">
     <value>Keine Hilfe für {0}</value>
@@ -252,7 +227,7 @@
     <value>Nicht autorisiert für {0} die {1} mit ID {2}</value>
   </data>
   <data name="NotAuthorizedToRetrieve0" xml:space="preserve">
-    <value>Nicht autorisiert zum Abrufen von '{0}' </value>
+    <value>Nicht autorisiert zum Abrufen von '{0}'</value>
   </data>
   <data name="NotAuthorizedToSave0" xml:space="preserve">
     <value>Nicht autorisiertt '{0}' zu speichern</value>
@@ -263,15 +238,6 @@
   <data name="NotRegisteredInEmailLogic" xml:space="preserve">
     <value>{0} ist nicht registriert in EmailLogic</value>
   </data>
-  <data name="NotValueFor0IsNotFoundIn1Table" xml:space="preserve">
-    <value>Es wurde kein Wert für {0} in Tabelle {1} gefunden</value>
-  </data>
-  <data name="NoTypeWithFullName0FoundInTheSchema" xml:space="preserve">
-    <value>Es wurde kein Typ mit dem FullName {0} im Schema gefunden</value>
-  </data>
-  <data name="NoUsersToProcessFound" xml:space="preserve">
-    <value>Es wurden keine Benutzer zur Verarbeitung gefunden</value>
-  </data>
   <data name="OfThe0" xml:space="preserve">
     <value>der {0}</value>
   </data>
@@ -281,35 +247,8 @@
   <data name="OfThe0_m" xml:space="preserve">
     <value>der {0}</value>
   </data>
-  <data name="Operation0DoesNotHaveConstructInitialized" xml:space="preserve">
-    <value>Der Vorgang {0} hat kein Konstrukt initialisiert ??</value>
-  </data>
-  <data name="Operation0DoesNotHaveConstructorInitialized" xml:space="preserve">
-    <value>Der Vorgang {0} hat keinen Konstruktor initialisiert</value>
-  </data>
-  <data name="Operation0DoesNotHaveDeleteInitialized" xml:space="preserve">
-    <value>Der Vorgang {0} hat kein Löschen initialisiert</value>
-  </data>
-  <data name="Operation0DoesNotHaveExecuteInitialized" xml:space="preserve">
-    <value>Der Vorgang {0} hat kein Execute initialisiert ??</value>
-  </data>
-  <data name="Operation0HasNoConstruct" xml:space="preserve">
-    <value>Der Vorgang {0} hat kein Konstrukt initialisiert</value>
-  </data>
-  <data name="Operation0IsA1NotA2Use3Instead" xml:space="preserve">
-    <value>Der Vorgang {0} ist eine {1} keine {2}, verwenden Sie stattdessen '{3}' </value>
-  </data>
-  <data name="Operation0IsNotAllowedForLites" xml:space="preserve">
-    <value>Der Vorgang {0} ist nicht zulässig für lites</value>
-  </data>
   <data name="Operation0IsNotAuthorized" xml:space="preserve">
     <value>Der Vorgang {0} ist nicht autorisiert</value>
-  </data>
-  <data name="Operation0NeedsALite" xml:space="preserve">
-    <value>Der Vorgang {0} benötigt ein Lite</value>
-  </data>
-  <data name="Operation0NotFoundForType1" xml:space="preserve">
-    <value>Der Vorgang {0} wurde für Typ {1} nicht gefunden</value>
   </data>
   <data name="OrNull" xml:space="preserve">
     <value>oder null</value>
@@ -318,16 +257,13 @@
     <value>ProcessExecution {0} wird nicht mehr ausgeführt</value>
   </data>
   <data name="QueryOf0" xml:space="preserve">
-    <value>Abfrage von {0} ??</value>
+    <value>Abfrage von {0} </value>
   </data>
   <data name="QueryOf0Connecting1" xml:space="preserve">
-    <value>Abfrage von {0} Herstellen einer Verbindung mit {1} ??</value>
+    <value>Abfrage von {0}, die {1} verbinden</value>
   </data>
   <data name="RemovesThe0FromTheDatabase" xml:space="preserve">
     <value>Entfernt {0} aus der Datenbank</value>
-  </data>
-  <data name="RepositoryNotSet" xml:space="preserve">
-    <value>Das Dateirepository wurde nicht eingerichtet</value>
   </data>
   <data name="ResetPasswordCode" xml:space="preserve">
     <value>Code für die Wiederherstellung des Passworts</value>
@@ -336,13 +272,7 @@
     <value>. Sollte  </value>
   </data>
   <data name="String" xml:space="preserve">
-    <value>Textzeichenfolge ??</value>
-  </data>
-  <data name="SufixNotSet" xml:space="preserve">
-    <value>Das Suffix für die Datei wurde nicht eingerichtet ??</value>
-  </data>
-  <data name="SystemUserNotLoadedInitializeToLevel1SimpleEntities" xml:space="preserve">
-    <value>Multiswitch-SystemBenutzer nicht geladen. Level1SimpleEntities initialisieren ??</value>
+    <value>Zeichenkette</value>
   </data>
   <data name="The0" xml:space="preserve">
     <value>Der {0}</value>
@@ -362,26 +292,8 @@
   <data name="TheExcelTemplateHasAColumn0NotPresentInTheFindWindow" xml:space="preserve">
     <value>Die Excel-Vorlage hat eine Spalte {0}, die nicht in der Suche vorhanden ist</value>
   </data>
-  <data name="TheFollowingKeysHaveBeenRepeatedIn01" xml:space="preserve">
-    <value>Die folgenden Schlüssel werden in {0}:{1} wiederholt</value>
-  </data>
-  <data name="TheKey0IsNotFoundIn1Table" xml:space="preserve">
-    <value>Der Schlüssel {0} wurde nicht in Tabelle {1} gefunden</value>
-  </data>
-  <data name="TheOperationNeedsA0InTheArgumentNumber1" xml:space="preserve">
-    <value>Der Vorgang braucht ein {0} in die Argumentnummer {1} ??</value>
-  </data>
-  <data name="TheOperationNeedsA0InTheArgumentNumber1_f" xml:space="preserve">
-    <value>Der Vorgang braucht ein {0} im Argument {1} ??</value>
-  </data>
-  <data name="TheOperationNeedsA0InTheArgumentNumber1_m" xml:space="preserve">
-    <value>Der Vorgang braucht ein {0} im Argument {1} ??</value>
-  </data>
   <data name="ThereAreNoResultsToWrite" xml:space="preserve">
     <value>Es gibt keine Ergebnisse für den Bericht zu exportieren</value>
-  </data>
-  <data name="Type0HasToImplement1AtLeast" xml:space="preserve">
-    <value>Der Typ {0} muss mindestens {1} implementieren</value>
   </data>
   <data name="Username0IsNotValid" xml:space="preserve">
     <value>Anwendername {0} ist ungültig</value>

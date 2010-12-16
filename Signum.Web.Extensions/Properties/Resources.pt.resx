@@ -126,9 +126,6 @@
   <data name="AreYouSureOfDeletingTheEntity012" xml:space="preserve">
     <value>Tens a certeza que queres excluir do sistema a entidade {0} ({1}: {2})?</value>
   </data>
-  <data name="ArgumentFilePathIDWasNotPassedToTheController" xml:space="preserve">
-    <value>Argumento {filePathID} não foi passado para o controlador</value>
-  </data>
   <data name="ChangePassword" xml:space="preserve">
     <value>Alterar a password</value>
   </data>
@@ -228,9 +225,6 @@
   <data name="FacadeMethodsAscx_Overriden" xml:space="preserve">
     <value>Sobrescrito</value>
   </data>
-  <data name="FileTypePropertyOfFileLineSettingsMustBeSpecified" xml:space="preserve">
-    <value>Propriedade do tipo de ficheiro das configurações de ficheiro tem de ser especificada para {0}</value>
-  </data>
   <data name="ForgotYourPassword" xml:space="preserve">
     <value>Esqueceste-te da password? Escreve o teu e-mail em baixo e verifica a tua caixa de correio.</value>
   </data>
@@ -273,9 +267,6 @@
   </data>
   <data name="NewPassword" xml:space="preserve">
     <value>Nova password</value>
-  </data>
-  <data name="NoErrorsFound" xml:space="preserve">
-    <value>Sem erros encontrados</value>
   </data>
   <data name="OperationsAscx_Allow" xml:space="preserve">
     <value>Permitir</value>
@@ -382,9 +373,6 @@
   <data name="RememberPasswordExplanation" xml:space="preserve">
     <value>Escrever o nome de usuário e endereço de e-mail para receber um e-mail com a recuperaração da password</value>
   </data>
-  <data name="ReportTemplateMustBeSpecified" xml:space="preserve">
-    <value>Especificar o modelo de relatório</value>
-  </data>
   <data name="ResetPassword" xml:space="preserve">
     <value>Restaurar password</value>
   </data>
@@ -417,9 +405,6 @@
   </data>
   <data name="ThereSNotARegisteredUserWithThatEmailAddress" xml:space="preserve">
     <value>Nenhum utilizador registado com esse endereço de e-mail</value>
-  </data>
-  <data name="TheresNotAViewForType0" xml:space="preserve">
-    <value>Não há um modo de exibição para o tipo {0}</value>
   </data>
   <data name="TheSpecifiedPasswordsDontMatch" xml:space="preserve">
     <value>As passwords especificadas não correspondem</value>

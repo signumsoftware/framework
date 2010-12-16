@@ -120,9 +120,6 @@
   <data name="AreYouSureOfDeletingTheEntity012" xml:space="preserve">
     <value>¿Está seguro de eliminar del sistema la entidad {0} ({1}:{2})?</value>
   </data>
-  <data name="ArgumentFilePathIDWasNotPassedToTheController" xml:space="preserve">
-    <value>No se ha pasado al controlador el parámetro {filePathID}</value>
-  </data>
   <data name="ConfirmNewPassword" xml:space="preserve">
     <value>Confirmar nueva contraseña</value>
   </data>
@@ -155,9 +152,6 @@
   </data>
   <data name="ErrorSavingFile" xml:space="preserve">
     <value>Error guardadndo el archivo</value>
-  </data>
-  <data name="FileTypePropertyOfFileLineSettingsMustBeSpecified" xml:space="preserve">
-    <value>La propiedad FileType del FileLine settings debe ser especificada para el FileLine {0}</value>
   </data>
   <data name="HelpDocumentation" xml:space="preserve">
     <value>Documentación de ayuda</value>
@@ -221,9 +215,6 @@
   </data>
   <data name="TargetSite" xml:space="preserve">
     <value>Origen</value>
-  </data>
-  <data name="TheresNotAViewForType0" xml:space="preserve">
-    <value>No hay una vista asociada al tipo {0}</value>
   </data>
   <data name="TheSpecifiedPasswordsDontMatch" xml:space="preserve">
     <value>Las contraseñas especificadas no coinciden</value>
@@ -381,9 +372,6 @@
   <data name="QueriesAscx_Query" xml:space="preserve">
     <value>Query</value>
   </data>
-  <data name="NoErrorsFound" xml:space="preserve">
-    <value>No se encontraron errores</value>
-  </data>
   <data name="ThereAreATotalOf0Errors" xml:space="preserve">
     <value>Hay un total de {0} errores</value>
   </data>
@@ -464,9 +452,6 @@
   </data>
   <data name="AreYouSureOfDeletingReport0" xml:space="preserve">
     <value>¿Está seguro de eliminar el informe {0}?</value>
-  </data>
-  <data name="ReportTemplateMustBeSpecified" xml:space="preserve">
-    <value>Debe especificar el modelo del informe</value>
   </data>
   <data name="Download" xml:space="preserve">
     <value>Descargar</value>

@@ -112,22 +112,22 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AggregateFunction_Average" xml:space="preserve">
     <value>Durchschnitt</value>
   </data>
   <data name="AggregateFunction_Count" xml:space="preserve">
-    <value>Zählung </value>
+    <value>Zählung</value>
   </data>
   <data name="AggregateFunction_Max" xml:space="preserve">
-    <value>Max. </value>
+    <value>Max</value>
   </data>
   <data name="AggregateFunction_Min" xml:space="preserve">
-    <value>Min. </value>
+    <value>Min</value>
   </data>
   <data name="AggregateFunction_Sum" xml:space="preserve">
     <value>Summe</value>
@@ -151,16 +151,16 @@
     <value>Diagrammtyp</value>
   </data>
   <data name="ChartBase_FirstDimension" xml:space="preserve">
-    <value>Erste Dimension </value>
+    <value>Erste Dimension</value>
   </data>
   <data name="ChartBase_FirstValue" xml:space="preserve">
     <value>Erster Wert</value>
   </data>
   <data name="ChartBase_GroupResults" xml:space="preserve">
-    <value>Zusammenstellen von Ergebnissen </value>
+    <value>Zusammenstellen von Ergebnissen</value>
   </data>
   <data name="ChartBase_SecondDimension" xml:space="preserve">
-    <value>Zweite Dimension </value>
+    <value>Zweite Dimension</value>
   </data>
   <data name="ChartBase_SecondValue" xml:space="preserve">
     <value>Zweiter Wert</value>
@@ -175,7 +175,7 @@
     <value>Abfrage-Name</value>
   </data>
   <data name="ChartResultType_Bubbles" xml:space="preserve">
-    <value>Blasen </value>
+    <value>Blasen</value>
   </data>
   <data name="ChartResultType_Points" xml:space="preserve">
     <value>Punkte</value>
@@ -211,7 +211,7 @@
     <value>Einheit</value>
   </data>
   <data name="ChartType_Bars" xml:space="preserve">
-    <value>Leiste </value>
+    <value>Leiste</value>
   </data>
   <data name="ChartType_Bubbles" xml:space="preserve">
     <value>Blasen</value>
@@ -384,8 +384,8 @@
   <data name="EmailPackageDN_NumLines" xml:space="preserve">
     <value>Anzahl der Linien</value>
   </data>
-  <data name="EmailPackageDN_Template" xml:space="preserve">
-    <value>Vorlage</value>
+  <data name="RoleQueries_ReferedBy" xml:space="preserve">
+    <value>Refered von</value>
   </data>
   <data name="DeploymentLogDN" xml:space="preserve">
     <value>Registrierung der Bereitstellung</value>
@@ -538,10 +538,10 @@
     <value>Name</value>
   </data>
   <data name="Holidayhavetobenullwhennocalendarisset" xml:space="preserve">
-    <value>Feiertage sollten null sein, wenn es keinen Kalender gibt.</value>
+    <value>Feiertage sollten null sein, wenn es keinen Kalender gibt</value>
   </data>
   <data name="Holidayhavetobetrueorfalsewhenacalendarisset" xml:space="preserve">
-    <value>Feiertage müssen wahr oder falsch sein, wenn es einen Kalender gibt.</value>
+    <value>Feiertage müssen wahr oder falsch sein, wenn es einen Kalender gibt</value>
   </data>
   <data name="HourMinuteDN" xml:space="preserve">
     <value>Stunden und Minuten</value>
@@ -588,14 +588,14 @@
   <data name="LogOperationDN_User" xml:space="preserve">
     <value>Benutzer</value>
   </data>
-  <data name="LogOperationQueries_All" xml:space="preserve">
-    <value>Alle</value>
+  <data name="ProcessOperation_Create" xml:space="preserve">
+    <value>Erstellen</value>
   </data>
-  <data name="LogOperationQueries_Completed" xml:space="preserve">
-    <value>Abgeschlossen</value>
+  <data name="EmailTemplateDN_FullClassName" xml:space="preserve">
+    <value>Full Class Name</value>
   </data>
-  <data name="LogOperationQueries_InProcess" xml:space="preserve">
-    <value>Im Prozess</value>
+  <data name="DeploymentLogDN_MachineName" xml:space="preserve">
+    <value>Machine Name</value>
   </data>
   <data name="NotUserLogged" xml:space="preserve">
     <value>Kein angemeldeter Benutzer</value>
@@ -606,8 +606,8 @@
   <data name="PackageDN" xml:space="preserve">
     <value>Paket</value>
   </data>
-  <data name="PackageDN_Lines" xml:space="preserve">
-    <value>Linien</value>
+  <data name="DeploymentLogDN_DataSourceName" xml:space="preserve">
+    <value>Data Source Name</value>
   </data>
   <data name="PackageDN_Name" xml:space="preserve">
     <value>Name</value>
@@ -672,8 +672,8 @@
   <data name="ProcessExecutionDN_CreationDate" xml:space="preserve">
     <value>Erstellungsdatum</value>
   </data>
-  <data name="ProcessExecutionDN_ErrorDate" xml:space="preserve">
-    <value>Fehlerdatum</value>
+  <data name="DeploymentLogDN_DatabaseName" xml:space="preserve">
+    <value>Database Name</value>
   </data>
   <data name="ProcessExecutionDN_Exception" xml:space="preserve">
     <value>Ausnahme</value>
@@ -682,7 +682,7 @@
     <value>Ausnahmedatum</value>
   </data>
   <data name="ProcessExecutionDN_ExecutionEnd" xml:space="preserve">
-    <value>Ausführungsdatum </value>
+    <value>Ausführungsdatum</value>
   </data>
   <data name="ProcessExecutionDN_ExecutionStart" xml:space="preserve">
     <value>Ausführungsstart</value>
@@ -1061,5 +1061,14 @@
   </data>
   <data name="Deleted" xml:space="preserve">
     <value>(Gelöscht)</value>
+  </data>
+  <data name="TaskOperation_ExecutePrivate" xml:space="preserve">
+    <value>Führen Sie private</value>
+  </data>
+  <data name="UserOperation_NewPassword" xml:space="preserve">
+    <value>Neues Passwort</value>
+  </data>
+  <data name="EmailTemplateDN_FriendlyName" xml:space="preserve">
+    <value>Beschreibenden Namen</value>
   </data>
 </root>

@@ -126,9 +126,6 @@
   <data name="AreYouSureOfDeletingTheEntity012" xml:space="preserve">
     <value>Sei sicuro di voler eliminare dal sistema l'entità {0} ({1}: {2})?</value>
   </data>
-  <data name="ArgumentFilePathIDWasNotPassedToTheController" xml:space="preserve">
-    <value>L'argomento {filePathID} non è stato trasmesso al revisore</value>
-  </data>
   <data name="ChangePassword" xml:space="preserve">
     <value>Cambia password</value>
   </data>
@@ -228,9 +225,6 @@
   <data name="FacadeMethodsAscx_Overriden" xml:space="preserve">
     <value>Sovrascritto</value>
   </data>
-  <data name="FileTypePropertyOfFileLineSettingsMustBeSpecified" xml:space="preserve">
-    <value>La proprietà Filetype delle impostazioni FileLine deve essere specificata per FileLine {0}</value>
-  </data>
   <data name="ForgotYourPassword" xml:space="preserve">
     <value>Hai dimenticato la password? Inserisci il tuo indirizzo email. Ti invieremo un'email con un link per reimpostare la password.</value>
   </data>
@@ -272,9 +266,6 @@
   </data>
   <data name="NewPassword" xml:space="preserve">
     <value>Nuova password</value>
-  </data>
-  <data name="NoErrorsFound" xml:space="preserve">
-    <value>Non sono stati riscontrati errori</value>
   </data>
   <data name="OperationsAscx_Allow" xml:space="preserve">
     <value>Consentire</value>
@@ -381,9 +372,6 @@
   <data name="RememberPasswordExplanation" xml:space="preserve">
     <value>Inserisci il tuo nome utente e l'indirizzo email per ricevere un messaggio di posta elettronica con la password</value>
   </data>
-  <data name="ReportTemplateMustBeSpecified" xml:space="preserve">
-    <value>È necessario specificare il modello di report</value>
-  </data>
   <data name="ResetPassword" xml:space="preserve">
     <value>Reimpostare la password</value>
   </data>
@@ -416,9 +404,6 @@
   </data>
   <data name="ThereSNotARegisteredUserWithThatEmailAddress" xml:space="preserve">
     <value>Non è stato individuato nessun utente registrato con quell'indirizzo email</value>
-  </data>
-  <data name="TheresNotAViewForType0" xml:space="preserve">
-    <value>Non vi è alcuna visualizzazione registrata per tipo {0}</value>
   </data>
   <data name="TheSpecifiedPasswordsDontMatch" xml:space="preserve">
     <value>Le password specificate non corrispondono</value>

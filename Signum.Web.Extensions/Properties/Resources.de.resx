@@ -112,10 +112,10 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AreYouSureOfDeletingQuery0" xml:space="preserve">
     <value>Sind Sie sicher, dass Sie die Abfrage {0} löschen wollen?</value>
@@ -125,9 +125,6 @@
   </data>
   <data name="AreYouSureOfDeletingTheEntity012" xml:space="preserve">
     <value>Sind Sie sicher, dass Sie Systementität {0} ({1}: {2}) löschen wollen?</value>
-  </data>
-  <data name="ArgumentFilePathIDWasNotPassedToTheController" xml:space="preserve">
-    <value>Argument {FilePathID} wurde nicht an den Controller übergeben</value>
   </data>
   <data name="ChangePassword" xml:space="preserve">
     <value>Passwort ändern</value>
@@ -216,9 +213,6 @@
   <data name="FacadeMethodsAscx_Overriden" xml:space="preserve">
     <value>Überschrieben</value>
   </data>
-  <data name="FileTypePropertyOfFileLineSettingsMustBeSpecified" xml:space="preserve">
-    <value>FileType-Eigenschaft der FileLine-Einstellungen muss für FileLine {0} angegeben werden</value>
-  </data>
   <data name="ForgotYourPassword" xml:space="preserve">
     <value>Passwort vergessen? Geben Sie Ihre Login-E-Mail unten ein. Wir senden Ihnen eine E-Mail mit einem Link zum Zurücksetzen Ihres Passworts.</value>
   </data>
@@ -250,8 +244,7 @@
     <value>Login</value>
   </data>
   <data name="MailBody_RememberPassword" xml:space="preserve">
-    <value>Wir senden Ihnen diese E-Mail, da Sie uns gebeten Ihnen Ihr Passwort mitzuteilen. Aus Sicherheitsgründen haben wir ein zufälliges Passwort erzeugt, dass Sie ändern können.Das Kennwort ist {0}
-</value>
+    <value>Wir senden Ihnen diese E-Mail, da Sie uns gebeten Ihnen Ihr Passwort mitzuteilen. Aus Sicherheitsgründen haben wir ein zufälliges Passwort erzeugt, dass Sie ändern können.Das Kennwort ist {0}</value>
   </data>
   <data name="MailSubject_RememberPassword" xml:space="preserve">
     <value>Passwort-Erinnerung</value>
@@ -261,9 +254,6 @@
   </data>
   <data name="NewPassword" xml:space="preserve">
     <value>Neues Passwort</value>
-  </data>
-  <data name="NoErrorsFound" xml:space="preserve">
-    <value>Keine Fehler gefunden</value>
   </data>
   <data name="OperationsAscx_Allow" xml:space="preserve">
     <value>Zulassen</value>
@@ -368,11 +358,7 @@
     <value>An Kennwort erinnern</value>
   </data>
   <data name="RememberPasswordExplanation" xml:space="preserve">
-    <value>Geben Sie Ihren Benutzernamen und Ihre E-Mail-Adresse ein, um eine E-Mail mit dem Passwort zu erhalten
-</value>
-  </data>
-  <data name="ReportTemplateMustBeSpecified" xml:space="preserve">
-    <value>Sie müssen die Berichtsvorlage angeben</value>
+    <value>Geben Sie Ihren Benutzernamen und Ihre E-Mail-Adresse ein, um eine E-Mail mit dem Passwort zu erhalten</value>
   </data>
   <data name="ResetPassword" xml:space="preserve">
     <value>Passwort zurücksetzen</value>
@@ -406,9 +392,6 @@
   </data>
   <data name="ThereSNotARegisteredUserWithThatEmailAddress" xml:space="preserve">
     <value>Es ist kein Benutzer mit dieser E-Mail-Adresse registriert</value>
-  </data>
-  <data name="TheresNotAViewForType0" xml:space="preserve">
-    <value>Es gibt keinen registrierten view für Typ {0} </value>
   </data>
   <data name="TheSpecifiedPasswordsDontMatch" xml:space="preserve">
     <value>Die angegebenen Passwörter stimmen nicht überein</value>
@@ -444,7 +427,7 @@
     <value>Benutzer</value>
   </data>
   <data name="UserNameAlreadyExists" xml:space="preserve">
-    <value>Der ausgewählte Benutzername ist bereits registriert, bitte wählen Sie einen anderen aus.</value>
+    <value>Der ausgewählte Benutzername ist bereits registriert, bitte wählen Sie einen anderen aus</value>
   </data>
   <data name="UserNameMustHaveAValue" xml:space="preserve">
     <value>Sie müssen den Benutzernamen eingeben</value>
@@ -458,17 +441,14 @@
   <data name="WeReceivedARequestToCreateAnAccountYouCanCreateItFollowingTheLinkBelow" xml:space="preserve">
     <value>Sie haben die Erstellung eines Kontos beantragt. Um dieses zu bestätigen, klicken Sie bitte unten auf den folgenden Link:</value>
   </data>
-  <data name="YouCanResetYourPasswordByFollowingTheLinkBelow" xml:space="preserve">
-    <value>Sie können ein neues Passwort erstellen, indem Sie auf den Link unten klicken</value>
-  </data>
   <data name="YouMustEnterTheCurrentPassword" xml:space="preserve">
     <value>Sie müssen Ihr aktuelles Passwort eingeben</value>
   </data>
   <data name="YouMustRepeatTheNewPassword" xml:space="preserve">
     <value>Sie müssen das neue Passwort wiederholen</value>
   </data>
-  <data name="YouRecentlyRequestedANewPassword" xml:space="preserve">
-    <value>Sie haben vor kurzem ein neues Passwort beantragt</value>
+  <data name="CouldntCreateFilePathWithUnknownFileTypeForField0" xml:space="preserve">
+    <value>Es konnte kein Dateipfad mit dem unbekannten Dateityp für Feld {{0}} erstellt werden</value>
   </data>
   <data name="YourNewPasswordIs0" xml:space="preserve">
     <value>Ihr neues Passwort ist {0}</value>

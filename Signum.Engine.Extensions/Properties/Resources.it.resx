@@ -136,17 +136,8 @@
   <data name="AccessToFacadeMethod0IsNotAllowed" xml:space="preserve">
     <value>Accesso al Facade Method '{0}' non consentito</value>
   </data>
-  <data name="AfterTheOperationTheStateShouldBe0ButIs1" xml:space="preserve">
-    <value>Dopo l'operazione {0}, lo stato dovrebbe essere {1} invece di {2}</value>
-  </data>
-  <data name="AmbiguityBetweenInterfaces0" xml:space="preserve">
-    <value>Ambiguità tra interfacce: {0}</value>
-  </data>
   <data name="Amount" xml:space="preserve">
     <value>importo</value>
-  </data>
-  <data name="AnonymousUserNotLoadedInitializeToLevel1SimpleEntities" xml:space="preserve">
-    <value>AnonymousUser non caricato. Inizializzazione di Level1SimpleEntities</value>
   </data>
   <data name="BelongsToAnotherKindOkLinqProvider" xml:space="preserve">
     <value>{0} appartiene a un altro tipo di Linq Provider</value>
@@ -166,17 +157,14 @@
   <data name="Check" xml:space="preserve">
     <value>verifica</value>
   </data>
-  <data name="ConstantExpressionWithAComplexIQueryableUnexpectedAt" xml:space="preserve">
-    <value>ConstantExpression con un complesso IQueryable non previsto in questa fase</value>
-  </data>
   <data name="ConstructsANew0" xml:space="preserve">
-    <value>Costruisce un nuovo {0}</value>
+    <value>Costruisci un nuovo {0}</value>
   </data>
   <data name="ConstructsANew0_f" xml:space="preserve">
-    <value>Costruisce una nuovo {0}</value>
+    <value>Costruisci una nuova {0}</value>
   </data>
   <data name="ConstructsANew0_m" xml:space="preserve">
-    <value>Costruisce un nuovo {0}</value>
+    <value>Costruisci un nuovo {0}</value>
   </data>
   <data name="Data" xml:space="preserve">
     <value>Dati</value>
@@ -190,15 +178,8 @@
   <data name="EmailIsNotValid" xml:space="preserve">
     <value>L'indirizzo email è diverso da quello memorizzato nel sistema</value>
   </data>
-  <data name="ErrorParsingXMLHelpFiles" xml:space="preserve">
-    <value>Errore di lettura dei file XML della Guida:
-</value>
-  </data>
-  <data name="ExcelReportArgumentIsNecessaryForCompositeReports" xml:space="preserve">
-    <value>excelReport argument necessario per compositeReports</value>
-  </data>
   <data name="ExcelTemplateMustHaveExtensionXLSXandCurrentOneHas0" xml:space="preserve">
-    <value>Il modello Excel deve avere estensione xlsx, ma quello corrente ha estensione {0}</value>
+    <value>Il modello Excel deve avere estensione xlsx, mentre quello corrente ha estensione {0}</value>
   </data>
   <data name="Executions" xml:space="preserve">
     <value>Esecuzioni</value>
@@ -239,12 +220,6 @@
   <data name="LastExecution" xml:space="preserve">
     <value>Ultima esecuzione</value>
   </data>
-  <data name="NoEmailsToProcessFound" xml:space="preserve">
-    <value>Non è stato trovato nessun messaggio di posta da elaborare</value>
-  </data>
-  <data name="NoEntitiesToProcessFound" xml:space="preserve">
-    <value>Non è stata trovata nessuna entità da elaborare</value>
-  </data>
   <data name="NoHelpFor0" xml:space="preserve">
     <value>Nessun aiuto per {0}</value>
   </data>
@@ -263,17 +238,8 @@
   <data name="NotRegisteredInEmailLogic" xml:space="preserve">
     <value>{0} non registrato in EmailLogic</value>
   </data>
-  <data name="NotValueFor0IsNotFoundIn1Table" xml:space="preserve">
-    <value>Non è stato trovato nessun valore per {0} nella tabella {1}</value>
-  </data>
-  <data name="NoTypeWithFullName0FoundInTheSchema" xml:space="preserve">
-    <value>Nessun Type con nome completo {0} trovato nello schema</value>
-  </data>
-  <data name="NoUsersToProcessFound" xml:space="preserve">
-    <value>Non sono stati trovati utenti da elaborare</value>
-  </data>
   <data name="OfThe0" xml:space="preserve">
-    <value>della {0}</value>
+    <value>del {0}</value>
   </data>
   <data name="OfThe0_f" xml:space="preserve">
     <value>della {0}</value>
@@ -281,35 +247,8 @@
   <data name="OfThe0_m" xml:space="preserve">
     <value>del {0}</value>
   </data>
-  <data name="Operation0DoesNotHaveConstructInitialized" xml:space="preserve">
-    <value>L'operazione {0} non dispone di Construct inizializzato</value>
-  </data>
-  <data name="Operation0DoesNotHaveConstructorInitialized" xml:space="preserve">
-    <value>L'operazione {0} non dispone di Construct inizializzato</value>
-  </data>
-  <data name="Operation0DoesNotHaveDeleteInitialized" xml:space="preserve">
-    <value>L'operazione {0} non dispone di Delete inizializzato</value>
-  </data>
-  <data name="Operation0DoesNotHaveExecuteInitialized" xml:space="preserve">
-    <value>L'operazione {0} non dispone di Execute inizializzato</value>
-  </data>
-  <data name="Operation0HasNoConstruct" xml:space="preserve">
-    <value>L'operazione {0} non dispone di Construct inizializzato</value>
-  </data>
-  <data name="Operation0IsA1NotA2Use3Instead" xml:space="preserve">
-    <value>L'operazione {0} è un {1} non un {2}, utilizzare '{3}'</value>
-  </data>
-  <data name="Operation0IsNotAllowedForLites" xml:space="preserve">
-    <value>L'operazione {0} non consente Lites</value>
-  </data>
   <data name="Operation0IsNotAuthorized" xml:space="preserve">
     <value>Operazione {0} non consentita</value>
-  </data>
-  <data name="Operation0NeedsALite" xml:space="preserve">
-    <value>L'operazione {0} richiede un Lite</value>
-  </data>
-  <data name="Operation0NotFoundForType1" xml:space="preserve">
-    <value>Operazione {0} per il tipo {1} non trovata</value>
   </data>
   <data name="OrNull" xml:space="preserve">
     <value>o nullo</value>
@@ -326,9 +265,6 @@
   <data name="RemovesThe0FromTheDatabase" xml:space="preserve">
     <value>Rimuovi l'elemento {0} dal database</value>
   </data>
-  <data name="RepositoryNotSet" xml:space="preserve">
-    <value>Il file repository non è stato impostato</value>
-  </data>
   <data name="ResetPasswordCode" xml:space="preserve">
     <value>Codice di reimpostazione password</value>
   </data>
@@ -337,12 +273,6 @@
   </data>
   <data name="String" xml:space="preserve">
     <value>stringa di testo</value>
-  </data>
-  <data name="SufixNotSet" xml:space="preserve">
-    <value>Non è stato impostato il nome del file fisico</value>
-  </data>
-  <data name="SystemUserNotLoadedInitializeToLevel1SimpleEntities" xml:space="preserve">
-    <value>SystemUser non caricato. Inizializzare Level1SimpleEntities</value>
   </data>
   <data name="The0" xml:space="preserve">
     <value>Il {0}</value>
@@ -362,27 +292,8 @@
   <data name="TheExcelTemplateHasAColumn0NotPresentInTheFindWindow" xml:space="preserve">
     <value>Il modello Excel ha una colonna {0} non presente nel motore di ricerca</value>
   </data>
-  <data name="TheFollowingKeysHaveBeenRepeatedIn01" xml:space="preserve">
-    <value>I seguenti tasti sono stati ripetuti in {0}:
-{1}</value>
-  </data>
-  <data name="TheKey0IsNotFoundIn1Table" xml:space="preserve">
-    <value>La chiave {0} non si trova nella tabella {1}</value>
-  </data>
-  <data name="TheOperationNeedsA0InTheArgumentNumber1" xml:space="preserve">
-    <value>L'operazione richiede un {0}  {1} il numero dell'argomento</value>
-  </data>
-  <data name="TheOperationNeedsA0InTheArgumentNumber1_f" xml:space="preserve">
-    <value>L'operazione richiede un {0} nell'argomento {1}</value>
-  </data>
-  <data name="TheOperationNeedsA0InTheArgumentNumber1_m" xml:space="preserve">
-    <value>L'operazione richiede un {0} nell'argomento {1}</value>
-  </data>
   <data name="ThereAreNoResultsToWrite" xml:space="preserve">
-    <value>Nessun risultato da scrivere</value>
-  </data>
-  <data name="Type0HasToImplement1AtLeast" xml:space="preserve">
-    <value>Il tipo {0} deve adempiere almeno {1}</value>
+    <value>Nessun risultato da riportare</value>
   </data>
   <data name="Username0IsNotValid" xml:space="preserve">
     <value>Il nome dell'utente {0} non è valido</value>

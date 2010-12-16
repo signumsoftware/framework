@@ -117,20 +117,8 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ProcessOperation_Cancel" xml:space="preserve">
-    <value>Cancelar</value>
-  </data>
-  <data name="ProcessOperation_Execute" xml:space="preserve">
-    <value>Ejecutar</value>
-  </data>
   <data name="ProcessOperation_FromProcess" xml:space="preserve">
     <value>Nueva ejecución</value>
-  </data>
-  <data name="ProcessOperation_Plan" xml:space="preserve">
-    <value>Planificar</value>
-  </data>
-  <data name="ProcessOperation_Suspend" xml:space="preserve">
-    <value>Suspender</value>
   </data>
   <data name="ProcessState_Canceled" xml:space="preserve">
     <value>Cancelado</value>
@@ -155,12 +143,6 @@
   </data>
   <data name="ProcessState_Suspending" xml:space="preserve">
     <value>Suspendiéndose</value>
-  </data>
-  <data name="ProcessQueries_ErrorExecutions" xml:space="preserve">
-    <value>Erróneas</value>
-  </data>
-  <data name="ProcessQueries_CurrentExecutions" xml:space="preserve">
-    <value>Actualmente en ejecución</value>
   </data>
   <data name="CalendarDN" xml:space="preserve">
     <value>Calendario</value>
@@ -261,9 +243,6 @@
   <data name="ProcessExecutionDN_CreationDate" xml:space="preserve">
     <value>F. Creación</value>
   </data>
-  <data name="ProcessExecutionDN_ErrorDate" xml:space="preserve">
-    <value>F. Error</value>
-  </data>
   <data name="ProcessExecutionDN_Exception" xml:space="preserve">
     <value>Excepción</value>
   </data>
@@ -307,7 +286,7 @@
     <value>Tarea programada</value>
   </data>
   <data name="ScheduledTaskDN_NextDate" xml:space="preserve">
-    <value>Proxima fecha </value>
+    <value>Proxima fecha</value>
   </data>
   <data name="ScheduledTaskDN_Rule" xml:space="preserve">
     <value>Regla</value>
@@ -468,29 +447,8 @@
   <data name="FileRepositoryDN_WebPrefix" xml:space="preserve">
     <value>Prefijo web</value>
   </data>
-  <data name="UserOperation_Create" xml:space="preserve">
-    <value>Crear</value>
-  </data>
-  <data name="UserOperation_Disable" xml:space="preserve">
-    <value>Desactivar</value>
-  </data>
-  <data name="UserOperation_Enable" xml:space="preserve">
-    <value>Activar</value>
-  </data>
-  <data name="UserOperation_Save" xml:space="preserve">
-    <value>Guardar</value>
-  </data>
   <data name="UserOperation_SaveNew" xml:space="preserve">
     <value>Guardar</value>
-  </data>
-  <data name="LogOperationQueries_All" xml:space="preserve">
-    <value>Todas</value>
-  </data>
-  <data name="LogOperationQueries_Completed" xml:space="preserve">
-    <value>Completadas</value>
-  </data>
-  <data name="LogOperationQueries_InProcess" xml:space="preserve">
-    <value>En proceso</value>
   </data>
   <data name="FileRepositoryDN_FileTypes" xml:space="preserve">
     <value>Tipos de archivo</value>
@@ -549,9 +507,6 @@
   <data name="HourMinuteDN_Minute" xml:space="preserve">
     <value>Minuto</value>
   </data>
-  <data name="ProcessOperation_Save" xml:space="preserve">
-    <value>Guardar</value>
-  </data>
   <data name="NotUserLogged" xml:space="preserve">
     <value>Ningún usuario logado</value>
   </data>
@@ -605,12 +560,6 @@
   </data>
   <data name="EmailPackageDN_NumLines" xml:space="preserve">
     <value>Num líneas</value>
-  </data>
-  <data name="EmailPackageDN_Template" xml:space="preserve">
-    <value>Plantilla</value>
-  </data>
-  <data name="PackageDN_Lines" xml:space="preserve">
-    <value>Líneas</value>
   </data>
   <data name="PackageDN_Name" xml:space="preserve">
     <value>Nombre</value>
@@ -1064,5 +1013,62 @@
   </data>
   <data name="Deleted" xml:space="preserve">
     <value>(Eliminado)</value>
+  </data>
+  <data name="ProcessQueries_CurrentExecutions" xml:space="preserve">
+    <value>Ejecuciones actuales</value>
+  </data>
+  <data name="ProcessQueries_ErrorExecutions" xml:space="preserve">
+    <value>Ejecuciones erroneas</value>
+  </data>
+  <data name="RoleQueries_ReferedBy" xml:space="preserve">
+    <value>Referido por</value>
+  </data>
+  <data name="DeploymentLogDN_DatabaseName" xml:space="preserve">
+    <value>Database Name</value>
+  </data>
+  <data name="DeploymentLogDN_DataSourceName" xml:space="preserve">
+    <value>Data Source Name</value>
+  </data>
+  <data name="DeploymentLogDN_MachineName" xml:space="preserve">
+    <value>Machine Name</value>
+  </data>
+  <data name="EmailTemplateDN_FullClassName" xml:space="preserve">
+    <value>Full Class Name</value>
+  </data>
+  <data name="ProcessOperation_Cancel" xml:space="preserve">
+    <value>Cancelar</value>
+  </data>
+  <data name="ProcessOperation_Create" xml:space="preserve">
+    <value>Crear</value>
+  </data>
+  <data name="ProcessOperation_Execute" xml:space="preserve">
+    <value>Ejecutar</value>
+  </data>
+  <data name="ProcessOperation_Plan" xml:space="preserve">
+    <value>Planificar</value>
+  </data>
+  <data name="ProcessOperation_Save" xml:space="preserve">
+    <value>Guardar</value>
+  </data>
+  <data name="ProcessOperation_Suspend" xml:space="preserve">
+    <value>Suspender</value>
+  </data>
+  <data name="TaskOperation_ExecutePrivate" xml:space="preserve">
+    <value>Ejecutar privado</value>
+  </data>
+  <data name="UserOperation_Create" xml:space="preserve">
+    <value>Crear</value>
+  </data>
+  <data name="UserOperation_Disable" xml:space="preserve">
+    <value>Deshabilitar</value>
+  </data>
+  <data name="UserOperation_Enable" xml:space="preserve">
+    <value>Habilitar</value>
+  </data>
+  <data name="UserOperation_NewPassword" xml:space="preserve">
+    <value>Nueva contraseña</value>
+  </data>
+  <data name="UserOperation_Save" xml:space="preserve">
+    <value>Guardar</value>
   </data>
 </root>

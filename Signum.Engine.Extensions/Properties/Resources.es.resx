@@ -120,13 +120,6 @@
   <data name="TheEntity0IsNew" xml:space="preserve">
     <value>La entidad {0} es nueva</value>
   </data>
-  <data name="Operation0DoesNotHaveDeleteInitialized" xml:space="preserve">
-    <value>La operation {0} no tiene Delete inicializado</value>
-  </data>
-  <data name="ErrorParsingXMLHelpFiles" xml:space="preserve">
-    <value>Error leyendo los archivos XML de ayuda:
-</value>
-  </data>
   <data name="QueryOf0Connecting1" xml:space="preserve">
     <value>Consulta de {0} que relaciona {1}</value>
   </data>
@@ -164,52 +157,6 @@
     <value>Se han encontrado {0} ciclos en el grafo de roles Roles debido a las relaciones:
 </value>
   </data>
-  <data name="TheKey0IsNotFoundIn1Table" xml:space="preserve">
-    <value>La clave {0} no se encuentra en la tabla {1}</value>
-  </data>
-  <data name="NotValueFor0IsNotFoundIn1Table" xml:space="preserve">
-    <value>No se ha necontrado ningún valor para para {0} en la tabla {1}</value>
-  </data>
-  <data name="Operation0NotFoundForType1" xml:space="preserve">
-    <value>La operación {0} no se ha encontrado para el tipo {1}</value>
-  </data>
-  <data name="Operation0IsA1NotA2Use3Instead" xml:space="preserve">
-    <value>La operación {0} es una {1} no una {2}, usa '{3}' en su lugar</value>
-  </data>
-  <data name="Operation0IsNotAllowedForLites" xml:space="preserve">
-    <value>La operación {0} no permite Lites</value>
-  </data>
-  <data name="Operation0NeedsALite" xml:space="preserve">
-    <value>La operación {0} necesita un Lite</value>
-  </data>
-  <data name="Type0HasToImplement1AtLeast" xml:space="preserve">
-    <value>El tipo {0} debe implementar {1} al menos</value>
-  </data>
-  <data name="AmbiguityBetweenInterfaces0" xml:space="preserve">
-    <value>Ambiguedad entre las interfaces: {0}</value>
-  </data>
-  <data name="TheOperationNeedsA0InTheArgumentNumber1_m" xml:space="preserve">
-    <value>La operacion necesita un {0} en el argumento {1}</value>
-  </data>
-  <data name="Operation0DoesNotHaveConstructorInitialized" xml:space="preserve">
-    <value>La operación {0} no tiene Constructor inicializado</value>
-  </data>
-  <data name="Operation0HasNoConstruct" xml:space="preserve">
-    <value>La operación {0} no tiene Construct inicializado</value>
-  </data>
-  <data name="TheFollowingKeysHaveBeenRepeatedIn01" xml:space="preserve">
-    <value>Las siguientes claves estan repetidas en {0}:
-{1}</value>
-  </data>
-  <data name="AfterTheOperationTheStateShouldBe0ButIs1" xml:space="preserve">
-    <value>Despues de la operación {0} el estado debería ser {1} en lugar de {2}</value>
-  </data>
-  <data name="Operation0DoesNotHaveExecuteInitialized" xml:space="preserve">
-    <value>La operación {0} no tiene Execute inicializado</value>
-  </data>
-  <data name="ExcelReportArgumentIsNecessaryForCompositeReports" xml:space="preserve">
-    <value>el argumento excelReport es necesario para compositeReports</value>
-  </data>
   <data name="Character" xml:space="preserve">
     <value>carácter</value>
   </data>
@@ -246,12 +193,6 @@
   <data name="Executions" xml:space="preserve">
     <value>Ejecuciones</value>
   </data>
-  <data name="RepositoryNotSet" xml:space="preserve">
-    <value>No se ha establecido el repositorio para el archivo</value>
-  </data>
-  <data name="SufixNotSet" xml:space="preserve">
-    <value>No se ha establecido el sufijo para el archivo</value>
-  </data>
   <data name="IncorrectPassword" xml:space="preserve">
     <value>Contraseña incorrecta</value>
   </data>
@@ -278,9 +219,6 @@
   </data>
   <data name="FromMany0_m" xml:space="preserve">
     <value>desde muchos {0}</value>
-  </data>
-  <data name="TheOperationNeedsA0InTheArgumentNumber1_f" xml:space="preserve">
-    <value>La operacion necesita una {0} en el argumento {1}</value>
   </data>
   <data name="_0IsA1_m" xml:space="preserve">
     <value>{0} es un {1}</value>
@@ -321,12 +259,6 @@
   <data name="From0OfThe1" xml:space="preserve">
     <value>desde {0} del {1} </value>
   </data>
-  <data name="TheOperationNeedsA0InTheArgumentNumber1" xml:space="preserve">
-    <value>La operación necesita un {0} en el argumento número {1}</value>
-  </data>
-  <data name="Operation0DoesNotHaveConstructInitialized" xml:space="preserve">
-    <value>La operación {0} no tiene un Construct inicializado</value>
-  </data>
   <data name="The0" xml:space="preserve">
     <value>El {0}</value>
   </data>
@@ -345,17 +277,11 @@
   <data name="BelongsToAnotherKindOkLinqProvider" xml:space="preserve">
     <value>{0} peretenece a otro tipo de Linq Provider</value>
   </data>
-  <data name="ConstantExpressionWithAComplexIQueryableUnexpectedAt" xml:space="preserve">
-    <value>ConstantExpression con un IQueryable complejo no esperado en este punto</value>
-  </data>
   <data name="HelpNotLoaded" xml:space="preserve">
     <value>Ayuda no cargada</value>
   </data>
   <data name="NoHelpFor0" xml:space="preserve">
     <value>No hay ayuda para {0}</value>
-  </data>
-  <data name="NoTypeWithFullName0FoundInTheSchema" xml:space="preserve">
-    <value>No se ha encontrado un Tipo con el nombre completo {0} en el esquema</value>
   </data>
   <data name="NotRegisteredInEmailLogic" xml:space="preserve">
     <value>{0} no está resgistrado en EmailLogic</value>
@@ -363,26 +289,11 @@
   <data name="NotRegistered" xml:space="preserve">
     <value>{0} no está registrado</value>
   </data>
-  <data name="NoUsersToProcessFound" xml:space="preserve">
-    <value>No se han encontrado usuarios que procesar</value>
-  </data>
-  <data name="NoEntitiesToProcessFound" xml:space="preserve">
-    <value>No se han encontrado entidades que procesar</value>
-  </data>
   <data name="ProcessExecution0IsNotRunningAnymore" xml:space="preserve">
     <value>El ProcessExecution {0} ya no está ejecutándose</value>
   </data>
   <data name="ResetPasswordCode" xml:space="preserve">
     <value>Código para restablecer la contraseña</value>
-  </data>
-  <data name="NoEmailsToProcessFound" xml:space="preserve">
-    <value>No se encontraron mensajes de correo electrónico para procesar</value>
-  </data>
-  <data name="SystemUserNotLoadedInitializeToLevel1SimpleEntities" xml:space="preserve">
-    <value>SystemUser no cargado. Inicializar a Level1SimpleEntities</value>
-  </data>
-  <data name="AnonymousUserNotLoadedInitializeToLevel1SimpleEntities" xml:space="preserve">
-    <value>AnonymousUser no cargado. Inicialize a nivel Level1SimpleEntities</value>
   </data>
   <data name="ExcelTemplateMustHaveExtensionXLSXandCurrentOneHas0" xml:space="preserve">
     <value>El template Excel debe tener extensión .xlsx, pero el actual tiene extensión {0}</value>

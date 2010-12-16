@@ -136,17 +136,8 @@
   <data name="AccessToFacadeMethod0IsNotAllowed" xml:space="preserve">
     <value>Acesso ao método fachada '{0}' não é permitido</value>
   </data>
-  <data name="AfterTheOperationTheStateShouldBe0ButIs1" xml:space="preserve">
-    <value>Após a operação o estado deveria ser {0} mas é {1}</value>
-  </data>
-  <data name="AmbiguityBetweenInterfaces0" xml:space="preserve">
-    <value>Ambiguidade entre interfaces {0}</value>
-  </data>
   <data name="Amount" xml:space="preserve">
     <value>Montante</value>
-  </data>
-  <data name="AnonymousUserNotLoadedInitializeToLevel1SimpleEntities" xml:space="preserve">
-    <value>Utilizador anónimo não carregado Inicializar para o nível {0} SimpleEntities</value>
   </data>
   <data name="BelongsToAnotherKindOkLinqProvider" xml:space="preserve">
     <value>{0} pertence a outro tipo de fornecedor Linq</value>
@@ -165,9 +156,6 @@
   </data>
   <data name="Check" xml:space="preserve">
     <value>Verificado</value>
-  </data>
-  <data name="ConstantExpressionWithAComplexIQueryableUnexpectedAt" xml:space="preserve">
-    <value>Expressão constante com um complexo IQueryable inesperado At</value>
   </data>
   <data name="ConstructsANew0" xml:space="preserve">
     <value>Constrói um novo {0}</value>
@@ -189,13 +177,6 @@
   </data>
   <data name="EmailIsNotValid" xml:space="preserve">
     <value>Email inválido</value>
-  </data>
-  <data name="ErrorParsingXMLHelpFiles" xml:space="preserve">
-    <value>Erro ao separar arquivos de ajuda XML:
-</value>
-  </data>
-  <data name="ExcelReportArgumentIsNecessaryForCompositeReports" xml:space="preserve">
-    <value>Argumento de referência Excel necessário para compôr relatórios</value>
   </data>
   <data name="ExcelTemplateMustHaveExtensionXLSXandCurrentOneHas0" xml:space="preserve">
     <value>Modelo Excel deverá ter a extensão. xlsx, a actual tem {0}</value>
@@ -239,12 +220,6 @@
   <data name="LastExecution" xml:space="preserve">
     <value>Última execução</value>
   </data>
-  <data name="NoEmailsToProcessFound" xml:space="preserve">
-    <value>Nenhum E-mail encontrado para processar</value>
-  </data>
-  <data name="NoEntitiesToProcessFound" xml:space="preserve">
-    <value>Nenhuma entidade encontrada para processar</value>
-  </data>
   <data name="NoHelpFor0" xml:space="preserve">
     <value>Nenhuma ajuda para {0}</value>
   </data>
@@ -263,15 +238,6 @@
   <data name="NotRegisteredInEmailLogic" xml:space="preserve">
     <value>{0} não está registado no EmailLogic</value>
   </data>
-  <data name="NotValueFor0IsNotFoundIn1Table" xml:space="preserve">
-    <value>Não valor para {0} não encontrado na {1} tabela</value>
-  </data>
-  <data name="NoTypeWithFullName0FoundInTheSchema" xml:space="preserve">
-    <value>Nenhum tipo com o nome completo {0} encontrado em Schema</value>
-  </data>
-  <data name="NoUsersToProcessFound" xml:space="preserve">
-    <value>Nenhum usuário encontrado para processar</value>
-  </data>
   <data name="OfThe0" xml:space="preserve">
     <value>Do {0}</value>
   </data>
@@ -281,35 +247,8 @@
   <data name="OfThe0_m" xml:space="preserve">
     <value>Do {0}</value>
   </data>
-  <data name="Operation0DoesNotHaveConstructInitialized" xml:space="preserve">
-    <value>Operação {0} não tem construção inicializada</value>
-  </data>
-  <data name="Operation0DoesNotHaveConstructorInitialized" xml:space="preserve">
-    <value>Operação {0} não tem constructor inicializado</value>
-  </data>
-  <data name="Operation0DoesNotHaveDeleteInitialized" xml:space="preserve">
-    <value>Operação {0} não tem eliminar inicializado</value>
-  </data>
-  <data name="Operation0DoesNotHaveExecuteInitialized" xml:space="preserve">
-    <value>Operação {0} não tem executar inicializado</value>
-  </data>
-  <data name="Operation0HasNoConstruct" xml:space="preserve">
-    <value>Operação {0} não tem Construção</value>
-  </data>
-  <data name="Operation0IsA1NotA2Use3Instead" xml:space="preserve">
-    <value>Operação {0} é um {1} não um {2}, utilizar '{3}' em vez disso</value>
-  </data>
-  <data name="Operation0IsNotAllowedForLites" xml:space="preserve">
-    <value>Operação {0} não é permitida para lites</value>
-  </data>
   <data name="Operation0IsNotAuthorized" xml:space="preserve">
     <value>Operação {0} não está autorizada</value>
-  </data>
-  <data name="Operation0NeedsALite" xml:space="preserve">
-    <value>Operação {0} precisa de um Lite</value>
-  </data>
-  <data name="Operation0NotFoundForType1" xml:space="preserve">
-    <value>Operação {0} não foi encontrada para o tipo {1}</value>
   </data>
   <data name="OrNull" xml:space="preserve">
     <value>ou nulo</value>
@@ -326,9 +265,6 @@
   <data name="RemovesThe0FromTheDatabase" xml:space="preserve">
     <value>Remove {0} da base de dados</value>
   </data>
-  <data name="RepositoryNotSet" xml:space="preserve">
-    <value>Arquivo não estabelecido</value>
-  </data>
   <data name="ResetPasswordCode" xml:space="preserve">
     <value>Restaurar password</value>
   </data>
@@ -337,12 +273,6 @@
   </data>
   <data name="String" xml:space="preserve">
     <value>Cadeia</value>
-  </data>
-  <data name="SufixNotSet" xml:space="preserve">
-    <value>Sufixo não estabelecido</value>
-  </data>
-  <data name="SystemUserNotLoadedInitializeToLevel1SimpleEntities" xml:space="preserve">
-    <value>Usuário do sistema não carregado Inicializar para o nível {0} SimpleEntities</value>
   </data>
   <data name="The0" xml:space="preserve">
     <value>O {0}</value>
@@ -362,26 +292,8 @@
   <data name="TheExcelTemplateHasAColumn0NotPresentInTheFindWindow" xml:space="preserve">
     <value>O modelo do Excel tem uma coluna {0} não existente no motor de busca</value>
   </data>
-  <data name="TheFollowingKeysHaveBeenRepeatedIn01" xml:space="preserve">
-    <value>As seguintes chaves foram repetidas em {0} {1}</value>
-  </data>
-  <data name="TheKey0IsNotFoundIn1Table" xml:space="preserve">
-    <value>Chave {0} não é encontrada na tabela {1}</value>
-  </data>
-  <data name="TheOperationNeedsA0InTheArgumentNumber1" xml:space="preserve">
-    <value>A operação precisa de um {0} no argumento número {1}</value>
-  </data>
-  <data name="TheOperationNeedsA0InTheArgumentNumber1_f" xml:space="preserve">
-    <value>A operação precisa de uma {0} no argumento número {1}</value>
-  </data>
-  <data name="TheOperationNeedsA0InTheArgumentNumber1_m" xml:space="preserve">
-    <value>A operação precisa de um {0} no argumento número {1}</value>
-  </data>
   <data name="ThereAreNoResultsToWrite" xml:space="preserve">
     <value>Não há resultados para escrever</value>
-  </data>
-  <data name="Type0HasToImplement1AtLeast" xml:space="preserve">
-    <value>Tipo {0} tem de implementar pelo menos {1}</value>
   </data>
   <data name="Username0IsNotValid" xml:space="preserve">
     <value>Nome de utilizador {0} não é válido</value>

@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="BasicPermissions_AdminRules" xml:space="preserve">
-    <value>Gestire le regole</value>
+    <value>Gestione regole</value>
   </data>
   <data name="CalendarDN" xml:space="preserve">
     <value>Calendario</value>
@@ -220,13 +220,10 @@
     <value>Pacchetto di posta elettronica</value>
   </data>
   <data name="EmailPackageDN_NumErrors" xml:space="preserve">
-    <value>Num errori</value>
+    <value>Num. errori</value>
   </data>
   <data name="EmailPackageDN_NumLines" xml:space="preserve">
     <value>Num linee</value>
-  </data>
-  <data name="EmailPackageDN_Template" xml:space="preserve">
-    <value>Modello</value>
   </data>
   <data name="EnumDN_Key" xml:space="preserve">
     <value>Key</value>
@@ -339,14 +336,14 @@
   <data name="LogOperationDN_User" xml:space="preserve">
     <value>Utente</value>
   </data>
-  <data name="LogOperationQueries_All" xml:space="preserve">
-    <value>Tutti</value>
+  <data name="AggregateFunction_Sum" xml:space="preserve">
+    <value>Somma</value>
   </data>
-  <data name="LogOperationQueries_Completed" xml:space="preserve">
-    <value>Completato</value>
+  <data name="AggregateFunction_Min" xml:space="preserve">
+    <value>Min</value>
   </data>
-  <data name="LogOperationQueries_InProcess" xml:space="preserve">
-    <value>Nel processo</value>
+  <data name="AggregateFunction_Max" xml:space="preserve">
+    <value>Max</value>
   </data>
   <data name="NotUserLogged" xml:space="preserve">
     <value>Utente non registrato</value>
@@ -354,8 +351,8 @@
   <data name="PackageDN" xml:space="preserve">
     <value>Pacchetto</value>
   </data>
-  <data name="PackageDN_Lines" xml:space="preserve">
-    <value>Linee</value>
+  <data name="AggregateFunction_Count" xml:space="preserve">
+    <value>Conteggio</value>
   </data>
   <data name="PackageDN_Name" xml:space="preserve">
     <value>Nome</value>
@@ -370,7 +367,7 @@
     <value>Eccezione</value>
   </data>
   <data name="PackageLineDN_FinishTime" xml:space="preserve">
-    <value>Finr</value>
+    <value>Fine</value>
   </data>
   <data name="PackageLineDN_Package" xml:space="preserve">
     <value>Pacchetto</value>
@@ -390,8 +387,8 @@
   <data name="ProcessExecutionDN_CreationDate" xml:space="preserve">
     <value>Data di creazione</value>
   </data>
-  <data name="ProcessExecutionDN_ErrorDate" xml:space="preserve">
-    <value>Data di errore</value>
+  <data name="AggregateFunction_Average" xml:space="preserve">
+    <value>Media</value>
   </data>
   <data name="ProcessExecutionDN_Exception" xml:space="preserve">
     <value>Eccezione</value>
@@ -499,7 +496,7 @@
     <value>Attività pianificata</value>
   </data>
   <data name="ScheduledTaskDN_NextDate" xml:space="preserve">
-    <value>Data successiva </value>
+    <value>Data successiva</value>
   </data>
   <data name="ScheduledTaskDN_Rule" xml:space="preserve">
     <value>Regola</value>
@@ -644,5 +641,434 @@
   </data>
   <data name="UserQueryDN_Orders" xml:space="preserve">
     <value>Ordini</value>
+  </data>
+  <data name="ChartBase_ChartType" xml:space="preserve">
+    <value>Tipo di grafico</value>
+  </data>
+  <data name="ChartBase_FirstDimension" xml:space="preserve">
+    <value>Prima dimensione</value>
+  </data>
+  <data name="ChartBase_FirstValue" xml:space="preserve">
+    <value>Primo valore</value>
+  </data>
+  <data name="ChartBase_GroupResults" xml:space="preserve">
+    <value>Aggruppare risultati</value>
+  </data>
+  <data name="ChartBase_SecondDimension" xml:space="preserve">
+    <value>Seconda dimensione</value>
+  </data>
+  <data name="ChartBase_SecondValue" xml:space="preserve">
+    <value>Secondo valore</value>
+  </data>
+  <data name="ChartRequest_Filters" xml:space="preserve">
+    <value>Filtri</value>
+  </data>
+  <data name="ChartResultType_Bubbles" xml:space="preserve">
+    <value>Bolle</value>
+  </data>
+  <data name="ChartResultType_Points" xml:space="preserve">
+    <value>Punti</value>
+  </data>
+  <data name="ChartResultType_TypeValue" xml:space="preserve">
+    <value>Tipo di valore</value>
+  </data>
+  <data name="ChartTokenDN" xml:space="preserve">
+    <value>Grafico token</value>
+  </data>
+  <data name="ChartTokenDN_Format" xml:space="preserve">
+    <value>Formato</value>
+  </data>
+  <data name="ChartTokenDN_OrderPriority" xml:space="preserve">
+    <value>Ordine di priorità</value>
+  </data>
+  <data name="ChartTokenDN_Type" xml:space="preserve">
+    <value>Tipo</value>
+  </data>
+  <data name="ChartTokenDN_Unit" xml:space="preserve">
+    <value>Unità</value>
+  </data>
+  <data name="ChartType_Bars" xml:space="preserve">
+    <value>Barre</value>
+  </data>
+  <data name="ChartType_Bubbles" xml:space="preserve">
+    <value>Bolle</value>
+  </data>
+  <data name="ChartType_Columns" xml:space="preserve">
+    <value>Colonne</value>
+  </data>
+  <data name="ChartType_Lines" xml:space="preserve">
+    <value>Linee</value>
+  </data>
+  <data name="ChartType_Pie" xml:space="preserve">
+    <value>Torta</value>
+  </data>
+  <data name="ChartType_Points" xml:space="preserve">
+    <value>Punti</value>
+  </data>
+  <data name="ChartType_StackedBars" xml:space="preserve">
+    <value>Barre impilate</value>
+  </data>
+  <data name="ChartType_TotalBars" xml:space="preserve">
+    <value>Totale barre</value>
+  </data>
+  <data name="ChartType_TotalColumns" xml:space="preserve">
+    <value>Totale colonne</value>
+  </data>
+  <data name="ControlPanelDN" xml:space="preserve">
+    <value>Pannello di controllo</value>
+  </data>
+  <data name="ControlPanelDN_NumberOfColumns" xml:space="preserve">
+    <value>Numero di colonne</value>
+  </data>
+  <data name="ControlPanelDN_Parts" xml:space="preserve">
+    <value>Parti</value>
+  </data>
+  <data name="ControlPanelDN_Related" xml:space="preserve">
+    <value>Correlati</value>
+  </data>
+  <data name="CountSearchControlPartDN_UserQueries" xml:space="preserve">
+    <value>Query utente</value>
+  </data>
+  <data name="CountUserQueryElement_Label" xml:space="preserve">
+    <value>Etichetta</value>
+  </data>
+  <data name="CustomTaskExecutionDN_user" xml:space="preserve">
+    <value>utente</value>
+  </data>
+  <data name="DeploymentLogDN_CreationDate" xml:space="preserve">
+    <value>Data di creazione</value>
+  </data>
+  <data name="DeploymentLogDN_DatabaseName" xml:space="preserve">
+    <value>Database Name</value>
+  </data>
+  <data name="DeploymentLogDN_DataSourceName" xml:space="preserve">
+    <value>Data Source Name</value>
+  </data>
+  <data name="DeploymentLogDN_Description" xml:space="preserve">
+    <value>Descrizione</value>
+  </data>
+  <data name="DeploymentLogDN_MachineName" xml:space="preserve">
+    <value>Machine Name</value>
+  </data>
+  <data name="DeploymentLogDN_Version" xml:space="preserve">
+    <value>Versione</value>
+  </data>
+  <data name="EmailMessageDN_Body" xml:space="preserve">
+    <value>Corpo del testo</value>
+  </data>
+  <data name="EmailPackageDN_Name" xml:space="preserve">
+    <value>Nome</value>
+  </data>
+  <data name="EmailState_Created" xml:space="preserve">
+    <value>Creato</value>
+  </data>
+  <data name="EmailState_Received" xml:space="preserve">
+    <value>Ricevuto</value>
+  </data>
+  <data name="EmailTemplateDN" xml:space="preserve">
+    <value>Modelli di posta elettronica</value>
+  </data>
+  <data name="EmailTemplateDN_FriendlyName" xml:space="preserve">
+    <value>Nome descrittivo</value>
+  </data>
+  <data name="EmailTemplateDN_FullClassName" xml:space="preserve">
+    <value>Full Class Name</value>
+  </data>
+  <data name="EmbeddedFileDN" xml:space="preserve">
+    <value>File incorporato</value>
+  </data>
+  <data name="EmbeddedFileDN_BinaryFile" xml:space="preserve">
+    <value>File binario</value>
+  </data>
+  <data name="EmbeddedFileDN_FileName" xml:space="preserve">
+    <value>Nome del file</value>
+  </data>
+  <data name="FileDN" xml:space="preserve">
+    <value>File</value>
+  </data>
+  <data name="FileDN_BinaryFile" xml:space="preserve">
+    <value>File binario</value>
+  </data>
+  <data name="FilePathDN_BinaryFile" xml:space="preserve">
+    <value>File binario</value>
+  </data>
+  <data name="FileTypeDN" xml:space="preserve">
+    <value>Tipo di file</value>
+  </data>
+  <data name="LinkElement_Label" xml:space="preserve">
+    <value>Etichetta</value>
+  </data>
+  <data name="LinkElement_Link" xml:space="preserve">
+    <value>Link</value>
+  </data>
+  <data name="LinkListPartDN_Links" xml:space="preserve">
+    <value>Links</value>
+  </data>
+  <data name="OperationDN" xml:space="preserve">
+    <value>Operazione</value>
+  </data>
+  <data name="PackageLineDN_Result" xml:space="preserve">
+    <value>Risultato</value>
+  </data>
+  <data name="PanelPart_Column" xml:space="preserve">
+    <value>Colonna</value>
+  </data>
+  <data name="PanelPart_Content" xml:space="preserve">
+    <value>Contenuto</value>
+  </data>
+  <data name="PanelPart_Fill" xml:space="preserve">
+    <value>Riempimento</value>
+  </data>
+  <data name="PanelPart_Row" xml:space="preserve">
+    <value>Riga</value>
+  </data>
+  <data name="PanelPart_Title" xml:space="preserve">
+    <value>Titolo</value>
+  </data>
+  <data name="PermissionDN" xml:space="preserve">
+    <value>Autorizzazione</value>
+  </data>
+  <data name="ProcessExecutionDN_User" xml:space="preserve">
+    <value>Utente</value>
+  </data>
+  <data name="ProcessOperation_Create" xml:space="preserve">
+    <value>Creare</value>
+  </data>
+  <data name="ProcessState_Error" xml:space="preserve">
+    <value>Errore</value>
+  </data>
+  <data name="PropertyDN" xml:space="preserve">
+    <value>Proprietà</value>
+  </data>
+  <data name="PropertyDN_Path" xml:space="preserve">
+    <value>Percorso di accesso</value>
+  </data>
+  <data name="PropertyDN_Route" xml:space="preserve">
+    <value>Percorso</value>
+  </data>
+  <data name="PropertyDN_Type" xml:space="preserve">
+    <value>Tipo</value>
+  </data>
+  <data name="QueryFilterDN" xml:space="preserve">
+    <value>Filtro Query</value>
+  </data>
+  <data name="QueryFilterDN_Operation" xml:space="preserve">
+    <value>Operazione</value>
+  </data>
+  <data name="QueryFilterDN_Value" xml:space="preserve">
+    <value>Valore</value>
+  </data>
+  <data name="QueryOrderDN" xml:space="preserve">
+    <value>Ordine Query</value>
+  </data>
+  <data name="QueryOrderDN_Index" xml:space="preserve">
+    <value>Indice</value>
+  </data>
+  <data name="QueryTokenDN_Token" xml:space="preserve">
+    <value>Token</value>
+  </data>
+  <data name="ResetPasswordRequestDN_Code" xml:space="preserve">
+    <value>Codice</value>
+  </data>
+  <data name="ResetPasswordRequestDN_User" xml:space="preserve">
+    <value>Utente</value>
+  </data>
+  <data name="UserChartDN_DisplayName" xml:space="preserve">
+    <value>Nome visualizzato</value>
+  </data>
+  <data name="UserChartDN_Filters" xml:space="preserve">
+    <value>Filtri</value>
+  </data>
+  <data name="UserChartDN_Query" xml:space="preserve">
+    <value>Query</value>
+  </data>
+  <data name="UserChartDN_Related" xml:space="preserve">
+    <value>Correlati</value>
+  </data>
+  <data name="UserDN_AnulationDate" xml:space="preserve">
+    <value>Data di Anulation</value>
+  </data>
+  <data name="UserOperation_NewPassword" xml:space="preserve">
+    <value>Nuova password</value>
+  </data>
+  <data name="UserQueryDN_Query" xml:space="preserve">
+    <value>Query</value>
+  </data>
+  <data name="UserQueryDN_Related" xml:space="preserve">
+    <value>Correlati</value>
+  </data>
+  <data name="UserState_Created" xml:space="preserve">
+    <value>Creato</value>
+  </data>
+  <data name="UserState_Disabled" xml:space="preserve">
+    <value>Non abilitato</value>
+  </data>
+  <data name="UserTicketDN" xml:space="preserve">
+    <value>Ticket utente</value>
+  </data>
+  <data name="UserTicketDN_ConnectionDate" xml:space="preserve">
+    <value>Data di connessione</value>
+  </data>
+  <data name="UserTicketDN_Device" xml:space="preserve">
+    <value>Dispositivo</value>
+  </data>
+  <data name="UserTicketDN_Ticket" xml:space="preserve">
+    <value>Ticket</value>
+  </data>
+  <data name="UserTicketDN_User" xml:space="preserve">
+    <value>Utente</value>
+  </data>
+  <data name="FacadeMethodDN" xml:space="preserve">
+    <value>Metodo di facciata</value>
+  </data>
+  <data name="ProcessExecutionDN_ExceptionDate" xml:space="preserve">
+    <value>Data di eccezione</value>
+  </data>
+  <data name="ChartBase_ChartResultType" xml:space="preserve">
+    <value>Tipo di risultato del grafico</value>
+  </data>
+  <data name="ChartRequest" xml:space="preserve">
+    <value>Richiesta di grafico</value>
+  </data>
+  <data name="ChartRequest_QueryName" xml:space="preserve">
+    <value>Nome della query</value>
+  </data>
+  <data name="ChartResultType_TypeTypeValue" xml:space="preserve">
+    <value>Valore del tipo di tipo</value>
+  </data>
+  <data name="ChartTokenDN_Aggregate" xml:space="preserve">
+    <value>Aggiunto</value>
+  </data>
+  <data name="ChartTokenDN_DisplayName" xml:space="preserve">
+    <value>Nome visualizzato</value>
+  </data>
+  <data name="ChartTokenDN_OrderType" xml:space="preserve">
+    <value>Tipo di ordine</value>
+  </data>
+  <data name="ChartType_MultiBars" xml:space="preserve">
+    <value>Multi barre</value>
+  </data>
+  <data name="ChartType_MultiColumns" xml:space="preserve">
+    <value>Multi colonne</value>
+  </data>
+  <data name="ChartType_MultiLines" xml:space="preserve">
+    <value>Multi linee</value>
+  </data>
+  <data name="ChartType_StackedAreas" xml:space="preserve">
+    <value>Aree impilate</value>
+  </data>
+  <data name="ChartType_StackedColumns" xml:space="preserve">
+    <value>Colonne impilate</value>
+  </data>
+  <data name="ChartType_TotalAreas" xml:space="preserve">
+    <value>Totale aree</value>
+  </data>
+  <data name="ControlPanelDN_DisplayName" xml:space="preserve">
+    <value>Nome visualizzato</value>
+  </data>
+  <data name="ControlPanelDN_HomePage" xml:space="preserve">
+    <value>Home Page</value>
+  </data>
+  <data name="CountUserQueryElement_UserQuery" xml:space="preserve">
+    <value>Query utente</value>
+  </data>
+  <data name="DateSpanDN" xml:space="preserve">
+    <value>Intervallo di date</value>
+  </data>
+  <data name="EmailMessageDN_FechaCreacion" xml:space="preserve">
+    <value>Data di creazione</value>
+  </data>
+  <data name="EmailState_Sent" xml:space="preserve">
+    <value>Inviato</value>
+  </data>
+  <data name="EmailState_SentError" xml:space="preserve">
+    <value>Invio fallito</value>
+  </data>
+  <data name="EmbeddedFileDN_FullWebPath" xml:space="preserve">
+    <value>Percorso Web completo</value>
+  </data>
+  <data name="EntityGroupDN" xml:space="preserve">
+    <value>Gruppo di entità</value>
+  </data>
+  <data name="FileDN_FileName" xml:space="preserve">
+    <value>Nome del file</value>
+  </data>
+  <data name="FileDN_FullWebPath" xml:space="preserve">
+    <value>Percorso Web completo</value>
+  </data>
+  <data name="FileDN_WebPath" xml:space="preserve">
+    <value>Percorso Web</value>
+  </data>
+  <data name="FilePathDN" xml:space="preserve">
+    <value>Percorso del file</value>
+  </data>
+  <data name="FilePathDN_FileLength" xml:space="preserve">
+    <value>Dimensioni file</value>
+  </data>
+  <data name="FilePathDN_FileTypeEnum" xml:space="preserve">
+    <value>File di tipo Enum</value>
+  </data>
+  <data name="FileRepositoryDN_FullPhysicalPrefix" xml:space="preserve">
+    <value>Prefisso fisico</value>
+  </data>
+  <data name="HourMinuteDN" xml:space="preserve">
+    <value>Ora e minuti</value>
+  </data>
+  <data name="LinkElement" xml:space="preserve">
+    <value>Link</value>
+  </data>
+  <data name="PackageDN_NumErrors" xml:space="preserve">
+    <value>Num. Errori</value>
+  </data>
+  <data name="PackageDN_NumLines" xml:space="preserve">
+    <value>Num. Linee</value>
+  </data>
+  <data name="QueryColumnDN" xml:space="preserve">
+    <value>Colonna di query</value>
+  </data>
+  <data name="QueryColumnDN_DisplayName" xml:space="preserve">
+    <value>Nome visualizzato</value>
+  </data>
+  <data name="QueryFilterDN_ValueString" xml:space="preserve">
+    <value>Valore stringa</value>
+  </data>
+  <data name="QueryOrderDN_OrderType" xml:space="preserve">
+    <value>Tipo di ordine</value>
+  </data>
+  <data name="ResetPasswordRequestDN" xml:space="preserve">
+    <value>Richiesta nuova password</value>
+  </data>
+  <data name="ResetPasswordRequestDN_RequestDate" xml:space="preserve">
+    <value>Data di richiesta</value>
+  </data>
+  <data name="UserChartDN" xml:space="preserve">
+    <value>Tabella utente</value>
+  </data>
+  <data name="UserDN_PasswordHash" xml:space="preserve">
+    <value>Password Hash</value>
+  </data>
+  <data name="UserQueryDN_ColumnsMode" xml:space="preserve">
+    <value>Modalità di colonne</value>
+  </data>
+  <data name="ChartType_Doughnout" xml:space="preserve">
+    <value>Ciambella</value>
+  </data>
+  <data name="DeploymentLogDN" xml:space="preserve">
+    <value>Deployment Log</value>
+  </data>
+  <data name="LinkListPartDN" xml:space="preserve">
+    <value>Voce di elenco link</value>
+  </data>
+  <data name="LogOperationDN" xml:space="preserve">
+    <value>Log Operation</value>
+  </data>
+  <data name="PanelPart" xml:space="preserve">
+    <value>Elemento di pannello</value>
+  </data>
+  <data name="TaskOperation_ExecutePrivate" xml:space="preserve">
+    <value>Esecuzione privata</value>
+  </data>
+  <data name="RoleQueries_ReferedBy" xml:space="preserve">
+    <value>Riferito a</value>
   </data>
 </root>
