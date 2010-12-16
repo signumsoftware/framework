@@ -195,7 +195,7 @@ namespace Signum.Engine
 
         public static string ReplaceTitle(Match m)
         {
-            return "<h" + m.Groups["begin"].Length + ">" + m.Groups["content"].ToString() + "</h" + m.Groups["end"].Length + ">";
+            return "<h" + m.Groups["begin"].Length + ">" + m.Groups["content"].ToString().Trim() + "</h" + m.Groups["end"].Length + ">";
         }
     }
 
