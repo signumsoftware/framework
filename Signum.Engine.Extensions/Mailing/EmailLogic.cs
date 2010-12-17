@@ -50,7 +50,10 @@ namespace Signum.Engine.Mailing
 
     public static class EmailLogic
     {
-        public static string OverrideEmailToAddress; 
+        public static string OverrideEmailToAddress;
+        [ThreadStatic]
+        public static string TemporaryOverrideEmailToAddress;
+        public const string TemporaryOverrideEmailToAddressSessionKey = "sfTemporaryOverrideEmailToAddress";
 
         public static Func<SmtpClient> SmtpClientBuilder;
 
@@ -276,7 +279,8 @@ namespace Signum.Engine.Mailing
 
         static MailMessage CreateMailMessage(EmailMessageDN emailMessage)
         {
-            MailAddress to = OverrideEmailToAddress.HasText() ? new MailAddress(OverrideEmailToAddress) :
+            MailAddress to = TemporaryOverrideEmailToAddress.HasText() ? new MailAddress(TemporaryOverrideEmailToAddress) :
+                OverrideEmailToAddress.HasText() ? new MailAddress(OverrideEmailToAddress) :
                 new MailAddress(emailMessage.Recipient.Retrieve().Email); 
 
 
