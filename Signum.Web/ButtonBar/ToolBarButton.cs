@@ -17,8 +17,8 @@ namespace Signum.Web
         public string AltText { get; set; }
         public string OnClick { get; set; }
 
-        public static string DefaultEntityDivCssClass = "entity-operation";
-        public static string DefaultQueryCssClass = "query-operation";
+        public static string DefaultEntityDivCssClass = "entity-button";
+        public static string DefaultQueryCssClass = "query-button";
 
         private string divCssClass;
         public string DivCssClass

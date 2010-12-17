@@ -385,11 +385,20 @@ namespace Signum.Web.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Executing operation....
+        ///   Looks up a localized string similar to Executed.
         /// </summary>
-        public static string Signum_executingOperation {
+        public static string Signum_Executed {
             get {
-                return ResourceManager.GetString("Signum_executingOperation", resourceCulture);
+                return ResourceManager.GetString("Signum_Executed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Executing....
+        /// </summary>
+        public static string Signum_Executing {
+            get {
+                return ResourceManager.GetString("Signum_Executing", resourceCulture);
             }
         }
         
@@ -408,15 +417,6 @@ namespace Signum.Web.Properties {
         public static string Signum_noResults {
             get {
                 return ResourceManager.GetString("Signum_noResults", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Operation exécutée.
-        /// </summary>
-        public static string Signum_operationExecuted {
-            get {
-                return ResourceManager.GetString("Signum_operationExecuted", resourceCulture);
             }
         }
         

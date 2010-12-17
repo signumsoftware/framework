@@ -51,7 +51,7 @@
        { %>
         <input type="button" value="+" class="lineButton create" onclick="<%= findOptions.Creating.HasText() ? findOptions.Creating : "SearchCreate({{prefix:'{0}'}});".Formato(context.ControlID)%>" />
     <%} %>
-    <ul class="operations">
+    <ul class="button-bar">
     <%= ButtonBarQueryHelper.GetButtonBarElementsForQuery(this.ViewContext, findOptions.QueryName, entitiesType, context.ControlID).ToString(Html)%> 
     </ul>
 </div>

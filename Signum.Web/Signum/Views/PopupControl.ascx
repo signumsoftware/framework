@@ -28,7 +28,7 @@
         <span class="popupEntityName"><%= modelTC.UntypedValue.GetType().NiceName()%></span> <span class="popupTitle"><%= modelTC.UntypedValue.TryToString() %></span>
         <%} %>
     </div>
-    <ul class="operations">
+    <ul class="button-bar">
         <%if (Model != null && Navigator.Manager.ShowOkSave(modelTC.UntypedValue.GetType(), false)){ %>
             <% if(ViewData[ViewDataKeys.OnOk]!=null) { %>
             <li><input type="button" id="<%=modelTC.Compose(ViewDataKeys.BtnOk)%>" value="OK" onclick="<%=ViewData[ViewDataKeys.OnOk]%>" /></li>

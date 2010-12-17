@@ -252,14 +252,14 @@
   <data name="Signum_error" xml:space="preserve">
     <value>Error</value>
   </data>
-  <data name="Signum_executingOperation" xml:space="preserve">
-    <value>Executing operation...</value>
+  <data name="Signum_Executing" xml:space="preserve">
+    <value>Executing...</value>
   </data>
   <data name="Signum_noElementsSelected" xml:space="preserve">
     <value>No elements selected</value>
   </data>
-  <data name="Signum_operationExecuted" xml:space="preserve">
-    <value>Operation exécutée</value>
+  <data name="Signum_Executed" xml:space="preserve">
+    <value>Executed</value>
   </data>
   <data name="Signum_popupErrors" xml:space="preserve">
     <value>There are errors in the entity, you want to continue?</value>

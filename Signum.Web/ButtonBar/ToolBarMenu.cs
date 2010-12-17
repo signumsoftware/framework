@@ -25,7 +25,7 @@ namespace Signum.Web
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            using (sb.Surround(new HtmlTag("ul").Class("menu-operation")))
+            using (sb.Surround(new HtmlTag("ul").Class("menu-button")))
                 if (Items != null)
                 {
                     foreach (ToolBarButton tbb in Items)
