@@ -2,53 +2,64 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
-using System.Web.Security;
-using System.Web.SessionState;
-using Signum.Engine.Maps;
-using $custommessage$.Web.Properties;
-using $custommessage$.Web;
+using System.Web.Mvc;
+using System.Web.Routing;
 using $custommessage$.Logic;
+using Signum.Engine;
+using $custommessage$.Web.Properties;
+using Signum.Engine.Maps;
+using Signum.Web;
 
 namespace $custommessage$.Web
 {
-    public class Global : System.Web.HttpApplication
-    {
+    // Note: For instructions on enabling IIS6 or IIS7 classic mode, 
+    // visit http://go.microsoft.com/?LinkId=9394801
 
-        protected void Application_Start(object sender, EventArgs e)
+    public class MvcApplication : System.Web.HttpApplication
+    {
+        public static void RegisterRoutes(RouteCollection routes)
         {
-            Starter.Start(Settings.Default.ConnectionString);
+            routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
+
+            routes.MapRoute(
+               "view",
+               "View/{typeUrlName}/{id}",
+               new { controller = "Signum", action = "View", typeFriendlyName = "", id = "" }
+            );
+
+            routes.MapRoute(
+                "find",
+                "Find/{sfQueryUrlName}",
+                new { controller = "Signum", action = "Find", sfQueryUrlName = "" }
+            );
+
+            routes.MapRoute(
+                "Default", // Route name
+                "{controller}/{action}/{id}", // URL with parameters
+                new { controller = "Home", action = "Index", id = UrlParameter.Optional } // Parameter defaults
+            );
+        }
+
+        protected void Application_Start()
+        {
+            RegisterRoutes(RouteTable.Routes);
+
+            Starter.Start(UserConnections.Replace(Settings.Default.ConnectionString));
 
             Schema.Current.Initialize();
+            WebStart();
         }
 
-        protected void Session_Start(object sender, EventArgs e)
+        private void WebStart()
         {
+            Navigator.Start(new NavigationManager());
+            Constructor.Start(new ConstructorManager());
+            
+            $custommessage$Client.Start();
 
-        }
+            ScriptHtmlHelper.Manager.MainAssembly = typeof($custommessage$Client).Assembly;
 
-        protected void Application_BeginRequest(object sender, EventArgs e)
-        {
-
-        }
-
-        protected void Application_AuthenticateRequest(object sender, EventArgs e)
-        {
-
-        }
-
-        protected void Application_Error(object sender, EventArgs e)
-        {
-
-        }
-
-        protected void Session_End(object sender, EventArgs e)
-        {
-
-        }
-
-        protected void Application_End(object sender, EventArgs e)
-        {
-
+            Navigator.Initialize();
         }
     }
 }

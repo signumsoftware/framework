@@ -1,0 +1,77 @@
+﻿/* Default CSS rules are embedded in Signum.Web and are accessible via Signum/Content/LineStyles.css */
+/* Feel free to override them as you wish here */
+
+h1
+{
+    margin:0px;
+}
+
+.line:after,.lastUnit:after
+{
+    clear:both;
+    display:block;
+    visibility:hidden;
+    overflow:hidden;
+    height:0 !important;
+    line-height:0;
+    font-size:xx-large;
+}
+.unit{float:left;}
+.lastUnit
+{
+    display:table-cell;
+    float:none;
+    width:auto;
+    _position:relative;
+    _left:-3px;
+    _margin-right:-3px;
+}
+
+body
+{
+    background: #eee;
+    color: #333;
+    padding: 0px 0px 40px;
+}
+
+#title
+{
+    padding:25px;    
+    background:#eee;
+    border-bottom: 10px solid #ccc;
+}
+
+.page
+{
+    background: #fff;
+    margin: 0px 10px;
+}
+
+#menu
+{
+    background: #DDD;
+    width: 15%;
+}
+
+#menu h2 {
+background: #333;
+color: white;
+font-size: 1em;
+font-weight: normal;
+padding: 6px 12px;
+margin:0;
+text-transform: uppercase;
+}
+
+#main
+{
+    width: 80%;
+    padding-left:10px;
+}
+
+#footer
+{
+    margin-top:10px;    
+    text-align:center;
+    background:#ccc;
+}

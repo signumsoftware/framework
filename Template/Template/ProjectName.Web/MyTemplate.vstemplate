@@ -1,7 +1,7 @@
-<VSTemplate Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005" Type="Project">
+<VSTemplate Version="3.0.0" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005" Type="Project">
   <TemplateData>
     <Name>ProjectName.Web</Name>
-    <Description>Web application for the server</Description>
+    <Description>ASP.Net MVC &amp; WCF Server</Description>
     <ProjectType>CSharp</ProjectType>
     <ProjectSubType>
     </ProjectSubType>
@@ -14,17 +14,45 @@
     <Icon>__TemplateIcon.ico</Icon>
   </TemplateData>
   <TemplateContent>
-    <Project TargetFileName="$custommessage$.Web.csproj" File="ProjectName.Web.csproj" ReplaceParameters="true">
+    <Project TargetFileName="$custommessage$.Web.csproj" File="Capri.Web.csproj" ReplaceParameters="true">
+      <Folder Name="App_Data" TargetFolderName="App_Data" />
+      <Folder Name="Code" TargetFolderName="Code">
+        <ProjectItem ReplaceParameters="true" TargetFileName="$custommessage$Client.cs">CapriClient.cs</ProjectItem>
+      </Folder>
+      <Folder Name="Content" TargetFolderName="Content">
+        <ProjectItem ReplaceParameters="true" TargetFileName="Site.css">Site.css</ProjectItem>
+      </Folder>
+      <Folder Name="Controllers" TargetFolderName="Controllers">
+        <ProjectItem ReplaceParameters="true" TargetFileName="HomeController.cs">HomeController.cs</ProjectItem>
+      </Folder>
       <ProjectItem ReplaceParameters="true" TargetFileName="Global.asax">Global.asax</ProjectItem>
       <ProjectItem ReplaceParameters="true" TargetFileName="Global.asax.cs">Global.asax.cs</ProjectItem>
+      <Folder Name="Models" TargetFolderName="Models" />
       <Folder Name="Properties" TargetFolderName="Properties">
         <ProjectItem ReplaceParameters="true" TargetFileName="AssemblyInfo.cs">AssemblyInfo.cs</ProjectItem>
         <ProjectItem ReplaceParameters="true" TargetFileName="Settings.settings">Settings.settings</ProjectItem>
         <ProjectItem ReplaceParameters="true" TargetFileName="Settings.Designer.cs">Settings.Designer.cs</ProjectItem>
       </Folder>
-      <ProjectItem ReplaceParameters="true" TargetFileName="Server$custommessage$.svc">Server.svc</ProjectItem>
-      <ProjectItem ReplaceParameters="true" TargetFileName="Server$custommessage$.svc.cs">Server.svc.cs</ProjectItem>
+      <Folder Name="Scripts" TargetFolderName="Scripts" />
+      <ProjectItem ReplaceParameters="true" TargetFileName="Server$custommessage$.svc">ServerCapri.svc</ProjectItem>
+      <ProjectItem ReplaceParameters="true" TargetFileName="Server$custommessage$.svc.cs">ServerCapri.svc.cs</ProjectItem>
+      <Folder Name="Views" TargetFolderName="Views">
+        <Folder Name="Capri" TargetFolderName="$custommessage$">
+          <ProjectItem ReplaceParameters="true" TargetFileName="MyEntity.ascx">MyEntity.ascx</ProjectItem>
+        </Folder>
+        <Folder Name="Home" TargetFolderName="Home">
+          <ProjectItem ReplaceParameters="true" TargetFileName="Index.aspx">Index.aspx</ProjectItem>
+        </Folder>
+        <Folder Name="Shared" TargetFolderName="Shared">
+          <ProjectItem ReplaceParameters="true" TargetFileName="Error.aspx">Error.aspx</ProjectItem>
+          <ProjectItem ReplaceParameters="true" TargetFileName="Menu.ascx">Menu.ascx</ProjectItem>
+          <ProjectItem ReplaceParameters="true" TargetFileName="Site.Master">Site.Master</ProjectItem>
+        </Folder>
+        <ProjectItem ReplaceParameters="true" TargetFileName="Web.config">Web.config</ProjectItem>
+      </Folder>
       <ProjectItem ReplaceParameters="true" TargetFileName="Web.config">Web.config</ProjectItem>
+      <ProjectItem ReplaceParameters="true" TargetFileName="Web.Debug.config">Web.Debug.config</ProjectItem>
+      <ProjectItem ReplaceParameters="true" TargetFileName="Web.Release.config">Web.Release.config</ProjectItem>
     </Project>
   </TemplateContent>
   <WizardExtension>

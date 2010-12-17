@@ -27,7 +27,7 @@ namespace $custommessage$.Load
                 {
                     {"N", NewDatabase},
                     {"S", Synchronize},
-                    {"L", null},
+                    {"L", null, "Load"},
                 }.Choose();
 
                 if (action == null)
@@ -42,7 +42,7 @@ namespace $custommessage$.Load
             {
                 Action[] actions = new ConsoleSwitch<int, Action>
                 {
-                    {0, LoadXXX},
+                    {0, LoadMyEntities},
                 }.ChooseMultiple();
 
                 if (actions == null)
@@ -50,7 +50,7 @@ namespace $custommessage$.Load
 
                 foreach (var acc in actions)
                 {
-                    Console.WriteLine("------- Ejecutando {0} ".Formato(acc.Method.Name.SpacePascal(true)).PadRight(Console.WindowWidth - 2, '-'));
+                    Console.WriteLine("------- Executing {0} ".Formato(acc.Method.Name.SpacePascal(true)).PadRight(Console.WindowWidth - 2, '-'));
                     acc();
                 }
             }
@@ -63,7 +63,7 @@ namespace $custommessage$.Load
             if (!val.StartsWith("y") && !val.StartsWith("Y"))
                 return;
 
-            Console.WriteLine("Creating new database...");
+            Console.Write("Creating new database...");
             Administrator.TotalGeneration();
             Console.WriteLine("Done.");
         }
@@ -76,16 +76,15 @@ namespace $custommessage$.Load
             Console.WriteLine();
 
             SqlPreCommand command = Administrator.TotalSynchronizeScript();
-            command.OpenSqlFile();
-            Console.WriteLine("Open again?");
-            string val = Console.ReadLine();
-            if (!val.StartsWith("y") && !val.StartsWith("Y"))
-                return;
-
-            command.OpenSqlFile();
+			if (command == null)
+			{
+                Console.WriteLine("Already synchronized!");
+				return; 
+			}				
+            command.OpenSqlFileRetry();
         }
 
-        static void LoadXXX()
+        static void LoadMyEntities()
         {
 
         }
