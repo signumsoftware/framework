@@ -20,7 +20,7 @@ namespace Signum.Web
         public static string DefaultEntityDivCssClass = "entity-button";
         public static string DefaultQueryCssClass = "query-button";
 
-        private string divCssClass;
+        private string divCssClass = "not-set";
         public string DivCssClass
         {
             get { return divCssClass; }

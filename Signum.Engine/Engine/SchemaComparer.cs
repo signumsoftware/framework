@@ -123,6 +123,7 @@ namespace Signum.Engine
         static Dictionary<string, DiffTable> GetDatabaseDescription()
         {
             var database = (from t in Database.View<SysTables>()
+                            where !Database.View<SysExtendedProperties>().Any(a => a.major_id == t.object_id && a.name == "microsoft_database_tools_support")
                             select new DiffTable
                             {
                                 Name = t.name,

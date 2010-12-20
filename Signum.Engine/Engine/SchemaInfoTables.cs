@@ -87,5 +87,12 @@ namespace Signum.Engine.SchemaInfoTables
         public int column_id;
     }
 
+    [SqlViewName("sys.extended_properties")]
+    public class SysExtendedProperties : IView
+    {
+        public int major_id;
+        public string name;
+    }
+
 #pragma warning restore 649
 }

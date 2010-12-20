@@ -39,6 +39,12 @@ namespace Signum.Web
             if (list != null)
                 links.AddRange(list.SelectMany(a => ((ToolBarButton[])a.DynamicInvoke(controllerContext, entity, partialViewName, prefix)) ?? Enumerable.Empty<ToolBarButton>()).NotNull());
 
+            foreach (var l in links)
+            {
+                if (l.DivCssClass == "not-set")
+                    l.DivCssClass = ToolBarButton.DefaultEntityDivCssClass;
+            }
+
             return links;
         }
     }
@@ -58,6 +64,12 @@ namespace Signum.Web
                     .Cast<GetToolBarButtonQueryDelegate>()
                     .Select(d => d(context, queryName, entityType, prefix) ?? Enumerable.Empty<ToolBarButton>())
                     .NotNull().SelectMany(d => d).ToList());
+
+            foreach (var el in elements)
+            {
+                if (el.DivCssClass == "not-set")
+                    el.DivCssClass = ToolBarButton.DefaultQueryCssClass;
+            }
 
             return elements;
         }

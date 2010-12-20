@@ -55,6 +55,28 @@ namespace Signum.Web
             }
         }
 
+        public static string ViewEntityRoute(IdentifiableEntity ie)
+        {
+            return "~/" + ViewRoute(ie.GetType(), ie.Id);
+        }
+
+        public static string ViewEntityRoute(Lite lite)
+        {
+            return "~/" + ViewRoute(lite.RuntimeType, lite.Id);
+        }
+
+
+        public static RedirectResult RedirectToEntity(IdentifiableEntity ie)
+        {
+            return new RedirectResult(ViewEntityRoute(ie));
+        }
+
+        public static RedirectResult RedirectToEntity(Lite lite)
+        {
+            return new RedirectResult(ViewEntityRoute(lite));
+        }
+     
+
         public static NavigationManager Manager;
 
         public static void Start(NavigationManager manager)
