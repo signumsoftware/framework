@@ -146,15 +146,6 @@
     <Content Include="Scripts\jqueryui\images\ui-icons_454545_256x240.png" />
     <Content Include="Scripts\jqueryui\images\ui-icons_888888_256x240.png" />
     <Content Include="Scripts\jqueryui\images\ui-icons_cd0a0a_256x240.png" />
-    <Content Include="Views\Music\Album.ascx" />
-    <Content Include="Views\Music\AmericanMusicAward.ascx" />
-    <Content Include="Views\Music\Artist.ascx" />
-    <Content Include="Views\Music\Award.ascx" />
-    <Content Include="Views\Music\Band.ascx" />
-    <Content Include="Views\Music\GrammyAward.ascx" />
-    <Content Include="Views\Music\Label.ascx" />
-    <Content Include="Views\Music\PersonalAward.ascx" />
-    <Content Include="Views\Music\Song.ascx" />
     <Content Include="Views\Shared\Menu.ascx" />
   </ItemGroup>
   <ItemGroup>

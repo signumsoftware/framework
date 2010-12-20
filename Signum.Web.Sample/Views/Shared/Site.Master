@@ -8,16 +8,14 @@
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
     <base href="<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/" ) %>" />
 
-    <link href="<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/" ) + "Script/jqueryui/ui.merged.css" %>" rel="stylesheet" type="text/css" />
-    <link href="<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/" ) + "Content/fluid/fluid.min.css" %>" rel="stylesheet" type="text/css" />
-    <link href="<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/" ) + "signum/Content/LineStyles.css" %>" rel="stylesheet" type="text/css" />
+    <%: Html.ScriptCss("~/content/fluid/fluid.min.css", "~/signum/Content/LineStyles.css") %>    
+    <%: Html.ScriptsJs("~/scripts/jquery-1.4.2.min.js")%>    
     
-    <script type="text/javascript" src="Scripts/jquery-1.4.2.min.js"></script>
-    <script type='text/javascript' src='http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.min.js'></script>
+   <script type='text/javascript' src='http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.min.js'></script>
     
-    <!--Calendar-->
-    <% Html.IncludeAreaJs("signum/Scripts/SF_jquery-ui-datepicker-extension.js"); %>    
-    <%= CalendarHelper.GetLocalizationVariables() %>
+
+    <%: Html.ScriptsJs("~/signum/Resources/" +System.Globalization.CultureInfo.CurrentCulture.Name + ".js")%>
+    <%: Html.ScriptsJs("~/signum/Scripts/SF_Globals.js", "~/signum/Scripts/SF_jquery-ui-datepicker-extension.js") %>    
     
     <asp:ContentPlaceHolder ID="head" runat="server"></asp:ContentPlaceHolder>    
 </head>
@@ -30,16 +28,8 @@
     </div>
   
     <div class="container_16" id="main">
-
-        <div class="grid_3 prefix_13" id="login">
-            <% //Html.RenderPartial(AuthClient.LoginUserControlUrl); %>
-        </div>    
-        <div class="clear"></div> 
-        
         <div id="title" class="grid_16">
-            <h1><a href="Home/Index">Signum Extensions Sample</a></h1>
-        </div>
-        <div class="grid_16">
+            <h1><a href="Home/Index">Signum Framework Application</a></h1>
         </div>
         
         <div class="clear"></div>
@@ -65,8 +55,8 @@
             </div>
             <div class="grid_8">            
             <ul>
-               <li><a href="Help">Documentación de ayuda</a></li>
-               <li><a href="mailto:soporte@signumsoftware.com">Soporte</a></li>
+               <li><a href="Help">Help</a></li>
+               <li><a href="mailto:soporte@signumsoftware.com">Support</a></li>
             </ul>
             </div>
         </div>
