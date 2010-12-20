@@ -10,6 +10,31 @@ namespace Signum.Utilities
 {
     public static class Sync
     {
+        public static IDisposable ChangeBothCultures(string cultureName)
+        {
+            if (string.IsNullOrEmpty(cultureName))
+                return null;
+
+            return ChangeBothCultures(new CultureInfo(cultureName));
+        }
+
+        public static IDisposable ChangeBothCultures(CultureInfo ci)
+        {
+            if (ci == null)
+                return null;
+
+            Thread t = Thread.CurrentThread;
+            CultureInfo old = t.CurrentCulture;
+            CultureInfo oldUI = t.CurrentUICulture;
+            t.CurrentCulture = ci;
+            t.CurrentUICulture = ci;
+            return new Disposable(() =>
+            {
+                t.CurrentCulture = old;
+                t.CurrentUICulture = oldUI;
+            });
+        }
+
         public static IDisposable ChangeCulture(string cultureName)
         {
             if (string.IsNullOrEmpty(cultureName))
@@ -90,5 +115,15 @@ namespace Signum.Utilities
             return result;
         }
 
+        public static LocString ToLoc(Func<string> resourceProperty)
+        {
+            return lang =>
+            {
+                using (Sync.ChangeBothCultures(lang))
+                    return resourceProperty();
+            };
+        }
     }
+
+    public delegate string LocString(string lang);
 }
