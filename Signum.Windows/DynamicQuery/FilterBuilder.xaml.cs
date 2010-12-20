@@ -20,8 +20,8 @@ using Signum.Entities.Reflection;
 
 namespace Signum.Windows
 {
-	public partial class FilterBuilder
-	{
+    public partial class FilterBuilder
+    {
         public static readonly DependencyProperty FiltersProperty =
             DependencyProperty.Register("Filters", typeof(FreezableCollection<FilterOption>), typeof(FilterBuilder), new UIPropertyMetadata(null));
         public FreezableCollection<FilterOption> Filters
@@ -30,13 +30,14 @@ namespace Signum.Windows
             set { SetValue(FiltersProperty, value); }
         }
 
-        public DragController FilterDragController {get;set;}
+        public DragController FilterDragController { get; set; }
 
         public FilterBuilder()
         {
-            FilterDragController = new DragController(fe => {
+            FilterDragController = new DragController(fe =>
+            {
                 FilterOption fo = ((FilterOption)((QueryTokenRenderer)fe).DataContext);
-                return new FilterOption { Token = fo.Token, Operation = fo.Operation, RealValue = fo.RealValue };               
+                return new FilterOption { Token = fo.Token, Operation = fo.Operation, RealValue = fo.RealValue };
             }, DragDropEffects.Copy);
             this.InitializeComponent();
         }
@@ -48,7 +49,7 @@ namespace Signum.Windows
             FilterOption f = (FilterOption)g.DataContext;
             Implementations implementations = f.Token.Implementations();
             Common.SetIsReadOnly(g, f.Frozen);
-        
+
             Type type = f.Token.Type;
             if (typeof(Lite).IsAssignableFrom(type))
             {
@@ -114,18 +115,18 @@ namespace Signum.Windows
             {
                 QueryToken token = f.Token;
 
-                ValueLine vl = new ValueLine() 
-                { 
-                    Type = type, 
-                    Format = token.Format, 
-                    UnitText = token.Unit 
+                ValueLine vl = new ValueLine()
+                {
+                    Type = type,
+                    Format = token.Format,
+                    UnitText = token.Unit
                 };
 
                 if (type.UnNullify().IsEnum)
                 {
                     vl.ItemSource = EnumProxy.GetValues(type.UnNullify()).PreAndNull(type.IsNullable());
                 }
-               
+
 
                 vl.SetBinding(ValueLine.ValueProperty, new Binding
                 {
@@ -198,7 +199,7 @@ namespace Signum.Windows
             FilterOption f = new FilterOption
             {
                 Token = queryToken,
-                Value = null,
+                Value = queryToken.Type.IsValueType && !queryToken.Type.IsNullable() ? Activator.CreateInstance(queryToken.Type) : null,
                 Operation = QueryUtils.GetFilterOperations(ft).First()
             };
 
