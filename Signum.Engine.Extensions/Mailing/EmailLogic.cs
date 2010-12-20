@@ -53,7 +53,14 @@ namespace Signum.Engine.Mailing
         public static string OverrideEmailToAddress;
         [ThreadStatic]
         public static string TemporaryOverrideEmailToAddress;
-        public const string TemporaryOverrideEmailToAddressSessionKey = "sfTemporaryOverrideEmailToAddress";
+
+        public static IDisposable OverrideTemporaryEmail(string toAddress)
+        {
+            string old = TemporaryOverrideEmailToAddress;
+            TemporaryOverrideEmailToAddress = toAddress;
+
+            return new Disposable(() => TemporaryOverrideEmailToAddress = old);
+        }
 
         public static Func<SmtpClient> SmtpClientBuilder;
 
@@ -203,18 +210,21 @@ namespace Signum.Engine.Mailing
 
         public static EmailMessageDN CreateEmailMessage(IEmailModel model, Lite<EmailPackageDN> package)
         {
-            EmailContent content = GetTemplate(model.GetType())(model);
-
-            var result = new EmailMessageDN
+            using (Sync.ChangeBothCultures(model.To.CultureInfo))
             {
-                State = EmailState.Created,
-                Recipient = model.To.ToLite(),
-                Template = GetTemplateDN(model.GetType()),
-                Subject = content.Subject,
-                Body = content.Body,
-                Package = package
-            };
-            return result;
+                EmailContent content = GetTemplate(model.GetType())(model);
+
+                var result = new EmailMessageDN
+                {
+                    State = EmailState.Created,
+                    Recipient = model.To.ToLite(),
+                    Template = GetTemplateDN(model.GetType()),
+                    Subject = content.Subject,
+                    Body = content.Body,
+                    Package = package
+                };
+                return result;
+            }
         }
 
         public static EmailMessageDN Send(this IEmailModel model)
@@ -279,7 +289,8 @@ namespace Signum.Engine.Mailing
 
         static MailMessage CreateMailMessage(EmailMessageDN emailMessage)
         {
-            MailAddress to = TemporaryOverrideEmailToAddress.HasText() ? new MailAddress(TemporaryOverrideEmailToAddress) :
+            MailAddress to = 
+                TemporaryOverrideEmailToAddress.HasText() ? new MailAddress(TemporaryOverrideEmailToAddress) :
                 OverrideEmailToAddress.HasText() ? new MailAddress(OverrideEmailToAddress) :
                 new MailAddress(emailMessage.Recipient.Retrieve().Email); 
 
@@ -300,6 +311,7 @@ namespace Signum.Engine.Mailing
             EmailPackageDN package = new EmailPackageDN
             {
                 NumLines = emails.Count,
+                OverrideEmailAddress = EmailLogic.TemporaryOverrideEmailToAddress,
             }.Save();
 
             var packLite = package.ToLite();
@@ -325,6 +337,7 @@ namespace Signum.Engine.Mailing
             EmailPackageDN package = new EmailPackageDN
             {
                 NumLines = recipientList.Count,
+                OverrideEmailAddress = EmailLogic.TemporaryOverrideEmailToAddress
             }.Save();
 
             var lite = package.ToLite();

@@ -114,6 +114,7 @@ namespace Signum.Entities.Mailing
     public interface IEmailOwnerDN : IIdentifiable
     {
         string Email { get; }
+        string CultureInfo { get; }
     }
 
     public enum EmailProcesses
@@ -150,6 +151,13 @@ namespace Signum.Entities.Mailing
         {
             get { return numErrors; }
             set { SetToStr(ref numErrors, value, () => NumErrors); }
+        }
+
+        string overrideEmailAddress;
+        public string OverrideEmailAddress
+        {
+            get { return overrideEmailAddress; }
+            set { Set(ref overrideEmailAddress, value, () => OverrideEmailAddress); }
         }
 
         public override string ToString()

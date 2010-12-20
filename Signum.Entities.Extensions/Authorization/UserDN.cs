@@ -11,6 +11,7 @@ using System.Reflection;
 using Signum.Entities.Extensions.Properties;
 using Signum.Entities.Mailing;
 using Signum.Entities.Extensions.Authorization;
+using System.Linq.Expressions;
 
 namespace Signum.Entities.Authorization
 {
@@ -81,6 +82,13 @@ namespace Signum.Entities.Authorization
         {
             get { return state; }
             set { Set(ref state, value, () => State); }
+        }
+
+        public static Expression<Func<UserDN, string>> CultureInfoExpression = 
+            u => null;
+        public string CultureInfo
+        {
+            get { return CultureInfoExpression.Invoke(this); }
         }
 
         protected override string PropertyValidation(PropertyInfo pi)

@@ -24,7 +24,8 @@ namespace Signum.Engine.Mailing
             EmailPackageDN package = new EmailPackageDN()
             {
                 NumLines = messages.Count,
-                Name = args.TryGetArgC<string>(1)
+                Name = args.TryGetArgC<string>(1),
+                OverrideEmailAddress = EmailLogic.TemporaryOverrideEmailToAddress
             }.Save();
 
             messages.Select(m => m.RetrieveAndForget()).Select(m => new EmailMessageDN()
@@ -48,40 +49,43 @@ namespace Signum.Engine.Mailing
                                                  where email.Package == package.ToLite() && email.State == EmailState.Created
                                                  select email.ToLite()).ToList();
 
-            int lastPercentage = 0;
-            for (int i = 0; i < emails.Count; i++)
+            using (EmailLogic.OverrideTemporaryEmail(package.OverrideEmailAddress))
             {
-                if (executingProcess.Suspended)
-                    return FinalState.Suspended;
-
-                EmailMessageDN ml = emails[i].RetrieveAndForget();
-
-                try
+                int lastPercentage = 0;
+                for (int i = 0; i < emails.Count; i++)
                 {
-                    using (Transaction tr = new Transaction(true))
+                    if (executingProcess.Suspended)
+                        return FinalState.Suspended;
+
+                    EmailMessageDN ml = emails[i].RetrieveAndForget();
+
+                    try
                     {
-                        EmailLogic.SendMail(ml);
-                        tr.Commit();
+                        using (Transaction tr = new Transaction(true))
+                        {
+                            EmailLogic.SendMail(ml);
+                            tr.Commit();
+                        }
                     }
-                }
-                catch (Exception e)
-                {
-                    using (Transaction tr = new Transaction(true))
+                    catch (Exception e)
                     {
-                        ml.Exception = e.Message;
-                        ml.Save();
-                        tr.Commit();
+                        using (Transaction tr = new Transaction(true))
+                        {
+                            ml.Exception = e.Message;
+                            ml.Save();
+                            tr.Commit();
 
-                        package.NumErrors++;
-                        package.Save();
+                            package.NumErrors++;
+                            package.Save();
+                        }
                     }
-                }
 
-                int percentage = (NotificationSteps * i) / emails.Count;
-                if (percentage != lastPercentage)
-                {
-                    executingProcess.ProgressChanged(percentage * 100 / NotificationSteps);
-                    lastPercentage = percentage;
+                    int percentage = (NotificationSteps * i) / emails.Count;
+                    if (percentage != lastPercentage)
+                    {
+                        executingProcess.ProgressChanged(percentage * 100 / NotificationSteps);
+                        lastPercentage = percentage;
+                    }
                 }
             }
 
