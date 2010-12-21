@@ -191,6 +191,8 @@
       <SubType>ASPXCodeBehind</SubType>
     </Content>
     <Content Include="Profiler\Views\ProfilerTable.ascx" />
+    <Content Include="Scheduler\Views\Calendar.ascx" />
+    <Content Include="Scheduler\Views\Holiday.ascx" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
