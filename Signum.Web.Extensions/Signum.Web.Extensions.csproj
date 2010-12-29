@@ -121,6 +121,7 @@
     <Compile Include="Reports\ReportClient.cs" />
     <Compile Include="Reports\Controllers\ReportController.cs" />
     <Compile Include="ControllerFilters\FilterAttributes.cs" />
+    <Compile Include="Scheduler\SchedulerClient.cs" />
     <Compile Include="ScriptCombiner\CombineController.cs" />
     <Compile Include="ScriptCombiner\Combiner.cs" />
     <Compile Include="ScriptCombiner\CombinerScriptHtmlManager.cs" />
@@ -192,6 +193,12 @@
     </Content>
     <Content Include="Profiler\Views\ProfilerTable.ascx" />
     <Content Include="Scheduler\Views\Calendar.ascx" />
+    <Content Include="Scheduler\Views\ScheduleRuleDaily.ascx" />
+    <Content Include="Scheduler\Views\ScheduleRuleWeekDays.ascx" />
+    <Content Include="Scheduler\Views\ScheduleRuleWeekly.ascx" />
+    <Content Include="Scheduler\Views\ScheduleRuleDay.ascx" />
+    <Content Include="Scheduler\Views\ScheduledTask.ascx" />
+    <Content Include="Scheduler\Views\CustomTaskExecution.ascx" />
     <Content Include="Scheduler\Views\Holiday.ascx" />
     <Content Include="Web.config" />
   </ItemGroup>

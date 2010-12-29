@@ -159,6 +159,7 @@
     <None Include="Authorization\Authorization.cd" />
     <None Include="Reports\CompositeReport.cd" />
     <None Include="Files\Files.cd" />
+    <None Include="Scheduler\Scheduler.cd" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

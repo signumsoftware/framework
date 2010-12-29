@@ -20,14 +20,14 @@ namespace Signum.Engine.Scheduler
 {
     public static class SchedulerLogic
     {
-        public static event Action<string, Exception> Error; 
+        public static event Action<string, Exception> Error;
 
-        static PriorityQueue<ScheduledTaskDN> priorityQueue = new PriorityQueue<ScheduledTaskDN>(new LambdaComparer<ScheduledTaskDN, DateTime>(st=>st.NextDate.Value));
+        static PriorityQueue<ScheduledTaskDN> priorityQueue = new PriorityQueue<ScheduledTaskDN>(new LambdaComparer<ScheduledTaskDN, DateTime>(st => st.NextDate.Value));
 
         static Timer timer = new Timer(new TimerCallback(DispatchEvents), // main timer
-								null,
-								Timeout.Infinite,
-								Timeout.Infinite);
+                                null,
+                                Timeout.Infinite,
+                                Timeout.Infinite);
 
         [ThreadStatic]
         static bool isSafeSave = false;
@@ -36,7 +36,7 @@ namespace Signum.Engine.Scheduler
         {
             bool lastSafe = isSafeSave;
             isSafeSave = true;
-            return new Disposable(() => isSafeSave = lastSafe); 
+            return new Disposable(() => isSafeSave = lastSafe);
         }
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
@@ -44,7 +44,7 @@ namespace Signum.Engine.Scheduler
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 AuthLogic.AssertStarted(sb);
-                OperationLogic.AssertStarted(sb); 
+                OperationLogic.AssertStarted(sb);
 
                 OperationLogic.Register(new BasicExecute<ITaskDN>(TaskOperation.ExecutePrivate)
                 {
@@ -62,12 +62,103 @@ namespace Signum.Engine.Scheduler
                      {
                          Entity = st.ToLite(),
                          st.Id,
-                         st.ToStr,
+                         //st.ToStr,
                          st.NextDate,
                          st.Suspended,
                      }).ToDynamic();
 
-                CustomTaskLogic.Start(sb, dqm); 
+                dqm[typeof(CalendarDN)] =
+                 (from st in Database.Query<CalendarDN>()
+                  select new
+                  {
+                      Entity = st.ToLite(),
+                      st.Id,
+                      st.Name,
+                      st.Holidays.Count,
+
+                  }).ToDynamic();
+
+
+         
+
+
+                dqm[typeof(CustomTaskExecutionDN)] =
+                    (from st in Database.Query<CustomTaskExecutionDN>()
+                     select new
+                     {
+                         Entity = st.ToLite(),
+                         st.Id,
+                         st.user,
+                         st.StartTime,
+                         st.EndTime,
+                         st.Exception,
+
+                     }).ToDynamic();
+
+
+                dqm[typeof(ScheduledTaskDN)] =
+                (from st in Database.Query<ScheduledTaskDN>()
+                 select new
+                 {
+                     Entity = st.ToLite(),
+                     st.Id,
+                     st.NextDate,
+                     st.Suspended,
+                     Rule = st.Rule.ToLite(),
+                     Task = st.Task.ToLite(),
+
+
+                 }).ToDynamic();
+
+                dqm[typeof(ScheduleRuleDailyDN)] =
+                (from st in Database.Query<ScheduleRuleDailyDN>()
+                 select new
+                 {
+                     Entity = st.ToLite(),
+                     st.Id,
+                     st.StartingOn,
+                     st.Hour,
+                     st.Minute,                     
+                 }).ToDynamic();
+
+
+                dqm[typeof(ScheduleRuleWeekDaysDN)] =
+                (from st in Database.Query<ScheduleRuleWeekDaysDN>()
+                 select new
+                 {
+                     Entity = st.ToLite(),
+                     st.Id,
+                     st.StartingOn,
+                     st.Hour,
+                     st.Minute,
+                     st.Monday,
+                     st.Wednesday,
+                     st.Tuesday,                 
+                     st.Friday,
+                     st.Saturday,
+                     st.Sunday,
+                     st.Holiday,                    
+
+                 }).ToDynamic();
+
+
+
+                dqm[typeof(ScheduleRuleWeeklyDN)] =
+             (from st in Database.Query<ScheduleRuleWeeklyDN>()
+              select new
+              {
+                  Entity = st.ToLite(),
+                  st.Id,
+                  st.StartingOn,
+                  st.DayOfTheWeek,
+                  st.Hour,
+                  st.Minute,
+                  
+              }).ToDynamic();
+
+
+
+                CustomTaskLogic.Start(sb, dqm);
             }
         }
 
@@ -87,27 +178,27 @@ namespace Signum.Engine.Scheduler
 
         static void Transaction_RealCommit()
         {
-            ReloadPlan(); 
+            ReloadPlan();
         }
 
         public static void ReloadPlan()
         {
             using (new EntityCache(true))
             using (AuthLogic.Disable())
-            lock(priorityQueue)
-            {
-                List<ScheduledTaskDN> schTasks = Database.Query<ScheduledTaskDN>().Where(st => !st.Suspended).ToList();
-
-                using(SafeSaving())
+                lock (priorityQueue)
                 {
-                    schTasks.SaveList(); //Force replanification
+                    List<ScheduledTaskDN> schTasks = Database.Query<ScheduledTaskDN>().Where(st => !st.Suspended).ToList();
+
+                    using (SafeSaving())
+                    {
+                        schTasks.SaveList(); //Force replanification
+                    }
+
+                    priorityQueue.Clear();
+                    priorityQueue.PushAll(schTasks);
+
+                    SetTimer();
                 }
-
-                priorityQueue.Clear(); 
-                priorityQueue.PushAll(schTasks);
-
-                SetTimer(); 
-            }
         }
 
         //Lock priorityQueue
@@ -130,49 +221,49 @@ namespace Signum.Engine.Scheduler
         static void OnError(string message, Exception ex)
         {
             if (Error != null)
-                Error(message, ex); 
+                Error(message, ex);
         }
 
-        static readonly TimeSpan MinimumSpan = TimeSpan.FromSeconds(10); 
+        static readonly TimeSpan MinimumSpan = TimeSpan.FromSeconds(10);
 
         static void DispatchEvents(object obj) // obj ignored
         {
             using (new EntityCache(true))
             using (AuthLogic.Disable())
-            lock (priorityQueue)
-            {
-                if (priorityQueue.Empty)
+                lock (priorityQueue)
                 {
-                    OnError("Inconstency in SchedulerLogic PriorityQueue", null);
-                    return; 
-                }
+                    if (priorityQueue.Empty)
+                    {
+                        OnError("Inconstency in SchedulerLogic PriorityQueue", null);
+                        return;
+                    }
 
-                ScheduledTaskDN st = priorityQueue.Pop(); //Exceed timer change
-                if (st.NextDate.HasValue && (st.NextDate - TimeZoneManager.Now) > MinimumSpan)
-                {
+                    ScheduledTaskDN st = priorityQueue.Pop(); //Exceed timer change
+                    if (st.NextDate.HasValue && (st.NextDate - TimeZoneManager.Now) > MinimumSpan)
+                    {
+                        SetTimer();
+                        return;
+                    }
+
+                    using (SafeSaving())
+                        st.Save();
+                    priorityQueue.Push(st);
+
+                    new Thread(() =>
+                    {
+                        try
+                        {
+                            using (AuthLogic.User(AuthLogic.SystemUser))
+                                st.Task.ToLite().ExecuteLite(TaskOperation.ExecutePrivate);
+                        }
+                        catch (Exception e)
+                        {
+                            OnError("Error executing task '{0}' with rule '{1}'".Formato(st.Task, st.Rule), e);
+                        }
+                    }).Start();
+
                     SetTimer();
-                    return;
                 }
-
-                using (SafeSaving())
-                    st.Save();
-                priorityQueue.Push(st);
-
-                new Thread(() =>
-                {
-                    try
-                    {
-                        using (AuthLogic.User(AuthLogic.SystemUser))
-                            st.Task.ToLite().ExecuteLite(TaskOperation.ExecutePrivate);
-                    }
-                    catch (Exception e)
-                    {
-                        OnError("Error executing task '{0}' with rule '{1}'".Formato(st.Task, st.Rule), e); 
-                    }
-                }).Start();
-
-                SetTimer(); 
-            }
         }
     }
 }

@@ -71,6 +71,18 @@ namespace Signum.Engine.Operations
                                                    lo.Start,
                                                    lo.End,
                                                    lo.Exception
+                                               }).ToDynamic();
+
+
+                dqm[typeof(OperationDN)] = (from lo in Database.Query<OperationDN>()
+                                               select new
+                                               {
+                                                   Entity = lo.ToLite(),
+                                                   lo.Id,
+                                                   lo.Name,
+                                                   lo.Key,
+                                                   
+                                           
                                                }).ToDynamic(); 
             }
         }
