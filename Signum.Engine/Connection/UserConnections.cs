@@ -24,7 +24,7 @@ namespace Signum.Engine
                 return new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
 
             Debug.WriteLine("UserConnection's file found on {0}".Formato(FileName));
-
+            Debug.WriteLine("{0}".Formato(File.ReadAllText(FileName)));
             return File.ReadAllLines(FileName).Select(s => s.Split('>')).ToDictionary(a => a[0], a => a[1]);          
         }
 
