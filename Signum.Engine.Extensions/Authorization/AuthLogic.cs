@@ -172,7 +172,7 @@ namespace Signum.Engine.Authorization
                 using (AuthLogic.Disable())
                 {
                     SystemUser = Database.Query<UserDN>().Single(a => a.UserName == SystemUserName);
-                    AnonymousUser = Database.Query<UserDN>().Single(a => a.UserName == AnonymousUserName);
+                    if (AnonymousUserName != null) AnonymousUser = Database.Query<UserDN>().Single(a => a.UserName == AnonymousUserName); //TODO: OLMO hay que proporcianarlo siempre?
                 }
             }
         }
