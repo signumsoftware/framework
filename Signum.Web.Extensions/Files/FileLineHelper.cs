@@ -76,7 +76,7 @@ namespace Signum.Web.Files
                 sb.AddLine(EntityBaseHelper.RemoveButton(helper, fileLine));
             }
 
-            using (sb.Surround(new HtmlTag("div", fileLine.Compose("DivNew")).Attr("style", "display:" + (hasEntity ? "block" : "none"))))
+            using (sb.Surround(new HtmlTag("div", fileLine.Compose("DivNew")).Attr("style", "display:" + (hasEntity ? "none" : "block"))))
             {
                 sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, fileLine, fileLine.ControlID));
 
