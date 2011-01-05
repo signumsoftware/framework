@@ -1046,7 +1046,7 @@ namespace Signum.Web
         {
             var dic = new
             { 
-                jsonResultType = JsonResultType.Url.ToString(),
+                result = JsonResultType.url.ToString(),
                 url = url
             };
 
@@ -1059,7 +1059,7 @@ namespace Signum.Web
 
     public enum JsonResultType
     {
-        Url,
+        url,
         ModelState
     }
 }

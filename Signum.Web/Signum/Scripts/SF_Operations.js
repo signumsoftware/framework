@@ -458,7 +458,7 @@ function OpOnSuccessDispatcher(prefix, operationResult, parentDiv) {
     $(".contextmenu-active").removeClass("contextmenu-active");
     if (empty(operationResult))
         return null;
-    if (operationResult.indexOf("jsonResultType") > 0)
+    if (operationResult.indexOf("result") > 0)
         return null; //ModelState errors should have been handled previously and same with redirections
 
     var $result = $(operationResult);
@@ -530,7 +530,7 @@ function OpContextualOnSuccess(prefix, operationResult) {
     $(".contextmenu-active").removeClass("contextmenu-active");
     if (empty(operationResult))
         return null;
-    if (operationResult.indexOf("jsonResultType") > 0)
+    if (operationResult.indexOf("result") > 0)
         return null; //ModelState errors should have been handled previously and same with redirections
 
     var $result = $(operationResult);

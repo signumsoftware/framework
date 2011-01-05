@@ -273,9 +273,9 @@
             json = ajaxResult;
         }
 
-        if (json.jsonResultType == null)
+        if (json.result == null)
             return null;
-        if (json.jsonResultType == 'Url')
+        if (json.result == 'url')
             return json.url;
         return null;
     };
