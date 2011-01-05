@@ -13,7 +13,6 @@ namespace Signum.Engine
         public WikiSettings(bool format)
         {
             Strong = Em = Underlined = Strike = Lists = Titles = format; 
-            AllowRawHtml = false;
             LineBreaks = MaxTwoLineBreaks = true;
         }
 
@@ -26,7 +25,6 @@ namespace Signum.Engine
         public bool Titles { get; set; }
         public bool LineBreaks { get; set; }
 
-        public bool AllowRawHtml { get; set; }
         public bool MaxTwoLineBreaks { get; set; }
 
     }
@@ -38,20 +36,6 @@ namespace Signum.Engine
         public static string WikiParse(this string content, WikiSettings settings)
         {
             string result;
-
-            Dictionary<string, string> htmlFragments = null;
-
-            if (settings.AllowRawHtml)
-            {
-                htmlFragments = new Dictionary<string, string>();
-
-                content = Regex.Replace(content, @"<!\[CDATA\[(?<html>.*?)\]\]>", m =>
-                {
-                    var key = HtmlSubstitute.Formato(htmlFragments.Count);
-                    htmlFragments.Add(key, m.Groups["html"].Value);
-                    return key;
-                }, RegexOptions.Singleline);
-            }
 
             //1: Replace token delimiters which are different from their encoded string so that they are not encoded
             result = Regex.Replace(content, "'{2,}", m => "####" + m.Length + "####");
@@ -68,9 +52,6 @@ namespace Signum.Engine
             //5: Process format
             result = ProcessFormat(result, settings);
            
-            if (settings.AllowRawHtml)
-                result = Regex.Replace(result, @"\|\|(?<key>HTML\d+)\|\|", m => htmlFragments[m.Value]);
-
             return result.Trim();
         }
 
