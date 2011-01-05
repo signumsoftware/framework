@@ -177,7 +177,7 @@ namespace Signum.Web.Queries
             {
                 items.Add(new ToolBarButton
                 {
-                    Text = uq.Retrieve().DisplayName,
+                    Text = uq.InDB().Select(q => q.DisplayName).SingleOrDefault(),
                     OnClick = Js.Submit(UserQueryFindRoute(queryName, uq.Id)).ToJS(),
                     DivCssClass = idCurrentUserQuery == uq.Id ? "SelectedUserQuery" : ""
                 });
