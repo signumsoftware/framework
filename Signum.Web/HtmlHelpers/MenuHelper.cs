@@ -81,7 +81,8 @@ namespace Signum.Web
             set { visible = value; }
         }
 
-        public string Class { get; set; }
+        public string Class { get; set; }           //is applied to link
+        public string ListItemClass { get; set; }   //is applied to list item
         
         public string ToString(string currentUrl, string rootClass) 
         {
@@ -103,7 +104,7 @@ namespace Signum.Web
                 return;
 
             if (depth != 0)
-                sb.AppendLine("<li class=\"l{0}\">".Formato(depth));
+                sb.AppendLine(("<li class=\"l{0}" + (string.IsNullOrEmpty(ListItemClass) ? "" : (" " + ListItemClass)) + "\">").Formato(depth));
 
             bool selectedSubmenu = false;
             if (Id != null && selectedRoute != null && selectedRoute.Split(' ').Contains(Id))
