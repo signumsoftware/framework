@@ -39,7 +39,7 @@ namespace Signum.Web.Reports
             ResultTable queryResult = DynamicQueryManager.Current.ExecuteQuery(request);
             byte[] binaryFile = PlainExcelGenerator.WritePlainExcel(queryResult);
 
-            return File(binaryFile, Signum.Web.Controllers.SignumController.GetMimeType(".xlsx"), Navigator.Manager.QuerySettings[findOptions.QueryName].UrlName + ".xlsx");
+            return File(binaryFile, MimeType.FromExtension(".xlsx"), Navigator.Manager.QuerySettings[findOptions.QueryName].UrlName + ".xlsx");
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
@@ -52,7 +52,7 @@ namespace Signum.Web.Reports
            
             byte[] file = ReportsLogic.ExecuteExcelReport(excelReport, request);
 
-            return File(file, Signum.Web.Controllers.SignumController.GetMimeType(".xlsx"), Navigator.Manager.QuerySettings[findOptions.QueryName].UrlName + "-" + DateTime.Now.ToString("yyyyMMdd-HHmmss") + ".xlsx");
+            return File(file, MimeType.FromExtension(".xlsx"), Navigator.Manager.QuerySettings[findOptions.QueryName].UrlName + "-" + DateTime.Now.ToString("yyyyMMdd-HHmmss") + ".xlsx");
             //Known Bug in IE: When the file dialog is shown, if Open is chosen the Excel will be broken as a result of IE automatically adding [1] to the name. 
             //There's not workaround for this, so either click on Save instead of Open, or use Firefox or Chrome
         }
@@ -129,7 +129,7 @@ namespace Signum.Web.Reports
             HttpContext.Response.AddHeader("content-disposition", "attachment; filename=" + Path.GetFileName(report.File.FileName));
             
             return File(report.File.BinaryFile,
-                Signum.Web.Controllers.SignumController.GetMimeType(Path.GetExtension(report.File.FileName)), 
+                MimeType.FromFileName(report.File.FileName), 
                 report.File.FileName);
         }
     }

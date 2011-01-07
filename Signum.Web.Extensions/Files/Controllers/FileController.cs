@@ -131,7 +131,7 @@ namespace Signum.Web.Files
 
             string path = fp.FullPhysicalPath;
             HttpContext.Response.AddHeader("content-disposition", "attachment; filename=" + Path.GetFileName(path));
-            HttpContext.Response.ContentType = SignumController.GetMimeType(Path.GetExtension(path).ToLower());
+            HttpContext.Response.ContentType = MimeType.FromFileName(path);
             HttpContext.Response.TransmitFile(path);
             return null;
         }
