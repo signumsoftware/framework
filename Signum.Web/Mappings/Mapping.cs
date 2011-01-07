@@ -36,10 +36,10 @@ namespace Signum.Web
 
         public static Mapping<T> Create<T>()
         {
-            if (typeof(ModifiableEntity).IsAssignableFrom(typeof(T)) || typeof(IIdentifiable).IsAssignableFrom(typeof(T)))
+            if (typeof(T).IsModifiableEntity() || typeof(T).IsIIdentifiable())
                 return (Mapping<T>)Activator.CreateInstance(typeof(AutoEntityMapping<>).MakeGenericType(typeof(T)));
 
-            if (typeof(Lite).IsAssignableFrom(typeof(T)))
+            if (typeof(T).IsLite())
                 return (Mapping<T>)Activator.CreateInstance(typeof(LiteMapping<>).MakeGenericType(Reflector.ExtractLite(typeof(T))));
 
             if (Reflector.IsMList(typeof(T)))
@@ -130,7 +130,7 @@ namespace Signum.Web
         }
     }
 
-    public class AutoEntityMapping<T> : Mapping<T> //ModifiableEntity || IIdentifiable
+    public class AutoEntityMapping<T> : Mapping<T> where T: class 
     {
         public Dictionary<Type, Mapping> AllowedMappings;
 
@@ -157,21 +157,24 @@ namespace Signum.Web
                 return (T)(object)null;
             }
 
+            if (typeof(T) == runtimeInfo.RuntimeType || typeof(T).IsEmbeddedEntity())
+                return GetRuntimeValue<T>(ctx); 
+
             return (T)miGetRuntimeValue.GetInvoker(runtimeInfo.RuntimeType)(this, ctx);
         }
 
         static GenericInvoker miGetRuntimeValue = GenericInvoker.Create(typeof(AutoEntityMapping<T>).GetMethod("GetRuntimeValue", BindingFlags.Instance | BindingFlags.Public));
 
         public R GetRuntimeValue<R>(MappingContext<T> tc)
-            where R : ModifiableEntity, T
+            where R : class 
         {
             if (AllowedMappings != null && !AllowedMappings.ContainsKey(typeof(R)))
             {
                 return (R)(object)tc.None(Resources.Type0NotAllowed.Formato(typeof(R)));
             }
 
-            Mapping<R> mapping = ((Mapping<R>)AllowedMappings.TryGetC(typeof(R))) ?? Navigator.EntitySettings<R>().MappingDefault;
-            SubContext<R> sc = new SubContext<R>(tc.ControlID, mapping, null, tc) { Value = (R)tc.Value };
+            Mapping<R> mapping =  (Mapping<R>)(AllowedMappings.TryGetC(typeof(R)) ?? Navigator.EntitySettings(typeof(R)).UntypedMappingDefault);
+            SubContext<R> sc = new SubContext<R>(tc.ControlID, mapping, null, tc) { Value = tc.Value as R }; // If the type is different, the AutoEntityMapping has the current value but EntityMapping just null
             mapping.OnGetValue(sc);
             tc.AddChild(sc);
             return sc.Value;
@@ -183,7 +186,6 @@ namespace Signum.Web
                 ctx.FirstChild.ValidateInternal();
         }
     }
-
 
     public class EntityMapping<T> : Mapping<T> where T : ModifiableEntity
     {
@@ -318,31 +320,30 @@ namespace Signum.Web
             if (runtimeInfo.RuntimeType == null)
                 return null;
 
-            T modifiable = ctx.Value;
-
-            if (runtimeInfo.IsNew)
+            if (typeof(T).IsEmbeddedEntity())
             {
-                if (modifiable != null)
-                {
-                    if (typeof(EmbeddedEntity).IsAssignableFrom(modifiable.GetType()) ||
-                        (typeof(IIdentifiable).IsAssignableFrom(modifiable.GetType()) && ((IIdentifiable)modifiable).IsNew))
-                        return modifiable;
-                }
-                return (T)Constructor.Construct(runtimeInfo.RuntimeType);
+                if (runtimeInfo.IsNew && ctx.Value == null)
+                    return Constructor.Construct<T>();
+
+                return ctx.Value;
             }
-
-            if (typeof(EmbeddedEntity).IsAssignableFrom(runtimeInfo.RuntimeType))
-                return modifiable;
-
-            IdentifiableEntity identifiable = (IdentifiableEntity)(ModifiableEntity)modifiable;
-
-            if (identifiable == null)
-                return (T)(ModifiableEntity)Database.Retrieve(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value);
-
-            if (runtimeInfo.IdOrNull == identifiable.IdOrNull && runtimeInfo.RuntimeType == identifiable.GetType())
-                return (T)(ModifiableEntity)identifiable;
             else
-                return (T)(ModifiableEntity)Database.Retrieve(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value);
+            {
+                IdentifiableEntity identifiable = (IdentifiableEntity)(ModifiableEntity)ctx.Value;
+
+                 if (runtimeInfo.IsNew)
+                 {
+                     if(identifiable != null && identifiable.IsNew)
+                         return (T)(ModifiableEntity)identifiable;
+                     else
+                         return Constructor.Construct<T>();
+                 }
+
+                 if (identifiable != null && runtimeInfo.IdOrNull == identifiable.IdOrNull && runtimeInfo.RuntimeType == identifiable.GetType())
+                     return (T)(ModifiableEntity)identifiable;
+                 else
+                     return (T)(ModifiableEntity)Database.Retrieve(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value);
+            }
         }
 
         public EntityMapping<T> GetProperty<P>(Expression<Func<T, P>> property, Action<Mapping<P>> continuation)
@@ -400,6 +401,9 @@ namespace Signum.Web
             return this;
         }
     }
+
+
+
 
     public class LiteMapping<S> : Mapping<Lite<S>>
         where S : class, IIdentifiable

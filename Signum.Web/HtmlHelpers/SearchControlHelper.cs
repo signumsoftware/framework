@@ -46,7 +46,7 @@ namespace Signum.Web
             if (helper.ViewData.Keys.Count(s => s == ViewDataKeys.PageTitle) == 0)
                 helper.ViewData[ViewDataKeys.PageTitle] = Navigator.Manager.SearchTitle(findOptions.QueryName);
             
-            helper.Write(helper.RenderPartialToString(Navigator.Manager.SearchControlUrl, helper.ViewData));
+            helper.Write(helper.Partial(Navigator.Manager.SearchControlUrl, helper.ViewData));
         }
 
         public static MvcHtmlString CountSearchControl(this HtmlHelper helper, FindOptions findOptions)
@@ -148,7 +148,7 @@ namespace Signum.Web
             return sb.ToHtml();
         }
 
-        public static MvcHtmlString TokensCombo(this HtmlHelper helper, string queryUrlName, IEnumerable<SelectListItem> items, Context context, int index, bool writeExpander)
+        public static MvcHtmlString TokensCombo(this HtmlHelper helper, object queryName, IEnumerable<SelectListItem> items, Context context, int index, bool writeExpander)
         {
             MvcHtmlString expander = null;
             if (writeExpander)
@@ -158,7 +158,7 @@ namespace Signum.Web
                 new
                 {
                     style = (writeExpander) ? "display:none" : "",
-                    onchange = "javascript:NewSubTokensCombo({{prefix:\"{0}\",queryUrlName:\"{1}\"}}".Formato(context.ControlID, queryUrlName) + "," + index + ");"
+                    onchange = "javascript:NewSubTokensCombo({{prefix:\"{0}\",webQueryName:\"{1}\"}}".Formato(context.ControlID, Navigator.ResolveWebQueryName(queryName)) + "," + index + ",'" + RouteHelper.New().SignumAction("NewSubTokensCombo") + "');"
                 });
 
             return expander == null? drop: expander.Concat(drop);
@@ -179,8 +179,7 @@ namespace Signum.Web
         {
             var queryName = helper.ViewData[ViewDataKeys.QueryName];
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-            string queryUrlName = Navigator.Manager.QuerySettings[queryName].UrlName;
-
+            
             var tokenPath = queryToken.FollowC(qt => qt.Parent).Reverse().NotNull().ToList();
 
             if (tokenPath.Count > 0)
@@ -196,7 +195,7 @@ namespace Signum.Web
             }).ToList();
 
             items.Insert(0, new SelectListItem { Text = "-", Selected = true, Value = "" });
-            sb.AddLine(SearchControlHelper.TokensCombo(helper, queryUrlName, items, context, 0, false));
+            sb.AddLine(SearchControlHelper.TokensCombo(helper, queryName, items, context, 0, false));
             
             for (int i = 0; i < tokenPath.Count; i++)
             {
@@ -211,7 +210,7 @@ namespace Signum.Web
                         Selected = i + 1 < tokenPath.Count && qt.Key == tokenPath[i+1].Key
                     }).ToList();
                     subitems.Insert(0, new SelectListItem { Text = "-", Selected = true, Value = "" });
-                    sb.AddLine(SearchControlHelper.TokensCombo(helper, queryUrlName, subitems, context, i + 1, (i + 1 >= tokenPath.Count)));
+                    sb.AddLine(SearchControlHelper.TokensCombo(helper, queryName, subitems, context, i + 1, (i + 1 >= tokenPath.Count)));
                 }
             }
             
@@ -220,12 +219,16 @@ namespace Signum.Web
 
         private static MvcHtmlString PrintValueField(HtmlHelper helper, Context parent, FilterOption filterOption)
         {
-            if (typeof(Lite).IsAssignableFrom(filterOption.Token.Type))
+            if (filterOption.Token.Type.IsLite())
             {
+                Lite lite = (Lite)filterOption.Value; 
+                if (string.IsNullOrEmpty(lite.ToStr))
+                    Database.FillToStr(lite);
+
                 Type cleanType = Reflector.ExtractLite(filterOption.Token.Type);
                 if (Reflector.IsLowPopulation(cleanType) && !cleanType.IsInterface && !(filterOption.Token.Implementations() is ImplementedByAllAttribute) && (cleanType != typeof(IdentifiableEntity)))
                 {
-                    EntityCombo ec = new EntityCombo(filterOption.Token.Type, filterOption.Value, parent, "", filterOption.Token.GetPropertyRoute())
+                    EntityCombo ec = new EntityCombo(filterOption.Token.Type, lite, parent, "", filterOption.Token.GetPropertyRoute())
                     {
                         LabelVisible = false,
                         BreakLine = false,
@@ -236,7 +239,7 @@ namespace Signum.Web
                 }
                 else
                 {
-                    EntityLine el = new EntityLine(filterOption.Token.Type, filterOption.Value, parent, "", filterOption.Token.GetPropertyRoute())
+                    EntityLine el = new EntityLine(filterOption.Token.Type, lite, parent, "", filterOption.Token.GetPropertyRoute())
                     {
                         LabelVisible = false,
                         BreakLine = false,

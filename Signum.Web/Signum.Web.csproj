@@ -156,7 +156,7 @@
     <Compile Include="Facades\QuerySettings.cs" />
     <Compile Include="HtmlHelpers\SearchControlHelper.cs" />
     <Compile Include="SignumViewEngine.cs" />
-    <Compile Include="RenderActionExtenders.cs" />
+    <Compile Include="HtmlHelpers\GenericRouteHelper.cs" />
     <Compile Include="LineHelpers\ValueLineHelper.cs" />
     <Compile Include="ViewDataKeys.cs" />
   </ItemGroup>
@@ -245,9 +245,6 @@
     </Content>
     <EmbeddedResource Include="Properties\Resources.de.resx" />
     <EmbeddedResource Include="Properties\Resources.pt.resx" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Signum\Views\Shared\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" />

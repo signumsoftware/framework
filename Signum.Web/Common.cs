@@ -142,26 +142,26 @@ namespace Signum.Web
         #endregion
 
         #region HttpContext
-        public static string FullyQualifiedApplicationPath
-        {
-            get
-            {
-                HttpContext context = HttpContext.Current;
-                if (context == null)
-                    return null;
+        //public static string FullyQualifiedApplicationPath
+        //{
+        //    get
+        //    {
+        //        HttpContext context = HttpContext.Current;
+        //        if (context == null)
+        //            return null;
 
-                string appPath = "{0}://{1}{2}{3}".Formato(
-                      context.Request.Url.Scheme,
-                      context.Request.Url.Host,
-                      context.Request.Url.Port == 80 ? string.Empty : ":" + context.Request.Url.Port,
-                      context.Request.ApplicationPath);
+        //        string appPath = "{0}://{1}{2}{3}".Formato(
+        //              context.Request.Url.Scheme,
+        //              context.Request.Url.Host,
+        //              context.Request.Url.Port == 80 ? string.Empty : ":" + context.Request.Url.Port,
+        //              context.Request.ApplicationPath);
 
-                if (!appPath.EndsWith("/"))
-                    appPath += "/";
+        //        if (!appPath.EndsWith("/"))
+        //            appPath += "/";
 
-                return appPath;
-            }
-        }
+        //        return appPath;
+        //    }
+        //}
         #endregion
 
         public static object Convert(object obj, Type type)
@@ -173,17 +173,17 @@ namespace Signum.Web
             if (type.IsAssignableFrom(objType))
                 return obj;
 
-            if (typeof(Lite).IsAssignableFrom(objType) && type.IsAssignableFrom(((Lite)obj).RuntimeType))
+            if (objType.IsLite() && type.IsAssignableFrom(((Lite)obj).RuntimeType))
             {
                 Lite lite = (Lite)obj;
                 return lite.UntypedEntityOrNull ?? Database.RetrieveAndForget(lite);
             }
 
-            if (typeof(Lite).IsAssignableFrom(type))
+            if (type.IsLite())
             {
                 Type liteType = Reflector.ExtractLite(type);
 
-                if (typeof(Lite).IsAssignableFrom(objType))
+                if (objType.IsLite())
                 {
                     Lite lite = (Lite)obj;
                     if (liteType.IsAssignableFrom(lite.RuntimeType))

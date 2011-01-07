@@ -15,7 +15,6 @@ namespace Signum.Web
     { 
         public const string RuntimeInfo = "sfRuntimeInfo";
         public const string StaticInfo = "sfStaticInfo";
-        public const string Implementations = "sfImplementations";
         public const string Entity = "sfEntity";
         public const string Template = "sfTemplate";
         public const string ToStr = "sfToStr";
@@ -33,6 +32,14 @@ namespace Signum.Web
             Create = true;
             Find = true;
             Remove = true;
+        }
+
+        public bool HasManyImplementations
+        {
+            get 
+            {
+                return Implementations != null && !Implementations.IsByAll && ((ImplementedByAttribute)Implementations).ImplementedTypes.Length > 1;
+            }
         }
 
         public Implementations Implementations { get; set; }
@@ -103,7 +110,7 @@ namespace Signum.Web
             };
         }
 
-        protected JsViewOptions DefaultJsViewOptions()
+        protected virtual JsViewOptions DefaultJsViewOptions()
         {
             return new JsViewOptions { PartialViewName = this.PartialViewName };
         }
@@ -156,7 +163,7 @@ namespace Signum.Web
                 if (UntypedValue == null)
                     return null;
 
-                return typeof(Lite).IsAssignableFrom(UntypedValue.GetType()) ? (UntypedValue as Lite).RuntimeType : UntypedValue.GetType();
+                return UntypedValue.GetType().IsLite() ? (UntypedValue as Lite).RuntimeType : UntypedValue.GetType();
             }
         }
 

@@ -34,6 +34,7 @@
 
         checkValidation: function (validateUrl, runtimeType) {
             log("EBaseLine checkValidation"); //Receives url as parameter so it can be overriden when setting viewOptions onOk
+
             var info = this.runtimeInfo();
             var id = (info.find().length > 0) ? info.id() : '';
             var validator = new PartialValidator({ controllerUrl: validateUrl, prefix: this.options.prefix, id: id, type: runtimeType });
@@ -76,24 +77,19 @@
             this.fireOnEntityChangedWithTicks(false);
         },
 
-        getRuntimeType: function (_onTypeFound) {
+        getRuntimeType: function (typeChooserUrl, _onTypeFound) {
             log("EBaseLine getRuntimeType");
-            var implSelector = this.pf(sfImplementations);
-            var impl = $(implSelector);
-            if (impl.length == 0)
-                return _onTypeFound(this.staticInfo().staticType());
+            var types = this.staticInfo().types().split(",");
+            if (types.length == 1)
+                return _onTypeFound(types[0]);
 
-            var implementations = impl.val().split(";");
-            if (implementations.length == 1)
-                return _onTypeFound(implementations[0]);
-
-            openChooser(this.options.prefix, _onTypeFound);
+            openChooser(this.options.prefix, _onTypeFound, null, null, {controllerUrl:typeChooserUrl});
         },
 
-        create: function (_viewOptions) {
+        create: function (_viewOptions, typeChooserUrl) {
             log("EBaseLine create");
             var _self = this;
-            var type = this.getRuntimeType(function (type) {
+            var type = this.getRuntimeType(typeChooserUrl, function (type) {
                 _self.typedCreate($.extend({ type: type }, _viewOptions));
             });
         },
@@ -113,17 +109,17 @@
             this.setTicks();
         },
 
-        find: function (_findOptions) {
+        find: function (_findOptions, typeChooserUrl) {
             log("EBaseLine find");
             var _self = this;
-            var type = this.getRuntimeType(function (type) {
-                _self.typedFind($.extend({ queryUrlName: type }, _findOptions));
+            var type = this.getRuntimeType(typeChooserUrl, function (type) {
+                _self.typedFind($.extend({ webQueryName: type }, _findOptions));
             });
         },
 
         typedFind: function (_findOptions) {
             log("EBaseline typedFind");
-            if (empty(_findOptions.queryUrlName)) throw "FindOptions queryUrlName parameter must not be null in EBaseline typedFind. Call find instead";
+            if (empty(_findOptions.webQueryName)) throw "FindOptions webQueryName parameter must not be null in EBaseline typedFind. Call find instead";
             var findOptions = this.createFindOptions(_findOptions);
             new FindNavigator(findOptions).openFinder();
         },
@@ -135,7 +131,7 @@
             var staticInfo = this.staticInfo();
 
             //If Embedded Entity => send path of runtimes and ids to be able to construct a typecontext
-            if (staticInfo.isEmbedded() == "e") {
+            if (staticInfo.isEmbedded()) {
                 var pathInfo = FullPathNodesSelector(this.options.prefix);
                 for (var i = 0; i < pathInfo.length; i++) {
                     var node = pathInfo[i];
@@ -143,7 +139,7 @@
                 }
             }
 
-            if (staticInfo.isReadOnly() == "r") {
+            if (staticInfo.isReadOnly()) {
                 extraParams.sfReadOnly = true;
             }
 
@@ -194,9 +190,6 @@
     var ELine = function (_elineOptions) {
         EBaseLine.call(this, _elineOptions);
 
-        var defaultViewUrl = "Signum/PopupView";
-        var defaultValidateUrl = "Signum/ValidatePartial";
-
         this.updateLinks = function (newToStr, newLink) {
             log("ELine updateLinks");
             var link = $(this.pf(sfLink));
@@ -219,10 +212,10 @@
             var info = this.runtimeInfo();
             return $.extend({
                 containerDiv: this.options.prefix.compose(sfEntity),
-                onOk: function () { return self.onViewingOk(defaultValidateUrl); },
+                onOk: function () { return self.onViewingOk(_viewOptions.validationControllerUrl); },
                 onOkClosed: function () { self.fireOnEntityChanged(true); },
                 onCancelled: null,
-                controllerUrl: defaultViewUrl,
+                controllerUrl: null,
                 type: info.runtimeType(),
                 id: info.id(),
                 prefix: this.options.prefix,
@@ -233,8 +226,6 @@
         this.onViewingOk = function (validateUrl) {
             log("ELine onViewingOk"); //Receives url as parameter so it can be overriden when setting viewOptions onOk
             var acceptChanges = this.checkValidation(validateUrl, this.runtimeInfo().runtimeType());
-            //        if (acceptChanges)
-            //            this.setTicks();
             return acceptChanges;
         };
 
@@ -243,10 +234,10 @@
             var self = this;
             return $.extend({
                 containerDiv: "",
-                onOk: function (clonedElements) { return self.onCreatingOk(clonedElements, defaultValidateUrl, _viewOptions.type); },
+                onOk: function (clonedElements) { return self.onCreatingOk(clonedElements, _viewOptions.validationControllerUrl, _viewOptions.type); },
                 onOkClosed: function () { self.fireOnEntityChanged(true); },
                 onCancelled: null,
-                controllerUrl: defaultViewUrl,
+                controllerUrl: null,
                 prefix: this.options.prefix,
                 requestExtraJsonData: this.extraJsonParams()
             }, _viewOptions);
@@ -300,12 +291,12 @@
 
     ELine.prototype = new EBaseLine();
 
-    function ELineOnCreating(_eline, _viewOptions) {
-        _eline.create(_viewOptions);
+    function ELineOnCreating(_eline, _viewOptions, typeChooserUrl) {
+        _eline.create(_viewOptions, typeChooserUrl);
     }
 
-    function ELineOnFinding(_eline, _findOptions) {
-        _eline.find(_findOptions);
+    function ELineOnFinding(_eline, _findOptions, typeChooserUrl) {
+        _eline.find(_findOptions, typeChooserUrl);
     }
 
     function ELineOnViewing(_eline, _viewOptions) {
@@ -340,7 +331,7 @@
             log("EDLine viewOptionsForCreating");
             return $.extend({
                 containerDiv: this.options.detailDiv,
-                controllerUrl: "Signum/PartialView",
+                controllerUrl: null,
                 prefix: this.options.prefix,
                 requestExtraJsonData: this.extraJsonParams()
             }, _viewOptions);
@@ -356,17 +347,17 @@
             this.fireOnEntityChangedWithTicks(true);
         };
 
-        this.find = function (_findOptions, _viewOptions) {
+        this.find = function (_findOptions, _viewOptions, typeChooserUrl) {
             log("EDLine find");
             var _self = this;
-            var type = this.getRuntimeType(function (type) {
-                _self.typedFind($.extend({ queryUrlName: type }, _findOptions), _viewOptions);
+            var type = this.getRuntimeType(typeChooserUrl, function (type) {
+                _self.typedFind($.extend({ webQueryName: type }, _findOptions), _viewOptions);
             });
         };
 
         this.typedFind = function (_findOptions, _viewOptions) {
             log("EDLine typedFind");
-            if (empty(_findOptions.queryUrlName)) throw "FindOptions queryUrlName parameter must not be null in EDLine typedFind. Call find instead";
+            if (empty(_findOptions.webQueryName)) throw "FindOptions webQueryName parameter must not be null in EDLine typedFind. Call find instead";
             var findOptions = this.createFindOptions(_findOptions, _viewOptions);
             new FindNavigator(findOptions).openFinder();
         };
@@ -403,12 +394,12 @@
 
     EDLine.prototype = new EBaseLine();
 
-    function EDLineOnCreating(_edline, _viewOptions) {
-        _edline.create(_viewOptions);
+    function EDLineOnCreating(_edline, _viewOptions, typeChooserUrl) {
+        _edline.create(_viewOptions, typeChooserUrl);
     }
 
-    function EDLineOnFinding(_edline, _findOptions, _viewOptions) {
-        _edline.find(_findOptions, _viewOptions);
+    function EDLineOnFinding(_edline, _findOptions, _viewOptions, typeChooserUrl) {
+        _edline.find(_findOptions, _viewOptions, typeChooserUrl);
     }
 
     function EDLineOnRemoving(_edline) {
@@ -418,9 +409,6 @@
     //EListOptions = EBaseLineOptions
     var EList = function (_elistOptions) {
         EBaseLine.call(this, _elistOptions);
-
-        var defaultViewUrl = "Signum/PopupView";
-        var defaultValidateUrl = "Signum/ValidatePartial";
 
         this.updateLinks = function (newToStr, newLink, itemPrefix) {
             log("EList updateLinks");
@@ -433,7 +421,7 @@
 
             //If Embedded Entity => send path of runtimes and ids to be able to construct a typecontext
             var staticInfo = this.staticInfo();
-            if (staticInfo.isEmbedded() == "e") {
+            if (staticInfo.isEmbedded()) {
                 var pathInfo = FullPathNodesSelector(itemPrefix);
                 for (var i = 0, l = pathInfo.length; i < l; i++) {
                     var node = pathInfo[i];
@@ -441,7 +429,7 @@
                 }
             }
 
-            if (staticInfo.isReadOnly() == "r") {
+            if (staticInfo.isReadOnly()) {
                 extraParams.sfReadOnly = true;
             }
 
@@ -495,6 +483,7 @@
 
         this.checkValidation = function (validateUrl, runtimeType, itemPrefix) {
             log("EList checkValidation"); //Receives url as parameter so it can be overriden when setting viewOptions onOk
+
             var info = this.itemRuntimeInfo(itemPrefix);
             var id = (info.find().length > 0) ? info.id() : '';
             var validator = new PartialValidator({ controllerUrl: validateUrl, prefix: itemPrefix, id: id, type: runtimeType });
@@ -518,10 +507,10 @@
             var newIndex = +this.getLastIndex() + 1;
             var itemPrefix = this.options.prefix.compose(newIndex);
             return $.extend({
-                onOk: function (clonedElements) { return self.onCreatingOk(clonedElements, defaultValidateUrl, _viewOptions.type, itemPrefix); },
+                onOk: function (clonedElements) { return self.onCreatingOk(clonedElements, _viewOptions.validationControllerUrl, _viewOptions.type, itemPrefix); },
                 onOkClosed: function () { self.fireOnEntityChanged(); },
                 onCancelled: null,
-                controllerUrl: defaultViewUrl,
+                controllerUrl: null,
                 prefix: itemPrefix,
                 requestExtraJsonData: this.extraJsonParams(itemPrefix)
             }, _viewOptions);
@@ -575,10 +564,10 @@
             var info = this.itemRuntimeInfo(itemPrefix);
             return $.extend({
                 containerDiv: itemPrefix.compose(sfEntity),
-                onOk: function () { return self.onViewingOk(defaultValidateUrl, itemPrefix); },
+                onOk: function () { return self.onViewingOk(_viewOptions.validationControllerUrl, itemPrefix); },
                 onOkClosed: function () { self.fireOnEntityChanged(); },
                 onCancelled: null,
-                controllerUrl: defaultViewUrl,
+                controllerUrl: null,
                 type: info.runtimeType(),
                 id: info.id(),
                 prefix: itemPrefix,
@@ -588,10 +577,8 @@
 
         this.onViewingOk = function (validateUrl, itemPrefix) {
             log("EList onViewingOk"); //Receives url as parameter so it can be overriden when setting viewOptions onOk
-            var acceptChanges = this.checkValidation(validateUrl, this.itemRuntimeInfo(itemPrefix).runtimeType(), itemPrefix);
-            //        if (acceptChanges)
-            //            this.setItemTicks(itemPrefix);
-            return acceptChanges;
+            var validatorResult = this.checkValidation(validateUrl, this.itemRuntimeInfo(itemPrefix).runtimeType(), itemPrefix);
+            return validatorResult.acceptChanges;
         };
 
         this.createFindOptions = function (_findOptions) {
@@ -655,12 +642,12 @@
 
     EList.prototype = new EBaseLine();
 
-    function EListOnCreating(_elist, _viewOptions) {
-        _elist.create(_viewOptions);
+    function EListOnCreating(_elist, _viewOptions, typeChooserUrl) {
+        _elist.create(_viewOptions, typeChooserUrl);
     };
 
-    function EListOnFinding(_elist, _findOptions) {
-        _elist.find(_findOptions);
+    function EListOnFinding(_elist, _findOptions, typeChooserUrl) {
+        _elist.find(_findOptions, typeChooserUrl);
     }
 
     function EListOnViewing(_elist, _viewOptions) {
@@ -675,8 +662,6 @@
     var ERep = function (_erepOptions) {
         log("ERep");
         EList.call(this, _erepOptions);
-
-        var defaultViewUrl = "Signum/PartialView";
 
         this.canAddItems = function () {
             log("ERep canAddItems");
@@ -733,7 +718,7 @@
             var itemPrefix = this.options.prefix.compose(newIndex);
             return $.extend({
                 containerDiv: "",
-                controllerUrl: defaultViewUrl,
+                controllerUrl: null,
                 prefix: itemPrefix,
                 requestExtraJsonData: this.extraJsonParams(itemPrefix)
             }, _viewOptions);
@@ -768,23 +753,23 @@
             log("ERep viewOptionsForViewing");
             return $.extend({
                 containerDiv: itemPrefix.compose(sfEntity),
-                controllerUrl: defaultViewUrl,
+                controllerUrl: null,
                 prefix: itemPrefix,
                 requestExtraJsonData: this.extraJsonParams(itemPrefix)
             }, _viewOptions);
         };
 
-        this.find = function (_findOptions, _viewOptions) {
+        this.find = function (_findOptions, _viewOptions, typeChooserUrl) {
             log("ERep find");
             var _self = this;
-            var type = this.getRuntimeType(function (type) {
-                _self.typedFind($.extend({ queryUrlName: type }, _findOptions), _viewOptions);
+            var type = this.getRuntimeType(typeChooserUrl, function (type) {
+                _self.typedFind($.extend({ webQueryName: type }, _findOptions), _viewOptions);
             });
         };
 
         this.typedFind = function (_findOptions, _viewOptions) {
             log("ERep typedFind");
-            if (empty(_findOptions.queryUrlName)) throw "FindOptions queryUrlName parameter must not be null in ERep typedFind. Call find instead";
+            if (empty(_findOptions.webQueryName)) throw "FindOptions webQueryName parameter must not be null in ERep typedFind. Call find instead";
             if (!this.canAddItems()) return;
             var findOptions = this.createFindOptions(_findOptions, _viewOptions);
             new FindNavigator(findOptions).openFinder();
@@ -838,12 +823,12 @@
 
     ERep.prototype = new EList();
 
-    function ERepOnCreating(_erep, _viewOptions) {
-        _erep.create(_viewOptions);
+    function ERepOnCreating(_erep, _viewOptions, typeChooserUrl) {
+        _erep.create(_viewOptions, typeChooserUrl);
     };
 
-    function ERepOnFinding(_erep, _findOptions, _viewOptions) {
-        _erep.find(_findOptions, _viewOptions);
+    function ERepOnFinding(_erep, _findOptions, _viewOptions, typeChooserUrl) {
+        _erep.find(_findOptions, _viewOptions, typeChooserUrl);
     }
 
     function ERepOnRemoving(_erep, itemPrefix) {
@@ -854,8 +839,6 @@
     var EDList = function (_edlistOptions) {
         log("EDList");
         EList.call(this, _edlistOptions);
-
-        this.defaultViewUrl = "Signum/PartialView";
 
         this.typedCreate = function (_viewOptions) {
             log("EDList create");
@@ -882,7 +865,7 @@
             var itemPrefix = this.options.prefix.compose(newIndex);
             return $.extend({
                 containerDiv: this.options.detailDiv,
-                controllerUrl: this.defaultViewUrl,
+                controllerUrl: null,
                 prefix: itemPrefix,
                 requestExtraJsonData: this.extraJsonParams(itemPrefix)
             }, _viewOptions);
@@ -944,7 +927,7 @@
             var info = this.itemRuntimeInfo(itemPrefix);
             return $.extend({
                 containerDiv: this.options.detailDiv,
-                controllerUrl: this.defaultViewUrl,
+                controllerUrl: null,
                 type: info.runtimeType(),
                 id: info.id(),
                 prefix: itemPrefix,
@@ -964,17 +947,17 @@
             $('#' + selectedItemPrefix.compose(sfEntity)).html('');
         };
 
-        this.find = function (_findOptions, _viewOptions) {
+        this.find = function (_findOptions, _viewOptions, typeChooserUrl) {
             log("EDList find");
             var _self = this;
-            var type = this.getRuntimeType(function (type) {
-                _self.typedFind($.extend({ queryUrlName: type }, _findOptions), _viewOptions);
+            var type = this.getRuntimeType(typeChooserUrl, function (type) {
+                _self.typedFind($.extend({ webQueryName: type }, _findOptions), _viewOptions);
             });
         };
 
         this.typedFind = function (_findOptions, _viewOptions) {
             log("EDList typedFind");
-            if (empty(_findOptions.queryUrlName)) throw "FindOptions queryUrlName parameter must not be null in EDList typedFind. Call find instead";
+            if (empty(_findOptions.webQueryName)) throw "FindOptions webQueryName parameter must not be null in EDList typedFind. Call find instead";
             this.restoreCurrent();
             var findOptions = this.createFindOptions(_findOptions, _viewOptions);
             new FindNavigator(findOptions).openFinder();
@@ -1035,12 +1018,12 @@
 
     EDList.prototype = new EList();
 
-    function EDListOnCreating(_edlist, _viewOptions) {
-        _edlist.create(_viewOptions);
+    function EDListOnCreating(_edlist, _viewOptions, typeChooserUrl) {
+        _edlist.create(_viewOptions, typeChooserUrl);
     };
 
-    function EDListOnFinding(_edlist, _findOptions, _viewOptions) {
-        _edlist.find(_findOptions, _viewOptions);
+    function EDListOnFinding(_edlist, _findOptions, _viewOptions, typeChooserUrl) {
+        _edlist.find(_findOptions, _viewOptions, typeChooserUrl);
     }
 
     function EDListOnViewing(_edlist, _viewOptions) {
@@ -1070,7 +1053,7 @@
             var separator = fullValue.indexOf(";");
             var value = new Object();
             if (separator == -1) {
-                value.runtimeType = this.staticInfo().staticType();
+                value.runtimeType = this.staticInfo().singleType();
                 value.id = fullValue;
             }
             else {
@@ -1099,8 +1082,8 @@
 
     ECombo.prototype = new ELine();
 
-    function EComboOnCreating(_ecombo, _viewOptions) {
-        _ecombo.create(_viewOptions);
+    function EComboOnCreating(_ecombo, _viewOptions, typeChooserUrl) {
+        _ecombo.create(_viewOptions, typeChooserUrl);
     };
 
     function EComboOnViewing(_ecombo, _viewOptions) {
@@ -1111,20 +1094,17 @@
         _ecombo.setSelected();
     }
 
-    //FLineOptions = EBaseOptions + asyncUpload
+    //FLineOptions = EBaseOptions + asyncUpload + controllerUrl
     var FLine = function (_flineOptions) {
         log("FLine");
         EBaseLine.call(this, _flineOptions);
-
-        var downloadControllerUrl = 'File/Download';
-        var uploadControllerUrl = 'File/Upload';
 
         this.download = function () {
             log("FLine download");
             var id = this.runtimeInfo().id();
             if (empty(id))
                 return;
-            window.ope(n$("base").attr("href") + downloadControllerUrl + "?filePathID=" + id);
+            window.open($("base").attr("href") + controllerUrl + "?filePathID=" + id);
         };
 
         this.removeSpecific = function () {
@@ -1139,7 +1119,7 @@
             $(this.pf(''))[0].setAttribute('value', $(this.pf(''))[0].value);
             var mform = $('form');
             mform.attr('enctype', 'multipart/form-data').attr('encoding', 'multipart/form-data');
-            this.runtimeInfo().setEntity(this.staticInfo().staticType(), '');
+            this.runtimeInfo().setEntity(this.staticInfo().singleType(), '');
         };
 
         this.upload = function () {
@@ -1151,7 +1131,7 @@
             var cEncoding = mform.attr('encoding');
             var cTarget = mform.attr('target');
             var cAction = mform.attr('action');
-            mform.attr('enctype', 'multipart/form-data').attr('encoding', 'multipart/form-data').attr('target', 'frame' + this.options.prefix).attr('action', uploadControllerUrl).submit();
+            mform.attr('enctype', 'multipart/form-data').attr('encoding', 'multipart/form-data').attr('target', 'frame' + this.options.prefix).attr('action', controllerUrl).submit();
             mform.attr('enctype', cEncType).attr('encoding', cEncoding).attr('target', cTarget).attr('action', cAction);
         };
     };

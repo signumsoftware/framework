@@ -208,17 +208,17 @@ namespace Signum.Windows
             if (type.IsAssignableFrom(objType))
                 return obj;
 
-            if (typeof(Lite).IsAssignableFrom(objType) && type.IsAssignableFrom(((Lite)obj).RuntimeType))
+            if (objType.IsLite() && type.IsAssignableFrom(((Lite)obj).RuntimeType))
             {
                 Lite lite = (Lite)obj;
                 return lite.UntypedEntityOrNull ?? RetrieveAndForget(lite);
             }
             
-            if (typeof(Lite).IsAssignableFrom(type))
+            if (type.IsLite())
             {
                 Type liteType = Reflector.ExtractLite(type); 
                 
-                if(typeof(Lite).IsAssignableFrom(objType))
+                if(objType.IsLite())
                 {
                     Lite lite = (Lite)obj;
                     if (liteType.IsAssignableFrom(lite.RuntimeType))
@@ -249,13 +249,13 @@ namespace Signum.Windows
             if (objType == type)
                 return true;
 
-            if (typeof(Lite).IsAssignableFrom(objType) && ((Lite)obj).RuntimeType == type)
+            if (objType.IsLite() && ((Lite)obj).RuntimeType == type)
             {
                 return true;
             }
 
             Type liteType;
-            if (typeof(Lite).IsAssignableFrom(type) && (liteType = Reflector.ExtractLite(type)).IsAssignableFrom(objType))
+            if (type.IsLite() && (liteType = Reflector.ExtractLite(type)).IsAssignableFrom(objType))
             {
                 return true;
             }

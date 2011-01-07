@@ -31,9 +31,7 @@ namespace Signum.Web
 
                 sb.AddLine(helper.HiddenEntityInfo(entityDetail));
 
-                if (entityDetail.Type.IsIIdentifiable() || entityDetail.Type.IsLite())
-                    sb.AddLine(EntityBaseHelper.HiddenImplementations(helper, entityDetail));
-                else
+                if (entityDetail.Type.IsEmbeddedEntity())
                 {
                     TypeContext templateTC = ((TypeContext)entityDetail.Parent).Clone((object)Constructor.Construct(entityDetail.Type.CleanType()));
                     sb.AddLine(EntityBaseHelper.EmbeddedTemplate(entityDetail, EntityBaseHelper.RenderTypeContext(helper, templateTC, RenderMode.Content, entityDetail)));

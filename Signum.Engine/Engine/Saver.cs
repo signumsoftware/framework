@@ -44,8 +44,8 @@ namespace Signum.Engine
             string error = GraphExplorer.Integrity(modifiables);
             if (error.HasText())
                 throw new ApplicationException(error);
-            
-            
+
+
             GraphExplorer.PropagateModifications(modifiables.Inverse());
 
             //colapsa modifiables (collections and embeddeds) keeping indentifiables only
@@ -55,12 +55,12 @@ namespace Signum.Engine
                 schema.OnSaving(node, roots.Contains(node));
 
             //Remove all the edges that doesn't mean a dependency
-            identifiables.RemoveAll(identifiables.Edges.Where(e=>!e.To.IsNew).ToList());
+            identifiables.RemoveAll(identifiables.Edges.Where(e => !e.To.IsNew).ToList());
 
             //Remove all the nodes that are not modified
             List<IdentifiableEntity> notModified = identifiables.Where(node => node.Modified == false).ToList();
 
-            notModified.ForEach(node=>identifiables.RemoveFullNode(node, None));
+            notModified.ForEach(node => identifiables.RemoveFullNode(node, None));
 
             //separa las conexiones 'prohibidas' de las buenas
             DirectedGraph<IdentifiableEntity> backEdges = identifiables.FeedbackEdgeSet();
@@ -79,7 +79,7 @@ namespace Signum.Engine
             SaveGroup(postSavings, schema, null);
 
             EntityCache.Add(identifiables);
-            EntityCache.Add(notModified); 
+            EntityCache.Add(notModified);
         }
 
 
@@ -105,36 +105,34 @@ namespace Signum.Engine
             SqlPreCommand total = preCommands.Combine(Spacing.Triple);
 
             int? lastId = null;
-            foreach (var item in total.Splits(SqlBuilder.MaxParametersInSQL))
-                ExecuteCommand(item, ref lastId);
+            foreach (var item in total.Splits(SqlBuilder.MaxParametersInSQL).ToList().Iterate())
+            {
+                SqlPreCommand command = item.Value;
 
+                List<IdentifiableEntity> insertedEntities = command.Leaves().Select(ss => ss.EntityToUpdate).NotNull().ToList();
+
+                SqlPreCommand combine = SqlPreCommand.Combine(Spacing.Triple,
+                                                SqlBuilder.DeclareIDsMemoryTable(),
+                                                SqlBuilder.DeclareLastEntityID(),
+                                                !item.IsFirst ? SqlBuilder.SetLastEntityId(lastId.Value) : null,
+                                                command,
+                                                SqlBuilder.SelectIDMemoryTable(),
+                                                !item.IsLast ? SqlBuilder.SelectLastEntityID() : null);
+
+                DataSet ds = Executor.ExecuteDataSet(combine.ToSimple());
+
+                DataTable dt = ds.Tables[0];
+                if (dt.Rows.Count != insertedEntities.Count)
+                    throw new InvalidOperationException("{0} objects inserted but only {1} ids have been generated".Formato(insertedEntities.Count, dt.Rows.Count));
+
+                for (int i = 0; i < dt.Rows.Count; i++)
+                    insertedEntities[i].id = (int)dt.Rows[i][0];
+                
+                EntityCache.Add<IdentifiableEntity>(insertedEntities);
+             
+                if (!item.IsLast)
+                    lastId = ds.Tables[1].Rows[0]["LastID"].Map(o => o == DBNull.Value ? (int?)null : (int?)o);
+            }
         }
-
-        public static void ExecuteCommand(SqlPreCommand command, ref int? lastId)
-        {
-            List<IdentifiableEntity> insertedEntities = command.Leaves().Select(ss => ss.EntityToUpdate).NotNull().ToList();
-
-            SqlPreCommand combine = SqlPreCommand.Combine(Spacing.Triple,
-                                            SqlBuilder.DeclareIDsMemoryTable(),
-                                            SqlBuilder.DeclareLastEntityID(),
-                                            lastId.TrySC(id => SqlBuilder.RestoreLastId(id)),
-                                            command,
-                                            SqlBuilder.SelectIDMemoryTable(),
-                                            SqlBuilder.SelectLastEntityID()
-                                         );
-
-            DataSet ds = Executor.ExecuteDataSet(combine.ToSimple());
-
-            DataTable dt = ds.Tables[0];
-            if (dt.Rows.Count != insertedEntities.Count)
-                throw new InvalidOperationException("{0} objects inserted but only {1} ids have been generated".Formato(insertedEntities.Count, dt.Rows.Count));
-
-            dt.Rows.Cast<DataRow>().ZipForeach(insertedEntities, (dr, ei) => ei.id = (int)dr[0]);
-
-            EntityCache.Add<IdentifiableEntity>(insertedEntities);
-            lastId = ds.Tables[1].Rows[0]["LastID"].Map(o => o == DBNull.Value ? (int?)null : (int?)o);
-
-        }
-
     }
 }

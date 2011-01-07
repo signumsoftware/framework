@@ -58,6 +58,9 @@ namespace Signum.Web
 
         public static JsInstruction JsViewing(EntityCombo ecombo, JsViewOptions viewOptions)
         {
+            if (viewOptions.ControllerUrl == null)
+                viewOptions.ControllerUrl = RouteHelper.New().SignumAction("PopupView");
+
             return new JsInstruction(() => "EComboOnViewing({0})".Formato(",".Combine(
                 ecombo.ToJS(),
                 viewOptions.TryCC(v => v.ToJS()))));
@@ -70,9 +73,13 @@ namespace Signum.Web
 
         private static JsInstruction JsCreating(EntityCombo ecombo, JsViewOptions viewOptions)
         {
+            if (viewOptions.ControllerUrl == null)
+                viewOptions.ControllerUrl = RouteHelper.New().SignumAction("PopupView");
+
             return new JsInstruction(() => "EComboOnCreating({0})".Formato(",".Combine(
                 ecombo.ToJS(),
-                viewOptions.TryCC(v => v.ToJS()))));
+                viewOptions.TryCC(v => v.ToJS()),
+                ecombo.HasManyImplementations ? RouteHelper.New().SignumAction("GetTypeChooser").SingleQuote() : null)));
         }
 
         protected override string DefaultFinding()

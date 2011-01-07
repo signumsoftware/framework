@@ -153,7 +153,7 @@ namespace Signum.Windows
         Content,
     }
 
-    public class EntitySettingsEmbedded<T> : EntitySettings where T : EmbeddedEntity
+    public class EmbeddedEntitySettings<T> : EntitySettings where T : EmbeddedEntity
     {
         public override Type StaticType
         {

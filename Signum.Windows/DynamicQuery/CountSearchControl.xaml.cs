@@ -145,13 +145,13 @@ namespace Signum.Windows
                     if (ItemsCount == 0)
                     {
                         FormattedText = (TextZeroItems ?? Properties.Resources.ThereIsNo0)
-                            .Formato(QueryUtils.GetNiceQueryName(QueryName));
+                            .Formato(QueryUtils.GetNiceName(QueryName));
                         tb.FontWeight = FontWeights.Regular;
                     }
                     else
                     {
                         FormattedText = (Text ?? "{1}: {0}")
-                            .Formato(ItemsCount, QueryUtils.GetNiceQueryName(QueryName));
+                            .Formato(ItemsCount, QueryUtils.GetNiceName(QueryName));
                         tb.FontWeight = FontWeights.Bold;
 
                     }

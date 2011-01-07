@@ -93,7 +93,7 @@ namespace Signum.Windows
                     return new XElement(m + "EntityLine", new XAttribute(m + "Common.Route", pi.Name));
             }
 
-            if (typeof(EmbeddedEntity).IsAssignableFrom(t))
+            if (t.IsEmbeddedEntity())
                 return new XElement(xmlns + "GroupBox", new XAttribute("Header", pi.Name), new XAttribute(m + "Common.Route", pi.Name),
                     GenerateStackPanel(t));
 
@@ -104,7 +104,7 @@ namespace Signum.Windows
                     return new XElement(xmlns + "GroupBox", new XAttribute("Header", pi.Name),
                         new XElement(m + "EntityList", new XAttribute(m + "Common.Route", pi.Name), new XAttribute("MaxHeight", "150")));
 
-                if (typeof(EmbeddedEntity).IsAssignableFrom(et))
+                if (et.IsEmbeddedEntity())
                     return new XElement(xmlns + "GroupBox", new XAttribute("Header", pi.Name),
                         new XElement(xmlns + "Grid",
                             new XElement(xmlns + "Grid.ColumnDefinitions",

@@ -35,13 +35,10 @@ namespace Signum.Web
 
                 using (sb.Surround(new HtmlTag("div").Class("value-container")))
                 {
-
                     sb.AddLine(helper.HiddenEntityInfo(entityLine));
 
                     if (entityLine.Type.IsIIdentifiable() || entityLine.Type.IsLite())
                     {
-                        sb.AddLine(EntityBaseHelper.HiddenImplementations(helper, entityLine));
-
                         if (EntityBaseHelper.RequiresLoadAll(helper, entityLine))
                             sb.AddLine(EntityBaseHelper.RenderTypeContext(helper, (TypeContext)entityLine.Parent, RenderMode.PopupInDiv, entityLine));
                         else if (entityLine.UntypedValue != null)
@@ -64,10 +61,10 @@ namespace Signum.Web
 
                             sb.AddLine(MvcHtmlString.Create(
                                 helper.AutoCompleteExtender(entityLine.Compose(EntityBaseKeys.ToStr),
-                                             Navigator.GetName(entityLine.Type.CleanType()),
-                                             ImplementationsModelBinder.Render(entityLine.Implementations),
+                                             new StaticInfo(entityLine.Type, entityLine.Implementations).Types,
                                              entityLine.Compose("sfId"),
-                                             "Signum/Autocomplete", entityLine.OnChangedTotal.HasText() ? entityLine.OnChangedTotal : "''").ToHtmlString()));
+                                             helper.UrlHelper().Action("Autocomplete", "Signum")
+                                             , entityLine.OnChangedTotal.HasText() ? entityLine.OnChangedTotal : "''").ToHtmlString()));
 
                         }
                     }

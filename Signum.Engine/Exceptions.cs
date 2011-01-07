@@ -21,7 +21,7 @@ namespace Signum.Engine.Exceptions
 
         protected UniqueKeyException(SerializationInfo info, StreamingContext context) : base(info, context) { }
 
-        static Regex indexRegex = new Regex(@"\'IX_(?<table>[^_]+)(_(?<field>[^_]+))+__(?<hash>[^_]+)\'"); 
+        static Regex indexRegex = new Regex(@"\'IX_(?<table>[^_]+)(_(?<field>[^_]+))+.*\'"); 
 
         public UniqueKeyException(SqlException inner) : base(null, inner) 
         {

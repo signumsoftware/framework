@@ -144,9 +144,9 @@ namespace Signum.Web
 
         public void Fill(JsOptionsBuilder op)
         {
-            Navigator.SetTokens(this.QueryName, this.FilterOptions); 
+            Navigator.SetTokens(this.QueryName, this.FilterOptions);
 
-            op.Add("queryUrlName", QueryName.TryCC(qn => Navigator.Manager.QuerySettings[qn].UrlName.SingleQuote()));
+            op.Add("webQueryName", QueryName.TryCC(qn => Navigator.ResolveWebQueryName(qn).SingleQuote()));
             op.Add("searchOnLoad", SearchOnLoad == true ? "true" : null);
             op.Add("filterMode", FilterMode != FilterMode.Visible ? FilterMode.ToString().SingleQuote() : null);
             op.Add("create", !Create ? "false" : null);
@@ -259,10 +259,10 @@ namespace Signum.Web
             object v = Common.Convert(Value, Token.Type);
             if (v != null)
             {
-                if (typeof(Lite).IsAssignableFrom(v.GetType()))
+                if (v.GetType().IsLite())
                 {
                     Lite lite = (Lite)v;
-                    value = "{0};{1}".Formato(lite.Id.ToString(), lite.RuntimeType.Name);
+                    value = lite.Key();
                 }
                 else
                     value = v.ToString();

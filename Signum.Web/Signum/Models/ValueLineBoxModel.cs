@@ -10,7 +10,7 @@ using Signum.Web.Properties;
 namespace Signum.Web
 {
     [Serializable]
-    public class ValueLineBoxModel : Entity
+    public class ValueLineBoxModel : ModelEntity
     {
         public ValueLineBoxModel()
         {

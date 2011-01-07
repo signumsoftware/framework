@@ -19,7 +19,7 @@ namespace Signum.Web
         static List<GetToolBarButtonEntityDelegate<ModifiableEntity>> globalButtons = new List<GetToolBarButtonEntityDelegate<ModifiableEntity>>();
 
         public static void RegisterEntityButtons<T>(GetToolBarButtonEntityDelegate<T> getToolBarButtons)
-            where T : IdentifiableEntity
+            where T : ModifiableEntity
         {
             entityButtons.GetOrCreate(typeof(T)).Add(getToolBarButtons);
         }

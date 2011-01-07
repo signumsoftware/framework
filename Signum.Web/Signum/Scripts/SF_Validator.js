@@ -12,9 +12,6 @@
             ajaxError: null,
             errorSummaryId : null
         }, _valOptions);
-
-        this.savingControllerUrl = this.valOptions.controllerUrl || "Signum/TrySave";
-        this.validatingControllerUrl = this.valOptions.controllerUrl || "Signum/Validate";
     };
 
     Validator.prototype = {
@@ -54,7 +51,7 @@
             var self = this;
             SF.ajax({
                 type: "POST",
-                url: this.savingControllerUrl,
+                url: this.valOptions.controllerUrl,
                 async: false,
                 data: this.constructRequestData(),
                 success: function (msg) {
@@ -83,7 +80,7 @@
             var self = this;
             SF.ajax({
                 type: "POST",
-                url: this.validatingControllerUrl,
+                url: this.valOptions.controllerUrl,
                 async: false,
                 data: this.constructRequestData(),
                 success: function (msg) {
@@ -208,9 +205,6 @@
             id: null
         }, _pvalOptions));
 
-        this.savingControllerUrl = this.valOptions.controllerUrl || "Signum/TrySavePartial";
-        this.validatingControllerUrl = this.valOptions.controllerUrl || "Signum/ValidatePartial";
-
         this.constructRequestDataForSaving = function () {
             log("PartialValidator constructRequestDataForSaving");
             var formChildren = $("#" + this.valOptions.parentDiv + " *, #" + sfTabId).add(GetSFInfoParams(this.valOptions.prefix));
@@ -255,7 +249,7 @@
             var self = this;
             SF.ajax({
                 type: "POST",
-                url: this.savingControllerUrl,
+                url: this.valOptions.controllerUrl,
                 async: false,
                 data: this.constructRequestDataForSaving(),
                 dataType: "JSON",
@@ -291,7 +285,7 @@
                     if (empty(info.runtimeType()))
                         requestData +=
                         qp(myRuntimeInfoKey,
-                        info.createValue(StaticInfoFor(this.valOptions.prefix).staticType(), info.id(), 'n', ''));
+                        info.createValue(StaticInfoFor(this.valOptions.prefix).singleType(), info.id(), 'n', ''));
                     else
                         requestData += qp(myRuntimeInfoKey, infoField.val());
                 }
@@ -331,7 +325,7 @@
             var self = this;
             SF.ajax({
                 type: "POST",
-                url: this.validatingControllerUrl,
+                url: this.valOptions.controllerUrl,
                 async: false,
                 data: this.constructRequestDataForValidating(),
                 dataType: "json",

@@ -59,7 +59,7 @@ namespace Signum.Engine.DynamicQuery
             Type = mi.ReturningType();
             Meta = meta;
 
-            if (typeof(IIdentifiable).IsAssignableFrom(Type))
+            if (Type.IsIIdentifiable())
                 throw new InvalidOperationException("The Type of column {0} is a subtype of IIdentifiable, use a Lite instead".Formato(mi.MemberName()));
 
             Type cleanType = Reflector.ExtractLite(Type);

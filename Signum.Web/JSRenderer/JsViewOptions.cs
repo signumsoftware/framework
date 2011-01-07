@@ -12,6 +12,7 @@ namespace Signum.Web
         public JsValue<string> Prefix { get; set; }
         public JsValue<string> ContainerDiv { get; set; }
         public JsValue<string> ControllerUrl { get; set; }
+        public JsValue<string> ValidationControllerUrl { get; set; }
         public JsFunction OnOk { get; set; }
         public JsFunction OnOkClosed { get; set; }
         public JsFunction OnCancelled { get; set; }
@@ -28,7 +29,8 @@ namespace Signum.Web
                 {
                     {"prefix", Prefix.TryCC(a=>a.ToJS())},
                     {"containerDiv", ContainerDiv.TryCC(a=>a.ToJS())},
-                    {"controllerUrl", ControllerUrl.TryCC(a=>a.ToJS())},
+                    {"controllerUrl", ControllerUrl.TryCC(a=>a.ToJS()) ?? RouteHelper.New().SignumAction("PopupView").SingleQuote()},
+                    {"validationControllerUrl", ValidationControllerUrl.TryCC(a => a.ToJS()) },
                     {"onOk", OnOk.TryCC(a=>a.ToJS())},
                     {"onOkClosed", OnOkClosed.TryCC(a=>a.ToJS())},
                     {"onCancelled", OnCancelled.TryCC(a=>a.ToJS())},

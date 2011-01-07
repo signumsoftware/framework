@@ -65,7 +65,7 @@ namespace Signum.Windows
                     c=>c.Type.UnNullify() == typeof(DateTime), 
                     c => b => FormatTools.TextBlockTemplate(b, TextAlignment.Right, c.Format == null ? null : ConverterFactory.New(Reflector.GetPropertyFormatter(c.Format, null)))),
                 new FormatterRule(FormatterPriority.Type, "Lite",
-                    c=>typeof(Lite).IsAssignableFrom(c.Type), //Not on entities! 
+                    c=>c.Type.IsLite(), //Not on entities! 
                     c=> b=> FormatTools.LightEntityLineTemplate(b)),
 
                 new FormatterRule(FormatterPriority.Property, "NumberUnit",

@@ -10,6 +10,7 @@ using Signum.Entities;
 using Signum.Entities.Reflection;
 using Signum.Web.Properties;
 using System.Web;
+using Signum.Engine;
 
 namespace Signum.Web
 {
@@ -19,19 +20,20 @@ namespace Signum.Web
         {
             if (lite == null)
                 return MvcHtmlString.Empty;
+            
+            if (string.IsNullOrEmpty(lite.ToStr))
+                Database.FillToStr(lite);
 
-            bool isNavigable = Navigator.IsNavigable(lite.RuntimeType, admin);
-            MvcHtmlString link = helper.Href("",
-                lite.ToStr,
-                isNavigable ? Navigator.ViewRoute(lite.RuntimeType, lite.Id) : "",
-                HttpUtility.HtmlEncode(Resources.View),
-                "",
-                isNavigable ? null : new Dictionary<string, object>() { { "style", "display:none" } });
-
-            if (isNavigable)
-                return link;
-            else
-                return link.Concat(lite.ToStr.EncodeHtml());
+            string key = lite.Key();
+            MvcHtmlString result = Navigator.IsNavigable(lite.RuntimeType, admin) ?
+                helper.Href("",
+                    lite.ToStr,
+                    Navigator.ViewRoute(lite),
+                    HttpUtility.HtmlEncode(Resources.View),
+                    "", null) :
+                lite.ToStr.EncodeHtml();
+            
+            return result.Concat(helper.HiddenAnonymous(key, new { @class = "data" }));
         }
     }
 }

@@ -74,20 +74,20 @@ namespace Signum.Web
             switch (mode)
             {
                 case RenderMode.Content:
-                    return helper.RenderPartialToString(partialViewName, vdd);
+                    return helper.Partial(partialViewName, vdd);
                 case RenderMode.Popup:
                     vdd.Add(ViewDataKeys.PartialViewName, partialViewName);
-                    return helper.RenderPartialToString(Navigator.Manager.PopupControlUrl, vdd);
+                    return helper.Partial(Navigator.Manager.PopupControlUrl, vdd);
                 case RenderMode.PopupInDiv:
                     vdd.Add(ViewDataKeys.PartialViewName, partialViewName);
                     return helper.Div(typeContext.Compose(EntityBaseKeys.Entity),
-                        helper.RenderPartialToString(Navigator.Manager.PopupControlUrl, vdd),
+                        helper.Partial(Navigator.Manager.PopupControlUrl, vdd),
                         "",
                         new Dictionary<string, object> { { "style", "display:none" } });
                 case RenderMode.ContentInVisibleDiv:
                 case RenderMode.ContentInInvisibleDiv:
                     return helper.Div(typeContext.Compose(EntityBaseKeys.Entity),
-                        helper.RenderPartialToString(partialViewName, vdd), "",
+                        helper.Partial(partialViewName, vdd), "",
                         (mode == RenderMode.ContentInInvisibleDiv) ? new Dictionary<string, object> { { "style", "display:none" } } : null);
                 default:
                     throw new InvalidOperationException();
@@ -99,15 +99,15 @@ namespace Signum.Web
             return input.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("/", "\\/").Replace("\r\n", "").Replace("\n", "");
         }
 
-        public static MvcHtmlString HiddenImplementations(HtmlHelper helper, EntityBase entityBase)
-        {
-            if (entityBase.Implementations == null)
-                return MvcHtmlString.Empty;
+        //public static MvcHtmlString HiddenImplementations(HtmlHelper helper, EntityBase entityBase)
+        //{
+        //    if (entityBase.Implementations == null)
+        //        return MvcHtmlString.Empty;
 
-            string implementations = ImplementationsModelBinder.Render(entityBase.Implementations);
+        //    string implementations = ImplementationsModelBinder.Render(entityBase.Implementations);
 
-            return helper.Hidden(entityBase.Compose(EntityBaseKeys.Implementations), implementations, new { disabled = "disabled" });
-        }
+        //    return helper.Hidden(entityBase.Compose(EntityBaseKeys.Implementations), implementations, new { disabled = "disabled" });
+        //}
 
         public static MvcHtmlString ViewButton(HtmlHelper helper, EntityBase entityBase)
         {

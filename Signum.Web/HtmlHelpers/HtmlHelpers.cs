@@ -11,6 +11,7 @@ using System.IO;
 using System.Web;
 using System.Web.Routing;
 using Signum.Utilities.Reflection;
+using Signum.Entities.Reflection;
 
 namespace Signum.Web
 {
@@ -42,11 +43,16 @@ namespace Signum.Web
 
         public static MvcHtmlString HiddenAnonymous(this HtmlHelper html, object value)
         {
+            return HiddenAnonymous(html, value, null);
+        }
+
+        public static MvcHtmlString HiddenAnonymous(this HtmlHelper html, object value, object htmlAttributes)
+        {
             return new HtmlTag("input").Attrs(new
             {
-                type="hidden",
-                value=value.ToString()
-            }).ToHtmlSelf();
+                type = "hidden",
+                value = value.ToString()
+            }).Attrs(htmlAttributes).ToHtmlSelf();
         }
 
         public static void FieldString(this HtmlHelper html, string label, string value)
@@ -196,7 +202,6 @@ namespace Signum.Web
             if (url != "#")
                 href.Attr("href", url);
 
-
             if (!string.IsNullOrEmpty(title))
                 href.Attr("title", title);
 
@@ -262,15 +267,15 @@ namespace Signum.Web
         }
         #endregion    
 
-        public static IHtmlString AutoCompleteExtender(this HtmlHelper html, string ddlName, string entityTypeName, string implementations, string entityIdFieldName,
+        public static IHtmlString AutoCompleteExtender(this HtmlHelper html, string ddlName, Type[] types, string entityIdFieldName,
                                                   string controllerUrl, string onSuccess)
         {
             return html.DynamicJs("~/signum/Scripts/SF_autocomplete.js").Callback(@"function () {{
                             new SF.Autocompleter(""{0}"", ""{1}"", {{
 	                            entityIdFieldName: ""{2}"",
-	                            extraParams: {{typeName: ""{3}"", implementations : ""{4}""}}}});
+	                            extraParams: {{types: ""{3}""}}}});
                         }}"
-                    .Formato(ddlName, controllerUrl, entityIdFieldName, entityTypeName, implementations)); 
+                    .Formato(ddlName, controllerUrl, entityIdFieldName, types.ToString(t => Navigator.ResolveWebTypeName(Reflector.ExtractLite(t) ?? t), ","))); 
         }
 
         public static string PropertyNiceName<R>(this HtmlHelper html, Expression<Func<R>> property)
@@ -281,6 +286,11 @@ namespace Signum.Web
         public static string PropertyNiceName<T, R>(this HtmlHelper html, Expression<Func<T, R>> property)
         {
             return ReflectionTools.BasePropertyInfo(property).NiceName();
+        }
+
+        public static UrlHelper UrlHelper(this HtmlHelper html)
+        {
+            return new UrlHelper(html.ViewContext.RequestContext);
         }
    }
 }

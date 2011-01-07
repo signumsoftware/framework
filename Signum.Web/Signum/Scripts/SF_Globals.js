@@ -179,12 +179,9 @@
 
     sfRuntimeInfo = "sfRuntimeInfo",
     sfStaticInfo = "sfStaticInfo",
-    sfImplementations = "sfImplementations",
     sfEntity = "sfEntity",
     sfToStr = "sfToStr",
     sfLink = "sfLink",
-
-    /*potentially movable */
 
     sfIndex = "sfIndex",
     sfTicks = "sfTicks",
@@ -192,7 +189,7 @@
     sfItemsContainer = "sfItemsContainer",
     sfRepeaterItem = "sfRepeaterItem",
 
-    sfQueryUrlName = "sfQueryUrlName",
+    sfWebQueryName = "sfWebQueryName",
     sfTop = "sfTop",
     sfAllowMultiple = "sfAllowMultiple",
     sfView = "sfView",
@@ -200,10 +197,7 @@
     sfIdRelated = "sfIdRelated",
     sfRuntimeTypeRelated = "sfRuntimeTypeRelated",
 
-    /* end movable */
-
-
-    sfBtnCancel = "sfBtnCancel",            //viewNavigator, findNavigator, mixin
+    sfBtnCancel = "sfBtnCancel",            //viewNavigator, findNavigator
     sfBtnOk = "sfBtnOk",                    //viewNavigator, findNavigator
 
     sfEntityTypeName = "sfEntityTypeName";   //operations, findNavigator
@@ -233,7 +227,7 @@
             success: function (ajaxResult) {
                 var url = SF.checkRedirection(ajaxResult);
                 if (!empty(url))
-                    window.location.href = isAbsoluteUrl(url) ? url : $("base").attr("href") + url;
+                    window.location.href = url;
                 else {
                     if (options.success != null)
                         options.success(ajaxResult);
@@ -241,22 +235,6 @@
             },
             error: options.error
         });
-
-        /*
-        
-        $.ajax($.extend(jqueryAjaxOptions, {
-        success: function(ajaxResult) {
-        var url = SF.checkRedirection(ajaxResult);
-        if (!empty(url))
-        window.location.href = $("base").attr("href") + url;
-        else {
-        if (options.success != null)
-        options.success(ajaxResult);
-        }
-        }
-        }));
-        
-        */
     };
 
     SF.checkRedirection = function (ajaxResult) {
@@ -311,59 +289,67 @@
 
     var StaticInfo = function (_prefix) {
         var prefix = _prefix,
-			_staticType = 0,
-			_isEmbedded = 1,
+			_types = 0,
+            _isEmbedded = 1,
 			_isReadOnly = 2,
-			$elem;				//cache for the element
-        
+			$elem; 			//cache for the element
+
         var find = function () {
-			if (!$elem) $elem = $('#' + prefix.compose(sfStaticInfo));
-			return $elem;
+            if (!$elem) $elem = $('#' + prefix.compose(sfStaticInfo));
+            return $elem;
         };
-		
+
         var value = function () {
             return find().val();
         };
-        
-		var toArray = function () {
+
+        var toArray = function () {
             return value().split(";")
         };
         var toValue = function (array) {
             return array.join(";");
         };
-		
+
         var getValue = function (key) {
             var array = toArray();
             return array[key];
         };
-        
-		var staticType = function () {
-            return getValue(_staticType);
+
+        var singleType = function () {
+            var typeArray = types().split(',');
+            if (typeArray.length != 1)
+                throw "types should have only one element for element {0}".format(prefix);
+            return typeArray[0];
         };
-        
-		var isEmbedded = function () {
-            return getValue(_isEmbedded);
+
+        var types = function () {
+            return getValue(_types);
         };
-        
-		var isReadOnly = function () {
-            return getValue(_isReadOnly);
+
+        var isEmbedded = function () {
+            return getValue(_isEmbedded) == "e";
         };
-		
-        var createValue = function (staticType, isEmbedded, isReadOnly) {
+
+        var isReadOnly = function () {
+            return getValue(_isReadOnly) == "r";
+        };
+
+        var createValue = function (types, isEmbedded, isReadOnly) {
             var array = [];
-            array[_staticType] = staticType;
-            array[_isEmbedded] = isEmbedded;
-            array[_isReadOnly] = isReadOnly;
+            array[_types] = types;
+            array[_isEmbedded] = isEmbedded ? "e" : "i";
+            array[_isReadOnly] = isReadOnly ? "r" : "";
             return toValue(array);
         };
-		
-		return{
-			staticType: staticType,
-			isEmbedded: isEmbedded,
-			isReadOnly: isReadOnly,
-			createValue: createValue,
+
+        return {
+            types: types,
+            singleType: singleType,
+            isEmbedded: isEmbedded,
+            isReadOnly: isReadOnly,
+            createValue: createValue,
             find: find
-		};
+        };
     };
 
     function StaticInfoFor(prefix) {

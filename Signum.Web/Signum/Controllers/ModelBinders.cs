@@ -53,41 +53,5 @@ namespace Signum.Web.Controllers
                 0,0,0,                    
                 TimeZoneManager.Mode == TimeZoneMode.Local ? DateTimeKind.Local : DateTimeKind.Utc);
         }
-    }
-
-
-    public class ImplementationsModelBinder : IModelBinder
-    {
-        public object BindModel(ControllerContext controllerContext, ModelBindingContext bindingContext)
-        {
-            string value = controllerContext.HttpContext.Request[bindingContext.ModelName];
-
-            return Parse(value); 
-        }
-
-        public static string Render(Implementations implementations)
-        {
-            if (implementations == null)
-                return "";
-
-            if (implementations.IsByAll)
-                return "[All]";
-
-            ImplementedByAttribute ib = (ImplementedByAttribute)implementations;
-            return ib.ImplementedTypes
-                .Select(t => Navigator.Manager.TypesToNames.TryGetC(t))
-                .NotNull()
-                .ToString(";");
-        }
-
-        public static Implementations Parse(string implementations)
-        {
-            if (string.IsNullOrEmpty(implementations))
-                return null;
-            if (implementations == "[All]")
-                return new ImplementedByAllAttribute();
-            else
-                return new ImplementedByAttribute(implementations.Split(';').Select(tn => Navigator.Manager.NamesToTypes.TryGetC(tn)).NotNull().ToArray());
-        }
-    }
+    }   
 }

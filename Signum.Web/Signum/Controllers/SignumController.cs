@@ -26,9 +26,9 @@ namespace Signum.Web.Controllers
     public class SignumController : Controller
     {
         [ValidateInput(false)]  //this is needed since a return content(View...) from an action that doesn't validate will throw here an exception. We suppose that validation has already been performed before getting here
-        public ViewResult View(string typeUrlName, int? id)
+        public ViewResult View(string webTypeName, int? id)
         {
-            Type t = Navigator.ResolveTypeFromUrlName(typeUrlName);
+            Type t = Navigator.ResolveType(webTypeName);
 
             Response.CacheControl = "no-cache";
             Response.AddHeader("Pragma", "no-cache");
@@ -62,7 +62,7 @@ namespace Signum.Web.Controllers
             if (result.GetType() == typeof(PartialViewResult))
                 return (PartialViewResult)result;
 
-            if (typeof(EmbeddedEntity).IsAssignableFrom(result.GetType()))
+            if (result.GetType().IsEmbeddedEntity())
                 throw new InvalidOperationException("PopupCreate cannot be called for EmbeddedEntity {0}".Formato(result.GetType()));
 
             if (!typeof(IdentifiableEntity).IsAssignableFrom(result.GetType()))
@@ -227,16 +227,23 @@ namespace Signum.Web.Controllers
             });
         }
 
-        JavaScriptSerializer jSerializer = new JavaScriptSerializer();
-
         [AcceptVerbs(HttpVerbs.Get)]
-        public ContentResult Autocomplete(string typeName, Implementations implementations, string q, int l)
+        public JsonResult Autocomplete(string types, string q, int l)
         {
-            Type type = Navigator.NamesToTypes[typeName];
+            Type[] typeArray = StaticInfo.ParseTypes(types);
+            if (typeArray == StaticInfo.ImplementedByAll)
+                throw new ArgumentException("ImplementedBy not allowed in Autocomplete");
 
-            return (Content(jSerializer.Serialize(
-                AutoCompleteUtils.FindLiteLike(type, implementations, q, l)
-                .Select(o => new { id = o.Id, text = o.ToStr, type = o.RuntimeType.Name }).ToList())));
+            List<Lite> lites  = AutoCompleteUtils.FindLiteLike(typeof(IdentifiableEntity), typeArray, q, l);
+
+            var result = lites.Select(o => new
+            {
+                id = o.Id,
+                text = o.ToStr,
+                type = Navigator.ResolveWebTypeName(o.RuntimeType)
+            }).ToList();
+
+            return Json(result, JsonRequestBehavior.AllowGet);
         }
 
         public ActionResult Find(FindOptions findOptions)
@@ -257,9 +264,9 @@ namespace Signum.Web.Controllers
         }
 
 		[AcceptVerbs(HttpVerbs.Post)]
-        public ContentResult AddFilter(string sfQueryUrlName, string tokenName, int index, string prefix)
+        public ContentResult AddFilter(string webQueryName, string tokenName, int index, string prefix)
         {
-            object queryName = Navigator.ResolveQueryFromUrlName(sfQueryUrlName);
+            object queryName = Navigator.ResolveQueryName(webQueryName);
 
             FilterOption fo = new FilterOption(tokenName, null);
             if (fo.Token == null)
@@ -273,26 +280,22 @@ namespace Signum.Web.Controllers
         }
 
         [HttpPost]
-        public ContentResult GetColumnName(string sfQueryUrlName, string tokenName)
+        public ContentResult GetColumnName(string webQueryName, string tokenName)
         {
-            object queryName = Navigator.ResolveQueryFromUrlName(sfQueryUrlName);
+            object queryName = Navigator.ResolveQueryName(webQueryName);
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
             QueryToken token = QueryUtils.Parse(tokenName, qd);
             return Content(token.NiceName());
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public ContentResult GetContextualPanel(string liteUrl, string sfQueryUrlName, string prefix)
+        public ContentResult GetContextualPanel(string lite, string webQueryName, string prefix)
         {
-            string[] urlParts = liteUrl.Split(new string[] { "/" }, StringSplitOptions.RemoveEmptyEntries);
+            string[] liteParts = lite.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
 
-            Type t = Navigator.ResolveTypeFromUrlName(urlParts[1]);
-            int id = int.Parse(urlParts[2]);
-            Lite lite = Lite.Create(t, id);
-
-            object queryName = Navigator.ResolveQueryFromUrlName(sfQueryUrlName);
+            object queryName = Navigator.ResolveQueryName(webQueryName);
             
-            string result = ContextualItemsHelper.GetContextualItemListForLite(this.ControllerContext, lite, queryName, prefix).ToString("");
+            string result = ContextualItemsHelper.GetContextualItemListForLite(this.ControllerContext, Lite.Create(Navigator.ResolveType(liteParts[0]), int.Parse(liteParts[1])) , queryName, prefix).ToString("");
 
             if (string.IsNullOrEmpty(result))
                 result = Resources.NoResults;
@@ -301,9 +304,9 @@ namespace Signum.Web.Controllers
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public ContentResult QuickFilter(string sfQueryUrlName, string tokenName, int index, string prefix, bool isLite, string typeUrlName, int? sfId, string sfValue)
+        public ContentResult QuickFilter(string webQueryName, string tokenName, int index, string prefix, string sfValue)
         {
-            object queryName = Navigator.ResolveQueryFromUrlName(sfQueryUrlName);
+            object queryName = Navigator.ResolveQueryName(webQueryName);
 
             FilterOption fo = new FilterOption(tokenName, null);
             if (fo.Token == null)
@@ -312,9 +315,6 @@ namespace Signum.Web.Controllers
                 fo.Token = QueryUtils.Parse(tokenName, qd); 
             }
             fo.Operation = QueryUtils.GetFilterOperations(QueryUtils.GetFilterType(fo.Token.Type)).First();
-            
-            if (isLite)
-                sfValue = sfId.Value + ";" + Navigator.TypesToNames[Navigator.ResolveTypeFromUrlName(typeUrlName)];
             
             try
             {
@@ -329,9 +329,9 @@ namespace Signum.Web.Controllers
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public ContentResult NewSubTokensCombo(string sfQueryUrlName, string tokenName, string prefix, int index)
-        { 
-            object queryName = Navigator.ResolveQueryFromUrlName(sfQueryUrlName);
+        public ContentResult NewSubTokensCombo(string webQueryName, string tokenName, string prefix, int index)
+        {
+            object queryName = Navigator.ResolveQueryName(webQueryName);
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
             QueryToken[] subtokens = QueryUtils.Parse(tokenName, t => QueryUtils.SubTokens(t, qd.Columns)).SubTokens();
             if (subtokens == null)
@@ -344,28 +344,33 @@ namespace Signum.Web.Controllers
                 Selected = false
             }).ToList();
             items.Insert(0, new SelectListItem { Text = "-", Selected = true, Value = "" });
-            return Content(SearchControlHelper.TokensCombo(CreateHtmlHelper(this), Navigator.Manager.QuerySettings[queryName].UrlName, items, new Context(null, prefix), index + 1, true).ToHtmlString());
+            return Content(SearchControlHelper.TokensCombo(CreateHtmlHelper(this), queryName, items, new Context(null, prefix), index + 1, true).ToHtmlString());
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public PartialViewResult GetTypeChooser(Implementations sfImplementations, string prefix)
+        public PartialViewResult GetTypeChooser(string types, string prefix)
         {
-            if (sfImplementations == null || sfImplementations.IsByAll)
-                throw new InvalidOperationException("GetTypeChooser needs an ImplementedBy");
+            Type[] typeArray = StaticInfo.ParseTypes(types);
 
-            string strButtons = ((ImplementedByAttribute)sfImplementations).ImplementedTypes
-                .ToString(type => {
-                    TagBuilder builder = new TagBuilder("input");
-                    builder.GenerateId(type.Name);
-                    builder.MergeAttribute("type", "button");
-                    builder.MergeAttribute("name", type.Name);
-                    builder.MergeAttribute("value", type.NiceName());
-                    
-                    return builder.ToString(TagRenderMode.SelfClosing);
-                }, "");
+            if (typeArray == StaticInfo.ImplementedByAll)
+                throw new ArgumentException("ImplementedByAll is not allowed in GetTypeChooser");
+
+            if (typeArray.Length == 1)
+                throw new ArgumentException("GetTypeChooser must recieve at least 2 types to chose from");
+
+            HtmlStringBuilder sb = new HtmlStringBuilder();
+            foreach (Type t in typeArray)
+            {
+                string webTypeName = Navigator.ResolveWebTypeName(t);
+
+                sb.Add(new HtmlTag("input", webTypeName)
+                    .Attrs(new { type = "button", name = webTypeName, value = t.NiceName() })
+                    .ToHtmlSelf());
+                sb.Add(new HtmlTag("br").ToHtmlSelf());
+            }
 
             ViewData.Model = new Context(null, prefix);
-            ViewData[ViewDataKeys.CustomHtml] = strButtons;
+            ViewData[ViewDataKeys.CustomHtml] = sb.ToHtml().ToString();
 
             return PartialView(Navigator.Manager.ChooserPopupUrl);
         }
@@ -376,17 +381,13 @@ namespace Signum.Web.Controllers
             if (buttons == null || buttons.Count == 0)
                 throw new InvalidOperationException("GetChooser needs a list of options");
 
-            StringBuilder sb = new StringBuilder();
+            HtmlStringBuilder sb = new HtmlStringBuilder();
             int i = 0;
-            foreach (string button in buttons) {
-                TagBuilder builder = new TagBuilder("input");
+            foreach (string button in buttons) 
+            {
                 string id = ids != null ? ids[i] : button.Replace(" ", "");
-                builder.GenerateId(id);
-                builder.MergeAttribute("type", "button");
-                builder.MergeAttribute("name", id);
-                builder.MergeAttribute("value", button);
-
-                sb.Append(builder.ToString(TagRenderMode.SelfClosing));
+                sb.Add(new HtmlTag("input", id).Attrs(new { type = "button", name = id, value = button }).ToHtmlSelf());
+                sb.Add(new HtmlTag("br").ToHtmlSelf());
                 i++;
             }
 
@@ -453,17 +454,6 @@ namespace Signum.Web.Controllers
                 return Navigator.PartialView(this, entity, prefix);
             else
                 return Navigator.NormalControl(this, entity, sfPartialViewName);
-        }
-
-        [AcceptVerbs(HttpVerbs.Post)]
-        public ActionResult DoPostBack()
-        {
-            MappingContext context = this.UntypedExtractEntity().UntypedApplyChanges(ControllerContext, null, true).UntypedValidateGlobal();
-
-            this.ModelState.FromContext(context);
-
-            ViewData[ViewDataKeys.ChangeTicks] = context.GetTicksDictionary();
-            return Navigator.View(this, (IdentifiableEntity)context.UntypedValue);
         }
 
         public static HtmlHelper CreateHtmlHelper(Controller c)

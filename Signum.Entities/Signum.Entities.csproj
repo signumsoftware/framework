@@ -83,6 +83,7 @@
     <Compile Include="..\Signum.Utilities\Properties\Version.cs">
       <Link>Properties\Version.cs</Link>
     </Compile>
+    <Compile Include="ModelEntity.cs" />
     <Compile Include="DynamicQuery\Column.cs" />
     <Compile Include="DynamicQuery\Filter.cs" />
     <Compile Include="DynamicQuery\Requests.cs" />
@@ -135,8 +136,8 @@
     <None Include="SignumFramework.pfx" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Properties\Resources.es.resx"/>
-    <EmbeddedResource Include="Properties\Resources.fr.resx"/>
+    <EmbeddedResource Include="Properties\Resources.es.resx" />
+    <EmbeddedResource Include="Properties\Resources.fr.resx" />
     <EmbeddedResource Include="Properties\Resources.it.resx" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>

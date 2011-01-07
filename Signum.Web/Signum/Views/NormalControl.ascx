@@ -5,7 +5,7 @@
 <%@ Import Namespace="Signum.Utilities" %>
 <%@ Import Namespace="Signum.Entities" %>
 <%
-    TypeContext modelTC = (TypeContext)ViewData.Model;
+    TypeContext modelTC = (TypeContext)ViewData.Model; 
 %>
 <h2>
     <%= Html.Hidden(ViewDataKeys.TabId, ViewData[ViewDataKeys.TabId]) %>
@@ -27,7 +27,7 @@
      <ul class="button-bar">
         <%if (Model != null && Navigator.Manager.ShowOkSave(modelTC.UntypedValue.GetType(), false))
           { %>
-            <li><a id="btnSave" class="entity-button save" onclick="javascript:TrySave({});"><%= Resources.Save %></a></li>  
+            <li><a id="btnSave" class="entity-button save" onclick="javascript:TrySave({controllerUrl:'<%= Url.SignumAction("TrySave") %>'});"><%= Resources.Save %></a></li>  
         <%} %>
         <%= ButtonBarEntityHelper.GetForEntity(this.ViewContext, (ModifiableEntity)modelTC.UntypedValue, ViewData[ViewDataKeys.PartialViewName].ToString(), modelTC.ControlID).ToString(Html)%>     
      </ul>

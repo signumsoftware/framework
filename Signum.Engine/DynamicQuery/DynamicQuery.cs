@@ -97,10 +97,10 @@ namespace Signum.Engine.DynamicQuery
 
     public class DEnumerable<T> : IDynamicInfo
     {
-        public DEnumerable(IEnumerable<object> collection, Type tupletype, Dictionary<QueryToken, int> tokenIndices)
+        public DEnumerable(IEnumerable<object> collection, Type tupleType, Dictionary<QueryToken, int> tokenIndices)
         {
             this.Collection = collection;
-            this.TupleType = tupletype;
+            this.TupleType = tupleType;
             this.TokenIndices = tokenIndices; 
         }
 

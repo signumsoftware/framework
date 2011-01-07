@@ -44,24 +44,26 @@ namespace Signum.Engine
             return TypeToDN[type];
         }
 
-        internal static void Schema_Initializing(Schema sender)
+        internal static void Schema_Initializing()
         {
+            Schema current = Schema.Current; 
+
             List<TypeDN> types = Administrator.UnsafeRetrieveAll<TypeDN>();
 
             var dict = EnumerableExtensions.JoinStrict(
-                types, sender.Tables.Keys, t => t.FullClassName, t => (Reflector.ExtractEnumProxy(t) ?? t).FullName,
+                types, current.Tables.Keys, t => t.FullClassName, t => (Reflector.ExtractEnumProxy(t) ?? t).FullName,
                 (typeDN, type) => new { typeDN, type },
-                "caching types table from {0}".Formato(sender.Table(typeof(TypeDN)).Name)
+                "caching types table from {0}".Formato(current.Table(typeof(TypeDN)).Name)
                 ).ToDictionary(a => a.type, a => a.typeDN);
 
-            sender.TypeToId = dict.SelectDictionary(k => k, v => v.Id);
-            sender.IdToTable = sender.TypeToId.ToDictionary(p => p.Value, p => sender.Table(p.Key));
+            current.TypeToId = dict.SelectDictionary(k => k, v => v.Id);
+            current.IdToTable = current.TypeToId.ToDictionary(p => p.Value, p => current.Table(p.Key));
 
-            sender.TypeToDN = dict;
-            sender.DnToType = dict.Inverse();
+            current.TypeToDN = dict;
+            current.DnToType = dict.Inverse();
 
-            sender.TypeToName = sender.Tables.SelectDictionary(k => k, v => v.CleanTypeName);
-            sender.NameToType = sender.TypeToName.Inverse("CleanTypeNames");
+            current.TypeToName = current.Tables.SelectDictionary(k => k, v => v.CleanTypeName);
+            current.NameToType = current.TypeToName.Inverse("CleanTypeNames");
 
         }
 
@@ -140,6 +142,11 @@ namespace Signum.Engine
         public static Type TryGetType(string cleanName)
         {
             return Schema.Current.NameToType.TryGetC(cleanName);
+        }
+
+        public static string GetCleanName(Type type)
+        {
+            return Schema.Current.TypeToName.GetOrThrow(type, "Type {0} not found in the schema");
         }
 
         public static string Key(this Lite lite)

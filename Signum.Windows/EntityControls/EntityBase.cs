@@ -156,7 +156,7 @@ namespace Signum.Windows
 
         private void SetType(Type type)
         {
-            if (typeof(Lite).IsAssignableFrom(type))
+            if (type.IsLite())
             {
                 CleanLite = true;
                 CleanType = Reflector.ExtractLite(type);
@@ -198,7 +198,7 @@ namespace Signum.Windows
             {
                 var type = Type;
 
-                if (this is EntityCombo && !typeof(Lite).IsAssignableFrom(type)) //Allways going to be lite
+                if (this is EntityCombo && !type.IsLite()) //Allways going to be lite
                     type = Reflector.GenerateLite(type);
 
                 EntityTemplate = Navigator.FindDataTemplate(this, type);
@@ -387,8 +387,8 @@ namespace Signum.Windows
             if (ViewButtons == ViewButtons.Ok)
             {
                 var options = new ViewOptions
-                { 
-                    TypeContext =  typeof(EmbeddedEntity).IsAssignableFrom(CleanType) ? GetEntityTypeContext() : null, 
+                {
+                    TypeContext = CleanType.IsEmbeddedEntity() ? GetEntityTypeContext() : null, 
                 };
 
                 if (isReadOnly)

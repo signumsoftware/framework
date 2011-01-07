@@ -135,12 +135,12 @@ namespace Signum.Web
 
             HttpContextBase httpContext = controller.ControllerContext.HttpContext;
 
-            if (!httpContext.Request.Params.AllKeys.Contains("sfQueryUrlName"))
+            if (!httpContext.Request.Params.AllKeys.Contains("webQueryName"))
                 return;
 
             Type type = obj.GetType();
 
-            object queryName = Navigator.ResolveQueryFromUrlName(httpContext.Request.Params["sfQueryUrlName"]);
+            object queryName = Navigator.ResolveQueryName(httpContext.Request.Params["webQueryName"]);
 
             var filters = FindOptionsModelBinder.ExtractFilterOptions(httpContext, queryName)
                 .Where(fo => fo.Operation == FilterOperation.EqualTo);

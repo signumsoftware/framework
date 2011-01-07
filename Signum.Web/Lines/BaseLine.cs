@@ -49,7 +49,7 @@ namespace Signum.Web
             set { reloadOnChange = value; }
         }
 
-        string reloadControllerUrl = "Signum/ReloadEntity";
+        string reloadControllerUrl = RouteHelper.New().SignumAction("ReloadEntity");
         public string ReloadControllerUrl 
         {
             get { return reloadControllerUrl; }

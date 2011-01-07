@@ -21,9 +21,9 @@ namespace Signum.Web
 
         public object QueryName { get; private set; }
 
-        public string Title { get; set; }
+        public Func<string> Title { get; set; }
         public int? Top { get; set; }
-        public string UrlName { get; set; }
+        public string WebQueryName { get; set; }
 
         public Func<object, bool> IsFindable;
 

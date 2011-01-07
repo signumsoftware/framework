@@ -102,7 +102,7 @@ namespace Signum.Windows
                 elements.AddRange(GetButtonBarElement.GetInvocationList()
                     .Cast<GetButtonBarElementDelegate>()
                     .Select(d => d(e.NewValue, MainControl, ViewButtons))
-                    .NotNull().SelectMany(d => d).ToList());
+                    .NotNull().SelectMany(d => d).NotNull().ToList());
 
             stackPanel.Children.Clear();
 

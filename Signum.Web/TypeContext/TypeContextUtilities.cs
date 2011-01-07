@@ -55,7 +55,7 @@ namespace Signum.Web
             return Common.UntypedWalkExpression(typeContext, lambda);
         }
 
-        public static TypeContext UntypedNew(IdentifiableEntity entity, string controlID)
+        public static TypeContext UntypedNew(IRootEntity entity, string controlID)
         {
             return (TypeContext)Activator.CreateInstance(typeof(TypeContext<>).MakeGenericType(entity.GetType()), entity, controlID);
         }

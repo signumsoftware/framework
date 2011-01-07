@@ -34,7 +34,11 @@ namespace Signum.Web
 
         public static MvcHtmlString HiddenStaticInfo(this HtmlHelper helper, TypeContext tc)
         {
-            return helper.Hidden(tc.Compose(EntityBaseKeys.StaticInfo), new StaticInfo(tc.UntypedValue.TryCC(uv=>uv.GetType()) ?? tc.Type) { IsReadOnly = tc.ReadOnly }.ToString(), new { disabled = "disabled" });
+            Type type = tc is EntityListBase ? ((EntityListBase)tc).ElementType : tc.Type;
+            Implementations imp = tc is EntityBase ? ((EntityBase)tc).Implementations : null;
+
+            StaticInfo si = new StaticInfo(type, imp) { IsReadOnly = tc.ReadOnly };
+            return helper.Hidden(tc.Compose(EntityBaseKeys.StaticInfo), si.ToString(), new { disabled = "disabled" });
         }
 
         public static MvcHtmlString HiddenEntityInfo<T, S>(this HtmlHelper helper, TypeContext<T> parent, Expression<Func<T, S>> property)
@@ -102,32 +106,57 @@ namespace Signum.Web
 
     public class StaticInfo
     {
-        public StaticInfo(Type staticType)
+        public static readonly Type[] ImplementedByAll = new Type[0];
+        public static readonly string ImplementedByAllKey = "[All]";
+
+        public StaticInfo(Type staticType, Implementations implementations)
         {
-            StaticType = staticType;
+            if (staticType.IsEmbeddedEntity())
+            {
+                if (implementations != null)
+                    throw new ArgumentException("implementations should be null for EmbeddedEntities");
+
+                Types = new[] { staticType };
+            }
+            else
+            {
+                Types = implementations == null ? new[] { staticType.CleanType() } :
+                        implementations.IsByAll ? ImplementedByAll :
+                        ((ImplementedByAttribute)implementations).ImplementedTypes;
+            }
         }
 
-        public Type StaticType { get; set; }
+        public Type[] Types { get; set; }
+
         public bool IsEmbedded
         {
-            get { return typeof(EmbeddedEntity).IsAssignableFrom(StaticType); }
+            get { return Types != null && Types.Length == 1 && typeof(EmbeddedEntity).IsAssignableFrom(Types[0]); }
         }
+
         public bool IsReadOnly { get; set; }
 
         public override string ToString()
         {
-            if (StaticType == null)
-                throw new ArgumentException("StaticInfo.StaticType must be set");
-
-            Type cleanStaticType = Reflector.ExtractLite(StaticType) ?? StaticType;
-
-            string staticTypeName = Navigator.GetName(cleanStaticType);
+            if (Types == null)
+                throw new ArgumentException("StaticInfo.Types must be set");
 
             return "{0};{1};{2}".Formato(
-                staticTypeName,
-                IsEmbedded ? "e" : "i",
-                IsReadOnly ? "r" : ""
+                    Types == ImplementedByAll ? ImplementedByAllKey : 
+                    Types.ToString(t => Navigator.ResolveWebTypeName(t), ","),
+                    IsEmbedded ? "e" : "i",
+                    IsReadOnly ? "r" : ""
                 );
+        }
+
+        public static Type[] ParseTypes(string types)
+        {
+            if (string.IsNullOrEmpty(types))
+                throw new ArgumentNullException("types");
+
+            if (types == ImplementedByAllKey)
+                return ImplementedByAll;
+
+            return types.Split(',').Select(tn => Navigator.ResolveType(tn)).NotNull().ToArray();
         }
     }
 
@@ -149,14 +178,14 @@ namespace Signum.Web
                 return;
             }
 
-            if (typeof(Lite).IsAssignableFrom(value.GetType()))
+            if (value.GetType().IsLite())
             {
                 Lite liteValue = value as Lite;
                 RuntimeType = liteValue.RuntimeType;
                 IdOrNull = liteValue.IdOrNull;
                 IsNew = liteValue.IdOrNull == null;
             }
-            else if (typeof(EmbeddedEntity).IsAssignableFrom(value.GetType()))
+            else if (value.GetType().IsEmbeddedEntity())
             {
                 RuntimeType = value.GetType();
             }
@@ -171,25 +200,16 @@ namespace Signum.Web
                 throw new ArgumentException("Invalid type {0} for RuntimeInfo. It must be Lite, IdentifiableEntity or EmbeddedEntity".Formato(value.GetType()));
         }
 
-        private string RuntimeTypeStr
-        {
-            get
-            {
-                if (RuntimeType == null)
-                    return "";
-                if (typeof(Lite).IsAssignableFrom(RuntimeType))
-                    throw new ArgumentException("RuntimeInfo's RuntimeType cannot be of type Lite. Use ExtractLite or construct a RuntimeInfo<T> instead");
-                return RuntimeType.Name;
-            }
-        }
-
         public override string ToString()
         {
             if (IdOrNull != null && IsNew)
                 throw new ArgumentException("Invalid RuntimeInfo parameters: IdOrNull={0} and IsNew=true".Formato(IdOrNull));
 
+            if (RuntimeType != null && RuntimeType.IsLite())
+                throw new ArgumentException("RuntimeInfo's RuntimeType cannot be of type Lite. Use ExtractLite or construct a RuntimeInfo<T> instead");
+
             return "{0};{1};{2};{3}".Formato(
-                RuntimeTypeStr,
+                (RuntimeType == null) ? "" : Navigator.ResolveWebTypeName(RuntimeType),
                 IdOrNull.TryToString(),
                 IsNew || (ForceNewInUI==true && !IdOrNull.HasValue) ? "n" : "o", //2nd condition is for EmbeddedEntities
                 Ticks.TryToString()
@@ -202,9 +222,11 @@ namespace Signum.Web
             if (parts.Length != 4)
                 throw new ArgumentException("Incorrect sfRuntimeInfo format: {0}".Formato(formValue));
 
+            string runtimeTypeString = parts[0];
+
             return new RuntimeInfo
             {
-                RuntimeType = parts[0].HasText() ? Navigator.ResolveType(parts[0]) : null,
+                RuntimeType = string.IsNullOrEmpty(runtimeTypeString) ? null : Navigator.ResolveType(runtimeTypeString),
                 IdOrNull = (parts[1].HasText()) ? int.Parse(parts[1]) : (int?)null,
                 IsNew = parts[2]=="n" ? true : false,
                 Ticks = (parts[3].HasText()) ? long.Parse(parts[3]) : (long?)null

@@ -27,17 +27,17 @@ namespace Signum.Web
 
             NameValueCollection parameters = controllerContext.HttpContext.Request.Params;
 
-            string queryUrlName = "";
-            object rawValue = bindingContext.ValueProvider.GetValue("sfQueryUrlName").TryCC(vp => vp.RawValue);
+            string webQueryName = "";
+            object rawValue = bindingContext.ValueProvider.GetValue("webQueryName").TryCC(vp => vp.RawValue);
             if (rawValue.GetType() == typeof(string[]))
-                queryUrlName = ((string[])rawValue)[0];
+                webQueryName = ((string[])rawValue)[0];
             else 
-                queryUrlName = (string)rawValue;
+                webQueryName = (string)rawValue;
 
-            if (!queryUrlName.HasText())
-                throw new InvalidOperationException("queryUrlName not provided");
+            if (!webQueryName.HasText())
+                throw new InvalidOperationException("webQueryName not provided");
 
-            fo.QueryName = Navigator.ResolveQueryFromUrlName(queryUrlName);
+            fo.QueryName = Navigator.ResolveQueryName(webQueryName);
 
             fo.FilterOptions = ExtractFilterOptions(controllerContext.HttpContext, fo.QueryName);
             fo.OrderOptions = ExtractOrderOptions(controllerContext.HttpContext, fo.QueryName);
@@ -199,20 +199,8 @@ namespace Signum.Web
                     return DateTime.Parse(value).FromUserInterface();
                 return null;
             }
-            if (typeof(Lite).IsAssignableFrom(type.UnNullify()))
-            {
-                string[] vals = ((string)value).Split(';');
-                int intValue;
-                if (vals[0].HasText() && int.TryParse(vals[0], out intValue))
-                {
-                    Type liteType = Navigator.NamesToTypes[vals[1]];
-                    if (typeof(Lite).IsAssignableFrom(liteType))
-                        liteType = Reflector.ExtractLite(liteType);
-                    return Database.RetrieveLite(liteType, intValue);
-                }
-                else
-                    return null;
-            }
+            if (type.UnNullify().IsLite())
+                return TypeLogic.ParseLite(Reflector.ExtractLite(type), value);
 
             return ReflectionTools.Parse(value, type); 
         }

@@ -1,59 +1,18 @@
 ﻿if (!FindNavigator && typeof FindNavigator == "undefined") {
 
-    $(function () {
-        $(".searchControl th:not(.thRowEntity):not(.thRowSelection)")
-        .live('click', function (e) {
-            if ($(this).hasClass("columnEditing"))
-                return true;
-            Sort(e);
-            return false;
-        })
-        .live('mousedown', function (e) {
-            if ($(this).hasClass("columnEditing"))
-                return true;
-            this.onselectstart = function () { return false };
-            return false;
-        });
-
-        $(".tblResults td").live('contextmenu', function (e) {
-            if ($(e.target).hasClass("searchCtxMenuOverlay") || $(e.target).parents().hasClass("searchCtxMenuOverlay")) {
-                $('.searchCtxMenuOverlay').remove();
-                return false;
-            }
-
-            var $this = $(this);
-            var index = $this.index();
-            var $th = $this.closest("table").find("th").eq(index);
-            if ($th.hasClass('thRowSelection'))
-                return false;
-            if ($th.hasClass('thRowEntity'))
-                EntityCellContextMenu(e);
-            else
-                CellContextMenu(e);
-            return false;
-        });
-
-        $('.searchCtxItem.quickFilter').live('click', function () {
-            log("contextmenu item click");
-            var $elem = $(this).closest("td");
-            $('.searchCtxMenuOverlay').remove();
-            QuickFilter($elem);
-        });
-    });
-
     function EntityCellContextMenu(e) {
         log("entity contextmenu");
 
         var $target = $(e.target);
 
-        var hiddenQueryName = $target.closest(".searchControl").children("input:hidden[id$=sfQueryUrlName]");
+        var hiddenQueryName = $target.closest(".searchControl").children("input:hidden[id$=sfWebQueryName]");
         var idHiddenQueryName = hiddenQueryName.attr('id');
-        var prefix = idHiddenQueryName.substring(0, idHiddenQueryName.indexOf("sfQueryUrlName"));
+        var prefix = idHiddenQueryName.substring(0, idHiddenQueryName.indexOf("sfWebQueryName"));
         if (prefix.charAt(prefix.length - 1) == "_")
             prefix = prefix.substring(0, prefix.length - 1);
 
-        var showCtx = window[prefix.compose("EntityContextMenu")];
-        if (showCtx == undefined || isFalse(showCtx))
+        var showCtxUrl = window[prefix.compose("EntityContextMenuUrl")];
+        if (showCtxUrl == undefined)
             return false; //EntityContextMenu not active
 
         var $cmenu = $("<div class='searchCtxMenu'></div>");
@@ -73,11 +32,11 @@
 
         $target.addClass("contextmenu-active");
         SF.ajax({
-            url: 'Signum/GetContextualPanel',
+            url: showCtxUrl,
             type: "POST",
             async: true,
             dataType: "html",
-            data: { liteUrl: $target.children('a').attr('href'), sfQueryUrlName: hiddenQueryName.val(), prefix: prefix },
+            data: { lite: $target.parent().attr('data-entity'), webQueryName: hiddenQueryName.val(), prefix: prefix },
             success: function (items) { $cmenu.html(items); }
         });
 
@@ -109,7 +68,7 @@
     var FindNavigator = function (_findOptions) {
         this.findOptions = $.extend({
             prefix: "",
-            queryUrlName: null,
+            webQueryName: null,
             searchOnLoad: false,
             allowMultiple: null,
             create: true,
@@ -121,8 +80,8 @@
             columns: null, //List of column names "columnName1,columnName2"
             columnMode: null,
             allowUserColumns: null,
-            navigatorControllerUrl: "Signum/PartialFind",
-            searchControllerUrl: "Signum/Search",
+            navigatorControllerUrl: null,
+            searchControllerUrl: null,
             onOk: null,
             onCancelled: null,
             onOkClosed: null,
@@ -140,6 +99,53 @@
 
         tempDivId: function () {
             return this.findOptions.prefix + "Temp";
+        },
+
+        initialize: function () {
+            var self = this;
+            $(this.pf("tblResults") + " th:not(.thRowEntity):not(.thRowSelection)")
+            .live('click', function (e) {
+                if ($(this).hasClass("columnEditing"))
+                    return true;
+                Sort(e, window[self.findOptions.prefix.compose("SearchUrl")]);
+                return false;
+            })
+            .live('mousedown', function (e) {
+                if ($(this).hasClass("columnEditing"))
+                    return true;
+                this.onselectstart = function () { return false };
+                return false;
+            });
+
+            $(this.pf("tblResults td")).live('contextmenu', function (e) {
+                if ($(e.target).hasClass("searchCtxMenuOverlay") || $(e.target).parents().hasClass("searchCtxMenuOverlay")) {
+                    $('.searchCtxMenuOverlay').remove();
+                    return false;
+                }
+
+                var $this = $(this);
+                var index = $this.index();
+                var $th = $this.closest("table").find("th").eq(index);
+                if ($th.hasClass('thRowSelection'))
+                    return false;
+                if ($th.hasClass('thRowEntity'))
+                    EntityCellContextMenu(e);
+                else
+                    CellContextMenu(e);
+                return false;
+            });
+
+            $(this.pf("tblResults") + " .searchCtxItem.quickFilter").live('click', function () {
+                log("contextmenu item click");
+                var $elem = $(this).closest("td");
+                $('.searchCtxMenuOverlay').remove();
+
+                var quickFilterUrl = window[self.findOptions.prefix.compose("QuickFilterUrl")];
+                if (quickFilterUrl == undefined)
+                    return false; //QuickFilters not active            
+
+                QuickFilter($elem, quickFilterUrl);
+            });
         },
 
         openFinder: function () {
@@ -231,7 +237,7 @@
 
         requestDataForSearch: function () {
             var requestData = new Object();
-            requestData[sfQueryUrlName] = $(this.pf(sfQueryUrlName)).val();
+            requestData["webQueryName"] = $(this.pf(sfWebQueryName)).val();
             requestData[sfTop] = $(this.pf(sfTop)).val();
             requestData[sfAllowMultiple] = $(this.pf(sfAllowMultiple)).val();
 
@@ -252,7 +258,7 @@
 
         requestDataForOpenFinder: function () {
             var requestData = new Object();
-            requestData[sfQueryUrlName] = this.findOptions.queryUrlName;
+            requestData["webQueryName"] = this.findOptions.webQueryName;
             requestData[sfTop] = this.findOptions.top;
             requestData[sfAllowMultiple] = this.findOptions.allowMultiple;
             if (this.findOptions.view == false)
@@ -316,7 +322,7 @@
 
             var info = RuntimeInfoFor(this.findOptions.prefix.compose("value").compose(index));
             if (info.find().length > 0) //If it's a Lite, the value is the Id
-                value = info.id() + ";" + info.runtimeType();
+                value = info.runtimeType() + ";" + info.id();
 
             var filter = new Object();
             filter["cn" + index] = $filter.find("td:nth-child(1) > :hidden").val();
@@ -412,7 +418,7 @@
                 this.findOptions.onCancelled();
         },
 
-        addColumn: function () {
+        addColumn: function (getColumnNameUrl) {
             log("FindNavigator addColumn");
 
             if (isFalse(this.findOptions.allowUserColumns) || $(this.pf("tblFilters tbody")).length == 0)
@@ -428,12 +434,12 @@
 
             var $tblHeaders = $(this.pf("tblResults thead tr"));
 
-            var queryUrlName = ((empty(this.findOptions.queryUrlName)) ? $(this.pf(sfQueryUrlName)).val() : this.findOptions.queryUrlName);
+            var webQueryName = ((empty(this.findOptions.webQueryName)) ? $(this.pf(sfWebQueryName)).val() : this.findOptions.webQueryName);
             var self = this;
             SF.ajax({
                 type: "POST",
-                url: "Signum/GetColumnName",
-                data: { "sfQueryUrlName": queryUrlName, "tokenName": tokenName },
+                url: getColumnNameUrl,
+                data: { "webQueryName": webQueryName, "tokenName": tokenName },
                 async: false,
                 dataType: "html",
                 success: function (columnNiceName) {
@@ -494,7 +500,7 @@
                 $(this.pf("btnEditColumnsFinish")).hide();
         },
 
-        addFilter: function () {
+        addFilter: function (addFilterUrl) {
             log("FindNavigator addFilter");
 
             var tableFilters = $(this.pf("tblFilters tbody"));
@@ -504,13 +510,13 @@
             var tokenName = this.constructTokenName();
             if (empty(tokenName)) return;
 
-            var queryUrlName = ((empty(this.findOptions.queryUrlName)) ? $(this.pf(sfQueryUrlName)).val() : this.findOptions.queryUrlName);
+            var webQueryName = ((empty(this.findOptions.webQueryName)) ? $(this.pf(sfWebQueryName)).val() : this.findOptions.webQueryName);
 
             var self = this;
             SF.ajax({
                 type: "POST",
-                url: "Signum/AddFilter",
-                data: { "sfQueryUrlName": queryUrlName, "tokenName": tokenName, "index": this.newFilterRowIndex(), "prefix": this.findOptions.prefix },
+                url: addFilterUrl,
+                data: { "webQueryName": webQueryName, "tokenName": tokenName, "index": this.newFilterRowIndex(), "prefix": this.findOptions.prefix },
                 async: false,
                 dataType: "html",
                 success: function (filterHtml) {
@@ -533,7 +539,7 @@
             return parseInt(lastRowIndex) + 1;
         },
 
-        newSubTokensCombo: function (index) {
+        newSubTokensCombo: function (index, controllerUrl) {
             log("FindNavigator newSubTokensCombo");
             var selectedColumn = $(this.pf("ddlTokens_" + index));
             if (selectedColumn.length == 0) return;
@@ -556,12 +562,12 @@
             if (selectedColumn.children("option:selected").val() == "") return;
 
             var tokenName = this.constructTokenName();
-            var queryUrlName = ((empty(this.findOptions.queryUrlName)) ? $(this.pf(sfQueryUrlName)).val() : this.findOptions.queryUrlName);
+            var webQueryName = ((empty(this.findOptions.webQueryName)) ? $(this.pf(sfWebQueryName)).val() : this.findOptions.webQueryName);
 
             SF.ajax({
                 type: "POST",
-                url: "Signum/NewSubTokensCombo",
-                data: { "sfQueryUrlName": queryUrlName, "tokenName": tokenName, "index": index, "prefix": this.findOptions.prefix },
+                url: controllerUrl,
+                data: { "webQueryName": webQueryName, "tokenName": tokenName, "index": index, "prefix": this.findOptions.prefix },
                 async: false,
                 dataType: "html",
                 success: function (newCombo) {
@@ -586,31 +592,28 @@
             return tokenName;
         },
 
-        quickFilter: function ($elem) {
+        quickFilter: function ($elem, quickFilterUrl) {
             log("FindNavigator quickFilter");
             var tableFilters = $(this.pf("tblFilters tbody"));
             if (tableFilters.length == 0)
                 return;
             var params;
-            var ahref = $elem.children('a');
-            if (ahref.length == 0) {
+            var data = $elem.children(".data");
+            if (data.length == 0) {
                 var cb = $elem.find("input:checkbox");
                 if (cb.length == 0)
-                    params = { "isLite": "false", "sfValue": $elem.html().trim() };
+                    params = { "sfValue": $elem.html().trim() };
                 else
-                    params = { "isLite": "false", "sfValue": (cb.filter(":checked").length > 0) };
+                    params = { "sfValue": (cb.filter(":checked").length > 0) };
             }
             else {
-                var route = ahref.attr("href");
-                var separator = route.indexOf("/");
-                var lastSeparator = route.lastIndexOf("/");
-                params = { "isLite": "true", "typeUrlName": route.substring(separator + 1, lastSeparator), "sfId": route.substring(lastSeparator + 1, route.length) };
+                params = { "sfValue": data.val() };
             }
 
             var cellIndex = $elem[0].cellIndex;
 
             params = $.extend(params, {
-                "sfQueryUrlName": $(this.pf(sfQueryUrlName)).val(),
+                "webQueryName": $(this.pf(sfWebQueryName)).val(),
                 "tokenName": $($($elem.closest(".tblResults")).find("th")[cellIndex]).children("input:hidden").val(),
                 "prefix": this.findOptions.prefix,
                 "index": this.newFilterRowIndex()
@@ -619,7 +622,7 @@
             var self = this;
             SF.ajax({
                 type: "POST",
-                url: "Signum/QuickFilter",
+                url: quickFilterUrl,
                 data: params,
                 async: false,
                 dataType: "html",
@@ -662,7 +665,7 @@
 
         requestDataForSearchPopupCreate: function () {
             var requestData = this.serializeFilters();
-            var requestData = $.extend(requestData, { sfQueryUrlName: ((empty(this.findOptions.queryUrlName)) ? $(this.pf(sfQueryUrlName)).val() : this.findOptions.queryUrlName) });
+            var requestData = $.extend(requestData, { webQueryName: ((empty(this.findOptions.webQueryName)) ? $(this.pf(sfWebQueryName)).val() : this.findOptions.webQueryName) });
             return requestData;
         },
 
@@ -675,8 +678,7 @@
             return $.extend({
                 type: $(this.pf(sfEntityTypeName)).val(),
                 containerDiv: null,
-                onCancelled: null,
-                controllerUrl: empty(this.findOptions.prefix) ? "Signum/Create" : "Signum/PopupCreate"
+                onCancelled: null
             }, _viewOptions);
         },
 
@@ -690,8 +692,7 @@
                 type: $(this.pf(sfEntityTypeName)).val(),
                 containerDiv: null,
                 requestExtraJsonData: this.requestDataForSearchPopupCreate(),
-                onCancelled: null,
-                controllerUrl: empty(this.findOptions.prefix) ? "Signum/Create" : "Signum/PopupCreate"
+                onCancelled: null
             }, _viewOptions);
         },
 
@@ -702,6 +703,10 @@
         .attr('checked', (select.length > 0) ? true : false);
         }
     };
+
+    function InitializeSearchControl(prefix) {
+        new FindNavigator({ prefix: prefix }).initialize();
+    }
 
     function OpenFinder(_findOptions) {
         new FindNavigator(_findOptions).openFinder();
@@ -729,8 +734,8 @@
         onSuccess(items);
     }
 
-    function AddColumn(prefix) {
-        new FindNavigator({ prefix: prefix }).addColumn();
+    function AddColumn(prefix, getColumnNameUrl) {
+        new FindNavigator({ prefix: prefix }).addColumn(getColumnNameUrl);
     }
 
     function EditColumns(prefix) {
@@ -745,18 +750,18 @@
         new FindNavigator({ prefix: prefix }).deleteColumn(columnName);
     }
 
-    function AddFilter(prefix) {
-        new FindNavigator({ prefix: prefix }).addFilter();
+    function AddFilter(prefix, addFilterUrl) {
+        new FindNavigator({ prefix: prefix }).addFilter(addFilterUrl);
     }
 
-    function NewSubTokensCombo(_findOptions, index) {
-        new FindNavigator(_findOptions).newSubTokensCombo(index);
+    function NewSubTokensCombo(_findOptions, index, controllerUrl) {
+        new FindNavigator(_findOptions).newSubTokensCombo(index, controllerUrl);
     }
 
-    function QuickFilter($elem) {
+    function QuickFilter($elem, quickFilterUrl) {
         var idtblresults = $elem.closest(".tblResults")[0].id;
         var prefix = (idtblresults == "tblResults") ? "" : idtblresults.substring(0, idtblresults.indexOf("tblResults") - 1);
-        new FindNavigator({ prefix: prefix }).quickFilter($elem);
+        new FindNavigator({ prefix: prefix }).quickFilter($elem, quickFilterUrl);
     }
 
     function DeleteFilter(prefix, index) {
@@ -767,7 +772,7 @@
         new FindNavigator({ prefix: prefix }).clearAllFilters();
     }
 
-    function SearchCreate(viewOptions) {
+    function SearchCreate(viewOptions, createUrl) {
         var findNavigator = new FindNavigator({ prefix: viewOptions.prefix });
         if (empty(viewOptions.prefix)) {
             var viewOptions = findNavigator.viewOptionsForSearchCreate(viewOptions);
@@ -783,7 +788,7 @@
         var findNavigator = new FindNavigator({ prefix: prefix }).toggleSelectAll();
     }
 
-    function Sort(evt) {
+    function Sort(evt, controllerUrl) {
         var $target = $(evt.target);
         var searchControlDiv = $target.parents(".searchControl");
 
@@ -791,7 +796,7 @@
         prefix = prefix.substring(0, prefix.indexOf("divSearchControl"));
         if (prefix.lastIndexOf("_") == prefix.length - 1)
             prefix = prefix.substring(0, prefix.length - 1);
-        var findNavigator = new FindNavigator({ prefix: prefix });
+        var findNavigator = new FindNavigator({ prefix: prefix, searchControllerUrl: controllerUrl });
 
         var multiCol = evt.shiftKey;
 

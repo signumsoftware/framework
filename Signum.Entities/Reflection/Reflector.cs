@@ -64,6 +64,11 @@ namespace Signum.Entities.Reflection
             return typeof(IIdentifiable).IsAssignableFrom(type);
         }
 
+        public static bool IsModifiableEntity(this Type type)
+        {
+            return typeof(ModifiableEntity).IsAssignableFrom(type);
+        }
+
         public static bool IsModifiableOrInterface(this Type t)
         {
             return IsModifiable(t) || IsIIdentifiable(t);
@@ -104,11 +109,6 @@ namespace Signum.Entities.Reflection
                 .ToArray();
 
             return result;
-        }
-
-        internal static IEnumerable<Type> Identifiables(Assembly assembly)
-        {
-            return assembly.GetTypes().Where(t => IsIdentifiableEntity(t));
         }
 
         internal static Type GenerateEnumProxy(Type enumType)
@@ -188,7 +188,7 @@ namespace Signum.Entities.Reflection
                 case ExpressionType.MemberAccess:
                     {
                         MemberExpression me = (MemberExpression)e;  
-                        if(typeof(Lite).IsAssignableFrom(me.Member.DeclaringType) && me.Member.Name.StartsWith("Entity"))
+                        if(me.Member.DeclaringType.IsLite() && me.Member.Name.StartsWith("Entity"))
                             return null;
                         
                         return me.Member;

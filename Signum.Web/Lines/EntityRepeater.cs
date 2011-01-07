@@ -64,9 +64,13 @@ namespace Signum.Web
 
         public static JsInstruction JsCreating(EntityRepeater erep, JsViewOptions viewOptions)
         {
+            if (viewOptions.ControllerUrl == null)
+                viewOptions.ControllerUrl = RouteHelper.New().SignumAction("PartialView");
+
             return new JsInstruction(() => "ERepOnCreating({0})".Formato(",".Combine(
                 erep.ToJS(),
-                viewOptions.TryCC(v => v.ToJS()))));
+                viewOptions.TryCC(v => v.ToJS()),
+                erep.HasManyImplementations ? RouteHelper.New().SignumAction("GetTypeChooser").SingleQuote() : null)));
         }
 
         protected override string DefaultFinding()
@@ -78,8 +82,9 @@ namespace Signum.Web
         {
             return new JsInstruction(() => "ERepOnFinding({0})".Formato(",".Combine(
                 erep.ToJS(),
-                findOptions.TryCC(f => f.ToJS())),
-                viewOptions.TryCC(v => v.ToJS())));
+                findOptions.TryCC(f => f.ToJS()),
+                viewOptions.TryCC(v => v.ToJS()),
+                erep.HasManyImplementations ? RouteHelper.New().SignumAction("GetTypeChooser").SingleQuote() : null)));
         }
 
         protected override string DefaultRemoving()

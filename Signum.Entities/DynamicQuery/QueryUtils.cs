@@ -14,7 +14,7 @@ namespace Signum.Entities.DynamicQuery
 {
     public static class QueryUtils
     {
-        public static string GetQueryName(object queryKey)
+        public static string GetQueryUniqueKey(object queryKey)
         {
             return
                 queryKey is Type ? ((Type)queryKey).FullName :
@@ -23,17 +23,17 @@ namespace Signum.Entities.DynamicQuery
         }
 
 
-        public static string GetNiceQueryName(object queryKey)
+        public static string GetNiceName(object queryName)
         {
-            return GetNiceQueryName(queryKey, null); 
+            return GetNiceName(queryName, null); 
         }
 
-        public static string GetNiceQueryName(object queryKey, CultureInfo ci)
+        public static string GetNiceName(object queryName, CultureInfo ci)
         {
             return
-                queryKey is Type ? ((Type)queryKey).NicePluralName() :
-                queryKey is Enum ? ((Enum)queryKey).NiceToString() :
-                queryKey.ToString();
+                queryName is Type ? ((Type)queryName).NicePluralName() :
+                queryName is Enum ? ((Enum)queryName).NiceToString() :
+                queryName.ToString();
         }
 
         public static FilterType GetFilterType(Type type)
@@ -77,10 +77,10 @@ namespace Signum.Entities.DynamicQuery
                     if (Reflector.ExtractLite(type) != null)
                         return FilterType.Lite;
 
-                    if (typeof(IIdentifiable).IsAssignableFrom(type))
+                    if (type.IsIIdentifiable())
                         return FilterType.Lite;
 
-                    if (typeof(EmbeddedEntity).IsAssignableFrom(type))
+                    if (type.IsEmbeddedEntity())
                         return FilterType.Embedded;
 
                     goto default;

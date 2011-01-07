@@ -39,9 +39,6 @@ namespace Signum.Web
 
                 using (!entityCombo.OnlyValue ? sb.Surround(new HtmlTag("div").Class("value-container")) : null)
                 {
-
-                    sb.AddLine(EntityBaseHelper.HiddenImplementations(helper, entityCombo));
-
                     sb.AddLine(helper.HiddenEntityInfo(entityCombo));
 
                     if (EntityBaseHelper.RequiresLoadAll(helper, entityCombo))
@@ -65,7 +62,7 @@ namespace Signum.Web
                                 data.Select(lite => new SelectListItem()
                                     {
                                         Text = lite.ToString(),
-                                        Value = entityCombo.Implementations != null ? lite.RuntimeType.Name + ";" + lite.Id.ToString() : lite.Id.ToString(),
+                                        Value = entityCombo.Implementations != null ? lite.Key() : lite.Id.ToString(),
                                         Selected = lite.IdOrNull == entityCombo.IdOrNull
                                     })
                                 );

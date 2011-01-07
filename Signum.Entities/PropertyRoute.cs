@@ -44,7 +44,7 @@ namespace Signum.Entities
 
         public PropertyRoute Add(PropertyInfo propertyInfo)
         {
-            if (typeof(IIdentifiable).IsAssignableFrom(this.Type))
+            if (this.Type.IsIIdentifiable())
             {
                 Implementations imp = GetImplementations();
 
@@ -73,7 +73,7 @@ namespace Signum.Entities
             if (!parent.Type.FollowC(a => a.BaseType).Contains(propertyInfo.DeclaringType))
                 throw new ArgumentException("PropertyInfo {0} not found on {1}".Formato(propertyInfo.PropertyName(), parent.Type));
 
-            if (typeof(IIdentifiable).IsAssignableFrom(parent.Type) && parent.PropertyRouteType != PropertyRouteType.Root)
+            if (parent.Type.IsIIdentifiable() && parent.PropertyRouteType != PropertyRouteType.Root)
                 throw new ArgumentException("Parent can not be a non-root Identifiable");
 
             if (Reflector.IsMList(parent.Type))
@@ -101,9 +101,9 @@ namespace Signum.Entities
             this.Parent = parent;
         }
 
-        public static PropertyRoute Root(Type identifiable)
+        public static PropertyRoute Root(Type propertyRouteRoot)
         {
-            return new PropertyRoute(identifiable);
+            return new PropertyRoute(propertyRouteRoot);
         }
 
         PropertyRoute(Type type)
@@ -111,8 +111,8 @@ namespace Signum.Entities
             if (type == null)
                 throw new ArgumentNullException("type");
 
-            if (!typeof(IdentifiableEntity).IsAssignableFrom(type))
-                throw new ArgumentException("Type must be a sub-type of IdentifiableEntity");
+            if (!typeof(IRootEntity).IsAssignableFrom(type))
+                throw new ArgumentException("Type must implement IPropertyRouteRoot");
 
             this.type = type;
             this.PropertyRouteType = PropertyRouteType.Root;

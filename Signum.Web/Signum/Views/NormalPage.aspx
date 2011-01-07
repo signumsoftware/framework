@@ -20,7 +20,7 @@
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
 
 <% TypeContext modelTC = (TypeContext)Model;
-    using(Html.BeginForm("DoPostBack","Signum","POST")){ %>
+    using(Html.BeginForm()){ %>
     
     <div id="divNormalControl">
         <% Html.RenderPartial(Navigator.Manager.NormalControlUrl, ViewData); %>

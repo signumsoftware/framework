@@ -47,6 +47,9 @@ namespace Signum.Web
 
         public static JsInstruction JsViewing(EntityListDetail edlist, JsViewOptions viewOptions)
         {
+            if (viewOptions.ControllerUrl == null)
+                viewOptions.ControllerUrl = RouteHelper.New().SignumAction("PartialView");
+
             return new JsInstruction(() => "EDListOnViewing({0})".Formato(",".Combine(
                 edlist.ToJS(),
                 viewOptions.TryCC(v => v.ToJS()))));
@@ -59,9 +62,13 @@ namespace Signum.Web
 
         private static JsInstruction JsCreating(EntityListDetail edlist, JsViewOptions viewOptions)
         {
+            if (viewOptions.ControllerUrl == null)
+                viewOptions.ControllerUrl = RouteHelper.New().SignumAction("PartialView");
+
             return new JsInstruction(() => "EDListOnCreating({0})".Formato(",".Combine(
                 edlist.ToJS(),
-                viewOptions.TryCC(v => v.ToJS()))));
+                viewOptions.TryCC(v => v.ToJS()),
+                edlist.HasManyImplementations ? RouteHelper.New().SignumAction("GetTypeChooser").SingleQuote() : null)));
         }
 
         protected override string DefaultFinding()
@@ -73,8 +80,9 @@ namespace Signum.Web
         {
             return new JsInstruction(() => "EDListOnFinding({0})".Formato(",".Combine(
                 edlist.ToJS(),
-                findOptions.TryCC(f => f.ToJS())),
-                viewOptions.TryCC(v => v.ToJS())));
+                findOptions.TryCC(f => f.ToJS()),
+                viewOptions.TryCC(v => v.ToJS()),
+                edlist.HasManyImplementations ? RouteHelper.New().SignumAction("GetTypeChooser").SingleQuote() : null)));
         }
 
         protected override string DefaultRemoving()

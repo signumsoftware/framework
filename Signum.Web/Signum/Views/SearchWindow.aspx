@@ -11,12 +11,11 @@
             "~/signum/Scripts/SF_Validator.js",   
             "~/signum/Scripts/SF_Operations.js")
     %>        
-    <%-- string s = Html.GetContextualItemListForQuery(((FindOptions)ViewData[ViewDataKeys.FindOptions]).QueryName).ContextualItemsToString();  --%>
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
 <%  
-    using(Html.BeginForm("DoPostBack","Signum","POST")){ %>
+    using(Html.BeginForm()){ %>
      <h2><%= ViewData[ViewDataKeys.PageTitle] ?? ""%></h2>
         <%Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString()); %>
         <%= Html.ValidationSummaryAjax() %>

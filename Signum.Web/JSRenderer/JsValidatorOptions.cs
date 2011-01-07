@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using Signum.Utilities;
 using System.Web.Mvc;
+using System.Web;
+using Signum.Web.Controllers;
 
 namespace Signum.Web
 {
@@ -46,21 +48,33 @@ namespace Signum.Web
     {
         public static JsInstruction ValidatePartial(JsValidatorOptions options)
         {
+            if (options.ControllerUrl == null)
+                options.ControllerUrl = RouteHelper.New().SignumAction("ValidatePartial");
+
             return new JsInstruction(() => "ValidatePartial({0})".Formato(options.ToJS()));
         }
 
         public static JsInstruction TrySavePartial(JsValidatorOptions options)
         {
+            if (options.ControllerUrl == null)
+                options.ControllerUrl = RouteHelper.New().SignumAction("TrySavePartial");
+
             return new JsInstruction(() => "TrySavePartial({0})".Formato(options.ToJS()));
         }
 
         public static JsInstruction Validate(JsValidatorOptions options)
         {
+            if (options.ControllerUrl == null)
+                options.ControllerUrl = RouteHelper.New().SignumAction("Validate");
+
             return new JsInstruction(() => "Validate({0})".Formato(options.ToJS()));
         }
 
         public static JsInstruction TrySave(JsValidatorOptions options)
         {
+            if (options.ControllerUrl == null)
+                options.ControllerUrl = RouteHelper.New().SignumAction("TrySave");
+
             return new JsInstruction(() => "TrySave({0})".Formato(options.ToJS()));
         }
 
@@ -71,6 +85,9 @@ namespace Signum.Web
 
         public static JsInstruction EntityIsValid(JsValidatorOptions options, JsFunction onSuccess)
         {
+            if (options.ControllerUrl == null)
+                options.ControllerUrl = RouteHelper.New().SignumAction(options.Prefix == null ? "Validate" : "ValidatePartial");
+
             return new JsInstruction(() => "EntityIsValid({0},{1})".Formato(options.ToJS(), onSuccess.ToJS()));
         }
     }

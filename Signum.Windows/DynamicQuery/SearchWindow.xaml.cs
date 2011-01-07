@@ -152,7 +152,7 @@ namespace Signum.Windows
         {
             tbEntityType.Text = searchControl.EntityType.NicePluralName();
 
-            string niceQueryName = QueryUtils.GetNiceQueryName(QueryName);
+            string niceQueryName = QueryUtils.GetNiceName(QueryName);
 
             if (niceQueryName.StartsWith(tbEntityType.Text))
                 niceQueryName = niceQueryName.Substring(tbEntityType.Text.Length).Trim();

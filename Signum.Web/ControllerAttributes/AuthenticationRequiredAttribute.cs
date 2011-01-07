@@ -26,7 +26,7 @@ namespace Signum.Web
             {
                 //send them off to the login page
                 string returnUrl = context.HttpContext.Request.Url.PathAndQuery;
-                string loginUrl = Common.FullyQualifiedApplicationPath + "Auth/Login?ReturnUrl={0}".Formato(returnUrl);
+                string loginUrl = RouteHelper.New().Action("Login", "Auth", new { referrer = returnUrl });
                 if (context.HttpContext.Request.IsAjaxRequest())
                     context.Result = Navigator.RedirectUrl(loginUrl);
                 else

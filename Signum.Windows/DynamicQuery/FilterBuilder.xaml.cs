@@ -51,7 +51,7 @@ namespace Signum.Windows
             Common.SetIsReadOnly(g, f.Frozen);
 
             Type type = f.Token.Type;
-            if (typeof(Lite).IsAssignableFrom(type))
+            if (type.IsLite())
             {
                 Type cleanType = Reflector.ExtractLite(type);
 
@@ -91,7 +91,7 @@ namespace Signum.Windows
                     g.Children.Add(el);
                 }
             }
-            else if (typeof(EmbeddedEntity).IsAssignableFrom(type))
+            else if (type.IsEmbeddedEntity())
             {
                 EntityLine el = new EntityLine
                 {

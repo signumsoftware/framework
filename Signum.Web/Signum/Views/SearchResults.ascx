@@ -6,6 +6,8 @@
 <%@ Import Namespace="System.Collections.Generic" %>
 <%@ Import Namespace="Signum.Utilities" %>
 <%@ Import Namespace="Signum.Web.Properties" %>
+<%@ Import Namespace="Signum.Engine" %>
+
 <% Context context = (Context)Model;
    FindOptions findOptions = (FindOptions)ViewData[ViewDataKeys.FindOptions];
    QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
@@ -17,11 +19,10 @@
 
     foreach (var row in queryResult.Rows)
     {
-      %>
-      <tr>
-      <%
         Lite entityField = row.Entity;
-
+      %>
+      <tr data-entity="<%: entityField.Key() %>">
+      <%
         if (findOptions.AllowMultiple.HasValue)
         {
             %>
@@ -31,14 +32,14 @@
             {
                 Html.Write(Html.CheckBox(
                     context.Compose("rowSelection", row.Index.ToString()),
-                    new { value = entityField.Id.ToString() + "__" + entityField.RuntimeType.Name + "__" + entityField.ToStr }));
+                    new { value = entityField.Id.ToString() + "__" + Navigator.ResolveWebTypeName(entityField.RuntimeType) + "__" + entityField.ToStr }));
 
             }
             else
             {
                 Html.Write(Html.RadioButton(
                     context.Compose("rowSelection"),
-                    entityField.Id.ToString() + "__" + entityField.RuntimeType.Name + "__" + entityField.ToStr));
+                    entityField.Id.ToString() + "__" + Navigator.ResolveWebTypeName(entityField.RuntimeType) + "__" + entityField.ToStr));
             }  
              %>
             </td>

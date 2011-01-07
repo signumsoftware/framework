@@ -45,6 +45,13 @@ namespace Signum.Web
             return "new ELine(" + this.OptionsJS() + ")";
         }
 
+        protected override JsViewOptions DefaultJsViewOptions()
+        {
+            var voptions = base.DefaultJsViewOptions();
+            voptions.ValidationControllerUrl = RouteHelper.New().SignumAction("ValidatePartial");
+            return voptions;
+        }
+
         protected override string DefaultViewing()
         {
             return EntityLine.JsViewing(this, DefaultJsViewOptions()).ToJS();
@@ -52,6 +59,9 @@ namespace Signum.Web
 
         public static JsInstruction JsViewing(EntityLine eline, JsViewOptions viewOptions)
         {
+            if (viewOptions.ControllerUrl == null)
+                viewOptions.ControllerUrl = RouteHelper.New().SignumAction("PopupView");
+
             return new JsInstruction(() => "ELineOnViewing({0})".Formato(",".Combine(
                 eline.ToJS(),
                 viewOptions.TryCC(v => v.ToJS()))));
@@ -63,10 +73,14 @@ namespace Signum.Web
         }
 
         public static JsInstruction JsCreating(EntityLine eline, JsViewOptions viewOptions)
-        { 
+        {
+            if (viewOptions.ControllerUrl == null)
+                viewOptions.ControllerUrl = RouteHelper.New().SignumAction("PopupView");
+
             return new JsInstruction(() => "ELineOnCreating({0})".Formato(",".Combine(
                 eline.ToJS(),
-                viewOptions.TryCC(v => v.ToJS()))));
+                viewOptions.TryCC(v => v.ToJS()),
+                eline.HasManyImplementations ? RouteHelper.New().SignumAction("GetTypeChooser").SingleQuote() : null)));
         }
 
         protected override string DefaultFinding()
@@ -78,7 +92,8 @@ namespace Signum.Web
         {
             return new JsInstruction(() => "ELineOnFinding({0})".Formato(",".Combine(
                 eline.ToJS(),
-                findOptions.TryCC(v => v.ToJS()))));
+                findOptions.TryCC(v => v.ToJS()),
+                eline.HasManyImplementations ? RouteHelper.New().SignumAction("GetTypeChooser").SingleQuote() : null)));
         }
 
         protected override string DefaultRemoving()

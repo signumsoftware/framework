@@ -93,6 +93,7 @@
     <Compile Include="DynamicQuery\StaticColumnFactory.cs" />
     <Compile Include="DynamicQuery\ManualDynamicQuery.cs" />
     <Compile Include="Engine\SqlUtils.cs" />
+    <Compile Include="Engine\StringEncoder.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="Database.cs" />
     <Compile Include="DynamicQuery\DynamicQueryManager.cs" />
@@ -182,7 +183,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Properties\Resources.es.resx"/>
+    <EmbeddedResource Include="Properties\Resources.es.resx" />
     <EmbeddedResource Include="Properties\Resources.fr.resx" />
     <EmbeddedResource Include="Properties\Resources.it.resx" />
     <EmbeddedResource Include="Properties\Resources.resx">

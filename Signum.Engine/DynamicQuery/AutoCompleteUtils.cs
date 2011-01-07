@@ -28,6 +28,11 @@ namespace Signum.Engine.DynamicQuery
             else
                 types = ((ImplementedByAttribute)implementations).ImplementedTypes;
 
+            return FindLiteLike(liteType, types, subString, count);
+        }
+
+        public static List<Lite> FindLiteLike(Type liteType, Type[] types, string subString, int count)
+        {
             return (from mi in new[] { miLiteStarting, miLiteContaining }
                     from type in types
                     from lite in (List<Lite>)mi.GetInvoker(liteType, type)(subString, count)

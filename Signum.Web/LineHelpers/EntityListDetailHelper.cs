@@ -31,13 +31,10 @@ namespace Signum.Web
 
             sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, listDetail));
 
-            sb.AddLine(helper.Hidden(listDetail.Compose(EntityBaseKeys.StaticInfo), 
-                new StaticInfo(listDetail.ElementType.CleanType()) { IsReadOnly = listDetail.ReadOnly }.ToString(), new { disabled = "disabled" }));
+            sb.AddLine(helper.HiddenStaticInfo(listDetail));
 
             sb.AddLine(helper.Hidden(listDetail.Compose(TypeContext.Ticks), 
                 EntityInfoHelper.GetTicks(helper, listDetail).TryToString() ?? ""));
-
-            sb.AddLine(EntityBaseHelper.HiddenImplementations(helper, listDetail));
 
             //If it's an embeddedEntity write an empty template with index 0 to be used when creating a new item
             if (listDetail.ElementType.IsEmbeddedEntity())

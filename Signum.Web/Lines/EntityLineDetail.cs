@@ -62,9 +62,13 @@ namespace Signum.Web
 
         public static JsInstruction JsCreating(EntityLineDetail edline, JsViewOptions viewOptions)
         {
+            if (viewOptions.ControllerUrl == null)
+                viewOptions.ControllerUrl = RouteHelper.New().SignumAction("PartialView");
+
             return new JsInstruction(() => "EDLineOnCreating({0})".Formato(",".Combine(
                 edline.ToJS(),
-                viewOptions.TryCC(v => v.ToJS()))));
+                viewOptions.TryCC(v => v.ToJS()),
+                edline.HasManyImplementations ? RouteHelper.New().SignumAction("GetTypeChooser").SingleQuote() : null)));
         }
 
         protected override string DefaultFinding()
@@ -76,8 +80,9 @@ namespace Signum.Web
         {
             return new JsInstruction(() => "EDLineOnFinding({0})".Formato(",".Combine(
                 edline.ToJS(),
-                findOptions.TryCC(f => f.ToJS())),
-                viewOptions.TryCC(v => v.ToJS())));
+                findOptions.TryCC(f => f.ToJS()),
+                viewOptions.TryCC(v => v.ToJS()),
+                edline.HasManyImplementations ? RouteHelper.New().SignumAction("GetTypeChooser").SingleQuote() : null)));
         }
 
         protected override string DefaultRemoving()

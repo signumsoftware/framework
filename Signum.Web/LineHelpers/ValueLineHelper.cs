@@ -364,7 +364,7 @@ namespace Signum.Web
         private static string GetReloadFunction(HtmlHelper helper, ValueLine valueLine)
         {
             return (valueLine.ReloadOnChange || valueLine.ReloadFunction.HasText()) ?
-                valueLine.ReloadFunction ?? "ReloadEntity('{0}','{1}'); ".Formato("Signum/ReloadEntity", helper.WindowPrefix()) :
+                valueLine.ReloadFunction ?? "ReloadEntity('{0}','{1}'); ".Formato(valueLine.ReloadControllerUrl, helper.WindowPrefix()) :
                 "";
         }
     }

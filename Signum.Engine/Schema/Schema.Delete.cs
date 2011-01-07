@@ -13,7 +13,7 @@ namespace Signum.Engine.Maps
     {
         public SqlPreCommand DeleteSql(int id)
         {
-            SqlParameter pid = SqlParameterBuilder.CreateReferenceParameter(SqlBuilder.PrimaryKeyName, false, id);
+            SqlParameter pid = SqlParameterBuilder.CreateIdParameter(id);
 
             var collectionFields = Fields.Values.Select(a => a.Field).OfType<FieldMList>();
 

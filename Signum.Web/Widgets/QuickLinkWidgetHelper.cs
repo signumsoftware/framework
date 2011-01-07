@@ -56,7 +56,7 @@ namespace Signum.Web
             {
                 Content =
                     @"<div class='widget quicklinks'><ul>{0}</ul>
-                    </div>".Formato(quicklinks.ToString(q => "<li><a onclick=\"javascript:OpenFinder({0});\">{1}</a></li>".Formato(JsFindOptions(q).ToJS(), QueryUtils.GetNiceQueryName(q.FindOptions.QueryName)), "")),
+                    </div>".Formato(quicklinks.ToString(q => "<li><a onclick=\"javascript:OpenFinder({0});\">{1}</a></li>".Formato(JsFindOptions(q).ToJS(), QueryUtils.GetNiceName(q.FindOptions.QueryName)), "")),
                 Label = "<a id='{0}'>{0}<span class='count {1}'>{2}</span></a>".Formato("Quicklinks", quicklinks.Count == 0 ? "disabled" : "", quicklinks.Count),
                 Id = "Notes",
                 Show = true,

@@ -7,7 +7,7 @@ if (!ViewNavigator && typeof ViewNavigator == "undefined") {
             onOkClosed: null,
             onCancelled: null,
             onLoaded: null,
-            controllerUrl: "Signum/PopupView",
+            controllerUrl: null,
             type: null,
             id: null,
             prefix: "",
@@ -273,10 +273,8 @@ if (!ViewNavigator && typeof ViewNavigator == "undefined") {
         //Construct popup
         var tempDivId = _prefix + "Temp";
         var requestData = "prefix=" + tempDivId;
-        var url = "Signum/GetChooser";
         if (empty(jsonOptionsListFormat)) {
-            requestData += "&sfImplementations=" + $('#' + _prefix.compose(sfImplementations)).val();
-            url = "Signum/GetTypeChooser";
+            requestData += "&types=" + StaticInfoFor(_prefix).types();
         }
         else {
             for (var i = 0; i < jsonOptionsListFormat.length; i++) {
@@ -288,7 +286,7 @@ if (!ViewNavigator && typeof ViewNavigator == "undefined") {
 
         SF.ajax({
             type: "POST",
-            url: url,
+            url: chooserOptions.controllerUrl,
             data: requestData,
             async: false,
             dataType: "html",

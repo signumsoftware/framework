@@ -15,6 +15,7 @@ var OperationManager = function(_options) {
         operationKey: null,
         isLite: false,
         controllerUrl: null,
+        validationControllerUrl: null,
         onOk: null,
         onCancelled: null,
         contextual: false,
@@ -59,7 +60,7 @@ OperationManager.prototype = {
         if (formChildren.filter("[name=" + myRuntimeInfoKey + "]").length == 0) {
             if (empty(runtimeType))
                 requestData.push(
-                    qp(myRuntimeInfoKey, info.createValue(StaticInfoFor(this.options.prefix).staticType(), info.id(), info.isNew(), info.ticks()))
+                    qp(myRuntimeInfoKey, info.createValue(StaticInfoFor(this.options.prefix).singleType(), info.id(), info.isNew(), info.ticks()))
                 );
             else
                 requestData.push(
@@ -206,7 +207,7 @@ OperationManager.prototype = {
 
 var OperationExecutor = function (_options) {
     OperationManager.call(this, $.extend({
-        controllerUrl: "Operation/OperationExecute"
+        controllerUrl: null
     }, _options));
 
     this.defaultExecute = function () {
@@ -223,7 +224,7 @@ var OperationExecutor = function (_options) {
         if (isTrue(this.options.isLite))
             onSuccess.call(this);
         else {
-            if (!EntityIsValid({ parentDiv: this.options.parentDiv, prefix: this.options.prefix }, function () { onSuccess.call(self) }))
+            if (!EntityIsValid({ parentDiv: this.options.parentDiv, prefix: this.options.prefix, controllerUrl: this.options.validationControllerUrl }, function () { onSuccess.call(self) }))
                 return;
         }
     };
@@ -243,7 +244,7 @@ OperationExecutor.prototype = new OperationManager();
 //ConstructorFrom options = OperationManager options + returnType
 var ConstructorFrom = function(_options) {
     OperationManager.call(this, $.extend({
-        controllerUrl: "Operation/ConstructFromExecute",
+        controllerUrl: null,
         returnType: null
     }, _options));
 
@@ -262,7 +263,7 @@ var ConstructorFrom = function(_options) {
         if (isTrue(this.options.isLite))
             onSuccess.call(this);
         else {
-            if (!EntityIsValid({ parentDiv: this.options.parentDiv, prefix: this.options.prefix }, function () { onSuccess.call(self) }))
+            if (!EntityIsValid({ parentDiv: this.options.parentDiv, prefix: this.options.prefix, controllerUrl: this.options.validationControllerUrl }, function () { onSuccess.call(self) }))
                 return;
         }
     };
@@ -281,7 +282,7 @@ ConstructorFrom.prototype = new OperationManager();
 
 var DeleteExecutor = function(_options) {
     OperationManager.call(this, $.extend({
-        controllerUrl: "Operation/DeleteExecute"
+        controllerUrl: null
     }, _options));
 
     this.defaultDelete = function() {
@@ -320,7 +321,7 @@ function OperationDelete(deleteExecutor) {
 //ConstructorFromMany options = OperationManager options + returnType
 var ConstructorFromMany = function(_options) {
     OperationManager.call(this, $.extend({
-        controllerUrl: "Operation/ConstructFromManyExecute",
+        controllerUrl: null,
         returnType: null
     }, _options));
 

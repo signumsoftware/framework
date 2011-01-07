@@ -427,9 +427,9 @@ namespace Signum.Engine.Linq
                 IEnumerable col = (IEnumerable)ce.Value;
 
                 Type colType = source.Type.ElementType();
-                if (typeof(IIdentifiable).IsAssignableFrom(colType))
+                if (colType.IsIIdentifiable())
                     return SmartEqualizer.EntityIn(newItem, col.Cast<IIdentifiable>().Select(ie => ToFieldInitExpression(ie)).ToArray());
-                else if (typeof(Lite).IsAssignableFrom(colType))
+                else if (colType.IsLite())
                     return SmartEqualizer.EntityIn(newItem, col.Cast<Lite>().Select(lite => ToLiteReferenceExpression(lite)).ToArray());
                 else
                     return InExpression.FromValues(newItem, col == null ? new object[0] : col.Cast<object>().ToArray());
@@ -442,7 +442,7 @@ namespace Signum.Engine.Linq
                 var pc = ColumnProjector.ProjectColumns(projection, alias);
 
                 SubqueryExpression se = null;
-                if (pc.Columns.Count == 1 && !typeof(IIdentifiable).IsAssignableFrom(newItem.Type))
+                if (pc.Columns.Count == 1 && !newItem.Type.IsIIdentifiable())
                     se = new InExpression(newItem, projection.Source);
                 else
                 {
@@ -786,11 +786,11 @@ namespace Signum.Engine.Linq
             if (c.Value == null)
                 return c; 
 
-            if (typeof(IIdentifiable).IsAssignableFrom(c.Type))
+            if (c.Type.IsIIdentifiable())
             {
                 return ToFieldInitExpression((IdentifiableEntity)c.Value);// podria ser null y lo meteriamos igualmente
             }
-            else if (typeof(Lite).IsAssignableFrom(c.Type))
+            else if (c.Type.IsLite())
             {
                 return ToLiteReferenceExpression((Lite)c.Value);
             }
@@ -1397,7 +1397,7 @@ namespace Signum.Engine.Linq
             else if (m is MemberMemberBinding)
             {
                 MemberMemberBinding mmb = (MemberMemberBinding)m;
-                if(!typeof(EmbeddedEntity).IsAssignableFrom(m.Member.ReturningType()))
+                if(!m.Member.ReturningType().IsEmbeddedEntity())
                     throw new InvalidOperationException("{0} does not inherit from EmbeddedEntity".Formato(m.Member.ReturningType()));
 
                 Expression obj2 = Expression.MakeMemberAccess(obj, mmb.Member);

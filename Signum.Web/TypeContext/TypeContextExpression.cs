@@ -10,6 +10,7 @@ using System.Linq.Expressions;
 using Signum.Engine.Maps;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Engine;
+using Signum.Entities.Reflection;
 
 namespace Signum.Web
 {
@@ -87,8 +88,8 @@ namespace Signum.Web
         protected override Expression VisitMemberAccess(MemberExpression me)
         {
             var tce = Cast(Visit(me.Expression));
-
-            if (typeof(Lite).IsAssignableFrom(tce.Type) && (me.Member.Name == "EntityOrNull" || me.Member.Name == "Entity"))
+            
+            if (tce.Type.IsLite() && (me.Member.Name == "EntityOrNull" || me.Member.Name == "Entity"))
                 return new TypeContextExpression(tce.Properties, me.Type, tce.Route.Add((PropertyInfo)me.Member));
 
             return new TypeContextExpression(

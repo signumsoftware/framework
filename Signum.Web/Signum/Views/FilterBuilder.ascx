@@ -25,11 +25,11 @@
                         .ToList();
                    columns.Insert(0, new SelectListItem { Text = "-", Selected = true, Value = "" });
                 %>
-               <%= Html.TokensCombo(Navigator.Manager.QuerySettings[findOptions.QueryName].UrlName, columns, context, 0, false)%>
-               <%= Html.Button(context.Compose("btnAddFilter"), "+", "AddFilter('{0}');".Formato(context.ControlID), "addFilter", new Dictionary<string, object> { { "title", "Add Filter" }})%>
+               <%= Html.TokensCombo(findOptions.QueryName, columns, context, 0, false)%>
+               <%= Html.Button(context.Compose("btnAddFilter"), "+", "AddFilter('{0}','{1}');".Formato(context.ControlID, Url.SignumAction("AddFilter")), "addFilter", new Dictionary<string, object> { { "title", "Add Filter" }})%>
                <% if (findOptions.AllowUserColumns.HasValue ? findOptions.AllowUserColumns.Value : Navigator.Manager.AllowUserColumns(context.ControlID))
                   { %>
-               <%= Html.Button(context.Compose("btnAddColumn"), "+", "AddColumn('{0}');".Formato(context.ControlID), "addColumn", new Dictionary<string, object> { { "title", "Add Column" } })%>
+               <%= Html.Button(context.Compose("btnAddColumn"), "+", "AddColumn('{0}','{1}');".Formato(context.ControlID, Url.SignumAction("GetColumnName")), "addColumn", new Dictionary<string, object> { { "title", "Add Column" } })%>
                <%= Html.Button(context.Compose("btnEditColumns"), Resources.UserColumnsEdit, "EditColumns('{0}');".Formato(context.ControlID), "")%>
                <%= Html.Button(context.Compose("btnEditColumnsFinish"), Resources.EditColumnsFinishEdit, "EditColumnsFinish('{0}');".Formato(context.ControlID), "", new Dictionary<string, object> { { "style", "display:none;" } })%>
                <% } %>

@@ -62,7 +62,7 @@ namespace Signum.Entities.DynamicQuery
             }
 
             Type cleanType = Reflector.ExtractLite(type) ?? type;
-            if (typeof(IIdentifiable).IsAssignableFrom(cleanType))
+            if (cleanType.IsIIdentifiable())
             {
                 if (implementations != null)
                 {
@@ -78,7 +78,7 @@ namespace Signum.Entities.DynamicQuery
                 return new[] { EntityPropertyToken.IdProperty(this), EntityPropertyToken.ToStrProperty(this) }
                     .Concat(EntityProperties(cleanType)).ToArray();
             }
-            else if(typeof(EmbeddedEntity).IsAssignableFrom(cleanType))
+            else if (cleanType.IsEmbeddedEntity())
             {
                 return EntityProperties(cleanType).ToArray();
             }

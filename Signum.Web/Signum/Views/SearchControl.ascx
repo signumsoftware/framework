@@ -19,14 +19,15 @@
 %>
 
 <div id="<%=context.Compose("divSearchControl") %>" class="searchControl">
-<%=Html.Hidden(context.Compose("sfQueryUrlName"), Navigator.Manager.QuerySettings[findOptions.QueryName].UrlName, new { disabled = "disabled" })%>
+<%=Html.Hidden(context.Compose("sfWebQueryName"), Navigator.ResolveWebQueryName(findOptions.QueryName), new { disabled = "disabled" })%>
 <%=Html.Hidden(context.Compose(ViewDataKeys.AllowMultiple), findOptions.AllowMultiple.ToString(), new { disabled = "disabled" })%>
 <%=Html.Hidden(context.Compose(ViewDataKeys.View), viewable, new { disabled = "disabled" })%>
-<%= Html.Hidden(context.Compose(ViewDataKeys.EntityTypeName), entitiesType.Name, new { disabled = "disabled" })%>
+<%= Html.Hidden(context.Compose(ViewDataKeys.EntityTypeName), Navigator.ResolveWebTypeName(entitiesType), new { disabled = "disabled" })%>
 <% if (findOptions.EntityContextMenu)
    {
-       Response.Write("<script type=\"text/javascript\">var " + context.Compose("EntityContextMenu") + " = true;</script>");
+       Response.Write("<script type=\"text/javascript\">var " + context.Compose("EntityContextMenuUrl") + " = '" + Url.SignumAction("GetContextualPanel") + "';</script>");
    }
+   Response.Write("<script type=\"text/javascript\">var " + context.Compose("QuickFilterUrl") + " = '" + Url.SignumAction("QuickFilter") + "'; var " + context.Compose("SearchUrl") + " = '" + Url.SignumAction("Search")  + "';</script>");
 %>
 
 <%= (findOptions.SearchOnLoad) ?
@@ -46,10 +47,10 @@
     <%= Html.Hidden(context.Compose("OrderBy"), findOptions.OrderOptions == null ? "" :
                 (findOptions.OrderOptions.ToString(oo => (oo.OrderType == OrderType.Ascending ? "" : "-") + oo.Token.FullKey(), ",")))%>
 
-    <input class="btnSearch" id="<%=context.Compose("btnSearch")%>" type="button" onclick="<%="Search({{prefix:'{0}'}});".Formato(context.ControlID) %>" value="<%: Resources.Search %>" /> 
+    <input class="btnSearch" id="<%=context.Compose("btnSearch")%>" type="button" onclick="<%="Search({{prefix:'{0}',searchControllerUrl:'{1}'}});".Formato(context.ControlID, Url.SignumAction("Search")) %>" value="<%: Resources.Search %>" /> 
     <% if (findOptions.Create && Navigator.IsCreable(entitiesType, true) && viewable)
        { %>
-        <input type="button" value="+" class="lineButton create" onclick="<%= findOptions.Creating.HasText() ? findOptions.Creating : "SearchCreate({{prefix:'{0}'}});".Formato(context.ControlID)%>" />
+        <input type="button" value="+" class="lineButton create" onclick="<%= findOptions.Creating.HasText() ? findOptions.Creating : "SearchCreate({{prefix:'{0}',controllerUrl:'{1}'}});".Formato(context.ControlID, Url.SignumAction(string.IsNullOrEmpty(context.ControlID) ? "Create" : "PopupCreate"))%>" />
     <%} %>
     <ul class="button-bar">
     <%= ButtonBarQueryHelper.GetButtonBarElementsForQuery(this.ViewContext, findOptions.QueryName, entitiesType, context.ControlID).ToString(Html)%> 
@@ -108,3 +109,7 @@
 
 </div>
 </div>
+<script type="text/javascript">
+    InitializeSearchControl("<%= context.ControlID %>");
+</script>
+

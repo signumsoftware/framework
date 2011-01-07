@@ -209,14 +209,14 @@ namespace Signum.Windows
             if (template != null)
                 return template;
 
-            if (typeof(Lite).IsAssignableFrom(entityType))
+            if (entityType.IsLite())
             {
                 template = (DataTemplate)element.FindResource(typeof(Lite));
                 if (template != null)
                     return template;
             }
 
-            if (typeof(ModifiableEntity).IsAssignableFrom(entityType) || typeof(IIdentifiable).IsAssignableFrom(entityType))
+            if (entityType.IsModifiableEntity() || entityType.IsIIdentifiable())
             {
                 template = (DataTemplate)element.FindResource(typeof(ModifiableEntity));
                 if (template != null)
@@ -286,16 +286,16 @@ namespace Signum.Windows
             Manager.Initialize();
         }
 
-        public static EntitySettings<T> GetEntitySettings<T>()
+        public static EntitySettings<T> EntitySettings<T>()
             where T : IdentifiableEntity
         {
             return (EntitySettings<T>)Manager.EntitySettings[typeof(T)];
         }
 
-        public static EntitySettingsEmbedded<T> GetEntitySettingsEmbedded<T>()
+        public static EmbeddedEntitySettings<T> EmbeddedEntitySettings<T>()
             where T : EmbeddedEntity
         {
-            return (EntitySettingsEmbedded<T>)Manager.EntitySettings[typeof(T)];
+            return (EmbeddedEntitySettings<T>)Manager.EntitySettings[typeof(T)];
         }
     }
 
@@ -432,7 +432,7 @@ namespace Signum.Windows
 
         public virtual string SearchTitle(object queryName)
         {
-            return Resources.FinderOf0.Formato(QueryUtils.GetNiceQueryName(queryName));
+            return Resources.FinderOf0.Formato(QueryUtils.GetNiceName(queryName));
         }
 
         public virtual Lite Find(FindOptions options)

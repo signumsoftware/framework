@@ -35,8 +35,8 @@ namespace Signum.Web
                 {
                     {"prefix", Prefix.TryCC(t=>t.ToJS())},
                     {"top", Top.TryCC(t=>t.ToJS()) },
-                    {"navigatorControllerUrl", NavigatorControllerUrl.TryCC(t=>t.ToJS())},
-                    {"searchControllerUrl",SearchControllerUrl.TryCC(t=>t.ToJS())},
+                    {"navigatorControllerUrl", NavigatorControllerUrl.TryCC(t=>t.ToJS()) ?? RouteHelper.New().SignumAction("PartialFind").SingleQuote() },
+                    {"searchControllerUrl",SearchControllerUrl.TryCC(t=>t.ToJS()) ?? RouteHelper.New().SignumAction("Search").SingleQuote() },
                     {"onOk",OnOk.TryCC(t=>t.ToJS())},
                     {"onCancelled", OnCancelled.TryCC(t=>t.ToJS())},
                     {"async", Async.TryCC(t=>t.ToJS())},

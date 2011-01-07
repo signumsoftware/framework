@@ -47,7 +47,7 @@ namespace Signum.Windows
                     return;
 
                 if (o is FindOptionsBase)
-                    menuItem.Header = QueryUtils.GetNiceQueryName(((FindOptionsBase)o).QueryName);
+                    menuItem.Header = QueryUtils.GetNiceName(((FindOptionsBase)o).QueryName);
                 else if (o is AdminOptions)
                     menuItem.Header = ((AdminOptions)o).Type.NicePluralName();
                 else if (o is Type)

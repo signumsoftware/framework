@@ -26,6 +26,11 @@ namespace Signum.Engine
             return CreateParameter(name, SqlBuilder.PrimaryKeyType, nullable, id);
         }
 
+        public static SqlParameter CreateIdParameter(int id)
+        {
+            return CreateParameter(SqlBuilder.PrimaryKeyName, SqlBuilder.PrimaryKeyType, false, id);
+        }
+
         public static SqlParameter CreateParameter(string name, SqlDbType type, bool nullable, object value)
         {
             AssertDateTime(value);

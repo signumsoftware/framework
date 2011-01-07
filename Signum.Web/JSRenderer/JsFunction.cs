@@ -54,10 +54,11 @@ namespace Signum.Web
 
         public static JsInstruction OpenChooser(JsValue<string> prefix, JsFunction onOptionChosen, string[] optionNames)
         {
-            return "openChooser({0}, {1}, [{2}]);".Formato(
+            return "openChooser({0}, {1}, [{2}], null, {{controllerUrl:'{3}'}});".Formato(
                     prefix.ToJS(),
                     onOptionChosen.ToJS(),
-                    optionNames.ToString(on => "'{0}'".Formato(on), ","));
+                    optionNames.ToString(on => "'{0}'".Formato(on), ","),
+                    optionNames.Empty() ? RouteHelper.New().SignumAction("GetTypeChooser") : RouteHelper.New().SignumAction("GetChooser"));
         }
 
         public static JsInstruction Submit(JsValue<string> controllerUrl)

@@ -163,7 +163,7 @@ namespace Signum.Windows
         public QuickLinkExplore(ExploreOptions options)
         {
             Options = options;
-            Label = QueryUtils.GetNiceQueryName(Options.QueryName);
+            Label = QueryUtils.GetNiceName(Options.QueryName);
             Icon = Navigator.Manager.GetFindIcon(Options.QueryName, false);
             IsVisible = Navigator.IsFindable(Options.QueryName);
         }
