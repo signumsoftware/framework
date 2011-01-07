@@ -42,8 +42,6 @@ namespace Signum.Web.Mailing
                     new EntitySettings<EmailPackageDN>(EntityType.Default){ PartialViewName = e => ViewPrefix + "EmailPackage"},
                     new EntitySettings<EmailTemplateDN>(EntityType.ServerOnly)
                 });
-
-                Navigator.RegisterTypeName<IEmailOwnerDN>();
             }
         }
     }

@@ -30,13 +30,12 @@ namespace Signum.Web.Operations
             if (isLite)
             {
                 RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(Request.Form[TypeContextUtilities.Compose(sfOldPrefix, EntityBaseKeys.RuntimeInfo)]);
-                if (runtimeInfo.IdOrNull.HasValue)
-                {
-                    Lite lite = Lite.Create(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value);
-                    entity = OperationLogic.ServiceExecuteLite(lite, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey));
-                }
-                else
-                    throw new ArgumentException(Resources.CouldNotCreateLiteWithoutAnIdToCallOperation0.Formato(sfOperationFullKey));
+                if (!runtimeInfo.IdOrNull.HasValue)
+                    throw new ArgumentException("Could not create a Lite without an Id to call Operation {0}".Formato(sfOperationFullKey));
+
+                Lite lite = Lite.Create(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value);
+                entity = OperationLogic.ServiceExecuteLite(lite, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey));
+
             }
             else
             {
@@ -83,13 +82,11 @@ namespace Signum.Web.Operations
         {
             IdentifiableEntity entity = null;
             RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(Request.Form[TypeContextUtilities.Compose(sfOldPrefix, EntityBaseKeys.RuntimeInfo)]);
-            if (runtimeInfo.IdOrNull.HasValue)
-            {
-                Lite lite = Lite.Create(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value);
-                entity = OperationLogic.ServiceExecuteLite(lite, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey));
-            }
-            else
-                throw new ArgumentException(Resources.CouldNotCreateLiteWithoutAnIdToCallOperation0.Formato(sfOperationFullKey));
+            if (!runtimeInfo.IdOrNull.HasValue)
+                throw new ArgumentException("Could not create a Lite without an Id to call Operation {0}".Formato(sfOperationFullKey));
+
+            Lite lite = Lite.Create(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value);
+            entity = OperationLogic.ServiceExecuteLite(lite, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey));
 
             return Content("");
         }
@@ -98,13 +95,11 @@ namespace Signum.Web.Operations
         public ActionResult DeleteExecute(string sfOperationFullKey, string prefix, string sfOldPrefix, string sfOnOk, string sfOnCancel)
         {
             RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(Request.Form[TypeContextUtilities.Compose(sfOldPrefix, EntityBaseKeys.RuntimeInfo)]);
-            if (runtimeInfo.IdOrNull.HasValue)
-            {
-                Lite lite = Lite.Create(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value);
-                OperationLogic.ServiceDelete(lite, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey), null);
-            }
-            else
-                throw new ArgumentException(Resources.CouldNotCreateLiteWithoutAnIdToCallOperation0.Formato(sfOperationFullKey));
+            if (!runtimeInfo.IdOrNull.HasValue)
+                throw new ArgumentException("Could not create a Lite without an Id to call Operation {0}".Formato(sfOperationFullKey));
+
+            Lite lite = Lite.Create(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value);
+            OperationLogic.ServiceDelete(lite, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey), null);
 
             if (Navigator.Manager.QuerySettings.ContainsKey(runtimeInfo.RuntimeType))
                 return Navigator.RedirectUrl(Navigator.FindRoute(runtimeInfo.RuntimeType));
@@ -118,13 +113,12 @@ namespace Signum.Web.Operations
             if (isLite)
             {
                 RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(Request.Form[TypeContextUtilities.Compose(sfOldPrefix ?? "", EntityBaseKeys.RuntimeInfo)]);
-                if (runtimeInfo.IdOrNull.HasValue)
-                {
-                    Lite lite = Lite.Create(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value);
-                    entity = (IdentifiableEntity)OperationLogic.ServiceConstructFromLite(lite, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey));
-                }
-                else
-                    throw new ArgumentException(Resources.CouldNotCreateLiteWithoutAnIdToCallOperation0.Formato(sfOperationFullKey));
+
+                if (!runtimeInfo.IdOrNull.HasValue)
+                    throw new ArgumentException("Could not create a Lite without an Id to call Operation {0}".Formato(sfOperationFullKey));
+
+                Lite lite = Lite.Create(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value);
+                entity = (IdentifiableEntity)OperationLogic.ServiceConstructFromLite(lite, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey));
             }
             else
             {
@@ -169,7 +163,7 @@ namespace Signum.Web.Operations
             Type type = Navigator.ResolveType(sfRuntimeType);
 
             if (sfIds == null || sfIds.Count == 0)
-                throw new ArgumentException(Resources.ConstructFromManyOperation0NeedsSourceLazies.Formato(sfOperationFullKey));
+                throw new ArgumentException("Construct from many operation {0} needs source Ids".Formato(sfOperationFullKey));
 
             List<Lite> sourceEntities = sfIds.Select(idstr => Lite.Create(type, idstr)).ToList();
             

@@ -185,7 +185,7 @@ namespace Signum.Web.Help
                 switch (letter)
                 {
                     case WikiFormat.EntityLink:
-                        Type t = HelpLogic.GetNameToType(link, false);
+                        Type t = TypeLogic.TryGetType(link);
                         return new WikiLink(
                             HelpLogic.EntityUrl(t),
                             text.HasText() ? text : t.NiceName());
@@ -217,7 +217,7 @@ namespace Signum.Web.Help
                     case WikiFormat.PropertyLink:
                         string[] parts = link.Split('.');
 
-                        Type type = HelpLogic.GetNameToType(parts[0], true);
+                        Type type = TypeLogic.GetType(parts[0]);
                         //TODO: NiceToString de la propiedad
                         return new WikiLink(
                             HelpLogic.PropertyUrl(type, parts[1]),
@@ -230,14 +230,14 @@ namespace Signum.Web.Help
                             Enum query = (Enum)o;
                             return new WikiLink(
                                 HelpLogic.QueryUrl(query),
-                                text.HasText() ? text : QueryUtils.GetNiceQueryName(query));
+                                text.HasText() ? text : QueryUtils.GetNiceName(query));
                         }
                         else
                         {
                             Type query = (Type)o;
                             return new WikiLink(
                                 HelpLogic.QueryUrl(query),
-                                text.HasText() ? text : QueryUtils.GetNiceQueryName(query));
+                                text.HasText() ? text : QueryUtils.GetNiceName(query));
                         }
 
                     case WikiFormat.WikiLink:

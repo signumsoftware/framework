@@ -16,6 +16,7 @@ namespace Signum.Web.Operations
         public JsValue<bool?> IsContextual { get; set; }
         public JsValue<string> ReturnType { get; set; }
         public JsValue<string> ControllerUrl { get; set; }
+        public JsValue<string> ValidationControllerUrl { get; set; }
         public JsInstruction RequestExtraJsonData { get; set; }
 
         public JsOperationOptions()
@@ -31,7 +32,8 @@ namespace Signum.Web.Operations
                     {"contextual", IsContextual.TryCC(a=>a.ToJS())},
                     {"returnType",ReturnType.TryCC(a=>a.ToJS())},
                     {"requestExtraJsonData", RequestExtraJsonData.TryCC(a=>a.ToJS())},
-                    {"controllerUrl", ControllerUrl.TryCC(a=>a.ToJS())}
+                    {"controllerUrl", ControllerUrl.TryCC(a=>a.ToJS())},
+                    {"validationControllerUrl", ValidationControllerUrl.TryCC(a => a.ToJS()) ?? RouteHelper.New().SignumAction(Prefix == null || !Prefix.ToJS().HasText() ? "Validate" : "ValidatePartial").SingleQuote() }
                 };
 
                 return builder.ToJS();

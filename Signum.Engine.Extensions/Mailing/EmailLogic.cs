@@ -51,15 +51,21 @@ namespace Signum.Engine.Mailing
     public static class EmailLogic
     {
         public static string OverrideEmailToAddress;
+
+        public static string TemporaryOverrideEmailToAddress
+        {
+            get { return temporaryOverrideEmailToAddress; }
+        }
+
         [ThreadStatic]
-        public static string TemporaryOverrideEmailToAddress;
+        static string temporaryOverrideEmailToAddress;
 
         public static IDisposable OverrideTemporaryEmail(string toAddress)
         {
-            string old = TemporaryOverrideEmailToAddress;
-            TemporaryOverrideEmailToAddress = toAddress;
+            string old = temporaryOverrideEmailToAddress;
+            temporaryOverrideEmailToAddress = toAddress;
 
-            return new Disposable(() => TemporaryOverrideEmailToAddress = old);
+            return new Disposable(() => temporaryOverrideEmailToAddress = old);
         }
 
         public static Func<SmtpClient> SmtpClientBuilder;
@@ -103,14 +109,14 @@ namespace Signum.Engine.Mailing
                                                    e.Exception,
                                                }).ToDynamic();
 
-                sb.Schema.Initializing(InitLevel.Level2NormalEntities, Schema_Initializing);
+                sb.Schema.Initializing[InitLevel.Level2NormalEntities] += Schema_Initializing;
                 sb.Schema.Generating += Schema_Generating;
                 sb.Schema.Synchronizing += Schema_Synchronizing; 
             }
         }
 
         #region database management
-        static void Schema_Initializing(Schema sender)
+        static void Schema_Initializing()
         {
             List<EmailTemplateDN> dbTemplates = Administrator.UnsafeRetrieveAll<EmailTemplateDN>();
 
@@ -289,8 +295,7 @@ namespace Signum.Engine.Mailing
 
         static MailMessage CreateMailMessage(EmailMessageDN emailMessage)
         {
-            MailAddress to = 
-                TemporaryOverrideEmailToAddress.HasText() ? new MailAddress(TemporaryOverrideEmailToAddress) :
+            MailAddress to = temporaryOverrideEmailToAddress.HasText() ? new MailAddress(temporaryOverrideEmailToAddress) :
                 OverrideEmailToAddress.HasText() ? new MailAddress(OverrideEmailToAddress) :
                 new MailAddress(emailMessage.Recipient.Retrieve().Email); 
 

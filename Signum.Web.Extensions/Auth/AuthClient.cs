@@ -27,7 +27,10 @@ namespace Signum.Web.Authorization
 {
     public static class AuthClient
     {
-        public static string PublicLoginUrl = "Auth/Login?referrer={0}";
+        public static string PublicLoginUrl(string returnUrl)
+        {
+            return RouteHelper.New().Action("Login", "Auth", new { referrer = returnUrl }); 
+        }
 
         public static string ViewPrefix = "auth/Views/";
          
@@ -46,10 +49,14 @@ namespace Signum.Web.Authorization
         public static string RememberPasswordUrl = ViewPrefix + "RememberPassword";
         public static string RememberPasswordSuccessUrl = ViewPrefix + "RememberPasswordSuccess";
 
-        public static void Start(bool types, bool property, bool queries, bool resetPasswordFeature)
+        public static bool ResetPasswordStarted;
+
+        public static void Start(bool types, bool property, bool queries, bool resetPassword)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
+                ResetPasswordStarted = resetPassword;
+
                 AssemblyResourceManager.RegisterAreaResources(
                     new AssemblyResourceStore(typeof(AuthClient), "~/auth/", "Signum.Web.Extensions.Auth."));
 
@@ -58,9 +65,6 @@ namespace Signum.Web.Authorization
                 if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(RoleDN)))
                     Navigator.AddSetting(new EntitySettings<RoleDN>(EntityType.Default));
                 
-                if (resetPasswordFeature)
-                    Navigator.RegisterTypeName<ResetPasswordRequestDN>();
-
                 if (property)
                     Common.CommonTask += new CommonTask(TaskAuthorizeProperties);
 
@@ -68,7 +72,7 @@ namespace Signum.Web.Authorization
                 {
                     Navigator.Manager.Initializing += () =>
                     {
-                        foreach (EntitySettings item in Navigator.Manager.EntitySettings.Values)
+                        foreach (EntitySettings item in Navigator.Manager.EntitySettings.Values.Where(a=>a.StaticType.IsIdentifiableEntity()))
                         {
                             miAttachEvents.GetInvoker(item.GetType().GetGenericArguments())(item); 
                         }
@@ -94,7 +98,7 @@ namespace Signum.Web.Authorization
                         string returnUrl = context.HttpContext.Request.Url.PathAndQuery;
                                             
                         //send them off to the login page
-                        string loginUrl = Common.FullyQualifiedApplicationPath + PublicLoginUrl.Formato(returnUrl);
+                        string loginUrl = PublicLoginUrl(returnUrl);
                         if (context.HttpContext.Request.IsAjaxRequest())
                             context.Result = Navigator.RedirectUrl(loginUrl);
                         else
@@ -109,7 +113,7 @@ namespace Signum.Web.Authorization
                     if (ctx.Exception is UnauthorizedAccessException)
                     {
                         string returnUrl = ctx.HttpContext.Request.Url.PathAndQuery;
-                        string loginUrl = Common.FullyQualifiedApplicationPath + AuthClient.PublicLoginUrl.Formato(returnUrl);
+                        string loginUrl = PublicLoginUrl(returnUrl);
 
                         HandleAnonymousNotAutorizedException(ctx, loginUrl);
                     }
@@ -150,8 +154,8 @@ namespace Signum.Web.Authorization
             }
         }
 
-        static GenericInvoker miAttachEvents = GenericInvoker.Create(() => AttachEvents<Entity>(null)); 
-        static void AttachEvents<T>(EntitySettings<T> settings) where T : ModifiableEntity
+        static GenericInvoker miAttachEvents = GenericInvoker.Create(() => AttachEvents<Entity>(null));
+        static void AttachEvents<T>(EntitySettings<T> settings) where T : IdentifiableEntity
         {
             settings.IsCreable += admin => TypeAuthLogic.GetTypeAllowed(typeof(T)).GetUI() == TypeAllowedBasic.Create;
             settings.IsReadOnly += (_, admin) => TypeAuthLogic.GetTypeAllowed(typeof(T)).GetUI() <= TypeAllowedBasic.Read;

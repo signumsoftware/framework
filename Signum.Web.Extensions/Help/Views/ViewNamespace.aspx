@@ -16,9 +16,10 @@
     <% Html.RenderPartial(HelpClient.ViewPrefix + HelpClient.Menu); %>
     <%
         NamespaceHelp nh = (NamespaceHelp)Model;
-         %>
-    <form action="Help/Namespace/<%=nh.Name%>/Save" id="form-save">
-        <div class="grid_12" id="entityName">    
+      using(var f = Html.BeginForm("SaveNamespace", "Help", new { @namespace = nh.Name }, FormMethod.Post, new { id = "form-save" }))
+      
+      %>
+         <div class="grid_12" id="entityName">    
             <h1><%=nh.Name %></h1> 
             <%= Html.TextArea("description", nh.Description, 5, 80, new { @class = "editable" })
                                             + "<span class=\"editor\" id=\"description-editor\">" + nh.Description.WikiParse(HelpClient.DefaultWikiSettings).Replace("\n", "<p>") + "</span>"%>
@@ -39,5 +40,5 @@
             </div>
         </div>
         <div class="clear"></div>
-    </form>
+    <% } %>
 </asp:Content>

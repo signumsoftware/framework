@@ -29,7 +29,7 @@ namespace Signum.Web.Files
 
             sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, fileRepeater));
 
-            sb.AddLine(helper.Hidden(fileRepeater.Compose(EntityBaseKeys.StaticInfo), new StaticInfo(fileRepeater.ElementType.CleanType()) { IsReadOnly = fileRepeater.ReadOnly }.ToString(), new { disabled = "disabled" }));
+            sb.AddLine(helper.HiddenStaticInfo(fileRepeater));
             sb.AddLine(helper.Hidden(fileRepeater.Compose(TypeContext.Ticks), EntityInfoHelper.GetTicks(helper, fileRepeater).TryToString() ?? ""));
 
             sb.AddLine(ListBaseHelper.CreateButton(helper, fileRepeater, new Dictionary<string, object> { { "title", fileRepeater.AddElementLinkText } }));

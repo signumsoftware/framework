@@ -65,7 +65,7 @@ namespace Signum.Engine.Authorization
 
                 sb.Include<UserDN>();
                 sb.Include<RoleDN>();
-                sb.Schema.Initializing(InitLevel.Level1SimpleEntities, Schema_Initializing);
+                sb.Schema.Initializing[InitLevel.Level1SimpleEntities] += Schema_Initializing;
                 sb.Schema.EntityEvents<RoleDN>().Saving += Schema_Saving;
 
                 dqm[typeof(RoleDN)] = (from r in Database.Query<RoleDN>()
@@ -162,7 +162,7 @@ namespace Signum.Engine.Authorization
             }
         }
 
-        static void Schema_Initializing(Schema schema)
+        static void Schema_Initializing()
         {
             _roles = Cache();
 
@@ -359,7 +359,7 @@ namespace Signum.Engine.Authorization
             PermissionAuthLogic.Start(sb);
         }
 
-        public static void ResetPasswordRequest(UserDN user, string fullyQualifiedApplicationPath)
+        public static void ResetPasswordRequest(UserDN user, Func<ResetPasswordRequestDN, string> urlGenerator)
         {
             //Remove old previous requests
             Database.Query<ResetPasswordRequestDN>()
@@ -377,7 +377,7 @@ namespace Signum.Engine.Authorization
             new ResetPasswordRequestMail
             {
                 To = user, 
-                Link = fullyQualifiedApplicationPath  + "Auth/ResetPasswordCode?email=" + user.Email + "&code=" + rpr.Code, 
+                Link = urlGenerator(rpr), 
             }.Send();
         }
 

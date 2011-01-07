@@ -39,7 +39,7 @@ namespace Signum.Web.Reports
             ResultTable queryResult = DynamicQueryManager.Current.ExecuteQuery(request);
             byte[] binaryFile = PlainExcelGenerator.WritePlainExcel(queryResult);
 
-            return File(binaryFile, MimeType.FromExtension(".xlsx"), Navigator.Manager.QuerySettings[findOptions.QueryName].UrlName + ".xlsx");
+            return File(binaryFile, MimeType.FromExtension(".xlsx"), Navigator.ResolveWebQueryName(findOptions.QueryName) + ".xlsx");
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
@@ -52,15 +52,15 @@ namespace Signum.Web.Reports
            
             byte[] file = ReportsLogic.ExecuteExcelReport(excelReport, request);
 
-            return File(file, MimeType.FromExtension(".xlsx"), Navigator.Manager.QuerySettings[findOptions.QueryName].UrlName + "-" + DateTime.Now.ToString("yyyyMMdd-HHmmss") + ".xlsx");
+            return File(file, MimeType.FromExtension(".xlsx"), Navigator.ResolveWebQueryName(findOptions.QueryName)  + "-" + DateTime.Now.ToString("yyyyMMdd-HHmmss") + ".xlsx");
             //Known Bug in IE: When the file dialog is shown, if Open is chosen the Excel will be broken as a result of IE automatically adding [1] to the name. 
             //There's not workaround for this, so either click on Save instead of Open, or use Firefox or Chrome
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public ViewResult Administer(string queryUrlName)
+        public ViewResult Administer(string webQueryName)
         {
-            object queryName = Navigator.ResolveQueryFromUrlName(queryUrlName);
+            object queryName = Navigator.ResolveQueryName(webQueryName);
             
             QueryDN query = QueryLogic.RetrieveOrGenerateQuery(queryName);
 
@@ -78,7 +78,7 @@ namespace Signum.Web.Reports
                     { 
                         new FilterOption("Query", query.ToLite())
                     },
-                    Creating = Js.SubmitOnly("Report/Create", "{{query:{0}}}".Formato(query.Id)).ToJS()
+                    Creating = Js.SubmitOnly(RouteHelper.New().Action("Create", "Report"), "{{query:{0}}}".Formato(query.Id)).ToJS()
                 };
 
                 return Navigator.Find(this, fo);
@@ -108,8 +108,7 @@ namespace Signum.Web.Reports
 
             Database.Save(report);
 
-            string newUrl = Navigator.ViewRoute(typeof(ExcelReportDN), report.Id);
-            this.HttpContext.Response.Redirect(Common.FullyQualifiedApplicationPath + newUrl, true);
+            this.HttpContext.Response.Redirect(Navigator.ViewRoute(report), true);
             return null;
         }
         
@@ -119,14 +118,14 @@ namespace Signum.Web.Reports
             ExcelReportDN report = excelReport.Retrieve();
             report.Deleted = true;
             report.Save();
-            return Navigator.RedirectUrl(Navigator.ViewRoute(typeof(ExcelReportDN), report.Id));
+            return Navigator.RedirectUrl(Navigator.ViewRoute(report));
         }
 
         public ActionResult DownloadTemplate(Lite<ExcelReportDN> excelReport)
         {
             ExcelReportDN report = excelReport.RetrieveAndForget();
 
-            HttpContext.Response.AddHeader("content-disposition", "attachment; filename=" + Path.GetFileName(report.File.FileName));
+            //HttpContext.Response.AddHeader("content-disposition", "attachment; filename=" + Path.GetFileName(report.File.FileName));
             
             return File(report.File.BinaryFile,
                 MimeType.FromFileName(report.File.FileName), 

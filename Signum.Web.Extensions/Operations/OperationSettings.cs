@@ -18,11 +18,8 @@ namespace Signum.Web.Operations
     {
         public string Text { get; set; }
         public string AltText { get; set; }
-
-        public string ControllerUrl { get; set; }
         public string RequestExtraJsonData { get; set; }
     }
-
 
     public class ConstructorSettings : OperationSettings
     {
@@ -90,14 +87,35 @@ namespace Signum.Web.Operations
         public IdentifiableEntity Entity { get; internal set; }
         public EntityOperationSettings OperationSettings { get; internal set; }
 
+
+
         public JsOperationOptions Options()
         {
+            return Options(null);
+        }
+
+        public JsOperationOptions Options(string actionName, string controllerName)
+        {
+            return Options(RouteHelper.New().Action(actionName,controllerName));
+        }
+
+        public JsOperationOptions Options(string controllerUrl)
+        {
+            if (string.IsNullOrEmpty(controllerUrl))
+            { 
+                string action = OperationInfo.OperationType == OperationType.Execute ? "OperationExecute" : 
+                                OperationInfo.OperationType == OperationType.ConstructorFrom ? "ConstructFromExecute" :
+                                OperationInfo.OperationType == OperationType.Delete ? "DeleteExecute" : null;
+                
+                controllerUrl = RouteHelper.New().Action(action, "Operation");
+            }
+
             return new JsOperationOptions
             {
                 OperationKey = EnumDN.UniqueKey(OperationInfo.Key),
                 IsLite = OperationInfo.Lite,
                 Prefix = this.Prefix,
-                ControllerUrl = OperationSettings.TryCC(s => s.ControllerUrl).TryCC(c => (JsValue<string>)c),
+                ControllerUrl = (JsValue<string>)controllerUrl,
                 RequestExtraJsonData = OperationSettings.TryCC(opt => opt.RequestExtraJsonData),
             };
         }
@@ -111,13 +129,31 @@ namespace Signum.Web.Operations
 
         public JsOperationOptions Options()
         {
+            return Options(null);
+        }
+
+        public JsOperationOptions Options(string actionName, string controllerName)
+        {
+            return Options(RouteHelper.New().Action(actionName, controllerName));
+        }
+
+        public JsOperationOptions Options(string controllerUrl)
+        {
+            if (string.IsNullOrEmpty(controllerUrl))
+            {
+                string action = OperationInfo.OperationType == OperationType.Execute ? "ContextualExecute" :
+                                OperationInfo.OperationType == OperationType.ConstructorFrom ? "ConstructFromExecute" :
+                                OperationInfo.OperationType == OperationType.Delete ? "DeleteExecute" : null;
+
+                controllerUrl = RouteHelper.New().Action(action, "Operation");
+            }
             return new JsOperationOptions
             {
                 OperationKey = EnumDN.UniqueKey(OperationInfo.Key),
                 IsLite = OperationInfo.Lite,
                 Prefix = this.Prefix,
                 IsContextual = true,
-                ControllerUrl = OperationSettings.TryCC(s => s.ControllerUrl).TryCC(c => (JsValue<string>)c) ?? (OperationInfo.OperationType == OperationType.Execute ? (JsValue<string>)"Operation/ContextualExecute" : null),
+                ControllerUrl = (JsValue<string>)controllerUrl,
                 RequestExtraJsonData = OperationSettings.TryCC(opt => opt.RequestExtraJsonData) ?? 
                                        "{{{0}:'{1}'}}".Formato(TypeContextUtilities.Compose(Prefix, EntityBaseKeys.RuntimeInfo), new RuntimeInfo(Entity).ToString())
             };
@@ -131,12 +167,25 @@ namespace Signum.Web.Operations
 
         public JsOperationOptions Options()
         {
+            return Options(null);
+        }
+
+        public JsOperationOptions Options(string actionName, string controllerName)
+        {
+            return Options(RouteHelper.New().Action(actionName, controllerName));
+        }
+
+        public JsOperationOptions Options(string controllerUrl)
+        {
+            if (string.IsNullOrEmpty(controllerUrl))
+                controllerUrl = RouteHelper.New().Action("ConstructFromManyExecute", "Operation");
+            
             return new JsOperationOptions
             {
                 OperationKey = EnumDN.UniqueKey(OperationInfo.Key),
                 IsLite = OperationInfo.Lite,
                 Prefix = this.Prefix,
-                ControllerUrl = OperationSettings.TryCC(s => s.ControllerUrl).TryCC(c => (JsValue<string>)c),
+                ControllerUrl = (JsValue<string>)controllerUrl,
                 RequestExtraJsonData = OperationSettings.TryCC(opt => (JsInstruction)opt.RequestExtraJsonData), //Not quoted
             };
         }

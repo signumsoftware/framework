@@ -1,11 +1,11 @@
-﻿#region usings
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Security.Principal;
 using System.Web;
 using System.Web.Mvc;
+using System.Web.Mvc.Html;
 using System.Web.Security;
 using System.Web.UI;
 using System.Threading;
@@ -17,7 +17,6 @@ using Signum.Utilities;
 using Signum.Entities;
 using Signum.Web.Controllers;
 using Signum.Web.Extensions.Properties;
-#endregion
 
 namespace Signum.Web.ViewsChecker
 {
@@ -50,7 +49,7 @@ namespace Signum.Web.ViewsChecker
                 {
                     Response.Clear();
                     entity = (ModifiableEntity)Constructor.Construct(entry.Key);
-                    result = helper.RenderPartialToString(entry.Value.OnPartialViewName(entity), new ViewDataDictionary(entity));
+                    result = helper.Partial(entry.Value.OnPartialViewName(entity), new ViewDataDictionary(entity));
                 }
                 catch (Exception ex)
                 {

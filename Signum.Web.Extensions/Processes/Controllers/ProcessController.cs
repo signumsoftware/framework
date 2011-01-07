@@ -25,7 +25,7 @@ namespace Signum.Web.Processes
     public class ProcessController : Controller
     {
         [AcceptVerbs(HttpVerbs.Post)]
-        public ContentResult getProgressExecution(int id)
+        public ContentResult GetProgressExecution(int id)
         {
             decimal progress = Database.Query<ProcessExecutionDN>().Where(pe => 
                     pe.Id == id).Select(pe => pe.Progress).Single() ?? 100;

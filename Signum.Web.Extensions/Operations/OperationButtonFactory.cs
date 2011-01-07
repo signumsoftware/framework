@@ -82,7 +82,7 @@ namespace Signum.Web.Operations
                 case OperationType.ConstructorFrom:
                     return new JsOperationConstructorFrom(ctx.Options()).DefaultConstruct();                    
                 default:
-                    throw new InvalidOperationException(Resources.InvalidOperationType0inTheConstructionOfOperation1.Formato(ctx.OperationInfo.OperationType.ToString(), EnumDN.UniqueKey(ctx.OperationInfo.Key)));
+                    throw new InvalidOperationException("Invalid Operation Type '{0}' in the construction of the operation '{1}'".Formato(ctx.OperationInfo.OperationType.ToString(), EnumDN.UniqueKey(ctx.OperationInfo.Key)));
             }
         }
 
@@ -97,14 +97,14 @@ namespace Signum.Web.Operations
                 case OperationType.ConstructorFrom:
                     return new JsOperationConstructorFrom(ctx.Options()).ContextualConstruct(ctx.Entity, ctx.OperationSettings.TryCC(o => o.Text) ?? ctx.OperationInfo.Key.NiceToString());
                 default:
-                    throw new InvalidOperationException(Resources.InvalidOperationType0inTheConstructionOfOperation1.Formato(ctx.OperationInfo.OperationType.ToString(), EnumDN.UniqueKey(ctx.OperationInfo.Key)));
+                    throw new InvalidOperationException("Invalid Operation Type '{0}' in the construction of the operation '{1}'".Formato(ctx.OperationInfo.OperationType.ToString(), EnumDN.UniqueKey(ctx.OperationInfo.Key)));
             }
         }
 
         static JsInstruction DefaultClick(QueryOperationContext ctx)
         {
             if (ctx.OperationInfo.OperationType != OperationType.ConstructorFromMany)
-                throw new InvalidOperationException(Resources.InvalidOperationType0inTheConstructionOfOperation1.Formato(ctx.OperationInfo.OperationType.ToString(), EnumDN.UniqueKey(ctx.OperationInfo.Key)));
+                throw new InvalidOperationException("Invalid Operation Type '{0}' in the construction of the operation '{1}'".Formato(ctx.OperationInfo.OperationType.ToString(), EnumDN.UniqueKey(ctx.OperationInfo.Key)));
 
             return new JsOperationConstructorFromMany(ctx.Options()).DefaultConstruct();
         }

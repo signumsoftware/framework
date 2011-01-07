@@ -53,7 +53,7 @@ namespace Signum.Web.Queries
         {
             UserQueryDN uq = Database.Retrieve<UserQueryDN>(id);
 
-            ViewData[ViewDataKeys.QueryName] = Navigator.Manager.QuerySettings.First(kvp => QueryUtils.GetQueryName(kvp.Key) == uq.Query.Key).Key;
+            ViewData[ViewDataKeys.QueryName] = QueryLogic.ToQueryName(uq.Query.Key);
 
             return Navigator.View(this, uq);
         }
@@ -64,7 +64,7 @@ namespace Signum.Web.Queries
 
             Database.Delete<UserQueryDN>(id);
 
-            return Redirect(Common.FullyQualifiedApplicationPath + Navigator.FindRoute(Navigator.ResolveQueryFromKey(uq.Query.Key)));
+            return Redirect(Navigator.FindRoute(uq.Query.Key));
         }
 
         public ActionResult SaveUserQuery()
@@ -73,7 +73,7 @@ namespace Signum.Web.Queries
 
             var userQuery = context.Value.Save();
 
-            ViewData[ViewDataKeys.QueryName] = Navigator.Manager.QuerySettings.First(kvp => QueryUtils.GetQueryName(kvp.Key) == userQuery.Query.Key).Key;
+            ViewData[ViewDataKeys.QueryName] = Navigator.Manager.QuerySettings.First(kvp => QueryUtils.GetQueryUniqueKey(kvp.Key) == userQuery.Query.Key).Key;
 
             return Navigator.View(this, userQuery);
         }

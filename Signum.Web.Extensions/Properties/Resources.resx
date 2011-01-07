@@ -123,18 +123,6 @@
   <data name="ConfirmNewPassword" xml:space="preserve">
     <value>Confirm new password</value>
   </data>
-  <data name="ConstructFromManyOperation0NeedsSourceIdsAsParameter" xml:space="preserve">
-    <value>Construct From Many Operation {{{0}}} needs source Ids as parameter</value>
-  </data>
-  <data name="ConstructFromManyOperation0NeedsSourceLazies" xml:space="preserve">
-    <value>Construct From Many Operation {{{0}}} needs source Lites</value>
-  </data>
-  <data name="CouldNotCreateLiteWithoutAnIdToCallOperation0" xml:space="preserve">
-    <value>Could not create Lite without an id to call Operation {{{0}}}</value>
-  </data>
-  <data name="CouldntCreateFilePathWithUnknownFileTypeForField0" xml:space="preserve">
-    <value>Couldn't create FilePath with unknown FileType for field {{0}}</value>
-  </data>
   <data name="CurrentPassword" xml:space="preserve">
     <value>Current password</value>
   </data>

@@ -98,7 +98,7 @@ namespace Signum.Windows.Chart
         {
             tbEntityType.Text = EntityType.NicePluralName();
 
-            string niceQueryName = QueryUtils.GetNiceQueryName(Request.QueryName);
+            string niceQueryName = QueryUtils.GetNiceName(Request.QueryName);
 
             if (niceQueryName.StartsWith(tbEntityType.Text))
                 niceQueryName = niceQueryName.Substring(tbEntityType.Text.Length).Trim();

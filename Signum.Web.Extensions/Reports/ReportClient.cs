@@ -27,9 +27,6 @@ namespace Signum.Web.Reports
         static bool ToExcelPlain;
         static bool ExcelReport;
         
-        public static string ToExcelPlainControllerUrl = "Report/ToExcelPlain";
-        public static string ExcelReportControllerUrl = "Report/ExcelReport";
-
         public static string ViewPrefix = "reports/Views/";
 
         public static void Start(bool toExcelPlain, bool excelReport)
@@ -60,7 +57,7 @@ namespace Signum.Web.Reports
                                     ctx.Value = new ExcelReportDN();
                                     
                                     string queryKey = ctx.Inputs[TypeContextUtilities.Compose("Query", "Key")];
-                                    object queryName = Navigator.Manager.QuerySettings.Keys.First(key => QueryUtils.GetQueryName(key) == queryKey);
+                                    object queryName = Navigator.Manager.QuerySettings.Keys.First(key => QueryUtils.GetQueryUniqueKey(key) == queryKey);
                                
                                     ctx.Value.Query = QueryLogic.RetrieveOrGenerateQuery(queryName);
                                 }
@@ -75,7 +72,7 @@ namespace Signum.Web.Reports
 
                 if (excelReport)
                 {
-                    FilesClient.Start();
+                    FilesClient.Start(false, true);
 
                     if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(QueryDN)))
                         Navigator.Manager.EntitySettings.Add(typeof(QueryDN), new EntitySettings<QueryDN>(EntityType.Default));
@@ -87,7 +84,7 @@ namespace Signum.Web.Reports
                             new ToolBarButton 
                             { 
                                 Text = Signum.Web.Properties.Resources.Save, 
-                                OnClick = Js.Submit("Report/Save").ToJS()
+                                OnClick = Js.Submit(RouteHelper.New().Action("Save", "Report")).ToJS()
                             }
                         };
 
@@ -97,13 +94,13 @@ namespace Signum.Web.Reports
                             {
                                 Text = Resources.Delete,
                                 OnClick = Js.Confirm(Resources.AreYouSureOfDeletingReport0.Formato(entity.DisplayName),
-                                                    Js.AjaxCall("Report/Delete", "{{excelReport:{0}}}".Formato(entity.Id), null)).ToJS(),
+                                                    Js.AjaxCall(RouteHelper.New().Action("Delete", "Report"), "{{excelReport:{0}}}".Formato(entity.Id), null)).ToJS(),
                             });
 
                             buttons.Add(new ToolBarButton
                             {
                                 Text = Resources.Download,
-                                OnClick = "window.open($('base').attr('href') + \"Report/DownloadTemplate?excelReport=" + entity.Id + "\")",
+                                OnClick = "window.open('" + RouteHelper.New().Action("DownloadTemplate", "Report", new { excelReport = entity.Id } ) + "');",
                             });
                         }
 
@@ -127,7 +124,7 @@ namespace Signum.Web.Reports
             {
                 AltText = Resources.ExcelReport,
                 Text = Resources.ExcelReport,
-                OnClick = "SubmitOnly('{0}', $.extend({{userQuery:'{1}'}},new FindNavigator({{prefix:'{2}'}}).requestDataForSearch()));".Formato(ToExcelPlainControllerUrl, (idCurrentUserQuery > 0 ? (int?)idCurrentUserQuery : null), prefix),
+                OnClick = "SubmitOnly('{0}', $.extend({{userQuery:'{1}'}},new FindNavigator({{prefix:'{2}'}}).requestDataForSearch()));".Formato(RouteHelper.New().Action("ToExcelPlain", "Report"), (idCurrentUserQuery > 0 ? (int?)idCurrentUserQuery : null), prefix),
                 DivCssClass = ToolBarButton.DefaultQueryCssClass
             };
 
@@ -151,7 +148,7 @@ namespace Signum.Web.Reports
                         {
                             AltText = report.ToStr,
                             Text = report.ToStr,
-                            OnClick = "SubmitOnly('{0}', $.extend({{excelReport:'{1}'}},new FindNavigator({{prefix:'{2}'}}).requestDataForSearch()));".Formato(ExcelReportControllerUrl, report.Id, prefix),
+                            OnClick = "SubmitOnly('{0}', $.extend({{excelReport:'{1}'}},new FindNavigator({{prefix:'{2}'}}).requestDataForSearch()));".Formato(RouteHelper.New().Action("ExcelReport", "Report"), report.Id, prefix),
                             DivCssClass = ToolBarButton.DefaultQueryCssClass
                         });
                     }
@@ -163,7 +160,7 @@ namespace Signum.Web.Reports
                 {
                     AltText = Resources.ExcelAdminister,
                     Text = Resources.ExcelAdminister,
-                    OnClick = Js.SubmitOnly("Report/Administer", "{{queryUrlName:'{0}'}}".Formato(Navigator.Manager.QuerySettings[queryName].UrlName)).ToJS(),
+                    OnClick = Js.SubmitOnly(RouteHelper.New().Action("Administer", "Report"), "{{webQueryName:'{0}'}}".Formato(Navigator.ResolveWebQueryName(queryName))).ToJS(),
                     DivCssClass = ToolBarButton.DefaultQueryCssClass
                 });
 

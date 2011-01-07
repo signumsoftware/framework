@@ -11,6 +11,7 @@ using Signum.Entities;
 using System.Web;
 using Signum.Entities.Basics;
 using Signum.Web.Extensions.Properties;
+using Signum.Entities.Reflection;
 #endregion
 
 namespace Signum.Web.Operations
@@ -125,7 +126,7 @@ namespace Signum.Web.Operations
 
         internal ModifiableEntity ConstructorManager_GeneralConstructor(Type type)
         {
-            if (!typeof(IIdentifiable).IsAssignableFrom(type))
+            if (!type.IsIIdentifiable())
                 return null;
 
             OperationInfo constructor = OperationLogic.ServiceGetConstructorOperationInfos(type).SingleOrDefault();

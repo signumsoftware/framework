@@ -76,7 +76,7 @@ namespace Signum.Engine.Extensions.Chart
         public static List<Lite<UserChartDN>> GetUserCharts(object queryName)
         {
             return (from er in Database.Query<UserChartDN>()
-                    where er.Query.Key == QueryUtils.GetQueryName(queryName)
+                    where er.Query.Key == QueryUtils.GetQueryUniqueKey(queryName)
                     select er.ToLite()).ToList();
         }
 

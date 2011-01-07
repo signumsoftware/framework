@@ -22,7 +22,7 @@ namespace Signum.Web.Files
     {
         public static string ViewPrefix = "files/Views/";
 
-        public static void Start()
+        public static void Start(bool filePath, bool embeddedFile)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -35,19 +35,20 @@ namespace Signum.Web.Files
 
                 FileRepositoryDN.OverridenPhisicalCurrentDirectory = AppDomain.CurrentDomain.BaseDirectory;
 
-                Navigator.AddSettings(new List<EntitySettings>
-                {
-                    new EntitySettings<FilePathDN>(EntityType.Default),
-                    new EntitySettings<EmbeddedFileDN>(EntityType.Default)
+                if (filePath)
+                    Navigator.AddSetting(new EntitySettings<FilePathDN>(EntityType.Default));
+
+                if (embeddedFile)
+                    Navigator.AddSetting(new EmbeddedEntitySettings<EmbeddedFileDN>()
                     {
                         MappingDefault = new EntityMapping<EmbeddedFileDN>(true)
-                        { 
+                        {
                             GetValue = ctx =>
                             {
                                 RuntimeInfo runtimeInfo = ctx.GetRuntimeInfo();
                                 if (runtimeInfo.RuntimeType == null)
                                     ctx.Value = null;
-                                else 
+                                else
                                 {
                                     if (runtimeInfo.IsNew)
                                     {
@@ -66,8 +67,7 @@ namespace Signum.Web.Files
                                 return ctx.Value;
                             }
                         }
-                    }
-                });
+                    });
             }
         }
     }

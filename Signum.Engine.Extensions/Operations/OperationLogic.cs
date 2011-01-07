@@ -16,6 +16,7 @@ using Signum.Utilities.ExpressionTrees;
 using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Extensions.Properties;
+using Signum.Entities.Reflection;
 
 namespace Signum.Engine.Operations
 {
@@ -130,7 +131,7 @@ namespace Signum.Engine.Operations
 
         public static void Register(this IOperation operation)
         {
-            if (!typeof(IIdentifiable).IsAssignableFrom(operation.Type))
+            if (!operation.Type.IsIIdentifiable())
                 throw new InvalidOperationException("Type {0} has to implement at tleast {1}".Formato(operation.Type));
 
             operation.AssertIsValid(); 
@@ -348,7 +349,7 @@ namespace Signum.Engine.Operations
 
         static IOperation TryFind(Type type, Enum operationKey)
         {
-            if (!typeof(IIdentifiable).IsAssignableFrom(type))
+            if (!type.IsIIdentifiable())
                 throw new InvalidOperationException("Type {0} has to implement at least {1}".Formato(type, typeof(IIdentifiable)));
 
             IOperation result = type.FollowC(t => t.BaseType)
@@ -359,7 +360,7 @@ namespace Signum.Engine.Operations
                 return result;
 
             List<Type> interfaces = type.GetInterfaces()
-                .Where(t => typeof(IIdentifiable).IsAssignableFrom(t) && operations.TryGetC(t).TryGetC(operationKey) != null)
+                .Where(t => t.IsIIdentifiable() && operations.TryGetC(t).TryGetC(operationKey) != null)
                 .ToList();
 
             if (interfaces.Count > 1)
@@ -373,7 +374,7 @@ namespace Signum.Engine.Operations
 
         static List<IOperation> TypeOperations(Type type)
         {
-            if (!typeof(IIdentifiable).IsAssignableFrom(type))
+            if (!type.IsIIdentifiable())
                 throw new InvalidOperationException("Type {0} has to implement at least {1}".Formato(type, typeof(IIdentifiable)));
 
             HashSet<Enum> result = type.FollowC(t => t.BaseType)
@@ -381,7 +382,7 @@ namespace Signum.Engine.Operations
                     .Select(t => operations.TryGetC(t)).NotNull().SelectMany(d=>d.Keys).ToHashSet();
 
             result.UnionWith(type.GetInterfaces()
-                .Where(t => typeof(IIdentifiable).IsAssignableFrom(t))
+                .Where(t => t.IsIIdentifiable())
                 .Select(t => operations.TryGetC(t))
                 .NotNull().SelectMany(d => d.Keys));
 

@@ -50,18 +50,18 @@ namespace Signum.Engine.Authorization
                      AuthUtils.MaxEntityGroup,
                      AuthUtils.MinEntityGroup);
 
-                sb.Schema.Initializing(InitLevel.Level0SyncEntities, Schema_InitializingRegisterEvents);
+                sb.Schema.Initializing[InitLevel.Level0SyncEntities] += Schema_InitializingRegisterEvents;
 
                 AuthLogic.ExportToXml += () => cache.ExportXml("EntityGroups", "EntityGroup", p => p.Key, b => b.ToString());
                 AuthLogic.ImportFromXml += (x, roles) => cache.ImportXml(x, "EntityGroups", "EntityGroup", roles, EnumLogic<EntityGroupDN>.ToEntity, EntityGroupAllowedDN.Parse);
             }
         }
 
-        static void Schema_InitializingRegisterEvents(Schema sender)
+        static void Schema_InitializingRegisterEvents()
         {
             foreach (var type in EntityGroupLogic.Types)
             {
-                miRegister.GetInvoker(type)(sender);
+                miRegister.GetInvoker(type)(Schema.Current);
             }
         }
 

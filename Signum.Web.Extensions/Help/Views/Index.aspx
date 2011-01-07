@@ -33,7 +33,11 @@
             { %>
                     <h2>Apéndices</h2>
         <ul>
-            <%=appendices.ToString(a => "<li><a href=\"Help/Appendix/{0}\">{1}</a></li>".Formato(a.Name, a.Title), "")%>
+            <% foreach(var a in appendices) { %>
+                <li>
+                <%: Html.ActionLink(a.Title, "ViewAppendix", new { appendix = a.Name }) %>
+                </li>
+            <% } %>
         </ul>
     <%} 
     }%>

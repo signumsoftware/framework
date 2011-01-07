@@ -32,15 +32,15 @@ namespace Signum.Web.ControlPanel
 
                 Navigator.AddSettings(new List<EntitySettings>{
                     new EntitySettings<ControlPanelDN>(EntityType.Default) { PartialViewName = e => ViewPrefix + "ControlPanelAdmin" },
-                    new EntitySettings<PanelPart>(EntityType.NotSaving) { PartialViewName = e => ViewPrefix + "PanelPart" },
+                    new EmbeddedEntitySettings<PanelPart>() { PartialViewName = e => ViewPrefix + "PanelPart" },
                     
                     //new EntitySettings<SearchControlPartDN>(EntityType.NotSaving) { PartialViewName = e => ViewPrefix + "SearchControlPart" },
                     
                     new EntitySettings<CountSearchControlPartDN>(EntityType.Default) { PartialViewName = e => ViewPrefix + "CountSearchControlPart" },
-                    new EntitySettings<CountUserQueryElement>(EntityType.NotSaving) { PartialViewName = e => ViewPrefix + "CountUserQueryElement" },
+                    new EmbeddedEntitySettings<CountUserQueryElement>() { PartialViewName = e => ViewPrefix + "CountUserQueryElement" },
                     
                     new EntitySettings<LinkListPartDN>(EntityType.Default) { PartialViewName = e => ViewPrefix + "LinkListPart" },
-                    new EntitySettings<LinkElement>(EntityType.NotSaving) { PartialViewName = e => ViewPrefix + "LinkElement" },
+                    new EmbeddedEntitySettings<LinkElement>() { PartialViewName = e => ViewPrefix + "LinkElement" },
                 });
 
                 Constructor.ConstructorManager.Constructors.Add(

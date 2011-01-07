@@ -33,7 +33,7 @@ namespace Signum.Engine.Basics
             {
 
                // QueryManagers = queryManagers;
-                sb.Schema.Initializing(InitLevel.Level0SyncEntities, new InitEventHandler(Schema_Initializing));
+                sb.Schema.Initializing[InitLevel.Level0SyncEntities] += Schema_Initializing;
 
                 sb.Include<QueryDN>();
 
@@ -51,20 +51,20 @@ namespace Signum.Engine.Basics
             return QueryNames.TryGetC(uniqueQueryName);
         }
 
-        static void Schema_Initializing(Schema sender)
+        static void Schema_Initializing()
         {
             QueryNames = CreateQueryNames();
         }
 
         private static Dictionary<string, object> CreateQueryNames()
         {
-            return DynamicQueryManager.Current.GetQueryNames().ToDictionary(qn => QueryUtils.GetQueryName(qn));
+            return DynamicQueryManager.Current.GetQueryNames().ToDictionary(qn => QueryUtils.GetQueryUniqueKey(qn));
         }
 
         public static Dictionary<string, QueryDN> RetrieveOrGenerateQueries()
         {
             var current = Database.RetrieveAll<QueryDN>().ToDictionary(a => a.Key);
-            var total = DynamicQueryManager.Current.GetQueries().Keys.ToDictionary(qn => QueryUtils.GetQueryName(qn), qn => CreateQuery(qn));
+            var total = DynamicQueryManager.Current.GetQueries().Keys.ToDictionary(qn => QueryUtils.GetQueryUniqueKey(qn), qn => CreateQuery(qn));
 
             total.SetRange(current);
             return total;
@@ -74,7 +74,7 @@ namespace Signum.Engine.Basics
         {
             Type type = TypeLogic.DnToType[typeDN];
 
-            string[] queryNames = DynamicQueryManager.Current.GetQueries(type).Keys.Select(qn => QueryUtils.GetQueryName(qn)).ToArray();
+            string[] queryNames = DynamicQueryManager.Current.GetQueries(type).Keys.Select(qn => QueryUtils.GetQueryUniqueKey(qn)).ToArray();
 
             var current = Database.RetrieveAll<QueryDN>().Where(a => queryNames.Contains(a.Key)).ToDictionary(a => a.Key);
             var total = DynamicQueryManager.Current.GetQueries(type).Keys.Select(qn => CreateQuery(qn)).ToDictionary(a => a.Key);
@@ -85,7 +85,7 @@ namespace Signum.Engine.Basics
 
         public static QueryDN RetrieveOrGenerateQuery(object queryName)
         {
-            return Database.RetrieveAll<QueryDN>().SingleOrDefault(a => a.Key == QueryUtils.GetQueryName(queryName)) ??
+            return Database.RetrieveAll<QueryDN>().SingleOrDefault(a => a.Key == QueryUtils.GetQueryUniqueKey(queryName)) ??
                 CreateQuery(queryName);
         }
 
@@ -95,8 +95,8 @@ namespace Signum.Engine.Basics
             {
                 return new QueryDN
                 {
-                    Key = QueryUtils.GetQueryName(queryName),
-                    DisplayName = QueryUtils.GetNiceQueryName(queryName)
+                    Key = QueryUtils.GetQueryUniqueKey(queryName),
+                    DisplayName = QueryUtils.GetNiceName(queryName)
                 };
             }
         }

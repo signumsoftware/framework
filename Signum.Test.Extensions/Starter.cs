@@ -33,7 +33,7 @@ namespace Signum.Test.Extensions
 
                 using (AuthLogic.Disable())
                 {
-                    Schema.Current.Initialize(InitLevel.Level0SyncEntities);
+                    Schema.Current.InitializeUntil(InitLevel.Level0SyncEntities);
 
                     Load();
 
@@ -52,9 +52,6 @@ namespace Signum.Test.Extensions
 
         public static void Start(string connectionString)
         {
-            //AuthLogic.SystemUserName = "System";
-            //AuthLogic.AnonymousUserName = "Anonymous";
-
             SchemaBuilder sb = new SchemaBuilder();
             DynamicQueryManager dqm = new DynamicQueryManager();
             ConnectionScope.Default = new Connection(connectionString, sb.Schema, dqm);
@@ -68,15 +65,9 @@ namespace Signum.Test.Extensions
             UserTicketLogic.Start(sb, dqm);
             OperationLogic.Start(sb, dqm);
 
-            //TypeAuthLogic.Start(sb);
-            //PropertyAuthLogic.Start(sb, true);
-            //QueryAuthLogic.Start(sb, dqm);
-            //OperationAuthLogic.Start(sb);
-            //PermissionAuthLogic.Start(sb);
             EntityGroupAuthLogic.Start(sb, true);
             AuthLogic.StartAllModules(sb, dqm);
-            //FacadeMethodAuthLogic.Start(sb, typeof(IServerSample));
-
+            
             QueryLogic.Start(sb);
             UserQueryLogic.Start(sb, dqm);
             UserQueryLogic.RegisterUserEntityGroup(sb, MusicGroups.UserEntities);
@@ -159,7 +150,7 @@ namespace Signum.Test.Extensions
                     Role = externalUser
                 }.Save();
 
-                Schema.Current.Initialize(InitLevel.Level3MainEntities);
+                Schema.Current.InitializeUntil(InitLevel.Level3MainEntities);
                 Signum.Test.Starter.Load();
 
                 EntityGroupAuthLogic.Manual.SetAllowed(externalUser.ToLite(), MusicGroups.JapanEntities,

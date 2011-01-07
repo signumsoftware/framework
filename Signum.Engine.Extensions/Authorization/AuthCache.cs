@@ -65,12 +65,12 @@ namespace Signum.Entities.Authorization
 
             sb.Include<RT>();
 
-            sb.Schema.Initializing(InitLevel.Level1SimpleEntities, Schema_InitializingCache);
+            sb.Schema.Initializing[InitLevel.Level1SimpleEntities] += Schema_InitializingCache;
             sb.Schema.EntityEvents<RT>().Saving += Schema_Saving;
             AuthLogic.RolesModified += InvalidateCache;
         }
 
-        void Schema_InitializingCache(Schema sender)
+        void Schema_InitializingCache()
         {
             _runtimeRules = NewCache();
         }

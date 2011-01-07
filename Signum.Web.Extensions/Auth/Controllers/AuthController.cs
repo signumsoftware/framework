@@ -117,7 +117,7 @@ namespace Signum.Web.Authorization
             }
 
             context.Value.Execute(UserOperation.SaveNew);
-            return Navigator.RedirectUrl(Navigator.ViewRoute(typeof(UserDN), context.Value.Id));
+            return Navigator.RedirectUrl(Navigator.ViewRoute(context.Value));
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
@@ -142,7 +142,7 @@ namespace Signum.Web.Authorization
             }
 
             context.Value.Execute(UserOperation.SaveNew);
-            return Navigator.RedirectUrl(Navigator.ViewRoute(typeof(UserDN), context.Value.Id));
+            return Navigator.RedirectUrl(Navigator.ViewRoute(context.Value));
         }
         #region "Reset"
 
@@ -170,7 +170,7 @@ namespace Signum.Web.Authorization
                     if (user == null)
                         throw new ApplicationException(Resources.ThereSNotARegisteredUserWithThatEmailAddress);
 
-                    AuthLogic.ResetPasswordRequest(user, Common.FullyQualifiedApplicationPath);
+                    AuthLogic.ResetPasswordRequest(user, rpr => RouteHelper.New().Action("ResetPasswordCode", "Auth", new { email = rpr.User.Email, code = rpr.Code }));
                 }
 
                 ViewData["email"] = email;

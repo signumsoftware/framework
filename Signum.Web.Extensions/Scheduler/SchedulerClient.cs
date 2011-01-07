@@ -45,7 +45,7 @@ namespace Signum.Web.Extensions.Scheduler
                     new EntitySettings<ScheduledTaskDN>(EntityType.Default){ PartialViewName = _ => ViewPrefix + "ScheduledTask" },
                     new EntitySettings<ScheduleRuleWeeklyDN >(EntityType.Default){ PartialViewName = _ => ViewPrefix + "ScheduleRuleWeekly" },
                     new EntitySettings<ScheduleRuleWeekDaysDN>(EntityType.Default){ PartialViewName = _ => ViewPrefix + "ScheduleRuleWeekDays" },
-                    new EntitySettings<HolidayDN>(EntityType.Default){ PartialViewName = _ => ViewPrefix + "Holiday" },
+                    new EmbeddedEntitySettings<HolidayDN>(){ PartialViewName = _ => ViewPrefix + "Holiday" },
                     new EntitySettings<CalendarDN>(EntityType.Default){ PartialViewName = _ => ViewPrefix + "Calendar" },
                     new EntitySettings<CustomTaskDN>(EntityType.Default){ PartialViewName = _ => ViewPrefix + "CustomTask" },
                     new EntitySettings<ScheduleRuleDayDN>(EntityType.Default){ PartialViewName = _ => ViewPrefix + "Calendar" },

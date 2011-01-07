@@ -21,9 +21,6 @@ namespace Signum.Web.Queries
 {
     public static class UserQueriesClient
     {
-        public static Func<object, int, string> UserQueryFindRoute = (queryName, userQueryId) => 
-            "UQ/{0}/{1}".Formato(Navigator.Manager.QuerySettings[queryName].UrlName, userQueryId);
-
         public static string ViewPrefix = "queries/Views/";
         public const string QueryKey = "QueryKey";
 
@@ -38,13 +35,13 @@ namespace Signum.Web.Queries
                     new { controller = "Resources", action = "Index", area = "queries" },
                     new { resourcesFolder = new InArray(new string[] { "Scripts", "Content", "Images" }) });
 
-                RouteTable.Routes.InsertRouteAt0("UQ/{queryUrlName}/{id}",
+                RouteTable.Routes.InsertRouteAt0("UQ/{webQueryName}/{id}",
                     new { controller = "Queries", action = "ViewUserQuery" });
 
                 Navigator.AddSettings(new List<EntitySettings>{
                     new EntitySettings<UserQueryDN>(EntityType.NotSaving) { PartialViewName = e => ViewPrefix + "UserQuery" },
                     
-                    new EntitySettings<QueryFilterDN>(EntityType.Default)
+                    new EmbeddedEntitySettings<QueryFilterDN>()
                     { 
                         PartialViewName = e => ViewPrefix + "QueryFilterIU", 
                         MappingDefault = new EntityMapping<QueryFilterDN>(true)
@@ -54,7 +51,7 @@ namespace Signum.Web.Queries
                                 string tokenStr = ExtractQueryTokenString(ctx);
             
                                 string queryKey = ((MappingContext<UserQueryDN>)ctx.Parent.Parent.Parent).Inputs[TypeContextUtilities.Compose("Query", "Key")];
-                                object queryName = Navigator.Manager.QuerySettings.Keys.First(key => QueryUtils.GetQueryName(key) == queryKey);
+                                object queryName = QueryLogic.ToQueryName(queryKey);
                                 
                                 QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
 
@@ -71,7 +68,7 @@ namespace Signum.Web.Queries
                         }
                     },
 
-                    new EntitySettings<QueryColumnDN>(EntityType.Default)
+                    new EmbeddedEntitySettings<QueryColumnDN>()
                     { 
                         PartialViewName = e => ViewPrefix + "QueryColumn", 
                         MappingDefault = new EntityMapping<QueryColumnDN>(true)
@@ -81,7 +78,7 @@ namespace Signum.Web.Queries
                                 string tokenStr = ExtractQueryTokenString(ctx);
             
                                 string queryKey = ((MappingContext<UserQueryDN>)ctx.Parent.Parent.Parent).Inputs[TypeContextUtilities.Compose("Query", "Key")];
-                                object queryName = Navigator.Manager.QuerySettings.Keys.First(key => QueryUtils.GetQueryName(key) == queryKey);
+                                object queryName = QueryLogic.ToQueryName(queryKey);
                                 QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
 
                                 var result = new QueryColumnDN 
@@ -96,7 +93,7 @@ namespace Signum.Web.Queries
                         }
                     },
 
-                    new EntitySettings<QueryOrderDN>(EntityType.Default)
+                    new EmbeddedEntitySettings<QueryOrderDN>()
                     { 
                         PartialViewName = e => ViewPrefix + "QueryOrder", 
                         MappingDefault = new EntityMapping<QueryOrderDN>(true)
@@ -106,7 +103,7 @@ namespace Signum.Web.Queries
                                 string tokenStr = ExtractQueryTokenString(ctx);
             
                                 string queryKey = ((MappingContext<UserQueryDN>)ctx.Parent.Parent.Parent).Inputs[TypeContextUtilities.Compose("Query", "Key")];
-                                object queryName = Navigator.Manager.QuerySettings.Keys.First(key => QueryUtils.GetQueryName(key) == queryKey);
+                                object queryName = QueryLogic.ToQueryName(queryKey);
                                 QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
                                 QueryToken token = QueryUtils.Parse(tokenStr, qd);
 
@@ -126,8 +123,6 @@ namespace Signum.Web.Queries
                 if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(QueryDN)))
                     Navigator.Manager.EntitySettings.Add(typeof(QueryDN), new EntitySettings<QueryDN>(EntityType.Default));
 
-                Navigator.RegisterTypeName<QueryTokenDN>();
-
                 ButtonBarQueryHelper.GetButtonBarForQueryName += new GetToolBarButtonQueryDelegate(ButtonBarQueryHelper_GetButtonBarForQueryName);
 
                 ButtonBarEntityHelper.RegisterEntityButtons<UserQueryDN>((controllerContext, entity, partialViewName, prefix) =>
@@ -137,13 +132,13 @@ namespace Signum.Web.Queries
                         new ToolBarButton 
                         { 
                             Text = Signum.Web.Properties.Resources.Save, 
-                            OnClick = JsValidator.EntityIsValid(prefix, Js.Submit("Queries/SaveUserQuery")).ToJS()
+                            OnClick = JsValidator.EntityIsValid(prefix, Js.Submit(RouteHelper.New().Action("SaveUserQuery", "Queries"))).ToJS()
                         },
                         new ToolBarButton
                         {
                             Text = Resources.Delete,
                             OnClick = Js.Confirm(Resources.AreYouSureOfDeletingQuery0.Formato(entity.DisplayName), 
-                                                Js.SubmitOnly("Queries/DeleteUserQuery", "{{id:{0}}}".Formato(entity.IdOrNull.TryToString()))).ToJS(),
+                                                Js.SubmitOnly(RouteHelper.New().Action("DeleteUserQuery", "Queries"), "{{id:{0}}}".Formato(entity.IdOrNull.TryToString()))).ToJS(),
                             Enabled = !entity.IsNew
                         }
                     };
@@ -178,7 +173,7 @@ namespace Signum.Web.Queries
                 items.Add(new ToolBarButton
                 {
                     Text = uq.InDB().Select(q => q.DisplayName).SingleOrDefault(),
-                    OnClick = Js.Submit(UserQueryFindRoute(queryName, uq.Id)).ToJS(),
+                    OnClick = Js.Submit(RouteHelper.New().Action("ViewUserQuery", "Queries", new { id = uq.Id })).ToJS(),
                     DivCssClass = idCurrentUserQuery == uq.Id ? "SelectedUserQuery" : ""
                 });
             }
@@ -191,7 +186,7 @@ namespace Signum.Web.Queries
                 AltText = Signum.Web.Properties.Resources.New,
                 Text = Signum.Web.Properties.Resources.New,
                 ImgSrc = "signum/images/lineButtons.gif",
-                OnClick = Js.SubmitOnly("Queries/CreateUserQuery", JsFindNavigator.JsRequestData(new JsFindOptions{Prefix = prefix})).ToJS()
+                OnClick = Js.SubmitOnly(RouteHelper.New().Action("CreateUserQuery", "Queries"), JsFindNavigator.JsRequestData(new JsFindOptions{Prefix = prefix})).ToJS()
             });
 
             if (idCurrentUserQuery > 0)
@@ -200,7 +195,7 @@ namespace Signum.Web.Queries
                 {
                     AltText = "Edit",
                     Text = "Edit",
-                    OnClick = Js.SubmitOnly("Queries/EditUserQuery", "{{id:{0}}}".Formato(idCurrentUserQuery)).ToJS()
+                    OnClick = Js.SubmitOnly(RouteHelper.New().Action("EditUserQuery", "Queries"), "{{id:{0}}}".Formato(idCurrentUserQuery)).ToJS()
                 });
             }
 
@@ -250,7 +245,7 @@ namespace Signum.Web.Queries
 
         public static FindOptions ToFindOptions(this UserQueryDN userQuery)
         {
-            object queryName = Navigator.ResolveQueryFromKey(userQuery.Query.Key); //.ToStr); ;
+            object queryName = QueryLogic.ToQueryName(userQuery.Query.Key);
 
             var result = new FindOptions(queryName);
             result.ApplyUserQuery(userQuery);

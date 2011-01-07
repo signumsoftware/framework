@@ -44,8 +44,6 @@ namespace Signum.Engine.Help
         }
 
         static Dictionary<Type, EntityHelp> typeToHelpFiles;
-        static Dictionary<string, Type> CleanNameToType;
-        static Dictionary<string, Type> NameToType;
 
         static Dictionary<string, NamespaceHelp> Namespaces;
         static Dictionary<string, AppendixHelp> Appendices;
@@ -53,27 +51,7 @@ namespace Signum.Engine.Help
         static Dictionary<Type, List<object>> TypeToQueryFiles;
         static Dictionary<object, QueryHelp> QueryColumns;
 
-        public static Type ToType(string s)
-        {
-            return ToType(s, true);
-        }
-
-        public static Type ToType(string s, bool throwException)
-        {
-            if (!throwException && CleanNameToType.ContainsKey(s) || throwException)
-                return CleanNameToType[s];
-            else
-                return null;
-        }
-
-        public static Type GetNameToType(string s, bool throwException)
-        {
-            if (!throwException && NameToType.ContainsKey(s) || throwException)
-                return NameToType[s];
-            else
-                return null;
-        }
-
+      
         public static NamespaceHelp GetNamespace(string @namespace)
         {
             return Namespaces.TryGetC(@namespace);
@@ -101,7 +79,7 @@ namespace Signum.Engine.Help
 
         public static string EntityUrl(Type entityType)
         {
-            return BaseUrl + "/" + Reflector.CleanTypeName(entityType);
+            return BaseUrl + "/" + TypeLogic.GetCleanName(entityType);
         }
 
         public static string OperationUrl(Type entityType, Enum operation)
@@ -122,7 +100,7 @@ namespace Signum.Engine.Help
         public static string QueryUrl(Enum query)
         {
             return HelpLogic.EntityUrl(DynamicQueryManager.Current[query].EntityColumn().DefaultEntityType())
-                + "#" + "q-" + QueryUtils.GetQueryName(query).ToString().Replace(".", "_");
+                + "#" + "q-" + QueryUtils.GetQueryUniqueKey(query).ToString().Replace(".", "_");
         }
 
         public static EntityHelp GetEntityHelp(Type entityType)
@@ -148,16 +126,11 @@ namespace Signum.Engine.Help
                 : null;
         }
 
-        public static Type FromCleanName(string cleanName)
-        {
-            return CleanNameToType.GetOrThrow(cleanName, Resources.NoHelpFor0.Formato(cleanName));
-        }
-
         public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Schema.Initializing(InitLevel.Level4BackgroundProcesses, Schema_Initialize);
+                sb.Schema.Initializing[InitLevel.Level4BackgroundProcesses] += Schema_Initialize;
             }
         }
 
@@ -181,9 +154,9 @@ namespace Signum.Engine.Help
             Appendices[appendixHelp.Name] = AppendixHelp.Load(XDocument.Load(appendixHelp.FileName), appendixHelp.FileName);
         }
 
-        static void Schema_Initialize(Schema sender)
+        static void Schema_Initialize()
         {
-            Type[] types = sender.Tables.Select(t => t.Key).ToArray();
+            Type[] types = Schema.Current.Tables.Select(t => t.Key).ToArray();
 
             var typesDic = types.ToDictionary(a => a.FullName);
 
@@ -192,7 +165,6 @@ namespace Signum.Engine.Help
                 TypeToHelpFiles = new Dictionary<Type, EntityHelp>();
                 return;
             }
-
 
             var entitiesDocuments = LoadDocuments(EntitiesDirectory);
             var namespacesDocuments = LoadDocuments(NamespacesDirectory);
@@ -209,9 +181,6 @@ namespace Signum.Engine.Help
 
                 //tipo a entityHelp
                 TypeToHelpFiles = typeHelpInfo.ToDictionary(p => p.Type);
-
-                CleanNameToType = typeHelpInfo.Select(t => t.Type).ToDictionary(t => Reflector.CleanTypeName(t));
-                NameToType = typeHelpInfo.Select(t => t.Type).ToDictionary(t => t.Name);
             }
 
             //Scope
@@ -418,7 +387,7 @@ namespace Signum.Engine.Help
                 var should = (from type in types
                               let keys = DynamicQueryManager.Current.GetQueries(type).Keys
                               from key in keys
-                              select key).ToDictionary(q => QueryUtils.GetQueryName(q));
+                              select key).ToDictionary(q => QueryUtils.GetQueryUniqueKey(q));
 
                 var current = (from doc in queriesDocuments 
                                let name = QueryHelp.GetQueryFullName(doc.Document)
@@ -442,13 +411,11 @@ namespace Signum.Engine.Help
                     },
                     (fullName, oldFile, query) =>
                     {
-                        QueryHelp.Synchronize(oldFile, QueryUtils.GetQueryName(query));
-
-
+                        QueryHelp.Synchronize(oldFile, QueryUtils.GetQueryUniqueKey(query));
                     });
 
-    }
-}
+            }
+        }
 
     }
 }

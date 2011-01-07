@@ -27,13 +27,13 @@ namespace Signum.Engine.Basics
 
                 EnumLogic<T>.getKeys = getKeys;
 
-                sb.Schema.Initializing(InitLevel.Level0SyncEntities, Schema_Initializing);
+                sb.Schema.Initializing[InitLevel.Level0SyncEntities] += Schema_Initializing;
                 sb.Schema.Synchronizing += Schema_Synchronizing;
                 sb.Schema.Generating += Schema_Generating;
             }
         }
 
-        static void Schema_Initializing(Schema schema)
+        static void Schema_Initializing()
         {
             using (new EntityCache(true))
             {

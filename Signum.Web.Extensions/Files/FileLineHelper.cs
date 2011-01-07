@@ -80,7 +80,7 @@ namespace Signum.Web.Files
             {
                 sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, fileLine, fileLine.ControlID));
 
-                sb.AddLine(MvcHtmlString.Create("<input type='file' onchange=\"FLineOnChanged({0});\" id='{1}' name='{1}' class='valueLine'/>".Formato(fileLine.ToJS(), fileLine.ControlID)));
+                sb.AddLine(MvcHtmlString.Create("<input type='file' onchange=\"{0}\" id='{1}' name='{1}' class='valueLine'/>".Formato(fileLine.GetOnChanged(), fileLine.ControlID)));
                 sb.AddLine(MvcHtmlString.Create("<img src='Images/loading.gif' id='{0}loading' alt='loading' style='display:none'/>".Formato(fileLine.ControlID)));
                 sb.AddLine(MvcHtmlString.Create("<iframe id='frame{0}' name='frame{0}' src='about:blank' style='position:absolute;left:-1000px;top:-1000px'></iframe>".Formato(fileLine.ControlID)));
             }

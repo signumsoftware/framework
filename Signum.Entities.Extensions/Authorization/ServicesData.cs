@@ -38,7 +38,7 @@ namespace Signum.Entities.Authorization
 
     //Only for client-side communication
     [Serializable, AvoidLocalization]
-    public abstract class BaseRulePack<T> : IdentifiableEntity
+    public abstract class BaseRulePack<T> : ModelEntity
         where T : EmbeddedEntity
     {
         Lite<RoleDN> role;

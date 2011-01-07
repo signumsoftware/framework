@@ -61,7 +61,7 @@ namespace Signum.Engine.Reports
         public static List<Lite<UserQueryDN>> GetUserQueries(object queryName)
         {
             return (from er in Database.Query<UserQueryDN>()
-                    where er.Query.Key == QueryUtils.GetQueryName(queryName)
+                    where er.Query.Key == QueryUtils.GetQueryUniqueKey(queryName)
                     select er.ToLite()).ToList(); 
         }
 

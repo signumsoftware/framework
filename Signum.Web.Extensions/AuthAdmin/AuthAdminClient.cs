@@ -46,13 +46,11 @@ namespace Signum.Web.Authorization
                 else
                     Navigator.AddSetting(new EntitySettings<RoleDN>(EntityType.Admin) { PartialViewName = _ => ViewPrefix + "Role" });
 
-                Navigator.RegisterTypeName<IUserRelatedDN>();
-
                 if (types)
                 {
                     Register<TypeRulePack, TypeAllowedRule, TypeDN, TypeAllowed, TypeDN>("types", a => a.Resource, "Resource", false);
 
-                    Navigator.EntitySettings<TypeRulePack>().MappingAdmin
+                    Navigator.EmbeddedEntitySettings<TypeRulePack>().MappingDefault
                         .GetProperty(m => m.Rules, rul =>
                         ((EntityMapping<TypeAllowedRule>)((MListDictionaryMapping<TypeAllowedRule, TypeDN>)rul).ElementMapping)
                                 .GetProperty(a => a.Allowed, m => m.GetValue = ctx => ParseTypeAllowed(ctx.Inputs, null)));
@@ -80,7 +78,7 @@ namespace Signum.Web.Authorization
                 {
                     Register<EntityGroupRulePack, EntityGroupAllowedRule, EntityGroupDN, EntityGroupAllowedDN, EntityGroupDN>("entityGroups", a => a.Resource, "Resource", false);
 
-                    Navigator.EntitySettings<EntityGroupRulePack>().MappingAdmin
+                    Navigator.EmbeddedEntitySettings<EntityGroupRulePack>().MappingDefault
                         .GetProperty(m => m.Rules, rul =>
                         ((EntityMapping<EntityGroupAllowedRule>)((MListDictionaryMapping<EntityGroupAllowedRule, EntityGroupDN>)rul).ElementMapping)
                                 .GetProperty(a => a.Allowed, m => m.GetValue = ctx =>
@@ -111,22 +109,19 @@ namespace Signum.Web.Authorization
                     { UserOperation.SaveNew, new EntityOperationSettings 
                     { 
                         IsVisible = ctx => ctx.Entity.IsNew,
-                        ControllerUrl = "Auth/SaveNewUser",
-                        OnClick = ctx => new JsOperationExecutor(ctx.Options()).OperationAjax(ctx.Prefix, JsOpSuccess.DefaultDispatcher)
+                        OnClick = ctx => new JsOperationExecutor(ctx.Options(RouteHelper.New().Action("SaveNewUser", "Auth"))).OperationAjax(ctx.Prefix, JsOpSuccess.DefaultDispatcher)
                     }},
                     { UserOperation.Save, new EntityOperationSettings 
                     { 
                         IsVisible = ctx => !ctx.Entity.IsNew,
-                        ControllerUrl = "Auth/SaveUser",
-                        OnClick = ctx => new JsOperationExecutor(ctx.Options()).OperationAjax(ctx.Prefix, JsOpSuccess.DefaultDispatcher)
+                        OnClick = ctx => new JsOperationExecutor(ctx.Options(RouteHelper.New().Action("SaveUser", "Auth"))).OperationAjax(ctx.Prefix, JsOpSuccess.DefaultDispatcher)
                     }},
                     { UserOperation.Disable, new EntityOperationSettings { IsVisible = ctx => !ctx.Entity.IsNew }},
                     { UserOperation.Enable, new EntityOperationSettings { IsVisible = ctx => !ctx.Entity.IsNew }},
                     { UserOperation.NewPassword, new EntityOperationSettings 
                     { 
                         IsVisible = ctx => !ctx.Entity.IsNew,
-                        ControllerUrl = "Auth/SaveUserWithNewPwd",
-                        OnClick = ctx => new JsOperationExecutor(ctx.Options()).OperationAjax(ctx.Prefix, JsOpSuccess.DefaultDispatcher)
+                        OnClick = ctx => new JsOperationExecutor(ctx.Options(RouteHelper.New().Action("SaveUserWithNewPwd", "Auth"))).OperationAjax(ctx.Prefix, JsOpSuccess.DefaultDispatcher)
                     }},
                 });
             }
@@ -141,10 +136,10 @@ namespace Signum.Web.Authorization
             if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(R)))
                 Navigator.AddSetting(new EntitySettings<R>(EntityType.ServerOnly));
 
-            Navigator.AddSetting(new EntitySettings<T>(EntityType.NotSaving)
+            Navigator.AddSetting(new EmbeddedEntitySettings<T>()
             {
                 PartialViewName = e => ViewPrefix + partialViewName,
-                MappingAdmin = new EntityMapping<T>(false)
+                MappingDefault = new EntityMapping<T>(false)
                     .CreateProperty(m => m.DefaultRule)
                     .SetProperty(m => m.Rules,
                         new MListDictionaryMapping<AR, K>(getKey, getKeyRoute)

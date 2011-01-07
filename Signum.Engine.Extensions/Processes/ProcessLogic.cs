@@ -65,7 +65,7 @@ namespace Signum.Engine.Processes
                     Execute = (pc, _) => ProcessLogic.Create(pc).ToLite().ExecuteLite(ProcessOperation.Execute)
                 });
 
-                sb.Schema.Initializing(InitLevel.Level4BackgroundProcesses, Schema_InitializingApplication);
+                sb.Schema.Initializing[InitLevel.Level4BackgroundProcesses] += Schema_InitializingApplication;
                 sb.Schema.EntityEvents<ProcessExecutionDN>().Saving += ProcessExecution_Saving;
 
                 dqm[typeof(ProcessDN)] =
@@ -198,7 +198,7 @@ namespace Signum.Engine.Processes
             process.Suspend();
         }
 
-        static void Schema_InitializingApplication(Schema sender)
+        static void Schema_InitializingApplication()
         {
             using (new EntityCache(true))
             {

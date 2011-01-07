@@ -32,7 +32,7 @@ namespace Signum.Windows.Reports
                 DefaultExt = ".xlsx",
                 Filter = Prop.Resources.Excel2007Spreadsheet,
                 OverwritePrompt = true,
-                FileName = "{0}.xlsx".Formato(QueryUtils.GetNiceQueryName(SearchControl.QueryName)),
+                FileName = "{0}.xlsx".Formato(QueryUtils.GetNiceName(SearchControl.QueryName)),
                 Title = Prop.Resources.FindLocationFoExcelReport
             };
 

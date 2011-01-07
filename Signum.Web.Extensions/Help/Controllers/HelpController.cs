@@ -15,6 +15,7 @@ using System.Diagnostics;
 using Signum.Web.Extensions;
 using System.Text;
 using Signum.Web.Extensions.Properties;
+using Signum.Engine;
 
 namespace Signum.Web.Help
 {
@@ -32,7 +33,7 @@ namespace Signum.Web.Help
         [AcceptVerbs(HttpVerbs.Get)]
         public ActionResult ViewEntity(string entity)
         {
-            Type type = HelpLogic.ToType(entity);
+            Type type = TypeLogic.GetType(entity);
             List<Type> relatedTypes = (from t in HelpLogic.AllTypes()
                                        where t.Namespace == type.Namespace
                                        orderby t.Name
@@ -108,7 +109,7 @@ namespace Signum.Web.Help
         public ContentResult SaveEntity(string entity)
         {
             bool entityModified = false;
-            EntityHelp eh = HelpLogic.GetEntityHelp(HelpLogic.ToType(entity));
+            EntityHelp eh = HelpLogic.GetEntityHelp(TypeLogic.GetType(entity));
             Dictionary<string, QueryHelp> processedQueryHelp = new Dictionary<string, QueryHelp>();
             foreach (string key in Request.Form.Keys)
             {

@@ -15,13 +15,14 @@
     <% Html.RenderPartial(HelpClient.ViewPrefix + HelpClient.Menu); %>
     <%
         AppendixHelp ah = (AppendixHelp)Model;
-     %>
-    <form action="Help/Appendix/<%=ah.Name%>/Save" id="form-save">
+    
+    using(var f = Html.BeginForm("SaveAppendix", "Help", new { appendix = ah.Name }, FormMethod.Post, new { id = "form-save" }))
+    %>
         <div class="grid_16" id="entityName">    
             <h1><%: ah.Title%></h1> 
             <%= Html.TextArea("description", ah.Description, 5, 80, new { @class = "editable" })
                                                             + "<span class=\"editor\" id=\"description-editor\">" + ah.Description.WikiParse(HelpClient.DefaultWikiSettings).Replace("\n", "<p>") + "</span>"%>
         </div>
         <div class="clear"></div>
-    </form>
+    <% } %>
 </asp:Content>

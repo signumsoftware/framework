@@ -13,6 +13,7 @@ using System.Reflection;
 using System.Web.Routing;
 using Signum.Web.Controllers;
 using Signum.Web.PortableAreas;
+using Signum.Engine.Engine;
 
 
 namespace Signum.Web.ScriptCombiner
@@ -74,7 +75,7 @@ namespace Signum.Web.ScriptCombiner
                 {
                     Request = r,
                     Content = null,
-                    Key = Signum.Services.Security.EncodeCleanUnsafe(request.ToString())
+                    Key = StringHashEncoder.Codify(request.ToString())
                 };
 
                 return ElementsByKey.GetOrAdd(elem.Key, elem);

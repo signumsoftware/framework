@@ -21,7 +21,7 @@ namespace Signum.Web.Basic
                 AssemblyResourceManager.RegisterAreaResources(
                     new AssemblyResourceStore(typeof(BasicClient), "~/basic/", "Signum.Web.Extensions.Basic."));
 
-                Navigator.AddSetting(new EntitySettings<DateSpanDN>(EntityType.Default) { PartialViewName = _ => ViewPrefix + "DateSpanIU" });
+                Navigator.AddSetting(new EmbeddedEntitySettings<DateSpanDN>() { PartialViewName = _ => ViewPrefix + "DateSpanIU" });
             }
         }
     }

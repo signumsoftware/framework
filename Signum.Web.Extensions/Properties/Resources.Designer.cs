@@ -160,42 +160,6 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Construct From Many Operation {{{0}}} needs source Ids as parameter.
-        /// </summary>
-        public static string ConstructFromManyOperation0NeedsSourceIdsAsParameter {
-            get {
-                return ResourceManager.GetString("ConstructFromManyOperation0NeedsSourceIdsAsParameter", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Construct From Many Operation {{{0}}} needs source Lites.
-        /// </summary>
-        public static string ConstructFromManyOperation0NeedsSourceLazies {
-            get {
-                return ResourceManager.GetString("ConstructFromManyOperation0NeedsSourceLazies", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Could not create Lite without an id to call Operation {{{0}}}.
-        /// </summary>
-        public static string CouldNotCreateLiteWithoutAnIdToCallOperation0 {
-            get {
-                return ResourceManager.GetString("CouldNotCreateLiteWithoutAnIdToCallOperation0", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Couldn&apos;t create FilePath with unknown FileType for field {{0}}.
-        /// </summary>
-        public static string CouldntCreateFilePathWithUnknownFileTypeForField0 {
-            get {
-                return ResourceManager.GetString("CouldntCreateFilePathWithUnknownFileTypeForField0", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Create.
         /// </summary>
         public static string Create {

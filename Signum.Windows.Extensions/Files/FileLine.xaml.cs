@@ -119,7 +119,7 @@ namespace Signum.Windows.Files
                 EntityTemplate = Navigator.FindDataTemplate(this, Type);
             }
 
-            if (typeof(Lite).IsAssignableFrom(Type))
+            if (Type.IsLite())
             {
                 cleanType = Reflector.ExtractLite(Type);
             }

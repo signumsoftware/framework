@@ -2,6 +2,7 @@
 <%@ Import Namespace="Signum.Web" %>
 <%@ Import Namespace="Signum.Entities.Authorization" %>
 <%@ Import Namespace="Signum.Web.Extensions.Properties" %>
+<%@ Import Namespace="Signum.Web.Authorization" %>
 
 <asp:Content ID="loginTitle" ContentPlaceHolderID="head" runat="server">
     <title>Log On</title>
@@ -54,7 +55,8 @@
                     %>                  
                 </td>
             </tr>
-            <% if (Navigator.TypesToNames.ContainsKey(typeof(ResetPasswordRequestDN))) { %>
+            <% if (AuthClient.ResetPasswordStarted)
+               { %>
             <tr>
                 <td>
                 </td>

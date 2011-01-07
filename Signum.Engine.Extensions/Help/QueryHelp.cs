@@ -49,7 +49,7 @@ namespace Signum.Engine.Help
             return new XDocument(
                 new XDeclaration("1.0", "utf-8", "yes"),
                    new XElement(_Query,
-                       new XAttribute(_Key, QueryUtils.GetQueryName(Key)),
+                       new XAttribute(_Key, QueryUtils.GetQueryUniqueKey(Key)),
                        new XAttribute(_Info, Info),
                        new XAttribute(_Language, Language),
                        new XElement(_Description, UserDescription),
@@ -131,7 +131,7 @@ namespace Signum.Engine.Help
         public string Save()
         {
             XDocument document = this.ToXDocument();
-            string path = DefaultFileName(QueryUtils.GetQueryName(Key));
+            string path = DefaultFileName(QueryUtils.GetQueryUniqueKey(Key));
             document.Save(path);
             return path;
         }

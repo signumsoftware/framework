@@ -256,7 +256,7 @@ namespace Signum.Windows.Operations
 
         internal object ConstructorManager_GeneralConstructor(Type type, Window win)
         {
-            if (!typeof(IIdentifiable).IsAssignableFrom(type))
+            if (!type.IsIIdentifiable())
                 return null;
 
             var list = Server.Return((IOperationServer s)=>s.GetConstructorOperationInfos(type)); 

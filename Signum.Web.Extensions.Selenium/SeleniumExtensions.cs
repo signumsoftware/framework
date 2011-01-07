@@ -6,6 +6,7 @@ using System.Threading;
 using Selenium;
 using System.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Signum.Web.Extensions.Selenium;
 
 namespace Signum.Web.Selenium
 {
@@ -43,8 +44,8 @@ namespace Signum.Web.Selenium
                 "http://localhost/");
 
             selenium.Start();
-            //selenium.SetSpeed("200");
-            selenium.SetSpeed("1000");
+            selenium.SetSpeed("200");
+            //selenium.SetSpeed("1000");
 
             selenium.SetTimeout("600000");
 
@@ -118,5 +119,25 @@ namespace Signum.Web.Selenium
             }
             Assert.IsTrue(condition());
         }
+
+        public static bool IsElementInCell(this ISelenium selenium, int rowIndexBase1, int columnIndexBase1, string selector)
+        {
+            return IsElementInCell(selenium, rowIndexBase1, columnIndexBase1, selector, "");
+        }
+
+        public static bool IsElementInCell(this ISelenium selenium, int rowIndexBase1, int columnIndexBase1, string selector, string prefix)
+        {
+            return selenium.IsElementPresent("jq=#" + prefix + "tblResults > tbody > tr:nth-child(" + rowIndexBase1 + ") > td:nth-child(" + columnIndexBase1 + ") " + selector);
+        }
+
+        public static bool IsEntityInRow(this ISelenium selenium, int rowIndexBase1, string liteKey)
+        {
+            return IsEntityInRow(selenium, rowIndexBase1, liteKey, "");
+        }
+
+        public static bool IsEntityInRow(this ISelenium selenium, int rowIndexBase1, string liteKey, string prefix)
+        {
+            return selenium.IsElementPresent("jq=#" + prefix + "tblResults > tbody > tr:nth-child(" + rowIndexBase1 + ")[data-entity='" + liteKey + "']");
+        }        
     }
 }

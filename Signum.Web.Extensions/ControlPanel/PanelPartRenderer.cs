@@ -39,7 +39,7 @@ namespace Signum.Web.ControlPanel
         public override void RenderPart(HtmlHelper helper, PanelPart part)
         {
             UserQueryDN uq = ((UserQueryDN)part.Content);
-            object queryName = Navigator.Manager.QuerySettings.Keys.First(k => QueryUtils.GetQueryName(k) == uq.Query.Key);
+            object queryName = Navigator.Manager.QuerySettings.Keys.First(k => QueryUtils.GetQueryUniqueKey(k) == uq.Query.Key);
             FindOptions fo = new FindOptions(queryName)
             {
                 FilterMode = FilterMode.OnlyResults
@@ -63,7 +63,7 @@ namespace Signum.Web.ControlPanel
 
             foreach (CountUserQueryElement uq in uqList)
             { 
-                object queryName = Navigator.Manager.QuerySettings.Keys.First(k => QueryUtils.GetQueryName(k) == uq.UserQuery.Query.Key);
+                object queryName = Navigator.Manager.QuerySettings.Keys.First(k => QueryUtils.GetQueryUniqueKey(k) == uq.UserQuery.Query.Key);
                 FindOptions fo = new FindOptions(queryName)
                 {
                     FilterMode = FilterMode.Hidden

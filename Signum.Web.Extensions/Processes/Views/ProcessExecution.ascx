@@ -45,7 +45,7 @@ Progress:
     function refreshUpdate(idProcess, idPrefix) {
         setTimeout(function() {
 
-            $.post("Process/getProgressExecution", { id: idProcess },
+            $.post("<%= Url.Action("GetProgressExecution", "Process") %>", { id: idProcess },
             function(data) {
                 $("#progressBar").width(data + '%');
                 if (data < 100) {
@@ -53,7 +53,7 @@ Progress:
                 }
                 else {
                     if (empty(idPrefix)) {
-                        ReloadEntity("Process/FinishProcessNormalPage", idPrefix);
+                        ReloadEntity("<%= Url.Action("FinishProcessNormalPage", "Process") %>", idPrefix);
                     }
                     else {
                         $("#" + idPrefix.compose("externalPopupDiv")).remove();

@@ -318,14 +318,14 @@ namespace Signum.Engine.Help
             if (qh != null)
                 foreach (var p in qh)
                 {
-                    m = regex.Match(QueryUtils.GetNiceQueryName(p.Key).RemoveDiacritics());
+                    m = regex.Match(QueryUtils.GetNiceName(p.Key).RemoveDiacritics());
                     if (m.Success)
-                        yield return new SearchResult(TypeSearchResult.Query, QueryUtils.GetNiceQueryName(p.Key), p.Info.ToString().Etc(etcLength), Type, m, HelpLogic.EntityUrl(Type) + "#" + "q-" + QueryUtils.GetQueryName(p.Key).ToString().Replace(".", "_"));
+                        yield return new SearchResult(TypeSearchResult.Query, QueryUtils.GetNiceName(p.Key), p.Info.ToString().Etc(etcLength), Type, m, HelpLogic.EntityUrl(Type) + "#" + "q-" + QueryUtils.GetQueryUniqueKey(p.Key).ToString().Replace(".", "_"));
                     else
                     {
                         m = regex.Match(p.Info.ToString().RemoveDiacritics());
                         if (m.Success)
-                            yield return new SearchResult(TypeSearchResult.QueryDescription, QueryUtils.GetNiceQueryName(p.Key), Extract(p.Info.ToString(), m), Type, m, HelpLogic.EntityUrl(Type) + "#" + "q-" + QueryUtils.GetQueryName(p.Key).ToString().Replace(".", "_"));
+                            yield return new SearchResult(TypeSearchResult.QueryDescription, QueryUtils.GetNiceName(p.Key), Extract(p.Info.ToString(), m), Type, m, HelpLogic.EntityUrl(Type) + "#" + "q-" + QueryUtils.GetQueryUniqueKey(p.Key).ToString().Replace(".", "_"));
                     }
                 }
 
@@ -347,7 +347,7 @@ namespace Signum.Engine.Help
 
         public static string QueryToString(KeyValuePair<object, string> kvp)
         {
-            return QueryUtils.GetNiceQueryName(kvp.Key) + " | " + kvp.Value;
+            return QueryUtils.GetNiceName(kvp.Key) + " | " + kvp.Value;
         }
 
         public static string OperationToString(KeyValuePair<Enum, string> kvp)

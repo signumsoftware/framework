@@ -38,12 +38,21 @@ namespace Signum.Web.Files
 
         public bool Download { get; set; }
 
+        public string DownloadUrl { get; set; }
+        public string UploadUrl { get; set; }
+
         public string Downloading { get; set; }
         internal string GetDownloading()
         {
             if (!Download)
                 return "";
             return Downloading ?? DefaultDownloading();
+        }
+
+        public string OnChanged { get; set; }
+        internal string GetOnChanged()
+        {
+            return OnChanged ?? DefaultOnChanged();
         }
 
         public FileLine(Type type, object untypedValue, Context parent, string controlID, PropertyRoute propertyRoute)
@@ -72,6 +81,10 @@ namespace Signum.Web.Files
         {
             var result = base.OptionsJSInternal();
             result.Add("asyncUpload", AsyncUpload ? "true" : "false");
+            if (DownloadUrl.HasText())
+                result.Add("controllerUrl", DownloadUrl.SingleQuote());
+            if (UploadUrl.HasText())
+                result.Add("controllerUrl", UploadUrl.SingleQuote());
             return result;
         }
 
@@ -92,7 +105,23 @@ namespace Signum.Web.Files
 
         public static JsInstruction JsDownloading(FileLine fline)
         {
+            if (fline.DownloadUrl == null)
+                fline.DownloadUrl = RouteHelper.New().Action("Download", "File");
+
             return new JsInstruction(() => "javascript:FLineOnDownloading({0})".Formato(fline.ToJS()));
+        }
+
+        protected string DefaultOnChanged()
+        {
+            return FileLine.JsOnChanged(this).ToJS();
+        }
+
+        public static JsInstruction JsOnChanged(FileLine fline)
+        {
+            if (fline.UploadUrl == null)
+                fline.UploadUrl = RouteHelper.New().Action("Upload", "File");
+
+            return new JsInstruction(() => "javascript:FLineOnChanged({0})".Formato(fline.ToJS()));
         }
 
         protected override string DefaultFinding()

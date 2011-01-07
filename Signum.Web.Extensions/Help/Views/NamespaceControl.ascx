@@ -9,7 +9,7 @@
             NamespaceModel nm = (NamespaceModel)Model;
             if (nm.Types.Count > 0)
            { %>
-            <h2><a href="Help/Namespace/<%= nm.Namespace %>"><%=nm.ShortNamespace%></a></h2>
+            <h2><%: Html.ActionLink(nm.ShortNamespace, "Namespace", new { @namespace = nm.Namespace }) %></h2>
         <% }
            else
            { %>
