@@ -46,9 +46,9 @@ namespace Signum.Web.Extensions.Sample.Test
             {
                 CheckLoginAndOpen("/Signum.Web.Extensions.Sample/Find/Album");
 
-                string administerLocator = "jq=div.query-operation:last a.query-operation:last";
-                string saveLocator = "jq=.operations > li:first > a";
-                string deleteLocator = "jq=.operations > li:nth-child(2) > a";
+                string administerLocator = "jq=div.query-button:last a.query-button:last";
+                string saveLocator = "jq=.button-bar > li:first > a";
+                string deleteLocator = "jq=.button-bar > li:nth-child(2) > a";
 
                 //create when there's no query created => direct navigation to create page
                 selenium.Click(administerLocator);
@@ -72,8 +72,8 @@ namespace Signum.Web.Extensions.Sample.Test
                 //delete
                 selenium.Click(administerLocator);
                 selenium.WaitForPageToLoad(PageLoadTimeout);
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=a[href=View/ExcelReport/1]"));
-                selenium.Click("jq=a[href=View/ExcelReport/1]");
+                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=a[href$=View/ExcelReport/1]"));
+                selenium.Click("jq=a[href$=View/ExcelReport/1]");
                 selenium.WaitForPageToLoad(PageLoadTimeout);
                 selenium.Click(deleteLocator);
                 //Assert.IsTrue(Regex.IsMatch(selenium.GetConfirmation(), "^¿" + extensionsManager.GetString("AreYouSureOfDeletingReport0").Formato("prueba 2") + "[\\s\\S]$"));

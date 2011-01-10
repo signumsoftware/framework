@@ -58,7 +58,7 @@ namespace Signum.Web.Extensions.Sample.Test
                 //create with implementations
                 selenium.Click("LastAward_btnCreate");
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #LastAwardTemp"));
-                selenium.Click("GrammyAwardDN");
+                selenium.Click("GrammyAward");
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#LastAward_Category"));
                 selenium.Type("LastAward_Category", "test");
                 selenium.Click("LastAward_sfBtnOk");
@@ -70,7 +70,7 @@ namespace Signum.Web.Extensions.Sample.Test
                 selenium.Click("LastAward_btnRemove");
                 selenium.Click("LastAward_btnFind");
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #LastAwardTemp"));
-                selenium.Click("GrammyAwardDN");
+                selenium.Click("GrammyAward");
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#LastAward_btnSearch"));
                 selenium.Click("LastAward_btnSearch");
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#LastAward_tblResults > tbody > tr"));
@@ -103,7 +103,7 @@ namespace Signum.Web.Extensions.Sample.Test
                 //create with implementations
                 selenium.Click("LastAward_btnCreate");
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #LastAwardTemp"));
-                selenium.Click("AmericanMusicAwardDN");
+                selenium.Click("AmericanMusicAward");
                 selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("jq=#divASustituir + #LastAwardTemp"));
                 Assert.IsTrue(selenium.IsElementPresent("jq=#LastAward_sfDetail #LastAward_Category"));
                 selenium.Type("LastAward_Category", "test");
@@ -112,7 +112,7 @@ namespace Signum.Web.Extensions.Sample.Test
                 selenium.Click("LastAward_btnRemove");
                 selenium.Click("LastAward_btnFind");
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #LastAwardTemp"));
-                selenium.Click("AmericanMusicAwardDN");
+                selenium.Click("AmericanMusicAward");
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#LastAward_btnSearch"));
                 selenium.Click("LastAward_btnSearch");
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#LastAward_tblResults > tbody > tr"));
@@ -153,7 +153,7 @@ namespace Signum.Web.Extensions.Sample.Test
                 //create with implementations
                 selenium.Click("Author_LastAward_btnCreate");
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #Author_LastAwardTemp"));
-                selenium.Click("AmericanMusicAwardDN");
+                selenium.Click("AmericanMusicAward");
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Author_LastAward_Category"));
                 selenium.Type("Author_LastAward_Category", "test");
                 selenium.Click("Author_LastAward_sfBtnOk");
@@ -165,7 +165,7 @@ namespace Signum.Web.Extensions.Sample.Test
                 selenium.Click("Author_LastAward_btnRemove");
                 selenium.Click("Author_LastAward_btnFind");
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #Author_LastAwardTemp"));
-                selenium.Click("AmericanMusicAwardDN");
+                selenium.Click("AmericanMusicAward");
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Author_LastAward_btnSearch"));
                 selenium.Click("Author_LastAward_btnSearch");
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Author_LastAward_tblResults > tbody > tr"));
@@ -230,7 +230,7 @@ namespace Signum.Web.Extensions.Sample.Test
                 //Create with implementations
                 selenium.Click("OtherAwards_btnCreate");
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #OtherAwardsTemp"));
-                selenium.Click("GrammyAwardDN");
+                selenium.Click("GrammyAward");
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #OtherAwards_0Temp"));
                 Assert.IsFalse(selenium.IsElementPresent("jq=#divASustituir + #OtherAwards_Temp"));
                 selenium.Type("OtherAwards_0_Category", "test");
@@ -243,7 +243,7 @@ namespace Signum.Web.Extensions.Sample.Test
                 //find with implementations
                 selenium.Click("OtherAwards_btnFind");
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #OtherAwardsTemp"));
-                selenium.Click("GrammyAwardDN");
+                selenium.Click("GrammyAward");
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #OtherAwards_1Temp"));
                 Assert.IsFalse(selenium.IsElementPresent("jq=#divASustituir + #OtherAwards_Temp"));
                 selenium.Click("OtherAwards_1_btnSearch");
@@ -361,7 +361,7 @@ namespace Signum.Web.Extensions.Sample.Test
                 //create with implementations
                 selenium.Click("OtherAwards_btnCreate");
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #OtherAwardsTemp"));
-                selenium.Click("GrammyAwardDN");
+                selenium.Click("GrammyAward");
                 selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("jq=#divASustituir + #OtherAwards_Temp"));
                 Assert.IsTrue(selenium.IsElementPresent("jq=#OtherAwards_sfDetail #OtherAwards_0_Category"));
                 Assert.IsTrue(selenium.IsElementPresent("jq=#OtherAwards_0_sfRuntimeInfo"));
@@ -370,7 +370,7 @@ namespace Signum.Web.Extensions.Sample.Test
                 //find with implementations
                 selenium.Click("OtherAwards_btnFind");
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #OtherAwardsTemp"));
-                selenium.Click("GrammyAwardDN");
+                selenium.Click("GrammyAward");
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #OtherAwards_1Temp"));
                 Assert.IsFalse(selenium.IsElementPresent("jq=#divASustituir + #OtherAwards_Temp"));
                 selenium.Click("OtherAwards_1_btnSearch");
@@ -437,7 +437,7 @@ namespace Signum.Web.Extensions.Sample.Test
                 //create with implementations
                 selenium.Click("OtherAwards_btnCreate");
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #OtherAwardsTemp"));
-                selenium.Click("GrammyAwardDN");
+                selenium.Click("GrammyAward");
                 selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("jq=#divASustituir + #OtherAwards_Temp"));
                 Assert.IsTrue(selenium.IsElementPresent("jq=#OtherAwards_sfItemsContainer > #OtherAwards_0_sfRepeaterItem"));
                 Assert.IsTrue(selenium.IsElementPresent("jq=#OtherAwards_0_sfRuntimeInfo"));

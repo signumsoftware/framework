@@ -55,7 +55,7 @@ namespace Signum.Web.Extensions.Sample.Test
                 selenium.Type("Year", "2010");
                 selenium.Click("Author_btnFind");
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #AuthorTemp"));
-                selenium.Click("BandDN");
+                selenium.Click("Band");
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Author_btnSearch"));
                 selenium.Click("Author_btnSearch");
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Author_tblResults > tbody > tr"));
@@ -175,7 +175,7 @@ namespace Signum.Web.Extensions.Sample.Test
                 //Delete has redirected to search window => Check deleted album doesn't exist any more
                 selenium.Click("btnSearch");
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#tblResults > tbody > tr"));
-                Assert.IsFalse(selenium.IsElementPresent("jq=a[href=View/Album/13]"));
+                Assert.IsFalse(selenium.IsElementPresent("jq=input:hidden[value=Album;13]"));
             }
             catch (Exception)
             {

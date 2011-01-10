@@ -57,7 +57,7 @@ namespace Signum.Web.Extensions.Sample.Test
                 selenium.Click("Parts_0_Fill");
                 selenium.Click("Parts_0_Content_btnFind");
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #Parts_0_ContentTemp"));
-                selenium.Click("UserQueryDN");
+                selenium.Click("UserQuery");
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Parts_0_Content_btnSearch"));
                 selenium.Click("jq=#Parts_0_Content_btnSearch");
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Parts_0_Content_tblResults > tbody > tr"));
@@ -73,7 +73,7 @@ namespace Signum.Web.Extensions.Sample.Test
                 selenium.Type("Parts_1_Column", "1");
                 selenium.Click("Parts_1_Content_btnCreate");
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #Parts_1_ContentTemp"));
-                selenium.Click("CountSearchControlPartDN");
+                selenium.Click("CountSearchControlPart");
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Parts_1_Content_UserQueries_btnCreate"));
                 selenium.Click("Parts_1_Content_UserQueries_btnCreate");
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("Parts_1_Content_UserQueries_0_Label"));
@@ -96,7 +96,7 @@ namespace Signum.Web.Extensions.Sample.Test
                 selenium.Type("Parts_2_Column", "2");
                 selenium.Click("Parts_2_Content_btnCreate");
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #Parts_2_ContentTemp"));
-                selenium.Click("LinkListPartDN");
+                selenium.Click("LinkListPart");
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Parts_2_Content_Links_btnCreate"));
                 selenium.Click("Parts_2_Content_Links_btnCreate");
                 selenium.WaitAjaxFinished(() => selenium.IsElementPresent("Parts_2_Content_Links_0_Label"));
