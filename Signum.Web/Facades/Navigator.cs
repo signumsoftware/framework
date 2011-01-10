@@ -99,17 +99,17 @@ namespace Signum.Web
             return Manager.View(controller, entity, partialViewName, admin);
         }
 
-        public static PartialViewResult NormalControl(ControllerBase controller, IdentifiableEntity entity)
+        public static PartialViewResult NormalControl(ControllerBase controller, IRootEntity entity)
         {
             return Manager.NormalControl(controller, entity, null, false); 
         }
 
-        public static PartialViewResult NormalControl(ControllerBase controller, IdentifiableEntity entity, bool admin)
+        public static PartialViewResult NormalControl(ControllerBase controller, IRootEntity entity, bool admin)
         {
             return Manager.NormalControl(controller, entity, null, admin); 
         }
 
-        public static PartialViewResult NormalControl(ControllerBase controller, IdentifiableEntity entity, string partialViewName)
+        public static PartialViewResult NormalControl(ControllerBase controller, IRootEntity entity, string partialViewName)
         {
             return Manager.NormalControl(controller, entity, partialViewName, false);
         }
