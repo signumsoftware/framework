@@ -84,11 +84,10 @@
                 async: false,
                 data: this.constructRequestData(),
                 success: function (msg) {
-                    alert(msg);
                     if (msg.indexOf("ModelState") > 0) {
-                        var result = $.parseJSON(msg);
+                        var result = $.parseJSON(msg);  
                         var modelState = result["ModelState"];
-                        returnValue = new Validator({prefix: "qe"}).showErrors(modelState, true);
+                        returnValue = self.showErrors(modelState, true);
                     }
                     else {
                         returnValue = true;
