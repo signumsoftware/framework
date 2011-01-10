@@ -29,12 +29,10 @@ namespace Signum.Web.Extensions.Sample
                     new EntitySettings<GrammyAwardDN>(EntityType.Default) { PartialViewName = e => ViewPrefix + "GrammyAward" },
                     new EntitySettings<LabelDN>(EntityType.Default) { PartialViewName = e => ViewPrefix + "Label" },
                     new EntitySettings<PersonalAwardDN>(EntityType.Default) { PartialViewName = e => ViewPrefix + "PersonalAward" },
-                    new EntitySettings<SongDN>(EntityType.Default) { PartialViewName = e => ViewPrefix + "Song" },
+                    new EmbeddedEntitySettings<SongDN>() { PartialViewName = e => ViewPrefix + "Song" },
 
                     new EntitySettings<AlbumFromBandModel>(EntityType.Default){PartialViewName = e => ViewPrefix + "AlbumFromBandModel"},
                 });
-
-                Navigator.RegisterTypeName<IAuthorDN>();
 
                 OperationClient.Manager.Settings.AddRange(new Dictionary<Enum, OperationSettings>
                 {
@@ -47,17 +45,15 @@ namespace Signum.Web.Extensions.Sample
                     }},
                     { AlbumOperation.CreateFromBand, new EntityOperationSettings 
                     { 
-                        ControllerUrl = "Music/CreateAlbumFromBand", 
                         OnClick = ctx => JsValidator.EntityIsValid(ctx.Prefix, 
-                            new JsOperationConstructorFrom(ctx.Options())
+                            new JsOperationConstructorFrom(ctx.Options("CreateAlbumFromBand", "Music"))
                             .OperationAjax(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk)),
                         OnContextualClick = ctx => Js.Confirm("Do you wish to create an album for band {0}".Formato(ctx.Entity.ToStr),
-                            new JsOperationConstructorFrom(ctx.Options()).OperationAjax(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk)),
+                            new JsOperationConstructorFrom(ctx.Options("CreateAlbumFromBand", "Music")).OperationAjax(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk)),
                     }},
                     { AlbumOperation.CreateGreatestHitsAlbum, new QueryOperationSettings
                     {
-                        ControllerUrl = "Music/CreateGreatestHitsAlbum",
-                        OnClick = ctx => new JsOperationConstructorFromMany(ctx.Options()).DefaultSubmit()
+                        OnClick = ctx => new JsOperationConstructorFromMany(ctx.Options("CreateGreatestHitsAlbum", "Music")).DefaultSubmit()
                     }},
                 });
             }
