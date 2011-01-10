@@ -8,8 +8,7 @@
 <head id="Head1" runat="server">
     <title><%=ViewData[ViewDataKeys.PageTitle] ?? ""%></title>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
-    <base href="<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/" ) %>" />
-
+    
     <%: Html.ScriptCss("~/content/fluid/fluid.min.css", "~/signum/Content/LineStyles.css") %>    
     <%: Html.ScriptsJs("~/scripts/jquery-1.4.2.min.js")%>    
     <script type='text/javascript' src='http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.min.js'></script>

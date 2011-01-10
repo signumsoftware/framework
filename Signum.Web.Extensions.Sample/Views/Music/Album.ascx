@@ -12,6 +12,7 @@ using (var e = Html.TypeContext<AlbumDN>())
 	Html.ValueLine(e, f => f.Year);
 	Html.EntityLine(e, f => f.Author);
 	Html.EntityList(e, f => f.Songs);
-	Html.EntityCombo(e, f => f.Label);
+    Html.EntityLine(e, f => f.BonusTrack);
+    Html.EntityCombo(e, f => f.Label);
 }
 %>

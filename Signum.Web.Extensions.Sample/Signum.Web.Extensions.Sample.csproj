@@ -96,13 +96,13 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\fluid\fluid.min.css" />
     <Content Include="Default.aspx" />
     <Content Include="Global.asax" />
     <Content Include="Views\Home\Index.aspx" />
     <Content Include="Views\Music\Album.ascx" />
     <Content Include="Views\Music\AmericanMusicAward.ascx" />
     <Content Include="Views\Music\Artist.ascx" />
-    <Content Include="Views\Music\Award.ascx" />
     <Content Include="Views\Music\Band.ascx" />
     <Content Include="Views\Music\GrammyAward.ascx" />
     <Content Include="Views\Music\Label.ascx" />
@@ -119,7 +119,6 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
-    <Content Include="Content\fluid\fluid.min.css" />
     <Content Include="Images\ajax-loader.gif" />
     <Content Include="Images\alert-overlay.png" />
     <Content Include="Images\asc.gif" />

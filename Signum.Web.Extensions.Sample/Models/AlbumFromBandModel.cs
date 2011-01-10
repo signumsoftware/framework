@@ -13,7 +13,6 @@ namespace Signum.Web.Extensions.Sample
         { 
         }
 
-
         public AlbumFromBandModel(Lite<BandDN> band)
         {
             Band = band;

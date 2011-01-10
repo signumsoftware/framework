@@ -38,7 +38,7 @@ namespace Signum.Web.Extensions.Sample
 
             ViewData[ViewDataKeys.WriteSFInfo] = true;
             ViewData[ViewDataKeys.OnOk] = JsValidator.EntityIsValid(prefix, new JsOperationExecutor(
-                new JsOperationOptions { Prefix = prefix, ControllerUrl = "Music/CreateAlbumFromBandOnOk" })
+                new JsOperationOptions { Prefix = prefix, ControllerUrl = RouteHelper.New().Action("CreateAlbumFromBandOnOk", "Music") })
                 .OperationAjax(prefix, JsOpSuccess.DefaultDispatcher)).ToJS();
             
             return Navigator.PopupView(this, model, prefix);
@@ -50,7 +50,7 @@ namespace Signum.Web.Extensions.Sample
 
             AlbumDN newAlbum = context.Value.Band.ConstructFromLite<AlbumDN>(AlbumOperation.CreateFromBand, new object[] { context.Value.Name, context.Value.Year, context.Value.Label });
 
-            return Navigator.RedirectUrl(Navigator.ViewRoute(typeof(AlbumDN), newAlbum.Id));
+            return Navigator.RedirectUrl(Navigator.ViewRoute(newAlbum));
         }
 
         public ActionResult CreateGreatestHitsAlbum(List<int> sfIds, string prefix)

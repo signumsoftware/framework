@@ -24,8 +24,8 @@
                 Text = "Others",
                 Children = 
                 {
-                    new WebMenuItem { Text = "Band with details", Link = "Music/BandDetail" },
-                    new WebMenuItem { Text = "Band with repeater", Link = "Music/BandRepeater" },
+                    new WebMenuItem { Text = "Band with details", Link = Url.Action("BandDetail", "Music") },
+                    new WebMenuItem { Text = "Band with repeater", Link = Url.Action("BandRepeater", "Music") },
                 }
             },
             new WebMenuItem
