@@ -33,15 +33,15 @@ namespace Signum.Web.Extensions.Sample
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
 
             routes.MapRoute(
-               "v",
-               "View/{typeUrlName}/{id}",
-               new { controller = "Signum", action = "View", typeFriendlyName = "", id = "" }
+               Navigator.ViewRouteName,
+               "View/{webTypeName}/{id}",
+               new { controller = "Signum", action = "View", webTypeName = "", id = "" }
            );
 
             routes.MapRoute(
-                "f",
-                "Find/{sfQueryUrlName}",
-                new { controller = "Signum", action = "Find", sfQueryUrlName = "" }
+                Navigator.FindRouteName,
+                "Find/{webQueryName}",
+                new { controller = "Signum", action = "Find", webQueryName = "" }
             );
 
             routes.MapRoute(
@@ -57,7 +57,6 @@ namespace Signum.Web.Extensions.Sample
             //RouteDebug.RouteDebugger.RewriteRoutesForTesting(RouteTable.Routes);
 
             Signum.Test.Extensions.Starter.Start(UserConnections.Replace(Settings.Default.ConnectionString));
-
 
             using (AuthLogic.Disable())
             {
