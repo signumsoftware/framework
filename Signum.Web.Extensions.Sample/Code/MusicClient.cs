@@ -24,7 +24,7 @@ namespace Signum.Web.Extensions.Sample
                     new EntitySettings<AlbumDN>(EntityType.NotSaving) { PartialViewName = e => ViewPrefix + "Album" },
                     new EntitySettings<AmericanMusicAwardDN>(EntityType.Default) { PartialViewName = e => ViewPrefix + "AmericanMusicAward" },
                     new EntitySettings<ArtistDN>(EntityType.Default) { PartialViewName = e => ViewPrefix + "Artist" },
-                    new EntitySettings<AwardDN>(EntityType.Default) { PartialViewName = e => ViewPrefix + "Award" },
+                    //new EntitySettings<AwardDN>(EntityType.Default) { PartialViewName = e => ViewPrefix + "Award" },
                     new EntitySettings<BandDN>(EntityType.Default) { PartialViewName = e => ViewPrefix + "Band" },
                     new EntitySettings<GrammyAwardDN>(EntityType.Default) { PartialViewName = e => ViewPrefix + "GrammyAward" },
                     new EntitySettings<LabelDN>(EntityType.Default) { PartialViewName = e => ViewPrefix + "Label" },
