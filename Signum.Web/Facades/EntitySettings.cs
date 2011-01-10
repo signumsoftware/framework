@@ -272,7 +272,11 @@ namespace Signum.Web
             if (OverrideImplementations != null && OverrideImplementations.ContainsKey(route))
                 return OverrideImplementations[route];
             
-            return Reflector.FindFieldInfo(route.PropertyInfo.DeclaringType, route.PropertyInfo, false).SingleAttribute<Implementations>();
+            var fieldInfo = Reflector.FindFieldInfo(route.PropertyInfo.DeclaringType, route.PropertyInfo, false);
+            if (fieldInfo == null)
+                return null;
+            else
+                return fieldInfo.SingleAttribute<Implementations>();
         }
     }
 
