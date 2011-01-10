@@ -111,7 +111,7 @@ namespace Signum.Web.Controllers
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public PartialViewResult PartialView(string sfRuntimeType, int? sfId, string prefix, bool? sfEmbeddedControl, bool? sfReadOnly, string sfUrl)
+        public PartialViewResult PartialView(string sfRuntimeType, int? sfId, string prefix, bool? sfReadOnly, string sfUrl)
         {
             Type type = Navigator.ResolveType(sfRuntimeType);
             bool isReactive = this.IsReactive();

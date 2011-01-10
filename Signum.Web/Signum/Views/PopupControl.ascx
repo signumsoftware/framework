@@ -38,7 +38,7 @@
         <%} %>
         <%= ButtonBarEntityHelper.GetForEntity(this.ViewContext, (ModifiableEntity)modelTC.UntypedValue, ViewData[ViewDataKeys.PartialViewName].ToString(), modelTC.ControlID).ToString(Html)%>
     </ul>
-    <%= Html.ValidationSummaryAjax(modelTC) %>
+    <%: Html.ValidationSummaryAjax(modelTC) %>
     <% Html.WritePopupHeader(); %>
     <div id="<%=modelTC.Compose("divMainControl")%>" class="divMainControl">
         <%

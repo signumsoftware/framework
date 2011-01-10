@@ -84,10 +84,11 @@
                 async: false,
                 data: this.constructRequestData(),
                 success: function (msg) {
+                    alert(msg);
                     if (msg.indexOf("ModelState") > 0) {
-                        var result = $.parseJSON(msg);  //eval('var result=' + msg);
+                        var result = $.parseJSON(msg);
                         var modelState = result["ModelState"];
-                        returnValue = self.showErrors(modelState, true);
+                        returnValue = new Validator({prefix: "qe"}).showErrors(modelState, true);
                     }
                     else {
                         returnValue = true;
@@ -172,7 +173,7 @@
                     if ((isMoreInner || isEqual) && $('#' + currPrefix.compose(sfGlobalValidationSummary)).length > 0 && !empty(partialErrors)) {
                         var currentSummary = !empty(this.valOptions.errorSummaryId) ?
                                              $('#' + this.valOptions.errorSummaryId) :
-                                             empty(this.valOptions.parentDiv) ? 
+                                             empty(this.valOptions.parentDiv) ?
                                                 $('#' + currPrefix.compose(sfGlobalValidationSummary)) :
                                                 $('#' + this.valOptions.parentDiv + " #" + currPrefix.compose(sfGlobalValidationSummary));
                         var summaryUL = currentSummary.children('.' + sfSummaryErrorClass);
