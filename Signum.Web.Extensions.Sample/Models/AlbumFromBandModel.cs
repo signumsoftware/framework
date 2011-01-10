@@ -7,7 +7,7 @@ using Signum.Entities;
 
 namespace Signum.Web.Extensions.Sample
 {
-    public class AlbumFromBandModel : Entity
+    public class AlbumFromBandModel : ModelEntity
     {
         public AlbumFromBandModel()
         { 

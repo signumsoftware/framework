@@ -31,7 +31,7 @@ namespace Signum.Web.Extensions.Sample
                     new EntitySettings<PersonalAwardDN>(EntityType.Default) { PartialViewName = e => ViewPrefix + "PersonalAward" },
                     new EmbeddedEntitySettings<SongDN>() { PartialViewName = e => ViewPrefix + "Song" },
 
-                    new EntitySettings<AlbumFromBandModel>(EntityType.Default){PartialViewName = e => ViewPrefix + "AlbumFromBandModel"},
+                    new EmbeddedEntitySettings<AlbumFromBandModel>(){PartialViewName = e => ViewPrefix + "AlbumFromBandModel"},
                 });
 
                 OperationClient.Manager.Settings.AddRange(new Dictionary<Enum, OperationSettings>
