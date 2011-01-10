@@ -109,19 +109,19 @@ namespace Signum.Web.Authorization
                     { UserOperation.SaveNew, new EntityOperationSettings 
                     { 
                         IsVisible = ctx => ctx.Entity.IsNew,
-                        OnClick = ctx => new JsOperationExecutor(ctx.Options(RouteHelper.New().Action("SaveNewUser", "Auth"))).OperationAjax(ctx.Prefix, JsOpSuccess.DefaultDispatcher)
+                        OnClick = ctx => new JsOperationExecutor(ctx.Options("SaveNewUser", "Auth")).OperationAjax(ctx.Prefix, JsOpSuccess.DefaultDispatcher)
                     }},
                     { UserOperation.Save, new EntityOperationSettings 
                     { 
                         IsVisible = ctx => !ctx.Entity.IsNew,
-                        OnClick = ctx => new JsOperationExecutor(ctx.Options(RouteHelper.New().Action("SaveUser", "Auth"))).OperationAjax(ctx.Prefix, JsOpSuccess.DefaultDispatcher)
+                        OnClick = ctx => new JsOperationExecutor(ctx.Options("SaveUser", "Auth")).OperationAjax(ctx.Prefix, JsOpSuccess.DefaultDispatcher)
                     }},
                     { UserOperation.Disable, new EntityOperationSettings { IsVisible = ctx => !ctx.Entity.IsNew }},
                     { UserOperation.Enable, new EntityOperationSettings { IsVisible = ctx => !ctx.Entity.IsNew }},
                     { UserOperation.NewPassword, new EntityOperationSettings 
                     { 
                         IsVisible = ctx => !ctx.Entity.IsNew,
-                        OnClick = ctx => new JsOperationExecutor(ctx.Options(RouteHelper.New().Action("SaveUserWithNewPwd", "Auth"))).OperationAjax(ctx.Prefix, JsOpSuccess.DefaultDispatcher)
+                        OnClick = ctx => new JsOperationExecutor(ctx.Options("SaveUserWithNewPwd", "Auth")).OperationAjax(ctx.Prefix, JsOpSuccess.DefaultDispatcher)
                     }},
                 });
             }
