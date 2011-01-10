@@ -34,9 +34,11 @@ namespace Signum.Web
             Manager = manager;
         }
 
+        public const string ViewRouteName = "sfView";
+
         public static string ViewRoute(Type type, int? id)
         {
-            return new UrlHelper(HttpContext.Current.Request.RequestContext).RouteUrl("sfView", new
+            return new UrlHelper(HttpContext.Current.Request.RequestContext).RouteUrl(ViewRouteName, new
             {
                 webTypeName = EntitySettings(type).WebTypeName,
                 id = id.TryToString()
@@ -63,9 +65,11 @@ namespace Signum.Web
             return new RedirectResult(ViewRoute(lite));
         }
 
+        public const string FindRouteName = "sfFind";
+
         public static string FindRoute(object queryName)
         {
-            return new UrlHelper(HttpContext.Current.Request.RequestContext).RouteUrl("sfFind", new
+            return new UrlHelper(HttpContext.Current.Request.RequestContext).RouteUrl(FindRouteName, new
             {
                 webQueryName = ResolveWebQueryName(queryName)
             });
