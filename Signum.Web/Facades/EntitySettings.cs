@@ -4,12 +4,14 @@ using System.Linq;
 using System.Text;
 using Signum.Entities;
 using Signum.Engine;
+using System.Web.Mvc;
 
 namespace Signum.Web
 {
     public abstract class EntitySettings
     {
         public virtual string WebTypeName { get; set; }
+        public Func<UrlHelper, Type, int?, string> ViewRoute { get; set; }
 
         public abstract Type StaticType { get; }
      

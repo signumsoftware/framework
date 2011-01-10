@@ -278,12 +278,11 @@ namespace Signum.Engine.Maps
 
             public void InitializeUntil(InitLevel topLevel)
             {
-                for (InitLevel current = initLevel ?? InitLevel.Level0SyncEntities; current <= topLevel; current++)
+                for (InitLevel current = initLevel + 1 ?? InitLevel.Level0SyncEntities; current <= topLevel; current++)
                 {
                     InitializeJust(current);
+                    initLevel = current;
                 }
-
-                initLevel = topLevel + 1;
             }
 
             void InitializeJust(InitLevel currentLevel)

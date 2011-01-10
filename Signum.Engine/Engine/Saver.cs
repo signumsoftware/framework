@@ -114,7 +114,7 @@ namespace Signum.Engine
                 SqlPreCommand combine = SqlPreCommand.Combine(Spacing.Triple,
                                                 SqlBuilder.DeclareIDsMemoryTable(),
                                                 SqlBuilder.DeclareLastEntityID(),
-                                                !item.IsFirst ? SqlBuilder.SetLastEntityId(lastId.Value) : null,
+                                                !item.IsFirst && lastId.HasValue ? SqlBuilder.SetLastEntityId(lastId.Value) : null,
                                                 command,
                                                 SqlBuilder.SelectIDMemoryTable(),
                                                 !item.IsLast ? SqlBuilder.SelectLastEntityID() : null);

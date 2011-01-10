@@ -38,6 +38,10 @@ namespace Signum.Web
 
         public static string ViewRoute(Type type, int? id)
         {
+            var entitySettings = EntitySettings(type);
+            if (entitySettings.ViewRoute != null)
+                return entitySettings.ViewRoute(new UrlHelper(HttpContext.Current.Request.RequestContext), type, id);
+
             return new UrlHelper(HttpContext.Current.Request.RequestContext).RouteUrl(ViewRouteName, new
             {
                 webTypeName = EntitySettings(type).WebTypeName,
