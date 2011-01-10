@@ -129,6 +129,7 @@
     <Compile Include="ScriptCombiner\GoogleClosure.cs" />
     <Compile Include="ScriptCombiner\JavascriptCombiner.cs" />
     <Compile Include="ScriptCombiner\JavaScriptMinifier.cs" />
+    <Compile Include="ScriptCombiner\Logger.cs" />
     <Compile Include="ViewsChecker\ViewsCheckerClient.cs" />
     <Compile Include="ViewsChecker\ViewError.cs" />
     <Compile Include="ViewsChecker\Controllers\ViewsCheckerController.cs" />
