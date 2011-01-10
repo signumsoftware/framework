@@ -5,6 +5,9 @@ using System.Text;
 using Signum.Entities;
 using Signum.Engine;
 using System.Web.Mvc;
+using Signum.Engine.Maps;
+using Signum.Entities.Reflection;
+using Signum.Utilities;
 
 namespace Signum.Web
 {
@@ -166,7 +169,7 @@ namespace Signum.Web
         }
     }
 
-    public class EmbeddedEntitySettings<T> : EntitySettings where T : EmbeddedEntity
+    public class EmbeddedEntitySettings<T> : EntitySettings, IImplementationsFinder where T : EmbeddedEntity
     {
         public override string WebTypeName { get; set; }
         
@@ -257,6 +260,19 @@ namespace Signum.Web
             ShowSave = true;
             MappingDefault = new EntityMapping<T>(true);
             WebTypeName = typeof(T).Name;
+        }
+
+        public Dictionary<PropertyRoute, Implementations> OverrideImplementations { get; set; }
+
+        public Implementations FindImplementations(PropertyRoute route)
+        {
+            if (route.PropertyRouteType == PropertyRouteType.Root)
+                return null;
+
+            if (OverrideImplementations != null && OverrideImplementations.ContainsKey(route))
+                return OverrideImplementations[route];
+            
+            return Reflector.FindFieldInfo(route.PropertyInfo.DeclaringType, route.PropertyInfo, false).SingleAttribute<Implementations>();
         }
     }
 

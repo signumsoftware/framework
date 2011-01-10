@@ -13,15 +13,18 @@
     
     
         <span class="typeNiceName"><%= modelTC.UntypedValue.GetType().NiceName() %></span>
-        <span class="entityId">
-           <% int? idOrNull = ((IIdentifiable)modelTC.UntypedValue).IdOrNull;
-           if (idOrNull != null)
+        <% IIdentifiable identifiable = modelTC.UntypedValue as IIdentifiable;
+           if (identifiable != null)
            { %>
+        <span class="entityId">
+           <% if (identifiable.IdOrNull != null)
+              { %>
                 <span class="separator">[</span>
-                <span>ID: <%= idOrNull.Value%></span> 
+                <span>ID: <%= identifiable.IdOrNull.Value%></span> 
                 <span class="separator">]</span>
             <% } %>
-            </span>
+        </span>
+        <% } %>
         <span class="title"><%= ViewData[ViewDataKeys.PageTitle] ?? "" %></span>
      </h2>
      <ul class="button-bar">

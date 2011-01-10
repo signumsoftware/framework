@@ -24,7 +24,7 @@ using Signum.Engine.Engine;
 
 namespace Signum.Engine.Maps
 {
-    public class Schema
+    public class Schema : IImplementationsFinder
     {
         bool silentMode = false;
         public bool SilentMode
@@ -386,7 +386,7 @@ namespace Signum.Engine.Maps
 
         public Implementations FindImplementations(PropertyRoute route)
         {
-            Type type = route.IdentifiableType;
+            Type type = route.RootType;
 
             if (!Tables.ContainsKey(type))
                 return null;

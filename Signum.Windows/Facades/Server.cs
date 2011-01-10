@@ -193,7 +193,7 @@ namespace Signum.Windows
 
         public static Implementations FindImplementations(PropertyRoute propertyRoute)
         {
-            if (Server.ServerTypes.ContainsKey(propertyRoute.IdentifiableType))
+            if (Server.ServerTypes.ContainsKey(propertyRoute.RootType))
                 return implementations.GetOrCreate(propertyRoute, () => Server.Return((IBaseServer s) => s.FindImplementations(propertyRoute)));
 
             return null;

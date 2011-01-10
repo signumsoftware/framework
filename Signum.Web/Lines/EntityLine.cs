@@ -37,7 +37,7 @@ namespace Signum.Web
             Create = false;
             Remove = false;
             Autocomplete = false;
-            Implementations = null;
+            //Implementations = null;
         }
 
         public override string ToJS()

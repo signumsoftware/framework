@@ -17,11 +17,11 @@ namespace Signum.Entities
     {
         Type type;
         public PropertyRouteType PropertyRouteType { get; private set; } 
-        public PropertyInfo PropertyInfo{get; private set;}
-        public PropertyRoute Parent {get; private set;}
+        public PropertyInfo PropertyInfo { get; private set;}
+        public PropertyRoute Parent { get; private set;}
 
         public static PropertyRoute Construct<T>(Expression<Func<T, object>> expression)
-            where T : IdentifiableEntity
+            where T : IRootEntity
         {
             PropertyRoute result = Root(typeof(T));
 
@@ -119,7 +119,7 @@ namespace Signum.Entities
         }
 
         public Type Type { get { return type ?? PropertyInfo.PropertyType; } }
-        public Type IdentifiableType { get { return type ?? Parent.IdentifiableType; } }
+        public Type RootType { get { return type ?? Parent.RootType; } }
 
         public PropertyInfo[] Properties
         {
@@ -279,6 +279,11 @@ namespace Signum.Entities
 
             return Equals(other);
         }
+    }
+
+    public interface IImplementationsFinder
+    {
+        Implementations FindImplementations(PropertyRoute route);
     }
 
     public enum PropertyRouteType

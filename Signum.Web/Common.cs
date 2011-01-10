@@ -76,7 +76,10 @@ namespace Signum.Web
                 if (Reflector.IsMList(bl.Type))
                     route = route.Add("Item");
 
-                eb.Implementations = Schema.Current.FindImplementations(route);
+                IImplementationsFinder finder = typeof(ModelEntity).IsAssignableFrom(route.RootType) ? 
+                    (IImplementationsFinder)Navigator.EntitySettings(route.RootType) : Schema.Current; 
+
+                eb.Implementations = finder.FindImplementations(route);
 
                 if (eb.Implementations != null && eb.Implementations.IsByAll)
                 {
