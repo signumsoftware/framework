@@ -28,11 +28,8 @@ namespace Signum.Web.Extensions.Scheduler
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-
-
                 AssemblyResourceManager.RegisterAreaResources(
                     new AssemblyResourceStore(typeof(SchedulerClient), "~/scheduler/", "Signum.Web.Extensions.Scheduler."));
-
 
                 RouteTable.Routes.InsertRouteAt0("scheduler/{resourcesFolder}/{*resourceName}",
                   new { controller = "Resources", action = "Index", area = "scheduler" },
@@ -48,9 +45,7 @@ namespace Signum.Web.Extensions.Scheduler
                     new EmbeddedEntitySettings<HolidayDN>(){ PartialViewName = _ => ViewPrefix + "Holiday" },
                     new EntitySettings<CalendarDN>(EntityType.Default){ PartialViewName = _ => ViewPrefix + "Calendar" },
                     new EntitySettings<CustomTaskDN>(EntityType.Default){ PartialViewName = _ => ViewPrefix + "CustomTask" },
-                    new EntitySettings<ScheduleRuleDayDN>(EntityType.Default){ PartialViewName = _ => ViewPrefix + "Calendar" },
-
-                  
+                   // new EntitySettings<ScheduleRuleDayDN>(EntityType.Default){ PartialViewName = _ => ViewPrefix + "Calendar" },
                 });
             }
         }
