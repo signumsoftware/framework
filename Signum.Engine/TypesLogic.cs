@@ -149,6 +149,11 @@ namespace Signum.Engine
             return Schema.Current.TypeToName.GetOrThrow(type, "Type {0} not found in the schema");
         }
 
+        public static string TryGetCleanName(Type type)
+        {
+            return Schema.Current.TypeToName.TryGetC(type);
+        }
+
         public static string Key(this Lite lite)
         {
             if (lite == null)

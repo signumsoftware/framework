@@ -275,7 +275,7 @@ namespace Signum.Web
 	                            entityIdFieldName: ""{2}"",
 	                            extraParams: {{types: ""{3}""}}}});
                         }}"
-                    .Formato(ddlName, controllerUrl, entityIdFieldName, types.ToString(t => Navigator.ResolveWebTypeName(Reflector.ExtractLite(t) ?? t), ","))); 
+                    .Formato(ddlName, controllerUrl, entityIdFieldName, types.ToString(t => Navigator.ResolveWebTypeName(t), ","))); 
         }
 
         public static string PropertyNiceName<R>(this HtmlHelper html, Expression<Func<R>> property)

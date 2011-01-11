@@ -513,8 +513,7 @@ namespace Signum.Web
                         if (!QuerySettings.ContainsKey(o))
                             QuerySettings.Add(o, new QuerySettings(o) { Top = QueryMaxResults });
                         if (!QuerySettings[o].WebQueryName.HasText())
-                            QuerySettings[o].WebQueryName = o is Type ? ResolveWebTypeName((Type)o) :
-                                                            o.ToString();
+                            QuerySettings[o].WebQueryName = GenerateWebQueryName(o);
                     }
 
                     WebQueryNames = QuerySettings.ToDictionary(kvp => kvp.Value.WebQueryName, kvp => kvp.Key, StringComparer.InvariantCultureIgnoreCase, "WebQueryNames");
@@ -799,6 +798,21 @@ namespace Signum.Web
                 ViewData = controller.ViewData,
                 TempData = controller.TempData
             };
+        }
+
+        private string GenerateWebQueryName(object queryName)
+        {
+            if (queryName is Type)
+            {
+                Type type = (Type)queryName;
+                var es = EntitySettings.TryGetC(type);
+                if (es != null)
+                    return es.WebTypeName;
+
+                return TypeLogic.TryGetCleanName(type) ?? type.Name;
+            }
+            
+            return queryName.ToString();
         }
 
         protected internal virtual string ResolveWebQueryName(object queryName)
