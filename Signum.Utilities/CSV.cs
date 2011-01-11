@@ -92,7 +92,7 @@ namespace Signum.Utilities
             return p;
         }
 
-        private static string ConvertToString(object a, CultureInfo culture)
+        static string ConvertToString(object a, CultureInfo culture)
         {
             IFormattable f = a as IFormattable;
             if (f != null)
@@ -101,7 +101,7 @@ namespace Signum.Utilities
                 return a.ToString();
         }
 
-        private static string HandleSpaces(string p)
+        static string HandleSpaces(string p)
         {
             return p.Replace("__", "^").Replace("_", " ").Replace("^", "_");
         }
@@ -173,11 +173,11 @@ namespace Signum.Utilities
 
                     string[] parts = nums.BiSelect((a, b) => currentLine.Substring(a + 1, b - a - 1)).ToArray();
 
-                    if (parts.Length != members.Count)
-                        throw new FormatException(currentLine);
+                    if (parts.Length < members.Count)
+                        throw new FormatException("Not enought fields on line: " + currentLine);
 
                     T t = new T();
-                    for (int i = 0; i < parts.Length; i++)
+                    for (int i = 0; i < members.Count; i++)
                     {
                         object value = ConvertTo(DecodeCSV(parts[i]), members[i].MemberInfo.ReturningType(), culture);
 
