@@ -167,7 +167,7 @@ namespace Signum.Windows.Chart
         //    if(typeof(IComparable).IsAssignableFrom(type))
         //        return Nullify((IComparable c)=>c); 
 
-        //    if (typeof(Lite).IsAssignableFrom(type))
+        //    if (type.IsLite())
         //        return Nullify((Lite b) => b.ToStr);
 
         //    return Nullify((object o) => o.ToString());
