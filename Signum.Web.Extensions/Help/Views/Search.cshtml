@@ -1,0 +1,59 @@
+@using Signum.Entities.Reflection
+@using Signum.Engine.Help
+@using Signum.Engine.WikiMarkup
+@using Signum.Web.Help
+@using Signum.Web.Extensions
+@section head
+{
+    @Html.ScriptCss("~/help/Content/help.css")
+}
+<script type="text/javascript">
+    function ShowMore(elem) {
+        $(elem).siblings("ul").children(".show-on-more").show();
+        $(elem).hide();
+    }
+</script>
+<div class="grid_16" id="entityContent">
+    <h1>
+        Buscador</h1>
+    @{ List<List<SearchResult>> results = (List<List<SearchResult>>)Model;
+       string q = Request.Params["q"];
+       int maxResults = 3;
+       int count = results.Count;
+    }
+    <p id="title">@count @(count == 1 ? "resultado" : "resultados")
+        para <b>@q</b> (en @ViewData["time"] ms)</p>
+    <hr />
+    <ul>
+        @foreach (var v in results)
+        {
+            int currentResults = 0;
+            <li class="result"><span class="entityName">@((v[0].Type != null ? v[0].Type.NiceName() : v[0].ObjectName).AddHtml("<b>", "</b>", q))</span>
+                <ul>
+                    @foreach (var sr in v)
+                    {
+                        currentResults++;               
+
+                        <li class="content @(currentResults > maxResults ? "show-on-more" : "")"><span class="typeSearchResult @sr.TypeSearchResult.ToString()">@sr.TypeSearchResult.ToString()</span>
+                            <a href="@sr.Link">
+                                @{ string content = sr.Content.WikiParse(HelpClient.NoLinkWikiSettings).AddHtml("<b>", "</b>", q);
+                                   string[] fragments = content.Split(new[] { " | " }, StringSplitOptions.RemoveEmptyEntries);}
+                                @if (fragments.Length == 1)
+                                {
+                                    @fragments[0]
+                                }
+                                else
+                                {
+                                    <span class="area">@fragments[0]</span> @fragments.Skip(1).ToString(" | ")
+                                } </a></li>
+                    }
+                </ul>
+                @if (currentResults > maxResults)
+                {
+                    <a class="more-link" onclick="javascript:ShowMore(this);">Mostrar @(v.Count - maxResults)
+                        @((v.Count - maxResults) != 1 ? "resultados restantes" : "resultado restante")</a>
+                }
+            </li>
+        }
+    </ul>
+</div>

@@ -1,0 +1,11 @@
+﻿@using Signum.Test
+
+@using (var e = Html.TypeContext<ArtistDN>()) 
+{
+	@Html.ValueLine(e, f => f.Name);
+	@Html.ValueLine(e, f => f.Dead);
+	@Html.ValueLine(e, f => f.Sex);
+	@Html.ValueLine(e, f => f.IsMale);
+	@Html.EntityLine(e, f => f.LastAward);
+	@Html.EntityList(e, f => f.Friends);
+}

@@ -23,7 +23,7 @@ using System.Web;
 using Signum.Utilities.Reflection;
 #endregion
 
-namespace Signum.Web.Authorization
+namespace Signum.Web.Auth
 {
     public static class AuthClient
     {
@@ -32,22 +32,20 @@ namespace Signum.Web.Authorization
             return RouteHelper.New().Action("Login", "Auth", new { referrer = returnUrl }); 
         }
 
-        public static string ViewPrefix = "auth/Views/";
-         
         public static string CookieName = "sfUser";
         
-        public static string LoginUrl = ViewPrefix + "Login";
-        public static string LoginUserControlUrl = ViewPrefix + "LoginUserControl";
-        public static string ChangePasswordUrl = ViewPrefix + "ChangePassword";
-        public static string ChangePasswordSuccessUrl = ViewPrefix + "ChangePasswordSuccess";
+        public static string LoginUrl = RouteHelper.AreaView("Login", "auth");
+        public static string LoginUserControlUrl = RouteHelper.AreaView("LoginUserControl", "Auth");
+        public static string ChangePasswordUrl = RouteHelper.AreaView( "ChangePassword", "auth");
+        public static string ChangePasswordSuccessUrl = RouteHelper.AreaView("ChangePasswordSuccess", "auth");
 
-        public static string ResetPasswordUrl = ViewPrefix + "ResetPassword";
-        public static string ResetPasswordSendUrl = ViewPrefix + "ResetPasswordSend";
-        public static string ResetPasswordSuccessUrl = ViewPrefix + "ResetPasswordSuccess";
-        public static string ResetPasswordSetNewUrl = ViewPrefix + "ResetPasswordSetNew";
+        public static string ResetPasswordUrl = RouteHelper.AreaView("ResetPassword", "auth");
+        public static string ResetPasswordSendUrl = RouteHelper.AreaView( "ResetPasswordSend", "auth");
+        public static string ResetPasswordSuccessUrl = RouteHelper.AreaView( "ResetPasswordSuccess", "auth");
+        public static string ResetPasswordSetNewUrl = RouteHelper.AreaView( "ResetPasswordSetNew", "auth");
 
-        public static string RememberPasswordUrl = ViewPrefix + "RememberPassword";
-        public static string RememberPasswordSuccessUrl = ViewPrefix + "RememberPasswordSuccess";
+        public static string RememberPasswordUrl = RouteHelper.AreaView( "RememberPassword", "auth");
+        public static string RememberPasswordSuccessUrl = RouteHelper.AreaView("RememberPasswordSuccess", "auth");
 
         public static bool ResetPasswordStarted;
 
@@ -57,8 +55,7 @@ namespace Signum.Web.Authorization
             {
                 ResetPasswordStarted = resetPassword;
 
-                AssemblyResourceManager.RegisterAreaResources(
-                    new AssemblyResourceStore(typeof(AuthClient), "~/auth/", "Signum.Web.Extensions.Auth."));
+                Navigator.RegisterArea(typeof(AuthClient)); 
 
                 if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(UserDN)))
                     Navigator.AddSetting(new EntitySettings<UserDN>(EntityType.Default));

@@ -70,7 +70,7 @@ namespace Signum.Web.ViewsChecker
             //Clear content written by the renderization of views, just want error content
             Response.Clear();
 
-            return View(ViewsCheckerClient.ViewPrefix + "ViewsChecker", errors);
+            return View("ViewsChecker", errors);
         }
 
         private string FindRegion(string result, string key)

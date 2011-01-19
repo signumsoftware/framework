@@ -52,7 +52,7 @@ namespace Signum.Web.ScriptCombiner
         class ScriptElement
         {
             public ScriptRequest Request;
-            public ScriptContentResult Content;
+            public StaticContentResult Content;
             public string Key;
         }
 
@@ -83,7 +83,7 @@ namespace Signum.Web.ScriptCombiner
             ).Key;
         }
 
-        public static ScriptContentResult GetContent(string key)
+        public static StaticContentResult GetContent(string key)
         {
             ScriptElement elem;
             if (!ElementsByKey.TryGetValue(key, out elem))
@@ -97,7 +97,7 @@ namespace Signum.Web.ScriptCombiner
             return elem.Content;
         }
 
-        private static ScriptContentResult Generate(ScriptRequest scriptRequest)
+        private static StaticContentResult Generate(ScriptRequest scriptRequest)
         {
             switch (scriptRequest.ScriptType)
             {
@@ -120,10 +120,10 @@ namespace Signum.Web.ScriptCombiner
         {
             ScriptHtmlHelper.Manager = new CombinerScriptHtmlManager();
 
-            RouteTable.Routes.InsertRouteAt0("combine/css/{key}",
+            RouteTable.Routes.MapRoute(null, "combine/css/{key}",
                new { controller = "Combine", action = "CSS", key = "" });
 
-            RouteTable.Routes.InsertRouteAt0("combine/js/{key}",
+            RouteTable.Routes.MapRoute(null, "combine/js/{key}",
                new { controller = "Combine", action = "JS", key = "" });
         }
     }

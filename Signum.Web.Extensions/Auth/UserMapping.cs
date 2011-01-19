@@ -15,7 +15,7 @@ using Signum.Web.Extensions.Properties;
 using Signum.Services;
 #endregion
 
-namespace Signum.Web.Authorization
+namespace Signum.Web.Auth
 {
     public static class UserMapping
     {

@@ -1,0 +1,42 @@
+@using Signum.Web.Extensions
+@using Signum.Web.Extensions.Properties
+@using Signum.Web.Help
+@using Signum.Engine.Help
+@{  
+    ViewBag.Title = Resources.HelpDocumentation;
+}
+
+@section head
+{
+    @Html.ScriptCss("~/help/Content/help.css")
+}
+<div class="grid_16" id="entityContent">
+    <h1>@Resources.HelpDocumentation</h1>
+    <table>
+        <tr>
+            @foreach (NamespaceModel item in ((NamespaceModel)Model).Namespaces)
+            {
+                <td>
+                    @{ Html.RenderPartial(HelpClient.NamespaceControlUrl, item); }
+                </td>
+            }
+        </tr>
+    </table>
+    @if (ViewData.TryGetC("appendices") != null)
+    {
+        List<AppendixHelp> appendices = (List<AppendixHelp>)ViewData["appendices"];
+        if (appendices.Count > 0)
+        {
+        <h2>@Resources.Appendices</h2>
+        <ul>
+            @foreach (var a in appendices)
+            {
+                <li>
+                    @Html.ActionLink(a.Title, "ViewAppendix", new { appendix = a.Name })
+                </li>
+            }
+        </ul>
+        }
+    }
+</div>
+</asp:Content>

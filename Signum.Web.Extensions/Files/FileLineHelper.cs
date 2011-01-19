@@ -102,7 +102,7 @@ namespace Signum.Web.Files
             helper.FileLine<T, S>(tc, property, null);
         }
 
-        public static void FileLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property, Action<FileLine> settingsModifier)
+        public static MvcHtmlString FileLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property, Action<FileLine> settingsModifier)
             where S : IFile
         {
             TypeContext<S> context = Common.WalkExpression(tc, property);
@@ -114,7 +114,7 @@ namespace Signum.Web.Files
             if (settingsModifier != null)
                 settingsModifier(fl);
 
-            helper.Write(helper.InternalFileLine(fl));
+            return helper.InternalFileLine(fl);
         }
 
         private static Enum GetFileTypeFromValue(FilePathDN fp)

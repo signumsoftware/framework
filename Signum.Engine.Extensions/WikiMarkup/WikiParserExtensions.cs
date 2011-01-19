@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 using Signum.Utilities;
 using System.Web;
 
-namespace Signum.Engine
+namespace Signum.Engine.WikiMarkup
 {
     public class WikiSettings
     {

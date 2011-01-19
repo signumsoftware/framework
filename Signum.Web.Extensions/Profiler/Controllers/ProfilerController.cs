@@ -28,9 +28,9 @@ namespace Signum.Web.Profiler
         {
             ProfilerPermissions.ViewHeavyProfiler.Authorize();
 
-            ViewData[ViewDataKeys.PageTitle] = "Root entries";
+            ViewData[ViewDataKeys.Title] = "Root entries";
 
-            return View(ProfileClient.ViewPath + "HeavyList", Signum.Utilities.HeavyProfiler.Entries); 
+            return View("HeavyList", Signum.Utilities.HeavyProfiler.Entries); 
         }
 
         [AcceptVerbs(HttpVerbs.Get)]
@@ -40,9 +40,9 @@ namespace Signum.Web.Profiler
 
             var list = Signum.Utilities.HeavyProfiler.AllEntries().Where(a => a.Role == "SQL").OrderByDescending(a => a.Elapsed).Take(top ?? 50).ToList();
 
-            ViewData[ViewDataKeys.PageTitle] = "Slowest SQL entries"; 
+            ViewData[ViewDataKeys.Title] = "Slowest SQL entries"; 
 
-            return View(ProfileClient.ViewPath + "HeavyList", list);
+            return View("HeavyList", list);
         }
 
         [AcceptVerbs(HttpVerbs.Get)]
@@ -52,10 +52,9 @@ namespace Signum.Web.Profiler
 
             var entry = HeavyProfiler.Find(indices);
 
-            ViewData[ViewDataKeys.PageTitle] = "Entry " + entry.FullIndex(); 
+            ViewData[ViewDataKeys.Title] = "Entry " + entry.FullIndex(); 
 
-
-            return View(ProfileClient.ViewPath + "HeavyDetails", entry);
+            return View("HeavyDetails", entry);
         }
 
         [AcceptVerbs(HttpVerbs.Get)]
@@ -92,8 +91,7 @@ namespace Signum.Web.Profiler
         {
             ProfilerPermissions.ViewTimeTracker.Authorize();
 
-            ViewData[ViewDataKeys.PageTitle] = "Times";
-            return View(ProfileClient.ViewPath + "Times");
+            return View("Times");
         }
 
         [AcceptVerbs(HttpVerbs.Get)]
@@ -110,8 +108,7 @@ namespace Signum.Web.Profiler
         {
             ProfilerPermissions.ViewTimeTracker.Authorize();
 
-            ViewData[ViewDataKeys.PageTitle] = "Table Times";
-            return View(ProfileClient.ViewPath + "TimeTable");
+            return View("TimeTable");
         }
 
         [AcceptVerbs(HttpVerbs.Get)]

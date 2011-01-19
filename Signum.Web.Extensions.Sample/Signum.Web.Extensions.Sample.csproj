@@ -3,25 +3,21 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
+    <ProductVersion>
+    </ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{4E8F08F7-6EA9-4D06-A2F5-CFAD4C1364E8}</ProjectGuid>
-    <ProjectTypeGuids>{F85E285D-A4E0-4152-9332-AB1D724D3325};{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
+    <ProjectTypeGuids>{E53F8FEA-EAE0-44A6-8774-FFD645390401};{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Signum.Web.Extensions.Sample</RootNamespace>
     <AssemblyName>Signum.Web.Extensions.Sample</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <MvcBuildViews>false</MvcBuildViews>
+    <MvcBuildViews>true</MvcBuildViews>
     <SccProjectName>SAK</SccProjectName>
     <SccLocalPath>SAK</SccLocalPath>
     <SccAuxPath>SAK</SccAuxPath>
     <SccProvider>SAK</SccProvider>
-    <FileUpgradeFlags>
-    </FileUpgradeFlags>
-    <OldToolsVersion>4.0</OldToolsVersion>
-    <UpgradeBackupLocation />
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -32,7 +28,6 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <UseVSHostingProcess>true</UseVSHostingProcess>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -41,46 +36,42 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="RouteDebug">
+      <HintPath>.\RouteDebug.dll</HintPath>
+    </Reference>
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Web.Mvc, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\Microsoft ASP.NET\ASP.NET MVC 3\Assemblies\System.Web.Mvc.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages" />
+    <Reference Include="System.Web.Helpers" />
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Runtime.Serialization">
-      <RequiredTargetFramework>3.0</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="System.ServiceModel">
-      <RequiredTargetFramework>3.0</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="System.Web.ApplicationServices" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Web.DynamicData" />
     <Reference Include="System.Web.Entity" />
-    <Reference Include="System.Web.Extensions" />
-    <Reference Include="System.Drawing" />
+    <Reference Include="System.Web.ApplicationServices" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Web" />
+    <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Web.Abstractions" />
-    <Reference Include="System.Web.Mvc, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System.Web.Routing" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Web.Services" />
     <Reference Include="System.EnterpriseServices" />
-    <Reference Include="System.Web.Mobile" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="WindowsBase">
-      <RequiredTargetFramework>3.0</RequiredTargetFramework>
-      <Private>True</Private>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Code\MusicClient.cs" />
     <Compile Include="Controllers\MusicController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
-    <Compile Include="Default.aspx.cs">
-      <DependentUpon>Default.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -97,22 +88,45 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\fluid\fluid.min.css" />
-    <Content Include="Default.aspx" />
     <Content Include="Global.asax" />
-    <Content Include="Views\Home\Index.aspx" />
-    <Content Include="Views\Music\Album.ascx" />
-    <Content Include="Views\Music\AmericanMusicAward.ascx" />
-    <Content Include="Views\Music\Artist.ascx" />
-    <Content Include="Views\Music\Band.ascx" />
-    <Content Include="Views\Music\GrammyAward.ascx" />
-    <Content Include="Views\Music\Label.ascx" />
-    <Content Include="Views\Music\PersonalAward.ascx" />
-    <Content Include="Views\Music\Song.ascx" />
-    <Content Include="Views\Shared\Error.aspx" />
-    <Content Include="Views\Shared\LogOnUserControl.ascx" />
-    <Content Include="Views\Shared\Menu.ascx" />
-    <Content Include="Views\Shared\WidgetView.ascx" />
+    <Content Include="Scripts\jquery-1.4.4-vsdoc.js" />
+    <Content Include="Scripts\jquery-1.4.4.js" />
+    <Content Include="Scripts\jquery-1.4.4.min.js" />
+    <Content Include="Scripts\jquery-ui.js" />
+    <Content Include="Scripts\jquery-ui.min.js" />
+    <Content Include="Scripts\jquery.unobtrusive-ajax.js" />
+    <Content Include="Scripts\jquery.unobtrusive-ajax.min.js" />
+    <Content Include="Scripts\jquery.validate-vsdoc.js" />
+    <Content Include="Scripts\jquery.validate.js" />
+    <Content Include="Scripts\jquery.validate.min.js" />
+    <Content Include="Scripts\jquery.validate.unobtrusive.js" />
+    <Content Include="Scripts\jquery.validate.unobtrusive.min.js" />
+    <Content Include="Scripts\MicrosoftAjax.debug.js" />
+    <Content Include="Scripts\MicrosoftAjax.js" />
+    <Content Include="Scripts\MicrosoftMvcAjax.debug.js" />
+    <Content Include="Scripts\MicrosoftMvcAjax.js" />
+    <Content Include="Scripts\MicrosoftMvcValidation.debug.js" />
+    <Content Include="Scripts\MicrosoftMvcValidation.js" />
+    <Content Include="Views\Home\Index.cshtml" />
+    <Content Include="Views\Music\Album.cshtml" />
+    <Content Include="Views\Music\AmericanMusicAward.cshtml" />
+    <Content Include="Views\Music\Artist.cshtml" />
+    <Content Include="Views\Music\Band.cshtml" />
+    <Content Include="Views\Music\GrammyAward.cshtml" />
+    <Content Include="Views\Music\Label.cshtml" />
+    <Content Include="Views\Music\PersonalAward.cshtml" />
+    <Content Include="Views\Music\Song.cshtml" />
+    <Content Include="Views\Shared\Error.cshtml" />
+    <Content Include="Views\Shared\LogOnUserControl.cshtml" />
+    <Content Include="Views\Shared\Menu.cshtml" />
+    <Content Include="Views\Shared\WidgetView.cshtml" />
+    <Content Include="Views\Music\AlbumFromBandModel.cshtml" />
+    <Content Include="Views\Music\BandDetail.cshtml" />
+    <Content Include="Views\Music\BandRepeater.cshtml" />
+    <Content Include="Views\Shared\_Layout.cshtml" />
+    <Content Include="Views\Web.config" />
     <Content Include="Web.config" />
+    <Content Include="Views\_ViewStart.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Properties\Settings.settings">
@@ -148,25 +162,9 @@
     <Content Include="Images\switch_minus.gif" />
     <Content Include="Images\switch_plus.gif" />
     <Content Include="Images\tab.png" />
-    <Content Include="Scripts\jquery-1.4.2.min.js" />
-    <Content Include="Scripts\jqueryui\jquery-ui-1.7.2.custom.min.js" />
-    <Content Include="Scripts\jqueryui\jquery-ui-1.8.1.custom.min.js" />
-    <Content Include="Scripts\jqueryui\jquery-ui-timepicker-addon-0.4.css" />
-    <Content Include="Scripts\jqueryui\ui.all.css" />
-    <Content Include="Scripts\jqueryui\ui.base.css" />
-    <Content Include="Scripts\jqueryui\ui.core.css" />
-    <Content Include="Scripts\jqueryui\ui.core.js" />
-    <Content Include="Scripts\jqueryui\ui.datepicker.css" />
-    <Content Include="Scripts\jqueryui\ui.merged.css" />
-    <Content Include="Scripts\jqueryui\ui.theme.css" />
     <Content Include="Scripts\menu.js" />
     <Content Include="Scripts\widget.js" />
     <Content Include="ServerSample.svc" />
-    <Content Include="Views\Music\AlbumFromBandModel.ascx" />
-    <Content Include="Views\Music\BandDetail.ascx" />
-    <Content Include="Views\Music\BandRepeater.ascx" />
-    <Content Include="Views\Shared\Site.Master" />
-    <Content Include="Views\Web.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Framework\Signum.Engine\Signum.Engine.csproj">
@@ -215,8 +213,8 @@
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target> -->
-  <Target Name="AfterBuild" Condition="'$(MvcBuildViews)'=='true'">
-    <AspNetCompiler VirtualPath="temp" PhysicalPath="$(ProjectDir)\..\$(ProjectName)" />
+  <Target Name="MvcBuildViews" AfterTargets="AfterBuild" Condition="'$(MvcBuildViews)'=='true'">
+    <AspNetCompiler VirtualPath="temp" PhysicalPath="$(WebProjectOutputDir)" />
   </Target>
   <ProjectExtensions>
     <VisualStudio>

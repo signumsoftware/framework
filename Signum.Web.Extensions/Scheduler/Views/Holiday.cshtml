@@ -1,0 +1,8 @@
+@using Signum.Engine
+@using Signum.Entities.Scheduler
+
+@using (var e = Html.TypeContext<HolidayDN>()) 
+{
+    @Html.ValueLine(e, f => f.Date);
+    @Html.ValueLine(e, f => f.Name);        
+}

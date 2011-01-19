@@ -22,20 +22,13 @@ using System.Web.Mvc.Html;
 
 namespace Signum.Web.Profiler
 {
-    public static class ProfileClient
+    public static class ProfilerClient
     {
-        public static string ViewPath = "profiler/Views/";
-
         public static void Start()
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                AssemblyResourceManager.RegisterAreaResources(
-                    new AssemblyResourceStore(typeof(ProfileClient), "~/profiler/", "Signum.Web.Extensions.Profiler."));
-
-                RouteTable.Routes.InsertRouteAt0("profiler/{resourcesFolder}/{*resourceName}",
-                    new { controller = "Resources", action = "Index", area = "profiler" },
-                    new { resourcesFolder = new InArray(new string[] { "Scripts", "Content", "Images" }) });
+                Navigator.RegisterArea(typeof(ProfilerClient));
             }
         }
 

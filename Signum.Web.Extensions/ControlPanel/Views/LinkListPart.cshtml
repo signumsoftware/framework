@@ -1,0 +1,11 @@
+@using Signum.Entities.ControlPanel
+@using Signum.Web.ControlPanel
+@using Signum.Entities.Reports
+
+@using (var tc = Html.TypeContext<LinkListPartDN>())
+{
+    tc.BreakLine = true;
+    tc.ValueFirst = false;
+
+    @Html.EntityRepeater(tc, p => p.Links);
+}

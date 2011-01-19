@@ -15,7 +15,7 @@ using System.Text;
 using Signum.Entities;
 using Signum.Web.Controllers;
 
-namespace Signum.Web.Authorization
+namespace Signum.Web.AuthAdmin
 {
     [HandleException, AuthenticationRequired]
     public class AuthAdminController : Controller

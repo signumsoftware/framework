@@ -13,24 +13,25 @@ namespace Signum.Web.Extensions.Sample
 {
     public static class MusicClient
     {
-        public static string ViewPrefix = "Views/Music/";
 
         public static void Start()
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
+                Func<string, string> absolute = viewName => "~/Views/Music/{0}.cshtml".Formato(viewName);
+
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<AlbumDN>(EntityType.NotSaving) { PartialViewName = e => ViewPrefix + "Album" },
-                    new EntitySettings<AmericanMusicAwardDN>(EntityType.Default) { PartialViewName = e => ViewPrefix + "AmericanMusicAward" },
-                    new EntitySettings<ArtistDN>(EntityType.Default) { PartialViewName = e => ViewPrefix + "Artist" },
-                    new EntitySettings<BandDN>(EntityType.Default) { PartialViewName = e => ViewPrefix + "Band" },
-                    new EntitySettings<GrammyAwardDN>(EntityType.Default) { PartialViewName = e => ViewPrefix + "GrammyAward" },
-                    new EntitySettings<LabelDN>(EntityType.Default) { PartialViewName = e => ViewPrefix + "Label" },
-                    new EntitySettings<PersonalAwardDN>(EntityType.Default) { PartialViewName = e => ViewPrefix + "PersonalAward" },
-                    new EmbeddedEntitySettings<SongDN>() { PartialViewName = e => ViewPrefix + "Song" },
+                    new EntitySettings<AlbumDN>(EntityType.NotSaving) { PartialViewName = e => absolute("Album") },
+                    new EntitySettings<AmericanMusicAwardDN>(EntityType.Default) { PartialViewName = e => absolute("AmericanMusicAward") },
+                    new EntitySettings<ArtistDN>(EntityType.Default) { PartialViewName = e => absolute("Artist") },
+                    new EntitySettings<BandDN>(EntityType.Default) { PartialViewName = e => absolute("Band") },
+                    new EntitySettings<GrammyAwardDN>(EntityType.Default) { PartialViewName = e => absolute("GrammyAward") },
+                    new EntitySettings<LabelDN>(EntityType.Default) { PartialViewName = e => absolute("Label") },
+                    new EntitySettings<PersonalAwardDN>(EntityType.Default) { PartialViewName = e => absolute("PersonalAward") },
+                    new EmbeddedEntitySettings<SongDN>() { PartialViewName = e => absolute("Song")},
 
-                    new EmbeddedEntitySettings<AlbumFromBandModel>(){PartialViewName = e => ViewPrefix + "AlbumFromBandModel"},
+                    new EmbeddedEntitySettings<AlbumFromBandModel>(){PartialViewName = e => absolute("AlbumFromBandModel")},
                 });
 
                 OperationClient.Manager.Settings.AddRange(new Dictionary<Enum, OperationSettings>

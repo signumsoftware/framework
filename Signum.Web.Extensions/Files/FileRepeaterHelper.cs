@@ -75,13 +75,13 @@ namespace Signum.Web.Files
             return sb.ToHtml();
         }
 
-        public static void FileRepeater<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, MList<S>>> property)
+        public static MvcHtmlString FileRepeater<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, MList<S>>> property)
             where S : FilePathDN
         {
-            helper.FileRepeater(tc, property, null);
+            return helper.FileRepeater(tc, property, null);
         }
 
-        public static void FileRepeater<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, MList<S>>> property, Action<FileRepeater> settingsModifier)
+        public static MvcHtmlString FileRepeater<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, MList<S>>> property, Action<FileRepeater> settingsModifier)
             where S : FilePathDN
         {
             TypeContext<MList<S>> context = Common.WalkExpression(tc, property);
@@ -94,7 +94,7 @@ namespace Signum.Web.Files
             if (settingsModifier != null)
                 settingsModifier(fl);
 
-            helper.Write(helper.InternalFileRepeater(fl));
+            return helper.InternalFileRepeater(fl);
         }
     }
 }

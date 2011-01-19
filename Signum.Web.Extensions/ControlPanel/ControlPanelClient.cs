@@ -15,32 +15,26 @@ namespace Signum.Web.ControlPanel
 {
     public class ControlPanelClient
     {
-        public static string ViewPrefix = "controlPanel/Views/";
-
         public static void Start()
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 UserQueriesClient.Start();
 
-                AssemblyResourceManager.RegisterAreaResources(
-                    new AssemblyResourceStore(typeof(ControlPanelClient), "~/controlPanel/", "Signum.Web.Extensions.ControlPanel."));
+                Navigator.RegisterArea(typeof(ControlPanelClient)); 
 
-                RouteTable.Routes.InsertRouteAt0("controlPanel/{resourcesFolder}/{*resourceName}",
-                    new { controller = "Resources", action = "Index", area = "controlPanel" },
-                    new { resourcesFolder = new InArray(new string[] { "Scripts", "Content", "Images" }) });
-
-                Navigator.AddSettings(new List<EntitySettings>{
-                    new EntitySettings<ControlPanelDN>(EntityType.Default) { PartialViewName = e => ViewPrefix + "ControlPanelAdmin" },
-                    new EmbeddedEntitySettings<PanelPart>() { PartialViewName = e => ViewPrefix + "PanelPart" },
+                Navigator.AddSettings(new List<EntitySettings>
+                {
+                    new EntitySettings<ControlPanelDN>(EntityType.Default) { PartialViewName = e => RouteHelper.AreaView("ControlPanelAdmin", "ControlPanel") },
+                    new EmbeddedEntitySettings<PanelPart>() { PartialViewName = e => RouteHelper.AreaView("PanelPart", "ControlPanel") },
                     
-                    //new EntitySettings<SearchControlPartDN>(EntityType.NotSaving) { PartialViewName = e => ViewPrefix + "SearchControlPart" },
+                    //new EntitySettings<SearchControlPartDN>(EntityType.NotSaving) { PartialViewName = e => RouteHelper.AreaView("SearchControlPart" },
                     
-                    new EntitySettings<CountSearchControlPartDN>(EntityType.Default) { PartialViewName = e => ViewPrefix + "CountSearchControlPart" },
-                    new EmbeddedEntitySettings<CountUserQueryElement>() { PartialViewName = e => ViewPrefix + "CountUserQueryElement" },
+                    new EntitySettings<CountSearchControlPartDN>(EntityType.Default) { PartialViewName = e => RouteHelper.AreaView("CountSearchControlPart", "ControlPanel") },
+                    new EmbeddedEntitySettings<CountUserQueryElement>() { PartialViewName = e => RouteHelper.AreaView("CountUserQueryElement", "ControlPanel") },
                     
-                    new EntitySettings<LinkListPartDN>(EntityType.Default) { PartialViewName = e => ViewPrefix + "LinkListPart" },
-                    new EmbeddedEntitySettings<LinkElement>() { PartialViewName = e => ViewPrefix + "LinkElement" },
+                    new EntitySettings<LinkListPartDN>(EntityType.Default) { PartialViewName = e => RouteHelper.AreaView("LinkListPart", "ControlPanel") },
+                    new EmbeddedEntitySettings<LinkElement>() { PartialViewName = e => RouteHelper.AreaView("LinkElement", "ControlPanel") },
                 });
 
                 Constructor.ConstructorManager.Constructors.Add(

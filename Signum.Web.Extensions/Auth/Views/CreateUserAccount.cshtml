@@ -1,0 +1,7 @@
+<p>
+    @Resources.WeReceivedARequestToCreateAnAccountYouCanCreateItFollowingTheLinkBelow
+</p>
+@if (ViewData.ContainsKey("Link"))
+{
+    @Html.Href(ViewData["link"].ToString(), ViewData["link"].ToString())
+} 

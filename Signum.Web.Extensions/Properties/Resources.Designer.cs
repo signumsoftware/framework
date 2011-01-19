@@ -61,6 +61,15 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Appendices.
+        /// </summary>
+        public static string Appendices {
+            get {
+                return ResourceManager.GetString("Appendices", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Are you sure of deleting query {0}?.
         /// </summary>
         public static string AreYouSureOfDeletingQuery0 {
@@ -84,6 +93,15 @@ namespace Signum.Web.Extensions.Properties {
         public static string AreYouSureOfDeletingTheEntity012 {
             get {
                 return ResourceManager.GetString("AreYouSureOfDeletingTheEntity012", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Buscador.
+        /// </summary>
+        public static string Buscador {
+            get {
+                return ResourceManager.GetString("Buscador", resourceCulture);
             }
         }
         

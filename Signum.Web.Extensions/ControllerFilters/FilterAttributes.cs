@@ -15,7 +15,7 @@ using Signum.Utilities;
 using System.Web.Routing;
 using Signum.Web;
 using Signum.Entities.Authorization;
-using Signum.Web.Authorization;
+using Signum.Web.Auth;
 using Signum.Engine.Authorization;
 using System.Threading;
 using System.IO.Compression;

@@ -6,7 +6,7 @@
     <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{86EE7792-96CF-4420-997B-8C811E2B166D}</ProjectGuid>
-    <ProjectTypeGuids>{F85E285D-A4E0-4152-9332-AB1D724D3325};{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
+    <ProjectTypeGuids>{E53F8FEA-EAE0-44A6-8774-FFD645390401};{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Signum.Web.Extensions</RootNamespace>
@@ -43,42 +43,193 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Configuration" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Web" />
-    <Reference Include="System.Web.Abstractions">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    <Reference Include="System.Activities" />
+    <Reference Include="System.IdentityModel" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.ServiceModel.Activation" />
+    <Reference Include="System.ServiceModel.Activities" />
+    <Reference Include="System.ServiceModel.Web" />
+    <Reference Include="System.Web.Mvc, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\Microsoft ASP.NET\ASP.NET MVC 3\Assemblies\System.Web.Mvc.dll</HintPath>
     </Reference>
-    <Reference Include="System.Web.ApplicationServices" />
+    <Reference Include="System.Web.WebPages" />
+    <Reference Include="System.Web.Helpers" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Web.DynamicData" />
     <Reference Include="System.Web.Entity" />
-    <Reference Include="System.Web.Extensions" />
-    <Reference Include="System.Web.Mvc, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
-    <Reference Include="System.Web.Routing">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
+    <Reference Include="System.Web.ApplicationServices" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Web.WebPages.Deployment, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" />
+    <Reference Include="System.WorkflowServices" />
     <Reference Include="System.Xml.Linq" />
-    <Reference Include="WindowsBase">
-      <RequiredTargetFramework>3.0</RequiredTargetFramework>
-      <Private>True</Private>
-    </Reference>
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Web.Abstractions" />
+    <Reference Include="System.Web.Routing" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Web.Services" />
+    <Reference Include="System.EnterpriseServices" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AuthAdmin\AuthAdminClient.cs" />
     <Compile Include="AuthAdmin\Controllers\AuthAdminController.cs" />
+    <Compile Include="AuthAdmin\Views\EntityGroups.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>EntityGroups.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="AuthAdmin\Views\FacadeMethods.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>FacadeMethods.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="AuthAdmin\Views\Operations.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Operations.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="AuthAdmin\Views\Permissions.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Permissions.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="AuthAdmin\Views\Properties.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Properties.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="AuthAdmin\Views\Queries.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Queries.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="AuthAdmin\Views\Role.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Role.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="AuthAdmin\Views\Types.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Types.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="AuthAdmin\Views\User.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>User.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="AuthAdmin\Views\_ViewStart.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>_ViewStart.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Auth\AuthClient.cs" />
     <Compile Include="Auth\UserMapping.cs" />
     <Compile Include="Auth\Controllers\AuthController.cs" />
+    <Compile Include="Auth\Views\ChangePassword.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ChangePassword.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Auth\Views\ChangePasswordSuccess.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ChangePasswordSuccess.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Auth\Views\CreateUserAccount.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>CreateUserAccount.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Auth\Views\Login.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Login.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Auth\Views\LoginUserControl.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>LoginUserControl.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Auth\Views\Register.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Register.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Auth\Views\RememberPassword.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>RememberPassword.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Auth\Views\RememberPasswordSuccess.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>RememberPasswordSuccess.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Auth\Views\ResetPassword.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ResetPassword.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Auth\Views\ResetPasswordSend.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ResetPasswordSend.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Auth\Views\ResetPasswordSetNew.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ResetPasswordSetNew.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Auth\Views\ResetPasswordSuccess.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ResetPasswordSuccess.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Auth\Views\_ViewStart.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>_ViewStart.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Basic\BasicClient.cs" />
+    <Compile Include="Basic\Views\DateSpan.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>DateSpan.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Basic\Views\_ViewStart.cs">
+      <DependentUpon>_ViewStart.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="Captcha\CaptchaClient.cs" />
     <Compile Include="Captcha\Controllers\CaptchaController.cs" />
     <Compile Include="Captcha\CaptchaHtmlHelper.cs" />
     <Compile Include="Captcha\CaptchaImage.cs" />
     <Compile Include="Captcha\CaptchaValidationAttribute.cs" />
+    <Compile Include="Captcha\Views\captcha.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>captcha.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Captcha\Views\captchaImage.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>captchaImage.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Captcha\Views\_ViewStart.cs">
+      <DependentUpon>_ViewStart.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="ControllerFilters\ActionFilter\ActionFilerConfigControllerActionInvoker.cs" />
     <Compile Include="ControllerFilters\ActionFilter\ActionFilterConfig.cs" />
     <Compile Include="ControllerFilters\ActionFilter\ActionFilterConfigControllerFactory.cs" />
@@ -87,6 +238,46 @@
     <Compile Include="ControlPanel\Controllers\ControlPanelController.cs" />
     <Compile Include="ControlPanel\ControlPanelClient.cs" />
     <Compile Include="ControlPanel\PanelPartRenderer.cs" />
+    <Compile Include="ControlPanel\Views\ControlPanel.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ControlPanel.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanel\Views\ControlPanelAdmin.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ControlPanelAdmin.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanel\Views\CountSearchControlPart.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>CountSearchControlPart.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanel\Views\CountUserQueryElement.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>CountUserQueryElement.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanel\Views\LinkElement.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>LinkElement.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanel\Views\LinkListPart.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>LinkListPart.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanel\Views\PanelPart.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>PanelPart.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanel\Views\_ViewStart.cs">
+      <DependentUpon>_ViewStart.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="Files\FileRepeaterHelper.cs" />
     <Compile Include="Files\FileRepeater.cs" />
     <Compile Include="Files\FileLineHelper.cs" />
@@ -96,8 +287,68 @@
     <Compile Include="Help\HelpClient.cs" />
     <Compile Include="Help\Controllers\HelpController.cs" />
     <Compile Include="Help\HelpModels.cs" />
+    <Compile Include="Help\Views\EntityProperty.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>EntityProperty.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Help\Views\Index.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Index.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Help\Views\Menu.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Menu.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Help\Views\NamespaceControl.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>NamespaceControl.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Help\Views\Search.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Search.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Help\Views\ViewAppendix.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ViewAppendix.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Help\Views\ViewEntity.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ViewEntity.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Help\Views\ViewNamespace.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ViewNamespace.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Help\Views\_ViewStart.cs">
+      <DependentUpon>_ViewStart.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="HttpModules\WhitespaceModule.cs" />
     <Compile Include="Mailing\EmailClient.cs" />
+    <Compile Include="Mailing\Views\EmailMessage.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>EmailMessage.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Mailing\Views\EmailPackage.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>EmailPackage.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Mailing\Views\_ViewStart.cs">
+      <DependentUpon>_ViewStart.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="Operations\JsOperations.cs" />
     <Compile Include="Operations\JsOperationOptions.cs" />
     <Compile Include="Operations\OperationButtonFactory.cs" />
@@ -107,21 +358,151 @@
     <Compile Include="Operations\OperationSettings.cs" />
     <Compile Include="Processes\ProcessClient.cs" />
     <Compile Include="Processes\Controllers\ProcessController.cs" />
+    <Compile Include="Processes\Views\Package.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Package.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Processes\Views\PackageLine.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>PackageLine.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Processes\Views\Process.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Process.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Processes\Views\ProcessExecution.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ProcessExecution.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Processes\Views\_ViewStart.cs">
+      <DependentUpon>_ViewStart.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="Profiler\ProfilerClient.cs" />
     <Compile Include="Profiler\Controllers\ProfilerController.cs" />
+    <Compile Include="Profiler\Views\HeavyDetails.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>HeavyDetails.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Profiler\Views\HeavyList.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>HeavyList.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Profiler\Views\ProfilerTable.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ProfilerTable.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Profiler\Views\Times.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Times.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Profiler\Views\TimeTable.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>TimeTable.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Profiler\Views\_ViewStart.cs">
+      <DependentUpon>_ViewStart.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Queries\Controller\QueriesController.cs" />
-    <Compile Include="Queries\UserQueriesClient.cs" />
-    <Compile Include="Queries\UserQueriesHelper.cs" />
+    <Compile Include="Reports\Views\_ViewStart.cs">
+      <DependentUpon>_ViewStart.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Scheduler\Views\_ViewStart.cs">
+      <DependentUpon>_ViewStart.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="UserQueries\Controller\QueriesController.cs" />
+    <Compile Include="UserQueries\UserQueriesClient.cs" />
+    <Compile Include="UserQueries\UserQueriesHelper.cs" />
+    <Compile Include="UserQueries\Views\QueryColumn.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>QueryColumn.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="UserQueries\Views\QueryFilter.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>QueryFilter.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="UserQueries\Views\QueryOrder.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>QueryOrder.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="UserQueries\Views\QueryToken.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>QueryToken.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="UserQueries\Views\UserQuery.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>UserQuery.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Reports\ReportClient.cs" />
     <Compile Include="Reports\Controllers\ReportController.cs" />
     <Compile Include="ControllerFilters\FilterAttributes.cs" />
+    <Compile Include="Reports\Views\ExcelReport.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ExcelReport.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Scheduler\SchedulerClient.cs" />
+    <Compile Include="Scheduler\Views\Calendar.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Calendar.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Scheduler\Views\CustomTaskExecution.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>CustomTaskExecution.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Scheduler\Views\Holiday.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Holiday.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Scheduler\Views\ScheduledTask.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ScheduledTask.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Scheduler\Views\ScheduleRuleDaily.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ScheduleRuleDaily.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Scheduler\Views\ScheduleRuleWeekDays.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ScheduleRuleWeekDays.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Scheduler\Views\ScheduleRuleWeekly.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ScheduleRuleWeekly.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="ScriptCombiner\CombineController.cs" />
     <Compile Include="ScriptCombiner\Combiner.cs" />
     <Compile Include="ScriptCombiner\CombinerScriptHtmlManager.cs" />
@@ -130,9 +511,24 @@
     <Compile Include="ScriptCombiner\JavascriptCombiner.cs" />
     <Compile Include="ScriptCombiner\JavaScriptMinifier.cs" />
     <Compile Include="ScriptCombiner\Logger.cs" />
+    <Compile Include="UserQueries\Views\_ViewStart.cs">
+      <DependentUpon>_ViewStart.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="ViewsChecker\ViewsCheckerClient.cs" />
     <Compile Include="ViewsChecker\ViewError.cs" />
     <Compile Include="ViewsChecker\Controllers\ViewsCheckerController.cs" />
+    <Compile Include="ViewsChecker\Views\ViewsChecker.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ViewsChecker.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="ViewsChecker\Views\_ViewStart.cs">
+      <DependentUpon>_ViewStart.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Framework\Signum.Engine\Signum.Engine.csproj">
@@ -174,58 +570,205 @@
     <Content Include="AuthAdmin\Images\thumb.png" />
     <Content Include="AuthAdmin\Images\treeView.png" />
     <Content Include="AuthAdmin\Scripts\authAdmin.js" />
-    <Content Include="AuthAdmin\Views\EntityGroups.ascx" />
-    <Content Include="AuthAdmin\Views\FacadeMethods.ascx" />
-    <Content Include="AuthAdmin\Views\Operations.ascx" />
-    <Content Include="AuthAdmin\Views\Permissions.ascx" />
-    <Content Include="AuthAdmin\Views\Properties.ascx" />
-    <Content Include="AuthAdmin\Views\Queries.ascx" />
-    <Content Include="AuthAdmin\Views\Role.ascx" />
-    <Content Include="AuthAdmin\Views\Types.ascx" />
-    <Content Include="AuthAdmin\Views\User.ascx" />
-    <Content Include="Help\Views\Web.config" />
-    <Content Include="Profiler\Views\Times.aspx" />
-    <Content Include="Profiler\Views\TimeTable.aspx" />
-    <Content Include="Profiler\Views\HeavyDetails.aspx">
-      <SubType>ASPXCodeBehind</SubType>
+    <None Include="AuthAdmin\Views\EntityGroups.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>EntityGroups.cs</LastGenOutput>
+    </None>
+    <None Include="AuthAdmin\Views\FacadeMethods.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>FacadeMethods.cs</LastGenOutput>
+    </None>
+    <None Include="AuthAdmin\Views\Operations.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>Operations.cs</LastGenOutput>
+    </None>
+    <None Include="AuthAdmin\Views\Permissions.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>Permissions.cs</LastGenOutput>
+    </None>
+    <None Include="AuthAdmin\Views\Properties.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>Properties.cs</LastGenOutput>
+    </None>
+    <None Include="AuthAdmin\Views\Queries.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>Queries.cs</LastGenOutput>
+    </None>
+    <None Include="AuthAdmin\Views\Role.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>Role.cs</LastGenOutput>
+    </None>
+    <None Include="AuthAdmin\Views\Types.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>Types.cs</LastGenOutput>
+    </None>
+    <None Include="AuthAdmin\Views\User.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>User.cs</LastGenOutput>
+    </None>
+    <None Include="Auth\Views\_ViewStart.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>_ViewStart.cs</LastGenOutput>
+    </None>
+    <None Include="AuthAdmin\Views\_ViewStart.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>_ViewStart.cs</LastGenOutput>
+    </None>
+    <Content Include="ControlPanel\Views\_ViewStart.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>_ViewStart.cs</LastGenOutput>
     </Content>
-    <Content Include="Profiler\Views\HeavyList.aspx">
-      <SubType>ASPXCodeBehind</SubType>
+    <Content Include="Help\Views\_ViewStart.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>_ViewStart.cs</LastGenOutput>
     </Content>
-    <Content Include="Profiler\Views\ProfilerTable.ascx" />
-    <Content Include="Scheduler\Views\Calendar.ascx" />
-    <Content Include="Scheduler\Views\ScheduleRuleDaily.ascx" />
-    <Content Include="Scheduler\Views\ScheduleRuleWeekDays.ascx" />
-    <Content Include="Scheduler\Views\ScheduleRuleWeekly.ascx" />
-    <Content Include="Scheduler\Views\ScheduleRuleDay.ascx" />
-    <Content Include="Scheduler\Views\ScheduledTask.ascx" />
-    <Content Include="Scheduler\Views\CustomTaskExecution.ascx" />
-    <Content Include="Scheduler\Views\Holiday.ascx" />
+    <Content Include="Mailing\Views\_ViewStart.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>_ViewStart.cs</LastGenOutput>
+    </Content>
+    <Content Include="Processes\Views\_ViewStart.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>_ViewStart.cs</LastGenOutput>
+    </Content>
+    <None Include="Basic\Views\_ViewStart.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>_ViewStart.cs</LastGenOutput>
+    </None>
+    <None Include="Captcha\Views\_ViewStart.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>_ViewStart.cs</LastGenOutput>
+    </None>
+    <None Include="Profiler\Views\Times.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>Times.cs</LastGenOutput>
+    </None>
+    <None Include="Profiler\Views\TimeTable.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>TimeTable.cs</LastGenOutput>
+    </None>
+    <None Include="Profiler\Views\HeavyDetails.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>HeavyDetails.cs</LastGenOutput>
+    </None>
+    <None Include="Profiler\Views\HeavyList.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>HeavyList.cs</LastGenOutput>
+    </None>
+    <None Include="Profiler\Views\ProfilerTable.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>ProfilerTable.cs</LastGenOutput>
+    </None>
+    <Content Include="Profiler\Views\_ViewStart.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>_ViewStart.cs</LastGenOutput>
+    </Content>
+    <None Include="Reports\Views\_ViewStart.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>_ViewStart.cs</LastGenOutput>
+    </None>
+    <None Include="Scheduler\Views\Calendar.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>Calendar.cs</LastGenOutput>
+    </None>
+    <None Include="Scheduler\Views\ScheduleRuleDaily.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>ScheduleRuleDaily.cs</LastGenOutput>
+    </None>
+    <None Include="Scheduler\Views\ScheduleRuleWeekDays.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>ScheduleRuleWeekDays.cs</LastGenOutput>
+    </None>
+    <None Include="Scheduler\Views\ScheduleRuleWeekly.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>ScheduleRuleWeekly.cs</LastGenOutput>
+    </None>
+    <None Include="Scheduler\Views\ScheduledTask.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>ScheduledTask.cs</LastGenOutput>
+    </None>
+    <None Include="Scheduler\Views\CustomTaskExecution.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>CustomTaskExecution.cs</LastGenOutput>
+    </None>
+    <None Include="Scheduler\Views\Holiday.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>Holiday.cs</LastGenOutput>
+    </None>
     <Content Include="Web.config" />
+    <Content Include="Basic\Views\Web.config" />
+    <Content Include="Captcha\Views\Web.config" />
+    <Content Include="ControlPanel\Views\Web.config" />
+    <Content Include="Help\Views\Web.config" />
+    <Content Include="Mailing\Views\Web.config" />
+    <Content Include="Processes\Views\Web.config" />
+    <Content Include="Profiler\Views\Web.config" />
+    <Content Include="UserQueries\Views\Web.config" />
+    <Content Include="Reports\Views\Web.config" />
+    <Content Include="Scheduler\Views\Web.config" />
+    <Content Include="ViewsChecker\Views\Web.config" />
+    <Content Include="ViewsChecker\Views\_ViewStart.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>_ViewStart.cs</LastGenOutput>
+    </Content>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Auth\Views\CreateUserAccount.ascx" />
-    <Content Include="Captcha\Views\captcha.ascx">
-      <SubType>ASPXCodeBehind</SubType>
-    </Content>
-    <Content Include="Captcha\Views\captchaImage.ascx">
-      <SubType>ASPXCodeBehind</SubType>
-    </Content>
-    <Content Include="Auth\Views\ChangePassword.aspx" />
-    <Content Include="Auth\Views\ChangePasswordSuccess.aspx" />
-    <Content Include="Auth\Views\Login.aspx">
-      <SubType>ASPXCodeBehind</SubType>
-    </Content>
-    <Content Include="Auth\Views\LoginUserControl.ascx" />
-    <Content Include="Auth\Views\Register.aspx">
-      <SubType>ASPXCodeBehind</SubType>
-    </Content>
-    <Content Include="Auth\Views\RememberPassword.aspx" />
-    <Content Include="Auth\Views\RememberPasswordSuccess.aspx" />
-    <Content Include="Auth\Views\ResetPassword.aspx" />
-    <Content Include="Auth\Views\ResetPasswordSend.aspx" />
-    <Content Include="Auth\Views\ResetPasswordSuccess.aspx" />
-    <Content Include="Auth\Views\ResetPasswordSetNew.aspx" />
+    <Content Include="AuthAdmin\Views\Web.config" />
+    <None Include="Auth\Views\CreateUserAccount.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>CreateUserAccount.cs</LastGenOutput>
+    </None>
+    <None Include="Captcha\Views\captcha.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>captcha.cs</LastGenOutput>
+    </None>
+    <None Include="Captcha\Views\captchaImage.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>captchaImage.cs</LastGenOutput>
+    </None>
+    <None Include="Auth\Views\ChangePassword.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>ChangePassword.cs</LastGenOutput>
+    </None>
+    <None Include="Auth\Views\ChangePasswordSuccess.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>ChangePasswordSuccess.cs</LastGenOutput>
+    </None>
+    <None Include="Auth\Views\Login.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>Login.cs</LastGenOutput>
+    </None>
+    <None Include="Auth\Views\LoginUserControl.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>LoginUserControl.cs</LastGenOutput>
+    </None>
+    <None Include="Auth\Views\Register.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>Register.cs</LastGenOutput>
+    </None>
+    <None Include="Auth\Views\RememberPassword.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>RememberPassword.cs</LastGenOutput>
+    </None>
+    <None Include="Auth\Views\RememberPasswordSuccess.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>RememberPasswordSuccess.cs</LastGenOutput>
+    </None>
+    <None Include="Auth\Views\ResetPassword.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>ResetPassword.cs</LastGenOutput>
+    </None>
+    <None Include="Auth\Views\ResetPasswordSend.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>ResetPasswordSend.cs</LastGenOutput>
+    </None>
+    <None Include="Auth\Views\ResetPasswordSuccess.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>ResetPasswordSuccess.cs</LastGenOutput>
+    </None>
+    <None Include="Auth\Views\ResetPasswordSetNew.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>ResetPasswordSetNew.cs</LastGenOutput>
+    </None>
     <EmbeddedResource Include="Properties\Resources.fr.resx" />
     <EmbeddedResource Include="Properties\Resources.it.resx" />
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -234,63 +777,148 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.es.resx" />
-    <Content Include="Basic\Views\DateSpanIU.ascx" />
-    <Content Include="ControlPanel\Views\ControlPanel.aspx" />
-    <Content Include="ControlPanel\Views\ControlPanelAdmin.ascx" />
-    <Content Include="ControlPanel\Views\LinkElement.ascx" />
-    <Content Include="ControlPanel\Views\LinkListPart.ascx" />
-    <Content Include="ControlPanel\Views\CountUserQueryElement.ascx" />
-    <Content Include="ControlPanel\Views\CountSearchControlPart.ascx" />
-    <Content Include="ControlPanel\Views\PanelPart.ascx" />
+    <None Include="Basic\Views\DateSpan.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>DateSpan.cs</LastGenOutput>
+    </None>
+    <None Include="ControlPanel\Views\ControlPanel.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>ControlPanel.cs</LastGenOutput>
+    </None>
+    <None Include="ControlPanel\Views\ControlPanelAdmin.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>ControlPanelAdmin.cs</LastGenOutput>
+    </None>
+    <None Include="ControlPanel\Views\LinkElement.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>LinkElement.cs</LastGenOutput>
+    </None>
+    <None Include="ControlPanel\Views\LinkListPart.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>LinkListPart.cs</LastGenOutput>
+    </None>
+    <None Include="ControlPanel\Views\CountUserQueryElement.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>CountUserQueryElement.cs</LastGenOutput>
+    </None>
+    <None Include="ControlPanel\Views\CountSearchControlPart.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>CountSearchControlPart.cs</LastGenOutput>
+    </None>
+    <None Include="ControlPanel\Views\PanelPart.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>PanelPart.cs</LastGenOutput>
+    </None>
     <Content Include="Help\Content\help.css" />
     <Content Include="Help\Images\favicon.ico" />
     <Content Include="Help\Images\icon-warning.png" />
     <Content Include="Help\Images\table.gif" />
-    <Content Include="Help\Views\EntityProperty.ascx">
-      <SubType>ASPXCodeBehind</SubType>
-    </Content>
-    <Content Include="Help\Views\Index.aspx" />
-    <Content Include="Help\Views\Menu.ascx" />
-    <Content Include="Help\Views\NamespaceControl.ascx">
-      <SubType>ASPXCodeBehind</SubType>
-    </Content>
-    <Content Include="Help\Views\Search.aspx">
-      <SubType>ASPXCodeBehind</SubType>
-    </Content>
-    <Content Include="Help\Views\ViewAppendix.aspx">
-      <SubType>ASPXCodeBehind</SubType>
-    </Content>
-    <Content Include="Help\Views\ViewEntity.aspx">
-      <SubType>ASPXCodeBehind</SubType>
-    </Content>
-    <Content Include="Help\Views\ViewNamespace.aspx">
-      <SubType>ASPXCodeBehind</SubType>
-    </Content>
-    <Content Include="Mailing\Views\EmailMessage.ascx" />
-    <Content Include="Mailing\Views\EmailPackage.ascx" />
     <Content Include="Processes\Content\Processes.css" />
-    <Content Include="Processes\Views\Package.ascx" />
-    <Content Include="Processes\Views\PackageLine.ascx" />
-    <Content Include="Processes\Views\Process.ascx" />
-    <Content Include="Processes\Views\ProcessExecution.ascx" />
-    <Content Include="Queries\Views\QueryColumn.ascx" />
-    <Content Include="Queries\Views\QueryFilterIU.ascx" />
-    <Content Include="Queries\Views\QueryOrder.ascx" />
-    <Content Include="Queries\Views\QueryToken.ascx" />
-    <Content Include="Queries\Views\UserQuery.ascx" />
-    <Content Include="Reports\Views\ExcelReport.ascx" />
-    <Content Include="ViewsChecker\Views\ViewsChecker.aspx">
-      <SubType>ASPXCodeBehind</SubType>
+    <None Include="Help\Views\EntityProperty.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>EntityProperty.cs</LastGenOutput>
+    </None>
+    <None Include="Help\Views\Index.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>Index.cs</LastGenOutput>
+    </None>
+    <None Include="Help\Views\Menu.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>Menu.cs</LastGenOutput>
+    </None>
+    <None Include="Help\Views\NamespaceControl.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>NamespaceControl.cs</LastGenOutput>
+    </None>
+    <None Include="Help\Views\Search.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>Search.cs</LastGenOutput>
+    </None>
+    <None Include="Help\Views\ViewAppendix.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>ViewAppendix.cs</LastGenOutput>
+    </None>
+    <None Include="Help\Views\ViewEntity.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>ViewEntity.cs</LastGenOutput>
+    </None>
+    <None Include="Help\Views\ViewNamespace.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>ViewNamespace.cs</LastGenOutput>
+    </None>
+    <None Include="Mailing\Views\EmailMessage.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>EmailMessage.cs</LastGenOutput>
+    </None>
+    <None Include="Mailing\Views\EmailPackage.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>EmailPackage.cs</LastGenOutput>
+    </None>
+    <None Include="Processes\Views\Package.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>Package.cs</LastGenOutput>
+    </None>
+    <None Include="Processes\Views\PackageLine.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>PackageLine.cs</LastGenOutput>
+    </None>
+    <None Include="Processes\Views\Process.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>Process.cs</LastGenOutput>
+    </None>
+    <None Include="Processes\Views\ProcessExecution.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>ProcessExecution.cs</LastGenOutput>
+    </None>
+    <Content Include="Scheduler\Views\_ViewStart.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>_ViewStart.cs</LastGenOutput>
     </Content>
+    <None Include="UserQueries\Views\QueryColumn.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>QueryColumn.cs</LastGenOutput>
+    </None>
+    <None Include="UserQueries\Views\QueryFilter.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>QueryFilter.cs</LastGenOutput>
+    </None>
+    <None Include="UserQueries\Views\QueryOrder.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>QueryOrder.cs</LastGenOutput>
+    </None>
+    <None Include="UserQueries\Views\QueryToken.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>QueryToken.cs</LastGenOutput>
+    </None>
+    <None Include="UserQueries\Views\UserQuery.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>UserQuery.cs</LastGenOutput>
+    </None>
+    <None Include="Reports\Views\ExcelReport.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>ExcelReport.cs</LastGenOutput>
+    </None>
+    <Content Include="UserQueries\Views\_ViewStart.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>_ViewStart.cs</LastGenOutput>
+    </Content>
+    <None Include="ViewsChecker\Views\ViewsChecker.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>ViewsChecker.cs</LastGenOutput>
+    </None>
     <EmbeddedResource Include="Properties\Resources.pt.resx" />
     <EmbeddedResource Include="Properties\Resources.de.resx" />
+    <Content Include="Auth\Views\Web.config" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" />
+  <!--<Target Name="MvcBuildViews" AfterTargets="AfterBuild" Condition="'$(MvcBuildViews)'=='true'">
+    <AspNetCompiler VirtualPath="temp" PhysicalPath="$(WebProjectOutputDir)" />
+  </Target>-->
   <Target Name="BeforeBuild">
     <ItemGroup>
-      <EmbeddedResource Include="**\*.aspx;**\*.ascx;**\*.gif;**\*.png;**\*.jpg;**\*.css;**\*.js" />
+      <EmbeddedResource Include="**\*.gif;**\*.png;**\*.jpg;**\*.css;**\*.js" />
     </ItemGroup>
   </Target>
   <ProjectExtensions>

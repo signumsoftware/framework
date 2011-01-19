@@ -1,0 +1,9 @@
+﻿@using Signum.Web.Extensions.Sample
+
+@using (var e = Html.TypeContext<AlbumFromBandModel>()) 
+{
+	@Html.EntityLine(e, f => f.Band);
+	@Html.ValueLine(e, f => f.Name);
+	@Html.ValueLine(e, f => f.Year);
+	@Html.EntityLine(e, f => f.Label);
+}

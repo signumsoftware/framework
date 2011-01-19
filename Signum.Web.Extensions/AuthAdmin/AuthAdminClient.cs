@@ -19,32 +19,25 @@ using System.Linq.Expressions;
 using Signum.Engine.Maps;
 using System.Web.Routing;
 
-namespace Signum.Web.Authorization
+namespace Signum.Web.AuthAdmin
 {
     public static class AuthAdminClient
     {
-        public static string ViewPrefix = "authAdmin/Views/";
-
         public static void Start(bool types, bool properties, bool queries, bool operations, bool permissions, bool facadeMethods, bool entityGroups)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                AssemblyResourceManager.RegisterAreaResources(
-                    new AssemblyResourceStore(typeof(AuthClient), "~/authAdmin/", "Signum.Web.Extensions.AuthAdmin."));
-
-                RouteTable.Routes.InsertRouteAt0("authAdmin/{resourcesFolder}/{*resourceName}",
-                    new { controller = "Resources", action = "Index", area = "authAdmin" },
-                    new { resourcesFolder = new InArray(new string[] { "Scripts", "Content", "Images" }) });
+                Navigator.RegisterArea(typeof(AuthAdminClient));
 
                 if (Navigator.Manager.EntitySettings.ContainsKey(typeof(UserDN)))
-                    Navigator.EntitySettings<UserDN>().PartialViewName = _ => ViewPrefix + "User";
+                    Navigator.EntitySettings<UserDN>().PartialViewName = _ => RouteHelper.AreaView("User", "authAdmin");
                 else
-                    Navigator.AddSetting(new EntitySettings<UserDN>(EntityType.Default) { PartialViewName = _ => ViewPrefix + "User" });
+                    Navigator.AddSetting(new EntitySettings<UserDN>(EntityType.Default) { PartialViewName = _ => RouteHelper.AreaView("User", "authAdmin") });
 
                 if (Navigator.Manager.EntitySettings.ContainsKey(typeof(RoleDN)))
-                    Navigator.EntitySettings<RoleDN>().PartialViewName = _ => ViewPrefix + "Role";
+                    Navigator.EntitySettings<RoleDN>().PartialViewName = _ => RouteHelper.AreaView("Role", "authAdmin"); 
                 else
-                    Navigator.AddSetting(new EntitySettings<RoleDN>(EntityType.Admin) { PartialViewName = _ => ViewPrefix + "Role" });
+                    Navigator.AddSetting(new EntitySettings<RoleDN>(EntityType.Admin) { PartialViewName = _ => RouteHelper.AreaView("Role", "authAdmin") });
 
                 if (types)
                 {
@@ -138,7 +131,7 @@ namespace Signum.Web.Authorization
 
             Navigator.AddSetting(new EmbeddedEntitySettings<T>()
             {
-                PartialViewName = e => ViewPrefix + partialViewName,
+                PartialViewName = e => RouteHelper.AreaView(partialViewName, "authAdmin"),
                 MappingDefault = new EntityMapping<T>(false)
                     .CreateProperty(m => m.DefaultRule)
                     .SetProperty(m => m.Rules,

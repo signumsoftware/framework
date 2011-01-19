@@ -21,7 +21,7 @@ using System.Collections.Generic;
 using Signum.Engine.Operations;
 #endregion
 
-namespace Signum.Web.Authorization
+namespace Signum.Web.Auth
 {
     [HandleException]
     public class AuthController : Controller
@@ -149,14 +149,12 @@ namespace Signum.Web.Authorization
         [AcceptVerbs(HttpVerbs.Get)]
         public ActionResult ResetPassword()
         {
-            ViewData[ViewDataKeys.PageTitle] = Resources.ResetPassword;
             return View(AuthClient.ResetPasswordUrl);
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult ResetPassword(string email)
         {
-            ViewData[ViewDataKeys.PageTitle] = Resources.ResetPassword;
             try
             {
                 if (string.IsNullOrEmpty(email))
@@ -199,7 +197,6 @@ namespace Signum.Web.Authorization
         public ActionResult ResetPasswordSend()
         {
             ViewData["Message"] = Resources.ResetPasswordCodeHasBeenSent.Formato(ViewData["email"]);
-            ViewData[ViewDataKeys.PageTitle] = Resources.ResetPassword;
 
             return View(AuthClient.ResetPasswordSendUrl);
         }
@@ -277,7 +274,6 @@ namespace Signum.Web.Authorization
 
         public ActionResult ResetPasswordSuccess()
         {
-            ViewData[ViewDataKeys.PageTitle] = Resources.ResetPasswordSuccess;
             return View(AuthClient.ResetPasswordSuccessUrl);
         }
         #endregion
@@ -292,7 +288,6 @@ namespace Signum.Web.Authorization
         [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult RememberPassword(string username, string email)
         {
-            ViewData[ViewDataKeys.PageTitle] = Resources.RememberPassword;
             try
             {
                 if (string.IsNullOrEmpty(username))
@@ -333,7 +328,7 @@ namespace Signum.Web.Authorization
         public ActionResult RememberPasswordSuccess()
         {
             ViewData["Message"] = Resources.PasswordHasBeenSent.Formato(ViewData["email"]);
-            ViewData[ViewDataKeys.PageTitle] = Resources.RememberPassword;
+            
 
             return View(AuthClient.RememberPasswordSuccessUrl);
         }
@@ -350,15 +345,7 @@ namespace Signum.Web.Authorization
             {
                 if (TempData.ContainsKey("referrer") && TempData["referrer"] != null)
                     ViewData["referrer"] = TempData["referrer"].ToString();
-                //else
-                //{
-                //    referrer = HttpContext.Request.Url.ToString(); //.PathAndQuery;
-                //    if (referrer.HasText())
-                //        ViewData["referrer"] = referrer;
-                //}
             }
-
-            ViewData[ViewDataKeys.PageTitle] = "Login";
 
             return View(AuthClient.LoginUrl);
         }

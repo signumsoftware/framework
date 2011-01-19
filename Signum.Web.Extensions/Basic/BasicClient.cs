@@ -12,16 +12,13 @@ namespace Signum.Web.Basic
 {
     public static class BasicClient
     {
-        public static string ViewPrefix = "basic/Views/";
-
         public static void Start()
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                AssemblyResourceManager.RegisterAreaResources(
-                    new AssemblyResourceStore(typeof(BasicClient), "~/basic/", "Signum.Web.Extensions.Basic."));
+                Navigator.RegisterArea(typeof(BasicClient));
 
-                Navigator.AddSetting(new EmbeddedEntitySettings<DateSpanDN>() { PartialViewName = _ => ViewPrefix + "DateSpanIU" });
+                Navigator.AddSetting(new EmbeddedEntitySettings<DateSpanDN>() { PartialViewName = _ => RouteHelper.AreaView("DateSpan", "basic") });
             }
         }
     }

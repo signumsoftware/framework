@@ -22,12 +22,10 @@ using Signum.Entities.Files;
 
 namespace Signum.Web.Reports
 {
-    public class ReportClient
+    public class ReportsClient
     {
         static bool ToExcelPlain;
         static bool ExcelReport;
-        
-        public static string ViewPrefix = "reports/Views/";
 
         public static void Start(bool toExcelPlain, bool excelReport)
         {
@@ -36,17 +34,12 @@ namespace Signum.Web.Reports
                 ToExcelPlain = toExcelPlain;
                 ExcelReport = excelReport;
 
-                AssemblyResourceManager.RegisterAreaResources(
-                    new AssemblyResourceStore(typeof(ReportClient), "~/reports/", "Signum.Web.Extensions.Reports."));
-
-                RouteTable.Routes.InsertRouteAt0("reports/{resourcesFolder}/{*resourceName}",
-                    new { controller = "Resources", action = "Index", area = "reports" },
-                    new { resourcesFolder = new InArray(new string[] { "Scripts", "Content", "Images" }) });
+                Navigator.RegisterArea(typeof(ReportsClient));
 
                 Navigator.AddSettings(new List<EntitySettings>{
                     new EntitySettings<ExcelReportDN>(EntityType.NotSaving) 
                     { 
-                        PartialViewName = _ => ViewPrefix + "ExcelReport",
+                        PartialViewName = _ => RouteHelper.AreaView("ExcelReport", "Reports"),
                         MappingAdmin = new EntityMapping<ExcelReportDN>(true)  
                         { 
                             GetEntity = ctx => 

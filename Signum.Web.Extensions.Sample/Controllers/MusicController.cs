@@ -22,12 +22,12 @@ namespace Signum.Web.Extensions.Sample
     {
         public ViewResult BandDetail()
         {
-            return Navigator.View(this, Database.Retrieve<BandDN>(1), MusicClient.ViewPrefix + "BandDetail");
+            return Navigator.View(this, Database.Retrieve<BandDN>(1), "BandDetail");
         }
 
         public ViewResult BandRepeater() 
         {
-            return Navigator.View(this, Database.Retrieve<BandDN>(1), MusicClient.ViewPrefix + "BandRepeater");
+            return Navigator.View(this, Database.Retrieve<BandDN>(1), "BandRepeater");
         }
 
         public ActionResult CreateAlbumFromBand(string prefix)

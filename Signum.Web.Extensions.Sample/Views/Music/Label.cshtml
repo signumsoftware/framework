@@ -1,0 +1,7 @@
+﻿@using Signum.Test
+
+
+@using (var e = Html.TypeContext<LabelDN>()) 
+{
+	@Html.ValueLine(e, f => f.Name);
+}

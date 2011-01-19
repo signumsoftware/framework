@@ -15,20 +15,22 @@ namespace Signum.Web.ControlPanel
     [Serializable]
     public abstract class PanelPartRenderer
     {
-        public abstract void RenderPart(HtmlHelper helper, PanelPart part);
-
-        public static Action<HtmlHelper, PanelPart> Render = (helper, panelPart) => DefaultRender(helper, panelPart);
-        public static void DefaultRender(HtmlHelper helper, PanelPart part)
+        public static Dictionary<Type, Func<PanelPartRenderer>> RegisteredRenderers = new Dictionary<Type, Func<PanelPartRenderer>>()
         {
-            if (part.Content is UserQueryDN)
-                new SearchControlPartRenderer().RenderPart(helper, part);
+            {typeof(UserQueryDN), ()=>new SearchControlPartRenderer()},
+            {typeof(CountSearchControlPartDN), ()=>new CountSearchControlPartRenderer()},
+            {typeof(LinkListPartDN), ()=>new LinkListPartRenderer()},
+        };
 
-            if (part.Content is CountSearchControlPartDN)
-                new CountSearchControlPartRenderer().RenderPart(helper, part);
+        public abstract MvcHtmlString RenderPart(HtmlHelper helper, PanelPart part);
 
-            if (part.Content is LinkListPartDN)
-                new LinkListPartRenderer().RenderPart(helper, part);
-        }
+        public static Func<HtmlHelper, PanelPart, MvcHtmlString> Render = (helper, panelPart) =>
+            {
+                var rederer = RegisteredRenderers.GetOrThrow(panelPart.Content.GetType(), "Not renderer registered in PanelPartRenderer for {0}")().RenderPart(helper, panelPart);
+
+                return new HtmlTag("fieldset").InnerHtml(
+                        new HtmlTag("legend").SetInnerText(panelPart.Title).ToHtml().Concat(rederer)).ToHtml();
+            };
     }
 
     [Serializable]
@@ -36,7 +38,7 @@ namespace Signum.Web.ControlPanel
     {
         public SearchControlPartRenderer() { }
 
-        public override void RenderPart(HtmlHelper helper, PanelPart part)
+        public override MvcHtmlString RenderPart(HtmlHelper helper, PanelPart part)
         {
             UserQueryDN uq = ((UserQueryDN)part.Content);
             object queryName = Navigator.Manager.QuerySettings.Keys.First(k => QueryUtils.GetQueryUniqueKey(k) == uq.Query.Key);
@@ -45,9 +47,7 @@ namespace Signum.Web.ControlPanel
                 FilterMode = FilterMode.OnlyResults
             };
 
-            helper.SearchControl(
-                uq,
-                fo,
+            return helper.SearchControl(uq,fo,
                 new Context(null, "r{0}c{1}".Formato(part.Row, part.Column)));
         }
     }
@@ -57,36 +57,28 @@ namespace Signum.Web.ControlPanel
     {
         public CountSearchControlPartRenderer() { }
 
-        public override void RenderPart(HtmlHelper helper, PanelPart part)
+        public override MvcHtmlString RenderPart(HtmlHelper helper, PanelPart part)
         {
             var uqList = ((CountSearchControlPartDN)part.Content).UserQueries;
 
+            HtmlStringBuilder sb = new HtmlStringBuilder();
             foreach (CountUserQueryElement uq in uqList)
-            { 
+            {
                 object queryName = Navigator.Manager.QuerySettings.Keys.First(k => QueryUtils.GetQueryUniqueKey(k) == uq.UserQuery.Query.Key);
                 FindOptions fo = new FindOptions(queryName)
                 {
                     FilterMode = FilterMode.Hidden
                 };
 
-                helper.Write(
-                    helper.Span(
-                        "lblr{0}c{1}".Formato(part.Row, part.Column),
-                        uq.Label,
-                        "labelLine"));
 
-                helper.Write(
-                    helper.CountSearchControl(
-                        uq.UserQuery,
-                        fo,
-                        "r{0}c{1}".Formato(part.Row, part.Column)));
+                sb.Add(helper.Span("lblr{0}c{1}".Formato(part.Row, part.Column), uq.Label, "labelLine"));
 
-                helper.Write(
-                    helper.Div(
-                        "divr{0}c{1}".Formato(part.Row, part.Column),
-                        null,
-                        "clearall"));
+                sb.Add(helper.CountSearchControl(uq.UserQuery, fo, "r{0}c{1}".Formato(part.Row, part.Column)));
+
+                sb.Add(helper.Div("divr{0}c{1}".Formato(part.Row, part.Column), null, "clearall"));
             }
+
+            return sb.ToHtml();
         }
     }
 
@@ -95,19 +87,19 @@ namespace Signum.Web.ControlPanel
     {
         public LinkListPartRenderer() { }
 
-        public override void RenderPart(HtmlHelper helper, PanelPart part)
+        public override MvcHtmlString RenderPart(HtmlHelper helper, PanelPart part)
         {
             var linkList = ((LinkListPartDN)part.Content).Links;
 
-            helper.Write(MvcHtmlString.Create("<ul id='ulr{0}c{1}'>".Formato(part.Row, part.Column)));
-            foreach (LinkElement link in linkList)
-            {
-                helper.Write(MvcHtmlString.Create("<li>"));
-                helper.Write(
-                    helper.Href(link.Link, link.Label));
-                helper.Write(MvcHtmlString.Create("</li>"));
-            }
-            helper.Write(MvcHtmlString.Create("</ul>"));
+            HtmlStringBuilder sb = new HtmlStringBuilder();
+            using (sb.Surround(new HtmlTag("ul", "ulr{0}c{1}".Formato(part.Row, part.Column))))
+                foreach (LinkElement link in linkList)
+                {
+                    using (sb.Surround(new HtmlTag("li")))
+                        sb.Add(helper.Href(link.Link, link.Label));
+                }
+
+            return sb.ToHtml();
         }
     }
 }

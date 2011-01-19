@@ -30,7 +30,7 @@ namespace Signum.Web.ScriptCombiner
             return content;
         }
 
-        internal static ScriptContentResult Combine(string[] virtualFiles)
+        internal static StaticContentResult Combine(string[] virtualFiles)
         {
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("/* {0} */".Formato(virtualFiles.ToString(",")));
@@ -41,7 +41,7 @@ namespace Signum.Web.ScriptCombiner
                 sb.AppendLine(Minify(content));
             }
 
-            return new ScriptContentResult(sb.ToString(), "text/css");
+            return new StaticContentResult(Encoding.UTF8.GetBytes(sb.ToString()), "text/css");
         }
 
         static string ReplaceRelativeImg(string content, string virtualFile)

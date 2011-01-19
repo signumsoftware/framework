@@ -19,7 +19,7 @@ namespace Signum.Web.Extensions.Sample.Controllers
 
             var panel = ControlPanelLogic.GetHomePageControlPanel();
             if (panel != null)
-                return View(ControlPanelClient.ViewPrefix + "ControlPanel", panel);
+                return View(RouteHelper.AreaView("ControlPanel", "ControlPanel"), panel);
             else
                 return View();
         }

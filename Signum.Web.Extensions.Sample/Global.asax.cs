@@ -16,10 +16,13 @@ using Signum.Engine.Authorization;
 using Signum.Entities;
 using Signum.Web.Queries;
 using Signum.Web.Reports;
-using Signum.Web.Authorization;
+using Signum.Web.Auth;
+using Signum.Web.AuthAdmin;
 using Signum.Web.ControlPanel;
 using Signum.Entities.ControlPanel;
 using Signum.Web.ScriptCombiner;
+using System.Reflection;
+using Signum.Web.PortableAreas;
 
 namespace Signum.Web.Extensions.Sample
 {
@@ -36,7 +39,7 @@ namespace Signum.Web.Extensions.Sample
                Navigator.ViewRouteName,
                "View/{webTypeName}/{id}",
                new { controller = "Signum", action = "View", webTypeName = "", id = "" }
-           );
+            );
 
             routes.MapRoute(
                 Navigator.FindRouteName,
@@ -44,19 +47,24 @@ namespace Signum.Web.Extensions.Sample
                 new { controller = "Signum", action = "Find", webQueryName = "" }
             );
 
+            
             routes.MapRoute(
                 "Default",                                              // Route name
                 "{controller}/{action}/{id}",                           // URL with parameters
-                new { controller = "Home", action = "Index", id = "" }  // Parameter defaults
+                new { controller = "Home", action = "Index", id = UrlParameter.Optional }  // Parameter defaults
             );
         }
 
         protected void Application_Start()
-        {
-            RegisterRoutes(RouteTable.Routes);
-            //RouteDebug.RouteDebugger.RewriteRoutesForTesting(RouteTable.Routes);
-
+        {   
             Signum.Test.Extensions.Starter.Start(UserConnections.Replace(Settings.Default.ConnectionString));
+
+            RouteTable.Routes.MapRoute(
+               "EmbeddedResources",
+               "{*file}",
+               new { controller = "Resources", action = "GetFile" },
+               new { file = new EmbeddedFileExist() }
+            );
 
             using (AuthLogic.Disable())
             {
@@ -64,7 +72,10 @@ namespace Signum.Web.Extensions.Sample
                 LinkTypesAndViews();
             }
 
-            //AuthenticationRequiredAttribute.Authenticate = null;
+            RegisterRoutes(RouteTable.Routes);
+
+            PortableAreaControllers.MainAssembly = Assembly.GetExecutingAssembly();
+            //RouteDebug.RouteDebugger.RewriteRoutesForTesting(RouteTable.Routes);
         }
 
         private void LinkTypesAndViews()
@@ -80,7 +91,7 @@ namespace Signum.Web.Extensions.Sample
             UserQueriesClient.Start();
             ControlPanelClient.Start();
 
-            ReportClient.Start(true, true);
+            ReportsClient.Start(true, true);
 
             MusicClient.Start();
 

@@ -13,13 +13,13 @@ namespace Signum.Web.ScriptCombiner
     public class CombineController : Controller
     {  
         [AcceptVerbs(HttpVerbs.Get)]
-        public ScriptContentResult CSS(string key)
+        public StaticContentResult CSS(string key)
         {
             return Combiner.GetContent(key);
         }
 
         [AcceptVerbs(HttpVerbs.Get)]
-        public ScriptContentResult JS(string key)
+        public StaticContentResult JS(string key)
         {
             return Combiner.GetContent(key);
         }

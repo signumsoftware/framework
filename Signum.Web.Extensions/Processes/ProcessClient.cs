@@ -24,27 +24,21 @@ using Signum.Entities.Processes;
 
 namespace Signum.Web.Processes
 {
-    public static class ProcessClient
-    {
-        public static string ViewPrefix = "process/Views/";
-         
+    public static class ProcessesClient
+    {   
         public static void Start()
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                AssemblyResourceManager.RegisterAreaResources(
-                    new AssemblyResourceStore(typeof(ProcessClient), "~/process/", "Signum.Web.Extensions.Processes."));
-                
-                RouteTable.Routes.InsertRouteAt0("process/{resourcesFolder}/{*resourceName}",
-                    new { controller = "Resources", action = "Index", area = "process" },
-                    new { resourcesFolder = new InArray(new string[] { "Scripts", "Content", "Images" }) });
+                Navigator.RegisterArea(typeof(ProcessesClient));
 
-                Navigator.AddSettings(new List<EntitySettings>{
-                    new EntitySettings<ProcessExecutionDN>(EntityType.Default){ PartialViewName = e => ViewPrefix + "ProcessExecution", },
-                    new EntitySettings<ProcessDN>(EntityType.Default){ PartialViewName = e => ViewPrefix + "Process"},
-                    new EntitySettings<PackageDN>(EntityType.Default){ PartialViewName = e => ViewPrefix + "Package"},
-                    new EntitySettings<PackageLineDN>(EntityType.Default){ PartialViewName = e => ViewPrefix + "PackageLine"},
-               });
+                Navigator.AddSettings(new List<EntitySettings>
+                {
+                    new EntitySettings<ProcessExecutionDN>(EntityType.Default){ PartialViewName = e => RouteHelper.AreaView("ProcessExecution", "Processes"), },
+                    new EntitySettings<ProcessDN>(EntityType.Default){ PartialViewName = e => RouteHelper.AreaView("Process", "Processes")},
+                    new EntitySettings<PackageDN>(EntityType.Default){ PartialViewName = e => RouteHelper.AreaView("Package", "Processes")},
+                    new EntitySettings<PackageLineDN>(EntityType.Default){ PartialViewName = e => RouteHelper.AreaView("PackageLine", "Processes")},
+                });
             }
         }
     }

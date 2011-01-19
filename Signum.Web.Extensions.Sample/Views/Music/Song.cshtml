@@ -1,0 +1,6 @@
+﻿@using Signum.Test
+
+@using (var e = Html.TypeContext<SongDN>()) 
+{
+	@Html.ValueLine(e, f => f.Name);
+}

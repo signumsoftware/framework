@@ -1,0 +1,8 @@
+﻿@using Signum.Test
+
+@using (var e = Html.TypeContext<PersonalAwardDN>()) 
+{
+	@Html.ValueLine(e, f => f.Year);
+	@Html.ValueLine(e, f => f.Category);
+	@Html.ValueLine(e, f => f.Result);
+}

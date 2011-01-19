@@ -9,15 +9,14 @@ namespace Signum.Web.Captcha
 {
     public static class CaptchaClient
     {
-        public static string CaptchaUrl = "captcha/Views/captcha";
-        public static string CaptchaImageUrl = "captcha/Views/captchaImage";
+        public static string CaptchaUrl = RouteHelper.AreaView("captcha", "captcha");
+        public static string CaptchaImageUrl = RouteHelper.AreaView("captchaImage", "captcha");
 
         public static void Start()
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                AssemblyResourceManager.RegisterAreaResources(
-                    new AssemblyResourceStore(typeof(CaptchaClient), "~/captcha/", "Signum.Web.Extensions.Captcha."));
+                Navigator.RegisterArea(typeof(CaptchaClient));
             }
         }
 

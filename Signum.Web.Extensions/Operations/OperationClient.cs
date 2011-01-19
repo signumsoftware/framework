@@ -24,6 +24,8 @@ namespace Signum.Web.Operations
         {
             Manager = operationManager;
 
+            Navigator.RegisterArea(typeof(OperationClient));
+
             ButtonBarEntityHelper.RegisterGlobalButtons(Manager.ButtonBar_GetButtonBarElement);
 
             Constructor.ConstructorManager.GeneralConstructor += new Func<Type, ModifiableEntity>(Manager.ConstructorManager_GeneralConstructor);

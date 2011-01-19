@@ -26,8 +26,7 @@ namespace Signum.Web.Help
         {
             NamespaceModel model = new NamespaceModel("", HelpLogic.AllTypes());
             ViewData["appendices"] = HelpLogic.GetAppendices();
-            ViewData[ViewDataKeys.PageTitle] = Resources.HelpDocumentation;
-            return View(HelpClient.ViewPrefix + HelpClient.IndexUrl, model);
+            return View(HelpClient.IndexUrl, model);
         }
 
         [AcceptVerbs(HttpVerbs.Get)]
@@ -40,12 +39,11 @@ namespace Signum.Web.Help
                                        select t).ToList();
 
             ViewData["nameSpace"] = relatedTypes;
-            ViewData[ViewDataKeys.PageTitle] = type.NiceName();
 
             //Buscamos en qué fichero se encuentra
             EntityHelp eh = HelpLogic.GetEntityHelp(type);
 
-            return View(HelpClient.ViewPrefix + HelpClient.ViewEntityUrl, eh);
+            return View(HelpClient.ViewEntityUrl, eh);
         }
 
         [AcceptVerbs(HttpVerbs.Get)]
@@ -60,17 +58,14 @@ namespace Signum.Web.Help
 
             ViewData["nameSpace"] = relatedTypes;
 
-            ViewData[ViewDataKeys.PageTitle] = model.Name;
-
-            return View(HelpClient.ViewPrefix + HelpClient.ViewNamespaceUrl, model);
+            return View(HelpClient.ViewNamespaceUrl, model);
         }
 
         [AcceptVerbs(HttpVerbs.Get)]
         public ActionResult ViewAppendix(string appendix)
         {
             AppendixHelp model = HelpLogic.GetAppendix(appendix);
-            ViewData[ViewDataKeys.PageTitle] = model.Title;
-            return View(HelpClient.ViewPrefix + HelpClient.ViewAppendixUrl, model);
+            return View(HelpClient.ViewAppendixUrl, model);
         }
 
         [AcceptVerbs(HttpVerbs.Get)]
@@ -100,8 +95,8 @@ namespace Signum.Web.Help
 
             sp.Stop();
             ViewData["time"] = sp.ElapsedMilliseconds;
-            ViewData[ViewDataKeys.PageTitle] = q + " - Buscador";
-            return View(HelpClient.ViewPrefix + HelpClient.SearchResults, results);
+            ViewData[ViewDataKeys.Title] = q + " - " + Resources.Buscador;
+            return View(HelpClient.SearchResults, results);
         }
 
 
@@ -244,7 +239,7 @@ namespace Signum.Web.Help
 
             ViewData["EntityCount"] = count;
             ViewData["UnavailableLinks"] = unavailable;*/
-            return View(HelpClient.ViewPrefix + HelpClient.TodoUrl, ehs);
+            return View(HelpClient.TodoUrl, ehs);
         }
     }
 }

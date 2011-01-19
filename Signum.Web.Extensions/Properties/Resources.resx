@@ -450,4 +450,10 @@
   <data name="PleaseConfirmYouDLikeToExecuteTheOperation0ToTheEntity123" xml:space="preserve">
     <value>Please confirm you'd like to execute the operation {0} to the entity {1} ({2}-{3})</value>
   </data>
+  <data name="Appendices" xml:space="preserve">
+    <value>Appendices</value>
+  </data>
+  <data name="Buscador" xml:space="preserve">
+    <value>Buscador</value>
+  </data>
 </root>

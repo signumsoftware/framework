@@ -20,18 +20,11 @@ namespace Signum.Web.Files
 {
     public static class FilesClient
     {
-        public static string ViewPrefix = "files/Views/";
-
         public static void Start(bool filePath, bool embeddedFile)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                AssemblyResourceManager.RegisterAreaResources(
-                    new AssemblyResourceStore(typeof(FilesClient), "~/files/", "Signum.Web.Extensions.Files."));
-                
-                RouteTable.Routes.InsertRouteAt0("files/{resourcesFolder}/{*resourceName}",
-                    new { controller = "Resources", action = "Index", area = "files" },
-                    new { resourcesFolder = new InArray(new string[] { "Scripts", "Content", "Images" }) });
+                Navigator.RegisterArea(typeof(FilesClient));
 
                 FileRepositoryDN.OverridenPhisicalCurrentDirectory = AppDomain.CurrentDomain.BaseDirectory;
 

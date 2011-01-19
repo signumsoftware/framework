@@ -21,25 +21,18 @@ using System.Web.Routing;
 
 namespace Signum.Web.Mailing
 {
-    public static class EmailClient
+    public static class MailingClient
     {
-        public static string ViewPrefix = "email/Views/";
-
         public static void Start()
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                AssemblyResourceManager.RegisterAreaResources(
-                    new AssemblyResourceStore(typeof(EmailClient), "~/email/", "Signum.Web.Extensions.Mailing."));
-
-                RouteTable.Routes.InsertRouteAt0("email/{resourcesFolder}/{*resourceName}",
-                    new { controller = "Resources", action = "Index", area = "email" },
-                    new { resourcesFolder = new InArray(new string[] { "Scripts", "Content", "Images" }) });
+                Navigator.RegisterArea(typeof(MailingClient));
 
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<EmailMessageDN>(EntityType.Default){ PartialViewName = e => ViewPrefix + "EmailMessage"},
-                    new EntitySettings<EmailPackageDN>(EntityType.Default){ PartialViewName = e => ViewPrefix + "EmailPackage"},
+                    new EntitySettings<EmailMessageDN>(EntityType.Default){ PartialViewName = e => RouteHelper.AreaView("EmailMessage", "Mailing")},
+                    new EntitySettings<EmailPackageDN>(EntityType.Default){ PartialViewName = e => RouteHelper.AreaView("EmailPackage", "Mailing")},
                     new EntitySettings<EmailTemplateDN>(EntityType.ServerOnly)
                 });
             }

@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Web.Mvc;
 using System.Web.Routing;
+using Signum.Web.PortableAreas;
 
 namespace Signum.Web
 {
-    public class ActionFilterConfigControllerFactory : DefaultControllerFactory
+    public class ActionFilterConfigControllerFactory : PortableAreaControllerFactory
     {
         public override IController CreateController(RequestContext requestContext, string controllerName)
         {

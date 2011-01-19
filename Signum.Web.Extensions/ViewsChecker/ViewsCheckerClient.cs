@@ -12,17 +12,12 @@ namespace Signum.Web.ViewsChecker
 {
     public static class ViewsCheckerClient
     {
-        public static string ViewPrefix = "viewsChecker/Views/";
-
         public static void Start()
         {
-            #if (DEBUG)
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                AssemblyResourceManager.RegisterAreaResources(
-                    new AssemblyResourceStore(typeof(ViewsCheckerClient), "~/viewsChecker/", "Signum.Web.Extensions.ViewsChecker."));
+                Navigator.RegisterArea(typeof(ViewsCheckerClient));
             }
-            #endif
         }
     }
 }
