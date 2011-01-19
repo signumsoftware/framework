@@ -27,10 +27,9 @@ namespace Signum.Web.Sample
                     new EntitySettings<GrammyAwardDN>(EntityType.Default) { PartialViewName = e => ViewPrefix + "GrammyAward" },
                     new EntitySettings<LabelDN>(EntityType.Default) { PartialViewName = e => ViewPrefix + "Label" },
                     new EntitySettings<PersonalAwardDN>(EntityType.Default) { PartialViewName = e => ViewPrefix + "PersonalAward" },
-                    new EntitySettings<SongDN>(EntityType.Default) { PartialViewName = e => ViewPrefix + "Song" },
+                    new EmbeddedEntitySettings<SongDN>() { PartialViewName = e => ViewPrefix + "Song" },
                 });
 
-                Navigator.RegisterTypeName<IAuthorDN>();
             }
         }
     }
