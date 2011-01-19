@@ -98,8 +98,8 @@
     <Compile Include="PortableAreas\FileRepositoryManager.cs" />
     <Compile Include="PortableAreas\CompiledRazorBuildProvider.cs" />
     <Compile Include="PortableAreas\CompiledVirtualPathProvider.cs" />
-    <Compile Include="PortableAreas\RouteExtensions.cs" />
     <Compile Include="PortableAreas\PortableAreaControllerFactory.cs" />
+    <Compile Include="PortableAreas\RouteExtensions.cs" />
     <Compile Include="PortableAreas\StaticContentResult.cs" />
     <Compile Include="ButtonBar\ToolBarMenu.cs" />
     <Compile Include="HtmlHelpers\HtmlTag.cs" />
