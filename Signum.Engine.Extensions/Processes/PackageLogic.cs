@@ -119,6 +119,7 @@ namespace Signum.Engine.Processes
                 {
                     using (Transaction tr = new Transaction(true))
                     {
+                        
                         using (AuthLogic.User(executingProcess.User.Retrieve()))
                         ExecuteLine(pl, package);
 
