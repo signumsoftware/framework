@@ -225,6 +225,8 @@
             async: options.async,
             dataType: options.dataType,
             success: function (ajaxResult) {
+                if (typeof (ajaxResult) === "string")
+                    ajaxResult = ajaxResult.trim();
                 var url = SF.checkRedirection(ajaxResult);
                 if (!empty(url))
                     window.location.href = url;
@@ -240,8 +242,8 @@
     SF.checkRedirection = function (ajaxResult) {
         if (empty(ajaxResult))
             return null;
+        
         var json;
-
         if (typeof ajaxResult !== "object") {
             //suppose that if is already an object it will be a json Object            
             if (!SF.isJSON(ajaxResult))

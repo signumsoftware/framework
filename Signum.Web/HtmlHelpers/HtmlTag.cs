@@ -160,6 +160,16 @@ namespace Signum.Web
     {
         StringBuilder sb = new StringBuilder();
 
+        public HtmlStringBuilder() { }
+        public HtmlStringBuilder(IEnumerable<MvcHtmlString> elements)
+        {
+            if(elements != null)
+                foreach (var item in elements)
+                {
+                    sb.AppendLine(item.ToHtmlString());
+                }
+        }
+
         public void Add(MvcHtmlString html)
         {
             if (!MvcHtmlString.IsNullOrEmpty(html))

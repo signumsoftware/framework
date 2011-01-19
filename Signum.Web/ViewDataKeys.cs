@@ -15,7 +15,7 @@ namespace Signum.Web
         public const string GlobalErrors = "sfGlobalErrors"; //Key for Global Errors in ModelStateDictionary
         public const string GlobalValidationSummary = "sfGlobalValidationSummary";
         public const string PartialViewName = "sfPartialViewName";
-        public const string PageTitle = "sfTitle";
+        public const string Title = "Title";
         public const string PageDescription = "sfDescription";
         public const string CustomHtml = "sfCustomHtml";
         public const string OnOk = "sfOnOk";

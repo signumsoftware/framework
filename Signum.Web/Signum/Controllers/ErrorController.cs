@@ -4,7 +4,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 
-namespace Signum.Web
+namespace Signum.Web.Controllers
 {
     public class ErrorController : Controller
     {

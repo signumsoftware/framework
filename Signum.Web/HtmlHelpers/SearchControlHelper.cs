@@ -33,7 +33,7 @@ namespace Signum.Web
 
     public static class SearchControlHelper
     {
-        public static void SearchControl(this HtmlHelper helper, FindOptions findOptions, Context context)
+        public static MvcHtmlString SearchControl(this HtmlHelper helper, FindOptions findOptions, Context context)
         {
             Navigator.SetTokens(findOptions.QueryName, findOptions.FilterOptions);
             Navigator.SetTokens(findOptions.QueryName, findOptions.OrderOptions);
@@ -43,10 +43,10 @@ namespace Signum.Web
             helper.ViewData[ViewDataKeys.FindOptions] = findOptions;
             helper.ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
             
-            if (helper.ViewData.Keys.Count(s => s == ViewDataKeys.PageTitle) == 0)
-                helper.ViewData[ViewDataKeys.PageTitle] = Navigator.Manager.SearchTitle(findOptions.QueryName);
+            if (helper.ViewData.ContainsKey(ViewDataKeys.Title))
+                helper.ViewData[ViewDataKeys.Title] = Navigator.Manager.SearchTitle(findOptions.QueryName);
             
-            helper.Write(helper.Partial(Navigator.Manager.SearchControlUrl, helper.ViewData));
+            return helper.Partial(Navigator.Manager.SearchControlUrl, helper.ViewData);
         }
 
         public static MvcHtmlString CountSearchControl(this HtmlHelper helper, FindOptions findOptions)
@@ -222,7 +222,7 @@ namespace Signum.Web
             if (filterOption.Token.Type.IsLite())
             {
                 Lite lite = (Lite)filterOption.Value; 
-                if (string.IsNullOrEmpty(lite.ToStr))
+                if (lite != null && string.IsNullOrEmpty(lite.ToStr))
                     Database.FillToStr(lite);
 
                 Type cleanType = Reflector.ExtractLite(filterOption.Token.Type);

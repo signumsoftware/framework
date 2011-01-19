@@ -18,6 +18,7 @@ using System.Collections;
 using System.Collections.Specialized;
 using System.Web.Script.Serialization;
 using System.Text;
+using System.IO;
 #endregion
 
 namespace Signum.Web.Controllers
@@ -370,7 +371,7 @@ namespace Signum.Web.Controllers
             }
 
             ViewData.Model = new Context(null, prefix);
-            ViewData[ViewDataKeys.CustomHtml] = sb.ToHtml().ToString();
+            ViewData[ViewDataKeys.CustomHtml] = sb.ToHtml();
 
             return PartialView(Navigator.Manager.ChooserPopupUrl);
         }
@@ -392,8 +393,10 @@ namespace Signum.Web.Controllers
             }
 
             ViewData.Model = new Context(null, prefix);
-            ViewData[ViewDataKeys.CustomHtml] = sb.ToString();
-            if (!string.IsNullOrEmpty(title)) ViewData[ViewDataKeys.PageTitle] = title;
+            ViewData[ViewDataKeys.CustomHtml] = sb.ToHtml();
+            if (title.HasText())
+                ViewData[ViewDataKeys.Title] = title;
+
             return PartialView(Navigator.Manager.ChooserPopupUrl);
         }
 
@@ -458,15 +461,16 @@ namespace Signum.Web.Controllers
 
         public static HtmlHelper CreateHtmlHelper(Controller c)
         {
-            return new HtmlHelper(
-                        new ViewContext(
-                            c.ControllerContext,
-                            new WebFormView(c.ControllerContext.RequestContext.HttpContext.Request.FilePath),
-                            c.ViewData,
-                            c.TempData,
-                            c.Response.Output
-                        ),
-                        new ViewPage());
+            var viewContext = new ViewContext(c.ControllerContext, new FakeView(), c.ViewData, c.TempData, TextWriter.Null);
+            return new HtmlHelper(viewContext, new ViewPage());
+        }
+
+        class FakeView : System.Web.Mvc.IView
+        {
+            public void Render(ViewContext viewContext, TextWriter writer)
+            {
+                throw new InvalidOperationException();
+            }
         }
     }
 }

@@ -21,6 +21,8 @@ using System.Configuration;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Web.Controllers;
 using System.Web.Hosting;
+using System.Web.Compilation;
+using Signum.Web.PortableAreas;
 #endregion
 
 namespace Signum.Web
@@ -450,6 +452,24 @@ namespace Signum.Web
             return EntitySettings(entity.GetType()).OnPartialViewName(entity); 
         }
 
+        public static void RegisterArea(Type clientType)
+        {
+            if (!clientType.Name.EndsWith("Client"))
+                throw new InvalidOperationException("The name of clientType should end with the convention 'Client'");
+
+            RegisterArea(clientType, clientType.Name.RemoveRight("Client".Length));
+        }
+
+        public static void RegisterArea(Type clientType, string areaName)
+        {
+            CompiledViews.RegisterArea(clientType.Assembly, areaName);
+            PortableAreaControllers.RegisterControllersIn(clientType, areaName);
+
+            EmbeddedFilesRespository rep = new EmbeddedFilesRespository(clientType.Assembly, areaName);
+            if (!rep.IsEmpty)
+                FileRepositoryManager.Register(rep);
+        }
+
         public static void Initialize()
         {
             Manager.Initialize();
@@ -461,20 +481,19 @@ namespace Signum.Web
         public Dictionary<Type, EntitySettings> EntitySettings {get;set;}
         public Dictionary<object, QuerySettings> QuerySettings {get;set;}
 
-        public static string ViewsPrefix = "signum/Views/";
 
-        public string AjaxErrorPageUrl = ViewsPrefix + "AjaxError";
-        public string ErrorPageUrl = ViewsPrefix + "Error";
-        public string NormalPageUrl = ViewsPrefix + "NormalPage";
-        public string NormalControlUrl = ViewsPrefix + "NormalControl";
-        public string PopupControlUrl = ViewsPrefix + "PopupControl";
-        public string ChooserPopupUrl = ViewsPrefix + "ChooserPopup";
-        public string SearchPopupControlUrl = ViewsPrefix + "SearchPopupControl";
-        public string SearchWindowUrl = ViewsPrefix + "SearchWindow";
-        public string SearchControlUrl = ViewsPrefix + "SearchControl";
-        public string SearchResultsUrl = ViewsPrefix + "SearchResults";
-        public string FilterBuilderUrl = ViewsPrefix + "FilterBuilder";
-        public string ValueLineBoxUrl = ViewsPrefix + "ValueLineBox";
+        public string AjaxErrorPageUrl = RouteHelper.AreaView("AjaxError", "signum");
+        public string ErrorPageUrl = RouteHelper.AreaView("Error", "signum");
+        public string NormalPageUrl = RouteHelper.AreaView("NormalPage", "signum");
+        public string NormalControlUrl = RouteHelper.AreaView("NormalControl", "signum");
+        public string PopupControlUrl = RouteHelper.AreaView("PopupControl", "signum");
+        public string ChooserPopupUrl = RouteHelper.AreaView("ChooserPopup", "signum");
+        public string SearchPopupControlUrl = RouteHelper.AreaView("SearchPopupControl", "signum");
+        public string SearchWindowUrl = RouteHelper.AreaView( "SearchWindow", "signum");
+        public string SearchControlUrl = RouteHelper.AreaView( "SearchControl", "signum");
+        public string SearchResultsUrl = RouteHelper.AreaView("SearchResults", "signum");
+        public string FilterBuilderUrl = RouteHelper.AreaView("FilterBuilder", "signum");
+        public string ValueLineBoxUrl = RouteHelper.AreaView("ValueLineBox", "signum");
         
         protected Dictionary<string, Type> WebTypeNames { get; private set; }
         protected Dictionary<string, object> WebQueryNames { get; private set; }
@@ -519,7 +538,9 @@ namespace Signum.Web
                     WebQueryNames = QuerySettings.ToDictionary(kvp => kvp.Value.WebQueryName, kvp => kvp.Key, StringComparer.InvariantCultureIgnoreCase, "WebQueryNames");
                 }
 
-                ConfigureSignumWebApplication();
+                Navigator.RegisterArea(typeof(Navigator), "signum");
+
+                FileRepositoryManager.Register(new LocalizedJavaScriptRepository(Resources.ResourceManager, "signum"));
 
                 if (Initializing != null)
                     Initializing();
@@ -528,27 +549,6 @@ namespace Signum.Web
             }
         }
 
-        private void ConfigureSignumWebApplication()
-        {
-            ViewEngines.Engines.Clear();
-            ViewEngines.Engines.Add(new SignumViewEngine());
-
-            AssemblyResourceManager.RegisterAreaResources(
-                new AssemblyResourceStore(typeof(Navigator), "~/signum/", "Signum.Web.Signum."));
-
-            LocalizeResourceManager.RegisterAreaResources(
-                new LocalizeResourceStore(Resources.ResourceManager, "signum"));
-
-
-            RouteTable.Routes.InsertRouteAt0("signum/{resourcesFolder}/{*resourceName}",
-                    new { controller = "Resources", action = "Index", area = "signum" },
-                    new { resourcesFolder = new InArray(new string[] { "Scripts", "Content", "Images", "Resources" }) });
-
-            ModelBinders.Binders.DefaultBinder = new LiteModelBinder();
-            ModelBinders.Binders.Add(typeof(FindOptions), new FindOptionsModelBinder());
-
-            HostingEnvironment.RegisterVirtualPathProvider(new SignumVirtualPathProvider());
-        }
 
         HashSet<string> loadedModules = new HashSet<string>();
 
@@ -603,9 +603,9 @@ namespace Signum.Web
             controller.ViewData.Model = tc; 
 
             controller.ViewData[ViewDataKeys.PartialViewName] = partialViewName ?? Navigator.OnPartialViewName((ModifiableEntity)entity);
-            
-            if (!controller.ViewData.Keys.Any(s => s==ViewDataKeys.PageTitle))
-                controller.ViewData[ViewDataKeys.PageTitle] = entity.ToString();
+
+            if (!controller.ViewData.ContainsKey(ViewDataKeys.Title))
+                controller.ViewData[ViewDataKeys.Title] = entity.ToString();
             
             string tabID = GetOrCreateTabID(controller);
             controller.ViewData[ViewDataKeys.TabId] = tabID;
@@ -683,8 +683,8 @@ namespace Signum.Web
             controller.ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
             controller.ViewData[ViewDataKeys.FindOptions] = findOptions;
 
-            if (controller.ViewData.Keys.Count(s => s == ViewDataKeys.PageTitle) == 0)
-                controller.ViewData[ViewDataKeys.PageTitle] = SearchTitle(findOptions.QueryName);
+            if (controller.ViewData.ContainsKey(ViewDataKeys.Title))
+                controller.ViewData[ViewDataKeys.Title] = SearchTitle(findOptions.QueryName);
             
             return new ViewResult()
             {
@@ -753,8 +753,8 @@ namespace Signum.Web
             controller.ViewData[ViewDataKeys.FindOptions] = findOptions;
             controller.ViewData[ViewDataKeys.QueryDescription] = queryDescription;
             
-            if (controller.ViewData.Keys.Count(s => s == ViewDataKeys.PageTitle) == 0)
-                controller.ViewData[ViewDataKeys.PageTitle] = SearchTitle(findOptions.QueryName);
+            if (controller.ViewData.ContainsKey(ViewDataKeys.Title))
+                controller.ViewData[ViewDataKeys.Title] = SearchTitle(findOptions.QueryName);
             
             return new PartialViewResult
             {

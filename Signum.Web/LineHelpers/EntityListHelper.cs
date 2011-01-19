@@ -99,12 +99,12 @@ namespace Signum.Web
             return sb.ToHtml();
         }
 
-        public static void EntityList<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, MList<S>>> property)
+        public static MvcHtmlString EntityList<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, MList<S>>> property)
         {
-            helper.EntityList<T, S>(tc, property, null);
+            return helper.EntityList<T, S>(tc, property, null);
         }
 
-        public static void EntityList<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, MList<S>>> property, Action<EntityList> settingsModifier)
+        public static MvcHtmlString EntityList<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, MList<S>>> property, Action<EntityList> settingsModifier)
         {
             TypeContext<MList<S>> context = Common.WalkExpression(tc, property);
 
@@ -117,7 +117,7 @@ namespace Signum.Web
             if (settingsModifier != null)
                 settingsModifier(el);
 
-            helper.Write(helper.InternalEntityList<S>(el));
+            return helper.InternalEntityList<S>(el);
         }
     }
 }

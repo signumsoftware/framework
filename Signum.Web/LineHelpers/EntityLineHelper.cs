@@ -121,12 +121,12 @@ namespace Signum.Web
             return sb.ToHtml();
         }
 
-        public static void EntityLine<T,S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property) 
+        public static MvcHtmlString EntityLine<T,S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property) 
         {
-            helper.EntityLine<T, S>(tc, property, null);
+            return helper.EntityLine<T, S>(tc, property, null);
         }
 
-        public static void EntityLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property, Action<EntityLine> settingsModifier)
+        public static MvcHtmlString EntityLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property, Action<EntityLine> settingsModifier)
         {
             TypeContext<S> context = Common.WalkExpression(tc, property);
 
@@ -139,7 +139,7 @@ namespace Signum.Web
             if (settingsModifier != null)
                 settingsModifier(el);
 
-            helper.Write(helper.InternalEntityLine(el));
+            return helper.InternalEntityLine(el);
         }
     }
 }

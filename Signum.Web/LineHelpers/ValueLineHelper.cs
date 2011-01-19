@@ -308,18 +308,17 @@ namespace Signum.Web
             return sb.ToHtml();
         }
 
-        public static string ValueLine<T>(this HtmlHelper helper, ValueLine valueLine)
+        public static MvcHtmlString ValueLine<T>(this HtmlHelper helper, ValueLine valueLine)
         {
-            helper.Write(helper.InternalValueLine(valueLine));
-            return valueLine.ControlID;
+            return helper.InternalValueLine(valueLine);
         }
 
-        public static string ValueLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property)
+        public static MvcHtmlString ValueLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property)
         {
             return helper.ValueLine(tc, property, null);
         }
 
-        public static string ValueLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property, Action<ValueLine> settingsModifier)
+        public static MvcHtmlString ValueLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property, Action<ValueLine> settingsModifier)
         {
             TypeContext<S> context = (TypeContext<S>)Common.WalkExpression(tc, property);
 
@@ -330,17 +329,15 @@ namespace Signum.Web
             if (settingsModifier != null)
                 settingsModifier(vl);
 
-            helper.Write(InternalValueLine(helper, vl));
-
-            return vl.ControlID;
+            return InternalValueLine(helper, vl);
         }
 
-        public static void HiddenLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property)
+        public static MvcHtmlString HiddenLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property)
         {
-            helper.HiddenLine(tc, property, null);
+            return helper.HiddenLine(tc, property, null);
         }
 
-        public static void HiddenLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property, Action<ValueLine> settingsModifier)
+        public static MvcHtmlString HiddenLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property, Action<ValueLine> settingsModifier)
         {
             TypeContext<S> context = (TypeContext<S>)Common.WalkExpression(tc, property);
 
@@ -351,7 +348,7 @@ namespace Signum.Web
             if (settingsModifier != null)
                 settingsModifier(hl);
 
-            helper.Write(Hidden(helper, hl));
+            return Hidden(helper, hl);
         }
 
         private static string SetTicksFunction(HtmlHelper helper, ValueLine valueLine)

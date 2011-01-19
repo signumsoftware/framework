@@ -22,33 +22,39 @@ namespace Signum.Web
                 return tc;
 
             T element = helper.ViewData.Model as T;
-            if (element != null)
-                return new TypeContext<T>(element, null);
+            if (element == null)
+                throw new InvalidCastException("Impossible to convert object {0} from {1} to {2}".Formato(
+                    helper.ViewData.Model,
+                    helper.ViewData.Model.GetType().TypeName(),
+                    typeof(TypeContext<T>).TypeName()));
 
-            throw new InvalidCastException("Impossible to convert object {0} from {1} to {2}".Formato(
-                helper.ViewData.Model,
-                helper.ViewData.Model.GetType().TypeName(),
-                typeof(TypeContext<T>).TypeName()));
+            return new TypeContext<T>(element, null);
         }
 
-        public static void WritePageHeader(this HtmlHelper helper)
+        public static MvcHtmlString NormalPageHeader(this HtmlHelper helper)
         {
-            if (helper.ViewData.ContainsKey(ViewDataKeys.Reactive))
-                helper.Write(helper.Hidden(ViewDataKeys.Reactive));
+            var entityInfo = helper.HiddenEntityInfo((TypeContext)helper.ViewData.Model);
 
-            helper.WriteEntityInfo((TypeContext)helper.ViewData.Model);
+            if (helper.ViewData.ContainsKey(ViewDataKeys.Reactive))
+                return helper.Hidden(ViewDataKeys.Reactive).Concat(entityInfo);
+
+            return entityInfo; 
         }
 
-        public static void WritePopupHeader(this HtmlHelper helper)
-        {
-            if (helper.ViewData.ContainsKey(ViewDataKeys.Reactive))
-                helper.Write(helper.Hidden(ViewDataKeys.Reactive));
-
+        public static MvcHtmlString PopupHeader(this HtmlHelper helper)
+        {   
             if (helper.ViewData.ContainsKey(ViewDataKeys.WriteSFInfo))
             {
-                helper.WriteEntityInfo((TypeContext)helper.ViewData.Model);
+                var entityInfo = helper.HiddenEntityInfo((TypeContext)helper.ViewData.Model);
                 helper.ViewData.Remove(ViewDataKeys.WriteSFInfo);
+
+                if (helper.ViewData.ContainsKey(ViewDataKeys.Reactive))
+                    return helper.Hidden(ViewDataKeys.Reactive).Concat(entityInfo);
+
+                return entityInfo;
             }
+
+            return null;
         }
     }
 }

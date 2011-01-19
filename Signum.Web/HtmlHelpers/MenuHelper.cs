@@ -10,10 +10,11 @@ using Signum.Entities;
 using Signum.Entities.Reflection;
 using Signum.Web.Properties;
 using Signum.Entities.DynamicQuery;
+using System.Web;
 
 namespace Signum.Web
 {
-    public delegate string WriteAHref(string href, string title, string text);
+    public delegate MvcHtmlString WriteAHref(string href, string title, string text);
 
     public class WebMenuItem 
     {
@@ -84,99 +85,91 @@ namespace Signum.Web
         public string Class { get; set; }           //is applied to link
         public string ListItemClass { get; set; }   //is applied to list item
         
-        public string ToString(string currentUrl, string rootClass) 
+        public MvcHtmlString ToHtml(string currentUrl, string rootClass) 
         {
-            StringBuilder sb = new StringBuilder();
+            HtmlStringBuilder sb = new HtmlStringBuilder();
             this.Write(sb, currentUrl, rootClass, 0, "");
-            return sb.ToString();
+            return sb.ToHtml();
         }
 
-        public string ToString(string currentUrl, string rootClass, string selectedRoute)
+        public MvcHtmlString ToHtml(string currentUrl, string rootClass, string selectedRoute)
         {
-            StringBuilder sb = new StringBuilder();
+            HtmlStringBuilder sb = new HtmlStringBuilder();
             this.Write(sb, currentUrl, rootClass, 0, selectedRoute);
-            return sb.ToString();
+            return sb.ToHtml();
         }
 
-        void Write(StringBuilder sb, string currentUrl,  string rootClass, int depth, string selectedRoute)
+        void Write(HtmlStringBuilder sb, string currentUrl, string rootClass, int depth, string selectedRoute)
         {
             if(!Visible)
                 return;
 
-            if (depth != 0)
-                sb.AppendLine(("<li class=\"l{0}" + (string.IsNullOrEmpty(ListItemClass) ? "" : (" " + ListItemClass)) + "\">").Formato(depth));
-
-            bool selectedSubmenu = false;
-            if (Id != null && selectedRoute != null && selectedRoute.Split(' ').Contains(Id))
+            using (depth == 0 ? null : sb.Surround(new HtmlTag("li").Class("l" + depth).Class(ListItemClass)))
             {
-                Class += " selected";
-                selectedSubmenu = true;
-            }
-
-            if (Children.Any())
-            {
-                if (depth == 0)
-                    sb.AppendLine("<ul class=\"{0}\">".Formato(rootClass));
-                else
+                bool selectedSubmenu = false;
+                if (Id != null && selectedRoute != null && selectedRoute.Split(' ').Contains(Id))
                 {
-                    //if the element is a link, write an A element
-                    //otherwise, a span
+                    Class += " selected";
+                    selectedSubmenu = true;
+                }
 
-                    if (Link != null)
+                if (Children.Any())
+                {
+                    if (depth != 0)
                     {
-                        sb.AppendLine(new HtmlTag("a")
-                                         .Attrs(new { onmouseover = "", title = Title, href = Link.ToString(), id = Id })
-                                         .Class(Class)
-                                         .SetInnerText(Text)
-                                         .ToHtml().ToHtmlString());
-                    }
-                    else
-                    {
-                        sb.AppendLine(new HtmlTag("span")
-                                         .Attrs(new { onmouseover = "", title = Title, id = Id })
-                                         .Class(Class)
-                                         .SetInnerText(Text)
-                                         .ToHtml().ToHtmlString());
+                        if (Link != null)
+                        {
+                            sb.AddLine(new HtmlTag("a")
+                                             .Attrs(new { onmouseover = "", title = Title, href = Link.ToString(), id = Id })
+                                             .Class(Class)
+                                             .SetInnerText(Text)
+                                             .ToHtml());
+                        }
+                        else
+                        {
+                            sb.AddLine(new HtmlTag("span")
+                                             .Attrs(new { onmouseover = "", title = Title, id = Id })
+                                             .Class(Class)
+                                             .SetInnerText(Text)
+                                             .ToHtml());
+                        }
                     }
 
-                    if (selectedSubmenu)
-                        sb.AppendLine("<ul class=\"submenu\" style=\"display:block\">");
-                    else
-                        sb.AppendLine("<ul class=\"submenu\">");
+                    using (sb.Surround(new HtmlTag("ul")
+                        .Class(depth == 0 ? rootClass : "submenu")
+                        .Attrs(selectedSubmenu ? new { style = "display:block" } : null)))
+                    {
+                        foreach (WebMenuItem menu in children)
+                        {
+                            menu.Write(sb, currentUrl, rootClass, depth + 1, selectedRoute);
+                        }
+                    }
                 }
-
-                foreach (WebMenuItem menu in children)
+                else if (Link != null)
                 {
-                    menu.Write(sb, currentUrl, rootClass, depth + 1, selectedRoute);
-                }
-                sb.Append("</ul>");
-            }
-            else if (Link != null)
-            {
-                string link = Link.ToString();
-                
-           /*     bool active = false;
+                    string link = Link.ToString();
 
-                if (link.HasText() && currentUrl.EndsWith(link)) { active = true; }*/
-                if (ManualA == null)
-                {
-                    HtmlTag tbA = /*active ? new FluentTagBuilder("span").AddCssClass("selected") :*/ new HtmlTag("a")
-                            .Attrs(new {href = link, title = Title, id = Id})
-                            .Class(Class);
+                    /*     bool active = false;
 
-                    if (!MvcHtmlString.IsNullOrEmpty(html))
-                        tbA.InnerHtml(html);
+                         if (link.HasText() && currentUrl.EndsWith(link)) { active = true; }*/
+                    if (ManualA == null)
+                    {
+                        HtmlTag tbA = /*active ? new FluentTagBuilder("span").AddCssClass("selected") :*/ new HtmlTag("a")
+                                .Attrs(new { href = link, title = Title, id = Id })
+                                .Class(Class);
+
+                        if (!MvcHtmlString.IsNullOrEmpty(html))
+                            tbA.InnerHtml(html);
+                        else
+                            tbA.SetInnerText(Text);
+
+                        sb.AddLine(tbA.ToHtml());
+                    }
                     else
-                        tbA.SetInnerText(Text);
- 
-                    sb.Append(tbA.ToHtml().ToHtmlString());
+                        sb.AddLine(ManualA(link, title, " ".CombineIfNotEmpty(Class, "selected")));
                 }
-                else
-                    sb.Append(ManualA(link, title, " ".CombineIfNotEmpty(Class, "selected")));
-            }
 
-            if (depth != 0)
-                sb.Append("</li>");
+            }
         }
     }
 }

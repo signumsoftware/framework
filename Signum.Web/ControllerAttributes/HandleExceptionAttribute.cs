@@ -61,9 +61,7 @@ namespace Signum.Web
                     TempData = filterContext.Controller.TempData,
                     ViewData = new ViewDataDictionary<HandleErrorInfo>(model)
                     {
-                        {ViewDataKeys.PageTitle, model.Exception.InnerException != null ? 
-                            model.Exception.InnerException.Message : 
-                            model.Exception.Message}
+                        {ViewDataKeys.Title, model.Exception.InnerException != null ?  model.Exception.InnerException.Message : model.Exception.Message}
                     },
                 };
             }

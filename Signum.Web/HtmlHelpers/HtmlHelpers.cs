@@ -15,16 +15,6 @@ using Signum.Entities.Reflection;
 
 namespace Signum.Web
 {
-    public enum MessageType
-    {
-        Ok,
-        Info,
-        Warning,
-        Error
-    }
-
- 
-
     public static class HtmlHelperExtenders
     {
         public static MvcHtmlString ValidationSummaryAjax(this HtmlHelper html)
@@ -55,13 +45,13 @@ namespace Signum.Web
             }).Attrs(htmlAttributes).ToHtmlSelf();
         }
 
-        public static void FieldString(this HtmlHelper html, string label, string value)
+        public static MvcHtmlString FieldString(this HtmlHelper html, string label, string value)
         {
             var span = new HtmlTag("span").InnerHtml(MvcHtmlString.Create(value)).Class("valueLine").ToHtml();
-            Field(html, label, span);
+            return Field(html, label, span);
         }
 
-        public static void Field(this HtmlHelper html, string label, MvcHtmlString value)
+        public static MvcHtmlString Field(this HtmlHelper html, string label, MvcHtmlString value)
         {
             HtmlTag field = new HtmlTag("div")
                                     .Class("field");
@@ -78,9 +68,7 @@ namespace Signum.Web
 
             field.InnerHtml(labelLine.ToHtml().Concat(valueLine.ToHtml()));
 
-            html.Write(field.ToHtml());
-
-            html.Write(clear);
+            return field.ToHtml().Concat(clear);
         }
 
         public static MvcHtmlString GetClearDiv()
@@ -234,38 +222,7 @@ namespace Signum.Web
                 .Attrs(htmlAttributes)
                 .Class(cssClass)
                 .ToHtmlSelf();
-        }
-
-        public static void Write(this HtmlHelper html, MvcHtmlString htmlText)
-        {
-            html.ViewContext.HttpContext.Response.Write(htmlText.ToHtmlString());
-        }
-
-        #region Message
-        public static void Message(this HtmlHelper html, string title, string content, MessageType type){
-            Message(html, title, content, type,null);
-        }
-
-        public static void Message(this HtmlHelper html, string name, string title, string content, MessageType type) {
-            Message(html,title,content,type,new {id = name});
-        }
-
-        public static void Message(this HtmlHelper html, string title, string content, MessageType type, object attributeList) {
-            HtmlTag div = new HtmlTag("div")
-                        .Class("message" + Enum.GetName(typeof(MessageType), type))
-                        .Attrs(attributeList);
-
-            HtmlTag tbTitle = new HtmlTag("p")
-                        .Class(title);
-
-            HtmlTag tbContent = new HtmlTag("p")
-                        .Class(content);
-
-            div.InnerHtml(tbTitle.ToHtml().Concat(tbContent.ToHtml()));
-
-            html.Write(div.ToHtml());
-        }
-        #endregion    
+        } 
 
         public static IHtmlString AutoCompleteExtender(this HtmlHelper html, string ddlName, Type[] types, string entityIdFieldName,
                                                   string controllerUrl, string onSuccess)
@@ -274,8 +231,7 @@ namespace Signum.Web
                             new SF.Autocompleter(""{0}"", ""{1}"", {{
 	                            entityIdFieldName: ""{2}"",
 	                            extraParams: {{types: ""{3}""}}}});
-                        }}"
-                    .Formato(ddlName, controllerUrl, entityIdFieldName, types.ToString(t => Navigator.ResolveWebTypeName(t), ","))); 
+                        }}".Formato(ddlName, controllerUrl, entityIdFieldName, types.ToString(t => Navigator.ResolveWebTypeName(t), ","))); 
         }
 
         public static string PropertyNiceName<R>(this HtmlHelper html, Expression<Func<R>> property)

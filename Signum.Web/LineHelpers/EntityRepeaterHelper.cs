@@ -85,13 +85,13 @@ namespace Signum.Web
             return sb.ToHtml();
         }
 
-        public static void EntityRepeater<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, MList<S>>> property)
+        public static MvcHtmlString EntityRepeater<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, MList<S>>> property)
             where S : Modifiable 
         {
-            helper.EntityRepeater(tc, property, null);
+            return helper.EntityRepeater(tc, property, null);
         }
 
-        public static void EntityRepeater<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, MList<S>>> property, Action<EntityRepeater> settingsModifier)
+        public static MvcHtmlString EntityRepeater<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, MList<S>>> property, Action<EntityRepeater> settingsModifier)
         {
             TypeContext<MList<S>> context = Common.WalkExpression(tc, property);
 
@@ -104,7 +104,7 @@ namespace Signum.Web
             if (settingsModifier != null)
                 settingsModifier(el);
 
-            helper.Write(helper.InternalEntityRepeater<S>(el));
+            return helper.InternalEntityRepeater<S>(el);
         }
     }
 }

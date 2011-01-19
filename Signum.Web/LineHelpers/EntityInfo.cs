@@ -59,36 +59,7 @@ namespace Signum.Web
             return helper.HiddenStaticInfo(typeContext);
         }
 
-        public static void WriteEntityInfo(this HtmlHelper helper, TypeContext tc)
-        {
-            helper.Write(helper.HiddenEntityInfo(tc));
-        }
-
-        public static void WriteRuntimeInfo<T>(this HtmlHelper helper, TypeContext tc)
-        {
-            helper.Write(helper.HiddenRuntimeInfo(tc));
-        }
-
-        public static void WriteStaticInfo(this HtmlHelper helper, TypeContext tc)
-        {
-            helper.Write(helper.HiddenStaticInfo(tc));
-        }
-
-        public static void WriteEntityInfo<T, S>(this HtmlHelper helper, TypeContext<T> parent, Expression<Func<T, S>> property)
-        {
-            helper.Write(helper.HiddenEntityInfo<T, S>(parent, property));
-        }
-
-        public static void WriteRuntimeInfo<T, S>(this HtmlHelper helper, TypeContext<T> parent, Expression<Func<T, S>> property)
-        {
-            helper.Write(helper.HiddenRuntimeInfo<T, S>(parent, property));
-        }
-
-        public static void WriteStaticInfo<T, S>(this HtmlHelper helper, TypeContext<T> parent, Expression<Func<T, S>> property)
-        {
-            helper.Write(helper.HiddenStaticInfo<T, S>(parent, property));
-        }
-
+       
         public static long? GetTicks(HtmlHelper helper, TypeContext tc)
         {
             if (tc.ShowTicks && !tc.ReadOnly &&

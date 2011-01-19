@@ -10,63 +10,54 @@ using Signum.Utilities;
 
 namespace Signum.Web.PortableAreas
 {
-    public class ScriptContentResult : ActionResult
+    public class StaticContentResult : ActionResult
     {
-        public string Content{get;private set;}
-        public string ContentType{get;private set;}
+        public string ContentType { get; set; }
         public TimeSpan CacheDuration = TimeSpan.FromDays(10);
         public byte[] Compressed { get; private set; }
         public byte[] Uncompressed { get; private set; }
         public bool IsText;
 
-        public ScriptContentResult(byte[] uncompressedContent, string contentMimeType)
+        public StaticContentResult(byte[] uncompressedContent, string fileName)
         {
-            this.ContentType = contentMimeType;
+            this.ContentType = MimeType.FromFileName(fileName);
             this.Uncompressed = uncompressedContent;
-        }
-
-        public ScriptContentResult(string content, string contentMimeType)
-        {
-            IsText = true; 
-            this.ContentType = contentMimeType;
-            this.Uncompressed = Encoding.UTF8.GetBytes(content);
         }
 
         public override void ExecuteResult(ControllerContext context)
         {
-           HttpResponseBase response = context.HttpContext.Response;
-                HttpRequestBase request = context.HttpContext.Request;
+            HttpResponseBase response = context.HttpContext.Response;
+            HttpRequestBase request = context.HttpContext.Request;
 
-                response.AppendHeader("Vary", "Accept-Encoding");
-                response.Cache.SetCacheability(HttpCacheability.Public);
-                //response.Cache.SetExpires(DateTime.Now.Add(CacheDuration));   //redundant
-                response.Cache.SetMaxAge(CacheDuration);
+            response.AppendHeader("Vary", "Accept-Encoding");
+            response.Cache.SetCacheability(HttpCacheability.Public);
+            //response.Cache.SetExpires(DateTime.Now.Add(CacheDuration));   //redundant
+            response.Cache.SetMaxAge(CacheDuration);
 
-                if (!VersionChanged(request, ScriptHtmlHelper.Manager.LastModified))
-                {
-                    response.StatusCode = 304;
-                    response.SuppressContent = true;
-                    return;
-                }
+            if (!VersionChanged(request, ScriptHtmlHelper.Manager.LastModified))
+            {
+                response.StatusCode = 304;
+                response.SuppressContent = true;
+                return;
+            }
 
-                bool canGZip = CanGZip(context.HttpContext.Request);
+            bool canGZip = CanGZip(context.HttpContext.Request);
 
-                byte[] bytes = canGZip ? (Compressed ?? (Compressed = Compress())) : Uncompressed;
+            byte[] bytes = canGZip ? (Compressed ?? (Compressed = Compress())) : Uncompressed;
 
-                response.AppendHeader("Content-Length", bytes.Length.ToString());
-                if (canGZip)
-                    response.AppendHeader("Content-Encoding", "gzip");
-                else if (IsText)
-                {
-                    response.ContentEncoding = Encoding.Unicode;
-                }
+            response.AppendHeader("Content-Length", bytes.Length.ToString());
+            if (canGZip)
+                response.AppendHeader("Content-Encoding", "gzip");
+            else if (IsText)
+            {
+                response.ContentEncoding = Encoding.Unicode;
+            }
 
-                response.Cache.SetLastModified(ScriptHtmlHelper.Manager.LastModified);
+            response.Cache.SetLastModified(ScriptHtmlHelper.Manager.LastModified);
 
-                response.ContentType = ContentType;
-                response.OutputStream.Write(bytes, 0, bytes.Length);
-                response.Flush();
-           
+            response.ContentType = ContentType;
+            response.OutputStream.Write(bytes, 0, bytes.Length);
+            response.Flush();
         }
 
         private bool VersionChanged(HttpRequestBase request, DateTime contentModified)
@@ -96,7 +87,7 @@ namespace Signum.Web.PortableAreas
                         uncompressedStream.CopyTo(stream);
                     }
                 }
-                
+
                 return memoryStream.ToArray();
             }
         }

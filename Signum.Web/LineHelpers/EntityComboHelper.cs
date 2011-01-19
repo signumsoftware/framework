@@ -108,12 +108,12 @@ namespace Signum.Web
             return sb.ToHtml();
         }
 
-        public static void EntityCombo<T,S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property) 
+        public static MvcHtmlString EntityCombo<T,S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property) 
         {
-            helper.EntityCombo<T, S>(tc, property, null);
+            return helper.EntityCombo<T, S>(tc, property, null);
         }
 
-        public static void EntityCombo<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property, Action<EntityCombo> settingsModifier)
+        public static MvcHtmlString EntityCombo<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property, Action<EntityCombo> settingsModifier)
         {
             TypeContext<S> context = Common.WalkExpression(tc, property);
 
@@ -126,23 +126,20 @@ namespace Signum.Web
             if (settingsModifier != null)
                 settingsModifier(ec);
 
-            helper.Write(helper.InternalEntityCombo(ec));
+            return helper.InternalEntityCombo(ec);
         }
 
-        public static string RenderOption(this SelectListItem item)
+        public static MvcHtmlString RenderOption(this SelectListItem item)
         {
-            TagBuilder builder = new TagBuilder("option")
-            {
-                InnerHtml = HttpUtility.HtmlEncode(item.Text),
-            };
+            HtmlTag builder = new HtmlTag("option").SetInnerText(item.Text);
 
             if (item.Value != null)
-                builder.Attributes["value"] = item.Value;
+                builder.Attr("value", item.Value);
 
             if (item.Selected)
-                builder.Attributes["selected"] = "selected";
+                builder.Attr("selected", "selected");
 
-            return builder.ToString(TagRenderMode.Normal);
+            return builder.ToHtml();
         }
 
         public static SelectListItem ToSelectListItem(this Lite lite, bool selected)
@@ -150,7 +147,7 @@ namespace Signum.Web
             return new SelectListItem { Text = lite.ToStr, Value = lite.Id.ToString(), Selected = selected };
         }
 
-        public static string ToOptions<T>(this IEnumerable<Lite<T>> lites, Lite<T> selectedElement) where T : class, IIdentifiable
+        public static MvcHtmlString ToOptions<T>(this IEnumerable<Lite<T>> lites, Lite<T> selectedElement) where T : class, IIdentifiable
         {
             List<SelectListItem> list = new List<SelectListItem>();
 
@@ -158,8 +155,8 @@ namespace Signum.Web
                 list.Add(new SelectListItem { Text = "-", Value = "" });
 
             list.AddRange(lites.Select(l => l.ToSelectListItem(l.Is(selectedElement))));
-     
-            return list.ToString(RenderOption, "\r\n");
+
+            return new HtmlStringBuilder( list.Select(RenderOption)).ToHtml();
         }
     }
 }
