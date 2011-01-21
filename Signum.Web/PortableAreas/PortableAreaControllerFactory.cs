@@ -65,7 +65,6 @@ namespace Signum.Web.PortableAreas
             if (MainAssembly == null)
                 throw new InvalidOperationException("PortableAreaControllers.MainAssembly is not set");
 
-
             areaName = null;
 
             if (type == null)
