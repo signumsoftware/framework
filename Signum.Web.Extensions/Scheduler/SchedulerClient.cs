@@ -22,6 +22,8 @@ namespace Signum.Web.Extensions.Scheduler
 {
     public static class SchedulerClient
     {
+        public static string ViewPrefix = "~/scheduler/Views/{0}.cshtml";
+
         public static void Start()
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -30,15 +32,15 @@ namespace Signum.Web.Extensions.Scheduler
                 
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<ScheduleRuleDailyDN>(EntityType.Default) { PartialViewName = _ => RouteHelper.AreaView("ScheduleRuleDaily", "Scheduler") },
-                    new EntitySettings<CustomTaskExecutionDN>(EntityType.Default){ PartialViewName = _ => RouteHelper.AreaView("CustomTaskExecution", "Scheduler") },
-                    new EntitySettings<ScheduledTaskDN>(EntityType.Default){ PartialViewName = _ => RouteHelper.AreaView("ScheduledTask", "Scheduler") },
-                    new EntitySettings<ScheduleRuleWeeklyDN >(EntityType.Default){ PartialViewName = _ => RouteHelper.AreaView("ScheduleRuleWeekly", "Scheduler") },
-                    new EntitySettings<ScheduleRuleWeekDaysDN>(EntityType.Default){ PartialViewName = _ => RouteHelper.AreaView("ScheduleRuleWeekDays", "Scheduler") },
-                    new EmbeddedEntitySettings<HolidayDN>(){ PartialViewName = _ => RouteHelper.AreaView("Holiday", "Scheduler") },
-                    new EntitySettings<CalendarDN>(EntityType.Default){ PartialViewName = _ => RouteHelper.AreaView("Calendar", "Scheduler") },
-                    new EntitySettings<CustomTaskDN>(EntityType.Default){ PartialViewName = _ => RouteHelper.AreaView("CustomTask", "Scheduler") },
-                   // new EntitySettings<ScheduleRuleDayDN>(EntityType.Default){ PartialViewName = _ => RouteHelper.AreaView("Calendar", "Scheduler") },
+                    new EntitySettings<ScheduleRuleDailyDN>(EntityType.Default) { PartialViewName = _ => ViewPrefix.Formato("ScheduleRuleDaily") },
+                    new EntitySettings<CustomTaskExecutionDN>(EntityType.Default){ PartialViewName = _ => ViewPrefix.Formato("CustomTaskExecution") },
+                    new EntitySettings<ScheduledTaskDN>(EntityType.Default){ PartialViewName = _ => ViewPrefix.Formato("ScheduledTask") },
+                    new EntitySettings<ScheduleRuleWeeklyDN >(EntityType.Default){ PartialViewName = _ => ViewPrefix.Formato("ScheduleRuleWeekly") },
+                    new EntitySettings<ScheduleRuleWeekDaysDN>(EntityType.Default){ PartialViewName = _ => ViewPrefix.Formato("ScheduleRuleWeekDays") },
+                    new EmbeddedEntitySettings<HolidayDN>(){ PartialViewName = _ => ViewPrefix.Formato("Holiday") },
+                    new EntitySettings<CalendarDN>(EntityType.Default){ PartialViewName = _ => ViewPrefix.Formato("Calendar") },
+                    new EntitySettings<CustomTaskDN>(EntityType.Default){ PartialViewName = _ => ViewPrefix.Formato("CustomTask") },
+                   // new EntitySettings<ScheduleRuleDayDN>(EntityType.Default){ PartialViewName = _ => ViewPrefix.Formato("Calendar") },
                 });
             }
         }

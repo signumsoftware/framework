@@ -25,7 +25,9 @@ using Signum.Entities.Processes;
 namespace Signum.Web.Processes
 {
     public static class ProcessesClient
-    {   
+    {
+        public static string ViewPrefix = "~/processes/Views/{0}.cshtml";
+
         public static void Start()
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -34,10 +36,10 @@ namespace Signum.Web.Processes
 
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<ProcessExecutionDN>(EntityType.Default){ PartialViewName = e => RouteHelper.AreaView("ProcessExecution", "Processes"), },
-                    new EntitySettings<ProcessDN>(EntityType.Default){ PartialViewName = e => RouteHelper.AreaView("Process", "Processes")},
-                    new EntitySettings<PackageDN>(EntityType.Default){ PartialViewName = e => RouteHelper.AreaView("Package", "Processes")},
-                    new EntitySettings<PackageLineDN>(EntityType.Default){ PartialViewName = e => RouteHelper.AreaView("PackageLine", "Processes")},
+                    new EntitySettings<ProcessExecutionDN>(EntityType.Default){ PartialViewName = e => ViewPrefix.Formato("ProcessExecution"), },
+                    new EntitySettings<ProcessDN>(EntityType.Default){ PartialViewName = e => ViewPrefix.Formato("Process")},
+                    new EntitySettings<PackageDN>(EntityType.Default){ PartialViewName = e => ViewPrefix.Formato("Package")},
+                    new EntitySettings<PackageLineDN>(EntityType.Default){ PartialViewName = e => ViewPrefix.Formato("PackageLine")},
                 });
             }
         }

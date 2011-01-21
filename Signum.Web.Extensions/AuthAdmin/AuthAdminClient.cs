@@ -23,21 +23,24 @@ namespace Signum.Web.AuthAdmin
 {
     public static class AuthAdminClient
     {
+        public static string ViewPrefix = "~/authAdmin/Views/{0}.cshtml";
+
         public static void Start(bool types, bool properties, bool queries, bool operations, bool permissions, bool facadeMethods, bool entityGroups)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 Navigator.RegisterArea(typeof(AuthAdminClient));
 
+
                 if (Navigator.Manager.EntitySettings.ContainsKey(typeof(UserDN)))
-                    Navigator.EntitySettings<UserDN>().PartialViewName = _ => RouteHelper.AreaView("User", "authAdmin");
+                    Navigator.EntitySettings<UserDN>().PartialViewName = _ => ViewPrefix.Formato("User");
                 else
-                    Navigator.AddSetting(new EntitySettings<UserDN>(EntityType.Default) { PartialViewName = _ => RouteHelper.AreaView("User", "authAdmin") });
+                    Navigator.AddSetting(new EntitySettings<UserDN>(EntityType.Default) { PartialViewName = _ => ViewPrefix.Formato("User") });
 
                 if (Navigator.Manager.EntitySettings.ContainsKey(typeof(RoleDN)))
-                    Navigator.EntitySettings<RoleDN>().PartialViewName = _ => RouteHelper.AreaView("Role", "authAdmin"); 
+                    Navigator.EntitySettings<RoleDN>().PartialViewName = _ => ViewPrefix.Formato("Role"); 
                 else
-                    Navigator.AddSetting(new EntitySettings<RoleDN>(EntityType.Admin) { PartialViewName = _ => RouteHelper.AreaView("Role", "authAdmin") });
+                    Navigator.AddSetting(new EntitySettings<RoleDN>(EntityType.Admin) { PartialViewName = _ => ViewPrefix.Formato("Role") });
 
                 if (types)
                 {
@@ -128,10 +131,11 @@ namespace Signum.Web.AuthAdmin
         {
             if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(R)))
                 Navigator.AddSetting(new EntitySettings<R>(EntityType.ServerOnly));
-
+            
+            string viewPrefix = "~/authAdmin/Views/{0}.cshtml";
             Navigator.AddSetting(new EmbeddedEntitySettings<T>()
             {
-                PartialViewName = e => RouteHelper.AreaView(partialViewName, "authAdmin"),
+                PartialViewName = e =>  viewPrefix.Formato(partialViewName),
                 MappingDefault = new EntityMapping<T>(false)
                     .CreateProperty(m => m.DefaultRule)
                     .SetProperty(m => m.Rules,

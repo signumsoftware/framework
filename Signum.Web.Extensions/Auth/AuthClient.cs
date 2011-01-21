@@ -34,18 +34,20 @@ namespace Signum.Web.Auth
 
         public static string CookieName = "sfUser";
         
-        public static string LoginUrl = RouteHelper.AreaView("Login", "auth");
-        public static string LoginUserControlUrl = RouteHelper.AreaView("LoginUserControl", "Auth");
-        public static string ChangePasswordUrl = RouteHelper.AreaView( "ChangePassword", "auth");
-        public static string ChangePasswordSuccessUrl = RouteHelper.AreaView("ChangePasswordSuccess", "auth");
+        public static string ViewPrefix = "~/auth/Views/{0}.cshtml";
 
-        public static string ResetPasswordUrl = RouteHelper.AreaView("ResetPassword", "auth");
-        public static string ResetPasswordSendUrl = RouteHelper.AreaView( "ResetPasswordSend", "auth");
-        public static string ResetPasswordSuccessUrl = RouteHelper.AreaView( "ResetPasswordSuccess", "auth");
-        public static string ResetPasswordSetNewUrl = RouteHelper.AreaView( "ResetPasswordSetNew", "auth");
+        public static string LoginUrl = ViewPrefix.Formato("Login");
+        public static string LoginUserControlUrl = ViewPrefix.Formato("LoginUserControl");
+        public static string ChangePasswordUrl = ViewPrefix.Formato("ChangePassword");
+        public static string ChangePasswordSuccessUrl = ViewPrefix.Formato("ChangePasswordSuccess");
 
-        public static string RememberPasswordUrl = RouteHelper.AreaView( "RememberPassword", "auth");
-        public static string RememberPasswordSuccessUrl = RouteHelper.AreaView("RememberPasswordSuccess", "auth");
+        public static string ResetPasswordUrl = ViewPrefix.Formato("ResetPassword");
+        public static string ResetPasswordSendUrl = ViewPrefix.Formato("ResetPasswordSend");
+        public static string ResetPasswordSuccessUrl = ViewPrefix.Formato("ResetPasswordSuccess");
+        public static string ResetPasswordSetNewUrl = ViewPrefix.Formato("ResetPasswordSetNew");
+
+        public static string RememberPasswordUrl = ViewPrefix.Formato("RememberPassword");
+        public static string RememberPasswordSuccessUrl = ViewPrefix.Formato("RememberPasswordSuccess");
 
         public static bool ResetPasswordStarted;
 

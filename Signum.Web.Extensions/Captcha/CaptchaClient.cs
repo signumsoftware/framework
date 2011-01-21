@@ -4,13 +4,16 @@ using System.Linq;
 using System.Text;
 using System.Drawing;
 using System.Reflection;
+using Signum.Utilities;
 
 namespace Signum.Web.Captcha
 {
     public static class CaptchaClient
     {
-        public static string CaptchaUrl = RouteHelper.AreaView("captcha", "captcha");
-        public static string CaptchaImageUrl = RouteHelper.AreaView("captchaImage", "captcha");
+        public static string ViewPrefix = "~/captcha/Views/{0}.cshtml";
+        
+        public static string CaptchaUrl = ViewPrefix.Formato("captcha");
+        public static string CaptchaImageUrl = ViewPrefix.Formato("captchaImage");
 
         public static void Start()
         {

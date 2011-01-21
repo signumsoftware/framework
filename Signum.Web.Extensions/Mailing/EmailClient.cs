@@ -23,16 +23,18 @@ namespace Signum.Web.Mailing
 {
     public static class MailingClient
     {
+        public static string ViewPrefix = "~/Mailing/Views/{0}.cshtml";
+
+
         public static void Start()
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 Navigator.RegisterArea(typeof(MailingClient));
-
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<EmailMessageDN>(EntityType.Default){ PartialViewName = e => RouteHelper.AreaView("EmailMessage", "Mailing")},
-                    new EntitySettings<EmailPackageDN>(EntityType.Default){ PartialViewName = e => RouteHelper.AreaView("EmailPackage", "Mailing")},
+                    new EntitySettings<EmailMessageDN>(EntityType.Default){ PartialViewName = e => ViewPrefix.Formato("EmailMessage")},
+                    new EntitySettings<EmailPackageDN>(EntityType.Default){ PartialViewName = e => ViewPrefix.Formato("EmailPackage")},
                     new EntitySettings<EmailTemplateDN>(EntityType.ServerOnly)
                 });
             }

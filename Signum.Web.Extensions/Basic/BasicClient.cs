@@ -7,18 +7,21 @@ using Signum.Services;
 using System.Reflection;
 using Signum.Entities.Extensions.Basics;
 using Signum.Utilities.Reflection;
+using Signum.Utilities;
 
 namespace Signum.Web.Basic
 {
     public static class BasicClient
     {
+        public static string ViewPrefix = "~/basic/Views/{0}.cshtml";
+
         public static void Start()
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 Navigator.RegisterArea(typeof(BasicClient));
-
-                Navigator.AddSetting(new EmbeddedEntitySettings<DateSpanDN>() { PartialViewName = _ => RouteHelper.AreaView("DateSpan", "basic") });
+               
+                Navigator.AddSetting(new EmbeddedEntitySettings<DateSpanDN>() { PartialViewName = _ => ViewPrefix.Formato("DateSpan") });
             }
         }
     }

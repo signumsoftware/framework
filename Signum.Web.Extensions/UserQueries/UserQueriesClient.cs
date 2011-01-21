@@ -33,12 +33,13 @@ namespace Signum.Web.Queries
                 RouteTable.Routes.MapRoute(null, "UQ/{webQueryName}/{id}",
                     new { controller = "Queries", action = "ViewUserQuery" });
 
+                string viewPrefix = "~/UserQueries/Views/{0}.cshtml";
                 Navigator.AddSettings(new List<EntitySettings>{
-                    new EntitySettings<UserQueryDN>(EntityType.NotSaving) { PartialViewName = e => RouteHelper.AreaView("UserQuery", "UserQueries") },
+                    new EntitySettings<UserQueryDN>(EntityType.NotSaving) { PartialViewName = e => viewPrefix.Formato("UserQuery") },
                     
                     new EmbeddedEntitySettings<QueryFilterDN>()
                     { 
-                        PartialViewName = e => RouteHelper.AreaView("QueryFilter", "UserQueries"), 
+                        PartialViewName = e => viewPrefix.Formato("QueryFilter"), 
                         MappingDefault = new EntityMapping<QueryFilterDN>(true)
                         {
                             GetValue = ctx => 
@@ -65,7 +66,7 @@ namespace Signum.Web.Queries
 
                     new EmbeddedEntitySettings<QueryColumnDN>()
                     { 
-                        PartialViewName = e => RouteHelper.AreaView("QueryColumn", "UserQueries"), 
+                        PartialViewName = e => viewPrefix.Formato("QueryColumn"), 
                         MappingDefault = new EntityMapping<QueryColumnDN>(true)
                         {
                             GetValue = ctx => 
@@ -90,7 +91,7 @@ namespace Signum.Web.Queries
 
                     new EmbeddedEntitySettings<QueryOrderDN>()
                     { 
-                        PartialViewName = e => RouteHelper.AreaView("QueryOrder", "UserQueries"), 
+                        PartialViewName = e => viewPrefix.Formato("QueryOrder"), 
                         MappingDefault = new EntityMapping<QueryOrderDN>(true)
                         {
                             GetValue = ctx => 

@@ -36,10 +36,11 @@ namespace Signum.Web.Reports
 
                 Navigator.RegisterArea(typeof(ReportsClient));
 
+                string viewPrefix = "~/Reports/Views/{0}.cshtml";
                 Navigator.AddSettings(new List<EntitySettings>{
                     new EntitySettings<ExcelReportDN>(EntityType.NotSaving) 
                     { 
-                        PartialViewName = _ => RouteHelper.AreaView("ExcelReport", "Reports"),
+                        PartialViewName = _ => viewPrefix.Formato("ExcelReport"),
                         MappingAdmin = new EntityMapping<ExcelReportDN>(true)  
                         { 
                             GetEntity = ctx => 

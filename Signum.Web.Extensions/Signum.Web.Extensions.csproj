@@ -459,7 +459,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>UserQuery.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Reports\ReportClient.cs" />
+    <Compile Include="Reports\ReportsClient.cs" />
     <Compile Include="Reports\Controllers\ReportController.cs" />
     <Compile Include="ControllerFilters\FilterAttributes.cs" />
     <Compile Include="Reports\Views\ExcelReport.cs">
