@@ -6,6 +6,7 @@ using System.Web.Mvc;
 using Signum.Entities.Authorization;
 using Signum.Engine.ControlPanel;
 using Signum.Web.ControlPanel;
+using Signum.Utilities;
 
 namespace Signum.Web.Extensions.Sample.Controllers
 {
@@ -19,7 +20,7 @@ namespace Signum.Web.Extensions.Sample.Controllers
 
             var panel = ControlPanelLogic.GetHomePageControlPanel();
             if (panel != null)
-                return View(RouteHelper.AreaView("ControlPanel", "ControlPanel"), panel);
+                return View(ControlPanelClient.ViewPrefix.Formato("ControlPanel"));
             else
                 return View();
         }

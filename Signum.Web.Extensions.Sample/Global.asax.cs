@@ -47,6 +47,12 @@ namespace Signum.Web.Extensions.Sample
                 new { controller = "Signum", action = "Find", webQueryName = "" }
             );
 
+            RouteTable.Routes.MapRoute(
+                 "EmbeddedResources",
+                 "{*file}",
+                 new { controller = "Resources", action = "GetFile" },
+                 new { file = new EmbeddedFileExist() }
+            );
             
             routes.MapRoute(
                 "Default",                                              // Route name
@@ -59,12 +65,7 @@ namespace Signum.Web.Extensions.Sample
         {   
             Signum.Test.Extensions.Starter.Start(UserConnections.Replace(Settings.Default.ConnectionString));
 
-            RouteTable.Routes.MapRoute(
-               "EmbeddedResources",
-               "{*file}",
-               new { controller = "Resources", action = "GetFile" },
-               new { file = new EmbeddedFileExist() }
-            );
+      
 
             using (AuthLogic.Disable())
             {
@@ -74,8 +75,6 @@ namespace Signum.Web.Extensions.Sample
 
             RegisterRoutes(RouteTable.Routes);
 
-            PortableAreaControllers.MainAssembly = Assembly.GetExecutingAssembly();
-            //RouteDebug.RouteDebugger.RewriteRoutesForTesting(RouteTable.Routes);
         }
 
         private void LinkTypesAndViews()
@@ -97,6 +96,7 @@ namespace Signum.Web.Extensions.Sample
 
             //Combiner.Start();
             ScriptHtmlHelper.Manager.MainAssembly = typeof(MusicClient).Assembly;
+            PortableAreaControllers.MainAssembly = Assembly.GetExecutingAssembly();
 
             Navigator.Initialize();
         }
