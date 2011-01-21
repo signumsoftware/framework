@@ -481,19 +481,20 @@ namespace Signum.Web
         public Dictionary<Type, EntitySettings> EntitySettings {get;set;}
         public Dictionary<object, QuerySettings> QuerySettings {get;set;}
 
+        public static string ViewPrefix = "~/signum/Views/{0}.cshtml";
 
-        public string AjaxErrorPageUrl = RouteHelper.AreaView("AjaxError", "signum");
-        public string ErrorPageUrl = RouteHelper.AreaView("Error", "signum");
-        public string NormalPageUrl = RouteHelper.AreaView("NormalPage", "signum");
-        public string NormalControlUrl = RouteHelper.AreaView("NormalControl", "signum");
-        public string PopupControlUrl = RouteHelper.AreaView("PopupControl", "signum");
-        public string ChooserPopupUrl = RouteHelper.AreaView("ChooserPopup", "signum");
-        public string SearchPopupControlUrl = RouteHelper.AreaView("SearchPopupControl", "signum");
-        public string SearchWindowUrl = RouteHelper.AreaView( "SearchWindow", "signum");
-        public string SearchControlUrl = RouteHelper.AreaView( "SearchControl", "signum");
-        public string SearchResultsUrl = RouteHelper.AreaView("SearchResults", "signum");
-        public string FilterBuilderUrl = RouteHelper.AreaView("FilterBuilder", "signum");
-        public string ValueLineBoxUrl = RouteHelper.AreaView("ValueLineBox", "signum");
+        public string AjaxErrorPageUrl = ViewPrefix.Formato("AjaxError");
+        public string ErrorPageUrl = ViewPrefix.Formato("Error");
+        public string NormalPageUrl = ViewPrefix.Formato("NormalPage");
+        public string NormalControlUrl = ViewPrefix.Formato("NormalControl");
+        public string PopupControlUrl = ViewPrefix.Formato("PopupControl");
+        public string ChooserPopupUrl = ViewPrefix.Formato("ChooserPopup");
+        public string SearchPopupControlUrl = ViewPrefix.Formato("SearchPopupControl");
+        public string SearchWindowUrl = ViewPrefix.Formato("SearchWindow");
+        public string SearchControlUrl = ViewPrefix.Formato("SearchControl");
+        public string SearchResultsUrl = ViewPrefix.Formato("SearchResults");
+        public string FilterBuilderUrl = ViewPrefix.Formato("FilterBuilder");
+        public string ValueLineBoxUrl = ViewPrefix.Formato("ValueLineBox");
         
         protected Dictionary<string, Type> WebTypeNames { get; private set; }
         protected Dictionary<string, object> WebQueryNames { get; private set; }

@@ -9,6 +9,7 @@ using System.Web.Routing;
 using System.Reflection;
 using System.Collections.Generic;
 using Signum.Utilities;
+using System.Web.WebPages;
 
 namespace Signum.Web
 {
@@ -30,11 +31,6 @@ namespace Signum.Web
             var requestContext = new RequestContext(httpContextBase, routeData);
 
             return new UrlHelper(requestContext);
-        }
-
-        public static string AreaView(string view, string area)
-        {
-            return "~/{0}/Views/{1}.cshtml".Formato(area, view); 
         }
     }
 
