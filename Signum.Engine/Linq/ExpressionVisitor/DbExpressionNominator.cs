@@ -272,6 +272,20 @@ namespace Signum.Engine.Linq
             return result;
         }
 
+        private Expression TrySqlTrim(Expression expression)
+        {
+            Expression expr = Visit(expression);
+            if (innerProjection || !candidates.Contains(expr))
+                return null;
+
+            Expression result =
+                TrySqlFunction(SqlFunction.LTRIM, expression.Type,
+                      TrySqlFunction(SqlFunction.RTRIM, expression.Type, expression));
+
+            candidates.Add(result);
+            return result;
+        }
+
         Expression Convert(Expression exp, Type type)
         {
             return new SqlFunctionExpression(type, SqlFunction.CONVERT.ToString(), new[]{exp, 
@@ -624,6 +638,7 @@ namespace Signum.Engine.Linq
                 case "string.ToUpper": return TrySqlFunction(SqlFunction.UPPER, m.Type, m.Object);
                 case "string.TrimStart": return TrySqlFunction(SqlFunction.LTRIM, m.Type, m.Object);
                 case "string.TrimEnd": return TrySqlFunction(SqlFunction.RTRIM, m.Type, m.Object);
+                case "string.Trim": return TrySqlTrim(m.Object);
                 case "string.Replace": return TrySqlFunction(SqlFunction.REPLACE, m.Type, m.Object, m.GetArgument("oldValue"), m.GetArgument("newValue"));
                 case "string.Substring": return TrySqlFunction(SqlFunction.SUBSTRING, m.Type, m.Object, Expression.Add(m.GetArgument("startIndex"), new SqlConstantExpression(1)), m.TryGetArgument("length") ?? new SqlConstantExpression(int.MaxValue));
                 case "string.Contains": return TryLike(m.Object, Expression.Add(Expression.Add(Expression.Constant("%"), m.GetArgument("value"), c), Expression.Constant("%"), c));
