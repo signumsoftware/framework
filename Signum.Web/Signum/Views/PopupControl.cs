@@ -45,7 +45,7 @@ namespace ASP
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Signum/Views/PopupControl.cshtml")]
-    public class _Page_Signum_Views_PopupControl_cshtml : System.Web.Mvc.WebViewPage<dynamic>
+    public class _Page_Signum_Views_PopupControl_cshtml : System.Web.Mvc.WebViewPage<TypeContext>
     {
 #line hidden
 
@@ -63,165 +63,63 @@ namespace ASP
         {
 
 
-   TypeContext modelTC = (TypeContext)ViewData.Model;
-
 WriteLiteral("<div id=\"");
 
 
-    Write(modelTC.Compose("externalPopupDiv"));
+    Write(Model.Compose("panelPopup"));
 
-WriteLiteral("\">\r\n    <div class=\"transparent popupBackground\">\r\n    </div>\r\n    <div id=\"");
-
-
-        Write(modelTC.Compose("panelPopup"));
-
-WriteLiteral("\" class=\"popupWindow\">\r\n");
+WriteLiteral("\" data-title=\"");
 
 
-         if (ViewData[ViewDataKeys.OnCancel] != null)
-        {
+                                              Write(ViewBag.Title);
 
-WriteLiteral("            <div class=\"closebox\" id=\"");
-
-
-                                 Write(modelTC.Compose(ViewDataKeys.BtnCancel));
-
-WriteLiteral("\" onclick=\"");
+WriteLiteral("\">\r\n    <div class=\"button-bar\">\r\n");
 
 
-                                                                                    Write(ViewData[ViewDataKeys.OnCancel]);
+         if (Model != null && Navigator.Manager.ShowOkSave(Model.UntypedValue.GetType(), false))
+        {  
 
-WriteLiteral("\">\r\n            </div>\r\n");
-
-
-        }
-        else
-        {
-
-WriteLiteral("            <div class=\"closebox\" id=\"");
+WriteLiteral("            <button id=\"");
 
 
-                                 Write(modelTC.Compose(ViewDataKeys.BtnCancel));
+                   Write(Model.Compose("btnOk"));
 
-WriteLiteral("\">\r\n            </div>\r\n");
+WriteLiteral("\" class=\"entity-button ok-button\" ");
+
+
+                                                                             Write(ViewData[ViewDataKeys.OnOk] != null ? Html.Raw("onclick=\"" + ViewData[ViewDataKeys.OnOk] + "\"") : null);
+
+WriteLiteral(">\r\n                OK</button>                \r\n");
 
 
         }
 
-WriteLiteral("        <div id=\"");
+WriteLiteral("        ");
 
 
-            Write(modelTC.Compose("divPopupDragHandle"));
+   Write(ButtonBarEntityHelper.GetForEntity(this.ViewContext, (ModifiableEntity)Model.UntypedValue, ViewData[ViewDataKeys.PartialViewName].ToString(), Model.ControlID).ToString(Html));
 
-WriteLiteral("\" class=\"dragHandle\">\r\n");
-
-
-               string pageTitle = (string)ViewData[ViewDataKeys.Title];
+WriteLiteral("\r\n    </div>\r\n    ");
 
 
-             if (pageTitle != null)
-            {
+Write(Html.ValidationSummaryAjax(Model));
 
-WriteLiteral("                <span class=\"popupEntityName\">");
-
-
-                                         Write(pageTitle);
-
-WriteLiteral("</span>\r\n");
+WriteLiteral("\r\n    ");
 
 
-            }
-            else
-            {
+Write(Html.PopupHeader());
 
-WriteLiteral("                <span class=\"popupEntityName\">");
+WriteLiteral("\r\n    <div id=\"");
 
 
-                                         Write(modelTC.UntypedValue.GetType().NiceName());
-
-WriteLiteral("</span> ");
-
-
-
-WriteLiteral("<span\r\n                    class=\"popupTitle\">");
-
-
-                                  Write(modelTC.UntypedValue.TryToString());
-
-WriteLiteral("</span>\r\n");
-
-
-            }
-
-WriteLiteral("        </div>\r\n        <ul class=\"button-bar\">\r\n");
-
-
-             if (Model != null && Navigator.Manager.ShowOkSave(modelTC.UntypedValue.GetType(), false))
-            {
-                if (ViewData[ViewDataKeys.OnOk] != null)
-                {
-
-WriteLiteral("                <li>\r\n                    <input type=\"button\" id=\"");
-
-
-                                        Write(modelTC.Compose(ViewDataKeys.BtnOk));
-
-WriteLiteral("\" value=\"OK\" onclick=\"");
-
-
-                                                                                                  Write(ViewData[ViewDataKeys.OnOk]);
-
-WriteLiteral("\" /></li>\r\n");
-
-
-                }
-                else
-                {
-
-WriteLiteral("                <li>\r\n                    <input type=\"button\" id=\"");
-
-
-                                        Write(modelTC.Compose(ViewDataKeys.BtnOk));
-
-WriteLiteral("\" value=\"OK\" /></li>\r\n");
-
-
-                }
-            }
-
-WriteLiteral("            ");
-
-
-       Write(ButtonBarEntityHelper.GetForEntity(this.ViewContext, (ModifiableEntity)modelTC.UntypedValue, ViewData[ViewDataKeys.PartialViewName].ToString(), modelTC.ControlID).ToString(Html));
-
-WriteLiteral("\r\n        </ul>\r\n        ");
-
-
-   Write(Html.ValidationSummaryAjax(modelTC));
-
-WriteLiteral("\r\n        ");
-
-
-   Write(Html.PopupHeader());
-
-WriteLiteral("\r\n        <div id=\"");
-
-
-            Write(modelTC.Compose("divMainControl"));
+        Write(Model.Compose("divMainControl"));
 
 WriteLiteral("\" class=\"divMainControl\">\r\n");
 
 
-               Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString(), (object)Model);
+           Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString(), Model);
 
-WriteLiteral("        </div>\r\n    </div>\r\n</div>\r\n");
-
-
-Write(Html.DynamicJs("~/signum/Scripts/SF_DragAndDrop.js").Callback(@"function () {{
-     SF.DragAndDrop(document.getElementById(""{0}""), document.getElementById(""{1}""));}}"
-                .Formato(modelTC.Compose("divPopupDragHandle"), modelTC.Compose("panelPopup"))));
-
-WriteLiteral("\r\n");
+WriteLiteral("    </div>\r\n</div>\r\n");
 
 
         }

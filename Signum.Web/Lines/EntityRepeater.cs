@@ -40,7 +40,7 @@ namespace Signum.Web
 
         public override string ToJS()
         {
-            return "new ERep(" + this.OptionsJS() + ")";
+            return "new SF.ERep(" + this.OptionsJS() + ")";
         }
 
         protected override JsOptionsBuilder OptionsJSInternal()
@@ -52,42 +52,44 @@ namespace Signum.Web
             return result;
         }
 
-        protected override string DefaultViewing()
+        protected override string DefaultView()
         {
             return null;
         }
 
-        protected override string DefaultCreating()
+        protected override string DefaultCreate()
         {
-            return EntityRepeater.JsCreating(this, DefaultJsViewOptions()).ToJS();
+            return EntityRepeater.JsCreate(this, DefaultJsViewOptions()).ToJS();
         }
 
-        public static JsInstruction JsCreating(EntityRepeater erep, JsViewOptions viewOptions)
+        public static JsInstruction JsCreate(EntityRepeater erep, JsViewOptions viewOptions)
         {
             if (viewOptions.ControllerUrl == null)
                 viewOptions.ControllerUrl = RouteHelper.New().SignumAction("PartialView");
 
-            return new JsInstruction(() => "ERepOnCreating({0})".Formato(",".Combine(
-                erep.ToJS(),
+            string createParams = ",".Combine(
                 viewOptions.TryCC(v => v.ToJS()),
-                erep.HasManyImplementations ? RouteHelper.New().SignumAction("GetTypeChooser").SingleQuote() : null)));
+                erep.HasManyImplementations ? RouteHelper.New().SignumAction("GetTypeChooser").SingleQuote() : null);
+
+            return new JsInstruction(() => "{0}.create({1})".Formato(erep.ToJS(), createParams));
         }
 
-        protected override string DefaultFinding()
+        protected override string DefaultFind()
         {
-            return EntityRepeater.JsFinding(this, DefaultJsfindOptions(), DefaultJsViewOptions()).ToJS();
+            return EntityRepeater.JsFind(this, DefaultJsfindOptions(), DefaultJsViewOptions()).ToJS();
         }
 
-        public static JsInstruction JsFinding(EntityRepeater erep, JsFindOptions findOptions, JsViewOptions viewOptions)
+        public static JsInstruction JsFind(EntityRepeater erep, JsFindOptions findOptions, JsViewOptions viewOptions)
         {
-            return new JsInstruction(() => "ERepOnFinding({0})".Formato(",".Combine(
-                erep.ToJS(),
-                findOptions.TryCC(f => f.ToJS()),
+            string findParams = ",".Combine(
+                findOptions.TryCC(v => v.ToJS()),
                 viewOptions.TryCC(v => v.ToJS()),
-                erep.HasManyImplementations ? RouteHelper.New().SignumAction("GetTypeChooser").SingleQuote() : null)));
+                erep.HasManyImplementations ? RouteHelper.New().SignumAction("GetTypeChooser").SingleQuote() : null);
+
+            return new JsInstruction(() => "{0}.find({1})".Formato(erep.ToJS(), findParams));
         }
 
-        protected override string DefaultRemoving()
+        protected override string DefaultRemove()
         {
             return null;
         }

@@ -72,9 +72,9 @@ namespace Signum.Web
                     sb.AddLine(
                         helper.Href(itemTC.Compose("btnRemove"),
                                     entityRepeater.RemoveElementLinkText,
-                                    "javascript:ERepOnRemoving({0}, '{1}');".Formato(entityRepeater.ToJS(), itemTC.ControlID),
+                                    "javascript:new SF.ERep({0}).remove('{1}');".Formato(entityRepeater.ToJS(), itemTC.ControlID),
                                     entityRepeater.RemoveElementLinkText,
-                                    "lineButton remove",
+                                    "sf-line-button sf-remove",
                                     null));
 
                 sb.AddLine(helper.Div("", null, "clearall", null)); //To keep remove button space

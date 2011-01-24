@@ -2,9 +2,9 @@
 @using Signum.Entities.Reflection
 @using Signum.Web.Properties
 @using Signum.Engine
+@model Context
 
-@{ Context context = (Context)Model;
-   FindOptions findOptions = (FindOptions)ViewData[ViewDataKeys.FindOptions];
+@{ FindOptions findOptions = (FindOptions)ViewData[ViewDataKeys.FindOptions];
    QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
    Type entitiesType = Reflector.ExtractLite(queryDescription.Columns.Single(a => a.IsEntity).Type);
    bool viewable = findOptions.View && Navigator.IsNavigable(entitiesType, true);
@@ -21,14 +21,14 @@
                 @if (findOptions.AllowMultiple.Value)
                 {
                     @Html.CheckBox(
-                        context.Compose("rowSelection", row.Index.ToString()),
+                        Model.Compose("rowSelection", row.Index.ToString()),
                         new { value = entityField.Id.ToString() + "__" + Navigator.ResolveWebTypeName(entityField.RuntimeType) + "__" + entityField.ToStr });
 
                 }
                 else
                 {
                     @Html.RadioButton(
-                        context.Compose("rowSelection"),
+                             Model.Compose("rowSelection"),
                         entityField.Id.ToString() + "__" + Navigator.ResolveWebTypeName(entityField.RuntimeType) + "__" + entityField.ToStr);
                 }
             </td>

@@ -83,8 +83,7 @@ WriteLiteral("\r\n");
 WriteLiteral("\r\n\r\n");
 
 
- using(Html.BeginForm())
-{
+ using(Html.BeginForm()){
 
 WriteLiteral("    <h2>");
 
@@ -95,20 +94,19 @@ WriteLiteral("</h2>\r\n");
 
 
     Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString());
+
     
 Write(Html.ValidationSummaryAjax());
 
                                  
 
-WriteLiteral("    <div id=\"divASustituir\">\r\n    </div>\r\n");
-
-
-
 WriteLiteral("    <div class=\"clear\">\r\n    </div>   \r\n");
 
 
  }
-WriteLiteral(" ");
+
+WriteLiteral("<script type=\"text/javascript\">\r\n    $(function () {\r\n        var $body = $(\"body" +
+"\");\r\n        $body.trigger(\"sf-new-content\", [$body]);\r\n    })\r\n</script>\r\n");
 
 
         }

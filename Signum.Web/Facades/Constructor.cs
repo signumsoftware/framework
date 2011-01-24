@@ -12,6 +12,7 @@ using Signum.Entities.DynamicQuery;
 using System.Web.Mvc;
 using Signum.Engine;
 using Signum.Web.Properties;
+using Signum.Engine.DynamicQuery;
 
 namespace Signum.Web
 {
@@ -100,7 +101,7 @@ namespace Signum.Web
             }
 
             if (preferredStyle == VisualConstructStyle.Navigate)
-                return new ContentResult { Content = Navigator.ViewRoute(type, null) };
+                return Navigator.RedirectUrl(Navigator.ViewRoute(type, null));
 
             ModifiableEntity entity = Constructor.Construct(type);
             return EncapsulateView(controller, entity, prefix, preferredStyle); 
@@ -142,7 +143,9 @@ namespace Signum.Web
 
             object queryName = Navigator.ResolveQueryName(httpContext.Request.Params["webQueryName"]);
 
-            var filters = FindOptionsModelBinder.ExtractFilterOptions(httpContext, queryName)
+            QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(queryName);
+
+            var filters = FindOptionsModelBinder.ExtractFilterOptions(httpContext, queryDescription)
                 .Where(fo => fo.Operation == FilterOperation.EqualTo);
 
             var pairs = from pi in type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
@@ -154,8 +157,6 @@ namespace Signum.Web
             foreach (var p in pairs)
                 p.pi.SetValue(obj, Common.Convert(p.fo.Value, p.pi.PropertyType), null);
         }
-
-       
     }
 
     public enum VisualConstructStyle

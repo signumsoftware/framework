@@ -99,26 +99,27 @@ namespace Signum.Web
             return input.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("/", "\\/").Replace("\r\n", "").Replace("\n", "");
         }
 
-        //public static MvcHtmlString HiddenImplementations(HtmlHelper helper, EntityBase entityBase)
-        //{
-        //    if (entityBase.Implementations == null)
-        //        return MvcHtmlString.Empty;
-
-        //    string implementations = ImplementationsModelBinder.Render(entityBase.Implementations);
-
-        //    return helper.Hidden(entityBase.Compose(EntityBaseKeys.Implementations), implementations, new { disabled = "disabled" });
-        //}
-
         public static MvcHtmlString ViewButton(HtmlHelper helper, EntityBase entityBase)
         {
             if (!entityBase.View)
                 return MvcHtmlString.Empty;
 
-            return helper.Button(entityBase.Compose("btnView"),
-                  "->",
-                  entityBase.GetViewing(),
-                  "lineButton go",
-                  (entityBase.UntypedValue == null) ? new Dictionary<string, object>() { { "style", "display:none" } } : new Dictionary<string, object>());
+            var htmlAttr = new Dictionary<string, object>
+            {
+                { "onclick", entityBase.GetViewing() },
+                { "data-icon", "ui-icon-circle-arrow-e" },
+                { "data-text", false}
+            };
+
+            if (entityBase.UntypedValue == null)
+                htmlAttr.Add("style", "display:none");
+
+            return helper.Href(entityBase.Compose("btnView"),
+                  Resources.LineButton_View,
+                  "",
+                  Resources.LineButton_View,
+                  "sf-line-button sf-view",
+                  htmlAttr);
         }
 
         public static MvcHtmlString CreateButton(HtmlHelper helper, EntityBase entityBase)
@@ -126,11 +127,22 @@ namespace Signum.Web
             if (!entityBase.Create)
                 return MvcHtmlString.Empty;
 
-            return helper.Button(entityBase.Compose("btnCreate"),
-                  "+",
-                  entityBase.GetCreating(),
-                  "lineButton create",
-                  (entityBase.UntypedValue == null) ? new Dictionary<string, object>() : new Dictionary<string, object>() { { "style", "display:none" } });
+            var htmlAttr = new Dictionary<string, object>
+            {
+                { "onclick", entityBase.GetCreating() },
+                { "data-icon", "ui-icon-circle-plus" },
+                { "data-text", false}
+            };
+
+            if (entityBase.UntypedValue != null)
+                htmlAttr.Add("style", "display:none");
+
+            return helper.Href(entityBase.Compose("btnCreate"),
+                  Resources.LineButton_Create,
+                  "",
+                  Resources.LineButton_Create,
+                  "sf-line-button sf-create",
+                  htmlAttr);
         }
 
         public static MvcHtmlString FindButton(HtmlHelper helper, EntityBase entityBase)
@@ -138,11 +150,22 @@ namespace Signum.Web
             if (!entityBase.Find || !entityBase.Type.CleanType().IsIIdentifiable())
                 return MvcHtmlString.Empty;
 
-            return helper.Button(entityBase.Compose("btnFind"),
-                 "O",
-                 entityBase.GetFinding(),
-                 "lineButton find",
-                 (entityBase.UntypedValue == null) ? new Dictionary<string, object>() : new Dictionary<string, object>() { { "style", "display:none" } });
+            var htmlAttr = new Dictionary<string, object>
+            {
+                { "onclick", entityBase.GetFinding() },
+                { "data-icon", "ui-icon-circle-zoomin" },
+                { "data-text", false}
+            };
+
+            if (entityBase.UntypedValue != null)
+                htmlAttr.Add("style", "display:none");
+
+            return helper.Href(entityBase.Compose("btnFind"),
+                  Resources.LineButton_Find,
+                  "",
+                  Resources.LineButton_Find,
+                  "sf-line-button sf-find",
+                  htmlAttr);
         }
 
         public static MvcHtmlString RemoveButton(HtmlHelper helper, EntityBase entityBase)
@@ -150,11 +173,22 @@ namespace Signum.Web
             if (!entityBase.Remove)
                 return MvcHtmlString.Empty;
 
-            return helper.Button(entityBase.Compose("btnRemove"),
-                  "x",
-                  entityBase.GetRemoving(),
-                  "lineButton remove",
-                  (entityBase.UntypedValue == null) ? new Dictionary<string, object>() { { "style", "display:none" } } : new Dictionary<string, object>());        
+            var htmlAttr = new Dictionary<string, object>
+            {
+                { "onclick", entityBase.GetRemoving() },
+                { "data-icon", "ui-icon-circle-close" },
+                { "data-text", false}
+            };
+
+            if (entityBase.UntypedValue == null)
+                htmlAttr.Add("style", "display:none");
+
+            return helper.Href(entityBase.Compose("btnRemove"),
+                  Resources.LineButton_Remove,
+                  "",
+                  Resources.LineButton_Remove,
+                  "sf-line-button sf-remove",
+                  htmlAttr);
         }
 
         public static MvcHtmlString BreakLineDiv(HtmlHelper helper, EntityBase entityBase)

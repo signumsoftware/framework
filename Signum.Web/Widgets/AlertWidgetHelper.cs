@@ -43,8 +43,8 @@ namespace Signum.Web
                 Content =
 @"<div class='widget alerts'>
     <ul>{0}</ul>{3}
-    <a class='create' onclick=""javascript:RelatedEntityCreate({1});"">{2}</a>
-</div>".Formato(list.Where(a => a.Count > 0).ToString(a => "<li><a href=\"javascript:OpenFinder({0});\">{1}<span class='count'>{2}</span></a></li>".Formato(JsFindOptions(identifiable, a.Query).ToJS(), a.Title, a.Count), ""),
+    <a class='create' onclick=""javascript:SF.relatedEntityCreate({1});"">{2}</a>
+</div>".Formato(list.Where(a => a.Count > 0).ToString(a => "<li><a href=\"javascript:new SF.FindNavigator({0}).openFinder();\">{1}<span class='count'>{2}</span></a></li>".Formato(JsFindOptions(identifiable, a.Query).ToJS(), a.Title, a.Count), ""),
                 voptions.ToJS(),
                 Properties.Resources.CreateAlert,
                 list.Where(a => a.Count > 0).ToList().Count > 0 ? "<hr/>" : ""),

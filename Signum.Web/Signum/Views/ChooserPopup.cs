@@ -44,7 +44,7 @@ namespace ASP
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Signum/Views/ChooserPopup.cshtml")]
-    public class _Page_Signum_Views_ChooserPopup_cshtml : System.Web.Mvc.WebViewPage<dynamic>
+    public class _Page_Signum_Views_ChooserPopup_cshtml : System.Web.Mvc.WebViewPage<Context>
     {
 #line hidden
 
@@ -61,92 +61,22 @@ namespace ASP
         public override void Execute()
         {
 
-   Context context = (Context)Model;
-
-WriteLiteral("<div id=\"");
+WriteLiteral("\r\n<div id=\"");
 
 
-    Write(context.Compose("externalPopupDiv"));
+    Write(Model.Compose("panelPopup"));
 
-WriteLiteral("\">\r\n    <div id=\"");
-
-
-        Write(context.Compose("modalBackground"));
-
-WriteLiteral("\" class=\"transparent popupBackground\">\r\n    </div>\r\n    <div id=\"");
+WriteLiteral("\" data-title=\"");
 
 
-        Write(context.Compose("panelPopup"));
+                                               Write((string)ViewData[ViewDataKeys.Title]);
 
-WriteLiteral("\" class=\"popupWindow\">\r\n");
-
-
-         if (ViewData[ViewDataKeys.OnCancel] != null)
-        {
-
-WriteLiteral("            <div class=\"closebox\" id=\"");
+WriteLiteral("\">\r\n    ");
 
 
-                                 Write(context.Compose(ViewDataKeys.BtnCancel));
+Write(ViewData[ViewDataKeys.CustomHtml]);
 
-WriteLiteral("\" onclick=\"");
-
-
-                                                                                    Write(ViewData[ViewDataKeys.OnCancel]);
-
-WriteLiteral("\">\r\n            </div>\r\n");
-
-
-        }
-        else
-        {
-
-WriteLiteral("            <div class=\"closebox\" id=\"");
-
-
-                                 Write(context.Compose(ViewDataKeys.BtnCancel));
-
-WriteLiteral("\">\r\n            </div>\r\n");
-
-
-        }
-
-WriteLiteral("        <div id=\"");
-
-
-            Write(context.Compose("divPopupDragHandle"));
-
-WriteLiteral("\" class=\"dragHandle\">\r\n");
-
-
-               string pageTitle = (string)ViewData[ViewDataKeys.Title];
-
-
-             if (pageTitle != null)
-            {
-WriteLiteral(" <span class=\"popupEntityName\">");
-
-
-                                       Write(pageTitle);
-
-WriteLiteral("</span> ");
-
-
-                                                              }
-
-WriteLiteral("        </div>\r\n        ");
-
-
-   Write(ViewData[ViewDataKeys.CustomHtml]);
-
-WriteLiteral("\r\n    </div>\r\n</div>\r\n");
-
-
-Write(Html.DynamicJs("~/signum/Scripts/SF_DragAndDrop.js").Callback(@"function () {{
-     SF.DragAndDrop(document.getElementById(""{0}""), document.getElementById(""{1}""));}}"
-        .Formato(context.Compose("divPopupDragHandle"), context.Compose("panelPopup"))));
-
-WriteLiteral("\r\n");
+WriteLiteral("\r\n</div>\r\n");
 
 
         }

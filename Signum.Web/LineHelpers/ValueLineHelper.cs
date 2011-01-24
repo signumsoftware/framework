@@ -170,14 +170,21 @@ namespace Signum.Web
                     valueLine.ValueHtmlProps.Add("onblur", setTicks + reloadOnChangeFunction);
             }
 
-            //valueLine.ValueHtmlProps["size"] = (valueLine.Format == "d") ? 10 : 20;
-            valueLine.ValueHtmlProps["size"] = CalendarHelper.FormatToString(valueLine.Format ?? "g").Length + 1;   //time is often rendered with two digits as hours, but format is represented as "H"
+            valueLine.ValueHtmlProps["size"] = DatePickerOptions.JsDateFormat(valueLine.Format ?? "g").Length + 1;   //time is often rendered with two digits as hours, but format is represented as "H"
 
             if (valueLine.DatePickerOptions.Format == null)
                 valueLine.DatePickerOptions.Format = valueLine.Format;
 
-            MvcHtmlString returnString = helper.TextBox(valueLine.ControlID, value.TryToString(valueLine.Format), valueLine.ValueHtmlProps)
-                .Concat(helper.Calendar(valueLine.ControlID, valueLine.DatePickerOptions));
+            bool isDefaultDatepicker = valueLine.DatePickerOptions.IsDefault();
+            if (isDefaultDatepicker) //if default, datepicker will be created when processing html in javascript 
+            {
+                valueLine.ValueHtmlProps.AddCssClass("datepicker");
+                valueLine.ValueHtmlProps["data-format"] =  valueLine.DatePickerOptions.Format;
+            }
+            MvcHtmlString returnString = helper.TextBox(valueLine.ControlID, value.TryToString(valueLine.Format), valueLine.ValueHtmlProps);
+            
+            if (!isDefaultDatepicker)
+                returnString = returnString.Concat(helper.Calendar(valueLine.ControlID, valueLine.DatePickerOptions));
 
             if (valueLine.DatePickerOptions.ShowAge)
                 returnString = returnString.Concat(helper.Span(valueLine.ControlID + "Age", String.Empty, "age"));
@@ -239,7 +246,7 @@ namespace Signum.Web
             if (valueLine.ReadOnly)
                 return helper.Span(valueLine.ControlID, valueLine.UntypedValue.TryToString() ?? "", "valueLine");
 
-            valueLine.ValueHtmlProps.Add("onkeydown", Reflector.IsDecimalNumber(valueLine.Type) ? "return validator.decimalNumber(event);" : "return validator.number(event);");
+            valueLine.ValueHtmlProps.Add("onkeydown", Reflector.IsDecimalNumber(valueLine.Type) ? "return SF.InputValidator.isDecimal(event);" : "return SF.InputValidator.isNumber(event);");
 
             return helper.TextboxInLine(valueLine, InputType.Text);
         }
@@ -361,7 +368,7 @@ namespace Signum.Web
         private static string GetReloadFunction(HtmlHelper helper, ValueLine valueLine)
         {
             return (valueLine.ReloadOnChange || valueLine.ReloadFunction.HasText()) ?
-                valueLine.ReloadFunction ?? "ReloadEntity('{0}','{1}'); ".Formato(valueLine.ReloadControllerUrl, helper.WindowPrefix()) :
+                valueLine.ReloadFunction ?? "SF.reloadEntity('{0}','{1}'); ".Formato(valueLine.ReloadControllerUrl, helper.WindowPrefix()) :
                 "";
         }
     }

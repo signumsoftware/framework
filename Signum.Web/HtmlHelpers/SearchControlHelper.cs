@@ -81,9 +81,9 @@ namespace Signum.Web
 
            if (options.PopupView)
                result += helper.Button(prefix + "csbtnView",
-                  "->",
-                  "javascript:OpenFinder({0});".Formato(foptions.ToJS()),
-                  "lineButton go", null);
+                  Resources.View,
+                  "javascript:new SF.FindNavigator({0}).openFinder();".Formato(foptions.ToJS()),
+                  "sf-line-button sf-view", null);
 
            return MvcHtmlString.Create(result);
         }
@@ -141,7 +141,7 @@ namespace Signum.Web
                 using (sb.Surround("td"))
                 {
                     if (!filterOptions.Frozen)
-                        sb.AddLine(helper.Button(context.Compose("btnDelete", index.ToString()), "X", "DeleteFilter('{0}',this);".Formato(context.ControlID), "", null));
+                        sb.AddLine(helper.Button(context.Compose("btnDelete", index.ToString()), "X", "new SF.FindNavigator({{prefix:\"{0}\"}}).deleteFilter(this);".Formato(context.ControlID), "", null));
                 }
             }
             
@@ -158,7 +158,8 @@ namespace Signum.Web
                 new
                 {
                     style = (writeExpander) ? "display:none" : "",
-                    onchange = "javascript:NewSubTokensCombo({{prefix:\"{0}\",webQueryName:\"{1}\"}}".Formato(context.ControlID, Navigator.ResolveWebQueryName(queryName)) + "," + index + ",'" + RouteHelper.New().SignumAction("NewSubTokensCombo") + "');"
+                    onchange = "javascript:new SF.FindNavigator({{prefix:\"{0}\",webQueryName:\"{1}\"}})".Formato(context.ControlID, Navigator.ResolveWebQueryName(queryName)) + 
+                               ".newSubTokensCombo(" + index + ",'" + RouteHelper.New().SignumAction("NewSubTokensCombo") + "');"
                 });
 
             return expander == null? drop: expander.Concat(drop);

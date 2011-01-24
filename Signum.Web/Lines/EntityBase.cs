@@ -121,39 +121,39 @@ namespace Signum.Web
         }
 
         public string Viewing { get; set; }
-        protected abstract string DefaultViewing();
+        protected abstract string DefaultView();
         internal string GetViewing()
         {
             if (!View)
                 return "";
-            return Viewing ?? DefaultViewing();
+            return Viewing ?? DefaultView();
         }
 
         public string Creating { get; set; }
-        protected abstract string DefaultCreating();
+        protected abstract string DefaultCreate();
         internal string GetCreating()
         {
             if (!Create)
                 return "";
-            return Creating ?? DefaultCreating();
+            return Creating ?? DefaultCreate();
         }
 
         public string Finding { get; set; }
-        protected abstract string DefaultFinding();
+        protected abstract string DefaultFind();
         internal string GetFinding()
         { 
             if (!Find)
                 return "";
-            return Finding ?? DefaultFinding();
+            return Finding ?? DefaultFind();
         }
 
         public string Removing { get; set; }
-        protected abstract string DefaultRemoving();
+        protected abstract string DefaultRemove();
         internal string GetRemoving()
         {
             if (!Remove)
                 return "";
-            return Removing ?? DefaultRemoving();
+            return Removing ?? DefaultRemove();
         }
 
         internal Type CleanRuntimeType 

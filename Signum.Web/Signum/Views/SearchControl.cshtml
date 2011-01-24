@@ -1,60 +1,63 @@
-@using Signum.Web.Properties
+﻿@using Signum.Web.Properties
 @using Signum.Entities.DynamicQuery
 @using Signum.Engine.DynamicQuery
 @using System.Configuration
 @using Signum.Entities.Reflection
-
-@{ Context context = (Context)Model;
-   FindOptions findOptions = (FindOptions)ViewData[ViewDataKeys.FindOptions];
-   QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
-   Type entitiesType = Reflector.ExtractLite(queryDescription.Columns.Single(a => a.IsEntity).Type);
-   bool viewable = findOptions.View && Navigator.IsNavigable(entitiesType, true); }
-<div id="@context.Compose("divSearchControl")" class="searchControl">
-    @Html.Hidden(context.Compose("sfWebQueryName"), Navigator.ResolveWebQueryName(findOptions.QueryName), new { disabled = "disabled" })
-    @Html.Hidden(context.Compose(ViewDataKeys.AllowMultiple), findOptions.AllowMultiple.ToString(), new { disabled = "disabled" })
-    @Html.Hidden(context.Compose(ViewDataKeys.View), viewable, new { disabled = "disabled" })
-    @Html.Hidden(context.Compose(ViewDataKeys.EntityTypeName), Navigator.ResolveWebTypeName(entitiesType), new { disabled = "disabled" })
+@using Signum.Web.Properties
+@model Context
+@{ 
+    FindOptions findOptions = (FindOptions)ViewData[ViewDataKeys.FindOptions];
+    QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
+    Type entitiesType = Reflector.ExtractLite(queryDescription.Columns.Single(a => a.IsEntity).Type);
+    bool viewable = findOptions.View && Navigator.IsNavigable(entitiesType, true);}
+<div id="@Model.Compose("divSearchControl")" class="searchControl">
+    @Html.Hidden(Model.Compose("sfWebQueryName"), Navigator.ResolveWebQueryName(findOptions.QueryName), new { disabled = "disabled" })
+    @Html.Hidden(Model.Compose("sfAllowMultiple"), findOptions.AllowMultiple.ToString(), new { disabled = "disabled" })
+    @Html.Hidden(Model.Compose("sfView"), viewable, new { disabled = "disabled" })
+    @Html.Hidden(Model.Compose("sfEntityTypeName"), Navigator.ResolveWebTypeName(entitiesType), new { disabled = "disabled" })
     @if (findOptions.EntityContextMenu)
     {
         <script type="text/javascript">
-            var @context.Compose("EntityContextMenuUrl")  = '@Url.SignumAction("GetContextualPanel")';
-        </script>
-    }    
+            var @Model.Compose("EntityContextMenuUrl")  = '@Url.SignumAction("GetContextualPanel")';
+         </script>
+    }
     <script type="text/javascript">
-        var @context.Compose("QuickFilterUrl")  = '@Url.SignumAction("QuickFilter")'; 
-        var @context.Compose("SearchUrl") = '@Url.SignumAction("Search")';
+        var @Model.Compose("QuickFilterUrl") = '@Url.SignumAction("QuickFilter")'; 
+        var @Model.Compose("SearchUrl") = '@Url.SignumAction("Search")';
     </script>
     @if(findOptions.SearchOnLoad)
     {
         <script type="text/javascript">
-            $(document).ready(function () { SearchOnLoad('@context.ControlID'); });
-        </script>
+            $(document).ready(function () { { SF.FindNavigator.searchOnLoad('@Model.ControlID'); } });
+            </script>    
     }
-    <div id="@context.Compose("divFilters")" style="display:@((findOptions.FilterMode != FilterMode.AlwaysHidden && findOptions.FilterMode != FilterMode.OnlyResults) ? "block" : "none")" >
+    <div id="@Model.Compose("divFilters")" style="display:@((findOptions.FilterMode != FilterMode.AlwaysHidden && findOptions.FilterMode != FilterMode.OnlyResults) ? "block" : "none")" >
         @{ Html.RenderPartial(Navigator.Manager.FilterBuilderUrl, ViewData);}
     </div>
     <div class="search-footer" style="display:@((findOptions.FilterMode != FilterMode.OnlyResults) ? "block" : "none")">
-        @Html.Label(null, Resources.NumberOfRows, context.Compose(ViewDataKeys.Top), null)
+        @Html.Label(null, Resources.NumberOfRows, Model.Compose("sfTop"), null)
         @{ int? top = findOptions.Top ?? Navigator.Manager.QuerySettings.GetOrThrow(findOptions.QueryName, "Missing QuerySettings for QueryName {0}").Top;}
-        @HtmlHelperExtenders.InputType("text", context.Compose(ViewDataKeys.Top), top.TryToString(), new Dictionary<string, object> { { "size", "5" }, { "onkeydown", "return validator.number(event)" } })
-        @Html.Hidden(context.Compose("OrderBy"), findOptions.OrderOptions == null ? "" :
-                (findOptions.OrderOptions.ToString(oo => (oo.OrderType == OrderType.Ascending ? "" : "-") + oo.Token.FullKey(), ",")))
-        <input class="btnSearch" id="@context.Compose("btnSearch")" type="button" onclick="@("Search({{prefix:'{0}',searchControllerUrl:'{1}'}});".Formato(context.ControlID, Url.SignumAction("Search")))" value="@Resources.Search" />
-        @if (findOptions.Create && Navigator.IsCreable(entitiesType, true) && viewable)
-        {
-            <input type="button" value="+" class="lineButton create" onclick="@(findOptions.Creating.HasText() ? findOptions.Creating : "SearchCreate({{prefix:'{0}',controllerUrl:'{1}'}});".Formato(context.ControlID, Url.SignumAction(string.IsNullOrEmpty(context.ControlID) ? "Create" : "PopupCreate")))" />
-        }
-        <ul class="button-bar">
-            @ButtonBarQueryHelper.GetButtonBarElementsForQuery(this.ViewContext, findOptions.QueryName, entitiesType, context.ControlID).ToString(Html)
-        </ul>
+        @HtmlHelperExtenders.InputType("text", Model.Compose("sfTop"), top.TryToString(), new Dictionary<string, object> { { "size", "5" }, { "onkeydown", "return SF.InputValidator.isNumber(event)" } })
+        @Html.Hidden(Model.Compose("sfOrders"), findOptions.OrderOptions.Empty() ? "" :
+                (findOptions.OrderOptions.ToString(oo => (oo.OrderType == OrderType.Ascending ? "" : "-") + oo.Token.FullKey(), ";") + ";"))
+        <div class="button-bar">
+            <button type="submit" class="query-button sf-search" data-icon="ui-icon-search" id="@Model.Compose("qbSearch")" onclick="@("new SF.FindNavigator({{prefix:'{0}',searchControllerUrl:'{1}'}}).search();return false;".Formato(Model.ControlID, Url.SignumAction("Search")))">@Resources.Search</button>
+            @if (findOptions.Create && Navigator.IsCreable(entitiesType, true) && viewable)
+            {
+                string creating = findOptions.Creating.HasText() ? findOptions.Creating :
+                    "SF.FindNavigator.create({{prefix:'{0}',controllerUrl:'{1}'}});return false;".Formato(Model.ControlID, Url.SignumAction(string.IsNullOrEmpty(Model.ControlID) ? "Create" : "PopupCreate"));
+                <a class="query-button" data-icon="ui-icon-plusthick" data-text="false" id="@Model.Compose("qbSearchCreate")" onclick="@creating">@Resources.Search_Create</a>
+            }
+            @ButtonBarQueryHelper.GetButtonBarElementsForQuery(this.ViewContext, findOptions.QueryName, entitiesType, Model.ControlID).ToString(Html)
+        </div>
     </div>
     @if (findOptions.FilterMode != FilterMode.OnlyResults)
     {
         <div class="clearall">
         </div>
     }
-    <div id="@context.Compose("divResults")" class="divResults">
-        <table id="@context.Compose("tblResults")" class="tblResults">
+    <div id="@Model.Compose("divResults")" class="divResults">
+        <table id="@Model.Compose("tblResults")" class="tblResults">
             <thead>
                 <tr>
                     @if (findOptions.AllowMultiple.HasValue)
@@ -62,7 +65,7 @@
                         <th class="thRowSelection">
                             @if (findOptions.AllowMultiple.Value)
                             {
-                                @Html.CheckBox(context.Compose("cbSelectAll"), false, new { onclick = "javascript:ToggleSelectAll('{0}');".Formato(context.ControlID) })
+                                @Html.CheckBox(Model.Compose("cbSelectAll"), false, new { onclick = "javascript:new SF.FindNavigator({{prefix:'{0}'}}).toggleSelectAll();".Formato(Model.ControlID) })
                             }
                         </th>
                     }
@@ -93,6 +96,6 @@
         </table>
     </div>
 </div>
-<script type="text/javascript">    
-    InitializeSearchControl("@context.ControlID");
+<script type="text/javascript">
+    new SF.FindNavigator({ prefix: "@Model.ControlID" }).initialize();
 </script>

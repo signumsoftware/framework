@@ -15,11 +15,11 @@ namespace Signum.Web.Controllers
     public class WidgetsController : Controller
     {
         #region Notes
-        public PartialViewResult CreateNote(string sfRuntimeTypeRelated, int? sfIdRelated, string sfOnOk, string sfOnCancel, string prefix, string sfUrl)
+        public PartialViewResult CreateNote(string sfRuntimeTypeRelated, int? sfIdRelated, string prefix, string url)
         {
             IdentifiableEntity entity = Database.Retrieve(Navigator.ResolveType(sfRuntimeTypeRelated), sfIdRelated.Value);
             ViewData[ViewDataKeys.WriteSFInfo] = true;
-            return Navigator.PopupView(this, NoteWidgetHelper.CreateNote(entity), prefix, sfUrl);
+            return Navigator.PopupView(this, NoteWidgetHelper.CreateNote(entity), prefix, url);
         }
 
         public MvcHtmlString RefreshNotes(string sfRuntimeTypeRelated, int? sfIdRelated)
@@ -34,11 +34,11 @@ namespace Signum.Web.Controllers
         #endregion
 
         #region Alerts
-        public PartialViewResult CreateAlert(string sfRuntimeTypeRelated, int? sfIdRelated, string sfOnOk, string sfOnCancel, string prefix, string sfUrl)
+        public PartialViewResult CreateAlert(string sfRuntimeTypeRelated, int? sfIdRelated, string prefix, string url)
         {
             IdentifiableEntity entity = Database.Retrieve(Navigator.ResolveType(sfRuntimeTypeRelated), sfIdRelated.Value);
             ViewData[ViewDataKeys.WriteSFInfo] = true;
-            return Navigator.PopupView(this, AlertWidgetHelper.CreateAlert(entity), prefix, sfUrl);
+            return Navigator.PopupView(this, AlertWidgetHelper.CreateAlert(entity), prefix, url);
         }
 
         public MvcHtmlString RefreshAlerts(string sfRuntimeTypeRelated, int? sfIdRelated)

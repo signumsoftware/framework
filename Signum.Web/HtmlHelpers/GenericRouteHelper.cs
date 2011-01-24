@@ -17,20 +17,7 @@ namespace Signum.Web
     {
         public static UrlHelper New()
         {
-            var httpContext = HttpContext.Current;
-
-            if (httpContext == null)
-            {
-                var request = new HttpRequest("/", "http://signumframework.com", "");
-                var response = new HttpResponse(new StringWriter());
-                httpContext = new HttpContext(request, response);
-            }
-
-            var httpContextBase = new HttpContextWrapper(httpContext);
-            var routeData = new RouteData();
-            var requestContext = new RequestContext(httpContextBase, routeData);
-
-            return new UrlHelper(requestContext);
+            return new UrlHelper(HttpContext.Current.Request.RequestContext);
         }
     }
 

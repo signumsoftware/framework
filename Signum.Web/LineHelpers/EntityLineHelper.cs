@@ -44,29 +44,29 @@ namespace Signum.Web
                         else if (entityLine.UntypedValue != null)
                             sb.AddLine(helper.Div(entityLine.Compose(EntityBaseKeys.Entity), null, "", new Dictionary<string, object> { { "style", "display:none" } }));
 
-                        sb.AddLine(helper.TextBox(
-                            entityLine.Compose(EntityBaseKeys.ToStr),
-                            entityLine.ToStr,
-                            new Dictionary<string, object>() 
-                        { 
-                            { "class", "valueLine" }, 
+                        if (entityLine.Autocomplete && entityLine.Implementations != null && entityLine.Implementations.IsByAll)
+                            throw new InvalidOperationException("Autocomplete is not possible with ImplementedByAll");
+
+                        var htmlAttr = new Dictionary<string, object>
+                        {
+                            {"class", "valueLine" + (entityLine.Autocomplete ? " entity-autocomplete" : "")},
                             { "autocomplete", "off" }, 
                             { "style", "display:" + ((entityLine.UntypedValue==null && !entityLine.ReadOnly) ? "block" : "none")}
-                        }));
+                        };
 
                         if (entityLine.Autocomplete)
                         {
-                            if (entityLine.Implementations != null && entityLine.Implementations.IsByAll)
-                                throw new InvalidOperationException("Autocomplete is not possible with ImplementedByAll");
-
-                            sb.AddLine(MvcHtmlString.Create(
-                                helper.AutoCompleteExtender(entityLine.Compose(EntityBaseKeys.ToStr),
-                                             new StaticInfo(entityLine.Type, entityLine.Implementations).Types,
-                                             entityLine.Compose("sfId"),
-                                             helper.UrlHelper().Action("Autocomplete", "Signum")
-                                             , entityLine.OnChangedTotal.HasText() ? entityLine.OnChangedTotal : "''").ToHtmlString()));
-
+                            htmlAttr.AddRange(new Dictionary<string, object>
+                            {
+                                { "data-url", helper.UrlHelper().Action("Autocomplete", "Signum") },
+                                { "data-types", new StaticInfo(entityLine.Type, entityLine.Implementations).Types.ToString(t => Navigator.ResolveWebTypeName(t), ",") }
+                            });
                         }
+
+                        sb.AddLine(helper.TextBox(
+                            entityLine.Compose(EntityBaseKeys.ToStr),
+                            entityLine.ToStr,
+                            htmlAttr));
                     }
                     else
                     {

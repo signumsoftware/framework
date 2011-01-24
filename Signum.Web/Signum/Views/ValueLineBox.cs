@@ -79,7 +79,7 @@ Write(Html.HiddenEntityInfo(e, f => f.Related));
 
                                              ;
 
-WriteLiteral("    <div style=\"display: none\">\r\n        ");
+WriteLiteral("    <div style=\"display: none\">\r\n    \r\n        ");
 
 
    Write(Html.ValueLine(e, f => f.BoxType));

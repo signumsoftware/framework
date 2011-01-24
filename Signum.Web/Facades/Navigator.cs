@@ -236,34 +236,21 @@ namespace Signum.Web
             Manager.SetTokens(queryName, orders);
         }
 
-        public static SortedList<string, string> ToSortedList(this NameValueCollection form, string prefixFilter, string prefixToIgnore)
+        public static SortedList<string, string> ToSortedList(this NameValueCollection form, string prefix)
         {
             SortedList<string, string> formValues = new SortedList<string, string>(form.Count);
             foreach (string key in form.Keys)
             {
-                if (key.HasText() && key != "prefixToIgnore" && (string.IsNullOrEmpty(prefixFilter) || key.StartsWith(prefixFilter)))
-                {
-                    if (string.IsNullOrEmpty(prefixToIgnore) || !key.StartsWith(prefixToIgnore))
-                        formValues.Add(key, form[key]);
-                }
+                if (key.HasText() && (string.IsNullOrEmpty(prefix) || key.StartsWith(prefix)))
+                    formValues.Add(key, form[key]);
             }
             
             return formValues;
         }
 
-        public static SortedList<string, object> ToSortedList(NameValueCollection form, string prefixToIgnore)
+        public static SortedList<string, string> ToSortedList(this NameValueCollection form)
         {
-            SortedList<string, object> formValues = new SortedList<string, object>(form.Count);
-            foreach (string key in form.Keys)
-            {
-                if (!string.IsNullOrEmpty(key) && key != "prefixToIgnore")
-                {
-                    if (string.IsNullOrEmpty(prefixToIgnore) || !key.StartsWith(prefixToIgnore))
-                        formValues.Add(key, form[key]);
-                }
-            }
-
-            return formValues;
+            return form.ToSortedList(null);
         }
 
         public static void AddSetting(EntitySettings settings)
@@ -314,7 +301,7 @@ namespace Signum.Web
         static GenericInvoker miApplyChanges = GenericInvoker.Create(()=>new TypeDN().ApplyChanges(null, null, true));
         public static MappingContext<T> ApplyChanges<T>(this T entity, ControllerContext controllerContext, string prefix, bool admin) where T : ModifiableEntity
         {
-            SortedList<string, string> inputs = controllerContext.HttpContext.Request.Form.ToSortedList(prefix, null);
+            SortedList<string, string> inputs = controllerContext.HttpContext.Request.Form.ToSortedList(prefix);
             Mapping<T> mapping = (Mapping<T>)Navigator.EntitySettings(typeof(T)).Map(s => admin ? s.UntypedMappingAdmin : s.UntypedMappingDefault);
 
             return Manager.ApplyChanges<T>(controllerContext, entity, prefix, mapping, inputs);
@@ -329,7 +316,7 @@ namespace Signum.Web
 
         public static MappingContext<T> ApplyChanges<T>(this T entity, ControllerContext controllerContext, string prefix, Mapping<T> mapping) where T : ModifiableEntity
         {
-            SortedList<string, string> inputs = controllerContext.HttpContext.Request.Form.ToSortedList(prefix, null);
+            SortedList<string, string> inputs = controllerContext.HttpContext.Request.Form.ToSortedList(prefix);
 
             return Manager.ApplyChanges<T>(controllerContext, entity, prefix, mapping, inputs);
         }
@@ -540,8 +527,8 @@ namespace Signum.Web
                 }
 
                 Navigator.RegisterArea(typeof(Navigator), "signum");
-
                 FileRepositoryManager.Register(new LocalizedJavaScriptRepository(Resources.ResourceManager, "signum"));
+                FileRepositoryManager.Register(new CalendarLocalizedJavaScriptRepository("~/signum/calendarResources/"));
 
                 if (Initializing != null)
                     Initializing();
@@ -549,7 +536,6 @@ namespace Signum.Web
                 Initialized = true;
             }
         }
-
 
         HashSet<string> loadedModules = new HashSet<string>();
 
@@ -606,8 +592,9 @@ namespace Signum.Web
             controller.ViewData[ViewDataKeys.PartialViewName] = partialViewName ?? Navigator.OnPartialViewName((ModifiableEntity)entity);
 
             if (!controller.ViewData.ContainsKey(ViewDataKeys.Title))
-                controller.ViewData[ViewDataKeys.Title] = entity.ToString();
+                controller.ViewData[ViewDataKeys.Title] = DefaultPageTitle(tc);
             
+
             string tabID = GetOrCreateTabID(controller);
             controller.ViewData[ViewDataKeys.TabId] = tabID;
 
@@ -627,6 +614,18 @@ namespace Signum.Web
             }
         }
 
+        internal string DefaultPageTitle(TypeContext tc)
+        {
+            string pageTitle = tc.UntypedValue.TryToString();
+            if (string.IsNullOrEmpty(pageTitle))
+            {
+                Gender gender = tc.UntypedValue.GetType().GetGender();
+                pageTitle =
+                    Resources.ResourceManager.GetGenderAwareResource("New", gender) + " " + tc.UntypedValue.GetType().NiceName();
+            }
+            return pageTitle;
+        }
+
         protected internal virtual PartialViewResult PopupView(ControllerBase controller, TypeContext tc, string partialViewName)
         {
             TypeContext cleanTC = TypeContextUtilities.CleanTypeContext(tc);
@@ -637,7 +636,10 @@ namespace Signum.Web
 
             controller.ViewData.Model = cleanTC;
             controller.ViewData[ViewDataKeys.PartialViewName] = partialViewName ?? Navigator.OnPartialViewName((ModifiableEntity)cleanTC.UntypedValue);
-            
+
+		   if (!controller.ViewData.ContainsKey(ViewDataKeys.Title))
+                controller.ViewData[ViewDataKeys.Title] = DefaultPageTitle(cleanTC);            
+
             if (Navigator.IsReadOnly(cleanType, false))
                 cleanTC.ReadOnly = true;
             

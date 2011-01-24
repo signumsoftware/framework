@@ -265,14 +265,19 @@ namespace Signum.Windows
 
         public static Dictionary<Type, TypeDN> ServerTypes { get; private set; }
 
-        private static Type TryGetType(string typeName)
+        public static Type TryGetType(string typeName)
         {
             return ServerTypes.Keys.Where(t => t.Name == typeName).SingleOrDefault();
         }
 
-        private static Type GetType(string typeName)
+        public static Type GetType(string typeName)
         {
             return ServerTypes.Keys.Where(t => t.Name == typeName).Single("Type {0} not found in the Server".Formato(typeName));
+        }
+
+        public static string GetCleanName(Type type)
+        {
+            return ServerTypes[type].CleanName;
         }
 
         public static Lite ParseLite(Type liteType, string liteKey)

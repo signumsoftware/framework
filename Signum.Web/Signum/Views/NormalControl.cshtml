@@ -1,11 +1,11 @@
 ﻿@using System.Configuration
 @using Signum.Web.Properties
-@{ TypeContext modelTC = (TypeContext)ViewData.Model;}
+@model TypeContext
 <h2>
     @Html.Hidden(ViewDataKeys.TabId, ViewData[ViewDataKeys.TabId])
     @Html.Hidden(ViewDataKeys.PartialViewName, ViewData[ViewDataKeys.PartialViewName])
-    <span class="typeNiceName">@modelTC.UntypedValue.GetType().NiceName()</span>
-    @{ IIdentifiable identifiable = modelTC.UntypedValue as IIdentifiable;}
+    <span class="typeNiceName">@Model.UntypedValue.GetType().NiceName()</span>
+    @{ IIdentifiable identifiable = Model.UntypedValue as IIdentifiable;}
     @if (identifiable != null)
     {
         <span class="entityId">
@@ -17,15 +17,15 @@
             }
         </span>
     }
-    <span class="title">@(ViewData[ViewDataKeys.Title] ?? "")</span>
+    <span class="title">@ViewBag.Title</span>
 </h2>
-<ul class="button-bar">
-    @if (Model != null && Navigator.Manager.ShowOkSave(modelTC.UntypedValue.GetType(), false))
+<div class="button-bar">
+    @if (Model != null && Navigator.Manager.ShowOkSave(Model.UntypedValue.GetType(), false))
     {
-        <li><a id="btnSave" class="entity-button save" onclick="javascript:TrySave({controllerUrl:'@Url.SignumAction("TrySave")'});">@Resources.Save</a></li>  
+        <a id="ebSave" class="entity-button save" onclick="javascript:new SF.Validator({controllerUrl:'@Url.SignumAction("TrySave")'}).trySave();">@Resources.Save</a>  
     }
-    @ButtonBarEntityHelper.GetForEntity(this.ViewContext, (ModifiableEntity)modelTC.UntypedValue, ViewData[ViewDataKeys.PartialViewName].ToString(), modelTC.ControlID).ToString(Html)
-</ul>
+    @ButtonBarEntityHelper.GetForEntity(this.ViewContext, (ModifiableEntity)Model.UntypedValue, ViewData[ViewDataKeys.PartialViewName].ToString(), Model.ControlID).ToString(Html)
+</div>
 <div class="clearall">
 </div>
 <div class="validationSummaryAjax">
@@ -33,5 +33,5 @@
     @Html.NormalPageHeader()
 </div>
 <div id="divMainControl" class="divMainControl">
-    @{ Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString(), (object)Model);}
+    @{ Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString(), Model);}
 </div>

@@ -232,6 +232,42 @@ namespace Signum.Web.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Create.
+        /// </summary>
+        public static string LineButton_Create {
+            get {
+                return ResourceManager.GetString("LineButton_Create", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Find.
+        /// </summary>
+        public static string LineButton_Find {
+            get {
+                return ResourceManager.GetString("LineButton_Find", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Remove.
+        /// </summary>
+        public static string LineButton_Remove {
+            get {
+                return ResourceManager.GetString("LineButton_Remove", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to View.
+        /// </summary>
+        public static string LineButton_View {
+            get {
+                return ResourceManager.GetString("LineButton_View", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Maximum.
         /// </summary>
         public static string Maximum {
@@ -354,6 +390,15 @@ namespace Signum.Web.Properties {
         public static string Search {
             get {
                 return ResourceManager.GetString("Search", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Create.
+        /// </summary>
+        public static string Search_Create {
+            get {
+                return ResourceManager.GetString("Search_Create", resourceCulture);
             }
         }
         

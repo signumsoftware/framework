@@ -48,9 +48,9 @@ namespace ASP
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Signum/Views/SearchResults.cshtml")]
-    public class _Page_Signum_Views_SearchResults_cshtml : System.Web.Mvc.WebViewPage<dynamic>
+    public class _Page_Signum_Views_SearchResults_cshtml : System.Web.Mvc.WebViewPage<Context>
     {
-
+#line hidden
 
         public _Page_Signum_Views_SearchResults_cshtml()
         {
@@ -68,10 +68,10 @@ namespace ASP
 
 
 
+
 WriteLiteral("\r\n");
 
 
-   Context context = (Context)Model;
    FindOptions findOptions = (FindOptions)ViewData[ViewDataKeys.FindOptions];
    QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
    Type entitiesType = Reflector.ExtractLite(queryDescription.Columns.Single(a => a.IsEntity).Type);
@@ -103,7 +103,7 @@ WriteLiteral("            <td>\r\n");
                 {
                     
                Write(Html.CheckBox(
-                        context.Compose("rowSelection", row.Index.ToString()),
+                        Model.Compose("rowSelection", row.Index.ToString()),
                         new { value = entityField.Id.ToString() + "__" + Navigator.ResolveWebTypeName(entityField.RuntimeType) + "__" + entityField.ToStr }));
 
                                                                                                                                                             ;
@@ -113,7 +113,7 @@ WriteLiteral("            <td>\r\n");
                 {
                     
                Write(Html.RadioButton(
-                        context.Compose("rowSelection"),
+                             Model.Compose("rowSelection"),
                         entityField.Id.ToString() + "__" + Navigator.ResolveWebTypeName(entityField.RuntimeType) + "__" + entityField.ToStr));
 
                                                                                                                                             ;

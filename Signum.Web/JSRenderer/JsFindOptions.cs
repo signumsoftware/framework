@@ -52,20 +52,27 @@ namespace Signum.Web
 
     public class JsFindNavigator : JsInstruction
     {
-        public JsFindNavigator(Func<string> renderer) : base(renderer)
+        public JsFindNavigator(Func<string> renderer)
+            : base(renderer)
+        {            
+        }
+
+        public static JsFindNavigator New(JsFindOptions options)
         { 
+            return new JsFindNavigator(() =>
+                "new SF.FindNavigator({0})".Formato(options.ToJS()));
         }
 
         public static JsFindNavigator JsOpenFinder(JsFindOptions options)
         {
-            return new JsFindNavigator(() =>
-                "OpenFinder({0})".Formato(options.ToJS()));
+            return new JsFindNavigator(() => 
+                New(options).ToJS() + ".openFinder()");
         }
 
         public static JsFindNavigator JsSelectedItems(JsFindOptions options)
         {
             return new JsFindNavigator(() =>
-                "SelectedItems({0})".Formato(options.ToJS()));
+                New(options).ToJS() + ".selectedItems()");
         }
 
         public static JsInstruction HasSelectedItems(JsValue<string> prefix, JsFunction onSuccess)
@@ -75,18 +82,20 @@ namespace Signum.Web
 
         public static JsInstruction HasSelectedItems(JsFindOptions options, JsFunction onSuccess)
         {
-            return new JsInstruction(() => "HasSelectedItems({0},{1})".Formato(options.ToJS(), onSuccess.ToJS()));
+            return new JsInstruction(() => 
+                New(options).ToJS() + ".hasSelectedItems({0})".Formato(onSuccess.ToJS()));
         }
 
         public static JsFindNavigator JsSplitSelectedIds(JsFindOptions options)
         {
             return new JsFindNavigator(() =>
-                "SplitSelectedIds({0})".Formato(options.ToJS()));
+                New(options).ToJS() + ".splitSelectedIds()");
         }
 
         public static JsInstruction JsRequestData(JsFindOptions options)
         {
-            return new JsInstruction(() => "new FindNavigator({0}).requestDataForSearch()".Formato(options.ToJS()));
+            return new JsInstruction(() => 
+                New(options).ToJS() + ".requestDataForSearch()");
         }
     }
 }

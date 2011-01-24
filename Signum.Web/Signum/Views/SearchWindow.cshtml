@@ -1,4 +1,4 @@
-@section head
+﻿@section head
 {
     @Html.ScriptsJs(
             "~/signum/Scripts/SF_Globals.js",
@@ -10,13 +10,17 @@
             "~/signum/Scripts/SF_Operations.js")
 }
 
-@using(Html.BeginForm())
-{
+@using(Html.BeginForm()){
     <h2>@(ViewData[ViewDataKeys.Title] ?? "")</h2>
     Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString());
+
     @Html.ValidationSummaryAjax()
-    <div id="divASustituir">
-    </div>
     <div class="clear">
     </div>   
- } 
+ }
+<script type="text/javascript">
+    $(function () {
+        var $body = $("body");
+        $body.trigger("sf-new-content", [$body]);
+    })
+</script>

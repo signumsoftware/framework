@@ -54,7 +54,7 @@ namespace Signum.Web
 
         public static JsInstruction OpenChooser(JsValue<string> prefix, JsFunction onOptionChosen, string[] optionNames)
         {
-            return "openChooser({0}, {1}, [{2}], null, {{controllerUrl:'{3}'}});".Formato(
+            return "SF.openChooser({0}, {1}, [{2}], null, {{controllerUrl:'{3}'}});".Formato(
                     prefix.ToJS(),
                     onOptionChosen.ToJS(),
                     optionNames.ToString(on => "'{0}'".Formato(on), ","),
@@ -63,7 +63,7 @@ namespace Signum.Web
 
         public static JsInstruction Submit(JsValue<string> controllerUrl)
         {
-            return new JsInstruction(() => "Submit({0})".Formato(controllerUrl.ToJS()));
+            return new JsInstruction(() => "SF.submit({0})".Formato(controllerUrl.ToJS()));
         }
 
         public static JsInstruction Submit(JsValue<string> controllerUrl, JsInstruction requestExtraJsonData)
@@ -71,7 +71,7 @@ namespace Signum.Web
             if (requestExtraJsonData == null)
                 return Submit(controllerUrl);
 
-            return new JsInstruction(() => "Submit({0},{1})".Formato(controllerUrl.ToJS(), requestExtraJsonData.ToJS()));
+            return new JsInstruction(() => "SF.submit({0},{1})".Formato(controllerUrl.ToJS(), requestExtraJsonData.ToJS()));
         }
 
         public static JsInstruction SubmitOnly(JsValue<string> controllerUrl, JsInstruction requestExtraJsonData)
@@ -79,7 +79,7 @@ namespace Signum.Web
             if (requestExtraJsonData == null)
                 throw new ArgumentException("requestExtraJsonData must be given to SubmitOnly. Use Submit otherwise");
 
-            return new JsInstruction(() => "SubmitOnly({0},{1})".Formato(controllerUrl.ToJS(), requestExtraJsonData.ToJS()));
+            return new JsInstruction(() => "SF.submitOnly({0},{1})".Formato(controllerUrl.ToJS(), requestExtraJsonData.ToJS()));
         }
 
         public static JsInstruction AjaxCall(JsValue<string> controllerUrl, JsInstruction requestData, JsFunction onSuccess)
@@ -100,7 +100,7 @@ namespace Signum.Web
 
         public static JsInstruction ReloadEntity(JsValue<string> controllerUrl, JsValue<string> parentDiv)
         {
-            return new JsInstruction(() => "ReloadEntity({0},{1})".Formato(controllerUrl.ToJS(), parentDiv.ToJS()));
+            return new JsInstruction(() => "SF.reloadEntity({0},{1})".Formato(controllerUrl.ToJS(), parentDiv.ToJS()));
         }
     }
 }

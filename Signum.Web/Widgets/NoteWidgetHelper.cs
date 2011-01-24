@@ -46,8 +46,8 @@ namespace Signum.Web
             {
                 Content =
                     @"<div class='widget notes'>
-                      <a class='view' onclick=""javascript:OpenFinder({0});"">{1}</a>
-                      <a class='create' onclick=""javascript:RelatedEntityCreate({2});"">{3}</a>
+                      <a class='view' onclick=""javascript:new SF.FindNavigator({0}).openFinder();"">{1}</a>
+                      <a class='create' onclick=""javascript:SF.relatedEntityCreate({2});"">{3}</a>
                     </div>".Formato(foptions.ToJS(), Properties.Resources.ViewNotes, voptions.ToJS(), Properties.Resources.CreateNote),
                 Label = "<a id='{0}'>{0}<span class='count {1}'>{2}</span></a>".Formato(Properties.Resources.Notes, count == 0 ? "disabled" : "", count),
                 Id = "Notes",

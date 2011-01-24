@@ -86,16 +86,16 @@ WriteLiteral("\">\r\n    <div id=\"");
 
         Write(context.Compose("fields-list"));
 
-WriteLiteral("\" class=\"fields-list\">\r\n        <a onclick=\"toggleFilters(this)\" class=\"filters-h" +
-"eader");
+WriteLiteral("\" class=\"fields-list\">\r\n        <a onclick=\"SF.FindNavigator.toggleFilters(this)\"" +
+" class=\"filters-header");
 
 
-                                                          Write(visible ? "" : " close");
+                                                                           Write(visible ? "" : " close");
 
 WriteLiteral("\" rev=\"filters-body\">");
 
 
-                                                                                                         Write(visible ? Html.Encode(Resources.HideFilters) : Html.Encode(Resources.ShowFilters));
+                                                                                                                          Write(visible ? Html.Encode(Resources.HideFilters) : Html.Encode(Resources.ShowFilters));
 
 WriteLiteral("</a>\r\n        <div class=\"filters\" ");
 
@@ -133,7 +133,7 @@ WriteLiteral("                ");
 WriteLiteral("\r\n                ");
 
 
-           Write(Html.Button(context.Compose("btnAddFilter"), "+", "AddFilter('{0}','{1}');".Formato(context.ControlID, Url.SignumAction("AddFilter")), "addFilter", new Dictionary<string, object> { { "title", "Add Filter" } }));
+           Write(Html.Button(context.Compose("btnAddFilter"), "+", "new SF.FindNavigator({{prefix:'{0}'}}).addFilter('{1}');".Formato(context.ControlID, Url.SignumAction("AddFilter")), "addFilter", new Dictionary<string, object> { { "title", "Add Filter" } }));
 
 WriteLiteral("\r\n");
 
@@ -141,23 +141,23 @@ WriteLiteral("\r\n");
                  if (findOptions.AllowUserColumns.HasValue ? findOptions.AllowUserColumns.Value : Navigator.Manager.AllowUserColumns(context.ControlID))
                 {
                     
-               Write(Html.Button(context.Compose("btnAddColumn"), "+", "AddColumn('{0}','{1}');".Formato(context.ControlID, Url.SignumAction("GetColumnName")), "addColumn", new Dictionary<string, object> { { "title", "Add Column" } }));
+               Write(Html.Button(context.Compose("btnAddColumn"), "+", "new SF.FindNavigator({{prefix:'{0}'}}).addColumn('{1}');".Formato(context.ControlID, Url.SignumAction("GetColumnName")), "addColumn", new Dictionary<string, object> { { "title", "Add Column" } }));
 
-                                                                                                                                                                                                                                          
+                                                                                                                                                                                                                                                                           
                     
-               Write(Html.Button(context.Compose("btnEditColumns"), Resources.UserColumnsEdit, "EditColumns('{0}');".Formato(context.ControlID), ""));
+               Write(Html.Button(context.Compose("btnEditColumns"), Resources.UserColumnsEdit, "new SF.FindNavigator({{prefix:'{0}'}}).editColumns();".Formato(context.ControlID), ""));
 
-                                                                                                                                                    
+                                                                                                                                                                                      
                     
-               Write(Html.Button(context.Compose("btnEditColumnsFinish"), Resources.EditColumnsFinishEdit, "EditColumnsFinish('{0}');".Formato(context.ControlID), "", new Dictionary<string, object> { { "style", "display:none;" } }));
+               Write(Html.Button(context.Compose("btnEditColumnsFinish"), Resources.EditColumnsFinishEdit, "new SF.FindNavigator({{prefix:'{0}'}}).editColumnsFinish();".Formato(context.ControlID), "", new Dictionary<string, object> { { "style", "display:none;" } }));
 
-                                                                                                                                                                                                                                       
+                                                                                                                                                                                                                                                                         
                 }
 
 WriteLiteral("                ");
 
 
-           Write(Html.Button(context.Compose("btnClearAllFilters"), Resources.DeleteFilters, "ClearAllFilters('{0}');".Formato(context.ControlID), "", findOptions.FilterOptions.Any() ? new Dictionary<string, object>() : new Dictionary<string, object> { { "style", "display:none;" } }));
+           Write(Html.Button(context.Compose("btnClearAllFilters"), Resources.DeleteFilters, "new SF.FindNavigator({{prefix:'{0}'}}).clearAllFilters();".Formato(context.ControlID), "", findOptions.FilterOptions.Any() ? new Dictionary<string, object>() : new Dictionary<string, object> { { "style", "display:none;" } }));
 
 WriteLiteral("\r\n            </div>\r\n");
 

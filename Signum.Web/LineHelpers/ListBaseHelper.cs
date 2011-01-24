@@ -26,11 +26,22 @@ namespace Signum.Web
             if (!listBase.Create)
                 return MvcHtmlString.Empty;
 
-            return helper.Button(listBase.Compose("btnCreate"),
-                  "+",
-                  listBase.GetCreating(),
-                  "lineButton create",
-                  htmlProperties);
+            var htmlAttr = new Dictionary<string, object>
+            {
+                { "onclick", listBase.GetCreating() },
+                { "data-icon", "ui-icon-circle-plus" },
+                { "data-text", false}
+            };
+
+            if (htmlProperties != null)
+                htmlAttr.AddRange(htmlProperties);
+
+            return helper.Href(listBase.Compose("btnCreate"),
+                  Resources.LineButton_Create,
+                  "",
+                  Resources.LineButton_Create,
+                  "sf-line-button sf-create",
+                  htmlAttr);
         }
 
         public static MvcHtmlString FindButton(HtmlHelper helper, EntityListBase listBase)
@@ -38,11 +49,19 @@ namespace Signum.Web
             if ((!listBase.Find) || !listBase.ElementType.CleanType().IsIIdentifiable())
                 return MvcHtmlString.Empty;
 
-            return helper.Button(listBase.Compose("btnFind"),
-                  "O",
-                  listBase.GetFinding(),
-                  "lineButton find",
-                  null);
+            var htmlAttr = new Dictionary<string, object>
+            {
+                { "onclick", listBase.GetFinding() },
+                { "data-icon", "ui-icon-circle-zoomin" },
+                { "data-text", false}
+            };
+
+            return helper.Href(listBase.Compose("btnFind"),
+                  Resources.LineButton_Find,
+                  "",
+                  Resources.LineButton_Find,
+                  "sf-line-button sf-find",
+                  htmlAttr);
         }
 
         public static MvcHtmlString RemoveButton(HtmlHelper helper, EntityListBase listBase)
@@ -50,12 +69,25 @@ namespace Signum.Web
             if (!listBase.Remove)
                 return MvcHtmlString.Empty;
 
+            var htmlAttr = new Dictionary<string, object>
+            {
+                { "onclick", listBase.GetRemoving() },
+                { "data-icon", "ui-icon-circle-close" },
+                { "data-text", false}
+            };
+
             IList list = (IList)listBase.UntypedValue;
-            return helper.Button(listBase.Compose("btnRemove"),
-                  "O",
-                  listBase.GetRemoving(),
-                  "lineButton remove",
-                  (list == null || list.Count == 0) ? new Dictionary<string, object>() { { "style", "display:none" } } : null);
+
+            if (list == null || list.Count == 0)
+                htmlAttr.Add("style", "display:none");
+
+            return helper.Href(listBase.Compose("btnRemove"),
+                  Resources.LineButton_Remove,
+                  "",
+                  Resources.LineButton_Remove,
+                  "sf-line-button sf-remove",
+                  htmlAttr);
+
         }
     }
 }

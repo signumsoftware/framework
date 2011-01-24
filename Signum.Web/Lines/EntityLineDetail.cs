@@ -34,12 +34,11 @@ namespace Signum.Web
             Find = false;
             Create = false;
             Remove = false;
-            //Implementations = null;
         }
 
         public override string ToJS()
         {
-            return "new EDLine(" + this.OptionsJS() + ")";
+            return "new SF.EDLine(" + this.OptionsJS() + ")";
         }
 
         protected override JsOptionsBuilder OptionsJSInternal()
@@ -50,49 +49,51 @@ namespace Signum.Web
             return result;
         }
 
-        protected override string DefaultViewing()
+        protected override string DefaultView()
         {
             return null;
         }
 
-        protected override string DefaultCreating()
+        protected override string DefaultCreate()
         {
-            return EntityLineDetail.JsCreating(this, DefaultJsViewOptions()).ToJS();
+            return EntityLineDetail.JsCreate(this, DefaultJsViewOptions()).ToJS();
         }
 
-        public static JsInstruction JsCreating(EntityLineDetail edline, JsViewOptions viewOptions)
+        public static JsInstruction JsCreate(EntityLineDetail edline, JsViewOptions viewOptions)
         {
             if (viewOptions.ControllerUrl == null)
                 viewOptions.ControllerUrl = RouteHelper.New().SignumAction("PartialView");
 
-            return new JsInstruction(() => "EDLineOnCreating({0})".Formato(",".Combine(
-                edline.ToJS(),
+            string createParams = ",".Combine(
                 viewOptions.TryCC(v => v.ToJS()),
-                edline.HasManyImplementations ? RouteHelper.New().SignumAction("GetTypeChooser").SingleQuote() : null)));
+                edline.HasManyImplementations ? RouteHelper.New().SignumAction("GetTypeChooser").SingleQuote() : null);
+
+            return new JsInstruction(() => "{0}.create({1})".Formato(edline.ToJS(), createParams));
         }
 
-        protected override string DefaultFinding()
+        protected override string DefaultFind()
         {
-            return EntityLineDetail.JsFinding(this, DefaultJsfindOptions(), DefaultJsViewOptions()).ToJS();
+            return EntityLineDetail.JsFind(this, DefaultJsfindOptions(), DefaultJsViewOptions()).ToJS();
         }
 
-        public static JsInstruction JsFinding(EntityLineDetail edline, JsFindOptions findOptions, JsViewOptions viewOptions)
+        public static JsInstruction JsFind(EntityLineDetail edline, JsFindOptions findOptions, JsViewOptions viewOptions)
         {
-            return new JsInstruction(() => "EDLineOnFinding({0})".Formato(",".Combine(
-                edline.ToJS(),
-                findOptions.TryCC(f => f.ToJS()),
+            string findParams = ",".Combine(
+                findOptions.TryCC(v => v.ToJS()),
                 viewOptions.TryCC(v => v.ToJS()),
-                edline.HasManyImplementations ? RouteHelper.New().SignumAction("GetTypeChooser").SingleQuote() : null)));
+                edline.HasManyImplementations ? RouteHelper.New().SignumAction("GetTypeChooser").SingleQuote() : null);
+
+            return new JsInstruction(() => "{0}.find({1})".Formato(edline.ToJS(), findParams));
         }
 
-        protected override string DefaultRemoving()
+        protected override string DefaultRemove()
         {
-            return EntityLineDetail.JsRemoving(this).ToJS();
+            return EntityLineDetail.JsRemove(this).ToJS();
         }
 
-        public static JsInstruction JsRemoving(EntityLineDetail edline)
+        public static JsInstruction JsRemove(EntityLineDetail edline)
         {
-            return new JsInstruction(() => "EDLineOnRemoving({0})".Formato(edline.ToJS()));
+            return new JsInstruction(() => "{0}.remove()".Formato(edline.ToJS()));
         }
     }
 }

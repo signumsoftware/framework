@@ -285,4 +285,19 @@
   <data name="_0HasAnInvalidFormat" xml:space="preserve">
     <value>{0} has an invalid format</value>
   </data>
+  <data name="Search_Create" xml:space="preserve">
+    <value>Create</value>
+  </data>
+  <data name="LineButton_Find" xml:space="preserve">
+    <value>Find</value>
+  </data>
+  <data name="LineButton_Create" xml:space="preserve">
+    <value>Create</value>
+  </data>
+  <data name="LineButton_Remove" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="LineButton_View" xml:space="preserve">
+    <value>View</value>
+  </data>
 </root>

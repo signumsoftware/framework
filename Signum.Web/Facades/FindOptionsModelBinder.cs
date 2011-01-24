@@ -27,6 +27,9 @@ namespace Signum.Web
 
             NameValueCollection parameters = controllerContext.HttpContext.Request.Params;
 
+            if (parameters.AllKeys.Any(name => !name.HasText()))
+                throw new Exception("Incorrect URL: " + controllerContext.HttpContext.Request.Url.ToString());
+
             string webQueryName = "";
             object rawValue = bindingContext.ValueProvider.GetValue("webQueryName").TryCC(vp => vp.RawValue);
             if (rawValue.GetType() == typeof(string[]))
@@ -39,151 +42,164 @@ namespace Signum.Web
 
             fo.QueryName = Navigator.ResolveQueryName(webQueryName);
 
-            fo.FilterOptions = ExtractFilterOptions(controllerContext.HttpContext, fo.QueryName);
-            fo.OrderOptions = ExtractOrderOptions(controllerContext.HttpContext, fo.QueryName);
-            fo.ColumnOptions = ExtractColumnsOptions(controllerContext.HttpContext, fo.QueryName);
+            QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(fo.QueryName);
 
-            if (parameters.AllKeys.Contains("sfAllowMultiple"))
+            fo.FilterOptions = ExtractFilterOptions(controllerContext.HttpContext, queryDescription);
+            fo.OrderOptions = ExtractOrderOptions(controllerContext.HttpContext, queryDescription);
+            fo.ColumnOptions = ExtractColumnsOptions(controllerContext.HttpContext, queryDescription);
+
+            if (parameters.AllKeys.Contains("allowMultiple"))
             {
                 bool aux;
-                if (bool.TryParse(parameters["sfAllowMultiple"], out aux))
+                if (bool.TryParse(parameters["allowMultiple"], out aux))
                     fo.AllowMultiple = aux;
             }
 
-            if (parameters.AllKeys.Contains("sfAsync"))
+            if (parameters.AllKeys.Contains("async"))
             {
                 bool aux;
-                if (bool.TryParse(parameters["sfAsync"], out aux))
+                if (bool.TryParse(parameters["async"], out aux))
                     fo.Async = aux;
             }
 
-            if (parameters.AllKeys.Contains("sfFilterMode"))
+            if (parameters.AllKeys.Contains("filterMode"))
             {
-                FilterMode mode = parameters["sfFilterMode"].ToEnum<FilterMode>();
+                FilterMode mode = parameters["filterMode"].ToEnum<FilterMode>();
                 if (mode == FilterMode.AlwaysHidden || mode == FilterMode.OnlyResults)
                 {
-                    if (controllerContext.HttpContext.Request.QueryString.AllKeys.Contains("sfFilterMode"))
+                    if (controllerContext.HttpContext.Request.QueryString.AllKeys.Contains("filterMode"))
                         throw new InvalidOperationException("QueryString cannot contain FilterMode set to Always Hidden or Only Results");
                 }
                 fo.FilterMode = mode;
             }
 
-            if (parameters.AllKeys.Contains("sfColumnMode"))
-                fo.ColumnOptionsMode = parameters["sfColumnMode"].ToEnum<ColumnOptionsMode>();
+            if (parameters.AllKeys.Contains("columnMode"))
+                fo.ColumnOptionsMode = parameters["columnMode"].ToEnum<ColumnOptionsMode>();
 
-            if (parameters.AllKeys.Contains("sfCreate"))
-                fo.Create = bool.Parse(parameters["sfCreate"]);
+            if (parameters.AllKeys.Contains("create"))
+                fo.Create = bool.Parse(parameters["create"]);
 
-            if (parameters.AllKeys.Contains("sfView"))
-                fo.View = bool.Parse(parameters["sfView"]);
+            if (parameters.AllKeys.Contains("view"))
+                fo.View = bool.Parse(parameters["view"]);
 
-            if (parameters.AllKeys.Contains("sfTop"))
+            if (parameters.AllKeys.Contains("top"))
             {
                 int aux;
-                if (int.TryParse(parameters["sfTop"], out aux))
+                if (int.TryParse(parameters["top"], out aux))
                     fo.Top = aux;
             }
 
-            if (parameters.AllKeys.Contains("sfSearchOnLoad"))
-                fo.SearchOnLoad = bool.Parse(parameters["sfSearchOnLoad"]);
+            if (parameters.AllKeys.Contains("searchOnLoad"))
+                fo.SearchOnLoad = bool.Parse(parameters["searchOnLoad"]);
 
             return fo;
         }
 
-        public static List<FilterOption> ExtractFilterOptions(HttpContextBase httpContext, object queryName)
+        //name1,operation1,value1;name2,operation2,value2; being values CSV encoded
+        static Regex filterRegex = new Regex(
+            "(?<token>[^;,]+),(?<op>[^;,]+),(?<value>'(?:[^']+|'')*'|[^;,]*);".Replace('\'', '"'),
+            RegexOptions.Multiline | RegexOptions.ExplicitCapture);
+
+        public static List<FilterOption> ExtractFilterOptions(HttpContextBase httpContext, QueryDescription queryDescription)
         {
             List<FilterOption> result = new List<FilterOption>();
 
-            QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(queryName);
-
             NameValueCollection parameters = httpContext.Request.Params;
-            if (parameters.AllKeys.Any(name => !name.HasText()))
-                throw new Exception("Incorrect URL: " + httpContext.Request.Url.ToString());
+            
+            string field = parameters["filters"];
 
-            var names = parameters.AllKeys.Where(k => k.StartsWith("cn"));
-            foreach (string nameKey in names)
+            if (!field.HasText())
+                return result;
+
+            var matches = filterRegex.Matches(field).Cast<Match>();
+
+            return matches.Select(m =>
             {
-                int index;
-                if (!int.TryParse(nameKey.RemoveLeft(2), out index))
-                    continue;
-
-                string name = parameters[nameKey];
-                string value = parameters["val" + index.ToString()];
-                string operation = parameters["sel" + index.ToString()];
-                bool frozen = parameters.AllKeys.Contains("fz" + index.ToString());
-
-                QueryToken token = QueryUtils.Parse(name, queryDescription);
-
-                object valueObject = Convert(value, token.Type);
-
-                result.Add(new FilterOption
+                string name = m.Groups["token"].Value;
+                var token = QueryUtils.Parse(name, queryDescription);
+                return new FilterOption
                 {
                     ColumnName = name,
                     Token = token,
-                    Operation = EnumExtensions.ToEnum<FilterOperation>(operation),
-                    Frozen = frozen,
-                    Value = valueObject,
-                });
-            }
-            return result;
+                    Operation = EnumExtensions.ToEnum<FilterOperation>(m.Groups["op"].Value),
+                    Value = Convert(DecodeValue(m.Groups["value"].Value), token.Type),
+                    //Frozen = frozen,
+                };
+            }).ToList();
         }
 
-        public static List<OrderOption> ExtractOrderOptions(HttpContextBase httpContext, object queryName)
+        //order1,-order2; minus symbol indicating descending
+        static Regex orderRegex = new Regex(
+            "(?<token>-?[^;,]+);".Replace('\'', '"'),
+            RegexOptions.Multiline | RegexOptions.ExplicitCapture);
+
+        public static List<OrderOption> ExtractOrderOptions(HttpContextBase httpContext, QueryDescription queryDescription)
         {
             List<OrderOption> result = new List<OrderOption>();
 
-            QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(queryName);
-
             NameValueCollection parameters = httpContext.Request.Params;
-            string field = parameters["sfOrderBy"];
+            string field = parameters["orders"];
             
             if (!field.HasText())
                 return result;
 
-            string[] orderArray = field.Split(new []{","}, StringSplitOptions.RemoveEmptyEntries);
-            
-            foreach (string currentOrderString in orderArray)
+            var matches = orderRegex.Matches(field).Cast<Match>();
+
+            return matches.Select(m =>
             {
-                OrderType orderType = currentOrderString.StartsWith("-") ? OrderType.Descending : OrderType.Ascending;
-                string token = orderType == OrderType.Ascending ? currentOrderString : currentOrderString.Substring(1, currentOrderString.Length-1);
-                result.Add(new OrderOption
+                var tokenCapture = m.Groups["token"].Value;
+                OrderType orderType = tokenCapture.StartsWith("-") ? OrderType.Descending : OrderType.Ascending;
+                string token = orderType == OrderType.Ascending ? tokenCapture : tokenCapture.Substring(1, tokenCapture.Length - 1);
+                return new OrderOption
                 {
                     Token = QueryUtils.Parse(token, queryDescription),
                     OrderType = orderType
-                });
-            }
-
-            return result;
+                };
+            }).ToList();
         }
 
-        public static List<ColumnOption> ExtractColumnsOptions(HttpContextBase httpContext, object queryName)
+        //columnName1,displayName1;columnName2,displayName2; being displayNames CSV encoded
+        static Regex columnRegex = new Regex(
+            "(?<token>[^;,]+)(,(?<name>'(?:[^']+|'')*'|[^;,]*))?;".Replace('\'', '"'),
+            RegexOptions.Multiline | RegexOptions.ExplicitCapture);
+
+        public static List<ColumnOption> ExtractColumnsOptions(HttpContextBase httpContext, QueryDescription queryDescription)
         {
             List<ColumnOption> result = new List<ColumnOption>();
 
-            QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(queryName);
-
             NameValueCollection parameters = httpContext.Request.Params;
-            string field = parameters["sfColumns"];
+            string field = parameters["columns"];
             
             if (!field.HasText())
                 return result;
 
-            string[] colArray = field.Split(new []{","}, StringSplitOptions.RemoveEmptyEntries);
-            
-            int numStaticCols = queryDescription.Columns.Count;
+            var matches = columnRegex.Matches(field).Cast<Match>();
 
-            for (int i = 0; i < colArray.Length; i++)
+            return matches.Select(m =>
             {
-                string[] currentColString = colArray[i].Split(';');
-
-                result.Add(new ColumnOption
+                var colName = m.Groups["token"].Value;
+                var displayCapture = m.Groups["name"].Captures;
+                return new ColumnOption
                 {
-                    ColumnName = currentColString[0],
-                    DisplayName = currentColString[1],
-                });
-            }
+                    ColumnName = colName,
+                    DisplayName = displayCapture.Count > 0 ? DecodeValue(m.Groups["name"].Value) : colName
+                };
+            }).ToList();
+        }
 
-            return result;
+        static string DecodeValue(string s)
+        {
+            if (s.StartsWith("\""))
+            {
+                if (!s.EndsWith("\""))
+                    throw new FormatException("Value starts by quotes but not ends with quotes".Formato(s));
+
+                return s.Substring(1, s.Length - 2).Replace("\"\"", "\"");
+            }
+            else
+            {
+                return s;
+            }
         }
 
         internal static object Convert(string value, Type type)

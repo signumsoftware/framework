@@ -153,33 +153,29 @@ namespace Signum.Utilities
             using (MemoryStream ms = new MemoryStream(data))
                 return ReadCVS<T>(ms, encoding, culture, skipFirtsLine).ToList();
         }
-
         
         public static IEnumerable<T> ReadCVS<T>(this Stream stream, Encoding encoding, CultureInfo culture, bool skipFirst)
             where T : new()
         {
             List<MemberEntry<T>> members = MemberEntryFactory.GenerateList<T>(MemberOptions.Fields | MemberOptions.Properties | MemberOptions.Untyped | MemberOptions.Setters);
 
+            string regex = @"^((?<val>'(?:[^']+|'')*'|[^;\r\n]*))?((?!($|\r\n));(?<val>'(?:[^']+|'')*'|[^;\r\n]*))*($|\r\n)".Replace('\'', '"').Replace(';', culture.TextInfo.ListSeparator.Single());
             using (StreamReader sr = new StreamReader(stream, encoding))
             {
-                if (skipFirst) sr.ReadLine();
-                while (!sr.EndOfStream)
+                string str = sr.ReadToEnd().Trim();
+                var matches = Regex.Matches(str, regex, RegexOptions.Multiline | RegexOptions.ExplicitCapture).Cast<Match>();
+
+                foreach (var m in matches)
                 {
-                    string currentLine = sr.ReadLine();
+                    var vals = m.Groups["val"].Captures;
 
-                    MatchCollection matches = Regex.Matches(currentLine, culture.TextInfo.ListSeparator + @"(?=([^""]*""[^""]*"")*(?![^""]*""))");
-
-                    int[] nums = matches.Cast<Match>().Select(a => a.Index).PreAnd(-1).And(currentLine.Length).ToArray();
-
-                    string[] parts = nums.BiSelect((a, b) => currentLine.Substring(a + 1, b - a - 1)).ToArray();
-
-                    if (parts.Length < members.Count)
-                        throw new FormatException("Not enought fields on line: " + currentLine);
+                    if (vals.Count < members.Count)
+                        throw new FormatException("Not enought fields on line: " + m.Value);
 
                     T t = new T();
                     for (int i = 0; i < members.Count; i++)
                     {
-                        object value = ConvertTo(DecodeCSV(parts[i]), members[i].MemberInfo.ReturningType(), culture);
+                        object value = ConvertTo(DecodeCSV(vals[i].Value), members[i].MemberInfo.ReturningType(), culture);
 
                         members[i].UntypedSetter(t, value); 
                     }
@@ -196,7 +192,9 @@ namespace Signum.Utilities
                 if (!s.EndsWith("\""))
                     throw new FormatException("Cell starts by quotes but not ends with quotes".Formato(s));
 
-                return s.Substring(1, s.Length - 2).Replace("\"\"", "\"");
+                string str =  s.Substring(1, s.Length - 2).Replace("\"\"", "\"");
+
+                return Regex.Replace(str, "(?<!\r)\n", "\r\n"); 
             }
 
             if (s.Contains("\""))

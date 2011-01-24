@@ -47,7 +47,7 @@ namespace Signum.Web
         JsViewOptions Options { get; set; }
 
         public JsViewNavigator(JsViewOptions options)
-            : base(() => "new ViewNavigator(" + options.ToJS() + ")")
+            : base(() => "new SF.ViewNavigator(" + options.ToJS() + ")")
         {
             this.Options = options;
         }
@@ -59,7 +59,7 @@ namespace Signum.Web
 
         public static JsInstruction ClosePopup(string prefix)
         {
-            return new JsInstruction(() => "ClosePopup('{0}')".Formato(prefix));
+            return new JsInstruction(() => "SF.closePopup('{0}')".Formato(prefix));
         }
     }
 }

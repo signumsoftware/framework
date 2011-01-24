@@ -45,7 +45,7 @@ namespace ASP
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Signum/Views/NormalPage.cshtml")]
-    public class _Page_Signum_Views_NormalPage_cshtml : System.Web.Mvc.WebViewPage<dynamic>
+    public class _Page_Signum_Views_NormalPage_cshtml : System.Web.Mvc.WebViewPage<TypeContext>
     {
 #line hidden
 
@@ -63,7 +63,6 @@ namespace ASP
         {
 
 
-WriteLiteral("\r\n");
 
 
 DefineSection("head", () => {
@@ -85,10 +84,7 @@ WriteLiteral("\r\n");
 
 });
 
-WriteLiteral("\r\n\r\n");
-
-
-   TypeContext modelTC = (TypeContext)Model;
+WriteLiteral("\r\n");
 
 
  using (Html.BeginForm())
@@ -105,15 +101,13 @@ WriteLiteral("    </div>\r\n");
 
     
 
-WriteLiteral("    <div id=\"divASustituir\">\r\n    </div>\r\n");
-
-
-
 WriteLiteral("    <div class=\"clear\">\r\n    </div>   \r\n");
 
 
 }
-WriteLiteral(" ");
+
+WriteLiteral("<script type=\"text/javascript\">\r\n    $(function () {\r\n        var $body = $(\"body" +
+"\");\r\n        $body.trigger(\"sf-new-content\", [$body]);\r\n    })\r\n</script>\r\n");
 
 
         }

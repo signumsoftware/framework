@@ -1,4 +1,6 @@
-﻿if (!SF.Autocompleter && typeof SF.Autocompleter == "undefined") {
+﻿"use strict";
+
+if (!SF.Autocompleter && typeof SF.Autocompleter == "undefined") {
 
 Autocompleter = function (controlId, url, _options) {
     this.options = $.extend({

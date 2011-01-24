@@ -1,549 +1,568 @@
-﻿if (!OperationManager && typeof OperationManager == "undefined") {
+﻿"use strict";
 
-var uiBlocked = false;
+SF.registerModule("Operations", function () {
 
-function blockUI() { 
-    uiBlocked = true;
-    var $divblocker = $("<div class='uiBlocker'></div>").width('300%').height('300%');
-    $('body').append($divblocker);
-}
+    var uiBlocked = false;
 
-var OperationManager = function(_options) {
-    this.options = $.extend({
-        prefix: "",
-        parentDiv: "",
-        operationKey: null,
-        isLite: false,
-        controllerUrl: null,
-        validationControllerUrl: null,
-        onOk: null,
-        onCancelled: null,
-        contextual: false,
-        requestExtraJsonData: null
-    }, _options);
-};
+    function blockUI() {
+        uiBlocked = true;
+        $("<div/>", {
+            "class": "uiBlocker",
+            "width": "300%",
+            "height": "300%"
+        }).appendTo($("body"));
+    }
 
-OperationManager.prototype = {
+    SF.OperationManager = function (_options) {
+        this.options = $.extend({
+            prefix: "",
+            parentDiv: "",
+            operationKey: null,
+            isLite: false,
+            controllerUrl: null,
+            validationControllerUrl: null,
+            onOk: null,
+            onCancelled: null,
+            contextual: false,
+            requestExtraJsonData: null
+        }, _options);
+    };
 
-    runtimeInfo: function () {
-        return RuntimeInfoFor(this.options.prefix);
-    },
+    SF.OperationManager.prototype = {
 
-    pf: function (s) {
-        return "#" + this.options.prefix.compose(s);
-    },
+        runtimeInfo: function () {
+            return new SF.RuntimeInfo(this.options.prefix);
+        },
 
-    newPrefix: function () {
-        return "New".compose(this.options.prefix);
-    },
+        pf: function (s) {
+            return "#" + SF.compose(this.options.prefix, s);
+        },
 
-    requestData: function (newPrefix) {
-        log("OperationManager requestData");
-        var formChildren = "";
-        if (isFalse(this.options.isLite)) {
-            if (empty(this.options.prefix)) //NormalWindow 
-                formChildren = empty(this.options.parentDiv) ? $("form :input") : $("#" + this.options.parentDiv + " :input");
-            else //PopupWindow
-                formChildren = $(this.pf("panelPopup *") + ", #" + sfReactive + ", #" + sfTabId);
-        }
-        else {
-            formChildren = $('#' + sfTabId);
-        }
-        formChildren = formChildren.not(".searchControl *");
-        var requestData = [];
-        requestData.push(formChildren.serialize());
+        newPrefix: function () {
+            return SF.compose("New", this.options.prefix);
+        },
 
-        var info = this.runtimeInfo();
-        var runtimeType = info.runtimeType();
-
-        var myRuntimeInfoKey = this.options.prefix.compose(sfRuntimeInfo);
-        if (formChildren.filter("[name=" + myRuntimeInfoKey + "]").length == 0) {
-            if (empty(runtimeType))
-                requestData.push(
-                    qp(myRuntimeInfoKey, info.createValue(StaticInfoFor(this.options.prefix).singleType(), info.id(), info.isNew(), info.ticks()))
-                );
-            else
-                requestData.push(
-                    qp(myRuntimeInfoKey, info.find().val())
-                );
-        }
-        requestData.push(qp("isLite", this.options.isLite)
-                     + qp("sfOperationFullKey", this.options.operationKey)
-                     + qp(sfPrefix, newPrefix)
-                     + qp("sfOldPrefix", this.options.prefix)
-                     + qp("sfOnOk", singleQuote(this.options.onOk)));
-
-        if (!empty(this.options.requestExtraJsonData)) {
-            for (var key in this.options.requestExtraJsonData) {
-                if (jQuery.isFunction(this.options.requestExtraJsonData[key]))
-                    requestData.push(qp(key, this.options.requestExtraJsonData[key]()));
-                else
-                    requestData.push(qp(key, this.options.requestExtraJsonData[key]));
+        requestData: function (newPrefix) {
+            SF.log("OperationManager requestData");
+            var formChildren = "";
+            if (SF.isFalse(this.options.isLite)) {
+                if (SF.isEmpty(this.options.prefix)) //NormalWindow 
+                    formChildren = SF.isEmpty(this.options.parentDiv) ? $("form :input") : $("#" + this.options.parentDiv + " :input");
+                else //PopupWindow
+                    formChildren = $(this.pf("panelPopup *") + ", #" + SF.Keys.reactive + ", #" + SF.Keys.tabId);
             }
-        }
-
-        return requestData.join('');
-    },
-
-    contextualRequestData: function (newPrefix) {
-        log("OperationManager contextualRequestData");
-        var requestData = [];
-        requestData.push("isLite=" + this.options.isLite
-                     + qp("sfOperationFullKey", this.options.operationKey)
-                     + qp(sfPrefix, newPrefix)
-                     + qp("sfOldPrefix", this.options.prefix)
-                     + qp("sfOnOk", singleQuote(this.options.onOk)));
-
-        if (!empty(this.options.requestExtraJsonData)) {
-            for (var key in this.options.requestExtraJsonData) {
-                if (jQuery.isFunction(this.options.requestExtraJsonData[key]))
-                    requestData.push(qp(key, this.options.requestExtraJsonData[key]()));
-                else
-                    requestData.push(qp(key, this.options.requestExtraJsonData[key]));
+            else {
+                formChildren = $('#' + SF.Keys.tabId);
             }
-        }
+            formChildren = formChildren.not(".searchControl *");
 
-        return requestData.join('');
-    },
+            var info = this.runtimeInfo();
+            var runtimeType = info.runtimeType();
 
-    operationAjax: function (newPrefix, onSuccess) {
-        log("OperationManager operationAjax");
+            var serializer = new SF.Serializer();
+            serializer.add(formChildren.serialize());
 
-        if (uiBlocked)
+            var myRuntimeInfoKey = SF.compose(this.options.prefix, SF.Keys.runtimeInfo);
+            if (formChildren.filter("[name=" + myRuntimeInfoKey + "]").length == 0) {
+                var value = SF.isEmpty(runtimeType)
+                ? info.createValue(SF.StaticInfo(this.options.prefix).singleType(), info.id(), info.isNew(), info.ticks())
+                : info.find().val();
+
+                serializer.add(myRuntimeInfoKey, value);
+            }
+
+            serializer.add({ isLite: this.options.isLite,
+                operationFullKey: this.options.operationKey,
+                prefix: newPrefix,
+                oldPrefix: this.options.prefix
+            });
+            serializer.add(this.options.requestExtraJsonData);
+
+            return serializer.serialize();
+        },
+
+        contextualRequestData: function (newPrefix) {
+            SF.log("OperationManager contextualRequestData");
+
+            var serializer = new SF.Serializer()
+            .add({
+                isLite: this.options.isLite,
+                operationFullKey: this.options.operationKey,
+                prefix: newPrefix,
+                oldPrefix: this.options.prefix
+            })
+            .add(this.options.requestExtraJsonData);
+
+            return serializer.serialize();
+        },
+
+        operationAjax: function (newPrefix, onSuccess) {
+            SF.log("OperationManager operationAjax");
+
+            if (uiBlocked) {
+                return false;
+            }
+            else {
+                blockUI();
+            }
+
+            SF.Notify.info(lang.signum.executingOperation);
+
+            if (SF.isEmpty(newPrefix))
+                newPrefix = this.options.prefix;
+
+            var self = this;
+            SF.ajax({
+                type: "POST",
+                url: this.options.controllerUrl,
+                data: this.options.contextual ? this.contextualRequestData(newPrefix) : this.requestData(newPrefix),
+                async: true,
+                dataType: "html",
+                success: function (operationResult) {
+                    uiBlocked = false;
+                    $(".uiBlocker").remove();
+
+                    if (self.executedSuccessfully(operationResult)) {
+                        var $operationResult = jQuery(operationResult);
+                        $("body").trigger("sf-new-content", [$operationResult]);
+                        if (onSuccess != null) {
+                            onSuccess(newPrefix, $operationResult, self.options.parentDiv);
+                        }
+                    }
+                    else {
+                        SF.Notify.error(lang.signum.error, 2000);
+                        return;
+                    }
+                },
+                error:
+                function () {
+                    uiBlocked = false;
+                    $(".uiBlocker").remove();
+                    SF.Notify.error(lang.signum.error, 2000);
+                }
+            });
+        },
+
+        operationSubmit: function () {
+            SF.log("OperationManager operationSubmit");
+
+            if (uiBlocked) {
+                return false;
+            }
+
+            $("form").append(SF.hiddenInput('isLite', this.options.isLite) +
+            SF.hiddenInput('operationFullKey', this.options.operationKey) +
+            SF.hiddenInput("oldPrefix", this.options.prefix));
+
+            SF.submit(this.options.controllerUrl, this.options.requestExtraJsonData);
+        },
+
+        executedSuccessfully: function (operationResult) {
+            SF.log("OperationManager executedSuccessfully");
+
+            if (operationResult.indexOf("ModelState") === -1) {
+                return true;
+            }
+
+            var result = $.parseJSON(operationResult),
+            modelState = result.ModelState;
+
+            if (SF.isEmpty(this.options.prefix)) {
+                new Validator().showErrors(modelState);
+            }
+            else {
+                var info = this.runtimeInfo();
+                new SF.PartialValidator({
+                    prefix: this.options.prefix,
+                    type: info.runtimeType(),
+                    id: info.id()
+                }).showErrors(modelState);
+            }
             return false;
-        else
-            blockUI();
+        },
 
-        NotifyInfo(lang.signum.executingOperation);
+        defaultSubmit: function () {
+            SF.log("OperationManager defaultSubmit");
 
-        if (empty(newPrefix))
-            newPrefix = this.options.prefix;
+            if (uiBlocked) {
+                return false;
+            }
 
-        var self = this;
+            if (SF.isTrue(this.options.isLite)) {
+                this.operationSubmit();
+            }
+            else {
+                var onSuccess = function () { this.operationSubmit(); };
+                var self = this;
+                var valOptions = {
+                    prefix: this.options.prefix,
+                    controllerUrl: this.options.validationControllerUrl
+                };
+                if (!SF.isEmpty(this.options.parentDiv)) { // So as not to override parentDiv to be set in PartialValidator constructor
+                    valOptions.parentDiv = this.options.parentDiv;
+                }
+                if (!SF.EntityIsValid(valOptions, function () { onSuccess.call(self) })) {
+                    return;
+                }
+            }
+        }
+    };
+
+    SF.OperationExecutor = function (_options) {
+        SF.OperationManager.call(this, $.extend({
+            controllerUrl: null
+        }, _options));
+
+        this.defaultExecute = function () {
+            SF.log("OperationExecutor defaultExecute");
+
+            if (uiBlocked) {
+                return false;
+            }
+
+            var onSuccess = function () {
+                this.operationAjax(null, SF.opReloadContent);
+            };
+
+            if (SF.isTrue(this.options.isLite)) {
+                onSuccess.call(this);
+            }
+            else {
+                var self = this;
+                var valOptions = {
+                    prefix: this.options.prefix,
+                    controllerUrl: this.options.validationControllerUrl
+                };
+                if (!SF.isEmpty(this.options.parentDiv)) { // So as not to override parentDiv to be set in PartialValidator constructor
+                    valOptions.parentDiv = this.options.parentDiv;
+                }
+                if (!SF.EntityIsValid(valOptions, function () { onSuccess.call(self) })) {
+                    return; 
+                }
+            }
+        };
+
+        this.contextualExecute = function (runtimeType, id) {
+            SF.log("OperationExecutor contextualExecute");
+
+            if (uiBlocked) {
+                return false;
+            }
+
+            this.operationAjax(null, SF.opMarkCellOnSuccess);
+        };
+    };
+
+    SF.OperationExecutor.prototype = new SF.OperationManager();
+
+    //ConstructorFrom options = OperationManager options + returnType
+    SF.ConstructorFrom = function (_options) {
+        SF.OperationManager.call(this, $.extend({
+            controllerUrl: null,
+            returnType: null
+        }, _options));
+
+        this.defaultConstruct = function () {
+            SF.log("ConstructorFrom construct");
+
+            if (uiBlocked) {
+                return false;
+            }
+
+            var onSuccess = function () {
+                this.operationAjax(this.newPrefix(), SF.opOpenPopup);
+            }
+
+            if (SF.isTrue(this.options.isLite)) {
+                onSuccess.call(this);
+            }
+            else {
+                var self = this;
+                var valOptions = {
+                    prefix: this.options.prefix,
+                    controllerUrl: this.options.validationControllerUrl
+                };
+                if (!SF.isEmpty(this.options.parentDiv)) { // So as not to override parentDiv to be set in PartialValidator constructor
+                    valOptions.parentDiv = this.options.parentDiv;
+                }
+                if (!SF.EntityIsValid(valOptions, function () { onSuccess.call(self) })) {
+                    return;
+                }
+            }
+        };
+
+        this.contextualConstruct = function (runtimeType, id) {
+            SF.log("ConstructorFrom contextualConstruct");
+
+            if (uiBlocked) {
+                return false;
+            }
+
+            this.operationAjax(this.newPrefix(), SF.opContextualOnSuccess);
+        };
+    };
+
+    SF.ConstructorFrom.prototype = new SF.OperationManager();
+
+    SF.DeleteExecutor = function (_options) {
+        SF.OperationManager.call(this, $.extend({
+            controllerUrl: null
+        }, _options));
+
+        this.defaultDelete = function () {
+            SF.log("DeleteExecutor defaultDelete");
+
+            if (uiBlocked) {
+                return false;
+            }
+
+            if (SF.isTrue(this.options.isLite)) {
+                SF.Notify.info(lang.signum.executingOperation);
+                this.operationAjax(this.options.prefix, function () {
+                    SF.Notify.info(lang.signum.operationExecuted, 2000);
+                });
+            }
+            else {
+                throw "Delete operation must be Lite";
+            }
+        };
+
+        this.contextualDelete = function (runtimeType, id) {
+            SF.log("DeleteExecutor contextualDelete");
+
+            if (uiBlocked) {
+                return false;
+            }
+
+            SF.Notify.info(lang.signum.executingOperation);
+            this.operationAjax(this.options.prefix, function () { SF.Notify.info(lang.signum.operationExecuted, 2000); });
+        };
+    };
+
+    SF.DeleteExecutor.prototype = new SF.OperationManager();
+
+    SF.OperationDelete = function (deleteExecutor) {
+        deleteExecutor.execute();
+    }
+
+    //ConstructorFromMany options = OperationManager options + returnType
+    SF.ConstructorFromMany = function (_options) {
+        SF.OperationManager.call(this, $.extend({
+            controllerUrl: null,
+            returnType: null
+        }, _options));
+
+        this.requestData = function (newPrefix, items) {
+            SF.log("ConstructorFromMany requestData");
+
+            var serializer = new SF.Serializer()
+                                .add($('#' + SF.Keys.tabId).serialize())
+                                .add({ runtimeType: $(this.pf(SF.Keys.entityTypeName)).val(),
+                                    operationFullKey: this.options.operationKey,
+                                    prefix: newPrefix,
+                                    oldPrefix: this.options.prefix
+                                });
+
+            for (var i = 0, l = items.length; i < l; i++) {
+                serializer.add("ids", items[i].id);
+            }
+
+            serializer.add(this.options.requestExtraJsonData);
+
+            return serializer.serialize();
+        };
+
+        this.operationAjax = function (newPrefix, items, onSuccess) {
+            SF.log("ConstructorFromMany operationAjax");
+
+            SF.Notify.info(lang.signum.executingOperation);
+
+            if (uiBlocked) {
+                return false;
+            }
+
+            var self = this;
+            SF.ajax({
+                type: "POST",
+                url: this.options.controllerUrl,
+                data: this.requestData(this.newPrefix(), items),
+                async: true,
+                dataType: "html",
+                success: function (operationResult) {
+                    uiBlocked = false;
+                    $(".uiBlocker").remove();
+
+                    if (self.executedSuccessfully(operationResult)) {
+                        var $operationResult = jQuery(operationResult);
+                        $("body").trigger("sf-new-content", [$operationResult]);
+                        if (onSuccess != null) {
+                            onSuccess(newPrefix, $operationResult, self.options.parentDiv);
+                        }
+                    }
+                    else {
+                        SF.Notify.error(lang.signum.error, 2000);
+                        return;
+                    }
+                },
+                error:
+                function () {
+                    uiBlocked = false;
+                    $(".uiBlocker").remove();
+                    SF.Notify.error(lang.signum.error, 2000);
+                }
+            });
+        };
+
+        this.defaultConstruct = function () {
+            SF.log("ConstructorFromMany defaultConstruct");
+
+            if (uiBlocked) {
+                return false;
+            }
+
+            var onSuccess = function (items) {
+                this.operationAjax(this.newPrefix(), items, SF.opOpenPopup);
+            }
+
+            var self = this;
+            new SF.FindNavigator({ prefix: this.options.prefix }).hasSelectedItems(function (items) { onSuccess.call(self, items) });
+        };
+
+        this.defaultSubmit = function () {
+            SF.log("ConstructorFromMany defaultSubmit");
+
+            if (uiBlocked) {
+                return false;
+            }
+
+            var onSuccess = function (items) {
+                for (var i = 0, l = items.length; i < l; i++) {
+                    $("form").append(SF.hiddenInput('ids', items[i].id));
+                }
+                this.operationSubmit();
+            };
+
+            var self = this;
+            new SF.FindNavigator({ prefix: this.options.prefix }).hasSelectedItems(function (items) { onSuccess.call(self, items) });
+        }
+    };
+
+    SF.ConstructorFromMany.prototype = new SF.OperationManager();
+
+    SF.reloadEntity = function (urlController, prefix, parentDiv) {
+        var $partialViewName = $('#sfPartialViewName');
+        var requestData = $("form :input").not(".searchControl :input").serialize() + "&prefix=" + prefix;
+        if ($partialViewName.length === 1) {
+            requestData += "&partialViewName=" + $partialViewName.val();
+        }
         SF.ajax({
             type: "POST",
-            url: this.options.controllerUrl,
-            data: this.options.contextual ? this.contextualRequestData(newPrefix) : this.requestData(newPrefix),
-            async: true,
+            url: urlController,
+            data: requestData,
+            async: false,
             dataType: "html",
-            success: function (operationResult) {
-                uiBlocked = false;
-                $(".uiBlocker").remove();
+            success: function (msg) {
 
-                if (self.executedSuccessfully(operationResult)) {
-                    if (onSuccess != null) {
-                        onSuccess(newPrefix, operationResult, self.options.parentDiv);
+                var $msg = jQuery(msg);
+                $("body").trigger("sf-new-content", [$msg]);
+
+                if (!SF.isEmpty(parentDiv)) {
+                    $('#' + parentDiv + ' input[onblur]').attr('onblur', ''); // To avoid Chrome to fire onblur when replacing parentdiv content
+                    $('#' + parentDiv).html('').append($msg);
+                }
+                else {
+                    if (SF.isEmpty(prefix)) {
+                        $('#divNormalControl').html('').append($msg);
+                    }
+                    else {
+                        $('#' + SF.compose(prefix, "divMainControl") + ' input[onblur]').attr('onblur', ''); // To avoid Chrome to fire onblur when replacing popup content
+                        $('#' + SF.compose(prefix, "divMainControl")).html('').append($msg);
                     }
                 }
-                else {
-                    NotifyInfo(lang.signum.error, 2000);
-                    return;
-                }
-            },
-            error:
-                function () {
-                    uiBlocked = false;
-                    $(".uiBlocker").remove();
-                    NotifyInfo(lang.signum.error, 2000);
-                }
+            }
         });
-    },
-
-    operationSubmit: function () {
-        log("OperationManager operationSubmit");
-
-        if (uiBlocked)
-            return false;
-
-        $("form").append(hiddenInput('isLite', this.options.isLite) +
-            hiddenInput('sfOperationFullKey', this.options.operationKey) +
-            hiddenInput("sfOldPrefix", this.options.prefix));
-
-        if (!empty(this.options.requestExtraJsonData)) {
-            for (var key in this.options.requestExtraJsonData) {
-                if (jQuery.isFunction(this.options.requestExtraJsonData[key]))
-                    $("form").append(hiddenInput(key, this.options.requestExtraJsonData[key]()));
-                else
-                    $("form").append(hiddenInput(key, this.options.requestExtraJsonData[key]));
-            }
-        }
-
-        Submit(this.options.controllerUrl);
-    },
-
-    executedSuccessfully: function (operationResult) {
-        log("OperationManager executedSuccessfully");
-
-        if (operationResult.indexOf("ModelState") < 0)
-            return true;
-
-        eval('var result=' + operationResult);
-        var modelState = result["ModelState"];
-        if (empty(this.options.prefix))
-            new Validator().showErrors(modelState);
-        else {
-            var info = this.runtimeInfo();
-            new PartialValidator({ prefix: this.options.prefix, type: info.runtimeType(), id: info.id() }).showErrors(modelState);
-        }
-        return false;
-    },
-
-    defaultSubmit: function () {
-        log("OperationManager defaultSubmit");
-
-        if (uiBlocked)
-            return false;
-
-        if (isTrue(this.options.isLite))
-            this.operationSubmit();
-        else {
-            var onSuccess = function () { this.operationSubmit(); };
-            var self = this;
-            if (!EntityIsValid({ parentDiv: this.options.parentDiv, prefix: this.options.prefix }, function () { onSuccess.call(self) }))
-                return;
-        }
     }
-};
 
-var OperationExecutor = function (_options) {
-    OperationManager.call(this, $.extend({
-        controllerUrl: null
-    }, _options));
-
-    this.defaultExecute = function () {
-        log("OperationExecutor defaultExecute");
-
-        if (uiBlocked)
-            return false;
-
-        var onSuccess = function () {
-            this.operationAjax(null, OpReloadContent);
-        };
-
-        var self = this;
-        if (isTrue(this.options.isLite))
-            onSuccess.call(this);
-        else {
-            if (!EntityIsValid({ parentDiv: this.options.parentDiv, prefix: this.options.prefix, controllerUrl: this.options.validationControllerUrl }, function () { onSuccess.call(self) }))
-                return;
-        }
-    };
-
-    this.contextualExecute = function (runtimeType, id) {
-        log("OperationExecutor contextualExecute");
-
-        if (uiBlocked)
-            return false;
-        
-        this.operationAjax(null, OpMarkCellOnSuccess);
-    };
-};
-
-OperationExecutor.prototype = new OperationManager();
-
-//ConstructorFrom options = OperationManager options + returnType
-var ConstructorFrom = function(_options) {
-    OperationManager.call(this, $.extend({
-        controllerUrl: null,
-        returnType: null
-    }, _options));
-
-    this.defaultConstruct = function() {
-        log("ConstructorFrom construct");
-
-        if (uiBlocked)
-            return false;
-
-        var onSuccess = function () 
-        { 
-            this.operationAjax(this.newPrefix(), OpOpenPopup);
+    SF.opOnSuccessDispatcher = function (prefix, $operationResult, parentDiv) {
+        SF.log("OperationExecutor OpDefaultOnSuccess");
+        $(".contextmenu-active").removeClass("contextmenu-active");
+        if ($operationResult === null) {
+            return null;
         }
 
-        var self = this;
-        if (isTrue(this.options.isLite))
-            onSuccess.call(this);
-        else {
-            if (!EntityIsValid({ parentDiv: this.options.parentDiv, prefix: this.options.prefix, controllerUrl: this.options.validationControllerUrl }, function () { onSuccess.call(self) }))
-                return;
-        }
-    };
-
-    this.contextualConstruct = function (runtimeType, id) {
-        log("ConstructorFrom contextualConstruct");
-
-        if (uiBlocked)
-            return false;
-
-        this.operationAjax(this.newPrefix(), OpContextualOnSuccess);
-    };
-};
-
-ConstructorFrom.prototype = new OperationManager();
-
-var DeleteExecutor = function(_options) {
-    OperationManager.call(this, $.extend({
-        controllerUrl: null
-    }, _options));
-
-    this.defaultDelete = function() {
-        log("DeleteExecutor defaultDelete");
-
-        if (uiBlocked)
-            return false;
-
-        var self = this;
-        if (isTrue(this.options.isLite)) {
-            NotifyInfo(lang.signum.executingOperation);
-            this.operationAjax(this.options.prefix, function() { NotifyInfo(lang.signum.operationExecuted, 2000); });
-        }
-        else {
-            throw "Delete operation must be Lite";
-        }
-    };
-
-    this.contextualDelete = function(runtimeType, id) {
-        log("DeleteExecutor contextualDelete");
-
-        if (uiBlocked)
-            return false;
-
-        NotifyInfo(lang.signum.executingOperation);
-        this.operationAjax(this.options.prefix, function() { NotifyInfo(lang.signum.operationExecuted, 2000); });
-    };
-};
-
-DeleteExecutor.prototype = new OperationManager();
-
-function OperationDelete(deleteExecutor) {
-    deleteExecutor.execute();
-}
-
-//ConstructorFromMany options = OperationManager options + returnType
-var ConstructorFromMany = function(_options) {
-    OperationManager.call(this, $.extend({
-        controllerUrl: null,
-        returnType: null
-    }, _options));
-
-    this.requestData = function(newPrefix, items) {
-        log("ConstructorFromMany requestData");
-
-        var requestData = [];
-        requestData.push($('#' + sfTabId).serialize());
-        requestData.push(qp("sfRuntimeType", $(this.pf(sfEntityTypeName)).val())
-                     + qp("sfOperationFullKey", this.options.operationKey)
-                     + qp(sfPrefix, newPrefix)
-                     + qp("sfOldPrefix", this.options.prefix)
-                     + qp("sfOnOk", singleQuote(this.options.onOk)));
-
-        for (var i = 0, l = items.length; i < l; i++)
-            requestData.push(qp("sfIds", items[i].id));
-
-        if (!empty(this.options.requestExtraJsonData)) {
-            for (var key in this.options.requestExtraJsonData) {
-                if (jQuery.isFunction(this.options.requestExtraJsonData[key]))
-                    requestData.push(qp(key, this.options.requestExtraJsonData[key]()));
-                else
-                    requestData.push(qp(key, this.options.requestExtraJsonData[key]));
-            }
-        }
-
-        return requestData.join('');
-    };
-
-    this.operationAjax = function(newPrefix, items, onSuccess) {
-        log("ConstructorFromMany operationAjax");
-
-        NotifyInfo(lang.signum.executingOperation);
-
-        if (uiBlocked)
-            return false;
-
-        var self = this;
-        SF.ajax({
-            type: "POST",
-            url: this.options.controllerUrl,
-            data: this.requestData(this.newPrefix(), items),
-            async: true,
-            dataType: "html",
-            success: function(operationResult) {
-                uiBlocked = false;
-                $(".uiBlocker").remove();
-
-                if (self.executedSuccessfully(operationResult)) {
-                    if (onSuccess != null)
-                        onSuccess(newPrefix, operationResult);
-                }
-                else {
-                    NotifyInfo(lang.signum.error, 2000);
-                    return;
-                }
-            },
-            error:
-                function () {
-                    uiBlocked = false;
-                    $(".uiBlocker").remove();
-
-                    NotifyInfo(lang.signum.error, 2000);
-                }
-        });
-    };
-
-    this.defaultConstruct = function() {
-        log("ConstructorFromMany defaultConstruct");
-
-        if (uiBlocked)
-            return false;
-
-        var onSuccess = function (items) {
-            this.operationAjax(this.newPrefix(), items, OpOpenPopup);
-        }
-
-        var self = this;
-        HasSelectedItems({ prefix: this.options.prefix }, function(items) { onSuccess.call(self, items) });
-    };
-
-    this.defaultSubmit = function() {
-        log("ConstructorFromMany defaultSubmit");
-
-        if (uiBlocked)
-            return false;
-
-        var onSuccess = function (items) {
-            for (var i = 0, l = items.length; i < l; i++)
-                $("form").append(hiddenInput('sfIds', items[i].id));
-            this.operationSubmit();
-        };
-
-        var self = this;
-        HasSelectedItems({ prefix: this.options.prefix }, function(items) { onSuccess.call(self, items) });
-    }
-};
-
-ConstructorFromMany.prototype = new OperationManager();
-
-function OperationConstructFromMany(constructorFrom) {
-    constructorFromMany.construct();
-}
-
-function ReloadEntity(urlController, prefix, parentDiv) {
-    var $partialViewName = $('#' + sfPartialViewName);
-    var requestData = $("form :input").not(".searchControl :input").serialize() + qp(sfPrefix, prefix);
-    if($partialViewName.length == 1)
-        requestData += qp(sfPartialViewName, $partialViewName.val());
-    SF.ajax({
-        type: "POST",
-        url: urlController,
-        data: requestData,
-        async: false,
-        dataType: "html",
-        success: function (msg) {
-            if (!empty(parentDiv)) {
-                $('#' + parentDiv + ' input[onblur]').attr('onblur',''); // To avoid Chrome to fire onblur when replacing parentdiv content
-                $('#' + parentDiv).html(msg);
-                }
-            else {
-                if (empty(prefix))
-                    $('#divNormalControl').html(msg);
-                else {
-                    $('#' + prefix.compose("divMainControl") + ' input[onblur]').attr('onblur',''); // To avoid Chrome to fire onblur when replacing popup content
-                    $('#' + prefix.compose("divMainControl")).html(msg);
-                }
-            }
-        }
-    });
-}
-
-function OpOnSuccessDispatcher(prefix, operationResult, parentDiv) {
-    log("OperationExecutor OpDefaultOnSuccess");
-    $(".contextmenu-active").removeClass("contextmenu-active");
-    if (empty(operationResult))
-        return null;
-    if (operationResult.indexOf("result") > 0)
-        return null; //ModelState errors should have been handled previously and same with redirections
-
-    var $result = $(operationResult);
-    var newPopupId = prefix.compose("panelPopup");
-    var hasNewPopup = $("#" + newPopupId, $result).length > 0; 
-    //Si el resultado es un normalControl, o es un popup y coincide con alguno de los abiertos => ReloadContent
-    if (!hasNewPopup ||
+        var newPopupId = SF.compose(prefix, "panelPopup");
+        var hasNewPopup = $("#" + newPopupId, $operationResult).length !== 0;
+        //If result is a NormalControl, or an already opened popup => ReloadContent
+        if (!hasNewPopup ||
             (hasNewPopup &&
-            $(".popupWindow:visible").filter(function() { return this.id == newPopupId }).length > 0)) {
-        OpReloadContent(prefix, operationResult, parentDiv)
+            $(".popupWindow:visible").filter(function () { return this.id == newPopupId }).length !== 0)) {
+            SF.opReloadContent(prefix, $operationResult, parentDiv)
+        }
+        else {
+            SF.opOpenPopup(prefix, $operationResult)
+        }
     }
-    else {
-        OpOpenPopup(prefix, operationResult)
+
+    SF.opReloadContent = function (prefix, $operationResult, parentDiv) {
+        SF.log("OperationExecutor OpReloadContent");
+        $(".contextmenu-active").removeClass("contextmenu-active");
+        if (SF.isEmpty(prefix)) { //NormalWindow
+
+            var $elem = SF.isEmpty(parentDiv) ? $("#divNormalControl") : $("#" + parentDiv);
+            $elem.html('').append($operationResult);
+        }
+        else { //PopupWindow
+            new SF.ViewNavigator({
+                prefix: prefix,
+                containerDiv: SF.compose(prefix, "externalPopupDiv")
+            }).viewSave($operationResult);
+        }
+        SF.Notify.info(lang.signum.operationExecuted, 2000);
     }
-}
 
-function OpReloadContent(prefix, operationResult, parentDiv){
-    log("OperationExecutor OpReloadContent");
-    $(".contextmenu-active").removeClass("contextmenu-active");
-    if (empty(prefix)) //NormalWindow
-    {
-        if (empty(parentDiv))
-            $("#divNormalControl").html(operationResult);
-        else
-            $("#" + parentDiv).html(operationResult);
+    SF.opOpenPopup = function (prefix, $operationResult) {
+        SF.log("OperationExecutor OpOpenPopup");
+        $(".contextmenu-active").removeClass("contextmenu-active");
+        new SF.ViewNavigator({ prefix: prefix }).showCreateSave($operationResult);
+        SF.Notify.info(lang.signum.operationExecuted, 2000);
     }
-    else { //PopupWindow
-        new ViewNavigator({
-            prefix: prefix,
-            containerDiv: prefix.compose("externalPopupDiv")
-        }).viewSave(operationResult);
+
+    SF.opOpenPopupNoDefaultOk = function (prefix, $operationResult) {
+        SF.log("OperationExecutor OpOpenPopupNoDefaultOk");
+        $(".contextmenu-active").removeClass("contextmenu-active");
+        new SF.ViewNavigator({ prefix: prefix, onOk: function () { return false; } }).showCreateSave($operationResult);
+        SF.Notify.info(lang.signum.operationExecuted, 2000);
     }
-    NotifyInfo(lang.signum.operationExecuted, 2000); 
-}
 
-function OpOpenPopup(prefix, operationResult) {
-    log("OperationExecutor OpOpenPopup");
-    $(".contextmenu-active").removeClass("contextmenu-active");
-    new ViewNavigator({ prefix: prefix }).showCreateSave(operationResult);
-    NotifyInfo(lang.signum.operationExecuted, 2000); 
-}
-
-function OpOpenPopupNoDefaultOk(prefix, operationResult) {
-    log("OperationExecutor OpOpenPopupNoDefaultOk");
-    $(".contextmenu-active").removeClass("contextmenu-active");
-    new ViewNavigator({ prefix: prefix, onOk: function() { return false; } }).showCreateSave(operationResult);
-    NotifyInfo(lang.signum.operationExecuted, 2000); 
-}
-
-function OpNavigate(prefix, operationResult)
-{
-    Submit(operationResult);
-}
-
-function OpMarkCellOnSuccess(prefix, operationResult){
-   log("OperationExecutor OpMarkCellOnSuccess");
-   var $td = $(".contextmenu-active");
-    if (empty(operationResult)) {
-        $td.addClass('entityCtxMenuSuccess');
+    SF.opNavigate = function (prefix, $operationResult) {
+        SF.submit($operationResult.html());
     }
-    else
-        $td.addClass('entityCtxMenuError');
-    $td.removeClass("contextmenu-active");
-    NotifyInfo(lang.signum.operationExecuted, 2000); 
-}
 
-function OpContextualOnSuccess(prefix, operationResult) {
-    log("OperationExecutor OpContextualOnSuccess");
-    $(".contextmenu-active").removeClass("contextmenu-active");
-    if (empty(operationResult))
-        return null;
-    if (operationResult.indexOf("result") > 0)
-        return null; //ModelState errors should have been handled previously and same with redirections
+    SF.opMarkCellOnSuccess = function (prefix, $operationResult) {
+        SF.log("OperationExecutor OpMarkCellOnSuccess");
+        $(".contextmenu-active")
+        .addClass($operationResult === null ? 'entityCtxMenuSuccess' : 'entityCtxMenuError')
+        .removeClass("contextmenu-active");
 
-    var $result = $(operationResult);
-    var newPopupId = prefix.compose("panelPopup");
-    var hasNewPopup = $("#" + newPopupId, $result).length > 0;
-    //If result is a NormalControl => Load it
-    if (hasNewPopup)
-        OpOpenPopup(prefix, operationResult)
-    else
-    {
-       $("form").html(operationResult);
-       NotifyInfo(lang.signum.operationExecuted, 2000); 
+        SF.Notify.info(lang.signum.operationExecuted, 2000);
     }
-}
-}
+
+    SF.opContextualOnSuccess = function (prefix, $operationResult) {
+        SF.log("OperationExecutor OpContextualOnSuccess");
+        $(".contextmenu-active").removeClass("contextmenu-active");
+        if ($operationResult === null) {
+            return null;
+        }
+
+        var newPopupId = SF.compose(prefix, "panelPopup");
+        var hasNewPopup = $("#" + newPopupId, $operationResult).length !== 0;
+        //If result is a NormalControl => Load it
+        if (hasNewPopup) {
+            SF.opOpenPopup(prefix, $operationResult)
+        }
+        else {
+            $("form").html('').append($operationResult);
+            SF.Notify.info(lang.signum.operationExecuted, 2000);
+        }
+    }
+});

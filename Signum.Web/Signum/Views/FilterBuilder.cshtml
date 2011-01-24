@@ -1,4 +1,4 @@
-@using Signum.Entities.DynamicQuery
+﻿@using Signum.Entities.DynamicQuery
 @using Signum.Entities.Reflection
 @using Signum.Engine.DynamicQuery
 @using Signum.Web.Properties
@@ -10,7 +10,7 @@
 
 <div id="@context.Compose("fields-search")">
     <div id="@context.Compose("fields-list")" class="fields-list">
-        <a onclick="toggleFilters(this)" class="filters-header@(visible ? "" : " close")" rev="filters-body">@(visible ? Html.Encode(Resources.HideFilters) : Html.Encode(Resources.ShowFilters))</a>
+        <a onclick="SF.FindNavigator.toggleFilters(this)" class="filters-header@(visible ? "" : " close")" rev="filters-body">@(visible ? Html.Encode(Resources.HideFilters) : Html.Encode(Resources.ShowFilters))</a>
         <div class="filters" @(visible ? "" : "style='display:none'")>
             <div id="@context.Compose("filters-body")" class="filters-body">
                 <label for="@context.Compose("ddlTokens_0")">@Resources.FilterByField</label>
@@ -19,14 +19,14 @@
                         .ToList();
                    columns.Insert(0, new SelectListItem { Text = "-", Selected = true, Value = "" });}
                 @Html.TokensCombo(findOptions.QueryName, columns, context, 0, false)
-                @Html.Button(context.Compose("btnAddFilter"), "+", "AddFilter('{0}','{1}');".Formato(context.ControlID, Url.SignumAction("AddFilter")), "addFilter", new Dictionary<string, object> { { "title", "Add Filter" } })
+                @Html.Button(context.Compose("btnAddFilter"), "+", "new SF.FindNavigator({{prefix:'{0}'}}).addFilter('{1}');".Formato(context.ControlID, Url.SignumAction("AddFilter")), "addFilter", new Dictionary<string, object> { { "title", "Add Filter" } })
                 @if (findOptions.AllowUserColumns.HasValue ? findOptions.AllowUserColumns.Value : Navigator.Manager.AllowUserColumns(context.ControlID))
                 {
-                    @Html.Button(context.Compose("btnAddColumn"), "+", "AddColumn('{0}','{1}');".Formato(context.ControlID, Url.SignumAction("GetColumnName")), "addColumn", new Dictionary<string, object> { { "title", "Add Column" } })
-                    @Html.Button(context.Compose("btnEditColumns"), Resources.UserColumnsEdit, "EditColumns('{0}');".Formato(context.ControlID), "")
-                    @Html.Button(context.Compose("btnEditColumnsFinish"), Resources.EditColumnsFinishEdit, "EditColumnsFinish('{0}');".Formato(context.ControlID), "", new Dictionary<string, object> { { "style", "display:none;" } })
+                    @Html.Button(context.Compose("btnAddColumn"), "+", "new SF.FindNavigator({{prefix:'{0}'}}).addColumn('{1}');".Formato(context.ControlID, Url.SignumAction("GetColumnName")), "addColumn", new Dictionary<string, object> { { "title", "Add Column" } })
+                    @Html.Button(context.Compose("btnEditColumns"), Resources.UserColumnsEdit, "new SF.FindNavigator({{prefix:'{0}'}}).editColumns();".Formato(context.ControlID), "")
+                    @Html.Button(context.Compose("btnEditColumnsFinish"), Resources.EditColumnsFinishEdit, "new SF.FindNavigator({{prefix:'{0}'}}).editColumnsFinish();".Formato(context.ControlID), "", new Dictionary<string, object> { { "style", "display:none;" } })
                 }
-                @Html.Button(context.Compose("btnClearAllFilters"), Resources.DeleteFilters, "ClearAllFilters('{0}');".Formato(context.ControlID), "", findOptions.FilterOptions.Any() ? new Dictionary<string, object>() : new Dictionary<string, object> { { "style", "display:none;" } })
+                @Html.Button(context.Compose("btnClearAllFilters"), Resources.DeleteFilters, "new SF.FindNavigator({{prefix:'{0}'}}).clearAllFilters();".Formato(context.ControlID), "", findOptions.FilterOptions.Any() ? new Dictionary<string, object>() : new Dictionary<string, object> { { "style", "display:none;" } })
             </div>
             @{ List<FilterOption> filterOptions = findOptions.FilterOptions;}
             <div class="filters-list">

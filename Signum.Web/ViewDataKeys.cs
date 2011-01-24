@@ -9,32 +9,20 @@ namespace Signum.Web
 {
     public static class ViewDataKeys
     {
-        public const string ResourcesRoute = "sfResourcesRoute";
-        public const string SearchResourcesRoute = "sfSearchResourcesRoute";
         public const string WriteSFInfo = "sfWriteSFInfo";
         public const string GlobalErrors = "sfGlobalErrors"; //Key for Global Errors in ModelStateDictionary
-        public const string GlobalValidationSummary = "sfGlobalValidationSummary";
-        public const string PartialViewName = "sfPartialViewName";
         public const string Title = "Title";
-        public const string PageDescription = "sfDescription";
         public const string CustomHtml = "sfCustomHtml";
         public const string OnOk = "sfOnOk";
-        public const string OnCancel = "sfOnCancel";
-        public const string BtnOk = "sfBtnOk";
-        public const string BtnCancel = "sfBtnCancel";
         public const string FindOptions = "sfFindOptions";
         public const string QueryDescription = "sfQueryDescription";
         public const string QueryName = "sfQueryName";
-        public const string Top = "sfTop";
         public const string Results = "sfResults";
-        public const string EntityTypeName = "sfEntityTypeName";
-        public const string AllowMultiple = "sfAllowMultiple";
-        public const string Create = "sfCreate";
-        public const string View = "sfView";
         public const string Formatters = "sfFormatters";
         public const string ChangeTicks = "sfChangeTicks";
         public const string Reactive = "sfReactive";
         public const string TabId = "sfTabId";
+        public const string PartialViewName = "sfPartialViewName";
         public const string ForceNewInUI = "sfForceNewInUI";
 
         public static string WindowPrefix(this HtmlHelper helper)

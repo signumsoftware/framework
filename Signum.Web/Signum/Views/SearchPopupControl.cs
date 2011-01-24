@@ -44,7 +44,7 @@ namespace ASP
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Signum/Views/SearchPopupControl.cshtml")]
-    public class _Page_Signum_Views_SearchPopupControl_cshtml : System.Web.Mvc.WebViewPage<dynamic>
+    public class _Page_Signum_Views_SearchPopupControl_cshtml : System.Web.Mvc.WebViewPage<Context>
     {
 #line hidden
 
@@ -61,123 +61,40 @@ namespace ASP
         public override void Execute()
         {
 
-   Context context = (Context)Model;
-   FindOptions findOptions = (FindOptions)ViewData[ViewDataKeys.FindOptions];
+
+    FindOptions findOptions = (FindOptions)ViewData[ViewDataKeys.FindOptions];
 
 WriteLiteral("<div id=\"");
 
 
-    Write(context.Compose("externalPopupDiv"));
+    Write(Model.Compose("panelPopup"));
 
-WriteLiteral("\">\r\n    <div id=\"");
-
-
-        Write(context.Compose("modalBackground"));
-
-WriteLiteral("\" class=\"transparent popupBackground\">\r\n    </div>\r\n    <div id=\"");
+WriteLiteral("\" data-title=\"");
 
 
-        Write(context.Compose("panelPopup"));
+                                              Write(ViewBag.Title);
 
-WriteLiteral("\" class=\"popupWindow\">\r\n");
-
-
-         if (ViewData[ViewDataKeys.OnCancel] != null)
-        {
-
-WriteLiteral("            <div class=\"closebox\" id=\"");
+WriteLiteral("\">\r\n    <div class=\"button-bar\">\r\n        <input type=\"button\" id=\"");
 
 
-                                 Write(context.Compose(ViewDataKeys.BtnCancel));
+                            Write(Model.Compose("btnOk"));
 
-WriteLiteral("\" onclick=\"");
-
-
-                                                                                    Write(ViewData[ViewDataKeys.OnCancel]);
-
-WriteLiteral("\">\r\n            </div>\r\n");
+WriteLiteral("\" class=\"query-button ok-button\" value=\"OK\" ");
 
 
-        }
-        else
-        {
+                                                                                                Write(ViewData[ViewDataKeys.OnOk] != null ? Html.Raw("onclick=\"" + ViewData[ViewDataKeys.OnOk] + "\"") : null);
 
-WriteLiteral("            <div class=\"closebox\" id=\"");
+WriteLiteral(" />\r\n    </div>\r\n    <div class=\"popup-body\">\r\n");
 
 
-                                 Write(context.Compose(ViewDataKeys.BtnCancel));
+           Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString(), Model);
 
-WriteLiteral("\">\r\n            </div>\r\n");
-
-
-        }
-
-WriteLiteral("        <div id=\"");
+WriteLiteral("        ");
 
 
-            Write(context.Compose("divPopupDragHandle"));
+   Write(Html.ValidationSummaryAjax(Model));
 
-WriteLiteral("\" class=\"dragHandle\">\r\n            <span class=\"popupTitle\">");
-
-
-                                 Write((string)ViewData[ViewDataKeys.Title] ?? "");
-
-WriteLiteral("</span>\r\n        </div>\r\n        <div id=\"");
-
-
-            Write(context.Compose("divButtonBar"));
-
-WriteLiteral("\" class=\"buttonBar\">\r\n");
-
-
-             if (ViewData[ViewDataKeys.OnOk] != null)
-            {
-
-WriteLiteral("                <input type=\"button\" id=\"");
-
-
-                                    Write(context.Compose(ViewDataKeys.BtnOk));
-
-WriteLiteral("\" value=\"OK\" onclick=\"");
-
-
-                                                                                              Write(ViewData[ViewDataKeys.OnOk]);
-
-WriteLiteral("\" />\r\n");
-
-
-            }
-            else
-            {
-
-WriteLiteral("                <input type=\"button\" id=\"");
-
-
-                                    Write(context.Compose(ViewDataKeys.BtnOk));
-
-WriteLiteral("\" value=\"OK\" />\r\n");
-
-
-            }
-
-WriteLiteral("        </div>\r\n        <div class=\"popup-body\">\r\n");
-
-
-               Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString(), (object)Model);
-
-WriteLiteral("            ");
-
-
-       Write(Html.ValidationSummaryAjax(context));
-
-WriteLiteral("\r\n        </div>\r\n    </div>\r\n</div>\r\n");
-
-
-Write(Html.DynamicJs("~/signum/Scripts/SF_DragAndDrop.js").Callback(@"function () {{
-     SF.DragAndDrop(document.getElementById(""{0}""), document.getElementById(""{1}""));}}"
-        .Formato(context.Compose("divPopupDragHandle"), context.Compose("panelPopup"))));
-
-WriteLiteral("\r\n");
+WriteLiteral("\r\n    </div>\r\n</div>\r\n");
 
 
         }

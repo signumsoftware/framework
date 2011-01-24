@@ -42,7 +42,7 @@ namespace Signum.Web
 
         public override string ToJS()
         {
-            return "new ELine(" + this.OptionsJS() + ")";
+            return "new SF.ELine(" + this.OptionsJS() + ")";
         }
 
         protected override JsViewOptions DefaultJsViewOptions()
@@ -52,58 +52,61 @@ namespace Signum.Web
             return voptions;
         }
 
-        protected override string DefaultViewing()
+        protected override string DefaultView()
         {
-            return EntityLine.JsViewing(this, DefaultJsViewOptions()).ToJS();
+            return EntityLine.JsView(this, DefaultJsViewOptions()).ToJS();
         }
 
-        public static JsInstruction JsViewing(EntityLine eline, JsViewOptions viewOptions)
+        public static JsInstruction JsView(EntityLine eline, JsViewOptions viewOptions)
         {
             if (viewOptions.ControllerUrl == null)
                 viewOptions.ControllerUrl = RouteHelper.New().SignumAction("PopupView");
 
-            return new JsInstruction(() => "ELineOnViewing({0})".Formato(",".Combine(
-                eline.ToJS(),
-                viewOptions.TryCC(v => v.ToJS()))));
+            return new JsInstruction(() => "{0}.view({1})".Formato(
+                    eline.ToJS(),
+                    viewOptions.TryCC(v => v.ToJS()) ?? ""
+                ));
         }
 
-        protected override string DefaultCreating()
+        protected override string DefaultCreate()
         {
-            return EntityLine.JsCreating(this, DefaultJsViewOptions()).ToJS();
+            return EntityLine.JsCreate(this, DefaultJsViewOptions()).ToJS();
         }
 
-        public static JsInstruction JsCreating(EntityLine eline, JsViewOptions viewOptions)
+        public static JsInstruction JsCreate(EntityLine eline, JsViewOptions viewOptions)
         {
             if (viewOptions.ControllerUrl == null)
                 viewOptions.ControllerUrl = RouteHelper.New().SignumAction("PopupView");
 
-            return new JsInstruction(() => "ELineOnCreating({0})".Formato(",".Combine(
-                eline.ToJS(),
+            string createParams = ",".Combine(
                 viewOptions.TryCC(v => v.ToJS()),
-                eline.HasManyImplementations ? RouteHelper.New().SignumAction("GetTypeChooser").SingleQuote() : null)));
+                eline.HasManyImplementations ? RouteHelper.New().SignumAction("GetTypeChooser").SingleQuote() : null);
+
+            return new JsInstruction(() => "{0}.create({1})".Formato(eline.ToJS(), createParams));
         }
 
-        protected override string DefaultFinding()
+        protected override string DefaultFind()
         {
-            return EntityLine.JsFinding(this, DefaultJsfindOptions()).ToJS();
+            return EntityLine.JsFind(this, DefaultJsfindOptions()).ToJS();
         }
 
-        public static JsInstruction JsFinding(EntityLine eline, JsFindOptions findOptions)
+        public static JsInstruction JsFind(EntityLine eline, JsFindOptions findOptions)
         {
-            return new JsInstruction(() => "ELineOnFinding({0})".Formato(",".Combine(
-                eline.ToJS(),
+            string findParams = ",".Combine(
                 findOptions.TryCC(v => v.ToJS()),
-                eline.HasManyImplementations ? RouteHelper.New().SignumAction("GetTypeChooser").SingleQuote() : null)));
+                eline.HasManyImplementations ? RouteHelper.New().SignumAction("GetTypeChooser").SingleQuote() : null);
+
+            return new JsInstruction(() => "{0}.find({1})".Formato(eline.ToJS(), findParams));
         }
 
-        protected override string DefaultRemoving()
+        protected override string DefaultRemove()
         {
-            return EntityLine.JsRemoving(this).ToJS();
+            return EntityLine.JsRemove(this).ToJS();
         }
 
-        public static JsInstruction JsRemoving(EntityLine eline)
+        public static JsInstruction JsRemove(EntityLine eline)
         {
-            return new JsInstruction(() => "ELineOnRemoving({0})".Formato(eline.ToJS()));
+            return new JsInstruction(() => "{0}.remove()".Formato(eline.ToJS()));
         }
     }
 }

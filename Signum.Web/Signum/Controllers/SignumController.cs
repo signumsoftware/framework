@@ -48,16 +48,16 @@ namespace Signum.Web.Controllers
             return Navigator.View(this, entity, true); //Always admin
         }
 
-        public ActionResult Create(string sfRuntimeType, string sfOnOk, string sfOnCancel, string prefix)
+        public ActionResult Create(string runtimeType, string prefix)
         {
-            Type type = Navigator.ResolveType(sfRuntimeType);
+            Type type = Navigator.ResolveType(runtimeType);
 
             return Constructor.VisualConstruct(this, type, prefix, VisualConstructStyle.Navigate);
         }
 
-        public PartialViewResult PopupCreate(string sfRuntimeType, string sfOnOk, string sfOnCancel, string prefix, string sfUrl)
+        public PartialViewResult PopupCreate(string runtimeType, string prefix, string url)
         {
-            Type type = Navigator.ResolveType(sfRuntimeType);
+            Type type = Navigator.ResolveType(runtimeType);
 
             object result = Constructor.VisualConstruct(this, type, prefix, VisualConstructStyle.PopupView);
             if (result.GetType() == typeof(PartialViewResult))
@@ -72,12 +72,12 @@ namespace Signum.Web.Controllers
             IdentifiableEntity entity = (IdentifiableEntity)result;
 
             ViewData[ViewDataKeys.WriteSFInfo] = true;
-            return Navigator.PopupView(this, entity, prefix, sfUrl);
+            return Navigator.PopupView(this, entity, prefix, url);
         }
 
-        public PartialViewResult PopupView(string sfRuntimeType, int? sfId, string sfOnOk, string sfOnCancel, string prefix, bool? sfReadOnly, string sfUrl)
+        public PartialViewResult PopupView(string runtimeType, int? id, string prefix, bool? readOnly, string url)
         {
-            Type type = Navigator.ResolveType(sfRuntimeType);
+            Type type = Navigator.ResolveType(runtimeType);
             bool isReactive = this.IsReactive();
 
             IdentifiableEntity entity = null;
@@ -86,10 +86,10 @@ namespace Signum.Web.Controllers
                 IdentifiableEntity parent = (IdentifiableEntity)this.UntypedExtractEntity().ThrowIfNullC("PopupView: Entity was not possible to extract");
                 entity = (IdentifiableEntity)MappingContext.FindSubentity(parent, prefix);
             }
-            if (entity == null || entity.GetType() != type || sfId != (entity as IIdentifiable).TryCS(e => e.IdOrNull))
+            if (entity == null || entity.GetType() != type || id != (entity as IIdentifiable).TryCS(e => e.IdOrNull))
             {
-                if (sfId.HasValue)
-                    entity = Database.Retrieve(type, sfId.Value);
+                if (id.HasValue)
+                    entity = Database.Retrieve(type, id.Value);
                 else
                 {
                     ActionResult result = Constructor.VisualConstruct(this, type, prefix, VisualConstructStyle.PopupView);
@@ -105,16 +105,16 @@ namespace Signum.Web.Controllers
 
             TypeContext tc = TypeContextUtilities.UntypedNew((IdentifiableEntity)entity, prefix);
 
-            if (sfReadOnly.HasValue)
+            if (readOnly.HasValue)
                 tc.ReadOnly = true;
 
-            return Navigator.PopupView(this, tc, sfUrl);
+            return Navigator.PopupView(this, tc, url);
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public PartialViewResult PartialView(string sfRuntimeType, int? sfId, string prefix, bool? sfReadOnly, string sfUrl)
+        public PartialViewResult PartialView(string runtimeType, int? id, string prefix, bool? readOnly, string url)
         {
-            Type type = Navigator.ResolveType(sfRuntimeType);
+            Type type = Navigator.ResolveType(runtimeType);
             bool isReactive = this.IsReactive();
 
             IdentifiableEntity entity = null;
@@ -124,10 +124,10 @@ namespace Signum.Web.Controllers
                     .ThrowIfNullC("PartialView: Entity was not possible to extract");
                 entity = (IdentifiableEntity)MappingContext.FindSubentity(parent, prefix);
             }
-            if (entity == null || entity.GetType() != type || sfId != (entity as IIdentifiable).TryCS(e => e.IdOrNull))
+            if (entity == null || entity.GetType() != type || id != (entity as IIdentifiable).TryCS(e => e.IdOrNull))
             {
-                if (sfId.HasValue)
-                    entity = Database.Retrieve(type, sfId.Value);
+                if (id.HasValue)
+                    entity = Database.Retrieve(type, id.Value);
                 else
                 {
                     object result = Constructor.VisualConstruct(this, type, prefix, VisualConstructStyle.PartialView);
@@ -143,10 +143,10 @@ namespace Signum.Web.Controllers
 
             TypeContext tc = TypeContextUtilities.UntypedNew((IdentifiableEntity)entity, prefix);
 
-            if (sfReadOnly.HasValue)
+            if (readOnly.HasValue)
                 tc.ReadOnly = true;
 
-            return Navigator.PartialView(this, tc, sfUrl);
+            return Navigator.PartialView(this, tc, url);
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
@@ -228,7 +228,7 @@ namespace Signum.Web.Controllers
             });
         }
 
-        [AcceptVerbs(HttpVerbs.Get)]
+        [AcceptVerbs(HttpVerbs.Post)]
         public JsonResult Autocomplete(string types, string q, int l)
         {
             Type[] typeArray = StaticInfo.ParseTypes(types);
@@ -244,7 +244,7 @@ namespace Signum.Web.Controllers
                 type = Navigator.ResolveWebTypeName(o.RuntimeType)
             }).ToList();
 
-            return Json(result, JsonRequestBehavior.AllowGet);
+            return Json(result);
         }
 
         public ActionResult Find(FindOptions findOptions)
@@ -259,9 +259,9 @@ namespace Signum.Web.Controllers
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public PartialViewResult Search(FindOptions findOptions, int? sfTop, string prefix)
+        public PartialViewResult Search(FindOptions findOptions, int? top, string prefix)
         {
-            return Navigator.Search(this, findOptions, sfTop, prefix);
+            return Navigator.Search(this, findOptions, top, prefix);
         }
 
 		[AcceptVerbs(HttpVerbs.Post)]
@@ -305,7 +305,7 @@ namespace Signum.Web.Controllers
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public ContentResult QuickFilter(string webQueryName, string tokenName, int index, string prefix, string sfValue)
+        public ContentResult QuickFilter(string webQueryName, string tokenName, int index, string prefix, string value)
         {
             object queryName = Navigator.ResolveQueryName(webQueryName);
 
@@ -319,7 +319,7 @@ namespace Signum.Web.Controllers
             
             try
             {
-                fo.Value = FindOptionsModelBinder.Convert(sfValue, fo.Token.Type);
+                fo.Value = FindOptionsModelBinder.Convert(value, fo.Token.Type);
             }
             catch (Exception) 
             { 
@@ -365,7 +365,7 @@ namespace Signum.Web.Controllers
                 string webTypeName = Navigator.ResolveWebTypeName(t);
 
                 sb.Add(new HtmlTag("input", webTypeName)
-                    .Attrs(new { type = "button", name = webTypeName, value = t.NiceName() })
+                    .Attrs(new { type = "button", name = webTypeName, value = t.NiceName(), @class = "sf-chooser-button" })
                     .ToHtmlSelf());
                 sb.Add(new HtmlTag("br").ToHtmlSelf());
             }
@@ -387,7 +387,9 @@ namespace Signum.Web.Controllers
             foreach (string button in buttons) 
             {
                 string id = ids != null ? ids[i] : button.Replace(" ", "");
-                sb.Add(new HtmlTag("input", id).Attrs(new { type = "button", name = id, value = button }).ToHtmlSelf());
+                sb.Add(new HtmlTag("input", id)
+                    .Attrs(new { type = "button", name = id, value = button, @class="sf-chooser-button" })
+                    .ToHtmlSelf());
                 sb.Add(new HtmlTag("br").ToHtmlSelf());
                 i++;
             }
@@ -401,7 +403,7 @@ namespace Signum.Web.Controllers
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public PartialViewResult ReloadEntity(string prefix, string sfPartialViewName)
+        public PartialViewResult ReloadEntity(string prefix, string partialViewName)
         {
             bool isReactive = this.IsReactive();
 
@@ -456,7 +458,7 @@ namespace Signum.Web.Controllers
             if (prefix.HasText())
                 return Navigator.PartialView(this, entity, prefix);
             else
-                return Navigator.NormalControl(this, entity, sfPartialViewName);
+                return Navigator.NormalControl(this, entity, partialViewName);
         }
 
         public static HtmlHelper CreateHtmlHelper(Controller c)

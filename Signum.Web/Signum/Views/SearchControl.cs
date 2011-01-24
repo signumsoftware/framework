@@ -48,7 +48,7 @@ namespace ASP
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Signum/Views/SearchControl.cshtml")]
-    public class _Page_Signum_Views_SearchControl_cshtml : System.Web.Mvc.WebViewPage<dynamic>
+    public class _Page_Signum_Views_SearchControl_cshtml : System.Web.Mvc.WebViewPage<Context>
     {
 #line hidden
 
@@ -69,39 +69,39 @@ namespace ASP
 
 
 
-WriteLiteral("\r\n");
 
 
-   Context context = (Context)Model;
-   FindOptions findOptions = (FindOptions)ViewData[ViewDataKeys.FindOptions];
-   QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
-   Type entitiesType = Reflector.ExtractLite(queryDescription.Columns.Single(a => a.IsEntity).Type);
-   bool viewable = findOptions.View && Navigator.IsNavigable(entitiesType, true); 
+
+   
+    FindOptions findOptions = (FindOptions)ViewData[ViewDataKeys.FindOptions];
+    QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
+    Type entitiesType = Reflector.ExtractLite(queryDescription.Columns.Single(a => a.IsEntity).Type);
+    bool viewable = findOptions.View && Navigator.IsNavigable(entitiesType, true);
 
 WriteLiteral("<div id=\"");
 
 
-    Write(context.Compose("divSearchControl"));
+    Write(Model.Compose("divSearchControl"));
 
 WriteLiteral("\" class=\"searchControl\">\r\n    ");
 
 
-Write(Html.Hidden(context.Compose("sfWebQueryName"), Navigator.ResolveWebQueryName(findOptions.QueryName), new { disabled = "disabled" }));
+Write(Html.Hidden(Model.Compose("sfWebQueryName"), Navigator.ResolveWebQueryName(findOptions.QueryName), new { disabled = "disabled" }));
 
 WriteLiteral("\r\n    ");
 
 
-Write(Html.Hidden(context.Compose(ViewDataKeys.AllowMultiple), findOptions.AllowMultiple.ToString(), new { disabled = "disabled" }));
+Write(Html.Hidden(Model.Compose("sfAllowMultiple"), findOptions.AllowMultiple.ToString(), new { disabled = "disabled" }));
 
 WriteLiteral("\r\n    ");
 
 
-Write(Html.Hidden(context.Compose(ViewDataKeys.View), viewable, new { disabled = "disabled" }));
+Write(Html.Hidden(Model.Compose("sfView"), viewable, new { disabled = "disabled" }));
 
 WriteLiteral("\r\n    ");
 
 
-Write(Html.Hidden(context.Compose(ViewDataKeys.EntityTypeName), Navigator.ResolveWebTypeName(entitiesType), new { disabled = "disabled" }));
+Write(Html.Hidden(Model.Compose("sfEntityTypeName"), Navigator.ResolveWebTypeName(entitiesType), new { disabled = "disabled" }));
 
 WriteLiteral("\r\n");
 
@@ -112,37 +112,37 @@ WriteLiteral("\r\n");
 WriteLiteral("        <script type=\"text/javascript\">\r\n            var ");
 
 
-           Write(context.Compose("EntityContextMenuUrl"));
+           Write(Model.Compose("EntityContextMenuUrl"));
 
 WriteLiteral("  = \'");
 
 
-                                                        Write(Url.SignumAction("GetContextualPanel"));
+                                                      Write(Url.SignumAction("GetContextualPanel"));
 
-WriteLiteral("\';\r\n        </script>\r\n");
+WriteLiteral("\';\r\n         </script>\r\n");
 
 
-    }    
+    }
 
 WriteLiteral("    <script type=\"text/javascript\">\r\n        var ");
 
 
-       Write(context.Compose("QuickFilterUrl"));
-
-WriteLiteral("  = \'");
-
-
-                                              Write(Url.SignumAction("QuickFilter"));
-
-WriteLiteral("\'; \r\n        var ");
-
-
-       Write(context.Compose("SearchUrl"));
+       Write(Model.Compose("QuickFilterUrl"));
 
 WriteLiteral(" = \'");
 
 
-                                        Write(Url.SignumAction("Search"));
+                                           Write(Url.SignumAction("QuickFilter"));
+
+WriteLiteral("\'; \r\n        var ");
+
+
+       Write(Model.Compose("SearchUrl"));
+
+WriteLiteral(" = \'");
+
+
+                                      Write(Url.SignumAction("Search"));
 
 WriteLiteral("\';\r\n    </script>\r\n");
 
@@ -151,12 +151,12 @@ WriteLiteral("\';\r\n    </script>\r\n");
     {
 
 WriteLiteral("        <script type=\"text/javascript\">\r\n            $(document).ready(function (" +
-") { SearchOnLoad(\'");
+") { { SF.FindNavigator.searchOnLoad(\'");
 
 
-                                                     Write(context.ControlID);
+                                                                        Write(Model.ControlID);
 
-WriteLiteral("\'); });\r\n        </script>\r\n");
+WriteLiteral("\'); } });\r\n            </script>    \r\n");
 
 
     }
@@ -164,12 +164,12 @@ WriteLiteral("\'); });\r\n        </script>\r\n");
 WriteLiteral("    <div id=\"");
 
 
-        Write(context.Compose("divFilters"));
+        Write(Model.Compose("divFilters"));
 
 WriteLiteral("\" style=\"display:");
 
 
-                                                        Write((findOptions.FilterMode != FilterMode.AlwaysHidden && findOptions.FilterMode != FilterMode.OnlyResults) ? "block" : "none");
+                                                      Write((findOptions.FilterMode != FilterMode.AlwaysHidden && findOptions.FilterMode != FilterMode.OnlyResults) ? "block" : "none");
 
 WriteLiteral("\" >\r\n");
 
@@ -184,7 +184,7 @@ WriteLiteral("    </div>\r\n    <div class=\"search-footer\" style=\"display:");
 WriteLiteral("\">\r\n        ");
 
 
-   Write(Html.Label(null, Resources.NumberOfRows, context.Compose(ViewDataKeys.Top), null));
+   Write(Html.Label(null, Resources.NumberOfRows, Model.Compose("sfTop"), null));
 
 WriteLiteral("\r\n");
 
@@ -194,51 +194,65 @@ WriteLiteral("\r\n");
 WriteLiteral("        ");
 
 
-   Write(HtmlHelperExtenders.InputType("text", context.Compose(ViewDataKeys.Top), top.TryToString(), new Dictionary<string, object> { { "size", "5" }, { "onkeydown", "return validator.number(event)" } }));
+   Write(HtmlHelperExtenders.InputType("text", Model.Compose("sfTop"), top.TryToString(), new Dictionary<string, object> { { "size", "5" }, { "onkeydown", "return SF.InputValidator.isNumber(event)" } }));
 
 WriteLiteral("\r\n        ");
 
 
-   Write(Html.Hidden(context.Compose("OrderBy"), findOptions.OrderOptions == null ? "" :
-                (findOptions.OrderOptions.ToString(oo => (oo.OrderType == OrderType.Ascending ? "" : "-") + oo.Token.FullKey(), ","))));
+   Write(Html.Hidden(Model.Compose("sfOrders"), findOptions.OrderOptions.Empty() ? "" :
+                (findOptions.OrderOptions.ToString(oo => (oo.OrderType == OrderType.Ascending ? "" : "-") + oo.Token.FullKey(), ";") + ";")));
 
-WriteLiteral("\r\n        <input class=\"btnSearch\" id=\"");
-
-
-                                Write(context.Compose("btnSearch"));
-
-WriteLiteral("\" type=\"button\" onclick=\"");
+WriteLiteral("\r\n        <div class=\"button-bar\">\r\n            <button type=\"submit\" class=\"quer" +
+"y-button sf-search\" data-icon=\"ui-icon-search\" id=\"");
 
 
-                                                                                       Write("Search({{prefix:'{0}',searchControllerUrl:'{1}'}});".Formato(context.ControlID, Url.SignumAction("Search")));
+                                                                                           Write(Model.Compose("qbSearch"));
 
-WriteLiteral("\" value=\"");
-
-
-                                                                                                                                                                                                              Write(Resources.Search);
-
-WriteLiteral("\" />\r\n");
+WriteLiteral("\" onclick=\"");
 
 
-         if (findOptions.Create && Navigator.IsCreable(entitiesType, true) && viewable)
-        {
+                                                                                                                                 Write("new SF.FindNavigator({{prefix:'{0}',searchControllerUrl:'{1}'}}).search();return false;".Formato(Model.ControlID, Url.SignumAction("Search")));
 
-WriteLiteral("            <input type=\"button\" value=\"+\" class=\"lineButton create\" onclick=\"");
-
-
-                                                                          Write(findOptions.Creating.HasText() ? findOptions.Creating : "SearchCreate({{prefix:'{0}',controllerUrl:'{1}'}});".Formato(context.ControlID, Url.SignumAction(string.IsNullOrEmpty(context.ControlID) ? "Create" : "PopupCreate")));
-
-WriteLiteral("\" />\r\n");
+WriteLiteral("\">");
 
 
-        }
+                                                                                                                                                                                                                                                                                   Write(Resources.Search);
 
-WriteLiteral("        <ul class=\"button-bar\">\r\n            ");
+WriteLiteral("</button>\r\n");
 
 
-       Write(ButtonBarQueryHelper.GetButtonBarElementsForQuery(this.ViewContext, findOptions.QueryName, entitiesType, context.ControlID).ToString(Html));
+             if (findOptions.Create && Navigator.IsCreable(entitiesType, true) && viewable)
+            {
+                string creating = findOptions.Creating.HasText() ? findOptions.Creating :
+                    "SF.FindNavigator.create({{prefix:'{0}',controllerUrl:'{1}'}});return false;".Formato(Model.ControlID, Url.SignumAction(string.IsNullOrEmpty(Model.ControlID) ? "Create" : "PopupCreate"));
 
-WriteLiteral("\r\n        </ul>\r\n    </div>\r\n");
+WriteLiteral("                <a class=\"query-button\" data-icon=\"ui-icon-plusthick\" data-text=\"" +
+"false\" id=\"");
+
+
+                                                                                       Write(Model.Compose("qbSearchCreate"));
+
+WriteLiteral("\" onclick=\"");
+
+
+                                                                                                                                  Write(creating);
+
+WriteLiteral("\">");
+
+
+                                                                                                                                             Write(Resources.Search_Create);
+
+WriteLiteral("</a>\r\n");
+
+
+            }
+
+WriteLiteral("            ");
+
+
+       Write(ButtonBarQueryHelper.GetButtonBarElementsForQuery(this.ViewContext, findOptions.QueryName, entitiesType, Model.ControlID).ToString(Html));
+
+WriteLiteral("\r\n        </div>\r\n    </div>\r\n");
 
 
      if (findOptions.FilterMode != FilterMode.OnlyResults)
@@ -252,12 +266,12 @@ WriteLiteral("        <div class=\"clearall\">\r\n        </div>\r\n");
 WriteLiteral("    <div id=\"");
 
 
-        Write(context.Compose("divResults"));
+        Write(Model.Compose("divResults"));
 
 WriteLiteral("\" class=\"divResults\">\r\n        <table id=\"");
 
 
-              Write(context.Compose("tblResults"));
+              Write(Model.Compose("tblResults"));
 
 WriteLiteral("\" class=\"tblResults\">\r\n            <thead>\r\n                <tr>\r\n");
 
@@ -271,9 +285,9 @@ WriteLiteral("                        <th class=\"thRowSelection\">\r\n");
                              if (findOptions.AllowMultiple.Value)
                             {
                                 
-                           Write(Html.CheckBox(context.Compose("cbSelectAll"), false, new { onclick = "javascript:ToggleSelectAll('{0}');".Formato(context.ControlID) }));
+                           Write(Html.CheckBox(Model.Compose("cbSelectAll"), false, new { onclick = "javascript:new SF.FindNavigator({{prefix:'{0}'}}).toggleSelectAll();".Formato(Model.ControlID) }));
 
-                                                                                                                                                                        
+                                                                                                                                                                                                      
                             }
 
 WriteLiteral("                        </th>\r\n");
@@ -323,12 +337,12 @@ WriteLiteral("\r\n                        </th>\r\n");
 
 WriteLiteral("                </tr>\r\n            </thead>\r\n            <tbody>\r\n            </t" +
 "body>\r\n            <tfoot>\r\n            </tfoot>\r\n        </table>\r\n    </div>\r\n" +
-"</div>\r\n<script type=\"text/javascript\">    \r\n    InitializeSearchControl(\"");
+"</div>\r\n<script type=\"text/javascript\">\r\n    new SF.FindNavigator({ prefix: \"");
 
 
-                        Write(context.ControlID);
+                               Write(Model.ControlID);
 
-WriteLiteral("\");\r\n</script>\r\n");
+WriteLiteral("\" }).initialize();\r\n</script>\r\n");
 
 
         }

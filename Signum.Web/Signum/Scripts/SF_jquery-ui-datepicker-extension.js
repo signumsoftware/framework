@@ -1,5 +1,4 @@
-﻿SF.add('datepicker-extension', function (S) {
-
+﻿SF.registerModule("Datepicker-extension", function () {
 
     // Overrides jquery calendar in (jquery-ui-1.7.2.js) to format dates in .net dateformat that can be found here:
     // http://msdn.microsoft.com/en-us/library/8kb3ddd4%28v=VS.71%29.aspx

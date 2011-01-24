@@ -12,7 +12,6 @@ namespace Signum.Web
     public class ToolBarButton
     {
         public string Id { get; set; }
-        public string ImgSrc { get; set; }
         public string Text { get; set; }
         public string AltText { get; set; }
         public string OnClick { get; set; }
@@ -42,23 +41,12 @@ namespace Signum.Web
 
         public virtual MvcHtmlString ToHtml(HtmlHelper helper)
         {
-            if (ImgSrc.HasText())
-            {
-                if (HtmlProps.ContainsKey("style"))
-                    HtmlProps["style"] = "background:transparent url(" + ImgSrc + ")  no-repeat scroll -4px top; text-indent:12px; " + HtmlProps["style"].ToString();
-                else
-                    HtmlProps["style"] = "background:transparent url(" + ImgSrc + ")  no-repeat scroll -4px top; text-indent:12px;";
-            }
-
             if (enabled)
-            {
                 HtmlProps.Add("onclick", OnClick);
-            }
             else
                 DivCssClass = DivCssClass + " disabled";
 
-
-            return helper.Href(Id, Text, "#", AltText ?? "", DivCssClass, HtmlProps);
+            return helper.Href(Id, Text, "", AltText ?? "", DivCssClass, HtmlProps);
         }
     }
 }

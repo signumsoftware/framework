@@ -45,7 +45,7 @@ namespace ASP
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Signum/Views/NormalControl.cshtml")]
-    public class _Page_Signum_Views_NormalControl_cshtml : System.Web.Mvc.WebViewPage<dynamic>
+    public class _Page_Signum_Views_NormalControl_cshtml : System.Web.Mvc.WebViewPage<TypeContext>
     {
 #line hidden
 
@@ -64,8 +64,6 @@ namespace ASP
 
 
 
-   TypeContext modelTC = (TypeContext)ViewData.Model;
-
 WriteLiteral("<h2>\r\n    ");
 
 
@@ -79,12 +77,12 @@ Write(Html.Hidden(ViewDataKeys.PartialViewName, ViewData[ViewDataKeys.PartialVie
 WriteLiteral("\r\n    <span class=\"typeNiceName\">");
 
 
-                          Write(modelTC.UntypedValue.GetType().NiceName());
+                          Write(Model.UntypedValue.GetType().NiceName());
 
 WriteLiteral("</span>\r\n");
 
 
-       IIdentifiable identifiable = modelTC.UntypedValue as IIdentifiable;
+       IIdentifiable identifiable = Model.UntypedValue as IIdentifiable;
 
 
      if (identifiable != null)
@@ -122,26 +120,26 @@ WriteLiteral("        </span>\r\n");
 WriteLiteral("    <span class=\"title\">");
 
 
-                    Write(ViewData[ViewDataKeys.Title] ?? "");
+                   Write(ViewBag.Title);
 
-WriteLiteral("</span>\r\n</h2>\r\n<ul class=\"button-bar\">\r\n");
+WriteLiteral("</span>\r\n</h2>\r\n<div class=\"button-bar\">\r\n");
 
 
-     if (Model != null && Navigator.Manager.ShowOkSave(modelTC.UntypedValue.GetType(), false))
+     if (Model != null && Navigator.Manager.ShowOkSave(Model.UntypedValue.GetType(), false))
     {
 
-WriteLiteral("        <li><a id=\"btnSave\" class=\"entity-button save\" onclick=\"javascript:TrySav" +
-"e({controllerUrl:\'");
+WriteLiteral("        <a id=\"ebSave\" class=\"entity-button save\" onclick=\"javascript:new SF.Vali" +
+"dator({controllerUrl:\'");
 
 
-                                                                                              Write(Url.SignumAction("TrySave"));
+                                                                                                  Write(Url.SignumAction("TrySave"));
 
-WriteLiteral("\'});\">");
+WriteLiteral("\'}).trySave();\">");
 
 
-                                                                                                                                Write(Resources.Save);
+                                                                                                                                              Write(Resources.Save);
 
-WriteLiteral("</a></li>  \r\n");
+WriteLiteral("</a>  \r\n");
 
 
     }
@@ -149,10 +147,10 @@ WriteLiteral("</a></li>  \r\n");
 WriteLiteral("    ");
 
 
-Write(ButtonBarEntityHelper.GetForEntity(this.ViewContext, (ModifiableEntity)modelTC.UntypedValue, ViewData[ViewDataKeys.PartialViewName].ToString(), modelTC.ControlID).ToString(Html));
+Write(ButtonBarEntityHelper.GetForEntity(this.ViewContext, (ModifiableEntity)Model.UntypedValue, ViewData[ViewDataKeys.PartialViewName].ToString(), Model.ControlID).ToString(Html));
 
-WriteLiteral("\r\n</ul>\r\n<div class=\"clearall\">\r\n</div>\r\n<div class=\"validationSummaryAjax\">\r\n   " +
-" ");
+WriteLiteral("\r\n</div>\r\n<div class=\"clearall\">\r\n</div>\r\n<div class=\"validationSummaryAjax\">\r\n  " +
+"  ");
 
 
 Write(Html.ValidationSummaryAjax());
@@ -165,7 +163,7 @@ Write(Html.NormalPageHeader());
 WriteLiteral("\r\n</div>\r\n<div id=\"divMainControl\" class=\"divMainControl\">\r\n");
 
 
-       Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString(), (object)Model);
+       Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString(), Model);
 
 WriteLiteral("</div>\r\n");
 

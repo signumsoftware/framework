@@ -50,15 +50,15 @@ namespace Signum.Web
         protected static string cssElement = "<link href=\"{0}\" rel=\"stylesheet\" type=\"text/css\" />";
         protected static string jsElement = "<script type=\"text/javascript\" src=\"{0}\"></script>";
 
-        public virtual string CombinedScript(HtmlHelper html, string[] files, ScriptType scriptType)
+        public virtual MvcHtmlString CombinedScript(HtmlHelper html, string[] files, ScriptType scriptType)
         {
             string scriptElement = scriptType == ScriptType.Css ? cssElement : jsElement;
 
-            StringBuilder sb = new StringBuilder();
+            HtmlStringBuilder sb = new HtmlStringBuilder();
             foreach (var f in files)
-                sb.AppendLine(scriptElement.Formato(Subdomain(f + "?v=" + Version)));
+                sb.AddLine(MvcHtmlString.Create(scriptElement.Formato(Subdomain(f + "?v=" + Version))));
 
-            return sb.ToString();
+            return sb.ToHtml();
         }
 
         public virtual string[] GerUrlsFor(string[] files, ScriptType scriptType)
@@ -75,12 +75,12 @@ namespace Signum.Web
         //from a different subdomain (real or virtual)
         public static MvcHtmlString ScriptCss(this HtmlHelper html, params string[] files)
         {
-            return MvcHtmlString.Create(Manager.CombinedScript(html, FilterAndInclude(files), ScriptType.Css));
+            return Manager.CombinedScript(html, FilterAndInclude(files), ScriptType.Css);
         }
 
         public static MvcHtmlString ScriptsJs(this HtmlHelper html, params string[] files)
         {
-            return MvcHtmlString.Create(Manager.CombinedScript(html, FilterAndInclude(files), ScriptType.Javascript));
+            return Manager.CombinedScript(html, FilterAndInclude(files), ScriptType.Javascript);
         }
 
         public static string[] UrlCss(params string[] files)

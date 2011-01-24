@@ -15,14 +15,6 @@ namespace Signum.Web
 
         public override MvcHtmlString ToHtml(HtmlHelper helper)
         {
-            if (ImgSrc.HasText())
-            {
-                if (HtmlProps.ContainsKey("style"))
-                    HtmlProps["style"] = "background:transparent url(" + ImgSrc + ")  no-repeat scroll -4px top; text-indent:12px; " + HtmlProps["style"].ToString();
-                else
-                    HtmlProps["style"] = "background:transparent url(" + ImgSrc + ")  no-repeat scroll -4px top; text-indent:12px;";
-            }
-
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
             using (sb.Surround(new HtmlTag("ul").Class("menu-button")))
@@ -32,12 +24,11 @@ namespace Signum.Web
                         sb.Add(tbb.ToHtml(helper).Surround("li"));
                 }
 
+            HtmlProps["onclick"] = "SF.Dropdowns.toggle(event, this);";
+            HtmlProps["data-icon-secondary"] = "ui-icon-triangle-1-s";
 
-
-            HtmlProps["onclick"] = "ToggleDropdown(this); return false;";
             return helper.Div(Id,
-                Text.EncodeHtml().Concat(helper.Div(null, null, "indicator", null)).Concat(sb.ToHtml())
-                , DivCssClass + " dropdown", HtmlProps);
+                Text.EncodeHtml().Concat(sb.ToHtml()), DivCssClass + " dropdown", HtmlProps);
         }
     }
 

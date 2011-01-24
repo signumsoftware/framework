@@ -95,19 +95,19 @@
     <Compile Include="PortableAreas\CompiledViews.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="PortableAreas\Repositories\CalendarLocalizedJavaScriptRepository.cs" />
     <Compile Include="PortableAreas\FileRepositoryManager.cs" />
     <Compile Include="PortableAreas\CompiledRazorBuildProvider.cs" />
     <Compile Include="PortableAreas\CompiledVirtualPathProvider.cs" />
     <Compile Include="PortableAreas\PortableAreaControllerFactory.cs" />
-    <Compile Include="PortableAreas\RouteExtensions.cs" />
     <Compile Include="PortableAreas\StaticContentResult.cs" />
     <Compile Include="ButtonBar\ToolBarMenu.cs" />
     <Compile Include="HtmlHelpers\HtmlTag.cs" />
     <Compile Include="JSRenderer\JsFunction.cs" />
     <Compile Include="JSRenderer\JsOptions.cs" />
     <Compile Include="Lines\EntityListBase.cs" />
-    <Compile Include="PortableAreas\EmbeddedFilesRespository.cs" />
-    <Compile Include="PortableAreas\LocalizedJavaScriptRepository.cs" />
+    <Compile Include="PortableAreas\Repositories\EmbeddedFilesRespository.cs" />
+    <Compile Include="PortableAreas\Repositories\LocalizedJavaScriptRepository.cs" />
     <Compile Include="PreApplicationStartCode.cs" />
     <Compile Include="Signum\Controllers\ErrorController.cs" />
     <Compile Include="Signum\Controllers\ResourcesController.cs" />
@@ -271,6 +271,8 @@
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>_ViewStart.cs</LastGenOutput>
     </Content>
+    <Content Include="Signum\Images\calendar.png" />
+    <Content Include="Signum\Scripts\SF_Utils.js" />
   </ItemGroup>
   <ItemGroup>
     <None Include="SignumFramework.pfx" />
@@ -296,7 +298,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Signum\Scripts\SF_Autocomplete.js" />
-    <Content Include="Signum\Scripts\SF_DragAndDrop.js" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Signum\Content\LineStyles.css" />

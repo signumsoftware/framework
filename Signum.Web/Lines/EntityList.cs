@@ -25,7 +25,7 @@ namespace Signum.Web
 
         public override string ToJS()
         {
-            return "new EList(" + this.OptionsJS() + ")";
+            return "new SF.EList(" + this.OptionsJS() + ")";
         }
 
         protected override JsViewOptions DefaultJsViewOptions()
@@ -35,58 +35,61 @@ namespace Signum.Web
             return voptions;
         }
 
-        protected override string DefaultViewing()
+        protected override string DefaultView()
         {
-            return EntityList.JsViewing(this, DefaultJsViewOptions()).ToJS();
+            return EntityList.JsView(this, DefaultJsViewOptions()).ToJS();
         }
 
-        public static JsInstruction JsViewing(EntityList elist, JsViewOptions viewOptions)
+        public static JsInstruction JsView(EntityList elist, JsViewOptions viewOptions)
         {
             if (viewOptions.ControllerUrl == null)
                 viewOptions.ControllerUrl = RouteHelper.New().SignumAction("PopupView");
 
-            return new JsInstruction(() => "EListOnViewing({0})".Formato(",".Combine(
-                elist.ToJS(),
-                viewOptions.TryCC(v => v.ToJS()))));
+            return new JsInstruction(() => "{0}.view({1})".Formato(
+                     elist.ToJS(),
+                     viewOptions.TryCC(v => v.ToJS()) ?? ""
+                 ));
         }
 
-        protected override string DefaultCreating()
+        protected override string DefaultCreate()
         {
-            return EntityList.JsCreating(this, DefaultJsViewOptions()).ToJS();
+            return EntityList.JsCreate(this, DefaultJsViewOptions()).ToJS();
         }
 
-        private static JsInstruction JsCreating(EntityList elist, JsViewOptions viewOptions)
+        private static JsInstruction JsCreate(EntityList elist, JsViewOptions viewOptions)
         {
             if (viewOptions.ControllerUrl == null)
                 viewOptions.ControllerUrl = RouteHelper.New().SignumAction("PopupView");
 
-            return new JsInstruction(() => "EListOnCreating({0})".Formato(",".Combine(
-                elist.ToJS(),
+            string createParams = ",".Combine(
                 viewOptions.TryCC(v => v.ToJS()),
-                elist.HasManyImplementations ? RouteHelper.New().SignumAction("GetTypeChooser").SingleQuote() : null)));
+                elist.HasManyImplementations ? RouteHelper.New().SignumAction("GetTypeChooser").SingleQuote() : null);
+
+            return new JsInstruction(() => "{0}.create({1})".Formato(elist.ToJS(), createParams));
         }
 
-        protected override string DefaultFinding()
+        protected override string DefaultFind()
         {
-            return EntityList.JsFinding(this, DefaultJsfindOptions()).ToJS();
+            return EntityList.JsFind(this, DefaultJsfindOptions()).ToJS();
         }
 
-        public static JsInstruction JsFinding(EntityList elist, JsFindOptions findOptions)
+        public static JsInstruction JsFind(EntityList elist, JsFindOptions findOptions)
         {
-            return new JsInstruction(() => "EListOnFinding({0})".Formato(",".Combine(
-                elist.ToJS(),
+            string findParams = ",".Combine(
                 findOptions.TryCC(v => v.ToJS()),
-                elist.HasManyImplementations ? RouteHelper.New().SignumAction("GetTypeChooser").SingleQuote() : null)));
+                elist.HasManyImplementations ? RouteHelper.New().SignumAction("GetTypeChooser").SingleQuote() : null);
+
+            return new JsInstruction(() => "{0}.find({1})".Formato(elist.ToJS(), findParams));
         }
 
-        protected override string DefaultRemoving()
+        protected override string DefaultRemove()
         {
-            return EntityList.JsRemoving(this).ToJS();
+            return EntityList.JsRemove(this).ToJS();
         }
 
-        public static JsInstruction JsRemoving(EntityList elist)
+        public static JsInstruction JsRemove(EntityList elist)
         {
-            return new JsInstruction(() => "EListOnRemoving({0})".Formato(elist.ToJS()));
+            return new JsInstruction(() => "{0}.remove()".Formato(elist.ToJS()));
         }
     }
 }

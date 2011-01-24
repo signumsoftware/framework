@@ -1,6 +1,6 @@
-@using System.Configuration
+﻿@using System.Configuration
 @using Signum.Web.Properties
-
+@model TypeContext
 @section head
 {
     @Html.ScriptsJs(
@@ -12,8 +12,6 @@
             "~/signum/Scripts/SF_Validator.js",
             "~/signum/Scripts/SF_Operations.js")
 }
-
-@{ TypeContext modelTC = (TypeContext)Model;}
 @using (Html.BeginForm())
 {
     
@@ -21,8 +19,12 @@
         @{ Html.RenderPartial(Navigator.Manager.NormalControlUrl, ViewData);}
     </div>
     
-    <div id="divASustituir">
-    </div>
     <div class="clear">
     </div>   
-} 
+}
+<script type="text/javascript">
+    $(function () {
+        var $body = $("body");
+        $body.trigger("sf-new-content", [$body]);
+    })
+</script>

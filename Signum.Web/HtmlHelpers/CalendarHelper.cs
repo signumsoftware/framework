@@ -7,12 +7,70 @@ using Signum.Utilities;
 using Signum.Web.Properties;
 using System.Globalization;
 using System.Web.Script.Serialization;
+using System.Web;
 
 namespace Signum.Web
 {
     public class DatePickerOptions
     {
+        public static DatePickerOptions Default = new DatePickerOptions();
+        
+        public bool IsDefault()
+        {
+            return this.ShowAge == Default.ShowAge &&
+                   this.ChangeMonth == Default.ChangeMonth &&
+                   this.ChangeYear == Default.ChangeYear &&
+                   this.FirstDay == Default.FirstDay &&
+                   this.YearRange == Default.YearRange &&
+                   this.ShowOn == Default.ShowOn &&
+                   this.ButtonImageOnly == Default.ButtonImageOnly &&
+                   this.ButtonText == Default.ButtonText &&
+                   this.ButtonImageSrc == Default.ButtonImageSrc &&
+                   this.MinDate == Default.MinDate &&
+                   this.MaxDate == Default.MaxDate &&
+                   this.ConstrainInput == Default.ConstrainInput;
+        }
+
         public string Format { get; set; }
+
+        public static string JsDateFormat(string dateFormat)
+        {
+            switch (dateFormat)
+            {
+                case "d":
+                    return CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern;
+                case "D":
+                    return CultureInfo.CurrentCulture.DateTimeFormat.LongDatePattern;
+                case "f":
+                    return CultureInfo.CurrentCulture.DateTimeFormat.LongDatePattern + " " + CultureInfo.CurrentCulture.DateTimeFormat.ShortTimePattern;
+                case "F":
+                    return CultureInfo.CurrentCulture.DateTimeFormat.FullDateTimePattern;
+                case "g":
+                    return CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern + " " + CultureInfo.CurrentCulture.DateTimeFormat.ShortTimePattern;
+                case "G":
+                    return CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern + " " + CultureInfo.CurrentCulture.DateTimeFormat.LongTimePattern;
+                case "m":
+                case "M":
+                    return CultureInfo.CurrentCulture.DateTimeFormat.MonthDayPattern;
+                case "r":
+                case "R":
+                    return CultureInfo.CurrentCulture.DateTimeFormat.RFC1123Pattern;
+                case "s":
+                    return CultureInfo.CurrentCulture.DateTimeFormat.SortableDateTimePattern;
+                case "t":
+                    return CultureInfo.CurrentCulture.DateTimeFormat.ShortTimePattern;
+                case "T":
+                    return CultureInfo.CurrentCulture.DateTimeFormat.LongTimePattern;
+                case "u":
+                    return CultureInfo.CurrentCulture.DateTimeFormat.UniversalSortableDateTimePattern;
+                case "U":
+                    return CultureInfo.CurrentCulture.DateTimeFormat.FullDateTimePattern;
+                case "y":
+                case "Y":
+                    return CultureInfo.CurrentCulture.DateTimeFormat.YearMonthPattern;
+            }
+            return dateFormat;
+        }
 
         bool showAge = false;
         /// <summary>
@@ -72,7 +130,7 @@ namespace Signum.Web
             set { buttonText = value; }
         }
 
-        string buttonImageSrc = "Scripts/jqueryui/images/calendar.png";
+        string buttonImageSrc = VirtualPathUtility.ToAbsolute("~/signum/Images/calendar.png");
         public string ButtonImageSrc
         {
             get { return buttonImageSrc; }
@@ -107,131 +165,41 @@ namespace Signum.Web
             get { return defaultculture ?? CultureInfo.CurrentCulture.Name.Substring(0, 2); }
             set { defaultculture = value; }
         }
+
+        public override string ToString()
+        {
+            return "{" + 
+                "changeMonth:{0}, changeYear:{1}, firstDay:{2}, yearRange:'{3}', showOn:'{4}', buttonImageOnly:{5}, buttonText:'{6}', buttonImage:'{7}', constrainInput: {8}{9}{10}{11}".Formato(
+                    ChangeMonth ? "true" : "false",
+                    ChangeYear ? "true" : "false",
+                    FirstDay,
+                    YearRange,
+                    ShowOn,
+                    ButtonImageOnly ? "true" : "false",
+                    ButtonText,
+                    ButtonImageSrc,
+                    ConstrainInput ? "true" : "false",
+                    (MinDate.HasText() ? ", minDate: " + MinDate : ""),
+                    (MaxDate.HasText() ? ", maxDate: " + MaxDate : ""),
+                    (Format.HasText() ? ", dateFormat: '" + JsDateFormat(Format) + "'" : "") + 
+                "}");
+        }
     }
 
     public static class CalendarHelper
     {
-        public static Action<HtmlHelper, StringBuilder> IncludeCss;
-        public static string jQueryPrefix = "";
-        //jQuery ui DatePicker
-
         public static MvcHtmlString Calendar(this HtmlHelper helper, string elementId, DatePickerOptions settings)
         {
             StringBuilder sb = new StringBuilder();
 
-            if (IncludeCss != null)
-                IncludeCss(helper, sb);
-            else
-                sb.AppendLine(helper.ScriptCss(
-                    "~/scripts/jqueryui/" + jQueryPrefix + "ui.core.css",
-                    "~/scripts/jqueryui/" + jQueryPrefix + "ui.datepicker.css",
-                    "~/scripts/jqueryui/" + jQueryPrefix + "ui.theme.css").ToHtmlString());
-
-            var context = helper.ViewContext.HttpContext;
-
-            if (context.Items["jqCalendar"] == null)
-            {
-                sb.AppendLine(GetLocalizationVariables());
-                sb.AppendLine(ScriptHtmlHelper.ScriptsJs(helper, "~/signum/scripts/SF_jquery-ui-datepicker-extension.js").ToHtmlString());
-                context.Items["jqCalendar"] = true;
-            }
-
             sb.AppendLine(
                 "<script type=\"text/javascript\">\n" + 
                 "$(function(){\n" +
-                "$(\"#" + elementId + "\").datepicker({ " + OptionsToString(settings) +" });\n" + 
-                "});\n" + 
+                "$(\"#" + elementId + "\").datepicker(" + settings.ToString() +");\n" + 
+                "});\n" +
                 "</script>");
 
             return MvcHtmlString.Create(sb.ToString());
-        }
-
-        static string OptionsToString(DatePickerOptions settings)
-        {
-            return "changeMonth:{0}, changeYear:{1}, firstDay:{2}, yearRange:'{3}', showOn:'{4}', buttonImageOnly:{5}, buttonText:'{6}', buttonImage:'{7}', constrainInput: {8}{9}{10}{11}".Formato(
-                settings.ChangeMonth ? "true" : "false",
-                settings.ChangeYear ? "true" : "false",
-                settings.FirstDay,
-                settings.YearRange,
-                settings.ShowOn,
-                settings.ButtonImageOnly ? "true" : "false",
-                settings.ButtonText,
-                settings.ButtonImageSrc,
-                settings.ConstrainInput ? "true" : "false",
-                (settings.MinDate.HasText() ? ", minDate: " + settings.MinDate : ""),
-                (settings.MaxDate.HasText() ? ", maxDate: " + settings.MaxDate : ""),
-                (settings.Format.HasText() ? ", dateFormat: '" + FormatToString(settings.Format) + "'" : "")
-                );
-        }
-
-        internal static string FormatToString(string dateFormat)
-        {
-            switch (dateFormat)
-            { 
-                case "d":
-                    return CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern;
-                case "D":
-                    return CultureInfo.CurrentCulture.DateTimeFormat.LongDatePattern;
-                case "f":
-                    return CultureInfo.CurrentCulture.DateTimeFormat.LongDatePattern + " " + CultureInfo.CurrentCulture.DateTimeFormat.ShortTimePattern;
-                case "F":
-                    return CultureInfo.CurrentCulture.DateTimeFormat.FullDateTimePattern;
-                case "g":
-                    return CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern + " " + CultureInfo.CurrentCulture.DateTimeFormat.ShortTimePattern;
-                case "G":
-                    return CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern + " " + CultureInfo.CurrentCulture.DateTimeFormat.LongTimePattern;
-                case "m":
-                case "M":
-                    return CultureInfo.CurrentCulture.DateTimeFormat.MonthDayPattern;
-                case "r":
-                case "R":
-                    return CultureInfo.CurrentCulture.DateTimeFormat.RFC1123Pattern;
-                case "s":
-                    return CultureInfo.CurrentCulture.DateTimeFormat.SortableDateTimePattern;
-                case "t":
-                    return CultureInfo.CurrentCulture.DateTimeFormat.ShortTimePattern;
-                case "T":
-                    return CultureInfo.CurrentCulture.DateTimeFormat.LongTimePattern;
-                case "u":
-                    return CultureInfo.CurrentCulture.DateTimeFormat.UniversalSortableDateTimePattern;
-                case "U":
-                    return CultureInfo.CurrentCulture.DateTimeFormat.FullDateTimePattern;
-                case "y":
-                case "Y":
-                    return CultureInfo.CurrentCulture.DateTimeFormat.YearMonthPattern;
-            }
-            return dateFormat;
-        }
-
-        static string GetLocalizationVariables()
-        {
-            string shortCultureName = DatePickerOptions.DefaultCulture;
-
-            StringBuilder sb = new StringBuilder();
-            sb.Append("<script type=\"text/javascript\">");
-            sb.Append("$.datepicker.regional['" + shortCultureName + "'] = ");
-
-            var config = new {
-                closeText = Resources.CalendarClose,
-                prevText = Resources.CalendarPrevious,
-                nextText = Resources.CalendarNext,
-                currentText = Resources.CalendarToday,
-                monthNames = CultureInfo.CurrentCulture.DateTimeFormat.MonthNames,
-                monthNamesShort = CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedMonthNames,
-                dayNames = CultureInfo.CurrentCulture.DateTimeFormat.DayNames,
-                dayNamesShort = CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedDayNames,
-                dayNamesMin = CultureInfo.CurrentCulture.DateTimeFormat.ShortestDayNames,
-                dateFormat = CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern + " " + CultureInfo.CurrentCulture.DateTimeFormat.ShortTimePattern,
-                firstDay = (int)CultureInfo.CurrentCulture.DateTimeFormat.FirstDayOfWeek
-            };
-
-            sb.Append(new JavaScriptSerializer().Serialize(config));
-
-            sb.Append(";");
-	        sb.Append("$.datepicker.setDefaults($.datepicker.regional['" + shortCultureName + "']);");
-            sb.Append("</script>");
-
-            return sb.ToString();
-        }
+        }     
     }
 }

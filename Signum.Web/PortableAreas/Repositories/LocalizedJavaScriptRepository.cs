@@ -18,34 +18,30 @@ namespace Signum.Web.PortableAreas
     public class LocalizedJavaScriptRepository : IFileRepository
     {
         public readonly ResourceManager ResourceManager;
-        public readonly string VirtualPath;
-        readonly string Folder;
+        public readonly string VirtualPathPrefix;
         readonly string ResourceKeyPrefix;
         readonly string JavaScriptVariableName;
-
-        string TotalPrefix { get { return VirtualPath + Folder; } }
 
         readonly ConcurrentDictionary<CultureInfo, StaticContentResult> cachedFiles = new ConcurrentDictionary<CultureInfo, StaticContentResult>();
 
         public LocalizedJavaScriptRepository(ResourceManager resourceManager, string areaName)
-            : this(resourceManager, "~/" + areaName + "/", "resources/", areaName + "_", areaName)
+            : this(resourceManager, "~/" + areaName + "/resources/", areaName + "_", areaName)
         {
         }
 
-        public LocalizedJavaScriptRepository(ResourceManager resourceManager, string virtualPath, string folder, string resourceKeyPrefix, string javaScriptVariableName)
+        public LocalizedJavaScriptRepository(ResourceManager resourceManager, string virtualPathPrefix, string resourceKeyPrefix, string javaScriptVariableName)
         {
             if (resourceManager == null)
                 throw new ArgumentNullException("resourceManager");
 
-            if (string.IsNullOrEmpty(virtualPath))
+            if (string.IsNullOrEmpty(virtualPathPrefix))
                 throw new ArgumentNullException("virtualPath");
 
             if (string.IsNullOrEmpty(resourceKeyPrefix))
                 throw new ArgumentNullException("resourceKeyPrefix");
 
             this.ResourceManager = resourceManager;
-            this.VirtualPath = virtualPath.ToLower();
-            this.Folder = folder.ToLower();
+            this.VirtualPathPrefix = virtualPathPrefix.ToLower();
             this.ResourceKeyPrefix = resourceKeyPrefix.ToLower();
             this.JavaScriptVariableName = javaScriptVariableName.ToLower();
         }
@@ -107,10 +103,10 @@ namespace Signum.Web.PortableAreas
 
         CultureInfo GetCultureInfo(string virtualPath)
         {
-            if (!virtualPath.StartsWith(TotalPrefix, StringComparison.InvariantCultureIgnoreCase))
+            if (!virtualPath.StartsWith(VirtualPathPrefix, StringComparison.InvariantCultureIgnoreCase))
                 return null;
 
-            var fileName = virtualPath.Substring(TotalPrefix.Length);
+            var fileName = virtualPath.Substring(VirtualPathPrefix.Length);
 
             if (Path.GetExtension(fileName) != ".js")
                 return null;
@@ -127,7 +123,7 @@ namespace Signum.Web.PortableAreas
 
         public override string ToString()
         {
-            return "LocalizedJavaScript {0} -> {1}".Formato(ResourceKeyPrefix, TotalPrefix);
+            return "LocalizedJavaScript {0} -> {1}".Formato(ResourceKeyPrefix, VirtualPathPrefix);
         }
     }
 }

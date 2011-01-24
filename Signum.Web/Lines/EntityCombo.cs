@@ -48,46 +48,48 @@ namespace Signum.Web
 
         public override string ToJS()
         {
-            return "new ECombo(" + this.OptionsJS() + ")";
+            return "new SF.ECombo(" + this.OptionsJS() + ")";
         }
 
-        protected override string DefaultViewing()
+        protected override string DefaultView()
         {
-            return EntityCombo.JsViewing(this, DefaultJsViewOptions()).ToJS();
+            return EntityCombo.JsView(this, DefaultJsViewOptions()).ToJS();
         }
 
-        public static JsInstruction JsViewing(EntityCombo ecombo, JsViewOptions viewOptions)
-        {
-            if (viewOptions.ControllerUrl == null)
-                viewOptions.ControllerUrl = RouteHelper.New().SignumAction("PopupView");
-
-            return new JsInstruction(() => "EComboOnViewing({0})".Formato(",".Combine(
-                ecombo.ToJS(),
-                viewOptions.TryCC(v => v.ToJS()))));
-        }
-
-        protected override string DefaultCreating()
-        {
-            return EntityCombo.JsCreating(this, DefaultJsViewOptions()).ToJS();
-        }
-
-        private static JsInstruction JsCreating(EntityCombo ecombo, JsViewOptions viewOptions)
+        public static JsInstruction JsView(EntityCombo ecombo, JsViewOptions viewOptions)
         {
             if (viewOptions.ControllerUrl == null)
                 viewOptions.ControllerUrl = RouteHelper.New().SignumAction("PopupView");
 
-            return new JsInstruction(() => "EComboOnCreating({0})".Formato(",".Combine(
-                ecombo.ToJS(),
+            return new JsInstruction(() => "{0}.view({1})".Formato(
+                    ecombo.ToJS(),
+                    viewOptions.TryCC(v => v.ToJS()) ?? ""
+                ));
+        }
+
+        protected override string DefaultCreate()
+        {
+            return EntityCombo.JsCreate(this, DefaultJsViewOptions()).ToJS();
+        }
+
+        private static JsInstruction JsCreate(EntityCombo ecombo, JsViewOptions viewOptions)
+        {
+            if (viewOptions.ControllerUrl == null)
+                viewOptions.ControllerUrl = RouteHelper.New().SignumAction("PopupView");
+
+            string createParams = ",".Combine(
                 viewOptions.TryCC(v => v.ToJS()),
-                ecombo.HasManyImplementations ? RouteHelper.New().SignumAction("GetTypeChooser").SingleQuote() : null)));
+                ecombo.HasManyImplementations ? RouteHelper.New().SignumAction("GetTypeChooser").SingleQuote() : null);
+
+            return new JsInstruction(() => "{0}.create({1})".Formato(ecombo.ToJS(), createParams));
         }
 
-        protected override string DefaultFinding()
+        protected override string DefaultFind()
         {
             return null;
         }
 
-        protected override string DefaultRemoving()
+        protected override string DefaultRemove()
         {
             return null;
         }
