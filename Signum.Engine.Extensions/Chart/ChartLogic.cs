@@ -29,7 +29,6 @@ namespace Signum.Engine.Extensions.Chart
             {
                 QueryLogic.Start(sb);
 
-                LiteFilterValueConverter.TryParseLite = TypeLogic.TryParseLite;
 
                 sb.Include<UserChartDN>();
 

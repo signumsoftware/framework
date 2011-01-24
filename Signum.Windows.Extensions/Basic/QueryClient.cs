@@ -6,6 +6,7 @@ using Signum.Utilities;
 using System.Reflection;
 using Signum.Services;
 using Signum.Entities.Basics;
+using Signum.Entities.Reports;
 
 namespace Signum.Windows
 {
@@ -18,6 +19,9 @@ namespace Signum.Windows
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 queryNames = Server.Return((IDynamicQueryServer s) => s.GetQueryNames().ToDictionary(a => a.ToString()));
+
+                LiteFilterValueConverter.ResolveType = Server.TryGetType;
+                LiteFilterValueConverter.TypeCleanName = Server.GetCleanName;
             }
         }
 

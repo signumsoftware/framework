@@ -64,7 +64,7 @@ namespace Signum.Web.Queries
 
             Database.Delete<UserQueryDN>(id);
 
-            return Redirect(Navigator.FindRoute(uq.Query.Key));
+            return Redirect(Navigator.FindRoute(QueryLogic.ToQueryName(uq.Query.Key)));
         }
 
         public ActionResult SaveUserQuery()

@@ -148,7 +148,7 @@ namespace Signum.Web.AuthAdmin
 
             ButtonBarEntityHelper.RegisterEntityButtons<T>((ControllerContext controllerContext, T entity, string viewName, string prefix) =>
                 new[] { new ToolBarButton { 
-                    OnClick = (embedded ? "postDialog('{0}', '{1}')" :  "Submit('{0}', '{1}')").Formato(
+                    OnClick = (embedded ? "postDialog('{0}', '{1}')" :  "SF.submit('{0}', '{1}')").Formato(
                         new UrlHelper(controllerContext.RequestContext).Action((embedded? "save" : "") +  partialViewName, "AuthAdmin"), prefix), 
                     Text = Resources.Save,
                     DivCssClass = ToolBarButton.DefaultEntityDivCssClass 

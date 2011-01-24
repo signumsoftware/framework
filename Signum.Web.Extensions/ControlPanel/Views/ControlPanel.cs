@@ -67,6 +67,8 @@ namespace ASP
 
 
 
+WriteLiteral("\r\n");
+
 
 DefineSection("head", () => {
 
@@ -92,7 +94,7 @@ WriteLiteral("\r\n\r\n");
 
  using(Html.BeginForm("DoPostBack","Signum","POST"))
 {
-    ControlPanelDN cp = (ControlPanelDN)Model; 
+    ControlPanelDN cp = (ControlPanelDN)Model;
 
 WriteLiteral("    <h1>\r\n        <a href=\"");
 
@@ -115,14 +117,14 @@ WriteLiteral("    <table>\r\n");
 
 
          for (int i = 0; i < rowNumber; i++)
-         {
+           { 
 
-WriteLiteral("            <tr>\r\n");
+WriteLiteral("                <tr>\r\n");
 
 
                  for (int j = 0; j < cp.NumberOfColumns; j++)
-                {
-                    PanelPart pp = cp.Parts.SingleOrDefault(p => p.Row == i + 1 && (p.Column == j + 1 || p.Fill));
+    {
+        PanelPart pp = cp.Parts.SingleOrDefault(p => p.Row == i + 1 && (p.Column == j + 1 || p.Fill));
 
 WriteLiteral("                    <td style=\"vertical-align:top;padding-right:20px\" ");
 
@@ -133,41 +135,36 @@ WriteLiteral(">\r\n");
 
 
                          if (pp != null)
-                        {
+        {
                             
                        Write(PanelPartRenderer.Render(Html, pp));
 
                                                                
-                        }
+        }
 
-WriteLiteral("                    </td>\r\n");
+WriteLiteral("        </td>\r\n");
 
 
-                    if (pp != null && pp.Fill) 
+        if (pp != null && pp.Fill)
                     {
-                        j = cp.NumberOfColumns;
-                    }
+            j = cp.NumberOfColumns;
+    }
                 }
 
-WriteLiteral("            </tr>\r\n");
+WriteLiteral("                </tr>\r\n");
 
 
-         }
+    }
 
 WriteLiteral("    </table>\r\n");
 
 
     }
 
-WriteLiteral("    <div id=\"divASustituir\">\r\n    </div>\r\n");
-
-
-
 WriteLiteral("    <div class=\"clear\">\r\n    </div>   \r\n");
 
 
- }
-WriteLiteral(" ");
+ } 
 
 
         }

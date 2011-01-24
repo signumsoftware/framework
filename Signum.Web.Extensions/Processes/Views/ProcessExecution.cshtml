@@ -1,4 +1,4 @@
-@using Signum.Entities.Processes
+﻿@using Signum.Entities.Processes
 @Html.DynamicCss("~/process/Content/Processes.css")
 @using (var e = Html.TypeContext<ProcessExecutionDN>())
 {
@@ -46,11 +46,11 @@
                 }
                 else {
                     if (empty(idPrefix)) {
-                        ReloadEntity("@Url.Action("FinishProcessNormalPage", "Process")", idPrefix);
+                        SF.reloadEntity("@Url.Action("FinishProcessNormalPage", "Process")", idPrefix);
                     }
                     else {
                         $("#" + idPrefix.compose("externalPopupDiv")).remove();
-                        new ViewNavigator({
+                        new SF.ViewNavigator({
                             type: "ProcessExecutionDN",
                             id: idProcess,
                             prefix: idPrefix

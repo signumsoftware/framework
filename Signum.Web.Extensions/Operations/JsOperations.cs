@@ -42,13 +42,13 @@ namespace Signum.Web.Operations
     
     public static class JsOpSuccess
     {
-        public static readonly JsFunction DefaultDispatcher = new JsFunction() { Renderer = () => "OpOnSuccessDispatcher" };
-        public static readonly JsFunction ReloadContent = new JsFunction() { Renderer = () => "OpReloadContent" };
-        public static readonly JsFunction OpenPopup = new JsFunction() { Renderer = () => "OpOpenPopup" };
-        public static readonly JsFunction OpenPopupNoDefaultOk = new JsFunction() { Renderer = () => "OpOpenPopupNoDefaultOk" };
-        public static readonly JsFunction Navigate = new JsFunction() { Renderer = () => "OpNavigate" };
-        public static readonly JsFunction DefaultContextualDispatcher = new JsFunction() { Renderer = () => "OpContextualOnSuccess" };
-        public static readonly JsFunction MarkCellOnSuccess = new JsFunction() { Renderer = () => "OpMarkCellOnSuccess" };
+        public static readonly JsFunction DefaultDispatcher = new JsFunction() { Renderer = () => "SF.opOnSuccessDispatcher" };
+        public static readonly JsFunction ReloadContent = new JsFunction() { Renderer = () => "SF.opReloadContent" };
+        public static readonly JsFunction OpenPopup = new JsFunction() { Renderer = () => "SF.opOpenPopup" };
+        public static readonly JsFunction OpenPopupNoDefaultOk = new JsFunction() { Renderer = () => "SF.opOpenPopupNoDefaultOk" };
+        public static readonly JsFunction Navigate = new JsFunction() { Renderer = () => "SF.opNavigate" };
+        public static readonly JsFunction DefaultContextualDispatcher = new JsFunction() { Renderer = () => "SF.opContextualOnSuccess" };
+        public static readonly JsFunction MarkCellOnSuccess = new JsFunction() { Renderer = () => "SF.opMarkCellOnSuccess" };
     }
 
     public class JsOperationExecutor : JsOperationBase
@@ -56,7 +56,7 @@ namespace Signum.Web.Operations
         public JsOperationExecutor(JsOperationOptions options)
             : base(options)
         {
-            Renderer = () => "new OperationExecutor(" + this.options.ToJS() + ")";
+            Renderer = () => "new SF.OperationExecutor(" + this.options.ToJS() + ")";
         }
 
         public JsInstruction DefaultExecute()
@@ -77,7 +77,7 @@ namespace Signum.Web.Operations
         public JsOperationConstructorFrom(JsOperationOptions options)
             : base(options)
         {
-            Renderer = () => "new ConstructorFrom(" + this.options.ToJS() + ")";
+            Renderer = () => "new SF.ConstructorFrom(" + this.options.ToJS() + ")";
         }
 
         public JsInstruction DefaultConstruct()
@@ -98,7 +98,7 @@ namespace Signum.Web.Operations
         public JsOperationConstructorFromMany(JsOperationOptions options)
             : base(options)
         {
-            Renderer = () => "new ConstructorFromMany(" + this.options.ToJS() + ")";
+            Renderer = () => "new SF.ConstructorFromMany(" + this.options.ToJS() + ")";
         }
 
         public JsInstruction DefaultConstruct()
@@ -112,7 +112,7 @@ namespace Signum.Web.Operations
         public JsOperationDelete(JsOperationOptions options)
             : base(options)
         {
-            Renderer = () => "new DeleteExecutor(" + this.options.ToJS() + ")";
+            Renderer = () => "new SF.DeleteExecutor(" + this.options.ToJS() + ")";
         }
 
         public JsInstruction DefaultDelete(IdentifiableEntity entity)

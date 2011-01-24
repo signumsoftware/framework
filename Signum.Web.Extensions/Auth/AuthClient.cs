@@ -27,15 +27,15 @@ namespace Signum.Web.Auth
 {
     public static class AuthClient
     {
-        public static string PublicLoginUrl(string returnUrl)
+        public static Func<string, string> PublicLoginUrl = (string returnUrl) =>
         {
             return RouteHelper.New().Action("Login", "Auth", new { referrer = returnUrl }); 
-        }
+        };
 
         public static string CookieName = "sfUser";
-        
+         
         public static string ViewPrefix = "~/auth/Views/{0}.cshtml";
-
+        
         public static string LoginUrl = ViewPrefix.Formato("Login");
         public static string LoginUserControlUrl = ViewPrefix.Formato("LoginUserControl");
         public static string ChangePasswordUrl = ViewPrefix.Formato("ChangePassword");

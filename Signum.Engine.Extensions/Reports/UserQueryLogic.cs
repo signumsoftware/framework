@@ -22,8 +22,6 @@ namespace Signum.Engine.Reports
             {
                 QueryLogic.Start(sb);
 
-                LiteFilterValueConverter.TryParseLite = TypeLogic.TryParseLite;
-
                 sb.Include<UserQueryDN>();
 
                 dqm[typeof(UserQueryDN)] = (from uq in Database.Query<UserQueryDN>()

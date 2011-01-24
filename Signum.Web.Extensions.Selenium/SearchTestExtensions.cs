@@ -1,0 +1,405 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using Selenium;
+using Signum.Utilities;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+namespace Signum.Web.Selenium
+{
+    public static class SearchTestExtensions
+    {
+        public static string SearchSelector(string prefix)
+        {
+            return "jq=#{0}qbSearch".Formato(prefix);
+        }
+
+        public static void Search(this ISelenium selenium)
+        {
+            Search(selenium, "");
+        }
+
+        public static void Search(this ISelenium selenium, string prefix)
+        {
+            selenium.Click(SearchSelector(prefix));
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(RowSelector(1, prefix)));
+        }
+
+        public static void SetTopToFinder(this ISelenium selenium, string top)
+        {
+            SetTopToFinder(selenium, top, "");
+        }
+
+        public static void SetTopToFinder(this ISelenium selenium, string top, string prefix)
+        {
+            selenium.Type("{0}sfTop".Formato(prefix), top);
+        }
+
+        public static void FilterSelectToken(this ISelenium selenium, int tokenSelectorIndexBase0, string itemSelector, bool willExpand)
+        {
+            FilterSelectToken(selenium, tokenSelectorIndexBase0, itemSelector, willExpand, "");
+        }
+
+        public static void FilterSelectToken(this ISelenium selenium, int tokenSelectorIndexBase0, string itemSelector, bool willExpand, string prefix)
+        {
+            selenium.Select("{0}ddlTokens_{1}".Formato(prefix, tokenSelectorIndexBase0), itemSelector);
+            if (willExpand)
+                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#{0}lblddlTokens_{1}".Formato(prefix, tokenSelectorIndexBase0 + 1)));
+        }
+
+        public static void ExpandTokens(this ISelenium selenium, int tokenSelectorIndexBase0)
+        {
+            ExpandTokens(selenium, tokenSelectorIndexBase0, "");
+        }
+
+        public static void ExpandTokens(this ISelenium selenium, int tokenSelectorIndexBase0, string prefix)
+        {
+            selenium.Click("jq=#{0}lblddlTokens_{1}".Formato(prefix, tokenSelectorIndexBase0));
+        }
+
+        public static string FilterOperationSelector(int filterIndexBase0)
+        {
+            return FilterOperationSelector(filterIndexBase0, "");
+        }
+
+        public static string FilterOperationSelector(int filterIndexBase0, string prefix)
+        {
+            return "jq=#{0}ddlSelector_{1}".Formato(prefix, filterIndexBase0);
+        }
+
+        public static void AddFilter(this ISelenium selenium, int filterIndexBase0)
+        {
+            AddFilter(selenium, filterIndexBase0, "");
+        }
+
+        public static void AddFilter(this ISelenium selenium, int filterIndexBase0, string prefix)
+        {
+            selenium.Click("{0}btnAddFilter".Formato(prefix));
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(FilterOperationSelector(filterIndexBase0, prefix)));
+        }        
+
+        public static void FilterSelectOperation(this ISelenium selenium, int filterIndexBase0, string optionSelector)
+        {
+            FilterSelectOperation(selenium, filterIndexBase0, optionSelector, "");
+        }
+
+        public static void FilterSelectOperation(this ISelenium selenium, int filterIndexBase0, string optionSelector, string prefix)
+        {
+            selenium.Select(FilterOperationSelector(filterIndexBase0, prefix), optionSelector);
+        }
+
+        public static void DeleteFilter(this ISelenium selenium, int filterIndexBase0)
+        {
+            DeleteFilter(selenium, filterIndexBase0, "");
+        }
+
+        public static void DeleteFilter(this ISelenium selenium, int filterIndexBase0, string prefix)
+        {
+            selenium.Click("jq=#{0}btnDelete_{1}".Formato(prefix, filterIndexBase0));
+        }
+
+        public static void QuickFilter(this ISelenium selenium, int rowIndexBase1, int columnIndexBase1, int filterIndexBase0)
+        {
+            QuickFilter(selenium, rowIndexBase1, columnIndexBase1, filterIndexBase0, "");
+        }
+
+        public static void QuickFilter(this ISelenium selenium, int rowIndexBase1, int columnIndexBase1, int filterIndexBase0, string prefix)
+        {
+            string cellSelector = SearchTestExtensions.CellSelector(rowIndexBase1, columnIndexBase1, prefix);
+            selenium.ContextMenu(cellSelector);
+            selenium.Click("{0} span".Formato(cellSelector));
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#{0}tblFilters #{0}trFilter_{1}".Formato(prefix, filterIndexBase0)));
+        }
+
+        public static void ClearAllFilters(this ISelenium selenium)
+        {
+            ClearAllFilters(selenium, "");
+        }
+
+        public static void ClearAllFilters(this ISelenium selenium, string prefix)
+        {
+            selenium.Click("{0}btnClearAllFilters".Formato(prefix));
+        }
+
+        public static string RowSelector()
+        {
+            return RowSelector("");
+        }
+
+        public static string RowSelector(string prefix)
+        {
+            return "jq=#{0}tblResults > tbody > tr".Formato(prefix);
+        }
+
+        public static string RowSelector(int rowIndexBase1)
+        {
+            return RowSelector(rowIndexBase1, "");
+        }
+
+        public static string RowSelector(int rowIndexBase1, string prefix)
+        {
+            return "{0}:nth-child({1})".Formato(RowSelector(prefix), rowIndexBase1);
+        }
+
+        public static string CellSelector(int rowIndexBase1, int columnIndexBase1)
+        {
+            return CellSelector(rowIndexBase1, columnIndexBase1, "");
+        }
+
+        public static string CellSelector(int rowIndexBase1, int columnIndexBase1, string prefix)
+        {
+            return "{0} > td:nth-child({1})".Formato(RowSelector(rowIndexBase1, prefix), columnIndexBase1);
+        }
+
+        public static void SelectRowRadioButton(this ISelenium selenium, int rowIndexBase0)
+        {
+            SelectRowRadioButton(selenium, rowIndexBase0);
+        }
+
+        public static void SelectRowRadioButton(this ISelenium selenium, int rowIndexBase0, string prefix)
+        {
+            selenium.Click("{0} > input:radio".Formato(CellSelector(rowIndexBase0 + 1, 1, prefix)));
+        }
+
+        public static void SelectRowCheckbox(this ISelenium selenium, int rowIndexBase0)
+        {
+            SelectRowCheckbox(selenium, rowIndexBase0, "");
+        }
+
+        public static void SelectRowCheckbox(this ISelenium selenium, int rowIndexBase0, string prefix)
+        {
+            selenium.Click("{0}rowSelection_{1}".Formato(prefix, rowIndexBase0));
+        }
+
+        public static string TableHeaderSelector()
+        {
+            return TableHeaderSelector("");    
+        }
+
+        public static string TableHeaderSelector(string prefix)
+        {
+            return "jq=#{0}tblResults > thead > tr > th".Formato(prefix);
+        }
+
+        public static string TableHeaderSelector(int columnIndexBase1)
+        {
+            return TableHeaderSelector(columnIndexBase1, "");
+        }
+
+        public static string TableHeaderSelector(int columnIndexBase1, string prefix)
+        {
+            return "{0}:nth-child({1})".Formato(TableHeaderSelector(prefix), columnIndexBase1);
+        }
+
+        public static void TableHasColumn(this ISelenium selenium, string tokenName)
+        {
+            TableHasColumn(selenium, tokenName, "");
+        }
+        
+        public static void TableHasColumn(this ISelenium selenium, string tokenName, string prefix)
+        {
+            Assert.IsTrue(selenium.IsElementPresent("{0} > :hidden[value={1}]".Formato(TableHeaderSelector(prefix), tokenName)));
+        }
+
+        public static void AddColumn(this ISelenium selenium, string columnTokenName)
+        {
+            AddColumn(selenium, columnTokenName, "");
+        }
+
+        public static void AddColumn(this ISelenium selenium, string columnTokenName, string prefix)
+        {
+            selenium.Click("{0}btnAddColumn".Formato(prefix));
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("{0} > :hidden[value={1}]".Formato(TableHeaderSelector(prefix), columnTokenName)));
+        }
+
+        public static void Sort(this ISelenium selenium, int columnIndexBase1, bool ascending)
+        {
+            Sort(selenium, columnIndexBase1, ascending, "");
+        }
+
+        public static void Sort(this ISelenium selenium, int columnIndexBase1, bool ascending, string prefix)
+        {
+            selenium.Click(TableHeaderSelector(columnIndexBase1, prefix));
+            selenium.TableHeaderMarkedAsSorted(columnIndexBase1, ascending, true, prefix);
+        }
+
+        public static void SortMultiple(this ISelenium selenium, int columnIndexBase1, bool ascending)
+        {
+            SortMultiple(selenium, columnIndexBase1, ascending, "");
+        }
+
+        public static void SortMultiple(this ISelenium selenium, int columnIndexBase1, bool ascending, string prefix)
+        {
+            selenium.ShiftKeyDown();
+            selenium.Click(TableHeaderSelector(columnIndexBase1, prefix));
+            selenium.ShiftKeyUp();
+            selenium.TableHeaderMarkedAsSorted(columnIndexBase1, ascending, true, prefix);
+        }
+
+        public static void TableHeaderMarkedAsSorted(this ISelenium selenium, int columnIndexBase1, bool ascending, bool marked)
+        {
+            TableHeaderMarkedAsSorted(selenium, columnIndexBase1, ascending, marked, "");
+        }
+
+        public static void TableHeaderMarkedAsSorted(this ISelenium selenium, int columnIndexBase1, bool ascending, bool marked, string prefix)
+        {
+            bool isMarked = selenium.IsElementPresent("{0}.{1}".Formato(
+                TableHeaderSelector(columnIndexBase1, prefix),
+                ascending ? ".headerSortDown" : ".headerSortUp"));
+
+            if (marked)
+                Assert.IsTrue(isMarked);
+            else
+                Assert.IsFalse(isMarked);
+        }
+
+        public static bool IsElementInCell(this ISelenium selenium, int rowIndexBase1, int columnIndexBase1, string selector)
+        {
+            return IsElementInCell(selenium, rowIndexBase1, columnIndexBase1, selector, "");
+        }
+
+        public static bool IsElementInCell(this ISelenium selenium, int rowIndexBase1, int columnIndexBase1, string selector, string prefix)
+        {
+            return selenium.IsElementPresent(CellSelector(rowIndexBase1, columnIndexBase1, prefix) + " " + selector);
+        }
+
+        public static bool IsEntityInRow(this ISelenium selenium, int rowIndexBase1, string liteKey)
+        {
+            return IsEntityInRow(selenium, rowIndexBase1, liteKey, "");
+        }
+
+        public static bool IsEntityInRow(this ISelenium selenium, int rowIndexBase1, string liteKey, string prefix)
+        {
+            return selenium.IsElementPresent("{0}[data-entity='{1}']".Formato(RowSelector(rowIndexBase1, prefix), liteKey));
+        }
+
+        public static string EntityRowSelector(string liteKey)
+        {
+            return EntityRowSelector(liteKey, "");
+        }
+
+        public static string EntityRowSelector(string liteKey, string prefix)
+        {
+            return "{0}[data-entity='{1}']".Formato(RowSelector(prefix), liteKey);
+        }
+
+        public static void EntityClick(this ISelenium selenium, string liteKey)
+        {
+            EntityClick(selenium, liteKey, "");
+        }
+
+        public static void EntityClick(this ISelenium selenium, string liteKey, string prefix)
+        {
+            selenium.Click("{0} > td:first > a".Formato(EntityRowSelector(liteKey, prefix)));
+        }
+
+        public static string EntityContextMenuSelector(int rowIndexBase1)
+        {
+            return EntityContextMenuSelector(rowIndexBase1, "");
+        }
+
+        public static string EntityContextMenuSelector(int rowIndexBase1, string prefix)
+        {
+            return "{0} .searchCtxMenu".Formato(CellSelector(rowIndexBase1, 1));
+        }
+
+        public static void EntityContextMenu(this ISelenium selenium, int rowIndexBase1)
+        {
+            EntityContextMenu(selenium, rowIndexBase1, "");
+        }
+
+        public static void EntityContextMenu(this ISelenium selenium, int rowIndexBase1, string prefix)
+        {
+            selenium.ContextMenu(CellSelector(rowIndexBase1, 1, prefix));
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(EntityContextMenuSelector(rowIndexBase1, prefix)));
+        }
+
+        public static void EntityContextMenuClick(this ISelenium selenium, int rowIndexBase1, int contextualElementIndexBase1)
+        {
+            EntityContextMenuClick(selenium, rowIndexBase1, contextualElementIndexBase1, "");
+        }
+
+        public static void EntityContextMenuClick(this ISelenium selenium, int rowIndexBase1, int contextualElementIndexBase1, string prefix)
+        {
+            selenium.Click("{0} li:nth-child({1}) a".Formato(EntityContextMenuSelector(rowIndexBase1, prefix), contextualElementIndexBase1));
+        }
+
+        public static Func<bool> ThereAreNRows(this ISelenium selenium, int n, string prefix)
+        {
+            return () => selenium.IsElementPresent(RowSelector(n, prefix)) &&
+                         !selenium.IsElementPresent(RowSelector(n + 1, prefix));
+        }
+
+        public static Func<bool> ThereAreNRows(this ISelenium selenium, int n)
+        {
+            return () => selenium.IsElementPresent(RowSelector(n)) &&
+                         !selenium.IsElementPresent(RowSelector(n + 1));
+        }
+
+        public static string SearchCreateLocator()
+        {
+            return SearchCreateLocator("");
+        }
+
+        public static string SearchCreateLocator(string prefix)
+        {
+            return QueryButtonLocator(prefix + "qbSearchCreate");
+        }
+
+        public static void SearchCreate(this ISelenium selenium)
+        {
+            selenium.Click(SearchCreateLocator(""));
+        }
+
+        public static void SearchCreate(this ISelenium selenium, string prefix)
+        {
+            selenium.Click(SearchCreateLocator(prefix));
+        }
+
+        public static string QueryButtonLocator(string id) {
+            //check query-button class present is redundant for locating, but it must be there in the html so good for testing
+            return "jq=#{0}.query-button".Formato(id); 
+        }
+
+        public static string QueryMenuOptionLocator(string menuId, string optionId)
+        {
+            //check of menu and item classes is redundant but it must be in the html, so good for testing
+            return "jq=#{0}.query-button.dropdown ul.menu-button li.ui-menu-item a.query-button#{1}".Formato(menuId, optionId); 
+        }
+
+        public static string QueryMenuOptionLocatorByAttr(string menuId, string optionLocator)
+        {
+            //check of menu and item classes is redundant but it must be in the html, so good for testing
+            return "jq=#{0}.query-button.dropdown ul.menu-button li.ui-menu-item a.query-button[{1}]".Formato(menuId, optionLocator);
+        }
+
+        public static void QueryButtonClick(this ISelenium selenium, string id)
+        {
+            selenium.Click(QueryButtonLocator(id));
+        }
+
+        public static void QueryMenuOptionClick(this ISelenium selenium, string menuId, string optionId)
+        {
+            selenium.Click(QueryMenuOptionLocator(menuId, optionId));
+        }
+
+        public static void QueryMenuOptionPresent(this ISelenium selenium, string menuId, string optionId, bool present)
+        {
+            bool isPresent = selenium.IsElementPresent(QueryMenuOptionLocator(menuId, optionId));
+            if (present)
+                Assert.IsTrue(isPresent);
+            else
+                Assert.IsFalse(isPresent);
+        }
+
+        public static void QueryMenuOptionPresentByAttr(this ISelenium selenium, string menuId, string optionLocator, bool present)
+        {
+            bool isPresent = selenium.IsElementPresent(QueryMenuOptionLocatorByAttr(menuId, optionLocator));
+            if (present)
+                Assert.IsTrue(isPresent);
+            else
+                Assert.IsFalse(isPresent);
+        }
+    }
+}

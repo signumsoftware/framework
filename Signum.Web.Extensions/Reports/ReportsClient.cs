@@ -77,6 +77,7 @@ namespace Signum.Web.Reports
                         {
                             new ToolBarButton 
                             { 
+                                Id = TypeContextUtilities.Compose(prefix, "ebReportSave"),
                                 Text = Signum.Web.Properties.Resources.Save, 
                                 OnClick = Js.Submit(RouteHelper.New().Action("Save", "Report")).ToJS()
                             }
@@ -86,6 +87,7 @@ namespace Signum.Web.Reports
                         {
                             buttons.Add(new ToolBarButton
                             {
+                                Id = TypeContextUtilities.Compose(prefix, "ebReportDelete"),
                                 Text = Resources.Delete,
                                 OnClick = Js.Confirm(Resources.AreYouSureOfDeletingReport0.Formato(entity.DisplayName),
                                                     Js.AjaxCall(RouteHelper.New().Action("Delete", "Report"), "{{excelReport:{0}}}".Formato(entity.Id), null)).ToJS(),
@@ -93,6 +95,7 @@ namespace Signum.Web.Reports
 
                             buttons.Add(new ToolBarButton
                             {
+                                Id = TypeContextUtilities.Compose(prefix, "ebReportDownload"),
                                 Text = Resources.Download,
                                 OnClick = "window.open('" + RouteHelper.New().Action("DownloadTemplate", "Report", new { excelReport = entity.Id } ) + "');",
                             });
@@ -116,9 +119,10 @@ namespace Signum.Web.Reports
 
             ToolBarButton plain = new ToolBarButton
             {
+                Id = TypeContextUtilities.Compose(prefix, "qbToExcelPlain"),
                 AltText = Resources.ExcelReport,
                 Text = Resources.ExcelReport,
-                OnClick = "SubmitOnly('{0}', $.extend({{userQuery:'{1}'}},new FindNavigator({{prefix:'{2}'}}).requestDataForSearch()));".Formato(RouteHelper.New().Action("ToExcelPlain", "Report"), (idCurrentUserQuery > 0 ? (int?)idCurrentUserQuery : null), prefix),
+                OnClick = Js.SubmitOnly(RouteHelper.New().Action("ToExcelPlain", "Report"), "$.extend({{userQuery:'{0}'}},new FindNavigator({{prefix:'{1}'}}).requestDataForSearch())".Formato((idCurrentUserQuery > 0 ? (int?)idCurrentUserQuery : null), prefix)).ToJS(),
                 DivCssClass = ToolBarButton.DefaultQueryCssClass
             };
 
@@ -142,7 +146,7 @@ namespace Signum.Web.Reports
                         {
                             AltText = report.ToStr,
                             Text = report.ToStr,
-                            OnClick = "SubmitOnly('{0}', $.extend({{excelReport:'{1}'}},new FindNavigator({{prefix:'{2}'}}).requestDataForSearch()));".Formato(RouteHelper.New().Action("ExcelReport", "Report"), report.Id, prefix),
+                            OnClick = Js.SubmitOnly(RouteHelper.New().Action("ExcelReport", "Report"), "$.extend({{excelReport:'{0}'}},new SF.FindNavigator({{prefix:'{1}'}}).requestDataForSearch())".Formato(report.Id, prefix)).ToJS(),
                             DivCssClass = ToolBarButton.DefaultQueryCssClass
                         });
                     }
@@ -152,6 +156,7 @@ namespace Signum.Web.Reports
 
                 items.Add(new ToolBarButton
                 {
+                    Id = TypeContextUtilities.Compose(prefix, "qbReportAdminister"),
                     AltText = Resources.ExcelAdminister,
                     Text = Resources.ExcelAdminister,
                     OnClick = Js.SubmitOnly(RouteHelper.New().Action("Administer", "Report"), "{{webQueryName:'{0}'}}".Formato(Navigator.ResolveWebQueryName(queryName))).ToJS(),
@@ -162,6 +167,7 @@ namespace Signum.Web.Reports
                 {
                     new ToolBarMenu
                     { 
+                        Id = TypeContextUtilities.Compose(prefix, "tmExcel"),
                         AltText = "Excel", 
                         Text = "Excel",
                         DivCssClass = ToolBarButton.DefaultQueryCssClass,

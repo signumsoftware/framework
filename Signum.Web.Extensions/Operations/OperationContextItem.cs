@@ -59,14 +59,6 @@ namespace Signum.Web.Operations
 
         private static MvcHtmlString IndividualOperationToString(this OperationsContextualItem oci)
         {
-            if (oci.ImgSrc.HasText())
-            {
-                if (oci.HtmlProps.ContainsKey("style"))
-                    oci.HtmlProps["style"] = "background:transparent url(" + oci.ImgSrc + ")  no-repeat scroll -4px top; text-indent:12px; " + oci.HtmlProps["style"].ToString();
-                else
-                    oci.HtmlProps["style"] = "background:transparent url(" + oci.ImgSrc + ")  no-repeat scroll -4px top; text-indent:12px;";
-            }
-
             if (oci.Enabled)
                 oci.HtmlProps.Add("onclick", oci.OnClick);
 

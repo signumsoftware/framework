@@ -20,7 +20,6 @@ namespace Signum.Windows.Reports
                 QueryClient.Start();
                 Navigator.AddSetting(new EntitySettings<UserQueryDN>(EntityType.Default));
                 SearchControl.GetCustomMenuItems += (qn, type) => new UserQueryMenuItem();
-                LiteFilterValueConverter.TryParseLite = Server.TryParseLite;
             }
         }
 

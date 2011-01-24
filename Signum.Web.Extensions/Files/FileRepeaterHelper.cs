@@ -59,7 +59,7 @@ namespace Signum.Web.Files
                         helper.Button(itemTC.Compose("btnRemove"),
                                       "x",
                                       "ERepOnRemoving({0}, '{1}');".Formato(fileRepeater.ToJS(), itemTC.ControlID),
-                                      "lineButton remove",
+                                      "sf-line-button remove",
                                       new Dictionary<string, object> { { "title", fileRepeater.RemoveElementLinkText } }));
 
                 //Render FileLine for the current item

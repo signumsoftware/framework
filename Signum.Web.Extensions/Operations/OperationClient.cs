@@ -74,10 +74,12 @@ namespace Signum.Web.Operations
                             (oi.OperationSettings == null || (oi.OperationSettings != null && oi.OperationSettings.GroupInMenu)));
             if (constructFroms.Any())
             {
+                string createText = Resources.Create;
                 buttons.Add(new ToolBarMenu
                 {
-                    AltText = Resources.Create,
-                    Text = Resources.Create,
+                    Id = "tmConstructors",
+                    AltText = createText,
+                    Text = createText,
                     DivCssClass = ToolBarButton.DefaultEntityDivCssClass,
                     Items = constructFroms.Select(ctx => OperationButtonFactory.Create(ctx)).ToList()
                 });
@@ -114,10 +116,12 @@ namespace Signum.Web.Operations
             var groupedConstructs = contexts.Where(oi => oi.OperationSettings == null || (oi.OperationSettings != null && oi.OperationSettings.GroupInMenu));
             if (groupedConstructs.Any())
             {
+                string createText = Resources.Create;
                 buttons.Add(new ToolBarMenu
                 {
-                    AltText = Resources.Create,
-                    Text = Resources.Create,
+                    Id = "tmConstructors",
+                    AltText = createText,
+                    Text = createText,
                     DivCssClass = ToolBarButton.DefaultQueryCssClass,
                     Items = groupedConstructs.Select(ctx => OperationButtonFactory.Create(ctx)).ToList()
                 });

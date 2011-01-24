@@ -127,15 +127,18 @@ namespace Signum.Web.Queries
                     {
                         new ToolBarButton 
                         { 
+                            Id = TypeContextUtilities.Compose(prefix, "ebUserQuerySave"),
                             Text = Signum.Web.Properties.Resources.Save, 
                             OnClick = JsValidator.EntityIsValid(prefix, Js.Submit(RouteHelper.New().Action("SaveUserQuery", "Queries"))).ToJS()
                         },
                         new ToolBarButton
                         {
+                            Id = TypeContextUtilities.Compose(prefix, "ebUserQueryDelete"),
                             Text = Resources.Delete,
+                            Enabled = !entity.IsNew,
                             OnClick = Js.Confirm(Resources.AreYouSureOfDeletingQuery0.Formato(entity.DisplayName), 
                                                 Js.SubmitOnly(RouteHelper.New().Action("DeleteUserQuery", "Queries"), "{{id:{0}}}".Formato(entity.IdOrNull.TryToString()))).ToJS(),
-                            Enabled = !entity.IsNew
+                            
                         }
                     };
                 });
@@ -166,32 +169,39 @@ namespace Signum.Web.Queries
 
             foreach (var uq in UserQueryLogic.GetUserQueries(queryName))
             {
+                string uqName = uq.InDB().Select(q => q.DisplayName).SingleOrDefault();
                 items.Add(new ToolBarButton
                 {
-                    Text = uq.InDB().Select(q => q.DisplayName).SingleOrDefault(),
+                    Text = uqName,
+                    AltText = uqName,
                     OnClick = Js.Submit(RouteHelper.New().Action("ViewUserQuery", "Queries", new { id = uq.Id })).ToJS(),
-                    DivCssClass = idCurrentUserQuery == uq.Id ? "SelectedUserQuery" : ""
+                    DivCssClass = ToolBarButton.DefaultQueryCssClass + (idCurrentUserQuery == uq.Id ? " SelectedUserQuery" : "")
                 });
             }
 
             if (items.Count > 0)
                 items.Add(new ToolBarSeparator());
 
+            string uqNewText = Signum.Web.Properties.Resources.New;
             items.Add(new ToolBarButton
             {
-                AltText = Signum.Web.Properties.Resources.New,
-                Text = Signum.Web.Properties.Resources.New,
-                ImgSrc = "signum/images/lineButtons.gif",
-                OnClick = Js.SubmitOnly(RouteHelper.New().Action("CreateUserQuery", "Queries"), JsFindNavigator.JsRequestData(new JsFindOptions{Prefix = prefix})).ToJS()
+                Id = TypeContextUtilities.Compose(prefix, "qbUserQueryNew"),
+                AltText = uqNewText,
+                Text = uqNewText,
+                OnClick = Js.SubmitOnly(RouteHelper.New().Action("CreateUserQuery", "Queries"), JsFindNavigator.JsRequestData(new JsFindOptions { Prefix = prefix })).ToJS(),
+                DivCssClass = ToolBarButton.DefaultQueryCssClass
             });
+
 
             if (idCurrentUserQuery > 0)
             {
                 items.Add(new ToolBarButton
                 {
+                    Id = TypeContextUtilities.Compose(prefix, "qbUserQueryEdit"),
                     AltText = "Edit",
                     Text = "Edit",
-                    OnClick = Js.SubmitOnly(RouteHelper.New().Action("EditUserQuery", "Queries"), "{{id:{0}}}".Formato(idCurrentUserQuery)).ToJS()
+                    OnClick = Js.SubmitOnly(RouteHelper.New().Action("EditUserQuery", "Queries"), "{{id:{0}}}".Formato(idCurrentUserQuery)).ToJS(),
+                    DivCssClass = ToolBarButton.DefaultQueryCssClass
                 });
             }
 
@@ -199,7 +209,7 @@ namespace Signum.Web.Queries
             {
                 new ToolBarMenu
                 { 
-                    Id = TypeContextUtilities.Compose(prefix, "uqmenu"),
+                    Id = TypeContextUtilities.Compose(prefix, "tmUserQueries"),
                     AltText = "User Queries", 
                     Text = "User Queries",
                     DivCssClass = ToolBarButton.DefaultQueryCssClass,
@@ -250,7 +260,6 @@ namespace Signum.Web.Queries
 
         public static UserQueryDN ToUserQuery(this FindOptions findOptions, Lite<IdentifiableEntity> related)
         {
-
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
             var tuple = QueryColumnDN.SmartColumns(findOptions.ColumnOptions.Select(co => co.ToColumn(qd)).ToList(), qd.Columns);
 

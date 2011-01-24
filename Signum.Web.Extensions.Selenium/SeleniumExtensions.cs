@@ -6,7 +6,7 @@ using System.Threading;
 using Selenium;
 using System.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Signum.Web.Extensions.Selenium;
+using Signum.Utilities;
 
 namespace Signum.Web.Selenium
 {
@@ -19,7 +19,7 @@ namespace Signum.Web.Selenium
 
     public static class SeleniumExtensions
     {
-        public static WebExplorer Explorer = WebExplorer.Chrome;
+        public static WebExplorer Explorer = WebExplorer.Firefox;
 
         public static Process LaunchSeleniumProcess()
         {
@@ -97,7 +97,8 @@ namespace Signum.Web.Selenium
             }
         }
 
-        public const string DefaultPageLoadTimeout = "100000"; // 5 mins // "100000"; //1.66666667 minutes
+        public const string DefaultPageLoadTimeout = "25000"; // 0.4 mins
+        //public const string DefaultPageLoadTimeout = "100000"; //1.66666667 minutes
 
         public const int DefaultAjaxTimeout = 100000;
 
@@ -120,24 +121,66 @@ namespace Signum.Web.Selenium
             Assert.IsTrue(condition());
         }
 
-        public static bool IsElementInCell(this ISelenium selenium, int rowIndexBase1, int columnIndexBase1, string selector)
+        public static string PopupSelector(string prefix)
         {
-            return IsElementInCell(selenium, rowIndexBase1, columnIndexBase1, selector, "");
+            return "jq=#{0}Temp".Formato(prefix);
         }
 
-        public static bool IsElementInCell(this ISelenium selenium, int rowIndexBase1, int columnIndexBase1, string selector, string prefix)
+        public static void PopupCancel(this ISelenium selenium, string prefix)
         {
-            return selenium.IsElementPresent("jq=#" + prefix + "tblResults > tbody > tr:nth-child(" + rowIndexBase1 + ") > td:nth-child(" + columnIndexBase1 + ") " + selector);
+            selenium.Click("jq=span.ui-dialog-title[id$='{0}Temp'] + a".Formato(prefix));
+            Assert.IsFalse(selenium.IsElementPresent("{0}:visible".Formato(PopupSelector(prefix))));
         }
 
-        public static bool IsEntityInRow(this ISelenium selenium, int rowIndexBase1, string liteKey)
+        public static void PopupOk(this ISelenium selenium, string prefix)
         {
-            return IsEntityInRow(selenium, rowIndexBase1, liteKey, "");
+            selenium.Click("jq=#{0}btnOk".Formato(prefix));
+            selenium.WaitAjaxFinished(() => !selenium.IsElementPresent(PopupSelector(prefix)));
         }
 
-        public static bool IsEntityInRow(this ISelenium selenium, int rowIndexBase1, string liteKey, string prefix)
+        public static void MainEntityHasId(this ISelenium selenium)
         {
-            return selenium.IsElementPresent("jq=#" + prefix + "tblResults > tbody > tr:nth-child(" + rowIndexBase1 + ")[data-entity='" + liteKey + "']");
-        }        
+            Assert.IsTrue(selenium.IsElementPresent("jq=.entityId span"));
+        }
+
+        public static string RuntimeInfoSelector(string prefix)
+        {
+            return RuntimeInfoSelector(prefix, -1);
+        }
+
+        public static string RuntimeInfoSelector(string prefix, int elementIndexBase0)
+        {
+            if (elementIndexBase0 != -1)
+                prefix += elementIndexBase0 + "_";
+
+            return "jq=#{0}sfRuntimeInfo".Formato(prefix);
+        }
+
+        public static string EntityButtonLocator(string buttonId)
+        {
+            //check of css class is redundant but it must be in the html, so good for testing
+            return "jq=#{0}.entity-button".Formato(buttonId); 
+        }
+
+        public static string EntityMenuOptionLocator(string menuId, string optionId)
+        {
+            //check of menu and item classes is redundant but it must be in the html, so good for testing
+            return "jq=#{0}.entity-button.dropdown ul.menu-button li.ui-menu-item a.entity-button#{1}".Formato(menuId, optionId);
+        }
+
+        public static void EntityButtonSaveClick(this ISelenium selenium)
+        {
+            EntityButtonClick(selenium, "ebSave");
+        }
+
+        public static void EntityButtonClick(this ISelenium selenium, string idButton)
+        {
+            selenium.Click(EntityButtonLocator(idButton));
+        }
+
+        public static void EntityMenuOptionClick(this ISelenium selenium, string menuId, string optionId)
+        {
+            selenium.Click(EntityMenuOptionLocator(menuId, optionId));
+        }
     }
 }

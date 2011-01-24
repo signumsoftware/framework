@@ -74,7 +74,7 @@ namespace Signum.Web.Files
 
         public override string ToJS()
         {
-            return "new FLine(" + this.OptionsJS() + ")";
+            return "new SF.FLine(" + this.OptionsJS() + ")";
         }
 
         protected override JsOptionsBuilder OptionsJSInternal()
@@ -88,14 +88,14 @@ namespace Signum.Web.Files
             return result;
         }
 
-        protected override string DefaultRemoving()
+        protected override string DefaultRemove()
         {
             return FileLine.JsRemoving(this).ToJS();
         }
 
         public static JsInstruction JsRemoving(FileLine fline)
         {
-            return new JsInstruction(() => "FLineOnRemoving({0})".Formato(fline.ToJS()));
+            return new JsInstruction(() => "{0}.remove()".Formato(fline.ToJS()));
         }
 
         protected string DefaultDownloading()
@@ -108,7 +108,7 @@ namespace Signum.Web.Files
             if (fline.DownloadUrl == null)
                 fline.DownloadUrl = RouteHelper.New().Action("Download", "File");
 
-            return new JsInstruction(() => "javascript:FLineOnDownloading({0})".Formato(fline.ToJS()));
+            return new JsInstruction(() => "javascript:{0}.download()".Formato(fline.ToJS()));
         }
 
         protected string DefaultOnChanged()
@@ -121,20 +121,20 @@ namespace Signum.Web.Files
             if (fline.UploadUrl == null)
                 fline.UploadUrl = RouteHelper.New().Action("Upload", "File");
 
-            return new JsInstruction(() => "javascript:FLineOnChanged({0})".Formato(fline.ToJS()));
+            return new JsInstruction(() => "javascript:{0}.onChanged()".Formato(fline.ToJS()));
         }
 
-        protected override string DefaultFinding()
+        protected override string DefaultFind()
         {
             return null;
         }
 
-        protected override string DefaultViewing()
+        protected override string DefaultView()
         {
             return null;
         }
 
-        protected override string DefaultCreating()
+        protected override string DefaultCreate()
         {
             return null;
         }

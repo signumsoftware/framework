@@ -41,6 +41,46 @@ namespace Signum.Web.Auth
         public static event Func<Controller, string> OnUserLoggedDefaultReturn;
         public const string SessionUserKey = "user";
 
+        [AcceptVerbs(HttpVerbs.Post)]
+        public ActionResult SaveNewUser(string prefix)
+        {
+            var context = this.ExtractEntity<UserDN>(prefix).ApplyChanges(this.ControllerContext, prefix, UserMapping.NewUser).ValidateGlobal();
+
+            if (context.GlobalErrors.Any())
+            { 
+                this.ModelState.FromContext(context);
+                return Navigator.ModelState(ModelState);
+            }
+
+            context.Value.Execute(UserOperation.SaveNew);
+            return Navigator.RedirectUrl(Navigator.ViewRoute(context.Value));
+        }
+
+        [AcceptVerbs(HttpVerbs.Post)]
+        public ActionResult SaveUserWithNewPwd(string prefix)
+        {
+            var context = this.ExtractEntity<UserDN>(prefix).ApplyChanges(this.ControllerContext, prefix, true);
+            ViewData["NewPwd"] = true;
+            return Navigator.NormalControl(this, context.Value);
+        }
+
+        [AcceptVerbs(HttpVerbs.Post)]
+        public ActionResult SaveUser(string prefix)
+        {
+            var context = (Request.Form.AllKeys.Any(k => k.EndsWith(UserMapping.NewPasswordKey))) ?
+                this.ExtractEntity<UserDN>(prefix).ApplyChanges(this.ControllerContext, prefix, UserMapping.NewUser).ValidateGlobal() :
+                this.ExtractEntity<UserDN>(prefix).ApplyChanges(this.ControllerContext, prefix, true).ValidateGlobal();
+
+            if (context.GlobalErrors.Any())
+            { 
+                this.ModelState.FromContext(context);
+                return Navigator.ModelState(ModelState);
+            }
+
+            context.Value.Execute(UserOperation.SaveNew);
+            return Navigator.RedirectUrl(Navigator.ViewRoute(context.Value));
+        }
+
         #region "Change password"
         public ActionResult ChangePassword()
         {
@@ -94,57 +134,7 @@ namespace Signum.Web.Auth
 
         #endregion
 
-        //[AcceptVerbs(HttpVerbs.Post)]
-        //public ActionResult ValidateNewUser()
-        //{
-        //    var context = this.ExtractEntity<UserDN>().ApplyChanges(this.ControllerContext, "", true);
-        //    context.Value.PasswordHash = Security.EncodePassword(GenerateRandomPassword());
-        //    context.ValidateGlobal();
-
-        //    this.ModelState.FromContext(context);
-        //    return Navigator.ModelState(ModelState);
-        //}
-
-        [AcceptVerbs(HttpVerbs.Post)]
-        public ActionResult SaveNewUser(string prefix)
-        {
-            var context = this.ExtractEntity<UserDN>(prefix).ApplyChanges(this.ControllerContext, prefix, UserMapping.NewUser).ValidateGlobal();
-
-            if (context.GlobalErrors.Any())
-            { 
-                this.ModelState.FromContext(context);
-                return Navigator.ModelState(ModelState);
-            }
-
-            context.Value.Execute(UserOperation.SaveNew);
-            return Navigator.RedirectUrl(Navigator.ViewRoute(context.Value));
-        }
-
-        [AcceptVerbs(HttpVerbs.Post)]
-        public ActionResult SaveUserWithNewPwd(string prefix)
-        {
-            var context = this.ExtractEntity<UserDN>(prefix).ApplyChanges(this.ControllerContext, prefix, true);
-            ViewData["NewPwd"] = true;
-            return Navigator.NormalControl(this, context.Value);
-        }
-
-        [AcceptVerbs(HttpVerbs.Post)]
-        public ActionResult SaveUser(string prefix)
-        {
-            var context = (Request.Form.AllKeys.Any(k => k.EndsWith(UserMapping.NewPasswordKey))) ?
-                this.ExtractEntity<UserDN>(prefix).ApplyChanges(this.ControllerContext, prefix, UserMapping.NewUser).ValidateGlobal() :
-                this.ExtractEntity<UserDN>(prefix).ApplyChanges(this.ControllerContext, prefix, true).ValidateGlobal();
-
-            if (context.GlobalErrors.Any())
-            { 
-                this.ModelState.FromContext(context);
-                return Navigator.ModelState(ModelState);
-            }
-
-            context.Value.Execute(UserOperation.SaveNew);
-            return Navigator.RedirectUrl(Navigator.ViewRoute(context.Value));
-        }
-        #region "Reset"
+        #region "Reset password"
 
         [AcceptVerbs(HttpVerbs.Get)]
         public ActionResult ResetPassword()
@@ -474,7 +464,7 @@ namespace Signum.Web.Auth
         #region Register User (Commented)
 
         //[AcceptVerbs(HttpVerbs.Post)]
-        //public ContentResult RegisterUserValidate(string prefixToIgnore)
+        //public ContentResult RegisterUserValidate()
         //{
         //    UserDN u = (UserDN)Navigator.ExtractEntity(this, Request.Form);
 
@@ -618,9 +608,6 @@ namespace Signum.Web.Auth
                 System.Web.HttpContext.Current.Response.Cookies[AuthClient.CookieName].Expires = DateTime.Now.AddDays(-10);
 
             System.Web.HttpContext.Current.Session.Abandon();
-       
-
         }
-
     }
 }

@@ -67,7 +67,7 @@ function treeView()
 }
 
 function openDialog(controllerUrl, data) {
-    var navigator = new ViewNavigator({
+    var navigator = new SF.ViewNavigator({
             controllerUrl: controllerUrl,
             requestExtraJsonData: data,
             type: 'PropertyRulePack',
@@ -79,5 +79,5 @@ function openDialog(controllerUrl, data) {
 }
 
 function postDialog(controllerUrl, prefix) {
-    new PartialValidator({ controllerUrl: controllerUrl, prefix: prefix }).trySave();
+    new SF.PartialValidator({ controllerUrl: controllerUrl, prefix: prefix }).trySave();
 }

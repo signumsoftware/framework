@@ -31,8 +31,6 @@ namespace Signum.Web.ControlPanel
                     new EntitySettings<ControlPanelDN>(EntityType.Default) { PartialViewName = e => ViewPrefix.Formato("ControlPanelAdmin") },
                     new EmbeddedEntitySettings<PanelPart>() { PartialViewName = e => ViewPrefix.Formato("PanelPart") },
                     
-                    //new EntitySettings<SearchControlPartDN>(EntityType.NotSaving) { PartialViewName = e => RouteHelper.AreaView("SearchControlPart" },
-                    
                     new EntitySettings<CountSearchControlPartDN>(EntityType.Default) { PartialViewName = e => ViewPrefix.Formato("CountSearchControlPart") },
                     new EmbeddedEntitySettings<CountUserQueryElement>() { PartialViewName = e => ViewPrefix.Formato("CountUserQueryElement") },
                     

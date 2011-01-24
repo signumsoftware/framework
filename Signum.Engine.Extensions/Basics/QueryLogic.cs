@@ -10,6 +10,7 @@ using System.Reflection;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities;
 using Signum.Utilities.Reflection;
+using Signum.Entities.Reports;
 
 namespace Signum.Engine.Basics
 {
@@ -31,6 +32,8 @@ namespace Signum.Engine.Basics
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
+                LiteFilterValueConverter.ResolveType = TypeLogic.TryGetType;
+                LiteFilterValueConverter.TypeCleanName = TypeLogic.GetCleanName;
 
                // QueryManagers = queryManagers;
                 sb.Schema.Initializing[InitLevel.Level0SyncEntities] += Schema_Initializing;

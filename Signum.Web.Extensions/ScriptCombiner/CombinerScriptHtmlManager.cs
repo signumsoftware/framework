@@ -15,7 +15,7 @@ namespace Signum.Web.ScriptCombiner
         protected static string controllerCssRoute = "~/combine/css/{0}";
         protected static string controllerJsRoute = "~/combine/js/{0}";
 
-        public override string CombinedScript(HtmlHelper html, string[] files, ScriptType scriptType)
+        public override MvcHtmlString CombinedScript(HtmlHelper html, string[] files, ScriptType scriptType)
         {
             if (files.Empty())
                 return null;
@@ -23,7 +23,7 @@ namespace Signum.Web.ScriptCombiner
             var key = GetKey(files, scriptType); 
 
             string url = (scriptType == ScriptType.Css ? controllerCssRoute : controllerJsRoute).Formato(key);
-            return (scriptType == ScriptType.Css ? cssElement : jsElement).Formato(Subdomain(url));
+            return MvcHtmlString.Create((scriptType == ScriptType.Css ? cssElement : jsElement).Formato(Subdomain(url)));
         }
 
         private string GetKey(string[] files, ScriptType scriptType)
