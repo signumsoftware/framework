@@ -37,7 +37,7 @@ namespace Signum.Web.PortableAreas
                                where att.VirtualPath.StartsWith(prefix, StringComparison.InvariantCultureIgnoreCase)
                                select new { att.VirtualPath, Type = t });
 
-            Views.AddRange(viewsInArea, a => a.VirtualPath, a => a.Type, "compiled views"); 
+            Views.AddRange(viewsInArea, a => a.VirtualPath, a => a.Type, "compiled views");
         }
 
         public static Type GetCompiledType(string virtualPath)

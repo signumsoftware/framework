@@ -450,9 +450,9 @@ namespace Signum.Web
         public static void RegisterArea(Type clientType, string areaName)
         {
             CompiledViews.RegisterArea(clientType.Assembly, areaName);
-            PortableAreaControllers.RegisterControllersIn(clientType, areaName);
+            PortableAreaControllers.RegisterControllersLike(clientType, areaName);
 
-            EmbeddedFilesRespository rep = new EmbeddedFilesRespository(clientType.Assembly, areaName);
+            EmbeddedFilesRepository rep = new EmbeddedFilesRepository(clientType.Assembly, areaName);
             if (!rep.IsEmpty)
                 FileRepositoryManager.Register(rep);
         }
