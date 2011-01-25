@@ -224,17 +224,6 @@ namespace Signum.Web
                 .ToHtmlSelf();
         }
 
-//        public static IHtmlString AutoCompleteExtender(this HtmlHelper html, string ddlName, Type[] types, string entityIdFieldName,
-//                                                  string controllerUrl, string onSuccess)
-//        {
-//            return html.DynamicJs("~/signum/Scripts/SF_autocomplete.js").Callback(@"function () {{
-//                            new SF.Autocompleter(""{0}"", ""{1}"", {{
-//	                            entityIdFieldName: ""{2}"",
-//	                            extraParams: {{types: ""{3}""}}}});
-//                        }}"
-//                    .Formato(ddlName, controllerUrl, entityIdFieldName, types.ToString(t => Navigator.ResolveWebTypeName(t), ","))); 
-//        }
-
         public static string PropertyNiceName<R>(this HtmlHelper html, Expression<Func<R>> property)
         {
             return ReflectionTools.BasePropertyInfo(property).NiceName();

@@ -419,6 +419,7 @@ namespace Signum.Web
         {
             return Manager.IsFindable(queryName);
         }
+
         public static ContentResult ModelState(ModelStateData modelStateData)
         {
             return Manager.ModelState(modelStateData);

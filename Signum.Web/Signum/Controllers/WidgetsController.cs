@@ -29,7 +29,7 @@ namespace Signum.Web.Controllers
             ViewDataDictionary vdd = new ViewDataDictionary();
             vdd.Add("WidgetNode", NoteWidgetHelper.CreateWidget(entity));
             HtmlHelper helper = SignumController.CreateHtmlHelper(this);
-            return helper.Partial("Views/Shared/WidgetView", vdd);
+            return helper.Partial("WidgetView", vdd);
         }
         #endregion
 
@@ -48,7 +48,7 @@ namespace Signum.Web.Controllers
             ViewDataDictionary vdd = new ViewDataDictionary();
             vdd.Add("WidgetNode", AlertWidgetHelper.CreateWidget(entity));
             HtmlHelper helper = SignumController.CreateHtmlHelper(this);
-            return helper.Partial("Views/Shared/WidgetView", vdd);
+            return helper.Partial("WidgetView", vdd);
         }
         #endregion
     }
