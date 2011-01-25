@@ -48,22 +48,6 @@ function RefreshDocumentos(urlController, typeName){
     });
 }
    
-function MostrarMenu() {
-        $("#content").removeClass('grid_16').addClass('grid_13'); 
-        $("#toggle-section-menu").removeClass('hidden').addClass('visible');
-        $("#mostrarMenu").removeClass('visible').addClass('hidden');
-        $(".menu").slideLeftShow();                      
-}
-
-function MostrarQuicklinks () {
-    $("#main").removeClass('hideQuicklinks');
-
-}      
-
-function OcultarQuicklinks () {
-    $("#main").addClass('hideQuicklinks');
-}       
-
 function initTooltips(node){	      
     $((node ? node : "") + '.tooltipped').each(function(){
       

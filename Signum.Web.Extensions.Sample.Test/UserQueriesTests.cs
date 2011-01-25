@@ -36,58 +36,155 @@ namespace Signum.Web.Extensions.Sample.Test
         }
 
         [TestMethod]
-        public void UQ_Create()
+        public void UserQuery_Create()
         {
-            try
-            {
-                CheckLoginAndOpen("/Signum.Web.Extensions.Sample/Find/Album");
+            string pathAlbumSearch = FindRoute("Album");
 
-                //add filter
-                selenium.Select("ddlTokens_0", "label=Year");
-                selenium.Click("btnAddFilter");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("ddlSelector_0"));
-                selenium.Select("ddlSelector_0", "value=GreaterThan");
-                selenium.Type("value_0", "2000");
+            CheckLoginAndOpen(pathAlbumSearch);
 
-                //add user column
-                selenium.Select("ddlTokens_0", "label=Label");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("lblddlTokens_1"));
-                selenium.Click("lblddlTokens_1");
-                selenium.Select("ddlTokens_1", "label=Owner");
-                selenium.Click("btnAddColumn");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=th > :hidden[value=Label.Owner]"));
+            //add filter of simple value
+            selenium.FilterSelectToken(0, "label=Year", false);
+            selenium.AddFilter(0);
+            selenium.FilterSelectOperation(0, "value=GreaterThan");
+            selenium.Type("value_0", "2000");
 
-                //add order
-                string yearth = "jq=th:nth-child(6)";
-                selenium.Click(yearth); //Year
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=th.headerSortDown"));
-                selenium.Click(yearth);
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=th.headerSortUp"));
-                
-                //create user query
-                selenium.Click("jq=#uqmenu li:first > a");
-                selenium.WaitForPageToLoad(PageLoadTimeout);
-                selenium.Type("DisplayName", "Last albums");
-                selenium.Click("link=Guardar");
-                selenium.WaitForPageToLoad(PageLoadTimeout);
+            //add filter of lite
+            selenium.FilterSelectToken(0, "label=Label", true);
+            selenium.AddFilter(0);
+            selenium.LineFindAndSelectElements("value_1_", false, new int[] { 1 });
 
-                //check new user query is in the dropdownlist
-                selenium.Open("/Signum.Web.Extensions.Sample/Find/Album");
-                selenium.WaitForPageToLoad(PageLoadTimeout);
-                Assert.IsTrue(selenium.IsElementPresent("//a[text()='Last albums']"));
-                
-                //load user query
-                selenium.Click("//a[text()='Last albums']");
-                selenium.WaitForPageToLoad(PageLoadTimeout);
-                Assert.IsTrue(selenium.IsElementPresent("value_0"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=th > :hidden[value=Label.Owner]"));
-                Assert.IsTrue(selenium.IsElementPresent(yearth + ".headerSortUp"));
-            }
-            catch (Exception)
-            {
-                Common.MyTestCleanup();
-                throw;
-            }
+            //add user column
+            selenium.FilterSelectToken(0, "label=Label", true);
+            selenium.ExpandTokens(1);
+            selenium.FilterSelectToken(1, "label=Owner", true);
+            selenium.AddColumn("Label.Owner");
+
+            int yearCol = 6;
+
+            //add order
+            selenium.Sort(yearCol, true);
+            selenium.Sort(yearCol, false);
+            
+            string uqMenuId = "tmUserQueries";
+            string uqCreateId = "qbUserQueryNew";
+
+            //create user query
+            selenium.QueryMenuOptionClick(uqMenuId, uqCreateId);
+            selenium.WaitForPageToLoad(PageLoadTimeout);
+            selenium.Type("DisplayName", "Last albums");
+
+            string saveId = "ebUserQuerySave";
+            
+            selenium.EntityButtonClick(saveId);
+            selenium.WaitForPageToLoad(PageLoadTimeout);
+
+            //check new user query is in the dropdownlist
+            string uqOptionSelector = "title='Last albums'";
+            selenium.Open(pathAlbumSearch);
+            selenium.WaitForPageToLoad(PageLoadTimeout);
+            selenium.QueryMenuOptionPresentByAttr(uqMenuId, uqOptionSelector, true);
+
+            //load user query
+            selenium.Click(SearchTestExtensions.QueryMenuOptionLocatorByAttr(uqMenuId, uqOptionSelector));
+            selenium.WaitForPageToLoad(PageLoadTimeout);
+            //Filter present
+            Assert.IsTrue(selenium.IsElementPresent("value_0"));
+            Assert.IsTrue(selenium.IsElementPresent(LinesTestExtensions.EntityLineToStrSelector("value_1_")));
+            //Column present
+            selenium.TableHasColumn("Label.Owner");
+            //Sort present
+            selenium.TableHeaderMarkedAsSorted(yearCol, false, true);
+        }
+
+        [TestMethod]
+        public void UserQuery_Edit()
+        {
+            string pathAlbumSearch = FindRoute("Album");
+
+            CheckLoginAndOpen(pathAlbumSearch);
+
+            string uqMenuId = "tmUserQueries";
+            string uqOptionSelector = "title='Last albums'";
+            string editId = "qbUserQueryEdit";
+
+            //load user query
+            selenium.Click(SearchTestExtensions.QueryMenuOptionLocatorByAttr(uqMenuId, uqOptionSelector));
+            selenium.WaitForPageToLoad(PageLoadTimeout);
+
+            //edit it
+            selenium.QueryMenuOptionClick(uqMenuId, editId);
+            selenium.WaitForPageToLoad(PageLoadTimeout);
+            selenium.LineRemove("Filters_1_");
+
+            //save it
+            string saveId = "ebUserQuerySave";
+            selenium.EntityButtonClick(saveId);
+            selenium.WaitForPageToLoad(PageLoadTimeout);
+
+            //check new user query is in the dropdownlist
+            selenium.Open(pathAlbumSearch);
+            selenium.WaitForPageToLoad(PageLoadTimeout);
+            
+            //load user query
+            selenium.Click(SearchTestExtensions.QueryMenuOptionLocatorByAttr(uqMenuId, uqOptionSelector));
+            selenium.WaitForPageToLoad(PageLoadTimeout);
+            //Filter present
+            Assert.IsTrue(selenium.IsElementPresent("value_0"));
+            Assert.IsFalse(selenium.IsElementPresent(LinesTestExtensions.EntityLineToStrSelector("value_1_"))); //Filter has been removed
+            //Column present
+            selenium.TableHasColumn("Label.Owner");
+            //Sort present
+            int yearCol = 6;
+            selenium.TableHeaderMarkedAsSorted(yearCol, false, true);
+        }
+
+        [TestMethod]
+        public void UserQuery_Delete()
+        {
+            string pathAlbumSearch = FindRoute("Album");
+
+            string uqMenuId = "tmUserQueries";
+            string uqCreateId = "qbUserQueryNew";
+            string editId = "qbUserQueryEdit";
+            string deleteId = "ebUserQueryDelete";
+
+            CheckLoginAndOpen(pathAlbumSearch);
+
+            int yearCol = 6;
+
+            //add order
+            selenium.Sort(yearCol, true);
+            
+            //create user query
+            selenium.QueryMenuOptionClick(uqMenuId, uqCreateId);
+            selenium.WaitForPageToLoad(PageLoadTimeout);
+            selenium.Type("DisplayName", "test");
+
+            string saveId = "ebUserQuerySave";
+
+            selenium.EntityButtonClick(saveId);
+            selenium.WaitForPageToLoad(PageLoadTimeout);
+
+            //check new user query is in the dropdownlist
+            string uqOptionSelector = "title='test'";
+            selenium.Open(pathAlbumSearch);
+            selenium.WaitForPageToLoad(PageLoadTimeout);
+            selenium.QueryMenuOptionPresentByAttr(uqMenuId, uqOptionSelector, true);
+
+            //load user query
+            selenium.Click(SearchTestExtensions.QueryMenuOptionLocatorByAttr(uqMenuId, uqOptionSelector));
+            selenium.WaitForPageToLoad(PageLoadTimeout);
+            //Sort present
+            selenium.TableHeaderMarkedAsSorted(yearCol, true, true);
+
+            //edit it
+            selenium.QueryMenuOptionClick(uqMenuId, editId);
+            selenium.WaitForPageToLoad(PageLoadTimeout);
+
+            //remove it
+            selenium.EntityButtonClick(deleteId);
+            selenium.WaitForPageToLoad(PageLoadTimeout);
+            selenium.QueryMenuOptionPresentByAttr(uqMenuId, uqOptionSelector, false);
         }
     }
 }

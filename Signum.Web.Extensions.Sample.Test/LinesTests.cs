@@ -12,12 +12,15 @@ using Signum.Test;
 using Signum.Web.Extensions.Sample.Test.Properties;
 using Signum.Engine.Maps;
 using Signum.Engine.Authorization;
+using Signum.Utilities;
 
 namespace Signum.Web.Extensions.Sample.Test
 {
     [TestClass]
     public class LinesTests : Common
     {
+        const string grammyAward = "GrammyAward";
+
         public LinesTests()
         {
 
@@ -38,419 +41,259 @@ namespace Signum.Web.Extensions.Sample.Test
         [TestMethod]
         public void EntityLine()
         {
-            try
-            {
-                CheckLoginAndOpen("/Signum.Web.Extensions.Sample/View/Band/1");
+            CheckLoginAndOpen(ViewRoute("Band", 1));
 
-                //view
-                selenium.Click("LastAward_btnView");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#LastAward_sfEntity:visible"));
+            string prefix = "LastAward_";
 
-                //cancel 
-                selenium.Click("LastAward_sfBtnCancel");
-                Assert.IsFalse(selenium.IsElementPresent("jq=#LastAward_sfEntity:visible"));
+            //view
+            selenium.LineView(prefix);
 
-                //delete
-                selenium.Click("LastAward_btnRemove");
-                Assert.IsTrue(selenium.IsElementPresent("jq=#LastAward_sfToStr:visible"));
-                Assert.IsFalse(selenium.IsElementPresent("jq=#LastAward_sfLink:visible"));
+            //cancel 
+            selenium.PopupCancel(prefix);
 
-                //create with implementations
-                selenium.Click("LastAward_btnCreate");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #LastAwardTemp"));
-                selenium.Click("GrammyAward");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#LastAward_Category"));
-                selenium.Type("LastAward_Category", "test");
-                selenium.Click("LastAward_sfBtnOk");
-                selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("jq=#divASustituir + #LastAwardTemp"));
-                Assert.IsFalse(selenium.IsElementPresent("jq=#LastAward_sfToStr:visible"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=#LastAward_sfLink:visible"));
+            //delete
+            selenium.LineRemove(prefix);
+            selenium.EntityLineHasValue(prefix, false);
 
-                //find with implementations
-                selenium.Click("LastAward_btnRemove");
-                selenium.Click("LastAward_btnFind");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #LastAwardTemp"));
-                selenium.Click("GrammyAward");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#LastAward_btnSearch"));
-                selenium.Click("LastAward_btnSearch");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#LastAward_tblResults > tbody > tr"));
-                selenium.Click("LastAward_rowSelection");
-                selenium.Click("LastAward_sfBtnOk");
-                selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("jq=#LastAward_sfToStr:visible"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=#LastAward_sfLink:visible"));
-            }
-            catch (Exception ex)
-            {
-                Common.MyTestCleanup();
-                throw ex;
-            }
+            //create with implementations
+            selenium.LineCreateWithImpl(prefix, true, grammyAward);
+            selenium.Type("{0}Category".Formato(prefix), "test");
+            selenium.PopupOk(prefix);
+            selenium.EntityLineHasValue(prefix, true);
+
+            //find with implementations
+            selenium.LineRemove(prefix);
+            selenium.LineFindWithImplAndSelectElements(prefix, grammyAward, false, new int[] { 0 });
+            selenium.EntityLineHasValue(prefix, true);
         }
 
         [TestMethod]
         public void EntityLineDetail()
         {
-            try
-            {
-                CheckLoginAndOpen("/Signum.Web.Extensions.Sample/Music/BandDetail");
+            CheckLoginAndOpen("/Signum.Web.Extensions.Sample/Music/BandDetail");
 
-                //Value is opened by default
-                Assert.IsTrue(selenium.IsElementPresent("jq=#LastAward_sfDetail #LastAward_Category"));
+            string prefix = "LastAward_";
 
-                //Delete
-                selenium.Click("LastAward_btnRemove");
-                Assert.IsFalse(selenium.IsElementPresent("jq=#LastAward_sfDetail #LastAward_Category"));
+            //Value is opened by default
+            selenium.EntityLineDetailHasValue(prefix, true);
 
-                //create with implementations
-                selenium.Click("LastAward_btnCreate");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #LastAwardTemp"));
-                selenium.Click("AmericanMusicAward");
-                selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("jq=#divASustituir + #LastAwardTemp"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=#LastAward_sfDetail #LastAward_Category"));
-                selenium.Type("LastAward_Category", "test");
+            //Delete
+            selenium.LineRemove(prefix);
+            selenium.EntityLineDetailHasValue(prefix, false);
 
-                //find with implementations
-                selenium.Click("LastAward_btnRemove");
-                selenium.Click("LastAward_btnFind");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #LastAwardTemp"));
-                selenium.Click("AmericanMusicAward");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#LastAward_btnSearch"));
-                selenium.Click("LastAward_btnSearch");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#LastAward_tblResults > tbody > tr"));
-                selenium.Click("LastAward_rowSelection");
-                selenium.Click("LastAward_sfBtnOk");
-                selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("jq=#divASustituir + #LastAwardTemp"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=#LastAward_sfDetail #LastAward_Category"));
-            }
-            catch (Exception ex)
-            {
-                Common.MyTestCleanup();
-                throw ex;
-            }
+            //create with implementations
+            selenium.LineCreateWithImpl(prefix, false, "AmericanMusicAward");
+            selenium.WaitAjaxFinished(() => selenium.CheckEntityListDetailHasValue(prefix, true));
+            selenium.Type("{0}Category".Formato(prefix), "test");
+
+            //find with implementations
+            selenium.LineRemove(prefix);
+            selenium.LineFindWithImplAndSelectElements(prefix, "AmericanMusicAward", false, new int[]{0});
+            selenium.WaitAjaxFinished(() => selenium.CheckEntityListDetailHasValue(prefix, true));
         }
 
         [TestMethod]
         public void EntityLineInPopup()
         {
-            try
-            {
-                CheckLoginAndOpen("/Signum.Web.Extensions.Sample/View/Album/1");
+            CheckLoginAndOpen(ViewRoute("Album", 1));
 
-                //open popup
-                selenium.Click("Author_btnView");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Author_sfEntity:visible"));
+            //open popup
+            selenium.LineView("Author_");
 
-                //view
-                selenium.Click("Author_LastAward_btnView");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Author_LastAward_sfEntity:visible"));
-                selenium.Click("Author_LastAward_sfBtnOk");
-                selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("jq=#Author_LastAward_sfEntity:visible"));
+            string prefix = "Author_LastAward_";
 
-                //delete
-                selenium.Click("Author_LastAward_btnRemove");
-                Assert.IsTrue(selenium.IsElementPresent("jq=#Author_LastAward_sfToStr:visible"));
-                Assert.IsFalse(selenium.IsElementPresent("jq=#Author_LastAward_sfLink:visible"));
+            //view
+            selenium.LineView(prefix);
+            selenium.PopupOk(prefix);
 
-                //create with implementations
-                selenium.Click("Author_LastAward_btnCreate");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #Author_LastAwardTemp"));
-                selenium.Click("AmericanMusicAward");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Author_LastAward_Category"));
-                selenium.Type("Author_LastAward_Category", "test");
-                selenium.Click("Author_LastAward_sfBtnOk");
-                selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("jq=#divASustituir + #Author_LastAwardTemp"));
-                Assert.IsFalse(selenium.IsElementPresent("jq=#Author_LastAward_sfToStr:visible"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=#Author_LastAward_sfLink:visible"));
+            //delete
+            selenium.LineRemove(prefix);
+            selenium.EntityLineHasValue(prefix, false);
 
-                //find with implementations
-                selenium.Click("Author_LastAward_btnRemove");
-                selenium.Click("Author_LastAward_btnFind");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #Author_LastAwardTemp"));
-                selenium.Click("AmericanMusicAward");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Author_LastAward_btnSearch"));
-                selenium.Click("Author_LastAward_btnSearch");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Author_LastAward_tblResults > tbody > tr"));
-                selenium.Click("Author_LastAward_rowSelection");
-                selenium.Click("Author_LastAward_sfBtnOk");
-                selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("jq=#divASustituir + #Author_LastAwardTemp"));
-                Assert.IsFalse(selenium.IsElementPresent("jq=#Author_LastAward_sfToStr:visible"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=#Author_LastAward_sfLink:visible"));
-            }
-            catch (Exception)
-            {
-                Common.MyTestCleanup();
-                throw;
-            }
+            //create with implementations
+            selenium.LineCreateWithImpl(prefix, true, "AmericanMusicAward");
+            selenium.Type("{0}Category".Formato(prefix), "test");
+            selenium.PopupOk(prefix);
+            selenium.EntityLineHasValue(prefix, true);
+
+            //find with implementations
+            selenium.LineRemove(prefix);
+            selenium.LineFindWithImplAndSelectElements(prefix, "AmericanMusicAward", false, new int[] { 0 });
+            selenium.EntityLineHasValue(prefix, true);
         }
 
         [TestMethod]
         public void EntityList()
         {
-            try
-            {
-                CheckLoginAndOpen("/Signum.Web.Extensions.Sample/View/Band/1");
+            CheckLoginAndOpen(ViewRoute("Band", 1));
 
-                //Create and cancel
-                selenium.Click("Members_btnCreate");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #Members_4Temp"));
-                selenium.Click("Members_4_sfBtnCancel");
-                Assert.IsFalse(selenium.IsElementPresent("jq=#divASustituir + #Members_4Temp"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=#Members > option:nth-child(4)"));
-                Assert.IsFalse(selenium.IsElementPresent("jq=#Members > option:nth-child(5)"));
-                Assert.IsFalse(selenium.IsElementPresent("jq=#Members_4_sfRuntimeInfo"));
+            string prefix = "Members_";
 
-                //Create and ok
-                selenium.Click("Members_btnCreate");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #Members_4Temp"));
-                selenium.Type("Members_4_Name", "test");
-                selenium.Click("Members_4_sfBtnOk");
-                selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("jq=#divASustituir + #Members_4Temp"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=#Members_4_sfEntity"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=#Members_4_sfRuntimeInfo"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=#Members > option:nth-child(5)"));
+            //Create and cancel
+            selenium.LineCreate(prefix, true, 4);
+            selenium.PopupCancel("{0}4_".Formato(prefix));
+            selenium.ListLineElementExists(prefix, 4, false);
 
-                //Delete
-                selenium.Click("Members_btnRemove");
-                Assert.IsFalse(selenium.IsElementPresent("jq=#Members_4_sfRuntimeInfo"));
-                Assert.IsFalse(selenium.IsElementPresent("jq=#Members > option:nth-child(5)"));
+            //Create and ok
+            selenium.LineCreate(prefix, true, 4);
+            selenium.Type("{0}4_Name".Formato(prefix), "test");
+            selenium.PopupOk("{0}4_".Formato(prefix));
+            selenium.ListLineElementExists(prefix, 4, true);
+            Assert.IsTrue(selenium.IsElementPresent("jq=#Members_4_sfEntity"));
+            
+            //Delete
+            selenium.LineRemove(prefix);
+            selenium.ListLineElementExists(prefix, 4, false);
 
-                //Find multiple
-                selenium.Click("Members_btnFind");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #Members_4Temp"));
-                selenium.Click("Members_4_btnSearch");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Members_4_tblResults > tbody > tr"));
-                selenium.Click("Members_4_rowSelection_4");
-                selenium.Click("Members_4_rowSelection_5");
-                selenium.Click("Members_4_sfBtnOk");
-                selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("jq=#divASustituir + #Members_4Temp"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=#Members_4_sfRuntimeInfo"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=#Members > option:nth-child(5)"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=#Members_5_sfRuntimeInfo"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=#Members > option:nth-child(6)"));
+            //Find multiple
+            selenium.LineFindAndSelectElements(prefix, true, new int[] { 4, 5 }, 4);
+            selenium.ListLineElementExists(prefix, 4, true);
+            selenium.ListLineElementExists(prefix, 5, true);
 
-                //Create with implementations
-                selenium.Click("OtherAwards_btnCreate");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #OtherAwardsTemp"));
-                selenium.Click("GrammyAward");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #OtherAwards_0Temp"));
-                Assert.IsFalse(selenium.IsElementPresent("jq=#divASustituir + #OtherAwards_Temp"));
-                selenium.Type("OtherAwards_0_Category", "test");
-                selenium.Click("OtherAwards_0_sfBtnOk");
-                selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("jq=#OtherAwards_0Temp"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=#OtherAwards_0_sfEntity"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=#OtherAwards_0_sfRuntimeInfo"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=#OtherAwards > option:nth-child(1)"));
+            prefix = "OtherAwards_";
 
-                //find with implementations
-                selenium.Click("OtherAwards_btnFind");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #OtherAwardsTemp"));
-                selenium.Click("GrammyAward");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #OtherAwards_1Temp"));
-                Assert.IsFalse(selenium.IsElementPresent("jq=#divASustituir + #OtherAwards_Temp"));
-                selenium.Click("OtherAwards_1_btnSearch");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#OtherAwards_1_tblResults > tbody > tr"));
-                selenium.Click("OtherAwards_1_rowSelection_0");
-                selenium.Click("OtherAwards_1_sfBtnOk");
-                selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("jq=#divASustituir + #OtherAwards_1Temp"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=#OtherAwards_1_sfRuntimeInfo"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=#OtherAwards > option:nth-child(2)"));
+            //Create with implementations
+            selenium.LineCreateWithImpl(prefix, true, grammyAward, 0);
+            selenium.Type("{0}0_Category".Formato(prefix), "test");
+            selenium.PopupOk("{0}0_".Formato(prefix));
+            selenium.ListLineElementExists(prefix, 0, true);
+            Assert.IsTrue(selenium.IsElementPresent("jq=#OtherAwards_0_sfEntity"));
 
-                //Delete
-                selenium.Click("OtherAwards_btnRemove");
-                Assert.IsFalse(selenium.IsElementPresent("jq=#OtherAwards_1_sfRuntimeInfo"));
-                Assert.IsFalse(selenium.IsElementPresent("jq=#OtherAwards > option:nth-child(2)"));
+            //find with implementations
+            selenium.LineFindWithImplAndSelectElements(prefix, grammyAward, true, new int[] { 0 }, 1);
+            selenium.ListLineElementExists(prefix, 1, true);
 
-                //View
-                selenium.Select("jq=#OtherAwards", "id=OtherAwards_0_sfToStr");
-                selenium.DoubleClick("jq=#OtherAwards > option:nth-child(1)");
-                Assert.IsTrue(selenium.IsElementPresent("jq=#OtherAwards_0_sfEntity:visible"));
-                selenium.Click("jq=#OtherAwards_0_sfBtnCancel");
-                Assert.IsFalse(selenium.IsElementPresent("jq=#OtherAwards_0_sfEntity:visible"));
-            }
-            catch (Exception)
-            {
-                Common.MyTestCleanup();
-                throw;
-            }
+            //Delete
+            selenium.LineRemove(prefix);
+            selenium.ListLineElementExists(prefix, 1, false);
+
+            //View
+            selenium.ListLineViewElement(prefix, 0, true);
+            selenium.PopupCancel("{0}0_".Formato(prefix));
         }
 
         [TestMethod]
         public void EntityListInPopup()
         {
-            try
-            {
-                CheckLoginAndOpen("/Signum.Web.Extensions.Sample/View/Band/1");
+            CheckLoginAndOpen(ViewRoute("Band", 1));
 
-                //open popup
-                selenium.Select("jq=#Members", "id=Members_0_sfToStr");
-                selenium.DoubleClick("jq=#Members_0_sfToStr");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Members_0_panelPopup:visible"));
+            //open popup
+            selenium.ListLineViewElement("Members_", 0, true);
 
-                //create
-                selenium.Click("Members_0_Friends_btnCreate");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #Members_0_Friends_1Temp"));
+            string prefix = "Members_0_Friends_";
 
-                selenium.Type("Members_0_Friends_1_Name", "test");
-                selenium.Click("Members_0_Friends_1_sfBtnOk");
-                Assert.IsFalse(selenium.IsElementPresent("jq=#divASustituir + #Members_0_Friends_1Temp"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=#Members_0_Friends > option:nth-child(1)"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=#Members_0_Friends_1_sfRuntimeInfo"));
+            //create
+            selenium.LineCreate(prefix, true, 1);
 
-                //find multiple
-                selenium.Click("Members_0_Friends_btnFind");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #Members_0_Friends_2Temp"));
-                selenium.Click("Members_0_Friends_2_btnSearch");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Members_0_Friends_2_tblResults > tbody > tr"));
-                selenium.Click("Members_0_Friends_2_rowSelection_4");
-                selenium.Click("Members_0_Friends_2_rowSelection_5");
-                selenium.Click("Members_0_Friends_2_sfBtnOk");
+            selenium.Type("{0}1_Name".Formato(prefix), "test");
+            selenium.PopupOk("{0}1_".Formato(prefix));
+            selenium.ListLineElementExists(prefix, 1, true);
 
-                //delete multiple
-                selenium.Select("Members_0_Friends", "id=Members_0_Friends_1_sfToStr");
-                selenium.AddSelection("Members_0_Friends", "id=Members_0_Friends_2_sfToStr");
-                selenium.Click("Members_0_Friends_btnRemove");
-                selenium.Click("Members_0_Friends_btnRemove");
-                Assert.IsTrue(selenium.IsElementPresent("jq=#Members_0_Friends > option:nth-child(2)"));
-                Assert.IsFalse(selenium.IsElementPresent("jq=#Members_0_Friends > option:nth-child(3)"));
-            }
-            catch (Exception)
-            {
-                Common.MyTestCleanup();
-                throw;
-            }
+            //find multiple
+            selenium.LineFindAndSelectElements(prefix, true, new int[]{4,5}, 2);
+            selenium.ListLineElementExists(prefix, 2, true);
+            selenium.ListLineElementExists(prefix, 3, true);
+
+            //delete multiple
+            selenium.ListLineSelectElement(prefix, 1, false);
+            selenium.ListLineSelectElement(prefix, 2, true);
+            selenium.LineRemove(prefix);
+            selenium.LineRemove(prefix);
+            selenium.ListLineElementExists(prefix, 1, false);
+            selenium.ListLineElementExists(prefix, 2, false);
+            selenium.ListLineElementExists(prefix, 3, true);
         }
 
         [TestMethod]
         public void EntityListDetail()
         {
-            try
-            {
-                CheckLoginAndOpen("/Signum.Web.Extensions.Sample/Music/BandDetail");
+            CheckLoginAndOpen("/Signum.Web.Extensions.Sample/Music/BandDetail");
 
-                //1st element is shown by default
-                Assert.IsTrue(selenium.IsElementPresent("jq=#Members_sfDetail #Members_0_Name"));
+            string prefix = "Members_";
 
-                //create
-                selenium.Click("Members_btnCreate");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Members_sfDetail #Members_4_Name"));
-                selenium.Type("Members_4_Name", "test");
-                Assert.IsTrue(selenium.IsElementPresent("jq=#Members_4_sfRuntimeInfo"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=#Members > option:nth-child(5)"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=#Members_sfDetail #Members_4_Name"));
+            //1st element is shown by default
+            selenium.EntityListDetailHasValue(prefix, true);
 
-                //delete
-                selenium.Click("Members_btnRemove");
-                Assert.IsFalse(selenium.IsElementPresent("jq=#Members_4_sfRuntimeInfo"));
-                Assert.IsFalse(selenium.IsElementPresent("jq=#Members > option:nth-child(5)"));
-                Assert.IsFalse(selenium.IsElementPresent("jq=#Members_sfDetail #Members_4_Name"));
+            //create
+            selenium.LineCreate(prefix, false, 4);
+            selenium.WaitAjaxFinished(() => selenium.CheckEntityListDetailHasValue(prefix, true));
+            selenium.Type("{0}4_Name".Formato(prefix), "test");
+            selenium.ListLineElementExists(prefix, 4, true);
 
-                //find multiple
-                selenium.Click("Members_btnFind");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #Members_4Temp"));
-                selenium.Click("Members_4_btnSearch");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Members_4_tblResults > tbody > tr"));
-                selenium.Click("Members_4_rowSelection_4");
-                selenium.Click("Members_4_rowSelection_5");
-                selenium.Click("Members_4_sfBtnOk");
-                selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("jq=#divASustituir + #Members_4Temp"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=#Members_4_sfRuntimeInfo"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=#Members > option:nth-child(5)"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=#Members_5_sfRuntimeInfo"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=#Members > option:nth-child(6)"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=#Members_sfDetail #Members_5_Name"));
+            //delete
+            selenium.LineRemove(prefix);
+            selenium.ListLineElementExists(prefix, 4, false);
+            selenium.EntityListDetailHasValue(prefix, false);
 
-                //create with implementations
-                selenium.Click("OtherAwards_btnCreate");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #OtherAwardsTemp"));
-                selenium.Click("GrammyAward");
-                selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("jq=#divASustituir + #OtherAwards_Temp"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=#OtherAwards_sfDetail #OtherAwards_0_Category"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=#OtherAwards_0_sfRuntimeInfo"));
-                selenium.Type("OtherAwards_0_Category", "test");
+            //find multiple
+            selenium.LineFindAndSelectElements(prefix, true, new int[] { 4, 5 }, 4);
+            selenium.ListLineElementExists(prefix, 4, true);
+            selenium.ListLineElementExists(prefix, 5, true);
+            selenium.EntityListDetailHasValue(prefix, true);
 
-                //find with implementations
-                selenium.Click("OtherAwards_btnFind");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #OtherAwardsTemp"));
-                selenium.Click("GrammyAward");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #OtherAwards_1Temp"));
-                Assert.IsFalse(selenium.IsElementPresent("jq=#divASustituir + #OtherAwards_Temp"));
-                selenium.Click("OtherAwards_1_btnSearch");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#OtherAwards_1_tblResults > tbody > tr"));
-                selenium.Click("OtherAwards_1_rowSelection_0");
-                selenium.Click("OtherAwards_1_sfBtnOk");
-                selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("jq=#divASustituir + #OtherAwards_1Temp"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=#OtherAwards_1_sfRuntimeInfo"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=#OtherAwards > option:nth-child(2)"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=#OtherAwards_sfDetail #OtherAwards_1_Category"));
+            prefix = "OtherAwards_";
 
-                //Delete
-                selenium.Click("OtherAwards_btnRemove");
-                Assert.IsFalse(selenium.IsElementPresent("jq=#OtherAwards_1_sfRuntimeInfo"));
-                Assert.IsFalse(selenium.IsElementPresent("jq=#OtherAwards > option:nth-child(2)"));
+            //create with implementations
+            selenium.LineCreateWithImpl(prefix, false, grammyAward, 0);
+            selenium.WaitAjaxFinished(() => selenium.CheckEntityListDetailHasValue(prefix, true));
+            selenium.ListLineElementExists(prefix, 0, true);
+            selenium.Type("{0}0_Category".Formato(prefix), "test");
 
-                //View detail
-                selenium.Select("jq=#OtherAwards", "id=OtherAwards_0_sfToStr");
-                selenium.DoubleClick("jq=#OtherAwards > option:nth-child(1)");
-                Assert.IsTrue(selenium.IsElementPresent("jq=#OtherAwards_sfDetail #OtherAwards_0_Category"));
-            }
-            catch (Exception)
-            {
-                Common.MyTestCleanup();
-                throw;
-            }
+            //find with implementations
+            selenium.LineFindWithImplAndSelectElements(prefix, grammyAward, true, new int[] { 0 }, 1);
+            selenium.ListLineElementExists(prefix, 1, true);
+            selenium.WaitAjaxFinished(() => selenium.CheckEntityListDetailHasValue(prefix, true));
+
+            //Delete
+            selenium.LineRemove(prefix);
+            selenium.ListLineElementExists(prefix, 1, false);
+
+            //View detail
+            selenium.ListLineViewElement(prefix, 0, false);
+            selenium.WaitAjaxFinished(() => selenium.CheckEntityListDetailHasValue(prefix, true));
         }
 
         [TestMethod]
         public void EntityRepeater()
         {
-            try
-            {
-                CheckLoginAndOpen("/Signum.Web.Extensions.Sample/Music/BandRepeater");
+            CheckLoginAndOpen("/Signum.Web.Extensions.Sample/Music/BandRepeater");
 
-                //All elements are shown
-                Assert.IsTrue(selenium.IsElementPresent("jq=#Members_sfItemsContainer > div.repeaterElement:nth-child(4)"));
+            string prefix = "Members_";
 
-                //Create
-                selenium.Click("Members_btnCreate");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Members_sfItemsContainer > #Members_4_sfRepeaterItem"));
-                selenium.Type("Members_4_Name", "test");
-                Assert.IsTrue(selenium.IsElementPresent("jq=#Members_4_sfRuntimeInfo"));
+            //All elements are shown
+            selenium.RepeaterItemExists(prefix, 0, true);
+            selenium.RepeaterItemExists(prefix, 1, true);
+            selenium.RepeaterItemExists(prefix, 2, true);
+            selenium.RepeaterItemExists(prefix, 3, true);
+            
+            //Create
+            selenium.LineCreate(prefix, false, 4);
+            selenium.RepeaterWaitUntilItemLoaded(prefix, 4);
+            selenium.Type("{0}4_Name".Formato(prefix), "test");
+            selenium.RepeaterItemExists(prefix, 4, true);
 
-                //delete
-                selenium.Click("Members_4_btnRemove");
-                Assert.IsFalse(selenium.IsElementPresent("jq=#Members_4_sfRuntimeInfo"));
-                Assert.IsFalse(selenium.IsElementPresent("jq=#Members_sfItemsContainer > #Members_4_sfRepeaterItem"));
+            //delete new element (created in client)
+            selenium.LineRemove("{0}4_".Formato(prefix));
+            selenium.RepeaterItemExists(prefix, 4, false);
 
-                //find multiple: it exists because Find is overriden to true in this EntityRepeater
-                selenium.Click("Members_btnFind");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #Members_4Temp"));
-                selenium.Click("Members_4_btnSearch");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Members_4_tblResults > tbody > tr"));
-                selenium.Click("Members_4_rowSelection_4");
-                selenium.Click("Members_4_rowSelection_5");
-                selenium.Click("Members_4_sfBtnOk");
-                selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("jq=#divASustituir + #Members_4Temp"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=#Members_4_sfRuntimeInfo"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=#Members_sfItemsContainer > #Members_4_sfRepeaterItem"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=#Members_5_sfRuntimeInfo"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=#Members_sfItemsContainer > #Members_5_sfRepeaterItem"));
+            //delete old element (created in server)
+            selenium.LineRemove("{0}0_".Formato(prefix));
+            selenium.RepeaterItemExists(prefix, 0, false);
 
-                //create with implementations
-                selenium.Click("OtherAwards_btnCreate");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #OtherAwardsTemp"));
-                selenium.Click("GrammyAward");
-                selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("jq=#divASustituir + #OtherAwards_Temp"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=#OtherAwards_sfItemsContainer > #OtherAwards_0_sfRepeaterItem"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=#OtherAwards_0_sfRuntimeInfo"));
-                selenium.Type("OtherAwards_0_Category", "test");
+            //find multiple: it exists because Find is overriden to true in this EntityRepeater
+            selenium.LineFindAndSelectElements(prefix, true, new int[]{4,5}, 4);
+            selenium.RepeaterItemExists(prefix, 4, true);
+            selenium.RepeaterItemExists(prefix, 5, true);
 
-                //find does not exist by default
-                Assert.IsFalse(selenium.IsElementPresent("jq=#OtherAwards_btnFind"));
-            }
-            catch (Exception)
-            {
-                Common.MyTestCleanup();
-                throw;
-            }
+            prefix = "OtherAwards_";
+
+            //create with implementations
+            selenium.LineCreateWithImpl(prefix, false, grammyAward, 0);
+            selenium.RepeaterItemExists(prefix, 0, true);
+            selenium.Type("{0}0_Category".Formato(prefix), "test");
+
+            //find does not exist by default
+            Assert.IsFalse(selenium.IsElementPresent(LinesTestExtensions.LineFindSelector(prefix)));
         }
     }
 }

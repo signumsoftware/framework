@@ -42,69 +42,67 @@ namespace Signum.Web.Extensions.Sample.Test
         [TestMethod]
         public void ExcelReport()
         {
-            try
-            {
-                CheckLoginAndOpen("/Signum.Web.Extensions.Sample/Find/Album");
+            string pathAlbumSearch = FindRoute("Album");
+            
+            CheckLoginAndOpen(pathAlbumSearch);
 
-                string administerLocator = "jq=div.query-button:last a.query-button:last";
-                string saveLocator = "jq=.button-bar > li:first > a";
-                string deleteLocator = "jq=.button-bar > li:nth-child(2) > a";
+            string excelMenuId = "tmExcel";
+            string administerReportsId = "qbReportAdminister";
 
-                //create when there's no query created => direct navigation to create page
-                selenium.Click(administerLocator);
-                selenium.WaitForPageToLoad(PageLoadTimeout);
-                selenium.Type("DisplayName", "test");
-                selenium.Type("File", "D:\\Signum\\Pruebas\\Albumchulo.xlsx");
-                selenium.Click(saveLocator);
-                selenium.WaitForPageToLoad(PageLoadTimeout);
-                Assert.IsTrue(selenium.IsElementPresent("jq=.entityId span"));
+            string pathSampleReport = "D:\\Signum\\Pruebas\\Albumchulo.xlsx";
+            
+            string saveReportId = "ebReportSave";
+            string deleteId = "ebReportDelete";
 
-                //modify
-                selenium.Type("DisplayName", "test 2");
-                selenium.Click(saveLocator);
-                selenium.WaitForPageToLoad(PageLoadTimeout);
+            //create when there's no query created => direct navigation to create page
+            selenium.QueryMenuOptionClick(excelMenuId, administerReportsId);
+            selenium.WaitForPageToLoad(PageLoadTimeout);
 
-                //created appears modified in menu
-                selenium.Open("/Signum.Web.Extensions.Sample/Find/Album");
-                selenium.WaitForPageToLoad(PageLoadTimeout);
-                Assert.IsTrue(selenium.IsElementPresent("link=test 2"));
+            selenium.Type("DisplayName", "test");
+            selenium.Type("File", pathSampleReport);
+            selenium.EntityButtonClick(saveReportId);
+            selenium.WaitForPageToLoad(PageLoadTimeout);
+            selenium.MainEntityHasId();
 
-                //delete
-                selenium.Click(administerLocator);
-                selenium.WaitForPageToLoad(PageLoadTimeout);
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=a[href$=View/ExcelReport/1]"));
-                selenium.Click("jq=a[href$=View/ExcelReport/1]");
-                selenium.WaitForPageToLoad(PageLoadTimeout);
-                selenium.Click(deleteLocator);
-                //Assert.IsTrue(Regex.IsMatch(selenium.GetConfirmation(), "^¿" + extensionsManager.GetString("AreYouSureOfDeletingReport0").Formato("prueba 2") + "[\\s\\S]$"));
-                Assert.IsTrue(Regex.IsMatch(selenium.GetConfirmation(), ".*"));
-                selenium.WaitForPageToLoad(PageLoadTimeout);
+            //modify
+            selenium.Type("DisplayName", "test 2");
+            selenium.EntityButtonClick(saveReportId);
+            selenium.WaitForPageToLoad(PageLoadTimeout);
 
-                //deleted does not appear in menu
-                selenium.Open("/Signum.Web.Extensions.Sample/Find/Album");
-                selenium.WaitForPageToLoad(PageLoadTimeout);
-                Assert.IsFalse(selenium.IsElementPresent("link=test 2"));
+            //created appears modified in menu
+            selenium.Open(pathAlbumSearch);
+            selenium.WaitForPageToLoad(PageLoadTimeout);
+            selenium.QueryMenuOptionPresentByAttr(excelMenuId, "title=test 2", true);
 
-                //create when there are already others
-                selenium.Click(administerLocator);
-                selenium.WaitForPageToLoad(PageLoadTimeout);
-                selenium.Click("jq=#btnSearch + input.create");
-                selenium.WaitForPageToLoad(PageLoadTimeout);
-                selenium.Type("DisplayName", "test 3");
-                selenium.Type("File", "D:\\Signum\\Pruebas\\Albumchulo.xlsx");
-                selenium.Click(saveLocator);
-                selenium.WaitForPageToLoad(PageLoadTimeout);
+            //delete
+            selenium.QueryMenuOptionClick(excelMenuId, administerReportsId);
+            selenium.WaitForPageToLoad(PageLoadTimeout);
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SearchTestExtensions.RowSelector(1))); //SearchOnLoad
+            selenium.EntityClick("ExcelReport;1");
+            selenium.WaitForPageToLoad(PageLoadTimeout);
+            selenium.EntityButtonClick(deleteId);
+            Assert.IsTrue(Regex.IsMatch(selenium.GetConfirmation(), ".*"));
+            selenium.WaitForPageToLoad(PageLoadTimeout);
 
-                //created appears modified in menu
-                selenium.Open("/Signum.Web.Extensions.Sample/Find/Album");
-                selenium.WaitForPageToLoad(PageLoadTimeout);
-                Assert.IsTrue(selenium.IsElementPresent("link=test 3"));
-            }
-            catch (Exception)
-            {
-                Common.MyTestCleanup();
-                throw;
-            }
+            //deleted does not appear in menu
+            selenium.Open(pathAlbumSearch);
+            selenium.WaitForPageToLoad(PageLoadTimeout);
+            selenium.QueryMenuOptionPresentByAttr(excelMenuId, "title=test 2", false);
+
+            //create when there are already others
+            selenium.QueryMenuOptionClick(excelMenuId, administerReportsId);
+            selenium.WaitForPageToLoad(PageLoadTimeout);
+            selenium.SearchCreate();
+            selenium.WaitForPageToLoad(PageLoadTimeout);
+            selenium.Type("DisplayName", "test 3");
+            selenium.Type("File", pathSampleReport);
+            selenium.EntityButtonClick(saveReportId);
+            selenium.WaitForPageToLoad(PageLoadTimeout);
+
+            //created appears in menu
+            selenium.Open(pathAlbumSearch);
+            selenium.WaitForPageToLoad(PageLoadTimeout);
+            selenium.QueryMenuOptionPresentByAttr(excelMenuId, "title=test 3", true);
         }
     }
 }

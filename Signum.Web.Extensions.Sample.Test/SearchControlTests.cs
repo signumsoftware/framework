@@ -14,6 +14,7 @@ using Signum.Engine.Maps;
 using Signum.Engine.Authorization;
 using System.Text.RegularExpressions;
 using Signum.Entities;
+using Signum.Utilities;
 
 namespace Signum.Web.Extensions.Sample.Test
 {
@@ -37,471 +38,363 @@ namespace Signum.Web.Extensions.Sample.Test
             Common.MyTestCleanup();
         }
 
-        private Func<bool> thereAreNRows(int n)
-        {
-            return () => selenium.IsElementPresent("jq=#tblResults > tbody > tr:nth-child(" + n + ")") &&
-                         !selenium.IsElementPresent("jq=#tblResults > tbody > tr:nth-child(" + (n + 1) + ")");
-        }
-
         [TestMethod]
         public void Filters()
         {
-            try
-            {
-                CheckLoginAndOpen("/Signum.Web.Extensions.Sample/Find/Album");
+            CheckLoginAndOpen(FindRoute("Album"));
 
-                //No filters
-                selenium.Click("btnSearch");
-                selenium.WaitAjaxFinished(thereAreNRows(12));
+            //No filters
+            selenium.Search();
+            selenium.WaitAjaxFinished(selenium.ThereAreNRows(12));
 
-                //Quickfilter of a Lite
-                selenium.ContextMenu("jq=#tblResults > tbody > tr:first > td:nth-child(3)");
-                selenium.Click("jq=#tblResults > tbody > tr:first > td:nth-child(3) span");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#tblFilters #trFilter_0"));
-                selenium.Click("btnSearch");
-                selenium.WaitAjaxFinished(thereAreNRows(4));
+            //Quickfilter of a Lite
+            selenium.QuickFilter(1, 3, 0);
+            selenium.Search();
+            selenium.WaitAjaxFinished(selenium.ThereAreNRows(4));
 
-                //Filter from the combo with Subtokens
-                selenium.Select("ddlTokens_0", "label=Label");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#lblddlTokens_1"));
-                selenium.Click("lblddlTokens_1");
-                selenium.Select("ddlTokens_1", "label=Name");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#btnAddFilter"));
-                selenium.Click("btnAddFilter");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#value_1"));
-                selenium.Type("value_1", "virgin");
-                selenium.Click("btnSearch");
-                selenium.WaitAjaxFinished(thereAreNRows(2));
+            //Filter of a Lite from the combo
+            selenium.FilterSelectToken(0, "label=Label", true);
+            selenium.AddFilter(1);
+            selenium.LineFindAndSelectElements("value_1_", false, new int[]{0});
+            selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("{0}:visible".Formato(LinesTestExtensions.LineFindSelector("value_1_"))));
+            selenium.Search();
+            selenium.WaitAjaxFinished(selenium.ThereAreNRows(2));
+            selenium.DeleteFilter(1);
 
-                //Quickfilter of a string
-                selenium.ContextMenu("jq=#tblResults > tbody > tr:first > td:nth-child(5)");
-                selenium.Click("jq=#tblResults > tbody > tr:first > td:nth-child(5) span");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#tblFilters #trFilter_2"));
-                selenium.Click("btnSearch");
-                selenium.WaitAjaxFinished(thereAreNRows(1));
+            //Filter from the combo with Subtokens
+            selenium.FilterSelectToken(0, "label=Label", true);
+            selenium.ExpandTokens(1);
+            selenium.FilterSelectToken(1, "label=Name", false);
+            selenium.AddFilter(1);
+            selenium.Type("value_1", "virgin");
+            selenium.Search();
+            selenium.WaitAjaxFinished(selenium.ThereAreNRows(2));
 
-                //Delete filter
-                selenium.Click("btnDelete_2");
-                selenium.Click("btnSearch");
-                selenium.WaitAjaxFinished(thereAreNRows(2));
+            //Quickfilter of a string
+            selenium.QuickFilter(1, 5, 2);
+            selenium.Search();
+            selenium.WaitAjaxFinished(selenium.ThereAreNRows(1));
 
-                //Filter from the combo with subtokens of a MList
-                selenium.Select("ddlTokens_0", "label=Album");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#lblddlTokens_1"));
-                selenium.Click("lblddlTokens_1");
-                selenium.Select("ddlTokens_1", "label=Songs");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#lblddlTokens_2"));
-                selenium.Click("lblddlTokens_2");
-                selenium.Select("ddlTokens_2", "value=Count");
-                selenium.Click("btnAddFilter");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#ddlSelector_2"));
-                selenium.Select("ddlSelector_2", "value=GreaterThan");
-                selenium.Type("value_2", "1");
-                selenium.Click("btnSearch");
-                selenium.WaitAjaxFinished(thereAreNRows(1));
+            //Delete filter
+            selenium.DeleteFilter(2);
+            selenium.Search();
+            selenium.WaitAjaxFinished(selenium.ThereAreNRows(2));
 
-                //Delete all filters
-                selenium.Click("btnClearAllFilters");
-                selenium.Click("btnSearch");
-                selenium.WaitAjaxFinished(thereAreNRows(12));
+            //Filter from the combo with subtokens of a MList
+            selenium.FilterSelectToken(0, "label=Album", true);
+            selenium.ExpandTokens(1);
+            selenium.FilterSelectToken(1, "label=Songs", true);
+            selenium.ExpandTokens(2);
+            selenium.FilterSelectToken(2, "value=Count", false);
+            selenium.AddFilter(2);
+            selenium.FilterSelectOperation(2, "value=GreaterThan");
+            selenium.Type("value_2", "1");
+            selenium.Search();
+            selenium.WaitAjaxFinished(selenium.ThereAreNRows(1));
 
-                //Top
-                selenium.Type("sfTop", "5");
-                selenium.Click("btnSearch");
-                selenium.WaitAjaxFinished(thereAreNRows(5));
-                selenium.Type("sfTop", ""); //Typing "" is as not writing top
-                selenium.Click("btnSearch");
-                selenium.WaitAjaxFinished(thereAreNRows(12));
-            }
-            catch (Exception)
-            {
-                Common.MyTestCleanup();
-                throw;
-            }
-        }
+            //Delete all filters
+            selenium.ClearAllFilters();
+            selenium.Search();
+            selenium.WaitAjaxFinished(selenium.ThereAreNRows(12));
 
-        private Func<bool> thereAreNRowsInPopup(int n)
-        {
-            return () => selenium.IsElementPresent("jq=#Members_0_tblResults > tbody > tr:nth-child(" + n + ")") &&
-                         !selenium.IsElementPresent("jq=#Members_0_tblResults > tbody > tr:nth-child(" + (n + 1) + ")");
+            //Top
+            selenium.SetTopToFinder("5");
+            selenium.Search();
+            selenium.WaitAjaxFinished(selenium.ThereAreNRows(5));
+            selenium.SetTopToFinder(""); 
+            selenium.Search();
+            selenium.WaitAjaxFinished(selenium.ThereAreNRows(12));
         }
 
         [TestMethod]
         public void FiltersInPopup()
         {
-            try
-            {
-                CheckLoginAndOpen("/Signum.Web.Extensions.Sample/View/Band/");
+            CheckLoginAndOpen(ViewRoute("Band", null));
 
-                //open search popup
-                selenium.Click("Members_btnFind");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Members_0_btnSearch"));
-                selenium.Click("Members_0_btnSearch");
-                selenium.WaitAjaxFinished(thereAreNRowsInPopup(8));
+            //open search popup
+            selenium.LineFind("Members_", 0);
 
-                //Quickfilter of a bool
-                selenium.ContextMenu("jq=#Members_0_tblResults > tbody > tr:first > td:nth-child(5)");
-                selenium.Click("jq=#Members_0_tblResults > tbody > tr:first > td:nth-child(5) span");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Members_0_tblFilters #Members_0_trFilter_0"));
+            string prefix = "Members_0_"; //prefix for all the popup
 
-                //Quickfilter of an enum
-                selenium.ContextMenu("jq=#Members_0_tblResults > tbody > tr:first > td:nth-child(6)");
-                selenium.Click("jq=#Members_0_tblResults > tbody > tr:first > td:nth-child(6) span");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Members_0_tblFilters #Members_0_trFilter_1"));
+            selenium.Search(prefix);
+            selenium.ThereAreNRows(8, prefix);
 
-                selenium.Click("Members_0_btnSearch");
-                selenium.WaitAjaxFinished(thereAreNRowsInPopup(7));
+            //Quickfilter of a bool
+            selenium.QuickFilter(1, 5, 0, prefix);
 
-                //Quickfilter of an int
-                selenium.ContextMenu("jq=#Members_0_tblResults > tbody > tr:nth-child(4) > td:nth-child(3)");
-                selenium.Click("jq=#Members_0_tblResults > tbody > tr:nth-child(4) > td:nth-child(3) span");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Members_0_tblFilters #Members_0_trFilter_2"));
-                selenium.Select("Members_0_ddlSelector_2", "value=GreaterThan");
-                selenium.Click("Members_0_btnSearch");
-                selenium.WaitAjaxFinished(thereAreNRowsInPopup(3));
+            //Quickfilter of an enum
+            selenium.QuickFilter(1, 6, 1, prefix);
 
-                selenium.Click("Members_0_btnDelete_2");
-                selenium.Click("Members_0_btnSearch");
-                selenium.WaitAjaxFinished(thereAreNRowsInPopup(7));
+            selenium.Search(prefix);
+            selenium.ThereAreNRows(7, prefix);
 
-                //Filter from the combo with Subtokens
-                selenium.Select("Members_0_ddlTokens_0", "label=Artist");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Members_0_lblddlTokens_1"));
-                selenium.Click("Members_0_lblddlTokens_1");
-                selenium.Select("Members_0_ddlTokens_1", "label=Name");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Members_0_btnAddFilter"));
-                selenium.Click("Members_0_btnAddFilter");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Members_0_value_2"));
-                selenium.Select("Members_0_ddlSelector_2", "value=EndsWith");
-                selenium.Type("Members_0_value_2", "a");
-                selenium.Click("Members_0_btnSearch");
-                selenium.WaitAjaxFinished(thereAreNRowsInPopup(1));
+            //Quickfilter of an int
+            selenium.QuickFilter(4, 3, 2, prefix);
+            selenium.FilterSelectOperation(2, "value=GreaterThan", prefix);
+            selenium.Search(prefix);
+            selenium.ThereAreNRows(3, prefix);
 
-                //Delete all filters
-                selenium.Click("Members_0_btnClearAllFilters");
-                selenium.Click("Members_0_btnSearch");
-                selenium.WaitAjaxFinished(thereAreNRowsInPopup(8));
+            selenium.DeleteFilter(2, prefix);
+            selenium.Search(prefix);
+            selenium.ThereAreNRows(7, prefix);
 
-                //Top
-                selenium.Type("Members_0_sfTop", "5");
-                selenium.Click("Members_0_btnSearch");
-                selenium.WaitAjaxFinished(thereAreNRowsInPopup(5));
-                selenium.Type("Members_0_sfTop", ""); //Typing "" is as not writing top
-                selenium.Click("Members_0_btnSearch");
-                selenium.WaitAjaxFinished(thereAreNRowsInPopup(8));
-            }
-            catch (Exception)
-            {
-                Common.MyTestCleanup();
-                throw;
-            }
+            //Filter of a Lite from the combo
+            selenium.FilterSelectToken(0, "label=Artist", true, prefix);
+            selenium.AddFilter(2, prefix);
+            selenium.LineFindAndSelectElements(prefix + "value_2_", false, new int[] { 0 });
+            selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("{0}:visible".Formato(LinesTestExtensions.LineFindSelector(prefix + "value_2_"))));
+            selenium.Search(prefix);
+            selenium.ThereAreNRows(1, prefix);
+            selenium.DeleteFilter(2, prefix);
+
+            //Filter from the combo with Subtokens
+            selenium.FilterSelectToken(0, "label=Artist", true, prefix);
+            selenium.ExpandTokens(1, prefix);
+            selenium.FilterSelectToken(1, "label=Name", false, prefix);
+            selenium.AddFilter(2, prefix);
+            selenium.FilterSelectOperation(2, "value=EndsWith", prefix);
+            selenium.Type(prefix + "value_2", "a");
+            selenium.Search(prefix);
+            selenium.ThereAreNRows(1, prefix);
+
+            //Delete all filters
+            selenium.ClearAllFilters(prefix);
+            selenium.Search(prefix);
+            selenium.ThereAreNRows(8, prefix);
+
+            //Top
+            selenium.SetTopToFinder("5", prefix);
+            selenium.Search(prefix);
+            selenium.ThereAreNRows(5, prefix);
+            selenium.SetTopToFinder("", prefix); 
+            selenium.Search(prefix);
+            selenium.ThereAreNRows(8, prefix);
         }
 
         [TestMethod]
         public void Orders()
         {
-            try
-            {
-                CheckLoginAndOpen("/Signum.Web.Extensions.Sample/Find/Album");
+            CheckLoginAndOpen(FindRoute("Album"));
 
-                //Ascending
-                string authorth = "jq=#tblResults > thead > tr > th:nth-child(3)";
-                selenium.Click(authorth); //Author
-                selenium.WaitAjaxFinished(() => selenium.IsElementInCell(1, 3, "input:hidden[value=Artist;5]"));
-                Assert.IsTrue(selenium.IsElementPresent(authorth + ".headerSortDown"));
+            int authorCol = 3;
 
-                //Multiple orders
-                string labelth = "jq=#tblResults > thead > tr > th:nth-child(4)";
-                selenium.ShiftKeyDown();
-                selenium.Click(labelth); //Label
-                selenium.ShiftKeyUp();
-                selenium.WaitAjaxFinished(() => selenium.IsElementInCell(1, 4, "input:hidden[value=Label;5]"));
-                Assert.IsTrue(selenium.IsElementPresent(authorth + ".headerSortDown"));
-                Assert.IsTrue(selenium.IsElementPresent(labelth + ".headerSortDown"));
+            //Ascending
+            selenium.Sort(authorCol, true);
+            selenium.WaitAjaxFinished(() => selenium.IsEntityInRow(1, "Album;5"));
+            
+            int labelCol = 4;
+            
+            //Multiple orders
+            selenium.SortMultiple(labelCol, true);
+            selenium.WaitAjaxFinished(() => selenium.IsEntityInRow(1, "Album;7"));
+            selenium.TableHeaderMarkedAsSorted(authorCol, true, true);
+            
+            //Multiple orders: change column order type to descending
+            selenium.SortMultiple(labelCol, false);
+            selenium.WaitAjaxFinished(() => selenium.IsEntityInRow(1, "Album;5"));
+            selenium.TableHeaderMarkedAsSorted(authorCol, true, true);
 
-                //Multiple orders: change column order type to descending
-                selenium.ShiftKeyDown();
-                selenium.Click(labelth); //Label
-                selenium.ShiftKeyUp();
-                selenium.WaitAjaxFinished(() => selenium.IsElementInCell(1, 4, "input:hidden[value=Label;3]"));
-                Assert.IsTrue(selenium.IsElementPresent(authorth + ".headerSortDown"));
-                Assert.IsTrue(selenium.IsElementPresent(labelth + ".headerSortUp"));
-
-                //Cancel multiple clicking a new order without Shift
-                selenium.Click(labelth); //Label
-                selenium.WaitAjaxFinished(() => selenium.IsElementInCell(1, 4, "input:hidden[value=Label;7]"));
-                Assert.IsFalse(selenium.IsElementPresent(authorth + ".headerSortDown"));
-                Assert.IsTrue(selenium.IsElementPresent(labelth + ".headerSortDown"));
-            }
-            catch (Exception)
-            {
-                Common.MyTestCleanup();
-                throw;
-            }
+            //Cancel multiple clicking a new order without Shift
+            selenium.Sort(labelCol, true);
+            selenium.WaitAjaxFinished(() => selenium.IsEntityInRow(1, "Album;12"));
+            selenium.TableHeaderMarkedAsSorted(authorCol, true, false);
         }
 
         [TestMethod]
         public void OrdersInPopup()
         {
-            try
-            {
-                CheckLoginAndOpen("/Signum.Web.Extensions.Sample/View/Band");
+            CheckLoginAndOpen(ViewRoute("Band", null));
 
-                //open search popup
-                selenium.Click("Members_btnFind");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Members_0_btnSearch"));
+            //open search popup
+            selenium.LineFind("Members_", 0);
+            
+            string prefix = "Members_0_"; //prefix for all the popup
 
-                //Ascending
-                string ismaleth = "jq=#Members_0_tblResults > thead > tr > th:nth-child(5)";
-                selenium.Click(ismaleth);
-                selenium.WaitAjaxFinished(() => selenium.IsElementInCell(1, 5, "input:checkbox[value=false]", "Members_0_"));
-                Assert.IsTrue(selenium.IsElementPresent(ismaleth + ".headerSortDown"));
+            int isMaleCol = 5;
 
-                //Descending
-                selenium.Click(ismaleth);
-                selenium.WaitAjaxFinished(() => selenium.IsElementInCell(1, 5, "input:checkbox[value=true]", "Members_0_"));
-                Assert.IsTrue(selenium.IsElementPresent(ismaleth + ".headerSortUp"));
+            //Ascending
+            selenium.Sort(isMaleCol, true, prefix);
+            selenium.WaitAjaxFinished(() => selenium.IsElementInCell(1, isMaleCol, "input:checkbox[value=false]", prefix));
+            
+            //Descending
+            selenium.Sort(isMaleCol, false, prefix);
+            selenium.WaitAjaxFinished(() => selenium.IsElementInCell(1, isMaleCol, "input:checkbox[value=true]", prefix));
 
-                //Multiple orders
-                string nameth = "jq=#Members_0_tblResults > thead > tr > th:nth-child(4)";
-                selenium.ShiftKeyDown();
-                selenium.Click(nameth); 
-                selenium.ShiftKeyUp();
-                selenium.WaitAjaxFinished(() => selenium.IsEntityInRow(1, "Artist;1", "Members_0_"));
-                Assert.IsTrue(selenium.IsElementPresent(ismaleth + ".headerSortUp"));
-                Assert.IsTrue(selenium.IsElementPresent(nameth + ".headerSortDown"));
+            int nameCol = 4;
 
-                //Multiple orders: change column order type to descending
-                selenium.ShiftKeyDown();
-                selenium.Click(nameth); 
-                selenium.ShiftKeyUp();
-                selenium.WaitAjaxFinished(() => selenium.IsEntityInRow(1, "Artist;8", "Members_0_"));
-                Assert.IsTrue(selenium.IsElementPresent(ismaleth + ".headerSortUp"));
-                Assert.IsTrue(selenium.IsElementPresent(nameth + ".headerSortUp"));
-                
-                //Cancel multiple clicking a new order without Shift
-                string idth = "jq=#Members_0_tblResults > thead > tr > th:nth-child(3)";
-                selenium.Click(idth);
-                selenium.WaitAjaxFinished(() => selenium.IsEntityInRow(1, "Artist;1", "Members_0_"));
-                Assert.IsTrue(selenium.IsElementPresent(idth + ".headerSortDown"));
-                Assert.IsFalse(selenium.IsElementPresent(ismaleth + ".headerSortUp"));
-                Assert.IsFalse(selenium.IsElementPresent(nameth + ".headerSortUp"));
-            }
-            catch (Exception)
-            {
-                Common.MyTestCleanup();
-                throw;
-            }
+            //Multiple orders
+            selenium.SortMultiple(nameCol, true, prefix);
+            selenium.WaitAjaxFinished(() => selenium.IsEntityInRow(1, "Artist;1", prefix));
+            selenium.TableHeaderMarkedAsSorted(isMaleCol, false, true, prefix);
+
+            //Multiple orders: change column order type to descending
+            selenium.SortMultiple(nameCol, false, prefix);
+            selenium.WaitAjaxFinished(() => selenium.IsEntityInRow(1, "Artist;8", prefix));
+            selenium.TableHeaderMarkedAsSorted(isMaleCol, false, true, prefix);
+
+            int idCol = 3;
+
+            //Cancel multiple clicking a new order without Shift
+            selenium.Sort(idCol, true, prefix);
+            selenium.WaitAjaxFinished(() => selenium.IsEntityInRow(1, "Artist;1", prefix));
+            selenium.TableHeaderMarkedAsSorted(isMaleCol, false, false, prefix);
+            selenium.TableHeaderMarkedAsSorted(nameCol, false, false, prefix);
         }
 
         [TestMethod]
         public void UserColumns()
         {
-            try
-            {
-                CheckLoginAndOpen("/Signum.Web.Extensions.Sample/Find/Album");
+            CheckLoginAndOpen(FindRoute("Album"));
 
-                //Add 2 user columns
-                selenium.Select("ddlTokens_0", "label=Label");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#lblddlTokens_1"));
-                selenium.Click("lblddlTokens_1");
-                selenium.Select("ddlTokens_1", "label=Id");
-                selenium.Click("btnAddColumn");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#tblResults > thead > tr > th > :hidden[value=Label.Id]"));
+            //Add 2 user columns
+            selenium.FilterSelectToken(0, "label=Label", true);
+            selenium.ExpandTokens(1);
+            selenium.FilterSelectToken(1, "label=Id", false);
+            selenium.AddColumn("Label.Id");
 
-                Assert.IsTrue(selenium.IsElementPresent("jq=#btnEditColumns:visible"));
+            Assert.IsTrue(selenium.IsElementPresent("jq=#btnEditColumns:visible"));
 
-                selenium.Select("ddlTokens_1", "label=Name");
-                selenium.Click("btnAddColumn");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#tblResults > thead > tr > th > :hidden[value=Label.Name]"));
+            selenium.FilterSelectToken(1, "label=Name", false);
+            selenium.AddColumn("Label.Name");
 
-                //Edit names
-                selenium.Click("btnEditColumns");
-                Assert.IsTrue(selenium.IsElementPresent("jq=#btnEditColumnsFinish:visible"));
-                selenium.Type("jq=#tblResults > thead > tr > th:nth-child(7) > :text", "Label Id");
-                selenium.Type("jq=#tblResults > thead > tr > th:nth-child(8) > :text", "Label Name");
-                selenium.Click("btnEditColumnsFinish");
+            //Edit names
+            selenium.Click("btnEditColumns");
+            Assert.IsTrue(selenium.IsElementPresent("jq=#btnEditColumnsFinish:visible"));
+            selenium.Type("{0} > :text".Formato(SearchTestExtensions.TableHeaderSelector(7)), "Label Id");
+            selenium.Type("{0} > :text".Formato(SearchTestExtensions.TableHeaderSelector(8)), "Label Name");
+            selenium.Click("btnEditColumnsFinish");
 
-                Assert.IsTrue(selenium.IsElementPresent("jq=#btnEditColumns:visible"));
-                Assert.IsFalse(selenium.IsElementPresent("jq=#btnEditColumnsFinish:visible"));
+            Assert.IsTrue(selenium.IsElementPresent("jq=#btnEditColumns:visible"));
+            Assert.IsFalse(selenium.IsElementPresent("jq=#btnEditColumnsFinish:visible"));
 
-                //Search with userColumns
-                selenium.Click("btnSearch");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#tblResults > tbody > tr:first > td:nth-child(8)"));
+            //Search with userColumns
+            selenium.Search();
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SearchTestExtensions.CellSelector(1, 8)));
 
-                //Delete one of the usercolumns
-                selenium.Click("btnEditColumns");
-                selenium.Click("jq=#tblResults > thead > tr > th:nth-child(7) > a#link-delete-user-col");
-                selenium.Click("btnEditColumnsFinish");
-                selenium.Click("btnSearch");
-                selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("jq=#tblResults > tbody > tr:first > td:nth-child(8)"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=#tblResults > tbody > tr:first > td:nth-child(7)"));
-            }
-            catch (Exception)
-            {
-                Common.MyTestCleanup();
-                throw;
-            }
+            //Delete one of the usercolumns
+            selenium.Click("btnEditColumns");
+            selenium.Click("{0} > a#link-delete-user-col".Formato(SearchTestExtensions.TableHeaderSelector(7)));
+                
+            selenium.Click("btnEditColumnsFinish");
+            selenium.Search();
+            selenium.WaitAjaxFinished(() => !selenium.IsElementPresent(SearchTestExtensions.CellSelector(1, 8)));
+            Assert.IsTrue(selenium.IsElementPresent(SearchTestExtensions.CellSelector(1, 7)));
         }
 
         [TestMethod]
         public void UserColumnsInPopup()
         {
-            try
-            {
-                CheckLoginAndOpen("/Signum.Web.Extensions.Sample/View/Band");
+            CheckLoginAndOpen(ViewRoute("Band", null));
 
-                //open search popup
-                selenium.Click("Members_btnFind");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Members_0_btnSearch"));
-
-                //User columns are not present in popup
-                Assert.IsFalse(selenium.IsElementPresent("jq=#Members_0_divFilters .addColumn"));
-            }
-            catch (Exception)
-            {
-                Common.MyTestCleanup();
-                throw;
-            }
+            //open search popup
+            selenium.LineFind("Members_", 0);
+            
+            //User columns are not present in popup
+            Assert.IsFalse(selenium.IsElementPresent("jq=#Members_0_divFilters .addColumn"));
         }
 
         [TestMethod]
         public void EntityCtxMenu_OpExecute()
         {
-            try
-            {
-                CheckLoginAndOpen("/Signum.Web.Extensions.Sample/Find/Artist");
+            CheckLoginAndOpen(FindRoute("Artist"));
 
-                //Search
-                selenium.Click("btnSearch");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#tblResults > tbody > tr"));
+            //Search
+            selenium.Search();
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SearchTestExtensions.RowSelector(1)));
 
-                //ArtistOperations.AssignPersonalAward
-                selenium.ContextMenu("jq=#tblResults > tbody > tr:first > td:first");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#tblResults > tbody > tr:first > td:first .searchCtxMenu a"));
-                selenium.Click("jq=#tblResults > tbody > tr:first > td:first .searchCtxMenu a");
-                
-                Assert.IsTrue(Regex.IsMatch(selenium.GetConfirmation(), ".*"));
-                selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("jq=#tblResults > tbody > tr:first > td:first > a.entityCtxMenuSuccess"));
-                Assert.IsFalse(selenium.IsElementPresent("jq=#tblResults > tbody > tr:first > td:first .searchCtxMenu .searchCtxMenuOverlay"));
+            string row1col1 = SearchTestExtensions.CellSelector(1, 1);
+            
+            //ArtistOperations.AssignPersonalAward
+            selenium.EntityContextMenu(1);
+            selenium.EntityContextMenuClick(1, 1);
 
-                //For Michael Jackson there are no operations enabled
-                selenium.ContextMenu("jq=#tblResults > tbody > tr:nth-child(5) > td:first");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#tblResults > tbody > tr:nth-child(5) > td:first .searchCtxMenu"));
-                //There's not a menu with hrefs => only some text saying there are no operations
-                Assert.IsFalse(selenium.IsElementPresent("jq=#tblResults > tbody > tr:first > td:first .searchCtxMenu a"));
-            }
-            catch (Exception)
-            {
-                Common.MyTestCleanup();
-                throw;
-            }
+            Assert.IsTrue(Regex.IsMatch(selenium.GetConfirmation(), ".*"));
+            selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("{0} > a.entityCtxMenuSuccess".Formato(row1col1)));
+            Assert.IsFalse(selenium.IsElementPresent("{0} .searchCtxMenu .searchCtxMenuOverlay".Formato(row1col1)));
+
+            //For Michael Jackson there are no operations enabled
+            selenium.EntityContextMenu(5);
+            //There's not a menu with hrefs => only some text saying there are no operations
+            Assert.IsFalse(selenium.IsElementPresent("{0} a".Formato(SearchTestExtensions.EntityContextMenuSelector(5))));
         }
 
         [TestMethod]
         public void EntityCtxMenu_OpConstructFrom_OpenPopup()
         {
-            try
-            {
-                CheckLoginAndOpen("/Signum.Web.Extensions.Sample/Find/Band");
+            CheckLoginAndOpen(FindRoute("Band"));
 
-                //Search
-                selenium.Click("btnSearch");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#tblResults > tbody > tr"));
+            //Search
+            selenium.Search();
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SearchTestExtensions.RowSelector(1)));
+            
+            string row1col1 = SearchTestExtensions.CellSelector(1, 1);
+            
+            //Band.CreateFromBand
+            selenium.EntityContextMenu(1);
+            selenium.EntityContextMenuClick(1, 1);
 
-                //Band.CreateFromBand
-                selenium.ContextMenu("jq=#tblResults > tbody > tr:first > td:first");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#tblResults > tbody > tr:first > td:first .searchCtxMenu a"));
-                selenium.Click("jq=#tblResults > tbody > tr:first > td:first .searchCtxMenu a");
-                
-                Assert.IsTrue(Regex.IsMatch(selenium.GetConfirmation(), ".*"));
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #NewTemp"));
+            Assert.IsTrue(Regex.IsMatch(selenium.GetConfirmation(), ".*"));
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SeleniumExtensions.PopupSelector("New_")));
 
-                selenium.Type("New_Name", "ctxtest");
-                selenium.Type("New_Year", DateTime.Now.Year.ToString());
-                selenium.Click("New_Label_btnFind");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #New_LabelTemp"));
-                selenium.Click("New_Label_btnSearch");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#New_LabelTemp .tblResults > tbody > tr"));
-                selenium.Click("New_Label_rowSelection");
-                selenium.Click("New_Label_sfBtnOk");
-                
-                selenium.Click("New_sfBtnOk");
-                selenium.WaitForPageToLoad(PageLoadTimeout);
-                Assert.IsTrue(selenium.IsElementPresent("jq=.entityId > span"));
-            }
-            catch (Exception)
-            {
-                Common.MyTestCleanup();
-                throw;
-            }
+            selenium.Type("New_Name", "ctxtest");
+            selenium.Type("New_Year", DateTime.Now.Year.ToString());
+            
+            selenium.LineFindAndSelectElements("New_Label_", false, new int[]{0});
+
+            selenium.Click("jq=#{0}btnOk".Formato("New_")); //Dont't call PopupOk helper => it makes an ajaxWait and then waitPageLoad fails
+            selenium.WaitForPageToLoad(PageLoadTimeout);
+            selenium.MainEntityHasId();
         }
 
         [TestMethod]
         public void EntityCtxMenu_OpConstructFrom_Navigate()
         {
-            try
-            {
-                CheckLoginAndOpen("/Signum.Web.Extensions.Sample/Find/Album");
+            CheckLoginAndOpen(FindRoute("Album"));
 
-                //Search
-                selenium.Click("btnSearch");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#tblResults > tbody > tr"));
+            //Search
+            selenium.Search();
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SearchTestExtensions.RowSelector(1)));
 
-                //Album.Clone
-                selenium.ContextMenu("jq=#tblResults > tbody > tr:first > td:first");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#tblResults > tbody > tr:first > td:first .operation-ctx-menu"));
-                selenium.Click("jq=#tblResults > tbody > tr:first > td:first .operation-ctx-menu li:nth-child(2) > a");
+            //Album.Clone
+            selenium.EntityContextMenu(1);
+            selenium.EntityContextMenuClick(1, 2);
 
-                Assert.IsTrue(Regex.IsMatch(selenium.GetConfirmation(), ".*"));
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#AlbumOperation_Save"));
+            Assert.IsTrue(Regex.IsMatch(selenium.GetConfirmation(), ".*"));
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#AlbumOperation_Save"));
 
-                selenium.Type("Name", "ctxtest2");
-                selenium.Type("Year", DateTime.Now.Year.ToString());
-                
-                selenium.Click("AlbumOperation_Save");
-                selenium.WaitForPageToLoad(PageLoadTimeout);
-                Assert.IsTrue(selenium.IsElementPresent("jq=.entityId > span"));
-            }
-            catch (Exception)
-            {
-                Common.MyTestCleanup();
-                throw;
-            }
+            selenium.Type("Name", "ctxtest2");
+            selenium.Type("Year", DateTime.Now.Year.ToString());
+
+            selenium.Click("AlbumOperation_Save");
+            selenium.WaitForPageToLoad(PageLoadTimeout);
+            selenium.MainEntityHasId();
         }
 
         [TestMethod]
         public void EntityCtxMenu_OpDelete()
         {
-            try
-            {
-                CheckLoginAndOpen("/Signum.Web.Extensions.Sample/Find/Album");
+            CheckLoginAndOpen(FindRoute("Album"));
 
-                //Album.Delete
-                //Order by Id descending so we delete the last cloned album
-                selenium.Click("jq=th#Id");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#tblResults > tbody > tr"));
-                selenium.Click("jq=th#Id");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#tblResults > tbody > tr"));
+            //Album.Delete
+            //Order by Id descending so we delete the last cloned album
+            int idCol = 2;
+            selenium.Sort(idCol, true);
+            selenium.Sort(idCol, false);
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SearchTestExtensions.RowSelector(1)));
 
-                Assert.IsTrue(selenium.IsElementPresent("jq=#tblResults > tbody > tr:nth-child(14)"));
-                Assert.IsFalse(selenium.IsElementPresent("jq=#tblResults > tbody > tr:nth-child(15)"));
+            Assert.IsTrue(selenium.IsElementPresent(SearchTestExtensions.RowSelector(14)));
+            Assert.IsFalse(selenium.IsElementPresent(SearchTestExtensions.RowSelector(15)));
 
-                selenium.ContextMenu("jq=#tblResults > tbody > tr:first > td:first");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#tblResults > tbody > tr:first > td:first .operation-ctx-menu"));
-                selenium.Click("jq=#tblResults > tbody > tr:first > td:first .operation-ctx-menu li:first > a");
+            string row1col1 = SearchTestExtensions.CellSelector(1, 1);
 
-                Assert.IsTrue(Regex.IsMatch(selenium.GetConfirmation(), ".*"));
-                selenium.WaitForPageToLoad(PageLoadTimeout);
+            selenium.EntityContextMenu(1);
+            selenium.EntityContextMenuClick(1, 1);
 
-                Assert.IsTrue(selenium.IsElementPresent("jq=#tblResults > tbody > tr:nth-child(13)"));
-                Assert.IsFalse(selenium.IsElementPresent("jq=#tblResults > tbody > tr:nth-child(14)"));
-            }
-            catch (Exception)
-            {
-                Common.MyTestCleanup();
-                throw;
-            }
+            Assert.IsTrue(Regex.IsMatch(selenium.GetConfirmation(), ".*"));
+            selenium.WaitForPageToLoad(PageLoadTimeout);
+
+            Assert.IsTrue(selenium.IsElementPresent(SearchTestExtensions.RowSelector(13)));
+            Assert.IsFalse(selenium.IsElementPresent(SearchTestExtensions.RowSelector(14)));
         }
     }
 }

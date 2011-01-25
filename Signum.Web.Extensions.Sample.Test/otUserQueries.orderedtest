@@ -1,11 +1,9 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<OrderedTest name="otUserQueries" storage="d:\signum\extensions\signum.web.extensions.sample.test\otuserqueries.orderedtest" id="5f7c1890-218e-4dc4-8b20-dffe51dcf9ec" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
-  <Css projectStructure="" iteration="" />
-  <Execution timeOut="2147483647" />
-  <Owners>
-    <Owner name="" />
-  </Owners>
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<OrderedTest name="otuserqueries" storage="d:\signum\extensions\signum.web.extensions.sample.test\otuserqueries.orderedtest" id="5f7c1890-218e-4dc4-8b20-dffe51dcf9ec" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Execution timeOut="2147483647" id="016d5854-1f04-4130-8d2d-e5818945efbb" />
   <TestLinks>
-    <TestLink id="bd0beb25-413d-58ef-bd11-dd9e5574b1d1" name="UQ_Create" storage="bin\debug\signum.web.extensions.sample.test.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel,   PublicKeyToken=b03f5f7f11d50a3a" />
+    <TestLink id="dc59c848-b88b-fcb7-8f63-abcb75595d3c" name="UserQuery_Create" storage="bin\debug\signum.web.extensions.sample.test.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <TestLink id="fc5addf4-2bb4-e2b0-f53d-212a2f45ecf3" name="UserQuery_Edit" storage="bin\debug\signum.web.extensions.sample.test.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <TestLink id="d186a671-2bf1-1ce4-423c-28dcc7c9437f" name="UserQuery_Delete" storage="bin\debug\signum.web.extensions.sample.test.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   </TestLinks>
 </OrderedTest>

@@ -8,7 +8,7 @@ using Signum.Engine.ControlPanel;
 using Signum.Web.ControlPanel;
 using Signum.Utilities;
 
-namespace Signum.Web.Extensions.Sample.Controllers
+namespace Signum.Web.Extensions.Sample
 {
     [HandleError]
     public class HomeController : Controller
@@ -20,7 +20,7 @@ namespace Signum.Web.Extensions.Sample.Controllers
 
             var panel = ControlPanelLogic.GetHomePageControlPanel();
             if (panel != null)
-                return View(ControlPanelClient.ViewPrefix.Formato("ControlPanel"));
+                return View(ControlPanelClient.ViewPrefix.Formato("ControlPanel"), panel);
             else
                 return View();
         }

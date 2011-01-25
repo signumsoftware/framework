@@ -1,74 +1,79 @@
 @using Signum.Web.Auth
 @using Signum.Web.ScriptCombiner
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head id="Head1" runat="server">
-    <title>@ViewData.TryGet(ViewDataKeys.Title, "")</title>
+@using Signum.Web.Extensions.Sample
+
+<!doctype html>
+<html>
+<head>
+    <title>@ViewBag.Title</title>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
-    @Html.ScriptCss("~/content/fluid/fluid.min.css", "~/signum/Content/LineStyles.css")
-    @Html.ScriptsJs("~/scripts/jquery-1.4.4.js")
-    <script type='text/javascript' src='http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.min.js'></script>
-    @Html.ScriptsJs("~/signum/Resources/" + System.Globalization.CultureInfo.CurrentCulture.Name + ".js")
-    @Html.ScriptsJs("~/signum/Scripts/SF_Globals.js", "~/signum/Scripts/SF_jquery-ui-datepicker-extension.js")
-    @if (IsSectionDefined("head"))
-    {
-        @RenderSection("head");
+    
+    @Html.ScriptCss("~/content/reset.css", "~/signum/content/lineStyles.css", "~/content/site.css", "~/content/smoothness/jquery-ui-1.8.7.custom.css")    
+    @Html.ScriptsJs("~/scripts/jquery-1.4.4.min.js", "~/scripts/jquery-ui-1.8.7.custom.min.js")    
+
+    @Html.ScriptsJs("~/signum/resources/" + System.Globalization.CultureInfo.CurrentCulture.Name + ".js")
+    @Html.ScriptsJs("~/signum/calendarResources/" + System.Globalization.CultureInfo.CurrentCulture.Name + ".js")
+    
+    @Html.ScriptsJs("~/signum/scripts/SF_Utils.js", "~/signum/scripts/SF_jquery-ui-datepicker-extension.js")    
+
+    @if (IsSectionDefined("head")) {
+        @RenderSection("head")
     }
 </head>
-<body>
-    <div class="container_16" id="main">
-        <div class="grid_3 prefix_13" id="login">
-            @{ Html.RenderPartial(AuthClient.LoginUserControlUrl);}
-        </div>
-        <div class="clear">
-        </div>
-        <div id="title" class="grid_16">
-            <h1>
-                <a href="Home/Index">Signum Extensions Sample</a></h1>
-        </div>
-        <div class="grid_16">
+
+<body> 
+    <div id="wrap">
+        <header>
+            <div id="user-info">
+                @{ Html.RenderPartial(AuthClient.LoginUserControlUrl);}
+
+            </div>    
+                
+            <div id="title">
+                <h1>@(Html.ActionLink<HomeController>( "Signum Extensions Sample", c=>c.Index()))</h1>
+            </div>
+        </header>
+
+        <div id="main">
+            <div id="widgets">
             @{ //Sólo mostrar menú si está identificado
                 bool identificado = Signum.Entities.Authorization.UserDN.Current != null;}
-            @if (identificado)
-            {
-                ViewDataDictionary vdd = new ViewDataDictionary()
+                @if (identificado)
                 {
-                    {ViewDataKeys.PartialViewName, ViewData[ViewDataKeys.PartialViewName]}
-                };
+                      ViewDataDictionary vdd = new ViewDataDictionary()
+                      {
+                        {ViewDataKeys.PartialViewName, ViewData[ViewDataKeys.PartialViewName]}
+                       };
 
-                Html.RenderPartial("WidgetView", vdd);
-            }
-        </div>
-        <div class="clear">
-        </div>
-        <div class="grid_3" id="menu">
-            @if (identificado)
-            {
+                       Html.RenderPartial("WidgetView", vdd);
+                }
+            </div>
+        
+            <div id="menu">
+                @if (identificado) {
                 <div class="box menu">
-                    <h2>
-                        Menú</h2>
+                    <h2>Menú</h2>
                     @{ Html.RenderPartial("Menu", ViewData["current"] = Context.Request.RawUrl);}
+
                 </div>
-            }
-        </div>
-        <div id="content" class="grid_13">
-            @RenderBody()
-        </div>
-        <div class="clear">
-        </div>
-        <div id="footer" class="container_16">
+                }
+            </div>
+            <div id="content">
+                @RenderBody()
+            </div>
+            <div class="clear"></div>
+      </div>
+      <footer>
             <div class="grid_8">
                 <span id="powered">Powered by <span class="company">Signum Framework</span></span>
             </div>
-            <div class="grid_8">
+            <div class="grid_8">            
                 <ul>
-                    <li><a href="Help">Documentación de ayuda</a></li>
-                    <li><a href="mailto:soporte@signumsoftware.com">Soporte</a></li>
+                   <li><a href="Help">Documentación de ayuda</a></li>
+                   <li><a href="mailto:soporte@signumsoftware.com">Soporte</a></li>
                 </ul>
             </div>
-        </div>
-        <div class="clear">
-        </div>
-    </div>
+        </footer>
+    </div>        
 </body>
 </html>

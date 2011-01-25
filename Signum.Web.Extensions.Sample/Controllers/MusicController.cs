@@ -53,12 +53,12 @@ namespace Signum.Web.Extensions.Sample
             return Navigator.RedirectUrl(Navigator.ViewRoute(newAlbum));
         }
 
-        public ActionResult CreateGreatestHitsAlbum(List<int> sfIds, string prefix)
+        public ActionResult CreateGreatestHitsAlbum(List<int> ids, string prefix)
         {
-            if (sfIds == null || sfIds.Count == 0)
+            if (ids == null || ids.Count == 0)
                 throw new ArgumentException("You need to specify source albums");
 
-            List<Lite> sourceAlbums = sfIds.Select(idstr => Lite.Create(typeof(AlbumDN), idstr)).ToList();
+            List<Lite> sourceAlbums = ids.Select(idstr => Lite.Create(typeof(AlbumDN), idstr)).ToList();
             
             IdentifiableEntity entity = OperationLogic.ServiceConstructFromMany(sourceAlbums, typeof(AlbumDN), AlbumOperation.CreateGreatestHitsAlbum);
 

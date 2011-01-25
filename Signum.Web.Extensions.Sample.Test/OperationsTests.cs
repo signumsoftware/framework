@@ -40,208 +40,144 @@ namespace Signum.Web.Extensions.Sample.Test
             Common.MyTestCleanup();
         }
 
+        string constructorsMenuId = "tmConstructors";
+
         [TestMethod]
         public void Execute_Navigate()
         {
-            try
-            {
-                //Album.Save
-                CheckLoginAndOpen("/Signum.Web.Extensions.Sample/Find/Album");
+            //Album.Save
+            CheckLoginAndOpen(FindRoute("Album"));
 
-                selenium.Click("jq=input.create");
-                selenium.WaitForPageToLoad(PageLoadTimeout);
+            selenium.SearchCreate();
+            selenium.WaitForPageToLoad(PageLoadTimeout);
 
-                selenium.Type("Name", "test");
-                selenium.Type("Year", "2010");
-                selenium.Click("Author_btnFind");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #AuthorTemp"));
-                selenium.Click("Band");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Author_btnSearch"));
-                selenium.Click("Author_btnSearch");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#Author_tblResults > tbody > tr"));
-                selenium.Click("Author_rowSelection");
-                selenium.Click("Author_sfBtnOk");
-                selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("jq=#divASustituir + #AuthorTemp"));
-                selenium.Select("Label", "label=Virgin");
-                
-                selenium.Click("AlbumOperation_Save");
-                selenium.WaitForPageToLoad(PageLoadTimeout);
-                Assert.IsTrue(selenium.IsElementPresent("jq=.entityId > span"));
-            }
-            catch (Exception)
-            {
-                Common.MyTestCleanup();
-                throw;
-            }
+            selenium.Type("Name", "test");
+            selenium.Type("Year", "2010");
+            selenium.LineFindWithImplAndSelectElements("Author_", "Band", false, new int[]{0});
+            selenium.Select("Label", "label=Virgin");
+
+            selenium.EntityButtonClick("AlbumOperation_Save");
+            selenium.WaitForPageToLoad(PageLoadTimeout);
+            selenium.MainEntityHasId();
         }
 
         [TestMethod]
         public void Execute_ReloadContent()
         {
-            try
-            {
-                //Album.Modify
-                CheckLoginAndOpen("/Signum.Web.Extensions.Sample/View/Album/1");
+            //Album.Modify
+            CheckLoginAndOpen(ViewRoute("Album", 1));
 
-                selenium.Type("Name", "Siamese Dreamm");
-                selenium.Click("AlbumOperation_Modify");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("//span[contains(@class,'title') and text()='Siamese Dreamm']"));
+            Execute_AlbumOperationModify(selenium, "Siamese Dreamm");
 
-                //Restore state for future tests
-                selenium.Type("Name", "Siamese Dream");
-                selenium.Click("AlbumOperation_Modify");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("//span[contains(@class,'title') and text()='Siamese Dream']"));
-            }
-            catch (Exception)
-            {
-                Common.MyTestCleanup();
-                throw;
-            }
+            //Restore state for future tests
+            Execute_AlbumOperationModify(selenium, "Siamese Dream");
+        }
+
+        void Execute_AlbumOperationModify(ISelenium selenium, string name)
+        {
+            selenium.Type("Name", name);
+            selenium.EntityButtonClick("AlbumOperation_Modify");
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("//span[contains(@class,'title') and text()='{0}']".Formato(name)));
         }
 
         [TestMethod]
         public void ConstructFrom_OpenPopup()
         {
-            try
-            {
-                //Album.CreateFromBand
-                CheckLoginAndOpen("/Signum.Web.Extensions.Sample/View/Band/1");
+            //Album.CreateFromBand
+            CheckLoginAndOpen(ViewRoute("Band", 1));
 
-                selenium.Click("AlbumOperation_CreateFromBand");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #NewTemp"));
+            selenium.EntityMenuOptionClick(constructorsMenuId, "AlbumOperation_CreateFromBand");
+            string popupPrefix = "New_";
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SeleniumExtensions.PopupSelector(popupPrefix)));
 
-                selenium.Type("New_Name", "test2");
-                selenium.Type("New_Year", "2010");
-                selenium.Click("New_Label_btnFind");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #New_LabelTemp"));
-                selenium.Click("New_Label_btnSearch");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#New_Label_tblResults > tbody > tr"));
-                selenium.Click("New_Label_rowSelection");
-                selenium.Click("New_Label_sfBtnOk");
-                selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("jq=#divASustituir + #New_LabelTemp"));
+            selenium.Type("{0}Name".Formato(popupPrefix), "test2");
+            selenium.Type("{0}Year".Formato(popupPrefix), "2010");
+            selenium.LineFindAndSelectElements("{0}Label_".Formato(popupPrefix), false, new int[] { 0 });
 
-                //When clicking Ok (Save) => Custom controller that returns a url => navigate
-                selenium.Click("New_sfBtnOk");
-                selenium.WaitForPageToLoad(PageLoadTimeout);
-                Assert.IsTrue(selenium.IsElementPresent("jq=.entityId > span"));
-            }
-            catch (Exception)
-            {
-                Common.MyTestCleanup();
-                throw;
-            }
+            //When clicking Ok (Save) => Custom controller that returns a url => navigate
+            selenium.Click("jq=#{0}btnOk".Formato(popupPrefix)); //Dont't call PopupOk helper => it makes an ajaxWait and then waitPageLoad fails
+            selenium.WaitForPageToLoad(PageLoadTimeout);
+            selenium.MainEntityHasId();
         }
 
         [TestMethod]
         public void ConstructFrom_Submit()
         {
-            try
-            {
-                //Album.Clone
-                CheckLoginAndOpen("/Signum.Web.Extensions.Sample/View/Album/1");
+            //Album.Clone
+            CheckLoginAndOpen(ViewRoute("Album", 1));
 
-                selenium.Click("AlbumOperation_Clone");
-                selenium.WaitForPageToLoad(PageLoadTimeout);
-                
-                selenium.Type("Name", "test3");
-                selenium.Type("Year", "2010");
-                
-                selenium.Click("AlbumOperation_Save");
-                selenium.WaitForPageToLoad(PageLoadTimeout);
-                Assert.IsTrue(selenium.IsElementPresent("jq=.entityId > span"));
-            }
-            catch (Exception)
-            {
-                Common.MyTestCleanup();
-                throw;
-            }
+            selenium.EntityMenuOptionClick(constructorsMenuId, "AlbumOperation_Clone");
+            selenium.WaitForPageToLoad(PageLoadTimeout);
+
+            selenium.Type("Name", "test3");
+            selenium.Type("Year", "2010");
+
+            selenium.EntityButtonClick("AlbumOperation_Save");
+            selenium.WaitForPageToLoad(PageLoadTimeout);
+            selenium.MainEntityHasId();
         }
 
         [TestMethod]
         public void Delete()
         {
-            try
-            {
-                //Album.Delete
-                CheckLoginAndOpen("/Signum.Web.Extensions.Sample/View/Album/13");
-                
-                Assert.IsTrue(selenium.IsElementPresent("AlbumOperation_Delete"));
-                selenium.Click("AlbumOperation_Delete");
+            //Album.Delete
+            CheckLoginAndOpen(ViewRoute("Album", 13));
 
-                Assert.IsTrue(Regex.IsMatch(selenium.GetConfirmation(), ".*"));
-                
-                selenium.WaitForPageToLoad(PageLoadTimeout);
-                
-                //Delete has redirected to search window => Check deleted album doesn't exist any more
-                selenium.Click("btnSearch");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#tblResults > tbody > tr"));
-                Assert.IsFalse(selenium.IsElementPresent("jq=input:hidden[value=Album;13]"));
-            }
-            catch (Exception)
-            {
-                Common.MyTestCleanup();
-                throw;
-            }
+            Assert.IsTrue(selenium.IsElementPresent("AlbumOperation_Delete"));
+            selenium.EntityButtonClick("AlbumOperation_Delete");
+
+            Assert.IsTrue(Regex.IsMatch(selenium.GetConfirmation(), ".*"));
+
+            selenium.WaitForPageToLoad(PageLoadTimeout);
+
+            //Delete has redirected to search window => Check deleted album doesn't exist any more
+            selenium.Search();
+            Assert.IsFalse(selenium.IsElementPresent(SearchTestExtensions.EntityRowSelector("Album;13")));
         }
 
         [TestMethod]
         public void ConstructFromMany_OpenPopup()
         {
-            try
-            {
-                //Album.CreateGreatestHits
-                CheckLoginAndOpen("/Signum.Web.Extensions.Sample/Find/Album?sfAllowMultiple=true");
+            //Album.CreateGreatestHits
+            CheckLoginAndOpen("{0}?allowMultiple=true".Formato(FindRoute("Album")));
 
-                selenium.Click("btnSearch");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#tblResults > tbody > tr"));
+            selenium.Search();
 
-                selenium.Click("rowSelection_0");
-                selenium.Click("rowSelection_1");
-                selenium.Click("AlbumOperation_CreateEmptyGreatestHitsAlbum");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#divASustituir + #NewTemp"));
+            selenium.SelectRowCheckbox(0);
+            selenium.SelectRowCheckbox(1);
 
-                selenium.Type("New_Name", "test greatest empty");
-                selenium.Select("New_Label", "label=Virgin");
+            selenium.QueryMenuOptionClick(constructorsMenuId, "AlbumOperation_CreateEmptyGreatestHitsAlbum");
+            string popupPrefix = "New_";
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SeleniumExtensions.PopupSelector(popupPrefix)));
 
-                selenium.Click("AlbumOperation_Save");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#AlbumOperation_Modify"));
-                Assert.IsTrue(selenium.IsElementPresent("jq=#divASustituir + #NewTemp"));
-            }
-            catch (Exception)
-            {
-                Common.MyTestCleanup();
-                throw;
-            }
+            selenium.Type("{0}Name".Formato(popupPrefix), "test greatest empty");
+            selenium.Select("{0}Label".Formato(popupPrefix), "label=Virgin");
+
+            selenium.EntityButtonClick("AlbumOperation_Save");
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SeleniumExtensions.EntityButtonLocator("AlbumOperation_Modify")));
+            Assert.IsTrue(selenium.IsElementPresent(SeleniumExtensions.PopupSelector(popupPrefix)));
         }
 
         [TestMethod]
         public void ConstructFromMany_Submit_UseSessionWhenNew()
         {
-            try
-            {
-                //Album.CreateGreatestHits
-                CheckLoginAndOpen("/Signum.Web.Extensions.Sample/Find/Album?sfAllowMultiple=true");
+            //Album.CreateGreatestHits
+            CheckLoginAndOpen("{0}?allowMultiple=true".Formato(FindRoute("Album")));
 
-                selenium.Click("btnSearch");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#tblResults > tbody > tr"));
+            selenium.Search();
+            
+            selenium.SelectRowCheckbox(0);
+            selenium.SelectRowCheckbox(1);
 
-                selenium.Click("rowSelection_0");
-                selenium.Click("rowSelection_1");
-                selenium.Click("AlbumOperation_CreateGreatestHitsAlbum");
-                selenium.WaitForPageToLoad(PageLoadTimeout);
+            selenium.QueryMenuOptionClick(constructorsMenuId, "AlbumOperation_CreateGreatestHitsAlbum");
+            selenium.WaitForPageToLoad(PageLoadTimeout);
 
-                selenium.Type("Name", "test greatest hits");
-                selenium.Select("Label", "label=Virgin");
-                
-                selenium.Click("AlbumOperation_Save");
-                selenium.WaitForPageToLoad(PageLoadTimeout);
-                Assert.IsTrue(selenium.IsElementPresent("jq=.entityId > span"));
-            }
-            catch (Exception)
-            {
-                Common.MyTestCleanup();
-                throw;
-            }
+            selenium.Type("Name", "test greatest hits");
+            selenium.Select("Label", "label=Virgin");
+
+            selenium.EntityButtonClick("AlbumOperation_Save");
+            selenium.WaitForPageToLoad(PageLoadTimeout);
+            selenium.MainEntityHasId();
         }
     }
 }

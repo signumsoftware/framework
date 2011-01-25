@@ -12,28 +12,31 @@ using Signum.Test;
 using Signum.Web.Extensions.Sample.Test.Properties;
 using Signum.Engine.Maps;
 using Signum.Engine.Authorization;
+using Signum.Utilities;
 
 namespace Signum.Web.Extensions.Sample.Test
 {
     [TestClass]
     public class Common : SeleniumTestClass
     {
+        protected string FindRoute(string webQueryName)
+        {
+            return "/Signum.Web.Extensions.Sample/Find/{0}".Formato(webQueryName);
+        }
+
+        protected string ViewRoute(string webTypeName, int? id)
+        {
+            return "/Signum.Web.Extensions.Sample/View/{0}/{1}".Formato(webTypeName, id.HasValue ? id.Value.ToString() : "");
+        }
+
         public static void Start(TestContext testContext)
         {
-            try
-            {
-                Signum.Test.Extensions.Starter.Start(UserConnections.Replace(Settings.Default.ConnectionString));
+            Signum.Test.Extensions.Starter.Start(UserConnections.Replace(Settings.Default.ConnectionString));
 
-                using (AuthLogic.Disable())
-                    Schema.Current.Initialize();
+            using (AuthLogic.Disable())
+                Schema.Current.Initialize();
 
-                SeleniumTestClass.LaunchSelenium();
-            }
-            catch (Exception)
-            {
-                MyTestCleanup();
-                throw;
-            }
+            SeleniumTestClass.LaunchSelenium();
         }
 
         public void Login()
