@@ -15,7 +15,7 @@ using System.Web.Mvc;
 
 namespace Signum.Web.PortableAreas
 {
-    public class EmbeddedFilesRespository: IFileRepository
+    public class EmbeddedFilesRepository: IFileRepository
     {
         public readonly Assembly Assembly;
         readonly string namespaceName;
@@ -23,13 +23,13 @@ namespace Signum.Web.PortableAreas
 
         readonly Dictionary<string, string> resources;
 
-        public EmbeddedFilesRespository(Assembly assembly, string areaName) :
-            this(assembly, "~/" + areaName + "/", assembly.GetName().Name + "." + areaName)
+        public EmbeddedFilesRepository(Assembly assembly, string areaName) :
+            this(assembly, "~/" + areaName + "/", assembly.GetName().Name + "." + areaName.Replace("/", "."))
         {
             
         }
 
-        public EmbeddedFilesRespository(Assembly assembly, string virtualPath, string namespaceName)
+        public EmbeddedFilesRepository(Assembly assembly, string virtualPath, string namespaceName)
         {
             if (assembly == null)
                 throw new ArgumentNullException("assembly");
