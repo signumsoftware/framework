@@ -76,9 +76,9 @@ namespace ASP
     using (var query = e.SubContext(f => f.Query))
     {
     
-Write(Html.HiddenEntityInfo(query));
+Write(Html.HiddenRuntimeInfo(query));
 
-                                 ;
+                                  
     
 Write(Html.ValueLine(query, f => f.DisplayName, f => { f.ReadOnly = true; f.LabelText = "Query"; }));
 
@@ -96,16 +96,16 @@ Write(Html.Hidden(query.Compose("DisplayName"), query.Value.DisplayName));
     
 Write(Html.ValueLine(e, f => f.DisplayName));
 
-                                          ;
+                                          
     
 Write(Html.ValueLine(e, f => f.Deleted, vl => vl.ReadOnly = true));
 
-                                                                ;
+                                                                
 
     
 Write(Html.FileLine(e, f => f.File, fl => fl.AsyncUpload = false));
 
-                                                                ;
+                                                                
 }
 
         }

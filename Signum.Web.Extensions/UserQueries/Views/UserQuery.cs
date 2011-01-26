@@ -72,13 +72,13 @@ namespace ASP
     
 Write(Html.EntityLine(e, f => f.Related, el => el.Create = false));
 
-                                                                ;
+                                                                
 using (var query = e.SubContext(f => f.Query))
 {
     
-Write(Html.HiddenEntityInfo(query));
+Write(Html.HiddenRuntimeInfo(query));
 
-                                 ;
+                                  
     
 Write(Html.Span("Query", "Query", "labelLine"));
 
@@ -105,7 +105,7 @@ Write(Html.Hidden(query.Compose("DisplayName"), query.Value.DisplayName));
     
 Write(Html.ValueLine(e, f => f.DisplayName));
 
-                                          ;
+                                          
 
 WriteLiteral("    <br />\r\n");
 
@@ -113,7 +113,7 @@ WriteLiteral("    <br />\r\n");
     
 Write(Html.EntityRepeater(e, f => f.Filters, er => { er.PreserveViewData = true; er.ForceNewInUI = true; }));
 
-                                                                                                          ;
+                                                                                                          
 
 WriteLiteral("    <br />\r\n");
 
@@ -121,11 +121,11 @@ WriteLiteral("    <br />\r\n");
     
 Write(Html.ValueLine(e, f => f.ColumnsMode));
 
-                                          ;
+                                          
     
 Write(Html.EntityRepeater(e, f => f.Columns, er => { er.PreserveViewData = true; er.ForceNewInUI = true; }));
 
-                                                                                                          ;
+                                                                                                          
 
 WriteLiteral("    <br />\r\n");
 
@@ -133,7 +133,7 @@ WriteLiteral("    <br />\r\n");
     
 Write(Html.EntityRepeater(e, f => f.Orders, er => { er.PreserveViewData = true; er.ForceNewInUI = true; }));
 
-                                                                                                         ;
+                                                                                                         
 
 
 WriteLiteral("    <br />\r\n");
@@ -142,7 +142,7 @@ WriteLiteral("    <br />\r\n");
     
 Write(Html.ValueLine(e, f => f.MaxItems));
 
-                                       ;
+                                       
 }
 
 WriteLiteral("} ");

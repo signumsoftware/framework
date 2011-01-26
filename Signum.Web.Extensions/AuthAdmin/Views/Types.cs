@@ -45,6 +45,7 @@ namespace ASP
     using System.Web.UI.WebControls.WebParts;
     using System.Web.UI.HtmlControls;
     using System.Xml.Linq;
+    using Signum.Web.AuthAdmin;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/AuthAdmin/Views/Types.cshtml")]
@@ -64,6 +65,7 @@ namespace ASP
         }
         public override void Execute()
         {
+
 
 Write(Html.DynamicCss("~/authAdmin/Content/authAdmin.css"));
 
@@ -272,18 +274,12 @@ WriteLiteral("                    <td>\r\n");
                          if (item.Value.Properties.HasValue)
                         {
 
-WriteLiteral("                            <a href=\"javascript:openDialog(\'AuthAdmin/Properties\'" +
-", {role:");
+WriteLiteral("                            <a href=\"javascript:openDialog(\'");
 
 
-                                                                                    Write(tc.Value.Role.Id);
+                                                       Write(Url.Action((AuthAdminController a)=>a.Properties(tc.Value.Role, item.Value.Resource.ToLite(), null)));
 
-WriteLiteral(", type:");
-
-
-                                                                                                            Write(item.Value.Resource.Id);
-
-WriteLiteral("});\">\r\n                                <div class=\"property\">\r\n                  " +
+WriteLiteral("\');\">\r\n                                <div class=\"property\">\r\n                  " +
 "                  <div class=\"thumb ");
 
 
@@ -310,18 +306,12 @@ WriteLiteral("                    <td>\r\n");
                          if (item.Value.Operations.HasValue)
                         {
 
-WriteLiteral("                            <a href=\"javascript:openDialog(\'AuthAdmin/Operations\'" +
-", {role:");
+WriteLiteral("                            <a href=\"javascript:openDialog(\'");
 
 
-                                                                                    Write(tc.Value.Role.Id);
+                                                       Write(Url.Action((AuthAdminController a)=>a.Operations(tc.Value.Role, item.Value.Resource.ToLite(), null)));
 
-WriteLiteral(", type:");
-
-
-                                                                                                            Write(item.Value.Resource.Id);
-
-WriteLiteral("});\">\r\n                                <div class=\"operation\">\r\n                 " +
+WriteLiteral("\');\">\r\n                                <div class=\"operation\">\r\n                 " +
 "                   <div class=\"thumb ");
 
 
@@ -348,18 +338,12 @@ WriteLiteral("                    <td>\r\n");
                          if (item.Value.Queries.HasValue)
                         {
 
-WriteLiteral("                            <a href=\"javascript:openDialog(\'AuthAdmin/Queries\', {" +
-"role:");
+WriteLiteral("                            <a href=\"javascript:openDialog(\'");
 
 
-                                                                                 Write(tc.Value.Role.Id);
+                                                       Write(Url.Action((AuthAdminController a)=>a.Queries(tc.Value.Role, item.Value.Resource.ToLite(), null)));
 
-WriteLiteral(", type:");
-
-
-                                                                                                         Write(item.Value.Resource.Id);
-
-WriteLiteral("});\">\r\n                                <div class=\"query\">\r\n                     " +
+WriteLiteral("\');\">\r\n                                <div class=\"query\">\r\n                     " +
 "               <div class=\"thumb ");
 
 

@@ -2,7 +2,7 @@
 @using Signum.Entities.Scheduler
 @using (var e = Html.TypeContext<ScheduleRuleDailyDN>())
 {
-    @Html.ValueLine(e, f => f.StartingOn);
-    @Html.ValueLine(e, f => f.Hour);
-    @Html.ValueLine(e, f => f.Minute);
+    @Html.ValueLine(e, f => f.StartingOn)
+    @Html.ValueLine(e, f => f.Hour)
+    @Html.ValueLine(e, f => f.Minute)
 }

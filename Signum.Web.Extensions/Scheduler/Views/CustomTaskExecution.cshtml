@@ -3,8 +3,8 @@
 
 @using (var e = Html.TypeContext<CustomTaskExecutionDN>()) 
 {
-    @Html.EntityLine(e, f => f.user);
-	@Html.ValueLine(e, f => f.StartTime);
-    @Html.ValueLine(e, f => f.EndTime);
-    @Html.ValueLine(e, f => f.Exception);
+    @Html.EntityLine(e, f => f.user)
+	@Html.ValueLine(e, f => f.StartTime)
+    @Html.ValueLine(e, f => f.EndTime)
+    @Html.ValueLine(e, f => f.Exception)
 }

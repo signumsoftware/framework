@@ -7,6 +7,6 @@
     tc.BreakLine = false;
     tc.ValueFirst = true;
 
-    @Html.ValueLine(tc, cuq => cuq.Label);
-    @Html.EntityLine(tc, cuq => cuq.UserQuery, el => el.Create = false);
+    @Html.ValueLine(tc, cuq => cuq.Label)
+    @Html.EntityLine(tc, cuq => cuq.UserQuery, el => el.Create = false)
 }

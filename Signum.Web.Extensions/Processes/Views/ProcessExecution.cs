@@ -63,7 +63,7 @@ namespace ASP
         {
 
 
-Write(Html.DynamicCss("~/process/Content/Processes.css"));
+Write(Html.DynamicCss("~/processes/Content/Processes.css"));
 
 WriteLiteral("\r\n");
 
@@ -177,17 +177,17 @@ WriteLiteral(@""", { id: idProcess },
                     refreshUpdate(idProcess, idPrefix);
                 }
                 else {
-                    if (empty(idPrefix)) {
-                        ReloadEntity(""");
+                    if (SF.isEmpty(idPrefix)) {
+                        SF.reloadEntity(""");
 
 
-                                 Write(Url.Action("FinishProcessNormalPage", "Process"));
+                                    Write(Url.Action("FinishProcessNormalPage", "Process"));
 
 WriteLiteral(@""", idPrefix);
                     }
                     else {
                         $(""#"" + idPrefix.compose(""externalPopupDiv"")).remove();
-                        new ViewNavigator({
+                        new SF.ViewNavigator({
                             type: ""ProcessExecutionDN"",
                             id: idProcess,
                             prefix: idPrefix
@@ -203,8 +203,7 @@ WriteLiteral(@""", idPrefix);
 
 
     }
-}
-WriteLiteral(" ");
+} 
 
 
         }

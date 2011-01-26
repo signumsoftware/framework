@@ -1,3 +1,4 @@
+@using Signum.Web.AuthAdmin
 @Html.DynamicCss("~/authAdmin/Content/authAdmin.css")
 @Html.ScriptsJs("~/authAdmin/Scripts/authAdmin.js")
 <script type="text/javascript">
@@ -8,8 +9,8 @@
 </script>
 @using (var tc = Html.TypeContext<TypeRulePack>())
 {
-    @Html.EntityLine(tc, f => f.Role);
-    @Html.ValueLine(tc, f => f.DefaultRule, vl => { vl.UnitText = tc.Value.DefaultLabel; });
+    @Html.EntityLine(tc, f => f.Role)
+    @Html.ValueLine(tc, f => f.DefaultRule, vl => { vl.UnitText = tc.Value.DefaultLabel; })
 
 
 
@@ -100,7 +101,7 @@
                     <td>
                         @if (item.Value.Properties.HasValue)
                         {
-                            <a href="javascript:openDialog('AuthAdmin/Properties', {role:@tc.Value.Role.Id, type:@item.Value.Resource.Id});">
+                            <a href="javascript:openDialog('@Url.Action((AuthAdminController a)=>a.Properties(tc.Value.Role, item.Value.Resource.ToLite(), null))');">
                                 <div class="property">
                                     <div class="thumb @item.Value.Properties.ToString().ToLower()">
                                     </div>
@@ -114,7 +115,7 @@
                     <td>
                         @if (item.Value.Operations.HasValue)
                         {
-                            <a href="javascript:openDialog('AuthAdmin/Operations', {role:@tc.Value.Role.Id, type:@item.Value.Resource.Id});">
+                            <a href="javascript:openDialog('@Url.Action((AuthAdminController a)=>a.Operations(tc.Value.Role, item.Value.Resource.ToLite(), null))');">
                                 <div class="operation">
                                     <div class="thumb @item.Value.Operations.ToString().ToLower()">
                                     </div>
@@ -128,7 +129,7 @@
                     <td>
                         @if (item.Value.Queries.HasValue)
                         {
-                            <a href="javascript:openDialog('AuthAdmin/Queries', {role:@tc.Value.Role.Id, type:@item.Value.Resource.Id});">
+                            <a href="javascript:openDialog('@Url.Action((AuthAdminController a)=>a.Queries(tc.Value.Role, item.Value.Resource.ToLite(), null))');">
                                 <div class="query">
                                     <div class="thumb @item.Value.Queries.ToString().ToLower()">
                                     </div>

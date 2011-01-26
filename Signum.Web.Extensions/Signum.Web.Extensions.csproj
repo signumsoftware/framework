@@ -356,7 +356,7 @@
     <Compile Include="Operations\OperationController.cs" />
     <Compile Include="Operations\OperationClient.cs" />
     <Compile Include="Operations\OperationSettings.cs" />
-    <Compile Include="Processes\ProcessClient.cs" />
+    <Compile Include="Processes\ProcessesClient.cs" />
     <Compile Include="Processes\Controllers\ProcessController.cs" />
     <Compile Include="Processes\Views\Package.cs">
       <AutoGen>True</AutoGen>
@@ -618,6 +618,7 @@
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>_ViewStart.cs</LastGenOutput>
     </Content>
+    <Content Include="Help\Scripts\help.js" />
     <Content Include="Help\Views\_ViewStart.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>_ViewStart.cs</LastGenOutput>

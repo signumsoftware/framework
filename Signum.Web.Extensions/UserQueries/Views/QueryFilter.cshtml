@@ -9,7 +9,7 @@
     <div style="float: left">
         @Html.QueryTokenCombo(e.Value.Token, e)
     </div>
-   @Html.ValueLine(style, f => f.Operation);
+   @Html.ValueLine(style, f => f.Operation)
    @Html.ValueLine(style, f => f.ValueString, vl => vl.ValueHtmlProps["size"] = 20);
 
     }

@@ -83,6 +83,26 @@ WriteLiteral(@"<script type=""text/javascript"">
                    }
         });
     }
+
+    function ShowError(XMLHttpRequest, textStatus, errorThrown) {
+        var error = getErrorMessage(XMLHttpRequest.responseText);
+        if (!error) {
+            error = textStatus;
+        }
+
+        var message = error.length > 50 ? error.substring(0, 49) + ""..."" : error;
+        SF.Notify.error(lang.signum.error + "": "" + message, 2000);
+
+        SF.log(error);
+        SF.log(XMLHttpRequest);
+        SF.log(thrownError);
+
+        alert(lang.signum.error + "": "" + error);
+
+        uiBlocked = false;
+        $("".uiBlocker"").remove();
+    
+    }
 </script>
 <div id=""divCaptcha"">
     <label class=""labelLine"">

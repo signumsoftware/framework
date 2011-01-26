@@ -26,7 +26,7 @@
         $(document).ready(function () { toggleCol('@fillId', '@colId'); });
     </script>
     
-        @Html.ValueLine(sc, pp => pp.Title);
-        @Html.EntityLine(sc, pp => pp.Content, el => el.Autocomplete = false);
+        @Html.ValueLine(sc, pp => pp.Title)
+        @Html.EntityLine(sc, pp => pp.Content, el => el.Autocomplete = false)
     }
 } 

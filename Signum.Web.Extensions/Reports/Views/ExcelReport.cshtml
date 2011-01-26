@@ -7,14 +7,14 @@
 {
     using (var query = e.SubContext(f => f.Query))
     {
-    @Html.HiddenEntityInfo(query);
+    @Html.HiddenRuntimeInfo(query)
     @Html.ValueLine(query, f => f.DisplayName, f => { f.ReadOnly = true; f.LabelText = "Query"; });
     @Html.Hidden(query.Compose("Key"), query.Value.Key)
     @Html.Hidden(query.Compose("DisplayName"), query.Value.DisplayName)
     }
 
-    @Html.ValueLine(e, f => f.DisplayName);
-    @Html.ValueLine(e, f => f.Deleted, vl => vl.ReadOnly = true);
+    @Html.ValueLine(e, f => f.DisplayName)
+    @Html.ValueLine(e, f => f.Deleted, vl => vl.ReadOnly = true)
 
-    @Html.FileLine(e, f => f.File, fl => fl.AsyncUpload = false);
+    @Html.FileLine(e, f => f.File, fl => fl.AsyncUpload = false)
 }

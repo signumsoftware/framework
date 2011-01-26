@@ -2,8 +2,8 @@
 @using Signum.Engine.Authorization
 @using (var e = Html.TypeContext<RoleDN>())
 {
-    @Html.ValueLine(e, f => f.Name);
-    @Html.EntityList(e, f => f.Roles);
+    @Html.ValueLine(e, f => f.Name)
+    @Html.EntityList(e, f => f.Roles)
 
 
     if (BasicPermissions.AdminRules.IsAuthorized() && !e.Value.IsNew)
