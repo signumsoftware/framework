@@ -71,9 +71,14 @@ WriteLiteral("<div id=\"");
 WriteLiteral("\" data-title=\"");
 
 
-                                              Write(ViewBag.Title);
+                                              Write(Navigator.Manager.GetTypeTitle(Model.UntypedValue as ModifiableEntity));
 
-WriteLiteral("\">\r\n    <div class=\"button-bar\">\r\n");
+WriteLiteral("\">\r\n    <h2>\r\n        <span class=\"title\">");
+
+
+                        Write(ViewBag.Title ?? Model.UntypedValue.TryToString());
+
+WriteLiteral("</span></h2>\r\n    <div class=\"button-bar\">\r\n");
 
 
          if (Model != null && Navigator.Manager.ShowOkSave(Model.UntypedValue.GetType(), false))

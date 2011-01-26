@@ -5,11 +5,13 @@ using System.Web;
 using System.Web.Mvc;
 using System.Web.Mvc.Html;
 using System.Linq.Expressions;
+using System.Linq;
 using System.Web.Routing;
 using System.Reflection;
 using System.Collections.Generic;
 using Signum.Utilities;
 using System.Web.WebPages;
+using Signum.Entities;
 
 namespace Signum.Web
 {
@@ -150,6 +152,8 @@ namespace Signum.Web
             return rvd;
         }
 
+        public static List<IParameterConverter> ParameterConverters = new List<IParameterConverter> { new LiteConverter() };
+
         static void AddParameterValuesFromExpressionToDictionary(RouteValueDictionary rvd, MethodCallExpression call)
         {
             ParameterInfo[] parameters = call.Method.GetParameters();
@@ -174,10 +178,33 @@ namespace Signum.Web
                         Func<object> func = lambdaExpression.Compile();
                         value = func();
                     }
+
+                    var conv = ParameterConverters.FirstOrDefault(c=>c.CanConvert(value));
+                    if(conv != null)
+                        value = conv.Convert(value);
+
                     rvd.Add(parameters[i].Name, value);
                 }
             }
         }
+    }
 
+    public interface IParameterConverter
+    {
+        bool CanConvert(object obj);
+        object Convert(object obj);
+    }
+
+    public class LiteConverter : IParameterConverter
+    {
+        public bool CanConvert(object obj)
+        {
+            return obj is Lite;
+        }
+
+        public object Convert(object obj)
+        {
+            return ((Lite)obj).Id; 
+        }
     }
 }

@@ -14,9 +14,13 @@
 }
 @using (Html.BeginForm())
 {
-    
-    <div id="divNormalControl">
-        @{ Html.RenderPartial(Navigator.Manager.NormalControlUrl, ViewData);}
+    var ident = Model.UntypedValue as IdentifiableEntity;
+    <div id="divNormalControl" @Html.Raw(ident != null? "data-isnew=\""+ident.IsNew.ToString().ToLower() +  "\"" : "")>
+      @if(string.IsNullOrEmpty(ViewBag.Title))
+        {
+            ViewBag.Title = Model.UntypedValue.TryToString();
+        }
+        @{ Html.RenderPartial(Navigator.Manager.NormalControlUrl);}
     </div>
     
     <div class="clear">

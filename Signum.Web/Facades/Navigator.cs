@@ -591,11 +591,7 @@ namespace Signum.Web
             controller.ViewData.Model = tc; 
 
             controller.ViewData[ViewDataKeys.PartialViewName] = partialViewName ?? Navigator.OnPartialViewName((ModifiableEntity)entity);
-
-            if (!controller.ViewData.ContainsKey(ViewDataKeys.Title))
-                controller.ViewData[ViewDataKeys.Title] = DefaultPageTitle(tc);
             
-
             string tabID = GetOrCreateTabID(controller);
             controller.ViewData[ViewDataKeys.TabId] = tabID;
 
@@ -615,16 +611,24 @@ namespace Signum.Web
             }
         }
 
-        internal string DefaultPageTitle(TypeContext tc)
+        public string GetTypeTitle(ModifiableEntity mod)
         {
-            string pageTitle = tc.UntypedValue.TryToString();
-            if (string.IsNullOrEmpty(pageTitle))
+            if (mod == null)
+                return "";
+
+            string niceName = mod.GetType().NiceName();
+
+            IdentifiableEntity ident = mod as IdentifiableEntity;
+            if (ident == null)
+                return niceName;
+
+            if (ident.IsNew)
             {
-                Gender gender = tc.UntypedValue.GetType().GetGender();
-                pageTitle =
-                    Resources.ResourceManager.GetGenderAwareResource("New", gender) + " " + tc.UntypedValue.GetType().NiceName();
+                Gender gender = ident.GetType().GetGender();
+                return Properties.Resources.ResourceManager.GetGenderAwareResource("New", gender) + " " + niceName;
+
             }
-            return pageTitle;
+            return niceName + " " + ident.Id;
         }
 
         protected internal virtual PartialViewResult PopupView(ControllerBase controller, TypeContext tc, string partialViewName)
@@ -636,10 +640,7 @@ namespace Signum.Web
                 throw new UnauthorizedAccessException(Resources.ViewForType0IsNotAllowed.Formato(cleanType.Name));
 
             controller.ViewData.Model = cleanTC;
-            controller.ViewData[ViewDataKeys.PartialViewName] = partialViewName ?? Navigator.OnPartialViewName((ModifiableEntity)cleanTC.UntypedValue);
-
-		   if (!controller.ViewData.ContainsKey(ViewDataKeys.Title))
-                controller.ViewData[ViewDataKeys.Title] = DefaultPageTitle(cleanTC);            
+            controller.ViewData[ViewDataKeys.PartialViewName] = partialViewName ?? Navigator.OnPartialViewName((ModifiableEntity)cleanTC.UntypedValue);        
 
             if (Navigator.IsReadOnly(cleanType, false))
                 cleanTC.ReadOnly = true;
@@ -687,7 +688,7 @@ namespace Signum.Web
             controller.ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
             controller.ViewData[ViewDataKeys.FindOptions] = findOptions;
 
-            if (controller.ViewData.ContainsKey(ViewDataKeys.Title))
+            if (!controller.ViewData.ContainsKey(ViewDataKeys.Title))
                 controller.ViewData[ViewDataKeys.Title] = SearchTitle(findOptions.QueryName);
             
             return new ViewResult()
@@ -757,7 +758,7 @@ namespace Signum.Web
             controller.ViewData[ViewDataKeys.FindOptions] = findOptions;
             controller.ViewData[ViewDataKeys.QueryDescription] = queryDescription;
             
-            if (controller.ViewData.ContainsKey(ViewDataKeys.Title))
+            if (!controller.ViewData.ContainsKey(ViewDataKeys.Title))
                 controller.ViewData[ViewDataKeys.Title] = SearchTitle(findOptions.QueryName);
             
             return new PartialViewResult

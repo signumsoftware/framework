@@ -77,50 +77,12 @@ Write(Html.Hidden(ViewDataKeys.PartialViewName, ViewData[ViewDataKeys.PartialVie
 WriteLiteral("\r\n    <span class=\"typeNiceName\">");
 
 
-                          Write(Model.UntypedValue.GetType().NiceName());
+                          Write(Navigator.Manager.GetTypeTitle(Model.UntypedValue as ModifiableEntity));
 
-WriteLiteral("</span>\r\n");
-
-
-       IIdentifiable identifiable = Model.UntypedValue as IIdentifiable;
+WriteLiteral("</span>\r\n    <span class=\"title\">");
 
 
-     if (identifiable != null)
-    {
-
-WriteLiteral("        <span class=\"entityId\">\r\n");
-
-
-             if (identifiable.IdOrNull != null)
-            {
-
-WriteLiteral("                <span class=\"separator\">[</span>\r\n");
-
-
-
-WriteLiteral("                <span>ID: ");
-
-
-                     Write(identifiable.IdOrNull.Value);
-
-WriteLiteral("</span> \r\n");
-
-
-
-WriteLiteral("                <span class=\"separator\">]</span>\r\n");
-
-
-            }
-
-WriteLiteral("        </span>\r\n");
-
-
-    }
-
-WriteLiteral("    <span class=\"title\">");
-
-
-                   Write(ViewBag.Title);
+                    Write(ViewBag.Title);
 
 WriteLiteral("</span>\r\n</h2>\r\n<div class=\"button-bar\">\r\n");
 

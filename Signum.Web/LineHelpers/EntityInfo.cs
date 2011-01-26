@@ -21,7 +21,7 @@ namespace Signum.Web
             return helper.Hidden(name, lite.Key());
         }
 
-        public static MvcHtmlString HiddenEntityInfo(this HtmlHelper helper, TypeContext tc)
+        public static MvcHtmlString HiddenEntityInfo(this HtmlHelper helper, EntityBase tc)
         {
             return helper.HiddenRuntimeInfo(tc).Concat(helper.HiddenStaticInfo(tc));
         }
@@ -32,19 +32,11 @@ namespace Signum.Web
                 new RuntimeInfo(tc.UntypedValue) { Ticks = GetTicks(helper, tc), ForceNewInUI = GetForceNewInUI(helper, tc) }.ToString());
         }
 
-        public static MvcHtmlString HiddenStaticInfo(this HtmlHelper helper, TypeContext tc)
+        public static MvcHtmlString HiddenStaticInfo(this HtmlHelper helper, EntityBase tc)
         {
             Type type = tc is EntityListBase ? ((EntityListBase)tc).ElementType : tc.Type;
-            Implementations imp = tc is EntityBase ? ((EntityBase)tc).Implementations : null;
-
-            StaticInfo si = new StaticInfo(type, imp) { IsReadOnly = tc.ReadOnly };
+            StaticInfo si = new StaticInfo(type, tc.Implementations) { IsReadOnly = tc.ReadOnly };
             return helper.Hidden(tc.Compose(EntityBaseKeys.StaticInfo), si.ToString(), new { disabled = "disabled" });
-        }
-
-        public static MvcHtmlString HiddenEntityInfo<T, S>(this HtmlHelper helper, TypeContext<T> parent, Expression<Func<T, S>> property)
-        {
-            TypeContext<S> typeContext = (TypeContext<S>)Common.WalkExpression(parent, property);
-            return helper.HiddenRuntimeInfo(typeContext).Concat(helper.HiddenStaticInfo(typeContext));
         }
 
         public static MvcHtmlString HiddenRuntimeInfo<T, S>(this HtmlHelper helper, TypeContext<T> parent, Expression<Func<T, S>> property)
@@ -52,13 +44,6 @@ namespace Signum.Web
             TypeContext<S> typeContext = (TypeContext<S>)Common.WalkExpression(parent, property);
             return helper.HiddenRuntimeInfo(typeContext);
         }
-
-        public static MvcHtmlString HiddenStaticInfo<T, S>(this HtmlHelper helper, TypeContext<T> parent, Expression<Func<T, S>> property)
-        {
-            TypeContext<S> typeContext = (TypeContext<S>)Common.WalkExpression(parent, property);
-            return helper.HiddenStaticInfo(typeContext);
-        }
-
        
         public static long? GetTicks(HtmlHelper helper, TypeContext tc)
         {

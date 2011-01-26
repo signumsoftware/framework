@@ -10,7 +10,7 @@
 
 <div id="@context.Compose("fields-search")">
     <div id="@context.Compose("fields-list")" class="fields-list">
-        <a onclick="SF.FindNavigator.toggleFilters(this)" class="filters-header@(visible ? "" : " close")" rev="filters-body">@(visible ? Html.Encode(Resources.HideFilters) : Html.Encode(Resources.ShowFilters))</a>
+        <a onclick="SF.FindNavigator.toggleFilters(this)" class="filters-header@(visible ? "" : " close")" rev="filters-body">@(visible ? Resources.HideFilters : Resources.ShowFilters)</a>
         <div class="filters" @(visible ? "" : "style='display:none'")>
             <div id="@context.Compose("filters-body")" class="filters-body">
                 <label for="@context.Compose("ddlTokens_0")">@Resources.FilterByField</label>

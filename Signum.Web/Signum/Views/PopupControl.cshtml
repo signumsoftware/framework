@@ -1,6 +1,8 @@
 ﻿@using Signum.Entities.Reflection
 @model TypeContext
-<div id="@Model.Compose("panelPopup")" data-title="@ViewBag.Title">
+<div id="@Model.Compose("panelPopup")" data-title="@Navigator.Manager.GetTypeTitle(Model.UntypedValue as ModifiableEntity)">
+    <h2>
+        <span class="title">@(ViewBag.Title ?? Model.UntypedValue.TryToString())</span></h2>
     <div class="button-bar">
         @if (Model != null && Navigator.Manager.ShowOkSave(Model.UntypedValue.GetType(), false))
         {  

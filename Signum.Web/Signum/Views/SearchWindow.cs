@@ -68,11 +68,11 @@ WriteLiteral("\r\n    ");
 
 Write(Html.ScriptsJs(
             "~/signum/Scripts/SF_Globals.js",
-            "~/signum/Scripts/SF_Popup.js",   
+            "~/signum/Scripts/SF_Popup.js",
             "~/signum/Scripts/SF_Lines.js",
             "~/signum/Scripts/SF_ViewNavigator.js",
             "~/signum/Scripts/SF_FindNavigator.js",
-            "~/signum/Scripts/SF_Validator.js",   
+            "~/signum/Scripts/SF_Validator.js",
             "~/signum/Scripts/SF_Operations.js"));
 
 WriteLiteral("\r\n");
@@ -80,20 +80,21 @@ WriteLiteral("\r\n");
 
 });
 
-WriteLiteral("\r\n\r\n");
+WriteLiteral("\r\n");
 
 
- using(Html.BeginForm()){
+ using (Html.BeginForm())
+{
 
-WriteLiteral("    <h2>");
-
-
-    Write(ViewData[ViewDataKeys.Title] ?? "");
-
-WriteLiteral("</h2>\r\n");
+WriteLiteral("    <h2>\r\n        <span class=\"title\">");
 
 
-    Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString());
+                        Write(ViewBag.Title);
+
+WriteLiteral("</span>\r\n    </h2>\r\n");
+
+
+     Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString());
 
     
 Write(Html.ValidationSummaryAjax());
@@ -103,7 +104,7 @@ Write(Html.ValidationSummaryAjax());
 WriteLiteral("    <div class=\"clear\">\r\n    </div>   \r\n");
 
 
- }
+}
 
 WriteLiteral("<script type=\"text/javascript\">\r\n    $(function () {\r\n        var $body = $(\"body" +
 "\");\r\n        $body.trigger(\"sf-new-content\", [$body]);\r\n    })\r\n</script>\r\n");

@@ -75,16 +75,16 @@ WriteLiteral("        <div class=\'clearall\'></div>\r\n");
 
     }
     
-Write(Html.HiddenEntityInfo(e, f => f.Related));
+Write(Html.HiddenRuntimeInfo(e, f => f.Related));
 
-                                             ;
+                                              
 
 WriteLiteral("    <div style=\"display: none\">\r\n    \r\n        ");
 
 
    Write(Html.ValueLine(e, f => f.BoxType));
 
-WriteLiteral(";\r\n    </div>\r\n");
+WriteLiteral("\r\n    </div>\r\n");
 
 
     switch (e.Value.BoxType)
@@ -93,31 +93,31 @@ WriteLiteral(";\r\n    </div>\r\n");
             
        Write(Html.ValueLine(e, f => f.BoolValue, vl => vl.LabelText = e.Value.FieldName));
 
-                                                                                        ;
+                                                                                        
             break;
         case ValueLineBoxType.Integer:
             
        Write(Html.ValueLine(e, f => f.IntValue, vl => vl.LabelText = e.Value.FieldName));
 
-                                                                                       ;
+                                                                                       
             break;
         case ValueLineBoxType.Decimal:
             
        Write(Html.ValueLine(e, f => f.DecimalValue, vl => vl.LabelText = e.Value.FieldName));
 
-                                                                                           ;
+                                                                                           
             break;
         case ValueLineBoxType.DateTime:
             
        Write(Html.ValueLine(e, f => f.DateValue, vl => vl.LabelText = e.Value.FieldName));
 
-                                                                                        ;
+                                                                                        
             break;
         case ValueLineBoxType.String:
             
        Write(Html.ValueLine(e, f => f.StringValue, vl => vl.LabelText = e.Value.FieldName));
 
-                                                                                          ;
+                                                                                          
             break;
         default:
             throw new InvalidOperationException("ValueLineBoxType {0} does not exist".Formato(e.Value.BoxType));

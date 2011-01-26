@@ -89,12 +89,23 @@ WriteLiteral("\r\n");
 
  using (Html.BeginForm())
 {
-    
+    var ident = Model.UntypedValue as IdentifiableEntity;
 
-WriteLiteral("    <div id=\"divNormalControl\">\r\n");
+WriteLiteral("    <div id=\"divNormalControl\" ");
 
 
-           Html.RenderPartial(Navigator.Manager.NormalControlUrl, ViewData);
+                          Write(Html.Raw(ident != null? "data-isnew=\""+ident.IsNew.ToString().ToLower() +  "\"" : ""));
+
+WriteLiteral(">\r\n");
+
+
+       if(string.IsNullOrEmpty(ViewBag.Title))
+        {
+            ViewBag.Title = Model.UntypedValue.TryToString();
+        }
+
+
+           Html.RenderPartial(Navigator.Manager.NormalControlUrl);
 
 WriteLiteral("    </div>\r\n");
 

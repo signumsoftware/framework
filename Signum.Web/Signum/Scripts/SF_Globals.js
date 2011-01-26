@@ -16,7 +16,7 @@ SF.registerModule("Globals", function () {
         staticInfo: "sfStaticInfo",
         toStr: "sfToStr",
         link: "sfLink"
-            };
+    };
 
     SF.StaticInfo = function (_prefix) {
         var prefix = _prefix,
@@ -148,7 +148,7 @@ SF.registerModule("Globals", function () {
                 array[_isNew] = SF.isEmpty(id) ? "n" : "o";
             }
             else {
-            array[_isNew] = isNew;
+                array[_isNew] = isNew;
             }
             array[_ticks] = ticks;
             return toValue(array);
@@ -176,7 +176,7 @@ SF.registerModule("Globals", function () {
                 result = value;
             } else {
                 result += "&" + value;
-    }
+            }
         };
 
         this.add = function (param, value) {
@@ -185,17 +185,17 @@ SF.registerModule("Globals", function () {
                     concat(param);
                 } else {
                     concat(param + "=" + value);
-    }
-    }
+                }
+            }
             else {
                 //json
                 for (var key in param) {
                     if (param.hasOwnProperty(key)) {
                         var value = param[key];
                         concat(key + "=" + (jQuery.isFunction(value) ? value() : value));
-        }
-        }
-    }
+                    }
+                }
+            }
             return this;
         };
 
@@ -228,7 +228,7 @@ SF.registerModule("Globals", function () {
 
         for (var i = 0, l = $sourceSelect.length; i < l; i++) {
             $cloneSelect.eq(i).val($sourceSelect.eq(i).val());
-    }
+        }
 
         return $clone;
     };
@@ -248,7 +248,7 @@ SF.registerModule("Globals", function () {
         if (!SF.isEmpty(requestExtraJsonData)) {
             for (var key in requestExtraJsonData) {
                 if (requestExtraJsonData.hasOwnProperty(key)) {
-                var str = $.isFunction(requestExtraJsonData[key]) ? requestExtraJsonData[key]() : requestExtraJsonData[key];
+                    var str = $.isFunction(requestExtraJsonData[key]) ? requestExtraJsonData[key]() : requestExtraJsonData[key];
                     $form.append(SF.hiddenInput(key, str));
                 }
             }
@@ -270,7 +270,7 @@ SF.registerModule("Globals", function () {
         if (!SF.isEmpty(requestExtraJsonData)) {
             for (var key in requestExtraJsonData) {
                 if (requestExtraJsonData.hasOwnProperty(key)) {
-                var str = $.isFunction(requestExtraJsonData[key]) ? requestExtraJsonData[key]() : requestExtraJsonData[key];
+                    var str = $.isFunction(requestExtraJsonData[key]) ? requestExtraJsonData[key]() : requestExtraJsonData[key];
                     $form.append(SF.hiddenInput(key, str));
                 }
             }
@@ -319,27 +319,63 @@ SF.registerModule("Globals", function () {
         });
     });
 
+    SF.entityAutocomplete = function ($elem, options) {
+        var lastXhr; //To avoid previous requests results to be shown
+        $elem.autocomplete({
+            delay: options.delay || 200,
+            source: function (request, response) {
+                if (lastXhr)
+                    lastXhr.abort();
+                lastXhr = SF.ajax({
+                    url: options.url,
+                    type: "post",
+                    async: true,
+                    dataType: "json",
+                    data: { types: options.types, l: options.count || 5, q: request.term },
+                    success: function (data) {
+                        lastXhr = null;
+                        response($.map(data, function (item) {
+                            return {
+                                label: item.text,
+                                value: item
+                            }
+                        }));
+                    }
+                });
+            },
+            focus: function (event, ui) {
+                $elem.val(ui.item.value.text);
+                return false;
+            },
+            select: function (event, ui) {
+                SF.autocompleteOnSelected($elem.id, ui.item.value);
+            }
+        });
+    };
+
     $(function () { $('#form input[type=text]').keypress(function (e) { return e.which != 13 }) });
 
     $(function () {
         var getErrorMessage = function (response) {
-        var error;
-        if (response != null && response != undefined) {
-            var startError = response.indexOf("<title>");
-            var endError = response.indexOf("</title>");
+            var error;
+            if (response != null && response != undefined) {
+                var startError = response.indexOf("<title>");
+                var endError = response.indexOf("</title>");
                 if ((startError !== -1) && (endError !== -1))
-                error = response.substring(startError + 7, endError);
-            else
-                error = response;
+                    error = response.substring(startError + 7, endError);
+                else
+                    error = response;
+            }
+            return error;
         }
-        return error;
-    }
 
-        $("body").bind("sf-ajax-error", function (event, XMLHttpRequest, ajaxOptions, thrownError) {
+        $("body").bind("sf-ajax-error", function (event, XMLHttpRequest, textStatus, thrownError) {
             var error = getErrorMessage(XMLHttpRequest.responseText);
-        if (!error) error = textStatus;
+            if (!error) {
+                error = textStatus;
+            }
 
-        var message = error.length > 50 ? error.substring(0, 49) + "..." : error;
+            var message = error.length > 50 ? error.substring(0, 49) + "..." : error;
             SF.Notify.error(lang.signum.error + ": " + message, 2000);
 
             SF.log(error);
@@ -348,26 +384,26 @@ SF.registerModule("Globals", function () {
 
             alert(lang.signum.error + ": " + error);
 
-        uiBlocked = false;
-        $(".uiBlocker").remove();
+            uiBlocked = false;
+            $(".uiBlocker").remove();
         });
-        });
+    });
 
 
-        $(function () {
+    $(function () {
         $("body").bind("sf-new-content", function (e, $newContent) {
             //buttons
             $newContent.find(".entity-button, .query-button, .sf-line-button, .sf-chooser-button").each(function (i, val) {
                 var $txt = $(val);
                 var data = $txt.data();
                 $txt.button({ text: (!("text" in data) || SF.isTrue(data.text)), icons: { primary: data.icon, secondary: data["icon-secondary"]} });
-        });
+            });
 
             //datepicker
             $newContent.find(".datepicker").each(function (i, val) {
                 var $txt = $(val);
                 $txt.datepicker(jQuery.extend({}, defaultDatepickerOptions, { dateFormat: $txt.attr("data-format") }));
-                    });
+            });
 
             //dropdown
             $newContent.find(".dropdown .menu-button")
@@ -381,42 +417,14 @@ SF.registerModule("Globals", function () {
             $newContent.find(".entity-autocomplete").each(function (i, val) {
                 var $txt = $(val);
                 var data = $txt.data();
-                var lastXhr; //To avoid previous requests results to be shown
-                $txt.autocomplete({
-                    delay: 200,
-                    source: function (request, response) {
-                        if (lastXhr)
-                            lastXhr.abort();
-                        lastXhr = SF.ajax({
-                            url: data.url,
-                            type: "post",
-                            async: true,
-                            dataType: "json",
-                            data: { types: data.types, l: 5, q: request.term },
-                            success: function (data) {
-                                lastXhr = null;
-                                response($.map(data, function (item) {
-                                    return {
-                                        label: item.text,
-                                        value: item
-                }
-                                }));
-                }
+                SF.entityAutocomplete($txt, { delay: 200, types: data.types, url: data.url, count: 5 });
             });
-        },
-                    focus: function (event, ui) {
-                        $txt.val(ui.item.value.text);
-                        return false;
-        },
-                    select: function (event, ui) {
-                        SF.autocompleteOnSelected(val.id, ui.item.value);
-        }
-        });
-    });
 
             //input placeholder
             $newContent.find('input[placeholder], textarea[placeholder]').placeholder();
 
+            //tabs
+            $newContent.find(".sf-tabs").tabs();
         });
     });
 });

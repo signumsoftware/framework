@@ -43,7 +43,7 @@ namespace Signum.Web
             helper.ViewData[ViewDataKeys.FindOptions] = findOptions;
             helper.ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
             
-            if (helper.ViewData.ContainsKey(ViewDataKeys.Title))
+            if (!helper.ViewData.ContainsKey(ViewDataKeys.Title))
                 helper.ViewData[ViewDataKeys.Title] = Navigator.Manager.SearchTitle(findOptions.QueryName);
             
             return helper.Partial(Navigator.Manager.SearchControlUrl, helper.ViewData);

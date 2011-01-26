@@ -95,7 +95,7 @@ WriteLiteral("\" class=\"fields-list\">\r\n        <a onclick=\"SF.FindNavigator
 WriteLiteral("\" rev=\"filters-body\">");
 
 
-                                                                                                                          Write(visible ? Html.Encode(Resources.HideFilters) : Html.Encode(Resources.ShowFilters));
+                                                                                                                          Write(visible ? Resources.HideFilters : Resources.ShowFilters);
 
 WriteLiteral("</a>\r\n        <div class=\"filters\" ");
 

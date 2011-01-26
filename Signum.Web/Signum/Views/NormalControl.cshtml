@@ -4,20 +4,8 @@
 <h2>
     @Html.Hidden(ViewDataKeys.TabId, ViewData[ViewDataKeys.TabId])
     @Html.Hidden(ViewDataKeys.PartialViewName, ViewData[ViewDataKeys.PartialViewName])
-    <span class="typeNiceName">@Model.UntypedValue.GetType().NiceName()</span>
-    @{ IIdentifiable identifiable = Model.UntypedValue as IIdentifiable;}
-    @if (identifiable != null)
-    {
-        <span class="entityId">
-            @if (identifiable.IdOrNull != null)
-            {
-                <span class="separator">[</span>
-                <span>ID: @identifiable.IdOrNull.Value</span> 
-                <span class="separator">]</span>
-            }
-        </span>
-    }
-    <span class="title">@ViewBag.Title</span>
+    <span class="typeNiceName">@Navigator.Manager.GetTypeTitle(Model.UntypedValue as ModifiableEntity)</span>
+    <span class="title">@(ViewBag.Title)</span>
 </h2>
 <div class="button-bar">
     @if (Model != null && Navigator.Manager.ShowOkSave(Model.UntypedValue.GetType(), false))

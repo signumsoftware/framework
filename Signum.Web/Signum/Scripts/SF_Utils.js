@@ -66,7 +66,8 @@ SF.ajax = function (jqueryAjaxOptions) {
         error: null
     }, jqueryAjaxOptions);
 
-    function checkRedirection (ajaxResult) {
+    function checkRedirection(ajaxResult) {
+
         if (SF.isEmpty(ajaxResult))
             return null;
         var json;
@@ -94,6 +95,9 @@ SF.ajax = function (jqueryAjaxOptions) {
         async: options.async,
         dataType: options.dataType,
         success: function (ajaxResult) {
+            if (typeof ajaxResult === "string") {
+                ajaxResult = ajaxResult ? ajaxResult.trim() : "";
+            }
             var url = checkRedirection(ajaxResult);
             if (!SF.isEmpty(url))
                 window.location.href = url;
@@ -183,6 +187,8 @@ String.prototype.format = function (values) {
         return value != null ? value : match;
     });
 };
+
+String.prototype.replaceAll = function (s1, s2) { return this.split(s1).join(s2) };
 
 if (typeof String.prototype.trim !== 'function') {
     String.prototype.trim = function () {
