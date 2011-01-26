@@ -205,9 +205,9 @@ SF.registerModule("Globals", function () {
     };
 
     SF.compose = function (str1, str2, separator) {
-        if (typeof (str1) !== "string")
+        if (typeof (str1) !== "string" && str1 !== null && str1 != undefined)
             throw "str1 " + str1 + " is not a string";
-        if (typeof (str2) !== "string")
+        if (typeof (str2) !== "string" && str2 !== null && str2 != undefined)
             throw "str2 " + str2 + " is not a string";
 
         if (SF.isEmpty(str1))
