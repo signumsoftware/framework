@@ -31,7 +31,7 @@ namespace Signum.Web.AuthAdmin
             return Navigator.View(this, PermissionAuthLogic.GetPermissionRules(role.FillToStr()), true);
         }
 
-        [AcceptVerbs(HttpVerbs.Post)]
+        [HttpPost]
         public ActionResult Permissions(FormCollection form)
         {
             Lite<RoleDN> role = this.ExtractLite<RoleDN>("Role");
@@ -49,7 +49,7 @@ namespace Signum.Web.AuthAdmin
             return Navigator.View(this, FacadeMethodAuthLogic.GetFacadeMethodRules(role.FillToStr()), true);
         }
 
-        [AcceptVerbs(HttpVerbs.Post)]
+        [HttpPost]
         public ActionResult FacadeMethods(FormCollection form)
         {
             Lite<RoleDN> role = this.ExtractLite<RoleDN>("Role");
@@ -67,7 +67,7 @@ namespace Signum.Web.AuthAdmin
             return Navigator.View(this, EntityGroupAuthLogic.GetEntityGroupRules(role.FillToStr()), true);
         }
 
-        [AcceptVerbs(HttpVerbs.Post)]
+        [HttpPost]
         public ActionResult EntityGroups(FormCollection form)
         {
             Lite<RoleDN> role = this.ExtractLite<RoleDN>("Role");
@@ -85,7 +85,7 @@ namespace Signum.Web.AuthAdmin
             return Navigator.View(this, TypeAuthLogic.GetTypeRules(role.FillToStr()), true);
         }
 
-        [AcceptVerbs(HttpVerbs.Post)]
+        [HttpPost]
         public ActionResult Types(FormCollection form)
         {
             Lite<RoleDN> role = this.ExtractLite<RoleDN>("Role");
@@ -97,14 +97,14 @@ namespace Signum.Web.AuthAdmin
             return RedirectToAction("Types", new { role = role.Id });
         }
 
-        [AcceptVerbs(HttpVerbs.Post)]
+        [HttpPost]
         public ActionResult Properties(Lite<RoleDN> role, Lite<TypeDN> type, string prefix)
         {
             ViewData[ViewDataKeys.WriteSFInfo] = true;
             return Navigator.PopupView(this, PropertyAuthLogic.GetPropertyRules(role.FillToStr(), type.Retrieve()), prefix);
         }
 
-        [AcceptVerbs(HttpVerbs.Post)]
+        [HttpPost]
         public ActionResult SaveProperties(FormCollection form, string prefix)
         {
             Lite<RoleDN> role = this.ExtractLite<RoleDN>(TypeContextUtilities.Compose(prefix, "Role"));
@@ -117,14 +117,14 @@ namespace Signum.Web.AuthAdmin
             return Navigator.ModelState(ModelState);
         }
 
-        [AcceptVerbs(HttpVerbs.Post)]
+        [HttpPost]
         public ActionResult Queries(Lite<RoleDN> role, Lite<TypeDN> type, string prefix)
         {
             ViewData[ViewDataKeys.WriteSFInfo] = true;
             return Navigator.PopupView(this, QueryAuthLogic.GetQueryRules(role.FillToStr(), type.Retrieve()), prefix);
         }
 
-        [AcceptVerbs(HttpVerbs.Post)]
+        [HttpPost]
         public ActionResult SaveQueries(FormCollection form, string prefix)
         {
             Lite<RoleDN> role = this.ExtractLite<RoleDN>(TypeContextUtilities.Compose(prefix, "Role"));
@@ -138,14 +138,14 @@ namespace Signum.Web.AuthAdmin
         }
 
 
-        [AcceptVerbs(HttpVerbs.Post)]
+        [HttpPost]
         public ActionResult Operations(Lite<RoleDN> role, Lite<TypeDN> type, string prefix)
         {
             ViewData[ViewDataKeys.WriteSFInfo] = true;
             return Navigator.PopupView(this, OperationAuthLogic.GetOperationRules(role.FillToStr(), type.Retrieve()), prefix);
         }
 
-        [AcceptVerbs(HttpVerbs.Post)]
+        [HttpPost]
         public ActionResult SaveOperations(FormCollection form, string prefix)
         {
             Lite<RoleDN> role = this.ExtractLite<RoleDN>(TypeContextUtilities.Compose(prefix, "Role"));

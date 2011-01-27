@@ -29,7 +29,7 @@ namespace Signum.Web.Auth
     {
         public static Func<string, string> PublicLoginUrl = (string returnUrl) =>
         {
-            return RouteHelper.New().Action("Login", "Auth", new { referrer = returnUrl }); 
+            return RouteHelper.New().Action("Login", "Auth", new { referrer = returnUrl });
         };
 
         public static string CookieName = "sfUser";

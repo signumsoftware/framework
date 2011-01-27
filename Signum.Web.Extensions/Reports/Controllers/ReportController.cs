@@ -28,7 +28,7 @@ namespace Signum.Web.Reports
     [HandleException, AuthenticationRequired]
     public class ReportController : Controller
     {
-        [AcceptVerbs(HttpVerbs.Post)]
+        [HttpPost]
         public ActionResult ToExcelPlain(FindOptions findOptions, string prefix)
         {
             if (!Navigator.IsFindable(findOptions.QueryName))
@@ -42,7 +42,7 @@ namespace Signum.Web.Reports
             return File(binaryFile, MimeType.FromExtension(".xlsx"), Navigator.ResolveWebQueryName(findOptions.QueryName) + ".xlsx");
         }
 
-        [AcceptVerbs(HttpVerbs.Post)]
+        [HttpPost]
         public ActionResult ExcelReport(FindOptions findOptions, Lite<ExcelReportDN> excelReport, string prefix)
         {
             if (!Navigator.IsFindable(findOptions.QueryName))
@@ -57,7 +57,7 @@ namespace Signum.Web.Reports
             //There's not workaround for this, so either click on Save instead of Open, or use Firefox or Chrome
         }
 
-        [AcceptVerbs(HttpVerbs.Post)]
+        [HttpPost]
         public ViewResult Administer(string webQueryName)
         {
             object queryName = Navigator.ResolveQueryName(webQueryName);
@@ -85,14 +85,14 @@ namespace Signum.Web.Reports
             }
         }
 
-        [AcceptVerbs(HttpVerbs.Post)]
+        [HttpPost]
         public ViewResult Create(Lite<QueryDN> query)
         {
             ExcelReportDN report = new ExcelReportDN { Query = query.Retrieve() };
             return Navigator.View(this, report);
         }
 
-        [AcceptVerbs(HttpVerbs.Post)]
+        [HttpPost]
         public ActionResult Save()
         {
             var context = this.ExtractEntity<ExcelReportDN>().ApplyChanges(ControllerContext, null, true).ValidateGlobal();
@@ -112,7 +112,7 @@ namespace Signum.Web.Reports
             return null;
         }
         
-        [AcceptVerbs(HttpVerbs.Post)]
+        [HttpPost]
         public ContentResult Delete(Lite<ExcelReportDN> excelReport)
         {
             ExcelReportDN report = excelReport.Retrieve();

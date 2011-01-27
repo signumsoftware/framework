@@ -23,7 +23,7 @@ namespace Signum.Web.Operations
     [HandleException, AuthenticationRequired]
     public class OperationController : Controller
     {
-        [AcceptVerbs(HttpVerbs.Post)]
+        [HttpPost, ValidateAntiForgeryToken]
         public ActionResult OperationExecute(string operationFullKey, bool isLite, string prefix, string oldPrefix)
         {
             IdentifiableEntity entity = null;
@@ -77,7 +77,7 @@ namespace Signum.Web.Operations
             }
         }
 
-        [AcceptVerbs(HttpVerbs.Post)]
+        [HttpPost, ValidateAntiForgeryToken]
         public ActionResult ContextualExecute(string operationFullKey, string oldPrefix)
         {
             IdentifiableEntity entity = null;
@@ -91,7 +91,7 @@ namespace Signum.Web.Operations
             return Content("");
         }
 
-        [AcceptVerbs(HttpVerbs.Post)]
+        [HttpPost, ValidateAntiForgeryToken]
         public ActionResult DeleteExecute(string operationFullKey, string prefix, string oldPrefix)
         {
             RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(Request.Form[TypeContextUtilities.Compose(oldPrefix, EntityBaseKeys.RuntimeInfo)]);
@@ -106,7 +106,7 @@ namespace Signum.Web.Operations
             return Content("");
         }
 
-        [AcceptVerbs(HttpVerbs.Post)]
+        [HttpPost, ValidateAntiForgeryToken]
         public ActionResult ConstructFromExecute(string operationFullKey, bool isLite, string prefix, string oldPrefix)
         {
             IdentifiableEntity entity = null;
@@ -157,7 +157,7 @@ namespace Signum.Web.Operations
             }
         }
 
-        [AcceptVerbs(HttpVerbs.Post)]
+        [HttpPost, ValidateAntiForgeryToken]
         public ActionResult ConstructFromManyExecute(string runtimeType, List<int> ids, string operationFullKey, string prefix)
         {
             Type type = Navigator.ResolveType(runtimeType);

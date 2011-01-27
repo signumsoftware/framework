@@ -88,7 +88,7 @@ namespace Signum.Web.Auth
             return View(AuthClient.ChangePasswordUrl);
         }
 
-        [AcceptVerbs(HttpVerbs.Post)]
+        [HttpPost]
         public ActionResult ChangePassword(FormCollection form)
         {
             var context = UserDN.Current.ApplyChanges(this.ControllerContext, "", UserMapping.ChangePasswordOld).ValidateGlobal();
@@ -134,7 +134,7 @@ namespace Signum.Web.Auth
 
         #endregion
 
-        #region "Reset password"
+        #region "Reset"
 
         [AcceptVerbs(HttpVerbs.Get)]
         public ActionResult ResetPassword()
@@ -142,7 +142,7 @@ namespace Signum.Web.Auth
             return View(AuthClient.ResetPasswordUrl);
         }
 
-        [AcceptVerbs(HttpVerbs.Post)]
+        [HttpPost]
         public ActionResult ResetPassword(string email)
         {
             try
@@ -219,7 +219,7 @@ namespace Signum.Web.Auth
             return View(AuthClient.ResetPasswordSetNewUrl);
         }
 
-        [AcceptVerbs(HttpVerbs.Post)]
+        [HttpPost]
         public ActionResult ResetPasswordSetNew(string code, Lite<ResetPasswordRequestDN> rpr)
         {
             ResetPasswordRequestDN request = null;
@@ -275,7 +275,7 @@ namespace Signum.Web.Auth
             return View(AuthClient.RememberPasswordUrl);
         }
 
-        [AcceptVerbs(HttpVerbs.Post)]
+        [HttpPost]
         public ActionResult RememberPassword(string username, string email)
         {
             try
@@ -340,7 +340,7 @@ namespace Signum.Web.Auth
             return View(AuthClient.LoginUrl);
         }
 
-        [AcceptVerbs(HttpVerbs.Post)]
+        [HttpPost]
         public ActionResult Login(string username, string password, bool rememberMe, string referrer)
         {
             // Basic parameter validation
@@ -463,7 +463,7 @@ namespace Signum.Web.Auth
 
         #region Register User (Commented)
 
-        //[AcceptVerbs(HttpVerbs.Post)]
+        //[HttpPost]
         //public ContentResult RegisterUserValidate()
         //{
         //    UserDN u = (UserDN)Navigator.ExtractEntity(this, Request.Form);

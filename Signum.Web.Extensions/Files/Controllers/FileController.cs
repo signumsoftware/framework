@@ -31,7 +31,7 @@ namespace Signum.Web.Files
     [HandleException]
     public class FileController : Controller
     {
-        [AcceptVerbs(HttpVerbs.Post)]
+        [HttpPost]
         public PartialViewResult PartialView(
             string prefix,
             string fileType,

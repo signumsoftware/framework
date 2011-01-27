@@ -38,7 +38,7 @@ namespace Signum.Web.Captcha
             context.ApplicationInstance.CompleteRequest();
         }
 
-        [AcceptVerbs(HttpVerbs.Post)]
+        [HttpPost]
         public PartialViewResult Refresh()
         {
             return new PartialViewResult()

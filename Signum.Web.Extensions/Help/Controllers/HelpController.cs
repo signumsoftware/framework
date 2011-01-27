@@ -100,7 +100,7 @@ namespace Signum.Web.Help
         }
 
 
-        [AcceptVerbs(HttpVerbs.Post)]
+        [HttpPost]
         public ContentResult SaveEntity(string entity)
         {
             bool entityModified = false;
@@ -162,7 +162,7 @@ namespace Signum.Web.Help
             return Content("");
         }
 
-        [AcceptVerbs(HttpVerbs.Post)]
+        [HttpPost]
         public ContentResult SaveNamespace(string @namespace)
         {
             NamespaceHelp nh = HelpLogic.GetNamespace(@namespace);
@@ -177,7 +177,7 @@ namespace Signum.Web.Help
             return Content("");
         }
 
-        [AcceptVerbs(HttpVerbs.Post)]
+        [HttpPost]
         public ContentResult SaveAppendix(string appendix)
         {
             AppendixHelp ah = HelpLogic.GetAppendix(appendix);

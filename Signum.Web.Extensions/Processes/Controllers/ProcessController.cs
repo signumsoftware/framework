@@ -24,7 +24,7 @@ namespace Signum.Web.Processes
     [HandleException, AuthenticationRequired]
     public class ProcessController : Controller
     {
-        [AcceptVerbs(HttpVerbs.Post)]
+        [HttpPost]
         public ContentResult GetProgressExecution(int id)
         {
             decimal progress = Database.Query<ProcessExecutionDN>().Where(pe => 
@@ -33,7 +33,7 @@ namespace Signum.Web.Processes
             return Content(Math.Round(progress, 0).ToString());
         }
 
-        [AcceptVerbs(HttpVerbs.Post)]
+        [HttpPost]
         public PartialViewResult FinishProcessNormalPage()
         {
             ProcessExecutionDN process = this.ExtractEntity<ProcessExecutionDN>()
