@@ -111,7 +111,7 @@ namespace Signum.Web.Controllers
             return Navigator.PopupView(this, tc, url);
         }
 
-        [AcceptVerbs(HttpVerbs.Post)]
+        [HttpPost]
         public PartialViewResult PartialView(string runtimeType, int? id, string prefix, bool? readOnly, string url)
         {
             Type type = Navigator.ResolveType(runtimeType);
@@ -149,7 +149,7 @@ namespace Signum.Web.Controllers
             return Navigator.PartialView(this, tc, url);
         }
 
-        [AcceptVerbs(HttpVerbs.Post)]
+        [HttpPost, ValidateAntiForgeryToken]
         public ActionResult TrySave()
         {
             MappingContext context = this.UntypedExtractEntity().UntypedApplyChanges(ControllerContext, null, true).UntypedValidateGlobal();
@@ -175,7 +175,7 @@ namespace Signum.Web.Controllers
                 return Navigator.RedirectUrl(newUrl);
         }
 
-        [AcceptVerbs(HttpVerbs.Post)]
+        [HttpPost]
         public ContentResult Validate()
         {
             MappingContext context = this.UntypedExtractEntity().UntypedApplyChanges(ControllerContext, null, true).UntypedValidateGlobal();
@@ -184,7 +184,7 @@ namespace Signum.Web.Controllers
             return Navigator.ModelState(ModelState);
         }
 
-        [AcceptVerbs(HttpVerbs.Post)]
+        [HttpPost, ValidateAntiForgeryToken]
         public ContentResult TrySavePartial(string prefix)
         {
             MappingContext context = this.UntypedExtractEntity(prefix).UntypedApplyChanges(ControllerContext, prefix, true).UntypedValidateGlobal();
@@ -204,7 +204,7 @@ namespace Signum.Web.Controllers
             });
         }
 
-        [AcceptVerbs(HttpVerbs.Post)]
+        [HttpPost]
         public ContentResult ValidatePartial(string prefix)
         {
             MappingContext context = this.UntypedExtractEntity(prefix).UntypedApplyChanges(ControllerContext, prefix, true).UntypedValidateGlobal();
@@ -228,7 +228,7 @@ namespace Signum.Web.Controllers
             });
         }
 
-        [AcceptVerbs(HttpVerbs.Post)]
+        [HttpPost]
         public JsonResult Autocomplete(string types, string q, int l)
         {
             Type[] typeArray = StaticInfo.ParseTypes(types);
@@ -252,19 +252,19 @@ namespace Signum.Web.Controllers
             return Navigator.Find(this, findOptions);
         }
 
-        [AcceptVerbs(HttpVerbs.Post)]
+        [HttpPost]
         public PartialViewResult PartialFind(FindOptions findOptions, string prefix)
         {
             return Navigator.PartialFind(this, findOptions, prefix);
         }
 
-        [AcceptVerbs(HttpVerbs.Post)]
+        [HttpPost]
         public PartialViewResult Search(FindOptions findOptions, int? top, string prefix)
         {
             return Navigator.Search(this, findOptions, top, prefix);
         }
 
-		[AcceptVerbs(HttpVerbs.Post)]
+        [HttpPost]
         public ContentResult AddFilter(string webQueryName, string tokenName, int index, string prefix)
         {
             object queryName = Navigator.ResolveQueryName(webQueryName);
@@ -289,7 +289,7 @@ namespace Signum.Web.Controllers
             return Content(token.NiceName());
         }
 
-        [AcceptVerbs(HttpVerbs.Post)]
+        [HttpPost]
         public ContentResult GetContextualPanel(string lite, string webQueryName, string prefix)
         {
             string[] liteParts = lite.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
@@ -304,7 +304,7 @@ namespace Signum.Web.Controllers
             return Content(result);
         }
 
-        [AcceptVerbs(HttpVerbs.Post)]
+        [HttpPost]
         public ContentResult QuickFilter(string webQueryName, string tokenName, int index, string prefix, string value)
         {
             object queryName = Navigator.ResolveQueryName(webQueryName);
@@ -329,7 +329,7 @@ namespace Signum.Web.Controllers
             return Content(SearchControlHelper.NewFilter(CreateHtmlHelper(this), queryName, fo, new Context(null, prefix), index).ToHtmlString());
         }
 
-        [AcceptVerbs(HttpVerbs.Post)]
+        [HttpPost]
         public ContentResult NewSubTokensCombo(string webQueryName, string tokenName, string prefix, int index)
         {
             object queryName = Navigator.ResolveQueryName(webQueryName);
@@ -348,7 +348,7 @@ namespace Signum.Web.Controllers
             return Content(SearchControlHelper.TokensCombo(CreateHtmlHelper(this), queryName, items, new Context(null, prefix), index + 1, true).ToHtmlString());
         }
 
-        [AcceptVerbs(HttpVerbs.Post)]
+        [HttpPost]
         public PartialViewResult GetTypeChooser(string types, string prefix)
         {
             Type[] typeArray = StaticInfo.ParseTypes(types);
@@ -376,7 +376,7 @@ namespace Signum.Web.Controllers
             return PartialView(Navigator.Manager.ChooserPopupUrl);
         }
 
-        [AcceptVerbs(HttpVerbs.Post)]
+        [HttpPost]
         public PartialViewResult GetChooser(List<string> buttons, List<string> ids, string prefix, string title)
         {
             if (buttons == null || buttons.Count == 0)
@@ -402,7 +402,7 @@ namespace Signum.Web.Controllers
             return PartialView(Navigator.Manager.ChooserPopupUrl);
         }
 
-        [AcceptVerbs(HttpVerbs.Post)]
+        [HttpPost, ValidateAntiForgeryToken]
         public PartialViewResult ReloadEntity(string prefix, string partialViewName)
         {
             bool isReactive = this.IsReactive();

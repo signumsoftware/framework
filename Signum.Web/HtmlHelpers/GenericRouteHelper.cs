@@ -29,7 +29,7 @@ namespace Signum.Web
             where TController : Controller
         {
             RouteValueDictionary rvd = ExpressionHelper.GetRouteValuesFromExpression(action);
-            return helper.Action(null, null, rvd);
+            return helper.Action((string)rvd["Action"], (string)rvd["Controller"], rvd);
         }
 
      
@@ -37,7 +37,7 @@ namespace Signum.Web
             where TController : Controller
         {
             RouteValueDictionary rvd = ExpressionHelper.GetRouteValuesFromExpression(action);
-            helper.RenderAction(null, null, rvd);
+            helper.RenderAction((string)rvd["Action"], (string)rvd["Controller"], rvd);
         }
 
 
@@ -179,10 +179,12 @@ namespace Signum.Web
                         value = func();
                     }
 
-                    var conv = ParameterConverters.FirstOrDefault(c=>c.CanConvert(value));
-                    if(conv != null)
-                        value = conv.Convert(value);
-
+                    if (!(value is Lite))
+                    {
+                        var conv = ParameterConverters.FirstOrDefault(c => c.CanConvert(value));
+                        if (conv != null)
+                            value = conv.Convert(value);
+                    }
                     rvd.Add(parameters[i].Name, value);
                 }
             }
