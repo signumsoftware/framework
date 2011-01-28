@@ -5,23 +5,23 @@ using System.Text;
 using System.Web.Mvc;
 using Signum.Utilities;
 using Signum.Web.PortableAreas;
+using System.Web.SessionState;
 
-namespace Signum.Web.ScriptCombiner
+namespace Signum.Web.Combine
 {
-    //TODO: Convert to sessionless controller
-    //http://www.lostechies.com/blogs/dahlbyk/archive/2010/12/06/renderaction-with-asp-net-mvc-3-sessionless-controllers.aspx
+    [SessionState(SessionStateBehavior.Disabled)]
     public class CombineController : Controller
     {  
         [AcceptVerbs(HttpVerbs.Get)]
         public StaticContentResult CSS(string key)
         {
-            return Combiner.GetContent(key);
+            return CombineClient.GetContent(key);
         }
 
         [AcceptVerbs(HttpVerbs.Get)]
         public StaticContentResult JS(string key)
         {
-            return Combiner.GetContent(key);
+            return CombineClient.GetContent(key);
         }
     }
 }

@@ -8,7 +8,7 @@ using System.IO;
 using System.Reflection;
 using System.Web;
 
-namespace Signum.Web.ScriptCombiner
+namespace Signum.Web.Combine
 {
     public class CombinerScriptHtmlManager : BasicScriptHtmlManager
     {
@@ -28,7 +28,7 @@ namespace Signum.Web.ScriptCombiner
 
         private string GetKey(string[] files, ScriptType scriptType)
         {   
-            return Combiner.GetKey(new ScriptRequest(files.Select(VirtualPathUtility.ToAbsolute).ToArray(), scriptType, Version));
+            return CombineClient.GetKey(new ScriptRequest(/*files.Select(VirtualPathUtility.ToAbsolute).ToArray()*/ files, scriptType, Version));
         }
 
         public override string[] GerUrlsFor(string[] files, ScriptType scriptType)

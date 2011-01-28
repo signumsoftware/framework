@@ -7,7 +7,7 @@ using Signum.Utilities;
 using System.Web;
 using Signum.Web.PortableAreas;
 
-namespace Signum.Web.ScriptCombiner
+namespace Signum.Web.Combine
 {
     public static class CssCombiner
     {
@@ -36,7 +36,7 @@ namespace Signum.Web.ScriptCombiner
             sb.AppendLine("/* {0} */".Formato(virtualFiles.ToString(",")));
             foreach (var vf in virtualFiles)
             {
-                var content = Combiner.ReadVirtualFile(vf);
+                var content = CombineClient.ReadVirtualFile(vf);
                 content = ReplaceRelativeImg(content, vf);
                 sb.AppendLine(Minify(content));
             }

@@ -503,14 +503,14 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ScheduleRuleWeekly.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="ScriptCombiner\CombineController.cs" />
-    <Compile Include="ScriptCombiner\Combiner.cs" />
-    <Compile Include="ScriptCombiner\CombinerScriptHtmlManager.cs" />
-    <Compile Include="ScriptCombiner\CssCombiner.cs" />
-    <Compile Include="ScriptCombiner\GoogleClosure.cs" />
-    <Compile Include="ScriptCombiner\JavascriptCombiner.cs" />
-    <Compile Include="ScriptCombiner\JavaScriptMinifier.cs" />
-    <Compile Include="ScriptCombiner\Logger.cs" />
+    <Compile Include="Combine\CombineController.cs" />
+    <Compile Include="Combine\Combiner.cs" />
+    <Compile Include="Combine\CombinerScriptHtmlManager.cs" />
+    <Compile Include="Combine\CssCombiner.cs" />
+    <Compile Include="Combine\GoogleClosure.cs" />
+    <Compile Include="Combine\JavascriptCombiner.cs" />
+    <Compile Include="Combine\JavaScriptMinifier.cs" />
+    <Compile Include="Combine\Logger.cs" />
     <Compile Include="UserQueries\Views\_ViewStart.cs">
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
       <AutoGen>True</AutoGen>

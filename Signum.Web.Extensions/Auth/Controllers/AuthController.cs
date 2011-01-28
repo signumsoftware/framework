@@ -158,7 +158,9 @@ namespace Signum.Web.Auth
                     if (user == null)
                         throw new ApplicationException(Resources.ThereSNotARegisteredUserWithThatEmailAddress);
 
-                    AuthLogic.ResetPasswordRequest(user, rpr => RouteHelper.New().Action("ResetPasswordCode", "Auth", new { email = rpr.User.Email, code = rpr.Code }));
+                    //since this is an url sent by email, it should contain the domain name
+                    AuthLogic.ResetPasswordRequest(user, rpr => 
+                        Request.Url.Scheme + System.Uri.SchemeDelimiter + Request.Url.Host + (Request.Url.Port != 80 ? (":" + Request.Url.Port ) : "") + RouteHelper.New().Action("ResetPasswordCode", "Auth", new { email = rpr.User.Email, code = rpr.Code }));
                 }
 
                 ViewData["email"] = email;
@@ -525,7 +527,7 @@ namespace Signum.Web.Auth
         //    return changesLog.Errors;
         //}
 
-        //public ActionResult UserExecOperation(string sfRuntimeType, int? sfId, string sfOperationFullKey, bool isLite, string prefix, string sfOnOk, string sfOnCancel)
+        //public ActionResult UserExecOperation(string sfRuntimeType, int? sfId, string operationFullKey, bool isLite, string prefix, string sfOnOk, string onCancel)
         //{
         //    Type type = Navigator.ResolveType(sfRuntimeType);
 
@@ -535,10 +537,10 @@ namespace Signum.Web.Auth
         //        if (sfId.HasValue)
         //        {
         //            Lite lite = Lite.Create(type, sfId.Value);
-        //            entity = (UserDN)OperationLogic.ServiceExecuteLite((Lite)lite, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey));
+        //            entity = (UserDN)OperationLogic.ServiceExecuteLite((Lite)lite, EnumLogic<OperationDN>.ToEnum(operationFullKey));
         //        }
         //        else
-        //            throw new ArgumentException(Resources.CouldNotCreateLiteWithoutAnIdToCallOperation0.Formato(sfOperationFullKey));
+        //            throw new ArgumentException(Resources.CouldNotCreateLiteWithoutAnIdToCallOperation0.Formato(operationFullKey));
         //    }
         //    else
         //    {
@@ -557,7 +559,7 @@ namespace Signum.Web.Auth
         //            return Navigator.ModelState(ModelState);
         //        }
 
-        //        entity = (UserDN)OperationLogic.ServiceExecute(entity, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey));
+        //        entity = (UserDN)OperationLogic.ServiceExecute(entity, EnumLogic<OperationDN>.ToEnum(operationFullKey));
 
         //        if (Navigator.ExtractIsReactive(Request.Form))
         //        {

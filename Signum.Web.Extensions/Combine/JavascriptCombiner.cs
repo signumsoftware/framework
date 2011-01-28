@@ -5,7 +5,7 @@ using System.Text;
 using Signum.Utilities;
 using Signum.Web.PortableAreas;
 
-namespace Signum.Web.ScriptCombiner
+namespace Signum.Web.Combine
 {
     public static class JavascriptCombiner
     {
@@ -27,7 +27,7 @@ namespace Signum.Web.ScriptCombiner
             StringBuilder sb = new StringBuilder();
             foreach (var vf in virtualFiles)
             {
-                sb.AppendLine(Combiner.ReadVirtualFile(vf));
+                sb.AppendLine(CombineClient.ReadVirtualFile(vf));
             }
 
             return new StaticContentResult(Encoding.UTF8.GetBytes(combineComment + Minify(sb.ToString())), "application/x-javascript");

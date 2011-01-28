@@ -4,7 +4,7 @@ using System.Web;
 using System.Xml;
 using System;
 
-namespace Signum.Web.ScriptCombiner
+namespace Signum.Web.Combine
 {
     /// <summary>
     /// A C# wrapper around the Google Closure Compiler web service.

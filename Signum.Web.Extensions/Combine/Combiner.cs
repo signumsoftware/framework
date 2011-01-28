@@ -16,7 +16,7 @@ using Signum.Web.PortableAreas;
 using Signum.Engine.Engine;
 
 
-namespace Signum.Web.ScriptCombiner
+namespace Signum.Web.Combine
 {
     public class ScriptRequest : IEquatable<ScriptRequest>
     {
@@ -47,7 +47,7 @@ namespace Signum.Web.ScriptCombiner
         }
     }
 
-    public static class Combiner
+    public static class CombineClient
     {
         class ScriptElement
         {
@@ -118,13 +118,23 @@ namespace Signum.Web.ScriptCombiner
 
         public static void Start()
         {
-            ScriptHtmlHelper.Manager = new CombinerScriptHtmlManager();
+            if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
+            {
+                ScriptHtmlHelper.Manager = new CombinerScriptHtmlManager();
 
-            RouteTable.Routes.MapRoute(null, "combine/css/{key}",
-               new { controller = "Combine", action = "CSS", key = "" });
+                Navigator.RegisterArea(typeof(CombineClient));
 
-            RouteTable.Routes.MapRoute(null, "combine/js/{key}",
-               new { controller = "Combine", action = "JS", key = "" });
+
+                Route routeCss = new Route("combine/css/{key}", new MvcRouteHandler());
+                routeCss.Defaults = new RouteValueDictionary(new { controller = "Combine", action = "CSS", key = "" });
+
+                RouteTable.Routes.Insert(0, routeCss);
+
+                Route routeJs = new Route("combine/js/{key}", new MvcRouteHandler());
+                routeJs.Defaults = new RouteValueDictionary(new { controller = "Combine", action = "JS", key = "" });
+
+                RouteTable.Routes.Insert(0, routeJs);
+            }
         }
     }
 }
