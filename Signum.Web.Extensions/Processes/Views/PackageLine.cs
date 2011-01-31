@@ -62,33 +62,35 @@ namespace ASP
         public override void Execute()
         {
 
+WriteLiteral("\r\n");
+
 
  using (var e = Html.TypeContext<PackageLineDN>())
 {
     
 Write(Html.EntityLine(e, f => f.Package, f => f.ReadOnly = true));
 
-                                                               ;
+                                                               
     
 Write(Html.EntityLine(e, f => f.Target, f => f.ReadOnly = true));
 
-                                                              ;
+                                                              
     
 Write(Html.EntityLine(e, f => f.Result, f => f.ReadOnly = true));
 
-                                                              ;
+                                                              
     
 Write(Html.ValueLine(e, f => f.FinishTime, f => f.ReadOnly = true));
 
-                                                                 ;
+                                                                 
     
 Write(Html.ValueLine(e, f => f.Exception, f => f.ReadOnly = true));
 
-                                                                ;
+                                                                
     
 Write(Html.ValueLine(e, f => f.IdOrNull, f => f.ReadOnly = true));
 
-                                                               ;
+                                                               
 }
 WriteLiteral(" ");
 

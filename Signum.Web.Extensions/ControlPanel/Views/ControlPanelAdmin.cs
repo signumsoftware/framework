@@ -66,29 +66,31 @@ namespace ASP
 
 
 
+WriteLiteral("\r\n");
+
 
  using (var tc = Html.TypeContext<ControlPanelDN>())
 {
     
 Write(Html.EntityLine(tc, cp => cp.Related, el => el.Create = false));
 
-                                                                   ;
+                                                                   
     
 Write(Html.ValueLine(tc, cp => cp.DisplayName));
 
-                                             ;
+                                             
     
 Write(Html.ValueLine(tc, cp => cp.HomePage));
 
-                                          ;
+                                          
     
 Write(Html.ValueLine(tc, cp => cp.NumberOfColumns));
 
-                                                 ;
+                                                 
     
 Write(Html.EntityRepeater(tc, cp => cp.Parts));
 
-                                            ;
+                                            
 }
 
         }

@@ -3,16 +3,19 @@
 @using Signum.Engine.WikiMarkup
 @using Signum.Web.Help
 @using Signum.Web.Extensions
+
 @section head
 {
     @Html.ScriptCss("~/help/Content/help.css")
 }
+
 <script type="text/javascript">
     function ShowMore(elem) {
         $(elem).siblings("ul").children(".show-on-more").show();
         $(elem).hide();
     }
 </script>
+
 <div class="grid_16" id="entityContent">
     <h1>
         Buscador</h1>

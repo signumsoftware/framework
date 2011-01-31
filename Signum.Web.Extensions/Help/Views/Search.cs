@@ -70,6 +70,8 @@ namespace ASP
 
 
 
+WriteLiteral("\r\n");
+
 
 DefineSection("head", () => {
 
@@ -83,10 +85,10 @@ WriteLiteral("\r\n");
 
 });
 
-WriteLiteral("\r\n<script type=\"text/javascript\">\r\n    function ShowMore(elem) {\r\n        $(elem)" +
-".siblings(\"ul\").children(\".show-on-more\").show();\r\n        $(elem).hide();\r\n    " +
-"}\r\n</script>\r\n<div class=\"grid_16\" id=\"entityContent\">\r\n    <h1>\r\n        Buscad" +
-"or</h1>\r\n");
+WriteLiteral("\r\n\r\n<script type=\"text/javascript\">\r\n    function ShowMore(elem) {\r\n        $(ele" +
+"m).siblings(\"ul\").children(\".show-on-more\").show();\r\n        $(elem).hide();\r\n  " +
+"  }\r\n</script>\r\n\r\n<div class=\"grid_16\" id=\"entityContent\">\r\n    <h1>\r\n        Bu" +
+"scador</h1>\r\n");
 
 
        List<List<SearchResult>> results = (List<List<SearchResult>>)Model;

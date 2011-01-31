@@ -68,6 +68,8 @@ namespace ASP
 
 
 
+WriteLiteral("\r\n");
+
 
 DefineSection("head", () => {
 
@@ -86,7 +88,7 @@ WriteLiteral("\r\n");
 
 });
 
-WriteLiteral("\r\n");
+WriteLiteral("\r\n\r\n");
 
 
    
@@ -94,6 +96,8 @@ WriteLiteral("\r\n");
     NamespaceHelp nh = (NamespaceHelp)Model;
     ViewBag.Title = nh.Name;
 
+
+WriteLiteral("\r\n");
 
 
  using (var f = Html.BeginForm("SaveNamespace", "Help", new { @namespace = nh.Name }, FormMethod.Post, new { id = "form-save" }))

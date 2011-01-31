@@ -66,6 +66,8 @@ namespace ASP
 
 
 
+WriteLiteral("\r\n");
+
 
  using (var e = Html.TypeContext<QueryFilterDN>())
 {
@@ -73,23 +75,22 @@ namespace ASP
     {
         style.OnlyValue = true;
 
-WriteLiteral("    <div style=\"float: left\">\r\n        ");
+WriteLiteral("        <div style=\"float: left\">\r\n            ");
 
 
-   Write(Html.QueryTokenCombo(e.Value.Token, e));
+       Write(Html.QueryTokenCombo(e.Value.Token, e));
 
-WriteLiteral("\r\n    </div>\r\n");
+WriteLiteral("\r\n        </div>\r\n");
 
 
-   
-Write(Html.ValueLine(style, f => f.Operation));
+        
+   Write(Html.ValueLine(style, f => f.Operation));
 
-                                           ;
-   
-Write(Html.ValueLine(style, f => f.ValueString, vl => vl.ValueHtmlProps["size"] = 20));
+                                                
+        
+   Write(Html.ValueLine(style, f => f.ValueString, vl => vl.ValueHtmlProps["size"] = 20));
 
-                                                                                   ;
-
+                                                                                        
     }
 }
 WriteLiteral(" ");

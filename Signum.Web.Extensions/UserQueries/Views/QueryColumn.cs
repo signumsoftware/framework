@@ -64,6 +64,8 @@ namespace ASP
         {
 
 
+WriteLiteral("\r\n");
+
 
  using (var e = Html.TypeContext<QueryColumnDN>())
 {
@@ -73,14 +75,14 @@ namespace ASP
         
    Write(Html.ValueLine(style, f => f.DisplayName, vl => vl.ValueHtmlProps["size"] = 20));
 
-                                                                                        ;
+                                                                                        
 
-WriteLiteral("    <div style=\"float: left\">\r\n        ");
+WriteLiteral("        <div style=\"float: left\">\r\n            ");
 
 
-   Write(Html.QueryTokenCombo(e.Value.Token, e));
+       Write(Html.QueryTokenCombo(e.Value.Token, e));
 
-WriteLiteral("\r\n    </div>\r\n");
+WriteLiteral("\r\n        </div>\r\n");
 
 
     }

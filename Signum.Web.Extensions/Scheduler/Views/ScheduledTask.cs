@@ -64,25 +64,27 @@ namespace ASP
         {
 
 
+WriteLiteral("\r\n");
+
 
  using (var e = Html.TypeContext<ScheduledTaskDN>())
 {
     
 Write(Html.ValueLine(e, f => f.NextDate));
 
-                                       ;
+                                       
     
 Write(Html.ValueLine(e, f => f.Suspended));
 
-                                        ;
+                                        
     
 Write(Html.EntityLine(e, f => f.Task));
 
-                                    ;
+                                    
     
 Write(Html.EntityLine(e, f => f.Rule));
 
-                                    ;
+                                    
 }
 
         }

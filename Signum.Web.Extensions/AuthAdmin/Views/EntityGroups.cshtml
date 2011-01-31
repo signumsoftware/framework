@@ -71,7 +71,7 @@
             </tr>
             <tr class="second">
                 <td>
-                    Out@Html.Hidden(item.Compose("OutBase"), item.Value.AllowedBase.OutGroup.ToStringParts())
+                    Out@(Html.Hidden(item.Compose("OutBase"), item.Value.AllowedBase.OutGroup.ToStringParts()))
                 </td>
                 <td>
                     <a class="cbLink create">

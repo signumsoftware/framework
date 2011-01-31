@@ -1,9 +1,11 @@
 @using Signum.Web.ViewsChecker
 @using Signum.Web.Extensions.Properties
+
 @{
     ViewBag.Title = Resources.ViewsChecker;
     List<ViewError> errors = (List<ViewError>)Model;
 }
+
 <h1>@Resources.ViewsChecker</h1>
 
 @if (errors == null || errors.Count == 0)

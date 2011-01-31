@@ -70,27 +70,29 @@ namespace ASP
 
 
 
+WriteLiteral("\r\n");
+
 
  using (var e = Html.TypeContext<ExcelReportDN>())
 {
     using (var query = e.SubContext(f => f.Query))
     {
-    
-Write(Html.HiddenRuntimeInfo(query));
+        
+   Write(Html.HiddenRuntimeInfo(query));
 
-                                  
-    
-Write(Html.ValueLine(query, f => f.DisplayName, f => { f.ReadOnly = true; f.LabelText = "Query"; }));
+                                      
+        
+   Write(Html.ValueLine(query, f => f.DisplayName, f => { f.ReadOnly = true; f.LabelText = "Query"; }));
 
-                                                                                                  ;
-    
-Write(Html.Hidden(query.Compose("Key"), query.Value.Key));
+                                                                                                      
+        
+   Write(Html.Hidden(query.Compose("Key"), query.Value.Key));
 
-                                                       
-    
-Write(Html.Hidden(query.Compose("DisplayName"), query.Value.DisplayName));
+                                                           
+        
+   Write(Html.Hidden(query.Compose("DisplayName"), query.Value.DisplayName));
 
-                                                                       
+                                                                           
     }
 
     
@@ -101,7 +103,6 @@ Write(Html.ValueLine(e, f => f.DisplayName));
 Write(Html.ValueLine(e, f => f.Deleted, vl => vl.ReadOnly = true));
 
                                                                 
-
     
 Write(Html.FileLine(e, f => f.File, fl => fl.AsyncUpload = false));
 

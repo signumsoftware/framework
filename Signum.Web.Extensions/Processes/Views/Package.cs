@@ -62,29 +62,31 @@ namespace ASP
         public override void Execute()
         {
 
+WriteLiteral("\r\n");
+
 
  using (var e = Html.TypeContext<PackageDN>())
 {
     
 Write(Html.ValueLine(e, f => f.Name));
 
-                                   ;
+                                   
     
 Write(Html.EntityLine(e, f => f.Operation, f => f.ReadOnly = true));
 
-                                                                 ;
+                                                                 
     
 Write(Html.ValueLine(e, f => f.NumLines, f => f.ReadOnly = true));
 
-                                                               ;
+                                                               
     
 Write(Html.ValueLine(e, f => f.NumErrors, f => f.ReadOnly = true));
 
-                                                                ;
+                                                                
     
 Write(Html.ValueLine(e, f => f.IdOrNull, f => f.ReadOnly = true));
 
-                                                               ;
+                                                               
 
 WriteLiteral("    <fieldset>\r\n        <legend>Lines</legend>\r\n        ");
 

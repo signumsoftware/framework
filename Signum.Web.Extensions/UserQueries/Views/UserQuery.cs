@@ -66,6 +66,8 @@ namespace ASP
 
 
 
+WriteLiteral("\r\n");
+
 
  using (var e = Html.TypeContext<UserQueryDN>())
 {
@@ -73,35 +75,35 @@ namespace ASP
 Write(Html.EntityLine(e, f => f.Related, el => el.Create = false));
 
                                                                 
-using (var query = e.SubContext(f => f.Query))
-{
-    
-Write(Html.HiddenRuntimeInfo(query));
+    using (var query = e.SubContext(f => f.Query))
+    {
+        
+   Write(Html.HiddenRuntimeInfo(query));
 
-                                  
-    
-Write(Html.Span("Query", "Query", "labelLine"));
+                                      
+        
+   Write(Html.Span("Query", "Query", "labelLine"));
 
-                                             
-    
-Write(Html.Href("hrefQuery", query.Value.DisplayName, Navigator.FindRoute(ViewData[ViewDataKeys.QueryName]), "", "valueLine", null));
+                                                 
+        
+   Write(Html.Href("hrefQuery", query.Value.DisplayName, Navigator.FindRoute(ViewData[ViewDataKeys.QueryName]), "", "valueLine", null));
 
-                                                                                                                                  
+                                                                                                                                      
         
 
-WriteLiteral("    <div class=\"clearall\">\r\n    </div>\r\n");
+WriteLiteral("        <div class=\"clearall\">\r\n        </div>\r\n");
 
 
         
-    
-Write(Html.Hidden(query.Compose("Key"), query.Value.Key));
+        
+   Write(Html.Hidden(query.Compose("Key"), query.Value.Key));
 
-                                                       
-    
-Write(Html.Hidden(query.Compose("DisplayName"), query.Value.DisplayName));
+                                                           
+        
+   Write(Html.Hidden(query.Compose("DisplayName"), query.Value.DisplayName));
 
-                                                                       
-}
+                                                                           
+    }
     
 Write(Html.ValueLine(e, f => f.DisplayName));
 
@@ -135,7 +137,6 @@ Write(Html.EntityRepeater(e, f => f.Orders, er => { er.PreserveViewData = true; 
 
                                                                                                          
 
-
 WriteLiteral("    <br />\r\n");
 
 
@@ -144,8 +145,7 @@ Write(Html.ValueLine(e, f => f.MaxItems));
 
                                        
 }
-
-WriteLiteral("} ");
+WriteLiteral(" ");
 
 
         }

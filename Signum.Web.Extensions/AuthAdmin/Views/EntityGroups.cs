@@ -81,11 +81,11 @@ WriteLiteral("\r\n<script type=\"text/javascript\">\r\n    $(function () {\r\n  
     
 Write(Html.EntityLine(tc, f => f.Role));
 
-                                     ;
+                                     
     
 Write(Html.ValueLine(tc, f => f.DefaultRule, vl => { vl.UnitText = tc.Value.DefaultLabel; }));
 
-                                                                                           ;
+                                                                                           
 
 
 WriteLiteral("    <table class=\"ruleTable\">\r\n        <thead>\r\n            <tr>\r\n               " +
@@ -177,13 +177,13 @@ WriteLiteral("\r\n                </td>\r\n            </tr>\r\n");
 
 
 
-WriteLiteral(@"            <tr class=""second"">
-                <td>
-                    Out@Html.Hidden(item.Compose(""OutBase""), item.Value.AllowedBase.OutGroup.ToStringParts())
-                </td>
-                <td>
-                    <a class=""cbLink create"">
-                        ");
+WriteLiteral("            <tr class=\"second\">\r\n                <td>\r\n                    Out");
+
+
+                   Write(Html.Hidden(item.Compose("OutBase"), item.Value.AllowedBase.OutGroup.ToStringParts()));
+
+WriteLiteral("\r\n                </td>\r\n                <td>\r\n                    <a class=\"cbLi" +
+"nk create\">\r\n                        ");
 
 
                    Write(Html.CheckBox(item.Compose("Out_Create"), item.Value.Allowed.OutGroup.IsActive(TypeAllowedBasic.Create), new { tag = "Create" }));

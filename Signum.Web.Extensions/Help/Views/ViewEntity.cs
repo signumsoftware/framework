@@ -76,6 +76,8 @@ namespace ASP
 
 
 
+WriteLiteral("\r\n");
+
 
 DefineSection("head", () => {
 
@@ -94,17 +96,19 @@ WriteLiteral("\r\n");
 
 });
 
-WriteLiteral("\r\n");
+WriteLiteral("\r\n\r\n");
 
 
    Html.RenderPartial(HelpClient.Menu);
+
+WriteLiteral("\r\n");
 
 
    EntityHelp eh = (EntityHelp)Model;
    ViewBag.Title = eh.Type.NiceName();
 
 
-WriteLiteral("<form action=\"");
+WriteLiteral("\r\n<form action=\"");
 
 
          Write(HelpLogic.EntityUrl(eh.Type));

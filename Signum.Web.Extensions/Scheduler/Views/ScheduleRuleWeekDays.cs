@@ -64,49 +64,51 @@ namespace ASP
         {
 
 
+WriteLiteral("\r\n");
+
 
  using (var e = Html.TypeContext<ScheduleRuleWeekDaysDN>())
 {
     
 Write(Html.ValueLine(e, f => f.StartingOn));
 
-                                         ;
+                                         
     
 Write(Html.ValueLine(e, f => f.Hour));
 
-                                   ;
+                                   
     
 Write(Html.ValueLine(e, f => f.Minute));
 
-                                     ;
+                                     
     
 Write(Html.ValueLine(e, f => f.Sunday));
 
-                                     ;
+                                     
     
 Write(Html.ValueLine(e, f => f.Monday));
 
-                                     ;
+                                     
     
 Write(Html.ValueLine(e, f => f.Tuesday));
 
-                                      ;
+                                      
     
 Write(Html.ValueLine(e, f => f.Wednesday));
 
-                                        ;
+                                        
     
 Write(Html.ValueLine(e, f => f.Thursday));
 
-                                       ;
+                                       
     
 Write(Html.ValueLine(e, f => f.Friday));
 
-                                     ;
+                                     
     
 Write(Html.ValueLine(e, f => f.Saturday));
 
-                                       ;
+                                       
 }
 
         }

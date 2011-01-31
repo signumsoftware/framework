@@ -62,6 +62,8 @@ namespace ASP
         public override void Execute()
         {
 
+WriteLiteral("\r\n");
+
 
  using (var s = Html.TypeContext<DateSpanDN>())
 {
@@ -71,7 +73,7 @@ WriteLiteral("    <table id=\'datespan\'>\r\n        <tr>\r\n            <td>\r\
 
            Write(Html.ValueLine(s, e => e.Years, vl => vl.ValueHtmlProps.Add("size", 3)));
 
-WriteLiteral(";\r\n            </td>\r\n            <td>\r\n                ");
+WriteLiteral("\r\n            </td>\r\n            <td>\r\n                ");
 
 
            Write(Html.ValueLine(s, e => e.Months, vl => vl.ValueHtmlProps.Add("size", 3)));

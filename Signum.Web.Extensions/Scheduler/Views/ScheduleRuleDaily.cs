@@ -64,21 +64,23 @@ namespace ASP
         {
 
 
+WriteLiteral("\r\n");
+
 
  using (var e = Html.TypeContext<ScheduleRuleDailyDN>())
 {
     
 Write(Html.ValueLine(e, f => f.StartingOn));
 
-                                         ;
+                                         
     
 Write(Html.ValueLine(e, f => f.Hour));
 
-                                   ;
+                                   
     
 Write(Html.ValueLine(e, f => f.Minute));
 
-                                     ;
+                                     
 }
 
         }

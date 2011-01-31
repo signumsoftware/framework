@@ -64,41 +64,43 @@ namespace ASP
         {
 
 
+WriteLiteral("\r\n");
+
 
  using (var e = Html.TypeContext<EmailMessageDN>())
 {
     
 Write(Html.EntityLine(e, f => f.Recipient));
 
-                                         ;
+                                         
     
 Write(Html.EntityLine(e, f => f.Template, f => f.ReadOnly = true));
 
-                                                                ;
+                                                                
     
 Write(Html.ValueLine(e, f => f.Sent, f => f.ReadOnly = true));
 
-                                                           ;
+                                                           
     
 Write(Html.ValueLine(e, f => f.Received, f => f.ReadOnly = true));
 
-                                                               ;
+                                                               
     
 Write(Html.ValueLine(e, f => f.Exception, f => f.ReadOnly = true));
 
-                                                                ;
+                                                                
     
 Write(Html.ValueLine(e, f => f.State, f => f.ReadOnly = true));
 
-                                                            ;
+                                                            
     
 Write(Html.EntityLine(e, f => f.Package, f => f.ReadOnly = true));
 
-                                                               ;
+                                                               
     
 Write(Html.ValueLine(e, f => f.Subject));
 
-                                      ;
+                                      
 
 WriteLiteral("    <h3>\r\n        Message:</h3>\r\n");
 

@@ -64,6 +64,8 @@ namespace ASP
         {
 
 
+WriteLiteral("\r\n");
+
 
    HeavyProfilerEntry entry = (HeavyProfilerEntry)Model;
 

@@ -2,16 +2,20 @@
 @using Signum.Web.Extensions
 @using Signum.Engine.WikiMarkup
 @using Signum.Engine.Help
+
 @section head
 {
     @Html.ScriptCss("~/help/Content/help.css")
     @Html.ScriptsJs("~/signum/Scripts/SF_Globals.js")
 }
+
 @{ Html.RenderPartial(HelpClient.Menu);}
+
 @{ 
     AppendixHelp ah = (AppendixHelp)Model;
     ViewBag.Title = ah.Title;
 }
+
 @using (var f = Html.BeginForm("SaveAppendix", "Help", new { appendix = ah.Name }, FormMethod.Post, new { id = "form-save" }))
 {
     <div class="grid_16" id="entityName">

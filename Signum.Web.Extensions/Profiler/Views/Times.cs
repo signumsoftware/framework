@@ -61,7 +61,8 @@ namespace ASP
         public override void Execute()
         {
 
-WriteLiteral(@"<style type=""text/css"">
+WriteLiteral(@"
+<style type=""text/css"">
     .task
     {
         border-bottom: 1px solid #ddd;
@@ -112,8 +113,7 @@ WriteLiteral(@"<style type=""text/css"">
     #tasks .left
     {
         float: left;
-    }
-    
+    }    
     
     .tblResults .percentile0
     {
@@ -128,6 +128,7 @@ WriteLiteral(@"<style type=""text/css"">
         background-color: #FFCCCC;
     }
 </style>
+
 ");
 
 

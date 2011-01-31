@@ -64,13 +64,15 @@ namespace ASP
         {
 
 
+WriteLiteral("\r\n");
+
 
   
     ViewBag.Title = Resources.ViewsChecker;
     List<ViewError> errors = (List<ViewError>)Model;
 
 
-WriteLiteral("<h1>");
+WriteLiteral("\r\n<h1>");
 
 
 Write(Resources.ViewsChecker);

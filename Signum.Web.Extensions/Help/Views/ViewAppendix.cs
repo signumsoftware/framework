@@ -68,6 +68,8 @@ namespace ASP
 
 
 
+WriteLiteral("\r\n");
+
 
 DefineSection("head", () => {
 
@@ -86,16 +88,20 @@ WriteLiteral("\r\n");
 
 });
 
-WriteLiteral("\r\n");
+WriteLiteral("\r\n\r\n");
 
 
    Html.RenderPartial(HelpClient.Menu);
+
+WriteLiteral("\r\n");
 
 
    
     AppendixHelp ah = (AppendixHelp)Model;
     ViewBag.Title = ah.Title;
 
+
+WriteLiteral("\r\n");
 
 
  using (var f = Html.BeginForm("SaveAppendix", "Help", new { appendix = ah.Name }, FormMethod.Post, new { id = "form-save" }))

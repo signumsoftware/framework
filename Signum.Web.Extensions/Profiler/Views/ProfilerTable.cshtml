@@ -1,9 +1,11 @@
 @using Signum.Utilities.ExpressionTrees
 @using Signum.Web.Profiler
+
 @{ List<HeavyProfilerEntry> entries = (List<HeavyProfilerEntry>)Model;
    var roles = entries.Select(a => a.GetDescendantRoles()).ToList();
    var allKeys = roles.SelectMany(a => a.Keys).Distinct().Order().ToList();
 }
+
 <table class="tblResults">
     <thead>
         <tr>

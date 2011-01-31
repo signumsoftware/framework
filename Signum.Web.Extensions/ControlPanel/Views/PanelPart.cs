@@ -66,7 +66,8 @@ namespace ASP
 
 
 
-WriteLiteral(@"<script type=""text/javascript"">
+WriteLiteral(@"
+<script type=""text/javascript"">
     function toggleCol(cbFillId, colInputId) {
         if ($(""#"" + cbFillId + "":checked"").length > 0)
             $('#' + colInputId).val(1).attr('disabled', 'disabled');
@@ -74,6 +75,7 @@ WriteLiteral(@"<script type=""text/javascript"">
             $('#' + colInputId).attr('disabled', '');
     }
 </script>
+
 ");
 
 
@@ -87,17 +89,17 @@ WriteLiteral(@"<script type=""text/javascript"">
         
    Write(Html.ValueLine(sc, pp => pp.Row, vl => vl.ValueHtmlProps["size"] = 2));
 
-                                                                              ;
+                                                                              
         string colId = null;
         
    Write(Html.ValueLine(sc, pp => pp.Column, vl => { vl.ValueHtmlProps["size"] = 2; colId = vl.ControlID; }));
 
-                                                                                                            ;
+                                                                                                            
         string fillId = null;
         
    Write(Html.ValueLine(sc, pp => pp.Fill, vl => { vl.ValueHtmlProps["onclick"] = "toggleCol(this.id,'" + colId + "');"; fillId = vl.ControlID; }));
 
-                                                                                                                                                  ;
+                                                                                                                                                  
         
 
 WriteLiteral("    <script type=\"text/javascript\">\r\n        $(document).ready(function () { togg" +
@@ -118,11 +120,11 @@ WriteLiteral("\'); });\r\n    </script>\r\n");
         
    Write(Html.ValueLine(sc, pp => pp.Title));
 
-                                           ;
+                                           
         
    Write(Html.EntityLine(sc, pp => pp.Content, el => el.Autocomplete = false));
 
-                                                                             ;
+                                                                             
     }
 }
 WriteLiteral(" ");

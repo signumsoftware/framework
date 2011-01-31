@@ -64,6 +64,8 @@ namespace ASP
         {
 
 
+WriteLiteral("\r\n");
+
 
  using (var e = Html.TypeContext<QueryOrderDN>())
 {
@@ -82,7 +84,7 @@ WriteLiteral("\r\n    </div>\r\n");
         
    Write(Html.ValueLine(style, f => f.OrderType));
 
-                                                ;
+                                                
     }
 }
 

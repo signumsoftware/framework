@@ -6,15 +6,19 @@
 @using Signum.Entities.DynamicQuery
 @using Signum.Entities.Operations
 @using Signum.Engine.WikiMarkup
+
 @section head
 {
     @Html.ScriptCss("~/help/Content/help.css")
     @Html.ScriptsJs("~/signum/Scripts/SF_Globals.js")
 }
+
 @{ Html.RenderPartial(HelpClient.Menu);}
+
 @{ EntityHelp eh = (EntityHelp)Model;
    ViewBag.Title = eh.Type.NiceName();
 }
+
 <form action="@HelpLogic.EntityUrl(eh.Type)/Save" id="form-save">
 <div class="grid_16" id="entityName">
     <span class='shortcut'>[e:@eh.Type.Name]</span>

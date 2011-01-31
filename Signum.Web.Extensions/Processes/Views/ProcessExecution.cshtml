@@ -1,5 +1,7 @@
 ﻿@using Signum.Entities.Processes
+
 @Html.DynamicCss("~/processes/Content/Processes.css")
+
 @using (var e = Html.TypeContext<ProcessExecutionDN>())
 {
     @Html.ValueLine(e, f => f.State, f => f.ReadOnly = true)
@@ -15,8 +17,7 @@
     @Html.ValueLine(e, f => f.ExceptionDate, f => { f.HideIfNull = true; f.ReadOnly = true; })
     @Html.ValueLine(e, f => f.Exception, f => { f.HideIfNull = true; f.ReadOnly = true; })
     @Html.ValueLine(e, f => f.Progress, f => f.ReadOnly = true)
-
-
+    
     if (e.Value.State == ProcessState.Executing)
     {
     @:Progress:

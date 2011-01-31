@@ -62,10 +62,12 @@ namespace ASP
         public override void Execute()
         {
 
+WriteLiteral("\r\n");
+
 
 Write(Html.DynamicCss("~/processes/Content/Processes.css"));
 
-WriteLiteral("\r\n");
+WriteLiteral("\r\n\r\n");
 
 
  using (var e = Html.TypeContext<ProcessExecutionDN>())
@@ -73,57 +75,56 @@ WriteLiteral("\r\n");
     
 Write(Html.ValueLine(e, f => f.State, f => f.ReadOnly = true));
 
-                                                            ;
+                                                            
     
 Write(Html.EntityLine(e, f => f.Process));
 
-                                       ;
+                                       
     
 Write(Html.EntityLine(e, f => f.ProcessData, f => f.ReadOnly = true));
 
-                                                                   ;
+                                                                   
     
 Write(Html.ValueLine(e, f => f.CreationDate));
 
-                                           ;
+                                           
     
 Write(Html.ValueLine(e, f => f.PlannedDate, f => { f.HideIfNull = true; f.ReadOnly = true; }));
 
-                                                                                            ;
+                                                                                            
     
 Write(Html.ValueLine(e, f => f.CancelationDate, f => { f.HideIfNull = true; f.ReadOnly = true; }));
 
-                                                                                                ;
+                                                                                                
     
 Write(Html.ValueLine(e, f => f.QueuedDate, f => { f.HideIfNull = true; f.ReadOnly = true; }));
 
-                                                                                           ;
+                                                                                           
     
 Write(Html.ValueLine(e, f => f.ExecutionStart, f => { f.HideIfNull = true; f.ReadOnly = true; }));
 
-                                                                                               ;
+                                                                                               
     
 Write(Html.ValueLine(e, f => f.ExecutionEnd, f => { f.HideIfNull = true; f.ReadOnly = true; }));
 
-                                                                                             ;
+                                                                                             
     
 Write(Html.ValueLine(e, f => f.SuspendDate, f => { f.HideIfNull = true; f.ReadOnly = true; }));
 
-                                                                                            ;
+                                                                                            
     
 Write(Html.ValueLine(e, f => f.ExceptionDate, f => { f.HideIfNull = true; f.ReadOnly = true; }));
 
-                                                                                              ;
+                                                                                              
     
 Write(Html.ValueLine(e, f => f.Exception, f => { f.HideIfNull = true; f.ReadOnly = true; }));
 
-                                                                                          ;
+                                                                                          
     
 Write(Html.ValueLine(e, f => f.Progress, f => f.ReadOnly = true));
 
-                                                               ;
-
-
+                                                               
+    
     if (e.Value.State == ProcessState.Executing)
     {
 

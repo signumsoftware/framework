@@ -70,7 +70,7 @@ namespace ASP
     
 Write(Html.ValueLine(e, f => f.UserName, vl => vl.ValueHtmlProps["size"] = 50));
 
-                                                                             ;
+                                                                             
     if (e.Value.IsNew || (ViewData["NewPwd"] != null && bool.Parse(ViewData["NewPwd"].ToString())))
     {
 
@@ -117,19 +117,19 @@ Write(Html.ValidationMessage(UserMapping.NewPasswordBisKey));
     
 Write(Html.ValueLine(e, f => f.Email, vl => vl.ValueHtmlProps["size"] = 30));
 
-                                                                          ;
+                                                                          
     
 Write(Html.EntityLine(e, f => f.Role));
 
-                                    ;
+                                    
     
 Write(Html.ValueLine(e, f => f.State));
 
-                                    ;
+                                    
     
 Write(Html.EntityLine(e, f => f.Related));
 
-                                       ;
+                                       
 }
 WriteLiteral(" ");
 
