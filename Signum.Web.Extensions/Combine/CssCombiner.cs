@@ -36,12 +36,12 @@ namespace Signum.Web.Combine
             sb.AppendLine("/* {0} */".Formato(virtualFiles.ToString(",")));
             foreach (var vf in virtualFiles)
             {
-                var content = CombineClient.ReadVirtualFile(vf);
-                content = ReplaceRelativeImg(content, vf);
+                var content = CombineClient.ReadStaticFile(vf);
+                content = ReplaceRelativeImg(content, VirtualPathUtility.ToAbsolute(vf));
                 sb.AppendLine(Minify(content));
             }
 
-            return new StaticContentResult(Encoding.UTF8.GetBytes(sb.ToString()), "text/css");
+            return new StaticContentResult(Encoding.UTF8.GetBytes(sb.ToString()), "bla.css");
         }
 
         static string ReplaceRelativeImg(string content, string virtualFile)

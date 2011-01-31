@@ -27,10 +27,10 @@ namespace Signum.Web.Combine
             StringBuilder sb = new StringBuilder();
             foreach (var vf in virtualFiles)
             {
-                sb.AppendLine(CombineClient.ReadVirtualFile(vf));
+                sb.AppendLine(CombineClient.ReadStaticFile(vf));
             }
 
-            return new StaticContentResult(Encoding.UTF8.GetBytes(combineComment + Minify(sb.ToString())), "application/x-javascript");
+            return new StaticContentResult(Encoding.UTF8.GetBytes(combineComment + Minify(sb.ToString())), "bla.js");
         }
     }
 }

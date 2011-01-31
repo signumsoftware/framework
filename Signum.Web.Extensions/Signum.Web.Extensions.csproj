@@ -504,7 +504,7 @@
       <DependentUpon>ScheduleRuleWeekly.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Combine\CombineController.cs" />
-    <Compile Include="Combine\Combiner.cs" />
+    <Compile Include="Combine\CombineClient.cs" />
     <Compile Include="Combine\CombinerScriptHtmlManager.cs" />
     <Compile Include="Combine\CssCombiner.cs" />
     <Compile Include="Combine\GoogleClosure.cs" />

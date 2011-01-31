@@ -107,13 +107,26 @@ namespace Signum.Web.Combine
             }
         }
 
-        public static string ReadVirtualFile(string virtualPath)
+        public static string ReadStaticFile(string virtualPath)
         {
-            VirtualFile vf = HostingEnvironment.VirtualPathProvider.GetFile(virtualPath);
-            using (Stream str = vf.Open())
-            using (StreamReader reader = new StreamReader(str))
-                return reader.ReadToEnd();
+            if (FileRepositoryManager.FileExists(virtualPath))
+            {
+                ActionResult result = FileRepositoryManager.GetFile(virtualPath);
+                StaticContentResult staticResult = result as StaticContentResult;
 
+                using (MemoryStream ms = new MemoryStream(staticResult.Uncompressed))
+                using (StreamReader reader = new StreamReader(ms))
+                    return reader.ReadToEnd();
+            }
+            else
+            {
+                if (virtualPath.StartsWith("~"))
+                    virtualPath = virtualPath.Substring(1); 
+
+                using (Stream str = VirtualPathProvider.OpenFile(virtualPath))
+                using (StreamReader reader = new StreamReader(str))
+                    return reader.ReadToEnd();
+            }
         }
 
         public static void Start()
@@ -124,16 +137,8 @@ namespace Signum.Web.Combine
 
                 Navigator.RegisterArea(typeof(CombineClient));
 
-
-                Route routeCss = new Route("combine/css/{key}", new MvcRouteHandler());
-                routeCss.Defaults = new RouteValueDictionary(new { controller = "Combine", action = "CSS", key = "" });
-
-                RouteTable.Routes.Insert(0, routeCss);
-
-                Route routeJs = new Route("combine/js/{key}", new MvcRouteHandler());
-                routeJs.Defaults = new RouteValueDictionary(new { controller = "Combine", action = "JS", key = "" });
-
-                RouteTable.Routes.Insert(0, routeJs);
+                RouteTable.Routes.MapRoute(null, "combine/css/{key}", new { controller = "Combine", action = "CSS", key = "" });
+                RouteTable.Routes.MapRoute(null, "combine/js/{key}", new { controller = "Combine", action = "JS", key = "" });
             }
         }
     }
