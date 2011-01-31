@@ -82,16 +82,16 @@ WriteLiteral("    <span class=\"separator\">|</span>");
 
 
                                     
-                               Write(Html.ActionLink("Logout", "Logout", "Auth", null, new { @class = "logout" }));
+                               Write(Html.ActionLink("Logout", "Logout", "Auth", null, new { @class = "sf-logout" }));
 
-                                                                                                                 
+                                                                                                                    
 }
 else
 { 
     
-Write(Html.ActionLink("Login", "Login", "Auth", null, new { @class = "login" }));
+Write(Html.ActionLink("Login", "Login", "Auth", null, new { @class = "sf-login" }));
 
-                                                                              
+                                                                                 
 }
 
 

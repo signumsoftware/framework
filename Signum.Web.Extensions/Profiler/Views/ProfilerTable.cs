@@ -64,16 +64,13 @@ namespace ASP
         {
 
 
-WriteLiteral("\r\n");
-
 
    List<HeavyProfilerEntry> entries = (List<HeavyProfilerEntry>)Model;
    var roles = entries.Select(a => a.GetDescendantRoles()).ToList();
    var allKeys = roles.SelectMany(a => a.Keys).Distinct().Order().ToList();
 
 
-WriteLiteral(@"
-<table class=""tblResults"">
+WriteLiteral(@"<table class=""sf-search-results"">
     <thead>
         <tr>
             <th>

@@ -75,35 +75,35 @@ WriteLiteral("\r\n");
 Write(Html.EntityLine(e, f => f.Related, el => el.Create = false));
 
                                                                 
-    using (var query = e.SubContext(f => f.Query))
-    {
+using (var query = e.SubContext(f => f.Query))
+{
+    
+Write(Html.HiddenRuntimeInfo(query));
+
+                                  
+    
+Write(Html.Span("Query", "Query", "sf-label-line"));
+
+                                             
+    
+Write(Html.Href("hrefQuery", query.Value.DisplayName, Navigator.FindRoute(ViewData[ViewDataKeys.QueryName]), "", "sf-value-line", null));
+
+                                                                                                                                  
         
-   Write(Html.HiddenRuntimeInfo(query));
 
-                                      
-        
-   Write(Html.Span("Query", "Query", "labelLine"));
-
-                                                 
-        
-   Write(Html.Href("hrefQuery", query.Value.DisplayName, Navigator.FindRoute(ViewData[ViewDataKeys.QueryName]), "", "valueLine", null));
-
-                                                                                                                                      
-        
-
-WriteLiteral("        <div class=\"clearall\">\r\n        </div>\r\n");
+WriteLiteral("    <div class=\"clearall\">\r\n    </div>\r\n");
 
 
         
-        
-   Write(Html.Hidden(query.Compose("Key"), query.Value.Key));
+    
+Write(Html.Hidden(query.Compose("Key"), query.Value.Key));
 
-                                                           
-        
-   Write(Html.Hidden(query.Compose("DisplayName"), query.Value.DisplayName));
+                                                       
+    
+Write(Html.Hidden(query.Compose("DisplayName"), query.Value.DisplayName));
 
-                                                                           
-    }
+                                                                       
+}
     
 Write(Html.ValueLine(e, f => f.DisplayName));
 

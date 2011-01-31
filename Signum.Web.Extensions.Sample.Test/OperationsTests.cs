@@ -46,6 +46,8 @@ namespace Signum.Web.Extensions.Sample.Test
         public void Execute_Navigate()
         {
             //Album.Save
+            
+            
             CheckLoginAndOpen(FindRoute("Album"));
 
             selenium.SearchCreate();
@@ -77,7 +79,7 @@ namespace Signum.Web.Extensions.Sample.Test
         {
             selenium.Type("Name", name);
             selenium.EntityButtonClick("AlbumOperation_Modify");
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("//span[contains(@class,'title') and text()='{0}']".Formato(name)));
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("//span[contains(@class,'sf-entity-title') and text()='{0}']".Formato(name)));
         }
 
         [TestMethod]

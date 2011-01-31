@@ -18,7 +18,7 @@ namespace Signum.Web.Operations
     {
         public OperationsContextualItem()
         {
-            DivCssClass = "operationsCtxItem";
+            DivCssClass = "sf-operations-ctxitem";
         }
 
         public override string ToString()
@@ -52,7 +52,7 @@ namespace Signum.Web.Operations
             {
                 //Label = "<span id='{0}'>{0}</span>".Formato("Operations"),
                 Id = "Operations",
-                Content = @"<div class='contextualItem operations'><ul class='operation-ctx-menu'>{0}</ul></div>".Formato(
+                Content = @"<div class='sf-operations-ctxitem sf-operations'><ul class='sf-operation-ctxmenu'>{0}</ul></div>".Formato(
                     operations.ToString(ctx => "<li>" + ctx.IndividualOperationToString() + "</li>", "")),
             };
         }

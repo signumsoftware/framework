@@ -12,8 +12,6 @@
     @Html.EntityLine(tc, f => f.Role)
     @Html.ValueLine(tc, f => f.DefaultRule, vl => { vl.UnitText = tc.Value.DefaultLabel; })
 
-
-
     <table class="ruleTable">
         <thead>
             <tr>
@@ -94,14 +92,14 @@
                     </a>
                 </td>
                 <td>
-                    @Html.CheckBox(item.Compose("Overriden"), item.Value.Overriden, new { disabled = "disabled", @class = "overriden" })
+                    @Html.CheckBox(item.Compose("Overriden"), item.Value.Overriden, new { disabled = "disabled", @class = "sf-overriden" })
                 </td>
                 @if (Navigator.Manager.EntitySettings.ContainsKey(typeof(PropertyRulePack)))
                 {
                     <td>
                         @if (item.Value.Properties.HasValue)
                         {
-                            <a href="javascript:openDialog('@Url.Action((AuthAdminController a)=>a.Properties(tc.Value.Role, item.Value.Resource.ToLite(), null))');">
+                            <a href="javascript:openDialog('@Url.Action((AuthAdminController a) => a.Properties(tc.Value.Role, item.Value.Resource.ToLite(), null))');">
                                 <div class="property">
                                     <div class="thumb @item.Value.Properties.ToString().ToLower()">
                                     </div>
@@ -115,7 +113,7 @@
                     <td>
                         @if (item.Value.Operations.HasValue)
                         {
-                            <a href="javascript:openDialog('@Url.Action((AuthAdminController a)=>a.Operations(tc.Value.Role, item.Value.Resource.ToLite(), null))');">
+                            <a href="javascript:openDialog('@Url.Action((AuthAdminController a) => a.Operations(tc.Value.Role, item.Value.Resource.ToLite(), null))');">
                                 <div class="operation">
                                     <div class="thumb @item.Value.Operations.ToString().ToLower()">
                                     </div>
@@ -129,7 +127,7 @@
                     <td>
                         @if (item.Value.Queries.HasValue)
                         {
-                            <a href="javascript:openDialog('@Url.Action((AuthAdminController a)=>a.Queries(tc.Value.Role, item.Value.Resource.ToLite(), null))');">
+                            <a href="javascript:openDialog('@Url.Action((AuthAdminController a) => a.Queries(tc.Value.Role, item.Value.Resource.ToLite(), null))');">
                                 <div class="query">
                                     <div class="thumb @item.Value.Queries.ToString().ToLower()">
                                     </div>
@@ -142,4 +140,4 @@
                    }
         }
     </table>
-} 
+}

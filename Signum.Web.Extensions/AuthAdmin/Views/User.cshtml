@@ -3,14 +3,14 @@
     @Html.ValueLine(e, f => f.UserName, vl => vl.ValueHtmlProps["size"] = 50)
     if (e.Value.IsNew || (ViewData["NewPwd"] != null && bool.Parse(ViewData["NewPwd"].ToString())))
     {
-    <label class="labelLine">@Resources.ChangePasswordAspx_NewPassword</label>
-    @Html.Password(UserMapping.NewPasswordKey, "", new Dictionary<string, string> { { "class", "valueLine" } })
+    <label class="sf-label-line">@Resources.ChangePasswordAspx_NewPassword</label>
+    @Html.Password(UserMapping.NewPasswordKey, "", new Dictionary<string, string> { { "class", "sf-value-line" } })
     @Html.ValidationMessage(UserMapping.NewPasswordKey)
     <div class="clearall">
     </div>
         
-    <label class="labelLine">@Resources.ChangePasswordAspx_ConfirmNewPassword</label>
-    @Html.Password(UserMapping.NewPasswordBisKey, "", new Dictionary<string, string> { { "class", "valueLine" } })
+    <label class="sf-label-line">@Resources.ChangePasswordAspx_ConfirmNewPassword</label>
+    @Html.Password(UserMapping.NewPasswordBisKey, "", new Dictionary<string, string> { { "class", "sf-value-line" } })
     @Html.ValidationMessage(UserMapping.NewPasswordBisKey)
     }
 

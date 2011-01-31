@@ -14,7 +14,7 @@ function magicRadios($ctx) {
         var $tr = $(this).parent("td").parent("tr");
         var radio = $(":radio", this);
         radio.attr("checked", true);
-        $(".overriden", $tr).attr("checked", radio.val() != $("input[name$=Base]", $tr).val());
+        $(".sf-overriden", $tr).attr("checked", radio.val() != $("input[name$=Base]", $tr).val());
         $(".cbLink", $tr).each(updateBackground);
     });
 }
@@ -48,7 +48,7 @@ function magicCheckBoxes($ctx) {
 
         var total = $.map($(".cbLink :checkbox:checked", $tr), function(a) { return $(a).attr("tag"); }).join(",");
 
-        $(".overriden", $tr).attr("checked", total != $("input[name$=Base]", $tr).val());
+        $(".sf-overriden", $tr).attr("checked", total != $("input[name$=Base]", $tr).val());
         $(".cbLink", $tr).each(updateBackground);
     });
 }

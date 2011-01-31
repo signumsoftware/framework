@@ -140,7 +140,7 @@ namespace Signum.Web.Selenium
 
         public static void MainEntityHasId(this ISelenium selenium)
         {
-            Assert.IsTrue(selenium.IsElementPresent("jq=.entityId span"));
+            Assert.IsTrue(selenium.IsElementPresent("jq=#divNormalControl[data-isnew=false]"));
         }
 
         public static string RuntimeInfoSelector(string prefix)
@@ -159,13 +159,13 @@ namespace Signum.Web.Selenium
         public static string EntityButtonLocator(string buttonId)
         {
             //check of css class is redundant but it must be in the html, so good for testing
-            return "jq=#{0}.entity-button".Formato(buttonId); 
+            return "jq=#{0}.sf-entity-button".Formato(buttonId); 
         }
 
         public static string EntityMenuOptionLocator(string menuId, string optionId)
         {
             //check of menu and item classes is redundant but it must be in the html, so good for testing
-            return "jq=#{0}.entity-button.dropdown ul.menu-button li.ui-menu-item a.entity-button#{1}".Formato(menuId, optionId);
+            return "jq=#{0}.sf-entity-button.dropdown ul.sf-menu-button li.ui-menu-item a.sf-entity-button#{1}".Formato(menuId, optionId);
         }
 
         public static void EntityButtonSaveClick(this ISelenium selenium)

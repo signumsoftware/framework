@@ -42,15 +42,13 @@ namespace Signum.Web.Files
                 }
             }
 
-            sb.AddLine(EntityBaseHelper.BreakLineDiv(helper, fileRepeater));
-
             return sb.ToHtml();
         }
 
         private static MvcHtmlString InternalRepeaterElement(this HtmlHelper helper, TypeElementContext<FilePathDN> itemTC, FileRepeater fileRepeater)
         {
             HtmlStringBuilder sb = new HtmlStringBuilder();
-            using (sb.Surround(new HtmlTag("div").IdName(itemTC.Compose(EntityRepeaterKeys.RepeaterElement)).Attr("class","repeaterElement")))
+            using (sb.Surround(new HtmlTag("div").IdName(itemTC.Compose(EntityRepeaterKeys.RepeaterElement)).Attr("class", "sf-repeater-element")))
             {
                 sb.AddLine(helper.Hidden(itemTC.Compose(EntityListBaseKeys.Index), itemTC.Index.ToString()));
 

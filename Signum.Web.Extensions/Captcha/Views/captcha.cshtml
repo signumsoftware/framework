@@ -36,13 +36,11 @@
 
         alert(lang.signum.error + ": " + error);
 
-        uiBlocked = false;
-        $(".uiBlocker").remove();
-    
+        SF.Blocker.disable();    
     }
 </script>
 <div id="divCaptcha">
-    <label class="labelLine">
+    <label class="sf-label-line">
         Escriba estos caracteres:</label>
     <div id="divCaptchaImage">
         @{ Html.RenderPartial(CaptchaClient.CaptchaImageUrl);}
@@ -50,7 +48,7 @@
     @Html.Href("solicitarNuevoCaptcha", "Solicite un nuevo código", "javascript:solicitarCaptcha();", "Solicite un nuevo código", null, new Dictionary<string, object> { { "style", "float:left" } })
     <div class="clearall">
     </div>
-    <label class="labelLine" for="sfCaptcha">
+    <label class="sf-label-line" for="sfCaptcha">
         Aquí:</label>
     @Html.TextBox("sfCaptcha", null, new { autocomplete = "off" })
 </div>

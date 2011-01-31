@@ -290,7 +290,7 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.LineFind("Members_", 0);
             
             //User columns are not present in popup
-            Assert.IsFalse(selenium.IsElementPresent("jq=#Members_0_divFilters .addColumn"));
+            Assert.IsFalse(selenium.IsElementPresent("jq=#Members_0_divFilters .sf-add-column"));
         }
 
         [TestMethod]
@@ -309,8 +309,8 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.EntityContextMenuClick(1, 1);
 
             Assert.IsTrue(Regex.IsMatch(selenium.GetConfirmation(), ".*"));
-            selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("{0} > a.entityCtxMenuSuccess".Formato(row1col1)));
-            Assert.IsFalse(selenium.IsElementPresent("{0} .searchCtxMenu .searchCtxMenuOverlay".Formato(row1col1)));
+            selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("{0} > a.entity-ctxmenu-success".Formato(row1col1)));
+            Assert.IsFalse(selenium.IsElementPresent("{0} .search-ctxmenu .search-ctxmenu-overlay".Formato(row1col1)));
 
             //For Michael Jackson there are no operations enabled
             selenium.EntityContextMenu(5);

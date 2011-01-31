@@ -83,13 +83,11 @@ WriteLiteral("\r\n<script type=\"text/javascript\">\r\n    $(function () {\r\n  
     
 Write(Html.EntityLine(tc, f => f.Role));
 
-                                     ;
+                                     
     
 Write(Html.ValueLine(tc, f => f.DefaultRule, vl => { vl.UnitText = tc.Value.DefaultLabel; }));
 
-                                                                                           ;
-
-
+                                                                                           
 
 
 WriteLiteral("    <table class=\"ruleTable\">\r\n        <thead>\r\n            <tr>\r\n               " +
@@ -260,7 +258,7 @@ WriteLiteral("\r\n                    </a>\r\n                </td>\r\n         
 "            ");
 
 
-               Write(Html.CheckBox(item.Compose("Overriden"), item.Value.Overriden, new { disabled = "disabled", @class = "overriden" }));
+               Write(Html.CheckBox(item.Compose("Overriden"), item.Value.Overriden, new { disabled = "disabled", @class = "sf-overriden" }));
 
 WriteLiteral("\r\n                </td>\r\n");
 
@@ -277,7 +275,7 @@ WriteLiteral("                    <td>\r\n");
 WriteLiteral("                            <a href=\"javascript:openDialog(\'");
 
 
-                                                       Write(Url.Action((AuthAdminController a)=>a.Properties(tc.Value.Role, item.Value.Resource.ToLite(), null)));
+                                                       Write(Url.Action((AuthAdminController a) => a.Properties(tc.Value.Role, item.Value.Resource.ToLite(), null)));
 
 WriteLiteral("\');\">\r\n                                <div class=\"property\">\r\n                  " +
 "                  <div class=\"thumb ");
@@ -309,7 +307,7 @@ WriteLiteral("                    <td>\r\n");
 WriteLiteral("                            <a href=\"javascript:openDialog(\'");
 
 
-                                                       Write(Url.Action((AuthAdminController a)=>a.Operations(tc.Value.Role, item.Value.Resource.ToLite(), null)));
+                                                       Write(Url.Action((AuthAdminController a) => a.Operations(tc.Value.Role, item.Value.Resource.ToLite(), null)));
 
 WriteLiteral("\');\">\r\n                                <div class=\"operation\">\r\n                 " +
 "                   <div class=\"thumb ");
@@ -341,7 +339,7 @@ WriteLiteral("                    <td>\r\n");
 WriteLiteral("                            <a href=\"javascript:openDialog(\'");
 
 
-                                                       Write(Url.Action((AuthAdminController a)=>a.Queries(tc.Value.Role, item.Value.Resource.ToLite(), null)));
+                                                       Write(Url.Action((AuthAdminController a) => a.Queries(tc.Value.Role, item.Value.Resource.ToLite(), null)));
 
 WriteLiteral("\');\">\r\n                                <div class=\"query\">\r\n                     " +
 "               <div class=\"thumb ");
@@ -370,7 +368,6 @@ WriteLiteral("    </table>\r\n");
 
 
 }
-WriteLiteral(" ");
 
 
         }

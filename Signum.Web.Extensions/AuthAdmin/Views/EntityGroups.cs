@@ -171,7 +171,7 @@ WriteLiteral("\r\n                    </a>\r\n                </td>\r\n         
 "            ");
 
 
-               Write(Html.CheckBox(item.Compose("InOverriden"), !item.Value.Allowed.InGroup.Equals(item.Value.AllowedBase.InGroup), new { disabled = "disabled", @class = "overriden" }));
+               Write(Html.CheckBox(item.Compose("InOverriden"), !item.Value.Allowed.InGroup.Equals(item.Value.AllowedBase.InGroup), new { disabled = "disabled", @class = "sf-overriden" }));
 
 WriteLiteral("\r\n                </td>\r\n            </tr>\r\n");
 
@@ -210,7 +210,7 @@ WriteLiteral("\r\n                    </a>\r\n                </td>\r\n         
 "            ");
 
 
-               Write(Html.CheckBox(item.Compose("OutOverriden"), !item.Value.Allowed.OutGroup.Equals(item.Value.AllowedBase.OutGroup), new { disabled = "disabled", @class = "overriden" }));
+               Write(Html.CheckBox(item.Compose("OutOverriden"), !item.Value.Allowed.OutGroup.Equals(item.Value.AllowedBase.OutGroup), new { disabled = "disabled", @class = "sf-overriden" }));
 
 WriteLiteral("\r\n                </td>\r\n            </tr>\r\n");
 

@@ -129,7 +129,7 @@ namespace Signum.Web.Selenium
 
         public static string RowSelector(string prefix)
         {
-            return "jq=#{0}tblResults > tbody > tr".Formato(prefix);
+            return "jq=#{0}sf-search-results > tbody > tr".Formato(prefix);
         }
 
         public static string RowSelector(int rowIndexBase1)
@@ -179,7 +179,7 @@ namespace Signum.Web.Selenium
 
         public static string TableHeaderSelector(string prefix)
         {
-            return "jq=#{0}tblResults > thead > tr > th".Formato(prefix);
+            return "jq=#{0}sf-search-results > thead > tr > th".Formato(prefix);
         }
 
         public static string TableHeaderSelector(int columnIndexBase1)
@@ -246,7 +246,7 @@ namespace Signum.Web.Selenium
         {
             bool isMarked = selenium.IsElementPresent("{0}.{1}".Formato(
                 TableHeaderSelector(columnIndexBase1, prefix),
-                ascending ? ".headerSortDown" : ".headerSortUp"));
+                ascending ? ".sf-header-sort-down" : ".sf-header-sort-up"));
 
             if (marked)
                 Assert.IsTrue(isMarked);
@@ -301,7 +301,7 @@ namespace Signum.Web.Selenium
 
         public static string EntityContextMenuSelector(int rowIndexBase1, string prefix)
         {
-            return "{0} .searchCtxMenu".Formato(CellSelector(rowIndexBase1, 1));
+            return "{0} .search-ctxmenu".Formato(CellSelector(rowIndexBase1, 1));
         }
 
         public static void EntityContextMenu(this ISelenium selenium, int rowIndexBase1)
@@ -359,19 +359,19 @@ namespace Signum.Web.Selenium
 
         public static string QueryButtonLocator(string id) {
             //check query-button class present is redundant for locating, but it must be there in the html so good for testing
-            return "jq=#{0}.query-button".Formato(id); 
+            return "jq=#{0}.sf-query-button".Formato(id); 
         }
 
         public static string QueryMenuOptionLocator(string menuId, string optionId)
         {
             //check of menu and item classes is redundant but it must be in the html, so good for testing
-            return "jq=#{0}.query-button.dropdown ul.menu-button li.ui-menu-item a.query-button#{1}".Formato(menuId, optionId); 
+            return "jq=#{0}.sf-query-button.sf-dropdown ul.sf-menu-button li.ui-menu-item a.sf-query-button#{1}".Formato(menuId, optionId); 
         }
 
         public static string QueryMenuOptionLocatorByAttr(string menuId, string optionLocator)
         {
             //check of menu and item classes is redundant but it must be in the html, so good for testing
-            return "jq=#{0}.query-button.dropdown ul.menu-button li.ui-menu-item a.query-button[{1}]".Formato(menuId, optionLocator);
+            return "jq=#{0}.sf-query-button.sf-dropdown ul.sf-menu-button li.ui-menu-item a.sf-query-button[{1}]".Formato(menuId, optionLocator);
         }
 
         public static void QueryButtonClick(this ISelenium selenium, string id)

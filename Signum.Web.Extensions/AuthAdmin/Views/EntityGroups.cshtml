@@ -66,7 +66,7 @@
                     </a>
                 </td>
                 <td>
-                    @Html.CheckBox(item.Compose("InOverriden"), !item.Value.Allowed.InGroup.Equals(item.Value.AllowedBase.InGroup), new { disabled = "disabled", @class = "overriden" })
+                    @Html.CheckBox(item.Compose("InOverriden"), !item.Value.Allowed.InGroup.Equals(item.Value.AllowedBase.InGroup), new { disabled = "disabled", @class = "sf-overriden" })
                 </td>
             </tr>
             <tr class="second">
@@ -94,7 +94,7 @@
                     </a>
                 </td>
                 <td>
-                    @Html.CheckBox(item.Compose("OutOverriden"), !item.Value.Allowed.OutGroup.Equals(item.Value.AllowedBase.OutGroup), new { disabled = "disabled", @class = "overriden" })
+                    @Html.CheckBox(item.Compose("OutOverriden"), !item.Value.Allowed.OutGroup.Equals(item.Value.AllowedBase.OutGroup), new { disabled = "disabled", @class = "sf-overriden" })
                 </td>
             </tr>
         }

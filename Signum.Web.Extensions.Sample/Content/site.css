@@ -1,20 +1,102 @@
 ﻿/* Default CSS rules are embedded in Signum.Web and are accessible via Signum/Content/LineStyles.css */
 /* Feel free to override them as you wish here */
 
+body 
+{
+    font-family: Arial, Helvetica, Verdana;
+    font-size: 12px;    
+	background-color:#ececec;
+}
+
+.ui-widget 
+{
+    font-size: 12px !important;
+    font-family: Arial, Helvetica, Verdana !important;
+}
+
 a {
+    color:#21759b;
 	text-decoration:none;
 }
+
+.ui-widget-content a 
+{
+    color:#21759b;
+}
+
+/* general tweaks */
+a:focus,a:active {
+    -moz-outline-style:none;
+    outline:none;
+}
+
+a:hover {
+    color:#d54e21;
+    cursor:pointer;
+}
+
+::-moz-focus-inner {
+    border: 0;
+}
+
+textarea, select {/* IE will show a border around input radio */
+    border:1px solid #ccc;
+    color:#333;
+    padding:3px 4px 4px;
+    
+    border-radius:2px;
+    -webkit-border-radius:2px;
+    -moz-border-radius:2px;
+}
+
+select {
+    padding:4px 4px 3px;
+}
+
+input[type=checkbox] {
+    margin-top:4px;
+    border:0;
+}
+
+input[type=text]:focus, input[type=password]:focus, input[type=button]:focus,
+input[type=number]:focus, input[type=email]:focus,
+input[type=url]:focus, input[type=tel]:focus,
+textarea:focus,select:focus {
+    border-color:#76baec;
+}
+
+legend 
+{
+	color:#555;
+	font-weight:bold;
+	padding:0.1em 0.2em;
+	clear:both;
+	border:0;
+}
+
+fieldset 
+{
+	border:1px dotted #bbb;
+	padding:10px;
+	margin-bottom:10px;
+	background-color:#fff;
+}
+
 header {
 	border-bottom:1px solid #e9e9e9;
 	margin-bottom:20px;
-	display:block;
+}
+
+header h1 
+{
+	font-size:200%;
+	padding:10px;
 }
 
 footer
 {
 	clear:both;
 	background-color:#999;
-	display:block;
 }
 
 #powered 
@@ -38,6 +120,11 @@ footer
     width: 145px;
 }
 
+#menu li
+{
+	margin-left:10px;
+}
+
 #content
 {
 	float: left;
@@ -53,11 +140,6 @@ footer
 	padding:20px;
 }
 
-body
-{
-	background-color:#ececec;
-}
-
 #wrap
 {
 	background-color:#fff;
@@ -67,87 +149,40 @@ body
 	box-shadow:0 0 20px #bbb;
 }
 
-h1 
+.sf-filters-header:before 
 {
-	font-size:200%;
-	padding:10px;
+	content: "▲";
 }
 
-.clear
+.sf-filters-header.close:before 
 {
-	 clear: both;
-}
-
-#menu li
-{
-	margin-left:10px;
-}
-
-#divNormalControl > h2 
-{
-	padding-left:4px;
-}
-
-#content h2 
-{
-	color: #424242;
-    font-size: 18px;
-	margin-bottom:10px;
+	content: "▼";    
 }
 
 
-.labelLine 
-{
-	color:#444;
+
+.sf-line-button {
+    font-size:0px;
+    text-indent:-9999px;
+    margin:0;
+    padding:0;
+    float:left;
 }
 
-.filters-header:before 
-{
-	content: "↑";
+.sf-line-button.sf-find {
+    background-position:0 -20px;
 }
 
-.filters-header {
-	background-color: inherit !important;
-    border: 0 !important;
-    padding: 0 !important;
-    margin-bottom:2px !important;
-    display:block;
-    float:none !important;
+.sf-line-button.sf-view {
+    background-position:0 -40px;
 }
 
-
-/* FindNavigator */
-.filters
-{
-	margin-bottom:10px;
+.sf-line-button.sf-remove {
+    background-position:0 -60px;
 }
 
-.search-footer
-{
-	margin: 0 !important;
-	margin-bottom:10px;
-}
-
-.field .entityList 
-{
-	min-width:120px;
-}
-
-.labelLine 
-{
-	width:80px !important;
-}
-
-.sf-line-button
-{
-    border:0 !important;
-    background:none !important;
-    width:1em !important;
-    margin:0 .1em !important;
-}
-
-.ui-widget 
-{
-    font-size:12px !important;
-    font-family:Arial, Verdana !important;
+.sf-line-button:hover {
+    cursor:pointer;
+    opacity:0.8;
+    filter:alpha(opacity=80);
 }

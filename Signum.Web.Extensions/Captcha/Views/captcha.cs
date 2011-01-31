@@ -99,13 +99,11 @@ WriteLiteral(@"<script type=""text/javascript"">
 
         alert(lang.signum.error + "": "" + error);
 
-        uiBlocked = false;
-        $("".uiBlocker"").remove();
-    
+        SF.Blocker.disable();    
     }
 </script>
 <div id=""divCaptcha"">
-    <label class=""labelLine"">
+    <label class=""sf-label-line"">
         Escriba estos caracteres:</label>
     <div id=""divCaptchaImage"">
 ");
@@ -118,8 +116,8 @@ WriteLiteral("    </div>\r\n    ");
 
 Write(Html.Href("solicitarNuevoCaptcha", "Solicite un nuevo código", "javascript:solicitarCaptcha();", "Solicite un nuevo código", null, new Dictionary<string, object> { { "style", "float:left" } }));
 
-WriteLiteral("\r\n    <div class=\"clearall\">\r\n    </div>\r\n    <label class=\"labelLine\" for=\"sfCap" +
-"tcha\">\r\n        Aquí:</label>\r\n    ");
+WriteLiteral("\r\n    <div class=\"clearall\">\r\n    </div>\r\n    <label class=\"sf-label-line\" for=\"s" +
+"fCaptcha\">\r\n        Aquí:</label>\r\n    ");
 
 
 Write(Html.TextBox("sfCaptcha", null, new { autocomplete = "off" }));

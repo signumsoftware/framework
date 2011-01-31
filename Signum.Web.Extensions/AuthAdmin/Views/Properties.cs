@@ -75,15 +75,15 @@ WriteLiteral("\r\n");
     
 Write(Html.EntityLine(tc, f => f.Role));
 
-                                     ;
+                                     
     
 Write(Html.ValueLine(tc, f => f.DefaultRule, vl => { vl.UnitText = tc.Value.DefaultLabel; }));
 
-                                                                                           ;
+                                                                                           
     
 Write(Html.EntityLine(tc, f => f.Type));
 
-                                     ;
+                                     
 
 
 WriteLiteral("    <table class=\"ruleTable\" id=\"properties\">\r\n        <thead>\r\n            <tr>\r" +
@@ -155,7 +155,7 @@ WriteLiteral("\r\n                    </a>\r\n                </td>\r\n         
 "            ");
 
 
-               Write(Html.CheckBox(item.Compose("Overriden"), item.Value.Overriden, new { disabled = "disabled", @class = "overriden" }));
+               Write(Html.CheckBox(item.Compose("Overriden"), item.Value.Overriden, new { disabled = "disabled", @class = "sf-overriden" }));
 
 WriteLiteral("\r\n                </td>\r\n            </tr>\r\n");
 

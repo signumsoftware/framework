@@ -71,7 +71,7 @@ namespace Signum.Web.ControlPanel
                 };
 
 
-                sb.Add(helper.Span("lblr{0}c{1}".Formato(part.Row, part.Column), uq.Label, "labelLine"));
+                sb.Add(helper.Span("lblr{0}c{1}".Formato(part.Row, part.Column), uq.Label, "sf-label-line"));
 
                 sb.Add(helper.CountSearchControl(uq.UserQuery, fo, "r{0}c{1}".Formato(part.Row, part.Column)));
 

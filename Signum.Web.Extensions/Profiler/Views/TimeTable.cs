@@ -66,15 +66,15 @@ namespace ASP
     ViewBag.Title = "Table Times";
 
 
-WriteLiteral("<script type=\"text/javascript\">\r\n    $(function () {\r\n        $(\".tblResults\").ta" +
-"blesorter();\r\n    });\r\n</script>\r\n\r\n");
+WriteLiteral("<script type=\"text/javascript\">\r\n    $(function () {\r\n        $(\".sf-search-resul" +
+"ts\").tablesorter();\r\n    });\r\n</script>\r\n\r\n");
 
 
 Write(Html.ActionLink("Clear", "ClearTimesTable"));
 
 WriteLiteral(@"
 
-<table class=""tblResults"">
+<table class=""sf-search-results"">
     <thead>
         <tr>
             <th>Name</th>

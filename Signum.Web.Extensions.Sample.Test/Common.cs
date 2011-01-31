@@ -51,14 +51,14 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.WaitAjaxFinished(() => selenium.IsTextPresent("Signum Extensions Sample"));
 
             //is already logged?
-            bool logged = selenium.IsElementPresent("jq=a.logout");
+            bool logged = selenium.IsElementPresent("jq=a.sf-logout");
             if (logged)
             {
-                selenium.Click("jq=a.logout");
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=a.login"));
+                selenium.Click("jq=a.sf-logout");
+                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=a.sf-login"));
             }
 
-            selenium.Click("jq=a.login");
+            selenium.Click("jq=a.sf-login");
 
             selenium.WaitForPageToLoad(PageLoadTimeout);
 
@@ -70,20 +70,20 @@ namespace Signum.Web.Extensions.Sample.Test
 
             selenium.WaitForPageToLoad(PageLoadTimeout);
 
-            Assert.IsTrue(selenium.IsElementPresent("jq=a.logout"));
+            Assert.IsTrue(selenium.IsElementPresent("jq=a.sf-logout"));
         }
 
         public void LogOut()
         {
-            selenium.Click("jq=a.logout");
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=a.login"));
+            selenium.Click("jq=a.sf-logout");
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=a.sf-login"));
         }
 
         public void CheckLoginAndOpen(string url)
         {
             selenium.Open(url);
             selenium.WaitForPageToLoad(PageLoadTimeout);
-            bool logged = selenium.IsElementPresent("jq=a.logout");
+            bool logged = selenium.IsElementPresent("jq=a.sf-logout");
             if (!logged)
                 Login();
 

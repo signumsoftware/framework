@@ -48,7 +48,7 @@ namespace Signum.Web.Files
             if (value != null)
                 sb.AddLine(helper.Div(fileLine.Compose(EntityBaseKeys.Entity), null, "", new Dictionary<string, object> { { "style", "display:none" } }));
 
-            fileLine.ValueHtmlProps.AddCssClass("valueLine");
+            fileLine.ValueHtmlProps.AddCssClass("sf-value-line");
             if (fileLine.ShowValidationMessage)
                 fileLine.ValueHtmlProps.AddCssClass("inlineVal"); //inlineVal class tells Javascript code to show Inline Error
 
@@ -67,11 +67,11 @@ namespace Signum.Web.Files
                                 value.TryCC(f => f.FileName) ?? "",
                                 fileLine.GetDownloading(),
                                 "Download",
-                                "valueLine",
+                                "sf-value-line",
                                 null));
                 }
                 else
-                    sb.AddLine(helper.Span(fileLine.Compose(EntityBaseKeys.ToStr), value.TryCC(f => f.FileName) ?? "", "valueLine", null));
+                    sb.AddLine(helper.Span(fileLine.Compose(EntityBaseKeys.ToStr), value.TryCC(f => f.FileName) ?? "", "sf-value-line", null));
 
                 sb.AddLine(EntityBaseHelper.RemoveButton(helper, fileLine));
             }
@@ -90,8 +90,6 @@ namespace Signum.Web.Files
                 sb.Add(MvcHtmlString.Create("&nbsp;"));
                 sb.AddLine(helper.ValidationMessage(fileLine.ControlID));
             }
-
-            sb.AddLine(EntityBaseHelper.BreakLineDiv(helper, fileLine));
 
             return sb.ToHtml();
         }

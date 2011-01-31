@@ -74,18 +74,18 @@ Write(Html.ValueLine(e, f => f.UserName, vl => vl.ValueHtmlProps["size"] = 50));
     if (e.Value.IsNew || (ViewData["NewPwd"] != null && bool.Parse(ViewData["NewPwd"].ToString())))
     {
 
-WriteLiteral("    <label class=\"labelLine\">");
+WriteLiteral("    <label class=\"sf-label-line\">");
 
 
-                        Write(Resources.ChangePasswordAspx_NewPassword);
+                            Write(Resources.ChangePasswordAspx_NewPassword);
 
 WriteLiteral("</label>\r\n");
 
 
     
-Write(Html.Password(UserMapping.NewPasswordKey, "", new Dictionary<string, string> { { "class", "valueLine" } }));
+Write(Html.Password(UserMapping.NewPasswordKey, "", new Dictionary<string, string> { { "class", "sf-value-line" } }));
 
-                                                                                                               
+                                                                                                                   
     
 Write(Html.ValidationMessage(UserMapping.NewPasswordKey));
 
@@ -96,18 +96,18 @@ WriteLiteral("    <div class=\"clearall\">\r\n    </div>\r\n");
 
         
 
-WriteLiteral("    <label class=\"labelLine\">");
+WriteLiteral("    <label class=\"sf-label-line\">");
 
 
-                        Write(Resources.ChangePasswordAspx_ConfirmNewPassword);
+                            Write(Resources.ChangePasswordAspx_ConfirmNewPassword);
 
 WriteLiteral("</label>\r\n");
 
 
     
-Write(Html.Password(UserMapping.NewPasswordBisKey, "", new Dictionary<string, string> { { "class", "valueLine" } }));
+Write(Html.Password(UserMapping.NewPasswordBisKey, "", new Dictionary<string, string> { { "class", "sf-value-line" } }));
 
-                                                                                                                  
+                                                                                                                      
     
 Write(Html.ValidationMessage(UserMapping.NewPasswordBisKey));
 

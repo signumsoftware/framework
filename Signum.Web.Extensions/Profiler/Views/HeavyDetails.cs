@@ -93,8 +93,8 @@ WriteLiteral(")</h2>\r\n");
 
 Write(Html.ActionLink("(View all)", "ViewAll"));
 
-WriteLiteral("\r\n<table class=\"tblResults\">\r\n    <tr>\r\n        <th>\r\n            Type\r\n        <" +
-"/th>\r\n        <td>\r\n            ");
+WriteLiteral("\r\n<table class=\"sf-search-results\">\r\n    <tr>\r\n        <th>\r\n            Type\r\n  " +
+"      </th>\r\n        <td>\r\n            ");
 
 
        Write(entry.Type.TryCC(t => t.TypeName()));
@@ -174,7 +174,7 @@ WriteLiteral(@"
 <br />
 <h3>
     StackTrace</h3>
-<table class=""tblResults"">
+<table class=""sf-search-results"">
     <thead>
         <tr>
             <th>
