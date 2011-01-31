@@ -34,8 +34,8 @@ namespace Signum.Web
             JsViewOptions voptions = new JsViewOptions
             {
                 Type = Type.Name,
-                ControllerUrl = "Widgets/CreateAlert",
-                OnOkClosed = new JsFunction(){ "RefreshAlerts('Widgets/RefreshAlerts')"}
+                ControllerUrl = RouteHelper.New().Action("CreateAlert", "Widgets"),
+                OnOkClosed = new JsFunction(){ "RefreshAlerts('{0}')".Formato(RouteHelper.New().Action("RefreshAlerts", "Widgets"))}
             };
 
             return new WidgetItem

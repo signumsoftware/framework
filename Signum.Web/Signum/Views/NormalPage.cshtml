@@ -1,6 +1,8 @@
 ﻿@using System.Configuration
 @using Signum.Web.Properties
+
 @model TypeContext
+           
 @section head
 {
     @Html.ScriptsJs(
@@ -12,6 +14,7 @@
             "~/signum/Scripts/SF_Validator.js",
             "~/signum/Scripts/SF_Operations.js")
 }
+
 @using (Html.BeginForm())
 {
     var ident = Model.UntypedValue as IdentifiableEntity;

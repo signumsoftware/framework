@@ -152,6 +152,7 @@ SF.registerModule("Lines", function () {
             if ($('#' + SF.Keys.reactive).length !== 0) {
                 extraParams[SF.Keys.reactive] = true;
                 extraParams[SF.Keys.tabId] = $('#' + SF.Keys.tabId).val();
+                extraParams[SF.Keys.antiForgeryToken] = $("input:hidden[name=" + SF.Keys.antiForgeryToken + "]").val();
                 extraParams[SF.Keys.runtimeInfo] = new SF.RuntimeInfo('').value();
             }
 
@@ -437,6 +438,7 @@ SF.registerModule("Lines", function () {
             if ($('#' + SF.Keys.reactive).length > 0) {
                 extraParams[SF.Keys.reactive] = true;
                 extraParams[SF.Keys.tabId] = $('#' + SF.Keys.tabId).val();
+                extraParams[SF.Keys.antiForgeryToken] = $("input:hidden[name=" + SF.Keys.antiForgeryToken + "]").val();
                 extraParams[SF.Keys.runtimeInfo] = new SF.RuntimeInfo('').value();
             }
 

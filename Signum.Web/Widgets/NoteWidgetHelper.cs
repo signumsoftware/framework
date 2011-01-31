@@ -38,8 +38,8 @@ namespace Signum.Web
             JsViewOptions voptions = new JsViewOptions
             {
                 Type = Type.Name,
-                ControllerUrl = "Widgets/CreateNote",
-                OnOkClosed = new JsFunction() { "RefreshNotes('Widgets/RefreshNotes')" }
+                ControllerUrl = RouteHelper.New().Action("CreateNote", "Widgets"),
+                OnOkClosed = new JsFunction() { "RefreshNotes('{0}')".Formato(RouteHelper.New().Action("RefreshNotes", "Widgets")) }
             };
 
             return new WidgetItem

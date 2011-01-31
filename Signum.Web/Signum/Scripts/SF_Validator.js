@@ -35,6 +35,7 @@ SF.registerModule("Validator", function () {
             var formChildren = SF.isEmpty(this.valOptions.parentDiv) ?
             $("form :input") : $("#" + this.valOptions.parentDiv + " :input")
                 .add("#" + SF.Keys.tabId)
+                .add("input:hidden[name=" + SF.Keys.antiForgeryToken + "]")
                 .add("#" + SF.Keys.reactive);
 
             var searchControlInputs = $(".searchControl :input");
@@ -221,7 +222,7 @@ SF.registerModule("Validator", function () {
         this.constructRequestDataForSaving = function () {
             SF.log("PartialValidator constructRequestDataForSaving");
             var prefix = this.valOptions.prefix;
-            var formChildren = $("#" + this.valOptions.parentDiv + " *, #" + SF.Keys.tabId).add(SF.getInfoParams(prefix));
+            var formChildren = $("#" + this.valOptions.parentDiv + " *, #" + SF.Keys.tabId + ", input:hidden[name=" + SF.Keys.antiForgeryToken + "]").add(SF.getInfoParams(prefix));
             formChildren = formChildren.not(".searchControl *, #" + SF.Keys.reactive);
 
             var serializer = new SF.Serializer();
@@ -280,8 +281,8 @@ SF.registerModule("Validator", function () {
         this.constructRequestDataForValidating = function () {
             SF.log("PartialValidator constructRequestDataForValidating");
             var formChildren = SF.isEmpty(this.valOptions.parentDiv) ?
-                               $("form :input, #" + SF.Keys.tabId) :
-                               $("#" + this.valOptions.parentDiv + " :input, #" + SF.Keys.tabId);
+                               $("form :input, #" + SF.Keys.tabId + ", input:hidden[name=" + SF.Keys.antiForgeryToken + "]") :
+                               $("#" + this.valOptions.parentDiv + " :input, #" + SF.Keys.tabId + ", input:hidden[name=" + SF.Keys.antiForgeryToken + "]");
             formChildren = formChildren.not(".searchControl :input, #" + SF.Keys.reactive);
 
             var serializer = new SF.Serializer().add(formChildren.serialize());

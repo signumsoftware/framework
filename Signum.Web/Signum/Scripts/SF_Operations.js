@@ -49,10 +49,10 @@ SF.registerModule("Operations", function () {
                 if (SF.isEmpty(this.options.prefix)) //NormalWindow 
                     formChildren = SF.isEmpty(this.options.parentDiv) ? $("form :input") : $("#" + this.options.parentDiv + " :input");
                 else //PopupWindow
-                    formChildren = $(this.pf("panelPopup *") + ", #" + SF.Keys.reactive + ", #" + SF.Keys.tabId);
+                    formChildren = $(this.pf("panelPopup *") + ", #" + SF.Keys.reactive + ", #" + SF.Keys.tabId + ", input:hidden[name=" + SF.Keys.antiForgeryToken + "]");
             }
             else {
-                formChildren = $('#' + SF.Keys.tabId);
+                formChildren = $('#' + SF.Keys.tabId + ", input:hidden[name=" + SF.Keys.antiForgeryToken + "]");
             }
             formChildren = formChildren.not(".searchControl *");
 
@@ -357,6 +357,7 @@ SF.registerModule("Operations", function () {
 
             var serializer = new SF.Serializer()
                                 .add($('#' + SF.Keys.tabId).serialize())
+                                .add($("input:hidden[name=" + SF.Keys.antiForgeryToken + "]").serialize())
                                 .add({ runtimeType: $(this.pf(SF.Keys.entityTypeName)).val(),
                                     operationFullKey: this.options.operationKey,
                                     prefix: newPrefix,

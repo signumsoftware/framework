@@ -63,6 +63,10 @@ namespace ASP
         {
 
 
+WriteLiteral("\r\n");
+
+
+WriteLiteral("           \r\n");
 
 
 DefineSection("head", () => {
@@ -84,7 +88,7 @@ WriteLiteral("\r\n");
 
 });
 
-WriteLiteral("\r\n");
+WriteLiteral("\r\n\r\n");
 
 
  using (Html.BeginForm())

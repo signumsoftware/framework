@@ -9,6 +9,7 @@ SF.registerModule("Globals", function () {
         separator: "_",
         tabId: "sfTabId",
         reactive: "sfReactive",
+        antiForgeryToken: "__RequestVerificationToken",
 
         entityTypeName: "sfEntityTypeName",
 

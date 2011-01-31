@@ -67,6 +67,11 @@ namespace ASP
 WriteLiteral("<h2>\r\n    ");
 
 
+Write(Html.AntiForgeryToken());
+
+WriteLiteral("\r\n    ");
+
+
 Write(Html.Hidden(ViewDataKeys.TabId, ViewData[ViewDataKeys.TabId]));
 
 WriteLiteral("\r\n    ");

@@ -2,6 +2,7 @@
 @using Signum.Web.Properties
 @model TypeContext
 <h2>
+    @Html.AntiForgeryToken()
     @Html.Hidden(ViewDataKeys.TabId, ViewData[ViewDataKeys.TabId])
     @Html.Hidden(ViewDataKeys.PartialViewName, ViewData[ViewDataKeys.PartialViewName])
     <span class="typeNiceName">@Navigator.Manager.GetTypeTitle(Model.UntypedValue as ModifiableEntity)</span>
