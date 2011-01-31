@@ -43,10 +43,10 @@ namespace Signum.Web
                 sb.AddLine(EntityBaseHelper.EmbeddedTemplate(listDetail, EntityBaseHelper.RenderTypeContext(helper, templateTC, RenderMode.Content, listDetail)));
             }
 
-            using (listDetail.ShowFieldDiv ? sb.Surround(new HtmlTag("div").Class("fieldList")) : null)
+            using (listDetail.ShowFieldDiv ? sb.Surround(new HtmlTag("div").Class("sf-field-list")) : null)
             {
                 HtmlStringBuilder sbSelect = new HtmlStringBuilder();
-                using(sbSelect.Surround(new HtmlTag("select").IdName(listDetail.ControlID).Attr("multiple", "multiple").Attr("ondblclick", listDetail.GetViewing()).Class("entityList")))
+                using (sbSelect.Surround(new HtmlTag("select").IdName(listDetail.ControlID).Attr("multiple", "multiple").Attr("ondblclick", listDetail.GetViewing()).Class("sf-entity-list")))
                 {
                     if (listDetail.UntypedValue != null)
                     {
@@ -65,8 +65,6 @@ namespace Signum.Web
                 }.ToHtml().Surround("table"));
             }
 
-            sb.AddLine(EntityBaseHelper.BreakLineDiv(helper, listDetail));
-
             if (listDetail.DetailDiv == defaultDetailDiv)
                 sb.AddLine(helper.Div(listDetail.DetailDiv, null, "detail"));
 
@@ -76,8 +74,6 @@ namespace Signum.Web
                         "$('#" + listDetail.ControlID + "').dblclick();\n" +
                         "});" +
                         "</script>"));
-
-            sb.AddLine(EntityBaseHelper.BreakLineDiv(helper, listDetail));
 
             return sb.ToHtml();
         }
@@ -104,8 +100,8 @@ namespace Signum.Web
                         name = itemTC.Compose(EntityBaseKeys.ToStr),
                         value = ""
                     })
-                    .Class("valueLine")
-                    .Class("entityListOption")
+                    .Class("sf-value-line")
+                    .Class("sf-entity-list-option")
                     .SetInnerText(
                         (itemTC.Value as IIdentifiable).TryCC(i => i.ToString()) ??
                         (itemTC.Value as Lite).TryCC(i => i.ToStr) ??

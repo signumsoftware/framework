@@ -47,35 +47,26 @@ namespace Signum.Web
 
         public static MvcHtmlString FieldString(this HtmlHelper html, string label, string value)
         {
-            var span = new HtmlTag("span").InnerHtml(MvcHtmlString.Create(value)).Class("valueLine").ToHtml();
+            var span = new HtmlTag("span").InnerHtml(MvcHtmlString.Create(value)).Class("sf-value-line").ToHtml();
             return Field(html, label, span);
         }
 
         public static MvcHtmlString Field(this HtmlHelper html, string label, MvcHtmlString value)
         {
             HtmlTag field = new HtmlTag("div")
-                                    .Class("field");
+                                    .Class("sf-field");
 
             HtmlTag labelLine = new HtmlTag("div")
-                                    .Class("labelLine")
+                                    .Class("sf-label-line")
                                     .SetInnerText(label);
 
             HtmlTag valueLine = new HtmlTag("div")
-                        .Class("value-container")
+                        .Class("sf-value-container")
                         .InnerHtml(value);
-
-            MvcHtmlString clear = HtmlHelperExtenders.GetClearDiv();
 
             field.InnerHtml(labelLine.ToHtml().Concat(valueLine.ToHtml()));
 
-            return field.ToHtml().Concat(clear);
-        }
-
-        public static MvcHtmlString GetClearDiv()
-        {
-            return new HtmlTag("div")
-                    .Class("clearall")
-                    .ToHtml();
+            return field.ToHtml();
         }
 
         public static MvcHtmlString CheckBox(this HtmlHelper html, string name, bool value, bool enabled)

@@ -108,7 +108,7 @@ namespace Signum.Web
                     sb.AddLine(helper.HiddenAnonymous(filterOptions.Token.FullKey()));
 
                     foreach(var t in filterOptions.Token.FollowC(tok => tok.Parent).Reverse())
-                       sb.AddLine(new HtmlTag("span").Class("filtertoken").SetInnerText(t.ToString()).ToHtml());
+                       sb.AddLine(new HtmlTag("span").Class("sf-filter-token").SetInnerText(t.ToString()).ToHtml());
                 }
                 using (sb.Surround("td"))
                 {

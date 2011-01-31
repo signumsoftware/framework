@@ -60,7 +60,7 @@ Autocompleter.prototype = {
         });
 
         this.$dd = $("<div/>")
-            .addClass("AutoCompleteMainDiv")
+            .addClass("sf-autocomplete-main")
             .click(function (e) { self.click(e); })
             .delegate("." + this.resultClass, "mouseenter", function () {
                 self.selectIndex($(this))
@@ -98,7 +98,7 @@ Autocompleter.prototype = {
         var self = this;
 
         if (self.request) self.request.abort();
-        self.$control.addClass('loading');
+        self.$control.addClass('sf-loading');
 
         if ($.isFunction(self.url)) {
             //we pass the input cleaned
@@ -153,7 +153,7 @@ Autocompleter.prototype = {
             width: this.$control.outerWidth() - 2
         });
 
-        this.$control.removeClass('loading');
+        this.$control.removeClass('sf-loading');
 
         if (prevCount == 0 && !this.options.showExtra)
             this.$dd.slideDown("fast");

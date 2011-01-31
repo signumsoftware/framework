@@ -24,7 +24,7 @@ namespace Signum.Web
                 return MvcHtmlString.Empty;
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
-            using (entityList.ShowFieldDiv ? sb.Surround(new HtmlTag("div").Class("field")) : null)
+            using (entityList.ShowFieldDiv ? sb.Surround(new HtmlTag("div").Class("sf-field")) : null)
             {
                 sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, entityList));
 
@@ -38,10 +38,10 @@ namespace Signum.Web
                     sb.AddLine(EntityBaseHelper.EmbeddedTemplate(entityList, EntityBaseHelper.RenderTypeContext(helper, templateTC, RenderMode.Popup, entityList)));
                 }
 
-                using (entityList.ShowFieldDiv ? sb.Surround(new HtmlTag("div").Class("fieldlist")) : null)
+                using (entityList.ShowFieldDiv ? sb.Surround(new HtmlTag("div").Class("sf-field-list")) : null)
                 {
                     HtmlStringBuilder sbSelect = new HtmlStringBuilder();
-                    using (sbSelect.Surround(new HtmlTag("select").IdName(entityList.ControlID).Attr("multiple", "multiple").Attr("ondblclick", entityList.GetViewing()).Class("entityList")))
+                    using (sbSelect.Surround(new HtmlTag("select").IdName(entityList.ControlID).Attr("multiple", "multiple").Attr("ondblclick", entityList.GetViewing()).Class("sf-entity-list")))
                     {
                         if (entityList.UntypedValue != null)
                         {
@@ -53,15 +53,13 @@ namespace Signum.Web
                     sb.Add(sbSelect.ToHtml());
 
                     HtmlStringBuilder sbBtns = new HtmlStringBuilder();
-                    sbBtns.AddLine(ListBaseHelper.CreateButton(helper, entityList, null).Surround("td").Surround("tr"));
-                    sbBtns.AddLine(ListBaseHelper.FindButton(helper, entityList).Surround("td").Surround("tr"));
-                    sbBtns.AddLine(ListBaseHelper.RemoveButton(helper, entityList).Surround("td").Surround("tr"));
+                    sbBtns.AddLine(ListBaseHelper.CreateButton(helper, entityList, null).Surround("li"));
+                    sbBtns.AddLine(ListBaseHelper.FindButton(helper, entityList).Surround("li"));
+                    sbBtns.AddLine(ListBaseHelper.RemoveButton(helper, entityList).Surround("li"));
 
-                    sb.AddLine(sbBtns.ToHtml().Surround("table"));
+                    sb.AddLine(sbBtns.ToHtml().Surround("ul"));
                 }
             }
-
-            sb.AddLine(EntityBaseHelper.BreakLineDiv(helper, entityList));
 
             return sb.ToHtml();
         }
@@ -78,7 +76,7 @@ namespace Signum.Web
             if (typeof(T).IsEmbeddedEntity() || EntityBaseHelper.RequiresLoadAll(helper, entityList))
                 sb.AddLine(EntityBaseHelper.RenderTypeContext(helper, itemTC, RenderMode.PopupInDiv, entityList));
             else if (itemTC.Value != null)
-                sb.Add(helper.Div(itemTC.Compose(EntityBaseKeys.Entity), null, "", new Dictionary<string, object> { { "style", "display:none" }, {"class", "entityList"}}));
+                sb.Add(helper.Div(itemTC.Compose(EntityBaseKeys.Entity), null, "", new Dictionary<string, object> { { "style", "display:none" }, { "class", "sf-entity-list" } }));
             
             //Note this is added to the sbOptions, not to the result sb
 
@@ -88,8 +86,8 @@ namespace Signum.Web
                                     name = itemTC.Compose(EntityBaseKeys.ToStr),
                                     value = ""
                                 })
-                                .Class("valueLine")
-                                .Class("entityListOption")
+                                .Class("sf-value-line")
+                                .Class("sf-entity-list-option")
                                 .SetInnerText(
                                     (itemTC.Value as IIdentifiable).TryCC(i => i.ToString()) ??
                                     (itemTC.Value as Lite).TryCC(i => i.ToStr) ??

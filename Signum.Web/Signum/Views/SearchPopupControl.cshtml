@@ -1,10 +1,10 @@
 ﻿@model Context
 @{  FindOptions findOptions = (FindOptions)ViewData[ViewDataKeys.FindOptions];}
 <div id="@Model.Compose("panelPopup")" data-title="@ViewBag.Title">
-    <div class="button-bar">
-        <input type="button" id="@Model.Compose("btnOk")" class="query-button ok-button" value="OK" @(ViewData[ViewDataKeys.OnOk] != null ? Html.Raw("onclick=\"" + ViewData[ViewDataKeys.OnOk] + "\"") : null) />
+    <div class="sf-button-bar">
+        <input type="button" id="@Model.Compose("btnOk")" class="sf-query-button sf-ok-button" value="OK" @(ViewData[ViewDataKeys.OnOk] != null ? Html.Raw("onclick=\"" + ViewData[ViewDataKeys.OnOk] + "\"") : null) />
     </div>
-    <div class="popup-body">
+    <div class="sf-popup-body">
         @{ Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString(), Model);}
         @Html.ValidationSummaryAjax(Model)
     </div>

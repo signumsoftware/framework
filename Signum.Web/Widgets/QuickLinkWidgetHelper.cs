@@ -85,7 +85,7 @@ namespace Signum.Web
     {
         public QuickLinkItem(object queryName, List<FilterOption> filterOptions)
         {
-            DivCssClass = "QuickLink";
+            DivCssClass = "sf-quick-link";
             FindOptions = new FindOptions
             {
                 QueryName = queryName,

@@ -41,21 +41,18 @@ namespace Signum.Web
             }
             else
             {
-                using (valueLine.ShowFieldDiv ? sb.Surround(new HtmlTag("div").Class("field")) : null)
-                using (valueLine.LabelVisible && valueLine.ValueFirst ? sb.Surround(new HtmlTag("div").Class("valueFirst")) : null)
+                using (valueLine.ShowFieldDiv ? sb.Surround(new HtmlTag("div").Class("sf-field")) : null)
+                using (valueLine.LabelVisible && valueLine.ValueFirst ? sb.Surround(new HtmlTag("div").Class("sf-value-first")) : null)
                 {
                     if (!valueLine.ValueFirst)
                         InternalValueLineLabel(helper, valueLine, sb);
 
-                    using (sb.Surround(new HtmlTag("div").Class("value-container")))
+                    using (sb.Surround(new HtmlTag("div").Class("sf-value-container")))
                         InternalValueLineValue(helper, valueLine, sb);
 
                     if (valueLine.ValueFirst)
                         InternalValueLineLabel(helper, valueLine, sb);
                 }
-
-                if (valueLine.BreakLine)
-                    sb.AddLine(helper.Div("", null, "clearall"));
             }
 
             return sb.ToHtml();
@@ -64,7 +61,7 @@ namespace Signum.Web
         private static void InternalValueLineLabel(HtmlHelper helper, ValueLine valueLine, HtmlStringBuilder sb)
         {
             if (valueLine.LabelVisible)
-                sb.AddLine(helper.Label(valueLine.Compose("lbl"), valueLine.LabelText, valueLine.ControlID, TypeContext.CssLineLabel, valueLine.LabelHtmlProps));
+                sb.AddLine(helper.Label(valueLine.Compose("lbl"), valueLine.LabelText, valueLine.ControlID, "sf-label-line", valueLine.LabelHtmlProps));
         }
 
         private static void InternalValueLineValue(HtmlHelper helper, ValueLine valueLine, HtmlStringBuilder sb)
@@ -76,7 +73,7 @@ namespace Signum.Web
 
             ValueLineType vltype = valueLine.ValueLineType ?? Configurator.GetDefaultValueLineType(valueLine.Type);
 
-            valueLine.ValueHtmlProps.AddCssClass("valueLine");
+            valueLine.ValueHtmlProps.AddCssClass("sf-value-line");
 
             if (valueLine.ShowValidationMessage)
                 valueLine.ValueHtmlProps.AddCssClass("inlineVal"); //inlineVal class tells Javascript code to show Inline Error
@@ -85,7 +82,7 @@ namespace Signum.Web
 
             if (valueLine.UnitText.HasText())
             {
-                sb.AddLine(helper.Span(valueLine.Compose("unit"), valueLine.UnitText, TypeContext.CssLineUnit));
+                sb.AddLine(helper.Span(valueLine.Compose("unit"), valueLine.UnitText, "sf-unit-line"));
             }
 
             if (valueLine.ShowValidationMessage)
@@ -100,7 +97,7 @@ namespace Signum.Web
             Enum value = (Enum)valueLine.UntypedValue;
 
             if (valueLine.ReadOnly)
-                return helper.Span(valueLine.ControlID, value != null ? value.NiceToString() : "", "valueLine");
+                return helper.Span(valueLine.ControlID, value != null ? value.NiceToString() : "", "sf-value-line");
 
             StringBuilder sb = new StringBuilder();
             List<SelectListItem> items = valueLine.EnumComboItems;
@@ -152,7 +149,7 @@ namespace Signum.Web
                 value = value.Value.ToUserInterface();
 
             if (valueLine.ReadOnly)
-                return helper.Span(valueLine.ControlID, value.TryToString(valueLine.Format), "valueLine");
+                return helper.Span(valueLine.ControlID, value.TryToString(valueLine.Format), "sf-value-line");
 
             valueLine.ValueHtmlProps.AddCssClass("maskedEdit");
 
@@ -213,7 +210,7 @@ namespace Signum.Web
         public static MvcHtmlString Hidden(this HtmlHelper helper, ValueLine valueLine)
         {
             if (valueLine.ReadOnly)
-                return helper.Span(valueLine.ControlID, valueLine.UntypedValue.TryToString() ?? "", "valueLine");
+                return helper.Span(valueLine.ControlID, valueLine.UntypedValue.TryToString() ?? "", "sf-value-line");
 
             return HtmlHelperExtenders.InputType("hidden", valueLine.ControlID, valueLine.UntypedValue.TryToString() ?? "", valueLine.ValueHtmlProps);
         }
@@ -221,7 +218,7 @@ namespace Signum.Web
         public static MvcHtmlString TextboxInLine(this HtmlHelper helper, ValueLine valueLine, InputType inputType)
         {
             if (valueLine.ReadOnly)
-                return helper.Span(valueLine.ControlID, valueLine.UntypedValue.TryToString() ?? "", "valueLine");
+                return helper.Span(valueLine.ControlID, valueLine.UntypedValue.TryToString() ?? "", "sf-value-line");
 
             string setTicks = SetTicksFunction(helper, valueLine);
             string reloadOnChangeFunction = GetReloadFunction(helper, valueLine);
@@ -244,7 +241,7 @@ namespace Signum.Web
         public static MvcHtmlString NumericTextbox(this HtmlHelper helper, ValueLine valueLine)
         {
             if (valueLine.ReadOnly)
-                return helper.Span(valueLine.ControlID, valueLine.UntypedValue.TryToString() ?? "", "valueLine");
+                return helper.Span(valueLine.ControlID, valueLine.UntypedValue.TryToString() ?? "", "sf-value-line");
 
             valueLine.ValueHtmlProps.Add("onkeydown", Reflector.IsDecimalNumber(valueLine.Type) ? "return SF.InputValidator.isDecimal(event);" : "return SF.InputValidator.isNumber(event);");
 
@@ -254,7 +251,7 @@ namespace Signum.Web
         public static MvcHtmlString TextAreaInLine(this HtmlHelper helper, ValueLine valueLine)
         {
             if (valueLine.ReadOnly)
-                return helper.Span(valueLine.ControlID, (string)valueLine.UntypedValue, "valueLine");
+                return helper.Span(valueLine.ControlID, (string)valueLine.UntypedValue, "sf-value-line");
 
             string setTicks = SetTicksFunction(helper, valueLine);
             string reloadOnChangeFunction = GetReloadFunction(helper, valueLine);

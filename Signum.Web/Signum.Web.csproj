@@ -267,6 +267,10 @@
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>NormalPage.cs</LastGenOutput>
     </None>
+    <Content Include="Signum\Content\SF_Lines.css" />
+    <Content Include="Signum\Content\SF_NormalPage.css" />
+    <Content Include="Signum\Content\SF_Notify.css" />
+    <Content Include="Signum\Content\SF_Search.css" />
     <Content Include="Signum\Views\_ViewStart.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>_ViewStart.cs</LastGenOutput>
@@ -304,7 +308,6 @@
     <Content Include="Signum\Images\asc.gif" />
     <Content Include="Signum\Images\desc.gif" />
     <Content Include="Signum\Images\dropdown-arrows.png" />
-    <Content Include="Signum\Images\fancy_closebox.png" />
     <Content Include="Signum\Images\gray-grad.png" />
     <Content Include="Signum\Images\lineButtons.gif" />
     <Content Include="Signum\Images\newFilter.png" />

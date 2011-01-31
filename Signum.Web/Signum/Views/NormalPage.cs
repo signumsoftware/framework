@@ -100,13 +100,7 @@ WriteLiteral("    <div id=\"divNormalControl\" ");
 
                           Write(Html.Raw(ident != null? "data-isnew=\""+ident.IsNew.ToString().ToLower() +  "\"" : ""));
 
-WriteLiteral(">\r\n");
-
-
-       if(string.IsNullOrEmpty(ViewBag.Title))
-        {
-            ViewBag.Title = Model.UntypedValue.TryToString();
-        }
+WriteLiteral(">\r\n     \r\n");
 
 
            Html.RenderPartial(Navigator.Manager.NormalControlUrl);

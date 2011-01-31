@@ -59,7 +59,6 @@ namespace Signum.Web
         [Flags]
         enum BoolStyles : short
         {
-            BreakLine = 1,
             LabelVisible = 2,
             ShowValidationMessage = 4,
             ReadOnly =8,
@@ -99,7 +98,6 @@ namespace Signum.Web
 
         public static readonly Context Default = new Context(null, null)
         {
-            BreakLine = true,
             LabelVisible = true,
             ShowValidationMessage = true,
             ReadOnly = false,
@@ -121,12 +119,6 @@ namespace Signum.Web
         {
             get { return this[BoolStyles.LabelVisible] ?? Parent.LabelVisible; }
             set { this[BoolStyles.LabelVisible] = value; }
-        }
-
-        public bool BreakLine   /* to deprecate */
-        {
-            get { return this[BoolStyles.BreakLine] ?? Parent.BreakLine; }
-            set { this[BoolStyles.BreakLine] = value; }
         }
 
         public bool ReadOnly
@@ -181,8 +173,6 @@ namespace Signum.Web
     public abstract class TypeContext : Context
     {
         public const string Ticks = "sfTicks";
-        public const string CssLineLabel = "labelLine";
-        public const string CssLineUnit = "unitLine";
 
         public abstract object UntypedValue { get; }
 

@@ -2,16 +2,7 @@
 
 SF.registerModule("Operations", function () {
 
-    var uiBlocked = false;
 
-    function blockUI() {
-        uiBlocked = true;
-        $("<div/>", {
-            "class": "uiBlocker",
-            "width": "300%",
-            "height": "300%"
-        }).appendTo($("body"));
-    }
 
     SF.OperationManager = function (_options) {
         this.options = $.extend({
@@ -54,7 +45,7 @@ SF.registerModule("Operations", function () {
             else {
                 formChildren = $('#' + SF.Keys.tabId + ", input:hidden[name=" + SF.Keys.antiForgeryToken + "]");
             }
-            formChildren = formChildren.not(".searchControl *");
+            formChildren = formChildren.not(".sf-search-control *");
 
             var info = this.runtimeInfo();
             var runtimeType = info.runtimeType();
@@ -99,11 +90,10 @@ SF.registerModule("Operations", function () {
         operationAjax: function (newPrefix, onSuccess) {
             SF.log("OperationManager operationAjax");
 
-            if (uiBlocked) {
+            if (SF.Blocker.isEnabled()) {
                 return false;
-            }
-            else {
-                blockUI();
+            } else {
+                SF.Blocker.enable();
             }
 
             SF.Notify.info(lang.signum.executingOperation);
@@ -119,8 +109,8 @@ SF.registerModule("Operations", function () {
                 async: true,
                 dataType: "html",
                 success: function (operationResult) {
-                    uiBlocked = false;
-                    $(".uiBlocker").remove();
+
+                SF.Blocker.disable();
 
                     if (self.executedSuccessfully(operationResult)) {
                         var $operationResult = jQuery(operationResult);
@@ -136,8 +126,7 @@ SF.registerModule("Operations", function () {
                 },
                 error:
                 function () {
-                    uiBlocked = false;
-                    $(".uiBlocker").remove();
+                    SF.Blocker.disable();
                     SF.Notify.error(lang.signum.error, 2000);
                 }
             });
@@ -146,7 +135,7 @@ SF.registerModule("Operations", function () {
         operationSubmit: function () {
             SF.log("OperationManager operationSubmit");
 
-            if (uiBlocked) {
+            if (SF.Blocker.isEnabled()) {
                 return false;
             }
 
@@ -184,7 +173,7 @@ SF.registerModule("Operations", function () {
         defaultSubmit: function () {
             SF.log("OperationManager defaultSubmit");
 
-            if (uiBlocked) {
+            if (SF.Blocker.isEnabled()) {
                 return false;
             }
 
@@ -216,7 +205,7 @@ SF.registerModule("Operations", function () {
         this.defaultExecute = function () {
             SF.log("OperationExecutor defaultExecute");
 
-            if (uiBlocked) {
+            if (SF.Blocker.isEnabled()) {
                 return false;
             }
 
@@ -245,7 +234,7 @@ SF.registerModule("Operations", function () {
         this.contextualExecute = function (runtimeType, id) {
             SF.log("OperationExecutor contextualExecute");
 
-            if (uiBlocked) {
+            if (SF.Blocker.isEnabled()) {
                 return false;
             }
 
@@ -265,7 +254,7 @@ SF.registerModule("Operations", function () {
         this.defaultConstruct = function () {
             SF.log("ConstructorFrom construct");
 
-            if (uiBlocked) {
+            if (SF.Blocker.isEnabled()) {
                 return false;
             }
 
@@ -294,7 +283,7 @@ SF.registerModule("Operations", function () {
         this.contextualConstruct = function (runtimeType, id) {
             SF.log("ConstructorFrom contextualConstruct");
 
-            if (uiBlocked) {
+            if (SF.Blocker.isEnabled()) {
                 return false;
             }
 
@@ -312,7 +301,7 @@ SF.registerModule("Operations", function () {
         this.defaultDelete = function () {
             SF.log("DeleteExecutor defaultDelete");
 
-            if (uiBlocked) {
+            if (SF.Blocker.isEnabled()) {
                 return false;
             }
 
@@ -330,7 +319,7 @@ SF.registerModule("Operations", function () {
         this.contextualDelete = function (runtimeType, id) {
             SF.log("DeleteExecutor contextualDelete");
 
-            if (uiBlocked) {
+            if (SF.Blocker.isEnabled()) {
                 return false;
             }
 
@@ -343,7 +332,7 @@ SF.registerModule("Operations", function () {
 
     SF.OperationDelete = function (deleteExecutor) {
         deleteExecutor.execute();
-    }
+    };
 
     //ConstructorFromMany options = OperationManager options + returnType
     SF.ConstructorFromMany = function (_options) {
@@ -378,7 +367,7 @@ SF.registerModule("Operations", function () {
 
             SF.Notify.info(lang.signum.executingOperation);
 
-            if (uiBlocked) {
+            if (SF.Blocker.isEnabled()) {
                 return false;
             }
 
@@ -390,8 +379,7 @@ SF.registerModule("Operations", function () {
                 async: true,
                 dataType: "html",
                 success: function (operationResult) {
-                    uiBlocked = false;
-                    $(".uiBlocker").remove();
+                    SF.Blocker.disable();
 
                     if (self.executedSuccessfully(operationResult)) {
                         var $operationResult = jQuery(operationResult);
@@ -407,8 +395,7 @@ SF.registerModule("Operations", function () {
                 },
                 error:
                 function () {
-                    uiBlocked = false;
-                    $(".uiBlocker").remove();
+                    SF.Blocker.disable();
                     SF.Notify.error(lang.signum.error, 2000);
                 }
             });
@@ -417,7 +404,7 @@ SF.registerModule("Operations", function () {
         this.defaultConstruct = function () {
             SF.log("ConstructorFromMany defaultConstruct");
 
-            if (uiBlocked) {
+            if (SF.Blocker.isEnabled()) {
                 return false;
             }
 
@@ -431,8 +418,8 @@ SF.registerModule("Operations", function () {
 
         this.defaultSubmit = function () {
             SF.log("ConstructorFromMany defaultSubmit");
-
-            if (uiBlocked) {
+            
+            if (SF.Blocker.isEnabled()) {
                 return false;
             }
 
@@ -452,7 +439,7 @@ SF.registerModule("Operations", function () {
 
     SF.reloadEntity = function (urlController, prefix, parentDiv) {
         var $partialViewName = $('#sfPartialViewName');
-        var requestData = $("form :input").not(".searchControl :input").serialize() + "&prefix=" + prefix;
+        var requestData = $("form :input").not(".sf-search-control :input").serialize() + "&prefix=" + prefix;
         if ($partialViewName.length === 1) {
             requestData += "&partialViewName=" + $partialViewName.val();
         }
@@ -482,11 +469,17 @@ SF.registerModule("Operations", function () {
                 }
             }
         });
-    }
+    };
+
+    SF.opDisableCtxmenu = function () {
+        var clss = "sf-ctxmenu-active";
+        $("." + clss).removeClass(clss);
+    };
 
     SF.opOnSuccessDispatcher = function (prefix, $operationResult, parentDiv) {
         SF.log("OperationExecutor OpDefaultOnSuccess");
-        $(".contextmenu-active").removeClass("contextmenu-active");
+        SF.opDisableCtxmenu();
+
         if ($operationResult === null) {
             return null;
         }
@@ -494,19 +487,17 @@ SF.registerModule("Operations", function () {
         var newPopupId = SF.compose(prefix, "panelPopup");
         var hasNewPopup = $("#" + newPopupId, $operationResult).length !== 0;
         //If result is a NormalControl, or an already opened popup => ReloadContent
-        if (!hasNewPopup ||
-            (hasNewPopup &&
-            $(".popupWindow:visible").filter(function () { return this.id == newPopupId }).length !== 0)) {
-            SF.opReloadContent(prefix, $operationResult, parentDiv)
+        if (!hasNewPopup || (hasNewPopup && $("#" + newPopupId + ":visible").length !== 0)) {
+            SF.opReloadContent(prefix, $operationResult, parentDiv);
         }
         else {
-            SF.opOpenPopup(prefix, $operationResult)
+            SF.opOpenPopup(prefix, $operationResult);
         }
-    }
+    };
 
     SF.opReloadContent = function (prefix, $operationResult, parentDiv) {
         SF.log("OperationExecutor OpReloadContent");
-        $(".contextmenu-active").removeClass("contextmenu-active");
+        SF.opDisableCtxmenu();
         if (SF.isEmpty(prefix)) { //NormalWindow
 
             var $elem = SF.isEmpty(parentDiv) ? $("#divNormalControl") : $("#" + parentDiv);
@@ -519,38 +510,38 @@ SF.registerModule("Operations", function () {
             }).viewSave($operationResult);
         }
         SF.Notify.info(lang.signum.operationExecuted, 2000);
-    }
+    };
 
     SF.opOpenPopup = function (prefix, $operationResult) {
         SF.log("OperationExecutor OpOpenPopup");
-        $(".contextmenu-active").removeClass("contextmenu-active");
+        SF.opDisableCtxmenu();
         new SF.ViewNavigator({ prefix: prefix }).showCreateSave($operationResult);
         SF.Notify.info(lang.signum.operationExecuted, 2000);
-    }
+    };
 
     SF.opOpenPopupNoDefaultOk = function (prefix, $operationResult) {
         SF.log("OperationExecutor OpOpenPopupNoDefaultOk");
-        $(".contextmenu-active").removeClass("contextmenu-active");
+        SF.opDisableCtxmenu();
         new SF.ViewNavigator({ prefix: prefix, onOk: function () { return false; } }).showCreateSave($operationResult);
         SF.Notify.info(lang.signum.operationExecuted, 2000);
-    }
+    };
 
     SF.opNavigate = function (prefix, $operationResult) {
         SF.submit($operationResult.html());
-    }
+    };
 
     SF.opMarkCellOnSuccess = function (prefix, $operationResult) {
         SF.log("OperationExecutor OpMarkCellOnSuccess");
-        $(".contextmenu-active")
-        .addClass($operationResult === null ? 'entityCtxMenuSuccess' : 'entityCtxMenuError')
-        .removeClass("contextmenu-active");
+        $(".sf-ctxmenu-active")
+            .addClass("sf-entity-ctxmenu-" + ($operationResult === null ? "success" : "error"))
+            .removeClass("sf-ctxmenu-active");
 
         SF.Notify.info(lang.signum.operationExecuted, 2000);
-    }
+    };
 
     SF.opContextualOnSuccess = function (prefix, $operationResult) {
         SF.log("OperationExecutor OpContextualOnSuccess");
-        $(".contextmenu-active").removeClass("contextmenu-active");
+        SF.opDisableCtxmenu();
         if ($operationResult === null) {
             return null;
         }
@@ -565,5 +556,5 @@ SF.registerModule("Operations", function () {
             $("form").html('').append($operationResult);
             SF.Notify.info(lang.signum.operationExecuted, 2000);
         }
-    }
+    };
 });

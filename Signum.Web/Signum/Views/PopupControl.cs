@@ -73,12 +73,12 @@ WriteLiteral("\" data-title=\"");
 
                                               Write(Navigator.Manager.GetTypeTitle(Model.UntypedValue as ModifiableEntity));
 
-WriteLiteral("\">\r\n    <h2>\r\n        <span class=\"title\">");
+WriteLiteral("\">\r\n    <h2><span class=\"sf-entity-title\">");
 
 
-                        Write(ViewBag.Title ?? Model.UntypedValue.TryToString());
+                                  Write(ViewBag.Title ?? Model.UntypedValue.TryToString());
 
-WriteLiteral("</span></h2>\r\n    <div class=\"button-bar\">\r\n");
+WriteLiteral("</span></h2>\r\n    <div class=\"sf-button-bar\">\r\n");
 
 
          if (Model != null && Navigator.Manager.ShowOkSave(Model.UntypedValue.GetType(), false))
@@ -89,10 +89,10 @@ WriteLiteral("            <button id=\"");
 
                    Write(Model.Compose("btnOk"));
 
-WriteLiteral("\" class=\"entity-button ok-button\" ");
+WriteLiteral("\" class=\"sf-entity-button sf-ok-button\" ");
 
 
-                                                                             Write(ViewData[ViewDataKeys.OnOk] != null ? Html.Raw("onclick=\"" + ViewData[ViewDataKeys.OnOk] + "\"") : null);
+                                                                                   Write(ViewData[ViewDataKeys.OnOk] != null ? Html.Raw("onclick=\"" + ViewData[ViewDataKeys.OnOk] + "\"") : null);
 
 WriteLiteral(">\r\n                OK</button>                \r\n");
 
@@ -119,7 +119,7 @@ WriteLiteral("\r\n    <div id=\"");
 
         Write(Model.Compose("divMainControl"));
 
-WriteLiteral("\" class=\"divMainControl\">\r\n");
+WriteLiteral("\" class=\".sf-main-control\">\r\n");
 
 
            Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString(), Model);

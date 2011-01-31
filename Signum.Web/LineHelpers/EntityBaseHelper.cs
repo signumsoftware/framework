@@ -24,7 +24,7 @@ namespace Signum.Web
         public static MvcHtmlString BaseLineLabel(HtmlHelper helper, BaseLine baseLine, string idLabelFor)
         {
             return baseLine.LabelVisible && !baseLine.OnlyValue ?
-                           helper.Label(baseLine.Compose("lbl"), baseLine.LabelText ?? "", idLabelFor, TypeContext.CssLineLabel) :
+                           helper.Label(baseLine.Compose("lbl"), baseLine.LabelText ?? "", idLabelFor, "sf-label-line") :
                            MvcHtmlString.Empty;
         }
 
@@ -189,11 +189,6 @@ namespace Signum.Web
                   Resources.LineButton_Remove,
                   "sf-line-button sf-remove",
                   htmlAttr);
-        }
-
-        public static MvcHtmlString BreakLineDiv(HtmlHelper helper, EntityBase entityBase)
-        {
-            return entityBase.BreakLine ? helper.Div("", null, "clearall") : MvcHtmlString.Empty;
         }
 
         internal static MvcHtmlString EmbeddedTemplate(EntityBase entityBase, MvcHtmlString template)

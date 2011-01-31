@@ -48,7 +48,7 @@ SF.registerModule("FindNavigator", function () {
 
         initialize: function () {
             var self = this;
-            $(this.pf("tblResults") + " th:not(.thRowEntity):not(.thRowSelection)")
+            $(this.pf("sf-search-results") + " th:not(.thRowEntity):not(.thRowSelection)")
             .live('click', function (e) {
                 if ($(this).hasClass("columnEditing"))
                     return true;
@@ -63,9 +63,9 @@ SF.registerModule("FindNavigator", function () {
                 return false;
             });
 
-            $(this.pf("tblResults td")).live('contextmenu', function (e) {
-                if ($(e.target).hasClass("searchCtxMenuOverlay") || $(e.target).parents().hasClass("searchCtxMenuOverlay")) {
-                    $('.searchCtxMenuOverlay').remove();
+            $(this.pf("sf-search-results td")).live('contextmenu', function (e) {
+                if ($(e.target).hasClass("search-ctxmenu-overlay") || $(e.target).parents().hasClass("search-ctxmenu-overlay")) {
+                    $('.search-ctxmenu-overlay').remove();
                     return false;
                 }
 
@@ -81,10 +81,10 @@ SF.registerModule("FindNavigator", function () {
                 return false;
             });
 
-            $(this.pf("tblResults") + " .searchCtxItem.quickFilter").live('click', function () {
+            $(this.pf("sf-search-results") + " .search-ctxitem.quickFilter").live('click', function () {
                 SF.log("contextmenu item click");
                 var $elem = $(this).closest("td");
-                $('.searchCtxMenuOverlay').remove();
+                $('.search-ctxmenu-overlay').remove();
 
                 var quickFilterUrl = window[SF.compose(self.findOptions.prefix, "QuickFilterUrl")];
                 if (quickFilterUrl == undefined)
@@ -98,14 +98,14 @@ SF.registerModule("FindNavigator", function () {
             SF.log("contextmenu");
             var $target = $(e.target);
 
-            var $cmenu = $("<div class='searchCtxMenu'><div class='searchCtxItem quickFilter'><span>Add filter</span></div></div>");
-            $('<div class="searchCtxMenuOverlay"></div>').click(function (e) {
+            var $cmenu = $("<div class='search-ctxmenu'><div class='search-ctxitem quickFilter'><span>Add filter</span></div></div>");
+            $('<div class="search-ctxmenu-overlay"></div>').click(function (e) {
                 SF.log("contextmenu click");
                 var $target = $(e.target);
-                if ($target.hasClass("searchCtxItem") || $target.parent().hasClass("searchCtxItem"))
+                if ($target.hasClass("search-ctxitem") || $target.parent().hasClass("search-ctxitem"))
                     $cmenu.hide();
                 else
-                    $('.searchCtxMenuOverlay').remove();
+                    $('.search-ctxmenu-overlay').remove();
             }).append($cmenu).appendTo($target);
             $cmenu.css({
                 left: $target.position().left + ($target.outerWidth() / 2),
@@ -188,7 +188,7 @@ SF.registerModule("FindNavigator", function () {
             this.editColumnsFinish();
 
             var $btnSearch = $(this.pf("qbSearch"));
-            $btnSearch.toggleClass('loading').val(lang.signum.searching);
+            $btnSearch.toggleClass("sf-loading").val(lang.signum.searching);
 
             var self = this;
             SF.ajax({
@@ -201,15 +201,15 @@ SF.registerModule("FindNavigator", function () {
                     var idBtnSearch = $btnSearch.attr('id');
                     if (SF.FindNavigator.asyncSearchFinished[idBtnSearch])
                         SF.FindNavigator.asyncSearchFinished[idBtnSearch] = false;
-                    $btnSearch.val(lang.signum.search).toggleClass('loading');
+                    $btnSearch.val(lang.signum.search).toggleClass("sf-loading");
                     if (!SF.isEmpty(r)) {
                         var $resultsHtml = jQuery(r);
                         $("body").trigger("sf-new-content", [$resultsHtml]);
-                        self.control().find(".divResults tbody").html('').append($resultsHtml);
+                        self.control().find(".sf-search-results-container tbody").html('').append($resultsHtml);
                     }
                     else {
-                        var columns = $(self.pf("divResults th")).length;
-                        self.control().find(".divResults tbody").html("<tr><td colspan=\"" + columns + "\">" + lang.signum.noResults + "</td></tr>")
+                        var columns = $(self.pf("sf-search-results-container th")).length;
+                        self.control().find(".sf-search-results-container tbody").html("<tr><td colspan=\"" + columns + "\">" + lang.signum.noResults + "</td></tr>")
                     }
                 },
                 error: function () {
@@ -346,7 +346,7 @@ SF.registerModule("FindNavigator", function () {
             var newOrder = found ? (oldOrder == "" ? "-" : "") : "";
             var currOrder = $(this.pf(this.orders));
             if (!multiCol) {
-                this.control().find(".divResults th").removeClass("headerSortUp headerSortDown");
+                this.control().find(".sf-search-results-container th").removeClass("sf-header-sort-up sf-header-sort-down");
                 currOrder.val(newOrder + columnName + ";");
             }
             else {
@@ -364,16 +364,16 @@ SF.registerModule("FindNavigator", function () {
             }
 
             if (newOrder == "-")
-                $th.removeClass("headerSortDown").addClass("headerSortUp");
+                $th.removeClass("sf-header-sort-down").addClass("sf-header-sort-up");
             else
-                $th.removeClass("headerSortUp").addClass("headerSortDown");
+                $th.removeClass("sf-header-sort-up").addClass("sf-header-sort-down");
         },
 
         serializeColumns: function () {
             SF.log("FindNavigator serializeColumns");
             var result = "";
             var self = this;
-            $(this.pf("tblResults thead tr th:not(.thRowEntity):not(.thRowSelection)")).each(function () {
+            $(this.pf("sf-search-results thead tr th:not(.thRowEntity):not(.thRowSelection)")).each(function () {
                 var $this = $(this);
                 var token = $this.find("input:hidden").val();
                 var displayName = $this.text().trim();
@@ -420,9 +420,9 @@ SF.registerModule("FindNavigator", function () {
             if (SF.isEmpty(tokenName)) return;
 
             var prefixedTokenName = SF.compose(this.findOptions.prefix, tokenName);
-            if ($(this.pf("tblResults thead tr th[id=\"" + prefixedTokenName + "\"]")).length > 0) return;
+            if ($(this.pf("sf-search-results thead tr th[id=\"" + prefixedTokenName + "\"]")).length > 0) return;
 
-            var $tblHeaders = $(this.pf("tblResults thead tr"));
+            var $tblHeaders = $(this.pf("sf-search-results thead tr"));
 
             var webQueryName = ((SF.isEmpty(this.findOptions.webQueryName)) ? $(this.pf(this.webQueryName)).val() : this.findOptions.webQueryName);
             var self = this;
@@ -443,7 +443,7 @@ SF.registerModule("FindNavigator", function () {
             SF.log("FindNavigator editColumns");
 
             var self = this;
-            $(this.pf("tblResults thead tr th:not(.thRowEntity):not(.thRowSelection)")).each(function () {
+            $(this.pf("sf-search-results thead tr th:not(.thRowEntity):not(.thRowSelection)")).each(function () {
                 var th = $(this);
                 th.addClass("columnEditing");
                 var hidden = th.find("input:hidden");
@@ -464,7 +464,7 @@ SF.registerModule("FindNavigator", function () {
                 return;
 
             var self = this;
-            $(this.pf("tblResults thead tr th:not(.thRowEntity):not(.thRowSelection)")).each(function () {
+            $(this.pf("sf-search-results thead tr th:not(.thRowEntity):not(.thRowSelection)")).each(function () {
                 var th = $(this);
                 th.removeClass("columnEditing");
                 var hidden = th.find("input:hidden");
@@ -480,13 +480,13 @@ SF.registerModule("FindNavigator", function () {
             SF.log("FindNavigator deleteColumn");
 
             var self = this;
-            $(this.pf("tblResults thead tr th"))
+            $(this.pf("sf-search-results thead tr th"))
         .filter(function () { return $(this).find("input:hidden[value='" + columnName + "']").length > 0 })
         .remove();
 
-            $(this.pf("tblResults tbody")).html("");
+            $(this.pf("sf-search-results tbody")).html("");
 
-            if ($(this.pf("tblResults thead tr th")).length == 0)
+            if ($(this.pf("sf-search-results thead tr th")).length == 0)
                 $(this.pf("btnEditColumnsFinish")).hide();
         },
 
@@ -510,8 +510,8 @@ SF.registerModule("FindNavigator", function () {
                 async: false,
                 dataType: "html",
                 success: function (filterHtml) {
-                    var $filterList = self.control().find(".filters-list");
-                    $filterList.find(".explanation").hide();
+                    var $filterList = self.control().find(".sf-filters-list");
+                    $filterList.find(".sf-explanation").hide();
                     $filterList.find("table").show();
 
                     var $filterHtml = jQuery(filterHtml);
@@ -589,10 +589,11 @@ SF.registerModule("FindNavigator", function () {
         quickFilter: function ($elem, quickFilterUrl) {
             SF.log("FindNavigator quickFilter");
             var tableFilters = $(this.pf("tblFilters tbody"));
-            if (tableFilters.length == 0)
+            if (tableFilters.length === 0) {
                 return;
+            }
             var params;
-            var data = $elem.children(".data");
+            var data = $elem.children(".sf-data");
             if (data.length == 0) {
                 var cb = $elem.find("input:checkbox");
                 if (cb.length == 0)
@@ -608,7 +609,7 @@ SF.registerModule("FindNavigator", function () {
 
             params = $.extend(params, {
                 "webQueryName": $(this.pf(this.webQueryName)).val(),
-                "tokenName": $($($elem.closest(".tblResults")).find("th")[cellIndex]).children("input:hidden").val(),
+                "tokenName": $($($elem.closest(".sf-search-results")).find("th")[cellIndex]).children("input:hidden").val(),
                 "prefix": this.findOptions.prefix,
                 "index": this.newFilterRowIndex()
             });
@@ -621,8 +622,8 @@ SF.registerModule("FindNavigator", function () {
                 async: false,
                 dataType: "html",
                 success: function (filterHtml) {
-                    var $filterList = self.control().find(".filters-list");
-                    $filterList.find(".explanation").hide();
+                    var $filterList = self.control().find(".sf-filters-list");
+                    $filterList.find(".sf-explanation").hide();
                     $filterList.find("table").show();
 
                     var $filterHtml = jQuery(filterHtml);
@@ -640,8 +641,8 @@ SF.registerModule("FindNavigator", function () {
                 return;
 
             if ($tr.siblings().length == 0) {
-                var $filterList = $tr.closest(".filters-list");
-                $filterList.find(".explanation").show();
+                var $filterList = $tr.closest(".sf-filters-list");
+                $filterList.find(".sf-explanation").show();
                 $filterList.find("table").hide();
                 $(this.pf("btnClearAllFilters"), this.control()).hide();
             }
@@ -652,8 +653,8 @@ SF.registerModule("FindNavigator", function () {
         clearAllFilters: function () {
             SF.log("FindNavigator clearAllFilters");
 
-            this.control().find(".filters-list")
-                     .find(".explanation").show().end()
+            this.control().find(".sf-filters-list")
+                     .find(".sf-explanation").show().end()
                      .find("table").hide()
                       .find("tbody > tr").remove();
 
@@ -706,7 +707,7 @@ SF.registerModule("FindNavigator", function () {
         SF.log("entity contextmenu");
         var $target = $(e.target);
 
-        var hiddenQueryName = $target.closest(".searchControl").children("input:hidden[id$=sfWebQueryName]");
+        var hiddenQueryName = $target.closest(".sf-search-control").children("input:hidden[id$=sfWebQueryName]");
         var idHiddenQueryName = hiddenQueryName.attr('id');
         var prefix = idHiddenQueryName.substring(0, idHiddenQueryName.indexOf("sfWebQueryName"));
         if (prefix.charAt(prefix.length - 1) == "_")
@@ -716,22 +717,28 @@ SF.registerModule("FindNavigator", function () {
         if (showCtxUrl == undefined)
             return false; //EntityContextMenu not active
 
-        var $cmenu = $("<div class='searchCtxMenu'></div>");
-        $('<div class="searchCtxMenuOverlay"></div>').click(function (e) {
-            SF.log("contextmenu click");
-            var $target = $(e.target);
-            if ($target.hasClass("searchCtxItem") || $target.parent().hasClass("searchCtxItem"))
-                $cmenu.hide();
-            else
-                $('.searchCtxMenuOverlay').remove();
-        }).append($cmenu).appendTo($target);
+        var $cmenu = $("<div/>",
+            { class: "sf-search-ctxmenu" });
+
+        $("<div/>",
+            { class: "sf-search-ctxmenu-overlay",
+                click: function (e) {
+                    SF.log("contextmenu click");
+                    var $target = $(e.target);
+                    if ($target.hasClass("sf-search-ctxitem") || $target.parent().hasClass("sf-search-ctxitem"))
+                        $cmenu.hide();
+                    else
+                        $('.sf-search-ctxmenu-overlay').remove();
+                } 
+            }).append($cmenu).appendTo($target);
+
         $cmenu.css({
             left: $target.position().left + ($target.outerWidth() / 2),
             top: $target.position().top + ($target.outerHeight() / 2),
             zIndex: '101'
         }).show();
 
-        $target.addClass("contextmenu-active");
+        $target.addClass("sf-ctxmenu-active");
         SF.ajax({
             url: showCtxUrl,
             type: "POST",
@@ -741,7 +748,7 @@ SF.registerModule("FindNavigator", function () {
             success: function (items) {
                 var $items = jQuery(items);
                 $("body").trigger("sf-new-content", [$items]);
-                $cmenu.html('').append($items); 
+                $cmenu.html('').append($items);
             }
         });
 
@@ -762,7 +769,7 @@ SF.registerModule("FindNavigator", function () {
 
     SF.FindNavigator.toggleFilters = function (elem) {
         var $elem = $(elem);
-        $elem.toggleClass('close').siblings(".filters").toggle();
+        $elem.toggleClass('close').siblings(".sf-filters").toggle();
         if ($elem.hasClass('close')) {
             $elem.html('Mostrar filtros');
         }
@@ -783,15 +790,15 @@ SF.registerModule("FindNavigator", function () {
             }
         };
 
-        if ($("#" + SF.compose(prefix, "divResults")).is(':visible')) {
+        if ($("#" + SF.compose(prefix, "sf-search-results-container")).is(':visible')) {
             makeSearch();
         }
         else {
-            var $tabContainer = $button.parents(".tabs").first();
+            var $tabContainer = $button.parents(".sf-tabs").first();
             if ($tabContainer.length) {
                 $tabContainer.find("a").click(
                 function () {
-                    if ($("#" + SF.compose(prefix, "divResults")).is(':visible')) {
+                    if ($("#" + SF.compose(prefix, "sf-search-results-container")).is(':visible')) {
                         makeSearch();
                     }
                 });
@@ -802,14 +809,14 @@ SF.registerModule("FindNavigator", function () {
     }
 
     //    SF.FindNavigator.QuickFilter = function ($elem, quickFilterUrl) {
-    //        var idtblresults = $elem.closest(".tblResults")[0].id;
-    //        var prefix = (idtblresults == "tblResults") ? "" : idtblresults.substring(0, idtblresults.indexOf("tblResults") - 1);
+    //        var idtblresults = $elem.closest(".sf-search-results")[0].id;
+    //        var prefix = (idtblresults == "sf-search-results") ? "" : idtblresults.substring(0, idtblresults.indexOf("sf-search-results") - 1);
     //        new SF.FindNavigator({ prefix: prefix }).quickFilter($elem, quickFilterUrl);
     //    }
 
     //    function Sort(evt, controllerUrl) {
     //        var $target = $(evt.target);
-    //        var searchControlDiv = $target.parents(".searchControl");
+    //        var searchControlDiv = $target.parents(".sf-search-control");
 
     //        var prefix = searchControlDiv[0].id;
     //        prefix = prefix.substring(0, prefix.indexOf("divSearchControl"));

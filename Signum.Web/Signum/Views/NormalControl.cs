@@ -79,32 +79,40 @@ WriteLiteral("\r\n    ");
 
 Write(Html.Hidden(ViewDataKeys.PartialViewName, ViewData[ViewDataKeys.PartialViewName]));
 
-WriteLiteral("\r\n    <span class=\"typeNiceName\">");
+WriteLiteral("\r\n    <span class=\"sf-type-nice-name\">");
 
 
-                          Write(Navigator.Manager.GetTypeTitle(Model.UntypedValue as ModifiableEntity));
+                               Write(Navigator.Manager.GetTypeTitle(Model.UntypedValue as ModifiableEntity));
 
-WriteLiteral("</span>\r\n    <span class=\"title\">");
+WriteLiteral("</span>\r\n");
 
 
-                    Write(ViewBag.Title);
+      if(string.IsNullOrEmpty(ViewBag.Title))
+     {
+         ViewBag.Title = Model.UntypedValue.TryToString();
+     }
 
-WriteLiteral("</span>\r\n</h2>\r\n<div class=\"button-bar\">\r\n");
+WriteLiteral("    <span class=\"sf-entity-title\">");
+
+
+                              Write(ViewBag.Title);
+
+WriteLiteral("</span>\r\n</h2>\r\n<div class=\"sf-button-bar\">\r\n");
 
 
      if (Model != null && Navigator.Manager.ShowOkSave(Model.UntypedValue.GetType(), false))
     {
 
-WriteLiteral("        <a id=\"ebSave\" class=\"entity-button save\" onclick=\"javascript:new SF.Vali" +
-"dator({controllerUrl:\'");
+WriteLiteral("        <a id=\"ebSave\" class=\"sf-entity-button sf-save\" onclick=\"javascript:new S" +
+"F.Validator({controllerUrl:\'");
 
 
-                                                                                                  Write(Url.SignumAction("TrySave"));
+                                                                                                        Write(Url.SignumAction("TrySave"));
 
 WriteLiteral("\'}).trySave();\">");
 
 
-                                                                                                                                              Write(Resources.Save);
+                                                                                                                                                    Write(Resources.Save);
 
 WriteLiteral("</a>  \r\n");
 
@@ -127,7 +135,7 @@ WriteLiteral("\r\n    ");
 
 Write(Html.NormalPageHeader());
 
-WriteLiteral("\r\n</div>\r\n<div id=\"divMainControl\" class=\"divMainControl\">\r\n");
+WriteLiteral("\r\n</div>\r\n<div id=\"divMainControl\" class=\"sf-main-control\">\r\n");
 
 
        Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString(), Model);

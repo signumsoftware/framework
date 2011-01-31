@@ -33,7 +33,7 @@ namespace Signum.Web
                     "", null) :
                 lite.ToStr.EncodeHtml();
             
-            return result.Concat(helper.HiddenAnonymous(key, new { @class = "data" }));
+            return result.Concat(helper.HiddenAnonymous(key, new { @class = "sf-data" }));
         }
     }
 }

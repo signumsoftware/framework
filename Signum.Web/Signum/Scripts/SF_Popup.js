@@ -32,7 +32,7 @@ SF.registerModule("Popup", function () {
                     };
 
                     if (options.onOk)
-                        $this.find(".ok-button").click(options.onOk);
+                        $this.find(".sf-ok-button").click(options.onOk);
 
                     $this.dialog(o);
                 }

@@ -86,28 +86,28 @@ WriteLiteral("\">\r\n    <div id=\"");
 
         Write(context.Compose("fields-list"));
 
-WriteLiteral("\" class=\"fields-list\">\r\n        <a onclick=\"SF.FindNavigator.toggleFilters(this)\"" +
-" class=\"filters-header");
+WriteLiteral("\" class=\"sf-fields-list\">\r\n        <a onclick=\"SF.FindNavigator.toggleFilters(thi" +
+"s)\" class=\"sf-filters-header");
 
 
-                                                                           Write(visible ? "" : " close");
+                                                                              Write(visible ? "" : " close");
 
-WriteLiteral("\" rev=\"filters-body\">");
-
-
-                                                                                                                          Write(visible ? Resources.HideFilters : Resources.ShowFilters);
-
-WriteLiteral("</a>\r\n        <div class=\"filters\" ");
+WriteLiteral("\" rev=\"sf-filters-body\">");
 
 
-                         Write(visible ? "" : "style='display:none'");
+                                                                                                                                Write(visible ? Resources.HideFilters : Resources.ShowFilters);
+
+WriteLiteral("</a>\r\n        <div class=\"sf-filters\" ");
+
+
+                            Write(visible ? "" : "style='display:none'");
 
 WriteLiteral(">\r\n            <div id=\"");
 
 
                 Write(context.Compose("filters-body"));
 
-WriteLiteral("\" class=\"filters-body\">\r\n                <label for=\"");
+WriteLiteral("\" class=\"sf-filters-body\">\r\n                <label for=\"");
 
 
                        Write(context.Compose("ddlTokens_0"));
@@ -133,7 +133,7 @@ WriteLiteral("                ");
 WriteLiteral("\r\n                ");
 
 
-           Write(Html.Button(context.Compose("btnAddFilter"), "+", "new SF.FindNavigator({{prefix:'{0}'}}).addFilter('{1}');".Formato(context.ControlID, Url.SignumAction("AddFilter")), "addFilter", new Dictionary<string, object> { { "title", "Add Filter" } }));
+           Write(Html.Button(context.Compose("btnAddFilter"), "+", "new SF.FindNavigator({{prefix:'{0}'}}).addFilter('{1}');".Formato(context.ControlID, Url.SignumAction("AddFilter")), "sf-add-filter", new Dictionary<string, object> { { "title", "Add Filter" } }));
 
 WriteLiteral("\r\n");
 
@@ -141,9 +141,9 @@ WriteLiteral("\r\n");
                  if (findOptions.AllowUserColumns.HasValue ? findOptions.AllowUserColumns.Value : Navigator.Manager.AllowUserColumns(context.ControlID))
                 {
                     
-               Write(Html.Button(context.Compose("btnAddColumn"), "+", "new SF.FindNavigator({{prefix:'{0}'}}).addColumn('{1}');".Formato(context.ControlID, Url.SignumAction("GetColumnName")), "addColumn", new Dictionary<string, object> { { "title", "Add Column" } }));
+               Write(Html.Button(context.Compose("btnAddColumn"), "+", "new SF.FindNavigator({{prefix:'{0}'}}).addColumn('{1}');".Formato(context.ControlID, Url.SignumAction("GetColumnName")), "sf-add-column", new Dictionary<string, object> { { "title", "Add Column" } }));
 
-                                                                                                                                                                                                                                                                           
+                                                                                                                                                                                                                                                                               
                     
                Write(Html.Button(context.Compose("btnEditColumns"), Resources.UserColumnsEdit, "new SF.FindNavigator({{prefix:'{0}'}}).editColumns();".Formato(context.ControlID), ""));
 
@@ -164,16 +164,16 @@ WriteLiteral("\r\n            </div>\r\n");
 
                List<FilterOption> filterOptions = findOptions.FilterOptions;
 
-WriteLiteral("            <div class=\"filters-list\">\r\n                <span class=\"explanation\"" +
-" style=\"");
+WriteLiteral("            <div class=\"sf-filters-list\">\r\n                <span class=\"sf-explan" +
+"ation\" style=\"");
 
 
-                                             Write((filterOptions == null || filterOptions.Count == 0) ? "" : "display:none;");
+                                                Write((filterOptions == null || filterOptions.Count == 0) ? "" : "display:none;");
 
 WriteLiteral("\">");
 
 
-                                                                                                                           Write(Resources.NoFiltersSpecified);
+                                                                                                                              Write(Resources.NoFiltersSpecified);
 
 WriteLiteral("</span>\r\n                <table id=\"");
 

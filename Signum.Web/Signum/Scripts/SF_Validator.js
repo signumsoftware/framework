@@ -19,7 +19,7 @@ SF.registerModule("Validator", function () {
 
     SF.Validator.prototype = {
 
-        fieldErrorClass: "field-validation-error",
+        fieldErrorClass: "sf-field-validation-error",
         inputErrorClass: SF.Validator.inputErrorClass,
         summaryErrorClass: "validation-summary-errors",
         inlineErrorVal: "inlineVal",
@@ -38,7 +38,7 @@ SF.registerModule("Validator", function () {
                 .add("input:hidden[name=" + SF.Keys.antiForgeryToken + "]")
                 .add("#" + SF.Keys.reactive);
 
-            var searchControlInputs = $(".searchControl :input");
+            var searchControlInputs = $(".sf-search-control :input");
             formChildren = formChildren.not(searchControlInputs);
 
             var serializer = new SF.Serializer();
@@ -223,7 +223,7 @@ SF.registerModule("Validator", function () {
             SF.log("PartialValidator constructRequestDataForSaving");
             var prefix = this.valOptions.prefix;
             var formChildren = $("#" + this.valOptions.parentDiv + " *, #" + SF.Keys.tabId + ", input:hidden[name=" + SF.Keys.antiForgeryToken + "]").add(SF.getInfoParams(prefix));
-            formChildren = formChildren.not(".searchControl *, #" + SF.Keys.reactive);
+            formChildren = formChildren.not(".sf-search-control *, #" + SF.Keys.reactive);
 
             var serializer = new SF.Serializer();
             serializer.add(formChildren.serialize());
@@ -283,7 +283,7 @@ SF.registerModule("Validator", function () {
             var formChildren = SF.isEmpty(this.valOptions.parentDiv) ?
                                $("form :input, #" + SF.Keys.tabId + ", input:hidden[name=" + SF.Keys.antiForgeryToken + "]") :
                                $("#" + this.valOptions.parentDiv + " :input, #" + SF.Keys.tabId + ", input:hidden[name=" + SF.Keys.antiForgeryToken + "]");
-            formChildren = formChildren.not(".searchControl :input, #" + SF.Keys.reactive);
+            formChildren = formChildren.not(".sf-search-control :input, #" + SF.Keys.reactive);
 
             var serializer = new SF.Serializer().add(formChildren.serialize());
 

@@ -27,13 +27,13 @@ namespace Signum.Web
                 return MvcHtmlString.Empty;
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
-            using (entityLine.ShowFieldDiv ? sb.Surround(new HtmlTag("div").Class("field")) : null)
-            using (entityLine.ValueFirst ? sb.Surround(new HtmlTag("div").Class("valueFirst")) : null)
+            using (entityLine.ShowFieldDiv ? sb.Surround(new HtmlTag("div").Class("sf-field")) : null)
+            using (entityLine.ValueFirst ? sb.Surround(new HtmlTag("div").Class("sf-value-first")) : null)
             {
                 if (!entityLine.ValueFirst)
                     sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, entityLine));
 
-                using (sb.Surround(new HtmlTag("div").Class("value-container")))
+                using (sb.Surround(new HtmlTag("div").Class("sf-value-container")))
                 {
                     sb.AddLine(helper.HiddenEntityInfo(entityLine));
 
@@ -49,7 +49,7 @@ namespace Signum.Web
 
                         var htmlAttr = new Dictionary<string, object>
                         {
-                            {"class", "valueLine" + (entityLine.Autocomplete ? " entity-autocomplete" : "")},
+                            {"class", "sf-value-line" + (entityLine.Autocomplete ? " sf-entity-autocomplete" : "")},
                             { "autocomplete", "off" }, 
                             { "style", "display:" + ((entityLine.UntypedValue==null && !entityLine.ReadOnly) ? "block" : "none")}
                         };
@@ -79,7 +79,7 @@ namespace Signum.Web
                         if (entityLine.UntypedValue != null)
                             sb.AddLine(EntityBaseHelper.RenderTypeContext(helper, (TypeContext)entityLine.Parent, RenderMode.PopupInDiv, entityLine));
 
-                        sb.AddLine(helper.Span(entityLine.Compose(EntityBaseKeys.ToStrLink), entityLine.UntypedValue.TryToString(), "valueLine"));
+                        sb.AddLine(helper.Span(entityLine.Compose(EntityBaseKeys.ToStrLink), entityLine.UntypedValue.TryToString(), "sf-value-line"));
                     }
 
                     int? id = entityLine.IdOrNull;
@@ -87,7 +87,7 @@ namespace Signum.Web
                     {
                         sb.AddLine(
                             helper.Href(entityLine.Compose(EntityBaseKeys.ToStrLink),
-                                entityLine.UntypedValue.ToString(), Navigator.ViewRoute(entityLine.CleanRuntimeType, id), Resources.View, "valueLine",
+                                entityLine.UntypedValue.ToString(), Navigator.ViewRoute(entityLine.CleanRuntimeType, id), Resources.View, "sf-value-line",
                                 new Dictionary<string, object> { { "style", "display:" + ((entityLine.UntypedValue == null) ? "none" : "block") } }));
                     }
                     else if (entityLine.Type.IsIIdentifiable() || entityLine.Type.IsLite())
@@ -95,7 +95,7 @@ namespace Signum.Web
                         sb.AddLine(
                             helper.Span(entityLine.Compose(EntityBaseKeys.ToStrLink),
                                 entityLine.UntypedValue.TryToString() ?? " ",
-                                "valueLine",
+                                "sf-value-line",
                                 new Dictionary<string, object> { { "style", "display:" + ((entityLine.UntypedValue == null) ? "none" : "block") } }));
                     }
 
@@ -115,8 +115,6 @@ namespace Signum.Web
                 if (entityLine.ValueFirst)
                     sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, entityLine));
             }
-
-            sb.AddLine(EntityBaseHelper.BreakLineDiv(helper, entityLine));
 
             return sb.ToHtml();
         }

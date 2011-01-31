@@ -9,28 +9,28 @@
    QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];}
 
 <div id="@context.Compose("fields-search")">
-    <div id="@context.Compose("fields-list")" class="fields-list">
-        <a onclick="SF.FindNavigator.toggleFilters(this)" class="filters-header@(visible ? "" : " close")" rev="filters-body">@(visible ? Resources.HideFilters : Resources.ShowFilters)</a>
-        <div class="filters" @(visible ? "" : "style='display:none'")>
-            <div id="@context.Compose("filters-body")" class="filters-body">
+    <div id="@context.Compose("fields-list")" class="sf-fields-list">
+        <a onclick="SF.FindNavigator.toggleFilters(this)" class="sf-filters-header@(visible ? "" : " close")" rev="sf-filters-body">@(visible ? Resources.HideFilters : Resources.ShowFilters)</a>
+        <div class="sf-filters" @(visible ? "" : "style='display:none'")>
+            <div id="@context.Compose("filters-body")" class="sf-filters-body">
                 <label for="@context.Compose("ddlTokens_0")">@Resources.FilterByField</label>
                 @{ var columns = queryDescription.Columns
                         .Select(c => new SelectListItem { Text = c.DisplayName, Value = c.Name, Selected = false })
                         .ToList();
                    columns.Insert(0, new SelectListItem { Text = "-", Selected = true, Value = "" });}
                 @Html.TokensCombo(findOptions.QueryName, columns, context, 0, false)
-                @Html.Button(context.Compose("btnAddFilter"), "+", "new SF.FindNavigator({{prefix:'{0}'}}).addFilter('{1}');".Formato(context.ControlID, Url.SignumAction("AddFilter")), "addFilter", new Dictionary<string, object> { { "title", "Add Filter" } })
+                @Html.Button(context.Compose("btnAddFilter"), "+", "new SF.FindNavigator({{prefix:'{0}'}}).addFilter('{1}');".Formato(context.ControlID, Url.SignumAction("AddFilter")), "sf-add-filter", new Dictionary<string, object> { { "title", "Add Filter" } })
                 @if (findOptions.AllowUserColumns.HasValue ? findOptions.AllowUserColumns.Value : Navigator.Manager.AllowUserColumns(context.ControlID))
                 {
-                    @Html.Button(context.Compose("btnAddColumn"), "+", "new SF.FindNavigator({{prefix:'{0}'}}).addColumn('{1}');".Formato(context.ControlID, Url.SignumAction("GetColumnName")), "addColumn", new Dictionary<string, object> { { "title", "Add Column" } })
+                    @Html.Button(context.Compose("btnAddColumn"), "+", "new SF.FindNavigator({{prefix:'{0}'}}).addColumn('{1}');".Formato(context.ControlID, Url.SignumAction("GetColumnName")), "sf-add-column", new Dictionary<string, object> { { "title", "Add Column" } })
                     @Html.Button(context.Compose("btnEditColumns"), Resources.UserColumnsEdit, "new SF.FindNavigator({{prefix:'{0}'}}).editColumns();".Formato(context.ControlID), "")
                     @Html.Button(context.Compose("btnEditColumnsFinish"), Resources.EditColumnsFinishEdit, "new SF.FindNavigator({{prefix:'{0}'}}).editColumnsFinish();".Formato(context.ControlID), "", new Dictionary<string, object> { { "style", "display:none;" } })
                 }
                 @Html.Button(context.Compose("btnClearAllFilters"), Resources.DeleteFilters, "new SF.FindNavigator({{prefix:'{0}'}}).clearAllFilters();".Formato(context.ControlID), "", findOptions.FilterOptions.Any() ? new Dictionary<string, object>() : new Dictionary<string, object> { { "style", "display:none;" } })
             </div>
             @{ List<FilterOption> filterOptions = findOptions.FilterOptions;}
-            <div class="filters-list">
-                <span class="explanation" style="@((filterOptions == null || filterOptions.Count == 0) ? "" : "display:none;")">@Resources.NoFiltersSpecified</span>
+            <div class="sf-filters-list">
+                <span class="sf-explanation" style="@((filterOptions == null || filterOptions.Count == 0) ? "" : "display:none;")">@Resources.NoFiltersSpecified</span>
                 <table id="@context.Compose("tblFilters")" style="@((filterOptions == null || filterOptions.Count == 0) ? "display:none;" : "")">
                     <thead>
                         <tr>

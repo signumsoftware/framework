@@ -41,8 +41,6 @@ namespace Signum.Web
             sb.AddLine(ListBaseHelper.CreateButton(helper, entityRepeater, new Dictionary<string, object> { { "title", entityRepeater.AddElementLinkText } }));
             sb.AddLine(ListBaseHelper.FindButton(helper, entityRepeater));
 
-            sb.AddLine(helper.Div("", null,"clearall", null)); //To keep create and find buttons' space
-
             using (sb.Surround(new HtmlTag("div").IdName(entityRepeater.Compose(EntityRepeaterKeys.ItemsContainer))))
             {
                 if (entityRepeater.UntypedValue != null)
@@ -52,8 +50,6 @@ namespace Signum.Web
                 }
             }
 
-            sb.AddLine(EntityBaseHelper.BreakLineDiv(helper, entityRepeater));
-
             return sb.ToHtml();
         }
 
@@ -61,7 +57,7 @@ namespace Signum.Web
         {
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            using (sb.Surround(new HtmlTag("div").IdName(itemTC.Compose(EntityRepeaterKeys.RepeaterElement)).Class("repeaterElement")))
+            using (sb.Surround(new HtmlTag("div").IdName(itemTC.Compose(EntityRepeaterKeys.RepeaterElement)).Class("sf-repeater-element")))
             {
                 if (!entityRepeater.ForceNewInUI)
                     sb.AddLine(helper.Hidden(itemTC.Compose(EntityListBaseKeys.Index), itemTC.Index.ToString()));
@@ -76,8 +72,6 @@ namespace Signum.Web
                                     entityRepeater.RemoveElementLinkText,
                                     "sf-line-button sf-remove",
                                     null));
-
-                sb.AddLine(helper.Div("", null, "clearall", null)); //To keep remove button space
 
                 sb.AddLine(EntityBaseHelper.RenderTypeContext(helper, itemTC, RenderMode.ContentInVisibleDiv, entityRepeater));
             }

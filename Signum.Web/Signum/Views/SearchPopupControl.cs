@@ -74,17 +74,17 @@ WriteLiteral("\" data-title=\"");
 
                                               Write(ViewBag.Title);
 
-WriteLiteral("\">\r\n    <div class=\"button-bar\">\r\n        <input type=\"button\" id=\"");
+WriteLiteral("\">\r\n    <div class=\"sf-button-bar\">\r\n        <input type=\"button\" id=\"");
 
 
                             Write(Model.Compose("btnOk"));
 
-WriteLiteral("\" class=\"query-button ok-button\" value=\"OK\" ");
+WriteLiteral("\" class=\"sf-query-button sf-ok-button\" value=\"OK\" ");
 
 
-                                                                                                Write(ViewData[ViewDataKeys.OnOk] != null ? Html.Raw("onclick=\"" + ViewData[ViewDataKeys.OnOk] + "\"") : null);
+                                                                                                      Write(ViewData[ViewDataKeys.OnOk] != null ? Html.Raw("onclick=\"" + ViewData[ViewDataKeys.OnOk] + "\"") : null);
 
-WriteLiteral(" />\r\n    </div>\r\n    <div class=\"popup-body\">\r\n");
+WriteLiteral(" />\r\n    </div>\r\n    <div class=\"sf-popup-body\">\r\n");
 
 
            Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString(), Model);

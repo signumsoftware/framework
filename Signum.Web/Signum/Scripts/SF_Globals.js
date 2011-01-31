@@ -295,28 +295,61 @@ SF.registerModule("Globals", function () {
     };
 
     SF.Dropdowns =
-{
-    toggle: function (event, elem) {
-        var $elem = $(elem),
-        clss = "open",
-        opened = $elem.hasClass(clss);
+    {
+        toggle: function (event, elem) {
+            var $elem = $(elem),
+            clss = "sf-open",
+            opened = $elem.hasClass(clss);
 
-        //SF.dropdowns.closeOpened();     //close opened
+            //SF.dropdowns.closeOpened();     //close opened
 
-        if (opened) {      //was opened, close
-            $elem.removeClass(clss);
+            if (opened) {      //was opened, close
+                $elem.removeClass(clss);
+            }
+            else {
+                $(".sf-dropdown").removeClass(clss);
+                $elem.addClass(clss);
+            }
+            SF.stopPropagation(event);
         }
-        else {
-            $(".dropdown").removeClass("open");
-            $elem.addClass(clss);
+    };
+
+    SF.Blocker = (function () {
+
+        var blocked = false,
+            $elem;
+
+        function isEnabled() {
+            return blocked;
         }
-        SF.stopPropagation(event);
-    }
-};
+
+        function enable() {
+            blocked = true;
+            $elem =
+                $("<div/>", {
+                    "class": "sf-ui-blocker",
+                    "width": "300%",
+                    "height": "300%"
+                }).appendTo($("body"));
+        }
+
+        function disable() {
+            blocked = false;
+            $elem.remove();
+        }
+
+        return {
+            isEnabled: isEnabled,
+            enable: enable,
+            disable: disable
+        };
+
+    })();
+
 
     $(function () {
         $("body").click(function (e) {
-            $(".dropdown").removeClass("open");
+            $(".sf-dropdown").removeClass("sf-open");
         });
     });
 
@@ -385,8 +418,7 @@ SF.registerModule("Globals", function () {
 
             alert(lang.signum.error + ": " + error);
 
-            uiBlocked = false;
-            $(".uiBlocker").remove();
+            SF.Blocker.disable();
         });
     });
 
@@ -394,7 +426,7 @@ SF.registerModule("Globals", function () {
     $(function () {
         $("body").bind("sf-new-content", function (e, $newContent) {
             //buttons
-            $newContent.find(".entity-button, .query-button, .sf-line-button, .sf-chooser-button").each(function (i, val) {
+            $newContent.find(".sf-entity-button, .sf-query-button, .sf-line-button, .sf-chooser-button").each(function (i, val) {
                 var $txt = $(val);
                 var data = $txt.data();
                 $txt.button({ text: (!("text" in data) || SF.isTrue(data.text)), icons: { primary: data.icon, secondary: data["icon-secondary"]} });
@@ -407,7 +439,7 @@ SF.registerModule("Globals", function () {
             });
 
             //dropdown
-            $newContent.find(".dropdown .menu-button")
+            $newContent.find(".sf-dropdown .sf-menu-button")
             .addClass("ui-autocomplete ui-menu ui-widget ui-widget-content ui-corner-all")
             .find("li")
             .addClass("ui-menu-item")
@@ -415,7 +447,7 @@ SF.registerModule("Globals", function () {
             .addClass("ui-corner-all");
 
             //autocomplete
-            $newContent.find(".entity-autocomplete").each(function (i, val) {
+            $newContent.find(".sf-entity-autocomplete").each(function (i, val) {
                 var $txt = $(val);
                 var data = $txt.data();
                 SF.entityAutocomplete($txt, { delay: 200, types: data.types, url: data.url, count: 5 });

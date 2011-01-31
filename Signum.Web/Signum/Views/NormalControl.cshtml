@@ -5,13 +5,17 @@
     @Html.AntiForgeryToken()
     @Html.Hidden(ViewDataKeys.TabId, ViewData[ViewDataKeys.TabId])
     @Html.Hidden(ViewDataKeys.PartialViewName, ViewData[ViewDataKeys.PartialViewName])
-    <span class="typeNiceName">@Navigator.Manager.GetTypeTitle(Model.UntypedValue as ModifiableEntity)</span>
-    <span class="title">@(ViewBag.Title)</span>
+    <span class="sf-type-nice-name">@Navigator.Manager.GetTypeTitle(Model.UntypedValue as ModifiableEntity)</span>
+     @if(string.IsNullOrEmpty(ViewBag.Title))
+     {
+         ViewBag.Title = Model.UntypedValue.TryToString();
+     }
+    <span class="sf-entity-title">@(ViewBag.Title)</span>
 </h2>
-<div class="button-bar">
+<div class="sf-button-bar">
     @if (Model != null && Navigator.Manager.ShowOkSave(Model.UntypedValue.GetType(), false))
     {
-        <a id="ebSave" class="entity-button save" onclick="javascript:new SF.Validator({controllerUrl:'@Url.SignumAction("TrySave")'}).trySave();">@Resources.Save</a>  
+        <a id="ebSave" class="sf-entity-button sf-save" onclick="javascript:new SF.Validator({controllerUrl:'@Url.SignumAction("TrySave")'}).trySave();">@Resources.Save</a>  
     }
     @ButtonBarEntityHelper.GetForEntity(this.ViewContext, (ModifiableEntity)Model.UntypedValue, ViewData[ViewDataKeys.PartialViewName].ToString(), Model.ControlID).ToString(Html)
 </div>
@@ -21,6 +25,6 @@
     @Html.ValidationSummaryAjax()
     @Html.NormalPageHeader()
 </div>
-<div id="divMainControl" class="divMainControl">
+<div id="divMainControl" class="sf-main-control">
     @{ Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString(), Model);}
 </div>

@@ -31,13 +31,13 @@ namespace Signum.Web
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            using (entityCombo.ShowFieldDiv && !entityCombo.OnlyValue ? sb.Surround(new HtmlTag("div").Class("field")): null)
-            using (entityCombo.ValueFirst ? sb.Surround(new HtmlTag("div").Class("valueFirst")) : null)
+            using (entityCombo.ShowFieldDiv && !entityCombo.OnlyValue ? sb.Surround(new HtmlTag("div").Class("sf-field")): null)
+            using (entityCombo.ValueFirst ? sb.Surround(new HtmlTag("div").Class("sf-value-first")) : null)
             {
                 if (!entityCombo.ValueFirst)
                     sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, entityCombo, entityCombo.ControlID));
 
-                using (!entityCombo.OnlyValue ? sb.Surround(new HtmlTag("div").Class("value-container")) : null)
+                using (!entityCombo.OnlyValue ? sb.Surround(new HtmlTag("div").Class("sf-value-container")) : null)
                 {
                     sb.AddLine(helper.HiddenEntityInfo(entityCombo));
 
@@ -47,7 +47,7 @@ namespace Signum.Web
                         sb.AddLine(helper.Div(entityCombo.Compose(EntityBaseKeys.Entity), null, "", new Dictionary<string, object> { { "style", "display:none" } }));
 
                     if (entityCombo.ReadOnly)
-                        sb.AddLine(helper.Span(entityCombo.ControlID, entityCombo.UntypedValue.TryToString(), "valueLine"));
+                        sb.AddLine(helper.Span(entityCombo.ControlID, entityCombo.UntypedValue.TryToString(), "sf-value-line"));
                     else
                     {
                         List<SelectListItem> items = new List<SelectListItem>();
@@ -68,7 +68,7 @@ namespace Signum.Web
                                 );
                         }
 
-                        entityCombo.ComboHtmlProperties.AddCssClass("valueLine");
+                        entityCombo.ComboHtmlProperties.AddCssClass("sf-value-line");
 
                         if (entityCombo.ComboHtmlProperties.ContainsKey("onchange"))
                             throw new InvalidOperationException("EntityCombo cannot have onchange html property, use onEntityChanged instead");
@@ -77,7 +77,7 @@ namespace Signum.Web
 
                         if (entityCombo.Size > 0)
                         {
-                            entityCombo.ComboHtmlProperties.AddCssClass("entityList");
+                            entityCombo.ComboHtmlProperties.AddCssClass("sf-entity-list");
                             entityCombo.ComboHtmlProperties.Add("size", Math.Min(entityCombo.Size, items.Count - 1));
                         }
 
@@ -101,9 +101,6 @@ namespace Signum.Web
                 if (entityCombo.ValueFirst)
                     sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, entityCombo, entityCombo.ControlID));
             }
-
-            if (!entityCombo.OnlyValue)
-                sb.AddLine(EntityBaseHelper.BreakLineDiv(helper, entityCombo));
 
             return sb.ToHtml();
         }

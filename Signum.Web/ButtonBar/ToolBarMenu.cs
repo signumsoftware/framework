@@ -17,7 +17,7 @@ namespace Signum.Web
         {
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            using (sb.Surround(new HtmlTag("ul").Class("menu-button")))
+            using (sb.Surround(new HtmlTag("ul").Class("sf-menu-button")))
                 if (Items != null)
                 {
                     foreach (ToolBarButton tbb in Items)
@@ -28,17 +28,15 @@ namespace Signum.Web
             HtmlProps["data-icon-secondary"] = "ui-icon-triangle-1-s";
 
             return helper.Div(Id,
-                Text.EncodeHtml().Concat(sb.ToHtml()), DivCssClass + " dropdown", HtmlProps);
+                Text.EncodeHtml().Concat(sb.ToHtml()), DivCssClass + " sf-dropdown", HtmlProps);
         }
     }
 
     public class ToolBarSeparator : ToolBarButton
     {
-        public static string DefaultMenuSeparatorCssClass = "toolbar-menu-separator";
-
         public override MvcHtmlString ToHtml(HtmlHelper helper)
         {
-            return helper.Div("", null, DivCssClass.HasText() ? DivCssClass : DefaultMenuSeparatorCssClass);
+            return helper.Div("", null, DivCssClass.HasText() ? DivCssClass : "sf-toolbar-menu-separator");
         }
     }
 }

@@ -25,7 +25,7 @@ namespace Signum.Web
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            using (sb.Surround(new HtmlTag("div").Class("EntityLineDetail")))
+            using (sb.Surround(new HtmlTag("div").Class("sf-entity-line-detail")))
             {
                 sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, entityDetail));
 
@@ -40,8 +40,6 @@ namespace Signum.Web
                 sb.AddLine(EntityBaseHelper.CreateButton(helper, entityDetail));
                 sb.AddLine(EntityBaseHelper.FindButton(helper, entityDetail));
                 sb.AddLine(EntityBaseHelper.RemoveButton(helper, entityDetail));
-
-                sb.AddLine(EntityBaseHelper.BreakLineDiv(helper, entityDetail));
 
                 MvcHtmlString controlHtml = null;
                 if (entityDetail.UntypedValue != null)

@@ -86,10 +86,10 @@ WriteLiteral("\r\n");
  using (Html.BeginForm())
 {
 
-WriteLiteral("    <h2>\r\n        <span class=\"title\">");
+WriteLiteral("    <h2>\r\n        <span class=\"sf-entity-title\">");
 
 
-                        Write(ViewBag.Title);
+                                  Write(ViewBag.Title);
 
 WriteLiteral("</span>\r\n    </h2>\r\n");
 
