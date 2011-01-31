@@ -16,8 +16,7 @@ namespace Signum.Web.PortableAreas
         public TimeSpan CacheDuration = TimeSpan.FromDays(10);
         public byte[] Compressed { get; private set; }
         public byte[] Uncompressed { get; private set; }
-        public bool IsText;
-
+        
         public StaticContentResult(byte[] uncompressedContent, string fileName)
         {
             this.ContentType = MimeType.FromFileName(fileName);
@@ -48,10 +47,10 @@ namespace Signum.Web.PortableAreas
             response.AppendHeader("Content-Length", bytes.Length.ToString());
             if (canGZip)
                 response.AppendHeader("Content-Encoding", "gzip");
-            else if (IsText)
-            {
-                response.ContentEncoding = Encoding.Unicode;
-            }
+            //else if (IsText)
+            //{
+            //    response.ContentEncoding = Encoding.Unicode;
+            //}
 
             response.Cache.SetLastModified(ScriptHtmlHelper.Manager.LastModified);
 
