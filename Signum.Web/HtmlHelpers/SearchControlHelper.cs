@@ -232,7 +232,7 @@ namespace Signum.Web
                     EntityCombo ec = new EntityCombo(filterOption.Token.Type, lite, parent, "", filterOption.Token.GetPropertyRoute())
                     {
                         LabelVisible = false,
-                        BreakLine = false,
+                        //BreakLine = false,
                         Implementations = filterOption.Token.Implementations()
                     };
                     EntityBaseHelper.ConfigureEntityBase(ec, filterOption.Token.Type.CleanType());
@@ -243,7 +243,7 @@ namespace Signum.Web
                     EntityLine el = new EntityLine(filterOption.Token.Type, lite, parent, "", filterOption.Token.GetPropertyRoute())
                     {
                         LabelVisible = false,
-                        BreakLine = false,
+                        //BreakLine = false,
                         Create = false,
                         Implementations = filterOption.Token.Implementations()
                     };
