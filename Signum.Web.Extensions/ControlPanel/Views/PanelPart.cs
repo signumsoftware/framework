@@ -83,7 +83,7 @@ WriteLiteral(@"
 {
     using (var sc = tc.SubContext())
     {
-        sc.BreakLine = false;
+        //sc.BreakLine = false;
         sc.ValueFirst = true;
 
         

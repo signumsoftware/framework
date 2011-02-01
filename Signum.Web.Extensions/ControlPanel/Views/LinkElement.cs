@@ -71,17 +71,17 @@ WriteLiteral("\r\n");
 
  using (var tc = Html.TypeContext<LinkElement>())
 {
-    tc.BreakLine = false;
+   // tc.BreakLine = false;
     tc.ValueFirst = true;
 
     
 Write(Html.ValueLine(tc, l => l.Label));
 
-                                     ;
+                                     
     
 Write(Html.ValueLine(tc, l => l.Link));
 
-                                    ;
+                                    
 }
 
         }

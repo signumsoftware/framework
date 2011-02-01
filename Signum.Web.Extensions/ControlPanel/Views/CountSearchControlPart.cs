@@ -71,13 +71,13 @@ WriteLiteral("\r\n");
 
  using (var tc = Html.TypeContext<CountSearchControlPartDN>())
 {
-    tc.BreakLine = true;
+    //tc.BreakLine = true;
     tc.ValueFirst = false;
 
     
 Write(Html.EntityRepeater(tc, p => p.UserQueries));
 
-                                                ;
+                                                
 }
 
         }

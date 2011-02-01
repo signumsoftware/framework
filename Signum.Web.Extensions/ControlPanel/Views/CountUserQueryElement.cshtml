@@ -4,7 +4,7 @@
 
 @using (var tc = Html.TypeContext<CountUserQueryElement>())
 {
-    tc.BreakLine = false;
+    //tc.BreakLine = false;
     tc.ValueFirst = true;
 
     @Html.ValueLine(tc, cuq => cuq.Label)

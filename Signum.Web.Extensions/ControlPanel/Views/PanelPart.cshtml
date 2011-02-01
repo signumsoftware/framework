@@ -15,7 +15,7 @@
 {
     using (var sc = tc.SubContext())
     {
-        sc.BreakLine = false;
+        //sc.BreakLine = false;
         sc.ValueFirst = true;
 
         @Html.ValueLine(sc, pp => pp.Row, vl => vl.ValueHtmlProps["size"] = 2)

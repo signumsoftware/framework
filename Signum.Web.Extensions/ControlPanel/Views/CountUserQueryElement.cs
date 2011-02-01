@@ -71,17 +71,17 @@ WriteLiteral("\r\n");
 
  using (var tc = Html.TypeContext<CountUserQueryElement>())
 {
-    tc.BreakLine = false;
+    //tc.BreakLine = false;
     tc.ValueFirst = true;
 
     
 Write(Html.ValueLine(tc, cuq => cuq.Label));
 
-                                         ;
+                                         
     
 Write(Html.EntityLine(tc, cuq => cuq.UserQuery, el => el.Create = false));
 
-                                                                       ;
+                                                                       
 }
 
         }
