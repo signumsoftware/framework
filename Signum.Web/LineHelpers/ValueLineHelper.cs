@@ -167,10 +167,12 @@ namespace Signum.Web
                     valueLine.ValueHtmlProps.Add("onblur", setTicks + reloadOnChangeFunction);
             }
 
-            valueLine.ValueHtmlProps["size"] = DatePickerOptions.JsDateFormat(valueLine.Format ?? "g").Length + 1;   //time is often rendered with two digits as hours, but format is represented as "H"
+            string jsDataFormat = DatePickerOptions.JsDateFormat(valueLine.Format ?? "g");
+
+            valueLine.ValueHtmlProps["size"] = jsDataFormat.Length + 1;   //time is often rendered with two digits as hours, but format is represented as "H"
 
             if (valueLine.DatePickerOptions.Format == null)
-                valueLine.DatePickerOptions.Format = valueLine.Format;
+                valueLine.DatePickerOptions.Format = jsDataFormat;
 
             bool isDefaultDatepicker = valueLine.DatePickerOptions.IsDefault();
             if (isDefaultDatepicker) //if default, datepicker will be created when processing html in javascript 

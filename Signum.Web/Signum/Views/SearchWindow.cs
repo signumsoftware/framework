@@ -101,7 +101,8 @@ Write(Html.ValidationSummaryAjax());
 
                                  
 
-WriteLiteral("    <div class=\"clear\">\r\n    </div>   \r\n");
+
+WriteLiteral("    <div class=\"clear\"></div>   \r\n");
 
 
 }

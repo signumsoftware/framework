@@ -63,8 +63,10 @@ namespace ASP
         {
 
 
+WriteLiteral("\r\n");
 
-WriteLiteral("<h2>\r\n    ");
+
+WriteLiteral("           \r\n<h2>\r\n    ");
 
 
 Write(Html.AntiForgeryToken());
@@ -92,12 +94,14 @@ WriteLiteral("</span>\r\n");
          ViewBag.Title = Model.UntypedValue.TryToString();
      }
 
+WriteLiteral("</span>\r\n</h2>\r\n<div class=\"button-bar\">\r\n");
 WriteLiteral("    <span class=\"sf-entity-title\">");
 
 
                               Write(ViewBag.Title);
 
 WriteLiteral("</span>\r\n</h2>\r\n<div class=\"sf-button-bar\">\r\n");
+WriteLiteral("</span>\r\n</h2>\r\n\r\n<div class=\"button-bar\">\r\n");
 
 
      if (Model != null && Navigator.Manager.ShowOkSave(Model.UntypedValue.GetType(), false))
@@ -124,7 +128,7 @@ WriteLiteral("    ");
 
 Write(ButtonBarEntityHelper.GetForEntity(this.ViewContext, (ModifiableEntity)Model.UntypedValue, ViewData[ViewDataKeys.PartialViewName].ToString(), Model.ControlID).ToString(Html));
 
-WriteLiteral("\r\n</div>\r\n<div class=\"clearall\">\r\n</div>\r\n<div class=\"validationSummaryAjax\">\r\n  " +
+WriteLiteral("\r\n</div>\r\n\r\n<div class=\"clearall\"></div>\r\n<div class=\"validationSummaryAjax\">\r\n  " +
 "  ");
 
 

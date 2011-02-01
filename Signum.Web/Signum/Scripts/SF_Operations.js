@@ -157,7 +157,7 @@ SF.registerModule("Operations", function () {
             modelState = result.ModelState;
 
             if (SF.isEmpty(this.options.prefix)) {
-                new Validator().showErrors(modelState);
+                new SF.Validator().showErrors(modelState);
             }
             else {
                 var info = this.runtimeInfo();

@@ -94,13 +94,28 @@ WriteLiteral("\r\n\r\n");
  using (Html.BeginForm())
 {
     var ident = Model.UntypedValue as IdentifiableEntity;
+    
 
 WriteLiteral("    <div id=\"divNormalControl\" ");
 
 
                           Write(Html.Raw(ident != null? "data-isnew=\""+ident.IsNew.ToString().ToLower() +  "\"" : ""));
 
+WriteLiteral(">\r\n");
+
+
+       if(string.IsNullOrEmpty(ViewBag.Title))
+        {
+            ViewBag.Title = Model.UntypedValue.TryToString();
+        }
 WriteLiteral(">\r\n     \r\n");
+WriteLiteral(">\r\n");
+
+
+         if(string.IsNullOrEmpty(ViewBag.Title))
+        {
+            ViewBag.Title = Model.UntypedValue.TryToString();
+        }
 
 
            Html.RenderPartial(Navigator.Manager.NormalControlUrl);
@@ -110,7 +125,7 @@ WriteLiteral("    </div>\r\n");
 
     
 
-WriteLiteral("    <div class=\"clear\">\r\n    </div>   \r\n");
+WriteLiteral("    <div class=\"clear\"></div>   \r\n");
 
 
 }
