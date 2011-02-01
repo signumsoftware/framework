@@ -14,58 +14,58 @@ namespace Signum.Windows
 {
     public static class BindExtensions
     {
-        public static T Bind<T>(this T frameworkElement, DependencyProperty property, BindingBase binding) where T : FrameworkElement
+        public static T Bind<T>(this T bindable, DependencyProperty property, BindingBase binding) where T : DependencyObject
         {
-            frameworkElement.SetBinding(property, binding);
-            return frameworkElement;
+            BindingOperations.SetBinding(bindable, property, binding);
+            return bindable;
         }
 
-        public static T Bind<T>(this T frameworkElement, DependencyProperty property, string sourcePath) where T : FrameworkElement
+        public static T Bind<T>(this T bindable, DependencyProperty property, string sourcePath) where T : DependencyObject
         {
-            frameworkElement.SetBinding(property, new Binding(sourcePath));
-            return frameworkElement;
+            BindingOperations.SetBinding(bindable, property, new Binding(sourcePath));
+            return bindable;
         }
 
-        public static T Bind<T, S>(this T frameworkElement, DependencyProperty property, Expression<Func<S, object>> sourcePath) where T : FrameworkElement
+        public static T Bind<T, S>(this T bindable, DependencyProperty property, Expression<Func<S, object>> sourcePath) where T : DependencyObject
         {
-            frameworkElement.SetBinding(property, new Binding(RouteVisitor.GetRoute(sourcePath)));
-            return frameworkElement;
+            BindingOperations.SetBinding(bindable, property, new Binding(RouteVisitor.GetRoute(sourcePath)));
+            return bindable;
         }
 
-        public static T Bind<T>(this T frameworkElement, DependencyProperty property, object source, string sourcePath) where T : FrameworkElement
+        public static T Bind<T>(this T bindable, DependencyProperty property, object source, string sourcePath) where T : DependencyObject
         {
-            frameworkElement.SetBinding(property, new Binding(sourcePath) { Source = source });
-            return frameworkElement;
+            BindingOperations.SetBinding(bindable, property, new Binding(sourcePath) { Source = source });
+            return bindable;
         }
 
-        public static T Bind<T, S>(this T frameworkElement, DependencyProperty property, S source, Expression<Func<S, object>> sourcePath) where T : FrameworkElement
+        public static T Bind<T, S>(this T bindable, DependencyProperty property, S source, Expression<Func<S, object>> sourcePath) where T : DependencyObject
         {
-            frameworkElement.SetBinding(property, new Binding(RouteVisitor.GetRoute(sourcePath)) { Source = source });
-            return frameworkElement;
+            BindingOperations.SetBinding(bindable, property, new Binding(RouteVisitor.GetRoute(sourcePath)) { Source = source });
+            return bindable;
         }
 
-        public static T Bind<T>(this T frameworkElement, DependencyProperty property, string sourcePath, IValueConverter converter) where T : FrameworkElement
+        public static T Bind<T>(this T bindable, DependencyProperty property, string sourcePath, IValueConverter converter) where T : DependencyObject
         {
-            frameworkElement.SetBinding(property, new Binding(sourcePath) { Converter = converter });
-            return frameworkElement;
+            BindingOperations.SetBinding(bindable, property, new Binding(sourcePath) { Converter = converter });
+            return bindable;
         }
 
-        public static T Bind<T, S>(this T frameworkElement, DependencyProperty property, Expression<Func<S, object>> sourcePath, IValueConverter converter) where T : FrameworkElement
+        public static T Bind<T, S>(this T bindable, DependencyProperty property, Expression<Func<S, object>> sourcePath, IValueConverter converter) where T : DependencyObject
         {
-            frameworkElement.SetBinding(property, new Binding(RouteVisitor.GetRoute(sourcePath)) { Converter = converter });
-            return frameworkElement;
+            BindingOperations.SetBinding(bindable, property, new Binding(RouteVisitor.GetRoute(sourcePath)) { Converter = converter });
+            return bindable;
         }
 
-        public static T Bind<T>(this T frameworkElement, DependencyProperty property, object source, string sourcePath, IValueConverter converter) where T : FrameworkElement
+        public static T Bind<T>(this T bindable, DependencyProperty property, object source, string sourcePath, IValueConverter converter) where T : DependencyObject
         {
-            frameworkElement.SetBinding(property, new Binding(sourcePath) { Source = source, Converter = converter });
-            return frameworkElement;
+            BindingOperations.SetBinding(bindable, property, new Binding(sourcePath) { Source = source, Converter = converter });
+            return bindable;
         }
 
-        public static T Bind<T, S>(this T frameworkElement, DependencyProperty property, S source, Expression<Func<S, object>> sourcePath, IValueConverter converter) where T : FrameworkElement
+        public static T Bind<T, S>(this T bindable, DependencyProperty property, S source, Expression<Func<S, object>> sourcePath, IValueConverter converter) where T : DependencyObject
         {
-            frameworkElement.SetBinding(property, new Binding(RouteVisitor.GetRoute(sourcePath)) { Source = source, Converter = converter });
-            return frameworkElement;
+            BindingOperations.SetBinding(bindable, property, new Binding(RouteVisitor.GetRoute(sourcePath)) { Source = source, Converter = converter });
+            return bindable;
         }
     }
 
