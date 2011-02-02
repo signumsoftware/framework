@@ -116,7 +116,7 @@ namespace Signum.Web.Selenium
             {
                 Debug.WriteLine(DateTime.Now < limit);
                 Debug.WriteLine(condition());
-                Thread.Sleep(1000);
+                Thread.Sleep(500);
             }
             Assert.IsTrue(condition());
         }
