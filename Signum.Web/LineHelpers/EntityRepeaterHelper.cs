@@ -71,7 +71,7 @@ namespace Signum.Web
                                     "javascript:new SF.ERep({0}).remove('{1}');".Formato(entityRepeater.ToJS(), itemTC.ControlID),
                                     entityRepeater.RemoveElementLinkText,
                                     "sf-line-button sf-remove",
-                                    null));
+                                    new Dictionary<string, object> { { "data-icon", "ui-icon-circle-close" }, { "data-text", false } }));
 
                 sb.AddLine(EntityBaseHelper.RenderTypeContext(helper, itemTC, RenderMode.ContentInVisibleDiv, entityRepeater));
             }

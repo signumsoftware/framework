@@ -2,8 +2,6 @@
 
 SF.registerModule("Operations", function () {
 
-
-
     SF.OperationManager = function (_options) {
         this.options = $.extend({
             prefix: "",
@@ -75,14 +73,15 @@ SF.registerModule("Operations", function () {
         contextualRequestData: function (newPrefix) {
             SF.log("OperationManager contextualRequestData");
 
-            var serializer = new SF.Serializer()
-            .add({
+            var serializer = new SF.Serializer();
+            serializer.add($("input:hidden[name=" + SF.Keys.antiForgeryToken + "]").serialize());
+            serializer.add({
                 isLite: this.options.isLite,
                 operationFullKey: this.options.operationKey,
                 prefix: newPrefix,
                 oldPrefix: this.options.prefix
             })
-            .add(this.options.requestExtraJsonData);
+            serializer.add(this.options.requestExtraJsonData);
 
             return serializer.serialize();
         },
@@ -109,16 +108,11 @@ SF.registerModule("Operations", function () {
                 async: true,
                 dataType: "html",
                 success: function (operationResult) {
-
-                SF.Blocker.disable();
-
+                    SF.Blocker.disable();
                     if (self.executedSuccessfully(operationResult)) {
-                        var $operationResult = jQuery(operationResult);
-                        $("body").trigger("sf-new-content", [$operationResult]);
                         if (onSuccess != null) {
-                            onSuccess(newPrefix, $operationResult, self.options.parentDiv);
+                            onSuccess(newPrefix, operationResult, self.options.parentDiv);
                         }
-                        $("body").trigger("sf-new-content-post-process", [$operationResult]);
                     }
                     else {
                         SF.Notify.error(lang.signum.error, 2000);
@@ -227,7 +221,7 @@ SF.registerModule("Operations", function () {
                     valOptions.parentDiv = this.options.parentDiv;
                 }
                 if (!SF.EntityIsValid(valOptions, function () { onSuccess.call(self) })) {
-                    return; 
+                    return;
                 }
             }
         };
@@ -325,7 +319,9 @@ SF.registerModule("Operations", function () {
             }
 
             SF.Notify.info(lang.signum.executingOperation);
-            this.operationAjax(this.options.prefix, function () { SF.Notify.info(lang.signum.operationExecuted, 2000); });
+            this.operationAjax(this.options.prefix, function () {
+                SF.Notify.info(lang.signum.operationExecuted, 2000);
+            });
         };
     };
 
@@ -370,6 +366,8 @@ SF.registerModule("Operations", function () {
 
             if (SF.Blocker.isEnabled()) {
                 return false;
+            } else {
+                SF.Blocker.enable();
             }
 
             var self = this;
@@ -383,12 +381,9 @@ SF.registerModule("Operations", function () {
                     SF.Blocker.disable();
 
                     if (self.executedSuccessfully(operationResult)) {
-                        var $operationResult = jQuery(operationResult);
-                        $("body").trigger("sf-new-content", [$operationResult]);
                         if (onSuccess != null) {
-                            onSuccess(newPrefix, $operationResult, self.options.parentDiv);
+                            onSuccess(newPrefix, operationResult, self.options.parentDiv);
                         }
-                        $("body").trigger("sf-new-content-post-process", [$operationResult]);
                     }
                     else {
                         SF.Notify.error(lang.signum.error, 2000);
@@ -420,7 +415,7 @@ SF.registerModule("Operations", function () {
 
         this.defaultSubmit = function () {
             SF.log("ConstructorFromMany defaultSubmit");
-            
+
             if (SF.Blocker.isEnabled()) {
                 return false;
             }
@@ -452,25 +447,22 @@ SF.registerModule("Operations", function () {
             async: false,
             dataType: "html",
             success: function (msg) {
-
-                var $msg = jQuery(msg);
-                $("body").trigger("sf-new-content", [$msg]);
-
                 if (!SF.isEmpty(parentDiv)) {
                     $('#' + parentDiv + ' input[onblur]').attr('onblur', ''); // To avoid Chrome to fire onblur when replacing parentdiv content
-                    $('#' + parentDiv).html('').append($msg);
+                    $('#' + parentDiv).html(msg);
+                    SF.triggerNewContent($('#' + parentDiv));
                 }
                 else {
                     if (SF.isEmpty(prefix)) {
-                        $('#divNormalControl').html('').append($msg);
+                        $('#divNormalControl').html(msg);
+                        SF.triggerNewContent($('#divNormalControl'));
                     }
                     else {
                         $('#' + SF.compose(prefix, "divMainControl") + ' input[onblur]').attr('onblur', ''); // To avoid Chrome to fire onblur when replacing popup content
-                        $('#' + SF.compose(prefix, "divMainControl")).html('').append($msg);
+                        $('#' + SF.compose(prefix, "divMainControl")).html(msg);
+                        SF.triggerNewContent($('#' + SF.compose(prefix, "divMainControl")));
                     }
                 }
-
-                $("body").trigger("sf-new-content-post-process", [$msg]);
             }
         });
     };
@@ -480,84 +472,88 @@ SF.registerModule("Operations", function () {
         $("." + clss).removeClass(clss);
     };
 
-    SF.opOnSuccessDispatcher = function (prefix, $operationResult, parentDiv) {
+    SF.opOnSuccessDispatcher = function (prefix, operationResult, parentDiv) {
         SF.log("OperationExecutor OpDefaultOnSuccess");
         SF.opDisableCtxmenu();
 
-        if ($operationResult === null) {
+        if (SF.isEmpty(operationResult)) {
             return null;
         }
 
+        var $result = $(operationResult);
         var newPopupId = SF.compose(prefix, "panelPopup");
-        var hasNewPopup = $("#" + newPopupId, $operationResult).length !== 0;
+        var hasNewPopup = $("#" + newPopupId, $result).length !== 0;
+
         //If result is a NormalControl, or an already opened popup => ReloadContent
         if (!hasNewPopup || (hasNewPopup && $("#" + newPopupId + ":visible").length !== 0)) {
-            SF.opReloadContent(prefix, $operationResult, parentDiv);
+            SF.opReloadContent(prefix, operationResult, parentDiv);
         }
         else {
-            SF.opOpenPopup(prefix, $operationResult);
+            SF.opOpenPopup(prefix, operationResult);
         }
     };
 
-    SF.opReloadContent = function (prefix, $operationResult, parentDiv) {
+    SF.opReloadContent = function (prefix, operationResult, parentDiv) {
         SF.log("OperationExecutor OpReloadContent");
         SF.opDisableCtxmenu();
         if (SF.isEmpty(prefix)) { //NormalWindow
-
             var $elem = SF.isEmpty(parentDiv) ? $("#divNormalControl") : $("#" + parentDiv);
-            $elem.html('').append($operationResult);
+            $elem.html(operationResult);
+            SF.triggerNewContent($elem);
         }
         else { //PopupWindow
             new SF.ViewNavigator({
                 prefix: prefix,
                 containerDiv: SF.compose(prefix, "externalPopupDiv")
-            }).viewSave($operationResult);
+            }).viewSave(operationResult);
         }
         SF.Notify.info(lang.signum.operationExecuted, 2000);
     };
 
-    SF.opOpenPopup = function (prefix, $operationResult) {
+    SF.opOpenPopup = function (prefix, operationResult) {
         SF.log("OperationExecutor OpOpenPopup");
         SF.opDisableCtxmenu();
-        new SF.ViewNavigator({ prefix: prefix }).showCreateSave($operationResult);
+        new SF.ViewNavigator({ prefix: prefix }).showCreateSave(operationResult);
         SF.Notify.info(lang.signum.operationExecuted, 2000);
     };
 
-    SF.opOpenPopupNoDefaultOk = function (prefix, $operationResult) {
+    SF.opOpenPopupNoDefaultOk = function (prefix, operationResult) {
         SF.log("OperationExecutor OpOpenPopupNoDefaultOk");
         SF.opDisableCtxmenu();
-        new SF.ViewNavigator({ prefix: prefix, onOk: function () { return false; } }).showCreateSave($operationResult);
+        new SF.ViewNavigator({ prefix: prefix, onOk: function () { return false; } }).showCreateSave(operationResult);
         SF.Notify.info(lang.signum.operationExecuted, 2000);
     };
 
-    SF.opNavigate = function (prefix, $operationResult) {
-        SF.submit($operationResult.html());
+    SF.opNavigate = function (prefix, operationResult) {
+        SF.submit(operationResult);
     };
 
-    SF.opMarkCellOnSuccess = function (prefix, $operationResult) {
+    SF.opMarkCellOnSuccess = function (prefix, operationResult) {
         SF.log("OperationExecutor OpMarkCellOnSuccess");
         $(".sf-ctxmenu-active")
-            .addClass("sf-entity-ctxmenu-" + ($operationResult === null ? "success" : "error"))
+            .addClass("sf-entity-ctxmenu-" + (SF.isEmpty(operationResult) ? "success" : "error"))
             .removeClass("sf-ctxmenu-active");
 
         SF.Notify.info(lang.signum.operationExecuted, 2000);
     };
 
-    SF.opContextualOnSuccess = function (prefix, $operationResult) {
+    SF.opContextualOnSuccess = function (prefix, operationResult) {
         SF.log("OperationExecutor OpContextualOnSuccess");
         SF.opDisableCtxmenu();
-        if ($operationResult === null) {
+        if (SF.isEmpty(operationResult)) {
             return null;
         }
 
         var newPopupId = SF.compose(prefix, "panelPopup");
-        var hasNewPopup = $("#" + newPopupId, $operationResult).length !== 0;
+        var $result = $(operationResult);
+        var hasNewPopup = $("#" + newPopupId, $result).length !== 0;
         //If result is a NormalControl => Load it
         if (hasNewPopup) {
-            SF.opOpenPopup(prefix, $operationResult)
+            SF.opOpenPopup(prefix, operationResult)
         }
         else {
-            $("form").html('').append($operationResult);
+            $("form").html(operationResult);
+            SF.triggerNewContent($("form"));
             SF.Notify.info(lang.signum.operationExecuted, 2000);
         }
     };

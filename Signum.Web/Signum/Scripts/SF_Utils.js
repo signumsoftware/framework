@@ -405,5 +405,9 @@ SF.LocalStorage = (function () {
             getItem: getItem,
             setItem: setItem
         };
-})();
+    })();
+
+    SF.triggerNewContent = function ($source) {
+        $("body").trigger("sf-new-content", [$source]);
+    }
 }

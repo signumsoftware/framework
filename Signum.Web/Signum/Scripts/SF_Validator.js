@@ -69,12 +69,14 @@ SF.registerModule("Validator", function () {
                     else {
                         if (SF.isEmpty(self.valOptions.parentDiv)) {
                             $("#content").html(msg.substring(msg.indexOf("<form"), msg.indexOf("</form>") + 7));
+                            SF.triggerNewContent($("#content"));
                         }
                         else {
                             $("#" + self.valOptions.parentDiv).html(msg.substring(msg.indexOf("<form"), msg.indexOf("</form>") + 7));
+                            SF.triggerNewContent($("#" + self.valOptions.parentDiv));
                         }
                         returnValue = true;
-                        SF.Notify.error(lang.signum.saved, 2000);
+                        SF.Notify.info(lang.signum.saved, 2000);
                     }
                 }
             });

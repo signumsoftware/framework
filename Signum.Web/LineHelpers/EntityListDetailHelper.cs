@@ -66,7 +66,7 @@ namespace Signum.Web
             }
 
             if (listDetail.DetailDiv == defaultDetailDiv)
-                sb.AddLine(helper.Div(listDetail.DetailDiv, null, "detail"));
+                sb.AddLine(helper.Div(listDetail.DetailDiv, null, "sf-entity-list-detail"));
 
             if (listDetail.UntypedValue != null && ((IList)listDetail.UntypedValue).Count > 0)
                 sb.AddLine(MvcHtmlString.Create("<script type=\"text/javascript\">\n" +

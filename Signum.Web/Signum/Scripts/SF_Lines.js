@@ -103,10 +103,7 @@ SF.registerModule("Lines", function () {
             var template = window[SF.compose(this.options.prefix, "sfTemplate")];
             if (!SF.isEmpty(template)) { //Template pre-loaded: In case of a list, it will be created with "_0" itemprefix => replace it with the current one
                 template = template.replace(new RegExp(SF.compose(this.options.prefix, "0"), "gi"), viewOptions.prefix);
-                var $template = $(template);
-                $("body").trigger("sf-new-content", [$template]);
-                new SF.ViewNavigator(viewOptions).showCreateOk($template);
-                $("body").trigger("sf-new-content-post-process", [$template]);
+                new SF.ViewNavigator(viewOptions).showCreateOk(template);
             }
             else
                 new SF.ViewNavigator(viewOptions).createOk();
@@ -327,10 +324,8 @@ SF.registerModule("Lines", function () {
             var viewOptions = this.viewOptionsForCreating(_viewOptions);
             var template = window[SF.compose(this.options.prefix, "sfTemplate")];
             if (!SF.isEmpty(template)) { //Template pre-loaded: EmbeddedEntity
-                var $template = $(template);
-                $("body").trigger("sf-new-content", [$template]);
-                $('#' + viewOptions.containerDiv).html('').append($template);
-                $("body").trigger("sf-new-content-post-process", [$template]);
+                $('#' + viewOptions.containerDiv).html(template);
+                SF.triggerNewContent($('#' + viewOptions.containerDiv));
             }
             else {
                 new SF.ViewNavigator(viewOptions).viewEmbedded();
@@ -704,10 +699,7 @@ SF.registerModule("Lines", function () {
             var template = window[SF.compose(this.options.prefix, "sfTemplate")];
             if (!SF.isEmpty(template)) { //Template pre-loaded (Embedded Entity): It will be created with "_0" itemprefix => replace it with the current one
                 template = template.replace(new RegExp(SF.compose(this.options.prefix, "0"), "gi"), viewOptions.prefix);
-                var $template = $(template);
-                $("body").trigger("sf-new-content", [$template]);
-                this.onItemCreated($template, viewOptions);
-                $("body").trigger("sf-new-content-post-process", [$template]);
+                this.onItemCreated(template, viewOptions);
             }
             else {
                 var self = this;
@@ -730,19 +722,19 @@ SF.registerModule("Lines", function () {
             }, _viewOptions);
         };
 
-        this.onItemCreated = function ($newHtml, viewOptions) {
+        this.onItemCreated = function (newHtml, viewOptions) {
             SF.log("ERep onItemCreated");
             if (SF.isEmpty(viewOptions.type)) {
                 throw "ViewOptions type parameter must not be null in ERep onItemCreated";
             }
 
             var itemPrefix = viewOptions.prefix;
-            this.newRepItem($newHtml, viewOptions.type, itemPrefix);
+            this.newRepItem(newHtml, viewOptions.type, itemPrefix);
             this.fireOnEntityChanged();
             this.setItemTicks(itemPrefix);
         };
 
-        this.newRepItem = function ($newHtml, runtimeType, itemPrefix) {
+        this.newRepItem = function (newHtml, runtimeType, itemPrefix) {
             SF.log("ERep newRepItem");
             var listInfo = this.staticInfo();
             var itemInfoValue = this.itemRuntimeInfo(itemPrefix).createValue(runtimeType, '', 'n', '');
@@ -755,8 +747,10 @@ SF.registerModule("Lines", function () {
                 "</div>" + //sfEntity
                 "</div>" //sfRepeaterItem          
                 );
-            $div.find("#" + SF.compose(itemPrefix, this.entity)).append($newHtml);
+
             $(this.pf(this.itemsContainer)).append($div);
+            $("#" + SF.compose(itemPrefix, this.entity)).html(newHtml);
+            SF.triggerNewContent($("#" + SF.compose(itemPrefix, this.entity)));
         };
 
         this.viewOptionsForViewing = function (_viewOptions, itemPrefix) { //Used in onFindingOk
@@ -854,10 +848,8 @@ SF.registerModule("Lines", function () {
             var template = window[SF.compose(this.options.prefix, "sfTemplate")];
             if (!SF.isEmpty(template)) { //Template pre-loaded (Embedded Entity): It will be created with "_0" itemprefix => replace it with the current one
                 template = template.replace(new RegExp(SF.compose(this.options.prefix, "0"), "gi"), viewOptions.prefix);
-                var $template = $(template);
-                $("body").trigger("sf-new-content", [$template]);
-                $('#' + viewOptions.containerDiv).html('').append($template);
-                $("body").trigger("sf-new-content-post-process", [$template]);
+                $('#' + viewOptions.containerDiv).html(template);
+                SF.triggerNewContent($('#' + viewOptions.containerDiv));
             }
             else {
                 new SF.ViewNavigator(viewOptions).viewEmbedded();

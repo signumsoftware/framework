@@ -33,7 +33,7 @@ SF.registerModule("ViewNavigator", function () {
             if (this.isLoaded())
                 return this.showViewOk(null);
             var self = this;
-            this.callServer(function ($controlHtml) { self.showViewOk($controlHtml); });
+            this.callServer(function (controlHtml) { self.showViewOk(controlHtml); });
         },
 
         createOk: function () {
@@ -41,7 +41,7 @@ SF.registerModule("ViewNavigator", function () {
             if (!SF.isEmpty(this.viewOptions.containerDiv))
                 throw "ContainerDiv cannot be specified to Navigator on createOk mode";
             var self = this;
-            this.callServer(function ($controlHtml) { self.showCreateOk($controlHtml); });
+            this.callServer(function (controlHtml) { self.showCreateOk(controlHtml); });
         },
 
         viewEmbedded: function () {
@@ -49,31 +49,31 @@ SF.registerModule("ViewNavigator", function () {
             if (SF.isEmpty(this.viewOptions.containerDiv))
                 throw "No containerDiv was specified to Navigator on viewEmbedded mode";
             var self = this;
-            this.callServer(function ($controlHtml) { $('#' + self.viewOptions.containerDiv).html($controlHtml); });
+            this.callServer(function (controlHtml) { $('#' + self.viewOptions.containerDiv).html(controlHtml); });
         },
 
         createEmbedded: function (onHtmlReceived) {
             SF.log("ViewNavigator createEmbedded");
             if (!SF.isEmpty(this.viewOptions.containerDiv))
                 throw "ContainerDiv cannot be specified to Navigator on createEmbedded mode";
-            this.callServer(function ($controlHtml) { onHtmlReceived($controlHtml) });
+            this.callServer(function (controlHtml) { onHtmlReceived(controlHtml) });
         },
 
-        viewSave: function ($html) {
+        viewSave: function (html) {
             SF.log("ViewNavigator viewSave");
             if (SF.isEmpty(this.viewOptions.containerDiv))
                 throw "No ContainerDiv was specified to Navigator on viewSave mode";
             if ($('#' + this.viewOptions.containerDiv).length == 0)
                 $("body").append(SF.hiddenDiv(this.viewOptions.containerDiv, null));
-            if ($html != null)
-                $('#' + this.viewOptions.containerDiv).html('').append($html);
+            if (!SF.isEmpty(html))
+                $('#' + this.viewOptions.containerDiv).html(html);
             if (this.isLoaded())
                 return this.showViewSave();
             else {
                 if (SF.isEmpty(this.viewOptions.type) && new SF.RuntimeInfo(this.viewOptions.prefix).find().length == 0)
                     throw "Type must be specified to Navigator on viewSave mode";
                 var self = this;
-                this.callServer(function ($controlHtml) { self.showViewSave($controlHtml); });
+                this.callServer(function (controlHtml) { self.showViewSave(controlHtml); });
             }
         },
 
@@ -85,7 +85,7 @@ SF.registerModule("ViewNavigator", function () {
                 throw "Type must be specified to Navigator on createSave mode";
             var self = this;
             this.viewOptions.prefix = SF.compose("New", this.viewOptions.prefix);
-            this.callServer(function ($controlHtml) { self.showCreateSave($controlHtml); });
+            this.callServer(function (controlHtml) { self.showCreateSave(controlHtml); });
         },
 
         navigate: function () {
@@ -103,17 +103,18 @@ SF.registerModule("ViewNavigator", function () {
             return !SF.isEmpty($('#' + this.viewOptions.containerDiv).html());
         },
 
-        showViewOk: function ($newHtml) {
+        showViewOk: function (newHtml) {
             SF.log("ViewNavigator showViewOk");
 
-            if ($newHtml == null)
-                $newHtml = $($('#' + this.viewOptions.containerDiv).html()); //preloaded
+            if (SF.isEmpty(newHtml))
+                newHtml = $('#' + this.viewOptions.containerDiv).html(); //preloaded
 
             //Backup current Html (for cancel scenarios)
             this.backup = SF.cloneContents(this.viewOptions.containerDiv);
             $('#' + this.viewOptions.containerDiv).html(''); //avoid id-collision
 
-            $("body").append(SF.hiddenDiv(this.tempDivId(), $newHtml));
+            $("body").append(SF.hiddenDiv(this.tempDivId(), newHtml));
+            SF.triggerNewContent($("#" + this.tempDivId()));
 
             var self = this;
             $("#" + this.tempDivId()).popup({
@@ -122,10 +123,13 @@ SF.registerModule("ViewNavigator", function () {
             });
         },
 
-        showViewSave: function ($newHtml) {
+        showViewSave: function (newHtml) {
             SF.log("ViewNavigator showViewSave");
-            if ($newHtml != null)
-                $('#' + this.viewOptions.containerDiv).html($newHtml);
+            if (!SF.isEmpty(newHtml)) {
+                $('#' + this.viewOptions.containerDiv).html(newHtml);
+            }
+            
+            SF.triggerNewContent($("#" + this.viewOptions.containerDiv));
 
             var self = this;
             $("#" + this.viewOptions.containerDiv).popup({
@@ -134,12 +138,15 @@ SF.registerModule("ViewNavigator", function () {
             });
         },
 
-        showCreateOk: function ($newHtml) {
+        showCreateOk: function (newHtml) {
             SF.log("ViewNavigator showCreateOk");
-            if ($newHtml != null)
-                $("body").append(SF.hiddenDiv(this.tempDivId(), $newHtml));
-
             var tempDivId = this.tempDivId();
+
+            if (!SF.isEmpty(newHtml)) {
+                $("body").append(SF.hiddenDiv(tempDivId, newHtml));
+            }
+
+            SF.triggerNewContent($("#" + tempDivId));
 
             var self = this;
             $("#" + tempDivId).popup({
@@ -148,13 +155,15 @@ SF.registerModule("ViewNavigator", function () {
             });
         },
 
-        showCreateSave: function ($newHtml) {
+        showCreateSave: function (newHtml) {
             SF.log("ViewNavigator showCreateSave");
-            if ($newHtml != null) {
-                $("body").append(SF.hiddenDiv(this.tempDivId(), $newHtml));
+            var tempDivId = this.tempDivId();
+
+            if (!SF.isEmpty(newHtml)) {
+                $("body").append(SF.hiddenDiv(tempDivId, newHtml));
             }
 
-            var tempDivId = this.tempDivId();
+            SF.triggerNewContent($("#" + tempDivId));
 
             var self = this;
             $("#" + tempDivId).popup({
@@ -193,10 +202,7 @@ SF.registerModule("ViewNavigator", function () {
                 async: false,
                 dataType: "html",
                 success: function (newHtml) {
-                    var $newHtml = jQuery(newHtml);
-                    $("body").trigger("sf-new-content", [$newHtml]);
-                    onSuccess($newHtml);
-                    $("body").trigger("sf-new-content-post-process", [$newHtml]);
+                    onSuccess(newHtml);
                 }
             });
         },
@@ -297,9 +303,8 @@ SF.registerModule("ViewNavigator", function () {
             dataType: "html",
             success: function (chooserHTML) {
                 var $chooserHTML = jQuery(chooserHTML);
-                $("body").trigger("sf-new-content", [$chooserHTML]);
                 $("body").append(SF.hiddenDiv(tempDivId, $chooserHTML));
-                $("body").trigger("sf-new-content-post-process", [$chooserHTML]);
+                SF.triggerNewContent($("#" + tempDivId));
                 //Set continuation for each type button
                 $('#' + tempDivId + " :button").each(function () {
                     $('#' + this.id).unbind('click').click(function () {

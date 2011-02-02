@@ -95,7 +95,11 @@ WriteLiteral("</span>\r\n    </h2>\r\n");
 
 
      Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString());
+    
+    
+Write(Html.AntiForgeryToken());
 
+                            
     
 Write(Html.ValidationSummaryAjax());
 

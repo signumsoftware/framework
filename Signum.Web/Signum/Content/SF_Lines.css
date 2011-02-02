@@ -20,7 +20,7 @@
 	min-width:350px;	/* a ver */
 }
 
-.sf-field:after{
+.sf-field:after, .sf-field-list:after{
     content: ".";
     display: block;
     height: 0;
@@ -86,6 +86,7 @@ a.sf-value-line, span.sf-value-line{
     font-size: 11px;
     color: #444;
     padding-left: 2px;
+    width: auto;
 }
 
 .sf-value-container .sf-value-container 

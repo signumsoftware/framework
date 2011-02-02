@@ -25,7 +25,7 @@ namespace Signum.Web
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            using (sb.Surround(new HtmlTag("div").Class("sf-entity-line-detail")))
+            using (sb.Surround(new HtmlTag("div").Class("sf-field sf-entity-line-detail")))
             {
                 sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, entityDetail));
 
