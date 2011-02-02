@@ -1,8 +1,6 @@
-﻿<%@ Control Language="C#" Inherits="System.Web.Mvc.ViewUserControl" %>
-<%@ Import Namespace="Signum.Web" %>
-<%@ Import Namespace="$custommessage$.Entities" %>
+﻿@using $custommessage$.Entities
 
-<%= new WebMenuItem
+@(new WebMenuItem
     {
         Children =
         {
@@ -15,5 +13,4 @@
                 },
             }
         }
-    }.ToString((string)ViewData["current"],"")
-%> 
+    }.ToHtml((string)ViewData["current"],"")) 

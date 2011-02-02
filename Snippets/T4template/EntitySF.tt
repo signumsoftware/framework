@@ -1,17 +1,10 @@
 <#@ template language="C#" HostSpecific="True" #>
 <#@ output extension="ascx" #>
-<#@ import namespace="System.Collections" #>
-<#@ import namespace="System.Reflection" #>
-<%@ Control Language="C#" Inherits="System.Web.Mvc.ViewUserControl" %>
-<%@ Import Namespace="Signum.Web" %>
-<%@ Import Namespace="Signum.Engine" %>
-<%@ Import Namespace="Signum.Entities" %>
-<%@ Import Namespace="Signum.Utilities" %>
 <# Type entityType = ((MvcTextTemplateHost)(Host)).ViewDataType; #>
-<%@ Import Namespace="<#= entityType.Namespace #>" %>
+@using <#= entityType.Namespace #>
 
 <%
-using (var e = Html.TypeContext<<#= entityType.Name #>>()) 
+@using (var e = Html.TypeContext<<#= entityType.Name #>>()) 
 {
 <#
 string[] commonProperties = {"Ticks","Id", "IdOrNull", "ToStr","IsNew","SelfModified","ToStringMethod","Error","Item","Modified","AllowChange"};
@@ -21,15 +14,15 @@ if (Array.IndexOf(commonProperties,pi.Name)>-1)
 continue;
 if (pi.PropertyType.IsValueType || pi.PropertyType == typeof(string)){
 #>
-	Html.ValueLine(e, f => f.<#= pi.Name #>);
+	@Html.ValueLine(e, f => f.<#= pi.Name #>);
 <#} 
 else if (typeof(IList).IsAssignableFrom(pi.PropertyType)) {
 #>
-	Html.EntityList(e, f => f.<#= pi.Name #>);
+	@Html.EntityList(e, f => f.<#= pi.Name #>);
 <#}
 else {
 #>
-	Html.EntityLine(e, f => f.<#= pi.Name #>);
+	@Html.EntityLine(e, f => f.<#= pi.Name #>);
 <#}	
 }#>
 }
