@@ -267,6 +267,7 @@
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>NormalPage.cs</LastGenOutput>
     </None>
+    <Content Include="Signum\Content\reset.css" />
     <Content Include="Signum\Content\SF_Lines.css" />
     <Content Include="Signum\Content\SF_NormalPage.css" />
     <Content Include="Signum\Content\SF_Notify.css" />
@@ -304,7 +305,6 @@
     <Content Include="Signum\Scripts\SF_Autocomplete.js" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Signum\Content\LineStyles.css" />
     <Content Include="Signum\Images\asc.gif" />
     <Content Include="Signum\Images\desc.gif" />
     <Content Include="Signum\Images\dropdown-arrows.png" />
