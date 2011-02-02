@@ -92,7 +92,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Content\reset.css" />
     <Content Include="Content\site.css" />
     <Content Include="Content\smoothness\images\ui-bg_flat_0_aaaaaa_40x100.png" />
     <Content Include="Content\smoothness\images\ui-bg_flat_75_ffffff_40x100.png" />
@@ -107,7 +106,7 @@
     <Content Include="Content\smoothness\images\ui-icons_454545_256x240.png" />
     <Content Include="Content\smoothness\images\ui-icons_888888_256x240.png" />
     <Content Include="Content\smoothness\images\ui-icons_cd0a0a_256x240.png" />
-    <Content Include="Content\smoothness\jquery-ui-1.8.7.custom.css" />
+    <Content Include="Content\smoothness\jquery-ui-1.8.9.custom.css" />
     <Content Include="Global.asax" />
     <Content Include="Images\calendar.png" />
     <Content Include="Scripts\jquery-1.5.min.js" />
