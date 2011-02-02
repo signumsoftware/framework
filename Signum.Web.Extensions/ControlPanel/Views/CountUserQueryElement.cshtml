@@ -4,9 +4,12 @@
 
 @using (var tc = Html.TypeContext<CountUserQueryElement>())
 {
-    //tc.BreakLine = false;
     tc.ValueFirst = true;
 
-    @Html.ValueLine(tc, cuq => cuq.Label)
-    @Html.EntityLine(tc, cuq => cuq.UserQuery, el => el.Create = false)
+    <div class="sf-field">
+        <div class="sf-value-container sf-value-inline">
+            @Html.ValueLine(tc, cuq => cuq.Label)
+            @Html.EntityLine(tc, cuq => cuq.UserQuery, el => el.Create = false)
+        </div>
+    </div>
 }

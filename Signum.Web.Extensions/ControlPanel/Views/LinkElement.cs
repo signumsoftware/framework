@@ -71,17 +71,23 @@ WriteLiteral("\r\n");
 
  using (var tc = Html.TypeContext<LinkElement>())
 {
-   // tc.BreakLine = false;
     tc.ValueFirst = true;
 
-    
-Write(Html.ValueLine(tc, l => l.Label));
 
-                                     
-    
-Write(Html.ValueLine(tc, l => l.Link));
+WriteLiteral("    <div class=\"sf-field\">\r\n        <div class=\"sf-value-container sf-value-inlin" +
+"e\">\r\n            ");
 
-                                    
+
+       Write(Html.ValueLine(tc, l => l.Label));
+
+WriteLiteral("\r\n            ");
+
+
+       Write(Html.ValueLine(tc, l => l.Link));
+
+WriteLiteral("\r\n        </div>\r\n    </div>\r\n");
+
+
 }
 
         }

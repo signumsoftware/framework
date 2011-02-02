@@ -301,7 +301,7 @@ namespace Signum.Web.Selenium
 
         public static string EntityContextMenuSelector(int rowIndexBase1, string prefix)
         {
-            return "{0} .search-ctxmenu".Formato(CellSelector(rowIndexBase1, 1));
+            return "{0} .sf-search-ctxmenu".Formato(CellSelector(rowIndexBase1, 1));
         }
 
         public static void EntityContextMenu(this ISelenium selenium, int rowIndexBase1)

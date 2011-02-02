@@ -83,48 +83,62 @@ WriteLiteral(@"
 {
     using (var sc = tc.SubContext())
     {
-        //sc.BreakLine = false;
         sc.ValueFirst = true;
-
-        
-   Write(Html.ValueLine(sc, pp => pp.Row, vl => vl.ValueHtmlProps["size"] = 2));
-
-                                                                              
-        string colId = null;
-        
-   Write(Html.ValueLine(sc, pp => pp.Column, vl => { vl.ValueHtmlProps["size"] = 2; colId = vl.ControlID; }));
-
-                                                                                                            
-        string fillId = null;
-        
-   Write(Html.ValueLine(sc, pp => pp.Fill, vl => { vl.ValueHtmlProps["onclick"] = "toggleCol(this.id,'" + colId + "');"; fillId = vl.ControlID; }));
-
-                                                                                                                                                  
         
 
-WriteLiteral("    <script type=\"text/javascript\">\r\n        $(document).ready(function () { togg" +
-"leCol(\'");
+WriteLiteral("        <div class=\"sf-field\">\r\n            <div class=\"sf-value-container sf-val" +
+"ue-inline\">\r\n                ");
 
 
-                                              Write(fillId);
+           Write(Html.ValueLine(sc, pp => pp.Row, vl => vl.ValueHtmlProps["size"] = 2));
+
+WriteLiteral("\r\n");
+
+
+                   string colId = null; 
+
+WriteLiteral("                ");
+
+
+           Write(Html.ValueLine(sc, pp => pp.Column, vl => { vl.ValueHtmlProps["size"] = 2; colId = vl.ControlID; }));
+
+WriteLiteral("\r\n");
+
+
+                   string fillId = null; 
+
+WriteLiteral("                ");
+
+
+           Write(Html.ValueLine(sc, pp => pp.Fill, vl => { vl.ValueHtmlProps["onclick"] = "toggleCol(this.id,'" + colId + "');"; fillId = vl.ControlID; }));
+
+WriteLiteral("\r\n        \r\n            <script type=\"text/javascript\">\r\n                $(docume" +
+"nt).ready(function () { toggleCol(\'");
+
+
+                                                      Write(fillId);
 
 WriteLiteral("\', \'");
 
 
-                                                         Write(colId);
+                                                                 Write(colId);
 
-WriteLiteral("\'); });\r\n    </script>\r\n");
+WriteLiteral("\'); });\r\n            </script>\r\n    \r\n                ");
 
 
-    
+           Write(Html.ValueLine(sc, pp => pp.Title));
+
+WriteLiteral("\r\n                ");
+
+
+           Write(Html.EntityLine(sc, pp => pp.Content, el => el.Autocomplete = false));
+
+WriteLiteral("\r\n            </div>\r\n        </div>\r\n");
+
+
         
-   Write(Html.ValueLine(sc, pp => pp.Title));
 
-                                           
         
-   Write(Html.EntityLine(sc, pp => pp.Content, el => el.Autocomplete = false));
-
-                                                                             
     }
 }
 WriteLiteral(" ");

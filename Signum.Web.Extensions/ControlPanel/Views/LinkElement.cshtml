@@ -4,9 +4,12 @@
 
 @using (var tc = Html.TypeContext<LinkElement>())
 {
-   // tc.BreakLine = false;
     tc.ValueFirst = true;
 
-    @Html.ValueLine(tc, l => l.Label)
-    @Html.ValueLine(tc, l => l.Link)
+    <div class="sf-field">
+        <div class="sf-value-container sf-value-inline">
+            @Html.ValueLine(tc, l => l.Label)
+            @Html.ValueLine(tc, l => l.Link)
+        </div>
+    </div>
 }
