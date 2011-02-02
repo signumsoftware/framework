@@ -540,7 +540,7 @@ SF.registerModule("Lines", function () {
             var select = $(this.pf(''));
             if (SF.isEmpty(newToStr))
                 newToStr = "&nbsp;";
-            select.append("\n<option id='" + SF.compose(itemPrefix, SF.Keys.toStr) + "' name='" + SF.compose(itemPrefix, SF.Keys.toStr) + "' value='' class='valueLine'>" + newToStr + "</option>");
+            select.append("\n<option id='" + SF.compose(itemPrefix, SF.Keys.toStr) + "' name='" + SF.compose(itemPrefix, SF.Keys.toStr) + "' value='' class='sf-value-line'>" + newToStr + "</option>");
             select.children('option').attr('selected', false); //Fix for Firefox: Set selected after retrieving the html of the select
             select.children('option:last').attr('selected', true);
         };
