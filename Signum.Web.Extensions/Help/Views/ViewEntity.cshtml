@@ -5,27 +5,22 @@
 @using Signum.Web.Extensions
 @using Signum.Entities.DynamicQuery
 @using Signum.Entities.Operations
-@using Signum.Engine.WikiMarkup
-
 @section head
 {
     @Html.ScriptCss("~/help/Content/help.css")
     @Html.ScriptsJs("~/signum/Scripts/SF_Globals.js")
 }
-
 @{ Html.RenderPartial(HelpClient.Menu);}
-
 @{ EntityHelp eh = (EntityHelp)Model;
    ViewBag.Title = eh.Type.NiceName();
 }
-
 <form action="@HelpLogic.EntityUrl(eh.Type)/Save" id="form-save">
 <div class="grid_16" id="entityName">
     <span class='shortcut'>[e:@eh.Type.Name]</span>
     <h1 title="@eh.Type.Namespace">@eh.Type.NiceName()</h1>
     @Html.TextArea("description", eh.Description, 5, 80, new { @class = "editable" })
     <span class="editor" id="description-editor">
-        @eh.Description.WikiParse(HelpClient.DefaultWikiSettings).Replace("\n", "<p>")
+        @Html.WikiParse(eh.Description, HelpClient.DefaultWikiSettings)
     </span>
 </div>
 <div class="clear">
@@ -67,10 +62,11 @@
                     <span class='shortcut'>[q:@QueryUtils.GetQueryUniqueKey(mq.Key)]</span>
                     <dt>@QueryUtils.GetNiceName(mq.Key)</dt>
                     <dd>
-                        <img src='help/Images/table.gif' title='Ver columnas' style='float: right' onclick="javascript:$(this).siblings('.query-columns').toggle('fast');" />@mq.Value.Info.WikiParse(HelpClient.DefaultWikiSettings)
+                        <img src='help/Images/table.gif' title='Ver columnas' style='float: right' onclick="javascript:$(this).siblings('.query-columns').toggle('fast');" />
+                        @Html.WikiParse(mq.Value.Info, HelpClient.DefaultWikiSettings)
                         @Html.TextArea("q-" + QueryUtils.GetQueryUniqueKey(mq.Key).Replace(".", "_"), mq.Value.UserDescription, new { @class = "editable" })
                         <span class="editor" id="q-@QueryUtils.GetQueryUniqueKey(mq.Key).Replace(".", "_")-editor">
-                            @mq.Value.UserDescription.WikiParse(HelpClient.DefaultWikiSettings).Replace("\n", "<p>")
+                            @Html.WikiParse(mq.Value.UserDescription, HelpClient.DefaultWikiSettings)
                         </span>
                         <div class='query-columns'>
                             <hr />
@@ -89,7 +85,7 @@
                                         </td>
                                         <td>@Html.TextArea("c-" + QueryUtils.GetQueryUniqueKey(mq.Key).Replace(".", "_") + "." + qc.Key, qc.Value.UserDescription, new { @class = "editable" })
                                             <span class="editor" id="qc-@(QueryUtils.GetQueryUniqueKey(mq.Key).Replace(".", "_") + "." + qc.Key)">
-                                                @qc.Value.UserDescription.WikiParse(HelpClient.DefaultWikiSettings).Replace("\n", "<p>")
+                                                @Html.WikiParse(qc.Value.UserDescription, HelpClient.DefaultWikiSettings)
                                             </span>
                                         </td>
                                     </tr>
@@ -113,10 +109,10 @@
                     <span class='shortcut'>[o:@OperationDN.UniqueKey(p.Key)]</span>
                     <dt>@p.Key.NiceToString()</dt>
                     <dd>
-                        @p.Value.Info.WikiParse(HelpClient.DefaultWikiSettings)
+                        @Html.WikiParse(p.Value.Info, HelpClient.DefaultWikiSettings)
                         @Html.TextArea("o-" + OperationDN.UniqueKey(p.Key), p.Value.UserDescription, new { @class = "editable" })
                         <span class="editor" id="o-@OperationDN.UniqueKey(p.Key).Replace(".", "_")-editor">
-                            @p.Value.UserDescription.WikiParse(HelpClient.DefaultWikiSettings).Replace("\n", "<p>")
+                            @Html.WikiParse(p.Value.UserDescription, HelpClient.DefaultWikiSettings)
                         </span>
                     </dd>
                 }

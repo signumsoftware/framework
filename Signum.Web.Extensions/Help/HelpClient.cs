@@ -26,18 +26,20 @@ namespace Signum.Web.Help
 {
     public static class HelpClient
     {
+        public static string ViewPrefix = "~/Help/Views/{0}.cshtml";
+
         //pages        
-        public static string IndexUrl =  "Index";
-        public static string ViewEntityUrl = "ViewEntity";
-        public static string ViewAppendixUrl = "ViewAppendix";
-        public static string ViewNamespaceUrl = "ViewNamespace";
-        public static string TodoUrl = "ViewTodo";
-        public static string SearchResults = "Search";
+        public static string IndexUrl =  ViewPrefix.Formato("Index");
+        public static string ViewEntityUrl = ViewPrefix.Formato("ViewEntity");
+        public static string ViewAppendixUrl = ViewPrefix.Formato("ViewAppendix");
+        public static string ViewNamespaceUrl = ViewPrefix.Formato("ViewNamespace");
+        public static string TodoUrl = ViewPrefix.Formato("ViewTodo");
+        public static string SearchResults = ViewPrefix.Formato("Search");
 
         //controls
-        public static string Menu = "Menu";
-        public static string ViewEntityPropertyUrl = "EntityProperty";
-        public static string NamespaceControlUrl = "NamespaceControl";
+        public static string Menu = ViewPrefix.Formato("Menu");
+        public static string ViewEntityPropertyUrl = ViewPrefix.Formato("EntityProperty");
+        public static string NamespaceControlUrl = ViewPrefix.Formato("NamespaceControl");
 
         public static void Start(string wikiUrl, string imagesFolder)
         {
@@ -87,15 +89,15 @@ namespace Signum.Web.Help
 
         private static void RegisterHelpRoutes()
         {
-            RouteTable.Routes.MapRoute(null, "Help/Appendix/{appendix}/Save", new { controller = "Help", action = "SaveAppendix", appendix = "" });
-            RouteTable.Routes.MapRoute(null, "Help/Namespace/{namespace}/Save", new { controller = "Help", action = "SaveNamespace", @namespace = "" });
-            RouteTable.Routes.MapRoute(null, "Help/{entity}/Save", new { controller = "Help", action = "SaveEntity", entity = "" });
-            RouteTable.Routes.MapRoute(null, "Help/Appendix/{appendix}", new { controller = "Help", action = "ViewAppendix", appendix = "" });
-            RouteTable.Routes.MapRoute(null, "Help/Namespace/{namespace}", new { controller = "Help", action = "ViewNamespace", @namespace = "" });
-            RouteTable.Routes.MapRoute(null, "Help/{entity}", new { controller = "Help", action = "ViewEntity", entity = "" });
+            RouteTable.Routes.MapRoute(null, "Help/Appendix/{appendix}/Save", new { controller = "Help", action = "SaveAppendix"});
+            RouteTable.Routes.MapRoute(null, "Help/Namespace/{namespace}/Save", new { controller = "Help", action = "SaveNamespace" });
+            RouteTable.Routes.MapRoute(null, "Help/Appendix/{appendix}", new { controller = "Help", action = "ViewAppendix"});
+            RouteTable.Routes.MapRoute(null, "Help/Namespace/{namespace}", new { controller = "Help", action = "ViewNamespace" });
             RouteTable.Routes.MapRoute(null, "Help/ViewTodo", new { controller = "Help", action = "ViewTodo" });
             RouteTable.Routes.MapRoute(null, "Help/Search", new { controller = "Help", action = "Search" });
             RouteTable.Routes.MapRoute(null, "Help", new { controller = "Help", action = "Index", });
+            RouteTable.Routes.MapRoute(null, "Help/{entity}/Save", new { controller = "Help", action = "SaveEntity" });
+            RouteTable.Routes.MapRoute(null, "Help/{entity}", new { controller = "Help", action = "ViewEntity", });
         }
 
         public static string WikiUrl;

@@ -16,9 +16,20 @@ using Signum.Web.Extensions;
 using System.Text;
 using Signum.Web.Extensions.Properties;
 using Signum.Engine;
+using Signum.Engine.WikiMarkup;
 
 namespace Signum.Web.Help
 {
+    public static class HelpHelpers
+    {
+        public static MvcHtmlString WikiParse(this HtmlHelper helper, string text, WikiSettings settings)
+        {
+            return MvcHtmlString.Create(WikiParserExtensions.WikiParse(text, settings).Replace("\n", "<p>")); 
+        }
+
+        
+    }
+
     [HandleException, AuthenticationRequired]
     public class HelpController : Controller
     {

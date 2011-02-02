@@ -48,7 +48,6 @@ namespace ASP
     using Signum.Web.Extensions;
     using Signum.Entities.DynamicQuery;
     using Signum.Entities.Operations;
-    using Signum.Engine.WikiMarkup;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Help/Views/ViewEntity.cshtml")]
@@ -76,9 +75,6 @@ namespace ASP
 
 
 
-WriteLiteral("\r\n");
-
-
 DefineSection("head", () => {
 
 WriteLiteral("\r\n    ");
@@ -96,19 +92,17 @@ WriteLiteral("\r\n");
 
 });
 
-WriteLiteral("\r\n\r\n");
+WriteLiteral("\r\n");
 
 
    Html.RenderPartial(HelpClient.Menu);
-
-WriteLiteral("\r\n");
 
 
    EntityHelp eh = (EntityHelp)Model;
    ViewBag.Title = eh.Type.NiceName();
 
 
-WriteLiteral("\r\n<form action=\"");
+WriteLiteral("<form action=\"");
 
 
          Write(HelpLogic.EntityUrl(eh.Type));
@@ -137,7 +131,7 @@ Write(Html.TextArea("description", eh.Description, 5, 80, new { @class = "editab
 WriteLiteral("\r\n    <span class=\"editor\" id=\"description-editor\">\r\n        ");
 
 
-   Write(eh.Description.WikiParse(HelpClient.DefaultWikiSettings).Replace("\n", "<p>"));
+   Write(Html.WikiParse(eh.Description, HelpClient.DefaultWikiSettings));
 
 WriteLiteral("\r\n    </span>\r\n</div>\r\n<div class=\"clear\">\r\n</div>\r\n<div id=\"entityContent\" class" +
 "=\"grid_12\">\r\n");
@@ -205,10 +199,10 @@ WriteLiteral("</dt>\r\n");
 
 WriteLiteral("                    <dd>\r\n                        <img src=\'help/Images/table.gif" +
 "\' title=\'Ver columnas\' style=\'float: right\' onclick=\"javascript:$(this).siblings" +
-"(\'.query-columns\').toggle(\'fast\');\" />");
+"(\'.query-columns\').toggle(\'fast\');\" />\r\n                        ");
 
 
-                                                                                                                                                                        Write(mq.Value.Info.WikiParse(HelpClient.DefaultWikiSettings));
+                   Write(Html.WikiParse(mq.Value.Info, HelpClient.DefaultWikiSettings));
 
 WriteLiteral("\r\n                        ");
 
@@ -223,7 +217,7 @@ WriteLiteral("\r\n                        <span class=\"editor\" id=\"q-");
 WriteLiteral("-editor\">\r\n                            ");
 
 
-                       Write(mq.Value.UserDescription.WikiParse(HelpClient.DefaultWikiSettings).Replace("\n", "<p>"));
+                       Write(Html.WikiParse(mq.Value.UserDescription, HelpClient.DefaultWikiSettings));
 
 WriteLiteral("\r\n                        </span>\r\n                        <div class=\'query-colu" +
 "mns\'>\r\n                            <hr />\r\n                            <table wi" +
@@ -270,7 +264,7 @@ WriteLiteral("\r\n                                            <span class=\"edit
 WriteLiteral("\">\r\n                                                ");
 
 
-                                           Write(qc.Value.UserDescription.WikiParse(HelpClient.DefaultWikiSettings).Replace("\n", "<p>"));
+                                           Write(Html.WikiParse(qc.Value.UserDescription, HelpClient.DefaultWikiSettings));
 
 WriteLiteral("\r\n                                            </span>\r\n                          " +
 "              </td>\r\n                                    </tr>\r\n");
@@ -321,7 +315,7 @@ WriteLiteral("</dt>\r\n");
 WriteLiteral("                    <dd>\r\n                        ");
 
 
-                   Write(p.Value.Info.WikiParse(HelpClient.DefaultWikiSettings));
+                   Write(Html.WikiParse(p.Value.Info, HelpClient.DefaultWikiSettings));
 
 WriteLiteral("\r\n                        ");
 
@@ -336,7 +330,7 @@ WriteLiteral("\r\n                        <span class=\"editor\" id=\"o-");
 WriteLiteral("-editor\">\r\n                            ");
 
 
-                       Write(p.Value.UserDescription.WikiParse(HelpClient.DefaultWikiSettings).Replace("\n", "<p>"));
+                       Write(Html.WikiParse(p.Value.UserDescription, HelpClient.DefaultWikiSettings));
 
 WriteLiteral("\r\n                        </span>\r\n                    </dd>\r\n");
 

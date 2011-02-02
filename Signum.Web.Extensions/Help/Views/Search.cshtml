@@ -31,7 +31,7 @@
         @foreach (var v in results)
         {
             int currentResults = 0;
-            <li class="result"><span class="entityName">@((v[0].Type != null ? v[0].Type.NiceName() : v[0].ObjectName).AddHtml("<b>", "</b>", q))</span>
+            <li class="result"><span class="entityName">@((v[0].Type != null ? v[0].Type.NiceName() : v[0].ObjectName))</span>
                 <ul>
                     @foreach (var sr in v)
                     {
@@ -39,16 +39,14 @@
 
                         <li class="content @(currentResults > maxResults ? "show-on-more" : "")"><span class="typeSearchResult @sr.TypeSearchResult.ToString()">@sr.TypeSearchResult.ToString()</span>
                             <a href="@sr.Link">
-                                @{ string content = sr.Content.WikiParse(HelpClient.NoLinkWikiSettings).AddHtml("<b>", "</b>", q);
-                                   string[] fragments = content.Split(new[] { " | " }, StringSplitOptions.RemoveEmptyEntries);}
-                                @if (fragments.Length == 1)
+                                @if(sr.TryObjectName == null)
                                 {
-                                    @fragments[0]
+                                    @Html.WikiParse(sr.Description, HelpClient.NoLinkWikiSettings)
+                                }else{
+                                    <span class="area">@Html.WikiParse(sr.ObjectName, HelpClient.NoLinkWikiSettings)</span>
+                                    @Html.WikiParse(sr.Description, HelpClient.NoLinkWikiSettings)
                                 }
-                                else
-                                {
-                                    <span class="area">@fragments[0]</span> @fragments.Skip(1).ToString(" | ")
-                                } </a></li>
+                               </a></li>
                     }
                 </ul>
                 @if (currentResults > maxResults)

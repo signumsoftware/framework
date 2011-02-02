@@ -80,7 +80,7 @@ WriteLiteral("<ul>\r\n    <li>\r\n");
 WriteLiteral("            <h2>");
 
 
-           Write(Html.ActionLink(nm.ShortNamespace, "Namespace", new { @namespace = nm.Namespace }));
+           Write(Html.ActionLink(nm.ShortNamespace, "ViewNamespace", new { @namespace = nm.Namespace }));
 
 WriteLiteral("</h2>\r\n");
 

@@ -42,7 +42,6 @@ namespace ASP
     using System.Web.UI.HtmlControls;
     using System.Xml.Linq;
     using Signum.Web.Help;
-    using Signum.Engine.WikiMarkup;
     using Signum.Web.Extensions;
     using Signum.Engine.Help;
     
@@ -64,7 +63,6 @@ namespace ASP
         }
         public override void Execute()
         {
-
 
 
 
@@ -116,7 +114,7 @@ WriteLiteral("</h1>\r\n        ");
 WriteLiteral("\r\n        <span class=\"editor\" id=\"description-editor\">\r\n            ");
 
 
-       Write(nh.Description.WikiParse(HelpClient.DefaultWikiSettings).Replace("\n", "<p>"));
+       Write(Html.WikiParse(nh.Description, HelpClient.DefaultWikiSettings));
 
 WriteLiteral("\r\n        </span>\r\n    </div>\r\n");
 

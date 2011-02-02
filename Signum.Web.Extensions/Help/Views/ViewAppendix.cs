@@ -43,7 +43,6 @@ namespace ASP
     using System.Xml.Linq;
     using Signum.Web.Help;
     using Signum.Web.Extensions;
-    using Signum.Engine.WikiMarkup;
     using Signum.Engine.Help;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
@@ -64,7 +63,6 @@ namespace ASP
         }
         public override void Execute()
         {
-
 
 
 
@@ -120,7 +118,7 @@ WriteLiteral("</h1>\r\n        ");
 WriteLiteral("\r\n        <span class=\"editor\" id=\"description-editor\">");
 
 
-                                                Write(ah.Description.WikiParse(HelpClient.DefaultWikiSettings).Replace("\n", "<p>"));
+                                                Write(Html.WikiParse(ah.Description, HelpClient.DefaultWikiSettings));
 
 WriteLiteral("</span>\r\n    </div>\r\n");
 

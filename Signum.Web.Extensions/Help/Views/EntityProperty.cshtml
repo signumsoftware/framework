@@ -1,5 +1,4 @@
 @using Signum.Entities.Reflection
-@using Signum.Engine.WikiMarkup
 @using Signum.Engine.Help
 @using Signum.Web.Help
 @using System.Reflection
@@ -12,9 +11,9 @@
 <span class='shortcut'>[p:@(ViewData["EntityName"]).@(k.Key)]</span>
 <dt>@k.Value.PropertyInfo.NiceName()</dt>
 <dd>
-    @k.Value.Info.WikiParse(HelpClient.DefaultWikiSettings)
+    @Html.WikiParse(k.Value.Info, HelpClient.DefaultWikiSettings)
     @Html.TextArea("p-" + k.Key.Replace("/", "_"), k.Value.UserDescription, new { @class = "editable" })
-    <span class="editor" id="p-@k.Key.Replace("/", "_")-editor">@k.Value.UserDescription.WikiParse(HelpClient.DefaultWikiSettings)</span>
+    <span class="editor" id="p-@k.Key.Replace("/", "_")-editor">@Html.WikiParse(k.Value.UserDescription, HelpClient.DefaultWikiSettings)</span>
 </dd>
 @if (ep.Children.Count > 0)
 {

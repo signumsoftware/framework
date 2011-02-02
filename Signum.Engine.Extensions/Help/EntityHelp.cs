@@ -491,11 +491,15 @@ namespace Signum.Engine.Help
         public string Description { get; set; }
         public string Link { get; set; }
 
-        public string Content { get {
-            if (TypeSearchResult == TypeSearchResult.Type || TypeSearchResult == TypeSearchResult.TypeDescription)
-                return Description;
-
-            return ObjectName + " | " + Description; } }
+        public string TryObjectName
+        {
+            get
+            {
+                if (TypeSearchResult == TypeSearchResult.Type || TypeSearchResult == TypeSearchResult.TypeDescription)
+                    return null;
+                return ObjectName;
+            }
+        }
 
         public SearchResult(TypeSearchResult typeSearchResult, string objectName, string description, Type type, Match match, string link)
         {

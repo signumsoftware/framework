@@ -1,5 +1,4 @@
 @using Signum.Web.Help
-@using Signum.Engine.WikiMarkup
 @using Signum.Web.Extensions
 @using Signum.Engine.Help
 
@@ -21,7 +20,7 @@
         <h1>@nh.Name</h1>
         @Html.TextArea("description", nh.Description, 5, 80, new { @class = "editable" })
         <span class="editor" id="description-editor">
-            @nh.Description.WikiParse(HelpClient.DefaultWikiSettings).Replace("\n", "<p>")
+            @Html.WikiParse(nh.Description, HelpClient.DefaultWikiSettings)
         </span>
     </div>
     <div class="grid_4">

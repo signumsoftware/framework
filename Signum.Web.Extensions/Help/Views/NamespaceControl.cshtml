@@ -7,7 +7,7 @@
     <li>
         @if (nm.Types.Count > 0)
         {
-            <h2>@Html.ActionLink(nm.ShortNamespace, "Namespace", new { @namespace = nm.Namespace })</h2>
+            <h2>@Html.ActionLink(nm.ShortNamespace, "ViewNamespace", new { @namespace = nm.Namespace })</h2>
         }
         else
         {

@@ -127,7 +127,7 @@ WriteLiteral(" ms)</p>\r\n    <hr />\r\n    <ul>\r\n");
 WriteLiteral("            <li class=\"result\"><span class=\"entityName\">");
 
 
-                                                    Write((v[0].Type != null ? v[0].Type.NiceName() : v[0].ObjectName).AddHtml("<b>", "</b>", q));
+                                                    Write((v[0].Type != null ? v[0].Type.NiceName() : v[0].ObjectName));
 
 WriteLiteral("</span>\r\n                <ul>\r\n");
 
@@ -160,34 +160,29 @@ WriteLiteral("</span>\r\n                            <a href=\"");
 WriteLiteral("\">\r\n");
 
 
-                                   string content = sr.Content.WikiParse(HelpClient.NoLinkWikiSettings).AddHtml("<b>", "</b>", q);
-                                   string[] fragments = content.Split(new[] { " | " }, StringSplitOptions.RemoveEmptyEntries);
-
-
-                                 if (fragments.Length == 1)
+                                 if(sr.TryObjectName == null)
                                 {
                                     
-                               Write(fragments[0]);
+                               Write(Html.WikiParse(sr.Description, HelpClient.NoLinkWikiSettings));
 
-                                                 
-                                }
-                                else
-                                {
+                                                                                                  
+                                }else{
 
 WriteLiteral("                                    <span class=\"area\">");
 
 
-                                                  Write(fragments[0]);
+                                                  Write(Html.WikiParse(sr.ObjectName, HelpClient.NoLinkWikiSettings));
 
-WriteLiteral("</span> ");
+WriteLiteral("</span>\r\n");
 
 
-                                                                            
-                                                                       Write(fragments.Skip(1).ToString(" | "));
+                                    
+                               Write(Html.WikiParse(sr.Description, HelpClient.NoLinkWikiSettings));
 
-                                                                                                              
+                                                                                                  
                                 }
-WriteLiteral(" </a></li>\r\n");
+
+WriteLiteral("                               </a></li>\r\n");
 
 
                     }
