@@ -28,7 +28,15 @@ SF.registerModule("Popup", function () {
                         title: $this.attr("data-title") || $this.children().attr("data-title"), //title causes that it is shown when mouseovering popup
                         modal: options.modal,
                         width: 'auto',
-                        close: options.onCancel
+                        close: options.onCancel,
+                        dragStop: function (event, ui) {
+                           var $dialog = $(event.target).closest(".ui-dialog");
+                            var w = $dialog.width();
+                            $dialog.width(w + 1);    //auto -> xxx width
+                            setTimeout(function () {
+                                $dialog.css({ width: "auto" });
+                            }, 500);
+                        }
                     };
 
                     if (options.onOk)

@@ -119,7 +119,7 @@ WriteLiteral("\r\n    <div id=\"");
 
         Write(Model.Compose("divMainControl"));
 
-WriteLiteral("\" class=\".sf-main-control\">\r\n");
+WriteLiteral("\" class=\"sf-main-control\">\r\n");
 
 
            Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString(), Model);

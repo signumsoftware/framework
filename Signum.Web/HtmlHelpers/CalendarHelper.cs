@@ -193,10 +193,10 @@ namespace Signum.Web
             StringBuilder sb = new StringBuilder();
 
             sb.AppendLine(
-                "<script type=\"text/javascript\">\n" + 
-                "$(function(){\n" +
-                "$(\"#" + elementId + "\").datepicker(" + settings.ToString() +");\n" + 
-                "});\n" +
+                "<script type=\"text/javascript\">" + 
+                //"$(function(){\n" +
+                "$(\"#" + elementId + "\").datepicker(" + settings.ToString() +");" + 
+                //"});\n" +
                 "</script>");
 
             return MvcHtmlString.Create(sb.ToString());

@@ -106,6 +106,7 @@ SF.registerModule("Lines", function () {
                 var $template = $(template);
                 $("body").trigger("sf-new-content", [$template]);
                 new SF.ViewNavigator(viewOptions).showCreateOk($template);
+                $("body").trigger("sf-new-content-post-process", [$template]);
             }
             else
                 new SF.ViewNavigator(viewOptions).createOk();
@@ -329,6 +330,7 @@ SF.registerModule("Lines", function () {
                 var $template = $(template);
                 $("body").trigger("sf-new-content", [$template]);
                 $('#' + viewOptions.containerDiv).html('').append($template);
+                $("body").trigger("sf-new-content-post-process", [$template]);
             }
             else {
                 new SF.ViewNavigator(viewOptions).viewEmbedded();
@@ -705,6 +707,7 @@ SF.registerModule("Lines", function () {
                 var $template = $(template);
                 $("body").trigger("sf-new-content", [$template]);
                 this.onItemCreated($template, viewOptions);
+                $("body").trigger("sf-new-content-post-process", [$template]);
             }
             else {
                 var self = this;
@@ -854,6 +857,7 @@ SF.registerModule("Lines", function () {
                 var $template = $(template);
                 $("body").trigger("sf-new-content", [$template]);
                 $('#' + viewOptions.containerDiv).html('').append($template);
+                $("body").trigger("sf-new-content-post-process", [$template]);
             }
             else {
                 new SF.ViewNavigator(viewOptions).viewEmbedded();

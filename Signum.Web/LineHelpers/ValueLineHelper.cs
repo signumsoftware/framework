@@ -177,7 +177,7 @@ namespace Signum.Web
             bool isDefaultDatepicker = valueLine.DatePickerOptions.IsDefault();
             if (isDefaultDatepicker) //if default, datepicker will be created when processing html in javascript 
             {
-                valueLine.ValueHtmlProps.AddCssClass("datepicker");
+                valueLine.ValueHtmlProps.AddCssClass("sf-datepicker");
                 valueLine.ValueHtmlProps["data-format"] =  valueLine.DatePickerOptions.Format;
             }
             MvcHtmlString returnString = helper.TextBox(valueLine.ControlID, value.TryToString(valueLine.Format), valueLine.ValueHtmlProps);

@@ -12,7 +12,7 @@
     </div>
     @Html.ValidationSummaryAjax(Model)
     @Html.PopupHeader()
-    <div id="@Model.Compose("divMainControl")" class=".sf-main-control">
+    <div id="@Model.Compose("divMainControl")" class="sf-main-control">
         @{ Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString(), Model);}
     </div>
 </div>

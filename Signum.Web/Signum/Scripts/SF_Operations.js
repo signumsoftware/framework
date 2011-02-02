@@ -118,6 +118,7 @@ SF.registerModule("Operations", function () {
                         if (onSuccess != null) {
                             onSuccess(newPrefix, $operationResult, self.options.parentDiv);
                         }
+                        $("body").trigger("sf-new-content-post-process", [$operationResult]);
                     }
                     else {
                         SF.Notify.error(lang.signum.error, 2000);
@@ -387,6 +388,7 @@ SF.registerModule("Operations", function () {
                         if (onSuccess != null) {
                             onSuccess(newPrefix, $operationResult, self.options.parentDiv);
                         }
+                        $("body").trigger("sf-new-content-post-process", [$operationResult]);
                     }
                     else {
                         SF.Notify.error(lang.signum.error, 2000);
@@ -467,6 +469,8 @@ SF.registerModule("Operations", function () {
                         $('#' + SF.compose(prefix, "divMainControl")).html('').append($msg);
                     }
                 }
+
+                $("body").trigger("sf-new-content-post-process", [$msg]);
             }
         });
     };

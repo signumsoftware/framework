@@ -108,8 +108,8 @@ WriteLiteral(">\r\n");
         {
             ViewBag.Title = Model.UntypedValue.TryToString();
         }
-WriteLiteral(">\r\n     \r\n");
-WriteLiteral(">\r\n");
+
+WriteLiteral("     \r\n");
 
 
          if(string.IsNullOrEmpty(ViewBag.Title))

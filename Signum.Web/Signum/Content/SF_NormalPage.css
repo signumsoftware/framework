@@ -2,6 +2,7 @@
 .sf-main-control {
     display:block;
     clear:both;
+    padding-bottom:5px; /* hack to prevent vertical scrollbars on popups due to the use of sf-line:after */
 }
 
 
@@ -100,7 +101,6 @@ h2 .sf-entity-title {
 }
 
 /* button-bar */
-
 .sf-button-bar, .sf-button-bar li
 {
     display:inline-block;
@@ -134,4 +134,9 @@ h2 .sf-entity-title {
     -moz-opacity:0.5;
     -khtml-opacity:0.5;
     opacity:0.5;
+}
+
+.clearall 
+{
+    clear:both;
 }

@@ -129,6 +129,7 @@ SF.registerModule("FindNavigator", function () {
                     var $popupHtml = jQuery(popupHtml);
                     $("body").trigger("sf-new-content", [$popupHtml]);
                     $("body").append(SF.hiddenDiv(self.tempDivId(), $popupHtml));
+                    $("body").trigger("sf-new-content-post-process", [$popupHtml]);
                     $("#" + self.tempDivId()).popup({
                         onOk: function () { self.onSearchOk(); },
                         onCancel: function () { self.onSearchCancel(); }
@@ -206,6 +207,7 @@ SF.registerModule("FindNavigator", function () {
                         var $resultsHtml = jQuery(r);
                         $("body").trigger("sf-new-content", [$resultsHtml]);
                         self.control().find(".sf-search-results-container tbody").html('').append($resultsHtml);
+                        $("body").trigger("sf-new-content-post-process", [$resultsHtml]);
                     }
                     else {
                         var columns = $(self.pf("sf-search-results-container th")).length;
@@ -517,7 +519,7 @@ SF.registerModule("FindNavigator", function () {
                     var $filterHtml = jQuery(filterHtml);
                     $("body").trigger("sf-new-content", [$filterHtml]);
                     tableFilters.append($filterHtml);
-
+                    $("body").trigger("sf-new-content-post-process", [$filterHtml]);
                     $(self.pf("btnClearAllFilters"), self.control()).show();
                 }
             });
@@ -567,6 +569,7 @@ SF.registerModule("FindNavigator", function () {
                     var $newCombo = jQuery(newCombo);
                     $("body").trigger("sf-new-content", [$newCombo]);
                     $(self.pf("ddlTokens_" + index)).after($newCombo);
+                    $("body").trigger("sf-new-content-post-process", [$newCombo]);
                 }
             });
         },
@@ -629,6 +632,7 @@ SF.registerModule("FindNavigator", function () {
                     var $filterHtml = jQuery(filterHtml);
                     $("body").trigger("sf-new-content", [$filterHtml]);
                     tableFilters.append($filterHtml);
+                    $("body").trigger("sf-new-content-post-process", [$filterHtml]);
 
                     $(self.pf("btnClearAllFilters"), self.control()).show();
                 }
@@ -729,7 +733,7 @@ SF.registerModule("FindNavigator", function () {
                         $cmenu.hide();
                     else
                         $('.sf-search-ctxmenu-overlay').remove();
-                } 
+                }
             }).append($cmenu).appendTo($target);
 
         $cmenu.css({
@@ -749,6 +753,7 @@ SF.registerModule("FindNavigator", function () {
                 var $items = jQuery(items);
                 $("body").trigger("sf-new-content", [$items]);
                 $cmenu.html('').append($items);
+                $("body").trigger("sf-new-content-post-process", [$items]);
             }
         });
 

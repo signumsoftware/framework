@@ -68,29 +68,43 @@ a.sf-value-line, span.sf-value-line{
 	zoom:1;
 }
 
-.sf-value-first{float:left;margin-bottom:3px;margin-right:2px;}
-.sf-value-first label {
-	clear:both !important;
-	color:#444444 !important;
-	display:block !important;
-	font-size:11px !important;
-	margin:0 !important;
-	width:auto;
-	text-align:left;
-	float:none;
-	line-height:15px;
-	padding-left:2px;
+/* inlines and value-first */
+
+.sf-field .sf-field 
+{
+    margin-top:0;  
+}
+.sf-value-inline .sf-field 
+{
+    float:left;
+    min-width:inherit;
 }
 
+.sf-value-inline .sf-label-line
+{
+    text-align:left;
+    font-size: 11px;
+    color: #444;
+    padding-left: 2px;
+}
+
+.sf-value-container .sf-value-container 
+{
+    clear:both;
+}
 
 /* entitylist */
 
-.sf-field,.sf-entity-line-detail {
+.sf-field, .sf-entity-line-detail {
     margin:6px 0;
 }
-.sf-field-list
-{
-    margin:6px 0;
+
+.sf-field-list ul:after{
+    content: ".";
+    display: block;
+    height: 0;
+    clear: both;
+    visibility: hidden;
 }
 
 .sf-entity-line-detail .sf-field .sf-label-line, .sf-entity-line-detail .sf-around .sf-label-line {

@@ -196,6 +196,7 @@ SF.registerModule("ViewNavigator", function () {
                     var $newHtml = jQuery(newHtml);
                     $("body").trigger("sf-new-content", [$newHtml]);
                     onSuccess($newHtml);
+                    $("body").trigger("sf-new-content-post-process", [$newHtml]);
                 }
             });
         },
@@ -298,6 +299,7 @@ SF.registerModule("ViewNavigator", function () {
                 var $chooserHTML = jQuery(chooserHTML);
                 $("body").trigger("sf-new-content", [$chooserHTML]);
                 $("body").append(SF.hiddenDiv(tempDivId, $chooserHTML));
+                $("body").trigger("sf-new-content-post-process", [$chooserHTML]);
                 //Set continuation for each type button
                 $('#' + tempDivId + " :button").each(function () {
                     $('#' + this.id).unbind('click').click(function () {
@@ -311,7 +313,7 @@ SF.registerModule("ViewNavigator", function () {
                     $('#' + tempDivId).remove();
                     if (onCancelled != null)
                         onCancelled();
-                } 
+                }
                 });
             }
         });
