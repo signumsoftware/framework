@@ -36,7 +36,7 @@ namespace Signum.Web
     {
         public override MvcHtmlString ToHtml(HtmlHelper helper)
         {
-            return helper.Div("", null, DivCssClass.HasText() ? DivCssClass : "sf-toolbar-menu-separator");
+            return helper.Div("", null, DivCssClass != "not-set" ? DivCssClass : "sf-toolbar-menu-separator");
         }
     }
 }

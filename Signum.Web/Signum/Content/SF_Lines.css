@@ -108,7 +108,7 @@ a.sf-value-line, span.sf-value-line{
     visibility: hidden;
 }
 
-.sf-entity-line-detail .sf-field .sf-label-line, .sf-entity-line-detail .sf-around .sf-label-line {
+.sf-entity-line-detail > div > .sf-field > .sf-label-line, .sf-entity-line-detail .sf-around .sf-label-line {
     width:100px;
     border-left:2px dotted #bbb;
     margin-left:120px;
@@ -146,10 +146,10 @@ a.sf-value-line, span.sf-value-line{
 	margin-right:5px;
 }
 
-.sf-entity-line-detail .sf-field 
+/*.sf-entity-line-detail .sf-field 
 {
 	clear:both;
-}
+}*/
 
 .sf-entity-line-detail .sf-field-inline .sf-field 
 {

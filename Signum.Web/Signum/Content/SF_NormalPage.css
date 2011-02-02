@@ -58,11 +58,13 @@
 
 .sf-dropdown .sf-menu-button > li
 {
-	float:none !important;
 	margin-left:0px !important;
-	margin-top:2px;
-	margin-bottom:2px;
 	clear:both;
+}
+.sf-dropdown .sf-toolbar-menu-separator
+{
+	height:1px;
+	background-color:#ddd;
 }
 
 .sf-dropdown .sf-menu-button > li a:hover, .sf-dropdown .sf-menu-button > li div:hover
