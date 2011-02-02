@@ -142,3 +142,8 @@ h2 .sf-entity-title {
 {
     clear:both;
 }
+
+.ui-tabs .ui-tabs-panel {
+    overflow: auto;
+    max-width:100%;
+}

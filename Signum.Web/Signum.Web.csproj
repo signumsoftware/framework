@@ -272,6 +272,7 @@
     <Content Include="Signum\Content\SF_NormalPage.css" />
     <Content Include="Signum\Content\SF_Notify.css" />
     <Content Include="Signum\Content\SF_Search.css" />
+    <Content Include="Signum\Scripts\SF_Slider.js" />
     <Content Include="Signum\Views\_ViewStart.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>_ViewStart.cs</LastGenOutput>

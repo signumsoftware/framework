@@ -1165,4 +1165,38 @@ SF.registerModule("Lines", function () {
         var prefix = controlId.substr(0, controlId.indexOf(SF.Keys.toStr) - 1);
         new SF.ELine({ prefix: prefix }).onAutocompleteSelected(controlId, data);
     };
+
+    SF.entityAutocomplete = function ($elem, options) {
+        var lastXhr; //To avoid previous requests results to be shown
+        $elem.autocomplete({
+            delay: options.delay || 200,
+            source: function (request, response) {
+                if (lastXhr)
+                    lastXhr.abort();
+                lastXhr = SF.ajax({
+                    url: options.url,
+                    type: "post",
+                    async: true,
+                    dataType: "json",
+                    data: { types: options.types, l: options.count || 5, q: request.term },
+                    success: function (data) {
+                        lastXhr = null;
+                        response($.map(data, function (item) {
+                            return {
+                                label: item.text,
+                                value: item
+                            }
+                        }));
+                    }
+                });
+            },
+            focus: function (event, ui) {
+                $elem.val(ui.item.value.text);
+                return false;
+            },
+            select: function (event, ui) {
+                SF.autocompleteOnSelected($elem.attr("id"), ui.item.value);
+            }
+        });
+    };
 });

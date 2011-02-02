@@ -353,40 +353,6 @@ SF.registerModule("Globals", function () {
         });
     });
 
-    SF.entityAutocomplete = function ($elem, options) {
-        var lastXhr; //To avoid previous requests results to be shown
-        $elem.autocomplete({
-            delay: options.delay || 200,
-            source: function (request, response) {
-                if (lastXhr)
-                    lastXhr.abort();
-                lastXhr = SF.ajax({
-                    url: options.url,
-                    type: "post",
-                    async: true,
-                    dataType: "json",
-                    data: { types: options.types, l: options.count || 5, q: request.term },
-                    success: function (data) {
-                        lastXhr = null;
-                        response($.map(data, function (item) {
-                            return {
-                                label: item.text,
-                                value: item
-                            }
-                        }));
-                    }
-                });
-            },
-            focus: function (event, ui) {
-                $elem.val(ui.item.value.text);
-                return false;
-            },
-            select: function (event, ui) {
-                SF.autocompleteOnSelected($elem.id, ui.item.value);
-            }
-        });
-    };
-
     $(function () { $('#form input[type=text]').keypress(function (e) { return e.which != 13 }) });
 
     $(function () {
