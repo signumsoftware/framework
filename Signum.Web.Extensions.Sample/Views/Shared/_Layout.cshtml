@@ -1,5 +1,5 @@
 @using Signum.Web.Auth
-@using Signum.Web.ScriptCombiner
+@using Signum.Web.Combine
 @using Signum.Web.Extensions.Sample
 
 <!doctype html>
@@ -13,16 +13,16 @@
         "~/signum/content/SF_NormalPage.css",
         "~/signum/content/SF_Notify.css",
         "~/signum/content/SF_Search.css",    
-        "~/content/smoothness/jquery-ui-1.8.7.custom.css",
+        "~/content/smoothness/jquery-ui-1.8.9.custom.css",
         "~/content/site.css"
         )    
     
-    @Html.ScriptsJs("~/scripts/jquery-1.4.4.min.js", "~/scripts/jquery-ui-1.8.7.custom.min.js")    
+    @Html.ScriptsJs("~/scripts/jquery-1.5.min.js", "~/scripts/jquery-ui-1.8.9.custom.min.js")    
 
     @Html.ScriptsJs("~/signum/resources/" + System.Globalization.CultureInfo.CurrentCulture.Name + ".js")
     @Html.ScriptsJs("~/signum/calendarResources/" + System.Globalization.CultureInfo.CurrentCulture.Name + ".js")
     
-    @Html.ScriptsJs("~/signum/scripts/SF_Utils.js", "~/signum/scripts/SF_jquery-ui-datepicker-extension.js")    
+    @Html.ScriptsJs("~/signum/scripts/SF_Utils.js", "~/signum/scripts/SF_jquery-ui-datepicker-extension.js", "~/scripts/newcontent.js")    
 
     @if (IsSectionDefined("head")) {
         @RenderSection("head")

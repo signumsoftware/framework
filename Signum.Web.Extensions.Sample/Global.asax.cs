@@ -20,7 +20,7 @@ using Signum.Web.Auth;
 using Signum.Web.AuthAdmin;
 using Signum.Web.ControlPanel;
 using Signum.Entities.ControlPanel;
-using Signum.Web.ScriptCombiner;
+using Signum.Web.Combine;
 using System.Reflection;
 using Signum.Web.PortableAreas;
 

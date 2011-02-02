@@ -109,11 +109,9 @@
     <Content Include="Content\smoothness\images\ui-icons_cd0a0a_256x240.png" />
     <Content Include="Content\smoothness\jquery-ui-1.8.7.custom.css" />
     <Content Include="Global.asax" />
-    <Content Include="Scripts\jquery-1.4.4-vsdoc.js" />
-    <Content Include="Scripts\jquery-1.4.4.js" />
     <Content Include="Images\calendar.png" />
-    <Content Include="Scripts\jquery-1.4.4.min.js" />
-    <Content Include="Scripts\jquery-ui-1.8.7.custom.min.js" />
+    <Content Include="Scripts\jquery-1.5.min.js" />
+    <Content Include="Scripts\jquery-ui-1.8.9.custom.min.js" />
     <Content Include="Scripts\jquery-ui.js" />
     <Content Include="Scripts\jquery-ui.min.js" />
     <Content Include="Scripts\jquery.unobtrusive-ajax.js" />
@@ -129,6 +127,7 @@
     <Content Include="Scripts\MicrosoftMvcAjax.js" />
     <Content Include="Scripts\MicrosoftMvcValidation.debug.js" />
     <Content Include="Scripts\MicrosoftMvcValidation.js" />
+    <Content Include="Scripts\newcontent.js" />
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Music\Album.cshtml" />
     <Content Include="Views\Music\AmericanMusicAward.cshtml" />
