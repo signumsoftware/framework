@@ -109,6 +109,16 @@ namespace Signum.Web
             return this;
         }
 
+        public HtmlTag InnerHtml(params MvcHtmlString[] html)
+        {
+            if (html == null)
+                tagBuilder.InnerHtml = null;
+            else
+                tagBuilder.InnerHtml = new HtmlStringBuilder(html).ToHtml().ToHtmlString();
+
+            return this;
+        }
+
         public override string ToString()
         {
             throw new InvalidOperationException("Call ToHtml instead");
@@ -127,6 +137,11 @@ namespace Signum.Web
         public MvcHtmlString ToHtml(TagRenderMode renderMode)
         {
             return MvcHtmlString.Create(tagBuilder.ToString(renderMode));
+        }
+
+        public static implicit operator MvcHtmlString(HtmlTag tag)
+        {
+            return tag.ToHtml(TagRenderMode.Normal);
         }
     }
 

@@ -28,12 +28,13 @@ namespace Signum.Web
         /// <summary>
         /// Text that will be shown as a header
         /// </summary>
-        public string Label { get; set; }
+        public MvcHtmlString Label { get; set; }
+
 
         /// <summary>
         /// The different widgets
         /// </summary>
-        public string Content { get; set; }
+        public MvcHtmlString Content { get; set; }
     }
 
     public static class WidgetsHelper

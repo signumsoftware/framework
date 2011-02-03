@@ -44,12 +44,22 @@ namespace Signum.Web
 
             return new WidgetItem
             {
-                Content =
-                    @"<div class='widget notes'>
-                      <a class='view' onclick=""javascript:new SF.FindNavigator({0}).openFinder();"">{1}</a>
-                      <a class='create' onclick=""javascript:SF.relatedEntityCreate({2});"">{3}</a>
-                    </div>".Formato(foptions.ToJS(), Properties.Resources.ViewNotes, voptions.ToJS(), Properties.Resources.CreateNote),
-                Label = "<a id='{0}'>{0}<span class='count {1}'>{2}</span></a>".Formato(Properties.Resources.Notes, count == 0 ? "disabled" : "", count),
+                Content = new HtmlTag("div").Class("widget notes").InnerHtml(
+                        new HtmlTag("href")
+                            .Class("view")
+                            .Attr("onclick", "javascript:new SF.FindNavigator({0}).openFinder();".Formato(foptions.ToJS()))
+                            .SetInnerText(Properties.Resources.ViewNotes).ToHtml(),
+                        new HtmlTag("href")
+                            .Class("create")
+                            .Attr("onclick", "javascript:SF.relatedEntityCreate({0});".Formato(voptions.ToJS()))
+                            .SetInnerText(Properties.Resources.CreateNote).ToHtml()
+                        ).ToHtml(),
+
+
+                Label = new HtmlTag("a", "Notes").InnerHtml(
+                    Properties.Resources.Notes.EncodeHtml(),
+                    new HtmlTag("span").Class("count").Class(count == 0 ? "disabled" : "").SetInnerText(count.ToString()).ToHtml()).ToHtml(),
+                
                 Id = "Notes",
                 Show = true,
             };

@@ -28,7 +28,7 @@ namespace Signum.Web
 
         public readonly RouteValueDictionary LabelHtmlProps = new RouteValueDictionary();
 
-        public bool visible = true;
+        bool visible = true;
         public bool Visible
         {
             get { return visible; }

@@ -69,6 +69,31 @@ namespace Signum.Web
             return field.ToHtml();
         }
 
+        public static IDisposable FieldInline(this HtmlHelper html)
+        {
+            return FieldInline(html, null);
+        }
+
+        public static IDisposable FieldInline(this HtmlHelper html, string fieldTitle)
+        {
+            TextWriter writer = html.ViewContext.Writer;
+
+            HtmlTag div = new HtmlTag("div").Class("sf-field");
+
+            writer.Write(div.ToHtml(TagRenderMode.StartTag));
+            if (fieldTitle != null)
+                writer.Write(new HtmlTag("label").Class("sf-label-line").SetInnerText(fieldTitle).ToHtml(TagRenderMode.Normal));
+
+            HtmlTag div2 = new HtmlTag("div").Class("sf-value-container sf-value-inline");
+            writer.Write(div2.ToHtml(TagRenderMode.StartTag));
+
+            return new Disposable(() =>
+            {
+                writer.Write(div2.ToHtml(TagRenderMode.EndTag));
+                writer.Write(div.ToHtml(TagRenderMode.EndTag));
+            }); 
+        }
+
         public static MvcHtmlString CheckBox(this HtmlHelper html, string name, bool value, bool enabled)
         {
             return CheckBox(html, name, value, enabled, null);

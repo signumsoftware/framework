@@ -27,6 +27,21 @@ namespace Signum.Web.PortableAreas
             Views.AddOrThrow(virtualPath, viewType, "compiled view {0} already registered");
         }
 
+
+        public static void RegisterViews(Assembly assembly, string[] views)
+        {
+            List<Type> viewsInArea = (from t in assembly.GetTypes()
+                                      where t.IsSubclassOf(typeof(WebPageRenderingBase))
+                                      let att = t.SingleAttribute<PageVirtualPathAttribute>()
+                                      where views.Contains(att.VirtualPath, StringComparer.InvariantCultureIgnoreCase)
+                                      select t).ToList();
+
+            foreach (var t in viewsInArea)
+            {
+                CompiledViews.RegisterView(t);
+            }
+        }
+
         public static void RegisterArea(Assembly assembly, string areaName)
         {
             string prefix = ("~/"+ areaName + "/").ToLowerInvariant();
@@ -46,5 +61,6 @@ namespace Signum.Web.PortableAreas
 
             return Views.TryGetC(virtualPath); 
         }
+
     }
 }

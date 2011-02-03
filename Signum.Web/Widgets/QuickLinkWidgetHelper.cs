@@ -52,12 +52,31 @@ namespace Signum.Web
         {
             List<QuickLinkItem> quicklinks = GetForEntity(identifiable, helper, partialViewName);
             if (quicklinks == null || quicklinks.Count == 0) return null;
+
+            HtmlStringBuilder content = new HtmlStringBuilder();
+            using (content.Surround(new HtmlTag("div").Class("widget quicklinks")))
+            {
+                using (content.Surround("ul"))
+                    foreach (var q in quicklinks)
+                    {
+                        using (content.Surround("li"))
+                            content.Add(new HtmlTag("a")
+                                .Attr("onclick", "javascript:new SF.FindNavigator({0}).openFinder();".Formato(JsFindOptions(q).ToJS()))
+                                .SetInnerText(QueryUtils.GetNiceName(q.FindOptions.QueryName)));
+                    }
+            }
+
+
             return new WidgetItem
             {
-                Content =
-                    @"<div class='widget quicklinks'><ul>{0}</ul>
-                    </div>".Formato(quicklinks.ToString(q => "<li><a onclick=\"javascript:new SF.FindNavigator({0}).openFinder();\">{1}</a></li>".Formato(JsFindOptions(q).ToJS(), QueryUtils.GetNiceName(q.FindOptions.QueryName)), "")),
-                Label = "<a id='{0}'>{0}<span class='count {1}'>{2}</span></a>".Formato("Quicklinks", quicklinks.Count == 0 ? "disabled" : "", quicklinks.Count),
+                Content = content.ToHtml(),
+                Label = new HtmlTag("a","Quicklinks").InnerHtml(
+                    "Quicklinks".EncodeHtml(),
+                     new HtmlTag("span")
+                        .Class("count")
+                        .Class(quicklinks.Count == 0 ? "disabled" : null)
+                        .SetInnerText(quicklinks.Count.ToString())
+                     ),
                 Id = "Notes",
                 Show = true,
             };

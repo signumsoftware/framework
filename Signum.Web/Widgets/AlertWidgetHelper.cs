@@ -38,19 +38,51 @@ namespace Signum.Web
                 OnOkClosed = new JsFunction(){ "RefreshAlerts('{0}')".Formato(RouteHelper.New().Action("RefreshAlerts", "Widgets"))}
             };
 
+
+            HtmlStringBuilder content = new HtmlStringBuilder(); 
+            using(content.Surround(new HtmlTag("div").Class("widget alerts")))
+            {
+                using(content.Surround("ul"))
+                {
+                    foreach (var a in list.Where(a=>a.Count > 0))
+	                {
+                        content.Add(new HtmlTag("a")
+                                    .Attr("href", "javascript:new SF.FindNavigator({0}).openFinder();".Formato(JsFindOptions(identifiable, a.Query).ToJS()))
+                                    .InnerHtml(
+                                        a.Title.EncodeHtml(), 
+                                        new HtmlTag("span").Class("count").SetInnerText(a.Count.ToString())
+                                    ));
+		 
+	                }
+                }
+
+                if(list.Count(a=>a.Count > 0) > 0)
+                    content.Add(new HtmlTag("hr").ToHtmlSelf());
+
+                content.Add(new HtmlTag("a")
+                    .Class("create")
+                    .Attr("onclick","javascript:SF.relatedEntityCreate({1});".Formato(voptions.ToJS()))
+                    .SetInnerText(Properties.Resources.CreateAlert));
+            }
+
             return new WidgetItem
             {
-                Content =
-@"<div class='widget alerts'>
-    <ul>{0}</ul>{3}
-    <a class='create' onclick=""javascript:SF.relatedEntityCreate({1});"">{2}</a>
-</div>".Formato(list.Where(a => a.Count > 0).ToString(a => "<li><a href=\"javascript:new SF.FindNavigator({0}).openFinder();\">{1}<span class='count'>{2}</span></a></li>".Formato(JsFindOptions(identifiable, a.Query).ToJS(), a.Title, a.Count), ""),
-                voptions.ToJS(),
-                Properties.Resources.CreateAlert,
-                list.Where(a => a.Count > 0).ToList().Count > 0 ? "<hr/>" : ""),
-                Label = "<a id='{0}'>{0}{1}</a>".Formato(
-                    Properties.Resources.Alerts,
-                    list.ToString(a => "<span class='count {0} {1}'>{2}</span>".Formato(a.Class, a.Count == 0 ? "disabled" : "", a.Count), "")),
+                Content = content.ToHtml(),
+                
+                Label = new HtmlTag("a", "Alerts").InnerHtml(
+                    Properties.Resources.Alerts.EncodeHtml(),
+                    new HtmlStringBuilder(
+                        list.Select(a=>
+                            new HtmlTag("span")
+                                .Class("count")
+                                .Class(a.Class)
+                                .Class(a.Count == 0 ? "disabled" : "")
+                                .SetInnerText(a.Count.ToString())
+                                .ToHtml())
+                        ).ToHtml()
+                    ).ToHtml(),
+                
+               
                 Id = Properties.Resources.Alerts,
                 Show = true
             };
