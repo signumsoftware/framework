@@ -10,8 +10,7 @@
         //datepicker
         $newContent.find(".sf-datepicker").each(function (i, val) {
             var $txt = $(val);
-            $txt.datepicker(jQuery.extend({}, defaultDatepickerOptions, { dateFormat: $txt.attr("data-format") }))
-                    .trigger(".sf-datepicker-loaded");
+            $txt.datepicker(jQuery.extend({}, defaultDatepickerOptions, { dateFormat: $txt.attr("data-format") }));
         });
 
         //dropdown
