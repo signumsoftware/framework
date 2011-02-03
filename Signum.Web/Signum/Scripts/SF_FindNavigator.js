@@ -713,10 +713,10 @@ SF.registerModule("FindNavigator", function () {
             return false; //EntityContextMenu not active
 
         var $cmenu = $("<div/>",
-            { class: "sf-search-ctxmenu" });
+            { "class": "sf-search-ctxmenu" });
 
         $("<div/>",
-            { class: "sf-search-ctxmenu-overlay",
+            { "class": "sf-search-ctxmenu-overlay",
                 click: function (e) {
                     SF.log("contextmenu click");
                     var $target = $(e.target);
