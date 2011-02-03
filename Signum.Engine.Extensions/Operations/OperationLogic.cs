@@ -342,7 +342,7 @@ namespace Signum.Engine.Operations
                 throw new InvalidOperationException("Operation {0} is not allowed for Lites".Formato(result.Key));
 
             if (!isLite && result.Lite)
-                throw new InvalidOperationException("Operation {0} needs a Lite".Formato(result.Key));
+               throw new InvalidOperationException("Operation {0} needs a Lite".Formato(result.Key));
 
             return result; 
         }
