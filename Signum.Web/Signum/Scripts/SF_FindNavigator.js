@@ -102,7 +102,7 @@ SF.registerModule("FindNavigator", function () {
             $('<div class="sf-search-ctxmenu-overlay"></div>').click(function (e) {
                 SF.log("contextmenu click");
                 var $target = $(e.target);
-                if ($target.hasClass("sf-search-ctxitem") || $target.parent().hasClass("search-ctxitem"))
+                if ($target.hasClass("sf-search-ctxitem") || $target.parent().hasClass("sf-search-ctxitem"))
                     $cmenu.hide();
                 else
                     $('.sf-search-ctxmenu-overlay').remove();
