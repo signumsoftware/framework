@@ -144,6 +144,16 @@ WriteLiteral(" = \'");
 
                                       Write(Url.SignumAction("Search"));
 
+WriteLiteral("\';\r\n        var ");
+
+
+       Write(Model.Compose("SaveUrl"));
+
+WriteLiteral(" = \'");
+
+
+                                    Write(Url.SignumAction("TrySavePartial"));
+
 WriteLiteral("\';\r\n    </script>\r\n");
 
 

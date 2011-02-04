@@ -763,8 +763,9 @@ SF.registerModule("FindNavigator", function () {
             new SF.ViewNavigator(viewOptions).navigate();
         }
         else {
+            var saveUrl = window[SF.compose(viewOptions.prefix, "SaveUrl")];
             var viewOptions = findNavigator.viewOptionsForSearchPopupCreate(viewOptions);
-            new SF.ViewNavigator(viewOptions).createSave();
+            new SF.ViewNavigator(viewOptions).createSave(saveUrl);
         }
     }
 
