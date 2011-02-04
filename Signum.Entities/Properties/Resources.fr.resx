@@ -343,7 +343,7 @@
     <value>Date</value>
   </data>
   <data name="_0IsNotSet" xml:space="preserve">
-    <value>Champ {0} non établie</value>
+    <value>{0} non établie</value>
   </data>
   <data name="AlertDN" xml:space="preserve">
     <value>Alerte</value>

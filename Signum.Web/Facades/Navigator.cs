@@ -478,7 +478,7 @@ namespace Signum.Web
         public string PopupControlUrl = ViewPrefix.Formato("PopupControl");
         public string ChooserPopupUrl = ViewPrefix.Formato("ChooserPopup");
         public string SearchPopupControlUrl = ViewPrefix.Formato("SearchPopupControl");
-        public string SearchWindowUrl = ViewPrefix.Formato("SearchWindow");
+        public string SearchPageUrl = ViewPrefix.Formato("SearchPage");
         public string SearchControlUrl = ViewPrefix.Formato("SearchControl");
         public string SearchResultsUrl = ViewPrefix.Formato("SearchResults");
         public string FilterBuilderUrl = ViewPrefix.Formato("FilterBuilder");
@@ -693,7 +693,7 @@ namespace Signum.Web
             
             return new ViewResult()
             {
-                ViewName = SearchWindowUrl,
+                ViewName = SearchPageUrl,
                 MasterName = null,
                 ViewData = controller.ViewData,
                 TempData = controller.TempData

@@ -124,7 +124,7 @@
     <value>{{0}} no tiene formato de {0} correcto</value>
   </data>
   <data name="_0HasMoreThan0DecimalPlaces" xml:space="preserve">
-    <value>{{0}} tiene mas de  {0} decimales</value>
+    <value>{{0}} tiene más de {0} decimales</value>
   </data>
   <data name="_0HasNoCorrectFormat" xml:space="preserve">
     <value>{0} no tiene el formato correcto</value>
@@ -343,7 +343,7 @@
     <value>Fecha</value>
   </data>
   <data name="_0IsNotSet" xml:space="preserve">
-    <value>Campo {0} no establecido</value>
+    <value>{0} no establecido</value>
   </data>
   <data name="AlertDN" xml:space="preserve">
     <value>Alerta</value>

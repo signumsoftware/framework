@@ -285,4 +285,10 @@
   <data name="NotPossibleToaAssign0" xml:space="preserve">
     <value>Il n'est pas possible d'attribuer {0}</value>
   </data>
+  <data name="New_f" xml:space="preserve">
+    <value>Nouvelle</value>
+  </data>
+  <data name="New_m" xml:space="preserve">
+    <value>Nouveau</value>
+  </data>
 </root>

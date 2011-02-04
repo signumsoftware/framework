@@ -130,8 +130,7 @@ WriteLiteral("    <div class=\"clear\"></div>   \r\n");
 
 }
 
-WriteLiteral("<script type=\"text/javascript\">\r\n    $(function () {\r\n        var $body = $(\"body" +
-"\");\r\n        $body.trigger(\"sf-new-content\", [$body]);\r\n    })\r\n</script>\r\n");
+
 
 
         }

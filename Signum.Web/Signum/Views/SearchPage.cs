@@ -43,12 +43,12 @@ namespace ASP
     using System.Xml.Linq;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
-    [System.Web.WebPages.PageVirtualPathAttribute("~/Signum/Views/SearchWindow.cshtml")]
-    public class _Page_Signum_Views_SearchWindow_cshtml : System.Web.Mvc.WebViewPage<dynamic>
+    [System.Web.WebPages.PageVirtualPathAttribute("~/Signum/Views/SearchPage.cshtml")]
+    public class _Page_Signum_Views_SearchPage_cshtml : System.Web.Mvc.WebViewPage<dynamic>
     {
 #line hidden
 
-        public _Page_Signum_Views_SearchWindow_cshtml()
+        public _Page_Signum_Views_SearchPage_cshtml()
         {
         }
         protected System.Web.HttpApplication ApplicationInstance
@@ -110,10 +110,6 @@ WriteLiteral("    <div class=\"clear\"></div>   \r\n");
 
 
 }
-
-WriteLiteral("<script type=\"text/javascript\">\r\n    $(function () {\r\n        var $body = $(\"body" +
-"\");\r\n        $body.trigger(\"sf-new-content\", [$body]);\r\n    })\r\n</script>\r\n");
-
 
         }
     }

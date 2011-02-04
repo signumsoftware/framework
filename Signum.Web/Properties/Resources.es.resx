@@ -249,8 +249,8 @@
   <data name="Signum_error" xml:space="preserve">
     <value>Error</value>
   </data>
-  <data name="Signum_executingOperation" xml:space="preserve">
-    <value>Ejecutando operación...</value>
+  <data name="Signum_Executing" xml:space="preserve">
+    <value>Ejecutando...</value>
   </data>
   <data name="Signum_noElementsSelected" xml:space="preserve">
     <value>Ningún elemento seleccionado</value>
@@ -258,8 +258,8 @@
   <data name="Signum_noResults" xml:space="preserve">
     <value>No se encontraron resultados</value>
   </data>
-  <data name="Signum_operationExecuted" xml:space="preserve">
-    <value>Operación ejecutada</value>
+  <data name="Signum_Executed" xml:space="preserve">
+    <value>Ejecutado</value>
   </data>
   <data name="Signum_popupErrors" xml:space="preserve">
     <value>Hay errores en la entidad, ¿quiere continuar?</value>
@@ -284,5 +284,11 @@
   </data>
   <data name="NotPossibleToaAssign0" xml:space="preserve">
     <value>No es posible asignar {0}</value>
+  </data>
+  <data name="New_f" xml:space="preserve">
+    <value>Nueva</value>
+  </data>
+  <data name="New_m" xml:space="preserve">
+    <value>Nuevo</value>
   </data>
 </root>

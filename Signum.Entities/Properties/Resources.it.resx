@@ -160,7 +160,7 @@
     <value>'{0}' non è un identificatore valido</value>
   </data>
   <data name="_0IsNotSet" xml:space="preserve">
-    <value>Il campo {0} non è impostato</value>
+    <value>{0} non è impostato</value>
   </data>
   <data name="And" xml:space="preserve">
     <value> e </value>

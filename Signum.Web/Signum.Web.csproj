@@ -172,10 +172,10 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>SearchResults.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Signum\Views\SearchWindow.cs">
+    <Compile Include="Signum\Views\SearchPage.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-      <DependentUpon>SearchWindow.cshtml</DependentUpon>
+      <DependentUpon>SearchPage.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Signum\Views\ValueLineBox.cs">
       <AutoGen>True</AutoGen>
@@ -251,9 +251,9 @@
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>SearchControl.cs</LastGenOutput>
     </None>
-    <None Include="Signum\Views\SearchWindow.cshtml">
+    <None Include="Signum\Views\SearchPage.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
-      <LastGenOutput>SearchWindow.cs</LastGenOutput>
+      <LastGenOutput>SearchPage.cs</LastGenOutput>
     </None>
     <None Include="Signum\Views\ChooserPopup.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>

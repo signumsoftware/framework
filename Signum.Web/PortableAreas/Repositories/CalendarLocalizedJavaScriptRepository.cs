@@ -69,7 +69,8 @@ namespace Signum.Web.PortableAreas
 
                     sw.WriteLine("$.datepicker.setDefaults($.datepicker.regional['" + DatePickerOptions.DefaultCulture + "']);");
 
-                    sw.WriteLine("var defaultDatepickerOptions = {0};".Formato(new DatePickerOptions() { Format = "g" }.ToString()));
+                    sw.WriteLine("var SF = SF || {}; SF.Locale = SF.Locale || {};");
+                    sw.WriteLine("SF.Locale.defaultDatepickerOptions = {0};".Formato(new DatePickerOptions() { Format = "g" }.ToString()));
                 }
 
                 return ms.ToArray();

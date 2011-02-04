@@ -279,4 +279,10 @@
   <data name="Signum_searching" xml:space="preserve">
     <value>Procurando...</value>
   </data>
+  <data name="New_f" xml:space="preserve">
+    <value>Nova</value>
+  </data>
+  <data name="New_m" xml:space="preserve">
+    <value>Novo</value>
+  </data>
 </root>

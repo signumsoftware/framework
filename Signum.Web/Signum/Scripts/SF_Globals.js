@@ -27,7 +27,9 @@ SF.registerModule("Globals", function () {
 			$elem; 			//cache for the element
 
         var find = function () {
-            if (!$elem) $elem = $('#' + SF.compose(prefix, SF.Keys.staticInfo));
+            if (!$elem) {
+                $elem = $('#' + SF.compose(prefix, SF.Keys.staticInfo));
+            }
             return $elem;
         };
 
@@ -49,8 +51,9 @@ SF.registerModule("Globals", function () {
 
         var singleType = function () {
             var typeArray = types().split(',');
-            if (typeArray.length != 1)
+            if (typeArray.length !== 1) {
                 throw "types should have only one element for element {0}".format(prefix);
+            }
             return typeArray[0];
         };
 
@@ -93,7 +96,9 @@ SF.registerModule("Globals", function () {
         var $elem; 			//cache for the element
 
         var find = function () {
-            if (!$elem) { $elem = $('#' + SF.compose(prefix, SF.Keys.runtimeInfo)); }
+            if (!$elem) {
+                $elem = $('#' + SF.compose(prefix, SF.Keys.runtimeInfo));
+            }
             return $elem;
         };
         var value = function () {
@@ -107,9 +112,9 @@ SF.registerModule("Globals", function () {
         };
         var getSet = function (key, val) {
             var array = toArray();
-            if (val == undefined)
+            if (val === undefined) {
                 return array[key];
-
+            }
             array[key] = val;
             find().val(toValue(array));
         };
@@ -206,17 +211,26 @@ SF.registerModule("Globals", function () {
     };
 
     SF.compose = function (str1, str2, separator) {
-        if (typeof (str1) !== "string" && str1 !== null && str1 != undefined)
+        if (typeof (str1) !== "string" && str1 !== null && str1 != undefined) {
             throw "str1 " + str1 + " is not a string";
-        if (typeof (str2) !== "string" && str2 !== null && str2 != undefined)
-            throw "str2 " + str2 + " is not a string";
+        }
 
-        if (SF.isEmpty(str1))
+        if (typeof (str2) !== "string" && str2 !== null && str2 != undefined) {
+            throw "str2 " + str2 + " is not a string";
+        }
+
+        if (SF.isEmpty(str1)) {
             return str2;
-        if (SF.isEmpty(str2))
+        }
+
+        if (SF.isEmpty(str2)) {
             return str1;
-        if (SF.isEmpty(separator))
+        }
+
+        if (SF.isEmpty(separator)) {
             separator = SF.Keys.separator;
+        }
+
         return str1 + separator + str2;
     };
 
@@ -358,13 +372,15 @@ SF.registerModule("Globals", function () {
     $(function () {
         var getErrorMessage = function (response) {
             var error;
-            if (response != null && response != undefined) {
+            if (response !== null && response !== undefined) {
                 var startError = response.indexOf("<title>");
                 var endError = response.indexOf("</title>");
-                if ((startError !== -1) && (endError !== -1))
+                if ((startError !== -1) && (endError !== -1)) {
                     error = response.substring(startError + 7, endError);
-                else
+                }
+                else {
                     error = response;
+                }
             }
             return error;
         }
@@ -383,8 +399,9 @@ SF.registerModule("Globals", function () {
             SF.log(thrownError);
 
             alert(lang.signum.error + ": " + error);
-
-            SF.Blocker.disable();
+            if (SF.Blocker.isEnabled()) {
+                SF.Blocker.disable();
+            }
         });
     });
 

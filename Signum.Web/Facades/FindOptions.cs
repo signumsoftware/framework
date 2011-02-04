@@ -112,7 +112,7 @@ namespace Signum.Web
 
         public bool Async { get; set; }
 
-        bool entityContextMenu = ContextualItemsHelper.EntityCtxMenuInSearchWindow;
+        bool entityContextMenu = ContextualItemsHelper.EntityCtxMenuInSearchPage;
         public bool EntityContextMenu
         {
             get { return entityContextMenu; }

@@ -408,6 +408,6 @@ SF.LocalStorage = (function () {
     })();
 
     SF.triggerNewContent = function ($source) {
-        $("body").trigger("sf-new-content", [$source]);
+        $source.trigger("sf-new-content");
     }
 }

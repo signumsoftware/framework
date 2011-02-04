@@ -26,12 +26,12 @@ namespace Signum.Web
 
     public static class ContextualItemsHelper
     {
-        public static bool EntityCtxMenuInSearchWindow = false;
+        public static bool EntityCtxMenuInSearchPage = false;
         public static event GetContextualItemDelegate GetContextualItemsForLite;
 
         public static void Start()
         {
-            EntityCtxMenuInSearchWindow = true;
+            EntityCtxMenuInSearchPage = true;
         }
 
         public static List<ContextualItem> GetContextualItemListForLite(ControllerContext controllerContext, Lite lite, object queryName, string prefix)

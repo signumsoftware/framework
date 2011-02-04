@@ -12,6 +12,7 @@ using System.Web;
 using System.Web.Routing;
 using Signum.Utilities.Reflection;
 using Signum.Entities.Reflection;
+using System.Web.Script.Serialization;
 
 namespace Signum.Web
 {
@@ -106,7 +107,7 @@ namespace Signum.Web
 
             if (enabled)
                 return html.CheckBox(name, value, htmlAttributes);
-            else 
+            else
             {
                 HtmlTag checkbox = new HtmlTag("input")
                                         .Id(name)
@@ -254,6 +255,16 @@ namespace Signum.Web
         {
             return new UrlHelper(html.ViewContext.RequestContext);
         }
-   }
+
+        public static MvcHtmlString FormatHtml(this HtmlHelper html, string text, params object[] values)
+        {
+            return new MvcHtmlString(string.Format(HttpUtility.HtmlEncode(text), values.Select(a => a is IHtmlString ? ((IHtmlString)a).ToHtmlString() : HttpUtility.HtmlEncode(a)).ToArray()));
+        }
+
+        public static MvcHtmlString Json(this HtmlHelper html, object value)
+        {
+            return new MvcHtmlString(new JavaScriptSerializer().Serialize(value));
+        }
+    }
 }
 
