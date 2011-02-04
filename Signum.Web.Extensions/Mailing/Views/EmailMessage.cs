@@ -64,8 +64,6 @@ namespace ASP
         {
 
 
-WriteLiteral("\r\n");
-
 
  using (var e = Html.TypeContext<EmailMessageDN>())
 {
@@ -115,7 +113,6 @@ WriteLiteral("\r\n    </div>\r\n");
 
 
 }
-WriteLiteral(" ");
 
 
         }

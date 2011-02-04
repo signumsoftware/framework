@@ -1,6 +1,5 @@
 @using Signum.Engine
 @using Signum.Entities.Mailing
-
 @using (var e = Html.TypeContext<EmailMessageDN>())
 {
     @Html.EntityLine(e, f => f.Recipient)
@@ -16,4 +15,4 @@
     <div>
         @Html.Raw(e.Value.Body)
     </div>
-} 
+}

@@ -76,7 +76,7 @@ WriteLiteral("<div id=\"reset-password-container\">\r\n    <h2>");
 WriteLiteral("</h2>\r\n    <p>");
 
 
-  Write(Html.Raw(Html.Encode(Resources.Please0IntoYourAccount).Formato(Html.ActionLink(Resources.LoginEnter, "login", "auth"))));
+  Write(Html.FormatHtml(Resources.Please0IntoYourAccount, Html.ActionLink(Resources.LoginEnter, "login", "auth")));
 
 WriteLiteral("</p>\r\n</div>\r\n");
 
