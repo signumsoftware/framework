@@ -129,7 +129,7 @@ WriteLiteral("                <tr>\r\n");
 WriteLiteral("                    <td style=\"vertical-align:top;padding-right:20px\" ");
 
 
-                                                                  Write((pp != null && pp.Fill) ? ("colspan=\""+ cp.NumberOfColumns + "\"") : "");
+                                                                  Write((pp != null && pp.Fill) ? ("colspan=" + cp.NumberOfColumns) : "");
 
 WriteLiteral(">\r\n");
 
