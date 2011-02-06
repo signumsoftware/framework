@@ -76,7 +76,7 @@ namespace Signum.Web
             };
 
            string result = options.Navigate ?
-               "<a class=\"count-search valueLine\" href=\"{0}\">{1}</a>".Formato(foptions.FindOptions.ToString(), count) :
+               "<a class=\"count-search valueLine\" href='{0}'>{1}</a>".Formato(foptions.FindOptions.ToString(), count) :
                "<span class=\"count-search valueLine\">{0}</span>".Formato(count);
 
            if (options.PopupView)

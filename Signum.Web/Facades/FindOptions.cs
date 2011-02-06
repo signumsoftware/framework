@@ -268,11 +268,23 @@ namespace Signum.Web
                     value = v.ToString();
             }
 
-            result = "{0},{1},{2}".Formato(ColumnName, Operation.ToString(), value);
+            result = "{0},{1},{2}".Formato(ColumnName, Operation.ToString(), EncodeCSV(value));
             //if (Frozen)
             //    result += "&fz{0}=true".Formato(filterIndex);
 
             return result;
+        }
+
+        string EncodeCSV(string p)
+        {
+            bool hasQuote = p.Contains("\"");
+            if (hasQuote || p.Contains(";") || p.Contains(";"))
+            {
+                if (hasQuote)
+                    p = p.Replace("\"", "\"\"");
+                return "\"" + p + "\"";
+            }
+            return p;
         }
     }
 
