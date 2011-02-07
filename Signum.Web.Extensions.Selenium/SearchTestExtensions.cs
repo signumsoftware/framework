@@ -129,7 +129,7 @@ namespace Signum.Web.Selenium
 
         public static string RowSelector(string prefix)
         {
-            return "jq=#{0}sf-search-results > tbody > tr".Formato(prefix);
+            return "jq=#{0}tblResults > tbody > tr".Formato(prefix);
         }
 
         public static string RowSelector(int rowIndexBase1)
@@ -179,7 +179,7 @@ namespace Signum.Web.Selenium
 
         public static string TableHeaderSelector(string prefix)
         {
-            return "jq=#{0}sf-search-results > thead > tr > th".Formato(prefix);
+            return "jq=#{0}tblResults > thead > tr > th".Formato(prefix);
         }
 
         public static string TableHeaderSelector(int columnIndexBase1)
