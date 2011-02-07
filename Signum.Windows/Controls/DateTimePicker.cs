@@ -55,15 +55,6 @@ namespace Signum.Windows
             set { SetValue(DateTimeConverterProperty, value); }
         }
 
-        public static readonly DependencyProperty TextProperty =
-            DependencyProperty.Register("Text", typeof(string), typeof(DateTimePicker), new UIPropertyMetadata(null));
-        public string Text
-        {
-            get { return (string)GetValue(TextProperty); }
-            set { SetValue(TextProperty, value); }
-        }
-
-
         public static readonly DependencyProperty SelectedDateProperty =
          DependencyProperty.Register("SelectedDate", typeof(DateTime?), typeof(DateTimePicker), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
         public DateTime? SelectedDate
@@ -80,27 +71,7 @@ namespace Signum.Windows
 
         public DateTimePicker()
         {
-            this.Loaded += new RoutedEventHandler(DateTimePicker_Loaded);
-        }
-
-        void DateTimePicker_Loaded(object sender, RoutedEventArgs e)
-        {
-            this.Loaded -= DateTimePicker_Loaded;
-            DateTimeConverter dtc = DateTimeConverter; 
-            Binding b = new Binding
-            {
-                Source = this,
-                Path = new PropertyPath(SelectedDateProperty),
-                Converter = dtc,
-                Mode = BindingMode.TwoWay,
-                ValidatesOnDataErrors = true,
-                ValidatesOnExceptions= true,
-                NotifyOnValidationError = true,
-            };
-            b.ValidationRules.Add(dtc);
-            //PresentationTraceSources.SetTraceLevel(b, PresentationTraceLevel.High);
-
-            BindingOperations.SetBinding(this, TextProperty, b);
+      
         }
 
         TextBox textBox;
@@ -109,23 +80,83 @@ namespace Signum.Windows
 
         public override void OnApplyTemplate()
         {
+            if (textBox != null)
+                BindingOperations.ClearBinding(textBox, TextBox.TextProperty); 
+
             textBox = (TextBox)GetTemplateChild("PART_EditableTextBox");
+
+            if (textBox != null)
+                BindingOperations.SetBinding(textBox, TextBox.TextProperty, new Binding
+                {
+                    Source = this,
+                    Path = new PropertyPath(SelectedDateProperty),
+                    Converter = DateTimeConverter,
+                    Mode = BindingMode.TwoWay,
+                    ValidatesOnDataErrors = true,
+                    ValidatesOnExceptions = true,
+                    NotifyOnValidationError = true,
+                    UpdateSourceTrigger = UpdateSourceTrigger.LostFocus,
+                }.Do(b => b.ValidationRules.Add(DateTimeConverter)));
+
+
+            if(pickerBase != null)
+                pickerBase.DropDownOpened -= pickerBase_DropDownOpened;
+
             pickerBase = (PickerBase)GetTemplateChild("PART_PickerBase");
 
-            if (monthCalendar != null)
-                monthCalendar.SelectedDatesChanged -= monthCalendar_SelectedDatesChanged;
-            monthCalendar = (System.Windows.Controls.Calendar)GetTemplateChild("PART_DatePickerCalendar");
-            if (monthCalendar != null)
-                monthCalendar.SelectedDatesChanged += monthCalendar_SelectedDatesChanged;
+            if (pickerBase != null)
+                pickerBase.DropDownOpened += pickerBase_DropDownOpened;
 
+
+
+            if (monthCalendar != null)
+            {
+                monthCalendar.SelectedDatesChanged -= monthCalendar_SelectedDatesChanged;
+                BindingOperations.ClearBinding(monthCalendar, System.Windows.Controls.Calendar.SelectedDateProperty); 
+            }
+
+            monthCalendar = (System.Windows.Controls.Calendar)GetTemplateChild("PART_DatePickerCalendar");
+
+            if (monthCalendar != null)
+            {
+                monthCalendar.SelectedDatesChanged += monthCalendar_SelectedDatesChanged;
+                BindingOperations.SetBinding(monthCalendar, System.Windows.Controls.Calendar.SelectedDateProperty, new Binding
+                {
+                    Source = this,
+                    Path = new PropertyPath(SelectedDateProperty),
+                    Mode = BindingMode.TwoWay,
+                    UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+                });
+            }
 
             UpdateVisibility();
+        }
+
+        bool avoidClose = false;
+
+        void pickerBase_DropDownOpened(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                avoidClose = true;
+
+                BindingExpression b = textBox.GetBindingExpression(TextBox.TextProperty);
+                b.UpdateSource();
+
+                if (monthCalendar.SelectedDate.HasValue)
+                    monthCalendar.DisplayDate = monthCalendar.SelectedDate.Value;
+            }
+            finally
+            {
+                avoidClose = false;
+            }
         }
 
 
         void monthCalendar_SelectedDatesChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            pickerBase.IsDropDownOpen = false;
+            if (!avoidClose)
+                pickerBase.IsDropDownOpen = false;
         }
 
         static void UpdateVisibility(DependencyObject d, DependencyPropertyChangedEventArgs e)

@@ -16,16 +16,15 @@
 						<m:PickerBase.PopupContent>
 							<Calendar x:Name="PART_DatePickerCalendar"
 							 IsEnabled="{TemplateBinding IsReadOnly}" 
-							 SelectedDate="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=SelectedDate}"
-                             SelectionMode="SingleDate"/>
+                             SelectionMode="SingleDate"/> <!--SelectedDate="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=SelectedDate, Mode=TwoWay}"-->
 						</m:PickerBase.PopupContent>
 						<m:PickerBase.ButtonContent>
 							<TextBox x:Name="PART_EditableTextBox" 
 							Margin="{TemplateBinding Padding}" 
 							IsReadOnly="{TemplateBinding IsReadOnly}" 
-							Style="{StaticResource ComboBoxEditableTextBox}" 
-							Text="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Text, ValidatesOnExceptions=true, NotifyOnValidationError=true, UpdateSourceTrigger=PropertyChanged}"/>
-						</m:PickerBase.ButtonContent>
+							Style="{StaticResource ComboBoxEditableTextBox}" />
+                            <!--Text="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=SelectedDate, ValidatesOnExceptions=true, NotifyOnValidationError=true, UpdateSourceTrigger=PropertyChanged}"-->
+                        </m:PickerBase.ButtonContent>
 					</m:PickerBase>
 				</ControlTemplate>
 			</Setter.Value>

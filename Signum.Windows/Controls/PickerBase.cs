@@ -133,15 +133,15 @@ namespace Signum.Windows
             base.OnMouseDown(e);
         }
 
-        //protected override void OnLostKeyboardFocus(KeyboardFocusChangedEventArgs e)
-        //{
-        //    popup.IsOpen = false;
+        protected override void OnLostKeyboardFocus(KeyboardFocusChangedEventArgs e)
+        {
+            DependencyObject obj = e.NewFocus as DependencyObject;
 
-        //    base.OnLostKeyboardFocus(e);
-        //}
+            if (obj == null || !popup.Child.IsAncestorOf(obj))
+                popup.IsOpen = false;
 
-       
-
+            base.OnLostKeyboardFocus(e);
+        }
 
         private void KeyDownHandler(KeyEventArgs e)
         {
