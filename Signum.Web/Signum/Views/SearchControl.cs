@@ -45,6 +45,8 @@ namespace ASP
     using Signum.Entities.DynamicQuery;
     using Signum.Engine.DynamicQuery;
     using Signum.Entities.Reflection;
+    //using WebMatrix.Data;
+    //using WebMatrix.WebData;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Signum/Views/SearchControl.cshtml")]
@@ -276,12 +278,12 @@ WriteLiteral("        <div class=\"clearall\">\r\n        </div>\r\n");
 WriteLiteral("    <div id=\"");
 
 
-        Write(Model.Compose("sf-search-results-container"));
+        Write(Model.Compose("divResults"));
 
 WriteLiteral("\" class=\"sf-search-results-container\">\r\n        <table id=\"");
 
 
-              Write(Model.Compose("sf-search-results"));
+              Write(Model.Compose("tblResults"));
 
 WriteLiteral("\" class=\"sf-search-results\">\r\n            <thead>\r\n                <tr>\r\n");
 

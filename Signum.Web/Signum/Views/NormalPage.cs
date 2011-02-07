@@ -42,6 +42,8 @@ namespace ASP
     using System.Web.UI.HtmlControls;
     using System.Xml.Linq;
     using Signum.Web.Properties;
+    //using WebMatrix.Data;
+    //using WebMatrix.WebData;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Signum/Views/NormalPage.cshtml")]
@@ -129,9 +131,6 @@ WriteLiteral("    <div class=\"clear\"></div>   \r\n");
 
 
 }
-
-
-
 
         }
     }

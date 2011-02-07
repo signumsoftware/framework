@@ -48,7 +48,7 @@ SF.registerModule("FindNavigator", function () {
 
         initialize: function () {
             var self = this;
-            $(this.pf("sf-search-results") + " th:not(.thRowEntity):not(.thRowSelection)")
+            $(this.pf("tblResults") + " th:not(.thRowEntity):not(.thRowSelection)")
             .live('click', function (e) {
                 if ($(this).hasClass("columnEditing"))
                     return true;
@@ -63,7 +63,7 @@ SF.registerModule("FindNavigator", function () {
                 return false;
             });
 
-            $(this.pf("sf-search-results td")).live('contextmenu', function (e) {
+            $(this.pf("tblResults td")).live('contextmenu', function (e) {
                 if ($(e.target).hasClass("sf-search-ctxmenu-overlay") || $(e.target).parents().hasClass("sf-search-ctxmenu-overlay")) {
                     $('.sf-search-ctxmenu-overlay').remove();
                     return false;
@@ -81,7 +81,7 @@ SF.registerModule("FindNavigator", function () {
                 return false;
             });
 
-            $(this.pf("sf-search-results") + " .sf-search-ctxitem.quickFilter").live('click', function () {
+            $(this.pf("tblResults") + " .sf-search-ctxitem.quickFilter").live('click', function () {
                 SF.log("contextmenu item click");
                 var $elem = $(this).closest("td");
                 $('.sf-search-ctxmenu-overlay').remove();
@@ -207,7 +207,7 @@ SF.registerModule("FindNavigator", function () {
                         SF.triggerNewContent(self.control().find(".sf-search-results-container tbody"));
                     }
                     else {
-                        var columns = $(self.pf("sf-search-results-container th")).length;
+                        var columns = $(self.pf("divResults th")).length;
                         self.control().find(".sf-search-results-container tbody").html("<tr><td colspan=\"" + columns + "\">" + lang.signum.noResults + "</td></tr>")
                     }
                 },
@@ -372,7 +372,7 @@ SF.registerModule("FindNavigator", function () {
             SF.log("FindNavigator serializeColumns");
             var result = "";
             var self = this;
-            $(this.pf("sf-search-results thead tr th:not(.thRowEntity):not(.thRowSelection)")).each(function () {
+            $(this.pf("tblResults thead tr th:not(.thRowEntity):not(.thRowSelection)")).each(function () {
                 var $this = $(this);
                 var token = $this.find("input:hidden").val();
                 var displayName = $this.text().trim();
@@ -419,9 +419,9 @@ SF.registerModule("FindNavigator", function () {
             if (SF.isEmpty(tokenName)) return;
 
             var prefixedTokenName = SF.compose(this.findOptions.prefix, tokenName);
-            if ($(this.pf("sf-search-results thead tr th[id=\"" + prefixedTokenName + "\"]")).length > 0) return;
+            if ($(this.pf("tblResults thead tr th[id=\"" + prefixedTokenName + "\"]")).length > 0) return;
 
-            var $tblHeaders = $(this.pf("sf-search-results thead tr"));
+            var $tblHeaders = $(this.pf("tblResults thead tr"));
 
             var webQueryName = ((SF.isEmpty(this.findOptions.webQueryName)) ? $(this.pf(this.webQueryName)).val() : this.findOptions.webQueryName);
             var self = this;
@@ -442,7 +442,7 @@ SF.registerModule("FindNavigator", function () {
             SF.log("FindNavigator editColumns");
 
             var self = this;
-            $(this.pf("sf-search-results thead tr th:not(.thRowEntity):not(.thRowSelection)")).each(function () {
+            $(this.pf("tblResults thead tr th:not(.thRowEntity):not(.thRowSelection)")).each(function () {
                 var th = $(this);
                 th.addClass("columnEditing");
                 var hidden = th.find("input:hidden");
@@ -463,7 +463,7 @@ SF.registerModule("FindNavigator", function () {
                 return;
 
             var self = this;
-            $(this.pf("sf-search-results thead tr th:not(.thRowEntity):not(.thRowSelection)")).each(function () {
+            $(this.pf("tblResults thead tr th:not(.thRowEntity):not(.thRowSelection)")).each(function () {
                 var th = $(this);
                 th.removeClass("columnEditing");
                 var hidden = th.find("input:hidden");
@@ -479,13 +479,13 @@ SF.registerModule("FindNavigator", function () {
             SF.log("FindNavigator deleteColumn");
 
             var self = this;
-            $(this.pf("sf-search-results thead tr th"))
+            $(this.pf("tblResults thead tr th"))
         .filter(function () { return $(this).find("input:hidden[value='" + columnName + "']").length > 0 })
         .remove();
 
-            $(this.pf("sf-search-results tbody")).html("");
+            $(this.pf("tblResults tbody")).html("");
 
-            if ($(this.pf("sf-search-results thead tr th")).length == 0)
+            if ($(this.pf("tblResults thead tr th")).length == 0)
                 $(this.pf("btnEditColumnsFinish")).hide();
         },
 
@@ -792,7 +792,7 @@ SF.registerModule("FindNavigator", function () {
             }
         };
 
-        if ($("#" + SF.compose(prefix, "sf-search-results-container")).is(':visible')) {
+        if ($("#" + SF.compose(prefix, "divResults")).is(':visible')) {
             makeSearch();
         }
         else {
@@ -800,7 +800,7 @@ SF.registerModule("FindNavigator", function () {
             if ($tabContainer.length) {
                 $tabContainer.find("a").click(
                 function () {
-                    if ($("#" + SF.compose(prefix, "sf-search-results-container")).is(':visible')) {
+                    if ($("#" + SF.compose(prefix, "divResults")).is(':visible')) {
                         makeSearch();
                     }
                 });
