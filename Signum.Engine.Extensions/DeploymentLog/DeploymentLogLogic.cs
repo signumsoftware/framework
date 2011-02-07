@@ -37,7 +37,7 @@ namespace Signum.Engine.DeploymentLog
 
         public static void Log(string description)
         {
-            new DeploymentLogDN
+          var dl=  new DeploymentLogDN
             {
                 CreationDate = TimeZoneManager.Now, 
                 Version = GetCurrentVersion(),
@@ -45,7 +45,10 @@ namespace Signum.Engine.DeploymentLog
                 DataSourceName = ConnectionScope.Current.DataSourceName(),
                 DatabaseName = ConnectionScope.Current.DatabaseName(),
                 MachineName = Environment.MachineName,
-            }.Save(); 
+            };
+          dl.Save();
+
+
         }
     }
 }
