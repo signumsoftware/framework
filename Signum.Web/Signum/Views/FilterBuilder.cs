@@ -45,6 +45,8 @@ namespace ASP
     using Signum.Entities.Reflection;
     using Signum.Engine.DynamicQuery;
     using Signum.Web.Properties;
+    //using WebMatrix.Data;
+    //using WebMatrix.WebData;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Signum/Views/FilterBuilder.cshtml")]
@@ -100,7 +102,7 @@ WriteLiteral("\" rev=\"sf-filters-body\">");
 WriteLiteral("</a>\r\n        <div class=\"sf-filters\" ");
 
 
-                            Write(visible ? "" : "style='display:none'");
+                            Write(visible ? "" : "style=display:none");
 
 WriteLiteral(">\r\n            <div id=\"");
 

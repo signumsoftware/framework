@@ -11,7 +11,7 @@
 <div id="@context.Compose("fields-search")">
     <div id="@context.Compose("fields-list")" class="sf-fields-list">
         <a onclick="SF.FindNavigator.toggleFilters(this)" class="sf-filters-header@(visible ? "" : " close")" rev="sf-filters-body">@(visible ? Resources.HideFilters : Resources.ShowFilters)</a>
-        <div class="sf-filters" @(visible ? "" : "style='display:none'")>
+        <div class="sf-filters" @(visible ? "" : "style=display:none")>
             <div id="@context.Compose("filters-body")" class="sf-filters-body">
                 <label for="@context.Compose("ddlTokens_0")">@Resources.FilterByField</label>
                 @{ var columns = queryDescription.Columns
