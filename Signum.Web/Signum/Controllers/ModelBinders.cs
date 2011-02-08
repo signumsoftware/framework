@@ -22,10 +22,13 @@ namespace Signum.Web.Controllers
                  string value = controllerContext.HttpContext.Request[bindingContext.ModelName];
                  if (value == null)
                  {
-                     if (controllerContext.RouteData.Values[bindingContext.ModelName] is Lite)
-                         return controllerContext.RouteData.Values[bindingContext.ModelName];
+                     object routeValue = controllerContext.RouteData.Values[bindingContext.ModelName];
+                     if (routeValue is Lite)
+                         return routeValue;
+                     else if(routeValue is int)
+                         return Lite.Create(cleanType, (int)routeValue);
                      else
-                         value = (string)controllerContext.RouteData.Values[bindingContext.ModelName];
+                         value = (string)routeValue;
                  }
                  int id;
                  if (int.TryParse(value, out id))
