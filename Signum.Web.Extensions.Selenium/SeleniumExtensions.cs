@@ -19,7 +19,7 @@ namespace Signum.Web.Selenium
 
     public static class SeleniumExtensions
     {
-        public static WebExplorer Explorer = WebExplorer.Chrome;
+        public static WebExplorer Explorer = WebExplorer.Firefox;
 
         public static Process LaunchSeleniumProcess()
         {
