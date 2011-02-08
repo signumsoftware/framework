@@ -406,7 +406,7 @@ namespace Signum.Engine.Authorization
                      ExportToXml == null ? null : ExportToXml.GetInvocationList().Cast<Func<XElement>>().Select(a => a()).NotNull()));
         }
 
-        public static SqlPreCommand ImportRules(XDocument doc)
+        public static SqlPreCommand ImportRulesScript(XDocument doc)
         {
             EnumerableExtensions.JoinStrict(
                 Roles,
@@ -458,7 +458,7 @@ namespace Signum.Engine.Authorization
                 var doc = XDocument.Load(fileName);
                 Console.WriteLine("Ok");
                 Console.Write("Importing...");
-                SqlPreCommand command = ImportRules(doc);
+                SqlPreCommand command = ImportRulesScript(doc);
                 Console.WriteLine("Ok");
 
                 command.OpenSqlFileRetry();
