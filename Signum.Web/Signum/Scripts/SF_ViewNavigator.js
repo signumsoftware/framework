@@ -128,7 +128,7 @@ SF.registerModule("ViewNavigator", function () {
             if (!SF.isEmpty(newHtml)) {
                 $('#' + this.viewOptions.containerDiv).html(newHtml);
             }
-            
+
             SF.triggerNewContent($("#" + this.viewOptions.containerDiv));
 
             var self = this;
@@ -272,7 +272,7 @@ SF.registerModule("ViewNavigator", function () {
     }
 
     SF.closePopup = function (prefix) {
-        $('#' + SF.compose(prefix, "externalPopupDiv")).remove();
+        $('#' + SF.compose(prefix, "panelPopup")).closest(".ui-dialog").remove();
     }
 
     /* chooserOptions */
