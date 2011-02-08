@@ -12,6 +12,8 @@ using System.Collections.Generic;
 using Signum.Utilities;
 using System.Web.WebPages;
 using Signum.Entities;
+using Signum.Entities.Reflection;
+using Signum.Engine;
 
 namespace Signum.Web
 {
@@ -179,12 +181,11 @@ namespace Signum.Web
                         value = func();
                     }
 
-                    if (!(value is Lite))
-                    {
-                        var conv = ParameterConverters.FirstOrDefault(c => c.CanConvert(value));
-                        if (conv != null)
-                            value = conv.Convert(value);
-                    }
+                   
+                    var conv = ParameterConverters.FirstOrDefault(c => c.CanConvert(value));
+                    if (conv != null)
+                        value = conv.Convert(value);
+                   
                     rvd.Add(parameters[i].Name, value);
                 }
             }
@@ -206,7 +207,11 @@ namespace Signum.Web
 
         public object Convert(object obj)
         {
-            return ((Lite)obj).Id; 
+            Lite lite = (Lite)obj;
+            if (Reflector.ExtractLite(lite.GetType()) == lite.RuntimeType)
+                return lite.Id;
+            else
+                return lite.Key();
         }
     }
 }
