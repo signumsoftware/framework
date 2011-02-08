@@ -57,6 +57,8 @@ namespace Signum.Engine.Mailing
             get { return temporaryOverrideEmailToAddress; }
         }
 
+        public static bool DisableEmailSending;
+
         [ThreadStatic]
         static string temporaryOverrideEmailToAddress;
 
@@ -71,7 +73,7 @@ namespace Signum.Engine.Mailing
         public static Func<SmtpClient> SmtpClientBuilder;
 
         static Dictionary<Type, Func<IEmailModel, EmailContent>> templates = new Dictionary<Type, Func<IEmailModel, EmailContent>>();
-        static Dictionary<Type, Lite<EmailTemplateDN>> templateToDN; 
+        static Dictionary<Type, Lite<EmailTemplateDN>> templateToDN;
 
         internal static void AssertStarted(SchemaBuilder sb)
         {
@@ -111,7 +113,7 @@ namespace Signum.Engine.Mailing
 
                 sb.Schema.Initializing[InitLevel.Level2NormalEntities] += Schema_Initializing;
                 sb.Schema.Generating += Schema_Generating;
-                sb.Schema.Synchronizing += Schema_Synchronizing; 
+                sb.Schema.Synchronizing += Schema_Synchronizing;
             }
         }
 
@@ -135,9 +137,9 @@ namespace Signum.Engine.Mailing
             Dictionary<string, EmailTemplateDN> should = GenerateTemplates().ToDictionary(s => s.FullClassName);
             Dictionary<string, EmailTemplateDN> old = Administrator.TryRetrieveAll<EmailTemplateDN>(replacements).ToDictionary(c => c.FullClassName);
 
-            replacements.AskForReplacements(old, should, EmailTemplates); 
+            replacements.AskForReplacements(old, should, EmailTemplates);
 
-            Dictionary<string, EmailTemplateDN> current = replacements.ApplyReplacements(old , EmailTemplates);
+            Dictionary<string, EmailTemplateDN> current = replacements.ApplyReplacements(old, EmailTemplates);
 
             return Synchronizer.SynchronizeScript(
                 current,
@@ -169,7 +171,7 @@ namespace Signum.Engine.Mailing
                              FriendlyName = type.NiceName()
                          }).ToList();
             return lista;
-        } 
+        }
         #endregion
 
         public static void StarProcesses(SchemaBuilder sb, DynamicQueryManager dqm)
@@ -187,13 +189,13 @@ namespace Signum.Engine.Mailing
                 });
 
                 dqm[typeof(EmailPackageDN)] = (from e in Database.Query<EmailPackageDN>()
-                                               select new 
-                                               { 
-                                                    Entity = e.ToLite(),
-                                                    e.Id,
-                                                    e.Error,
-                                                    e.NumLines,
-                                                    e.NumErrors,
+                                               select new
+                                               {
+                                                   Entity = e.ToLite(),
+                                                   e.Id,
+                                                   e.Error,
+                                                   e.NumLines,
+                                                   e.NumErrors,
                                                }).ToDynamic();
             }
         }
@@ -201,7 +203,7 @@ namespace Signum.Engine.Mailing
         public static void RegisterTemplate<T>(Func<T, EmailContent> template)
             where T : IEmailModel
         {
-            templates[typeof(T)] = et=>template((T)et);
+            templates[typeof(T)] = et => template((T)et);
         }
 
         public static Lite<EmailTemplateDN> GetTemplateDN(Type type)
@@ -242,16 +244,20 @@ namespace Signum.Engine.Mailing
             return result;
         }
 
+
+
         public static void SendMail(EmailMessageDN emailMessage)
         {
             emailMessage.State = EmailState.Sent;
             emailMessage.Sent = TimeZoneManager.Now;
             emailMessage.Received = null;
 
-            MailMessage message = CreateMailMessage(emailMessage);
-
-            SmtpClient client = SmtpClientBuilder == null ? new SmtpClient() : SmtpClientBuilder();
-            client.Send(message);
+            if (!DisableEmailSending)
+            {
+                MailMessage message = CreateMailMessage(emailMessage);
+                SmtpClient client = SmtpClientBuilder == null ? new SmtpClient() : SmtpClientBuilder();
+                client.Send(message);
+            }
             emailMessage.Save();
         }
 
@@ -267,12 +273,18 @@ namespace Signum.Engine.Mailing
             emailMessage.Sent = null;
             emailMessage.Received = null;
 
-            MailMessage message = CreateMailMessage(emailMessage); 
-
-            SmtpClient client = SmtpClientBuilder == null ? new SmtpClient() : SmtpClientBuilder();
-            client.SendCompleted += new SendCompletedEventHandler(client_SendCompleted);
-
-            client.SendAsync(message, emailMessage);
+            if (!DisableEmailSending)
+            {
+                MailMessage message = CreateMailMessage(emailMessage);
+                SmtpClient client = SmtpClientBuilder == null ? new SmtpClient() : SmtpClientBuilder();
+                client.SendCompleted += new SendCompletedEventHandler(client_SendCompleted);
+                client.SendAsync(message, emailMessage);
+            }
+            else
+            { 
+                emailMessage.State = EmailState.Sent;
+                emailMessage.Sent = TimeZoneManager.Now;            
+            }
             emailMessage.Save();
         }
 
@@ -297,7 +309,7 @@ namespace Signum.Engine.Mailing
         {
             MailAddress to = temporaryOverrideEmailToAddress.HasText() ? new MailAddress(temporaryOverrideEmailToAddress) :
                 OverrideEmailToAddress.HasText() ? new MailAddress(OverrideEmailToAddress) :
-                new MailAddress(emailMessage.Recipient.Retrieve().Email); 
+                new MailAddress(emailMessage.Recipient.Retrieve().Email);
 
 
             MailMessage message = new MailMessage()
@@ -387,7 +399,7 @@ namespace Signum.Engine.Mailing
     public struct Link
     {
         public readonly string Url;
-        public readonly string Content; 
+        public readonly string Content;
 
         public Link(string url, string content)
         {
