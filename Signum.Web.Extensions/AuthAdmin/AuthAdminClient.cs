@@ -135,6 +135,7 @@ namespace Signum.Web.AuthAdmin
             string viewPrefix = "~/authAdmin/Views/{0}.cshtml";
             Navigator.AddSetting(new EmbeddedEntitySettings<T>()
             {
+                ShowSave = false,
                 PartialViewName = e =>  viewPrefix.Formato(partialViewName),
                 MappingDefault = new EntityMapping<T>(false)
                     .CreateProperty(m => m.DefaultRule)
