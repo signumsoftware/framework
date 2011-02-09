@@ -25,7 +25,7 @@ namespace Signum.Engine.Mailing
             {
                 NumLines = messages.Count,
                 Name = args.TryGetArgC<string>(1),
-                OverrideEmailAddress = EmailLogic.TemporaryOverrideEmailToAddress
+                OverrideEmailAddress = EmailLogic.OnEmailAddress()
             }.Save();
 
             messages.Select(m => m.RetrieveAndForget()).Select(m => new EmailMessageDN()
@@ -49,7 +49,8 @@ namespace Signum.Engine.Mailing
                                                  where email.Package == package.ToLite() && email.State == EmailState.Created
                                                  select email.ToLite()).ToList();
 
-            using (EmailLogic.OverrideTemporaryEmail(package.OverrideEmailAddress))
+
+            using (EmailLogic.OverrideEmailAddressForProcess(package.OverrideEmailAddress))
             {
                 int lastPercentage = 0;
                 for (int i = 0; i < emails.Count; i++)
