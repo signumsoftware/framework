@@ -57,30 +57,24 @@ namespace Signum.Engine.WikiMarkup
 
         static string ProcessTokens(string content, WikiSettings settings)
         {
-            StringBuilder sb = new StringBuilder();
-            int firstIndex = 0;
-
-            Match m = Regex.Match(content, @"\[(.+?)\]");
-            while (m.Success)
+            return Regex.Replace(content, @"\[(?<content>([^\[\]]|\[\[|\]\])*)\]", m =>
             {
-                string text = m.Value;
+                string text = m.Groups["content"].Value.Replace("[[", "[").Replace("]]", "]");
+
                 try
                 {
-                    text = settings.TokenParser
-                    .GetInvocationList()
-                    .Cast<Func<string, string>>()
-                    .Select(a => a(m.Value)).NotNull().First();
+                    return settings.TokenParser
+                        .GetInvocationList()
+                        .Cast<Func<string, string>>()
+                        .Select(a => a(text))
+                        .NotNull()
+                        .First();
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
+                    return "<span class=\"sf-wiki-error\">{0}</span>".Formato(m.Value);
                 }
-
-                sb.Append(content.Substring(firstIndex, m.Index - firstIndex) + ((text != null) ? text : ""));
-                firstIndex = m.Index + m.Length;
-                m = m.NextMatch();
-            }
-            sb.Append(content.Substring(firstIndex, content.Length - firstIndex));
-            return sb.ToString();
+            });
         }
 
         static string ProcessFormat(string content, WikiSettings settings)

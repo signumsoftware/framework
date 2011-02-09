@@ -52,13 +52,15 @@ namespace Signum.Web.Help
 
                 RegisterHelpRoutes();
 
-                DefaultWikiSettings = new WikiSettings(true) { TokenParser = TokenParser };
+                DefaultWikiSettings = new WikiSettings(true);
+                DefaultWikiSettings.TokenParser += TokenParser;
                 DefaultWikiSettings.TokenParser += s =>
                 {
                     try
                     {
                         WikiLink wl = LinkParser(s);
-                        if (wl != null) return wl.ToHtmlString();
+                        if (wl != null) 
+                            return wl.ToHtmlString();
                     }
                     catch (Exception)
                     {
@@ -69,7 +71,8 @@ namespace Signum.Web.Help
 
                 DefaultWikiSettings.TokenParser += ProcessImages;
 
-                NoLinkWikiSettings = new WikiSettings(false) { TokenParser = TokenParser, LineBreaks = false };
+                NoLinkWikiSettings = new WikiSettings(false) { LineBreaks = false };
+                NoLinkWikiSettings.TokenParser += TokenParser;
                 NoLinkWikiSettings.TokenParser += s =>
                 {
                     try
@@ -170,7 +173,7 @@ namespace Signum.Web.Help
         public static WikiLink LinkParser(string content)
         {
             Match m = Regex.Match(content,
-                        @"\[(?<letter>[^:]+):(?<link>.*?)(\|(?<text>.*?))?\]");
+                        @"(?<letter>[^:]+):(?<link>.*?)(\|(?<text>.*?))?");
 
             if (m.Success)
             {
@@ -250,7 +253,7 @@ namespace Signum.Web.Help
             return null;
         }
 
-        static Regex ImageRegex = new Regex(@"\[image(?<position>[^\|]+)\|(?<url>[^\|\]]*)(\|(?<footer>.*))?\]");
+        static Regex ImageRegex = new Regex(@"image(?<position>[^\|]+)\|(?<url>[^\|\]]*)(\|(?<footer>.*))?");
 
         public static string ProcessImages(string content)
         {

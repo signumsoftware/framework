@@ -166,6 +166,11 @@ hr {border:0;border-top:1px solid #E5E5E5;}
 right:1px;
 top:1px;}
 
+.sf-wiki-error
+{
+    color:Red;
+}
+
 a.unavailable
 {
 	color:Red;
