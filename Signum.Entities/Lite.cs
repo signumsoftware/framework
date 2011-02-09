@@ -29,11 +29,24 @@ namespace Signum.Entities
         {
         }
 
+
+        public Lite(int id, string toStr)
+            : base(typeof(T), id)
+        {
+            this.ToStr = toStr;
+        }
+
         public Lite(Type runtimeType, int id)
             : base(runtimeType, id)
         {
             if (!typeof(T).IsAssignableFrom(runtimeType))
                 throw new InvalidOperationException("Type {0} is not smaller than {1}".Formato(runtimeType, typeof(T)));
+        }
+
+        public Lite(Type runtimeType, int id, string toStr)
+            :this(runtimeType, id)
+        {
+            this.ToStr = toStr;
         }
 
         internal Lite(T entity)
