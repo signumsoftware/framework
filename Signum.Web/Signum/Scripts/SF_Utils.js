@@ -131,14 +131,14 @@ SF.ajax = function (jqueryAjaxOptions) {
         data: options.data,
         async: options.async,
         dataType: options.dataType,
-        success: function (ajaxResult) {
-            if (typeof ajaxResult === "string") {
-                ajaxResult = ajaxResult ? ajaxResult.trim() : "";
+        success: function (result) {
+            if (typeof result === "string") {
+                result = result ? result.trim() : "";
             }
-            var url = checkRedirection(ajaxResult);
+            var url = checkRedirection(result);
                 if (!SF.isEmpty(url)) window.location.href = url;
             else {
-                    if (options.success != null) options.success(ajaxResult);
+                if (options.success != null) options.success(result);
             }
         },
         error: options.error

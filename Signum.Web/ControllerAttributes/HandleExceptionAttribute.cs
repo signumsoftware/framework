@@ -75,7 +75,7 @@ namespace Signum.Web
         {
             int error = new HttpException(null, ex).GetHttpCode();
 
-            if (error == 401) //not authorized shows a log-io
+            if (error == 401) //not authorized shows a log-in
                 return 500;
 
             if (ex.GetType() == typeof(EntityNotFoundException))

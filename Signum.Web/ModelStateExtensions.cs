@@ -28,7 +28,7 @@ namespace Signum.Web
 
         public static string ToJsonData(this ModelStateDictionary modelState)
         {
-            return modelState.ToJSonObjectBig(
+            return modelState.ToJSonObject(
                 key => key.Quote(),
                 value => value.Errors.ToJSonArray(me => me.ErrorMessage.Quote()));
         }
