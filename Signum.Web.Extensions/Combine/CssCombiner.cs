@@ -33,12 +33,14 @@ namespace Signum.Web.Combine
         internal static StaticContentResult Combine(string[] virtualFiles)
         {
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine("/* {0} */".Formato(virtualFiles.ToString(",")));
+          
             foreach (var vf in virtualFiles)
             {
                 var content = CombineClient.ReadStaticFile(vf);
                 content = ReplaceRelativeImg(content, VirtualPathUtility.ToAbsolute(vf));
-                sb.AppendLine(Minify(content));
+                sb.AppendLine("/* {0} */".Formato(vf));
+                //content = Minify(content); 
+                sb.AppendLine(content);
             }
 
             return new StaticContentResult(Encoding.UTF8.GetBytes(sb.ToString()), "bla.css");
