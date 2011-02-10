@@ -258,7 +258,10 @@ namespace Signum.Web
 
         public static MvcHtmlString FormatHtml(this HtmlHelper html, string text, params object[] values)
         {
-            return new MvcHtmlString(string.Format(HttpUtility.HtmlEncode(text), values.Select(a => a is IHtmlString ? ((IHtmlString)a).ToHtmlString() : HttpUtility.HtmlEncode(a)).ToArray()));
+            return new MvcHtmlString(string.Format(HttpUtility.HtmlEncode(text), values.Select(a => 
+                a is IHtmlString ? ((IHtmlString)a).ToHtmlString() : 
+                a is HtmlTag ? ((HtmlTag)a).ToHtml().ToHtmlString() :
+                HttpUtility.HtmlEncode(a)).ToArray()));
         }
 
         public static MvcHtmlString Json(this HtmlHelper html, object value)
