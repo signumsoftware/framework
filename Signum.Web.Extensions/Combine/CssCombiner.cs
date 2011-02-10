@@ -39,7 +39,7 @@ namespace Signum.Web.Combine
                 var content = CombineClient.ReadStaticFile(vf);
                 content = ReplaceRelativeImg(content, VirtualPathUtility.ToAbsolute(vf));
                 sb.AppendLine("/* {0} */".Formato(vf));
-                //content = Minify(content); 
+                content = Minify(content); 
                 sb.AppendLine(content);
             }
 
