@@ -54,11 +54,12 @@ namespace Signum.Web.Files
 
                 if (fileRepeater.Remove)
                     sb.AddLine(
-                        helper.Button(itemTC.Compose("btnRemove"),
-                                      "x",
-                                      "ERepOnRemoving({0}, '{1}');".Formato(fileRepeater.ToJS(), itemTC.ControlID),
-                                      "sf-line-button remove",
-                                      new Dictionary<string, object> { { "title", fileRepeater.RemoveElementLinkText } }));
+                        helper.Href(itemTC.Compose("btnRemove"),
+                                      fileRepeater.RemoveElementLinkText,
+                                      "javascript:new SF.ERep({0}).remove('{1}');".Formato(fileRepeater.ToJS(), itemTC.ControlID),
+                                      fileRepeater.RemoveElementLinkText,
+                                      "sf-line-button sf-remove",
+                                      new Dictionary<string, object> { { "data-icon", "ui-icon-circle-close" }, { "data-text", false } }));
 
                 //Render FileLine for the current item
                 using (sb.Surround(new HtmlTag("div").IdName(itemTC.Compose(EntityBaseKeys.Entity))))

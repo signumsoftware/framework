@@ -65,10 +65,10 @@ namespace Signum.Web.Files
                     sb.AddLine(
                             helper.Href(fileLine.Compose(EntityBaseKeys.ToStrLink),
                                 value.TryCC(f => f.FileName) ?? "",
-                                fileLine.GetDownloading(),
+                                "",
                                 "Download",
                                 "sf-value-line",
-                                null));
+                                new Dictionary<string, object> { { "onclick", fileLine.GetDownloading() } }));
                 }
                 else
                     sb.AddLine(helper.Span(fileLine.Compose(EntityBaseKeys.ToStr), value.TryCC(f => f.FileName) ?? "", "sf-value-line", null));
@@ -81,7 +81,7 @@ namespace Signum.Web.Files
                 sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, fileLine, fileLine.ControlID));
 
                 sb.AddLine(MvcHtmlString.Create("<input type='file' onchange=\"{0}\" id='{1}' name='{1}' class='valueLine'/>".Formato(fileLine.GetOnChanged(), fileLine.ControlID)));
-                sb.AddLine(MvcHtmlString.Create("<img src='Images/loading.gif' id='{0}loading' alt='loading' style='display:none'/>".Formato(fileLine.ControlID)));
+                sb.AddLine(MvcHtmlString.Create("<img src='{0}' id='{1}loading' alt='loading' style='display:none'/>".Formato(RouteHelper.New().Content("~/Images/loading.gif"), fileLine.ControlID)));
                 sb.AddLine(MvcHtmlString.Create("<iframe id='frame{0}' name='frame{0}' src='about:blank' style='position:absolute;left:-1000px;top:-1000px'></iframe>".Formato(fileLine.ControlID)));
             }
 
