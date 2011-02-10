@@ -108,8 +108,7 @@ namespace Signum.Web.Reports
 
             Database.Save(report);
 
-            this.HttpContext.Response.Redirect(Navigator.ViewRoute(report), true);
-            return null;
+            return Navigator.RedirectToEntity(report);
         }
         
         [HttpPost]

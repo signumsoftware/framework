@@ -313,7 +313,7 @@ namespace Signum.Engine.Mailing
 
             MailMessage message = new MailMessage()
             {
-                To = { address },
+                To = { address ?? emailMessage.Recipient.Retrieve().Email },
                 Subject = emailMessage.Subject,
                 Body = emailMessage.Body,
                 IsBodyHtml = true,

@@ -37,7 +37,7 @@ namespace Signum.Web.Auth
         public static event Func<string> GenerateRandomPassword = () => MyRandom.Current.NextString(8);
 
         public static event Action OnUserLogged;
-        public static event Action<Controller, UserDN> OnUserPreLogin;
+        public static event Func<Controller, UserDN, ActionResult> OnUserPreLogin;
         public static event Func<Controller, string> OnUserLoggedDefaultReturn;
         public const string SessionUserKey = "user";
 
@@ -364,7 +364,11 @@ namespace Signum.Web.Auth
                 return LoginErrorAjaxOrForm(Request.IsAjaxRequest() ? "password" : "_FORM", Resources.InvalidUsernameOrPassword);
 
             if (OnUserPreLogin != null)
-                OnUserPreLogin(this, user);
+            {
+                var result = OnUserPreLogin(this, user);
+                if (result != null)
+                    return result; 
+            }
 
             Thread.CurrentPrincipal = user;
 
@@ -436,7 +440,13 @@ namespace Signum.Web.Auth
                            ref ticketText);
 
                     if (OnUserPreLogin != null)
-                        OnUserPreLogin(null, user);
+                    {
+                        var result = OnUserPreLogin(null, user);
+                        if (result != null)
+                        {
+                            //We can not execute :S
+                        }
+                    }
 
                     Thread.CurrentPrincipal = user;
 

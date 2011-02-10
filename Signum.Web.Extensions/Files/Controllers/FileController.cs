@@ -129,11 +129,14 @@ namespace Signum.Web.Files
 
             return File(binaryFile, SignumController.GetMimeType(Path.GetExtension(fp.FileName)), fp.FileName);*/
 
+            
+            //
+            //HttpContext.Response.AddHeader("content-disposition", "attachment; filename=" + Path.GetFileName(path));
+            //HttpContext.Response.ContentType = 
+            //HttpContext.Response.TransmitFile(path);
+
             string path = fp.FullPhysicalPath;
-            HttpContext.Response.AddHeader("content-disposition", "attachment; filename=" + Path.GetFileName(path));
-            HttpContext.Response.ContentType = MimeType.FromFileName(path);
-            HttpContext.Response.TransmitFile(path);
-            return null;
+            return File(path,  MimeType.FromFileName(path));
         }
     }
 }
