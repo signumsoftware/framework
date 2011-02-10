@@ -1099,7 +1099,7 @@ SF.registerModule("Lines", function () {
             if (SF.isEmpty(id)) {
                 return;
             }
-            window.open($("base").attr("href") + controllerUrl + "?filePathID=" + id);
+            window.open(this.options.controllerUrl + "?filePathID=" + id);
         };
 
         this.removeSpecific = function () {
@@ -1126,7 +1126,7 @@ SF.registerModule("Lines", function () {
             var cEncoding = mform.attr('encoding');
             var cTarget = mform.attr('target');
             var cAction = mform.attr('action');
-            mform.attr('enctype', 'multipart/form-data').attr('encoding', 'multipart/form-data').attr('target', 'frame' + this.options.prefix).attr('action', controllerUrl).submit();
+            mform.attr('enctype', 'multipart/form-data').attr('encoding', 'multipart/form-data').attr('target', 'frame' + this.options.prefix).attr('action', this.options.controllerUrl).submit();
             mform.attr('enctype', cEncType).attr('encoding', cEncoding).attr('target', cTarget).attr('action', cAction);
         };
 
