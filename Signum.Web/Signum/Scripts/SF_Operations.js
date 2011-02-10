@@ -125,6 +125,8 @@ SF.registerModule("Operations", function () {
                     SF.Notify.error(lang.signum.error, 2000);
                 }
             });
+
+            return false;
         },
 
         operationSubmit: function () {
@@ -139,6 +141,8 @@ SF.registerModule("Operations", function () {
             SF.hiddenInput("oldPrefix", this.options.prefix));
 
             SF.submit(this.options.controllerUrl, this.options.requestExtraJsonData);
+
+            return false;
         },
 
         executedSuccessfully: function (operationResult) {
@@ -189,6 +193,8 @@ SF.registerModule("Operations", function () {
                     return;
                 }
             }
+
+            return false;
         }
     };
 
