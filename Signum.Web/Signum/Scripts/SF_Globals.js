@@ -304,8 +304,8 @@ SF.registerModule("Globals", function () {
         return "<input type='hidden' id='" + id + "' name='" + id + "' value='" + value + "' />\n";
     };
 
-    SF.hiddenDiv = function (id, $innerHtml) {
-        return $("<div id='" + id + "' name='" + id + "' style='display:none'></div>").append($innerHtml == null ? "" : $innerHtml);
+    SF.hiddenDiv = function (id, innerHtml) {
+        return "<div id='" + id + "' name='" + id + "' style='display:none'>" + innerHtml + "</div>";
     };
 
     SF.Dropdowns =

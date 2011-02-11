@@ -64,7 +64,7 @@ SF.registerModule("ViewNavigator", function () {
             if (SF.isEmpty(this.viewOptions.containerDiv))
                 throw "No ContainerDiv was specified to Navigator on viewSave mode";
             if ($('#' + this.viewOptions.containerDiv).length == 0)
-                $("body").append(SF.hiddenDiv(this.viewOptions.containerDiv, null));
+                $("body").append(SF.hiddenDiv(this.viewOptions.containerDiv, ""));
             if (!SF.isEmpty(html))
                 $('#' + this.viewOptions.containerDiv).html(html);
             if (this.isLoaded())
@@ -302,8 +302,7 @@ SF.registerModule("ViewNavigator", function () {
             async: false,
             dataType: "html",
             success: function (chooserHTML) {
-                var $chooserHTML = jQuery(chooserHTML);
-                $("body").append(SF.hiddenDiv(tempDivId, $chooserHTML));
+                $("body").append(SF.hiddenDiv(tempDivId, chooserHTML));
                 SF.triggerNewContent($("#" + tempDivId));
                 //Set continuation for each type button
                 $('#' + tempDivId + " :button").each(function () {

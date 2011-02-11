@@ -253,7 +253,7 @@ SF.registerModule("Lines", function () {
         this.newEntity = function (clonedElements, runtimeType) {
             var info = this.runtimeInfo();
             info.setEntity(runtimeType, '');
-            info.find().after(SF.hiddenDiv(SF.compose(this.options.prefix, this.entity), null));
+            info.find().after(SF.hiddenDiv(SF.compose(this.options.prefix, this.entity), ""));
             $(this.pf(this.entity)).append(clonedElements);
         };
 
@@ -284,7 +284,7 @@ SF.registerModule("Lines", function () {
             var info = this.runtimeInfo();
             info.setEntity(selectedItems[0].type, selectedItems[0].id);
             if ($(this.pf(this.entity)).length == 0)
-                info.find().after(SF.hiddenDiv(SF.compose(this.options.prefix, this.entity), null));
+                info.find().after(SF.hiddenDiv(SF.compose(this.options.prefix, this.entity), ""));
             $(this.pf(SF.Keys.toStr)).val(''); //Clean
             $(this.pf(SF.Keys.link)).html(selectedItems[0].toStr).attr('href', selectedItems[0].link);
             return true;
@@ -529,7 +529,7 @@ SF.registerModule("Lines", function () {
             var listInfo = this.staticInfo();
             var itemInfoValue = new SF.RuntimeInfo(itemPrefix).createValue(runtimeType, '', 'n', '');
             listInfo.find().after(SF.hiddenInput(SF.compose(itemPrefix, SF.Keys.runtimeInfo), itemInfoValue))
-                .after(SF.hiddenDiv(SF.compose(itemPrefix, this.entity), null));
+                .after(SF.hiddenDiv(SF.compose(itemPrefix, this.entity), ""));
             $('#' + SF.compose(itemPrefix, this.entity)).append(clonedElements);
 
             var select = $(this.pf(''));
