@@ -369,7 +369,7 @@ SF.registerModule("Globals", function () {
 
     $(function () { $('#form input[type=text]').keypress(function (e) { return e.which != 13 }) });
 
-    $(function () {
+    SF.AjaxError = (function () {
         var getErrorMessage = function (response) {
             var error;
             if (response !== null && response !== undefined) {
@@ -403,6 +403,10 @@ SF.registerModule("Globals", function () {
                 SF.Blocker.disable();
             }
         });
-    });
 
+        return
+        {
+            getErrorMessage: getErrorMessage
+        }
+    })();
 });
