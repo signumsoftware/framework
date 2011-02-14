@@ -6,6 +6,7 @@ using Signum.Utilities.Properties;
 using System.Globalization;
 using System.Linq.Expressions;
 using Signum.Utilities.ExpressionTrees;
+using System.Text.RegularExpressions;
 
 namespace Signum.Utilities
 {
@@ -222,14 +223,8 @@ namespace Signum.Utilities
             if (date.Year == currentdate.Year)
             {
                 string pattern = CultureInfo.CurrentCulture.DateTimeFormat.LongDatePattern;
-                pattern = pattern.Replace("yy", "");
-
+                pattern = Regex.Replace(pattern, "('[^']*')?yyy?y?('[^']*')?", "");
                 string dateString = date.ToString(pattern);
-                foreach (string endSeparator in Resources.DateSeparators.Split(';'))
-                {
-                    if (dateString.EndsWith(endSeparator))
-                        dateString = dateString.Substring(0, dateString.Length - endSeparator.Length);
-                }
                 return dateString.Trim().FirstUpper();
             }
             return date.ToLongDateString();

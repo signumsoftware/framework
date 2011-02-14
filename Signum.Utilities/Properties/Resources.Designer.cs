@@ -214,15 +214,6 @@ namespace Signum.Utilities.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ,.
-        /// </summary>
-        public static string DateSeparators {
-            get {
-                return ResourceManager.GetString("DateSeparators", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to This {0}.
         /// </summary>
         public static string DateThis {
