@@ -24,21 +24,6 @@ namespace Signum.Windows
 
         public Func<object, bool> IsFindable;
 
-        Dictionary<string, Func<Binding, DataTemplate>> formatters;
-        public Dictionary<string, Func<Binding, DataTemplate>> Formatters
-        {
-            get
-            {
-                if (formatters == null)
-                    formatters = new Dictionary<string, Func<Binding, DataTemplate>>();
-                return formatters;
-            }
-            set
-            {
-                formatters = value;
-            }
-        }
-
         internal QueryDescription QueryDescription { get; set; }
 
         public static List<FormatterRule> FormatRules { get; set; }
@@ -59,7 +44,7 @@ namespace Signum.Windows
                     c=>c.Type.UnNullify().IsEnum, 
                     c=> b => FormatTools.TextBlockTemplate(b, TextAlignment.Left, Converters.EnumDescriptionConverter)),
                 new FormatterRule(FormatterPriority.Type, "Number",
-                    c=>Reflector.IsNumber(c.Type), 
+                    c=> Reflector.IsNumber(c.Type), 
                     c => b => FormatTools.TextBlockTemplate(b, TextAlignment.Right, c.Format == null ? null : ConverterFactory.New(Reflector.GetPropertyFormatter(c.Format, null)))),
                 new FormatterRule(FormatterPriority.Type, "DateTime",
                     c=>c.Type.UnNullify() == typeof(DateTime), 
@@ -68,18 +53,14 @@ namespace Signum.Windows
                     c=>c.Type.IsLite(), //Not on entities! 
                     c=> b=> FormatTools.LightEntityLineTemplate(b)),
 
-                new FormatterRule(FormatterPriority.Property, "NumberUnit",
-                    c=>Reflector.IsNumber(c.Type) && c.Unit != null,
+                new FormatterRule(FormatterPriority.DecoratedType, "NumberUnit",
+                    c=> Reflector.IsNumber(c.Type) && c.Unit != null,
                     c => b => FormatTools.TextBlockTemplate(b, TextAlignment.Right, ConverterFactory.New(Reflector.GetPropertyFormatter(c.Format,c.Unit))))
             }; 
         }
 
         public Func<Binding, DataTemplate> GetFormatter(Column column)
         {
-            var result = formatters.TryGetC(column.Name);
-            if(result != null)
-                return result;
-
             FormatterRule fr = FormatRules.Where(cfr => cfr.IsApplicable(column)).WithMax(a=>a.Priority); 
 
             return fr.Formatter(column); 
@@ -107,6 +88,7 @@ namespace Signum.Windows
     {
         public const int Default = 0;
         public const int Type = 100;
+        public const int DecoratedType = 150; 
         public const int Property = 200;
     }
 

@@ -104,6 +104,17 @@ namespace Signum.Windows
             obj.SetValue(RouteProperty, value);
         }
 
+        public static readonly DependencyProperty LabelOnlyRouteProperty =
+         DependencyProperty.RegisterAttached("LabelOnlyRoute", typeof(string), typeof(Common), new FrameworkPropertyMetadata(null, new PropertyChangedCallback(RoutePropertyChanged)));
+        public static string GetLabelOnlyRoute(this DependencyObject obj)
+        {
+            return (string)obj.GetValue(LabelOnlyRouteProperty);
+        }
+        public static void SetLabelOnlyRoute(this DependencyObject obj, string value)
+        {
+            obj.SetValue(LabelOnlyRouteProperty, value);
+        }
+
         [ThreadStatic]
         static bool delayRoutes = false;
 
@@ -151,8 +162,10 @@ namespace Signum.Windows
             if (DesignerProperties.GetIsInDesignMode(fe))
             {
                 DependencyProperty labelText =
-                    fe is ValueLine ? ValueLine.LabelTextProperty :
-                    fe is EntityBase ? EntityBase.LabelTextProperty :
+                    fe is LineBase ? ((LineBase)fe).CommonRouteLabelText() :
+                    fe is HeaderedContentControl ? HeaderedContentControl.HeaderProperty :
+                    fe is TextBlock ? TextBlock.TextProperty :
+                    fe is Label ? Label.ContentProperty :
                     null;
 
                 if (labelText != null && fe.NotSet(labelText))
@@ -165,13 +178,13 @@ namespace Signum.Windows
             string route = (string)e.NewValue;
 
             if (!delayRoutes)
-                InititializeRoute(fe, route);
+                InititializeRoute(fe, route, e.Property);
             else
             {
                 if (fe is IPreLoad)
-                    ((IPreLoad)fe).PreLoad += (s, e2) => InititializeRoute(fe, route);
+                    ((IPreLoad)fe).PreLoad += (s, e2) => InititializeRoute(fe, route, e.Property);
                 else
-                    fe.Loaded += (s, e2) => InititializeRoute(fe, route);
+                    fe.Loaded += (s, e2) => InititializeRoute(fe, route, e.Property);
             }
         }
 
@@ -182,7 +195,7 @@ namespace Signum.Windows
             LabelOnly, 
         }
 
-        private static void InititializeRoute(FrameworkElement fe, string route)
+        private static void InititializeRoute(FrameworkElement fe, string route, DependencyProperty property)
         {
             PropertyRoute parentContext = GetTypeContext(fe.Parent);
 
@@ -195,7 +208,7 @@ namespace Signum.Windows
 
             var context = ContinueRouteExtension.Continue(parentContext, route); 
 
-            if (!pseudoRoute)
+            if (property == Common.RouteProperty)
             {
                 SetTypeContext(fe, context);
 
@@ -204,7 +217,7 @@ namespace Signum.Windows
             }
             else
             {
-                foreach (CommonRouteTask task in PseudoRouteTask.GetInvocationList())
+                foreach (CommonRouteTask task in LabelOnlyRouteTask.GetInvocationList())
                     task(fe, route, context);
             }
         }
@@ -212,7 +225,7 @@ namespace Signum.Windows
         #region Tasks
         public static event CommonRouteTask RouteTask;
 
-        public static event CommonRouteTask PseudoRouteTask;
+        public static event CommonRouteTask LabelOnlyRouteTask;
 
         static Common()
         {
@@ -226,7 +239,7 @@ namespace Signum.Windows
             RouteTask += TaskSetCollaspeIfNull;
             RouteTask += TaskSetNotNullItemsSource;
 
-            PseudoRouteTask += TaskSetLabelText;
+            LabelOnlyRouteTask += TaskSetLabelText;
         }
 
         public static void TaskSetValueProperty(FrameworkElement fe, string route, PropertyRoute context)
@@ -270,6 +283,7 @@ namespace Signum.Windows
                fe is LineBase ? ((LineBase)fe).CommonRouteLabelText() :
                fe is HeaderedContentControl ? HeaderedContentControl.HeaderProperty :
                fe is TextBlock ? TextBlock.TextProperty:
+               fe is Label? Label.ContentProperty: 
                null;
 
             if (labelText != null && fe.NotSet(labelText))

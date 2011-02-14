@@ -21,7 +21,7 @@
         <GradientStop Color="#FFD4E9FF" Offset="1"/>
     </LinearGradientBrush>
 
-    <Path x:Key="Create" Stretch="Fill" Stroke="#FF1BA351" x:Shared="False">
+    <Path x:Key="Create" Stretch="Fill" Stroke="#FF117333" x:Shared="False">
         <Path.Data>
             <CombinedGeometry GeometryCombineMode="Union" >
                 <CombinedGeometry.Geometry1>
