@@ -23,7 +23,7 @@ namespace Signum.Entities.Reflection
             return sb.ToString();
         }
 
-        static int GetHashCode32(string value)
+        public static int GetHashCode32(string value)
         {
             int num = 0x15051505;
             int num2 = num;

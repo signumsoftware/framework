@@ -20,7 +20,6 @@ using Signum.Engine.Linq;
 using System.Data.SqlClient;
 using Signum.Services;
 using System.Globalization;
-using Signum.Engine.Engine;
 
 namespace Signum.Engine.Maps
 {

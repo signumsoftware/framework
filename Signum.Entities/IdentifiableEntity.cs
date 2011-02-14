@@ -13,6 +13,7 @@ using System.ComponentModel;
 using System.Linq.Expressions;
 using Signum.Utilities.Reflection;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Services;
 
 namespace Signum.Entities
 {
@@ -113,7 +114,7 @@ namespace Signum.Entities
         {
             return id == null ?
                 base.GetHashCode() :
-                GetType().FullName.GetHashCode() ^ id.Value;
+                StringHashEncoder.GetHashCode32(GetType().FullName) ^ id.Value;
         }
 
         /// <summary>

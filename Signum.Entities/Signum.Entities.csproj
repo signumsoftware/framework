@@ -109,6 +109,7 @@
     <Compile Include="PropertyRoute.cs" />
     <Compile Include="Reflection\GraphExplorer.cs" />
     <Compile Include="Reflection\Reflector.cs" />
+    <Compile Include="Reflection\StringHashEncoder.cs" />
     <Compile Include="TimeZoneManager.cs" />
     <Compile Include="TypeAttributes.cs" />
     <Compile Include="Validator.cs" />
@@ -148,12 +149,6 @@
     <EmbeddedResource Include="Properties\Resources.de.resx" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Signum.Utilities\Signum.Utilities.csproj">
-      <Project>{F7D3F72D-741D-4F67-8CF8-CD41B9035FED}</Project>
-      <Name>Signum.Utilities</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
       <Visible>False</Visible>
       <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
@@ -169,6 +164,12 @@
       <ProductName>Windows Installer 3.1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Signum.Utilities\Signum.Utilities.csproj">
+      <Project>{F7D3F72D-741D-4F67-8CF8-CD41B9035FED}</Project>
+      <Name>Signum.Utilities</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
