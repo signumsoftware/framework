@@ -73,7 +73,7 @@ namespace Signum.Engine.DynamicQuery
             }
         }
 
-        protected string DisplayName()
+        public string DisplayName()
         {
             if (OverrideDisplayName != null)
                 return OverrideDisplayName();
