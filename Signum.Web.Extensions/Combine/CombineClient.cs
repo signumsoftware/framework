@@ -13,7 +13,7 @@ using System.Reflection;
 using System.Web.Routing;
 using Signum.Web.Controllers;
 using Signum.Web.PortableAreas;
-using Signum.Engine.Engine;
+using Signum.Entities.Reflection;
 
 namespace Signum.Web.Combine
 {
