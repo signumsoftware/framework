@@ -62,7 +62,7 @@
             <GroupBox.Header>
                 <StackPanel Orientation="Horizontal">
                     <Image Source="../Images/order.png" Stretch="None"/>
-                    <TextBlock m:Common.Route="$Orders"/>
+                    <TextBlock m:Common.LabelOnlyRoute="Orders"/>
                 </StackPanel>
             </GroupBox.Header>
             <m:EntityList m:Common.Route="Orders" Grid.IsSharedSizeScope="true" Move="True"  >

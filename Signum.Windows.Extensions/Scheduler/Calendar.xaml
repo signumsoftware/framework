@@ -6,7 +6,7 @@
     m:Common.TypeContext="d:CalendarDN">
     <StackPanel>
         <m:ValueLine m:Common.Route="Name" />
-        <GroupBox m:Common.Route="$Holidays">
+        <GroupBox m:Common.LabelOnlyRoute="Holidays">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" MinWidth="200" />
