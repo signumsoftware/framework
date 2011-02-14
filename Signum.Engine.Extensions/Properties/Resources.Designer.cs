@@ -98,6 +98,24 @@ namespace Signum.Engine.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} is a {1} and shows the property {2}.
+        /// </summary>
+        internal static string _0IsA1AndShowsTheProperty2 {
+            get {
+                return ResourceManager.GetString("_0IsA1AndShowsTheProperty2", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} is a calculated {1}.
+        /// </summary>
+        internal static string _0IsACalculated1 {
+            get {
+                return ResourceManager.GetString("_0IsACalculated1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0} is a collection of elements {1}.
         /// </summary>
         internal static string _0IsACollectionOfElements1 {
@@ -121,6 +139,15 @@ namespace Signum.Engine.Extensions.Properties {
         internal static string Amount {
             get {
                 return ResourceManager.GetString("Amount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to any.
+        /// </summary>
+        internal static string Any {
+            get {
+                return ResourceManager.GetString("Any", resourceCulture);
             }
         }
         

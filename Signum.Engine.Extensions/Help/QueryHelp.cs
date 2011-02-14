@@ -124,7 +124,7 @@ namespace Signum.Engine.Help
                 Info = HelpGenerator.GetQueryHelp(DynamicQueryManager.Current[key]),
                 Columns = GenerateColumns(key).ToDictionary(
                                 kvp => kvp.Name,
-                                kvp => new QueryColumnHelp() { Name = kvp.Name, Info = "" })
+                                kvp => new QueryColumnHelp() { Name = kvp.Name, Info = HelpGenerator.GetQueryColumnHelp(kvp) })
             };
         }
 

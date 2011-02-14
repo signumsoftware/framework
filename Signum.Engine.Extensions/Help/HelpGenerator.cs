@@ -24,18 +24,20 @@ namespace Signum.Engine.Help
         {
             string validations = Validator.GetOrCreatePropertyPack(pr).Validators.CommaAnd(v => v.HelpMessage);
 
+            Implementations imp = Schema.Current.FindImplementations(pr); 
+
             if (validations.HasText())
                 validations = Resources.Should + validations;
 
             if (Reflector.IsIIdentifiable(pr.Type))
             {
-                return EntityProperty(pr, pr.Type, pr.Type.TypeLink()) + validations;
+                return EntityProperty(pr, pr.Type, pr.Type.TypeLinks(imp)) + validations;
             }
             else if (pr.Type.IsLite())
             {
                 Type cleanType = Reflector.ExtractLite(pr.Type);
 
-                return EntityProperty(pr, cleanType, cleanType.TypeLink()) + validations;
+                return EntityProperty(pr, cleanType, cleanType.TypeLinks(imp)) + validations;
             }
             else if (Reflector.IsEmbeddedEntity(pr.Type))
             {
@@ -47,25 +49,25 @@ namespace Signum.Engine.Help
 
                 if (elemType.IsIIdentifiable())
                 {
-                    return Resources._0IsACollectionOfElements1.Formato(pr.PropertyInfo.NiceName(), elemType.TypeLink()) + validations;
+                    return Resources._0IsACollectionOfElements1.Formato(pr.PropertyInfo.NiceName(), elemType.TypeLinks(imp)) + validations;
                 }
                 else if (elemType.IsLite())
                 {
-                    return Resources._0IsACollectionOfElements1.Formato(pr.PropertyInfo.NiceName(), Reflector.ExtractLite(elemType).TypeLink()) + validations;
+                    return Resources._0IsACollectionOfElements1.Formato(pr.PropertyInfo.NiceName(), Reflector.ExtractLite(elemType).TypeLinks(imp)) + validations;
                 }
-                else if (Reflector.IsEmbeddedEntity(pr.PropertyInfo.PropertyType))
+                else if (Reflector.IsEmbeddedEntity(elemType))
                 {
                     return Resources._0IsACollectionOfElements1.Formato(pr.PropertyInfo.NiceName(), elemType.NiceName()) + validations;
                 }
                 else
                 {
-                    string valueType = ValueType(elemType, pr);
+                    string valueType = ValueType(pr.Add("Item"));
                     return Resources._0IsACollectionOfElements1.Formato(pr.PropertyInfo.NiceName(), valueType) + validations;
                 }
             }
             else
             {
-                string valueType = ValueType(pr.Type, pr);
+                string valueType = ValueType(pr);
 
                 Gender gender = NaturalLanguageTools.GetGender(valueType);
 
@@ -84,26 +86,50 @@ namespace Signum.Engine.Help
                     propertyType.GetGenderAwareResource(() => Resources._0IsA1).Formato(pr.PropertyInfo.NiceName(), typeName);
         }
 
-        static string ValueType(Type propertyType, PropertyRoute pr)
+        static string ValueType(PropertyRoute pr)
         {
-            UnitAttribute unit = pr.PropertyInfo.SingleAttribute<UnitAttribute>();
+            Type type = pr.Type;
+            string format = Reflector.FormatString(pr);
+            string unit = pr.PropertyInfo.SingleAttribute<UnitAttribute>().TryCC(u=>u.UnitName);
+            return ValueType(type, format, unit);
+        }
 
-            Type cleanType = Nullable.GetUnderlyingType(propertyType) ?? propertyType;
+        private static string ValueType(Type type, string format, string unit)
+        {
+            Type cleanType = Nullable.GetUnderlyingType(type) ?? type;
 
             string typeName =
                     cleanType.IsEnum ? Resources.ValueLike0.Formato(Enum.GetValues(cleanType).Cast<Enum>().CommaOr(e => e.NiceToString())) :
-                    cleanType == typeof(decimal) && unit != null && unit.UnitName == "€" ? Resources.Amount :
-                    cleanType == typeof(DateTime) && Validator.GetOrCreatePropertyPack(pr).Validators.OfType<DateTimePrecissionValidatorAttribute>().SingleOrDefault().Map(a => a != null && a.Precision == DateTimePrecision.Days) ? Resources.Date :
+                    cleanType == typeof(decimal) && unit != null && unit == "€" ? Resources.Amount :
+                    cleanType == typeof(DateTime) && format == "d" ? Resources.Date :
                     NaturalTypeDescription(cleanType);
 
-            string orNull = Nullable.GetUnderlyingType(pr.Type) != null ? Resources.OrNull : null;
+            string orNull = Nullable.GetUnderlyingType(type) != null ? Resources.OrNull : null;
 
-            return typeName.Add(unit != null ? Resources.ExpressedIn + unit.UnitName : null, " ").Add(orNull, " ");
+            return typeName.Add(unit != null ? Resources.ExpressedIn + unit : null, " ").Add(orNull, " ");
+        }
+
+        static string TypeLinks(this Type type, Implementations implementations)
+        {
+            if (implementations == null)
+                return type.TypeLink();
+            if (implementations.IsByAll)
+                return Resources.Any + " " + type.TypeLink();
+            return ((ImplementedByAttribute)implementations).ImplementedTypes.CommaOr(TypeLink);
         }
 
         static string TypeLink(this Type type)
         {
-            return "[e:" + type.Name + "]";
+            string cleanName = TypeLogic.TryGetCleanName(type);
+            if (cleanName.HasText())
+                return "[e:" + cleanName + "]";
+            return type.NiceName();
+        }
+
+        static string PropertyLink(this PropertyRoute route)
+        {
+            string cleanName = TypeLogic.GetCleanName(route.RootType);
+            return "[p:" + cleanName + "." + route.PropertyString() + "]";
         }
 
         static string NaturalTypeDescription(Type type)
@@ -165,69 +191,41 @@ namespace Signum.Engine.Help
 
         public static string GetQueryHelp(IDynamicQuery dynamicQuery)
         {
-            Type entityType = dynamicQuery.EntityColumn().DefaultEntityType();
+            ColumnDescriptionFactory cdf = dynamicQuery.EntityColumn();
 
-            if (dynamicQuery.Expression != null)
+            return Resources.QueryOf0.Formato(Reflector.ExtractLite(cdf.Type).TypeLinks(cdf.Implementations));
+        }
+
+        internal static string GetQueryColumnHelp(ColumnDescriptionFactory kvp)
+        {
+            string typeDesc = QueryColumnType(kvp);
+
+            if (kvp.PropertyRoute != null)
+                return Resources._0IsA1AndShowsTheProperty2.Formato(kvp.DisplayName(), typeDesc, PropertyLink(kvp.PropertyRoute));
+            else
+                return Resources._0IsACalculated1.Formato(kvp.DisplayName(), typeDesc);
+        }
+
+        private static string QueryColumnType(ColumnDescriptionFactory kvp)
+        {
+            if (Reflector.IsIIdentifiable(kvp.Type))
             {
-                Expression expression;
-                try
-                {
-                    expression = DbQueryProvider.Clean(dynamicQuery.Expression);
-                }
-                catch (Exception)
-                {
-                    expression = MetaEvaluator.Clean(dynamicQuery.Expression);
-                }
-
-                List<Type> types = TableGatherer.GatherTables(expression);
-                if (types.Count == 1 && types.Contains(entityType))
-                    return Resources.QueryOf0.Formato(entityType.NicePluralName());
-                else
-                    return Resources.QueryOf0Connecting1.Formato(entityType.NicePluralName(), types.CommaAnd(t => t.NiceName()));
+                return kvp.Type.TypeLinks(kvp.Implementations);
             }
+            else if (kvp.Type.IsLite())
+            {
+                Type cleanType = Reflector.ExtractLite(kvp.Type);
 
-            return Resources.QueryOf0.Formato(entityType.NicePluralName());
-        }
-    }
-
-    internal class TableGatherer : SimpleExpressionVisitor
-    {
-        List<Type> result = new List<Type>();
-
-        public static List<Type> GatherTables(Expression expression)
-        {
-            TableGatherer visitor = new TableGatherer();
-            visitor.Visit(expression);
-            return visitor.result;
-        }
-
-        protected override Expression VisitConstant(ConstantExpression c)
-        {
-            Type type = TableType(c.Value);
-            if(type != null)
-                result.Add(type);
-
-            return c;
-        }
-
-        public Type TableType(object value)
-        {
-            if (value == null)
-                return null;
-
-            Type type = value.GetType();
-            if (!typeof(IQueryable).IsAssignableFrom(type))
-                return null;
-
-            IQueryable query = (IQueryable)value;
-
-            if (!type.IsInstantiationOf(typeof(Query<>)))
-                throw new InvalidOperationException(Resources.BelongsToAnotherKindOkLinqProvider);
-
-            if (!query.IsBase())
-                throw new InvalidOperationException("ConstantExpression with complex IQueryable unexpected");
-
-            return query.ElementType;
+                return cleanType.TypeLinks(kvp.Implementations);
+            }
+            else if (Reflector.IsEmbeddedEntity(kvp.Type))
+            {
+                return kvp.Type.NiceName();
+            }
+            else
+            {
+                return ValueType(kvp.Type, kvp.Format, kvp.Unit);
+            }
         }
     }
 }

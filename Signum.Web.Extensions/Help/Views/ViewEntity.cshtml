@@ -75,9 +75,9 @@
                                 {
                                     <tr>
                                         <td>
-                                            <b>@qc.Value.Name.NiceName()</b> @qc.Value.Info
+                                            <b>@qc.Value.Name.NiceName()</b>
                                         </td>
-                                        <td>@qc.Value.Info
+                                        <td> @Html.WikiParse(qc.Value.Info, HelpClient.DefaultWikiSettings)
                                         </td>
                                     </tr>
                                     <tr>

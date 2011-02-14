@@ -87,9 +87,9 @@ namespace Signum.Engine.Help
             return HelpLogic.EntityUrl(entityType) + "#" + "o-" + OperationDN.UniqueKey(operation).Replace('.', '_');
         }
 
-        public static string PropertyUrl(Type entityType, string property)
+        public static string PropertyUrl(PropertyRoute route)
         {
-            return HelpLogic.EntityUrl(entityType) + "#" + "p-" + property;
+            return HelpLogic.EntityUrl(route.RootType) + "#" + "p-" + route.PropertyString();
         }
 
         public static string QueryUrl(Type entityType)
@@ -362,7 +362,7 @@ namespace Signum.Engine.Help
                                {
                                    TypeName = name,
                                    File = doc.File,
-                               }).ToDictionary(a => a.TypeName, a => a.File);
+                               }).ToDictionary(a => a.TypeName, a => a.File,"Types in HelpFiles");
 
              
                 HelpTools.SynchronizeReplacing(replacements, "Type", current, should,
@@ -387,7 +387,7 @@ namespace Signum.Engine.Help
                 var should = (from type in types
                               let keys = DynamicQueryManager.Current.GetQueries(type).Keys
                               from key in keys
-                              select key).ToDictionary(q => QueryUtils.GetQueryUniqueKey(q));
+                              select key).Distinct().ToDictionary(q => QueryUtils.GetQueryUniqueKey(q), "Queries in HelpFiles");
 
                 var current = (from doc in queriesDocuments 
                                let name = QueryHelp.GetQueryFullName(doc.Document)

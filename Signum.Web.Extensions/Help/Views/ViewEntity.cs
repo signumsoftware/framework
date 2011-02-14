@@ -233,16 +233,11 @@ WriteLiteral("                                    <tr>\r\n                      
 
                                           Write(qc.Value.Name.NiceName());
 
-WriteLiteral("</b> ");
+WriteLiteral("</b>\r\n                                        </td>\r\n                            " +
+"            <td> ");
 
 
-                                                                        Write(qc.Value.Info);
-
-WriteLiteral("\r\n                                        </td>\r\n                                " +
-"        <td>");
-
-
-                                       Write(qc.Value.Info);
+                                        Write(Html.WikiParse(qc.Value.Info, HelpClient.DefaultWikiSettings));
 
 WriteLiteral("\r\n                                        </td>\r\n                                " +
 "    </tr>\r\n");

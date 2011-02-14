@@ -173,7 +173,7 @@ namespace Signum.Web.Help
         public static WikiLink LinkParser(string content)
         {
             Match m = Regex.Match(content,
-                        @"(?<letter>[^:]+):(?<link>.*?)(\|(?<text>.*?))?");
+                        @"^(?<letter>[^:]+):(?<link>[^\|]*)(\|(?<text>.*))?$");
 
             if (m.Success)
             {
@@ -214,13 +214,14 @@ namespace Signum.Web.Help
                             }
 
                     case WikiFormat.PropertyLink:
-                        string[] parts = link.Split('.');
-
-                        Type type = TypeLogic.GetType(parts[0]);
+                        int index= link.IndexOf("."); 
+                        string type = link.Substring(0, index); 
+                        string rest = link.Substring(index +1);
+                        PropertyRoute route = PropertyRoute.Parse(TypeLogic.TryGetType(type), rest);
                         //TODO: NiceToString de la propiedad
                         return new WikiLink(
-                            HelpLogic.PropertyUrl(type, parts[1]),
-                            text.HasText() ? text : parts[1].NiceName());
+                            HelpLogic.PropertyUrl(route),
+                            route.Properties.ToString(p=>p.NiceName(), "-"));
 
                     case WikiFormat.QueryLink:
                         object o = QueryLogic.TryToQueryName(link);
@@ -253,7 +254,7 @@ namespace Signum.Web.Help
             return null;
         }
 
-        static Regex ImageRegex = new Regex(@"image(?<position>[^\|]+)\|(?<url>[^\|\]]*)(\|(?<footer>.*))?");
+        static Regex ImageRegex = new Regex(@"^image(?<position>[^\|]+)\|(?<url>[^\|\]]*)(\|(?<footer>.*))?$");
 
         public static string ProcessImages(string content)
         {

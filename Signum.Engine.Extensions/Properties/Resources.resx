@@ -313,4 +313,13 @@
   <data name="YouRecentlyRequestedANewPassword" xml:space="preserve">
     <value>You recently requested a new password</value>
   </data>
+  <data name="Any" xml:space="preserve">
+    <value>any</value>
+  </data>
+  <data name="_0IsA1AndShowsTheProperty2" xml:space="preserve">
+    <value>{0} is a {1} and shows the property {2}</value>
+  </data>
+  <data name="_0IsACalculated1" xml:space="preserve">
+    <value>{0} is a calculated {1}</value>
+  </data>
 </root>
