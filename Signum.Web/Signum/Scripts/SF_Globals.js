@@ -369,23 +369,24 @@ SF.registerModule("Globals", function () {
 
     $(function () { $('#form input[type=text]').keypress(function (e) { return e.which != 13 }) });
 
-    SF.AjaxError = (function () {
-        var getErrorMessage = function (response) {
-            var error;
-            if (response !== null && response !== undefined) {
-                var startError = response.indexOf("<title>");
-                var endError = response.indexOf("</title>");
-                if ((startError !== -1) && (endError !== -1)) {
-                    error = response.substring(startError + 7, endError);
-                }
-                else {
-                    error = response;
-                }
-            }
-            return error;
-        }
-
+    $(function () {
         $("body").bind("sf-ajax-error", function (event, XMLHttpRequest, textStatus, thrownError) {
+
+            var getErrorMessage = function (response) {
+                var error;
+                if (response !== null && response !== undefined) {
+                    var startError = response.indexOf("<title>");
+                    var endError = response.indexOf("</title>");
+                    if ((startError !== -1) && (endError !== -1)) {
+                        error = response.substring(startError + 7, endError);
+                    }
+                    else {
+                        error = response;
+                    }
+                }
+                return error;
+            }
+
             var error = getErrorMessage(XMLHttpRequest.responseText);
             if (!error) {
                 error = textStatus;
@@ -403,10 +404,5 @@ SF.registerModule("Globals", function () {
                 SF.Blocker.disable();
             }
         });
-
-        return
-        {
-            getErrorMessage: getErrorMessage
-        }
-    })();
+    })
 });

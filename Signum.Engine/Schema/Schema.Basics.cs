@@ -208,7 +208,7 @@ namespace Signum.Engine.Maps
             if (Synchronizing == null)
                 return null;
 
-            using (Sync.ChangeCulture(ForceCultureInfo))
+            using (Sync.ChangeBothCultures(ForceCultureInfo))
             {
                 Replacements replacements = new Replacements();
                 SqlPreCommand command = Synchronizing
@@ -244,7 +244,7 @@ namespace Signum.Engine.Maps
             if (Generating == null)
                 return null;
 
-            using (Sync.ChangeCulture(ForceCultureInfo))
+            using (Sync.ChangeBothCultures(ForceCultureInfo))
             {
                 return Generating
                     .GetInvocationList()
