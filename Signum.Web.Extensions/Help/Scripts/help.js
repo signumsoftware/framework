@@ -6,7 +6,7 @@ SF.Help = (function () {
     function edit() {
         $(".editable").each(function () {
             var self = $(this);
-            self.bind('click', function (event) {
+            self.bind('focus', function (event) {
                 $(this).addClass("modified");
             });
 
