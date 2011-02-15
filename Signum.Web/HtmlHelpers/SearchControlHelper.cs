@@ -222,7 +222,7 @@ namespace Signum.Web
         {
             if (filterOption.Token.Type.IsLite())
             {
-                Lite lite = (Lite)filterOption.Value; 
+                Lite lite = (Lite)Common.Convert(filterOption.Value, filterOption.Token.Type); 
                 if (lite != null && string.IsNullOrEmpty(lite.ToStr))
                     Database.FillToStr(lite);
 

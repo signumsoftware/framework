@@ -115,8 +115,8 @@ a.sf-value-line, span.sf-value-line{
 
 .sf-entity-line-detail > div > .sf-field > .sf-label-line, .sf-entity-line-detail .sf-around .sf-label-line {
     width:100px;
-    border-left:2px dotted #bbb;
-    margin-left:120px;
+   /* border-left:2px dotted #bbb;*/
+    margin-left:80px;
 }
 
 .sf-entity-line-detail tr {vertical-align:top;}
