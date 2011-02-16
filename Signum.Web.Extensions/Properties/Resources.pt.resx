@@ -150,17 +150,11 @@
   <data name="ConfirmNewPassword" xml:space="preserve">
     <value>Confirmar a nova password</value>
   </data>
-  <data name="ConstructFromManyOperation0NeedsSourceIdsAsParameter" xml:space="preserve">
-    <value>Construir de muitos, operação {{{0}}} precisa IDs de origem como parâmetro</value>
+  <data name="Buscador" xml:space="preserve">
+    <value>Buscador</value>
   </data>
-  <data name="ConstructFromManyOperation0NeedsSourceLazies" xml:space="preserve">
-    <value>Construir de muitos, operação {{{0}}} necessita de origem Lites</value>
-  </data>
-  <data name="CouldNotCreateLiteWithoutAnIdToCallOperation0" xml:space="preserve">
-    <value>Não foi possível criar Lite sem um ID para chamar a operação {{{0}}}</value>
-  </data>
-  <data name="CouldntCreateFilePathWithUnknownFileTypeForField0" xml:space="preserve">
-    <value>Não foi possível criar um endereço de ficheiro com o tipo de ficheiro desconhecido para o campo {{0}}</value>
+  <data name="Appendices" xml:space="preserve">
+    <value>Apêndices</value>
   </data>
   <data name="Create" xml:space="preserve">
     <value>Criar</value>
@@ -226,7 +220,7 @@
     <value>Sobrescrito</value>
   </data>
   <data name="ForgotYourPassword" xml:space="preserve">
-    <value>Esqueceste-te da password? Escreve o teu e-mail em baixo e verifica a tua caixa de correio.</value>
+    <value>Esqueceste-te da password? Escreve o teu e-mail abaixo e vai à tua caixa de correio.</value>
   </data>
   <data name="GoBackToLoginPage" xml:space="preserve">
     <value>Voltar à página de login</value>

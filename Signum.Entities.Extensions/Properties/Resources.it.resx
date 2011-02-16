@@ -124,7 +124,7 @@
     <value>Calendario</value>
   </data>
   <data name="CalendarDN_Holidays" xml:space="preserve">
-    <value>Vacanze</value>
+    <value>Festivi</value>
   </data>
   <data name="CalendarDN_Name" xml:space="preserve">
     <value>Nome</value>
@@ -226,7 +226,7 @@
     <value>Num linee</value>
   </data>
   <data name="EnumDN_Key" xml:space="preserve">
-    <value>Key</value>
+    <value>Chiave di accesso</value>
   </data>
   <data name="EnumDN_Name" xml:space="preserve">
     <value>Nome</value>
@@ -256,7 +256,7 @@
     <value>Espressione dovrebbe avere una quantità discreta di valori</value>
   </data>
   <data name="FilePathDN_FileLengthString" xml:space="preserve">
-    <value>Dimensioni</value>
+    <value>Dimensione</value>
   </data>
   <data name="FilePathDN_FileName" xml:space="preserve">
     <value>Nome del file</value>
@@ -295,7 +295,7 @@
     <value>Prefisso web</value>
   </data>
   <data name="HolidayDN" xml:space="preserve">
-    <value>Vacanze</value>
+    <value>Festivi</value>
   </data>
   <data name="HolidayDN_Date" xml:space="preserve">
     <value>Data</value>
@@ -304,10 +304,10 @@
     <value>Nome</value>
   </data>
   <data name="Holidayhavetobenullwhennocalendarisset" xml:space="preserve">
-    <value>Le vacanze devono essere nulle quando non è impostato nessun calendario</value>
+    <value>I festivi devono essere nulli quando non è impostato nessun calendario</value>
   </data>
   <data name="Holidayhavetobetrueorfalsewhenacalendarisset" xml:space="preserve">
-    <value>Le vacanze devono essere vero o falso quando è impostato un calendario</value>
+    <value>Scegliere vero o falso per i festivi quando è impostato un calendario</value>
   </data>
   <data name="HourMinuteDN_Hour" xml:space="preserve">
     <value>Ora</value>
@@ -331,7 +331,7 @@
     <value>Inizio</value>
   </data>
   <data name="LogOperationDN_Target" xml:space="preserve">
-    <value>Destinazione</value>
+    <value>Destinatario</value>
   </data>
   <data name="LogOperationDN_User" xml:space="preserve">
     <value>Utente</value>
@@ -373,7 +373,7 @@
     <value>Pacchetto</value>
   </data>
   <data name="PackageLineDN_Target" xml:space="preserve">
-    <value>Destinazione</value>
+    <value>Destinatario</value>
   </data>
   <data name="ProcessDN" xml:space="preserve">
     <value>Processo</value>
@@ -445,10 +445,10 @@
     <value>Errori</value>
   </data>
   <data name="ProcessStartIsGreaterThanProcessEnd" xml:space="preserve">
-    <value>Avvio del processo maggiore di fine processo</value>
+    <value>Avvio Processo maggiore di Fine Processo</value>
   </data>
   <data name="ProcessStartIsNullButProcessEndIsNot" xml:space="preserve">
-    <value>Avvio del processo nullo, ma processo finale non lo è</value>
+    <value>Avvio Processo nullo, ma Fine Processo non lo è</value>
   </data>
   <data name="ProcessState_Canceled" xml:space="preserve">
     <value>Annullato</value>
@@ -481,7 +481,7 @@
     <value>Nome visualizzato</value>
   </data>
   <data name="QueryDN_Key" xml:space="preserve">
-    <value>Key</value>
+    <value>Chiave di accesso</value>
   </data>
   <data name="RoleDN" xml:space="preserve">
     <value>Ruolo</value>
@@ -520,7 +520,7 @@
     <value>Minuto</value>
   </data>
   <data name="ScheduleRuleDayDN_StartingOn" xml:space="preserve">
-    <value>Partenza il</value>
+    <value>Inizia il</value>
   </data>
   <data name="ScheduleRuleWeekDaysDN" xml:space="preserve">
     <value>Giorni della settimana</value>
@@ -529,7 +529,7 @@
     <value>e nei giorni festivi</value>
   </data>
   <data name="ScheduleRuleWeekDaysDN_At" xml:space="preserve">
-    <value>a</value>
+    <value>alle</value>
   </data>
   <data name="ScheduleRuleWeekDaysDN_ButHoliday" xml:space="preserve">
     <value>festivi esclusi</value>
@@ -919,7 +919,7 @@
     <value>Utente</value>
   </data>
   <data name="FacadeMethodDN" xml:space="preserve">
-    <value>Metodo di facciata</value>
+    <value>Facade Method</value>
   </data>
   <data name="ProcessExecutionDN_ExceptionDate" xml:space="preserve">
     <value>Data di eccezione</value>
@@ -982,7 +982,7 @@
     <value>Inviato</value>
   </data>
   <data name="EmailState_SentError" xml:space="preserve">
-    <value>Invio fallito</value>
+    <value>Invio non riuscito</value>
   </data>
   <data name="EmbeddedFileDN_FullWebPath" xml:space="preserve">
     <value>Percorso Web completo</value>
@@ -1003,10 +1003,10 @@
     <value>Percorso del file</value>
   </data>
   <data name="FilePathDN_FileLength" xml:space="preserve">
-    <value>Dimensioni file</value>
+    <value>Dimensione file</value>
   </data>
   <data name="FilePathDN_FileTypeEnum" xml:space="preserve">
-    <value>File di tipo Enum</value>
+    <value>Tipo di file Enum</value>
   </data>
   <data name="FileRepositoryDN_FullPhysicalPrefix" xml:space="preserve">
     <value>Prefisso fisico</value>
@@ -1048,7 +1048,7 @@
     <value>Password Hash</value>
   </data>
   <data name="UserQueryDN_ColumnsMode" xml:space="preserve">
-    <value>Modalità di colonne</value>
+    <value>Modalità colonne</value>
   </data>
   <data name="ChartType_Doughnout" xml:space="preserve">
     <value>Ciambella</value>
@@ -1070,5 +1070,11 @@
   </data>
   <data name="RoleQueries_ReferedBy" xml:space="preserve">
     <value>Riferito a</value>
+  </data>
+  <data name="EmailPackageDN_OverrideEmailAddress" xml:space="preserve">
+    <value>Sostituire l'indirizzo di posta elettronica</value>
+  </data>
+  <data name="UserDN_CultureInfo" xml:space="preserve">
+    <value>Info cultura</value>
   </data>
 </root>

@@ -447,10 +447,13 @@
   <data name="YouMustRepeatTheNewPassword" xml:space="preserve">
     <value>Sie müssen das neue Passwort wiederholen</value>
   </data>
-  <data name="CouldntCreateFilePathWithUnknownFileTypeForField0" xml:space="preserve">
-    <value>Es konnte kein Dateipfad mit dem unbekannten Dateityp für Feld {{0}} erstellt werden</value>
+  <data name="Appendices" xml:space="preserve">
+    <value>Anhang</value>
   </data>
   <data name="YourNewPasswordIs0" xml:space="preserve">
     <value>Ihr neues Passwort ist {0}</value>
+  </data>
+  <data name="Buscador" xml:space="preserve">
+    <value>Suchmaschine</value>
   </data>
 </root>

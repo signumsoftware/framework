@@ -383,11 +383,17 @@ namespace Signum.Entities.Authorization
                  select new XElement("Role",
                      new XAttribute("Name", r.ToStr),
                      max ? null : new XAttribute("Default", "Min"),
-                     specificRules.TryGetC(r).TryCC(dic => dic.Select(kvp => new XElement(elementName,
-                         new XAttribute("Resource", resourceToString(kvp.Key)),
-                         new XAttribute("Allowed", allowedToString(kvp.Value))
-                     )))
-                 )));
+                     specificRules.TryGetC(r).TryCC(dic =>
+                         from kvp in dic
+                         let resource = resourceToString(kvp.Key)
+                         let allowed = allowedToString(kvp.Value)
+                         orderby resource
+                         select new XElement(elementName,
+                         new XAttribute("Resource", resource),
+                         new XAttribute("Allowed", allowed))
+
+                     ))
+                 ));
         }
 
 

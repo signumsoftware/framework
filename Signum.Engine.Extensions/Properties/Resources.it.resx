@@ -143,13 +143,13 @@
     <value>{0} appartiene a un altro tipo di Linq Provider</value>
   </data>
   <data name="Call0Over1OfThe2" xml:space="preserve">
-    <value>Eseguire {0} in {1} di {2}</value>
+    <value>Eseguire {0} su {1} di {2}</value>
   </data>
   <data name="Call0Over1OfThe2_f" xml:space="preserve">
-    <value>Eseguire {0} in {1} di {2}</value>
+    <value>Eseguire {0} su {1} di {2}</value>
   </data>
   <data name="Call0Over1OfThe2_m" xml:space="preserve">
-    <value>Eseguire {0} in {1} di {2}</value>
+    <value>Eseguire {0} su {1} di {2}</value>
   </data>
   <data name="Character" xml:space="preserve">
     <value>carattere</value>
@@ -179,7 +179,7 @@
     <value>L'indirizzo email è diverso da quello memorizzato nel sistema</value>
   </data>
   <data name="ExcelTemplateMustHaveExtensionXLSXandCurrentOneHas0" xml:space="preserve">
-    <value>Il modello Excel deve avere estensione xlsx, mentre quello corrente ha estensione {0}</value>
+    <value>Il modello Excel deve avere estensione .xlsx, mentre quello corrente ha estensione {0}</value>
   </data>
   <data name="Executions" xml:space="preserve">
     <value>Esecuzioni</value>
@@ -224,7 +224,7 @@
     <value>Nessun aiuto per {0}</value>
   </data>
   <data name="NotAuthorizedTo0The1WithId2" xml:space="preserve">
-    <value>{1} con ID {2} non autorizzato a {0}</value>
+    <value>{1} con Id {2} non autorizzato a {0}</value>
   </data>
   <data name="NotAuthorizedToRetrieve0" xml:space="preserve">
     <value>Non autorizzato al recupero di '{0}'</value>
@@ -233,10 +233,10 @@
     <value>Non autorizzato a salvare '{0}'</value>
   </data>
   <data name="NotRegistered" xml:space="preserve">
-    <value>{0} non registrato</value>
+    <value>{0} non è registrato</value>
   </data>
   <data name="NotRegisteredInEmailLogic" xml:space="preserve">
-    <value>{0} non registrato in EmailLogic</value>
+    <value>{0} non è registrato a EmailLogic</value>
   </data>
   <data name="OfThe0" xml:space="preserve">
     <value>del {0}</value>
@@ -305,7 +305,7 @@
     <value>valore come {0}</value>
   </data>
   <data name="YouCanResetYourPasswordByFollowingTheLinkBelow" xml:space="preserve">
-    <value>È possibile creare una nuova password cliccando sul link qui sotto:</value>
+    <value>È possibile creare una nuova password cliccando sul link che segue:</value>
   </data>
   <data name="YouRecentlyRequestedANewPassword" xml:space="preserve">
     <value>È stata richiesta una nuova password</value>

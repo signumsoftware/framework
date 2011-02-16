@@ -1071,4 +1071,10 @@
   <data name="UserOperation_Save" xml:space="preserve">
     <value>Guardar</value>
   </data>
+  <data name="EmailPackageDN_OverrideEmailAddress" xml:space="preserve">
+    <value>Reemplazar dirección e-Mail</value>
+  </data>
+  <data name="UserDN_CultureInfo" xml:space="preserve">
+    <value>Info de la cultura</value>
+  </data>
 </root>

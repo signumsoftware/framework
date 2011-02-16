@@ -1071,4 +1071,10 @@
   <data name="UserOperation_NewPassword" xml:space="preserve">
     <value>Nova senha</value>
   </data>
+  <data name="EmailPackageDN_OverrideEmailAddress" xml:space="preserve">
+    <value>Substituir o endereço de E-mail</value>
+  </data>
+  <data name="UserDN_CultureInfo" xml:space="preserve">
+    <value>Info cultura</value>
+  </data>
 </root>

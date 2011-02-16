@@ -225,17 +225,11 @@
   <data name="Create" xml:space="preserve">
     <value>Créer</value>
   </data>
-  <data name="CouldntCreateFilePathWithUnknownFileTypeForField0" xml:space="preserve">
-    <value>Impossible de créer FilePath avec FileType inconnu pour champ {{0}}</value>
+  <data name="Buscador" xml:space="preserve">
+    <value>Moteur de recherche</value>
   </data>
-  <data name="CouldNotCreateLiteWithoutAnIdToCallOperation0" xml:space="preserve">
-    <value>Impossible de créer un Lite sans Id pour appeler  l'opération {{{0}}}</value>
-  </data>
-  <data name="ConstructFromManyOperation0NeedsSourceLazies" xml:space="preserve">
-    <value>L'opération Construct From Many {{{0}}} nécessite les Lites sources</value>
-  </data>
-  <data name="ConstructFromManyOperation0NeedsSourceIdsAsParameter" xml:space="preserve">
-    <value>L'opération Construct From Many {{{0}}} nécessite les Ids sources comme paramètre</value>
+  <data name="Appendices" xml:space="preserve">
+    <value>Annexes</value>
   </data>
   <data name="ConfirmNewPassword" xml:space="preserve">
     <value>Confirmer nouveau mot de passe</value>

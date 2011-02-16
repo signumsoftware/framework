@@ -1071,4 +1071,10 @@
   <data name="EmailTemplateDN_FriendlyName" xml:space="preserve">
     <value>Beschreibenden Namen</value>
   </data>
+  <data name="EmailPackageDN_OverrideEmailAddress" xml:space="preserve">
+    <value>E-Mail-Adresse ersetzen</value>
+  </data>
+  <data name="UserDN_CultureInfo" xml:space="preserve">
+    <value>Kulturinfo</value>
+  </data>
 </root>

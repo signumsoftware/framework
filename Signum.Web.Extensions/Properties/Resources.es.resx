@@ -123,17 +123,11 @@
   <data name="ConfirmNewPassword" xml:space="preserve">
     <value>Confirmar nueva contraseña</value>
   </data>
-  <data name="ConstructFromManyOperation0NeedsSourceIdsAsParameter" xml:space="preserve">
-    <value>La operación Construct From Many {{{0}}} necesita los Ids origen como parámetro</value>
+  <data name="Buscador" xml:space="preserve">
+    <value>Buscador</value>
   </data>
-  <data name="ConstructFromManyOperation0NeedsSourceLazies" xml:space="preserve">
-    <value>La operación Construct From Many {{{0}}} necesita los Lites de origen</value>
-  </data>
-  <data name="CouldNotCreateLiteWithoutAnIdToCallOperation0" xml:space="preserve">
-    <value>No se pude crear un Lite sin Id para llamar a la operación {{{0}}}</value>
-  </data>
-  <data name="CouldntCreateFilePathWithUnknownFileTypeForField0" xml:space="preserve">
-    <value>No se pudo crear un FilePathDN con un FileType desconocido para el campo {{0}}</value>
+  <data name="Appendices" xml:space="preserve">
+    <value>Apéndices</value>
   </data>
   <data name="CurrentPassword" xml:space="preserve">
     <value>Contraseña actual</value>
