@@ -1,5 +1,6 @@
 ﻿$(function () {
-    $("body").bind("sf-new-content", function (e, $newContent) {
+    $("body").bind("sf-new-content", function (e) {
+        var $newContent = $(e.target);
         //buttons
         $newContent.find(".sf-entity-button, .sf-query-button, .sf-line-button, .sf-chooser-button").each(function (i, val) {
             var $txt = $(val);
@@ -10,7 +11,7 @@
         //datepicker
         $newContent.find(".sf-datepicker").each(function (i, val) {
             var $txt = $(val);
-            $txt.datepicker(jQuery.extend({}, defaultDatepickerOptions, { dateFormat: $txt.attr("data-format") }));
+            $txt.datepicker(jQuery.extend({}, SF.Locale.defaultDatepickerOptions, { dateFormat: $txt.attr("data-format") }));
         });
 
         //dropdown
@@ -34,4 +35,6 @@
         //tabs
         $newContent.find(".sf-tabs").tabs();
     });
+
+    $("body").trigger("sf-new-content");
 });
