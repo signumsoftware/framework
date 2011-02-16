@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="_0HasBeenRenamedIn1" xml:space="preserve">
-    <value>'{0}' è stata rinominata in {1}?</value>
+    <value>'{0}' è stata rinominata {1}?</value>
   </data>
   <data name="CannotInsertDuplicatedFields0On1Table" xml:space="preserve">
     <value>Impossibile inserire duplicati nel campo {0} della tabella {1}</value>
@@ -127,19 +127,19 @@
     <value>Non autorizzato a recuperare {0} {1}</value>
   </data>
   <data name="ConcurrencyErrorOnDatabaseTable0Id1" xml:space="preserve">
-    <value>Concorrenza nel database, tabella errore = {0} ID = {1}</value>
+    <value>Concorrenza nel database, tabella errore = {0}, Id = {1}</value>
   </data>
   <data name="EndOfSyncScript" xml:space="preserve">
     <value>--- FINE DELLO SCRIPT DI SINCRONIZZAZIONE</value>
   </data>
   <data name="EntityWithType0AndId1NotFound" xml:space="preserve">
-    <value>Entità di tipo {0} con ID {1} non trovata</value>
+    <value>Entità di tipo {0} con Id {1} non trovata</value>
   </data>
   <data name="NNone" xml:space="preserve">
     <value>- n: nessuno</value>
   </data>
   <data name="NoWayOfMappingType0Found" xml:space="preserve">
-    <value>Mappatura {0} non trovata</value>
+    <value>Mappatura di {0} non trovata</value>
   </data>
   <data name="StartOfSyncScriptGeneratedOn0" xml:space="preserve">
     <value>--- INIZIO DELLO SCRIPT DI SINCRONIZZAZIONE GENERATO SU {0}</value>
@@ -148,7 +148,7 @@
     <value>Ci sono '{0}' che fanno riferimento a questa entità</value>
   </data>
   <data name="ThereAreRecordsIn0PointingToThisTableByColumn1" xml:space="preserve">
-    <value>Ci sono record in '{0}' che fanno riferimento alla colonna '{1}' di questa tabella</value>
+    <value>Ci sono record in '{0}' che fanno riferimento a questa tabella mediante la colonna '{1}'</value>
   </data>
   <data name="UnauthorizedAccessTo0Because1" xml:space="preserve">
     <value>Accesso negato a {0} a causa di {1}</value>

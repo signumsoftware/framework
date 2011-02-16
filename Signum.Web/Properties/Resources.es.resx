@@ -291,4 +291,19 @@
   <data name="New_m" xml:space="preserve">
     <value>Nuevo</value>
   </data>
+  <data name="LineButton_Create" xml:space="preserve">
+    <value>Crear</value>
+  </data>
+  <data name="LineButton_Find" xml:space="preserve">
+    <value>Buscar</value>
+  </data>
+  <data name="LineButton_Remove" xml:space="preserve">
+    <value>Quitar</value>
+  </data>
+  <data name="LineButton_View" xml:space="preserve">
+    <value>Ver</value>
+  </data>
+  <data name="Search_Create" xml:space="preserve">
+    <value>Crear</value>
+  </data>
 </root>

@@ -163,7 +163,7 @@
     <value>{0} non è impostato</value>
   </data>
   <data name="And" xml:space="preserve">
-    <value> e </value>
+    <value>e </value>
   </data>
   <data name="As0" xml:space="preserve">
     <value>Come {0}</value>
@@ -307,7 +307,7 @@
     <value>Nuovo</value>
   </data>
   <data name="Of" xml:space="preserve">
-    <value> di </value>
+    <value>di </value>
   </data>
   <data name="OrBeNull" xml:space="preserve">
     <value>o essere nullo</value>
@@ -352,7 +352,7 @@
     <value>Data di avviso</value>
   </data>
   <data name="AlertDN_CheckDate" xml:space="preserve">
-    <value>Data di controllo</value>
+    <value>Data di verifica</value>
   </data>
   <data name="AlertDN_Entity" xml:space="preserve">
     <value>Entità</value>
@@ -379,7 +379,7 @@
     <value>Nota</value>
   </data>
   <data name="NoteDN_Target" xml:space="preserve">
-    <value>Destinazione</value>
+    <value>Destinatario</value>
   </data>
   <data name="NoteDN_Text" xml:space="preserve">
     <value>Testo</value>

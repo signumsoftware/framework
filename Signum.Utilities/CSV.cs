@@ -165,7 +165,7 @@ namespace Signum.Utilities
                 string str = sr.ReadToEnd().Trim();
                 var matches = Regex.Matches(str, regex, RegexOptions.Multiline | RegexOptions.ExplicitCapture).Cast<Match>();
 
-                foreach (var m in matches)
+                foreach (var m in matches.Skip(skipFirst ? 1 : 0))
                 {
                     var vals = m.Groups["val"].Captures;
 
@@ -177,7 +177,7 @@ namespace Signum.Utilities
                     {
                         object value = ConvertTo(DecodeCSV(vals[i].Value), members[i].MemberInfo.ReturningType(), culture);
 
-                        members[i].UntypedSetter(t, value); 
+                        members[i].UntypedSetter(t, value);
                     }
 
                     yield return t;

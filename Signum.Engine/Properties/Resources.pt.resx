@@ -121,10 +121,10 @@
     <value>'{0}' foi renomeada para {1}</value>
   </data>
   <data name="CannotInsertDuplicatedFields0On1Table" xml:space="preserve">
-    <value>Não é possível inserir campos duplicados {0} na {1} tabela</value>
+    <value>Não é possível inserir valores duplicados no campo {0} da tabela {1}</value>
   </data>
   <data name="ConcurrencyErrorOnDatabaseTable0Id1" xml:space="preserve">
-    <value>Erro de concodância na base de dados, tabela = {0}, ID = {1}</value>
+    <value>Erro de concordância na base de dados, tabela = {0}, ID = {1}</value>
   </data>
   <data name="EndOfSyncScript" xml:space="preserve">
     <value>--- FINAL DO SCRIPT DE SINCRONIZAÇÃO</value>

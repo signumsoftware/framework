@@ -127,10 +127,10 @@
     <value>Chiudere</value>
   </data>
   <data name="CalendarNext" xml:space="preserve">
-    <value>Successivo</value>
+    <value>Succ</value>
   </data>
   <data name="CalendarPrevious" xml:space="preserve">
-    <value>Precedente</value>
+    <value>Prec</value>
   </data>
   <data name="CalendarToday" xml:space="preserve">
     <value>Oggi</value>
@@ -290,5 +290,20 @@
   </data>
   <data name="New_m" xml:space="preserve">
     <value>Nuovo</value>
+  </data>
+  <data name="LineButton_Create" xml:space="preserve">
+    <value>Creare</value>
+  </data>
+  <data name="LineButton_Find" xml:space="preserve">
+    <value>Cercare</value>
+  </data>
+  <data name="LineButton_Remove" xml:space="preserve">
+    <value>Rimuovere</value>
+  </data>
+  <data name="LineButton_View" xml:space="preserve">
+    <value>Vedere</value>
+  </data>
+  <data name="Search_Create" xml:space="preserve">
+    <value>Creare</value>
   </data>
 </root>

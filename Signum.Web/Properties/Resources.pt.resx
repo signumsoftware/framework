@@ -249,8 +249,8 @@
   <data name="Signum_error" xml:space="preserve">
     <value>Erro</value>
   </data>
-  <data name="Signum_executingOperation" xml:space="preserve">
-    <value>Executando operação...</value>
+  <data name="LineButton_Create" xml:space="preserve">
+    <value>Criar</value>
   </data>
   <data name="Signum_noElementsSelected" xml:space="preserve">
     <value>Nenhum elemento selecionado</value>
@@ -258,8 +258,8 @@
   <data name="Signum_noResults" xml:space="preserve">
     <value>Não foram encontrados</value>
   </data>
-  <data name="Signum_operationExecuted" xml:space="preserve">
-    <value>Operação exécutée</value>
+  <data name="_0HasAnInvalidFormat" xml:space="preserve">
+    <value>{0} tem um formato inválido</value>
   </data>
   <data name="Signum_popupErrors" xml:space="preserve">
     <value>Existem erros na entidade, deseja continuar?</value>
@@ -284,5 +284,26 @@
   </data>
   <data name="New_m" xml:space="preserve">
     <value>Novo</value>
+  </data>
+  <data name="LineButton_Find" xml:space="preserve">
+    <value>Encontrar</value>
+  </data>
+  <data name="LineButton_Remove" xml:space="preserve">
+    <value>Remover</value>
+  </data>
+  <data name="LineButton_View" xml:space="preserve">
+    <value>Ver</value>
+  </data>
+  <data name="NotPossibleToaAssign0" xml:space="preserve">
+    <value>Não é possível atribuir {0}</value>
+  </data>
+  <data name="Search_Create" xml:space="preserve">
+    <value>Criar</value>
+  </data>
+  <data name="Signum_Executed" xml:space="preserve">
+    <value>Executado</value>
+  </data>
+  <data name="Signum_Executing" xml:space="preserve">
+    <value>Em execução...</value>
   </data>
 </root>
