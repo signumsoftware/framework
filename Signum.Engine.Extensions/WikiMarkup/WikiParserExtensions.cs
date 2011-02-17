@@ -81,33 +81,33 @@ namespace Signum.Engine.WikiMarkup
         {
             // Replacing both
                 content = Regex.Replace(content,
-                "(?<begin>'''''{1})(?<content>.+?)(?<end>'''''{1})",
+                "(?<begin>''''')(?<content>.+?)(?<end>''''')",
                 (settings.Strong && settings.Em) ? "<strong><em>${content}</em></strong>" : "${content}",
-                RegexOptions.Compiled);
+                RegexOptions.Compiled | RegexOptions.Singleline);
 
             // Replacing bolds
                 content = Regex.Replace(content,
-                "(?<begin>'''{1})(?<content>.+?)(?<end>'''{1})",
+                "(?<begin>''')(?<content>.+?)(?<end>''')",
                 settings.Strong ? "<strong>${content}</strong>" : "${content}",
-                RegexOptions.Compiled);
+                RegexOptions.Compiled | RegexOptions.Singleline);
 
             // Replacing italics
                 content = Regex.Replace(content,
-                "(?<begin>''{1})(?<content>.+?)(?<end>''{1})",
+                "(?<begin>'')(?<content>.+?)(?<end>'')",
                 settings.Em ? "<em>${content}</em>" : "${content}",
-                RegexOptions.Compiled);
+                RegexOptions.Compiled | RegexOptions.Singleline);
 
             // Replacing underlined
                 content = Regex.Replace(content,
-                "(?<begin>__{1})(?<content>.+?)(?<end>__{1})",
+                "(?<begin>__)(?<content>.+?)(?<end>__)",
                 settings.Underlined ? "<u>${content}</u>" : "${content}",
-                RegexOptions.Compiled);
+                RegexOptions.Compiled | RegexOptions.Singleline);
 
             // Replacing strike
             content = Regex.Replace(content,
-            "(?<begin>\\-\\-{1})(?<content>.+?)(?<end>\\-\\-{1})",
+            "(?<begin>\\-\\-)(?<content>.+?)(?<end>\\-\\-)",
             settings.Strike ? "<s>${content}</s>" : "${content}",
-            RegexOptions.Compiled);
+            RegexOptions.Compiled| RegexOptions.Singleline);
 
             // Replacing lists
             content = Regex.Replace(content,
