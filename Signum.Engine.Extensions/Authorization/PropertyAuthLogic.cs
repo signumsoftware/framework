@@ -46,7 +46,10 @@ namespace Signum.Engine.Authorization
                 {
                     var arr = s.Split('|');
                     Type type = TypeLogic.GetType(arr[0]);
-                    return PropertyLogic.GetEntity(PropertyRoute.Parse(type, arr[1]));
+                    var property =  PropertyLogic.GetEntity(PropertyRoute.Parse(type, arr[1]));
+                    if (property.IsNew)
+                        property.Save();
+                    return property;
                 }, EnumExtensions.ToEnum<PropertyAllowed>);
             }
         }
