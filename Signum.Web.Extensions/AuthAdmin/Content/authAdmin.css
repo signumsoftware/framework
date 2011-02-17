@@ -153,8 +153,16 @@ a.cbLink.none, a.cbLink.not-allowed
     background-position: 0px -32px; 
 }
 
+tr.first
+{
+    border-top: 1px gray solid
+}
 
 
+table.ruleTable tr :hover
+{
+    background-color: #F0F0F0
+}
 
 
 

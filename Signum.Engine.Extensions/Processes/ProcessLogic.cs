@@ -284,7 +284,6 @@ namespace Signum.Engine.Processes
 
         static void DoWork(object number)
         {
-
             using (AuthLogic.User(UserDN.Current != null ? UserDN.Current : AuthLogic.SystemUser))
             {
                 foreach (var ep in processQueue)

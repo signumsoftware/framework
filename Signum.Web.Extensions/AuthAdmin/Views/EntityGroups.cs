@@ -126,8 +126,8 @@ WriteLiteral("\r\n                </th>\r\n            </tr>\r\n        </thead>
          foreach (var item in tc.TypeElementContext(p => p.Rules))
         {
 
-WriteLiteral("            <tr>\r\n                <td rowspan=\"2\" style=\"vertical-align: middle\">" +
-"\r\n                    ");
+WriteLiteral("            <tr class=\"first\">\r\n                <td rowspan=\"2\" style=\"vertical-a" +
+"lign: middle\">\r\n                    ");
 
 
                Write(Html.Span(null, item.Value.Resource.Name));
@@ -137,10 +137,11 @@ WriteLiteral("\r\n                    ");
 
                Write(Html.HiddenRuntimeInfo(item, i => i.Resource));
 
-WriteLiteral("\r\n                </td>\r\n                <td>\r\n                    In");
+WriteLiteral("\r\n                </td>\r\n                <td>\r\n                    In\r\n          " +
+"          ");
 
 
-                  Write(Html.Hidden(item.Compose("InBase"), item.Value.AllowedBase.InGroup.ToStringParts()));
+               Write(Html.Hidden(item.Compose("InBase"), item.Value.AllowedBase.InGroup.ToStringParts()));
 
 WriteLiteral("\r\n                </td>\r\n                <td>\r\n                    <a class=\"cbLi" +
 "nk create\">\r\n                        ");
@@ -176,10 +177,11 @@ WriteLiteral("\r\n                </td>\r\n            </tr>\r\n");
 
 
 
-WriteLiteral("            <tr class=\"second\">\r\n                <td>\r\n                    Out");
+WriteLiteral("            <tr>\r\n                <td>\r\n                    Out\r\n                " +
+"    ");
 
 
-                   Write(Html.Hidden(item.Compose("OutBase"), item.Value.AllowedBase.OutGroup.ToStringParts()));
+               Write(Html.Hidden(item.Compose("OutBase"), item.Value.AllowedBase.OutGroup.ToStringParts()));
 
 WriteLiteral("\r\n                </td>\r\n                <td>\r\n                    <a class=\"cbLi" +
 "nk create\">\r\n                        ");
@@ -219,8 +221,7 @@ WriteLiteral("\r\n                </td>\r\n            </tr>\r\n");
 WriteLiteral("    </table>\r\n");
 
 
-}
-WriteLiteral(" ");
+} 
 
 
         }
