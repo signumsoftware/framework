@@ -282,4 +282,7 @@
   <data name="CountUserQueryElement" xml:space="preserve">
     <value>Counter</value>
   </data>
+  <data name="_0RulesFor1" xml:space="preserve">
+    <value>{0} rules for {1}</value>
+  </data>
 </root>

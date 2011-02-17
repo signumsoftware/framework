@@ -61,6 +61,15 @@ namespace Signum.Entities.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} rules for {1}.
+        /// </summary>
+        public static string _0RulesFor1 {
+            get {
+                return ResourceManager.GetString("_0RulesFor1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Admin rules.
         /// </summary>
         public static string BasicPermissions_AdminRules {

@@ -1077,4 +1077,10 @@
   <data name="UserDN_CultureInfo" xml:space="preserve">
     <value>Info de la cultura</value>
   </data>
+  <data name="String1" xml:space="preserve">
+    <value />
+  </data>
+  <data name="_0RulesFor1" xml:space="preserve">
+    <value>Reglas de {0} para {1}</value>
+  </data>
 </root>

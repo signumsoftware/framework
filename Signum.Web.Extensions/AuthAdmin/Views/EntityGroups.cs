@@ -137,14 +137,13 @@ WriteLiteral("\r\n                    ");
 
                Write(Html.HiddenRuntimeInfo(item, i => i.Resource));
 
-WriteLiteral(@"
-                </td>
-                <td>
-                    In@Html.Hidden(item.Compose(""InBase""), item.Value.AllowedBase.InGroup.ToStringParts())
-                </td>
-                <td>
-                    <a class=""cbLink create"">
-                        ");
+WriteLiteral("\r\n                </td>\r\n                <td>\r\n                    In");
+
+
+                  Write(Html.Hidden(item.Compose("InBase"), item.Value.AllowedBase.InGroup.ToStringParts()));
+
+WriteLiteral("\r\n                </td>\r\n                <td>\r\n                    <a class=\"cbLi" +
+"nk create\">\r\n                        ");
 
 
                    Write(Html.CheckBox(item.Compose("In_Create"), item.Value.Allowed.InGroup.IsActive(TypeAllowedBasic.Create), new { tag = "Create" }));

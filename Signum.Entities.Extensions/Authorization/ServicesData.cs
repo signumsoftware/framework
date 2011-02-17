@@ -6,6 +6,7 @@ using Signum.Entities.Basics;
 using Signum.Entities;
 using Signum.Utilities;
 using Signum.Entities.Operations;
+using Signum.Entities.Extensions.Properties;
 
 namespace Signum.Entities.Authorization
 {
@@ -39,7 +40,6 @@ namespace Signum.Entities.Authorization
     //Only for client-side communication
     [Serializable, AvoidLocalization]
     public abstract class BaseRulePack<T> : ModelEntity
-        where T : EmbeddedEntity
     {
         Lite<RoleDN> role;
         [NotNullValidator]
@@ -135,10 +135,17 @@ namespace Signum.Entities.Authorization
         {
             return "{0} -> {1}".Formato(resource, Allowed) + (Overriden ? "(overriden from {0})".Formato(AllowedBase) : "");
         }
+
     }
 
     [Serializable]
-    public class TypeRulePack : BaseRulePack<TypeAllowedRule> { }
+    public class TypeRulePack : BaseRulePack<TypeAllowedRule>
+    {
+        public override string ToString()
+        {
+            return Resources._0RulesFor1.Formato(typeof(TypeDN).NiceName(), Role);
+        }
+    }
 
     [Serializable]
     public class TypeAllowedRule : AllowedRule<TypeDN, TypeAllowed> 
@@ -174,35 +181,71 @@ namespace Signum.Entities.Authorization
 
 
     [Serializable]
-    public class PropertyRulePack : BaseRulePack<PropertyAllowedRule> { }
+    public class PropertyRulePack : BaseRulePack<PropertyAllowedRule>
+    {
+        public override string ToString()
+        {
+            return Resources._0RulesFor1.Formato(typeof(PropertyDN).NiceName(), Role);
+        }
+    }
     [Serializable]
     public class PropertyAllowedRule : AllowedRule<PropertyDN, PropertyAllowed>{}
 
 
     [Serializable]
-    public class QueryRulePack : BaseRulePack<QueryAllowedRule> { }
+    public class QueryRulePack : BaseRulePack<QueryAllowedRule>
+    {
+        public override string ToString()
+        {
+            return Resources._0RulesFor1.Formato(typeof(QueryDN).NiceName(), Role);
+        }
+    }
     [Serializable]
     public class QueryAllowedRule : AllowedRule<QueryDN, bool> { }
 
 
     [Serializable]
-    public class OperationRulePack : BaseRulePack<OperationAllowedRule> { }
+    public class OperationRulePack : BaseRulePack<OperationAllowedRule>
+    {
+        public override string ToString()
+        {
+            return Resources._0RulesFor1.Formato(typeof(OperationDN).NiceName(), Role);
+        }
+    }
     [Serializable]
     public class OperationAllowedRule : AllowedRule<OperationDN, bool> { } 
 
 
     [Serializable]
-    public class PermissionRulePack : BaseRulePack<PermissionAllowedRule> { }
+    public class PermissionRulePack : BaseRulePack<PermissionAllowedRule>
+    {
+        public override string ToString()
+        {
+            return Resources._0RulesFor1.Formato(typeof(PermissionDN).NiceName(), Role);
+        }
+    }
     [Serializable]
     public class PermissionAllowedRule : AllowedRule<PermissionDN, bool> { } 
 
     [Serializable]
-    public class FacadeMethodRulePack : BaseRulePack<FacadeMethodAllowedRule> { }
+    public class FacadeMethodRulePack : BaseRulePack<FacadeMethodAllowedRule>
+    {
+        public override string ToString()
+        {
+            return Resources._0RulesFor1.Formato(typeof(FacadeMethodDN).NiceName(), Role);
+        }
+    }
     [Serializable]
     public class FacadeMethodAllowedRule : AllowedRule<FacadeMethodDN, bool> { } 
 
     [Serializable]
-    public class EntityGroupRulePack : BaseRulePack<EntityGroupAllowedRule> { }
+    public class EntityGroupRulePack : BaseRulePack<EntityGroupAllowedRule>
+    {
+        public override string ToString()
+        {
+            return Resources._0RulesFor1.Formato(typeof(EntityGroupDN).NiceName(), Role);
+        }
+    }
 
     [Serializable]
     public class EntityGroupAllowedRule : AllowedRule<EntityGroupDN, EntityGroupAllowedDN> { }
