@@ -294,6 +294,16 @@ namespace Signum.Web.Selenium
             selenium.Click("{0} > td:first > a".Formato(EntityRowSelector(liteKey, prefix)));
         }
 
+        public static void EntityClick(this ISelenium selenium, int rowIndexBase1)
+        {
+            EntityClick(selenium, rowIndexBase1, "");
+        }
+
+        public static void EntityClick(this ISelenium selenium, int rowIndexBase1, string prefix)
+        {
+            selenium.Click("{0} > a".Formato(CellSelector(rowIndexBase1, 1, prefix)));
+        }
+
         public static string EntityContextMenuSelector(int rowIndexBase1)
         {
             return EntityContextMenuSelector(rowIndexBase1, "");

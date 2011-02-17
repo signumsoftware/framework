@@ -122,7 +122,7 @@ namespace Signum.Web.Reports
                 Id = TypeContextUtilities.Compose(prefix, "qbToExcelPlain"),
                 AltText = Resources.ExcelReport,
                 Text = Resources.ExcelReport,
-                OnClick = Js.SubmitOnly(RouteHelper.New().Action("ToExcelPlain", "Report"), "$.extend({{userQuery:'{0}'}},new FindNavigator({{prefix:'{1}'}}).requestDataForSearch())".Formato((idCurrentUserQuery > 0 ? (int?)idCurrentUserQuery : null), prefix)).ToJS(),
+                OnClick = Js.SubmitOnly(RouteHelper.New().Action("ToExcelPlain", "Report"), "$.extend({{userQuery:'{0}'}},new SF.FindNavigator({{prefix:'{1}'}}).requestDataForSearch())".Formato((idCurrentUserQuery > 0 ? (int?)idCurrentUserQuery : null), prefix)).ToJS(),
                 DivCssClass = ToolBarButton.DefaultQueryCssClass
             };
 
