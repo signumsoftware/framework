@@ -69,7 +69,8 @@ namespace Signum.Engine.Linq
             Expression rebinded = QueryRebinder.Rebind(rewrited);
             Expression projCleaned = EntityCleaner.Clean(rebinded);
             Expression replaced = AliasProjectionReplacer.Replace(projCleaned);
-            Expression columnCleaned = UnusedColumnRemover.Remove(replaced);
+            Expression removed = CountOrderByRemover.Remove(replaced);
+            Expression columnCleaned = UnusedColumnRemover.Remove(removed);
             Expression rowFilled = RowNumberFiller.Fill(columnCleaned);
             Expression subqueryCleaned = RedundantSubqueryRemover.Remove(rowFilled);
             return subqueryCleaned;

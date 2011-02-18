@@ -111,6 +111,7 @@
     <Compile Include="Linq\ExpressionVisitor\ColumnProjector.cs" />
     <Compile Include="Linq\ExpressionVisitor\ConditionsRewriter.cs" />
     <Compile Include="Linq\ExpressionVisitor\ChildProjectionFlattener.cs" />
+    <Compile Include="Linq\ExpressionVisitor\CountOrderByRemover.cs" />
     <Compile Include="Linq\ExpressionVisitor\RowNumberFiller.cs" />
     <Compile Include="Linq\ExpressionVisitor\QueryFilterer.cs" />
     <Compile Include="Linq\ExpressionVisitor\QueryRebinder.cs" />

@@ -374,6 +374,8 @@ namespace Signum.Web
 
     public class ValueLineConfigurator
     {
+        public int? MaxValueLineSize = 100; 
+
         public virtual ValueLineType GetDefaultValueLineType(Type type)
         {
             type = type.UnNullify();

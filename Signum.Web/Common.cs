@@ -113,7 +113,8 @@ namespace Signum.Web
                     if (max != -1)
                     {
                         vl.ValueHtmlProps.Add("maxlength", max);
-                        vl.ValueHtmlProps.Add("size", max);
+                        int? maxSize = ValueLineHelper.Configurator.MaxValueLineSize;
+                        vl.ValueHtmlProps.Add("size", maxSize.HasValue ? Math.Min(max, maxSize.Value) : max);
                     }
                 }
             }

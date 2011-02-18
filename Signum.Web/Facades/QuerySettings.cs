@@ -27,21 +27,6 @@ namespace Signum.Web
 
         public Func<object, bool> IsFindable;
 
-        private Dictionary<string, Func<HtmlHelper, object, MvcHtmlString>> formatters;
-        public Dictionary<string, Func<HtmlHelper, object, MvcHtmlString>> Formatters
-        {
-            get 
-            {
-                if (formatters == null)
-                    formatters = new Dictionary<string, Func<HtmlHelper, object, MvcHtmlString>>();
-                return formatters;
-            }
-            set 
-            {
-                formatters = value;
-            }
-        }
-
         public static List<FormatterRule> FormatRules { get; set; }
         public static List<EntityFormatterRule> EntityFormatRules { get; set; }
 
@@ -107,8 +92,7 @@ namespace Signum.Web
 
         public Func<HtmlHelper, object, MvcHtmlString> GetFormatter(Column column)
         {
-            return formatters.TryGetC(column.Name) ??
-                   FormatRules.Last(cfr => cfr.IsApplyable(column)).Formatter(column);
+            return FormatRules.Last(cfr => cfr.IsApplyable(column)).Formatter(column);
         }
 
         public bool OnIsFindable()

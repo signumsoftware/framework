@@ -159,7 +159,7 @@ namespace Signum.Web
 
         public override string ToString()
         {
-            return ReadOnly.ToString() + ((Parent != null) ? Parent.ToString() : "");
+            return ControlID; 
         }
         #endregion
 
