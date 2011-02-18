@@ -75,10 +75,10 @@ namespace Signum.Engine.Mailing
                             ml.Exception = e.Message;
                             ml.Save();
                             tr.Commit();
+                        }   
 
-                            package.NumErrors++;
-                            package.Save();
-                        }
+                        package.NumErrors++;
+                        package.Save();
                     }
 
                     int percentage = (NotificationSteps * i) / emails.Count;

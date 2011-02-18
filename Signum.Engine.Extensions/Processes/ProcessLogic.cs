@@ -513,7 +513,7 @@ namespace Signum.Engine.Processes
             catch (Exception e)
             {
                 Execution.State = ProcessState.Error;
-                Execution.ExceptionDate = DateTime.Today;
+                Execution.ExceptionDate = TimeZoneManager.Now;
                 Execution.Exception = e.Message;
                 Execution.Save();
             }
