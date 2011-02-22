@@ -114,7 +114,7 @@ namespace Signum.Web.AuthAdmin
 
             PropertyAuthLogic.SetPropertyRules(prp.Value);
 
-            return Navigator.ModelState(ModelState);
+            return JsonAction.ModelState(ModelState);
         }
 
         [HttpPost]
@@ -125,7 +125,7 @@ namespace Signum.Web.AuthAdmin
         }
 
         [HttpPost]
-        public ActionResult SaveQueries(FormCollection form, string prefix)
+        public JsonResult SaveQueries(FormCollection form, string prefix)
         {
             Lite<RoleDN> role = this.ExtractLite<RoleDN>(TypeContextUtilities.Compose(prefix, "Role"));
             TypeDN type = this.ExtractEntity<TypeDN>(TypeContextUtilities.Compose(prefix, "Type"));
@@ -134,7 +134,7 @@ namespace Signum.Web.AuthAdmin
 
             QueryAuthLogic.SetQueryRules(prp.Value);
 
-            return Navigator.ModelState(ModelState);
+            return JsonAction.ModelState(ModelState);
         }
 
 
@@ -155,7 +155,7 @@ namespace Signum.Web.AuthAdmin
 
             OperationAuthLogic.SetOperationRules(prp.Value);
 
-            return Navigator.ModelState(ModelState);
+            return JsonAction.ModelState(ModelState);
         }
     }
 }

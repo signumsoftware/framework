@@ -100,7 +100,7 @@ Write(Html.ActionLink("Slowest", "HeavySlowest"));
 WriteLiteral("\r\n</div>\r\n");
 
 
-   Html.RenderPartial("ProfilerTable", (object)Model);
+   Html.RenderPartial(ProfilerClient.ViewPrefix.Formato("ProfilerTable"), (object)Model);
 
 
         }

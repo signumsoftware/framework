@@ -162,7 +162,7 @@ WriteLiteral("</td>\r\n            <td class=\"right\">");
 WriteLiteral("</td>            \r\n        </tr>\r\n    </tbody>\r\n");
 
 
-     }
+    }
  }
 
 WriteLiteral("</table>\r\n");

@@ -14,4 +14,4 @@
     @Html.ActionLink("Clean", "Clean")
     @Html.ActionLink("Slowest", "HeavySlowest")
 </div>
-@{ Html.RenderPartial("ProfilerTable", (object)Model);}
+@{ Html.RenderPartial(ProfilerClient.ViewPrefix.Formato("ProfilerTable"), (object)Model);}

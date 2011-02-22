@@ -76,7 +76,7 @@
 {
     <h3>
         Childs</h3>
-    Html.RenderPartial("ProfilerTable", entry.Entries);
+    Html.RenderPartial(ProfilerClient.ViewPrefix.Formato("ProfilerTable"), entry.Entries);
 }
 <h3>
     Aditional Data</h3>

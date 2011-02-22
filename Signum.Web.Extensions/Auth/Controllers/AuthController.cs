@@ -38,7 +38,21 @@ namespace Signum.Web.Auth
 
         public static event Action OnUserLogged;
         public static event Func<Controller, UserDN, ActionResult> OnUserPreLogin;
-        public static event Func<Controller, string> OnUserLoggedDefaultReturn;
+        public static event Func<Controller, string> OnUserLoggedDefaultRedirect = c =>
+        {
+            string referrer = c.ControllerContext.HttpContext.Request["referrer"];
+
+            if (referrer.HasText())
+                return referrer;
+
+            return RouteHelper.New().Action("Index", "Home");
+        };
+
+        public static event Func<Controller, string> OnUserLogoutRedirect = c =>
+        {
+            return RouteHelper.New().Action("Index", "Home");
+        };
+
         public const string SessionUserKey = "user";
 
         [AcceptVerbs(HttpVerbs.Post)]
@@ -49,11 +63,11 @@ namespace Signum.Web.Auth
             if (context.GlobalErrors.Any())
             { 
                 this.ModelState.FromContext(context);
-                return Navigator.ModelState(ModelState);
+                return JsonAction.ModelState(ModelState);
             }
 
             context.Value.Execute(UserOperation.SaveNew);
-            return Navigator.RedirectUrl(Navigator.ViewRoute(context.Value));
+            return JsonAction.Redirect(Navigator.ViewRoute(context.Value));
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
@@ -74,18 +88,18 @@ namespace Signum.Web.Auth
             if (context.GlobalErrors.Any())
             { 
                 this.ModelState.FromContext(context);
-                return Navigator.ModelState(ModelState);
+                return JsonAction.ModelState(ModelState);
             }
 
             context.Value.Execute(UserOperation.SaveNew);
-            return Navigator.RedirectUrl(Navigator.ViewRoute(context.Value));
+            return JsonAction.Redirect(Navigator.ViewRoute(context.Value));
         }
 
         #region "Change password"
         public ActionResult ChangePassword()
         {
             ViewData["Title"] = Resources.ChangePassword;
-            return View(AuthClient.ChangePasswordUrl);
+            return View(AuthClient.ChangePasswordView);
         }
 
         [HttpPost]
@@ -98,7 +112,7 @@ namespace Signum.Web.Auth
                 ViewData["Title"] = Resources.ChangePassword;
                 ModelState.FromContext(context);
                 RestoreCleanCurrentUser();
-                return View(AuthClient.ChangePasswordUrl);
+                return View(AuthClient.ChangePasswordView);
             }
 
             string errorPasswordValidation = ValidatePassword(Request.Params[UserMapping.NewPasswordKey]);
@@ -106,7 +120,7 @@ namespace Signum.Web.Auth
             {
                 ModelState.AddModelError("password", errorPasswordValidation);
                 RestoreCleanCurrentUser();
-                return View(AuthClient.ChangePasswordUrl);
+                return View(AuthClient.ChangePasswordView);
             }
 
             using (AuthLogic.Disable())
@@ -129,7 +143,7 @@ namespace Signum.Web.Auth
             ViewData["Message"] = Resources.PasswordHasBeenChangedSuccessfully;
             ViewData["Title"] = Resources.ChangePassword;
 
-            return View(AuthClient.ChangePasswordSuccessUrl);
+            return View(AuthClient.ChangePasswordSuccessView);
         }
 
         #endregion
@@ -139,7 +153,7 @@ namespace Signum.Web.Auth
         [AcceptVerbs(HttpVerbs.Get)]
         public ActionResult ResetPassword()
         {
-            return View(AuthClient.ResetPasswordUrl);
+            return View(AuthClient.ResetPasswordView);
         }
 
         [HttpPost]
@@ -175,14 +189,14 @@ namespace Signum.Web.Auth
         ViewResult ResetPasswordError(string key, string error)
         {
             ModelState.AddModelError("_FORM", error);
-            return View(AuthClient.ResetPasswordUrl);
+            return View(AuthClient.ResetPasswordView);
         }
 
         ViewResult ResetPasswordSetNewError(int idResetPasswordRequest, string key, string error)
         {
             ModelState.AddModelError("_FORM", error);
             ViewData["rpr"] = idResetPasswordRequest;
-            return View(AuthClient.ResetPasswordSetNewUrl);
+            return View(AuthClient.ResetPasswordSetNewView);
         }
 
         [AcceptVerbs(HttpVerbs.Get)]
@@ -190,7 +204,7 @@ namespace Signum.Web.Auth
         {
             ViewData["Message"] = Resources.ResetPasswordCodeHasBeenSent.Formato(ViewData["email"]);
 
-            return View(AuthClient.ResetPasswordSendUrl);
+            return View(AuthClient.ResetPasswordSendView);
         }
 
         [AcceptVerbs(HttpVerbs.Get)]
@@ -218,7 +232,7 @@ namespace Signum.Web.Auth
                 return RedirectToAction("ResetPassword");
             }
             ViewData["rpr"] = rpr.Id;
-            return View(AuthClient.ResetPasswordSetNewUrl);
+            return View(AuthClient.ResetPasswordSetNewView);
         }
 
         [HttpPost]
@@ -266,7 +280,7 @@ namespace Signum.Web.Auth
 
         public ActionResult ResetPasswordSuccess()
         {
-            return View(AuthClient.ResetPasswordSuccessUrl);
+            return View(AuthClient.ResetPasswordSuccessView);
         }
         #endregion
 
@@ -274,7 +288,7 @@ namespace Signum.Web.Auth
         public ActionResult RememberPassword()
         {
             ViewData["Title"] = Resources.RememberPassword;
-            return View(AuthClient.RememberPasswordUrl);
+            return View(AuthClient.RememberPasswordView);
         }
 
         [HttpPost]
@@ -314,7 +328,7 @@ namespace Signum.Web.Auth
         ViewResult RememberPasswordError(string key, string error)
         {
             ModelState.AddModelError("_FORM", error);
-            return View(AuthClient.RememberPasswordUrl);
+            return View(AuthClient.RememberPasswordView);
         }
 
         public ActionResult RememberPasswordSuccess()
@@ -322,7 +336,7 @@ namespace Signum.Web.Auth
             ViewData["Message"] = Resources.PasswordHasBeenSent.Formato(ViewData["email"]);
             
 
-            return View(AuthClient.RememberPasswordSuccessUrl);
+            return View(AuthClient.RememberPasswordSuccessView);
         }
         #endregion
 
@@ -339,7 +353,7 @@ namespace Signum.Web.Auth
                     ViewData["referrer"] = TempData["referrer"].ToString();
             }
 
-            return View(AuthClient.LoginUrl);
+            return View(AuthClient.LoginView);
         }
 
         [HttpPost]
@@ -388,13 +402,13 @@ namespace Signum.Web.Auth
 
             AddUserSession(user.UserName, user);
 
-            if (OnUserLoggedDefaultReturn != null)
-                return LoginRedirectAjaxOrForm(OnUserLoggedDefaultReturn(this));
+            if (OnUserLoggedDefaultRedirect != null)
+                return LoginRedirectAjaxOrForm(OnUserLoggedDefaultRedirect(this));
 
             if (referrer.HasText())
                 return LoginRedirectAjaxOrForm(referrer);
 
-            return RedirectToAction("Index", "Home");
+            return LoginRedirectAjaxOrForm(RouteHelper.New().Action("Index", "Home"));
         }
 
         private ActionResult LoginErrorAjaxOrForm(string key, string message)
@@ -403,7 +417,7 @@ namespace Signum.Web.Auth
             {
                 ModelState.Clear();
                 ModelState.AddModelError(key, message, "");
-                return Navigator.ModelState(ModelState);
+                return JsonAction.ModelState(ModelState);
             }
             else
                 return LoginError(key, message);
@@ -412,7 +426,7 @@ namespace Signum.Web.Auth
         public ActionResult LoginRedirectAjaxOrForm(string url)
         {
             if (Request.IsAjaxRequest())
-                return Navigator.RedirectUrl(url);
+                return JsonAction.Redirect(url);
             else
                 return Redirect(url);
         }
@@ -420,7 +434,7 @@ namespace Signum.Web.Auth
         ViewResult LoginError(string key, string error)
         {
             ModelState.AddModelError(key, error);
-            return View(AuthClient.LoginUrl);
+            return View(AuthClient.LoginView);
         }
 
         public static bool LoginFromCookie()
@@ -607,7 +621,7 @@ namespace Signum.Web.Auth
         {
             LogoutDo();
 
-            return RedirectToAction("Index", "Home");
+            return LoginRedirectAjaxOrForm(OnUserLogoutRedirect(this));
         }
 
         public static void LogoutDo()

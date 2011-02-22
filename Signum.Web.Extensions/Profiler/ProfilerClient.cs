@@ -24,6 +24,8 @@ namespace Signum.Web.Profiler
 {
     public static class ProfilerClient
     {
+        public static string ViewPrefix = "~/Profiler/Views/{0}.cshtml";
+
         public static void Start()
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))

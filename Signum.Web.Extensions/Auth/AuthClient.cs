@@ -36,18 +36,18 @@ namespace Signum.Web.Auth
          
         public static string ViewPrefix = "~/auth/Views/{0}.cshtml";
         
-        public static string LoginUrl = ViewPrefix.Formato("Login");
-        public static string LoginUserControlUrl = ViewPrefix.Formato("LoginUserControl");
-        public static string ChangePasswordUrl = ViewPrefix.Formato("ChangePassword");
-        public static string ChangePasswordSuccessUrl = ViewPrefix.Formato("ChangePasswordSuccess");
+        public static string LoginView = ViewPrefix.Formato("Login");
+        public static string LoginUserControlView = ViewPrefix.Formato("LoginUserControl");
+        public static string ChangePasswordView = ViewPrefix.Formato("ChangePassword");
+        public static string ChangePasswordSuccessView = ViewPrefix.Formato("ChangePasswordSuccess");
 
-        public static string ResetPasswordUrl = ViewPrefix.Formato("ResetPassword");
-        public static string ResetPasswordSendUrl = ViewPrefix.Formato("ResetPasswordSend");
-        public static string ResetPasswordSuccessUrl = ViewPrefix.Formato("ResetPasswordSuccess");
-        public static string ResetPasswordSetNewUrl = ViewPrefix.Formato("ResetPasswordSetNew");
+        public static string ResetPasswordView = ViewPrefix.Formato("ResetPassword");
+        public static string ResetPasswordSendView = ViewPrefix.Formato("ResetPasswordSend");
+        public static string ResetPasswordSuccessView = ViewPrefix.Formato("ResetPasswordSuccess");
+        public static string ResetPasswordSetNewView = ViewPrefix.Formato("ResetPasswordSetNew");
 
-        public static string RememberPasswordUrl = ViewPrefix.Formato("RememberPassword");
-        public static string RememberPasswordSuccessUrl = ViewPrefix.Formato("RememberPasswordSuccess");
+        public static string RememberPasswordView = ViewPrefix.Formato("RememberPassword");
+        public static string RememberPasswordSuccessView = ViewPrefix.Formato("RememberPasswordSuccess");
 
         public static bool ResetPasswordStarted;
 
@@ -99,7 +99,7 @@ namespace Signum.Web.Auth
                         //send them off to the login page
                         string loginUrl = PublicLoginUrl(returnUrl);
                         if (context.HttpContext.Request.IsAjaxRequest())
-                            context.Result = Navigator.RedirectUrl(loginUrl);
+                            context.Result = JsonAction.Redirect(loginUrl);
                         else
                             context.Result = new RedirectResult(loginUrl);
                     }
@@ -139,7 +139,7 @@ namespace Signum.Web.Auth
                 //send them off to the login page
                 
                 if (ctx.HttpContext.Request.IsAjaxRequest())
-                    ctx.Result = Navigator.RedirectUrl(absoluteLoginUrl);
+                    ctx.Result = JsonAction.Redirect(absoluteLoginUrl);
                 else
                     ctx.Result = new RedirectResult(absoluteLoginUrl);
 

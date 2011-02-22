@@ -112,12 +112,12 @@ namespace Signum.Web.Reports
         }
         
         [HttpPost]
-        public ContentResult Delete(Lite<ExcelReportDN> excelReport)
+        public JsonResult Delete(Lite<ExcelReportDN> excelReport)
         {
             ExcelReportDN report = excelReport.Retrieve();
             report.Deleted = true;
             report.Save();
-            return Navigator.RedirectUrl(Navigator.ViewRoute(report));
+            return JsonAction.Redirect(Navigator.ViewRoute(report));
         }
 
         public ActionResult DownloadTemplate(Lite<ExcelReportDN> excelReport)

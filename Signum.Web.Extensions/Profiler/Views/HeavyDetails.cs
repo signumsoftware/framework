@@ -159,7 +159,7 @@ WriteLiteral("</table>\r\n<br />\r\n");
 WriteLiteral("    <h3>\r\n        Childs</h3>\r\n");
 
 
-    Html.RenderPartial("ProfilerTable", entry.Entries);
+    Html.RenderPartial(ProfilerClient.ViewPrefix.Formato("ProfilerTable"), entry.Entries);
 }
 
 WriteLiteral("<h3>\r\n    Aditional Data</h3>\r\n<div>\r\n    <pre>\r\n    <code>\r\n        ");

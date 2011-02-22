@@ -10,6 +10,7 @@ using System.Windows;
 using System.Linq.Expressions;
 using System.Xml.Linq;
 using System.IO;
+using System.Data.SqlClient;
 
 namespace Signum.Entities.Authorization
 {
@@ -68,6 +69,18 @@ namespace Signum.Entities.Authorization
             sb.Schema.Initializing[InitLevel.Level1SimpleEntities] += Schema_InitializingCache;
             sb.Schema.EntityEvents<RT>().Saving += Schema_Saving;
             AuthLogic.RolesModified += InvalidateCache;
+
+            sb.Schema.Table<R>().PreDeleteSqlSync += new Func<IdentifiableEntity, SqlPreCommand>(AuthCache_PreDeleteSqlSync);
+        }
+
+        SqlPreCommand AuthCache_PreDeleteSqlSync(IdentifiableEntity arg)
+        {
+            var t = Schema.Current.Table<RT>();
+            var f = (FieldReference)t.Fields["resource"].Field;
+
+            var param = SqlParameterBuilder.CreateReferenceParameter("id", false, arg.Id);
+
+            return new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}".Formato(t.Name, f.Name, param.ParameterName), new List<SqlParameter> { param });
         }
 
         void Schema_InitializingCache()

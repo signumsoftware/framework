@@ -45,7 +45,7 @@ namespace Signum.Web.Operations
                 if (context.GlobalErrors.Any())
                 {
                     this.ModelState.FromContext(context);
-                    return Navigator.ModelState(ModelState);
+                    return JsonAction.ModelState(ModelState);
                 }
 
                 entity = OperationLogic.ServiceExecute(entity, EnumLogic<OperationDN>.ToEnum(operationFullKey));
@@ -70,7 +70,7 @@ namespace Signum.Web.Operations
                     if (HttpContext.Request.UrlReferrer.AbsolutePath.Contains(newUrl))
                         return Navigator.NormalControl(this, entity);
                     else
-                        return Navigator.RedirectUrl(newUrl);
+                        return JsonAction.Redirect(newUrl);
                 }
                 else
                     return Navigator.View(this, entity);
@@ -102,7 +102,7 @@ namespace Signum.Web.Operations
             OperationLogic.ServiceDelete(lite, EnumLogic<OperationDN>.ToEnum(operationFullKey), null);
 
             if (Navigator.Manager.QuerySettings.ContainsKey(runtimeInfo.RuntimeType))
-                return Navigator.RedirectUrl(Navigator.FindRoute(runtimeInfo.RuntimeType));
+                return JsonAction.Redirect(Navigator.FindRoute(runtimeInfo.RuntimeType));
             return Content("");
         }
 
@@ -128,7 +128,7 @@ namespace Signum.Web.Operations
                 if (context.GlobalErrors.Any())
                 {
                     this.ModelState.FromContext(context);
-                    return Navigator.ModelState(ModelState);
+                    return JsonAction.ModelState(ModelState);
                 }
 
                 entity = (IdentifiableEntity)OperationLogic.ServiceConstructFrom(entity, EnumLogic<OperationDN>.ToEnum(operationFullKey));
@@ -150,7 +150,7 @@ namespace Signum.Web.Operations
                     if (HttpContext.Request.UrlReferrer.AbsolutePath.Contains(newUrl))
                         return Navigator.NormalControl(this, entity);
                     else
-                        return Navigator.RedirectUrl(newUrl);
+                        return JsonAction.Redirect(newUrl);
                 }
                 else
                     return Navigator.View(this, entity);

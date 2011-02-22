@@ -301,7 +301,7 @@ namespace Signum.Engine.Authorization
 
                 Expression exp = arguments[0].Type.IsLite() ? Expression.Property(arguments[0], "Entity") : arguments[0];
 
-                return IsAllowedExpression(exp, allowed, userInterface);
+                return IsAllowedExpression(exp, allowed, userInterface) ?? Expression.Constant(true);
             }
         }
 
