@@ -448,13 +448,22 @@ namespace Signum.Engine.Maps
 
         public event FilterQueryEventHandler<T> FilterQuery;
 
-        public IQueryable<T> OnFilterQuery(IQueryable<T> query)
+        public event PreUnsafeDeleteHandler<T> PreUnsafeDelete;
+
+        internal IQueryable<T> OnFilterQuery(IQueryable<T> query)
         {
             if (FilterQuery != null)
                 foreach (FilterQueryEventHandler<T> filter in FilterQuery.GetInvocationList())
                     query = filter(query);
 
             return query;
+        }
+
+        internal void OnPreUnsafeDelete(IQueryable<T> query)
+        {
+            if (PreUnsafeDelete != null)
+                foreach (PreUnsafeDeleteHandler<T> action in PreUnsafeDelete.GetInvocationList().Reverse())
+                    action(query);
         }
 
         void IEntityEvents.OnPreSaving(IdentifiableEntity entity, bool isRoot, ref bool graphModified)
@@ -494,6 +503,8 @@ namespace Signum.Engine.Maps
     public delegate void RetrivingEntitiesEventHandler(Type type, int[] ids, bool inQuery);
     public delegate void DeleteEntityEventHandler(Type type, int id);
     public delegate IQueryable<T> FilterQueryEventHandler<T>(IQueryable<T> query);
+
+    public delegate void PreUnsafeDeleteHandler<T>(IQueryable<T> query);
 
     public delegate void InitEventHandler();
     public delegate void SyncEventHandler();

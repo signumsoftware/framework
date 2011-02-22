@@ -506,9 +506,15 @@ namespace Signum.Engine
         {
             if (query == null)
                 throw new ArgumentNullException("query");
+            
+            using (Transaction tr = new Transaction())
+            {
+                Schema.Current.EntityEvents<T>().OnPreUnsafeDelete(query);
 
-            int rows = DbQueryProvider.Single.Delete<T>(query);
-            return rows;
+                int rows = DbQueryProvider.Single.Delete<T>(query);
+
+                return tr.Commit(rows);
+            }
         }
 
 
