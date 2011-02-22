@@ -119,7 +119,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Mappings\MappingContext.cs" />
-    <Compile Include="ModelStateData.cs" />
     <Compile Include="ModelStateExtensions.cs" />
     <Compile Include="ButtonBar\ToolBarButton.cs" />
     <Compile Include="Signum\Views\AjaxError.cs">

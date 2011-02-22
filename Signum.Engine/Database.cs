@@ -536,6 +536,13 @@ namespace Signum.Engine
             return new Disposable(() => userInterface = oldValue);
         }
 
+        public static IDisposable ForLogic()
+        {
+            var oldValue = UserInterface;
+            userInterface = false;
+            return new Disposable(() => userInterface = oldValue);
+        }
+
         public static void SetUserInterface(bool value)
         {
             userInterface = value; 

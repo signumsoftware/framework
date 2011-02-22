@@ -13,7 +13,7 @@ namespace Signum.Web.Controllers
             Exception ex = HttpContext.Session[HandleExceptionAttribute.ErrorSessionKey] as Exception;
             HttpContext.Application.Remove(Request.UserHostAddress);
             ViewData.Model = ex;
-            return View(Navigator.Manager.ErrorPageUrl);
+            return View(Navigator.Manager.ErrorPageView);
         }
 
     }

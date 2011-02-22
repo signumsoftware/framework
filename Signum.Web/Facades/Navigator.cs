@@ -420,21 +420,6 @@ namespace Signum.Web
             return Manager.IsFindable(queryName);
         }
 
-        public static ContentResult ModelState(ModelStateData modelStateData)
-        {
-            return Manager.ModelState(modelStateData);
-        }
-
-        public static ContentResult ModelState(ModelStateDictionary modelState)
-        {
-            return Manager.ModelState(new ModelStateData(modelState));
-        }
-
-        public static ContentResult RedirectUrl(string url)
-        {
-            return Manager.RedirectUrl(url);
-        }
-
         public static string OnPartialViewName(ModifiableEntity entity)
         {
             return EntitySettings(entity.GetType()).OnPartialViewName(entity); 
@@ -471,18 +456,18 @@ namespace Signum.Web
 
         public static string ViewPrefix = "~/signum/Views/{0}.cshtml";
 
-        public string AjaxErrorPageUrl = ViewPrefix.Formato("AjaxError");
-        public string ErrorPageUrl = ViewPrefix.Formato("Error");
-        public string NormalPageUrl = ViewPrefix.Formato("NormalPage");
-        public string NormalControlUrl = ViewPrefix.Formato("NormalControl");
-        public string PopupControlUrl = ViewPrefix.Formato("PopupControl");
-        public string ChooserPopupUrl = ViewPrefix.Formato("ChooserPopup");
-        public string SearchPopupControlUrl = ViewPrefix.Formato("SearchPopupControl");
-        public string SearchPageUrl = ViewPrefix.Formato("SearchPage");
-        public string SearchControlUrl = ViewPrefix.Formato("SearchControl");
-        public string SearchResultsUrl = ViewPrefix.Formato("SearchResults");
-        public string FilterBuilderUrl = ViewPrefix.Formato("FilterBuilder");
-        public string ValueLineBoxUrl = ViewPrefix.Formato("ValueLineBox");
+        public string AjaxErrorPageView = ViewPrefix.Formato("AjaxError");
+        public string ErrorPageView = ViewPrefix.Formato("Error");
+        public string NormalPageView = ViewPrefix.Formato("NormalPage");
+        public string NormalControlView = ViewPrefix.Formato("NormalControl");
+        public string PopupControlView = ViewPrefix.Formato("PopupControl");
+        public string ChooserPopupView = ViewPrefix.Formato("ChooserPopup");
+        public string SearchPopupControlView = ViewPrefix.Formato("SearchPopupControl");
+        public string SearchPageView = ViewPrefix.Formato("SearchPage");
+        public string SearchControlView = ViewPrefix.Formato("SearchControl");
+        public string SearchResultsView = ViewPrefix.Formato("SearchResults");
+        public string FilterBuilderView = ViewPrefix.Formato("FilterBuilder");
+        public string ValueLineBoxView = ViewPrefix.Formato("ValueLineBox");
         
         protected Dictionary<string, Type> WebTypeNames { get; private set; }
         protected Dictionary<string, object> WebQueryNames { get; private set; }
@@ -503,7 +488,7 @@ namespace Signum.Web
         {
             if (!Initialized)
             {
-                Navigator.AddSetting(new EmbeddedEntitySettings<ValueLineBoxModel> { PartialViewName = _ => ValueLineBoxUrl });
+                Navigator.AddSetting(new EmbeddedEntitySettings<ValueLineBoxModel> { PartialViewName = _ => ValueLineBoxView });
 
                 foreach (var es in EntitySettings.Values)
                 {
@@ -564,7 +549,7 @@ namespace Signum.Web
 
             return new ViewResult()
             {
-                ViewName = NormalPageUrl,
+                ViewName = NormalPageView,
                 MasterName = null,
                 ViewData = controller.ViewData,
                 TempData = controller.TempData
@@ -577,7 +562,7 @@ namespace Signum.Web
 
             return new PartialViewResult()
             {
-                ViewName = NormalControlUrl,
+                ViewName = NormalControlView,
                 ViewData = controller.ViewData,
                 TempData = controller.TempData
             };
@@ -647,7 +632,7 @@ namespace Signum.Web
             
             return new PartialViewResult
             {
-                ViewName = PopupControlUrl,
+                ViewName = PopupControlView,
                 ViewData = controller.ViewData,
                 TempData = controller.TempData
             };
@@ -683,7 +668,7 @@ namespace Signum.Web
 
             controller.ViewData.Model = new Context(null, "");
 
-            controller.ViewData[ViewDataKeys.PartialViewName] = SearchControlUrl;
+            controller.ViewData[ViewDataKeys.PartialViewName] = SearchControlView;
 
             controller.ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
             controller.ViewData[ViewDataKeys.FindOptions] = findOptions;
@@ -693,7 +678,7 @@ namespace Signum.Web
             
             return new ViewResult()
             {
-                ViewName = SearchPageUrl,
+                ViewName = SearchPageView,
                 MasterName = null,
                 ViewData = controller.ViewData,
                 TempData = controller.TempData
@@ -753,7 +738,7 @@ namespace Signum.Web
             QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
 
             controller.ViewData.Model = context;
-            controller.ViewData[ViewDataKeys.PartialViewName] = SearchControlUrl;
+            controller.ViewData[ViewDataKeys.PartialViewName] = SearchControlView;
             
             controller.ViewData[ViewDataKeys.FindOptions] = findOptions;
             controller.ViewData[ViewDataKeys.QueryDescription] = queryDescription;
@@ -763,7 +748,7 @@ namespace Signum.Web
             
             return new PartialViewResult
             {
-                ViewName = SearchPopupControlUrl,
+                ViewName = SearchPopupControlView,
                 ViewData = controller.ViewData,
                 TempData = controller.TempData
             };
@@ -799,7 +784,7 @@ namespace Signum.Web
 
             return new PartialViewResult
             {
-                ViewName = SearchResultsUrl,
+                ViewName = SearchResultsView,
                 ViewData = controller.ViewData,
                 TempData = controller.TempData
             };
@@ -972,33 +957,47 @@ namespace Signum.Web
 
             return true;
         }
-
-        internal ContentResult ModelState(ModelStateData modelStateData)
-        {
-            System.Diagnostics.Debug.WriteLine(modelStateData.ToString());
-
-            return new ContentResult { Content = modelStateData.ToString() };
-        }
-
-        internal ContentResult RedirectUrl(string url)
-        {
-            var dic = new
-            { 
-                result = JsonResultType.url.ToString(),
-                url = url
-            };
-
-            return new ContentResult 
-            { 
-                Content = dic.ToJSonObject(v => v.ToString().Quote())
-            };
-        }
-
     }
 
     public enum JsonResultType
     {
         url,
         ModelState
+    }
+
+    public static class JsonAction
+    {
+        public static JsonResult Redirect(string url)
+        {
+            return new JsonResult
+            {
+                Data = new
+                {
+                    result = JsonResultType.url.ToString(),
+                    url = url
+                }
+            };
+        }
+
+        public static JsonResult ModelState(ModelStateDictionary dictionary)
+        {
+            return ModelState(dictionary, null, null); 
+        }
+
+        public static JsonResult ModelState(ModelStateDictionary dictionary, string newToString, string newToStringLink)
+        {
+            Dictionary<string, string> result = new Dictionary<string, string>
+            {
+                {"result", JsonResultType.ModelState.ToString()},
+                {"ModelState", dictionary.ToJsonData()}
+            };
+
+            if (newToString != null)
+                result.Add(EntityBaseKeys.ToStr, newToString);
+            if (newToStringLink != null)
+                result.Add(EntityBaseKeys.ToStrLink, newToStringLink);
+
+            return new JsonResult { Data = result };
+        }
     }
 }

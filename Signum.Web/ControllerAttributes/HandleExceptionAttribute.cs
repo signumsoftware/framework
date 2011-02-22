@@ -48,7 +48,7 @@ namespace Signum.Web
                 //we do not want to use a master page, just render a control with the error string
                 filterContext.Result = new PartialViewResult
                 {
-                    ViewName = Navigator.Manager.AjaxErrorPageUrl,
+                    ViewName = Navigator.Manager.AjaxErrorPageView,
                     ViewData = new ViewDataDictionary<HandleErrorInfo>(model),
                     TempData = filterContext.Controller.TempData
                 };
@@ -57,7 +57,7 @@ namespace Signum.Web
             {
                 filterContext.Result = new ViewResult
                 {
-                    ViewName = Navigator.Manager.ErrorPageUrl,
+                    ViewName = Navigator.Manager.ErrorPageView,
                     TempData = filterContext.Controller.TempData,
                     ViewData = new ViewDataDictionary<HandleErrorInfo>(model)
                     {

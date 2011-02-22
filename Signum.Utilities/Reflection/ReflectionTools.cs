@@ -99,6 +99,27 @@ namespace Signum.Utilities.Reflection
             return pi;
         }
 
+        public static ConstructorInfo GetConstuctorInfo<R>(Expression<Func<R>> constuctor)
+        {
+            return BaseConstuctorInfo(constuctor);
+        }
+
+        public static ConstructorInfo BaseConstuctorInfo(LambdaExpression constuctor)
+        {
+            if (constuctor == null)
+                throw new ArgumentNullException("constuctor");
+
+            Expression body = constuctor.Body;
+            if (body.NodeType == ExpressionType.Convert)
+                body = ((UnaryExpression)body).Operand;
+
+            NewExpression ex = body as NewExpression;
+            if (ex == null)
+                throw new ArgumentException("The lambda 'constuctor' should be an expression constructing an object");
+
+            return ex.Constructor;
+        }
+
 
         public static FieldInfo GetFieldInfo<R>(Expression<Func<R>> field)
         {

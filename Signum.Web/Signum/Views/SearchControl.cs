@@ -186,7 +186,7 @@ WriteLiteral("\" style=\"display:");
 WriteLiteral("\" >\r\n");
 
 
-           Html.RenderPartial(Navigator.Manager.FilterBuilderUrl, ViewData);
+           Html.RenderPartial(Navigator.Manager.FilterBuilderView, ViewData);
 
 WriteLiteral("    </div>\r\n    <div class=\"sf-search-footer\" style=\"display:");
 

@@ -46,7 +46,7 @@ namespace Signum.Web
             if (!helper.ViewData.ContainsKey(ViewDataKeys.Title))
                 helper.ViewData[ViewDataKeys.Title] = Navigator.Manager.SearchTitle(findOptions.QueryName);
             
-            return helper.Partial(Navigator.Manager.SearchControlUrl, helper.ViewData);
+            return helper.Partial(Navigator.Manager.SearchControlView, helper.ViewData);
         }
 
         public static MvcHtmlString CountSearchControl(this HtmlHelper helper, FindOptions findOptions)

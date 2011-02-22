@@ -77,11 +77,11 @@ namespace Signum.Web
                     return helper.Partial(partialViewName, vdd);
                 case RenderMode.Popup:
                     vdd.Add(ViewDataKeys.PartialViewName, partialViewName);
-                    return helper.Partial(Navigator.Manager.PopupControlUrl, vdd);
+                    return helper.Partial(Navigator.Manager.PopupControlView, vdd);
                 case RenderMode.PopupInDiv:
                     vdd.Add(ViewDataKeys.PartialViewName, partialViewName);
                     return helper.Div(typeContext.Compose(EntityBaseKeys.Entity),
-                        helper.Partial(Navigator.Manager.PopupControlUrl, vdd),
+                        helper.Partial(Navigator.Manager.PopupControlView, vdd),
                         "",
                         new Dictionary<string, object> { { "style", "display:none" } });
                 case RenderMode.ContentInVisibleDiv:

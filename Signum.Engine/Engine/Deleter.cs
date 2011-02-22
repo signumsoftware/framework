@@ -53,8 +53,7 @@ namespace Signum.Engine
 
             SqlPreCommand comando = SqlPreCommand.Combine(Spacing.Double,
                 table.DeleteSql(ids),
-                SqlBuilder.SelectRowCount()
-                );
+                SqlBuilder.SelectRowCount());
             return comando;
         }
     }

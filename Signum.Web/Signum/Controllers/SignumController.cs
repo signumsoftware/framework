@@ -153,7 +153,7 @@ namespace Signum.Web.Controllers
             if (context.GlobalErrors.Any())
             {
                 this.ModelState.FromContext(context);
-                return Navigator.ModelState(ModelState);
+                return JsonAction.ModelState(ModelState);
             }
 
             IdentifiableEntity ident = context.UntypedValue as IdentifiableEntity;
@@ -168,20 +168,20 @@ namespace Signum.Web.Controllers
             if (HttpContext.Request.UrlReferrer.AbsolutePath.Contains(newUrl))
                 return Navigator.View(this, ident, true);
             else
-                return Navigator.RedirectUrl(newUrl);
+                return JsonAction.Redirect(newUrl);
         }
 
         [HttpPost]
-        public ContentResult Validate()
+        public JsonResult Validate()
         {
             MappingContext context = this.UntypedExtractEntity().UntypedApplyChanges(ControllerContext, null, true).UntypedValidateGlobal();
 
             this.ModelState.FromContext(context);
-            return Navigator.ModelState(ModelState);
+            return JsonAction.ModelState(ModelState);
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ContentResult TrySavePartial(string prefix)
+        public JsonResult TrySavePartial(string prefix)
         {
             MappingContext context = this.UntypedExtractEntity(prefix).UntypedApplyChanges(ControllerContext, prefix, true).UntypedValidateGlobal();
 
@@ -193,15 +193,11 @@ namespace Signum.Web.Controllers
 
             string newLink = Navigator.ViewRoute(context.UntypedValue.GetType(), ident.TryCS(e => e.IdOrNull));
 
-            return Navigator.ModelState(new ModelStateData(this.ModelState)
-            {
-                NewToStr = context.UntypedValue.ToString(),
-                NewtoStrLink = newLink
-            });
+            return JsonAction.ModelState(ModelState, context.UntypedValue.ToString(), newLink);
         }
 
         [HttpPost]
-        public ContentResult ValidatePartial(string prefix)
+        public JsonResult ValidatePartial(string prefix)
         {
             MappingContext context = this.UntypedExtractEntity(prefix).UntypedApplyChanges(ControllerContext, prefix, true).UntypedValidateGlobal();
 
@@ -217,11 +213,7 @@ namespace Signum.Web.Controllers
             else
                 newLink = Navigator.ViewRoute(context.UntypedValue.GetType(), ident.TryCS(e => e.IdOrNull));
 
-            return Navigator.ModelState(new ModelStateData(this.ModelState)
-            {
-                NewToStr = context.UntypedValue.ToString(),
-                NewtoStrLink = newLink
-            });
+            return JsonAction.ModelState(ModelState, context.UntypedValue.ToString(), newLink);
         }
 
         [HttpPost]
@@ -341,6 +333,7 @@ namespace Signum.Web.Controllers
                 Selected = false
             }).ToList();
             items.Insert(0, new SelectListItem { Text = "-", Selected = true, Value = "" });
+
             return Content(SearchControlHelper.TokensCombo(CreateHtmlHelper(this), queryName, items, new Context(null, prefix), index + 1, true).ToHtmlString());
         }
 
@@ -369,7 +362,7 @@ namespace Signum.Web.Controllers
             ViewData.Model = new Context(null, prefix);
             ViewData[ViewDataKeys.CustomHtml] = sb.ToHtml();
 
-            return PartialView(Navigator.Manager.ChooserPopupUrl);
+            return PartialView(Navigator.Manager.ChooserPopupView);
         }
 
         [HttpPost]
@@ -395,7 +388,7 @@ namespace Signum.Web.Controllers
             if (title.HasText())
                 ViewData[ViewDataKeys.Title] = title;
 
-            return PartialView(Navigator.Manager.ChooserPopupUrl);
+            return PartialView(Navigator.Manager.ChooserPopupView);
         }
 
         [HttpPost, ValidateAntiForgeryToken]

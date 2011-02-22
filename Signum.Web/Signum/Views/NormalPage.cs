@@ -120,7 +120,7 @@ WriteLiteral("     \r\n");
         }
 
 
-           Html.RenderPartial(Navigator.Manager.NormalControlUrl);
+           Html.RenderPartial(Navigator.Manager.NormalControlView);
 
 WriteLiteral("    </div>\r\n");
 

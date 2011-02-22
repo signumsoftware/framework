@@ -20,19 +20,7 @@ namespace Signum.Web
     /// </summary>
     public class AuthenticationRequiredAttribute : AuthorizeAttribute
     {
-        public static Action<AuthorizationContext> Authenticate = context =>
-        {
-            if (!context.HttpContext.User.Identity.IsAuthenticated)
-            {
-                //send them off to the login page
-                string returnUrl = context.HttpContext.Request.Url.PathAndQuery;
-                string loginUrl = RouteHelper.New().Action("Login", "Auth", new { referrer = returnUrl });
-                if (context.HttpContext.Request.IsAjaxRequest())
-                    context.Result = Navigator.RedirectUrl(loginUrl);
-                else
-                    context.Result = new RedirectResult(loginUrl);
-            }
-        };
+        public static Action<AuthorizationContext> Authenticate;
 
         public override void OnAuthorization(AuthorizationContext filterContext)
         {

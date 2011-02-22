@@ -101,7 +101,7 @@ namespace Signum.Web
             }
 
             if (preferredStyle == VisualConstructStyle.Navigate)
-                return Navigator.RedirectUrl(Navigator.ViewRoute(type, null));
+                return JsonAction.Redirect(Navigator.ViewRoute(type, null));
 
             ModifiableEntity entity = Constructor.Construct(type);
             return EncapsulateView(controller, entity, prefix, preferredStyle); 
