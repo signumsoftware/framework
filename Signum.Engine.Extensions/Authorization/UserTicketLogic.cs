@@ -29,7 +29,7 @@ namespace Signum.Engine.Authorization
                                              select new
                                              {
                                                  Entity = ut.ToLite(),
-                                                 ut.IdOrNull,
+                                                 ut.Id,
                                                  ut.User,
                                                  ut.Ticket,
                                                  ut.ConnectionDate,
