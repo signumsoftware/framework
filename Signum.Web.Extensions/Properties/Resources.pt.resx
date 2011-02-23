@@ -169,13 +169,13 @@
     <value>Download</value>
   </data>
   <data name="EmailIsNotValid" xml:space="preserve">
-    <value>O e-mail é diferente do e-mail armazenado</value>
+    <value>O E-mail é diferente do E-mail armazenado</value>
   </data>
   <data name="EmailMustHaveAValue" xml:space="preserve">
-    <value>O e-mail deve ter um valor</value>
+    <value>O E-mail deve ter um valor</value>
   </data>
   <data name="EmailNotExistsDatabase" xml:space="preserve">
-    <value>O e-mail fornecido não existe na base de dados</value>
+    <value>O E-mail fornecido não existe na base de dados</value>
   </data>
   <data name="EmailSent" xml:space="preserve">
     <value>E-mail enviado</value>
@@ -220,7 +220,7 @@
     <value>Sobrescrito</value>
   </data>
   <data name="ForgotYourPassword" xml:space="preserve">
-    <value>Esqueceste-te da password? Escreve o teu e-mail abaixo e vai à tua caixa de correio.</value>
+    <value>Esqueceste-te da password? Escreve o teu E-mail abaixo e vai à tua caixa de correio.</value>
   </data>
   <data name="GoBackToLoginPage" xml:space="preserve">
     <value>Voltar à página de login</value>
@@ -365,13 +365,13 @@
     <value>Lembrar password</value>
   </data>
   <data name="RememberPasswordExplanation" xml:space="preserve">
-    <value>Escrever o nome de usuário e endereço de e-mail para receber um e-mail com a recuperaração da password</value>
+    <value>Escrever o nome de usuário e endereço de E-mail para receber um E-mail com a recuperaração da password</value>
   </data>
   <data name="ResetPassword" xml:space="preserve">
     <value>Restaurar password</value>
   </data>
   <data name="ResetPasswordCodeHasBeenSent" xml:space="preserve">
-    <value>Um código de confirmação para restaurar sua password foi enviado para a conta de e-mail {0}</value>
+    <value>Um código de confirmação para restaurar sua password foi enviado para a conta de E-mail {0}</value>
   </data>
   <data name="ResetPasswordSuccess" xml:space="preserve">
     <value>Password alterada com êxito</value>
@@ -395,10 +395,10 @@
     <value>Há um total de {0} erros</value>
   </data>
   <data name="ThereHasBeenAnErrorWithYourRequestToResetYourPasswordPleaseEnterYourLogin" xml:space="preserve">
-    <value>Houve um erro com o ter pedido para alterar a password. Escreve o teu e-mail.</value>
+    <value>Houve um erro com o ter pedido para alterar a password. Escreve o teu E-mail.</value>
   </data>
   <data name="ThereSNotARegisteredUserWithThatEmailAddress" xml:space="preserve">
-    <value>Nenhum utilizador registado com esse endereço de e-mail</value>
+    <value>Nenhum utilizador registado com esse endereço de E-mail</value>
   </data>
   <data name="TheSpecifiedPasswordsDontMatch" xml:space="preserve">
     <value>As passwords especificadas não correspondem</value>

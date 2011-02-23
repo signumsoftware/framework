@@ -30,11 +30,11 @@ namespace Signum.Entities.Mailing
             set { Set(ref template, value, () => Template); }
         }
 
-        DateTime fechaCreacion = TimeZoneManager.Now;
-        public DateTime FechaCreacion
+        DateTime creationTime = TimeZoneManager.Now;
+        public DateTime CreationTime
         {
-            get { return fechaCreacion; }
-            private set { Set(ref fechaCreacion, value, () => FechaCreacion); }
+            get { return creationTime; }
+            private set { Set(ref creationTime, value, () => CreationTime); }
         }
 
         DateTime? sent;

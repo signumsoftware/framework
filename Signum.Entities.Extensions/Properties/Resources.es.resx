@@ -999,8 +999,8 @@
   <data name="DeploymentLogDN_Version" xml:space="preserve">
     <value>Versión</value>
   </data>
-  <data name="EmailMessageDN_FechaCreacion" xml:space="preserve">
-    <value>Fecha de Creacion</value>
+  <data name="_0RulesFor1" xml:space="preserve">
+    <value>reglas de {0} para {1}</value>
   </data>
   <data name="EmailState_Created" xml:space="preserve">
     <value>Creado</value>
@@ -1077,10 +1077,7 @@
   <data name="UserDN_CultureInfo" xml:space="preserve">
     <value>Info de la cultura</value>
   </data>
-  <data name="String1" xml:space="preserve">
-    <value />
-  </data>
-  <data name="_0RulesFor1" xml:space="preserve">
-    <value>Reglas de {0} para {1}</value>
+  <data name="EmailMessageDN_CreationTime" xml:space="preserve">
+    <value>Fecha de creación</value>
   </data>
 </root>

@@ -176,7 +176,7 @@
     <value>Data e hora</value>
   </data>
   <data name="EmailIsNotValid" xml:space="preserve">
-    <value>Email inválido</value>
+    <value>E-mail inválido</value>
   </data>
   <data name="ExcelTemplateMustHaveExtensionXLSXandCurrentOneHas0" xml:space="preserve">
     <value>Modelo Excel deverá ter a extensão. xlsx, a actual tem {0}</value>
@@ -236,7 +236,7 @@
     <value>{0} não está registado</value>
   </data>
   <data name="NotRegisteredInEmailLogic" xml:space="preserve">
-    <value>{0} não está registado no EmailLogic</value>
+    <value>{0} não está registado no E-mailLogic</value>
   </data>
   <data name="OfThe0" xml:space="preserve">
     <value>Do {0}</value>

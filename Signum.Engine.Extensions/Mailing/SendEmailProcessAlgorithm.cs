@@ -62,21 +62,10 @@ namespace Signum.Engine.Mailing
 
                     try
                     {
-                        using (Transaction tr = new Transaction(true))
-                        {
-                            EmailLogic.SendMail(ml);
-                            tr.Commit();
-                        }
+                        EmailLogic.SendMail(ml);
                     }
-                    catch (Exception e)
+                    catch (Exception)
                     {
-                        using (Transaction tr = new Transaction(true))
-                        {
-                            ml.Exception = e.Message;
-                            ml.Save();
-                            tr.Commit();
-                        }   
-
                         package.NumErrors++;
                         package.Save();
                     }

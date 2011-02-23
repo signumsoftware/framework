@@ -340,7 +340,7 @@
     <value>Anos</value>
   </data>
   <data name="EmailMessageDN" xml:space="preserve">
-    <value>Mensagen de e-mail</value>
+    <value>Mensagen de E-mail</value>
   </data>
   <data name="EmailMessageDN_Body" xml:space="preserve">
     <value>Corpo</value>
@@ -370,10 +370,10 @@
     <value>Modelo</value>
   </data>
   <data name="EmailOperations_ReSendEmails" xml:space="preserve">
-    <value>Reenviar e-mails</value>
+    <value>Reenviar E-mails</value>
   </data>
   <data name="EmailPackageDN" xml:space="preserve">
-    <value>Arquivo de e-mail</value>
+    <value>Arquivo de E-mail</value>
   </data>
   <data name="EmailPackageDN_Name" xml:space="preserve">
     <value>Nome</value>
@@ -406,7 +406,7 @@
     <value>Envio falhou</value>
   </data>
   <data name="EmailTemplateDN" xml:space="preserve">
-    <value>Modelo de e-mail</value>
+    <value>Modelo de E-mail</value>
   </data>
   <data name="EmbeddedFileDN" xml:space="preserve">
     <value>Ficheiro anexado</value>
@@ -961,7 +961,7 @@
     <value>Data de Anulação</value>
   </data>
   <data name="UserDN_Email" xml:space="preserve">
-    <value>e-mail</value>
+    <value>E-mail</value>
   </data>
   <data name="UserDN_PasswordHash" xml:space="preserve">
     <value>Password Hash</value>

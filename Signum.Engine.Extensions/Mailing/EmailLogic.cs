@@ -247,17 +247,28 @@ namespace Signum.Engine.Mailing
 
         public static void SendMail(EmailMessageDN emailMessage)
         {
-            emailMessage.State = EmailState.Sent;
-            emailMessage.Sent = TimeZoneManager.Now;
-            emailMessage.Received = null;
-
-            MailMessage message = CreateMailMessage(emailMessage);
-            if (message != null)
+            try
             {
-                SmtpClient client = SmtpClientBuilder == null ? new SmtpClient() : SmtpClientBuilder();
-                client.Send(message);
+                MailMessage message = CreateMailMessage(emailMessage);
+
+                if (message != null)
+                {
+                    SmtpClient client = SmtpClientBuilder == null ? new SmtpClient() : SmtpClientBuilder();
+                    client.Send(message);
+                }
+
+                emailMessage.State = EmailState.Sent;
+                emailMessage.Sent = TimeZoneManager.Now;
+                emailMessage.Received = null;
+                emailMessage.Save();
             }
-            emailMessage.Save();
+            catch (Exception e)
+            {
+                emailMessage.Exception = e.Message;
+                emailMessage.State = EmailState.SentError;
+                emailMessage.Save();
+                throw;
+            }
         }
 
         public static void SendAsync(this IEmailModel model)
@@ -267,41 +278,61 @@ namespace Signum.Engine.Mailing
             SendMailAsync(message);
         }
 
+        class EmailUser
+        {
+            public EmailMessageDN EmailMessage; 
+            public UserDN User; 
+        }
+
         public static void SendMailAsync(EmailMessageDN emailMessage)
         {
-            emailMessage.Sent = null;
-            emailMessage.Received = null;
-
-            MailMessage message = CreateMailMessage(emailMessage);
-            if (message != null)
+            try
             {
-                SmtpClient client = SmtpClientBuilder == null ? new SmtpClient() : SmtpClientBuilder();
-                client.SendCompleted += new SendCompletedEventHandler(client_SendCompleted);
-                client.SendAsync(message, emailMessage);
+                MailMessage message = CreateMailMessage(emailMessage);
+                if (message != null)
+                {
+                    SmtpClient client = SmtpClientBuilder == null ? new SmtpClient() : SmtpClientBuilder();
+                    client.SendCompleted += new SendCompletedEventHandler(client_SendCompleted);
+
+                    emailMessage.Sent = null;
+                    emailMessage.Received = null;
+                    emailMessage.Save();
+
+                    client.SendAsync(message, new EmailUser { EmailMessage = emailMessage, User = UserDN.Current });
+                }
+                else
+                {
+                    emailMessage.Received = null;
+                    emailMessage.State = EmailState.Sent;
+                    emailMessage.Sent = TimeZoneManager.Now;
+                    emailMessage.Save();
+                }
             }
-            else
-            { 
-                emailMessage.State = EmailState.Sent;
-                emailMessage.Sent = TimeZoneManager.Now;            
+            catch (Exception e)
+            {
+                emailMessage.Sent = TimeZoneManager.Now;
+                emailMessage.State = EmailState.SentError;
+                emailMessage.Exception = e.Message;
+                emailMessage.Save(); 
             }
-            emailMessage.Save();
         }
 
         static void client_SendCompleted(object sender, AsyncCompletedEventArgs e)
         {
-            EmailMessageDN emailMessage = (EmailMessageDN)e.UserState;
+            EmailUser emailUser = (EmailUser)e.UserState;
+            EmailMessageDN em = emailUser.EmailMessage;
             if (e.Error != null)
             {
-                emailMessage.Exception = e.Error.Message;
-                emailMessage.State = EmailState.SentError;
+                em.Exception = e.Error.Message;
+                em.State = EmailState.SentError;
             }
             else
             {
-                emailMessage.State = EmailState.Sent;
-                emailMessage.Sent = TimeZoneManager.Now;
+                em.State = EmailState.Sent;
+                em.Sent = TimeZoneManager.Now;
             }
-            using (AuthLogic.Disable())
-                emailMessage.Save();
+            using (AuthLogic.User(emailUser.User))
+                em.Save();
         }
 
         static MailMessage CreateMailMessage(EmailMessageDN emailMessage)
