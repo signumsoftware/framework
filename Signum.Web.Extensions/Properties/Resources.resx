@@ -192,12 +192,6 @@
   <data name="Property0NotExistsInType1" xml:space="preserve">
     <value>Property {0} does not exist in type {1}</value>
   </data>
-  <data name="RememberPassword" xml:space="preserve">
-    <value>Remember password</value>
-  </data>
-  <data name="RememberPasswordExplanation" xml:space="preserve">
-    <value>Type your username and your email address to receive an email message with the password</value>
-  </data>
   <data name="Source" xml:space="preserve">
     <value>Source</value>
   </data>
@@ -411,9 +405,6 @@
   <data name="RememberMe" xml:space="preserve">
     <value>Remember me</value>
   </data>
-  <data name="ThePasswordMustHaveBetween7And15CharactersEachOfThemBeingANumber09OrALetter" xml:space="preserve">
-    <value>The password must have between 7 and 15 characters, each of them being a number 0-9 or a letter</value>
-  </data>
   <data name="ThereHasBeenAnErrorWithYourRequestToResetYourPasswordPleaseEnterYourLogin" xml:space="preserve">
     <value>There has been an error with your request to reset your password. Please, enter your login.</value>
   </data>
@@ -455,5 +446,11 @@
   </data>
   <data name="Buscador" xml:space="preserve">
     <value>Buscador</value>
+  </data>
+  <data name="ExpiredPasswordMessage" xml:space="preserve">
+    <value>Your password has expired. You should change it</value>
+  </data>
+  <data name="ExpectedUserLogged" xml:space="preserve">
+    <value>Expected a user logged</value>
   </data>
 </root>

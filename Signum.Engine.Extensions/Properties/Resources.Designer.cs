@@ -287,6 +287,15 @@ namespace Signum.Engine.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Expired password.
+        /// </summary>
+        internal static string ExpiredPassword {
+            get {
+                return ResourceManager.GetString("ExpiredPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to expressed in .
         /// </summary>
         internal static string ExpressedIn {
@@ -494,6 +503,15 @@ namespace Signum.Engine.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Your password is near to expired.
+        /// </summary>
+        internal static string PasswordNearExpired {
+            get {
+                return ResourceManager.GetString("PasswordNearExpired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to ProcessExecution {0} is not running anymore.
         /// </summary>
         internal static string ProcessExecution0IsNotRunningAnymore {
@@ -607,6 +625,15 @@ namespace Signum.Engine.Extensions.Properties {
         internal static string TheExcelTemplateHasAColumn0NotPresentInTheFindWindow {
             get {
                 return ResourceManager.GetString("TheExcelTemplateHasAColumn0NotPresentInTheFindWindow", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The password must have between 7 and 15 characters, each of them being a number 0-9 or a letter.
+        /// </summary>
+        internal static string ThePasswordMustHaveBetween7And15CharactersEachOfThemBeingANumber09OrALetter {
+            get {
+                return ResourceManager.GetString("ThePasswordMustHaveBetween7And15CharactersEachOfThemBeingANumber09OrALetter", resourceCulture);
             }
         }
         

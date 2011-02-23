@@ -81,6 +81,11 @@
   <ItemGroup>
     <Compile Include="AuthAdmin\AuthAdminClient.cs" />
     <Compile Include="AuthAdmin\Controllers\AuthAdminController.cs" />
+    <Compile Include="AuthAdmin\Views\PasswordValidInterval.cs">
+      <DependentUpon>PasswordValidInterval.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="AuthAdmin\Views\EntityGroups.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -139,11 +144,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ChangePassword.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Auth\Views\ChangePasswordSuccess.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>ChangePasswordSuccess.cshtml</DependentUpon>
-    </Compile>
+    <Compile Include="Auth\Views\ChangePasswordSuccess.cs" />
     <Compile Include="Auth\Views\CreateUserAccount.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -163,16 +164,6 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Register.cshtml</DependentUpon>
-    </Compile>
-    <Compile Include="Auth\Views\RememberPassword.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>RememberPassword.cshtml</DependentUpon>
-    </Compile>
-    <Compile Include="Auth\Views\RememberPasswordSuccess.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>RememberPasswordSuccess.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Auth\Views\ResetPassword.cs">
       <AutoGen>True</AutoGen>
@@ -570,6 +561,10 @@
     <Content Include="AuthAdmin\Images\thumb.png" />
     <Content Include="AuthAdmin\Images\treeView.png" />
     <Content Include="AuthAdmin\Scripts\authAdmin.js" />
+    <Content Include="AuthAdmin\Views\PasswordValidInterval.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>PasswordValidInterval.cs</LastGenOutput>
+    </Content>
     <None Include="AuthAdmin\Views\EntityGroups.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>EntityGroups.cs</LastGenOutput>
@@ -746,14 +741,6 @@
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>Register.cs</LastGenOutput>
     </None>
-    <None Include="Auth\Views\RememberPassword.cshtml">
-      <Generator>MvcRazorClassGenerator</Generator>
-      <LastGenOutput>RememberPassword.cs</LastGenOutput>
-    </None>
-    <None Include="Auth\Views\RememberPasswordSuccess.cshtml">
-      <Generator>MvcRazorClassGenerator</Generator>
-      <LastGenOutput>RememberPasswordSuccess.cs</LastGenOutput>
-    </None>
     <None Include="Auth\Views\ResetPassword.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>ResetPassword.cs</LastGenOutput>
@@ -777,7 +764,9 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.es.resx" />
+    <EmbeddedResource Include="Properties\Resources.es.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <None Include="Basic\Views\DateSpan.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>DateSpan.cs</LastGenOutput>
@@ -908,7 +897,9 @@
       <LastGenOutput>ViewsChecker.cs</LastGenOutput>
     </None>
     <EmbeddedResource Include="Properties\Resources.pt.resx" />
-    <EmbeddedResource Include="Properties\Resources.de.resx" />
+    <EmbeddedResource Include="Properties\Resources.de.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <Content Include="Auth\Views\Web.config" />
   </ItemGroup>
   <ItemGroup />

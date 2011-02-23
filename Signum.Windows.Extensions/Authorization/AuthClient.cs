@@ -14,6 +14,7 @@ using Signum.Entities.Basics;
 using Signum.Entities;
 using Signum.Utilities.Reflection;
 using Signum.Utilities.DataStructures;
+using Signum.Entities.Extensions.Authorization;
 
 namespace Signum.Windows.Authorization
 {
@@ -27,7 +28,7 @@ namespace Signum.Windows.Authorization
                 UpdateCacheEvent();
         }
 
-        public static void Start(bool types, bool property, bool queries, bool permissions, bool facadeMethods, bool entityGroups)
+        public static void Start(bool types, bool property, bool queries, bool permissions, bool facadeMethods, bool entityGroups, bool defaultPasswordExpiresLogic)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -39,12 +40,13 @@ namespace Signum.Windows.Authorization
                 if (permissions) PermissionAuthClient.Start();
                 if (facadeMethods) FacadeMethodAuthClient.Start();
                 if (entityGroups) EntityGroupAuthClient.Start();
-
+                if (defaultPasswordExpiresLogic) UserDN.ValidatePassword = UserDN.ValidatePasswordDefauld;
 
                 UpdateCache();
 
                 Navigator.AddSetting(new EntitySettings<UserDN>(EntityType.Admin) { View = e => new User() });
                 Navigator.AddSetting(new EntitySettings<RoleDN>(EntityType.Default) { View = e => new Role() });
+                Navigator.AddSetting(new EntitySettings<PasswordValidIntervalDN>(EntityType.Admin) { View = e => new PasswordValidInterval() });
             }
         }
     }

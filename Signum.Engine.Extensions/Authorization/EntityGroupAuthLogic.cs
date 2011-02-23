@@ -19,6 +19,7 @@ using Signum.Utilities.ExpressionTrees;
 using Signum.Engine.Linq;
 using Signum.Engine.Extensions.Properties;
 using Signum.Entities.Operations;
+using Signum.Engine.Exceptions;
 
 namespace Signum.Engine.Authorization
 {
@@ -96,7 +97,7 @@ namespace Signum.Engine.Authorization
         static bool saveDisabled;
         public static IDisposable DisableSave()
         {
-            bool oldSaveDisabled = saveDisabled; 
+            bool oldSaveDisabled = saveDisabled;
             saveDisabled = true;
             return new Disposable(() => saveDisabled = oldSaveDisabled);
         }
@@ -111,14 +112,14 @@ namespace Signum.Engine.Authorization
 
         static void EntityGroupAuthLogic_Retrieving(Type type, int[] ids, bool inQuery)
         {
-            if (AuthLogic.IsEnabled && !retrieveDisabled && (!inQuery || queriesDisabled)  && !IsAllwaysAllowed(type, TypeAllowedBasic.Read))
+            if (AuthLogic.IsEnabled && !retrieveDisabled && (!inQuery || queriesDisabled) && !IsAllwaysAllowed(type, TypeAllowedBasic.Read))
             {
-                miAssertAllowed.GetInvoker(type)(ids, TypeAllowedBasic.Read); 
+                miAssertAllowed.GetInvoker(type)(ids, TypeAllowedBasic.Read);
             }
         }
 
         const string CreatedKey = "Created";
-        const string ModifiedKey = "Modified"; 
+        const string ModifiedKey = "Modified";
 
         static void EntityGroupAuthLogic_Saving<T>(T ident, bool isRoot)
             where T : IdentifiableEntity
@@ -201,23 +202,26 @@ namespace Signum.Engine.Authorization
         {
             using (DisableQueries())
             {
-                int[] found = Database.Query<T>().Where(a => requested.Contains(a.Id)).WhereIsAllowedFor(typeAllowed, Database.UserInterface).Select(a => a.Id).ToArray();
+                var found = Database.Query<T>().Where(a => requested.Contains(a.Id)).Select(a => new
+                {
+                    a.Id,
+                    Allowed = a.IsAllowedFor(typeAllowed, Database.UserInterface),
+                }).ToArray();
 
                 if (found.Length != requested.Length)
-                {
-                    int[] notFound = requested.Except(found).ToArray();
+                    throw new EntityNotFoundException(typeof(T), requested.Except(found.Select(a => a.Id)).ToArray());
 
+                int[] notFound = found.Where(a => !a.Allowed).Select(a => a.Id).ToArray();
+                if (notFound.Any())
                     throw new UnauthorizedAccessException(Resources.NotAuthorizedTo0The1WithId2.Formato(
                         typeAllowed.NiceToString(),
-                        notFound.Length == 1 ? typeof(T).NiceName() : typeof(T).NicePluralName(),
-                        notFound.Length == 1 ? notFound[0].ToString() : notFound.CommaAnd()));
-                }
+                        notFound.Length == 1 ? typeof(T).NiceName() : typeof(T).NicePluralName(), notFound.CommaAnd()));
             }
         }
 
         public static void AssertAllowed(this IIdentifiable ident, TypeAllowedBasic allowed)
         {
-            AssertAllowed(ident, allowed, Database.UserInterface); 
+            AssertAllowed(ident, allowed, Database.UserInterface);
         }
 
         public static void AssertAllowed(this IIdentifiable ident, TypeAllowedBasic allowed, bool userInterface)
@@ -229,7 +233,7 @@ namespace Signum.Engine.Authorization
         [MethodExpander(typeof(IsAllowedForExpander))]
         public static bool IsAllowedFor(this IIdentifiable ident, TypeAllowedBasic allowed)
         {
-            return IsAllowedFor(ident, allowed, Database.UserInterface); 
+            return IsAllowedFor(ident, allowed, Database.UserInterface);
         }
 
         [MethodExpander(typeof(IsAllowedForExpander))]
@@ -239,6 +243,7 @@ namespace Signum.Engine.Authorization
         }
 
         static GenericInvoker miIsAllowedForEntity = GenericInvoker.Create(() => IsAllowedFor<IdentifiableEntity>((IdentifiableEntity)null, TypeAllowedBasic.Create, true));
+        [MethodExpander(typeof(IsAllowedForExpander))]
         static bool IsAllowedFor<T>(this T entity, TypeAllowedBasic allowed, bool userInterface)
             where T : IdentifiableEntity
         {
@@ -246,7 +251,7 @@ namespace Signum.Engine.Authorization
                 return true;
 
             if (entity.IsNew)
-                throw new InvalidOperationException("The entity {0} is new");
+                throw new InvalidOperationException("The entity {0} is new".Formato(entity));
 
             using (DisableQueries())
                 return entity.InDB().WhereIsAllowedFor(allowed, userInterface).Any();
@@ -269,7 +274,7 @@ namespace Signum.Engine.Authorization
         [MethodExpander(typeof(IsAllowedForExpander))]
         public static bool IsAllowedFor(this Lite lite, TypeAllowedBasic allowed)
         {
-            return IsAllowedFor(lite, allowed, Database.UserInterface); 
+            return IsAllowedFor(lite, allowed, Database.UserInterface);
         }
 
         [MethodExpander(typeof(IsAllowedForExpander))]
@@ -297,7 +302,7 @@ namespace Signum.Engine.Authorization
                 TypeAllowedBasic allowed = (TypeAllowedBasic)ExpressionEvaluator.Eval(arguments[1]);
 
                 bool userInterface = arguments.Length == 3 ? (bool)ExpressionEvaluator.Eval(arguments[2]) :
-                    Database.UserInterface; 
+                    Database.UserInterface;
 
                 Expression exp = arguments[0].Type.IsLite() ? Expression.Property(arguments[0], "Entity") : arguments[0];
 
@@ -332,7 +337,7 @@ namespace Signum.Engine.Authorization
 
             return result;
         }
-        
+
         class EntityGroupTuple
         {
             public Enum Key;
@@ -364,7 +369,7 @@ namespace Signum.Engine.Authorization
 
         static bool IsAllwaysAllowed(Type type, TypeAllowedBasic allowed)
         {
-            return GetPairs(type, allowed, Database.UserInterface).Empty(); 
+            return GetPairs(type, allowed, Database.UserInterface).Empty();
         }
 
         internal static Expression IsAllowedExpression(Expression entity, TypeAllowedBasic allowed, bool userInterface)
@@ -399,7 +404,7 @@ namespace Signum.Engine.Authorization
             return cleanBody;
         }
 
-        
+
 
         static Expression InvokeLambda(this LambdaExpression lambda, Expression p)
         {

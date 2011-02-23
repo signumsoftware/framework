@@ -13,30 +13,18 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Signum.Entities.Authorization;
 using Signum.Entities;
-using Signum.Windows;
-using Signum.Services;
+using Signum.Services; 
 
 namespace Signum.Windows.Authorization
 {
     /// <summary>
     /// Interaction logic for Usuario.xaml
     /// </summary>
-    public partial class User : UserControl
+    public partial class PasswordValidInterval : UserControl
     {
-        public User()
+        public PasswordValidInterval()
         {
             InitializeComponent();
-        }
-
-        private void changePassword_Click(object sender, RoutedEventArgs e)
-        {
-        
-            var resultado=new NewPassword().ShowDialog();          
-            if (resultado.HasValue && resultado.Value)
-            {
-                UserDN user = (UserDN)DataContext;
-                this.RaiseEvent(new ChangeDataContextEventArgs(user.ToLite().Retrieve()));
-            }
         }
     }
 }

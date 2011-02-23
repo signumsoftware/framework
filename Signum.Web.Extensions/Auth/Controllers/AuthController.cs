@@ -19,6 +19,7 @@ using Signum.Entities;
 using Signum.Engine.Mailing;
 using System.Collections.Generic;
 using Signum.Engine.Operations;
+using Signum.Entities.Extensions.Authorization;
 #endregion
 
 namespace Signum.Web.Auth
@@ -26,13 +27,6 @@ namespace Signum.Web.Auth
     [HandleException]
     public class AuthController : Controller
     {
-        public static event Func<string, string> ValidatePassword =
-            p =>
-            {
-                if (Regex.Match(p, @"^[0-9a-zA-Z]{7,15}$").Success)
-                    return null;
-                return Resources.ThePasswordMustHaveBetween7And15CharactersEachOfThemBeingANumber09OrALetter;
-            };
 
         public static event Func<string> GenerateRandomPassword = () => MyRandom.Current.NextString(8);
 
@@ -98,6 +92,10 @@ namespace Signum.Web.Auth
         #region "Change password"
         public ActionResult ChangePassword()
         {
+
+            if (TempData.ContainsKey("message") && TempData["message"] != null)
+                ViewData["message"] = TempData["message"].ToString();
+
             ViewData["Title"] = Resources.ChangePassword;
             return View(AuthClient.ChangePasswordView);
         }
@@ -105,8 +103,43 @@ namespace Signum.Web.Auth
         [HttpPost]
         public ActionResult ChangePassword(FormCollection form)
         {
-            var context = UserDN.Current.ApplyChanges(this.ControllerContext, "", UserMapping.ChangePasswordOld).ValidateGlobal();
 
+            UserDN user = null;
+
+            if (UserDN.Current == null)
+            {
+                var username = (string)TempData["username"];
+                if (!username.HasText())
+                    username = (string)form["username"];
+
+
+                using (AuthLogic.Disable())
+                    user = AuthLogic.RetrieveUser(username);
+
+                var context = user.ApplyChanges(this.ControllerContext, "", UserMapping.ChangePasswordOld).ValidateGlobal();
+
+                if (context.GlobalErrors.Any())
+                {
+                    ViewData["username"] = username;
+                    ViewData["Title"] = Resources.ChangePassword;
+                    ModelState.FromContext(context);
+                    return View(AuthClient.ChangePasswordView);
+                }
+
+                string errorPasswordValidation = UserDN.OnValidatePassword(Request.Params[UserMapping.NewPasswordKey]);
+                if (errorPasswordValidation.HasText())
+                {
+                    ViewData["username"] = username;
+                    ViewData["Title"] = Resources.ChangePassword;
+                    ModelState.AddModelError("password", errorPasswordValidation);
+                    return View(AuthClient.ChangePasswordView);
+                }
+
+            }
+
+            else
+            {
+            var context = UserDN.Current.ApplyChanges(this.ControllerContext, "", UserMapping.ChangePasswordOld).ValidateGlobal();
             if (context.GlobalErrors.Any())
             {
                 ViewData["Title"] = Resources.ChangePassword;
@@ -115,7 +148,7 @@ namespace Signum.Web.Auth
                 return View(AuthClient.ChangePasswordView);
             }
 
-            string errorPasswordValidation = ValidatePassword(Request.Params[UserMapping.NewPasswordKey]);
+                string errorPasswordValidation = UserDN.OnValidatePassword(Request.Params[UserMapping.NewPasswordKey]);
             if (errorPasswordValidation.HasText())
             {
                 ModelState.AddModelError("password", errorPasswordValidation);
@@ -123,12 +156,17 @@ namespace Signum.Web.Auth
                 return View(AuthClient.ChangePasswordView);
             }
 
-            using (AuthLogic.Disable())
-            {
-                Database.Save(context.Value);
+                user = context.Value;
             }
 
+
+
+            AuthLogic.ChagePassword(user.UserName,Security.EncodePassword( form[UserMapping.OldPasswordKey]), Security.EncodePassword(form[UserMapping.NewPasswordKey]));
+            Login(user.UserName, form[UserMapping.NewPasswordKey], false, null);
+
             return RedirectToAction("ChangePasswordSuccess");
+
+
         }
 
         private void RestoreCleanCurrentUser()
@@ -156,13 +194,15 @@ namespace Signum.Web.Auth
             return View(AuthClient.ResetPasswordView);
         }
 
+     
+
         [HttpPost]
         public ActionResult ResetPassword(string email)
         {
             try
             {
                 if (string.IsNullOrEmpty(email))
-                    return RememberPasswordError("email", Resources.EmailMustHaveAValue);
+                    return ResetPasswordError("email", Resources.EmailMustHaveAValue);
 
                 using (AuthLogic.Disable())
                 {
@@ -259,7 +299,7 @@ namespace Signum.Web.Auth
                     return ResetPasswordSetNewError(request.Id, "", "");
                 }
 
-                string errorPasswordValidation = ValidatePassword(Request.Params[UserMapping.NewPasswordKey]);
+                string errorPasswordValidation = UserDN.OnValidatePassword(Request.Params[UserMapping.NewPasswordKey]);
                 if (errorPasswordValidation.HasText())
                     return ResetPasswordSetNewError(request.Id, "NewPassword", errorPasswordValidation);
 
@@ -284,62 +324,7 @@ namespace Signum.Web.Auth
         }
         #endregion
 
-        #region "Remember password"
-        public ActionResult RememberPassword()
-        {
-            ViewData["Title"] = Resources.RememberPassword;
-            return View(AuthClient.RememberPasswordView);
-        }
-
-        [HttpPost]
-        public ActionResult RememberPassword(string username, string email)
-        {
-            try
-            {
-                if (string.IsNullOrEmpty(username))
-                    return RememberPasswordError("username", Resources.UserNameMustHaveAValue);
-
-                if (string.IsNullOrEmpty(email))
-                    return RememberPasswordError("email", Resources.EmailMustHaveAValue);
-
-                UserDN user = AuthLogic.UserToRememberPassword(username, email);
-                string randomPassword = GenerateRandomPassword();
-                using (AuthLogic.Disable())
-                {
-                    user.PasswordHash = Security.EncodePassword(randomPassword);
-                    user.Save();
-                }
-
-                new ResetPasswordMail
-                {
-                    To = user,
-                    NewPassord = randomPassword
-                }.Send();
-
-                ViewData["email"] = email;
-                return RedirectToAction("RememberPasswordSuccess");
-            }
-            catch (Exception ex)
-            {
-                return RememberPasswordError("_FORM", ex.Message);
-            }
-        }
-
-        ViewResult RememberPasswordError(string key, string error)
-        {
-            ModelState.AddModelError("_FORM", error);
-            return View(AuthClient.RememberPasswordView);
-        }
-
-        public ActionResult RememberPasswordSuccess()
-        {
-            ViewData["Message"] = Resources.PasswordHasBeenSent.Formato(ViewData["email"]);
-            
-
-            return View(AuthClient.RememberPasswordSuccessView);
-        }
-        #endregion
-
+  
         #region Login
 
         [AcceptVerbs(HttpVerbs.Get)]
@@ -372,10 +357,29 @@ namespace Signum.Web.Auth
             {
                 user = AuthLogic.Login(username, Security.EncodePassword(password));
             }
-            catch (Exception) { }
+            catch (ExpiredPasswordApplicationException)
+            {
+                TempData["message"] = Resources.ExpiredPasswordMessage;
+                TempData["username"] = username;
+                return RedirectToAction("ChangePassword");
+            }
+            catch (IncorrectUserOrPasswordApplicationException) {
 
-            if (user == null) //if it's an ajax request the error will match the password field
                 return LoginErrorAjaxOrForm(Request.IsAjaxRequest() ? "password" : "_FORM", Resources.InvalidUsernameOrPassword);
+            }
+            catch (Exception ex) { 
+                 
+                throw new Exception(Resources.ExpectedUserLogged,ex);
+            }
+
+
+            //if (user == null) //if it's an ajax request the error will match the password field
+            //    return LoginErrorAjaxOrForm(Request.IsAjaxRequest() ? "password" : "_FORM", Resources.InvalidUsernameOrPassword);
+
+
+            if (user == null)
+                throw new Exception(Resources.ExpectedUserLogged);
+
 
             if (OnUserPreLogin != null)
             {
@@ -402,13 +406,11 @@ namespace Signum.Web.Auth
 
             AddUserSession(user.UserName, user);
 
-            if (OnUserLoggedDefaultRedirect != null)
+    		TempData["Message"] = AuthLogic.OnPasswordNearExpiredLogic();
+
+    
                 return LoginRedirectAjaxOrForm(OnUserLoggedDefaultRedirect(this));
 
-            if (referrer.HasText())
-                return LoginRedirectAjaxOrForm(referrer);
-
-            return LoginRedirectAjaxOrForm(RouteHelper.New().Action("Index", "Home"));
         }
 
         private ActionResult LoginErrorAjaxOrForm(string key, string message)

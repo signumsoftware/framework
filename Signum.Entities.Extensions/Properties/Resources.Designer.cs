@@ -529,6 +529,15 @@ namespace Signum.Entities.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The password must have between 7 and 15 characters, each of them being a number 0-9 or a letter.
+        /// </summary>
+        public static string ThePasswordMustHaveBetween7And15CharactersEachOfThemBeingANumber09OrALetter {
+            get {
+                return ResourceManager.GetString("ThePasswordMustHaveBetween7And15CharactersEachOfThemBeingANumber09OrALetter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The user state must be disabled.
         /// </summary>
         public static string TheUserStateMustBeDisabled {

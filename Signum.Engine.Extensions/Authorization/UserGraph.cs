@@ -19,15 +19,15 @@ namespace Signum.Engine.Authorization
             this.GetState = u => u.State;
             this.Operations = new List<IGraphOperation>
             {
-                new Construct(UserOperation.Create, UserState.Created)
+                new Construct(UserOperation.Create, UserState.New)
                 {
-                    Constructor = args =>new UserDN {State = UserState.Created}
+                    Constructor = args =>new UserDN {State = UserState.New}
                 },
 
                 new Goto(UserOperation.SaveNew, UserState.Created)
                 {
-                   FromStates = new []{UserState.Created},
-                   Execute = (u,_) => {},
+                   FromStates = new []{UserState.New},
+                   Execute = (u,_) => {u.State=UserState.Created;},
                    AllowsNew = true,
                    Lite = false
                 },

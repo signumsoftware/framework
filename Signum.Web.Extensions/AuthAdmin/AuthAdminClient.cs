@@ -42,6 +42,11 @@ namespace Signum.Web.AuthAdmin
                 else
                     Navigator.AddSetting(new EntitySettings<RoleDN>(EntityType.Admin) { PartialViewName = _ => ViewPrefix.Formato("Role") });
 
+                if (Navigator.Manager.EntitySettings.ContainsKey(typeof(PasswordValidIntervalDN)))
+                    Navigator.EntitySettings<RoleDN>().PartialViewName = _ => ViewPrefix.Formato("PasswordValidInterval");
+                else
+                    Navigator.AddSetting(new EntitySettings<PasswordValidIntervalDN>(EntityType.Admin) { PartialViewName = _ => ViewPrefix.Formato("PasswordValidInterval") });
+
                 if (types)
                 {
                     Register<TypeRulePack, TypeAllowedRule, TypeDN, TypeAllowed, TypeDN>("types", a => a.Resource, "Resource", false);

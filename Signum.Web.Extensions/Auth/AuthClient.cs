@@ -46,7 +46,7 @@ namespace Signum.Web.Auth
         public static string ResetPasswordSuccessView = ViewPrefix.Formato("ResetPasswordSuccess");
         public static string ResetPasswordSetNewView = ViewPrefix.Formato("ResetPasswordSetNew");
 
-        public static string RememberPasswordView = ViewPrefix.Formato("RememberPassword");
+    
         public static string RememberPasswordSuccessView = ViewPrefix.Formato("RememberPasswordSuccess");
 
         public static bool ResetPasswordStarted;

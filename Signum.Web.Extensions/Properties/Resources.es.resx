@@ -199,7 +199,7 @@
     <value>La propiedad {0} no existe en el tipo {1}</value>
   </data>
   <data name="RememberPassword" xml:space="preserve">
-    <value>Recordar contraseña</value>
+    <value>Reasignar contraseña</value>
   </data>
   <data name="RememberPasswordExplanation" xml:space="preserve">
     <value>Introduzca su nombre de usuario y dirección de correo electrónico para recibir un mensaje en su cuenta con la contraseña</value>

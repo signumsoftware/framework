@@ -15,6 +15,12 @@ namespace Signum.Services
         [OperationContract, NetDataContract]
         void Login(string username, string passwordHash);
 
+        [OperationContract, NetDataContract]
+        void LoginChagePassword(string username, string passwordHash, string newPasswordHash);
+
+        [OperationContract, NetDataContract]
+        void ChagePassword(string username, string passwordHash, string newPasswordHash);
+
         [OperationContract(IsTerminating = true), NetDataContract]
         void Logout();
 

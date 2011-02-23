@@ -113,6 +113,14 @@ Write(Html.ValidationMessage(UserMapping.NewPasswordBisKey));
 
                                                           
     }
+     
+Write(Html.ValueLine(e, f => f.PasswordNeverExpires));
+
+                                                    
+      
+ Write(Html.ValueLine(e, f => f.PasswordSetDate));
+
+                                                
 
     
 Write(Html.ValueLine(e, f => f.Email, vl => vl.ValueHtmlProps["size"] = 30));

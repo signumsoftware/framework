@@ -12,12 +12,31 @@ using Signum.Entities.Extensions.Properties;
 using Signum.Entities.Mailing;
 using Signum.Entities.Extensions.Authorization;
 using System.Linq.Expressions;
+using System.Text.RegularExpressions;
 
 namespace Signum.Entities.Authorization
 {
     [Serializable]
     public class UserDN : Entity, IPrincipal, IEmailOwnerDN
     {
+
+        public static  Func<string, string> ValidatePassword;
+        public static Func<string, string> ValidatePasswordDefauld = p =>
+        {
+            if (Regex.Match(p, @"^[0-9a-zA-Z]{7,15}$").Success)
+                return null;
+            return Resources.ThePasswordMustHaveBetween7And15CharactersEachOfThemBeingANumber09OrALetter;
+        };
+
+
+        public static string OnValidatePassword(string password)
+        {
+            if (ValidatePassword != null)
+                return ValidatePassword(password);
+
+            return null;
+        }
+
         [NotNullable, UniqueIndex, SqlDbType(Size = 100)]
         string userName;
         [StringLengthValidator(AllowNulls = false, Min = 2, Max = 100)]
@@ -33,7 +52,26 @@ namespace Signum.Entities.Authorization
         public string PasswordHash
         {
             get { return passwordHash; }
-            set { Set(ref passwordHash, value, () => PasswordHash); }
+            set
+            {
+                if (Set(ref passwordHash, value, () => PasswordHash))
+                    PasswordSetDate = DateTime.Now.TrimToSeconds();
+            }
+        }
+
+        DateTime passwordSetDate;
+        public DateTime PasswordSetDate
+        {
+            get { return passwordSetDate; }
+            private set { Set(ref passwordSetDate, value, () => PasswordSetDate); }
+        }
+
+
+        bool passwordNeverExpires;
+        public bool PasswordNeverExpires
+        {
+            get { return passwordNeverExpires; }
+            set { Set(ref passwordNeverExpires, value, () => PasswordNeverExpires); }
         }
 
         IUserRelatedDN related;
@@ -75,7 +113,7 @@ namespace Signum.Entities.Authorization
         {
             get { return anulationDate; }
             set { Set(ref anulationDate, value, () => AnulationDate); }
-        } 
+        }
 
         UserState state;
         public UserState State
@@ -84,7 +122,7 @@ namespace Signum.Entities.Authorization
             set { Set(ref state, value, () => State); }
         }
 
-        public static Expression<Func<UserDN, string>> CultureInfoExpression = 
+        public static Expression<Func<UserDN, string>> CultureInfoExpression =
             u => null;
         public string CultureInfo
         {
@@ -93,8 +131,8 @@ namespace Signum.Entities.Authorization
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            
-            if (pi.Is(()=>State))
+
+            if (pi.Is(() => State))
             {
                 if (anulationDate != null && state != UserState.Disabled)
                     return Resources.TheUserStateMustBeDisabled;
@@ -117,6 +155,8 @@ namespace Signum.Entities.Authorization
 
     public enum UserState
     {
+        [Ignore]
+        New=-1,
         Created,
         Disabled,
     }
@@ -135,4 +175,19 @@ namespace Signum.Entities.Authorization
     {
 
     }
+
+
+
+    [Serializable]
+    public class IncorrectUserOrPasswordApplicationException : ApplicationException
+    {
+        public IncorrectUserOrPasswordApplicationException() { }
+        public IncorrectUserOrPasswordApplicationException(string message) : base(message) { }
+        public IncorrectUserOrPasswordApplicationException(string message, Exception inner) : base(message, inner) { }
+        protected IncorrectUserOrPasswordApplicationException(
+          System.Runtime.Serialization.SerializationInfo info,
+          System.Runtime.Serialization.StreamingContext context)
+            : base(info, context) { }
+    }
+
 }

@@ -19,6 +19,9 @@ namespace Signum.Windows.Authorization
 {
     public partial class Login
     {
+
+        
+
         public Login()
         {
             this.InitializeComponent();
@@ -31,6 +34,7 @@ namespace Signum.Windows.Authorization
             _minimizarNoFocus = ExtensionsImageLoader.GetImageSortName("bminimizar.png");
             _cerrarFocus = ExtensionsImageLoader.GetImageSortName("bcerrar-on.png");
             _cerrarNoFocus = ExtensionsImageLoader.GetImageSortName("bcerrar.png");
+            SetingNewPassword = false;
         }
 
         public string UserName
@@ -43,6 +47,40 @@ namespace Signum.Windows.Authorization
         {
             get { return tbPassword.Password; }
             set { tbPassword.Password = value; }
+        }
+
+
+        public string NewPassword
+        {
+            get { return tbNewPassword1.Password; }
+            set { tbNewPassword1.Password = value; }
+        }
+        public string NewPassword2
+        {
+            get { return tbNewPassword2.Password; }
+            set { tbNewPassword2.Password = value; }
+        }
+        private GridLength rowHeight ;
+        private bool setingNewPassword;
+        public bool SetingNewPassword
+        {
+            get { return setingNewPassword; }
+            set
+            {
+                setingNewPassword = value;
+                    if (setingNewPassword)
+                    {
+                        this.LayoutRoot.RowDefinitions[6].Height = rowHeight;
+                        this.LayoutRoot.RowDefinitions[7].Height = rowHeight;
+                    }
+                    else
+                    {
+                        rowHeight = this.LayoutRoot.RowDefinitions[6].Height;
+                        this.LayoutRoot.RowDefinitions[6].Height = new GridLength(0);
+                        this.LayoutRoot.RowDefinitions[7].Height = new GridLength(0);
+                    
+                    }
+            }
         }
 
         public string CompanyName
@@ -75,6 +113,12 @@ namespace Signum.Windows.Authorization
             tbPassword.Focus();
         }
 
+        public void FocusNewPassword1()
+        {
+            tbNewPassword1.SelectAll();
+            tbNewPassword1.Focus();
+        }
+
         private BitmapFrame _minimizarFocus;
 
         private BitmapFrame _minimizarNoFocus;
@@ -83,7 +127,7 @@ namespace Signum.Windows.Authorization
 
         private BitmapFrame _cerrarNoFocus;
 
-        public event EventHandler LoginClicked;
+        public  event EventHandler LoginClicked;
 
         private void btLogin_Click(object sender, RoutedEventArgs e)
         {

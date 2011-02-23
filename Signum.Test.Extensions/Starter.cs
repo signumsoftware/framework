@@ -61,7 +61,7 @@ namespace Signum.Test.Extensions
             sb.Settings.OverrideFieldAttributes((UserQueryDN uq) => uq.Related, new ImplementedByAttribute(typeof(UserDN), typeof(RoleDN)));
             sb.Settings.OverrideFieldAttributes((UserChartDN uq) => uq.Related, new ImplementedByAttribute(typeof(UserDN), typeof(RoleDN)));
 
-            AuthLogic.Start(sb, dqm, "System", "Anonymous");
+            AuthLogic.Start(sb, dqm, "System", "Anonymous",false);
             UserTicketLogic.Start(sb, dqm);
             OperationLogic.Start(sb, dqm);
 
@@ -117,6 +117,7 @@ namespace Signum.Test.Extensions
                 // crear los usuarios base
                 new UserDN
                 {
+                    State=UserState.Created,
                     UserName = AuthLogic.SystemUserName,
                     PasswordHash = Security.EncodePassword(Guid.NewGuid().ToString()),
                     Role = superUser
@@ -124,6 +125,7 @@ namespace Signum.Test.Extensions
 
                 new UserDN
                 {
+                    State = UserState.Created,
                     UserName = AuthLogic.AnonymousUserName,
                     PasswordHash = Security.EncodePassword(Guid.NewGuid().ToString()),
                     Role = anonymousUser
@@ -131,6 +133,7 @@ namespace Signum.Test.Extensions
 
                 new UserDN
                 {
+                    State = UserState.Created,
                     UserName = "su",
                     PasswordHash = Security.EncodePassword("su"),
                     Role = superUser
@@ -138,6 +141,7 @@ namespace Signum.Test.Extensions
 
                 new UserDN
                 {
+                    State = UserState.Created,
                     UserName = "internal",
                     PasswordHash = Security.EncodePassword("internal"),
                     Role = internalUser
@@ -145,6 +149,7 @@ namespace Signum.Test.Extensions
 
                 new UserDN
                 {
+                    State = UserState.Created,
                     UserName = "external",
                     PasswordHash = Security.EncodePassword("external"),
                     Role = externalUser

@@ -93,6 +93,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Authorization\AuthClient.cs" />
+    <Compile Include="Authorization\NewPassword.xaml.cs">
+      <DependentUpon>NewPassword.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Authorization\PasswordValidInterval.xaml.cs">
+      <DependentUpon>PasswordValidInterval.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Authorization\QueryAuthClient.cs" />
     <Compile Include="Authorization\FacadeMethodAuthClient.cs" />
     <Compile Include="Authorization\TypeAuthClient.cs" />
@@ -285,6 +291,14 @@
     <Page Include="Authorization\AuthResources.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Authorization\NewPassword.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Authorization\PasswordValidInterval.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

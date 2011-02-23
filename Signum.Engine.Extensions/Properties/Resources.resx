@@ -322,4 +322,13 @@
   <data name="_0IsACalculated1" xml:space="preserve">
     <value>{0} is a calculated {1}</value>
   </data>
+  <data name="ExpiredPassword" xml:space="preserve">
+    <value>Expired password</value>
+  </data>
+  <data name="PasswordNearExpired" xml:space="preserve">
+    <value>Your password is near to expired</value>
+  </data>
+  <data name="ThePasswordMustHaveBetween7And15CharactersEachOfThemBeingANumber09OrALetter" xml:space="preserve">
+    <value>The password must have between 7 and 15 characters, each of them being a number 0-9 or a letter</value>
+  </data>
 </root>

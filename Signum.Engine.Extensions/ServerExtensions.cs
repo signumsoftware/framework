@@ -58,7 +58,36 @@ namespace Signum.Services
             }
             catch (Exception e)
             {
-                throw new FaultException(e.Message);
+                throw new FaultException(e.Message, new FaultCode(e.GetType().Name));
+
+            }
+        }
+
+
+        public virtual void ChagePassword(string username, string passwordHash, string newPasswordHash)
+        {
+
+            try
+            {
+                currentUser = AuthLogic.ChagePassword(username, passwordHash, newPasswordHash);
+            }
+            catch (Exception e)
+            {
+                throw new FaultException(e.Message, new FaultCode(e.GetType().Name));
+
+            }
+        }
+
+
+        public virtual void LoginChagePassword(string username, string passwordHash, string newPasswordHash)
+        {
+            try
+            {
+                currentUser = AuthLogic.ChagePasswordLogin(username, passwordHash, newPasswordHash);
+            }
+            catch (Exception e)
+            {
+                throw new FaultException(e.Message, new FaultCode(e.GetType().Name));
             }
         }
 
@@ -350,5 +379,5 @@ namespace Signum.Services
         }
         #endregion
 
-    } 
+    }
 }

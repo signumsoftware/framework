@@ -331,6 +331,24 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Expected a user logged.
+        /// </summary>
+        public static string ExpectedUserLogged {
+            get {
+                return ResourceManager.GetString("ExpectedUserLogged", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your password has expired. You should change it.
+        /// </summary>
+        public static string ExpiredPasswordMessage {
+            get {
+                return ResourceManager.GetString("ExpiredPasswordMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Allow.
         /// </summary>
         public static string FacadeMethodsAscx_Allow {
@@ -790,24 +808,6 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Remember password.
-        /// </summary>
-        public static string RememberPassword {
-            get {
-                return ResourceManager.GetString("RememberPassword", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Type your username and your email address to receive an email message with the password.
-        /// </summary>
-        public static string RememberPasswordExplanation {
-            get {
-                return ResourceManager.GetString("RememberPasswordExplanation", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Reset Password.
         /// </summary>
         public static string ResetPassword {
@@ -867,15 +867,6 @@ namespace Signum.Web.Extensions.Properties {
         public static string TheConfirmationCodeThatYouHaveJustSentIsInvalid {
             get {
                 return ResourceManager.GetString("TheConfirmationCodeThatYouHaveJustSentIsInvalid", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The password must have between 7 and 15 characters, each of them being a number 0-9 or a letter.
-        /// </summary>
-        public static string ThePasswordMustHaveBetween7And15CharactersEachOfThemBeingANumber09OrALetter {
-            get {
-                return ResourceManager.GetString("ThePasswordMustHaveBetween7And15CharactersEachOfThemBeingANumber09OrALetter", resourceCulture);
             }
         }
         

@@ -68,7 +68,12 @@ WriteLiteral("<h2>");
 
 Write(Resources.ChangePasswordAspx_ChangePassword);
 
-WriteLiteral("</h2>\r\n<p>");
+WriteLiteral("</h2>\r\n<p> </p>\r\n<p>");
+
+
+Write(ViewData["message"]);
+
+WriteLiteral(" </p>\r\n<p> </p>\r\n<p>");
 
 
 Write(Resources.ChangePasswordAspx_WriteActualPasswordAndNewOne);
@@ -83,6 +88,12 @@ WriteLiteral("\r\n");
 
  using (Html.BeginForm())
 {
+    
+       
+  Write(Html.Hidden(UserMapping.UserNameKey, ViewData["username"]));
+
+                                                                  
+    
 
 WriteLiteral("    <div id=\"changePassword\">\r\n        <table>\r\n            <tr>\r\n               " +
 " <td class=\"label\">");
