@@ -21,7 +21,7 @@ namespace Signum.Windows.Authorization
             Started = true;
 
             Common.RouteTask += Common_RouteTask;
-            Common.PseudoRouteTask += Common_RouteTask;
+            Common.LabelOnlyRouteTask += Common_RouteTask;
             PropertyRoute.SetIsAllowedCallback(pr => GetPropertyAllowed(pr) >= PropertyAllowed.Read);
 
             AuthClient.UpdateCacheEvent += new Action(AuthClient_UpdateCacheEvent);

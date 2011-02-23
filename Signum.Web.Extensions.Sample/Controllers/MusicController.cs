@@ -44,13 +44,13 @@ namespace Signum.Web.Extensions.Sample
             return Navigator.PopupView(this, model, prefix);
         }
 
-        public ContentResult CreateAlbumFromBandOnOk(string prefix)
+        public JsonResult CreateAlbumFromBandOnOk(string prefix)
         {
             MappingContext<AlbumFromBandModel> context = Navigator.ExtractEntity<AlbumFromBandModel>(this, prefix).ApplyChanges(this.ControllerContext, prefix, true).ValidateGlobal();
 
             AlbumDN newAlbum = context.Value.Band.ConstructFromLite<AlbumDN>(AlbumOperation.CreateFromBand, new object[] { context.Value.Name, context.Value.Year, context.Value.Label });
 
-            return Navigator.RedirectUrl(Navigator.ViewRoute(newAlbum));
+            return JsonAction.Redirect(Navigator.ViewRoute(newAlbum));
         }
 
         public ActionResult CreateGreatestHitsAlbum(List<int> ids, string prefix)

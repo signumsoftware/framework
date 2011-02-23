@@ -70,7 +70,6 @@ WriteLiteral(@"<script type=""text/javascript"">
             url: ""Captcha.ashx/Refresh"",
             data: """",
             async: false,
-            dataType: ""html"",
             success:
                    function (msg) {
                        $(""#divCaptchaImage"").html(msg);
