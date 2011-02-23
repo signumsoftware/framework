@@ -60,9 +60,11 @@ SF.registerModule("Validator", function () {
                 async: false,
                 data: this.constructRequestData(),
                 success: function (msg) {
-                    if (msg.indexOf("ModelState") > 0) {
-                        var result = $.parseJSON(msg);  //eval('var result=' + msg);
-                        var modelState = result.ModelState;
+                    if (typeof msg === "object") {
+                        if (msg.result != "ModelState") {
+                            throw "Validator trySave: Incorrect result type " + msg.result;
+                        }
+                        var modelState = msg.ModelState;
                         returnValue = self.showErrors(modelState, true);
                         SF.Notify.error(lang.signum.error, 2000);
                     }
@@ -93,9 +95,11 @@ SF.registerModule("Validator", function () {
                 async: false,
                 data: this.constructRequestData(),
                 success: function (msg) {
-                    if (msg.indexOf("ModelState") > 0) {
-                        var result = $.parseJSON(msg);
-                        var modelState = result.ModelState;
+                    if (typeof msg === "object") {
+                        if (msg.result != "ModelState") {
+                            throw "Validator validate: Incorrect result type " + msg.result;
+                        }
+                        var modelState = msg.ModelState;
                         returnValue = self.showErrors(modelState, true);
                     }
                     else {
@@ -256,8 +260,6 @@ SF.registerModule("Validator", function () {
 
         this.trySave = function () {
             SF.log("PartialValidator trySave");
-            //        if (SF.isEmpty(this.valOptions.type))
-            //            throw "Type must be specified in PartialValidatorOptions for TrySavePartial";
             SF.Notify.info(lang.signum.saving);
             var validatorResult = null;
             var self = this;

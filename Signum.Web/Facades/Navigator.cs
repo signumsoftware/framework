@@ -986,7 +986,7 @@ namespace Signum.Web
 
         public static JsonResult ModelState(ModelStateDictionary dictionary, string newToString, string newToStringLink)
         {
-            Dictionary<string, string> result = new Dictionary<string, string>
+            Dictionary<string, object> result = new Dictionary<string, object>
             {
                 {"result", JsonResultType.ModelState.ToString()},
                 {"ModelState", dictionary.ToJsonData()}

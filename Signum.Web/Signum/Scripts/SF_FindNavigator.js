@@ -124,7 +124,6 @@ SF.registerModule("FindNavigator", function () {
                 url: this.findOptions.navigatorControllerUrl,
                 data: this.requestDataForOpenFinder(),
                 async: false,
-                dataType: "html",
                 success: function (popupHtml) {
                     var divId = self.tempDivId();
                     $("body").append(SF.hiddenDiv(divId, popupHtml));
@@ -196,7 +195,6 @@ SF.registerModule("FindNavigator", function () {
                 url: this.findOptions.searchControllerUrl,
                 data: this.requestDataForSearch(),
                 async: this.findOptions.async,
-                dataType: "html",
                 success: function (r) {
                     var idBtnSearch = $btnSearch.attr('id');
                     if (SF.FindNavigator.asyncSearchFinished[idBtnSearch])
@@ -430,7 +428,6 @@ SF.registerModule("FindNavigator", function () {
                 url: getColumnNameUrl,
                 data: { "webQueryName": webQueryName, "tokenName": tokenName },
                 async: false,
-                dataType: "html",
                 success: function (columnNiceName) {
                     $tblHeaders.append("<th><input type=\"hidden\" value=\"" + tokenName + "\" />" + columnNiceName + "</th>");
                     $(self.pf("btnEditColumns")).show();
@@ -507,7 +504,6 @@ SF.registerModule("FindNavigator", function () {
                 url: addFilterUrl,
                 data: { "webQueryName": webQueryName, "tokenName": tokenName, "index": this.newFilterRowIndex(), "prefix": this.findOptions.prefix },
                 async: false,
-                dataType: "html",
                 success: function (filterHtml) {
                     var $filterList = self.control().find(".sf-filters-list");
                     $filterList.find(".sf-explanation").hide();
@@ -560,7 +556,6 @@ SF.registerModule("FindNavigator", function () {
                 url: controllerUrl,
                 data: { "webQueryName": webQueryName, "tokenName": tokenName, "index": index, "prefix": this.findOptions.prefix },
                 async: false,
-                dataType: "html",
                 success: function (newCombo) {
                     $(self.pf("ddlTokens_" + index)).after(newCombo);
                 }
@@ -616,7 +611,6 @@ SF.registerModule("FindNavigator", function () {
                 url: quickFilterUrl,
                 data: params,
                 async: false,
-                dataType: "html",
                 success: function (filterHtml) {
                     var $filterList = self.control().find(".sf-filters-list");
                     $filterList.find(".sf-explanation").hide();
@@ -745,7 +739,6 @@ SF.registerModule("FindNavigator", function () {
             url: showCtxUrl,
             type: "POST",
             async: true,
-            dataType: "html",
             data: requestData,
             success: function (items) {
                 $cmenu.html(items);

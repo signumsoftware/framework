@@ -200,7 +200,6 @@ SF.registerModule("ViewNavigator", function () {
                 url: this.viewOptions.controllerUrl,
                 data: this.constructRequestData(),
                 async: false,
-                dataType: "html",
                 success: function (newHtml) {
                     onSuccess(newHtml);
                 }
@@ -300,7 +299,6 @@ SF.registerModule("ViewNavigator", function () {
             url: chooserOptions.controllerUrl,
             data: requestData,
             async: false,
-            dataType: "html",
             success: function (chooserHTML) {
                 $("body").append(SF.hiddenDiv(tempDivId, chooserHTML));
                 SF.triggerNewContent($("#" + tempDivId));

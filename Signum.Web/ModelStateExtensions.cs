@@ -26,11 +26,12 @@ namespace Signum.Web
                         modelState.AddModelError(p.Key, v, form[p.Key]);
         }
 
-        public static string ToJsonData(this ModelStateDictionary modelState)
+        public static Dictionary<string, string[]> ToJsonData(this ModelStateDictionary modelState)
         {
-            return modelState.ToJSonObject(
-                key => key.Quote(),
-                value => value.Errors.ToJSonArray(me => me.ErrorMessage.Quote()));
+            return modelState.ToDictionary(
+                kvp => kvp.Key,
+                kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray() 
+                );
         }
 
         //http://www.crankingoutcode.com/2009/02/01/IssuesWithAddModelErrorSetModelValueWithMVCRC1.aspx

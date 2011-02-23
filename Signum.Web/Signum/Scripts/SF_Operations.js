@@ -106,7 +106,6 @@ SF.registerModule("Operations", function () {
                 url: this.options.controllerUrl,
                 data: this.options.contextual ? this.contextualRequestData(newPrefix) : this.requestData(newPrefix),
                 async: true,
-                dataType: "html",
                 success: function (operationResult) {
                     SF.Blocker.disable();
                     if (self.executedSuccessfully(operationResult)) {
@@ -148,12 +147,10 @@ SF.registerModule("Operations", function () {
         executedSuccessfully: function (operationResult) {
             SF.log("OperationManager executedSuccessfully");
 
-            if (operationResult.indexOf("ModelState") === -1) {
+            if ((typeof (operationResult) !== "object") || (operationResult.result != "ModelState"))
                 return true;
-            }
 
-            var result = $.parseJSON(operationResult),
-            modelState = result.ModelState;
+            modelState = operationResult.ModelState;
 
             if (SF.isEmpty(this.options.prefix)) {
                 new SF.Validator().showErrors(modelState);
@@ -382,7 +379,6 @@ SF.registerModule("Operations", function () {
                 url: this.options.controllerUrl,
                 data: this.requestData(this.newPrefix(), items),
                 async: true,
-                dataType: "html",
                 success: function (operationResult) {
                     SF.Blocker.disable();
 
@@ -451,7 +447,6 @@ SF.registerModule("Operations", function () {
             url: urlController,
             data: requestData,
             async: false,
-            dataType: "html",
             success: function (msg) {
                 if (!SF.isEmpty(parentDiv)) {
                     $('#' + parentDiv + ' input[onblur]').attr('onblur', ''); // To avoid Chrome to fire onblur when replacing parentdiv content

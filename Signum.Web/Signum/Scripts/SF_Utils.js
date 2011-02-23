@@ -96,54 +96,52 @@ SF.registerModule = (function () {
 };
     })();
 
-SF.ajax = function (jqueryAjaxOptions) {
-    var options = $.extend({
-        type: null,
-        url: null,
-        data: null,
-        async: false,
-        dataType: null,
-        success: null,
-        error: null
-    }, jqueryAjaxOptions);
+    SF.ajax = function (jqueryAjaxOptions) {
+        var options = $.extend({
+            type: null,
+            url: null,
+            data: null,
+            async: false,
+            dataType: null,
+            success: null,
+            error: null
+        }, jqueryAjaxOptions);
 
-    function checkRedirection(ajaxResult) {
-
-            if (SF.isEmpty(ajaxResult)) return null;
-        var json;
-
-        if (typeof ajaxResult !== "object") {
-            //suppose that if is already an object it will be a json Object            
-                if (!SF.isJSON(ajaxResult)) return null;
-            json = $.parseJSON(ajaxResult);
-        } else {
-            json = ajaxResult;
-        }
-
-            if (json.result == null) return null;
-            if (json.result == 'url') return json.url;
+        function checkRedirection(ajaxResult) {
+            if (SF.isEmpty(ajaxResult)) {
+                return null;
+            }
+            if (typeof ajaxResult !== "object") {
+                return null;
+            }
+            if (ajaxResult.result == null) {
+                return null;
+            }
+            if (ajaxResult.result == 'url') {
+                return ajaxResult.url;
+            }
             return null;
-    };
+        };
 
-    return $.ajax({
-        type: options.type,
-        url: options.url,
-        data: options.data,
-        async: options.async,
-        dataType: options.dataType,
-        success: function (result) {
-            if (typeof result === "string") {
-                result = result ? result.trim() : "";
-            }
-            var url = checkRedirection(result);
+        return $.ajax({
+            type: options.type,
+            url: options.url,
+            data: options.data,
+            async: options.async,
+            dataType: options.dataType,
+            success: function (result) {
+                if (typeof result === "string") {
+                    result = result ? result.trim() : "";
+                }
+                var url = checkRedirection(result);
                 if (!SF.isEmpty(url)) window.location.href = url;
-            else {
-                if (options.success != null) options.success(result);
-            }
-        },
-        error: options.error
-    });
-};
+                else {
+                    if (options.success != null) options.success(result);
+                }
+            },
+            error: options.error
+        });
+    };
 
 $(document).ajaxError(function (event, XMLHttpRequest, ajaxOptions, thrownError) {
     //check request status
@@ -153,22 +151,6 @@ $(document).ajaxError(function (event, XMLHttpRequest, ajaxOptions, thrownError)
     if (XMLHttpRequest.status === 0) return;
     $("body").trigger("sf-ajax-error", [XMLHttpRequest, ajaxOptions, thrownError]);
 });
-
-//Based on jquery-1.4.2 parseJSON function
-SF.isJSON = function (data) {
-        if (typeof data !== "string" || !data) return null;
-
-    // Make sure leading/trailing whitespace is removed (IE can't handle it)
-    data = jQuery.trim(data);
-
-    // Make sure the incoming data is actual JSON
-    // Logic borrowed from http://json.org/json2.js
-        if (/^[\],:{}\s]*$/.test(data.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g, "@").replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, "]").replace(/(?:^|:|,)(?:\s*\[)+/g, ""))) {
-
-        return true;
-        } else
-        return false;
-};
 
 SF.stopPropagation = function (event) {
         if (event.stopPropagation) event.stopPropagation();
