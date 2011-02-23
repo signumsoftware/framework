@@ -26,7 +26,7 @@ namespace Signum.Entities
 
         public Lite(int id)
             : base(typeof(T), id)
-        {
+        {        
         }
 
 

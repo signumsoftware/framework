@@ -21,37 +21,56 @@ namespace Signum.Web
 
     public static class EmbeddedControlHelper
     {
-        public static void EmbeddedControl<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property)
+        public static void RenderEmbeddedControl<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property)
         {
-            EmbeddedControl<T, S>(helper, tc, property, null);
+            RenderEmbeddedControl<T, S>(helper, tc, property, null);
         }
 
-        public static void EmbeddedControl<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property, Action<EmbeddedControlSettings> settingsModifier)
+        public static void RenderEmbeddedControl<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property, Action<EmbeddedControlSettings> settingsModifier)
         {
             EmbeddedControlSettings ec = new EmbeddedControlSettings();
 
             if (settingsModifier != null)
                 settingsModifier(ec);
 
-            TypeContext<S> context = Common.WalkExpression(tc, property);
+            TypeContext ntc = TypeContextUtilities.CleanTypeContext(Common.WalkExpression(tc, property));
 
-            //if (context.Value == null)
-            //    throw new NullReferenceException("EmbeddedControl");
-
-            TypeContext ntc = TypeContextUtilities.CleanTypeContext(context);
-
-            string viewName = ec.ViewName ?? Navigator.Manager.EntitySettings[ntc.Type].OnPartialViewName((ModifiableEntity)ntc.UntypedValue);
-
+            if(ec.ViewName == null)
+                ec.ViewName = Navigator.Manager.EntitySettings[ntc.Type].OnPartialViewName((ModifiableEntity)ntc.UntypedValue); 
+            
             ViewDataDictionary vdd = new ViewDataDictionary(ntc);
-
             if (ec.ViewData != null)
-            {
-                foreach (KeyValuePair<string, object> key in ec.ViewData)
-                    if (!vdd.ContainsKey(key.Key)) vdd[key.Key] = ec.ViewData[key.Key];
-            }
+                vdd.AddRange(ec.ViewData); 
+
             helper.PropagateSFKeys(vdd);
 
-            helper.RenderPartial(viewName, vdd);
+            helper.RenderPartial(ec.ViewName, vdd);
+        }
+
+        public static MvcHtmlString EmbeddedControl<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property)
+        {
+            return EmbeddedControl<T, S>(helper, tc, property, null);
+        }
+
+        public static MvcHtmlString EmbeddedControl<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property, Action<EmbeddedControlSettings> settingsModifier)
+        {
+            EmbeddedControlSettings ec = new EmbeddedControlSettings();
+
+            if (settingsModifier != null)
+                settingsModifier(ec);
+
+            TypeContext ntc = TypeContextUtilities.CleanTypeContext(Common.WalkExpression(tc, property));
+
+            if (ec.ViewName == null)
+                ec.ViewName = Navigator.Manager.EntitySettings[ntc.Type].OnPartialViewName((ModifiableEntity)ntc.UntypedValue);
+
+            ViewDataDictionary vdd = new ViewDataDictionary(ntc);
+            if (ec.ViewData != null)
+                vdd.AddRange(ec.ViewData);
+
+            helper.PropagateSFKeys(vdd);
+
+            return helper.Partial(ec.ViewName, vdd);
         }
     }
 }

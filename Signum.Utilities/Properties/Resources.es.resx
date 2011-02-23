@@ -165,9 +165,6 @@
   <data name="DateLast" xml:space="preserve">
     <value>{0} pasado</value>
   </data>
-  <data name="DateSeparators" xml:space="preserve">
-    <value>,,</value>
-  </data>
   <data name="DateThis" xml:space="preserve">
     <value>Este {0}</value>
   </data>
