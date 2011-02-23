@@ -55,7 +55,7 @@ namespace Signum.Entities.Authorization
             set
             {
                 if (Set(ref passwordHash, value, () => PasswordHash))
-                    PasswordSetDate = DateTime.Now.TrimToSeconds();
+                    PasswordSetDate = TimeZoneManager.Now.TrimToSeconds();
             }
         }
 

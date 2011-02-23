@@ -51,7 +51,7 @@ namespace Signum.Web.Auth
 
         public static bool ResetPasswordStarted;
 
-        public static void Start(bool types, bool property, bool queries, bool resetPassword)
+        public static void Start(bool types, bool property, bool queries, bool resetPassword, bool passwordExpiration)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -64,6 +64,9 @@ namespace Signum.Web.Auth
                 if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(RoleDN)))
                     Navigator.AddSetting(new EntitySettings<RoleDN>(EntityType.Default));
                 
+                if (passwordExpiration)
+                    Navigator.AddSetting(new EntitySettings<PasswordValidIntervalDN>(EntityType.Admin) { PartialViewName = _ => ViewPrefix.Formato("PasswordValidInterval") });
+
                 if (property)
                     Common.CommonTask += new CommonTask(TaskAuthorizeProperties);
 
