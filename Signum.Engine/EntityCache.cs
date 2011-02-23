@@ -24,7 +24,7 @@ namespace Signum.Engine
 
                 IdentifiableEntity ident = dic.TryGetC(ie.Id);
 
-                if (ident == null)
+                if (ident == null)    
                     dic.Add(ie.Id, ie);
                 else if (ident != ie)
                    throw new InvalidOperationException("There's a different instance of the same entity with Type '{0}' and Id '{1}'".Formato(ie.GetType().Name, ie.id));
