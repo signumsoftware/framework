@@ -22,19 +22,3 @@ using System.Security;
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
 [assembly: Guid("b7ff53fc-169d-4fe3-9d34-070a4372f6ee")]
-
-
-[assembly: System.Web.UI.WebResource("Signum.Web.Scripts.jquery-1.4.2.min.js", "text/javascript")]
-[assembly: System.Web.UI.WebResource("Signum.Web.Scripts.MicrosoftAjax.debug.js", "text/javascript")]
-[assembly: System.Web.UI.WebResource("Signum.Web.Scripts.MicrosoftAjax.js", "text/javascript")]
-[assembly: System.Web.UI.WebResource("Signum.Web.Scripts.MicrosoftMvcAjax.debug.js", "text/javascript")]
-[assembly: System.Web.UI.WebResource("Signum.Web.Scripts.MicrosoftMvcAjax.js", "text/javascript")]
-[assembly: System.Web.UI.WebResource("Signum.Web.Scripts.SF_Autocomplete.js", "text/javascript")]
-[assembly: System.Web.UI.WebResource("Signum.Web.Scripts.SF_DragAndDrop.js", "text/javascript")]
-[assembly: System.Web.UI.WebResource("Signum.Web.Scripts.SF_FindNavigator.js", "text/javascript")]
-[assembly: System.Web.UI.WebResource("Signum.Web.Scripts.SF_Globals.js", "text/javascript")]
-[assembly: System.Web.UI.WebResource("Signum.Web.Scripts.SF_Lines.js", "text/javascript")]
-[assembly: System.Web.UI.WebResource("Signum.Web.Scripts.SF_Operations.js", "text/javascript")]
-[assembly: System.Web.UI.WebResource("Signum.Web.Scripts.SF_Popup.js", "text/javascript")]
-[assembly: System.Web.UI.WebResource("Signum.Web.Scripts.SF_Validator.js", "text/javascript")]
-[assembly: System.Web.UI.WebResource("Signum.Web.Scripts.SF_ViewNavigator.js", "text/javascript")]
