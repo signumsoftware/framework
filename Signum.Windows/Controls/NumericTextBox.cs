@@ -87,7 +87,7 @@ namespace Signum.Windows
                 Converter = NullableDecimalConverter,
                 Path = new PropertyPath(ValueProperty),
                 Mode = BindingMode.TwoWay,
-                UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
+                UpdateSourceTrigger = UpdateSourceTrigger.LostFocus,
                 ValidatesOnDataErrors = true,
                 ValidatesOnExceptions = true,
                 NotifyOnValidationError = true,

@@ -314,7 +314,11 @@ namespace Signum.Windows
 
         public virtual UpdateSourceTrigger GetUpdateSourceTrigger(ValueLine vl)
         {
+            if (vl.ValueLineType == ValueLineType.Number)
+                return UpdateSourceTrigger.PropertyChanged; 
+
             return UpdateSourceTrigger.LostFocus;
+            
         }
 
         public virtual IValueConverter GetReadOnlyConverter(ValueLine vl)
