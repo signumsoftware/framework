@@ -494,7 +494,7 @@ namespace Signum.Engine.Authorization
                         RolesInOrder().Select(r => new XElement("Role",
                             new XAttribute("Name", r.ToStr),
                             new XAttribute("Contains", Roles.RelatedTo(r).ToString(","))))),
-                     ExportToXml == null ? null : ExportToXml.GetInvocationList().Cast<Func<XElement>>().Select(a => a()).NotNull().OrderBy(a => a.Name)))
+                     ExportToXml == null ? null : ExportToXml.GetInvocationList().Cast<Func<XElement>>().Select(a => a()).NotNull().OrderBy(a => a.Name)));
         }
 
         public static SqlPreCommand ImportRulesScript(XDocument doc)
