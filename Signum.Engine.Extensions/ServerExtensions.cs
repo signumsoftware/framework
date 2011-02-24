@@ -49,7 +49,6 @@ namespace Signum.Services
         }
 
         #region ILoginServer Members
-
         public virtual void Login(string username, string passwordHash)
         {
             try
@@ -69,7 +68,7 @@ namespace Signum.Services
 
             try
             {
-                currentUser = AuthLogic.ChagePassword(username, passwordHash, newPasswordHash);
+                AuthLogic.ChagePassword(username, passwordHash, newPasswordHash);
             }
             catch (Exception e)
             {
@@ -102,6 +101,14 @@ namespace Signum.Services
               () => currentUser);
         }
 
+
+        public string PasswordNearExpired()
+        {
+
+            return Return(MethodInfo.GetCurrentMethod(),
+             () => AuthLogic.OnPasswordNearExpiredLogic());
+            
+        }
 
         #endregion
 

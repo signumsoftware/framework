@@ -26,6 +26,10 @@ namespace Signum.Services
 
         [OperationContract, NetDataContract]
         UserDN GetCurrentUser();
+
+        [OperationContract, NetDataContract]
+        string PasswordNearExpired();
+
     }
 
     [ServiceContract]
@@ -38,7 +42,7 @@ namespace Signum.Services
         void SetTypesRules(TypeRulePack rules);
 
         [OperationContract, NetDataContract]
-        DefaultDictionary<Type, TypeAllowed> AuthorizedTypes(); 
+        DefaultDictionary<Type, TypeAllowed> AuthorizedTypes();
     }
 
     [ServiceContract]
@@ -48,7 +52,7 @@ namespace Signum.Services
         FacadeMethodRulePack GetFacadeMethodRules(Lite<RoleDN> role);
 
         [OperationContract, NetDataContract]
-        void SetFacadeMethodRules(FacadeMethodRulePack rules); 
+        void SetFacadeMethodRules(FacadeMethodRulePack rules);
     }
 
     [ServiceContract]
@@ -74,7 +78,7 @@ namespace Signum.Services
         void SetPropertyRules(PropertyRulePack rules);
 
         [OperationContract, NetDataContract]
-        DefaultDictionary<PropertyRoute, PropertyAllowed> AuthorizedProperties(); 
+        DefaultDictionary<PropertyRoute, PropertyAllowed> AuthorizedProperties();
     }
 
     [ServiceContract]

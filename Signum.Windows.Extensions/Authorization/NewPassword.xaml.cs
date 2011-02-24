@@ -33,6 +33,12 @@ namespace Signum.Windows.Authorization
             get { return pb1.Password; }
         }
 
+        UserDN user=UserDN.Current;
+        public UserDN User
+        {
+            get { return user; }
+            set { user = value; }
+        }
         private void bntOk_Click(object sender, RoutedEventArgs e)
         {
             
@@ -43,7 +49,7 @@ namespace Signum.Windows.Authorization
                 return;
             }
 
-            Server.Execute((ILoginServer a) => a.ChagePassword(UserDN.Current.UserName, UserDN.Current.PasswordHash, Security.EncodePassword(Password)));
+            Server.Execute((ILoginServer a) => a.ChagePassword(user.UserName, user.PasswordHash, Security.EncodePassword(Password)));
 
             MessageBox.Show(this, "Password changed", "Notice", MessageBoxButton.OK);
 

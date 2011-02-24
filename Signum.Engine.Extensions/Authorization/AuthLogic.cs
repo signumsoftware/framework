@@ -29,8 +29,8 @@ namespace Signum.Engine.Authorization
         public static int MinRequiredPasswordLength = 6;
         public static event Func<UserDN, bool> PasswordExpiresLogic;
         public static event Func<string> PasswordNearExpiredLogic;
-      
-   
+
+
 
 
         public static string SystemUserName { get; set; }
@@ -139,7 +139,7 @@ namespace Signum.Engine.Authorization
                         using (AuthLogic.Disable())
                         {
                             var ivp = Database.Query<PasswordValidIntervalDN>().Where(p => p.Enabled).FirstOrDefault();
-                            if (ivp == null)
+                            if (ivp == null || UserDN.Current.PasswordNeverExpires)
                                 return null;
 
                             if (DateTime.Now > UserDN.Current.PasswordSetDate.AddDays((double)ivp.Days).AddDays((double)-ivp.DaysWarning))
@@ -410,22 +410,18 @@ namespace Signum.Engine.Authorization
 
         public static UserDN ChagePasswordLogin(string username, string passwordHash, string newPasswordHash)
         {
-            var user = ChagePassword(username, passwordHash, newPasswordHash);
-            user = Login(username, newPasswordHash);
-            return user;
+            ChagePassword(username, passwordHash, newPasswordHash);
+            return Login(username, newPasswordHash);
         }
 
-        public static UserDN ChagePassword(string username, string passwordHash, string newPasswordHash)
+        public static void ChagePassword(string username, string passwordHash, string newPasswordHash)
         {
-
             var user = RetrieveUser(username, passwordHash);
             user.PasswordHash = newPasswordHash;
             using (AuthLogic.Disable())
                 user.Save();
-
-            return user;
         }
-        
+
         //public static UserDN UserToRememberPassword(string username, string email)
         //{
         //    UserDN user = null;
@@ -567,7 +563,7 @@ namespace Signum.Engine.Authorization
 
             return null;
         }
-   
+
     }
 
     public class ResetPasswordMail : EmailModel<UserDN>

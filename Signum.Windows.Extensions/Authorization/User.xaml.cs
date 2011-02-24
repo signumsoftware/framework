@@ -30,11 +30,13 @@ namespace Signum.Windows.Authorization
 
         private void changePassword_Click(object sender, RoutedEventArgs e)
         {
-        
-            var resultado=new NewPassword().ShowDialog();          
-            if (resultado.HasValue && resultado.Value)
+            UserDN user = (UserDN)DataContext;
+            var np = new NewPassword();
+            np.User = user;
+            var result = np.ShowDialog();
+            if (result.HasValue && result.Value)
             {
-                UserDN user = (UserDN)DataContext;
+
                 this.RaiseEvent(new ChangeDataContextEventArgs(user.ToLite().Retrieve()));
             }
         }
