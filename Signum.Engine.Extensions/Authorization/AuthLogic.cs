@@ -332,7 +332,7 @@ namespace Signum.Engine.Authorization
 
         public static IEnumerable<Lite<RoleDN>> RolesInOrder()
         {
-            return Roles.CompilationOrder();
+            return Roles.CompilationOrderGroups().SelectMany(gr => gr.OrderBy(a => a.ToStr));
         }
 
         public static int Compare(Lite<RoleDN> role1, Lite<RoleDN> role2)
@@ -494,34 +494,46 @@ namespace Signum.Engine.Authorization
                         RolesInOrder().Select(r => new XElement("Role",
                             new XAttribute("Name", r.ToStr),
                             new XAttribute("Contains", Roles.RelatedTo(r).ToString(","))))),
-                     ExportToXml == null ? null : ExportToXml.GetInvocationList().Cast<Func<XElement>>().Select(a => a()).NotNull()));
+                     ExportToXml == null ? null : ExportToXml.GetInvocationList().Cast<Func<XElement>>().Select(a => a()).NotNull().OrderBy(a => a.Name)))
         }
 
         public static SqlPreCommand ImportRulesScript(XDocument doc)
         {
-            EnumerableExtensions.JoinStrict(
-                Roles,
-                doc.Root.Element("Roles").Elements("Role"),
-                r => r.ToStr,
-                x => x.Attribute("Name").Value,
-                (r, x) => EnumerableExtensions.JoinStrict(
-                            Roles.RelatedTo(r),
-                            x.Attribute("Contains").Value.Split(','),
-                            sr => sr.ToStr,
-                            s => s,
-                            (sr, s) => 0,
-                            "Checking SubRoles of {0}".Formato(r)),
-                "Checking Roles");
-
             var rolesDic = Roles.ToDictionary(a => a.ToStr);
+            var rolesXml = doc.Root.Element("Roles").Elements("Role").ToDictionary(x => x.Attribute("Name").Value);
+
+            var xmlOnly = rolesXml.Keys.Except(rolesDic.Keys).ToList();
+            if (xmlOnly.Any())
+                throw new InvalidOperationException("Roles not found in database: {0}".Formato(xmlOnly.ToString(", ")));
+
+            foreach (var kvp in rolesXml)
+            {
+                var r = rolesDic[kvp.Key];
+
+                EnumerableExtensions.JoinStrict(
+                    Roles.RelatedTo(r),
+                    kvp.Value.Attribute("Contains").Value.Split(','),
+                    sr => sr.ToStr,
+                    s => s,
+                    (sr, s) => 0,
+                    "Checking SubRoles of {0}".Formato(r));
+            }
+
+            var dbOnlyWarnings = rolesDic.Keys.Except(rolesXml.Keys).Select(n =>
+                    new SqlPreCommandSimple("-- Alien role {0} not configured!!".Formato(n))
+                ).Combine(Spacing.Simple);
 
             var result = ImportFromXml.GetInvocationList()
                 .Cast<Func<XElement, Dictionary<string, Lite<RoleDN>>, SqlPreCommand>>()
                 .Select(inv => inv(doc.Root, rolesDic)).Combine(Spacing.Triple);
 
+            if (result == null && dbOnlyWarnings == null)
+                return null;
+
             return SqlPreCommand.Combine(Spacing.Triple,
                 new SqlPreCommandSimple("-- BEGIN AUTH SYNC SCRIPT"),
                 new SqlPreCommandSimple("use {0}".Formato(ConnectionScope.Current.DatabaseName())),
+                dbOnlyWarnings,
                 result,
                 new SqlPreCommandSimple("-- END AUTH SYNC SCRIPT"));
         }
@@ -552,7 +564,10 @@ namespace Signum.Engine.Authorization
                 SqlPreCommand command = ImportRulesScript(doc);
                 Console.WriteLine("Ok");
 
-                command.OpenSqlFileRetry();
+                if (command == null)
+                    Console.WriteLine("No changes necessary!");
+                else
+                    command.OpenSqlFileRetry();
             }
         }
 

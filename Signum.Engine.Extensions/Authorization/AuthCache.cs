@@ -402,9 +402,8 @@ namespace Signum.Entities.Authorization
                          let allowed = allowedToString(kvp.Value)
                          orderby resource
                          select new XElement(elementName,
-                         new XAttribute("Resource", resource),
-                         new XAttribute("Allowed", allowed))
-
+                            new XAttribute("Resource", resource),
+                            new XAttribute("Allowed", allowed))
                      ))
                  ));
         }

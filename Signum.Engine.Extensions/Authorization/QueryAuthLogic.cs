@@ -44,7 +44,7 @@ namespace Signum.Engine.Authorization
                 AuthLogic.ExportToXml += () => cache.ExportXml("Queries", "Query", p => p.Key, b => b.ToString());
                 AuthLogic.ImportFromXml += (x, roles) => cache.ImportXml(x, "Queries", "Query", roles, s =>
                 {
-                    var query = QueryLogic.RetrieveOrGenerateQuery(s);
+                    var query = QueryLogic.RetrieveOrGenerateQuery(QueryLogic.QueryNames[s]);
                     if (query.IsNew)
                         return query.Save();
                     return query;
