@@ -401,6 +401,7 @@ namespace Signum.Utilities.DataStructures
             return CompilationOrderGroups().SelectMany(e => e);
         }
 
+
         /// <summary>
         /// A simple but effective linear-time heuristic constructs a vertex ordering,
         /// just as in the topological sort heuristic above, and deletes any arc going from right to left. 

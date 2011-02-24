@@ -117,8 +117,7 @@ namespace Signum.Utilities
         public static Dictionary<K, V> ToDictionary<K, V>(this IEnumerable<KeyValuePair<K, V>> collection)
         {
              var result = new Dictionary<K,V>();
-             foreach (var kvp in collection)
-                 result.Add(kvp.Key, kvp.Value);
+             result.AddRange<K, V>(collection);
             return result;
         }
 
@@ -251,17 +250,15 @@ namespace Signum.Utilities
             return set.ToDictionary(k => k, k => mixer(k, dic1.TryGetS(k), dic2.TryGetS(k)));
         }
 
-        public static void AddRange<K, V>(this IDictionary<K, V> dictionary, IDictionary<K, V> other)
+        public static void AddRange<K, V>(this IDictionary<K, V> dictionary, IEnumerable<KeyValuePair<K, V>> collection)
         {
-            foreach (var item in other)
-            {
-                dictionary.Add(item.Key, item.Value);
-            }
+            foreach (var kvp in collection)
+                dictionary.Add(kvp.Key, kvp.Value);
         }
 
-        public static void AddRange<K, V>(this IDictionary<K, V> dictionary, IDictionary<K, V> other, string errorContext)
+        public static void AddRange<K, V>(this IDictionary<K, V> dictionary, IEnumerable<KeyValuePair<K, V>> collection, string errorContext)
         {
-            dictionary.AddRange(other, kvp => kvp.Key, kvp => kvp.Value, errorContext); 
+            dictionary.AddRange(collection, kvp => kvp.Key, kvp => kvp.Value, errorContext); 
         }
 
         public static void AddRange<K, V, A>(this IDictionary<K, V> dictionary, IEnumerable<A> collection, Func<A, K> keySelector, Func<A, V> valueSelector)
