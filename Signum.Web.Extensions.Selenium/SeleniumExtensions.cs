@@ -38,12 +38,18 @@ namespace Signum.Web.Selenium
 
         public static ISelenium InitializeSelenium()
         {
-            ISelenium selenium =  new DefaultSelenium("localhost", 
-                4444,
-                Explorer == WebExplorer.Firefox ? "*chrome" : Explorer == WebExplorer.IE ? "*iexplore" : "*googlechrome", 
-                "http://localhost/");
+            //ISelenium selenium =  new DefaultSelenium("localhost", 
+            //    4444,
+            //    Explorer == WebExplorer.Firefox ? "*chrome" : Explorer == WebExplorer.IE ? "*iexplore" : "*googlechrome", 
+            //    "http://localhost/");
 
+            ISelenium selenium = new DefaultSelenium("ucalenda.ss",
+                4444,
+                "*chrome",
+                "http://ucalenda.ss:8404/");
+            
             selenium.Start();
+            
             selenium.SetSpeed("200");
             //selenium.SetSpeed("1000");
 
