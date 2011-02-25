@@ -148,7 +148,7 @@ namespace Signum.Web
         {
             List<SelectListItem> list = new List<SelectListItem>();
 
-            if (selectedElement == null)
+            if (selectedElement == null || !lites.Contains(selectedElement))
                 list.Add(new SelectListItem { Text = "-", Value = "" });
 
             list.AddRange(lites.Select(l => l.ToSelectListItem(l.Is(selectedElement))));
