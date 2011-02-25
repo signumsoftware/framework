@@ -20,7 +20,7 @@ using Signum.Web.Extensions.Properties;
 
 namespace Signum.Web.Operations
 {
-    [HandleException, AuthenticationRequired]
+    [HandleException, AuthenticationRequired, UserInterface]
     public class OperationController : Controller
     {
         [HttpPost, ValidateAntiForgeryToken]
