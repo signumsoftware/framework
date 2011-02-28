@@ -33,11 +33,11 @@ namespace Signum.Engine.Maps
                         SqlBuilder.DeleteSql(Name, pids));
         }
 
-        public SqlPreCommand DeleteSqlSync(IdentifiableEntity ident)
+        public SqlPreCommand DeleteSqlSync(IdentifiableEntity ident, string comment = null)
         {
             return SqlPreCommand.Combine(Spacing.Simple,
-                OnPreDeleteSqlSync(ident), 
-                SqlBuilder.DeleteSql(Name, ident.Id, ident.ToStr));
+                OnPreDeleteSqlSync(ident),
+                SqlBuilder.DeleteSqlSync(Name, ident.Id, comment ?? ident.ToStr));
         }
 
         public event Func<IdentifiableEntity, SqlPreCommand> PreDeleteSqlSync;

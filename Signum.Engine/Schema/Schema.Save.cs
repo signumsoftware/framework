@@ -33,7 +33,7 @@ namespace Signum.Engine.Maps
             return sql;
         }
 
-        public SqlPreCommand InsertSqlSync(IdentifiableEntity ident)
+        public SqlPreCommand InsertSqlSync(IdentifiableEntity ident, string comment = null)
         {
             bool dirty = false; 
             ident.PreSaving(ref dirty); 
@@ -46,7 +46,7 @@ namespace Signum.Engine.Maps
             foreach (var v in Fields.Values)
                 v.Field.CreateParameter(parameters, v.Getter(ident), Forbidden.None);
 
-            return SqlBuilder.InsertSync(Name, parameters);
+            return SqlBuilder.InsertSync(Name, parameters, comment);
         }
 
         SqlPreCommand InsertSql(IdentifiableEntity ident, Forbidden forbidden)
@@ -88,18 +88,19 @@ namespace Signum.Engine.Maps
                 parameters.Insert(0, pid);
 
                 if (cols == null)
-                    return SqlBuilder.InsertSync(Name, parameters);
+                    return SqlBuilder.InsertNoIdentity(Name, parameters);
                 else
                     return SqlPreCommand.Combine(Spacing.Double,
-                       SqlBuilder.InsertSync(Name, parameters),
+                       SqlBuilder.InsertNoIdentity(Name, parameters),
                        SqlBuilder.SetLastEntityId(ident.Id),
                        cols);
             }
         }
 
-        public SqlPreCommand UpdateSqlSync(IdentifiableEntity ident)
+        public SqlPreCommand UpdateSqlSync(IdentifiableEntity ident, string comment = null)
         {   
-            string oldToStr = ident.ToStr;
+            if(comment == null)
+                comment = ident.ToStr;
 
             bool dirty = false;
             ident.PreSaving(ref dirty);
@@ -111,7 +112,7 @@ namespace Signum.Engine.Maps
             foreach (var v in Fields.Values)
                 v.Field.CreateParameter(parameters, v.Getter(ident), Forbidden.None);
 
-            return SqlBuilder.UpdateSync(Name, parameters, ident.Id, oldToStr);
+            return SqlBuilder.UpdateSync(Name, parameters, ident.Id, comment);
         }
 
         SqlPreCommand UpdateSql(IdentifiableEntity ident, Forbidden forbidden)

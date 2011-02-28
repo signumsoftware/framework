@@ -88,21 +88,29 @@ namespace Signum.Engine
                     parameters.And(pid).ToList()));
         }
 
-        internal static SqlPreCommand UpdateSync(string table, List<SqlParameter> parameters, int id, string oldToStr)
+        internal static SqlPreCommand UpdateSync(string table, List<SqlParameter> parameters, int id, string comment)
         {
             SqlParameter paramId = SqlParameterBuilder.CreateIdParameter(id);
 
             return new SqlPreCommandSimple(
                     "UPDATE {0} SET --{1}\r\n{2}\r\n WHERE id = {3}".Formato(
-                        table.SqlScape(), oldToStr,
+                        table.SqlScape(), comment,
                         parameters.ToString(p => "{0} = {1}".Formato(p.SourceColumn.SqlScape(), p.ParameterName).Indent(2), ",\r\n"),
                         paramId.ParameterName),
                     parameters.And(paramId).ToList());
         }
 
-        internal static SqlPreCommand InsertSync(string table, List<SqlParameter> parameters)
+        internal static SqlPreCommand InsertSync(string table, List<SqlParameter> parameters, string comment)
         {
-            return new SqlPreCommandSimple("INSERT {0} ({1}) \r\n VALUES ({2})".Formato(table,
+            return new SqlPreCommandSimple("INSERT {0} ({1}) --{2}\r\n VALUES ({3})".Formato(table,
+                    parameters.ToString(p => p.SourceColumn.SqlScape(), ", "), 
+                    comment,
+                    parameters.ToString(p => p.ParameterName, ", ")), parameters);
+        }
+
+        internal static SqlPreCommand InsertNoIdentity(string table, List<SqlParameter> parameters)
+        {
+            return new SqlPreCommandSimple("INSERT {0} ({1})\r\n VALUES ({2})".Formato(table,
                     parameters.ToString(p => p.SourceColumn.SqlScape(), ", "),
                     parameters.ToString(p => p.ParameterName, ", ")), parameters);
         }
@@ -153,9 +161,9 @@ namespace Signum.Engine
             return new SqlPreCommandSimple("DELETE {0} WHERE id IN ({1})".Formato(table.SqlScape(), backIds.ToString(p => p.ParameterName, ", ")), backIds);
         }
 
-        internal static SqlPreCommand DeleteSql(string table, int id, string oldToStr)
+        internal static SqlPreCommand DeleteSqlSync(string table, int id, string comment)
         {
-            return new SqlPreCommandSimple("DELETE {0} WHERE id = {1} --{2}".Formato(table.SqlScape(), id, oldToStr));
+            return new SqlPreCommandSimple("DELETE {0} WHERE id = {1} --{2}".Formato(table.SqlScape(), id, comment));
         }
 
         internal static SqlPreCommand RelationalDelete(string table, string backIdColumn, SqlParameter backId)
