@@ -70,8 +70,8 @@ namespace Signum.Web.Files
                     continue; //Only new files will come with content
 
                 HttpPostedFileBase hpf = Request.Files[file] as HttpPostedFileBase;
-                if (hpf.ContentLength == 0)
-                    continue;
+                //if (hpf.ContentLength == 0)
+                //    continue;
 
                 string fileType = (string)Request.Form[TypeContextUtilities.Compose(file, FileLineKeys.FileType)];
                 if (!fileType.HasText())
@@ -103,7 +103,7 @@ namespace Signum.Web.Files
             else
             {
                 sb.AppendLine("parDoc.getElementById('{0}loading').style.display='none';".Formato(formFieldId));
-                sb.AppendLine("window.alert('{0}');".Formato(Resources.ErrorSavingFile));
+                sb.AppendLine("window.parent.alert('{0}');".Formato(Resources.ErrorSavingFile));
             }
 
             sb.AppendLine("</script>");
