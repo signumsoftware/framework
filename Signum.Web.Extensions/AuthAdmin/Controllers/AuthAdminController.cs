@@ -14,6 +14,8 @@ using System.Net;
 using System.Text;
 using Signum.Entities;
 using Signum.Web.Controllers;
+using System.IO;
+using System.Xml;
 
 namespace Signum.Web.AuthAdmin
 {
@@ -156,6 +158,18 @@ namespace Signum.Web.AuthAdmin
             OperationAuthLogic.SetOperationRules(prp.Value);
 
             return JsonAction.ModelState(ModelState);
+        }
+
+        [HttpGet]
+        public FileResult Export()
+        {
+            using (MemoryStream ms = new MemoryStream())
+            {
+                using (XmlWriter writer = XmlWriter.Create(ms))
+                    AuthLogic.ExportRules().WriteTo(writer);
+
+                return File(ms.ToArray(), MimeType.FromExtension("xml"), "AuthRules.xml");
+            }
         }
     }
 }
