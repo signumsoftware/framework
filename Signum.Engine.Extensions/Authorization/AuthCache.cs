@@ -421,16 +421,17 @@ namespace Signum.Entities.Authorization
                 (role, x) =>
                 {
                     var max = x.Attribute("Default") == null || x.Attribute("Default").Value != "Min";
-                    SqlPreCommand defSql = Comment(SetDefault(table, null, max, role), role, null);
+                    SqlPreCommand defSql = SetDefault(table, null, max, role);
 
                     SqlPreCommand restSql = (from xr in x.Elements(elementName)
                                              let r = toResource(xr.Attribute("Resource").Value)
-                                             select Comment(table.InsertSqlSync(new RT
+                                             let a = parseAllowed(xr.Attribute("Allowed").Value)
+                                             select table.InsertSqlSync(new RT
                                              {
                                                  Resource = r,
                                                  Role = role,
-                                                 Allowed = parseAllowed(xr.Attribute("Allowed").Value)
-                                             }), role, r)).Combine(Spacing.Simple);
+                                                 Allowed = a
+                                             }, Comment(role, r, a))).Combine(Spacing.Simple);
 
                     return SqlPreCommand.Combine(Spacing.Simple, defSql, restSql);
                 },
@@ -438,36 +439,47 @@ namespace Signum.Entities.Authorization
                 {
                     var def = list.SingleOrDefault(a => a.Resource == null);
                     var max = x.Attribute("Default") == null || x.Attribute("Default").Value != "Min";
-                    SqlPreCommand defSql = Comment(SetDefault(table, def, max, role), role, null);
+                    SqlPreCommand defSql = SetDefault(table, def, max, role);
 
                     SqlPreCommand restSql = Synchronizer.SynchronizeScript(
                         list.Where(a => a.Resource != null).ToDictionary(a => a.Resource),
                         x.Elements(elementName).ToDictionary(a => toResource(a.Attribute("Resource").Value)),
-                        (r, rt) => Comment(table.DeleteSqlSync(rt), role, r),
-                        (r, xr) => Comment(table.InsertSqlSync(new RT { Resource = r, Role = role, Allowed = parseAllowed(xr.Attribute("Allowed").Value) }), role, r),
-                        (r, pr, xr) => { pr.Allowed = parseAllowed(xr.Attribute("Allowed").Value); return Comment(table.UpdateSqlSync(pr), role, r); }, Spacing.Simple);
+                        (r, rt) => table.DeleteSqlSync(rt, Comment(role, r, rt.Allowed)),
+                        (r, xr) =>
+                        {
+                            var a = parseAllowed(xr.Attribute("Allowed").Value);
+                            return table.InsertSqlSync(new RT { Resource = r, Role = role, Allowed = a }, Comment(role, r, a));
+                        },
+                        (r, pr, xr) =>
+                        {
+                            var oldA = pr.Allowed;
+                            pr.Allowed = parseAllowed(xr.Attribute("Allowed").Value);
+                            return table.UpdateSqlSync(pr, Comment(role, r, oldA, pr.Allowed));
+                        }, Spacing.Simple);
 
                     return SqlPreCommand.Combine(Spacing.Simple, defSql, restSql);
                 }, Spacing.Double);
         }
 
-        SqlPreCommand Comment(this SqlPreCommand sql, Lite<RoleDN> role, R resource)
+
+        static string Comment(Lite<RoleDN> role, R resource, A allowed)
         {
-            if (sql == null)
-                return null; 
+            return "{0} {1} for {2} ({3})".Formato(typeof(R).NiceName(), resource.ToStr, role, allowed);
+        }
 
-            var comment = resource == null ? "-- Default {0} for {1}".Formato(typeof(R).NiceName(), role) :
-                "-- {0} {1} for {1}".Formato(typeof(R).NiceName(), resource.ToStr, role);
-
-            return SqlPreCommand.Combine(Spacing.Simple, new SqlPreCommandSimple(comment), sql); 
+        static string Comment(Lite<RoleDN> role, R resource, A from, A to)
+        {
+            return "{0} {1} for {2} ({3} -> {4})".Formato(typeof(R).NiceName(), resource.ToStr, role, from, to);
         }
 
         private SqlPreCommand SetDefault(Table table, RT def, bool max, Lite<RoleDN> role)
         {
+            string comment = "Default {0} for {1}".Formato(typeof(R).NiceName(), role);
+
             if (max)
             {
                 if (def != null)
-                    return table.DeleteSqlSync(def);
+                    return table.DeleteSqlSync(def, comment + " ({0})".Formato(def.Allowed));
 
                 return null;
             }
@@ -480,12 +492,13 @@ namespace Signum.Entities.Authorization
                         Role = role,
                         Resource = null,
                         Allowed = Min.BaseAllowed
-                    });
+                    }, comment + " ({0})".Formato(Min.BaseAllowed));
                 }
                 else if (!def.Allowed.Equals(Min.BaseAllowed))
                 {
+                    var old = def.Allowed;
                     def.Allowed = Min.BaseAllowed;
-                    return table.UpdateSqlSync(def);
+                    return table.UpdateSqlSync(def, comment + "({0} -> {1})".Formato(old, Min.BaseAllowed));
                 }
 
                 return null;

@@ -494,7 +494,7 @@ namespace Signum.Engine.Authorization
                         RolesInOrder().Select(r => new XElement("Role",
                             new XAttribute("Name", r.ToStr),
                             new XAttribute("Contains", Roles.RelatedTo(r).ToString(","))))),
-                     ExportToXml == null ? null : ExportToXml.GetInvocationList().Cast<Func<XElement>>().Select(a => a()).NotNull().OrderBy(a => a.Name)));
+                     ExportToXml == null ? null : ExportToXml.GetInvocationList().Cast<Func<XElement>>().Select(a => a()).NotNull().OrderBy(a => a.Name.ToString())));
         }
 
         public static SqlPreCommand ImportRulesScript(XDocument doc)
@@ -512,7 +512,7 @@ namespace Signum.Engine.Authorization
 
                 EnumerableExtensions.JoinStrict(
                     Roles.RelatedTo(r),
-                    kvp.Value.Attribute("Contains").Value.Split(','),
+                    kvp.Value.Attribute("Contains").Value.Split(new []{','}, StringSplitOptions.RemoveEmptyEntries),
                     sr => sr.ToStr,
                     s => s,
                     (sr, s) => 0,

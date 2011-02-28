@@ -41,7 +41,7 @@ namespace Signum.Engine.Authorization
                     PropertyRoute.SetIsAllowedCallback(pp => GetPropertyAllowed(pp) > PropertyAllowed.None);
                 }
 
-                AuthLogic.ExportToXml += () => cache.ExportXml("Properties", "Property", p => p.Type.ClassName + "|" + p.Path, pa => pa.ToString());
+                AuthLogic.ExportToXml += () => cache.ExportXml("Properties", "Property", p => p.Type.CleanName + "|" + p.Path, pa => pa.ToString());
                 AuthLogic.ImportFromXml += (x, roles) => cache.ImportXml(x, "Properties", "Property", roles, s =>
                 {
                     var arr = s.Split('|');
