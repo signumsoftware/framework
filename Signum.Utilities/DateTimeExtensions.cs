@@ -291,6 +291,14 @@ namespace Signum.Utilities
 
             return sb.ToString();
         }
+
+        public static long JavascriptMilliseconds(this DateTime dateTime)
+        {
+            if (dateTime.Kind != DateTimeKind.Utc)
+                throw new InvalidOperationException("dateTime should be UTC"); 
+
+            return (long)new TimeSpan(dateTime.Ticks - new DateTime(1970, 1, 1).Ticks).TotalMilliseconds;
+        } 
     }
 
     public enum DateTimePrecision
