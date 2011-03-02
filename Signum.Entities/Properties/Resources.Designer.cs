@@ -214,6 +214,15 @@ namespace Signum.Entities.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Attempt to modify locked entity {0}.
+        /// </summary>
+        public static string AttemptToModifyLockedEntity0 {
+            get {
+                return ResourceManager.GetString("AttemptToModifyLockedEntity0", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to be .
         /// </summary>
         public static string Be {

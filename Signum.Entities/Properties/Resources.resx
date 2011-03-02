@@ -345,4 +345,7 @@
   <data name="IdentifiableEntity_ToStr" xml:space="preserve">
     <value>Text</value>
   </data>
+  <data name="AttemptToModifyLockedEntity0" xml:space="preserve">
+    <value>Attempt to modify locked entity {0}</value>
+  </data>
 </root>

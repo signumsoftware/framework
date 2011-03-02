@@ -38,7 +38,7 @@ namespace Signum.Entities.Patterns
                 return false;
 
             if (this.locked)
-                throw new InvalidOperationException("Attempt to modify locked entity {0}".Formato(this.ToString()));
+                throw new ApplicationException( Resources.AttemptToModifyLockedEntity0.Formato(this.ToString()));
             
             return base.Set<T>(ref field, value, property);
         }
