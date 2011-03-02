@@ -43,7 +43,8 @@ namespace Signum.Web.Selenium
                 Explorer == WebExplorer.Firefox ? "*chrome" : Explorer == WebExplorer.IE ? "*iexplore" : "*googlechrome",
                 "http://localhost/");
             
-            selenium.Start();
+           
+                selenium.Start();
             
             selenium.SetSpeed("200");
             //selenium.SetSpeed("1000");
