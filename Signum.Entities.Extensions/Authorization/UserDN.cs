@@ -20,7 +20,13 @@ namespace Signum.Entities.Authorization
     public class UserDN : Entity, IPrincipal, IEmailOwnerDN
     {
 
-        public static  Func<string, string> ValidatePassword;
+        public UserDN()
+        {
+            PasswordHash = Guid.NewGuid().ToString();
+        }
+
+
+        public static Func<string, string> ValidatePassword;
         public static Func<string, string> ValidatePasswordDefauld = p =>
         {
             if (Regex.Match(p, @"^[0-9a-zA-Z]{7,15}$").Success)
@@ -156,7 +162,7 @@ namespace Signum.Entities.Authorization
     public enum UserState
     {
         [Ignore]
-        New=-1,
+        New = -1,
         Created,
         Disabled,
     }
