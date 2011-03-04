@@ -685,6 +685,10 @@ namespace Signum.Engine.Linq
             {
                 expr = ((ImplementedByAllExpression)expr).Id;
             }
+            else if (expr is MethodCallExpression && ReflectionTools.MethodEqual(((MethodCallExpression)expr).Method, miToUserInterface))
+            {
+                expr = ((MethodCallExpression)expr).Arguments[0]; 
+            }
 
             projection = ApplyExpansions(projection);
 
@@ -692,6 +696,8 @@ namespace Signum.Engine.Linq
 
             return DbExpressionNominator.FullNominate(expr, false);
         }
+
+        static MethodInfo miToUserInterface = ReflectionTools.GetMethodInfo(() => DateTime.Now.ToUserInterface()); 
 
         protected virtual Expression BindThenBy(Expression source, LambdaExpression orderSelector, OrderType orderType)
         {
