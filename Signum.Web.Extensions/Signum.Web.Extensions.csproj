@@ -144,7 +144,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ChangePassword.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Auth\Views\ChangePasswordSuccess.cs" />
+    <Compile Include="Auth\Views\ChangePasswordSuccess.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ChangePasswordSuccess.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Auth\Views\CreateUserAccount.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
