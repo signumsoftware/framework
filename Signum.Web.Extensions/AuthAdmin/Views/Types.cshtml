@@ -5,6 +5,7 @@
     $(function () {
         magicCheckBoxes($(document));
         treeView();
+        $(".ruleTable a.miniButton").click(openDialog); 
     });
 </script>
 @using (var tc = Html.TypeContext<TypeRulePack>())
@@ -99,7 +100,7 @@
                     <td>
                         @if (item.Value.Properties.HasValue)
                         {
-                            <a href="javascript:openDialog('@Url.Action((AuthAdminController a) => a.Properties(tc.Value.Role, item.Value.Resource.ToLite(), null))');">
+                            <a class="miniButton" href="@Url.Action((AuthAdminController a) => a.Properties(tc.Value.Role, item.Value.Resource.ToLite(), null))">
                                 <div class="property">
                                     <div class="thumb @item.Value.Properties.ToString().ToLower()">
                                     </div>
@@ -113,7 +114,7 @@
                     <td>
                         @if (item.Value.Operations.HasValue)
                         {
-                            <a href="javascript:openDialog('@Url.Action((AuthAdminController a) => a.Operations(tc.Value.Role, item.Value.Resource.ToLite(), null))');">
+                            <a class="miniButton" href="@Url.Action((AuthAdminController a) => a.Operations(tc.Value.Role, item.Value.Resource.ToLite(), null))">
                                 <div class="operation">
                                     <div class="thumb @item.Value.Operations.ToString().ToLower()">
                                     </div>
@@ -127,7 +128,7 @@
                     <td>
                         @if (item.Value.Queries.HasValue)
                         {
-                            <a href="javascript:openDialog('@Url.Action((AuthAdminController a) => a.Queries(tc.Value.Role, item.Value.Resource.ToLite(), null))');">
+                            <a class="miniButton" href="@Url.Action((AuthAdminController a) => a.Queries(tc.Value.Role, item.Value.Resource.ToLite(), null))">
                                 <div class="query">
                                     <div class="thumb @item.Value.Queries.ToString().ToLower()">
                                     </div>

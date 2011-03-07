@@ -165,8 +165,7 @@ namespace Signum.Web.AuthAdmin
         {
             using (MemoryStream ms = new MemoryStream())
             {
-                using (XmlWriter writer = XmlWriter.Create(ms))
-                    AuthLogic.ExportRules().WriteTo(writer);
+                AuthLogic.ExportRules().Save(ms);
 
                 return File(ms.ToArray(), MimeType.FromExtension("xml"), "AuthRules.xml");
             }

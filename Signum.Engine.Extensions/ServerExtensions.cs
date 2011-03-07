@@ -175,7 +175,7 @@ namespace Signum.Services
         #endregion
 
         #region IQueryServer Members
-
+        [SuggestUserInterface]
         public QueryDN RetrieveOrGenerateQuery(object queryName)
         {
             return Return(MethodInfo.GetCurrentMethod(),
@@ -185,7 +185,6 @@ namespace Signum.Services
         #endregion
 
         #region IPropertyAuthServer Members
-
         public PropertyRulePack GetPropertyRules(Lite<RoleDN> role, TypeDN typeDN)
         {
             return Return(MethodInfo.GetCurrentMethod(),
@@ -203,7 +202,6 @@ namespace Signum.Services
             return Return(MethodInfo.GetCurrentMethod(),
               () => PropertyAuthLogic.AuthorizedProperties());
         }
-
         #endregion
 
         #region ITypeAuthServer Members
@@ -325,23 +323,26 @@ namespace Signum.Services
         public bool IsAllowedFor(Lite lite, TypeAllowedBasic allowed)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-             () => EntityGroupAuthLogic.IsAllowedFor(lite, allowed, true));
+             () => EntityGroupAuthLogic.IsAllowedFor(lite, allowed, Signum.Engine.ExecutionContext.Current));
         }
         #endregion
 
         #region IChartServer
+        [SuggestUserInterface]
         public ResultTable ExecuteChart(ChartRequest request)
         {
             return Return(MethodInfo.GetCurrentMethod(),
                () => ChartLogic.ExecuteChart(request));
         }
 
+        [SuggestUserInterface]
         public List<Lite<UserChartDN>> GetUserCharts(object queryName)
         {
             return Return(MethodInfo.GetCurrentMethod(),
             () => ChartLogic.GetUserCharts(queryName));
         }
 
+        [SuggestUserInterface]
         public void RemoveUserChart(Lite<UserChartDN> lite)
         {
             Execute(MethodInfo.GetCurrentMethod(),
@@ -352,18 +353,21 @@ namespace Signum.Services
 
         #region IExcelReportServer Members
 
+        [SuggestUserInterface]
         public List<Lite<ExcelReportDN>> GetExcelReports(object queryName)
         {
             return Return(MethodInfo.GetCurrentMethod(),
                 () => ReportsLogic.GetExcelReports(queryName));
         }
 
+        [SuggestUserInterface]
         public byte[] ExecuteExcelReport(Lite<ExcelReportDN> excelReport, QueryRequest request)
         {
             return Return(MethodInfo.GetCurrentMethod(),
                 () => ReportsLogic.ExecuteExcelReport(excelReport, request));
         }
 
+        [SuggestUserInterface]
         public byte[] ExecutePlainExcel(QueryRequest request)
         {
             return Return(MethodInfo.GetCurrentMethod(),
@@ -373,12 +377,14 @@ namespace Signum.Services
         #endregion
 
         #region IUserQueriesServer
+        [SuggestUserInterface]
         public List<Lite<UserQueryDN>> GetUserQueries(object queryName)
         {
             return Return(MethodInfo.GetCurrentMethod(),
             () => UserQueryLogic.GetUserQueries(queryName));
         }
 
+        [SuggestUserInterface]
         public void RemoveUserQuery(Lite<UserQueryDN> lite)
         {
             Execute(MethodInfo.GetCurrentMethod(),

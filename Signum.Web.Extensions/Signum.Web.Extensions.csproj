@@ -225,11 +225,6 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
-    <Compile Include="ControllerFilters\ActionFilter\ActionFilerConfigControllerActionInvoker.cs" />
-    <Compile Include="ControllerFilters\ActionFilter\ActionFilterConfig.cs" />
-    <Compile Include="ControllerFilters\ActionFilter\ActionFilterConfigControllerFactory.cs" />
-    <Compile Include="ControllerFilters\ActionFilter\ConfigActionFilter.cs" />
-    <Compile Include="ControllerFilters\ActionFilter\IActionFilterConfiguration.cs" />
     <Compile Include="ControlPanel\Controllers\ControlPanelController.cs" />
     <Compile Include="ControlPanel\ControlPanelClient.cs" />
     <Compile Include="ControlPanel\PanelPartRenderer.cs" />

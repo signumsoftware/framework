@@ -66,16 +66,22 @@ function treeView()
     });
 }
 
-function openDialog(controllerUrl, data) {
+function openDialog(e) {
+    var $me = $(this);
     var navigator = new SF.ViewNavigator({
-            controllerUrl: controllerUrl,
-            requestExtraJsonData: data,
-            type: 'PropertyRulePack',
-            onLoaded: function(divId) {
+        controllerUrl: $me.attr("href"),
+        requestExtraJsonData: null,
+        type: 'PropertyRulePack',
+        onCancelled: function () {
+            $me.children("div").css("opacity", 0.5);
+        },
+        onLoaded: function (divId) {
             magicRadios($("#" + divId));
-        } 
-         });
+
+        }
+    });
     navigator.createSave();
+    event.preventDefault();
 }
 
 function postDialog(controllerUrl, prefix) {

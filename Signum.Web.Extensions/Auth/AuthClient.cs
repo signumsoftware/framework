@@ -97,7 +97,7 @@ namespace Signum.Web.Auth
                 { 
                     if (UserDN.Current == null)
                     {
-                        string returnUrl = context.HttpContext.Request.Url.PathAndQuery;
+                        string returnUrl = context.HttpContext.Request.SuggestedReturnUrl().PathAndQuery;
                                             
                         //send them off to the login page
                         string loginUrl = PublicLoginUrl(returnUrl);
@@ -114,7 +114,7 @@ namespace Signum.Web.Auth
                 {
                     if (ctx.Exception is UnauthorizedAccessException)
                     {
-                        string returnUrl = ctx.HttpContext.Request.Url.PathAndQuery;
+                        string returnUrl = ctx.HttpContext.Request.SuggestedReturnUrl().PathAndQuery;
                         string loginUrl = PublicLoginUrl(returnUrl);
 
                         HandleAnonymousNotAutorizedException(ctx, loginUrl);
@@ -125,6 +125,13 @@ namespace Signum.Web.Auth
                     }
                 };
             }
+        }
+
+        public static Uri SuggestedReturnUrl(this HttpRequestBase request)
+        {
+            if (request.IsAjaxRequest() || request.HttpMethod == "POST")
+                return request.UrlReferrer;
+            return request.Url;
         }
 
         public static void HandleAnonymousNotAutorizedException(ExceptionContext ctx, string absoluteLoginUrl)
@@ -139,8 +146,6 @@ namespace Signum.Web.Auth
 
             if (UserDN.Current == null || UserDN.Current == AuthLogic.AnonymousUser)
             {
-                //send them off to the login page
-                
                 if (ctx.HttpContext.Request.IsAjaxRequest())
                     ctx.Result = JsonAction.Redirect(absoluteLoginUrl);
                 else

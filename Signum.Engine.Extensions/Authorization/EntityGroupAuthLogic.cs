@@ -205,7 +205,7 @@ namespace Signum.Engine.Authorization
                 var found = Database.Query<T>().Where(a => requested.Contains(a.Id)).Select(a => new
                 {
                     a.Id,
-                    Allowed = a.IsAllowedFor(typeAllowed, Database.UserInterface),
+                    Allowed = a.IsAllowedFor(typeAllowed, ExecutionContext.Current),
                 }).ToArray();
 
                 if (found.Length != requested.Length)
@@ -221,30 +221,30 @@ namespace Signum.Engine.Authorization
 
         public static void AssertAllowed(this IIdentifiable ident, TypeAllowedBasic allowed)
         {
-            AssertAllowed(ident, allowed, Database.UserInterface);
+            AssertAllowed(ident, allowed, ExecutionContext.Current);
         }
 
-        public static void AssertAllowed(this IIdentifiable ident, TypeAllowedBasic allowed, bool userInterface)
+        public static void AssertAllowed(this IIdentifiable ident, TypeAllowedBasic allowed, ExecutionContext executionContext)
         {
-            if (!ident.IsAllowedFor(allowed, userInterface))
+            if (!ident.IsAllowedFor(allowed, executionContext))
                 throw new UnauthorizedAccessException(Resources.NotAuthorizedTo0The1WithId2.Formato(allowed.NiceToString().ToLower(), ident.GetType().NiceName(), ident.Id));
         }
 
         [MethodExpander(typeof(IsAllowedForExpander))]
         public static bool IsAllowedFor(this IIdentifiable ident, TypeAllowedBasic allowed)
         {
-            return IsAllowedFor(ident, allowed, Database.UserInterface);
+            return IsAllowedFor(ident, allowed, ExecutionContext.Current);
         }
 
         [MethodExpander(typeof(IsAllowedForExpander))]
-        public static bool IsAllowedFor(this IIdentifiable ident, TypeAllowedBasic allowed, bool userInterface)
+        public static bool IsAllowedFor(this IIdentifiable ident, TypeAllowedBasic allowed, ExecutionContext executionContext)
         {
-            return (bool)miIsAllowedForEntity.GetInvoker(ident.GetType()).Invoke(ident, allowed, userInterface);
+            return (bool)miIsAllowedForEntity.GetInvoker(ident.GetType()).Invoke(ident, allowed, executionContext);
         }
 
-        static GenericInvoker miIsAllowedForEntity = GenericInvoker.Create(() => IsAllowedFor<IdentifiableEntity>((IdentifiableEntity)null, TypeAllowedBasic.Create, true));
+        static GenericInvoker miIsAllowedForEntity = GenericInvoker.Create(() => IsAllowedFor<IdentifiableEntity>((IdentifiableEntity)null, TypeAllowedBasic.Create, null));
         [MethodExpander(typeof(IsAllowedForExpander))]
-        static bool IsAllowedFor<T>(this T entity, TypeAllowedBasic allowed, bool userInterface)
+        static bool IsAllowedFor<T>(this T entity, TypeAllowedBasic allowed, ExecutionContext executionContext)
             where T : IdentifiableEntity
         {
             if (!AuthLogic.IsEnabled)
@@ -254,45 +254,45 @@ namespace Signum.Engine.Authorization
                 throw new InvalidOperationException("The entity {0} is new".Formato(entity));
 
             using (DisableQueries())
-                return entity.InDB().WhereIsAllowedFor(allowed, userInterface).Any();
+                return entity.InDB().WhereIsAllowedFor(allowed, executionContext).Any();
         }
 
         public static void AssertAllowed(this Lite lite, TypeAllowedBasic allowed)
         {
-            AssertAllowed(lite, allowed, Database.UserInterface);
+            AssertAllowed(lite, allowed, ExecutionContext.Current);
         }
 
-        public static void AssertAllowed(this Lite lite, TypeAllowedBasic allowed, bool userInterface)
+        public static void AssertAllowed(this Lite lite, TypeAllowedBasic allowed, ExecutionContext executionContext)
         {
             if (lite.IdOrNull == null)
-                AssertAllowed(lite.UntypedEntityOrNull, allowed, userInterface);
+                AssertAllowed(lite.UntypedEntityOrNull, allowed, executionContext);
 
-            if (!lite.IsAllowedFor(allowed, userInterface))
+            if (!lite.IsAllowedFor(allowed, executionContext))
                 throw new UnauthorizedAccessException(Resources.NotAuthorizedTo0The1WithId2.Formato(allowed.NiceToString().ToLower(), lite.RuntimeType.NiceName(), lite.Id));
         }
 
         [MethodExpander(typeof(IsAllowedForExpander))]
         public static bool IsAllowedFor(this Lite lite, TypeAllowedBasic allowed)
         {
-            return IsAllowedFor(lite, allowed, Database.UserInterface);
+            return IsAllowedFor(lite, allowed, ExecutionContext.Current);
         }
 
         [MethodExpander(typeof(IsAllowedForExpander))]
-        public static bool IsAllowedFor(this Lite lite, TypeAllowedBasic allowed, bool userInterface)
+        public static bool IsAllowedFor(this Lite lite, TypeAllowedBasic allowed, ExecutionContext executionContext)
         {
-            return (bool)miIsAllowedForLite.GetInvoker(lite.RuntimeType).Invoke(lite, allowed, userInterface);
+            return (bool)miIsAllowedForLite.GetInvoker(lite.RuntimeType).Invoke(lite, allowed, executionContext);
         }
 
-        static GenericInvoker miIsAllowedForLite = GenericInvoker.Create(() => IsAllowedFor<IdentifiableEntity>((Lite)null, TypeAllowedBasic.Create, true));
+        static GenericInvoker miIsAllowedForLite = GenericInvoker.Create(() => IsAllowedFor<IdentifiableEntity>((Lite)null, TypeAllowedBasic.Create, null));
 
-        static bool IsAllowedFor<T>(this Lite lite, TypeAllowedBasic allowed, bool userInterface)
+        static bool IsAllowedFor<T>(this Lite lite, TypeAllowedBasic allowed, ExecutionContext executionContext)
             where T : IdentifiableEntity
         {
             if (!AuthLogic.IsEnabled)
                 return true;
 
             using (DisableQueries())
-                return lite.ToLite<T>().InDB().WhereIsAllowedFor(allowed, userInterface).Any();
+                return lite.ToLite<T>().InDB().WhereIsAllowedFor(allowed, executionContext).Any();
         }
 
         class IsAllowedForExpander : IMethodExpander
@@ -301,12 +301,12 @@ namespace Signum.Engine.Authorization
             {
                 TypeAllowedBasic allowed = (TypeAllowedBasic)ExpressionEvaluator.Eval(arguments[1]);
 
-                bool userInterface = arguments.Length == 3 ? (bool)ExpressionEvaluator.Eval(arguments[2]) :
-                    Database.UserInterface;
+                ExecutionContext executionContext = arguments.Length == 3 ? (ExecutionContext)ExpressionEvaluator.Eval(arguments[2]) :
+                    ExecutionContext.Current;
 
                 Expression exp = arguments[0].Type.IsLite() ? Expression.Property(arguments[0], "Entity") : arguments[0];
 
-                return IsAllowedExpression(exp, allowed, userInterface) ?? Expression.Constant(true);
+                return IsAllowedExpression(exp, allowed, executionContext) ?? Expression.Constant(true);
             }
         }
 
@@ -318,17 +318,17 @@ namespace Signum.Engine.Authorization
             if (!AuthLogic.IsEnabled)
                 return query;
 
-            return WhereIsAllowedFor<T>(query, TypeAllowedBasic.Read, Database.UserInterface);
+            return WhereIsAllowedFor<T>(query, TypeAllowedBasic.Read, ExecutionContext.Current);
         }
 
 
         [MethodExpander(typeof(WhereIsAllowedForExpander))]
-        public static IQueryable<T> WhereIsAllowedFor<T>(this IQueryable<T> query, TypeAllowedBasic allowed, bool userInterface)
+        public static IQueryable<T> WhereIsAllowedFor<T>(this IQueryable<T> query, TypeAllowedBasic allowed, ExecutionContext executionContext)
             where T : IdentifiableEntity
         {
             ParameterExpression e = Expression.Parameter(typeof(T), "e");
 
-            Expression body = IsAllowedExpression(e, allowed, userInterface);
+            Expression body = IsAllowedExpression(e, allowed, executionContext);
 
             if (body == null)
                 return query;
@@ -346,10 +346,12 @@ namespace Signum.Engine.Authorization
             public IEntityGroupInfo EntityGroup;
         }
 
-        private static List<EntityGroupTuple> GetPairs(Type type, TypeAllowedBasic allowed, bool userInterface)
+        private static List<EntityGroupTuple> GetPairs(Type type, TypeAllowedBasic allowed, ExecutionContext executionContext)
         {
             if (!Schema.Current.Tables.ContainsKey(type))
                 throw new InvalidOperationException("{0} is not included in the schema".Formato(type));
+
+            bool userInterface = executionContext == ExecutionContext.UserInterface; 
 
             var pairs = (from eg in EntityGroupLogic.GroupsFor(type)
                          let allowedDN = cache.GetAllowed(eg)
@@ -369,12 +371,12 @@ namespace Signum.Engine.Authorization
 
         static bool IsAllwaysAllowed(Type type, TypeAllowedBasic allowed)
         {
-            return GetPairs(type, allowed, Database.UserInterface).Empty();
+            return GetPairs(type, allowed, ExecutionContext.Current).Empty();
         }
 
-        internal static Expression IsAllowedExpression(Expression entity, TypeAllowedBasic allowed, bool userInterface)
+        internal static Expression IsAllowedExpression(Expression entity, TypeAllowedBasic allowed, ExecutionContext executionContext)
         {
-            var pairs = GetPairs(entity.Type, allowed, userInterface);
+            var pairs = GetPairs(entity.Type, allowed, executionContext);
 
             if (pairs.Count == 0)
                 return null;
@@ -430,21 +432,20 @@ namespace Signum.Engine.Authorization
 
         class WhereIsAllowedForExpander : IMethodExpander
         {
-
             public Expression Expand(Expression instance, Expression[] arguments, Type[] typeArguments)
             {
                 TypeAllowedBasic allowed = (TypeAllowedBasic)ExpressionEvaluator.Eval(arguments[1]);
-                bool userInterface = (bool)ExpressionEvaluator.Eval(arguments[2]);
+                ExecutionContext context = (ExecutionContext)ExpressionEvaluator.Eval(arguments[2]);
 
-                return (Expression)miCallWhereIsAllowedFor.GetInvoker(typeArguments)(arguments[0], allowed, userInterface);
+                return (Expression)miCallWhereIsAllowedFor.GetInvoker(typeArguments)(arguments[0], allowed, context);
             }
 
-            static GenericInvoker miCallWhereIsAllowedFor = GenericInvoker.Create(() => CallWhereIsAllowedFor<TypeDN>(null, TypeAllowedBasic.Create, true));
-            static Expression CallWhereIsAllowedFor<T>(Expression expression, TypeAllowedBasic allowed, bool userInterface)
+            static GenericInvoker miCallWhereIsAllowedFor = GenericInvoker.Create(() => CallWhereIsAllowedFor<TypeDN>(null, TypeAllowedBasic.Create, null));
+            static Expression CallWhereIsAllowedFor<T>(Expression expression, TypeAllowedBasic allowed, ExecutionContext executionContext)
                 where T : IdentifiableEntity
             {
                 IQueryable<T> query = new Query<T>(DbQueryProvider.Single, expression);
-                IQueryable<T> result = WhereIsAllowedFor(query, allowed, userInterface);
+                IQueryable<T> result = WhereIsAllowedFor(query, allowed, executionContext);
                 return result.Expression;
             }
         }

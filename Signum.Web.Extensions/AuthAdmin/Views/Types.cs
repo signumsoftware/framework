@@ -75,7 +75,8 @@ WriteLiteral("\r\n");
 Write(Html.ScriptsJs("~/authAdmin/Scripts/authAdmin.js"));
 
 WriteLiteral("\r\n<script type=\"text/javascript\">\r\n    $(function () {\r\n        magicCheckBoxes($" +
-"(document));\r\n        treeView();\r\n    });\r\n</script>\r\n");
+"(document));\r\n        treeView();\r\n        $(\".ruleTable a.miniButton\").click(op" +
+"enDialog); \r\n    });\r\n</script>\r\n");
 
 
  using (var tc = Html.TypeContext<TypeRulePack>())
@@ -272,13 +273,13 @@ WriteLiteral("                    <td>\r\n");
                          if (item.Value.Properties.HasValue)
                         {
 
-WriteLiteral("                            <a href=\"javascript:openDialog(\'");
+WriteLiteral("                            <a class=\"miniButton\" href=\"");
 
 
-                                                       Write(Url.Action((AuthAdminController a) => a.Properties(tc.Value.Role, item.Value.Resource.ToLite(), null)));
+                                                   Write(Url.Action((AuthAdminController a) => a.Properties(tc.Value.Role, item.Value.Resource.ToLite(), null)));
 
-WriteLiteral("\');\">\r\n                                <div class=\"property\">\r\n                  " +
-"                  <div class=\"thumb ");
+WriteLiteral("\">\r\n                                <div class=\"property\">\r\n                     " +
+"               <div class=\"thumb ");
 
 
                                                  Write(item.Value.Properties.ToString().ToLower());
@@ -304,13 +305,13 @@ WriteLiteral("                    <td>\r\n");
                          if (item.Value.Operations.HasValue)
                         {
 
-WriteLiteral("                            <a href=\"javascript:openDialog(\'");
+WriteLiteral("                            <a class=\"miniButton\" href=\"");
 
 
-                                                       Write(Url.Action((AuthAdminController a) => a.Operations(tc.Value.Role, item.Value.Resource.ToLite(), null)));
+                                                   Write(Url.Action((AuthAdminController a) => a.Operations(tc.Value.Role, item.Value.Resource.ToLite(), null)));
 
-WriteLiteral("\');\">\r\n                                <div class=\"operation\">\r\n                 " +
-"                   <div class=\"thumb ");
+WriteLiteral("\">\r\n                                <div class=\"operation\">\r\n                    " +
+"                <div class=\"thumb ");
 
 
                                                  Write(item.Value.Operations.ToString().ToLower());
@@ -336,13 +337,13 @@ WriteLiteral("                    <td>\r\n");
                          if (item.Value.Queries.HasValue)
                         {
 
-WriteLiteral("                            <a href=\"javascript:openDialog(\'");
+WriteLiteral("                            <a class=\"miniButton\" href=\"");
 
 
-                                                       Write(Url.Action((AuthAdminController a) => a.Queries(tc.Value.Role, item.Value.Resource.ToLite(), null)));
+                                                   Write(Url.Action((AuthAdminController a) => a.Queries(tc.Value.Role, item.Value.Resource.ToLite(), null)));
 
-WriteLiteral("\');\">\r\n                                <div class=\"query\">\r\n                     " +
-"               <div class=\"thumb ");
+WriteLiteral("\">\r\n                                <div class=\"query\">\r\n                        " +
+"            <div class=\"thumb ");
 
 
                                                  Write(item.Value.Queries.ToString().ToLower());

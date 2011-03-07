@@ -159,7 +159,7 @@ tr.first
 }
 
 
-table.ruleTable tr :hover
+table.ruleTable tr:hover
 {
     background-color: #F0F0F0
 }
