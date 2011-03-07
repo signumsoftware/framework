@@ -93,7 +93,9 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.WaitAjaxFinished(selenium.ThereAreNRows(1));
 
             //Delete all filters
-            selenium.ClearAllFilters();
+            selenium.DeleteFilter(2);
+            selenium.DeleteFilter(1);
+            selenium.DeleteFilter(0);
             selenium.Search();
             selenium.WaitAjaxFinished(selenium.ThereAreNRows(12));
 
@@ -158,7 +160,9 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.ThereAreNRows(1, prefix);
 
             //Delete all filters
-            selenium.ClearAllFilters(prefix);
+            selenium.DeleteFilter(2, prefix);
+            selenium.DeleteFilter(1, prefix);
+            selenium.DeleteFilter(0, prefix);
             selenium.Search(prefix);
             selenium.ThereAreNRows(8, prefix);
 

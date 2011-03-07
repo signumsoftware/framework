@@ -112,16 +112,6 @@ namespace Signum.Web.Selenium
             selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#{0}tblFilters #{0}trFilter_{1}".Formato(prefix, filterIndexBase0)));
         }
 
-        public static void ClearAllFilters(this ISelenium selenium)
-        {
-            ClearAllFilters(selenium, "");
-        }
-
-        public static void ClearAllFilters(this ISelenium selenium, string prefix)
-        {
-            selenium.Click("{0}btnClearAllFilters".Formato(prefix));
-        }
-
         public static string RowSelector()
         {
             return RowSelector("");

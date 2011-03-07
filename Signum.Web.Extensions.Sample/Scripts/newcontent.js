@@ -2,7 +2,7 @@
     $("body").bind("sf-new-content", function (e) {
         var $newContent = $(e.target);
         //buttons
-        $newContent.find(".sf-entity-button, .sf-query-button, .sf-line-button, .sf-chooser-button").each(function (i, val) {
+        $newContent.find(".sf-entity-button, .sf-query-button, .sf-line-button, .sf-chooser-button, .sf-button").each(function (i, val) {
             var $txt = $(val);
             var data = $txt.data();
             $txt.button({ text: (!("text" in data) || SF.isTrue(data.text)), icons: { primary: data.icon, secondary: data["icon-secondary"]} });
