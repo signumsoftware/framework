@@ -180,7 +180,7 @@
   <data name="Average" xml:space="preserve">
     <value>Average</value>
   </data>
-  <data name="DeleteFilter" xml:space="preserve">
+  <data name="FilterBuilder_DeleteFilter" xml:space="preserve">
     <value>Delete Filter</value>
   </data>
   <data name="ExecutedXTimes" xml:space="preserve">
@@ -188,9 +188,6 @@
   </data>
   <data name="Field" xml:space="preserve">
     <value>Field</value>
-  </data>
-  <data name="FilterByField" xml:space="preserve">
-    <value>Filter by field</value>
   </data>
   <data name="HideFilters" xml:space="preserve">
     <value>Hide filters</value>
@@ -299,5 +296,11 @@
   </data>
   <data name="LineButton_View" xml:space="preserve">
     <value>View</value>
+  </data>
+  <data name="FilterBuilder_AddColumn" xml:space="preserve">
+    <value>Add column</value>
+  </data>
+  <data name="FilterBuilder_AddFilter" xml:space="preserve">
+    <value>Add filter</value>
   </data>
 </root>

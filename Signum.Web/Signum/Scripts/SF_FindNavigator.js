@@ -304,7 +304,7 @@ SF.registerModule("FindNavigator", function () {
                 }
             }
 
-            return $filter.find("td:nth-child(1) > :hidden").val() + "," + selector.val() + "," + value;
+            return $filter.find("td:nth-child(2) > :hidden").val() + "," + selector.val() + "," + value;
         },
 
         serializeOrders: function () {

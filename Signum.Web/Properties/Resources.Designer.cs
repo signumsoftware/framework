@@ -151,15 +151,6 @@ namespace Signum.Web.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Delete Filter.
-        /// </summary>
-        public static string DeleteFilter {
-            get {
-                return ResourceManager.GetString("DeleteFilter", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Finish Edit.
         /// </summary>
         public static string EditColumnsFinishEdit {
@@ -196,11 +187,29 @@ namespace Signum.Web.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Filter by field.
+        ///   Looks up a localized string similar to Add column.
         /// </summary>
-        public static string FilterByField {
+        public static string FilterBuilder_AddColumn {
             get {
-                return ResourceManager.GetString("FilterByField", resourceCulture);
+                return ResourceManager.GetString("FilterBuilder_AddColumn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Add filter.
+        /// </summary>
+        public static string FilterBuilder_AddFilter {
+            get {
+                return ResourceManager.GetString("FilterBuilder_AddFilter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Delete Filter.
+        /// </summary>
+        public static string FilterBuilder_DeleteFilter {
+            get {
+                return ResourceManager.GetString("FilterBuilder_DeleteFilter", resourceCulture);
             }
         }
         

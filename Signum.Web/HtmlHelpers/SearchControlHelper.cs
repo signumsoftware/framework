@@ -103,13 +103,34 @@ namespace Signum.Web
 
             using (sb.Surround(new HtmlTag("tr").IdName(context.Compose("trFilter", index.ToString()))))
             {
-                using (sb.Surround(new HtmlTag("td"))) //.IdName(context.Compose("td" + index.ToString() + "__" + filterOptions.Token.FullKey()))))
+                using (sb.Surround("td"))
+                {
+                    if (!filterOptions.Frozen)
+                    {
+                        var htmlAttr = new Dictionary<string, object>
+                        {
+                            { "data-icon", "ui-icon-close" },
+                            { "data-text", false},
+                            { "onclick", "new SF.FindNavigator({{prefix:\"{0}\"}}).deleteFilter(this);".Formato(context.ControlID) },
+                        };
+                        sb.AddLine(helper.Href(
+                            context.Compose("btnDelete", index.ToString()),
+                            Resources.FilterBuilder_DeleteFilter,
+                            "",
+                            Resources.FilterBuilder_DeleteFilter,
+                            "sf-button",
+                            htmlAttr));
+                    }
+                }
+                
+                using (sb.Surround(new HtmlTag("td"))) 
                 {
                     sb.AddLine(helper.HiddenAnonymous(filterOptions.Token.FullKey()));
 
                     foreach(var t in filterOptions.Token.FollowC(tok => tok.Parent).Reverse())
                        sb.AddLine(new HtmlTag("span").Class("sf-filter-token").SetInnerText(t.ToString()).ToHtml());
                 }
+
                 using (sb.Surround("td"))
                 {
                     sb.AddLine(
@@ -137,26 +158,6 @@ namespace Signum.Web
                     else
                         sb.AddLine(PrintValueField(helper, valueContext, filterOptions));
                 }
-
-                using (sb.Surround("td"))
-                {
-                    if (!filterOptions.Frozen)
-                    {
-                        var htmlAttr = new Dictionary<string, object>
-                        {
-                            { "data-icon", "ui-icon-closethick" },
-                            { "data-text", false},
-                            { "onclick", "new SF.FindNavigator({{prefix:\"{0}\"}}).deleteFilter(this);".Formato(context.ControlID) },
-                        };
-                        sb.AddLine(helper.Href(
-                            context.Compose("btnDelete", index.ToString()), 
-                            Resources.DeleteFilter,
-                            "",
-                            Resources.DeleteFilter,
-                            "sf-button", 
-                            htmlAttr));
-                    }
-                }
             }
             
             return sb.ToHtml();
@@ -182,10 +183,11 @@ namespace Signum.Web
         private static MvcHtmlString TokensComboExpander(this HtmlHelper helper, Context context, int index)
         { 
             return helper.Span(
-                context.Compose("lblddlTokens_" + index), "[...]", "",
+                context.Compose("lblddlTokens_" + index), 
+                "[...]",
+                "sf-subtokens-expander",
                 new Dictionary<string, object>
                 { 
-                    { "style", "cursor:pointer;margin-left:5px" },
                     { "onclick", "$('#{0}').remove();$('#{1}').show().focus().click();".Formato(context.Compose("lblddlTokens_" + index), context.Compose("ddlTokens_" + index))}
                 });
         }

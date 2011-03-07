@@ -107,17 +107,7 @@ WriteLiteral(">\r\n            <div id=\"");
 
                 Write(context.Compose("filters-body"));
 
-WriteLiteral("\" class=\"sf-filters-body\">\r\n                <label for=\"");
-
-
-                       Write(context.Compose("ddlTokens_0"));
-
-WriteLiteral("\">");
-
-
-                                                        Write(Resources.FilterByField);
-
-WriteLiteral("</label>\r\n");
+WriteLiteral("\" class=\"sf-filters-body\">\r\n");
 
 
                    var columns = queryDescription.Columns
@@ -125,25 +115,45 @@ WriteLiteral("</label>\r\n");
                         .ToList();
                    columns.Insert(0, new SelectListItem { Text = "-", Selected = true, Value = "" });
 
-WriteLiteral("                ");
+WriteLiteral("                \r\n                ");
 
 
            Write(Html.TokensCombo(findOptions.QueryName, columns, context, 0, false));
 
-WriteLiteral("\r\n                ");
+WriteLiteral("\r\n                \r\n                ");
 
 
-           Write(Html.Button(context.Compose("btnAddFilter"), "+", "new SF.FindNavigator({{prefix:'{0}'}}).addFilter('{1}');".Formato(context.ControlID, Url.SignumAction("AddFilter")), "sf-add-filter", new Dictionary<string, object> { { "title", "Add Filter" } }));
+           Write(Html.Href(
+                        context.Compose("btnAddFilter"), 
+                        Resources.FilterBuilder_AddFilter, 
+                        "",
+                        Resources.FilterBuilder_AddFilter,
+                        "sf-query-button sf-add-filter", 
+                        new Dictionary<string, object> 
+                        { 
+                            { "onclick", "new SF.FindNavigator({{prefix:'{0}'}}).addFilter('{1}');".Formato(context.ControlID, Url.SignumAction("AddFilter")) },
+                            { "data-icon", "ui-icon-arrowthick-1-s" }
+                        }));
 
-WriteLiteral("\r\n");
+WriteLiteral("\r\n\r\n");
 
 
                  if (findOptions.AllowUserColumns.HasValue ? findOptions.AllowUserColumns.Value : Navigator.Manager.AllowUserColumns(context.ControlID))
                 {
                     
-               Write(Html.Button(context.Compose("btnAddColumn"), "+", "new SF.FindNavigator({{prefix:'{0}'}}).addColumn('{1}');".Formato(context.ControlID, Url.SignumAction("GetColumnName")), "sf-add-column", new Dictionary<string, object> { { "title", "Add Column" } }));
+               Write(Html.Href(
+                        context.Compose("btnAddColumn"), 
+                        Resources.FilterBuilder_AddColumn, 
+                        "", 
+                        Resources.FilterBuilder_AddColumn, 
+                        "sf-query-button sf-add-column", 
+                        new Dictionary<string, object> 
+                        { 
+                            { "onclick", "new SF.FindNavigator({{prefix:'{0}'}}).addColumn('{1}');".Formato(context.ControlID, Url.SignumAction("GetColumnName")) }, 
+                            { "data-icon", "ui-icon-arrowthick-1-e" }
+                        }));
 
-                                                                                                                                                                                                                                                                               
+                          
                     
                Write(Html.Button(context.Compose("btnEditColumns"), Resources.UserColumnsEdit, "new SF.FindNavigator({{prefix:'{0}'}}).editColumns();".Formato(context.ControlID), ""));
 
@@ -181,10 +191,11 @@ WriteLiteral("\" style=\"");
                                                               Write((filterOptions == null || filterOptions.Count == 0) ? "display:none;" : "");
 
 WriteLiteral("\">\r\n                    <thead>\r\n                        <tr>\r\n                  " +
-"          <th>");
+"          <th>\r\n                            </th>\r\n                            <" +
+"th class=\"sf-filter-field-header\">");
 
 
-                           Write(Resources.Field);
+                                                          Write(Resources.Field);
 
 WriteLiteral("\r\n                            </th>\r\n                            <th>");
 
@@ -196,9 +207,8 @@ WriteLiteral("\r\n                            </th>\r\n                         
 
                            Write(Resources.Value);
 
-WriteLiteral("\r\n                            </th>\r\n                            <th>\r\n          " +
-"                  </th>\r\n                        </tr>\r\n                    </th" +
-"ead>\r\n                    <tbody>\r\n");
+WriteLiteral("\r\n                            </th>\r\n                        </tr>\r\n             " +
+"       </thead>\r\n                    <tbody>\r\n");
 
 
                          for (int i = 0; i < filterOptions.Count; i++)

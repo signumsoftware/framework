@@ -300,12 +300,7 @@
   <ItemGroup>
     <Content Include="Signum\Images\asc.gif" />
     <Content Include="Signum\Images\desc.gif" />
-    <Content Include="Signum\Images\dropdown-arrows.png" />
-    <Content Include="Signum\Images\gray-grad.png" />
     <Content Include="Signum\Images\lineButtons.gif" />
-    <Content Include="Signum\Images\newFilter.png" />
-    <Content Include="Signum\Images\newColumn.png" />
-    <Content Include="Signum\Images\popup-header-back.jpg" />
     <Content Include="Signum\Images\sign_error.gif" />
     <Content Include="Signum\Scripts\SF_jquery-ui-datepicker-extension.js" />
     <None Include="Signum\Views\NormalControl.cshtml">

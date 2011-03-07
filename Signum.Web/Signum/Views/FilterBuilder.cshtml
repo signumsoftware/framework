@@ -13,16 +13,38 @@
         <a onclick="SF.FindNavigator.toggleFilters(this)" class="sf-filters-header@(visible ? "" : " close")" rev="sf-filters-body">@(visible ? Resources.HideFilters : Resources.ShowFilters)</a>
         <div class="sf-filters" @(visible ? "" : "style=display:none")>
             <div id="@context.Compose("filters-body")" class="sf-filters-body">
-                <label for="@context.Compose("ddlTokens_0")">@Resources.FilterByField</label>
                 @{ var columns = queryDescription.Columns
                         .Select(c => new SelectListItem { Text = c.DisplayName, Value = c.Name, Selected = false })
                         .ToList();
                    columns.Insert(0, new SelectListItem { Text = "-", Selected = true, Value = "" });}
+                
                 @Html.TokensCombo(findOptions.QueryName, columns, context, 0, false)
-                @Html.Button(context.Compose("btnAddFilter"), "+", "new SF.FindNavigator({{prefix:'{0}'}}).addFilter('{1}');".Formato(context.ControlID, Url.SignumAction("AddFilter")), "sf-add-filter", new Dictionary<string, object> { { "title", "Add Filter" } })
+                
+                @Html.Href(
+                        context.Compose("btnAddFilter"), 
+                        Resources.FilterBuilder_AddFilter, 
+                        "",
+                        Resources.FilterBuilder_AddFilter,
+                        "sf-query-button sf-add-filter", 
+                        new Dictionary<string, object> 
+                        { 
+                            { "onclick", "new SF.FindNavigator({{prefix:'{0}'}}).addFilter('{1}');".Formato(context.ControlID, Url.SignumAction("AddFilter")) },
+                            { "data-icon", "ui-icon-arrowthick-1-s" }
+                        })
+
                 @if (findOptions.AllowUserColumns.HasValue ? findOptions.AllowUserColumns.Value : Navigator.Manager.AllowUserColumns(context.ControlID))
                 {
-                    @Html.Button(context.Compose("btnAddColumn"), "+", "new SF.FindNavigator({{prefix:'{0}'}}).addColumn('{1}');".Formato(context.ControlID, Url.SignumAction("GetColumnName")), "sf-add-column", new Dictionary<string, object> { { "title", "Add Column" } })
+                    @Html.Href(
+                        context.Compose("btnAddColumn"), 
+                        Resources.FilterBuilder_AddColumn, 
+                        "", 
+                        Resources.FilterBuilder_AddColumn, 
+                        "sf-query-button sf-add-column", 
+                        new Dictionary<string, object> 
+                        { 
+                            { "onclick", "new SF.FindNavigator({{prefix:'{0}'}}).addColumn('{1}');".Formato(context.ControlID, Url.SignumAction("GetColumnName")) }, 
+                            { "data-icon", "ui-icon-arrowthick-1-e" }
+                        })
                     @Html.Button(context.Compose("btnEditColumns"), Resources.UserColumnsEdit, "new SF.FindNavigator({{prefix:'{0}'}}).editColumns();".Formato(context.ControlID), "")
                     @Html.Button(context.Compose("btnEditColumnsFinish"), Resources.EditColumnsFinishEdit, "new SF.FindNavigator({{prefix:'{0}'}}).editColumnsFinish();".Formato(context.ControlID), "", new Dictionary<string, object> { { "style", "display:none;" } })
                 }
@@ -33,13 +55,13 @@
                 <table id="@context.Compose("tblFilters")" style="@((filterOptions == null || filterOptions.Count == 0) ? "display:none;" : "")">
                     <thead>
                         <tr>
-                            <th>@Resources.Field
+                            <th>
+                            </th>
+                            <th class="sf-filter-field-header">@Resources.Field
                             </th>
                             <th>@Resources.Operation
                             </th>
                             <th>@Resources.Value
-                            </th>
-                            <th>
                             </th>
                         </tr>
                     </thead>
