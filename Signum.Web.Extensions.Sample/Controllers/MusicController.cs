@@ -17,7 +17,7 @@ using Signum.Engine.Basics;
 
 namespace Signum.Web.Extensions.Sample
 {
-    [HandleError, AuthenticationRequired]
+    [HandleException, AuthenticationRequired]
     public class MusicController : Controller
     {
         public ViewResult BandDetail()
@@ -32,6 +32,7 @@ namespace Signum.Web.Extensions.Sample
 
         public ActionResult CreateAlbumFromBand(string prefix)
         {
+            throw new ApplicationException("¡¡¡áéìöü!!!");
             BandDN band = Navigator.ExtractEntity<BandDN>(this);
 
             AlbumFromBandModel model = new AlbumFromBandModel(band.ToLite());

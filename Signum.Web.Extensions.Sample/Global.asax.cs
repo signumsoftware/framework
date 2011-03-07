@@ -83,7 +83,7 @@ namespace Signum.Web.Extensions.Sample
             Constructor.Start(new ConstructorManager());
             OperationClient.Start(new OperationManager(), true);
 
-            AuthClient.Start(true, true, true, true);
+            AuthClient.Start(true, true, true, true, false);
             AuthAdminClient.Start(true, true, true, true, true, true, true);
 
             ContextualItemsHelper.Start();

@@ -10,7 +10,7 @@ using Signum.Utilities;
 
 namespace Signum.Web.Extensions.Sample
 {
-    [HandleError]
+    [HandleException]
     public class HomeController : Controller
     {
         public ActionResult Index()
