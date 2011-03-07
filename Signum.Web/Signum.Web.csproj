@@ -121,11 +121,6 @@
     <Compile Include="Mappings\MappingContext.cs" />
     <Compile Include="ModelStateExtensions.cs" />
     <Compile Include="ButtonBar\ToolBarButton.cs" />
-    <Compile Include="Signum\Views\AjaxError.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>AjaxError.cshtml</DependentUpon>
-    </Compile>
     <Compile Include="Signum\Views\ChooserPopup.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -326,10 +321,6 @@
     <Content Include="Signum\Scripts\SF_Popup.js" />
     <Content Include="Signum\Scripts\SF_Validator.js" />
     <Content Include="Signum\Scripts\SF_ViewNavigator.js" />
-    <None Include="Signum\Views\AjaxError.cshtml">
-      <Generator>MvcRazorClassGenerator</Generator>
-      <LastGenOutput>AjaxError.cs</LastGenOutput>
-    </None>
     <None Include="Signum\Views\Error.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>Error.cs</LastGenOutput>
