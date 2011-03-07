@@ -45,8 +45,6 @@ namespace ASP
     using Signum.Entities.Reflection;
     using Signum.Engine.DynamicQuery;
     using Signum.Web.Properties;
-    //using WebMatrix.Data;
-    //using WebMatrix.WebData;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Signum/Views/FilterBuilder.cshtml")]
@@ -156,12 +154,7 @@ WriteLiteral("\r\n");
                                                                                                                                                                                                                                                                          
                 }
 
-WriteLiteral("                ");
-
-
-           Write(Html.Button(context.Compose("btnClearAllFilters"), Resources.DeleteFilters, "new SF.FindNavigator({{prefix:'{0}'}}).clearAllFilters();".Formato(context.ControlID), "", findOptions.FilterOptions.Any() ? new Dictionary<string, object>() : new Dictionary<string, object> { { "style", "display:none;" } }));
-
-WriteLiteral("\r\n            </div>\r\n");
+WriteLiteral("            </div>\r\n");
 
 
                List<FilterOption> filterOptions = findOptions.FilterOptions;

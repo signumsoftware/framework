@@ -141,7 +141,21 @@ namespace Signum.Web
                 using (sb.Surround("td"))
                 {
                     if (!filterOptions.Frozen)
-                        sb.AddLine(helper.Button(context.Compose("btnDelete", index.ToString()), "X", "new SF.FindNavigator({{prefix:\"{0}\"}}).deleteFilter(this);".Formato(context.ControlID), "", null));
+                    {
+                        var htmlAttr = new Dictionary<string, object>
+                        {
+                            { "data-icon", "ui-icon-closethick" },
+                            { "data-text", false},
+                            { "onclick", "new SF.FindNavigator({{prefix:\"{0}\"}}).deleteFilter(this);".Formato(context.ControlID) },
+                        };
+                        sb.AddLine(helper.Href(
+                            context.Compose("btnDelete", index.ToString()), 
+                            Resources.DeleteFilter,
+                            "",
+                            Resources.DeleteFilter,
+                            "sf-button", 
+                            htmlAttr));
+                    }
                 }
             }
             

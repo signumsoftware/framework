@@ -180,8 +180,8 @@
   <data name="Average" xml:space="preserve">
     <value>Average</value>
   </data>
-  <data name="DeleteFilters" xml:space="preserve">
-    <value>Delete Filters</value>
+  <data name="DeleteFilter" xml:space="preserve">
+    <value>Delete Filter</value>
   </data>
   <data name="ExecutedXTimes" xml:space="preserve">
     <value>Executed x times</value>

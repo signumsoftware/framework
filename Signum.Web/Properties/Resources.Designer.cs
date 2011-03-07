@@ -151,11 +151,11 @@ namespace Signum.Web.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Delete Filters.
+        ///   Looks up a localized string similar to Delete Filter.
         /// </summary>
-        public static string DeleteFilters {
+        public static string DeleteFilter {
             get {
-                return ResourceManager.GetString("DeleteFilters", resourceCulture);
+                return ResourceManager.GetString("DeleteFilter", resourceCulture);
             }
         }
         

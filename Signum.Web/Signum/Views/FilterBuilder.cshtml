@@ -26,7 +26,6 @@
                     @Html.Button(context.Compose("btnEditColumns"), Resources.UserColumnsEdit, "new SF.FindNavigator({{prefix:'{0}'}}).editColumns();".Formato(context.ControlID), "")
                     @Html.Button(context.Compose("btnEditColumnsFinish"), Resources.EditColumnsFinishEdit, "new SF.FindNavigator({{prefix:'{0}'}}).editColumnsFinish();".Formato(context.ControlID), "", new Dictionary<string, object> { { "style", "display:none;" } })
                 }
-                @Html.Button(context.Compose("btnClearAllFilters"), Resources.DeleteFilters, "new SF.FindNavigator({{prefix:'{0}'}}).clearAllFilters();".Formato(context.ControlID), "", findOptions.FilterOptions.Any() ? new Dictionary<string, object>() : new Dictionary<string, object> { { "style", "display:none;" } })
             </div>
             @{ List<FilterOption> filterOptions = findOptions.FilterOptions;}
             <div class="sf-filters-list">

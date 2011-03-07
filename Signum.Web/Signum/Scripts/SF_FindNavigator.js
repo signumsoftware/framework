@@ -511,8 +511,6 @@ SF.registerModule("FindNavigator", function () {
 
                     tableFilters.append(filterHtml);
                     SF.triggerNewContent($(self.pf("tblFilters tbody tr:last")));
-
-                    $(self.pf("btnClearAllFilters"), self.control()).show();
                 }
             });
         },
@@ -618,8 +616,6 @@ SF.registerModule("FindNavigator", function () {
 
                     tableFilters.append(filterHtml);
                     SF.triggerNewContent($(self.pf("tblFilters tbody tr:last")));
-
-                    $(self.pf("btnClearAllFilters"), self.control()).show();
                 }
             });
         },
@@ -633,22 +629,9 @@ SF.registerModule("FindNavigator", function () {
                 var $filterList = $tr.closest(".sf-filters-list");
                 $filterList.find(".sf-explanation").show();
                 $filterList.find("table").hide();
-                $(this.pf("btnClearAllFilters"), this.control()).hide();
             }
 
             $tr.remove();
-        },
-
-        clearAllFilters: function () {
-            SF.log("FindNavigator clearAllFilters");
-
-            this.control().find(".sf-filters-list")
-                     .find(".sf-explanation").show().end()
-                     .find("table").hide()
-                      .find("tbody > tr").remove();
-
-            $(this.pf("btnClearAllFilters"), this.control()).hide();
-
         },
 
         requestDataForSearchPopupCreate: function () {
