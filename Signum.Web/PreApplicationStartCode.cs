@@ -30,7 +30,7 @@ namespace Signum.Web
             System.Web.WebPages.PreApplicationStartCode.Start();
             System.Web.WebPages.Razor.PreApplicationStartCode.Start();
 
-            ControllerBuilder.Current.SetControllerFactory(new PortableAreaControllerFactory());
+            ControllerBuilder.Current.SetControllerFactory(new SignumControllerFactory());
             HostingEnvironment.RegisterVirtualPathProvider(new CompiledVirtualPathProvider(HostingEnvironment.VirtualPathProvider));
             BuildProvider.RegisterBuildProvider(".cshtml", typeof(CompiledRazorBuildProvider));
 

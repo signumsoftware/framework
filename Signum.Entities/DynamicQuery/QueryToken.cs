@@ -611,7 +611,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string Key
         {
-            get { return "{0}.MonthStart".Formato(Parent.Key); }
+            get { return "MonthStart"; }
         }
 
         protected override QueryToken[] SubTokensInternal()
@@ -685,7 +685,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string Key
         {
-            get { return "{0}.Date".Formato(Parent.Key); }
+            get { return "Date"; }
         }
 
         protected override QueryToken[] SubTokensInternal()

@@ -9,15 +9,22 @@ namespace Signum.Utilities.DataStructures
     public class LambdaComparer<T, S> : IComparer<T>, IEqualityComparer<T>, IComparer, IEqualityComparer
     {
         Func<T, S> func;
-        IComparer<S> comparer = Comparer<S>.Default;
-        IEqualityComparer<S> equalityComparer = EqualityComparer<S>.Default;
+        IComparer<S> comparer = null;
+        IEqualityComparer<S> equalityComparer = null;
+        
+        public LambdaComparer(Func<T, S> func) : this(func, EqualityComparer<S>.Default, Comparer<S>.Default) { }
 
-        public LambdaComparer(Func<T, S> func)
+        public LambdaComparer(Func<T, S> func, IEqualityComparer<S> equalityComparer, IComparer<S> comparer)
         {
             if (func == null)
                 throw new ArgumentNullException("func");
 
+            if (equalityComparer == null)
+                throw new ArgumentNullException("equalityComparer"); 
+
             this.func = func;
+            this.equalityComparer = equalityComparer;
+            this.comparer = comparer;
         }
 
         public int Compare(T x, T y)

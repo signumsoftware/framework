@@ -250,7 +250,7 @@ namespace Signum.Web
         }
 
 
-        public string ToString()
+        public override string ToString()
         {
             string result = "";
             

@@ -86,12 +86,13 @@
     <Compile Include="Facades\Constructor.cs" />
     <Compile Include="HtmlHelpers\ScriptHtmlHelper.cs" />
     <Compile Include="ButtonBar\ContextualItem.cs" />
-    <Compile Include="ControllerAttributes\UserInterfaceAttribute.cs" />
+    <Compile Include="ControllerAttributes\ExecutionContextAttribute.cs" />
     <Compile Include="ControllerAttributes\HandleExceptionAttribute.cs" />
     <Compile Include="ControllerAttributes\AuthenticationRequiredAttribute.cs" />
     <Compile Include="ControllerAttributes\RedirectToUrl.cs" />
     <Compile Include="ControllerAttributes\RequireSslAttribute.cs" />
     <Compile Include="MimeTypes.cs" />
+    <Compile Include="PortableAreas\ActionFilterConfig.cs" />
     <Compile Include="PortableAreas\CompiledViews.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -99,7 +100,7 @@
     <Compile Include="PortableAreas\FileRepositoryManager.cs" />
     <Compile Include="PortableAreas\CompiledRazorBuildProvider.cs" />
     <Compile Include="PortableAreas\CompiledVirtualPathProvider.cs" />
-    <Compile Include="PortableAreas\PortableAreaControllerFactory.cs" />
+    <Compile Include="PortableAreas\SignumControllerFactory.cs" />
     <Compile Include="PortableAreas\StaticContentResult.cs" />
     <Compile Include="ButtonBar\ToolBarMenu.cs" />
     <Compile Include="HtmlHelpers\HtmlTag.cs" />

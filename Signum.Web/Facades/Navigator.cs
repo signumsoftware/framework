@@ -83,7 +83,7 @@ namespace Signum.Web
 
         public static ViewResult View(ControllerBase controller, IRootEntity entity)
         {
-            return Manager.View(controller, entity, null, false); 
+            return Manager.View(controller, entity, null, true); 
         }
 
         public static ViewResult View(ControllerBase controller, IRootEntity entity, bool admin)
@@ -93,7 +93,7 @@ namespace Signum.Web
 
         public static ViewResult View(ControllerBase controller, IRootEntity entity, string partialViewName)
         {
-            return Manager.View(controller, entity, partialViewName, false);
+            return Manager.View(controller, entity, partialViewName, true);
         }
 
         public static ViewResult View(ControllerBase controller, IRootEntity entity, string partialViewName, bool admin)
@@ -103,7 +103,7 @@ namespace Signum.Web
 
         public static PartialViewResult NormalControl(ControllerBase controller, IRootEntity entity)
         {
-            return Manager.NormalControl(controller, entity, null, false); 
+            return Manager.NormalControl(controller, entity, null, true); 
         }
 
         public static PartialViewResult NormalControl(ControllerBase controller, IRootEntity entity, bool admin)
@@ -113,7 +113,7 @@ namespace Signum.Web
 
         public static PartialViewResult NormalControl(ControllerBase controller, IRootEntity entity, string partialViewName)
         {
-            return Manager.NormalControl(controller, entity, partialViewName, false);
+            return Manager.NormalControl(controller, entity, partialViewName, true);
         }
 
         public static string GetOrCreateTabID(ControllerBase c)
@@ -436,7 +436,7 @@ namespace Signum.Web
         public static void RegisterArea(Type clientType, string areaName)
         {
             CompiledViews.RegisterArea(clientType.Assembly, areaName);
-            PortableAreaControllers.RegisterControllersLike(clientType, areaName);
+            SignumControllerFactory.RegisterControllersLike(clientType, areaName);
 
             EmbeddedFilesRepository rep = new EmbeddedFilesRepository(clientType.Assembly, areaName);
             if (!rep.IsEmpty)

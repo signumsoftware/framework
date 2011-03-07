@@ -9,6 +9,8 @@ using System.Collections;
 using System.Data;
 using Signum.Entities.DynamicQuery;
 using System.Reflection;
+using Signum.Utilities;
+using System.Collections.Concurrent;
 
 
 namespace Signum.Services
@@ -45,5 +47,35 @@ namespace Signum.Services
 
         [OperationContract, NetDataContract]
         List<Lite<TypeDN>> TypesAssignableFrom(Type type);
+    }
+
+    [AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
+    public sealed class SuggestUserInterfaceAttribute : Attribute
+    {
+        public bool value; 
+
+        public SuggestUserInterfaceAttribute() : this(true)
+        {
+
+        }
+        public SuggestUserInterfaceAttribute(bool value)
+        {
+            this.value = value; 
+        }
+
+        static ConcurrentDictionary<MethodBase, bool?> dictionary = new ConcurrentDictionary<MethodBase, bool?>();  
+
+        internal static bool? Suggests(MethodBase mi)
+        {
+            return dictionary.GetOrAdd(mi, _=>
+            {
+                var attr = mi.SingleAttributeInherit<SuggestUserInterfaceAttribute>();
+                     
+                if (attr == null)
+                    return null;
+
+                return attr.value; 
+            }); 
+        }
     }
 }

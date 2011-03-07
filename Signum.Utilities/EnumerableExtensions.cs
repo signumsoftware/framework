@@ -561,6 +561,11 @@ namespace Signum.Utilities
 
         public static List<IGrouping<T, T>> GroupWhen<T>(this IEnumerable<T> collection, Func<T, bool> isGroupKey)
         {
+            return GroupWhen(collection, isGroupKey, false); 
+        }
+
+        public static List<IGrouping<T, T>> GroupWhen<T>(this IEnumerable<T> collection, Func<T, bool> isGroupKey, bool includeKeyInGroup)
+        {
             List<IGrouping<T, T>> result = new List<IGrouping<T, T>>();
             Grouping<T, T> group = null;
             foreach (var item in collection)
@@ -568,6 +573,8 @@ namespace Signum.Utilities
                 if (isGroupKey(item))
                 {
                     group = new Grouping<T, T>(item);
+                    if (includeKeyInGroup)
+                        group.Add(item); 
                     result.Add(group);
                 }
                 else
@@ -583,6 +590,11 @@ namespace Signum.Utilities
         public static IEnumerable<T> Distinct<T, S>(this IEnumerable<T> collection, Func<T, S> func)
         {
             return collection.Distinct(new LambdaComparer<T, S>(func));
+        }
+
+        public static IEnumerable<T> Distinct<T, S>(this IEnumerable<T> collection, Func<T, S> func, IEqualityComparer<S> comparer)
+        {
+            return collection.Distinct(new LambdaComparer<T, S>(func, comparer, null));
         }
 
         public static IEnumerable<List<T>> GroupsOf<T>(this IEnumerable<T> collection, int groupSize)

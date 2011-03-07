@@ -23,7 +23,7 @@ using System.IO;
 
 namespace Signum.Web.Controllers
 {
-    [HandleException, AuthenticationRequired, UserInterface]
+    [HandleException, AuthenticationRequired]
     public class SignumController : Controller
     {
         [ValidateInput(false)]  //this is needed since a return content(View...) from an action that doesn't validate will throw here an exception. We suppose that validation has already been performed before getting here
