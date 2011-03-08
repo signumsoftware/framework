@@ -96,7 +96,7 @@ namespace Signum.Web.Extensions.Sample
 
             //Combiner.Start();
             ScriptHtmlHelper.Manager.MainAssembly = typeof(MusicClient).Assembly;
-            PortableAreaControllers.MainAssembly = Assembly.GetExecutingAssembly();
+            SignumControllerFactory.MainAssembly = Assembly.GetExecutingAssembly();
 
             Navigator.Initialize();
         }

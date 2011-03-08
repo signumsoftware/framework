@@ -337,7 +337,7 @@ namespace Signum.Web.Auth
                 if (TempData.ContainsKey("referrer") && TempData["referrer"] != null)
                     ViewData["referrer"] = TempData["referrer"].ToString();
             }
-
+            
             return View(AuthClient.LoginView);
         }
 
