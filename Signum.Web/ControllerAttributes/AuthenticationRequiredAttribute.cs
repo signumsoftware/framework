@@ -20,12 +20,26 @@ namespace Signum.Web
     /// </summary>
     public class AuthenticationRequiredAttribute : AuthorizeAttribute
     {
+        public AuthenticationRequiredAttribute()
+        {
+            Required = true;
+        }
+
+        public AuthenticationRequiredAttribute(bool required) 
+        {
+            this.Required = required; 
+        }
+
+        public bool Required {get; set;}
+
         public static Action<AuthorizationContext> Authenticate;
 
         public override void OnAuthorization(AuthorizationContext filterContext)
         {
-            if (Authenticate != null)
-                Authenticate(filterContext);
+            if(Required && Authenticate != null)
+            {
+                  Authenticate(filterContext);
+            }
         }
     }
 }

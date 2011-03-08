@@ -11,7 +11,6 @@ using Signum.Web;
 
 namespace Signum.Web.Controllers
 {
-    [HandleException, AuthenticationRequired]
     public class WidgetsController : Controller
     {
         #region Notes

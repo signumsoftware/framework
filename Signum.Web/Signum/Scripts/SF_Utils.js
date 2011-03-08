@@ -96,16 +96,7 @@ SF.registerModule = (function () {
 };
     })();
 
-    SF.ajax = function (jqueryAjaxOptions) {
-        var options = $.extend({
-            type: null,
-            url: null,
-            data: null,
-            async: false,
-            dataType: null,
-            success: null,
-            error: null
-        }, jqueryAjaxOptions);
+    SF.ajax = function (options) {
 
         function checkRedirection(ajaxResult) {
             if (SF.isEmpty(ajaxResult)) {
@@ -123,24 +114,20 @@ SF.registerModule = (function () {
             return null;
         };
 
-        return $.ajax({
-            type: options.type,
-            url: options.url,
-            data: options.data,
-            async: options.async,
-            dataType: options.dataType,
-            success: function (result) {
-                if (typeof result === "string") {
-                    result = result ? result.trim() : "";
-                }
-                var url = checkRedirection(result);
-                if (!SF.isEmpty(url)) window.location.href = url;
-                else {
-                    if (options.success != null) options.success(result);
-                }
-            },
-            error: options.error
-        });
+        var originalSuccess = options.success; 
+
+        options.success = function (result) {
+            if (typeof result === "string") {
+                result = result ? result.trim() : "";
+            }
+            var url = checkRedirection(result);
+            if (!SF.isEmpty(url)) window.location.href = url;
+            else {
+                if (originalSuccess != null) originalSuccess(result);
+            }
+        };
+
+        return $.ajax(options);
     };
 
 $(document).ajaxError(function (event, XMLHttpRequest, ajaxOptions, thrownError) {

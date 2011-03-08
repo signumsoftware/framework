@@ -18,7 +18,7 @@ namespace Signum.Web.PortableAreas
         }
 
         List<FilterAttribute> addFilters;
-        Func<ControllerContext, ActionDescriptor, FilterAttribute> addFilterDelegate; 
+        Func<ConditionalFilterContext, FilterAttribute> addFilterDelegate; 
         List<Type> removeFilters;
 
         public ActionFilterConfig<T> AddFilters(params FilterAttribute[] actionFilters)
@@ -34,7 +34,7 @@ namespace Signum.Web.PortableAreas
             return this;
         }
 
-        public ActionFilterConfig<T> AddFilters(Func<ControllerContext, ActionDescriptor, FilterAttribute> addFilter)
+        public ActionFilterConfig<T> AddFilters(Func<ConditionalFilterContext, FilterAttribute> addFilter)
         {
             addFilterDelegate += addFilter;
 
@@ -62,11 +62,15 @@ namespace Signum.Web.PortableAreas
             if (addFilters != null)
                 filterInfo.AddFilters(addFilters);
 
-            if(addFilterDelegate != null)
+            if (addFilterDelegate != null)
+            {
+                var ctx = new ConditionalFilterContext(controllerContext, actionDescription, filterInfo); 
+
                 filterInfo.AddFilters(
                     addFilterDelegate.GetInvocationList()
-                    .Cast<Func<ControllerContext, ActionDescriptor, FilterAttribute>>()
-                    .Select(del=>del(controllerContext, actionDescription)).NotNull()); 
+                    .Cast<Func<ConditionalFilterContext, FilterAttribute>>()
+                    .Select(del => del(ctx)).NotNull());
+            }
         }
 
         public ActionFilterConfig<T> Action(Expression<Func<T, ActionResult>> expression)
@@ -76,11 +80,25 @@ namespace Signum.Web.PortableAreas
     }
 
 
+    public class ConditionalFilterContext
+    {
+        internal ConditionalFilterContext(ControllerContext controllerContext, ActionDescriptor actionDescriptor, FilterInfo filterInfo)
+        {
+            this.ControllerContext = controllerContext;
+            this.ActionDescriptor = actionDescriptor;
+            this.FilterInfo = filterInfo; 
+        }
+
+        public ControllerContext ControllerContext { get; private set; }
+        public ActionDescriptor ActionDescriptor { get; private set; }
+        public FilterInfo FilterInfo { get; private set; }
+    }
+
     public class ControllerFilterConfig<T> : IFilterConfig where T : Controller
     {
         Dictionary<string, ActionFilterConfig<T>> actions;
         List<FilterAttribute> addFilters;
-        Func<ControllerContext, ActionDescriptor, FilterAttribute> addFilterDelegate;
+        Func<ConditionalFilterContext, FilterAttribute> addFilterDelegate;
         List<Type> removeFilters;
 
         public ControllerFilterConfig<T> AddFilters(params FilterAttribute[] actionFilters)
@@ -96,7 +114,7 @@ namespace Signum.Web.PortableAreas
             return this;
         }
 
-        public ControllerFilterConfig<T> AddFilters(Func<ControllerContext, ActionDescriptor, FilterAttribute> addFilter)
+        public ControllerFilterConfig<T> AddFilters(Func<ConditionalFilterContext, FilterAttribute> addFilter)
         {
             addFilterDelegate += addFilter;
 
@@ -139,10 +157,14 @@ namespace Signum.Web.PortableAreas
                 filterInfo.AddFilters(addFilters);
 
             if (addFilterDelegate != null)
+            {
+                var ctx = new ConditionalFilterContext(controllerContext, actionDescription, filterInfo); 
+
                 filterInfo.AddFilters(
                     addFilterDelegate.GetInvocationList()
-                    .Cast<Func<ControllerContext, ActionDescriptor, FilterAttribute>>()
-                    .Select(del => del(controllerContext, actionDescription)).NotNull());
+                    .Cast<Func<ConditionalFilterContext, FilterAttribute>>()
+                    .Select(del => del(ctx)).NotNull());
+            }
 
             var afc = actions.TryGetC(actionDescription.ActionName);
             if (afc != null)

@@ -89,9 +89,14 @@ namespace Signum.Web.PortableAreas
 
         public static Dictionary<Type, IFilterConfig> Config = new Dictionary<Type, IFilterConfig>();
 
-        public static ControllerFilterConfig<T> ConfigController<T>() where T : Controller
+        public static ControllerFilterConfig<T> Controller<T>() where T : Controller
         {
             return (ControllerFilterConfig<T>)Config.GetOrCreate(typeof(T), () => new ControllerFilterConfig<T>());
+        }
+
+        public static ControllerFilterConfig<Controller> EveryController()
+        {
+            return (ControllerFilterConfig<Controller>)Config.GetOrCreate(typeof(Controller), () => new ControllerFilterConfig<Controller>());
         }
     }
 

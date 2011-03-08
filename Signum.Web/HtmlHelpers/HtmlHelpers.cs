@@ -13,6 +13,7 @@ using System.Web.Routing;
 using Signum.Utilities.Reflection;
 using Signum.Entities.Reflection;
 using System.Web.Script.Serialization;
+using System.Web.WebPages;
 
 namespace Signum.Web
 {
@@ -267,6 +268,13 @@ namespace Signum.Web
         public static MvcHtmlString Json(this HtmlHelper html, object value)
         {
             return new MvcHtmlString(new JavaScriptSerializer().Serialize(value));
+        }
+
+        public static HelperResult If(this WebPageBase webPage, bool condition, Func<HelperResult> html)
+        {
+            if (condition)
+                return html();
+            return null;
         }
     }
 }

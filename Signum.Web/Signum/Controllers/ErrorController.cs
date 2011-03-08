@@ -15,6 +15,5 @@ namespace Signum.Web.Controllers
             ViewData.Model = ex;
             return View(Navigator.Manager.ErrorPageView);
         }
-
     }
 }

@@ -14,8 +14,6 @@ using Signum.Engine.Exceptions;
 
 namespace Signum.Web
 {
-    [SuppressMessage("Microsoft.Performance", "CA1813:AvoidUnsealedAttributes",
-           Justification = "This attribute is AllowMultiple = true and users might want to override behavior.")]
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = true, AllowMultiple = true)]
     [AspNetHostingPermission(System.Security.Permissions.SecurityAction.LinkDemand, Level = AspNetHostingPermissionLevel.Minimal)]
     [AspNetHostingPermission(System.Security.Permissions.SecurityAction.InheritanceDemand, Level = AspNetHostingPermissionLevel.Minimal)]

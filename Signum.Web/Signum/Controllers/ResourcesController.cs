@@ -15,6 +15,7 @@ using Signum.Web.PortableAreas;
 
 namespace Signum.Web.Controllers
 {
+    [AuthenticationRequired(false)]
     public class ResourcesController : Controller
     {
         public ActionResult GetFile(string file)

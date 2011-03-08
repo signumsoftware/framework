@@ -89,8 +89,6 @@
     <Compile Include="ControllerAttributes\ExecutionContextAttribute.cs" />
     <Compile Include="ControllerAttributes\HandleExceptionAttribute.cs" />
     <Compile Include="ControllerAttributes\AuthenticationRequiredAttribute.cs" />
-    <Compile Include="ControllerAttributes\RedirectToUrl.cs" />
-    <Compile Include="ControllerAttributes\RequireSslAttribute.cs" />
     <Compile Include="MimeTypes.cs" />
     <Compile Include="PortableAreas\ActionFilterConfig.cs" />
     <Compile Include="PortableAreas\CompiledViews.cs">
@@ -214,7 +212,6 @@
     <Compile Include="Widgets\QuickLinkWidgetHelper.cs" />
     <Compile Include="Widgets\NoteWidgetHelper.cs" />
     <Compile Include="Widgets\WidgetsHelper.cs" />
-    <Compile Include="ControllerAttributes\WwwRedirectAttributes.cs" />
     <Compile Include="HtmlHelpers\MenuHelper.cs" />
     <Compile Include="LineHelpers\LightEntityLineHelper.cs" />
     <Compile Include="LineHelpers\EntityRepeaterHelper.cs" />
