@@ -25,7 +25,6 @@ using Signum.Engine.Basics;
 
 namespace Signum.Web.Reports
 {
-    [HandleException, AuthenticationRequired]
     public class ReportController : Controller
     {
         [HttpPost]

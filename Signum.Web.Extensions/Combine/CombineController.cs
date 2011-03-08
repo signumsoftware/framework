@@ -9,7 +9,7 @@ using System.Web.SessionState;
 
 namespace Signum.Web.Combine
 {
-    [SessionState(SessionStateBehavior.Disabled)]
+    [SessionState(SessionStateBehavior.Disabled), AuthenticationRequired(false)]
     public class CombineController : Controller
     {  
         [AcceptVerbs(HttpVerbs.Get)]

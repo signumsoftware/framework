@@ -28,7 +28,6 @@ using Signum.Web.Controllers;
 
 namespace Signum.Web.Files
 {
-    [HandleException]
     public class FileController : Controller
     {
         [HttpPost]

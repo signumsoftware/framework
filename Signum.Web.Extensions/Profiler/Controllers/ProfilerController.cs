@@ -20,7 +20,6 @@ using Signum.Entities.Profiler;
 
 namespace Signum.Web.Profiler
 {
-    [HandleException, AuthenticationRequired]
     public class ProfilerController : Controller
     {
         [AcceptVerbs(HttpVerbs.Get)]

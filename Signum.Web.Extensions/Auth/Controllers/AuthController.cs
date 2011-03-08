@@ -24,10 +24,9 @@ using Signum.Entities.Extensions.Authorization;
 
 namespace Signum.Web.Auth
 {
-    [HandleException]
+    [AuthenticationRequired(false)]
     public class AuthController : Controller
     {
-
         public static event Func<string> GenerateRandomPassword = () => MyRandom.Current.NextString(8);
 
         public static event Action OnUserLogged;

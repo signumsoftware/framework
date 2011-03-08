@@ -10,7 +10,6 @@ using Signum.Entities;
 
 namespace Signum.Web.ControlPanel
 {
-    [HandleException, AuthenticationRequired]
     public class ControlPanelController : Controller
     {
         

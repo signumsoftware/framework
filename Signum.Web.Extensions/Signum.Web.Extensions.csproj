@@ -225,6 +225,8 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
+    <Compile Include="ControllerFilters\GZipFilter.cs" />
+    <Compile Include="Profiler\TimeTracker.cs" />
     <Compile Include="ControlPanel\Controllers\ControlPanelController.cs" />
     <Compile Include="ControlPanel\ControlPanelClient.cs" />
     <Compile Include="ControlPanel\PanelPartRenderer.cs" />
@@ -451,7 +453,6 @@
     </Compile>
     <Compile Include="Reports\ReportsClient.cs" />
     <Compile Include="Reports\Controllers\ReportController.cs" />
-    <Compile Include="ControllerFilters\FilterAttributes.cs" />
     <Compile Include="Reports\Views\ExcelReport.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

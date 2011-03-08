@@ -21,7 +21,6 @@ using Signum.Entities.Processes;
 
 namespace Signum.Web.Processes
 {
-    [HandleException, AuthenticationRequired]
     public class ProcessController : Controller
     {
         [HttpPost]

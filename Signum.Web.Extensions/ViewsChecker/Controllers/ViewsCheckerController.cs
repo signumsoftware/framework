@@ -20,7 +20,6 @@ using Signum.Web.Extensions.Properties;
 
 namespace Signum.Web.ViewsChecker
 {
-    [HandleException]
     public class ViewsCheckerController : Controller
     {
         public ViewResult Index()

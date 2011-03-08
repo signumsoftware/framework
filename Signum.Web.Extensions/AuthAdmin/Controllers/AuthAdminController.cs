@@ -19,7 +19,6 @@ using System.Xml;
 
 namespace Signum.Web.AuthAdmin
 {
-    [HandleException, AuthenticationRequired]
     public class AuthAdminController : Controller
     {
         protected override void OnAuthorization(AuthorizationContext filterContext)

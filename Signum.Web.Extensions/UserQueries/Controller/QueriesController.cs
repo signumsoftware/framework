@@ -25,7 +25,6 @@ using Signum.Entities.Authorization;
 
 namespace Signum.Web.Queries
 {
-    [HandleException, AuthenticationRequired]
     public class QueriesController : Controller
     {
         public ActionResult ViewUserQuery(int id)

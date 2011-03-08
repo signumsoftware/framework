@@ -30,7 +30,6 @@ namespace Signum.Web.Help
         
     }
 
-    [HandleException, AuthenticationRequired]
     public class HelpController : Controller
     {
         public ActionResult Index()
