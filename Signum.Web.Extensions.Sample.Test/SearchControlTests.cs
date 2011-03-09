@@ -99,6 +99,16 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.Search();
             selenium.WaitAjaxFinished(selenium.ThereAreNRows(12));
 
+            //QuickFilter from header of a Lite
+            selenium.QuickFilterFromHeader(4, 0); //Label
+            selenium.Search();
+            selenium.WaitAjaxFinished(selenium.ThereAreNRows(0));
+            selenium.LineFindAndSelectElements("value_0_", false, new int[] { 0 });
+            selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("{0}:visible".Formato(LinesTestExtensions.LineFindSelector("value_0_"))));
+            selenium.Search();
+            selenium.WaitAjaxFinished(selenium.ThereAreNRows(2));
+            selenium.DeleteFilter(0);
+
             //Top
             selenium.SetTopToFinder("5");
             selenium.Search();
@@ -119,7 +129,7 @@ namespace Signum.Web.Extensions.Sample.Test
             string prefix = "Members_0_"; //prefix for all the popup
 
             selenium.Search(prefix);
-            selenium.ThereAreNRows(8, prefix);
+            selenium.WaitAjaxFinished(selenium.ThereAreNRows(8, prefix));
 
             //Quickfilter of a bool
             selenium.QuickFilter(1, 5, 0, prefix);
@@ -128,17 +138,17 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.QuickFilter(1, 6, 1, prefix);
 
             selenium.Search(prefix);
-            selenium.ThereAreNRows(7, prefix);
+            selenium.WaitAjaxFinished(selenium.ThereAreNRows(7, prefix));
 
             //Quickfilter of an int
             selenium.QuickFilter(4, 3, 2, prefix);
             selenium.FilterSelectOperation(2, "value=GreaterThan", prefix);
             selenium.Search(prefix);
-            selenium.ThereAreNRows(3, prefix);
+            selenium.WaitAjaxFinished(selenium.ThereAreNRows(3, prefix));
 
             selenium.DeleteFilter(2, prefix);
             selenium.Search(prefix);
-            selenium.ThereAreNRows(7, prefix);
+            selenium.WaitAjaxFinished(selenium.ThereAreNRows(7, prefix));
 
             //Filter of a Lite from the combo
             selenium.FilterSelectToken(0, "label=Artist", true, prefix);
@@ -146,7 +156,7 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.LineFindAndSelectElements(prefix + "value_2_", false, new int[] { 0 });
             selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("{0}:visible".Formato(LinesTestExtensions.LineFindSelector(prefix + "value_2_"))));
             selenium.Search(prefix);
-            selenium.ThereAreNRows(1, prefix);
+            selenium.WaitAjaxFinished(selenium.ThereAreNRows(1, prefix));
             selenium.DeleteFilter(2, prefix);
 
             //Filter from the combo with Subtokens
@@ -157,22 +167,30 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.FilterSelectOperation(2, "value=EndsWith", prefix);
             selenium.Type(prefix + "value_2", "a");
             selenium.Search(prefix);
-            selenium.ThereAreNRows(1, prefix);
+            selenium.WaitAjaxFinished(selenium.ThereAreNRows(1, prefix));
 
             //Delete all filters
             selenium.DeleteFilter(2, prefix);
             selenium.DeleteFilter(1, prefix);
             selenium.DeleteFilter(0, prefix);
             selenium.Search(prefix);
-            selenium.ThereAreNRows(8, prefix);
+            selenium.WaitAjaxFinished(selenium.ThereAreNRows(8, prefix));
+
+            //QuickFilter from header of an int
+            selenium.QuickFilterFromHeader(3, 0, prefix);
+            selenium.FilterSelectOperation(0, "value=LessThanOrEqual", prefix);
+            selenium.Type(prefix + "value_0", "2");
+            selenium.Search(prefix);
+            selenium.WaitAjaxFinished(selenium.ThereAreNRows(2, prefix));
+            selenium.DeleteFilter(0, prefix);
 
             //Top
             selenium.SetTopToFinder("5", prefix);
             selenium.Search(prefix);
-            selenium.ThereAreNRows(5, prefix);
+            selenium.WaitAjaxFinished(selenium.ThereAreNRows(5, prefix));
             selenium.SetTopToFinder("", prefix); 
             selenium.Search(prefix);
-            selenium.ThereAreNRows(8, prefix);
+            selenium.WaitAjaxFinished(selenium.ThereAreNRows(8, prefix));
         }
 
         [TestMethod]
@@ -256,33 +274,22 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.FilterSelectToken(1, "label=Id", false);
             selenium.AddColumn("Label.Id");
 
-            Assert.IsTrue(selenium.IsElementPresent("jq=#btnEditColumns:visible"));
-
             selenium.FilterSelectToken(1, "label=Name", false);
             selenium.AddColumn("Label.Name");
 
             //Edit names
-            selenium.Click("btnEditColumns");
-            Assert.IsTrue(selenium.IsElementPresent("jq=#btnEditColumnsFinish:visible"));
-            selenium.Type("{0} > :text".Formato(SearchTestExtensions.TableHeaderSelector(7)), "Label Id");
-            selenium.Type("{0} > :text".Formato(SearchTestExtensions.TableHeaderSelector(8)), "Label Name");
-            selenium.Click("btnEditColumnsFinish");
-
-            Assert.IsTrue(selenium.IsElementPresent("jq=#btnEditColumns:visible"));
-            Assert.IsFalse(selenium.IsElementPresent("jq=#btnEditColumnsFinish:visible"));
+            selenium.EditColumnName(7, "Label Id");
 
             //Search with userColumns
             selenium.Search();
             selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SearchTestExtensions.CellSelector(1, 8)));
 
             //Delete one of the usercolumns
-            selenium.Click("btnEditColumns");
-            selenium.Click("{0} > a#link-delete-user-col".Formato(SearchTestExtensions.TableHeaderSelector(7)));
-                
-            selenium.Click("btnEditColumnsFinish");
+            selenium.RemoveColumn(7, 8);
+            selenium.WaitAjaxFinished(selenium.ThereAreNRows(0));
             selenium.Search();
-            selenium.WaitAjaxFinished(() => !selenium.IsElementPresent(SearchTestExtensions.CellSelector(1, 8)));
-            Assert.IsTrue(selenium.IsElementPresent(SearchTestExtensions.CellSelector(1, 7)));
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SearchTestExtensions.CellSelector(1, 7)));
+            Assert.IsTrue(!selenium.IsElementPresent(SearchTestExtensions.CellSelector(1, 8)));
         }
 
         [TestMethod]
@@ -292,9 +299,21 @@ namespace Signum.Web.Extensions.Sample.Test
 
             //open search popup
             selenium.LineFind("Members_", 0);
-            
+
+            string prefix = "Members_0_"; //prefix for all the popup
+
             //User columns are not present in popup
-            Assert.IsFalse(selenium.IsElementPresent("jq=#Members_0_divFilters .sf-add-column"));
+            Assert.IsFalse(selenium.IsElementPresent("jq=#{0}divFilters .sf-add-column".Formato(prefix)));
+
+            //Edit names
+            selenium.EditColumnName(5, "Male", prefix);
+
+            //Delete column
+            selenium.RemoveColumn(4, 8, prefix);
+            selenium.WaitAjaxFinished(selenium.ThereAreNRows(0, prefix));
+            selenium.Search(prefix);
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SearchTestExtensions.CellSelector(1, 7, prefix)));
+            Assert.IsTrue(!selenium.IsElementPresent(SearchTestExtensions.CellSelector(1, 8, prefix)));
         }
 
         [TestMethod]

@@ -108,8 +108,57 @@ namespace Signum.Web.Selenium
         {
             string cellSelector = SearchTestExtensions.CellSelector(rowIndexBase1, columnIndexBase1, prefix);
             selenium.ContextMenu(cellSelector);
-            selenium.Click("{0} span".Formato(cellSelector));
+            selenium.Click("{0} .quickfilter".Formato(cellSelector));
             selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#{0}tblFilters #{0}trFilter_{1}".Formato(prefix, filterIndexBase0)));
+        }
+
+        public static void QuickFilterFromHeader(this ISelenium selenium, int columnIndexBase1, int filterIndexBase0)
+        {
+            QuickFilterFromHeader(selenium, columnIndexBase1, filterIndexBase0, "");
+        }
+
+        public static void QuickFilterFromHeader(this ISelenium selenium, int columnIndexBase1, int filterIndexBase0, string prefix)
+        {
+            string headerSelector = SearchTestExtensions.TableHeaderSelector(columnIndexBase1, prefix);
+            selenium.ContextMenu(headerSelector);
+            selenium.Click("{0} .quickfilter-header".Formato(headerSelector));
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#{0}tblFilters #{0}trFilter_{1}".Formato(prefix, filterIndexBase0)));
+        }
+
+        public static void RemoveColumn(this ISelenium selenium, int columnIndexBase1, int numberOfColumnsBeforeDeleting)
+        {
+            RemoveColumn(selenium, columnIndexBase1, numberOfColumnsBeforeDeleting, "");
+        }
+
+        public static void RemoveColumn(this ISelenium selenium, int columnIndexBase1, int numberOfColumnsBeforeDeleting, string prefix)
+        {
+            string lastHeaderSelector = SearchTestExtensions.TableHeaderSelector(numberOfColumnsBeforeDeleting, prefix);
+            Assert.IsTrue(selenium.IsElementPresent(lastHeaderSelector));
+            string headerSelector = SearchTestExtensions.TableHeaderSelector(columnIndexBase1, prefix);
+            selenium.ContextMenu(headerSelector);
+            selenium.Click("{0} .remove-column".Formato(headerSelector));
+            selenium.WaitAjaxFinished(() => !selenium.IsElementPresent(lastHeaderSelector));
+        }
+
+        public static void EditColumnName(this ISelenium selenium, int columnIndexBase1, string newName)
+        {
+            EditColumnName(selenium, columnIndexBase1, newName, "");
+        }
+
+        public static void EditColumnName(this ISelenium selenium, int columnIndexBase1, string newName, string prefix)
+        {
+            string headerSelector = SearchTestExtensions.TableHeaderSelector(columnIndexBase1, prefix);
+            selenium.ContextMenu(headerSelector);
+            selenium.Click("{0} .edit-column".Formato(headerSelector));
+
+            string popupPrefix = prefix + "newName_";
+            string popupSelector = SeleniumExtensions.PopupSelector(popupPrefix);
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(popupSelector));
+            selenium.Type("{0} input:text".Formato(popupSelector), newName);
+
+            selenium.PopupOk(popupPrefix);
+            selenium.WaitAjaxFinished(() => !selenium.IsElementPresent(SeleniumExtensions.PopupSelector(popupPrefix)));
+            Assert.IsTrue(selenium.IsElementPresent("{0}:contains('{1}')".Formato(headerSelector, newName)));
         }
 
         public static string RowSelector()
@@ -327,14 +376,20 @@ namespace Signum.Web.Selenium
 
         public static Func<bool> ThereAreNRows(this ISelenium selenium, int n, string prefix)
         {
-            return () => selenium.IsElementPresent(RowSelector(n, prefix)) &&
-                         !selenium.IsElementPresent(RowSelector(n + 1, prefix));
+            if (n == 0)
+            {
+                return () => !selenium.IsElementPresent(RowSelector(n, prefix));
+            }
+            else
+            {
+                return () => selenium.IsElementPresent(RowSelector(n, prefix)) &&
+                             !selenium.IsElementPresent(RowSelector(n + 1, prefix));
+            }
         }
 
         public static Func<bool> ThereAreNRows(this ISelenium selenium, int n)
         {
-            return () => selenium.IsElementPresent(RowSelector(n)) &&
-                         !selenium.IsElementPresent(RowSelector(n + 1));
+            return ThereAreNRows(selenium, n, "");
         }
 
         public static string SearchCreateLocator()

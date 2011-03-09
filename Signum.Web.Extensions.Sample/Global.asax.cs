@@ -65,19 +65,17 @@ namespace Signum.Web.Extensions.Sample
         {   
             Signum.Test.Extensions.Starter.Start(UserConnections.Replace(Settings.Default.ConnectionString));
 
-      
-
             using (AuthLogic.Disable())
             {
                 Schema.Current.Initialize();
-                LinkTypesAndViews();
+                WebStart();
             }
 
             RegisterRoutes(RouteTable.Routes);
 
         }
 
-        private void LinkTypesAndViews()
+        private void WebStart()
         {
             Navigator.Start(new NavigationManager());
             Constructor.Start(new ConstructorManager());
@@ -99,6 +97,12 @@ namespace Signum.Web.Extensions.Sample
             SignumControllerFactory.MainAssembly = Assembly.GetExecutingAssembly();
 
             Navigator.Initialize();
+
+            SignumControllerFactory.EveryController().AddFilters(
+                new HandleExceptionAttribute());
+
+            SignumControllerFactory.EveryController().AddFilters(
+                ctx => ctx.FilterInfo.AuthorizationFilters.OfType<AuthenticationRequiredAttribute>().Any() ? null : new AuthenticationRequiredAttribute());
         }
 
         protected void Application_AcquireRequestState(object sender, EventArgs e)

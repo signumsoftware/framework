@@ -17,7 +17,6 @@ using Signum.Engine.Basics;
 
 namespace Signum.Web.Extensions.Sample
 {
-    [HandleException, AuthenticationRequired]
     public class MusicController : Controller
     {
         public ViewResult BandDetail()
