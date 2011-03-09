@@ -27,6 +27,8 @@ namespace Signum.Windows.Files
         static BitmapFrame film = ExtensionsImageLoader.GetImageSortName("film.png");
         static BitmapFrame music = ExtensionsImageLoader.GetImageSortName("documentMusic.png");
         static BitmapFrame cs = ExtensionsImageLoader.GetImageSortName("textCodeCsharp.png");
+        static BitmapFrame ppt = ExtensionsImageLoader.GetImageSortName("ppt.png");
+        static BitmapFrame pptx = ExtensionsImageLoader.GetImageSortName("pptx.png");
         static BitmapFrame unknown = ExtensionsImageLoader.GetImageSortName("unknown.png");
 
         static Dictionary<string, BitmapFrame> imagenes = new Dictionary<string, BitmapFrame>() 
@@ -38,6 +40,7 @@ namespace Signum.Windows.Files
             {".xlsx", excel},
             {".csv", excel},
             {".eml", email},
+            {".msg", email},
             {".htm", html},
             {".html", html},
             {".mht", html},
@@ -61,6 +64,8 @@ namespace Signum.Windows.Files
             {".wma", music},
             {".wav", music},
             {".cs", cs},
+            {".ppt", ppt},
+            {".pptx", ppt}
         };
         public static IValueConverter Converter = ConverterFactory.New((string fileName) =>
             imagenes.TryGetC(Path.GetExtension(fileName).ToLower()) ?? unknown);
