@@ -189,7 +189,7 @@
   <data name="Field" xml:space="preserve">
     <value>Field</value>
   </data>
-  <data name="HideFilters" xml:space="preserve">
+  <data name="Signum_hideFilters" xml:space="preserve">
     <value>Hide filters</value>
   </data>
   <data name="Maximum" xml:space="preserve">
@@ -210,7 +210,7 @@
   <data name="Search" xml:space="preserve">
     <value>Search</value>
   </data>
-  <data name="ShowFilters" xml:space="preserve">
+  <data name="Signum_showFilters" xml:space="preserve">
     <value>Show filters</value>
   </data>
   <data name="Value" xml:space="preserve">
@@ -233,12 +233,6 @@
   </data>
   <data name="CalendarToday" xml:space="preserve">
     <value>Today</value>
-  </data>
-  <data name="EditColumnsFinishEdit" xml:space="preserve">
-    <value>Finish Edit</value>
-  </data>
-  <data name="UserColumnsEdit" xml:space="preserve">
-    <value>Edit User Columns</value>
   </data>
   <data name="NoResults" xml:space="preserve">
     <value>No results</value>
@@ -302,5 +296,17 @@
   </data>
   <data name="FilterBuilder_AddFilter" xml:space="preserve">
     <value>Add filter</value>
+  </data>
+  <data name="Signum_addFilter" xml:space="preserve">
+    <value>Add filter</value>
+  </data>
+  <data name="Signum_editColumnName" xml:space="preserve">
+    <value>Edit column name</value>
+  </data>
+  <data name="Signum_enterTheNewColumnName" xml:space="preserve">
+    <value>Enter the new column name</value>
+  </data>
+  <data name="Signum_removeColumn" xml:space="preserve">
+    <value>Remove column</value>
   </data>
 </root>

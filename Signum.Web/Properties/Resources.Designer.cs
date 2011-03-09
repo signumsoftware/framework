@@ -151,15 +151,6 @@ namespace Signum.Web.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Finish Edit.
-        /// </summary>
-        public static string EditColumnsFinishEdit {
-            get {
-                return ResourceManager.GetString("EditColumnsFinishEdit", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Excel.
         /// </summary>
         public static string Excel {
@@ -219,15 +210,6 @@ namespace Signum.Web.Properties {
         public static string Future {
             get {
                 return ResourceManager.GetString("Future", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Hide filters.
-        /// </summary>
-        public static string HideFilters {
-            get {
-                return ResourceManager.GetString("HideFilters", resourceCulture);
             }
         }
         
@@ -421,11 +403,29 @@ namespace Signum.Web.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Show filters.
+        ///   Looks up a localized string similar to Add filter.
         /// </summary>
-        public static string ShowFilters {
+        public static string Signum_addFilter {
             get {
-                return ResourceManager.GetString("ShowFilters", resourceCulture);
+                return ResourceManager.GetString("Signum_addFilter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Edit column name.
+        /// </summary>
+        public static string Signum_editColumnName {
+            get {
+                return ResourceManager.GetString("Signum_editColumnName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enter the new column name.
+        /// </summary>
+        public static string Signum_enterTheNewColumnName {
+            get {
+                return ResourceManager.GetString("Signum_enterTheNewColumnName", resourceCulture);
             }
         }
         
@@ -453,6 +453,15 @@ namespace Signum.Web.Properties {
         public static string Signum_Executing {
             get {
                 return ResourceManager.GetString("Signum_Executing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Hide filters.
+        /// </summary>
+        public static string Signum_hideFilters {
+            get {
+                return ResourceManager.GetString("Signum_hideFilters", resourceCulture);
             }
         }
         
@@ -493,6 +502,15 @@ namespace Signum.Web.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Remove column.
+        /// </summary>
+        public static string Signum_removeColumn {
+            get {
+                return ResourceManager.GetString("Signum_removeColumn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Saved.
         /// </summary>
         public static string Signum_saved {
@@ -529,20 +547,20 @@ namespace Signum.Web.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Show filters.
+        /// </summary>
+        public static string Signum_showFilters {
+            get {
+                return ResourceManager.GetString("Signum_showFilters", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Type {0} not allowed.
         /// </summary>
         public static string Type0NotAllowed {
             get {
                 return ResourceManager.GetString("Type0NotAllowed", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Edit User Columns.
-        /// </summary>
-        public static string UserColumnsEdit {
-            get {
-                return ResourceManager.GetString("UserColumnsEdit", resourceCulture);
             }
         }
         

@@ -10,22 +10,19 @@
     QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
     Type entitiesType = Reflector.ExtractLite(queryDescription.Columns.Single(a => a.IsEntity).Type);
     bool viewable = findOptions.View && Navigator.IsNavigable(entitiesType, true);}
-<div id="@Model.Compose("divSearchControl")" class="sf-search-control">
+<div id="@Model.Compose("divSearchControl")" 
+     class="sf-search-control" 
+     data-quickfilter-url="@Url.SignumAction("QuickFilter")"
+     data-search-url="@Url.SignumAction("Search")"
+     data-popup-save-url="@Url.SignumAction("TrySavePartial")"
+     @(findOptions.EntityContextMenu ? " data-entity-ctx-menu-url=" + Url.SignumAction("GetContextualPanel") : "")
+     >
+
     @Html.Hidden(Model.Compose("sfWebQueryName"), Navigator.ResolveWebQueryName(findOptions.QueryName), new { disabled = "disabled" })
     @Html.Hidden(Model.Compose("sfAllowMultiple"), findOptions.AllowMultiple.ToString(), new { disabled = "disabled" })
     @Html.Hidden(Model.Compose("sfView"), viewable, new { disabled = "disabled" })
     @Html.Hidden(Model.Compose("sfEntityTypeName"), Navigator.ResolveWebTypeName(entitiesType), new { disabled = "disabled" })
-    @if (findOptions.EntityContextMenu)
-    {
-        <script type="text/javascript">
-            var @Model.Compose("EntityContextMenuUrl")  = '@Url.SignumAction("GetContextualPanel")';
-         </script>
-    }
-    <script type="text/javascript">
-        var @Model.Compose("QuickFilterUrl") = '@Url.SignumAction("QuickFilter")'; 
-        var @Model.Compose("SearchUrl") = '@Url.SignumAction("Search")';
-        var @Model.Compose("SaveUrl") = '@Url.SignumAction("TrySavePartial")';
-    </script>
+    
     @if(findOptions.SearchOnLoad)
     {
         <script type="text/javascript">
@@ -33,7 +30,7 @@
             </script>    
     }
     <div id="@Model.Compose("divFilters")" style="display:@((findOptions.FilterMode != FilterMode.AlwaysHidden && findOptions.FilterMode != FilterMode.OnlyResults) ? "block" : "none")" >
-        @{ Html.RenderPartial(Navigator.Manager.FilterBuilderUrl, ViewData);}
+        @{ Html.RenderPartial(Navigator.Manager.FilterBuilderView, ViewData);}
     </div>
     <div class="sf-search-footer" style="display:@((findOptions.FilterMode != FilterMode.OnlyResults) ? "block" : "none")">
         @Html.Label(null, Resources.NumberOfRows, Model.Compose("sfTop"), null)

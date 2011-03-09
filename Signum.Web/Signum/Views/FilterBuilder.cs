@@ -95,7 +95,7 @@ WriteLiteral("\" class=\"sf-fields-list\">\r\n        <a onclick=\"SF.FindNaviga
 WriteLiteral("\" rev=\"sf-filters-body\">");
 
 
-                                                                                                                                Write(visible ? Resources.HideFilters : Resources.ShowFilters);
+                                                                                                                                Write(visible ? Resources.Signum_hideFilters : Resources.Signum_showFilters);
 
 WriteLiteral("</a>\r\n        <div class=\"sf-filters\" ");
 
@@ -154,14 +154,6 @@ WriteLiteral("\r\n\r\n");
                         }));
 
                           
-                    
-               Write(Html.Button(context.Compose("btnEditColumns"), Resources.UserColumnsEdit, "new SF.FindNavigator({{prefix:'{0}'}}).editColumns();".Formato(context.ControlID), ""));
-
-                                                                                                                                                                                      
-                    
-               Write(Html.Button(context.Compose("btnEditColumnsFinish"), Resources.EditColumnsFinishEdit, "new SF.FindNavigator({{prefix:'{0}'}}).editColumnsFinish();".Formato(context.ControlID), "", new Dictionary<string, object> { { "style", "display:none;" } }));
-
-                                                                                                                                                                                                                                                                         
                 }
 
 WriteLiteral("            </div>\r\n");

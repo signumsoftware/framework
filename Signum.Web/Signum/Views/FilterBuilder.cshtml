@@ -10,7 +10,7 @@
 
 <div id="@context.Compose("fields-search")">
     <div id="@context.Compose("fields-list")" class="sf-fields-list">
-        <a onclick="SF.FindNavigator.toggleFilters(this)" class="sf-filters-header@(visible ? "" : " close")" rev="sf-filters-body">@(visible ? Resources.HideFilters : Resources.ShowFilters)</a>
+        <a onclick="SF.FindNavigator.toggleFilters(this)" class="sf-filters-header@(visible ? "" : " close")" rev="sf-filters-body">@(visible ? Resources.Signum_hideFilters : Resources.Signum_showFilters)</a>
         <div class="sf-filters" @(visible ? "" : "style=display:none")>
             <div id="@context.Compose("filters-body")" class="sf-filters-body">
                 @{ var columns = queryDescription.Columns
@@ -45,8 +45,6 @@
                             { "onclick", "new SF.FindNavigator({{prefix:'{0}'}}).addColumn('{1}');".Formato(context.ControlID, Url.SignumAction("GetColumnName")) }, 
                             { "data-icon", "ui-icon-arrowthick-1-e" }
                         })
-                    @Html.Button(context.Compose("btnEditColumns"), Resources.UserColumnsEdit, "new SF.FindNavigator({{prefix:'{0}'}}).editColumns();".Formato(context.ControlID), "")
-                    @Html.Button(context.Compose("btnEditColumnsFinish"), Resources.EditColumnsFinishEdit, "new SF.FindNavigator({{prefix:'{0}'}}).editColumnsFinish();".Formato(context.ControlID), "", new Dictionary<string, object> { { "style", "display:none;" } })
                 }
             </div>
             @{ List<FilterOption> filterOptions = findOptions.FilterOptions;}

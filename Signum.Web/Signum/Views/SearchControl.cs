@@ -45,8 +45,6 @@ namespace ASP
     using Signum.Entities.DynamicQuery;
     using Signum.Engine.DynamicQuery;
     using Signum.Entities.Reflection;
-    //using WebMatrix.Data;
-    //using WebMatrix.WebData;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Signum/Views/SearchControl.cshtml")]
@@ -85,7 +83,27 @@ WriteLiteral("<div id=\"");
 
     Write(Model.Compose("divSearchControl"));
 
-WriteLiteral("\" class=\"sf-search-control\">\r\n    ");
+WriteLiteral("\" \r\n     class=\"sf-search-control\" \r\n     data-quickfilter-url=\"");
+
+
+                      Write(Url.SignumAction("QuickFilter"));
+
+WriteLiteral("\"\r\n     data-search-url=\"");
+
+
+                 Write(Url.SignumAction("Search"));
+
+WriteLiteral("\"\r\n     data-popup-save-url=\"");
+
+
+                     Write(Url.SignumAction("TrySavePartial"));
+
+WriteLiteral("\"\r\n     ");
+
+
+ Write(findOptions.EntityContextMenu ? " data-entity-ctx-menu-url=" + Url.SignumAction("GetContextualPanel") : "");
+
+WriteLiteral("\r\n     >\r\n\r\n    ");
 
 
 Write(Html.Hidden(Model.Compose("sfWebQueryName"), Navigator.ResolveWebQueryName(findOptions.QueryName), new { disabled = "disabled" }));
@@ -105,58 +123,7 @@ WriteLiteral("\r\n    ");
 
 Write(Html.Hidden(Model.Compose("sfEntityTypeName"), Navigator.ResolveWebTypeName(entitiesType), new { disabled = "disabled" }));
 
-WriteLiteral("\r\n");
-
-
-     if (findOptions.EntityContextMenu)
-    {
-
-WriteLiteral("        <script type=\"text/javascript\">\r\n            var ");
-
-
-           Write(Model.Compose("EntityContextMenuUrl"));
-
-WriteLiteral("  = \'");
-
-
-                                                      Write(Url.SignumAction("GetContextualPanel"));
-
-WriteLiteral("\';\r\n         </script>\r\n");
-
-
-    }
-
-WriteLiteral("    <script type=\"text/javascript\">\r\n        var ");
-
-
-       Write(Model.Compose("QuickFilterUrl"));
-
-WriteLiteral(" = \'");
-
-
-                                           Write(Url.SignumAction("QuickFilter"));
-
-WriteLiteral("\'; \r\n        var ");
-
-
-       Write(Model.Compose("SearchUrl"));
-
-WriteLiteral(" = \'");
-
-
-                                      Write(Url.SignumAction("Search"));
-
-WriteLiteral("\';\r\n        var ");
-
-
-       Write(Model.Compose("SaveUrl"));
-
-WriteLiteral(" = \'");
-
-
-                                    Write(Url.SignumAction("TrySavePartial"));
-
-WriteLiteral("\';\r\n    </script>\r\n");
+WriteLiteral("\r\n    \r\n");
 
 
      if(findOptions.SearchOnLoad)

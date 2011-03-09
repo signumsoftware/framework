@@ -48,12 +48,28 @@ SF.registerModule("FindNavigator", function () {
 
         initialize: function () {
             var self = this;
+
+            var closeMyOpenedCtxMenu = function (target) {
+                if ($(target).hasClass("sf-search-ctxmenu-overlay") || $(target).parents().hasClass("sf-search-ctxmenu-overlay")) {
+                    $('.sf-search-ctxmenu-overlay').remove();
+                    return false;
+                }
+                return true;
+            };
+
             $(this.pf("tblResults") + " th:not(.thRowEntity):not(.thRowSelection)")
             .live('click', function (e) {
                 if ($(this).hasClass("columnEditing"))
                     return true;
                 self.newSortOrder($(e.target), e.shiftKey);
                 self.search();
+                return false;
+            })
+            .live('contextmenu', function (e) {
+                if (!closeMyOpenedCtxMenu(e.target)) {
+                    return false;
+                }
+                self.headerContextMenu(e);
                 return false;
             })
             .live('mousedown', function (e) {
@@ -64,8 +80,7 @@ SF.registerModule("FindNavigator", function () {
             });
 
             $(this.pf("tblResults td")).live('contextmenu', function (e) {
-                if ($(e.target).hasClass("sf-search-ctxmenu-overlay") || $(e.target).parents().hasClass("sf-search-ctxmenu-overlay")) {
-                    $('.sf-search-ctxmenu-overlay').remove();
+                if (!closeMyOpenedCtxMenu(e.target)) {
                     return false;
                 }
 
@@ -81,37 +96,92 @@ SF.registerModule("FindNavigator", function () {
                 return false;
             });
 
-            $(this.pf("tblResults") + " .sf-search-ctxitem.quickFilter").live('click', function () {
+            $(this.pf("tblResults") + " .sf-search-ctxitem.quickfilter").live('click', function () {
                 SF.log("contextmenu item click");
                 var $elem = $(this).closest("td");
                 $('.sf-search-ctxmenu-overlay').remove();
 
-                var quickFilterUrl = window[SF.compose(self.findOptions.prefix, "QuickFilterUrl")];
+                var quickFilterUrl = self.control().data("quickfilter-url");
                 if (quickFilterUrl == undefined)
                     return false; //QuickFilters not active            
 
-                self.quickFilter($elem, quickFilterUrl);
+                self.quickFilterCell($elem, quickFilterUrl);
+            });
+
+            $(this.pf("tblResults") + " .sf-search-ctxitem.quickfilter-header").live('click', function () {
+                SF.log("contextmenu item click");
+                var $elem = $(this).closest("th");
+                $('.sf-search-ctxmenu-overlay').remove();
+
+                var quickFilterUrl = self.control().data("quickfilter-url");
+                if (quickFilterUrl == undefined)
+                    return false; //QuickFilters not active            
+
+                self.quickFilterHeader($elem, quickFilterUrl);
+                return false;
+            });
+
+            $(this.pf("tblResults") + " .sf-search-ctxitem.remove-column").live('click', function () {
+                SF.log("contextmenu item click");
+                var $elem = $(this).closest("th");
+                $('.sf-search-ctxmenu-overlay').remove();
+
+                self.removeColumn($elem);
+                return false;
+            });
+
+            $(this.pf("tblResults") + " .sf-search-ctxitem.edit-column").live('click', function () {
+                SF.log("contextmenu item click");
+                var $elem = $(this).closest("th");
+                $('.sf-search-ctxmenu-overlay').remove();
+
+                self.editColumn($elem);
+                return false;
             });
         },
 
-        cellContextMenu: function (e) {
-            SF.log("contextmenu");
+        createCtxMenu: function (e) {
+            var $cmenu = $("<div class='sf-search-ctxmenu'></div>");
             var $target = $(e.target);
-
-            var $cmenu = $("<div class='sf-search-ctxmenu'><div class='sf-search-ctxitem quickFilter'><span>Add filter</span></div></div>");
-            $('<div class="sf-search-ctxmenu-overlay"></div>').click(function (e) {
-                SF.log("contextmenu click");
-                var $target = $(e.target);
-                if ($target.hasClass("sf-search-ctxitem") || $target.parent().hasClass("sf-search-ctxitem"))
-                    $cmenu.hide();
-                else
-                    $('.sf-search-ctxmenu-overlay').remove();
-            }).append($cmenu).appendTo($target);
             $cmenu.css({
                 left: $target.position().left + ($target.outerWidth() / 2),
                 top: $target.position().top + ($target.outerHeight() / 2),
                 zIndex: '101'
-            }).show();
+            });
+
+            var $ctxMenuOverlay = $('<div class="sf-search-ctxmenu-overlay"></div>').click(function (e) {
+                SF.log("contextmenu click");
+                var $clickTarget = $(e.target);
+                if ($clickTarget.hasClass("sf-search-ctxitem") || $clickTarget.parent().hasClass("sf-search-ctxitem"))
+                    $cmenu.hide();
+                else
+                    $('.sf-search-ctxmenu-overlay').remove();
+            }).append($cmenu);
+
+            return $ctxMenuOverlay;
+        },
+
+        headerContextMenu: function (e) {
+            SF.log("headerContextmenu");
+            var $menu = this.createCtxMenu(e);
+            $menu.find(".sf-search-ctxmenu")
+                .append("<div class='sf-search-ctxitem quickfilter-header'>" + lang.signum.addFilter + "</div>")
+                .append("<div class='sf-search-ctxitem edit-column'>" + lang.signum.editColumnName + "</div>")
+                .append("<div class='sf-search-ctxitem remove-column'>" + lang.signum.removeColumn + "</div>");
+            var $target = $(e.target);
+            $target.append($menu);
+
+            return false;
+        },
+
+        cellContextMenu: function (e) {
+            SF.log("cellContextmenu");
+            var $menu = this.createCtxMenu(e);
+            $menu.find(".sf-search-ctxmenu")
+                .html("<div class='sf-search-ctxitem quickfilter'>" + lang.signum.addFilter + "</div>");
+
+            var $target = $(e.target);
+            $target.append($menu);
 
             return false;
         },
@@ -184,8 +254,6 @@ SF.registerModule("FindNavigator", function () {
         },
 
         search: function () {
-            this.editColumnsFinish();
-
             var $btnSearch = $(this.pf("qbSearch"));
             $btnSearch.toggleClass("sf-loading").val(lang.signum.searching);
 
@@ -318,7 +386,7 @@ SF.registerModule("FindNavigator", function () {
             SF.log("FindNavigator sort");
             var columnName = $th.find("input:hidden").val();
 
-            this.findOptions.searchControllerUrl = window[SF.compose(this.findOptions.prefix, "SearchUrl")]
+            this.findOptions.searchControllerUrl = this.control().data("search-url");
 
             var currOrderArray = [];
             var currOrder = $(this.pf(this.orders)).val();
@@ -411,8 +479,6 @@ SF.registerModule("FindNavigator", function () {
             if (SF.isFalse(this.findOptions.allowUserColumns) || $(this.pf("tblFilters tbody")).length == 0)
                 throw "Adding columns is not allowed";
 
-            this.editColumnsFinish();
-
             var tokenName = this.constructTokenName();
             if (SF.isEmpty(tokenName)) return;
 
@@ -430,60 +496,40 @@ SF.registerModule("FindNavigator", function () {
                 async: false,
                 success: function (columnNiceName) {
                     $tblHeaders.append("<th><input type=\"hidden\" value=\"" + tokenName + "\" />" + columnNiceName + "</th>");
-                    $(self.pf("btnEditColumns")).show();
                 }
             });
         },
 
-        editColumns: function () {
-            SF.log("FindNavigator editColumns");
+        editColumn: function ($th) {
+            SF.log("FindNavigator editColumn");
 
-            var self = this;
-            $(this.pf("tblResults thead tr th:not(.thRowEntity):not(.thRowSelection)")).each(function () {
-                var th = $(this);
-                th.addClass("columnEditing");
-                var hidden = th.find("input:hidden");
-                th.html("<input type=\"text\" value=\"" + th.text().trim() + "\" />" +
-                    "<br /><a id=\"link-delete-user-col\" onclick=\"new SF.FindNavigator({prefix:'" + self.findOptions.prefix + "'}).deleteColumn('" + hidden.val() + "');\">Delete Column</a>")
-              .append(hidden);
-            });
+            var $colTokenHidden = $th.find("input:hidden");
+            var colName = $th.text().trim();
 
-            $(this.pf("btnEditColumnsFinish")).show();
-            $(this.pf("btnEditColumns")).hide();
+            var popupPrefix = SF.compose(this.findOptions.prefix, "newName");
+
+            var divId = "columnNewName";
+            var $div = $("<div id='" + divId + "'></div>");
+            $div.html("<p>" + lang.signum.enterTheNewColumnName + "</p>")
+                .append("<br />")
+                .append("<input type='text' value='" + colName + "' />")
+                .append("<br />").append("<br />")
+                .append("<input type='button' id='" + SF.compose(popupPrefix, "btnOk") + "' class='sf-button sf-ok-button' value='OK' />");
+            
+            var $tempContainer = $("<div></div>").append($div);
+            
+            new SF.ViewNavigator({
+                onOk: function () { $th.html($("#columnNewName > input:text").val()).append($colTokenHidden); },
+                prefix: popupPrefix
+            }).showViewOk($tempContainer.html());
         },
 
-        editColumnsFinish: function () {
-            SF.log("FindNavigator editColumnsFinish");
+        removeColumn: function ($th) {
+            SF.log("FindNavigator removeColumn");
 
-            var $btnFinish = $(this.pf("btnEditColumnsFinish:visible"));
-            if ($btnFinish.length == 0)
-                return;
-
-            var self = this;
-            $(this.pf("tblResults thead tr th:not(.thRowEntity):not(.thRowSelection)")).each(function () {
-                var th = $(this);
-                th.removeClass("columnEditing");
-                var hidden = th.find("input:hidden");
-                var newColName = th.find("input:text").val();
-                th.html(newColName).append(hidden);
-            });
-
-            $btnFinish.hide();
-            $(this.pf("btnEditColumns")).show();
-        },
-
-        deleteColumn: function (columnName) {
-            SF.log("FindNavigator deleteColumn");
-
-            var self = this;
-            $(this.pf("tblResults thead tr th"))
-        .filter(function () { return $(this).find("input:hidden[value='" + columnName + "']").length > 0 })
-        .remove();
+            $th.remove();
 
             $(this.pf("tblResults tbody")).html("");
-
-            if ($(this.pf("tblResults thead tr th")).length == 0)
-                $(this.pf("btnEditColumnsFinish")).hide();
         },
 
         addFilter: function (addFilterUrl) {
@@ -575,33 +621,20 @@ SF.registerModule("FindNavigator", function () {
             return tokenName;
         },
 
-        quickFilter: function ($elem, quickFilterUrl) {
+        quickFilter: function (value, tokenName, quickFilterUrl) {
             SF.log("FindNavigator quickFilter");
             var tableFilters = $(this.pf("tblFilters tbody"));
             if (tableFilters.length === 0) {
                 return;
             }
-            var params;
-            var data = $elem.children(".sf-data");
-            if (data.length == 0) {
-                var cb = $elem.find("input:checkbox");
-                if (cb.length == 0)
-                    params = { "value": $elem.html().trim() };
-                else
-                    params = { "value": (cb.filter(":checked").length > 0) };
-            }
-            else {
-                params = { "value": data.val() };
-            }
 
-            var cellIndex = $elem[0].cellIndex;
-
-            params = $.extend(params, {
+            var params = {
+                "value": value,
                 "webQueryName": $(this.pf(this.webQueryName)).val(),
-                "tokenName": $($($elem.closest(".sf-search-results")).find("th")[cellIndex]).children("input:hidden").val(),
+                "tokenName": tokenName,
                 "prefix": this.findOptions.prefix,
                 "index": this.newFilterRowIndex()
-            });
+            };
 
             var self = this;
             SF.ajax({
@@ -618,6 +651,34 @@ SF.registerModule("FindNavigator", function () {
                     SF.triggerNewContent($(self.pf("tblFilters tbody tr:last")));
                 }
             });
+        },
+
+        quickFilterCell: function ($elem, quickFilterUrl) {
+            SF.log("FindNavigator quickFilterCell");
+
+            var value;
+            var data = $elem.children(".sf-data");
+            if (data.length == 0) {
+                var cb = $elem.find("input:checkbox");
+                if (cb.length == 0)
+                    value = $elem.html().trim();
+                else
+                    value = cb.filter(":checked").length > 0;
+            }
+            else {
+                value = data.val();
+            }
+
+            var cellIndex = $elem[0].cellIndex;
+            var tokenName = $($($elem.closest(".sf-search-results")).find("th")[cellIndex]).children("input:hidden").val();
+
+            this.quickFilter(value, tokenName, quickFilterUrl);
+        },
+
+        quickFilterHeader: function ($elem, quickFilterUrl) {
+            SF.log("FindNavigator quickFilterHeader");
+
+            this.quickFilter("", $elem.find("input:hidden").val(), quickFilterUrl);
         },
 
         deleteFilter: function (elem) {
@@ -685,8 +746,8 @@ SF.registerModule("FindNavigator", function () {
         if (prefix.charAt(prefix.length - 1) == "_")
             prefix = prefix.substring(0, prefix.length - 1);
 
-        var showCtxUrl = window[SF.compose(prefix, "EntityContextMenuUrl")];
-        if (showCtxUrl == undefined)
+        var entityCtxMenuUrl = $("#" + SF.compose(prefix, "divSearchControl")).data("entity-ctx-menu-url");
+        if (SF.isEmpty(entityCtxMenuUrl))
             return false; //EntityContextMenu not active
 
         var $cmenu = $("<div/>",
@@ -713,13 +774,13 @@ SF.registerModule("FindNavigator", function () {
         $target.addClass("sf-ctxmenu-active");
 
         var requestData = {
-            lite: $target.parent().attr('data-entity'),
+            lite: $target.parent().data('entity'),
             webQueryName: hiddenQueryName.val(),
             prefix: prefix
         };
 
         SF.ajax({
-            url: showCtxUrl,
+            url: entityCtxMenuUrl,
             type: "POST",
             async: true,
             data: requestData,
@@ -739,7 +800,7 @@ SF.registerModule("FindNavigator", function () {
             new SF.ViewNavigator(viewOptions).navigate();
         }
         else {
-            var saveUrl = window[SF.compose(viewOptions.prefix, "SaveUrl")];
+            var saveUrl = this.control().data("popup-save-url");
             var viewOptions = findNavigator.viewOptionsForSearchPopupCreate(viewOptions);
             new SF.ViewNavigator(viewOptions).createSave(saveUrl);
         }
@@ -749,10 +810,10 @@ SF.registerModule("FindNavigator", function () {
         var $elem = $(elem);
         $elem.toggleClass('close').siblings(".sf-filters").toggle();
         if ($elem.hasClass('close')) {
-            $elem.html('Mostrar filtros');
+            $elem.html(lang.signum.showFilters);
         }
         else {
-            $elem.html('Ocultar filtros');
+            $elem.html(lang.signum.hideFilters);
         }
         return false;
     }
@@ -785,25 +846,4 @@ SF.registerModule("FindNavigator", function () {
             }
         }
     }
-
-    //    SF.FindNavigator.QuickFilter = function ($elem, quickFilterUrl) {
-    //        var idtblresults = $elem.closest(".sf-search-results")[0].id;
-    //        var prefix = (idtblresults == "sf-search-results") ? "" : idtblresults.substring(0, idtblresults.indexOf("sf-search-results") - 1);
-    //        new SF.FindNavigator({ prefix: prefix }).quickFilter($elem, quickFilterUrl);
-    //    }
-
-    //    function Sort(evt, controllerUrl) {
-    //        var $target = $(evt.target);
-    //        var searchControlDiv = $target.parents(".sf-search-control");
-
-    //        var prefix = searchControlDiv[0].id;
-    //        prefix = prefix.substring(0, prefix.indexOf("divSearchControl"));
-    //        if (prefix.lastIndexOf("_") == prefix.length - 1)
-    //            prefix = prefix.substring(0, prefix.length - 1);
-    //        var findNavigator = new FindNavigator({ prefix: prefix, searchControllerUrl: controllerUrl });
-
-    //        var multiCol = evt.shiftKey;
-
-    //        findNavigator.setNewSortOrder($target, multiCol).search();
-    //    }
 });

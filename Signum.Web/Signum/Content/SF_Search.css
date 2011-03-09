@@ -76,30 +76,20 @@
     cursor:pointer;
     margin: 0 5px;
 }
-.sf-search-ctxitem span
+.sf-search-ctxitem
 {
     width: 100px;
     display: block;
     padding: 5px 10px;
     cursor: pointer;
+    font-weight: normal;
 }
 .sf-search-ctxmenu
 {
     border: 1px solid #aaa;
     position: absolute;
     background: #fff;
-    display: none;
     padding: 2px;
-}
-.sf-search-ctxmenu ul
-{
-    list-style-type: none;
-    margin: 0;
-}
-.sf-search-ctxmenu ul li
-{
-    margin: 2px;
-    clear: both;
 }
 .sf-search-ctxmenu-overlay
 {
