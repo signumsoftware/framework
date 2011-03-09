@@ -115,7 +115,7 @@ namespace Signum.Engine.Authorization
 
         public static DefaultDictionary<Type, TypeAllowed> AuthorizedTypes()
         {
-            return cache.GetCleanDictionary();
+            return cache.GetDefaultDictionary();
         }
     }
 

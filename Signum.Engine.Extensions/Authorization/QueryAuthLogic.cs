@@ -59,7 +59,7 @@ namespace Signum.Engine.Authorization
 
         public static DefaultDictionary<object, bool> QueryRules()
         {
-            return cache.GetCleanDictionary();
+            return cache.GetDefaultDictionary();
         }
 
         public static QueryRulePack GetQueryRules(Lite<RoleDN> roleLite, TypeDN typeDN)

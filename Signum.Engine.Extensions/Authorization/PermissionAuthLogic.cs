@@ -94,7 +94,7 @@ namespace Signum.Engine.Authorization
 
         public static DefaultDictionary<Enum, bool> ServicePermissionRules()
         {
-            return cache.GetCleanDictionary();
+            return cache.GetDefaultDictionary();
         }
 
         public static PermissionRulePack GetPermissionRules(Lite<RoleDN> roleLite)

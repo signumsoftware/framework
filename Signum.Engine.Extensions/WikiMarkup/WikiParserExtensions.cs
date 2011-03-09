@@ -70,7 +70,7 @@ namespace Signum.Engine.WikiMarkup
                         .NotNull()
                         .First();
                 }
-                catch (Exception e)
+                catch
                 {
                     return "<span class=\"sf-wiki-error\">{0}</span>".Formato(m.Value);
                 }

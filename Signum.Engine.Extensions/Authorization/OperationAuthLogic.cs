@@ -86,5 +86,10 @@ namespace Signum.Engine.Authorization
         {
             return OperationLogic.GetAllOperationInfos(entityType).Select(oi => cache.GetAllowed(role, oi.Key)).Collapse();
         }
+
+        public static DefaultDictionary<Enum, bool> OperationRules()
+        {
+            return cache.GetDefaultDictionary();
+        }
     }
 }

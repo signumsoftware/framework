@@ -79,7 +79,7 @@ namespace Signum.Engine.Authorization
 
         public static DefaultDictionary<PropertyRoute, PropertyAllowed> AuthorizedProperties()
         {
-            return cache.GetCleanDictionary();
+            return cache.GetDefaultDictionary();
         }
 
         public static AuthThumbnail? GetAllowedThumbnail(Lite<RoleDN> role, Type entityType)

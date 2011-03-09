@@ -23,7 +23,7 @@ namespace Signum.Windows.Authorization
             {
                 foreach (QuerySettings qs in Navigator.Manager.QuerySettings.Values)
                 {
-                    qs.IsFindable += qn => GetQueryAceess(qn);
+                    qs.IsFindable += qn => GetAllowed(qn);
                 }
             };
 
@@ -37,7 +37,7 @@ namespace Signum.Windows.Authorization
             authorizedQueries = Server.Return((IQueryAuthServer s) => s.QueriesRules()); 
         }
 
-        static bool GetQueryAceess(object queryName)
+        public static bool GetAllowed(object queryName)
         {
             return authorizedQueries.GetAllowed(queryName);
         }
@@ -58,7 +58,7 @@ namespace Signum.Windows.Authorization
 
                 if (queryName != null && Navigator.Manager.QuerySettings.ContainsKey(queryName))
                 {
-                    if (!GetQueryAceess(queryName))
+                    if (!GetAllowed(queryName))
                         menuItem.Visibility = Visibility.Collapsed;
                 }
             }

@@ -298,6 +298,12 @@ namespace Signum.Services
             Execute(MethodInfo.GetCurrentMethod(),
                () => OperationAuthLogic.SetOperationRules(rules));
         }
+
+        public DefaultDictionary<Enum, bool> OperationRules()
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+            () => OperationAuthLogic.OperationRules());
+        }
         #endregion
 
         #region IEntityGroupAuthServer Members

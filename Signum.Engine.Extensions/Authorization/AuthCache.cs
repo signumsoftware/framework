@@ -299,9 +299,9 @@ namespace Signum.Entities.Authorization
             return RuntimeRules[role].GetAllowed(key);
         }
       
-        internal DefaultDictionary<K, A> GetCleanDictionary()
+        internal DefaultDictionary<K, A> GetDefaultDictionary()
         {
-            return RuntimeRules[RoleDN.Current.ToLite()].CleanDictionary();
+            return RuntimeRules[RoleDN.Current.ToLite()].DefaultDictionary();
         }
 
         public class RoleAllowedCache
@@ -377,7 +377,7 @@ namespace Signum.Entities.Authorization
                 return behaviour == max ? DefaultRule.Max : DefaultRule.Min;
             }
 
-            internal DefaultDictionary<K, A> CleanDictionary()
+            internal DefaultDictionary<K, A> DefaultDictionary()
             {
                 return this.rules;
             }
