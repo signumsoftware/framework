@@ -81,7 +81,7 @@ namespace Signum.Windows.Extensions.Sample
                 }
             });
 
-            AuthClient.Start(true, true, true, true, true, true, false);
+            AuthClient.Start(true, true, true, true, true, true, true, false);
 
             //ProcessClient.Start();
             //SchedulerClient.Start();
