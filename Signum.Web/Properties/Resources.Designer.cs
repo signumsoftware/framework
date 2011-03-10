@@ -511,6 +511,24 @@ namespace Signum.Web.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Move left.
+        /// </summary>
+        public static string Signum_reorderColumn_MoveLeft {
+            get {
+                return ResourceManager.GetString("Signum_reorderColumn_MoveLeft", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Move right.
+        /// </summary>
+        public static string Signum_reorderColumn_MoveRight {
+            get {
+                return ResourceManager.GetString("Signum_reorderColumn_MoveRight", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Saved.
         /// </summary>
         public static string Signum_saved {

@@ -59,8 +59,6 @@ SF.registerModule("FindNavigator", function () {
 
             $(this.pf("tblResults") + " th:not(.thRowEntity):not(.thRowSelection)")
             .live('click', function (e) {
-                if ($(this).hasClass("columnEditing"))
-                    return true;
                 self.newSortOrder($(e.target), e.shiftKey);
                 self.search();
                 return false;
@@ -73,8 +71,6 @@ SF.registerModule("FindNavigator", function () {
                 return false;
             })
             .live('mousedown', function (e) {
-                if ($(this).hasClass("columnEditing"))
-                    return true;
                 this.onselectstart = function () { return false };
                 return false;
             });
@@ -138,6 +134,15 @@ SF.registerModule("FindNavigator", function () {
                 self.editColumn($elem);
                 return false;
             });
+
+            $(this.pf("tblResults") + " .move-column-left," + this.pf("tblResults") + " .move-column-right").live('click', function (e) {
+                SF.log("contextmenu item click");
+                var $elem = $(this).closest("th");
+                $('.sf-search-ctxmenu-overlay').remove();
+
+                self.moveColumn($elem, e);
+                return false;
+            });
         },
 
         createCtxMenu: function (e) {
@@ -164,11 +169,25 @@ SF.registerModule("FindNavigator", function () {
         headerContextMenu: function (e) {
             SF.log("headerContextmenu");
             var $menu = this.createCtxMenu(e);
-            $menu.find(".sf-search-ctxmenu")
-                .append("<div class='sf-search-ctxitem quickfilter-header'>" + lang.signum.addFilter + "</div>")
+
+            var $itemContainer = $menu.find(".sf-search-ctxmenu");
+            $itemContainer.append("<div class='sf-search-ctxitem quickfilter-header'>" + lang.signum.addFilter + "</div>")
                 .append("<div class='sf-search-ctxitem edit-column'>" + lang.signum.editColumnName + "</div>")
                 .append("<div class='sf-search-ctxitem remove-column'>" + lang.signum.removeColumn + "</div>");
+
             var $target = $(e.target);
+            var $th = $target.closest("th");
+            var thIndex = $th.index();
+
+            var extraCols = this.control().find(".thRowEntity,.thRowSelection");
+
+            if (thIndex > extraCols.length) {
+                $itemContainer.append("<div class='sf-search-ctxitem move-column-left'>" + lang.signum.reorderColumn_MoveLeft + "</div>")
+            }
+            if (thIndex < $th.parent().children("th").length - 1) {
+                $itemContainer.append("<div class='sf-search-ctxitem move-column-right'>" + lang.signum.reorderColumn_MoveRight + "</div>");
+            }
+
             $target.append($menu);
 
             return false;
@@ -515,13 +534,34 @@ SF.registerModule("FindNavigator", function () {
                 .append("<input type='text' value='" + colName + "' />")
                 .append("<br />").append("<br />")
                 .append("<input type='button' id='" + SF.compose(popupPrefix, "btnOk") + "' class='sf-button sf-ok-button' value='OK' />");
-            
+
             var $tempContainer = $("<div></div>").append($div);
-            
+
             new SF.ViewNavigator({
                 onOk: function () { $th.html($("#columnNewName > input:text").val()).append($colTokenHidden); },
                 prefix: popupPrefix
             }).showViewOk($tempContainer.html());
+        },
+
+        moveColumn: function ($th, e) {
+            SF.log("FindNavigator moveColumn");
+            var $target = $(e.target);
+            var thIndex = $th.index();
+            var $ths = $th.parent().children("th");
+            if ($target.hasClass("move-column-left")) {
+                var $prevTh = $($ths[thIndex - 1]);
+                $th.detach();
+                $prevTh.before($th);
+            }
+            else if ($target.hasClass("move-column-right")) {
+                var $nextTh = $($ths[thIndex + 1]);
+                $th.detach();
+                $nextTh.after($th);
+            }
+            else {
+                throw "No direction was given to FindNavigator moveColumn";
+            }
+            $(this.pf("tblResults tbody")).html("");
         },
 
         removeColumn: function ($th) {

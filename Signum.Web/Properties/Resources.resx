@@ -309,4 +309,10 @@
   <data name="Signum_removeColumn" xml:space="preserve">
     <value>Remove column</value>
   </data>
+  <data name="Signum_reorderColumn_MoveLeft" xml:space="preserve">
+    <value>Move left</value>
+  </data>
+  <data name="Signum_reorderColumn_MoveRight" xml:space="preserve">
+    <value>Move right</value>
+  </data>
 </root>
