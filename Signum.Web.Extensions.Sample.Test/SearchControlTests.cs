@@ -284,6 +284,12 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.Search();
             selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SearchTestExtensions.CellSelector(1, 8)));
 
+            //Move columns
+            Assert.IsFalse(selenium.CanMoveColumn(1, true));
+            Assert.IsFalse(selenium.CanMoveColumn(8, false));
+            selenium.MoveColumn(7, "Label Id", true);
+            selenium.MoveColumn(6, "Label Id", false);
+
             //Delete one of the usercolumns
             selenium.RemoveColumn(7, 8);
             selenium.WaitAjaxFinished(selenium.ThereAreNRows(0));
@@ -307,6 +313,12 @@ namespace Signum.Web.Extensions.Sample.Test
 
             //Edit names
             selenium.EditColumnName(5, "Male", prefix);
+
+            //Move columns
+            Assert.IsFalse(selenium.CanMoveColumn(3, true, prefix));
+            Assert.IsFalse(selenium.CanMoveColumn(8, false, prefix));
+            selenium.MoveColumn(3, "Id", false, prefix);
+            selenium.MoveColumn(4, "Id", true, prefix);
 
             //Delete column
             selenium.RemoveColumn(4, 8, prefix);

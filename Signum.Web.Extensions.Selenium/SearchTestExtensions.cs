@@ -161,6 +161,36 @@ namespace Signum.Web.Selenium
             Assert.IsTrue(selenium.IsElementPresent("{0}:contains('{1}')".Formato(headerSelector, newName)));
         }
 
+        public static bool CanMoveColumn(this ISelenium selenium, int columnIndexBase1, bool left)
+        {
+            return CanMoveColumn(selenium, columnIndexBase1, left, "");
+        }
+
+        public static bool CanMoveColumn(this ISelenium selenium, int columnIndexBase1, bool left, string prefix)
+        {
+            string headerSelector = SearchTestExtensions.TableHeaderSelector(columnIndexBase1, prefix);
+            selenium.ContextMenu(headerSelector);
+            bool result = selenium.IsElementPresent("{0} .move-column-{1}".Formato(headerSelector, left ? "left" : "right"));
+            selenium.ContextMenu(headerSelector); //close it
+            return result;
+        }
+
+        public static void MoveColumn(this ISelenium selenium, int columnIndexBase1, string columnName, bool left)
+        {
+            MoveColumn(selenium, columnIndexBase1, columnName, left, "");
+        }
+
+        public static void MoveColumn(this ISelenium selenium, int columnIndexBase1, string columnName, bool left, string prefix)
+        {
+            string headerSelector = SearchTestExtensions.TableHeaderSelector(columnIndexBase1, prefix);
+            selenium.ContextMenu(headerSelector);
+            selenium.Click("{0} .move-column-{1}".Formato(headerSelector, left ? "left" : "right"));
+
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("{0}:contains('{1}')".Formato(
+                SearchTestExtensions.TableHeaderSelector((left ? (columnIndexBase1 - 1) : (columnIndexBase1 + 1)), prefix),
+                columnName)));
+        }
+
         public static string RowSelector()
         {
             return RowSelector("");
