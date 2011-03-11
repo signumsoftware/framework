@@ -189,6 +189,13 @@
     </Compile>
     <Compile Include="ExtensionsImageLoader.cs" />
     <Compile Include="Files\ImageFileExtension.cs" />
+    <Compile Include="Mailing\ClientCertificationFile.xaml.cs">
+      <DependentUpon>ClientCertificationFile.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Mailing\SMTPConfiguration.xaml.cs">
+      <DependentUpon>SMTPConfiguration.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Mailing\SMTPConfigurationClient.cs" />
     <Compile Include="Operations\ConstructFromMenuItem.cs" />
     <Compile Include="Operations\OperationServer.cs" />
     <Compile Include="Operations\OperationSettings.cs" />
@@ -451,6 +458,14 @@
       <Generator>MSBuild:Compile</Generator>
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Mailing\ClientCertificationFile.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Mailing\SMTPConfiguration.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Operations\LogOperation.xaml">
       <SubType>Designer</SubType>

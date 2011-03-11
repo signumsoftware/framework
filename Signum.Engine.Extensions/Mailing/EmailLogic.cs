@@ -21,6 +21,7 @@ using Signum.Engine.Authorization;
 using Signum.Utilities.Reflection;
 using System.ComponentModel;
 using System.Web;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Signum.Engine.Mailing
 {
@@ -58,9 +59,9 @@ namespace Signum.Engine.Mailing
         static string overrideEmailAddressForProcess;
         internal static IDisposable OverrideEmailAddressForProcess(string emailAddress)
         {
-            var old = overrideEmailAddressForProcess; 
+            var old = overrideEmailAddressForProcess;
             overrideEmailAddressForProcess = emailAddress;
-            return new Disposable(()=>overrideEmailAddressForProcess = old); 
+            return new Disposable(() => overrideEmailAddressForProcess = old);
         }
 
         internal static string OnEmailAddress()
@@ -68,7 +69,7 @@ namespace Signum.Engine.Mailing
             if (overrideEmailAddressForProcess.HasText())
                 return overrideEmailAddressForProcess;
 
-            return OverrideEmailAddress(); 
+            return OverrideEmailAddress();
         }
 
         public static Func<SmtpClient> SmtpClientBuilder;
@@ -280,8 +281,8 @@ namespace Signum.Engine.Mailing
 
         class EmailUser
         {
-            public EmailMessageDN EmailMessage; 
-            public UserDN User; 
+            public EmailMessageDN EmailMessage;
+            public UserDN User;
         }
 
         public static void SendMailAsync(EmailMessageDN emailMessage)
@@ -313,7 +314,7 @@ namespace Signum.Engine.Mailing
                 emailMessage.Sent = TimeZoneManager.Now;
                 emailMessage.State = EmailState.SentError;
                 emailMessage.Exception = e.Message;
-                emailMessage.Save(); 
+                emailMessage.Save();
             }
         }
 
@@ -337,8 +338,8 @@ namespace Signum.Engine.Mailing
 
         static MailMessage CreateMailMessage(EmailMessageDN emailMessage)
         {
-            var address =  OnEmailAddress();
-            
+            var address = OnEmailAddress();
+
             if (address == DoNotSend)
                 return null;
 
@@ -440,6 +441,110 @@ namespace Signum.Engine.Mailing
         public override string ToString()
         {
             return @"<a href='{0}'>{1}</a>".Formato(Url, HttpUtility.HtmlEncode(Content));
+        }
+    }
+
+    public static class SMTPConfigurationLogic
+    {
+        internal static void AssertStarted(SchemaBuilder sb)
+        {
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => SMTPConfigurationLogic.Start(null, null)));
+        }
+
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        {
+            if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+            {
+                sb.Include<SMTPConfigurationDN>();
+                sb.Schema.EntityEvents<SMTPConfigurationDN>().Saving += new EntityEventHandler<SMTPConfigurationDN>(EmailClientSettingsLogic_Saving);
+
+                dqm[typeof(SMTPConfigurationDN)] = (from s in Database.Query<SMTPConfigurationDN>()
+                                                    select new
+                                                    {
+                                                        Entity = s.ToLite(),
+                                                        s.Id,
+                                                        s.Name,
+                                                        s.Host,
+                                                        s.Port,
+                                                        s.UseDefaultCredentials,
+                                                        s.Username,
+                                                        s.Password,
+                                                        s.EnableSSL
+                                                    }).ToDynamic();
+
+                dqm[SMTPConfigurationQueries.NoCredentialsData] = (from s in Database.Query<SMTPConfigurationDN>()
+                                                                   select new
+                                                                   {
+                                                                       Entity = s.ToLite(),
+                                                                       s.Id,
+                                                                       s.Name,
+                                                                       s.Host,
+                                                                       s.Port,
+                                                                       s.UseDefaultCredentials,
+                                                                       s.EnableSSL
+                                                                   }).ToDynamic();
+
+                dqm[typeof(ClientCertificationFileDN)] = (from c in Database.Query<ClientCertificationFileDN>()
+                                                          select new 
+                                                          { 
+                                                            Entity = c.ToLite(),
+                                                            c.Id,
+                                                            c.Name,
+                                                            CertFileType = c.CertFileType.NiceToString(),
+                                                            c.FullFilePath
+                                                          }).ToDynamic();
+
+                sb.Schema.Initializing[InitLevel.Level2NormalEntities] += SetCache;
+            }
+        }
+
+        static void EmailClientSettingsLogic_Saving(SMTPConfigurationDN ident, bool isRoot)
+        {
+            if (ident.Modified.Value)
+                Transaction.RealCommit += () => smtpConfigurations = null;
+        }
+
+        static void SetCache()
+        {
+            smtpConfigurations = Database.RetrieveAll<SMTPConfigurationDN>().ToDictionary(s => s.Name);
+        }
+
+        static Dictionary<string, SMTPConfigurationDN> smtpConfigurations;
+        public static Dictionary<string, SMTPConfigurationDN> SmtpConfigurations
+        {
+            get
+            {
+                if (smtpConfigurations == null)
+                    SetCache();
+                return SMTPConfigurationLogic.smtpConfigurations;
+            }
+        }
+
+        public static SmtpClient GenerateSmtpClient(string smtpSettingsName, bool defaultIfNotPresent)
+        {
+            var settings = SmtpConfigurations.TryGet(smtpSettingsName, null);
+            if (settings == null)
+                if (defaultIfNotPresent)
+                    return new SmtpClient();
+                else
+                    throw new ArgumentException("The setting {0} was not found in the SMTP settings cache".Formato(smtpSettingsName));
+
+            SmtpClient client = new SmtpClient()
+            {
+                Host = settings.Host,
+                Port = settings.Port,
+                UseDefaultCredentials = settings.UseDefaultCredentials,
+                Credentials = settings.Username.HasText() ? new NetworkCredential(settings.Username, settings.Password) : null,
+                EnableSsl = settings.EnableSSL,
+            };
+            foreach (var cc in settings.ClientCertificationFiles)
+            {
+                client.ClientCertificates.Add(cc.CertFileType == CertFileType.CertFile ?
+                    X509Certificate.CreateFromCertFile(cc.FullFilePath)
+                    : X509Certificate.CreateFromSignedFile(cc.FullFilePath));
+            }
+
+            return client;
         }
     }
 }
