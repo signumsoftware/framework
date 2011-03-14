@@ -287,13 +287,22 @@ SF.registerModule("FindNavigator", function () {
                     if (SF.FindNavigator.asyncSearchFinished[idBtnSearch])
                         SF.FindNavigator.asyncSearchFinished[idBtnSearch] = false;
                     $btnSearch.val(lang.signum.search).toggleClass("sf-loading");
+                    var $control = self.control();
                     if (!SF.isEmpty(r)) {
-                        self.control().find(".sf-search-results-container tbody").html(r);
-                        SF.triggerNewContent(self.control().find(".sf-search-results-container tbody"));
+                        $control.find(".sf-search-results-container tbody").html(r);
+                        SF.triggerNewContent($control.find(".sf-search-results-container tbody"));
+                        var rowCount = $control.find(".sf-search-results-container tbody tr").length;
+                        $control.find(self.pf("rowsFoundCount")).html(rowCount);
+                        $control.find(".rows-found-count-maximum").removeClass("rows-found-count-maximum");
+                        if (rowCount == $(self.pf("sfTop")).val()) {
+                            $control.find(".rows-found-count").addClass("rows-found-count-maximum");
+                        }
                     }
                     else {
                         var columns = $(self.pf("divResults th")).length;
-                        self.control().find(".sf-search-results-container tbody").html("<tr><td colspan=\"" + columns + "\">" + lang.signum.noResults + "</td></tr>")
+                        $control.find(".sf-search-results-container tbody").html("<tr><td colspan=\"" + columns + "\">" + lang.signum.noResults + "</td></tr>")
+                        $control.find(self.pf("rowsFoundCount")).html(0);
+                        $control.find(".rows-found-count-maximum").removeClass("rows-found-count-maximum");
                     }
                 },
                 error: function () {
@@ -514,7 +523,7 @@ SF.registerModule("FindNavigator", function () {
                 data: { "webQueryName": webQueryName, "tokenName": tokenName },
                 async: false,
                 success: function (columnNiceName) {
-                    $tblHeaders.append("<th><input type=\"hidden\" value=\"" + tokenName + "\" />" + columnNiceName + "</th>");
+                    $tblHeaders.append("<th class='ui-state-default'><input type=\"hidden\" value=\"" + tokenName + "\" />" + columnNiceName + "</th>");
                 }
             });
         },
@@ -570,6 +579,21 @@ SF.registerModule("FindNavigator", function () {
             $th.remove();
 
             $(this.pf("tblResults tbody")).html("");
+        },
+
+        toggleFilters: function (elem) {
+            var $elem = $(elem);
+            $elem.toggleClass('close');
+            this.control().find(".sf-filters").toggle();
+            if ($elem.hasClass('close')) {
+                $elem.find(".ui-button-icon-primary").removeClass("ui-icon-triangle-1-n").addClass("ui-icon-triangle-1-e");
+                $elem.find(".ui-button-text").html(lang.signum.showFilters);
+            }
+            else {
+                $elem.find(".ui-button-icon-primary").removeClass("ui-icon-triangle-1-e").addClass("ui-icon-triangle-1-n");
+                $elem.find(".ui-button-text").html(lang.signum.hideFilters);
+            }
+            return false;
         },
 
         addFilter: function (addFilterUrl) {
@@ -844,18 +868,6 @@ SF.registerModule("FindNavigator", function () {
             var viewOptions = findNavigator.viewOptionsForSearchPopupCreate(viewOptions);
             new SF.ViewNavigator(viewOptions).createSave(saveUrl);
         }
-    }
-
-    SF.FindNavigator.toggleFilters = function (elem) {
-        var $elem = $(elem);
-        $elem.toggleClass('close').siblings(".sf-filters").toggle();
-        if ($elem.hasClass('close')) {
-            $elem.html(lang.signum.showFilters);
-        }
-        else {
-            $elem.html(lang.signum.hideFilters);
-        }
-        return false;
     }
 
     SF.FindNavigator.asyncSearchFinished = new Array();

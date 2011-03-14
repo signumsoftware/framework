@@ -74,7 +74,7 @@ WriteLiteral("\" data-title=\"");
 
                                               Write(ViewBag.Title);
 
-WriteLiteral("\">\r\n    <div class=\"sf-button-bar\">\r\n        <input type=\"button\" id=\"");
+WriteLiteral("\">\r\n    <div class=\"sf-query-button-bar\">\r\n        <input type=\"button\" id=\"");
 
 
                             Write(Model.Compose("btnOk"));

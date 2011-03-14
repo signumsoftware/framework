@@ -86,28 +86,17 @@ WriteLiteral("\">\r\n    <div id=\"");
 
         Write(context.Compose("fields-list"));
 
-WriteLiteral("\" class=\"sf-fields-list\">\r\n        <a onclick=\"SF.FindNavigator.toggleFilters(thi" +
-"s)\" class=\"sf-filters-header");
+WriteLiteral("\" class=\"sf-fields-list\">\r\n        <div class=\"ui-widget sf-filters\" ");
 
 
-                                                                              Write(visible ? "" : " close");
-
-WriteLiteral("\" rev=\"sf-filters-body\">");
-
-
-                                                                                                                                Write(visible ? Resources.Signum_hideFilters : Resources.Signum_showFilters);
-
-WriteLiteral("</a>\r\n        <div class=\"sf-filters\" ");
-
-
-                            Write(visible ? "" : "style=display:none");
+                                      Write(visible ? "" : "style=display:none");
 
 WriteLiteral(">\r\n            <div id=\"");
 
 
                 Write(context.Compose("filters-body"));
 
-WriteLiteral("\" class=\"sf-filters-body\">\r\n");
+WriteLiteral("\" class=\"ui-widget-header ui-corner-top sf-filters-body\">\r\n");
 
 
                    var columns = queryDescription.Columns
@@ -161,8 +150,8 @@ WriteLiteral("            </div>\r\n");
 
                List<FilterOption> filterOptions = findOptions.FilterOptions;
 
-WriteLiteral("            <div class=\"sf-filters-list\">\r\n                <span class=\"sf-explan" +
-"ation\" style=\"");
+WriteLiteral("            <div class=\"ui-widget-content ui-corner-bottom sf-filters-list\">\r\n   " +
+"             <span class=\"sf-explanation\" style=\"");
 
 
                                                 Write((filterOptions == null || filterOptions.Count == 0) ? "" : "display:none;");

@@ -216,8 +216,8 @@
   <data name="Value" xml:space="preserve">
     <value>Value</value>
   </data>
-  <data name="NumberOfRows" xml:space="preserve">
-    <value>Number of rows</value>
+  <data name="SearchControl_ShowNRows_Show" xml:space="preserve">
+    <value>Show</value>
   </data>
   <data name="Excel" xml:space="preserve">
     <value>Excel</value>
@@ -314,5 +314,11 @@
   </data>
   <data name="Signum_reorderColumn_MoveRight" xml:space="preserve">
     <value>Move right</value>
+  </data>
+  <data name="SearchControl_RowsFound" xml:space="preserve">
+    <value>rows found</value>
+  </data>
+  <data name="SearchControl_ShowNRows_Rows" xml:space="preserve">
+    <value>rows</value>
   </data>
 </root>

@@ -155,83 +155,76 @@ WriteLiteral("\" >\r\n");
 
            Html.RenderPartial(Navigator.Manager.FilterBuilderView, ViewData);
 
-WriteLiteral("    </div>\r\n    <div class=\"sf-search-footer\" style=\"display:");
+WriteLiteral("    </div>\r\n    \r\n");
 
 
-                                             Write((findOptions.FilterMode != FilterMode.OnlyResults) ? "block" : "none");
+      bool filtersVisible = findOptions.FilterMode == FilterMode.Visible;
 
-WriteLiteral("\">\r\n        ");
-
-
-   Write(Html.Label(null, Resources.NumberOfRows, Model.Compose("sfTop"), null));
-
-WriteLiteral("\r\n");
+WriteLiteral("    ");
 
 
-           int? top = findOptions.Top ?? Navigator.Manager.QuerySettings.GetOrThrow(findOptions.QueryName, "Missing QuerySettings for QueryName {0}").Top;
+Write(Html.Href("",
+                (filtersVisible ? Resources.Signum_hideFilters : Resources.Signum_showFilters), 
+                "",
+                (filtersVisible ? Resources.Signum_hideFilters : Resources.Signum_showFilters),
+                "sf-query-button" + " sf-filters-header" + (filtersVisible ? "" : " close"), 
+                new Dictionary<string, object> 
+                { 
+                    { "onclick", "new SF.FindNavigator({{prefix: '{0}'}}).toggleFilters(this)".Formato(Model.ControlID) },
+                    { "data-icon", filtersVisible ? "ui-icon-triangle-1-n" : "ui-icon-triangle-1-e" }
+                }));
 
-WriteLiteral("        ");
-
-
-   Write(HtmlHelperExtenders.InputType("text", Model.Compose("sfTop"), top.TryToString(), new Dictionary<string, object> { { "size", "5" }, { "onkeydown", "return SF.InputValidator.isNumber(event)" } }));
-
-WriteLiteral("\r\n        ");
-
-
-   Write(Html.Hidden(Model.Compose("sfOrders"), findOptions.OrderOptions.Empty() ? "" :
-                (findOptions.OrderOptions.ToString(oo => (oo.OrderType == OrderType.Ascending ? "" : "-") + oo.Token.FullKey(), ";") + ";")));
-
-WriteLiteral("\r\n        <div class=\"sf-button-bar\">\r\n            <button type=\"submit\" class=\"s" +
-"f-query-button sf-search\" data-icon=\"ui-icon-search\" id=\"");
+WriteLiteral("\r\n    \r\n    <div class=\"sf-query-button-bar\">\r\n        <button type=\"submit\" clas" +
+"s=\"sf-query-button sf-search\" data-icon=\"ui-icon-search\" id=\"");
 
 
-                                                                                              Write(Model.Compose("qbSearch"));
+                                                                                          Write(Model.Compose("qbSearch"));
 
 WriteLiteral("\" onclick=\"");
 
 
-                                                                                                                                    Write("new SF.FindNavigator({{prefix:'{0}',searchControllerUrl:'{1}'}}).search();return false;".Formato(Model.ControlID, Url.SignumAction("Search")));
+                                                                                                                                Write("new SF.FindNavigator({{prefix:'{0}',searchControllerUrl:'{1}'}}).search();return false;".Formato(Model.ControlID, Url.SignumAction("Search")));
 
 WriteLiteral("\">");
 
 
-                                                                                                                                                                                                                                                                                      Write(Resources.Search);
+                                                                                                                                                                                                                                                                                  Write(Resources.Search);
 
 WriteLiteral("</button>\r\n");
 
 
-             if (findOptions.Create && Navigator.IsCreable(entitiesType, true) && viewable)
-            {
-                string creating = findOptions.Creating.HasText() ? findOptions.Creating :
-                    "SF.FindNavigator.create({{prefix:'{0}',controllerUrl:'{1}'}});return false;".Formato(Model.ControlID, Url.SignumAction(string.IsNullOrEmpty(Model.ControlID) ? "Create" : "PopupCreate"));
+         if (findOptions.Create && Navigator.IsCreable(entitiesType, true) && viewable)
+        {
+            string creating = findOptions.Creating.HasText() ? findOptions.Creating :
+                "SF.FindNavigator.create({{prefix:'{0}',controllerUrl:'{1}'}});return false;".Formato(Model.ControlID, Url.SignumAction(string.IsNullOrEmpty(Model.ControlID) ? "Create" : "PopupCreate"));
 
-WriteLiteral("                <a class=\"sf-query-button\" data-icon=\"ui-icon-plusthick\" data-tex" +
-"t=\"false\" id=\"");
+WriteLiteral("            <a class=\"sf-query-button\" data-icon=\"ui-icon-plusthick\" data-text=\"f" +
+"alse\" id=\"");
 
 
-                                                                                          Write(Model.Compose("qbSearchCreate"));
+                                                                                      Write(Model.Compose("qbSearchCreate"));
 
 WriteLiteral("\" onclick=\"");
 
 
-                                                                                                                                     Write(creating);
+                                                                                                                                 Write(creating);
 
 WriteLiteral("\">");
 
 
-                                                                                                                                                Write(Resources.Search_Create);
+                                                                                                                                            Write(Resources.Search_Create);
 
 WriteLiteral("</a>\r\n");
 
 
-            }
+        }
 
-WriteLiteral("            ");
+WriteLiteral("        ");
 
 
-       Write(ButtonBarQueryHelper.GetButtonBarElementsForQuery(this.ViewContext, findOptions.QueryName, entitiesType, Model.ControlID).ToString(Html));
+   Write(ButtonBarQueryHelper.GetButtonBarElementsForQuery(this.ViewContext, findOptions.QueryName, entitiesType, Model.ControlID).ToString(Html));
 
-WriteLiteral("\r\n        </div>\r\n    </div>\r\n");
+WriteLiteral("\r\n    </div>\r\n");
 
 
      if (findOptions.FilterMode != FilterMode.OnlyResults)
@@ -247,18 +240,20 @@ WriteLiteral("    <div id=\"");
 
         Write(Model.Compose("divResults"));
 
-WriteLiteral("\" class=\"sf-search-results-container\">\r\n        <table id=\"");
+WriteLiteral("\" class=\"ui-widget ui-corner-all sf-search-results-container\">\r\n        <table id" +
+"=\"");
 
 
               Write(Model.Compose("tblResults"));
 
-WriteLiteral("\" class=\"sf-search-results\">\r\n            <thead>\r\n                <tr>\r\n");
+WriteLiteral("\" class=\"sf-search-results\">\r\n            <thead class=\"ui-widget-header ui-corne" +
+"r-top\">\r\n                <tr>\r\n");
 
 
                      if (findOptions.AllowMultiple.HasValue)
                     {
 
-WriteLiteral("                        <th class=\"thRowSelection\">\r\n");
+WriteLiteral("                        <th class=\"ui-state-default thRowSelection\">\r\n");
 
 
                              if (findOptions.AllowMultiple.Value)
@@ -278,14 +273,17 @@ WriteLiteral("                        </th>\r\n");
                      if (viewable)
                     {
 
-WriteLiteral("                        <th class=\"thRowEntity\">\r\n                        </th>\r\n" +
-"");
+WriteLiteral("                        <th class=\"ui-state-default thRowEntity\">\r\n              " +
+"          </th>\r\n");
 
 
                     }
 
 
-                     foreach (var col in findOptions.MergeColumns())
+                      List<Column> columns = findOptions.MergeColumns(); 
+
+
+                     foreach (var col in columns)
                     {
                         var order = findOptions.OrderOptions.FirstOrDefault(oo => oo.Token.FullKey() == col.Name);
                         OrderType? orderType = null;
@@ -294,10 +292,10 @@ WriteLiteral("                        <th class=\"thRowEntity\">\r\n            
                             orderType = order.OrderType;
                         }
 
-WriteLiteral("                        <th class=\"");
+WriteLiteral("                        <th class=\"ui-state-default ");
 
 
-                               Write((orderType == null) ? "" : (orderType == OrderType.Ascending ? "sf-header-sort-down" : "sf-header-sort-up"));
+                                                Write((orderType == null) ? "" : (orderType == OrderType.Ascending ? "sf-header-sort-down" : "sf-header-sort-up"));
 
 WriteLiteral("\">\r\n                            <input type=\"hidden\" value=\"");
 
@@ -314,9 +312,62 @@ WriteLiteral("\r\n                        </th>\r\n");
 
                     }
 
-WriteLiteral("                </tr>\r\n            </thead>\r\n            <tbody>\r\n            </t" +
-"body>\r\n            <tfoot>\r\n            </tfoot>\r\n        </table>\r\n    </div>\r\n" +
-"</div>\r\n<script type=\"text/javascript\">\r\n    new SF.FindNavigator({ prefix: \"");
+WriteLiteral("                </tr>\r\n            </thead>\r\n            <tbody class=\"ui-widget-" +
+"content\">\r\n                <tr>\r\n                    <td colspan=\"");
+
+
+                             Write(columns.Count + (viewable ? 1 : 0) + (findOptions.AllowMultiple.HasValue ? 1 : 0));
+
+WriteLiteral("\">");
+
+
+                                                                                                                  Write(Resources.Signum_noResults);
+
+WriteLiteral("</td>\r\n                </tr>\r\n            </tbody>\r\n            <tfoot>\r\n        " +
+"    </tfoot>\r\n        </table>\r\n        \r\n        <div class=\"ui-widget-header u" +
+"i-corner-bottom sf-search-footer\" style=\"display:");
+
+
+                                                                                   Write((findOptions.FilterMode != FilterMode.OnlyResults) ? "block" : "none");
+
+WriteLiteral("\">\r\n            ");
+
+
+       Write(Html.Span(null, Resources.SearchControl_ShowNRows_Show));
+
+WriteLiteral("\r\n");
+
+
+               int? top = findOptions.Top ?? Navigator.Manager.QuerySettings.GetOrThrow(findOptions.QueryName, "Missing QuerySettings for QueryName {0}").Top;
+
+WriteLiteral("            ");
+
+
+       Write(HtmlHelperExtenders.InputType("text", Model.Compose("sfTop"), top.TryToString(), new Dictionary<string, object> { { "size", "3" }, { "onkeydown", "return SF.InputValidator.isNumber(event)" } }));
+
+WriteLiteral("\r\n            ");
+
+
+       Write(Html.Span(null, Resources.SearchControl_ShowNRows_Rows + "."));
+
+WriteLiteral("\r\n            ");
+
+
+       Write(Html.Span(Model.Compose("rowsFoundCount"), "0", "rows-found-count"));
+
+WriteLiteral("\r\n            ");
+
+
+       Write(Html.Span(null, Resources.SearchControl_RowsFound, "rows-found-count"));
+
+WriteLiteral("\r\n\r\n            ");
+
+
+       Write(Html.Hidden(Model.Compose("sfOrders"), findOptions.OrderOptions.Empty() ? "" :
+                    (findOptions.OrderOptions.ToString(oo => (oo.OrderType == OrderType.Ascending ? "" : "-") + oo.Token.FullKey(), ";") + ";")));
+
+WriteLiteral("\r\n        </div>\r\n    </div>\r\n</div>\r\n<script type=\"text/javascript\">\r\n    new SF" +
+".FindNavigator({ prefix: \"");
 
 
                                Write(Model.ControlID);

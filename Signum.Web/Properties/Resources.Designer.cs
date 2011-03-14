@@ -340,15 +340,6 @@ namespace Signum.Web.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Number of rows.
-        /// </summary>
-        public static string NumberOfRows {
-            get {
-                return ResourceManager.GetString("NumberOfRows", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Operation.
         /// </summary>
         public static string Operation {
@@ -390,6 +381,33 @@ namespace Signum.Web.Properties {
         public static string Search_Create {
             get {
                 return ResourceManager.GetString("Search_Create", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to rows found.
+        /// </summary>
+        public static string SearchControl_RowsFound {
+            get {
+                return ResourceManager.GetString("SearchControl_RowsFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to rows.
+        /// </summary>
+        public static string SearchControl_ShowNRows_Rows {
+            get {
+                return ResourceManager.GetString("SearchControl_ShowNRows_Rows", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Show.
+        /// </summary>
+        public static string SearchControl_ShowNRows_Show {
+            get {
+                return ResourceManager.GetString("SearchControl_ShowNRows_Show", resourceCulture);
             }
         }
         

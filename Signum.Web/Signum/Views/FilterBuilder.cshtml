@@ -10,9 +10,8 @@
 
 <div id="@context.Compose("fields-search")">
     <div id="@context.Compose("fields-list")" class="sf-fields-list">
-        <a onclick="SF.FindNavigator.toggleFilters(this)" class="sf-filters-header@(visible ? "" : " close")" rev="sf-filters-body">@(visible ? Resources.Signum_hideFilters : Resources.Signum_showFilters)</a>
-        <div class="sf-filters" @(visible ? "" : "style=display:none")>
-            <div id="@context.Compose("filters-body")" class="sf-filters-body">
+        <div class="ui-widget sf-filters" @(visible ? "" : "style=display:none")>
+            <div id="@context.Compose("filters-body")" class="ui-widget-header ui-corner-top sf-filters-body">
                 @{ var columns = queryDescription.Columns
                         .Select(c => new SelectListItem { Text = c.DisplayName, Value = c.Name, Selected = false })
                         .ToList();
@@ -48,7 +47,7 @@
                 }
             </div>
             @{ List<FilterOption> filterOptions = findOptions.FilterOptions;}
-            <div class="sf-filters-list">
+            <div class="ui-widget-content ui-corner-bottom sf-filters-list">
                 <span class="sf-explanation" style="@((filterOptions == null || filterOptions.Count == 0) ? "" : "display:none;")">@Resources.NoFiltersSpecified</span>
                 <table id="@context.Compose("tblFilters")" style="@((filterOptions == null || filterOptions.Count == 0) ? "display:none;" : "")">
                     <thead>

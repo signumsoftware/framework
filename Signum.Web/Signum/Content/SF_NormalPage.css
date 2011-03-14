@@ -103,15 +103,17 @@ h2 .sf-entity-title {
 }
 
 /* button-bar */
-.sf-button-bar, .sf-button-bar li
+.sf-button-bar, .sf-button-bar li, .sf-query-button-bar, .sf-query-button-bar li
 {
     display:inline-block;
 }
-
-.sf-button-bar  
+.sf-button-bar, .sf-query-button-bar 
 {
 	list-style:none;	
-	margin-bottom:20px;
+}
+.sf-button-bar
+{
+    margin-bottom:20px;
 }
 
 .sf-entity-button.sf-disabled:hover {
