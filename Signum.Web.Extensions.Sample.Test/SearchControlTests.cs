@@ -113,9 +113,13 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.SetTopToFinder("5");
             selenium.Search();
             selenium.WaitAjaxFinished(selenium.ThereAreNRows(5));
+            Assert.IsTrue(selenium.IsElementPresent("jq=#rowsFoundCount:contains(5)"));
+            Assert.IsTrue(selenium.IsElementPresent("jq=.rows-found-count-maximum"));
             selenium.SetTopToFinder(""); 
             selenium.Search();
             selenium.WaitAjaxFinished(selenium.ThereAreNRows(12));
+            Assert.IsTrue(selenium.IsElementPresent("jq=#rowsFoundCount:contains(12)"));
+            Assert.IsFalse(selenium.IsElementPresent("jq=.rows-found-count-maximum"));
         }
 
         [TestMethod]

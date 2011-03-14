@@ -149,17 +149,6 @@ footer
 	box-shadow:0 0 20px #bbb;
 }
 
-.sf-filters-header:before 
-{
-	content: "▲";
-}
-
-.sf-filters-header.close:before 
-{
-	content: "▼";    
-}
-
-
 
 .sf-line-button {
     font-size:0px;
