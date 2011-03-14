@@ -25,7 +25,7 @@ namespace Signum.Web
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            using (sb.Surround(new HtmlTag("div").Class("sf-field sf-entity-line-detail")))
+            using (sb.Surround(new HtmlTag("div").Class("sf-field")))
             {
                 sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, entityDetail));
 
@@ -46,7 +46,7 @@ namespace Signum.Web
                     controlHtml = EntityBaseHelper.RenderTypeContext(helper, (TypeContext)entityDetail.Parent, RenderMode.Content, entityDetail);
 
                 if (entityDetail.DetailDiv == entityDetail.DefaultDetailDiv)
-                    sb.AddLine(helper.Div(entityDetail.DetailDiv, controlHtml, ""));
+                    sb.AddLine(helper.Div(entityDetail.DetailDiv, controlHtml, "sf-entity-line-detail"));
                 else if (controlHtml != null)
                     sb.AddLine(MvcHtmlString.Create("<script type=\"text/javascript\">\n" +
                             "$(document).ready(function() {\n" +
