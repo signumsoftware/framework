@@ -73,10 +73,10 @@ namespace Signum.Utilities
             if (string.IsNullOrEmpty(singularName))
                 return singularName;
 
-            int index = singularName.IndexOf(' ');
+            int index = singularName.LastIndexOf(' ');
 
             if (index != -1)
-                return MakePlural(singularName.Substring(0, index)) + singularName.Substring(index);
+                return singularName.Substring(0, index + 1) + MakePlural(singularName.Substring(index + 1));
 
             var result = exceptions.FirstOrDefault(r => singularName.EndsWith(r.Key));
             if (result.Value != null)
@@ -96,6 +96,7 @@ namespace Signum.Utilities
             {"z", "ces"},  //vez -> veces
             {"g", "gues"}, //zigzag -> zigzagues
             {"c", "ques"}, //frac -> fraques
+            {"t", "ts"}, //mamut -> mamuts
             {"án", "anes"},
             {"én", "enes"},
             {"ín", "ines"},
@@ -119,8 +120,8 @@ namespace Signum.Utilities
             if (result.Value != null)
                 return singularName.Substring(0, singularName.Length - result.Key.Length) + result.Value;
 
-            char lassChar = singularName[singularName.Length - 1];
-            if (vowels.Contains(lassChar))
+            char lastChar = singularName[singularName.Length - 1];
+            if (vowels.Contains(lastChar))
                 return singularName + "s";
             else
                 return singularName + "es";
