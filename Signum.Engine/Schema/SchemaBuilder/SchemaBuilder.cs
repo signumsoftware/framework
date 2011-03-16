@@ -46,11 +46,7 @@ namespace Signum.Engine.Maps
             get { return schema; }
         }
 
-        public Table Include<T>() where T : IdentifiableEntity
-        {
-            return Include(typeof(T));
-        }
-
+    
         public void AddUniqueIndex<T>(Expression<Func<T, object>> fields) where T : IdentifiableEntity
         {
             AddUniqueIndex<T>(fields, null); 
@@ -105,32 +101,37 @@ namespace Signum.Engine.Maps
             table.MultiIndexes.Add(uniqueIndex);
         }
 
-        /// <summary>
-        /// Includes a type in the Schema
-        /// </summary>
+        public Table Include<T>() where T : IdentifiableEntity
+        {
+            return Include(typeof(T));
+        }
+
         public virtual Table Include(Type type)
         {
             Table result;
             if (!schema.Tables.TryGetValue(type, out result))
             {
-                result = PreCreate(type);
+                if (type.IsAbstract)
+                    throw new InvalidOperationException("Impossible to include in the Schema the type {0} because is abstract".Formato(type));
+
+                if (!Reflector.IsIdentifiableEntity(type))
+                    throw new InvalidOperationException("Impossible to include in the Schema the type {0} because is not and IdentifiableEntity".Formato(type));
+
+                result = new Table(type);
 
                 schema.Tables.Add(type, result);
+
+                string name = schema.Settings.desambiguatedNames.TryGetC(type) ?? Reflector.CleanTypeName(Reflector.ExtractEnumProxy(type) ?? type);
+
+                if (schema.NameToType.ContainsKey(name))
+                    throw new InvalidOperationException("Two types have the same cleanName, desambiguate using Schema.Current.Settings.Desambiguate method: \r\n {0}\r\n {1}".Formato(schema.NameToType[name].FullName, type.FullName)); 
+
+                schema.NameToType[name] = type;
+                schema.TypeToName[type] = name;
 
                 Complete(result);
             }
             return result;
-        }
-
-        Table PreCreate(Type type)
-        {
-            if (type.IsAbstract)
-                throw new InvalidOperationException("Impossible to include in the Schema the type {0} because is abstract".Formato(type));
-
-            if (!Reflector.IsIdentifiableEntity(type))
-                throw new InvalidOperationException("Impossible to include in the Schema the type {0} because is not and IdentifiableEntity".Formato(type));
-            
-            return new Table(type);
         }
 
         void Complete(Table table)
@@ -142,8 +143,6 @@ namespace Signum.Engine.Maps
             table.Fields = GenerateFields(type, Contexts.Normal, table, NameSequence.Void, false);
             table.GenerateColumns();
         }
-
-        
 
         HashSet<string> loadedModules = new HashSet<string>();
         public bool NotDefined(MethodBase methodBase)
@@ -322,7 +321,7 @@ namespace Signum.Engine.Maps
                 ImplementationColumns = ib.ImplementedTypes.ToDictionary(t => t, t => new ImplementationColumn
                 {
                     ReferenceTable = Include(t),
-                    Name = name.Add(t.Name).ToString(),
+                    Name = name.Add(TypeLogic.GetCleanName(t)).ToString(),
                     Nullable = nullable,
                 }),
                 IsLite  = Reflector.ExtractLite(fieldType) != null

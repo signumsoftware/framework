@@ -32,11 +32,6 @@ namespace Signum.Utilities
             return (T[])Enum.GetValues(typeof(T));
         }
 
-        public static List<string> GetStringValues<T>()
-        {
-            return GetValues<T>().Select(x => x.ToString()).ToList();
-        }
-
         public static bool IsDefined<T>(T value) where T : struct
         {
             return Enum.IsDefined(typeof(T), value);

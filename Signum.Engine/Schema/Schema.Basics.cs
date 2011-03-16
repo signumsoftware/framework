@@ -74,17 +74,17 @@ namespace Signum.Engine.Maps
             set { dnToType = value; }
         }
 
-        Dictionary<string, Type> nameToType;
+        Dictionary<string, Type> nameToType = new Dictionary<string,Type>();
         internal Dictionary<string, Type> NameToType
         {
-            get { return nameToType.ThrowIfNullC(errorType); }
+            get { return nameToType; }
             set { nameToType = value; }
         }
 
-        Dictionary<Type, string> typeToName;
+        Dictionary<Type, string> typeToName = new Dictionary<Type,string>();
         internal Dictionary<Type, string> TypeToName
         {
-            get { return typeToName.ThrowIfNullC(errorType); }
+            get { return typeToName; }
             set { typeToName = value; }
         }
 

@@ -45,6 +45,8 @@ namespace Signum.Engine.Maps
             {typeof(Guid), SqlDbType.UniqueIdentifier}
         };
 
+        internal Dictionary<Type, string> desambiguatedNames;
+
         Dictionary<SqlDbType, int> defaultSize = new Dictionary<SqlDbType, int>()
         {
             {SqlDbType.NVarChar, 200}, 
@@ -250,6 +252,14 @@ namespace Signum.Engine.Maps
         internal SqlDbType DefaultSqlType(Type type)
         {
             return this.TypeValues.GetOrThrow(type, "Type {0} not registered"); 
+        }
+
+        public void Desambiguate(Type type, string cleanName)
+        {
+            if (desambiguatedNames != null)
+                desambiguatedNames = new Dictionary<Type, string>();
+
+            desambiguatedNames[type] = cleanName;
         }
     }
 
