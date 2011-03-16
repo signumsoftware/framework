@@ -11,8 +11,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Signum.Utilities", "Signum.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Signum.Web", "Signum.Web\Signum.Web.csproj", "{61898D02-521F-49AB-928B-F80615D55CA3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Signum.Web.Sample", "Signum.Web.Sample\Signum.Web.Sample.csproj", "{C6E52C42-F9BB-4CEE-B0F4-B5743CD96C19}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Signum.Windows", "Signum.Windows\Signum.Windows.csproj", "{76278145-7CCD-4411-9B8A-078708128571}"
 EndProject
 Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "SignumFramework2Setup", "SignumFrameworkSetup\SignumFrameworkSetup.vdproj", "{F48EB5C9-D4CE-43A0-B5E9-74B9583E3663}"
@@ -21,9 +19,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WizardProjectName", "Templa
 EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 10
+		SccNumberOfProjects = 9
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
-		SccTeamFoundationServer = http://192.168.0.8:8080/
+		SccTeamFoundationServer = http://192.168.0.8:8080/tfs/defaultcollection
 		SccLocalPath0 = .
 		SccProjectUniqueName1 = Signum.Engine\\Signum.Engine.csproj
 		SccProjectName1 = Signum.Engine
@@ -43,15 +41,12 @@ Global
 		SccProjectUniqueName6 = Signum.Windows\\Signum.Windows.csproj
 		SccProjectName6 = Signum.Windows
 		SccLocalPath6 = Signum.Windows
-		SccProjectUniqueName7 = Signum.Web.Sample\\Signum.Web.Sample.csproj
-		SccProjectName7 = Signum.Web.Sample
-		SccLocalPath7 = Signum.Web.Sample
-		SccProjectUniqueName8 = SignumFrameworkSetup\\SignumFrameworkSetup.vdproj
-		SccProjectName8 = SignumFrameworkSetup
-		SccLocalPath8 = SignumFrameworkSetup
-		SccProjectUniqueName9 = Template\\WizardProjectName\\WizardProjectName\\WizardProjectName.csproj
-		SccProjectName9 = Template/WizardProjectName/WizardProjectName
-		SccLocalPath9 = Template\\WizardProjectName\\WizardProjectName
+		SccProjectUniqueName7 = SignumFrameworkSetup\\SignumFrameworkSetup.vdproj
+		SccProjectName7 = SignumFrameworkSetup
+		SccLocalPath7 = SignumFrameworkSetup
+		SccProjectUniqueName8 = Template\\WizardProjectName\\WizardProjectName\\WizardProjectName.csproj
+		SccProjectName8 = Template/WizardProjectName/WizardProjectName
+		SccLocalPath8 = Template\\WizardProjectName\\WizardProjectName
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -89,12 +84,6 @@ Global
 		{61898D02-521F-49AB-928B-F80615D55CA3}.Partial|Any CPU.Build.0 = Release|Any CPU
 		{61898D02-521F-49AB-928B-F80615D55CA3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{61898D02-521F-49AB-928B-F80615D55CA3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C6E52C42-F9BB-4CEE-B0F4-B5743CD96C19}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C6E52C42-F9BB-4CEE-B0F4-B5743CD96C19}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C6E52C42-F9BB-4CEE-B0F4-B5743CD96C19}.Partial|Any CPU.ActiveCfg = Release|Any CPU
-		{C6E52C42-F9BB-4CEE-B0F4-B5743CD96C19}.Partial|Any CPU.Build.0 = Release|Any CPU
-		{C6E52C42-F9BB-4CEE-B0F4-B5743CD96C19}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C6E52C42-F9BB-4CEE-B0F4-B5743CD96C19}.Release|Any CPU.Build.0 = Release|Any CPU
 		{76278145-7CCD-4411-9B8A-078708128571}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{76278145-7CCD-4411-9B8A-078708128571}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{76278145-7CCD-4411-9B8A-078708128571}.Partial|Any CPU.ActiveCfg = Partial|Any CPU
