@@ -19,7 +19,6 @@ namespace Signum.Engine.Profiler
                 if (timeTracker)
                     PermissionAuthLogic.RegisterPermissions(ProfilerPermissions.ViewTimeTracker);
 
-
                 if (heavyProfiler)
                     PermissionAuthLogic.RegisterPermissions(ProfilerPermissions.ViewHeavyProfiler); 
             }

@@ -62,7 +62,7 @@ namespace Signum.Web.Profiler
             ProfilerPermissions.ViewHeavyProfiler.Authorize();
 
             Signum.Utilities.HeavyProfiler.Enabled = true;
-            return RedirectToAction(ProfilerClient.ViewPrefix.Formato("Heavy"));
+            return RedirectToAction("Heavy");
         }
 
         [AcceptVerbs(HttpVerbs.Get)]
@@ -71,7 +71,7 @@ namespace Signum.Web.Profiler
             ProfilerPermissions.ViewHeavyProfiler.Authorize();
 
             Signum.Utilities.HeavyProfiler.Enabled = false;
-            return RedirectToAction(ProfilerClient.ViewPrefix.Formato("Heavy"));
+            return RedirectToAction("Heavy");
         }
 
         [AcceptVerbs(HttpVerbs.Get)]
@@ -80,9 +80,8 @@ namespace Signum.Web.Profiler
             ProfilerPermissions.ViewHeavyProfiler.Authorize();
 
             Signum.Utilities.HeavyProfiler.Clean();
-            return RedirectToAction(ProfilerClient.ViewPrefix.Formato("Heavy"));
+            return RedirectToAction("Heavy");
         }
-
 
 
         [AcceptVerbs(HttpVerbs.Get)]
@@ -99,7 +98,7 @@ namespace Signum.Web.Profiler
             ProfilerPermissions.ViewTimeTracker.Authorize();
 
             Signum.Utilities.TimeTracker.IdentifiedElapseds.Clear();
-            return RedirectToAction(ProfilerClient.ViewPrefix.Formato("Times")); 
+            return RedirectToAction("Times"); 
         }
 
         [AcceptVerbs(HttpVerbs.Get)]
@@ -116,7 +115,7 @@ namespace Signum.Web.Profiler
             ProfilerPermissions.ViewTimeTracker.Authorize();
 
             Signum.Utilities.TimeTracker.IdentifiedElapseds.Clear();
-            return RedirectToAction(ProfilerClient.ViewPrefix.Formato("Times"));
+            return RedirectToAction("Times");
         }
     }
 }
