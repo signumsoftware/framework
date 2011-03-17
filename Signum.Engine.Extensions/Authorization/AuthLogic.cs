@@ -408,13 +408,13 @@ namespace Signum.Engine.Authorization
             }
         }
 
-        public static UserDN ChagePasswordLogin(string username, string passwordHash, string newPasswordHash)
+        public static UserDN ChangePasswordLogin(string username, string passwordHash, string newPasswordHash)
         {
-            ChagePassword(username, passwordHash, newPasswordHash);
+            ChangePassword(username, passwordHash, newPasswordHash);
             return Login(username, newPasswordHash);
         }
 
-        public static void ChagePassword(string username, string passwordHash, string newPasswordHash)
+        public static void ChangePassword(string username, string passwordHash, string newPasswordHash)
         {
             var user = RetrieveUser(username, passwordHash);
             user.PasswordHash = newPasswordHash;

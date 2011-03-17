@@ -213,6 +213,7 @@ namespace Signum.Entities.Authorization
         }
     }
 
+    [ForceLocalization]
     public enum TypeAllowedBasic
     {
         None = 0,

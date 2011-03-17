@@ -68,7 +68,7 @@ namespace Signum.Services
 
             try
             {
-                AuthLogic.ChagePassword(username, passwordHash, newPasswordHash);
+                AuthLogic.ChangePassword(username, passwordHash, newPasswordHash);
             }
             catch (Exception e)
             {
@@ -82,7 +82,7 @@ namespace Signum.Services
         {
             try
             {
-                currentUser = AuthLogic.ChagePasswordLogin(username, passwordHash, newPasswordHash);
+                currentUser = AuthLogic.ChangePasswordLogin(username, passwordHash, newPasswordHash);
             }
             catch (Exception e)
             {
