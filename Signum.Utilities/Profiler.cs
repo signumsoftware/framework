@@ -184,8 +184,12 @@ namespace Signum.Utilities
             if (fileName == null)
                 return null;
 
-            return fileName.Right(50, false) + " ({0})".Formato(frame.GetFileLineNumber());
+            if (fileName.Length > 70)
+                fileName = "..." + fileName.Right(67, false);
+
+            return fileName + " ({0})".Formato(frame.GetFileLineNumber());
         }
+        
 
         public static HeavyProfilerEntry Find(string indices)
         {
@@ -286,7 +290,7 @@ namespace Signum.Utilities
 
         public string ToString(HeavyProfilerEntry parent)
         {
-            return "{0} {1:00}% ({2})".Formato(Time.NiceToString(), (Time.Ticks * 100.0) / parent.Stopwatch.Elapsed.Ticks,  Count);
+            return "{0} {1:00}% ({2})".Formato(Time.NiceToString(), (Time.Ticks * 100.0) / parent.Stopwatch.Elapsed.Ticks, Count);
         }
     }
 }
