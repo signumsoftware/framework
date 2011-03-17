@@ -13,18 +13,10 @@
 <table class="sf-search-results">
     <tr>
         <th>
-            Type
-        </th>
-        <td>
-            @entry.Type.TryCC(t => t.TypeName())
-        </td>
-    </tr>
-    <tr>
-        <th>
             Method
         </th>
         <td>
-            @entry.Method.Name
+            @(entry.Type.TryCC(t => t.TypeName())).@entry.Method.Name
         </td>
     </tr>
     <tr>
@@ -53,7 +45,7 @@
     </tr>
     <tr>
         <th>
-            Childs
+            Direct Childs
         </th>
         <td>
             @entry.GetEntriesResume().TryToString()
@@ -80,6 +72,10 @@
 }
 <h3>
     Aditional Data</h3>
+
+    <div>
+    
+    </div>
 <div>
     <pre>
     <code>

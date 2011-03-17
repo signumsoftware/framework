@@ -39,7 +39,7 @@ namespace Signum.Web.Profiler
 
             var list = Signum.Utilities.HeavyProfiler.AllEntries().Where(a => a.Role == "SQL").OrderByDescending(a => a.Elapsed).Take(top ?? 50).ToList();
 
-            ViewData[ViewDataKeys.Title] = "Slowest SQL entries"; 
+            ViewData[ViewDataKeys.Title] = "Slowest SQLs"; 
 
             return View(ProfilerClient.ViewPrefix.Formato("HeavyList"), list);
         }

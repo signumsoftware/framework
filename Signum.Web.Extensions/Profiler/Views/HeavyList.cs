@@ -87,17 +87,28 @@ WriteLiteral("</h2>\r\n<div>\r\n");
                                             
     }
 
-WriteLiteral("    ");
+WriteLiteral("    |\r\n    ");
 
 
 Write(Html.ActionLink("Clean", "Clean"));
 
-WriteLiteral("\r\n    ");
+WriteLiteral("\r\n    |\r\n\r\n");
 
 
-Write(Html.ActionLink("Slowest", "HeavySlowest"));
+     if(@ViewBag.Slowest)
+    {
+        
+   Write(Html.ActionLink("Root Entries", "Heavy"));
 
-WriteLiteral("\r\n</div>\r\n");
+                                                 
+    }else{
+        
+   Write(Html.ActionLink("Slowest SQLs", "HeavySlowest"));
+
+                                                                
+    }
+
+WriteLiteral("</div>\r\n");
 
 
    Html.RenderPartial(ProfilerClient.ViewPrefix.Formato("ProfilerTable"), (object)Model);

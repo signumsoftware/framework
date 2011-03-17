@@ -93,17 +93,16 @@ WriteLiteral(")</h2>\r\n");
 
 Write(Html.ActionLink("(View all)", "ViewAll"));
 
-WriteLiteral("\r\n<table class=\"sf-search-results\">\r\n    <tr>\r\n        <th>\r\n            Type\r\n  " +
-"      </th>\r\n        <td>\r\n            ");
+WriteLiteral("\r\n<table class=\"sf-search-results\">\r\n    <tr>\r\n        <th>\r\n            Method\r\n" +
+"        </th>\r\n        <td>\r\n            ");
 
 
-       Write(entry.Type.TryCC(t => t.TypeName()));
+        Write(entry.Type.TryCC(t => t.TypeName()));
 
-WriteLiteral("\r\n        </td>\r\n    </tr>\r\n    <tr>\r\n        <th>\r\n            Method\r\n        <" +
-"/th>\r\n        <td>\r\n            ");
+WriteLiteral(".");
 
 
-       Write(entry.Method.Name);
+                                              Write(entry.Method.Name);
 
 WriteLiteral("\r\n        </td>\r\n    </tr>\r\n    <tr>\r\n        <th>\r\n            File Line\r\n      " +
 "  </th>\r\n        <td>\r\n            ");
@@ -123,8 +122,8 @@ WriteLiteral("\r\n        </td>\r\n    </tr>\r\n    <tr>\r\n        <th>\r\n    
 
        Write(entry.Elapsed.NiceToString());
 
-WriteLiteral("\r\n        </td>\r\n    </tr>\r\n    <tr>\r\n        <th>\r\n            Childs\r\n        <" +
-"/th>\r\n        <td>\r\n            ");
+WriteLiteral("\r\n        </td>\r\n    </tr>\r\n    <tr>\r\n        <th>\r\n            Direct Childs\r\n  " +
+"      </th>\r\n        <td>\r\n            ");
 
 
        Write(entry.GetEntriesResume().TryToString());
@@ -162,7 +161,8 @@ WriteLiteral("    <h3>\r\n        Childs</h3>\r\n");
     Html.RenderPartial(ProfilerClient.ViewPrefix.Formato("ProfilerTable"), entry.Entries);
 }
 
-WriteLiteral("<h3>\r\n    Aditional Data</h3>\r\n<div>\r\n    <pre>\r\n    <code>\r\n        ");
+WriteLiteral("<h3>\r\n    Aditional Data</h3>\r\n\r\n    <div>\r\n    \r\n    </div>\r\n<div>\r\n    <pre>\r\n " +
+"   <code>\r\n        ");
 
 
    Write(entry.AditionalData);

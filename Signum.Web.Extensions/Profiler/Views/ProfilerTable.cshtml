@@ -12,25 +12,23 @@
                 Entry
             </th>
             <th>
-                Type
-            </th>
-            <th>
-                Method
-            </th>
-            <th>
                 Role
             </th>
             <th>
                 Time
             </th>
-            <th>
-                Childs
-            </th>
+           
             @foreach (var k in allKeys)
             {
-                <th>@k Childs
+                <th>@k Time
                 </th>
             }
+             <th>
+                Direct Childs
+            </th>
+             <th>
+                Method
+            </th>
             <th>
                 Aditional Data
             </th>
@@ -44,12 +42,6 @@
             <tr>
                 <td>
                     @Html.ProfilerEntry("View", entry.FullIndex())
-                </td>
-                <td>
-                    @entry.Type.TypeName()
-                </td>
-                <td>
-                    @entry.Method.Name
                 </td>
                 <td>
                     @entry.Role
@@ -66,6 +58,9 @@
                         @rol.TryGetC(k).TryCC(r => r.ToString(entry))
                     </td>
                 }
+                <td>
+                    @(entry.Type.TypeName()).@entry.Method.Name
+                </td>
                 <td>
                     @entry.AditionalData.TryCC(o => o.ToString().Left(50, false))
                 </td>

@@ -11,7 +11,15 @@
     {
         @Html.ActionLink("Enable", "Enable")
     }
+    |
     @Html.ActionLink("Clean", "Clean")
-    @Html.ActionLink("Slowest", "HeavySlowest")
+    |
+
+    @if(@ViewBag.Slowest)
+    {
+        @Html.ActionLink("Root Entries", "Heavy")
+    }else{
+        @Html.ActionLink("Slowest SQLs", "HeavySlowest")        
+    }
 </div>
 @{ Html.RenderPartial(ProfilerClient.ViewPrefix.Formato("ProfilerTable"), (object)Model);}

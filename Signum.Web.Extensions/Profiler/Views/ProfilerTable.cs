@@ -64,34 +64,18 @@ namespace ASP
         {
 
 
+WriteLiteral("\r\n");
+
 
    List<HeavyProfilerEntry> entries = (List<HeavyProfilerEntry>)Model;
    var roles = entries.Select(a => a.GetDescendantRoles()).ToList();
    var allKeys = roles.SelectMany(a => a.Keys).Distinct().Order().ToList();
 
 
-WriteLiteral(@"<table class=""sf-search-results"">
-    <thead>
-        <tr>
-            <th>
-                Entry
-            </th>
-            <th>
-                Type
-            </th>
-            <th>
-                Method
-            </th>
-            <th>
-                Role
-            </th>
-            <th>
-                Time
-            </th>
-            <th>
-                Childs
-            </th>
-");
+WriteLiteral("<table class=\"sf-search-results\">\r\n    <thead>\r\n        <tr>\r\n            <th>\r\n " +
+"               Entry\r\n            </th>\r\n            <th>\r\n                Role\r" +
+"\n            </th>\r\n            <th>\r\n                Time\r\n            </th>\r\n " +
+"          \r\n");
 
 
              foreach (var k in allKeys)
@@ -102,13 +86,15 @@ WriteLiteral("                <th>");
 
                Write(k);
 
-WriteLiteral(" Childs\r\n                </th>\r\n");
+WriteLiteral(" Time\r\n                </th>\r\n");
 
 
             }
 
-WriteLiteral("            <th>\r\n                Aditional Data\r\n            </th>\r\n        </tr" +
-">\r\n    </thead>\r\n    <tbody>\r\n");
+WriteLiteral("             <th>\r\n                Direct Childs\r\n            </th>\r\n            " +
+" <th>\r\n                Method\r\n            </th>\r\n            <th>\r\n            " +
+"    Aditional Data\r\n            </th>\r\n        </tr>\r\n    </thead>\r\n    <tbody>\r" +
+"\n");
 
 
          for (int i = 0; i < entries.Count; i++)
@@ -120,16 +106,6 @@ WriteLiteral("            <tr>\r\n                <td>\r\n                    ")
 
 
                Write(Html.ProfilerEntry("View", entry.FullIndex()));
-
-WriteLiteral("\r\n                </td>\r\n                <td>\r\n                    ");
-
-
-               Write(entry.Type.TypeName());
-
-WriteLiteral("\r\n                </td>\r\n                <td>\r\n                    ");
-
-
-               Write(entry.Method.Name);
 
 WriteLiteral("\r\n                </td>\r\n                <td>\r\n                    ");
 
@@ -165,6 +141,16 @@ WriteLiteral("\r\n                    </td>\r\n");
                 }
 
 WriteLiteral("                <td>\r\n                    ");
+
+
+                Write(entry.Type.TypeName());
+
+WriteLiteral(".");
+
+
+                                        Write(entry.Method.Name);
+
+WriteLiteral("\r\n                </td>\r\n                <td>\r\n                    ");
 
 
                Write(entry.AditionalData.TryCC(o => o.ToString().Left(50, false)));
