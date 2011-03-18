@@ -30,7 +30,7 @@ SF.registerModule("Popup", function () {
                         width: 'auto',
                         close: options.onCancel,
                         dragStop: function (event, ui) {
-                           var $dialog = $(event.target).closest(".ui-dialog");
+                            var $dialog = $(event.target).closest(".ui-dialog");
                             var w = $dialog.width();
                             $dialog.width(w + 1);    //auto -> xxx width
                             setTimeout(function () {
@@ -47,4 +47,19 @@ SF.registerModule("Popup", function () {
             });
         }
     })(jQuery);
+
+    SF.Popup = {};
+
+    SF.Popup.serialize = function (prefix) {
+        return $('#' + SF.compose(prefix, "panelPopup") + " :input").serialize();
+    };
+
+    SF.Popup.serializeJson = function (prefix) {
+        var arr = $('#' + SF.compose(prefix, "panelPopup") + " :input").serializeArray();
+        var data = {};
+        for (var index = 0; index < arr.length; index++) {
+            data[arr[index].name] = arr[index].value;
+        }
+        return data;
+    };
 });

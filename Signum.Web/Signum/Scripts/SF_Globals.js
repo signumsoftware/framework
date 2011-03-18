@@ -193,12 +193,22 @@ SF.registerModule("Globals", function () {
                     concat(param + "=" + value);
                 }
             }
+            else if ($.isFunction(param)) {
+                var data = param();
+                //json
+                for (var key in data) {
+                    if (data.hasOwnProperty(key)) {
+                        var value = data[key];
+                        concat(key + "=" + value);
+                    }
+                }
+            }
             else {
                 //json
                 for (var key in param) {
                     if (param.hasOwnProperty(key)) {
                         var value = param[key];
-                        concat(key + "=" + (jQuery.isFunction(value) ? value() : value));
+                        concat(key + "=" + value);
                     }
                 }
             }
@@ -261,10 +271,12 @@ SF.registerModule("Globals", function () {
     SF.submit = function (urlController, requestExtraJsonData) {
         var $form = $("form");
         if (!SF.isEmpty(requestExtraJsonData)) {
+            if ($.isFunction(requestExtraJsonData)) {
+                requestExtraJsonData = requestExtraJsonData();
+            }
             for (var key in requestExtraJsonData) {
                 if (requestExtraJsonData.hasOwnProperty(key)) {
-                    var str = $.isFunction(requestExtraJsonData[key]) ? requestExtraJsonData[key]() : requestExtraJsonData[key];
-                    $form.append(SF.hiddenInput(key, str));
+                    $form.append(SF.hiddenInput(key, requestExtraJsonData[key]));
                 }
             }
         }
@@ -283,10 +295,12 @@ SF.registerModule("Globals", function () {
         });
 
         if (!SF.isEmpty(requestExtraJsonData)) {
+            if ($.isFunction(requestExtraJsonData)) {
+                requestExtraJsonData = requestExtraJsonData();
+            }
             for (var key in requestExtraJsonData) {
                 if (requestExtraJsonData.hasOwnProperty(key)) {
-                    var str = $.isFunction(requestExtraJsonData[key]) ? requestExtraJsonData[key]() : requestExtraJsonData[key];
-                    $form.append(SF.hiddenInput(key, str));
+                    $form.append(SF.hiddenInput(key, requestExtraJsonData[key]));
                 }
             }
         }
