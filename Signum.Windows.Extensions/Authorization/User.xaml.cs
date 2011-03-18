@@ -31,12 +31,9 @@ namespace Signum.Windows.Authorization
         private void changePassword_Click(object sender, RoutedEventArgs e)
         {
             UserDN user = (UserDN)DataContext;
-            var np = new NewPassword();
-            np.User = user;
-            var result = np.ShowDialog();
-            if (result.HasValue && result.Value)
+            var np = new NewPassword() { User = user, Owner = this.FindCurrentWindow() };
+            if (np.ShowDialog() == true)
             {
-
                 this.RaiseEvent(new ChangeDataContextEventArgs(user.ToLite().Retrieve()));
             }
         }

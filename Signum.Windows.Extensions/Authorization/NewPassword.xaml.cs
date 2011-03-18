@@ -23,7 +23,6 @@ namespace Signum.Windows.Authorization
     /// </summary>
     public partial class NewPassword : Window
     {
-      
         public NewPassword()
         {
             InitializeComponent();
@@ -41,20 +40,17 @@ namespace Signum.Windows.Authorization
         }
         private void bntOk_Click(object sender, RoutedEventArgs e)
         {
-            
-         
             if (pb1.Password != pb2.Password)
             {
                 MessageBox.Show(this, "Password do not match", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
-            Server.Execute((ILoginServer a) => a.ChagePassword(user.UserName, user.PasswordHash, Security.EncodePassword(Password)));
+            Server.Execute((ILoginServer s) => s.ChagePassword(user.UserName, user.PasswordHash, Security.EncodePassword(Password)));
 
             MessageBox.Show(this, "Password changed", "Notice", MessageBoxButton.OK);
 
             DialogResult = false;
-
         }
 
         private void btCancel_Click(object sender, RoutedEventArgs e)

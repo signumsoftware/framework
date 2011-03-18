@@ -34,7 +34,7 @@ namespace Signum.Windows.Authorization
             _minimizarNoFocus = ExtensionsImageLoader.GetImageSortName("bminimizar.png");
             _cerrarFocus = ExtensionsImageLoader.GetImageSortName("bcerrar-on.png");
             _cerrarNoFocus = ExtensionsImageLoader.GetImageSortName("bcerrar.png");
-            SetingNewPassword = false;
+            SettingNewPassword = false;
         }
 
         public string UserName
@@ -61,25 +61,25 @@ namespace Signum.Windows.Authorization
             set { tbNewPassword2.Password = value; }
         }
         private GridLength rowHeight ;
-        private bool setingNewPassword;
-        public bool SetingNewPassword
+        private bool settingNewPassword;
+        public bool SettingNewPassword
         {
-            get { return setingNewPassword; }
+            get { return settingNewPassword; }
             set
             {
-                setingNewPassword = value;
-                    if (setingNewPassword)
-                    {
-                        this.LayoutRoot.RowDefinitions[6].Height = rowHeight;
-                        this.LayoutRoot.RowDefinitions[7].Height = rowHeight;
-                    }
-                    else
-                    {
-                        rowHeight = this.LayoutRoot.RowDefinitions[6].Height;
-                        this.LayoutRoot.RowDefinitions[6].Height = new GridLength(0);
-                        this.LayoutRoot.RowDefinitions[7].Height = new GridLength(0);
-                    
-                    }
+                settingNewPassword = value;
+                if (settingNewPassword)
+                {
+                    this.LayoutRoot.RowDefinitions[6].Height = rowHeight;
+                    this.LayoutRoot.RowDefinitions[7].Height = rowHeight;
+                }
+                else
+                {
+                    rowHeight = this.LayoutRoot.RowDefinitions[6].Height;
+                    this.LayoutRoot.RowDefinitions[6].Height = new GridLength(0);
+                    this.LayoutRoot.RowDefinitions[7].Height = new GridLength(0);
+
+                }
             }
         }
 
