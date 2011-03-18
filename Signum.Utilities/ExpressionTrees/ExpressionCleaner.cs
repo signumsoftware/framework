@@ -38,6 +38,18 @@ namespace Signum.Utilities.ExpressionTrees
 		}
 	}
 
+    //The name of the field for the expression that defines the content
+    [AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
+    public sealed class ExpressionFieldAttribute : Attribute
+    {
+        public string Name { get; set; }
+        public Type Type { get; set; }
+        public ExpressionFieldAttribute(string name)
+        {
+            this.Name =name;
+        }
+    }
+     
 	/// <summary>
     /// Implementation of SimpleExpressionVisitor that does the replacement
     /// * MethodExpanderAttribute
@@ -132,25 +144,29 @@ namespace Signum.Utilities.ExpressionTrees
 
         public static LambdaExpression GetExpansion(Type decType, MemberInfo mi)
         {
-            FieldInfo fi;
-            if(decType != null)
-            {
-                fi = decType.GetField(mi.Name + "Expression", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-                if (fi != null)
-                    return fi.GetValue(null) as LambdaExpression;
+            ExpressionFieldAttribute efa = mi.SingleAttribute<ExpressionFieldAttribute>();
 
-                if (decType == mi.DeclaringType)
-                    return null; 
-            }
+            string name = efa.TryCC(a => a.Name) ?? mi.Name + "Expression";
+            Type type = efa.TryCC(a => a.Type) ?? decType ?? mi.DeclaringType;
 
-            fi = mi.DeclaringType.GetField(mi.Name + "Expression", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+            FieldInfo fi = type.GetField(name, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
             if (fi != null)
                 return fi.GetValue(null) as LambdaExpression;
+            else
+            {
+                if (efa != null)
+                    throw new InvalidOperationException("Expression field {0} not found on  {1}".Formato(name, type));
+
+                if (type != mi.DeclaringType)
+                {
+                    fi = mi.DeclaringType.GetField(name, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+                    if (fi != null)
+                        return fi.GetValue(null) as LambdaExpression;
+                }
+            }
 
             return null;
         }
-
-
 
         #region Simplifier
 
