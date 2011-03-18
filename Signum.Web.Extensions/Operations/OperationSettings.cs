@@ -155,7 +155,9 @@ namespace Signum.Web.Operations
                 IsContextual = true,
                 ControllerUrl = (JsValue<string>)controllerUrl,
                 RequestExtraJsonData = OperationSettings.TryCC(opt => opt.RequestExtraJsonData) ?? 
-                                       "{{{0}:'{1}'}}".Formato(TypeContextUtilities.Compose(Prefix, EntityBaseKeys.RuntimeInfo), new RuntimeInfo(Entity).ToString())
+                    "{{{0}:'{1}'}}".Formato(
+                        TypeContextUtilities.Compose(Prefix, EntityBaseKeys.RuntimeInfo), 
+                        "{0};{1};{2};{3}".Formato(Navigator.ResolveWebTypeName(Entity.GetType()), Entity.Id, "o", ""))
             };
         }
     }

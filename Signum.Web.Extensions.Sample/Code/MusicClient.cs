@@ -8,6 +8,7 @@ using System.Reflection;
 using Signum.Test;
 using Signum.Web.Operations;
 using Signum.Test.Extensions;
+using System.Web.Mvc;
 
 namespace Signum.Web.Extensions.Sample
 {
@@ -34,6 +35,27 @@ namespace Signum.Web.Extensions.Sample
 
 
                     new EmbeddedEntitySettings<AlbumFromBandModel>(){PartialViewName = e => ViewPrefix.Formato("AlbumFromBandModel")},
+                });
+
+                ButtonBarEntityHelper.RegisterEntityButtons<AlbumDN>((ctx, album, partialViewName, prefix) =>
+                { 
+                    if (album.IsNew)
+                        return null;
+
+                    return new ToolBarButton[]
+                    {
+                        new ToolBarButton
+                        {
+                            DivCssClass = ToolBarButton.DefaultEntityDivCssClass,
+                            Id = TypeContextUtilities.Compose(prefix, "CloneWithData"),
+                            Text = "Clone with data",
+                            OnClick = new JsOperationConstructorFrom(new JsOperationOptions
+                            { 
+                                ControllerUrl = RouteHelper.New().Action("CloneWithData", "Music"),
+                                Prefix = prefix
+                            }).OperationAjax(Js.NewPrefix(prefix), JsOpSuccess.OpenPopupNoDefaultOk).ToJS()
+                        }
+                    };
                 });
 
                 OperationClient.Manager.Settings.AddRange(new Dictionary<Enum, OperationSettings>

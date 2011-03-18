@@ -14,6 +14,7 @@ using Signum.Entities;
 using Signum.Engine.Operations;
 using Signum.Test.Extensions;
 using Signum.Engine.Basics;
+using Signum.Utilities;
 
 namespace Signum.Web.Extensions.Sample
 {
@@ -62,6 +63,44 @@ namespace Signum.Web.Extensions.Sample
             IdentifiableEntity entity = OperationLogic.ServiceConstructFromMany(sourceAlbums, typeof(AlbumDN), AlbumOperation.CreateGreatestHitsAlbum);
 
             return Navigator.View(this, entity);
+        }
+
+        /// <summary>
+        /// Button that tests opening a popup and on Ok => submit form + popup
+        /// </summary>
+        /// <param name="prefix"></param>
+        /// <returns></returns>
+        public ActionResult CloneWithData(string prefix)
+        {
+            ViewData[ViewDataKeys.OnOk] = JsValidator.EntityIsValid(prefix,
+                                    Js.Submit(
+                                        RouteHelper.New().Action("Clone", "Music"),
+                                        "function() {{ var data = {{ prefix:'{0}' }}; return $.extend(data, SF.Popup.serializeJson('{0}')); }}".Formato(prefix))
+                                    ).ToJS();
+
+            ViewData[ViewDataKeys.Title] = "Introduzca los datos de las disponibilidades a crear";
+
+            ViewData[ViewDataKeys.WriteSFInfo] = true;
+            return this.PopupView(new ValueLineBoxModel(this.ExtractEntity<AlbumDN>(), ValueLineBoxType.String, "Name", "Write new album's name"), prefix);
+        }
+
+        public ActionResult Clone(string prefix)
+        {
+            var valueCtx = this.ExtractEntity<ValueLineBoxModel>(prefix)
+                               .ApplyChanges(this.ControllerContext, prefix, false)
+                               .ValidateGlobal();
+            var album = this.ExtractLite<AlbumDN>(null);
+
+            if (valueCtx.GlobalErrors.Any())
+            {
+                this.ModelState.FromContext(valueCtx);
+                return JsonAction.ModelState(ModelState);
+            }
+
+            AlbumDN newAlbum = album.ConstructFromLite<AlbumDN>(AlbumOperation.Clone);
+            newAlbum.Name = valueCtx.Value.StringValue;
+
+            return Navigator.View(this, newAlbum);
         }
     }
 }

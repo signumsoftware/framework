@@ -43,11 +43,9 @@ namespace Signum.Web.Extensions.Sample.Test
         string constructorsMenuId = "tmConstructors";
 
         [TestMethod]
-        public void Execute_Navigate()
+        public void Operations001_Execute_Navigate()
         {
             //Album.Save
-            
-            
             CheckLoginAndOpen(FindRoute("Album"));
 
             selenium.SearchCreate();
@@ -64,7 +62,7 @@ namespace Signum.Web.Extensions.Sample.Test
         }
 
         [TestMethod]
-        public void Execute_ReloadContent()
+        public void Operations002_Execute_ReloadContent()
         {
             //Album.Modify
             CheckLoginAndOpen(ViewRoute("Album", 1));
@@ -83,7 +81,7 @@ namespace Signum.Web.Extensions.Sample.Test
         }
 
         [TestMethod]
-        public void ConstructFrom_OpenPopup()
+        public void Operations003_ConstructFrom_OpenPopup()
         {
             //Album.CreateFromBand
             CheckLoginAndOpen(ViewRoute("Band", 1));
@@ -103,7 +101,7 @@ namespace Signum.Web.Extensions.Sample.Test
         }
 
         [TestMethod]
-        public void ConstructFrom_Submit()
+        public void Operations004_ConstructFrom_Submit()
         {
             //Album.Clone
             CheckLoginAndOpen(ViewRoute("Album", 1));
@@ -120,7 +118,7 @@ namespace Signum.Web.Extensions.Sample.Test
         }
 
         [TestMethod]
-        public void Delete()
+        public void Operations005_Delete()
         {
             //Album.Delete
             CheckLoginAndOpen(ViewRoute("Album", 13));
@@ -138,7 +136,7 @@ namespace Signum.Web.Extensions.Sample.Test
         }
 
         [TestMethod]
-        public void ConstructFromMany_OpenPopup()
+        public void Operations006_ConstructFromMany_OpenPopup()
         {
             //Album.CreateGreatestHits
             CheckLoginAndOpen("{0}?allowMultiple=true".Formato(FindRoute("Album")));
@@ -161,7 +159,7 @@ namespace Signum.Web.Extensions.Sample.Test
         }
 
         [TestMethod]
-        public void ConstructFromMany_Submit_UseSessionWhenNew()
+        public void Operations007_ConstructFromMany_Submit_UseSessionWhenNew()
         {
             //Album.CreateGreatestHits
             CheckLoginAndOpen("{0}?allowMultiple=true".Formato(FindRoute("Album")));
@@ -180,6 +178,23 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.EntityButtonClick("AlbumOperation_Save");
             selenium.WaitForPageToLoad(PageLoadTimeout);
             selenium.MainEntityHasId();
+        }
+
+        [TestMethod]
+        public void Operations008_OpenPopupAndSubmitFormAndPopup()
+        {
+            //Album.Clone
+            CheckLoginAndOpen(ViewRoute("Album", 1));
+
+            selenium.EntityButtonClick("CloneWithData");
+
+            string popupPrefix = "New_";
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("{0}:visible".Formato(SeleniumExtensions.PopupSelector(popupPrefix))));
+
+            selenium.Type("{0}StringValue".Formato(popupPrefix), "test popup");
+            selenium.PopupOk(popupPrefix);
+
+            selenium.IsTextPresent("test popup");
         }
     }
 }
