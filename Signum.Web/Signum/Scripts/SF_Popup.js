@@ -58,7 +58,12 @@ SF.registerModule("Popup", function () {
         var arr = $('#' + SF.compose(prefix, "panelPopup") + " :input").serializeArray();
         var data = {};
         for (var index = 0; index < arr.length; index++) {
-            data[arr[index].name] = arr[index].value;
+            if (data[arr[index].name] != null) {
+                data[arr[index].name] += "," + arr[index].value;
+            }
+            else {
+                data[arr[index].name] = arr[index].value;
+            }
         }
         return data;
     };

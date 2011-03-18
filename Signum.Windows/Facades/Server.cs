@@ -289,5 +289,10 @@ namespace Signum.Windows
         {
             return Lite.TryParseLite(liteType, liteKey, TryGetType, out result);
         }
+
+        //public static void Execute(Action<global::Signum.Services.ILoginServer> action)
+        //{
+        //    throw new NotImplementedException();
+        //}
     }
 }
