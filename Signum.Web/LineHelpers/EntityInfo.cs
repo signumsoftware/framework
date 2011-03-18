@@ -29,7 +29,7 @@ namespace Signum.Web
         public static MvcHtmlString HiddenRuntimeInfo(this HtmlHelper helper, TypeContext tc)
         {
             return helper.Hidden(tc.Compose(EntityBaseKeys.RuntimeInfo), 
-                new RuntimeInfo(tc.UntypedValue) { Ticks = GetTicks(helper, tc), ForceNewInUI = GetForceNewInUI(helper, tc) }.ToString());
+                new RuntimeInfo(tc.UntypedValue) { Ticks = GetTicks(helper, tc) }.ToString());
         }
 
         public static MvcHtmlString HiddenStaticInfo(this HtmlHelper helper, EntityBase tc)
@@ -51,12 +51,6 @@ namespace Signum.Web
                 (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || (tc as BaseLine).TryCS(bl => bl.ReloadOnChange) == true))
                 return helper.GetChangeTicks(tc.ControlID) ?? 0;
             return null;
-        }
-
-        public static bool GetForceNewInUI(HtmlHelper helper, TypeContext tc)
-        {
-            return (tc as EntityBase).TryCS(eb => eb.ForceNewInUI) == true 
-                || helper.ViewData.ContainsKey(ViewDataKeys.ForceNewInUI);
         }
     }
 
@@ -122,7 +116,6 @@ namespace Signum.Web
         public int? IdOrNull { get; set; }
         public bool IsNew { get; set; }
         public long? Ticks { get; set; }
-        public bool? ForceNewInUI { get; set; }
 
         public RuntimeInfo() { }
 
@@ -167,7 +160,7 @@ namespace Signum.Web
             return "{0};{1};{2};{3}".Formato(
                 (RuntimeType == null) ? "" : Navigator.ResolveWebTypeName(RuntimeType),
                 IdOrNull.TryToString(),
-                IsNew || (ForceNewInUI==true && !IdOrNull.HasValue) ? "n" : "o", //2nd condition is for EmbeddedEntities
+                IsNew || (!IdOrNull.HasValue) ? "n" : "o", //2nd condition is for EmbeddedEntities
                 Ticks.TryToString()
                 );
         }

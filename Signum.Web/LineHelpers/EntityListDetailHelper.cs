@@ -82,13 +82,13 @@ namespace Signum.Web
         {
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            if (!listDetail.ForceNewInUI)
+            if (listDetail.ShouldWriteOldIndex(itemTC))
                 sb.AddLine(helper.Hidden(itemTC.Compose(EntityListBaseKeys.Index), itemTC.Index.ToString()));
 
             sb.AddLine(helper.HiddenRuntimeInfo(itemTC));
 
             //TODO: Anto - RequestLoadAll con ItemTC
-            if (typeof(T).IsEmbeddedEntity() || ((IdentifiableEntity)(object)itemTC.Value).IsNew || EntityBaseHelper.RequiresLoadAll(helper, listDetail) || listDetail.ForceNewInUI)
+            if (typeof(T).IsEmbeddedEntity() || ((IdentifiableEntity)(object)itemTC.Value).IsNew || EntityBaseHelper.RequiresLoadAll(helper, listDetail))
                 sb.AddLine(EntityBaseHelper.RenderTypeContext(helper, itemTC, RenderMode.ContentInInvisibleDiv, listDetail));
             else if (itemTC.Value != null)
                 sb.Add(helper.Div(itemTC.Compose(EntityBaseKeys.Entity), null, "", new Dictionary<string, object> { { "style", "display:none" } }));

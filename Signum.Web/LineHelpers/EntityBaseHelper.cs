@@ -61,8 +61,6 @@ namespace Signum.Web
                 helper.PropagateSFKeys(vdd);
             }
 
-            if (line.ForceNewInUI)
-                vdd[ViewDataKeys.ForceNewInUI] = true;
 
             if (line.ReloadOnChange)
                 vdd[ViewDataKeys.Reactive] = true;

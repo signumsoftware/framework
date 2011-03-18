@@ -39,5 +39,28 @@ namespace Signum.Web
         {
             get { return Type.ElementType(); }
         }
+
+        public WriteIndex WriteIndex = WriteIndex.ForSavedEntities;
+
+        public bool ShouldWriteOldIndex(TypeContext tc)
+        {
+            if(WriteIndex == WriteIndex.Allways )
+            return  true;
+
+            if (WriteIndex == Web.WriteIndex.ForSavedEntities)
+            {
+                IdentifiableEntity ie = tc.Parent.FollowC(a => a.Parent).OfType<TypeContext>().Select(a=>a.UntypedValue).OfType<IdentifiableEntity>().First("Parent entity not found");
+                return !ie.IsNew; 
+            }
+
+            return false; 
+        }
+    }
+
+    public enum WriteIndex
+    {
+        ForSavedEntities,
+        Allways,
+        Never
     }
 }

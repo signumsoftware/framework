@@ -322,7 +322,7 @@ namespace Signum.Web
 
             if (typeof(T).IsEmbeddedEntity())
             {
-                if (runtimeInfo.IsNew && ctx.Value == null)
+                if (runtimeInfo.IsNew || ctx.Value == null)
                     return Constructor.Construct<T>();
 
                 return ctx.Value;

@@ -60,16 +60,6 @@ namespace Signum.Web
             set { preserveViewData = value; }
         }
 
-        bool forceNewInUI;
-        /// <summary>
-        /// If set to true and the line value is new, RuntimeInfo will be rendered as "n" instead of "o"
-        /// </summary>
-        public bool ForceNewInUI
-        {
-            get { return forceNewInUI; }
-            set { forceNewInUI = value; }
-        }
-
         public string OnEntityChanged { get; set; }
         
         string onChangedTotal;

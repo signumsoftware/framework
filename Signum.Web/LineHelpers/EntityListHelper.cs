@@ -68,7 +68,7 @@ namespace Signum.Web
         {
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            if (!entityList.ForceNewInUI)
+            if (entityList.ShouldWriteOldIndex(itemTC))
                 sb.AddLine(helper.Hidden(itemTC.Compose(EntityListBaseKeys.Index), itemTC.Index.ToString()));
 
             sb.AddLine(helper.HiddenRuntimeInfo(itemTC));

@@ -59,7 +59,7 @@ namespace Signum.Web
 
             using (sb.Surround(new HtmlTag("div").IdName(itemTC.Compose(EntityRepeaterKeys.RepeaterElement)).Class("sf-repeater-element")))
             {
-                if (!entityRepeater.ForceNewInUI)
+                if (entityRepeater.ShouldWriteOldIndex(itemTC))
                     sb.AddLine(helper.Hidden(itemTC.Compose(EntityListBaseKeys.Index), itemTC.Index.ToString()));
 
                 sb.AddLine(helper.HiddenRuntimeInfo(itemTC));

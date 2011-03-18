@@ -329,6 +329,7 @@ SF.registerModule("Lines", function () {
             }
             else {
                 new SF.ViewNavigator(viewOptions).viewEmbedded();
+                SF.triggerNewContent($("#" + this.options.detailDiv));
             }
             this.onCreated(viewOptions.type);
             this.setTicks();
@@ -389,6 +390,7 @@ SF.registerModule("Lines", function () {
             //View result in the detailDiv
             var viewOptions = this.viewOptionsForCreating($.extend(_viewOptions, { type: selectedItems[0].type, id: selectedItems[0].id }));
             new SF.ViewNavigator(viewOptions).viewEmbedded();
+            SF.triggerNewContent($("#" + this.options.detailDiv));
 
             return true;
         };
@@ -817,6 +819,7 @@ SF.registerModule("Lines", function () {
                 //View results in the repeater
                 var viewOptions = this.viewOptionsForViewing($.extend(_viewOptions, { type: item.type, id: item.id }), itemPrefix);
                 new SF.ViewNavigator(viewOptions).viewEmbedded();
+                SF.triggerNewContent($(SF.compose(itemPrefix, this.entity)));                
 
                 this.setItemTicks(itemPrefix);
             }
@@ -853,6 +856,7 @@ SF.registerModule("Lines", function () {
             }
             else {
                 new SF.ViewNavigator(viewOptions).viewEmbedded();
+                SF.triggerNewContent($('#' + viewOptions.containerDiv));
             }
             this.onItemCreated(viewOptions);
             this.setTicks();
@@ -922,6 +926,7 @@ SF.registerModule("Lines", function () {
             else {
                 var viewOptions = this.viewOptionsForViewing(_viewOptions, selectedItemPrefix);
                 new SF.ViewNavigator(viewOptions).viewEmbedded();
+                SF.triggerNewContent($('#' + _viewOptions.containerDiv));
             }
             this.setTicks();
             this.setItemTicks(selectedItemPrefix);

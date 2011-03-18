@@ -23,8 +23,7 @@ namespace Signum.Web
         public const string Reactive = "sfReactive";
         public const string TabId = "sfTabId";
         public const string PartialViewName = "sfPartialViewName";
-        public const string ForceNewInUI = "sfForceNewInUI";
-
+        
         public static string WindowPrefix(this HtmlHelper helper)
         {
             TypeContext tc = helper.ViewData.Model as TypeContext;
