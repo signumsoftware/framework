@@ -28,7 +28,7 @@ namespace Signum.Web.Profiler
             ProfilerPermissions.ViewHeavyProfiler.Authorize();
 
             ViewData[ViewDataKeys.Title] = "Root entries";
-
+            ViewBag.Slowest = false;
             return View(ProfilerClient.ViewPrefix.Formato("HeavyList"), Signum.Utilities.HeavyProfiler.Entries); 
         }
 
@@ -39,7 +39,8 @@ namespace Signum.Web.Profiler
 
             var list = Signum.Utilities.HeavyProfiler.AllEntries().Where(a => a.Role == "SQL").OrderByDescending(a => a.Elapsed).Take(top ?? 50).ToList();
 
-            ViewData[ViewDataKeys.Title] = "Slowest SQLs"; 
+            ViewData[ViewDataKeys.Title] = "Slowest SQLs";
+            ViewBag.Slowest = true;
 
             return View(ProfilerClient.ViewPrefix.Formato("HeavyList"), list);
         }

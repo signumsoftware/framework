@@ -10,12 +10,13 @@
     else
     {
         @Html.ActionLink("Enable", "Enable")
-    }
-    |
-    @Html.ActionLink("Clean", "Clean")
-    |
 
-    @if(@ViewBag.Slowest)
+    }
+    
+    @Html.ActionLink("Clean", "Clean")
+    
+
+    @if(ViewBag.Slowest)
     {
         @Html.ActionLink("Root Entries", "Heavy")
     }else{

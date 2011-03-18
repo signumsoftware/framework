@@ -85,17 +85,18 @@ WriteLiteral("</h2>\r\n<div>\r\n");
    Write(Html.ActionLink("Enable", "Enable"));
 
                                             
+
     }
 
-WriteLiteral("    |\r\n    ");
+WriteLiteral("    \r\n    ");
 
 
 Write(Html.ActionLink("Clean", "Clean"));
 
-WriteLiteral("\r\n    |\r\n\r\n");
+WriteLiteral("\r\n    \r\n\r\n");
 
 
-     if(@ViewBag.Slowest)
+     if(ViewBag.Slowest)
     {
         
    Write(Html.ActionLink("Root Entries", "Heavy"));
