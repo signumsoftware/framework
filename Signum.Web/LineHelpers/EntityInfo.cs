@@ -29,7 +29,7 @@ namespace Signum.Web
         public static MvcHtmlString HiddenRuntimeInfo(this HtmlHelper helper, TypeContext tc)
         {
             return helper.Hidden(tc.Compose(EntityBaseKeys.RuntimeInfo), 
-                new RuntimeInfo(tc.UntypedValue) { Ticks = GetTicks(helper, tc) }.ToString());
+                new RuntimeInfo(tc) { Ticks = GetTicks(helper, tc) }.ToString());
         }
 
         public static MvcHtmlString HiddenStaticInfo(this HtmlHelper helper, EntityBase tc)
@@ -119,34 +119,38 @@ namespace Signum.Web
 
         public RuntimeInfo() { }
 
-        public RuntimeInfo(object value)
+        public RuntimeInfo(TypeContext tc)
         {
-            if (value == null)
+            if (tc.UntypedValue == null)
             {
                 RuntimeType = null;
                 return;
             }
-
-            if (value.GetType().IsLite())
+            
+            Type type = tc.UntypedValue.GetType();
+            if (type.IsLite())
             {
-                Lite liteValue = value as Lite;
+                Lite liteValue = tc.UntypedValue as Lite;
                 RuntimeType = liteValue.RuntimeType;
                 IdOrNull = liteValue.IdOrNull;
                 IsNew = liteValue.IdOrNull == null;
             }
-            else if (value.GetType().IsEmbeddedEntity())
+            else if (type.IsEmbeddedEntity())
             {
-                RuntimeType = value.GetType();
+                RuntimeType = type;
+
+                IdentifiableEntity ie = tc.Parent.FollowC(a => a.Parent).OfType<TypeContext>().Select(a=>a.UntypedValue).OfType<IdentifiableEntity>().FirstOrDefault();
+                IsNew = ie.TryCS(i => i.IsNew) ?? true; 
             }
-            else if (typeof(IdentifiableEntity).IsAssignableFrom(value.GetType()))
+            else if (typeof(IdentifiableEntity).IsAssignableFrom(type))
             {
-                RuntimeType = value.GetType();
-                IIdentifiable identifiable = value as IIdentifiable;
+                RuntimeType = type;
+                IIdentifiable identifiable = tc.UntypedValue as IIdentifiable;
                 IdOrNull = identifiable.IdOrNull;
                 IsNew = identifiable.IdOrNull == null;
             }
             else
-                throw new ArgumentException("Invalid type {0} for RuntimeInfo. It must be Lite, IdentifiableEntity or EmbeddedEntity".Formato(value.GetType()));
+                throw new ArgumentException("Invalid type {0} for RuntimeInfo. It must be Lite, IdentifiableEntity or EmbeddedEntity".Formato(type));
         }
 
         public override string ToString()
@@ -160,7 +164,7 @@ namespace Signum.Web
             return "{0};{1};{2};{3}".Formato(
                 (RuntimeType == null) ? "" : Navigator.ResolveWebTypeName(RuntimeType),
                 IdOrNull.TryToString(),
-                IsNew || (!IdOrNull.HasValue) ? "n" : "o", //2nd condition is for EmbeddedEntities
+                IsNew ? "n" : "o",
                 Ticks.TryToString()
                 );
         }
