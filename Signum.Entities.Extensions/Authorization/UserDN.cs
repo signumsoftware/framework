@@ -174,7 +174,8 @@ namespace Signum.Entities.Authorization
         Save,
         Enable,
         Disable,
-        NewPassword
+        //NewPassword,
+        SetPassword
     }
 
     public interface IUserRelatedDN : IIdentifiable

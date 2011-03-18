@@ -453,4 +453,10 @@
   <data name="ExpectedUserLogged" xml:space="preserve">
     <value>Expected a user logged</value>
   </data>
+  <data name="EnterTheNewPassword" xml:space="preserve">
+    <value>Enter the new password</value>
+  </data>
+  <data name="PasswordsAreDifferent" xml:space="preserve">
+    <value>Passwords are different</value>
+  </data>
 </root>

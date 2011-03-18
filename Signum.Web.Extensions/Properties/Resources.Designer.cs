@@ -250,6 +250,15 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Enter the new password.
+        /// </summary>
+        public static string EnterTheNewPassword {
+            get {
+                return ResourceManager.GetString("EnterTheNewPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to All.
         /// </summary>
         public static string EntityGroupsAscx_All {
@@ -606,6 +615,15 @@ namespace Signum.Web.Extensions.Properties {
         public static string PasswordReseted {
             get {
                 return ResourceManager.GetString("PasswordReseted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Passwords are different.
+        /// </summary>
+        public static string PasswordsAreDifferent {
+            get {
+                return ResourceManager.GetString("PasswordsAreDifferent", resourceCulture);
             }
         }
         

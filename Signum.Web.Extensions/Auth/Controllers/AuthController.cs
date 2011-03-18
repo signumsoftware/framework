@@ -20,6 +20,7 @@ using Signum.Engine.Mailing;
 using System.Collections.Generic;
 using Signum.Engine.Operations;
 using Signum.Entities.Extensions.Authorization;
+using Signum.Web.Operations;
 #endregion
 
 namespace Signum.Web.Auth
@@ -87,6 +88,42 @@ namespace Signum.Web.Auth
             context.Value.Execute(UserOperation.SaveNew);
             return JsonAction.Redirect(Navigator.ViewRoute(context.Value));
         }
+
+    
+
+
+
+        [AcceptVerbs(HttpVerbs.Post)]
+        public ActionResult SetPassword(string prefix, string oldPrefix)
+        {
+            UserDN entity = this.ExtractEntity<UserDN>(oldPrefix);
+            var model = new SetPasswordModel { User = entity.ToLite() };
+
+            ViewData[ViewDataKeys.WriteSFInfo] = true; 
+            ViewData[ViewDataKeys.OnOk] = JsValidator.EntityIsValid(prefix,
+                new JsOperationExecutor(new JsOperationOptions
+                {
+                    ControllerUrl = RouteHelper.New().Action("SetPasswordOnOk", "Auth"),
+                    Prefix = prefix,
+                }).OperationAjax(prefix, JsOpSuccess.DefaultDispatcher)).ToJS();
+
+            ViewData[ViewDataKeys.Title] = Resources.EnterTheNewPassword;
+            return Navigator.PopupView(this, model, prefix);
+        }
+
+        [AcceptVerbs(HttpVerbs.Post)]
+        public JsonResult SetPasswordOnOk(string prefix)
+        {
+            var context = this.ExtractEntity<SetPasswordModel>(prefix).ApplyChanges(this.ControllerContext, prefix, true).ValidateGlobal();
+
+            UserDN g = context.Value.User.ExecuteLite(UserOperation.SetPassword, context.Value.Password);
+
+            return JsonAction.Redirect(Navigator.ViewRoute(typeof(UserDN), g.Id));
+        }
+
+
+
+
 
         #region "Change password"
         public ActionResult ChangePassword()

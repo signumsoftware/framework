@@ -137,6 +137,7 @@
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Auth\AuthClient.cs" />
+    <Compile Include="Auth\Models\SetPasswordModel.cs" />
     <Compile Include="Auth\UserMapping.cs" />
     <Compile Include="Auth\Controllers\AuthController.cs" />
     <Compile Include="Auth\Views\ChangePassword.cs">
@@ -188,6 +189,11 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>ResetPasswordSuccess.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Auth\Views\SetPassword.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SetPassword.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Auth\Views\_ViewStart.cs">
       <AutoGen>True</AutoGen>
@@ -601,6 +607,10 @@
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>User.cs</LastGenOutput>
     </None>
+    <Content Include="Auth\Views\SetPassword.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>SetPassword.cs</LastGenOutput>
+    </Content>
     <None Include="Auth\Views\_ViewStart.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>_ViewStart.cs</LastGenOutput>

@@ -161,10 +161,14 @@ namespace Signum.Engine.Authorization
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 new UserGraph().Register();
-                OperationLogic.Register(new BasicExecute<UserDN>(UserOperation.NewPassword)
+                OperationLogic.Register(new BasicExecute<UserDN>(UserOperation.SetPassword)
                 {
-                    Lite = false,
-                    Execute = (u, _) => { throw new InvalidOperationException("This is an IU operation, not meant to be called in logic"); }
+                    Lite = true,
+                    Execute = (u, args) =>
+                    {
+                        string newPassword = args.TryGetArgC<string>(0);
+                        AuthLogic.ChangePassword(u.UserName, u.PasswordHash, Security.EncodePassword(newPassword));
+                    }
                 });
             }
         }
@@ -512,7 +516,7 @@ namespace Signum.Engine.Authorization
 
                 EnumerableExtensions.JoinStrict(
                     Roles.RelatedTo(r),
-                    kvp.Value.Attribute("Contains").Value.Split(new []{','}, StringSplitOptions.RemoveEmptyEntries),
+                    kvp.Value.Attribute("Contains").Value.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries),
                     sr => sr.ToStr,
                     s => s,
                     (sr, s) => 0,

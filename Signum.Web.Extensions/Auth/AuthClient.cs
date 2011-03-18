@@ -63,9 +63,13 @@ namespace Signum.Web.Auth
                     Navigator.AddSetting(new EntitySettings<UserDN>(EntityType.Default));
                 if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(RoleDN)))
                     Navigator.AddSetting(new EntitySettings<RoleDN>(EntityType.Default));
-                
+
                 if (passwordExpiration)
-                    Navigator.AddSetting(new EntitySettings<PasswordValidIntervalDN>(EntityType.Admin) { PartialViewName = _ => ViewPrefix.Formato("PasswordValidInterval") });
+                {
+                    Navigator.AddSetting(new EntitySettings<PasswordValidIntervalDN>(EntityType.Admin) { PartialViewName = _ => ViewPrefix.Formato("PasswordValidInterval") });                  
+                }
+
+                Navigator.AddSetting(new EmbeddedEntitySettings<SetPasswordModel>() { PartialViewName = _ => ViewPrefix.Formato("SetPassword") });
 
                 if (property)
                     Common.CommonTask += new CommonTask(TaskAuthorizeProperties);
@@ -124,6 +128,21 @@ namespace Signum.Web.Auth
                         HandleExceptionAttribute.DefaultOnException(ctx);
                     }
                 };
+
+
+                OperationClient.Manager.Settings.AddRange(new Dictionary<Enum, OperationSettings>
+                {
+                    { UserOperation.SetPassword, new EntityOperationSettings 
+                    { 
+                        OnClick = ctx => new JsOperationConstructorFrom(ctx.Options("SetPassword","Auth"))
+                            .OperationAjax(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk),
+                        IsContextualVisible = _ => false
+                    }},
+                
+                   
+                });
+
+
             }
         }
 
