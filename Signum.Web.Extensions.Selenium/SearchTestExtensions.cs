@@ -370,6 +370,13 @@ namespace Signum.Web.Selenium
 
         public static void EntityClick(this ISelenium selenium, int rowIndexBase1, string prefix)
         {
+            selenium.EntityClick(rowIndexBase1, prefix);
+        }
+        public static void EntityClick(this ISelenium selenium, int rowIndexBase1,bool multiSel, string prefix)
+        {
+            if (multiSel)
+            selenium.Click("{0} > a".Formato(CellSelector(rowIndexBase1, 2, prefix)));
+            else
             selenium.Click("{0} > a".Formato(CellSelector(rowIndexBase1, 1, prefix)));
         }
 
