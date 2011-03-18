@@ -23,6 +23,16 @@ namespace Signum.Web.Operations
         {
             Renderer = () =>
             {
+                bool emptyPrefix = false;
+                if (Prefix == null)
+                    emptyPrefix = true;
+                else
+                {
+                    string pf = Prefix.ToJS();
+                    if (string.IsNullOrEmpty(pf) || pf == "''")
+                        emptyPrefix = true;
+                }
+                    
                 var builder = new JsOptionsBuilder(false)
                 {
                     {"prefix", Prefix.TryCC(a=>a.ToJS())},
@@ -33,7 +43,8 @@ namespace Signum.Web.Operations
                     {"returnType",ReturnType.TryCC(a=>a.ToJS())},
                     {"requestExtraJsonData", RequestExtraJsonData.TryCC(a=>a.ToJS())},
                     {"controllerUrl", ControllerUrl.TryCC(a=>a.ToJS())},
-                    {"validationControllerUrl", ValidationControllerUrl.TryCC(a => a.ToJS()) ?? RouteHelper.New().SignumAction(Prefix == null || !Prefix.ToJS().HasText() ? "Validate" : "ValidatePartial").SingleQuote() }
+                    {"validationControllerUrl", ValidationControllerUrl.TryCC(a => a.ToJS()) ?? 
+                        RouteHelper.New().SignumAction(emptyPrefix ? "Validate" : "ValidatePartial").SingleQuote() }
                 };
 
                 return builder.ToJS();
