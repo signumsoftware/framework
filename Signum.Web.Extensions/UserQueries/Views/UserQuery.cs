@@ -84,11 +84,11 @@ Write(Html.HiddenRuntimeInfo(query));
     
 Write(Html.Span("Query", "Query", "sf-label-line"));
 
-                                             
+                                                 
     
 Write(Html.Href("hrefQuery", query.Value.DisplayName, Navigator.FindRoute(ViewData[ViewDataKeys.QueryName]), "", "sf-value-line", null));
 
-                                                                                                                                  
+                                                                                                                                      
         
 
 WriteLiteral("    <div class=\"clearall\">\r\n    </div>\r\n");
@@ -113,9 +113,9 @@ WriteLiteral("    <br />\r\n");
 
 
     
-Write(Html.EntityRepeater(e, f => f.Filters, er => { er.PreserveViewData = true; er.ForceNewInUI = true; }));
+Write(Html.EntityRepeater(e, f => f.Filters, er => { er.PreserveViewData = true;}));
 
-                                                                                                          
+                                                                                 
 
 WriteLiteral("    <br />\r\n");
 
@@ -125,17 +125,17 @@ Write(Html.ValueLine(e, f => f.ColumnsMode));
 
                                           
     
-Write(Html.EntityRepeater(e, f => f.Columns, er => { er.PreserveViewData = true; er.ForceNewInUI = true; }));
+Write(Html.EntityRepeater(e, f => f.Columns, er => { er.PreserveViewData = true;}));
 
-                                                                                                          
+                                                                                 
 
 WriteLiteral("    <br />\r\n");
 
 
     
-Write(Html.EntityRepeater(e, f => f.Orders, er => { er.PreserveViewData = true; er.ForceNewInUI = true; }));
+Write(Html.EntityRepeater(e, f => f.Orders, er => { er.PreserveViewData = true; }));
 
-                                                                                                         
+                                                                                 
 
 WriteLiteral("    <br />\r\n");
 
@@ -144,8 +144,7 @@ WriteLiteral("    <br />\r\n");
 Write(Html.ValueLine(e, f => f.MaxItems));
 
                                        
-}
-WriteLiteral(" ");
+} 
 
 
         }

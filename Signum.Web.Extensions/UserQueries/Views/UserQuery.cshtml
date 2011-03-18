@@ -19,12 +19,12 @@ using (var query = e.SubContext(f => f.Query))
 }
     @Html.ValueLine(e, f => f.DisplayName)
     <br />
-    @Html.EntityRepeater(e, f => f.Filters, er => { er.PreserveViewData = true; er.ForceNewInUI = true; })
+    @Html.EntityRepeater(e, f => f.Filters, er => { er.PreserveViewData = true;})
     <br />
     @Html.ValueLine(e, f => f.ColumnsMode)
-    @Html.EntityRepeater(e, f => f.Columns, er => { er.PreserveViewData = true; er.ForceNewInUI = true; })
+    @Html.EntityRepeater(e, f => f.Columns, er => { er.PreserveViewData = true;})
     <br />
-    @Html.EntityRepeater(e, f => f.Orders, er => { er.PreserveViewData = true; er.ForceNewInUI = true; })
+    @Html.EntityRepeater(e, f => f.Orders, er => { er.PreserveViewData = true; })
     <br />
     @Html.ValueLine(e, f => f.MaxItems)
 } 
