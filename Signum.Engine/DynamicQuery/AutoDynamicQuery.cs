@@ -33,7 +33,7 @@ namespace Signum.Engine.DynamicQuery
 
             DQueryable<T> result = Query
                 .Where(request.Filters)
-                .SelectDynamic(request.Columns, request.Orders)
+                .SelectExpandable(request.Columns, request.Orders)
                 .OrderBy(request.Orders).TryTake(request.Limit);
 
             DEnumerable<T> array = result.ToArray();
@@ -49,7 +49,7 @@ namespace Signum.Engine.DynamicQuery
         public override Lite ExecuteUniqueEntity(UniqueEntityRequest request)
         {
             var columns = new List<Column> { new _EntityColumn(EntityColumn().BuildColumnDescription()) };
-            DQueryable<T> orderQuery = Query.Where(request.Filters).SelectDynamic(columns, request.Orders).OrderBy(request.Orders);
+            DQueryable<T> orderQuery = Query.Where(request.Filters).SelectExpandable(columns, request.Orders).OrderBy(request.Orders);
 
             var entitySelect = GetEntitySelector(orderQuery.TupleType);
 

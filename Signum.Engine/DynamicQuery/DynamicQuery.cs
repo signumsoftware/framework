@@ -123,7 +123,7 @@ namespace Signum.Engine.DynamicQuery
 
         #region SelectExpandable
 
-        public static DQueryable<T> SelectDynamic<T>(this IQueryable<T> query, List<Column> columns, List<Order> orders)
+        public static DQueryable<T> SelectExpandable<T>(this IQueryable<T> query, List<Column> columns, List<Order> orders)
         {
             HashSet<QueryToken> tokens = new HashSet<QueryToken>(columns.Select(c => c.Token));
             if (orders != null)

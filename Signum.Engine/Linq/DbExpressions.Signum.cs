@@ -28,6 +28,7 @@ namespace Signum.Engine.Linq
         public readonly Expression TypeId;
         public readonly Expression OtherCondition; //Used for IBA only, 
         public readonly ProjectionToken Token;
+
        
         public string TableAlias; //Changed on expansion 
         public List<FieldBinding> Bindings = new List<FieldBinding>();// not readonly!!!
@@ -174,7 +175,6 @@ namespace Signum.Engine.Linq
     internal class ImplementedByExpression : DbExpression//, IPropertyInitExpression
     {
         public readonly ReadOnlyCollection<ImplementationColumnExpression> Implementations;
-
         public List<PropertyBinding> PropertyBindings = new List<PropertyBinding>(); //For interface Access
   
         public ImplementedByExpression(Type type, ReadOnlyCollection<ImplementationColumnExpression> implementations)
@@ -233,7 +233,7 @@ namespace Signum.Engine.Linq
 
         public readonly Expression Id;
         public readonly Expression TypeId;
-        public readonly ProjectionToken Token; 
+        public readonly ProjectionToken Token;
 
         public ImplementedByAllExpression(Type type, Expression id, Expression typeId, ProjectionToken token)
             : base(DbExpressionType.ImplementedByAll, type)

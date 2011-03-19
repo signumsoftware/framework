@@ -129,13 +129,13 @@ namespace Signum.Engine.Linq
             }
             else if (m.Method.DeclaringType == typeof(object) && m.Method.Name == "ToString" && typeof(IdentifiableEntity).IsAssignableFrom(m.Object.Type))
             {
-                return Visit(Expression.MakeMemberAccess(m.Object, ReflectionTools.GetFieldInfo((IdentifiableEntity ei) =>ei.toStr)));
+                return Visit(Expression.MakeMemberAccess(m.Object, ReflectionTools.GetFieldInfo((IdentifiableEntity ei) => ei.toStr)));
             }
-            else if ( m.Method.DeclaringType.IsInstantiationOf(typeof(EnumProxy<>)) && m.Method.Name == "ToEnum")
+            else if (m.Method.DeclaringType.IsInstantiationOf(typeof(EnumProxy<>)) && m.Method.Name == "ToEnum")
             {
                 FieldInitExpression fi = (FieldInitExpression)Visit(m.Object);
 
-                return Expression.Convert((ColumnExpression)fi.ExternalId, m.Method.DeclaringType.GetGenericArguments()[0]);            
+                return Expression.Convert((ColumnExpression)fi.ExternalId, m.Method.DeclaringType.GetGenericArguments()[0]);
             }
             else if (m.Object != null && typeof(IList).IsAssignableFrom(m.Object.Type) && m.Method.Name == "Contains")
             {
@@ -145,7 +145,6 @@ namespace Signum.Engine.Linq
             MethodCallExpression result = (MethodCallExpression)base.VisitMethodCall(m);
             return BindMethodCall(result);
         }
-
 
         internal Expression Coalesce(Type type, IEnumerable<Expression> exp)
         {
@@ -426,13 +425,15 @@ namespace Signum.Engine.Linq
                 ConstantExpression ce = (ConstantExpression)source;
                 IEnumerable col = (IEnumerable)ce.Value;
 
-                Type colType = source.Type.ElementType();
-                if (colType.IsIIdentifiable())
-                    return SmartEqualizer.EntityIn(newItem, col.Cast<IIdentifiable>().Select(ie => ToFieldInitExpression(ie)).ToArray());
-                else if (colType.IsLite())
-                    return SmartEqualizer.EntityIn(newItem, col.Cast<Lite>().Select(lite => ToLiteReferenceExpression(lite)).ToArray());
-                else
-                    return InExpression.FromValues(newItem, col == null ? new object[0] : col.Cast<object>().ToArray());
+                switch ((DbExpressionType)newItem.NodeType)
+                {
+                    case DbExpressionType.LiteReference:return SmartEqualizer.EntityIn((LiteReferenceExpression)newItem, col.Cast<Lite>());
+                    case DbExpressionType.FieldInit:
+                    case DbExpressionType.ImplementedBy:
+                    case DbExpressionType.ImplementedByAll: return SmartEqualizer.EntityIn(newItem, col.Cast<IdentifiableEntity>());
+                    default:
+                        return InExpression.FromValues(newItem, col == null ? new object[0] : col.Cast<object>().ToArray());
+                }
             }
             else
             {
@@ -788,42 +789,8 @@ namespace Signum.Engine.Linq
             Type tableType = TableType(c.Value);
             if(tableType != null)
                 return GetTableProjection(tableType);
-
-            if (c.Value == null)
-                return c; 
-
-            if (c.Type.IsIIdentifiable())
-            {
-                return ToFieldInitExpression((IdentifiableEntity)c.Value);// podria ser null y lo meteriamos igualmente
-            }
-            else if (c.Type.IsLite())
-            {
-                return ToLiteReferenceExpression((Lite)c.Value);
-            }
+           
             return c;
-        }
-
-        static Expression ToLiteReferenceExpression(Lite lite)
-        {
-            Expression id = Expression.Constant(lite.IdOrNull ?? int.MinValue);
-            Expression typeId = TypeConstant(lite.RuntimeType);
-
-            Type liteType = lite.GetType();
-
-            return new LiteReferenceExpression(liteType,
-                EntityCasting(new FieldInitExpression(lite.RuntimeType, null, id, typeId, null, ProjectionToken.External), Reflector.ExtractLite(liteType)),
-                id, Expression.Constant(lite.ToStr), typeId);
-        }
-
-        static Expression ToFieldInitExpression(IIdentifiable ei)
-        {
-            return new FieldInitExpression(
-                ei.GetType(),
-                null,
-                Expression.Constant(ei.IdOrNull ?? int.MinValue),
-                TypeConstant(ei.GetType()),
-                null,
-                ProjectionToken.External);
         }
 
         static bool IsNewId(Expression expression)
@@ -1210,19 +1177,23 @@ namespace Signum.Engine.Linq
             if (operand.NodeType == (ExpressionType)DbExpressionType.FieldInit)
             {
                 FieldInitExpression fie = (FieldInitExpression)operand;
-                if (!b.TypeOperand.IsAssignableFrom(fie.Type))
-                    throw new InvalidCastException("A concrete {0} can not be a {1}".Formato(fie.Type.TypeName(), b.TypeOperand.TypeName()));
-
-                return new IsNotNullExpression(fie.ExternalId); //Usefull mainly for Shy<T>
+                if (b.TypeOperand.IsAssignableFrom(fie.Type)) // upcasting
+                {
+                    return new IsNotNullExpression(fie.ExternalId); //Usefull mainly for Shy<T>
+                }
+                else
+                {
+                    return Expression.Constant(false);
+                }
             }
             if (operand.NodeType == (ExpressionType)DbExpressionType.ImplementedBy)
             {
                 ImplementedByExpression ib = (ImplementedByExpression)operand;
 
                 FieldInitExpression[] fies = ib.Implementations.Where(imp => b.TypeOperand.IsAssignableFrom(imp.Type)).Select(imp=>imp.Field).ToArray();
-                    
-                if(fies.Empty())
-                    throw new InvalidCastException("No implementation ({0}) can be a {1}".Formato(fies.ToString(f=>f.Type.TypeName(), ", "), b.TypeOperand.TypeName()));
+
+                if (fies.Empty())
+                    return Expression.Constant(false);
 
                 return fies.Select(f => (Expression)new IsNotNullExpression(f.ExternalId)).Aggregate((f1, f2) => Expression.Or(f1, f2));
             }
@@ -1274,10 +1245,16 @@ namespace Signum.Engine.Linq
 
             if (operand.NodeType == (ExpressionType)DbExpressionType.FieldInit)
             {
-                if (!uType.IsAssignableFrom(operand.Type))
-                    throw new InvalidCastException("Impossible to convert {0} to {1}".Formato(uType, operand.Type));
+                FieldInitExpression fie = (FieldInitExpression)operand;
 
-                return new ImplementedByExpression(uType, new[] { new ImplementationColumnExpression(operand.Type, (FieldInitExpression)operand) }.ToReadOnly());
+                if (uType.IsAssignableFrom(fie.Type)) // upcasting
+                {
+                    return new ImplementedByExpression(uType, new[] { new ImplementationColumnExpression(operand.Type, fie) }.ToReadOnly());
+                }
+                else
+                {
+                    return new FieldInitExpression(uType, null, Expression.Constant(null, typeof(int?)), TypeSqlConstant(uType), null, fie.Token);
+                }               
             }
             if (operand.NodeType == (ExpressionType)DbExpressionType.ImplementedBy)
             {
@@ -1286,8 +1263,9 @@ namespace Signum.Engine.Linq
                 FieldInitExpression[] fies = ib.Implementations.Where(imp => uType.IsAssignableFrom(imp.Type)).Select(imp => imp.Field).ToArray();
 
                 if (fies.Empty())
-                    throw new InvalidCastException("No implementation ({0}) can be a {1}".Formato(fies.ToString(f => f.Type.TypeName(), ", "), uType.TypeName()));
-
+                {
+                    return new FieldInitExpression(uType, null, Expression.Constant(null, typeof(int?)), TypeSqlConstant(uType), null, ib.Implementations.Single().Field.Token);
+                }
                 if (fies.Length == 1 && fies[0].Type == uType)
                     return fies[0];
 
@@ -1428,6 +1406,8 @@ namespace Signum.Engine.Linq
         {
             if (expression.IsNull())
                 return AssignNull(colExpression);
+
+            expression = SmartEqualizer.ConstantToEntity(expression) ?? expression;
 
             if (expression is FieldInitExpression && IsNewId(((FieldInitExpression)expression).ExternalId))
                 throw new InvalidOperationException("The entity is new");

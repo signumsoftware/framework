@@ -460,6 +460,42 @@ namespace Signum.Test.LinqProvider
                     SingleOrDefaultName = b.Members.Take(1).Select(m => m.Name).SingleOrDefault(),
                 }).ToList();
         }
+
+        [TestMethod]
+        public void SelectMemoryEntity()
+        {
+            var artist = Database.Query<ArtistDN>().First();
+
+            var songs = Database.Query<AlbumDN>().Select(a => new
+            {
+                Lite = a.ToLite(),
+                Memory = artist,
+            }).ToList(); 
+        }
+
+        [TestMethod]
+        public void SelectMemoryLite()
+        {
+            var artist = Database.Query<ArtistDN>().Select(a=>a.ToLite()).First();
+
+            var songs = Database.Query<AlbumDN>().Select(a => new
+            {
+                Lite = a.ToLite(),
+                MemoryLite = artist,
+            }).ToList();
+        }
+
+        [TestMethod]
+        public void SelectOutsideStringNull()
+        {
+            var awards = Database.Query<GrammyAwardDN>().Select(a => ((AmericanMusicAwardDN)(AwardDN)a).Category).ToList();
+        }
+
+        [TestMethod]
+        public void SelectOutsideLiteNull()
+        {
+            var awards = Database.Query<GrammyAwardDN>().Select(a => ((AmericanMusicAwardDN)(AwardDN)a).ToLite()).ToList();
+        }
     }
 
     public static class AuthorExtensions

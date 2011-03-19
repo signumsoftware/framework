@@ -172,7 +172,6 @@ namespace Signum.Test.LinqProvider
                           select a.ToLite()).ToList();
         }
 
-
         [TestMethod]
         public void WhereCase()
         {
@@ -234,5 +233,26 @@ namespace Signum.Test.LinqProvider
         {
             var albums = Database.Query<AlbumDN>().Select(a => Tuple.Create(a.Name, a.Name, a.Name, a.Name, a.Name, a.Name, a.Name, a.Label)).Where(t => t.Rest.Item1 == null).ToList();
         }
+
+        [TestMethod]
+        public void WhereOutsideIs()
+        {
+            var albums = Database.Query<BandDN>().Where(a => a.LastAward is PersonalAwardDN).ToList();
+        }
+
+        [TestMethod]
+        public void WhereOutsideCast()
+        {
+            var albums = Database.Query<BandDN>().Where(a => ((PersonalAwardDN)a.LastAward) != null).ToList();
+        }
+
+        [TestMethod]
+        public void WhereOutsideEquals()
+        {
+            var pa = Database.Query<PersonalAwardDN>().First();
+
+            var albums = Database.Query<BandDN>().Where(a => a.LastAward == pa).ToList();
+        }
+
     }
 }

@@ -9,6 +9,7 @@ using Signum.Utilities.Reflection;
 using Signum.Engine.Maps;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Engine.Properties;
+using Signum.Entities.Reflection;
 
 namespace Signum.Engine.Linq
 {
@@ -43,23 +44,25 @@ namespace Signum.Engine.Linq
                        (exp2 as NewExpression).Arguments, (o, i) => SmartEqualizer.PolymorphicEqual(o, i)).Aggregate((a, b) => Expression.And(a, b));
             }
 
-            return SmartEqualizer.TryEntityEquals(exp1, exp2);
+            return EntityEquals(exp1, exp2) ?? EqualNullable(exp1, exp2);
         }
 
-        public static Expression TryEntityEquals(Expression e1, Expression e2)
+        internal static Expression EntityIn(Expression newItem, IEnumerable<IdentifiableEntity> collection)
         {
-            return EntityEquals(e1, e2) ?? EqualNullable(e1, e2);
+            Dictionary<Type, object[]> entityIDs = collection.AgGroupToDictionary(a => a.GetType(), gr => gr.Select(a => (object)(a.IdOrNull ?? int.MaxValue)).ToArray());
+
+            return EntityIn(newItem, entityIDs);
         }
 
-        internal static Expression EntityIn(Expression newItem, Expression[] expression)
+        internal static Expression EntityIn(LiteReferenceExpression liteReference, IEnumerable<Lite> collection)
         {
-            if(newItem is LiteReferenceExpression)
-                return EntityIn(((LiteReferenceExpression)newItem).Reference, expression.Cast<LiteReferenceExpression>().Select(l=>l.Reference).ToArray()); 
+            Dictionary<Type, object[]> entityIDs = collection.AgGroupToDictionary(a => a.RuntimeType, gr => gr.Select(a => (object)(a.IdOrNull ?? int.MaxValue)).ToArray());
 
-            var fies = expression.Select(t=> t as FieldInitExpression ?? ((ImplementedByExpression)t).Implementations.Single().Field); 
+            return EntityIn(liteReference.Reference, entityIDs); 
+        }
 
-            Dictionary<Type, object[]> entityIDs = fies.AgGroupToDictionary(a=>a.Type, gr=> gr.Select(a=>((ConstantExpression)a.ExternalId).Value??int.MaxValue).ToArray()); 
-
+        static Expression EntityIn(Expression newItem, Dictionary<Type, object[]> entityIDs)
+        {
             FieldInitExpression fie = newItem as FieldInitExpression;
             if (fie != null)
                 return InExpression.FromValues(fie.ExternalId, entityIDs.TryGetC(fie.Type) ?? new object[0]);
@@ -80,7 +83,10 @@ namespace Signum.Engine.Linq
         }
 
         public static Expression EntityEquals(Expression e1, Expression e2)
-        {   
+        {
+            e1 = ConstantToEntity(e1) ?? e1;
+            e2 = ConstantToEntity(e2) ?? e2; 
+
             if (e1 is LiteReferenceExpression || e2 is LiteReferenceExpression )
             {
                 e1 = e1.IsNull() ? e1 : ((LiteReferenceExpression)e1).Reference;
@@ -119,6 +125,7 @@ namespace Signum.Engine.Linq
                 else if (tE2 == DbExpressionType.ImplementedByAll) return EqualsToNull(((ImplementedByAllExpression)e2).Id);
                 else if (e2.IsNull()) return SqlConstantExpression.True;
                 else return null;
+
             else return null;
         }
 
@@ -181,6 +188,56 @@ namespace Signum.Engine.Linq
         static Expression EqualsToNull(Expression exp)
         {
             return new IsNullExpression(exp);
+        }
+
+        public static Expression ConstantToEntity(Expression expression)
+        {
+            ConstantExpression c = expression as ConstantExpression;
+            if (c == null)
+                return null;
+
+            if (c.Value == null)
+                return c;
+
+            if (c.Type.IsIIdentifiable())
+            {
+                return ToFieldInitExpression((IdentifiableEntity)c.Value);// podria ser null y lo meteriamos igualmente
+            }
+            else if (c.Type.IsLite())
+            {
+                return ToLiteReferenceExpression((Lite)c.Value);
+            }
+
+            return null;
+        }
+
+        static Expression ToLiteReferenceExpression(Lite lite)
+        {
+            Expression id = Expression.Constant(lite.IdOrNull ?? int.MinValue);
+            Expression typeId = QueryBinder.TypeConstant(lite.RuntimeType);
+
+            Type liteType = lite.GetType();
+
+            Expression fie = new FieldInitExpression(lite.RuntimeType, null, id, typeId, null, ProjectionToken.External);
+
+            Type staticType = Reflector.ExtractLite(liteType);
+            if (staticType != fie.Type)
+                fie = new ImplementedByExpression(staticType, 
+                    new[] { new ImplementationColumnExpression(fie.Type, (FieldInitExpression)fie) }.ToReadOnly());
+
+            return new LiteReferenceExpression(liteType,
+                fie, id, Expression.Constant(lite.ToStr), typeId);
+        }
+
+        static Expression ToFieldInitExpression(IIdentifiable ei)
+        {
+            return new FieldInitExpression(
+                ei.GetType(),
+                null,
+                Expression.Constant(ei.IdOrNull ?? int.MinValue),
+                QueryBinder.TypeConstant(ei.GetType()),
+                null,
+                ProjectionToken.External);
         }
     }
 }
