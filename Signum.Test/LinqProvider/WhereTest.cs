@@ -42,6 +42,19 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void WhereExplicitConvert()
+        {
+            var list = Database.Query<AlbumDN>().Where(a=>a.Id.ToString() == "1").ToList();
+        }
+
+        [TestMethod]
+        public void WhereImplicitConvert()
+        {
+            Database.Query<AlbumDN>().Where(a => ("C" + a.Id) == "C1").Any();
+        }
+
+
+        [TestMethod]
         public void WhereSelect()
         {
             var list = Database.Query<AlbumDN>().Where(a => a.Year < 1995).Select(a => new { a.Year, Author = a.Author.ToLite(), a.Name }).ToList();

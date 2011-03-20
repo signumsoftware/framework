@@ -13,6 +13,7 @@ using Signum.Engine.Properties;
 using System.Collections.ObjectModel;
 using Signum.Engine.Maps;
 using System.Data;
+using Signum.Entities.Reflection;
 
 namespace Signum.Engine.Linq
 {
@@ -172,6 +173,18 @@ namespace Signum.Engine.Linq
             return cex;
         }
 
+        protected Expression TrySqlToString(Type type, Expression expression)
+        {
+            var newExp = Visit(expression);
+            if (candidates.Contains(newExp) && IsFullNominate)
+            {
+                var cast = new SqlCastExpression(type, newExp);
+                candidates.Add(cast);
+                return cast;
+            }
+            return null;
+        }
+
         protected Expression TrySqlFunction(SqlFunction sqlFunction, Type type, params Expression[] expression)
         {
             return TrySqlFunction(sqlFunction.ToString(), type, expression); 
@@ -320,10 +333,20 @@ namespace Signum.Engine.Linq
             }
 
             if (candidates.Contains(left) && candidates.Contains(right))
-                candidates.Add(b);
+            {
+                if (b.NodeType == ExpressionType.Add && IsFullNominate && (left.Type == typeof(string)) != (right.Type == typeof(string)))
+                {
+                    b = Expression.Add(
+                        left.Type == typeof(string) ? left : new SqlCastExpression(typeof(string), left),
+                        right.Type == typeof(string) ? right : new SqlCastExpression(typeof(string), right), miSimpleConcat);
+                }
 
+                candidates.Add(b);
+            }
             return b;
         }
+
+        static MethodInfo miSimpleConcat = ReflectionTools.GetMethodInfo(() => string.Concat("a", "b"));
 
         private static Expression Transform(BinaryExpression b)
         {
@@ -415,8 +438,6 @@ namespace Signum.Engine.Linq
                 candidates.Add(result);
 
             return result;
-
-            
         }
 
         protected override Expression VisitProjection(ProjectionExpression proj)
@@ -620,6 +641,9 @@ namespace Signum.Engine.Linq
 
         private Expression HardCodedMethods(MethodCallExpression m)
         {
+            if(m.Method.Name == "ToString")
+                return TrySqlToString(typeof(string), m.Object); 
+
             switch (m.Method.DeclaringType.TypeName() + "." + m.Method.Name)
             {
                 case "string.IndexOf":
