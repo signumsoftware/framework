@@ -121,9 +121,9 @@ namespace Signum.Engine.DynamicQuery
             return new ManualDynamicQuery<T>(execute); 
         }
 
-        #region SelectExpandable
+        #region SelectDynamic
 
-        public static DQueryable<T> SelectExpandable<T>(this IQueryable<T> query, List<Column> columns, List<Order> orders)
+        public static DQueryable<T> SelectDynamic<T>(this IQueryable<T> query, List<Column> columns, List<Order> orders)
         {
             HashSet<QueryToken> tokens = new HashSet<QueryToken>(columns.Select(c => c.Token));
             if (orders != null)
@@ -134,7 +134,7 @@ namespace Signum.Engine.DynamicQuery
             return new DQueryable<T>(query.Select(result.TupleConstructor), result.TupleType, result.TokenIndices);
         }
 
-        public static DEnumerable<T> SelectExpandable<T>(this IEnumerable<T> query, List<Column> columns, List<Order> orders)
+        public static DEnumerable<T> SelectDynamic<T>(this IEnumerable<T> query, List<Column> columns, List<Order> orders)
         {
             HashSet<QueryToken> tokens = new HashSet<QueryToken>(columns.Select(c => c.Token));
               if (orders != null)
