@@ -33,7 +33,12 @@ namespace $custommessage$.Windows
             this.DispatcherUnhandledException += new DispatcherUnhandledExceptionEventHandler(App_DispatcherUnhandledException);
             Async.ExceptionHandler = UnhandledAsyncException;
 
-            //InitializeComponent();
+            InitializeComponent();
+        }
+
+        private void Application_Startup(object sender, StartupEventArgs e)
+        {
+            //Fix so App.xaml InitializeComponent gets generated
         }
 
         void UnhandledAsyncException(Exception e, Window win)
@@ -49,14 +54,13 @@ namespace $custommessage$.Windows
 
         protected override void OnStartup(StartupEventArgs args)
         {
-            Navigator.Start(new NavigationManager
-            {
-                EntitySettings = new Dictionary<Type, EntitySettings>(),
-            });
-
-            Navigator.AddSetting(new EntitySettings<MyEntityDN>(EntityType.Default) { View = e => new MyEntity() }); 
-
+            Navigator.Start(new NavigationManager());
             Constructor.Start(new ConstructorManager());
+
+            Navigator.AddSettings(new List<EntitySettings>
+            {
+                new EntitySettings<MyEntityDN>(EntityType.Default) { View = e => new MyEntity() }
+            }); 
 
             Navigator.Initialize();
         }

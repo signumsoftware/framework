@@ -21,7 +21,6 @@
       </Folder>
       <Folder Name="Content" TargetFolderName="Content">
         <ProjectItem ReplaceParameters="false" TargetFileName="site.css">site.css</ProjectItem>
-        <ProjectItem ReplaceParameters="false" TargetFileName="reset.css">reset.css</ProjectItem>
         <Folder Name="smoothness" TargetFolderName="smoothness">
           <ProjectItem ReplaceParameters="false" TargetFileName="jquery-ui-1.8.9.custom.css">jquery-ui-1.8.9.custom.css</ProjectItem>
           <Folder Name="images" TargetFolderName="images">

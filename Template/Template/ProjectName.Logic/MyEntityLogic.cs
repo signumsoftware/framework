@@ -7,6 +7,7 @@ using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Engine;
 using Signum.Engine.DynamicQuery;
+using System.Reflection;
 using $custommessage$.Entities;
 
 namespace $custommessage$.Logic
@@ -14,16 +15,19 @@ namespace $custommessage$.Logic
     public static class MyEntityLogic
     {
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
-        {        
-            sb.Include<MyEntityDN>();
+        {
+            if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+            {
+                sb.Include<MyEntityDN>();
 
-            dqm[typeof(MyEntityDN)] = (from e in Database.Query<MyEntityDN>()
-                                       select new
-                                       {
-                                             Entity = e.ToLite(),
-                                             e.Id,
-                                             e.Name
-                                       }).ToDynamic();          
+                dqm[typeof(MyEntityDN)] = (from e in Database.Query<MyEntityDN>()
+                                           select new
+                                           {
+                                                 Entity = e.ToLite(),
+                                                 e.Id,
+                                                 e.Name
+                                           }).ToDynamic();  
+            }
         }
     }
 }
