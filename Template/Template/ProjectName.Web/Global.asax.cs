@@ -9,6 +9,7 @@ using Signum.Engine;
 using $custommessage$.Web.Properties;
 using Signum.Engine.Maps;
 using Signum.Web;
+using Signum.Web.PortableAreas;
 
 namespace $custommessage$.Web
 {
@@ -21,16 +22,23 @@ namespace $custommessage$.Web
         {
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
 
-            routes.MapRoute(
-               "view",
-               "View/{typeUrlName}/{id}",
-               new { controller = "Signum", action = "View", typeFriendlyName = "", id = "" }
+              routes.MapRoute(
+               Navigator.ViewRouteName,
+               "View/{webTypeName}/{id}",
+               new { controller = "Signum", action = "View", webTypeName = "", id = "" }
             );
 
             routes.MapRoute(
-                "find",
-                "Find/{sfQueryUrlName}",
-                new { controller = "Signum", action = "Find", sfQueryUrlName = "" }
+                Navigator.FindRouteName,
+                "Find/{webQueryName}",
+                new { controller = "Signum", action = "Find", webQueryName = "" }
+            );
+
+            RouteTable.Routes.MapRoute(
+                 "EmbeddedResources",
+                 "{*file}",
+                 new { controller = "Resources", action = "GetFile" },
+                 new { file = new EmbeddedFileExist() }
             );
 
             routes.MapRoute(
@@ -42,12 +50,13 @@ namespace $custommessage$.Web
 
         protected void Application_Start()
         {
-            RegisterRoutes(RouteTable.Routes);
-
             Starter.Start(UserConnections.Replace(Settings.Default.ConnectionString));
 
             Schema.Current.Initialize();
+
             WebStart();
+            
+            RegisterRoutes(RouteTable.Routes);
         }
 
         private void WebStart()
@@ -58,6 +67,7 @@ namespace $custommessage$.Web
             $custommessage$Client.Start();
 
             ScriptHtmlHelper.Manager.MainAssembly = typeof($custommessage$Client).Assembly;
+            SignumControllerFactory.MainAssembly = typeof($custommessage$Client).Assembly;
 
             Navigator.Initialize();
         }
