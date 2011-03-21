@@ -380,3 +380,55 @@ SF.LocalStorage = (function () {
         $source.trigger("sf-new-content");
     }
 }
+
+SF.NewContentProcessor = {
+    defaultButtons: function ($newContent) {
+        $newContent.find(".sf-entity-button, .sf-query-button, .sf-line-button, .sf-chooser-button, .sf-button").each(function (i, val) {
+            var $txt = $(val);
+            var data = $txt.data();
+            $txt.button({
+                text: (!("text" in data) || SF.isTrue(data.text)),
+                icons: { primary: data.icon, secondary: data["icon-secondary"] },
+                disabled: $txt.hasClass("sf-disabled")
+            });
+        });
+    },
+
+    defaultDatepicker: function ($newContent) {
+        $newContent.find(".sf-datepicker").each(function (i, val) {
+            var $txt = $(val);
+            $txt.datepicker(jQuery.extend({}, SF.Locale.defaultDatepickerOptions, { dateFormat: $txt.attr("data-format") }));
+        });
+    },
+
+    defaultDropdown: function ($newContent) {
+        $newContent.find(".sf-dropdown .sf-menu-button")
+            .addClass("ui-autocomplete ui-menu ui-widget ui-widget-content ui-corner-all")
+            .find("li")
+            .addClass("ui-menu-item")
+            .find("a")
+            .addClass("ui-corner-all");
+    },
+
+    defaultAutocomplete: function ($newContent) {
+        $newContent.find(".sf-entity-autocomplete").each(function (i, val) {
+            var $txt = $(val);
+            var data = $txt.data();
+            SF.entityAutocomplete($txt, { delay: 200, types: data.types, url: data.url, count: 5 });
+        });
+    },
+
+    defaultPlaceholder: function ($newContent) {
+        $newContent.find('input[placeholder], textarea[placeholder]').placeholder();
+    },
+
+    defaultTabs: function ($newContent) {
+        $newContent.find(".sf-tabs").tabs();
+    },
+
+    defaultSlider: function ($newContent) {
+        $newContent.find(".sf-search-results-container").each(function (i, val) {
+            new SF.slider(jQuery(val));
+        });
+    }
+};
