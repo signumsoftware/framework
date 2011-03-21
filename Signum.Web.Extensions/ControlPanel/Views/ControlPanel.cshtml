@@ -31,7 +31,7 @@
                 @for (int j = 0; j < cp.NumberOfColumns; j++)
     {
         PanelPart pp = cp.Parts.SingleOrDefault(p => p.Row == i + 1 && (p.Column == j + 1 || p.Fill));
-                    <td style="vertical-align:top;padding-right:20px" @((pp != null && pp.Fill) ? ("colspan=" + cp.NumberOfColumns) : "")>
+                    <td style="vertical-align:top;margin-right:20px" @((pp != null && pp.Fill) ? ("colspan=" + cp.NumberOfColumns) : "")>
                         @if (pp != null)
         {
                             @PanelPartRenderer.Render(Html, pp)

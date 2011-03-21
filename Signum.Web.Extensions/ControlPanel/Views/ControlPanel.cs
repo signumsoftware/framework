@@ -126,10 +126,10 @@ WriteLiteral("                <tr>\r\n");
     {
         PanelPart pp = cp.Parts.SingleOrDefault(p => p.Row == i + 1 && (p.Column == j + 1 || p.Fill));
 
-WriteLiteral("                    <td style=\"vertical-align:top;padding-right:20px\" ");
+WriteLiteral("                    <td style=\"vertical-align:top;margin-right:20px\" ");
 
 
-                                                                  Write((pp != null && pp.Fill) ? ("colspan=" + cp.NumberOfColumns) : "");
+                                                                 Write((pp != null && pp.Fill) ? ("colspan=" + cp.NumberOfColumns) : "");
 
 WriteLiteral(">\r\n");
 
