@@ -51,21 +51,20 @@ namespace Signum.Engine.ControlPanel
             }
         }
 
-        public static ControlPanelDN GetHomePageControlPanel()
+        public static Lite<ControlPanelDN> GetHomePageControlPanel()
         {
             UserDN currentUser = UserDN.Current;
             if (currentUser == null)
                 return null;
 
-            var panel = Database.Query<ControlPanelDN>()
-                .FirstOrDefault(cp => cp.Related.Entity is UserDN && cp.Related.ToLite<UserDN>().RefersTo(currentUser) && cp.HomePage);
+            var panel = Database.Query<ControlPanelDN>().Where(cp => cp.Related.ToLite<UserDN>().RefersTo(currentUser) && cp.HomePage).Select(a => a.ToLite()).FirstOrDefault();
             if (panel != null)
                 return panel;
 
             var panels = Database.Query<ControlPanelDN>().Where(cp => cp.Related.Entity is RoleDN && cp.HomePage)
                 .Select(cp => new { ControlPanel = cp.ToLite(), Role = ((RoleDN)cp.Related.Entity).ToLite() }).ToList();
 
-            return panels.OrderByDescending(p => AuthLogic.Rank(p.Role)).FirstOrDefault().TryCC(p => p.ControlPanel.Retrieve());
+            return panels.OrderByDescending(p => AuthLogic.Rank(p.Role)).FirstOrDefault().TryCC(p => p.ControlPanel);
         }
 
         public static void RegisterUserEntityGroup(SchemaBuilder sb, Enum newEntityGroupKey)

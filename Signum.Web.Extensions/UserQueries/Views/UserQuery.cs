@@ -85,10 +85,20 @@ Write(Html.HiddenRuntimeInfo(query));
 Write(Html.Span("Query", "Query", "sf-label-line"));
 
                                                  
+    if (ViewData[ViewDataKeys.QueryName] != null)
+    {
     
 Write(Html.Href("hrefQuery", query.Value.DisplayName, Navigator.FindRoute(ViewData[ViewDataKeys.QueryName]), "", "sf-value-line", null));
 
                                                                                                                                       
+    }
+    else 
+    { 
+        
+   Write(Html.Span("spanQuery", query.Value.DisplayName, "sf-value-line"));
+
+                                                                         
+    }
         
 
 WriteLiteral("    <div class=\"clearall\">\r\n    </div>\r\n");

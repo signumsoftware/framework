@@ -9,7 +9,14 @@ using (var query = e.SubContext(f => f.Query))
 {
     @Html.HiddenRuntimeInfo(query)
     @Html.Span("Query", "Query", "sf-label-line")
+    if (ViewData[ViewDataKeys.QueryName] != null)
+    {
     @Html.Href("hrefQuery", query.Value.DisplayName, Navigator.FindRoute(ViewData[ViewDataKeys.QueryName]), "", "sf-value-line", null)
+    }
+    else 
+    { 
+        @Html.Span("spanQuery", query.Value.DisplayName, "sf-value-line")
+    }
         
     <div class="clearall">
     </div>
