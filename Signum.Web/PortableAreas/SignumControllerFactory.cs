@@ -77,7 +77,7 @@ namespace Signum.Web.PortableAreas
 
         public override IController CreateController(RequestContext requestContext, string controllerName)
         {
-            pvar controller = base.CreateController(requestContext, controllerName);
+            var controller = base.CreateController(requestContext, controllerName);
 
             var controllerInstance = controller as Controller;
 
