@@ -19,6 +19,7 @@ using Signum.Services;
 using Signum.Entities;
 using Signum.Utilities.Reflection;
 using System.Windows.Input;
+using System.Windows.Controls.Primitives;
 
 namespace Signum.Windows
 {
@@ -158,7 +159,10 @@ namespace Signum.Windows
 
         public static void RoutePropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            FrameworkElement fe = (FrameworkElement)d;
+            FrameworkElement fe = d as FrameworkElement;
+            if (fe == null)
+                return;
+
             if (DesignerProperties.GetIsInDesignMode(fe))
             {
                 DependencyProperty labelText =
@@ -186,6 +190,42 @@ namespace Signum.Windows
                 else
                     fe.Loaded += (s, e2) => InititializeRoute(fe, route, e.Property);
             }
+
+            if(fe is DataGrid)
+                fe.Initialized += new EventHandler(fe_Initialized);
+        }
+
+        static void fe_Initialized(object sender, EventArgs e)
+        {
+            DataGrid grid = (DataGrid)sender;
+            PropertyRoute parentContext = GetTypeContext(grid).Add("Item");
+
+            SetTypeContext(grid, parentContext); 
+
+            foreach (DataGridColumn column in grid.Columns)
+            {
+                if (column.IsSet(Common.RouteProperty))
+                {
+                    string route = (string)column.GetValue(Common.RouteProperty);
+                    PropertyRoute context = ContinueRouteExtension.Continue(parentContext, route);
+
+                    SetTypeContext(column, context);
+
+                    foreach (ColumnCommonRouteTask task in ColumnRouteTask.GetInvocationList())
+                        task(column, route, context);
+                }
+                else
+                {
+                    if (column.IsSet(Common.LabelOnlyRouteProperty))
+                    {
+                        string route = (string)column.GetValue(Common.LabelOnlyRouteProperty);
+                        PropertyRoute context = ContinueRouteExtension.Continue(parentContext, route);
+
+                        foreach (ColumnCommonRouteTask task in ColumnLabelOnlyRouteTask.GetInvocationList())
+                            task(column, route, context);
+                    }
+                }
+            }
         }
 
         public enum RouteType
@@ -197,14 +237,10 @@ namespace Signum.Windows
 
         private static void InititializeRoute(FrameworkElement fe, string route, DependencyProperty property)
         {
-            PropertyRoute parentContext = GetTypeContext(fe.Parent);
+            PropertyRoute parentContext = GetTypeContext(fe.Parent ?? fe);
 
             if (parentContext == null)
                 throw new InvalidOperationException("Route attached property can not be set with null TypeContext: '{0}'".Formato(route));
-
-            bool pseudoRoute = route.StartsWith("$");
-            if (pseudoRoute)
-                route = route.Substring(1);
 
             var context = ContinueRouteExtension.Continue(parentContext, route); 
 
@@ -224,8 +260,10 @@ namespace Signum.Windows
 
         #region Tasks
         public static event CommonRouteTask RouteTask;
-
         public static event CommonRouteTask LabelOnlyRouteTask;
+
+        public static event ColumnCommonRouteTask ColumnRouteTask;
+        public static event ColumnCommonRouteTask ColumnLabelOnlyRouteTask;
 
         static Common()
         {
@@ -240,12 +278,37 @@ namespace Signum.Windows
             RouteTask += TaskSetNotNullItemsSource;
 
             LabelOnlyRouteTask += TaskSetLabelText;
+
+            ColumnRouteTask += TaskSetValueColumnProperty;
+            ColumnRouteTask += TaskSetLabelText;
+            ColumnLabelOnlyRouteTask += TaskSetLabelText;
         }
+
+        public static void TaskSetValueColumnProperty(DataGridColumn col, string route, PropertyRoute context)
+        {
+            DataGridBoundColumn colBound = col as DataGridBoundColumn;
+
+            if (col == null)
+                return;
+
+            if (colBound.Binding == null)
+            {
+                bool isReadOnly = context.PropertyRouteType == PropertyRouteType.Property && context.PropertyInfo.IsReadOnly();
+                colBound.Binding = new Binding(route)
+                {
+                    Mode = isReadOnly ? BindingMode.OneWay : BindingMode.TwoWay,
+                    NotifyOnValidationError = true,
+                    ValidatesOnExceptions = true,
+                    ValidatesOnDataErrors = true,
+                };
+            }
+        } 
 
         public static void TaskSetValueProperty(FrameworkElement fe, string route, PropertyRoute context)
         {
             DependencyProperty valueProperty =
                 fe is LineBase ? ((LineBase)fe).CommonRouteValue() :
+                fe is DataGrid ? DataGrid.ItemsSourceProperty :
                 FrameworkElement.DataContextProperty;
 
 
@@ -277,13 +340,14 @@ namespace Signum.Windows
             }
         }
 
-        public static void TaskSetLabelText(FrameworkElement fe, string route, PropertyRoute context)
+        public static void TaskSetLabelText(DependencyObject fe, string route, PropertyRoute context)
         {
             DependencyProperty labelText =
                fe is LineBase ? ((LineBase)fe).CommonRouteLabelText() :
                fe is HeaderedContentControl ? HeaderedContentControl.HeaderProperty :
                fe is TextBlock ? TextBlock.TextProperty:
-               fe is Label? Label.ContentProperty: 
+               fe is Label ? Label.ContentProperty :
+               fe is DataGridColumn ? DataGridColumn.HeaderProperty : 
                null;
 
             if (labelText != null && fe.NotSet(labelText))
@@ -421,4 +485,5 @@ namespace Signum.Windows
     }
 
     public delegate void CommonRouteTask(FrameworkElement fe, string route, PropertyRoute context);
+    public delegate void ColumnCommonRouteTask(DataGridColumn column, string route, PropertyRoute context);
 }
