@@ -138,9 +138,6 @@ namespace Signum.Web
             else if (type.IsEmbeddedEntity())
             {
                 RuntimeType = type;
-
-                IdentifiableEntity ie = tc.Parent.FollowC(a => a.Parent).OfType<TypeContext>().Select(a=>a.UntypedValue).OfType<IdentifiableEntity>().FirstOrDefault();
-                IsNew = ie.TryCS(i => i.IsNew) ?? true; 
             }
             else if (typeof(IdentifiableEntity).IsAssignableFrom(type))
             {

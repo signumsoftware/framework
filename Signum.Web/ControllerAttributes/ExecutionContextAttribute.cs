@@ -21,8 +21,7 @@ namespace Signum.Web
     {
         public static Func<ActionExecutingContext, ExecutionContext>  SetExecutionContext = a=> ExecutionContext.UserInterface;
 
-        //static StringBuilder sb = new StringBuilder(); 
-
+     
         public ExecutionContextAttribute()
         {
         }
@@ -31,13 +30,7 @@ namespace Signum.Web
         {
             if(SetExecutionContext != null)
             {
-                var context = SetExecutionContext(filterContext);
-
-                //sb.AppendFormat(System.Threading.Thread.CurrentThread.ManagedThreadId +  " Start {0}.{1}  {2}->{3}\r\n",
-                //    filterContext.ActionDescriptor.ActionName,
-                //    filterContext.ActionDescriptor.ControllerDescriptor.ControllerName,
-                //    ExecutionContext.Current.TryToString() ?? "NULL", 
-                //    context.TryToString() ?? "NULL"); 
+                ExecutionContext context = SetExecutionContext(filterContext);
 
                 filterContext.RequestContext.HttpContext.Items[typeof(ExecutionContext)] = ExecutionContext.Scope(context);
             }
@@ -54,13 +47,6 @@ namespace Signum.Web
                     scope.Dispose();
                     filterContext.RequestContext.HttpContext.Items.Remove(typeof(ExecutionContext));
                 }
-
-                //sb.AppendFormat(System.Threading.Thread.CurrentThread.ManagedThreadId + " End {0}.{1} {2}->{3}  {4}\r\n",
-                //       filterContext.RouteData.Values["Action"],
-                //       filterContext.RouteData.Values["Controller"],
-                //       oldContext.TryToString() ?? "NULL",
-                //       ExecutionContext.Current.TryToString() ?? "NULL",
-                //       scope == null ? "NO SCOPE!!" : "");
             }
         }
 

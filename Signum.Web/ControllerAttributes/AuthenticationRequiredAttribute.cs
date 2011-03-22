@@ -25,20 +25,20 @@ namespace Signum.Web
             Required = true;
         }
 
-        public AuthenticationRequiredAttribute(bool required) 
+        public AuthenticationRequiredAttribute(bool required)
         {
-            this.Required = required; 
+            this.Required = required;
         }
 
-        public bool Required {get; set;}
+        public bool Required { get; set; }
 
         public static Action<AuthorizationContext> Authenticate;
 
         public override void OnAuthorization(AuthorizationContext filterContext)
         {
-            if(Required && Authenticate != null)
+            if (Required && Authenticate != null)
             {
-                  Authenticate(filterContext);
+                Authenticate(filterContext);
             }
         }
     }

@@ -456,7 +456,6 @@ namespace Signum.Web
 
         public static string ViewPrefix = "~/signum/Views/{0}.cshtml";
 
-        public string ErrorPageView = ViewPrefix.Formato("Error");
         public string NormalPageView = ViewPrefix.Formato("NormalPage");
         public string NormalControlView = ViewPrefix.Formato("NormalControl");
         public string PopupControlView = ViewPrefix.Formato("PopupControl");

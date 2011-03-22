@@ -87,7 +87,7 @@
     <Compile Include="HtmlHelpers\ScriptHtmlHelper.cs" />
     <Compile Include="ButtonBar\ContextualItem.cs" />
     <Compile Include="ControllerAttributes\ExecutionContextAttribute.cs" />
-    <Compile Include="ControllerAttributes\HandleExceptionAttribute.cs" />
+    <Compile Include="ControllerAttributes\SignumExceptionHandlerAttribute.cs" />
     <Compile Include="ControllerAttributes\AuthenticationRequiredAttribute.cs" />
     <Compile Include="MimeTypes.cs" />
     <Compile Include="PortableAreas\ActionFilterConfig.cs" />
@@ -108,7 +108,6 @@
     <Compile Include="PortableAreas\Repositories\EmbeddedFilesRespository.cs" />
     <Compile Include="PortableAreas\Repositories\LocalizedJavaScriptRepository.cs" />
     <Compile Include="PreApplicationStartCode.cs" />
-    <Compile Include="Signum\Controllers\ErrorController.cs" />
     <Compile Include="Signum\Controllers\ResourcesController.cs" />
     <Compile Include="Signum\Controllers\ModelBinders.cs" />
     <Compile Include="Signum\Controllers\SignumController.cs" />

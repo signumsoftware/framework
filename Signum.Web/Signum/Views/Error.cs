@@ -44,7 +44,7 @@ namespace ASP
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Signum/Views/Error.cshtml")]
-    public class _Page_Signum_Views_Error_cshtml : System.Web.Mvc.WebViewPage<dynamic>
+    public class _Page_Signum_Views_Error_cshtml : System.Web.Mvc.WebViewPage<HandleErrorInfo >
     {
 #line hidden
 
@@ -65,20 +65,17 @@ namespace ASP
     this.ViewBag.Title = "Error"; 
 
 
+
 WriteLiteral("<div id=\"main-home\">\r\n");
 
 
-       HandleErrorInfo hei = ViewData.Model as HandleErrorInfo;
-       Exception ex = hei != null ? hei.Exception : ViewData.Model as Exception;
-
-
-     if (ex is ApplicationException)
+     if (Model.Exception is ApplicationException)
     {
 
 WriteLiteral("        <h1>");
 
 
-       Write(ex.Message);
+       Write(Model.Exception.Message);
 
 WriteLiteral("</h1>\r\n");
 
@@ -87,7 +84,7 @@ WriteLiteral("</h1>\r\n");
     else
     {
 
-WriteLiteral("        <h1>\r\n            ");
+WriteLiteral("        <h1>");
 
 
         Write("Error " + this.ViewContext.HttpContext.Response.StatusCode);
@@ -106,38 +103,30 @@ WriteLiteral("</h2>\r\n");
 
     }
 
-
-     if (hei != null)
-    {
-
-WriteLiteral("        <div class=\"error-region\">\r\n            <p>\r\n                <span>Contro" +
-"ller: </span><code>\r\n                    ");
+WriteLiteral("    <div class=\"error-region\">\r\n        <p>\r\n            <span>Controller: </span" +
+">\r\n            <code>\r\n                ");
 
 
-               Write(hei.ControllerName);
+           Write(Model.ControllerName);
 
-WriteLiteral("</code>\r\n            </p>\r\n            <p>\r\n                <span>Action: </span>" +
-"<code>\r\n                    ");
-
-
-               Write(hei.ActionName);
-
-WriteLiteral("</code>\r\n            </p>\r\n        </div>\r\n");
+WriteLiteral("\r\n            </code>\r\n        </p>\r\n        <p>\r\n            <span>Action: </spa" +
+"n>\r\n            <code>\r\n                ");
 
 
-    }
+           Write(Model.ActionName);
 
-WriteLiteral("    <div class=\"error-region\">\r\n        <span>Message: </span>\r\n        <pre>\r\n  " +
-"          <code>\r\n                ");
+WriteLiteral("\r\n            </code>\r\n        </p>\r\n    </div>\r\n    <div class=\"error-region\">\r\n" +
+"        <span>Message: </span>\r\n        <pre>\r\n            <code>\r\n             " +
+"   ");
 
 
-           Write(ex.Message);
+           Write(Model.Exception.Message);
 
 WriteLiteral("\r\n            </code>\r\n        </pre>\r\n        <span>StackTrace: </span>\r\n       " +
 " <pre>\r\n            <code>\r\n                ");
 
 
-           Write(ex.StackTrace);
+           Write(Model.Exception.StackTrace);
 
 WriteLiteral("\r\n            </code>\r\n        </pre>\r\n    </div>\r\n</div>\r\n");
 
