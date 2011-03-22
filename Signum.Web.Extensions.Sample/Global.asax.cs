@@ -99,7 +99,7 @@ namespace Signum.Web.Extensions.Sample
             Navigator.Initialize();
 
             SignumControllerFactory.EveryController().AddFilters(
-                new HandleExceptionAttribute());
+                new SignumExceptionHandlerAttribute());
 
             SignumControllerFactory.EveryController().AddFilters(
                 ctx => ctx.FilterInfo.AuthorizationFilters.OfType<AuthenticationRequiredAttribute>().Any() ? null : new AuthenticationRequiredAttribute());

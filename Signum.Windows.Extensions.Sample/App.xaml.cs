@@ -87,7 +87,7 @@ namespace Signum.Windows.Extensions.Sample
             //SchedulerClient.Start();
 
             LinksWidget.Start();
-            ReportClient.Start(true, false, false);
+            ReportClient.Start(false, false);
 
             Links.RegisterGlobalLinks((r, c) => new[]{
                 new QuickLinkExplore(new ExploreOptions(typeof(LogOperationDN) )
