@@ -118,7 +118,6 @@
     <Compile Include="Processes\Process.cs" />
     <Compile Include="Processes\Package.cs" />
     <Compile Include="Profiler\ProfilerPermissions.cs" />
-    <Compile Include="Reports\CompositeReportDN.cs" />
     <Compile Include="Reports\IUserQueryServer.cs" />
     <Compile Include="Reports\ExcelReportDN.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -161,7 +160,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Authorization\Authorization.cd" />
-    <None Include="Reports\CompositeReport.cd" />
     <None Include="Files\Files.cd" />
     <None Include="Scheduler\Scheduler.cd" />
   </ItemGroup>

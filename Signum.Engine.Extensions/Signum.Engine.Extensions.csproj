@@ -189,7 +189,6 @@
     <None Include="Help\Sample.xml" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Authorization\ResetPasswordMail.htm" />
     <EmbeddedResource Include="Authorization\ResetPasswordRequestMail.htm" />
     <EmbeddedResource Include="Mailing\DefaultEmailTemplate.htm" />
     <Content Include="Reports\DocumentFormat.OpenXml.dll" />

@@ -20,7 +20,7 @@ namespace Signum.Engine.Reports
 {
     public static class ReportsLogic
     {
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, bool excelReport, bool compositeReport)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, bool excelReport)
         {
             if (excelReport)
             {
@@ -37,22 +37,7 @@ namespace Signum.Engine.Reports
                                                   s.DisplayName,
                                                   s.Deleted,
                                               }).ToDynamic();
-                if (compositeReport)
-                {
-                    sb.Include<CompositeReportDN>();
-                    dqm[typeof(CompositeReportDN)] = (from e in Database.Query<CompositeReportDN>()
-                                                      select new
-                                                      {
-                                                          Entity = e.ToLite(),
-                                                          e.Id,
-                                                          Nombre = e.Name,
-                                                          Reports = e.ExcelReports.Count(),
-                                                      }).ToDynamic();
-                }
-
             }
-            else if (compositeReport)
-                throw new InvalidOperationException("excelReport is necessary for compositeReport");
         }
 
         public static List<Lite<ExcelReportDN>> GetExcelReports(object queryName)

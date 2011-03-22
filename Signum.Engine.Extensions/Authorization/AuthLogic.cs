@@ -177,9 +177,6 @@ namespace Signum.Engine.Authorization
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-
-                //StartSimpleResetPassword(sb, dqm);
-
                 sb.Include<ResetPasswordRequestDN>();
 
                 dqm[typeof(ResetPasswordRequestDN)] = (from e in Database.Query<ResetPasswordRequestDN>()
@@ -202,23 +199,6 @@ namespace Signum.Engine.Authorization
                         Subject = Resources.ResetPasswordCode,
                         Body = EmailRenderer.Replace(EmailRenderer.ReadFromResourceStream(typeof(AuthLogic).Assembly,
                            "Signum.Engine.Extensions.Authorization.ResetPasswordRequestMail.htm"),
-                               model, null, Resources.ResourceManager)
-                    };
-                });
-            }
-        }
-
-        public static void StartSimpleResetPassword(SchemaBuilder sb, DynamicQueryManager dqm)
-        {
-            if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-            {
-                EmailLogic.RegisterTemplate<ResetPasswordMail>(model =>
-                {
-                    return new EmailContent
-                    {
-                        Subject = Resources.ResetPasswordCode,
-                        Body = EmailRenderer.Replace(EmailRenderer.ReadFromResourceStream(typeof(AuthLogic).Assembly,
-                            "Signum.Engine.Extensions.Authorization.ResetPasswordMail.htm"),
                                model, null, Resources.ResourceManager)
                     };
                 });
@@ -403,10 +383,10 @@ namespace Signum.Engine.Authorization
             {
                 UserDN user = RetrieveUser(username);
                 if (user == null)
-                    throw new IncorrectUserOrPasswordApplicationException(Signum.Engine.Extensions.Properties.Resources.Username0IsNotValid.Formato(username));
+                    throw new IncorrectUsernameException(Resources.Username0IsNotValid.Formato(username));
 
                 if (user.PasswordHash != passwordHash)
-                    throw new IncorrectUserOrPasswordApplicationException(Signum.Engine.Extensions.Properties.Resources.IncorrectPassword);
+                    throw new IncorrectPasswordException(Resources.IncorrectPassword);
 
                 return user;
             }
@@ -583,11 +563,6 @@ namespace Signum.Engine.Authorization
             return null;
         }
 
-    }
-
-    public class ResetPasswordMail : EmailModel<UserDN>
-    {
-        public string NewPassword;
     }
 
     public class ResetPasswordRequestMail : EmailModel<UserDN>

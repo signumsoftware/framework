@@ -184,17 +184,25 @@ namespace Signum.Entities.Authorization
     }
 
 
-
     [Serializable]
-    public class IncorrectUserOrPasswordApplicationException : ApplicationException
+    public class IncorrectUsernameException : ApplicationException
     {
-        public IncorrectUserOrPasswordApplicationException() { }
-        public IncorrectUserOrPasswordApplicationException(string message) : base(message) { }
-        public IncorrectUserOrPasswordApplicationException(string message, Exception inner) : base(message, inner) { }
-        protected IncorrectUserOrPasswordApplicationException(
+        public IncorrectUsernameException() { }
+        public IncorrectUsernameException(string message) : base(message) { }
+        protected IncorrectUsernameException(
           System.Runtime.Serialization.SerializationInfo info,
           System.Runtime.Serialization.StreamingContext context)
             : base(info, context) { }
     }
 
+    [Serializable]
+    public class IncorrectPasswordException : ApplicationException
+    {
+        public IncorrectPasswordException() { }
+        public IncorrectPasswordException(string message) : base(message) { }
+        protected IncorrectPasswordException(
+          System.Runtime.Serialization.SerializationInfo info,
+          System.Runtime.Serialization.StreamingContext context)
+            : base(info, context) { }
+    }
 }
