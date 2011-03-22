@@ -15,7 +15,7 @@ namespace Signum.Windows
 {
     public static class DateSpanClient
     {
-        internal static void AsserIsStarted()
+        public static void AsserIsStarted()
         {
             Navigator.Manager.AssertDefined(ReflectionTools.GetMethodInfo(() => DateSpanClient.Start()));
         }

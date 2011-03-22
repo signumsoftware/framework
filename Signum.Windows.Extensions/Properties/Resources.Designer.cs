@@ -70,6 +70,15 @@ namespace Signum.Windows.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Characters left:.
+        /// </summary>
+        public static string CharactersLeft {
+            get {
+                return ResourceManager.GetString("CharactersLeft", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Chart for.
         /// </summary>
         public static string ChartFor {
@@ -372,6 +381,15 @@ namespace Signum.Windows.Extensions.Properties {
         public static string SelectSomeRowsFirst {
             get {
                 return ResourceManager.GetString("SelectSomeRowsFirst", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Send Data.
+        /// </summary>
+        public static string SendData {
+            get {
+                return ResourceManager.GetString("SendData", resourceCulture);
             }
         }
         

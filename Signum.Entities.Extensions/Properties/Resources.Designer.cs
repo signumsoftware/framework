@@ -169,6 +169,15 @@ namespace Signum.Entities.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to End date must be higher than start date.
+        /// </summary>
+        public static string EndDateMustBeHigherThanStartDate {
+            get {
+                return ResourceManager.GetString("EndDateMustBeHigherThanStartDate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Expression should be some kind of aggregate.
         /// </summary>
         public static string ExpressionShouldBeSomeKindOfAggregate {

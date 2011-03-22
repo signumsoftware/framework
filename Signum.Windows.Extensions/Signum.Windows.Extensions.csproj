@@ -276,6 +276,13 @@
       <DependentUpon>ScheduleRuleWeekly.xaml</DependentUpon>
     </Compile>
     <Compile Include="Shapes\Arrow.cs" />
+    <Compile Include="SMS\SMSClient.cs" />
+    <Compile Include="SMS\SMSMessage.xaml.cs">
+      <DependentUpon>SMSMessage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SMS\SMSTemplate.xaml.cs">
+      <DependentUpon>SMSTemplate.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ZoomViewer.cs" />
     <EmbeddedResource Include="Properties\Resources.es.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -562,6 +569,14 @@
       <Generator>MSBuild:Compile</Generator>
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="SMS\SMSMessage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SMS\SMSTemplate.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Themes\generic.xaml">
       <Generator>MSBuild:Compile</Generator>

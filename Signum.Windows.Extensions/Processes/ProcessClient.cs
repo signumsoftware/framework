@@ -15,7 +15,7 @@ namespace Signum.Windows.Processes
 {
     public static class ProcessClient
     {
-        internal static void AsserIsStarted()
+        public static void AsserIsStarted()
         {
             Navigator.Manager.AssertDefined(ReflectionTools.GetMethodInfo(()=>Start()));
         }

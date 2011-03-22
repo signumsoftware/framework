@@ -15,7 +15,7 @@ using Signum.Windows;
 using Signum.Entities;
 using Signum.Entities.Mailing;
 
-namespace Signum.Windows.Extensions.Mailing
+namespace Signum.Windows.Mailing
 {
     /// <summary>
     /// Interaction logic for SMTPConfiguration.xaml

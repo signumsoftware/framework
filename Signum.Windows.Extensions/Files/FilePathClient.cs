@@ -12,7 +12,7 @@ namespace Signum.Windows.Files
 {
     public static class FilePathClient
     {
-        internal static void AsserIsStarted()
+        public static void AsserIsStarted()
         {
             Navigator.Manager.AssertDefined(ReflectionTools.GetMethodInfo(() => FilePathClient.Start()));
         }
