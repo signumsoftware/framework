@@ -530,12 +530,23 @@ namespace Signum.Windows
             OnCreate();
         }
 
+        public Type SelectType()
+        {
+            if (Implementations == null)
+                return EntityType;
+            else if (Implementations.IsByAll)
+                throw new InvalidOperationException("ImplementedByAll is not supported for this operation, override the event");
+            else
+                return Navigator.SelectType(this.FindCurrentWindow(), ((ImplementedByAttribute)Implementations).ImplementedTypes);
+        }
+
+
         protected void OnCreate()
         {
             if (!Create)
                 return;
 
-            IdentifiableEntity result = Creating == null ? (IdentifiableEntity)Constructor.Construct(EntityType, this.FindCurrentWindow()) : Creating();
+            IdentifiableEntity result = Creating == null ? (IdentifiableEntity)Constructor.Construct(SelectType(), this.FindCurrentWindow()) : Creating();
 
             if (result == null)
                 return;

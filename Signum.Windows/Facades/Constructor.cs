@@ -31,6 +31,12 @@ namespace Signum.Windows
         {
             return (T)Construct(typeof(T), window);
         }
+
+        public static void Register<T>(Func<Window, T> constructor) 
+            where T:class
+        {
+            ConstructorManager.Constructors.Add(typeof(T), constructor);
+        }
     }
     
     public class ConstructorManager
