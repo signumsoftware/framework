@@ -421,7 +421,7 @@ namespace Signum.Windows
         DataTemplate CreateDataTemplate(ResultColumn c)
         {
             Binding b = new Binding("[{0}]".Formato(c.Index)) { Mode = BindingMode.OneTime };
-            DataTemplate dt = Settings.GetFormatter(c.Column)(b);
+            DataTemplate dt = QuerySettings.GetFormatter(c.Column)(b);
             return dt;
         }
 

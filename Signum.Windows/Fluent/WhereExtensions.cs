@@ -11,7 +11,6 @@ namespace Signum.Windows
 {
     public static class WhereExtensions
     {
-
         public static IEnumerable<DependencyObject> VisualParents(this DependencyObject child)
         {
             return child.FollowC(VisualTreeHelper.GetParent);

@@ -12,6 +12,7 @@ using Signum.Entities.Reflection;
 using System.Reflection;
 using System.Globalization;
 using System.Windows.Media;
+using System.Linq.Expressions;
 
 namespace Signum.Windows
 {
@@ -25,6 +26,26 @@ namespace Signum.Windows
         public Func<object, bool> IsFindable;
 
         internal QueryDescription QueryDescription { get; set; }
+
+        public QuerySettings(object queryName)
+        {
+            this.QueryName = queryName; 
+        }
+
+        internal bool OnIsFindable()
+        {
+            if (IsFindable != null)
+                foreach (Func<object, bool> isFindable in IsFindable.GetInvocationList())
+                {
+                    if (!isFindable(QueryName))
+                        return false;
+                }
+
+            return true;
+        }
+
+
+        public static Dictionary<PropertyRoute, Func<Binding, DataTemplate>> PropertyFormatters { get; set; }
 
         public static List<FormatterRule> FormatRules { get; set; }
 
@@ -56,31 +77,30 @@ namespace Signum.Windows
                 new FormatterRule(FormatterPriority.DecoratedType, "NumberUnit",
                     c=> Reflector.IsNumber(c.Type) && c.Unit != null,
                     c => b => FormatTools.TextBlockTemplate(b, TextAlignment.Right, ConverterFactory.New(Reflector.GetPropertyFormatter(c.Format,c.Unit))))
-            }; 
+            };
+
+            PropertyFormatters = new Dictionary<PropertyRoute, Func<Binding, DataTemplate>>();
         }
 
-        public Func<Binding, DataTemplate> GetFormatter(Column column)
+        public static void RegisterPropertyFormat<T>(Expression<Func<T, object>> property, Func<Binding, DataTemplate> formatter)
+            where T : IRootEntity
         {
-            FormatterRule fr = FormatRules.Where(cfr => cfr.IsApplicable(column)).WithMax(a=>a.Priority); 
-
-            return fr.Formatter(column); 
+            PropertyFormatters.Add(PropertyRoute.Construct(property), formatter);
         }
 
-        public QuerySettings(object queryName)
+        public static Func<Binding, DataTemplate> GetFormatter(Column column)
         {
-            this.QueryName = queryName; 
-        }
+            PropertyRoute route = column.Token.GetPropertyRoute();
+            if (route != null)
+            {
+                var formatter = QuerySettings.PropertyFormatters.TryGetC(route);
+                if (formatter != null)
+                    return formatter;
+            }
 
-        internal bool OnIsFindable()
-        {
-            if (IsFindable != null)
-                foreach (Func<object, bool> isFindable in IsFindable.GetInvocationList())
-                {
-                    if (!isFindable(QueryName))
-                        return false;
-                }
+            FormatterRule fr = FormatRules.Where(cfr => cfr.IsApplicable(column)).WithMax(a => a.Priority);
 
-            return true;
+            return fr.Formatter(column);
         }
     }
 
