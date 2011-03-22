@@ -251,8 +251,12 @@ namespace Signum.Engine.Linq
             {
                 return MListProjection((MListExpression)expression);
             }
+            else if (expression is ProjectionExpression)
+            {
+                return (ProjectionExpression)expression;
+            }
 
-            return (ProjectionExpression)expression;
+            throw new InvalidOperationException("Impossible to convert in ProjectionExpression: \r\n" + expression.NiceToString()); 
         }
 
         private static Expression RemoveGroupByConvert(Expression expression)
