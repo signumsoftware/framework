@@ -12,7 +12,7 @@ namespace Signum.Windows.Reports
 {
     public class ReportClient
     {
-        public static void Start(bool toExcel, bool excelReport, bool compositeReport)
+        public static void Start(bool toExcel, bool excelReport)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -26,11 +26,6 @@ namespace Signum.Windows.Reports
                     QueryClient.Start();
 
                     Navigator.AddSetting(new EntitySettings<ExcelReportDN>(EntityType.Default) { View = e => new ExcelReport() });
-
-                    if (compositeReport)
-                    {
-                        Navigator.AddSetting(new EntitySettings<CompositeReportDN>(EntityType.Default) { View = e => new CompositeReport() });
-                    }
                 }
                 else
                 {
@@ -38,10 +33,6 @@ namespace Signum.Windows.Reports
                     {
                         SearchControl.GetCustomMenuItems += (qn, type) => new PlainExcelMenuItem();
                     }
-
-                    if (compositeReport)
-                        throw new InvalidOperationException();
-
                 }
             }
         }

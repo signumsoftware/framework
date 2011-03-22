@@ -36,36 +36,36 @@ namespace Signum.Web.Reports
 
                 Navigator.RegisterArea(typeof(ReportsClient));
 
-                string viewPrefix = "~/Reports/Views/{0}.cshtml";
-                Navigator.AddSettings(new List<EntitySettings>{
-                    new EntitySettings<ExcelReportDN>(EntityType.NotSaving) 
-                    { 
-                        PartialViewName = _ => viewPrefix.Formato("ExcelReport"),
-                        MappingAdmin = new EntityMapping<ExcelReportDN>(true)  
-                        { 
-                            GetEntity = ctx => 
-                            {
-                                RuntimeInfo runtimeInfo = ctx.GetRuntimeInfo();
-                                if (runtimeInfo.IsNew)
-                                {
-                                    ctx.Value = new ExcelReportDN();
-                                    
-                                    string queryKey = ctx.Inputs[TypeContextUtilities.Compose("Query", "Key")];
-                                    object queryName = Navigator.Manager.QuerySettings.Keys.First(key => QueryUtils.GetQueryUniqueKey(key) == queryKey);
-                               
-                                    ctx.Value.Query = QueryLogic.RetrieveOrGenerateQuery(queryName);
-                                }
-                                else
-                                    ctx.Value = Database.Retrieve<ExcelReportDN>(runtimeInfo.IdOrNull.Value);
-
-                                return ctx.Value;
-                            }
-                        }
-                    }
-                });
-
                 if (excelReport)
                 {
+                    string viewPrefix = "~/Reports/Views/{0}.cshtml";
+                    Navigator.AddSettings(new List<EntitySettings>{
+                        new EntitySettings<ExcelReportDN>(EntityType.NotSaving) 
+                        { 
+                            PartialViewName = _ => viewPrefix.Formato("ExcelReport"),
+                            MappingAdmin = new EntityMapping<ExcelReportDN>(true)  
+                            { 
+                                GetEntity = ctx => 
+                                {
+                                    RuntimeInfo runtimeInfo = ctx.GetRuntimeInfo();
+                                    if (runtimeInfo.IsNew)
+                                    {
+                                        ctx.Value = new ExcelReportDN();
+                                    
+                                        string queryKey = ctx.Inputs[TypeContextUtilities.Compose("Query", "Key")];
+                                        object queryName = Navigator.Manager.QuerySettings.Keys.First(key => QueryUtils.GetQueryUniqueKey(key) == queryKey);
+                               
+                                        ctx.Value.Query = QueryLogic.RetrieveOrGenerateQuery(queryName);
+                                    }
+                                    else
+                                        ctx.Value = Database.Retrieve<ExcelReportDN>(runtimeInfo.IdOrNull.Value);
+
+                                    return ctx.Value;
+                                }
+                            }
+                        }
+                    });
+
                     FilesClient.Start(false, true);
 
                     if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(QueryDN)))

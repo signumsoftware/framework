@@ -61,6 +61,8 @@ namespace Signum.Web.Auth
 
                 if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(UserDN)))
                     Navigator.AddSetting(new EntitySettings<UserDN>(EntityType.Default));
+                Navigator.EntitySettings<UserDN>().ShowSave = false;
+
                 if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(RoleDN)))
                     Navigator.AddSetting(new EntitySettings<RoleDN>(EntityType.Default));
 

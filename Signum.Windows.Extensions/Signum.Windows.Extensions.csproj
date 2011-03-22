@@ -215,15 +215,11 @@
     <Compile Include="Processes\ProcessExecution.xaml.cs">
       <DependentUpon>ProcessExecution.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Reports\CompositeReport.xaml.cs">
-      <DependentUpon>CompositeReport.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Reports\UserQueryClient.cs" />
     <Compile Include="Reports\UserQueryMenuItem.cs" />
     <Compile Include="Reports\UserQuery.xaml.cs">
       <DependentUpon>UserQuery.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Reports\CompositeReportGenerator.cs" />
     <Compile Include="Reports\ExcelReport.xaml.cs">
       <DependentUpon>ExcelReport.xaml</DependentUpon>
     </Compile>
@@ -501,12 +497,6 @@
     <Page Include="Processes\ProcessExecution.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Reports\CompositeReport.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

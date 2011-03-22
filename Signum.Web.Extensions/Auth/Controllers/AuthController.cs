@@ -399,13 +399,18 @@ namespace Signum.Web.Auth
                 TempData["username"] = username;
                 return RedirectToAction("ChangePassword");
             }
-            catch (IncorrectUserOrPasswordApplicationException) {
-
+            catch (IncorrectUsernameException)
+            {
+                return LoginErrorAjaxOrForm(Request.IsAjaxRequest() ? "username" : "_FORM", Resources.InvalidUsernameOrPassword);
+            }
+            catch (IncorrectPasswordException)
+            {
                 return LoginErrorAjaxOrForm(Request.IsAjaxRequest() ? "password" : "_FORM", Resources.InvalidUsernameOrPassword);
             }
-            catch (Exception ex) { 
-                 
-                throw new Exception(Resources.ExpectedUserLogged,ex);
+            catch (Exception ex)
+            {
+
+                throw new Exception(Resources.ExpectedUserLogged, ex);
             }
 
 
