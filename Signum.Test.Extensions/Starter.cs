@@ -79,7 +79,7 @@ namespace Signum.Test.Extensions
             ChartLogic.RegisterUserEntityGroup(sb, MusicGroups.UserEntities);
             ChartLogic.RegisterRoleEntityGroup(sb, MusicGroups.RoleEntities);
 
-            ReportsLogic.Start(sb, dqm, true, false);
+            ReportsLogic.Start(sb, dqm, true);
 
             Signum.Test.Starter.StartMusic(sb, dqm);
 
