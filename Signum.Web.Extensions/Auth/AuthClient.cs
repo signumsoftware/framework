@@ -114,18 +114,19 @@ namespace Signum.Web.Auth
 
                 Schema.Current.EntityEvents<UserDN>().Saving += AuthClient_Saving;
 
-                HandleExceptionAttribute.OnExceptionHandled = ctx =>
+                var defaultException = SignumExceptionHandlerAttribute.OnControllerException;
+                SignumExceptionHandlerAttribute.OnControllerException = ctx =>
                 {
-                    if (ctx.Exception is UnauthorizedAccessException)
+                    if (ctx.Exception is UnauthorizedAccessException && (UserDN.Current == null || UserDN.Current == AuthLogic.AnonymousUser))
                     {
                         string returnUrl = ctx.HttpContext.Request.SuggestedReturnUrl().PathAndQuery;
                         string loginUrl = PublicLoginUrl(returnUrl);
 
-                        HandleAnonymousNotAutorizedException(ctx, loginUrl);
+                        DefaultOnControllerUnauthorizedAccessException(ctx, loginUrl);
                     }
                     else
                     {
-                        HandleExceptionAttribute.DefaultOnException(ctx);
+                        defaultException(ctx);
                     }
                 };
 
@@ -138,8 +139,6 @@ namespace Signum.Web.Auth
                             .OperationAjax(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk),
                         IsContextualVisible = _ => false
                     }},
-                
-                   
                 });
 
 
@@ -153,31 +152,26 @@ namespace Signum.Web.Auth
             return request.Url;
         }
 
-        public static void HandleAnonymousNotAutorizedException(ExceptionContext ctx, string absoluteLoginUrl)
-        { 
-            Exception exception = ctx.Exception.FollowC(a => a.InnerException).Last();
-            string controllerName = (string)ctx.RouteData.Values["controller"];
-            string actionName = (string)ctx.RouteData.Values["action"];
-            HandleErrorInfo model = new HandleErrorInfo(exception, controllerName, actionName);
+        public static void DefaultOnControllerUnauthorizedAccessException(ExceptionContext ctx, string absoluteLoginUrl)
+        {
+            Exception exception = SignumExceptionHandlerAttribute.CleanException(ctx.Exception);
 
-            if (HandleExceptionAttribute.LogControllerException != null)
-                HandleExceptionAttribute.LogControllerException(model);
+            HandleErrorInfo model = new HandleErrorInfo(exception, 
+                (string)ctx.RouteData.Values["controller"], 
+                (string)ctx.RouteData.Values["action"]);
 
-            if (UserDN.Current == null || UserDN.Current == AuthLogic.AnonymousUser)
-            {
-                if (ctx.HttpContext.Request.IsAjaxRequest())
-                    ctx.Result = JsonAction.Redirect(absoluteLoginUrl);
-                else
-                    ctx.Result = new RedirectResult(absoluteLoginUrl);
+            if (SignumExceptionHandlerAttribute.LogException != null)
+                SignumExceptionHandlerAttribute.LogException(model);
 
-                ctx.ExceptionHandled = true;
-                ctx.HttpContext.Response.Clear();
-                ctx.HttpContext.Response.TrySkipIisCustomErrors = true;
-            }
+            if (ctx.HttpContext.Request.IsAjaxRequest())
+                ctx.Result = JsonAction.Redirect(absoluteLoginUrl);
             else
-            {
-                HandleExceptionAttribute.DefaultOnException(ctx);
-            }
+                ctx.Result = new RedirectResult(absoluteLoginUrl);
+
+            ctx.ExceptionHandled = true;
+            ctx.HttpContext.Response.Clear();
+            ctx.HttpContext.Response.TrySkipIisCustomErrors = true;
+
         }
 
         static GenericInvoker miAttachEvents = GenericInvoker.Create(() => AttachEvents<Entity>(null));
