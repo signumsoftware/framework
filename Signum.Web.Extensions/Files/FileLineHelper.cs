@@ -29,66 +29,88 @@ namespace Signum.Web.Files
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            sb.AddLine(helper.HiddenEntityInfo(fileLine));
-
-            FilePathDN filePath = value as FilePathDN;
-            if (filePath != null)
-            {
-                if (fileLine.FileType == null)
-                    fileLine.FileType = FileLineHelper.GetFileTypeFromValue(filePath);
-                if (fileLine.FileType == null)
-                    throw new ArgumentException("FileType property of FileLine settings must be specified for FileLine {0}".Formato(fileLine.ControlID));
-
-                sb.AddLine(helper.Hidden(fileLine.Compose(FileLineKeys.FileType),
-                    EnumDN.UniqueKey((value != null) ?
-                        filePath.FileTypeEnum ?? EnumLogic<FileTypeDN>.ToEnum(filePath.FileType) :
-                        fileLine.FileType)));
-            }
-
-            if (value != null)
-                sb.AddLine(helper.Div(fileLine.Compose(EntityBaseKeys.Entity), null, "", new Dictionary<string, object> { { "style", "display:none" } }));
-
-            fileLine.ValueHtmlProps.AddCssClass("sf-value-line");
-            if (fileLine.ShowValidationMessage)
-                fileLine.ValueHtmlProps.AddCssClass("inlineVal"); //inlineVal class tells Javascript code to show Inline Error
-
-            bool hasEntity = value != null && value.FileName.HasText();
-
-            using (sb.Surround(new HtmlTag("div", fileLine.Compose("DivOld")).Attr("style", "display:" + (hasEntity ? "block" : "none"))))
+            using (fileLine.ShowFieldDiv ? sb.Surround(new HtmlTag("div").Class("sf-field")) : null)
+            using (fileLine.ValueFirst ? sb.Surround(new HtmlTag("div").Class("sf-value-first")) : null)
             {
 
-                sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, fileLine,
-                    fileLine.Download ? fileLine.Compose(EntityBaseKeys.ToStrLink) : fileLine.Compose(EntityBaseKeys.ToStr)));
+                sb.AddLine(helper.HiddenEntityInfo(fileLine));
 
-                if (fileLine.Download && !(value is EmbeddedEntity))
+                FilePathDN filePath = value as FilePathDN;
+                if (filePath != null)
                 {
-                    sb.AddLine(
-                            helper.Href(fileLine.Compose(EntityBaseKeys.ToStrLink),
-                                value.TryCC(f => f.FileName) ?? "",
-                                "",
-                                "Download",
-                                "sf-value-line",
-                                new Dictionary<string, object> { { "onclick", fileLine.GetDownloading() } }));
+                    if (fileLine.FileType == null)
+                        fileLine.FileType = FileLineHelper.GetFileTypeFromValue(filePath);
+                    if (fileLine.FileType == null)
+                        throw new ArgumentException("FileType property of FileLine settings must be specified for FileLine {0}".Formato(fileLine.ControlID));
+
+                    sb.AddLine(helper.Hidden(fileLine.Compose(FileLineKeys.FileType),
+                        EnumDN.UniqueKey((value != null) ?
+                            filePath.FileTypeEnum ?? EnumLogic<FileTypeDN>.ToEnum(filePath.FileType) :
+                            fileLine.FileType)));
                 }
-                else
-                    sb.AddLine(helper.Span(fileLine.Compose(EntityBaseKeys.ToStr), value.TryCC(f => f.FileName) ?? "", "sf-value-line", null));
 
-                sb.AddLine(EntityBaseHelper.RemoveButton(helper, fileLine));
-            }
+                if (value != null)
+                    sb.AddLine(helper.Div(fileLine.Compose(EntityBaseKeys.Entity), null, "", new Dictionary<string, object> { { "style", "display:none" } }));
 
-            using (sb.Surround(new HtmlTag("div", fileLine.Compose("DivNew")).Attr("style", "display:" + (hasEntity ? "none" : "block"))))
-            {
-                sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, fileLine, fileLine.ControlID));
+                fileLine.ValueHtmlProps.AddCssClass("sf-value-line");
+                if (fileLine.ShowValidationMessage)
+                    fileLine.ValueHtmlProps.AddCssClass("inlineVal"); //inlineVal class tells Javascript code to show Inline Error
 
-                sb.AddLine(MvcHtmlString.Create("<input type='file' onchange=\"{0}\" id='{1}' name='{1}' class='valueLine'/>".Formato(fileLine.GetOnChanged(), fileLine.ControlID)));
-                sb.AddLine(MvcHtmlString.Create("<img src='{0}' id='{1}loading' alt='loading' style='display:none'/>".Formato(RouteHelper.New().Content("~/Images/loading.gif"), fileLine.ControlID)));
-                sb.AddLine(MvcHtmlString.Create("<iframe id='frame{0}' name='frame{0}' src='about:blank' style='position:absolute;left:-1000px;top:-1000px'></iframe>".Formato(fileLine.ControlID)));
-            }
+                bool hasEntity = value != null && value.FileName.HasText();
 
-            if (fileLine.ShowValidationMessage)
-            {
-                sb.Add(MvcHtmlString.Create("&nbsp;"));
-                sb.AddLine(helper.ValidationMessage(fileLine.ControlID));
+                using (sb.Surround(new HtmlTag("div", fileLine.Compose("DivOld")).Attr("style", "display:" + (hasEntity ? "block" : "none"))))
+                {
+                    var label = EntityBaseHelper.BaseLineLabel(helper, fileLine,
+                            fileLine.Download ? fileLine.Compose(EntityBaseKeys.ToStrLink) : fileLine.Compose(EntityBaseKeys.ToStr));
+
+                    if (!fileLine.ValueFirst)
+                        sb.AddLine(label);
+
+                    using (sb.Surround(new HtmlTag("div").Class("sf-value-container")))
+                    {
+                        if (fileLine.Download && !(value is EmbeddedEntity))
+                        {
+                            sb.AddLine(
+                                    helper.Href(fileLine.Compose(EntityBaseKeys.ToStrLink),
+                                        value.TryCC(f => f.FileName) ?? "",
+                                        "",
+                                        "Download",
+                                        "sf-value-line",
+                                        new Dictionary<string, object> { { "onclick", fileLine.GetDownloading() } }));
+                        }
+                        else
+                            sb.AddLine(helper.Span(fileLine.Compose(EntityBaseKeys.ToStr), value.TryCC(f => f.FileName) ?? "", "sf-value-line", null));
+
+                        sb.AddLine(EntityBaseHelper.RemoveButton(helper, fileLine));
+
+                        if (fileLine.ValueFirst)
+                            sb.AddLine(label);
+                    }
+                }
+
+                using (sb.Surround(new HtmlTag("div", fileLine.Compose("DivNew")).Attr("style", "display:" + (hasEntity ? "none" : "block"))))
+                {
+                    var label = EntityBaseHelper.BaseLineLabel(helper, fileLine, fileLine.ControlID);
+
+                    if (!fileLine.ValueFirst)
+                        sb.AddLine(label);
+
+                    using (sb.Surround(new HtmlTag("div").Class("sf-value-container")))
+                    {
+                        sb.AddLine(MvcHtmlString.Create("<input type='file' onchange=\"{0}\" id='{1}' name='{1}' class='valueLine'/>".Formato(fileLine.GetOnChanged(), fileLine.ControlID)));
+                        sb.AddLine(MvcHtmlString.Create("<img src='{0}' id='{1}loading' alt='loading' style='display:none'/>".Formato(RouteHelper.New().Content("~/Images/loading.gif"), fileLine.ControlID)));
+                        sb.AddLine(MvcHtmlString.Create("<iframe id='frame{0}' name='frame{0}' src='about:blank' style='position:absolute;left:-1000px;top:-1000px'></iframe>".Formato(fileLine.ControlID)));
+
+                        if (fileLine.ValueFirst)
+                            sb.AddLine(label);
+                    }
+                }
+
+                if (fileLine.ShowValidationMessage)
+                {
+                    sb.Add(MvcHtmlString.Create("&nbsp;"));
+                    sb.AddLine(helper.ValidationMessage(fileLine.ControlID));
+                }
             }
 
             return sb.ToHtml();
