@@ -94,6 +94,7 @@
     <Content Include="Content\smoothness\images\ui-icons_888888_256x240.png" />
     <Content Include="Content\smoothness\images\ui-icons_cd0a0a_256x240.png" />
     <Content Include="Content\smoothness\jquery-ui-1.8.9.custom.css" />
+    <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="Server$custommessage$.svc" />
     <Content Include="Views\$custommessage$\MyEntity.cshtml" />

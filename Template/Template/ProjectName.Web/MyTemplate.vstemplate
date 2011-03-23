@@ -45,6 +45,7 @@
         <ProjectItem ReplaceParameters="false" TargetFileName="jquery-ui-1.8.9.custom.min.js">jquery-ui-1.8.9.custom.min.js</ProjectItem>
         <ProjectItem ReplaceParameters="false" TargetFileName="newcontent.js">newcontent.js</ProjectItem>
       </Folder>
+      <ProjectItem ReplaceParameters="false" TargetFileName="favicon.ico">jquery-1.5.min.js</ProjectItem>
       <Folder Name="Controllers" TargetFolderName="Controllers">
         <ProjectItem ReplaceParameters="true" TargetFileName="HomeController.cs">HomeController.cs</ProjectItem>
       </Folder>
