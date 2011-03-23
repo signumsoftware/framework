@@ -70,7 +70,6 @@ namespace Signum.Web
             if (ticks != null)
                 sb.AddLine(helper.Hidden(valueLine.Compose(TypeContext.Ticks), ticks.Value));
 
-
             ValueLineType vltype = valueLine.ValueLineType ?? Configurator.GetDefaultValueLineType(valueLine.Type);
 
             valueLine.ValueHtmlProps.AddCssClass("sf-value-line");
@@ -87,7 +86,6 @@ namespace Signum.Web
 
             if (valueLine.ShowValidationMessage)
             {
-                sb.Add(MvcHtmlString.Create("&nbsp;"));
                 sb.AddLine(helper.ValidationMessage(valueLine.ControlID));
             }
         }

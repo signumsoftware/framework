@@ -21,7 +21,7 @@
 }
 
 .sf-field:after, .sf-field-list:after{
-    content: ".";
+    content: "";
     display: block;
     height: 0;
     clear: both;
@@ -99,9 +99,10 @@ a.sf-value-line, span.sf-value-line{
     clear:both;
 }
 
-/* entitylist */
-
-.sf-field, .sf-entity-line-detail {
+.sf-field {
+    margin:2px 0;
+}
+.sf-entity-line-detail {
     margin:6px 0;
 }
 
@@ -186,6 +187,7 @@ a.sf-value-line, span.sf-value-line{
 .input-validation-error {
     border:1px solid #ff6666 !important;
     background-color:#ffeeee !important;
+    padding-left: 2px;
 }
 
 .input-validation-error[type=checkbox] {

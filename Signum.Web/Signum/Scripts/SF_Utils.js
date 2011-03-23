@@ -269,7 +269,7 @@ SF.InputValidator = {
     isDecimal: function (e) {
         var c = e.keyCode;
         return (
-            this.number(e) || (c == 110) || //NumPad Decimal
+            this.isNumber(e) || (c == 110) || //NumPad Decimal
             (c == 190) || //.
 			(c == 188) //,
 		);

@@ -134,7 +134,7 @@ SF.registerModule("Validator", function () {
             $('.' + this.summaryErrorClass).replaceWith("");
 
             var allErrors = [];
-            var inlineErrorStart = '&nbsp;<span class="' + this.fieldErrorClass + '">';
+            var inlineErrorStart = '<span class="' + this.fieldErrorClass + '">';
             var inlineErrorEnd = "</span>";
 
             var controlID;

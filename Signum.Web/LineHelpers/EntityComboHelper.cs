@@ -92,7 +92,6 @@ namespace Signum.Web
 
                     if (entityCombo.ShowValidationMessage)
                     {
-                        sb.Add(MvcHtmlString.Create("&nbsp;"));
                         sb.AddLine(helper.ValidationMessage(entityCombo.ControlID));
                     }
 
