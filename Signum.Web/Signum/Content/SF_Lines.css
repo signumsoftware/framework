@@ -140,6 +140,10 @@ a.sf-value-line, span.sf-value-line{
 	border-style:solid;
 	clear:both;
 }
+.sf-repeater-element:last-child
+{
+    border-bottom-color: #dfdfdf;
+}
 .sf-repeater a.sf-remove
 {
 	position:absolute;

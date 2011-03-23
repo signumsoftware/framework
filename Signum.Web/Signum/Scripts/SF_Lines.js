@@ -742,8 +742,7 @@ SF.registerModule("Lines", function () {
             var itemInfoValue = this.itemRuntimeInfo(itemPrefix).createValue(runtimeType, '', 'n', '');
 
             var $div = $("<div id='" + SF.compose(itemPrefix, this.repeaterItem) + "' name='" + SF.compose(itemPrefix, this.repeaterItem) + "' class='sf-repeater-element'>" +
-                "<a id='" + SF.compose(itemPrefix, "btnRemove") + "' title='" + this.options.removeItemLinkText + "' href=\"javascript:new SF.ERep({prefix:'" + this.options.prefix + "', onEntityChanged:" + (SF.isEmpty(this.options.onEntityChanged) ? "''" : this.options.onEntityChanged) + "}).remove('" + itemPrefix + "');\" class='sf-line-button remove'>" + this.options.removeItemLinkText + "</a>" +
-                "<div class='clearall'></div>" +
+                "<a id='" + SF.compose(itemPrefix, "btnRemove") + "' title='" + this.options.removeItemLinkText + "' href=\"javascript:new SF.ERep({prefix:'" + this.options.prefix + "', onEntityChanged:" + (SF.isEmpty(this.options.onEntityChanged) ? "''" : this.options.onEntityChanged) + "}).remove('" + itemPrefix + "');\" class='sf-line-button sf-remove' data-icon='ui-icon-circle-close' data-text='false'>" + this.options.removeItemLinkText + "</a>" +
                 SF.hiddenInput(SF.compose(itemPrefix, SF.Keys.runtimeInfo), itemInfoValue) +
                 "<div id='" + SF.compose(itemPrefix, this.entity) + "' name='" + SF.compose(itemPrefix, this.entity) + "'>" +
                 "</div>" + //sfEntity
@@ -752,7 +751,7 @@ SF.registerModule("Lines", function () {
 
             $(this.pf(this.itemsContainer)).append($div);
             $("#" + SF.compose(itemPrefix, this.entity)).html(newHtml);
-            SF.triggerNewContent($("#" + SF.compose(itemPrefix, this.entity)));
+            SF.triggerNewContent($("#" + SF.compose(itemPrefix, this.repeaterItem)));
         };
 
         this.viewOptionsForViewing = function (_viewOptions, itemPrefix) { //Used in onFindingOk
