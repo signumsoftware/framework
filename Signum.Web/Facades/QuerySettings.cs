@@ -9,6 +9,7 @@ using System.Web;
 using System.Web.Mvc;
 using Signum.Entities.Reflection;
 using Signum.Web.Properties;
+using System.Linq.Expressions;
 
 namespace Signum.Web
 {
@@ -27,8 +28,22 @@ namespace Signum.Web
 
         public Func<object, bool> IsFindable;
 
+        public bool OnIsFindable()
+        {
+            if (IsFindable != null)
+                foreach (Func<object, bool> item in IsFindable.GetInvocationList())
+                {
+                    if (!item(QueryName))
+                        return false;
+                }
+
+            return true;
+        }
+
         public static List<FormatterRule> FormatRules { get; set; }
         public static List<EntityFormatterRule> EntityFormatRules { get; set; }
+
+        public static Dictionary<PropertyRoute, Func<HtmlHelper, object, MvcHtmlString>> PropertyFormatters { get; set; }
 
         static QuerySettings()
         {
@@ -79,6 +94,8 @@ namespace Signum.Web
                     return h.Href(Navigator.ViewRoute(l.RuntimeType, l.Id), h.Encode(Resources.View));
                 }),
             };
+
+            PropertyFormatters = new Dictionary<PropertyRoute, Func<HtmlHelper, object, MvcHtmlString>>();
         }
 
         public static MvcHtmlString AlignCenter(MvcHtmlString innerHTML)
@@ -92,19 +109,22 @@ namespace Signum.Web
 
         public Func<HtmlHelper, object, MvcHtmlString> GetFormatter(Column column)
         {
+            PropertyRoute route = column.Token.GetPropertyRoute();
+            if (route != null)
+            {
+                var formatter = QuerySettings.PropertyFormatters.TryGetC(route);
+                if (formatter != null)
+                    return formatter;
+            }
+
             return FormatRules.Last(cfr => cfr.IsApplyable(column)).Formatter(column);
         }
 
-        public bool OnIsFindable()
-        {
-            if (IsFindable != null)
-                foreach (Func<object, bool> item in IsFindable.GetInvocationList())
-                {
-                    if (!item(QueryName))
-                        return false;
-                }
 
-            return true;
+        public static void RegisterPropertyFormat<T>(Expression<Func<T, object>> property, Func<HtmlHelper, object, MvcHtmlString> formatter)
+         where T : IRootEntity
+        {
+            PropertyFormatters.Add(PropertyRoute.Construct(property), formatter);
         }
     }
 

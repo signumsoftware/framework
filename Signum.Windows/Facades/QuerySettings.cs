@@ -46,7 +46,6 @@ namespace Signum.Windows
 
 
         public static Dictionary<PropertyRoute, Func<Binding, DataTemplate>> PropertyFormatters { get; set; }
-
         public static List<FormatterRule> FormatRules { get; set; }
 
         static QuerySettings()
