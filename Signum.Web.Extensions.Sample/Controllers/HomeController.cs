@@ -7,6 +7,7 @@ using Signum.Entities.Authorization;
 using Signum.Engine.ControlPanel;
 using Signum.Web.ControlPanel;
 using Signum.Utilities;
+using Signum.Engine;
 
 namespace Signum.Web.Extensions.Sample
 {
@@ -19,8 +20,8 @@ namespace Signum.Web.Extensions.Sample
                 return View();
 
             var panel = ControlPanelLogic.GetHomePageControlPanel();
-            if (panel != null)
-                return View(ControlPanelClient.ViewPrefix.Formato("ControlPanel"), panel);
+            if (panel != null) 
+                return View(ControlPanelClient.ViewPrefix.Formato("ControlPanel"), panel.Retrieve());
             else
                 return View();
         }

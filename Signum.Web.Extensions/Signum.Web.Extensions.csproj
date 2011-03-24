@@ -623,6 +623,8 @@
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>_ViewStart.cs</LastGenOutput>
     </Content>
+    <Content Include="Files\Images\loading.gif" />
+    <Content Include="Files\Scripts\SF_Files.js" />
     <Content Include="Help\Scripts\help.js" />
     <Content Include="Help\Views\_ViewStart.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>

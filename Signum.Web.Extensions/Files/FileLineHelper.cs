@@ -32,8 +32,11 @@ namespace Signum.Web.Files
             using (fileLine.ShowFieldDiv ? sb.Surround(new HtmlTag("div").Class("sf-field")) : null)
             using (fileLine.ValueFirst ? sb.Surround(new HtmlTag("div").Class("sf-value-first")) : null)
             {
-
                 sb.AddLine(helper.HiddenEntityInfo(fileLine));
+                sb.AddLine(new HtmlTag("script")
+                    .Attr("type", "text/javascript")
+                    .InnerHtml(MvcHtmlString.Create("$(function(){ SF.Loader.loadJs('" + RouteHelper.New().Content("~/Files/Scripts/SF_Files.js") + "'); });"))
+                    .ToHtml());
 
                 FilePathDN filePath = value as FilePathDN;
                 if (filePath != null)
@@ -98,7 +101,7 @@ namespace Signum.Web.Files
                     using (sb.Surround(new HtmlTag("div").Class("sf-value-container")))
                     {
                         sb.AddLine(MvcHtmlString.Create("<input type='file' onchange=\"{0}\" id='{1}' name='{1}' class='valueLine'/>".Formato(fileLine.GetOnChanged(), fileLine.ControlID)));
-                        sb.AddLine(MvcHtmlString.Create("<img src='{0}' id='{1}loading' alt='loading' style='display:none'/>".Formato(RouteHelper.New().Content("~/Images/loading.gif"), fileLine.ControlID)));
+                        sb.AddLine(MvcHtmlString.Create("<img src='{0}' id='{1}loading' alt='loading' style='display:none'/>".Formato(RouteHelper.New().Content("~/Files/Images/loading.gif"), fileLine.ControlID)));
                         sb.AddLine(MvcHtmlString.Create("<iframe id='frame{0}' name='frame{0}' src='about:blank' style='position:absolute;left:-1000px;top:-1000px'></iframe>".Formato(fileLine.ControlID)));
 
                         if (fileLine.ValueFirst)
