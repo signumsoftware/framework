@@ -243,13 +243,13 @@
   <data name="Signum_error" xml:space="preserve">
     <value>Error</value>
   </data>
-  <data name="Signum_Executing" xml:space="preserve">
+  <data name="Signum_executing" xml:space="preserve">
     <value>Executing...</value>
   </data>
   <data name="Signum_noElementsSelected" xml:space="preserve">
     <value>No elements selected</value>
   </data>
-  <data name="Signum_Executed" xml:space="preserve">
+  <data name="Signum_executed" xml:space="preserve">
     <value>Executed</value>
   </data>
   <data name="Signum_popupErrors" xml:space="preserve">

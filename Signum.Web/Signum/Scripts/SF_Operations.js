@@ -95,7 +95,7 @@ SF.registerModule("Operations", function () {
                 SF.Blocker.enable();
             }
 
-            SF.Notify.info(lang.signum.executingOperation);
+            SF.Notify.info(lang.signum.executing);
 
             if (SF.isEmpty(newPrefix))
                 newPrefix = this.options.prefix;
@@ -304,9 +304,9 @@ SF.registerModule("Operations", function () {
             }
 
             if (SF.isTrue(this.options.isLite)) {
-                SF.Notify.info(lang.signum.executingOperation);
+                SF.Notify.info(lang.signum.executing);
                 this.operationAjax(this.options.prefix, function () {
-                    SF.Notify.info(lang.signum.operationExecuted, 2000);
+                    SF.Notify.info(lang.signum.executed, 2000);
                 });
             }
             else {
@@ -321,9 +321,9 @@ SF.registerModule("Operations", function () {
                 return false;
             }
 
-            SF.Notify.info(lang.signum.executingOperation);
+            SF.Notify.info(lang.signum.executing);
             this.operationAjax(this.options.prefix, function () {
-                SF.Notify.info(lang.signum.operationExecuted, 2000);
+                SF.Notify.info(lang.signum.executed, 2000);
             });
         };
     };
@@ -365,7 +365,7 @@ SF.registerModule("Operations", function () {
         this.operationAjax = function (newPrefix, items, onSuccess) {
             SF.log("ConstructorFromMany operationAjax");
 
-            SF.Notify.info(lang.signum.executingOperation);
+            SF.Notify.info(lang.signum.executing);
 
             if (SF.Blocker.isEnabled()) {
                 return false;
@@ -508,21 +508,21 @@ SF.registerModule("Operations", function () {
                 containerDiv: SF.compose(prefix, "externalPopupDiv")
             }).viewSave(operationResult);
         }
-        SF.Notify.info(lang.signum.operationExecuted, 2000);
+        SF.Notify.info(lang.signum.executed, 2000);
     };
 
     SF.opOpenPopup = function (prefix, operationResult) {
         SF.log("OperationExecutor OpOpenPopup");
         SF.opDisableCtxmenu();
         new SF.ViewNavigator({ prefix: prefix }).showCreateSave(operationResult);
-        SF.Notify.info(lang.signum.operationExecuted, 2000);
+        SF.Notify.info(lang.signum.executed, 2000);
     };
 
     SF.opOpenPopupNoDefaultOk = function (prefix, operationResult) {
         SF.log("OperationExecutor OpOpenPopupNoDefaultOk");
         SF.opDisableCtxmenu();
         new SF.ViewNavigator({ prefix: prefix, onOk: function () { return false; } }).showCreateSave(operationResult);
-        SF.Notify.info(lang.signum.operationExecuted, 2000);
+        SF.Notify.info(lang.signum.executed, 2000);
     };
 
     SF.opNavigate = function (prefix, operationResult) {
@@ -535,7 +535,7 @@ SF.registerModule("Operations", function () {
             .addClass("sf-entity-ctxmenu-" + (SF.isEmpty(operationResult) ? "success" : "error"))
             .removeClass("sf-ctxmenu-active");
 
-        SF.Notify.info(lang.signum.operationExecuted, 2000);
+        SF.Notify.info(lang.signum.executed, 2000);
     };
 
     SF.opContextualOnSuccess = function (prefix, operationResult) {
@@ -555,7 +555,7 @@ SF.registerModule("Operations", function () {
         else {
             $("form").html(operationResult);
             SF.triggerNewContent($("form"));
-            SF.Notify.info(lang.signum.operationExecuted, 2000);
+            SF.Notify.info(lang.signum.executed, 2000);
         }
     };
 });

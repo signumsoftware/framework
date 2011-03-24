@@ -140,7 +140,15 @@ WriteLiteral("\'); } });\r\n            </script>    \r\n");
 
     }
 
-WriteLiteral("    <div id=\"");
+WriteLiteral("    \r\n");
+
+
+      
+        bool filtersAlwaysHidden = findOptions.FilterMode == FilterMode.AlwaysHidden || findOptions.FilterMode == FilterMode.OnlyResults;
+        bool filtersVisible = findOptions.FilterMode == FilterMode.Visible;
+     
+
+WriteLiteral("    \r\n    <div id=\"");
 
 
         Write(Model.Compose("divFilters"));
@@ -148,7 +156,7 @@ WriteLiteral("    <div id=\"");
 WriteLiteral("\" style=\"display:");
 
 
-                                                      Write((findOptions.FilterMode != FilterMode.AlwaysHidden && findOptions.FilterMode != FilterMode.OnlyResults) ? "block" : "none");
+                                                      Write(filtersAlwaysHidden ? "none" : "block");
 
 WriteLiteral("\" >\r\n");
 
@@ -158,24 +166,25 @@ WriteLiteral("\" >\r\n");
 WriteLiteral("    </div>\r\n    \r\n");
 
 
-      bool filtersVisible = findOptions.FilterMode == FilterMode.Visible;
-
-WriteLiteral("    ");
-
-
-Write(Html.Href("",
-                (filtersVisible ? Resources.Signum_hideFilters : Resources.Signum_showFilters), 
+     if (!filtersAlwaysHidden)
+    {
+        
+   Write(Html.Href("",
+                (filtersVisible ? Resources.Signum_hideFilters : Resources.Signum_showFilters),
                 "",
                 (filtersVisible ? Resources.Signum_hideFilters : Resources.Signum_showFilters),
-                "sf-query-button" + " sf-filters-header" + (filtersVisible ? "" : " close"), 
+                "sf-query-button" + " sf-filters-header" + (filtersVisible ? "" : " close"),
                 new Dictionary<string, object> 
                 { 
                     { "onclick", "new SF.FindNavigator({{prefix: '{0}'}}).toggleFilters(this)".Formato(Model.ControlID) },
                     { "data-icon", filtersVisible ? "ui-icon-triangle-1-n" : "ui-icon-triangle-1-e" }
                 }));
 
-WriteLiteral("\r\n    \r\n    <div class=\"sf-query-button-bar\">\r\n        <button type=\"submit\" clas" +
-"s=\"sf-query-button sf-search\" data-icon=\"ui-icon-search\" id=\"");
+                  
+    }
+
+WriteLiteral("    \r\n    <div class=\"sf-query-button-bar\">\r\n        <button type=\"submit\" class=" +
+"\"sf-query-button sf-search\" data-icon=\"ui-icon-search\" id=\"");
 
 
                                                                                           Write(Model.Compose("qbSearch"));

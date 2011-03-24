@@ -29,21 +29,29 @@
             $(document).ready(function () { { SF.FindNavigator.searchOnLoad('@Model.ControlID'); } });
             </script>    
     }
-    <div id="@Model.Compose("divFilters")" style="display:@((findOptions.FilterMode != FilterMode.AlwaysHidden && findOptions.FilterMode != FilterMode.OnlyResults) ? "block" : "none")" >
+    
+    @{
+        bool filtersAlwaysHidden = findOptions.FilterMode == FilterMode.AlwaysHidden || findOptions.FilterMode == FilterMode.OnlyResults;
+        bool filtersVisible = findOptions.FilterMode == FilterMode.Visible;
+     }
+    
+    <div id="@Model.Compose("divFilters")" style="display:@(filtersAlwaysHidden ? "none" : "block")" >
         @{ Html.RenderPartial(Navigator.Manager.FilterBuilderView, ViewData);}
     </div>
     
-    @{bool filtersVisible = findOptions.FilterMode == FilterMode.Visible;}
-    @Html.Href("",
-                (filtersVisible ? Resources.Signum_hideFilters : Resources.Signum_showFilters), 
+    @if (!filtersAlwaysHidden)
+    {
+        @Html.Href("",
+                (filtersVisible ? Resources.Signum_hideFilters : Resources.Signum_showFilters),
                 "",
                 (filtersVisible ? Resources.Signum_hideFilters : Resources.Signum_showFilters),
-                "sf-query-button" + " sf-filters-header" + (filtersVisible ? "" : " close"), 
+                "sf-query-button" + " sf-filters-header" + (filtersVisible ? "" : " close"),
                 new Dictionary<string, object> 
                 { 
                     { "onclick", "new SF.FindNavigator({{prefix: '{0}'}}).toggleFilters(this)".Formato(Model.ControlID) },
                     { "data-icon", filtersVisible ? "ui-icon-triangle-1-n" : "ui-icon-triangle-1-e" }
                 })
+    }
     
     <div class="sf-query-button-bar">
         <button type="submit" class="sf-query-button sf-search" data-icon="ui-icon-search" id="@Model.Compose("qbSearch")" onclick="@("new SF.FindNavigator({{prefix:'{0}',searchControllerUrl:'{1}'}}).search();return false;".Formato(Model.ControlID, Url.SignumAction("Search")))">@Resources.Search</button>

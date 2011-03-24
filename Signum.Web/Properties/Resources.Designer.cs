@@ -459,18 +459,18 @@ namespace Signum.Web.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Executed.
         /// </summary>
-        public static string Signum_Executed {
+        public static string Signum_executed {
             get {
-                return ResourceManager.GetString("Signum_Executed", resourceCulture);
+                return ResourceManager.GetString("Signum_executed", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Executing....
         /// </summary>
-        public static string Signum_Executing {
+        public static string Signum_executing {
             get {
-                return ResourceManager.GetString("Signum_Executing", resourceCulture);
+                return ResourceManager.GetString("Signum_executing", resourceCulture);
             }
         }
         
