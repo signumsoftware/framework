@@ -150,9 +150,6 @@
   <data name="AccessToFacadeMethod0IsNotAllowed" xml:space="preserve">
     <value>Accès à la méthode de façade '{0}' n'est pas autorisée</value>
   </data>
-  <data name="NotAuthorizedTo0The1WithId2" xml:space="preserve">
-    <value>Pas autorisé à {0} le {1} avec l'ID {2}</value>
-  </data>
   <data name="_0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships" xml:space="preserve">
     <value>Trouvé {0} cycles dans le graphe de rôles en raison de relations rôles:
 </value>

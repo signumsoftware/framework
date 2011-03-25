@@ -975,8 +975,8 @@
   <data name="DateSpanDN" xml:space="preserve">
     <value>Intervallo di date</value>
   </data>
-  <data name="EmailMessageDN_FechaCreacion" xml:space="preserve">
-    <value>Data di creazione</value>
+  <data name="_0RulesFor1" xml:space="preserve">
+    <value>regole di {0} in {1}</value>
   </data>
   <data name="EmailState_Sent" xml:space="preserve">
     <value>Inviato</value>
@@ -1076,5 +1076,8 @@
   </data>
   <data name="UserDN_CultureInfo" xml:space="preserve">
     <value>Info cultura</value>
+  </data>
+  <data name="EmailMessageDN_CreationTime" xml:space="preserve">
+    <value>Data di creazione</value>
   </data>
 </root>

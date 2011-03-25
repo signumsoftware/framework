@@ -198,11 +198,11 @@
   <data name="Property0NotExistsInType1" xml:space="preserve">
     <value>La propiedad {0} no existe en el tipo {1}</value>
   </data>
-  <data name="RememberPassword" xml:space="preserve">
-    <value>Reasignar contraseña</value>
+  <data name="ExpiredPasswordMessage" xml:space="preserve">
+    <value>Su contraseña ha caducado. Debe cambiarla</value>
   </data>
-  <data name="RememberPasswordExplanation" xml:space="preserve">
-    <value>Introduzca su nombre de usuario y dirección de correo electrónico para recibir un mensaje en su cuenta con la contraseña</value>
+  <data name="ExpectedUserLogged" xml:space="preserve">
+    <value>Se esperaba que un usuario hubiera iniciado sesión</value>
   </data>
   <data name="Source" xml:space="preserve">
     <value>Fuente</value>
@@ -402,8 +402,8 @@
   <data name="RememberMe" xml:space="preserve">
     <value>Recordarme</value>
   </data>
-  <data name="ThePasswordMustHaveBetween7And15CharactersEachOfThemBeingANumber09OrALetter" xml:space="preserve">
-    <value>La contraseña debe tener entre 7 y 15 caracteres, siendo cada uno de ellos un número del 0 al 9 o una letra</value>
+  <data name="EnterTheNewPassword" xml:space="preserve">
+    <value>Escriba la nueva contraseña</value>
   </data>
   <data name="ThereHasBeenAnErrorWithYourRequestToResetYourPasswordPleaseEnterYourLogin" xml:space="preserve">
     <value>Se ha producido un error con tu solicitud de cambio de contraseña. Por favor, introduzca su email.</value>
@@ -455,5 +455,8 @@
   </data>
   <data name="PleaseConfirmYouDLikeToExecuteTheOperation0ToTheEntity123" xml:space="preserve">
     <value>Confirme que desea ejecutar la operación {0} a la entidad {1} ({2}-{3})</value>
+  </data>
+  <data name="PasswordsAreDifferent" xml:space="preserve">
+    <value>Las contraseñas son diferentes</value>
   </data>
 </root>

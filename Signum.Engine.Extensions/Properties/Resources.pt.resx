@@ -223,9 +223,6 @@
   <data name="NoHelpFor0" xml:space="preserve">
     <value>Nenhuma ajuda para {0}</value>
   </data>
-  <data name="NotAuthorizedTo0The1WithId2" xml:space="preserve">
-    <value>Não autorizado para {0} o {1} com a ID {2}</value>
-  </data>
   <data name="NotAuthorizedToRetrieve0" xml:space="preserve">
     <value>Não autorizado para a recuperar '{0}'</value>
   </data>
@@ -312,5 +309,14 @@
   </data>
   <data name="YouRecentlyRequestedANewPassword" xml:space="preserve">
     <value>Solicitaste recentemente uma nova password</value>
+  </data>
+  <data name="_0IsA1AndShowsTheProperty2" xml:space="preserve">
+    <value>{0} é um {1} e mostra a propriedade {2}</value>
+  </data>
+  <data name="_0IsACalculated1" xml:space="preserve">
+    <value>{0} é um calculado {1}</value>
+  </data>
+  <data name="Any" xml:space="preserve">
+    <value>qualquer</value>
   </data>
 </root>

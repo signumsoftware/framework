@@ -151,7 +151,7 @@
     <value>El acceso a el Método de Fachada '{0}' no está permitido</value>
   </data>
   <data name="NotAuthorizedTo0The1WithId2" xml:space="preserve">
-    <value>No autorizado para {0} la {1} con Id {2}</value>
+    <value>No autorizado para {0} la entidad {1} con Id {2}</value>
   </data>
   <data name="_0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships" xml:space="preserve">
     <value>Se han encontrado {0} ciclos en el grafo de roles Roles debido a las relaciones:
@@ -321,5 +321,17 @@
   </data>
   <data name="Any" xml:space="preserve">
     <value>cualquier</value>
+  </data>
+  <data name="ExpiredPassword" xml:space="preserve">
+    <value>Contraseña caducada</value>
+  </data>
+  <data name="PasswordNearExpired" xml:space="preserve">
+    <value>Tu contraseña está a punto de caducar</value>
+  </data>
+  <data name="SMSSendActionWasNotEstablished" xml:space="preserve">
+    <value>No se estableció SMSSendAction</value>
+  </data>
+  <data name="ThePasswordMustHaveBetween7And15CharactersEachOfThemBeingANumber09OrALetter" xml:space="preserve">
+    <value>La contraseña debe tener entre 7 y 15 caracteres, siendo cada uno de ellos un número de 0 a 9 o una letra</value>
   </data>
 </root>

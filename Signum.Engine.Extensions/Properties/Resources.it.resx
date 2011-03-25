@@ -223,9 +223,6 @@
   <data name="NoHelpFor0" xml:space="preserve">
     <value>Nessun aiuto per {0}</value>
   </data>
-  <data name="NotAuthorizedTo0The1WithId2" xml:space="preserve">
-    <value>{1} con Id {2} non autorizzato a {0}</value>
-  </data>
   <data name="NotAuthorizedToRetrieve0" xml:space="preserve">
     <value>Non autorizzato al recupero di '{0}'</value>
   </data>
@@ -312,5 +309,14 @@
   </data>
   <data name="YourVersion" xml:space="preserve">
     <value>la tua versione</value>
+  </data>
+  <data name="_0IsA1AndShowsTheProperty2" xml:space="preserve">
+    <value>{0} è un {1} e viene illustrata la proprietà {2}</value>
+  </data>
+  <data name="_0IsACalculated1" xml:space="preserve">
+    <value>{0} è {1} calcolato</value>
+  </data>
+  <data name="Any" xml:space="preserve">
+    <value>qualsiasi</value>
   </data>
 </root>

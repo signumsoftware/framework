@@ -223,9 +223,6 @@
   <data name="NoHelpFor0" xml:space="preserve">
     <value>Keine Hilfe für {0}</value>
   </data>
-  <data name="NotAuthorizedTo0The1WithId2" xml:space="preserve">
-    <value>Nicht autorisiert für {0} die {1} mit ID {2}</value>
-  </data>
   <data name="NotAuthorizedToRetrieve0" xml:space="preserve">
     <value>Nicht autorisiert zum Abrufen von '{0}'</value>
   </data>
