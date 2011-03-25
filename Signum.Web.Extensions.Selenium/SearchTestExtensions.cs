@@ -36,6 +36,17 @@ namespace Signum.Web.Selenium
             selenium.Type("{0}sfTop".Formato(prefix), top);
         }
 
+        public static void ToggleFilters(this ISelenium selenium, bool show)
+        {
+            ToggleFilters(selenium, show, "");
+        }
+
+        public static void ToggleFilters(this ISelenium selenium, bool show, string prefix)
+        {
+            selenium.Click("jq=#{0}divSearchControl .sf-filters-header".Formato(prefix));
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#{0}divSearchControl .sf-filters:{1}".Formato(prefix, show ? "visible" : "hidden")));
+        }
+
         public static void FilterSelectToken(this ISelenium selenium, int tokenSelectorIndexBase0, string itemSelector, bool willExpand)
         {
             FilterSelectToken(selenium, tokenSelectorIndexBase0, itemSelector, willExpand, "");
@@ -370,7 +381,7 @@ namespace Signum.Web.Selenium
 
         public static void EntityClick(this ISelenium selenium, int rowIndexBase1, string prefix)
         {
-            selenium.EntityClick(rowIndexBase1, prefix);
+            selenium.EntityClick(rowIndexBase1, false, prefix);
         }
         public static void EntityClick(this ISelenium selenium, int rowIndexBase1,bool multiSel, string prefix)
         {
