@@ -58,7 +58,7 @@ namespace Signum.Web.Extensions.Sample
                     };
                 });
 
-                OperationClient.Manager.Settings.AddRange(new Dictionary<Enum, OperationSettings>
+                OperationsClient.Manager.Settings.AddRange(new Dictionary<Enum, OperationSettings>
                 {
                     { AlbumOperation.Clone, new EntityOperationSettings 
                     { 

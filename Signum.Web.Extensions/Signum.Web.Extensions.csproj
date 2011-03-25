@@ -351,8 +351,8 @@
     <Compile Include="Operations\JsOperationOptions.cs" />
     <Compile Include="Operations\OperationButtonFactory.cs" />
     <Compile Include="Operations\OperationContextItem.cs" />
-    <Compile Include="Operations\OperationController.cs" />
-    <Compile Include="Operations\OperationClient.cs" />
+    <Compile Include="Operations\Controllers\OperationController.cs" />
+    <Compile Include="Operations\OperationsClient.cs" />
     <Compile Include="Operations\OperationSettings.cs" />
     <Compile Include="Processes\ProcessesClient.cs" />
     <Compile Include="Processes\Controllers\ProcessController.cs" />
@@ -634,6 +634,7 @@
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>_ViewStart.cs</LastGenOutput>
     </Content>
+    <Content Include="Operations\Scripts\SF_Operations.js" />
     <Content Include="Processes\Views\_ViewStart.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>_ViewStart.cs</LastGenOutput>

@@ -133,7 +133,7 @@ namespace Signum.Web.Auth
                 };
 
 
-                OperationClient.Manager.Settings.AddRange(new Dictionary<Enum, OperationSettings>
+                OperationsClient.Manager.Settings.AddRange(new Dictionary<Enum, OperationSettings>
                 {
                     { UserOperation.SetPassword, new EntityOperationSettings 
                     { 

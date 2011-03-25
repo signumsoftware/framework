@@ -32,7 +32,7 @@ namespace Signum.Web.Operations
     {
         static EntityOperationSettings()
         {
-            CssClass = _ => null;
+            CssClass = _ => "sf-operation";
         }
 
         public static Func<Enum, string> CssClass { get; set; }

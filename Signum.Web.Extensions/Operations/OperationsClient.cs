@@ -16,7 +16,7 @@ using Signum.Entities.Reflection;
 
 namespace Signum.Web.Operations
 {
-    public static class OperationClient
+    public static class OperationsClient
     {
         public static OperationManager Manager { get; private set; }
 
@@ -24,7 +24,11 @@ namespace Signum.Web.Operations
         {
             Manager = operationManager;
 
-            Navigator.RegisterArea(typeof(OperationClient));
+            Navigator.RegisterArea(typeof(OperationsClient));
+            
+            var scripts = Navigator.Manager.DefaultScripts();
+            scripts.Add("~/Operations/Scripts/SF_Operations.js");
+            Navigator.Manager.DefaultScripts += () => scripts;
 
             ButtonBarEntityHelper.RegisterGlobalButtons(Manager.ButtonBar_GetButtonBarElement);
 

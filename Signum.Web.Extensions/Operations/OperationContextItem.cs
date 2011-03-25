@@ -80,7 +80,7 @@ namespace Signum.Web.Operations
 
             var contexts =
                     from oi in list
-                    let os = (EntityOperationSettings)OperationClient.Manager.Settings.TryGetC(oi.Key)
+                    let os = (EntityOperationSettings)OperationsClient.Manager.Settings.TryGetC(oi.Key)
                     let ctx = new ContextualOperationContext()
                     {
                         Entity = ident,
