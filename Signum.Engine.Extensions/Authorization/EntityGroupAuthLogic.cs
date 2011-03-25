@@ -213,9 +213,16 @@ namespace Signum.Engine.Authorization
 
                 int[] notFound = found.Where(a => !a.Allowed).Select(a => a.Id).ToArray();
                 if (notFound.Any())
+                {
+                    List<DebugData> debugInfo = Database.Query<T>().Where(a => notFound.Contains(a.Id))
+                        .Select(a => a.IsAllowedForDebug(typeAllowed, ExecutionContext.Current)).ToList();
+
+                    string details = debugInfo.ToString(a => "  {0} because {1}".Formato(a.Lite, a.Errors()), "\r\n");
+
                     throw new UnauthorizedAccessException(Resources.NotAuthorizedTo0The1WithId2.Formato(
                         typeAllowed.NiceToString(),
-                        notFound.Length == 1 ? typeof(T).NiceName() : typeof(T).NicePluralName(), notFound.CommaAnd()));
+                        notFound.Length == 1 ? typeof(T).NiceName() : typeof(T).NicePluralName(), notFound.CommaAnd()) + "\r\n" + details);
+                }
             }
         }
 
@@ -257,6 +264,27 @@ namespace Signum.Engine.Authorization
                 return entity.InDB().WhereIsAllowedFor(allowed, executionContext).Any();
         }
 
+        [MethodExpander(typeof(IsAllowedForDebugExpander))]
+        public static DebugData IsAllowedForDebug(this IIdentifiable ident, TypeAllowedBasic allowed, ExecutionContext executionContext)
+        {
+            return (DebugData)miIsAllowedForDebugEntity.GetInvoker(ident.GetType()).Invoke(ident, allowed, executionContext);
+        }
+
+        static GenericInvoker miIsAllowedForDebugEntity = GenericInvoker.Create(() => IsAllowedForDebug<IdentifiableEntity>((IdentifiableEntity)null, TypeAllowedBasic.Create, null));
+        [MethodExpander(typeof(IsAllowedForDebugExpander))]
+        static DebugData IsAllowedForDebug<T>(this T entity, TypeAllowedBasic allowed, ExecutionContext executionContext)
+            where T : IdentifiableEntity
+        {
+            if (!AuthLogic.IsEnabled)
+                return null;
+
+            if (entity.IsNew)
+                throw new InvalidOperationException("The entity {0} is new".Formato(entity));
+
+            using (DisableQueries())
+                return entity.InDB().Select(e => e.IsAllowedForDebug(allowed, executionContext)).Single();
+        }
+
         public static void AssertAllowed(this Lite lite, TypeAllowedBasic allowed)
         {
             AssertAllowed(lite, allowed, ExecutionContext.Current);
@@ -284,7 +312,7 @@ namespace Signum.Engine.Authorization
         }
 
         static GenericInvoker miIsAllowedForLite = GenericInvoker.Create(() => IsAllowedFor<IdentifiableEntity>((Lite)null, TypeAllowedBasic.Create, null));
-
+        [MethodExpander(typeof(IsAllowedForExpander))]
         static bool IsAllowedFor<T>(this Lite lite, TypeAllowedBasic allowed, ExecutionContext executionContext)
             where T : IdentifiableEntity
         {
@@ -293,6 +321,25 @@ namespace Signum.Engine.Authorization
 
             using (DisableQueries())
                 return lite.ToLite<T>().InDB().WhereIsAllowedFor(allowed, executionContext).Any();
+        }
+
+
+        [MethodExpander(typeof(IsAllowedForExpander))]
+        public static DebugData IsAllowedForDebug(this Lite lite, TypeAllowedBasic allowed, ExecutionContext executionContext)
+        {
+            return (DebugData)miIsAllowedForDebugLite.GetInvoker(lite.RuntimeType).Invoke(lite, allowed, executionContext);
+        }
+
+        static GenericInvoker miIsAllowedForDebugLite = GenericInvoker.Create(() => IsAllowedForDebug<IdentifiableEntity>((Lite)null, TypeAllowedBasic.Create, null));
+        [MethodExpander(typeof(IsAllowedForExpander))]
+        static DebugData IsAllowedForDebug<T>(this Lite lite, TypeAllowedBasic allowed, ExecutionContext executionContext)
+             where T : IdentifiableEntity
+        {
+            if (!AuthLogic.IsEnabled)
+                return null;
+
+            using (DisableQueries())
+                return lite.ToLite<T>().InDB().Select(a => a.IsAllowedForDebug(allowed, executionContext)).Single();
         }
 
         class IsAllowedForExpander : IMethodExpander
@@ -307,6 +354,22 @@ namespace Signum.Engine.Authorization
                 Expression exp = arguments[0].Type.IsLite() ? Expression.Property(arguments[0], "Entity") : arguments[0];
 
                 return IsAllowedExpression(exp, allowed, executionContext) ?? Expression.Constant(true);
+            }
+        }
+
+
+        class IsAllowedForDebugExpander : IMethodExpander
+        {
+            public Expression Expand(Expression instance, Expression[] arguments, Type[] typeArguments)
+            {
+                TypeAllowedBasic allowed = (TypeAllowedBasic)ExpressionEvaluator.Eval(arguments[1]);
+
+                ExecutionContext executionContext = arguments.Length == 3 ? (ExecutionContext)ExpressionEvaluator.Eval(arguments[2]) :
+                    ExecutionContext.Current;
+
+                Expression exp = arguments[0].Type.IsLite() ? Expression.Property(arguments[0], "Entity") : arguments[0];
+
+                return IsAllowedExpressionDebug(exp, allowed, executionContext);
             }
         }
 
@@ -338,7 +401,7 @@ namespace Signum.Engine.Authorization
             return result;
         }
 
-        class EntityGroupTuple
+        internal class EntityGroupTuple
         {
             public Enum Key;
             public bool AllowedIn;
@@ -351,7 +414,7 @@ namespace Signum.Engine.Authorization
             if (!Schema.Current.Tables.ContainsKey(type))
                 throw new InvalidOperationException("{0} is not included in the schema".Formato(type));
 
-            bool userInterface = executionContext == ExecutionContext.UserInterface; 
+            bool userInterface = executionContext == ExecutionContext.UserInterface;
 
             var pairs = (from eg in EntityGroupLogic.GroupsFor(type)
                          let allowedDN = cache.GetAllowed(eg)
@@ -406,6 +469,109 @@ namespace Signum.Engine.Authorization
             return cleanBody;
         }
 
+        static ConstructorInfo ciDebugData = ReflectionTools.GetConstuctorInfo(() => new DebugData(null, null));
+        static ConstructorInfo ciGroupDebugData = ReflectionTools.GetConstuctorInfo(() => new GroupDebugData(null, true));
+        static ConstructorInfo ciGroupDebugDataApplicable = ReflectionTools.GetConstuctorInfo(() => new GroupDebugData(null, true, true));
+        static MethodInfo miToLite = ReflectionTools.GetMethodInfo((IdentifiableEntity a) => a.ToLite()).GetGenericMethodDefinition();
+
+        internal static Expression IsAllowedExpressionDebug(Expression entity, TypeAllowedBasic allowed, ExecutionContext executionContext)
+        {
+            var pairs = GetPairs(entity.Type, allowed, executionContext);
+
+            Expression liteEntity = Expression.Call(null, miToLite.MakeGenericMethod(entity.Type), entity);
+
+            if (pairs.Count == 0)
+                return Expression.New(ciDebugData, liteEntity, Expression.Constant(new List<GroupDebugData>()));
+
+            var sureNotallowed = pairs.Where(p => (p.EntityGroup.IsApplicable == null || p.EntityGroup.IsApplicable.Resume == true) && !p.AllowedIn && !p.AllowedOut);
+            if (sureNotallowed.Any())
+                return Expression.New(ciDebugData, liteEntity, Expression.Constant(sureNotallowed.Select(p => new GroupDebugData(p, false, null))));
+
+            Expression list = Expression.ListInit(Expression.New(typeof(List<GroupDebugData>)), pairs.Select(p =>
+            {
+                if (p.EntityGroup.IsApplicable == null || p.EntityGroup.IsApplicable.Resume == true)
+                {
+                    return Expression.New(ciGroupDebugData, Expression.Constant(p),
+                        p.EntityGroup.IsInGroup.UntypedExpression.InvokeLambda(entity));
+                }
+                else
+                {
+                    return Expression.New(ciGroupDebugDataApplicable, Expression.Constant(p),
+                        p.EntityGroup.IsApplicable.UntypedExpression.InvokeLambda(entity),
+                        p.EntityGroup.IsInGroup.UntypedExpression.InvokeLambda(entity));
+
+                }
+            }).ToArray());
+
+            Expression body = Expression.New(ciDebugData, liteEntity, list);
+
+            Expression cleanBody = DbQueryProvider.Clean(body);
+
+            return cleanBody;
+        }
+
+        public class DebugData
+        {
+            public DebugData(Lite lite, List<GroupDebugData> groups)
+            {
+                this.Lite = lite;
+                this.Groups = groups;
+            }
+            bool IsAllowed { get { return Groups.All(g => g.IsAllowed); } }
+            public Lite Lite { get; private set; }
+            public List<GroupDebugData> Groups { get; private set; }
+
+            internal string Errors()
+            {
+                return Groups.Where(a => !a.IsAllowed).CommaAnd(a => a.Description());
+            }
+        }
+
+        public class GroupDebugData
+        {
+            EntityGroupTuple tuple;
+
+            internal GroupDebugData(EntityGroupTuple tuple, bool inGroup)
+            {
+                this.tuple = tuple;
+                this.IsApplicable = null;
+                this.InGroup = inGroup;
+            }
+
+            internal GroupDebugData(EntityGroupTuple tuple, bool isApplicable, bool? inGroup)
+            {
+                this.tuple = tuple;
+                this.IsApplicable = isApplicable;
+                this.InGroup = inGroup;
+            }
+
+            public Enum Key { get { return tuple.Key; } }
+            public bool AllowedIn { get { return tuple.AllowedIn; } }
+            public bool AllowedOut { get { return tuple.AllowedOut; } }
+            public bool? IsApplicable { get; private set; }
+            public bool? InGroup { get; private set; }
+
+            public bool IsAllowed
+            {
+                get
+                {
+                    if (IsApplicable == false)
+                        return true;
+
+                    return InGroup.Value ? AllowedIn : AllowedOut;
+                }
+            }
+
+            internal string Description()
+            {
+                return "({0})".Formato(", ".Combine(
+                    Key.NiceToString(),
+                    IsApplicable == true ? "IsApplicable" : null,
+                    InGroup == true ? "InGroup" : "Not InGroup",
+                    InGroup == true ? (this.AllowedIn ? "AllowedIn" : "Not AllowedIn") :
+                                     (this.AllowedOut ? "AllowedOut" : "Not AllowedOut")));
+            }
+        }
 
 
         static Expression InvokeLambda(this LambdaExpression lambda, Expression p)
@@ -554,12 +720,4 @@ namespace Signum.Engine.Authorization
                 yield return access.OutGroup.Get(userInterface);
         }
     }
-
-    //public enum DisableSaveOptions
-    //{
-    //    Origin = 1,
-    //    Destiny = 2,
-    //    Both = Origin | Destiny,
-    //    ReEnabled = 0, 
-    //}
 }
