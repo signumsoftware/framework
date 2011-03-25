@@ -66,14 +66,7 @@ DefineSection("head", () => {
 WriteLiteral("\r\n    ");
 
 
-Write(Html.ScriptsJs(
-            "~/signum/Scripts/SF_Globals.js",
-            "~/signum/Scripts/SF_Popup.js",
-            "~/signum/Scripts/SF_Lines.js",
-            "~/signum/Scripts/SF_ViewNavigator.js",
-            "~/signum/Scripts/SF_FindNavigator.js",
-            "~/signum/Scripts/SF_Validator.js",
-            "~/signum/Scripts/SF_Operations.js"));
+Write(Html.ScriptsJs(Navigator.Manager.DefaultScripts().ToArray()));
 
 WriteLiteral("\r\n");
 

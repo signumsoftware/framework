@@ -1,13 +1,6 @@
 ﻿@section head
 {
-    @Html.ScriptsJs(
-            "~/signum/Scripts/SF_Globals.js",
-            "~/signum/Scripts/SF_Popup.js",
-            "~/signum/Scripts/SF_Lines.js",
-            "~/signum/Scripts/SF_ViewNavigator.js",
-            "~/signum/Scripts/SF_FindNavigator.js",
-            "~/signum/Scripts/SF_Validator.js",
-            "~/signum/Scripts/SF_Operations.js")
+    @Html.ScriptsJs(Navigator.Manager.DefaultScripts().ToArray())
 }
 @using (Html.BeginForm())
 {

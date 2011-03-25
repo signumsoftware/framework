@@ -309,7 +309,6 @@
     </None>
     <Content Include="Signum\Scripts\SF_FindNavigator.js" />
     <Content Include="Signum\Scripts\SF_Lines.js" />
-    <Content Include="Signum\Scripts\SF_Operations.js" />
     <Content Include="Signum\Scripts\SF_Popup.js" />
     <Content Include="Signum\Scripts\SF_Validator.js" />
     <Content Include="Signum\Scripts\SF_ViewNavigator.js" />

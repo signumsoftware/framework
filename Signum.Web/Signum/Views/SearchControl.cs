@@ -262,7 +262,7 @@ WriteLiteral("\" class=\"sf-search-results\">\r\n            <thead class=\"ui-w
                      if (findOptions.AllowMultiple.HasValue)
                     {
 
-WriteLiteral("                        <th class=\"ui-state-default thRowSelection\">\r\n");
+WriteLiteral("                        <th class=\"ui-state-default th-col-selection\">\r\n");
 
 
                              if (findOptions.AllowMultiple.Value)
@@ -282,8 +282,8 @@ WriteLiteral("                        </th>\r\n");
                      if (viewable)
                     {
 
-WriteLiteral("                        <th class=\"ui-state-default thRowEntity\">\r\n              " +
-"          </th>\r\n");
+WriteLiteral("                        <th class=\"ui-state-default th-col-entity\">\r\n            " +
+"            </th>\r\n");
 
 
                     }

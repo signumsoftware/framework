@@ -57,7 +57,7 @@ SF.registerModule("FindNavigator", function () {
                 return true;
             };
 
-            $(this.pf("tblResults") + " th:not(.thRowEntity):not(.thRowSelection)")
+            $(this.pf("tblResults") + " th:not(.th-col-entity):not(.th-col-selection)")
             .live('click', function (e) {
                 self.newSortOrder($(e.target), e.shiftKey);
                 self.search();
@@ -83,10 +83,10 @@ SF.registerModule("FindNavigator", function () {
                 var $this = $(this);
                 var index = $this.index();
                 var $th = $this.closest("table").find("th").eq(index);
-                if ($th.hasClass('thRowSelection'))
+                if ($th.hasClass('th-col-selection'))
                     return false;
-                if ($th.hasClass('thRowEntity'))
-                    SF.FindNavigator.entityCellContextMenu(e);
+                if ($th.hasClass('th-col-entity'))
+                    self.control().trigger('entity-cell-ctx-menu', [this, self]);
                 else
                     self.cellContextMenu(e);
                 return false;
@@ -145,12 +145,11 @@ SF.registerModule("FindNavigator", function () {
             });
         },
 
-        createCtxMenu: function (e) {
+        createCtxMenu: function ($rightClickTarget) {
             var $cmenu = $("<div class='sf-search-ctxmenu'></div>");
-            var $target = $(e.target);
             $cmenu.css({
-                left: $target.position().left + ($target.outerWidth() / 2),
-                top: $target.position().top + ($target.outerHeight() / 2),
+                left: $rightClickTarget.position().left + ($rightClickTarget.outerWidth() / 2),
+                top: $rightClickTarget.position().top + ($rightClickTarget.outerHeight() / 2),
                 zIndex: '101'
             });
 
@@ -168,18 +167,17 @@ SF.registerModule("FindNavigator", function () {
 
         headerContextMenu: function (e) {
             SF.log("headerContextmenu");
-            var $menu = this.createCtxMenu(e);
+            
+            var $th = $(e.target).closest("th");
+            var $menu = this.createCtxMenu($th);
 
             var $itemContainer = $menu.find(".sf-search-ctxmenu");
             $itemContainer.append("<div class='sf-search-ctxitem quickfilter-header'>" + lang.signum.addFilter + "</div>")
                 .append("<div class='sf-search-ctxitem edit-column'>" + lang.signum.editColumnName + "</div>")
                 .append("<div class='sf-search-ctxitem remove-column'>" + lang.signum.removeColumn + "</div>");
 
-            var $target = $(e.target);
-            var $th = $target.closest("th");
             var thIndex = $th.index();
-
-            var extraCols = this.control().find(".thRowEntity,.thRowSelection");
+            var extraCols = this.control().find(".th-col-entity,.th-col-selection");
 
             if (thIndex > extraCols.length) {
                 $itemContainer.append("<div class='sf-search-ctxitem move-column-left'>" + lang.signum.reorderColumn_MoveLeft + "</div>")
@@ -188,19 +186,21 @@ SF.registerModule("FindNavigator", function () {
                 $itemContainer.append("<div class='sf-search-ctxitem move-column-right'>" + lang.signum.reorderColumn_MoveRight + "</div>");
             }
 
-            $target.append($menu);
+            $th.append($menu);
 
             return false;
         },
 
         cellContextMenu: function (e) {
             SF.log("cellContextmenu");
-            var $menu = this.createCtxMenu(e);
+            
+            var $td = $(e.target);
+            var $menu = this.createCtxMenu($td);
+            
             $menu.find(".sf-search-ctxmenu")
                 .html("<div class='sf-search-ctxitem quickfilter'>" + lang.signum.addFilter + "</div>");
 
-            var $target = $(e.target);
-            $target.append($menu);
+            $td.append($menu);
 
             return false;
         },
@@ -466,7 +466,7 @@ SF.registerModule("FindNavigator", function () {
             SF.log("FindNavigator serializeColumns");
             var result = "";
             var self = this;
-            $(this.pf("tblResults thead tr th:not(.thRowEntity):not(.thRowSelection)")).each(function () {
+            $(this.pf("tblResults thead tr th:not(.th-col-entity):not(.th-col-selection)")).each(function () {
                 var $this = $(this);
                 var token = $this.find("input:hidden").val();
                 var displayName = $this.text().trim();
@@ -799,63 +799,6 @@ SF.registerModule("FindNavigator", function () {
         .attr('checked', (select.length > 0) ? true : false);
         }
     };
-
-    SF.FindNavigator.entityCellContextMenu = function (e) {
-        SF.log("entity contextmenu");
-        var $target = $(e.target);
-
-        var hiddenQueryName = $target.closest(".sf-search-control").children("input:hidden[id$=sfWebQueryName]");
-        var idHiddenQueryName = hiddenQueryName.attr('id');
-        var prefix = idHiddenQueryName.substring(0, idHiddenQueryName.indexOf("sfWebQueryName"));
-        if (prefix.charAt(prefix.length - 1) == "_")
-            prefix = prefix.substring(0, prefix.length - 1);
-
-        var entityCtxMenuUrl = $("#" + SF.compose(prefix, "divSearchControl")).data("entity-ctx-menu-url");
-        if (SF.isEmpty(entityCtxMenuUrl))
-            return false; //EntityContextMenu not active
-
-        var $cmenu = $("<div/>",
-            { "class": "sf-search-ctxmenu" });
-
-        $("<div/>",
-            { "class": "sf-search-ctxmenu-overlay",
-                click: function (e) {
-                    SF.log("contextmenu click");
-                    var $target = $(e.target);
-                    if ($target.hasClass("sf-search-ctxitem") || $target.parent().hasClass("sf-search-ctxitem"))
-                        $cmenu.hide();
-                    else
-                        $('.sf-search-ctxmenu-overlay').remove();
-                }
-            }).append($cmenu).appendTo($target);
-
-        $cmenu.css({
-            left: $target.position().left + ($target.outerWidth() / 2),
-            top: $target.position().top + ($target.outerHeight() / 2),
-            zIndex: '101'
-        }).show();
-
-        $target.addClass("sf-ctxmenu-active");
-
-        var requestData = {
-            lite: $target.parent().data('entity'),
-            webQueryName: hiddenQueryName.val(),
-            prefix: prefix
-        };
-
-        SF.ajax({
-            url: entityCtxMenuUrl,
-            type: "POST",
-            async: true,
-            data: requestData,
-            success: function (items) {
-                $cmenu.html(items);
-                SF.triggerNewContent($cmenu);
-            }
-        });
-
-        return false;
-    }
 
     SF.FindNavigator.create = function (viewOptions) {
         var findNavigator = new SF.FindNavigator({ prefix: viewOptions.prefix });

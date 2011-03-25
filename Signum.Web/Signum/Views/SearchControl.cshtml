@@ -74,7 +74,7 @@
                 <tr>
                     @if (findOptions.AllowMultiple.HasValue)
                     {
-                        <th class="ui-state-default thRowSelection">
+                        <th class="ui-state-default th-col-selection">
                             @if (findOptions.AllowMultiple.Value)
                             {
                                 @Html.CheckBox(Model.Compose("cbSelectAll"), false, new { onclick = "javascript:new SF.FindNavigator({{prefix:'{0}'}}).toggleSelectAll();".Formato(Model.ControlID) })
@@ -83,7 +83,7 @@
                     }
                     @if (viewable)
                     {
-                        <th class="ui-state-default thRowEntity">
+                        <th class="ui-state-default th-col-entity">
                         </th>
                     }
                     @{List<Column> columns = findOptions.MergeColumns(); }

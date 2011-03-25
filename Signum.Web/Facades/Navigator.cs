@@ -472,6 +472,16 @@ namespace Signum.Web
 
         public Func<string, bool> AllowUserColumns = s => s.HasText() ? false : true;
 
+        public Func<List<string>> DefaultScripts = () => new List<string>
+        {
+            "~/signum/Scripts/SF_Globals.js",
+            "~/signum/Scripts/SF_Popup.js",
+            "~/signum/Scripts/SF_Lines.js",
+            "~/signum/Scripts/SF_ViewNavigator.js",
+            "~/signum/Scripts/SF_FindNavigator.js",
+            "~/signum/Scripts/SF_Validator.js"
+        };
+
         public NavigationManager()
         {
             EntitySettings = new Dictionary<Type, EntitySettings>();
