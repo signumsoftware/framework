@@ -163,13 +163,10 @@
     <value>{0} fa </value>
   </data>
   <data name="And" xml:space="preserve">
-    <value>e </value>
+    <value> e </value>
   </data>
   <data name="DateLast" xml:space="preserve">
     <value>{0} passato</value>
-  </data>
-  <data name="DateSeparators" xml:space="preserve">
-    <value>,</value>
   </data>
   <data name="DateThis" xml:space="preserve">
     <value>Questo {0}</value>
@@ -199,7 +196,7 @@
     <value>Nessuna opzione con chiave {0} trovata</value>
   </data>
   <data name="Or" xml:space="preserve">
-    <value>o </value>
+    <value> o </value>
   </data>
   <data name="OS_Unknown0" xml:space="preserve">
     <value>Sconosciuto ({0})</value>
