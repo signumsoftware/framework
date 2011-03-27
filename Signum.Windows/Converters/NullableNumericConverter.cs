@@ -7,10 +7,13 @@ using System.Globalization;
 using System.Windows.Controls;
 using Signum.Windows.Properties;
 using System.Text.RegularExpressions;
+using Signum.Utilities.Reflection;
+using Signum.Utilities;
+using Signum.Entities.Reflection;
 
 namespace Signum.Windows
 {
-    public class NullableDecimalConverter : ValidationRule, IValueConverter
+    public class NullableNumericConverter : ValidationRule, IValueConverter
     {
         public static string NormalizeToDecimal(string format)
         {
@@ -20,34 +23,45 @@ namespace Signum.Windows
             return format;
         }
 
-        public static readonly NullableDecimalConverter Integer = new NullableDecimalConverter("N0");
-        public static readonly NullableDecimalConverter Number = new NullableDecimalConverter("N2");
+        public static readonly NullableNumericConverter Integer = new NullableNumericConverter("N0");
+        public static readonly NullableNumericConverter Number = new NullableNumericConverter("N2");
 
         public string Format { get; set; } 
-        public NullableDecimalConverter(string format)
+        public NullableNumericConverter(string format)
         {
             this.Format = format; 
         }
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            decimal? v = (decimal?)value;
-            return v == null ? "" : v.Value.ToString(Format);
+            return value == null ? "" : ((IFormattable)value).ToString(Format, culture);
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
+            if(string.IsNullOrEmpty((string)value))
+                return null;
+
             string s = (string)value;
-            return s == "" ? null : (decimal?)decimal.Parse(s, CultureInfo.CurrentCulture);
+            if (ReflectionTools.IsPercentage(Format, culture))
+            {
+                return ReflectionTools.ParsePercentage(s, targetType, culture);
+            }
+
+            return ReflectionTools.Parse(s, targetType, culture); 
         }
 
-        public override ValidationResult Validate(object value, CultureInfo cultureInfo)
+        public override ValidationResult Validate(object value, CultureInfo culture)
         {
             string s = (string)value;
             decimal v;
             if (string.IsNullOrEmpty(s))
                 return new ValidationResult(true, null);
-            else if (!decimal.TryParse(s, out v))
+
+            if (ReflectionTools.IsPercentage(Format, culture))
+                s = s.Trim(culture.NumberFormat.PercentSymbol.ToCharArray());
+
+            if (!decimal.TryParse(s, NumberStyles.Number, culture, out v))
                 return new ValidationResult(false, Resources.InvalidFormat);
             else
                 return new ValidationResult(true, null);

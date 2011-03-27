@@ -301,6 +301,58 @@ namespace Signum.Utilities.Reflection
             return Expression.Lambda<Func<T>>(Expression.Convert(Expression.New(type), typeof(T))).Compile();
         }
 
+        public static bool IsNumber(Type type)
+        {
+            switch (Type.GetTypeCode(type.UnNullify()))
+            {
+                case TypeCode.Single: 
+                case TypeCode.Double: 
+                case TypeCode.Decimal: 
+
+                case TypeCode.Byte:
+
+                case TypeCode.Int16:
+                case TypeCode.Int32: 
+                case TypeCode.Int64: 
+                case TypeCode.UInt16: 
+                case TypeCode.UInt32:
+                case TypeCode.UInt64: return true;
+            }
+
+            return false;
+        }
+
+        public static bool IsPercentage(string formatString, CultureInfo culture)
+        {
+            return formatString.StartsWith("p", StringComparison.InvariantCultureIgnoreCase); 
+        }
+
+        public static object ParsePercentage(string value, Type targetType, CultureInfo culture)
+        {
+            value = value.Trim(culture.NumberFormat.PercentSymbol.ToCharArray());
+
+            if (string.IsNullOrEmpty(value))
+                return null; 
+
+            switch (Type.GetTypeCode(targetType.UnNullify()))
+            {
+                case TypeCode.Single: return Single.Parse(value, culture) / 100.0f;
+                case TypeCode.Double: return Double.Parse(value, culture) / 100.0;
+                case TypeCode.Decimal: return Decimal.Parse(value, culture) / 100M;
+
+                case TypeCode.Byte: return (Byte)(Byte.Parse(value, culture) / 100);
+
+                case TypeCode.Int16: return (Int16)(Int16.Parse(value, culture) / 100);
+                case TypeCode.Int32: return (Int32)(Int32.Parse(value, culture) / 100);
+                case TypeCode.Int64: return (Int64)(Int64.Parse(value, culture) / 100);
+                case TypeCode.UInt16: return (UInt16)(UInt16.Parse(value, culture) / 100);
+                case TypeCode.UInt32: return (UInt32)(UInt32.Parse(value, culture) / 100);
+                case TypeCode.UInt64: return (UInt64)(UInt64.Parse(value, culture) / 100);
+                default:
+                    throw new InvalidOperationException("targetType is not a number");
+            }
+        }
+
         public static T Parse<T>(string value)
         {
             if (typeof(T) == typeof(string))
@@ -329,6 +381,36 @@ namespace Signum.Utilities.Reflection
                 return Enum.Parse(utype, (string)value);
             else
                 return Convert.ChangeType(value, utype);
+        }
+
+        public static T Parse<T>(string value, CultureInfo culture)
+        {
+            if (typeof(T) == typeof(string))
+                return (T)(object)value;
+
+            if (value == null || value == "")
+                return (T)(object)null;
+
+            Type utype = typeof(T).UnNullify();
+            if (utype.IsEnum)
+                return (T)Enum.Parse(utype, (string)value);
+            else
+                return (T)Convert.ChangeType(value, utype, culture);
+        }
+
+        public static object Parse(string value, Type type, CultureInfo culture)
+        {
+            if (type == typeof(string))
+                return (object)value;
+
+            if (value == null || value == "")
+                return (object)null;
+
+            Type utype = type.UnNullify();
+            if (utype.IsEnum)
+                return Enum.Parse(utype, (string)value);
+            else
+                return Convert.ChangeType(value, utype, culture);
         }
 
         public static bool TryParse<T>(string value, out T result)

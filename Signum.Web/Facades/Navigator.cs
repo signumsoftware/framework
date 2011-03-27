@@ -299,7 +299,7 @@ namespace Signum.Web
         }
 
         static GenericInvoker miApplyChanges = GenericInvoker.Create(()=>new TypeDN().ApplyChanges(null, null, true));
-        public static MappingContext<T> ApplyChanges<T>(this T entity, ControllerContext controllerContext, string prefix, bool admin) where T : ModifiableEntity
+        public static MappingContext<T> ApplyChanges<T>(this T entity, ControllerContext controllerContext, string prefix, bool admin) where T : IRootEntity
         {
             SortedList<string, string> inputs = controllerContext.HttpContext.Request.Form.ToSortedList(prefix);
             Mapping<T> mapping = (Mapping<T>)Navigator.EntitySettings(typeof(T)).Map(s => admin ? s.UntypedMappingAdmin : s.UntypedMappingDefault);
@@ -307,21 +307,21 @@ namespace Signum.Web
             return Manager.ApplyChanges<T>(controllerContext, entity, prefix, mapping, inputs);
         }
 
-        public static MappingContext<T> ApplyChanges<T>(this T entity, ControllerContext controllerContext, string prefix, bool admin, SortedList<string, string> inputs) where T : ModifiableEntity
+        public static MappingContext<T> ApplyChanges<T>(this T entity, ControllerContext controllerContext, string prefix, bool admin, SortedList<string, string> inputs) where T : IRootEntity
         {
             Mapping<T> mapping = (Mapping<T>)Navigator.EntitySettings(typeof(T)).Map(s => admin ? s.UntypedMappingAdmin : s.UntypedMappingDefault);
 
             return Manager.ApplyChanges<T>(controllerContext, entity, prefix, mapping, inputs);
         }
 
-        public static MappingContext<T> ApplyChanges<T>(this T entity, ControllerContext controllerContext, string prefix, Mapping<T> mapping) where T : ModifiableEntity
+        public static MappingContext<T> ApplyChanges<T>(this T entity, ControllerContext controllerContext, string prefix, Mapping<T> mapping) where T : IRootEntity
         {
             SortedList<string, string> inputs = controllerContext.HttpContext.Request.Form.ToSortedList(prefix);
 
             return Manager.ApplyChanges<T>(controllerContext, entity, prefix, mapping, inputs);
         }
 
-        public static MappingContext<T> ApplyChanges<T>(this T entity, ControllerContext controllerContext, string prefix, Mapping<T> mapping, SortedList<string, string> inputs) where T : ModifiableEntity
+        public static MappingContext<T> ApplyChanges<T>(this T entity, ControllerContext controllerContext, string prefix, Mapping<T> mapping, SortedList<string, string> inputs) where T : IRootEntity
         {
             return Manager.ApplyChanges<T>(controllerContext, entity, prefix, mapping, inputs);
         }
@@ -835,7 +835,7 @@ namespace Signum.Web
                 TypeLogic.GetCleanName(type); //For types registered in the schema but not in web
         }
 
-        protected internal virtual MappingContext<T> ApplyChanges<T>(ControllerContext controllerContext, T entity, string prefix, Mapping<T> mapping, SortedList<string, string> inputs) where T : ModifiableEntity
+        protected internal virtual MappingContext<T> ApplyChanges<T>(ControllerContext controllerContext, T entity, string prefix, Mapping<T> mapping, SortedList<string, string> inputs) where T : IRootEntity
         {
             RootContext<T> ctx = new RootContext<T>(prefix, mapping, inputs, controllerContext) { Value = entity };
             mapping.OnGetValue(ctx);

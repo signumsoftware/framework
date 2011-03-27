@@ -32,20 +32,20 @@ namespace Signum.Windows
             IsReadOnlyProperty.OverrideMetadata(typeof(NumericTextBox), new FrameworkPropertyMetadata() { PropertyChangedCallback = (d, e) => ((NumericTextBox)d).UpdateVisibility() });
         }
 
-        public static readonly DependencyProperty XIncrementProperty =
-            DependencyProperty.Register("XIncrement", typeof(decimal), typeof(NumericTextBox), new UIPropertyMetadata(0.1m));
-        public decimal XIncrement
+        public static readonly DependencyProperty LargeIncrementProperty =
+            DependencyProperty.Register("LargeIncrement", typeof(decimal), typeof(NumericTextBox), new UIPropertyMetadata(10.0m));
+        public decimal LargeIncrement
         {
-            get { return (decimal)GetValue(XIncrementProperty); }
-            set { SetValue(XIncrementProperty, value); }
+            get { return (decimal)GetValue(LargeIncrementProperty); }
+            set { SetValue(LargeIncrementProperty, value); }
         }
 
-        public static readonly DependencyProperty YIncrementProperty =
-          DependencyProperty.Register("YIncrement", typeof(decimal), typeof(NumericTextBox), new UIPropertyMetadata(1.0m));
-        public decimal YIncrement
+        public static readonly DependencyProperty SmallIncrementProperty =
+          DependencyProperty.Register("SmallIncrement", typeof(decimal), typeof(NumericTextBox), new UIPropertyMetadata(1.0m));
+        public decimal SmallIncrement
         {
-            get { return (decimal)GetValue(YIncrementProperty); }
-            set { SetValue(YIncrementProperty, value); }
+            get { return (decimal)GetValue(SmallIncrementProperty); }
+            set { SetValue(SmallIncrementProperty, value); }
         }
 
         public static readonly DependencyProperty ValueProperty =
@@ -56,12 +56,12 @@ namespace Signum.Windows
             set { SetValue(ValueProperty, value); }
         }
 
-        public static readonly DependencyProperty NullableDecimalConverterProperty =
-            DependencyProperty.Register("NullableDecimalConverter", typeof(NullableDecimalConverter), typeof(NumericTextBox), new UIPropertyMetadata(NullableDecimalConverter.Number));
-        public NullableDecimalConverter NullableDecimalConverter
+        public static readonly DependencyProperty NullableNumericConverterProperty =
+            DependencyProperty.Register("NullableNumericConverter", typeof(NullableNumericConverter), typeof(NumericTextBox), new UIPropertyMetadata(NullableNumericConverter.Number));
+        public NullableNumericConverter NullableNumericConverter
         {
-            get { return (NullableDecimalConverter)GetValue(NullableDecimalConverterProperty); }
-            set { SetValue(NullableDecimalConverterProperty, value); }
+            get { return (NullableNumericConverter)GetValue(NullableNumericConverterProperty); }
+            set { SetValue(NullableNumericConverterProperty, value); }
         }
 
         public static readonly DependencyProperty ShowAnchorProperty =
@@ -84,7 +84,7 @@ namespace Signum.Windows
             Binding b = new Binding
             {
                 Source = this,
-                Converter = NullableDecimalConverter,
+                Converter = NullableNumericConverter,
                 Path = new PropertyPath(ValueProperty),
                 Mode = BindingMode.TwoWay,
                 UpdateSourceTrigger = UpdateSourceTrigger.LostFocus,
@@ -92,7 +92,7 @@ namespace Signum.Windows
                 ValidatesOnExceptions = true,
                 NotifyOnValidationError = true,
             };
-            b.ValidationRules.Add(NullableDecimalConverter);
+            b.ValidationRules.Add(NullableNumericConverter);
 
             BindingOperations.SetBinding(this, TextProperty, b);
         }
@@ -110,16 +110,16 @@ namespace Signum.Windows
                 if ((e.KeyboardDevice.Modifiers & ModifierKeys.Shift) != 0)
                 {
                     if (e.Key == Key.Up)
-                        Value += XIncrement;
+                        Value += LargeIncrement;
                     else
-                        Value -= XIncrement;
+                        Value -= LargeIncrement;
                 }
                 else
                 {
                     if (e.Key == Key.Up)
-                        Value += YIncrement;
+                        Value += SmallIncrement;
                     else
-                        Value -= YIncrement;
+                        Value -= SmallIncrement;
                 }
 
                 e.Handled = true;
@@ -177,7 +177,7 @@ namespace Signum.Windows
             if (mouseIncrementor == null)
                 return;
 
-            if (XIncrement == 0 && YIncrement == 0)
+            if (LargeIncrement == 0 && SmallIncrement == 0)
                 return;
 
             if (Value == null)
@@ -193,12 +193,12 @@ namespace Signum.Windows
             if (Math.Abs(intDeltaX) > Math.Abs(intDeltaY))
             {
                 Mouse.OverrideCursor = Cursors.SizeWE;
-                Value = mouseIncrementor.Value - ((int)intDeltaX / 5) * XIncrement;
+                Value = mouseIncrementor.Value - ((int)intDeltaX / 5) * LargeIncrement;
             }
             else
             {
                 Mouse.OverrideCursor = Cursors.SizeNS;
-                Value = mouseIncrementor.Value +((int)intDeltaY / 5) * YIncrement; 
+                Value = mouseIncrementor.Value +((int)intDeltaY / 5) * SmallIncrement; 
             }
         }
 

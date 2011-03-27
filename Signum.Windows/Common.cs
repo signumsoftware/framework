@@ -279,12 +279,23 @@ namespace Signum.Windows
 
             LabelOnlyRouteTask += TaskSetLabelText;
 
-            ColumnRouteTask += TaskSetValueColumnProperty;
-            ColumnRouteTask += TaskSetLabelText;
-            ColumnLabelOnlyRouteTask += TaskSetLabelText;
+            ColumnRouteTask += TaskColumnSetValueProperty;
+            ColumnRouteTask += TaskColumnSetLabelText;
+            ColumnRouteTask += TaskColumnSetReadOnly;
+            ColumnLabelOnlyRouteTask += TaskColumnSetLabelText;
         }
 
-        public static void TaskSetValueColumnProperty(DataGridColumn col, string route, PropertyRoute context)
+        static void TaskColumnSetReadOnly(DataGridColumn column, string route, PropertyRoute context)
+        {
+            bool isReadOnly = context.PropertyRouteType == PropertyRouteType.Property && context.PropertyInfo.IsReadOnly();
+
+            if (isReadOnly && column.NotSet(DataGridColumn.IsReadOnlyProperty))
+            {
+                column.IsReadOnly = isReadOnly;
+            }
+        }
+
+        public static void TaskColumnSetValueProperty(DataGridColumn col, string route, PropertyRoute context)
         {
             DataGridBoundColumn colBound = col as DataGridBoundColumn;
 
@@ -300,9 +311,43 @@ namespace Signum.Windows
                     NotifyOnValidationError = true,
                     ValidatesOnExceptions = true,
                     ValidatesOnDataErrors = true,
+                    Converter = GetConverter(context),
                 };
             }
-        } 
+        }
+
+        private static IValueConverter GetConverter(PropertyRoute context)
+        {
+            string format = Reflector.FormatString(context);
+            var valueType = ValueLine.Configurator.GetDefaultValueLineType(context.Type);
+            if (valueType == ValueLineType.Number)
+                return format == NullableNumericConverter.Integer.Format ? NullableNumericConverter.Integer :
+                       format == NullableNumericConverter.Number.Format ? NullableNumericConverter.Number :
+                       new NullableNumericConverter(format);
+
+            if (valueType == ValueLineType.DateTime)
+                return format == DateTimeConverter.DateAndTime.Format ? DateTimeConverter.DateAndTime :
+                       format == DateTimeConverter.Date.Format ? DateTimeConverter.Date :
+                       new DateTimeConverter(format);
+
+            return null;
+        }
+
+        public static void TaskColumnSetLabelText(DataGridColumn col, string route, PropertyRoute context)
+        {
+            DependencyProperty labelText = DataGridColumn.HeaderProperty;
+
+            if (labelText != null && col.NotSet(labelText))
+            {
+                string text = context.PropertyInfo.NiceName();
+
+                UnitAttribute ua = context.PropertyInfo.SingleAttribute<UnitAttribute>();
+                if (ua != null)
+                    text += " (" + ua.UnitName + ")";
+
+                col.SetValue(labelText, text);
+            }
+        }
 
         public static void TaskSetValueProperty(FrameworkElement fe, string route, PropertyRoute context)
         {
@@ -340,19 +385,18 @@ namespace Signum.Windows
             }
         }
 
-        public static void TaskSetLabelText(DependencyObject fe, string route, PropertyRoute context)
+        public static void TaskSetLabelText(FrameworkElement fe, string route, PropertyRoute context)
         {
             DependencyProperty labelText =
                fe is LineBase ? ((LineBase)fe).CommonRouteLabelText() :
                fe is HeaderedContentControl ? HeaderedContentControl.HeaderProperty :
                fe is TextBlock ? TextBlock.TextProperty:
                fe is Label ? Label.ContentProperty :
-               fe is DataGridColumn ? DataGridColumn.HeaderProperty : 
                null;
 
             if (labelText != null && fe.NotSet(labelText))
             {
-                fe.SetValue(labelText, (context as PropertyRoute).TryCC(ts => ts.PropertyInfo.NiceName()));
+                fe.SetValue(labelText, context.PropertyInfo.NiceName());
             }
         }
 

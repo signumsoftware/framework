@@ -8,6 +8,8 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using Signum.Entities.Basics;
 using Signum.Utilities;
+using Signum.Utilities.Reflection;
+using System.Globalization;
 
 namespace Signum.Windows
 {
@@ -243,15 +245,21 @@ namespace Signum.Windows
             {ValueLineType.Boolean, vl =>new CheckBox(){ VerticalAlignment = VerticalAlignment.Center, HorizontalAlignment = HorizontalAlignment.Left}},
             {ValueLineType.Number, vl =>
             {
-                var nt = new NumericTextBox(){ XIncrement = 10, YIncrement = 1};
+                var nt = new NumericTextBox();
                 if(vl.Format != null)
                 {
-                    var format = NullableDecimalConverter.NormalizeToDecimal(vl.Format);
+                    var format = NullableNumericConverter.NormalizeToDecimal(vl.Format);
 
-                    nt.NullableDecimalConverter = 
-                        format == NullableDecimalConverter.Integer.Format?  NullableDecimalConverter.Integer:
-                        format == NullableDecimalConverter.Number.Format?  NullableDecimalConverter.Number:
-                        new NullableDecimalConverter(format); 
+                    nt.NullableNumericConverter = 
+                        format == NullableNumericConverter.Integer.Format?  NullableNumericConverter.Integer:
+                        format == NullableNumericConverter.Number.Format?  NullableNumericConverter.Number:
+                        new NullableNumericConverter(format); 
+
+                    if(ReflectionTools.IsPercentage(nt.NullableNumericConverter.Format, CultureInfo.CurrentCulture))
+                    {
+                        nt.LargeIncrement = 0.1m;
+                        nt.SmallIncrement = 0.01m;
+                    }
                 }
                 return nt;
             }},

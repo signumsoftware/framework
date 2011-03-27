@@ -18,6 +18,7 @@ using System.Diagnostics;
 using System.Web.Mvc;
 using System.Collections.Specialized;
 using System.Linq.Expressions;
+using System.Globalization;
 #endregion
 
 namespace Signum.Web
@@ -109,7 +110,9 @@ namespace Signum.Web
     {
         public override T DefaultGetValue(MappingContext<T> ctx)
         {
+
             Type type = typeof(T).UnNullify();
+
             if (type == typeof(bool))
             {
                 return (T)(object)ValueMapping.ParseHtmlBool(ctx.Input);
@@ -120,8 +123,12 @@ namespace Signum.Web
                     return (T)(object)DateTime.Parse(ctx.Input).FromUserInterface();
                 return (T)(object)null;
             }
-            else
-                return ReflectionTools.Parse<T>(ctx.Input);
+            else if (ReflectionTools.IsNumber(type) && ReflectionTools.IsPercentage(Reflector.FormatString(ctx.PropertyRoute), CultureInfo.CurrentCulture))
+            {
+                return (T)ReflectionTools.ParsePercentage(ctx.Input, type, CultureInfo.CurrentCulture);
+            }
+            
+            return ReflectionTools.Parse<T>(ctx.Input);
         }
 
         public override void RecursiveValidation(MappingContext<T> ctx)
@@ -158,25 +165,25 @@ namespace Signum.Web
             }
 
             if (typeof(T) == runtimeInfo.RuntimeType || typeof(T).IsEmbeddedEntity())
-                return GetRuntimeValue<T>(ctx); 
+                return GetRuntimeValue<T>(ctx, ctx.PropertyRoute);
 
-            return (T)miGetRuntimeValue.GetInvoker(runtimeInfo.RuntimeType)(this, ctx);
+            return (T)miGetRuntimeValue.GetInvoker(runtimeInfo.RuntimeType)(this, ctx, PropertyRoute.Root(runtimeInfo.RuntimeType));
         }
 
         static GenericInvoker miGetRuntimeValue = GenericInvoker.Create(typeof(AutoEntityMapping<T>).GetMethod("GetRuntimeValue", BindingFlags.Instance | BindingFlags.Public));
 
-        public R GetRuntimeValue<R>(MappingContext<T> tc)
+        public R GetRuntimeValue<R>(MappingContext<T> ctx, PropertyRoute route)
             where R : class 
         {
             if (AllowedMappings != null && !AllowedMappings.ContainsKey(typeof(R)))
             {
-                return (R)(object)tc.None(Resources.Type0NotAllowed.Formato(typeof(R)));
+                return (R)(object)ctx.None(Resources.Type0NotAllowed.Formato(typeof(R)));
             }
 
             Mapping<R> mapping =  (Mapping<R>)(AllowedMappings.TryGetC(typeof(R)) ?? Navigator.EntitySettings(typeof(R)).UntypedMappingDefault);
-            SubContext<R> sc = new SubContext<R>(tc.ControlID, mapping, null, tc) { Value = tc.Value as R }; // If the type is different, the AutoEntityMapping has the current value but EntityMapping just null
+            SubContext<R> sc = new SubContext<R>(ctx.ControlID, mapping, null, route, ctx) { Value = ctx.Value as R }; // If the type is different, the AutoEntityMapping has the current value but EntityMapping just null
             mapping.OnGetValue(sc);
-            tc.AddChild(sc);
+            ctx.AddChild(sc);
             return sc.Value;
         }
 
@@ -244,7 +251,10 @@ namespace Signum.Web
 
             public SubContext<P> CreateSubContext(MappingContext<T> parent)
             {
-                SubContext<P> ctx = new SubContext<P>(TypeContextUtilities.Compose(parent.ControlID, PropertyPack.PropertyInfo.Name), Mapping, PropertyPack, parent);
+                string newControlId = TypeContextUtilities.Compose(parent.ControlID, PropertyPack.PropertyInfo.Name);
+                PropertyRoute route = parent.PropertyRoute.Add(this.PropertyPack.PropertyInfo);
+
+                SubContext<P> ctx = new SubContext<P>(newControlId, Mapping, PropertyPack, route, parent);
                 if (parent.Value != null)
                     ctx.Value = GetValue(parent.Value);
                 return ctx;
@@ -462,7 +472,7 @@ namespace Signum.Web
             if (EntityMapping == null)
                 throw new InvalidOperationException("Changes to Entity {0} are not allowed because EntityMapping is null".Formato(newLite.TryToString()));
 
-            var sc = new SubContext<S>(ctx.ControlID, EntityMapping, null, ctx) { Value = newLite.Retrieve() };
+            var sc = new SubContext<S>(ctx.ControlID, EntityMapping, null, ctx.PropertyRoute.Add("Entity"), ctx) { Value = newLite.Retrieve() };
             EntityMapping.OnGetValue(sc);
 
             ctx.AddChild(sc);
@@ -496,6 +506,8 @@ namespace Signum.Web
         {
             IList<string> inputKeys = (IList<string>)ctx.Inputs.Keys;
 
+            PropertyRoute route = ctx.PropertyRoute.Add("Item"); 
+
             for (int i = 0; i < inputKeys.Count; i++)
             {
                 string subControlID = inputKeys[i];
@@ -505,7 +517,7 @@ namespace Signum.Web
 
                 string index = subControlID.Substring(0, subControlID.IndexOf(TypeContext.Separator));
 
-                SubContext<S> itemCtx = new SubContext<S>(TypeContextUtilities.Compose(ctx.ControlID, index), ElementMapping, null, ctx);
+                SubContext<S> itemCtx = new SubContext<S>(TypeContextUtilities.Compose(ctx.ControlID, index), ElementMapping, null, route, ctx);
 
                 yield return itemCtx;
 
@@ -597,11 +609,13 @@ namespace Signum.Web
             MList<S> list = ctx.Value;
             var dic = list.ToDictionary(GetKey);
 
+            PropertyRoute route = ctx.PropertyRoute.Add("Item"); 
+
             foreach (MappingContext<S> itemCtx in GenerateItemContexts(ctx))
             {
                 Debug.Assert(!itemCtx.Empty());
 
-                SubContext<K> subContext = new SubContext<K>(TypeContextUtilities.Compose(itemCtx.ControlID, Route), keyPropertyMapping, null, itemCtx);
+                SubContext<K> subContext = new SubContext<K>(TypeContextUtilities.Compose(itemCtx.ControlID, Route), keyPropertyMapping, null, route, itemCtx);
 
                 keyPropertyMapping.OnGetValue(subContext);
 

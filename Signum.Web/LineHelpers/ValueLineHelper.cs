@@ -217,8 +217,11 @@ namespace Signum.Web
 
         public static MvcHtmlString TextboxInLine(this HtmlHelper helper, ValueLine valueLine, InputType inputType)
         {
+            string value = (valueLine.UntypedValue as IFormattable).TryToString(valueLine.Format) ?? 
+                           valueLine.UntypedValue.TryToString() ?? "";
+
             if (valueLine.ReadOnly)
-                return helper.Span(valueLine.ControlID, valueLine.UntypedValue.TryToString() ?? "", "sf-value-line");
+                return helper.Span(valueLine.ControlID, value, "sf-value-line");
 
             string setTicks = SetTicksFunction(helper, valueLine);
             string reloadOnChangeFunction = GetReloadFunction(helper, valueLine);
@@ -235,7 +238,7 @@ namespace Signum.Web
 
             valueLine.ValueHtmlProps["type"] = inputType.ToString().ToLower();
 
-            return helper.TextBox(valueLine.ControlID, valueLine.UntypedValue.TryToString() ?? "", valueLine.ValueHtmlProps);
+            return helper.TextBox(valueLine.ControlID, value, valueLine.ValueHtmlProps);
         }
 
         public static MvcHtmlString NumericTextbox(this HtmlHelper helper, ValueLine valueLine)

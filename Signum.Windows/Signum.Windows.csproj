@@ -421,7 +421,7 @@
     </Compile>
     <Compile Include="Facades\Constructor.cs" />
     <Compile Include="Converters\DateTimeConverter.cs" />
-    <Compile Include="Converters\NullableDecimalConverter.cs" />
+    <Compile Include="Converters\NullableNumericConverter.cs" />
     <Compile Include="Converters\DoubleListConverter.cs" />
     <Compile Include="Facades\MenuManager.cs" />
     <Compile Include="Facades\ShortcutHelper.cs" />

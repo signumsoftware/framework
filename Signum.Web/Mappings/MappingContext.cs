@@ -28,6 +28,7 @@ namespace Signum.Web
         internal abstract MappingContext Next { get; set; }
         
         internal readonly PropertyPack PropertyPack;
+        internal readonly PropertyRoute PropertyRoute; 
 
         public abstract void AddOnFinish(Action action);
 
@@ -105,10 +106,11 @@ namespace Signum.Web
         }
         public abstract IDictionary<string, List<string>> Errors { get; }
 
-        public MappingContext(string controlID, PropertyPack propertyPack)
+        public MappingContext(string controlID, PropertyPack propertyPack, PropertyRoute route)
         {
             this.ControlID = controlID ?? "";
             this.PropertyPack = propertyPack;
+            this.PropertyRoute = route; 
         }
 
         internal abstract void ValidateInternal();
@@ -215,8 +217,8 @@ namespace Signum.Web
         public Mapping<T> Mapping { get; private set; }
         public override Mapping UntypedMapping { get { return Mapping; } }
 
-        public MappingContext(string controlID, Mapping<T> mapping, PropertyPack propertyPack)
-            : base(controlID, propertyPack)
+        public MappingContext(string controlID, Mapping<T> mapping, PropertyPack propertyPack, PropertyRoute route)
+            : base(controlID, propertyPack, route)
         {
             this.Mapping = mapping;
         }
@@ -317,7 +319,7 @@ namespace Signum.Web
         }
     }
 
-    internal class RootContext<T> : MappingContext<T>
+    internal class RootContext<T> : MappingContext<T> where T : IRootEntity
     {
         public override MappingContext Parent { get { throw new InvalidOperationException(); } }
         public override MappingContext Root { get { return this; } }
@@ -347,7 +349,7 @@ namespace Signum.Web
         SortedList<long, System.Tuple<string, Action>> actions = new SortedList<long, Tuple<string, Action>>();
 
         public RootContext(string prefix, Mapping<T> mapping, SortedList<string, string> globalInputs, ControllerContext controllerContext) :
-            base(prefix, mapping, null)
+            base(prefix, mapping, null, PropertyRoute.Root(typeof(T)))
         {
             this.globalInputs = globalInputs;
             if (prefix.HasText())
@@ -437,8 +439,8 @@ namespace Signum.Web
             throw new InvalidOperationException();
         }
 
-        public SubContext(string controlID, Mapping<T> mapping, PropertyPack propertyPack, MappingContext parent) :
-            base(controlID, mapping, propertyPack)
+        public SubContext(string controlID, Mapping<T> mapping, PropertyPack propertyPack, PropertyRoute route, MappingContext parent) :
+            base(controlID, mapping, propertyPack, route)
         {
             this.parent = parent;
             this.root = parent.Root;
