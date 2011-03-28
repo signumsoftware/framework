@@ -461,7 +461,7 @@ namespace Signum.Engine.Linq
             if (!innerProjection && candidates.Contains(exp))
                 candidates.Add(result);
 
-            return inExp;
+            return result;
         }
 
         protected override Expression VisitExists(ExistsExpression exists)
