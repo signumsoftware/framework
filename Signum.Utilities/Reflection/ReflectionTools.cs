@@ -324,7 +324,7 @@ namespace Signum.Utilities.Reflection
 
         public static bool IsPercentage(string formatString, CultureInfo culture)
         {
-            return formatString.StartsWith("p", StringComparison.InvariantCultureIgnoreCase); 
+            return formatString.HasText() && formatString.StartsWith("p", StringComparison.InvariantCultureIgnoreCase); 
         }
 
         public static object ParsePercentage(string value, Type targetType, CultureInfo culture)
