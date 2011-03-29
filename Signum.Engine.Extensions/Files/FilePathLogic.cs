@@ -30,7 +30,7 @@ namespace Signum.Engine.Files
                 EnumLogic<FileTypeDN>.Start(sb, () => fileTypes.Keys.ToHashSet());
 
                 sb.Schema.EntityEvents<FilePathDN>().PreSaving += FilePath_PreSaving;
-                sb.Schema.EntityEvents<FilePathDN>().Deleting += FilePath_Deleting;
+                sb.Schema.EntityEvents<FilePathDN>().PreUnsafeDelete +=new PreUnsafeDeleteHandler<FilePathDN>(FilePathLogic_PreUnsafeDelete);
 
                 dqm[typeof(FileRepositoryDN)] = (from r in Database.Query<FileRepositoryDN>()
                                                  select new
@@ -68,21 +68,21 @@ namespace Signum.Engine.Files
             }
         }
 
-        static void FilePath_Deleting(Type type, int id)
+        static void FilePathLogic_PreUnsafeDelete(IQueryable<FilePathDN> query)
         {
-            string fullPath = (from f in Database.Query<FilePathDN>()
-                               where f.Id == id
-                               select f.FullPhysicalPath).Single();
+            var list = query.Select(a => a.FullPhysicalPath).ToList();
 
             Transaction.RealCommit += () =>
             {
-                if (unsafeMode)
-                    Debug.WriteLine(fullPath);
-                else
-                    File.Delete(fullPath);
+                foreach (var fullPath in list)
+                {
+                    if (unsafeMode)
+                        Debug.WriteLine(fullPath);
+                    else
+                        File.Delete(fullPath);
+                }
             };
         }
-
         
 
         const long ERROR_DISK_FULL = 112L; // see winerror.h
