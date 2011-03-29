@@ -137,7 +137,6 @@
     <Compile Include="Linq\ProjectionReader.cs" />
     <Compile Include="Linq\Meta\MetadataVisitor.cs" />
     <Compile Include="Linq\TranslateResult.cs" />
-    <Compile Include="Engine\Deleter.cs" />
     <Compile Include="Engine\Saver.cs">
       <SubType>Code</SubType>
     </Compile>

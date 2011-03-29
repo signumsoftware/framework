@@ -175,20 +175,6 @@ namespace Signum.Engine.Maps
             entityEventsGlobal.OnRetrieved(entity, isRoot);
         }
 
-        internal void OnDeleting(Type type, List<int> ids)
-        {
-            AssertAllowed(type);
-
-            IEntityEvents ee = entityEvents.TryGetC(type);
-
-            foreach (var id in ids)
-            {
-                if (ee != null)
-                    ee.OnDeleting(type, id);
-
-                entityEventsGlobal.OnDeleting(type, id);
-            }
-        }
 
         internal IQueryable<T> OnFilterQuery<T>(IQueryable<T> query)
             where T : IdentifiableEntity
@@ -432,7 +418,6 @@ namespace Signum.Engine.Maps
         void OnSaving(IdentifiableEntity entity, bool isRoot);
         void OnRetrieving(Type type, int[] ids, bool inQuery);
         void OnRetrieved(IdentifiableEntity entity, bool isRoot);
-        void OnDeleting(Type type, int id);
     }
 
     public class EntityEvents<T> : IEntityEvents
@@ -443,8 +428,6 @@ namespace Signum.Engine.Maps
 
         public event RetrivingEntitiesEventHandler Retrieving;
         public event EntityEventHandler<T> Retrieved;
-
-        public event DeleteEntityEventHandler Deleting;
 
         public event FilterQueryEventHandler<T> FilterQuery;
 
@@ -489,19 +472,12 @@ namespace Signum.Engine.Maps
             if (Retrieved != null)
                 Retrieved((T)entity, isRoot);
         }
-
-        void IEntityEvents.OnDeleting(Type type, int id)
-        {
-            if (Deleting != null)
-                Deleting(type, id);
-        }
     }
 
     public delegate void PreSavingEntityEventHandler<T>(T ident, bool isRoot, ref bool graphModified) where T : IdentifiableEntity;
     public delegate void EntityEventHandler<T>(T ident, bool isRoot) where T : IdentifiableEntity;
     public delegate void SavedEntityEventHandler<T>(T ident, SavedEventArgs args) where T : IdentifiableEntity;
     public delegate void RetrivingEntitiesEventHandler(Type type, int[] ids, bool inQuery);
-    public delegate void DeleteEntityEventHandler(Type type, int id);
     public delegate IQueryable<T> FilterQueryEventHandler<T>(IQueryable<T> query);
 
     public delegate void PreUnsafeDeleteHandler<T>(IQueryable<T> query);
