@@ -363,39 +363,8 @@ namespace Signum.Engine
             if (type == null)
                 throw new ArgumentNullException("type");
 
-            using (HeavyProfiler.Log("DB"))
-            using (Transaction tr = new Transaction())
-            {
-                Deleter.Delete(type, id);
-
-                tr.Commit();
-            }
+            giDeleteId.GetInvoker(type)(id); 
         }
-
-        public static void Delete(Type type, IEnumerable<int> ids)
-        {
-            if (type == null)
-                throw new ArgumentNullException("type");
-
-            if (ids == null)
-                throw new ArgumentNullException("ids");
-
-            using (HeavyProfiler.Log("DB"))
-            using (Transaction tr = new Transaction())
-            {
-                Deleter.Delete(type, ids.ToList());
-
-                tr.Commit();
-            }
-        }
-
-
-        public static void Delete<T>(int id)
-            where T : IdentifiableEntity
-        {
-            Delete(typeof(T), id);
-        }
-
 
         public static void Delete<T>(Lite<T> lite)
             where T : class, IIdentifiable
@@ -403,7 +372,7 @@ namespace Signum.Engine
             if (lite == null)
                 throw new ArgumentNullException("lite");
 
-            Delete(lite.RuntimeType, lite.Id);
+            giDeleteId.GetInvoker(lite.RuntimeType)(lite.Id);
         }
 
         public static void Delete<T>(this T ident)
@@ -412,10 +381,26 @@ namespace Signum.Engine
             if (ident == null)
                 throw new ArgumentNullException("ident");
 
-            Delete(ident.GetType(), ident.Id);
+            if (ident.GetType() == typeof(T))
+                Delete<T>(ident.Id);
+            else
+                giDeleteId.GetInvoker(ident.GetType())(ident.Id);
         }
 
-        public static void DeleteList<T>(IEnumerable<T> collection)
+        static GenericInvoker giDeleteId = GenericInvoker.Create(() => Delete<IdentifiableEntity>(2));
+        public static void Delete<T>(int id)
+            where T : IdentifiableEntity
+        {
+            using (HeavyProfiler.Log("DB"))
+            {
+                int result = Database.Query<T>().Where(a => a.Id == id).UnsafeDelete();
+                if (result != 1)
+                    throw new InvalidOperationException("ident not found in the database");
+            }
+        }
+
+
+        public static void DeleteList<T>(IList<T> collection)
             where T : IdentifiableEntity
         {
             if (collection == null)
@@ -423,12 +408,20 @@ namespace Signum.Engine
 
             if (collection.Empty()) return;
 
-            Delete(
-                collection.Select(a => a.GetType()).Distinct().Single("There are entities of different types"), 
-                collection.Select(i => i.Id));
+            var areNew = collection.Where(a => a.IsNew);
+            if (areNew.Any())
+                throw new InvalidOperationException("The following entities are new:\r\n" + 
+                    areNew.ToString(a => "\t{0}".Formato(a), "\r\n"));
+
+            var groups = collection.GroupBy(a => a.GetType(), a => a.Id).ToList();
+
+            foreach (var gr in groups)
+            {
+                giDeleteList.GetInvoker(gr.Key)(gr.ToList());
+            }
         }
 
-        public static void DeleteList<T>(IEnumerable<Lite<T>> collection)
+        public static void DeleteList<T>(IList<Lite<T>> collection)
             where T : class, IIdentifiable
         {
             if (collection == null)
@@ -436,10 +429,49 @@ namespace Signum.Engine
 
             if (collection.Empty()) return;
 
-            Delete(
-                collection.Select(a => a.RuntimeType).Distinct().Single("There are entities of different types"),
-                collection.Select(i => i.Id));
+            var areNew = collection.Where(a => a.IdOrNull == null);
+            if (areNew.Any())
+                throw new InvalidOperationException("The following entities are new:\r\n" +
+                    areNew.ToString(a => "\t{0}".Formato(a), "\r\n"));
+
+
+            var groups = collection.GroupBy(a => a.RuntimeType, a => a.Id).ToList();
+
+            using (Transaction tr = new Transaction())
+            {
+                foreach (var gr in groups)
+                {
+                    giDeleteList.GetInvoker(gr.Key)(gr.ToList());
+                }
+
+                tr.Commit();
+            }
+
         }
+
+        public static void Delete(Type type, IList<int> ids)
+        {
+            if (type == null)
+                throw new ArgumentNullException("type");
+
+            giDeleteList.GetInvoker(type)(ids);
+        }
+
+        static GenericInvoker giDeleteList = GenericInvoker.Create(() => Delete<IdentifiableEntity>(new []{1,2,3})); 
+        public static void Delete<T>(IList<int> ids)
+            where T:IdentifiableEntity
+        {
+            if (ids == null)
+                throw new ArgumentNullException("ids");
+
+            using (HeavyProfiler.Log("DB"))
+            {
+                int result = Database.Query<T>().Where(a => ids.Contains(a.Id)).UnsafeDelete();
+                if (result != ids.Count())
+                    throw new InvalidOperationException("not all the elements have been deleted");
+            }
+        }
+
         #endregion
 
         #region Query
@@ -452,9 +484,6 @@ namespace Signum.Engine
         public static IQueryable<S> InDB<S>(this S entity)
             where S: IIdentifiable
         {
-            if (entity == null)
-                throw new ArgumentNullException("entity");
-
             return (IQueryable<S>)miInDB.GetInvoker(typeof(S), entity.GetType()).Invoke(entity);
         }
 
@@ -466,6 +495,9 @@ namespace Signum.Engine
         {
             if (entity == null)
                 throw new ArgumentNullException("entity");
+
+            if (entity.IsNew)
+                throw new ArgumentException("entity is new");
 
             return Database.Query<RT>().Where(rt => rt == entity).Select(rt => (S)rt);
         }
