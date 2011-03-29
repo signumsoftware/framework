@@ -16,7 +16,7 @@ namespace Signum.Web.Selenium
         protected static Process seleniumServerProcess;
         private static bool Cleaned = false;
 
-        protected const string PageLoadTimeout = SeleniumExtensions.DefaultPageLoadTimeout; //1.66666667 minutes
+        protected const string PageLoadTimeout = SeleniumExtensions.DefaultPageLoadTimeout;
 
         public SeleniumTestClass()
         {

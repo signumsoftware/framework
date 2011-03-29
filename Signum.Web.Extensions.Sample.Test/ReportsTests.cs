@@ -61,7 +61,7 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.Type("DisplayName", "test");
             selenium.Type("File", pathSampleReport);
             selenium.EntityButtonClick(saveReportId);
-            selenium.WaitForPageToLoad(PageLoadTimeout);
+            selenium.WaitForPageToLoad(SeleniumExtensions.PageLoadLongTimeout);
             selenium.MainEntityHasId();
 
             //modify
