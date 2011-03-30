@@ -27,7 +27,7 @@ namespace Signum.Web.Selenium
             seleniumServerProcess.StartInfo.FileName = "java";
             if (Explorer == WebExplorer.Firefox && System.IO.Directory.Exists("D:\\Signum\\Selenium"))
                 seleniumServerProcess.StartInfo.Arguments =
-                    "-jar c:/selenium/selenium-server.jar -firefoxProfileTemplate D:\\Signum\\Selenium";
+                    "-jar -timeout 360 c:/selenium/selenium-server.jar -firefoxProfileTemplate D:\\Signum\\Selenium";
             else
                 seleniumServerProcess.StartInfo.Arguments =
                     "-jar c:/selenium/selenium-server.jar";
@@ -47,8 +47,8 @@ namespace Signum.Web.Selenium
             
             selenium.SetSpeed("200");
             //selenium.SetSpeed("1000");
-
-            selenium.SetTimeout("0");
+            
+            selenium.SetTimeout("600000");
 
             selenium.AddLocationStrategy("jq",
             "var loc = locator; " +
