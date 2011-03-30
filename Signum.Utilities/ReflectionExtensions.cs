@@ -9,6 +9,7 @@ using System.Reflection.Emit;
 using System.Collections;
 using Signum.Utilities.Properties;
 using Signum.Utilities.ExpressionTrees;
+using System.Runtime.CompilerServices;
 
 namespace Signum.Utilities
 {
@@ -21,7 +22,7 @@ namespace Signum.Utilities
 
         public static Type Nullify(this Type type)
         {
-            return type.IsClass || type.IsNullable() ? type : typeof(Nullable<>).MakeGenericType(type);
+            return type.IsClass || type.IsInterface || type.IsNullable() ? type : typeof(Nullable<>).MakeGenericType(type);
         }
 
         public static bool IsNullable(this Type type)
@@ -104,6 +105,11 @@ namespace Signum.Utilities
             return ft.GetInterfaces().PreAnd(ft)
                 .SingleOrDefault(ti => ti.IsGenericType && ti.GetGenericTypeDefinition() == typeof(IEnumerable<>))
                 .TryCC(ti => ti.GetGenericArguments()[0]);
+        }
+
+        public static bool IsExtensionMethod(this MethodInfo m)
+        {
+            return m.IsStatic && m.HasAttribute<ExtensionAttribute>();
         }
     }
 }

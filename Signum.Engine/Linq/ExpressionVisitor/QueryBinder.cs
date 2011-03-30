@@ -832,23 +832,31 @@ namespace Signum.Engine.Linq
 
         private Expression BindMethodCall(MethodCallExpression m)
         {
-            Expression source = m.Object;
+            Expression source = m.Method.IsExtensionMethod() ? m.Arguments[0]: m.Object;
 
             if (source == null)
                 return m;
 
-            LambdaExpression lambda = ExpressionCleaner.GetExpansion(source.Type, m.Method);
-            if (lambda != null) //new expansions discovered
+            if (source != null && ExpressionCleaner.HasExpansions(source.Type, m.Method) && source is FieldInitExpression) //new expansions discovered
             {
-                int i= 0;  
-                var dic = m.Arguments.PreAnd(m.Object).ToDictionary(a=>Expression.Parameter(a.Type, "temp" + (i++)));
+                Dictionary<ParameterExpression, Expression> replacements = new Dictionary<ParameterExpression, Expression>();
+                Func<Expression, Expression> replace = e =>
+                {
+                    if (e == null || e.NodeType == ExpressionType.Quote || e.NodeType == ExpressionType.Lambda)
+                        return e;
+                    ParameterExpression pe = Expression.Parameter(e.Type, "p" + replacements.Count);
+                    replacements.Add(pe, e);
+                    return pe; 
+                }; 
 
-                Expression cleanedLambda = DbQueryProvider.Clean(Expression.Invoke(lambda, dic.Keys));
+                MethodCallExpression simple = Expression.Call(replace(m.Object), m.Method, m.Arguments.Select(replace).ToArray());
 
-                map.AddRange(dic); 
-                Expression result = Visit(cleanedLambda);
-                map.RemoveRange(dic.Keys); 
+                Expression binded = ExpressionCleaner.BindMethodExpression(simple, true);
 
+                Expression cleanedSimple = DbQueryProvider.Clean(binded);
+                map.AddRange(replacements);
+                Expression result = Visit(cleanedSimple);
+                map.RemoveRange(replacements.Keys);
                 return result;
             }
 
@@ -856,11 +864,20 @@ namespace Signum.Engine.Linq
             {
                 ImplementedByExpression ib = (ImplementedByExpression)source;
 
+                if (m.Method.IsExtensionMethod())
+                {
+                    List<Expression> list = ib.Implementations.Select(
+                        imp => BindMethodCall(Expression.Call(null, m.Method, m.Arguments.Skip(1).PreAnd(imp.Field)))).ToList();
 
-                List<Expression> list = ib.Implementations
-                    .Select(imp => BindMethodCall(Expression.Call(imp.Field, m.Method, m.Arguments))).ToList();
+                    return Collapse(list, m.Type);
+                }
+                else
+                {
+                       List<Expression> list = ib.Implementations.Select(
+                          imp => BindMethodCall(Expression.Call(imp.Field, m.Method, m.Arguments))).ToList();
 
-                return Collapse(list, m.Type);
+                    return Collapse(list, m.Type);
+                }
             }
 
             return m;
@@ -868,19 +885,19 @@ namespace Signum.Engine.Linq
 
         public Expression BindMemberAccess(MemberExpression m)
         {
-            Expression source = m.Expression; 
+            Expression source = m.Expression;
 
-            LambdaExpression lambda = ExpressionCleaner.GetExpansion(source.Type, m.Member);
-            if (lambda != null) //new expansions discovered
+            if (source != null && m.Member is PropertyInfo && ExpressionCleaner.HasExpansions(source.Type, (PropertyInfo)m.Member)) //new expansions discovered
             {
-                ParameterExpression temp = Expression.Parameter(source.Type, "temp");
+                ParameterExpression parameter = Expression.Parameter(m.Expression.Type, "temp");
+                MemberExpression simple = Expression.MakeMemberAccess(parameter, m.Member);
 
-                Expression cleanedLambda = DbQueryProvider.Clean(Expression.Invoke(lambda, temp));
+                Expression binded = ExpressionCleaner.BindMemberExpression(simple, true);
 
-                map.Add(temp, source);
-                Expression result = Visit(cleanedLambda);
-                map.Remove(temp);
-
+                Expression cleanedSimple = DbQueryProvider.Clean(binded);
+                map.Add(parameter, source);
+                Expression result = Visit(cleanedSimple);
+                map.Remove(parameter);
                 return result;
             }
             
@@ -892,7 +909,6 @@ namespace Signum.Engine.Linq
                     source = proj.Projector;
                 }
             }
-            
             
             source = RemoveGroupByConvert(source);
 
@@ -1228,6 +1244,11 @@ namespace Signum.Engine.Linq
             return base.VisitUnary(u); 
         }
 
+        protected override Expression VisitLambda(LambdaExpression lambda)
+        {
+            return lambda; //not touch until invoke
+        }
+
         public Expression SimplifyRedundandConverts(UnaryExpression unary)
         {
             //(int)(object)3 --> 3
@@ -1268,7 +1289,7 @@ namespace Signum.Engine.Linq
 
                 if (fies.Empty())
                 {
-                    return new FieldInitExpression(uType, null, Expression.Constant(null, typeof(int?)), TypeSqlConstant(uType), null, ib.Implementations.Single().Field.Token);
+                    return new FieldInitExpression(uType, null, Expression.Constant(null, typeof(int?)), TypeSqlConstant(uType), null, ib.Implementations.First().Field.Token);
                 }
                 if (fies.Length == 1 && fies[0].Type == uType)
                     return fies[0];

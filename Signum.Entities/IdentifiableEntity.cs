@@ -117,27 +117,6 @@ namespace Signum.Entities
                 StringHashEncoder.GetHashCode32(GetType().FullName) ^ id.Value;
         }
 
-        /// <summary>
-        /// Sql-nullify an constant expression in order to work on polymorphic member accesses on Linq queries.
-        /// </summary>
-        [MethodExpander(typeof(ShyExpander))]
-        public T Shy<T>(T value)
-        {
-            return value;
-        }
-
-        class ShyExpander : IMethodExpander
-        {
-            public Expression Expand(Expression instance, Expression[] arguments, Type[] typeArguments)
-            {
-                Type t = typeArguments[0];
-
-                Expression ce =  Expression.Constant(null, t.Nullify());
-
-                return Expression.Condition(Expression.NotEqual(instance, Expression.Constant(null, instance.Type)), arguments[0].Nullify(), ce);
-            }
-        }
-
     }
 
     public interface IIdentifiable : INotifyPropertyChanged, IDataErrorInfo, ICloneable, IRootEntity

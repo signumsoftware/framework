@@ -26,10 +26,10 @@ namespace Signum.Utilities.ExpressionTrees
 	public sealed class MethodExpanderAttribute : Attribute
 	{
 		private Type expanderType;
-		public Type ExpanderType
-		{
-			get { return expanderType; }
-		}
+        public Type ExpanderType
+        {
+            get { return expanderType; }
+        }
 
         /// <param name="type">A class that implements IMethodExpander</param>
 		public MethodExpanderAttribute(Type type)
@@ -37,6 +37,15 @@ namespace Signum.Utilities.ExpressionTrees
 			expanderType = type;
 		}
 	}
+
+    //The member is polymorphic and should be expanded in a latter stage
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Property)]
+    public sealed class PolymorphicExpansionAttribute : Attribute
+    {
+        public PolymorphicExpansionAttribute()
+        {
+        }
+    }
 
     //The name of the field for the expression that defines the content
     [AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
@@ -91,58 +100,92 @@ namespace Signum.Utilities.ExpressionTrees
 
 		protected override Expression VisitMethodCall(MethodCallExpression m)
 		{
-            MethodExpanderAttribute attribute = m.Method.SingleAttribute<MethodExpanderAttribute>();
-			if (attribute != null)
-			{
-                IMethodExpander expander = Activator.CreateInstance(attribute.ExpanderType) as IMethodExpander;
-				if (expander == null) 
-                    throw new InvalidOperationException("Expansion failed, {0} does not implement IMethodExpander".Formato(attribute.ExpanderType.Name));
+            MethodCallExpression expr = (MethodCallExpression)base.VisitMethodCall(m);
 
-                Expression exp = expander.Expand(
-                    Visit(m.Object), 
-                    m.Arguments.Select(p => Visit(p)).ToArray(), 
-                    m.Method.IsGenericMethod ? m.Method.GetGenericArguments() : null);
+            Expression binded =  BindMethodExpression(expr, false);
 
-                return Visit(exp);
-			}
+            if (binded != null)
+                return Visit(binded);
 
+            return expr;
+		}
+
+        public static Expression BindMethodExpression(MethodCallExpression m, bool allowPolymorphics)
+        {
             if (m.Method.DeclaringType == typeof(ExpressionExtensions) && m.Method.Name == "Invoke")
             {
                 LambdaExpression lambda = (LambdaExpression)(ExpressionEvaluator.Eval(m.Arguments[0]));
 
-                return Visit(Expression.Invoke(lambda, m.Arguments.Skip(1).Select(a => Visit(a)).ToArray()));
+                return Expression.Invoke(lambda, m.Arguments.Skip(1).ToArray());
             }
 
-            LambdaExpression lambdaExpression = GetExpansion(m.Object.TryCC(c => c.Type), m.Method);
-            if(lambdaExpression != null)
+            if (m.Method.HasAttributeInherit<PolymorphicExpansionAttribute>() && !allowPolymorphics)
+                return null;
+
+            MethodExpanderAttribute attribute = m.Method.SingleAttribute<MethodExpanderAttribute>();
+            if (attribute != null)
             {
-                Expression[] args =  m.Object == null ? m.Arguments.ToArray() : m.Arguments.PreAnd(m.Object).ToArray();
+                IMethodExpander expander = Activator.CreateInstance(attribute.ExpanderType) as IMethodExpander;
+                if (expander == null)
+                    throw new InvalidOperationException("Expansion failed, {0} does not implement IMethodExpander".Formato(attribute.ExpanderType.Name));
 
-                return Visit(Expression.Invoke(lambdaExpression, args.Select(e => Visit(e)).ToArray()));
+                Expression exp = expander.Expand(
+                    m.Object,
+                    m.Arguments.ToArray(),
+                    m.Method.IsGenericMethod ? m.Method.GetGenericArguments() : null);
+
+                return exp;
             }
 
-			return base.VisitMethodCall(m);
-		}
+            LambdaExpression lambdaExpression = GetFieldExpansion(m.Object.TryCC(c => c.Type), m.Method);
+            if (lambdaExpression != null)
+            {
+                Expression[] args = m.Object == null ? m.Arguments.ToArray() : m.Arguments.PreAnd(m.Object).ToArray();
+
+                return Expression.Invoke(lambdaExpression, args);
+            }
+
+            return null;
+
+        }
 
         protected override Expression VisitMemberAccess(MemberExpression m)
         {
+            MemberExpression exp = (MemberExpression)base.VisitMemberAccess(m);
+
+            Expression binded = BindMemberExpression(exp, false);
+
+            if (binded != null)
+                return Visit(binded);
+
+            return exp;
+        }
+        
+        public static Expression BindMemberExpression(MemberExpression m, bool allowPolymorphics)
+        {
             PropertyInfo pi = m.Member as PropertyInfo;
             if (pi == null)
-                return base.VisitMemberAccess(m);
+                return null;
 
-            LambdaExpression lambda = GetExpansion(m.Expression.TryCC(c => c.Type), pi);
-            if (lambda != null)
-            {
-                if (m.Expression == null)
-                    return Visit(lambda.Body);
-                else
-                    return Visit(Expression.Invoke(lambda, Visit(m.Expression)));
-            }
+            if (pi.HasAttributeInherit<PolymorphicExpansionAttribute>() && !allowPolymorphics)
+                return null;
 
-            return base.VisitMemberAccess(m);
+            LambdaExpression lambda = GetFieldExpansion(m.Expression.TryCC(c => c.Type), pi);
+            if (lambda == null)
+                return null;
+
+            if (m.Expression == null)
+                return lambda.Body;
+            else
+                return Expression.Invoke(lambda, m.Expression);
         }
 
-        public static LambdaExpression GetExpansion(Type decType, MemberInfo mi)
+        public static bool HasExpansions(Type type, MemberInfo mi)
+        {
+            return GetFieldExpansion(type, mi) != null || mi is MethodInfo && mi.HasAttribute<MethodExpanderAttribute>();
+        }
+        
+        static LambdaExpression GetFieldExpansion(Type decType, MemberInfo mi)
         {
             ExpressionFieldAttribute efa = mi.SingleAttribute<ExpressionFieldAttribute>();
 
@@ -284,5 +327,5 @@ namespace Signum.Utilities.ExpressionTrees
             return c;
         } 
         #endregion
-	}
+    }
 }
