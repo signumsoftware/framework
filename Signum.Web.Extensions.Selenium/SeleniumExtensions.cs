@@ -43,13 +43,12 @@ namespace Signum.Web.Selenium
                 Explorer == WebExplorer.Firefox ? "*chrome" : Explorer == WebExplorer.IE ? "*iexplore" : "*googlechrome",
                 "http://localhost/");
             
-           
                 selenium.Start();
             
             selenium.SetSpeed("200");
             //selenium.SetSpeed("1000");
 
-            selenium.SetTimeout("600000");
+            selenium.SetTimeout("0");
 
             selenium.AddLocationStrategy("jq",
             "var loc = locator; " +
