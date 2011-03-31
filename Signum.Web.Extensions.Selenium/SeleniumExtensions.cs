@@ -174,6 +174,13 @@ namespace Signum.Web.Selenium
             EntityButtonClick(selenium, "ebSave");
         }
 
+        public static bool EntityButtonEnabled(this ISelenium selenium, string idButton)
+        {
+            string locator = EntityButtonLocator(idButton);
+            Assert.IsTrue(selenium.IsElementPresent(locator));
+            return !selenium.IsElementPresent("{0}.sf-disabled".Formato(locator));
+        }
+
         public static void EntityButtonClick(this ISelenium selenium, string idButton)
         {
             selenium.Click(EntityButtonLocator(idButton));
