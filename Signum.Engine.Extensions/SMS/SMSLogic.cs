@@ -9,13 +9,18 @@ using Signum.Entities.SMS;
 using Signum.Engine.Extensions.Properties;
 using Signum.Entities;
 using Signum.Utilities;
+using Signum.Utilities.Reflection;
 
 namespace Signum.Engine.SMS
 {
     public static class SMSLogic
     {
         private static Action<SMSMessageDN> SMSSendAction;
-        public static bool IsStarted;
+
+        public static void AssertStarted(SchemaBuilder sb)
+        {
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null, null, null)));
+        }
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Action<SMSMessageDN> sendAction)
         {
@@ -44,15 +49,13 @@ namespace Signum.Engine.SMS
                                                         Entity = t.ToLite(),
                                                         t.Id,
                                                         t.Name,
-                                                        Active = t.Active(),
+                                                        IsActive = t.IsActiveNow(),
                                                         Message = t.Message.Etc(20),
                                                         Source = t.From,
                                                         t.State,
                                                         t.StartDate,
                                                         t.EndDate,
                                                      }).ToDynamic();
-
-                IsStarted = true;
             }
         }
 
@@ -64,8 +67,17 @@ namespace Signum.Engine.SMS
         public static void SendSMS(SMSMessageDN message)
         {
             if (SMSSendAction == null)
-                throw new InvalidOperationException(Resources.SMSSendActionWasNotEstablished);
-            SMSSendAction(message);
+                throw new InvalidOperationException("SMSSendAction was not established");
+            SendSMS(message, SMSSendAction);
         }
+
+        public static void SendSMS(SMSMessageDN message, Action<SMSMessageDN> send) //Allow various custom sendProviders
+        {
+            send(message);
+            message.SendDate = DateTime.Now; 
+            message.State = SMSMessageState.Sent;
+            message.Save();
+        }
+
     }
 }

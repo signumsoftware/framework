@@ -12,8 +12,8 @@ namespace Signum.Entities.SMS
 
     public enum SMSTemplateState
     {
-        Disabled,
-        Enabled
+        Created,
+        Modified
     }
 
     public enum SMSTemplateOperations
@@ -35,7 +35,7 @@ namespace Signum.Entities.SMS
         }
 
         string message;
-        [StringLengthValidator(AllowNulls = false, Max = SMSCharacters.SMSMaxTextLength)]
+        [StringLengthValidator(AllowNulls = false, Max = SMSCharacters.TripleSMSMaxTextLength)]
         public string Message
         {
             get { return message; }
@@ -50,11 +50,18 @@ namespace Signum.Entities.SMS
             set { Set(ref from, value, () => From); }
         }
 
-        SMSTemplateState state = SMSTemplateState.Disabled;
+        SMSTemplateState state;
         public SMSTemplateState State
         {
             get { return state; }
             set { Set(ref state, value, () => State); }
+        }
+
+        bool active;
+        public bool Active
+        {
+            get { return active; }
+            set { Set(ref active, value, () => Active); }
         }
 
         DateTime startDate = DateTime.Now;
@@ -73,11 +80,11 @@ namespace Signum.Entities.SMS
             set { Set(ref endDate, value, () => EndDate); }
         }
 
-        static Expression<Func<SMSTemplateDN, bool>> ActiveExpression =
-            (mt) => mt.State == SMSTemplateState.Enabled && DateTime.Now.IsInInterval(mt.StartDate, mt.EndDate);
-        public bool Active()
+        static Expression<Func<SMSTemplateDN, bool>> IsActiveNowExpression =
+            (mt) => mt.active && DateTime.Now.IsInInterval(mt.StartDate, mt.EndDate);
+        public bool IsActiveNow()
         { 
-            return ActiveExpression.Invoke(this);
+            return IsActiveNowExpression.Invoke(this);
         }
 
         protected override string PropertyValidation(System.Reflection.PropertyInfo pi)
@@ -154,6 +161,7 @@ namespace Signum.Entities.SMS
         }
 
         public const int SMSMaxTextLength = 160; //default length for SMS messages
+        public const int TripleSMSMaxTextLength = 160 * 3;
 
         public static int CharactersToEnd(string text, int maxLength)
         {

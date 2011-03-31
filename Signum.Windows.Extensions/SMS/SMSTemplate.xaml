@@ -13,7 +13,7 @@
             <TextBlock x:Name="charactersLeft" FontWeight="Bold">160</TextBlock>
         </StackPanel>
         <m:ValueLine m:Common.Route="From" />
-        <m:ValueLine m:Common.Route="State" m:Common.IsReadOnly="True"/>
+        <m:ValueLine m:Common.Route="Active" m:Common.IsReadOnly="True"/>
         <m:ValueLine m:Common.Route="StartDate" />
         <m:ValueLine m:Common.Route="EndDate" />
     </StackPanel>

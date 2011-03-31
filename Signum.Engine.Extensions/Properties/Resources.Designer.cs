@@ -566,15 +566,6 @@ namespace Signum.Engine.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to SMSSendAction was not established.
-        /// </summary>
-        internal static string SMSSendActionWasNotEstablished {
-            get {
-                return ResourceManager.GetString("SMSSendActionWasNotEstablished", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to string.
         /// </summary>
         internal static string String {

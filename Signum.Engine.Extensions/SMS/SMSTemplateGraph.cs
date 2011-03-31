@@ -14,29 +14,31 @@ namespace Signum.Engine.SMS
             this.GetState = t => t.State;
             this.Operations = new List<IGraphOperation> 
             { 
-                new Construct(SMSTemplateOperations.Create, SMSTemplateState.Disabled)
+                new Construct(SMSTemplateOperations.Create, SMSTemplateState.Created)
                 {
-                    Constructor = _ => new SMSTemplateDN{},
+                    Constructor = _ => new SMSTemplateDN{State = SMSTemplateState.Created},
                 },
 
-                new Goto(SMSTemplateOperations.Modify, SMSTemplateState.Disabled)
+                new Goto(SMSTemplateOperations.Modify, SMSTemplateState.Modified)
                 {
                     Lite = false,
                     AllowsNew = true,
-                    FromStates = new [] { SMSTemplateState.Disabled },
-                    Execute = (t, _) => { t.State = SMSTemplateState.Disabled; }
+                    FromStates = new [] { SMSTemplateState.Created, SMSTemplateState.Modified },
+                    Execute = (t, _) => { t.State = SMSTemplateState.Modified; }
                 },
 
-                new Goto(SMSTemplateOperations.Enable, SMSTemplateState.Enabled)
+                new Goto(SMSTemplateOperations.Enable, SMSTemplateState.Modified)
                 {
-                    FromStates = new [] { SMSTemplateState.Disabled },
-                    Execute = (t, _) => { t.State = SMSTemplateState.Enabled; }
+                    CanExecute = c => c.Active ? "The template is already active" : null,
+                    FromStates = new [] { SMSTemplateState.Modified },
+                    Execute = (t, _) => { t.Active = true; }
                 },
 
-                new Goto(SMSTemplateOperations.Disable, SMSTemplateState.Disabled)
+                new Goto(SMSTemplateOperations.Disable, SMSTemplateState.Modified)
                 {
-                    FromStates = new [] { SMSTemplateState.Enabled },
-                    Execute = (t, _) => { t.State = SMSTemplateState.Disabled; }                    
+                    CanExecute = c => !c.Active ? "The template is already inactive" : null,
+                    FromStates = new [] { SMSTemplateState.Modified },
+                    Execute = (t, _) => { t.Active = false; }                    
                 }
             };
         }
