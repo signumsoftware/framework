@@ -17,19 +17,6 @@ namespace Signum.Engine.Linq
     {
         public static Expression EqualNullable(Expression e1, Expression e2)
         {
-            if (e1.IsNull())
-            {
-                if (e2.IsNull())
-                    return SqlConstantExpression.True;
-                else
-                    return new IsNullExpression(e2);
-            }
-            else
-            {
-                if (e2.IsNull())
-                    return new IsNullExpression(e1);
-            }
-
             if (e1.Type.IsNullable() == e2.Type.IsNullable())
                 return Expression.Equal(e1, e2);
 

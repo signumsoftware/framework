@@ -496,29 +496,5 @@ namespace Signum.Entities
             else
                 return object.ReferenceEquals(lite1.EntityOrNull, lite2.EntityOrNull);
         }
-
-        /// <summary>
-        /// Sql-nullifies an constant expression in order to work on polymorphic member accesses on Linq queries.
-        /// </summary>
-        [MethodExpander(typeof(ShyExpander))]
-        public static T Shy<T>(this IIdentifiable entity, T value)
-        {
-            return value;
-        }
-
-        class ShyExpander : IMethodExpander
-        {
-            public Expression Expand(Expression instance, Expression[] arguments, Type[] typeArguments)
-            {
-                Type t = typeArguments[0];
-
-                Expression entity = arguments[0];
-                Expression arg = arguments[1];
-
-                Expression ce = Expression.Constant(null, t.Nullify());
-
-                return Expression.Condition(Expression.NotEqual(entity, Expression.Constant(null, entity.Type)), arg.Nullify(), ce);
-            }
-        }
     }
 }

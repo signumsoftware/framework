@@ -866,17 +866,19 @@ namespace Signum.Engine.Linq
 
                 if (m.Method.IsExtensionMethod())
                 {
-                    List<Expression> list = ib.Implementations.Select(
-                        imp => BindMethodCall(Expression.Call(null, m.Method, m.Arguments.Skip(1).PreAnd(imp.Field)))).ToList();
+                    List<When> whens = ib.Implementations.Select(
+                        imp =>new When(NotNull(imp.Field.ExternalId),
+                            BindMethodCall(Expression.Call(null, m.Method, m.Arguments.Skip(1).PreAnd(imp.Field))))).ToList();
 
-                    return Collapse(list, m.Type);
+                    return CombineWhens(whens, m.Type);
                 }
                 else
                 {
-                       List<Expression> list = ib.Implementations.Select(
-                          imp => BindMethodCall(Expression.Call(imp.Field, m.Method, m.Arguments))).ToList();
+                    List<When> whens = ib.Implementations.Select(
+                       imp => new When(NotNull(imp.Field.ExternalId),
+                           BindMethodCall(Expression.Call(imp.Field, m.Method, m.Arguments)))).ToList();
 
-                    return Collapse(list, m.Type);
+                    return CombineWhens(whens, m.Type);
                 }
             }
 
@@ -887,7 +889,7 @@ namespace Signum.Engine.Linq
         {
             Expression source = m.Expression;
 
-            if (source != null && m.Member is PropertyInfo && ExpressionCleaner.HasExpansions(source.Type, (PropertyInfo)m.Member)) //new expansions discovered
+            if (source != null && m.Member is PropertyInfo && ExpressionCleaner.HasExpansions(source.Type, (PropertyInfo)m.Member) && source is FieldInitExpression) //new expansions discovered
             {
                 ParameterExpression parameter = Expression.Parameter(m.Expression.Type, "temp");
                 MemberExpression simple = Expression.MakeMemberAccess(parameter, m.Member);
@@ -1006,16 +1008,18 @@ namespace Signum.Engine.Linq
 
                     PropertyInfo pi = (PropertyInfo)m.Member;
 
-                    Expression result = ib.TryGetPropertyBinding(pi); 
+                    Expression result = ib.TryGetPropertyBinding(pi);
 
-                    if(result == null)
+                    if (result == null)
                     {
-                        List<Expression> list = ib.Implementations
-                            .Select(imp => BindMemberAccess(Expression.MakeMemberAccess(imp.Field, m.Member))).ToList();
+                        List<When> whens = ib.Implementations.Select(imp =>
+                            new When(
+                                NotNull(imp.Field.ExternalId),
+                                BindMemberAccess(Expression.MakeMemberAccess(imp.Field, m.Member)))).ToList();
 
-                        result = Collapse(list, m.Member.ReturningType());
+                        result = CombineWhens(whens, m.Member.ReturningType());
 
-                        ib.AddPropertyBinding(pi, result); 
+                        ib.AddPropertyBinding(pi, result);
                     }
 
                     return result; 
@@ -1034,46 +1038,75 @@ namespace Signum.Engine.Linq
             return Expression.MakeMemberAccess(source, m.Member);
         }
 
-        private Expression Collapse(List<Expression> list, Type returnType)
+        Expression NotNull(Expression exp)
         {
-            if(list.Count == 0)
+            return Expression.NotEqual(exp.Nullify(), Expression.Constant(null, typeof(int?)));
+        }
+
+        public Expression ConditionalWhens(List<When> whens)
+        {
+            var types = whens.Select(a => a.Value.Type).Distinct().ToList(); 
+
+            Type type = types.Count == 1? types[0]:
+                types.Count == 2 && types[0].Nullify() == types[1].Nullify() ? types[0].Nullify(): null;
+   
+            if(type == null)
+                throw new InvalidOperationException(
+                    "Incopatible return type for the expressions: {0}".Formato(whens.ToString(w=>w.Value.Type.NiceName() +": "+ w.Value.NiceToString(), "\r\n")));
+
+
+            var @default = (Expression)Expression.Constant(null, type.Nullify());
+
+            var result = Enumerable.Reverse(whens).Aggregate(
+                @default, (acum, when) => Expression.Condition(when.Condition, when.Value.Nullify(), acum));
+
+            return result.UnNullify();
+        }
+
+        private Expression CombineWhens(List<When> whens, Type returnType)
+        {
+            if(whens.Count == 0)
                 return Expression.Constant(null, returnType.Nullify());
 
-            if (list.All(e => e is LiteReferenceExpression))
-            {
-                Expression entity = Collapse(list.Select(exp => ((LiteReferenceExpression)exp).Reference).ToList(), Reflector.ExtractLite(returnType));
+            if (whens.Count == 1)
+                return whens.Single().Value;
 
-                return MakeLite(returnType, entity, null); 
+            if (whens.All(e => e.Value is LiteReferenceExpression))
+            {
+                Expression entity = CombineWhens(whens.Select(w => new When(w.Condition, 
+                    ((LiteReferenceExpression)w.Value).Reference)).ToList(), Reflector.ExtractLite(returnType));
+
+                return MakeLite(returnType, entity, null);
             }
 
-            if(list.Any(e=>e is ImplementedByAllExpression))
+            if(whens.Any(e=>e.Value is ImplementedByAllExpression))
             {
-                Expression id = Coalesce(typeof(int?), list.Select(e => GetId(e)));
-                Expression typeId = Coalesce(typeof(int?), list.Select(e => GetTypeId(e)));
+                Expression id = ConditionalWhens(whens.Select(w => new When(w.Condition, GetId(w.Value))).ToList());
+                Expression typeId = ConditionalWhens(whens.Select(w => new When(w.Condition, GetTypeId(w.Value))).ToList());
 
-                return new ImplementedByAllExpression(returnType, id, typeId, CoalesceToken(list.Select(a => GetToken(a)))); 
+                return new ImplementedByAllExpression(returnType, id, typeId, CombineToken(whens.Select(a => GetToken(a.Value)))); 
             }
 
-            if(list.All(e=>e is FieldInitExpression || e is ImplementedByExpression))
+            if(whens.All(e=>e.Value is FieldInitExpression || e.Value is ImplementedByExpression))
             {
-                var fies = (from e in list
-                            where e is FieldInitExpression
-                            select new {e.Type, Fie = (FieldInitExpression)e }).ToList();
+                var fies = (from e in whens
+                            where e.Value is FieldInitExpression
+                            select new {e.Value.Type, Fie = (FieldInitExpression)e.Value, e.Condition }).ToList();
 
-                var ibs = (from e in list
-                            where e is ImplementedByExpression
-                            from imp in ((ImplementedByExpression)e).Implementations
-                            select new {imp.Type, Fie = imp.Field }).ToList();
+                var ibs = (from e in whens
+                            where e.Value is ImplementedByExpression
+                            from imp in ((ImplementedByExpression)e.Value).Implementations
+                            select new {imp.Type, Fie = imp.Field, Condition = (Expression)Expression.And(e.Condition, 
+                                Expression.NotEqual(imp.Field.ExternalId, Expression.Constant(null, typeof(int?)))) }).ToList();
 
-                var groups = fies.Concat(ibs).AgGroupToDictionary(a => a.Type, g => g.Select(a => a.Fie).ToList());
+                var groups = fies.Concat(ibs).GroupToDictionary(a => a.Type);
 
                 var implementations = groups.Select(g =>
                     new ImplementationColumnExpression(g.Key,
                         new FieldInitExpression(g.Key, null,
-                            Coalesce(typeof(int?),
-                            g.Value.Select(fie => fie.ExternalId)),
+                            CombineWhens(g.Value.Select(w=>new When(w.Condition, w.Fie.ExternalId)).ToList(), typeof(int?)),
                             TypeSqlConstant(g.Key),
-                            null, CoalesceToken(g.Value.Select(f => f.Token))))).ToReadOnly();
+                            null, CombineToken(g.Value.Select(f => f.Fie.Token))))).ToReadOnly();
 
                 if(implementations.Count == 1)
                     return implementations[0].Field;
@@ -1081,26 +1114,27 @@ namespace Signum.Engine.Linq
                 return new ImplementedByExpression(returnType, implementations);    
             }
 
-            if(list.All(e=>e is EmbeddedFieldInitExpression))
+            if(whens.All(e=>e.Value is EmbeddedFieldInitExpression))
             {
                 var lc = new LambdaComparer<FieldInfo, string>(fi=>fi.Name);
 
-                var groups = list
-                    .SelectMany(e => ((EmbeddedFieldInitExpression)e).Bindings, (e, b) => new { e, b })
-                    .GroupBy(p => p.b.FieldInfo, p => p.e, lc)
+                var groups = whens
+                    .SelectMany(w => ((EmbeddedFieldInitExpression)w.Value).Bindings, (w, b) => new { w, b })
+                    .GroupBy(p => p.b.FieldInfo, p => p.w, lc)
                     .ToDictionary(g => g.Key, g => g.ToList(), lc);
 
-                FieldEmbedded fe = ((EmbeddedFieldInitExpression)list.First()).FieldEmbedded;
+                var hasValue = whens.All(w => ((EmbeddedFieldInitExpression)w.Value).HasValue == null) ? null :
+                    CombineWhens(whens.Select(w => new When(w.Condition, ((EmbeddedFieldInitExpression)w.Value).HasValue ?? new SqlConstantExpression(true))).ToList(), typeof(bool));
 
                 return new EmbeddedFieldInitExpression(returnType,
-                    Coalesce(typeof(bool), list.Select(e => ((EmbeddedFieldInitExpression)e).HasValue ?? new SqlConstantExpression(true))),
-                    groups.Select(k => new FieldBinding(k.Key, Coalesce(k.Key.FieldType.Nullify(), k.Value))), fe);
+                    hasValue, 
+                    groups.Select(k => new FieldBinding(k.Key, CombineWhens(k.Value, k.Key.FieldType))), null);
             }
 
-            if (list.Any(e => e is MListExpression))
+            if (whens.Any(e => e.Value is MListExpression))
                 throw new InvalidOperationException("MList on implementedBy are not supported yet");
 
-            return Coalesce(returnType, list);
+            return ConditionalWhens(whens);
         }
 
         Expression GetId(Expression expression)
@@ -1109,8 +1143,19 @@ namespace Signum.Engine.Linq
                 return ((FieldInitExpression)expression).ExternalId;
 
             if (expression is ImplementedByExpression)
-                return Coalesce(typeof(int?), ((ImplementedByExpression)expression).Implementations.Select(imp => imp.Field.ExternalId).ToList());
+            {
+                ImplementedByExpression ib = (ImplementedByExpression)expression;
 
+                if (ib.Implementations.Count == 0)
+                    return NullId;
+
+                if (ib.Implementations.Count == 1)
+                    return ib.Implementations[0].Field.ExternalId;//Not regular, but usefull
+
+                Expression aggregate = Coalesce(typeof(int?), ib.Implementations.Select(imp => imp.Field.ExternalId));
+
+                return aggregate;
+            }
             if (expression is ImplementedByAllExpression)
                 return ((ImplementedByAllExpression)expression).Id;
 
@@ -1144,7 +1189,7 @@ namespace Signum.Engine.Linq
             throw new NotSupportedException();
         }
 
-        ProjectionToken CoalesceToken(IEnumerable<ProjectionToken> tokens)
+        ProjectionToken CombineToken(IEnumerable<ProjectionToken> tokens)
         {
             return tokens.NotNull().Distinct().SingleOrDefault("Different ProjectionTokens");
         }
@@ -1155,7 +1200,7 @@ namespace Signum.Engine.Linq
                 return ((FieldInitExpression)expression).Token;
 
             if (expression is ImplementedByExpression)
-                return CoalesceToken(((ImplementedByExpression)expression).Implementations.Select(im => im.Field.Token));
+                return CombineToken(((ImplementedByExpression)expression).Implementations.Select(im => im.Field.Token));
 
             if (expression is ImplementedByAllExpression)
                 return ((ImplementedByAllExpression)expression).Token;
@@ -1524,8 +1569,8 @@ namespace Signum.Engine.Linq
                     {
                         AssignColumn(colIba.Id, Coalesce(typeof(int?), ib.Implementations.Select(e => e.Field.ExternalId))),
                         AssignColumn(colIba.TypeId, 
-                            new CaseExpression(ib.Implementations.Select(i => 
-                            new When(new IsNotNullExpression(i.Field.ExternalId), TypeConstant(i.Type))), NullId))
+                           ConditionalWhens(ib.Implementations.Select(imp => 
+                            new When(NotNull(imp.Field.ExternalId), TypeConstant(imp.Type))).ToList()))
                     };
                 }
 
