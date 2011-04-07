@@ -322,16 +322,14 @@ namespace Signum.Engine.Linq
             {
                 var expression = SmartEqualizer.PolymorphicEqual(b.Left, b.Right);
 
-                BinaryExpression newB = expression as BinaryExpression;
-                if (newB != null)
+                if (expression.NodeType == ExpressionType.Equal)
                 {
+                    BinaryExpression newB = expression as BinaryExpression;
                     var left = Visit(newB.Left);
                     var right = Visit(newB.Right);
-                    if (left != b.Left || right != b.Right)
-                    {
-                         b = Expression.MakeBinary(b.NodeType, left, right, b.IsLiftedToNull, b.Method);
-                    }
 
+                    newB = Expression.MakeBinary(b.NodeType, left, right, b.IsLiftedToNull, b.Method);
+                    
                     if (candidates.Contains(left) && candidates.Contains(right))
                     {
                         Expression result = ConvertToSql(b);
@@ -340,7 +338,7 @@ namespace Signum.Engine.Linq
                         return result;
                     }
 
-                    return b;
+                    return newB;
                 }
                 else
                 {
