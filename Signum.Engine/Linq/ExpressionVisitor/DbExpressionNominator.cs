@@ -332,7 +332,7 @@ namespace Signum.Engine.Linq
                     
                     if (candidates.Contains(left) && candidates.Contains(right))
                     {
-                        Expression result = ConvertToSql(b);
+                        Expression result = ConvertToSql(newB);
                         candidates.Add(result);
 
                         return result;
