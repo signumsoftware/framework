@@ -1043,24 +1043,31 @@ namespace Signum.Engine.Linq
             return Expression.NotEqual(exp.Nullify(), Expression.Constant(null, typeof(int?)));
         }
 
-        public Expression ConditionalWhens(List<When> whens)
+        public Expression ConditionalWhens(List<When> whens, Type returnType)
         {
-            var types = whens.Select(a => a.Value.Type).Distinct().ToList(); 
-
-            Type type = types.Count == 1? types[0]:
-                types.Count == 2 && types[0].Nullify() == types[1].Nullify() ? types[0].Nullify(): null;
-   
-            if(type == null)
-                throw new InvalidOperationException(
-                    "Incopatible return type for the expressions: {0}".Formato(whens.ToString(w=>w.Value.Type.NiceName() +": "+ w.Value.NiceToString(), "\r\n")));
-
-
-            var @default = (Expression)Expression.Constant(null, type.Nullify());
+            var @default = returnType.IsClass || returnType.IsNullable() ?
+                                Expression.Constant(null, returnType) :
+                                Convert(Expression.Constant(null, returnType.Nullify()), returnType);
 
             var result = Enumerable.Reverse(whens).Aggregate(
-                @default, (acum, when) => Expression.Condition(when.Condition, when.Value.Nullify(), acum));
+                @default, (acum, when) => Expression.Condition(when.Condition, Convert(when.Value, returnType), acum));
 
-            return result.UnNullify();
+            return result;
+        }
+
+        private Expression Convert(Expression expression, Type returnType)
+        {
+            if (expression.Type == returnType)
+                return expression;
+
+            if (expression.Type.Nullify() == returnType)
+                return expression.Nullify();
+
+            if (expression.Type.UnNullify() == returnType)
+                return expression.UnNullify();
+
+            throw new InvalidOperationException("Imposible to convert to {0} the expression: \r\n{1}"
+                .Formato(returnType.TypeName(), expression.NiceToString())); 
         }
 
         private Expression CombineWhens(List<When> whens, Type returnType)
@@ -1081,8 +1088,8 @@ namespace Signum.Engine.Linq
 
             if(whens.Any(e=>e.Value is ImplementedByAllExpression))
             {
-                Expression id = ConditionalWhens(whens.Select(w => new When(w.Condition, GetId(w.Value))).ToList());
-                Expression typeId = ConditionalWhens(whens.Select(w => new When(w.Condition, GetTypeId(w.Value))).ToList());
+                Expression id = ConditionalWhens(whens.Select(w => new When(w.Condition, GetId(w.Value))).ToList(), typeof(int?));
+                Expression typeId = ConditionalWhens(whens.Select(w => new When(w.Condition, GetTypeId(w.Value))).ToList(), typeof(int?));
 
                 return new ImplementedByAllExpression(returnType, id, typeId, CombineToken(whens.Select(a => GetToken(a.Value)))); 
             }
@@ -1134,7 +1141,7 @@ namespace Signum.Engine.Linq
             if (whens.Any(e => e.Value is MListExpression))
                 throw new InvalidOperationException("MList on implementedBy are not supported yet");
 
-            return ConditionalWhens(whens);
+            return ConditionalWhens(whens, returnType);
         }
 
         Expression GetId(Expression expression)
@@ -1570,7 +1577,7 @@ namespace Signum.Engine.Linq
                         AssignColumn(colIba.Id, Coalesce(typeof(int?), ib.Implementations.Select(e => e.Field.ExternalId))),
                         AssignColumn(colIba.TypeId, 
                            ConditionalWhens(ib.Implementations.Select(imp => 
-                            new When(NotNull(imp.Field.ExternalId), TypeConstant(imp.Type))).ToList()))
+                            new When(NotNull(imp.Field.ExternalId), TypeConstant(imp.Type))).ToList(), typeof(int?)))
                     };
                 }
 
