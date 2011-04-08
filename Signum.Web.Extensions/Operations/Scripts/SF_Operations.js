@@ -570,7 +570,8 @@ SF.registerModule("Operations", function () {
         $td.addClass("sf-ctxmenu-active");
 
         var $menu = findNavigator.createCtxMenu($td);
-        var $itemContainer = $menu.find(".sf-search-ctxmenu");
+        var $itemContainer = $menu.find(".sf-search-ctxmenu");
+
         var requestData = {
             lite: $td.parent().data('entity'),
             webQueryName: $(findNavigator.pf(findNavigator.webQueryName)).val(),
