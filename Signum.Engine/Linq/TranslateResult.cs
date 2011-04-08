@@ -115,7 +115,7 @@ namespace Signum.Engine.Linq
         {
             switch (uniqueFunction)
             {
-                case UniqueFunction.First: return enumerable.First();
+                case UniqueFunction.First:  return enumerable.First();
                 case UniqueFunction.FirstOrDefault: return enumerable.FirstOrDefault();
                 case UniqueFunction.Single: return enumerable.Single();
                 case UniqueFunction.SingleOrDefault: return enumerable.SingleOrDefault();
