@@ -1089,17 +1089,17 @@
   <data name="EndDateMustBeHigherThanStartDate" xml:space="preserve">
     <value>La fecha de finalización debe ser mayor que la fecha de inicio</value>
   </data>
-  <data name="PasswordValidIntervalDN" xml:space="preserve">
-    <value>Intervalo válido de contraseña</value>
+  <data name="PasswordExpiresIntervalDN_Enabled" xml:space="preserve">
+    <value>Habilitado</value>
   </data>
-  <data name="PasswordValidIntervalDN_Days" xml:space="preserve">
-    <value>Días</value>
-  </data>
-  <data name="PasswordValidIntervalDN_DaysWarning" xml:space="preserve">
+  <data name="PasswordExpiresIntervalDN_DaysWarning" xml:space="preserve">
     <value>Días de alerta</value>
   </data>
-  <data name="PasswordValidIntervalDN_Enabled" xml:space="preserve">
-    <value>Habilitado</value>
+  <data name="PasswordExpiresIntervalDN_Days" xml:space="preserve">
+    <value>Días</value>
+  </data>
+  <data name="PasswordExpiresIntervalDN" xml:space="preserve">
+    <value>Intervalo caducidad contraseña</value>
   </data>
   <data name="SendState_Delivered" xml:space="preserve">
     <value>Entregado</value>
