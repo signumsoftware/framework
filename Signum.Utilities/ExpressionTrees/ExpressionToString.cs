@@ -621,6 +621,13 @@ namespace Signum.Utilities.ExpressionTrees
                     builder.Append(" as ");
                     builder.Append(u.Type.TypeName());
                     break;
+                case ExpressionType.Convert:
+                    builder.Append("((");
+                    builder.Append(u.Type.TypeName());
+                    builder.Append(")");
+                    Visit(u.Operand);
+                    builder.Append(")");
+                    break;
                 default:
                     builder.Append(u.NodeType);
                     builder.Append("(");
@@ -628,7 +635,6 @@ namespace Signum.Utilities.ExpressionTrees
                     builder.Append(")");
                     break;
             }
-
 
             return u;
         }
