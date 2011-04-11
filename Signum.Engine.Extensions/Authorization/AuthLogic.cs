@@ -26,11 +26,8 @@ namespace Signum.Engine.Authorization
 {
     public static class AuthLogic
     {
-        public static int MinRequiredPasswordLength = 6;
-        public static event Func<UserDN, bool> PasswordExpiresLogic;
-        public static event Func<string> PasswordNearExpiredLogic;
-
-
+        public static event Action<UserDN> UserLogingIn;
+        public static event Func<string> LoginMessage;
 
 
         public static string SystemUserName { get; set; }
@@ -60,10 +57,10 @@ namespace Signum.Engine.Authorization
 
         public static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => AuthLogic.Start(null, null, null, null, false)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => AuthLogic.Start(null, null, null, null)));
         }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, string systemUserName, string anonymousUserName, bool defaultPasswordExpiresLogic)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, string systemUserName, string anonymousUserName)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -85,15 +82,14 @@ namespace Signum.Engine.Authorization
                                        }).ToDynamic();
 
                 dqm[RoleQueries.ReferedBy] = (from r in Database.Query<RoleDN>()
-                                              from rc in Database.Query<RoleDN>()
-                                              where r.Roles.Contains(rc.ToLite())
+                                              from rc in r.Roles
                                               select new
                                               {
                                                   Entity = r.ToLite(),
                                                   r.Id,
                                                   r.Name,
 
-                                                  Refered = rc.ToLite(),
+                                                  Refered = rc,
                                               }).ToDynamic();
 
                 dqm[typeof(UserDN)] = (from e in Database.Query<UserDN>()
@@ -108,51 +104,6 @@ namespace Signum.Engine.Authorization
                                            e.PasswordSetDate,
                                            Related = e.Related.ToLite(),
                                        }).ToDynamic();
-
-
-                if (defaultPasswordExpiresLogic)
-                {
-                    sb.Include<PasswordValidIntervalDN>();
-
-                    dqm[typeof(PasswordValidIntervalDN)] =
-                        (from e in Database.Query<PasswordValidIntervalDN>()
-                         select new
-                         {
-                             Entity = e.ToLite(),
-                             e.Id,
-                             e.Enabled,
-                             e.Days,
-                             e.DaysWarning
-                         }).ToDynamic();
-
-                    PasswordExpiresLogic += (u =>
-                    {
-                        var ivp = Database.Query<PasswordValidIntervalDN>().Where(p => p.Enabled).FirstOrDefault();
-                        if (ivp == null)
-                            return false;
-
-                        return !(DateTime.Now.AddDays(-(double)ivp.Days) < u.PasswordSetDate);
-                    });
-
-                    PasswordNearExpiredLogic = (() =>
-                    {
-                        using (AuthLogic.Disable())
-                        {
-                            var ivp = Database.Query<PasswordValidIntervalDN>().Where(p => p.Enabled).FirstOrDefault();
-                            if (ivp == null || UserDN.Current.PasswordNeverExpires)
-                                return null;
-
-                            if (DateTime.Now > UserDN.Current.PasswordSetDate.AddDays((double)ivp.Days).AddDays((double)-ivp.DaysWarning))
-                                return Resources.PasswordNearExpired;
-
-                            return null;
-                        }
-                    });
-
-                    UserDN.ValidatePassword = UserDN.ValidatePasswordDefauld;
-
-                }
-
             }
         }
 
@@ -173,37 +124,7 @@ namespace Signum.Engine.Authorization
             }
         }
 
-        public static void StartResetPasswordRequest(SchemaBuilder sb, DynamicQueryManager dqm)
-        {
-            if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-            {
-                sb.Include<ResetPasswordRequestDN>();
-
-                dqm[typeof(ResetPasswordRequestDN)] = (from e in Database.Query<ResetPasswordRequestDN>()
-                                                       select new
-                                                       {
-                                                           Entity = e.ToLite(),
-                                                           e.Id,
-                                                           e.RequestDate,
-                                                           e.Code,
-                                                           User = e.User.ToLite(),
-                                                           e.User.Email
-                                                       }).ToDynamic();
-
-                EmailLogic.AssertStarted(sb);
-
-                EmailLogic.RegisterTemplate<ResetPasswordRequestMail>(model =>
-                {
-                    return new EmailContent
-                    {
-                        Subject = Resources.ResetPasswordCode,
-                        Body = EmailRenderer.Replace(EmailRenderer.ReadFromResourceStream(typeof(AuthLogic).Assembly,
-                           "Signum.Engine.Extensions.Authorization.ResetPasswordRequestMail.htm"),
-                               model, null, Resources.ResourceManager)
-                    };
-                });
-            }
-        }
+       
 
         static void Schema_Initializing()
         {
@@ -352,7 +273,7 @@ namespace Signum.Engine.Authorization
             return new Disposable(() => temporallyDisabled = lastValue);
         }
 
-        public static IDisposable Enabled()
+        public static IDisposable Enable()
         {
             bool lastValue = temporallyDisabled;
             temporallyDisabled = false;
@@ -370,8 +291,8 @@ namespace Signum.Engine.Authorization
             {
                 UserDN user = RetrieveUser(username, passwordHash);
 
-                if (!user.PasswordNeverExpires && PasswordExpiresLogic != null && PasswordExpiresLogic(user))
-                    throw new ExpiredPasswordApplicationException(Signum.Engine.Extensions.Properties.Resources.ExpiredPassword);
+                if (UserLogingIn != null)
+                    UserLogingIn(user);
 
                 return user;
             }
@@ -406,21 +327,6 @@ namespace Signum.Engine.Authorization
                 user.Save();
         }
 
-        //public static UserDN UserToRememberPassword(string username, string email)
-        //{
-        //    UserDN user = null;
-        //    using (AuthLogic.Disable())
-        //    {
-        //        user = Database.Query<UserDN>().SingleOrDefault(u => u.UserName == username);
-        //        if (user == null)
-        //            throw new ApplicationException(Signum.Engine.Extensions.Properties.Resources.Username0IsNotValid.Formato(username));
-
-        //        if (user.Email != email)
-        //            throw new ApplicationException(Signum.Engine.Extensions.Properties.Resources.EmailIsNotValid);
-        //    }
-        //    return user;
-        //}
-
         public static void StartAllModules(SchemaBuilder sb, DynamicQueryManager dqm, params Type[] serviceInterfaces)
         {
             TypeAuthLogic.Start(sb);
@@ -432,28 +338,6 @@ namespace Signum.Engine.Authorization
             QueryAuthLogic.Start(sb, dqm);
             OperationAuthLogic.Start(sb);
             PermissionAuthLogic.Start(sb);
-        }
-
-        public static void ResetPasswordRequest(UserDN user, Func<ResetPasswordRequestDN, string> urlGenerator)
-        {
-            //Remove old previous requests
-            Database.Query<ResetPasswordRequestDN>()
-                .Where(r => r.User.Is(user) && r.RequestDate < TimeZoneManager.Now.AddMonths(1))
-                .UnsafeDelete();
-
-            ResetPasswordRequestDN rpr = new ResetPasswordRequestDN()
-            {
-                Code = MyRandom.Current.NextString(5),
-                User = user,
-                RequestDate = TimeZoneManager.Now,
-            }.Save();
-
-
-            new ResetPasswordRequestMail
-            {
-                To = user,
-                Link = urlGenerator(rpr),
-            }.Send();
         }
 
         internal static Lite<RoleDN>[] CurrentRoles()
@@ -555,18 +439,12 @@ namespace Signum.Engine.Authorization
             }
         }
 
-        public static string OnPasswordNearExpiredLogic()
+        public static string OnLoginMessage()
         {
-            if (AuthLogic.PasswordNearExpiredLogic != null)
-                return AuthLogic.PasswordNearExpiredLogic();
+            if (AuthLogic.LoginMessage != null)
+                return AuthLogic.LoginMessage();
 
             return null;
         }
-
-    }
-
-    public class ResetPasswordRequestMail : EmailModel<UserDN>
-    {
-        public string Link;
     }
 }
