@@ -144,11 +144,11 @@
   <data name="CreateNote" xml:space="preserve">
     <value>Notiz erstellen</value>
   </data>
-  <data name="DeleteFilters" xml:space="preserve">
-    <value>Filter löschen</value>
+  <data name="SearchControl_RowsFound" xml:space="preserve">
+    <value>Zeilen gefunden</value>
   </data>
-  <data name="EditColumnsFinishEdit" xml:space="preserve">
-    <value>Fertig bearbeiten</value>
+  <data name="Search_Create" xml:space="preserve">
+    <value>Erstellen</value>
   </data>
   <data name="Excel" xml:space="preserve">
     <value>Excel</value>
@@ -159,14 +159,14 @@
   <data name="Field" xml:space="preserve">
     <value>Feld</value>
   </data>
-  <data name="FilterByField" xml:space="preserve">
-    <value>Filtern von Feldern</value>
+  <data name="LineButton_View" xml:space="preserve">
+    <value>Ansehen</value>
   </data>
   <data name="Future" xml:space="preserve">
     <value>Zukünftige</value>
   </data>
-  <data name="HideFilters" xml:space="preserve">
-    <value>Filter ausblenden</value>
+  <data name="LineButton_Remove" xml:space="preserve">
+    <value>Entfernen</value>
   </data>
   <data name="IncorrectEntityInSessionYouMustReloadThePageToContinue" xml:space="preserve">
     <value>Sitzungsdaten sind falsch. Aktualisieren Sie die Seite, um fortzufahren</value>
@@ -195,8 +195,8 @@
   <data name="Notes" xml:space="preserve">
     <value>Notizen</value>
   </data>
-  <data name="NumberOfRows" xml:space="preserve">
-    <value>Anzahl der Datensätze</value>
+  <data name="LineButton_Find" xml:space="preserve">
+    <value>Finden</value>
   </data>
   <data name="Operation" xml:space="preserve">
     <value>Betrieb</value>
@@ -213,14 +213,14 @@
   <data name="ShowCalendar" xml:space="preserve">
     <value>Kalender anzeigen</value>
   </data>
-  <data name="ShowFilters" xml:space="preserve">
-    <value>Filter anzeigen</value>
+  <data name="LineButton_Create" xml:space="preserve">
+    <value>Erstellen</value>
   </data>
   <data name="Type0NotAllowed" xml:space="preserve">
     <value>Der Typ {0} ist nicht zulässig</value>
   </data>
-  <data name="UserColumnsEdit" xml:space="preserve">
-    <value>User Spalten bearbeiten</value>
+  <data name="FilterBuilder_DeleteFilter" xml:space="preserve">
+    <value>Filter löschen</value>
   </data>
   <data name="Value" xml:space="preserve">
     <value>Wert</value>
@@ -249,8 +249,8 @@
   <data name="Signum_error" xml:space="preserve">
     <value>Fehler</value>
   </data>
-  <data name="Signum_Executing" xml:space="preserve">
-    <value>Wird ausgeführt...</value>
+  <data name="FilterBuilder_AddFilter" xml:space="preserve">
+    <value>Filter hinzufügen</value>
   </data>
   <data name="Signum_noElementsSelected" xml:space="preserve">
     <value>Keine Elemente ausgewählt</value>
@@ -258,8 +258,8 @@
   <data name="Signum_noResults" xml:space="preserve">
     <value>Keine Ergebnisse gefunden</value>
   </data>
-  <data name="Signum_Executed" xml:space="preserve">
-    <value>Ausgeführt</value>
+  <data name="FilterBuilder_AddColumn" xml:space="preserve">
+    <value>Spalte hinzufügen</value>
   </data>
   <data name="Signum_popupErrors" xml:space="preserve">
     <value>Es sind Fehler in der Entität, möchten Sie fortfahren?</value>
@@ -294,7 +294,40 @@
   <data name="New_n" xml:space="preserve">
     <value>Neues</value>
   </data>
-  <data name="String1" xml:space="preserve">
-    <value />
+  <data name="SearchControl_ShowNRows_Rows" xml:space="preserve">
+    <value>Zeilen</value>
+  </data>
+  <data name="SearchControl_ShowNRows_Show" xml:space="preserve">
+    <value>Anzeigen</value>
+  </data>
+  <data name="Signum_addFilter" xml:space="preserve">
+    <value>Filter hinzufügen</value>
+  </data>
+  <data name="Signum_editColumnName" xml:space="preserve">
+    <value>Spaltennamen bearbeiten</value>
+  </data>
+  <data name="Signum_enterTheNewColumnName" xml:space="preserve">
+    <value>Geben Sie den neuen Spaltennamen ein</value>
+  </data>
+  <data name="Signum_executed" xml:space="preserve">
+    <value>Ausgeführt</value>
+  </data>
+  <data name="Signum_executing" xml:space="preserve">
+    <value>Wird ausgeführt...</value>
+  </data>
+  <data name="Signum_hideFilters" xml:space="preserve">
+    <value>Filter ausblenden</value>
+  </data>
+  <data name="Signum_removeColumn" xml:space="preserve">
+    <value>Spalte löschen</value>
+  </data>
+  <data name="Signum_reorderColumn_MoveLeft" xml:space="preserve">
+    <value>Nach links bewegen</value>
+  </data>
+  <data name="Signum_reorderColumn_MoveRight" xml:space="preserve">
+    <value>Nach rechts bewegen</value>
+  </data>
+  <data name="Signum_showFilters" xml:space="preserve">
+    <value>Filter anzeigen</value>
   </data>
 </root>

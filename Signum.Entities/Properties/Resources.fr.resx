@@ -408,4 +408,7 @@
   <data name="TypeDN_TableName" xml:space="preserve">
     <value>Table Name</value>
   </data>
+  <data name="AttemptToModifyLockedEntity0" xml:space="preserve">
+    <value>Essais de modifier l'entité verrouillée {0}</value>
+  </data>
 </root>

@@ -57,6 +57,7 @@ namespace Signum.Engine.Linq
             this.projector = projectorExpression.Compile();
             this.retriever = retriever;
             this.lookups = lookups;
+            this.Row = -1; 
         }
 
         public T Current
@@ -73,6 +74,7 @@ namespace Signum.Engine.Linq
         {
             if (dataReader.Read())
             {
+                this.Row++;
                 this.current = this.projector(this);
                 return true;
             }
@@ -85,7 +87,6 @@ namespace Signum.Engine.Linq
 
         public void Dispose()
         {
-            dataReader.Dispose();
         }
 
         public Retriever Retriever
@@ -145,6 +146,8 @@ namespace Signum.Engine.Linq
             else
                 return lookup[key];
         }
+
+        public int Row;
     }
 
     internal class ExpressionCompilableAsserter : SimpleExpressionVisitor
