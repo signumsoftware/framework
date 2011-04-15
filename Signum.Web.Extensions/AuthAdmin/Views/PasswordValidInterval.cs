@@ -69,7 +69,7 @@ namespace ASP
 
 
 
- using (var e = Html.TypeContext<PasswordValidIntervalDN>())
+ using (var e = Html.TypeContext<PasswordExpiresIntervalDN>())
 {
     
 Write(Html.ValueLine(e, f => f.Enabled));

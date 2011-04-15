@@ -61,7 +61,7 @@ namespace Signum.Test.Extensions
             sb.Settings.OverrideFieldAttributes((UserQueryDN uq) => uq.Related, new ImplementedByAttribute(typeof(UserDN), typeof(RoleDN)));
             sb.Settings.OverrideFieldAttributes((UserChartDN uq) => uq.Related, new ImplementedByAttribute(typeof(UserDN), typeof(RoleDN)));
 
-            AuthLogic.Start(sb, dqm, "System", "Anonymous",false);
+            AuthLogic.Start(sb, dqm, "System", "Anonymous");
             UserTicketLogic.Start(sb, dqm);
             OperationLogic.Start(sb, dqm);
 

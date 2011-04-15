@@ -249,7 +249,7 @@ namespace Signum.Web.Auth
                         throw new ApplicationException(Resources.ThereSNotARegisteredUserWithThatEmailAddress);
 
                     //since this is an url sent by email, it should contain the domain name
-                    AuthLogic.ResetPasswordRequest(user, rpr => 
+                    ResetPasswordRequestLogic.ResetPasswordRequest(user, rpr => 
                         Request.Url.Scheme + System.Uri.SchemeDelimiter + Request.Url.Host + (Request.Url.Port != 80 ? (":" + Request.Url.Port ) : "") + RouteHelper.New().Action("ResetPasswordCode", "Auth", new { email = rpr.User.Email, code = rpr.Code }));
                 }
 
@@ -383,17 +383,17 @@ namespace Signum.Web.Auth
             // Basic parameter validation
             if (!username.HasText())
                 return LoginErrorAjaxOrForm("username", Resources.UserNameMustHaveAValue);
-            
+
             if (string.IsNullOrEmpty(password))
                 return LoginErrorAjaxOrForm("password", Resources.PasswordMustHaveAValue);
-            
+
             // Attempt to login
             UserDN user = null;
             try
             {
                 user = AuthLogic.Login(username, Security.EncodePassword(password));
             }
-            catch (ExpiredPasswordApplicationException)
+            catch (PasswordExpiredException)
             {
                 TempData["message"] = Resources.ExpiredPasswordMessage;
                 TempData["username"] = username;
@@ -426,7 +426,7 @@ namespace Signum.Web.Auth
             {
                 var result = OnUserPreLogin(this, user);
                 if (result != null)
-                    return result; 
+                    return result;
             }
 
             Thread.CurrentPrincipal = user;
@@ -447,10 +447,10 @@ namespace Signum.Web.Auth
 
             AddUserSession(user.UserName, user);
 
-    		TempData["Message"] = AuthLogic.OnPasswordNearExpiredLogic();
+            TempData["Message"] = AuthLogic.OnLoginMessage();
 
-    
-                return LoginRedirectAjaxOrForm(OnUserLoggedDefaultRedirect(this));
+
+            return LoginRedirectAjaxOrForm(OnUserLoggedDefaultRedirect(this));
 
         }
 
