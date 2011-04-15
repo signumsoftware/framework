@@ -1089,17 +1089,17 @@
   <data name="EndDateMustBeHigherThanStartDate" xml:space="preserve">
     <value>La fecha de finalización debe ser mayor que la fecha de inicio</value>
   </data>
-  <data name="PasswordExpiresIntervalDN_Enabled" xml:space="preserve">
-    <value>Habilitado</value>
+  <data name="PasswordValidIntervalDN" xml:space="preserve">
+    <value>Intervalo válido de contraseña</value>
   </data>
-  <data name="PasswordExpiresIntervalDN_DaysWarning" xml:space="preserve">
-    <value>Días de alerta</value>
-  </data>
-  <data name="PasswordExpiresIntervalDN_Days" xml:space="preserve">
+  <data name="PasswordValidIntervalDN_Days" xml:space="preserve">
     <value>Días</value>
   </data>
-  <data name="PasswordExpiresIntervalDN" xml:space="preserve">
-    <value>Intervalo caducidad contraseña</value>
+  <data name="PasswordValidIntervalDN_DaysWarning" xml:space="preserve">
+    <value>Días de alerta</value>
+  </data>
+  <data name="PasswordValidIntervalDN_Enabled" xml:space="preserve">
+    <value>Habilitado</value>
   </data>
   <data name="SendState_Delivered" xml:space="preserve">
     <value>Entregado</value>
@@ -1191,11 +1191,11 @@
   <data name="SMSTemplateOperations_Modify" xml:space="preserve">
     <value>Modificar</value>
   </data>
-  <data name="SMSTemplateDN_Active" xml:space="preserve">
-    <value>Activo</value>
+  <data name="SMSTemplateState_Disabled" xml:space="preserve">
+    <value>Deshabilitado</value>
   </data>
-  <data name="SMSMessageDN_MessageID" xml:space="preserve">
-    <value>ID de mensaje</value>
+  <data name="SMSTemplateState_Enabled" xml:space="preserve">
+    <value>Habilitado</value>
   </data>
   <data name="SMTPConfigurationDN" xml:space="preserve">
     <value>Configuración SMTP</value>
@@ -1256,11 +1256,5 @@
   </data>
   <data name="UserState_New" xml:space="preserve">
     <value>Nuevo</value>
-  </data>
-  <data name="SMSTemplateState_Created" xml:space="preserve">
-    <value>Creado</value>
-  </data>
-  <data name="SMSTemplateState_Modified" xml:space="preserve">
-    <value>Modificado</value>
   </data>
 </root>

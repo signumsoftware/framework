@@ -319,19 +319,4 @@
   <data name="Any" xml:space="preserve">
     <value>qualsiasi</value>
   </data>
-  <data name="ExpiredPassword" xml:space="preserve">
-    <value>Password scaduta</value>
-  </data>
-  <data name="NotAuthorizedTo0The1WithId2" xml:space="preserve">
-    <value>Non autorizzato a {0} entità {1} con Id {2}</value>
-  </data>
-  <data name="PasswordNearExpired" xml:space="preserve">
-    <value>La password sta per scadere</value>
-  </data>
-  <data name="SMSSendActionWasNotEstablished" xml:space="preserve">
-    <value>SMSSendAction non è stata stabilita</value>
-  </data>
-  <data name="ThePasswordMustHaveBetween7And15CharactersEachOfThemBeingANumber09OrALetter" xml:space="preserve">
-    <value>La password deve essere compresa tra 7 e 15 caratteri, ognuno dei quali è un numero da 0 a 9 o una lettera</value>
-  </data>
 </root>

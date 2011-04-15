@@ -5,8 +5,10 @@ using System.Text;
 
 namespace Signum.Entities.Authorization
 {
+
+    // TODO: esta entidad debiera ser unica, tal vez estar en negocio
     [Serializable]
-    public class PasswordExpiresIntervalDN : Entity
+    public class PasswordValidIntervalDN : Entity
     {
         decimal days;
         public decimal Days
@@ -28,16 +30,17 @@ namespace Signum.Entities.Authorization
             get { return enabled; }
             set { Set(ref enabled, value, () => Enabled); }
         }
+
     }
 
 
     [Serializable]
-    public class PasswordExpiredException : ApplicationException
+    public class ExpiredPasswordApplicationException : ApplicationException
     {
-        public PasswordExpiredException() { }
-        public PasswordExpiredException(string message) : base(message) { }
-        public PasswordExpiredException(string message, Exception inner) : base(message, inner) { }
-        protected PasswordExpiredException(
+        public ExpiredPasswordApplicationException() { }
+        public ExpiredPasswordApplicationException(string message) : base(message) { }
+        public ExpiredPasswordApplicationException(string message, Exception inner) : base(message, inner) { }
+        protected ExpiredPasswordApplicationException(
           System.Runtime.Serialization.SerializationInfo info,
           System.Runtime.Serialization.StreamingContext context)
             : base(info, context) { }

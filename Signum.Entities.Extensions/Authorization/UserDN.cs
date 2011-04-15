@@ -26,7 +26,8 @@ namespace Signum.Entities.Authorization
         }
 
 
-        public static Func<string, string> ValidatePassword = p =>
+        public static Func<string, string> ValidatePassword;
+        public static Func<string, string> ValidatePasswordDefauld = p =>
         {
             if (Regex.Match(p, @"^[0-9a-zA-Z]{7,15}$").Success)
                 return null;

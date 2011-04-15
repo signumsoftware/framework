@@ -20,8 +20,6 @@ namespace Signum.Engine.Basics
             {
                 sb.Include<PropertyDN>();
 
-                sb.AddUniqueIndex<PropertyDN>(p => new { p.Path, p.Type }); 
-
                 sb.Schema.Synchronizing += SyncronizeProperties;
             }
         }
