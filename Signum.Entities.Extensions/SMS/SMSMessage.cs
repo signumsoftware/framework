@@ -89,14 +89,5 @@ namespace Signum.Entities.SMS
             get { return destinationNumber; }
             set { Set(ref destinationNumber, value, () => DestinationNumber); }
         }
-
-        [SqlDbType(Size = 100)]
-        string messageID;
-        [StringLengthValidator(AllowNulls = true, Max = 100)]
-        public string MessageID
-        {
-            get { return messageID; }
-            set { Set(ref messageID, value, () => MessageID); }
-        }
     }
 }

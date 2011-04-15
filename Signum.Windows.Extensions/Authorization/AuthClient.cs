@@ -41,12 +41,14 @@ namespace Signum.Windows.Authorization
                 if (facadeMethods) FacadeMethodAuthClient.Start();
                 if (entityGroups) EntityGroupAuthClient.Start();
                 if(operations)OperationAuthClient.Start();
+                if (defaultPasswordExpiresLogic) UserDN.ValidatePassword = UserDN.ValidatePasswordDefauld;
+
 
                 UpdateCache();
 
                 Navigator.AddSetting(new EntitySettings<UserDN>(EntityType.Admin) { View = e => new User() });
                 Navigator.AddSetting(new EntitySettings<RoleDN>(EntityType.Default) { View = e => new Role() });
-                Navigator.AddSetting(new EntitySettings<PasswordExpiresIntervalDN>(EntityType.Admin) { View = e => new PasswordValidInterval() });
+                Navigator.AddSetting(new EntitySettings<PasswordValidIntervalDN>(EntityType.Admin) { View = e => new PasswordValidInterval() });
             }
         }
     }

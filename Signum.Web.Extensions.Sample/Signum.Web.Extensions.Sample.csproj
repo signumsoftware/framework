@@ -124,7 +124,7 @@
     <Content Include="Content\smoothness\jquery-ui-1.8.9.custom.css" />
     <Content Include="Global.asax" />
     <Content Include="Images\calendar.png" />
-    <Content Include="Scripts\jquery-1.5.2.min.js" />
+    <Content Include="Scripts\jquery-1.5.min.js" />
     <Content Include="Scripts\jquery-ui-1.8.9.custom.min.js" />
     <Content Include="Scripts\jquery-ui.js" />
     <Content Include="Scripts\jquery-ui.min.js" />

@@ -15,20 +15,21 @@ namespace Signum.Engine.SMS
 {
     public static class SMSLogic
     {
-        static Func<SMSMessageDN, string> SMSSendAction;
-        static Func<SMSTemplateDN, List<string>, List<string>> SMSMultipleSendAction;
+        private static Action<SMSMessageDN> SMSSendAction;
 
         public static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null, null)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null, null, null)));
         }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Action<SMSMessageDN> sendAction)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<SMSMessageDN>();
 
+                SMSSendAction = sendAction;
+                
                 dqm[typeof(SMSMessageDN)] = (from m in Database.Query<SMSMessageDN>()
                                              select new
                                              {
@@ -43,29 +44,24 @@ namespace Signum.Engine.SMS
                                              }).ToDynamic();
 
                 dqm[typeof(SMSTemplateDN)] = (from t in Database.Query<SMSTemplateDN>()
-                                              select new
-                                              {
-                                                  Entity = t.ToLite(),
-                                                  t.Id,
-                                                  t.Name,
-                                                  IsActive = t.IsActiveNow(),
-                                                  Message = t.Message.Etc(20),
-                                                  Source = t.From,
-                                                  t.State,
-                                                  t.StartDate,
-                                                  t.EndDate,
-                                              }).ToDynamic();
+                                                     select new 
+                                                     { 
+                                                        Entity = t.ToLite(),
+                                                        t.Id,
+                                                        t.Name,
+                                                        IsActive = t.IsActiveNow(),
+                                                        Message = t.Message.Etc(20),
+                                                        Source = t.From,
+                                                        t.State,
+                                                        t.StartDate,
+                                                        t.EndDate,
+                                                     }).ToDynamic();
             }
         }
 
-        public static void RegisterSMSSendAction(Func<SMSMessageDN, string> action)
+        public static void RegisterSMSSendAction(Action<SMSMessageDN> action)
         {
             SMSSendAction = action;
-        }
-
-        public static void RegisterSMSMultipleSendAction(Func<SMSTemplateDN, List<string>, List<string>> action)
-        {
-            SMSMultipleSendAction = action;
         }
 
         public static void SendSMS(SMSMessageDN message)
@@ -75,39 +71,12 @@ namespace Signum.Engine.SMS
             SendSMS(message, SMSSendAction);
         }
 
-        //Allows concurrent custom sendProviders for one application
-        public static void SendSMS(SMSMessageDN message, Func<SMSMessageDN, string> send) 
+        public static void SendSMS(SMSMessageDN message, Action<SMSMessageDN> send) //Allow various custom sendProviders
         {
-            message.MessageID = send(message);
-            message.SendDate = DateTime.Now;
+            send(message);
+            message.SendDate = DateTime.Now; 
             message.State = SMSMessageState.Sent;
             message.Save();
-        }
-
-        public static List<SMSMessageDN> CreateAndSendMultipleSMSMessages(SMSTemplateDN template, List<string> phones)
-        {
-            return CreateAndSendMultipleSMSMessages(template, phones, SMSMultipleSendAction);
-        }
-
-        //Allows concurrent custom sendProviders for one application
-        public static List<SMSMessageDN> CreateAndSendMultipleSMSMessages(SMSTemplateDN template,
-            List<string> phones, Func<SMSTemplateDN, List<string>, List<string>> send) 
-        {
-            var messages = new List<SMSMessageDN>();
-            var IDs = send(template, phones);
-            var sendDate = DateTime.Now;
-            for (int i = 0; i < phones.Count; i++)
-            {
-                var message = template.CreateSMSMessage();
-                message.SendDate = sendDate;
-                message.SendState = SendState.Sent;
-                message.DestinationNumber = phones[i];
-                message.MessageID = IDs[i];
-                message.Save();
-                messages.Add(message);
-            }
-
-            return messages;
         }
 
     }

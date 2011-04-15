@@ -97,17 +97,6 @@ namespace Signum.Entities.SMS
 
             return base.PropertyValidation(pi);
         }
-
-        public SMSMessageDN CreateSMSMessage()
-        {
-            return new SMSMessageDN 
-            { 
-                Template = this.ToLite(),
-                Message = this.message,
-                From = this.from,
-                State = SMSMessageState.Created,
-            };
-        }
     }
 
 

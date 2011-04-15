@@ -360,11 +360,11 @@
   <data name="RememberMe" xml:space="preserve">
     <value>Me rappeler</value>
   </data>
-  <data name="PasswordsAreDifferent" xml:space="preserve">
-    <value>Les mots de passe sont différents</value>
+  <data name="RememberPassword" xml:space="preserve">
+    <value>Rappeler mot de passe</value>
   </data>
-  <data name="ExpiredPasswordMessage" xml:space="preserve">
-    <value>Votre mot de passe a expiré. Vous devez le modifier</value>
+  <data name="RememberPasswordExplanation" xml:space="preserve">
+    <value>Entrez votre nom d'utilisateur et adresse email pour recevoir un message avec le mot de passe</value>
   </data>
   <data name="ResetPassword" xml:space="preserve">
     <value>Réinitialiser le mot de passe</value>
@@ -387,8 +387,8 @@
   <data name="TheConfirmationCodeThatYouHaveJustSentIsInvalid" xml:space="preserve">
     <value>Le code de confirmation fourni n'est pas valide</value>
   </data>
-  <data name="EnterTheNewPassword" xml:space="preserve">
-    <value>Entrez le nouveau mot de passe</value>
+  <data name="ThePasswordMustHaveBetween7And15CharactersEachOfThemBeingANumber09OrALetter" xml:space="preserve">
+    <value>Le mot de passe doit avoir entre 7 et 15 caractères, chacun d'eux étant un nombre de 0 à 9 ou une lettre</value>
   </data>
   <data name="ThereAreATotalOf0Errors" xml:space="preserve">
     <value>Il y a un total de {0} erreurs</value>
