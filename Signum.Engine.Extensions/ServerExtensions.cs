@@ -106,7 +106,7 @@ namespace Signum.Services
         {
 
             return Return(MethodInfo.GetCurrentMethod(),
-             () => AuthLogic.OnPasswordNearExpiredLogic());
+             () => AuthLogic.OnLoginMessage());
             
         }
 

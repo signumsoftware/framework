@@ -310,4 +310,28 @@
   <data name="TheExcelTemplateHasAColumn0NotPresentInTheFindWindow" xml:space="preserve">
     <value>Le modèle Excel possède une colonne {0} n'est pas présent dans le moteur de recherche</value>
   </data>
+  <data name="_0IsA1AndShowsTheProperty2" xml:space="preserve">
+    <value>{0} is a {1} and shows the property {2}</value>
+  </data>
+  <data name="_0IsACalculated1" xml:space="preserve">
+    <value>{0} is a calculated {1}</value>
+  </data>
+  <data name="Any" xml:space="preserve">
+    <value>toute</value>
+  </data>
+  <data name="ExpiredPassword" xml:space="preserve">
+    <value>Mot de passe a expiré</value>
+  </data>
+  <data name="NotAuthorizedTo0The1WithId2" xml:space="preserve">
+    <value>Pas autorisée à {0} du {1} avec l'Id {2}</value>
+  </data>
+  <data name="PasswordNearExpired" xml:space="preserve">
+    <value>Votre mot de passe est près d'expirer</value>
+  </data>
+  <data name="SMSSendActionWasNotEstablished" xml:space="preserve">
+    <value>SMSSendAction n'a pas établie</value>
+  </data>
+  <data name="ThePasswordMustHaveBetween7And15CharactersEachOfThemBeingANumber09OrALetter" xml:space="preserve">
+    <value>Le mot de passe doit avoir entre 7 et 15 caractères, chacun d'entre eux étant un numéro 0-9 ou une lettre</value>
+  </data>
 </root>
