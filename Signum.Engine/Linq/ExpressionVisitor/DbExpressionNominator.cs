@@ -127,7 +127,7 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitConstant(ConstantExpression c)
         {
-            if (!innerProjection && (IsFullNominate || isAggresive) && IsSimpleType(c.Type))
+            if (!innerProjection && (IsFullNominate || isAggresive) && (IsSimpleType(c.Type) || c.Type == typeof(object) && c.IsNull()))
                 candidates.Add(c);
             return c;
         }
@@ -315,76 +315,119 @@ namespace Signum.Engine.Linq
             return Expression.Negate(new SqlFunctionExpression(typeof(int), SqlFunction.DATEPART.ToString(), new Expression[] { new SqlEnumExpression(part), dateExpression }));
         }
 
+
         protected override Expression VisitBinary(BinaryExpression b)
-        {
-            var transformed = Transform(b);
-            if (transformed != null)
-                return Visit(transformed);
-
-            Expression left = this.Visit(b.Left);
-            Expression right = this.Visit(b.Right);
-            Expression conversion = this.Visit(b.Conversion);
-            if (left != b.Left || right != b.Right || conversion != b.Conversion)
-            {
-                if (b.NodeType == ExpressionType.Coalesce && b.Conversion != null)
-                    b = Expression.Coalesce(left, right, conversion as LambdaExpression);
-                else
-                    b = Expression.MakeBinary(b.NodeType, left, right, b.IsLiftedToNull, b.Method);
-            }
-
-            if (candidates.Contains(left) && candidates.Contains(right))
-            {
-                if (b.NodeType == ExpressionType.Add && IsFullNominate && (left.Type == typeof(string)) != (right.Type == typeof(string)))
-                {
-                    b = Expression.Add(
-                        left.Type == typeof(string) ? left : new SqlCastExpression(typeof(string), left),
-                        right.Type == typeof(string) ? right : new SqlCastExpression(typeof(string), right), miSimpleConcat);
-                }
-
-                candidates.Add(b);
-            }
-            return b;
-        }
-
-        static MethodInfo miSimpleConcat = ReflectionTools.GetMethodInfo(() => string.Concat("a", "b"));
-
-        private static Expression Transform(BinaryExpression b)
         {
             if (b.NodeType == ExpressionType.Equal || b.NodeType == ExpressionType.NotEqual)
             {
-                var newExp = SmartEqualizer.PolymorphicEqual(b.Left, b.Right);
+                var expression = SmartEqualizer.PolymorphicEqual(b.Left, b.Right);
 
-                BinaryExpression newBin = newExp as BinaryExpression;
-                if (newBin != null && newBin.Left == b.Left && newBin.Right == b.Right)
-                    return null;
-
-                if (b.NodeType == ExpressionType.NotEqual)
+                if (expression.NodeType == ExpressionType.Equal)
                 {
-                    if (newExp.NodeType == ExpressionType.Equal)
+                    BinaryExpression newB = expression as BinaryExpression;
+                    var left = Visit(newB.Left);
+                    var right = Visit(newB.Right);
+
+                    newB = Expression.MakeBinary(b.NodeType, left, right, b.IsLiftedToNull, b.Method);
+                    
+                    if (candidates.Contains(left) && candidates.Contains(right))
                     {
-                        BinaryExpression be = (BinaryExpression)newExp;
-                        return Expression.NotEqual(be.Left, be.Right);
+                        Expression result = ConvertToSql(newB);
+                        candidates.Add(result);
+
+                        return result;
                     }
-                    else if (newExp.NodeType == (ExpressionType)DbExpressionType.IsNull)
-                    {
-                        return new IsNotNullExpression(((IsNullExpression)newExp).Expression);
-                    }
-                    else if (newExp.NodeType == ExpressionType.Not)
-                    {
-                        return ((UnaryExpression)newExp).Operand;
-                    }
-                    else
-                    {
-                        return Expression.Not(newExp);
-                    }
+
+                    return newB;
                 }
                 else
                 {
-                    return newExp;
+                    var result = Visit(expression);
+
+                    if (b.NodeType == ExpressionType.NotEqual)
+                    {
+                        bool nominated = candidates.Contains(result);
+                        result = Expression.Not(result);
+                        if (nominated)
+                            candidates.Add(result);
+                        return result;
+                    }
+                    else
+                    {
+                        return Visit(expression);
+                    }
                 }
             }
-            return null;
+            else
+            {
+
+
+                Expression left = this.Visit(b.Left);
+                Expression right = this.Visit(b.Right);
+                Expression conversion = this.Visit(b.Conversion);
+                if (left != b.Left || right != b.Right || conversion != b.Conversion)
+                {
+                    if (b.NodeType == ExpressionType.Coalesce && b.Conversion != null)
+                        b = Expression.Coalesce(left, right, conversion as LambdaExpression);
+                    else
+                        b = Expression.MakeBinary(b.NodeType, left, right, b.IsLiftedToNull, b.Method);
+                }
+
+                if (candidates.Contains(left) && candidates.Contains(right))
+                {
+                    if (b.NodeType == ExpressionType.Add && IsFullNominate && (left.Type == typeof(string)) != (right.Type == typeof(string)))
+                    {
+                        b = Expression.Add(
+                            left.Type == typeof(string) ? left : new SqlCastExpression(typeof(string), left),
+                            right.Type == typeof(string) ? right : new SqlCastExpression(typeof(string), right), miSimpleConcat);
+                    }
+
+                    candidates.Add(b);
+                }
+                return b;
+            }
         }
+
+        private Expression ConvertToSql(BinaryExpression b)
+        {
+            if (b.NodeType == ExpressionType.Equal)
+            {
+                if (b.Left.IsNull())
+                {
+                    if (b.Right.IsNull())
+                        return SqlConstantExpression.True;
+                    else
+                        return new IsNullExpression(b.Right);
+                }
+                else
+                {
+                    if (b.Right.IsNull())
+                        return new IsNullExpression(b.Left);
+
+                    return b;
+                }
+            }
+            else if (b.NodeType == ExpressionType.NotEqual)
+            {
+                if (b.Left.IsNull())
+                {
+                    if (b.Right.IsNull())
+                        return SqlConstantExpression.False;
+                    else
+                        return new IsNotNullExpression(b.Right);
+                }
+                else
+                {
+                    if (b.Right.IsNull())
+                        return new IsNotNullExpression(b.Left);
+
+                    return b;
+                }
+            }
+            throw new InvalidOperationException(); 
+        }
+
+        static MethodInfo miSimpleConcat = ReflectionTools.GetMethodInfo(() => string.Concat("a", "b"));
 
 
         protected override Expression VisitConditional(ConditionalExpression c)

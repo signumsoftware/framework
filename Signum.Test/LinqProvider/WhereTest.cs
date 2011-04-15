@@ -193,6 +193,12 @@ namespace Signum.Test.LinqProvider
                         select a).ToArray();
         }
 
+        [TestMethod]
+        public void WherePolyExpressionMethod()
+        {
+            var list = Database.Query<AlbumDN>().Where(a => a.Author.Lonely()).ToArray();
+        }
+
 
         [TestMethod]
         public void WhereOptimize()

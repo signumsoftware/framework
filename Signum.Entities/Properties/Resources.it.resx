@@ -163,7 +163,7 @@
     <value>{0} non è impostato</value>
   </data>
   <data name="And" xml:space="preserve">
-    <value>e </value>
+    <value> e </value>
   </data>
   <data name="As0" xml:space="preserve">
     <value>Come {0}</value>
@@ -307,7 +307,7 @@
     <value>Nuovo</value>
   </data>
   <data name="Of" xml:space="preserve">
-    <value>di </value>
+    <value> di </value>
   </data>
   <data name="OrBeNull" xml:space="preserve">
     <value>o essere nullo</value>
@@ -407,5 +407,8 @@
   </data>
   <data name="CorruptEntity" xml:space="preserve">
     <value>Entità corruttibili</value>
+  </data>
+  <data name="AttemptToModifyLockedEntity0" xml:space="preserve">
+    <value>Si è tentato di modificare l'entità bloccata {0}</value>
   </data>
 </root>

@@ -26,27 +26,30 @@ namespace Signum.Web
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, entityRepeater));
-
-            sb.AddLine(helper.HiddenStaticInfo(entityRepeater));
-            sb.AddLine(helper.Hidden(entityRepeater.Compose(TypeContext.Ticks), EntityInfoHelper.GetTicks(helper, entityRepeater).TryToString() ?? ""));
-
-            //If it's an embeddedEntity write an empty template with index 0 to be used when creating a new item
-            if (entityRepeater.ElementType.IsEmbeddedEntity())
+            using (entityRepeater.ShowFieldDiv ? sb.Surround(new HtmlTag("div").Class("sf-field")) : null)
             {
-                TypeElementContext<T> templateTC = new TypeElementContext<T>((T)(object)Constructor.Construct(typeof(T)), (TypeContext)entityRepeater.Parent, 0);
-                sb.AddLine(EntityBaseHelper.EmbeddedTemplate(entityRepeater, EntityBaseHelper.RenderTypeContext(helper, templateTC, RenderMode.Content, entityRepeater)));
-            }
+                sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, entityRepeater));
 
-            sb.AddLine(ListBaseHelper.CreateButton(helper, entityRepeater, new Dictionary<string, object> { { "title", entityRepeater.AddElementLinkText } }));
-            sb.AddLine(ListBaseHelper.FindButton(helper, entityRepeater));
+                sb.AddLine(helper.HiddenStaticInfo(entityRepeater));
+                sb.AddLine(helper.Hidden(entityRepeater.Compose(TypeContext.Ticks), EntityInfoHelper.GetTicks(helper, entityRepeater).TryToString() ?? ""));
 
-            using (sb.Surround(new HtmlTag("div").IdName(entityRepeater.Compose(EntityRepeaterKeys.ItemsContainer))))
-            {
-                if (entityRepeater.UntypedValue != null)
+                //If it's an embeddedEntity write an empty template with index 0 to be used when creating a new item
+                if (entityRepeater.ElementType.IsEmbeddedEntity())
                 {
-                    foreach (var itemTC in TypeContextUtilities.TypeElementContext((TypeContext<MList<T>>)entityRepeater.Parent))
-                        sb.Add(InternalRepeaterElement(helper, itemTC, entityRepeater));
+                    TypeElementContext<T> templateTC = new TypeElementContext<T>((T)(object)Constructor.Construct(typeof(T)), (TypeContext)entityRepeater.Parent, 0);
+                    sb.AddLine(EntityBaseHelper.EmbeddedTemplate(entityRepeater, EntityBaseHelper.RenderTypeContext(helper, templateTC, RenderMode.Content, entityRepeater)));
+                }
+
+                sb.AddLine(ListBaseHelper.CreateButton(helper, entityRepeater, new Dictionary<string, object> { { "title", entityRepeater.AddElementLinkText } }));
+                sb.AddLine(ListBaseHelper.FindButton(helper, entityRepeater));
+
+                using (sb.Surround(new HtmlTag("div").IdName(entityRepeater.Compose(EntityRepeaterKeys.ItemsContainer))))
+                {
+                    if (entityRepeater.UntypedValue != null)
+                    {
+                        foreach (var itemTC in TypeContextUtilities.TypeElementContext((TypeContext<MList<T>>)entityRepeater.Parent))
+                            sb.Add(InternalRepeaterElement(helper, itemTC, entityRepeater));
+                    }
                 }
             }
 
