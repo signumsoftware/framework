@@ -30,7 +30,6 @@ namespace Signum.Web.PortableAreas
 
             response.AppendHeader("Vary", "Accept-Encoding");
             response.Cache.SetCacheability(HttpCacheability.Public);
-            //response.Cache.SetExpires(DateTime.Now.Add(CacheDuration));   //redundant
             response.Cache.SetMaxAge(CacheDuration);
 
             if (!VersionChanged(request, ScriptHtmlHelper.Manager.LastModified))
@@ -47,16 +46,11 @@ namespace Signum.Web.PortableAreas
             response.AppendHeader("Content-Length", bytes.Length.ToString());
             if (canGZip)
                 response.AppendHeader("Content-Encoding", "gzip");
-            //else if (IsText)
-            //{
-            //    response.ContentEncoding = Encoding.Unicode;
-            //}
 
             response.Cache.SetLastModified(ScriptHtmlHelper.Manager.LastModified);
 
             response.ContentType = ContentType;
             response.OutputStream.Write(bytes, 0, bytes.Length);
-            response.Flush();
         }
 
         private bool VersionChanged(HttpRequestBase request, DateTime contentModified)
