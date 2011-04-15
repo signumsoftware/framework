@@ -196,7 +196,7 @@ namespace Signum.Web
                                 EntityBaseHelper.JsEscape(template.ToHtmlString())));
         }
 
-        public static void ConfigureEntityBase(EntityBase eb, Type entityType)
+        internal static void ConfigureEntityBase(EntityBase eb, Type entityType)
         {
             Common.TaskSetImplementations(eb);
 

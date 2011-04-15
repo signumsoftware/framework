@@ -144,11 +144,11 @@
   <data name="CreateNote" xml:space="preserve">
     <value>Crea una nota</value>
   </data>
-  <data name="Signum_enterTheNewColumnName" xml:space="preserve">
-    <value>Immettere il nuovo nome della colonna</value>
+  <data name="DeleteFilters" xml:space="preserve">
+    <value>Eliminare filtri</value>
   </data>
-  <data name="Signum_editColumnName" xml:space="preserve">
-    <value>Modificare il nome della colonna</value>
+  <data name="EditColumnsFinishEdit" xml:space="preserve">
+    <value>Completare la modifica</value>
   </data>
   <data name="Excel" xml:space="preserve">
     <value>Excel</value>
@@ -159,14 +159,14 @@
   <data name="Field" xml:space="preserve">
     <value>Campo</value>
   </data>
-  <data name="Signum_addFilter" xml:space="preserve">
-    <value>Aggiungi filtro</value>
+  <data name="FilterByField" xml:space="preserve">
+    <value>Filtra per campo</value>
   </data>
   <data name="Future" xml:space="preserve">
     <value>Prossimo</value>
   </data>
-  <data name="SearchControl_ShowNRows_Show" xml:space="preserve">
-    <value>Visualizza</value>
+  <data name="HideFilters" xml:space="preserve">
+    <value>Nascondi filtri</value>
   </data>
   <data name="IncorrectEntityInSessionYouMustReloadThePageToContinue" xml:space="preserve">
     <value>I dati della sessione non sono corretti. Ricarica la pagina per continuare</value>
@@ -195,8 +195,8 @@
   <data name="Notes" xml:space="preserve">
     <value>Note</value>
   </data>
-  <data name="SearchControl_ShowNRows_Rows" xml:space="preserve">
-    <value>righe</value>
+  <data name="NumberOfRows" xml:space="preserve">
+    <value>Numero di righe</value>
   </data>
   <data name="Operation" xml:space="preserve">
     <value>Operazione</value>
@@ -213,14 +213,14 @@
   <data name="ShowCalendar" xml:space="preserve">
     <value>Mostra calendario</value>
   </data>
-  <data name="SearchControl_RowsFound" xml:space="preserve">
-    <value>righe trovate</value>
+  <data name="ShowFilters" xml:space="preserve">
+    <value>Mostra filtri</value>
   </data>
   <data name="Signum_error" xml:space="preserve">
     <value>Errore</value>
   </data>
-  <data name="FilterBuilder_DeleteFilter" xml:space="preserve">
-    <value>Elimina filtro</value>
+  <data name="Signum_Executing" xml:space="preserve">
+    <value>Esecuzione in corso...</value>
   </data>
   <data name="Signum_noElementsSelected" xml:space="preserve">
     <value>Nessun elemento selezionato</value>
@@ -228,8 +228,8 @@
   <data name="Signum_noResults" xml:space="preserve">
     <value>Nessun risultato trovato</value>
   </data>
-  <data name="FilterBuilder_AddFilter" xml:space="preserve">
-    <value>Aggiungi filtro</value>
+  <data name="Signum_Executed" xml:space="preserve">
+    <value>Eseguito</value>
   </data>
   <data name="Signum_popupErrors" xml:space="preserve">
     <value>Ci sono errori nell'entità, continuare?</value>
@@ -252,8 +252,8 @@
   <data name="Type0NotAllowed" xml:space="preserve">
     <value>Tipo {0} non consentito</value>
   </data>
-  <data name="FilterBuilder_AddColumn" xml:space="preserve">
-    <value>Aggiungi colonna</value>
+  <data name="UserColumnsEdit" xml:space="preserve">
+    <value>Modificare le colonne utente</value>
   </data>
   <data name="Value" xml:space="preserve">
     <value>Valore</value>
@@ -305,26 +305,5 @@
   </data>
   <data name="Search_Create" xml:space="preserve">
     <value>Creare</value>
-  </data>
-  <data name="Signum_executed" xml:space="preserve">
-    <value>Eseguito</value>
-  </data>
-  <data name="Signum_executing" xml:space="preserve">
-    <value>In esecuzione...</value>
-  </data>
-  <data name="Signum_hideFilters" xml:space="preserve">
-    <value>Nascondi filtri</value>
-  </data>
-  <data name="Signum_removeColumn" xml:space="preserve">
-    <value>Eliminare colonna</value>
-  </data>
-  <data name="Signum_reorderColumn_MoveLeft" xml:space="preserve">
-    <value>Spostare a sinistra</value>
-  </data>
-  <data name="Signum_reorderColumn_MoveRight" xml:space="preserve">
-    <value>Spostare a destra</value>
-  </data>
-  <data name="Signum_showFilters" xml:space="preserve">
-    <value>Mostra filtri</value>
   </data>
 </root>

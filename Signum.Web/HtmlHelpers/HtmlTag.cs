@@ -10,7 +10,7 @@ using System.Collections;
 
 namespace Signum.Web
 {
-    public class HtmlTag : IHtmlString
+    public class HtmlTag
     {
         TagBuilder tagBuilder;
         public TagBuilder TagBuilder
@@ -142,11 +142,6 @@ namespace Signum.Web
         public static implicit operator MvcHtmlString(HtmlTag tag)
         {
             return tag.ToHtml(TagRenderMode.Normal);
-        }
-
-        public string ToHtmlString()
-        {
-            return tagBuilder.ToString(TagRenderMode.Normal);
         }
     }
 

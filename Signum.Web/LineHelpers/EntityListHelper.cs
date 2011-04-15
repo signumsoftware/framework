@@ -64,7 +64,7 @@ namespace Signum.Web
             return sb.ToHtml();
         }
 
-        static MvcHtmlString InternalListElement<T>(this HtmlHelper helper, HtmlStringBuilder sbOptions, TypeElementContext<T> itemTC, EntityList entityList)
+        private static MvcHtmlString InternalListElement<T>(this HtmlHelper helper, HtmlStringBuilder sbOptions, TypeElementContext<T> itemTC, EntityList entityList)
         {
             HtmlStringBuilder sb = new HtmlStringBuilder();
 

@@ -11,7 +11,6 @@ using Signum.Utilities.ExpressionTrees;
 using System.Text.RegularExpressions;
 using Signum.Engine.Exceptions;
 using Signum.Engine.DynamicQuery;
-using System.Data.SqlTypes;
 
 namespace Signum.Engine
 {
@@ -199,22 +198,10 @@ namespace Signum.Engine
                 {
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
-                        FieldReader fr = new FieldReader(reader);
-                        int row = -1;
-                        try
+                        var fr = new FieldReader(reader);
+                        while (reader.Read())
                         {
-                            while (reader.Read())
-                            {
-                                row++;
-                                forEach(fr);
-                            }
-                        }
-                        catch (SqlTypeException ex)
-                        {
-                            FieldReaderException fieldEx = fr.CreateFieldReaderException(ex);
-                            fieldEx.Command = command;
-                            fieldEx.Row = row;
-                            throw fieldEx;
+                            forEach(fr);
                         }
                     }
                 }
@@ -225,7 +212,6 @@ namespace Signum.Engine
                         throw;
                     throw nex;
                 }
-               
             }
         }
 

@@ -538,7 +538,7 @@ namespace Signum.Engine.Linq
             if (value == null)
                 throw new ArgumentNullException("value");
 
-            if (condition.Type.UnNullify() != typeof(bool))
+            if (condition.Type != typeof(bool))
                 throw new ArgumentException("condition");
 
             this.Condition = condition;
@@ -559,7 +559,7 @@ namespace Signum.Engine.Linq
         public CaseExpression(IEnumerable<When> whens, Expression defaultValue)
             :base(DbExpressionType.Case, defaultValue.Type)
         {
-            if (whens.Any(w => w.Value.Type.UnNullify() != defaultValue.Type.UnNullify()))
+            if (whens.Any(w => w.Value.Type != defaultValue.Type))
                 throw new ArgumentException("whens");
 
             this.Whens = whens.ToReadOnly();

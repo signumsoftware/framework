@@ -109,14 +109,14 @@ namespace Signum.Test
         }
 
         static Expression<Func<ArtistDN, string>> FullNameExpression =
-             a => a.Name + (a.Dead ? " Dead" : "") + (a.IsMale ? " Male" : " Female");
+             a => a.Shy(a.Name + (a.Dead ? " Dead" : "") + (a.IsMale ? " Male" : " Female"));
         public string FullName
         {
             get{ return FullNameExpression.Invoke(this); }
         }
 
         static Expression<Func<ArtistDN, bool>> LonelyExpression =
-            a => !a.Friends.Any();
+            a => a.Shy(!a.Friends.Any());
         public bool Lonely()
         {
             return LonelyExpression.Invoke(this);
@@ -175,14 +175,14 @@ namespace Signum.Test
         }
 
         static Expression<Func<BandDN, string>> FullNameExpression =
-            b => b.Name + " (" + b.Members.Count + " members )";
+            b => b.Shy(b.Name + " (" + b.Members.Count + " members )");
         public string FullName
         {
             get { return FullNameExpression.Invoke(this); }
         }
 
         static Expression<Func<BandDN, bool>> LonelyExpression =
-            b => !b.Members.Any();
+            b => b.Shy(!b.Members.Any());
         public bool Lonely()
         {
             return LonelyExpression.Invoke(this);

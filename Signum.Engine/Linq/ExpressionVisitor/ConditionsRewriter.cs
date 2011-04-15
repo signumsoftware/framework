@@ -32,7 +32,7 @@ namespace Signum.Engine.Linq
 
         public static bool IsBooleanExpression(Expression expr)
         {
-            return expr.Type.UnNullify() == typeof(bool);
+            return expr.Type == typeof(bool);
         }
 
         public static bool IsSqlCondition(Expression expression)

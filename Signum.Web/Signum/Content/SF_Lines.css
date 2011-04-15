@@ -17,7 +17,7 @@
 
 .sf-field
 {
-	min-width:350px;
+	min-width:350px;	/* a ver */
 }
 
 .sf-field:after, .sf-field-list:after{
@@ -132,12 +132,13 @@ a.sf-value-line, span.sf-value-line{
 
 .sf-repeater-element
 {
-	margin-left:105px;
+	margin-left:160px;
 	padding: 5px;
 	display:block;
+	border-color:#dfdfdf #eee #fff #eee;
+	border-width:1px;
+	border-style:solid;
 	clear:both;
-	float:left;
-	width: 100%;
 }
 .sf-repeater-element:last-child
 {
