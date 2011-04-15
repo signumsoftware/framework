@@ -485,7 +485,7 @@ namespace Signum.Engine.Authorization
 
             var sureNotallowed = pairs.Where(p => (p.EntityGroup.IsApplicable == null || p.EntityGroup.IsApplicable.Resume == true) && !p.AllowedIn && !p.AllowedOut);
             if (sureNotallowed.Any())
-                return Expression.New(ciDebugData, liteEntity, Expression.Constant(sureNotallowed.Select(p => new GroupDebugData(p, false, null))));
+                return Expression.New(ciDebugData, liteEntity, Expression.Constant(sureNotallowed.Select(p => new GroupDebugData(p, false, false))));
 
             Expression list = Expression.ListInit(Expression.New(typeof(List<GroupDebugData>)), pairs.Select(p =>
             {
@@ -538,11 +538,12 @@ namespace Signum.Engine.Authorization
                 this.InGroup = inGroup;
             }
 
-            internal GroupDebugData(EntityGroupTuple tuple, bool isApplicable, bool? inGroup)
+            internal GroupDebugData(EntityGroupTuple tuple, bool isApplicable, bool inGroup)
             {
                 this.tuple = tuple;
                 this.IsApplicable = isApplicable;
-                this.InGroup = inGroup;
+                if (isApplicable)
+                    this.InGroup = inGroup;
             }
 
             public Enum Key { get { return tuple.Key; } }
