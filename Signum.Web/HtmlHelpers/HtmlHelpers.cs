@@ -14,7 +14,6 @@ using Signum.Utilities.Reflection;
 using Signum.Entities.Reflection;
 using System.Web.Script.Serialization;
 using System.Web.WebPages;
-using Signum.Engine;
 
 namespace Signum.Web
 {
@@ -258,16 +257,12 @@ namespace Signum.Web
             return new UrlHelper(html.ViewContext.RequestContext);
         }
 
-        public static HtmlString FormatHtml(this HtmlHelper html, string text, params object[] values)
+        public static MvcHtmlString FormatHtml(this HtmlHelper html, string text, params object[] values)
         {
-            return text.FormatHtml(values);
-        }
-
-        public static MvcHtmlString FormatHtml(this string text, params object[] values)
-        {
-            return new MvcHtmlString(string.Format(HttpUtility.HtmlEncode(text), values.Select(a =>
-                 a is IHtmlString ? ((IHtmlString)a).ToHtmlString() :
-                 HttpUtility.HtmlEncode(a)).ToArray()));
+            return new MvcHtmlString(string.Format(HttpUtility.HtmlEncode(text), values.Select(a => 
+                a is IHtmlString ? ((IHtmlString)a).ToHtmlString() : 
+                a is HtmlTag ? ((HtmlTag)a).ToHtml().ToHtmlString() :
+                HttpUtility.HtmlEncode(a)).ToArray()));
         }
 
         public static MvcHtmlString Json(this HtmlHelper html, object value)

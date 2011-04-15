@@ -408,7 +408,4 @@
   <data name="AlertDN_AlertDate" xml:space="preserve">
     <value>Alert Date</value>
   </data>
-  <data name="AttemptToModifyLockedEntity0" xml:space="preserve">
-    <value>Es wurde versucht, die gesperrte Entität {0} zu ändern</value>
-  </data>
 </root>

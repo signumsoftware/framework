@@ -8,7 +8,6 @@ using System.Data;
 using Signum.Utilities;
 using System.Collections;
 using Signum.Engine.DynamicQuery;
-using System.Data.SqlTypes;
 
 namespace Signum.Engine.Linq
 {
@@ -52,20 +51,7 @@ namespace Signum.Engine.Linq
 
                 IEnumerable<KeyValuePair<K, V>> enumerabe = new ProjectionRowEnumerable<KeyValuePair<K, V>>(enumerator);
 
-                try
-                {
-                    var lookUp = enumerabe.ToLookup(a => a.Key, a => a.Value);
-
-                    lookups.Add(Name, lookUp);
-                }
-                catch (SqlTypeException ex)
-                {
-                    FieldReaderException fieldEx = enumerator.Reader.CreateFieldReaderException(ex);
-                    fieldEx.Command = command;
-                    fieldEx.Row = enumerator.Row;
-                    fieldEx.Projector = ProjectorExpression;
-                    throw fieldEx;
-                }
+                lookups.Add(Name, enumerabe.ToLookup(a => a.Key, a => a.Value));
             }
         }
 
@@ -107,28 +93,16 @@ namespace Signum.Engine.Linq
 
                 object result;
                 using (HeavyProfiler.Log("SQL", command.Sql))
-                using (SqlDataReader reader = Executor.UnsafeExecuteDataReader(command))
+                using (SqlDataReader reader = Executor.UnsafeExecuteDataReader(command))                
                 {
                     ProjectionRowEnumerator<T> enumerator = new ProjectionRowEnumerator<T>(reader, ProjectorExpression, retriever, lookups);
 
                     IEnumerable<T> enumerable = new ProjectionRowEnumerable<T>(enumerator);
 
-                    try
-                    {
-
-                        if (Unique == null)
-                            result = enumerable.ToList();
-                        else
-                            result = UniqueMethod(enumerable, Unique.Value);
-                    }
-                    catch (SqlTypeException ex)
-                    {
-                        FieldReaderException fieldEx = enumerator.Reader.CreateFieldReaderException(ex);
-                        fieldEx.Command = command;
-                        fieldEx.Row = enumerator.Row;
-                        fieldEx.Projector = ProjectorExpression;
-                        throw fieldEx;
-                    }
+                    if (Unique == null)
+                        result = enumerable.ToList();
+                    else
+                        result = UniqueMethod(enumerable, Unique.Value);
                 }
 
                 retriever.ProcessAll();
@@ -141,7 +115,7 @@ namespace Signum.Engine.Linq
         {
             switch (uniqueFunction)
             {
-                case UniqueFunction.First:  return enumerable.First();
+                case UniqueFunction.First: return enumerable.First();
                 case UniqueFunction.FirstOrDefault: return enumerable.FirstOrDefault();
                 case UniqueFunction.Single: return enumerable.Single();
                 case UniqueFunction.SingleOrDefault: return enumerable.SingleOrDefault();
