@@ -13,7 +13,7 @@ namespace Signum.Windows
 
         public static IAsyncResult Do(Window win, Action otherThread, Action endAction, Action finallyAction)
         {          
-            Action async = () =>
+            Action action = () =>
             {
                 try
                 {
@@ -30,7 +30,7 @@ namespace Signum.Windows
                 }
             };
 
-            return async.BeginInvoke(null, null);
+            return action.BeginInvoke(null, null);
         }
 
         public static void Invoke(this Dispatcher dispatcher, Action action)
