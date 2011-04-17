@@ -58,7 +58,7 @@ namespace Signum.Engine.Processes
 
                 OperationLogic.AssertStarted(sb);
                 AuthLogic.AssertStarted(sb);
-                new ProcessExecutionGraph().Register();
+                ProcessExecutionGraph.Register();
 
                 OperationLogic.Register(new BasicExecute<ProcessDN>(TaskOperation.ExecutePrivate)
                 {
@@ -303,7 +303,7 @@ namespace Signum.Engine.Processes
 
         public class ProcessExecutionGraph : Graph<ProcessExecutionDN, ProcessState>
         {
-            private ProcessExecutionDN Create(ProcessDN process, Enum processKey, params object[] args)
+            static ProcessExecutionDN Create(ProcessDN process, Enum processKey, params object[] args)
             {
                 IProcessDataDN data;
                 if (args != null && args.Length != 0 && args[0] is IProcessDataDN)
@@ -324,15 +324,15 @@ namespace Signum.Engine.Processes
                 }.Save();
             }
 
-            public ProcessExecutionGraph()
+            static ProcessExecutionGraph()
             {
-                this.GetState = e => e.State;
-                this.Operations = new List<IGraphOperation>()
+                GetState = e => e.State;
+                Operations = new List<IGraphOperation>()
                 {   
 
                     new Construct(ProcessOperation.Create , ProcessState.Created)
                     {                     
-                        Constructor = args=>
+                        Construct = args=>
                         {
                             Enum processKey = args.GetArg<Enum>(0); 
                             return Create(EnumLogic<ProcessDN>.ToEntity(processKey), processKey, args.Skip(1).ToArray());

@@ -9,14 +9,14 @@ namespace Signum.Engine.SMS
 {
     public class SMSTemplateGraph : Graph<SMSTemplateDN, SMSTemplateState>
     {
-        public SMSTemplateGraph()
+        static SMSTemplateGraph()
         {
-            this.GetState = t => t.State;
-            this.Operations = new List<IGraphOperation> 
+            GetState = t => t.State;
+            Operations = new List<IGraphOperation> 
             { 
                 new Construct(SMSTemplateOperations.Create, SMSTemplateState.Created)
                 {
-                    Constructor = _ => new SMSTemplateDN{State = SMSTemplateState.Created},
+                    Construct = _ => new SMSTemplateDN{State = SMSTemplateState.Created},
                 },
 
                 new Goto(SMSTemplateOperations.Modify, SMSTemplateState.Modified)

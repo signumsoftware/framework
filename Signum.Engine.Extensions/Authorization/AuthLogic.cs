@@ -111,7 +111,7 @@ namespace Signum.Engine.Authorization
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                new UserGraph().Register();
+                UserGraph.Register();
                 OperationLogic.Register(new BasicExecute<UserDN>(UserOperation.SetPassword)
                 {
                     Lite = true,

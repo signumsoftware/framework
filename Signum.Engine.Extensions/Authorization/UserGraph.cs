@@ -14,14 +14,14 @@ namespace Signum.Engine.Authorization
 {
     public class UserGraph : Graph<UserDN, UserState>
     {
-        public UserGraph()
+        static UserGraph()
         {
-            this.GetState = u => u.State;
-            this.Operations = new List<IGraphOperation>
+            GetState = u => u.State;
+            Operations = new List<IGraphOperation>
             {
                 new Construct(UserOperation.Create, UserState.New)
                 {
-                    Constructor = args =>new UserDN {State = UserState.New}
+                    Construct = args =>new UserDN {State = UserState.New}
                 },
 
                 new Goto(UserOperation.SaveNew, UserState.Created)

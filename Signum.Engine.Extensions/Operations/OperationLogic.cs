@@ -153,7 +153,7 @@ namespace Signum.Engine.Operations
         public static List<OperationInfo> ServiceGetConstructorOperationInfos(Type entityType)
         {
             return (from o in TypeOperations(entityType)
-                    where o is IConstructorOperation && OperationAllowed(o.Key)
+                    where o is IConstructOperation && OperationAllowed(o.Key)
                     select ToOperationInfo(o, null)).ToList();
         }
 
@@ -326,7 +326,7 @@ namespace Signum.Engine.Operations
                 throw new InvalidOperationException("Operation {0} is a {1} not a {2} use {3} instead".Formato(operationKey, result.GetType().TypeName(), typeof(T).TypeName(),
                     result is IExecuteOperation ? "Execute" :
                     result is IDeleteOperation ? "Delete" :
-                    result is IConstructorOperation ? "Construct" :
+                    result is IConstructOperation ? "Construct" :
                     result is IConstructorFromOperation ? "ConstructFrom" :
                     result is IConstructorFromManyOperation ? "ConstructFromMany" : null));
 
