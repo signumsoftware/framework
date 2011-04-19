@@ -185,25 +185,10 @@ namespace Signum.Engine.Operations
         public static Action<E, S> EnterState { get; set; }
         public static Action<E, S> ExitState { get; set; }
 
-        public static List<IGraphOperation> Operations { get; set; }
         public static Dictionary<S, StateOptions> States { get; set; }
 
-        public static void Register()
+        public static DirectedEdgedGraph<string, string> ToDirectedGraph()
         {
-            var errors = Operations.GroupCount(a => a.Key).Where(kvp => kvp.Value > 1).ToList();
-
-            if (errors.Count != 0)
-                throw new InvalidOperationException("The following keys have been repeated in {0}: {1}".Formato(typeof(Graph<E, S>).NicePluralName(), errors.ToString(a => " - {0} ({1})".Formato(a.Key, a.Value), "\r\n")));
-
-            foreach (var operation in Operations)
-	        {   
-                OperationLogic.Register(operation);
-	        }
-        }
-
-        public DirectedEdgedGraph<string, string> ToDirectedGraph()
-        {
-
             DirectedEdgedGraph<string, string> result = new DirectedEdgedGraph<string, string>();
 
             Action<string, string, Enum> Add = (from, to, key) =>
@@ -215,7 +200,7 @@ namespace Signum.Engine.Operations
                         result.Add(from, to, dic[to] + ", " + key.ToString()); 
                 }; 
             
-            foreach (var item in Operations)
+            foreach (var item in OperationLogic.GraphOperations<E,S>())
             {
                 switch (item.OperationType)
                 {

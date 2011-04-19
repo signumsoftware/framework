@@ -126,11 +126,10 @@ namespace Signum.Engine.Operations
         }
         #endregion
 
-
         public static void Register(this IOperation operation)
         {
             if (!operation.Type.IsIIdentifiable())
-                throw new InvalidOperationException("Type {0} has to implement at tleast {1}".Formato(operation.Type));
+                throw new InvalidOperationException("Type {0} has to implement at least {1}".Formato(operation.Type));
 
             operation.AssertIsValid(); 
 
@@ -254,13 +253,13 @@ namespace Signum.Engine.Operations
         #region Construct
         public static IIdentifiable ServiceConstruct(Type type, Enum operationKey, params object[] args)
         {
-            return Find<IConstructorOperation>(type, operationKey).Construct(args);
+            return Find<IConstructOperation>(type, operationKey).Construct(args);
         }
 
         public static T Construct<T>(Enum operationKey, params object[] args)
             where T : class, IIdentifiable
         {
-            return (T)Find<IConstructorOperation>(typeof(T), operationKey).Construct(args);
+            return (T)Find<IConstructOperation>(typeof(T), operationKey).Construct(args);
         }
         #endregion
 
@@ -432,6 +431,13 @@ namespace Signum.Engine.Operations
         public static Type[] FindTypes(Enum operation)
         {
             return operations.Where(o => o.Value.ContainsKey(operation)).Select(a => a.Key).ToArray();
+        }
+
+        internal static IEnumerable<Graph<E, S>.IGraphOperation> GraphOperations<E, S>()
+            where E : IdentifiableEntity
+            where S : struct
+        {
+            return operations.Values.SelectMany(d => d.Values).OfType<Graph<E, S>.IGraphOperation>();
         }
     }
 

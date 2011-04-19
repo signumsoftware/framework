@@ -324,88 +324,94 @@ namespace Signum.Engine.Processes
                 }.Save();
             }
 
-            static ProcessExecutionGraph()
+
+            public static void Register()
             {
                 GetState = e => e.State;
-                Operations = new List<IGraphOperation>()
-                {   
 
-                    new Construct(ProcessOperation.Create , ProcessState.Created)
-                    {                     
-                        Construct = args=>
-                        {
-                            Enum processKey = args.GetArg<Enum>(0); 
-                            return Create(EnumLogic<ProcessDN>.ToEntity(processKey), processKey, args.Skip(1).ToArray());
-                        }
-                    },
 
-                    new ConstructFrom<ProcessDN>(ProcessOperation.FromProcess, ProcessState.Created)
+                new Construct(ProcessOperation.Create, ProcessState.Created)
+                {
+                    Construct = args =>
                     {
-                        Lite = false,
-                        Construct = (process, args)=>
-                        {
-                            return Create(process, EnumLogic<ProcessDN>.ToEnum(process), args);
-                        }
-                    },
-                    new Goto(ProcessOperation.Save, ProcessState.Created)
-                    {
-                         FromStates = new []{ProcessState.Created },
-                         AllowsNew = true,
-                         Lite = false,
-                         Execute = (pe, args)=>
-                         {
-                            
-                             pe.Save(); 
-                         }
-                    },
-                    //new Goto(ProcessOperation.Save, ProcessState.Planned)
-                    //{
-                    //     FromStates = new []{ProcessState.Planned},
-                    //     AllowsNew = true,
-                    //     Lite = false,
-                    //     Execute = (pe, args)=>
-                    //     {
-                              //pe.State=ProcessState.Planned ;
-                    //         pe.Save(); 
-                    //     }
-                    //},
-                    new Goto(ProcessOperation.Plan, ProcessState.Planned)
-                    {
-                         FromStates = new []{ProcessState.Created, ProcessState.Canceled, ProcessState.Planned, ProcessState.Suspended},
-                         Execute = (pe, args)=>
-                         {
-                             pe.State = ProcessState.Planned;
-                             pe.PlannedDate = (DateTime)args[0]; 
-                         }
-                    },
-                    new Goto(ProcessOperation.Cancel, ProcessState.Canceled)
-                    {
-                         FromStates = new []{ProcessState.Planned, ProcessState.Created, ProcessState.Suspended},
-                         Execute = (pe, _)=>
-                         {
-                             pe.State = ProcessState.Canceled;
-                             pe.CancelationDate = TimeZoneManager.Now; 
-                         }
-                    },
-                    new Goto(ProcessOperation.Execute, ProcessState.Queued)
-                    {
-                         FromStates = new []{ProcessState.Created, ProcessState.Planned, ProcessState.Canceled, ProcessState.Suspended},
-                         Execute = (pe, _)=>
-                         {
-                            pe.Queue();
-                            pe.Save();                            
-                         }
-                    },
-                    new Goto(ProcessOperation.Suspend, ProcessState.Suspending)
-                    {
-                         FromStates = new []{ProcessState.Queued, ProcessState.Executing},
-                         Execute = (pe, _)=>
-                         {
-                             pe.State = ProcessState.Suspending;
-                             pe.SuspendDate = TimeZoneManager.Now;
-                         }
+                        Enum processKey = args.GetArg<Enum>(0);
+                        return Create(EnumLogic<ProcessDN>.ToEntity(processKey), processKey, args.Skip(1).ToArray());
                     }
-                };
+                }.Register();
+
+                new ConstructFrom<ProcessDN>(ProcessOperation.FromProcess, ProcessState.Created)
+                {
+                    Lite = false,
+                    Construct = (process, args) =>
+                    {
+                        return Create(process, EnumLogic<ProcessDN>.ToEnum(process), args);
+                    }
+                }.Register();
+
+                new Goto(ProcessOperation.Save, ProcessState.Created)
+                {
+                    FromStates = new[] { ProcessState.Created },
+                    AllowsNew = true,
+                    Lite = false,
+                    Execute = (pe, args) =>
+                    {
+
+                        pe.Save();
+                    }
+                }.Register();
+
+                //new Goto(ProcessOperation.Save, ProcessState.Planned)
+                //{
+                //     FromStates = new []{ProcessState.Planned},
+                //     AllowsNew = true,
+                //     Lite = false,
+                //     Execute = (pe, args)=>
+                //     {
+                //pe.State=ProcessState.Planned ;
+                //         pe.Save(); 
+                //     }
+                //}.Register();
+
+                new Goto(ProcessOperation.Plan, ProcessState.Planned)
+                {
+                    FromStates = new[] { ProcessState.Created, ProcessState.Canceled, ProcessState.Planned, ProcessState.Suspended },
+                    Execute = (pe, args) =>
+                    {
+                        pe.State = ProcessState.Planned;
+                        pe.PlannedDate = (DateTime)args[0];
+                    }
+                }.Register();
+
+                new Goto(ProcessOperation.Cancel, ProcessState.Canceled)
+                {
+                    FromStates = new[] { ProcessState.Planned, ProcessState.Created, ProcessState.Suspended },
+                    Execute = (pe, _) =>
+                    {
+                        pe.State = ProcessState.Canceled;
+                        pe.CancelationDate = TimeZoneManager.Now;
+                    }
+                }.Register();
+
+                new Goto(ProcessOperation.Execute, ProcessState.Queued)
+                {
+                    FromStates = new[] { ProcessState.Created, ProcessState.Planned, ProcessState.Canceled, ProcessState.Suspended },
+                    Execute = (pe, _) =>
+                    {
+                        pe.Queue();
+                        pe.Save();
+                    }
+                }.Register();
+
+                new Goto(ProcessOperation.Suspend, ProcessState.Suspending)
+                {
+                    FromStates = new[] { ProcessState.Queued, ProcessState.Executing },
+                    Execute = (pe, _) =>
+                    {
+                        pe.State = ProcessState.Suspending;
+                        pe.SuspendDate = TimeZoneManager.Now;
+                    }
+                }.Register();
+
             }
         }
 
