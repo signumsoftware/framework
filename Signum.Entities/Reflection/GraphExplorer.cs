@@ -215,7 +215,14 @@ namespace Signum.Entities.Reflection
 
         private static string Modified(Modifiable ie)
         {
-            return " [{0}/{1}]".Formato(ie.Modified, ie.SelfModified);
+            string str = ",".Combine(ie.SelfModified ? "SelfModified" : null,
+                                               ie.Modified == true ? "Modified" :
+                                               ie.Modified == false ? "Not-Modified" : null);
+
+            if (str.HasText())
+                return "({0})".Formato(str);
+
+            return null;
         }
 
         private static XAttribute[] GetAttributes(Lite lite)
@@ -246,7 +253,7 @@ namespace Signum.Entities.Reflection
         {
             return new[]
             {
-               new XAttribute("Label", list.ToString() ?? "[null]"),
+               new XAttribute("Label", (list.ToString() ?? "[null]") +  Modified((Modifiable)list)),
                new XAttribute("TypeName", list.GetType().TypeName()), 
                new XAttribute("NodeRadius", 2),
                new XAttribute("Background", ColorGenerator.ColorFor(list.GetType().ElementType().FullName.GetHashCode())),
