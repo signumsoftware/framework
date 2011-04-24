@@ -187,6 +187,11 @@ namespace Signum.Engine.Operations
 
         public static Dictionary<S, StateOptions> States { get; set; }
 
+        public static XDocument ToDGML()
+        {
+            return ToDirectedGraph().ToDGML();
+        }
+
         public static DirectedEdgedGraph<string, string> ToDirectedGraph()
         {
             DirectedEdgedGraph<string, string> result = new DirectedEdgedGraph<string, string>();
