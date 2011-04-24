@@ -36,11 +36,11 @@ namespace Signum.Engine.Reports
                                                 Orders = uq.Orders.Count,
                                             }).ToDynamic(); 
 
-                sb.Schema.EntityEvents<UserQueryDN>().Retrieved += new EntityEventHandler<UserQueryDN>(UserQueryLogic_Retrieved);
+                sb.Schema.EntityEvents<UserQueryDN>().Retrieved += new RetrievedEventHandler<UserQueryDN>(UserQueryLogic_Retrieved);
             }
         }
 
-        static void UserQueryLogic_Retrieved(UserQueryDN userQuery, bool isRoot)
+        static void UserQueryLogic_Retrieved(UserQueryDN userQuery)
         {
             object queryName = QueryLogic.ToQueryName(userQuery.Query.Key);
 

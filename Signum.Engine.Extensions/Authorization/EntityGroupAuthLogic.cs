@@ -66,12 +66,12 @@ namespace Signum.Engine.Authorization
             }
         }
 
-        static GenericInvoker miRegister = GenericInvoker.Create(() => EntityGroupAuthLogic.RegisterSchemaEvent<TypeDN>(null));
+        static GenericInvoker<Action<Schema>> miRegister = 
+            new GenericInvoker<Action<Schema>>(s => EntityGroupAuthLogic.RegisterSchemaEvent<TypeDN>(s));
         static void RegisterSchemaEvent<T>(Schema sender)
              where T : IdentifiableEntity
         {
-            sender.EntityEvents<T>().Saving += new EntityEventHandler<T>(EntityGroupAuthLogic_Saving);
-            sender.EntityEvents<T>().Retrieving += new RetrivingEntitiesEventHandler(EntityGroupAuthLogic_Retrieving);
+            sender.EntityEvents<T>().Saving += new SavingEventHandler<T>(EntityGroupAuthLogic_Saving);
             sender.EntityEvents<T>().FilterQuery += new FilterQueryEventHandler<T>(EntityGroupAuthLogic_FilterQuery);
         }
 
@@ -82,15 +82,6 @@ namespace Signum.Engine.Authorization
             bool oldQueriesDisabled = queriesDisabled;
             queriesDisabled = true;
             return new Disposable(() => queriesDisabled = oldQueriesDisabled);
-        }
-
-        [ThreadStatic]
-        static bool retrieveDisabled;
-        public static IDisposable DisableRetrieve()
-        {
-            bool oldRetrieveDisabled = retrieveDisabled;
-            retrieveDisabled = true;
-            return new Disposable(() => retrieveDisabled = oldRetrieveDisabled);
         }
 
         [ThreadStatic]
@@ -110,13 +101,6 @@ namespace Signum.Engine.Authorization
             return query;
         }
 
-        static void EntityGroupAuthLogic_Retrieving(Type type, int[] ids, bool inQuery)
-        {
-            if (AuthLogic.IsEnabled && !retrieveDisabled && (!inQuery || queriesDisabled) && !IsAllwaysAllowed(type, TypeAllowedBasic.Read))
-            {
-                miAssertAllowed.GetInvoker(type)(ids, TypeAllowedBasic.Read);
-            }
-        }
 
         const string CreatedKey = "Created";
         const string ModifiedKey = "Modified";
@@ -196,7 +180,8 @@ namespace Signum.Engine.Authorization
         }
 
 
-        static GenericInvoker miAssertAllowed = GenericInvoker.Create(() => AssertAllowed<IdentifiableEntity>(null, TypeAllowedBasic.Create));
+        static GenericInvoker<Action<int[], TypeAllowedBasic>> miAssertAllowed = 
+            new GenericInvoker<Action<int[], TypeAllowedBasic>>((a, tab) => AssertAllowed<IdentifiableEntity>(a, tab));
         static void AssertAllowed<T>(int[] requested, TypeAllowedBasic typeAllowed)
             where T : IdentifiableEntity
         {
@@ -246,10 +231,11 @@ namespace Signum.Engine.Authorization
         [MethodExpander(typeof(IsAllowedForExpander))]
         public static bool IsAllowedFor(this IIdentifiable ident, TypeAllowedBasic allowed, ExecutionContext executionContext)
         {
-            return (bool)miIsAllowedForEntity.GetInvoker(ident.GetType()).Invoke(ident, allowed, executionContext);
+            return miIsAllowedForEntity.GetInvoker(ident.GetType()).Invoke(ident, allowed, executionContext);
         }
 
-        static GenericInvoker miIsAllowedForEntity = GenericInvoker.Create(() => IsAllowedFor<IdentifiableEntity>((IdentifiableEntity)null, TypeAllowedBasic.Create, null));
+        static GenericInvoker<Func<IIdentifiable, TypeAllowedBasic, ExecutionContext, bool>> miIsAllowedForEntity 
+            = new GenericInvoker<Func<IIdentifiable, TypeAllowedBasic, ExecutionContext, bool>>((ie, tab, ec) => IsAllowedFor<IdentifiableEntity>((IdentifiableEntity)ie, tab, ec));
         [MethodExpander(typeof(IsAllowedForExpander))]
         static bool IsAllowedFor<T>(this T entity, TypeAllowedBasic allowed, ExecutionContext executionContext)
             where T : IdentifiableEntity
@@ -267,10 +253,11 @@ namespace Signum.Engine.Authorization
         [MethodExpander(typeof(IsAllowedForDebugExpander))]
         public static DebugData IsAllowedForDebug(this IIdentifiable ident, TypeAllowedBasic allowed, ExecutionContext executionContext)
         {
-            return (DebugData)miIsAllowedForDebugEntity.GetInvoker(ident.GetType()).Invoke(ident, allowed, executionContext);
+            return miIsAllowedForDebugEntity.GetInvoker(ident.GetType()).Invoke((IdentifiableEntity)ident, allowed, executionContext);
         }
 
-        static GenericInvoker miIsAllowedForDebugEntity = GenericInvoker.Create(() => IsAllowedForDebug<IdentifiableEntity>((IdentifiableEntity)null, TypeAllowedBasic.Create, null));
+        static GenericInvoker<Func<IIdentifiable, TypeAllowedBasic, ExecutionContext, DebugData>> miIsAllowedForDebugEntity =
+            new GenericInvoker<Func<IIdentifiable, TypeAllowedBasic, ExecutionContext, DebugData>>((ii, tab, ec) => IsAllowedForDebug<IdentifiableEntity>((IdentifiableEntity)ii, tab, ec));
         [MethodExpander(typeof(IsAllowedForDebugExpander))]
         static DebugData IsAllowedForDebug<T>(this T entity, TypeAllowedBasic allowed, ExecutionContext executionContext)
             where T : IdentifiableEntity
@@ -308,10 +295,11 @@ namespace Signum.Engine.Authorization
         [MethodExpander(typeof(IsAllowedForExpander))]
         public static bool IsAllowedFor(this Lite lite, TypeAllowedBasic allowed, ExecutionContext executionContext)
         {
-            return (bool)miIsAllowedForLite.GetInvoker(lite.RuntimeType).Invoke(lite, allowed, executionContext);
+            return miIsAllowedForLite.GetInvoker(lite.RuntimeType).Invoke(lite, allowed, executionContext);
         }
 
-        static GenericInvoker miIsAllowedForLite = GenericInvoker.Create(() => IsAllowedFor<IdentifiableEntity>((Lite)null, TypeAllowedBasic.Create, null));
+        static GenericInvoker<Func<Lite, TypeAllowedBasic, ExecutionContext, bool>> miIsAllowedForLite =
+            new GenericInvoker<Func<Lite, TypeAllowedBasic, ExecutionContext, bool>>((l, tab, ec) => IsAllowedFor<IdentifiableEntity>(l, tab, ec));
         [MethodExpander(typeof(IsAllowedForExpander))]
         static bool IsAllowedFor<T>(this Lite lite, TypeAllowedBasic allowed, ExecutionContext executionContext)
             where T : IdentifiableEntity
@@ -327,10 +315,11 @@ namespace Signum.Engine.Authorization
         [MethodExpander(typeof(IsAllowedForExpander))]
         public static DebugData IsAllowedForDebug(this Lite lite, TypeAllowedBasic allowed, ExecutionContext executionContext)
         {
-            return (DebugData)miIsAllowedForDebugLite.GetInvoker(lite.RuntimeType).Invoke(lite, allowed, executionContext);
+            return miIsAllowedForDebugLite.GetInvoker(lite.RuntimeType).Invoke(lite, allowed, executionContext);
         }
 
-        static GenericInvoker miIsAllowedForDebugLite = GenericInvoker.Create(() => IsAllowedForDebug<IdentifiableEntity>((Lite)null, TypeAllowedBasic.Create, null));
+        static GenericInvoker<Func<Lite, TypeAllowedBasic, ExecutionContext, DebugData>> miIsAllowedForDebugLite = 
+            new GenericInvoker<Func<Lite, TypeAllowedBasic, ExecutionContext, DebugData>>((l, tab, ec) => IsAllowedForDebug<IdentifiableEntity>(l, tab, ec));
         [MethodExpander(typeof(IsAllowedForExpander))]
         static DebugData IsAllowedForDebug<T>(this Lite lite, TypeAllowedBasic allowed, ExecutionContext executionContext)
              where T : IdentifiableEntity
@@ -583,10 +572,10 @@ namespace Signum.Engine.Authorization
         {
             public Expression Expand(Expression instance, Expression[] arguments, Type[] typeArguments)
             {
-                return (Expression)miCallWhereAllowed.GetInvoker(typeArguments).Invoke(arguments[0]);
+                return miCallWhereAllowed.GetInvoker(typeArguments).Invoke(arguments[0]);
             }
 
-            static GenericInvoker miCallWhereAllowed = GenericInvoker.Create(() => CallWhereAllowed<TypeDN>(null));
+            static GenericInvoker<Func<Expression, Expression>> miCallWhereAllowed = new GenericInvoker<Func<Expression, Expression>>(exp => CallWhereAllowed<TypeDN>(exp));
             static Expression CallWhereAllowed<T>(Expression expression)
                 where T : IdentifiableEntity
             {
@@ -603,10 +592,10 @@ namespace Signum.Engine.Authorization
                 TypeAllowedBasic allowed = (TypeAllowedBasic)ExpressionEvaluator.Eval(arguments[1]);
                 ExecutionContext context = (ExecutionContext)ExpressionEvaluator.Eval(arguments[2]);
 
-                return (Expression)miCallWhereIsAllowedFor.GetInvoker(typeArguments)(arguments[0], allowed, context);
+                return miCallWhereIsAllowedFor.GetInvoker(typeArguments)(arguments[0], allowed, context);
             }
 
-            static GenericInvoker miCallWhereIsAllowedFor = GenericInvoker.Create(() => CallWhereIsAllowedFor<TypeDN>(null, TypeAllowedBasic.Create, null));
+            static GenericInvoker<Func<Expression, TypeAllowedBasic, ExecutionContext, Expression>> miCallWhereIsAllowedFor = new GenericInvoker<Func<Expression, TypeAllowedBasic, ExecutionContext, Expression>>((ex, tab, ec) => CallWhereIsAllowedFor<TypeDN>(ex, tab, ec));
             static Expression CallWhereIsAllowedFor<T>(Expression expression, TypeAllowedBasic allowed, ExecutionContext executionContext)
                 where T : IdentifiableEntity
             {

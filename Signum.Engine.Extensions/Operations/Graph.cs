@@ -205,40 +205,40 @@ namespace Signum.Engine.Operations
                 switch (item.OperationType)
                 {
                     case OperationType.Execute:
-                        {
-                            Goto gOp = (Goto)item;
+                    {
+                        Goto gOp = (Goto)item;
 
-                            if (gOp.FromStates == null)
-                                Add("[All States]", gOp.TargetState.ToString(), item.Key);
-                            else
-                                foreach (var s in gOp.FromStates)
-                                    Add(s.ToString(), gOp.TargetState.ToString(), item.Key);
+                        if (gOp.FromStates == null)
+                            Add("[All States]", gOp.TargetState.ToString(), item.Key);
+                        else
+                            foreach (var s in gOp.FromStates)
+                                Add(s.ToString(), gOp.TargetState.ToString(), item.Key);
 
 
-                        } break;
+                    } break;
                     case OperationType.Delete:
-                        {
-                            Delete dOp = (Delete)item;
-                            if (dOp.FromStates == null)
-                                Add("[All States]", "[Deleted]", item.Key);
-                            else
-                                foreach (var s in dOp.FromStates)
-                                    Add(s.ToString(), "[Deleted]", dOp.Key);
+                    {
+                        Delete dOp = (Delete)item;
+                        if (dOp.FromStates == null)
+                            Add("[All States]", "[Deleted]", item.Key);
+                        else
+                            foreach (var s in dOp.FromStates)
+                                Add(s.ToString(), "[Deleted]", dOp.Key);
 
 
-                        } break;
+                    } break;
                     case OperationType.Constructor:
                     case OperationType.ConstructorFrom:
                     case OperationType.ConstructorFromMany:
-                        {
-                            string from = item.OperationType == OperationType.Constructor ? "[New]" :
-                                          item.OperationType == OperationType.ConstructorFrom ? "[From {0}]".Formato(item.GetType().GetGenericArguments()[2].TypeName()) :
-                                          item.OperationType == OperationType.ConstructorFromMany ? "[FromMany {0}]".Formato(item.GetType().GetGenericArguments()[2].TypeName()) : "";
+                    {
+                        string from = item.OperationType == OperationType.Constructor ? "[New]" :
+                                        item.OperationType == OperationType.ConstructorFrom ? "[From {0}]".Formato(item.GetType().GetGenericArguments()[2].TypeName()) :
+                                        item.OperationType == OperationType.ConstructorFromMany ? "[FromMany {0}]".Formato(item.GetType().GetGenericArguments()[2].TypeName()) : "";
 
-                            Add(from, ((IGraphInnerOperation)item).TargetState.ToString(), item.Key);
+                        Add(from, ((IGraphInnerOperation)item).TargetState.ToString(), item.Key);
 
 
-                        } break;
+                    } break;
                 }
             }
 
