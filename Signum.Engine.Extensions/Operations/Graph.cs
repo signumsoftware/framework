@@ -185,12 +185,15 @@ namespace Signum.Engine.Operations
         public static Action<E, S> EnterState { get; set; }
         public static Action<E, S> ExitState { get; set; }
 
-        public static List<IGraphOperation> Operations { get; set; }
         public static Dictionary<S, StateOptions> States { get; set; }
 
-        public DirectedEdgedGraph<string, string> ToDirectedGraph()
+        public static XDocument ToDGML()
         {
+            return ToDirectedGraph().ToDGML();
+        }
 
+        public static DirectedEdgedGraph<string, string> ToDirectedGraph()
+        {
             DirectedEdgedGraph<string, string> result = new DirectedEdgedGraph<string, string>();
 
             Action<string, string, Enum> Add = (from, to, key) =>
@@ -202,7 +205,7 @@ namespace Signum.Engine.Operations
                         result.Add(from, to, dic[to] + ", " + key.ToString()); 
                 }; 
             
-            foreach (var item in Operations)
+            foreach (var item in OperationLogic.GraphOperations<E,S>())
             {
                 switch (item.OperationType)
                 {
