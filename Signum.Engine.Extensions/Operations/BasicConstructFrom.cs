@@ -17,7 +17,7 @@ namespace Signum.Engine.Operations
         IIdentifiable Construct(IIdentifiable entity, params object[] parameters);
     }
 
-    public class BasicConstructorFrom<F, T> : IConstructorFromOperation
+    public class BasicConstructFrom<F, T> : IConstructorFromOperation
         where T : class, IIdentifiable
         where F : class, IIdentifiable
     {
@@ -34,7 +34,7 @@ namespace Signum.Engine.Operations
         public Func<F, object[], T> Construct { get; set; }
         public Func<F, string> CanConstruct { get; set; }
 
-        public BasicConstructorFrom(Enum key)
+        public BasicConstructFrom(Enum key)
         {
             this.Key = key;
             this.Returns = true;

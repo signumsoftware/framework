@@ -78,7 +78,7 @@ namespace Signum.Entities.Authorization
             get { return passwordNeverExpires; }
             set { Set(ref passwordNeverExpires, value, () => PasswordNeverExpires); }
         }
-
+       
         IUserRelatedDN related;
         public IUserRelatedDN Related
         {

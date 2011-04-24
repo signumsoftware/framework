@@ -240,4 +240,16 @@
   <data name="SendData" xml:space="preserve">
     <value>Send Data</value>
   </data>
+  <data name="Login_New" xml:space="preserve">
+    <value>New:</value>
+  </data>
+  <data name="Login_Password" xml:space="preserve">
+    <value>Password:</value>
+  </data>
+  <data name="Login_Repeat" xml:space="preserve">
+    <value>Repeat:</value>
+  </data>
+  <data name="Login_UserName" xml:space="preserve">
+    <value>Username:</value>
+  </data>
 </root>
