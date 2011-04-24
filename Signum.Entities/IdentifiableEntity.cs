@@ -46,8 +46,7 @@ namespace Signum.Entities
         public string ToStr
         {
             get { return toStr; }
-            //protected set { Set(ref toStr, value, () => ToStr); }
-               protected set { toStr= value; }// TODO: olmo revisar
+            protected set { Set(ref toStr, value, () => ToStr); }
         }
 
         [Ignore]
@@ -77,7 +76,7 @@ namespace Signum.Entities
         {
             base.PreSaving(ref graphModified);
 
-            ToStr = ToString();
+            toStr = ToString();
         }
 
         public override string ToString()
