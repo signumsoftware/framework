@@ -254,13 +254,13 @@ namespace Signum.Engine.Operations
         #region Construct
         public static IIdentifiable ServiceConstruct(Type type, Enum operationKey, params object[] args)
         {
-            return Find<IConstructorOperation>(type, operationKey).Construct(args);
+            return Find<IConstructOperation>(type, operationKey).Construct(args);
         }
 
         public static T Construct<T>(Enum operationKey, params object[] args)
             where T : class, IIdentifiable
         {
-            return (T)Find<IConstructorOperation>(typeof(T), operationKey).Construct(args);
+            return (T)Find<IConstructOperation>(typeof(T), operationKey).Construct(args);
         }
         #endregion
 

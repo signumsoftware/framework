@@ -188,19 +188,6 @@ namespace Signum.Engine.Operations
         public static List<IGraphOperation> Operations { get; set; }
         public static Dictionary<S, StateOptions> States { get; set; }
 
-        public static void Register()
-        {
-            var errors = Operations.GroupCount(a => a.Key).Where(kvp => kvp.Value > 1).ToList();
-
-            if (errors.Count != 0)
-                throw new InvalidOperationException("The following keys have been repeated in {0}: {1}".Formato(typeof(Graph<E, S>).NicePluralName(), errors.ToString(a => " - {0} ({1})".Formato(a.Key, a.Value), "\r\n")));
-
-            foreach (var operation in Operations)
-	        {   
-                OperationLogic.Register(operation);
-	        }
-        }
-
         public DirectedEdgedGraph<string, string> ToDirectedGraph()
         {
 
