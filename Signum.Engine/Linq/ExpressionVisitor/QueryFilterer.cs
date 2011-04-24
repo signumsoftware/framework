@@ -14,7 +14,7 @@ namespace Signum.Engine.Linq
 {
     public class QueryFilterer : SimpleExpressionVisitor
     {
-        static GenericInvoker miFilter = GenericInvoker.Create(() => Schema.Current.OnFilterQuery<TypeDN>(null));
+        static GenericInvoker<Func<Schema, IQueryable, IQueryable>> miFilter = new GenericInvoker<Func<Schema, IQueryable, IQueryable>>((s,q) => s.OnFilterQuery<TypeDN>((IQueryable<TypeDN>)q));
 
         protected override Expression VisitConstant(ConstantExpression c)
         {
@@ -24,7 +24,7 @@ namespace Signum.Engine.Linq
 
                 if (query.IsBase() && typeof(IdentifiableEntity).IsAssignableFrom(query.ElementType))
                 {
-                    IQueryable newQuery = (IQueryable)miFilter.GetInvoker(c.Type.GetGenericArguments())(Schema.Current, query);
+                    IQueryable newQuery = miFilter.GetInvoker(c.Type.GetGenericArguments())(Schema.Current, query);
 
                     if (newQuery != query)
                         return newQuery.Expression;
@@ -43,6 +43,7 @@ namespace Signum.Engine.Linq
             return base.VisitConstant(c);
         }
 
+        
         internal static Expression Filter(Expression expression)
         {
             return new QueryFilterer().Visit(expression);

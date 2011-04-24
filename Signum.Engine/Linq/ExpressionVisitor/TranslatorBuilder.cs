@@ -14,6 +14,7 @@ using Signum.Entities.Reflection;
 using Signum.Utilities.Reflection;
 using Signum.Utilities.ExpressionTrees;
 using System.Collections;
+using Signum.Engine.Maps;
 
 namespace Signum.Engine.Linq
 {  
@@ -23,10 +24,10 @@ namespace Signum.Engine.Linq
         {
             Type type = proj.UniqueFunction == null ? proj.Type.ElementType() : proj.Type;
 
-            return (ITranslateResult)miBuildPrivate.GetInvoker(type)(proj);
+            return miBuildPrivate.GetInvoker(type)(proj);
         }
 
-        static GenericInvoker miBuildPrivate = GenericInvoker.Create(() => BuildPrivate<int>(null));
+        static GenericInvoker<Func<ProjectionExpression, ITranslateResult>> miBuildPrivate = new GenericInvoker<Func<ProjectionExpression, ITranslateResult>>(pe => BuildPrivate<int>(pe));
 
         static TranslateResult<T> BuildPrivate<T>(ProjectionExpression proj)
         {
@@ -77,11 +78,10 @@ namespace Signum.Engine.Linq
             if(!type.IsInstantiationOf(typeof(KeyValuePair<,>)))
                 throw new InvalidOperationException("All child projections should create KeyValuePairs");
 
-            return (IChildProjection)miBuildChildPrivate.GetInvoker(type.GetGenericArguments())(proj);
+            return miBuildChildPrivate.GetInvoker(type.GetGenericArguments())(proj);
         }
 
-        static GenericInvoker miBuildChildPrivate = GenericInvoker.Create(() => BuildChildPrivate<int, bool>(null));
-
+        static GenericInvoker<Func<ProjectionExpression, IChildProjection>> miBuildChildPrivate = new GenericInvoker<Func<ProjectionExpression, IChildProjection>>(proj => BuildChildPrivate<int, bool>(proj));
 
         static ChildProjection<K, V> BuildChildPrivate<K, V>(ProjectionExpression proj)
         {
@@ -155,25 +155,37 @@ namespace Signum.Engine.Linq
         /// </summary>
         public class ProjectionBuilder : DbExpressionVisitor
         {
-            ParameterExpression row = Expression.Parameter(typeof(IProjectionRow), "row");
-            Scope scope; 
+            static ParameterExpression row = Expression.Parameter(typeof(IProjectionRow), "row");
 
+            static PropertyInfo piRetriever = ReflectionTools.GetPropertyInfo((IProjectionRow r) => r.Retriever);
+            static MemberExpression retriever = Expression.Property(row, piRetriever); 
+           
             public PropertyInfo piToStrLite = ReflectionTools.GetPropertyInfo((Lite l) =>l.ToStr);
+            static FieldInfo fiId = ReflectionTools.GetFieldInfo((IdentifiableEntity i) => i.id);
 
-            static MethodInfo miGetList = ReflectionTools.GetMethodInfo((IProjectionRow row) => row.GetList<int>(null, 1)).GetGenericMethodDefinition();
+            static MethodInfo miCached = ReflectionTools.GetMethodInfo((IRetriever r) => r.Cached<TypeDN>(null, null)).GetGenericMethodDefinition();
+            static MethodInfo miRequest = ReflectionTools.GetMethodInfo((IRetriever r) => r.Request<TypeDN>(null)).GetGenericMethodDefinition();
+            static MethodInfo miRequestIBA = ReflectionTools.GetMethodInfo((IRetriever r) => r.RequestIBA<TypeDN>(1, 1)).GetGenericMethodDefinition();
 
-            static MethodInfo miGetIdentifiable = ReflectionTools.GetMethodInfo((IProjectionRow row) => row.GetIdentifiable<TypeDN>(null)).GetGenericMethodDefinition();
-            static MethodInfo miGetImplementedBy = ReflectionTools.GetMethodInfo((IProjectionRow row) => row.GetImplementedBy<TypeDN>(null, null)).GetGenericMethodDefinition(); 
-            static MethodInfo miGetImplementedByAll = ReflectionTools.GetMethodInfo((IProjectionRow row) => row.GetImplementedByAll<TypeDN>(null, null)).GetGenericMethodDefinition();
+            static MethodInfo miConstructLite = ReflectionTools.GetMethodInfo(() => ConstructLite<TypeDN>(1, 1, "")).GetGenericMethodDefinition();
 
-            static MethodInfo miGetLiteIdentifiable = ReflectionTools.GetMethodInfo((IProjectionRow row) => row.GetLiteIdentifiable<TypeDN>(null, null, null)).GetGenericMethodDefinition(); 
-            static MethodInfo miGetLiteImplementedByAll = ReflectionTools.GetMethodInfo((IProjectionRow row) => row.GetLiteImplementedByAll<TypeDN>(null, null)).GetGenericMethodDefinition(); 
+            Scope scope; 
+        
+
+            public static Lite<T> ConstructLite<T>(int? id, int? typeId, string str)
+                where T : class, IIdentifiable
+            {
+                if (id == null)
+                    return null;
+
+                return new Lite<T>(Schema.Current.IdToType[typeId.Value], id.Value, str);
+            }
 
             static internal Expression<Func<IProjectionRow, T>> Build<T>(Expression expression, Scope scope)
             {
                 ProjectionBuilder pb = new ProjectionBuilder() { scope = scope };
                 Expression body = pb.Visit(expression);
-                return Expression.Lambda<Func<IProjectionRow, T>>(body, pb.row);
+                return Expression.Lambda<Func<IProjectionRow, T>>(body, row);
             }
 
             Expression NullifyColumn(Expression exp)
@@ -228,8 +240,19 @@ namespace Signum.Engine.Linq
 
             protected override Expression VisitFieldInit(FieldInitExpression fieldInit)
             {
-                return Expression.Call(row, miGetIdentifiable.MakeGenericMethod(fieldInit.Type), 
-                    Visit(NullifyColumn(fieldInit.ExternalId)));
+                Expression id = Visit(NullifyColumn(fieldInit.ExternalId));
+
+                if (fieldInit.TableAlias == null)
+                    return Expression.Call(retriever, miRequest.MakeGenericMethod(fieldInit.Type), id);
+
+                ParameterExpression e = Expression.Parameter(fieldInit.Type, fieldInit.Type.Name.ToLower().Substring(0, 1));
+
+                var block = Expression.Block(fieldInit.Bindings.Select(b =>
+                    Expression.Assign(Expression.Field(e, b.FieldInfo), Visit(b.Binding))));
+
+                LambdaExpression lambda = Expression.Lambda(block, e);
+
+                return Expression.Call(retriever, miCached, id, lambda);
             }
 
             protected override Expression VisitEmbeddedFieldInit(EmbeddedFieldInitExpression efie)
@@ -243,26 +266,16 @@ namespace Signum.Engine.Linq
                 return Expression.Condition(Expression.Equal(Visit(efie.HasValue), Expression.Constant(true)), ctor, Expression.Constant(null, ctor.Type));
             }
 
-            protected override Expression VisitMList(MListExpression ml)
-            {
-                return Expression.Call(row, miGetList.MakeGenericMethod(ml.Type.ElementType()),
-                    Expression.Constant(ml.RelationalTable),
-                    Visit(ml.BackID));
-            }
+            static readonly ConstantExpression NullInt = Expression.Constant(null, typeof(int?));
 
             protected override Expression VisitImplementedBy(ImplementedByExpression rb)
             {
-                Type[] types = rb.Implementations.Select(a => a.Type).ToArray();
-                return Expression.Call(row,
-                    miGetImplementedBy.MakeGenericMethod(rb.Type),
-                    Expression.Constant(types),
-                    Expression.NewArrayInit(typeof(int?),
-                    rb.Implementations.Select(i => Visit(NullifyColumn(i.Field.ExternalId))).ToArray()));
+                return rb.Implementations.Select(fie => new When(Expression.NotEqual(fie.Field.ExternalId, NullInt), Visit(fie.Field))).ToCondition(rb.Type);
             }
 
             protected override Expression VisitImplementedByAll(ImplementedByAllExpression rba)
             {
-                return Expression.Call(row, miGetImplementedByAll.MakeGenericMethod(rba.Type),
+                return Expression.Call(row, miRequestIBA.MakeGenericMethod(rba.Type),
                     Visit(NullifyColumn(rba.Id)),
                     Visit(NullifyColumn(rba.TypeId)));
             }
@@ -279,11 +292,16 @@ namespace Signum.Engine.Linq
                     return Expression.Constant(null, lite.Type);
                 else if (toStr == null)
                 {
-                    return Expression.Call(row, miGetLiteImplementedByAll.MakeGenericMethod(liteType), id.Nullify(), typeId.Nullify());
+                    return Expression.Call(row, miRequestIBA.MakeGenericMethod(liteType), id.Nullify(), typeId.Nullify());
                 }
                 else
-                    return Expression.Call(row, miGetLiteIdentifiable.MakeGenericMethod(liteType), id.Nullify(), typeId.Nullify(), toStr);
+                {
+                    ConstructorInfo ciLite = lite.Type.GetConstructor(new []{typeof(Type), typeof(int), typeof(string)});
+                    return Expression.Condition(id.NotEqualsNulll(), Expression.New(ciLite, id.UnNullify(), typeId.Nullify(), toStr), Expression.Constant(null, lite.Type));
+                }
             }
+
+            static ConstructorInfo ciLite = ReflectionTools.GetConstuctorInfo(() => new Lite<IdentifiableEntity>(typeof(IdentifiableEntity), 2, ""));
 
             protected override Expression VisitSqlConstant(SqlConstantExpression sce)
             {
@@ -303,6 +321,8 @@ namespace Signum.Engine.Linq
 
                 return base.VisitSqlFunction(sqlFunction);
             }
+
+            
         }
     }
 
@@ -325,6 +345,7 @@ namespace Signum.Engine.Linq
         }
 
         static MethodInfo miLookup = ReflectionTools.GetMethodInfo((IProjectionRow row) => row.Lookup<int, double>(null, 0)).GetGenericMethodDefinition();
+        static MethodInfo miToMListNotModified = ReflectionTools.GetMethodInfo((IEnumerable<int> col) => col.ToMListNotModified()).GetGenericMethodDefinition();
         
         public Expression Lookup(Expression row, ChildProjectionExpression cProj)
         {
@@ -335,7 +356,14 @@ namespace Signum.Engine.Linq
             Expression call = Expression.Call(row, mi, Expression.Constant(cProj.Projection.Token), cProj.OuterKey);
 
             if (cProj.Projection.UniqueFunction == null)
+            {
+                if (cProj.Projection.Type.IsInstantiationOf(typeof(MList<>)))
+                {
+                    return Expression.Call(miToMListNotModified, call); 
+                }
+
                 return call;
+            }
 
             MethodInfo miUnique = UniqueMethod(cProj.Projection.UniqueFunction.Value); 
             return Expression.Call(miUnique.MakeGenericMethod(t), call);

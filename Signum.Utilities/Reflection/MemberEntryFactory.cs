@@ -23,7 +23,7 @@ namespace Signum.Utilities.Reflection
         //You can acces them in a untyped fashion using IMemberEntry 
         public static IList GenerateIList(Type type, MemberOptions options)
         {
-            return (IList)mi1.GetInvoker(type).Invoke(options);
+            return mi1.GetInvoker(type).Invoke(options);
         }
 
         public static List<MemberEntry<T>> GenerateList<T>()
@@ -33,7 +33,7 @@ namespace Signum.Utilities.Reflection
 
         static BindingFlags bf = BindingFlags.Public | BindingFlags.Instance;
 
-        static GenericInvoker mi1 = GenericInvoker.Create(() => GenerateList<int>(MemberOptions.Default));
+        static GenericInvoker<Func<MemberOptions, IList>> mi1 = new GenericInvoker<Func<MemberOptions, IList>>(mo => GenerateList<int>(mo));
         public static List<MemberEntry<T>> GenerateList<T>(MemberOptions options)
         {
             PropertyInfo[] properties = (options & MemberOptions.Properties) == 0 ? new PropertyInfo[0] : typeof(T).GetProperties(bf);

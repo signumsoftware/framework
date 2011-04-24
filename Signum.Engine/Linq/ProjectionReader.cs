@@ -19,23 +19,15 @@ namespace Signum.Engine.Linq
     {
         FieldReader Reader { get; }
 
-        Retriever Retriever { get; }
+        IRetriever Retriever { get; }
 
-        IEnumerable<S> Lookup<K, S>(ProjectionToken token, K key); 
-
-        MList<S> GetList<S>(RelationalTable tr, int id);
-
-        S GetIdentifiable<S>(int? id) where S : IdentifiableEntity;
-        S GetImplementedBy<S>(Type[] types, params int?[] ids) where S :  IIdentifiable;
-        S GetImplementedByAll<S>(int? id, int? typeId) where S :  IIdentifiable;
-
-        Lite<S> GetLiteIdentifiable<S>(int? id, int? typeId, string str) where S : class, IIdentifiable;
-        Lite<S> GetLiteImplementedByAll<S>(int? id, int? typeId) where S :class,  IIdentifiable;
+        IEnumerable<S> Lookup<K, S>(ProjectionToken token, K key);
     }
 
     internal class ProjectionRowEnumerator<T> : IProjectionRow, IEnumerator<T>
     {
         public FieldReader Reader { get; private set;}
+        public IRetriever Retriever { get; private set; }
 
         public IProjectionRow Parent { get; private set; }
 
@@ -45,19 +37,18 @@ namespace Signum.Engine.Linq
         Func<IProjectionRow, T> projector; 
         Expression<Func<IProjectionRow, T>> projectorExpression;
 
-        Retriever retriever;
         Dictionary<ProjectionToken, IEnumerable> lookups;
 
-        internal ProjectionRowEnumerator(SqlDataReader dataReader, Expression<Func<IProjectionRow, T>> projectorExpression, Retriever retriever, Dictionary<ProjectionToken, IEnumerable> lookups)
+        internal ProjectionRowEnumerator(SqlDataReader dataReader, Expression<Func<IProjectionRow, T>> projectorExpression, Dictionary<ProjectionToken, IEnumerable> lookups, IRetriever retriever)
         {
             this.dataReader = dataReader;
             this.Reader = new FieldReader(dataReader);
 
             this.projectorExpression = ExpressionCompilableAsserter.Assert(projectorExpression);
             this.projector = projectorExpression.Compile();
-            this.retriever = retriever;
             this.lookups = lookups;
-            this.Row = -1; 
+            this.Row = -1;
+            this.Retriever = retriever;
         }
 
         public T Current
@@ -70,6 +61,7 @@ namespace Signum.Engine.Linq
             get { return this.current; }
         }
 
+        public int Row;
         public bool MoveNext()
         {
             if (dataReader.Read())
@@ -88,55 +80,7 @@ namespace Signum.Engine.Linq
         public void Dispose()
         {
         }
-
-        public Retriever Retriever
-        {
-            get { return retriever; }
-        }
-  
-        public MList<S> GetList<S>(RelationalTable tr, int id)
-        {
-            return (MList<S>)Retriever.GetList(tr, id);
-        }
-
-        public S GetIdentifiable<S>(int? id) where S : IdentifiableEntity
-        {
-            if (id == null) return null; 
-            return (S)Retriever.GetIdentifiable(ConnectionScope.Current.Schema.Table(typeof(S)), id.Value, true);
-        }
-
-        public S GetImplementedBy<S>(Type[] types, params int?[] ids)
-            where S :  IIdentifiable
-        {
-            int pos = ids.IndexOf(id => id.HasValue);
-            if (pos == -1) return default(S);
-            return (S)(object)Retriever.GetIdentifiable(ConnectionScope.Current.Schema.Table(types[pos]), ids[pos].Value, true);
-        }
-
-        public S GetImplementedByAll<S>(int? id, int? idType)
-            where S :  IIdentifiable
-        {
-            if (id == null) return default(S); 
-            Table table = Schema.Current.IdToTable[idType.Value];
-            return (S)(object)Retriever.GetIdentifiable(table, id.Value, true);
-        }
-
-        public Lite<S> GetLiteIdentifiable<S>( int? id, int? idType, string str) where S : class, IIdentifiable
-        {
-            if (id == null) return null;
-
-            Type runtimeType = Schema.Current.IdToTable[idType.Value].Type;
-            return new Lite<S>(runtimeType, id.Value) { ToStr = str }; 
-        }
-
-        public Lite<S> GetLiteImplementedByAll<S>(int? id, int? idType) where S : class, IIdentifiable
-        {
-            if (id == null) return null; 
-            Table table = Schema.Current.IdToTable[idType.Value];
-            return (Lite<S>)Retriever.GetLite(table, typeof(S), id.Value);
-        }
-
-
+ 
         public IEnumerable<S> Lookup<K, S>(ProjectionToken token, K key)
         {
             Lookup<K, S> lookup = (Lookup<K, S>)lookups[token];
@@ -145,30 +89,6 @@ namespace Signum.Engine.Linq
                 return Enumerable.Empty<S>();
             else
                 return lookup[key];
-        }
-
-        public int Row;
-    }
-
-    internal class ExpressionCompilableAsserter : SimpleExpressionVisitor
-    {
-        protected override Expression Visit(Expression exp)
-        {
-            try
-            {
-                return base.Visit(exp);
-            }
-            catch (InvalidOperationException e)
-            {
-                if (e.Message.StartsWith("Unhandled Expression"))
-                    throw new NotSupportedException("The expression can not be compiled:\r\n{0}".Formato(exp.NiceToString()));
-                throw;
-            }
-        }
-
-        internal static Expression<Func<IProjectionRow, T>> Assert<T>(Expression<Func<IProjectionRow, T>> projectorExpression)
-        {
-            return (Expression<Func<IProjectionRow, T>>)new ExpressionCompilableAsserter().Visit(projectorExpression);
         }
     }
 
@@ -190,6 +110,28 @@ namespace Signum.Engine.Linq
         IEnumerator IEnumerable.GetEnumerator()
         {
             return this.GetEnumerator();
+        }
+    }
+
+    internal class ExpressionCompilableAsserter : SimpleExpressionVisitor
+    {
+        protected override Expression Visit(Expression exp)
+        {
+            try
+            {
+                return base.Visit(exp);
+            }
+            catch (InvalidOperationException e)
+            {
+                if (e.Message.StartsWith("Unhandled Expression"))
+                    throw new NotSupportedException("The expression can not be compiled:\r\n{0}".Formato(exp.NiceToString()));
+                throw;
+            }
+        }
+
+        internal static Expression<Func<IProjectionRow, T>> Assert<T>(Expression<Func<IProjectionRow, T>> projectorExpression)
+        {
+            return (Expression<Func<IProjectionRow, T>>)new ExpressionCompilableAsserter().Visit(projectorExpression);
         }
     }
 }

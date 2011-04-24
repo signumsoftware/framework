@@ -38,7 +38,7 @@ namespace Signum.Engine.Linq
                 Expression projector = this.Visit(proj.Projector);
 
                 if (projector != proj.Projector)
-                    proj = new ProjectionExpression(proj.Source, projector, proj.UniqueFunction, proj.Token);
+                    proj = new ProjectionExpression(proj.Source, projector, proj.UniqueFunction, proj.Token, proj.Type);
 
                 currentSource = null;
                 return proj;
@@ -52,11 +52,11 @@ namespace Signum.Engine.Linq
                     Expression projector = Visit(proj.Projector);
 
                     var key = Expression.Constant(0);
-                    var ciKVP = typeof(KeyValuePair<,>).MakeGenericType(key.Type, projector.Type).GetConstructor(new[] { key.Type, projector.Type });
-
+                    var kvpType = typeof(KeyValuePair<,>).MakeGenericType(key.Type, projector.Type);
+                    var ciKVP = kvpType.GetConstructor(new[] { key.Type, projector.Type });
+                    Type colType = proj.Type.GetGenericTypeDefinition();
                     return new ChildProjectionExpression(new ProjectionExpression(
-                        proj.Source,
-                        Expression.New(ciKVP, key, projector), proj.UniqueFunction, proj.Token),
+                        proj.Source, Expression.New(ciKVP, key, projector), proj.UniqueFunction, proj.Token, colType .MakeGenericType(kvpType) ),
                         Expression.Constant(0));
 
                 }
@@ -114,12 +114,13 @@ namespace Signum.Engine.Linq
 
                     currentSource = old;
 
-                    var key = TupleReflection.TupleChainConstructor(columnsSMExternal.Select(cd => cd.GetReference(aliasSM)));
-                    var ciKVP = typeof(KeyValuePair<,>).MakeGenericType(key.Type, projector.Type).GetConstructor(new[] { key.Type, projector.Type });
-
+                    Expression key = TupleReflection.TupleChainConstructor(columnsSMExternal.Select(cd => cd.GetReference(aliasSM)));
+                    Type kvpType = typeof(KeyValuePair<,>).MakeGenericType(key.Type, projector.Type);
+                    ConstructorInfo ciKVP = kvpType.GetConstructor(new[] { key.Type, projector.Type });
+                    Type colType = proj.Type.GetGenericTypeDefinition();
                     return new ChildProjectionExpression(new ProjectionExpression(
                         selectMany,
-                        Expression.New(ciKVP, key, projector), proj.UniqueFunction, proj.Token),
+                        Expression.New(ciKVP, key, projector), proj.UniqueFunction, proj.Token, colType.MakeGenericType(kvpType)),
                         TupleReflection.TupleChainConstructor(columns));
                 }
             }

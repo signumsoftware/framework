@@ -127,7 +127,7 @@ namespace Signum.Engine.Exceptions
 
         protected EntityNotFoundException(SerializationInfo info, StreamingContext context) : base(info, context) { }
 
-        public EntityNotFoundException(Type type, int[] ids)
+        public EntityNotFoundException(Type type, params int[] ids)
             : base(Resources.EntityWithType0AndId1NotFound.Formato(type.Name, ids.ToString(", ")))
         {
             this.Type = type;

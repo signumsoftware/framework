@@ -25,7 +25,7 @@ namespace Signum.Engine.Linq
 
         public readonly Table Table;
         public readonly Expression ExternalId;
-        public readonly Expression TypeId;
+        public Expression TypeId { get { return QueryBinder.TypeSqlConstant(Type); } }
         public readonly Expression OtherCondition; //Used for IBA only, 
         public readonly ProjectionToken Token;
 
@@ -33,7 +33,7 @@ namespace Signum.Engine.Linq
         public string TableAlias; //Changed on expansion 
         public List<FieldBinding> Bindings = new List<FieldBinding>();// not readonly!!!
 
-        public FieldInitExpression(Type type, string tableAlias, Expression externalId, Expression typeId, Expression otherCondition, ProjectionToken token)
+        public FieldInitExpression(Type type, string tableAlias, Expression externalId, Expression otherCondition, ProjectionToken token)
             : base(DbExpressionType.FieldInit, type)
         {
             if (type == null) 
@@ -49,20 +49,24 @@ namespace Signum.Engine.Linq
             this.Token = token;
             this.TableAlias = tableAlias;
             this.ExternalId = externalId;
-            this.TypeId = typeId;
             this.OtherCondition = otherCondition;
         }
 
-        public Expression GetOrCreateFieldBinding(ProjectionToken token, FieldInfo fi, QueryBinder binder)
+        public Expression GetOrCreateFieldBinding(FieldInfo fi, BinderTools tools)
         {
             FieldBinding binding = Bindings.SingleOrDefault(fb => ReflectionTools.FieldEquals(fi, fb.FieldInfo));
             if (binding != null)
                 return binding.Binding;
 
-            Expression ex = Table.CreateBinding(token, TableAlias, fi, binder);
+            Expression ex = Table.CreateBinding(Token, TableAlias, fi, tools);
 
             if (ex is MListExpression)
-                ((MListExpression)ex).BackID = GetOrCreateFieldBinding(token, FieldInitExpression.IdField, binder);
+            {
+                MListExpression mle = (MListExpression)ex;
+
+                mle.BackID = GetOrCreateFieldBinding(FieldInitExpression.IdField, tools);
+                ex = tools.MListProjection(mle);
+            }
 
             Bindings.Add(new FieldBinding(fi, ex));
 
@@ -84,6 +88,16 @@ namespace Signum.Engine.Linq
             return bindings.HasText() ?
                 constructor + "\r\n{" + bindings.Indent(4) + "\r\n}" :
                 constructor;
+        }
+
+        public void Complete(BinderTools tools)
+        {
+            foreach (EntityField field in Table.Fields.Values.Where(f =>
+                !ReflectionTools.Equals(f.FieldInfo, IdField) &&
+                !ReflectionTools.FieldEquals(f.FieldInfo, ToStrField)))
+            {
+                GetOrCreateFieldBinding(field.FieldInfo, tools);
+            }
         }
     }
 

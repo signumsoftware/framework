@@ -551,6 +551,41 @@ namespace Signum.Engine.Linq
         }
     }
 
+    internal static class WhenExtensions
+    {
+        public static Expression ToCondition(this IEnumerable<When> whens, Type returnType)
+        {
+            var @default = returnType.IsClass || returnType.IsNullable() ?
+                                Expression.Constant(null, returnType) :
+                                Convert(Expression.Constant(null, returnType.Nullify()), returnType);
+
+            var result = whens.Reverse().Aggregate(
+                @default, (acum, when) => Expression.Condition(when.Condition, Convert(when.Value, returnType), acum));
+
+            return result;
+        }
+
+        private static Expression Convert(Expression expression, Type returnType)
+        {
+            if (expression.Type == returnType)
+                return expression;
+
+            if (expression.Type.Nullify() == returnType)
+                return expression.Nullify();
+
+            if (expression.Type.UnNullify() == returnType)
+                return expression.UnNullify();
+
+            throw new InvalidOperationException("Imposible to convert to {0} the expression: \r\n{1}"
+                .Formato(returnType.TypeName(), expression.NiceToString()));
+        }
+
+        public static Expression NotEqualsNulll(this Expression exp)
+        {
+            return Expression.NotEqual(exp.Nullify(), Expression.Constant(null, typeof(int?)));
+        }
+    }
+
     internal class CaseExpression : DbExpression
     {
         public readonly ReadOnlyCollection<When> Whens;
@@ -780,10 +815,8 @@ namespace Signum.Engine.Linq
         public readonly UniqueFunction?  UniqueFunction;
         public readonly ProjectionToken Token; 
 
-        internal ProjectionExpression(SelectExpression source, Expression projector, UniqueFunction? uniqueFunction, ProjectionToken token)
-            : base(DbExpressionType.Projection,
-            uniqueFunction == null ? typeof(IQueryable<>).MakeGenericType(projector.Type) :
-            projector.Type)
+        internal ProjectionExpression(SelectExpression source, Expression projector, UniqueFunction? uniqueFunction, ProjectionToken token, Type resultType)
+            : base(DbExpressionType.Projection, resultType)
         {
             if (source == null)
                 throw new ArgumentNullException("source");
@@ -793,6 +826,10 @@ namespace Signum.Engine.Linq
 
             if (token == null)
                 throw new ArgumentNullException("token");
+
+            Type shouldImplement = uniqueFunction == null ? typeof(IEnumerable<>).MakeGenericType(projector.Type) : projector.Type;
+            if (!shouldImplement.IsAssignableFrom(resultType))
+                throw new InvalidOperationException("ProjectionType is {0} but should implement {1}".Formato(resultType.TypeName(), shouldImplement.TypeName()));  
 
             this.Source = source;
             this.Projector = projector;
@@ -833,7 +870,7 @@ namespace Signum.Engine.Linq
             if (projection.UniqueFunction != null)
                 return type;
 
-            return typeof(IEnumerable<>).MakeGenericType(new Type[] { type });
+            return projection.Projector.Type.GetGenericTypeDefinition().MakeGenericType(new Type[] { type });
         }
 
         public override string ToString()

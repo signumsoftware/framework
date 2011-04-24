@@ -82,8 +82,6 @@ namespace Signum.Engine.Linq
                     return this.VisitImplementedByAll((ImplementedByAllExpression)exp);     
                 case  DbExpressionType.LiteReference:
                     return this.VisitLiteReference((LiteReferenceExpression)exp);
-                case DbExpressionType.MList:
-                    return this.VisitMList((MListExpression)exp);
 
                 default:
                     return base.Visit(exp);
@@ -137,14 +135,6 @@ namespace Signum.Engine.Linq
         protected virtual Expression VisitSelectRowCount(SelectRowCountExpression src)
         {
             return src;
-        }
-
-        protected virtual Expression VisitMList(MListExpression ml)
-        {
-            var newBackID = Visit(ml.BackID);
-            if (newBackID != ml.BackID)
-                return new MListExpression(ml.Type, newBackID, ml.RelationalTable);
-            return ml;
         }
 
         protected virtual Expression VisitLiteReference(LiteReferenceExpression lite)
@@ -222,13 +212,12 @@ namespace Signum.Engine.Linq
                 var bindings = fie.Bindings.NewIfChange(fb => Visit(fb.Binding).Map(r => r == fb.Binding ? fb : new FieldBinding(fb.FieldInfo, r)));
 
                 var id = Visit(fie.ExternalId);
-                var typeId = Visit(fie.TypeId);
                 var other = Visit(fie.OtherCondition);
 
                 var token = VisitProjectionToken(fie.Token);
 
-                if (fie.Bindings != bindings || fie.ExternalId != id || fie.OtherCondition != other || fie.Token != token || fie.TypeId != typeId)
-                    return new FieldInitExpression(fie.Type, fie.TableAlias, id, typeId, other, token) { Bindings = bindings };
+                if (fie.Bindings != bindings || fie.ExternalId != id || fie.OtherCondition != other || fie.Token != token)
+                    return new FieldInitExpression(fie.Type, fie.TableAlias, id, other, token) { Bindings = bindings };
 
                 return fie;
             });
@@ -379,7 +368,7 @@ namespace Signum.Engine.Linq
 
             if (source != proj.Source || projector != proj.Projector || token != proj.Token)
             {
-                return new ProjectionExpression(source, projector, proj.UniqueFunction, token);
+                return new ProjectionExpression(source, projector, proj.UniqueFunction, token, proj.Type);
             }
             return proj;
         }

@@ -23,6 +23,8 @@ using System.Globalization;
 
 namespace Signum.Engine.Maps
 {
+    
+
     public class Schema : IImplementationsFinder
     {
         bool silentMode = false;
@@ -53,11 +55,11 @@ namespace Signum.Engine.Maps
             set { typeToId = value; }
         }
 
-        Dictionary<int, Table> idToTable;
-        internal Dictionary<int, Table> IdToTable
+        Dictionary<int, Type> idToType;
+        internal Dictionary<int, Type> IdToType
         {
-            get { return idToTable.ThrowIfNullC(errorType); }
-            set { idToTable = value; }
+            get { return idToType.ThrowIfNullC(errorType); }
+            set { idToType = value; }
         }
 
         Dictionary<Type, TypeDN> typeToDN;
@@ -151,28 +153,16 @@ namespace Signum.Engine.Maps
             entityEventsGlobal.OnSaving(entity, isRoot);
         }
 
-        internal void OnRetrieving(Type type, int[] ids, bool inQuery)
-        {
-            AssertAllowed(type);
-
-            IEntityEvents ee = entityEvents.TryGetC(type);
-
-            if (ee != null)
-                ee.OnRetrieving(type, ids, inQuery);
-
-            entityEventsGlobal.OnRetrieving(type, ids, inQuery);
-        }
-
-        internal void OnRetrieved(IdentifiableEntity entity, bool isRoot)
+        internal void OnRetrieved(IdentifiableEntity entity)
         {
             AssertAllowed(entity.GetType());
 
             IEntityEvents ee = entityEvents.TryGetC(entity.GetType());
 
             if (ee != null)
-                ee.OnRetrieved(entity, isRoot);
+                ee.OnRetrieved(entity);
 
-            entityEventsGlobal.OnRetrieved(entity, isRoot);
+            entityEventsGlobal.OnRetrieved(entity);
         }
 
 
@@ -382,9 +372,9 @@ namespace Signum.Engine.Maps
             if (ibField != null)
                 return new ImplementedByAttribute(ibField.ImplementationColumns.Keys.ToArray());
 
-            FieldImplementedByAll ibaField = field as FieldImplementedByAll;
-            if (ibaField != null)
-                return new ImplementedByAllAttribute();
+            //FieldImplementedByAll ibaField = field as FieldImplementedByAll;
+            //if (ibaField != null)
+            //    return new ImplementedByAllAttribute();
 
             return null;
         }
@@ -416,18 +406,16 @@ namespace Signum.Engine.Maps
     {
         void OnPreSaving(IdentifiableEntity entity, bool isRoot, ref bool graphModified);
         void OnSaving(IdentifiableEntity entity, bool isRoot);
-        void OnRetrieving(Type type, int[] ids, bool inQuery);
-        void OnRetrieved(IdentifiableEntity entity, bool isRoot);
+        void OnRetrieved(IdentifiableEntity entity);
     }
 
     public class EntityEvents<T> : IEntityEvents
         where T : IdentifiableEntity
     {
-        public event PreSavingEntityEventHandler<T> PreSaving;
-        public event EntityEventHandler<T> Saving;
+        public event PreSavingEventHandler<T> PreSaving;
+        public event SavingEventHandler<T> Saving;
 
-        public event RetrivingEntitiesEventHandler Retrieving;
-        public event EntityEventHandler<T> Retrieved;
+        public event RetrievedEventHandler<T> Retrieved;
 
         public event FilterQueryEventHandler<T> FilterQuery;
 
@@ -461,23 +449,17 @@ namespace Signum.Engine.Maps
                 Saving((T)entity, isRoot);
         }
 
-        void IEntityEvents.OnRetrieving(Type type, int[] ids, bool inQuery)
-        {
-            if (Retrieving != null)
-                Retrieving(type, ids, inQuery);
-        }
-
-        void IEntityEvents.OnRetrieved(IdentifiableEntity entity, bool isRoot)
+        void IEntityEvents.OnRetrieved(IdentifiableEntity entity)
         {
             if (Retrieved != null)
-                Retrieved((T)entity, isRoot);
+                Retrieved((T)entity);
         }
     }
 
-    public delegate void PreSavingEntityEventHandler<T>(T ident, bool isRoot, ref bool graphModified) where T : IdentifiableEntity;
-    public delegate void EntityEventHandler<T>(T ident, bool isRoot) where T : IdentifiableEntity;
-    public delegate void SavedEntityEventHandler<T>(T ident, SavedEventArgs args) where T : IdentifiableEntity;
-    public delegate void RetrivingEntitiesEventHandler(Type type, int[] ids, bool inQuery);
+    public delegate void PreSavingEventHandler<T>(T ident, bool isRoot, ref bool graphModified) where T : IdentifiableEntity;
+    public delegate void RetrievedEventHandler<T>(T ident) where T : IdentifiableEntity;    
+    public delegate void SavingEventHandler<T>(T ident, bool isRoot) where T : IdentifiableEntity;
+    public delegate void SavedEventHandler<T>(T ident, SavedEventArgs args) where T : IdentifiableEntity;
     public delegate IQueryable<T> FilterQueryEventHandler<T>(IQueryable<T> query);
 
     public delegate void PreUnsafeDeleteHandler<T>(IQueryable<T> query);
@@ -627,12 +609,9 @@ namespace Signum.Engine.Maps
 
         public List<UniqueIndex> MultiIndexes { get; set; }
 
-        public Func<object> Constructor { get; private set; }
-
         public Table(Type type)
         {
             this.Type = type;
-            this.Constructor = ReflectionTools.CreateConstructor<object>(type);
         }
 
         public override string ToString()
@@ -649,8 +628,6 @@ namespace Signum.Engine.Maps
             {
                 col.Position = i++;
             }
-
-            CompleteRetrieve();
         }
 
         public Field GetField(MemberInfo value, bool throws)
@@ -1074,12 +1051,7 @@ namespace Signum.Engine.Maps
                 throw new NotImplementedException();
             }
 
-            internal override Expression GetExpression(ProjectionToken token, string tableAlias, QueryBinder binder)
-            {
-                throw new NotImplementedException();
-            }
-
-            internal override Expression GenerateValue(ParameterExpression reader, ParameterExpression retriever)
+            internal override Expression GetExpression(ProjectionToken token, string tableAlias, BinderTools tools)
             {
                 throw new NotImplementedException();
             }
@@ -1099,7 +1071,6 @@ namespace Signum.Engine.Maps
         public RelationalTable(Type collectionType)
         {
             this.CollectionType = collectionType;
-            this.Constructor = ReflectionTools.CreateConstructor<IList>(collectionType);
         }
 
         public override string ToString()
@@ -1116,8 +1087,6 @@ namespace Signum.Engine.Maps
             {
                 col.Position = i++;
             }
-
-            CompleteRetrieve();
         }
 
         public List<UniqueIndex> GeneratUniqueIndexes()

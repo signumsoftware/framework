@@ -167,13 +167,13 @@ namespace Signum.Web
             if (typeof(T) == runtimeInfo.RuntimeType || typeof(T).IsEmbeddedEntity())
                 return GetRuntimeValue<T>(ctx, ctx.PropertyRoute);
 
-            return (T)miGetRuntimeValue.GetInvoker(runtimeInfo.RuntimeType)(this, ctx, PropertyRoute.Root(runtimeInfo.RuntimeType));
+            return miGetRuntimeValue.GetInvoker(runtimeInfo.RuntimeType)(this, ctx, PropertyRoute.Root(runtimeInfo.RuntimeType));
         }
 
-        static GenericInvoker miGetRuntimeValue = GenericInvoker.Create(typeof(AutoEntityMapping<T>).GetMethod("GetRuntimeValue", BindingFlags.Instance | BindingFlags.Public));
-
+        static GenericInvoker<Func<AutoEntityMapping<T>, MappingContext<T>, PropertyRoute, T>> miGetRuntimeValue = 
+           new GenericInvoker<Func<AutoEntityMapping<T>, MappingContext<T>, PropertyRoute, T>>((aem, mc, pr)=>aem.GetRuntimeValue<T>(mc, pr));
         public R GetRuntimeValue<R>(MappingContext<T> ctx, PropertyRoute route)
-            where R : class 
+            where R : class, T 
         {
             if (AllowedMappings != null && !AllowedMappings.ContainsKey(typeof(R)))
             {

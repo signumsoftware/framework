@@ -26,12 +26,10 @@ namespace Signum.Engine.Linq
     {
         ProjectionToken Name { get; }
 
-        void Fill(Dictionary<ProjectionToken, IEnumerable> lookups, Retriever retriever);
+        void Fill(Dictionary<ProjectionToken, IEnumerable> lookups, IRetriever retriever);
 
         SqlPreCommandSimple PreCommand();
     }
-
-
 
     class ChildProjection<K, V> : IChildProjection
     {
@@ -42,13 +40,13 @@ namespace Signum.Engine.Linq
         internal Func<SqlParameter[]> GetParameters;
         internal Expression<Func<IProjectionRow, KeyValuePair<K, V>>> ProjectorExpression;
 
-        public void Fill(Dictionary<ProjectionToken, IEnumerable> lookups, Retriever retriever)
+        public void Fill(Dictionary<ProjectionToken, IEnumerable> lookups, IRetriever retriever)
         {
             SqlPreCommandSimple command = new SqlPreCommandSimple(CommandText, GetParameters().ToList());
             using (HeavyProfiler.Log("SQL", command.Sql))
             using (SqlDataReader reader = Executor.UnsafeExecuteDataReader(command))
             {
-                ProjectionRowEnumerator<KeyValuePair<K, V>> enumerator = new ProjectionRowEnumerator<KeyValuePair<K, V>>(reader, ProjectorExpression, retriever, lookups);
+                ProjectionRowEnumerator<KeyValuePair<K, V>> enumerator = new ProjectionRowEnumerator<KeyValuePair<K, V>>(reader, ProjectorExpression, lookups, retriever);
 
                 IEnumerable<KeyValuePair<K, V>> enumerabe = new ProjectionRowEnumerable<KeyValuePair<K, V>>(enumerator);
 
@@ -94,44 +92,44 @@ namespace Signum.Engine.Linq
             using (new EntityCache())
             using (Transaction tr = new Transaction())
             {
-                Retriever retriever = new Retriever() { InQuery = true };
-
-                if (ChildProjections != null)
-                {
-                    lookups = new Dictionary<ProjectionToken, IEnumerable>();
-                    foreach (var chils in ChildProjections)
-                        chils.Fill(lookups, retriever);
-                }
-
-                SqlPreCommandSimple command = new SqlPreCommandSimple(CommandText, GetParameters().ToList());
-
                 object result;
-                using (HeavyProfiler.Log("SQL", command.Sql))
-                using (SqlDataReader reader = Executor.UnsafeExecuteDataReader(command))
+                using (IRetriever retriever = EntityCache.NewRetriever())
                 {
-                    ProjectionRowEnumerator<T> enumerator = new ProjectionRowEnumerator<T>(reader, ProjectorExpression, retriever, lookups);
-
-                    IEnumerable<T> enumerable = new ProjectionRowEnumerable<T>(enumerator);
-
-                    try
+                    if (ChildProjections != null)
                     {
-
-                        if (Unique == null)
-                            result = enumerable.ToList();
-                        else
-                            result = UniqueMethod(enumerable, Unique.Value);
+                        lookups = new Dictionary<ProjectionToken, IEnumerable>();
+                        foreach (var chils in ChildProjections)
+                            chils.Fill(lookups, retriever);
                     }
-                    catch (SqlTypeException ex)
+
+                    SqlPreCommandSimple command = new SqlPreCommandSimple(CommandText, GetParameters().ToList());
+
+                  
+                    using (HeavyProfiler.Log("SQL", command.Sql))
+                    using (SqlDataReader reader = Executor.UnsafeExecuteDataReader(command))
                     {
-                        FieldReaderException fieldEx = enumerator.Reader.CreateFieldReaderException(ex);
-                        fieldEx.Command = command;
-                        fieldEx.Row = enumerator.Row;
-                        fieldEx.Projector = ProjectorExpression;
-                        throw fieldEx;
+                        ProjectionRowEnumerator<T> enumerator = new ProjectionRowEnumerator<T>(reader, ProjectorExpression, lookups, retriever);
+
+                        IEnumerable<T> enumerable = new ProjectionRowEnumerable<T>(enumerator);
+
+                        try
+                        {
+
+                            if (Unique == null)
+                                result = enumerable.ToList();
+                            else
+                                result = UniqueMethod(enumerable, Unique.Value);
+                        }
+                        catch (SqlTypeException ex)
+                        {
+                            FieldReaderException fieldEx = enumerator.Reader.CreateFieldReaderException(ex);
+                            fieldEx.Command = command;
+                            fieldEx.Row = enumerator.Row;
+                            fieldEx.Projector = ProjectorExpression;
+                            throw fieldEx;
+                        }
                     }
                 }
-
-                retriever.ProcessAll();
 
                 return tr.Commit(result);
             }

@@ -268,10 +268,10 @@ namespace Signum.Engine.DynamicQuery
             return (IOrderedQueryable<object>)query.Provider.CreateQuery<object>(Expression.Call(null, mi, new Expression[] { query.Expression, Expression.Quote(lambda) }));
         }
 
-        static GenericInvoker miOrderByE = GenericInvoker.Create(() => Database.Query<TypeDN>().ToList().OrderBy(t => t.Id));
-        static GenericInvoker miThenByE = GenericInvoker.Create(() => Database.Query<TypeDN>().ToList().OrderBy(t => t.Id).ThenBy(t => t.Id));
-        static GenericInvoker miOrderByDescendingE = GenericInvoker.Create(() => Database.Query<TypeDN>().ToList().OrderByDescending(t => t.Id));
-        static GenericInvoker miThenByDescendingE = GenericInvoker.Create(() => Database.Query<TypeDN>().ToList().OrderBy(t => t.Id).ThenByDescending(t => t.Id));
+        static GenericInvoker<Func<IEnumerable<object>, Delegate, IOrderedEnumerable<object>>> miOrderByE = new GenericInvoker<Func<IEnumerable<object>, Delegate, IOrderedEnumerable<object>>>((col, del) => col.OrderBy((Func<object, object>)del));
+        static GenericInvoker<Func<IOrderedEnumerable<object>, Delegate, IOrderedEnumerable<object>>> miThenByE = new GenericInvoker<Func<IOrderedEnumerable<object>, Delegate, IOrderedEnumerable<object>>>((col, del) => col.ThenBy((Func<object, object>)del));
+        static GenericInvoker<Func<IEnumerable<object>, Delegate, IOrderedEnumerable<object>>> miOrderByDescendingE = new GenericInvoker<Func<IEnumerable<object>, Delegate, IOrderedEnumerable<object>>>((col, del) => col.OrderByDescending((Func<object, object>)del));
+        static GenericInvoker<Func<IOrderedEnumerable<object>, Delegate, IOrderedEnumerable<object>>> miThenByDescendingE = new GenericInvoker<Func<IOrderedEnumerable<object>, Delegate, IOrderedEnumerable<object>>>((col, del) => col.ThenByDescending((Func<object, object>)del));
 
         public static DEnumerable<T> OrderBy<T>(this DEnumerable<T> collection, List<Order> orders)
         {
@@ -299,16 +299,16 @@ namespace Signum.Engine.DynamicQuery
 
         static IOrderedEnumerable<object> OrderBy(this IEnumerable<object> collection, LambdaExpression lambda, OrderType orderType)
         {
-            GenericInvoker mi = orderType == OrderType.Ascending ? miOrderByE : miOrderByDescendingE;
+            var mi = orderType == OrderType.Ascending ? miOrderByE : miOrderByDescendingE;
 
-            return (IOrderedEnumerable<object>)mi.GetInvoker(lambda.Type.GetGenericArguments())(collection, lambda.Compile());
+            return mi.GetInvoker(lambda.Type.GetGenericArguments())(collection, lambda.Compile());
         }
 
         static IOrderedEnumerable<object> ThenBy(this IOrderedEnumerable<object> collection, LambdaExpression lambda, OrderType orderType)
         {
-            GenericInvoker mi = orderType == OrderType.Ascending ? miThenByE : miThenByDescendingE;
+            var mi = orderType == OrderType.Ascending ? miThenByE : miThenByDescendingE;
 
-            return (IOrderedEnumerable<object>)mi.GetInvoker(lambda.Type.GetGenericArguments())(collection, lambda.Compile());
+            return mi.GetInvoker(lambda.Type.GetGenericArguments())(collection, lambda.Compile());
         }
 
         #endregion
@@ -393,14 +393,14 @@ namespace Signum.Engine.DynamicQuery
         {
             var columnValues = columnAccesors.Select(c => new ResultColumn(
                 c.Item1,
-                (Array)miGetValues.GetInvoker(c.Item1.Type)(result, c.Item2.Compile()))
+                miGetValues.GetInvoker(c.Item1.Type)(result, c.Item2.Compile()))
              ).ToArray();
 
             return new ResultTable(columnValues);
         }
 
-        static GenericInvoker miGetValues = GenericInvoker.Create(() => GetValues<int>(null, null));
-        static Array GetValues<S>(object[] collection, Func<object, S> getter)
+        static GenericInvoker<Func<object[], Delegate, Array>> miGetValues = new GenericInvoker<Func<object[], Delegate, Array>>((objs, del) => GetValues<int>(objs, (Func<object, int>)del));
+        static S[] GetValues<S>(object[] collection, Func<object, S> getter)
         {
             S[] array = new S[collection.Length];
             for (int i = 0; i < collection.Length; i++)

@@ -47,8 +47,11 @@ namespace Signum.Engine.Linq
         {
             Expression cleaned = Clean(expression);
             Expression filtered = QueryFilterer.Filter(cleaned);
-            ProjectionExpression binded = (ProjectionExpression)QueryBinder.Bind(filtered);
-            ProjectionExpression optimized = (ProjectionExpression)Optimize(binded);
+
+            BinderTools tools = new BinderTools();
+
+            ProjectionExpression binded = (ProjectionExpression)QueryBinder.Bind(filtered, tools);
+            ProjectionExpression optimized = (ProjectionExpression)Optimize(binded, tools);
 
             ProjectionExpression flat = ChildProjectionFlattener.Flatten(optimized);
 
@@ -63,11 +66,11 @@ namespace Signum.Engine.Linq
             return simplified;
         }
 
-        internal static Expression Optimize(Expression binded)
+        internal static Expression Optimize(Expression binded, BinderTools tools)
         {
             Expression rewrited = AggregateRewriter.Rewrite(binded);
-            Expression rebinded = QueryRebinder.Rebind(rewrited);
-            Expression projCleaned = EntityCleaner.Clean(rebinded);
+            Expression projCleaned = EntityCompleter.Clean(rewrited, tools);
+            Expression rebinded = QueryRebinder.Rebind(projCleaned);
             Expression replaced = AliasProjectionReplacer.Replace(projCleaned);
             Expression removed = CountOrderByRemover.Remove(replaced);
             Expression columnCleaned = UnusedColumnRemover.Remove(removed);
@@ -81,8 +84,9 @@ namespace Signum.Engine.Linq
         {
             Expression cleaned = Clean(query.Expression);
             Expression filtered = QueryFilterer.Filter(cleaned);
-            CommandExpression delete = new QueryBinder().BindDelete(filtered);
-            CommandExpression deleteOptimized = (CommandExpression)Optimize(delete);
+            BinderTools tools = new BinderTools();
+            CommandExpression delete = new QueryBinder(tools).BindDelete(filtered);
+            CommandExpression deleteOptimized = (CommandExpression)Optimize(delete, tools);
             CommandResult cr = TranslatorBuilder.BuildCommandResult(deleteOptimized);
 
             return cr.Execute();
@@ -93,8 +97,10 @@ namespace Signum.Engine.Linq
         {
             Expression cleaned = Clean(query.Expression);
             Expression filtered = QueryFilterer.Filter(cleaned);
-            CommandExpression update = new QueryBinder().BindUpdate(filtered, set);
-            CommandExpression updateOptimized = (CommandExpression)Optimize(update);
+
+            BinderTools tools = new BinderTools();
+            CommandExpression update = new QueryBinder(tools).BindUpdate(filtered, set);
+            CommandExpression updateOptimized = (CommandExpression)Optimize(update, tools);
             CommandResult cr = TranslatorBuilder.BuildCommandResult(updateOptimized);
 
             return cr.Execute();

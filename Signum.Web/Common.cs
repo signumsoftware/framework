@@ -135,10 +135,11 @@ namespace Signum.Web
         internal static TypeContext UntypedWalkExpression(TypeContext tc, LambdaExpression lambda)
         {
             Type returnType = lambda.Body.Type;
-            return (TypeContext)miWalkExpression.GetInvoker(tc.Type, returnType)(tc, lambda);
+            return miWalkExpression.GetInvoker(tc.Type, returnType)(tc, lambda);
         }
 
-        static GenericInvoker miWalkExpression = GenericInvoker.Create(() => Common.WalkExpression<TypeDN, TypeDN>(null, null));
+        static GenericInvoker<Func<TypeContext, LambdaExpression, TypeContext>> miWalkExpression = 
+            new GenericInvoker<Func<TypeContext, LambdaExpression, TypeContext>>((tc, le) => Common.WalkExpression<TypeDN, TypeDN>((TypeContext<TypeDN>)tc, (Expression<Func<TypeDN, TypeDN>>)le));
         public static TypeContext<S> WalkExpression<T, S>(TypeContext<T> tc, Expression<Func<T, S>> lambda)
         {
             return MemberAccessGatherer.WalkExpression(tc, lambda);

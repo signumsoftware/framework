@@ -41,7 +41,7 @@ namespace Signum.Engine.Linq
 
             if (source != proj.Source || projector != proj.Projector || token != proj.Token)
             {
-                return new ProjectionExpression(source, projector, proj.UniqueFunction, token);
+                return new ProjectionExpression(source, projector, proj.UniqueFunction, token, proj.Type);
             }
             return proj;       
         }

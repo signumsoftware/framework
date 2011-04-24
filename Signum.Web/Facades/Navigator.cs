@@ -295,10 +295,11 @@ namespace Signum.Web
 
         public static MappingContext UntypedApplyChanges(this ModifiableEntity entity, ControllerContext controllerContext, string prefix, bool admin)
         {
-            return (MappingContext)miApplyChanges.GetInvoker(entity.GetType()).Invoke(entity, controllerContext, prefix, admin);
+            return miApplyChanges.GetInvoker(entity.GetType()).Invoke(entity, controllerContext, prefix, admin);
         }
 
-        static GenericInvoker miApplyChanges = GenericInvoker.Create(()=>new TypeDN().ApplyChanges(null, null, true));
+        static GenericInvoker<Func<ModifiableEntity, ControllerContext, string, bool, MappingContext>> miApplyChanges =
+            new GenericInvoker<Func<ModifiableEntity, ControllerContext, string, bool, MappingContext>>((me, cc, pr, ad) => ApplyChanges<TypeDN>((TypeDN)me, cc, pr, ad));
         public static MappingContext<T> ApplyChanges<T>(this T entity, ControllerContext controllerContext, string prefix, bool admin) where T : IRootEntity
         {
             SortedList<string, string> inputs = controllerContext.HttpContext.Request.Form.ToSortedList(prefix);
@@ -351,7 +352,7 @@ namespace Signum.Web
             return (Lite<T>)Manager.ExtractLite<T>(controller, prefix);
         }
 
-        public static List<Lite<T>> ExtractLitesList<T>(string commaSeparatedIds, bool retrive) where T : class, IIdentifiable
+        public static List<Lite<T>> ExtractLitesList<T>(string commaSeparatedIds, bool retrive) where T : IdentifiableEntity
         {
             if (!commaSeparatedIds.HasText())
                 return new List<Lite<T>>();

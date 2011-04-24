@@ -201,19 +201,18 @@ namespace Signum.Engine.Linq
         static Expression ToLiteReferenceExpression(Lite lite)
         {
             Expression id = Expression.Constant(lite.IdOrNull ?? int.MinValue);
-            Expression typeId = QueryBinder.TypeConstant(lite.RuntimeType);
 
             Type liteType = lite.GetType();
 
-            Expression fie = new FieldInitExpression(lite.RuntimeType, null, id, typeId, null, ProjectionToken.External);
+            FieldInitExpression fie = new FieldInitExpression(lite.RuntimeType, null, id, null, ProjectionToken.External);
 
             Type staticType = Reflector.ExtractLite(liteType);
-            if (staticType != fie.Type)
-                fie = new ImplementedByExpression(staticType, 
+            Expression reference = staticType != fie.Type? (Expression)fie: 
+                new ImplementedByExpression(staticType, 
                     new[] { new ImplementationColumnExpression(fie.Type, (FieldInitExpression)fie) }.ToReadOnly());
 
             return new LiteReferenceExpression(liteType,
-                fie, id, Expression.Constant(lite.ToStr), typeId);
+                fie, id, Expression.Constant(lite.ToStr), fie.TypeId);
         }
 
         static Expression ToFieldInitExpression(IIdentifiable ei)
@@ -222,7 +221,6 @@ namespace Signum.Engine.Linq
                 ei.GetType(),
                 null,
                 Expression.Constant(ei.IdOrNull ?? int.MinValue),
-                QueryBinder.TypeConstant(ei.GetType()),
                 null,
                 ProjectionToken.External);
         }

@@ -296,11 +296,6 @@ namespace Signum.Utilities.Reflection
             return (Action<object, object>)exp.Compile();
         }
 
-        public static Func<T> CreateConstructor<T>(Type type)
-        {
-            return Expression.Lambda<Func<T>>(Expression.Convert(Expression.New(type), typeof(T))).Compile();
-        }
-
         public static bool IsNumber(Type type)
         {
             switch (Type.GetTypeCode(type.UnNullify()))

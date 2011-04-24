@@ -89,7 +89,7 @@ namespace Signum.Engine.Linq
             SelectExpression source = (SelectExpression)this.Visit(projection.Source);
             if (projector != projection.Projector || source != projection.Source)
             {
-                return new ProjectionExpression(source, projector, projection.UniqueFunction, projection.Token);
+                return new ProjectionExpression(source, projector, projection.UniqueFunction, projection.Token, projection.Type);
             }
             return projection;
         }

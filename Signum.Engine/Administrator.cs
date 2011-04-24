@@ -56,30 +56,9 @@ namespace Signum.Engine
             {
                 if (ExistTable(table.Name))
                 {
-                    return UnsafeRetrieveAll(type);
+                    return Database.RetrieveAll(type);
                 }
                 return new List<IdentifiableEntity>();
-            }
-        }
-
-        public static List<T> UnsafeRetrieveAll<T>()
-          where T : IdentifiableEntity
-        {
-            return UnsafeRetrieveAll(typeof(T)).Cast<T>().ToList();
-        }
-
-        private static List<IdentifiableEntity> UnsafeRetrieveAll(Type type)
-        {
-            using (new EntityCache())
-            using (Transaction tr = new Transaction())
-            {
-                Retriever rec = new Retriever();
-
-                List<IdentifiableEntity> ident = rec.UnsafeRetrieveAll(type);
-
-                rec.ProcessAll();
-
-                return tr.Commit(ident);
             }
         }
 

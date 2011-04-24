@@ -198,36 +198,6 @@ namespace Signum.Engine
                 campoParameters.ToString(p => p.ParameterName, ", ")), campoParameters);
         }
 
-        internal static SqlPreCommand SelectByIds(string table, string[] columns, string column, int[] ids)
-        {
-            List<SqlParameter> parameters = ids.Select(id => SqlParameterBuilder.CreateReferenceParameter("val", false, id)).ToList();
-
-            return new SqlPreCommandSimple("SELECT {0} FROM {1} WHERE {2} IN ({3})".Formato(
-            columns.ToString(a => a.SqlScape(), ", "), table.SqlScape(), column.SqlScape(),
-            parameters.ToString(p => p.ParameterName, ", ")), parameters);
-        }
-
-        internal static SqlPreCommand SelectCount(string table, int id)
-        {
-            SqlParameter idParam = SqlParameterBuilder.CreateIdParameter(id);
-
-            return new SqlPreCommandSimple("SELECT COUNT(id) FROM {0} WHERE  id = {1}".Formato(table.SqlScape(), idParam.ParameterName), new List<SqlParameter> { idParam });
-        }
-
-        internal static SqlPreCommand SelectToStr(string table, int id)
-        {
-            SqlParameter idParam = SqlParameterBuilder.CreateIdParameter(id);
-
-            return new SqlPreCommandSimple("SELECT ToStr FROM {0} WHERE  id = {1}".Formato(table.SqlScape(), idParam.ParameterName), new List<SqlParameter> { idParam });
-        }
-
-        internal static SqlPreCommandSimple SelectAll(string table, string[] columns)
-        {
-            return new SqlPreCommandSimple("SELECT {0} FROM {1}".Formato(
-            columns.ToString(a => a.SqlScape(), ", "),
-            table.SqlScape()));
-        }
-
         #region Create Tables
 
         public static SqlPreCommand CreateTableSql(ITable t)
