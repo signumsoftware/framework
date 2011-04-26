@@ -17,7 +17,7 @@ namespace Signum.Engine.Operations
         IIdentifiable Construct(List<Lite> lites, params object[] parameters);
     }
 
-    public class BasicConstructorFromMany<F, T> : IConstructorFromManyOperation
+    public class BasicConstructFromMany<F, T> : IConstructorFromManyOperation
         where T : class, IIdentifiable
         where F: class, IIdentifiable
     {
@@ -31,7 +31,7 @@ namespace Signum.Engine.Operations
 
         public Func<List<Lite<F>>, object[], T> Constructor { get; set; }
 
-        public BasicConstructorFromMany(Enum key)
+        public BasicConstructFromMany(Enum key)
         {
             this.Key = key; 
         }
@@ -53,7 +53,7 @@ namespace Signum.Engine.Operations
 
                     OperationLogic.OnBeginOperation(this, null);
 
-                    T result = OnConstructor(lites.Select(l => l.ToLite<F>()).ToList(), args);
+                    T result = OnConstruct(lites.Select(l => l.ToLite<F>()).ToList(), args);
 
                     OperationLogic.OnEndOperation(this, result);
 
@@ -75,7 +75,7 @@ namespace Signum.Engine.Operations
             }
         }
 
-        protected virtual T OnConstructor(List<Lite<F>> lites, object[] args)
+        protected virtual T OnConstruct(List<Lite<F>> lites, object[] args)
         {
             return Constructor(lites, args);
         }

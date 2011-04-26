@@ -12,10 +12,14 @@
     <AssemblyName>Signum.Engine.Extensions</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <SccProjectName>SAK</SccProjectName>
-    <SccLocalPath>SAK</SccLocalPath>
-    <SccAuxPath>SAK</SccAuxPath>
-    <SccProvider>SAK</SccProvider>
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccProvider>
+    </SccProvider>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <OldToolsVersion>4.0</OldToolsVersion>
@@ -121,9 +125,9 @@
     <Compile Include="Mailing\EmailLogic.cs" />
     <Compile Include="Mailing\EmailRenderer.cs" />
     <Compile Include="Mailing\SendEmailProcessAlgorithm.cs" />
-    <Compile Include="Operations\Constructor.cs" />
-    <Compile Include="Operations\ConstructorFrom.cs" />
-    <Compile Include="Operations\ConstructorFromMany.cs" />
+    <Compile Include="Operations\BasicConstruct.cs" />
+    <Compile Include="Operations\BasicConstructFrom.cs" />
+    <Compile Include="Operations\BasicConstructFromMany.cs" />
     <Compile Include="Operations\Delete.cs" />
     <Compile Include="Operations\Execute.cs" />
     <Compile Include="Operations\Graph.cs" />

@@ -83,7 +83,7 @@ namespace Signum.Test.Extensions
 
             Signum.Test.Starter.StartMusic(sb, dqm);
 
-            new AlbumGraph().Register();
+            AlbumGraph.Register();
             OperationLogic.Register(new BasicExecute<ArtistDN>(ArtistOperation.AssignPersonalAward)
             {
                 Lite = true,
