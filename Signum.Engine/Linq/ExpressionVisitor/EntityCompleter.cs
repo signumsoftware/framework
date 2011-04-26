@@ -34,6 +34,8 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitFieldInit(FieldInitExpression fie)
         {
+            fie = new FieldInitExpression(fie.Type, fie.TableAlias, fie.ExternalId, null, fie.Token) { Bindings = fie.Bindings.ToList() };
+
             if (previousTypes.Contains(fie.Type))
                 fie.Bindings.Clear();
             else

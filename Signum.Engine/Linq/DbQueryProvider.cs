@@ -71,7 +71,7 @@ namespace Signum.Engine.Linq
             Expression rewrited = AggregateRewriter.Rewrite(binded);
             Expression projCleaned = EntityCompleter.Clean(rewrited, tools);
             Expression rebinded = QueryRebinder.Rebind(projCleaned);
-            Expression replaced = AliasProjectionReplacer.Replace(projCleaned);
+            Expression replaced = AliasProjectionReplacer.Replace(rebinded);
             Expression removed = CountOrderByRemover.Remove(replaced);
             Expression columnCleaned = UnusedColumnRemover.Remove(removed);
             Expression rowFilled = RowNumberFiller.Fill(columnCleaned);
