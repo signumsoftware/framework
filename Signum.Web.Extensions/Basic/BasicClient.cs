@@ -20,8 +20,12 @@ namespace Signum.Web.Basic
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 Navigator.RegisterArea(typeof(BasicClient));
-               
-                Navigator.AddSetting(new EmbeddedEntitySettings<DateSpanDN>() { PartialViewName = _ => ViewPrefix.Formato("DateSpan") });
+
+                Navigator.AddSettings(new List<EntitySettings>
+                {
+                    new EmbeddedEntitySettings<DateSpanDN>() { PartialViewName = _ => ViewPrefix.Formato("DateSpan") },
+                    new EmbeddedEntitySettings<HourMinuteDN>() { PartialViewName = _ => ViewPrefix.Formato("HourMinute") }
+                });
             }
         }
     }
