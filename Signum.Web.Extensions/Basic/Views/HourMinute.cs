@@ -65,23 +65,21 @@ namespace ASP
 
  using (var e = Html.TypeContext<HourMinuteDN>())
 {
+    using (Html.FieldInline())
+    {
+        
+   Write(Html.ValueLine(e, f => f.Hour, vl => vl.ValueHtmlProps["size"] = 2));
 
-        using (Html.FieldInline())
-        {
-            
-       Write(Html.ValueLine(e, f => f.Hour, vl => vl.ValueHtmlProps["size"] = 2));
+                                                                            
+        
+   Write(Html.Span("", ":", "sf-value-line", new Dictionary<string, object> { { "style", "font-weight:bold" } }));
 
-                                                                                
-            
-       Write(Html.Span("", ":", "sf-value-line", new Dictionary<string, object> { { "style", "font-weight:bold" } }));
+                                                                                                                
+        
+   Write(Html.ValueLine(e, f => f.Minute, vl => vl.ValueHtmlProps["size"] = 2));
 
-                                                                                                                    
-            
-       Write(Html.ValueLine(e, f => f.Minute, vl => vl.ValueHtmlProps["size"] = 2));
-
-                                                                                  
-        }
-   
+                                                                              
+    }
 }
 
 
