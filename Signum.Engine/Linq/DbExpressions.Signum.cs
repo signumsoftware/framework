@@ -92,11 +92,28 @@ namespace Signum.Engine.Linq
 
         public void Complete(BinderTools tools)
         {
+            AssertTable(tools);
+
             foreach (EntityField field in Table.Fields.Values.Where(f =>
                 !ReflectionTools.Equals(f.FieldInfo, IdField) &&
                 !ReflectionTools.FieldEquals(f.FieldInfo, ToStrField)))
             {
                 GetOrCreateFieldBinding(field.FieldInfo, tools);
+            }
+        }
+
+        public void AssertTable(BinderTools tools)
+        {
+            if (TableAlias == null)
+            {
+                TableAlias = tools.GetNextTableAlias(Type);
+                if (!Table.IsView)
+                    GetOrCreateFieldBinding(FieldInitExpression.IdField, tools);
+                tools.AddRequest(Token, new TableCondition
+                {
+                    FieldInit = this,
+                    Table = new TableExpression(TableAlias, Table.Name)
+                });
             }
         }
     }

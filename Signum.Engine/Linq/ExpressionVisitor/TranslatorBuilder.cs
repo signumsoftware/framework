@@ -247,12 +247,17 @@ namespace Signum.Engine.Linq
 
                 ParameterExpression e = Expression.Parameter(fieldInit.Type, fieldInit.Type.Name.ToLower().Substring(0, 1));
 
-                var block = Expression.Block(fieldInit.Bindings.Select(b =>
-                    Expression.Assign(Expression.Field(e, b.FieldInfo), Visit(b.Binding))));
+                var block = Expression.Block(
+                    fieldInit.Bindings
+                    .Where(a => !ReflectionTools.FieldEquals(FieldInitExpression.IdField, a.FieldInfo))
+                    .Select(b => Expression.Assign(
+                        Expression.Field(e, b.FieldInfo),
+                        ExpressionTools.Convert(Visit(b.Binding), b.FieldInfo.FieldType)
+                    )));
 
-                LambdaExpression lambda = Expression.Lambda(block, e);
+                LambdaExpression lambda = Expression.Lambda(typeof(Action<>).MakeGenericType(fieldInit.Type), block, e);
 
-                return Expression.Call(retriever, miCached, id, lambda);
+                return Expression.Call(retriever, miCached.MakeGenericMethod(fieldInit.Type), id, lambda);
             }
 
             protected override Expression VisitEmbeddedFieldInit(EmbeddedFieldInitExpression efie)
@@ -297,6 +302,9 @@ namespace Signum.Engine.Linq
                 else
                 {
                     ConstructorInfo ciLite = lite.Type.GetConstructor(new []{typeof(Type), typeof(int), typeof(string)});
+                    ConstantExpression dicIdToType = Expression.Constant(Schema.Current.IdToType); 
+
+
                     return Expression.Condition(id.NotEqualsNulll(), Expression.New(ciLite, id.UnNullify(), typeId.Nullify(), toStr), Expression.Constant(null, lite.Type));
                 }
             }

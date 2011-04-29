@@ -207,20 +207,17 @@ namespace Signum.Engine.Linq
 
         protected virtual Expression VisitFieldInit(FieldInitExpression fie)
         {
-            return fieCache.GetOrCreate(fie, () =>
-            {
-                var bindings = fie.Bindings.NewIfChange(fb => Visit(fb.Binding).Map(r => r == fb.Binding ? fb : new FieldBinding(fb.FieldInfo, r)));
+            var bindings = fie.Bindings.NewIfChange(fb => Visit(fb.Binding).Map(r => r == fb.Binding ? fb : new FieldBinding(fb.FieldInfo, r)));
 
-                var id = Visit(fie.ExternalId);
-                var other = Visit(fie.OtherCondition);
+            var id = Visit(fie.ExternalId);
+            var other = Visit(fie.OtherCondition);
 
-                var token = VisitProjectionToken(fie.Token);
+            var token = VisitProjectionToken(fie.Token);
 
-                if (fie.Bindings != bindings || fie.ExternalId != id || fie.OtherCondition != other || fie.Token != token)
-                    return new FieldInitExpression(fie.Type, fie.TableAlias, id, other, token) { Bindings = bindings };
+            if (fie.Bindings != bindings || fie.ExternalId != id || fie.OtherCondition != other || fie.Token != token)
+                return new FieldInitExpression(fie.Type, fie.TableAlias, id, other, token) { Bindings = bindings };
 
-                return fie;
-            });
+            return fie;
         }
 
         protected virtual Expression VisitEmbeddedFieldInit(EmbeddedFieldInitExpression efie)

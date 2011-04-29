@@ -119,6 +119,9 @@ namespace Signum.Engine.Linq
         {
             try
             {
+                if (exp != null && exp.NodeType == ExpressionType.Block)
+                    return exp;
+
                 return base.Visit(exp);
             }
             catch (InvalidOperationException e)

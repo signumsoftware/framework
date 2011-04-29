@@ -551,7 +551,7 @@ namespace Signum.Engine.Linq
         }
     }
 
-    internal static class WhenExtensions
+    internal static class ExpressionTools
     {
         public static Expression ToCondition(this IEnumerable<When> whens, Type returnType)
         {
@@ -565,7 +565,7 @@ namespace Signum.Engine.Linq
             return result;
         }
 
-        private static Expression Convert(Expression expression, Type returnType)
+        public static Expression Convert(Expression expression, Type returnType)
         {
             if (expression.Type == returnType)
                 return expression;

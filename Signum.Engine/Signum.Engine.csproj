@@ -122,7 +122,6 @@
     <Compile Include="Linq\ExpressionVisitor\EntityCompleter.cs" />
     <Compile Include="Linq\ExpressionVisitor\DbExpressionVisitor.cs" />
     <Compile Include="Linq\ExpressionVisitor\DbExpressionNominator.cs" />
-    <Compile Include="Linq\ExpressionVisitor\ProjectionExpressionFinder.cs" />
     <Compile Include="Linq\ExpressionVisitor\QueryBinder.cs" />
     <Compile Include="Linq\ExpressionVisitor\QueryFormatter.cs" />
     <Compile Include="Linq\ExpressionVisitor\RedundantSubqueryRemover.cs" />

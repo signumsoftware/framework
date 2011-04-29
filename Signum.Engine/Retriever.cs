@@ -36,8 +36,6 @@ namespace Signum.Engine
         Dictionary<IdentityTuple, IdentifiableEntity> requests = new Dictionary<IdentityTuple, IdentifiableEntity>();
         Dictionary<IdentityTuple, List<Lite>> liteRequests = new Dictionary<IdentityTuple, List<Lite>>();
 
-        List<IdentifiableEntity> postRetrieving = new List<IdentifiableEntity>();
-
         public T Cached<T>(int? id, Action<T> complete) where T : IdentifiableEntity
         {
             if (id == null)
@@ -61,11 +59,11 @@ namespace Signum.Engine
             else
             {
                 entity = Constructor<T>.Call();
+                entity.id = id.Value;
             }
 
             complete(entity);
-            entityCache.Add(tuple, entity);
-            postRetrieving.Add(entity);
+            retrieved.Add(tuple, entity);
 
             return entity;
         }
@@ -89,6 +87,7 @@ namespace Signum.Engine
                 return (T)ident;
 
             T entity = Constructor<T>.Call();
+            entity.id = id.Value;
             requests.Add(tuple, entity);
             return entity;
         }
@@ -112,16 +111,19 @@ namespace Signum.Engine
             if (requests.TryGetValue(tuple, out ident))
                 return (T)(IIdentifiable)ident;
 
-            T entity = (T)giConstruct.GetInvoker(type)();
+            T entity = (T)giConstruct.GetInvoker(type)(id.Value);
+ 
             requests.Add(tuple, (IdentifiableEntity)(IIdentifiable)entity);
 
             return entity;
         }
 
-        static GenericInvoker<Func<IIdentifiable>> giConstruct = new GenericInvoker<Func<IIdentifiable>>(() => Construct<TypeDN>());
-        static T Construct<T>()
+        static GenericInvoker<Func<int, IIdentifiable>> giConstruct = new GenericInvoker<Func<int, IIdentifiable>>(id => Construct<TypeDN>(id));
+        static T Construct<T>(int id) where T:IdentifiableEntity
         {
-            return Constructor<T>.Call();
+            var entity = Constructor<T>.Call();
+            entity.id = id;
+            return entity;
         }
 
         public Lite<T> RequestLiteIBA<T>(int? id, int? typeId) where T : class, IIdentifiable
@@ -211,7 +213,7 @@ namespace Signum.Engine
         }
     }
 
-    static class Constructor<T>
+    static class Constructor<T> where T:IdentifiableEntity
     {
         static Func<T> call;
         public static Func<T> Call

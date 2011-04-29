@@ -879,17 +879,7 @@ namespace Signum.Engine.Linq
                     if (fi != null && fi.FieldEquals((IdentifiableEntity ie) => ie.id))
                         return fie.ExternalId.UnNullify();
 
-                    if (fie.TableAlias == null)
-                    {
-                        fie.TableAlias = tools.GetNextTableAlias(fie.Type);
-                        if (!fie.Table.IsView)
-                            fie.GetOrCreateFieldBinding(FieldInitExpression.IdField, this.tools);
-                        tools.AddRequest(fie.Token, new TableCondition
-                        {
-                            FieldInit = fie,
-                            Table = new TableExpression(fie.TableAlias, fie.Table.Name)
-                        });
-                    }
+                    fie.AssertTable(tools);
 
                     if (fi == null)
                         throw new InvalidOperationException("The member {0} of {1} is not accesible on queries".Formato(m.Member.Name, fie.Type.TypeName()));

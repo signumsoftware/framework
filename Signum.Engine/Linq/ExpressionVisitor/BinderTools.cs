@@ -66,7 +66,9 @@ namespace Signum.Engine.Linq
             {
                 FieldInitExpression fie = (FieldInitExpression)expression;
 
-                return ((FieldInitExpression)expression).GetOrCreateFieldBinding(FieldInitExpression.ToStrField, this);
+                fie.AssertTable(this); 
+
+                return fie.GetOrCreateFieldBinding(FieldInitExpression.ToStrField, this);
             }
 
             if (expression is ImplementedByExpression)
