@@ -4,7 +4,7 @@
     using (Html.FieldInline())
     {
         @Html.ValueLine(e, f => f.Hour, vl => vl.ValueHtmlProps["size"] = 2)
-        @Html.Span("", ":", "sf-value-line", new Dictionary<string, object> { { "style", "font-weight:bold" } })
+        @Html.Span("", ":", "sf-value-line sf-time-separator", new Dictionary<string, object> { { "style", "font-weight:bold" } })
         @Html.ValueLine(e, f => f.Minute, vl => vl.ValueHtmlProps["size"] = 2)
     }
 }

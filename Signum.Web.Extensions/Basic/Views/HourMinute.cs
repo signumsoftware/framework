@@ -72,9 +72,9 @@ namespace ASP
 
                                                                             
         
-   Write(Html.Span("", ":", "sf-value-line", new Dictionary<string, object> { { "style", "font-weight:bold" } }));
+   Write(Html.Span("", ":", "sf-value-line sf-time-separator", new Dictionary<string, object> { { "style", "font-weight:bold" } }));
 
-                                                                                                                
+                                                                                                                                  
         
    Write(Html.ValueLine(e, f => f.Minute, vl => vl.ValueHtmlProps["size"] = 2));
 
