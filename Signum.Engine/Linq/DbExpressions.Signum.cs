@@ -58,19 +58,21 @@ namespace Signum.Engine.Linq
             if (binding != null)
                 return binding.Binding;
 
+            AssertTable(tools);
+
             Expression ex = Table.CreateBinding(Token, TableAlias, fi, tools);
+
+            Bindings.Add(new FieldBinding(fi, ex));
 
             if (ex is MListExpression)
             {
                 MListExpression mle = (MListExpression)ex;
 
                 mle.BackID = GetOrCreateFieldBinding(FieldInitExpression.IdField, tools);
-                ex = tools.MListProjection(mle);
+                return tools.MListProjection(mle);
             }
 
-            Bindings.Add(new FieldBinding(fi, ex));
-
-            return ex;
+            return ex; 
         }
 
         public Expression GetFieldBinding(FieldInfo fi)
@@ -102,7 +104,7 @@ namespace Signum.Engine.Linq
             }
         }
 
-        public void AssertTable(BinderTools tools)
+        void AssertTable(BinderTools tools)
         {
             if (TableAlias == null)
             {

@@ -154,7 +154,7 @@ namespace Signum.Engine.Maps
                 return false;
 
             if (FieldInfoAttributes(type, fi).OfType<NullableAttribute>().Any())
-                return false;
+                return true;
 
             return fieldType.IsValueType ? Nullable.GetUnderlyingType(fieldType) != null : true;
         }

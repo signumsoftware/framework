@@ -576,6 +576,9 @@ namespace Signum.Engine.Linq
             if (expression.Type.UnNullify() == returnType)
                 return expression.UnNullify();
 
+            if (returnType.IsAssignableFrom(expression.Type) || expression.Type.IsAssignableFrom(returnType))
+                return Expression.Convert(expression, returnType);
+
             throw new InvalidOperationException("Imposible to convert to {0} the expression: \r\n{1}"
                 .Formato(returnType.TypeName(), expression.NiceToString()));
         }
@@ -591,19 +594,46 @@ namespace Signum.Engine.Linq
         public readonly ReadOnlyCollection<When> Whens;
         public readonly Expression DefaultValue;
 
+        
         public CaseExpression(IEnumerable<When> whens, Expression defaultValue)
-            :base(DbExpressionType.Case, defaultValue.Type)
+            :base(DbExpressionType.Case, GetType(whens, defaultValue))
         {
-            if (whens.Any(w => w.Value.Type.UnNullify() != defaultValue.Type.UnNullify()))
+            if (whens.Empty())
+                throw new ArgumentNullException("whens");
+
+            Type refType = this.Type.UnNullify();
+
+            if (whens.Any(w => w.Value.Type.UnNullify() != refType))
                 throw new ArgumentException("whens");
 
             this.Whens = whens.ToReadOnly();
             this.DefaultValue = defaultValue;
         }
 
+        static Type GetType(IEnumerable<When> whens, Expression defaultValue)
+        {
+            var types = whens.Select(w => w.Value.Type).ToList();
+            if (defaultValue != null)
+                types.Add(defaultValue.Type);
+
+            if (types.Any(a => a.IsNullable()))
+                types = types.Select(ReflectionExtensions.Nullify).ToList();
+
+            return types.Distinct().Single();
+        }
+
         public override string ToString()
         {
-            return "CASE\r\n{0}\r\n  ELSE {1}\r\nEND".Formato(Whens.ToString("\r\n"), DefaultValue.NiceToString());
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("CASE");
+            foreach (var w in Whens)
+                sb.AppendLine(w.ToString());
+
+            if(DefaultValue != null)
+                sb.AppendLine(DefaultValue.NiceToString()); 
+
+            sb.AppendLine("END");
+            return sb.ToString();
         }
     }
 
@@ -870,7 +900,7 @@ namespace Signum.Engine.Linq
             if (projection.UniqueFunction != null)
                 return type;
 
-            return projection.Projector.Type.GetGenericTypeDefinition().MakeGenericType(new Type[] { type });
+            return typeof(IEnumerable<>).MakeGenericType(new Type[] { type });
         }
 
         public override string ToString()

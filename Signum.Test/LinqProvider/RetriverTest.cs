@@ -61,6 +61,14 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void RetriveWithIBA()
+        {
+            var list = Database.Query<NoteDN>().ToList();
+
+            AssertRetrived(list);
+        }
+
+        [TestMethod]
         public void RetriveWithMList()
         {
             var list = Database.Query<ArtistDN>().ToList();
@@ -76,17 +84,11 @@ namespace Signum.Test.LinqProvider
             AssertRetrived(list);
         }
 
-        [TestMethod]
-        public void RetriveWithIBA()
-        {
-            var list = Database.Query<NoteDN>().ToList();
-
-            AssertRetrived(list);
-        }
-
         private void AssertRetrived<T>(List<T> list) where T:Modifiable
         {
-            var problematic = GraphExplorer.FromRoots(list).Where(a =>
+            var graph = GraphExplorer.FromRoots(list);
+
+            var problematic = graph.Where(a =>
                 a.Modified != null ||
                 a.SelfModified ||
                 a is IdentifiableEntity && (((IdentifiableEntity)a).IdOrNull == null || ((IdentifiableEntity)a).IsNew));

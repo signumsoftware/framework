@@ -156,5 +156,11 @@ namespace Signum.Test.LinqProvider
         {
             BandDN sigur = Database.Query<BandDN>().Single(b => b.Members.All(a => a.Sex == Sex.Male));
         }
+
+        [TestMethod]
+        public void RetrieveBand()
+        {
+            BandDN sigur = Database.Query<BandDN>().Single(b => b.Name.StartsWith("Sigur"));
+        }
     }
 }

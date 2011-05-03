@@ -19,9 +19,6 @@ using System.Collections.ObjectModel;
 
 namespace Signum.Engine.Linq
 {
-   
-
-
     /// <summary>
     /// QueryBinder is a visitor that converts method calls to LINQ operations into 
     /// custom DbExpression nodes and references to class members into references to columns
@@ -202,15 +199,21 @@ namespace Signum.Engine.Linq
         {
             expression = RemoveGroupByConvert(expression);
 
-            if (expression.NodeType == ExpressionType.New)
+            if (expression is ProjectionExpression)
+            {
+                return (ProjectionExpression)expression;
+            }
+            else if (expression.NodeType == ExpressionType.New)
             {
                 NewExpression nex = (NewExpression)expression;
                 if (nex.Type.IsInstantiationOf(typeof(Grouping<,>)))
-                    return (ProjectionExpression)nex.Arguments[1]; 
+                    return (ProjectionExpression)nex.Arguments[1];
             }
-            else if (expression is ProjectionExpression)
+            else if(expression.NodeType == ExpressionType.Call)
             {
-                return (ProjectionExpression)expression;
+                var proj = BinderTools.ExtractMListProjection(((MethodCallExpression)expression));
+                if (proj != null)
+                    return proj;
             }
 
             throw new InvalidOperationException("Impossible to convert in ProjectionExpression: \r\n" + expression.NiceToString()); 
@@ -876,13 +879,11 @@ namespace Signum.Engine.Linq
                     FieldInitExpression fie = (FieldInitExpression)source;
                     FieldInfo fi = Reflector.FindFieldInfo(fie.Type, m.Member, false);
 
-                    if (fi != null && fi.FieldEquals((IdentifiableEntity ie) => ie.id))
-                        return fie.ExternalId.UnNullify();
-
-                    fie.AssertTable(tools);
-
                     if (fi == null)
                         throw new InvalidOperationException("The member {0} of {1} is not accesible on queries".Formato(m.Member.Name, fie.Type.TypeName()));
+                    
+                    if (fi != null && fi.FieldEquals((IdentifiableEntity ie) => ie.id))
+                        return fie.ExternalId.UnNullify();
 
                     Expression result = fie.GetOrCreateFieldBinding(fi, this.tools);
                     return result;

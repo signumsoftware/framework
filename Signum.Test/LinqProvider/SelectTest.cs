@@ -328,21 +328,21 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelectThrowIntNullable()
         {
-            Assert2.Throws<SqlNullValueException>(() =>
+            Assert2.Throws<FieldReaderException>(() =>
                 Database.Query<AlbumDN>().Select(a => ((ArtistDN)a.Author).Id).ToArray());
         }
 
         [TestMethod]
         public void SelectThrowBoolNullable()
         {
-            Assert2.Throws<SqlNullValueException>(() =>
+            Assert2.Throws<FieldReaderException>(() =>
                 Database.Query<AlbumDN>().Select(a => ((ArtistDN)a.Author).Dead).ToArray());
         }
         
         [TestMethod]
         public void SelectThrowEnumNullable()
         {
-            Assert2.Throws<SqlNullValueException>(() =>
+            Assert2.Throws<FieldReaderException>(() =>
                 Database.Query<AlbumDN>().Select(a => ((ArtistDN)a.Author).Sex).ToArray());
         }
 

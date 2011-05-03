@@ -8,45 +8,62 @@ using Signum.Utilities;
 
 namespace Signum.Engine.Linq
 {
-    //Removes Orderby when there's a 
-    internal class CountOrderByRemover : DbExpressionVisitor
+    internal class OrderByRewriter : DbExpressionVisitor
     {
-        public bool ShouldRemoveOrders;
+        IEnumerable<OrderExpression> gatheredOrderings;
+        SelectExpression outerMostSelect;
 
-        public IDisposable SetShouldRemove(bool value)
+        private OrderByRewriter() { }
+
+        static internal Expression Rewrite(Expression expression)
         {
-            var saved = this.ShouldRemoveOrders; 
-            this.ShouldRemoveOrders = value;
-            return new Disposable(() => this.ShouldRemoveOrders = saved); 
+            return new OrderByRewriter().Visit(expression);
+        }
+
+        protected override Expression VisitProjection(ProjectionExpression proj)
+        {
+            var oldGatheredOrderings = gatheredOrderings;
+            var oldOuterMostSelect = outerMostSelect;
+
+            gatheredOrderings = Enumerable.Empty<OrderExpression>();
+            outerMostSelect = proj.Source;
+
+            var result = base.VisitProjection(proj);
+
+            gatheredOrderings = oldGatheredOrderings;
+            outerMostSelect = oldOuterMostSelect;
+
+            return result;
         }
 
         protected override Expression VisitSelect(SelectExpression select)
         {
-            bool shouldRemove = ShouldRemoveOrders || IsCountSumOrAvg(select); 
+            select = (SelectExpression)base.VisitSelect(select);
+            if (select.OrderBy != null && select.OrderBy.Count > 0)
+                this.PrependOrderings(select.OrderBy);
 
-            using (SetShouldRemove(false))
-            {                
-                Expression top = this.Visit(select.Top);
-                SourceExpression from;
-                using (SetShouldRemove(shouldRemove))
-                    from  = this.VisitSource(select.From);
+            var orderings = select == outerMostSelect && !IsCountSumOrAvg(select) ? gatheredOrderings : null;
 
-                Expression where = this.Visit(select.Where);
-                ReadOnlyCollection<ColumnDeclaration> columns = this.VisitColumnDeclarations(select.Columns);
-
-                ReadOnlyCollection<OrderExpression> orderBy;
-                if (shouldRemove && select.OrderBy != null)
-                    orderBy = null;
-                else 
-                    orderBy = this.VisitOrderBy(select.OrderBy);
-
-                ReadOnlyCollection<Expression> groupBy = this.VisitGroupBy(select.GroupBy);
-
-                if (top != select.Top || from != select.From || where != select.Where || columns != select.Columns || orderBy != select.OrderBy || groupBy != select.GroupBy)
-                    return new SelectExpression(select.Alias, select.Distinct, top, columns, from, where, orderBy, groupBy);
-
+            if (AreEqual(select.OrderBy, orderings))
                 return select;
-            }
+
+            return new SelectExpression(select.Alias, select.Distinct, select.Top, select.Columns, select.From, select.Where, gatheredOrderings, select.GroupBy);
+        }
+
+        static bool AreEqual(IEnumerable<OrderExpression> col1, IEnumerable<OrderExpression> col2)
+        {
+            bool col1Empty = col1 == null || col1.Empty();
+            bool col2Empty = col2 == null || col2.Empty();
+
+
+            if (col1Empty && col2Empty)
+                return true;
+
+
+            if (col1Empty || col2Empty)
+                return false;
+
+            return col1 == col2;
         }
 
         private bool IsCountSumOrAvg(SelectExpression select)
@@ -62,9 +79,44 @@ namespace Signum.Engine.Linq
             return exp.AggregateFunction == AggregateFunction.Count || exp.AggregateFunction == AggregateFunction.Sum || exp.AggregateFunction == AggregateFunction.Average;
         }
 
-        internal static Expression Remove(Expression expression)
+        protected override Expression VisitJoin(JoinExpression join)
         {
-            return new CountOrderByRemover().Visit(expression); 
+            SourceExpression left = this.VisitSource(join.Left);
+
+            IEnumerable<OrderExpression> leftOrders = this.gatheredOrderings;
+            this.gatheredOrderings = null;
+
+            SourceExpression right = this.VisitSource(join.Right);
+
+            this.PrependOrderings(leftOrders);
+
+            Expression condition = this.Visit(join.Condition);
+
+            if (left != join.Left || right != join.Right || condition != join.Condition)
+            {
+                return new JoinExpression(join.JoinType, left, right, condition);
+            }
+            return join;
+        }
+
+        protected void PrependOrderings(IEnumerable<OrderExpression> newOrderings)
+        {
+            if (newOrderings != null)
+            {
+                if (this.gatheredOrderings == null)
+                {
+                    this.gatheredOrderings = newOrderings;
+                }
+                else
+                {
+                    List<OrderExpression> list = this.gatheredOrderings as List<OrderExpression>;
+                    if (list == null)
+                    {
+                        this.gatheredOrderings = list = new List<OrderExpression>(this.gatheredOrderings);
+                    }
+                    list.InsertRange(0, newOrderings);
+                }
+            }
         }
     }
 }

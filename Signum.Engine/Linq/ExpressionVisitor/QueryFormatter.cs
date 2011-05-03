@@ -264,9 +264,12 @@ namespace Signum.Engine.Linq
                 Visit(when.Value);
                 AppendNewLine(Indentation.Same); 
             }
-            sb.Append("ELSE ");
-            Visit(cex.DefaultValue);
-            AppendNewLine(Indentation.Outer);
+            if (cex.DefaultValue != null)
+            {
+                sb.Append("ELSE ");
+                Visit(cex.DefaultValue);
+                AppendNewLine(Indentation.Outer);
+            }
             sb.Append("END");
             AppendNewLine(Indentation.Outer);
 

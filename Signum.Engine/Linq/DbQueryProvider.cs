@@ -70,10 +70,12 @@ namespace Signum.Engine.Linq
         {
             Expression rewrited = AggregateRewriter.Rewrite(binded);
             Expression projCleaned = EntityCompleter.Clean(rewrited, tools);
-            Expression rebinded = QueryRebinder.Rebind(projCleaned);
+            Expression removed = OrderByRewriter.Rewrite(projCleaned);
+
+            Expression rebinded = QueryRebinder.Rebind(removed);
+
             Expression replaced = AliasProjectionReplacer.Replace(rebinded);
-            Expression removed = CountOrderByRemover.Remove(replaced);
-            Expression columnCleaned = UnusedColumnRemover.Remove(removed);
+            Expression columnCleaned = UnusedColumnRemover.Remove(replaced);
             Expression rowFilled = RowNumberFiller.Fill(columnCleaned);
             Expression subqueryCleaned = RedundantSubqueryRemover.Remove(rowFilled);
             return subqueryCleaned;

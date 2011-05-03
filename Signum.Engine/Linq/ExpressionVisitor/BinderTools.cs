@@ -5,6 +5,9 @@ using System.Text;
 using System.Linq.Expressions;
 using Signum.Utilities;
 using Signum.Engine.Maps;
+using System.Reflection;
+using Signum.Utilities.Reflection;
+using Signum.Entities;
 
 namespace Signum.Engine.Linq
 {
@@ -45,7 +48,7 @@ namespace Signum.Engine.Linq
 
             return new ProjectionExpression(
                     new SelectExpression(newAlias, false, null, pc.Columns, source, null, null, null),
-                    pc.Projector, null, projection.Token, projection.Type);
+                    pc.Projector, projection.UniqueFunction, projection.Token, projection.Type);
         }
 
         internal static SqlConstantExpression NullId = new SqlConstantExpression(null, typeof(int?));
@@ -65,8 +68,6 @@ namespace Signum.Engine.Linq
             if (expression is FieldInitExpression)
             {
                 FieldInitExpression fie = (FieldInitExpression)expression;
-
-                fie.AssertTable(this); 
 
                 return fie.GetOrCreateFieldBinding(FieldInitExpression.ToStrField, this);
             }
@@ -151,8 +152,18 @@ namespace Signum.Engine.Linq
 
             return new SqlFunctionExpression(type, SqlFunction.COALESCE.ToString(), list);
         }
+        
+        static MethodInfo miToMListNotModified = ReflectionTools.GetMethodInfo((IEnumerable<int> col) => col.ToMListNotModified()).GetGenericMethodDefinition();
 
-        internal ProjectionExpression MListProjection(MListExpression mle)
+        public static ProjectionExpression ExtractMListProjection(MethodCallExpression exp)
+        {
+            if (exp.Method.IsInstantiationOf(miToMListNotModified))
+                return (ProjectionExpression)exp.Arguments[0];
+
+            return null; 
+        }
+
+        internal MethodCallExpression MListProjection(MListExpression mle)
         {
             RelationalTable tr = mle.RelationalTable;
 
@@ -175,7 +186,7 @@ namespace Signum.Engine.Linq
 
             proj = ApplyExpansions(proj);
 
-            return proj;
+            return Expression.Call(miToMListNotModified.MakeGenericMethod(pc.Projector.Type), proj);
         }
 
         internal string GetNextSelectAlias()

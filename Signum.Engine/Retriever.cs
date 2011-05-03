@@ -142,9 +142,11 @@ namespace Signum.Engine
         {
             while (requests.Count > 0)
             {
-                var group = requests.GroupBy(a => a.Key.Type, a => a.Key.Id).OrderByDescending(a => a.Count()).First();
+                var group = requests.GroupBy(a => a.Key.Type, a => a.Key).OrderByDescending(a => a.Count()).First();
 
-                Database.RetrieveList(group.Key, group.ToList());
+                Database.RetrieveList(group.Key, group.Select(t=>t.Id).ToList());
+
+                requests.RemoveRange(group);
             }
 
             while (liteRequests.Count > 0)
@@ -160,6 +162,8 @@ namespace Signum.Engine
                         lite.ToStr = pair.ToStr;
                     }
                 }
+
+                liteRequests.RemoveRange(group.Select(a => a.Key));
             }
 
             foreach (var kvp in retrieved)
@@ -194,17 +198,17 @@ namespace Signum.Engine
 
         public T Request<T>(int? id) where T : IdentifiableEntity
         {
-            return Request<T>(id);
+            return Parent.Request<T>(id);
         }
 
         public T RequestIBA<T>(int? id, int? typeId) where T : class, IIdentifiable
         {
-            return RequestIBA<T>(id, typeId);
+            return Parent.RequestIBA<T>(id, typeId);
         }
 
         public Lite<T> RequestLiteIBA<T>(int? id, int? typeId) where T : class, IIdentifiable
         {
-            return RequestLiteIBA<T>(id, typeId);
+            return Parent.RequestLiteIBA<T>(id, typeId);
         }
 
         public void Dispose()

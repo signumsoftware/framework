@@ -90,6 +90,11 @@ namespace Signum.Engine.Maps
             set { typeToName = value; }
         }
 
+        internal  Type GetType(int id)
+        {
+            return this.idToType[id]; 
+        }
+
         #region Events
 
         public event Func<Type, string> IsAllowedCallback;

@@ -128,7 +128,9 @@ namespace Signum.Engine.Linq
         protected override Expression VisitConstant(ConstantExpression c)
         {
             if (!innerProjection && (IsFullNominate || isAggresive) && (IsSimpleType(c.Type) || c.Type == typeof(object) && c.IsNull()))
+            {
                 candidates.Add(c);
+            }
             return c;
         }
 
@@ -167,7 +169,7 @@ namespace Signum.Engine.Linq
             if (newWhens != cex.Whens || newDefault != cex.DefaultValue)
                 cex = new CaseExpression(newWhens, newDefault);
 
-            if (newWhens.All(w => candidates.Contains(w.Condition) && candidates.Contains(w.Value)) && candidates.Contains(newDefault))
+            if (newWhens.All(w => candidates.Contains(w.Condition) && candidates.Contains(w.Value)) && (newDefault == null || candidates.Contains(newDefault)))
                 candidates.Add(cex);
 
             return cex;
@@ -448,12 +450,16 @@ namespace Signum.Engine.Linq
 
                 if (ifFalse.NodeType == (ExpressionType)DbExpressionType.Case)
                 {
-                    var oldC  = (CaseExpression)ifFalse;
+                    var oldC = (CaseExpression)ifFalse;
                     candidates.Remove(ifFalse); // just to save some memory
                     result = new CaseExpression(oldC.Whens.PreAnd(new When(newTest, newTrue)), oldC.DefaultValue);
                 }
                 else
-                    result = new CaseExpression(new[] { new When(newTest, newTrue) }, ConditionsRewriter.MakeSqlValue(ifFalse));
+                {
+                    Expression @default = ifFalse.IsNull() ? null : ConditionsRewriter.MakeSqlValue(ifFalse); 
+
+                    result = new CaseExpression(new[] { new When(newTest, newTrue) }, @default );
+                }
 
                 candidates.Add(result);
             }

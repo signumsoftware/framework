@@ -284,7 +284,7 @@ namespace Signum.Engine
             if (type == null)
                 throw new ArgumentNullException("type");
 
-            IList list = (IList)giRetrieveList.GetInvoker(type).Invoke(ids);
+            IList list = (IList)giRetrieveListLite.GetInvoker(type).Invoke(ids);
             return list.Cast<Lite>().ToList();
         }
 

@@ -188,7 +188,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void RootMaxException()
         {
-            Assert2.Throws<SqlNullValueException>(() => Database.Query<ArtistDN>().Where(a => false).Max(a => a.Name.Length));
+            Assert2.Throws<FieldReaderException>(() => Database.Query<ArtistDN>().Where(a => false).Max(a => a.Name.Length));
         }
 
         [TestMethod]
@@ -200,7 +200,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void RootMinException()
         {
-            Assert2.Throws<SqlNullValueException>(() => Database.Query<ArtistDN>().Where(a => false).Min(a => a.Name.Length));
+            Assert2.Throws<FieldReaderException>(() => Database.Query<ArtistDN>().Where(a => false).Min(a => a.Name.Length));
         }
 
         [TestMethod]
