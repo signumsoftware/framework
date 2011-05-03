@@ -86,6 +86,7 @@
     <Compile Include="ControllerAttributes\ExecutionContextAttribute.cs" />
     <Compile Include="ControllerAttributes\SignumExceptionHandlerAttribute.cs" />
     <Compile Include="ControllerAttributes\AuthenticationRequiredAttribute.cs" />
+    <Compile Include="HtmlHelpers\PagerExtensions.cs" />
     <Compile Include="MimeTypes.cs" />
     <Compile Include="PortableAreas\ActionFilterConfig.cs" />
     <Compile Include="PortableAreas\CompiledViews.cs">
