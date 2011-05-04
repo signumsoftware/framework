@@ -79,7 +79,7 @@ namespace Signum.Engine.Authorization
         public static UserDN UpdateTicket(string device, ref string ticket)
         {
             using (Transaction tr = new Transaction())
-            {
+            { 
                 Tuple<int, string> pair = UserTicketDN.ParseTicket(ticket);
 
                 UserDN result = Database.Retrieve<UserDN>(pair.Item1);
