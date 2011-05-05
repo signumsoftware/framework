@@ -53,15 +53,10 @@ namespace Signum.Engine.Linq
             return n.candidates;
         }
         
-        static internal Expression FullNominate(Expression expression, bool isCondition)
+        static internal Expression FullNominate(Expression expression)
         {
             DbExpressionNominator n = new DbExpressionNominator { existingAliases = null };
             Expression result = n.Visit(expression);
-         
-            if (isCondition)
-                result = ConditionsRewriter.MakeSqlCondition(result);
-            else
-                result = ConditionsRewriter.MakeSqlValue(result); 
 
             return result;
         }
@@ -445,20 +440,17 @@ namespace Signum.Engine.Linq
 
             if (candidates.Contains(test) && candidates.Contains(ifTrue) && candidates.Contains(ifFalse))
             {
-                Expression newTest = ConditionsRewriter.MakeSqlCondition(test); 
-                Expression newTrue = ConditionsRewriter.MakeSqlValue(ifTrue);
-
                 if (ifFalse.NodeType == (ExpressionType)DbExpressionType.Case)
                 {
                     var oldC = (CaseExpression)ifFalse;
                     candidates.Remove(ifFalse); // just to save some memory
-                    result = new CaseExpression(oldC.Whens.PreAnd(new When(newTest, newTrue)), oldC.DefaultValue);
+                    result = new CaseExpression(oldC.Whens.PreAnd(new When(test, ifTrue)), oldC.DefaultValue);
                 }
                 else
                 {
-                    Expression @default = ifFalse.IsNull() ? null : ConditionsRewriter.MakeSqlValue(ifFalse); 
+                    Expression @default = ifFalse.IsNull() ? null : ifFalse;
 
-                    result = new CaseExpression(new[] { new When(newTest, newTrue) }, @default );
+                    result = new CaseExpression(new[] { new When(test, ifTrue) }, @default);
                 }
 
                 candidates.Add(result);

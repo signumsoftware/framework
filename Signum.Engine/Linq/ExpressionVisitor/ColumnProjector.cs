@@ -121,9 +121,6 @@ namespace Signum.Engine.Linq
                 }
                 else
                 {
-                    if (ConditionsRewriter.IsBooleanExpression(expression))
-                        expression = ConditionsRewriter.MakeSqlValue(expression);
-                   
                     return generator.NewColumn(expression).GetReference(newAlias); ;
                 }
             }

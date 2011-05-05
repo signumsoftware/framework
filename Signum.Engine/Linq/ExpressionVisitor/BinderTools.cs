@@ -39,7 +39,7 @@ namespace Signum.Engine.Linq
 
             JoinExpression source = (JoinExpression)allProjections.Aggregate((SourceExpression)projection.Source, (e, p) =>
             {
-                var externalID = DbExpressionNominator.FullNominate(p.FieldInit.ExternalId, false);
+                var externalID = DbExpressionNominator.FullNominate(p.FieldInit.ExternalId);
 
                 Expression equal = SmartEqualizer.EqualNullable(externalID, p.FieldInit.GetFieldBinding(FieldInitExpression.IdField));
                 Expression condition = p.FieldInit.OtherCondition == null ? equal : Expression.And(p.FieldInit.OtherCondition, equal);
@@ -131,7 +131,7 @@ namespace Signum.Engine.Linq
                         imp.Field.TypeId))
                     .ToList().ToCondition(typeof(int?));
 
-                return DbExpressionNominator.FullNominate(aggregate, false);
+                return DbExpressionNominator.FullNominate(aggregate);
             }
 
             if (expression is ImplementedByAllExpression)

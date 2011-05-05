@@ -12,30 +12,37 @@ namespace Signum.Engine.Linq
 {
     internal class ConditionsRewriter: DbExpressionVisitor
     {
-        public static Expression MakeSqlCondition(Expression expression)
+        public static Expression Rewrite(Expression expression)
         {
-            ConditionsRewriter cr = new ConditionsRewriter();
-            var exp = cr.Visit(expression);
+            return new ConditionsRewriter().Visit(expression);
+        }
+
+        static Expression MakeSqlCondition(Expression exp)
+        {
+            if (exp == null)
+                return null;
+
             if (!IsBooleanExpression(exp) || IsSqlCondition(exp))
                 return exp;
             return Expression.Equal(exp, new SqlConstantExpression(true));
         }
 
-        public static Expression MakeSqlValue(Expression expression)
+        static Expression MakeSqlValue(Expression exp)
         {
-            ConditionsRewriter cr = new ConditionsRewriter();
-            var exp = cr.Visit(expression);
+            if (exp == null)
+                return null;
+
             if (!IsBooleanExpression(exp) || !IsSqlCondition(exp))
                 return exp;
             return new CaseExpression(new[] { new When(exp, new SqlConstantExpression(true)) }, new SqlConstantExpression(false));
         }
 
-        public static bool IsBooleanExpression(Expression expr)
+        static bool IsBooleanExpression(Expression expr)
         {
             return expr.Type.UnNullify() == typeof(bool);
         }
 
-        public static bool IsSqlCondition(Expression expression)
+        static bool IsSqlCondition(Expression expression)
         {
             if (!IsBooleanExpression(expression))
                 throw new InvalidOperationException("Expected boolean expression: {0}".Formato(expression.ToString()));
@@ -152,6 +159,76 @@ namespace Signum.Engine.Linq
             if (args != sqlFunction.Arguments)
                 return new SqlFunctionExpression(sqlFunction.Type, sqlFunction.SqlFunction, args);
             return sqlFunction;
+        }
+
+        protected override When VisitWhen(When when)
+        {
+            var newCondition = MakeSqlCondition(Visit(when.Condition));
+            var newValue = MakeSqlValue(Visit(when.Value));
+            if (when.Condition != newCondition || newValue != when.Value)
+                return new When(newCondition, newValue);
+            return when;
+        }
+
+        protected override Expression VisitCase(CaseExpression cex)
+        {
+            var newWhens = cex.Whens.NewIfChange(w => VisitWhen(w));
+            var newDefault = MakeSqlValue(Visit(cex.DefaultValue));
+
+            if (newWhens != cex.Whens || newDefault != cex.DefaultValue)
+                return new CaseExpression(newWhens, newDefault);
+            return cex;
+        }
+
+        protected override Expression VisitAggregate(AggregateExpression aggregate)
+        {
+            Expression source = MakeSqlValue(Visit(aggregate.Source));
+            if (source != aggregate.Source)
+                return new AggregateExpression(aggregate.Type, source, aggregate.AggregateFunction);
+            return aggregate;
+        }
+
+        protected override Expression VisitSelect(SelectExpression select)
+        {
+            Expression top = this.Visit(select.Top);
+            SourceExpression from = this.VisitSource(select.From);
+            Expression where = MakeSqlCondition(this.Visit(select.Where));
+            ReadOnlyCollection<ColumnDeclaration> columns = select.Columns.NewIfChange(c => MakeSqlValue(Visit(c.Expression)).Map(e => e == c.Expression ? c : new ColumnDeclaration(c.Name, e)));
+            ReadOnlyCollection<OrderExpression> orderBy = select.OrderBy.NewIfChange(o => MakeSqlValue(Visit(o.Expression)).Map(e => e == o.Expression ? o : new OrderExpression(o.OrderType, e)));
+            ReadOnlyCollection<Expression> groupBy = select.GroupBy.NewIfChange(e => MakeSqlValue(Visit(e)));
+
+            if (top != select.Top || from != select.From || where != select.Where || columns != select.Columns || orderBy != select.OrderBy || groupBy != select.GroupBy)
+                return new SelectExpression(select.Alias, select.Distinct, top, columns, from, where, orderBy, groupBy);
+
+            return select;
+        }
+
+        protected override Expression VisitUpdate(UpdateExpression update)
+        {
+            var source = Visit(update.Source);
+            var where = Visit(update.Where);
+            var assigments = update.Assigments.NewIfChange(c =>
+            {
+                var exp = MakeSqlValue(Visit(c.Expression));
+                if (exp != c.Expression)
+                    return new ColumnAssignment(c.Column, exp);
+                return c;
+            });
+            if (source != update.Source || where != update.Where || assigments != update.Assigments)
+                return new UpdateExpression(update.Table, (SourceExpression)source, where, assigments);
+            return update;
+        }
+
+        protected override Expression VisitJoin(JoinExpression join)
+        {
+            SourceExpression left = this.VisitSource(join.Left);
+            SourceExpression right = this.VisitSource(join.Right);
+            Expression condition = MakeSqlCondition(this.Visit(join.Condition));
+            if (left != join.Left || right != join.Right || condition != join.Condition)
+            {
+                return new JoinExpression(join.JoinType, left, right, condition);
+            }
+            return join;
         }
     }
 }

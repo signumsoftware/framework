@@ -245,7 +245,7 @@ namespace Signum.Engine.Linq
             ProjectionExpression projection = this.VisitCastProjection(source);
             Expression where = null;
             if (predicate != null)
-                where = DbExpressionNominator.FullNominate(MapAndVisitExpand(predicate, ref projection), true);
+                where = DbExpressionNominator.FullNominate(MapAndVisitExpand(predicate, ref projection));
 
             string alias = tools.GetNextSelectAlias();
             Expression top = function == UniqueFunction.First || function == UniqueFunction.FirstOrDefault ? Expression.Constant(1) : null;
@@ -276,13 +276,13 @@ namespace Signum.Engine.Linq
             Expression exp =
                 aggregateFunction == AggregateFunction.Count ? null :
                 selector != null ? MapAndVisitExpand(selector, ref projection):
-                DbExpressionNominator.FullNominate(projection.Projector, false);
+                DbExpressionNominator.FullNominate(projection.Projector);
 
             if (coalesceTrick)
                 exp = Expression.Convert(exp, resultType.Nullify());
 
             if(exp != null)
-                exp = DbExpressionNominator.FullNominate(exp, false);
+                exp = DbExpressionNominator.FullNominate(exp);
 
             string alias = tools.GetNextSelectAlias();
             var aggregate = !coalesceTrick ? new AggregateExpression(resultType, exp, aggregateFunction) :
@@ -304,7 +304,7 @@ namespace Signum.Engine.Linq
             {
                 Expression exp2 =
                      aggregateFunction == AggregateFunction.Count ? null :
-                     selector != null ? DbExpressionNominator.FullNominate(MapAndVisitExpand(selector, ref info.Projection), false) :
+                     selector != null ? DbExpressionNominator.FullNominate(MapAndVisitExpand(selector, ref info.Projection)) :
                      info.Projection.Projector;
 
                 return new AggregateSubqueryExpression(info.Alias, new AggregateExpression(resultType, exp2, aggregateFunction), subquery);
@@ -387,7 +387,7 @@ namespace Signum.Engine.Linq
                     se = new InExpression(newItem, projection.Source);
                 else
                 {
-                    Expression where = DbExpressionNominator.FullNominate(SmartEqualizer.PolymorphicEqual(projection.Projector, newItem), true);
+                    Expression where = DbExpressionNominator.FullNominate(SmartEqualizer.PolymorphicEqual(projection.Projector, newItem));
                     se = new ExistsExpression(new SelectExpression(alias, false, null, pc.Columns, projection.Source, where, null, null));
                 }
 
@@ -404,8 +404,7 @@ namespace Signum.Engine.Linq
                 throw new ArgumentException("expr");
 
             var alias = tools.GetNextSelectAlias();
-            Expression exprAsValue = ConditionsRewriter.MakeSqlValue(expr);
-            SelectExpression select = new SelectExpression(alias, false, null, new[] { new ColumnDeclaration("value", exprAsValue) }, null, null, null, null);
+            SelectExpression select = new SelectExpression(alias, false, null, new[] { new ColumnDeclaration("value", expr) }, null, null, null, null);
             return new ProjectionExpression(select, new ColumnExpression(expr.Type, alias, "value"), uniqueFunction, new ProjectionToken(), resultType);
         }
 
@@ -430,7 +429,7 @@ namespace Signum.Engine.Linq
             if (exp.NodeType == ExpressionType.Constant && ((bool)((ConstantExpression)exp).Value))
                 return projection;
 
-            Expression where = DbExpressionNominator.FullNominate(exp, true);
+            Expression where = DbExpressionNominator.FullNominate(exp);
 
             string alias = tools.GetNextSelectAlias();
             ProjectedColumns pc = ColumnProjector.ProjectColumns(projection, alias);
@@ -513,7 +512,7 @@ namespace Signum.Engine.Linq
             Expression innerKeyExpr = Visit(innerKey.Body);
             map.Remove(innerKey.Parameters[0]);
 
-            Expression condition = DbExpressionNominator.FullNominate(SmartEqualizer.EqualNullable(outerKeyExpr, innerKeyExpr), true);
+            Expression condition = DbExpressionNominator.FullNominate(SmartEqualizer.EqualNullable(outerKeyExpr, innerKeyExpr));
 
             JoinType jt = rightOuter && leftOuter ? JoinType.FullOuterJoin :
                           rightOuter ? JoinType.RightOuterJoin :
@@ -635,7 +634,7 @@ namespace Signum.Engine.Linq
 
             map.Remove(lambda.Parameters[0]);
 
-            return DbExpressionNominator.FullNominate(expr, false);
+            return DbExpressionNominator.FullNominate(expr);
         }
 
         static MethodInfo miToUserInterface = ReflectionTools.GetMethodInfo(() => DateTime.Now.ToUserInterface()); 
@@ -1306,7 +1305,7 @@ namespace Signum.Engine.Linq
             if (col == null)
                 throw new InvalidOperationException("{0} does not represent a column".Formato(column.NiceToString()));
 
-            return new ColumnAssignment(col.Name, DbExpressionNominator.FullNominate(expression, false));
+            return new ColumnAssignment(col.Name, DbExpressionNominator.FullNominate(expression));
         }
 
         private ColumnAssignment[] Assign(Expression colExpression, Expression expression)

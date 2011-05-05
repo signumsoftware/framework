@@ -78,7 +78,9 @@ namespace Signum.Engine.Linq
             Expression columnCleaned = UnusedColumnRemover.Remove(replaced);
             Expression rowFilled = RowNumberFiller.Fill(columnCleaned);
             Expression subqueryCleaned = RedundantSubqueryRemover.Remove(rowFilled);
-            return subqueryCleaned;
+
+            Expression rewriteConditions = ConditionsRewriter.Rewrite(subqueryCleaned);
+            return rewriteConditions;
         }
 
         internal int Delete<T>(IQueryable<T> query)
