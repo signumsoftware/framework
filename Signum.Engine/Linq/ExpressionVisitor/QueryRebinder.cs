@@ -43,7 +43,7 @@ namespace Signum.Engine.Linq
             {
                 return new ProjectionExpression(source, projector, proj.UniqueFunction, token, proj.Type);
             }
-            return proj;       
+            return proj;
         }
 
         protected override Expression VisitTable(TableExpression table)
@@ -113,6 +113,7 @@ namespace Signum.Engine.Linq
             this.VisitColumnDeclarations(select.Columns);
             this.VisitOrderBy(select.OrderBy);
             this.VisitGroupBy(select.GroupBy);
+
 
             SourceExpression from = this.VisitSource(select.From);
 
@@ -192,6 +193,7 @@ namespace Signum.Engine.Linq
             scopes = scopes.Push(new Dictionary<ColumnExpression, Expression>());
             return new Disposable(() => scopes = scopes.Pop());
         }
+
 
         protected override Expression VisitColumn(ColumnExpression column)
         {

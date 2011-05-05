@@ -886,6 +886,9 @@ namespace Signum.Engine.Linq
                         return fie.ExternalId.UnNullify();
 
                     Expression result = fie.GetOrCreateFieldBinding(fi, this.tools);
+                    if (result is MListExpression)
+                        result = tools.MListProjection((MListExpression)result); 
+
                     return result;
                 }
                 case (ExpressionType)DbExpressionType.EmbeddedFieldInit:

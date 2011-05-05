@@ -97,6 +97,7 @@ namespace Signum.Engine.Linq
             return new ProjectedColumns(e, cp.generator.columns.AsReadOnly(), newToken);
         }
 
+
         protected override Expression Visit(Expression expression)
         {
             if (this.candidates.Contains(expression))
@@ -139,6 +140,25 @@ namespace Signum.Engine.Linq
                 return newToken;
 
             return token;
+        }
+
+        Dictionary<ImplementedByAllExpression, Expression> ibas = new Dictionary<ImplementedByAllExpression, Expression>();
+        protected override Expression VisitImplementedByAll(ImplementedByAllExpression iba)
+        {
+            return ibas.GetOrCreate(iba, () => base.VisitImplementedByAll(iba));
+        }
+
+        Dictionary<ImplementedByExpression, Expression> ibs = new Dictionary<ImplementedByExpression, Expression>();
+        protected override Expression VisitImplementedBy(ImplementedByExpression ib)
+        {
+            return ibs.GetOrCreate(ib, () => base.VisitImplementedBy(ib));
+        }
+
+
+        Dictionary<FieldInitExpression, Expression> fies = new Dictionary<FieldInitExpression, Expression>();
+        protected override Expression VisitFieldInit(FieldInitExpression fie)
+        {
+            return fies.GetOrCreate(fie, () => base.VisitFieldInit(fie));
         }
     }
 

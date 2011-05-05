@@ -82,6 +82,9 @@ namespace Signum.Engine.Linq
                     return this.VisitImplementedByAll((ImplementedByAllExpression)exp);     
                 case  DbExpressionType.LiteReference:
                     return this.VisitLiteReference((LiteReferenceExpression)exp);
+                case DbExpressionType.MList:
+                    return this.VisitMList((MListExpression)exp);
+
 
                 default:
                     return base.Visit(exp);
@@ -148,6 +151,15 @@ namespace Signum.Engine.Linq
             return lite;
         }
 
+        protected virtual Expression VisitMList(MListExpression ml)
+        {
+            var newBackID = Visit(ml.BackID);
+            if (newBackID != ml.BackID)
+                return new MListExpression(ml.Type, newBackID, ml.RelationalTable);
+            return ml;
+        }
+
+
         protected virtual Expression VisitSqlEnum(SqlEnumExpression sqlEnum)
         {
             return sqlEnum;
@@ -171,6 +183,9 @@ namespace Signum.Engine.Linq
             return column;
         }
 
+
+    
+
         protected virtual Expression VisitImplementedByAll(ImplementedByAllExpression reference)
         {
             var id = Visit(reference.Id);
@@ -185,6 +200,7 @@ namespace Signum.Engine.Linq
             return reference;
         }
 
+      
         protected virtual Expression VisitImplementedBy(ImplementedByExpression reference)
         {
             var implementations = reference.Implementations
@@ -201,10 +217,7 @@ namespace Signum.Engine.Linq
         {
             return token;
         }
-
-
-        protected Dictionary<FieldInitExpression, FieldInitExpression> fieCache = new Dictionary<FieldInitExpression, FieldInitExpression>();
-
+     
         protected virtual Expression VisitFieldInit(FieldInitExpression fie)
         {
             var bindings = fie.Bindings.NewIfChange(fb => Visit(fb.Binding).Map(r => r == fb.Binding ? fb : new FieldBinding(fb.FieldInfo, r)));

@@ -62,17 +62,21 @@ namespace Signum.Engine.Linq
 
             Expression ex = Table.CreateBinding(Token, TableAlias, fi, tools);
 
-            Bindings.Add(new FieldBinding(fi, ex));
-
             if (ex is MListExpression)
             {
                 MListExpression mle = (MListExpression)ex;
 
                 mle.BackID = GetOrCreateFieldBinding(FieldInitExpression.IdField, tools);
-                return tools.MListProjection(mle);
             }
 
+            Bindings.Add(new FieldBinding(fi, ex));
+
             return ex; 
+        }
+        public void ReplaceBinding(FieldInfo fi, Expression expression)
+        {
+            Bindings.RemoveAll(a=>ReflectionTools.FieldEquals(a.FieldInfo, fi));
+            Bindings.Add(new FieldBinding(fi, expression)); 
         }
 
         public Expression GetFieldBinding(FieldInfo fi)
@@ -100,7 +104,13 @@ namespace Signum.Engine.Linq
                 !ReflectionTools.Equals(f.FieldInfo, IdField) &&
                 !ReflectionTools.FieldEquals(f.FieldInfo, ToStrField)))
             {
-                GetOrCreateFieldBinding(field.FieldInfo, tools);
+                Expression exp = GetOrCreateFieldBinding(field.FieldInfo, tools);
+
+                if (exp is MListExpression)
+                {
+                    Expression proj = tools.MListProjection((MListExpression)exp);
+                    ReplaceBinding(field.FieldInfo, proj); 
+                }  
             }
         }
 

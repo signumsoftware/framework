@@ -134,14 +134,4 @@ namespace Signum.Engine.Exceptions
             this.Ids = ids;
         }
     }
-
-    [Serializable]
-    public class OrderByNotLastException : Exception
-    {
-        public OrderByNotLastException(SqlException inner)
-            : base("The translated query has an ORDERBY in a innner SELECT statement, write the query in a different way", inner)
-        {
-
-        }
-    }
 }

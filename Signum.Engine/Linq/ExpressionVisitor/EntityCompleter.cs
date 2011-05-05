@@ -18,7 +18,7 @@ namespace Signum.Engine.Linq
         BinderTools tools;
         ImmutableStack<Type> previousTypes = ImmutableStack<Type>.Empty; 
 
-        public static Expression Clean(Expression source, BinderTools tools)
+        public static Expression Complete(Expression source, BinderTools tools)
         {
             EntityCompleter pc = new EntityCompleter(){ tools = tools};
             return pc.Visit(source);

@@ -69,10 +69,10 @@ namespace Signum.Engine.Linq
         internal static Expression Optimize(Expression binded, BinderTools tools)
         {
             Expression rewrited = AggregateRewriter.Rewrite(binded);
-            Expression projCleaned = EntityCompleter.Clean(rewrited, tools);
-            Expression removed = OrderByRewriter.Rewrite(projCleaned);
+            Expression completed = EntityCompleter.Complete(rewrited, tools);
+            Expression orderRewrited = OrderByRewriter.Rewrite(completed);
 
-            Expression rebinded = QueryRebinder.Rebind(removed);
+            Expression rebinded = QueryRebinder.Rebind(orderRewrited);
 
             Expression replaced = AliasProjectionReplacer.Replace(rebinded);
             Expression columnCleaned = UnusedColumnRemover.Remove(replaced);

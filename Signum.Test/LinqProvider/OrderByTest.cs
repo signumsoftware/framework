@@ -60,7 +60,7 @@ namespace Signum.Test.LinqProvider
             var songsAlbum = Database.Query<ArtistDN>().OrderBy(a => a.Dead).Take(3);
         }
 
-        [TestMethod, ExpectedException(typeof(OrderByNotLastException))]
+        [TestMethod]
         public void OrderByNotLast()
         {
             var songsAlbum = Database.Query<ArtistDN>().OrderBy(a => a.Dead).Where(a => a.Id != 0).ToList();

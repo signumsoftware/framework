@@ -38,16 +38,18 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitSelect(SelectExpression select)
         {
+            bool isOuterMost = select == outerMostSelect; 
+
             select = (SelectExpression)base.VisitSelect(select);
             if (select.OrderBy != null && select.OrderBy.Count > 0)
                 this.PrependOrderings(select.OrderBy);
 
-            var orderings = select == outerMostSelect && !IsCountSumOrAvg(select) ? gatheredOrderings : null;
+            var orderings = isOuterMost && !IsCountSumOrAvg(select) ? gatheredOrderings : null;
 
             if (AreEqual(select.OrderBy, orderings))
                 return select;
 
-            return new SelectExpression(select.Alias, select.Distinct, select.Top, select.Columns, select.From, select.Where, gatheredOrderings, select.GroupBy);
+            return new SelectExpression(select.Alias, select.Distinct, select.Top, select.Columns, select.From, select.Where, orderings, select.GroupBy);
         }
 
         static bool AreEqual(IEnumerable<OrderExpression> col1, IEnumerable<OrderExpression> col2)
