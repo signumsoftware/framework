@@ -81,6 +81,7 @@
     <Compile Include="ExpressionTrees\Linq.cs" />
     <Compile Include="FileExtensions.cs" />
     <Compile Include="NaturalLanguageTools.cs" />
+    <Compile Include="Pagination.cs" />
     <Compile Include="QueryableExtensions.cs" />
     <Compile Include="Reflection\GenericInvoker.cs" />
     <Compile Include="Reflection\TupleExtensions.cs" />
