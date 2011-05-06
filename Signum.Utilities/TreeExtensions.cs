@@ -104,5 +104,10 @@ namespace Signum.Utilities
         {
             Children = new List<Node<T>>();
         }
+
+        //public override string ToString()
+        //{
+        //   // StringWriter 
+        //}
     }
 }
