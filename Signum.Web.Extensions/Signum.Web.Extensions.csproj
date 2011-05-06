@@ -211,6 +211,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>DateSpan.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Basic\Views\HourMinute.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>HourMinute.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Basic\Views\_ViewStart.cs">
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
       <AutoGen>True</AutoGen>
@@ -644,6 +649,10 @@
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>_ViewStart.cs</LastGenOutput>
     </Content>
+    <None Include="Basic\Views\HourMinute.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>HourMinute.cs</LastGenOutput>
+    </None>
     <None Include="Basic\Views\_ViewStart.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>_ViewStart.cs</LastGenOutput>
