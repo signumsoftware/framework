@@ -25,9 +25,9 @@ namespace Signum.Web.Selenium
         {
             Process seleniumServerProcess = new Process();
             seleniumServerProcess.StartInfo.FileName = "java";
-            if (Explorer == WebExplorer.Firefox && System.IO.Directory.Exists("D:\\Signum\\Selenium"))
+            if (Explorer == WebExplorer.Firefox && System.IO.Directory.Exists("D:\\Selenium"))
                 seleniumServerProcess.StartInfo.Arguments =
-                    "-jar c:/selenium/selenium-server.jar -firefoxProfileTemplate D:\\Signum\\Selenium -timeout 3600";
+                    "-jar c:/selenium/selenium-server.jar -firefoxProfileTemplate D:\\Selenium -timeout 3600";
             else
                 seleniumServerProcess.StartInfo.Arguments =
                     "-jar c:/selenium/selenium-server.jar -timeout 3600";

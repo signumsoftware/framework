@@ -181,7 +181,6 @@ namespace Signum.Test.Extensions
         {
             using (AuthLogic.UnsafeUser("external"))
             using (EntityGroupAuthLogic.DisableQueries())
-            using (EntityGroupAuthLogic.DisableRetrieve())
             {
                 //Because of target
                 {
