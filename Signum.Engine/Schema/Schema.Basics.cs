@@ -377,9 +377,9 @@ namespace Signum.Engine.Maps
             if (ibField != null)
                 return new ImplementedByAttribute(ibField.ImplementationColumns.Keys.ToArray());
 
-            //FieldImplementedByAll ibaField = field as FieldImplementedByAll;
-            //if (ibaField != null)
-            //    return new ImplementedByAllAttribute();
+            FieldImplementedByAll ibaField = field as FieldImplementedByAll;
+            if (ibaField != null)
+                return new ImplementedByAllAttribute();
 
             return null;
         }
@@ -627,12 +627,6 @@ namespace Signum.Engine.Maps
         public void GenerateColumns()
         {
             Columns = Fields.Values.SelectMany(c => c.Field.Columns()).ToDictionary(c => c.Name);
-
-            int i = 0;
-            foreach (var col in Columns.Values)
-            {
-                col.Position = i++;
-            }
         }
 
         public Field GetField(MemberInfo value, bool throws)
@@ -742,7 +736,6 @@ namespace Signum.Engine.Maps
     {
         string Name { get; }
         bool Nullable { get; }
-        int Position { get; set; }
         SqlDbType SqlDbType { get; }
         bool PrimaryKey { get; }
         bool Identity { get; }
@@ -767,7 +760,6 @@ namespace Signum.Engine.Maps
         int? IColumn.Size { get { return null; } }
         int? IColumn.Scale { get { return null; } }
         Table IColumn.ReferenceTable { get { return null; } }
-        public int Position { get; set; }
 
         Table table;
         public FieldPrimaryKey(Type fieldType, Table table)
@@ -805,7 +797,6 @@ namespace Signum.Engine.Maps
         public int? Size { get; set; }
         public int? Scale { get; set; }
         Table IColumn.ReferenceTable { get { return null; } }
-        public int Position { get; set; }
 
         public FieldValue(Type fieldType)
             : base(fieldType)
@@ -841,7 +832,6 @@ namespace Signum.Engine.Maps
             int? IColumn.Size { get { return null; } }
             int? IColumn.Scale { get { return null; } }
             public Table ReferenceTable { get { return null; } }
-            public int Position { get; set; }
         }
 
         public EmbeddedHasValueColumn HasValue { get; set; }
@@ -906,7 +896,6 @@ namespace Signum.Engine.Maps
         int? IColumn.Size { get { return null; } }
         int? IColumn.Scale { get { return null; } }
         public Table ReferenceTable { get; set; }
-        public int Position { get; set; }
 
         public bool IsLite { get; set; }
 
@@ -976,7 +965,6 @@ namespace Signum.Engine.Maps
         int? IColumn.Size { get { return null; } }
         int? IColumn.Scale { get { return null; } }
         public Table ReferenceTable { get; set; }
-        public int Position { get; set; }
     }
 
     public partial class FieldMList : Field, IFieldFinder
@@ -1026,40 +1014,6 @@ namespace Signum.Engine.Maps
             int? IColumn.Size { get { return null; } }
             int? IColumn.Scale { get { return null; } }
             Table IColumn.ReferenceTable { get { return null; } }
-            public int Position { get; set; }
-        }
-
-        public partial class BackReferenceColumn : Field, IColumn
-        {
-            public BackReferenceColumn(Type fieldType)
-                : base(fieldType)
-            {
-            }
-
-            public string Name { get; set; }
-            bool IColumn.Nullable { get { return false; } }
-            SqlDbType IColumn.SqlDbType { get { return SqlBuilder.PrimaryKeyType; } }
-            bool IColumn.PrimaryKey { get { return false; } }
-            bool IColumn.Identity { get { return false; } }
-            int? IColumn.Size { get { return null; } }
-            int? IColumn.Scale { get { return null; } }
-            public Table ReferenceTable { get; set; }
-            public int Position { get; set; }
-
-            public override IEnumerable<IColumn> Columns()
-            {
-                yield return this;
-            }
-
-            public override IEnumerable<UniqueIndex> GeneratUniqueIndexes(ITable table)
-            {
-                throw new NotImplementedException();
-            }
-
-            internal override Expression GetExpression(ProjectionToken token, string tableAlias, BinderTools tools)
-            {
-                throw new NotImplementedException();
-            }
         }
 
         public Dictionary<string, IColumn> Columns { get; set; }
@@ -1067,7 +1021,7 @@ namespace Signum.Engine.Maps
 
         public string Name { get; set; }
         public PrimaryKeyColumn PrimaryKey { get; set; }
-        public BackReferenceColumn BackReference { get; set; }
+        public FieldReference BackReference { get; set; }
         public Field Field { get; set; }
 
         public Type CollectionType { get; private set; }
@@ -1086,12 +1040,6 @@ namespace Signum.Engine.Maps
         public void GenerateColumns()
         {
             Columns = new IColumn[] { PrimaryKey, BackReference }.Concat(Field.Columns()).ToDictionary(a => a.Name);
-
-            int i = 0;
-            foreach (var col in Columns.Values)
-            {
-                col.Position = i++;
-            }
         }
 
         public List<UniqueIndex> GeneratUniqueIndexes()
@@ -1103,6 +1051,7 @@ namespace Signum.Engine.Maps
 
             return result;
         }
+
     }
 
     public enum KindOfField

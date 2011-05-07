@@ -317,6 +317,16 @@ namespace Signum.Engine.Linq
                 }
             }
 
+            protected override Expression VisitMListElement(MListElementExpression mle)
+            {
+                Type type = mle.Type;
+
+                return Expression.MemberInit(Expression.New(type),
+                    Expression.Bind(type.GetProperty("RowId"), Visit(mle.RowId)),
+                    Expression.Bind(type.GetProperty("Parent"), Visit(mle.Parent)),
+                    Expression.Bind(type.GetProperty("Element"), Visit(mle.Element)));
+            }
+
             private int? ConstantValue(Expression typeId)
             {
                 if (typeId.NodeType == ExpressionType.Convert)

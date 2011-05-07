@@ -101,8 +101,7 @@ namespace Signum.Engine.Linq
             AssertTable(tools);
 
             foreach (EntityField field in Table.Fields.Values.Where(f =>
-                !ReflectionTools.Equals(f.FieldInfo, IdField) &&
-                !ReflectionTools.FieldEquals(f.FieldInfo, ToStrField)))
+                !ReflectionTools.Equals(f.FieldInfo, IdField)))
             {
                 Expression exp = GetOrCreateFieldBinding(field.FieldInfo, tools);
 
@@ -171,6 +170,8 @@ namespace Signum.Engine.Linq
                 constructor;
         }
     }
+
+   
 
     internal class FieldBinding
     {
@@ -338,6 +339,29 @@ namespace Signum.Engine.Linq
         public override string ToString()
         {
             return "MList({0},{1})".Formato(RelationalTable.Name, BackID); 
+        }
+    }
+
+    internal class MListElementExpression : DbExpression
+    {
+        public readonly Expression RowId;
+        public readonly FieldInitExpression Parent;
+        public readonly Expression Element;
+
+        public readonly RelationalTable Table;
+
+        public MListElementExpression(Expression rowId, FieldInitExpression parent, Expression element, RelationalTable table)
+            : base(DbExpressionType.MListElement, typeof(MListElement<,>).MakeGenericType(parent.Type, element.Type))
+        {
+            this.RowId = rowId;
+            this.Parent = parent;
+            this.Element = element;
+            this.Table = table;
+        }
+
+        public override string ToString()
+        {
+            return "MListElement({0})\r\n{{\r\nParent={1},\r\nElement={2}}})".Formato(RowId, Parent, Element);
         }
     }
 }

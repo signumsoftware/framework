@@ -83,8 +83,7 @@ namespace Signum.Engine.Linq
             return rewriteConditions;
         }
 
-        internal int Delete<T>(IQueryable<T> query)
-            where T : IdentifiableEntity
+        internal int Delete(IQueryable query)
         {
             Expression cleaned = Clean(query.Expression);
             Expression filtered = QueryFilterer.Filter(cleaned);
@@ -97,7 +96,6 @@ namespace Signum.Engine.Linq
         }
 
         internal int Update<T>(IQueryable<T> query, Expression<Func<T, T>> set)
-            where T : IdentifiableEntity
         {
             Expression cleaned = Clean(query.Expression);
             Expression filtered = QueryFilterer.Filter(cleaned);

@@ -17,23 +17,34 @@ namespace Signum.Engine.Linq
             return new ConditionsRewriter().Visit(expression);
         }
 
-        static Expression MakeSqlCondition(Expression exp)
+        public bool inSql = false;
+
+        public IDisposable InSql()
+        {
+            var oldInSelect = inSql;
+            inSql = true;
+            return new Disposable(() => inSql = oldInSelect); 
+        }
+
+        Expression MakeSqlCondition(Expression exp)
         {
             if (exp == null)
                 return null;
 
-            if (!IsBooleanExpression(exp) || IsSqlCondition(exp))
+            if (!inSql || !IsBooleanExpression(exp) || IsSqlCondition(exp))
                 return exp;
+
             return Expression.Equal(exp, new SqlConstantExpression(true));
         }
 
-        static Expression MakeSqlValue(Expression exp)
+        Expression MakeSqlValue(Expression exp)
         {
             if (exp == null)
                 return null;
 
-            if (!IsBooleanExpression(exp) || !IsSqlCondition(exp))
+            if (!inSql || !IsBooleanExpression(exp) || !IsSqlCondition(exp))
                 return exp;
+
             return new CaseExpression(new[] { new When(exp, new SqlConstantExpression(true)) }, new SqlConstantExpression(false));
         }
 
@@ -229,6 +240,29 @@ namespace Signum.Engine.Linq
                 return new JoinExpression(join.JoinType, left, right, condition);
             }
             return join;
+        }
+
+        protected override Expression VisitProjection(ProjectionExpression proj)
+        {
+            SelectExpression source;
+            using (InSql())
+            {
+                source = (SelectExpression)this.Visit(proj.Source);
+            }
+            Expression projector = this.Visit(proj.Projector);
+            ProjectionToken token = VisitProjectionToken(proj.Token);
+
+            if (source != proj.Source || projector != proj.Projector || token != proj.Token)
+            {
+                return new ProjectionExpression(source, projector, proj.UniqueFunction, token, proj.Type);
+            }
+            return proj;
+        }
+
+        protected override Expression VisitCommandAggregate(CommandAggregateExpression cea)
+        {
+            using (InSql())
+                return base.VisitCommandAggregate(cea);
         }
     }
 }

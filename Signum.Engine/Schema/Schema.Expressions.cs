@@ -33,18 +33,37 @@ namespace Signum.Engine.Maps
             return result;
         }
 
-        internal Expression GetViewExpression(ProjectionToken token, string tableAlias, BinderTools tools)
+        internal Expression GetProjectorExpression(ProjectionToken token, string tableAlias, BinderTools tools)
         {
-            var bindings = (from kvp in this.Fields
-                            let fi = kvp.Value.FieldInfo
-                            select new FieldBinding(fi, kvp.Value.Field.GetExpression(token, tableAlias, tools))).ToReadOnly();
+            if (!IsView)
+            {
+                Schema.Current.AssertAllowed(Type);
 
-            return new EmbeddedFieldInitExpression(this.Type, null, bindings, null);
+                Expression id = this.CreateBinding(token, tableAlias, FieldInitExpression.IdField, tools);
+                return new FieldInitExpression(this.Type, tableAlias, id, null, token)
+                {
+                    Bindings = { new FieldBinding(FieldInitExpression.IdField, id) }
+                };
+            }
+            else
+            {
+                var bindings = (from kvp in this.Fields
+                                let fi = kvp.Value.FieldInfo
+                                select new FieldBinding(fi, kvp.Value.Field.GetExpression(token, tableAlias, tools))).ToReadOnly();
+
+                return new EmbeddedFieldInitExpression(this.Type, null, bindings, null);
+            }
         }
     }
 
     public partial class RelationalTable
     {
+
+        internal ColumnExpression RowIdExpression(string tableAlias)
+        {
+            return new ColumnExpression(typeof(int), tableAlias, ((IColumn)this.PrimaryKey).Name);
+        }
+
         internal ColumnExpression BackColumnExpression(string tableAlias)
         {
             return new ColumnExpression(BackReference.ReferenceType(), tableAlias, BackReference.Name);
@@ -53,6 +72,18 @@ namespace Signum.Engine.Maps
         internal Expression FieldExpression(ProjectionToken token, string tableAlias, BinderTools tools)
         {
             return Field.GetExpression(token, tableAlias, tools);
+        }
+
+        internal Expression GetProjectorExpression(ProjectionToken token, string tableAlias, BinderTools tools)
+        {
+            Schema.Current.AssertAllowed(this.BackReference.ReferenceTable.Type);
+
+            Type elementType = typeof(MListElement<,>).MakeGenericType(BackReference.FieldType, Field.FieldType);
+
+            return new MListElementExpression(
+                 RowIdExpression(tableAlias) ,
+                (FieldInitExpression)this.BackReference.GetExpression(token, tableAlias, tools),
+                this.Field.GetExpression(token, tableAlias, tools), this);
         }
     }
 

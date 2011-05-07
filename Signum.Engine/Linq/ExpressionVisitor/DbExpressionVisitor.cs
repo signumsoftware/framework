@@ -84,7 +84,8 @@ namespace Signum.Engine.Linq
                     return this.VisitLiteReference((LiteReferenceExpression)exp);
                 case DbExpressionType.MList:
                     return this.VisitMList((MListExpression)exp);
-
+                case DbExpressionType.MListElement:
+                    return this.VisitMListElement((MListElementExpression)exp);
 
                 default:
                     return base.Visit(exp);
@@ -159,6 +160,15 @@ namespace Signum.Engine.Linq
             return ml;
         }
 
+        protected virtual Expression VisitMListElement(MListElementExpression mle)
+        {
+            var rowId = Visit(mle.RowId);
+            var parent = (FieldInitExpression)Visit(mle.Parent);
+            var element = Visit(mle.Element);
+            if (rowId != mle.RowId || parent != mle.Parent || element != mle.Parent)
+                return new MListElementExpression(rowId, parent, element, mle.Table);
+            return mle;
+        }
 
         protected virtual Expression VisitSqlEnum(SqlEnumExpression sqlEnum)
         {

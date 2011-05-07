@@ -55,6 +55,7 @@ namespace Signum.Engine.Linq
         ImplementedByAll,
         LiteReference,
         MList,
+        MListElement,
     }
 
     internal abstract class DbExpression : Expression
@@ -942,12 +943,12 @@ namespace Signum.Engine.Linq
 
     internal class UpdateExpression : CommandExpression
     {
-        public readonly Table Table;
+        public readonly ITable Table;
         public readonly ReadOnlyCollection<ColumnAssignment> Assigments; 
         public readonly SourceExpression Source;
         public readonly Expression Where;
 
-        public UpdateExpression(Table table, SourceExpression source, Expression where, IEnumerable<ColumnAssignment> assigments)
+        public UpdateExpression(ITable table, SourceExpression source, Expression where, IEnumerable<ColumnAssignment> assigments)
             :base(DbExpressionType.Update)
         {
             this.Table = table;

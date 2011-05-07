@@ -358,7 +358,7 @@ namespace Signum.Engine.Maps
             RelationalTable relationalTable = new RelationalTable(fi.FieldType)
             {
                 Name = GenerateTableNameCollection(type, name),
-                BackReference = new RelationalTable.BackReferenceColumn(table.Type)
+                BackReference = new FieldReference(table.Type)
                 {
                     Name = GenerateBackReferenceName(type),
                     ReferenceTable = table

@@ -652,67 +652,49 @@ namespace Signum.Engine.Linq
         private bool IsTable(Expression expression)
         {
             ConstantExpression c = expression as ConstantExpression;
-            return c != null && TableType(c.Value) != null;
+            return c != null && IsTable(c.Value);
         }
 
-        public Type TableType(object value)
+        public bool IsTable(object value)
         {
-            if (value == null)
-                return null;
-
-            Type type = value.GetType();
-            if (!typeof(IQueryable).IsAssignableFrom(type))
-                return null;
-
-            IQueryable query = (IQueryable)value;
-
-            if (!type.IsInstantiationOf(typeof(Query<>)))
-                throw new InvalidOperationException("{0} belongs to another kind of Linq Provider".Formato(type.TypeName()));
+            IQueryable query = value as IQueryable;
+            if (query == null)
+                return false;
 
             if (!query.IsBase())
-                throw new InvalidOperationException("Cosntant Expression with complex IQueryable not expected at this stage");
+                throw new InvalidOperationException("Constant Expression with complex IQueryable not expected at this stage");
 
-            return query.ElementType;
+            Type type = value.GetType();
+
+            if (!type.IsInstantiationOf(typeof(SignumTable<>)) && !type.IsInstantiationOf(typeof(Query<>)))
+                throw new InvalidOperationException("{0} belongs to another kind of Linq Provider".Formato(type.TypeName()));
+
+            return true;
         }
 
-        private ProjectionExpression GetTableProjection(Type type)
+        private ProjectionExpression GetTableProjection(IQueryable query)
         {
-            string tableAlias = tools.GetNextTableAlias(type);
-            Type resultType = typeof(IEnumerable<>).MakeGenericType(type);
+            string tableAlias = tools.GetNextTableAlias(query.ElementType);
             ProjectionToken token = new ProjectionToken();
 
-            Expression exp; 
-            Table table;
-            TableExpression tableExpression; 
-            if (typeof(IdentifiableEntity).IsAssignableFrom(type))
-            {
-                Schema.Current.AssertAllowed(type);
+            ITable table = query is ISignumTable ? ((ISignumTable)query).Table : new ViewBuilder(Schema.Current).NewView(query.ElementType);
 
-                table = ConnectionScope.Current.Schema.Table(type);
+            Expression exp = table is Table ? 
+                ((Table)table).GetProjectorExpression(token, tableAlias, this.tools) :
+                ((RelationalTable)table).GetProjectorExpression(token, tableAlias, this.tools);
 
-                tableExpression = new TableExpression(tableAlias, table.Name);
+            Type resultType = typeof(IQueryable<>).MakeGenericType(query.ElementType);
+            TableExpression tableExpression = new TableExpression(tableAlias, table.Name);
 
-                Expression id = table.CreateBinding(token, tableAlias, FieldInitExpression.IdField, this.tools);
-                exp = new FieldInitExpression(type, tableAlias, id, null, token)
-                {
-                    Bindings = { new FieldBinding(FieldInitExpression.IdField, id) }
-                };
-            }
-            else
-            {
-                ViewBuilder vb = new ViewBuilder(Schema.Current);
-                table = vb.NewView(type);
-
-                tableExpression = new TableExpression(tableAlias, table.Name);
-
-                exp = table.GetViewExpression(token, tableAlias, this.tools); 
-            }
             string selectAlias = tools.GetNextSelectAlias();
 
-            ProjectedColumns pc = ColumnProjector.ProjectColumns(exp, selectAlias, new[] { tableAlias }, new[] { token });
+            ProjectedColumns pc = ColumnProjector.ProjectColumns(exp, selectAlias, new[] { tableAlias }, new ProjectionToken[0]);
+
             ProjectionExpression projection = new ProjectionExpression(
                 new SelectExpression(selectAlias, false, null, pc.Columns, tableExpression, null, null, null),
-            pc.Projector, null, pc.Token, typeof(IQueryable<>).MakeGenericType(type));
+            pc.Projector, null, token, resultType);
+
+            projection = tools.ApplyExpansions(projection);
 
             return projection;
         }
@@ -724,9 +706,8 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitConstant(ConstantExpression c)
         {
-            Type tableType = TableType(c.Value);
-            if(tableType != null)
-                return GetTableProjection(tableType);
+            if(IsTable(c.Value))
+                return GetTableProjection((IQueryable)c.Value);
            
             return c;
         }
@@ -954,6 +935,19 @@ namespace Signum.Engine.Linq
                         return iba.Id;
 
                     throw new InvalidOperationException("The member {0} of ImplementedByAll is not accesible on queries".Formato(m.Member));
+                }
+                case (ExpressionType)DbExpressionType.MListElement:
+                {
+                    MListElementExpression mle = (MListElementExpression)source;
+
+                    switch (m.Member.Name)
+	                {
+                        case "RowId": return mle.RowId;
+                        case "Parent": return mle.Parent;
+                        case "Element": return mle.Element;
+                        default: 
+                             throw new InvalidOperationException("The member {0} of MListElement is not accesible on queries".Formato(m.Member));
+	                }
                 }
             }
       
@@ -1235,44 +1229,83 @@ namespace Signum.Engine.Linq
 
         internal CommandExpression BindDelete(Expression source)
         {
+            List<CommandExpression> commands = new List<CommandExpression>(); 
+
             ProjectionExpression pr = VisitCastProjection(source);
-            FieldInitExpression fie = (FieldInitExpression)pr.Projector;
-            Expression id = fie.Table.CreateBinding(null, fie.Table.Name, FieldInitExpression.IdField, null);
 
-            DeleteExpression delete = new DeleteExpression(fie.Table, pr.Source, SmartEqualizer.EqualNullable(id, fie.ExternalId));
-
-            CommandExpression[] relationalDeletes = fie.Table.Fields.Values.Select(ef => ef.Field).OfType<FieldMList>().Select(f =>
+            if (pr.Projector is FieldInitExpression)
             {
-                Expression backId = f.RelationalTable.BackColumnExpression(f.RelationalTable.Name);
-                return new DeleteExpression(f.RelationalTable, pr.Source,
-                    SmartEqualizer.EqualNullable(backId, fie.ExternalId));
-            }).Cast<CommandExpression>().ToArray();
 
-            return new CommandAggregateExpression(relationalDeletes.And(delete).And(new SelectRowCountExpression()));
+                FieldInitExpression fie = (FieldInitExpression)pr.Projector;
+                Expression id = fie.Table.CreateBinding(null, fie.Table.Name, FieldInitExpression.IdField, null);
+
+                commands.AddRange(fie.Table.Fields.Values.Select(ef => ef.Field).OfType<FieldMList>().Select(f =>
+                {
+                    Expression backId = f.RelationalTable.BackColumnExpression(f.RelationalTable.Name);
+                    return new DeleteExpression(f.RelationalTable, pr.Source,
+                        SmartEqualizer.EqualNullable(backId, fie.ExternalId));
+                }));
+
+                commands.Add(new DeleteExpression(fie.Table, pr.Source, SmartEqualizer.EqualNullable(id, fie.ExternalId))); 
+            }
+            else if (pr.Projector is MListElementExpression)
+            {
+                MListElementExpression mlee = (MListElementExpression)pr.Projector;
+
+                Expression id = mlee.Table.RowIdExpression(mlee.Table.Name);
+
+                commands.Add(new DeleteExpression(mlee.Table, pr.Source, SmartEqualizer.EqualNullable(id, mlee.RowId)));
+            }
+            else
+                throw new InvalidOperationException("Delete not supported for {0}".Formato(pr.Projector.GetType().TypeName())); 
+
+            commands.Add(new SelectRowCountExpression()); 
+
+            return new CommandAggregateExpression(commands);
         }
 
         internal CommandExpression BindUpdate(Expression source, LambdaExpression set)
         {
             ProjectionExpression pr = VisitCastProjection(source);
-            FieldInitExpression fie = (FieldInitExpression)pr.Projector;
-            Expression id = fie.Table.CreateBinding(null, fie.Table.Name, FieldInitExpression.IdField, null);
 
             MemberInitExpression mie = (MemberInitExpression)set.Body;
             ParameterExpression param = set.Parameters[0];
 
             map.Add(param, pr.Projector);
             List<ColumnAssignment> assigments = mie.Bindings.SelectMany(m => ColumnAssigments(param, m)).ToList();
-
-            pr = tools.ApplyExpansions(pr);
-            fie = (FieldInitExpression)pr.Projector;
             map.Remove(param);
 
-            return new CommandAggregateExpression(
-                new CommandExpression[]
-                { 
-                    new UpdateExpression(fie.Table, pr.Source, SmartEqualizer.EqualNullable(id, fie.ExternalId), assigments),
-                    new SelectRowCountExpression()
-                });
+            pr = tools.ApplyExpansions(pr);
+
+            ITable table;
+            Expression condition;
+
+            if (pr.Projector is FieldInitExpression)
+            {
+                FieldInitExpression fie = (FieldInitExpression)pr.Projector;
+
+                Expression id = fie.Table.CreateBinding(null, fie.Table.Name, FieldInitExpression.IdField, null);
+
+                condition = SmartEqualizer.EqualNullable(id, fie.ExternalId);
+                table = fie.Table;
+            }
+            else if (pr.Projector is MListElementExpression)
+            {
+                MListElementExpression mlee = (MListElementExpression)pr.Projector;
+
+                Expression id = mlee.Table.RowIdExpression(mlee.Table.Name);
+
+                condition = SmartEqualizer.EqualNullable(id, mlee.RowId);
+                table = mlee.Table;
+            }
+            else 
+                throw new InvalidOperationException("Update not supported for {0}".Formato(pr.Projector.GetType().TypeName())); 
+
+            return new CommandAggregateExpression(new CommandExpression[]
+            { 
+                new UpdateExpression(table, pr.Source, condition, assigments),
+                new SelectRowCountExpression()
+            });
         }
 
         private ColumnAssignment[] ColumnAssigments(Expression obj, MemberBinding m)

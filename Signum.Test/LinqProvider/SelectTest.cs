@@ -452,14 +452,13 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelectSingleCellSingle()
         {
-            var list = Database.Query<BandDN>()
-                .Select(b => new
-                {
-                    FirstName = b.Members.Select(m => m.Name).First(),
-                    FirstOrDefaultName = b.Members.Select(m => m.Name).FirstOrDefault(),
-                    SingleName = b.Members.Take(1).Select(m => m.Name).Single(),
-                    SingleOrDefaultName = b.Members.Take(1).Select(m => m.Name).SingleOrDefault(),
-                }).ToList();
+            var list = Database.Query<BandDN>().Select(b => new
+            {
+                FirstName = b.Members.Select(m => m.Name).First(),
+                FirstOrDefaultName = b.Members.Select(m => m.Name).FirstOrDefault(),
+                SingleName = b.Members.Take(1).Select(m => m.Name).Single(),
+                SingleOrDefaultName = b.Members.Take(1).Select(m => m.Name).SingleOrDefault(),
+            }).ToList();
         }
 
         [TestMethod]
@@ -496,6 +495,27 @@ namespace Signum.Test.LinqProvider
         public void SelectOutsideLiteNull()
         {
             var awards = Database.Query<GrammyAwardDN>().Select(a => ((AmericanMusicAwardDN)(AwardDN)a).ToLite()).ToList();
+        }
+
+        [TestMethod]
+        public void SelectMListLite()
+        {
+            var lists = (from mle in Database.MListQuery((ArtistDN a) => a.Friends)
+                         select new { Artis = mle.Parent.Name, Friend = mle.Element.Entity.Name }).ToList();
+        }
+
+        [TestMethod]
+        public void SelectMListEntity()
+        {
+            var lists = (from mle in Database.MListQuery((BandDN a) => a.Members)
+                         select new { Band = mle.Parent.Name, Artis = mle.Element.Name }).ToList();
+        }
+
+        [TestMethod]
+        public void SelectMListEmbedded()
+        {
+            var lists = (from mle in Database.MListQuery((AlbumDN a) => a.Songs)
+                         select mle).ToList();
         }
     }
 

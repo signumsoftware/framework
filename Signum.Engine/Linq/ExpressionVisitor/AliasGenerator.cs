@@ -45,14 +45,11 @@ namespace Signum.Engine.Linq
                 baseAlias[type] = alias;
             }
 
-
             int? count = tablesCount.TryGetS(alias);
             tablesCount[alias] = (count ?? 0) + 1;
 
             return alias + count;
         }
-
-
 
         int selectAliasCount = 0;
         public string GetNextSelectAlias()
