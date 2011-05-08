@@ -5,6 +5,7 @@ using System.Text;
 using System.Linq.Expressions;
 using System.Collections.ObjectModel;
 using Signum.Utilities;
+using Signum.Entities.DynamicQuery;
 
 namespace Signum.Engine.Linq
 {
@@ -38,21 +39,31 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitSelect(SelectExpression select)
         {
-            bool isOuterMost = select == outerMostSelect; 
+            bool isOuterMost = select == outerMostSelect;
 
             select = (SelectExpression)base.VisitSelect(select);
-            if (select.Top != null || select.GroupBy != null && select.GroupBy.Any())
-                gatheredOrderings = Enumerable.Empty<OrderExpression>(); 
+            if (select.GroupBy != null && select.GroupBy.Any())
+                gatheredOrderings = Enumerable.Empty<OrderExpression>();
+
+            if (select.Reverse)
+                gatheredOrderings = gatheredOrderings.Select(o => 
+                    new OrderExpression(o.OrderType == OrderType.Ascending ? OrderType.Descending : OrderType.Ascending, o.Expression));  
 
             if (select.OrderBy != null && select.OrderBy.Count > 0)
                 this.PrependOrderings(select.OrderBy);
 
-            var orderings = isOuterMost && !IsCountSumOrAvg(select) ? gatheredOrderings : null;
+            var orderings = (isOuterMost && !IsCountSumOrAvg(select)) ? gatheredOrderings : null;
 
-            if (AreEqual(select.OrderBy, orderings))
+            if (select.Top != null)
+            {
+                orderings = gatheredOrderings;
+                gatheredOrderings = Enumerable.Empty<OrderExpression>();
+            }
+
+            if (AreEqual(select.OrderBy, orderings) && !select.Reverse)
                 return select;
 
-            return new SelectExpression(select.Alias, select.Distinct, select.Top, select.Columns, select.From, select.Where, orderings, select.GroupBy);
+            return new SelectExpression(select.Alias, select.Distinct, false, select.Top, select.Columns, select.From, select.Where, orderings, select.GroupBy);
         }
 
         static bool AreEqual(IEnumerable<OrderExpression> col1, IEnumerable<OrderExpression> col2)
@@ -60,10 +71,8 @@ namespace Signum.Engine.Linq
             bool col1Empty = col1 == null || col1.Empty();
             bool col2Empty = col2 == null || col2.Empty();
 
-
             if (col1Empty && col2Empty)
                 return true;
-
 
             if (col1Empty || col2Empty)
                 return false;

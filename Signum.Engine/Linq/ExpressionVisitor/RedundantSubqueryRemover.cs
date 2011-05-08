@@ -37,6 +37,7 @@ namespace Signum.Engine.Linq
                 {
                     SelectExpression newSelect = (SelectExpression)SubqueryRemover.Remove(select, new[] { fromSelect });
 
+                    var reverse = (selectRole & SelectRoles.Reverse) != 0 ? newSelect.Reverse : fromSelect.Reverse;
                     var distinct = (selectRole & SelectRoles.Distinct) != 0 ? newSelect.Distinct : fromSelect.Distinct;
                     var top = (selectRole & SelectRoles.Top) != 0 ? newSelect.Top : fromSelect.Top;
                     var where = minSelect == maxSelect && minSelect == SelectRoles.Where ? Expression.And(newSelect.Where, fromSelect.Where) :
@@ -44,7 +45,7 @@ namespace Signum.Engine.Linq
                     var groupBy = (selectRole & SelectRoles.GroupBy) != 0 ? newSelect.GroupBy : fromSelect.GroupBy;
                     var orderBy = (selectRole & SelectRoles.OrderBy) != 0 ? newSelect.OrderBy : fromSelect.OrderBy;
 
-                    return new SelectExpression(newSelect.Alias, distinct, top, newSelect.Columns, newSelect.From, where, orderBy, groupBy);
+                    return new SelectExpression(newSelect.Alias, distinct, reverse, top, newSelect.Columns, newSelect.From, where, orderBy, groupBy);
                 }
             }
 

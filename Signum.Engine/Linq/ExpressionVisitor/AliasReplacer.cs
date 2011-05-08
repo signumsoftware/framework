@@ -49,7 +49,7 @@ namespace Signum.Engine.Linq
             string newAlias = aliasMap.TryGetC(select.Alias) ?? select.Alias;
 
             if (top != select.Top || from != select.From || where != select.Where || columns != select.Columns || orderBy != select.OrderBy || groupBy != select.GroupBy || newAlias != select.Alias)
-                return new SelectExpression(newAlias, false, top, columns, from, where, orderBy, groupBy);
+                return new SelectExpression(newAlias, select.Distinct, select.Reverse, top, columns, from, where, orderBy, groupBy);
 
             return select;
         }

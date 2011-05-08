@@ -133,7 +133,7 @@ namespace Signum.Engine.Linq
             CurrentScope.SetRange(askedColumns);
 
             if (top != select.Top || from != select.From || where != select.Where || columns != select.Columns || orderBy != select.OrderBy || groupBy != select.GroupBy)
-                return new SelectExpression(select.Alias, select.Distinct, top, columns, from, where, orderBy, groupBy);
+                return new SelectExpression(select.Alias, select.Distinct, select.Reverse, top, columns, from, where, orderBy, groupBy);
 
             return select;
         }

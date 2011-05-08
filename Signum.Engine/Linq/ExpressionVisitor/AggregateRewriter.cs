@@ -37,7 +37,7 @@ namespace Signum.Engine.Linq
                     this.map.Add(ae, cd.GetReference(ae.GroupByAlias));
                     aggColumns.Add(cd);
                 }
-                return new SelectExpression(select.Alias, select.Distinct, select.Top, aggColumns, select.From, select.Where, select.OrderBy, select.GroupBy);
+                return new SelectExpression(select.Alias, select.Distinct, select.Reverse, select.Top, aggColumns, select.From, select.Where, select.OrderBy, select.GroupBy);
             }
             return select;
         }

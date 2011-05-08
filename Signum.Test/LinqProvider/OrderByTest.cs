@@ -55,6 +55,36 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void OrderByReverse()
+        {
+            var artists = Database.Query<ArtistDN>().OrderBy(a => a.Dead).Reverse().Select(a => a.Name);
+        }
+
+        [TestMethod]
+        public void OrderByLast()
+        {
+            var michael = Database.Query<ArtistDN>().OrderBy(a => a.Dead).Last();
+        }
+
+        [TestMethod]
+        public void OrderByThenByReverseLast()
+        {
+            var michael = Database.Query<ArtistDN>().OrderByDescending(a => a.Dead).ThenBy(a=>a.Name).Reverse().Last();
+        }
+
+        [TestMethod]
+        public void OrderByTakeReverse()
+        {
+            var michael = Database.Query<ArtistDN>().OrderByDescending(a => a.Dead).Take(2).Reverse().First(); //reverse ignored
+        }
+
+        [TestMethod]
+        public void OrderByTakeOrderBy()
+        {
+            var michael = Database.Query<ArtistDN>().OrderByDescending(a => a.Dead).Take(2).OrderBy(a=>a.Name).First(); //reverse ignored
+        }
+
+        [TestMethod]
         public void OrderByTop()
         {
             var songsAlbum = Database.Query<ArtistDN>().OrderBy(a => a.Dead).Take(3);

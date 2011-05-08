@@ -252,10 +252,11 @@ namespace Signum.Engine.Linq
     {
         Where = 1,
         GroupBy = 2,
-        OrderBy = 4,
-        Select = 8,
-        Distinct = 16,
-        Top = 32
+        Reverse = 4,
+        OrderBy = 8,
+        Select = 16,
+        Distinct = 32,
+        Top = 64
     }
     /// <summary>
     /// A custom expression node used to represent a SQL SELECT expression
@@ -269,6 +270,7 @@ namespace Signum.Engine.Linq
         public readonly ReadOnlyCollection<Expression> GroupBy;
         public readonly Expression Top;
         public readonly bool Distinct;
+        public readonly bool Reverse;
 
         readonly string[] knownAliases; 
         public override string[] KnownAliases
@@ -276,10 +278,11 @@ namespace Signum.Engine.Linq
             get { return knownAliases; }
         }
 
-        internal SelectExpression(string alias, bool distinct, Expression top, IEnumerable<ColumnDeclaration> columns, SourceExpression from, Expression where, IEnumerable<OrderExpression> orderBy, IEnumerable<Expression> groupBy)
+        internal SelectExpression(string alias, bool distinct, bool reverse, Expression top, IEnumerable<ColumnDeclaration> columns, SourceExpression from, Expression where, IEnumerable<OrderExpression> orderBy, IEnumerable<Expression> groupBy)
             : base(DbExpressionType.Select, alias)
         {
             this.Distinct = distinct;
+            this.Reverse = reverse;
             this.Top = top;
             this.Columns = columns.ToReadOnly();
             this.From = from;
@@ -294,14 +297,16 @@ namespace Signum.Engine.Linq
             get 
             {
                 SelectRoles roles = (SelectRoles)0;
-                if (!Columns.All(cd => cd.Expression is ColumnExpression))
-                    roles |= SelectRoles.Select;
                 if (Where != null)
                     roles |= SelectRoles.Where;
                 if (GroupBy != null && GroupBy.Count > 0)
                     roles |= SelectRoles.GroupBy;
+                if (Reverse)
+                    roles |= SelectRoles.Reverse;
                 if (OrderBy != null && OrderBy.Count > 0)
                     roles |= SelectRoles.OrderBy;
+                if (!Columns.All(cd => cd.Expression is ColumnExpression))
+                    roles |= SelectRoles.Select;
                 if(Distinct)
                     roles |= SelectRoles.Distinct;
                 if (Top != null)

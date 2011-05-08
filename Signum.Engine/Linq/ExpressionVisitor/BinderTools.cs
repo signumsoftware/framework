@@ -47,7 +47,7 @@ namespace Signum.Engine.Linq
             });
 
             return new ProjectionExpression(
-                    new SelectExpression(newAlias, false, null, pc.Columns, source, null, null, null),
+                    new SelectExpression(newAlias, false, false, null, pc.Columns, source, null, null, null),
                     pc.Projector, projection.UniqueFunction, projection.Token, projection.Type);
         }
 
@@ -181,7 +181,7 @@ namespace Signum.Engine.Linq
             ProjectedColumns pc = ColumnProjector.ProjectColumns(expr, selectAlias, tableExpression.KnownAliases, new ProjectionToken[0]); // no Token
 
             var proj = new ProjectionExpression(
-                new SelectExpression(selectAlias, false, null, pc.Columns, tableExpression, SmartEqualizer.EqualNullable(mle.BackID, ce), null, null),
+                new SelectExpression(selectAlias, false, false, null, pc.Columns, tableExpression, SmartEqualizer.EqualNullable(mle.BackID, ce), null, null),
                  pc.Projector, null, token, mle.Type);
 
             proj = ApplyExpansions(proj);

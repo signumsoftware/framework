@@ -57,7 +57,7 @@ namespace Signum.Engine.Linq
 
             if (columns != select.Columns || orderbys != select.OrderBy || where != select.Where || from != select.From || groupbys != select.GroupBy)
             {
-                return new SelectExpression(select.Alias, select.Distinct, select.Top, columns, from, where, orderbys, groupbys);
+                return new SelectExpression(select.Alias, select.Distinct, select.Reverse, select.Top, columns, from, where, orderbys, groupbys);
             }
 
             return select;
