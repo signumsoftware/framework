@@ -61,6 +61,7 @@ namespace Signum.Test.LinqProvider
         {
             var artists = Database.Query<ArtistDN>();
             Assert.IsTrue(artists.Any(a => a.Name.IndexOf('M') == 0));
+            Assert.IsTrue(artists.Any(a => a.Name.IndexOf("Mi") == 0));
             Assert.IsTrue(artists.Any(a => a.Name.Contains("Jackson")));
             Assert.IsTrue(artists.Any(a => a.Name.StartsWith("Billy")));
             Assert.IsTrue(artists.Any(a => a.Name.EndsWith("Corgan")));
@@ -132,6 +133,7 @@ namespace Signum.Test.LinqProvider
             Dump((AlbumDN a) => Math.Log10(a.Year));
             Dump((AlbumDN a) => Math.Ceiling(a.Year + 0.5).InSql());
             Dump((AlbumDN a) => Math.Round(a.Year + 0.5).InSql());
+            Dump((AlbumDN a) => Math.Truncate(a.Year + 0.5).InSql());
         }
 
         public void Dump<T,S>(Expression<Func<T, S>> bla)

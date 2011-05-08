@@ -258,7 +258,7 @@ namespace Signum.Engine.Linq
             if (innerProjection || !candidates.Contains(expr))
                 return null;
 
-            Expression result = Expression.Convert(Expression.Add(
+            Expression result = Expression.Convert(Expression.Subtract(
                     TrySqlFunction(SqlFunction.DATEPART, typeof(int), new SqlEnumExpression(SqlEnums.weekday), expr),
                     Expression.Constant(1)), typeof(DayOfWeek));
 
@@ -746,7 +746,7 @@ namespace Signum.Engine.Linq
                 case "Math.Round": return TrySqlFunction(SqlFunction.ROUND, m.Type,
                     m.TryGetArgument("a") ?? m.TryGetArgument("d") ?? m.GetArgument("value"),
                     m.TryGetArgument("decimals") ?? m.TryGetArgument("digits") ?? new SqlConstantExpression(0));
-
+                case "Math.Truncate": return TrySqlFunction(SqlFunction.ROUND, m.Type, m.GetArgument("d"), new SqlConstantExpression(0), new SqlConstantExpression(1));
                 case "ExpressionNominatorExtensions.InSql":
                     using (ForceFullNominate())
                     {

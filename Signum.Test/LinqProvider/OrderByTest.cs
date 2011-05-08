@@ -65,5 +65,18 @@ namespace Signum.Test.LinqProvider
         {
             var songsAlbum = Database.Query<ArtistDN>().OrderBy(a => a.Dead).Where(a => a.Id != 0).ToList();
         }
+
+        [TestMethod]
+        public void OrderByDistinct()
+        {
+            var songsAlbum = Database.Query<ArtistDN>().OrderBy(a => a.Dead).Distinct().ToList();
+        }
+
+        [TestMethod]
+        public void OrderByGroupBy()
+        {
+            var songsAlbum = Database.Query<ArtistDN>().OrderBy(a => a.Dead).GroupBy(a => a.Sex, (s, gr) => new { Sex = s, Count = gr.Count() }).ToList();
+        }
+
     }
 }

@@ -41,6 +41,9 @@ namespace Signum.Engine.Linq
             bool isOuterMost = select == outerMostSelect; 
 
             select = (SelectExpression)base.VisitSelect(select);
+            if (select.Top != null || select.GroupBy != null && select.GroupBy.Any())
+                gatheredOrderings = Enumerable.Empty<OrderExpression>(); 
+
             if (select.OrderBy != null && select.OrderBy.Count > 0)
                 this.PrependOrderings(select.OrderBy);
 
