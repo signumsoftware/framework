@@ -310,7 +310,7 @@ namespace Signum.Engine
         public static SqlPreCommand AlterTableForeignKeys(ITable t)
         {
             return t.Columns.Values.Select(c =>
-                c.ReferenceTable == null ? null : SqlBuilder.AlterTableAddConstraintForeignKey(t.Name, c.Name, c.ReferenceTable.Name)).Combine(Spacing.Simple);
+                c.ReferenceTable == null? null : SqlBuilder.AlterTableAddConstraintForeignKey(t.Name, c.Name, c.ReferenceTable.Name)).Combine(Spacing.Simple);
         }
 
         public static SqlPreCommand CreateAllIndices(ITable t)

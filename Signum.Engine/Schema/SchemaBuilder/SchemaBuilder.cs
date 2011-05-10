@@ -284,13 +284,17 @@ namespace Signum.Engine.Maps
 
         protected virtual Field GenerateFieldEnum(Type type, FieldInfo fi, Type fieldType, NameSequence name, bool forceNull)
         {
+            Type cleanEnum = fieldType.UnNullify();
+
+            var table = Include(Reflector.GenerateEnumProxy(cleanEnum));
+
             return new FieldEnum(fieldType)
             {
                 Name = name.ToString(),
                 Nullable = Settings.IsNullable(type, fi, fieldType, forceNull),
                 IsLite = false,
                 IndexType = Settings.GetIndexType(type, fi),
-                ReferenceTable = Include(Reflector.GenerateEnumProxy(fieldType.UnNullify())),
+                ReferenceTable = cleanEnum.HasAttribute<FlagsAttribute>() ? null : table,
             };
         }
 
