@@ -200,8 +200,8 @@ namespace Signum.Engine.Help
         {
             string typeDesc = QueryColumnType(kvp);
 
-            if (kvp.PropertyRoute != null)
-                return Resources._0IsA1AndShowsTheProperty2.Formato(kvp.DisplayName(), typeDesc, PropertyLink(kvp.PropertyRoute));
+            if (kvp.PropertyRoutes != null)
+                return Resources._0IsA1AndShowsTheProperty2.Formato(kvp.DisplayName(), typeDesc, kvp.PropertyRoutes.ToString(pr=>PropertyLink(pr), ", "));
             else
                 return Resources._0IsACalculated1.Formato(kvp.DisplayName(), typeDesc);
         }
