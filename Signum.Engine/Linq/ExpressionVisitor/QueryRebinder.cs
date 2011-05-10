@@ -138,7 +138,7 @@ namespace Signum.Engine.Linq
             return select;
         }
 
-        private ReadOnlyCollection<ColumnDeclaration> AnswerAndExpand(ReadOnlyCollection<ColumnDeclaration> columns, string currentAlias, Dictionary<ColumnExpression, Expression> askedColumns)
+        private ReadOnlyCollection<ColumnDeclaration> AnswerAndExpand(ReadOnlyCollection<ColumnDeclaration> columns, Alias currentAlias, Dictionary<ColumnExpression, Expression> askedColumns)
         {
             List<ColumnDeclaration> result = columns.ToList();
          

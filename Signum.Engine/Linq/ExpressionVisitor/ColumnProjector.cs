@@ -39,23 +39,23 @@ namespace Signum.Engine.Linq
         HashSet<Expression> candidates;
         ProjectionToken[] tokens;
         ProjectionToken newToken;
-        string[] knownAliases;
-        string newAlias;
+        Alias[] knownAliases;
+        Alias newAlias;
 
 
         private ColumnProjector() { }
 
-        static internal ColumnExpression SingleProjection(ColumnDeclaration declaration, string newAlias, Type columnType)
+        static internal ColumnExpression SingleProjection(ColumnDeclaration declaration, Alias newAlias, Type columnType)
         {
             return new ColumnExpression(columnType, newAlias, declaration.Name);
         }
 
-        static internal ProjectedColumns ProjectColumns(ProjectionExpression projector, string newAlias)
+        static internal ProjectedColumns ProjectColumns(ProjectionExpression projector, Alias newAlias)
         {
             return ProjectColumns(projector.Projector, newAlias, projector.Source.KnownAliases, new[] { projector.Token });
         }
 
-        static internal ProjectedColumns ProjectColumnsGroupBy(Expression projector, string newAlias, string[] knownAliases, ProjectionToken[] tokens)
+        static internal ProjectedColumns ProjectColumnsGroupBy(Expression projector, Alias newAlias, Alias[] knownAliases, ProjectionToken[] tokens)
         {
             ProjectionToken newToken = new ProjectionToken();
 
@@ -76,7 +76,7 @@ namespace Signum.Engine.Linq
             return new ProjectedColumns(e, cp.generator.columns.AsReadOnly(), newToken);
         }
 
-        static internal ProjectedColumns ProjectColumns(Expression projector, string newAlias, string[] knownAliases, ProjectionToken[] tokens)
+        static internal ProjectedColumns ProjectColumns(Expression projector, Alias newAlias, Alias[] knownAliases, ProjectionToken[] tokens)
         {
             ProjectionToken newToken = new ProjectionToken(); 
 

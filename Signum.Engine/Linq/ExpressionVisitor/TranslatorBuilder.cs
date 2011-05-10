@@ -365,13 +365,13 @@ namespace Signum.Engine.Linq
 
     internal class Scope
     {
-        public string Alias;
+        public Alias Alias;
 
         public Dictionary<string, int> Positions;
 
         static PropertyInfo miReader = ReflectionTools.GetPropertyInfo((IProjectionRow row) => row.Reader);
 
-        public Expression GetColumnExpression(Expression row, string alias, string name, Type type)
+        public Expression GetColumnExpression(Expression row, Alias alias, string name, Type type)
         {
             if (alias != Alias)
                 throw new InvalidOperationException("alias '{0}' not found".Formato(alias));

@@ -13,7 +13,7 @@ namespace Signum.Engine.Linq
 {
     internal class BinderTools
     {
-        AliasGenerator aliasGenerator = new AliasGenerator(); 
+        public readonly AliasGenerator AliasGenerator = new AliasGenerator(); 
         Dictionary<ProjectionToken, HashSet<TableCondition>> requests = new Dictionary<ProjectionToken, HashSet<TableCondition>>();
 
         public BinderTools()
@@ -32,8 +32,8 @@ namespace Signum.Engine.Linq
 
             HashSet<TableCondition> allProjections = requests.Extract(projection.Token);
 
-            string newAlias = aliasGenerator.GetNextSelectAlias();
-            string[] oldAliases = allProjections.Select(p => p.Table.Alias).And(projection.Source.Alias).ToArray();
+            Alias newAlias = AliasGenerator.NextSelectAlias();
+            Alias[] oldAliases = allProjections.Select(p => p.Table.Alias).And(projection.Source.Alias).ToArray();
 
             ProjectedColumns pc = ColumnProjector.ProjectColumns(projection.Projector, newAlias, oldAliases, new ProjectionToken[0]); //Do not replace tokens
 
@@ -167,14 +167,14 @@ namespace Signum.Engine.Linq
         {
             RelationalTable tr = mle.RelationalTable;
 
-            string tableAlias = GetNextSelectAlias();
+            Alias tableAlias = NextSelectAlias();
             TableExpression tableExpression = new TableExpression(tableAlias, tr.Name);
 
             ProjectionToken token = new ProjectionToken();
 
             Expression expr = tr.FieldExpression(token, tableAlias, this);
 
-            string selectAlias = GetNextSelectAlias();
+            Alias selectAlias = NextSelectAlias();
 
             ColumnExpression ce = tr.BackColumnExpression(tableAlias);
 
@@ -189,14 +189,14 @@ namespace Signum.Engine.Linq
             return Expression.Call(miToMListNotModified.MakeGenericMethod(pc.Projector.Type), proj);
         }
 
-        internal string GetNextSelectAlias()
+        internal Alias NextSelectAlias()
         {
-            return aliasGenerator.GetNextSelectAlias();
+            return AliasGenerator.NextSelectAlias();
         }
 
-        internal string GetNextTableAlias(Type type)
+        internal Alias NextTableAlias(string tableName)
         {
-            return aliasGenerator.GetNextTableAlias(type);
+            return AliasGenerator.NextTableAlias(tableName);
         }
     }
 

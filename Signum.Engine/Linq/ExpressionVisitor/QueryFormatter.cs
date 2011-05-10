@@ -400,11 +400,8 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitColumn(ColumnExpression column)
         {
-            if (column.Alias.HasText())
-            {
-                sb.Append(column.Alias.SqlScape());
-                sb.Append(".");
-            }
+            sb.Append(column.Alias.Name.SqlScape());
+            sb.Append(".");
             sb.Append(column.Name.SqlScape());
 
             return column;
@@ -566,7 +563,7 @@ namespace Signum.Engine.Linq
                 }
 
                 sb.Append(" AS ");
-                sb.Append(((SourceWithAliasExpression)source).Alias.SqlScape());
+                sb.Append(((SourceWithAliasExpression)source).Alias.Name.SqlScape());
             }
             else
                 this.VisitJoin((JoinExpression)source);

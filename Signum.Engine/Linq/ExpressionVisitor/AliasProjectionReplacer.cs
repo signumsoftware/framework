@@ -8,23 +8,23 @@ namespace Signum.Engine.Linq
 {
     internal class AliasProjectionReplacer : DbExpressionVisitor
     {
+        AliasGenerator generator; 
         ProjectionExpression root;
 
-        public static Expression Replace(Expression proj)
+        public static Expression Replace(Expression proj, AliasGenerator generator)
         {
-            AliasProjectionReplacer apr = new AliasProjectionReplacer() { root = proj as ProjectionExpression };
+            AliasProjectionReplacer apr = new AliasProjectionReplacer()
+            {
+                root = proj as ProjectionExpression,
+                generator = generator
+            };
             return apr.Visit(proj);
-        }
-        int aliasCount = 0;
-        private string GetNextAlias()
-        {
-            return "r" + (aliasCount++);
-        }
+        }       
 
         protected override Expression VisitProjection(ProjectionExpression proj)
         {
             if (proj != root)
-                return (ProjectionExpression)AliasReplacer.Replace(base.VisitProjection(proj), GetNextAlias);
+                return (ProjectionExpression)AliasReplacer.Replace(base.VisitProjection(proj), generator);
             else
                 return (ProjectionExpression)base.VisitProjection(proj);
         }

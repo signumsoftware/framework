@@ -14,12 +14,13 @@ namespace Signum.Engine.Linq
 {
     internal class ChildProjectionFlattener : DbExpressionVisitor
     {
+        AliasGenerator generator; 
         SelectExpression currentSource;
         private ChildProjectionFlattener(){}
 
-        static internal ProjectionExpression Flatten(ProjectionExpression proj)
+        static internal ProjectionExpression Flatten(ProjectionExpression proj, AliasGenerator aliasGenerator)
         {
-            var result = (ProjectionExpression)new ChildProjectionFlattener().Visit(proj);
+            var result = (ProjectionExpression)new ChildProjectionFlattener { generator = aliasGenerator }.Visit(proj);
             if (result == proj)
                 return result;
 
@@ -67,7 +68,7 @@ namespace Signum.Engine.Linq
 
                     if (!IsKey(currentSource, columns))
                     {
-                        string aliasDistinct = currentSource.Alias + "D";
+                        Alias aliasDistinct = generator.GetUniqueAlias(currentSource.Alias.Name + "D");
                         ColumnGenerator generatorDistinct = new ColumnGenerator();
 
                         List<ColumnDeclaration> columnDistinct = columns.Select(ce => generatorDistinct.MapColumn(ce)).ToList();
@@ -95,7 +96,7 @@ namespace Signum.Engine.Linq
                     List<OrderExpression> innerOrders;
                     SelectExpression @internal = ExtractOrders(proj.Source, out innerOrders);
 
-                    string aliasSM = @internal.Alias + "SM";
+                    Alias aliasSM = generator.GetUniqueAlias(@internal.Alias.Name + "SM");
                     SelectExpression selectMany = new SelectExpression(aliasSM, false, false, null, columnsSMExternal.Concat(columnsSMInternal),
                         new JoinExpression(JoinType.CrossApply,
                             external,
@@ -247,13 +248,13 @@ namespace Signum.Engine.Linq
 
         internal class ExternalColumnGatherer : DbExpressionVisitor
         {
-            string externalAlias;
+            Alias externalAlias;
 
             HashSet<ColumnExpression> columns = new HashSet<ColumnExpression>();
 
             private ExternalColumnGatherer() { }
 
-            public static HashSet<ColumnExpression> Gatherer(Expression source, string externalAlias)
+            public static HashSet<ColumnExpression> Gatherer(Expression source, Alias externalAlias)
             {
                 ExternalColumnGatherer ap = new ExternalColumnGatherer()
                 {

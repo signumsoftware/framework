@@ -29,11 +29,11 @@ namespace Signum.Engine.Linq
         public readonly Expression OtherCondition; //Used for IBA only, 
         public readonly ProjectionToken Token;
 
-       
-        public string TableAlias; //Changed on expansion 
+
+        public Alias TableAlias; //Changed on expansion 
         public List<FieldBinding> Bindings = new List<FieldBinding>();// not readonly!!!
 
-        public FieldInitExpression(Type type, string tableAlias, Expression externalId, Expression otherCondition, ProjectionToken token)
+        public FieldInitExpression(Type type, Alias tableAlias, Expression externalId, Expression otherCondition, ProjectionToken token)
             : base(DbExpressionType.FieldInit, type)
         {
             if (type == null) 
@@ -117,7 +117,7 @@ namespace Signum.Engine.Linq
         {
             if (TableAlias == null)
             {
-                TableAlias = tools.GetNextTableAlias(Type);
+                TableAlias = tools.NextTableAlias(Table.Name);
                 if (!Table.IsView)
                     GetOrCreateFieldBinding(FieldInitExpression.IdField, tools);
                 tools.AddRequest(Token, new TableCondition

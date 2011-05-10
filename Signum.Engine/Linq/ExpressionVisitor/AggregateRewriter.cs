@@ -11,7 +11,7 @@ namespace Signum.Engine.Linq
     /// </summary>
     internal class AggregateRewriter : DbExpressionVisitor
     {
-        ILookup<string, AggregateSubqueryExpression> lookup;
+        ILookup<Alias, AggregateSubqueryExpression> lookup;
         Dictionary<AggregateSubqueryExpression, Expression> map;
 
         private AggregateRewriter(Expression expr)

@@ -9,52 +9,39 @@ namespace Signum.Engine.Linq
 {
     public class AliasGenerator
     {
-        Dictionary<string, int> tablesCount = new Dictionary<string, int>() { { "s", 0 } };
-        Dictionary<Type, string> baseAlias = new Dictionary<Type, string>();
+        HashSet<string> usedAliases = new HashSet<string>();
 
-        string GenerateBaseAlias(Type type)
+        public Alias GetUniqueAlias(string baseAlias)
         {
-            string cleanName = Reflector.CleanTypeName(type);
+            if (usedAliases.Add(baseAlias))
+                return new Alias(baseAlias);
 
-            string result = cleanName.Where(c => char.IsUpper(c)).ToString("").ToLower();
-            if (!tablesCount.ContainsKey(result))
-                return result;
-
-            for (int i = 1; i < cleanName.Length; i++)
+            for (int i = 1; ; i++)
             {
-                result = cleanName.Substring(0, i).ToLower();
-                if (!tablesCount.ContainsKey(result))
-                    return result;
+                string alias = baseAlias + i;
+
+                if (usedAliases.Add(alias))
+                    return new Alias(alias);
+
             }
-
-            int count = 1;
-            while (true)
-            {
-                result = cleanName.ToLower() + new string('_', count++);
-                if (!tablesCount.ContainsKey(result))
-                    return result;
-            }
-        }
-
-        public string GetNextTableAlias(Type type)
-        {
-            string alias;
-            if (!baseAlias.TryGetValue(type, out alias))
-            {
-                alias = GenerateBaseAlias(type);
-                baseAlias[type] = alias;
-            }
-
-            int? count = tablesCount.TryGetS(alias);
-            tablesCount[alias] = (count ?? 0) + 1;
-
-            return alias + count;
         }
 
         int selectAliasCount = 0;
-        public string GetNextSelectAlias()
+        public Alias NextSelectAlias()
         {
-            return "s" + (selectAliasCount++);
+            return GetUniqueAlias("s" + (selectAliasCount++));
+        }
+
+        public Alias NextTableAlias(string tableName)
+        {
+            string abv = new string(tableName.Where(c => char.IsUpper(c)).ToArray());
+
+            return GetUniqueAlias(abv);
+        }
+
+        internal Alias CloneAlias(Alias alias)
+        {
+            return GetUniqueAlias(alias.Name + "b");
         }
     }
 }

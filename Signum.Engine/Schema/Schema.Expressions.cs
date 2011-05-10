@@ -22,7 +22,7 @@ namespace Signum.Engine.Maps
 
     public partial class Table
     {
-        internal Expression CreateBinding(ProjectionToken token, string tableAlias, FieldInfo fi, BinderTools tools)
+        internal Expression CreateBinding(ProjectionToken token, Alias tableAlias, FieldInfo fi, BinderTools tools)
         {
             EntityField field = Fields.TryGetC(fi.Name);
             if (field == null)
@@ -33,7 +33,7 @@ namespace Signum.Engine.Maps
             return result;
         }
 
-        internal Expression GetProjectorExpression(ProjectionToken token, string tableAlias, BinderTools tools)
+        internal Expression GetProjectorExpression(ProjectionToken token, Alias tableAlias, BinderTools tools)
         {
             if (!IsView)
             {
@@ -59,22 +59,22 @@ namespace Signum.Engine.Maps
     public partial class RelationalTable
     {
 
-        internal ColumnExpression RowIdExpression(string tableAlias)
+        internal ColumnExpression RowIdExpression(Alias tableAlias)
         {
             return new ColumnExpression(typeof(int), tableAlias, ((IColumn)this.PrimaryKey).Name);
         }
 
-        internal ColumnExpression BackColumnExpression(string tableAlias)
+        internal ColumnExpression BackColumnExpression(Alias tableAlias)
         {
             return new ColumnExpression(BackReference.ReferenceType(), tableAlias, BackReference.Name);
         }
 
-        internal Expression FieldExpression(ProjectionToken token, string tableAlias, BinderTools tools)
+        internal Expression FieldExpression(ProjectionToken token, Alias tableAlias, BinderTools tools)
         {
             return Field.GetExpression(token, tableAlias, tools);
         }
 
-        internal Expression GetProjectorExpression(ProjectionToken token, string tableAlias, BinderTools tools)
+        internal Expression GetProjectorExpression(ProjectionToken token, Alias tableAlias, BinderTools tools)
         {
             Schema.Current.AssertAllowed(this.BackReference.ReferenceTable.Type);
 
@@ -99,12 +99,12 @@ namespace Signum.Engine.Maps
 
     public abstract partial class Field
     {
-        internal abstract Expression GetExpression(ProjectionToken token, string tableAlias, BinderTools tools);
+        internal abstract Expression GetExpression(ProjectionToken token, Alias tableAlias, BinderTools tools);
     }
 
     public partial class FieldPrimaryKey
     {
-        internal override Expression GetExpression(ProjectionToken token, string tableAlias, BinderTools tools)
+        internal override Expression GetExpression(ProjectionToken token, Alias tableAlias, BinderTools tools)
         {
             return new ColumnExpression(typeof(int), tableAlias, this.Name);
         }
@@ -112,7 +112,7 @@ namespace Signum.Engine.Maps
 
     public partial class FieldValue
     {
-        internal override Expression GetExpression(ProjectionToken token, string tableAlias, BinderTools tools)
+        internal override Expression GetExpression(ProjectionToken token, Alias tableAlias, BinderTools tools)
         {
             return new ColumnExpression(this.FieldType, tableAlias, this.Name);
         }
@@ -120,7 +120,7 @@ namespace Signum.Engine.Maps
 
     public partial class FieldReference
     {
-        internal override Expression GetExpression(ProjectionToken token, string tableAlias, BinderTools tools)
+        internal override Expression GetExpression(ProjectionToken token, Alias tableAlias, BinderTools tools)
         {
             Type cleanType = IsLite ? Reflector.ExtractLite(FieldType) : FieldType;
 
@@ -136,7 +136,7 @@ namespace Signum.Engine.Maps
 
     public partial class FieldEnum
     {
-        internal override Expression GetExpression(ProjectionToken token, string tableAlias, BinderTools tools)
+        internal override Expression GetExpression(ProjectionToken token, Alias tableAlias, BinderTools tools)
         {
             return Expression.Convert(new ColumnExpression(this.ReferenceType(), tableAlias, Name), FieldType);
         }
@@ -144,7 +144,7 @@ namespace Signum.Engine.Maps
 
     public partial class FieldMList
     {
-        internal override Expression GetExpression(ProjectionToken token, string tableAlias, BinderTools tools)
+        internal override Expression GetExpression(ProjectionToken token, Alias tableAlias, BinderTools tools)
         {
             return new MListExpression(FieldType, null, RelationalTable); // keep back id empty for some seconds 
         }
@@ -152,7 +152,7 @@ namespace Signum.Engine.Maps
 
     public partial class FieldEmbedded
     {
-        internal override Expression GetExpression(ProjectionToken token, string tableAlias, BinderTools tools)
+        internal override Expression GetExpression(ProjectionToken token, Alias tableAlias, BinderTools tools)
         {
             var bindings = (from kvp in EmbeddedFields
                             let fi = kvp.Value.FieldInfo
@@ -175,7 +175,7 @@ namespace Signum.Engine.Maps
 
     public partial class FieldImplementedBy
     {
-        internal override Expression GetExpression(ProjectionToken token, string tableAlias, BinderTools tools)
+        internal override Expression GetExpression(ProjectionToken token, Alias tableAlias, BinderTools tools)
         {
             var implementations = (from kvp in ImplementationColumns
                                    select new ImplementationColumnExpression(kvp.Key,
@@ -194,7 +194,7 @@ namespace Signum.Engine.Maps
 
     public partial class FieldImplementedByAll
     {
-        internal override Expression GetExpression(ProjectionToken token, string tableAlias, BinderTools tools)
+        internal override Expression GetExpression(ProjectionToken token, Alias tableAlias, BinderTools tools)
         {
             Expression result = new ImplementedByAllExpression(IsLite ? Reflector.ExtractLite(FieldType) : FieldType,
                 new ColumnExpression(Column.ReferenceType(), tableAlias, Column.Name),

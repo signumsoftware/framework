@@ -58,6 +58,16 @@ namespace Signum.Engine.Linq
         MListElement,
     }
 
+    public class Alias
+    {
+        public readonly string Name;  
+
+        public Alias(string name)
+        {
+            this.Name = name;
+        }
+    }
+
     internal abstract class DbExpression : Expression
     {
         readonly Type type;
@@ -83,7 +93,7 @@ namespace Signum.Engine.Linq
 
     internal abstract class SourceExpression : DbExpression
     {
-        public abstract string[] KnownAliases { get; }
+        public abstract Alias[] KnownAliases { get; }
 
         public SourceExpression(DbExpressionType nodeType)
             : base(nodeType, typeof(void))
@@ -93,9 +103,9 @@ namespace Signum.Engine.Linq
 
     internal abstract class SourceWithAliasExpression: SourceExpression
     {
-        public readonly string Alias;
+        public readonly Alias Alias;
 
-        public SourceWithAliasExpression(DbExpressionType nodeType, string alias)
+        public SourceWithAliasExpression(DbExpressionType nodeType, Alias alias)
             : base(nodeType)
         {
             this.Alias = alias;
@@ -110,12 +120,12 @@ namespace Signum.Engine.Linq
     {
         public readonly string Name;
 
-        public override string[] KnownAliases
+        public override Alias[] KnownAliases
         {
             get { return new[] { Alias }; }
         }
 
-        internal TableExpression(string alias, string name)
+        internal TableExpression(Alias alias, string name)
             : base(DbExpressionType.Table, alias)
         {
             this.Name = name;
@@ -132,10 +142,10 @@ namespace Signum.Engine.Linq
     /// </summary>
     internal class ColumnExpression : DbExpression, IEquatable<ColumnExpression>
     {
-        public readonly string Alias;
+        public readonly Alias Alias;
         public readonly string Name;
 
-        internal ColumnExpression(Type type, string alias, string name)
+        internal ColumnExpression(Type type, Alias alias, string name)
             : base(DbExpressionType.Column, type)
         {
             if (alias == null)
@@ -191,7 +201,7 @@ namespace Signum.Engine.Linq
                                    Expression.NiceToString();
         }
 
-        public ColumnExpression GetReference(string alias)
+        public ColumnExpression GetReference(Alias alias)
         {
             return new ColumnExpression(Expression.Type, alias, Name); 
         }
@@ -272,13 +282,13 @@ namespace Signum.Engine.Linq
         public readonly bool Distinct;
         public readonly bool Reverse;
 
-        readonly string[] knownAliases; 
-        public override string[] KnownAliases
+        readonly Alias[] knownAliases;
+        public override Alias[] KnownAliases
         {
             get { return knownAliases; }
         }
 
-        internal SelectExpression(string alias, bool distinct, bool reverse, Expression top, IEnumerable<ColumnDeclaration> columns, SourceExpression from, Expression where, IEnumerable<OrderExpression> orderBy, IEnumerable<Expression> groupBy)
+        internal SelectExpression(Alias alias, bool distinct, bool reverse, Expression top, IEnumerable<ColumnDeclaration> columns, SourceExpression from, Expression where, IEnumerable<OrderExpression> orderBy, IEnumerable<Expression> groupBy)
             : base(DbExpressionType.Select, alias)
         {
             this.Distinct = distinct;
@@ -355,7 +365,7 @@ namespace Signum.Engine.Linq
         public readonly SourceExpression Right;
         public new readonly Expression Condition;
 
-        public override string[] KnownAliases
+        public override Alias[] KnownAliases
         {
             get { return Left.KnownAliases.Concat(Right.KnownAliases).ToArray(); }
         }
@@ -781,10 +791,10 @@ namespace Signum.Engine.Linq
 
     internal class AggregateSubqueryExpression : DbExpression
     {
-        public readonly string GroupByAlias;
+        public readonly Alias GroupByAlias;
         public readonly Expression AggregateInGroupSelect;
         public readonly ScalarExpression AggregateAsSubquery;
-        public AggregateSubqueryExpression(string groupByAlias, Expression aggregateInGroupSelect, ScalarExpression aggregateAsSubquery)
+        public AggregateSubqueryExpression(Alias groupByAlias, Expression aggregateInGroupSelect, ScalarExpression aggregateAsSubquery)
             : base(DbExpressionType.AggregateSubquery, aggregateAsSubquery.Type)
         {
             this.AggregateInGroupSelect = aggregateInGroupSelect;

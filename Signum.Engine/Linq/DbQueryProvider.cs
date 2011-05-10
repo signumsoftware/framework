@@ -53,7 +53,7 @@ namespace Signum.Engine.Linq
             ProjectionExpression binded = (ProjectionExpression)QueryBinder.Bind(filtered, tools);
             ProjectionExpression optimized = (ProjectionExpression)Optimize(binded, tools);
 
-            ProjectionExpression flat = ChildProjectionFlattener.Flatten(optimized);
+            ProjectionExpression flat = ChildProjectionFlattener.Flatten(optimized, tools.AliasGenerator);
 
             ITranslateResult result = TranslatorBuilder.Build(flat);
             return continuation(result);
@@ -74,7 +74,7 @@ namespace Signum.Engine.Linq
 
             Expression rebinded = QueryRebinder.Rebind(orderRewrited);
 
-            Expression replaced = AliasProjectionReplacer.Replace(rebinded);
+            Expression replaced = AliasProjectionReplacer.Replace(rebinded, tools.AliasGenerator);
             Expression columnCleaned = UnusedColumnRemover.Remove(replaced);
             Expression rowFilled = RowNumberFiller.Fill(columnCleaned);
             Expression subqueryCleaned = RedundantSubqueryRemover.Remove(rowFilled);

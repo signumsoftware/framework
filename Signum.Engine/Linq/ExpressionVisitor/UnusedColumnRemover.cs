@@ -13,7 +13,7 @@ namespace Signum.Engine.Linq
 {
     internal class UnusedColumnRemover : DbExpressionVisitor
     {
-        Dictionary<string, HashSet<string>> allColumnsUsed = new Dictionary<string, HashSet<string>>();
+        Dictionary<Alias, HashSet<string>> allColumnsUsed = new Dictionary<Alias, HashSet<string>>();
 
         private UnusedColumnRemover() { }
 
