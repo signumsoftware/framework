@@ -65,21 +65,13 @@ namespace Signum.Engine.Linq
         static MetaExpression MakeCleanMeta(Type type, Expression expression)
         {
             MetaExpression meta = expression as MetaExpression;
-            //if (meta != null)
-            //{
-                return new MetaExpression(type, meta.Meta); 
-            //}
 
-            //return new MetaExpression(type, null); 
+            return new MetaExpression(type, meta.Meta);
         }
 
         static MetaExpression MakeDirtyMeta(Type type, params Expression[] expression)
         {
             var metas = expression.OfType<MetaExpression>().Select(a => a.Meta).NotNull().ToArray();
-            //if (metas.Length != expression.Length)
-            //{
-            //    metas = metas;
-            //}
 
             return new MetaExpression(type, new DirtyMeta(metas));
         }
@@ -205,9 +197,13 @@ namespace Signum.Engine.Linq
             {
                 MetaExpression meta = expression as MetaExpression;
                 if (meta != null && meta.Meta is CleanMeta)
+                {
+                    PropertyRoute route = ((CleanMeta)meta.Meta).PropertyRoutes.Single("Metas doesn't work over polymorphic MLists").Add("Item");
+
                     return new MetaProjectorExpression(expression.Type,
                         new MetaExpression(elementType,
-                            new CleanMeta(((CleanMeta)meta.Meta).PropertyRoute.Add("Item"))));
+                            new CleanMeta(new[] { route })));
+                }
 
                 return new MetaProjectorExpression(expression.Type,
                      MakeVoidMeta(elementType)); 
@@ -378,20 +374,37 @@ namespace Signum.Engine.Linq
                     break;
             }
 
-            if (typeof(ModifiableEntity).IsAssignableFrom(source.Type))
+            if (typeof(ModifiableEntity).IsAssignableFrom(source.Type) || typeof(IIdentifiable).IsAssignableFrom(source.Type))
             {
-                if (typeof(IdentifiableEntity).IsAssignableFrom(source.Type)) //Works for simple entities and also for interface casting
-                    return new MetaExpression(memberType, new CleanMeta(PropertyRoute.Root(source.Type).Add(Reflector.FindPropertyInfo(member))));
+                var pi = Reflector.FindPropertyInfo(member); 
 
                 MetaExpression meta = (MetaExpression)source;
-                PropertyRoute path = meta.Meta is CleanMeta ? ((CleanMeta)meta.Meta).PropertyRoute : PropertyRoute.Root(source.Type);
 
-                return new MetaExpression(memberType, new CleanMeta(path.Add(Reflector.FindPropertyInfo(member))));
+                if (meta.Meta is CleanMeta)
+                {
+                    PropertyRoute[] routes = ((CleanMeta)meta.Meta).PropertyRoutes.SelectMany(r=>GetRoutes(r, source.Type, pi.Name)).ToArray();
+
+                    return new MetaExpression(memberType, new CleanMeta(routes));
+                }
+                            
+                if (typeof(IRootEntity).IsAssignableFrom(source.Type)) //Works for simple entities and also for interface casting
+                    return new MetaExpression(memberType, new CleanMeta(new[]{ PropertyRoute.Root(source.Type).Add(pi)}));
             }
 
             return MakeDirtyMeta(memberType, source);
         }
 
+        private static PropertyRoute[] GetRoutes(PropertyRoute route, Type type, string piName)
+        {
+            Implementations imp = route.GetImplementations();
+
+            if (imp == null)
+                return new[] { route.Add(piName) };
+            else if (imp.IsByAll)
+                throw new InvalidOperationException("Metas doesn't work on ImplementedByAll");
+            else
+                return ((ImplementedByAttribute)imp).ImplementedTypes.Where(t=>type.IsAssignableFrom(t)).Select(t => PropertyRoute.Root(t).Add(piName)).ToArray();
+        }
 
         protected override Expression VisitTypeIs(TypeBinaryExpression b)
         {

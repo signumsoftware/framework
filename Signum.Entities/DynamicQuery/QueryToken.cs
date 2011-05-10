@@ -527,12 +527,15 @@ namespace Signum.Entities.DynamicQuery
         {
             if (Column.Type.UnNullify() == typeof(DateTime))
             {
-                if (Column.PropertyRoute != null)
+                if (Column.PropertyRoutes != null)
                 {
-                    var att = Validator.GetOrCreatePropertyPack(Column.PropertyRoute.Parent.Type, Column.PropertyRoute.PropertyInfo.Name)
-                        .Validators.OfType<DateTimePrecissionValidatorAttribute>().SingleOrDefault();
-                    if (att != null)
-                        return DateTimeProperties(this, att.Precision);
+                    DateTimePrecision? precission = 
+                        Column.PropertyRoutes.Select(pr => Validator.GetOrCreatePropertyPack(pr.Parent.Type, pr.PropertyInfo.Name)
+                        .Validators.OfType<DateTimePrecissionValidatorAttribute>().SingleOrDefault())
+                        .Select(dtp => dtp.TryCS(d => d.Precision)).Distinct().Only();
+
+                    if (precission != null)
+                        return DateTimeProperties(this, precission.Value);
                 }
 
                 if (Column.Format == "d")
@@ -550,13 +553,13 @@ namespace Signum.Entities.DynamicQuery
 
         public override bool IsAllowed()
         {
-            return true;  // Is it wasn't it sould be filtered before
+            return true;  //If it wasn't, sould be filtered before
         }
 
         public override PropertyRoute GetPropertyRoute()
         {
-            if (Column.PropertyRoute != null)
-                return Column.PropertyRoute;
+            if (Column.PropertyRoutes != null)
+                return Column.PropertyRoutes[0]; //HACK: compatibility with IU entitiy elements
 
             Type type = Reflector.ExtractLite(Type);
             if (type != null && typeof(IdentifiableEntity).IsAssignableFrom(type))
