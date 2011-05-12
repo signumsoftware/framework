@@ -114,6 +114,9 @@ namespace Signum.Utilities.ExpressionTrees
             if (e == null)
                 return null;
 
+            if (e is ConstantExpression)
+                return (LambdaExpression)((ConstantExpression)e).Value;
+
             while (e.NodeType == ExpressionType.Quote)
             {
                 e = ((UnaryExpression)e).Operand;
