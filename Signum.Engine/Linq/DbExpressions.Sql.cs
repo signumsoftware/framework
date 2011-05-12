@@ -250,11 +250,12 @@ namespace Signum.Engine.Linq
     internal enum SelectRoles
     {
         Where = 1,
-        GroupBy = 2,
-        OrderBy = 4,
-        Select = 8,
-        Distinct = 16,
-        Top = 32
+        Aggregate = 2,
+        GroupBy = 4,
+        OrderBy = 8,
+        Select = 16,
+        Distinct = 32,
+        Top = 64
     }
     /// <summary>
     /// A custom expression node used to represent a SQL SELECT expression
@@ -293,16 +294,24 @@ namespace Signum.Engine.Linq
             get 
             {
                 SelectRoles roles = (SelectRoles)0;
-                if (!Columns.All(cd => cd.Expression is ColumnExpression))
-                    roles |= SelectRoles.Select;
+
                 if (Where != null)
                     roles |= SelectRoles.Where;
+
                 if (GroupBy != null && GroupBy.Count > 0)
                     roles |= SelectRoles.GroupBy;
+                else if (Columns.Any(cd => AggregateFinder.HasAggregates(cd.Expression)))
+                    roles |= SelectRoles.Aggregate;
+
                 if (OrderBy != null && OrderBy.Count > 0)
                     roles |= SelectRoles.OrderBy;
+
+                if (!Columns.All(cd => cd.Expression is ColumnExpression))
+                    roles |= SelectRoles.Select;
+                
                 if(Distinct)
                     roles |= SelectRoles.Distinct;
+                
                 if (Top != null)
                     roles |= SelectRoles.Top;
 
