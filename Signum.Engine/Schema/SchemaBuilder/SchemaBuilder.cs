@@ -294,7 +294,7 @@ namespace Signum.Engine.Maps
                 Nullable = Settings.IsNullable(type, fi, fieldType, forceNull),
                 IsLite = false,
                 IndexType = Settings.GetIndexType(type, fi),
-                ReferenceTable = cleanEnum.HasAttribute<FlagsAttribute>() ? null : table,
+                ReferenceTable = cleanEnum.HasAttribute<FlagsAttribute>() && !fi.HasAttribute<ForceForeignKey>() ? null : table,
             };
         }
 

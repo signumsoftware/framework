@@ -151,6 +151,11 @@ namespace Signum.Entities
 
     }
 
+    [AttributeUsage(AttributeTargets.Field)]
+    public class ForceForeignKey : Attribute
+    {
+
+    }
 
     //Used by NotifyCollectionChangedAttribute, NotifyChildPropertyAttribute, ValidateChildPropertyAttribute
     internal static class AttributeManager<T>
