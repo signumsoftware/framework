@@ -144,11 +144,11 @@
   <data name="CreateNote" xml:space="preserve">
     <value>Criar nota</value>
   </data>
-  <data name="DeleteFilters" xml:space="preserve">
-    <value>Excluir filtros</value>
+  <data name="Signum_enterTheNewColumnName" xml:space="preserve">
+    <value>Digite o novo nome da coluna</value>
   </data>
-  <data name="EditColumnsFinishEdit" xml:space="preserve">
-    <value>Terminar Editar</value>
+  <data name="Signum_editColumnName" xml:space="preserve">
+    <value>Editar o nome da coluna</value>
   </data>
   <data name="Excel" xml:space="preserve">
     <value>Excel</value>
@@ -159,14 +159,14 @@
   <data name="Field" xml:space="preserve">
     <value>Campo</value>
   </data>
-  <data name="FilterByField" xml:space="preserve">
-    <value>Filtrar por campo</value>
+  <data name="Signum_addFilter" xml:space="preserve">
+    <value>Adicionar filtro</value>
   </data>
   <data name="Future" xml:space="preserve">
     <value>Futuro</value>
   </data>
-  <data name="HideFilters" xml:space="preserve">
-    <value>Ocultar os filtros</value>
+  <data name="SearchControl_ShowNRows_Show" xml:space="preserve">
+    <value>Mostrar</value>
   </data>
   <data name="IncorrectEntityInSessionYouMustReloadThePageToContinue" xml:space="preserve">
     <value>Dados incorretos na sessão. Recarregar a página para continuar</value>
@@ -195,8 +195,8 @@
   <data name="Notes" xml:space="preserve">
     <value>Notas</value>
   </data>
-  <data name="NumberOfRows" xml:space="preserve">
-    <value>Número de linhas</value>
+  <data name="SearchControl_ShowNRows_Rows" xml:space="preserve">
+    <value>linhas</value>
   </data>
   <data name="Operation" xml:space="preserve">
     <value>Operação</value>
@@ -213,14 +213,14 @@
   <data name="ShowCalendar" xml:space="preserve">
     <value>Mostrar calendário</value>
   </data>
-  <data name="ShowFilters" xml:space="preserve">
-    <value>Mostrar filtros</value>
+  <data name="SearchControl_RowsFound" xml:space="preserve">
+    <value>Linhas encontradas</value>
   </data>
   <data name="Type0NotAllowed" xml:space="preserve">
     <value>Tipo {0} não permitido</value>
   </data>
-  <data name="UserColumnsEdit" xml:space="preserve">
-    <value>Editar colunas de utilizador</value>
+  <data name="FilterBuilder_DeleteFilter" xml:space="preserve">
+    <value>Remover filtro</value>
   </data>
   <data name="Value" xml:space="preserve">
     <value>Valor</value>
@@ -300,10 +300,31 @@
   <data name="Search_Create" xml:space="preserve">
     <value>Criar</value>
   </data>
-  <data name="Signum_Executed" xml:space="preserve">
+  <data name="FilterBuilder_AddFilter" xml:space="preserve">
+    <value>Adicionar filtro</value>
+  </data>
+  <data name="FilterBuilder_AddColumn" xml:space="preserve">
+    <value>Adicionar coluna</value>
+  </data>
+  <data name="Signum_executed" xml:space="preserve">
     <value>Executado</value>
   </data>
-  <data name="Signum_Executing" xml:space="preserve">
-    <value>Em execução...</value>
+  <data name="Signum_executing" xml:space="preserve">
+    <value>A Executar...</value>
+  </data>
+  <data name="Signum_hideFilters" xml:space="preserve">
+    <value>Ocultar filtros</value>
+  </data>
+  <data name="Signum_removeColumn" xml:space="preserve">
+    <value>Remover a coluna</value>
+  </data>
+  <data name="Signum_reorderColumn_MoveLeft" xml:space="preserve">
+    <value>Mover para a esquerda</value>
+  </data>
+  <data name="Signum_reorderColumn_MoveRight" xml:space="preserve">
+    <value>Mover para a direita</value>
+  </data>
+  <data name="Signum_showFilters" xml:space="preserve">
+    <value>Visualizar filtros</value>
   </data>
 </root>
