@@ -58,13 +58,79 @@ namespace Signum.Engine.Linq
         MListElement,
     }
 
-    public class Alias
+    class Alias
     {
         public readonly string Name;  
 
-        public Alias(string name)
+        Alias(string name)
         {
             this.Name = name;
+        }
+
+        [ThreadStatic]
+        static AliasGenerator current;
+
+        public static Alias Raw(string name)
+        {
+            return new Alias(name);
+        }
+
+        public static Alias NextTableAlias(string tableName)
+        {
+            string abv = new string(tableName.Where(c => char.IsUpper(c)).ToArray());
+
+            return current.GetUniqueAlias(abv);
+        }
+
+        public static Alias CloneAlias(Alias alias)
+        {
+            return current.GetUniqueAlias(alias.Name + "b");
+        }
+
+        public static Alias NextSelectAlias()
+        {
+            return current.NextSelectAlias();
+        }
+
+        public static Alias GetUniqueAlias(string baseAlias)
+        {
+            return current.GetUniqueAlias(baseAlias);
+        }
+
+        public static IDisposable NewGenerator()
+        {
+            return current = new AliasGenerator();
+        }
+
+        class AliasGenerator: IDisposable
+        {
+            HashSet<string> usedAliases = new HashSet<string>();
+
+            int selectAliasCount = 0;
+            public Alias NextSelectAlias()
+            {
+                return GetUniqueAlias("s" + (selectAliasCount++));
+            }
+
+            public Alias GetUniqueAlias(string baseAlias)
+            {
+                if (usedAliases.Add(baseAlias))
+                    return new Alias(baseAlias);
+
+                for (int i = 1; ; i++)
+                {
+                    string alias = baseAlias + i;
+
+                    if (usedAliases.Add(alias))
+                        return new Alias(alias);
+
+                }
+            }
+
+            public void Dispose()
+            {
+                current = null;
+            }
         }
     }
 

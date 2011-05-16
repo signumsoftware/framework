@@ -14,13 +14,12 @@ namespace Signum.Engine.Linq
 {
     internal class ChildProjectionFlattener : DbExpressionVisitor
     {
-        AliasGenerator generator; 
         SelectExpression currentSource;
         private ChildProjectionFlattener(){}
 
-        static internal ProjectionExpression Flatten(ProjectionExpression proj, AliasGenerator aliasGenerator)
+        static internal ProjectionExpression Flatten(ProjectionExpression proj)
         {
-            var result = (ProjectionExpression)new ChildProjectionFlattener { generator = aliasGenerator }.Visit(proj);
+            var result = (ProjectionExpression)new ChildProjectionFlattener().Visit(proj);
             if (result == proj)
                 return result;
 
@@ -68,7 +67,7 @@ namespace Signum.Engine.Linq
 
                     if (!IsKey(currentSource, columns))
                     {
-                        Alias aliasDistinct = generator.GetUniqueAlias(currentSource.Alias.Name + "D");
+                        Alias aliasDistinct = Alias.GetUniqueAlias(currentSource.Alias.Name + "D");
                         ColumnGenerator generatorDistinct = new ColumnGenerator();
 
                         List<ColumnDeclaration> columnDistinct = columns.Select(ce => generatorDistinct.MapColumn(ce)).ToList();
@@ -96,7 +95,7 @@ namespace Signum.Engine.Linq
                     List<OrderExpression> innerOrders;
                     SelectExpression @internal = ExtractOrders(proj.Source, out innerOrders);
 
-                    Alias aliasSM = generator.GetUniqueAlias(@internal.Alias.Name + "SM");
+                    Alias aliasSM = Alias.GetUniqueAlias(@internal.Alias.Name + "SM");
                     SelectExpression selectMany = new SelectExpression(aliasSM, false, false, null, columnsSMExternal.Concat(columnsSMInternal),
                         new JoinExpression(JoinType.CrossApply,
                             external,

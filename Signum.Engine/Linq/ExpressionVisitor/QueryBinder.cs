@@ -562,7 +562,7 @@ namespace Signum.Engine.Linq
             Expression elemExpr = elementSelector == null ? projection.Projector : this.MapAndVisitExpand(elementSelector, ref projection);
 
             Expression subqueryKey = GroupEntityCleaner.Clean(MapAndVisitExpand(keySelector, ref subqueryProjection));// recompute key columns for group expressions relative to subquery (need these for doing the correlation predicate
-            ProjectedColumns subqueryKeyPC = ColumnProjector.ProjectColumnsGroupBy(subqueryKey, new Alias("basura"), subqueryProjection.Source.KnownAliases, new[] { subqueryProjection.Token }); // use same projection trick to get group-by expressions based on subquery
+            ProjectedColumns subqueryKeyPC = ColumnProjector.ProjectColumnsGroupBy(subqueryKey, Alias.Raw("basura"), subqueryProjection.Source.KnownAliases, new[] { subqueryProjection.Token }); // use same projection trick to get group-by expressions based on subquery
             Expression subqueryElemExpr = elementSelector == null ? subqueryProjection.Projector : this.MapAndVisitExpand(elementSelector, ref subqueryProjection); // compute element based on duplicated subquery
 
             Expression subqueryCorrelation =
@@ -1248,11 +1248,11 @@ namespace Signum.Engine.Linq
             if (pr.Projector is FieldInitExpression)
             {
                 FieldInitExpression fie = (FieldInitExpression)pr.Projector;
-                Expression id = fie.Table.CreateBinding(null, new Alias(fie.Table.Name), FieldInitExpression.IdField, null);
+                Expression id = fie.Table.CreateBinding(null, Alias.Raw(fie.Table.Name), FieldInitExpression.IdField, null);
 
                 commands.AddRange(fie.Table.Fields.Values.Select(ef => ef.Field).OfType<FieldMList>().Select(f =>
                 {
-                    Expression backId = f.RelationalTable.BackColumnExpression(new Alias(f.RelationalTable.Name));
+                    Expression backId = f.RelationalTable.BackColumnExpression(Alias.Raw(f.RelationalTable.Name));
                     return new DeleteExpression(f.RelationalTable, pr.Source,
                         SmartEqualizer.EqualNullable(backId, fie.ExternalId));
                 }));
@@ -1263,7 +1263,7 @@ namespace Signum.Engine.Linq
             {
                 MListElementExpression mlee = (MListElementExpression)pr.Projector;
 
-                Expression id = mlee.Table.RowIdExpression(new Alias(mlee.Table.Name));
+                Expression id = mlee.Table.RowIdExpression(Alias.Raw(mlee.Table.Name));
 
                 commands.Add(new DeleteExpression(mlee.Table, pr.Source, SmartEqualizer.EqualNullable(id, mlee.RowId)));
             }
@@ -1295,7 +1295,7 @@ namespace Signum.Engine.Linq
             {
                 FieldInitExpression fie = (FieldInitExpression)pr.Projector;
 
-                Expression id = fie.Table.CreateBinding(null, new Alias(fie.Table.Name), FieldInitExpression.IdField, null);
+                Expression id = fie.Table.CreateBinding(null, Alias.Raw(fie.Table.Name), FieldInitExpression.IdField, null);
 
                 condition = SmartEqualizer.EqualNullable(id, fie.ExternalId);
                 table = fie.Table;
@@ -1304,7 +1304,7 @@ namespace Signum.Engine.Linq
             {
                 MListElementExpression mlee = (MListElementExpression)pr.Projector;
 
-                Expression id = mlee.Table.RowIdExpression(new Alias(mlee.Table.Name));
+                Expression id = mlee.Table.RowIdExpression(Alias.Raw(mlee.Table.Name));
 
                 condition = SmartEqualizer.EqualNullable(id, mlee.RowId);
                 table = mlee.Table;

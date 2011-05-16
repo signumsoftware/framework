@@ -14,11 +14,11 @@ namespace Signum.Engine.Linq
 
         private AliasReplacer() { }
 
-        public static Expression Replace(Expression source, AliasGenerator generator)
+        public static Expression Replace(Expression source)
         {
             AliasReplacer ap = new AliasReplacer()
             {
-                aliasMap = AliasGatherer.Gather(source).Reverse().ToDictionary(a => a, a => generator.CloneAlias(a))
+                aliasMap = AliasGatherer.Gather(source).Reverse().ToDictionary(a => a, a => Alias.CloneAlias(a))
             };
 
             return ap.Visit(source);

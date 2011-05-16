@@ -13,7 +13,6 @@ namespace Signum.Engine.Linq
 {
     internal class BinderTools
     {
-        public readonly AliasGenerator AliasGenerator = new AliasGenerator(); 
         Dictionary<ProjectionToken, HashSet<TableCondition>> requests = new Dictionary<ProjectionToken, HashSet<TableCondition>>();
 
         public BinderTools()
@@ -32,7 +31,7 @@ namespace Signum.Engine.Linq
 
             HashSet<TableCondition> allProjections = requests.Extract(projection.Token);
 
-            Alias newAlias = AliasGenerator.NextSelectAlias();
+            Alias newAlias = Alias.NextSelectAlias();
             Alias[] oldAliases = allProjections.Select(p => p.Table.Alias).And(projection.Source.Alias).ToArray();
 
             ProjectedColumns pc = ColumnProjector.ProjectColumns(projection.Projector, newAlias, oldAliases, new ProjectionToken[0]); //Do not replace tokens
@@ -191,12 +190,12 @@ namespace Signum.Engine.Linq
 
         internal Alias NextSelectAlias()
         {
-            return AliasGenerator.NextSelectAlias();
+            return Alias.NextSelectAlias();
         }
 
         internal Alias NextTableAlias(string tableName)
         {
-            return AliasGenerator.NextTableAlias(tableName);
+            return Alias.NextTableAlias(tableName);
         }
     }
 
