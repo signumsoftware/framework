@@ -185,7 +185,7 @@ namespace Signum.Engine.Mailing
                 ProcessLogic.AssertStarted(sb);
                 ProcessLogic.Register(EmailProcesses.SendEmails, new SendEmailProcessAlgorithm());
 
-                OperationLogic.Register(new BasicConstructorFromMany<EmailMessageDN, ProcessExecutionDN>(EmailOperations.ReSendEmails)
+                OperationLogic.Register(new BasicConstructFromMany<EmailMessageDN, ProcessExecutionDN>(EmailOperations.ReSendEmails)
                 {
                     Constructor = (messages, args) => ProcessLogic.Create(EmailProcesses.SendEmails, messages)
                 });

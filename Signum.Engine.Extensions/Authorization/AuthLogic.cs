@@ -111,8 +111,8 @@ namespace Signum.Engine.Authorization
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                new UserGraph().Register();
-                OperationLogic.Register(new BasicExecute<UserDN>(UserOperation.SetPassword)
+                UserGraph.Register();
+                new BasicExecute<UserDN>(UserOperation.SetPassword)
                 {
                     Lite = true,
                     Execute = (u, args) =>
@@ -120,7 +120,7 @@ namespace Signum.Engine.Authorization
                         string newPassword = args.TryGetArgC<string>(0);
                         AuthLogic.ChangePassword(u.UserName, u.PasswordHash, Security.EncodePassword(newPassword));
                     }
-                });
+                }.Register();
             }
         }
 

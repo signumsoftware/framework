@@ -9,38 +9,35 @@ namespace Signum.Engine.SMS
 {
     public class SMSTemplateGraph : Graph<SMSTemplateDN, SMSTemplateState>
     {
-        public SMSTemplateGraph()
+        static SMSTemplateGraph()
         {
-            this.GetState = t => t.State;
-            this.Operations = new List<IGraphOperation> 
-            { 
-                new Construct(SMSTemplateOperations.Create, SMSTemplateState.Created)
-                {
-                    Constructor = _ => new SMSTemplateDN{State = SMSTemplateState.Created},
-                },
+            GetState = t => t.State;
+            new Construct(SMSTemplateOperations.Create, SMSTemplateState.Created)
+            {
+                Construct = _ => new SMSTemplateDN { State = SMSTemplateState.Created },
+            }.Register();
 
-                new Goto(SMSTemplateOperations.Modify, SMSTemplateState.Modified)
-                {
-                    Lite = false,
-                    AllowsNew = true,
-                    FromStates = new [] { SMSTemplateState.Created, SMSTemplateState.Modified },
-                    Execute = (t, _) => { t.State = SMSTemplateState.Modified; }
-                },
+            new Goto(SMSTemplateOperations.Modify, SMSTemplateState.Modified)
+            {
+                Lite = false,
+                AllowsNew = true,
+                FromStates = new[] { SMSTemplateState.Created, SMSTemplateState.Modified },
+                Execute = (t, _) => { t.State = SMSTemplateState.Modified; }
+            }.Register();
 
-                new Goto(SMSTemplateOperations.Enable, SMSTemplateState.Modified)
-                {
-                    CanExecute = c => c.Active ? "The template is already active" : null,
-                    FromStates = new [] { SMSTemplateState.Modified },
-                    Execute = (t, _) => { t.Active = true; }
-                },
+            new Goto(SMSTemplateOperations.Enable, SMSTemplateState.Modified)
+            {
+                CanExecute = c => c.Active ? "The template is already active" : null,
+                FromStates = new[] { SMSTemplateState.Modified },
+                Execute = (t, _) => { t.Active = true; }
+            }.Register();
 
-                new Goto(SMSTemplateOperations.Disable, SMSTemplateState.Modified)
-                {
-                    CanExecute = c => !c.Active ? "The template is already inactive" : null,
-                    FromStates = new [] { SMSTemplateState.Modified },
-                    Execute = (t, _) => { t.Active = false; }                    
-                }
-            };
+            new Goto(SMSTemplateOperations.Disable, SMSTemplateState.Modified)
+            {
+                CanExecute = c => !c.Active ? "The template is already inactive" : null,
+                FromStates = new[] { SMSTemplateState.Modified },
+                Execute = (t, _) => { t.Active = false; }
+            }.Register();
         }
     }
 }

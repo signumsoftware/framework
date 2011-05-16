@@ -13,12 +13,12 @@ using Signum.Engine.Authorization;
 
 namespace Signum.Engine.Operations
 {
-    public interface IConstructorOperation : IOperation
+    public interface IConstructOperation : IOperation
     {
         IIdentifiable Construct(params object[] parameters);
     }
 
-    public class BasicConstructor<T> : IConstructorOperation
+    public class BasicConstruct<T> : IConstructOperation
         where T: IIdentifiable
     {
         public Enum Key { get; private set; }        
@@ -28,14 +28,14 @@ namespace Signum.Engine.Operations
         public Type ReturnType { get { return typeof(T); } }
 
         public bool Lite { get { return false; } }
-        public Func<object[], T> Constructor { get; set; }
+        public Func<object[], T> Construct { get; set; }
 
-        public BasicConstructor(Enum key)
+        public BasicConstruct(Enum key)
         {
             this.Key = key; 
         }
 
-        IIdentifiable IConstructorOperation.Construct(params object[] args)
+        IIdentifiable IConstructOperation.Construct(params object[] args)
         {
             OperationLogic.AssertOperationAllowed(Key);
              
@@ -77,12 +77,12 @@ namespace Signum.Engine.Operations
 
         protected virtual T OnConstruct(object[] args)
         {
-            return Constructor(args);
+            return Construct(args);
         }
 
         public void AssertIsValid()
         {
-            if (Constructor == null)
+            if (Construct == null)
                 throw new InvalidOperationException("Operation {0} does not have Constructor initialized".Formato(Key));
         }
 
