@@ -113,15 +113,12 @@ namespace Signum.Engine.Linq
         }
     }
 
-    internal class ExpressionCompilableAsserter : SimpleExpressionVisitor
+    internal class ExpressionCompilableAsserter : ExpressionVisitor
     {
-        protected override Expression Visit(Expression exp)
+        public override Expression Visit(Expression exp)
         {
             try
             {
-                if (exp != null && exp.NodeType == ExpressionType.Block)
-                    return exp;
-
                 return base.Visit(exp);
             }
             catch (InvalidOperationException e)
