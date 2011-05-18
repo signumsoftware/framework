@@ -1089,17 +1089,17 @@
   <data name="EndDateMustBeHigherThanStartDate" xml:space="preserve">
     <value>La data di scadenza deve essere maggiore della data di inizio</value>
   </data>
-  <data name="PasswordValidIntervalDN" xml:space="preserve">
-    <value>Intervallo password valido</value>
+  <data name="SMSTemplateDN_Active" xml:space="preserve">
+    <value>Attivo</value>
   </data>
-  <data name="PasswordValidIntervalDN_Days" xml:space="preserve">
-    <value>Giorni</value>
+  <data name="SMSMessageDN_MessageID" xml:space="preserve">
+    <value>ID messaggio</value>
   </data>
-  <data name="PasswordValidIntervalDN_DaysWarning" xml:space="preserve">
-    <value>Giorni di avviso</value>
+  <data name="PasswordExpiresIntervalDN_Enabled" xml:space="preserve">
+    <value>Attivato</value>
   </data>
-  <data name="PasswordValidIntervalDN_Enabled" xml:space="preserve">
-    <value>Abilitato</value>
+  <data name="PasswordExpiresIntervalDN_DaysWarning" xml:space="preserve">
+    <value>Giorni di preavviso</value>
   </data>
   <data name="SendState_Delivered" xml:space="preserve">
     <value>Consegnato</value>
@@ -1191,11 +1191,11 @@
   <data name="SMSTemplateOperations_Modify" xml:space="preserve">
     <value>Modificare</value>
   </data>
-  <data name="SMSTemplateState_Disabled" xml:space="preserve">
-    <value>Disattivato</value>
+  <data name="PasswordExpiresIntervalDN_Days" xml:space="preserve">
+    <value>Giorni</value>
   </data>
-  <data name="SMSTemplateState_Enabled" xml:space="preserve">
-    <value>Attivato</value>
+  <data name="PasswordExpiresIntervalDN" xml:space="preserve">
+    <value>Intervallo di scadenza password</value>
   </data>
   <data name="SMTPConfigurationDN" xml:space="preserve">
     <value>Configurazione SMTP</value>
@@ -1256,5 +1256,11 @@
   </data>
   <data name="UserState_New" xml:space="preserve">
     <value>Nuovo</value>
+  </data>
+  <data name="SMSTemplateState_Created" xml:space="preserve">
+    <value>Creato</value>
+  </data>
+  <data name="SMSTemplateState_Modified" xml:space="preserve">
+    <value>Modificato</value>
   </data>
 </root>

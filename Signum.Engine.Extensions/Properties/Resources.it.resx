@@ -328,9 +328,6 @@
   <data name="PasswordNearExpired" xml:space="preserve">
     <value>La password sta per scadere</value>
   </data>
-  <data name="SMSSendActionWasNotEstablished" xml:space="preserve">
-    <value>SMSSendAction non è stata stabilita</value>
-  </data>
   <data name="ThePasswordMustHaveBetween7And15CharactersEachOfThemBeingANumber09OrALetter" xml:space="preserve">
     <value>La password deve essere compresa tra 7 e 15 caratteri, ognuno dei quali è un numero da 0 a 9 o una lettera</value>
   </data>

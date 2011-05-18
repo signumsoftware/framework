@@ -98,7 +98,7 @@ namespace Signum.Web.AuthAdmin
             return RedirectToAction("Types", new { role = role.Id });
         }
 
-        [HttpPost]
+
         public ActionResult Properties(Lite<RoleDN> role, Lite<TypeDN> type, string prefix)
         {
             ViewData[ViewDataKeys.WriteSFInfo] = true;
