@@ -77,7 +77,11 @@ namespace Signum.Engine.Linq
 
         public static Alias NextTableAlias(string tableName)
         {
-            string abv = new string(tableName.Where(c => char.IsUpper(c)).ToArray());
+            string abv = tableName.Any(char.IsUpper) ? new string(tableName.Where(c => char.IsUpper(c)).ToArray()) :
+                tableName.Any(a => a == '_') ? new string(tableName.Split(new[] { '_' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s[0]).ToArray()) : null;
+
+            if (string.IsNullOrEmpty(abv))
+                abv = tableName.Left(3, false); 
 
             return current.GetUniqueAlias(abv);
         }
