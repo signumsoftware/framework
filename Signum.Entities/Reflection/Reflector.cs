@@ -277,7 +277,7 @@ namespace Signum.Entities.Reflection
             if (lpa != null)
                 return lpa.Low;
 
-            return !typeof(Entity).IsAssignableFrom(type);
+            return !typeof(Entity).IsAssignableFrom(type) && !type.IsInterface;
         }
 
     

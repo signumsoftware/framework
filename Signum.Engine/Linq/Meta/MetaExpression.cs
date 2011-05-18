@@ -66,5 +66,10 @@ namespace Signum.Engine.Linq
             this.type = type;
             this.Meta = meta;
         }
+
+        public override string ToString()
+        {
+            return "Exp({0})".Formato(Meta);
+        }
     }
 }
