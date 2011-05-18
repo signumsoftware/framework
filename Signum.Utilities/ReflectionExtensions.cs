@@ -111,5 +111,22 @@ namespace Signum.Utilities
         {
             return m.IsStatic && m.HasAttribute<ExtensionAttribute>();
         }
+
+        public static PropertyInfo GetBaseDefinition(this PropertyInfo propertyInfo)
+        {
+            var method = propertyInfo.GetAccessors(true)[0];
+            if (method == null)
+                return null;
+
+            var baseMethod = method.GetBaseDefinition();
+
+            if (baseMethod == method)
+                return propertyInfo;
+
+            var arguments = propertyInfo.GetIndexParameters().Select(p => p.ParameterType).ToArray();
+
+            return baseMethod.DeclaringType.GetProperty(propertyInfo.Name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+                null, propertyInfo.PropertyType, arguments, null);
+        }
     }
 }

@@ -127,7 +127,7 @@ namespace Signum.Utilities.ExpressionTrees
             {
                 IMethodExpander expander = Activator.CreateInstance(attribute.ExpanderType) as IMethodExpander;
                 if (expander == null)
-                    throw new InvalidOperationException("Expansion failed, {0} does not implement IMethodExpander".Formato(attribute.ExpanderType.Name));
+                    throw new InvalidOperationException("Expansion failed, '{0}' does not implement IMethodExpander".Formato(attribute.ExpanderType.TypeName()));
 
                 Expression exp = expander.Expand(
                     m.Object,
@@ -184,31 +184,86 @@ namespace Signum.Utilities.ExpressionTrees
         {
             return GetFieldExpansion(type, mi) != null || mi is MethodInfo && mi.HasAttribute<MethodExpanderAttribute>();
         }
-        
+
         static LambdaExpression GetFieldExpansion(Type decType, MemberInfo mi)
+        {
+            if (decType == null || decType == mi.DeclaringType || IsStatic(mi))
+                return GetExpansion(mi);
+            else
+            {
+                for (MemberInfo m = GetMember(decType, mi); m != null; m = BaseMember(m))
+                {
+                    var result = GetExpansion(m);
+                    if (result != null)
+                        return result;
+                }
+
+                return null; 
+            }
+        }
+
+        static bool IsStatic(MemberInfo mi)
+        {
+            if (mi is MethodInfo)
+                return ((MethodInfo)mi).IsStatic;
+
+            if (mi is PropertyInfo)
+                return (((PropertyInfo)mi).GetGetMethod() ?? ((PropertyInfo)mi).GetSetMethod()).IsStatic;
+
+            return false;
+        }
+
+        static LambdaExpression GetExpansion(MemberInfo mi)
         {
             ExpressionFieldAttribute efa = mi.SingleAttribute<ExpressionFieldAttribute>();
 
             string name = efa.TryCC(a => a.Name) ?? mi.Name + "Expression";
-            Type type = efa.TryCC(a => a.Type) ?? decType ?? mi.DeclaringType;
+            Type type = mi.DeclaringType;
 
             FieldInfo fi = type.GetField(name, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
             if (fi != null)
                 return fi.GetValue(null) as LambdaExpression;
-            else
-            {
-                if (efa != null)
-                    throw new InvalidOperationException("Expression field {0} not found on  {1}".Formato(name, type));
-
-                if (type != mi.DeclaringType)
-                {
-                    fi = mi.DeclaringType.GetField(name, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-                    if (fi != null)
-                        return fi.GetValue(null) as LambdaExpression;
-                }
-            }
+            else if (efa != null)
+                throw new InvalidOperationException("Expression field '{0}' not found on '{1}'".Formato(name, type.TypeName())); 
 
             return null;
+        }
+
+        static BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+
+        static MemberInfo GetMember(Type decType, MemberInfo mi)
+        {
+            if (mi is MethodInfo)
+            {
+                Type[] types = ((MethodInfo)mi).GetParameters().Select(a => a.ParameterType).ToArray();
+                return decType.GetMethod(mi.Name, flags, null, types, null);
+            }
+
+            if (mi is PropertyInfo)
+            {
+                Type[] types = ((PropertyInfo)mi).GetIndexParameters().Select(a => a.ParameterType).ToArray();
+
+                return decType.GetProperty(mi.Name, flags, null, ((PropertyInfo)mi).PropertyType, types, null); 
+            }
+
+            throw new InvalidOperationException("Invalid Member type"); 
+        }
+
+        static MemberInfo BaseMember(MemberInfo mi)
+        {
+            MemberInfo result;
+            if (mi is MethodInfo)
+                result = ((MethodInfo)mi).GetBaseDefinition();
+
+            else if (mi is PropertyInfo)
+                result = ((PropertyInfo)mi).GetBaseDefinition();
+            else
+                throw new InvalidOperationException("Invalid Member type");
+
+            if (result == mi)
+                return null;
+
+            return result; 
         }
 
         #region Simplifier
