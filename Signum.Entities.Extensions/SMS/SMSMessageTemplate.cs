@@ -27,7 +27,9 @@ namespace Signum.Entities.SMS
     [Serializable]
     public class SMSTemplateDN : Entity
     {
+        [SqlDbType(Size = 100)]
         string name;
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name
         {
             get { return name; }
@@ -50,7 +52,7 @@ namespace Signum.Entities.SMS
             set { Set(ref from, value, () => From); }
         }
 
-        SMSTemplateState state;
+        SMSTemplateState state = SMSTemplateState.Created;
         public SMSTemplateState State
         {
             get { return state; }
@@ -64,7 +66,7 @@ namespace Signum.Entities.SMS
             set { Set(ref active, value, () => Active); }
         }
 
-        DateTime startDate = DateTime.Now;
+        DateTime startDate = TimeZoneManager.Now.TrimToMinutes();
         [MinutesPrecissionValidator]
         public DateTime StartDate
         {
@@ -96,6 +98,11 @@ namespace Signum.Entities.SMS
             }
 
             return base.PropertyValidation(pi);
+        }
+
+        public override string ToString()
+        {
+            return Name;
         }
 
         public SMSMessageDN CreateSMSMessage()

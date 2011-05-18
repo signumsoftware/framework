@@ -55,6 +55,8 @@ namespace Signum.Engine.SMS
                                                   t.StartDate,
                                                   t.EndDate,
                                               }).ToDynamic();
+
+                SMSTemplateGraph.Register();
             }
         }
 
