@@ -1102,7 +1102,7 @@ namespace Signum.Engine.Linq
                 if (fies.Empty())
                     return Expression.Constant(false);
 
-                return fies.Select(f => (Expression)new IsNotNullExpression(f.ExternalId)).Aggregate((f1, f2) => Expression.Or(f1, f2));
+                return fies.Select(f => (Expression)Expression.NotEqual(f.ExternalId, BinderTools.NullId)).Aggregate((f1, f2) => Expression.Or(f1, f2));
             }
             else if (operand.NodeType == (ExpressionType)DbExpressionType.ImplementedByAll)
             {

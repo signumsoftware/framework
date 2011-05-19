@@ -142,8 +142,8 @@ namespace Signum.Engine.Linq
                 b.NodeType == ExpressionType.LessThan ||
                 b.NodeType == ExpressionType.LessThanOrEqual)
             {
-                Expression left = MakeSqlValue(b.Left);
-                Expression right = MakeSqlValue(b.Right);
+                Expression left = MakeSqlValue(this.Visit(b.Left));
+                Expression right = MakeSqlValue(this.Visit(b.Right));
                 if (left != b.Left || right != b.Right)
                 {
                     return Expression.MakeBinary(b.NodeType, left, right, b.IsLiftedToNull, b.Method);
@@ -152,8 +152,8 @@ namespace Signum.Engine.Linq
             }
             else if (b.NodeType == ExpressionType.Coalesce)
             {
-                Expression left = MakeSqlValue(b.Left);
-                Expression right = MakeSqlValue(b.Right);
+                Expression left = MakeSqlValue(this.Visit(b.Left));
+                Expression right = MakeSqlValue(this.Visit(b.Right));
                 if (left != b.Left || right != b.Right)
                 {
                     return Expression.Coalesce(left, right);

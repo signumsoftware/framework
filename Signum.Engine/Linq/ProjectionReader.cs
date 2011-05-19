@@ -121,9 +121,9 @@ namespace Signum.Engine.Linq
             {
                 return base.Visit(exp);
             }
-            catch (InvalidOperationException e)
+            catch (ArgumentException e)
             {
-                if (e.Message.StartsWith("Unhandled Expression"))
+                if (e.Message.Contains("reducible"))
                     throw new NotSupportedException("The expression can not be compiled:\r\n{0}".Formato(exp.NiceToString()));
                 throw;
             }

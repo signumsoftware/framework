@@ -373,4 +373,30 @@ namespace Signum.Test
             return name;
         }
     }
+
+    [Serializable]
+    public class AwardNominationDN : Entity
+    {
+        Lite<IAuthorDN> author;
+        public Lite<IAuthorDN> Author
+        {
+            get { return author; }
+            set { Set(ref author, value, () => Author); }
+        }
+
+        [ImplementedBy(typeof(GrammyAwardDN), typeof(PersonalAwardDN), typeof(AmericanMusicAwardDN))]
+        Lite<AwardDN> award;
+        public Lite<AwardDN> Award
+        {
+            get { return award; }
+            set { Set(ref award, value, () => Award); }
+        }
+
+        int year;
+        public int Year
+        {
+            get { return year; }
+            set { Set(ref year, value, () => Year); }
+        }
+    }
 }

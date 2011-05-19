@@ -44,8 +44,7 @@ namespace Signum.Engine.Linq
         }
 
         T Translate<T>(Expression expression, Func<ITranslateResult, T> continuation) //For debugging purposes
-        {
-            ITranslateResult result; 
+        {   
             using (Alias.NewGenerator())
             {
                 Expression cleaned = Clean(expression);
@@ -58,9 +57,9 @@ namespace Signum.Engine.Linq
 
                 ProjectionExpression flat = ChildProjectionFlattener.Flatten(optimized);
 
-                result = TranslatorBuilder.Build(flat);
+                ITranslateResult result = TranslatorBuilder.Build(flat);
+                return continuation(result);
             }
-            return continuation(result);
         }
 
         public static Expression Clean(Expression expression)
@@ -89,7 +88,6 @@ namespace Signum.Engine.Linq
 
         internal int Delete(IQueryable query)
         {
-            CommandResult cr; 
             using (Alias.NewGenerator())
             {
                 Expression cleaned = Clean(query.Expression);
@@ -97,15 +95,13 @@ namespace Signum.Engine.Linq
                 BinderTools tools = new BinderTools();
                 CommandExpression delete = new QueryBinder(tools).BindDelete(filtered);
                 CommandExpression deleteOptimized = (CommandExpression)Optimize(delete, tools);
-                cr = TranslatorBuilder.BuildCommandResult(deleteOptimized);
+                CommandResult cr = TranslatorBuilder.BuildCommandResult(deleteOptimized);
+                return cr.Execute();
             }
-
-            return cr.Execute();
         }
 
         internal int Update<T>(IQueryable<T> query, Expression<Func<T, T>> set)
         {
-            CommandResult cr;
             using (Alias.NewGenerator())
             {
                 Expression cleaned = Clean(query.Expression);
@@ -114,10 +110,10 @@ namespace Signum.Engine.Linq
                 BinderTools tools = new BinderTools();
                 CommandExpression update = new QueryBinder(tools).BindUpdate(filtered, set);
                 CommandExpression updateOptimized = (CommandExpression)Optimize(update, tools);
-                cr = TranslatorBuilder.BuildCommandResult(updateOptimized);
-            }
+                CommandResult cr = TranslatorBuilder.BuildCommandResult(updateOptimized);
 
-            return cr.Execute();
+                return cr.Execute();
+            }
         }
     }
 }

@@ -118,6 +118,12 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void SelectEntityWithLiteIb()
+        {
+            var list = Database.Query<AwardNominationDN>().Where(a => a.Award.Entity is GrammyAwardDN).ToList();
+        }
+
+        [TestMethod]
         public void SelectLiteUpcast()
         {
             var list = Database.Query<ArtistDN>()

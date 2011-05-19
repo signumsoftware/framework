@@ -67,6 +67,11 @@ namespace Signum.Engine.Linq
             this.Name = name;
         }
 
+        public override string ToString()
+        {
+            return Name;
+        }
+
         [ThreadStatic]
         static AliasGenerator current;
 
@@ -81,7 +86,9 @@ namespace Signum.Engine.Linq
                 tableName.Any(a => a == '_') ? new string(tableName.Split(new[] { '_' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s[0]).ToArray()) : null;
 
             if (string.IsNullOrEmpty(abv))
-                abv = tableName.Left(3, false); 
+                abv = tableName.Left(3, false);
+            else
+                abv = abv.ToLower();
 
             return current.GetUniqueAlias(abv);
         }

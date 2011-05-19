@@ -31,6 +31,8 @@ namespace Signum.Engine.Linq
 
         bool IsFullNominate { get { return tempFullNominate || existingAliases == null; } }
 
+        bool IsFullNominateOrAggresive { get { return IsFullNominate || isAggresive; } }
+
         bool isAggresive = false;
 
         bool innerProjection = false; 
@@ -90,10 +92,10 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitColumn(ColumnExpression column)
         {
-            if (((IsFullNominate || isAggresive) && !innerProjection) ||
+            if ((IsFullNominateOrAggresive && !innerProjection) ||
                 existingAliases.Contains(column.Alias))
                 candidates.Add(column);
-            
+
             return column;
         }
 
@@ -122,7 +124,7 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitConstant(ConstantExpression c)
         {
-            if (!innerProjection && (IsFullNominate || isAggresive) && (IsSimpleType(c.Type) || c.Type == typeof(object) && c.IsNull()))
+            if (!innerProjection && IsFullNominateOrAggresive && (IsSimpleType(c.Type) || c.Type == typeof(object) && c.IsNull()))
             {
                 candidates.Add(c);
             }
@@ -173,7 +175,7 @@ namespace Signum.Engine.Linq
         protected Expression TrySqlToString(Type type, Expression expression)
         {
             var newExp = Visit(expression);
-            if (candidates.Contains(newExp) && IsFullNominate)
+            if (candidates.Contains(newExp) && IsFullNominateOrAggresive)
             {
                 var cast = new SqlCastExpression(type, newExp);
                 candidates.Add(cast);
@@ -251,7 +253,7 @@ namespace Signum.Engine.Linq
 
         private Expression TrySqlDayOftheWeek(Expression expression)
         {
-            if (!IsFullNominate)
+            if (!IsFullNominateOrAggresive)
                 return null;
 
             Expression expr = Visit(expression);
@@ -319,40 +321,38 @@ namespace Signum.Engine.Linq
             {
                 var expression = SmartEqualizer.PolymorphicEqual(b.Left, b.Right);
 
-                if (expression.NodeType == ExpressionType.Equal)
+                if (expression.NodeType == ExpressionType.Equal) //simple comparison
                 {
                     BinaryExpression newB = expression as BinaryExpression;
                     var left = Visit(newB.Left);
                     var right = Visit(newB.Right);
 
                     newB = Expression.MakeBinary(b.NodeType, left, right, b.IsLiftedToNull, b.Method);
-                    
                     if (candidates.Contains(left) && candidates.Contains(right))
+                        candidates.Add(newB);
+
+                    if (candidates.Contains(newB) && IsFullNominateOrAggresive)
                     {
-                        Expression result = ConvertToSql(newB);
+                        Expression result = ConvertToSqlComparison(newB);
                         candidates.Add(result);
-
-                        return result;
-                    }
-
-                    return newB;
-                }
-                else
-                {
-                    var result = Visit(expression);
-
-                    if (b.NodeType == ExpressionType.NotEqual)
-                    {
-                        bool nominated = candidates.Contains(result);
-                        result = Expression.Not(result);
-                        if (nominated)
-                            candidates.Add(result);
                         return result;
                     }
                     else
                     {
-                        return Visit(expression);
+                        return ConvertAvoidNominate(newB);
                     }
+                }
+                else //tuples, entities, etc...
+                {
+                    Expression result = Visit(expression);
+                    if (b.NodeType == ExpressionType.Equal)
+                        return result;
+
+                    bool nominated = candidates.Contains(result);
+                    result = Expression.Not(result);
+                    if (nominated)
+                        candidates.Add(result);
+                    return result;
                 }
             }
             else
@@ -370,22 +370,63 @@ namespace Signum.Engine.Linq
                         b = Expression.MakeBinary(b.NodeType, left, right, b.IsLiftedToNull, b.Method);
                 }
 
-                if (candidates.Contains(left) && candidates.Contains(right))
+                Expression result = b;
+                if (candidates.Contains(left) && candidates.Contains(right) && IsFullNominateOrAggresive)
                 {
-                    if (b.NodeType == ExpressionType.Add && IsFullNominate && (left.Type == typeof(string)) != (right.Type == typeof(string)))
+                    if (b.NodeType == ExpressionType.Add)
                     {
-                        b = Expression.Add(
-                            left.Type == typeof(string) ? left : new SqlCastExpression(typeof(string), left),
-                            right.Type == typeof(string) ? right : new SqlCastExpression(typeof(string), right), miSimpleConcat);
+                        result = ConvertToSqlAddition(b);
+                    }
+                    else if (b.NodeType == ExpressionType.Coalesce)
+                    {
+                        result = ConvertToSqlCoallesce(b);
                     }
 
-                    candidates.Add(b);
+                    candidates.Add(result);
                 }
-                return b;
+
+                return result;
             }
         }
 
-        private Expression ConvertToSql(BinaryExpression b)
+        private Expression ConvertToSqlCoallesce(BinaryExpression b)
+        {
+            Expression left = b.Left;
+            Expression right = b.Right;
+
+            List<Expression> expressions = new List<Expression>();
+            SqlFunctionExpression fLeft = left as SqlFunctionExpression;
+            if (fLeft != null && fLeft.SqlFunction == SqlFunction.COALESCE.ToString())
+                expressions.AddRange(fLeft.Arguments);
+            else
+                expressions.Add(left);
+
+            SqlFunctionExpression fRight = right as SqlFunctionExpression;
+            if (fRight != null && fRight.SqlFunction == SqlFunction.COALESCE.ToString())
+                expressions.AddRange(fRight.Arguments);
+            else
+                expressions.Add(right);
+
+            var result = new SqlFunctionExpression(b.Type, SqlFunction.COALESCE.ToString(), expressions);
+            candidates.Add(result);
+            return result;
+        }
+
+        private BinaryExpression ConvertToSqlAddition(BinaryExpression b)
+        {
+            Expression left = b.Left;
+            Expression right = b.Right;
+
+            if ((left.Type == typeof(string)) != (right.Type == typeof(string)))
+            {
+                b = Expression.Add(
+                    left.Type == typeof(string) ? left : new SqlCastExpression(typeof(string), left),
+                    right.Type == typeof(string) ? right : new SqlCastExpression(typeof(string), right), miSimpleConcat);
+            }
+            return b;
+        }
+
+        private Expression ConvertToSqlComparison(BinaryExpression b)
         {
             if (b.NodeType == ExpressionType.Equal)
             {
@@ -422,6 +463,45 @@ namespace Signum.Engine.Linq
                 }
             }
             throw new InvalidOperationException(); 
+        }
+
+        private Expression ConvertAvoidNominate(BinaryExpression b)
+        {
+            if (b.NodeType == ExpressionType.Equal)
+            {
+                if (b.Left.IsNull())
+                {
+                    if (b.Right.IsNull())
+                        return Expression.Constant(true);
+                    else
+                        return Expression.Equal(Expression.Constant(null, b.Left.Type), b.Right);
+                }
+                else
+                {
+                    if (b.Right.IsNull())
+                        return Expression.Equal(b.Left, Expression.Constant(null, b.Right.Type));
+
+                    return b;
+                }
+            }
+            else if (b.NodeType == ExpressionType.NotEqual)
+            {
+                if (b.Left.IsNull())
+                {
+                    if (b.Right.IsNull())
+                        return Expression.Constant(false);
+                    else
+                        return Expression.NotEqual(Expression.Constant(null, b.Left.Type), b.Right);
+                }
+                else
+                {
+                    if (b.Right.IsNull())
+                        return Expression.NotEqual(b.Left, Expression.Constant(null, b.Right.Type));
+
+                    return b;
+                }
+            }
+            throw new InvalidOperationException();
         }
 
         static MethodInfo miSimpleConcat = ReflectionTools.GetMethodInfo(() => string.Concat("a", "b"));

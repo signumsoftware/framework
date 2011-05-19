@@ -54,6 +54,7 @@ namespace Signum.Test
             sb.Include<NoteDN>();
             sb.Include<AlertDN>();
             sb.Include<PersonalAwardDN>();
+            sb.Include<AwardNominationDN>();
 
             dqm[typeof(AlbumDN)] = (from a in Database.Query<AlbumDN>()
                                     select new
@@ -137,18 +138,29 @@ namespace Signum.Test
                                                 a.Category,
                                                 a.Result
                                             }).ToDynamic();
+
+            dqm[typeof(AwardNominationDN)] = (from a in Database.Query<AwardNominationDN>()
+                                            select new
+                                            {
+                                                Entity = a.ToLite(),
+                                                a.Id,
+                                                a.Award,
+                                                a.Author
+                                            }).ToDynamic();
         }
 
         public const string Japan = "Japan";
         
         public static void Load()
         {
+            var ama = new AmericanMusicAwardDN { Category = "Indie Rock", Year = 1991, Result = AwardResult.Nominated }.Save();
+
             BandDN smashingPumpkins = new BandDN
             {
                 Name = "Smashing Pumpkins",
                 Members = "Billy Corgan, James Iha, D'arcy Wretzky, Jimmy Chamberlin"
                 .Split(',').Select(s => new ArtistDN { Name = s.Trim(), Sex = s.Contains("Wretzky") ? Sex.Female : Sex.Male, Status = s.Contains("Wretzky") ? Status.Married: (Status?)null }).ToMList(),
-                LastAward = new AmericanMusicAwardDN { Category = "Indie Rock", Year = 1991, Result = AwardResult.Nominated }
+                LastAward = ama,
             };
 
             CountryDN usa = new CountryDN { Name = "USA" };
@@ -209,11 +221,13 @@ namespace Signum.Test
                 Label = wea,
             }.Save();
 
+            var pa  =new PersonalAwardDN { Category = "Best Artist", Year = 1983, Result = AwardResult.Won }.Save();
+
             ArtistDN michael = new ArtistDN
             {
                 Name = "Michael Jackson",
                 Dead = true,
-                LastAward = new PersonalAwardDN { Category = "Best Artist", Year = 1983, Result = AwardResult.Won },
+                LastAward = pa,
                 Status = Status.Single,
             };
 
@@ -287,13 +301,14 @@ namespace Signum.Test
                 Label = mjj
             }.Save();
 
+            var ga = new GrammyAwardDN { Category = "Foreing Band", Year = 2001, Result = AwardResult.Won };
 
             BandDN sigurRos = new BandDN
             {
                 Name = "Sigur Ros",
                 Members = "Jón Þór Birgisson, Georg Hólm, Orri Páll Dýrason"
                 .Split(',').Select(s => new ArtistDN { Name = s.Trim() }).ToMList(),
-                LastAward = new GrammyAwardDN { Category = "Foreing Band", Year = 2001, Result = AwardResult.Won }
+                LastAward = ga,
             };
 
             LabelDN fatCat = new LabelDN { Name = "FatCat Records", Country = usa, Owner = universal.ToLite() }; 
@@ -321,6 +336,17 @@ namespace Signum.Test
                 BonusTrack = new SongDN { Name = "Svo hljótt" },
                 Label = emi
             }.Save();
+
+
+            new AwardNominationDN { Author = sigurRos.ToLite<IAuthorDN>(), Award = ga.ToLite<AwardDN>() }.Save();
+            new AwardNominationDN { Author = michael.ToLite<IAuthorDN>(), Award = ga.ToLite<AwardDN>() }.Save();
+            new AwardNominationDN { Author = smashingPumpkins.ToLite<IAuthorDN>(), Award = ga.ToLite<AwardDN>() }.Save();
+
+            new AwardNominationDN { Author = sigurRos.ToLite<IAuthorDN>(), Award = ama.ToLite<AwardDN>() }.Save();
+            new AwardNominationDN { Author = michael.ToLite<IAuthorDN>(), Award = ama.ToLite<AwardDN>() }.Save();
+            new AwardNominationDN { Author = smashingPumpkins.ToLite<IAuthorDN>(), Award = ama.ToLite<AwardDN>() }.Save();
+
+            new AwardNominationDN { Author = michael.ToLite<IAuthorDN>(), Award = pa.ToLite<AwardDN>() }.Save();
         }
     }
 }

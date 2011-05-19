@@ -80,9 +80,10 @@ namespace Signum.Engine.Linq
 
                 if (ib.Implementations.Count == 1)
                     return ib.Implementations[0].Field.GetOrCreateFieldBinding(FieldInitExpression.ToStrField, this);//Not regular, but usefull
-                return ib.Implementations.Select(imp =>
-                    new When(new IsNotNullExpression(imp.Field.ExternalId),
-                    imp.Field.GetOrCreateFieldBinding(FieldInitExpression.ToStrField, this))).ToList().ToCondition(typeof(string));
+                return ib.Implementations.Select(imp =>new When(
+                    Expression.NotEqual(imp.Field.ExternalId, NullId),
+                    imp.Field.GetOrCreateFieldBinding(FieldInitExpression.ToStrField, this)))
+                    .ToCondition(typeof(string));
             }
 
             if (expression is ImplementedByAllExpression)
@@ -126,11 +127,11 @@ namespace Signum.Engine.Linq
                     return ib.Implementations[0].Field.TypeId;//Not regular, but usefull
 
                 Expression aggregate = ib.Implementations.Select(imp => new When(
-                        new IsNotNullExpression(imp.Field.ExternalId),
+                        Expression.NotEqual(imp.Field.ExternalId, NullId),
                         imp.Field.TypeId))
                     .ToList().ToCondition(typeof(int?));
 
-                return DbExpressionNominator.FullNominate(aggregate);
+                return aggregate;
             }
 
             if (expression is ImplementedByAllExpression)
@@ -143,13 +144,13 @@ namespace Signum.Engine.Linq
         {
             var list = exp.ToList();
 
-            if (list.Count == 0)
+            if (list.Empty())
                 return Expression.Constant(null, type);
 
-            if (list.Count == 1)
+            if (list.Count() == 1)
                 return list[0]; //Not regular, but usefull
 
-            return new SqlFunctionExpression(type, SqlFunction.COALESCE.ToString(), list);
+            return exp.Reverse().Aggregate((ac, e) => Expression.Coalesce(e, ac));
         }
         
         static MethodInfo miToMListNotModified = ReflectionTools.GetMethodInfo((IEnumerable<int> col) => col.ToMListNotModified()).GetGenericMethodDefinition();

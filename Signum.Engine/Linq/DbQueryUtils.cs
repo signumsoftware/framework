@@ -15,7 +15,9 @@ namespace Signum.Engine.Linq
         internal static bool IsNull(this Expression e)
         {
             ConstantExpression ce = e as ConstantExpression;
-            return ce != null && ce.Value == null;
+            SqlConstantExpression sce = e as SqlConstantExpression;
+            return ce != null && ce.Value == null || 
+                sce != null && sce.Value == null;
         }
     }
 }

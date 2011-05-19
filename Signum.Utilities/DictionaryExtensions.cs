@@ -87,7 +87,6 @@ namespace Signum.Utilities
             return result;
         }
 
-
         public static V GetOrThrow<K, V>(this IDictionary<K, V> dictionary, K key, string message)
         {
             V result;
