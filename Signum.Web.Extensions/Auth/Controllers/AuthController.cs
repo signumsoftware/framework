@@ -378,7 +378,7 @@ namespace Signum.Web.Auth
         }
 
         [HttpPost]
-        public ActionResult Login(string username, string password, bool rememberMe, string referrer)
+        public ActionResult Login(string username, string password, bool? rememberMe, string referrer)
         {
             // Basic parameter validation
             if (!username.HasText())
@@ -432,7 +432,7 @@ namespace Signum.Web.Auth
             Thread.CurrentPrincipal = user;
 
             //guardamos una cookie persistente si se ha seleccionado
-            if (rememberMe)
+            if (rememberMe.HasValue && rememberMe.Value)
             {
                 string ticketText = UserTicketLogic.NewTicket(
                        System.Web.HttpContext.Current.Request.UserHostAddress);
