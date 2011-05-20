@@ -315,7 +315,7 @@ namespace Signum.Utilities.ExpressionTrees
                 if (GetBool(test))
                     return this.Visit(c.IfTrue);
                 else
-                    this.Visit(c.IfFalse);
+                    return this.Visit(c.IfFalse);
             }
 
             Expression ifTrue = this.Visit(c.IfTrue);
