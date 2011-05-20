@@ -79,8 +79,8 @@ namespace Signum.Entities.Authorization
             set { Set(ref passwordNeverExpires, value, () => PasswordNeverExpires); }
         }
        
-        IUserRelatedDN related;
-        public IUserRelatedDN Related
+        IIdentifiable related;
+        public IIdentifiable Related
         {
             get { return related; }
             set { Set(ref related, value, () => Related); }
@@ -177,10 +177,10 @@ namespace Signum.Entities.Authorization
         SetPassword
     }
 
-    public interface IUserRelatedDN : IIdentifiable
-    {
+    //public interface IUserRelatedDN : IIdentifiable
+    //{
 
-    }
+    //}
 
 
     [Serializable]
