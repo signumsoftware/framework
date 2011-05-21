@@ -58,15 +58,19 @@ namespace Signum.Engine.SchemaInfoTables
     {
         public int object_id;
         public string name;
-        public int parent_object_id; 
+        public int parent_object_id;
+        public int referenced_object_id; 
     }
 
     [SqlViewName("sys.foreign_key_columns")]
     public class SysForeignKeyColumns : IView
     {
         public int constraint_object_id;
+        public int constraint_column_id;
         public int parent_object_id;
         public int parent_column_id;
+        public int referenced_object_id;
+        public int referenced_column_id;
     }
 
     [SqlViewName("sys.indexes")]

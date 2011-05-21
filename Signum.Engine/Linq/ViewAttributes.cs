@@ -6,7 +6,7 @@ using System.Text;
 namespace Signum.Engine
 {
     [AttributeUsage(AttributeTargets.Class, Inherited = false)]
-    sealed class SqlViewNameAttribute : Attribute
+    public sealed class SqlViewNameAttribute : Attribute
     {
         public string Name { get; private set;}
 
@@ -17,7 +17,7 @@ namespace Signum.Engine
     }
 
     [AttributeUsage(AttributeTargets.Method, Inherited = false)]
-    sealed class SqlMethodAttribute : Attribute
+    public sealed class SqlMethodAttribute : Attribute
     {
         public string Name { get; private set; }
         
@@ -32,7 +32,7 @@ namespace Signum.Engine
     }
 
     [AttributeUsage(AttributeTargets.Field, Inherited = false)]
-    sealed class SqlViewColumnAttribute : Attribute
+    public sealed class SqlViewColumnAttribute : Attribute
     {
         public string Name { get; private set;}
 
