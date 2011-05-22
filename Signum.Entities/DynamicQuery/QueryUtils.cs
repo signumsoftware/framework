@@ -213,7 +213,34 @@ namespace Signum.Entities.DynamicQuery
             }
         }
 
+        public static string CanFilter(QueryToken token)
+        {
+            if (token.Type != typeof(string) && token.Type.ElementType() != null)
+                return "You can not filter by collections, continue the sequence";
+            
+            return null;
+        }
 
-       
+        public static string CanColumn(QueryToken token)
+        {
+            if (token.Type != typeof(string) && token.Type.ElementType() != null)
+                return "You can not add collections as columns";
+
+            if (token.HasAllOrAny())
+                return "Columns can not contain '{0}' or '{1}'".Formato(CollectionElementType.All.NiceToString(), CollectionElementType.Any.NiceToString());
+
+            return null; 
+        }
+
+        public static string CanOrder(QueryToken token)
+        {
+            if (token.Type.IsEmbeddedEntity())
+                return "{0} can not be ordered".Formato(token.Type.NicePluralName());
+
+            if (token.HasAllOrAny())
+                return "Orders can not contains {0} or {1}".Formato(CollectionElementType.All.NiceToString(), CollectionElementType.Any.NiceToString());
+
+            return null;
+        }
     }
 }

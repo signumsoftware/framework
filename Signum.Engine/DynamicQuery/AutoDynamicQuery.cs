@@ -32,9 +32,11 @@ namespace Signum.Engine.DynamicQuery
             request.Columns.Insert(0, new _EntityColumn(EntityColumn().BuildColumnDescription()));
 
             DQueryable<T> result = Query
+                .ToDQueryable(GetColumnDescriptions())
                 .Where(request.Filters)
-                .SelectDynamic(request.Columns, request.Orders)
-                .OrderBy(request.Orders).TryTake(request.Limit);
+                .OrderBy(request.Orders)
+                .Select(request.Columns)
+                .TryTake(request.Limit);
 
             DEnumerable<T> array = result.ToArray();
 
@@ -43,28 +45,20 @@ namespace Signum.Engine.DynamicQuery
 
         public override int ExecuteQueryCount(QueryCountRequest request)
         {
-            return Query.Where(request.Filters).Count();
+            return Query.ToDQueryable(GetColumnDescriptions()).Where(request.Filters).Query.Count();
         }
 
         public override Lite ExecuteUniqueEntity(UniqueEntityRequest request)
         {
             var columns = new List<Column> { new _EntityColumn(EntityColumn().BuildColumnDescription()) };
-            DQueryable<T> orderQuery = Query.Where(request.Filters).SelectDynamic(columns, request.Orders).OrderBy(request.Orders);
+            DQueryable<T> orderQuery = Query
+                .ToDQueryable(GetColumnDescriptions())
+                .Where(request.Filters)
+                .OrderBy(request.Orders)
+                .Select(columns);
 
-            var entitySelect = GetEntitySelector(orderQuery.TupleType);
-
-            return (Lite)orderQuery.Query.Select(entitySelect).Unique(request.UniqueType);
+            return (Lite)orderQuery.Query.Unique(request.UniqueType);
         }
-
-        private static Expression<Func<object, Lite>> GetEntitySelector(Type tupleType)
-        {
-            ParameterExpression p = Expression.Parameter(typeof(object), "p");
-            return Expression.Lambda<Func<object, Lite>>(
-                Expression.Convert(
-                    TupleReflection.TupleChainProperty(Expression.Convert(p, tupleType), 0),
-                typeof(Lite)), p);
-        }
-
         public override Expression Expression
         {
             get { return Query.Expression; }
