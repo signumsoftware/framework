@@ -56,7 +56,7 @@ namespace Signum.Test.Extensions
             DynamicQueryManager dqm = new DynamicQueryManager();
             ConnectionScope.Default = new Connection(connectionString, sb.Schema, dqm);
 
-            sb.Settings.OverrideTypeAttributes<IUserRelatedDN>(new ImplementedByAttribute());
+            sb.Settings.OverrideFieldAttributes((UserDN u) => u.Related, new ImplementedByAttribute());
             sb.Settings.OverrideFieldAttributes((ControlPanelDN cp) => cp.Related, new ImplementedByAttribute(typeof(UserDN), typeof(RoleDN)));
             sb.Settings.OverrideFieldAttributes((UserQueryDN uq) => uq.Related, new ImplementedByAttribute(typeof(UserDN), typeof(RoleDN)));
             sb.Settings.OverrideFieldAttributes((UserChartDN uq) => uq.Related, new ImplementedByAttribute(typeof(UserDN), typeof(RoleDN)));
