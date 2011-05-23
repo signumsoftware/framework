@@ -344,7 +344,7 @@ namespace Signum.Engine.Operations
             return result; 
         }
 
-        static IOperation TryFind(Type type, Enum operationKey)
+        public static IOperation TryFind(Type type, Enum operationKey)
         {
             if (!type.IsIIdentifiable())
                 throw new InvalidOperationException("Type {0} has to implement at least {1}".Formato(type, typeof(IIdentifiable)));
