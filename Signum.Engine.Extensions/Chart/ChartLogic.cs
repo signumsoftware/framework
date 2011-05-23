@@ -181,12 +181,12 @@ namespace Signum.Engine.Extensions.Chart
             }
             else
             {
-                collection = ((ManualDynamicQuery<T>)dq).Execute(new QueryRequest 
-                { 
-                    Columns = columns, 
-                    Filters = request.Filters, 
-                    QueryName = request.QueryName 
-                });
+                collection = ((ManualDynamicQuery<T>)dq).Execute(new QueryRequest
+                {
+                    Columns = columns,
+                    Filters = request.Filters,
+                    QueryName = request.QueryName
+                }, dq.GetColumnDescriptions());
             }
 
             if (!request.GroupResults)
