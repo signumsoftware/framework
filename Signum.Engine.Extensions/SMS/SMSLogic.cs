@@ -11,6 +11,7 @@ using Signum.Entities;
 using Signum.Utilities;
 using Signum.Utilities.Reflection;
 using Signum.Engine.Operations;
+using Signum.Engine.Processes;
 
 namespace Signum.Engine.SMS
 {
@@ -22,10 +23,10 @@ namespace Signum.Engine.SMS
 
         public static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null, null, false)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null, null, false, false)));
         }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, bool registerGraph)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, bool registerGraph, bool registerProcess)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -62,6 +63,25 @@ namespace Signum.Engine.SMS
                 {
                     SMSMessageGraph.Register();
                     SMSTemplateGraph.Register();
+                }
+
+                if (registerProcess)
+                {
+                    if (!registerGraph)
+                        throw new ArgumentException("registerGraph must be true in order to enable operations for the process");
+
+                    ProcessLogic.Register(
+                        SMSMessageProcess.Send,
+                        new PackageConstructFromAlgorithm<SMSMessageDN, SMSMessageDN>(
+                            SMSMessageOperations.Send,
+                            () =>
+                            {
+                                using (new CommandTimeoutScope(300))
+                                {
+                                    return Database.Query<SMSMessageDN>().Where(m =>
+                                        m.State == SMSMessageState.Created).Select(m => m.ToLite()).Take(100).ToList();
+                                }
+                            }));
                 }
             }
         }
@@ -168,4 +188,5 @@ namespace Signum.Engine.SMS
             }.Register();
         }
     }
+
 }

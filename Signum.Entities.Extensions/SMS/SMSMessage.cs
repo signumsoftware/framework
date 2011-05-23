@@ -27,6 +27,12 @@ namespace Signum.Entities.SMS
         UpdateStatus
     }
 
+    public enum SMSMessageProcess
+    { 
+        Send,
+        UpdateStatus
+    }
+
     [Serializable]
     public class SMSMessageDN : Entity
     {
