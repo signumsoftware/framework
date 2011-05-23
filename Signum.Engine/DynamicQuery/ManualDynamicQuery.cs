@@ -12,9 +12,9 @@ namespace Signum.Engine.DynamicQuery
 {
     public class ManualDynamicQuery<T> : DynamicQuery<T>
     {
-        public Func<QueryRequest, DEnumerable<T>> Execute { get; private set; }
+        public Func<QueryRequest, List<ColumnDescription>, DEnumerable<T>> Execute { get; private set; }
 
-        public ManualDynamicQuery(Func<QueryRequest, DEnumerable<T>> execute)
+        public ManualDynamicQuery(Func<QueryRequest, List<ColumnDescription>, DEnumerable<T>> execute)
         {
             if (execute == null)
                 throw new ArgumentNullException("execute");
@@ -28,7 +28,7 @@ namespace Signum.Engine.DynamicQuery
         {
             request.Columns.Insert(0, new _EntityColumn(EntityColumn().BuildColumnDescription()));
 
-            DEnumerable<T> manualResult = Execute(request);
+            DEnumerable<T> manualResult = Execute(request, GetColumnDescriptions());
 
             return manualResult.ToResultTable(request.Columns); 
         }
@@ -41,7 +41,7 @@ namespace Signum.Engine.DynamicQuery
                 Filters = request.Filters,
             };
 
-            return Execute(req).Collection.Count();
+            return Execute(req, GetColumnDescriptions()).Collection.Count();
         }
 
         public override Lite ExecuteUniqueEntity(UniqueEntityRequest request)
@@ -55,7 +55,7 @@ namespace Signum.Engine.DynamicQuery
                 Columns = new List<Column> { new Column(this.EntityColumn().BuildColumnDescription()) }
             };
 
-            DEnumerable<T> mr = Execute(req);
+            DEnumerable<T> mr = Execute(req, GetColumnDescriptions());
 
             ParameterExpression pe = Expression.Parameter(typeof(object), "p");
             Func<object, Lite> entitySelector = Expression.Lambda<Func<object, Lite>>(TupleReflection.TupleChainProperty(pe, 0), pe).Compile();

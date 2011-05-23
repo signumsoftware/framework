@@ -116,7 +116,7 @@ namespace Signum.Engine.DynamicQuery
             return new AutoDynamicQuery<T>(query); 
         }
 
-        public static DynamicQuery<T> Manual<T>(Func<QueryRequest, DEnumerable<T>> execute)
+        public static DynamicQuery<T> Manual<T>(Func<QueryRequest, List<ColumnDescription>, DEnumerable<T>> execute)
         {
             return new ManualDynamicQuery<T>(execute); 
         }
@@ -199,18 +199,57 @@ namespace Signum.Engine.DynamicQuery
         
 	    #endregion
 
-        //public static DQueryable<T> SelectMany<T>(this IQueryable<T> query, List<QueryToken> allTokens)
-        //{
-        //    var elementTokens = (from t in allTokens
-        //                         from tt in t.FollowC(a => a.Parent)
-        //                         where tt is CollectionElementToken && ((CollectionElementToken)tt).ElementType == CollectionElementType.Element
-        //                         select tt).ToHashSet(); 
+        public static DQueryable<T> SelectMany<T>(this DQueryable<T> query, List<QueryToken> allTokens)
+        {
+            List<CollectionElementToken> elementTokens = allTokens
+                .SelectMany(t => t.FollowC(tt => tt.Parent))
+                .OfType<CollectionElementToken>()
+                .Where(a => a.ElementType == CollectionElementType.Element)
+                .Distinct()
+                .OrderBy(a => a.FullKey().Length)
+                .ToList();
 
+
+            foreach (var cet in elementTokens)
+            {
+                query = query.SelectMany(cet);
+            }
+
+            return query;
+        }
+
+        static MethodInfo miSelectMany = ReflectionTools.GetMethodInfo(() => Database.Query<TypeDN>().SelectMany(t => t.Namespace, (t, c) => t)).GetGenericMethodDefinition();
+
+        public static DQueryable<T> SelectMany<T>(this DQueryable<T> query, CollectionElementToken cet)
+        {
+            var collectionSelector = Expression.Lambda(cet.Parent.BuildExpression(query.Context), query.Context.Parameter); 
             
+            Type elementType = cet.Parent.Type.ElementType();
+
+            var elementParameter = Expression.Parameter(elementType);
+            
+            
+            var properties = query.Context.Replacemens.Values.And(elementParameter);
+
+            var ctor = TupleReflection.TupleChainConstructor(properties); 
+
+            var resultSelector = Expression.Lambda(Expression.Convert(ctor,typeof(object)), query.Context.Parameter, elementParameter);
+            
+            
+            var resultQuery = query.Query.Provider.CreateQuery<object>(Expression.Call(null, miSelectMany.MakeGenericMethod(typeof(object), elementType, typeof(object)), 
+                new Expression[] { query.Query.Expression, Expression.Quote(collectionSelector), Expression.Quote(resultSelector) }));
+
+            var parameter = Expression.Parameter(typeof(object));
 
 
+            var newReplacements = query.Context.Replacemens.Keys.And(cet).Select((a,i)=>new {
+                Token = a, 
+                Expression = TupleReflection.TupleChainProperty(Expression.Convert(parameter, ctor.Type), i)
+            }).ToDictionary(a=>a.Token, a=>a.Expression);
 
-        //}
+            return new DQueryable<T>(resultQuery,
+                new BuildExpressionContext(ctor.Type, parameter, newReplacements)); 
+        }
 
 
         #region Where
