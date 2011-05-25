@@ -521,7 +521,7 @@ namespace Signum.Engine.Maps
 
         public string IndexName
         {
-            get { return "IX_{0}_{1}".Formato(Table.Name, ColumnSignature()); }
+            get { return "IX_{0}_{1}".Formato(Table.Name, ColumnSignature()).Left(ConnectionScope.Current.MaxNameLength, false); }
         }
 
         public string ViewName
@@ -531,7 +531,7 @@ namespace Signum.Engine.Maps
                 if (string.IsNullOrEmpty(Where) || ConnectionScope.Current.DBMS != DBMS.SqlServer2005)
                     return null;
 
-                return "VIX_{0}_{1}".Formato(Table.Name, ColumnSignature());
+                return "VIX_{0}_{1}".Formato(Table.Name, ColumnSignature()).Left(ConnectionScope.Current.MaxNameLength, false);
             }
         }
 
