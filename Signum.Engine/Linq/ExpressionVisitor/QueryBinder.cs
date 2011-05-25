@@ -222,7 +222,7 @@ namespace Signum.Engine.Linq
 
         private static Expression RemoveGroupByConvert(Expression expression)
         {
-            if (expression.NodeType == ExpressionType.Convert && expression.Type.IsInstantiationOf(typeof(IGrouping<,>)))
+            if (expression.NodeType == ExpressionType.Convert && (expression.Type.IsInstantiationOf(typeof(IGrouping<,>)) || expression.Type.IsInstantiationOf(typeof(IEnumerable<>))))
                 expression = ((UnaryExpression)expression).Operand;
             return expression;
         }

@@ -23,12 +23,12 @@ using System.Windows.Threading;
 using System.Windows.Documents;
 using Signum.Windows.DynamicQuery;
 using System.Diagnostics;
+using System.Collections.Specialized;
 
 namespace Signum.Windows
 {
     public partial class SearchControl
     {
-
         public static readonly DependencyProperty QueryNameProperty =
             DependencyProperty.Register("QueryName", typeof(object), typeof(SearchControl), new UIPropertyMetadata(null));
         public object QueryName
@@ -292,6 +292,7 @@ namespace Signum.Windows
             }
 
             filterBuilder.Filters = FilterOptions;
+            ((INotifyCollectionChanged)FilterOptions).CollectionChanged += FilterOptions_CollectionChanged;
 
             Navigator.Manager.SetOrderTokens(QueryName, OrderOptions);
 
@@ -316,8 +317,22 @@ namespace Signum.Windows
             }
         }
 
+        void FilterOptions_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            UpdateMultiplyMessage();                       
+        }
+
         QueryToken[] tokenBuilder_SubTokensEvent(QueryToken arg)
         {
+            string canColumn = QueryUtils.CanColumn(arg);
+            btCreateColumn.IsEnabled = string.IsNullOrEmpty(canColumn);
+            btCreateColumn.ToolTip = canColumn;
+         
+
+            string canFilter = QueryUtils.CanFilter(arg);
+            btCreateFilter.IsEnabled = string.IsNullOrEmpty(canFilter);
+            btCreateFilter.ToolTip = canFilter;
+
             return QueryUtils.SubTokens(arg, Description.Columns);
         }
 
@@ -436,7 +451,7 @@ namespace Signum.Windows
 
             btFind.IsEnabled = false;
 
-            var request = GetQueryRequest();
+            var request = UpdateMultiplyMessage();
 
             Async.Do(this.FindCurrentWindow(),
                 () => resultTable = Server.Return((IDynamicQueryServer s) => s.ExecuteQuery(request)),
@@ -448,6 +463,18 @@ namespace Signum.Windows
                     }
                 },
                 () => { btFind.IsEnabled = true; });
+        }
+
+        public QueryRequest UpdateMultiplyMessage()
+        {
+            var result = GetQueryRequest();
+
+            string message = CollectionElementToken.MultipliedMessage(result.Multiplications, EntityType);
+
+            tbMultiplications.Text = message;
+            brMultiplications.Visibility = message.HasText() ? Visibility.Visible : Visibility.Collapsed;
+
+            return result;
         }
 
         public QueryRequest GetQueryRequest()
@@ -590,6 +617,13 @@ namespace Signum.Windows
             if (ci == null)
                 return;
 
+            string canOrder = QueryUtils.CanOrder(ci.Column.Token);
+            if (canOrder.HasText())
+            {
+                MessageBox.Show(canOrder);
+                return; 
+            }
+
             if ((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift || (OrderOptions.Count == 1 && OrderOptions[0].ColumnOrderInfo.TryCC(coi=>coi.Header) == header))
             {
 
@@ -659,6 +693,8 @@ namespace Signum.Windows
             QueryToken token = tokenBuilder.Token;
 
             AddColumn(token);
+
+            UpdateMultiplyMessage(); 
         }
 
         private void AddColumn(QueryToken token)
@@ -714,6 +750,8 @@ namespace Signum.Windows
             ColumnInfo co = (ColumnInfo)gvch.Tag;
 
             gvResults.Columns.Remove(co.GridViewColumn);
+
+            UpdateMultiplyMessage(); 
         }
 
         private void filter_Click(object sender, RoutedEventArgs e)
@@ -738,6 +776,9 @@ namespace Signum.Windows
             OrderOptions.AddRange(orders);
             Navigator.Manager.SetOrderTokens(QueryName, OrderOptions);
             CompleteOrderColumns();
+
+
+            UpdateMultiplyMessage(); 
         }
 
         private void btFilters_Unchecked(object sender, RoutedEventArgs e)

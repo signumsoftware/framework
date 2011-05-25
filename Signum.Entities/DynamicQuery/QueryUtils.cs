@@ -215,6 +215,9 @@ namespace Signum.Entities.DynamicQuery
 
         public static string CanFilter(QueryToken token)
         {
+            if (token == null)
+                return "No column selected";
+
             if (token.Type != typeof(string) && token.Type.ElementType() != null)
                 return "You can not filter by collections, continue the sequence";
             
@@ -223,6 +226,9 @@ namespace Signum.Entities.DynamicQuery
 
         public static string CanColumn(QueryToken token)
         {
+            if (token == null)
+                return "No column selected"; 
+
             if (token.Type != typeof(string) && token.Type.ElementType() != null)
                 return "You can not add collections as columns";
 
@@ -234,6 +240,9 @@ namespace Signum.Entities.DynamicQuery
 
         public static string CanOrder(QueryToken token)
         {
+            if (token == null)
+                return "No column selected"; 
+
             if (token.Type.IsEmbeddedEntity())
                 return "{0} can not be ordered".Formato(token.Type.NicePluralName());
 

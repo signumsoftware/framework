@@ -264,7 +264,7 @@ namespace Signum.Engine.Linq
                 if (efie.HasValue == null)
                     return ctor;
 
-                return Expression.Condition(Expression.Equal(Visit(efie.HasValue), Expression.Constant(true)), ctor, Expression.Constant(null, ctor.Type));
+                return Expression.Condition(Expression.Equal(Visit(efie.HasValue.Nullify()), Expression.Constant(true, typeof(bool?))), ctor, Expression.Constant(null, ctor.Type));
             }
 
             protected override Expression VisitImplementedBy(ImplementedByExpression rb)

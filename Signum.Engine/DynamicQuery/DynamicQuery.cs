@@ -199,17 +199,8 @@ namespace Signum.Engine.DynamicQuery
         
 	    #endregion
 
-        public static DQueryable<T> SelectMany<T>(this DQueryable<T> query, List<QueryToken> allTokens)
+        public static DQueryable<T> SelectMany<T>(this DQueryable<T> query, List<CollectionElementToken> elementTokens)
         {
-            List<CollectionElementToken> elementTokens = allTokens
-                .SelectMany(t => t.FollowC(tt => tt.Parent))
-                .OfType<CollectionElementToken>()
-                .Where(a => a.ElementType == CollectionElementType.Element)
-                .Distinct()
-                .OrderBy(a => a.FullKey().Length)
-                .ToList();
-
-
             foreach (var cet in elementTokens)
             {
                 query = query.SelectMany(cet);
@@ -219,22 +210,24 @@ namespace Signum.Engine.DynamicQuery
         }
 
         static MethodInfo miSelectMany = ReflectionTools.GetMethodInfo(() => Database.Query<TypeDN>().SelectMany(t => t.Namespace, (t, c) => t)).GetGenericMethodDefinition();
-
+        static MethodInfo miDefaultIfEmptyE = ReflectionTools.GetMethodInfo(() => Database.Query<TypeDN>().AsEnumerable().DefaultIfEmpty()).GetGenericMethodDefinition();
+     
         public static DQueryable<T> SelectMany<T>(this DQueryable<T> query, CollectionElementToken cet)
         {
-            var collectionSelector = Expression.Lambda(cet.Parent.BuildExpression(query.Context), query.Context.Parameter); 
-            
             Type elementType = cet.Parent.Type.ElementType();
 
-            var elementParameter = Expression.Parameter(elementType);
+            var collectionSelector = Expression.Lambda(typeof(Func<,>).MakeGenericType(typeof(object), typeof(IEnumerable<>).MakeGenericType(elementType)),
+                Expression.Call(miDefaultIfEmptyE.MakeGenericMethod(elementType),
+                    cet.Parent.BuildExpression(query.Context)),
+                query.Context.Parameter);
+
+            var elementParameter = cet.CreateParameter();
             
-            
-            var properties = query.Context.Replacemens.Values.And(elementParameter);
+            var properties = query.Context.Replacemens.Values.And(cet.CreateExpression(elementParameter));
 
             var ctor = TupleReflection.TupleChainConstructor(properties); 
 
             var resultSelector = Expression.Lambda(Expression.Convert(ctor,typeof(object)), query.Context.Parameter, elementParameter);
-            
             
             var resultQuery = query.Query.Provider.CreateQuery<object>(Expression.Call(null, miSelectMany.MakeGenericMethod(typeof(object), elementType, typeof(object)), 
                 new Expression[] { query.Query.Expression, Expression.Quote(collectionSelector), Expression.Quote(resultSelector) }));

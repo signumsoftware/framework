@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Signum.Utilities;
 
 namespace Signum.Entities.DynamicQuery
 {
@@ -17,6 +18,18 @@ namespace Signum.Entities.DynamicQuery
         public List<Order> Orders { get; set; }
 
         public int? Limit { get; set; }
+
+        public List<CollectionElementToken> Multiplications
+        {
+            get
+            {
+                HashSet<QueryToken> allTokens = Columns.Select(a => a.Token)
+                    .Concat(Filters.Select(a => a.Token))
+                    .Concat(Orders.Select(a => a.Token)).ToHashSet();
+
+                return CollectionElementToken.GetElements(allTokens);
+            }
+        }
     }
 
     [Serializable]
@@ -25,6 +38,11 @@ namespace Signum.Entities.DynamicQuery
         public object QueryName { get; set; }
 
         public List<Filter> Filters { get; set; }
+
+        public List<CollectionElementToken> Multiplications
+        {
+            get { return CollectionElementToken.GetElements(Filters.Select(a => a.Token).ToHashSet()); }
+        }
     }
 
     [Serializable]
@@ -37,5 +55,16 @@ namespace Signum.Entities.DynamicQuery
         public List<Order> Orders { get; set; }
 
         public UniqueType UniqueType { get; set; }
+
+        public List<CollectionElementToken> Multiplications
+        {
+            get
+            {
+                HashSet<QueryToken> allTokens = Filters.Select(a => a.Token)
+                    .Concat(Orders.Select(a => a.Token)).ToHashSet();
+
+                return CollectionElementToken.GetElements(allTokens);
+            }
+        }
     }
 }

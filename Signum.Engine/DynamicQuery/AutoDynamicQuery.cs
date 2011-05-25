@@ -33,6 +33,7 @@ namespace Signum.Engine.DynamicQuery
 
             DQueryable<T> result = Query
                 .ToDQueryable(GetColumnDescriptions())
+                .SelectMany(request.Multiplications)
                 .Where(request.Filters)
                 .OrderBy(request.Orders)
                 .Select(request.Columns)

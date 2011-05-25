@@ -180,6 +180,11 @@ namespace Signum.Entities.DynamicQuery
             return key == Key ? this : null;
         }
 
+        public override bool Equals(object obj)
+        {
+            return obj is QueryToken && obj.GetType() == this.GetType() && Equals((QueryToken)obj);
+        }
+
         public bool Equals(QueryToken other)
         {
             return other != null && other.FullKey() == this.FullKey();
@@ -311,7 +316,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override Type Type
         {
-            get { return BuildLite(PropertyInfo.PropertyType); }
+            get { return BuildLite(PropertyInfo.PropertyType).Nullify(); }
         }
 
         public override string ToString()
@@ -336,14 +341,14 @@ namespace Signum.Entities.DynamicQuery
             {
                 baseExpression = ExtractEntity(baseExpression, true);
 
-                return Expression.Property(baseExpression, PropertyInfo.Name); // Late binding over Lite or Identifiable
+                return Expression.Property(baseExpression, PropertyInfo.Name).Nullify(); // Late binding over Lite or Identifiable
             }
 
             baseExpression = ExtractEntity(baseExpression, false);
 
             Expression result = Expression.Property(baseExpression, PropertyInfo);
 
-            return BuildLite(result);
+            return BuildLite(result).Nullify();
         }
 
         protected override QueryToken[] SubTokensInternal()
@@ -628,7 +633,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override Type Type
         {
-            get { return typeof(DateTime); }
+            get { return typeof(DateTime?); }
         }
 
         public override string Key
@@ -647,7 +652,7 @@ namespace Signum.Entities.DynamicQuery
         {
             var exp = Parent.BuildExpression(context);
             
-            return Expression.Call(miMonthStart, exp.UnNullify());
+            return Expression.Call(miMonthStart, exp.UnNullify()).Nullify();
         }
 
         public override PropertyRoute GetPropertyRoute()
@@ -702,7 +707,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override Type Type
         {
-            get { return typeof(DateTime); }
+            get { return typeof(DateTime?); }
         }
 
         public override string Key
@@ -721,7 +726,7 @@ namespace Signum.Entities.DynamicQuery
         {
             var exp = Parent.BuildExpression(context);
 
-            return Expression.Property(exp.UnNullify(), miDate);
+            return Expression.Property(exp.UnNullify(), miDate).Nullify();
         }
 
         public override PropertyRoute GetPropertyRoute()
@@ -769,7 +774,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override Type Type
         {
-            get { return BuildLite(Parent.Type.ElementType());  }
+            get { return BuildLite(Parent.Type.ElementType().Nullify()); }
         }
 
         public override string ToString()
@@ -873,7 +878,27 @@ namespace Signum.Entities.DynamicQuery
 
         internal Expression CreateExpression(ParameterExpression parameter)
         {
-            return BuildLite(parameter);
+            return BuildLite(parameter).Nullify();
+        }
+
+        public static List<CollectionElementToken> GetElements(HashSet<QueryToken> allTokens)
+        {
+            return allTokens
+                .SelectMany(t => t.FollowC(tt => tt.Parent))
+                .OfType<CollectionElementToken>()
+                .Where(a => a.ElementType == CollectionElementType.Element)
+                .Distinct()
+                .OrderBy(a => a.FullKey().Length)
+                .ToList();
+        }
+
+        public static string MultipliedMessage(List<CollectionElementToken> elements, Type entityType)
+        {
+            if(elements.Empty())
+                return null;
+
+
+            return "The number of {0} is being multiplied by {1}".Formato(entityType.NiceName(), elements.CommaAnd(a => a.Parent.ToString()));
         }
     }
 
