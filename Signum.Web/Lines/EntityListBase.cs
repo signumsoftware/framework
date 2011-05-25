@@ -44,7 +44,7 @@ namespace Signum.Web
 
         public bool ShouldWriteOldIndex(TypeContext tc)
         {
-            if(WriteIndex == WriteIndex.Allways)
+            if(WriteIndex == WriteIndex.Always)
             return  true;
 
             if (WriteIndex == Web.WriteIndex.ForSavedEntities)
@@ -60,7 +60,7 @@ namespace Signum.Web
     public enum WriteIndex
     {
         ForSavedEntities,
-        Allways,
+        Always,
         Never
     }
 }

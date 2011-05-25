@@ -67,6 +67,8 @@ namespace Signum.Engine
         public abstract string DatabaseName();
 
         public abstract string DataSourceName();
+
+        public virtual int MaxNameLength { get { return 128; } }
     }
 
 
