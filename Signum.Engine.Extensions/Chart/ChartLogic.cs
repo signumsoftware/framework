@@ -177,7 +177,7 @@ namespace Signum.Engine.Extensions.Chart
             IDynamicInfo collection;
             if (dq is AutoDynamicQuery<T>)
             {
-                collection = ((AutoDynamicQuery<T>)dq).Query.ToDQueryable(dq.GetColumnDescriptions()).Where(request.Filters).Select(columns);
+                collection = ((AutoDynamicQuery<T>)dq).Query.ToDQueryable(dq.GetColumnDescriptions()).SelectMany(request.Multiplications).Where(request.Filters).Select(columns);
             }
             else
             {

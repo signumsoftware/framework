@@ -20,6 +20,7 @@ using Signum.Windows.DynamicQuery;
 using Signum.Utilities.DataStructures;
 using System.Reflection;
 using Signum.Utilities.Reflection;
+using System.Collections.Specialized;
 
 namespace Signum.Windows.Chart
 {
@@ -82,6 +83,10 @@ namespace Signum.Windows.Chart
                     Value = f.Value
                 }));
 
+            ((INotifyCollectionChanged)filterBuilder.Filters).CollectionChanged += Filters_CollectionChanged;
+            Request.ChartRequestChanged += Request_ChartRequestChanged;
+   
+
             Description = Navigator.Manager.GetQueryDescription(Request.QueryName);
             var entityColumn = Description.Columns.SingleOrDefault(a => a.IsEntity);
             EntityType = Reflector.ExtractLite(entityColumn.Type);
@@ -90,6 +95,16 @@ namespace Signum.Windows.Chart
             qtbFilters.SubTokensEvent += new Func<QueryToken, QueryToken[]>(qtbFilters_SubTokensEvent);
 
             SetTitle(); 
+        }
+
+        void Request_ChartRequestChanged()
+        {
+            UpdateMultiplyMessage();
+        }
+
+        void Filters_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            UpdateMultiplyMessage();
         }
 
         void SetTitle()
@@ -104,6 +119,14 @@ namespace Signum.Windows.Chart
                 niceQueryName = "- " + niceQueryName;
 
             tbQueryName.Text = niceQueryName;
+        }
+
+        public void UpdateMultiplyMessage()
+        {
+            string message = CollectionElementToken.MultipliedMessage(Request.Multiplications, EntityType);
+
+            tbMultiplications.Text = message;
+            brMultiplications.Visibility = message.HasText() ? Visibility.Visible : Visibility.Collapsed;
         }
 
         QueryToken[] qtbFilters_SubTokensEvent(QueryToken arg)
@@ -217,7 +240,7 @@ namespace Signum.Windows.Chart
             }
             catch (ChartNullException ex)
             {
-                ChartRequest cr = (ChartRequest)DataContext;
+                ChartRequest cr = Request;
 
                 ChartTokenDN ct = cr.GetToken(ex.ChartTokenName);
 
