@@ -198,7 +198,17 @@ namespace Signum.Web.Controllers
         [HttpPost]
         public JsonResult ValidatePartial(string prefix)
         {
-            MappingContext context = this.UntypedExtractEntity(prefix).UntypedApplyChanges(ControllerContext, prefix, true).UntypedValidateGlobal();
+            ModifiableEntity mod = this.UntypedExtractEntity(prefix);
+            MappingContext context = null;
+            if (mod as EmbeddedEntity != null && !(mod is ModelEntity))
+            {
+                mod = this.UntypedExtractEntity(); //apply changes to the parent entity
+                context = mod.UntypedApplyChanges(ControllerContext, "", true).UntypedValidateGlobal();
+            }
+            else
+            {
+                context = mod.UntypedApplyChanges(ControllerContext, prefix, true).UntypedValidateGlobal();
+            }
 
             this.ModelState.FromContext(context);
 
