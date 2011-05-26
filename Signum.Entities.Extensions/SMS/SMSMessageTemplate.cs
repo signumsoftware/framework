@@ -107,12 +107,31 @@ namespace Signum.Entities.SMS
 
         public SMSMessageDN CreateSMSMessage()
         {
+            return CreateSMSMessage(null);
+        }
+
+        public SMSMessageDN CreateSMSMessage(string destinationNumber) 
+        {
             return new SMSMessageDN 
             { 
                 Template = this.ToLite(),
                 Message = this.message,
                 From = this.from,
                 State = SMSMessageState.Created,
+                DestinationNumber = destinationNumber
+            };            
+        }
+
+        public SMSMessageDN CreateSMSMessage(string destinationNumber, Lite<SMSSendPackageDN> package)
+        {
+            return new SMSMessageDN
+            {
+                Template = this.ToLite(),
+                Message = this.message,
+                From = this.from,
+                State = SMSMessageState.Created,
+                DestinationNumber = destinationNumber,
+                Package = package
             };
         }
     }

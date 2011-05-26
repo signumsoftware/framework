@@ -12,6 +12,8 @@ using Signum.Utilities;
 using Signum.Utilities.Reflection;
 using Signum.Engine.Operations;
 using Signum.Engine.Processes;
+using Signum.Entities.Processes;
+using Signum.Engine.Extensions.SMS;
 
 namespace Signum.Engine.SMS
 {
@@ -23,10 +25,10 @@ namespace Signum.Engine.SMS
 
         public static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null, null, false, false)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null, null, false)));
         }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, bool registerGraph, bool registerProcess)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, bool registerGraph)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -64,27 +66,94 @@ namespace Signum.Engine.SMS
                     SMSMessageGraph.Register();
                     SMSTemplateGraph.Register();
                 }
-
-                if (registerProcess)
-                {
-                    if (!registerGraph)
-                        throw new ArgumentException("registerGraph must be true in order to enable operations for the process");
-
-                    ProcessLogic.Register(
-                        SMSMessageProcess.Send,
-                        new PackageConstructFromAlgorithm<SMSMessageDN, SMSMessageDN>(
-                            SMSMessageOperations.Send,
-                            () =>
-                            {
-                                using (new CommandTimeoutScope(300))
-                                {
-                                    return Database.Query<SMSMessageDN>().Where(m =>
-                                        m.State == SMSMessageState.Created).Select(m => m.ToLite()).Take(100).ToList();
-                                }
-                            }));
-                }
             }
         }
+
+        #region processes
+
+        public static void StartProcesses(SchemaBuilder sb, DynamicQueryManager dqm)
+        {
+            if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+            {
+                //TODO: 777 luis hay que hacer getoperationinfo para lanzar ex si no están registrados
+                //SMSMessageGraph.Register();
+                //SMSTemplateGraph.Register();
+
+                sb.Include<SMSSendPackageDN>();
+                SMSLogic.AssertStarted(sb);
+                ProcessLogic.AssertStarted(sb);
+                ProcessLogic.Register(SMSMessageProcess.Send, new SMSMessageSendProcessAlgortihm());
+                ProcessLogic.Register(SMSMessageProcess.UpdateStatus, new SMSMessageUpdateStatusProcessAlgortihm());
+
+                new BasicConstructFromMany<ISMSDestinationOwner, ProcessExecutionDN>(SMSMessageOperations.Send)
+                {
+                    Constructor = (messages, args) => SendMessages(args.GetArg<SMSTemplateDN>(0), messages.RetrieveFromListOfLite())
+                }.Register();
+
+                new BasicConstructFromMany<SMSMessageDN, ProcessExecutionDN>(SMSMessageOperations.UpdateStatus) 
+                {
+                    Constructor = (messages, _) => UpdateMessages(messages.RetrieveFromListOfLite())
+                }.Register();
+
+                //TODO: 777 luis - hay que registrar correctamente el proceso para todos los mensajes del sistema
+                //new BasicExecute<ProcessExecutionDN>(SMSMessageOperations.UpdateStatus)
+                //{
+                //    Execute = (_, __) => new SMSMessageUpdateStatusProcessAlgortihm().CreateData()
+                //}.Register();
+
+                dqm[typeof(SMSSendPackageDN)] = (from e in Database.Query<SMSSendPackageDN>()
+                                             select new
+                                             {
+                                                 Entity = e.ToLite(),
+                                                 e.Id,
+                                                 e.Error,
+                                                 e.NumLines,
+                                                 e.NumErrors,
+                                             }).ToDynamic();
+            }
+        }
+
+        private static ProcessExecutionDN UpdateMessages(List<SMSMessageDN> messages)
+        {
+            SMSSendPackageDN package = new SMSSendPackageDN
+            {
+                NumLines = messages.Count,
+            }.Save();
+
+            var packLite = package.ToLite();
+
+            if (messages.Any(m => m.State != SMSMessageState.Sent))
+                throw new ApplicationException("SMS messages must be sent prior to update the status");
+
+            messages.Select(m => m.Do(ms => ms.Package = packLite)).SaveList();
+
+            var process = ProcessLogic.Create(SMSMessageProcess.Send, package);
+
+            process.ToLite().ExecuteLite(ProcessOperation.Execute);
+
+            return process;
+        }
+
+        public static ProcessExecutionDN SendMessages<T>(SMSTemplateDN template, List<T> recipientList)
+            where T : class, ISMSDestinationOwner
+        {
+            SMSSendPackageDN package = new SMSSendPackageDN
+            {
+                NumLines = recipientList.Count,
+            }.Save();
+
+            var packLite = package.ToLite();
+
+            recipientList.Select(r => template.CreateSMSMessage(r.DestinationNumber, packLite)).SaveList();
+
+            var process = ProcessLogic.Create(SMSMessageProcess.Send, package);
+
+            process.ToLite().ExecuteLite(ProcessOperation.Execute);
+
+            return process;
+        }
+
+        #endregion
 
         public static void RegisterSMSSendAction(Func<SMSMessageDN, string> action)
         {
