@@ -110,11 +110,13 @@ namespace Signum.Engine.Linq
 
         public static IDisposable NewGenerator()
         {
-            return current = new AliasGenerator();
+            return current = new AliasGenerator { previous = current } ;
         }
 
         class AliasGenerator: IDisposable
         {
+            public AliasGenerator previous;
+
             HashSet<string> usedAliases = new HashSet<string>();
 
             int selectAliasCount = 0;
@@ -140,7 +142,7 @@ namespace Signum.Engine.Linq
 
             public void Dispose()
             {
-                current = null;
+                current = previous;
             }
         }
     }
