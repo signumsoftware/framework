@@ -38,18 +38,21 @@ namespace Signum.Web.Files
                     .InnerHtml(MvcHtmlString.Create("$(function(){ SF.Loader.loadJs('" + RouteHelper.New().Content("~/Files/Scripts/SF_Files.js") + "'); });"))
                     .ToHtml());
 
-                FilePathDN filePath = value as FilePathDN;
-                if (filePath != null)
+                if (fileLine.PropertyRoute.PropertyInfo.PropertyType == typeof(FilePathDN))
                 {
-                    if (fileLine.FileType == null)
-                        fileLine.FileType = FileLineHelper.GetFileTypeFromValue(filePath);
-                    if (fileLine.FileType == null)
-                        throw new ArgumentException("FileType property of FileLine settings must be specified for FileLine {0}".Formato(fileLine.ControlID));
-
-                    sb.AddLine(helper.Hidden(fileLine.Compose(FileLineKeys.FileType),
-                        EnumDN.UniqueKey((value != null) ?
-                            filePath.FileTypeEnum ?? EnumLogic<FileTypeDN>.ToEnum(filePath.FileType) :
-                            fileLine.FileType)));
+                    FilePathDN filePath = value as FilePathDN;
+                    if (filePath != null)
+                    {
+                        sb.AddLine(helper.Hidden(fileLine.Compose(FileLineKeys.FileType),
+                            EnumDN.UniqueKey(filePath.FileTypeEnum ?? EnumLogic<FileTypeDN>.ToEnum(filePath.FileType))));
+                    }
+                    else
+                    {
+                        if (fileLine.FileType == null)
+                            throw new ArgumentException("FileType property of FileLine settings must be specified for FileLine {0}".Formato(fileLine.ControlID));                    
+                        
+                        sb.AddLine(helper.Hidden(fileLine.Compose(FileLineKeys.FileType), EnumDN.UniqueKey(fileLine.FileType)));
+                    }
                 }
 
                 if (value != null)
