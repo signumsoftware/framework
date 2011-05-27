@@ -216,12 +216,12 @@
                         <Border BorderThickness="0,0,0,0" CornerRadius="100000,100000,100000,100000" Opacity="0" Margin="0,0,-1,-1" x:Name="ShadowBorder" Background="#39000000" RenderTransformOrigin="0.5,0.5">
 
                         </Border>
-                        <Border x:Name="OuterBorder" BorderBrush="#FF6E7D95" BorderThickness="1,1,1,1" CornerRadius="100000,100000,100000,100000" Opacity="0">
-                            <Border ClipToBounds="False" x:Name="InnerBorder" Width="Auto" Height="Auto" BorderBrush="#FFDDE2EC" BorderThickness="1,1,1,1" CornerRadius="10000,10000,10000,10000">
+                        <Border x:Name="OuterBorder" BorderBrush="#FF6db6ff" BorderThickness="1,1,1,1" CornerRadius="100000,100000,100000,100000" Opacity="0">
+                            <Border ClipToBounds="False" x:Name="InnerBorder" Width="Auto" Height="Auto" BorderBrush="#FFd4e9ff" BorderThickness="1,1,1,1" CornerRadius="10000,10000,10000,10000">
                                 <Border.Background>
                                     <LinearGradientBrush EndPoint="0.505,0.489" StartPoint="0.512,-0.004">
-                                        <GradientStop Color="#FFF3F5F8" Offset="0"/>
-                                        <GradientStop Color="#FFC0CADB" Offset="1"/>
+                                        <GradientStop Color="#FFf7fbff" Offset="0"/>
+                                        <GradientStop Color="#FFc9e4ff" Offset="1"/>
                                     </LinearGradientBrush>
                                 </Border.Background>
                             </Border>
@@ -244,13 +244,13 @@
                             <Setter Property="Background" TargetName="InnerBorder">
                                 <Setter.Value>
                                     <LinearGradientBrush EndPoint="0.505,0.489" StartPoint="0.512,-0.004">
-                                        <GradientStop Color="#FFB4BDCA" Offset="0"/>
-                                        <GradientStop Color="#FF798CAD" Offset="1"/>
+                                      <GradientStop Color="#FFc9e4ff" Offset="0"/>
+                                      <GradientStop Color="#FFf7fbff" Offset="1"/>
                                     </LinearGradientBrush>
                                 </Setter.Value>
                             </Setter>
-                            <Setter Property="BorderBrush" TargetName="InnerBorder" Value="#FFB0BACC"/>
-                            <Setter Property="BorderBrush" TargetName="OuterBorder" Value="#FF313F55"/>
+                            <Setter Property="BorderBrush" TargetName="InnerBorder" Value="#FFaad5ff"/>
+                            <Setter Property="BorderBrush" TargetName="OuterBorder" Value="#FFc0e0ff"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -360,12 +360,12 @@
                         <Border BorderThickness="0,0,0,0" Opacity="0" Margin="0,0,-1,-1" x:Name="ShadowBorder" Background="#39000000" RenderTransformOrigin="0.5,0.5" CornerRadius="{TemplateBinding Padding, Converter={x:Static m:Converters.ThicknessToCornerRadius}}">
 
                         </Border>
-                        <Border x:Name="OuterBorder" BorderBrush="#FF6E7D95" BorderThickness="1,1,1,1" CornerRadius="{TemplateBinding Padding, Converter={x:Static m:Converters.ThicknessToCornerRadius}}" Opacity="0">
-                            <Border ClipToBounds="False" x:Name="InnerBorder" Width="Auto" Height="Auto" BorderBrush="#FFDDE2EC" BorderThickness="1,1,1,1" CornerRadius="{TemplateBinding Padding, Converter={x:Static m:Converters.ThicknessToCornerRadius}}">
+                        <Border x:Name="OuterBorder" BorderBrush="#FF6db6ff" BorderThickness="1,1,1,1" CornerRadius="{TemplateBinding Padding, Converter={x:Static m:Converters.ThicknessToCornerRadius}}" Opacity="0">
+                            <Border ClipToBounds="False" x:Name="InnerBorder" Width="Auto" Height="Auto" BorderBrush="#FFd4e9ff" BorderThickness="1,1,1,1" CornerRadius="{TemplateBinding Padding, Converter={x:Static m:Converters.ThicknessToCornerRadius}}">
                                 <Border.Background>
                                     <LinearGradientBrush EndPoint="0.505,0.489" StartPoint="0.512,-0.004">
-                                        <GradientStop Color="#FFF3F5F8" Offset="0"/>
-                                        <GradientStop Color="#FFC0CADB" Offset="1"/>
+                                        <GradientStop Color="#FFf7fbff" Offset="0"/>
+                                        <GradientStop Color="#FFc9e4ff" Offset="1"/>
                                     </LinearGradientBrush>
                                 </Border.Background>
                             </Border>
@@ -386,13 +386,13 @@
                             <Setter Property="Background" TargetName="InnerBorder">
                                 <Setter.Value>
                                     <LinearGradientBrush EndPoint="0.505,0.489" StartPoint="0.512,-0.004">
-                                        <GradientStop Color="#FFB4BDCA" Offset="0"/>
-                                        <GradientStop Color="#FF798CAD" Offset="1"/>
+                                      <GradientStop Color="#FFc9e4ff" Offset="0"/>
+                                      <GradientStop Color="#FFf7fbff" Offset="1"/>
                                     </LinearGradientBrush>
                                 </Setter.Value>
                             </Setter>
-                            <Setter Property="BorderBrush" TargetName="InnerBorder" Value="#FFB0BACC"/>
-                            <Setter Property="BorderBrush" TargetName="OuterBorder" Value="#FF313F55"/>
+                            <Setter Property="BorderBrush" TargetName="InnerBorder" Value="#FFaad5ff"/>
+                            <Setter Property="BorderBrush" TargetName="OuterBorder" Value="#FFc0e0ff"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

@@ -23,8 +23,17 @@ namespace Signum.Entities.DynamicQuery
         public abstract Type Type { get; }
         public abstract string Key { get; }
         protected abstract QueryToken[] SubTokensInternal();
-     
-        public abstract Expression BuildExpression(Expression expression);
+
+        public Expression BuildExpression(BuildExpressionContext context)
+        {
+            Expression result;
+            if (context.Replacemens != null && context.Replacemens.TryGetValue(this, out result))
+                return result;
+
+            return BuildExpressionInternal(context); 
+        }
+
+        protected abstract Expression BuildExpressionInternal(BuildExpressionContext context);
 
         public abstract PropertyRoute GetPropertyRoute();
         public abstract Implementations Implementations();
@@ -104,6 +113,22 @@ namespace Signum.Entities.DynamicQuery
             }.NotNull().ToArray();
         }
 
+        public static QueryToken[] CollectionProperties(QueryToken parent)
+        {
+            return new QueryToken[]
+            {
+                new NetPropertyToken(parent, parent.Type.GetProperty("Count", BindingFlags.Public| BindingFlags.Instance), Resources.Count),
+                parent.HasAllOrAny() ?null: new CollectionElementToken(parent, CollectionElementType.Element),
+                new CollectionElementToken(parent, CollectionElementType.Any),
+                new CollectionElementToken(parent, CollectionElementType.All),
+            }.NotNull().ToArray();
+        }
+
+        public virtual bool HasAllOrAny()
+        {
+            return Parent != null && Parent.HasAllOrAny(); 
+        }
+
         IEnumerable<QueryToken> EntityProperties(Type type)
         {
             return Reflector.PublicInstancePropertiesInOrder(type)
@@ -155,9 +180,19 @@ namespace Signum.Entities.DynamicQuery
             return key == Key ? this : null;
         }
 
+        public override bool Equals(object obj)
+        {
+            return obj is QueryToken && obj.GetType() == this.GetType() && Equals((QueryToken)obj);
+        }
+
         public bool Equals(QueryToken other)
         {
             return other != null && other.FullKey() == this.FullKey();
+        }
+
+        public override int GetHashCode()
+        {
+            return this.FullKey().GetHashCode();
         }
     }
 
@@ -204,9 +239,9 @@ namespace Signum.Entities.DynamicQuery
             get { return PropertyInfo.Name; }
         }
 
-        public override Expression BuildExpression(Expression expression)
+        protected override Expression BuildExpressionInternal(BuildExpressionContext context)
         {
-            var result = Parent.BuildExpression(expression);
+            var result = Parent.BuildExpression(context);
 
             return Expression.Property(result.UnNullify(), PropertyInfo);
         }
@@ -229,15 +264,6 @@ namespace Signum.Entities.DynamicQuery
         public override Implementations Implementations()
         {
             return null;
-        }
-
-
-        public static QueryToken[] CollectionProperties(QueryToken parent)
-        {
-            return new[]
-            {
-                new NetPropertyToken(parent, parent.Type.GetProperty("Count", BindingFlags.Public| BindingFlags.Instance), Resources.Count)
-            };
         }
 
         public override bool IsAllowed()
@@ -290,7 +316,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override Type Type
         {
-            get { return BuildLite(PropertyInfo.PropertyType); }
+            get { return BuildLite(PropertyInfo.PropertyType).Nullify(); }
         }
 
         public override string ToString()
@@ -306,23 +332,23 @@ namespace Signum.Entities.DynamicQuery
             get { return PropertyInfo.Name; }
         }
 
-        public override Expression BuildExpression(Expression expression)
+        protected override Expression BuildExpressionInternal(BuildExpressionContext context)
         {
-            var baseExpression = Parent.BuildExpression(expression);
+            var baseExpression = Parent.BuildExpression(context);
 
             if (PropertyInfo.Is((IdentifiableEntity ident) => ident.Id) ||
                 PropertyInfo.Is((IdentifiableEntity ident) => ident.ToStr))
             {
                 baseExpression = ExtractEntity(baseExpression, true);
 
-                return Expression.Property(baseExpression, PropertyInfo.Name); // Late binding over Lite or Identifiable
+                return Expression.Property(baseExpression, PropertyInfo.Name).Nullify(); // Late binding over Lite or Identifiable
             }
 
             baseExpression = ExtractEntity(baseExpression, false);
 
             Expression result = Expression.Property(baseExpression, PropertyInfo);
 
-            return BuildLite(result);
+            return BuildLite(result).Nullify();
         }
 
         protected override QueryToken[] SubTokensInternal()
@@ -333,7 +359,6 @@ namespace Signum.Entities.DynamicQuery
 
                 if (route != null)
                 {
-          
                     var att = Validator.GetOrCreatePropertyPack(route.Parent.Type, route.PropertyInfo.Name).TryCC(pp =>
                         pp.Validators.OfType<DateTimePrecissionValidatorAttribute>().SingleOrDefault());
                     if (att != null)
@@ -428,9 +453,9 @@ namespace Signum.Entities.DynamicQuery
             get { return "({0})".Formato(type.FullName.Replace(".", ":")); }
         }
 
-        public override Expression BuildExpression(Expression expression)
+        protected override Expression BuildExpressionInternal(BuildExpressionContext context)
         {
-            Expression baseExpression = Parent.BuildExpression(expression);
+            Expression baseExpression = Parent.BuildExpression(context);
 
             Expression result = Expression.TypeAs(ExtractEntity(baseExpression, false), type);
 
@@ -517,10 +542,9 @@ namespace Signum.Entities.DynamicQuery
             get { return Column.Unit; }
         }
 
-        public override Expression BuildExpression(Expression expression)
+        protected override Expression BuildExpressionInternal(BuildExpressionContext context)
         {
-            //No base
-            return Expression.Property(expression, Column.Name);
+            throw new InvalidOperationException("BuildExpressionInternal not supported for ColumnToken");
         }
 
         protected override QueryToken[] SubTokensInternal()
@@ -609,7 +633,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override Type Type
         {
-            get { return typeof(DateTime); }
+            get { return typeof(DateTime?); }
         }
 
         public override string Key
@@ -624,11 +648,11 @@ namespace Signum.Entities.DynamicQuery
 
         static MethodInfo miMonthStart = ReflectionTools.GetMethodInfo(() => DateTimeExtensions.MonthStart(DateTime.MinValue));
 
-        public override Expression BuildExpression(Expression expression)
+        protected override Expression BuildExpressionInternal(BuildExpressionContext context)
         {
-            var exp = Parent.BuildExpression(expression);
+            var exp = Parent.BuildExpression(context);
             
-            return Expression.Call(miMonthStart, exp.UnNullify());
+            return Expression.Call(miMonthStart, exp.UnNullify()).Nullify();
         }
 
         public override PropertyRoute GetPropertyRoute()
@@ -683,7 +707,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override Type Type
         {
-            get { return  typeof(DateTime); }
+            get { return typeof(DateTime?); }
         }
 
         public override string Key
@@ -698,11 +722,11 @@ namespace Signum.Entities.DynamicQuery
 
         static PropertyInfo miDate = ReflectionTools.GetPropertyInfo((DateTime d) => d.Date);
 
-        public override Expression BuildExpression(Expression expression)
+        protected override Expression BuildExpressionInternal(BuildExpressionContext context)
         {
-            var exp = Parent.BuildExpression(expression);
+            var exp = Parent.BuildExpression(context);
 
-            return Expression.Property(exp.UnNullify(), miDate);
+            return Expression.Property(exp.UnNullify(), miDate).Nullify();
         }
 
         public override PropertyRoute GetPropertyRoute()
@@ -724,5 +748,170 @@ namespace Signum.Entities.DynamicQuery
         {
             return new DateQueryToken(Parent.Clone()); 
         }
+    }
+
+    [ForceLocalization]
+    public enum CollectionElementType
+    {
+        Element,
+        Any,
+        All
+    }
+
+    [Serializable]
+    public class CollectionElementToken : QueryToken
+    {
+        public CollectionElementType ElementType { get; private set; }
+
+        internal CollectionElementToken(QueryToken parent, CollectionElementType type)
+            : base(parent)
+        {
+            if (parent.Type.ElementType() == null)
+                throw new InvalidOperationException("not a collection");
+
+            this.ElementType = type; 
+        }
+
+        public override Type Type
+        {
+            get { return BuildLite(Parent.Type.ElementType().Nullify()); }
+        }
+
+        public override string ToString()
+        {
+            return ElementType.NiceToString();
+        }
+
+        public override string Key
+        {
+            get { return ElementType.ToString(); }
+        }
+
+      
+
+        protected override QueryToken[] SubTokensInternal()
+        {
+            if (Type.ElementType() != null)
+            {
+                return NetPropertyToken.CollectionProperties(this);
+            }
+
+            return SubTokensBase(Type, Implementations());
+        }
+
+        public override Implementations Implementations()
+        {
+            return Parent.Implementations();
+        }
+
+        public override string Format
+        {
+            get { return Parent.Format; }
+        }
+
+        public override string Unit
+        {
+            get { return Parent.Unit; }
+        }
+
+        public override bool IsAllowed()
+        {
+            return Parent.IsAllowed(); 
+        }
+
+        public override bool HasAllOrAny()
+        {
+            return ElementType == CollectionElementType.All || ElementType == CollectionElementType.Any;
+        }
+
+        public override PropertyRoute GetPropertyRoute()
+        {
+            PropertyRoute parent = Parent.GetPropertyRoute();
+            if (parent == null)
+                return null;
+
+            return parent.Add("Item");
+        }
+
+        public override string NiceName()
+        {
+            if(ElementType != CollectionElementType.Element)
+                throw new InvalidOperationException("NiceName not supported for {0}".Formato(ElementType));
+
+            Type parentElement = Parent.Type.ElementType().CleanType();
+
+            if (parentElement.IsModifiableEntity())
+                return parentElement.NiceName();
+
+            return "Element of " + Parent.NiceName();
+        }
+
+        public override QueryToken Clone()
+        {
+            return new CollectionElementToken(Parent.Clone(), ElementType);
+        }
+
+        static MethodInfo miAnyE = ReflectionTools.GetMethodInfo((IEnumerable<string> col) => col.Any(null)).GetGenericMethodDefinition();
+        static MethodInfo miAllE = ReflectionTools.GetMethodInfo((IEnumerable<string> col) => col.All(null)).GetGenericMethodDefinition();
+        static MethodInfo miAnyQ = ReflectionTools.GetMethodInfo((IQueryable<string> col) => col.Any(null)).GetGenericMethodDefinition();
+        static MethodInfo miAllQ = ReflectionTools.GetMethodInfo((IQueryable<string> col) => col.All(null)).GetGenericMethodDefinition();
+
+        protected override Expression BuildExpressionInternal(BuildExpressionContext context)
+        {
+            throw new InvalidOperationException("CollectionElementToken does not support this method");
+        }
+
+        internal Expression BuildExpressionLambda(BuildExpressionContext context, LambdaExpression lambda)
+        {
+            MethodInfo mi = typeof(IQueryable).IsAssignableFrom(Parent.Type) ? (ElementType == CollectionElementType.All ? miAllQ: miAnyQ ) : 
+                                                                               (ElementType == CollectionElementType.All ? miAllE: miAnyE );
+
+            var collection = Parent.BuildExpression(context);
+
+            return Expression.Call(mi.MakeGenericMethod(Parent.Type.ElementType()), collection, lambda);
+        }
+
+        internal ParameterExpression CreateParameter()
+        {
+            return Expression.Parameter(Parent.Type.ElementType());
+        }
+
+        internal Expression CreateExpression(ParameterExpression parameter)
+        {
+            return BuildLite(parameter).Nullify();
+        }
+
+        public static List<CollectionElementToken> GetElements(HashSet<QueryToken> allTokens)
+        {
+            return allTokens
+                .SelectMany(t => t.FollowC(tt => tt.Parent))
+                .OfType<CollectionElementToken>()
+                .Where(a => a.ElementType == CollectionElementType.Element)
+                .Distinct()
+                .OrderBy(a => a.FullKey().Length)
+                .ToList();
+        }
+
+        public static string MultipliedMessage(List<CollectionElementToken> elements, Type entityType)
+        {
+            if(elements.Empty())
+                return null;
+
+
+            return "The number of {0} is being multiplied by {1}".Formato(entityType.NiceName(), elements.CommaAnd(a => a.Parent.ToString()));
+        }
+    }
+
+    public class BuildExpressionContext
+    {
+        public BuildExpressionContext(Type tupleType, ParameterExpression parameter, Dictionary<QueryToken, Expression> replacemens)
+        {
+            this.Parameter = parameter;
+            this.Replacemens = replacemens; 
+        }
+
+        public readonly Type TupleType;
+        public readonly ParameterExpression Parameter;
+        public readonly Dictionary<QueryToken, Expression> Replacemens; 
     }
 }

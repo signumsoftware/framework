@@ -84,17 +84,11 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitProjection(ProjectionExpression proj)
         {
-            var oldList = previousTypes;
-
-            previousTypes = ImmutableStack<Type>.Empty;
-
             Expression projector = this.Visit(proj.Projector);
 
             var result = new ProjectionExpression(proj.Source, projector, proj.UniqueFunction, proj.Token, proj.Type);
 
             var expanded = tools.ApplyExpansions(result);
-
-            previousTypes = oldList; 
 
             return expanded;
         }

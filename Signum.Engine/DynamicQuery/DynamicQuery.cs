@@ -51,8 +51,13 @@ namespace Signum.Engine.DynamicQuery
             return new QueryDescription
             {
                 QueryName = queryName,
-                Columns = StaticColumns.Where(f => f.IsAllowed()).Select(f => f.BuildColumnDescription()).ToList()
+                Columns = GetColumnDescriptions()
             };
+        }
+
+        public List<ColumnDescription> GetColumnDescriptions()
+        {
+            return StaticColumns.Where(f => f.IsAllowed()).Select(f => f.BuildColumnDescription()).ToList();
         }
 
         public DynamicQuery<T> Column<S>(Expression<Func<T, S>> column, Action<ColumnDescriptionFactory> change)
@@ -77,36 +82,31 @@ namespace Signum.Engine.DynamicQuery
 
     public interface IDynamicInfo
     {
-        Type TupleType { get;  }
-        Dictionary<QueryToken, int> TokenIndices { get; }
+        BuildExpressionContext Context { get; }
     }
 
     public class DQueryable<T> : IDynamicInfo
     {
-        public DQueryable(IQueryable<object> query, Type tupletype, Dictionary<QueryToken, int> tokenIndices)
+        public DQueryable(IQueryable<object> query, BuildExpressionContext context)
         {
             this.Query= query;
-            this.TupleType = tupletype;
-            this.TokenIndices = tokenIndices; 
+            this.Context = context;
         }
 
         public IQueryable<object> Query{ get; private set; }
-        public Type TupleType { get; private set; }
-        public Dictionary<QueryToken, int> TokenIndices { get; private set; }
+        public BuildExpressionContext Context { get; private set; }
     }
 
     public class DEnumerable<T> : IDynamicInfo
     {
-        public DEnumerable(IEnumerable<object> collection, Type tupleType, Dictionary<QueryToken, int> tokenIndices)
+        public DEnumerable(IEnumerable<object> collection, BuildExpressionContext context)
         {
             this.Collection = collection;
-            this.TupleType = tupleType;
-            this.TokenIndices = tokenIndices; 
+            this.Context = context;
         }
 
         public IEnumerable<object> Collection{ get; private set; }
-        public Type TupleType { get; private set; }
-        public Dictionary<QueryToken, int> TokenIndices { get; private set; }
+        public BuildExpressionContext Context { get; private set; }
     }
 
     public static class DynamicQuery
@@ -116,109 +116,179 @@ namespace Signum.Engine.DynamicQuery
             return new AutoDynamicQuery<T>(query); 
         }
 
-        public static DynamicQuery<T> Manual<T>(Func<QueryRequest, DEnumerable<T>> execute)
+        public static DynamicQuery<T> Manual<T>(Func<QueryRequest, List<ColumnDescription>, DEnumerable<T>> execute)
         {
             return new ManualDynamicQuery<T>(execute); 
         }
 
+#region ToDQueryable
+
+        public static DQueryable<T> ToDQueryable<T>(this IQueryable<T> query, List<ColumnDescription> descriptions)
+        {
+            ParameterExpression pe = Expression.Parameter(typeof(object));
+
+            var dic = descriptions.ToDictionary(cd => (QueryToken)new ColumnToken(cd), cd => (Expression)Expression.PropertyOrField(Expression.Convert(pe, typeof(T)), cd.Name));
+
+            return new DQueryable<T>(query.Select(a => (object)a), new BuildExpressionContext(typeof(T), pe, dic));
+        }
+
+#endregion 
+
         #region SelectDynamic
 
-        public static DQueryable<T> SelectDynamic<T>(this IQueryable<T> query, List<Column> columns, List<Order> orders)
+        public static DQueryable<T> Select<T>(this DQueryable<T> query, List<Column> columns)
         {
             HashSet<QueryToken> tokens = new HashSet<QueryToken>(columns.Select(c => c.Token));
-            if (orders != null)
-                tokens.AddRange(orders.Select(o => o.Token));
 
-            TupleResult<T> result = TupleConstructor<T>(tokens);
+            TupleResult result = TupleConstructor(query.Context, tokens);
 
-            return new DQueryable<T>(query.Select(result.TupleConstructor), result.TupleType, result.TokenIndices);
+            return new DQueryable<T>(query.Query.Select(result.TupleConstructor), new BuildExpressionContext(result.TupleType, result.Parameter, result.Replacements));
         }
 
-        public static DEnumerable<T> SelectDynamic<T>(this IEnumerable<T> query, List<Column> columns, List<Order> orders)
+        public static DEnumerable<T> Select<T>(this DEnumerable<T> collection, List<Column> columns)
         {
             HashSet<QueryToken> tokens = new HashSet<QueryToken>(columns.Select(c => c.Token));
-              if (orders != null)
-                tokens.AddRange(orders.Select(o => o.Token));
+            
+            TupleResult result = TupleConstructor(collection.Context, tokens);
 
-              TupleResult<T> result = TupleConstructor<T>(tokens);
-
-              return new DEnumerable<T>(query.Select(result.TupleConstructor.Compile()), result.TupleType, result.TokenIndices);
+            return new DEnumerable<T>(collection.Collection.Select(result.TupleConstructor.Compile()), new BuildExpressionContext(result.TupleType, result.Parameter, result.Replacements));
         }
 
-        class TupleResult<T>
+
+        public static DEnumerable<T> Concat<T>(this DEnumerable<T> collection, DEnumerable<T> other)
         {
-            public Expression<Func<T, object>> TupleConstructor;
+            if (collection.Context.TupleType != other.Context.TupleType)
+                throw new InvalidOperationException("Enumerable's TupleType does not match Other's one.\r\n Enumerable: {0}: \r\n Other:  {1}".Formato(
+                    collection.Context.TupleType.TypeName(),
+                    other.Context.TupleType.TypeName()));
+
+            return new DEnumerable<T>(collection.Collection.Concat(other.Collection), collection.Context); 
+        }
+
+        class TupleResult
+        {
+            public Expression<Func<object, object>> TupleConstructor;
+
+            public ParameterExpression Parameter;
             public Type TupleType;
-            public Dictionary<QueryToken, int> TokenIndices;
+            public Dictionary<QueryToken, Expression> Replacements;
         }
 
-        static TupleResult<T> TupleConstructor<T>(HashSet<QueryToken> tokens)
+        static TupleResult TupleConstructor(BuildExpressionContext context, HashSet<QueryToken> tokens)
         {
-            ParameterExpression param = Expression.Parameter(typeof(T), "p");
-            List<Expression> expressions = tokens.Select(c => c.BuildExpression(param)).ToList();
+            string str = tokens.Select(t => QueryUtils.CanColumn(t)).NotNull().ToString("\r\n");
+            if (str == null)
+                throw new ApplicationException(str);
+
+           
+            List<Expression> expressions = tokens.Select(t => t.BuildExpression(context)).ToList();
             Expression ctor = TupleReflection.TupleChainConstructor(expressions);
 
-            return new TupleResult<T>
+            var pe = Expression.Parameter(typeof(object));
+
+            return new TupleResult
             {
                 TupleType = ctor.Type,
-                TokenIndices = tokens.Select((t, i) => new { t, i }).ToDictionary(t => t.t, t => t.i),
-                TupleConstructor = Expression.Lambda<Func<T, object>>(
-                    (Expression)Expression.Convert(ctor, typeof(object)), param),
+                Parameter = pe,
+                Replacements = tokens.Select((t, i) => new { Token = t, Expr = TupleReflection.TupleChainProperty(Expression.Convert(pe, ctor.Type), i) }).ToDictionary(t => t.Token, t => t.Expr),
+                
+                TupleConstructor = Expression.Lambda<Func<object, object>>(
+                    (Expression)Expression.Convert(ctor, typeof(object)), context.Parameter),
             };
-        }
-
-        public static DEnumerable<T> Concat<T>(this DEnumerable<T> enumerable, DEnumerable<T> other)
-        {
-            if (enumerable.TupleType != other.TupleType)
-                throw new InvalidOperationException("Enumerable's TupleType does not match Other's one.\r\n Enumerable: {0}: \r\n Other:  {1}".Formato(
-                    enumerable.TupleType.TypeName(),
-                    other.TupleType.TypeName()));
-
-            return new DEnumerable<T>(enumerable.Collection.Concat(other.Collection), enumerable.TupleType, other.TokenIndices); 
         }
         
 	    #endregion
 
-        #region Where
-        static Expression<Func<T, bool>> GetWhereExpression<T>(List<Filter> filters)
+        public static DQueryable<T> SelectMany<T>(this DQueryable<T> query, List<CollectionElementToken> elementTokens)
         {
-            if (filters == null || filters.Count == 0)
-                return null;
+            foreach (var cet in elementTokens)
+            {
+                query = query.SelectMany(cet);
+            }
 
-            ParameterExpression pe = Expression.Parameter(typeof(T), "p");
-
-            Expression body = filters.Select(f => f.GetCondition(pe)).Aggregate((e1, e2) => Expression.And(e1, e2));
-
-            return Expression.Lambda<Func<T,  bool>>(body, pe);
+            return query;
         }
 
-        public static IQueryable<T> Where<T>(this IQueryable<T> query, params Filter[] filters)
+        static MethodInfo miSelectMany = ReflectionTools.GetMethodInfo(() => Database.Query<TypeDN>().SelectMany(t => t.Namespace, (t, c) => t)).GetGenericMethodDefinition();
+        static MethodInfo miDefaultIfEmptyE = ReflectionTools.GetMethodInfo(() => Database.Query<TypeDN>().AsEnumerable().DefaultIfEmpty()).GetGenericMethodDefinition();
+     
+        public static DQueryable<T> SelectMany<T>(this DQueryable<T> query, CollectionElementToken cet)
+        {
+            Type elementType = cet.Parent.Type.ElementType();
+
+            var collectionSelector = Expression.Lambda(typeof(Func<,>).MakeGenericType(typeof(object), typeof(IEnumerable<>).MakeGenericType(elementType)),
+                Expression.Call(miDefaultIfEmptyE.MakeGenericMethod(elementType),
+                    cet.Parent.BuildExpression(query.Context)),
+                query.Context.Parameter);
+
+            var elementParameter = cet.CreateParameter();
+            
+            var properties = query.Context.Replacemens.Values.And(cet.CreateExpression(elementParameter));
+
+            var ctor = TupleReflection.TupleChainConstructor(properties); 
+
+            var resultSelector = Expression.Lambda(Expression.Convert(ctor,typeof(object)), query.Context.Parameter, elementParameter);
+            
+            var resultQuery = query.Query.Provider.CreateQuery<object>(Expression.Call(null, miSelectMany.MakeGenericMethod(typeof(object), elementType, typeof(object)), 
+                new Expression[] { query.Query.Expression, Expression.Quote(collectionSelector), Expression.Quote(resultSelector) }));
+
+            var parameter = Expression.Parameter(typeof(object));
+
+
+            var newReplacements = query.Context.Replacemens.Keys.And(cet).Select((a,i)=>new {
+                Token = a, 
+                Expression = TupleReflection.TupleChainProperty(Expression.Convert(parameter, ctor.Type), i)
+            }).ToDictionary(a=>a.Token, a=>a.Expression);
+
+            return new DQueryable<T>(resultQuery,
+                new BuildExpressionContext(ctor.Type, parameter, newReplacements)); 
+        }
+
+
+        #region Where
+
+        public static DQueryable<T> Where<T>(this DQueryable<T> query, params Filter[] filters)
         {
             return Where(query, filters.NotNull().ToList()); 
         }
 
-        public static IQueryable<T> Where<T>(this IQueryable<T> query, List<Filter> filters)
+        public static DQueryable<T> Where<T>(this DQueryable<T> query, List<Filter> filters)
         {
-            var where = GetWhereExpression<T>(filters);
+            var where = GetWhereExpression(query.Context, filters);
 
-            if (where != null)
-                return query.Where(where);
+            if (where == null)
+                return query;
 
-            return query; 
+            return new DQueryable<T>(query.Query.Where(where), query.Context);
         }
 
-        public static IEnumerable<T> Where<T>(this IEnumerable<T> sequence, params Filter[] filters)
+        public static DEnumerable<T> Where<T>(this DEnumerable<T> collection, params Filter[] filters)
         {
-            return Where(sequence, filters.NotNull().ToList()); 
+            return Where(collection, filters.NotNull().ToList()); 
         }
 
-        public static IEnumerable<T> Where<T>(this IEnumerable<T> sequence, List<Filter> filters)
+        public static DEnumerable<T> Where<T>(this DEnumerable<T> collection, List<Filter> filters)
         {
-            var where = GetWhereExpression<T>(filters);
+            var where = GetWhereExpression(collection.Context, filters);
 
-            if (where != null)
-                return sequence.Where(where.Compile());
-            return sequence;
+            if (where == null)
+                return collection;
+
+            return new DEnumerable<T>(collection.Collection.Where(where.Compile()), collection.Context);
+        }
+
+        static Expression<Func<object, bool>> GetWhereExpression(BuildExpressionContext context, List<Filter> filters)
+        {
+            if (filters == null || filters.Count == 0)
+                return null;
+
+            string str = filters.Select(f => QueryUtils.CanFilter(f.Token)).NotNull().ToString("\r\n");
+            if (str == null)
+                throw new ApplicationException(str);
+
+            Expression body = filters.Select(f => f.GetCondition(context)).Aggregate((e1, e2) => Expression.And(e1, e2));
+
+            return Expression.Lambda<Func<object, bool>>(body, context.Parameter);
         }
 
         #endregion
@@ -232,11 +302,15 @@ namespace Signum.Engine.DynamicQuery
 
         public static DQueryable<T> OrderBy<T>(this DQueryable<T> query, List<Order> orders)
         {
+            string str = orders.Select(f => QueryUtils.CanOrder(f.Token)).NotNull().ToString("\r\n");
+            if (str == null)
+                throw new ApplicationException(str);
+
             var pairs = orders.Select(o => Tuple.Create(
-                    TupleReflection.TupleChainPropertyLambda(query.TupleType, query.TokenIndices[o.Token]),
+                     Expression.Lambda(o.Token.BuildExpression(query.Context), query.Context.Parameter),
                     o.OrderType)).ToList();
 
-            return new DQueryable<T>(query.Query.OrderBy(pairs), query.TupleType, query.TokenIndices);
+            return new DQueryable<T>(query.Query.OrderBy(pairs), query.Context);
         }
 
         public static IQueryable<object> OrderBy(this IQueryable<object> query, List<Tuple<LambdaExpression, OrderType>> orders)
@@ -276,10 +350,11 @@ namespace Signum.Engine.DynamicQuery
         public static DEnumerable<T> OrderBy<T>(this DEnumerable<T> collection, List<Order> orders)
         {
             var pairs = orders.Select(o => Tuple.Create(
-                 TupleReflection.TupleChainPropertyLambda(collection.TupleType, collection.TokenIndices[o.Token]),
-                 o.OrderType)).ToList();
+                    Expression.Lambda(o.Token.BuildExpression(collection.Context), collection.Context.Parameter),
+                   o.OrderType)).ToList();
 
-            return new DEnumerable<T>(collection.Collection.OrderBy(pairs), collection.TupleType, collection.TokenIndices);
+
+            return new DEnumerable<T>(collection.Collection.OrderBy(pairs), collection.Context);
         }
 
         public static IEnumerable<object> OrderBy(this IEnumerable<object> collection, List<Tuple<LambdaExpression, OrderType>> orders)
@@ -339,25 +414,25 @@ namespace Signum.Engine.DynamicQuery
             return query;
         }
 
-        public static IEnumerable<T> TryTake<T>(this IEnumerable<T> sequence, int? num)
+        public static IEnumerable<T> TryTake<T>(this IEnumerable<T> collection, int? num)
         {
             if (num.HasValue)
-                return sequence.Take(num.Value);
-            return sequence;
+                return collection.Take(num.Value);
+            return collection;
         }
 
         public static DQueryable<T> TryTake<T>(this DQueryable<T> query, int? num)
         {
             if (num.HasValue)
-                return new DQueryable<T>(query.Query.Take(num.Value), query.TupleType, query.TokenIndices);
+                return new DQueryable<T>(query.Query.Take(num.Value), query.Context);
             return query;
         }
 
-        public static DEnumerable<T> TryTake<T>(this DEnumerable<T> sequence, int? num)
+        public static DEnumerable<T> TryTake<T>(this DEnumerable<T> collection, int? num)
         {
             if (num.HasValue)
-                return new DEnumerable<T>(sequence.Collection.Take(num.Value), sequence.TupleType, sequence.TokenIndices);
-            return sequence;
+                return new DEnumerable<T>(collection.Collection.Take(num.Value), collection.Context);
+            return collection;
         }
         #endregion
 
@@ -368,25 +443,25 @@ namespace Signum.Engine.DynamicQuery
 
         public static DEnumerable<T> AsEnumerable<T>(this DQueryable<T> query)
         {
-            return new DEnumerable<T>(query.Query.AsEnumerable(), query.TupleType, query.TokenIndices);
+            return new DEnumerable<T>(query.Query.AsEnumerable(), query.Context);
         }
 
         public static DEnumerable<T> ToArray<T>(this DQueryable<T> query)
         {
-            return new DEnumerable<T>(query.Query.ToArray(), query.TupleType, query.TokenIndices);
+            return new DEnumerable<T>(query.Query.ToArray(), query.Context);
         }
 
         public static DEnumerable<T> ToArray<T>(this DEnumerable<T> query)
         {
-            return new DEnumerable<T>(query.Collection.ToArray(), query.TupleType, query.TokenIndices);
+            return new DEnumerable<T>(query.Collection.ToArray(), query.Context);
         }
 
         public static ResultTable ToResultTable<T>(this DEnumerable<T> collection, List<Column> columns)
         {
             object[] array = collection.Collection as object[] ?? collection.Collection.ToArray();
 
-            return ToResultTable(array, columns.Select(c => Tuple.Create(c, 
-                TupleReflection.TupleChainPropertyLambda(collection.TupleType, collection.TokenIndices[c.Token]))).ToList());
+            return ToResultTable(array, columns.Select(c => Tuple.Create(c,
+                Expression.Lambda(c.Token.BuildExpression(collection.Context), collection.Context.Parameter))).ToList());
         }
 
         public static ResultTable ToResultTable(this object[] result, List<Tuple<Column, LambdaExpression>> columnAccesors)
