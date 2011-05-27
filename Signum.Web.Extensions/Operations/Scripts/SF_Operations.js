@@ -4,6 +4,7 @@ SF.registerModule("Operations", function () {
 
     SF.OperationManager = function (_options) {
         this.options = $.extend({
+            sender: null,
             prefix: "",
             parentDiv: "",
             operationKey: null,
@@ -36,7 +37,7 @@ SF.registerModule("Operations", function () {
             var formChildren = "";
             if (SF.isFalse(this.options.isLite)) {
                 if (SF.isEmpty(this.options.prefix)) //NormalWindow 
-                    formChildren = SF.isEmpty(this.options.parentDiv) ? $("form :input") : $("#" + this.options.parentDiv + " :input");
+                    formChildren = SF.isEmpty(this.options.parentDiv) ? $(this.options.sender).closest("form").find(":input") : $("#" + this.options.parentDiv + " :input");
                 else //PopupWindow
                     formChildren = $(this.pf("panelPopup *") + ", #" + SF.Keys.reactive + ", #" + SF.Keys.tabId + ", input:hidden[name=" + SF.Keys.antiForgeryToken + "]");
             }
@@ -135,11 +136,12 @@ SF.registerModule("Operations", function () {
                 return false;
             }
 
-            $("form").append(SF.hiddenInput('isLite', this.options.isLite) +
+            var $form = $(this.options.sender).closest("form");
+            $form.append(SF.hiddenInput('isLite', this.options.isLite) +
             SF.hiddenInput('operationFullKey', this.options.operationKey) +
             SF.hiddenInput("oldPrefix", this.options.prefix));
 
-            SF.submit(this.options.controllerUrl, this.options.requestExtraJsonData);
+            SF.submit(this.options.controllerUrl, this.options.requestExtraJsonData, $form);
 
             return false;
         },
@@ -424,7 +426,7 @@ SF.registerModule("Operations", function () {
 
             var onSuccess = function (items) {
                 for (var i = 0, l = items.length; i < l; i++) {
-                    $("form").append(SF.hiddenInput('ids', items[i].id));
+                    $(this.options.sender).closest("form").append(SF.hiddenInput('ids', items[i].id));
                 }
                 this.operationSubmit();
             };
@@ -553,8 +555,9 @@ SF.registerModule("Operations", function () {
             SF.opOpenPopup(prefix, operationResult)
         }
         else {
-            $("form").html(operationResult);
-            SF.triggerNewContent($("form"));
+            var $form = $("form");
+            $form.html(operationResult);
+            SF.triggerNewContent($form);
             SF.Notify.info(lang.signum.executed, 2000);
         }
     };
