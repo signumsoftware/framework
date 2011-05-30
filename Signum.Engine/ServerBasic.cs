@@ -125,7 +125,7 @@ namespace Signum.Services
         }
         #endregion
 
-        #region IQueryServer
+        #region IDynamicQueryServer
         [SuggestUserInterface]
         public virtual QueryDescription GetQueryDescription(object queryName)
         {
@@ -159,6 +159,13 @@ namespace Signum.Services
         {
             return Return(MethodInfo.GetCurrentMethod(),
                 () => DynamicQueryManager.Current.GetQueryNames());
+        }
+
+        [SuggestUserInterface]
+        public virtual List<QueryToken> ExternalQueryToken(Type type, QueryToken parent)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+               () => DynamicQueryManager.Current.GetExtensions(type, parent).ToList());
         }
         #endregion
     }

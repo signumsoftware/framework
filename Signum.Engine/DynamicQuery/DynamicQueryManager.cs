@@ -11,6 +11,11 @@ using Signum.Entities;
 using System.Diagnostics;
 using Signum.Engine.Maps;
 using Signum.Services;
+using System.Linq.Expressions;
+using Signum.Engine.Linq;
+using Signum.Entities.Reflection;
+using Signum.Utilities.ExpressionTrees;
+using Signum.Utilities.Reflection;
 
 namespace Signum.Engine.DynamicQuery
 {
@@ -23,6 +28,7 @@ namespace Signum.Engine.DynamicQuery
         }
 
         Dictionary<object, IDynamicQuery> queries = new Dictionary<object, IDynamicQuery>();
+        ExternalPolymorphicDictionary<string, ExtensionInfo> registeredExtensions = new ExternalPolymorphicDictionary<string, ExtensionInfo>(); 
 
         public IDynamicQuery this[object queryName]
         {
@@ -109,27 +115,105 @@ namespace Signum.Engine.DynamicQuery
             return queries.ToDictionary();
         }
 
-        public string Errors(object queryName)
+        static DynamicQueryManager()
         {
-            try
+            QueryToken.EntityExtensions = (type, parent) => DynamicQueryManager.Current.GetExtensions(type, parent);
+            ExtensionToken.BuildExtension = (type, key, expression) => DynamicQueryManager.Current.BuildExtension(type, key, expression);
+        }
+
+        private Expression BuildExtension(Type type, string key, Expression context)
+        {
+            LambdaExpression lambda = registeredExtensions.TryGetValue(type, key).Lambda;
+
+            return ExpressionReplacer.Replace(Expression.Invoke(lambda, context)); 
+        }
+
+        public IEnumerable<QueryToken> GetExtensions(Type type, QueryToken parent)
+        {
+            return registeredExtensions.GetAllKeys(type)
+                .Select(k => registeredExtensions.TryGetValue(type, k))
+                .Select(ei => ei.CreateToken(parent));
+        }
+
+        public ExtensionInfo RegisterExtension<E, S>(Expression<Func<E, S>> lambdaToMethod)
+            where E : class, IIdentifiable
+        {
+            MethodInfo mi = ReflectionTools.GetMethodInfo(lambdaToMethod);
+
+            AssertExtensionMethod(mi);
+
+            return RegisterExtension<E, S>(lambdaToMethod, () => mi.Name.NiceName(), mi.Name);
+        }
+
+        public ExtensionInfo RegisterExtension<E, S>(Expression<Func<E, S>> lambdaToMethod, Func<string> niceName)
+            where E : class, IIdentifiable
+        {
+            MethodInfo mi = ReflectionTools.GetMethodInfo(lambdaToMethod);
+
+            AssertExtensionMethod(mi);
+
+            return RegisterExtension<E, S>(lambdaToMethod, niceName, mi.Name);
+        }
+
+        private static void AssertExtensionMethod(MethodInfo mi)
+        {
+            if (mi.DeclaringType.Assembly == typeof(Enumerable).Assembly ||
+                mi.DeclaringType.Assembly == typeof(Csv).Assembly ||
+                mi.DeclaringType.Assembly == typeof(Lite).Assembly ||
+                mi.DeclaringType.Assembly == typeof(Database).Assembly)
+                throw new InvalidOperationException("The parameter 'lambdaToMethod' should be an expression calling a expression method");
+        }
+
+        public ExtensionInfo RegisterExtension<E, S>(Expression<Func<E, S>> extensionLambda, Func<string> niceName, string key) 
+            where E : class, IIdentifiable
+        {
+            var result = new ExtensionInfo(typeof(S), key, extensionLambda, typeof(E))
+            {   
+                NiceName = niceName,
+            };
+
+            registeredExtensions.Add(typeof(E), key, result);
+
+            return result;
+        }
+    }
+
+    public class ExtensionInfo
+    {
+        public ExtensionInfo(Type type, string key, LambdaExpression lambda, Type entityType)
+        {
+            this.Type = type;
+            this.Key = key;
+            this.Lambda = lambda;
+
+            Expression e = MetadataVisitor.JustVisit(lambda, entityType);
+
+            MetaExpression me = e as MetaExpression ?? (e as MetaProjectorExpression).TryCC(a => a.Projector as MetaExpression);
+            CleanMeta cm = me == null ? null : me.Meta as CleanMeta;
+
+            if (cm != null)
             {
-                IDynamicQuery dq = this[queryName];
-
-                Connection.CommandCount = 0;
-                ResultTable result = dq.ExecuteQuery(new QueryRequest { QueryName = queryName, Limit = 100 });
-
-                if(result.Rows.Length == 0)
-                    return "Warning {0}: No Results".Formato(queryName);
-
-                if (Connection.CommandCount != 1)
-                    return "Error {0}: N + 1 query problem".Formato(queryName);
-
-                return null;
+                this.Format = ColumnDescriptionFactory.GetFormat(cm.PropertyRoutes);
+                this.Unit = ColumnDescriptionFactory.GetUnit(cm.PropertyRoutes);
+                this.Implementations = ColumnDescriptionFactory.AggregateImplementations(cm.PropertyRoutes);
             }
-            catch (Exception e)
-            {
-                return "Error {0}: {1}".Formato(queryName, e.Message);
-            }
+
+            IsAllowed = () => me.Meta == null || me.Meta.IsAllowed();
+        }
+
+        public readonly Type Type;
+        public readonly string Key; 
+
+        internal readonly LambdaExpression Lambda;
+        public Func<string> NiceName;
+        public string Format;
+        public string Unit;
+        public Implementations Implementations;
+        public Func<bool> IsAllowed;
+
+        internal ExtensionToken CreateToken(QueryToken parent)
+        {
+            return new ExtensionToken(parent, Key, Type, Unit, Format, Implementations, IsAllowed()) { DisplayName = NiceName() }; 
         }
     }
 }

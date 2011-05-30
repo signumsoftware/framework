@@ -24,7 +24,10 @@ namespace Signum.Services
         Lite ExecuteUniqueEntity(UniqueEntityRequest request);
 
         [OperationContract, NetDataContract]
-        List<object> GetQueryNames();      
+        List<object> GetQueryNames();
+
+        [OperationContract, NetDataContract]
+        List<QueryToken> ExternalQueryToken(Type type, QueryToken parent);
     }
 
 }

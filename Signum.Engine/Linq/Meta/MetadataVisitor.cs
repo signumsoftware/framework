@@ -61,6 +61,14 @@ namespace Signum.Engine.Linq
             });
         }
 
+        internal static Expression JustVisit(LambdaExpression expression, Type type)
+        {
+            var cleaned = MetaEvaluator.Clean(expression);
+
+            var replaced = ExpressionReplacer.Replace(Expression.Invoke(cleaned, new MetaExpression(type, null)));
+
+            return new MetadataVisitor().Visit(replaced);
+        }
 
         static MetaExpression MakeCleanMeta(Type type, Expression expression)
         {
