@@ -268,8 +268,8 @@ SF.registerModule("Globals", function () {
         return path;
     };
 
-    SF.submit = function (urlController, requestExtraJsonData) {
-        var $form = $("form");
+    SF.submit = function (urlController, requestExtraJsonData, $form) {
+        $form = $form || $("form");
         if (!SF.isEmpty(requestExtraJsonData)) {
             if ($.isFunction(requestExtraJsonData)) {
                 requestExtraJsonData = requestExtraJsonData();

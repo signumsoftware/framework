@@ -284,9 +284,30 @@ SF.registerModule("Validator", function () {
 
         this.constructRequestDataForValidating = function () {
             SF.log("PartialValidator constructRequestDataForValidating");
-            var formChildren = SF.isEmpty(this.valOptions.parentDiv) ?
-                               $("form :input, #" + SF.Keys.tabId + ", input:hidden[name=" + SF.Keys.antiForgeryToken + "]") :
-                               $("#" + this.valOptions.parentDiv + " :input, #" + SF.Keys.tabId + ", input:hidden[name=" + SF.Keys.antiForgeryToken + "]");
+
+            //Send main form to be able to construct a typecontext if EmbeddedEntity
+            var staticInfo = SF.StaticInfo(this.valOptions.prefix);
+            var isEmbedded = false;
+            if (staticInfo.find().length == 0 && !SF.isEmpty(this.valOptions.prefix)) { //If List => use parent
+                var lastPrefix = this.valOptions.prefix.substr(0, this.valOptions.prefix.lastIndexOf(SF.Keys.separator));
+                staticInfo = SF.StaticInfo(lastPrefix);
+            }
+            if (staticInfo.find().length > 0 && staticInfo.isEmbedded()) {
+                isEmbedded = true;
+            }
+
+            var formChildren = null;
+            if (isEmbedded) { 
+                formChildren = $("form :input, #" + SF.Keys.tabId + ", input:hidden[name=" + SF.Keys.antiForgeryToken + "]");
+            }
+            if (!SF.isEmpty(this.valOptions.parentDiv)) {
+                if (formChildren == null) {
+                    formChildren = $("#" + this.valOptions.parentDiv + " :input, #" + SF.Keys.tabId + ", input:hidden[name=" + SF.Keys.antiForgeryToken + "]");
+                }
+                else {
+                    formChildren = formChildren.add($("#" + this.valOptions.parentDiv + " :input"));
+                }
+            }                  
             formChildren = formChildren.not(".sf-search-control :input, #" + SF.Keys.reactive);
 
             var serializer = new SF.Serializer().add(formChildren.serialize());

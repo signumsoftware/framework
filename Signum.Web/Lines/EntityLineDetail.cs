@@ -78,6 +78,9 @@ namespace Signum.Web
 
         public static JsInstruction JsFind(EntityLineDetail edline, JsFindOptions findOptions, JsViewOptions viewOptions)
         {
+            if (viewOptions.ControllerUrl == null)
+                viewOptions.ControllerUrl = RouteHelper.New().SignumAction("PartialView");
+
             string findParams = ",".Combine(
                 findOptions.TryCC(v => v.ToJS()),
                 viewOptions.TryCC(v => v.ToJS()),
