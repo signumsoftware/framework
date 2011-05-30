@@ -88,17 +88,10 @@ WriteLiteral("    <span class=\"separator\">|</span>");
 }
 else
 { 
-    if (Request.Url.PathAndQuery.Contains(Url.Action<AuthController>(ac => ac.Login(""))))
-    {
-        
-   Write(Html.ActionLink("Login", "Login", "Auth", null, new { @class = "sf-login" }));
+    
+Write(Html.ActionLink("Login", "Login", "Auth", null, new { @class = "sf-login" }));
 
-                                                                                     
-    }
-    else 
-    { 
-        Html.RenderPartial(AuthClient.LoginView); 
-    }
+                                                                                 
 }
 
 

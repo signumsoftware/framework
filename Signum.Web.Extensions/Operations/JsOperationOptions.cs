@@ -35,6 +35,7 @@ namespace Signum.Web.Operations
                     
                 var builder = new JsOptionsBuilder(false)
                 {
+                    {"sender", "this"},
                     {"prefix", Prefix.TryCC(a=>a.ToJS())},
                     {"parentDiv", ParentDiv.TryCC(a => a.ToJS())},
                     {"operationKey", OperationKey.TryCC(a=>a.ToJS())},

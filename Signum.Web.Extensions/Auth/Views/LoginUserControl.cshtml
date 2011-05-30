@@ -5,12 +5,5 @@
 }
 else
 { 
-    if (Request.Url.PathAndQuery.Contains(Url.Action<AuthController>(ac => ac.Login(""))))
-    {
-        @Html.ActionLink("Login", "Login", "Auth", null, new { @class = "sf-login" })
-    }
-    else 
-    { 
-        Html.RenderPartial(AuthClient.LoginView); 
-    }
+    @Html.ActionLink("Login", "Login", "Auth", null, new { @class = "sf-login" })
 }

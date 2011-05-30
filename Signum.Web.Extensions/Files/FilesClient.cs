@@ -14,6 +14,7 @@ using System.Reflection;
 using Signum.Entities.Files;
 using System.Web.Routing;
 using System.IO;
+using Signum.Engine.Basics;
 #endregion
 
 namespace Signum.Web.Files
@@ -29,9 +30,40 @@ namespace Signum.Web.Files
                 FileRepositoryDN.OverridenPhisicalCurrentDirectory = AppDomain.CurrentDomain.BaseDirectory;
 
                 if (filePath)
-                    Navigator.AddSetting(new EntitySettings<FilePathDN>(EntityType.Default));
+                {
+                    Navigator.AddSetting(new EntitySettings<FilePathDN>(EntityType.Default)
+                    {
+                        MappingDefault = new EntityMapping<FilePathDN>(true)
+                        {
+                            GetEntity = ctx =>
+                            {
+                                RuntimeInfo runtimeInfo = ctx.GetRuntimeInfo();
+                                if (runtimeInfo.RuntimeType == null)
+                                    return null;
+                                else
+                                {
+                                    if (runtimeInfo.IsNew)
+                                    {
+                                        string fileType = ctx.Inputs[FileLineKeys.FileType];
+                                        var fp = new FilePathDN(EnumLogic<FileTypeDN>.ToEnum(fileType));
+
+                                        HttpPostedFileBase hpf = ctx.ControllerContext.HttpContext.Request.Files[ctx.ControlID] as HttpPostedFileBase;
+
+                                        fp.FileName = Path.GetFileName(hpf.FileName);
+                                        fp.BinaryFile = hpf.InputStream.ReadAllBytes();
+
+                                        return fp;
+                                    }
+                                }
+
+                                return ctx.Value;
+                            }
+                        }
+                    });
+                }
 
                 if (embeddedFile)
+                {
                     Navigator.AddSetting(new EmbeddedEntitySettings<EmbeddedFileDN>()
                     {
                         MappingDefault = new EntityMapping<EmbeddedFileDN>(true)
@@ -61,6 +93,7 @@ namespace Signum.Web.Files
                             }
                         }
                     });
+                }
             }
         }
     }
