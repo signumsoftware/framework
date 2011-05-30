@@ -40,11 +40,11 @@ namespace Signum.Engine.Operations
 
     public static class OperationLogic
     {
-        static Dictionary<Type, Dictionary<Enum, IOperation>> operations = new Dictionary<Type, Dictionary<Enum, IOperation>>();
+        static ExternalPolymorphicDictionary<Enum, IOperation> operations = new ExternalPolymorphicDictionary<Enum, IOperation>();
 
-        public static IEnumerable<Enum> RegisteredOperations
+        public static HashSet<Enum> RegisteredOperations
         {
-            get { return operations.Values.SelectMany(b => b.Keys); }
+            get { return operations.GetAllKeys(); }
         }
 
         public static void AssertStarted(SchemaBuilder sb)
@@ -59,7 +59,7 @@ namespace Signum.Engine.Operations
                 sb.Include<OperationDN>();
                 sb.Include<LogOperationDN>();
 
-                EnumLogic<OperationDN>.Start(sb, () => RegisteredOperations.ToHashSet());
+                EnumLogic<OperationDN>.Start(sb, () => RegisteredOperations);
 
                 dqm[typeof(LogOperationDN)] = (from lo in Database.Query<LogOperationDN>()
                                                select new
@@ -133,7 +133,7 @@ namespace Signum.Engine.Operations
 
             operation.AssertIsValid(); 
 
-            operations.GetOrCreate(operation.Type)[operation.Key] = operation;
+            operations.Add(operation.Type, operation.Key, operation);
         }
 
         static OperationInfo ToOperationInfo(IOperation operation, string canExecute)
@@ -317,7 +317,7 @@ namespace Signum.Engine.Operations
         static T Find<T>(Type type, Enum operationKey)
             where T : IOperation
         {
-            IOperation result = TryFind(type, operationKey);
+            IOperation result = operations.TryGetValue(type, operationKey);
             if (result == null)
                 throw new InvalidOperationException("Operation {0} not found for type {1}".Formato(operationKey, type));
 
@@ -344,46 +344,12 @@ namespace Signum.Engine.Operations
             return result; 
         }
 
-        public static IOperation TryFind(Type type, Enum operationKey)
-        {
-            if (!type.IsIIdentifiable())
-                throw new InvalidOperationException("Type {0} has to implement at least {1}".Formato(type, typeof(IIdentifiable)));
-
-            IOperation result = type.FollowC(t => t.BaseType)
-                .TakeWhile(t => typeof(IdentifiableEntity).IsAssignableFrom(t))
-                .Select(t => operations.TryGetC(t).TryGetC(operationKey)).NotNull().FirstOrDefault();
-
-            if (result != null)
-                return result;
-
-            List<Type> interfaces = type.GetInterfaces()
-                .Where(t => t.IsIIdentifiable() && operations.TryGetC(t).TryGetC(operationKey) != null)
-                .ToList();
-
-            if (interfaces.Count > 1)
-                throw new InvalidOperationException("Ambiguity between interfaces: {0}".Formato(interfaces.ToString(", ")));
-
-            if (interfaces.Count < 1)
-                return null;
-
-            return operations[interfaces.Single()][operationKey];
-        }
 
         static List<IOperation> TypeOperations(Type type)
         {
-            if (!type.IsIIdentifiable())
-                throw new InvalidOperationException("Type {0} has to implement at least {1}".Formato(type, typeof(IIdentifiable)));
+            var keys = operations.GetAllKeys(type);
 
-            HashSet<Enum> result = type.FollowC(t => t.BaseType)
-                    .TakeWhile(t => typeof(IdentifiableEntity).IsAssignableFrom(t))
-                    .Select(t => operations.TryGetC(t)).NotNull().SelectMany(d=>d.Keys).ToHashSet();
-
-            result.UnionWith(type.GetInterfaces()
-                .Where(t => t.IsIIdentifiable())
-                .Select(t => operations.TryGetC(t))
-                .NotNull().SelectMany(d => d.Keys));
-
-            return result.Select(a => TryFind(type, a)).ToList();
+            return keys.Select(k => operations.TryGetValue(type, k)).ToList();
         }
 
         public static T GetArg<T>(this object[] args, int pos)
@@ -430,18 +396,20 @@ namespace Signum.Engine.Operations
 
         public static Type[] FindTypes(Enum operation)
         {
-            return operations.Where(o => o.Value.ContainsKey(operation)).Select(a => a.Key).ToArray();
+            return operations.ImplementingTypes(operation);
         }
 
         internal static IEnumerable<Graph<E, S>.IGraphOperation> GraphOperations<E, S>()
             where E : IdentifiableEntity
             where S : struct
         {
-            return operations.Values.SelectMany(d => d.Values).OfType<Graph<E, S>.IGraphOperation>();
+            return operations.RawDictionary.Values.SelectMany(d => d.Values).OfType<Graph<E, S>.IGraphOperation>();
         }
     }
 
     public delegate void OperationHandler(IOperation operation, IIdentifiable entity);
     public delegate void ErrorOperationHandler(IOperation operation, IIdentifiable entity, Exception ex);
     public delegate bool AllowOperationHandler(Enum operationKey);
+
+   
 }
