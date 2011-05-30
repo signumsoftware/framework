@@ -149,9 +149,12 @@ namespace Signum.Windows
                 () => buttonBar.SaveButton.IsEnabled = true);
         }
 
+
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
         {
             base.OnClosing(e);
+
+            MoveFocus();
 
             if (buttonBar.ViewButtons== ViewButtons.Save && this.HasChanges())
             {
@@ -179,6 +182,17 @@ namespace Signum.Windows
                         return;
                     }
                 }
+            }
+        }
+
+        private static void MoveFocus()
+        {
+            // Change keyboard focus.
+            UIElement elementWithFocus = Keyboard.FocusedElement as UIElement;
+
+            if (elementWithFocus != null)
+            {
+                elementWithFocus.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
             }
         }
 

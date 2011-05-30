@@ -224,5 +224,10 @@ namespace Signum.Windows
                     EnsureEntities().Remove(item);
             }
         }
+
+        private void listBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            btView_Click(sender, null);
+        }
     }
 }
