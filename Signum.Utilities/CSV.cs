@@ -12,26 +12,26 @@ using System.Reflection;
 
 namespace Signum.Utilities
 {
-    public static class CSV
+    public static class Csv
     {
-        public static string ToCSVFile<T>(this IEnumerable<T> collection, string fileName, Encoding encoding = null, CultureInfo culture = null, bool writeHeaders = true)
+        public static string ToCsvFile<T>(this IEnumerable<T> collection, string fileName, Encoding encoding = null, CultureInfo culture = null, bool writeHeaders = true)
         {
             using (FileStream fs = File.Create(fileName))
-                ToCSV<T>(collection, fs, encoding, culture, writeHeaders);
+                ToCsv<T>(collection, fs, encoding, culture, writeHeaders);
 
             return fileName;
         }
 
-        public static byte[] ToCSVBytes<T>(this IEnumerable<T> collection, Encoding encoding = null, CultureInfo culture = null, bool writeHeaders = true)
+        public static byte[] ToCsvBytes<T>(this IEnumerable<T> collection, Encoding encoding = null, CultureInfo culture = null, bool writeHeaders = true)
         {   
             using (MemoryStream ms = new MemoryStream())
             {
-                collection.ToCSV(ms, encoding, culture, writeHeaders);
+                collection.ToCsv(ms, encoding, culture, writeHeaders);
                 return ms.ToArray();
             }
         }
 
-        public static void ToCSV<T>(this IEnumerable<T> collection, Stream stream, Encoding encoding= null, CultureInfo culture = null, bool writeHeaders = true)
+        public static void ToCsv<T>(this IEnumerable<T> collection, Stream stream, Encoding encoding= null, CultureInfo culture = null, bool writeHeaders = true)
         {
             encoding = encoding ?? Encoding.GetEncoding(1272);
             culture = culture ?? CultureInfo.CurrentCulture;
@@ -47,12 +47,12 @@ namespace Signum.Utilities
 
                 foreach (var item in collection)
                 {
-                    sw.WriteLine(members.ToString(m => m.Getter(item).TryCC(a => EncodeCSV(ConvertToString(a, culture), culture)), separator));
+                    sw.WriteLine(members.ToString(m => m.Getter(item).TryCC(a => EncodeCsv(ConvertToString(a, culture), culture)), separator));
                 }
             }
         }
 
-        static string EncodeCSV(string p, CultureInfo culture)
+        static string EncodeCsv(string p, CultureInfo culture)
         {
             string separator = culture.TextInfo.ListSeparator;
 
@@ -120,7 +120,7 @@ namespace Signum.Utilities
                     T t = new T();
                     for (int i = 0; i < members.Count; i++)
                     {
-                        object value = ConvertTo(DecodeCSV(vals[i].Value), members[i].MemberInfo.ReturningType(), culture);
+                        object value = ConvertTo(DecodeCsv(vals[i].Value), members[i].MemberInfo.ReturningType(), culture);
 
                         members[i].UntypedSetter(t, value);
                     }
@@ -130,7 +130,7 @@ namespace Signum.Utilities
             }
         }
 
-        static string DecodeCSV(string s)
+        static string DecodeCsv(string s)
         {
             if (s.StartsWith("\""))
             {
