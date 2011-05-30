@@ -29,7 +29,7 @@ namespace Signum.Engine.Operations
         public bool Returns { get { return true; } }
         public Type ReturnType { get { return typeof(T); } }
 
-        public Func<List<Lite<F>>, object[], T> Constructor { get; set; }
+        public Func<List<Lite<F>>, object[], T> Construct { get; set; }
 
         public BasicConstructFromMany(Enum key)
         {
@@ -77,12 +77,12 @@ namespace Signum.Engine.Operations
 
         protected virtual T OnConstruct(List<Lite<F>> lites, object[] args)
         {
-            return Constructor(lites, args);
+            return Construct(lites, args);
         }
 
-        public void AssertIsValid()
+        public virtual void AssertIsValid()
         {
-            if (Constructor == null)
+            if (Construct == null)
                 throw new InvalidOperationException("Operation {0} Constructor initialized".Formato(Key));       
         }
 

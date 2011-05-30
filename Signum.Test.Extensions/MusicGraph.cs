@@ -32,26 +32,27 @@ namespace Signum.Test.Extensions
         {
             GetState = f => (f.IsNew) ? AlbumState.New : AlbumState.Saved;
 
-            new Goto(AlbumOperation.Save, AlbumState.Saved)
+            new Execute(AlbumOperation.Save)
             {
+                FromStates = new[] { AlbumState.New },
+                ToState = AlbumState.Saved,
                 AllowsNew = true,
                 Lite = false,
-                FromStates = new[] { AlbumState.New },
-                Returns = true,
                 Execute = (album, _) => { album.Save(); },
             }.Register();
 
-            new Goto(AlbumOperation.Modify, AlbumState.Saved)
+            new Execute(AlbumOperation.Modify)
             {
-                AllowsNew = false,
                 FromStates = new[] { AlbumState.Saved },
+                ToState = AlbumState.Saved,
+                AllowsNew = false,
                 Lite = false,
-                Returns = true,
                 Execute = (album, _) => { },
             }.Register();
 
-            new ConstructFrom<BandDN>(AlbumOperation.CreateFromBand, AlbumState.Saved)
+            new ConstructFrom<BandDN>(AlbumOperation.CreateFromBand)
             {
+                ToState = AlbumState.Saved,
                 AllowsNew = false,
                 Lite = true,
                 Construct = (BandDN band, object[] args) =>
@@ -69,8 +70,9 @@ namespace Signum.Test.Extensions
                 Delete = (album, _) => album.Delete()
             }.Register();
 
-            new ConstructFrom<AlbumDN>(AlbumOperation.Clone, AlbumState.New)
+            new ConstructFrom<AlbumDN>(AlbumOperation.Clone)
             {
+                ToState = AlbumState.New,
                 AllowsNew = false,
                 Lite = true,
                 Construct = (g, args) =>
@@ -83,9 +85,10 @@ namespace Signum.Test.Extensions
                 }
             }.Register();
 
-            new ConstructFromMany<AlbumDN>(AlbumOperation.CreateGreatestHitsAlbum, AlbumState.New)
+            new ConstructFromMany<AlbumDN>(AlbumOperation.CreateGreatestHitsAlbum)
             {
-                Constructor = (albumLites, _) =>
+                ToState = AlbumState.New,
+                Construct = (albumLites, _) =>
                 {
                     List<AlbumDN> albums = albumLites.Select(a => a.Retrieve()).ToList();
                     if (albums.Select(a => a.Author).Distinct().Count() > 1)
@@ -101,9 +104,10 @@ namespace Signum.Test.Extensions
             }.Register();
 
 
-            new ConstructFromMany<AlbumDN>(AlbumOperation.CreateEmptyGreatestHitsAlbum, AlbumState.New)
+            new ConstructFromMany<AlbumDN>(AlbumOperation.CreateEmptyGreatestHitsAlbum)
             {
-                Constructor = (albumLites, _) =>
+                ToState = AlbumState.New,
+                Construct = (albumLites, _) =>
                 {
                     List<AlbumDN> albums = albumLites.Select(a => a.Retrieve()).ToList();
                     if (albums.Select(a => a.Author).Distinct().Count() > 1)
