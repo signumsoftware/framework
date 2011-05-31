@@ -330,8 +330,9 @@ namespace Signum.Engine.Processes
                 GetState = e => e.State;
 
 
-                new Construct(ProcessOperation.Create, ProcessState.Created)
+                new Construct(ProcessOperation.Create)
                 {
+                    ToState = ProcessState.Created,
                     Construct = args =>
                     {
                         Enum processKey = args.GetArg<Enum>(0);
@@ -339,8 +340,9 @@ namespace Signum.Engine.Processes
                     }
                 }.Register();
 
-                new ConstructFrom<ProcessDN>(ProcessOperation.FromProcess, ProcessState.Created)
+                new ConstructFrom<ProcessDN>(ProcessOperation.FromProcess)
                 {
+                    ToState = ProcessState.Created,
                     Lite = false,
                     Construct = (process, args) =>
                     {
@@ -348,9 +350,10 @@ namespace Signum.Engine.Processes
                     }
                 }.Register();
 
-                new Goto(ProcessOperation.Save, ProcessState.Created)
+                new Execute(ProcessOperation.Save)
                 {
                     FromStates = new[] { ProcessState.Created },
+                    ToState = ProcessState.Created,
                     AllowsNew = true,
                     Lite = false,
                     Execute = (pe, args) =>
@@ -360,7 +363,7 @@ namespace Signum.Engine.Processes
                     }
                 }.Register();
 
-                //new Goto(ProcessOperation.Save, ProcessState.Planned)
+                //new Execute(ProcessOperation.Save, ProcessState.Planned)
                 //{
                 //     FromStates = new []{ProcessState.Planned},
                 //     AllowsNew = true,
@@ -372,9 +375,10 @@ namespace Signum.Engine.Processes
                 //     }
                 //}.Register();
 
-                new Goto(ProcessOperation.Plan, ProcessState.Planned)
-                {
+                new Execute(ProcessOperation.Plan)
+                {   
                     FromStates = new[] { ProcessState.Created, ProcessState.Canceled, ProcessState.Planned, ProcessState.Suspended },
+                    ToState = ProcessState.Planned,
                     Execute = (pe, args) =>
                     {
                         pe.State = ProcessState.Planned;
@@ -382,9 +386,10 @@ namespace Signum.Engine.Processes
                     }
                 }.Register();
 
-                new Goto(ProcessOperation.Cancel, ProcessState.Canceled)
+                new Execute(ProcessOperation.Cancel)
                 {
                     FromStates = new[] { ProcessState.Planned, ProcessState.Created, ProcessState.Suspended },
+                    ToState = ProcessState.Canceled,
                     Execute = (pe, _) =>
                     {
                         pe.State = ProcessState.Canceled;
@@ -392,9 +397,10 @@ namespace Signum.Engine.Processes
                     }
                 }.Register();
 
-                new Goto(ProcessOperation.Execute, ProcessState.Queued)
+                new Execute(ProcessOperation.Execute)
                 {
                     FromStates = new[] { ProcessState.Created, ProcessState.Planned, ProcessState.Canceled, ProcessState.Suspended },
+                    ToState = ProcessState.Queued,
                     Execute = (pe, _) =>
                     {
                         pe.Queue();
@@ -402,9 +408,10 @@ namespace Signum.Engine.Processes
                     }
                 }.Register();
 
-                new Goto(ProcessOperation.Suspend, ProcessState.Suspending)
+                new Execute(ProcessOperation.Suspend)
                 {
                     FromStates = new[] { ProcessState.Queued, ProcessState.Executing },
+                    ToState = ProcessState.Suspending,
                     Execute = (pe, _) =>
                     {
                         pe.State = ProcessState.Suspending;

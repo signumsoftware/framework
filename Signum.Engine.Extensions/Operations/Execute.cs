@@ -128,7 +128,7 @@ namespace Signum.Engine.Operations
         }
 
 
-        public void AssertIsValid()
+        public virtual void AssertIsValid()
         {
             if (Execute == null)
                 throw new InvalidOperationException("Operation {0} does not have Execute initialized".Formato(Key));

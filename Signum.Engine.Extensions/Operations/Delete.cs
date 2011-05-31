@@ -124,7 +124,7 @@ namespace Signum.Engine.Operations
         }
 
 
-        public void AssertIsValid()
+        public virtual void AssertIsValid()
         {
             if (Delete == null)
                 throw new InvalidOperationException("Operation {0} does not have Delete initialized".Formato(Key));

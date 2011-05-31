@@ -187,7 +187,7 @@ namespace Signum.Engine.Mailing
 
                 OperationLogic.Register(new BasicConstructFromMany<EmailMessageDN, ProcessExecutionDN>(EmailOperations.ReSendEmails)
                 {
-                    Constructor = (messages, args) => ProcessLogic.Create(EmailProcesses.SendEmails, messages)
+                    Construct = (messages, args) => ProcessLogic.Create(EmailProcesses.SendEmails, messages)
                 });
 
                 dqm[typeof(EmailPackageDN)] = (from e in Database.Query<EmailPackageDN>()

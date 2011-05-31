@@ -22,6 +22,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto" MinHeight="100"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <Border BorderThickness="0,0,0,1" Padding="2" Grid.Row="0">
@@ -55,7 +56,10 @@
             </Grid>
         </GroupBox>
         <c:ChartBuilder Grid.Row="3"/>
-        <TabControl Grid.Row="4" Margin="2,0,2,2" MinHeight="200" MinWidth="200">
+        <Border x:Name="brMultiplications" BorderBrush="#fbdd73" Background="#fff59d" BorderThickness="1" CornerRadius="2" Margin="2,0,2,2" Padding="2" HorizontalAlignment="Stretch" Visibility="Collapsed" Grid.Row="4">
+            <TextBlock x:Name="tbMultiplications"/>
+        </Border>
+        <TabControl Grid.Row="5" Margin="2,0,2,2" MinHeight="200" MinWidth="200">
             <TabItem>
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal">
@@ -103,7 +107,7 @@
                 </Grid>
             </TabItem>
         </TabControl>
-        <m:ImageButton x:Name="execute" Image="execute.png" VerticalAlignment="Top" Content="Draw Chart!" Margin="180,0,2,0" Grid.Row="4" Click="execute_Click" />
+        <m:ImageButton x:Name="execute" Image="execute.png" VerticalAlignment="Top" Content="Draw Chart!" Margin="180,0,2,0" Grid.Row="5" Click="execute_Click" />
 
     </Grid>
 </Window>
