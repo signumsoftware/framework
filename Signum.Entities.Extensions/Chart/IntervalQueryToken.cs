@@ -198,14 +198,14 @@ namespace Signum.Entities.Chart
             return null;
         }
 
-        public override Expression BuildExpression(Expression expression)
+        protected override Expression BuildExpressionInternal(BuildExpressionContext context)
         {
             string error;
             IntervalDefinition intervals = ParseInterval(Intervals, isDecimal, out error);
             if (intervals == null)
                 throw new InvalidOperationException(error);
 
-            Expression exp = Parent.BuildExpression(expression);
+            Expression exp = Parent.BuildExpression(context);
 
             Type t = Parent.Type.UnNullify();
             Expression sqlExpression = CreateSqlExpression(intervals, exp, t);
@@ -397,7 +397,7 @@ namespace Signum.Entities.Chart
             return null;
         }
 
-        public override Expression BuildExpression(Expression expression)
+        protected override Expression BuildExpressionInternal(BuildExpressionContext context)
         {
             return Expression.Constant(1); 
         }
