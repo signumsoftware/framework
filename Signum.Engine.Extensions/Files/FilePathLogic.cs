@@ -180,7 +180,7 @@ namespace Signum.Engine.Files
 
         public static byte[] GetByteArray(FilePathDN fp)
         {
-            return File.ReadAllBytes(fp.FullPhysicalPath);
+            return fp.BinaryFile ?? File.ReadAllBytes(fp.FullPhysicalPath);
         }
     }
 
