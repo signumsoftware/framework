@@ -363,7 +363,7 @@ namespace Signum.Engine.Processes
                     }
                 }.Register();
 
-                //new Goto(ProcessOperation.Save, ProcessState.Planned)
+                //new Execute(ProcessOperation.Save, ProcessState.Planned)
                 //{
                 //     FromStates = new []{ProcessState.Planned},
                 //     AllowsNew = true,

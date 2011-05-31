@@ -405,6 +405,11 @@ namespace Signum.Engine.Operations
         {
             return operations.RawDictionary.Values.SelectMany(d => d.Values).OfType<Graph<E, S>.IGraphOperation>();
         }
+
+        public static bool IsDefined(Type type, Enum operation)
+        {
+            return operations.TryGetValue(type, operation) != null;
+        }
     }
 
     public delegate void OperationHandler(IOperation operation, IIdentifiable entity);
