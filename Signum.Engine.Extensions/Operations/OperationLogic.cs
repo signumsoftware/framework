@@ -17,6 +17,7 @@ using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Extensions.Properties;
 using Signum.Entities.Reflection;
+using System.Linq.Expressions;
 
 namespace Signum.Engine.Operations
 {
@@ -40,6 +41,13 @@ namespace Signum.Engine.Operations
 
     public static class OperationLogic
     {
+        static Expression<Func<OperationDN, IQueryable<LogOperationDN>>> LogOperationsExpression = 
+            o => Database.Query<LogOperationDN>().Where(a=>a.Operation == o);
+        public static IQueryable<LogOperationDN> LogOperations(this OperationDN o)
+        {
+            return LogOperationsExpression.Invoke(o);
+        }
+        
         static ExternalPolymorphicDictionary<Enum, IOperation> operations = new ExternalPolymorphicDictionary<Enum, IOperation>();
 
         public static HashSet<Enum> RegisteredOperations
@@ -73,8 +81,7 @@ namespace Signum.Engine.Operations
                                                    lo.End,
                                                    lo.Exception
                                                }).ToDynamic();
-
-
+             
                 dqm[typeof(OperationDN)] = (from lo in Database.Query<OperationDN>()
                                             select new
                                             {
@@ -82,7 +89,9 @@ namespace Signum.Engine.Operations
                                                 lo.Id,
                                                 lo.Name,
                                                 lo.Key,
-                                            }).ToDynamic(); 
+                                            }).ToDynamic();
+
+                dqm.RegisterExpression((OperationDN o) => o.LogOperations());
             }
         }
 
