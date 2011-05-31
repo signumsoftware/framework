@@ -152,7 +152,7 @@ SF.registerModule("Operations", function () {
             if ((typeof (operationResult) !== "object") || (operationResult.result != "ModelState"))
                 return true;
 
-            modelState = operationResult.ModelState;
+            var modelState = operationResult.ModelState;
 
             if (SF.isEmpty(this.options.prefix)) {
                 new SF.Validator().showErrors(modelState);
