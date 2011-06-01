@@ -387,4 +387,12 @@ namespace Signum.Utilities
             return dic.ToDictionary(k => k.Value, k => k.Key, comparer, errorContext);
         }
     }
+
+    public static class KVP
+    {
+        public static KeyValuePair<K, V> Create<K, V>(K key, V value)
+        {
+            return new KeyValuePair<K, V>(key, value);
+        }
+    }
 }
