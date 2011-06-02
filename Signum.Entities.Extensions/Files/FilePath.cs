@@ -30,8 +30,8 @@ namespace Signum.Entities.Files
         public FilePathDN(Enum fileType, string path)
             : this(fileType)
         {
-            this.fileName = Path.GetFileName(path);
-            this.binaryFile = File.ReadAllBytes(path);
+            this.FileName = Path.GetFileName(path);
+            this.BinaryFile = File.ReadAllBytes(path);
         }
 
         [NotNullable, SqlDbType(Size = 260)]
