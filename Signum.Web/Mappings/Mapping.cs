@@ -75,7 +75,7 @@ namespace Signum.Web
             }
         }
 
-        public abstract T DefaultGetValue(MappingContext<T> ctx);
+        protected internal abstract T DefaultGetValue(MappingContext<T> ctx);
 
         public Func<MappingContext<T>, T> GetValue;
 
@@ -108,7 +108,7 @@ namespace Signum.Web
 
     public class ValueMapping<T> : Mapping<T>
     {
-        public override T DefaultGetValue(MappingContext<T> ctx)
+        protected internal override T DefaultGetValue(MappingContext<T> ctx)
         {
 
             Type type = typeof(T).UnNullify();
@@ -151,7 +151,7 @@ namespace Signum.Web
             return mapping;
         }
 
-        public override T DefaultGetValue(MappingContext<T> ctx)
+        protected internal override T DefaultGetValue(MappingContext<T> ctx)
         {
             string strRuntimeInfo;
             if (!ctx.Inputs.TryGetValue(EntityBaseKeys.RuntimeInfo, out strRuntimeInfo))
@@ -273,7 +273,7 @@ namespace Signum.Web
             }
         }
 
-        public override T DefaultGetValue(MappingContext<T> ctx)
+        protected internal override T DefaultGetValue(MappingContext<T> ctx)
         {
             var val = OnGetEntity(ctx);
 
@@ -356,7 +356,7 @@ namespace Signum.Web
             }
         }
 
-        public EntityMapping<T> GetProperty<P>(Expression<Func<T, P>> property, Action<Mapping<P>> continuation)
+        public EntityMapping<T> SetProperty<P>(Expression<Func<T, P>> property, Action<Mapping<P>> continuation)
         {
             PropertyInfo pi = ReflectionTools.GetPropertyInfo(property);
             continuation(((PropertyMapping<P>)Properties[pi.Name]).Mapping);
@@ -398,6 +398,14 @@ namespace Signum.Web
             return this;
         }
 
+        public EntityMapping<T> SetProperty<P>(Expression<Func<T, P>> property, Func<MappingContext<P>, P> getValue)
+        {
+            PropertyInfo pi = ReflectionTools.GetPropertyInfo(property);
+            ((PropertyMapping<P>)Properties[pi.Name]).Mapping.GetValue = getValue;
+            
+            return this;
+        }
+
         public EntityMapping<T> RemoveProperty<P>(Expression<Func<T, P>> property)
         {
             PropertyInfo pi = ReflectionTools.GetPropertyInfo(property);
@@ -425,7 +433,7 @@ namespace Signum.Web
             EntityMapping = Create<S>();
         }
 
-        public override Lite<S> DefaultGetValue(MappingContext<Lite<S>> ctx)
+        protected internal override Lite<S> DefaultGetValue(MappingContext<Lite<S>> ctx)
         {
             var newLite = Change(ctx);
             if (newLite == ctx.Value)
@@ -526,7 +534,7 @@ namespace Signum.Web
 
         }
 
-        public override MList<S> DefaultGetValue(MappingContext<MList<S>> ctx)
+        protected internal override MList<S> DefaultGetValue(MappingContext<MList<S>> ctx)
         {
             MList<S> oldList = ctx.Value;
 
@@ -604,7 +612,7 @@ namespace Signum.Web
             this.Route = route;
         }
 
-        public override MList<S> DefaultGetValue(MappingContext<MList<S>> ctx)
+        protected internal override MList<S> DefaultGetValue(MappingContext<MList<S>> ctx)
         {
             MList<S> list = ctx.Value;
             var dic = list.ToDictionary(GetKey);
