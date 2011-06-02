@@ -203,7 +203,7 @@ namespace Signum.Web.Auth
             }
         }
 
-        static void AuthClient_Saving(UserDN ident, bool isRoot)
+        static void AuthClient_Saving(UserDN ident)
         {
             Transaction.RealCommit += () =>
             {

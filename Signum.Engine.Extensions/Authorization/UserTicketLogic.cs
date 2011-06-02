@@ -40,7 +40,7 @@ namespace Signum.Engine.Authorization
             }
         }
 
-        static void UserTicketLogic_Saving(UserDN ident, bool isRoot)
+        static void UserTicketLogic_Saving(UserDN ident)
         {
             Transaction.PreRealCommit += () =>
             {
