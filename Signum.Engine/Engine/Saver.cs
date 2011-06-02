@@ -38,7 +38,7 @@ namespace Signum.Engine
                     IdentifiableEntity ident = m as IdentifiableEntity;
 
                     if (ident != null)
-                        schema.OnPreSaving(ident, roots.Contains(ident), ref graphModified);
+                        schema.OnPreSaving(ident, ref graphModified);
                 }, createGraph);
 
             string error = GraphExplorer.Integrity(modifiables);
@@ -52,7 +52,7 @@ namespace Signum.Engine
             DirectedGraph<IdentifiableEntity> identifiables = GraphExplorer.ColapseIdentifiables(modifiables);
 
             foreach (var node in identifiables)
-                schema.OnSaving(node, roots.Contains(node));
+                schema.OnSaving(node);
 
             //Remove all the edges that doesn't mean a dependency
             identifiables.RemoveAll(identifiables.Edges.Where(e => !e.To.IsNew).ToList());
