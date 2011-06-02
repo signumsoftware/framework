@@ -240,7 +240,7 @@ namespace Signum.Entities.Authorization
             }
         }
 
-        void Schema_Saving(RT rule, bool isRoot)
+        void Schema_Saving(RT rule)
         {
             Transaction.RealCommit += () => InvalidateCache();
         }

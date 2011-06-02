@@ -53,7 +53,7 @@ namespace Signum.Engine.Authorization
             return cache.GetAllowed(type).GetDB() != TypeAllowedBasic.None ? null : "Type '{0}' is set to None".Formato(type.NiceName());
         }
 
-        static void Schema_Saving(IdentifiableEntity ident, bool isRoot)
+        static void Schema_Saving(IdentifiableEntity ident)
         {
             if (ident.Modified.Value)
             {

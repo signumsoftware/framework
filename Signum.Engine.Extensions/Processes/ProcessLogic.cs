@@ -150,7 +150,7 @@ namespace Signum.Engine.Processes
             }
         }
 
-        static void ProcessExecution_Saving(ProcessExecutionDN pe, bool isRoot)
+        static void ProcessExecution_Saving(ProcessExecutionDN pe)
         {
             if (pe.Modified.Value)
                 Transaction.RealCommit += () =>

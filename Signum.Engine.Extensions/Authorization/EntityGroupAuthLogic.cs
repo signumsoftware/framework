@@ -105,7 +105,7 @@ namespace Signum.Engine.Authorization
         const string CreatedKey = "Created";
         const string ModifiedKey = "Modified";
 
-        static void EntityGroupAuthLogic_Saving<T>(T ident, bool isRoot)
+        static void EntityGroupAuthLogic_Saving<T>(T ident)
             where T : IdentifiableEntity
         {
             if (AuthLogic.IsEnabled && !saveDisabled && ident.Modified.Value)

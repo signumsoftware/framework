@@ -498,7 +498,7 @@ namespace Signum.Engine.Mailing
             }
         }
 
-        static void EmailClientSettingsLogic_Saving(SMTPConfigurationDN ident, bool isRoot)
+        static void EmailClientSettingsLogic_Saving(SMTPConfigurationDN ident)
         {
             if (ident.Modified.Value)
                 Transaction.RealCommit += () => smtpConfigurations = null;
