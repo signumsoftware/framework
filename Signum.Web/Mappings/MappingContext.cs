@@ -317,6 +317,11 @@ namespace Signum.Web
             string strRuntimeInfo = Inputs[EntityBaseKeys.RuntimeInfo];
             return RuntimeInfo.FromFormValue(strRuntimeInfo);
         }
+
+        public T DefaultGetValue()
+        {
+            return Mapping.DefaultGetValue(this);
+        }
     }
 
     internal class RootContext<T> : MappingContext<T> where T : IRootEntity
