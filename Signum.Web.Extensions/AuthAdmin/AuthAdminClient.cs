@@ -47,9 +47,9 @@ namespace Signum.Web.AuthAdmin
                     Register<TypeRulePack, TypeAllowedRule, TypeDN, TypeAllowed, TypeDN>("types", a => a.Resource, "Resource", false);
 
                     Navigator.EmbeddedEntitySettings<TypeRulePack>().MappingDefault
-                        .GetProperty(m => m.Rules, rul =>
+                        .SetProperty(m => m.Rules, rul =>
                         ((EntityMapping<TypeAllowedRule>)((MListDictionaryMapping<TypeAllowedRule, TypeDN>)rul).ElementMapping)
-                                .GetProperty(a => a.Allowed, m => m.GetValue = ctx => ParseTypeAllowed(ctx.Inputs, null)));
+                                .SetProperty(a => a.Allowed, ctx => ParseTypeAllowed(ctx.Inputs, null)));
                 }
 
                 if (properties)
@@ -75,9 +75,9 @@ namespace Signum.Web.AuthAdmin
                     Register<EntityGroupRulePack, EntityGroupAllowedRule, EntityGroupDN, EntityGroupAllowedDN, EntityGroupDN>("entityGroups", a => a.Resource, "Resource", false);
 
                     Navigator.EmbeddedEntitySettings<EntityGroupRulePack>().MappingDefault
-                        .GetProperty(m => m.Rules, rul =>
+                        .SetProperty(m => m.Rules, rul =>
                         ((EntityMapping<EntityGroupAllowedRule>)((MListDictionaryMapping<EntityGroupAllowedRule, EntityGroupDN>)rul).ElementMapping)
-                                .GetProperty(a => a.Allowed, m => m.GetValue = ctx =>
+                                .SetProperty(a => a.Allowed, ctx =>
                                     new EntityGroupAllowedDN(ParseTypeAllowed(ctx.Parent.Inputs, "In_"), ParseTypeAllowed(ctx.Parent.Inputs, "Out_"))
                                 ));
                 }
