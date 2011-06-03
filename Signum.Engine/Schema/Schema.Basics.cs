@@ -343,7 +343,7 @@ namespace Signum.Engine.Maps
             return Tables.GetOrThrow(type, "Table {0} not loaded in schema");
         }
 
-        static Field FindField(IFieldFinder fieldFinder, MemberInfo[] members, bool throws)
+        internal static Field FindField(IFieldFinder fieldFinder, MemberInfo[] members, bool throws)
         {
             IFieldFinder current = fieldFinder;
             Field result = null;
@@ -1002,7 +1002,7 @@ namespace Signum.Engine.Maps
         }
     }
 
-    public partial class RelationalTable : ITable
+    public partial class RelationalTable : ITable, IFieldFinder
     {
         public class PrimaryKeyColumn : IColumn
         {
@@ -1052,6 +1052,19 @@ namespace Signum.Engine.Maps
             return result;
         }
 
+        public Field GetField(MemberInfo value, bool throws)
+        {
+            if (value.Name == "Parent")
+                return this.BackReference;
+
+            if (value.Name == "Element")
+                return this.Field;
+
+            if (throws)
+                throw new InvalidOperationException("'{0}' not found".Formato(value.Name));
+
+            return null;
+        }
     }
 
     public enum KindOfField

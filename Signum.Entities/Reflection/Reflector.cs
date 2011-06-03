@@ -145,7 +145,7 @@ namespace Signum.Entities.Reflection
             return ExtractLite(t) ?? t;
         }    
 
-        public static MemberInfo[] GetMemberList<T>(Expression<Func<T, object>> lambdaToField)
+        public static MemberInfo[] GetMemberList<T, S>(Expression<Func<T, S>> lambdaToField)
         {
             Expression e = lambdaToField.Body;
 

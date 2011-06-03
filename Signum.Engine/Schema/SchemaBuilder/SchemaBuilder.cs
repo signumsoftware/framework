@@ -60,13 +60,28 @@ namespace Signum.Engine.Maps
             Expression<Func<T, object>>[] fieldsNotNullLambdas = Split(fieldsNotNull);
 
             Field[] colFields = fieldLambdas.Select(fun => schema.Field<T>(fun)).ToArray();
-            Field[] collFieldsNotNull = fieldsNotNullLambdas.Select(fun => schema.Field<T>(fun)).ToArray();
+            Field[] colFieldsNotNull = fieldsNotNullLambdas.Select(fun => schema.Field<T>(fun)).ToArray();
 
-            AddUniqueIndex(new UniqueIndex(schema.Table<T>(), colFields).WhereNotNull(collFieldsNotNull));
+            AddUniqueIndex(new UniqueIndex(schema.Table<T>(), colFields).WhereNotNull(colFieldsNotNull));
+        }
+
+        public void AddUniqueIndexMList<T, V>(Expression<Func<T, MList<V>>> toMList, Expression<Func<MListElement<T, V>, object>> fields, Expression<Func<MListElement<T, V>, object>> fieldsNotNull)
+            where T : IdentifiableEntity
+        {
+            Schema schema = Schema.Current;
+
+            Expression<Func<MListElement<T, V>, object>>[] fieldLambdas = Split(fields);
+            Expression<Func<MListElement<T, V>, object>>[] fieldsNotNullLambdas = Split(fieldsNotNull);
+
+            RelationalTable table = ((FieldMList)Schema.FindField(schema.Table(typeof(T)), Reflector.GetMemberList(toMList), true)).RelationalTable;
+
+            Field[] colFields = fieldLambdas.Select(fun => Schema.FindField(table,  Reflector.GetMemberList(fun), true)).ToArray();
+            Field[] colFieldsNotNull = fieldsNotNullLambdas.Select(fun => Schema.FindField(table,  Reflector.GetMemberList(fun), true)).ToArray();
+
+            AddUniqueIndex(table, colFields, colFieldsNotNull);
         }
 
         Expression<Func<T, object>>[] Split<T>(Expression<Func<T, object>> columns)
-            where T : IdentifiableEntity
         {
             if (columns == null)
                 return new Expression<Func<T, object>>[0];
