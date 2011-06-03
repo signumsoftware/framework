@@ -90,7 +90,7 @@ namespace Signum.Test
                                          LastAward = a.LastAward.ToLite(),
                                      }).ToDynamic();
 
-            dqm.RegisterExtension((IAuthorDN au) => Database.Query<AlbumDN>().Where(a => a.Author == au), () => "Albums", "Albums"); 
+            dqm.RegisterExpression((IAuthorDN au) => Database.Query<AlbumDN>().Where(a => a.Author == au), () => "Albums", "Albums"); 
 
             dqm[typeof(BandDN)] = (from a in Database.Query<BandDN>()
                                    select new

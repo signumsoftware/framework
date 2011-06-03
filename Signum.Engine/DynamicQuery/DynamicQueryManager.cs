@@ -135,24 +135,24 @@ namespace Signum.Engine.DynamicQuery
                 .Select(ei => ei.CreateToken(parent));
         }
 
-        public ExtensionInfo RegisterExtension<E, S>(Expression<Func<E, S>> lambdaToMethod)
+        public ExtensionInfo RegisterExpression<E, S>(Expression<Func<E, S>> lambdaToMethod)
             where E : class, IIdentifiable
         {
             MethodInfo mi = ReflectionTools.GetMethodInfo(lambdaToMethod);
 
             AssertExtensionMethod(mi);
 
-            return RegisterExtension<E, S>(lambdaToMethod, () => mi.Name.NiceName(), mi.Name);
+            return RegisterExpression<E, S>(lambdaToMethod, () => mi.Name.NiceName(), mi.Name);
         }
 
-        public ExtensionInfo RegisterExtension<E, S>(Expression<Func<E, S>> lambdaToMethod, Func<string> niceName)
+        public ExtensionInfo RegisterExpression<E, S>(Expression<Func<E, S>> lambdaToMethod, Func<string> niceName)
             where E : class, IIdentifiable
         {
             MethodInfo mi = ReflectionTools.GetMethodInfo(lambdaToMethod);
 
             AssertExtensionMethod(mi);
 
-            return RegisterExtension<E, S>(lambdaToMethod, niceName, mi.Name);
+            return RegisterExpression<E, S>(lambdaToMethod, niceName, mi.Name);
         }
 
         private static void AssertExtensionMethod(MethodInfo mi)
@@ -164,7 +164,7 @@ namespace Signum.Engine.DynamicQuery
                 throw new InvalidOperationException("The parameter 'lambdaToMethod' should be an expression calling a expression method");
         }
 
-        public ExtensionInfo RegisterExtension<E, S>(Expression<Func<E, S>> extensionLambda, Func<string> niceName, string key) 
+        public ExtensionInfo RegisterExpression<E, S>(Expression<Func<E, S>> extensionLambda, Func<string> niceName, string key) 
             where E : class, IIdentifiable
         {
             var result = new ExtensionInfo(typeof(S), key, extensionLambda, typeof(E))
