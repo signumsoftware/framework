@@ -91,7 +91,7 @@ namespace Signum.Entities
         protected Lite(Type runtimeType, int id)
         {
             if (runtimeType == null || !typeof(IdentifiableEntity).IsAssignableFrom(runtimeType))
-                throw new InvalidOperationException("Type {0} does not implement {1}".Formato(runtimeType, typeof(IIdentifiable)));
+                throw new InvalidOperationException("Type {0} does not implement {1}".Formato(runtimeType, typeof(IdentifiableEntity)));
 
             this.runtimeType = runtimeType;
             this.id = id;
