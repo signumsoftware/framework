@@ -14,6 +14,8 @@ namespace Signum.Utilities
 {
     public static class Csv
     {
+        public static Encoding DefaultEncoding = Encoding.GetEncoding(1252);
+
         public static string ToCsvFile<T>(this IEnumerable<T> collection, string fileName, Encoding encoding = null, CultureInfo culture = null, bool writeHeaders = true)
         {
             using (FileStream fs = File.Create(fileName))
@@ -33,7 +35,7 @@ namespace Signum.Utilities
 
         public static void ToCsv<T>(this IEnumerable<T> collection, Stream stream, Encoding encoding= null, CultureInfo culture = null, bool writeHeaders = true)
         {
-            encoding = encoding ?? Encoding.GetEncoding(1272);
+            encoding = encoding ?? DefaultEncoding;
             culture = culture ?? CultureInfo.CurrentCulture;
 
             string separator = culture.TextInfo.ListSeparator; 
@@ -79,7 +81,7 @@ namespace Signum.Utilities
 
         public static List<T> ReadFile<T>(string fileName, Encoding encoding = null, CultureInfo culture = null, bool skipFirtsLine = true) where T : new()
         {
-            encoding = encoding ?? Encoding.GetEncoding(1272);
+            encoding = encoding ?? DefaultEncoding;
             culture = culture ?? CultureInfo.CurrentCulture;
 
             using (FileStream fs = File.OpenRead(fileName))
@@ -96,7 +98,7 @@ namespace Signum.Utilities
         public static IEnumerable<T> ReadStream<T>(this Stream stream, Encoding encoding = null, CultureInfo culture = null, bool skipFirtsLine = true)
             where T : new()
         {
-            encoding = encoding ?? Encoding.GetEncoding(1272);
+            encoding = encoding ?? DefaultEncoding;
             culture = culture ?? CultureInfo.CurrentCulture;
 
             List<MemberEntry<T>> members = MemberEntryFactory.GenerateList<T>(MemberOptions.Fields | MemberOptions.Properties | MemberOptions.Untyped | MemberOptions.Setters);
