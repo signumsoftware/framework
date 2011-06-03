@@ -64,6 +64,11 @@ namespace Signum.Engine.Maps
 
             AddUniqueIndex(new UniqueIndex(schema.Table<T>(), colFields).WhereNotNull(colFieldsNotNull));
         }
+        public void AddUniqueIndexMList<T, V>(Expression<Func<T, MList<V>>> toMList, Expression<Func<MListElement<T, V>, object>> fields)
+           where T : IdentifiableEntity
+        {
+            AddUniqueIndexMList(toMList, fields, null); 
+        }
 
         public void AddUniqueIndexMList<T, V>(Expression<Func<T, MList<V>>> toMList, Expression<Func<MListElement<T, V>, object>> fields, Expression<Func<MListElement<T, V>, object>> fieldsNotNull)
             where T : IdentifiableEntity
