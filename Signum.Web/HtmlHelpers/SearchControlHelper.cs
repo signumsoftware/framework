@@ -150,7 +150,7 @@ namespace Signum.Web
                 {
                     Context valueContext = new Context(context, "value_" + index.ToString());
 
-                    if (filterOptions.Frozen)
+                    if (filterOptions.Frozen && !filterOptions.Token.Type.IsLite())
                     {
                         string txtValue = (filterOptions.Value != null) ? filterOptions.Value.ToString() : "";
                         sb.AddLine(helper.TextBox(valueContext.ControlID, txtValue, new { @readonly = "readonly" }));
@@ -247,24 +247,24 @@ namespace Signum.Web
                 {
                     EntityCombo ec = new EntityCombo(filterOption.Token.Type, lite, parent, "", filterOption.Token.GetPropertyRoute())
                     {
-                        LabelVisible = false,
-                        //BreakLine = false,
-                        Implementations = filterOption.Token.Implementations()
+                        Implementations = filterOption.Token.Implementations(),
                     };
-                    EntityBaseHelper.ConfigureEntityBase(ec, filterOption.Token.Type.CleanType());
+                    EntityBaseHelper.ConfigureEntityButtons(ec, filterOption.Token.Type.CleanType());
+                    ec.LabelVisible = false;
+                    ec.Create = false;
+                    ec.ReadOnly = filterOption.Frozen;
                     return EntityComboHelper.InternalEntityCombo(helper, ec);
                 }
                 else
                 {
                     EntityLine el = new EntityLine(filterOption.Token.Type, lite, parent, "", filterOption.Token.GetPropertyRoute())
                     {
-                        LabelVisible = false,
-                        //BreakLine = false,
-                        Create = false,
-                        Implementations = filterOption.Token.Implementations()
+                         Implementations = filterOption.Token.Implementations(),
                     };
-                    EntityBaseHelper.ConfigureEntityBase(el, filterOption.Token.Type.CleanType());
+                    EntityBaseHelper.ConfigureEntityButtons(el, filterOption.Token.Type.CleanType());
+                    el.LabelVisible = false;
                     el.Create = false;
+                    el.ReadOnly = filterOption.Frozen;
 
                     return EntityLineHelper.InternalEntityLine(helper, el);
                 }
