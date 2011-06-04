@@ -195,7 +195,7 @@ namespace Signum.Web.Controllers
             return JsonAction.ModelState(ModelState, context.UntypedValue.ToString(), newLink);
         }
 
-        [HttpPost, ValidateInput(false)]
+        [HttpPost]
         public JsonResult ValidatePartial(string prefix)
         {
             ModifiableEntity mod = this.UntypedExtractEntity(prefix);
