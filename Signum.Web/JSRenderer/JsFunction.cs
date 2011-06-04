@@ -19,9 +19,10 @@ namespace Signum.Web
             Renderer = () => "function({0}){{{1}}}".Formato(Args.ToString(", "), instructions.ToString(a => a.ToJS(), ";").Indent(3));
         }
 
-        public void Add(JsInstruction instruction)
+        public JsFunction Add(JsInstruction instruction)
         {
             instructions.Add(instruction);
+            return this;
         }
      
         public IEnumerator<JsInstruction> GetEnumerator()

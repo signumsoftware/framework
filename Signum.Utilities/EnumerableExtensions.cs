@@ -712,6 +712,11 @@ namespace Signum.Utilities
             return new HashSet<T>(source);
         }
 
+        public static HashSet<T> ToHashSet<T>(this IEnumerable<T> source, IEqualityComparer<T> comparer)
+        {
+            return new HashSet<T>(source, comparer);
+        }
+
         public static ReadOnlyCollection<T> ToReadOnly<T>(this IEnumerable<T> collection)
         {
             return collection == null ? null :

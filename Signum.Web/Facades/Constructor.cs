@@ -39,6 +39,11 @@ namespace Signum.Web
         {
             return ConstructorManager.VisualConstruct(controller, type, prefix, preferredStyle);
         }
+
+        public static void AddConstructor<T>(Func<T> constructor) where T:ModifiableEntity
+        {
+            ConstructorManager.Constructors.Add(typeof(T), constructor);
+        }
     }
 
     public class ConstructContext
