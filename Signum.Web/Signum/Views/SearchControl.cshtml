@@ -53,7 +53,7 @@
                 })
     }
     
-    <div class="sf-query-button-bar">
+    <div class="sf-query-button-bar" style="display:@((findOptions.FilterMode != FilterMode.OnlyResults) ? "block" : "none")">
         <button type="submit" class="sf-query-button sf-search" data-icon="ui-icon-search" id="@Model.Compose("qbSearch")" onclick="@("new SF.FindNavigator({{prefix:'{0}',searchControllerUrl:'{1}'}}).search();return false;".Formato(Model.ControlID, Url.SignumAction("Search")))">@Resources.Search</button>
         @if (findOptions.Create && Navigator.IsCreable(entitiesType, true) && viewable)
         {
