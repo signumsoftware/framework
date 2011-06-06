@@ -445,7 +445,7 @@ namespace Signum.Web.Auth
                 System.Web.HttpContext.Current.Response.Cookies.Add(cookie);
             }
 
-            AddUserSession(user.UserName, user);
+            AddUserSession(user);
 
             TempData["Message"] = AuthLogic.OnLoginMessage();
 
@@ -512,7 +512,7 @@ namespace Signum.Web.Auth
                         Expires = DateTime.Now.Add(UserTicketLogic.ExpirationInterval),
                     });
 
-                    AddUserSession(user.UserName, user);
+                    AddUserSession(user);
                     return true;
                 }
                 catch
@@ -652,7 +652,7 @@ namespace Signum.Web.Auth
                 System.Web.HttpContext.Current.Session[SessionUserKey] = newUser;
         }
 
-        public static void AddUserSession(string userName, UserDN user)
+        public static void AddUserSession(UserDN user)
         {
             System.Web.HttpContext.Current.Session[SessionUserKey] = user;
 
