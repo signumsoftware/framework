@@ -848,7 +848,7 @@ namespace Signum.Web
         {
             NameValueCollection form = controller.ControllerContext.HttpContext.Request.Form;
             
-            if (form.AllKeys.Any(s => s == ViewDataKeys.Reactive) && (string.IsNullOrEmpty(prefix) || !prefix.StartsWith("New")))
+            if (form[ViewDataKeys.Reactive] != null && (string.IsNullOrEmpty(prefix) || !prefix.StartsWith("New")))
             {
                 controller.ViewData[ViewDataKeys.Reactive] = true;
                 ModifiableEntity mod = (ModifiableEntity)controller.ControllerContext.HttpContext.Session[controller.TabID()];

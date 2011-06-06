@@ -200,6 +200,11 @@ namespace Signum.Web
         {
             Common.TaskSetImplementations(eb);
 
+            ConfigureEntityButtons(eb, entityType);
+        }
+
+        public static void ConfigureEntityButtons(EntityBase eb, Type entityType)
+        {
             if (eb.Implementations == null && Navigator.Manager.EntitySettings.ContainsKey(entityType))
             {
                 eb.Create = Navigator.IsCreable(entityType, false);
