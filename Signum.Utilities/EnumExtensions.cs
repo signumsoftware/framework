@@ -53,6 +53,22 @@ namespace Signum.Utilities
             return result;
         }
 
+        public static long MinFlag(long value)
+        {
+            int result = 1;
+            while ((result & value) == 0 && result != 0)
+                result <<= 1;
+            return result;
+        }
+
+        public static long MaxFlag(long value)
+        {
+            int result = (int.MaxValue >> 1) + 1; // because C2
+            while ((result & value) == 0 && result != 0)
+                result >>= 1;
+            return result;
+        }
+
         public static bool TryParse(string value, Type enumType, bool ignoreCase, out Enum result)
         {
             if (!Enum.IsDefined(enumType, value))
