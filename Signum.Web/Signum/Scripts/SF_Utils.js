@@ -399,9 +399,7 @@ SF.NewContentProcessor = {
     defaultDatepicker: function ($newContent) {
         $newContent.find(".sf-datepicker").each(function (i, val) {
             var $txt = $(val);
-            if (!txt.hasClass("hasDatepicker")) {
-                $txt.datepicker(jQuery.extend({}, SF.Locale.defaultDatepickerOptions, { dateFormat: $txt.attr("data-format") }));
-            }
+            $txt.datepicker(jQuery.extend({}, SF.Locale.defaultDatepickerOptions, { dateFormat: $txt.attr("data-format") }));
         });
     },
 
@@ -417,10 +415,8 @@ SF.NewContentProcessor = {
     defaultAutocomplete: function ($newContent) {
         $newContent.find(".sf-entity-autocomplete").each(function (i, val) {
             var $txt = $(val);
-            if (!$txt.hasClass(".ui-autocomplete-input")) {
-                var data = $txt.data();
-                SF.entityAutocomplete($txt, { delay: 200, types: data.types, url: data.url, count: 5 });
-            }
+            var data = $txt.data();
+            SF.entityAutocomplete($txt, { delay: 200, types: data.types, url: data.url, count: 5 });
         });
     },
 
