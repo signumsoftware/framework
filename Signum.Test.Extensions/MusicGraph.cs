@@ -65,11 +65,6 @@ namespace Signum.Test.Extensions
                     }.Save()
             }.Register();
 
-            new Delete(AlbumOperation.Delete)
-            {
-                Delete = (album, _) => album.Delete()
-            }.Register();
-
             new ConstructFrom<AlbumDN>(AlbumOperation.Clone)
             {
                 ToState = AlbumState.New,
