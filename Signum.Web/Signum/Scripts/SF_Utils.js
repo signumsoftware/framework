@@ -385,19 +385,23 @@ SF.NewContentProcessor = {
     defaultButtons: function ($newContent) {
         $newContent.find(".sf-entity-button, .sf-query-button, .sf-line-button, .sf-chooser-button, .sf-button").each(function (i, val) {
             var $txt = $(val);
-            var data = $txt.data();
-            $txt.button({
-                text: (!("text" in data) || SF.isTrue(data.text)),
-                icons: { primary: data.icon, secondary: data["icon-secondary"] },
-                disabled: $txt.hasClass("sf-disabled")
-            });
+            if (!$txt.hasClass("ui-button")) {
+                var data = $txt.data();
+                $txt.button({
+                    text: (!("text" in data) || SF.isTrue(data.text)),
+                    icons: { primary: data.icon, secondary: data["icon-secondary"] },
+                    disabled: $txt.hasClass("sf-disabled")
+                });
+            }
         });
     },
 
     defaultDatepicker: function ($newContent) {
         $newContent.find(".sf-datepicker").each(function (i, val) {
             var $txt = $(val);
-            $txt.datepicker(jQuery.extend({}, SF.Locale.defaultDatepickerOptions, { dateFormat: $txt.attr("data-format") }));
+            if (!txt.hasClass("hasDatepicker")) {
+                $txt.datepicker(jQuery.extend({}, SF.Locale.defaultDatepickerOptions, { dateFormat: $txt.attr("data-format") }));
+            }
         });
     },
 
@@ -413,8 +417,10 @@ SF.NewContentProcessor = {
     defaultAutocomplete: function ($newContent) {
         $newContent.find(".sf-entity-autocomplete").each(function (i, val) {
             var $txt = $(val);
-            var data = $txt.data();
-            SF.entityAutocomplete($txt, { delay: 200, types: data.types, url: data.url, count: 5 });
+            if (!$txt.hasClass(".ui-autocomplete-input")) {
+                var data = $txt.data();
+                SF.entityAutocomplete($txt, { delay: 200, types: data.types, url: data.url, count: 5 });
+            }
         });
     },
 
