@@ -460,6 +460,21 @@ namespace Signum.Web.Selenium
             selenium.Click(SearchCreateLocator(prefix));
         }
 
+        public static void SearchCreateWithImpl(this ISelenium selenium, string typeToChoose)
+        {
+            SearchCreateWithImpl(selenium, typeToChoose, "");
+        }
+
+        public static void SearchCreateWithImpl(this ISelenium selenium, string typeToChoose, string prefix)
+        {
+            selenium.Click(SearchCreateLocator(prefix));
+
+            //implementation popup opens
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SeleniumExtensions.PopupSelector(prefix)));
+            selenium.Click(typeToChoose);
+            selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("{0} .sf-chooser-button".Formato(SeleniumExtensions.PopupSelector(prefix))));
+        }
+
         public static string QueryButtonLocator(string id) {
             //check query-button class present is redundant for locating, but it must be there in the html so good for testing
             return "jq=#{0}.sf-query-button".Formato(id); 

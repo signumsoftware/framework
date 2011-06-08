@@ -33,7 +33,6 @@ namespace Signum.Web.Extensions.Sample
 
                     new EntitySettings<NoteDN>(EntityType.Default) { PartialViewName = e => ViewPrefix.Formato("Note") },
 
-
                     new EmbeddedEntitySettings<AlbumFromBandModel>(){PartialViewName = e => ViewPrefix.Formato("AlbumFromBandModel")},
                 });
 

@@ -12,6 +12,7 @@ using Signum.Test;
 using Signum.Web.Extensions.Sample.Test.Properties;
 using Signum.Engine.Maps;
 using Signum.Engine.Authorization;
+using Signum.Utilities;
 
 namespace Signum.Web.Extensions.Sample.Test
 {
@@ -54,7 +55,6 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.LineFindAndSelectElements("value_1_", false, new int[] { 1 });
 
             //add user column
-            selenium.FilterSelectToken(0, "label=Label", true);
             selenium.ExpandTokens(1);
             selenium.FilterSelectToken(1, "label=Owner", true);
             selenium.AddColumn("Label.Owner");

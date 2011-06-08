@@ -349,7 +349,7 @@ SF.registerModule("Operations", function () {
             var serializer = new SF.Serializer()
                                 .add($('#' + SF.Keys.tabId).serialize())
                                 .add($("input:hidden[name=" + SF.Keys.antiForgeryToken + "]").serialize())
-                                .add({ runtimeType: $(this.pf(SF.Keys.entityTypeName)).val(),
+                                .add({ runtimeType: $(this.pf(SF.Keys.entityTypeNames)).val(),
                                     operationFullKey: this.options.operationKey,
                                     prefix: newPrefix,
                                     oldPrefix: this.options.prefix

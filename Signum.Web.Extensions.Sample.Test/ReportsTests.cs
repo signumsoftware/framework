@@ -49,7 +49,7 @@ namespace Signum.Web.Extensions.Sample.Test
             string excelMenuId = "tmExcel";
             string administerReportsId = "qbReportAdminister";
 
-            string pathSampleReport = "D:\\Signum\\Pruebas\\Albumchulo.xlsx";
+            string pathSampleReport = "D:\\Signum\\Pruebas\\Framework\\Albumchulo.xlsx";
             
             string saveReportId = "ebReportSave";
             string deleteId = "ebReportDelete";

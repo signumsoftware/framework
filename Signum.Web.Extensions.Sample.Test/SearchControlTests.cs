@@ -333,6 +333,40 @@ namespace Signum.Web.Extensions.Sample.Test
         }
 
         [TestMethod]
+        public void ImplementedByFinder()
+        {
+            CheckLoginAndOpen(FindRoute("IAuthorDN"));
+            
+            selenium.Search();
+
+            //Results of implementing types
+            Assert.IsTrue(selenium.IsEntityInRow(1, new Lite<ArtistDN>(1).Key()));
+            Assert.IsTrue(selenium.IsEntityInRow(9, new Lite<BandDN>(1).Key()));
+
+            //Filters
+            selenium.FilterSelectToken(0, "label=Id", false);
+            selenium.AddFilter(0);
+            selenium.Type("value_0", "1");
+            selenium.Search();
+            selenium.WaitAjaxFinished(selenium.ThereAreNRows(2)); //Entity with id 1 of each type
+
+            selenium.DeleteFilter(0);
+            selenium.FilterSelectToken(0, "label=IAuthor", true);
+            selenium.ExpandTokens(1);
+            selenium.FilterSelectToken(1, "value=({0})".Formato(typeof(ArtistDN).FullName.Replace(".", ":")), true);
+            selenium.ExpandTokens(2);
+            selenium.FilterSelectToken(2, "Id", false);
+            selenium.AddFilter(0);
+            selenium.Type("value_0", "1"); 
+            selenium.Search();
+            selenium.WaitAjaxFinished(selenium.ThereAreNRows(1)); //only ArtistDN;1
+
+            //Create implemented type
+            selenium.SearchCreateWithImpl("Artist");
+            Assert.IsTrue(selenium.IsElementPresent("jq=#Dead")); //there's an artist valueline
+        }
+
+        [TestMethod]
         public void EntityCtxMenu_OpExecute()
         {
             CheckLoginAndOpen(FindRoute("Artist"));
@@ -396,7 +430,7 @@ namespace Signum.Web.Extensions.Sample.Test
 
             //Album.Clone
             selenium.EntityContextMenu(1);
-            selenium.EntityContextMenuClick(1, 2);
+            selenium.EntityContextMenuClick(1, 1);
 
             Assert.IsTrue(Regex.IsMatch(selenium.GetConfirmation(), ".*"));
             selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#AlbumOperation_Save"));
@@ -427,7 +461,7 @@ namespace Signum.Web.Extensions.Sample.Test
             string row1col1 = SearchTestExtensions.CellSelector(1, 1);
 
             selenium.EntityContextMenu(1);
-            selenium.EntityContextMenuClick(1, 1);
+            selenium.EntityContextMenuClick(1, 2);
 
             Assert.IsTrue(Regex.IsMatch(selenium.GetConfirmation(), ".*"));
             selenium.WaitForPageToLoad(PageLoadTimeout);
