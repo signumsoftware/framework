@@ -385,12 +385,14 @@ SF.NewContentProcessor = {
     defaultButtons: function ($newContent) {
         $newContent.find(".sf-entity-button, .sf-query-button, .sf-line-button, .sf-chooser-button, .sf-button").each(function (i, val) {
             var $txt = $(val);
-            var data = $txt.data();
-            $txt.button({
-                text: (!("text" in data) || SF.isTrue(data.text)),
-                icons: { primary: data.icon, secondary: data["icon-secondary"] },
-                disabled: $txt.hasClass("sf-disabled")
-            });
+            if (!$txt.hasClass("ui-button")) {
+                var data = $txt.data();
+                $txt.button({
+                    text: (!("text" in data) || SF.isTrue(data.text)),
+                    icons: { primary: data.icon, secondary: data["icon-secondary"] },
+                    disabled: $txt.hasClass("sf-disabled")
+                });
+            }
         });
     },
 
