@@ -6,8 +6,10 @@
 
 @{ FindOptions findOptions = (FindOptions)ViewData[ViewDataKeys.FindOptions];
    QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
-   Type entitiesType = Reflector.ExtractLite(queryDescription.Columns.Single(a => a.IsEntity).Type);
-   bool viewable = findOptions.View && Navigator.IsNavigable(entitiesType, true);
+   var entityColumn = queryDescription.Columns.Single(a => a.IsEntity);
+   Type entitiesType = Reflector.ExtractLite(entityColumn.Type);
+   Implementations implementations = entityColumn.Implementations;
+   bool viewable = findOptions.View && (implementations != null || Navigator.IsNavigable(entitiesType, true));
 
    ResultTable queryResult = (ResultTable)ViewData[ViewDataKeys.Results];
    Dictionary<int, Func<HtmlHelper, object, MvcHtmlString>> formatters = (Dictionary<int, Func<HtmlHelper, object, MvcHtmlString>>)ViewData[ViewDataKeys.Formatters];}

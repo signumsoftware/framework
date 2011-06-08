@@ -11,7 +11,7 @@ SF.registerModule("Globals", function () {
         reactive: "sfReactive",
         antiForgeryToken: "__RequestVerificationToken",
 
-        entityTypeName: "sfEntityTypeName",
+        entityTypeNames: "sfEntityTypeNames",
 
         runtimeInfo: "sfRuntimeInfo",
         staticInfo: "sfStaticInfo",
