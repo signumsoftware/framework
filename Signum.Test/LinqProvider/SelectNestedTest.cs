@@ -51,6 +51,33 @@ namespace Signum.Test.LinqProvider
                                    select a.ToLite()).ToList()).ToList();
         }
 
+        [TestMethod]
+        public void SelecteNullableLookupColumns()
+        {
+            var neasted = (from l in Database.Query<LabelDN>()
+                           join o in Database.Query<LabelDN>().DefaultIfEmpty() on l.Owner.Entity equals o
+                           group l.ToLite() by o.ToLite() into g
+                           select new
+                           {
+                               Owner = g.Key,
+                               List = g.ToList()
+                           }).ToList(); 
+                          
+        }
+
+        [TestMethod]
+        public void SelecteGroupBy()
+        {
+            var neasted = (from l in Database.Query<LabelDN>()
+                           group l.ToLite() by l.Owner into g
+                           select new
+                           {
+                               Owner = g.Key,
+                               List = g.ToList(),
+                               Count = g.Count()
+                           }).ToList();
+
+        }
 
         [TestMethod]
         public void SelecteNestedIBPlus()

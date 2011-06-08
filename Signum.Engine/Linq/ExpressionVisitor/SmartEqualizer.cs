@@ -15,6 +15,15 @@ namespace Signum.Engine.Linq
 {
     internal static class SmartEqualizer
     {
+        public static Expression EqualNullableGroupBy(Expression e1, Expression e2)
+        {
+            if (e1.Type.IsNullable() || e2.Type.IsNullable())
+                return Expression.Or(Expression.Equal(e1.Nullify(), e2.Nullify()),
+                    Expression.And(new IsNullExpression(e1), new IsNullExpression(e2)));
+
+            return Expression.Equal(e1, e2);;
+        }
+
         public static Expression EqualNullable(Expression e1, Expression e2)
         {
             if (e1.Type.IsNullable() == e2.Type.IsNullable())
