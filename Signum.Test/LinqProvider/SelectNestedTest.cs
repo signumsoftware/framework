@@ -60,7 +60,8 @@ namespace Signum.Test.LinqProvider
                            select new
                            {
                                Owner = g.Key,
-                               List = g.ToList()
+                               List = g.ToList(),
+                               Count = g.Count()
                            }).ToList(); 
                           
         }
