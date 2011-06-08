@@ -46,12 +46,8 @@ namespace Signum.Engine.Authorization
             set { anonymousUser = value; }
         }
 
-
-        static DirectedGraph<Lite<RoleDN>> _roles;
-        static DirectedGraph<Lite<RoleDN>> Roles
-        {
-            get { return Sync.Initialize(ref _roles, () => Cache()); }
-        }
+        static readonly Lazy<DirectedGraph<Lite<RoleDN>>> roles = 
+            new Lazy<DirectedGraph<Lite<RoleDN>>>(Cache, LazyThreadSafetyMode.PublicationOnly); 
 
         public static event Action RolesModified;
 
@@ -128,7 +124,7 @@ namespace Signum.Engine.Authorization
 
         static void Schema_Initializing()
         {
-            _roles = Cache();
+            var r = roles.Value;
 
             if (SystemUserName != null || AnonymousUserName != null)
             {
@@ -177,7 +173,7 @@ namespace Signum.Engine.Authorization
 
         public static void InvalidateCache()
         {
-            _roles = null;
+            roles.ResetPublicationOnly();
 
             if (RolesModified != null)
                 RolesModified();
@@ -237,15 +233,15 @@ namespace Signum.Engine.Authorization
 
         public static IEnumerable<Lite<RoleDN>> RolesInOrder()
         {
-            return Roles.CompilationOrderGroups().SelectMany(gr => gr.OrderBy(a => a.ToStr));
+            return roles.Value.CompilationOrderGroups().SelectMany(gr => gr.OrderBy(a => a.ToStr));
         }
 
         public static int Compare(Lite<RoleDN> role1, Lite<RoleDN> role2)
         {
-            if (Roles.IndirectlyRelatedTo(role1).Contains(role2))
+            if (roles.Value.IndirectlyRelatedTo(role1).Contains(role2))
                 return 1;
 
-            if (Roles.IndirectlyRelatedTo(role2).Contains(role1))
+            if (roles.Value.IndirectlyRelatedTo(role2).Contains(role1))
                 return -1;
 
             return 0;
@@ -253,7 +249,7 @@ namespace Signum.Engine.Authorization
 
         public static IEnumerable<Lite<RoleDN>> RelatedTo(Lite<RoleDN> role)
         {
-            return Roles.RelatedTo(role);
+            return roles.Value.RelatedTo(role);
         }
 
         static bool gloaballyEnabled = true;
@@ -342,12 +338,12 @@ namespace Signum.Engine.Authorization
 
         internal static Lite<RoleDN>[] CurrentRoles()
         {
-            return Roles.IndirectlyRelatedTo(RoleDN.Current.ToLite()).And(RoleDN.Current.ToLite()).ToArray();
+            return roles.Value.IndirectlyRelatedTo(RoleDN.Current.ToLite()).And(RoleDN.Current.ToLite()).ToArray();
         }
 
         internal static int Rank(Lite<RoleDN> role)
         {
-            return Roles.IndirectlyRelatedTo(role).Count;
+            return roles.Value.IndirectlyRelatedTo(role).Count;
         }
 
         public static event Func<XElement> ExportToXml;
@@ -361,13 +357,13 @@ namespace Signum.Engine.Authorization
                     new XElement("Roles",
                         RolesInOrder().Select(r => new XElement("Role",
                             new XAttribute("Name", r.ToStr),
-                            new XAttribute("Contains", Roles.RelatedTo(r).ToString(","))))),
+                            new XAttribute("Contains", roles.Value.RelatedTo(r).ToString(","))))),
                      ExportToXml == null ? null : ExportToXml.GetInvocationList().Cast<Func<XElement>>().Select(a => a()).NotNull().OrderBy(a => a.Name.ToString())));
         }
 
         public static SqlPreCommand ImportRulesScript(XDocument doc)
         {
-            var rolesDic = Roles.ToDictionary(a => a.ToStr);
+            var rolesDic = roles.Value.ToDictionary(a => a.ToStr);
             var rolesXml = doc.Root.Element("Roles").Elements("Role").ToDictionary(x => x.Attribute("Name").Value);
 
             var xmlOnly = rolesXml.Keys.Except(rolesDic.Keys).ToList();
@@ -379,7 +375,7 @@ namespace Signum.Engine.Authorization
                 var r = rolesDic[kvp.Key];
 
                 EnumerableExtensions.JoinStrict(
-                    Roles.RelatedTo(r),
+                    roles.Value.RelatedTo(r),
                     kvp.Value.Attribute("Contains").Value.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries),
                     sr => sr.ToStr,
                     s => s,
