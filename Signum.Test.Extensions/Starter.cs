@@ -92,6 +92,11 @@ namespace Signum.Test.Extensions
                 Execute = (a,para) => a.LastAward = new PersonalAwardDN() { Category = "Best Artist", Year = DateTime.Now.Year, Result = AwardResult.Won }
             });
 
+            OperationLogic.Register(new BasicDelete<AlbumDN>(AlbumOperation.Delete)
+            {
+                Delete = (album, _) => album.Delete()
+            });
+
             EntityGroupLogic.Register<LabelDN>(MusicGroups.JapanEntities, l => l.Country.Name.StartsWith(Signum.Test.Starter.Japan) || l.Owner != null && l.Owner.Entity.Country.Name.StartsWith(Signum.Test.Starter.Japan));
             EntityGroupLogic.Register<AlbumDN>(MusicGroups.JapanEntities, a => a.Label.IsInGroup(MusicGroups.JapanEntities));
         }
