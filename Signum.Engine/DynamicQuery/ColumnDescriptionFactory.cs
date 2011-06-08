@@ -84,28 +84,39 @@ namespace Signum.Engine.DynamicQuery
 
         internal static Implementations AggregateImplementations(PropertyRoute[] routes)
         {
-            return AggregateImplementations(routes.Select(a => a.GetImplementations() ?? new ImplementedByAttribute(a.Type.CleanType())).NotNull());
+            Type type = routes.Select(a => a.Type).Distinct().Single().CleanType();
+
+            return AggregateImplementations(routes.Select(a => a.GetImplementations() ?? new ImplementedByAttribute(a.Type.CleanType())).NotNull(), type);
         }
 
-        private static Implementations AggregateImplementations(IEnumerable<Implementations> collection)
+        private static Implementations AggregateImplementations(IEnumerable<Implementations> collection, Type type)
         {
             if (collection.Empty())
                 return null;
 
             var only = collection.Only();
             if (only != null)
-                return only; 
+            {
+                ImplementedByAttribute ib = only as ImplementedByAttribute;
+                if (ib != null && ib.ImplementedTypes.Length == 1 && ib.ImplementedTypes[0] == type)
+                    return null;
 
+                return only;
+            }
             ImplementedByAttribute iba = (ImplementedByAttribute)collection.FirstOrDefault(a => a.IsByAll);
             if (iba != null)
                 return iba;
 
-            return new ImplementedByAttribute(
-                collection
+            var types = collection
                 .Cast<ImplementedByAttribute>()
                 .SelectMany(ib => ib.ImplementedTypes)
                 .Distinct()
-                .ToArray());
+                .ToArray();
+
+            if (types.Length == 1 && types[0] == type)
+                return null;
+         
+            return new ImplementedByAttribute(types);
         }
 
         public string DisplayName()
