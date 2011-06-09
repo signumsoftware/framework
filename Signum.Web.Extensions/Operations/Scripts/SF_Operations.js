@@ -210,7 +210,7 @@ SF.registerModule("Operations", function () {
             }
 
             var onSuccess = function () {
-                this.operationAjax(null, SF.opReloadContent);
+                this.operationAjax(null, SF.opOnSuccessDispatcher);
             };
 
             if (SF.isTrue(this.options.isLite)) {
@@ -485,11 +485,11 @@ SF.registerModule("Operations", function () {
 
         var $result = $(operationResult);
         var newPopupId = SF.compose(prefix, "panelPopup");
-        var hasNewPopup = $("#" + newPopupId, $result).length !== 0;
+        var hasNewPopup = $result.filter("#New_New_New_panelPopup").length !== 0;
 
         //If result is a NormalControl, or an already opened popup => ReloadContent
         if (!hasNewPopup || (hasNewPopup && $("#" + newPopupId + ":visible").length !== 0)) {
-            SF.opReloadContent(prefix, operationResult, parentDiv);
+            SF.opReloadContent(prefix, operationResult, !SF.isEmpty(parentDiv) ? parentDiv : hasNewPopup ? newPopupId : "");
         }
         else {
             SF.opOpenPopup(prefix, operationResult);
@@ -507,7 +507,7 @@ SF.registerModule("Operations", function () {
         else { //PopupWindow
             new SF.ViewNavigator({
                 prefix: prefix,
-                containerDiv: SF.compose(prefix, "externalPopupDiv")
+                containerDiv: parentDiv /*SF.compose(prefix, "externalPopupDiv")*/
             }).viewSave(operationResult);
         }
         SF.Notify.info(lang.signum.executed, 2000);
