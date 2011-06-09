@@ -64,6 +64,11 @@ namespace Signum.Web.Operations
             return new JsInstruction(() => "{0}.defaultExecute()".Formato(this.ToJS()));
         }
 
+        public JsInstruction DefaultExecute(string newPrefix, JsFunction onSuccess)
+        {
+            return new JsInstruction(() => "{0}.defaultExecute(\'{1}\', {2})".Formato(this.ToJS(), newPrefix, onSuccess.ToJS()));
+        }
+
         public JsInstruction ContextualExecute(IdentifiableEntity entity, string operationName)
         {
             return new JsInstruction(() => Js.Confirm(
@@ -83,6 +88,11 @@ namespace Signum.Web.Operations
         public JsInstruction DefaultConstruct()
         {
             return new JsInstruction(() => "{0}.defaultConstruct()".Formato(this.ToJS()));
+        }
+
+        public JsInstruction DefaultConstruct(string newPrefix, JsFunction onSuccess)
+        {
+            return new JsInstruction(() => "{0}.defaultConstruct(\'{1}\', {2})".Formato(this.ToJS(), newPrefix, onSuccess.ToJS()));
         }
 
         public JsInstruction ContextualConstruct(IdentifiableEntity entity, string operationName)

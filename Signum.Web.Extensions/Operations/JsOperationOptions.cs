@@ -16,7 +16,7 @@ namespace Signum.Web.Operations
         public JsValue<bool?> IsContextual { get; set; }
         public JsValue<string> ReturnType { get; set; }
         public JsValue<string> ControllerUrl { get; set; }
-        public JsValue<string> ValidationControllerUrl { get; set; }
+        public JsValidatorOptions ValidationOptions { get; set; }
         public JsInstruction RequestExtraJsonData { get; set; }
 
         public JsOperationOptions()
@@ -32,6 +32,16 @@ namespace Signum.Web.Operations
                     if (string.IsNullOrEmpty(pf) || pf == "''")
                         emptyPrefix = true;
                 }
+
+                JsValidatorOptions valOptions = ValidationOptions ?? new JsValidatorOptions();
+                bool emptyValOptionsController = valOptions.ControllerUrl == null;
+                if (!emptyValOptionsController)
+                {
+                    string valController = valOptions.ControllerUrl.ToJS();
+                    emptyValOptionsController = string.IsNullOrEmpty(valController) || valController == "''";
+                }
+                if (emptyValOptionsController)
+                    valOptions.ControllerUrl = RouteHelper.New().SignumAction(emptyPrefix ? "Validate" : "ValidatePartial");
                     
                 var builder = new JsOptionsBuilder(false)
                 {
@@ -44,8 +54,7 @@ namespace Signum.Web.Operations
                     {"returnType",ReturnType.TryCC(a=>a.ToJS())},
                     {"requestExtraJsonData", RequestExtraJsonData.TryCC(a=>a.ToJS())},
                     {"controllerUrl", ControllerUrl.TryCC(a=>a.ToJS())},
-                    {"validationControllerUrl", ValidationControllerUrl.TryCC(a => a.ToJS()) ?? 
-                        RouteHelper.New().SignumAction(emptyPrefix ? "Validate" : "ValidatePartial").SingleQuote() }
+                    {"validationOptions", valOptions.ToJS()}
                 };
 
                 return builder.ToJS();

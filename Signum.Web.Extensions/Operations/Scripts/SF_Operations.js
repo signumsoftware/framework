@@ -10,7 +10,7 @@ SF.registerModule("Operations", function () {
             operationKey: null,
             isLite: false,
             controllerUrl: null,
-            validationControllerUrl: null,
+            validationOptions: {},
             onOk: null,
             onCancelled: null,
             contextual: false,
@@ -181,10 +181,7 @@ SF.registerModule("Operations", function () {
             else {
                 var onSuccess = function () { this.operationSubmit(); };
                 var self = this;
-                var valOptions = {
-                    prefix: this.options.prefix,
-                    controllerUrl: this.options.validationControllerUrl
-                };
+                var valOptions = $.extend({ prefix: this.options.prefix }, this.options.validationOptions);
                 if (!SF.isEmpty(this.options.parentDiv)) { // So as not to override parentDiv to be set in PartialValidator constructor
                     valOptions.parentDiv = this.options.parentDiv;
                 }
@@ -202,15 +199,20 @@ SF.registerModule("Operations", function () {
             controllerUrl: null
         }, _options));
 
-        this.defaultExecute = function () {
+        this.defaultExecute = function (newPrefix, onAjaxSuccess) {
             SF.log("OperationExecutor defaultExecute");
 
             if (SF.Blocker.isEnabled()) {
                 return false;
             }
 
+            if (SF.isEmpty(newPrefix))
+                newPrefix = null;
+
+            onAjaxSuccess = typeof onAjaxSuccess == "undefined" ? SF.opOnSuccessDispatcher : onAjaxSuccess;
+
             var onSuccess = function () {
-                this.operationAjax(null, SF.opOnSuccessDispatcher);
+                this.operationAjax(newPrefix, onAjaxSuccess);
             };
 
             if (SF.isTrue(this.options.isLite)) {
@@ -218,10 +220,7 @@ SF.registerModule("Operations", function () {
             }
             else {
                 var self = this;
-                var valOptions = {
-                    prefix: this.options.prefix,
-                    controllerUrl: this.options.validationControllerUrl
-                };
+                var valOptions = $.extend({ prefix: this.options.prefix }, this.options.validationOptions);
                 if (!SF.isEmpty(this.options.parentDiv)) { // So as not to override parentDiv to be set in PartialValidator constructor
                     valOptions.parentDiv = this.options.parentDiv;
                 }
@@ -251,15 +250,20 @@ SF.registerModule("Operations", function () {
             returnType: null
         }, _options));
 
-        this.defaultConstruct = function () {
+        this.defaultConstruct = function (newPrefix, onAjaxSuccess) {
             SF.log("ConstructorFrom construct");
 
             if (SF.Blocker.isEnabled()) {
                 return false;
             }
 
+            if (SF.isEmpty(newPrefix))
+                newPrefix = this.newPrefix();
+
+            onAjaxSuccess = typeof onAjaxSuccess == "undefined" ? SF.opOpenPopup : onAjaxSuccess;
+
             var onSuccess = function () {
-                this.operationAjax(this.newPrefix(), SF.opOpenPopup);
+                this.operationAjax(newPrefix, onAjaxSuccess);
             }
 
             if (SF.isTrue(this.options.isLite)) {
@@ -267,10 +271,7 @@ SF.registerModule("Operations", function () {
             }
             else {
                 var self = this;
-                var valOptions = {
-                    prefix: this.options.prefix,
-                    controllerUrl: this.options.validationControllerUrl
-                };
+                var valOptions = $.extend({ prefix: this.options.prefix }, this.options.validationOptions);
                 if (!SF.isEmpty(this.options.parentDiv)) { // So as not to override parentDiv to be set in PartialValidator constructor
                     valOptions.parentDiv = this.options.parentDiv;
                 }
