@@ -566,7 +566,7 @@ namespace Signum.Engine.Linq
             Expression subqueryElemExpr = elementSelector == null ? subqueryProjection.Projector : this.MapAndVisitExpand(elementSelector, ref subqueryProjection); // compute element based on duplicated subquery
 
             Expression subqueryCorrelation =
-                keyPC.Columns.Zip(subqueryKeyPC.Columns, (c1, c2) => SmartEqualizer.EqualNullable(new ColumnExpression(c1.Expression.Type, alias, c1.Name), c2.Expression))
+                keyPC.Columns.Zip(subqueryKeyPC.Columns, (c1, c2) => SmartEqualizer.EqualNullableGroupBy(new ColumnExpression(c1.Expression.Type, alias, c1.Name), c2.Expression))
                 .Aggregate((a, b) => Expression.And(a, b));
 
             // build subquery that projects the desired element

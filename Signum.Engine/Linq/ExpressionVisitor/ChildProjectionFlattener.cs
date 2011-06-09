@@ -114,14 +114,14 @@ namespace Signum.Engine.Linq
 
                     currentSource = old;
 
-                    Expression key = TupleReflection.TupleChainConstructor(columnsSMExternal.Select(cd => cd.GetReference(aliasSM)));
+                    Expression key = TupleReflection.TupleChainConstructor(columnsSMExternal.Select(cd => cd.GetReference(aliasSM).Nullify()));
                     Type kvpType = typeof(KeyValuePair<,>).MakeGenericType(key.Type, projector.Type);
                     ConstructorInfo ciKVP = kvpType.GetConstructor(new[] { key.Type, projector.Type });
                     Type projType = proj.UniqueFunction == null ? proj.Type.GetGenericTypeDefinition().MakeGenericType(kvpType) : kvpType;
                     return new ChildProjectionExpression(new ProjectionExpression(
                         selectMany,
                         Expression.New(ciKVP, key, projector), proj.UniqueFunction, proj.Token, projType),
-                        TupleReflection.TupleChainConstructor(columns));
+                        TupleReflection.TupleChainConstructor(columns.Select(a=>a.Nullify())));
                 }
             }
         }
