@@ -353,7 +353,7 @@ namespace Signum.Engine.Operations
             return result; 
         }
 
-        public IOperation[] OperationsWithKey(Enum operationKey)
+        public static IOperation[] OperationsWithKey(Enum operationKey)
         {
             var types = operations.ImplementingTypes(operationKey);
 
