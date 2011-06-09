@@ -65,8 +65,10 @@ SF.registerModule("ViewNavigator", function () {
                 throw "No ContainerDiv was specified to Navigator on viewSave mode";
             if ($('#' + this.viewOptions.containerDiv).length == 0)
                 $("body").append(SF.hiddenDiv(this.viewOptions.containerDiv, ""));
-            if (!SF.isEmpty(html))
+            if (!SF.isEmpty(html)) {
+                $('#' + this.viewOptions.containerDiv).closest(".ui-dialog").remove();
                 $('#' + this.viewOptions.containerDiv).html(html);
+            }
             if (this.isLoaded())
                 return this.showViewSave();
             else {
