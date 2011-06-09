@@ -154,6 +154,7 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>SearchControl.cshtml</DependentUpon>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Compile>
     <Compile Include="Signum\Views\SearchPopupControl.cs">
       <AutoGen>True</AutoGen>
@@ -239,10 +240,11 @@
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>FilterBuilder.cs</LastGenOutput>
     </None>
-    <None Include="Signum\Views\SearchControl.cshtml">
+    <Content Include="Signum\Views\SearchControl.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>SearchControl.cs</LastGenOutput>
-    </None>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <None Include="Signum\Views\SearchPage.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>SearchPage.cs</LastGenOutput>

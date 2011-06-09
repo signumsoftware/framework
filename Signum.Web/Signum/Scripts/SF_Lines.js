@@ -85,7 +85,7 @@ SF.registerModule("Lines", function () {
             if (types.length == 1)
                 return _onTypeFound(types[0]);
 
-            SF.openChooser(this.options.prefix, _onTypeFound, null, null, { controllerUrl: typeChooserUrl });
+            SF.openTypeChooser(this.options.prefix, _onTypeFound, { controllerUrl: typeChooserUrl });
         },
 
         create: function (_viewOptions, typeChooserUrl) {

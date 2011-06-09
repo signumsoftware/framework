@@ -54,6 +54,8 @@ namespace Signum.Web.Controllers
         {
             Type type = Navigator.ResolveType(runtimeType);
 
+            ViewData[ViewDataKeys.WriteSFInfo] = true;
+
             object result = Constructor.VisualConstruct(this, type, prefix, VisualConstructStyle.PopupView);
             if (result.GetType() == typeof(PartialViewResult))
                 return (PartialViewResult)result;
@@ -66,7 +68,6 @@ namespace Signum.Web.Controllers
 
             IdentifiableEntity entity = (IdentifiableEntity)result;
 
-            ViewData[ViewDataKeys.WriteSFInfo] = true;
             return Navigator.PopupView(this, entity, prefix, url);
         }
 

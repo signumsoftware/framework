@@ -540,6 +540,8 @@ namespace Signum.Engine
             {
                 Ordinal = LastOrdinal,
                 ColumnName = reader.GetName(LastOrdinal),
+                ColumnType = reader.GetFieldType(LastOrdinal),
+                
             };
         }
     }
@@ -562,7 +564,7 @@ namespace Signum.Engine
 
                 if (Projector != null)
                 {
-                    text += "\r\nCalling: row.Reader.GetString({0})".Formato(Ordinal);
+                    text += "\r\nCalling: row.Reader.Get{0}({1})".Formato(ColumnType.Name, Ordinal);
                     text += "\r\nProjector:\r\n{0}".Formato(Projector.NiceToString().Indent(4));
                 }
 
@@ -575,6 +577,7 @@ namespace Signum.Engine
 
         public int Ordinal { get; internal set; }
         public string ColumnName { get; internal set; }
+        public Type ColumnType { get; internal set; }
         public int Row { get; internal set; }
         public SqlPreCommand Command { get; internal set; }
         public LambdaExpression Projector { get; internal set; }

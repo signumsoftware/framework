@@ -167,7 +167,7 @@ SF.registerModule("FindNavigator", function () {
 
         headerContextMenu: function (e) {
             SF.log("headerContextmenu");
-            
+
             var $th = $(e.target).closest("th");
             var $menu = this.createCtxMenu($th);
 
@@ -193,10 +193,10 @@ SF.registerModule("FindNavigator", function () {
 
         cellContextMenu: function (e) {
             SF.log("cellContextmenu");
-            
+
             var $td = $(e.target);
             var $menu = this.createCtxMenu($td);
-            
+
             $menu.find(".sf-search-ctxmenu")
                 .html("<div class='sf-search-ctxitem quickfilter'>" + lang.signum.addFilter + "</div>");
 
@@ -772,7 +772,6 @@ SF.registerModule("FindNavigator", function () {
             _viewOptions.prefix = SF.compose("New", _viewOptions.prefix);
             var self = this;
             return $.extend({
-                type: $(this.pf(SF.Keys.entityTypeName)).val(),
                 containerDiv: null,
                 onCancelled: null
             }, _viewOptions);
@@ -785,11 +784,33 @@ SF.registerModule("FindNavigator", function () {
             _viewOptions.prefix = SF.compose("New", _viewOptions.prefix);
             var self = this;
             return $.extend({
-                type: $(this.pf(SF.Keys.entityTypeName)).val(),
                 containerDiv: null,
                 requestExtraJsonData: this.requestDataForSearchPopupCreate(),
                 onCancelled: null
             }, _viewOptions);
+        },
+
+        getRuntimeType: function (typeChooserUrl, _onTypeFound) {
+            SF.log("FindNavigator getRuntimeType");
+            var typeStr = $(this.pf(SF.Keys.entityTypeNames)).val();
+            var types = typeStr.split(",");
+            if (types.length == 1)
+                return _onTypeFound(types[0]);
+
+            SF.openTypeChooser(this.findOptions.prefix, _onTypeFound, { controllerUrl: typeChooserUrl, types: typeStr });
+        },
+
+        typedCreate: function (viewOptions) {
+            SF.log("FindNavigator typedCreate");
+            if (SF.isEmpty(viewOptions.prefix)) {
+                var viewOptions = this.viewOptionsForSearchCreate(viewOptions);
+                new SF.ViewNavigator(viewOptions).navigate();
+            }
+            else {
+                var saveUrl = this.control().data("popup-save-url");
+                var viewOptions = this.viewOptionsForSearchPopupCreate(viewOptions);
+                new SF.ViewNavigator(viewOptions).createSave(saveUrl);
+            }
         },
 
         toggleSelectAll: function () {
@@ -800,17 +821,11 @@ SF.registerModule("FindNavigator", function () {
         }
     };
 
-    SF.FindNavigator.create = function (viewOptions) {
+    SF.FindNavigator.create = function (viewOptions, typeChooserUrl) {
         var findNavigator = new SF.FindNavigator({ prefix: viewOptions.prefix });
-        if (SF.isEmpty(viewOptions.prefix)) {
-            var viewOptions = findNavigator.viewOptionsForSearchCreate(viewOptions);
-            new SF.ViewNavigator(viewOptions).navigate();
-        }
-        else {
-            var saveUrl = this.control().data("popup-save-url");
-            var viewOptions = findNavigator.viewOptionsForSearchPopupCreate(viewOptions);
-            new SF.ViewNavigator(viewOptions).createSave(saveUrl);
-        }
+        var type = findNavigator.getRuntimeType(typeChooserUrl, function (type) {
+            findNavigator.typedCreate($.extend({ type: type }, viewOptions));
+        });
     }
 
     SF.FindNavigator.asyncSearchFinished = new Array();
