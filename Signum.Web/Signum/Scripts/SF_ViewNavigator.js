@@ -66,7 +66,6 @@ SF.registerModule("ViewNavigator", function () {
             if ($('#' + this.viewOptions.containerDiv).length == 0)
                 $("body").append(SF.hiddenDiv(this.viewOptions.containerDiv, ""));
             if (!SF.isEmpty(html)) {
-                $('#' + this.viewOptions.containerDiv).closest(".ui-dialog").remove();
                 $('#' + this.viewOptions.containerDiv).html(html);
             }
             if (this.isLoaded())
@@ -273,7 +272,7 @@ SF.registerModule("ViewNavigator", function () {
     }
 
     SF.closePopup = function (prefix) {
-        $('#' + SF.compose(prefix, "panelPopup")).closest(".ui-dialog").remove();
+        $('#' + SF.compose(prefix, "panelPopup")).closest(".ui-dialog-content,.ui-dialog").remove();
     }
 
     /* chooserOptions: controllerUrl & types*/
