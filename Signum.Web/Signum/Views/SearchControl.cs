@@ -75,8 +75,11 @@ namespace ASP
    
     FindOptions findOptions = (FindOptions)ViewData[ViewDataKeys.FindOptions];
     QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
-    Type entitiesType = Reflector.ExtractLite(queryDescription.Columns.Single(a => a.IsEntity).Type);
-    bool viewable = findOptions.View && Navigator.IsNavigable(entitiesType, true);
+    var entityColumn = queryDescription.Columns.Single(a => a.IsEntity);
+    Type entitiesType = Reflector.ExtractLite(entityColumn.Type);
+    Implementations implementations = entityColumn.Implementations;
+    bool viewable = findOptions.View && (implementations != null || Navigator.IsNavigable(entitiesType, true));
+
 
 WriteLiteral("<div id=\"");
 
@@ -121,7 +124,11 @@ Write(Html.Hidden(Model.Compose("sfView"), viewable, new { disabled = "disabled"
 WriteLiteral("\r\n    ");
 
 
-Write(Html.Hidden(Model.Compose("sfEntityTypeName"), Navigator.ResolveWebTypeName(entitiesType), new { disabled = "disabled" }));
+Write(Html.Hidden(Model.Compose("sfEntityTypeNames"), 
+                               implementations == null ? Navigator.ResolveWebTypeName(entitiesType) :
+                                                      implementations.IsByAll ? "[All]" :
+                                                      ((ImplementedByAttribute)implementations).ImplementedTypes.ToString(t => Navigator.ResolveWebTypeName(t), ","), 
+                               new { disabled = "disabled" }));
 
 WriteLiteral("\r\n    \r\n");
 
@@ -207,10 +214,14 @@ WriteLiteral("\">");
 WriteLiteral("</button>\r\n");
 
 
-         if (findOptions.Create && Navigator.IsCreable(entitiesType, true) && viewable)
+         if (findOptions.Create && (implementations != null || Navigator.IsCreable(entitiesType, true)) && viewable)
         {
+            bool hasManyImplementations = implementations != null && !implementations.IsByAll && ((ImplementedByAttribute)implementations).ImplementedTypes.Length > 1;
             string creating = findOptions.Creating.HasText() ? findOptions.Creating :
-                "SF.FindNavigator.create({{prefix:'{0}',controllerUrl:'{1}'}});return false;".Formato(Model.ControlID, Url.SignumAction(string.IsNullOrEmpty(Model.ControlID) ? "Create" : "PopupCreate"));
+                "SF.FindNavigator.create({{prefix:'{0}',controllerUrl:'{1}'}},'{2}');return false;".Formato(
+                    Model.ControlID, 
+                    Url.SignumAction(string.IsNullOrEmpty(Model.ControlID) ? "Create" : "PopupCreate"),
+                    hasManyImplementations ? RouteHelper.New().SignumAction("GetTypeChooser") : "");
 
 WriteLiteral("            <a class=\"sf-query-button\" data-icon=\"ui-icon-plusthick\" data-text=\"f" +
 "alse\" id=\"");

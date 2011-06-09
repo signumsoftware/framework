@@ -149,6 +149,55 @@ namespace Signum.Test
                                                 a.Award,
                                                 a.Author
                                             }).ToDynamic();
+
+            //dqm[typeof(AwardDN)] = (from a in Database.Query<BandDN>()
+            //                        select new
+            //                        {
+            //                            Entity = a.LastAward.ToLite<AwardDN>(),
+            //                            a.LastAward.Id,
+            //                            a.LastAward.Category,
+            //                            a.LastAward.Result,
+            //                        }).ToDynamic();
+
+            dqm[typeof(IAuthorDN)] = DynamicQuery.Manual((request, descriptions) =>
+                                    {
+                                        var one = (from a in Database.Query<ArtistDN>()
+                                                   select new
+                                                   {
+                                                       Entity = a.ToLite<IAuthorDN>(),
+                                                       a.Id,
+                                                       Type = "Artist",
+                                                       a.Name,
+                                                       Lonely = a.Lonely(),
+                                                       LastAward = a.LastAward.ToLite()
+                                                   }).ToDQueryable(descriptions)
+                                                    .SelectMany(request.Multiplications)
+                                                    .Where(request.Filters)
+                                                    .OrderBy(request.Orders)
+                                                    .Select(request.Columns)
+                                                    .TryTake(request.Limit).ToArray();
+
+
+                                        var two = (from a in Database.Query<BandDN>()
+                                                   select new
+                                                   {
+                                                       Entity = a.ToLite<IAuthorDN>(),
+                                                       a.Id,
+                                                       Type = "Band",
+                                                       a.Name,
+                                                       Lonely = a.Lonely(),
+                                                       LastAward = a.LastAward.ToLite()
+                                                   }).ToDQueryable(descriptions)
+                                                    .SelectMany(request.Multiplications)
+                                                    .Where(request.Filters)
+                                                    .OrderBy(request.Orders)
+                                                    .Select(request.Columns)
+                                                    .TryTake(request.Limit).ToArray();
+
+                                        return one.Concat(two).OrderBy(request.Orders).TryTake(request.Limit);
+                                    })
+                                    .Column(a => a.Entity, cl => cl.Implementations = new ImplementedByAttribute(typeof(ArtistDN), typeof(BandDN)))
+                                    .Column(a => a.LastAward, cl => cl.Implementations = new ImplementedByAllAttribute());
         }
 
         public const string Japan = "Japan";

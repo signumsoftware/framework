@@ -53,13 +53,22 @@ namespace Signum.Web
             return TypeContextUtilities.Compose("New", prefix);
         }
 
+        public static JsInstruction OpenTypeChooser(JsValue<string> prefix, JsFunction onOptionChosen, string[] typeNames)
+        {
+            return "SF.openChooser({0}, {1}, {{controllerUrl:'{2}', types:'{3}'}});".Formato(
+                    prefix.ToJS(),
+                    onOptionChosen.ToJS(),
+                    RouteHelper.New().SignumAction("GetTypeChooser"),
+                    typeNames == null ? "" : typeNames.ToString(","));
+        }
+
         public static JsInstruction OpenChooser(JsValue<string> prefix, JsFunction onOptionChosen, string[] optionNames)
         {
             return "SF.openChooser({0}, {1}, [{2}], null, {{controllerUrl:'{3}'}});".Formato(
                     prefix.ToJS(),
                     onOptionChosen.ToJS(),
                     optionNames.ToString(on => "'{0}'".Formato(on), ","),
-                    optionNames.Empty() ? RouteHelper.New().SignumAction("GetTypeChooser") : RouteHelper.New().SignumAction("GetChooser"));
+                    RouteHelper.New().SignumAction("GetChooser"));
         }
 
         public static JsInstruction Submit(JsValue<string> controllerUrl)

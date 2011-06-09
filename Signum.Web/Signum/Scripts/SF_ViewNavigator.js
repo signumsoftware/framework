@@ -274,17 +274,47 @@ SF.registerModule("ViewNavigator", function () {
         $('#' + SF.compose(prefix, "panelPopup")).closest(".ui-dialog").remove();
     }
 
+    /* chooserOptions: controllerUrl & types*/
+    SF.openTypeChooser = function (prefix, onTypeChosen, chooserOptions) {
+        SF.log("openTypeChooser");
+        var tempDivId = SF.compose(prefix, "Temp");
+        SF.ajax({
+            type: "POST",
+            url: chooserOptions.controllerUrl,
+            data: { prefix: tempDivId, types: (SF.isEmpty(chooserOptions.types) ? SF.StaticInfo(prefix).types() : chooserOptions.types) },
+            async: false,
+            success: function (chooserHTML) {
+                $("body").append(SF.hiddenDiv(tempDivId, chooserHTML));
+                SF.triggerNewContent($("#" + tempDivId));
+                //Set continuation for each type button
+                $('#' + tempDivId + " :button").each(function () {
+                    $('#' + this.id).unbind('click').click(function () {
+                        var option = this.id;
+                        $('#' + tempDivId).remove();
+                        onTypeChosen(option);
+                    });
+                });
+
+                $("#" + tempDivId).popup({ onCancel: function () {
+                    $('#' + tempDivId).remove();
+                    if (onCancelled != null)
+                        onCancelled();
+                }
+                });
+            }
+        });
+    }
+
     /* chooserOptions */
     /* ids: List of ids */
     /* title: Window title */
-
     SF.openChooser = function (_prefix, onOptionClicked, jsonOptionsListFormat, onCancelled, chooserOptions) {
         SF.log("openChooser");
         //Construct popup
         var tempDivId = SF.compose(_prefix, "Temp");
         var requestData = "prefix=" + tempDivId;
         if (SF.isEmpty(jsonOptionsListFormat)) {
-            requestData += "&types=" + SF.StaticInfo(_prefix).types();
+            throw "chooser options must be provider. Use openTypeChooser for automatic type chooser";
         }
         else {
             for (var i = 0; i < jsonOptionsListFormat.length; i++) {
