@@ -565,9 +565,9 @@ namespace Signum.Engine.Linq
             ProjectedColumns subqueryKeyPC = ColumnProjector.ProjectColumnsGroupBy(subqueryKey, Alias.Raw("basura"), subqueryProjection.Source.KnownAliases, new[] { subqueryProjection.Token }); // use same projection trick to get group-by expressions based on subquery
             Expression subqueryElemExpr = elementSelector == null ? subqueryProjection.Projector : this.MapAndVisitExpand(elementSelector, ref subqueryProjection); // compute element based on duplicated subquery
 
-            Expression subqueryCorrelation =
+            Expression subqueryCorrelation = keyPC.Columns.Empty() ? null : 
                 keyPC.Columns.Zip(subqueryKeyPC.Columns, (c1, c2) => SmartEqualizer.EqualNullableGroupBy(new ColumnExpression(c1.Expression.Type, alias, c1.Name), c2.Expression))
-                .Aggregate((a, b) => Expression.And(a, b));
+                    .Aggregate((a, b) => Expression.And(a, b));
 
             // build subquery that projects the desired element
             Alias elementAlias = tools.NextSelectAlias();
