@@ -219,7 +219,7 @@ SF.registerModule("Lines", function () {
             var info = this.runtimeInfo();
             return $.extend({
                 containerDiv: SF.compose(this.options.prefix, self.entity),
-                onOk: function () { return self.onViewingOk(_viewOptions.validationControllerUrl); },
+                onOk: function () { return self.onViewingOk(_viewOptions.validationOptions.controllerUrl); },
                 onOkClosed: function () { self.fireOnEntityChanged(true); },
                 onCancelled: null,
                 controllerUrl: null,
@@ -241,7 +241,7 @@ SF.registerModule("Lines", function () {
             var self = this;
             return $.extend({
                 containerDiv: "",
-                onOk: function (clonedElements) { return self.onCreatingOk(clonedElements, _viewOptions.validationControllerUrl, _viewOptions.type); },
+                onOk: function (clonedElements) { return self.onCreatingOk(clonedElements, _viewOptions.validationOptions.controllerUrl, _viewOptions.type); },
                 onOkClosed: function () { self.fireOnEntityChanged(true); },
                 onCancelled: null,
                 controllerUrl: null,
@@ -507,7 +507,7 @@ SF.registerModule("Lines", function () {
             var newIndex = +this.getLastIndex() + 1;
             var itemPrefix = SF.compose(this.options.prefix, newIndex.toString());
             return $.extend({
-                onOk: function (clonedElements) { return self.onCreatingOk(clonedElements, _viewOptions.validationControllerUrl, _viewOptions.type, itemPrefix); },
+                onOk: function (clonedElements) { return self.onCreatingOk(clonedElements, _viewOptions.validationOptions.controllerUrl, _viewOptions.type, itemPrefix); },
                 onOkClosed: function () { self.fireOnEntityChanged(); },
                 onCancelled: null,
                 controllerUrl: null,
@@ -564,7 +564,7 @@ SF.registerModule("Lines", function () {
             var info = this.itemRuntimeInfo(itemPrefix);
             return $.extend({
                 containerDiv: SF.compose(itemPrefix, self.entity),
-                onOk: function () { return self.onViewingOk(_viewOptions.validationControllerUrl, itemPrefix); },
+                onOk: function () { return self.onViewingOk(_viewOptions.validationOptions.controllerUrl, itemPrefix); },
                 onOkClosed: function () { self.fireOnEntityChanged(); },
                 onCancelled: null,
                 controllerUrl: null,

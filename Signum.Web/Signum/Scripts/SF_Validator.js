@@ -297,7 +297,7 @@ SF.registerModule("Validator", function () {
             }
 
             var formChildren = null;
-            if (isEmbedded) { 
+            if (isEmbedded) {
                 formChildren = $("form :input, #" + SF.Keys.tabId + ", input:hidden[name=" + SF.Keys.antiForgeryToken + "]");
             }
             if (!SF.isEmpty(this.valOptions.parentDiv)) {
@@ -307,7 +307,7 @@ SF.registerModule("Validator", function () {
                 else {
                     formChildren = formChildren.add($("#" + this.valOptions.parentDiv + " :input"));
                 }
-            }                  
+            }
             formChildren = formChildren.not(".sf-search-control :input, #" + SF.Keys.reactive);
 
             var serializer = new SF.Serializer().add(formChildren.serialize());

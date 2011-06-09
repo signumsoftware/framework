@@ -31,7 +31,7 @@ namespace Signum.Web
         protected override JsViewOptions DefaultJsViewOptions()
         {
             var voptions = base.DefaultJsViewOptions();
-            voptions.ValidationControllerUrl = RouteHelper.New().SignumAction("ValidatePartial");
+            voptions.ValidationOptions = new JsValidatorOptions { ControllerUrl = RouteHelper.New().SignumAction("ValidatePartial") };
             return voptions;
         }
 
