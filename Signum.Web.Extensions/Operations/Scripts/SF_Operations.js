@@ -505,6 +505,7 @@ SF.registerModule("Operations", function () {
             SF.triggerNewContent($elem);
         }
         else { //PopupWindow
+            SF.closePopup(prefix);
             new SF.ViewNavigator({
                 prefix: prefix,
                 containerDiv: parentDiv /*SF.compose(prefix, "externalPopupDiv")*/
