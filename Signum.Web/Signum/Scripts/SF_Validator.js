@@ -365,7 +365,7 @@ SF.registerModule("Validator", function () {
 
     SF.PartialValidator.prototype = new SF.Validator();
 
-    SF.EntityIsValid = function (validationOptions, onSuccess) {
+    SF.EntityIsValid = function (validationOptions, onSuccess, sender) {
         SF.log("Validator EntityIsValid");
 
         SF.Notify.info(lang.signum.validating);
@@ -386,7 +386,12 @@ SF.registerModule("Validator", function () {
         if (isValid) {
             SF.Notify.clear();
             if (onSuccess != null) {
-                onSuccess();
+                if (typeof sender != "undefined") {
+                    onSuccess.call(sender);
+                }
+                else {
+                    onSuccess();
+                }
             }
         }
         else {
