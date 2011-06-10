@@ -68,9 +68,9 @@ namespace Signum.Web.Extensions.Sample
                     }},
                     { AlbumOperation.CreateFromBand, new EntityOperationSettings 
                     { 
-                        OnClick = ctx => JsValidator.EntityIsValid(ctx.Prefix, 
-                            new JsOperationConstructorFrom(ctx.Options("CreateAlbumFromBand", "Music"))
-                            .OperationAjax(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk)),
+                        OnClick = ctx => new JsOperationConstructorFrom(ctx.Options("CreateAlbumFromBand", "Music"))
+                            .DefaultConstruct(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk),
+
                         OnContextualClick = ctx => Js.Confirm("Do you wish to create an album for band {0}".Formato(ctx.Entity.ToStr),
                             new JsOperationConstructorFrom(ctx.Options("CreateAlbumFromBand", "Music")).OperationAjax(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk)),
                     }},

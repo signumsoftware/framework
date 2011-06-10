@@ -185,7 +185,7 @@ SF.registerModule("Operations", function () {
                 if (!SF.isEmpty(this.options.parentDiv)) { // So as not to override parentDiv to be set in PartialValidator constructor
                     valOptions.parentDiv = this.options.parentDiv;
                 }
-                if (!SF.EntityIsValid(valOptions, function () { onSuccess.call(self) })) {
+                if (!SF.EntityIsValid(valOptions, function () { onSuccess.call(self) }, this.options.sender)) {
                     return;
                 }
             }
@@ -224,7 +224,7 @@ SF.registerModule("Operations", function () {
                 if (!SF.isEmpty(this.options.parentDiv)) { // So as not to override parentDiv to be set in PartialValidator constructor
                     valOptions.parentDiv = this.options.parentDiv;
                 }
-                if (!SF.EntityIsValid(valOptions, function () { onSuccess.call(self) })) {
+                if (!SF.EntityIsValid(valOptions, function () { onSuccess.call(self) }, this.options.sender)) {
                     return;
                 }
             }
@@ -275,7 +275,7 @@ SF.registerModule("Operations", function () {
                 if (!SF.isEmpty(this.options.parentDiv)) { // So as not to override parentDiv to be set in PartialValidator constructor
                     valOptions.parentDiv = this.options.parentDiv;
                 }
-                if (!SF.EntityIsValid(valOptions, function () { onSuccess.call(self) })) {
+                if (!SF.EntityIsValid(valOptions, function () { onSuccess.call(self) }, this.options.sender)) {
                     return;
                 }
             }
@@ -486,7 +486,7 @@ SF.registerModule("Operations", function () {
 
         var $result = $(operationResult);
         var newPopupId = SF.compose(prefix, "panelPopup");
-        var hasNewPopup = $result.filter("#New_New_New_panelPopup").length !== 0;
+        var hasNewPopup = $result.filter("#" + newPopupId).length !== 0;
 
         //If result is a NormalControl, or an already opened popup => ReloadContent
         if (!hasNewPopup || (hasNewPopup && $("#" + newPopupId + ":visible").length !== 0)) {
@@ -507,10 +507,12 @@ SF.registerModule("Operations", function () {
         }
         else { //PopupWindow
             SF.closePopup(prefix);
-            new SF.ViewNavigator({
-                prefix: prefix,
-                containerDiv: parentDiv /*SF.compose(prefix, "externalPopupDiv")*/
-            }).viewSave(operationResult);
+            var viewNav = new SF.ViewNavigator({
+                prefix: prefix
+                //containerDiv: parentDiv /*SF.compose(prefix, "externalPopupDiv")*/
+            });
+            viewNav.viewOptions.containerDiv = viewNav.tempDivId();
+            viewNav.viewSave(operationResult);
         }
         SF.Notify.info(lang.signum.executed, 2000);
     };
@@ -549,9 +551,9 @@ SF.registerModule("Operations", function () {
             return null;
         }
 
-        var newPopupId = SF.compose(prefix, "panelPopup");
         var $result = $(operationResult);
-        var hasNewPopup = $("#" + newPopupId, $result).length !== 0;
+        var newPopupId = SF.compose(prefix, "panelPopup");
+        var hasNewPopup = $result.filter("#" + newPopupId).length !== 0;
         //If result is a NormalControl => Load it
         if (hasNewPopup) {
             SF.opOpenPopup(prefix, operationResult)

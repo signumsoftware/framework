@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using Signum.Utilities;
 using System.Web.Mvc;
+using Signum.Engine.Operations;
+using Signum.Entities.Basics;
 
 namespace Signum.Web.Operations
 {
@@ -11,7 +13,7 @@ namespace Signum.Web.Operations
     {
         public JsValue<string> Prefix { get; set; }
         public JsValue<string> ParentDiv { get; set; }
-        public JsValue<string> OperationKey { get; set; }
+        public Enum Operation { get; set; }
         public JsValue<bool?> IsLite { get; set; }
         public JsValue<bool?> IsContextual { get; set; }
         public JsValue<string> ReturnType { get; set; }
@@ -42,13 +44,18 @@ namespace Signum.Web.Operations
                 }
                 if (emptyValOptionsController)
                     valOptions.ControllerUrl = RouteHelper.New().SignumAction(emptyPrefix ? "Validate" : "ValidatePartial");
-                    
+
+                if (IsLite == null && Operation != null)
+                {
+                    IsLite = (OperationLogic.OperationsWithKey(Operation)[0] as IEntityOperation).TryCS(o => o.Lite);
+                }
+
                 var builder = new JsOptionsBuilder(false)
                 {
                     {"sender", "this"},
                     {"prefix", Prefix.TryCC(a=>a.ToJS())},
                     {"parentDiv", ParentDiv.TryCC(a => a.ToJS())},
-                    {"operationKey", OperationKey.TryCC(a=>a.ToJS())},
+                    {"operationKey", Operation.TryCC(o => ((JsValue<string>)EnumDN.UniqueKey(o))).TryCC(a=>a.ToJS())},
                     {"isLite", IsLite.TryCC(a=>a.ToJS())},
                     {"contextual", IsContextual.TryCC(a=>a.ToJS())},
                     {"returnType",ReturnType.TryCC(a=>a.ToJS())},

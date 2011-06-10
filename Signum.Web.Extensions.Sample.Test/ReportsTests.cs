@@ -72,7 +72,7 @@ namespace Signum.Web.Extensions.Sample.Test
             //created appears modified in menu
             selenium.Open(pathAlbumSearch);
             selenium.WaitForPageToLoad(PageLoadTimeout);
-            selenium.QueryMenuOptionPresentByAttr(excelMenuId, "title=test 2", true);
+            selenium.QueryMenuOptionPresentByAttr(excelMenuId, "title='test 2'", true);
 
             //delete
             selenium.QueryMenuOptionClick(excelMenuId, administerReportsId);
@@ -87,7 +87,7 @@ namespace Signum.Web.Extensions.Sample.Test
             //deleted does not appear in menu
             selenium.Open(pathAlbumSearch);
             selenium.WaitForPageToLoad(PageLoadTimeout);
-            selenium.QueryMenuOptionPresentByAttr(excelMenuId, "title=test 2", false);
+            selenium.QueryMenuOptionPresentByAttr(excelMenuId, "title='test 2'", false);
 
             //create when there are already others
             selenium.QueryMenuOptionClick(excelMenuId, administerReportsId);
@@ -102,7 +102,7 @@ namespace Signum.Web.Extensions.Sample.Test
             //created appears in menu
             selenium.Open(pathAlbumSearch);
             selenium.WaitForPageToLoad(PageLoadTimeout);
-            selenium.QueryMenuOptionPresentByAttr(excelMenuId, "title=test 3", true);
+            selenium.QueryMenuOptionPresentByAttr(excelMenuId, "title='test 3'", true);
         }
     }
 }
