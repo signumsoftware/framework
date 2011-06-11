@@ -378,10 +378,10 @@ namespace Signum.Engine.Linq
 
                 switch ((DbExpressionType)newItem.NodeType)
                 {
-                    case DbExpressionType.LiteReference:return SmartEqualizer.EntityIn((LiteReferenceExpression)newItem, col.Cast<Lite>());
+                    case DbExpressionType.LiteReference: return SmartEqualizer.EntityIn((LiteReferenceExpression)newItem, col == null ? Enumerable.Empty<Lite>() : col.Cast<Lite>());
                     case DbExpressionType.FieldInit:
                     case DbExpressionType.ImplementedBy:
-                    case DbExpressionType.ImplementedByAll: return SmartEqualizer.EntityIn(newItem, col.Cast<IdentifiableEntity>());
+                    case DbExpressionType.ImplementedByAll: return SmartEqualizer.EntityIn(newItem, col == null ? Enumerable.Empty<IdentifiableEntity>() : col.Cast<IdentifiableEntity>());
                     default:
                         return InExpression.FromValues(newItem, col == null ? new object[0] : col.Cast<object>().ToArray());
                 }
