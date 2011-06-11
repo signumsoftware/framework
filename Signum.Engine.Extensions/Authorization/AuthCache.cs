@@ -248,7 +248,7 @@ namespace Signum.Entities.Authorization
         {
             RoleAllowedCache cache = runtimeRules.Value[rules.Role];
 
-            rules.SubRoles = AuthLogic.RelatedTo(rules.Role).ToList();
+            rules.SubRoles = AuthLogic.RelatedTo(rules.Role).ToMList();
             rules.DefaultRule = GetDefaultRule(rules.Role);
             rules.Rules = (from r in resources
                            let k = ToKey(r)

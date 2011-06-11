@@ -33,31 +33,28 @@ namespace Signum.Web.Files
                 {
                     Navigator.AddSetting(new EntitySettings<FilePathDN>(EntityType.Default)
                     {
-                        MappingDefault = new EntityMapping<FilePathDN>(true)
+                        MappingDefault = ctx =>
                         {
-                            GetEntity = ctx =>
+                            RuntimeInfo runtimeInfo = ctx.GetRuntimeInfo();
+                            if (runtimeInfo.RuntimeType == null)
+                                return null;
+                            else
                             {
-                                RuntimeInfo runtimeInfo = ctx.GetRuntimeInfo();
-                                if (runtimeInfo.RuntimeType == null)
-                                    return null;
-                                else
+                                if (runtimeInfo.IsNew)
                                 {
-                                    if (runtimeInfo.IsNew)
-                                    {
-                                        string fileType = ctx.Inputs[FileLineKeys.FileType];
-                                        var fp = new FilePathDN(EnumLogic<FileTypeDN>.ToEnum(fileType));
+                                    string fileType = ctx.Inputs[FileLineKeys.FileType];
+                                    var fp = new FilePathDN(EnumLogic<FileTypeDN>.ToEnum(fileType));
 
-                                        HttpPostedFileBase hpf = ctx.ControllerContext.HttpContext.Request.Files[ctx.ControlID] as HttpPostedFileBase;
+                                    HttpPostedFileBase hpf = ctx.ControllerContext.HttpContext.Request.Files[ctx.ControlID] as HttpPostedFileBase;
 
-                                        fp.FileName = Path.GetFileName(hpf.FileName);
-                                        fp.BinaryFile = hpf.InputStream.ReadAllBytes();
+                                    fp.FileName = Path.GetFileName(hpf.FileName);
+                                    fp.BinaryFile = hpf.InputStream.ReadAllBytes();
 
-                                        return fp;
-                                    }
+                                    return fp;
                                 }
-
-                                return ctx.Value;
                             }
+
+                            return ctx.None();
                         }
                     });
                 }
@@ -66,31 +63,30 @@ namespace Signum.Web.Files
                 {
                     Navigator.AddSetting(new EmbeddedEntitySettings<EmbeddedFileDN>()
                     {
-                        MappingDefault = new EntityMapping<EmbeddedFileDN>(true)
+                        MappingDefault = ctx =>
                         {
-                            GetValue = ctx =>
+                            RuntimeInfo runtimeInfo = ctx.GetRuntimeInfo();
+                            if (runtimeInfo.RuntimeType == null)
+                                return null;
+                            else
                             {
-                                RuntimeInfo runtimeInfo = ctx.GetRuntimeInfo();
-                                if (runtimeInfo.RuntimeType == null)
-                                    ctx.Value = null;
-                                else
+                                if (runtimeInfo.IsNew)
                                 {
-                                    if (runtimeInfo.IsNew)
+                                    var result = new EmbeddedFileDN();
+
+                                    HttpPostedFileBase hpf = ctx.ControllerContext.HttpContext.Request.Files[ctx.ControlID] as HttpPostedFileBase;
+
+                                    if (hpf.ContentLength != 0)
                                     {
-                                        ctx.Value = new EmbeddedFileDN();
-
-                                        HttpPostedFileBase hpf = ctx.ControllerContext.HttpContext.Request.Files[ctx.ControlID] as HttpPostedFileBase;
-
-                                        if (hpf.ContentLength != 0)
-                                        {
-                                            ctx.Value.FileName = Path.GetFileName(hpf.FileName);
-                                            ctx.Value.BinaryFile = hpf.InputStream.ReadAllBytes();
-                                        }
+                                        result.FileName = Path.GetFileName(hpf.FileName);
+                                        result.BinaryFile = hpf.InputStream.ReadAllBytes();
                                     }
-                                }
 
-                                return ctx.Value;
+                                    return result;
+                                }
                             }
+
+                            return ctx.None();
                         }
                     });
                 }

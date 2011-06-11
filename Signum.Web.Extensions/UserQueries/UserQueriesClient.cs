@@ -33,87 +33,51 @@ namespace Signum.Web.Queries
                     new { controller = "Queries", action = "ViewUserQuery" });
 
                 string viewPrefix = "~/UserQueries/Views/{0}.cshtml";
+
+
+                Mapping<QueryToken> qtMapping = ctx=>
+                {
+                    string tokenStr = "";
+                    foreach (string key in ctx.Parent.Inputs.Keys.Where(k => k.Contains("ddlTokens")).Order())
+                        tokenStr += ctx.Parent.Inputs[key] + ".";
+                    while (tokenStr.EndsWith("."))
+                        tokenStr = tokenStr.Substring(0, tokenStr.Length - 1);
+
+                    string queryKey = ((MappingContext<UserQueryDN>)ctx.Parent.Parent.Parent.Parent).Inputs[TypeContextUtilities.Compose("Query", "Key")];
+                    object queryName = QueryLogic.ToQueryName(queryKey);
+                    QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
+                    return QueryUtils.Parse(tokenStr, qd);
+                };
+
                 Navigator.AddSettings(new List<EntitySettings>{
                     new EntitySettings<UserQueryDN>(EntityType.NotSaving) { PartialViewName = e => viewPrefix.Formato("UserQuery") },
                     
                     new EmbeddedEntitySettings<QueryFilterDN>()
                     { 
                         PartialViewName = e => viewPrefix.Formato("QueryFilter"), 
-                        MappingDefault = new EntityMapping<QueryFilterDN>(true)
-                        {
-                            GetValue = ctx => 
-                            {
-                                string tokenStr = ExtractQueryTokenString(ctx);
-            
-                                string queryKey = ((MappingContext<UserQueryDN>)ctx.Parent.Parent.Parent).Inputs[TypeContextUtilities.Compose("Query", "Key")];
-                                object queryName = QueryLogic.ToQueryName(queryKey);
-                                
-                                QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-
-                                var result = new QueryFilterDN
-                                    {
-                                        Token = QueryUtils.Parse(tokenStr, qd), 
-                                        Operation = EnumExtensions.ToEnum<FilterOperation>(ctx.Inputs["Operation"]),
-                                        ValueString = ctx.Inputs["ValueString"]
-                                    };
-                                    
-                                ctx.Value = result;
-                                return result;
-                            }
-                        }
+                        MappingDefault = new EntityMapping<QueryFilterDN>(false)
+                            .CreateProperty(a=>a.Operation)
+                            .CreateProperty(a=>a.ValueString)
+                            .SetProperty(a=>a.Token, qtMapping)
                     },
 
                     new EmbeddedEntitySettings<QueryColumnDN>()
                     { 
                         PartialViewName = e => viewPrefix.Formato("QueryColumn"), 
-                        MappingDefault = new EntityMapping<QueryColumnDN>(true)
-                        {
-                            GetValue = ctx => 
-                            {
-                                string tokenStr = ExtractQueryTokenString(ctx);
-            
-                                string queryKey = ((MappingContext<UserQueryDN>)ctx.Parent.Parent.Parent).Inputs[TypeContextUtilities.Compose("Query", "Key")];
-                                object queryName = QueryLogic.ToQueryName(queryKey);
-                                QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-
-                                var result = new QueryColumnDN 
-                                    { 
-                                        Token = QueryUtils.Parse(tokenStr, qd),
-                                        DisplayName = ctx.Inputs["DisplayName"]
-                                    }; 
-                                    
-                                ctx.Value = result;
-                                return result;
-                            }
-                        }
+                        MappingDefault = new EntityMapping<QueryColumnDN>(false)
+                            .CreateProperty(a=>a.DisplayName)
+                            .SetProperty(a=>a.Token, qtMapping)
                     },
 
                     new EmbeddedEntitySettings<QueryOrderDN>()
                     { 
                         PartialViewName = e => viewPrefix.Formato("QueryOrder"), 
-                        MappingDefault = new EntityMapping<QueryOrderDN>(true)
-                        {
-                            GetValue = ctx => 
-                            {
-                                string tokenStr = ExtractQueryTokenString(ctx);
-            
-                                string queryKey = ((MappingContext<UserQueryDN>)ctx.Parent.Parent.Parent).Inputs[TypeContextUtilities.Compose("Query", "Key")];
-                                object queryName = QueryLogic.ToQueryName(queryKey);
-                                QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-                                QueryToken token = QueryUtils.Parse(tokenStr, qd);
-
-                                var result = new QueryOrderDN 
-                                    { 
-                                        Token = token,
-                                        OrderType = (OrderType)Enum.Parse(typeof(OrderType), ctx.Inputs["OrderType"]),
-                                    };
-                                    
-                                ctx.Value = result;
-                                return result;
-                            }
-                        }
+                        MappingDefault = new EntityMapping<QueryOrderDN>(false)
+                            .CreateProperty(a=>a.OrderType)
+                            .SetProperty(a=>a.Token, qtMapping)
                     },
                 });
+                
 
                 if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(QueryDN)))
                     Navigator.Manager.EntitySettings.Add(typeof(QueryDN), new EntitySettings<QueryDN>(EntityType.Default));
@@ -144,15 +108,7 @@ namespace Signum.Web.Queries
             }
         }
 
-        private static string ExtractQueryTokenString(MappingContext ctx)
-        {
-            string tokenStr = "";
-            foreach (string key in ctx.Inputs.Keys.Where(k => k.Contains("ddlTokens")).Order())
-                tokenStr += ctx.Inputs[key] + ".";
-            while (tokenStr.EndsWith("."))
-                tokenStr = tokenStr.Substring(0, tokenStr.Length - 1);
-            return tokenStr;
-        }
+        
 
         static ToolBarButton[] ButtonBarQueryHelper_GetButtonBarForQueryName(ControllerContext controllerContext, object queryName, Type entityType, string prefix)
         {

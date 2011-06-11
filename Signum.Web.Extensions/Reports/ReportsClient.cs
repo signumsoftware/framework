@@ -43,26 +43,7 @@ namespace Signum.Web.Reports
                         new EntitySettings<ExcelReportDN>(EntityType.NotSaving) 
                         { 
                             PartialViewName = _ => viewPrefix.Formato("ExcelReport"),
-                            MappingAdmin = new EntityMapping<ExcelReportDN>(true)  
-                            { 
-                                GetEntity = ctx => 
-                                {
-                                    RuntimeInfo runtimeInfo = ctx.GetRuntimeInfo();
-                                    if (runtimeInfo.IsNew)
-                                    {
-                                        ctx.Value = new ExcelReportDN();
-                                    
-                                        string queryKey = ctx.Inputs[TypeContextUtilities.Compose("Query", "Key")];
-                                        object queryName = Navigator.Manager.QuerySettings.Keys.First(key => QueryUtils.GetQueryUniqueKey(key) == queryKey);
-                               
-                                        ctx.Value.Query = QueryLogic.RetrieveOrGenerateQuery(queryName);
-                                    }
-                                    else
-                                        ctx.Value = Database.Retrieve<ExcelReportDN>(runtimeInfo.IdOrNull.Value);
-
-                                    return ctx.Value;
-                                }
-                            }
+                            MappingAdmin = new ExcelReportMapping()
                         }
                     });
 
@@ -107,6 +88,29 @@ namespace Signum.Web.Reports
 
                 if (toExcelPlain || excelReport)
                     ButtonBarQueryHelper.GetButtonBarForQueryName +=new GetToolBarButtonQueryDelegate(ButtonBarQueryHelper_GetButtonBarForQueryName); 
+            }
+        }
+
+        public class ExcelReportMapping : EntityMapping<ExcelReportDN>
+        {
+            public ExcelReportMapping() : base(true) { }
+
+            public override ExcelReportDN GetEntity(MappingContext<ExcelReportDN> ctx)
+            {
+                RuntimeInfo runtimeInfo = ctx.GetRuntimeInfo();
+                if (runtimeInfo.IsNew)
+                {
+                    var result = new ExcelReportDN();
+
+                    string queryKey = ctx.Inputs[TypeContextUtilities.Compose("Query", "Key")];
+                    object queryName = Navigator.Manager.QuerySettings.Keys.First(key => QueryUtils.GetQueryUniqueKey(key) == queryKey);
+
+                    result.Query = QueryLogic.RetrieveOrGenerateQuery(queryName);
+
+                    return result;
+                }
+                else
+                    return Database.Retrieve<ExcelReportDN>(runtimeInfo.IdOrNull.Value);
             }
         }
 
