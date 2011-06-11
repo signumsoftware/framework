@@ -838,8 +838,8 @@ namespace Signum.Web
 
         protected internal virtual MappingContext<T> ApplyChanges<T>(ControllerContext controllerContext, T entity, string prefix, Mapping<T> mapping, SortedList<string, string> inputs) where T : IRootEntity
         {
-            RootContext<T> ctx = new RootContext<T>(prefix, mapping, inputs, controllerContext) { Value = entity };
-            mapping.OnGetValue(ctx);
+            RootContext<T> ctx = new RootContext<T>(prefix, inputs, controllerContext) { Value = entity };
+            mapping(ctx);
             ctx.Finish();
             return ctx;
         }

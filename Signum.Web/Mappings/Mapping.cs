@@ -19,15 +19,64 @@ using System.Web.Mvc;
 using System.Collections.Specialized;
 using System.Linq.Expressions;
 using System.Globalization;
+using Signum.Web;
 #endregion
 
 namespace Signum.Web
 {
-    public abstract class Mapping
-    {
-        public abstract Type StaticType { get; }
+    public delegate T Mapping<T>(MappingContext<T> ctx);
 
-        protected static readonly string[] specialProperties = new[] 
+    public static class Mapping
+    {
+        static Mapping()
+        {
+            MappingRepository<bool>.Mapping = GetValue<bool>(ParseHtmlBool);
+            MappingRepository<byte>.Mapping = GetValue<byte>(byte.Parse);
+            MappingRepository<short>.Mapping = GetValue<short>(short.Parse);
+            MappingRepository<int>.Mapping = GetValue<int>(int.Parse);
+            MappingRepository<long>.Mapping = GetValue<long>(long.Parse);
+            MappingRepository<float>.Mapping = GetValue<float>(float.Parse);
+            MappingRepository<double>.Mapping = GetValue<double>(double.Parse);
+            MappingRepository<decimal>.Mapping = GetValue<decimal>(decimal.Parse);
+            MappingRepository<DateTime>.Mapping = GetValue<DateTime>(DateTime.Parse);
+            MappingRepository<Guid>.Mapping = GetValue<Guid>(Guid.Parse);
+
+            MappingRepository<bool?>.Mapping = GetValueNullable<bool>(ParseHtmlBool);
+            MappingRepository<byte?>.Mapping = GetValueNullable<byte>(byte.Parse);
+            MappingRepository<short?>.Mapping = GetValueNullable<short>(short.Parse);
+            MappingRepository<int?>.Mapping = GetValueNullable<int>(int.Parse);
+            MappingRepository<long?>.Mapping = GetValueNullable<long>(long.Parse);
+            MappingRepository<float?>.Mapping = GetValueNullable<float>(float.Parse);
+            MappingRepository<double?>.Mapping = GetValueNullable<double>(double.Parse);
+            MappingRepository<decimal?>.Mapping = GetValueNullable<decimal>(decimal.Parse);
+            MappingRepository<DateTime?>.Mapping = GetValueNullable<DateTime>(DateTime.Parse);
+            MappingRepository<Guid?>.Mapping = GetValueNullable<Guid>(Guid.Parse);
+
+            MappingRepository<string>.Mapping = ctx =>
+            {
+                if (ctx.Empty())
+                    return ctx.None();
+
+                return ctx.Input;
+            };
+        }
+
+        public static EntityMapping<T> AsEntityMapping<T>(this Mapping<T> mapping) where T : ModifiableEntity
+        {
+            return (EntityMapping<T>)mapping.Target;
+        }
+
+        public static AutoEntityMapping<T> AsAutoEntityMapping<T>(this Mapping<T> mapping) where T : class
+        {
+            return (AutoEntityMapping<T>)mapping.Target;
+        }
+
+        public static MListMapping<T> AsMListMapping<T>(this Mapping<MList<T>> mapping) where T : class
+        {
+            return (MListMapping<T>)mapping.Target;
+        }
+
+        internal static readonly string[] specialProperties = new[] 
         { 
             TypeContext.Ticks,
             EntityBaseKeys.RuntimeInfo,
@@ -35,70 +84,102 @@ namespace Signum.Web
             EntityListBaseKeys.Index,
         };
 
-        public static Mapping<T> Create<T>()
+        static GenericInvoker<Func<Delegate>> giForAutoEntity = new GenericInvoker<Func<Delegate>>(() => ForAutoEntity<IIdentifiable>());
+        static Mapping<T> ForAutoEntity<T>() where T : class
         {
+            return new AutoEntityMapping<T>().GetValue;
+        }
+
+        static GenericInvoker<Func<Delegate>> giForLite = new GenericInvoker<Func<Delegate>>(() => ForLite<IIdentifiable>());
+        static Mapping<Lite<S>> ForLite<S>() where S : class, IIdentifiable
+        {
+            return new LiteMapping<S>().GetValue;
+        }
+
+        static GenericInvoker<Func<Delegate>> giForMList = new GenericInvoker<Func<Delegate>>(() => ForMList<int>());
+        static Mapping<MList<S>> ForMList<S>()
+        {
+            return new MListMapping<S>().GetValue;
+        }
+
+        static GenericInvoker<Func<Delegate>> giForEnum = new GenericInvoker<Func<Delegate>>(() => ForEnum<DayOfWeek>());
+        static Mapping<T> ForEnum<T>() where T : struct
+        {
+            return MappingRepository<T>.Mapping = GetValue<T>(str => (T)Enum.Parse(typeof(T), str));
+        }
+
+        static GenericInvoker<Func<Delegate>> giForEnumNullable = new GenericInvoker<Func<Delegate>>(() => ForEnumNullable<DayOfWeek>());
+        static Mapping<T?> ForEnumNullable<T>() where T : struct
+        {
+            return MappingRepository<T?>.Mapping = GetValueNullable<T>(str => (T)Enum.Parse(typeof(T), str));
+        }
+
+
+        static Mapping<T> ForValue<T>()
+        {
+            var result = MappingRepository<T>.Mapping;
+
+            if (result != null)
+                return result;
+
+            if (typeof(T).UnNullify().IsEnum)
+            {
+                MappingRepository<T>.Mapping = (Mapping<T>)(typeof(T).IsNullable() ? giForEnumNullable : giForEnum).GetInvoker(typeof(T).UnNullify())();
+
+                return MappingRepository<T>.Mapping;
+            }
+
+            throw new InvalidOperationException("No mapping implemented for {0}".Formato(typeof(T).TypeName()));
+        }
+
+        static class MappingRepository<T>
+        {
+            public static Mapping<T> Mapping; 
+        }
+
+        public static Mapping<T> New<T>()
+        {
+            if(MappingRepository<T>.Mapping != null)
+                return MappingRepository<T>.Mapping; 
+
             if (typeof(T).IsModifiableEntity() || typeof(T).IsIIdentifiable())
-                return (Mapping<T>)Activator.CreateInstance(typeof(AutoEntityMapping<>).MakeGenericType(typeof(T)));
+                return (Mapping<T>)giForAutoEntity.GetInvoker(typeof(T))(); ;
 
             if (typeof(T).IsLite())
-                return (Mapping<T>)Activator.CreateInstance(typeof(LiteMapping<>).MakeGenericType(Reflector.ExtractLite(typeof(T))));
+                return (Mapping<T>)giForLite.GetInvoker(Reflector.ExtractLite(typeof(T)))();
 
             if (Reflector.IsMList(typeof(T)))
-                return (Mapping<T>)Activator.CreateInstance(typeof(MListMapping<>).MakeGenericType(typeof(T).ElementType()));
+                return (Mapping<T>)giForMList.GetInvoker(typeof(T).ElementType())();
 
-            return new ValueMapping<T>();
-        }
-    }
-
-    public abstract class Mapping<T> : Mapping
-    {
-        public override Type StaticType
-        {
-            get { return typeof(T); }
+            return ForValue<T>();
         }
 
-        public void OnGetValue(MappingContext<T> ctx)
+        static Mapping<T> GetValue<T>(Func<string, T> parse) where T : struct
         {
-            if (GetValue != null)
-            {
-                ctx.Value = GetValue(ctx);
-            }
-            else
+            return ctx =>
             {
                 if (ctx.Empty())
-                {
-                    ctx.SupressChange = true;
-                    return;
-                }
+                    return ctx.None();
 
-                ctx.Value = DefaultGetValue(ctx);
-            }
+                return parse(ctx.Input);
+            };
         }
 
-        protected internal abstract T DefaultGetValue(MappingContext<T> ctx);
-
-        public Func<MappingContext<T>, T> GetValue;
-
-        internal void OnValidation(MappingContext<T> ctx)
+        static Mapping<T?> GetValueNullable<T>(Func<string, T> parse) where T : struct
         {
-            Debug.Assert(!ctx.Empty());
+            return ctx =>
+            {
+                if (ctx.Empty())
+                    return ctx.None();
 
-            if (!AvoidRecursiveValidation)
-                RecursiveValidation(ctx);
+                string input = ctx.Input;
+                if (string.IsNullOrWhiteSpace(input))
+                    return null;
 
-            if (Validated != null)
-                Validated(ctx);
+                return parse(ctx.Input);
+            };
         }
 
-        public abstract void RecursiveValidation(MappingContext<T> ctx);
-
-        public bool AvoidRecursiveValidation { get; set; }
-
-        public Action<MappingContext<T>> Validated;
-    }
-
-    public class ValueMapping
-    {
         public static bool ParseHtmlBool(string input)
         {
             string[] vals = input.Split(',');
@@ -106,53 +187,35 @@ namespace Signum.Web
         }
     }
 
-    public class ValueMapping<T> : Mapping<T>
+    public abstract class BaseMapping<T>
     {
-        protected internal override T DefaultGetValue(MappingContext<T> ctx)
+        public abstract T GetValue(MappingContext<T> mapping);
+
+        public static implicit operator Mapping<T>(BaseMapping<T> mapping)
         {
-
-            Type type = typeof(T).UnNullify();
-
-            if (type == typeof(bool))
-            {
-                return (T)(object)ValueMapping.ParseHtmlBool(ctx.Input);
-            }
-            else if (type == typeof(DateTime))
-            {
-                if (ctx.Input.HasText())
-                    return (T)(object)DateTime.Parse(ctx.Input).FromUserInterface();
-                return (T)(object)null;
-            }
-            else if (ReflectionTools.IsNumber(type) && ReflectionTools.IsPercentage(Reflector.FormatString(ctx.PropertyRoute), CultureInfo.CurrentCulture))
-            {
-                return (T)ReflectionTools.ParsePercentage(ctx.Input, type, CultureInfo.CurrentCulture);
-            }
-            
-            return ReflectionTools.Parse<T>(ctx.Input);
-        }
-
-        public override void RecursiveValidation(MappingContext<T> ctx)
-        {
-            return;
+            return mapping.GetValue;
         }
     }
 
-    public class AutoEntityMapping<T> : Mapping<T> where T: class 
+    public class AutoEntityMapping<T> : BaseMapping<T> where T : class 
     {
-        public Dictionary<Type, Mapping> AllowedMappings;
+        public Dictionary<Type, Delegate> AllowedMappings;
 
-        public EntityMapping<R> RegisterMapping<R>(EntityMapping<R> mapping) where R : ModifiableEntity
+        public Mapping<R> RegisterMapping<R>(Mapping<R> mapping) where R : ModifiableEntity
         {
             if (AllowedMappings == null)
-                AllowedMappings = new Dictionary<Type, Mapping>();
+                AllowedMappings = new Dictionary<Type, Delegate>();
 
             AllowedMappings.Add(typeof(R), mapping);
 
             return mapping;
         }
 
-        protected internal override T DefaultGetValue(MappingContext<T> ctx)
+        public override T GetValue(MappingContext<T> ctx)
         {
+            if (ctx.Empty())
+                return ctx.None();
+
             string strRuntimeInfo;
             if (!ctx.Inputs.TryGetValue(EntityBaseKeys.RuntimeInfo, out strRuntimeInfo))
                 return ctx.Value; //I only have some ValueLines of an Entity (so no Runtime, Id or anything)
@@ -181,20 +244,14 @@ namespace Signum.Web
             }
 
             Mapping<R> mapping =  (Mapping<R>)(AllowedMappings.TryGetC(typeof(R)) ?? Navigator.EntitySettings(typeof(R)).UntypedMappingDefault);
-            SubContext<R> sc = new SubContext<R>(ctx.ControlID, mapping, null, route, ctx) { Value = ctx.Value as R }; // If the type is different, the AutoEntityMapping has the current value but EntityMapping just null
-            mapping.OnGetValue(sc);
+            SubContext<R> sc = new SubContext<R>(ctx.ControlID, null, route, ctx) { Value = ctx.Value as R }; // If the type is different, the AutoEntityMapping has the current value but EntityMapping just null
+            sc.Value = mapping(sc);
             ctx.AddChild(sc);
             return sc.Value;
         }
-
-        public override void RecursiveValidation(MappingContext<T> ctx)
-        {
-            if (ctx.FirstChild != null)
-                ctx.FirstChild.ValidateInternal();
-        }
     }
 
-    public class EntityMapping<T> : Mapping<T> where T : ModifiableEntity
+    public class EntityMapping<T>: BaseMapping<T> where T : ModifiableEntity
     {
         abstract class PropertyMapping
         {
@@ -219,7 +276,7 @@ namespace Signum.Web
                 GetValue = ReflectionTools.CreateGetter<T, P>(pp.PropertyInfo);
                 SetValue = ReflectionTools.CreateSetter<T, P>(pp.PropertyInfo);
                 PropertyPack = pp;
-                Mapping = Create<P>();
+                Mapping = Signum.Web.Mapping.New<P>();
             }
 
             public override void SetProperty(MappingContext<T> parent)
@@ -228,7 +285,7 @@ namespace Signum.Web
 
                 try
                 {
-                    Mapping.OnGetValue(ctx);
+                    ctx.Value = Mapping(ctx);
 
                     if (!ctx.SupressChange)
                     {
@@ -254,7 +311,7 @@ namespace Signum.Web
                 string newControlId = TypeContextUtilities.Compose(parent.ControlID, PropertyPack.PropertyInfo.Name);
                 PropertyRoute route = parent.PropertyRoute.Add(this.PropertyPack.PropertyInfo);
 
-                SubContext<P> ctx = new SubContext<P>(newControlId, Mapping, PropertyPack, route, parent);
+                SubContext<P> ctx = new SubContext<P>(newControlId, PropertyPack, route, parent);
                 if (parent.Value != null)
                     ctx.Value = GetValue(parent.Value);
                 return ctx;
@@ -273,9 +330,12 @@ namespace Signum.Web
             }
         }
 
-        protected internal override T DefaultGetValue(MappingContext<T> ctx)
+        public override T GetValue(MappingContext<T> ctx)
         {
-            var val = OnGetEntity(ctx);
+            if (ctx.Empty())
+                return ctx.None();
+
+            var val = GetEntity(ctx);
 
             if (val == ctx.Value)
                 ctx.SupressChange = true;
@@ -284,10 +344,12 @@ namespace Signum.Web
 
             SetProperties(ctx);
 
+            RecursiveValidation(ctx);
+
             return val;
         }
 
-        public void SetProperties(MappingContext<T> ctx)
+        public virtual void SetProperties(MappingContext<T> ctx)
         {
             foreach (PropertyMapping item in Properties.Values)
             {
@@ -295,7 +357,7 @@ namespace Signum.Web
             }
         }
 
-        public override void RecursiveValidation(MappingContext<T> ctx)
+        public virtual void RecursiveValidation(MappingContext<T> ctx)
         {
             ModifiableEntity entity = ctx.Value;
             foreach (MappingContext childCtx in ctx.Children())
@@ -303,23 +365,10 @@ namespace Signum.Web
                 string error = entity.PropertyCheck(childCtx.PropertyPack);
                 if (error.HasText())
                     childCtx.Error.Add(error);
-
-
-                childCtx.ValidateInternal();
             }
         }
 
-        public Func<MappingContext<T>, T> GetEntity;
-
-        public T OnGetEntity(MappingContext<T> ctx)
-        {
-            if (GetEntity != null)
-                return GetEntity(ctx);
-            else
-                return DefaultGetEntity(ctx);
-        }
-
-        public T DefaultGetEntity(MappingContext<T> ctx)
+        public virtual T GetEntity(MappingContext<T> ctx)
         {
             string strRuntimeInfo;
             if (!ctx.Inputs.TryGetValue(EntityBaseKeys.RuntimeInfo, out strRuntimeInfo))
@@ -355,13 +404,7 @@ namespace Signum.Web
                      return (T)(ModifiableEntity)Database.Retrieve(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value);
             }
         }
-
-        public EntityMapping<T> SetProperty<P>(Expression<Func<T, P>> property, Action<Mapping<P>> continuation)
-        {
-            PropertyInfo pi = ReflectionTools.GetPropertyInfo(property);
-            continuation(((PropertyMapping<P>)Properties[pi.Name]).Mapping);
-            return this;
-        }
+ 
 
         public EntityMapping<T> CreateProperty<P>(Expression<Func<T, P>> property)
         {
@@ -370,38 +413,35 @@ namespace Signum.Web
             PropertyMapping<P> propertyMapping = (PropertyMapping<P>)Properties.GetOrCreate(pi.Name,
                 () => new PropertyMapping<P>(Validator.GetOrCreatePropertyPack(typeof(T), pi.Name)));
 
-            propertyMapping.Mapping = Mapping.Create<P>();
+            propertyMapping.Mapping = Mapping.New<P>();
 
             return this;
         }
 
-        public EntityMapping<T> SetProperty<P, M>(Expression<Func<T, P>> property, M newMapping, Action<M> continuation)
-           where M : Mapping<P>
+        public EntityMapping<T> ReplaceProperty<P>(Expression<Func<T, P>> property, Func<Mapping<P>, Mapping<P>> replacer)
         {
-            SetProperty<P>(property, newMapping);
-
-            if (continuation != null)
-                continuation(newMapping);
-
+            PropertyInfo pi = ReflectionTools.GetPropertyInfo(property);
+            var pm = (PropertyMapping<P>)Properties[pi.Name];
+            pm.Mapping = replacer(pm.Mapping);
             return this;
         }
 
-        public EntityMapping<T> SetProperty<P>(Expression<Func<T, P>> property, Mapping<P> newMapping)
+
+        public EntityMapping<T> GetProperty<P>(Expression<Func<T, P>> property, Action<Mapping<P>> continuation)
+        {
+            PropertyInfo pi = ReflectionTools.GetPropertyInfo(property);
+            continuation(((PropertyMapping<P>)Properties[pi.Name]).Mapping);
+            return this;
+        }
+
+        public EntityMapping<T> SetProperty<P>(Expression<Func<T, P>> property, Mapping<P> mapping)
         {
             PropertyInfo pi = ReflectionTools.GetPropertyInfo(property);
 
             PropertyMapping<P> propertyMapping = (PropertyMapping<P>)Properties.GetOrCreate(pi.Name,
                 () => new PropertyMapping<P>(Validator.GetOrCreatePropertyPack(typeof(T), pi.Name)));
 
-            propertyMapping.Mapping = newMapping;
-
-            return this;
-        }
-
-        public EntityMapping<T> SetProperty<P>(Expression<Func<T, P>> property, Func<MappingContext<P>, P> getValue)
-        {
-            PropertyInfo pi = ReflectionTools.GetPropertyInfo(property);
-            ((PropertyMapping<P>)Properties[pi.Name]).Mapping.GetValue = getValue;
+            propertyMapping.Mapping = mapping;
             
             return this;
         }
@@ -421,20 +461,20 @@ namespace Signum.Web
     }
 
 
-
-
-    public class LiteMapping<S> : Mapping<Lite<S>>
-        where S : class, IIdentifiable
+    public class LiteMapping<S> where S : class, IIdentifiable
     {
         public Mapping<S> EntityMapping { get; set; }
 
         public LiteMapping()
         {
-            EntityMapping = Create<S>();
+            EntityMapping = Mapping.New<S>();
         }
 
-        protected internal override Lite<S> DefaultGetValue(MappingContext<Lite<S>> ctx)
+        public Lite<S> GetValue(MappingContext<Lite<S>> ctx)
         {
+            if (ctx.Empty())
+                return ctx.None();
+
             var newLite = Change(ctx);
             if (newLite == ctx.Value)
                 ctx.SupressChange = true;
@@ -480,8 +520,8 @@ namespace Signum.Web
             if (EntityMapping == null)
                 throw new InvalidOperationException("Changes to Entity {0} are not allowed because EntityMapping is null".Formato(newLite.TryToString()));
 
-            var sc = new SubContext<S>(ctx.ControlID, EntityMapping, null, ctx.PropertyRoute.Add("Entity"), ctx) { Value = newLite.Retrieve() };
-            EntityMapping.OnGetValue(sc);
+            var sc = new SubContext<S>(ctx.ControlID, null, ctx.PropertyRoute.Add("Entity"), ctx) { Value = newLite.Retrieve() };
+            sc.Value = EntityMapping(sc);
 
             ctx.AddChild(sc);
 
@@ -490,52 +530,49 @@ namespace Signum.Web
 
             return sc.Value.ToLite(sc.Value.IsNew);
         }
-
-        public override void RecursiveValidation(MappingContext<Lite<S>> ctx)
-        {
-            if (EntityMapping != null && ctx.Value != null && ctx.Value.EntityOrNull != null)
-            {
-                if (ctx.FirstChild != null)
-                    ctx.FirstChild.ValidateInternal();
-            }
-        }
     }
 
-    public class MListMapping<S> : Mapping<MList<S>>
+    public abstract class BaseMListMapping<S> : BaseMapping<MList<S>>
     {
         public Mapping<S> ElementMapping { get; set; }
 
-        public MListMapping()
+        public BaseMListMapping()
         {
-            ElementMapping = Create<S>();
+            ElementMapping = Mapping.New<S>();
         }
 
         public IEnumerable<MappingContext<S>> GenerateItemContexts(MappingContext<MList<S>> ctx)
         {
             IList<string> inputKeys = (IList<string>)ctx.Inputs.Keys;
 
-            PropertyRoute route = ctx.PropertyRoute.Add("Item"); 
+            PropertyRoute route = ctx.PropertyRoute.Add("Item");
 
             for (int i = 0; i < inputKeys.Count; i++)
             {
                 string subControlID = inputKeys[i];
 
-                if (specialProperties.Contains(subControlID))
+                if (Mapping.specialProperties.Contains(subControlID))
                     continue;
 
                 string index = subControlID.Substring(0, subControlID.IndexOf(TypeContext.Separator));
 
-                SubContext<S> itemCtx = new SubContext<S>(TypeContextUtilities.Compose(ctx.ControlID, index), ElementMapping, null, route, ctx);
+                SubContext<S> itemCtx = new SubContext<S>(TypeContextUtilities.Compose(ctx.ControlID, index), null, route, ctx);
 
                 yield return itemCtx;
 
                 i += itemCtx.Inputs.Count - 1;
             }
-
         }
 
-        protected internal override MList<S> DefaultGetValue(MappingContext<MList<S>> ctx)
+    }
+
+    public class MListMapping<S> : BaseMListMapping<S>
+    {
+        public override MList<S> GetValue(MappingContext<MList<S>> ctx)
         {
+            if (ctx.Empty())
+                return ctx.None();
+
             MList<S> oldList = ctx.Value;
 
             MList<S> newList = new MList<S>();
@@ -549,7 +586,7 @@ namespace Signum.Web
                 if (oldIndex.HasValue && oldList.Count > oldIndex.Value)
                     itemCtx.Value = oldList[oldIndex.Value];
 
-                ElementMapping.OnGetValue(itemCtx);
+                itemCtx.Value = ElementMapping(itemCtx);
 
                 ctx.AddChild(itemCtx);
                 if (itemCtx.Value != null)
@@ -558,7 +595,11 @@ namespace Signum.Web
             return newList;
         }
 
-        public MList<S> CorrelatedGetValue(MappingContext<MList<S>> ctx)
+    }
+
+    public class MListCorrelatedMapping<S> : MListMapping<S>
+    {
+        public override MList<S> GetValue(MappingContext<MList<S>> ctx)
         {
             MList<S> list = ctx.Value;
             int i = 0;
@@ -568,7 +609,7 @@ namespace Signum.Web
                 Debug.Assert(!itemCtx.Empty());
 
                 itemCtx.Value = list[i];
-                ElementMapping.OnGetValue(itemCtx);
+                itemCtx.Value = ElementMapping(itemCtx);
 
                 ctx.AddChild(itemCtx);
                 list[i] = itemCtx.Value;
@@ -578,57 +619,46 @@ namespace Signum.Web
 
             return list;
         }
-
-        public override void RecursiveValidation(MappingContext<MList<S>> ctx)
-        {
-            foreach (var ct in ctx.Children())
-            {
-                ct.ValidateInternal();
-            }
-        }
     }
 
-    public class MListDictionaryMapping<S, K> : MListMapping<S>
+    public class MListDictionaryMapping<S, K> : BaseMListMapping<S>
         where S : ModifiableEntity
     {
         Func<S, K> GetKey;
 
         public string Route { get; set; }
 
-        Mapping<K> keyPropertyMapping;
-        public Mapping<K> KeyPropertyMapping
-        {
-            get { return keyPropertyMapping; }
-            set { keyPropertyMapping = value; }
-        }
-
-
+        public Mapping<K> KeyPropertyMapping{get;set;}
+        
         public MListDictionaryMapping(Func<S, K> getKey, string route)
         {
             this.GetKey = getKey;
 
-            this.keyPropertyMapping = Create<K>();
+            this.KeyPropertyMapping = Mapping.New<K>();
 
             this.Route = route;
         }
 
-        protected internal override MList<S> DefaultGetValue(MappingContext<MList<S>> ctx)
+        public override MList<S> GetValue(MappingContext<MList<S>> ctx)
         {
+            if (ctx.Empty())
+                return ctx.None();
+
             MList<S> list = ctx.Value;
             var dic = list.ToDictionary(GetKey);
 
-            PropertyRoute route = ctx.PropertyRoute.Add("Item"); 
+            PropertyRoute route = ctx.PropertyRoute.Add("Item");
 
             foreach (MappingContext<S> itemCtx in GenerateItemContexts(ctx))
             {
                 Debug.Assert(!itemCtx.Empty());
 
-                SubContext<K> subContext = new SubContext<K>(TypeContextUtilities.Compose(itemCtx.ControlID, Route), keyPropertyMapping, null, route, itemCtx);
+                SubContext<K> subContext = new SubContext<K>(TypeContextUtilities.Compose(itemCtx.ControlID, Route), null, route, itemCtx);
 
-                keyPropertyMapping.OnGetValue(subContext);
+                subContext.Value = KeyPropertyMapping(subContext);
 
                 itemCtx.Value = dic[subContext.Value];
-                ElementMapping.OnGetValue(itemCtx);
+                itemCtx.Value = ElementMapping(itemCtx);
 
                 ctx.AddChild(itemCtx);
             }

@@ -71,9 +71,7 @@ namespace Signum.Web
         public abstract ControllerContext ControllerContext { get; }
 
         public abstract object UntypedValue { get; }
-        public abstract Mapping UntypedMapping { get; }
 
-        public abstract MappingContext UntypedValidateMapping();
         public abstract MappingContext UntypedValidateGlobal();
 
         public string ControlID { get; private set; }
@@ -113,9 +111,7 @@ namespace Signum.Web
             this.PropertyRoute = route; 
         }
 
-        internal abstract void ValidateInternal();
-
-        public static ModifiableEntity FindSubentity(IdentifiableEntity entity, string prefix)
+        public static ModifiableEntity FindSubEntity(IdentifiableEntity entity, string prefix)
         {
             if (!prefix.HasText())
                 return entity;
@@ -214,13 +210,9 @@ namespace Signum.Web
             get { return Value; }
         }
 
-        public Mapping<T> Mapping { get; private set; }
-        public override Mapping UntypedMapping { get { return Mapping; } }
-
-        public MappingContext(string controlID, Mapping<T> mapping, PropertyPack propertyPack, PropertyRoute route)
+        public MappingContext(string controlID, PropertyPack propertyPack, PropertyRoute route)
             : base(controlID, propertyPack, route)
         {
-            this.Mapping = mapping;
         }
 
         internal bool SupressChange;
@@ -267,31 +259,13 @@ namespace Signum.Web
             get { throw new NotImplementedException(); }
         }
 
-        internal override void ValidateInternal()
-        {
-            Mapping.OnValidation(this);
-        }
-
-        public override  MappingContext UntypedValidateMapping()
-        {
-            return ValidateMapping();
-        }
-
         public override MappingContext UntypedValidateGlobal()
         {
             return ValidateGlobal();
         }
 
-        public  MappingContext<T> ValidateMapping()
-        {
-            Mapping.OnValidation(this);
-            return this;
-        }
-
         public MappingContext<T> ValidateGlobal()
         {
-            this.ValidateMapping();
-
             var globalErrors = CalculateGlobalErrors();
 
             //meter el resto en el diccionario
@@ -316,11 +290,6 @@ namespace Signum.Web
         {
             string strRuntimeInfo = Inputs[EntityBaseKeys.RuntimeInfo];
             return RuntimeInfo.FromFormValue(strRuntimeInfo);
-        }
-
-        public T DefaultGetValue()
-        {
-            return Mapping.DefaultGetValue(this);
         }
     }
 
@@ -353,8 +322,8 @@ namespace Signum.Web
         // Ticks => ControlID, Action
         SortedList<long, System.Tuple<string, Action>> actions = new SortedList<long, Tuple<string, Action>>();
 
-        public RootContext(string prefix, Mapping<T> mapping, SortedList<string, string> globalInputs, ControllerContext controllerContext) :
-            base(prefix, mapping, null, PropertyRoute.Root(typeof(T)))
+        public RootContext(string prefix, SortedList<string, string> globalInputs, ControllerContext controllerContext) :
+            base(prefix, null, PropertyRoute.Root(typeof(T)))
         {
             this.globalInputs = globalInputs;
             if (prefix.HasText())
@@ -444,8 +413,8 @@ namespace Signum.Web
             throw new InvalidOperationException();
         }
 
-        public SubContext(string controlID, Mapping<T> mapping, PropertyPack propertyPack, PropertyRoute route, MappingContext parent) :
-            base(controlID, mapping, propertyPack, route)
+        public SubContext(string controlID, PropertyPack propertyPack, PropertyRoute route, MappingContext parent) :
+            base(controlID, propertyPack, route)
         {
             this.parent = parent;
             this.root = parent.Root;
