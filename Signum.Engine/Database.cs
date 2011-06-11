@@ -324,7 +324,7 @@ namespace Signum.Engine
             giDeleteId.GetInvoker(type)(id);
         }
 
-        public static void Delete<T>(Lite<T> lite)
+        public static void Delete<T>(this Lite<T> lite)
             where T : class, IIdentifiable
         {
             if (lite == null)
