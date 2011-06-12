@@ -28,7 +28,7 @@ namespace Signum.Web
             return "new SF.EList(" + this.OptionsJS() + ")";
         }
 
-        protected override JsViewOptions DefaultJsViewOptions()
+        public override JsViewOptions DefaultJsViewOptions()
         {
             var voptions = base.DefaultJsViewOptions();
             voptions.ValidationOptions = new JsValidatorOptions { ControllerUrl = RouteHelper.New().SignumAction("ValidatePartial") };
