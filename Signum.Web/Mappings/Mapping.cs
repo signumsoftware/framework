@@ -356,12 +356,6 @@ namespace Signum.Web
             }
         }
 
-        public EntityMapping<T> SetProperty<P>(Expression<Func<T, P>> property, Action<Mapping<P>> continuation)
-        {
-            PropertyInfo pi = ReflectionTools.GetPropertyInfo(property);
-            continuation(((PropertyMapping<P>)Properties[pi.Name]).Mapping);
-            return this;
-        }
 
         public EntityMapping<T> CreateProperty<P>(Expression<Func<T, P>> property)
         {
@@ -375,18 +369,15 @@ namespace Signum.Web
             return this;
         }
 
-        public EntityMapping<T> SetProperty<P, M>(Expression<Func<T, P>> property, M newMapping, Action<M> continuation)
-           where M : Mapping<P>
+
+        public EntityMapping<T> SetPropertyMapping<P>(Expression<Func<T, P>> property, Action<Mapping<P>> continuation)
         {
-            SetProperty<P>(property, newMapping);
-
-            if (continuation != null)
-                continuation(newMapping);
-
+            PropertyInfo pi = ReflectionTools.GetPropertyInfo(property);
+            continuation(((PropertyMapping<P>)Properties[pi.Name]).Mapping);
             return this;
         }
 
-        public EntityMapping<T> SetProperty<P>(Expression<Func<T, P>> property, Mapping<P> newMapping)
+        public EntityMapping<T> SetPropertyMapping<P>(Expression<Func<T, P>> property, Mapping<P> newMapping)
         {
             PropertyInfo pi = ReflectionTools.GetPropertyInfo(property);
 
