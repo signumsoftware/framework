@@ -100,12 +100,12 @@ namespace Signum.Web
             };
         }
 
-        protected virtual JsViewOptions DefaultJsViewOptions()
+        public virtual JsViewOptions DefaultJsViewOptions()
         {
             return new JsViewOptions { PartialViewName = this.PartialViewName };
         }
 
-        protected JsFindOptions DefaultJsfindOptions()
+        public JsFindOptions DefaultJsfindOptions()
         {
             return new JsFindOptions();
         }
