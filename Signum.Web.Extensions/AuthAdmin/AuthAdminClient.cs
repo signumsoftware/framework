@@ -47,7 +47,7 @@ namespace Signum.Web.AuthAdmin
                     Register<TypeRulePack, TypeAllowedRule, TypeDN, TypeAllowed, TypeDN>("types", a => a.Resource, "Resource", false);
 
                     Navigator.EmbeddedEntitySettings<TypeRulePack>().MappingDefault
-                        .SetProperty(m => m.Rules, rul =>
+                        .SetPropertyMapping(m => m.Rules, rul =>
                         ((EntityMapping<TypeAllowedRule>)((MListDictionaryMapping<TypeAllowedRule, TypeDN>)rul).ElementMapping)
                                 .SetProperty(a => a.Allowed, ctx => ParseTypeAllowed(ctx.Inputs, null)));
                 }
@@ -75,7 +75,7 @@ namespace Signum.Web.AuthAdmin
                     Register<EntityGroupRulePack, EntityGroupAllowedRule, EntityGroupDN, EntityGroupAllowedDN, EntityGroupDN>("entityGroups", a => a.Resource, "Resource", false);
 
                     Navigator.EmbeddedEntitySettings<EntityGroupRulePack>().MappingDefault
-                        .SetProperty(m => m.Rules, rul =>
+                        .SetPropertyMapping(m => m.Rules, rul =>
                         ((EntityMapping<EntityGroupAllowedRule>)((MListDictionaryMapping<EntityGroupAllowedRule, EntityGroupDN>)rul).ElementMapping)
                                 .SetProperty(a => a.Allowed, ctx =>
                                     new EntityGroupAllowedDN(ParseTypeAllowed(ctx.Parent.Inputs, "In_"), ParseTypeAllowed(ctx.Parent.Inputs, "Out_"))
@@ -109,12 +109,12 @@ namespace Signum.Web.AuthAdmin
                 PartialViewName = e =>  viewPrefix.Formato(partialViewName),
                 MappingDefault = new EntityMapping<T>(false)
                     .CreateProperty(m => m.DefaultRule)
-                    .SetProperty(m => m.Rules,
+                    .SetPropertyMapping(m => m.Rules,
                         new MListDictionaryMapping<AR, K>(getKey, getKeyRoute)
                         {
                             ElementMapping = new EntityMapping<AR>(false)
-                                    .SetProperty(p => p.Allowed, new ValueMapping<A>(), null)
-                        }, null)
+                                    .SetPropertyMapping(p => p.Allowed, new ValueMapping<A>())
+                        })
             });
 
             ButtonBarEntityHelper.RegisterEntityButtons<T>((ControllerContext controllerContext, T entity, string viewName, string prefix) =>
