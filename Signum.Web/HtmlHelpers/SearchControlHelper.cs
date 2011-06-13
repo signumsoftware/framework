@@ -38,15 +38,23 @@ namespace Signum.Web
             Navigator.SetTokens(findOptions.QueryName, findOptions.FilterOptions);
             Navigator.SetTokens(findOptions.QueryName, findOptions.OrderOptions);
 
-            helper.ViewData.Model = context;
+            var viewData = new ViewDataDictionary(context);
+            viewData[ViewDataKeys.FindOptions] = findOptions;
+            viewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
 
-            helper.ViewData[ViewDataKeys.FindOptions] = findOptions;
-            helper.ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
+            viewData[ViewDataKeys.Title] = helper.ViewData.ContainsKey(ViewDataKeys.Title) ?
+                helper.ViewData[ViewDataKeys.Title] :
+                Navigator.Manager.SearchTitle(findOptions.QueryName);
+
+            //helper.ViewData.Model = context;
+
+            //helper.ViewData[ViewDataKeys.FindOptions] = findOptions;
+            //helper.ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
             
-            if (!helper.ViewData.ContainsKey(ViewDataKeys.Title))
-                helper.ViewData[ViewDataKeys.Title] = Navigator.Manager.SearchTitle(findOptions.QueryName);
-            
-            return helper.Partial(Navigator.Manager.SearchControlView, helper.ViewData);
+            //if (!helper.ViewData.ContainsKey(ViewDataKeys.Title))
+            //    helper.ViewData[ViewDataKeys.Title] = Navigator.Manager.SearchTitle(findOptions.QueryName);
+
+            return helper.Partial(Navigator.Manager.SearchControlView, viewData);
         }
 
         public static MvcHtmlString CountSearchControl(this HtmlHelper helper, FindOptions findOptions)
