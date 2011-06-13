@@ -75,23 +75,34 @@ namespace Signum.Web
             int count = Navigator.QueryCount(new CountOptions(findOptions.QueryName)
             {
                 FilterOptions = findOptions.FilterOptions
-            });            
+            });
 
             JsFindOptions foptions = new JsFindOptions
             {
                 Prefix = prefix,
-                FindOptions = findOptions
+                FindOptions = findOptions            
             };
 
            string result = options.Navigate ?
-               "<a class=\"count-search valueLine\" href='{0}'>{1}</a>".Formato(foptions.FindOptions.ToString(), count) :
-               "<span class=\"count-search valueLine\">{0}</span>".Formato(count);
+               "<a class=\"count-search sf-value-line\" href='{0}'>{1}</a>".Formato(foptions.FindOptions.ToString(), count) :
+               "<span class=\"count-search sf-value-line\">{0}</span>".Formato(count);
 
            if (options.PopupView)
-               result += helper.Button(prefix + "csbtnView",
-                  Resources.View,
-                  "javascript:new SF.FindNavigator({0}).openFinder();".Formato(foptions.ToJS()),
-                  "sf-line-button sf-view", null);
+           {
+                var htmlAttr = new Dictionary<string, object>
+                {
+                    { "onclick", "javascript:new SF.FindNavigator({0}).openFinder();".Formato(foptions.ToJS()) },
+                    { "data-icon", "ui-icon-circle-arrow-e" },
+                    { "data-text", false}
+                };
+
+               result += helper.Href(prefix + "csbtnView",
+                     Resources.LineButton_View,
+                     "",
+                     Resources.LineButton_View,
+                     "sf-line-button sf-view",
+                     htmlAttr);
+           }
 
            return MvcHtmlString.Create(result);
         }

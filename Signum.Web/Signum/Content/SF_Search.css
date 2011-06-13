@@ -18,6 +18,14 @@
 {
     min-width: 140px;    
 }
+span.sf-filter-token
+{
+    padding: 3px;
+    border: 1px solid #BBB;
+    border-radius: 3px;
+    -moz-border-radius:3px;
+    -webkit-border-radius:3px;
+}
 .sf-filters-body
 {
     padding: 5px;
