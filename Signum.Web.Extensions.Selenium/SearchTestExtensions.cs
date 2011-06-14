@@ -79,6 +79,20 @@ namespace Signum.Web.Selenium
             return "jq=#{0}ddlSelector_{1}".Formato(prefix, filterIndexBase0);
         }
 
+        public static void CheckAddFilterEnabled(this ISelenium selenium, bool isEnabled)
+        {
+            CheckAddFilterEnabled(selenium, isEnabled, "");
+        }
+
+        public static void CheckAddFilterEnabled(this ISelenium selenium, bool isEnabled, string prefix)
+        {
+            bool enabled = selenium.IsElementPresent("jq=#{0}btnAddFilter:not(.ui-button-disabled)".Formato(prefix));
+            if (isEnabled)
+                Assert.IsTrue(enabled);
+            else
+                Assert.IsFalse(enabled);
+        }        
+
         public static void AddFilter(this ISelenium selenium, int filterIndexBase0)
         {
             AddFilter(selenium, filterIndexBase0, "");
@@ -209,7 +223,7 @@ namespace Signum.Web.Selenium
 
         public static string RowSelector(string prefix)
         {
-            return "jq=#{0}tblResults > tbody > tr".Formato(prefix);
+            return "jq=#{0}tblResults > tbody > tr:not(.sf-tr-multiply)".Formato(prefix);
         }
 
         public static string RowSelector(int rowIndexBase1)
@@ -280,6 +294,34 @@ namespace Signum.Web.Selenium
         public static void TableHasColumn(this ISelenium selenium, string tokenName, string prefix)
         {
             Assert.IsTrue(selenium.IsElementPresent("{0} > :hidden[value={1}]".Formato(TableHeaderSelector(prefix), tokenName)));
+        }
+
+        public static void CheckMultiplyMessage(this ISelenium selenium, bool isPresent)
+        {
+            CheckMultiplyMessage(selenium, isPresent, "");
+        }
+
+        public static void CheckMultiplyMessage(this ISelenium selenium, bool isPresent, string prefix)
+        {
+            bool present = selenium.IsElementPresent("jq=#{0}tblResults > tbody > tr.sf-tr-multiply".Formato(prefix));
+            if (isPresent)
+                Assert.IsTrue(present);
+            else
+                Assert.IsFalse(present);
+        }
+
+        public static void CheckAddColumnEnabled(this ISelenium selenium, bool isEnabled)
+        {
+            CheckAddColumnEnabled(selenium, isEnabled, "");
+        }
+
+        public static void CheckAddColumnEnabled(this ISelenium selenium, bool isEnabled, string prefix)
+        {
+            bool enabled = selenium.IsElementPresent("jq=#{0}btnAddColumn:not(.ui-button-disabled)".Formato(prefix));
+            if (isEnabled)
+                Assert.IsTrue(enabled);
+            else
+                Assert.IsFalse(enabled);
         }
 
         public static void AddColumn(this ISelenium selenium, string columnTokenName)

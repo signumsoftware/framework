@@ -367,6 +367,107 @@ namespace Signum.Web.Extensions.Sample.Test
         }
 
         [TestMethod]
+        public void MultiplyFinder()
+        {
+            CheckLoginAndOpen(FindRoute("Artist"));
+
+            selenium.Search();
+            selenium.WaitAjaxFinished(selenium.ThereAreNRows(8));
+
+            //[Num]
+            selenium.FilterSelectToken(0, "label=Artist", true);
+            selenium.CheckAddFilterEnabled(true);
+            selenium.CheckAddColumnEnabled(true);
+            selenium.ExpandTokens(1);
+            selenium.CheckAddFilterEnabled(false);
+            selenium.CheckAddColumnEnabled(false);
+            selenium.FilterSelectToken(1, "label=Friends", true);
+            selenium.CheckAddFilterEnabled(false);
+            selenium.CheckAddColumnEnabled(false);
+            selenium.ExpandTokens(2);
+            selenium.FilterSelectToken(2, "value=Count", false);
+            selenium.CheckAddFilterEnabled(true);
+            selenium.CheckAddColumnEnabled(true);
+            
+            selenium.AddFilter(0);
+            selenium.Type("value_0", "1");
+            selenium.Search();
+            selenium.CheckMultiplyMessage(false);
+            selenium.WaitAjaxFinished(selenium.ThereAreNRows(3));
+            
+            selenium.AddColumn("Entity.Friends.Count");
+            selenium.Search();
+            selenium.WaitAjaxFinished(selenium.ThereAreNRows(3));
+            selenium.CheckMultiplyMessage(false);
+
+            selenium.DeleteFilter(0);
+            selenium.RemoveColumn(8, 8);
+
+            //Element
+            selenium.FilterSelectToken(2, "value=Element", true);
+            selenium.CheckAddFilterEnabled(true);
+            selenium.CheckAddColumnEnabled(true);
+            
+            selenium.AddColumn("Entity.Friends.Count");
+            selenium.Search();
+            selenium.CheckMultiplyMessage(true);
+            selenium.WaitAjaxFinished(selenium.ThereAreNRows(10));
+
+            selenium.AddFilter(0);
+            selenium.LineFindAndSelectElements("value_0_", false, new int[] { 2 });
+            selenium.Search();
+            selenium.CheckMultiplyMessage(true);
+            selenium.WaitAjaxFinished(selenium.ThereAreNRows(3));
+
+            selenium.DeleteFilter(0);
+            selenium.RemoveColumn(8, 8);
+
+            //Any
+            selenium.FilterSelectToken(2, "value=Any", true);
+            selenium.CheckAddFilterEnabled(true);
+            selenium.CheckAddColumnEnabled(false);
+
+            selenium.AddFilter(0);
+            selenium.LineFindAndSelectElements("value_0_", false, new int[] { 2 });
+            selenium.Search();
+            selenium.CheckMultiplyMessage(false);
+            selenium.WaitAjaxFinished(selenium.ThereAreNRows(3));
+
+            selenium.ExpandTokens(3);
+            selenium.FilterSelectToken(3, "value=Name", true);
+            selenium.Type("value_1_", "i");
+            selenium.Search();
+            selenium.CheckMultiplyMessage(false);
+            selenium.WaitAjaxFinished(selenium.ThereAreNRows(0));
+            selenium.Type("value_1_", "arcy");
+            selenium.Search();
+            selenium.CheckMultiplyMessage(false);
+            selenium.WaitAjaxFinished(selenium.ThereAreNRows(3));
+
+            selenium.DeleteFilter(1);
+            selenium.DeleteFilter(0);
+
+            //All
+            selenium.FilterSelectToken(2, "value=All", true);
+            selenium.CheckAddFilterEnabled(true);
+            selenium.CheckAddColumnEnabled(false);
+
+            selenium.AddFilter(0);
+            selenium.FilterSelectOperation(0, "value=DistinctTo");
+            selenium.LineFindAndSelectElements("value_0_", false, new int[] { 2 });
+            selenium.Search();
+            selenium.CheckMultiplyMessage(false);
+            selenium.WaitAjaxFinished(selenium.ThereAreNRows(5));
+
+            selenium.ExpandTokens(3);
+            selenium.FilterSelectToken(3, "value=Name", true);
+            selenium.Type("value_1_", "Corgan");
+            selenium.Search();
+            selenium.CheckMultiplyMessage(false);
+            selenium.WaitAjaxFinished(selenium.ThereAreNRows(4));
+        }
+
+        [TestMethod]
         public void EntityCtxMenu_OpExecute()
         {
             CheckLoginAndOpen(FindRoute("Artist"));

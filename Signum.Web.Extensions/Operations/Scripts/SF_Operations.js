@@ -441,7 +441,7 @@ SF.registerModule("Operations", function () {
 
     SF.reloadEntity = function (urlController, prefix, parentDiv) {
         var $partialViewName = $('#sfPartialViewName');
-        var requestData = $("form :input").not(".sf-search-control :input").serialize() + "&prefix=" + prefix;
+        var requestData = $("form :input,form :select").not(".sf-search-control :input,.sf-search-control :select").serialize() + "&prefix=" + prefix;
         if ($partialViewName.length === 1) {
             requestData += "&partialViewName=" + $partialViewName.val();
         }
