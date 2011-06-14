@@ -77,7 +77,7 @@ namespace Signum.Web.Extensions.Sample.Test
             //delete
             selenium.QueryMenuOptionClick(excelMenuId, administerReportsId);
             selenium.WaitForPageToLoad(PageLoadTimeout);
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SearchTestExtensions.RowSelector(1))); //SearchOnLoad
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SearchTestExtensions.RowSelector(selenium, 1))); //SearchOnLoad
             selenium.EntityClick("ExcelReport;1");
             selenium.WaitForPageToLoad(PageLoadTimeout);
             selenium.EntityButtonClick(deleteId);

@@ -286,7 +286,7 @@ namespace Signum.Web.Extensions.Sample.Test
 
             //Search with userColumns
             selenium.Search();
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SearchTestExtensions.CellSelector(1, 8)));
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SearchTestExtensions.CellSelector(selenium, 1, 8)));
 
             //Move columns
             Assert.IsFalse(selenium.CanMoveColumn(1, true));
@@ -298,8 +298,8 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.RemoveColumn(7, 8);
             selenium.WaitAjaxFinished(selenium.ThereAreNRows(0));
             selenium.Search();
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SearchTestExtensions.CellSelector(1, 7)));
-            Assert.IsTrue(!selenium.IsElementPresent(SearchTestExtensions.CellSelector(1, 8)));
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SearchTestExtensions.CellSelector(selenium, 1, 7)));
+            Assert.IsTrue(!selenium.IsElementPresent(SearchTestExtensions.CellSelector(selenium, 1, 8)));
         }
 
         [TestMethod]
@@ -328,8 +328,8 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.RemoveColumn(4, 8, prefix);
             selenium.WaitAjaxFinished(selenium.ThereAreNRows(0, prefix));
             selenium.Search(prefix);
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SearchTestExtensions.CellSelector(1, 7, prefix)));
-            Assert.IsTrue(!selenium.IsElementPresent(SearchTestExtensions.CellSelector(1, 8, prefix)));
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SearchTestExtensions.CellSelector(selenium, 1, 7, prefix)));
+            Assert.IsTrue(!selenium.IsElementPresent(SearchTestExtensions.CellSelector(selenium, 1, 8, prefix)));
         }
 
         [TestMethod]
@@ -392,13 +392,13 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.AddFilter(0);
             selenium.Type("value_0", "1");
             selenium.Search();
-            selenium.CheckMultiplyMessage(false);
+            selenium.AssertMultiplyMessage(false);
             selenium.WaitAjaxFinished(selenium.ThereAreNRows(3));
             
             selenium.AddColumn("Entity.Friends.Count");
             selenium.Search();
             selenium.WaitAjaxFinished(selenium.ThereAreNRows(3));
-            selenium.CheckMultiplyMessage(false);
+            selenium.AssertMultiplyMessage(false);
 
             selenium.DeleteFilter(0);
             selenium.RemoveColumn(8, 8);
@@ -410,13 +410,13 @@ namespace Signum.Web.Extensions.Sample.Test
             
             selenium.AddColumn("Entity.Friends.Count");
             selenium.Search();
-            selenium.CheckMultiplyMessage(true);
+            selenium.AssertMultiplyMessage(true);
             selenium.WaitAjaxFinished(selenium.ThereAreNRows(10));
 
             selenium.AddFilter(0);
             selenium.LineFindAndSelectElements("value_0_", false, new int[] { 2 });
             selenium.Search();
-            selenium.CheckMultiplyMessage(true);
+            selenium.AssertMultiplyMessage(true);
             selenium.WaitAjaxFinished(selenium.ThereAreNRows(3));
 
             selenium.DeleteFilter(0);
@@ -430,18 +430,19 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.AddFilter(0);
             selenium.LineFindAndSelectElements("value_0_", false, new int[] { 2 });
             selenium.Search();
-            selenium.CheckMultiplyMessage(false);
+            selenium.AssertMultiplyMessage(false);
             selenium.WaitAjaxFinished(selenium.ThereAreNRows(3));
 
             selenium.ExpandTokens(3);
             selenium.FilterSelectToken(3, "value=Name", true);
-            selenium.Type("value_1_", "i");
+            selenium.AddFilter(1);
+            selenium.Type("value_1", "i");
             selenium.Search();
-            selenium.CheckMultiplyMessage(false);
+            selenium.AssertMultiplyMessage(false);
             selenium.WaitAjaxFinished(selenium.ThereAreNRows(0));
-            selenium.Type("value_1_", "arcy");
+            selenium.Type("value_1", "arcy");
             selenium.Search();
-            selenium.CheckMultiplyMessage(false);
+            selenium.AssertMultiplyMessage(false);
             selenium.WaitAjaxFinished(selenium.ThereAreNRows(3));
 
             selenium.DeleteFilter(1);
@@ -456,14 +457,15 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.FilterSelectOperation(0, "value=DistinctTo");
             selenium.LineFindAndSelectElements("value_0_", false, new int[] { 2 });
             selenium.Search();
-            selenium.CheckMultiplyMessage(false);
+            selenium.AssertMultiplyMessage(false);
             selenium.WaitAjaxFinished(selenium.ThereAreNRows(5));
 
             selenium.ExpandTokens(3);
             selenium.FilterSelectToken(3, "value=Name", true);
-            selenium.Type("value_1_", "Corgan");
+            selenium.AddFilter(1);
+            selenium.Type("value_1", "Corgan");
             selenium.Search();
-            selenium.CheckMultiplyMessage(false);
+            selenium.AssertMultiplyMessage(false);
             selenium.WaitAjaxFinished(selenium.ThereAreNRows(4));
         }
 
@@ -474,9 +476,9 @@ namespace Signum.Web.Extensions.Sample.Test
 
             //Search
             selenium.Search();
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SearchTestExtensions.RowSelector(1)));
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SearchTestExtensions.RowSelector(selenium, 1)));
 
-            string row1col1 = SearchTestExtensions.CellSelector(1, 1);
+            string row1col1 = SearchTestExtensions.CellSelector(selenium, 1, 1);
             
             //ArtistOperations.AssignPersonalAward
             selenium.EntityContextMenu(1);
@@ -489,7 +491,7 @@ namespace Signum.Web.Extensions.Sample.Test
             //For Michael Jackson there are no operations enabled
             selenium.EntityContextMenu(5);
             //There's not a menu with hrefs => only some text saying there are no operations
-            Assert.IsFalse(selenium.IsElementPresent("{0} a".Formato(SearchTestExtensions.EntityContextMenuSelector(5))));
+            Assert.IsFalse(selenium.IsElementPresent("{0} a".Formato(SearchTestExtensions.EntityContextMenuSelector(selenium, 5))));
         }
 
         [TestMethod]
@@ -499,9 +501,9 @@ namespace Signum.Web.Extensions.Sample.Test
 
             //Search
             selenium.Search();
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SearchTestExtensions.RowSelector(1)));
-            
-            string row1col1 = SearchTestExtensions.CellSelector(1, 1);
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SearchTestExtensions.RowSelector(selenium, 1)));
+
+            string row1col1 = SearchTestExtensions.CellSelector(selenium, 1, 1);
             
             //Band.CreateFromBand
             selenium.EntityContextMenu(1);
@@ -527,7 +529,7 @@ namespace Signum.Web.Extensions.Sample.Test
 
             //Search
             selenium.Search();
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SearchTestExtensions.RowSelector(1)));
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SearchTestExtensions.RowSelector(selenium, 1)));
 
             //Album.Clone
             selenium.EntityContextMenu(1);
@@ -554,12 +556,12 @@ namespace Signum.Web.Extensions.Sample.Test
             int idCol = 2;
             selenium.Sort(idCol, true);
             selenium.Sort(idCol, false);
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SearchTestExtensions.RowSelector(1)));
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SearchTestExtensions.RowSelector(selenium, 1)));
 
-            Assert.IsTrue(selenium.IsElementPresent(SearchTestExtensions.RowSelector(14)));
-            Assert.IsFalse(selenium.IsElementPresent(SearchTestExtensions.RowSelector(15)));
+            Assert.IsTrue(selenium.IsElementPresent(SearchTestExtensions.RowSelector(selenium, 14)));
+            Assert.IsFalse(selenium.IsElementPresent(SearchTestExtensions.RowSelector(selenium, 15)));
 
-            string row1col1 = SearchTestExtensions.CellSelector(1, 1);
+            string row1col1 = SearchTestExtensions.CellSelector(selenium, 1, 1);
 
             selenium.EntityContextMenu(1);
             selenium.EntityContextMenuClick(1, 2);
@@ -567,8 +569,8 @@ namespace Signum.Web.Extensions.Sample.Test
             Assert.IsTrue(Regex.IsMatch(selenium.GetConfirmation(), ".*"));
             selenium.WaitForPageToLoad(PageLoadTimeout);
 
-            Assert.IsTrue(selenium.IsElementPresent(SearchTestExtensions.RowSelector(13)));
-            Assert.IsFalse(selenium.IsElementPresent(SearchTestExtensions.RowSelector(14)));
+            Assert.IsTrue(selenium.IsElementPresent(SearchTestExtensions.RowSelector(selenium, 13)));
+            Assert.IsFalse(selenium.IsElementPresent(SearchTestExtensions.RowSelector(selenium, 14)));
         }
     }
 }
