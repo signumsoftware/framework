@@ -282,6 +282,12 @@ namespace Signum.Utilities
                 throw new ArgumentException("There are some repeated {0}: {1}".Formato(errorContext, repetitions.ToString(", ")));
         }
 
+        public static void SetRange<K, V>(this IDictionary<K, V> dictionary, IEnumerable<KeyValuePair<K,V>> collection)
+        {
+            foreach (var item in collection)
+                dictionary[item.Key] = item.Value;
+        }
+
         public static void SetRange<K, V>(this IDictionary<K, V> dictionary, IEnumerable<K> keys, IEnumerable<V> values)
         {
             foreach (var item in keys.ZipStrict(values))

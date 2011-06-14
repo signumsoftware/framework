@@ -331,7 +331,6 @@ namespace Signum.Entities
 
     public static class LiteUtils
     {
-      
         public static Lite<T> ToLite<T>(this T entity)
           where T : class, IIdentifiable
         {
