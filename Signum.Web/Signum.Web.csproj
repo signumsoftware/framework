@@ -37,9 +37,6 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Commons.Web.Mvc.PrecompiledViews">
-      <HintPath>C:\Users\luis\AppData\Local\Microsoft\VisualStudio\10.0\Extensions\Chris van de Steeg\Razor Single File Generator for MVC\1.0.5\Commons.Web.Mvc.PrecompiledViews.dll</HintPath>
-    </Reference>
     <Reference Include="System.Activities" />
     <Reference Include="System.IdentityModel" />
     <Reference Include="System.Runtime.Serialization" />
