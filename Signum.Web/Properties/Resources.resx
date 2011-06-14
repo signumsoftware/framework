@@ -321,4 +321,10 @@
   <data name="SearchControl_ShowNRows_Rows" xml:space="preserve">
     <value>rows</value>
   </data>
+  <data name="Signum_selectToken" xml:space="preserve">
+    <value>Select a token</value>
+  </data>
+  <data name="ChooseAType" xml:space="preserve">
+    <value>Choose a type</value>
+  </data>
 </root>

@@ -160,3 +160,8 @@ fieldset {
     border-bottom-right-radius: 4px 4px;
     border-bottom-left-radius: 4px 4px;
 }
+
+.sf-chooser-button
+{
+    width: 100%;    
+}

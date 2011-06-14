@@ -308,7 +308,7 @@ SF.registerModule("Validator", function () {
                     formChildren = formChildren.add($("#" + this.valOptions.parentDiv + " :input"));
                 }
             }
-            formChildren = formChildren.not(".sf-search-control :input, #" + SF.Keys.reactive);
+            formChildren = formChildren.not(".sf-search-control :input,#" + SF.Keys.reactive);
 
             var serializer = new SF.Serializer().add(formChildren.serialize());
 

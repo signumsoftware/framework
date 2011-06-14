@@ -131,6 +131,17 @@ namespace Signum.Web.Properties {
                 return ResourceManager.GetString("Checked", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to ChooseAType.
+        /// </summary>
+        public static string ChooseAType
+        {
+            get
+            {
+                return ResourceManager.GetString("ChooseAType", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to Create alert.

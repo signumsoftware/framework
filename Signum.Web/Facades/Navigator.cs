@@ -782,10 +782,17 @@ namespace Signum.Web
             ResultTable queryResult = DynamicQueryManager.Current.ExecuteQuery(request);
             
             controller.ViewData.Model = context;
-            
+
             controller.ViewData[ViewDataKeys.FindOptions] = findOptions;
-            controller.ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
             
+            QueryDescription qd = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
+            controller.ViewData[ViewDataKeys.QueryDescription] = qd;
+            
+            Type entitiesType = Reflector.ExtractLite(qd.Columns.Single(a => a.IsEntity).Type);
+            string message = CollectionElementToken.MultipliedMessage(request.Multiplications, entitiesType);
+            if (message.HasText())
+                controller.ViewData[ViewDataKeys.MultipliedMessage] = message;
+
             controller.ViewData[ViewDataKeys.Results] = queryResult;
 
             QuerySettings settings = QuerySettings[findOptions.QueryName];

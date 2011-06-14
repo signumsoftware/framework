@@ -18,6 +18,7 @@ namespace Signum.Web
         public const string QueryDescription = "sfQueryDescription";
         public const string QueryName = "sfQueryName";
         public const string Results = "sfResults";
+        public const string MultipliedMessage = "sfMultipliedMessage";
         public const string Formatters = "sfFormatters";
         public const string ChangeTicks = "sfChangeTicks";
         public const string Reactive = "sfReactive";

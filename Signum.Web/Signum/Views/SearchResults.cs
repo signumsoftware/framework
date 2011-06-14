@@ -82,6 +82,31 @@ WriteLiteral("\r\n");
    ResultTable queryResult = (ResultTable)ViewData[ViewDataKeys.Results];
    Dictionary<int, Func<HtmlHelper, object, MvcHtmlString>> formatters = (Dictionary<int, Func<HtmlHelper, object, MvcHtmlString>>)ViewData[ViewDataKeys.Formatters];
 
+WriteLiteral("\r\n");
+
+
+ if (ViewData.ContainsKey(ViewDataKeys.MultipliedMessage))
+{ 
+
+WriteLiteral("    <tr class=\"sf-tr-multiply\">\r\n        <td class=\"sf-td-multiply ui-state-highl" +
+"ight\" colspan=\"");
+
+
+                                                           Write(queryResult.Columns.Count() + (viewable ? 1 : 0) + (findOptions.AllowMultiple.HasValue ? 1 : 0));
+
+WriteLiteral("\">\r\n            <span class=\"ui-icon ui-icon-info\" style=\"float: left; margin-rig" +
+"ht: .3em;\"></span>\r\n            ");
+
+
+       Write(ViewData[ViewDataKeys.MultipliedMessage]);
+
+WriteLiteral("\r\n        </td>\r\n    </tr>\r\n");
+
+
+}
+
+WriteLiteral("\r\n");
+
 
  foreach (var row in queryResult.Rows)
 {

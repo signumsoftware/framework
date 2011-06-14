@@ -327,4 +327,7 @@
   <data name="Signum_showFilters" xml:space="preserve">
     <value>Mostrar filtros</value>
   </data>
+  <data name="ChooseAType" xml:space="preserve">
+    <value>Elige un tipo</value>
+  </data>
 </root>
