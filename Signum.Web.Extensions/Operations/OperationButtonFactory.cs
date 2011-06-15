@@ -76,11 +76,11 @@ namespace Signum.Web.Operations
             switch (ctx.OperationInfo.OperationType)
             {
                 case OperationType.Execute:
-                    return new JsOperationExecutor(ctx.Options()).DefaultExecute();
+                    return new JsOperationExecutor(ctx.Options()).validateAndAjax();
                 case OperationType.Delete:
-                    return new JsOperationDelete(ctx.Options()).DefaultDelete(ctx.Entity);
+                    return new JsOperationDelete(ctx.Options()).confirmAndAjax(ctx.Entity);
                 case OperationType.ConstructorFrom:
-                    return new JsOperationConstructorFrom(ctx.Options()).DefaultConstruct();                    
+                    return new JsOperationConstructorFrom(ctx.Options()).validateAndAjax();                    
                 default:
                     throw new InvalidOperationException("Invalid Operation Type '{0}' in the construction of the operation '{1}'".Formato(ctx.OperationInfo.OperationType.ToString(), EnumDN.UniqueKey(ctx.OperationInfo.Key)));
             }
@@ -106,7 +106,7 @@ namespace Signum.Web.Operations
             if (ctx.OperationInfo.OperationType != OperationType.ConstructorFromMany)
                 throw new InvalidOperationException("Invalid Operation Type '{0}' in the construction of the operation '{1}'".Formato(ctx.OperationInfo.OperationType.ToString(), EnumDN.UniqueKey(ctx.OperationInfo.Key)));
 
-            return new JsOperationConstructorFromMany(ctx.Options()).DefaultConstruct();
+            return new JsOperationConstructorFromMany(ctx.Options()).ajaxSelected();
         }
     }
 }

@@ -41,7 +41,7 @@ namespace Signum.Web.Extensions.Sample
                 { 
                     Prefix = prefix, 
                     ControllerUrl = RouteHelper.New().Action("CreateAlbumFromBandOnOk", "Music") 
-                }).DefaultExecute().ToJS();
+                }).validateAndAjax().ToJS();
             
             return Navigator.PopupView(this, model, prefix);
         }

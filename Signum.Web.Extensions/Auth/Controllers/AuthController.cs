@@ -104,7 +104,7 @@ namespace Signum.Web.Auth
                 {
                     ControllerUrl = RouteHelper.New().Action("SetPasswordOnOk", "Auth"),
                     Prefix = prefix,
-                }).DefaultExecute().ToJS();
+                }).validateAndAjax().ToJS();
 
             ViewData[ViewDataKeys.Title] = Resources.EnterTheNewPassword;
             return Navigator.PopupView(this, model, prefix);
