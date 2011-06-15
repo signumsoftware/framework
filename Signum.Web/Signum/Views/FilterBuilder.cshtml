@@ -28,8 +28,8 @@
                         context.Compose("btnAddFilter"), 
                         Resources.FilterBuilder_AddFilter, 
                         "",
-                        Resources.FilterBuilder_AddFilter,
-                        "sf-query-button sf-add-filter", 
+                        Resources.Signum_selectToken,
+                        "sf-query-button sf-add-filter sf-disabled", 
                         new Dictionary<string, object> 
                         { 
                             //{ "onclick", "new SF.FindNavigator({{prefix:'{0}'}}).addFilter('{1}');".Formato(context.ControlID, Url.SignumAction("AddFilter")) },
@@ -42,9 +42,9 @@
                     @Html.Href(
                         context.Compose("btnAddColumn"), 
                         Resources.FilterBuilder_AddColumn, 
-                        "", 
-                        Resources.FilterBuilder_AddColumn, 
-                        "sf-query-button sf-add-column", 
+                        "",
+                        Resources.Signum_selectToken,
+                        "sf-query-button sf-add-column sf-disabled", 
                         new Dictionary<string, object> 
                         { 
                             //{ "onclick", "new SF.FindNavigator({{prefix:'{0}'}}).addColumn('{1}');".Formato(context.ControlID, Url.SignumAction("GetColumnName")) }, 

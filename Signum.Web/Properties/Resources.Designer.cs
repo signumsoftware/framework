@@ -594,6 +594,16 @@ namespace Signum.Web.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Select token.
+        /// </summary>
+        public static string Signum_selectToken
+        {
+            get {
+                return ResourceManager.GetString("Signum_selectToken", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Show filters.
         /// </summary>
         public static string Signum_showFilters {

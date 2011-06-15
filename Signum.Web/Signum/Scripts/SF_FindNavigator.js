@@ -144,20 +144,10 @@ SF.registerModule("FindNavigator", function () {
                 return false;
             });
 
-            $(this.pf("btnAddFilter")).bind('click', function () {
-                self.addFilter();
-            });
-
-            $(this.pf("btnAddColumn")).bind('click', function () {
-                self.addColumn();
-            });
-
             $(this.pf("divSearchControl .sf-subtokens-expander")).live('click', function () {
                 var $this = $(this);
                 $this.next().show().focus().click();
                 $this.remove();
-                self.changeButtonState($(self.pf("btnAddFilter")), lang.signum.selectToken);
-                self.changeButtonState($(self.pf("btnAddColumn")), lang.signum.selectToken);
             });
         },
 
@@ -304,7 +294,7 @@ SF.registerModule("FindNavigator", function () {
                         SF.FindNavigator.asyncSearchFinished[idBtnSearch] = false;
                     $btnSearch.val(lang.signum.search).toggleClass("sf-loading");
                     var $control = self.control();
-                    var $tbody =  $control.find(".sf-search-results-container tbody");
+                    var $tbody = $control.find(".sf-search-results-container tbody");
                     if (!SF.isEmpty(r)) {
                         $tbody.html(r);
                         SF.triggerNewContent($control.find(".sf-search-results-container tbody"));
@@ -681,6 +671,15 @@ SF.registerModule("FindNavigator", function () {
 
             var $selectedOption = selectedColumn.children("option:selected");
             if ($selectedOption.val() == "") {
+                if (index == 0) {
+                    this.changeButtonState($btnAddFilter, lang.signum.selectToken);
+                    this.changeButtonState($btnAddColumn, lang.signum.selectToken);
+                }
+                else {
+                    var $prevSelectedOption = $(this.pf("ddlTokens_" + (parseInt(index, 10) - 1))).find("option:selected");
+                    this.changeButtonState($btnAddFilter, $prevSelectedOption.attr("data-filter"), function () { self.addFilter(); });
+                    this.changeButtonState($btnAddColumn, $prevSelectedOption.attr("data-column"), function () { self.addColumn(); });
+                }
                 return;
             }
 
