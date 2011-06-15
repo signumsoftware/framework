@@ -370,6 +370,8 @@ namespace Signum.Web.Extensions.Sample.Test
         public void MultiplyFinder()
         {
             CheckLoginAndOpen(FindRoute("Artist"));
+            selenium.CheckAddFilterEnabled(false);
+            selenium.CheckAddColumnEnabled(false);
 
             selenium.Search();
             selenium.WaitAjaxFinished(selenium.ThereAreNRows(8));
@@ -379,8 +381,8 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.CheckAddFilterEnabled(true);
             selenium.CheckAddColumnEnabled(true);
             selenium.ExpandTokens(1);
-            selenium.CheckAddFilterEnabled(false);
-            selenium.CheckAddColumnEnabled(false);
+            selenium.CheckAddFilterEnabled(true);
+            selenium.CheckAddColumnEnabled(true);
             selenium.FilterSelectToken(1, "label=Friends", true);
             selenium.CheckAddFilterEnabled(false);
             selenium.CheckAddColumnEnabled(false);
@@ -388,7 +390,7 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.FilterSelectToken(2, "value=Count", false);
             selenium.CheckAddFilterEnabled(true);
             selenium.CheckAddColumnEnabled(true);
-            
+                        
             selenium.AddFilter(0);
             selenium.Type("value_0", "1");
             selenium.Search();
@@ -399,6 +401,10 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.Search();
             selenium.WaitAjaxFinished(selenium.ThereAreNRows(3));
             selenium.AssertMultiplyMessage(false);
+
+            selenium.FilterSelectToken(2, "value=", false);
+            selenium.CheckAddFilterEnabled(false);
+            selenium.CheckAddColumnEnabled(false);
 
             selenium.DeleteFilter(0);
             selenium.RemoveColumn(8, 8);
