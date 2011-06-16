@@ -94,50 +94,61 @@ SF.registerModule = (function () {
             loadCss: loadCss,
             loadJs: loadJs
 };
-    })();
+})();
 
-    SF.ajax = function (options) {
+(function (options) {
+    $.ajaxSetup({
+        type: "POST",
+        sfCheckRedirection: true
+    });
 
-        function checkRedirection(ajaxResult) {
-            if (SF.isEmpty(ajaxResult)) {
-                return null;
-            }
-            if (typeof ajaxResult !== "object") {
-                return null;
-            }
-            if (ajaxResult.result == null) {
-                return null;
-            }
-            if (ajaxResult.result == 'url') {
-                return ajaxResult.url;
-            }
+    var checkRedirection = function (ajaxResult) {
+        if (SF.isEmpty(ajaxResult)) {
             return null;
-        };
-
-        var originalSuccess = options.success; 
-
-        options.success = function (result) {
-            if (typeof result === "string") {
-                result = result ? result.trim() : "";
-            }
-            var url = checkRedirection(result);
-            if (!SF.isEmpty(url)) window.location.href = url;
-            else {
-                if (originalSuccess != null) originalSuccess(result);
-            }
-        };
-
-        return $.ajax(options);
+        }
+        if (typeof ajaxResult !== "object") {
+            return null;
+        }
+        if (ajaxResult.result == null) {
+            return null;
+        }
+        if (ajaxResult.result == 'url') {
+            return ajaxResult.url;
+        }
+        return null;
     };
 
-$(document).ajaxError(function (event, XMLHttpRequest, ajaxOptions, thrownError) {
-    //check request status
-    //request.abort() has status 0, so we don't show this "error", since we have
-    //explicitly aborted the request.
-    //this error is documented on http://bugs.jquery.com/ticket/7189
-    if (XMLHttpRequest.status === 0) return;
-    $("body").trigger("sf-ajax-error", [XMLHttpRequest, ajaxOptions, thrownError]);
-});
+    $.ajaxPrefilter(function (options, originalOptions, jqXHR) {
+        if (options.sfCheckRedirection) {
+            var originalSuccess = options.success;
+
+            options.success = function (result) {
+                if (typeof result === "string") {
+                    result = result ? result.trim() : "";
+                }
+                var url = checkRedirection(result);
+                if (!SF.isEmpty(url)) {
+                    window.location.href = url;
+                }
+                else {
+                    if (originalSuccess != null) {
+                        originalSuccess(result);
+                    }
+                }
+            };
+        }
+    });
+
+    $(document).ajaxError(function (event, XMLHttpRequest, ajaxOptions, thrownError) {
+        //check request status
+        //request.abort() has status 0, so we don't show this "error", since we have
+        //explicitly aborted the request.
+        //this error is documented on http://bugs.jquery.com/ticket/7189
+        if (XMLHttpRequest.status !== 0) {
+            $("body").trigger("sf-ajax-error", [XMLHttpRequest, ajaxOptions, thrownError]);
+        }
+    });
+})();
 
 SF.stopPropagation = function (event) {
         if (event.stopPropagation) event.stopPropagation();
