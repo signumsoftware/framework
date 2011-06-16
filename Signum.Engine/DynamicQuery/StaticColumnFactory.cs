@@ -25,27 +25,26 @@ namespace Signum.Engine.DynamicQuery
         public string Unit { get; set; }
         public Implementations Implementations { get; set; }
 
-        PropertyRoute propertyRoute;
-        public PropertyRoute PropertyRoute
+        PropertyRoute[] propertyRoutes;
+        public PropertyRoute[] PropertyRoutes
         {
-            get { return propertyRoute; }
+            get { return propertyRoutes; }
             set
             {
-                propertyRoute = value;
-                if (propertyRoute != null)
+                propertyRoutes = value;
+                if (propertyRoutes != null)
                 {
-                    switch (propertyRoute.PropertyRouteType)
+                    switch (propertyRoutes[0].PropertyRouteType)
                     {
                         case PropertyRouteType.LiteEntity:
                         case PropertyRouteType.Root:
                             throw new InvalidOperationException("PropertyRoute can not be of RouteType Root");
                         case PropertyRouteType.Property:
-                            PropertyInfo pi = propertyRoute.PropertyInfo;
-                            Format = Reflector.FormatString(propertyRoute);
-                            Unit = pi.SingleAttribute<UnitAttribute>().TryCC(u => u.UnitName);
+                            Format = propertyRoutes.Select(pr=> Reflector.FormatString(pr)).Distinct().Only();
+                            Unit = propertyRoutes.Select(pr=> pr.PropertyInfo.SingleAttribute<UnitAttribute>().TryCC(u => u.UnitName)).Distinct().Only();
                             return;
                         case PropertyRouteType.MListItems:
-                            Format = Reflector.FormatString(propertyRoute.Type);
+                            Format = Reflector.FormatString(propertyRoutes[0].Type);
                             return;
                     }
                 }
@@ -66,11 +65,46 @@ namespace Signum.Engine.DynamicQuery
             if (IsEntity && cleanType == null)
                 throw new InvalidOperationException("Entity must be a Lite");
 
-            if (meta is CleanMeta && ((CleanMeta)meta).PropertyRoute.PropertyRouteType != PropertyRouteType.Root)
+            if (meta is CleanMeta && ((CleanMeta)meta).PropertyRoutes.All(pr => pr.PropertyRouteType != PropertyRouteType.Root))
             {
-                PropertyRoute = ((CleanMeta)meta).PropertyRoute;
-                Implementations = PropertyRoute.GetImplementations();
+                PropertyRoutes = ((CleanMeta)meta).PropertyRoutes;
+                Implementations = AggregateImplementations(PropertyRoutes.Select(a => a.GetImplementations() ?? FakeImplementation(Type, a.Type)).NotNull());
             }
+        }
+
+        private Entities.Implementations FakeImplementation(Type abstractType, Type concreteType)
+        {
+            abstractType = Reflector.ExtractLite(abstractType) ?? abstractType;
+            concreteType = Reflector.ExtractLite(concreteType) ?? concreteType;
+
+            if (abstractType == concreteType)
+                return null;
+
+            if (!abstractType.IsAssignableFrom(concreteType))
+                throw new InvalidOperationException("{0} does not implement {1}");
+
+            return new ImplementedByAttribute(concreteType);
+        }
+
+        private Implementations AggregateImplementations(IEnumerable<Implementations> collection)
+        {
+            if (collection.Empty())
+                return null;
+
+            var only = collection.Only();
+            if (only != null)
+                return only; 
+
+            ImplementedByAttribute iba = (ImplementedByAttribute)collection.FirstOrDefault(a => a.IsByAll);
+            if (iba != null)
+                return iba;
+
+            return new ImplementedByAttribute(
+                collection
+                .Cast<ImplementedByAttribute>()
+                .SelectMany(ib => ib.ImplementedTypes)
+                .Distinct()
+                .ToArray());
         }
 
         public string DisplayName()
@@ -81,16 +115,22 @@ namespace Signum.Engine.DynamicQuery
             if (IsEntity)
                 return this.Type.NiceName();
 
-            if (PropertyRoute != null && propertyRoute.PropertyRouteType == PropertyRouteType.Property && PropertyRoute.PropertyInfo.Name == Name)
-                return propertyRoute.PropertyInfo.NiceName();
+            if (propertyRoutes != null && 
+                propertyRoutes[0].PropertyRouteType == PropertyRouteType.Property &&
+                propertyRoutes[0].PropertyInfo.Name == Name)
+            {
+                var result = propertyRoutes.Select(pr=>pr.PropertyInfo.NiceName()).Only();
+                if (result != null)
+                    return result;
+            }
 
             return Name.NiceName();
         }
 
-        public void SetPropertyRoute<T>(Expression<Func<T, object>> expression)
+        public void SetPropertyRoutes<T>(params Expression<Func<T, object>>[] expression)
             where T : IdentifiableEntity
         {
-            PropertyRoute = PropertyRoute.Construct(expression);
+            PropertyRoutes = expression.Select(exp => PropertyRoute.Construct(exp)).ToArray();
         }
 
         public bool IsEntity
@@ -107,7 +147,7 @@ namespace Signum.Engine.DynamicQuery
         {
             return new ColumnDescription(Name, Type)
             {
-                PropertyRoute = propertyRoute,
+                PropertyRoutes = propertyRoutes,
                 Implementations = Implementations,
 
                 DisplayName = DisplayName(),

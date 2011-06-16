@@ -20,21 +20,21 @@ namespace Signum.Entities.DynamicQuery
     [Serializable]
     public class CleanMeta : Meta
     {
-        public PropertyRoute PropertyRoute; 
+        public PropertyRoute[] PropertyRoutes;
 
-        public CleanMeta(PropertyRoute propertyRoute)
+        public CleanMeta(PropertyRoute[] propertyRoutes)
         {
-            this.PropertyRoute = propertyRoute;
+            this.PropertyRoutes = propertyRoutes;
         }
 
         public override bool IsAllowed()
         {
-            return PropertyRoute.IsAllowed();
+            return PropertyRoutes.All(a => a.IsAllowed());
         }
 
         public override string ToString()
         {
-            return "CleanMeta( {0} )".Formato(PropertyRoute);
+            return "CleanMeta({0})".Formato(PropertyRoutes.ToString(", "));
         }
 
     }
@@ -58,7 +58,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string ToString()
         {
-            return "DirtyMeta( {0} )".Formato(Properties.Select(a=>a.PropertyRoute).ToString(", "));
+            return "DirtyMeta({0})".Formato(Properties.ToString(", "));
         }
     }
 }
