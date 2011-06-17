@@ -22,8 +22,7 @@ SF.Help = (function () {
 
     function save() {
         $("#save-action").html("Guardando...");
-        SF.ajax({
-            type: "POST",
+        $.ajax({
             url: document.getElementById("form-save").action,
             async: false,
             data: $("form#form-save .modified").serialize(),

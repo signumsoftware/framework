@@ -102,11 +102,9 @@ SF.registerModule("Operations", function () {
                 newPrefix = this.options.prefix;
 
             var self = this;
-            SF.ajax({
-                type: "POST",
+            $.ajax({
                 url: this.options.controllerUrl,
                 data: this.options.contextual ? this.contextualRequestData(newPrefix) : this.requestData(newPrefix),
-                async: true,
                 success: function (operationResult) {
                     SF.Blocker.disable();
                     if (self.executedSuccessfully(operationResult)) {
@@ -119,8 +117,7 @@ SF.registerModule("Operations", function () {
                         return;
                     }
                 },
-                error:
-                function () {
+                error: function () {
                     SF.Blocker.disable();
                     SF.Notify.error(lang.signum.error, 2000);
                 }
@@ -377,11 +374,9 @@ SF.registerModule("Operations", function () {
             }
 
             var self = this;
-            SF.ajax({
-                type: "POST",
+            $.ajax({
                 url: this.options.controllerUrl,
                 data: this.requestData(this.newPrefix(), items),
-                async: true,
                 success: function (operationResult) {
                     SF.Blocker.disable();
 
@@ -395,8 +390,7 @@ SF.registerModule("Operations", function () {
                         return;
                     }
                 },
-                error:
-                function () {
+                error: function () {
                     SF.Blocker.disable();
                     SF.Notify.error(lang.signum.error, 2000);
                 }
@@ -445,8 +439,7 @@ SF.registerModule("Operations", function () {
         if ($partialViewName.length === 1) {
             requestData += "&partialViewName=" + $partialViewName.val();
         }
-        SF.ajax({
-            type: "POST",
+        $.ajax({
             url: urlController,
             data: requestData,
             async: false,
@@ -585,10 +578,8 @@ SF.registerModule("Operations", function () {
             prefix: findNavigator.findOptions.prefix
         };
 
-        SF.ajax({
+        $.ajax({
             url: entityCtxMenuUrl,
-            type: "POST",
-            async: true,
             data: requestData,
             success: function (items) {
                 $itemContainer.html(items);
