@@ -7,10 +7,11 @@ using System.Web.Mvc;
 using Signum.Utilities;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
+using Signum.Web.Properties;
 
 namespace Signum.Web
 {
-    public delegate QuickLinkItem[] GetQuickLinkItemDelegate<T>(T entity, HtmlHelper helper, string partialViewName);  
+    public delegate QuickLink[] GetQuickLinkItemDelegate<T>(HtmlHelper helper, T entity, string partialViewName, string prefix);  
 
     public static class QuickLinkWidgetHelper
     {
@@ -28,94 +29,109 @@ namespace Signum.Web
             globalLinks.Add(getQuickLinks);
         }
 
-        public static List<QuickLinkItem> GetForEntity(IdentifiableEntity ident, HtmlHelper helper, string partialViewName)
+        public static List<QuickLink> GetForEntity(HtmlHelper helper, IdentifiableEntity ident, string partialViewName, string prefix)
         {
-            List<QuickLinkItem> links = new List<QuickLinkItem>();
+            List<QuickLink> links = new List<QuickLink>();
 
-            links.AddRange(globalLinks.SelectMany(a => (a(ident, helper, partialViewName)??Empty)).NotNull());
+            links.AddRange(globalLinks.SelectMany(a => (a(helper, ident, partialViewName, prefix) ?? Empty)).NotNull());
 
             List<Delegate> list = entityLinks.TryGetC(ident.GetType());
             if (list != null)
-                links.AddRange(list.SelectMany(a => (QuickLinkItem[])a.DynamicInvoke(ident, helper, partialViewName) ?? Empty).NotNull());
+                links.AddRange(list.SelectMany(a => (QuickLink[])a.DynamicInvoke(helper, ident, partialViewName, prefix) ?? Empty).NotNull());
 
             return links;
         }
 
-        static QuickLinkItem[] Empty = new QuickLinkItem[0];
+        static QuickLink[] Empty = new QuickLink[0];
 
         public static void Start()
         {
-            WidgetsHelper.GetWidgetsForView += (helper, entity, partialViewName) => CreateWidget(helper, (IdentifiableEntity)entity, partialViewName);
+            WidgetsHelper.GetWidgetsForView += (helper, entity, partialViewName, prefix) => CreateWidget(helper, (IdentifiableEntity)entity, partialViewName, prefix);
         }
 
-        public static WidgetItem CreateWidget(HtmlHelper helper, IdentifiableEntity identifiable, string partialViewName)
+        public static WidgetItem CreateWidget(HtmlHelper helper, IdentifiableEntity identifiable, string partialViewName, string prefix)
         {
-            List<QuickLinkItem> quicklinks = GetForEntity(identifiable, helper, partialViewName);
-            if (quicklinks == null || quicklinks.Count == 0) return null;
+            List<QuickLink> quicklinks = GetForEntity(helper, identifiable, partialViewName, prefix);
+            if (quicklinks == null || quicklinks.Count == 0) 
+                return null;
 
             HtmlStringBuilder content = new HtmlStringBuilder();
-            using (content.Surround(new HtmlTag("div").Class("widget quicklinks")))
+            using (content.Surround(new HtmlTag("div").Class("sf-widget sf-quicklinks")))
             {
                 using (content.Surround("ul"))
+                {
                     foreach (var q in quicklinks)
                     {
-                        using (content.Surround("li"))
-                            content.Add(new HtmlTag("a")
-                                .Attr("onclick", "javascript:new SF.FindNavigator({0}).openFinder();".Formato(JsFindOptions(q).ToJS()))
-                                .SetInnerText(QueryUtils.GetNiceName(q.FindOptions.QueryName)));
+                        using (content.Surround(new HtmlTag("li").Class("sf-quicklink")))
+                        {
+                            content.Add(
+                                new HtmlTag("a").Attr("onclick", q.Execute()).SetInnerText(q.Text));
+                        }
                     }
+                }
             }
-
 
             return new WidgetItem
             {
-                Content = content.ToHtml(),
-                Label = new HtmlTag("a","Quicklinks").InnerHtml(
-                    "Quicklinks".EncodeHtml(),
-                     new HtmlTag("span")
-                        .Class("count")
-                        .Class(quicklinks.Count == 0 ? "disabled" : null)
-                        .SetInnerText(quicklinks.Count.ToString())
+                Id = TypeContextUtilities.Compose(prefix, "widgetQuicklinks"),
+                Label = new HtmlTag("a", "quicklinks").InnerHtml(
+                     Resources.Quicklinks.EncodeHtml(),
+                     new HtmlTag("span").Class("sf-count").SetInnerText(quicklinks.Count.ToString()).ToHtml()
                      ),
-                Id = "Notes",
-                Show = true,
+                Content = content.ToHtml()
             };
-        }
-
-        private static JsFindOptions JsFindOptions(QuickLinkItem quickLinkItem)
-        {
-            JsFindOptions foptions = new JsFindOptions
-            {
-                FindOptions = new FindOptions
-                {
-                    QueryName = quickLinkItem.FindOptions.QueryName,
-                    Create = false,
-                    SearchOnLoad = true,
-                    FilterMode = FilterMode.Hidden,
-                    FilterOptions = quickLinkItem.FindOptions.FilterOptions
-                },
-                Prefix = Js.NewPrefix("")
-            };
-            return foptions;
-        }
-
+        }     
     }
-    public class QuickLinkItem : ToolBarButton
+
+    public abstract class QuickLink : ToolBarButton
     {
-        public QuickLinkItem(object queryName, List<FilterOption> filterOptions)
+        public QuickLink()
         {
-            DivCssClass = "sf-quick-link";
-            FindOptions = new FindOptions
+            DivCssClass = "sf-quicklink";
+        }
+
+        public string Prefix { get; set; }
+
+        public bool IsVisible { get; set; }
+
+        public abstract string Execute();
+    }
+
+    public class QuickLinkFind : QuickLink
+    {
+        public FindOptions FindOptions { get; set; }
+        
+        public QuickLinkFind(FindOptions findOptions)
+        {
+            FindOptions = findOptions;
+            IsVisible = Navigator.IsFindable(findOptions.QueryName);
+            Text = QueryUtils.GetNiceName(findOptions.QueryName);
+        }
+
+        public QuickLinkFind(object queryName, string columnName, object value, bool hideColumn) :
+            this(new FindOptions
             {
                 QueryName = queryName,
-                FilterOptions = filterOptions,
-                AllowMultiple = false,
-                FilterMode = FilterMode.Hidden,
                 SearchOnLoad = true,
-                Create = false,
-            };
+                ColumnOptionsMode = hideColumn ? ColumnOptionsMode.Remove: ColumnOptionsMode.Add,
+                ColumnOptions = hideColumn ? new List<ColumnOption>{new ColumnOption(columnName)}: new List<ColumnOption>(),
+                FilterMode = FilterMode.Hidden,
+                FilterOptions = new List<FilterOption>
+                {
+                    new FilterOption(columnName, value),
+                },
+                Create = false
+            })
+        {
         }
 
-        public FindOptions FindOptions { get; set; }
+        public override string Execute()
+        {
+            return new JsFindNavigator(new JsFindOptions
+            {
+                FindOptions = FindOptions,
+                Prefix = Js.NewPrefix(Prefix ?? "")
+            }).openFinder().ToJS();
+        }
     }
 }
