@@ -327,4 +327,7 @@
   <data name="ChooseAType" xml:space="preserve">
     <value>Choose a type</value>
   </data>
+  <data name="Quicklinks" xml:space="preserve">
+    <value>Quick links</value>
+  </data>
 </root>
