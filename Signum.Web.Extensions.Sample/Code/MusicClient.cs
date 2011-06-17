@@ -36,9 +36,20 @@ namespace Signum.Web.Extensions.Sample
                     new EmbeddedEntitySettings<AlbumFromBandModel>(){PartialViewName = e => ViewPrefix.Formato("AlbumFromBandModel")},
                 });
 
-                ButtonBarEntityHelper.RegisterEntityButtons<AlbumDN>((ctx, album, partialViewName, prefix) =>
-                { 
-                    if (album.IsNew)
+                QuickLinkWidgetHelper.RegisterEntityLinks<LabelDN>((helper, entity, partialViewName, prefix) =>
+                {
+                    if (entity.IsNew)
+                        return null;
+
+                    return new QuickLink[]
+                    {
+                        new QuickLinkFind(typeof(AlbumDN), "Label", entity, true)
+                    };
+                });
+
+                ButtonBarEntityHelper.RegisterEntityButtons<AlbumDN>((ctx, entity, partialViewName, prefix) =>
+                {
+                    if (entity.IsNew)
                         return null;
 
                     return new ToolBarButton[]

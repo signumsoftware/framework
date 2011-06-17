@@ -92,6 +92,8 @@ namespace Signum.Web.Extensions.Sample
 
             MusicClient.Start();
 
+            QuickLinkWidgetHelper.Start();
+
             //Combiner.Start();
             ScriptHtmlHelper.Manager.MainAssembly = typeof(MusicClient).Assembly;
             SignumControllerFactory.MainAssembly = Assembly.GetExecutingAssembly();
