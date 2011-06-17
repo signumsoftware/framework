@@ -94,7 +94,7 @@ namespace Signum.Web
 
         public static JsInstruction AjaxCall(JsValue<string> controllerUrl, JsInstruction requestData, JsFunction onSuccess)
         {
-            return new JsInstruction(() => "SF.ajax({{type:'POST',url:{0},async:false,data:{1},success:{2}}})"
+            return new JsInstruction(() => "$.ajax({{url:{0},data:{1},success:{2}}})"
                 .Formato(controllerUrl.ToJS(), requestData.ToJS(), onSuccess.TryCC(os => os.ToJS()) ?? "null"));
         }
 

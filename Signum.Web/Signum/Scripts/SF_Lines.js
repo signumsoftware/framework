@@ -1120,11 +1120,8 @@ SF.registerModule("Lines", function () {
             source: function (request, response) {
                 if (lastXhr)
                     lastXhr.abort();
-                lastXhr = SF.ajax({
+                lastXhr = $.ajax({
                     url: options.url,
-                    type: "post",
-                    async: true,
-                    dataType: "json",
                     data: { types: options.types, l: options.count || 5, q: request.term },
                     success: function (data) {
                         lastXhr = null;

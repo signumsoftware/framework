@@ -54,8 +54,7 @@ SF.registerModule("Validator", function () {
             SF.Notify.info(lang.signum.saving);
             var returnValue = false;
             var self = this;
-            SF.ajax({
-                type: "POST",
+            $.ajax({
                 url: this.valOptions.controllerUrl,
                 async: false,
                 data: this.constructRequestData(),
@@ -89,8 +88,7 @@ SF.registerModule("Validator", function () {
             SF.log("Validator validate");
             var returnValue = false;
             var self = this;
-            SF.ajax({
-                type: "POST",
+            $.ajax({
                 url: this.valOptions.controllerUrl,
                 async: false,
                 data: this.constructRequestData(),
@@ -263,12 +261,10 @@ SF.registerModule("Validator", function () {
             SF.Notify.info(lang.signum.saving);
             var validatorResult = null;
             var self = this;
-            SF.ajax({
-                type: "POST",
+            $.ajax({
                 url: this.valOptions.controllerUrl,
                 async: false,
                 data: this.constructRequestDataForSaving(),
-                dataType: "JSON",
                 success: function (result) {
                     validatorResult = self.createValidatorResult(result);
                     self.showErrors(validatorResult.modelState);
@@ -348,12 +344,10 @@ SF.registerModule("Validator", function () {
             SF.log("PartialValidator validate");
             var validatorResult = null;
             var self = this;
-            SF.ajax({
-                type: "POST",
+            $.ajax({
                 url: this.valOptions.controllerUrl,
                 async: false,
                 data: this.constructRequestDataForValidating(),
-                dataType: "json",
                 success: function (result) {
                     validatorResult = self.createValidatorResult(result);
                     self.showErrors(validatorResult.modelState);

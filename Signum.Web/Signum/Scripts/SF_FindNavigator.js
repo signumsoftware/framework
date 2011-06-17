@@ -214,8 +214,7 @@ SF.registerModule("FindNavigator", function () {
         openFinder: function () {
             SF.log("FindNavigator openFinder");
             var self = this;
-            SF.ajax({
-                type: "POST",
+            $.ajax({
                 url: this.findOptions.navigatorControllerUrl,
                 data: this.requestDataForOpenFinder(),
                 async: false,
@@ -283,8 +282,7 @@ SF.registerModule("FindNavigator", function () {
             $btnSearch.toggleClass("sf-loading").val(lang.signum.searching);
 
             var self = this;
-            SF.ajax({
-                type: "POST",
+            $.ajax({
                 url: this.findOptions.searchControllerUrl,
                 data: this.requestDataForSearch(),
                 async: this.findOptions.async,
@@ -527,8 +525,7 @@ SF.registerModule("FindNavigator", function () {
 
             var webQueryName = ((SF.isEmpty(this.findOptions.webQueryName)) ? $(this.pf(this.webQueryName)).val() : this.findOptions.webQueryName);
             var self = this;
-            SF.ajax({
-                type: "POST",
+            $.ajax({
                 url: $(this.pf("btnAddColumn")).attr("data-url"),
                 data: { "webQueryName": webQueryName, "tokenName": tokenName },
                 async: false,
@@ -619,8 +616,7 @@ SF.registerModule("FindNavigator", function () {
             var webQueryName = ((SF.isEmpty(this.findOptions.webQueryName)) ? $(this.pf(this.webQueryName)).val() : this.findOptions.webQueryName);
 
             var self = this;
-            SF.ajax({
-                type: "POST",
+            $.ajax({
                 url: $(this.pf("btnAddFilter")).attr("data-url"),
                 data: { "webQueryName": webQueryName, "tokenName": tokenName, "index": this.newFilterRowIndex(), "prefix": this.findOptions.prefix },
                 async: false,
@@ -689,8 +685,7 @@ SF.registerModule("FindNavigator", function () {
             var tokenName = this.constructTokenName();
             var webQueryName = ((SF.isEmpty(this.findOptions.webQueryName)) ? $(this.pf(this.webQueryName)).val() : this.findOptions.webQueryName);
 
-            SF.ajax({
-                type: "POST",
+            $.ajax({
                 url: controllerUrl,
                 data: { "webQueryName": webQueryName, "tokenName": tokenName, "index": index, "prefix": this.findOptions.prefix },
                 async: false,
@@ -744,8 +739,7 @@ SF.registerModule("FindNavigator", function () {
             };
 
             var self = this;
-            SF.ajax({
-                type: "POST",
+            $.ajax({
                 url: quickFilterUrl,
                 data: params,
                 async: false,
