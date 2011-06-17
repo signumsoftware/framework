@@ -460,6 +460,7 @@ namespace Signum.Web
         public string NormalPageView = ViewPrefix.Formato("NormalPage");
         public string NormalControlView = ViewPrefix.Formato("NormalControl");
         public string PopupControlView = ViewPrefix.Formato("PopupControl");
+        public string PopupOkControlView = ViewPrefix.Formato("PopupOkControl");
         public string ChooserPopupView = ViewPrefix.Formato("ChooserPopup");
         public string SearchPopupControlView = ViewPrefix.Formato("SearchPopupControl");
         public string SearchPageView = ViewPrefix.Formato("SearchPage");

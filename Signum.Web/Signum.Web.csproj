@@ -148,6 +148,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>PopupControl.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Signum\Views\PopupOkControl1.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>PopupOkControl.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Signum\Views\SearchControl.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -225,6 +230,10 @@
     <Compile Include="ViewDataKeys.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Signum\Views\PopupOkControl.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>PopupOkControl1.cs</LastGenOutput>
+    </Content>
     <None Include="Signum\Views\SearchResults.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>SearchResults.cs</LastGenOutput>
