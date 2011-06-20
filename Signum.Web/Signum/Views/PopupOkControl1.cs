@@ -41,15 +41,15 @@ namespace ASP
     using System.Web.UI.WebControls.WebParts;
     using System.Web.UI.HtmlControls;
     using System.Xml.Linq;
-    using Signum.Web.Properties;
+    using Signum.Entities.Reflection;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
-    [System.Web.WebPages.PageVirtualPathAttribute("~/Signum/Views/NormalPage.cshtml")]
-    public class _Page_Signum_Views_NormalPage_cshtml : System.Web.Mvc.WebViewPage<TypeContext>
+    [System.Web.WebPages.PageVirtualPathAttribute("~/Signum/Views/PopupOkControl.cshtml")]
+    public class _Page_Signum_Views_PopupOkControl_cshtml : System.Web.Mvc.WebViewPage<TypeContext>
     {
-#line hidden
 
-        public _Page_Signum_Views_NormalPage_cshtml()
+
+        public _Page_Signum_Views_PopupOkControl_cshtml()
         {
         }
         protected System.Web.HttpApplication ApplicationInstance
@@ -63,65 +63,53 @@ namespace ASP
         {
 
 
-WriteLiteral("\r\n");
+WriteLiteral("<div id=\"");
 
 
-WriteLiteral("           \r\n");
+    Write(Model.Compose("panelPopup"));
+
+WriteLiteral("\" data-title=\"");
 
 
-DefineSection("head", () => {
+                                              Write(Navigator.Manager.GetTypeTitle(Model.UntypedValue as ModifiableEntity));
+
+WriteLiteral("\">\r\n    <h2><span class=\"sf-entity-title\">");
+
+
+                                  Write(ViewBag.Title ?? Model.UntypedValue.TryToString());
+
+WriteLiteral("</span></h2>\r\n    <div class=\"sf-button-bar\">\r\n        <button id=\"");
+
+
+               Write(Model.Compose("btnOk"));
+
+WriteLiteral("\" class=\"sf-entity-button sf-ok-button\" ");
+
+
+                                                                               Write(ViewData[ViewDataKeys.OnOk] != null ? Html.Raw("onclick=\"" + ViewData[ViewDataKeys.OnOk] + "\"") : null);
+
+WriteLiteral(">\r\n                OK</button>                \r\n    </div>\r\n    ");
+
+
+Write(Html.ValidationSummaryAjax(Model));
 
 WriteLiteral("\r\n    ");
 
 
-Write(Html.ScriptsJs(Navigator.Manager.DefaultScripts().ToArray()));
+Write(Html.PopupHeader());
 
-WriteLiteral("\r\n");
-
-
-});
-
-WriteLiteral("\r\n\r\n");
+WriteLiteral("\r\n    <div id=\"");
 
 
- using (Html.BeginForm())
-{
-    var ident = Model.UntypedValue as IdentifiableEntity;
-    
+        Write(Model.Compose("divMainControl"));
 
-WriteLiteral("    <div id=\"divNormalControl\" ");
+WriteLiteral("\" class=\"sf-main-control\">\r\n");
 
 
-                          Write(Html.Raw(ident != null? "data-isnew=\""+ident.IsNew.ToString().ToLower() +  "\"" : ""));
+           Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString(), Model);
 
-WriteLiteral(">\r\n");
+WriteLiteral("    </div>\r\n</div>\r\n");
 
-
-       if(string.IsNullOrEmpty(ViewBag.Title))
-        {
-            ViewBag.Title = Model.UntypedValue.TryToString();
-        }
-
-WriteLiteral("     \r\n");
-
-
-         if(string.IsNullOrEmpty(ViewBag.Title))
-        {
-            ViewBag.Title = Model.UntypedValue.TryToString();
-        }
-
-
-           Html.RenderPartial(Navigator.Manager.NormalControlView);
-
-WriteLiteral("    </div>\r\n");
-
-
-    
-
-WriteLiteral("    <div class=\"clear\"></div>   \r\n");
-
-
-}
 
         }
     }

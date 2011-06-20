@@ -39,6 +39,8 @@ namespace Signum.Engine.DynamicQuery
             {
                 QueryName = request.QueryName,
                 Filters = request.Filters,
+                Columns = new List<Column>() { new Column(this.EntityColumn().BuildColumnDescription()) },
+                Orders = new List<Order>(),
             };
 
             return Execute(req, GetColumnDescriptions()).Collection.Count();

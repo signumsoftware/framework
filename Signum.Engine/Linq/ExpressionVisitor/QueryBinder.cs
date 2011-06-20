@@ -378,10 +378,10 @@ namespace Signum.Engine.Linq
 
                 switch ((DbExpressionType)newItem.NodeType)
                 {
-                    case DbExpressionType.LiteReference:return SmartEqualizer.EntityIn((LiteReferenceExpression)newItem, col.Cast<Lite>());
+                    case DbExpressionType.LiteReference: return SmartEqualizer.EntityIn((LiteReferenceExpression)newItem, col == null ? Enumerable.Empty<Lite>() : col.Cast<Lite>());
                     case DbExpressionType.FieldInit:
                     case DbExpressionType.ImplementedBy:
-                    case DbExpressionType.ImplementedByAll: return SmartEqualizer.EntityIn(newItem, col.Cast<IdentifiableEntity>());
+                    case DbExpressionType.ImplementedByAll: return SmartEqualizer.EntityIn(newItem, col == null ? Enumerable.Empty<IdentifiableEntity>() : col.Cast<IdentifiableEntity>());
                     default:
                         return InExpression.FromValues(newItem, col == null ? new object[0] : col.Cast<object>().ToArray());
                 }
@@ -565,9 +565,9 @@ namespace Signum.Engine.Linq
             ProjectedColumns subqueryKeyPC = ColumnProjector.ProjectColumnsGroupBy(subqueryKey, Alias.Raw("basura"), subqueryProjection.Source.KnownAliases, new[] { subqueryProjection.Token }); // use same projection trick to get group-by expressions based on subquery
             Expression subqueryElemExpr = elementSelector == null ? subqueryProjection.Projector : this.MapAndVisitExpand(elementSelector, ref subqueryProjection); // compute element based on duplicated subquery
 
-            Expression subqueryCorrelation =
+            Expression subqueryCorrelation = keyPC.Columns.Empty() ? null : 
                 keyPC.Columns.Zip(subqueryKeyPC.Columns, (c1, c2) => SmartEqualizer.EqualNullableGroupBy(new ColumnExpression(c1.Expression.Type, alias, c1.Name), c2.Expression))
-                .Aggregate((a, b) => Expression.And(a, b));
+                    .Aggregate((a, b) => Expression.And(a, b));
 
             // build subquery that projects the desired element
             Alias elementAlias = tools.NextSelectAlias();

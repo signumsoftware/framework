@@ -460,6 +460,7 @@ namespace Signum.Web
         public string NormalPageView = ViewPrefix.Formato("NormalPage");
         public string NormalControlView = ViewPrefix.Formato("NormalControl");
         public string PopupControlView = ViewPrefix.Formato("PopupControl");
+        public string PopupOkControlView = ViewPrefix.Formato("PopupOkControl");
         public string ChooserPopupView = ViewPrefix.Formato("ChooserPopup");
         public string SearchPopupControlView = ViewPrefix.Formato("SearchPopupControl");
         public string SearchPageView = ViewPrefix.Formato("SearchPage");
@@ -480,7 +481,8 @@ namespace Signum.Web
             "~/signum/Scripts/SF_Lines.js",
             "~/signum/Scripts/SF_ViewNavigator.js",
             "~/signum/Scripts/SF_FindNavigator.js",
-            "~/signum/Scripts/SF_Validator.js"
+            "~/signum/Scripts/SF_Validator.js",
+            "~/signum/Scripts/SF_Widgets.js"
         };
 
         public NavigationManager()
@@ -782,10 +784,17 @@ namespace Signum.Web
             ResultTable queryResult = DynamicQueryManager.Current.ExecuteQuery(request);
             
             controller.ViewData.Model = context;
-            
+
             controller.ViewData[ViewDataKeys.FindOptions] = findOptions;
-            controller.ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
             
+            QueryDescription qd = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
+            controller.ViewData[ViewDataKeys.QueryDescription] = qd;
+            
+            Type entitiesType = Reflector.ExtractLite(qd.Columns.Single(a => a.IsEntity).Type);
+            string message = CollectionElementToken.MultipliedMessage(request.Multiplications, entitiesType);
+            if (message.HasText())
+                controller.ViewData[ViewDataKeys.MultipliedMessage] = message;
+
             controller.ViewData[ViewDataKeys.Results] = queryResult;
 
             QuerySettings settings = QuerySettings[findOptions.QueryName];

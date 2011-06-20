@@ -1,0 +1,23 @@
+﻿.sf-widgets-container
+{
+    float: right;    
+    padding: 4px 2px;    
+}
+
+.sf-widget-li
+{
+    position: relative;    
+}
+
+.sf-widget
+{
+    display: none;
+    position: absolute;
+    background: white;
+    padding: 10px;
+}
+
+.sf-widget-li-active .sf-widget
+{
+    display: block;    
+}

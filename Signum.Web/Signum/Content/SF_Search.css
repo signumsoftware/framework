@@ -58,6 +58,10 @@
     vertical-align: middle;
     padding: 0 3px;
 }
+.sf-filter-token
+{
+    padding: 2px 5px;    
+}
 .sf-subtokens-expander 
 {
     cursor:pointer;
@@ -164,4 +168,8 @@
 .sf-search-control
 {
     min-width:400px;    
+}
+.sf-search-control .sf-td-multiply
+{
+    font-style: italic;    
 }

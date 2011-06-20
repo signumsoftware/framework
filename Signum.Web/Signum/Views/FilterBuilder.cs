@@ -99,12 +99,18 @@ WriteLiteral(">\r\n            <div id=\"");
 WriteLiteral("\" class=\"ui-widget-header ui-corner-top sf-filters-body\">\r\n");
 
 
-                   var columns = queryDescription.Columns
-                        .Select(c => new SelectListItem { Text = c.DisplayName, Value = c.Name, Selected = false })
-                        .ToList();
-                   columns.Insert(0, new SelectListItem { Text = "-", Selected = true, Value = "" });
+                   var columns = new HtmlStringBuilder();
+                   columns.AddLine(new HtmlTag("option").Attr("value", "").SetInnerText("-").ToHtml());
+                   foreach (var c in queryDescription.Columns)
+                   {
+                       var option = new HtmlTag("option")
+                           .Attr("value", c.Name)
+                           .SetInnerText(c.DisplayName);
+                       columns.AddLine(option.ToHtml());
+                   }
+                
 
-WriteLiteral("                \r\n                ");
+WriteLiteral("                ");
 
 
            Write(Html.TokensCombo(findOptions.QueryName, columns, context, 0, false));
@@ -116,12 +122,13 @@ WriteLiteral("\r\n                \r\n                ");
                         context.Compose("btnAddFilter"), 
                         Resources.FilterBuilder_AddFilter, 
                         "",
-                        Resources.FilterBuilder_AddFilter,
-                        "sf-query-button sf-add-filter", 
+                        Resources.Signum_selectToken,
+                        "sf-query-button sf-add-filter sf-disabled", 
                         new Dictionary<string, object> 
                         { 
-                            { "onclick", "new SF.FindNavigator({{prefix:'{0}'}}).addFilter('{1}');".Formato(context.ControlID, Url.SignumAction("AddFilter")) },
-                            { "data-icon", "ui-icon-arrowthick-1-s" }
+                            //{ "onclick", "new SF.FindNavigator({{prefix:'{0}'}}).addFilter('{1}');".Formato(context.ControlID, Url.SignumAction("AddFilter")) },
+                            { "data-icon", "ui-icon-arrowthick-1-s" },
+                            { "data-url", Url.SignumAction("AddFilter") }
                         }));
 
 WriteLiteral("\r\n\r\n");
@@ -133,13 +140,14 @@ WriteLiteral("\r\n\r\n");
                Write(Html.Href(
                         context.Compose("btnAddColumn"), 
                         Resources.FilterBuilder_AddColumn, 
-                        "", 
-                        Resources.FilterBuilder_AddColumn, 
-                        "sf-query-button sf-add-column", 
+                        "",
+                        Resources.Signum_selectToken,
+                        "sf-query-button sf-add-column sf-disabled", 
                         new Dictionary<string, object> 
                         { 
-                            { "onclick", "new SF.FindNavigator({{prefix:'{0}'}}).addColumn('{1}');".Formato(context.ControlID, Url.SignumAction("GetColumnName")) }, 
-                            { "data-icon", "ui-icon-arrowthick-1-e" }
+                            //{ "onclick", "new SF.FindNavigator({{prefix:'{0}'}}).addColumn('{1}');".Formato(context.ControlID, Url.SignumAction("GetColumnName")) }, 
+                            { "data-icon", "ui-icon-arrowthick-1-e" },
+                            { "data-url", Url.SignumAction("GetColumnName") }
                         }));
 
                           

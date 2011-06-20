@@ -54,8 +54,7 @@ SF.registerModule("Validator", function () {
             SF.Notify.info(lang.signum.saving);
             var returnValue = false;
             var self = this;
-            SF.ajax({
-                type: "POST",
+            $.ajax({
                 url: this.valOptions.controllerUrl,
                 async: false,
                 data: this.constructRequestData(),
@@ -89,8 +88,7 @@ SF.registerModule("Validator", function () {
             SF.log("Validator validate");
             var returnValue = false;
             var self = this;
-            SF.ajax({
-                type: "POST",
+            $.ajax({
                 url: this.valOptions.controllerUrl,
                 async: false,
                 data: this.constructRequestData(),
@@ -263,12 +261,10 @@ SF.registerModule("Validator", function () {
             SF.Notify.info(lang.signum.saving);
             var validatorResult = null;
             var self = this;
-            SF.ajax({
-                type: "POST",
+            $.ajax({
                 url: this.valOptions.controllerUrl,
                 async: false,
                 data: this.constructRequestDataForSaving(),
-                dataType: "JSON",
                 success: function (result) {
                     validatorResult = self.createValidatorResult(result);
                     self.showErrors(validatorResult.modelState);
@@ -297,7 +293,7 @@ SF.registerModule("Validator", function () {
             }
 
             var formChildren = null;
-            if (isEmbedded) { 
+            if (isEmbedded) {
                 formChildren = $("form :input, #" + SF.Keys.tabId + ", input:hidden[name=" + SF.Keys.antiForgeryToken + "]");
             }
             if (!SF.isEmpty(this.valOptions.parentDiv)) {
@@ -307,8 +303,8 @@ SF.registerModule("Validator", function () {
                 else {
                     formChildren = formChildren.add($("#" + this.valOptions.parentDiv + " :input"));
                 }
-            }                  
-            formChildren = formChildren.not(".sf-search-control :input, #" + SF.Keys.reactive);
+            }
+            formChildren = formChildren.not(".sf-search-control :input,#" + SF.Keys.reactive);
 
             var serializer = new SF.Serializer().add(formChildren.serialize());
 
@@ -348,12 +344,10 @@ SF.registerModule("Validator", function () {
             SF.log("PartialValidator validate");
             var validatorResult = null;
             var self = this;
-            SF.ajax({
-                type: "POST",
+            $.ajax({
                 url: this.valOptions.controllerUrl,
                 async: false,
                 data: this.constructRequestDataForValidating(),
-                dataType: "json",
                 success: function (result) {
                     validatorResult = self.createValidatorResult(result);
                     self.showErrors(validatorResult.modelState);
@@ -365,7 +359,7 @@ SF.registerModule("Validator", function () {
 
     SF.PartialValidator.prototype = new SF.Validator();
 
-    SF.EntityIsValid = function (validationOptions, onSuccess) {
+    SF.EntityIsValid = function (validationOptions, onSuccess, sender) {
         SF.log("Validator EntityIsValid");
 
         SF.Notify.info(lang.signum.validating);
@@ -386,7 +380,12 @@ SF.registerModule("Validator", function () {
         if (isValid) {
             SF.Notify.clear();
             if (onSuccess != null) {
-                onSuccess();
+                if (typeof sender != "undefined") {
+                    onSuccess.call(sender);
+                }
+                else {
+                    onSuccess();
+                }
             }
         }
         else {

@@ -346,13 +346,32 @@ namespace Signum.Web.Controllers
             if (subtokens == null)
                 return Content("");
 
-            var items = subtokens.Select(t => new SelectListItem
+            //var items = subtokens.Select(t => new SelectListItem
+            //{
+            //    Text = t.ToString(),
+            //    Value = t.Key,
+            //    Selected = false
+            //}).ToList();
+            //items.Insert(0, new SelectListItem { Text = "-", Selected = true, Value = "" });
+
+            var items = new HtmlStringBuilder();
+            items.AddLine(new HtmlTag("option").Attr("value", "").SetInnerText("-").ToHtml());
+            foreach (var t in subtokens)
             {
-                Text = t.ToString(),
-                Value = t.Key,
-                Selected = false
-            }).ToList();
-            items.Insert(0, new SelectListItem { Text = "-", Selected = true, Value = "" });
+                var option = new HtmlTag("option")
+                    .Attr("value", t.Key)
+                    .SetInnerText(t.ToString());
+
+                string canColumn = QueryUtils.CanColumn(t);
+                if (canColumn.HasText())
+                    option.Attr("data-column", canColumn);
+
+                string canFilter = QueryUtils.CanFilter(t);
+                if (canFilter.HasText())
+                    option.Attr("data-filter", canFilter);
+
+                items.AddLine(option.ToHtml());
+            }
 
             return Content(SearchControlHelper.TokensCombo(CreateHtmlHelper(this), queryName, items, new Context(null, prefix), index + 1, true).ToHtmlString());
         }
@@ -381,6 +400,7 @@ namespace Signum.Web.Controllers
 
             ViewData.Model = new Context(null, prefix);
             ViewData[ViewDataKeys.CustomHtml] = sb.ToHtml();
+            ViewData[ViewDataKeys.Title] = Resources.ChooseAType;
 
             return PartialView(Navigator.Manager.ChooserPopupView);
         }
