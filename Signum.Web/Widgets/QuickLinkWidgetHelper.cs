@@ -56,7 +56,7 @@ namespace Signum.Web
                 return null;
 
             HtmlStringBuilder content = new HtmlStringBuilder();
-            using (content.Surround(new HtmlTag("div").Class("sf-widget sf-quicklinks")))
+            using (content.Surround(new HtmlTag("div").Class("ui-corner-all ui-widget-content sf-widget sf-quicklinks")))
             {
                 using (content.Surround("ul"))
                 {
@@ -76,7 +76,7 @@ namespace Signum.Web
                 Id = TypeContextUtilities.Compose(prefix, "widgetQuicklinks"),
                 Label = new HtmlTag("a", "quicklinks").InnerHtml(
                      Resources.Quicklinks.EncodeHtml(),
-                     new HtmlTag("span").Class("sf-count").SetInnerText(quicklinks.Count.ToString()).ToHtml()
+                     new HtmlTag("span").Class("sf-widget-count").SetInnerText(quicklinks.Count.ToString()).ToHtml()
                      ),
                 Content = content.ToHtml()
             };

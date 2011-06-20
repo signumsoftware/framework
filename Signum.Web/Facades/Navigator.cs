@@ -480,7 +480,8 @@ namespace Signum.Web
             "~/signum/Scripts/SF_Lines.js",
             "~/signum/Scripts/SF_ViewNavigator.js",
             "~/signum/Scripts/SF_FindNavigator.js",
-            "~/signum/Scripts/SF_Validator.js"
+            "~/signum/Scripts/SF_Validator.js",
+            "~/signum/Scripts/SF_Widgets.js"
         };
 
         public NavigationManager()

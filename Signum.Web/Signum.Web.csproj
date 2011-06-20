@@ -238,6 +238,7 @@
       <LastGenOutput>FilterBuilder.cs</LastGenOutput>
     </None>
     <Content Include="Signum\Content\SF_Widgets.css" />
+    <Content Include="Signum\Scripts\SF_Widgets.js" />
     <Content Include="Signum\Views\SearchControl.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>SearchControl.cs</LastGenOutput>
