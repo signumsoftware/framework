@@ -157,14 +157,11 @@ namespace Signum.Web
             string setTicks = SetTicksFunction(helper, valueLine);
             string reloadOnChangeFunction = GetReloadFunction(helper, valueLine);
 
-            if (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || valueLine.ReloadOnChange || valueLine.ReloadFunction.HasText())
-            {
-                if (valueLine.ValueHtmlProps.ContainsKey("onblur"))
-                    valueLine.ValueHtmlProps["onblur"] = setTicks + valueLine.ValueHtmlProps["onblur"] + reloadOnChangeFunction;
-                else
-                    valueLine.ValueHtmlProps.Add("onblur", setTicks + reloadOnChangeFunction);
-            }
-
+            if (valueLine.ValueHtmlProps.ContainsKey("onblur"))
+                valueLine.ValueHtmlProps["onblur"] = "this.setAttribute('value', this.value); " + setTicks + valueLine.ValueHtmlProps["onblur"] + reloadOnChangeFunction;
+            else
+                valueLine.ValueHtmlProps.Add("onblur", "this.setAttribute('value', this.value); " + setTicks + reloadOnChangeFunction);
+            
             string jsDataFormat = DatePickerOptions.JsDateFormat(valueLine.Format ?? "g");
 
             valueLine.ValueHtmlProps["size"] = jsDataFormat.Length + 1;   //time is often rendered with two digits as hours, but format is represented as "H"

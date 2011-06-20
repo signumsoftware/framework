@@ -15,6 +15,12 @@ namespace Signum.Engine.Linq
 {
     internal static class SmartEqualizer
     {
+        public static Expression EqualNullableGroupBy(Expression e1, Expression e2)
+        {
+            return Expression.Or(Expression.Equal(e1.Nullify(), e2.Nullify()),
+                Expression.And(new IsNullExpression(e1), new IsNullExpression(e2)));
+        }
+
         public static Expression EqualNullable(Expression e1, Expression e2)
         {
             if (e1.Type.IsNullable() == e2.Type.IsNullable())
@@ -36,6 +42,9 @@ namespace Signum.Engine.Linq
 
         internal static Expression EntityIn(Expression newItem, IEnumerable<IdentifiableEntity> collection)
         {
+            if (collection.Empty())
+                return SqlConstantExpression.False;
+
             Dictionary<Type, object[]> entityIDs = collection.AgGroupToDictionary(a => a.GetType(), gr => gr.Select(a => (object)(a.IdOrNull ?? int.MaxValue)).ToArray());
 
             return EntityIn(newItem, entityIDs);
@@ -43,6 +52,9 @@ namespace Signum.Engine.Linq
 
         internal static Expression EntityIn(LiteReferenceExpression liteReference, IEnumerable<Lite> collection)
         {
+            if (collection.Empty())
+                return SqlConstantExpression.False;
+
             Dictionary<Type, object[]> entityIDs = collection.AgGroupToDictionary(a => a.RuntimeType, gr => gr.Select(a => (object)(a.IdOrNull ?? int.MaxValue)).ToArray());
 
             return EntityIn(liteReference.Reference, entityIDs); 

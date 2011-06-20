@@ -54,6 +54,8 @@ namespace Signum.Web.Controllers
         {
             Type type = Navigator.ResolveType(runtimeType);
 
+            ViewData[ViewDataKeys.WriteSFInfo] = true;
+
             object result = Constructor.VisualConstruct(this, type, prefix, VisualConstructStyle.PopupView);
             if (result.GetType() == typeof(PartialViewResult))
                 return (PartialViewResult)result;
@@ -66,7 +68,6 @@ namespace Signum.Web.Controllers
 
             IdentifiableEntity entity = (IdentifiableEntity)result;
 
-            ViewData[ViewDataKeys.WriteSFInfo] = true;
             return Navigator.PopupView(this, entity, prefix, url);
         }
 
@@ -200,7 +201,8 @@ namespace Signum.Web.Controllers
         {
             ModifiableEntity mod = this.UntypedExtractEntity(prefix);
             MappingContext context = null;
-            if (mod as EmbeddedEntity != null && !(mod is ModelEntity))
+            bool isEmbedded = mod as EmbeddedEntity != null && !(mod is ModelEntity);
+            if (isEmbedded)
             {
                 mod = this.UntypedExtractEntity(); //apply changes to the parent entity
                 context = mod.UntypedApplyChanges(ControllerContext, "", true).UntypedValidateGlobal();
@@ -213,16 +215,25 @@ namespace Signum.Web.Controllers
             this.ModelState.FromContext(context);
 
             string newLink = "";
+            string newToStr = "";
             IIdentifiable ident = context.UntypedValue as IIdentifiable;
-            if (context.UntypedValue == null)
+            if (isEmbedded)
+            {
+                newToStr = MappingContext.FindSubentity((IdentifiableEntity)context.UntypedValue, prefix).ToString();
+            }
+            else if (context.UntypedValue == null)
             {
                 RuntimeInfo ei = RuntimeInfo.FromFormValue(Request.Form[TypeContextUtilities.Compose(prefix, EntityBaseKeys.RuntimeInfo)]);
                 newLink = Navigator.ViewRoute(ei.RuntimeType, ident.TryCS(e => e.IdOrNull));
+                newToStr = context.UntypedValue.ToString();
             }
             else
+            {
                 newLink = Navigator.ViewRoute(context.UntypedValue.GetType(), ident.TryCS(e => e.IdOrNull));
-
-            return JsonAction.ModelState(ModelState, context.UntypedValue.ToString(), newLink);
+                newToStr = context.UntypedValue.ToString();
+            }
+            
+            return JsonAction.ModelState(ModelState, newToStr, newLink);
         }
 
         [HttpPost]
@@ -335,13 +346,32 @@ namespace Signum.Web.Controllers
             if (subtokens == null)
                 return Content("");
 
-            var items = subtokens.Select(t => new SelectListItem
+            //var items = subtokens.Select(t => new SelectListItem
+            //{
+            //    Text = t.ToString(),
+            //    Value = t.Key,
+            //    Selected = false
+            //}).ToList();
+            //items.Insert(0, new SelectListItem { Text = "-", Selected = true, Value = "" });
+
+            var items = new HtmlStringBuilder();
+            items.AddLine(new HtmlTag("option").Attr("value", "").SetInnerText("-").ToHtml());
+            foreach (var t in subtokens)
             {
-                Text = t.ToString(),
-                Value = t.Key,
-                Selected = false
-            }).ToList();
-            items.Insert(0, new SelectListItem { Text = "-", Selected = true, Value = "" });
+                var option = new HtmlTag("option")
+                    .Attr("value", t.Key)
+                    .SetInnerText(t.ToString());
+
+                string canColumn = QueryUtils.CanColumn(t);
+                if (canColumn.HasText())
+                    option.Attr("data-column", canColumn);
+
+                string canFilter = QueryUtils.CanFilter(t);
+                if (canFilter.HasText())
+                    option.Attr("data-filter", canFilter);
+
+                items.AddLine(option.ToHtml());
+            }
 
             return Content(SearchControlHelper.TokensCombo(CreateHtmlHelper(this), queryName, items, new Context(null, prefix), index + 1, true).ToHtmlString());
         }
@@ -370,6 +400,7 @@ namespace Signum.Web.Controllers
 
             ViewData.Model = new Context(null, prefix);
             ViewData[ViewDataKeys.CustomHtml] = sb.ToHtml();
+            ViewData[ViewDataKeys.Title] = Resources.ChooseAType;
 
             return PartialView(Navigator.Manager.ChooserPopupView);
         }

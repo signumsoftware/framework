@@ -92,10 +92,12 @@ namespace Signum.Engine.Linq
             {
                 Expression cleaned = Clean(query.Expression);
                 Expression filtered = QueryFilterer.Filter(cleaned);
+
                 BinderTools tools = new BinderTools();
                 CommandExpression delete = new QueryBinder(tools).BindDelete(filtered);
                 CommandExpression deleteOptimized = (CommandExpression)Optimize(delete, tools);
                 CommandResult cr = TranslatorBuilder.BuildCommandResult(deleteOptimized);
+
                 return cr.Execute();
             }
         }

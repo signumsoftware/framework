@@ -53,13 +53,22 @@ namespace Signum.Web
             return TypeContextUtilities.Compose("New", prefix);
         }
 
+        public static JsInstruction OpenTypeChooser(JsValue<string> prefix, JsFunction onOptionChosen, string[] typeNames)
+        {
+            return "SF.openChooser({0}, {1}, {{controllerUrl:'{2}', types:'{3}'}});".Formato(
+                    prefix.ToJS(),
+                    onOptionChosen.ToJS(),
+                    RouteHelper.New().SignumAction("GetTypeChooser"),
+                    typeNames == null ? "" : typeNames.ToString(","));
+        }
+
         public static JsInstruction OpenChooser(JsValue<string> prefix, JsFunction onOptionChosen, string[] optionNames)
         {
             return "SF.openChooser({0}, {1}, [{2}], null, {{controllerUrl:'{3}'}});".Formato(
                     prefix.ToJS(),
                     onOptionChosen.ToJS(),
                     optionNames.ToString(on => "'{0}'".Formato(on), ","),
-                    optionNames.Empty() ? RouteHelper.New().SignumAction("GetTypeChooser") : RouteHelper.New().SignumAction("GetChooser"));
+                    RouteHelper.New().SignumAction("GetChooser"));
         }
 
         public static JsInstruction Submit(JsValue<string> controllerUrl)
@@ -85,7 +94,7 @@ namespace Signum.Web
 
         public static JsInstruction AjaxCall(JsValue<string> controllerUrl, JsInstruction requestData, JsFunction onSuccess)
         {
-            return new JsInstruction(() => "SF.ajax({{type:'POST',url:{0},async:false,data:{1},success:{2}}})"
+            return new JsInstruction(() => "$.ajax({{url:{0},data:{1},success:{2}}})"
                 .Formato(controllerUrl.ToJS(), requestData.ToJS(), onSuccess.TryCC(os => os.ToJS()) ?? "null"));
         }
 

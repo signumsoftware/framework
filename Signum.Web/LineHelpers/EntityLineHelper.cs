@@ -70,7 +70,7 @@ namespace Signum.Web
                     }
                     else
                     {
-                        if (entityLine.UntypedValue == null)
+                        if (entityLine.UntypedValue == null && entityLine.Parent is TypeContext) /*Second condition filters embedded entities in filters to be rendered */
                         {
                             TypeContext templateTC = ((TypeContext)entityLine.Parent).Clone((object)Constructor.Construct(entityLine.Type.CleanType()));
                             sb.AddLine(EntityBaseHelper.EmbeddedTemplate(entityLine, EntityBaseHelper.RenderTypeContext(helper, templateTC, RenderMode.Popup, entityLine)));
@@ -130,6 +130,9 @@ namespace Signum.Web
             EntityLine el = new EntityLine(typeof(S), context.Value, context, null, context.PropertyRoute);
 
             EntityBaseHelper.ConfigureEntityBase(el, el.CleanRuntimeType ?? el.Type.CleanType());
+
+            if (el.Implementations.TryCS(i => i.IsByAll) == true)
+                el.Autocomplete = false;
 
             Common.FireCommonTasks(el);
 

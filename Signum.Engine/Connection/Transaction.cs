@@ -242,26 +242,95 @@ namespace Signum.Engine
             }
         }
 
-        public Transaction() : this(false, null) { }
-
-        public Transaction(bool forceNew) : this(forceNew, null) { }
-
-        const string connectionError = "ConnectionScope.Current not established. User ConnectionScope.Default to do it.";
-
-        public Transaction(bool forceNew, IsolationLevel? isolationLevel)
+        class NoneTransaction : ICoreTransaction
         {
-            if (currents == null)
-                currents = new Dictionary<BaseConnection, ICoreTransaction>();
+            ICoreTransaction parent;
 
-            BaseConnection bc = ConnectionScope.Current;
+            public SqlConnection Connection { get; private set; }
+            public SqlTransaction Transaction { get{return null;}}
+            public DateTime Time { get; private set; }
+            public bool RolledBack { get; private set; }
+            public bool Started { get; private set; }
+            public event Action RealCommit;
+            public event Action PreRealCommit;
 
-            if (bc == null)
-                throw new InvalidOperationException(connectionError);
+            public NoneTransaction(ICoreTransaction parent)
+            {
+                Time = TimeZoneManager.Now;
+                this.parent = parent;
+            }
+
+            public void Start()
+            {
+                if (!Started)
+                {
+                    Connection con = (Connection)ConnectionScope.Current;
+                    Connection = new SqlConnection(con.ConnectionString);
+
+                    Connection.Open();
+                    //Transaction = Connection.BeginTransaction(IsolationLevel ?? con.IsolationLevel);
+                    Started = true;
+                }
+            }
+
+            public void Commit()
+            {
+                if (Started)
+                {
+                    if (PreRealCommit != null)
+                        PreRealCommit();
+
+                    //Transaction.Commit();
+
+                    if (RealCommit != null)
+                        RealCommit();
+                }
+            }
+
+            public void Rollback()
+            {
+                if (Started && !RolledBack)
+                {
+                    //Transaction.Rollback();
+                    NotifyRollback();
+                    RolledBack = true;
+                }
+            }
+
+            public ICoreTransaction Finish()
+            {
+                //if (Transaction != null)
+                //{
+                //    Transaction.Dispose();
+                //    Transaction = null;
+                //}
+
+                if (Connection != null)
+                {
+                    Connection.Dispose();
+                    Connection = null;
+                }
+
+                return parent;
+            }
+
+            Dictionary<string, object> userData;
+            public Dictionary<string, object> UserData
+            {
+                get { return userData ?? (userData = new Dictionary<string, object>()); }
+            }
+        }
+
+        public Transaction():this(false){}
+
+        public Transaction(bool forceNew)
+        {
+            BaseConnection bc = AssertConnection();
 
             ICoreTransaction parent = currents.TryGetC(bc);
             if (parent == null || forceNew)
             {
-                currents[bc] = coreTransaction = new RealTransaction(parent, isolationLevel);
+                currents[bc] = coreTransaction = new RealTransaction(parent, null);
             }
             else
             {
@@ -269,8 +338,44 @@ namespace Signum.Engine
                 currents[bc] = coreTransaction = new FakedTransaction(parent);
             }
         }
+    
+        Transaction(BaseConnection bc, ICoreTransaction transaction)
+        {
+            currents[bc] = coreTransaction = transaction;
+        }
 
-        public Transaction(string savePointName)
+        public static Transaction None()
+        {
+            BaseConnection bc = AssertConnection();
+
+            ICoreTransaction parent = currents.TryGetC(bc);
+
+            return new Transaction(bc, new NoneTransaction(parent));
+        }
+
+        public static Transaction NamedSavePoint(string savePointName)
+        {
+            BaseConnection bc = AssertConnection();
+
+            ICoreTransaction parent = GetCurrent();
+            return new Transaction(bc, new NamedTransaction(parent, savePointName));
+        }
+
+        public static Transaction ForceNew()
+        {
+            return ForceNew(null);
+        }
+
+        public static Transaction ForceNew(IsolationLevel? isolationLevel)
+        {
+            BaseConnection bc = AssertConnection();
+
+            ICoreTransaction parent = currents.TryGetC(bc);
+
+            return new Transaction(bc, new RealTransaction(parent, isolationLevel));
+        }
+
+        private static BaseConnection AssertConnection()
         {
             if (currents == null)
                 currents = new Dictionary<BaseConnection, ICoreTransaction>();
@@ -278,12 +383,11 @@ namespace Signum.Engine
             BaseConnection bc = ConnectionScope.Current;
 
             if (bc == null)
-                throw new InvalidOperationException(connectionError);
-
-            ICoreTransaction parent = GetCurrent();
-            currents[bc] = coreTransaction = new NamedTransaction(parent, savePointName);
+                throw new InvalidOperationException("ConnectionScope.Current not established. Use ConnectionScope.Default to do it.");
+            return bc;
         }
 
+        
         void AssertTransaction()
         {
             if (GetCurrent().RolledBack)

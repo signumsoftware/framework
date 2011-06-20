@@ -6,11 +6,24 @@
 
 @{ FindOptions findOptions = (FindOptions)ViewData[ViewDataKeys.FindOptions];
    QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
-   Type entitiesType = Reflector.ExtractLite(queryDescription.Columns.Single(a => a.IsEntity).Type);
-   bool viewable = findOptions.View && Navigator.IsNavigable(entitiesType, true);
+   var entityColumn = queryDescription.Columns.Single(a => a.IsEntity);
+   Type entitiesType = Reflector.ExtractLite(entityColumn.Type);
+   Implementations implementations = entityColumn.Implementations;
+   bool viewable = findOptions.View && (implementations != null || Navigator.IsNavigable(entitiesType, true));
 
    ResultTable queryResult = (ResultTable)ViewData[ViewDataKeys.Results];
    Dictionary<int, Func<HtmlHelper, object, MvcHtmlString>> formatters = (Dictionary<int, Func<HtmlHelper, object, MvcHtmlString>>)ViewData[ViewDataKeys.Formatters];}
+
+@if (ViewData.ContainsKey(ViewDataKeys.MultipliedMessage))
+{ 
+    <tr class="sf-tr-multiply">
+        <td class="sf-td-multiply ui-state-highlight" colspan="@(queryResult.Columns.Count() + (viewable ? 1 : 0) + (findOptions.AllowMultiple.HasValue ? 1 : 0))">
+            <span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span>
+            @ViewData[ViewDataKeys.MultipliedMessage]
+        </td>
+    </tr>
+}
+
 @foreach (var row in queryResult.Rows)
 {
     Lite entityField = row.Entity;

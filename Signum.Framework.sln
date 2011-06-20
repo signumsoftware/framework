@@ -22,6 +22,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WizardProjectName", "Templa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Signum.Test", "Signum.Test\Signum.Test.csproj", "{DE565EB3-EE44-469D-B6B9-C8F3CA0712EF}"
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "SignumFramework2Setup", "SignumFrameworkSetup\SignumFrameworkSetup.vdproj", "{8872E295-9239-4193-BE63-51FE9204E6A2}"
+EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = Signum.Framework.vsmdi
@@ -59,6 +61,10 @@ Global
 		{DE565EB3-EE44-469D-B6B9-C8F3CA0712EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DE565EB3-EE44-469D-B6B9-C8F3CA0712EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DE565EB3-EE44-469D-B6B9-C8F3CA0712EF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8872E295-9239-4193-BE63-51FE9204E6A2}.Debug|Any CPU.ActiveCfg = Debug
+		{8872E295-9239-4193-BE63-51FE9204E6A2}.Debug|Any CPU.Build.0 = Debug
+		{8872E295-9239-4193-BE63-51FE9204E6A2}.Release|Any CPU.ActiveCfg = Release
+		{8872E295-9239-4193-BE63-51FE9204E6A2}.Release|Any CPU.Build.0 = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -37,9 +37,6 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Commons.Web.Mvc.PrecompiledViews">
-      <HintPath>C:\Users\luis\AppData\Local\Microsoft\VisualStudio\10.0\Extensions\Chris van de Steeg\Razor Single File Generator for MVC\1.0.5\Commons.Web.Mvc.PrecompiledViews.dll</HintPath>
-    </Reference>
     <Reference Include="System.Activities" />
     <Reference Include="System.IdentityModel" />
     <Reference Include="System.Runtime.Serialization" />
@@ -109,6 +106,11 @@
     <Compile Include="PortableAreas\Repositories\EmbeddedFilesRespository.cs" />
     <Compile Include="PortableAreas\Repositories\LocalizedJavaScriptRepository.cs" />
     <Compile Include="PreApplicationStartCode.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="Signum\Controllers\ResourcesController.cs" />
     <Compile Include="Signum\Controllers\ModelBinders.cs" />
     <Compile Include="Signum\Controllers\SignumController.cs" />
@@ -150,10 +152,16 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>PopupControl.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Signum\Views\PopupOkControl1.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>PopupOkControl.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Signum\Views\SearchControl.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>SearchControl.cshtml</DependentUpon>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Compile>
     <Compile Include="Signum\Views\SearchPopupControl.cs">
       <AutoGen>True</AutoGen>
@@ -203,11 +211,6 @@
     <Compile Include="LineHelpers\EmbeddedControlHelper.cs" />
     <Compile Include="Facades\FindOptionsModelBinder.cs" />
     <Compile Include="JSRenderer\JsRenderer.cs" />
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
     <Compile Include="Widgets\AlertWidgetHelper.cs" />
     <Compile Include="Widgets\QuickLinkWidgetHelper.cs" />
     <Compile Include="Widgets\NoteWidgetHelper.cs" />
@@ -231,6 +234,10 @@
     <Compile Include="ViewDataKeys.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Signum\Views\PopupOkControl.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>PopupOkControl1.cs</LastGenOutput>
+    </Content>
     <None Include="Signum\Views\SearchResults.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>SearchResults.cs</LastGenOutput>
@@ -239,10 +246,13 @@
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>FilterBuilder.cs</LastGenOutput>
     </None>
-    <None Include="Signum\Views\SearchControl.cshtml">
+    <Content Include="Signum\Content\SF_Widgets.css" />
+    <Content Include="Signum\Scripts\SF_Widgets.js" />
+    <Content Include="Signum\Views\SearchControl.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>SearchControl.cs</LastGenOutput>
-    </None>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <None Include="Signum\Views\SearchPage.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>SearchPage.cs</LastGenOutput>
@@ -317,7 +327,9 @@
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>Error.cs</LastGenOutput>
     </None>
-    <EmbeddedResource Include="Properties\Resources.es.resx" />
+    <EmbeddedResource Include="Properties\Resources.es.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.fr.resx" />
     <EmbeddedResource Include="Properties\Resources.it.resx" />
     <EmbeddedResource Include="Properties\Resources.resx">
