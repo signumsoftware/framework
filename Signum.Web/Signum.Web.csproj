@@ -106,7 +106,11 @@
     <Compile Include="PortableAreas\Repositories\EmbeddedFilesRespository.cs" />
     <Compile Include="PortableAreas\Repositories\LocalizedJavaScriptRepository.cs" />
     <Compile Include="PreApplicationStartCode.cs" />
-    <Compile Include="Properties\Resources.Designer.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="Signum\Controllers\ResourcesController.cs" />
     <Compile Include="Signum\Controllers\ModelBinders.cs" />
     <Compile Include="Signum\Controllers\SignumController.cs" />
@@ -242,6 +246,7 @@
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>FilterBuilder.cs</LastGenOutput>
     </None>
+    <Content Include="Signum\Content\SF_Widgets.css" />
     <Content Include="Signum\Views\SearchControl.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>SearchControl.cs</LastGenOutput>

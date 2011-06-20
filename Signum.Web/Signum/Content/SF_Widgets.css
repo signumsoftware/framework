@@ -1,0 +1,11 @@
+﻿.sf-widgets-container
+{
+    float: right;    
+    padding: 4px 2px;
+    
+}
+
+.sf-widget
+{
+    display: none;    
+}
