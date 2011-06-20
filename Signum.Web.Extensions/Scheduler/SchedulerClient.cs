@@ -43,9 +43,9 @@ namespace Signum.Web.Extensions.Scheduler
                    // new EntitySettings<ScheduleRuleDayDN>(EntityType.Default){ PartialViewName = _ => ViewPrefix.Formato("Calendar") },
                 });
                 
-                Navigator.EntitySettings<ScheduleRuleDailyDN>().MappingAdmin.SetProperty(srd => srd.StartingOn, MappingDate);
+                Navigator.EntitySettings<ScheduleRuleDailyDN>().MappingAdmin.AsEntityMapping().SetProperty(srd => srd.StartingOn, MappingDate);
 
-                Navigator.EntitySettings<ScheduleRuleWeeklyDN>().MappingAdmin.SetProperty(srw => srw.StartingOn, MappingDate);
+                Navigator.EntitySettings<ScheduleRuleWeeklyDN>().MappingAdmin.AsEntityMapping().SetProperty(srw => srw.StartingOn, MappingDate);
             }
         }
 

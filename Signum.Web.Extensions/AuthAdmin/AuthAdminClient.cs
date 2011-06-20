@@ -103,7 +103,7 @@ namespace Signum.Web.AuthAdmin
                 PartialViewName = e =>  viewPrefix.Formato(partialViewName),
                 MappingDefault = new EntityMapping<T>(false)
                     .CreateProperty(m => m.DefaultRule)
-                    .SetPropertyMapping(m => m.Rules,
+                    .SetProperty(m => m.Rules,
                         new MListDictionaryMapping<AR, K>(getKey, getKeyRoute)
                         {
                             ElementMapping = new EntityMapping<AR>(false).SetProperty(p => p.Allowed, allowedMapping)
