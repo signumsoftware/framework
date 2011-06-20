@@ -117,6 +117,7 @@ namespace Signum.Windows.Chart
                     return new[]{ new DataSeries
                     { 
                         RenderAs = ToRenderAs(ChartRequest.ChartType),
+                        //MaxWidth = this.Width
                         //XValueFormatString = ChartRequest.FirstDimension.Format,
                         //YValueFormatString = ChartRequest.SecondDimension.Format,
                     }
