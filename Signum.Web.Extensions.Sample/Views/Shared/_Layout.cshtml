@@ -1,5 +1,6 @@
 @using Signum.Web.Auth
 @using Signum.Web.Combine
+@using Signum.Entities.Authorization
 @using Signum.Web.Extensions.Sample
 
 <!doctype html>
@@ -14,6 +15,7 @@
         "~/signum/content/SF_NormalPage.css",
         "~/signum/content/SF_Notify.css",
         "~/signum/content/SF_Search.css",    
+        "~/signum/content/SF_Widgets.css",
         "~/content/site.css"
         )    
     
@@ -42,21 +44,9 @@
         </header>
 
         <div id="main">
-            @{ //Sólo mostrar menú si está identificado
-                bool identificado = Signum.Entities.Authorization.UserDN.Current != null;}
-                @if (identificado)
-                {
-                    ViewDataDictionary vdd = new ViewDataDictionary() {
-                        {ViewDataKeys.PartialViewName, ViewData[ViewDataKeys.PartialViewName]}
-                       };
-                        <div id="widgets">
-                        @{Html.RenderPartial("WidgetView", vdd);}
-                        </div>
-                }
-
-        
             <div id="menu">
-                @if (identificado) {
+                @if (UserDN.Current != null)
+                {
                 <div class="box menu">
                     <h2>Menú</h2>
                     @{ Html.RenderPartial("Menu", ViewData["current"] = Context.Request.RawUrl);}

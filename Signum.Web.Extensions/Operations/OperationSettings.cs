@@ -112,7 +112,7 @@ namespace Signum.Web.Operations
 
             return new JsOperationOptions
             {
-                OperationKey = EnumDN.UniqueKey(OperationInfo.Key),
+                Operation = OperationInfo.Key,
                 IsLite = OperationInfo.Lite,
                 Prefix = this.Prefix,
                 ControllerUrl = (JsValue<string>)controllerUrl,
@@ -149,7 +149,7 @@ namespace Signum.Web.Operations
             }
             return new JsOperationOptions
             {
-                OperationKey = EnumDN.UniqueKey(OperationInfo.Key),
+                Operation = OperationInfo.Key,
                 IsLite = OperationInfo.Lite,
                 Prefix = this.Prefix,
                 IsContextual = true,
@@ -184,7 +184,7 @@ namespace Signum.Web.Operations
             
             return new JsOperationOptions
             {
-                OperationKey = EnumDN.UniqueKey(OperationInfo.Key),
+                Operation = OperationInfo.Key,
                 IsLite = OperationInfo.Lite,
                 Prefix = this.Prefix,
                 ControllerUrl = (JsValue<string>)controllerUrl,

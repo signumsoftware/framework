@@ -353,6 +353,13 @@ namespace Signum.Engine.Operations
             return result; 
         }
 
+        public static IOperation[] OperationsWithKey(Enum operationKey)
+        {
+            var types = operations.ImplementingTypes(operationKey);
+
+            return types.Select(t => operations.TryGetValue(t, operationKey)).ToArray();
+        }
+
 
         static List<IOperation> TypeOperations(Type type)
         {
