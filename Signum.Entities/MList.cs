@@ -16,7 +16,6 @@ namespace Signum.Entities
     [Serializable, DebuggerTypeProxy(typeof(MListDebugging<>)), DebuggerDisplay("Count = {Count}")]
     public class MList<T> : Modifiable, IList<T>, IList, INotifyCollectionChanged, INotifyPropertyChanged 
     {
-        int hashCode = -1;
         List<T> innerList = new List<T>();
 
         #region Events

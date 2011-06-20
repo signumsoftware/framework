@@ -129,7 +129,7 @@ namespace Signum.Web
                 return MappingRepository<T>.Mapping;
             }
 
-            throw new InvalidOperationException("No mapping implemented for {0}".Formato(typeof(T).TypeName()));
+            return null;
         }
 
         static class MappingRepository<T>
@@ -139,8 +139,9 @@ namespace Signum.Web
 
         public static Mapping<T> New<T>()
         {
-            if(MappingRepository<T>.Mapping != null)
-                return MappingRepository<T>.Mapping; 
+            var result = ForValue<T>();
+            if (result != null)
+                return result;
 
             if (typeof(T).IsModifiableEntity() || typeof(T).IsIIdentifiable())
                 return (Mapping<T>)giForAutoEntity.GetInvoker(typeof(T))(); ;
@@ -151,7 +152,7 @@ namespace Signum.Web
             if (Reflector.IsMList(typeof(T)))
                 return (Mapping<T>)giForMList.GetInvoker(typeof(T).ElementType())();
 
-            return ForValue<T>();
+            return ctx => { throw new InvalidOperationException("No mapping implemented for {0}".Formato(typeof(T).TypeName())); };
         }
 
         static Mapping<T> GetValue<T>(Func<string, T> parse) where T : struct
