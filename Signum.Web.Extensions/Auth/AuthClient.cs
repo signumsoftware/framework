@@ -138,7 +138,7 @@ namespace Signum.Web.Auth
                     { UserOperation.SetPassword, new EntityOperationSettings 
                     { 
                         OnClick = ctx => new JsOperationConstructorFrom(ctx.Options("SetPassword","Auth"))
-                            .OperationAjax(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk),
+                            .ajax(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk),
                         IsContextualVisible = _ => false
                     }},
                 });

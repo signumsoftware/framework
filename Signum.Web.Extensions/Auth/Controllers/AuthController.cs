@@ -100,12 +100,11 @@ namespace Signum.Web.Auth
             var model = new SetPasswordModel { User = entity.ToLite() };
 
             ViewData[ViewDataKeys.WriteSFInfo] = true; 
-            ViewData[ViewDataKeys.OnOk] = JsValidator.EntityIsValid(prefix,
-                new JsOperationExecutor(new JsOperationOptions
+            ViewData[ViewDataKeys.OnOk] = new JsOperationExecutor(new JsOperationOptions
                 {
                     ControllerUrl = RouteHelper.New().Action("SetPasswordOnOk", "Auth"),
                     Prefix = prefix,
-                }).OperationAjax(prefix, JsOpSuccess.DefaultDispatcher)).ToJS();
+                }).validateAndAjax().ToJS();
 
             ViewData[ViewDataKeys.Title] = Resources.EnterTheNewPassword;
             return Navigator.PopupView(this, model, prefix);

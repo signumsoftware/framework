@@ -36,15 +36,15 @@ namespace Signum.Web.Auth
 
         public static EntityMapping<UserDN> ChangePassword = new EntityMapping<UserDN>(false)
             .SetProperty(u => u.PasswordHash, ctx =>
-            {      
-                return GetNewPassword(ctx, NewPasswordKey, NewPasswordBisKey);
-            });
+        {      
+            return GetNewPassword(ctx, NewPasswordKey, NewPasswordBisKey);
+        });
 
         public static EntityMapping<UserDN> NewUser = new EntityMapping<UserDN>(true)
             .SetProperty(u => u.PasswordHash, ctx =>
-            {
-                return GetNewPassword(ctx, NewPasswordKey, NewPasswordBisKey);
-            });
+        {
+            return GetNewPassword(ctx, NewPasswordKey, NewPasswordBisKey);
+        });
 
         public static string GetNewPassword(MappingContext<string> ctx, string newPasswordKey, string newPasswordBisKey)
         {

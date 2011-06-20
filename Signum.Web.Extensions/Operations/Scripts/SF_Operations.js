@@ -10,7 +10,7 @@ SF.registerModule("Operations", function () {
             operationKey: null,
             isLite: false,
             controllerUrl: null,
-            validationControllerUrl: null,
+            validationOptions: {},
             onOk: null,
             onCancelled: null,
             contextual: false,
@@ -87,8 +87,8 @@ SF.registerModule("Operations", function () {
             return serializer.serialize();
         },
 
-        operationAjax: function (newPrefix, onSuccess) {
-            SF.log("OperationManager operationAjax");
+        ajax: function (newPrefix, onSuccess) {
+            SF.log("OperationManager ajax");
 
             if (SF.Blocker.isEnabled()) {
                 return false;
@@ -102,11 +102,9 @@ SF.registerModule("Operations", function () {
                 newPrefix = this.options.prefix;
 
             var self = this;
-            SF.ajax({
-                type: "POST",
+            $.ajax({
                 url: this.options.controllerUrl,
                 data: this.options.contextual ? this.contextualRequestData(newPrefix) : this.requestData(newPrefix),
-                async: true,
                 success: function (operationResult) {
                     SF.Blocker.disable();
                     if (self.executedSuccessfully(operationResult)) {
@@ -119,8 +117,7 @@ SF.registerModule("Operations", function () {
                         return;
                     }
                 },
-                error:
-                function () {
+                error: function () {
                     SF.Blocker.disable();
                     SF.Notify.error(lang.signum.error, 2000);
                 }
@@ -129,8 +126,8 @@ SF.registerModule("Operations", function () {
             return false;
         },
 
-        operationSubmit: function () {
-            SF.log("OperationManager operationSubmit");
+        submit: function () {
+            SF.log("OperationManager submit");
 
             if (SF.Blocker.isEnabled()) {
                 return false;
@@ -168,27 +165,24 @@ SF.registerModule("Operations", function () {
             return false;
         },
 
-        defaultSubmit: function () {
-            SF.log("OperationManager defaultSubmit");
+        validateAndSubmit: function () {
+            SF.log("OperationManager validateAndSubmit");
 
             if (SF.Blocker.isEnabled()) {
                 return false;
             }
 
             if (SF.isTrue(this.options.isLite)) {
-                this.operationSubmit();
+                this.submit();
             }
             else {
-                var onSuccess = function () { this.operationSubmit(); };
+                var onSuccess = function () { this.submit(); };
                 var self = this;
-                var valOptions = {
-                    prefix: this.options.prefix,
-                    controllerUrl: this.options.validationControllerUrl
-                };
+                var valOptions = $.extend({ prefix: this.options.prefix }, this.options.validationOptions);
                 if (!SF.isEmpty(this.options.parentDiv)) { // So as not to override parentDiv to be set in PartialValidator constructor
                     valOptions.parentDiv = this.options.parentDiv;
                 }
-                if (!SF.EntityIsValid(valOptions, function () { onSuccess.call(self) })) {
+                if (!SF.EntityIsValid(valOptions, function () { onSuccess.call(self) }, this.options.sender)) {
                     return;
                 }
             }
@@ -202,15 +196,20 @@ SF.registerModule("Operations", function () {
             controllerUrl: null
         }, _options));
 
-        this.defaultExecute = function () {
-            SF.log("OperationExecutor defaultExecute");
+        this.validateAndAjax = function (newPrefix, onAjaxSuccess) {
+            SF.log("OperationExecutor validateAndAjax");
 
             if (SF.Blocker.isEnabled()) {
                 return false;
             }
 
+            if (SF.isEmpty(newPrefix))
+                newPrefix = null;
+
+            onAjaxSuccess = typeof onAjaxSuccess == "undefined" ? SF.opOnSuccessDispatcher : onAjaxSuccess;
+
             var onSuccess = function () {
-                this.operationAjax(null, SF.opOnSuccessDispatcher);
+                this.ajax(newPrefix, onAjaxSuccess);
             };
 
             if (SF.isTrue(this.options.isLite)) {
@@ -218,14 +217,11 @@ SF.registerModule("Operations", function () {
             }
             else {
                 var self = this;
-                var valOptions = {
-                    prefix: this.options.prefix,
-                    controllerUrl: this.options.validationControllerUrl
-                };
+                var valOptions = $.extend({ prefix: this.options.prefix }, this.options.validationOptions);
                 if (!SF.isEmpty(this.options.parentDiv)) { // So as not to override parentDiv to be set in PartialValidator constructor
                     valOptions.parentDiv = this.options.parentDiv;
                 }
-                if (!SF.EntityIsValid(valOptions, function () { onSuccess.call(self) })) {
+                if (!SF.EntityIsValid(valOptions, function () { onSuccess.call(self) }, this.options.sender)) {
                     return;
                 }
             }
@@ -238,7 +234,7 @@ SF.registerModule("Operations", function () {
                 return false;
             }
 
-            this.operationAjax(null, SF.opMarkCellOnSuccess);
+            this.ajax(null, SF.opMarkCellOnSuccess);
         };
     };
 
@@ -251,15 +247,20 @@ SF.registerModule("Operations", function () {
             returnType: null
         }, _options));
 
-        this.defaultConstruct = function () {
-            SF.log("ConstructorFrom construct");
+        this.validateAndAjax = function (newPrefix, onAjaxSuccess) {
+            SF.log("ConstructorFrom validateAndAjax");
 
             if (SF.Blocker.isEnabled()) {
                 return false;
             }
 
+            if (SF.isEmpty(newPrefix))
+                newPrefix = this.newPrefix();
+
+            onAjaxSuccess = typeof onAjaxSuccess == "undefined" ? SF.opOpenPopup : onAjaxSuccess;
+
             var onSuccess = function () {
-                this.operationAjax(this.newPrefix(), SF.opOpenPopup);
+                this.ajax(newPrefix, onAjaxSuccess);
             }
 
             if (SF.isTrue(this.options.isLite)) {
@@ -267,14 +268,11 @@ SF.registerModule("Operations", function () {
             }
             else {
                 var self = this;
-                var valOptions = {
-                    prefix: this.options.prefix,
-                    controllerUrl: this.options.validationControllerUrl
-                };
+                var valOptions = $.extend({ prefix: this.options.prefix }, this.options.validationOptions);
                 if (!SF.isEmpty(this.options.parentDiv)) { // So as not to override parentDiv to be set in PartialValidator constructor
                     valOptions.parentDiv = this.options.parentDiv;
                 }
-                if (!SF.EntityIsValid(valOptions, function () { onSuccess.call(self) })) {
+                if (!SF.EntityIsValid(valOptions, function () { onSuccess.call(self) }, this.options.sender)) {
                     return;
                 }
             }
@@ -287,7 +285,7 @@ SF.registerModule("Operations", function () {
                 return false;
             }
 
-            this.operationAjax(this.newPrefix(), SF.opContextualOnSuccess);
+            this.ajax(this.newPrefix(), SF.opContextualOnSuccess);
         };
     };
 
@@ -298,23 +296,23 @@ SF.registerModule("Operations", function () {
             controllerUrl: null
         }, _options));
 
-        this.defaultDelete = function () {
-            SF.log("DeleteExecutor defaultDelete");
+//        this.defaultDelete = function () {
+//            SF.log("DeleteExecutor defaultDelete");
 
-            if (SF.Blocker.isEnabled()) {
-                return false;
-            }
+//            if (SF.Blocker.isEnabled()) {
+//                return false;
+//            }
 
-            if (SF.isTrue(this.options.isLite)) {
-                SF.Notify.info(lang.signum.executing);
-                this.operationAjax(this.options.prefix, function () {
-                    SF.Notify.info(lang.signum.executed, 2000);
-                });
-            }
-            else {
-                throw "Delete operation must be Lite";
-            }
-        };
+//            if (SF.isTrue(this.options.isLite)) {
+//                SF.Notify.info(lang.signum.executing);
+//                this.ajax(this.options.prefix, function () {
+//                    SF.Notify.info(lang.signum.executed, 2000);
+//                });
+//            }
+//            else {
+//                throw "Delete operation must be Lite";
+//            }
+//        };
 
         this.contextualDelete = function (runtimeType, id) {
             SF.log("DeleteExecutor contextualDelete");
@@ -324,7 +322,7 @@ SF.registerModule("Operations", function () {
             }
 
             SF.Notify.info(lang.signum.executing);
-            this.operationAjax(this.options.prefix, function () {
+            this.ajax(this.options.prefix, function () {
                 SF.Notify.info(lang.signum.executed, 2000);
             });
         };
@@ -364,8 +362,8 @@ SF.registerModule("Operations", function () {
             return serializer.serialize();
         };
 
-        this.operationAjax = function (newPrefix, items, onSuccess) {
-            SF.log("ConstructorFromMany operationAjax");
+        this.ajax = function (newPrefix, items, onSuccess) {
+            SF.log("ConstructorFromMany ajax");
 
             SF.Notify.info(lang.signum.executing);
 
@@ -376,11 +374,9 @@ SF.registerModule("Operations", function () {
             }
 
             var self = this;
-            SF.ajax({
-                type: "POST",
+            $.ajax({
                 url: this.options.controllerUrl,
                 data: this.requestData(this.newPrefix(), items),
-                async: true,
                 success: function (operationResult) {
                     SF.Blocker.disable();
 
@@ -394,31 +390,30 @@ SF.registerModule("Operations", function () {
                         return;
                     }
                 },
-                error:
-                function () {
+                error: function () {
                     SF.Blocker.disable();
                     SF.Notify.error(lang.signum.error, 2000);
                 }
             });
         };
 
-        this.defaultConstruct = function () {
-            SF.log("ConstructorFromMany defaultConstruct");
+        this.ajaxSelected = function () {
+            SF.log("ConstructorFromMany ajaxSelected");
 
             if (SF.Blocker.isEnabled()) {
                 return false;
             }
 
             var onSuccess = function (items) {
-                this.operationAjax(this.newPrefix(), items, SF.opOpenPopup);
+                this.ajax(this.newPrefix(), items, SF.opOpenPopup);
             }
 
             var self = this;
             new SF.FindNavigator({ prefix: this.options.prefix }).hasSelectedItems(function (items) { onSuccess.call(self, items) });
         };
 
-        this.defaultSubmit = function () {
-            SF.log("ConstructorFromMany defaultSubmit");
+        this.submitSelected = function () {
+            SF.log("ConstructorFromMany submitSelected");
 
             if (SF.Blocker.isEnabled()) {
                 return false;
@@ -428,7 +423,7 @@ SF.registerModule("Operations", function () {
                 for (var i = 0, l = items.length; i < l; i++) {
                     $(this.options.sender).closest("form").append(SF.hiddenInput('ids', items[i].id));
                 }
-                this.operationSubmit();
+                this.submit();
             };
 
             var self = this;
@@ -440,12 +435,11 @@ SF.registerModule("Operations", function () {
 
     SF.reloadEntity = function (urlController, prefix, parentDiv) {
         var $partialViewName = $('#sfPartialViewName');
-        var requestData = $("form :input").not(".sf-search-control :input").serialize() + "&prefix=" + prefix;
+        var requestData = $("form :input,form :select").not(".sf-search-control :input,.sf-search-control :select").serialize() + "&prefix=" + prefix;
         if ($partialViewName.length === 1) {
             requestData += "&partialViewName=" + $partialViewName.val();
         }
-        SF.ajax({
-            type: "POST",
+        $.ajax({
             url: urlController,
             data: requestData,
             async: false,
@@ -485,7 +479,7 @@ SF.registerModule("Operations", function () {
 
         var $result = $(operationResult);
         var newPopupId = SF.compose(prefix, "panelPopup");
-        var hasNewPopup = $result.filter("#New_New_New_panelPopup").length !== 0;
+        var hasNewPopup = $result.filter("#" + newPopupId).length !== 0;
 
         //If result is a NormalControl, or an already opened popup => ReloadContent
         if (!hasNewPopup || (hasNewPopup && $("#" + newPopupId + ":visible").length !== 0)) {
@@ -505,10 +499,13 @@ SF.registerModule("Operations", function () {
             SF.triggerNewContent($elem);
         }
         else { //PopupWindow
-            new SF.ViewNavigator({
-                prefix: prefix,
-                containerDiv: parentDiv /*SF.compose(prefix, "externalPopupDiv")*/
-            }).viewSave(operationResult);
+            SF.closePopup(prefix);
+            var viewNav = new SF.ViewNavigator({
+                prefix: prefix
+                //containerDiv: parentDiv /*SF.compose(prefix, "externalPopupDiv")*/
+            });
+            viewNav.viewOptions.containerDiv = viewNav.tempDivId();
+            viewNav.viewSave(operationResult);
         }
         SF.Notify.info(lang.signum.executed, 2000);
     };
@@ -547,9 +544,9 @@ SF.registerModule("Operations", function () {
             return null;
         }
 
-        var newPopupId = SF.compose(prefix, "panelPopup");
         var $result = $(operationResult);
-        var hasNewPopup = $("#" + newPopupId, $result).length !== 0;
+        var newPopupId = SF.compose(prefix, "panelPopup");
+        var hasNewPopup = $result.filter("#" + newPopupId).length !== 0;
         //If result is a NormalControl => Load it
         if (hasNewPopup) {
             SF.opOpenPopup(prefix, operationResult)
@@ -581,10 +578,8 @@ SF.registerModule("Operations", function () {
             prefix: findNavigator.findOptions.prefix
         };
 
-        SF.ajax({
+        $.ajax({
             url: entityCtxMenuUrl,
-            type: "POST",
-            async: true,
             data: requestData,
             success: function (items) {
                 $itemContainer.html(items);

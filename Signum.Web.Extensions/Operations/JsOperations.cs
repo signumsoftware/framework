@@ -19,24 +19,19 @@ namespace Signum.Web.Operations
             this.options = options;
         }
 
-        public JsInstruction DefaultSubmit()
+        public JsInstruction validateAndSubmit()
         {
-            return new JsInstruction(() => "{0}.defaultSubmit()".Formato(this.ToJS()));
+            return new JsInstruction(() => "{0}.validateAndSubmit()".Formato(this.ToJS()));
         }
 
-        public JsInstruction OperationSubmit()
+        public JsInstruction submit()
         {
-            return new JsInstruction(() => "{0}.operationSubmit()".Formato(this.ToJS()));
+            return new JsInstruction(() => "{0}.submit()".Formato(this.ToJS()));
         }
 
-        public JsInstruction OperationAjax(string newPrefix, JsFunction onSuccess)
+        public JsInstruction ajax(string newPrefix, JsFunction onSuccess)
         {
-            return new JsInstruction(() => "{0}.operationAjax(\'{1}\', {2})".Formato(this.ToJS(), newPrefix, onSuccess.ToJS()));
-        }
-
-        public JsInstruction OperationAjax(string newPrefix, string querySelectedItems, JsFunction onSuccess)
-        {
-            return new JsInstruction(() => "{0}.operationAjax(\'{1}\',{2},{3})".Formato(this.ToJS(), newPrefix, querySelectedItems, onSuccess.ToJS()));
+            return new JsInstruction(() => "{0}.ajax(\'{1}\', {2})".Formato(this.ToJS(), newPrefix, onSuccess.ToJS()));
         }
     }
     
@@ -59,9 +54,14 @@ namespace Signum.Web.Operations
             Renderer = () => "new SF.OperationExecutor(" + this.options.ToJS() + ")";
         }
 
-        public JsInstruction DefaultExecute()
+        public JsInstruction validateAndAjax()
         {
-            return new JsInstruction(() => "{0}.defaultExecute()".Formato(this.ToJS()));
+            return new JsInstruction(() => "{0}.validateAndAjax()".Formato(this.ToJS()));
+        }
+
+        public JsInstruction validateAndAjax(string newPrefix, JsFunction onSuccess)
+        {
+            return new JsInstruction(() => "{0}.validateAndAjax(\'{1}\', {2})".Formato(this.ToJS(), newPrefix, onSuccess.ToJS()));
         }
 
         public JsInstruction ContextualExecute(IdentifiableEntity entity, string operationName)
@@ -80,9 +80,14 @@ namespace Signum.Web.Operations
             Renderer = () => "new SF.ConstructorFrom(" + this.options.ToJS() + ")";
         }
 
-        public JsInstruction DefaultConstruct()
+        public JsInstruction validateAndAjax()
         {
-            return new JsInstruction(() => "{0}.defaultConstruct()".Formato(this.ToJS()));
+            return new JsInstruction(() => "{0}.validateAndAjax()".Formato(this.ToJS()));
+        }
+
+        public JsInstruction validateAndAjax(string newPrefix, JsFunction onSuccess)
+        {
+            return new JsInstruction(() => "{0}.validateAndAjax(\'{1}\', {2})".Formato(this.ToJS(), newPrefix, onSuccess.ToJS()));
         }
 
         public JsInstruction ContextualConstruct(IdentifiableEntity entity, string operationName)
@@ -101,9 +106,19 @@ namespace Signum.Web.Operations
             Renderer = () => "new SF.ConstructorFromMany(" + this.options.ToJS() + ")";
         }
 
-        public JsInstruction DefaultConstruct()
+        public JsInstruction ajaxSelected()
         {
-            return new JsInstruction(() => "{0}.defaultConstruct()".Formato(this.ToJS()));
+            return new JsInstruction(() => "{0}.ajaxSelected()".Formato(this.ToJS()));
+        }
+
+        public JsInstruction ajaxSelected(string newPrefix, string querySelectedItems, JsFunction onSuccess)
+        {
+            return new JsInstruction(() => "{0}.ajaxSelected(\'{1}\',{2},{3})".Formato(this.ToJS(), newPrefix, querySelectedItems, onSuccess.ToJS()));
+        }
+
+        public JsInstruction submitSelected()
+        {
+            return new JsInstruction(() => "{0}.submitSelected()".Formato(this.ToJS()));
         }
     }
 
@@ -115,11 +130,11 @@ namespace Signum.Web.Operations
             Renderer = () => "new SF.DeleteExecutor(" + this.options.ToJS() + ")";
         }
 
-        public JsInstruction DefaultDelete(IdentifiableEntity entity)
+        public JsInstruction confirmAndAjax(IdentifiableEntity entity)
         {
             return new JsInstruction(() => Js.Confirm(
-                Resources.PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem + ": {0} ({1}-{2})".Formato(entity.ToStr, entity.GetType().NiceName(), entity.Id), 
-                "{0}.defaultDelete()".Formato(this.ToJS())).ToJS());
+                Resources.PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem + ": {0} ({1}-{2})".Formato(entity.ToStr, entity.GetType().NiceName(), entity.Id),
+                "{0}.ajax()".Formato(this.ToJS())).ToJS());
         }
 
         public JsInstruction ContextualDelete(IdentifiableEntity entity)

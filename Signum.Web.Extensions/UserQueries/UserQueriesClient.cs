@@ -143,7 +143,7 @@ namespace Signum.Web.Queries
                 Id = TypeContextUtilities.Compose(prefix, "qbUserQueryNew"),
                 AltText = uqNewText,
                 Text = uqNewText,
-                OnClick = Js.SubmitOnly(RouteHelper.New().Action("CreateUserQuery", "Queries"), JsFindNavigator.JsRequestData(new JsFindOptions { Prefix = prefix })).ToJS(),
+                OnClick = Js.SubmitOnly(RouteHelper.New().Action("CreateUserQuery", "Queries"), new JsFindNavigator(prefix).requestData()).ToJS(),
                 DivCssClass = ToolBarButton.DefaultQueryCssClass
             });
 
