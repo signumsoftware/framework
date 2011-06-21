@@ -260,6 +260,20 @@ namespace Signum.Web
             return !sc.SupressChange;
         }
 
+        public bool Parse<V>(out V value)
+        {
+            var mapping = Mapping.ForValue<V>();
+
+            if (mapping == null)
+                throw new InvalidOperationException("No mapping for value {0}".Formato(typeof(T).TypeName()));
+
+            var sc = new SubContext<V>(this.ControlID, null, null, this);
+
+            value = mapping(sc);
+
+            return !sc.SupressChange;
+        }
+
         public bool Empty()
         {
             return !HasInput && Inputs.Count == 0;
