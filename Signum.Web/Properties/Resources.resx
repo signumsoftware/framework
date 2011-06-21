@@ -330,4 +330,7 @@
   <data name="Quicklinks" xml:space="preserve">
     <value>Quick links</value>
   </data>
+  <data name="InvalidFormat" xml:space="preserve">
+    <value>Invalid format</value>
+  </data>
 </root>

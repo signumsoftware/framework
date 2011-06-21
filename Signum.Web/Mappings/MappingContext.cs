@@ -14,6 +14,7 @@ using Signum.Web.Properties;
 using Signum.Engine;
 using Signum.Utilities.DataStructures;
 using System.Web.Mvc;
+using Signum.Utilities.ExpressionTrees;
 #endregion
 
 namespace Signum.Web
@@ -102,6 +103,7 @@ namespace Signum.Web
                     Root.GlobalErrors[ControlID] = value;
             }
         }
+
         public abstract IDictionary<string, List<string>> Errors { get; }
 
         public MappingContext(string controlID, PropertyPack propertyPack, PropertyRoute route)
@@ -230,18 +232,32 @@ namespace Signum.Web
             return default(T);
         }
 
-        public T None(string errorKey, string error)
+        public T None(string property, string error)
         {
-            this.Errors.GetOrCreate(errorKey).Add(error);
+            this.Errors.GetOrCreate(property).Add(error);
             SupressChange = true;
             return default(T);
         }
 
-        public T ParentNone(string errorKey, string error)
+        public T ParentNone(string property, string error)
         {
-            this.Parent.Errors.GetOrCreate(errorKey).Add(error);
+            this.Parent.Errors.GetOrCreate(property).Add(error);
             SupressChange = true;
             return default(T);
+        }
+
+        public bool Parse<V>(string property, out V value)
+        {
+            var mapping = Mapping.ForValue<V>();
+
+            if (mapping == null)
+                throw new InvalidOperationException("No mapping for value {0}".Formato(typeof(T).TypeName()));
+
+            var sc = new SubContext<V>(TypeContextUtilities.Compose(this.ControlID, property), null, null, this);
+
+            value = mapping(sc);
+
+            return !sc.SupressChange;
         }
 
         public bool Empty()

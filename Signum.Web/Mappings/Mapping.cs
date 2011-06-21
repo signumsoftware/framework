@@ -115,7 +115,7 @@ namespace Signum.Web
         }
 
 
-        static Mapping<T> ForValue<T>()
+        public static Mapping<T> ForValue<T>()
         {
             var result = MappingRepository<T>.Mapping;
 
@@ -162,7 +162,14 @@ namespace Signum.Web
                 if (ctx.Empty())
                     return ctx.None();
 
-                return parse(ctx.Input);
+                try
+                {
+                    return parse(ctx.Input);
+                }
+                catch (FormatException)
+                {
+                    return ctx.None(ctx.PropertyPack != null ? Resources._0HasAnInvalidFormat.Formato(ctx.PropertyPack.PropertyInfo.NiceName()) : Resources.InvalidFormat);
+                }
             };
         }
 
@@ -177,7 +184,14 @@ namespace Signum.Web
                 if (string.IsNullOrWhiteSpace(input))
                     return null;
 
-                return parse(ctx.Input);
+                try
+                {
+                    return parse(ctx.Input);
+                }
+                catch (FormatException)
+                {
+                    return ctx.None(ctx.PropertyPack != null ? Resources._0HasAnInvalidFormat.Formato(ctx.PropertyPack.PropertyInfo.NiceName()) : Resources.InvalidFormat);
+                }
             };
         }
 
