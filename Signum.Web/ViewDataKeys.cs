@@ -20,8 +20,6 @@ namespace Signum.Web
         public const string Results = "sfResults";
         public const string MultipliedMessage = "sfMultipliedMessage";
         public const string Formatters = "sfFormatters";
-        public const string ChangeTicks = "sfChangeTicks";
-        public const string Reactive = "sfReactive";
         public const string TabId = "sfTabId";
         public const string PartialViewName = "sfPartialViewName";
         
@@ -32,28 +30,6 @@ namespace Signum.Web
                 return null;
             else
                 return tc.ControlID;
-        }
-
-        public static long? GetChangeTicks(this HtmlHelper helper, string controlID)
-        {
-            if (!helper.ViewData.ContainsKey(ViewDataKeys.ChangeTicks))
-                return null;
-            return ((Dictionary<string, long>)helper.ViewData[ViewDataKeys.ChangeTicks])
-                .TryGetS(controlID);
-        }
-
-        /// <summary>
-        /// Propagates LoadAll, Reactive, ChangeTicks
-        /// </summary>
-        /// <param name="helper"></param>
-        /// <param name="vdd"></param>
-        public static void PropagateSFKeys(this HtmlHelper helper, ViewDataDictionary vdd)
-        {
-            if (helper.ViewData.ContainsKey(ViewDataKeys.Reactive))
-                vdd[ViewDataKeys.Reactive] = true;
-            
-            if (helper.ViewData.ContainsKey(ViewDataKeys.ChangeTicks))
-                vdd[ViewDataKeys.ChangeTicks] = helper.ViewData[ViewDataKeys.ChangeTicks];
         }
     }
 }

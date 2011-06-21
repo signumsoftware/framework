@@ -74,31 +74,19 @@ namespace Signum.Web.Controllers
         public PartialViewResult PopupView(string runtimeType, int? id, string prefix, bool? readOnly, string url)
         {
             Type type = Navigator.ResolveType(runtimeType);
-            bool isReactive = this.IsReactive();
-
+            
             IdentifiableEntity entity = null;
-            if (isReactive)
+            if (id.HasValue)
+                entity = Database.Retrieve(type, id.Value);
+            else
             {
-                IdentifiableEntity parent = (IdentifiableEntity)this.UntypedExtractEntity().ThrowIfNullC("PopupView: Entity was not possible to extract");
-                entity = (IdentifiableEntity)MappingContext.FindSubEntity(parent, prefix);
-            }
-            if (entity == null || entity.GetType() != type || id != (entity as IIdentifiable).TryCS(e => e.IdOrNull))
-            {
-                if (id.HasValue)
-                    entity = Database.Retrieve(type, id.Value);
+                ActionResult result = Constructor.VisualConstruct(this, type, prefix, VisualConstructStyle.PopupView);
+                if (result is PartialViewResult)
+                    return (PartialViewResult)result;
                 else
-                {
-                    ActionResult result = Constructor.VisualConstruct(this, type, prefix, VisualConstructStyle.PopupView);
-                    if (result is PartialViewResult)
-                        return (PartialViewResult)result;
-                    else
-                        throw new InvalidOperationException("Invalid result type for a Constructor");
-                }
+                    throw new InvalidOperationException("Invalid result type for a Constructor");
             }
-
-            if (isReactive)
-                this.ViewData[ViewDataKeys.Reactive] = true;
-
+            
             TypeContext tc = TypeContextUtilities.UntypedNew((IdentifiableEntity)entity, prefix);
 
             if (readOnly.HasValue)
@@ -111,32 +99,19 @@ namespace Signum.Web.Controllers
         public PartialViewResult PartialView(string runtimeType, int? id, string prefix, bool? readOnly, string url)
         {
             Type type = Navigator.ResolveType(runtimeType);
-            bool isReactive = this.IsReactive();
-
+            
             IdentifiableEntity entity = null;
-            if (isReactive)
+            if (id.HasValue)
+                entity = Database.Retrieve(type, id.Value);
+            else
             {
-                IdentifiableEntity parent = (IdentifiableEntity)this.UntypedExtractEntity()
-                    .ThrowIfNullC("PartialView: Entity was not possible to extract");
-                entity = (IdentifiableEntity)MappingContext.FindSubEntity(parent, prefix);
-            }
-            if (entity == null || entity.GetType() != type || id != (entity as IIdentifiable).TryCS(e => e.IdOrNull))
-            {
-                if (id.HasValue)
-                    entity = Database.Retrieve(type, id.Value);
+                object result = Constructor.VisualConstruct(this, type, prefix, VisualConstructStyle.PartialView);
+                if (result is PartialViewResult)
+                    return (PartialViewResult)result;
                 else
-                {
-                    object result = Constructor.VisualConstruct(this, type, prefix, VisualConstructStyle.PartialView);
-                    if (result is PartialViewResult)
-                        return (PartialViewResult)result;
-                    else
-                        throw new InvalidOperationException("Invalid result type for a Constructor");
-                }
+                    throw new InvalidOperationException("Invalid result type for a Constructor");
             }
-
-            if (isReactive)
-                this.ViewData[ViewDataKeys.Reactive] = true;
-
+            
             TypeContext tc = TypeContextUtilities.UntypedNew((IdentifiableEntity)entity, prefix);
 
             if (readOnly.HasValue)
@@ -161,8 +136,6 @@ namespace Signum.Web.Controllers
                 throw new ArgumentNullException("No IdentifiableEntity to save");
 
             Database.Save(ident);
-
-            ViewData[ViewDataKeys.ChangeTicks] = context.GetTicksDictionary();
 
             string newUrl = Navigator.ViewRoute(ident.GetType(), ident.Id);
             if (HttpContext.Request.UrlReferrer.AbsolutePath.Contains(newUrl))
@@ -431,65 +404,6 @@ namespace Signum.Web.Controllers
                 ViewData[ViewDataKeys.Title] = title;
 
             return PartialView(Navigator.Manager.ChooserPopupView);
-        }
-
-        [HttpPost, ValidateAntiForgeryToken]
-        public PartialViewResult ReloadEntity(string prefix, string partialViewName)
-        {
-            bool isReactive = this.IsReactive();
-
-            var ctx = this.UntypedExtractEntity(prefix)
-                .UntypedApplyChanges(this.ControllerContext, isReactive ? "" : prefix, true);
-
-            IdentifiableEntity entity = (IdentifiableEntity)ctx.UntypedValue;
-
-            var ticksDic = ctx.GetTicksDictionary();
-
-            if (isReactive && prefix.HasText() && !prefix.StartsWith("New"))
-            {
-                ModifiableEntity subentity = (ModifiableEntity)MappingContext.FindSubEntity(entity, prefix);
-
-                //If subentity == null, it's a new entity => create it and apply changes partially
-                if (subentity == null)
-                {
-                    string runtimeInfoKey = TypeContextUtilities.Compose(prefix ?? "", EntityBaseKeys.RuntimeInfo);
-                    if (Request.Form.AllKeys.Contains(runtimeInfoKey))
-                    { // If there's runtimeInfo in the form => use it to create subentity
-                        RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(Request.Form[runtimeInfoKey]);
-                        if (runtimeInfo.IdOrNull != null)
-                            subentity = Database.Retrieve(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value);
-                        else
-                            subentity = (ModifiableEntity)Constructor.Construct(runtimeInfo.RuntimeType);
-                    }
-                    else
-                    { // Try to create subentity from the string route => will fail if there are interfaces
-                        Type type = MappingContext.FindSubentityType(entity, prefix);
-                        subentity = (ModifiableEntity)Constructor.Construct(type);
-                    }
-
-                    var subctx = subentity.UntypedApplyChanges(this.ControllerContext, prefix, true);
-
-                    ticksDic.AddRange(subctx.GetTicksDictionary());
-
-                    subentity = (ModifiableEntity)subctx.UntypedValue;
-                }
-
-                entity = (IdentifiableEntity)subentity;
-            }
-
-            this.ViewData[ViewDataKeys.ChangeTicks] = ticksDic;
-            
-            if (isReactive)
-            {
-                if (!prefix.HasText())
-                    Session[this.TabID()] = entity;
-                this.ViewData[ViewDataKeys.Reactive] = true;
-            }
-
-            if (prefix.HasText())
-                return Navigator.PartialView(this, entity, prefix);
-            else
-                return Navigator.NormalControl(this, entity, partialViewName);
         }
 
         public static HtmlHelper CreateHtmlHelper(Controller c)

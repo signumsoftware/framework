@@ -33,12 +33,7 @@ namespace Signum.Web
 
         public static MvcHtmlString NormalPageHeader(this HtmlHelper helper)
         {
-            var entityInfo = helper.HiddenRuntimeInfo((TypeContext)helper.ViewData.Model);
-
-            if (helper.ViewData.ContainsKey(ViewDataKeys.Reactive))
-                return helper.Hidden(ViewDataKeys.Reactive).Concat(entityInfo);
-
-            return entityInfo; 
+            return helper.HiddenRuntimeInfo((TypeContext)helper.ViewData.Model);
         }
 
         public static MvcHtmlString PopupHeader(this HtmlHelper helper)
@@ -47,9 +42,6 @@ namespace Signum.Web
             {
                 var entityInfo = helper.HiddenRuntimeInfo((TypeContext)helper.ViewData.Model);
                 helper.ViewData.Remove(ViewDataKeys.WriteSFInfo);
-
-                if (helper.ViewData.ContainsKey(ViewDataKeys.Reactive))
-                    return helper.Hidden(ViewDataKeys.Reactive).Concat(entityInfo);
 
                 return entityInfo;
             }

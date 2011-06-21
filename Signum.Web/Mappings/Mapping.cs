@@ -81,7 +81,6 @@ namespace Signum.Web
 
         internal static readonly string[] specialProperties = new[] 
         { 
-            TypeContext.Ticks,
             EntityBaseKeys.RuntimeInfo,
             EntityBaseKeys.ToStr, 
             EntityListBaseKeys.Index,
@@ -261,6 +260,7 @@ namespace Signum.Web
             Mapping<R> mapping =  (Mapping<R>)(AllowedMappings.TryGetC(typeof(R)) ?? Navigator.EntitySettings(typeof(R)).UntypedMappingDefault);
             SubContext<R> sc = new SubContext<R>(ctx.ControlID, null, route, ctx) { Value = ctx.Value as R }; // If the type is different, the AutoEntityMapping has the current value but EntityMapping just null
             sc.Value = mapping(sc);
+            ctx.SupressChange = sc.SupressChange;
             ctx.AddChild(sc);
             return sc.Value;
         }
@@ -303,12 +303,7 @@ namespace Signum.Web
                     ctx.Value = Mapping(ctx);
 
                     if (!ctx.SupressChange)
-                    {
-                        if (ctx.Ticks != null && ctx.Ticks != 0)
-                            ctx.AddOnFinish(() => SetValue(parent.Value, ctx.Value));
-                        else
-                            SetValue(parent.Value, ctx.Value);
-                    }
+                        SetValue(parent.Value, ctx.Value);
                 }
                 catch (Exception e)
                 {

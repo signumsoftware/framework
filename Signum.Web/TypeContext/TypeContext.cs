@@ -64,8 +64,7 @@ namespace Signum.Web
             ReadOnly =8,
             ValueFirst = 16,
             ShowFieldDiv =32,
-            ShowTicks = 64,
-            OnlyValue = 128
+            OnlyValue = 64
         }
 
         BoolStyles styleValues;
@@ -103,7 +102,6 @@ namespace Signum.Web
             ReadOnly = false,
             ValueFirst = false,
             ShowFieldDiv = true,
-            ShowTicks = true,
             OnlyValue = false
         };
 
@@ -151,12 +149,6 @@ namespace Signum.Web
             set { this[BoolStyles.ShowFieldDiv] = value; }
         }
 
-        public bool ShowTicks
-        {
-            get { return this[BoolStyles.ShowTicks] ?? Parent.ShowTicks; }
-            set { this[BoolStyles.ShowTicks] = value; }
-        }
-
         public override string ToString()
         {
             return ControlID; 
@@ -172,8 +164,6 @@ namespace Signum.Web
     #region TypeContext
     public abstract class TypeContext : Context
     {
-        public const string Ticks = "sfTicks";
-
         public abstract object UntypedValue { get; }
 
         public abstract Type Type { get; }
