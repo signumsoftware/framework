@@ -283,7 +283,7 @@ SF.registerModule("FindNavigator", function () {
 
             var self = this;
             $.ajax({
-                url: this.findOptions.searchControllerUrl,
+                url: (SF.isEmpty(this.findOptions.searchControllerUrl) ? this.control().attr("data-search-url") : this.findOptions.searchControllerUrl),
                 data: this.requestDataForSearch(),
                 async: this.findOptions.async,
                 success: function (r) {
