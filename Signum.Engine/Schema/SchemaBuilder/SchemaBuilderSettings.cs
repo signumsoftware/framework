@@ -261,6 +261,7 @@ namespace Signum.Engine.Maps
 
             desambiguatedNames[type] = cleanName;
         }
+
     }
 
     internal enum ReferenceFieldType

@@ -80,7 +80,7 @@ namespace Signum.Web.Controllers
             if (isReactive)
             {
                 IdentifiableEntity parent = (IdentifiableEntity)this.UntypedExtractEntity().ThrowIfNullC("PopupView: Entity was not possible to extract");
-                entity = (IdentifiableEntity)MappingContext.FindSubentity(parent, prefix);
+                entity = (IdentifiableEntity)MappingContext.FindSubEntity(parent, prefix);
             }
             if (entity == null || entity.GetType() != type || id != (entity as IIdentifiable).TryCS(e => e.IdOrNull))
             {
@@ -118,7 +118,7 @@ namespace Signum.Web.Controllers
             {
                 IdentifiableEntity parent = (IdentifiableEntity)this.UntypedExtractEntity()
                     .ThrowIfNullC("PartialView: Entity was not possible to extract");
-                entity = (IdentifiableEntity)MappingContext.FindSubentity(parent, prefix);
+                entity = (IdentifiableEntity)MappingContext.FindSubEntity(parent, prefix);
             }
             if (entity == null || entity.GetType() != type || id != (entity as IIdentifiable).TryCS(e => e.IdOrNull))
             {
@@ -219,7 +219,7 @@ namespace Signum.Web.Controllers
             IIdentifiable ident = context.UntypedValue as IIdentifiable;
             if (isEmbedded)
             {
-                newToStr = MappingContext.FindSubentity((IdentifiableEntity)context.UntypedValue, prefix).ToString();
+                newToStr = MappingContext.FindSubEntity((IdentifiableEntity)context.UntypedValue, prefix).ToString();
             }
             else if (context.UntypedValue == null)
             {
@@ -447,7 +447,7 @@ namespace Signum.Web.Controllers
 
             if (isReactive && prefix.HasText() && !prefix.StartsWith("New"))
             {
-                ModifiableEntity subentity = (ModifiableEntity)MappingContext.FindSubentity(entity, prefix);
+                ModifiableEntity subentity = (ModifiableEntity)MappingContext.FindSubEntity(entity, prefix);
 
                 //If subentity == null, it's a new entity => create it and apply changes partially
                 if (subentity == null)
