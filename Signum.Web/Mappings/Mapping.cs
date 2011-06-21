@@ -233,22 +233,19 @@ namespace Signum.Web
         {
             if (ctx.Empty())
                 return ctx.None();
-
+            
             string strRuntimeInfo;
-            if (!ctx.Inputs.TryGetValue(EntityBaseKeys.RuntimeInfo, out strRuntimeInfo))
-                return ctx.Value; //I only have some ValueLines of an Entity (so no Runtime, Id or anything)
+            Type runtimeType = ctx.Inputs.TryGetValue(EntityBaseKeys.RuntimeInfo, out strRuntimeInfo) ? 
+                RuntimeInfo.FromFormValue(strRuntimeInfo).RuntimeType: 
+                ctx.Value.TryCC(t=>t.GetType());
 
-            RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(strRuntimeInfo);
-
-            if (runtimeInfo.RuntimeType == null)
-            {
+            if (runtimeType == null)
                 return (T)(object)null;
-            }
 
-            if (typeof(T) == runtimeInfo.RuntimeType || typeof(T).IsEmbeddedEntity())
+            if (typeof(T) == runtimeType || typeof(T).IsEmbeddedEntity())
                 return GetRuntimeValue<T>(ctx, ctx.PropertyRoute);
 
-            return miGetRuntimeValue.GetInvoker(runtimeInfo.RuntimeType)(this, ctx, PropertyRoute.Root(runtimeInfo.RuntimeType));
+            return miGetRuntimeValue.GetInvoker(runtimeType)(this, ctx, PropertyRoute.Root(runtimeType));
         }
 
         static GenericInvoker<Func<AutoEntityMapping<T>, MappingContext<T>, PropertyRoute, T>> miGetRuntimeValue = 
