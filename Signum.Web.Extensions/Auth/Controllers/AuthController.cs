@@ -119,11 +119,7 @@ namespace Signum.Web.Auth
 
             return JsonAction.Redirect(Navigator.ViewRoute(typeof(UserDN), g.Id));
         }
-
-
-
-
-
+                
         #region "Change password"
         public ActionResult ChangePassword()
         {
@@ -358,8 +354,7 @@ namespace Signum.Web.Auth
             return View(AuthClient.ResetPasswordSuccessView);
         }
         #endregion
-
-  
+          
         #region Login
 
         [AcceptVerbs(HttpVerbs.Get)]
@@ -527,118 +522,6 @@ namespace Signum.Web.Auth
                 }
             }
         }
-        #endregion
-
-        #region Register User (Commented)
-
-        //[HttpPost]
-        //public ContentResult RegisterUserValidate()
-        //{
-        //    UserDN u = (UserDN)Navigator.ExtractEntity(this, Request.Form);
-
-        //    ChangesLog changesLog = RegisterUserApplyChanges(Request.Form, ref u);
-
-        //    this.ModelState.FromDictionary(changesLog.Errors, Request.Form);
-        //    return Navigator.ModelState(ModelState);
-        //}
-
-        //public ActionResult RegisterUserPost()
-        //{
-        //    UserDN u = (UserDN)Navigator.ExtractEntity(this, Request.Form);
-
-        //    ChangesLog changesLog = RegisterUserApplyChanges(Request.Form, ref u);
-        //    if (changesLog.Errors != null && changesLog.Errors.Count > 0)
-        //    {
-        //        this.ModelState.FromDictionary(changesLog.Errors, Request.Form);
-        //        return Navigator.ModelState(ModelState);
-        //    }
-
-        //    u = (UserDN)OperationLogic.ServiceExecute(u, UserOperation.SaveNew);
-
-        //    if (Navigator.ExtractIsReactive(Request.Form))
-        //    {
-        //        string tabID = Navigator.ExtractTabID(Request.Form);
-        //        Session[tabID] = u;
-        //    }
-
-        //    return Navigator.View(this, u);
-        //}
-
-        //ChangesLog RegisterUserApplyChanges(NameValueCollection form, ref UserDN u)
-        //{
-        //    List<string> fullIntegrityErrors;
-        //    ChangesLog changesLog = Navigator.ApplyChangesAndValidate(this, ref u, "", "my", out fullIntegrityErrors);
-        //    if (fullIntegrityErrors != null && fullIntegrityErrors.Count > 0)
-        //    {
-        //        fullIntegrityErrors = fullIntegrityErrors.Where(s => !s.Contains("Password Hash")).ToList();
-        //        if (fullIntegrityErrors.Count > 0)
-        //            changesLog.Errors.Add(ViewDataKeys.GlobalErrors, fullIntegrityErrors);
-        //    }
-        //    if (u != null && u.UserName.HasText())
-        //    {
-        //        string username = u.UserName;
-        //        if (Database.Query<UserDN>().Any(us => us.UserName == username))
-        //            changesLog.Errors.Add(ViewDataKeys.GlobalErrors, new List<string> { Resources.UserNameAlreadyExists });
-        //    }
-        //    return changesLog;
-        //}
-
-        //Dictionary<string, List<string>> UserOperationApplyChanges(NameValueCollection form, ref UserDN u)
-        //{
-        //    List<string> fullIntegrityErrors;
-        //    ChangesLog changesLog = Navigator.ApplyChangesAndValidate(this, ref u, "", "my", out fullIntegrityErrors);
-        //    if (fullIntegrityErrors != null && fullIntegrityErrors.Count > 0)
-        //        changesLog.Errors.Add(ViewDataKeys.GlobalErrors, fullIntegrityErrors.Where(s => !s.Contains("Password Hash")).ToList());
-
-        //    return changesLog.Errors;
-        //}
-
-        //public ActionResult UserExecOperation(string sfRuntimeType, int? sfId, string operationFullKey, bool isLite, string prefix, string sfOnOk, string onCancel)
-        //{
-        //    Type type = Navigator.ResolveType(sfRuntimeType);
-
-        //    UserDN entity = null;
-        //    if (isLite)
-        //    {
-        //        if (sfId.HasValue)
-        //        {
-        //            Lite lite = Lite.Create(type, sfId.Value);
-        //            entity = (UserDN)OperationLogic.ServiceExecuteLite((Lite)lite, EnumLogic<OperationDN>.ToEnum(operationFullKey));
-        //        }
-        //        else
-        //            throw new ArgumentException(Resources.CouldNotCreateLiteWithoutAnIdToCallOperation0.Formato(operationFullKey));
-        //    }
-        //    else
-        //    {
-        //        //if (sfId.HasValue)
-        //        //    entity = Database.Retrieve<UserDN>(sfId.Value);
-        //        //else
-        //        //    entity = (UserDN)Navigator.CreateInstance(type);
-
-        //        entity = (UserDN)Navigator.ExtractEntity(this, Request.Form);
-
-        //        Dictionary<string, List<string>> errors = UserOperationApplyChanges(Request.Form, ref entity);
-
-        //        if (errors != null && errors.Count > 0)
-        //        {
-        //            this.ModelState.FromDictionary(errors, Request.Form);
-        //            return Navigator.ModelState(ModelState);
-        //        }
-
-        //        entity = (UserDN)OperationLogic.ServiceExecute(entity, EnumLogic<OperationDN>.ToEnum(operationFullKey));
-
-        //        if (Navigator.ExtractIsReactive(Request.Form))
-        //        {
-        //            string tabID = Navigator.ExtractTabID(Request.Form);
-        //            Session[tabID] = entity;
-        //        }
-        //    }
-
-        //    if (prefix.HasText())
-        //        return Navigator.PopupView(this, entity, prefix);
-        //    else //NormalWindow
-        //        return Navigator.View(this, entity);
-        //} 
         #endregion
 
         public static void UpdateSessionUser()

@@ -39,7 +39,7 @@ SF.registerModule("Operations", function () {
                 if (SF.isEmpty(this.options.prefix)) //NormalWindow 
                     formChildren = SF.isEmpty(this.options.parentDiv) ? $(this.options.sender).closest("form").find(":input") : $("#" + this.options.parentDiv + " :input");
                 else //PopupWindow
-                    formChildren = $(this.pf("panelPopup *") + ", #" + SF.Keys.reactive + ", #" + SF.Keys.tabId + ", input:hidden[name=" + SF.Keys.antiForgeryToken + "]");
+                    formChildren = $(this.pf("panelPopup *") + ", #" + SF.Keys.tabId + ", input:hidden[name=" + SF.Keys.antiForgeryToken + "]");
             }
             else {
                 formChildren = $('#' + SF.Keys.tabId + ", input:hidden[name=" + SF.Keys.antiForgeryToken + "]");
@@ -55,7 +55,7 @@ SF.registerModule("Operations", function () {
             var myRuntimeInfoKey = SF.compose(this.options.prefix, SF.Keys.runtimeInfo);
             if (formChildren.filter("[name=" + myRuntimeInfoKey + "]").length == 0) {
                 var value = SF.isEmpty(runtimeType)
-                ? info.createValue(SF.StaticInfo(this.options.prefix).singleType(), info.id(), info.isNew(), info.ticks())
+                ? info.createValue(SF.StaticInfo(this.options.prefix).singleType(), info.id(), info.isNew())
                 : info.find().val();
 
                 serializer.add(myRuntimeInfoKey, value);
@@ -433,36 +433,36 @@ SF.registerModule("Operations", function () {
 
     SF.ConstructorFromMany.prototype = new SF.OperationManager();
 
-    SF.reloadEntity = function (urlController, prefix, parentDiv) {
-        var $partialViewName = $('#sfPartialViewName');
-        var requestData = $("form :input,form :select").not(".sf-search-control :input,.sf-search-control :select").serialize() + "&prefix=" + prefix;
-        if ($partialViewName.length === 1) {
-            requestData += "&partialViewName=" + $partialViewName.val();
-        }
-        $.ajax({
-            url: urlController,
-            data: requestData,
-            async: false,
-            success: function (msg) {
-                if (!SF.isEmpty(parentDiv)) {
-                    $('#' + parentDiv + ' input[onblur]').attr('onblur', ''); // To avoid Chrome to fire onblur when replacing parentdiv content
-                    $('#' + parentDiv).html(msg);
-                    SF.triggerNewContent($('#' + parentDiv));
-                }
-                else {
-                    if (SF.isEmpty(prefix)) {
-                        $('#divNormalControl').html(msg);
-                        SF.triggerNewContent($('#divNormalControl'));
-                    }
-                    else {
-                        $('#' + SF.compose(prefix, "divMainControl") + ' input[onblur]').attr('onblur', ''); // To avoid Chrome to fire onblur when replacing popup content
-                        $('#' + SF.compose(prefix, "divMainControl")).html(msg);
-                        SF.triggerNewContent($('#' + SF.compose(prefix, "divMainControl")));
-                    }
-                }
-            }
-        });
-    };
+//    SF.reloadEntity = function (urlController, prefix, parentDiv) {
+//        var $partialViewName = $('#sfPartialViewName');
+//        var requestData = $("form :input,form :select").not(".sf-search-control :input,.sf-search-control :select").serialize() + "&prefix=" + prefix;
+//        if ($partialViewName.length === 1) {
+//            requestData += "&partialViewName=" + $partialViewName.val();
+//        }
+//        $.ajax({
+//            url: urlController,
+//            data: requestData,
+//            async: false,
+//            success: function (msg) {
+//                if (!SF.isEmpty(parentDiv)) {
+//                    $('#' + parentDiv + ' input[onblur]').attr('onblur', ''); // To avoid Chrome to fire onblur when replacing parentdiv content
+//                    $('#' + parentDiv).html(msg);
+//                    SF.triggerNewContent($('#' + parentDiv));
+//                }
+//                else {
+//                    if (SF.isEmpty(prefix)) {
+//                        $('#divNormalControl').html(msg);
+//                        SF.triggerNewContent($('#divNormalControl'));
+//                    }
+//                    else {
+//                        $('#' + SF.compose(prefix, "divMainControl") + ' input[onblur]').attr('onblur', ''); // To avoid Chrome to fire onblur when replacing popup content
+//                        $('#' + SF.compose(prefix, "divMainControl")).html(msg);
+//                        SF.triggerNewContent($('#' + SF.compose(prefix, "divMainControl")));
+//                    }
+//                }
+//            }
+//        });
+//    };
 
     SF.opDisableCtxmenu = function () {
         var clss = "sf-ctxmenu-active";
