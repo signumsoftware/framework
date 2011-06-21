@@ -392,8 +392,9 @@ namespace Signum.Web.Controllers
             {
                 string webTypeName = Navigator.ResolveWebTypeName(t);
 
-                sb.Add(new HtmlTag("input", webTypeName)
-                    .Attrs(new { type = "button", name = webTypeName, value = t.NiceName(), @class = "sf-chooser-button" })
+                sb.Add(new HtmlTag("input")
+                    .IdName(webTypeName)
+                    .Attrs(new { type = "button", value = t.NiceName(), @class = "sf-chooser-button" })
                     .ToHtmlSelf());
                 sb.Add(new HtmlTag("br").ToHtmlSelf());
             }
@@ -416,8 +417,9 @@ namespace Signum.Web.Controllers
             foreach (string button in buttons) 
             {
                 string id = ids != null ? ids[i] : button.Replace(" ", "");
-                sb.Add(new HtmlTag("input", id)
-                    .Attrs(new { type = "button", name = id, value = button, @class="sf-chooser-button" })
+                sb.Add(new HtmlTag("input")
+                    .IdName("option_" + id)
+                    .Attrs(new Dictionary<string, string> { { "data-id", id }, { "type", "button" }, { "value", button }, { "class", "sf-chooser-button" } })
                     .ToHtmlSelf());
                 sb.Add(new HtmlTag("br").ToHtmlSelf());
                 i++;

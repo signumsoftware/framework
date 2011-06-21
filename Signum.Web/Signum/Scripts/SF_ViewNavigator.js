@@ -333,7 +333,7 @@ SF.registerModule("ViewNavigator", function () {
                 //Set continuation for each type button
                 $('#' + tempDivId + " :button").each(function () {
                     $('#' + this.id).unbind('click').click(function () {
-                        var option = this.id;
+                        var option = $(this).attr("data-id");
                         $('#' + tempDivId).remove();
                         onOptionClicked(option);
                     });
