@@ -51,39 +51,16 @@ namespace Signum.Web.Extensions.Scheduler
 
         public static DateTime MappingDate(MappingContext<DateTime> ctx)
         {
-            DateTime dateStart;
-            int hours;
+            if (ctx.Parent.Empty())
+                return ctx.None();
+
+            DateTime dateStart; 
+            int hours; 
             int mins;
-            if (ctx.Parse("Date", out dateStart) & ctx.Parse("Hour", out hours) & ctx.Parse("Minute", out mins))
+            if (ctx.Parent.Parse("Date", out dateStart) & ctx.Parent.Parse("Hour", out hours) & ctx.Parent.Parse("Minute", out mins))
                 return dateStart.AddHours(hours).AddMinutes(mins).FromUserInterface();
 
             return ctx.None();
-
-            //string date;
-            //if (!ctx.Parent.Inputs.TryGetValue("Date", out date))
-            //    return ctx.None();
-
-            //DateTime dateStart;
-            //if (!DateTime.TryParse(date, out dateStart))
-            //    return ctx.ParentNone("Date", "Invalid date");
-
-            //string hour;
-            //if (!ctx.Parent.Inputs.TryGetValue("Hour", out hour))
-            //    return ctx.None();
-
-            //int hours;
-            //if (!int.TryParse(hour, out hours) || hours < 0 || hours > 23)
-            //    return ctx.ParentNone("Hour", "Invalid hour");
-
-            //string min;
-            //if (!ctx.Parent.Inputs.TryGetValue("Minute", out min))
-            //    return ctx.None();
-
-            //int mins;
-            //if (!int.TryParse(min, out mins) || mins < 0 || mins > 59)
-            //    return ctx.ParentNone("Min", "Invalid min");
-
-            //return dateStart.AddHours(hours).AddMinutes(mins).FromUserInterface();
         }
     }
 }

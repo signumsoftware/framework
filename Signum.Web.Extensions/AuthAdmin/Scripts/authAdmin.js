@@ -81,7 +81,7 @@ function openDialog(e) {
         }
     });
     navigator.createSave();
-    event.preventDefault();
+    e.preventDefault();
 }
 
 function postDialog(controllerUrl, prefix) {
