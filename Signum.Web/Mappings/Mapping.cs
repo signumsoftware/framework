@@ -30,29 +30,37 @@ namespace Signum.Web
     {
         static Mapping()
         {
-            MappingRepository<bool>.Mapping = GetValue<bool>(ParseHtmlBool);
-            MappingRepository<byte>.Mapping = GetValue<byte>(byte.Parse);
-            MappingRepository<short>.Mapping = GetValue<short>(short.Parse);
-            MappingRepository<int>.Mapping = GetValue<int>(int.Parse);
-            MappingRepository<long>.Mapping = GetValue<long>(long.Parse);
-            MappingRepository<float>.Mapping = GetValue<float>(float.Parse);
-            MappingRepository<double>.Mapping = GetValue<double>(double.Parse);
-            MappingRepository<decimal>.Mapping = GetValue<decimal>(decimal.Parse);
-            MappingRepository<DateTime>.Mapping = GetValue<DateTime>(str => DateTime.Parse(str).FromUserInterface());
-            MappingRepository<Guid>.Mapping = GetValue<Guid>(Guid.Parse);
-            MappingRepository<TimeSpan>.Mapping = GetValue<TimeSpan>(TimeSpan.Parse);
+            MappingRepository<bool>.Mapping = GetValue(ctx => ParseHtmlBool(ctx.Input));
+            MappingRepository<byte>.Mapping = GetValue(ctx => byte.Parse(ctx.Input));
+            MappingRepository<sbyte>.Mapping = GetValue(ctx => sbyte.Parse(ctx.Input));
+            MappingRepository<short>.Mapping = GetValue(ctx => short.Parse(ctx.Input));
+            MappingRepository<ushort>.Mapping = GetValue(ctx => ushort.Parse(ctx.Input));
+            MappingRepository<int>.Mapping = GetValue(ctx => int.Parse(ctx.Input));
+            MappingRepository<uint>.Mapping = GetValue(ctx => uint.Parse(ctx.Input));
+            MappingRepository<long>.Mapping = GetValue(ctx => long.Parse(ctx.Input));
+            MappingRepository<ulong>.Mapping = GetValue(ctx => ulong.Parse(ctx.Input));
+            MappingRepository<float>.Mapping = GetValue(ctx => ctx.PropertyRoute != null && ReflectionTools.IsPercentage(Reflector.FormatString(ctx.PropertyRoute), CultureInfo.CurrentCulture) ? (float)ReflectionTools.ParsePercentage(ctx.Input, typeof(float), CultureInfo.CurrentCulture): float.Parse(ctx.Input));
+            MappingRepository<double>.Mapping = GetValue(ctx => ctx.PropertyRoute != null && ReflectionTools.IsPercentage(Reflector.FormatString(ctx.PropertyRoute), CultureInfo.CurrentCulture) ? (double)ReflectionTools.ParsePercentage(ctx.Input, typeof(double), CultureInfo.CurrentCulture) : double.Parse(ctx.Input));
+            MappingRepository<decimal>.Mapping = GetValue(ctx => ctx.PropertyRoute != null && ReflectionTools.IsPercentage(Reflector.FormatString(ctx.PropertyRoute), CultureInfo.CurrentCulture) ? (decimal)ReflectionTools.ParsePercentage(ctx.Input, typeof(decimal), CultureInfo.CurrentCulture) : decimal.Parse(ctx.Input));
+            MappingRepository<DateTime>.Mapping = GetValue(ctx => DateTime.Parse(ctx.Input).FromUserInterface());
+            MappingRepository<Guid>.Mapping = GetValue(ctx => Guid.Parse(ctx.Input));
+            MappingRepository<TimeSpan>.Mapping = GetValue(ctx => TimeSpan.Parse(ctx.Input));
 
-            MappingRepository<bool?>.Mapping = GetValueNullable<bool>(ParseHtmlBool);
-            MappingRepository<byte?>.Mapping = GetValueNullable<byte>(byte.Parse);
-            MappingRepository<short?>.Mapping = GetValueNullable<short>(short.Parse);
-            MappingRepository<int?>.Mapping = GetValueNullable<int>(int.Parse);
-            MappingRepository<long?>.Mapping = GetValueNullable<long>(long.Parse);
-            MappingRepository<float?>.Mapping = GetValueNullable<float>(float.Parse);
-            MappingRepository<double?>.Mapping = GetValueNullable<double>(double.Parse);
-            MappingRepository<decimal?>.Mapping = GetValueNullable<decimal>(decimal.Parse);
-            MappingRepository<DateTime?>.Mapping = GetValueNullable<DateTime>(str=>DateTime.Parse(str).FromUserInterface());
-            MappingRepository<Guid?>.Mapping = GetValueNullable<Guid>(Guid.Parse);
-            MappingRepository<TimeSpan?>.Mapping = GetValueNullable<TimeSpan>(TimeSpan.Parse);
+            MappingRepository<bool?>.Mapping = GetValueNullable(ctx => ParseHtmlBool(ctx.Input));
+            MappingRepository<byte?>.Mapping = GetValueNullable(ctx => byte.Parse(ctx.Input));
+            MappingRepository<sbyte?>.Mapping = GetValueNullable(ctx => sbyte.Parse(ctx.Input));
+            MappingRepository<short?>.Mapping = GetValueNullable(ctx => short.Parse(ctx.Input));
+            MappingRepository<ushort?>.Mapping = GetValueNullable(ctx => ushort.Parse(ctx.Input));
+            MappingRepository<int?>.Mapping = GetValueNullable(ctx => int.Parse(ctx.Input));
+            MappingRepository<uint?>.Mapping = GetValueNullable(ctx => uint.Parse(ctx.Input));
+            MappingRepository<long?>.Mapping = GetValueNullable(ctx => long.Parse(ctx.Input));
+            MappingRepository<ulong?>.Mapping = GetValueNullable(ctx => ulong.Parse(ctx.Input));
+            MappingRepository<float?>.Mapping = GetValueNullable(ctx => ctx.PropertyRoute != null && ReflectionTools.IsPercentage(Reflector.FormatString(ctx.PropertyRoute), CultureInfo.CurrentCulture) ? (float)ReflectionTools.ParsePercentage(ctx.Input, typeof(float), CultureInfo.CurrentCulture) : float.Parse(ctx.Input));
+            MappingRepository<double?>.Mapping = GetValueNullable(ctx => ctx.PropertyRoute != null && ReflectionTools.IsPercentage(Reflector.FormatString(ctx.PropertyRoute), CultureInfo.CurrentCulture) ? (double)ReflectionTools.ParsePercentage(ctx.Input, typeof(double), CultureInfo.CurrentCulture) : double.Parse(ctx.Input));
+            MappingRepository<decimal?>.Mapping = GetValueNullable(ctx => ctx.PropertyRoute != null && ReflectionTools.IsPercentage(Reflector.FormatString(ctx.PropertyRoute), CultureInfo.CurrentCulture) ? (decimal)ReflectionTools.ParsePercentage(ctx.Input, typeof(decimal), CultureInfo.CurrentCulture) : decimal.Parse(ctx.Input));
+            MappingRepository<DateTime?>.Mapping = GetValueNullable(ctx => DateTime.Parse(ctx.Input).FromUserInterface());
+            MappingRepository<Guid?>.Mapping = GetValueNullable(ctx => Guid.Parse(ctx.Input));
+            MappingRepository<TimeSpan?>.Mapping = GetValueNullable(ctx => TimeSpan.Parse(ctx.Input));
 
 
             MappingRepository<string>.Mapping = ctx =>
@@ -108,13 +116,13 @@ namespace Signum.Web
         static GenericInvoker<Func<Delegate>> giForEnum = new GenericInvoker<Func<Delegate>>(() => ForEnum<DayOfWeek>());
         static Mapping<T> ForEnum<T>() where T : struct
         {
-            return MappingRepository<T>.Mapping = GetValue<T>(str => (T)Enum.Parse(typeof(T), str));
+            return MappingRepository<T>.Mapping = GetValue<T>(ctx => (T)Enum.Parse(typeof(T), ctx.Input));
         }
 
         static GenericInvoker<Func<Delegate>> giForEnumNullable = new GenericInvoker<Func<Delegate>>(() => ForEnumNullable<DayOfWeek>());
         static Mapping<T?> ForEnumNullable<T>() where T : struct
         {
-            return MappingRepository<T?>.Mapping = GetValueNullable<T>(str => (T)Enum.Parse(typeof(T), str));
+            return MappingRepository<T?>.Mapping = GetValueNullable<T>(ctx => (T)Enum.Parse(typeof(T), ctx.Input));
         }
 
 
@@ -158,7 +166,7 @@ namespace Signum.Web
             return ctx => { throw new InvalidOperationException("No mapping implemented for {0}".Formato(typeof(T).TypeName())); };
         }
 
-        static Mapping<T> GetValue<T>(Func<string, T> parse) where T : struct
+        static Mapping<T> GetValue<T>(Func<MappingContext, T> parse) where T : struct
         {
             return ctx =>
             {
@@ -167,7 +175,7 @@ namespace Signum.Web
 
                 try
                 {
-                    return parse(ctx.Input);
+                    return parse(ctx);
                 }
                 catch (FormatException)
                 {
@@ -176,7 +184,7 @@ namespace Signum.Web
             };
         }
 
-        static Mapping<T?> GetValueNullable<T>(Func<string, T> parse) where T : struct
+        static Mapping<T?> GetValueNullable<T>(Func<MappingContext, T> parse) where T : struct
         {
             return ctx =>
             {
@@ -189,7 +197,7 @@ namespace Signum.Web
 
                 try
                 {
-                    return parse(ctx.Input);
+                    return parse(ctx);
                 }
                 catch (FormatException)
                 {
