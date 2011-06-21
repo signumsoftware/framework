@@ -38,8 +38,9 @@ namespace Signum.Web
             MappingRepository<float>.Mapping = GetValue<float>(float.Parse);
             MappingRepository<double>.Mapping = GetValue<double>(double.Parse);
             MappingRepository<decimal>.Mapping = GetValue<decimal>(decimal.Parse);
-            MappingRepository<DateTime>.Mapping = GetValue<DateTime>(DateTime.Parse);
+            MappingRepository<DateTime>.Mapping = GetValue<DateTime>(str => DateTime.Parse(str).FromUserInterface());
             MappingRepository<Guid>.Mapping = GetValue<Guid>(Guid.Parse);
+            MappingRepository<TimeSpan>.Mapping = GetValue<TimeSpan>(TimeSpan.Parse);
 
             MappingRepository<bool?>.Mapping = GetValueNullable<bool>(ParseHtmlBool);
             MappingRepository<byte?>.Mapping = GetValueNullable<byte>(byte.Parse);
@@ -49,8 +50,10 @@ namespace Signum.Web
             MappingRepository<float?>.Mapping = GetValueNullable<float>(float.Parse);
             MappingRepository<double?>.Mapping = GetValueNullable<double>(double.Parse);
             MappingRepository<decimal?>.Mapping = GetValueNullable<decimal>(decimal.Parse);
-            MappingRepository<DateTime?>.Mapping = GetValueNullable<DateTime>(DateTime.Parse);
+            MappingRepository<DateTime?>.Mapping = GetValueNullable<DateTime>(str=>DateTime.Parse(str).FromUserInterface());
             MappingRepository<Guid?>.Mapping = GetValueNullable<Guid>(Guid.Parse);
+            MappingRepository<TimeSpan?>.Mapping = GetValueNullable<TimeSpan>(TimeSpan.Parse);
+
 
             MappingRepository<string>.Mapping = ctx =>
             {

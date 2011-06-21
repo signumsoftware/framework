@@ -90,6 +90,11 @@ namespace Signum.Web
             get { return Root.GlobalInputs.GetOrThrow(ControlID, "'{0}' is not in the form"); }
         }
 
+        public bool Empty()
+        {
+            return !HasInput && Inputs.Count == 0;
+        }
+
         public abstract IDictionary<string, string> Inputs { get; }
 
         public List<string> Error
@@ -112,6 +117,35 @@ namespace Signum.Web
             this.PropertyPack = propertyPack;
             this.PropertyRoute = route; 
         }
+
+        public bool Parse<V>(string property, out V value)
+        {
+            var mapping = Mapping.ForValue<V>();
+
+            if (mapping == null)
+                throw new InvalidOperationException("No mapping for value {0}".Formato(typeof(V).TypeName()));
+
+            var sc = new SubContext<V>(TypeContextUtilities.Compose(this.ControlID, property), null, null, this);
+
+            value = mapping(sc);
+
+            return !sc.SupressChange;
+        }
+
+        public bool Parse<V>(out V value)
+        {
+            var mapping = Mapping.ForValue<V>();
+
+            if (mapping == null)
+                throw new InvalidOperationException("No mapping for value {0}".Formato(typeof(V).TypeName()));
+
+            var sc = new SubContext<V>(this.ControlID, null, null, this);
+
+            value = mapping(sc);
+
+            return !sc.SupressChange;
+        }
+
 
         public static ModifiableEntity FindSubEntity(IdentifiableEntity entity, string prefix)
         {
@@ -245,40 +279,7 @@ namespace Signum.Web
             SupressChange = true;
             return default(T);
         }
-
-        public bool Parse<V>(string property, out V value)
-        {
-            var mapping = Mapping.ForValue<V>();
-
-            if (mapping == null)
-                throw new InvalidOperationException("No mapping for value {0}".Formato(typeof(T).TypeName()));
-
-            var sc = new SubContext<V>(TypeContextUtilities.Compose(this.ControlID, property), null, null, this);
-
-            value = mapping(sc);
-
-            return !sc.SupressChange;
-        }
-
-        public bool Parse<V>(out V value)
-        {
-            var mapping = Mapping.ForValue<V>();
-
-            if (mapping == null)
-                throw new InvalidOperationException("No mapping for value {0}".Formato(typeof(T).TypeName()));
-
-            var sc = new SubContext<V>(this.ControlID, null, null, this);
-
-            value = mapping(sc);
-
-            return !sc.SupressChange;
-        }
-
-        public bool Empty()
-        {
-            return !HasInput && Inputs.Count == 0;
-        }
-
+    
         public override MappingContext Parent
         {
             get { throw new NotImplementedException(); }
