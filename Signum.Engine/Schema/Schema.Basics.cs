@@ -553,8 +553,29 @@ namespace Signum.Engine.Maps
                 return this;
             }
 
-            this.Where = notNullColumns.ToString(c => c.Name.SqlScape() + " IS NOT NULL", " AND ");
+            this.Where = notNullColumns.ToString(c => {
+                string res = c.Name.SqlScape() + " IS NOT NULL";
+                if (!IsString(c.SqlDbType))
+                    return res;
+
+                return res + " AND " + c.Name.SqlScape() + " <> ''";
+
+            }, " AND ");
             return this;
+        }
+
+        private bool IsString(SqlDbType sqlDbType)
+        {
+            switch (sqlDbType)
+            {
+                case SqlDbType.NText:
+                case SqlDbType.NVarChar:
+                case SqlDbType.Text:
+                case SqlDbType.VarChar:
+                    return true;
+            }
+
+            return false;
         }
 
         public UniqueIndex WhereNotNull(params Field[] notNullFields)
