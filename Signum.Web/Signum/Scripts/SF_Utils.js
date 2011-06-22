@@ -119,6 +119,9 @@ SF.registerModule = (function () {
     };
 
     $.ajaxPrefilter(function (options, originalOptions, jqXHR) {
+        if (options.dataType == "script" && (typeof originalOptions.type == "undefined")) {
+            options.type = "GET";
+        }
         if (options.sfCheckRedirection) {
             var originalSuccess = options.success;
 
