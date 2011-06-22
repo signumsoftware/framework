@@ -64,8 +64,7 @@ namespace Signum.Web
                     {
                         using (content.Surround(new HtmlTag("li").Class("sf-quicklink")))
                         {
-                            content.Add(
-                                new HtmlTag("a").Attr("onclick", q.Execute()).SetInnerText(q.Text));
+                            content.Add(q.Execute());
                         }
                     }
                 }
@@ -94,7 +93,23 @@ namespace Signum.Web
 
         public bool IsVisible { get; set; }
 
-        public abstract string Execute();
+        public abstract MvcHtmlString Execute();
+    }
+
+    public class QuickLinkAction : QuickLink
+    {
+        public string Url { get; set; }
+        
+        public QuickLinkAction(string text, string url)
+        {
+            Text = text;
+            Url = url;
+        }
+
+        public override MvcHtmlString Execute()
+        {
+            return new HtmlTag("a").Attr("href", Url).SetInnerText(Text);
+        }
     }
 
     public class QuickLinkFind : QuickLink
@@ -125,13 +140,15 @@ namespace Signum.Web
         {
         }
 
-        public override string Execute()
+        public override MvcHtmlString Execute()
         {
-            return new JsFindNavigator(new JsFindOptions
+            string onclick = new JsFindNavigator(new JsFindOptions
             {
                 FindOptions = FindOptions,
                 Prefix = Js.NewPrefix(Prefix ?? "")
             }).openFinder().ToJS();
+
+            return new HtmlTag("a").Attr("onclick", onclick).SetInnerText(Text);
         }
     }
 }
