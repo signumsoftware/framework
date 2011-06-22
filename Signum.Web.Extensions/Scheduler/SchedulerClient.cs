@@ -58,7 +58,7 @@ namespace Signum.Web.Extensions.Scheduler
             int hours; 
             int mins;
             if (ctx.Parent.Parse("Date", out dateStart) & ctx.Parent.Parse("Hour", out hours) & ctx.Parent.Parse("Minute", out mins))
-                return dateStart.AddHours(hours).AddMinutes(mins).FromUserInterface();
+                return dateStart.AddHours(hours).AddMinutes(mins);
 
             return ctx.None();
         }
