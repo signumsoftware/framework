@@ -221,6 +221,12 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
+    <Compile Include="Calendar\CalendarClient.cs" />
+    <Compile Include="Calendar\Views\Calendar.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Calendar.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Captcha\CaptchaClient.cs" />
     <Compile Include="Captcha\Controllers\CaptchaController.cs" />
     <Compile Include="Captcha\CaptchaHtmlHelper.cs" />
@@ -629,6 +635,8 @@
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>_ViewStart.cs</LastGenOutput>
     </None>
+    <Content Include="Calendar\Content\calendar.css" />
+    <Content Include="Calendar\Scripts\calendar.js" />
     <Content Include="ControlPanel\Views\_ViewStart.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>_ViewStart.cs</LastGenOutput>
@@ -657,6 +665,10 @@
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>_ViewStart.cs</LastGenOutput>
     </None>
+    <Content Include="Calendar\Views\Calendar.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>Calendar.cs</LastGenOutput>
+    </Content>
     <None Include="Captcha\Views\_ViewStart.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>_ViewStart.cs</LastGenOutput>
