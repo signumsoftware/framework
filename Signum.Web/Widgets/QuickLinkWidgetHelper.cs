@@ -68,7 +68,7 @@ namespace Signum.Web
             }
 
             HtmlStringBuilder label = new HtmlStringBuilder();
-            using (label.Surround(new HtmlTag("a").Class("sf-widget-toggler").Attr("title", Resources.Quicklinks)))
+            using (label.Surround(new HtmlTag("a").Class("sf-widget-toggler sf-quicklink-toggler").Attr("title", Resources.Quicklinks)))
             {
                 label.Add(new HtmlTag("span")
                     .Class("ui-icon ui-icon-star")
