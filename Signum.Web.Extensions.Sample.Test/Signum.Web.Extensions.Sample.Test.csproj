@@ -61,6 +61,7 @@
   <ItemGroup>
     <Compile Include="Common.cs" />
     <Compile Include="ControlPanelTests.cs" />
+    <Compile Include="WidgetsTests.cs" />
     <Compile Include="UserQueriesTests.cs" />
     <Compile Include="OperationsTests.cs" />
     <Compile Include="ReportsTests.cs" />
