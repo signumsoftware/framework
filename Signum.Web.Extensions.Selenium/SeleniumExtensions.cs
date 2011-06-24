@@ -191,6 +191,13 @@ namespace Signum.Web.Selenium
             selenium.Click(EntityMenuOptionLocator(menuId, optionId));
         }
 
+        public static bool EntityMenuOptionEnabled(this ISelenium selenium, string menuId, string optionId)
+        {
+            string locator = EntityMenuOptionLocator(menuId, optionId);
+            Assert.IsTrue(selenium.IsElementPresent(locator));
+            return !selenium.IsElementPresent("{0}.sf-disabled".Formato(locator));
+        }
+
         public static string ValidationSummarySelector(string prefix)
         {
             return "jq=#{0}sfGlobalValidationSummary".Formato(prefix);
