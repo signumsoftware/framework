@@ -61,26 +61,6 @@ namespace Signum.Web
         }
 
         public string OnEntityChanged { get; set; }
-        
-        string onChangedTotal;
-        protected internal string OnChangedTotal
-        {
-            get 
-            {
-                if (onChangedTotal.HasText())
-                    return onChangedTotal;
-                
-                string doReload = (ReloadOnChange) ?
-                    (ReloadFunction ?? Js.ReloadEntity(ReloadControllerUrl, Parent.Parent.ControlID).ToJS()) :
-                    "";
-                string total = OnEntityChanged + doReload;
-                
-                if (total.HasText())
-                    onChangedTotal = "function(){" + total + "}";
-
-                return onChangedTotal;
-            }
-        }
 
         public string PartialViewName { get; set; }
 
@@ -96,7 +76,7 @@ namespace Signum.Web
             return new JsOptionsBuilder(false)
             {
                 {"prefix", ControlID.SingleQuote()},
-                {"onEntityChanged", OnChangedTotal}, 
+                {"onEntityChanged", "function(){ " + OnEntityChanged + " }"}, 
             };
         }
 

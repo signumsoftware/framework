@@ -29,7 +29,6 @@ namespace Signum.Web
             //CommonTask += new CommonTask(TaskSetImplementations);
             CommonTask += new CommonTask(TaskSetReadOnly);
             CommonTask += new CommonTask(TaskSetHtmlProperties);
-            CommonTask += new CommonTask(TaskSetReloadOnChange);
         }
 
         public static void FireCommonTasks(BaseLine eb)
@@ -117,16 +116,6 @@ namespace Signum.Web
                         vl.ValueHtmlProps.Add("size", maxSize.HasValue ? Math.Min(max, maxSize.Value) : max);
                     }
                 }
-            }
-        }
-
-        public static void TaskSetReloadOnChange(BaseLine bl)
-        {
-            if (bl != null)
-            {
-                var atribute = bl.PropertyRoute.PropertyInfo.SingleAttribute<ReloadEntityOnChange>();
-                if (atribute != null)
-                    bl.ReloadOnChange = true;
             }
         }
 #endregion

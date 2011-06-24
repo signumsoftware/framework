@@ -35,8 +35,7 @@ SF.registerModule("Validator", function () {
             var formChildren = SF.isEmpty(this.valOptions.parentDiv) ?
             $("form :input") : $("#" + this.valOptions.parentDiv + " :input")
                 .add("#" + SF.Keys.tabId)
-                .add("input:hidden[name=" + SF.Keys.antiForgeryToken + "]")
-                .add("#" + SF.Keys.reactive);
+                .add("input:hidden[name=" + SF.Keys.antiForgeryToken + "]");
 
             var searchControlInputs = $(".sf-search-control :input");
             formChildren = formChildren.not(searchControlInputs);
@@ -227,7 +226,7 @@ SF.registerModule("Validator", function () {
             SF.log("PartialValidator constructRequestDataForSaving");
             var prefix = this.valOptions.prefix;
             var formChildren = $("#" + this.valOptions.parentDiv + " *, #" + SF.Keys.tabId + ", input:hidden[name=" + SF.Keys.antiForgeryToken + "]").add(SF.getInfoParams(prefix));
-            formChildren = formChildren.not(".sf-search-control *, #" + SF.Keys.reactive);
+            formChildren = formChildren.not(".sf-search-control *");
 
             var serializer = new SF.Serializer();
             serializer.add(formChildren.serialize());
@@ -238,7 +237,7 @@ SF.registerModule("Validator", function () {
 
             if (formChildren.filter(this.pf(SF.Keys.runtimeInfo)).length === 0) {
                 serializer.add(SF.compose(prefix, SF.Keys.runtimeInfo),
-                    new SF.RuntimeInfo(prefix).createValue(this.valOptions.type, '', 'n', ''));
+                    new SF.RuntimeInfo(prefix).createValue(this.valOptions.type, '', 'n'));
             }
 
             serializer.add(this.valOptions.requestExtraJsonData);
@@ -304,7 +303,7 @@ SF.registerModule("Validator", function () {
                     formChildren = formChildren.add($("#" + this.valOptions.parentDiv + " :input"));
                 }
             }
-            formChildren = formChildren.not(".sf-search-control :input,#" + SF.Keys.reactive);
+            formChildren = formChildren.not(".sf-search-control :input");
 
             var serializer = new SF.Serializer().add(formChildren.serialize());
 
@@ -317,17 +316,16 @@ SF.registerModule("Validator", function () {
 
                 if (SF.isEmpty(this.valOptions.type)) {
                     value = SF.isEmpty(info.runtimeType())
-                        ? info.createValue(SF.StaticInfo(this.valOptions.prefix).singleType(), info.id(), 'n', '')
+                        ? info.createValue(SF.StaticInfo(this.valOptions.prefix).singleType(), info.id(), 'n')
                         : infoField.val();
                 }
                 else {
                     if (infoField.length === 0) {
-                        value = info.createValue(this.valOptions.type, SF.isEmpty(!this.valOptions.id) ? this.valOptions.id : '', 'n', '');
+                        value = info.createValue(this.valOptions.type, SF.isEmpty(!this.valOptions.id) ? this.valOptions.id : '', 'n');
                     }
                     else {
                         var mixedVal = new SF.RuntimeInfo("Temp");
-                        var currTicks = ($('#' + SF.Keys.reactive).length > 0) ? new Date().getTime() : "";
-                        value = mixedVal.createValue(this.valOptions.type, this.valOptions.id, null, currTicks);
+                        value = mixedVal.createValue(this.valOptions.type, this.valOptions.id, null);
                     }
                 }
 

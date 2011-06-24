@@ -40,22 +40,6 @@ namespace Signum.Web
             set { hideIfNull = value; }
         }
 
-        bool reloadOnChange = false;
-        public bool ReloadOnChange
-        {
-            get { return reloadOnChange; }
-            set { reloadOnChange = value; }
-        }
-
-        string reloadControllerUrl = RouteHelper.New().SignumAction("ReloadEntity");
-        public string ReloadControllerUrl 
-        {
-            get { return reloadControllerUrl; }
-            set { reloadControllerUrl = value; } 
-        }
-
-        public string ReloadFunction { get; set; }
-
         object untypedValue;
         public override object UntypedValue
         {

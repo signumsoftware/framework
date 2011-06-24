@@ -121,11 +121,6 @@ namespace Signum.Web
             return Manager.GetOrCreateTabID(c);
         }
 
-        public static bool IsReactive(this ControllerBase controller)
-        {
-            return controller.ControllerContext.HttpContext.Request.Form.AllKeys.Contains(ViewDataKeys.Reactive);
-        }
-
         public static string TabID(this ControllerBase controller)
         {
             NameValueCollection form = controller.ControllerContext.HttpContext.Request.Form;
@@ -596,15 +591,6 @@ namespace Signum.Web
 
             if (Navigator.IsReadOnly(type, admin))
                 tc.ReadOnly = true;
-            
-            bool useSessionWhenNew = GraphExplorer.FromRoot((ModifiableEntity)entity).Any(m => (m as IIdentifiable).TryCS(i => i.IsNew) == true && m.GetType().HasAttribute<UseSessionWhenNew>());
-            bool isReactive = GraphExplorer.FromRoot((ModifiableEntity)entity).Any(m => m.GetType().HasAttribute<Reactive>());
-
-            if (useSessionWhenNew || isReactive)
-            {
-                controller.ViewData[ViewDataKeys.Reactive] = true;
-                controller.ControllerContext.HttpContext.Session[tabID] = entity;
-            }
         }
 
         public string GetTypeTitle(ModifiableEntity mod)
@@ -849,7 +835,6 @@ namespace Signum.Web
         {
             RootContext<T> ctx = new RootContext<T>(prefix, inputs, controllerContext) { Value = entity };
             mapping(ctx);
-            ctx.Finish();
             return ctx;
         }
 
@@ -857,24 +842,24 @@ namespace Signum.Web
         {
             NameValueCollection form = controller.ControllerContext.HttpContext.Request.Form;
             
-            if (form[ViewDataKeys.Reactive] != null && (string.IsNullOrEmpty(prefix) || !prefix.StartsWith("New")))
-            {
-                controller.ViewData[ViewDataKeys.Reactive] = true;
-                ModifiableEntity mod = (ModifiableEntity)controller.ControllerContext.HttpContext.Session[controller.TabID()];
-                if (mod == null)
-                    throw new InvalidOperationException(Resources.YourSessionHasTimedOutClickF5ToReloadTheEntity);
+            //if (form[ViewDataKeys.Reactive] != null && (string.IsNullOrEmpty(prefix) || !prefix.StartsWith("New")))
+            //{
+            //    controller.ViewData[ViewDataKeys.Reactive] = true;
+            //    ModifiableEntity mod = (ModifiableEntity)controller.ControllerContext.HttpContext.Session[controller.TabID()];
+            //    if (mod == null)
+            //        throw new InvalidOperationException(Resources.YourSessionHasTimedOutClickF5ToReloadTheEntity);
 
-                RuntimeInfo parentRuntimeInfo = RuntimeInfo.FromFormValue(form[EntityBaseKeys.RuntimeInfo]);
-                if (mod.GetType() == parentRuntimeInfo.RuntimeType &&
-                    (mod.GetType().IsEmbeddedEntity() || ((IIdentifiable)mod).IdOrNull == parentRuntimeInfo.IdOrNull))
-                {
-                    //if (clone == null || clone.Value) 
-                    //    return (ModifiableEntity)((ICloneable)mod).Clone();
-                    return mod;
-                }
-                else
-                    throw new InvalidOperationException(Resources.IncorrectEntityInSessionYouMustReloadThePageToContinue);
-            }
+            //    RuntimeInfo parentRuntimeInfo = RuntimeInfo.FromFormValue(form[EntityBaseKeys.RuntimeInfo]);
+            //    if (mod.GetType() == parentRuntimeInfo.RuntimeType &&
+            //        (mod.GetType().IsEmbeddedEntity() || ((IIdentifiable)mod).IdOrNull == parentRuntimeInfo.IdOrNull))
+            //    {
+            //        //if (clone == null || clone.Value) 
+            //        //    return (ModifiableEntity)((ICloneable)mod).Clone();
+            //        return mod;
+            //    }
+            //    else
+            //        throw new InvalidOperationException(Resources.IncorrectEntityInSessionYouMustReloadThePageToContinue);
+            //}
 
             RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(form[TypeContextUtilities.Compose(prefix ?? "", EntityBaseKeys.RuntimeInfo)]);
             if (runtimeInfo.IdOrNull != null)

@@ -31,7 +31,6 @@ namespace Signum.Web
                 sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, entityRepeater));
 
                 sb.AddLine(helper.HiddenStaticInfo(entityRepeater));
-                sb.AddLine(helper.Hidden(entityRepeater.Compose(TypeContext.Ticks), EntityInfoHelper.GetTicks(helper, entityRepeater).TryToString() ?? ""));
 
                 //If it's an embeddedEntity write an empty template with index 0 to be used when creating a new item
                 if (entityRepeater.ElementType.IsEmbeddedEntity())

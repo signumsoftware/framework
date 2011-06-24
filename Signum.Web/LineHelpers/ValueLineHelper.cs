@@ -66,10 +66,6 @@ namespace Signum.Web
 
         private static void InternalValueLineValue(HtmlHelper helper, ValueLine valueLine, HtmlStringBuilder sb)
         {
-            long? ticks = EntityInfoHelper.GetTicks(helper, valueLine);
-            if (ticks != null)
-                sb.AddLine(helper.Hidden(valueLine.Compose(TypeContext.Ticks), ticks.Value));
-
             ValueLineType vltype = valueLine.ValueLineType ?? Configurator.GetDefaultValueLineType(valueLine.Type);
 
             valueLine.ValueHtmlProps.AddCssClass("sf-value-line");
@@ -124,15 +120,6 @@ namespace Signum.Web
                 if (value != null)
                     items.Where(e => e.Value == value.ToString()).Single("Not value present in ValueLine", "More than one values present in ValueLine").Selected = true;
 
-
-            string setTicks = SetTicksFunction(helper, valueLine);
-            string reloadOnChangeFunction = GetReloadFunction(helper, valueLine);
-
-            if (valueLine.ValueHtmlProps.ContainsKey("onchange"))
-                valueLine.ValueHtmlProps["onchange"] = setTicks + valueLine.ValueHtmlProps["onchange"] + reloadOnChangeFunction;
-            else
-                valueLine.ValueHtmlProps.Add("onchange", setTicks + reloadOnChangeFunction);
-
             return helper.DropDownList(valueLine.ControlID, items, valueLine.ValueHtmlProps);
         }
 
@@ -154,13 +141,10 @@ namespace Signum.Web
             if (valueLine.DatePickerOptions.ShowAge)
                 valueLine.ValueHtmlProps.AddCssClass("hasAge");
 
-            string setTicks = SetTicksFunction(helper, valueLine);
-            string reloadOnChangeFunction = GetReloadFunction(helper, valueLine);
-
             if (valueLine.ValueHtmlProps.ContainsKey("onblur"))
-                valueLine.ValueHtmlProps["onblur"] = "this.setAttribute('value', this.value); " + setTicks + valueLine.ValueHtmlProps["onblur"] + reloadOnChangeFunction;
+                valueLine.ValueHtmlProps["onblur"] = "this.setAttribute('value', this.value); " + valueLine.ValueHtmlProps["onblur"];
             else
-                valueLine.ValueHtmlProps.Add("onblur", "this.setAttribute('value', this.value); " + setTicks + reloadOnChangeFunction);
+                valueLine.ValueHtmlProps.Add("onblur", "this.setAttribute('value', this.value);");
             
             string jsDataFormat = DatePickerOptions.JsDateFormat(valueLine.Format ?? "g");
 
@@ -220,18 +204,15 @@ namespace Signum.Web
             if (valueLine.ReadOnly)
                 return helper.Span(valueLine.ControlID, value, "sf-value-line");
 
-            string setTicks = SetTicksFunction(helper, valueLine);
-            string reloadOnChangeFunction = GetReloadFunction(helper, valueLine);
-
             if (!valueLine.ValueHtmlProps.ContainsKey("autocomplete"))
                 valueLine.ValueHtmlProps.Add("autocomplete", "off");
             else
                 valueLine.ValueHtmlProps.Remove("autocomplete");
 
             if (valueLine.ValueHtmlProps.ContainsKey("onblur"))
-                valueLine.ValueHtmlProps["onblur"] = "this.setAttribute('value', this.value); " + setTicks + valueLine.ValueHtmlProps["onblur"] + reloadOnChangeFunction;
+                valueLine.ValueHtmlProps["onblur"] = "this.setAttribute('value', this.value); " + valueLine.ValueHtmlProps["onblur"];
             else
-                valueLine.ValueHtmlProps.Add("onblur", "this.setAttribute('value', this.value); " + setTicks + reloadOnChangeFunction);
+                valueLine.ValueHtmlProps.Add("onblur", "this.setAttribute('value', this.value);");
 
             valueLine.ValueHtmlProps["type"] = inputType.ToString().ToLower();
 
@@ -253,14 +234,11 @@ namespace Signum.Web
             if (valueLine.ReadOnly)
                 return helper.Span(valueLine.ControlID, (string)valueLine.UntypedValue, "sf-value-line");
 
-            string setTicks = SetTicksFunction(helper, valueLine);
-            string reloadOnChangeFunction = GetReloadFunction(helper, valueLine);
-
             valueLine.ValueHtmlProps.Add("autocomplete", "off");
             if (valueLine.ValueHtmlProps.ContainsKey("onblur"))
-                valueLine.ValueHtmlProps["onblur"] = "this.setAttribute('value', this.value); " + setTicks + valueLine.ValueHtmlProps["onblur"] + reloadOnChangeFunction;
+                valueLine.ValueHtmlProps["onblur"] = "this.setAttribute('value', this.value); " + valueLine.ValueHtmlProps["onblur"];
             else
-                valueLine.ValueHtmlProps.Add("onblur", "this.setAttribute('value', this.value); " + setTicks + reloadOnChangeFunction);
+                valueLine.ValueHtmlProps.Add("onblur", "this.setAttribute('value', this.value);");
 
             return helper.TextArea(valueLine.ControlID, (string)valueLine.UntypedValue, valueLine.ValueHtmlProps);
         }
@@ -269,19 +247,6 @@ namespace Signum.Web
         {
             if (valueLine.ReadOnly)
                 valueLine.ValueHtmlProps.Add("disabled", "disabled");
-            else
-            {
-                string setTicks = SetTicksFunction(helper, valueLine);
-                string reloadOnChangeFunction = GetReloadFunction(helper, valueLine);
-
-                if (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || valueLine.ReloadOnChange || valueLine.ReloadFunction.HasText())
-                {
-                    if (valueLine.ValueHtmlProps.ContainsKey("onclick"))
-                        valueLine.ValueHtmlProps["onclick"] = setTicks + valueLine.ValueHtmlProps["onclick"] + reloadOnChangeFunction;
-                    else
-                        valueLine.ValueHtmlProps.Add("onclick", setTicks + reloadOnChangeFunction);
-                }
-            }
 
             bool? value = (bool?)valueLine.UntypedValue;
             return HtmlHelperExtenders.CheckBox(helper, valueLine.ControlID, value.HasValue ? value.Value : false, !valueLine.ReadOnly, valueLine.ValueHtmlProps);
@@ -353,20 +318,6 @@ namespace Signum.Web
                 settingsModifier(hl);
 
             return Hidden(helper, hl);
-        }
-
-        private static string SetTicksFunction(HtmlHelper helper, ValueLine valueLine)
-        {
-            return (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || valueLine.ReloadOnChange || valueLine.ReloadFunction.HasText()) ?
-                "$('#{0}').val(new Date().getTime()); ".Formato(valueLine.Compose(TypeContext.Ticks)) :
-                "";
-        }
-
-        private static string GetReloadFunction(HtmlHelper helper, ValueLine valueLine)
-        {
-            return (valueLine.ReloadOnChange || valueLine.ReloadFunction.HasText()) ?
-                valueLine.ReloadFunction ?? "SF.reloadEntity('{0}','{1}'); ".Formato(valueLine.ReloadControllerUrl, helper.WindowPrefix()) :
-                "";
         }
     }
 

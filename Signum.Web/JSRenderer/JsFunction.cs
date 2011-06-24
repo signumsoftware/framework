@@ -107,10 +107,5 @@ namespace Signum.Web
         {
             return new JsInstruction(() => "if(confirm({0})) {1}".Formato(message.ToJS(), onSuccess.ToJS()));
         }
-
-        public static JsInstruction ReloadEntity(JsValue<string> controllerUrl, JsValue<string> parentDiv)
-        {
-            return new JsInstruction(() => "SF.reloadEntity({0},{1})".Formato(controllerUrl.ToJS(), parentDiv.ToJS()));
-        }
     }
 }
