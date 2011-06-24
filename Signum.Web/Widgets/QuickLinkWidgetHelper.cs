@@ -56,27 +56,35 @@ namespace Signum.Web
                 return null;
 
             HtmlStringBuilder content = new HtmlStringBuilder();
-            using (content.Surround(new HtmlTag("div").Class("ui-corner-all ui-widget-content sf-widget sf-quicklinks")))
+            using (content.Surround(new HtmlTag("ul").Class("sf-menu-button sf-widget-content sf-quicklinks")))
             {
-                using (content.Surround("ul"))
+                foreach (var q in quicklinks)
                 {
-                    foreach (var q in quicklinks)
+                    using (content.Surround(new HtmlTag("li").Class("sf-quicklink")))
                     {
-                        using (content.Surround(new HtmlTag("li").Class("sf-quicklink")))
-                        {
-                            content.Add(q.Execute());
-                        }
+                        content.Add(q.Execute());
                     }
                 }
             }
 
+            HtmlStringBuilder label = new HtmlStringBuilder();
+            using (label.Surround(new HtmlTag("a").Class("sf-widget-toggler").Attr("title", Resources.Quicklinks)))
+            {
+                label.Add(new HtmlTag("span")
+                    .Class("ui-icon ui-icon-star")
+                    .InnerHtml(Resources.Quicklinks.EncodeHtml())
+                    .ToHtml());
+
+                label.Add(new HtmlTag("span")
+                    .Class("sf-widget-count")
+                    .SetInnerText(quicklinks.Count.ToString())
+                    .ToHtml());
+            }
+            
             return new WidgetItem
             {
                 Id = TypeContextUtilities.Compose(prefix, "widgetQuicklinks"),
-                Label = new HtmlTag("a", "quicklinks").InnerHtml(
-                     Resources.Quicklinks.EncodeHtml(),
-                     new HtmlTag("span").Class("sf-widget-count").SetInnerText(quicklinks.Count.ToString()).ToHtml()
-                     ),
+                Label = label.ToHtml(),
                 Content = content.ToHtml()
             };
         }     
@@ -149,6 +157,23 @@ namespace Signum.Web
             }).openFinder().ToJS();
 
             return new HtmlTag("a").Attr("onclick", onclick).SetInnerText(Text);
+        }
+    }
+
+    public class QuickLinkView : QuickLink
+    {
+        public Lite lite;
+
+        public QuickLinkView(Lite liteEntity)
+        {
+            lite = liteEntity;
+            IsVisible = Navigator.IsNavigable(lite.RuntimeType, false);
+            Text = lite.RuntimeType.NiceName();
+        }
+
+        public override MvcHtmlString Execute()
+        {
+            return new HtmlTag("a").Attr("href", Navigator.ViewRoute(lite)).SetInnerText(Text);
         }
     }
 }

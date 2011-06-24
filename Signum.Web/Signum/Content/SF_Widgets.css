@@ -1,23 +1,28 @@
 ﻿.sf-widgets-container
 {
     float: right;    
-    padding: 4px 2px;    
-}
-
-.sf-widget-li
-{
-    position: relative;    
 }
 
 .sf-widget
 {
-    display: none;
-    position: absolute;
-    background: white;
-    padding: 10px;
+    position: relative; 
+    border-left: solid 1px #AAA;
+    padding: 4px 2px; /*Change SF.Widgets .sf-item onmouseover accordingly*/     
 }
 
-.sf-widget-li-active .sf-widget
+.sf-widget-content
 {
-    display: block;    
+    margin-left: 0 !important;
+    margin-top: 0 !important;
+}
+
+.sf-widget-toggler
+{
+    vertical-align: top;    
+}
+
+.sf-widget-toggler .ui-icon, .sf-widget-toggler .sf-widget-count
+{
+    display: inline-block;
+    vertical-align: top;   
 }
