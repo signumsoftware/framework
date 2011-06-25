@@ -66,7 +66,7 @@ namespace Signum.Web
             {
                 foreach (WidgetItem widget in widgets)
                 {
-                    using (sb.Surround(new HtmlTag("li").Class("sf-dropdown sf-widget")))
+                    using (sb.Surround(new HtmlTag("li").IdName(widget.Id).Class("sf-dropdown sf-widget")))
                     {
                         sb.AddLine(widget.Label);
                         sb.AddLine(widget.Content);

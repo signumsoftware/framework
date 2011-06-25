@@ -183,6 +183,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ValueLineBox.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Signum\Views\Widgets\Note.cs">
+      <DependentUpon>Note.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="Signum\Views\_ViewStart.cs">
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
       <AutoGen>True</AutoGen>
@@ -212,6 +217,7 @@
     <Compile Include="Facades\FindOptionsModelBinder.cs" />
     <Compile Include="JSRenderer\JsRenderer.cs" />
     <Compile Include="Widgets\AlertWidgetHelper.cs" />
+    <Compile Include="Widgets\NotesClient.cs" />
     <Compile Include="Widgets\QuickLinkWidgetHelper.cs" />
     <Compile Include="Widgets\NoteWidgetHelper.cs" />
     <Compile Include="Widgets\WidgetsHelper.cs" />
@@ -281,6 +287,10 @@
     </Content>
     <Content Include="Signum\Images\calendar.png" />
     <Content Include="Signum\Scripts\SF_Utils.js" />
+    <Content Include="Signum\Views\Widgets\Note.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>Note.cs</LastGenOutput>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <None Include="SignumFramework.pfx" />

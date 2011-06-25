@@ -5,6 +5,7 @@
 
 .sf-widget
 {
+    display: inline-block;
     position: relative; 
     border-left: solid 1px #AAA;
     padding: 4px 2px; /*Change SF.Widgets .sf-item onmouseover accordingly*/     

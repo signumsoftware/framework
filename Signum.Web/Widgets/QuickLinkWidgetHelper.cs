@@ -46,10 +46,10 @@ namespace Signum.Web
 
         public static void Start()
         {
-            WidgetsHelper.GetWidgetsForView += (helper, entity, partialViewName, prefix) => entity is IdentifiableEntity ? CreateQuickLinkWidget(helper, (IdentifiableEntity)entity, partialViewName, prefix) : null;
+            WidgetsHelper.GetWidgetsForView += (helper, entity, partialViewName, prefix) => entity is IdentifiableEntity ? CreateWidget(helper, (IdentifiableEntity)entity, partialViewName, prefix) : null;
         }
 
-        public static WidgetItem CreateQuickLinkWidget(HtmlHelper helper, IdentifiableEntity identifiable, string partialViewName, string prefix)
+        public static WidgetItem CreateWidget(HtmlHelper helper, IdentifiableEntity identifiable, string partialViewName, string prefix)
         {
             List<QuickLink> quicklinks = GetForEntity(helper, identifiable, partialViewName, prefix);
             if (quicklinks == null || quicklinks.Count == 0) 
@@ -83,7 +83,7 @@ namespace Signum.Web
             
             return new WidgetItem
             {
-                Id = TypeContextUtilities.Compose(prefix, "widgetQuicklinks"),
+                Id = TypeContextUtilities.Compose(prefix, "quicklinksWidget"),
                 Label = label.ToHtml(),
                 Content = content.ToHtml()
             };
