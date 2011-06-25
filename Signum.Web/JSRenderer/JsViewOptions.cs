@@ -52,12 +52,27 @@ namespace Signum.Web
             this.Options = options;
         }
 
-        public JsInstruction ShowCreateSave(JsValue<string> html)
+        public JsInstruction viewOk()
         {
-            return new JsInstruction(() => "{0}.{1}({2})".Formato(this.ToJS(), "showCreateSave", html.ToJS()));
+            return new JsInstruction(() => "{0}.viewOk()".Formato(this.ToJS()));
         }
 
-        public static JsInstruction ClosePopup(string prefix)
+        public JsInstruction createOk()
+        {
+            return new JsInstruction(() => "{0}.createOk()".Formato(this.ToJS()));
+        }
+
+        public JsInstruction viewSave(JsValue<string> html)
+        {
+            return new JsInstruction(() => "{0}.viewSave({1})".Formato(this.ToJS(), html.ToJS()));
+        }
+
+        public JsInstruction createSave(string saveUrl)
+        {
+            return new JsInstruction(() => "{0}.createSave('{1}')".Formato(this.ToJS(), saveUrl));
+        }
+
+        public static JsInstruction closePopup(string prefix)
         {
             return new JsInstruction(() => "SF.closePopup('{0}')".Formato(prefix));
         }
