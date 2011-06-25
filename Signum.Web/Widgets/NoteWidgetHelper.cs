@@ -6,19 +6,20 @@ using Signum.Utilities;
 using System.Web.Mvc;
 using Signum.Web.Properties;
 using Signum.Web.Controllers;
+using Signum.Entities.DynamicQuery;
 
 namespace Signum.Web
 {
     public static class NoteWidgetHelper
     {
+        public static Type NoteType { get; set; }
         public static Func<IdentifiableEntity, INoteDN> CreateNote { get; set; }
-        public static Type Type { get; set; }
         public static string NotesQueryColumn { get; set; }
 
         static object notesQuery; 
         public static object NotesQuery 
         {
-            get { return notesQuery ?? Type; }
+            get { return notesQuery ?? NoteType; }
             set { notesQuery = value; }
         }
 
@@ -51,13 +52,15 @@ namespace Signum.Web
                     Create = false,
                     SearchOnLoad = true,
                     FilterMode = FilterMode.AlwaysHidden,
-                    FilterOptions = { new FilterOption( NotesQueryColumn, identifiable.ToLite()) }
+                    FilterOptions = { new FilterOption( NotesQueryColumn, identifiable.ToLite()) },
+                    ColumnOptions = { new ColumnOption(NotesQueryColumn) },
+                    ColumnOptionsMode = ColumnOptionsMode.Remove,
                 }
             };
 
             JsViewOptions voptions = new JsViewOptions
             {
-                Type = Type.Name,
+                Type = NoteType.Name,
                 Prefix = prefix,
                 ControllerUrl = RouteHelper.New().Action("CreateNote", "Widgets"),
                 RequestExtraJsonData = "function(){{ return {{ {0}: new SF.RuntimeInfo('{1}').find().val() }}; }}".Formato(EntityBaseKeys.RuntimeInfo, prefix),
@@ -70,7 +73,7 @@ namespace Signum.Web
                 using (content.Surround(new HtmlTag("li").Class("sf-note")))
                 {
                     content.AddLine(new HtmlTag("a")
-                        .Class("sf-notes-view")
+                        .Class("sf-note-view")
                         .Attr("onclick", new JsFindNavigator(foptions).openFinder().ToJS())
                         .InnerHtml(Resources.ViewNotes.EncodeHtml())
                         .ToHtml());
@@ -79,7 +82,7 @@ namespace Signum.Web
                 using (content.Surround(new HtmlTag("li").Class("sf-note")))
                 {
                     content.AddLine(new HtmlTag("a")
-                       .Class("sf-notes-create")
+                       .Class("sf-note-create")
                        .Attr("onclick", new JsViewNavigator(voptions).createSave(RouteHelper.New().SignumAction("TrySavePartial")).ToJS())
                        .InnerHtml(Resources.CreateNote.EncodeHtml())
                        .ToHtml());
