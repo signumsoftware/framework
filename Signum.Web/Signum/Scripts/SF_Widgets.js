@@ -20,13 +20,13 @@ SF.Widgets = (function () {
         SF.Dropdowns.toggle(evt, this);
     });
 
-    var onNoteCreated = function (url, prefix) {
+    var onNoteCreated = function (url, prefix, successMessage) {
         $.ajax({
             url: url,
             data: { sfRuntimeInfo: new SF.RuntimeInfo(prefix).find().val() },
             success: function (newCount) {
                 $("#" + SF.compose(prefix, "notesWidget")).find(".sf-widget-count").html(newCount);
-                window.alert("Note created");
+                window.alert(successMessage);
             }
         });
     };

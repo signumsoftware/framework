@@ -340,6 +340,15 @@ namespace Signum.Web.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Note created.
+        /// </summary>
+        public static string NoteCreated {
+            get {
+                return ResourceManager.GetString("NoteCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Notes.
         /// </summary>
         public static string Notes {

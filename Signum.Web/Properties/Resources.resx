@@ -333,4 +333,7 @@
   <data name="InvalidFormat" xml:space="preserve">
     <value>Invalid format</value>
   </data>
+  <data name="NoteCreated" xml:space="preserve">
+    <value>Note created</value>
+  </data>
 </root>

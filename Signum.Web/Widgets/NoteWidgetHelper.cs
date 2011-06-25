@@ -30,6 +30,14 @@ namespace Signum.Web
             });
         }
 
+        public static string JsOnNoteCreated(string prefix, string successMessage)
+        {
+            return "SF.Widgets.onNoteCreated('{0}','{1}','{2}')".Formato(
+                RouteHelper.New().Action<WidgetsController>(wc => wc.NotesCount()), 
+                prefix,
+                successMessage);
+        }
+
         public static WidgetItem CreateWidget(HtmlHelper helper, IdentifiableEntity identifiable, string partialViewName, string prefix)
         {
             if (identifiable == null || identifiable.IsNew || identifiable is INoteDN)
@@ -53,7 +61,7 @@ namespace Signum.Web
                 Prefix = prefix,
                 ControllerUrl = RouteHelper.New().Action("CreateNote", "Widgets"),
                 RequestExtraJsonData = "function(){{ return {{ {0}: new SF.RuntimeInfo('{1}').find().val() }}; }}".Formato(EntityBaseKeys.RuntimeInfo, prefix),
-                OnOkClosed = new JsFunction() { "SF.Widgets.onNoteCreated('{0}','{1}')".Formato(RouteHelper.New().Action<WidgetsController>(wc => wc.NotesCount()), prefix) }
+                OnOkClosed = new JsFunction() { JsOnNoteCreated(prefix, Resources.NoteCreated) }
             };
 
             HtmlStringBuilder content = new HtmlStringBuilder();
