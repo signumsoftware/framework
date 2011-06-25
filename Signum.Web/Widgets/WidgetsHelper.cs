@@ -66,7 +66,7 @@ namespace Signum.Web
             {
                 foreach (WidgetItem widget in widgets)
                 {
-                    using (sb.Surround(new HtmlTag("li").Class("sf-widget-li")))
+                    using (sb.Surround(new HtmlTag("li").Class("sf-dropdown sf-widget")))
                     {
                         sb.AddLine(widget.Label);
                         sb.AddLine(widget.Content);
@@ -75,21 +75,5 @@ namespace Signum.Web
             }
             return sb.ToHtml();
         }
-
-        //private static MvcHtmlString WidgetsToString(HtmlHelper helper, List<string> widgets)
-        //{
-        //    if (widgets == null || widgets.Count == 0)
-        //        return "";
-
-        //    MvcHtmlString sb = new MvcHtmlString();
-
-        //    foreach (string widget in widgets)
-        //    {
-        //        if (widget != "")
-        //            sb.AppendLine(widget);
-        //    }
-
-        //    return sb.ToString();
-        //}
     }
 }
