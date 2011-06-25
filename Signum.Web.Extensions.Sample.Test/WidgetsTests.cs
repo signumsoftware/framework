@@ -47,5 +47,30 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SeleniumExtensions.PopupSelector(popupPrefix)));
             selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SearchTestExtensions.RowSelector(selenium, 1, popupPrefix)));
         }
+
+        [TestMethod]
+        public void Widgets010_Notes()
+        {
+            CheckLoginAndOpen(ViewRoute("Label", 1));
+            Assert.IsTrue(selenium.EntityHasNNotes(0));
+
+            //Create note
+            selenium.NotesCreateClick();
+
+            string popupPrefix = "New_";
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SeleniumExtensions.PopupSelector(popupPrefix)));
+
+            selenium.Type(popupPrefix + "Text", "note test");
+            selenium.PopupOk(popupPrefix);
+
+            selenium.GetAlert();
+            selenium.WaitAjaxFinished(() => selenium.EntityHasNNotes(1));
+
+            //View notes
+            selenium.NotesViewClick();
+            popupPrefix = "";
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SeleniumExtensions.PopupSelector(popupPrefix)));
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SearchTestExtensions.RowSelector(selenium, 1, popupPrefix)));
+        }
     }
 }

@@ -30,5 +30,43 @@ namespace Signum.Web.Selenium
             selenium.MouseOver("{0} .sf-quicklink-toggler".Formato(WidgetContainerSelector(prefix)));
             selenium.Click("{0} .sf-quicklinks > .sf-quicklink:nth-child({1}) > a".Formato(WidgetContainerSelector(prefix), quickLinkIndexBase1));
         }
+
+        static string notesTogglerClass = "sf-notes-toggler";
+        static string notesDropDownClass = "sf-notes";
+
+        public static void NotesCreateClick(this ISelenium selenium)
+        {
+            NotesCreateClick(selenium, "");
+        }
+
+        public static void NotesCreateClick(this ISelenium selenium, string prefix)
+        {
+            selenium.MouseOver("{0} .{1}".Formato(WidgetContainerSelector(prefix), notesTogglerClass));
+            selenium.Click("{0} .{1} .sf-notes-create".Formato(WidgetContainerSelector(prefix), notesDropDownClass));
+        }
+
+        public static void NotesViewClick(this ISelenium selenium)
+        {
+            NotesViewClick(selenium, "");
+        }
+
+        public static void NotesViewClick(this ISelenium selenium, string prefix)
+        {
+            selenium.MouseOver("{0} .{1}".Formato(WidgetContainerSelector(prefix), notesTogglerClass));
+            selenium.Click("{0} .{1} .sf-notes-view".Formato(WidgetContainerSelector(prefix), notesDropDownClass));
+        }
+
+        public static bool EntityHasNNotes(this ISelenium selenium, int notesNumber)
+        {
+            return EntityHasNNotes(selenium, notesNumber, "");
+        }
+
+        public static bool EntityHasNNotes(this ISelenium selenium, int notesNumber, string prefix)
+        {
+            return selenium.IsElementPresent("{0} .{1} .sf-widget-count:contains({2})".Formato(
+                WidgetContainerSelector(prefix), 
+                notesTogglerClass,
+                notesNumber));
+        }
     }
 }
