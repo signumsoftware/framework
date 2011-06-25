@@ -42,7 +42,7 @@ namespace Signum.Web.Selenium
         public static void NotesCreateClick(this ISelenium selenium, string prefix)
         {
             selenium.MouseOver("{0} .{1}".Formato(WidgetContainerSelector(prefix), notesTogglerClass));
-            selenium.Click("{0} .{1} .sf-notes-create".Formato(WidgetContainerSelector(prefix), notesDropDownClass));
+            selenium.Click("{0} .{1} .sf-note-create".Formato(WidgetContainerSelector(prefix), notesDropDownClass));
         }
 
         public static void NotesViewClick(this ISelenium selenium)
@@ -53,7 +53,7 @@ namespace Signum.Web.Selenium
         public static void NotesViewClick(this ISelenium selenium, string prefix)
         {
             selenium.MouseOver("{0} .{1}".Formato(WidgetContainerSelector(prefix), notesTogglerClass));
-            selenium.Click("{0} .{1} .sf-notes-view".Formato(WidgetContainerSelector(prefix), notesDropDownClass));
+            selenium.Click("{0} .{1} .sf-note-view".Formato(WidgetContainerSelector(prefix), notesDropDownClass));
         }
 
         public static bool EntityHasNNotes(this ISelenium selenium, int notesNumber)
