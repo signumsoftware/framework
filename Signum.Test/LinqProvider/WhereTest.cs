@@ -152,7 +152,7 @@ namespace Signum.Test.LinqProvider
         {
             ArtistDN michael = Database.Query<ArtistDN>().Single(a => a.Dead);
 
-            var albums = (from n in Database.Query<NoteDN>()
+            var albums = (from n in Database.Query<NoteWithDateDN>()
                           where n.Target == michael
                           select n.ToLite()).ToList();
         }
@@ -172,7 +172,7 @@ namespace Signum.Test.LinqProvider
         {
             ArtistDN michael = Database.Query<ArtistDN>().Single(a => a.Dead);
 
-            var albums = (from n in Database.Query<NoteDN>()
+            var albums = (from n in Database.Query<NoteWithDateDN>()
                           where n.Target.ToLite() == michael.ToLite<IIdentifiable>()
                           select n.ToLite()).ToList();
         }

@@ -84,33 +84,33 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void DateDifFunctions()
         {
-            Dump((NoteDN n) => n.CreationTime.Year);
-            Dump((NoteDN n) => n.CreationTime.Month);
-            Dump((NoteDN n) => n.CreationTime.Day);
-            Dump((NoteDN n) => n.CreationTime.DayOfYear);
-            Dump((NoteDN n) => n.CreationTime.Hour);
-            Dump((NoteDN n) => n.CreationTime.Minute);
-            Dump((NoteDN n) => n.CreationTime.Second);
-            Dump((NoteDN n) => n.CreationTime.Millisecond);
+            Dump((NoteWithDateDN n) => n.CreationTime.Year);
+            Dump((NoteWithDateDN n) => n.CreationTime.Month);
+            Dump((NoteWithDateDN n) => n.CreationTime.Day);
+            Dump((NoteWithDateDN n) => n.CreationTime.DayOfYear);
+            Dump((NoteWithDateDN n) => n.CreationTime.Hour);
+            Dump((NoteWithDateDN n) => n.CreationTime.Minute);
+            Dump((NoteWithDateDN n) => n.CreationTime.Second);
+            Dump((NoteWithDateDN n) => n.CreationTime.Millisecond);
            
 
-            Dump((NoteDN n) => (n.CreationTime - n.CreationTime).TotalDays.InSql());
-            Dump((NoteDN n) => (n.CreationTime - n.CreationTime).TotalHours.InSql());
-            Dump((NoteDN n) => (n.CreationTime - n.CreationTime).TotalMinutes.InSql());
-            Dump((NoteDN n) => (n.CreationTime - n.CreationTime).TotalSeconds.InSql());
-            Dump((NoteDN n) => (n.CreationTime.AddDays(1) - n.CreationTime).TotalMilliseconds.InSql());
+            Dump((NoteWithDateDN n) => (n.CreationTime - n.CreationTime).TotalDays.InSql());
+            Dump((NoteWithDateDN n) => (n.CreationTime - n.CreationTime).TotalHours.InSql());
+            Dump((NoteWithDateDN n) => (n.CreationTime - n.CreationTime).TotalMinutes.InSql());
+            Dump((NoteWithDateDN n) => (n.CreationTime - n.CreationTime).TotalSeconds.InSql());
+            Dump((NoteWithDateDN n) => (n.CreationTime.AddDays(1) - n.CreationTime).TotalMilliseconds.InSql());
         }
 
         [TestMethod]
         public void DateFunctions()
         {
-            Dump((NoteDN n) => n.CreationTime.Date);
+            Dump((NoteWithDateDN n) => n.CreationTime.Date);
         }
 
         [TestMethod]
         public void DayOfWeekFunction()
         {
-            var list = Database.Query<NoteDN>().Where(n => n.CreationTime.DayOfWeek != DayOfWeek.Sunday)
+            var list = Database.Query<NoteWithDateDN>().Where(n => n.CreationTime.DayOfWeek != DayOfWeek.Sunday)
                 .Select(n => n.CreationTime.DayOfWeek).ToList();
         }
 

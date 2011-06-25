@@ -63,7 +63,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void RetriveWithIBA()
         {
-            var list = Database.Query<NoteDN>().ToList();
+            var list = Database.Query<NoteWithDateDN>().ToList();
 
             AssertRetrived(list);
         }

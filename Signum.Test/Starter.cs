@@ -52,6 +52,7 @@ namespace Signum.Test
         {
             sb.Include<AlbumDN>();
             sb.Include<NoteDN>();
+            sb.Include<NoteWithDateDN>();
             sb.Include<AlertDN>();
             sb.Include<PersonalAwardDN>();
             sb.Include<AwardNominationDN>();
@@ -67,8 +68,16 @@ namespace Signum.Test
                                         a.Year
                                     }).ToDynamic();
 
-
             dqm[typeof(NoteDN)] = (from a in Database.Query<NoteDN>()
+                                           select new
+                                           {
+                                               Entity = a.ToLite(),
+                                               a.Id,
+                                               a.Text,
+                                               a.Target
+                                           }).ToDynamic();
+
+            dqm[typeof(NoteWithDateDN)] = (from a in Database.Query<NoteWithDateDN>()
                                     select new
                                     {
                                         Entity = a.ToLite(),
@@ -219,7 +228,7 @@ namespace Signum.Test
 
             smashingPumpkins.Members.ForEach(m => m.Friends = smashingPumpkins.Members.Where(a => a.Sex != m.Sex).Select(a => a.ToLiteFat()).ToMList());
 
-            new NoteDN { CreationTime = DateTime.Now.AddHours(+8), Text = "American alternative rock band", Target = smashingPumpkins }.Save();
+            new NoteWithDateDN { CreationTime = DateTime.Now.AddHours(+8), Text = "American alternative rock band", Target = smashingPumpkins }.Save();
 
             LabelDN virgin = new LabelDN { Name = "Virgin", Country = usa };
 
@@ -249,7 +258,7 @@ namespace Signum.Test
 
             mellon.Save();
 
-            new NoteDN { CreationTime = DateTime.Now.AddDays(-100).AddHours(-8), Text = "The blue one with the angel", Target = mellon }.Save();
+            new NoteWithDateDN { CreationTime = DateTime.Now.AddDays(-100).AddHours(-8), Text = "The blue one with the angel", Target = mellon }.Save();
 
             LabelDN wea = new LabelDN { Name = "WEA International", Country = usa, Owner = virgin.ToLite() };
 
@@ -282,7 +291,7 @@ namespace Signum.Test
                 Status = Status.Single,
             };
 
-            new NoteDN { CreationTime = new DateTime(2009, 6, 25, 0, 0, 0), Text = "Death on June, 25th", Target = michael }.Save();
+            new NoteWithDateDN { CreationTime = new DateTime(2009, 6, 25, 0, 0, 0), Text = "Death on June, 25th", Target = michael }.Save();
 
             LabelDN universal = new LabelDN { Name = "UMG Recordings", Country = usa };
 

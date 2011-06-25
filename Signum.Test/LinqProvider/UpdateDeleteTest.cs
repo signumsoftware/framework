@@ -94,7 +94,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [TestMethod]
         public void UpdateValueNull()
         {
-            int count = Database.Query<NoteDN>().UnsafeUpdate(a => new NoteDN { Text = null });
+            int count = Database.Query<NoteWithDateDN>().UnsafeUpdate(a => new NoteWithDateDN { Text = null });
         }
 
         [TestMethod]
@@ -196,13 +196,13 @@ namespace Signum.Test.LinqProviderUpdateDelete
         {
             ArtistDN michael = Database.Query<ArtistDN>().Single(a => a.Dead);
 
-            int count = Database.Query<NoteDN>().UnsafeUpdate(n => new NoteDN {  Target = michael });
+            int count = Database.Query<NoteWithDateDN>().UnsafeUpdate(n => new NoteWithDateDN {  Target = michael });
         }
 
         [TestMethod]
         public void UpdateIbaNull()
         {
-            int count = Database.Query<NoteDN>().UnsafeUpdate(n => new NoteDN { Target = null });
+            int count = Database.Query<NoteWithDateDN>().UnsafeUpdate(n => new NoteWithDateDN { Target = null });
         }
 
         [TestMethod]

@@ -9,7 +9,7 @@ using Signum.Utilities;
 namespace Signum.Test
 {
     [Serializable]
-    public class NoteDN : Entity
+    public class NoteWithDateDN : Entity
     {
         [SqlDbType(Size = int.MaxValue)]
         string text;

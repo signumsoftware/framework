@@ -28,14 +28,14 @@ namespace Signum.Test
         [TestMethod]
         public void NoMetadata()
         {
-            Assert.IsNull(DynamicQuery.QueryMetadata(Database.Query<NoteDN>().Select(a => a.Target)));
+            Assert.IsNull(DynamicQuery.QueryMetadata(Database.Query<NoteWithDateDN>().Select(a => a.Target)));
         }
 
         [TestMethod]
         public void RawEntity()
         {
-            var dic = DynamicQuery.QueryMetadata(Database.Query<NoteDN>());
-            Assert.AreEqual(dic.Count, typeof(NoteDN).GetProperties(BindingFlags.Instance | BindingFlags.Public).Length);
+            var dic = DynamicQuery.QueryMetadata(Database.Query<NoteWithDateDN>());
+            Assert.AreEqual(dic.Count, typeof(NoteWithDateDN).GetProperties(BindingFlags.Instance | BindingFlags.Public).Length);
 
             Assert.IsTrue(dic.Values.All(m => m is CleanMeta));
         }
@@ -43,7 +43,7 @@ namespace Signum.Test
         [TestMethod]
         public void AnonymousType()
         {
-            var dic = DynamicQuery.QueryMetadata(Database.Query<NoteDN>().Select(a => new { a.Target, a.Text, a.ToStr.Length, Sum = a.ToStr + a.ToStr }));
+            var dic = DynamicQuery.QueryMetadata(Database.Query<NoteWithDateDN>().Select(a => new { a.Target, a.Text, a.ToStr.Length, Sum = a.ToStr + a.ToStr }));
             Assert.IsInstanceOfType(dic["Target"], typeof(CleanMeta));
             Assert.IsInstanceOfType(dic["Text"], typeof(CleanMeta));
             Assert.IsInstanceOfType(dic["Length"], typeof(DirtyMeta));
@@ -59,7 +59,7 @@ namespace Signum.Test
         [TestMethod]
         public void NamedType()
         {
-            var dic = DynamicQuery.QueryMetadata(Database.Query<NoteDN>().Select(a => new Bla { ToStr = a.ToStr, Length = a.ToStr.Length }));
+            var dic = DynamicQuery.QueryMetadata(Database.Query<NoteWithDateDN>().Select(a => new Bla { ToStr = a.ToStr, Length = a.ToStr.Length }));
             Assert.IsInstanceOfType(dic["ToStr"], typeof(CleanMeta));
             Assert.IsInstanceOfType(dic["Length"], typeof(DirtyMeta));
         }

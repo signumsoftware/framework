@@ -186,7 +186,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelectLiteIBA()
         {
-            var list = Database.Query<NoteDN>().Select(a => a.Target.ToLite()).ToList();
+            var list = Database.Query<NoteWithDateDN>().Select(a => a.Target.ToLite()).ToList();
         }
 
         [TestMethod]
@@ -218,7 +218,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelectEntityIBA()
         {
-            var list = Database.Query<NoteDN>().Select(a => a.Target).ToList();
+            var list = Database.Query<NoteWithDateDN>().Select(a => a.Target).ToList();
         }
 
         [TestMethod]
@@ -258,7 +258,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelectCastIBA()
         {
-            var list = (from n in Database.Query<NoteDN>()
+            var list = (from n in Database.Query<NoteWithDateDN>()
                         select 
                         ((ArtistDN)n.Target).Name ??
                         ((AlbumDN)n.Target).Name ??
@@ -277,7 +277,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelectCastIsIBA()
         {
-            var list = (from n in Database.Query<NoteDN>()
+            var list = (from n in Database.Query<NoteWithDateDN>()
                         select n.Target is ArtistDN ?
                         ((ArtistDN)n.Target).Name :
                         ((BandDN)n.Target).Name).ToList(); //Just to full-nominate
