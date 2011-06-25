@@ -116,7 +116,7 @@ namespace Signum.Windows.Extensions.Sample
 
                 new EntitySettings<CountryDN>(EntityType.Admin) { View = e => new Country() },
 
-                new EntitySettings<Signum.Test.NoteDN>(EntityType.Default) { View = e => new Note() },
+                new EntitySettings<NoteWithDateDN>(EntityType.Default) { View = e => new NoteWithDate() },
             });
 
             Navigator.Initialize();
