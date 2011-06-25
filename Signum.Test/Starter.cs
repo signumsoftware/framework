@@ -11,6 +11,8 @@ using System.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Signum.Entities.Basics;
 using Signum.Engine.DynamicQuery;
+using Signum.Utilities.ExpressionTrees;
+using Signum.Utilities;
 
 namespace Signum.Test
 {
@@ -158,16 +160,22 @@ namespace Signum.Test
                                                 a.Award,
                                                 a.Author
                                             }).ToDynamic();
+            
+            var alertExpr = Linq.Expr((AlertDN a) => new
+            {
+                Entity = a.ToLite(),
+                a.Id,
+                a.AlertDate,
+                Text = a.Text.Etc(100),
+                a.CheckDate,
+                Target = a.Entity
+            });
 
-            //dqm[typeof(AwardDN)] = (from a in Database.Query<BandDN>()
-            //                        select new
-            //                        {
-            //                            Entity = a.LastAward.ToLite<AwardDN>(),
-            //                            a.LastAward.Id,
-            //                            a.LastAward.Category,
-            //                            a.LastAward.Result,
-            //                        }).ToDynamic();
-
+            dqm[typeof(AlertDN)] = Database.Query<AlertDN>().Select(alertExpr).ToDynamic();
+            dqm[AlertQueries.NotAttended] = Database.Query<AlertDN>().Where(a => a.NotAttended).Select(alertExpr).ToDynamic();
+            dqm[AlertQueries.Attended] = Database.Query<AlertDN>().Where(a => a.Attended).Select(alertExpr).ToDynamic();
+            dqm[AlertQueries.Future] = Database.Query<AlertDN>().Where(a => a.Future).Select(alertExpr).ToDynamic();
+            
             dqm[typeof(IAuthorDN)] = DynamicQuery.Manual((request, descriptions) =>
                                     {
                                         var one = (from a in Database.Query<ArtistDN>()

@@ -70,11 +70,47 @@ namespace Signum.Web.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Alert created.
+        /// </summary>
+        public static string AlertCreated {
+            get {
+                return ResourceManager.GetString("AlertCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Alerts.
         /// </summary>
         public static string Alerts {
             get {
                 return ResourceManager.GetString("Alerts", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Attended.
+        /// </summary>
+        public static string Alerts_Attended {
+            get {
+                return ResourceManager.GetString("Alerts_Attended", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Future.
+        /// </summary>
+        public static string Alerts_Future {
+            get {
+                return ResourceManager.GetString("Alerts_Future", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Not attended.
+        /// </summary>
+        public static string Alerts_NotAttended {
+            get {
+                return ResourceManager.GetString("Alerts_NotAttended", resourceCulture);
             }
         }
         
@@ -120,15 +156,6 @@ namespace Signum.Web.Properties {
         public static string CalendarToday {
             get {
                 return ResourceManager.GetString("CalendarToday", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Checked.
-        /// </summary>
-        public static string Checked {
-            get {
-                return ResourceManager.GetString("Checked", resourceCulture);
             }
         }
         
@@ -210,15 +237,6 @@ namespace Signum.Web.Properties {
         public static string FilterBuilder_DeleteFilter {
             get {
                 return ResourceManager.GetString("FilterBuilder_DeleteFilter", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Future.
-        /// </summary>
-        public static string Future {
-            get {
-                return ResourceManager.GetString("Future", resourceCulture);
             }
         }
         
@@ -687,15 +705,6 @@ namespace Signum.Web.Properties {
         public static string ViewNotes {
             get {
                 return ResourceManager.GetString("ViewNotes", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Warned.
-        /// </summary>
-        public static string Warned {
-            get {
-                return ResourceManager.GetString("Warned", resourceCulture);
             }
         }
         

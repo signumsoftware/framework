@@ -132,26 +132,17 @@
   <data name="Alerts" xml:space="preserve">
     <value>Alerts</value>
   </data>
-  <data name="Checked" xml:space="preserve">
-    <value>Checked</value>
-  </data>
   <data name="CreateAlert" xml:space="preserve">
     <value>Create alert</value>
   </data>
   <data name="CreateNote" xml:space="preserve">
     <value>Create note</value>
   </data>
-  <data name="Future" xml:space="preserve">
-    <value>Future</value>
-  </data>
   <data name="Notes" xml:space="preserve">
     <value>Notes</value>
   </data>
   <data name="ViewNotes" xml:space="preserve">
     <value>View notes</value>
-  </data>
-  <data name="Warned" xml:space="preserve">
-    <value>Warned</value>
   </data>
   <data name="View" xml:space="preserve">
     <value>View</value>
@@ -335,5 +326,17 @@
   </data>
   <data name="NoteCreated" xml:space="preserve">
     <value>Note created</value>
+  </data>
+  <data name="AlertCreated" xml:space="preserve">
+    <value>Alert created</value>
+  </data>
+  <data name="Alerts_Attended" xml:space="preserve">
+    <value>Attended</value>
+  </data>
+  <data name="Alerts_Future" xml:space="preserve">
+    <value>Future</value>
+  </data>
+  <data name="Alerts_NotAttended" xml:space="preserve">
+    <value>Not attended</value>
   </data>
 </root>

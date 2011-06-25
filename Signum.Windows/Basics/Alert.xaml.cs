@@ -32,7 +32,7 @@ namespace Signum.Windows.Basics
         {
             WidgetPanel.GetWidgets += (obj, mainControl) => obj is IdentifiableEntity && !(obj is IAlertDN || ((IdentifiableEntity)obj).IsNew) ? new AlertsWidget() : null;
 
-            AlertsWidget.CreateAlert = ei => ei.IsNew ? null : new Signum.Entities.Basics.AlertDN { Entity = ei.ToLite() };
+            AlertsWidget.CreateAlert = ei => ei.IsNew ? null : new AlertDN { Entity = ei.ToLite() };
 
             Navigator.AddSetting(new EntitySettings<AlertDN>(EntityType.Default)
             {

@@ -31,7 +31,22 @@ SF.Widgets = (function () {
         });
     };
 
+    var onAlertCreated = function (url, prefix, successMessage) {
+        $.ajax({
+            url: url,
+            data: { sfRuntimeInfo: new SF.RuntimeInfo(prefix).find().val() },
+            success: function (jsonNewCount) {
+                var $alertsWidget = $("#" + SF.compose(prefix, "alertsWidget"));
+                $alertsWidget.find(".sf-alert-warned").html(jsonNewCount.warned);
+                $alertsWidget.find(".sf-alert-future").html(jsonNewCount.future);
+                $alertsWidget.find(".sf-alert-attended").html(jsonNewCount.attended);
+                window.alert(successMessage);
+            }
+        });
+    };
+
     return {
-        onNoteCreated: onNoteCreated
+        onNoteCreated: onNoteCreated,
+        onAlertCreated: onAlertCreated
     };
 })();

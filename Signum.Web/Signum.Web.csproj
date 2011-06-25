@@ -183,6 +183,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ValueLineBox.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Signum\Views\Widgets\Alert.cs">
+      <DependentUpon>Alert.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="Signum\Views\Widgets\Note.cs">
       <DependentUpon>Note.cshtml</DependentUpon>
       <AutoGen>True</AutoGen>
@@ -217,6 +222,7 @@
     <Compile Include="Facades\FindOptionsModelBinder.cs" />
     <Compile Include="JSRenderer\JsRenderer.cs" />
     <Compile Include="Widgets\AlertWidgetHelper.cs" />
+    <Compile Include="Widgets\AlertsClient.cs" />
     <Compile Include="Widgets\NotesClient.cs" />
     <Compile Include="Widgets\QuickLinkWidgetHelper.cs" />
     <Compile Include="Widgets\NoteWidgetHelper.cs" />
@@ -290,6 +296,10 @@
     <Content Include="Signum\Views\Widgets\Note.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>Note.cs</LastGenOutput>
+    </Content>
+    <Content Include="Signum\Views\Widgets\Alert.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>Alert.cs</LastGenOutput>
     </Content>
   </ItemGroup>
   <ItemGroup>
