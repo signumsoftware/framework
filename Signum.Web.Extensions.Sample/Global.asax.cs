@@ -93,6 +93,7 @@ namespace Signum.Web.Extensions.Sample
 
             QuickLinkWidgetHelper.Start();
             NotesClient.Start();
+            AlertsClient.Start();
 
             MusicClient.Start();
 
