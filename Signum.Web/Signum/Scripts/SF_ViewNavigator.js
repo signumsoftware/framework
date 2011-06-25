@@ -348,15 +348,4 @@ SF.registerModule("ViewNavigator", function () {
             }
         });
     }
-
-    SF.relatedEntityCreate = function (viewOptions) {
-        var info = new SF.RuntimeInfo('');
-        var extraJson = {
-            sfIdRelated: info.id(),
-            sfRuntimeTypeRelated: info.runtimeType()
-        };
-
-        var navigator = new SF.ViewNavigator($.extend(viewOptions, { requestExtraJsonData: extraJson }));
-        navigator.createSave();
-    }
 });
