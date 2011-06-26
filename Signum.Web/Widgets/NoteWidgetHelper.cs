@@ -46,6 +46,7 @@ namespace Signum.Web
 
             JsFindOptions foptions = new JsFindOptions
             {
+                Prefix = TypeContextUtilities.Compose(prefix, "New"),
                 FindOptions = new FindOptions
                 {
                     QueryName = NotesQuery,

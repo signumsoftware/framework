@@ -67,7 +67,7 @@ namespace Signum.Web
                     {
                         content.AddLine(new HtmlTag("a")
                             .Class("sf-alert-view")
-                            .Attr("onclick", new JsFindNavigator(GetJsFindOptions(identifiable, a.Query)).openFinder().ToJS())
+                            .Attr("onclick", new JsFindNavigator(GetJsFindOptions(identifiable, a.Query, prefix)).openFinder().ToJS())
                             .InnerHtml(
                                 new HtmlTag("span").Class("sf-alert-count-label " + a.Class).InnerHtml((a.Title + ": ").EncodeHtml()),
                                 new HtmlTag("span").Class(a.Class).SetInnerText(a.Count.ToString()))
@@ -127,10 +127,11 @@ namespace Signum.Web
             };
         }
 
-        static JsFindOptions GetJsFindOptions(IdentifiableEntity identifiable, object queryName)
+        static JsFindOptions GetJsFindOptions(IdentifiableEntity identifiable, object queryName, string prefix)
         {
             return new JsFindOptions
             {
+                Prefix = TypeContextUtilities.Compose(prefix, "New"),
                 FindOptions = new FindOptions
                 {
                     QueryName = queryName,
