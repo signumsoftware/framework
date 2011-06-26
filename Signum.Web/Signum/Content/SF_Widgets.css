@@ -8,7 +8,7 @@
     display: inline-block;
     position: relative; 
     border-left: solid 1px #AAA;
-    padding: 4px 2px; /*Change SF.Widgets .sf-item onmouseover accordingly*/     
+    padding: 4px 2px 0px 2px; /*Change SF.Widgets .sf-item onmouseover accordingly*/     
 }
 
 .sf-widget-content
@@ -20,10 +20,33 @@
 .sf-widget-toggler
 {
     vertical-align: top;    
+    line-height: 16px;
 }
 
 .sf-widget-toggler .ui-icon, .sf-widget-toggler .sf-widget-count
 {
     display: inline-block;
     vertical-align: top;   
+    height: 16px;
+    line-height: 16px;
+}
+
+.sf-alerts-count-separator
+{
+    vertical-align: top;    
+}
+
+.sf-widget-count
+{
+    margin-left: 2px;
+}
+
+.sf-alert-warned
+{
+    color: Red;    
+}
+
+.ui-state-highlight a
+{
+    color: auto !important;    
 }

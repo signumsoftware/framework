@@ -69,9 +69,8 @@ namespace Signum.Web
                             .Class("sf-alert-view")
                             .Attr("onclick", new JsFindNavigator(GetJsFindOptions(identifiable, a.Query)).openFinder().ToJS())
                             .InnerHtml(
-                                a.Title.EncodeHtml(),
-                                ":".EncodeHtml(),
-                                new HtmlTag("span").Class("sf-alert-count " + a.Class).SetInnerText(a.Count.ToString()))
+                                new HtmlTag("span").Class("sf-alert-count-label " + a.Class).InnerHtml((a.Title + ": ").EncodeHtml()),
+                                new HtmlTag("span").Class(a.Class).SetInnerText(a.Count.ToString()))
                             .ToHtml());
                     }
                 }
@@ -89,7 +88,10 @@ namespace Signum.Web
             }
 
             HtmlStringBuilder label = new HtmlStringBuilder();
-            using (label.Surround(new HtmlTag("a").Class("sf-widget-toggler sf-alerts-toggler").Attr("title", Resources.Alerts)))
+            var toggler = new HtmlTag("a")
+                .Class("sf-widget-toggler sf-alerts-toggler")
+                .Attr("title", Resources.Alerts);
+            using (label.Surround(toggler))
             {
                 label.Add(new HtmlTag("span")
                     .Class("ui-icon ui-icon-calendar")

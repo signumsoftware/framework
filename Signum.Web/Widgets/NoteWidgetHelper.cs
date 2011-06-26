@@ -89,16 +89,21 @@ namespace Signum.Web
                 }
             }
 
+            int count = CountNotes(identifiable);
+
             HtmlStringBuilder label = new HtmlStringBuilder();
-            using (label.Surround(new HtmlTag("a").Class("sf-widget-toggler sf-notes-toggler").Attr("title", Resources.Notes)))
+            
+            var toggler = new HtmlTag("a")
+                .Class("sf-widget-toggler sf-notes-toggler")
+                .Attr("title", Resources.Notes);
+            
+            using (label.Surround(toggler))
             {
                 label.Add(new HtmlTag("span")
                     .Class("ui-icon ui-icon-pin-w")
                     .InnerHtml(Resources.Notes.EncodeHtml())
                     .ToHtml());
-
-                int count = CountNotes(identifiable);
-
+                                
                 label.Add(new HtmlTag("span")
                     .Class("sf-widget-count")
                     .SetInnerText(count.ToString())

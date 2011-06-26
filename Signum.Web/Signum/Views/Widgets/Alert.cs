@@ -74,12 +74,16 @@ Write(Html.ValueLine(tc, n => n.AlertDate));
 
                                          
     
-Write(Html.ValueLine(tc, n => n.Text, vl => 
-    {
-        vl.ValueLineType = ValueLineType.TextArea;
-    }));
+Write(Html.ValueLine(tc, n => n.CheckDate));
 
-      ;
+                                         
+    
+Write(Html.ValueLine(tc, n => n.Text, vl =>
+{
+    vl.ValueLineType = ValueLineType.TextArea;
+}));
+
+  ;
 }
 WriteLiteral(" ");
 

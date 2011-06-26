@@ -34,6 +34,8 @@ namespace Signum.Web
         /// The different widgets
         /// </summary>
         public MvcHtmlString Content { get; set; }
+
+        public static string CssClassHighlighted = "ui-state-highlight ui-corner-all";
     }
 
     public static class WidgetsHelper
