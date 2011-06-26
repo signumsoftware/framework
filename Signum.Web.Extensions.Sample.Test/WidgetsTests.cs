@@ -68,9 +68,70 @@ namespace Signum.Web.Extensions.Sample.Test
 
             //View notes
             selenium.NotesViewClick();
-            popupPrefix = "";
             selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SeleniumExtensions.PopupSelector(popupPrefix)));
             selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SearchTestExtensions.RowSelector(selenium, 1, popupPrefix)));
+        }
+
+        [TestMethod]
+        public void Widgets020_Alerts()
+        {
+            string viewRoute = ViewRoute("Label", 1);
+            CheckLoginAndOpen(viewRoute);
+            
+            string warned = WidgetsTestExtensions.AlertWarnedClass;
+            string future = WidgetsTestExtensions.AlertFutureClass;
+            string attended = WidgetsTestExtensions.AlertAttendedClass;
+
+            Assert.IsTrue(selenium.EntityHasNAlerts(0, warned));
+            Assert.IsTrue(selenium.EntityHasNAlerts(0, future));
+            Assert.IsTrue(selenium.EntityHasNAlerts(0, attended));
+
+            //Create future
+            selenium.AlertsCreateClick();
+
+            string popupPrefix = "New_";
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SeleniumExtensions.PopupSelector(popupPrefix)));
+
+            selenium.Type(popupPrefix + "Text", "alert test");
+            selenium.Type(popupPrefix + "AlertDate", DateTime.Today.AddDays(1).ToString("dd/MM/yyyy hh:mm"));
+            selenium.PopupOk(popupPrefix);
+
+            selenium.GetAlert();
+            selenium.WaitAjaxFinished(() => selenium.EntityHasNAlerts(1, future));
+            selenium.WaitAjaxFinished(() => selenium.EntityHasNAlerts(0, warned));
+            selenium.WaitAjaxFinished(() => selenium.EntityHasNAlerts(0, attended));
+
+            //Create past
+            selenium.AlertsCreateClick();
+
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SeleniumExtensions.PopupSelector(popupPrefix)));
+
+            selenium.Type(popupPrefix + "Text", "warned alert test");
+            selenium.Type(popupPrefix + "AlertDate", DateTime.Today.AddDays(-1).ToString("dd/MM/yyyy hh:mm"));
+            selenium.PopupOk(popupPrefix);
+
+            selenium.GetAlert();
+            selenium.WaitAjaxFinished(() => selenium.EntityHasNAlerts(1, future));
+            selenium.WaitAjaxFinished(() => selenium.EntityHasNAlerts(1, warned));
+            selenium.WaitAjaxFinished(() => selenium.EntityHasNAlerts(0, attended));
+
+            //View warned alert and attend it
+            selenium.AlertsViewClick(warned);
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SeleniumExtensions.PopupSelector(popupPrefix)));
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SearchTestExtensions.RowSelector(selenium, 1, popupPrefix)));
+
+            selenium.EntityClick(1, popupPrefix);
+            selenium.WaitForPageToLoad(PageLoadTimeout);
+
+            selenium.Type("CheckDate", DateTime.Today.ToString("dd/MM/yyyy hh:mm"));
+            selenium.EntityButtonSaveClick();
+
+            selenium.Open(viewRoute);
+            selenium.WaitForPageToLoad(PageLoadTimeout);
+
+            Assert.IsTrue(selenium.EntityHasNAlerts(0, warned));
+            Assert.IsTrue(selenium.EntityHasNAlerts(1, future));
+            Assert.IsTrue(selenium.EntityHasNAlerts(1, attended));
         }
     }
 }

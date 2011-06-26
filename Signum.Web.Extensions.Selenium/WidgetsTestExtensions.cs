@@ -68,5 +68,51 @@ namespace Signum.Web.Selenium
                 notesTogglerClass,
                 notesNumber));
         }
+
+        static string alertsTogglerClass = "sf-alerts-toggler";
+        static string alertsDropDownClass = "sf-alerts";
+
+        public static string AlertWarnedClass = "sf-alert-warned";
+        public static string AlertFutureClass = "sf-alert-future";
+        public static string AlertAttendedClass = "sf-alert-attended";
+
+        public static void AlertsCreateClick(this ISelenium selenium)
+        {
+            AlertsCreateClick(selenium, "");
+        }
+
+        public static void AlertsCreateClick(this ISelenium selenium, string prefix)
+        {
+            selenium.MouseOver("{0} .{1}".Formato(WidgetContainerSelector(prefix), alertsTogglerClass));
+            selenium.Click("{0} .{1} .sf-alert-create".Formato(WidgetContainerSelector(prefix), alertsDropDownClass));
+        }
+
+        public static void AlertsViewClick(this ISelenium selenium, string alertTypeClass)
+        {
+            AlertsViewClick(selenium, alertTypeClass, "");
+        }
+
+        public static void AlertsViewClick(this ISelenium selenium, string alertTypeClass, string prefix)
+        {
+            selenium.MouseOver("{0} .{1}".Formato(WidgetContainerSelector(prefix), alertsTogglerClass));
+            selenium.Click("{0} .{1} .sf-alert-view .{2}".Formato(
+                WidgetContainerSelector(prefix), 
+                alertsDropDownClass,
+                alertTypeClass));
+        }
+
+        public static bool EntityHasNAlerts(this ISelenium selenium, int alertsNumber, string alertTypeClass)
+        {
+            return EntityHasNAlerts(selenium, alertsNumber, alertTypeClass, "");
+        }
+
+        public static bool EntityHasNAlerts(this ISelenium selenium, int alertsNumber, string alertTypeClass, string prefix)
+        {
+            return selenium.IsElementPresent("{0} .{1} .sf-widget-count.{2}:contains({3})".Formato(
+                WidgetContainerSelector(prefix),
+                alertsTogglerClass,
+                alertTypeClass,
+                alertsNumber));
+        }
     }
 }
