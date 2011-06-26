@@ -8,7 +8,7 @@
     display: inline-block;
     position: relative; 
     border-left: solid 1px #AAA;
-    padding: 4px 2px 0px 2px; /*Change SF.Widgets .sf-item onmouseover accordingly*/     
+    padding: 1px 2px; /*Change SF.Widgets .sf-item onmouseover accordingly*/     
 }
 
 .sf-widget-content
@@ -21,6 +21,11 @@
 {
     vertical-align: top;    
     line-height: 16px;
+}
+
+.sf-widget-toggler:hover,.sf-widget-toggler:hover
+{
+    text-decoration: none;    
 }
 
 .sf-widget-toggler .ui-icon, .sf-widget-toggler .sf-widget-count

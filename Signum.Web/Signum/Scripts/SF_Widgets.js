@@ -9,7 +9,7 @@ SF.Widgets = (function () {
             SF.Dropdowns.toggle(evt, this);
             var $content = $this.find(".sf-widget-content");
             $content.css({
-                top: $this.height() + 4, /*4 = .sf-widget padding-top + padding-bottom*/
+                top: $this.height() + 2, /*2 = .sf-widget padding-top + padding-bottom*/
                 left: ($this.width() - $content.width())
             });
         }
