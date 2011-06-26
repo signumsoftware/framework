@@ -16,17 +16,6 @@
     margin-left:-5px;
 }
 
-.sf-dropdown.sf-open 
-{
-  color:#fff;
-  text-shadow:0 0 0 transparent;	
-  background-color: #777777;
-  background-image: -moz-linear-gradient(top, #777777, #999999); /* FF3.6 */
-  background-image: -webkit-gradient(linear,left top,left bottom,color-stop(0, #777777),color-stop(1, #999999)); /* Saf4+, Chrome */
-            filter:  progid:DXImageTransform.Microsoft.gradient(startColorStr='#777777', EndColorStr='#999999'); /* IE6,IE7 */
-        -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorStr='#777777', EndColorStr='#999999')"; /* IE8 */
-}
-
 .sf-dropdown.sf-open .sf-menu-button
 {
 	display:block;
