@@ -23,6 +23,7 @@ using Signum.Entities.ControlPanel;
 using Signum.Web.Combine;
 using System.Reflection;
 using Signum.Web.PortableAreas;
+using Signum.Web.Widgets;
 
 namespace Signum.Web.Extensions.Sample
 {
@@ -90,9 +91,11 @@ namespace Signum.Web.Extensions.Sample
 
             ReportsClient.Start(true, true);
 
-            MusicClient.Start();
-
             QuickLinkWidgetHelper.Start();
+            NotesClient.Start();
+            AlertsClient.Start();
+
+            MusicClient.Start();
 
             //Combiner.Start();
             ScriptHtmlHelper.Manager.MainAssembly = typeof(MusicClient).Assembly;

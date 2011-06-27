@@ -459,4 +459,7 @@
   <data name="PasswordsAreDifferent" xml:space="preserve">
     <value>Passwords are different</value>
   </data>
+  <data name="Search_CtxMenuItem_Operations" xml:space="preserve">
+    <value>Operations</value>
+  </data>
 </root>

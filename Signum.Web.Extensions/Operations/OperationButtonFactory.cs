@@ -34,9 +34,9 @@ namespace Signum.Web.Operations
             };
         }
 
-        public static OperationsContextualItem Create(ContextualOperationContext ctx, EntityOperationContext entityCtx)
+        public static ContextualItem Create(ContextualOperationContext ctx, EntityOperationContext entityCtx)
         {
-            return new OperationsContextualItem
+            return new ContextualItem
             {
                 Id = EnumDN.UniqueKey(ctx.OperationInfo.Key),
 

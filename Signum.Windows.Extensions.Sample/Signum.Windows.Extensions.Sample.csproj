@@ -98,8 +98,8 @@
     <Compile Include="Controls\Label.xaml.cs">
       <DependentUpon>Label.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\Note.xaml.cs">
-      <DependentUpon>Note.xaml</DependentUpon>
+    <Compile Include="Controls\NoteWithDate.xaml.cs">
+      <DependentUpon>NoteWithDate.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\PersonalAward.xaml.cs">
       <DependentUpon>PersonalAward.xaml</DependentUpon>
@@ -218,7 +218,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Controls\Note.xaml">
+    <Page Include="Controls\NoteWithDate.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
       <Generator>MSBuild:Compile</Generator>

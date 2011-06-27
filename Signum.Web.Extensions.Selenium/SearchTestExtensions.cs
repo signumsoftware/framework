@@ -452,7 +452,7 @@ namespace Signum.Web.Selenium
 
         public static string EntityContextMenuSelector(ISelenium selenium, int rowIndexBase1, string prefix)
         {
-            return "{0} .sf-search-ctxmenu".Formato(CellSelector(selenium, rowIndexBase1, 1));
+            return "{0} td:nth-child({1}) .sf-search-ctxmenu:visible".Formato(RowSelector(prefix), 1);
         }
 
         public static void EntityContextMenu(this ISelenium selenium, int rowIndexBase1)
@@ -466,14 +466,26 @@ namespace Signum.Web.Selenium
             selenium.WaitAjaxFinished(() => selenium.IsElementPresent(EntityContextMenuSelector(selenium, rowIndexBase1, prefix)));
         }
 
-        public static void EntityContextMenuClick(this ISelenium selenium, int rowIndexBase1, int contextualElementIndexBase1)
+        public static void EntityContextMenuClick(this ISelenium selenium, int rowIndexBase1, string itemId)
         {
-            EntityContextMenuClick(selenium, rowIndexBase1, contextualElementIndexBase1, "");
+            EntityContextMenuClick(selenium, rowIndexBase1, itemId, "");
         }
 
-        public static void EntityContextMenuClick(this ISelenium selenium, int rowIndexBase1, int contextualElementIndexBase1, string prefix)
+        public static void EntityContextMenuClick(this ISelenium selenium, int rowIndexBase1, string itemId, string prefix)
         {
-            selenium.Click("{0} li:nth-child({1}) a".Formato(EntityContextMenuSelector(selenium, rowIndexBase1, prefix), contextualElementIndexBase1));
+            selenium.Click("{0} li.sf-search-ctxitem a#{1}".Formato(EntityContextMenuSelector(selenium, rowIndexBase1, prefix), itemId));
+        }
+
+        public static void EntityContextQuickLinkClick(this ISelenium selenium, int rowIndexBase1, int quickLinkIndexBase1)
+        {
+            EntityContextQuickLinkClick(selenium, rowIndexBase1, quickLinkIndexBase1, "");
+        }
+
+        public static void EntityContextQuickLinkClick(this ISelenium selenium, int rowIndexBase1, int quickLinkIndexBase1, string prefix)
+        {
+            selenium.Click("{0} .sf-search-ctxmenu-quicklinks .sf-search-ctxitem a:nth-child({1})".Formato(
+                EntityContextMenuSelector(selenium, rowIndexBase1, prefix), 
+                quickLinkIndexBase1));
         }
 
         public static Func<bool> ThereAreNRows(this ISelenium selenium, int n, string prefix)

@@ -204,6 +204,7 @@
     <Content Include="Scripts\menu.js" />
     <Content Include="Scripts\widget.js" />
     <Content Include="ServerSample.svc" />
+    <Content Include="Views\Music\NoteWithDate.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Framework\Signum.Engine\Signum.Engine.csproj">

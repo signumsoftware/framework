@@ -31,12 +31,12 @@ namespace Signum.Web.Extensions.Sample
                     new EntitySettings<PersonalAwardDN>(EntityType.Default) { PartialViewName = e => ViewPrefix.Formato("PersonalAward") },
                     new EmbeddedEntitySettings<SongDN>() { PartialViewName = e => ViewPrefix.Formato("Song")},
 
-                    new EntitySettings<NoteDN>(EntityType.Default) { PartialViewName = e => ViewPrefix.Formato("Note") },
+                    new EntitySettings<NoteWithDateDN>(EntityType.Default) { PartialViewName = e => ViewPrefix.Formato("Note") },
 
                     new EmbeddedEntitySettings<AlbumFromBandModel>(){PartialViewName = e => ViewPrefix.Formato("AlbumFromBandModel")},
                 });
 
-                QuickLinkWidgetHelper.RegisterEntityLinks<LabelDN>((helper, entity, partialViewName, prefix) =>
+                QuickLinkWidgetHelper.RegisterEntityLinks<LabelDN>((entity, partialViewName, prefix) =>
                 {
                     if (entity.IsNew)
                         return null;
