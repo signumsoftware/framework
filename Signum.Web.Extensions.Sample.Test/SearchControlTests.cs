@@ -488,7 +488,7 @@ namespace Signum.Web.Extensions.Sample.Test
             
             //ArtistOperations.AssignPersonalAward
             selenium.EntityContextMenu(1);
-            selenium.EntityContextMenuClick(1, 1);
+            selenium.EntityContextMenuClick(1, "ArtistOperation_AssignPersonalAward");
 
             Assert.IsTrue(Regex.IsMatch(selenium.GetConfirmation(), ".*"));
             selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("{0} > a.sf-entity-ctxmenu-success".Formato(row1col1)));
@@ -513,7 +513,7 @@ namespace Signum.Web.Extensions.Sample.Test
             
             //Band.CreateFromBand
             selenium.EntityContextMenu(1);
-            selenium.EntityContextMenuClick(1, 1);
+            selenium.EntityContextMenuClick(1, "AlbumOperation_CreateFromBand");
 
             Assert.IsTrue(Regex.IsMatch(selenium.GetConfirmation(), ".*"));
             selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SeleniumExtensions.PopupSelector("New_")));
@@ -539,7 +539,7 @@ namespace Signum.Web.Extensions.Sample.Test
 
             //Album.Clone
             selenium.EntityContextMenu(1);
-            selenium.EntityContextMenuClick(1, 1);
+            selenium.EntityContextMenuClick(1, "AlbumOperation_Clone");
 
             Assert.IsTrue(Regex.IsMatch(selenium.GetConfirmation(), ".*"));
             selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#AlbumOperation_Save"));
@@ -570,7 +570,7 @@ namespace Signum.Web.Extensions.Sample.Test
             string row1col1 = SearchTestExtensions.CellSelector(selenium, 1, 1);
 
             selenium.EntityContextMenu(1);
-            selenium.EntityContextMenuClick(1, 2);
+            selenium.EntityContextMenuClick(1, "AlbumOperation_Delete");
 
             Assert.IsTrue(Regex.IsMatch(selenium.GetConfirmation(), ".*"));
             selenium.WaitForPageToLoad(PageLoadTimeout);

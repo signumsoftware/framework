@@ -14,20 +14,7 @@ using Signum.Web.Extensions.Properties;
 
 namespace Signum.Web.Operations
 {
-    public class OperationsContextualItem : ContextualItem
-    {
-        public OperationsContextualItem()
-        {
-            
-        }
-
-        public override string ToString()
-        {
-            return Content;
-        }
-    }
-
-    public delegate OperationsContextualItem[] GetOperationsContextualItemDelegate(Lite lite);
+    public delegate ContextualItem[] GetOperationsContextualItemDelegate(Lite lite);
 
     public static class OperationsContextualItemsHelper
     {
@@ -45,7 +32,7 @@ namespace Signum.Web.Operations
 
         public static ContextualItem CreateContextualItem(ControllerContext controllerContext, Lite lite, object queryName, string prefix)
         {
-            List<OperationsContextualItem> operations = GetForLite(lite, queryName, prefix);
+            List<ContextualItem> operations = GetForLite(lite, queryName, prefix);
             if (operations == null || operations.Count == 0) 
                 return null;
 
@@ -68,14 +55,14 @@ namespace Signum.Web.Operations
                 }
             }
 
-            return new OperationsContextualItem
+            return new ContextualItem
             {
-                Id = "Operations",
+                Id = TypeContextUtilities.Compose(prefix, "ctxItemOperations"),
                 Content = content.ToHtml().ToString()
             };
         }
 
-        private static MvcHtmlString IndividualOperationToString(this OperationsContextualItem oci)
+        private static MvcHtmlString IndividualOperationToString(this ContextualItem oci)
         {
             if (oci.Enabled)
                 oci.HtmlProps.Add("onclick", oci.OnClick);
@@ -88,9 +75,9 @@ namespace Signum.Web.Operations
                         .ToHtml();
         }
 
-        static OperationsContextualItem[] Empty = new OperationsContextualItem[0];
+        static ContextualItem[] Empty = new ContextualItem[0];
 
-        public static List<OperationsContextualItem> GetForLite(Lite lite, object queryName, string prefix)
+        public static List<ContextualItem> GetForLite(Lite lite, object queryName, string prefix)
         {
             IdentifiableEntity ident = Database.Retrieve(lite);
 
