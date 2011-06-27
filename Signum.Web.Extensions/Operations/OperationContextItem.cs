@@ -18,7 +18,7 @@ namespace Signum.Web.Operations
     {
         public OperationsContextualItem()
         {
-            DivCssClass = "sf-operations-ctxitem";
+            
         }
 
         public override string ToString()
@@ -46,14 +46,32 @@ namespace Signum.Web.Operations
         public static ContextualItem CreateContextualItem(ControllerContext controllerContext, Lite lite, object queryName, string prefix)
         {
             List<OperationsContextualItem> operations = GetForLite(lite, queryName, prefix);
-            if (operations == null || operations.Count == 0) return null;
+            if (operations == null || operations.Count == 0) 
+                return null;
+
+            HtmlStringBuilder content = new HtmlStringBuilder();
+            using(content.Surround(new HtmlTag("ul").Class("sf-search-ctxmenu-operations")))
+            {
+                string ctxItemClass = "sf-search-ctxitem";
+
+                content.AddLine(new HtmlTag("li")
+                    .Class(ctxItemClass + " sf-search-ctxitem-header")
+                    .InnerHtml(
+                        new HtmlTag("span").InnerHtml(Resources.Search_CtxMenuItem_Operations.EncodeHtml()))
+                    );
+
+                foreach(var operation in operations)
+                {
+                    content.AddLine(new HtmlTag("li")
+                        .Class(ctxItemClass)
+                        .InnerHtml(operation.IndividualOperationToString()));
+                }
+            }
 
             return new OperationsContextualItem
             {
-                //Label = "<span id='{0}'>{0}</span>".Formato("Operations"),
                 Id = "Operations",
-                Content = @"<div class='sf-operations-ctxitem sf-operations'><ul class='sf-operation-ctxmenu'>{0}</ul></div>".Formato(
-                    operations.ToString(ctx => "<li>" + ctx.IndividualOperationToString() + "</li>", "")),
+                Content = content.ToHtml().ToString()
             };
         }
 
@@ -65,7 +83,7 @@ namespace Signum.Web.Operations
             return new HtmlTag("a", oci.Id)
                         .Attrs(oci.HtmlProps)
                         .Attr("title", oci.AltText ?? "")
-                        .Class(oci.DivCssClass)
+                        .Class("sf-operation-ctxitem")
                         .SetInnerText(oci.Text)
                         .ToHtml();
         }
