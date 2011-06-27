@@ -154,6 +154,9 @@ SF.registerModule("ViewNavigator", function () {
                 onOk: function () { self.onCreateOk() },
                 onCancel: function () { self.onCreateCancel() }
             });
+
+            if (this.viewOptions.onLoaded != null)
+                this.viewOptions.onLoaded(this.tempDivId());
         },
 
         showCreateSave: function (newHtml, saveUrl) {
