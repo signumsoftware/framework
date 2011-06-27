@@ -11,7 +11,7 @@ using Signum.Web.Properties;
 
 namespace Signum.Web
 {
-    public delegate QuickLink[] GetQuickLinkItemDelegate<T>(HtmlHelper helper, T entity, string partialViewName, string prefix);  
+    public delegate QuickLink[] GetQuickLinkItemDelegate<T>(T entity, string partialViewName, string prefix);  
 
     public static class QuickLinkWidgetHelper
     {
@@ -29,15 +29,15 @@ namespace Signum.Web
             globalLinks.Add(getQuickLinks);
         }
 
-        public static List<QuickLink> GetForEntity(HtmlHelper helper, IdentifiableEntity ident, string partialViewName, string prefix)
+        public static List<QuickLink> GetForEntity(IdentifiableEntity ident, string partialViewName, string prefix)
         {
             List<QuickLink> links = new List<QuickLink>();
 
-            links.AddRange(globalLinks.SelectMany(a => (a(helper, ident, partialViewName, prefix) ?? Empty)).NotNull());
+            links.AddRange(globalLinks.SelectMany(a => (a(ident, partialViewName, prefix) ?? Empty)).NotNull());
 
             List<Delegate> list = entityLinks.TryGetC(ident.GetType());
             if (list != null)
-                links.AddRange(list.SelectMany(a => (QuickLink[])a.DynamicInvoke(helper, ident, partialViewName, prefix) ?? Empty).NotNull());
+                links.AddRange(list.SelectMany(a => (QuickLink[])a.DynamicInvoke(ident, partialViewName, prefix) ?? Empty).NotNull());
 
             return links;
         }
@@ -46,12 +46,12 @@ namespace Signum.Web
 
         public static void Start()
         {
-            WidgetsHelper.GetWidgetsForView += (helper, entity, partialViewName, prefix) => entity is IdentifiableEntity ? CreateWidget(helper, (IdentifiableEntity)entity, partialViewName, prefix) : null;
+            WidgetsHelper.GetWidgetsForView += (entity, partialViewName, prefix) => entity is IdentifiableEntity ? CreateWidget((IdentifiableEntity)entity, partialViewName, prefix) : null;
         }
 
-        public static WidgetItem CreateWidget(HtmlHelper helper, IdentifiableEntity identifiable, string partialViewName, string prefix)
+        public static WidgetItem CreateWidget(IdentifiableEntity identifiable, string partialViewName, string prefix)
         {
-            List<QuickLink> quicklinks = GetForEntity(helper, identifiable, partialViewName, prefix);
+            List<QuickLink> quicklinks = GetForEntity(identifiable, partialViewName, prefix);
             if (quicklinks == null || quicklinks.Count == 0) 
                 return null;
 

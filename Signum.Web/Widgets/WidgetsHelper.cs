@@ -9,7 +9,7 @@ using Signum.Entities;
 
 namespace Signum.Web
 {
-    public delegate WidgetItem GetWidgetDelegate(HtmlHelper helper, ModifiableEntity entity, string partialViewName, string prefix);
+    public delegate WidgetItem GetWidgetDelegate(ModifiableEntity entity, string partialViewName, string prefix);
 
     public class WidgetItem
     {
@@ -42,7 +42,7 @@ namespace Signum.Web
     {
         public static event GetWidgetDelegate GetWidgetsForView;
 
-        public static List<WidgetItem> GetWidgetsForEntity(this HtmlHelper helper, ModifiableEntity entity, string partialViewName, string prefix)
+        public static List<WidgetItem> GetWidgetsForEntity(ModifiableEntity entity, string partialViewName, string prefix)
         {
             List<WidgetItem> widgets = new List<WidgetItem>();
             if (entity != null)
@@ -50,7 +50,7 @@ namespace Signum.Web
                 if (GetWidgetsForView != null)
                     widgets.AddRange(GetWidgetsForView.GetInvocationList()
                         .Cast<GetWidgetDelegate>()
-                        .Select(d => d(helper, entity, partialViewName, prefix))
+                        .Select(d => d(entity, partialViewName, prefix))
                         .NotNull().ToList());
             }
             return widgets;
@@ -58,7 +58,7 @@ namespace Signum.Web
 
         public static MvcHtmlString RenderWidgetsForEntity(this HtmlHelper helper, ModifiableEntity entity, string partialViewName, string prefix)
         {
-            List<WidgetItem> widgets = GetWidgetsForEntity(helper, entity, partialViewName, prefix);
+            List<WidgetItem> widgets = GetWidgetsForEntity(entity, partialViewName, prefix);
 
             if (widgets == null)
                 return MvcHtmlString.Empty;
