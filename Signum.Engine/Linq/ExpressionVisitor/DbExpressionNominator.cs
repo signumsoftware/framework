@@ -563,11 +563,22 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitProjection(ProjectionExpression proj)
         {
-            bool oldInnerProjection = this.innerProjection;
-            innerProjection = true;
-            var result = base.VisitProjection(proj);
-            innerProjection = oldInnerProjection;
-            return result;
+            if (proj.IsOneCell)
+            {
+                var select = (SelectExpression)base.Visit(proj.Source);
+                var scalar = new ScalarExpression(proj.Type, select);
+                var result = Replacer.Replace(proj.Projector, proj.Source.Columns.Single().GetReference(proj.Source.Alias), scalar);
+                candidates.Add(result);
+                return result;
+            }
+            else
+            {
+                bool oldInnerProjection = this.innerProjection;
+                innerProjection = true;
+                var result = base.VisitProjection(proj);
+                innerProjection = oldInnerProjection;
+                return result;
+            }
         }
 
         protected override Expression VisitIn(InExpression inExp)

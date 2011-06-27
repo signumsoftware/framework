@@ -456,6 +456,12 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void SelectSingleCellWhere()
+        {
+            var list = Database.Query<BandDN>().Where(b => b.Members.OrderBy(a => a.Sex).Select(a => a.Sex).First() == Sex.Male).Select(a => a.Name).ToList();
+        }
+
+        [TestMethod]
         public void SelectSingleCellSingle()
         {
             var list = Database.Query<BandDN>().Select(b => new
