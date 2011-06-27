@@ -134,6 +134,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="otWidgets.orderedtest">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="otSearchControlEntityCtxMenu.orderedtest">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

@@ -46,6 +46,16 @@ namespace Signum.Web.Extensions.Sample.Test
             string popupPrefix = "New_";
             selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SeleniumExtensions.PopupSelector(popupPrefix)));
             selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SearchTestExtensions.RowSelector(selenium, 1, popupPrefix)));
+
+            selenium.Open(FindRoute("Label"));
+            selenium.WaitForPageToLoad(PageLoadTimeout);
+            selenium.Search();
+
+            selenium.EntityContextMenu(1);
+            selenium.EntityContextQuickLinkClick(1, 1);
+
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SeleniumExtensions.PopupSelector(popupPrefix)));
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SearchTestExtensions.RowSelector(selenium, 1, popupPrefix)));
         }
 
         [TestMethod]
