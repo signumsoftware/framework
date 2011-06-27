@@ -8,6 +8,7 @@ using Signum.Utilities;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
 using Signum.Web.Properties;
+using Signum.Engine;
 
 namespace Signum.Web
 {
@@ -47,6 +48,8 @@ namespace Signum.Web
         public static void Start()
         {
             WidgetsHelper.GetWidgetsForView += (entity, partialViewName, prefix) => entity is IdentifiableEntity ? CreateWidget((IdentifiableEntity)entity, partialViewName, prefix) : null;
+
+            ContextualItemsHelper.GetContextualItemsForLite += new GetContextualItemDelegate(ContextualItemsHelper_GetContextualItemsForLite);
         }
 
         public static WidgetItem CreateWidget(IdentifiableEntity identifiable, string partialViewName, string prefix)
@@ -86,6 +89,40 @@ namespace Signum.Web
                 Id = TypeContextUtilities.Compose(prefix, "quicklinksWidget"),
                 Label = label.ToHtml(),
                 Content = content.ToHtml()
+            };
+        }
+
+        static ContextualItem ContextualItemsHelper_GetContextualItemsForLite(ControllerContext controllerContext, Lite lite, object queryName, string prefix)
+        {
+            IdentifiableEntity ie = Database.Retrieve(lite);
+            List<QuickLink> quicklinks = GetForEntity(ie, Navigator.EntitySettings(ie.GetType()).OnPartialViewName(ie), prefix);
+            if (quicklinks == null || quicklinks.Count == 0)
+                return null;
+
+            HtmlStringBuilder content = new HtmlStringBuilder();
+            using (content.Surround(new HtmlTag("ul").Class("sf-search-ctxmenu-quicklinks")))
+            {
+                string ctxItemClass = "sf-search-ctxitem";
+
+                content.AddLine(new HtmlTag("li")
+                    .Class(ctxItemClass + " sf-search-ctxitem-header")
+                    .InnerHtml(
+                        new HtmlTag("span").InnerHtml(Resources.Quicklinks.EncodeHtml()))
+                    );
+
+                foreach (var q in quicklinks)
+                {
+                    using (content.Surround(new HtmlTag("li").Class(ctxItemClass)))
+                    {
+                        content.Add(q.Execute());
+                    }
+                }
+            }
+
+            return new ContextualItem
+            {
+                Id = TypeContextUtilities.Compose(prefix, "ctxItemQuickLinks"),
+                Content = content.ToHtml().ToString()
             };
         }     
     }

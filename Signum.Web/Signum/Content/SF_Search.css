@@ -75,7 +75,7 @@
 }
 .sf-search-ctxitem
 {
-    width: 100px;
+    min-width: 100px;
     display: block;
     padding: 5px 10px;
     cursor: pointer;
@@ -90,6 +90,10 @@
 {
     font-weight: bold;
     cursor: default;    
+}
+.sf-search-ctxitem-no-results
+{
+    font-style: italic;    
 }
 .sf-search-ctxmenu-overlay
 {
