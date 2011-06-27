@@ -24,6 +24,13 @@ namespace Signum.Web
 
         public string LabelText { get; set; }
 
+        string labelClass = "sf-label-line";
+        public string LabelClass
+        {
+            get { return labelClass; }
+            set { labelClass = value; }
+        }
+
         public readonly RouteValueDictionary LabelHtmlProps = new RouteValueDictionary();
 
         bool visible = true;

@@ -26,9 +26,15 @@ namespace Signum.Web
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            using (entityRepeater.ShowFieldDiv ? sb.Surround(new HtmlTag("div").Class("sf-field")) : null)
+            using (sb.Surround(new HtmlTag("fieldset").Class("sf-repeater-field")))
             {
-                sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, entityRepeater));
+                using (sb.Surround(new HtmlTag("legend")))
+                {
+                    sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, entityRepeater));
+                    
+                    sb.AddLine(ListBaseHelper.CreateButton(helper, entityRepeater, new Dictionary<string, object> { { "title", entityRepeater.AddElementLinkText } }));
+                    sb.AddLine(ListBaseHelper.FindButton(helper, entityRepeater));
+                }
 
                 sb.AddLine(helper.HiddenStaticInfo(entityRepeater));
 
@@ -38,10 +44,7 @@ namespace Signum.Web
                     TypeElementContext<T> templateTC = new TypeElementContext<T>((T)(object)Constructor.Construct(typeof(T)), (TypeContext)entityRepeater.Parent, 0);
                     sb.AddLine(EntityBaseHelper.EmbeddedTemplate(entityRepeater, EntityBaseHelper.RenderTypeContext(helper, templateTC, RenderMode.Content, entityRepeater)));
                 }
-
-                sb.AddLine(ListBaseHelper.CreateButton(helper, entityRepeater, new Dictionary<string, object> { { "title", entityRepeater.AddElementLinkText } }));
-                sb.AddLine(ListBaseHelper.FindButton(helper, entityRepeater));
-
+                
                 using (sb.Surround(new HtmlTag("div").IdName(entityRepeater.Compose(EntityRepeaterKeys.ItemsContainer))))
                 {
                     if (entityRepeater.UntypedValue != null)
@@ -59,21 +62,24 @@ namespace Signum.Web
         {
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            using (sb.Surround(new HtmlTag("div").IdName(itemTC.Compose(EntityRepeaterKeys.RepeaterElement)).Class("sf-repeater-element")))
+            using (sb.Surround(new HtmlTag("fieldset").IdName(itemTC.Compose(EntityRepeaterKeys.RepeaterElement)).Class("sf-repeater-element")))
             {
-                if (entityRepeater.ShouldWriteOldIndex(itemTC))
-                    sb.AddLine(helper.Hidden(itemTC.Compose(EntityListBaseKeys.Index), itemTC.Index.ToString()));
-
-                sb.AddLine(helper.HiddenRuntimeInfo(itemTC));
-
-                if (entityRepeater.Remove)
-                    sb.AddLine(
-                        helper.Href(itemTC.Compose("btnRemove"),
+                using (sb.Surround(new HtmlTag("legend")))
+                { 
+                    if (entityRepeater.Remove)
+                        sb.AddLine(
+                            helper.Href(itemTC.Compose("btnRemove"),
                                     entityRepeater.RemoveElementLinkText,
                                     "javascript:new SF.ERep({0}).remove('{1}');".Formato(entityRepeater.ToJS(), itemTC.ControlID),
                                     entityRepeater.RemoveElementLinkText,
                                     "sf-line-button sf-remove",
                                     new Dictionary<string, object> { { "data-icon", "ui-icon-circle-close" }, { "data-text", false } }));
+                }
+
+                if (entityRepeater.ShouldWriteOldIndex(itemTC))
+                    sb.AddLine(helper.Hidden(itemTC.Compose(EntityListBaseKeys.Index), itemTC.Index.ToString()));
+
+                sb.AddLine(helper.HiddenRuntimeInfo(itemTC));
 
                 sb.AddLine(EntityBaseHelper.RenderTypeContext(helper, itemTC, RenderMode.ContentInVisibleDiv, entityRepeater));
             }

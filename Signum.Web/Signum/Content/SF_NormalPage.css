@@ -161,6 +161,11 @@ fieldset {
     border-bottom-left-radius: 4px 4px;
 }
 
+legend
+{
+    background-color: #fff; /*IE fix*/    
+}
+
 .sf-chooser-button
 {
     width: 100%;    

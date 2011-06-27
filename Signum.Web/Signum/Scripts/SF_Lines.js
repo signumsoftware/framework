@@ -608,11 +608,12 @@ SF.registerModule("Lines", function () {
 
         this.itemsContainer = "sfItemsContainer";
         this.repeaterItem = "sfRepeaterItem";
+        this.repeaterItemClass = "sf-repeater-element";
 
         this.canAddItems = function () {
             SF.log("ERep canAddItems");
             if (!SF.isEmpty(this.options.maxElements)) {
-                if ($(this.pf(this.itemsContainer) + " > div[name$=" + this.repeaterItem + "]").length >= +this.options.maxElements) {
+                if ($(this.pf(this.itemsContainer) + " > ." + this.repeaterItemClass).length >= +this.options.maxElements) {
                     return false;
                 }
             }
@@ -621,7 +622,7 @@ SF.registerModule("Lines", function () {
 
         this.getLastIndex = function () {
             SF.log("ERep getLastIndex");
-            var lastElement = $(this.pf(this.itemsContainer) + " > div[name$=" + this.repeaterItem + "]:last");
+            var lastElement = $(this.pf(this.itemsContainer) + " > ." + this.repeaterItemClass + ":last");
             var lastIndex = -1;
             if (lastElement.length !== 0) {
                 var nameSelected = lastElement[0].id;
@@ -680,12 +681,14 @@ SF.registerModule("Lines", function () {
             var listInfo = this.staticInfo();
             var itemInfoValue = this.itemRuntimeInfo(itemPrefix).createValue(runtimeType, '', 'n');
 
-            var $div = $("<div id='" + SF.compose(itemPrefix, this.repeaterItem) + "' name='" + SF.compose(itemPrefix, this.repeaterItem) + "' class='sf-repeater-element'>" +
+            var $div = $("<fieldset id='" + SF.compose(itemPrefix, this.repeaterItem) + "' name='" + SF.compose(itemPrefix, this.repeaterItem) + "' class='" + this.repeaterItemClass + "'>" +
+                "<legend>" +
                 "<a id='" + SF.compose(itemPrefix, "btnRemove") + "' title='" + this.options.removeItemLinkText + "' href=\"javascript:new SF.ERep({prefix:'" + this.options.prefix + "', onEntityChanged:" + (SF.isEmpty(this.options.onEntityChanged) ? "''" : this.options.onEntityChanged) + "}).remove('" + itemPrefix + "');\" class='sf-line-button sf-remove' data-icon='ui-icon-circle-close' data-text='false'>" + this.options.removeItemLinkText + "</a>" +
+                "</legend>" +
                 SF.hiddenInput(SF.compose(itemPrefix, SF.Keys.runtimeInfo), itemInfoValue) +
                 "<div id='" + SF.compose(itemPrefix, this.entity) + "' name='" + SF.compose(itemPrefix, this.entity) + "'>" +
                 "</div>" + //sfEntity
-                "</div>" //sfRepeaterItem          
+                "</fieldset>"
                 );
 
             $(this.pf(this.itemsContainer)).append($div);
@@ -765,6 +768,17 @@ SF.registerModule("Lines", function () {
             SF.log("ERep remove");
             $('#' + SF.compose(itemPrefix, this.repeaterItem)).remove();
             this.fireOnEntityChanged();
+        };
+
+        this.updateButtonsDisplay = function () {
+            SF.log("ERep updateButtonsDisplay");
+            var $buttons = $(this.pf("btnFind"), this.pf("btnFind"));
+            if (this.canAddItems()) {
+                $buttons.show();
+            }
+            else {
+                $buttons.hide();
+            }
         };
     };
 

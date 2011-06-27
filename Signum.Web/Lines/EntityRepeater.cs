@@ -36,6 +36,7 @@ namespace Signum.Web
             RemoveElementLinkText = Resources.Remove;
             AddElementLinkText = Resources.New;
             Find = false;
+            LabelClass = "sf-label-repeater-line";
         }
 
         public override string ToJS()

@@ -26,6 +26,7 @@ namespace Signum.Web
         {
             DefaultDetailDiv = DetailDiv = this.Compose(EntityBaseKeys.Detail);
             View = false;
+            LabelClass = "sf-label-detail-line";
         }
 
         protected override void SetReadOnly()

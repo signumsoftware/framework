@@ -24,8 +24,8 @@ namespace Signum.Web
         public static MvcHtmlString BaseLineLabel(HtmlHelper helper, BaseLine baseLine, string idLabelFor)
         {
             return baseLine.LabelVisible && !baseLine.OnlyValue ?
-                           helper.Label(baseLine.Compose("lbl"), baseLine.LabelText ?? "", idLabelFor, "sf-label-line") :
-                           MvcHtmlString.Empty;
+                   helper.Label(baseLine.Compose("lbl"), baseLine.LabelText ?? "", idLabelFor, baseLine.LabelClass) :
+                   MvcHtmlString.Empty;
         }
 
         public static bool RequiresLoadAll(HtmlHelper helper, EntityBase eb)
