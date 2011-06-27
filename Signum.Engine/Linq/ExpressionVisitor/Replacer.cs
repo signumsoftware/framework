@@ -28,7 +28,7 @@ namespace Signum.Engine.Linq
 
         protected override Expression Visit(Expression exp)
         {
-            if (exp == this.searchFor)
+            if (exp != null && (exp == this.searchFor || exp.Equals(this.searchFor)))
             {
                 return this.replaceWith;
             }

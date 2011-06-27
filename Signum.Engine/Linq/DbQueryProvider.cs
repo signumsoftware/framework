@@ -82,7 +82,9 @@ namespace Signum.Engine.Linq
             Expression rowFilled = RowNumberFiller.Fill(columnCleaned);
             Expression subqueryCleaned = RedundantSubqueryRemover.Remove(rowFilled);
 
-            Expression rewriteConditions = ConditionsRewriter.Rewrite(subqueryCleaned);
+            Expression singleCellOptimixed = SingleCellOptimizer.Optimize((ProjectionExpression)subqueryCleaned);
+
+            Expression rewriteConditions = ConditionsRewriter.Rewrite(singleCellOptimixed);
             return rewriteConditions;
         }
 
