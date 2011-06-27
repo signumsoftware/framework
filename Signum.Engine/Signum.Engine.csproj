@@ -127,7 +127,6 @@
     <Compile Include="Linq\ExpressionVisitor\QueryFormatter.cs" />
     <Compile Include="Linq\ExpressionVisitor\RedundantSubqueryRemover.cs" />
     <Compile Include="Linq\ExpressionVisitor\Replacer.cs" />
-    <Compile Include="Linq\ExpressionVisitor\SingleCellOptimizer.cs" />
     <Compile Include="Linq\ExpressionVisitor\SmartEqualizer.cs" />
     <Compile Include="Linq\ExpressionVisitor\SubqueryRemover.cs" />
     <Compile Include="Linq\ExpressionVisitor\TranslatorBuilder.cs" />
