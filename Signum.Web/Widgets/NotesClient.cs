@@ -21,7 +21,7 @@ namespace Signum.Web.Widgets
             }
 
             WidgetsHelper.GetWidgetsForView += 
-                (helper, entity, partialViewName, prefix) => entity is IdentifiableEntity ? NoteWidgetHelper.CreateWidget(helper, (IdentifiableEntity)entity, partialViewName, prefix) : null;
+                (entity, partialViewName, prefix) => entity is IdentifiableEntity ? NoteWidgetHelper.CreateWidget((IdentifiableEntity)entity, partialViewName, prefix) : null;
             
             NoteWidgetHelper.NoteType = typeof(NoteDN);
             NoteWidgetHelper.CreateNote = ei => ei.IsNew ? null : new NoteDN { Target = ei.ToLite() };

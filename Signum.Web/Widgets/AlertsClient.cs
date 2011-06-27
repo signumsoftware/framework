@@ -21,7 +21,7 @@ namespace Signum.Web.Widgets
             }
 
             WidgetsHelper.GetWidgetsForView += 
-                (helper, entity, partialViewName, prefix) => entity is IdentifiableEntity ? AlertWidgetHelper.CreateWidget(helper, (IdentifiableEntity)entity, partialViewName, prefix) : null;
+                (entity, partialViewName, prefix) => entity is IdentifiableEntity ? AlertWidgetHelper.CreateWidget((IdentifiableEntity)entity, partialViewName, prefix) : null;
 
             AlertWidgetHelper.AlertType = typeof(AlertDN);
             AlertWidgetHelper.CreateAlert = ei => ei.IsNew ? null : new AlertDN { Entity = ei.ToLite() };

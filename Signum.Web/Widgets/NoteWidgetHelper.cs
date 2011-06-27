@@ -39,7 +39,7 @@ namespace Signum.Web
                 successMessage);
         }
 
-        public static WidgetItem CreateWidget(HtmlHelper helper, IdentifiableEntity identifiable, string partialViewName, string prefix)
+        public static WidgetItem CreateWidget(IdentifiableEntity identifiable, string partialViewName, string prefix)
         {
             if (identifiable == null || identifiable.IsNew || identifiable is INoteDN)
                 return null;

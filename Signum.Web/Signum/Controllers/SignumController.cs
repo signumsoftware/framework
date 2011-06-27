@@ -280,7 +280,7 @@ namespace Signum.Web.Controllers
             string result = ContextualItemsHelper.GetContextualItemListForLite(this.ControllerContext, Lite.Create(Navigator.ResolveType(liteParts[0]), int.Parse(liteParts[1])) , queryName, prefix).ToString("");
 
             if (string.IsNullOrEmpty(result))
-                result = Resources.NoResults;
+                result = new HtmlTag("li").Class("sf-search-ctxitem sf-search-ctxitem-no-results").InnerHtml(Resources.NoResults.EncodeHtml()).ToHtml().ToString();
 
             return Content(result);
         }
