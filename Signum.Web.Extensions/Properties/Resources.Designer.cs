@@ -853,6 +853,16 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Operations.
+        /// </summary>
+        public static string Search_CtxMenuItem_Operations
+        {
+            get {
+                return ResourceManager.GetString("Search_CtxMenuItem_Operations", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Source.
         /// </summary>
         public static string Source {
