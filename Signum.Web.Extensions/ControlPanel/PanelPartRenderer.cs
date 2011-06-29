@@ -7,7 +7,7 @@ using Signum.Utilities;
 using Signum.Entities;
 using System.Web.Mvc;
 using Signum.Entities.Reports;
-using Signum.Web.Queries;
+using Signum.Web.UserQueries;
 using Signum.Entities.DynamicQuery;
 
 namespace Signum.Web.ControlPanel

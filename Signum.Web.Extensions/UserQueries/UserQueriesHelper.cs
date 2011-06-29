@@ -6,7 +6,7 @@ using Signum.Entities.Reports;
 using System.Web.Mvc;
 using Signum.Entities.DynamicQuery;
 
-namespace Signum.Web.Queries
+namespace Signum.Web.UserQueries
 {
     public static class UserQueriesHelper
     {
@@ -26,7 +26,6 @@ namespace Signum.Web.Queries
 
             return helper.SearchControl(userQuery, findOptions, context);
         }
-
 
         public static MvcHtmlString CountSearchControl(this HtmlHelper helper, UserQueryDN userQuery, FindOptions findOptions, string prefix)
         {

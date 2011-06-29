@@ -462,4 +462,13 @@
   <data name="Search_CtxMenuItem_Operations" xml:space="preserve">
     <value>Operations</value>
   </data>
+  <data name="UserQueries_CreateNew" xml:space="preserve">
+    <value>Create</value>
+  </data>
+  <data name="UserQueries_Edit" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="UserQueries_UserQueries" xml:space="preserve">
+    <value>User Queries</value>
+  </data>
 </root>

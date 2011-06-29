@@ -116,17 +116,17 @@ namespace Signum.Web.Reports
 
         static ToolBarButton[] ButtonBarQueryHelper_GetButtonBarForQueryName(ControllerContext controllerContext, object queryName, Type entityType, string prefix)
         {
-            int idCurrentUserQuery = 0;
+            Lite<UserQueryDN> currentUserQuery = null;
             string url = (controllerContext.RouteData.Route as Route).TryCC(r => r.Url);
             if (url.HasText() && url.Contains("UQ"))
-                idCurrentUserQuery = int.Parse(controllerContext.RouteData.Values["id"].ToString());
+                currentUserQuery = new Lite<UserQueryDN>(int.Parse(controllerContext.RouteData.Values["lite"].ToString()));
 
             ToolBarButton plain = new ToolBarButton
             {
                 Id = TypeContextUtilities.Compose(prefix, "qbToExcelPlain"),
                 AltText = Resources.ExcelReport,
                 Text = Resources.ExcelReport,
-                OnClick = Js.SubmitOnly(RouteHelper.New().Action("ToExcelPlain", "Report"), "$.extend({{userQuery:'{0}'}},new SF.FindNavigator({{prefix:'{1}'}}).requestDataForSearch())".Formato((idCurrentUserQuery > 0 ? (int?)idCurrentUserQuery : null), prefix)).ToJS(),
+                OnClick = Js.SubmitOnly(RouteHelper.New().Action("ToExcelPlain", "Report"), "$.extend({{userQuery:'{0}'}},new SF.FindNavigator({{prefix:'{1}'}}).requestDataForSearch())".Formato((currentUserQuery != null ? currentUserQuery.IdOrNull : null), prefix)).ToJS(),
                 DivCssClass = ToolBarButton.DefaultQueryCssClass
             };
 
