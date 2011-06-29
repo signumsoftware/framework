@@ -130,7 +130,7 @@
             @Html.Span(Model.Compose("rowsFoundCount"), "0", "rows-found-count")
             @Html.Span(null, Resources.SearchControl_RowsFound, "rows-found-count")
 
-            @Html.Hidden(Model.Compose("sfOrders"), findOptions.OrderOptions.Empty() ? "" :
+            @Html.Hidden(Model.Compose("sfOrders"), findOptions.OrderOptions.IsEmpty() ? "" :
                     (findOptions.OrderOptions.ToString(oo => (oo.OrderType == OrderType.Ascending ? "" : "-") + oo.Token.FullKey(), ";") + ";"))
         </div>
     </div>

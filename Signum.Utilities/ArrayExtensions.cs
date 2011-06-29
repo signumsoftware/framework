@@ -28,7 +28,7 @@ namespace Signum.Utilities
 
         public static S[] ToArray<T, S>(this IEnumerable<T> collection, Func<T, S> value, Func<T, int> xPos)
         {
-            if (collection.Empty())
+            if (collection.IsEmpty())
                 return new S[0];
 
             return ToArray(collection, value, xPos, collection.Max(xPos) + 1);
@@ -44,7 +44,7 @@ namespace Signum.Utilities
 
         public static S[,] ToArray<T, S>(this IEnumerable<T> collection, Func<T, S> value, Func<T, int> xPos, Func<T, int> yPos)
         {
-            if (collection.Empty())
+            if (collection.IsEmpty())
                 return new S[0, 0];
 
             return ToArray(collection, value, xPos, yPos, collection.Max(xPos) + 1, collection.Max(yPos) + 1);
@@ -60,7 +60,7 @@ namespace Signum.Utilities
 
         public static S[, ,] ToArray<T, S>(this IEnumerable<T> collection, Func<T, S> value, Func<T, int> xPos, Func<T, int> yPos, Func<T, int> zPos)
         {
-            if (collection.Empty())
+            if (collection.IsEmpty())
                 return new S[0, 0, 0];
 
             return ToArray(collection, value, xPos, yPos, zPos, collection.Max(xPos) + 1, collection.Max(yPos) + 1, collection.Max(zPos) + 1);

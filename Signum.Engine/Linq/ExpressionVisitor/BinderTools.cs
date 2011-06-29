@@ -144,7 +144,7 @@ namespace Signum.Engine.Linq
         {
             var list = exp.ToList();
 
-            if (list.Empty())
+            if (list.IsEmpty())
                 return Expression.Constant(null, type);
 
             if (list.Count() == 1)

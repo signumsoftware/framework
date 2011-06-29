@@ -42,7 +42,7 @@ namespace Signum.Engine.Linq
 
         internal static Expression EntityIn(Expression newItem, IEnumerable<IdentifiableEntity> collection)
         {
-            if (collection.Empty())
+            if (collection.IsEmpty())
                 return SqlConstantExpression.False;
 
             Dictionary<Type, object[]> entityIDs = collection.AgGroupToDictionary(a => a.GetType(), gr => gr.Select(a => (object)(a.IdOrNull ?? int.MaxValue)).ToArray());
@@ -52,7 +52,7 @@ namespace Signum.Engine.Linq
 
         internal static Expression EntityIn(LiteReferenceExpression liteReference, IEnumerable<Lite> collection)
         {
-            if (collection.Empty())
+            if (collection.IsEmpty())
                 return SqlConstantExpression.False;
 
             Dictionary<Type, object[]> entityIDs = collection.AgGroupToDictionary(a => a.RuntimeType, gr => gr.Select(a => (object)(a.IdOrNull ?? int.MaxValue)).ToArray());

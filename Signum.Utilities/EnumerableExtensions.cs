@@ -21,12 +21,17 @@ namespace Signum.Utilities
 {
     public static class EnumerableExtensions
     {
-        public static bool Empty<T>(this IEnumerable<T> collection)
+        public static bool IsEmpty<T>(this IEnumerable<T> collection)
         {
             foreach (var item in collection)
                 return false;
 
             return true;
+        }
+
+        public static bool IsNullOrEmpty<T>(this IEnumerable<T> collection)
+        {
+            return collection == null || collection.IsEmpty();
         }
 
         public static IEnumerable<T> NotNull<T>(this IEnumerable<T> collection) where T : class

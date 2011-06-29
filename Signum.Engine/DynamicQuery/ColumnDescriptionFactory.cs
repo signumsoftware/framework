@@ -91,7 +91,7 @@ namespace Signum.Engine.DynamicQuery
 
         private static Implementations AggregateImplementations(IEnumerable<Implementations> collection, Type type)
         {
-            if (collection.Empty())
+            if (collection.IsEmpty())
                 return null;
 
             var only = collection.Only();

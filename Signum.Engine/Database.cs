@@ -299,7 +299,7 @@ namespace Signum.Engine
             if (lites == null)
                 throw new ArgumentNullException("lites");
 
-            if (lites.Empty()) return new List<IdentifiableEntity>();
+            if (lites.IsEmpty()) return new List<IdentifiableEntity>();
 
 
             using (Transaction tr = new Transaction())
@@ -364,7 +364,7 @@ namespace Signum.Engine
             if (collection == null)
                 throw new ArgumentNullException("collection");
 
-            if (collection.Empty()) return;
+            if (collection.IsEmpty()) return;
 
             var areNew = collection.Where(a => a.IsNew);
             if (areNew.Any())
@@ -385,7 +385,7 @@ namespace Signum.Engine
             if (collection == null)
                 throw new ArgumentNullException("collection");
 
-            if (collection.Empty()) return;
+            if (collection.IsEmpty()) return;
 
             var areNew = collection.Where(a => a.IdOrNull == null);
             if (areNew.Any())

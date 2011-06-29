@@ -45,7 +45,7 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitRowNumber(RowNumberExpression rowNumber)
         {
-            if (rowNumber.OrderBy == null || rowNumber.OrderBy.Empty())
+            if (rowNumber.OrderBy == null || rowNumber.OrderBy.IsEmpty())
             {
                 SelectExpression inner = (SelectExpression)innerSource;
 

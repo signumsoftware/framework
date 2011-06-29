@@ -41,7 +41,7 @@ namespace Signum.Entities.DynamicQuery
                 .Where(a => a.ElementType == CollectionElementType.Any ||
                             a.ElementType == CollectionElementType.All).ToList();
 
-            if (allAny.Empty())
+            if (allAny.IsEmpty())
                 return GetConditionBasic(context);
 
             var parameters = allAny.ToDictionary(a => a, a => a.CreateParameter());

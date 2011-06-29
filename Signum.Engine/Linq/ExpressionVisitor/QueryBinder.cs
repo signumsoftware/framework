@@ -159,7 +159,7 @@ namespace Signum.Engine.Linq
 
         private Expression MapAndVisitExpandWithIndex(LambdaExpression lambda, ref ProjectionExpression p, out ReadOnlyCollection<OrderExpression> orderExpression)
         {
-            bool hasOrder = p.Source.OrderBy != null && !p.Source.OrderBy.Empty();
+            bool hasOrder = p.Source.OrderBy != null && !p.Source.OrderBy.IsEmpty();
 
             RowNumberExpression rne = new RowNumberExpression(p.Source.OrderBy); //if its null should be filled in a later stage
 
@@ -565,7 +565,7 @@ namespace Signum.Engine.Linq
             ProjectedColumns subqueryKeyPC = ColumnProjector.ProjectColumnsGroupBy(subqueryKey, Alias.Raw("basura"), subqueryProjection.Source.KnownAliases, new[] { subqueryProjection.Token }); // use same projection trick to get group-by expressions based on subquery
             Expression subqueryElemExpr = elementSelector == null ? subqueryProjection.Projector : this.MapAndVisitExpand(elementSelector, ref subqueryProjection); // compute element based on duplicated subquery
 
-            Expression subqueryCorrelation = keyPC.Columns.Empty() ? null : 
+            Expression subqueryCorrelation = keyPC.Columns.IsEmpty() ? null : 
                 keyPC.Columns.Zip(subqueryKeyPC.Columns, (c1, c2) => SmartEqualizer.EqualNullableGroupBy(new ColumnExpression(c1.Expression.Type, alias, c1.Name), c2.Expression))
                     .Aggregate((a, b) => Expression.And(a, b));
 
@@ -1099,7 +1099,7 @@ namespace Signum.Engine.Linq
 
                 FieldInitExpression[] fies = ib.Implementations.Where(imp => b.TypeOperand.IsAssignableFrom(imp.Type)).Select(imp=>imp.Field).ToArray();
 
-                if (fies.Empty())
+                if (fies.IsEmpty())
                     return Expression.Constant(false);
 
                 return fies.Select(f => (Expression)Expression.NotEqual(f.ExternalId, BinderTools.NullId)).Aggregate((f1, f2) => Expression.Or(f1, f2));
@@ -1174,7 +1174,7 @@ namespace Signum.Engine.Linq
 
                 FieldInitExpression[] fies = ib.Implementations.Where(imp => uType.IsAssignableFrom(imp.Type)).Select(imp => imp.Field).ToArray();
 
-                if (fies.Empty())
+                if (fies.IsEmpty())
                 {
                     return new FieldInitExpression(uType, null, Expression.Constant(null, typeof(int?)), null, ib.Implementations.First().Field.Token);
                 }
