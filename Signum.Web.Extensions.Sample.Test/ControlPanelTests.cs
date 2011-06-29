@@ -13,6 +13,12 @@ using Signum.Web.Extensions.Sample.Test.Properties;
 using Signum.Engine.Maps;
 using Signum.Engine.Authorization;
 using Signum.Utilities;
+using Signum.Entities.Reports;
+using Signum.Engine.Basics;
+using Signum.Web.UserQueries;
+using Signum.Entities;
+using Signum.Entities.DynamicQuery;
+using Signum.Engine.DynamicQuery;
 
 namespace Signum.Web.Extensions.Sample.Test
 {
@@ -21,7 +27,27 @@ namespace Signum.Web.Extensions.Sample.Test
     {
         public ControlPanelTests()
         {
+            using (AuthLogic.Disable())
+            {
+                object queryName = typeof(AlbumDN);
+                QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
 
+                UserQueryDN userQuery = new FindOptions(queryName)
+                {
+                    FilterOptions = new List<FilterOption>
+                    {
+                        new FilterOption("Id", 3) 
+                        {
+                            Token = QueryUtils.Parse("Id", qd),
+                            Operation = FilterOperation.GreaterThan 
+                        }
+                    },
+                    ColumnOptionsMode = ColumnOptionsMode.Add
+                }.ToUserQuery(null);
+                userQuery.DisplayName = "test";
+
+                userQuery.Save();
+            }
         }
 
         [ClassInitialize]
@@ -37,28 +63,28 @@ namespace Signum.Web.Extensions.Sample.Test
         }
 
         [TestMethod]
-        public void ControlPanel_Create()
+        public void ControlPanel001_Create()
         {
             CheckLoginAndOpen(FindRoute("ControlPanel"));
 
             selenium.SearchCreate();
-                selenium.WaitForPageToLoad(PageLoadTimeout);
+            selenium.WaitForPageToLoad(PageLoadTimeout);
 
-                //Related is RoleDN.Current, and when available UserDN.Current
-                selenium.Type("DisplayName", "Control Panel Home Page");
-                selenium.Click("HomePage");
-                selenium.Type("NumberOfColumns", "2");
+            //Related is RoleDN.Current, and when available UserDN.Current
+            selenium.Type("DisplayName", "Control Panel Home Page");
+            selenium.Click("HomePage");
+            selenium.Type("NumberOfColumns", "2");
                 
             string partsPrefix = "Parts_";
 
-                //SearchControlPart with userquery created in UQ_Create test
+            //SearchControlPart with userquery created in UQ_Create test
             string part0 = "{0}0_".Formato(partsPrefix);
             selenium.LineCreate(partsPrefix, false, 0);
             selenium.RepeaterWaitUntilItemLoaded(partsPrefix, 0);
             SetPartBasicProperties(selenium, part0, 1, 1, true, "Last Albums");
             selenium.LineFindWithImplAndSelectElements("{0}Content_".Formato(part0), "UserQuery", false, new int[]{0});
                 
-                //CountSearchControlPart with userquery created in UQ_Create test
+            //CountSearchControlPart with userquery created in UQ_Create test
             string part1 = "{0}1_".Formato(partsPrefix);
             selenium.LineCreate(partsPrefix, false, 1);
             selenium.RepeaterWaitUntilItemLoaded(partsPrefix, 1);
@@ -74,7 +100,7 @@ namespace Signum.Web.Extensions.Sample.Test
             
             selenium.PopupOk(part1content);
 
-                //LinkListPart
+            //LinkListPart
             string part2 = "{0}2_".Formato(partsPrefix);
             selenium.LineCreate(partsPrefix, false, 2);
             selenium.RepeaterWaitUntilItemLoaded(partsPrefix, 2);
@@ -87,11 +113,11 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.PopupOk(part2content);
 
             selenium.EntityButtonSaveClick();
-                selenium.WaitForPageToLoad(PageLoadTimeout);
+            selenium.WaitForPageToLoad(PageLoadTimeout);
 
-                //view
-                selenium.Open("/Signum.Web.Extensions.Sample/");
-                selenium.WaitForPageToLoad(PageLoadTimeout);
+            //view
+            selenium.Open("/Signum.Web.Extensions.Sample/");
+            selenium.WaitForPageToLoad(PageLoadTimeout);
             Assert.IsTrue(selenium.IsElementPresent("{0} #r1c1_divSearchControl".Formato(PartFrontEndSelector(1, 1))));
             Assert.IsTrue(selenium.IsElementPresent("{0} #lblr2c1 + a.count-search".Formato(PartFrontEndSelector(2, 1))));
             Assert.IsTrue(selenium.IsElementPresent("{0} li:nth-child(2) > a".Formato(PartFrontEndSelector(2, 2))));
@@ -100,15 +126,15 @@ namespace Signum.Web.Extensions.Sample.Test
         string PartFrontEndSelector(int rowIndexBase1, int colIndexBase1)
         {
             return "jq=table > tbody > tr:nth-child({0}) > td:nth-child({1})".Formato(rowIndexBase1, colIndexBase1);
-            }
+        }
 
         void CreateLinkListPart(ISelenium selenium, string partPrefix, int linkIndexBase0, string label, string link)
-            {
+        {
             selenium.LineCreate(partPrefix, false, linkIndexBase0);
             selenium.RepeaterWaitUntilItemLoaded(partPrefix, linkIndexBase0);
             selenium.Type("{0}{1}_Label".Formato(partPrefix, linkIndexBase0), label);
             selenium.Type("{0}{1}_Link".Formato(partPrefix, linkIndexBase0), link);
-            }
+        }
 
         void SetPartBasicProperties(ISelenium selenium, string partPrefix, int rowIndexBase1, int colIndexBase1, bool fillRow, string partTitle)
         {

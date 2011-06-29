@@ -61,6 +61,7 @@
   <ItemGroup>
     <Compile Include="Common.cs" />
     <Compile Include="ControlPanelTests.cs" />
+    <Compile Include="OperationsCtxMenuTests.cs" />
     <Compile Include="WidgetsTests.cs" />
     <Compile Include="UserQueriesTests.cs" />
     <Compile Include="OperationsTests.cs" />
@@ -134,10 +135,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="otWidgets.orderedtest">
+    <None Include="otoperations_ctxmenu.orderedtest">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="otSearchControlEntityCtxMenu.orderedtest">
+    <None Include="otWidgets.orderedtest">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="otControlPanel.orderedtest">

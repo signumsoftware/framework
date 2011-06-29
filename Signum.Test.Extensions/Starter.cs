@@ -44,7 +44,7 @@ namespace Signum.Test.Extensions
             }
         }
 
-        internal static void Dirty()
+        public static void Dirty()
         {
             started = false;
         }

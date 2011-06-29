@@ -31,7 +31,8 @@ namespace Signum.Web.Extensions.Sample.Test
 
         public static void Start(TestContext testContext)
         {
-            Signum.Test.Extensions.Starter.Start(UserConnections.Replace(Settings.Default.ConnectionString));
+            Signum.Test.Extensions.Starter.Dirty(); //Force generate database
+            Signum.Test.Extensions.Starter.StartAndLoad(UserConnections.Replace(Settings.Default.ConnectionString));
 
             using (AuthLogic.Disable())
                 Schema.Current.Initialize();

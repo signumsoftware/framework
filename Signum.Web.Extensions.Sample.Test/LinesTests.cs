@@ -39,7 +39,7 @@ namespace Signum.Web.Extensions.Sample.Test
         }
 
         [TestMethod]
-        public void EntityLine()
+        public void Lines001_EntityLine()
         {
             CheckLoginAndOpen(ViewRoute("Band", 1));
 
@@ -68,32 +68,7 @@ namespace Signum.Web.Extensions.Sample.Test
         }
 
         [TestMethod]
-        public void EntityLineDetail()
-        {
-            CheckLoginAndOpen("/Signum.Web.Extensions.Sample/Music/BandDetail");
-
-            string prefix = "LastAward_";
-
-            //Value is opened by default
-            selenium.EntityLineDetailHasValue(prefix, true);
-
-            //Delete
-            selenium.LineRemove(prefix);
-            selenium.EntityLineDetailHasValue(prefix, false);
-
-            //create with implementations
-            selenium.LineCreateWithImpl(prefix, false, "AmericanMusicAward");
-            selenium.WaitAjaxFinished(() => selenium.CheckEntityListDetailHasValue(prefix, true));
-            selenium.Type("{0}Category".Formato(prefix), "test");
-
-            //find with implementations
-            selenium.LineRemove(prefix);
-            selenium.LineFindWithImplAndSelectElements(prefix, "AmericanMusicAward", false, new int[]{0});
-            selenium.WaitAjaxFinished(() => selenium.CheckEntityListDetailHasValue(prefix, true));
-        }
-
-        [TestMethod]
-        public void EntityLineInPopup()
+        public void Lines002_EntityLineInPopup()
         {
             CheckLoginAndOpen(ViewRoute("Album", 1));
 
@@ -123,7 +98,32 @@ namespace Signum.Web.Extensions.Sample.Test
         }
 
         [TestMethod]
-        public void EntityList()
+        public void Lines003_EntityLineDetail()
+        {
+            CheckLoginAndOpen("/Signum.Web.Extensions.Sample/Music/BandDetail");
+
+            string prefix = "LastAward_";
+
+            //Value is opened by default
+            selenium.EntityLineDetailHasValue(prefix, true);
+
+            //Delete
+            selenium.LineRemove(prefix);
+            selenium.EntityLineDetailHasValue(prefix, false);
+
+            //create with implementations
+            selenium.LineCreateWithImpl(prefix, false, "AmericanMusicAward");
+            selenium.WaitAjaxFinished(() => selenium.CheckEntityListDetailHasValue(prefix, true));
+            selenium.Type("{0}Category".Formato(prefix), "test");
+
+            //find with implementations
+            selenium.LineRemove(prefix);
+            selenium.LineFindWithImplAndSelectElements(prefix, "AmericanMusicAward", false, new int[]{0});
+            selenium.WaitAjaxFinished(() => selenium.CheckEntityListDetailHasValue(prefix, true));
+        }
+
+        [TestMethod]
+        public void Lines004_EntityList()
         {
             CheckLoginAndOpen(ViewRoute("Band", 1));
 
@@ -173,7 +173,7 @@ namespace Signum.Web.Extensions.Sample.Test
         }
 
         [TestMethod]
-        public void EntityListInPopup()
+        public void Lines005_EntityListInPopup()
         {
             CheckLoginAndOpen(ViewRoute("Band", 1));
 
@@ -205,7 +205,7 @@ namespace Signum.Web.Extensions.Sample.Test
         }
 
         [TestMethod]
-        public void EntityListDetail()
+        public void Lines006_EntityListDetail()
         {
             CheckLoginAndOpen("/Signum.Web.Extensions.Sample/Music/BandDetail");
 
@@ -254,7 +254,7 @@ namespace Signum.Web.Extensions.Sample.Test
         }
 
         [TestMethod]
-        public void EntityRepeater()
+        public void Lines007_EntityRepeater()
         {
             CheckLoginAndOpen("/Signum.Web.Extensions.Sample/Music/BandRepeater");
 
