@@ -15,6 +15,7 @@ namespace Signum.Web
         public string Text { get; set; }
         public string AltText { get; set; }
         public string OnClick { get; set; }
+        public string Href { get; set; }
 
         public static string DefaultEntityDivCssClass = "sf-entity-button";
         public static string DefaultQueryCssClass = "sf-query-button";
@@ -41,12 +42,12 @@ namespace Signum.Web
 
         public virtual MvcHtmlString ToHtml(HtmlHelper helper)
         {
-            if (enabled)
+            if (enabled && OnClick.HasText())
                 HtmlProps.Add("onclick", OnClick);
             else
                 DivCssClass = DivCssClass + " sf-disabled";
 
-            return helper.Href(Id, Text, "", AltText ?? "", DivCssClass, HtmlProps);
+            return helper.Href(Id, Text, Href ?? "", AltText ?? "", DivCssClass, HtmlProps);
         }
     }
 }
