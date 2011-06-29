@@ -252,14 +252,19 @@ namespace Signum.Utilities
         public static string SmartDatePattern(this DateTime date)
         {
             DateTime currentdate = DateTime.Today;
+            return SmartDatePattern(date, currentdate);
+        }
+
+        public static string SmartDatePattern(this DateTime date, DateTime currentdate)
+        {
             int datediff = (date.Date - currentdate).Days;
 
             if (-7 <= datediff && datediff <= -2)
                 return Resources.DateLast.Formato(CultureInfo.CurrentCulture.DateTimeFormat.GetDayName(date.DayOfWeek).FirstUpper());
-            
+
             if (datediff == -1)
                 return Resources.Yesterday;
-            
+
             if (datediff == 0)
                 return Resources.Today;
 
