@@ -96,7 +96,7 @@ namespace Signum.Entities.Authorization
         {
             var allowed = Database.Query<RT>().Where(a => a.Resource == null && a.Role == role).Select(a=>a.Allowed).ToList();
 
-            return allowed.Empty() || allowed[0].Equals(Max.BaseAllowed) ? DefaultRule.Max : DefaultRule.Min; 
+            return allowed.IsEmpty() || allowed[0].Equals(Max.BaseAllowed) ? DefaultRule.Max : DefaultRule.Min; 
         }
 
         void IManualAuth<K, A>.SetDefaultRule(Lite<RoleDN> role, DefaultRule behaviour)
@@ -201,7 +201,7 @@ namespace Signum.Entities.Authorization
             {
                 var behaviour = GetBehaviour(role);
                 var related = AuthLogic.RelatedTo(role);
-                if (related.Empty())
+                if (related.IsEmpty())
                     return behaviour.BaseAllowed;
                 else
                     return behaviour.MergeAllowed(related.Select(r => GetAllowed(r)));
@@ -318,7 +318,7 @@ namespace Signum.Entities.Authorization
                 A defaultAllowed;
                 Dictionary<K, A> tmpRules; 
 
-                if(baseCaches.Empty())
+                if(baseCaches.IsEmpty())
                 {
                     defaultAllowed = behaviour.BaseAllowed;
 
@@ -367,7 +367,7 @@ namespace Signum.Entities.Authorization
 
             public A GetAllowedBase(K k)
             {
-                return baseCaches.Empty() ? rules.DefaultAllowed :
+                return baseCaches.IsEmpty() ? rules.DefaultAllowed :
                        behaviour.MergeAllowed(baseCaches.Select(b => b.GetAllowed(k)));
             }
 

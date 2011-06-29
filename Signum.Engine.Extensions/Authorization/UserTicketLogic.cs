@@ -112,7 +112,7 @@ namespace Signum.Engine.Authorization
 
             List<Lite<UserTicketDN>> tooMuch = user.Tickets().OrderByDescending(t => t.ConnectionDate).Select(t => t.ToLite()).ToList().Skip(MaxTicketsPerUser).ToList();
 
-            if (tooMuch.Empty()) return result;
+            if (tooMuch.IsEmpty()) return result;
 
             Database.DeleteList<UserTicketDN>(tooMuch);
 

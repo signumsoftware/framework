@@ -58,7 +58,7 @@ namespace Signum.Entities.Authorization
 
         public string DefaultLabel
         {
-            get { return subRoles == null || subRoles.Empty() ? "Value" : "of " + subRoles.CommaAnd(); }
+            get { return subRoles == null || subRoles.IsEmpty() ? "Value" : "of " + subRoles.CommaAnd(); }
         }
 
         DefaultRule defaultRule;

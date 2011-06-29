@@ -423,7 +423,7 @@ namespace Signum.Engine.Authorization
 
         static bool IsAllwaysAllowed(Type type, TypeAllowedBasic allowed)
         {
-            return GetPairs(type, allowed, ExecutionContext.Current).Empty();
+            return GetPairs(type, allowed, ExecutionContext.Current).IsEmpty();
         }
 
         internal static Expression IsAllowedExpression(Expression entity, TypeAllowedBasic allowed, ExecutionContext executionContext)
