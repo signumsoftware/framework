@@ -388,7 +388,7 @@ WriteLiteral("\r\n            ");
 WriteLiteral("\r\n\r\n            ");
 
 
-       Write(Html.Hidden(Model.Compose("sfOrders"), findOptions.OrderOptions.Empty() ? "" :
+       Write(Html.Hidden(Model.Compose("sfOrders"), findOptions.OrderOptions.IsEmpty() ? "" :
                     (findOptions.OrderOptions.ToString(oo => (oo.OrderType == OrderType.Ascending ? "" : "-") + oo.Token.FullKey(), ";") + ";")));
 
 WriteLiteral("\r\n        </div>\r\n    </div>\r\n</div>\r\n<script type=\"text/javascript\">\r\n    new SF" +

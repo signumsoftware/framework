@@ -703,7 +703,7 @@ namespace Signum.Engine.Linq
         public CaseExpression(IEnumerable<When> whens, Expression defaultValue)
             :base(DbExpressionType.Case, GetType(whens, defaultValue))
         {
-            if (whens.Empty())
+            if (whens.IsEmpty())
                 throw new ArgumentNullException("whens");
 
             Type refType = this.Type.UnNullify();

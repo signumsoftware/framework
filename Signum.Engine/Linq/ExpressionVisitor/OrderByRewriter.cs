@@ -68,8 +68,8 @@ namespace Signum.Engine.Linq
 
         static bool AreEqual(IEnumerable<OrderExpression> col1, IEnumerable<OrderExpression> col2)
         {
-            bool col1Empty = col1 == null || col1.Empty();
-            bool col2Empty = col2 == null || col2.Empty();
+            bool col1Empty = col1 == null || col1.IsEmpty();
+            bool col2Empty = col2 == null || col2.IsEmpty();
 
             if (col1Empty && col2Empty)
                 return true;

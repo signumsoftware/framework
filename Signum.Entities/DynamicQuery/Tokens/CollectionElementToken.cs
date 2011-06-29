@@ -142,7 +142,7 @@ namespace Signum.Entities.DynamicQuery
 
         public static string MultipliedMessage(List<CollectionElementToken> elements, Type entityType)
         {
-            if (elements.Empty())
+            if (elements.IsEmpty())
                 return null;
 
 

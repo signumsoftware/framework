@@ -497,7 +497,7 @@ namespace Signum.Engine.Maps
             if (table == null)
                 throw new ArgumentNullException("table");
 
-            if (fields == null || fields.Empty())
+            if (fields == null || fields.IsEmpty())
                 throw new InvalidOperationException("No fields");
 
             if (fields.OfType<FieldEmbedded>().Any())
@@ -513,7 +513,7 @@ namespace Signum.Engine.Maps
             if (table == null)
                 throw new ArgumentNullException("table");
 
-            if (columns == null || columns.Empty())
+            if (columns == null || columns.IsEmpty())
                 throw new ArgumentNullException("columns");
 
             this.Table = table;
@@ -547,7 +547,7 @@ namespace Signum.Engine.Maps
 
         public UniqueIndex WhereNotNull(params IColumn[] notNullColumns)
         {
-            if (notNullColumns == null || notNullColumns.Empty())
+            if (notNullColumns == null || notNullColumns.IsEmpty())
             {
                 Where = null;
                 return this;
@@ -580,7 +580,7 @@ namespace Signum.Engine.Maps
 
         public UniqueIndex WhereNotNull(params Field[] notNullFields)
         {
-            if (notNullFields == null || notNullFields.Empty())
+            if (notNullFields == null || notNullFields.IsEmpty())
             {
                 Where = null;
                 return this;
