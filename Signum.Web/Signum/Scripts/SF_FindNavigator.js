@@ -143,12 +143,6 @@ SF.registerModule("FindNavigator", function () {
                 self.moveColumn($elem, e);
                 return false;
             });
-
-            $(this.pf("divSearchControl .sf-subtokens-expander")).live('click', function () {
-                var $this = $(this);
-                $this.next().show().focus().click();
-                $this.remove();
-            });
         },
 
         createCtxMenu: function ($rightClickTarget) {
@@ -892,5 +886,11 @@ SF.registerModule("FindNavigator", function () {
                 makeSearch();
             }
         }
-    }
+    };
+
+    $(".sf-subtokens-expander").live('click', function () {
+        var $this = $(this);
+        $this.next().show().focus().click();
+        $this.remove();
+    });
 });

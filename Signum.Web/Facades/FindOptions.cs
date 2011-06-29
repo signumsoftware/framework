@@ -62,11 +62,24 @@ namespace Signum.Web
             set { this.columnOptions = value; }
         }
 
-        int? top; //If null, use QuerySettings one
+        int? top;
+        /// <summary>
+        /// If null, use QuerySettings one
+        /// </summary>
         public int? Top
         {
             get { return top; }
             set { top = value; }
+        }
+
+        bool topEmpty;
+        /// <summary>
+        /// Force empty top (if set to true, Top will be ignored)
+        /// </summary>
+        public bool TopEmpty
+        {
+            get { return topEmpty; }
+            set { topEmpty = value; }
         }
 
         public FindOptions() { }
