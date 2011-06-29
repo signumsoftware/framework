@@ -93,11 +93,6 @@ namespace Signum.Entities.DynamicQuery
                 }
             }
 
-            if (Reflector.IsMList(PropertyInfo.PropertyType))
-            {
-                return NetPropertyToken.CollectionProperties(this);
-            }
-
             return SubTokensBase(PropertyInfo.PropertyType, Implementations());
         }
 
