@@ -122,7 +122,7 @@ WriteLiteral("            <tr>\r\n                <td class=\"sf-annual-calendar
             string month = CultureInfo.CurrentUICulture.DateTimeFormat.AbbreviatedMonthNames[startDate.AddDays(d).Month - 1];
             if (startDate.AddDays(d).Month != startDate.AddDays(d + 6).Month)
             {
-                month += " / " + CultureInfo.CurrentUICulture.DateTimeFormat.AbbreviatedMonthNames[startDate.AddDays(d).Month];
+                month += " " + CultureInfo.CurrentUICulture.DateTimeFormat.AbbreviatedMonthNames[startDate.AddDays(d).Month];
             }
                     
 

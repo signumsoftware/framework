@@ -25,8 +25,10 @@ SF.Calendar = (function () {
             $currTr = $calTableBody.children("tr:nth-child(" + (parseInt(r, 10) + 1) + ")");
             for (var c = Math.min(originIndex, index); c <= Math.max(originIndex, index); c++) {
                 $currTd = $currTr.children("td:nth-child(" + (parseInt(c, 10) + 1) + ")");
-                $currTd.addClass(selectedClass);
-                currShiftSelection.push($currTd);
+                if ($currTd.children("." + inactiveDivClass).length == 0) {
+                    $currTd.addClass(selectedClass);
+                    currShiftSelection.push($currTd);
+                }
             }
         }
     }
