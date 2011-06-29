@@ -48,6 +48,13 @@ namespace Signum.Windows
         public static Dictionary<PropertyRoute, Func<Binding, DataTemplate>> PropertyFormatters { get; set; }
         public static List<FormatterRule> FormatRules { get; set; }
 
+        Dictionary<string, Func<Binding, DataTemplate>> formatters;
+        public Dictionary<string, Func<Binding, DataTemplate>> Formatters
+        {
+            get { return formatters ?? (formatters = new Dictionary<string, Func<Binding, DataTemplate>>()); }
+            set { formatters = value; }
+        }
+
         static QuerySettings()
         {
             FormatRules = new List<FormatterRule>
@@ -89,6 +96,10 @@ namespace Signum.Windows
 
         public static Func<Binding, DataTemplate> GetFormatter(Column column)
         {
+            Func<Binding, DataTemplate> cf;
+            if (formatters != null && formatters.TryGetValue(column.Name, out cf))
+                return cf; 
+
             PropertyRoute route = column.Token.GetPropertyRoute();
             if (route != null)
             {
