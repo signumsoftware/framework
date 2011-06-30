@@ -120,7 +120,7 @@ namespace Signum.Entities.Authorization
             set { Set(ref anulationDate, value, () => AnulationDate); }
         }
 
-        UserState state;
+        UserState state = UserState.Created;
         public UserState State
         {
             get { return state; }
