@@ -5,6 +5,7 @@ using System.Text;
 using Signum.Utilities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Signum.Test.Properties;
+using System.Linq.Expressions;
 
 namespace Signum.Test
 {
@@ -41,6 +42,43 @@ namespace Signum.Test
             }
 
             throw new AssertFailedException(Resources.No0HasBeenThrown.Formato(typeof(T).Name));
+        }
+
+        public static void AssertAll<T>(this IEnumerable<T> collection, Expression<Func<T, bool>> predicate)
+        {
+            foreach (var item in collection)
+            {
+                if (!predicate.Invoke(item))
+                    Assert.Fail("'{0}' fails on '{1}'".Formato(item, predicate.NiceToString())); 
+            }
+        }
+
+        public static void AssertContains<T>(this IEnumerable<T> collection, params T[] elements)
+        {
+            var hs = collection.ToHashSet();
+
+            string notFound = elements.Where(a => !hs.Contains(a)).CommaAnd();
+
+            if (notFound.HasText())
+                Assert.Fail("{0} not found".Formato(notFound)); 
+        }
+
+        public static void AssertExactly<T>(this IEnumerable<T> collection, params T[] elements)
+        {
+            var hs = collection.ToHashSet();
+
+            string notFound = elements.Where(a => !hs.Contains(a)).CommaAnd();
+            string exceeded = hs.Where(a => elements.Contains(a)).CommaAnd(); ;
+
+            if (notFound.HasText() && exceeded.HasText())
+                Assert.Fail("{0} not found and {1} exceeded".Formato(notFound, exceeded));
+
+            if(notFound.HasText())
+                Assert.Fail("{0} not found".Formato(notFound));
+
+            if (exceeded.HasText())
+                Assert.Fail("{0} exceeded".Formato(exceeded));
+
         }
     }
 }
