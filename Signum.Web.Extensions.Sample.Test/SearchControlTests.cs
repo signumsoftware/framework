@@ -440,7 +440,7 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.WaitAjaxFinished(selenium.ThereAreNRows(3));
 
             selenium.ExpandTokens(3);
-            selenium.FilterSelectToken(3, "value=Name", true);
+            selenium.FilterSelectToken(3, "value=Name", false);
             selenium.AddFilter(1);
             selenium.Type("value_1", "i");
             selenium.Search();
@@ -467,7 +467,7 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.WaitAjaxFinished(selenium.ThereAreNRows(5));
 
             selenium.ExpandTokens(3);
-            selenium.FilterSelectToken(3, "value=Name", true);
+            selenium.FilterSelectToken(3, "value=Name", false);
             selenium.AddFilter(1);
             selenium.Type("value_1", "Corgan");
             selenium.Search();

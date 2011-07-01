@@ -2,6 +2,25 @@
 @using Signum.Web.ControlPanel
 @using System.Reflection
 
+<script type="text/javascript">
+    var SF = SF || {};
+
+    SF.ControlPanel = (function () {
+        var toggleFillColumn = function (cbFillId, colInputId) {
+            if ($("#" + cbFillId + ":checked").length > 0) {
+                $('#' + colInputId).val(1).attr('disabled', 'disabled');
+            }
+            else {
+                $('#' + colInputId).removeAttr('disabled');
+            }
+        };
+
+        return {
+            toggleFillColumn: toggleFillColumn
+        };
+    })();
+</script>
+
 @using (var tc = Html.TypeContext<ControlPanelDN>())
 {
     @Html.EntityLine(tc, cp => cp.Related, el => el.Create = false)
