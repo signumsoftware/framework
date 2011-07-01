@@ -203,15 +203,22 @@ namespace Signum.Web.Selenium
             return "jq=#{0}sfGlobalValidationSummary".Formato(prefix);
         }
 
-        public static bool FormHasNErrors(this ISelenium selenium, int numberOfErrors)
+        public static bool FormHasNErrors(this ISelenium selenium, int? numberOfErrors)
         {
             return FormHasNErrors(selenium, numberOfErrors, "");
         }
 
-        public static bool FormHasNErrors(this ISelenium selenium, int numberOfErrors, string prefix)
+        public static bool FormHasNErrors(this ISelenium selenium, int? numberOfErrors, string prefix)
         {
-            return selenium.IsElementPresent("{0} > ul > li:nth-child({1})".Formato(ValidationSummarySelector(prefix), numberOfErrors)) &&
-                   !selenium.IsElementPresent("{0} > ul > li:nth-child({1})".Formato(ValidationSummarySelector(prefix), numberOfErrors + 1));
+            if (numberOfErrors.HasValue)
+            {
+                return selenium.IsElementPresent("{0} > ul > li:nth-child({1})".Formato(ValidationSummarySelector(prefix), numberOfErrors)) &&
+                       !selenium.IsElementPresent("{0} > ul > li:nth-child({1})".Formato(ValidationSummarySelector(prefix), numberOfErrors + 1));
+            }
+            else
+            {
+                return selenium.IsElementPresent("{0} > ul > li".Formato(ValidationSummarySelector(prefix)));
+            }
         }
 
         public static bool FormElementHasError(this ISelenium selenium, string elementId)
