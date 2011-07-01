@@ -39,6 +39,7 @@ namespace Signum.Windows.Chart
 
         public ResultTable resultTable;
         public QueryDescription Description;
+        public QuerySettings Settings { get; private set; }
         public Type EntityType;
 
         ChartRendererBase chartRenderer; 
@@ -88,6 +89,7 @@ namespace Signum.Windows.Chart
    
 
             Description = Navigator.Manager.GetQueryDescription(Request.QueryName);
+            Settings = Navigator.GetQuerySettings(Request.QueryName);
             var entityColumn = Description.Columns.SingleOrDefault(a => a.IsEntity);
             EntityType = Reflector.ExtractLite(entityColumn.Type);
 
@@ -154,8 +156,6 @@ namespace Signum.Windows.Chart
         { 
             UpdateFilters();
             var request = Request;
-
-
 
             if (HasErrors())
                 return;
@@ -363,7 +363,7 @@ namespace Signum.Windows.Chart
         DataTemplate CreateDataTemplate(ResultColumn c)
         {
             Binding b = new Binding("[{0}]".Formato(c.Index)) { Mode = BindingMode.OneTime };
-            DataTemplate dt = QuerySettings.GetFormatter(c.Column)(b);
+            DataTemplate dt = Settings.GetFormatter(c.Column)(b);
             return dt;
         }
 
