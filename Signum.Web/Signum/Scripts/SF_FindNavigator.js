@@ -636,30 +636,33 @@ SF.registerModule("FindNavigator", function () {
 
         newSubTokensCombo: function (index, controllerUrl) {
             SF.log("FindNavigator newSubTokensCombo");
-            var selectedColumn = $(this.pf("ddlTokens_" + index));
-            var self = this;
-            var $btnAddFilter = $(this.pf("btnAddFilter"));
-            var $btnAddColumn = $(this.pf("btnAddColumn"));
-            if (selectedColumn.length == 0) {
+            var $selectedColumn = $(this.pf("ddlTokens_" + index));
+            if ($selectedColumn.length == 0) {
                 return;
             }
 
+            var self = this;
+            var $btnAddFilter = $(this.pf("btnAddFilter"));
+            var $btnAddColumn = $(this.pf("btnAddColumn"));
+            
             //Clear child subtoken combos
             var self = this;
-            $("select,span")
+            $selectedColumn.siblings("select,span")
                 .filter(function () {
-                    return ($(this).attr("id").indexOf(SF.compose(self.findOptions.prefix, "ddlTokens_")) == 0)
-                    || ($(this).attr("id").indexOf(SF.compose(self.findOptions.prefix, "lblddlTokens_")) == 0)
-                })
-                .filter(function () {
-                    var currentId = $(this).attr("id");
-                    var lastSeparatorIndex = currentId.lastIndexOf("_");
-                    var currentIndex = currentId.substring(lastSeparatorIndex + 1, currentId.length);
+                    var elementId = $(this).attr("id");
+                    if (typeof elementId == "undefined") {
+                        return false;
+                    }
+                    if ((elementId.indexOf(SF.compose(self.findOptions.prefix, "ddlTokens_")) != 0)
+                        && (elementId.indexOf(SF.compose(self.findOptions.prefix, "lblddlTokens_")) != 0)) {
+                        return false;
+                    }
+                    var currentIndex = elementId.substring(elementId.lastIndexOf("_") + 1, elementId.length);
                     return parseInt(currentIndex) > index;
                 })
                 .remove();
 
-            var $selectedOption = selectedColumn.children("option:selected");
+            var $selectedOption = $selectedColumn.children("option:selected");
             if ($selectedOption.val() == "") {
                 if (index == 0) {
                     this.changeButtonState($btnAddFilter, lang.signum.selectToken);

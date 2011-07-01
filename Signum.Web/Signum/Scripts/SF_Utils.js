@@ -403,7 +403,7 @@ SF.NewContentProcessor = {
                 var data = $txt.data();
                 $txt.button({
                     text: (!("text" in data) || SF.isTrue(data.text)),
-                    icons: { primary: data.icon, secondary: data["icon-secondary"] },
+                    icons: { primary: data.icon, secondary: data.iconSecondary },
                     disabled: $txt.hasClass("sf-disabled")
                 });
             }
