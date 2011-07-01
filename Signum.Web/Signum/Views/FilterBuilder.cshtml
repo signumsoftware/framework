@@ -8,10 +8,10 @@
    FindOptions findOptions = (FindOptions)ViewData[ViewDataKeys.FindOptions];
    QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];}
 
-<div id="@context.Compose("fields-search")">
-    <div id="@context.Compose("fields-list")" class="sf-fields-list">
+<div>
+    <div class="sf-fields-list">
         <div class="ui-widget sf-filters" @(visible ? "" : "style=display:none")>
-            <div id="@context.Compose("filters-body")" class="ui-widget-header ui-corner-top sf-filters-body">
+            <div class="ui-widget-header ui-corner-top sf-filters-body">
                 @{ var columns = new HtmlStringBuilder();
                    columns.AddLine(new HtmlTag("option").Attr("value", "").SetInnerText("-").ToHtml());
                    foreach (var c in queryDescription.Columns)
