@@ -94,7 +94,7 @@ namespace Signum.Windows
             PropertyFormatters.Add(PropertyRoute.Construct(property), formatter);
         }
 
-        public static Func<Binding, DataTemplate> GetFormatter(Column column)
+        public Func<Binding, DataTemplate> GetFormatter(Column column)
         {
             Func<Binding, DataTemplate> cf;
             if (formatters != null && formatters.TryGetValue(column.Name, out cf))
