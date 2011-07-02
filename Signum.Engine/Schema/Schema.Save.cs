@@ -23,14 +23,22 @@ namespace Signum.Engine.Maps
 
     public partial class Table
     {
-        internal SqlPreCommand Save(IdentifiableEntity ident, Forbidden forbidden)
-        {   
-            SqlPreCommand sql = ident.IsNew ? InsertSql(ident, forbidden) : UpdateSql(ident, forbidden);
+        internal void Save(IdentifiableEntity ident, Forbidden forbidden)
+        {
+            bool isNew = ident.IsNew;
+
+            if (ident.IsNew)
+                Insert(ident, forbidden); 
+            else
+                Update(ident, forbidden); 
 
             if (forbidden.Count == 0)
                 ident.Modified = null;
 
-            return sql;
+            foreach (var ef in Fields.Values.Where(e=>e.Field is FieldMList))
+            {
+                ((FieldMList)ef.Field).RelationalTable.RelationalInserts((Modifiable)ef.Getter(ident), isNew, ident, forbidden);
+            }
         }
 
         public SqlPreCommand InsertSqlSync(IdentifiableEntity ident, string comment = null)
@@ -49,12 +57,8 @@ namespace Signum.Engine.Maps
             return SqlBuilder.InsertSync(Name, parameters, comment);
         }
 
-        SqlPreCommand InsertSql(IdentifiableEntity ident, Forbidden forbidden)
+        void Insert(IdentifiableEntity ident, Forbidden forbidden)
         {
-            SqlPreCommand cols = (from ef in Fields.Values
-                                  where ef.Field is FieldMList
-                                  select ((FieldMList)ef.Field).RelationalTable.RelationalInserts((Modifiable)ef.Getter(ident), false, forbidden)).Combine(Spacing.Simple);      
-
             Entity ent = ident as Entity;
             if (ent != null)
                 ent.Ticks = Transaction.StartTime.Ticks;
@@ -70,13 +74,7 @@ namespace Signum.Engine.Maps
                 if (ident.IdOrNull != null)
                     throw new InvalidOperationException("{0} is new, but has Id {1}".Formato(ident, ident.IdOrNull));
 
-                if (cols == null)
-                    return SqlBuilder.InsertSaveId(Name, parameters, ident);
-                else
-                    return SqlPreCommand.Combine(Spacing.Double,
-                        SqlBuilder.InsertSaveId(Name, parameters, ident),
-                        SqlBuilder.SetLastIdScopeIdentity(),
-                        cols);
+                ident.id = (int)SqlBuilder.InsertIdentity(Name, parameters).ExecuteScalar();
             }
             else
             {
@@ -87,13 +85,7 @@ namespace Signum.Engine.Maps
 
                 parameters.Insert(0, pid);
 
-                if (cols == null)
-                    return SqlBuilder.InsertNoIdentity(Name, parameters);
-                else
-                    return SqlPreCommand.Combine(Spacing.Double,
-                       SqlBuilder.InsertNoIdentity(Name, parameters),
-                       SqlBuilder.SetLastEntityId(ident.Id),
-                       cols);
+                SqlBuilder.InsertNoIdentity(Name, parameters).ExecuteNonQuery();
             }
         }
 
@@ -115,12 +107,8 @@ namespace Signum.Engine.Maps
             return SqlBuilder.UpdateSync(Name, parameters, ident.Id, comment);
         }
 
-        SqlPreCommand UpdateSql(IdentifiableEntity ident, Forbidden forbidden)
+        void Update(IdentifiableEntity ident, Forbidden forbidden)
         {
-            SqlPreCommand cols = (from ef in Fields.Values
-                                  where ef.Field is FieldMList
-                                  select ((FieldMList)ef.Field).RelationalTable.RelationalInserts((Modifiable)ef.Getter(ident), false, forbidden)).Combine(Spacing.Simple);      
-
             if (ident is Entity)
             {
                 Entity entity = (Entity)ident;
@@ -132,14 +120,7 @@ namespace Signum.Engine.Maps
                 foreach (var v in Fields.Values)
                     v.Field.CreateParameter(parameters, v.Getter(entity), forbidden);
 
-
-                if (cols == null)
-                    return SqlBuilder.UpdateEntity(Name, parameters, entity.Id, oldTicks);
-                else
-                    return SqlPreCommand.Combine(Spacing.Double,
-                        SqlBuilder.SetLastEntityId(entity.Id),
-                        SqlBuilder.UpdateEntityLastId(Name, parameters, entity.Id, oldTicks),
-                        cols); 
+                SqlBuilder.UpdateEntity(Name, parameters, entity.Id, oldTicks).ToSimple().ExecuteNonQuery();
             }
             else
             {
@@ -147,38 +128,40 @@ namespace Signum.Engine.Maps
                 foreach (var v in Fields.Values)
                     v.Field.CreateParameter(parameters, v.Getter(ident), forbidden);
 
-                if (cols == null)
-                    return SqlBuilder.Update(Name, parameters, ident.Id);
-                else
-                    return SqlPreCommand.Combine(Spacing.Double,
-                        SqlBuilder.SetLastEntityId(ident.Id),
-                        SqlBuilder.UpdateLastId(Name, parameters),
-                        cols); 
+                SqlBuilder.Update(Name, parameters, ident.Id).ExecuteNonQuery();
             }
         }
     }
 
     public partial class RelationalTable
     { 
-        internal SqlPreCommand RelationalInserts(Modifiable collection, bool newEntity, Forbidden forbidden)
+        internal void RelationalInserts(Modifiable collection, bool newEntity, IdentifiableEntity ident, Forbidden forbidden)
         {
             if (collection == null)
-                return newEntity? null: SqlBuilder.RelationalDeleteScope(Name, BackReference.Name); 
+            {
+                if (!newEntity)
+                    SqlBuilder.RelationalDelete(Name, BackReference.Name, ident.Id).ExecuteNonQuery();
+            }
+            else
+            {
+                if (collection.Modified == false) // no es modificado ??
+                    return;
 
-            if (collection.Modified == false) // no es modificado ??
-                return null;
+                if (forbidden.Count == 0)
+                    collection.Modified = null;
 
-            if (forbidden.Count == 0)
-                collection.Modified = null;
+                if (!newEntity)
+                    SqlBuilder.RelationalDelete(Name, BackReference.Name, ident.Id).ExecuteNonQuery();
 
-            var clean = newEntity ? null : SqlBuilder.RelationalDeleteScope(Name, BackReference.Name);
+                foreach (object item in (IEnumerable)collection)
+                {
+                    var list = new List<SqlParameter>();
+                    BackReference.CreateParameter(list, ident, forbidden);
+                    Field.CreateParameter(list, item, forbidden);
 
-            var inserts = ((IEnumerable)collection).Cast<object>()
-                .Select(o => SqlBuilder.RelationalInsertScope(Name, BackReference.Name,
-                    new List<SqlParameter>().Do(lp => Field.CreateParameter(lp, o, forbidden))))
-                .Combine(Spacing.Simple);
-
-            return SqlPreCommand.Combine(Spacing.Double, clean, inserts); 
+                    SqlBuilder.InsertIdentity(Name, list).ExecuteNonQuery();
+                }
+            }
         }
     }
 

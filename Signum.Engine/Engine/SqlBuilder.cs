@@ -15,8 +15,6 @@ using System.Globalization;
 
 namespace Signum.Engine
 {
-
-
     internal static class SqlBuilder
     {
         public readonly static SqlDbType PrimaryKeyType = SqlDbType.Int;
@@ -28,33 +26,27 @@ namespace Signum.Engine
         public readonly static SqlDbType ToStrType = SqlDbType.NVarChar;
         public readonly static string ToStrName = "ToStr";
 
-        public readonly static int MaxParametersInSQL = 2000;
 
-        public static SqlPreCommand CreateTable(string table, List<string> campos)
+        internal static SqlPreCommandSimple Update(string table, List<SqlParameter> parameters, int id)
         {
-            return new SqlPreCommandSimple("CREATE TABLE {0}(\r\n{1}\r\n)".Formato(table.SqlScape(), campos.ToString(",\r\n").Indent(2)));
+            SqlParameter pid = SqlParameterBuilder.CreateIdParameter(id);
+
+            return new SqlPreCommandSimple(
+                    "UPDATE {0} SET \r\n{1}\r\n WHERE id = {2}".Formato(table.SqlScape(),
+                    parameters.ToString(p => "{0} = {1}".Formato(p.SourceColumn.SqlScape(), p.ParameterName).Indent(2), ",\r\n"),
+                    pid.ParameterName),
+                    parameters.And(pid).ToList());
         }
 
-        internal static SqlPreCommand UpdateEntityLastId(string table, List<SqlParameter> parameters, int id, long ticks)
-        {
-            SqlParameter ticksParam = SqlParameterBuilder.CreateParameter("ticks", SqlDbType.BigInt, false, ticks);
-
-            return SqlPreCommand.Combine(Spacing.Simple,
-                new SqlPreCommandSimple(
-                    "UPDATE {0} SET \r\n{1}\r\n WHERE id = @LastEntityID AND ticks = {2}".Formato(table.SqlScape(),
-                        parameters.ToString(p => "{0} = {1}".Formato(p.SourceColumn.SqlScape(), p.ParameterName).Indent(2), ",\r\n"),
-                        ticksParam.ParameterName), parameters.And(ticksParam).ToList()),
-                CheckRowCount(table, id));
-        }
 
         internal static SqlPreCommand UpdateEntity(string table, List<SqlParameter> parameters, int id, long ticks)
         {
             SqlParameter pid = SqlParameterBuilder.CreateIdParameter(id);
-            SqlParameter ticksParam = SqlParameterBuilder.CreateParameter("ticks", SqlDbType.BigInt, false, ticks);
+            SqlParameter ticksParam = SqlParameterBuilder.CreateParameter("old_ticks", SqlDbType.BigInt, false, ticks);
 
             return SqlPreCommand.Combine(Spacing.Simple,
                 new SqlPreCommandSimple(
-                    "UPDATE {0} SET \r\n{1}\r\n WHERE id = {2} AND ticks = {3}".Formato(table.SqlScape(),
+                    "UPDATE {0} SET \r\n{1}\r\n WHERE id = {2} AND old_ticks = {3}".Formato(table.SqlScape(),
                         parameters.ToString(p => "{0} = {1}".Formato(p.SourceColumn.SqlScape(), p.ParameterName).Indent(2), ",\r\n"),
                         pid.ParameterName,
                         ticksParam.ParameterName), parameters.And(pid).And(ticksParam).ToList()),
@@ -67,28 +59,7 @@ namespace Signum.Engine
                                     Resources.ConcurrencyErrorOnDatabaseTable0Id1.Formato(table, id)));
         }
 
-        internal static SqlPreCommand UpdateLastId(string table, List<SqlParameter> parameters)
-        {
-            return SqlPreCommand.Combine(Spacing.Simple,
-                new SqlPreCommandSimple(
-                    "UPDATE {0} SET \r\n{1}\r\n WHERE id = @LastEntityID".Formato(table.SqlScape(),
-                    parameters.ToString(p => "{0} = {1}".Formato(p.SourceColumn.SqlScape(), p.ParameterName).Indent(2), ",\r\n")),
-                    parameters));
-        }
-
-        internal static SqlPreCommand Update(string table, List<SqlParameter> parameters, int id)
-        {
-            SqlParameter pid = SqlParameterBuilder.CreateIdParameter(id);
-
-            return SqlPreCommand.Combine(Spacing.Simple,
-                new SqlPreCommandSimple(
-                    "UPDATE {0} SET \r\n{1}\r\n WHERE id = {2}".Formato(table.SqlScape(),
-                    parameters.ToString(p => "{0} = {1}".Formato(p.SourceColumn.SqlScape(), p.ParameterName).Indent(2), ",\r\n"), 
-                    pid.ParameterName),
-                    parameters.And(pid).ToList()));
-        }
-
-        internal static SqlPreCommand UpdateSync(string table, List<SqlParameter> parameters, int id, string comment)
+        internal static SqlPreCommandSimple UpdateSync(string table, List<SqlParameter> parameters, int id, string comment)
         {
             SqlParameter paramId = SqlParameterBuilder.CreateIdParameter(id);
 
@@ -100,7 +71,28 @@ namespace Signum.Engine
                     parameters.And(paramId).ToList());
         }
 
-        internal static SqlPreCommand InsertSync(string table, List<SqlParameter> parameters, string comment)
+        internal static SqlPreCommandSimple Insert(string table, List<SqlParameter> parameters)
+        {
+            return new SqlPreCommandSimple("INSERT {0} ({1})\r\n VALUES ({2})".Formato(table,
+                    parameters.ToString(p => p.SourceColumn.SqlScape(), ", "),
+                    parameters.ToString(p => p.ParameterName, ", ")), parameters);
+        }
+
+        internal static SqlPreCommandSimple InsertIdentity(string table, List<SqlParameter> parameters)
+        {
+            return new SqlPreCommandSimple("INSERT {0} ({1})\r\n VALUES ({2}); SELECT CONVERT(Int,SCOPE_IDENTITY()) AS [newID]".Formato(table,
+                    parameters.ToString(p => p.SourceColumn.SqlScape(), ", "),
+                    parameters.ToString(p => p.ParameterName, ", ")), parameters);
+        }
+
+        internal static SqlPreCommandSimple InsertNoIdentity(string table, List<SqlParameter> parameters)
+        {
+            return new SqlPreCommandSimple("INSERT {0} ({1})\r\n VALUES ({2})".Formato(table,
+                    parameters.ToString(p => p.SourceColumn.SqlScape(), ", "),
+                    parameters.ToString(p => p.ParameterName, ", ")), parameters);
+        }
+
+        internal static SqlPreCommandSimple InsertSync(string table, List<SqlParameter> parameters, string comment)
         {
             return new SqlPreCommandSimple("INSERT {0} ({1}) --{2}\r\n VALUES ({3})".Formato(table,
                     parameters.ToString(p => p.SourceColumn.SqlScape(), ", "), 
@@ -108,97 +100,30 @@ namespace Signum.Engine
                     parameters.ToString(p => p.ParameterName, ", ")), parameters);
         }
 
-        internal static SqlPreCommand InsertNoIdentity(string table, List<SqlParameter> parameters)
+        internal static SqlPreCommandSimple DeleteSql(string table, int id)
         {
-            return new SqlPreCommandSimple("INSERT {0} ({1})\r\n VALUES ({2})".Formato(table,
-                    parameters.ToString(p => p.SourceColumn.SqlScape(), ", "),
-                    parameters.ToString(p => p.ParameterName, ", ")), parameters);
+            return new SqlPreCommandSimple("DELETE {0} WHERE id = @id".Formato(table.SqlScape()), 
+                new List<SqlParameter> { SqlParameterBuilder.CreateIdParameter(id) });
         }
 
-        internal static SqlPreCommand InsertLastEntity(string table, SqlParameter id, List<SqlParameter> parameters)
-        {
-            return new SqlPreCommandSimple("INSERT INTO {0} ({1})\r\n VALUES ({2}); \r\n SET @LastEntityID = {0}".Formato(table.SqlScape(),
-                    parameters.ToString(p => p.SourceColumn.SqlScape(), ", "),
-                    parameters.ToString(p => p.ParameterName, ", ")), parameters);
-        }
-
-        internal static SqlPreCommand InsertSaveId(string table, List<SqlParameter> parameters, IdentifiableEntity entityToUpdate)
-        {
-            return new SqlPreCommandSimple("INSERT INTO {0} ({1})\r\n OUTPUT INSERTED.id INTO @MyIdTable\r\n VALUES ({2})".Formato(table.SqlScape(),
-                    parameters.ToString(p => p.SourceColumn.SqlScape(), ", "),
-                    parameters.ToString(p => p.ParameterName, ", ")), parameters) { EntityToUpdate = entityToUpdate };
-        }
-
-        internal static SqlPreCommandSimple DeclareLastEntityID()
-        {
-            return new SqlPreCommandSimple("DECLARE @LastEntityID int");
-        }
-
-        internal static SqlPreCommandSimple SelectLastEntityID()
-        {
-            return new SqlPreCommandSimple("SELECT @LastEntityID as LastID");
-        }
-
-        internal static SqlPreCommand SetLastEntityId(int id)
-        {
-            SqlParameter pid = SqlParameterBuilder.CreateIdParameter(id);
-
-            return new SqlPreCommandSimple("SET @LastEntityID = {0}".Formato(pid.ParameterName), new List<SqlParameter> { pid });
-        }
-
-        public static SqlPreCommand SetLastIdScopeIdentity()
-        {
-            return new SqlPreCommandSimple("SET @LastEntityID = SCOPE_IDENTITY()");
-        }
-
-        internal static SqlPreCommand DeleteSql(string table, SqlParameter backId)
-        {
-            return new SqlPreCommandSimple("DELETE {0} WHERE id = {1}".Formato(table.SqlScape(), backId.ParameterName), new List<SqlParameter> { backId });
-        }
-
-        internal static SqlPreCommand DeleteSql(string table, List<SqlParameter> backIds)
-        {
-            return new SqlPreCommandSimple("DELETE {0} WHERE id IN ({1})".Formato(table.SqlScape(), backIds.ToString(p => p.ParameterName, ", ")), backIds);
-        }
-
-        internal static SqlPreCommand DeleteSqlSync(string table, int id, string comment)
+        internal static SqlPreCommandSimple DeleteSqlSync(string table, int id, string comment)
         {
             return new SqlPreCommandSimple("DELETE {0} WHERE id = {1} --{2}".Formato(table.SqlScape(), id, comment));
         }
 
-        internal static SqlPreCommand RelationalDelete(string table, string backIdColumn, SqlParameter backId)
+        internal static SqlPreCommandSimple RelationalDelete(string table, string backIdColumn, int backId)
         {
-            return new SqlPreCommandSimple("DELETE {0} WHERE {1} = {2}".Formato(table.SqlScape(), backIdColumn, backId.ParameterName));
-        }
+            SqlParameter backIdParam = SqlParameterBuilder.CreateReferenceParameter(backIdColumn, false, backId);
 
-        internal static SqlPreCommand RelationalDelete(string table, string backIdColumn, List<SqlParameter> backIds)
-        {
-            return new SqlPreCommandSimple("DELETE {0} WHERE {1} IN ({2})".Formato(table.SqlScape(), backIdColumn, backIds.ToString(p => p.ParameterName, ", ")));
-        }
-
-        internal static SqlPreCommand DeclareIDsMemoryTable()
-        {
-            return new SqlPreCommandSimple("DECLARE @MyIdTable table(id int)");
-        }
-
-        internal static SqlPreCommand SelectIDMemoryTable()
-        {
-            return new SqlPreCommandSimple("SELECT id FROM @MyIdTable as InsertedIdTable");
-        }
-
-        internal static SqlPreCommand RelationalDeleteScope(string table, string backIdColumn)
-        {
-            return new SqlPreCommandSimple("DELETE {0} WHERE {1} = @LastEntityID".Formato(table.SqlScape(), backIdColumn));
-        }
-
-        internal static SqlPreCommand RelationalInsertScope(string table, string backIdColumn, List<SqlParameter> campoParameters)
-        {
-            return new SqlPreCommandSimple("INSERT INTO {0} ({1}, {2}) VALUES ( @LastEntityID, {3})".Formato(table.SqlScape(), backIdColumn.SqlScape(),
-                campoParameters.ToString(p => p.SourceColumn.SqlScape(), ", "),
-                campoParameters.ToString(p => p.ParameterName, ", ")), campoParameters);
+            return new SqlPreCommandSimple("DELETE {0} WHERE {1} = {2}".Formato(table.SqlScape(), backIdColumn, backIdParam.ParameterName), 
+                new List<SqlParameter> { backIdParam });
         }
 
         #region Create Tables
+        public static SqlPreCommand CreateTable(string table, List<string> campos)
+        {
+            return new SqlPreCommandSimple("CREATE TABLE {0}(\r\n{1}\r\n)".Formato(table.SqlScape(), campos.ToString(",\r\n").Indent(2)));
+        }
 
         public static SqlPreCommand CreateTableSql(ITable t)
         {

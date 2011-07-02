@@ -13,14 +13,6 @@ namespace Signum.Engine
 {
     public static class SqlParameterBuilder
     {
-        [ThreadStatic]
-        static int parameterCounter;
-
-        static string GetParameterName(string name)
-        {
-            return "@" + name + (parameterCounter++).ToString();
-        }
-
         public static SqlParameter CreateReferenceParameter(string name, bool nullable, int? id)
         {
             return CreateParameter(name, SqlBuilder.PrimaryKeyType, nullable, id);
@@ -35,7 +27,7 @@ namespace Signum.Engine
         {
             AssertDateTime(value);
 
-            return new SqlParameter(GetParameterName(name), type)
+            return new SqlParameter("@" + name, type)
             {
                 IsNullable = nullable,
                 Value = value == null ? DBNull.Value : value,

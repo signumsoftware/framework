@@ -497,8 +497,6 @@ namespace Signum.Engine
         }
         #endregion
 
-        public static int MaxParameters { get { return SqlBuilder.MaxParametersInSQL; } }
-
         public static int UnsafeDelete<T>(this IQueryable<T> query)
               where T : IdentifiableEntity
         {
