@@ -23,18 +23,6 @@ namespace Signum.Engine
 
     public abstract class SqlPreCommand
     {
-        public class SqlPair
-        {
-            public readonly SqlPreCommand New;
-            public readonly SqlPreCommand Remainig;
-
-            public SqlPair(SqlPreCommand @new, SqlPreCommand remaining)
-            {
-                this.New = @new;
-                this.Remainig = remaining;
-            }
-        }
-
         public abstract IEnumerable<SqlPreCommandSimple> Leaves();
 
         protected internal abstract void GenerateScript(StringBuilder sb);
@@ -48,24 +36,6 @@ namespace Signum.Engine
         public override string ToString()
         {
             return this.PlainSql();
-        }
-
-        protected internal abstract SqlPair Split(ref int remainingParameters);
-
-        public IEnumerable<SqlPreCommand> Splits(int numParams)
-        {
-            SqlPreCommand rem = this;
-            while (rem != null)
-            {
-                int remainingParams = numParams;
-                SqlPreCommand.SqlPair pair = rem.Split(ref remainingParams);
-                if (pair.New == null)
-                    throw new InvalidOperationException("There is a SqlPreComandSimple with more than {0} parameters".Formato(numParams));
-
-                yield return pair.New;
-
-                rem = pair.Remainig;
-            }
         }
 
         public static SqlPreCommand Combine(Spacing spacing, params SqlPreCommand[] sentences)
@@ -155,7 +125,6 @@ namespace Signum.Engine
     {
         public string Sql { get; private set; }
         public List<SqlParameter> Parameters { get; private set; }
-        internal IdentifiableEntity EntityToUpdate { get;  set; }
 
         public SqlPreCommandSimple(string sql)
         {
@@ -192,13 +161,6 @@ namespace Signum.Engine
         protected internal override int NumParameters
         {
             get { return Parameters.TryCS(p => p.Count) ?? 0; }
-        }
-
-        protected internal override SqlPair Split(ref int remainingParameters)
-        {
-            return (remainingParameters -= this.NumParameters) >= 0 ?
-                 new SqlPair(this, null) :
-                 new SqlPair(null, this);
         }
     }
 
@@ -260,26 +222,6 @@ namespace Signum.Engine
         {
             get { return Commands.Sum(c => c.NumParameters); }
         }
-
-        protected internal override SqlPair Split(ref int remParameters)
-        {
-            SqlPair lastPair = null;
-            int i = 0;
-            for (; i < Commands.Length && (lastPair == null || lastPair.Remainig == null); i++)
-                lastPair = Commands[i].Split(ref remParameters);
-
-            //i es la posicion del siguiente a procesar
-            if (i == Commands.Length && lastPair.Remainig == null)
-                return new SqlPair(this, null);
-
-            if (i == 0 || i == 1 && lastPair.New == null)
-                return new SqlPair(null, this);
-
-            return new SqlPair(
-               Commands.Take(i - 1).And(lastPair.New).Combine(Spacing),
-               Commands.Skip(i).PreAnd(lastPair.Remainig).Combine(Spacing));
-        }
-
     }
 
 }

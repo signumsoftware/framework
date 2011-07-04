@@ -8,93 +8,252 @@ using Signum.Engine;
 using Signum.Utilities;
 using Signum.Engine.Properties;
 using Signum.Entities.Reflection;
+using Signum.Engine.Exceptions;
+using System.Linq.Expressions;
+using System.Reflection;
+using Signum.Utilities.Reflection;
+using System.Data;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.Maps
 {
     public class Forbidden: HashSet<IdentifiableEntity>
     {
         internal static readonly Forbidden None = new Forbidden();
-
-        public IdentifiableEntity Filter(IdentifiableEntity ei)
-        {
-            return Contains(ei) ? null : ei; 
-        }
     }
 
     public partial class Table
     {
-        internal SqlPreCommand Save(IdentifiableEntity ident, Forbidden forbidden)
-        {   
-            SqlPreCommand sql = ident.IsNew ? InsertSql(ident, forbidden) : UpdateSql(ident, forbidden);
+      
+        string sqlInsert;
+        Func<IdentifiableEntity, Forbidden, List<SqlParameter>> insertParameters;
+        Action<IdentifiableEntity, Forbidden> insert;
 
-            if (forbidden.Count == 0)
-                ident.Modified = null;
+        void InitializeInsert()
+        {
+            var trios = new List<Table.Trio>();
+            var assigments = new List<BinaryExpression>();
+            var paramIdent = Expression.Parameter(typeof(IdentifiableEntity), "ident");
+            var paramForbidden = Expression.Parameter(typeof(Forbidden), "forbidden");
 
-            return sql;
+            var cast = Expression.Parameter(Type, "casted");
+            assigments.Add(Expression.Assign(cast, Expression.Convert(paramIdent, Type)));
+
+            foreach (var item in Fields.Values.Where(a=>!Identity || !(a.Field is FieldPrimaryKey)))
+            {
+                item.Field.CreateParameter(trios, assigments, Expression.Field(cast, item.FieldInfo), paramForbidden);
+            }
+
+            sqlInsert = "INSERT {0} ({1})\r\n VALUES ({2})".Formato(Name.SqlScape(),
+                trios.ToString(p => p.SourceColumn.SqlScape(), ", "),
+                trios.ToString(p => p.ParameterName, ", "));
+
+            if (Identity)
+                sqlInsert += ";SELECT CONVERT(Int,SCOPE_IDENTITY()) AS [newID]";
+
+            var expr = Expression.Lambda<Func<IdentifiableEntity, Forbidden, List<SqlParameter>>>(
+                CreateBlock(trios.Select(a => a.ParameterBuilder), assigments), paramIdent, paramForbidden);
+
+            insertParameters = expr.Compile();
+
+            if(Identity)
+            {
+                if(typeof(Entity).IsAssignableFrom(this.Type))
+                {
+                    insert = (ident, forbidden)=>
+                    {
+                        if (ident.IdOrNull != null)
+                            throw new InvalidOperationException("{0} is new, but has Id {1}".Formato(ident, ident.IdOrNull));
+
+                        ((Entity)ident).Ticks = Transaction.StartTime.Ticks;
+
+                        ident.id = (int)new SqlPreCommandSimple(sqlInsert, insertParameters(ident, forbidden)).ExecuteScalar();
+                    };
+                }
+                else
+                {
+                    insert = (ident, forbidden)=>
+                    {
+                        if (ident.IdOrNull != null)
+                            throw new InvalidOperationException("{0} is new, but has Id {1}".Formato(ident, ident.IdOrNull));
+
+                        ident.id = (int)new SqlPreCommandSimple(sqlInsert, insertParameters(ident, forbidden)).ExecuteScalar();
+                    };
+                }
+            }
+            else
+            {
+                if (typeof(Entity).IsAssignableFrom(this.Type))
+                {
+                    insert = (ident, forbidden) =>
+                    {
+                        if (ident.IdOrNull == null)
+                            throw new InvalidOperationException("{0} should have an Id, since the table has no Identity".Formato(ident, ident.IdOrNull));
+
+                        ((Entity)ident).Ticks = Transaction.StartTime.Ticks;
+
+                        new SqlPreCommandSimple(sqlInsert, insertParameters(ident, forbidden)).ExecuteNonQuery();
+                    };
+                }
+                else
+                {
+                    insert = (ident, forbidden) =>
+                    {
+                        if (ident.IdOrNull == null)
+                            throw new InvalidOperationException("{0} should have an Id, since the table has no Identity".Formato(ident, ident.IdOrNull));
+
+                        new SqlPreCommandSimple(sqlInsert, insertParameters(ident, forbidden)).ExecuteNonQuery();
+                    };
+                }
+            }   
         }
+
+        static FieldInfo fiId = ReflectionTools.GetFieldInfo((IdentifiableEntity i) => i.id);
+        static FieldInfo fiTicks = ReflectionTools.GetFieldInfo((Entity i) => i.ticks);
+
+        string sqlUpdate;
+        Func<IdentifiableEntity, long, Forbidden, List<SqlParameter>> updateParameters;
+        Action<IdentifiableEntity, Forbidden> update; 
+
+        void InitializeUpdate()
+        {
+            var trios = new List<Trio>();
+            var assigments = new List<BinaryExpression>();
+            var paramIdent = Expression.Parameter(typeof(IdentifiableEntity), "ident");
+            var paramForbidden = Expression.Parameter(typeof(Forbidden), "forbidden");
+            var paramOldTicks = Expression.Parameter(typeof(long), "oldTicks");
+
+            var cast = Expression.Parameter(Type);
+            assigments.Add(Expression.Assign(cast, Expression.Convert(paramIdent, Type)));
+
+            foreach (var item in Fields.Values.Where(a =>!(a.Field is FieldPrimaryKey)))
+            {
+                item.Field.CreateParameter(trios, assigments, Expression.Field(cast, item.FieldInfo), paramForbidden);
+            }
+
+            string idParamName = SqlParameterBuilder.GetParameterName("id");
+
+            sqlUpdate = "UPDATE {0} SET \r\n{1}\r\n WHERE id = {2}".Formato(Name.SqlScape(),
+                    trios.ToString(p => "{0} = {1}".Formato(p.SourceColumn.SqlScape(), p.ParameterName).Indent(2), ",\r\n"),
+                    idParamName);
+
+
+            List<Expression> parameters = trios.Select(a => (Expression)a.ParameterBuilder).ToList();
+
+            parameters.Add(SqlParameterBuilder.ParameterFactory(idParamName, SqlBuilder.PrimaryKeyType, false, Expression.Field(paramIdent, fiId)));
+
+            if (typeof(Entity).IsAssignableFrom(this.Type))
+            {
+                string oldTicksParamName = SqlParameterBuilder.GetParameterName("old_ticks");
+
+                sqlUpdate += " AND ticks = {0}".Formato(oldTicksParamName);
+
+                parameters.Add(SqlParameterBuilder.ParameterFactory(oldTicksParamName, SqlDbType.BigInt, false, paramOldTicks));
+            }
+
+            var expr = Expression.Lambda<Func<IdentifiableEntity, long, Forbidden, List<SqlParameter>>>(
+                CreateBlock(parameters, assigments), paramIdent, paramOldTicks, paramForbidden);
+
+            updateParameters = expr.Compile();
+
+            if (typeof(Entity).IsAssignableFrom(this.Type))
+            {
+                update = (ident, forbidden) =>
+                {
+                    Entity entity = (Entity)ident;
+
+                    long oldTicks = entity.Ticks;
+                    entity.Ticks = Transaction.StartTime.Ticks;
+
+                    int num = (int)new SqlPreCommandSimple(sqlUpdate, updateParameters(ident, oldTicks, forbidden)).ExecuteNonQuery();
+                    if (num != 1)
+                        throw new ConcurrencyException(ident.GetType(), ident.Id);
+                };
+            }
+            else
+            {
+                update = (ident, forbidden) =>
+                {
+                    int num = (int)new SqlPreCommandSimple(sqlUpdate, updateParameters(ident, -1, forbidden)).ExecuteNonQuery();
+                    if (num != 1)
+                        throw new EntityNotFoundException(ident.GetType(), ident.Id);
+                };
+            }
+        }
+
+        Action<IdentifiableEntity, Forbidden, bool> saveCollections;
+
+        static MethodInfo miRelationalInserts = ReflectionTools.GetMethodInfo((RelationalTable rt) => rt.RelationalInserts(null, true, null, null));
+
+        void InitializeCollections()
+        {
+            var paramIdent = Expression.Parameter(typeof(IdentifiableEntity), "ident");
+            var paramForbidden = Expression.Parameter(typeof(Forbidden), "forbidden");
+            var paramIsNew = Expression.Parameter(typeof(bool), "isNew");
+
+            var entity = Expression.Parameter(Type);
+
+            var castEntity = Expression.Assign(entity, Expression.Convert(paramIdent, Type));  
+
+            var calls = Fields.Values.Where(ef => ef.Field is FieldMList)
+                         .Select(ef=>(Expression)Expression.Call(Expression.Constant(((FieldMList)ef.Field).RelationalTable), miRelationalInserts,
+                             Expression.Field(entity, ef.FieldInfo), paramIsNew, paramIdent, paramForbidden)).ToList();
+
+            if (calls.IsEmpty())
+                saveCollections = null;
+            else
+            {
+                var exp = Expression.Lambda<Action<IdentifiableEntity, Forbidden, bool>>(Expression.Block(new[] { entity },
+                    calls.PreAnd(castEntity)), paramIdent, paramForbidden, paramIsNew);
+
+                saveCollections = exp.Compile();
+            }
+        }
+
+        internal void Save(IdentifiableEntity ident, Forbidden forbidden)
+        {
+            using (HeavyProfiler.Log(role: "Table"))
+            {
+                bool isNew = ident.IsNew;
+
+                if (isNew)
+                {
+                    insert(ident, forbidden);
+                    ident.IsNew = false;
+                }
+                else
+                {
+                    update(ident, forbidden);
+                }
+
+                if (forbidden.Count == 0)
+                    ident.Modified = null;
+
+                if (saveCollections != null)
+                    saveCollections(ident, forbidden, isNew);
+            }
+        }
+
+        static readonly Forbidden NullForbidden = new Forbidden();
 
         public SqlPreCommand InsertSqlSync(IdentifiableEntity ident, string comment = null)
         {
             bool dirty = false; 
-            ident.PreSaving(ref dirty); 
+            ident.PreSaving(ref dirty);
 
-            List<SqlParameter> parameters = new List<SqlParameter>();
-
-            if (!Identity)
-                parameters.Add(SqlParameterBuilder.CreateIdParameter(ident.Id));
-
-            foreach (var v in Fields.Values)
-                v.Field.CreateParameter(parameters, v.Getter(ident), Forbidden.None);
-
-            return SqlBuilder.InsertSync(Name, parameters, comment);
+            return new SqlPreCommandSimple(AddComment(sqlInsert, comment), insertParameters(ident, NullForbidden)); 
         }
 
-        SqlPreCommand InsertSql(IdentifiableEntity ident, Forbidden forbidden)
+        static string AddComment(string sql, string comment)
         {
-            SqlPreCommand cols = (from ef in Fields.Values
-                                  where ef.Field is FieldMList
-                                  select ((FieldMList)ef.Field).RelationalTable.RelationalInserts((Modifiable)ef.Getter(ident), false, forbidden)).Combine(Spacing.Simple);      
+            if (string.IsNullOrEmpty(comment))
+                return sql;
 
-            Entity ent = ident as Entity;
-            if (ent != null)
-                ent.Ticks = Transaction.StartTime.Ticks;
-
-            List<SqlParameter> parameters = new List<SqlParameter>();
-            foreach (var v in Fields.Values.Where(a=>!(a.Field is FieldPrimaryKey)))
-                v.Field.CreateParameter(parameters, v.Getter(ident), forbidden);
-
-            ident.IsNew = false;
-
-            if (Identity)
-            {
-                if (ident.IdOrNull != null)
-                    throw new InvalidOperationException("{0} is new, but has Id {1}".Formato(ident, ident.IdOrNull));
-
-                if (cols == null)
-                    return SqlBuilder.InsertSaveId(Name, parameters, ident);
-                else
-                    return SqlPreCommand.Combine(Spacing.Double,
-                        SqlBuilder.InsertSaveId(Name, parameters, ident),
-                        SqlBuilder.SetLastIdScopeIdentity(),
-                        cols);
-            }
+            int index = sql.IndexOf("\r\n");
+            if (index == -1)
+                return sql + " -- " + comment;
             else
-            {
-                if (ident.IdOrNull == null)
-                    throw new InvalidOperationException("{0} should have an Id, since the table has no Identity".Formato(ident, ident.IdOrNull));
-
-                SqlParameter pid = SqlParameterBuilder.CreateIdParameter(ident.Id);
-
-                parameters.Insert(0, pid);
-
-                if (cols == null)
-                    return SqlBuilder.InsertNoIdentity(Name, parameters);
-                else
-                    return SqlPreCommand.Combine(Spacing.Double,
-                       SqlBuilder.InsertNoIdentity(Name, parameters),
-                       SqlBuilder.SetLastEntityId(ident.Id),
-                       cols);
-            }
+                return sql.Insert(index, " -- " + comment); 
         }
 
         public SqlPreCommand UpdateSqlSync(IdentifiableEntity ident, string comment = null)
@@ -108,155 +267,209 @@ namespace Signum.Engine.Maps
             if (!ident.SelfModified)
                 return null;
 
-            List<SqlParameter> parameters = new List<SqlParameter>();
-            foreach (var v in Fields.Values)
-                v.Field.CreateParameter(parameters, v.Getter(ident), Forbidden.None);
-
-            return SqlBuilder.UpdateSync(Name, parameters, ident.Id, comment);
+            return new SqlPreCommandSimple(AddComment(sqlUpdate, comment), 
+                updateParameters(ident, (ident as Entity).TryCS(a => a.Ticks) ?? -1, NullForbidden));
         }
 
-        SqlPreCommand UpdateSql(IdentifiableEntity ident, Forbidden forbidden)
+        public class Trio
         {
-            SqlPreCommand cols = (from ef in Fields.Values
-                                  where ef.Field is FieldMList
-                                  select ((FieldMList)ef.Field).RelationalTable.RelationalInserts((Modifiable)ef.Getter(ident), false, forbidden)).Combine(Spacing.Simple);      
-
-            if (ident is Entity)
+            public Trio(IColumn column, Expression value)
             {
-                Entity entity = (Entity)ident;
-
-                long oldTicks = entity.Ticks;
-                entity.Ticks = Transaction.StartTime.Ticks;
-
-                List<SqlParameter> parameters = new List<SqlParameter>();
-                foreach (var v in Fields.Values)
-                    v.Field.CreateParameter(parameters, v.Getter(entity), forbidden);
-
-
-                if (cols == null)
-                    return SqlBuilder.UpdateEntity(Name, parameters, entity.Id, oldTicks);
-                else
-                    return SqlPreCommand.Combine(Spacing.Double,
-                        SqlBuilder.SetLastEntityId(entity.Id),
-                        SqlBuilder.UpdateEntityLastId(Name, parameters, entity.Id, oldTicks),
-                        cols); 
+                this.SourceColumn = column.Name;
+                this.ParameterName = SqlParameterBuilder.GetParameterName(column.Name);
+                this.ParameterBuilder = SqlParameterBuilder.ParameterFactory(this.ParameterName, column.SqlDbType, column.Nullable, value);
             }
-            else
+
+            public string SourceColumn;
+            public string ParameterName;
+            public MemberInitExpression ParameterBuilder; //Expression<SqlParameter>
+
+            public override string ToString()
             {
-                List<SqlParameter> parameters = new List<SqlParameter>();
-                foreach (var v in Fields.Values)
-                    v.Field.CreateParameter(parameters, v.Getter(ident), forbidden);
-
-                if (cols == null)
-                    return SqlBuilder.Update(Name, parameters, ident.Id);
-                else
-                    return SqlPreCommand.Combine(Spacing.Double,
-                        SqlBuilder.SetLastEntityId(ident.Id),
-                        SqlBuilder.UpdateLastId(Name, parameters),
-                        cols); 
+                return "{0} {1} {2}".Formato(SourceColumn, ParameterName, ParameterBuilder.NiceToString());
             }
+        }
+
+        static ConstructorInfo ciNewList = ReflectionTools.GetConstuctorInfo(() => new List<SqlParameter>(1));
+
+        public static Expression CreateBlock(IEnumerable<Expression> parameters, IEnumerable<BinaryExpression> assigments)
+        {
+            return Expression.Block(assigments.Select(a => (ParameterExpression)a.Left),
+                assigments.Cast<Expression>().And(
+                Expression.ListInit(Expression.New(ciNewList, Expression.Constant(parameters.Count())),
+                parameters)));
         }
     }
 
     public partial class RelationalTable
-    { 
-        internal SqlPreCommand RelationalInserts(Modifiable collection, bool newEntity, Forbidden forbidden)
+    {
+        string sqlDelete;
+        string sqlInsert;
+        Func<IdentifiableEntity, object, Forbidden, List<SqlParameter>> ParameterBuilder;
+
+        void InitializeSaveSql()
+        {
+            DeleteSql();
+
+            InsertSql();
+        }
+
+        private void DeleteSql()
+        {
+            sqlDelete = "DELETE {0} WHERE {1} = @{1}".Formato(Name.SqlScape(), BackReference.Name);
+        }
+
+        private void InsertSql()
+        {
+            var trios = new List<Table.Trio>();
+            var assigments = new List<BinaryExpression>();
+            var ident = Expression.Parameter(typeof(IdentifiableEntity),"ident");
+            var item = Expression.Parameter(typeof(object),"item");
+            var forbidden = Expression.Parameter(typeof(Forbidden),"forbidden");
+
+            BackReference.CreateParameter(trios, assigments, ident, forbidden);
+            Field.CreateParameter(trios, assigments, item, forbidden);
+
+            sqlInsert = "INSERT {0} ({1})\r\n VALUES ({2})".Formato(Name.SqlScape(),
+                trios.ToString(p => p.SourceColumn.SqlScape(), ", "),
+                trios.ToString(p => p.ParameterName, ", "));
+
+            var expr = Expression.Lambda<Func<IdentifiableEntity, object, Forbidden, List<SqlParameter>>>(
+                Table.CreateBlock(trios.Select(a => a.ParameterBuilder), assigments), ident, item, forbidden);
+
+            ParameterBuilder = expr.Compile();
+        }
+
+        internal static SqlPreCommandSimple InsertIdentity(string table, List<SqlParameter> parameters)
+        {
+            return new SqlPreCommandSimple("INSERT {0} ({1})\r\n VALUES ({2}); SELECT CONVERT(Int,SCOPE_IDENTITY()) AS [newID]".Formato(table,
+                    parameters.ToString(p => p.SourceColumn.SqlScape(), ", "),
+                    parameters.ToString(p => p.ParameterName, ", ")), parameters);
+        }
+
+        internal void RelationalInserts(Modifiable collection, bool newEntity, IdentifiableEntity ident, Forbidden forbidden)
         {
             if (collection == null)
-                return newEntity? null: SqlBuilder.RelationalDeleteScope(Name, BackReference.Name); 
+            {
+                if (!newEntity)
+                    new SqlPreCommandSimple(sqlDelete,
+                        new List<SqlParameter> { SqlParameterBuilder.CreateReferenceParameter(BackReference.Name, false, ident.Id) }).ExecuteNonQuery();
+            }
+            else
+            {
+                if (collection.Modified == false) // no es modificado ??
+                    return;
 
-            if (collection.Modified == false) // no es modificado ??
-                return null;
+                if (forbidden.Count == 0)
+                    collection.Modified = null;
 
-            if (forbidden.Count == 0)
-                collection.Modified = null;
+                if (!newEntity)
+                    new SqlPreCommandSimple(sqlDelete,
+                        new List<SqlParameter> { SqlParameterBuilder.CreateReferenceParameter(BackReference.Name, false, ident.Id) }).ExecuteNonQuery();
 
-            var clean = newEntity ? null : SqlBuilder.RelationalDeleteScope(Name, BackReference.Name);
-
-            var inserts = ((IEnumerable)collection).Cast<object>()
-                .Select(o => SqlBuilder.RelationalInsertScope(Name, BackReference.Name,
-                    new List<SqlParameter>().Do(lp => Field.CreateParameter(lp, o, forbidden))))
-                .Combine(Spacing.Simple);
-
-            return SqlPreCommand.Combine(Spacing.Double, clean, inserts); 
+                foreach (object item in (IEnumerable)collection)
+                {
+                    new SqlPreCommandSimple(sqlInsert,
+                        ParameterBuilder(ident, item, forbidden)).ExecuteNonQuery();
+                }
+            }
         }
     }
 
 
     public abstract partial class Field
     {
-        protected internal virtual void CreateParameter(List<SqlParameter> parameters, object value, Forbidden forbidden) { }
+        protected internal virtual void CreateParameter(List<Table.Trio> trios, List<BinaryExpression> assigments, Expression value, Expression forbidden) { }
     }
 
     public partial class FieldPrimaryKey
     {
-        protected internal override void CreateParameter(List<SqlParameter> parameters, object value, Forbidden forbidden)
+        protected internal override void CreateParameter(List<Table.Trio> trios, List<BinaryExpression> assigments, Expression value, Expression forbidden)
         {
+            trios.Add(new Table.Trio(this, value));
         }
     }
 
     public partial class FieldValue 
     {
-        protected internal override void CreateParameter(List<SqlParameter> parameters, object value, Forbidden forbidden)
+        protected internal override void CreateParameter(List<Table.Trio> trios, List<BinaryExpression> assigments, Expression value, Expression forbidden)
         {
-            parameters.Add(SqlParameterBuilder.CreateParameter(Name, SqlDbType, Nullable, value)); 
+            trios.Add(new Table.Trio(this, value));
         }
     }
 
-    public static partial class ReferenceFieldExtensions
+    public static partial class FieldReferenceExtensions
     {
-        public static int? GetIdForLite(this IFieldReference cr, object value, Forbidden forbidden)
-        {
-            if (value == null)
-                return null;
+        static MethodInfo miGetIdForLite = ReflectionTools.GetMethodInfo(() => GetIdForLite(null, null));
+        static MethodInfo miGetIdForEntity = ReflectionTools.GetMethodInfo(() => GetIdForEntity(null, null));
 
-            if (cr.IsLite)
-            {
-                Lite l = (Lite)value;
-                return l.UntypedEntityOrNull == null ? l.Id :
-                       forbidden.Contains(l.UntypedEntityOrNull) ? (int?)null :
-                       l.RefreshId();
-            }
-            else
-            {
-                IdentifiableEntity ie = (IdentifiableEntity)value;
-                return forbidden.Contains(ie) ? (int?)null : ie.Id;
-            }
+        public static Expression GetIdFactory(this IFieldReference fr, Expression value, Expression forbidden)
+        {
+            return Expression.Call(fr.IsLite ? miGetIdForLite : miGetIdForEntity, value, forbidden); 
         }
 
-        public static Type GetTypeForLite(this IFieldReference cr, object value, Forbidden forbidden)
+        static int? GetIdForLite(object value, Forbidden forbidden)
         {
             if (value == null)
                 return null;
 
-            if (cr.IsLite)
-            {
-                Lite l = (Lite)value;
-                return l.UntypedEntityOrNull == null ? l.RuntimeType :
-                     forbidden.Contains(l.UntypedEntityOrNull) ? null :
-                     l.RuntimeType;
-            }
-            else
-            {
-                IdentifiableEntity ie = (IdentifiableEntity)value;
-                return forbidden.Contains(ie) ? null : ie.GetType();
-            }
+            Lite l = (Lite)value;
+            return l.UntypedEntityOrNull == null ? l.Id :
+                   forbidden.Contains(l.UntypedEntityOrNull) ? (int?)null :
+                   l.RefreshId();
+        }
+
+        static int? GetIdForEntity(object value, Forbidden forbidden)
+        {
+            if (value == null)
+                return null;
+
+            IdentifiableEntity ie = (IdentifiableEntity)value;
+            return forbidden.Contains(ie) ? (int?)null : ie.Id;
+        }
+
+        static MethodInfo miGetTypeForLite = ReflectionTools.GetMethodInfo(() => GetTypeForLite(null, null));
+        static MethodInfo miGetTypeForEntity = ReflectionTools.GetMethodInfo(() => GetTypeForEntity(null, null));
+
+        public static Expression GetTypeFactory(this IFieldReference fr, Expression value, Expression forbidden)
+        {
+            return Expression.Call(fr.IsLite ? miGetTypeForLite : miGetTypeForEntity, value, forbidden);
+        }
+
+        static Type GetTypeForLite(object value, Forbidden forbidden)
+        {
+            if (value == null)
+                return null;
+
+            Lite l = (Lite)value;
+            return l.UntypedEntityOrNull == null ? l.RuntimeType :
+                 forbidden.Contains(l.UntypedEntityOrNull) ? null :
+                 l.RuntimeType;
+        }
+
+        static Type GetTypeForEntity(object value, Forbidden forbidden)
+        {
+            if (value == null)
+                return null;
+
+            IdentifiableEntity ie = (IdentifiableEntity)value;
+            return forbidden.Contains(ie) ? null : ie.GetType();
         }
     }
 
     public partial class FieldReference
     {
-        protected internal override void CreateParameter(List<SqlParameter> parameters, object value, Forbidden forbidden)
+        protected internal override void CreateParameter(List<Table.Trio> trios, List<BinaryExpression> assigments, Expression value, Expression forbidden)
         {
-            parameters.Add(SqlParameterBuilder.CreateReferenceParameter(Name, Nullable, this.GetIdForLite(value, forbidden)));
+            trios.Add(new Table.Trio(this, this.GetIdFactory(value, forbidden)));
         }
     }
 
     public partial class FieldEnum
     {
-        protected internal override void CreateParameter(List<SqlParameter> parameters, object value, Forbidden forbidden)
+        protected internal override void CreateParameter(List<Table.Trio> trios, List<BinaryExpression> assigments, Expression value, Expression forbidden)
         {
-            base.CreateParameter(parameters, EnumProxy.FromEnum((Enum)value), forbidden);
+            trios.Add(new Table.Trio(this, Expression.Convert(value, Nullable ? typeof(int?) : typeof(int))));
         }
     }
 
@@ -265,55 +478,78 @@ namespace Signum.Engine.Maps
     }
 
     public partial class FieldEmbedded
-    {
-        SqlParameter HasValueParameter(bool hasValue)
+    {    
+        protected internal override void CreateParameter(List<Table.Trio> trios, List<BinaryExpression> assigments, Expression value, Expression forbidden)
         {
-            return SqlParameterBuilder.CreateParameter(HasValue.Name, HasValue.SqlDbType, HasValue.Nullable, hasValue);
-        }
+            ParameterExpression embedded = Expression.Parameter(this.FieldType, "embedded");
 
-        protected internal override void CreateParameter(List<SqlParameter> parameters, object value, Forbidden forbidden)
-        {
-            if (value == null)
+            if (HasValue != null)
             {
-                if (HasValue != null)
-                    parameters.Add(HasValueParameter(false));
-                else
-                    throw new InvalidOperationException("Impossible to save null on a not-nullable embedded field");
-                
-                foreach (var v in EmbeddedFields.Values)
-                    v.Field.CreateParameter(parameters, null, forbidden);
+                trios.Add(new Table.Trio(HasValue, Expression.NotEqual(value, Expression.Constant(null, FieldType))));
+
+                assigments.Add(Expression.Assign(embedded, Expression.Convert(value, this.FieldType)));
+
+                foreach (var ef in EmbeddedFields.Values)
+                {
+                    ef.Field.CreateParameter(trios, assigments,
+                        Expression.Condition(
+                            Expression.Equal(embedded, Expression.Constant(null, this.FieldType)),
+                            Expression.Constant(null, ef.FieldInfo.FieldType.Nullify()),
+                            Expression.Field(embedded, ef.FieldInfo).Nullify()), forbidden);
+                }
             }
             else
             {
-                 if (HasValue != null)
-                     parameters.Add(HasValueParameter(true));
+                assigments.Add(Expression.Assign(embedded, Expression.Convert(value.NodeType == ExpressionType.Conditional? value: Expression.Call(Expression.Constant(this), miCheckNull, value), this.FieldType)));
 
-                EmbeddedEntity ec = (EmbeddedEntity)value;
-                if (forbidden.Count == 0)
-                    ec.Modified = null;
-                foreach (var v in EmbeddedFields.Values)
-                    v.Field.CreateParameter(parameters, v.Getter(value), forbidden);
+                foreach (var ef in EmbeddedFields.Values)
+                {
+                    ef.Field.CreateParameter(trios, assigments,
+                        Expression.Field(embedded, ef.FieldInfo), forbidden);
+                }
+
             }
-        }      
+        }
+
+        static MethodInfo miCheckNull = ReflectionTools.GetMethodInfo((FieldEmbedded fe) => fe.CheckNull(null));
+        object CheckNull(object obj)
+        {
+            if(obj == null)
+                throw new InvalidOperationException("Impossible to save 'null' on the not-nullable embedded field of type '{0}'".Formato(this.FieldType.Name));
+
+            return obj;
+        }
     }
 
     public partial class FieldImplementedBy
     {
-        protected internal override void CreateParameter(List<SqlParameter> parameters, object value, Forbidden forbidden)
+        protected internal override void CreateParameter(List<Table.Trio> trios, List<BinaryExpression> assigments, Expression value, Expression forbidden)
         {
-            Type valType = value == null ? null :
-                value is Lite ? ((Lite)value).RuntimeType :
-                value.GetType();
+            ParameterExpression ibType = Expression.Parameter(typeof(Type), "ibType");
+            ParameterExpression ibId = Expression.Parameter(typeof(int?), "ibId");
 
-            if (valType != null && !ImplementationColumns.ContainsKey(valType))
-                throw new InvalidOperationException("Type {0} is not a mapped type ({1})".Formato(valType, ImplementationColumns.Keys.ToString(k => k.Name, ", ")));
+            assigments.Add(Expression.Assign(ibType, Expression.Call(Expression.Constant(this), miCheckType, this.GetTypeFactory(value, forbidden))));
+            assigments.Add(Expression.Assign(ibId, this.GetIdFactory(value, forbidden))); 
 
-            var param = ImplementationColumns.Select(p =>
-                SqlParameterBuilder.CreateReferenceParameter(p.Value.Name, true,
-                       p.Key != valType ? null : this.GetIdForLite(value, forbidden))).ToList();
+            var nullId = Expression.Constant(null, typeof(int?));
 
-            parameters.AddRange(param);          
-        }     
+            foreach (var imp in ImplementationColumns)
+            {
+                trios.Add(new Table.Trio(imp.Value,
+                    Expression.Condition(Expression.Equal(ibType, Expression.Constant(imp.Key)), ibId, Expression.Constant(null, typeof(int?)))
+                    ));
+            }
+        }
+
+        static MethodInfo miCheckType = ReflectionTools.GetMethodInfo((FieldImplementedBy fe) => fe.CheckType(null));
+        
+        Type CheckType(Type type)
+        {
+            if(type != null && !ImplementationColumns.ContainsKey(type))
+                throw new InvalidOperationException("Type {0} is not a mapped type ({1})".Formato(type.Name, ImplementationColumns.Keys.ToString(k => k.Name, ", ")));
+
+            return type;
+        }
     }
 
     public partial class ImplementationColumn
@@ -323,11 +559,22 @@ namespace Signum.Engine.Maps
 
     public partial class FieldImplementedByAll
     {
-        protected internal override void CreateParameter(List<SqlParameter> parameters, object value, Forbidden forbidden)
+        protected internal override void CreateParameter(List<Table.Trio> trios, List<BinaryExpression> assigments, Expression value, Expression forbidden)
         {
-            parameters.Add(SqlParameterBuilder.CreateReferenceParameter(Column.Name, Column.Nullable, this.GetIdForLite(value, forbidden)));
-            parameters.Add(SqlParameterBuilder.CreateReferenceParameter(ColumnTypes.Name, ColumnTypes.Nullable, this.GetTypeForLite(value, forbidden).TryCS(t => Schema.Current.TypeToId[t])));
+            trios.Add(new Table.Trio(Column, this.GetIdFactory(value, forbidden)));
+            trios.Add(new Table.Trio(ColumnTypes, Expression.Call(Expression.Constant(this), miConvertType, this.GetTypeFactory(value, forbidden))));
+        }
+
+        static MethodInfo miConvertType = ReflectionTools.GetMethodInfo((FieldImplementedByAll fe) => fe.ConvertType(null));
+
+        int? ConvertType(Type type)
+        {
+            if (type == null)
+                return null;
+
+            return Schema.Current.TypeToId.GetOrThrow(type, "{0} not registered in the schema"); 
         }
     }
 
+    
 }

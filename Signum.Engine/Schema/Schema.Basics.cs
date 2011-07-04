@@ -23,8 +23,6 @@ using System.Globalization;
 
 namespace Signum.Engine.Maps
 {
-    
-
     public class Schema : IImplementationsFinder
     {
         bool silentMode = false;
@@ -627,7 +625,20 @@ namespace Signum.Engine.Maps
         public Type Type { get; private set; }
 
         public string Name { get; set; }
-        public bool Identity { get; set; }
+        bool identity = true;
+        public bool Identity
+        {
+            get { return identity; }
+            set
+            {
+                if (identity != value)
+                {
+                    identity = value;
+                    if (sqlInsert != null) // not too fast
+                        InitializeInsert();
+                }
+            }
+        }
         public bool IsView { get; internal set; }
         public string CleanTypeName { get; set; }
 
@@ -649,6 +660,10 @@ namespace Signum.Engine.Maps
         public void GenerateColumns()
         {
             Columns = Fields.Values.SelectMany(c => c.Field.Columns()).ToDictionary(c => c.Name);
+
+            InitializeInsert();
+            InitializeUpdate();
+            InitializeCollections();
         }
 
         public Field GetField(MemberInfo value, bool throws)
@@ -912,7 +927,7 @@ namespace Signum.Engine.Maps
     {
         public string Name { get; set; }
         public bool Nullable { get; set; }
-        SqlDbType IColumn.SqlDbType { get { return SqlBuilder.PrimaryKeyType; } }
+        public SqlDbType SqlDbType { get { return SqlBuilder.PrimaryKeyType; } }
         bool IColumn.PrimaryKey { get { return false; } }
         bool IColumn.Identity { get { return false; } }
         int? IColumn.Size { get { return null; } }
@@ -1062,6 +1077,8 @@ namespace Signum.Engine.Maps
         public void GenerateColumns()
         {
             Columns = new IColumn[] { PrimaryKey, BackReference }.Concat(Field.Columns()).ToDictionary(a => a.Name);
+
+            InitializeSaveSql();
         }
 
         public List<UniqueIndex> GeneratUniqueIndexes()

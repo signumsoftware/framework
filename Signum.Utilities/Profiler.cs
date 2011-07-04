@@ -276,8 +276,8 @@ namespace Signum.Utilities
             if(Entries == null)
                 return Elapsed.NiceToString();
 
-            return "{0} = {1}".Formato(Elapsed.NiceToString(),
-                GetDescendantRoles().ToString(kvp => "{0} {1}".Formato(kvp.Key, kvp.Value.ToString(this)), ", "));
+            return "{0} {1} --> ({2})".Formato(Elapsed.NiceToString(), Role,
+                GetDescendantRoles().ToString(kvp => "{0} {1}".Formato(kvp.Key, kvp.Value.ToString(this)), " | "));
         }
     }
 
