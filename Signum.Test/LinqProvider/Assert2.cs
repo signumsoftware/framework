@@ -68,7 +68,7 @@ namespace Signum.Test
             var hs = collection.ToHashSet();
 
             string notFound = elements.Where(a => !hs.Contains(a)).CommaAnd();
-            string exceeded = hs.Where(a => elements.Contains(a)).CommaAnd(); ;
+            string exceeded = hs.Where(a => !elements.Contains(a)).CommaAnd(); ;
 
             if (notFound.HasText() && exceeded.HasText())
                 Assert.Fail("{0} not found and {1} exceeded".Formato(notFound, exceeded));
