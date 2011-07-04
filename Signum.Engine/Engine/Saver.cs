@@ -18,17 +18,17 @@ namespace Signum.Engine
     {
         public static void SaveAll(IdentifiableEntity[] idents)
         {
-             Save(()=>GraphExplorer.FromRoots(idents), idents);
+             Save(()=>GraphExplorer.FromRoots(idents));
         }
 
         public static void Save(IdentifiableEntity ident) 
         {
-            Save(() => GraphExplorer.FromRoot(ident), new[] { ident });
+            Save(() =>{ using(HeavyProfiler.Log("GraphExplorer")) return GraphExplorer.FromRoot(ident);});
         }
 
         static readonly IdentifiableEntity[] None = new IdentifiableEntity[0];
 
-        static void Save(Func<DirectedGraph<Modifiable>> createGraph, IdentifiableEntity[] roots)
+        static void Save(Func<DirectedGraph<Modifiable>> createGraph)
         {
             DirectedGraph<Modifiable> modifiables = GraphExplorer.PreSaving(createGraph);
 
@@ -44,7 +44,6 @@ namespace Signum.Engine
             string error = GraphExplorer.Integrity(modifiables);
             if (error.HasText())
                 throw new ApplicationException(error);
-
 
             GraphExplorer.PropagateModifications(modifiables.Inverse());
 
@@ -72,15 +71,31 @@ namespace Signum.Engine
 
             IEnumerable<HashSet<IdentifiableEntity>> groups = identifiables.CompilationOrderGroups();
 
+            Forbidden forbidden = new Forbidden();
+
             foreach (var group in groups)
             {
-                SaveGroup(group, schema, backEdges);
+                foreach (var ident in group)
+                {
+                    forbidden.Clear();
+                    if (backEdges != null)
+                        forbidden.UnionWith(backEdges.TryRelatedTo(ident));
+
+                    schema.Table(ident.GetType()).Save(ident, forbidden);
+                }
             }
 
             if (backEdges != null)
             {
                 var postSavings = backEdges.Edges.Select(e => e.From).ToHashSet();
-                SaveGroup(postSavings, schema, null);
+                foreach (var ident in postSavings)
+                {
+                    forbidden.Clear();
+                    if (backEdges != null)
+                        forbidden.UnionWith(backEdges.TryRelatedTo(ident));
+
+                    schema.Table(ident.GetType()).Save(ident, forbidden);
+                }
             }
 
             EntityCache.Add(identifiables);
@@ -88,18 +103,6 @@ namespace Signum.Engine
         }
 
 
-        static void SaveGroup(HashSet<IdentifiableEntity> group, Schema schema, DirectedGraph<IdentifiableEntity> backEdges)
-        {
-            foreach (var ident in group)
-            {
-                Table table = schema.Table(ident.GetType());
-
-                Forbidden forbidden = new Forbidden();
-                if (backEdges != null)
-                    forbidden.UnionWith(backEdges.TryRelatedTo(ident));
-
-                table.Save(ident, forbidden);
-            }
-        }
+       
     }
 }

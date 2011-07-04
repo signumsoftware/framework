@@ -134,4 +134,20 @@ namespace Signum.Engine.Exceptions
             this.Ids = ids;
         }
     }
+
+    [Serializable]
+    public class ConcurrencyException: Exception
+    {
+        public Type Type { get; private set; }
+        public int Id { get; private set; }
+
+        protected ConcurrencyException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+
+        public ConcurrencyException(Type type, int id)
+            : base(Resources.ConcurrencyErrorOnDatabaseTable0Id1.Formato(type.NiceName(), id))
+        {
+            this.Type = type;
+            this.Id = id;
+        }
+    }
 }
