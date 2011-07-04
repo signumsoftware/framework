@@ -20,6 +20,7 @@ using Signum.Engine.Linq;
 using System.Data.SqlClient;
 using Signum.Services;
 using System.Globalization;
+using System.Threading;
 
 namespace Signum.Engine.Maps
 {
@@ -634,8 +635,8 @@ namespace Signum.Engine.Maps
                 if (identity != value)
                 {
                     identity = value;
-                    if (sqlInsert != null) // not too fast
-                        InitializeInsert();
+                    if (inserter != null && inserter.IsValueCreated) // not too fast
+                        inserter.ResetPublicationOnly();
                 }
             }
         }
@@ -661,9 +662,9 @@ namespace Signum.Engine.Maps
         {
             Columns = Fields.Values.SelectMany(c => c.Field.Columns()).ToDictionary(c => c.Name);
 
-            InitializeInsert();
-            InitializeUpdate();
-            InitializeCollections();
+            inserter = new Lazy<InsertCache>(InitializeInsert, LazyThreadSafetyMode.PublicationOnly);
+            updater = new Lazy<UpdateCache>(InitializeUpdate, LazyThreadSafetyMode.None);
+            saveCollections = new Lazy<Action<IdentifiableEntity,Forbidden,bool>>(InitializeCollections, LazyThreadSafetyMode.None);
         }
 
         public Field GetField(MemberInfo value, bool throws)

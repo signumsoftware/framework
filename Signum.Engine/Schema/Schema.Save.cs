@@ -14,6 +14,7 @@ using System.Reflection;
 using Signum.Utilities.Reflection;
 using System.Data;
 using Signum.Utilities.ExpressionTrees;
+using System.Threading;
 
 namespace Signum.Engine.Maps
 {
@@ -24,13 +25,19 @@ namespace Signum.Engine.Maps
 
     public partial class Table
     {
-      
-        string sqlInsert;
-        Func<IdentifiableEntity, Forbidden, List<SqlParameter>> insertParameters;
-        Action<IdentifiableEntity, Forbidden> insert;
-
-        void InitializeInsert()
+        class InsertCache
         {
+            public string SqlInsert;
+            public Func<IdentifiableEntity, Forbidden, List<SqlParameter>> InsertParameters;
+            public Action<IdentifiableEntity, Forbidden> Insert;
+        }
+
+        Lazy<InsertCache> inserter;
+
+        InsertCache InitializeInsert()
+        {
+            InsertCache result = new InsertCache();
+
             var trios = new List<Table.Trio>();
             var assigments = new List<BinaryExpression>();
             var paramIdent = Expression.Parameter(typeof(IdentifiableEntity), "ident");
@@ -44,40 +51,40 @@ namespace Signum.Engine.Maps
                 item.Field.CreateParameter(trios, assigments, Expression.Field(cast, item.FieldInfo), paramForbidden);
             }
 
-            sqlInsert = "INSERT {0} ({1})\r\n VALUES ({2})".Formato(Name.SqlScape(),
+            result.SqlInsert = "INSERT {0} ({1})\r\n VALUES ({2})".Formato(Name.SqlScape(),
                 trios.ToString(p => p.SourceColumn.SqlScape(), ", "),
                 trios.ToString(p => p.ParameterName, ", "));
 
             if (Identity)
-                sqlInsert += ";SELECT CONVERT(Int,SCOPE_IDENTITY()) AS [newID]";
+                result.SqlInsert += ";SELECT CONVERT(Int,SCOPE_IDENTITY()) AS [newID]";
 
             var expr = Expression.Lambda<Func<IdentifiableEntity, Forbidden, List<SqlParameter>>>(
                 CreateBlock(trios.Select(a => a.ParameterBuilder), assigments), paramIdent, paramForbidden);
 
-            insertParameters = expr.Compile();
+            result.InsertParameters = expr.Compile();
 
             if(Identity)
             {
                 if(typeof(Entity).IsAssignableFrom(this.Type))
                 {
-                    insert = (ident, forbidden)=>
+                    result.Insert = (ident, forbidden) =>
                     {
                         if (ident.IdOrNull != null)
                             throw new InvalidOperationException("{0} is new, but has Id {1}".Formato(ident, ident.IdOrNull));
 
                         ((Entity)ident).Ticks = Transaction.StartTime.Ticks;
 
-                        ident.id = (int)new SqlPreCommandSimple(sqlInsert, insertParameters(ident, forbidden)).ExecuteScalar();
+                        ident.id = (int)new SqlPreCommandSimple(result.SqlInsert, result.InsertParameters(ident, forbidden)).ExecuteScalar();
                     };
                 }
                 else
                 {
-                    insert = (ident, forbidden)=>
+                    result.Insert = (ident, forbidden) =>
                     {
                         if (ident.IdOrNull != null)
                             throw new InvalidOperationException("{0} is new, but has Id {1}".Formato(ident, ident.IdOrNull));
 
-                        ident.id = (int)new SqlPreCommandSimple(sqlInsert, insertParameters(ident, forbidden)).ExecuteScalar();
+                        ident.id = (int)new SqlPreCommandSimple(result.SqlInsert, result.InsertParameters(ident, forbidden)).ExecuteScalar();
                     };
                 }
             }
@@ -85,38 +92,47 @@ namespace Signum.Engine.Maps
             {
                 if (typeof(Entity).IsAssignableFrom(this.Type))
                 {
-                    insert = (ident, forbidden) =>
+                    result.Insert = (ident, forbidden) =>
                     {
                         if (ident.IdOrNull == null)
                             throw new InvalidOperationException("{0} should have an Id, since the table has no Identity".Formato(ident, ident.IdOrNull));
 
                         ((Entity)ident).Ticks = Transaction.StartTime.Ticks;
 
-                        new SqlPreCommandSimple(sqlInsert, insertParameters(ident, forbidden)).ExecuteNonQuery();
+                        new SqlPreCommandSimple(result.SqlInsert, result.InsertParameters(ident, forbidden)).ExecuteNonQuery();
                     };
                 }
                 else
                 {
-                    insert = (ident, forbidden) =>
+                    result.Insert = (ident, forbidden) =>
                     {
                         if (ident.IdOrNull == null)
                             throw new InvalidOperationException("{0} should have an Id, since the table has no Identity".Formato(ident, ident.IdOrNull));
 
-                        new SqlPreCommandSimple(sqlInsert, insertParameters(ident, forbidden)).ExecuteNonQuery();
+                        new SqlPreCommandSimple(result.SqlInsert, result.InsertParameters(ident, forbidden)).ExecuteNonQuery();
                     };
                 }
-            }   
+            }
+
+            return result;
         }
 
         static FieldInfo fiId = ReflectionTools.GetFieldInfo((IdentifiableEntity i) => i.id);
         static FieldInfo fiTicks = ReflectionTools.GetFieldInfo((Entity i) => i.ticks);
 
-        string sqlUpdate;
-        Func<IdentifiableEntity, long, Forbidden, List<SqlParameter>> updateParameters;
-        Action<IdentifiableEntity, Forbidden> update; 
-
-        void InitializeUpdate()
+        class UpdateCache
         {
+            public string SqlUpdate;
+            public Func<IdentifiableEntity, long, Forbidden, List<SqlParameter>> UpdateParameters;
+            public Action<IdentifiableEntity, Forbidden> Update; 
+        }
+
+        Lazy<UpdateCache> updater;
+
+        UpdateCache InitializeUpdate()
+        {
+            UpdateCache result = new UpdateCache();
+
             var trios = new List<Trio>();
             var assigments = new List<BinaryExpression>();
             var paramIdent = Expression.Parameter(typeof(IdentifiableEntity), "ident");
@@ -133,7 +149,7 @@ namespace Signum.Engine.Maps
 
             string idParamName = SqlParameterBuilder.GetParameterName("id");
 
-            sqlUpdate = "UPDATE {0} SET \r\n{1}\r\n WHERE id = {2}".Formato(Name.SqlScape(),
+            result.SqlUpdate = "UPDATE {0} SET \r\n{1}\r\n WHERE id = {2}".Formato(Name.SqlScape(),
                     trios.ToString(p => "{0} = {1}".Formato(p.SourceColumn.SqlScape(), p.ParameterName).Indent(2), ",\r\n"),
                     idParamName);
 
@@ -146,7 +162,7 @@ namespace Signum.Engine.Maps
             {
                 string oldTicksParamName = SqlParameterBuilder.GetParameterName("old_ticks");
 
-                sqlUpdate += " AND ticks = {0}".Formato(oldTicksParamName);
+                result.SqlUpdate += " AND ticks = {0}".Formato(oldTicksParamName);
 
                 parameters.Add(SqlParameterBuilder.ParameterFactory(oldTicksParamName, SqlDbType.BigInt, false, paramOldTicks));
             }
@@ -154,38 +170,40 @@ namespace Signum.Engine.Maps
             var expr = Expression.Lambda<Func<IdentifiableEntity, long, Forbidden, List<SqlParameter>>>(
                 CreateBlock(parameters, assigments), paramIdent, paramOldTicks, paramForbidden);
 
-            updateParameters = expr.Compile();
+            result.UpdateParameters = expr.Compile();
 
             if (typeof(Entity).IsAssignableFrom(this.Type))
             {
-                update = (ident, forbidden) =>
+                result.Update = (ident, forbidden) =>
                 {
                     Entity entity = (Entity)ident;
 
                     long oldTicks = entity.Ticks;
                     entity.Ticks = Transaction.StartTime.Ticks;
 
-                    int num = (int)new SqlPreCommandSimple(sqlUpdate, updateParameters(ident, oldTicks, forbidden)).ExecuteNonQuery();
+                    int num = (int)new SqlPreCommandSimple(result.SqlUpdate, result.UpdateParameters(ident, oldTicks, forbidden)).ExecuteNonQuery();
                     if (num != 1)
                         throw new ConcurrencyException(ident.GetType(), ident.Id);
                 };
             }
             else
             {
-                update = (ident, forbidden) =>
+                result.Update = (ident, forbidden) =>
                 {
-                    int num = (int)new SqlPreCommandSimple(sqlUpdate, updateParameters(ident, -1, forbidden)).ExecuteNonQuery();
+                    int num = (int)new SqlPreCommandSimple(result.SqlUpdate, result.UpdateParameters(ident, -1, forbidden)).ExecuteNonQuery();
                     if (num != 1)
                         throw new EntityNotFoundException(ident.GetType(), ident.Id);
                 };
             }
+
+            return result;
         }
 
-        Action<IdentifiableEntity, Forbidden, bool> saveCollections;
+        Lazy<Action<IdentifiableEntity, Forbidden, bool>> saveCollections;
 
         static MethodInfo miRelationalInserts = ReflectionTools.GetMethodInfo((RelationalTable rt) => rt.RelationalInserts(null, true, null, null));
 
-        void InitializeCollections()
+        Action<IdentifiableEntity, Forbidden, bool> InitializeCollections()
         {
             var paramIdent = Expression.Parameter(typeof(IdentifiableEntity), "ident");
             var paramForbidden = Expression.Parameter(typeof(Forbidden), "forbidden");
@@ -200,13 +218,13 @@ namespace Signum.Engine.Maps
                              Expression.Field(entity, ef.FieldInfo), paramIsNew, paramIdent, paramForbidden)).ToList();
 
             if (calls.IsEmpty())
-                saveCollections = null;
+                return null;
             else
             {
                 var exp = Expression.Lambda<Action<IdentifiableEntity, Forbidden, bool>>(Expression.Block(new[] { entity },
                     calls.PreAnd(castEntity)), paramIdent, paramForbidden, paramIsNew);
 
-                saveCollections = exp.Compile();
+                return exp.Compile();
             }
         }
 
@@ -218,19 +236,19 @@ namespace Signum.Engine.Maps
 
                 if (isNew)
                 {
-                    insert(ident, forbidden);
+                    inserter.Value.Insert(ident, forbidden);
                     ident.IsNew = false;
                 }
                 else
                 {
-                    update(ident, forbidden);
+                    updater.Value.Update(ident, forbidden);
                 }
 
                 if (forbidden.Count == 0)
                     ident.Modified = null;
 
-                if (saveCollections != null)
-                    saveCollections(ident, forbidden, isNew);
+                if (saveCollections.Value != null)
+                    saveCollections.Value(ident, forbidden, isNew);
             }
         }
 
@@ -241,7 +259,9 @@ namespace Signum.Engine.Maps
             bool dirty = false; 
             ident.PreSaving(ref dirty);
 
-            return new SqlPreCommandSimple(AddComment(sqlInsert, comment), insertParameters(ident, NullForbidden)); 
+            var ic = inserter.Value;
+
+            return new SqlPreCommandSimple(AddComment(ic.SqlInsert, comment), ic.InsertParameters(ident, NullForbidden)); 
         }
 
         static string AddComment(string sql, string comment)
@@ -267,8 +287,10 @@ namespace Signum.Engine.Maps
             if (!ident.SelfModified)
                 return null;
 
-            return new SqlPreCommandSimple(AddComment(sqlUpdate, comment), 
-                updateParameters(ident, (ident as Entity).TryCS(a => a.Ticks) ?? -1, NullForbidden));
+            var uc = updater.Value;
+
+            return new SqlPreCommandSimple(AddComment(uc.SqlUpdate, comment),
+                uc.UpdateParameters(ident, (ident as Entity).TryCS(a => a.Ticks) ?? -1, NullForbidden));
         }
 
         public class Trio
