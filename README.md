@@ -11,7 +11,7 @@ Signum.Windows dramatically simplifies giving a WPF user interface to your entit
 
 
 ### Main Features ###
-Entities-first approach
+* Entities-first approach
 * ORM with a full LINQ Provider
 * Unified validation
 * Schema generation (and sync)
