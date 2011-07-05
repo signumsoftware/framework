@@ -31,6 +31,18 @@ namespace Signum.Engine
 
         protected internal abstract int NumParameters { get; }
 
+        /// <summary>
+        /// For debugging purposes
+        /// </summary>
+        public string PlainSql()
+        {
+            StringBuilder sb = new StringBuilder();
+            this.PlainSql(sb);
+            return sb.ToString(); 
+        }
+
+        protected internal abstract void PlainSql(StringBuilder sb);
+
         public abstract SqlPreCommandSimple ToSimple();
 
         public override string ToString()
@@ -60,22 +72,6 @@ namespace Signum.Engine
             return SqlPreCommand.Combine(spacing, preCommands.ToArray());
         }
 
-        static readonly Regex regex = new Regex(@"@[_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}][_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}\p{Nd}]*");
-        /// <summary>
-        /// For debugging purposes
-        /// </summary>
-        public static string PlainSql(this SqlPreCommand command)
-        {
-            SqlPreCommandSimple cs = command.ToSimple();
-            if (cs.Parameters == null)
-                return cs.Sql;
-
-            var dic = cs.Parameters.ToDictionary(a=>a.ParameterName, a=>Encode(a.Value)); 
-
-            return regex.Replace(cs.Sql, m=> dic.TryGetC(m.Value) ?? m.Value);
-        }
-
-
         public static void OpenSqlFile(this SqlPreCommand command)
         {
             OpenSqlFile(command, "Sync {0:dd-MM-yyyy}.sql".Formato(DateTime.Now));
@@ -101,23 +97,6 @@ namespace Signum.Engine
             Thread.Sleep(1000);
 
             Process.Start(fileName); 
-        }
-
-        static string Encode(object value)
-        {
-            if (value == null || value == DBNull.Value)
-                return "NULL";
-
-            if (value is string)
-                return "\'" + ((string)value).Replace("'", "''") + "'";
-
-            if (value is DateTime)
-                return "convert(datetime, '{0:s}', 126)".Formato(value);
-
-            if (value is bool)
-               return (((bool)value) ? 1 : 0).ToString();
-
-            return value.ToString();
         }
     }
 
@@ -161,6 +140,38 @@ namespace Signum.Engine
         protected internal override int NumParameters
         {
             get { return Parameters.TryCS(p => p.Count) ?? 0; }
+        }
+
+        static readonly Regex regex = new Regex(@"@[_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}][_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}\p{Nd}]*");
+      
+        static string Encode(object value)
+        {
+            if (value == null || value == DBNull.Value)
+                return "NULL";
+
+            if (value is string)
+                return "\'" + ((string)value).Replace("'", "''") + "'";
+
+            if (value is DateTime)
+                return "convert(datetime, '{0:s}', 126)".Formato(value);
+
+            if (value is bool)
+                return (((bool)value) ? 1 : 0).ToString();
+
+            return value.ToString();
+        }
+
+        protected internal override void PlainSql(StringBuilder sb)
+        {
+            if (Parameters.IsNullOrEmpty())
+                sb.Append(Sql);
+            else
+            {
+
+                var dic = Parameters.ToDictionary(a => a.ParameterName, a => Encode(a.Value));
+
+                sb.Append(regex.Replace(Sql, m => dic.TryGetC(m.Value) ?? m.Value));
+            }
         }
     }
 
@@ -221,6 +232,20 @@ namespace Signum.Engine
         protected internal override int NumParameters
         {
             get { return Commands.Sum(c => c.NumParameters); }
+        }
+
+        protected internal override void PlainSql(StringBuilder sb)
+        {
+            string sep = separators[Spacing];
+            bool borrar = false;
+            foreach (SqlPreCommand com in Commands)
+            {
+                com.PlainSql(sb);
+                sb.Append(sep);
+                borrar = true;
+            }
+
+            if (borrar) sb.Remove(sb.Length - sep.Length, sep.Length);
         }
     }
 

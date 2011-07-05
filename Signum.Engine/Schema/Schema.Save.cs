@@ -55,9 +55,6 @@ namespace Signum.Engine.Maps
                 trios.ToString(p => p.SourceColumn.SqlScape(), ", "),
                 trios.ToString(p => p.ParameterName, ", "));
 
-            if (Identity)
-                result.SqlInsert += ";SELECT CONVERT(Int,SCOPE_IDENTITY()) AS [newID]";
-
             var expr = Expression.Lambda<Func<IdentifiableEntity, Forbidden, List<SqlParameter>>>(
                 CreateBlock(trios.Select(a => a.ParameterBuilder), assigments), paramIdent, paramForbidden);
 
@@ -74,7 +71,7 @@ namespace Signum.Engine.Maps
 
                         ((Entity)ident).Ticks = Transaction.StartTime.Ticks;
 
-                        ident.id = (int)new SqlPreCommandSimple(result.SqlInsert, result.InsertParameters(ident, forbidden)).ExecuteScalar();
+                        ident.id = (int)new SqlPreCommandSimple(result.SqlInsert + ";SELECT CONVERT(Int,SCOPE_IDENTITY()) AS [newID]", result.InsertParameters(ident, forbidden)).ExecuteScalar();
                     };
                 }
                 else
@@ -84,7 +81,7 @@ namespace Signum.Engine.Maps
                         if (ident.IdOrNull != null)
                             throw new InvalidOperationException("{0} is new, but has Id {1}".Formato(ident, ident.IdOrNull));
 
-                        ident.id = (int)new SqlPreCommandSimple(result.SqlInsert, result.InsertParameters(ident, forbidden)).ExecuteScalar();
+                        ident.id = (int)new SqlPreCommandSimple(result.SqlInsert + ";SELECT CONVERT(Int,SCOPE_IDENTITY()) AS [newID]", result.InsertParameters(ident, forbidden)).ExecuteScalar();
                     };
                 }
             }
