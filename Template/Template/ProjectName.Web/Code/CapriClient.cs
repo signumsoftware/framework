@@ -10,7 +10,7 @@ namespace $custommessage$.Web
 {
     public static class $custommessage$Client
     {
-        public static string ViewPrefix = "Views/$custommessage$/";
+        public static string ViewPrefix = "~/Views/$custommessage$/";
 
         public static void Start()
         {
