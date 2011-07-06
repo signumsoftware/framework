@@ -48,7 +48,7 @@ SF.registerModule("Files", function () {
             var cTarget = mform.attr('target');
             var cAction = mform.attr('action');
             mform.attr('enctype', 'multipart/form-data').attr('encoding', 'multipart/form-data').attr('target', 'frame' + this.options.prefix).attr('action', this.options.controllerUrl).submit();
-            mform.attr('enctype', cEncType).attr('encoding', cEncoding).attr('target', cTarget).attr('action', cAction);
+            mform.attr('enctype', cEncType || "").attr('encoding', cEncoding || "").attr('target', cTarget || "").attr('action', cAction || "");
         };
 
         this.onChanged = function () {
