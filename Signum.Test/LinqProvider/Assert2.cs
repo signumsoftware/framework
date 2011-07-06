@@ -63,6 +63,16 @@ namespace Signum.Test
                 Assert.Fail("{0} not found".Formato(notFound)); 
         }
 
+        public static void AssertNotContains<T>(this IEnumerable<T> collection, params T[] elements)
+        {
+            var hs = collection.ToHashSet();
+
+            string found = elements.Where(a => hs.Contains(a)).CommaAnd();
+
+            if (found.HasText())
+                Assert.Fail("{0}  found".Formato(found));
+        }
+
         public static void AssertExactly<T>(this IEnumerable<T> collection, params T[] elements)
         {
             var hs = collection.ToHashSet();
