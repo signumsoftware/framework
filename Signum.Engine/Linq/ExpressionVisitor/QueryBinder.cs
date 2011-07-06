@@ -1151,7 +1151,7 @@ namespace Signum.Engine.Linq
         {
             if (operand == null)
                 return null;
-            
+
             if (operand.Type == uType)
                 return operand;
 
