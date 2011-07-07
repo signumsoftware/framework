@@ -72,6 +72,11 @@ namespace Signum.Web
             };
         }
 
+        public static void RegisterValue<T>(Mapping<T> mapping)
+        {
+            MappingRepository<T>.Mapping = mapping;
+        }
+
         public static EntityMapping<T> AsEntityMapping<T>(this Mapping<T> mapping) where T : ModifiableEntity
         {
             return (EntityMapping<T>)mapping.Target;
@@ -210,6 +215,8 @@ namespace Signum.Web
             string[] vals = input.Split(',');
             return vals[0] == "true" || vals[0] == "True";
         }
+
+      
     }
 
     public abstract class BaseMapping<T>

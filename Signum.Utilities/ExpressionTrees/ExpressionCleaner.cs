@@ -48,7 +48,7 @@ namespace Signum.Utilities.ExpressionTrees
     }
 
     //The name of the field for the expression that defines the content
-    [AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Method| AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
     public sealed class ExpressionFieldAttribute : Attribute
     {
         public string Name { get; set; }
@@ -236,14 +236,28 @@ namespace Signum.Utilities.ExpressionTrees
             if (mi is MethodInfo)
             {
                 Type[] types = ((MethodInfo)mi).GetParameters().Select(a => a.ParameterType).ToArray();
-                return decType.GetMethod(mi.Name, flags, null, types, null);
+                var result = decType.GetMethod(mi.Name, flags, null, types, null);
+                if (result != null)
+                    return result;
+
+                if (mi.DeclaringType.IsInterface)
+                    return decType.GetMethod(mi.DeclaringType.FullName + "." + mi.Name, flags, null, types, null);
+
+                return null;
             }
 
             if (mi is PropertyInfo)
             {
                 Type[] types = ((PropertyInfo)mi).GetIndexParameters().Select(a => a.ParameterType).ToArray();
 
-                return decType.GetProperty(mi.Name, flags, null, ((PropertyInfo)mi).PropertyType, types, null); 
+                var result = decType.GetProperty(mi.Name, flags, null, ((PropertyInfo)mi).PropertyType, types, null) ;
+                if (result != null)
+                    return result; 
+
+                if(mi.DeclaringType.IsInterface)
+                    return decType.GetProperty(mi.DeclaringType.FullName + "." + mi.Name, flags, null, ((PropertyInfo)mi).PropertyType, types, null);
+
+                return null;
             }
 
             throw new InvalidOperationException("Invalid Member type"); 
