@@ -53,7 +53,8 @@ namespace Signum.Web.Operations
             if (prefix.HasText())
             {
                 ViewData[ViewDataKeys.WriteSFInfo] = true;
-                return Navigator.PopupView(this, entity, prefix);
+                TypeContext tc = TypeContextUtilities.UntypedNew(entity, prefix);
+                return this.PopupOpen(new ViewSaveOptions(tc));
             }
             else //NormalWindow
             {
@@ -133,7 +134,8 @@ namespace Signum.Web.Operations
             if (prefix.HasText())
             {
                 ViewData[ViewDataKeys.WriteSFInfo] = true;
-                return Navigator.PopupView(this, entity, prefix);
+                TypeContext tc = TypeContextUtilities.UntypedNew(entity, prefix);
+                return this.PopupOpen(new ViewSaveOptions(tc));
             }
             else //NormalWindow
             {
@@ -166,7 +168,8 @@ namespace Signum.Web.Operations
             IdentifiableEntity entity = OperationLogic.ServiceConstructFromMany(sourceEntities, type, EnumLogic<OperationDN>.ToEnum(operationFullKey));
 
             ViewData[ViewDataKeys.WriteSFInfo] = true;
-            return Navigator.PopupView(this, entity, prefix);
+            TypeContext tc = TypeContextUtilities.UntypedNew(entity, prefix);
+            return this.PopupOpen(new ViewSaveOptions(tc));
         }
     }
 }

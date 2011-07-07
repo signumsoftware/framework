@@ -107,7 +107,9 @@ namespace Signum.Web.Auth
                 }).validateAndAjax().ToJS();
 
             ViewData[ViewDataKeys.Title] = Resources.EnterTheNewPassword;
-            return Navigator.PopupView(this, model, prefix);
+
+            TypeContext tc = TypeContextUtilities.UntypedNew(model, prefix);
+            return this.PopupOpen(new ViewOkOptions(tc));
         }
 
         [AcceptVerbs(HttpVerbs.Post)]

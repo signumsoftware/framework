@@ -42,8 +42,9 @@ namespace Signum.Web.Extensions.Sample
                     Prefix = prefix, 
                     ControllerUrl = RouteHelper.New().Action("CreateAlbumFromBandOnOk", "Music") 
                 }).validateAndAjax().ToJS();
-            
-            return Navigator.PopupView(this, model, prefix);
+
+            TypeContext tc = TypeContextUtilities.UntypedNew(model, prefix);
+            return this.PopupOpen(new ViewOkOptions(tc));
         }
 
         public JsonResult CreateAlbumFromBandOnOk(string prefix)
@@ -83,7 +84,9 @@ namespace Signum.Web.Extensions.Sample
             ViewData[ViewDataKeys.Title] = "Introduzca los datos de las disponibilidades a crear";
 
             ViewData[ViewDataKeys.WriteSFInfo] = true;
-            return this.PopupView(new ValueLineBoxModel(this.ExtractEntity<AlbumDN>(), ValueLineBoxType.String, "Name", "Write new album's name"), prefix);
+
+            TypeContext tc = TypeContextUtilities.UntypedNew(new ValueLineBoxModel(this.ExtractEntity<AlbumDN>(), ValueLineBoxType.String, "Name", "Write new album's name"), prefix);
+            return this.PopupOpen(new ViewOkOptions(tc));
         }
 
         public ActionResult Clone(string prefix)
