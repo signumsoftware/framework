@@ -37,6 +37,7 @@ namespace Signum.Engine.Authorization
             {
                 AuthLogic.AssertStarted(sb);
                 EntityGroupLogic.Start(sb);
+
                 if (registerEntitiesWithNoGroup)
                 {
                     PermissionAuthLogic.RegisterPermissions(BasicPermissions.EntitiesWithNoGroup);

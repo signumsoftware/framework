@@ -280,7 +280,7 @@ namespace Signum.Entities.Authorization
             InvalidateCache();
         }
 
-        private DefaultRule GetDefaultRule(Lite<RoleDN> role)
+        public DefaultRule GetDefaultRule(Lite<RoleDN> role)
         {
             return runtimeRules.Value[role].GetDefaultRule(Max);
         }

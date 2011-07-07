@@ -14,6 +14,8 @@ using System.Reflection;
 using System.Security.Authentication;
 using Signum.Engine.Extensions.Properties;
 using Signum.Entities.Reflection;
+using Signum.Entities.DynamicQuery;
+using Signum.Utilities.DataStructures;
 
 namespace Signum.Engine.Authorization
 {
@@ -43,6 +45,10 @@ namespace Signum.Engine.Authorization
 
                 AuthLogic.ExportToXml += () => cache.ExportXml("Types", "Type", t => t.CleanName, ta => ta.ToString());
                 AuthLogic.ImportFromXml += (x, roles) => cache.ImportXml(x, "Types", "Type", roles, s => TypeLogic.TypeToDN[TypeLogic.GetType(s)], EnumExtensions.ToEnum<TypeAllowed>);
+
+                Signum.Entities.Audit.Register(Audit.CyclesInRoles);
+                Signum.Entities.Audit.Register(Audit.UnsafeRoles);
+                Signum.Entities.Audit.Register(Audit.QueriesAndTypes);
             }
         }
 
@@ -119,6 +125,51 @@ namespace Signum.Engine.Authorization
         public static DefaultDictionary<Type, TypeAllowed> AuthorizedTypes()
         {
             return cache.GetDefaultDictionary();
+        }
+
+        public static class Audit
+        {
+            public static List<string> CyclesInRoles()
+            {
+                return AuthLogic.RolesGraph().FeedbackEdgeSet().Edges.Select(e => "{0} -> {1} produces a cycle".Formato(e.From, e.To)).ToList(); 
+            }
+
+            public static List<string> UnsafeRoles()
+            {
+                var g = AuthLogic.RolesGraph();
+
+                var minUsers = g.Where(r2 => cache.GetDefaultRule(r2) == DefaultRule.Min && g.RelatedTo(r2).IsEmpty()).ToList();
+
+                return g.Where(r => !g.IndirectlyRelatedTo(r).Any(r2 => minUsers.Contains(r2)))
+                 .Select(r => "{0} does not inherit from {1}".Formato(r, minUsers.CommaAnd())).ToList();
+            }
+
+            public static List<string> QueriesAndTypes()
+            {
+                return (from r in AuthLogic.RolesGraph()
+                        from t in Schema.Current.Tables.Keys.Where(a=>!a.IsEnumProxy())
+                        let ua = TypeAuthLogic.GetTypeAllowed(r,t).GetUI()
+                        let qns = (from qn in DynamicQueryManager.Current.GetQueries(t)
+                                   where  QueryAuthLogic.GetQueryAllowed(r, qn) != (ua == TypeAllowedBasic.None)
+                                   select qn).ToList()
+                        where qns.Any()
+                        select "Role {0}, type '{1}' is {2} but the queries {3} are {4}".Formato(
+                          r, t.Name,  ua,  qns.CommaAnd(qn=>QueryUtils.GetNiceName(qn)), 
+                          ua == TypeAllowedBasic.None ? "allowed": "not allowed")).ToList();
+
+            }
+
+            public static List<string> RecursiveAllowed()
+            {      
+                var graph =  Schema.Current.ToDirectedGraph();
+
+                return (from r in AuthLogic.RolesGraph()
+                        from t in graph
+                        where !t.Type.IsEnumProxy() && TypeAuthLogic.GetTypeAllowed(r, t.Type).GetDB() > TypeAllowedBasic.None
+                        from t2 in graph.IndirectlyRelatedTo(t, kvp => kvp.Value)
+                        where !t2.Type.IsEnumProxy() && TypeAuthLogic.GetTypeAllowed(r, t2.Type).GetDB() == TypeAllowedBasic.None
+                        select "Role {0} can retrieve '{1}' but not '{2}'".Formato(r, t.Type.Name, t2.Type.Name)).ToList();
+            }
         }
     }
 
