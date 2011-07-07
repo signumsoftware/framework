@@ -36,7 +36,7 @@ namespace $custommessage$.Load
                 action();
             }
 
-            Schema.Current.Initialize(InitLevel.Level0SyncEntities );
+            Schema.Current.InitializeUntil(InitLevel.Level0SyncEntities );
 
             while (true)
             {

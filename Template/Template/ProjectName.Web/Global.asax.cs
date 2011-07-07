@@ -69,7 +69,18 @@ namespace $custommessage$.Web
             ScriptHtmlHelper.Manager.MainAssembly = typeof($custommessage$Client).Assembly;
             SignumControllerFactory.MainAssembly = typeof($custommessage$Client).Assembly;
 
+            SignumControllerFactory.EveryController().AddFilters(ctx =>
+              ctx.FilterInfo.AuthorizationFilters.OfType<AuthenticationRequiredAttribute>().Any() ? null : new AuthenticationRequiredAttribute());
+
+            SignumControllerFactory.EveryController().AddFilters(new SignumExceptionHandlerAttribute());
+
+
             Navigator.Initialize();
+        }
+
+        protected void Application_Error(Object sender, EventArgs e)
+        {
+            SignumExceptionHandlerAttribute.HandlerApplication_Error(HttpContext.Current, true);
         }
     }
 }
