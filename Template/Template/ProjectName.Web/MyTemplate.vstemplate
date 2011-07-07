@@ -22,7 +22,7 @@
       <Folder Name="Content" TargetFolderName="Content">
         <ProjectItem ReplaceParameters="false" TargetFileName="site.css">site.css</ProjectItem>
         <Folder Name="smoothness" TargetFolderName="smoothness">
-          <ProjectItem ReplaceParameters="false" TargetFileName="jquery-ui-1.8.9.custom.css">jquery-ui-1.8.9.custom.css</ProjectItem>
+          <ProjectItem ReplaceParameters="false" TargetFileName="jquery-ui-1.8.14.css">jquery-ui-1.8.14.css</ProjectItem>
           <Folder Name="images" TargetFolderName="images">
             <ProjectItem ReplaceParameters="false" TargetFileName="ui-bg_flat_0_aaaaaa_40x100.png">ui-bg_flat_0_aaaaaa_40x100.png</ProjectItem>
             <ProjectItem ReplaceParameters="false" TargetFileName="ui-bg_flat_75_ffffff_40x100.png">ui-bg_flat_75_ffffff_40x100.png</ProjectItem>
@@ -41,8 +41,8 @@
         </Folder>
       </Folder>
       <Folder Name="Scripts" TargetFolderName="Scripts">
-        <ProjectItem ReplaceParameters="false" TargetFileName="jquery-1.5.min.js">jquery-1.5.min.js</ProjectItem>
-        <ProjectItem ReplaceParameters="false" TargetFileName="jquery-ui-1.8.9.custom.min.js">jquery-ui-1.8.9.custom.min.js</ProjectItem>
+        <ProjectItem ReplaceParameters="false" TargetFileName="jquery-1.6.2.min.js">jquery-1.6.2.min.js</ProjectItem>
+        <ProjectItem ReplaceParameters="false" TargetFileName="jquery-ui-1.8.14.min.js">jquery-ui-1.8.14.min.js</ProjectItem>
         <ProjectItem ReplaceParameters="false" TargetFileName="newcontent.js">newcontent.js</ProjectItem>
       </Folder>
       <ProjectItem ReplaceParameters="false" TargetFileName="favicon.ico">favicon.ico</ProjectItem>
