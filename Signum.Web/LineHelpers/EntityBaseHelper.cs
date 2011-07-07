@@ -62,10 +62,14 @@ namespace Signum.Web
                 case RenderMode.Content:
                     return helper.Partial(partialViewName, vdd);
                 case RenderMode.Popup:
-                    vdd.Add(ViewDataKeys.PartialViewName, partialViewName);
+                    vdd[ViewDataKeys.PartialViewName] = partialViewName;
+                    vdd[ViewDataKeys.OkVisible] = line.ViewButton == ViewButtons.Ok;
+                    vdd[ViewDataKeys.SaveVisible] = line.ViewButton == ViewButtons.Save && Navigator.Manager.ShowSave(line.CleanRuntimeType, false) && !line.ReadOnly;
                     return helper.Partial(Navigator.Manager.PopupControlView, vdd);
                 case RenderMode.PopupInDiv:
-                    vdd.Add(ViewDataKeys.PartialViewName, partialViewName);
+                    vdd[ViewDataKeys.PartialViewName] = partialViewName;
+                    vdd[ViewDataKeys.OkVisible] = line.ViewButton == ViewButtons.Ok;
+                    vdd[ViewDataKeys.SaveVisible] = line.ViewButton == ViewButtons.Save && Navigator.Manager.ShowSave(line.CleanRuntimeType, false) && !line.ReadOnly;
                     return helper.Div(typeContext.Compose(EntityBaseKeys.Entity),
                         helper.Partial(Navigator.Manager.PopupControlView, vdd),
                         "",
@@ -116,7 +120,7 @@ namespace Signum.Web
             var htmlAttr = new Dictionary<string, object>
             {
                 { "onclick", entityBase.GetCreating() },
-                { "data-icon", "ui-icon-circle-plus" },
+                { "data-icon", entityBase.ViewMode == ViewMode.Popup ? "ui-icon-circle-plus" : "ui-icon-plusthick" },
                 { "data-text", false}
             };
 
@@ -199,9 +203,8 @@ namespace Signum.Web
                 eb.View = Navigator.IsViewable(entityType, false);
                 eb.Find = Navigator.IsFindable(entityType);
 
-                EntityLine el = eb as EntityLine;
-                if (el != null)
-                    el.Navigate = Navigator.IsNavigable(entityType, false);
+                bool isLite = ((eb as EntityListBase).TryCC(elb => elb.ElementType) ?? eb.Type).IsLite();
+                eb.ViewMode = isLite ? ViewMode.Navigate : ViewMode.Popup;
             }
         }
     }

@@ -47,7 +47,7 @@ namespace ASP
     [System.Web.WebPages.PageVirtualPathAttribute("~/Signum/Views/NormalControl.cshtml")]
     public class _Page_Signum_Views_NormalControl_cshtml : System.Web.Mvc.WebViewPage<TypeContext>
     {
-#line hidden
+
 
         public _Page_Signum_Views_NormalControl_cshtml()
         {
@@ -112,19 +112,19 @@ WriteLiteral("    <span class=\"sf-entity-title\">");
 WriteLiteral("</span>\r\n</div>\r\n<div class=\"sf-button-bar\">\r\n");
 
 
-     if (Model != null && Navigator.Manager.ShowOkSave(modifiable.GetType(), false))
+     if (Model != null && Navigator.Manager.ShowSave(modifiable.GetType(), false))
     {
 
-WriteLiteral("        <a id=\"ebSave\" class=\"sf-entity-button sf-save\" onclick=\"javascript:new S" +
-"F.Validator({controllerUrl:\'");
+WriteLiteral("        <a id=\"ebSave\" class=\"sf-entity-button sf-save\" onclick=\"new SF.Validator" +
+"({controllerUrl:\'");
 
 
-                                                                                                        Write(Url.SignumAction("TrySave"));
+                                                                                             Write(Url.SignumAction("TrySave"));
 
 WriteLiteral("\'}).trySave();\">");
 
 
-                                                                                                                                                    Write(Resources.Save);
+                                                                                                                                         Write(Resources.Save);
 
 WriteLiteral("</a>  \r\n");
 

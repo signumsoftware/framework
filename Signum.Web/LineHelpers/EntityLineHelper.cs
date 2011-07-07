@@ -83,7 +83,7 @@ namespace Signum.Web
                     }
 
                     int? id = entityLine.IdOrNull;
-                    if (entityLine.Navigate && id != null)
+                    if (entityLine.View && entityLine.ViewMode == ViewMode.Navigate && id != null)
                     {
                         sb.AddLine(
                             helper.Href(entityLine.Compose(EntityBaseKeys.ToStrLink),

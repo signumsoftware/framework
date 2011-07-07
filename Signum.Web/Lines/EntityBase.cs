@@ -43,13 +43,17 @@ namespace Signum.Web
         }
 
         public Implementations Implementations { get; set; }
+
+        public ViewMode ViewMode { get; set; } 
         
         public bool View { get; set; }
         public bool Create { get; set; }
         public bool Find { get; set; }
         public bool Remove { get; set; }
         public bool ReadOnlyEntity { get; set; }
-        
+
+        public ViewButtons? ViewButton { get; set; }
+
         bool preserveViewData = false; 
         /// <summary>
         /// When rendering the line content, it will preserve the ViewData values except the Model
@@ -163,5 +167,11 @@ namespace Signum.Web
                        (UntypedValue as Lite).TryCC(l => l.ToStr);
             }
         }
+    }
+
+    public enum ViewMode
+    {
+        Popup,
+        Navigate
     }
 }

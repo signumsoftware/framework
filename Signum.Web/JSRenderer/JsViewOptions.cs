@@ -14,11 +14,13 @@ namespace Signum.Web
         public JsValue<string> ControllerUrl { get; set; }
         public JsValidatorOptions ValidationOptions { get; set; }
         public JsFunction OnOk { get; set; }
+        public JsFunction OnSave { get; set; }
         public JsFunction OnOkClosed { get; set; }
         public JsFunction OnCancelled { get; set; }
         public JsValue<string> Type { get; set; }
         public JsValue<int?> Id { get; set; }
         public JsValue<string> PartialViewName { get; set; }
+        public JsValue<bool> Navigate { get; set; }
         public JsInstruction RequestExtraJsonData { get; set; }
 
         public JsViewOptions()
@@ -32,10 +34,12 @@ namespace Signum.Web
                     {"controllerUrl", ControllerUrl.TryCC(a=>a.ToJS()) ?? RouteHelper.New().SignumAction("PopupView").SingleQuote()},
                     {"validationOptions", ValidationOptions.TryCC(a => a.ToJS()) },
                     {"onOk", OnOk.TryCC(a=>a.ToJS())},
+                    {"onSave", OnSave.TryCC(a=>a.ToJS())},
                     {"onOkClosed", OnOkClosed.TryCC(a=>a.ToJS())},
                     {"onCancelled", OnCancelled.TryCC(a=>a.ToJS())},
                     {"type", Type.TryCC(a=>a.ToJS())},
                     {"partialViewName", PartialViewName.TryCC(a=>a.ToJS())},
+                    {"navigate", Navigate.TryCC(a=>a.ToJS())},
                     {"requestExtraJsonData", RequestExtraJsonData.TryCC(a=>a.ToJS())},
                 }.ToJS();
             };

@@ -124,7 +124,8 @@ namespace Signum.Web
             switch (preferredStyle)
             {
                 case VisualConstructStyle.PopupView:
-                    return Navigator.PopupView(controller, ident, prefix);
+                    TypeContext tc = TypeContextUtilities.UntypedNew(ident, prefix);
+                    return Navigator.PopupOpen(controller, new ViewOkOptions(tc));
                 case VisualConstructStyle.PartialView:
                     return Navigator.PartialView(controller, ident, prefix);
                 case VisualConstructStyle.View:

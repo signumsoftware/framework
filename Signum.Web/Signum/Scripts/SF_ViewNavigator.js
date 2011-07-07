@@ -6,6 +6,7 @@ SF.registerModule("ViewNavigator", function () {
         this.viewOptions = $.extend({
             containerDiv: null,
             onOk: null,
+            onSave: null,
             onOkClosed: null,
             onCancelled: null,
             onLoaded: null,
@@ -14,6 +15,7 @@ SF.registerModule("ViewNavigator", function () {
             id: null,
             prefix: "",
             partialViewName: null,
+            navigate: null,
             requestExtraJsonData: null
         }, _viewOptions);
 
@@ -134,7 +136,7 @@ SF.registerModule("ViewNavigator", function () {
 
             var self = this;
             $("#" + this.viewOptions.containerDiv).popup({
-                onOk: function () { self.onCreateSave() },
+                onSave: function () { self.onCreateSave() },
                 onCancel: function () { self.onCreateCancel() }
             });
         },
@@ -171,7 +173,7 @@ SF.registerModule("ViewNavigator", function () {
 
             var self = this;
             $("#" + tempDivId).popup({
-                onOk: function () { self.onCreateSave(saveUrl) },
+                onSave: function () { self.onCreateSave(saveUrl) },
                 onCancel: function () { self.onCreateCancel() }
             });
 
@@ -246,7 +248,7 @@ SF.registerModule("ViewNavigator", function () {
 
         onCreateSave: function (saveUrl) {
             SF.log("ViewNavigator onCreateSave");
-            var doDefault = (this.viewOptions.onOk != null) ? this.viewOptions.onOk(this.tempDivId()) : true;
+            var doDefault = (this.viewOptions.onSave != null) ? this.viewOptions.onSave(this.tempDivId()) : true;
             if (doDefault != false) {
                 var validatorResult = new SF.PartialValidator({ prefix: this.viewOptions.prefix, type: this.viewOptions.type, controllerUrl: saveUrl }).trySave();
                 if (!validatorResult.isValid) {

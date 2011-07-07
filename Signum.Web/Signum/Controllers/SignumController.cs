@@ -68,7 +68,8 @@ namespace Signum.Web.Controllers
 
             IdentifiableEntity entity = (IdentifiableEntity)result;
 
-            return Navigator.PopupView(this, entity, prefix, url);
+            TypeContext tc = TypeContextUtilities.UntypedNew(entity, prefix);
+            return this.PopupOpen(new ViewOkOptions(tc) { PartialViewName = url });
         }
 
         public PartialViewResult PopupView(string runtimeType, int? id, string prefix, bool? readOnly, string url)
@@ -88,11 +89,7 @@ namespace Signum.Web.Controllers
             }
             
             TypeContext tc = TypeContextUtilities.UntypedNew((IdentifiableEntity)entity, prefix);
-
-            if (readOnly.HasValue)
-                tc.ReadOnly = true;
-
-            return Navigator.PopupView(this, tc, url);
+            return this.PopupOpen(new ViewOkOptions(tc) { PartialViewName = url, ReadOnly = readOnly.HasValue });
         }
 
         [HttpPost]
