@@ -1,4 +1,5 @@
 ﻿@using Signum.Entities.Reflection
+@using Signum.Web.Properties
 @model TypeContext
 <div id="@Model.Compose("panelPopup")" data-title="@Navigator.Manager.GetTypeTitle(Model.UntypedValue as ModifiableEntity)">
     <h2><span class="sf-entity-title">@(ViewBag.Title ?? Model.UntypedValue.TryToString())</span></h2>
@@ -11,7 +12,7 @@
         @if (ViewData.ContainsKey(ViewDataKeys.SaveVisible) && (bool)ViewData[ViewDataKeys.SaveVisible])
         {  
             <button id="@Model.Compose("ebSave")" class="sf-entity-button sf-save" @(ViewData[ViewDataKeys.OnSave] != null ? Html.Raw("onclick=\"" + ViewData[ViewDataKeys.OnSave] + "\"") : null)>
-                OK</button>                
+                @Resources.Save</button>                
         }
         @ButtonBarEntityHelper.GetForEntity(this.ViewContext, (ModifiableEntity)Model.UntypedValue, ViewData[ViewDataKeys.PartialViewName].ToString(), Model.ControlID).ToString(Html)
     </div>

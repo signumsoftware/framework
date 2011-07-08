@@ -42,6 +42,7 @@ namespace ASP
     using System.Web.UI.HtmlControls;
     using System.Xml.Linq;
     using Signum.Entities.Reflection;
+    using Signum.Web.Properties;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Signum/Views/PopupControl.cshtml")]
@@ -61,6 +62,7 @@ namespace ASP
         }
         public override void Execute()
         {
+
 
 
 WriteLiteral("<div id=\"");
@@ -113,7 +115,12 @@ WriteLiteral("\" class=\"sf-entity-button sf-save\" ");
 
                                                                                Write(ViewData[ViewDataKeys.OnSave] != null ? Html.Raw("onclick=\"" + ViewData[ViewDataKeys.OnSave] + "\"") : null);
 
-WriteLiteral(">\r\n                OK</button>                \r\n");
+WriteLiteral(">\r\n                ");
+
+
+           Write(Resources.Save);
+
+WriteLiteral("</button>                \r\n");
 
 
         }
