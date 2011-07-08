@@ -34,7 +34,6 @@ namespace Signum.Web.Operations
 
                 Lite lite = Lite.Create(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value);
                 entity = OperationLogic.ServiceExecuteLite(lite, EnumLogic<OperationDN>.ToEnum(operationFullKey));
-
             }
             else
             {
@@ -143,15 +142,16 @@ namespace Signum.Web.Operations
                 {
                     if (entity.IsNew)
                         return Navigator.NormalControl(this, entity);
-
-                    string newUrl = Navigator.ViewRoute(entity.GetType(), entity.Id);
-                    if (HttpContext.Request.UrlReferrer.AbsolutePath.Contains(newUrl))
-                        return Navigator.NormalControl(this, entity);
                     else
-                        return JsonAction.Redirect(newUrl);
+                        return JsonAction.Redirect(Navigator.ViewRoute(entity));
                 }
                 else
-                    return Navigator.View(this, entity);
+                {
+                    if (entity.IsNew)
+                        return Navigator.View(this, entity);
+                    else
+                        return Redirect(Navigator.ViewRoute(entity));
+                }
             }
         }
 
@@ -167,9 +167,29 @@ namespace Signum.Web.Operations
             
             IdentifiableEntity entity = OperationLogic.ServiceConstructFromMany(sourceEntities, type, EnumLogic<OperationDN>.ToEnum(operationFullKey));
 
-            ViewData[ViewDataKeys.WriteSFInfo] = true;
-            TypeContext tc = TypeContextUtilities.UntypedNew(entity, prefix);
-            return this.PopupOpen(new ViewSaveOptions(tc));
+            if (prefix.HasText())
+            {
+                ViewData[ViewDataKeys.WriteSFInfo] = true;
+                TypeContext tc = TypeContextUtilities.UntypedNew(entity, prefix);
+                return this.PopupOpen(new ViewSaveOptions(tc));
+            }
+            else
+            {
+                if (Request.IsAjaxRequest())
+                {
+                    if (entity.IsNew)
+                        return Navigator.NormalControl(this, entity);
+                    else
+                        return JsonAction.Redirect(Navigator.ViewRoute(entity));
+                }
+                else
+                {
+                    if (entity.IsNew)
+                        return Navigator.View(this, entity);
+                    else 
+                        return Redirect(Navigator.ViewRoute(entity));
+                }
+            }
         }
     }
 }

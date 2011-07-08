@@ -81,7 +81,26 @@ namespace Signum.Web.Extensions.Sample.Test
         }
 
         [TestMethod]
-        public void Operations003_ConstructFrom_OpenPopup()
+        public void Operations003_ConstructFrom()
+        {
+            //Album.Clone
+            CheckLoginAndOpen(ViewRoute("Album", 1));
+
+            Assert.IsFalse(selenium.EntityButtonEnabled("AlbumOperation_Save"));
+
+            selenium.EntityMenuOptionClick(constructorsMenuId, "AlbumOperation_Clone");
+            selenium.WaitAjaxFinished(() => selenium.EntityButtonEnabled("AlbumOperation_Save"));
+
+            selenium.Type("Name", "test3");
+            selenium.Type("Year", "2010");
+
+            selenium.EntityButtonClick("AlbumOperation_Save");
+            selenium.WaitForPageToLoad(PageLoadTimeout);
+            selenium.MainEntityHasId();
+        }
+
+        [TestMethod]
+        public void Operations004_ConstructFrom_OpenPopup()
         {
             //Album.CreateFromBand
             CheckLoginAndOpen(ViewRoute("Band", 1));
@@ -96,23 +115,6 @@ namespace Signum.Web.Extensions.Sample.Test
 
             //When clicking Ok (Save) => Custom controller that returns a url => navigate
             selenium.Click("jq=#{0}btnOk".Formato(popupPrefix)); //Dont't call PopupOk helper => it makes an ajaxWait and then waitPageLoad fails
-            selenium.WaitForPageToLoad(PageLoadTimeout);
-            selenium.MainEntityHasId();
-        }
-
-        [TestMethod]
-        public void Operations004_ConstructFrom_Submit()
-        {
-            //Album.Clone
-            CheckLoginAndOpen(ViewRoute("Album", 1));
-
-            selenium.EntityMenuOptionClick(constructorsMenuId, "AlbumOperation_Clone");
-            selenium.WaitForPageToLoad(PageLoadTimeout);
-
-            selenium.Type("Name", "test3");
-            selenium.Type("Year", "2010");
-
-            selenium.EntityButtonClick("AlbumOperation_Save");
             selenium.WaitForPageToLoad(PageLoadTimeout);
             selenium.MainEntityHasId();
         }

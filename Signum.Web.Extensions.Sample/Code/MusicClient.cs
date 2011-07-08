@@ -72,7 +72,6 @@ namespace Signum.Web.Extensions.Sample
                 {
                     { AlbumOperation.Clone, new EntityOperationSettings 
                     { 
-                        OnClick = ctx => new JsOperationConstructorFrom(ctx.Options()).validateAndSubmit(),
                         OnContextualClick = ctx => Js.Confirm("Do you wish to clone album {0}".Formato(ctx.Entity.ToStr),
                             new JsOperationConstructorFrom(ctx.Options()).ajax(ctx.Prefix, JsOpSuccess.DefaultContextualDispatcher)),
                         IsVisible = ctx => true,

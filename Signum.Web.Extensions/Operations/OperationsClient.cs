@@ -65,7 +65,8 @@ namespace Signum.Web.Operations
                          PartialViewName = partialViewName,
                          Prefix = prefix
                     }
-                    where os == null || os.IsVisible == null || os.IsVisible(ctx)
+                    where (string.IsNullOrEmpty(prefix) || os.TryCS(sett => sett.IsVisibleOnOkPopup) == true) &&
+                          (os == null || os.IsVisible == null || os.IsVisible(ctx))
                     select ctx;
 
             List<ToolBarButton> buttons = contexts
