@@ -100,7 +100,7 @@ namespace Signum.Web.Auth
             var model = new SetPasswordModel { User = entity.ToLite() };
 
             ViewData[ViewDataKeys.WriteSFInfo] = true; 
-            ViewData[ViewDataKeys.OnOk] = new JsOperationExecutor(new JsOperationOptions
+            ViewData[ViewDataKeys.OnSave] = new JsOperationExecutor(new JsOperationOptions
                 {
                     ControllerUrl = RouteHelper.New().Action("SetPasswordOnOk", "Auth"),
                     Prefix = prefix,
@@ -109,7 +109,7 @@ namespace Signum.Web.Auth
             ViewData[ViewDataKeys.Title] = Resources.EnterTheNewPassword;
 
             TypeContext tc = TypeContextUtilities.UntypedNew(model, prefix);
-            return this.PopupOpen(new ViewOkOptions(tc));
+            return this.PopupOpen(new ViewSaveOptions(tc));
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
