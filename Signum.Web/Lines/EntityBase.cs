@@ -46,13 +46,11 @@ namespace Signum.Web
 
         public ViewMode ViewMode { get; set; } 
         
-        public bool View { get; set; }
+        public virtual bool View { get; set; }
         public bool Create { get; set; }
         public bool Find { get; set; }
         public bool Remove { get; set; }
         public bool ReadOnlyEntity { get; set; }
-
-        public ViewButtons? ViewButton { get; set; }
 
         bool preserveViewData = false; 
         /// <summary>

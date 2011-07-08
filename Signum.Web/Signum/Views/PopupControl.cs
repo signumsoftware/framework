@@ -81,7 +81,7 @@ WriteLiteral("\">\r\n    <h2><span class=\"sf-entity-title\">");
 WriteLiteral("</span></h2>\r\n    <div class=\"sf-button-bar\">\r\n");
 
 
-         if ((bool)ViewData[ViewDataKeys.OkVisible])
+         if (ViewData.ContainsKey(ViewDataKeys.OkVisible) && (bool)ViewData[ViewDataKeys.OkVisible])
         {  
 
 WriteLiteral("            <button id=\"");
@@ -100,7 +100,7 @@ WriteLiteral(">\r\n                OK</button>                \r\n");
         }
 
 
-         if ((bool)ViewData[ViewDataKeys.SaveVisible])
+         if (ViewData.ContainsKey(ViewDataKeys.SaveVisible) && (bool)ViewData[ViewDataKeys.SaveVisible])
         {  
 
 WriteLiteral("            <button id=\"");

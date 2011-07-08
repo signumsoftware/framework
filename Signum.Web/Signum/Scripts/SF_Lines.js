@@ -513,6 +513,13 @@ SF.registerModule("Lines", function () {
         this.viewInIndex = function (_viewOptions, selectedItemPrefix) {
             SF.log("EList viewInIndex");
             var viewOptions = this.viewOptionsForViewing(_viewOptions, selectedItemPrefix);
+            if (viewOptions.navigate) {
+                var itemInfo = this.itemRuntimeInfo(selectedItemPrefix);
+                if (!SF.isEmpty(itemInfo.id())) {
+                    window.open(_viewOptions.controllerUrl.substring(0, _viewOptions.controllerUrl.lastIndexOf("/") + 1) + itemInfo.runtimeType() + "/" + itemInfo.id(), "_blank");
+                }
+                return;
+            }
             new SF.ViewNavigator(viewOptions).viewOk();
         };
 
@@ -588,13 +595,9 @@ SF.registerModule("Lines", function () {
 
         this.updateButtonsDisplay = function () {
             SF.log("EList updateButtonsDisplay");
-            var btnRemove = $(this.pf("btnRemove"));
-            if ($('#' + this.options.prefix + " > option").length !== 0) {
-                btnRemove.show();
-            }
-            else {
-                btnRemove.hide();
-            }
+            var hasElements = $('#' + this.options.prefix + " > option").length > 0;
+            $(this.pf("btnRemove")).toggle(hasElements);
+            $(this.pf("btnView")).toggle(hasElements);
         };
     };
 
@@ -880,7 +883,7 @@ SF.registerModule("Lines", function () {
             else {
                 var viewOptions = this.viewOptionsForViewing(_viewOptions, selectedItemPrefix);
                 new SF.ViewNavigator(viewOptions).viewEmbedded();
-                SF.triggerNewContent($('#' + _viewOptions.containerDiv));
+                SF.triggerNewContent($('#' + viewOptions.containerDiv));
             }
         };
 
@@ -1034,6 +1037,20 @@ SF.registerModule("Lines", function () {
             runtimeInfo.setEntity(newRuntimeType, newId);
             $(this.pf(this.entity)).html(''); //Clean
             this.fireOnEntityChanged(newEntity);
+        };
+
+        this.view = function (_viewOptions) {
+            SF.log("ELine view");
+            var viewOptions = this.viewOptionsForViewing(_viewOptions);
+            if (viewOptions.navigate) {
+                var runtimeInfo = this.runtimeInfo();
+                if (!SF.isEmpty(runtimeInfo.id())) {
+                    window.open(viewOptions.controllerUrl.substring(0, viewOptions.controllerUrl.lastIndexOf("/") + 1) + runtimeInfo.runtimeType() + "/" + runtimeInfo.id(), "_blank");
+                }
+            }
+            else {
+                new SF.ViewNavigator(viewOptions).viewOk();
+            }
         };
     };
 

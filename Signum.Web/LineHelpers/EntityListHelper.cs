@@ -40,7 +40,10 @@ namespace Signum.Web
                 using (entityList.ShowFieldDiv ? sb.Surround(new HtmlTag("div").Class("sf-field-list")) : null)
                 {
                     HtmlStringBuilder sbSelect = new HtmlStringBuilder();
-                    using (sbSelect.Surround(new HtmlTag("select").IdName(entityList.ControlID).Attr("multiple", "multiple").Attr("ondblclick", entityList.GetViewing()).Class("sf-entity-list")))
+                    
+                    var sbSelectContainer = new HtmlTag("select").IdName(entityList.ControlID).Class("sf-entity-list").Attr("multiple", "multiple");
+                    
+                    using (sbSelect.Surround(sbSelectContainer))
                     {
                         if (entityList.UntypedValue != null)
                         {
@@ -51,12 +54,13 @@ namespace Signum.Web
 
                     sb.Add(sbSelect.ToHtml());
 
-                    HtmlStringBuilder sbBtns = new HtmlStringBuilder();
-                    sbBtns.AddLine(ListBaseHelper.CreateButton(helper, entityList, null).Surround("li"));
-                    sbBtns.AddLine(ListBaseHelper.FindButton(helper, entityList).Surround("li"));
-                    sbBtns.AddLine(ListBaseHelper.RemoveButton(helper, entityList).Surround("li"));
-
-                    sb.AddLine(sbBtns.ToHtml().Surround("ul"));
+                    using (sb.Surround(new HtmlTag("ul")))
+                    {
+                        sb.AddLine(ListBaseHelper.ViewButton(helper, entityList).Surround("li"));
+                        sb.AddLine(ListBaseHelper.CreateButton(helper, entityList, null).Surround("li"));
+                        sb.AddLine(ListBaseHelper.FindButton(helper, entityList).Surround("li"));
+                        sb.AddLine(ListBaseHelper.RemoveButton(helper, entityList).Surround("li"));
+                    }
                 }
             }
 

@@ -20,8 +20,8 @@ namespace Signum.Web
 {
     public class EntityLine : EntityBase
     {
-        public bool Autocomplete { get; set; }        
-        
+        public bool Autocomplete { get; set; }
+
         public EntityLine(Type type, object untypedValue, Context parent, string controlID, PropertyRoute propertyRoute)
             : base(type, untypedValue, parent, controlID, propertyRoute)
         {
