@@ -2,6 +2,6 @@
 
 @using (var e = Html.TypeContext<LabelDN>()) 
 {
-	@Html.ValueLine(e, f => f.Name);
-    @Html.EntityLine(e, f => f.Owner, el => el.ViewMode = ViewMode.Popup)
+	@Html.ValueLine(e, f => f.Name)
+    @Html.EntityCombo(e, f => f.Owner)
 }
