@@ -18,17 +18,17 @@ namespace Signum.Engine
     {
         public static void SaveAll(IdentifiableEntity[] idents)
         {
-             Save(()=>GraphExplorer.FromRoots(idents), idents);
+             Save(()=>GraphExplorer.FromRoots(idents));
         }
 
         public static void Save(IdentifiableEntity ident) 
         {
-            Save(() => GraphExplorer.FromRoot(ident), new[] { ident });
+            Save(() =>{ using(HeavyProfiler.Log("GraphExplorer")) return GraphExplorer.FromRoot(ident);});
         }
 
         static readonly IdentifiableEntity[] None = new IdentifiableEntity[0];
 
-        static void Save(Func<DirectedGraph<Modifiable>> createGraph, IdentifiableEntity[] roots)
+        static void Save(Func<DirectedGraph<Modifiable>> createGraph)
         {
             DirectedGraph<Modifiable> modifiables = GraphExplorer.PreSaving(createGraph);
 
@@ -38,13 +38,12 @@ namespace Signum.Engine
                     IdentifiableEntity ident = m as IdentifiableEntity;
 
                     if (ident != null)
-                        schema.OnPreSaving(ident, roots.Contains(ident), ref graphModified);
+                        schema.OnPreSaving(ident, ref graphModified);
                 }, createGraph);
 
             string error = GraphExplorer.Integrity(modifiables);
             if (error.HasText())
                 throw new ApplicationException(error);
-
 
             GraphExplorer.PropagateModifications(modifiables.Inverse());
 
@@ -52,7 +51,7 @@ namespace Signum.Engine
             DirectedGraph<IdentifiableEntity> identifiables = GraphExplorer.ColapseIdentifiables(modifiables);
 
             foreach (var node in identifiables)
-                schema.OnSaving(node, roots.Contains(node));
+                schema.OnSaving(node);
 
             //Remove all the edges that doesn't mean a dependency
             identifiables.RemoveAll(identifiables.Edges.Where(e => !e.To.IsNew).ToList());
@@ -65,74 +64,45 @@ namespace Signum.Engine
             //separa las conexiones 'prohibidas' de las buenas
             DirectedGraph<IdentifiableEntity> backEdges = identifiables.FeedbackEdgeSet();
 
-            identifiables.RemoveAll(backEdges.Edges);
+            if (backEdges.IsEmpty())
+                backEdges = null;
+            else
+                identifiables.RemoveAll(backEdges.Edges);
 
             IEnumerable<HashSet<IdentifiableEntity>> groups = identifiables.CompilationOrderGroups();
 
+            Forbidden forbidden = new Forbidden();
+
             foreach (var group in groups)
             {
-                SaveGroup(group, schema, backEdges);
+                foreach (var ident in group)
+                {
+                    forbidden.Clear();
+                    if (backEdges != null)
+                        forbidden.UnionWith(backEdges.TryRelatedTo(ident));
+
+                    schema.Table(ident.GetType()).Save(ident, forbidden);
+                }
             }
 
-            var postSavings = backEdges.Edges.Select(e => e.From).ToHashSet();
+            if (backEdges != null)
+            {
+                var postSavings = backEdges.Edges.Select(e => e.From).ToHashSet();
+                foreach (var ident in postSavings)
+                {
+                    forbidden.Clear();
+                    if (backEdges != null)
+                        forbidden.UnionWith(backEdges.TryRelatedTo(ident));
 
-            SaveGroup(postSavings, schema, null);
+                    schema.Table(ident.GetType()).Save(ident, forbidden);
+                }
+            }
 
             EntityCache.Add(identifiables);
             EntityCache.Add(notModified);
         }
 
 
-        static void SaveGroup(HashSet<IdentifiableEntity> group, Schema schema, DirectedGraph<IdentifiableEntity> backEdges)
-        {
-            List<SqlPreCommand> preCommands = new List<SqlPreCommand>(group.Count);
-            foreach (var ident in group)
-            {
-                Table table = schema.Table(ident.GetType());
-
-                Forbidden forbidden = new Forbidden();
-                if (backEdges != null)
-                    forbidden.UnionWith(backEdges.TryRelatedTo(ident));
-
-                SqlPreCommand pc = table.Save(ident, forbidden);
-
-                preCommands.Add(pc);
-            }
-
-            if (preCommands.Count == 0)
-                return;
-
-            SqlPreCommand total = preCommands.Combine(Spacing.Triple);
-
-            int? lastId = null;
-            foreach (var item in total.Splits(SqlBuilder.MaxParametersInSQL).ToList().Iterate())
-            {
-                SqlPreCommand command = item.Value;
-
-                List<IdentifiableEntity> insertedEntities = command.Leaves().Select(ss => ss.EntityToUpdate).NotNull().ToList();
-
-                SqlPreCommand combine = SqlPreCommand.Combine(Spacing.Triple,
-                                                SqlBuilder.DeclareIDsMemoryTable(),
-                                                SqlBuilder.DeclareLastEntityID(),
-                                                !item.IsFirst && lastId.HasValue ? SqlBuilder.SetLastEntityId(lastId.Value) : null,
-                                                command,
-                                                SqlBuilder.SelectIDMemoryTable(),
-                                                !item.IsLast ? SqlBuilder.SelectLastEntityID() : null);
-
-                DataSet ds = Executor.ExecuteDataSet(combine.ToSimple());
-
-                DataTable dt = ds.Tables[0];
-                if (dt.Rows.Count != insertedEntities.Count)
-                    throw new InvalidOperationException("{0} objects inserted but only {1} ids have been generated".Formato(insertedEntities.Count, dt.Rows.Count));
-
-                for (int i = 0; i < dt.Rows.Count; i++)
-                    insertedEntities[i].id = (int)dt.Rows[i][0];
-                
-                EntityCache.Add<IdentifiableEntity>(insertedEntities);
-             
-                if (!item.IsLast)
-                    lastId = ds.Tables[1].Rows[0]["LastID"].Map(o => o == DBNull.Value ? (int?)null : (int?)o);
-            }
-        }
+       
     }
 }

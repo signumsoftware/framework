@@ -41,9 +41,9 @@ namespace Signum.Engine.Linq
 
             if (source != proj.Source || projector != proj.Projector || token != proj.Token)
             {
-                return new ProjectionExpression(source, projector, proj.UniqueFunction, token);
+                return new ProjectionExpression(source, projector, proj.UniqueFunction, token, proj.Type);
             }
-            return proj;       
+            return proj;
         }
 
         protected override Expression VisitTable(TableExpression table)
@@ -114,6 +114,7 @@ namespace Signum.Engine.Linq
             this.VisitOrderBy(select.OrderBy);
             this.VisitGroupBy(select.GroupBy);
 
+
             SourceExpression from = this.VisitSource(select.From);
 
             Expression top = this.Visit(select.Top);
@@ -132,12 +133,12 @@ namespace Signum.Engine.Linq
             CurrentScope.SetRange(askedColumns);
 
             if (top != select.Top || from != select.From || where != select.Where || columns != select.Columns || orderBy != select.OrderBy || groupBy != select.GroupBy)
-                return new SelectExpression(select.Alias, select.Distinct, top, columns, from, where, orderBy, groupBy);
+                return new SelectExpression(select.Alias, select.Distinct, select.Reverse, top, columns, from, where, orderBy, groupBy);
 
             return select;
         }
 
-        private ReadOnlyCollection<ColumnDeclaration> AnswerAndExpand(ReadOnlyCollection<ColumnDeclaration> columns, string currentAlias, Dictionary<ColumnExpression, Expression> askedColumns)
+        private ReadOnlyCollection<ColumnDeclaration> AnswerAndExpand(ReadOnlyCollection<ColumnDeclaration> columns, Alias currentAlias, Dictionary<ColumnExpression, Expression> askedColumns)
         {
             List<ColumnDeclaration> result = columns.ToList();
          
@@ -192,6 +193,7 @@ namespace Signum.Engine.Linq
             scopes = scopes.Push(new Dictionary<ColumnExpression, Expression>());
             return new Disposable(() => scopes = scopes.Pop());
         }
+
 
         protected override Expression VisitColumn(ColumnExpression column)
         {

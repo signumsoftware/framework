@@ -67,6 +67,8 @@ namespace Signum.Engine
         public abstract string DatabaseName();
 
         public abstract string DataSourceName();
+
+        public virtual int MaxNameLength { get { return 128; } }
     }
 
 
@@ -299,7 +301,6 @@ namespace Signum.Engine
             switch (ex.Number)
             {
                 case -2: return new TimeoutException(ex.Message, ex);
-                case 1033: return new OrderByNotLastException(ex);
                 case 2601: return new UniqueKeyException(ex);
                 case 547: return new ForeignKeyException(ex);
                 default: return ex;

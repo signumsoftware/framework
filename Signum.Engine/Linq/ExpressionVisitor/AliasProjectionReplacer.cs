@@ -12,19 +12,17 @@ namespace Signum.Engine.Linq
 
         public static Expression Replace(Expression proj)
         {
-            AliasProjectionReplacer apr = new AliasProjectionReplacer() { root = proj as ProjectionExpression };
+            AliasProjectionReplacer apr = new AliasProjectionReplacer()
+            {
+                root = proj as ProjectionExpression,
+            };
             return apr.Visit(proj);
-        }
-        int aliasCount = 0;
-        private string GetNextAlias()
-        {
-            return "r" + (aliasCount++);
-        }
+        }       
 
         protected override Expression VisitProjection(ProjectionExpression proj)
         {
             if (proj != root)
-                return (ProjectionExpression)AliasReplacer.Replace(base.VisitProjection(proj), GetNextAlias);
+                return (ProjectionExpression)AliasReplacer.Replace(base.VisitProjection(proj));
             else
                 return (ProjectionExpression)base.VisitProjection(proj);
         }

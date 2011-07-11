@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,77 +12,49 @@ using System.Reflection;
 
 namespace Signum.Utilities
 {
-    public static class CSV
+    public static class Csv
     {
-        public static string ToCSV<T>(this IEnumerable<T> collection, string fileName)
+        public static Encoding DefaultEncoding = Encoding.GetEncoding(1252);
+
+        public static string ToCsvFile<T>(this IEnumerable<T> collection, string fileName, Encoding encoding = null, CultureInfo culture = null, bool writeHeaders = true)
         {
             using (FileStream fs = File.Create(fileName))
-                ToCSV<T>(collection, fs, Encoding.UTF8, CultureInfo.CurrentCulture);
+                ToCsv<T>(collection, fs, encoding, culture, writeHeaders);
 
             return fileName;
         }
 
-        public static string ToCSV<T>(this IEnumerable<T> collection, string fileName, Encoding encoding)
-        {
-            using (FileStream fs = File.Create(fileName))
-                ToCSV<T>(collection, fs, encoding, CultureInfo.CurrentCulture);
-
-            return fileName;
-        }
-
-        public static string ToCSV<T>(this IEnumerable<T> collection, string fileName, Encoding encoding, CultureInfo culture)
-        {
-            using (FileStream fs = File.Create(fileName))
-                ToCSV<T>(collection, fs, encoding, culture);
-
-            return fileName;
-        }
-
-        public static byte[] ToCSV<T>(this IEnumerable<T> collection)
-        {
+        public static byte[] ToCsvBytes<T>(this IEnumerable<T> collection, Encoding encoding = null, CultureInfo culture = null, bool writeHeaders = true)
+        {   
             using (MemoryStream ms = new MemoryStream())
             {
-                collection.ToCSV(ms, Encoding.UTF8, CultureInfo.CurrentCulture);
+                collection.ToCsv(ms, encoding, culture, writeHeaders);
                 return ms.ToArray();
             }
         }
 
-        public static byte[] ToCSV<T>(this IEnumerable<T> collection, Encoding encoding)
+        public static void ToCsv<T>(this IEnumerable<T> collection, Stream stream, Encoding encoding= null, CultureInfo culture = null, bool writeHeaders = true)
         {
-            using (MemoryStream ms = new MemoryStream())
-            {
-                collection.ToCSV(ms, encoding, CultureInfo.CurrentCulture);
-                return ms.ToArray();
-            }
-        }
+            encoding = encoding ?? DefaultEncoding;
+            culture = culture ?? CultureInfo.CurrentCulture;
 
-        public static byte[] ToCSV<T>(this IEnumerable<T> collection, Encoding encoding, CultureInfo culture)
-        {
-            using (MemoryStream ms = new MemoryStream())
-            {
-                collection.ToCSV(ms, encoding, culture);
-                return ms.ToArray();
-            }
-        }
-
-        public static void ToCSV<T>(this IEnumerable<T> collection, Stream stream, Encoding encoding, CultureInfo culture)
-        {
             string separator = culture.TextInfo.ListSeparator; 
 
             List<MemberEntry<T>> members = MemberEntryFactory.GenerateList<T>();
 
             using (StreamWriter sw = new StreamWriter(stream, encoding))
             {
-                sw.WriteLine(members.ToString(m => HandleSpaces(m.Name), separator));
+                if (writeHeaders)
+                    sw.WriteLine(members.ToString(m => HandleSpaces(m.Name), separator));
 
                 foreach (var item in collection)
                 {
-                    sw.WriteLine(members.ToString(m => m.Getter(item).TryCC(a => EncodeCSV(ConvertToString(a, culture), culture)), separator));
+                    sw.WriteLine(members.ToString(m => m.Getter(item).TryCC(a => EncodeCsv(ConvertToString(a, culture), culture)), separator));
                 }
             }
         }
 
-        static string EncodeCSV(string p, CultureInfo culture)
+        static string EncodeCsv(string p, CultureInfo culture)
         {
             string separator = culture.TextInfo.ListSeparator;
 
@@ -106,57 +79,28 @@ namespace Signum.Utilities
             return p.Replace("__", "^").Replace("_", " ").Replace("^", "_");
         }
 
-        public static List<T> ReadCVS<T>(string fileName) where T : new()
+        public static List<T> ReadFile<T>(string fileName, Encoding encoding = null, CultureInfo culture = null, bool skipFirtsLine = true) where T : new()
         {
+            encoding = encoding ?? DefaultEncoding;
+            culture = culture ?? CultureInfo.CurrentCulture;
+
             using (FileStream fs = File.OpenRead(fileName))
-                return ReadCVS<T>(fs, Encoding.UTF8, CultureInfo.CurrentCulture, true).ToList();
+                return ReadStream<T>(fs, encoding, culture, skipFirtsLine).ToList();
         }
 
-        public static List<T> ReadCVS<T>(string fileName, Encoding encoding) where T : new()
+        public static List<T> ReadBytes<T>(byte[] data, Encoding encoding = null, CultureInfo culture = null, bool skipFirtsLine = true) where T : new()
         {
-            using (FileStream fs = File.OpenRead(fileName))
-                return ReadCVS<T>(fs, encoding, CultureInfo.CurrentCulture, true).ToList();
-        }
-
-        public static List<T> ReadCVS<T>(string fileName, Encoding encoding, CultureInfo culture) where T : new()
-        {
-            using (FileStream fs = File.OpenRead(fileName))
-                return ReadCVS<T>(fs, encoding, culture, true).ToList();
-        }
-
-        public static List<T> ReadCVS<T>(string fileName, Encoding encoding, CultureInfo culture, bool skipFirtsLine) where T : new()
-        {
-            using (FileStream fs = File.OpenRead(fileName))
-                return ReadCVS<T>(fs, encoding, culture, skipFirtsLine).ToList();
-        }
-
-        public static List<T> ReadCVS<T>(byte[] data) where T : new()
-        {
+            
             using (MemoryStream ms = new MemoryStream(data))
-                return ReadCVS<T>(ms, Encoding.UTF8, CultureInfo.CurrentCulture, true).ToList();
+                return ReadStream<T>(ms, encoding, culture, skipFirtsLine).ToList();
         }
 
-        public static List<T> ReadCVS<T>(byte[] data, Encoding encoding) where T : new()
-        {
-            using (MemoryStream ms = new MemoryStream(data))
-                return ReadCVS<T>(ms, encoding, CultureInfo.CurrentCulture, true).ToList();
-        }
-
-        public static List<T> ReadCVS<T>(byte[] data, Encoding encoding, CultureInfo culture) where T : new()
-        {
-            using (MemoryStream ms = new MemoryStream(data))
-                return ReadCVS<T>(ms, encoding, culture, true).ToList();
-        }
-
-        public static List<T> ReadCVS<T>(byte[] data, Encoding encoding, CultureInfo culture, bool skipFirtsLine) where T : new()
-        {
-            using (MemoryStream ms = new MemoryStream(data))
-                return ReadCVS<T>(ms, encoding, culture, skipFirtsLine).ToList();
-        }
-        
-        public static IEnumerable<T> ReadCVS<T>(this Stream stream, Encoding encoding, CultureInfo culture, bool skipFirst)
+        public static IEnumerable<T> ReadStream<T>(this Stream stream, Encoding encoding = null, CultureInfo culture = null, bool skipFirtsLine = true)
             where T : new()
         {
+            encoding = encoding ?? DefaultEncoding;
+            culture = culture ?? CultureInfo.CurrentCulture;
+
             List<MemberEntry<T>> members = MemberEntryFactory.GenerateList<T>(MemberOptions.Fields | MemberOptions.Properties | MemberOptions.Untyped | MemberOptions.Setters);
 
             string regex = @"^((?<val>'(?:[^']+|'')*'|[^;\r\n]*))?((?!($|\r\n));(?<val>'(?:[^']+|'')*'|[^;\r\n]*))*($|\r\n)".Replace('\'', '"').Replace(';', culture.TextInfo.ListSeparator.Single());
@@ -165,7 +109,10 @@ namespace Signum.Utilities
                 string str = sr.ReadToEnd().Trim();
                 var matches = Regex.Matches(str, regex, RegexOptions.Multiline | RegexOptions.ExplicitCapture).Cast<Match>();
 
-                foreach (var m in matches.Skip(skipFirst ? 1 : 0))
+                if (skipFirtsLine)
+                    matches = matches.Skip(1); 
+
+                foreach (var m in matches)
                 {
                     var vals = m.Groups["val"].Captures;
 
@@ -175,7 +122,7 @@ namespace Signum.Utilities
                     T t = new T();
                     for (int i = 0; i < members.Count; i++)
                     {
-                        object value = ConvertTo(DecodeCSV(vals[i].Value), members[i].MemberInfo.ReturningType(), culture);
+                        object value = ConvertTo(DecodeCsv(vals[i].Value), members[i].MemberInfo.ReturningType(), culture);
 
                         members[i].UntypedSetter(t, value);
                     }
@@ -185,7 +132,7 @@ namespace Signum.Utilities
             }
         }
 
-        static string DecodeCSV(string s)
+        static string DecodeCsv(string s)
         {
             if (s.StartsWith("\""))
             {

@@ -5,17 +5,11 @@ using System.Text;
 
 namespace Signum.Entities
 {
-    [AttributeUsage(AttributeTargets.Class)]
-    public sealed class Reactive : Attribute
-    {
+    //[AttributeUsage(AttributeTargets.Class)]
+    //public sealed class UseSessionWhenNew : Attribute
+    //{
 
-    }
-
-    [AttributeUsage(AttributeTargets.Class)]
-    public sealed class UseSessionWhenNew : Attribute
-    {
-
-    }
+    //}
 
     [AttributeUsage(AttributeTargets.Class)]
     public sealed class LowPopulationAttribute : Attribute

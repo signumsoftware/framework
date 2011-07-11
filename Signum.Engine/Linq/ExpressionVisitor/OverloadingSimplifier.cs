@@ -76,6 +76,9 @@ namespace Signum.Engine.Linq
         static MethodInfo miFirstOrDefaultQ = ReflectionTools.GetMethodInfo(() => Queryable.FirstOrDefault((IQueryable<string>)null)).GetGenericMethodDefinition();
         static MethodInfo miFirstOrDefaultE = ReflectionTools.GetMethodInfo(() => Enumerable.FirstOrDefault((IEnumerable<string>)null)).GetGenericMethodDefinition();
 
+        static MethodInfo miReverseQ = ReflectionTools.GetMethodInfo(() => Queryable.Reverse((IQueryable<string>)null)).GetGenericMethodDefinition();
+        static MethodInfo miReverseE = ReflectionTools.GetMethodInfo(() => Enumerable.Reverse((IEnumerable<string>)null)).GetGenericMethodDefinition();
+
         static int i = 0; 
 
         public static Expression Simplify(Expression expression)
@@ -241,7 +244,25 @@ namespace Signum.Engine.Linq
                     MethodInfo mCount = (query ? miCountQ : miCountE).MakeGenericMethod(paramTypes[0]);
                     
                     return Expression.Call(mCount, Expression.Call(mWhere, source, predicate)); 
-                }                
+                }
+
+
+                if (mi.Name.Contains("Last"))
+                {
+                    var source = Visit(m.GetArgument("source"));
+                    var predicate = (LambdaExpression)Visit(m.TryGetArgument("predicate").StripQuotes());
+
+                    Expression reverse = Expression.Call((query ? miReverseQ : miReverseE).MakeGenericMethod(paramTypes[0]), source); 
+
+                    if(predicate != null)
+                        reverse = Expression.Call((query ? miWhereQ : miWhereE).MakeGenericMethod(paramTypes[0]), source, predicate);
+
+                    MethodInfo mEqFirst = query ?
+                        mi.Name.Contains("OrDefault") ? miFirstOrDefaultQ : miFirstQ :
+                        mi.Name.Contains("OrDefault") ? miFirstOrDefaultE : miFirstE;
+
+                    return Expression.Call(mEqFirst.MakeGenericMethod(paramTypes[0]), reverse);
+                }
 
 
                 if (ReflectionTools.MethodEqual(mi, miElementAtE) || ReflectionTools.MethodEqual(mi, miElementAtOrDefaultE) ||
@@ -285,7 +306,6 @@ namespace Signum.Engine.Linq
 
                         if(ReflectionTools.MethodEqual(mi2, miSkipE) ||ReflectionTools.MethodEqual(mi2, miSkipQ))
                         {
-
                             var source = Visit(m2.GetArgument("source"));
                             var skip = Visit(m2.GetArgument("count"));
                             var take = Visit(m.GetArgument("count"));
@@ -301,11 +321,8 @@ namespace Signum.Engine.Linq
                             MethodInfo miWhereIndex = (query ? miWhereIndexQ : miWhereIndexE).MakeGenericMethod(paramTypes[0]);
 
                             return Expression.Call(miWhereIndex, source, lambda); 
-
-                        }                       
-
+                        } 
                     }
-                    
                 }
 
             }

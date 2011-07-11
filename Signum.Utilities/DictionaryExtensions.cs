@@ -87,7 +87,6 @@ namespace Signum.Utilities
             return result;
         }
 
-
         public static V GetOrThrow<K, V>(this IDictionary<K, V> dictionary, K key, string message)
         {
             V result;
@@ -283,6 +282,12 @@ namespace Signum.Utilities
                 throw new ArgumentException("There are some repeated {0}: {1}".Formato(errorContext, repetitions.ToString(", ")));
         }
 
+        public static void SetRange<K, V>(this IDictionary<K, V> dictionary, IEnumerable<KeyValuePair<K,V>> collection)
+        {
+            foreach (var item in collection)
+                dictionary[item.Key] = item.Value;
+        }
+
         public static void SetRange<K, V>(this IDictionary<K, V> dictionary, IEnumerable<K> keys, IEnumerable<V> values)
         {
             foreach (var item in keys.ZipStrict(values))
@@ -386,6 +391,14 @@ namespace Signum.Utilities
         public static Dictionary<V, K> Inverse<K, V>(this IDictionary<K, V> dic, IEqualityComparer<V> comparer, string errorContext)
         {
             return dic.ToDictionary(k => k.Value, k => k.Key, comparer, errorContext);
+        }
+    }
+
+    public static class KVP
+    {
+        public static KeyValuePair<K, V> Create<K, V>(K key, V value)
+        {
+            return new KeyValuePair<K, V>(key, value);
         }
     }
 }

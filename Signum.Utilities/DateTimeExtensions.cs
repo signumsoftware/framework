@@ -200,17 +200,71 @@ namespace Signum.Utilities
             return DateTimePrecision.Days;
         }
 
+        public static TimeSpan TrimTo(this TimeSpan timeSpan, DateTimePrecision precision)
+        {
+            switch (precision)
+            {
+                case DateTimePrecision.Days: return timeSpan.TrimToDays();
+                case DateTimePrecision.Hours: return TrimToHours(timeSpan);
+                case DateTimePrecision.Minutes: return TrimToMinutes(timeSpan);
+                case DateTimePrecision.Seconds: return TrimToSeconds(timeSpan);
+                case DateTimePrecision.Milliseconds: return timeSpan;
+            }
+            throw new ArgumentException("precission");
+        }
+
+        public static TimeSpan TrimToSeconds(this TimeSpan dateTime)
+        {
+            return new TimeSpan(dateTime.Days, dateTime.Hours, dateTime.Minutes, dateTime.Seconds);
+        }
+
+        public static TimeSpan TrimToMinutes(this TimeSpan dateTime)
+        {
+            return new TimeSpan(dateTime.Days, dateTime.Hours, dateTime.Minutes, 0);
+        }
+
+        public static TimeSpan TrimToHours(this TimeSpan dateTime)
+        {
+            return new TimeSpan(dateTime.Days, dateTime.Hours, 0, 0);
+        }
+
+        public static TimeSpan TrimToDays(this TimeSpan dateTime)
+        {
+            return new TimeSpan(dateTime.Days, 0, 0, 0);
+        }
+
+        public static DateTimePrecision? GetPrecision(this TimeSpan timeSpan)
+        {
+            if (timeSpan.Milliseconds != 0)
+                return DateTimePrecision.Milliseconds;
+            if (timeSpan.Seconds != 0)
+                return DateTimePrecision.Seconds;
+            if (timeSpan.Minutes != 0)
+                return DateTimePrecision.Minutes;
+            if (timeSpan.Hours != 0)
+                return DateTimePrecision.Hours;
+            if (timeSpan.Days != 0)
+                return DateTimePrecision.Days;
+            
+            return null;
+        }
+
         public static string SmartDatePattern(this DateTime date)
         {
             DateTime currentdate = DateTime.Today;
+            return SmartDatePattern(date, currentdate);
+        }
+
+        public static string SmartDatePattern(this DateTime date, DateTime currentdate)
+        {
             int datediff = (date.Date - currentdate).Days;
 
             if (-7 <= datediff && datediff <= -2)
                 return Resources.DateLast.Formato(CultureInfo.CurrentCulture.DateTimeFormat.GetDayName(date.DayOfWeek).FirstUpper());
-            
+
             if (datediff == -1)
                 return Resources.Yesterday;
-            
+
             if (datediff == 0)
                 return Resources.Today;
 
@@ -258,35 +312,40 @@ namespace Signum.Utilities
 
         public static string NiceToString(this TimeSpan timeSpan)
         {
+            return timeSpan.NiceToString(DateTimePrecision.Milliseconds); 
+        }
+
+        public static string NiceToString(this TimeSpan timeSpan, DateTimePrecision precission)
+        {
             StringBuilder sb = new StringBuilder();
             bool any = false;
-            if (timeSpan.Days != 0)
+            if (timeSpan.Days != 0 && precission >= DateTimePrecision.Days)
             {
-                sb.AppendFormat("{0}d", timeSpan.Days);
-                any = true; 
+                sb.AppendFormat("{0}d ", timeSpan.Days);
+                any = true;
             }
 
-            if (any || timeSpan.Hours != 0)
+            if ((any || timeSpan.Hours != 0) && precission >= DateTimePrecision.Hours)
             {
-                sb.AppendFormat("{0,-2}h ", timeSpan.Hours);
-                any = true; 
+                sb.AppendFormat("{0,2}h ", timeSpan.Hours);
+                any = true;
             }
 
-            if (any || timeSpan.Minutes != 0)
+            if ((any || timeSpan.Minutes != 0) && precission >= DateTimePrecision.Minutes)
             {
-                sb.AppendFormat("{0,-2}m ", timeSpan.Minutes);
-                any = true; 
+                sb.AppendFormat("{0,2}m ", timeSpan.Minutes);
+                any = true;
             }
 
-            if (any || timeSpan.Seconds != 0)
+            if ((any || timeSpan.Seconds != 0) && precission >= DateTimePrecision.Seconds)
             {
-                sb.AppendFormat("{0,-2}s ", timeSpan.Seconds);
-                any = true; 
+                sb.AppendFormat("{0,2}s ", timeSpan.Seconds);
+                any = true;
             }
 
-            if (any || timeSpan.Milliseconds != 0)
+            if ((any || timeSpan.Milliseconds != 0) && precission >= DateTimePrecision.Milliseconds)
             {
-                sb.AppendFormat("{0,-3}ms", timeSpan.Milliseconds);
+                sb.AppendFormat("{0,3}ms", timeSpan.Milliseconds);
             }
 
             return sb.ToString();

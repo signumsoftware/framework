@@ -29,7 +29,6 @@ namespace Signum.Web
             //CommonTask += new CommonTask(TaskSetImplementations);
             CommonTask += new CommonTask(TaskSetReadOnly);
             CommonTask += new CommonTask(TaskSetHtmlProperties);
-            CommonTask += new CommonTask(TaskSetReloadOnChange);
         }
 
         public static void FireCommonTasks(BaseLine eb)
@@ -119,26 +118,17 @@ namespace Signum.Web
                 }
             }
         }
-
-        public static void TaskSetReloadOnChange(BaseLine bl)
-        {
-            if (bl != null)
-            {
-                var atribute = bl.PropertyRoute.PropertyInfo.SingleAttribute<ReloadEntityOnChange>();
-                if (atribute != null)
-                    bl.ReloadOnChange = true;
-            }
-        }
 #endregion
 
         #region TypeContext
         internal static TypeContext UntypedWalkExpression(TypeContext tc, LambdaExpression lambda)
         {
             Type returnType = lambda.Body.Type;
-            return (TypeContext)miWalkExpression.GetInvoker(tc.Type, returnType)(tc, lambda);
+            return miWalkExpression.GetInvoker(tc.Type, returnType)(tc, lambda);
         }
 
-        static GenericInvoker miWalkExpression = GenericInvoker.Create(() => Common.WalkExpression<TypeDN, TypeDN>(null, null));
+        static GenericInvoker<Func<TypeContext, LambdaExpression, TypeContext>> miWalkExpression = 
+            new GenericInvoker<Func<TypeContext, LambdaExpression, TypeContext>>((tc, le) => Common.WalkExpression<TypeDN, TypeDN>((TypeContext<TypeDN>)tc, (Expression<Func<TypeDN, TypeDN>>)le));
         public static TypeContext<S> WalkExpression<T, S>(TypeContext<T> tc, Expression<Func<T, S>> lambda)
         {
             return MemberAccessGatherer.WalkExpression(tc, lambda);

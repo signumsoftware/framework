@@ -270,6 +270,15 @@ namespace Signum.Utilities
                    from p in pe.Descendants().PreAnd(pe)
                    select p;
         }
+
+        public override string ToString()
+        {
+            if(Entries == null)
+                return Elapsed.NiceToString();
+
+            return "{0} {1} --> ({2})".Formato(Elapsed.NiceToString(), Role,
+                GetDescendantRoles().ToString(kvp => "{0} {1}".Formato(kvp.Key, kvp.Value.ToString(this)), " | "));
+        }
     }
 
     public class ProfileResume

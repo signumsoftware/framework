@@ -25,9 +25,16 @@ namespace Signum.Web
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            using (sb.Surround(new HtmlTag("div").Class("sf-field")))
+            using (sb.Surround(new HtmlTag("fieldset").Class("sf-line-detail-field")))
             {
-                sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, entityDetail));
+                using (sb.Surround(new HtmlTag("legend")))
+                {
+                    sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, entityDetail));
+
+                    sb.AddLine(EntityBaseHelper.CreateButton(helper, entityDetail));
+                    sb.AddLine(EntityBaseHelper.FindButton(helper, entityDetail));
+                    sb.AddLine(EntityBaseHelper.RemoveButton(helper, entityDetail));
+                }
 
                 sb.AddLine(helper.HiddenEntityInfo(entityDetail));
 
@@ -36,10 +43,6 @@ namespace Signum.Web
                     TypeContext templateTC = ((TypeContext)entityDetail.Parent).Clone((object)Constructor.Construct(entityDetail.Type.CleanType()));
                     sb.AddLine(EntityBaseHelper.EmbeddedTemplate(entityDetail, EntityBaseHelper.RenderTypeContext(helper, templateTC, RenderMode.Content, entityDetail)));
                 }
-
-                sb.AddLine(EntityBaseHelper.CreateButton(helper, entityDetail));
-                sb.AddLine(EntityBaseHelper.FindButton(helper, entityDetail));
-                sb.AddLine(EntityBaseHelper.RemoveButton(helper, entityDetail));
 
                 MvcHtmlString controlHtml = null;
                 if (entityDetail.UntypedValue != null)

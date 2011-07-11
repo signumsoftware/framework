@@ -16,17 +16,6 @@
     margin-left:-5px;
 }
 
-.sf-dropdown.sf-open 
-{
-  color:#fff;
-  text-shadow:0 0 0 transparent;	
-  background-color: #777777;
-  background-image: -moz-linear-gradient(top, #777777, #999999); /* FF3.6 */
-  background-image: -webkit-gradient(linear,left top,left bottom,color-stop(0, #777777),color-stop(1, #999999)); /* Saf4+, Chrome */
-            filter:  progid:DXImageTransform.Microsoft.gradient(startColorStr='#777777', EndColorStr='#999999'); /* IE6,IE7 */
-        -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorStr='#777777', EndColorStr='#999999')"; /* IE8 */
-}
-
 .sf-dropdown.sf-open .sf-menu-button
 {
 	display:block;
@@ -78,28 +67,39 @@
 }
 
 /* entity title */
-
-h2 .sf-type-nice-name {
-    font-size:13px;
-    color:#50abbe;
-    font-weight:normal;
+.sf-normal-control-header
+{
+    float:left;
+    width: 100%;
+    vertical-align: top;
+    margin-bottom: 0.5em;
 }
 
-h2 .sf-entity-id {
+.sf-type-nice-name 
+{
+    float:left;
+    font-size:12px;
+    color:#000;
+    padding: 1px 2px;
+}
+
+.sf-entity-id {
     clear:right;
     font-size:13px;
     color:#3E818F;
 }
 
-h2 .sf-separator {
+.sf-separator {
     color:#ccc;
 }
 
-h2 .sf-entity-title {
+.sf-entity-title {
     display:block;
     font-size:18px;
     color: #424242;
 	margin-bottom:10px;
+	font-weight: bold;
+    line-height: 1.2em;
 }
 
 /* button-bar */
@@ -159,4 +159,14 @@ fieldset {
     border-top-right-radius: 4px 4px;
     border-bottom-right-radius: 4px 4px;
     border-bottom-left-radius: 4px 4px;
+}
+
+legend
+{
+    background-color: #fff; /*IE fix*/    
+}
+
+.sf-chooser-button
+{
+    width: 100%;    
 }

@@ -1,77 +1,98 @@
 ﻿/* Default CSS rules are embedded in Signum.Web and are accessible via Signum/Content/LineStyles.css */
 /* Feel free to override them as you wish here */
 
-h1
+body 
 {
-    margin:0px;
+    font-family: Arial, Helvetica, Verdana;
+    font-size: 13px;   
+    text-align: center; 
+    background-color: #eee;
 }
 
-.line:after,.lastUnit:after
-{
-    clear:both;
-    display:block;
-    visibility:hidden;
-    overflow:hidden;
-    height:0 !important;
-    line-height:0;
-    font-size:xx-large;
-}
-.unit{float:left;}
-.lastUnit
-{
-    display:table-cell;
-    float:none;
-    width:auto;
-    _position:relative;
-    _left:-3px;
-    _margin-right:-3px;
-}
-
-body
-{
-    background: #eee;
-    color: #333;
-    padding: 0px 0px 40px;
-}
-
-#title
-{
-    padding:25px;    
-    background:#eee;
-    border-bottom: 10px solid #ccc;
-}
-
-.page
-{
-    background: #fff;
-    margin: 0px 10px;
-}
-
-#menu
-{
-    background: #DDD;
-    width: 15%;
-}
-
-#menu h2 {
-background: #333;
-color: white;
-font-size: 1em;
-font-weight: normal;
-padding: 6px 12px;
-margin:0;
-text-transform: uppercase;
-}
-
-#main
+#wrap
 {
     width: 80%;
-    padding-left:10px;
+    min-width: 800px;
+    margin: auto;
+    text-align: left;    
+    background-color: #eee;
+}
+
+#header
+{
+    height: 40px;
+    padding: 20px 0;
+    background-color: #EEE;
+}
+
+#header a
+{    
+    font-size: 32px !important;
+    text-shadow: 1px 1px 2px #111;
+    text-decoration: none;
+    color: #000;
+}
+
+#main 
+{
+	height: 100%;
+	-moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
+    border-radius: 4px;
+    background-color: #fff;
+}
+
+#content
+{
+	margin-left: 145px;
+	padding: 10px;
+	min-height: 400px;
+	border-left: 1px solid #CCC;
 }
 
 #footer
 {
-    margin-top:10px;    
-    text-align:center;
-    background:#ccc;
+    padding: 5px 0;
+    text-align: center;    
+}
+
+h1 
+{
+    font-size: 1.5em;
+    color: black;
+}
+
+
+/*Menu*/
+#menu 
+{
+    float: left;
+    width: 145px;
+}
+li
+{
+    padding-left: 5px;    
+}
+li.l1 > span
+{
+    display: block;
+    font-weight: bold;
+    margin: 20px 0 5px 0;
+    padding: 5px;
+    text-transform: uppercase;
+    color: #555;
+    font-size: 1.2em;
+}
+li.l1:first-child > span
+{
+    margin: 0px 0 5px 0;
+}
+li.l2
+{
+    text-decoration: none;    
+    padding-top: 3px;
+}
+#menu a
+{
+    text-decoration: none; 
 }

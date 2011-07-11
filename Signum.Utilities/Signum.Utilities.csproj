@@ -81,11 +81,12 @@
     <Compile Include="ExpressionTrees\Linq.cs" />
     <Compile Include="FileExtensions.cs" />
     <Compile Include="NaturalLanguageTools.cs" />
+    <Compile Include="Pagination.cs" />
     <Compile Include="QueryableExtensions.cs" />
     <Compile Include="Reflection\GenericInvoker.cs" />
     <Compile Include="Reflection\TupleExtensions.cs" />
     <Compile Include="TimeSpanExtensions.cs" />
-    <Compile Include="CSV.cs" />
+    <Compile Include="Csv.cs" />
     <Compile Include="DataStructures\Grouping.cs" />
     <Compile Include="DataStructures\ImmutableAVLTree.cs">
       <SubType>Code</SubType>

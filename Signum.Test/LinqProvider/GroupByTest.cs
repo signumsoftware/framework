@@ -154,6 +154,13 @@ namespace Signum.Test.LinqProvider
             var songsAlbum = Database.Query<ArtistDN>().Sum(a => a.Name.Length);
         }
 
+
+        [TestMethod]
+        public void RootSumNoArgs()
+        {
+            var songsAlbum = Database.Query<ArtistDN>().Select(a => a.Name.Length).Sum();
+        }
+
         [TestMethod]
         public void RootSumWhere()
         {
@@ -186,9 +193,15 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void RootMaxNoArgs()
+        {
+            var songsAlbum = Database.Query<ArtistDN>().Select(a => a.Name.Length).Max();
+        }
+
+        [TestMethod]
         public void RootMaxException()
         {
-            Assert2.Throws<SqlNullValueException>(() => Database.Query<ArtistDN>().Where(a => false).Max(a => a.Name.Length));
+            Assert2.Throws<FieldReaderException>(() => Database.Query<ArtistDN>().Where(a => false).Max(a => a.Name.Length));
         }
 
         [TestMethod]
@@ -200,7 +213,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void RootMinException()
         {
-            Assert2.Throws<SqlNullValueException>(() => Database.Query<ArtistDN>().Where(a => false).Min(a => a.Name.Length));
+            Assert2.Throws<FieldReaderException>(() => Database.Query<ArtistDN>().Where(a => false).Min(a => a.Name.Length));
         }
 
         [TestMethod]
@@ -281,6 +294,12 @@ namespace Signum.Test.LinqProvider
                                                where al2.Id == g.Max(a => (int?)a.Id)
                                                select al2.ToLite()).FirstOrDefault()
                           }).ToList();
+        }
+
+        [TestMethod]
+        public void GroupBySelectMany()
+        {
+            var songsAlbum = Database.Query<ArtistDN>().GroupBy(a => a.Sex).SelectMany(a => a).ToList();
         }
     }
 }

@@ -25,15 +25,15 @@ namespace Signum.Engine.Linq
 
         public readonly Table Table;
         public readonly Expression ExternalId;
-        public readonly Expression TypeId;
+        public Expression TypeId { get { return QueryBinder.TypeSqlConstant(Type); } }
         public readonly Expression OtherCondition; //Used for IBA only, 
         public readonly ProjectionToken Token;
 
-       
-        public string TableAlias; //Changed on expansion 
+
+        public Alias TableAlias; //Changed on expansion 
         public List<FieldBinding> Bindings = new List<FieldBinding>();// not readonly!!!
 
-        public FieldInitExpression(Type type, string tableAlias, Expression externalId, Expression typeId, Expression otherCondition, ProjectionToken token)
+        public FieldInitExpression(Type type, Alias tableAlias, Expression externalId, Expression otherCondition, ProjectionToken token)
             : base(DbExpressionType.FieldInit, type)
         {
             if (type == null) 
@@ -49,24 +49,34 @@ namespace Signum.Engine.Linq
             this.Token = token;
             this.TableAlias = tableAlias;
             this.ExternalId = externalId;
-            this.TypeId = typeId;
             this.OtherCondition = otherCondition;
         }
 
-        public Expression GetOrCreateFieldBinding(ProjectionToken token, FieldInfo fi, QueryBinder binder)
+        public Expression GetOrCreateFieldBinding(FieldInfo fi, BinderTools tools)
         {
             FieldBinding binding = Bindings.SingleOrDefault(fb => ReflectionTools.FieldEquals(fi, fb.FieldInfo));
             if (binding != null)
                 return binding.Binding;
 
-            Expression ex = Table.CreateBinding(token, TableAlias, fi, binder);
+            AssertTable(tools);
+
+            Expression ex = Table.CreateBinding(Token, TableAlias, fi, tools);
 
             if (ex is MListExpression)
-                ((MListExpression)ex).BackID = GetOrCreateFieldBinding(token, FieldInitExpression.IdField, binder);
+            {
+                MListExpression mle = (MListExpression)ex;
+
+                mle.BackID = GetOrCreateFieldBinding(FieldInitExpression.IdField, tools);
+            }
 
             Bindings.Add(new FieldBinding(fi, ex));
 
-            return ex;
+            return ex; 
+        }
+        public void ReplaceBinding(FieldInfo fi, Expression expression)
+        {
+            Bindings.RemoveAll(a=>ReflectionTools.FieldEquals(a.FieldInfo, fi));
+            Bindings.Add(new FieldBinding(fi, expression)); 
         }
 
         public Expression GetFieldBinding(FieldInfo fi)
@@ -84,6 +94,38 @@ namespace Signum.Engine.Linq
             return bindings.HasText() ?
                 constructor + "\r\n{" + bindings.Indent(4) + "\r\n}" :
                 constructor;
+        }
+
+        public void Complete(BinderTools tools)
+        {
+            AssertTable(tools);
+
+            foreach (EntityField field in Table.Fields.Values.Where(f =>
+                !ReflectionTools.Equals(f.FieldInfo, IdField)))
+            {
+                Expression exp = GetOrCreateFieldBinding(field.FieldInfo, tools);
+
+                if (exp is MListExpression)
+                {
+                    Expression proj = tools.MListProjection((MListExpression)exp);
+                    ReplaceBinding(field.FieldInfo, proj); 
+                }  
+            }
+        }
+
+        void AssertTable(BinderTools tools)
+        {
+            if (TableAlias == null)
+            {
+                TableAlias = tools.NextTableAlias(Table.Name);
+                if (!Table.IsView)
+                    GetOrCreateFieldBinding(FieldInitExpression.IdField, tools);
+                tools.AddRequest(Token, new TableCondition
+                {
+                    FieldInit = this,
+                    Table = new TableExpression(TableAlias, Table.Name)
+                });
+            }
         }
     }
 
@@ -128,6 +170,8 @@ namespace Signum.Engine.Linq
                 constructor;
         }
     }
+
+   
 
     internal class FieldBinding
     {
@@ -295,6 +339,29 @@ namespace Signum.Engine.Linq
         public override string ToString()
         {
             return "MList({0},{1})".Formato(RelationalTable.Name, BackID); 
+        }
+    }
+
+    internal class MListElementExpression : DbExpression
+    {
+        public readonly Expression RowId;
+        public readonly FieldInitExpression Parent;
+        public readonly Expression Element;
+
+        public readonly RelationalTable Table;
+
+        public MListElementExpression(Expression rowId, FieldInitExpression parent, Expression element, RelationalTable table)
+            : base(DbExpressionType.MListElement, typeof(MListElement<,>).MakeGenericType(parent.Type, element.Type))
+        {
+            this.RowId = rowId;
+            this.Parent = parent;
+            this.Element = element;
+            this.Table = table;
+        }
+
+        public override string ToString()
+        {
+            return "MListElement({0})\r\n{{\r\nParent={1},\r\nElement={2}}})".Formato(RowId, Parent, Element);
         }
     }
 }

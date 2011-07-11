@@ -18,8 +18,8 @@ namespace Signum.Web
 
         public abstract Type StaticType { get; }
      
-        public abstract Mapping UntypedMappingDefault { get; }
-        public abstract Mapping UntypedMappingAdmin { get; }
+        public abstract Delegate UntypedMappingDefault { get; }
+        public abstract Delegate UntypedMappingAdmin { get; }
 
         public abstract bool OnIsReadOnly(ModifiableEntity entity, bool isAdmin);
         public abstract bool OnIsViewable(ModifiableEntity entity, bool isAdmin);
@@ -49,11 +49,11 @@ namespace Signum.Web
             get { return typeof(T); }
         }
 
-        public EntityMapping<T> MappingDefault { get; set; }
-        public EntityMapping<T> MappingAdmin { get; set; }
+        public Mapping<T> MappingDefault { get; set; }
+        public Mapping<T> MappingAdmin { get; set; }
 
-        public override Mapping UntypedMappingDefault { get { return MappingDefault; } }
-        public override Mapping UntypedMappingAdmin { get { return MappingAdmin; } }
+        public override Delegate UntypedMappingDefault { get { return MappingDefault; } }
+        public override Delegate UntypedMappingAdmin { get { return MappingAdmin; } }
 
         public override bool OnIsReadOnly(ModifiableEntity entity, bool isAdmin)
         {
@@ -134,7 +134,7 @@ namespace Signum.Web
             {
                 case EntityType.Default:
                     ShowSave = true;
-                    MappingAdmin = MappingDefault = new EntityMapping<T>(true);
+                    MappingAdmin = MappingDefault = new EntityMapping<T>(true).GetValue;
                     break;
                 case EntityType.Admin:
                     ShowSave = true;
@@ -142,18 +142,18 @@ namespace Signum.Web
                     IsCreable = admin => admin;
                     IsViewable = (_, admin) => admin;
                     IsNavigable = (_, admin) => admin;
-                    MappingAdmin = new EntityMapping<T>(true);
-                    MappingDefault = new EntityMapping<T>(false);
+                    MappingAdmin = new EntityMapping<T>(true).GetValue;
+                    MappingDefault = new EntityMapping<T>(false).GetValue;
                     break;
                 case EntityType.NotSaving:
                     ShowSave = false;
-                    MappingAdmin = MappingDefault = new EntityMapping<T>(true);
+                    MappingAdmin = MappingDefault = new EntityMapping<T>(true).GetValue;
                     break;
                 case EntityType.ServerOnly:
                     ShowSave = false;
                     IsReadOnly = (_, admin) => true;
                     IsCreable = admin => false;
-                    MappingAdmin = MappingDefault = new EntityMapping<T>(false);
+                    MappingAdmin = MappingDefault = new EntityMapping<T>(false).GetValue;
                     break;
                 case EntityType.Content:
                     ShowSave = false;
@@ -161,7 +161,7 @@ namespace Signum.Web
                     IsViewable = (_, admin) => false;
                     IsNavigable = (_, admin) => false;
                     MappingAdmin = null;
-                    MappingDefault = new EntityMapping<T>(true);
+                    MappingDefault = new EntityMapping<T>(true).GetValue;
                     break;
                 default:
                     break;
@@ -178,9 +178,9 @@ namespace Signum.Web
             get { return typeof(T); }
         }
 
-        public EntityMapping<T> MappingDefault { get; set; }
-        public override Mapping UntypedMappingDefault { get { return MappingDefault; } }
-        public override Mapping UntypedMappingAdmin { get { return MappingDefault; } }
+        public Mapping<T> MappingDefault { get; set; }
+        public override Delegate UntypedMappingDefault { get { return MappingDefault; } }
+        public override Delegate UntypedMappingAdmin { get { return MappingDefault; } }
 
         public override bool OnIsReadOnly(ModifiableEntity entity, bool isAdmin)
         {
@@ -258,7 +258,7 @@ namespace Signum.Web
         public EmbeddedEntitySettings()
         {
             ShowSave = true;
-            MappingDefault = new EntityMapping<T>(true);
+            MappingDefault = new EntityMapping<T>(true).GetValue;
             WebTypeName = typeof(T).Name;
         }
 

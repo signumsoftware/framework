@@ -62,11 +62,24 @@ namespace Signum.Web
             set { this.columnOptions = value; }
         }
 
-        int? top; //If null, use QuerySettings one
+        int? top;
+        /// <summary>
+        /// If null, use QuerySettings one
+        /// </summary>
         public int? Top
         {
             get { return top; }
             set { top = value; }
+        }
+
+        bool topEmpty;
+        /// <summary>
+        /// Force empty top (if set to true, Top will be ignored)
+        /// </summary>
+        public bool TopEmpty
+        {
+            get { return topEmpty; }
+            set { topEmpty = value; }
         }
 
         public FindOptions() { }
@@ -151,7 +164,7 @@ namespace Signum.Web
             op.Add("filterMode", FilterMode != FilterMode.Visible ? FilterMode.ToString().SingleQuote() : null);
             op.Add("create", !Create ? "false" : null);
             op.Add("allowMultiple", AllowMultiple.TrySC(b => b ? "true" : "false"));
-            op.Add("filters", filterOptions.Empty() ? null : (filterOptions.ToString(fo => fo.ToString(), ";") + ";").SingleQuote());
+            op.Add("filters", filterOptions.IsEmpty() ? null : (filterOptions.ToString(fo => fo.ToString(), ";") + ";").SingleQuote());
             op.Add("allowUserColumns", AllowUserColumns.HasValue ? (AllowUserColumns.Value ? "true" : "false") : null);
             op.Add("columnMode", ColumnOptionsMode != ColumnOptionsMode.Add ? ColumnOptionsMode.ToString().SingleQuote() : null);
         }

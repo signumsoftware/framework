@@ -14,40 +14,38 @@ namespace Signum.Web.Controllers
     public class WidgetsController : Controller
     {
         #region Notes
-        public PartialViewResult CreateNote(string sfRuntimeTypeRelated, int? sfIdRelated, string prefix, string url)
+        public PartialViewResult CreateNote(string prefix)
         {
-            IdentifiableEntity entity = Database.Retrieve(Navigator.ResolveType(sfRuntimeTypeRelated), sfIdRelated.Value);
+            var entity = (IdentifiableEntity)this.UntypedExtractEntity(); //Related entity always sent with no prefix
             ViewData[ViewDataKeys.WriteSFInfo] = true;
-            return Navigator.PopupView(this, NoteWidgetHelper.CreateNote(entity), prefix, url);
+            return Navigator.PopupView(this, NoteWidgetHelper.CreateNote(entity), prefix);
         }
 
-        public MvcHtmlString RefreshNotes(string sfRuntimeTypeRelated, int? sfIdRelated)
+        public ContentResult NotesCount()
         {
-            IdentifiableEntity entity = Database.Retrieve(Navigator.ResolveType(sfRuntimeTypeRelated), sfIdRelated.Value);
-
-            ViewDataDictionary vdd = new ViewDataDictionary();
-            vdd.Add("WidgetNode", NoteWidgetHelper.CreateWidget(entity));
-            HtmlHelper helper = SignumController.CreateHtmlHelper(this);
-            return helper.Partial("WidgetView", vdd);
+            var entity = (IdentifiableEntity)this.UntypedExtractEntity(); //Related entity always sent with no prefix
+            int count = NoteWidgetHelper.CountNotes(entity);
+            return Content(count.ToString());
         }
         #endregion
 
         #region Alerts
-        public PartialViewResult CreateAlert(string sfRuntimeTypeRelated, int? sfIdRelated, string prefix, string url)
+        public PartialViewResult CreateAlert(string prefix)
         {
-            IdentifiableEntity entity = Database.Retrieve(Navigator.ResolveType(sfRuntimeTypeRelated), sfIdRelated.Value);
+            var entity = (IdentifiableEntity)this.UntypedExtractEntity(); //Related entity always sent with no prefix
             ViewData[ViewDataKeys.WriteSFInfo] = true;
-            return Navigator.PopupView(this, AlertWidgetHelper.CreateAlert(entity), prefix, url);
+            return Navigator.PopupView(this, AlertWidgetHelper.CreateAlert(entity), prefix);
         }
 
-        public MvcHtmlString RefreshAlerts(string sfRuntimeTypeRelated, int? sfIdRelated)
+        public JsonResult AlertsCount()
         {
-            IdentifiableEntity entity = Database.Retrieve(Navigator.ResolveType(sfRuntimeTypeRelated), sfIdRelated.Value);
-
-            ViewDataDictionary vdd = new ViewDataDictionary();
-            vdd.Add("WidgetNode", AlertWidgetHelper.CreateWidget(entity));
-            HtmlHelper helper = SignumController.CreateHtmlHelper(this);
-            return helper.Partial("WidgetView", vdd);
+            var entity = (IdentifiableEntity)this.UntypedExtractEntity(); //Related entity always sent with no prefix
+            return Json(new
+            {
+                warned = AlertWidgetHelper.CountAlerts(entity, AlertWidgetHelper.WarnedAlertsQuery),
+                future = AlertWidgetHelper.CountAlerts(entity, AlertWidgetHelper.FutureAlertsQuery),
+                attended = AlertWidgetHelper.CountAlerts(entity, AlertWidgetHelper.AttendedAlertsQuery),
+            });
         }
         #endregion
     }

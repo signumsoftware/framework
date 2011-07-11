@@ -75,7 +75,7 @@ SF.registerModule("FindNavigator", function () {
                 return false;
             });
 
-            $(this.pf("tblResults td")).live('contextmenu', function (e) {
+            $(this.pf("tblResults td:not(.sf-td-no-results):not(.sf-td-multiply)")).live('contextmenu', function (e) {
                 if (!closeMyOpenedCtxMenu(e.target)) {
                     return false;
                 }
@@ -167,7 +167,7 @@ SF.registerModule("FindNavigator", function () {
 
         headerContextMenu: function (e) {
             SF.log("headerContextmenu");
-            
+
             var $th = $(e.target).closest("th");
             var $menu = this.createCtxMenu($th);
 
@@ -193,10 +193,10 @@ SF.registerModule("FindNavigator", function () {
 
         cellContextMenu: function (e) {
             SF.log("cellContextmenu");
-            
+
             var $td = $(e.target);
             var $menu = this.createCtxMenu($td);
-            
+
             $menu.find(".sf-search-ctxmenu")
                 .html("<div class='sf-search-ctxitem quickfilter'>" + lang.signum.addFilter + "</div>");
 
@@ -208,8 +208,7 @@ SF.registerModule("FindNavigator", function () {
         openFinder: function () {
             SF.log("FindNavigator openFinder");
             var self = this;
-            SF.ajax({
-                type: "POST",
+            $.ajax({
                 url: this.findOptions.navigatorControllerUrl,
                 data: this.requestDataForOpenFinder(),
                 async: false,
@@ -277,9 +276,8 @@ SF.registerModule("FindNavigator", function () {
             $btnSearch.toggleClass("sf-loading").val(lang.signum.searching);
 
             var self = this;
-            SF.ajax({
-                type: "POST",
-                url: this.findOptions.searchControllerUrl,
+            $.ajax({
+                url: (SF.isEmpty(this.findOptions.searchControllerUrl) ? this.control().attr("data-search-url") : this.findOptions.searchControllerUrl),
                 data: this.requestDataForSearch(),
                 async: this.findOptions.async,
                 success: function (r) {
@@ -288,10 +286,11 @@ SF.registerModule("FindNavigator", function () {
                         SF.FindNavigator.asyncSearchFinished[idBtnSearch] = false;
                     $btnSearch.val(lang.signum.search).toggleClass("sf-loading");
                     var $control = self.control();
+                    var $tbody = $control.find(".sf-search-results-container tbody");
                     if (!SF.isEmpty(r)) {
-                        $control.find(".sf-search-results-container tbody").html(r);
+                        $tbody.html(r);
                         SF.triggerNewContent($control.find(".sf-search-results-container tbody"));
-                        var rowCount = $control.find(".sf-search-results-container tbody tr").length;
+                        var rowCount = $control.find(".sf-search-results-container tbody tr:not(.sf-tr-multiply)").length;
                         $control.find(self.pf("rowsFoundCount")).html(rowCount);
                         $control.find(".rows-found-count-maximum").removeClass("rows-found-count-maximum");
                         if (rowCount == $(self.pf("sfTop")).val()) {
@@ -299,8 +298,11 @@ SF.registerModule("FindNavigator", function () {
                         }
                     }
                     else {
+                        $tbody.html("");
+                    }
+                    if ($tbody.find("tr:not(.sf-tr-multiply)").length == 0) {
                         var columns = $(self.pf("divResults th")).length;
-                        $control.find(".sf-search-results-container tbody").html("<tr><td colspan=\"" + columns + "\">" + lang.signum.noResults + "</td></tr>")
+                        $tbody.append("<tr><td class=\"sf-td-no-results\" colspan=\"" + columns + "\">" + lang.signum.noResults + "</td></tr>")
                         $control.find(self.pf("rowsFoundCount")).html(0);
                         $control.find(".rows-found-count-maximum").removeClass("rows-found-count-maximum");
                     }
@@ -501,7 +503,7 @@ SF.registerModule("FindNavigator", function () {
                 this.findOptions.onCancelled();
         },
 
-        addColumn: function (getColumnNameUrl) {
+        addColumn: function () {
             SF.log("FindNavigator addColumn");
 
             if (SF.isFalse(this.findOptions.allowUserColumns) || $(this.pf("tblFilters tbody")).length == 0)
@@ -517,9 +519,8 @@ SF.registerModule("FindNavigator", function () {
 
             var webQueryName = ((SF.isEmpty(this.findOptions.webQueryName)) ? $(this.pf(this.webQueryName)).val() : this.findOptions.webQueryName);
             var self = this;
-            SF.ajax({
-                type: "POST",
-                url: getColumnNameUrl,
+            $.ajax({
+                url: $(this.pf("btnAddColumn")).attr("data-url"),
                 data: { "webQueryName": webQueryName, "tokenName": tokenName },
                 async: false,
                 success: function (columnNiceName) {
@@ -596,7 +597,7 @@ SF.registerModule("FindNavigator", function () {
             return false;
         },
 
-        addFilter: function (addFilterUrl) {
+        addFilter: function () {
             SF.log("FindNavigator addFilter");
 
             var tableFilters = $(this.pf("tblFilters tbody"));
@@ -609,9 +610,8 @@ SF.registerModule("FindNavigator", function () {
             var webQueryName = ((SF.isEmpty(this.findOptions.webQueryName)) ? $(this.pf(this.webQueryName)).val() : this.findOptions.webQueryName);
 
             var self = this;
-            SF.ajax({
-                type: "POST",
-                url: addFilterUrl,
+            $.ajax({
+                url: $(this.pf("btnAddFilter")).attr("data-url"),
                 data: { "webQueryName": webQueryName, "tokenName": tokenName, "index": this.newFilterRowIndex(), "prefix": this.findOptions.prefix },
                 async: false,
                 success: function (filterHtml) {
@@ -636,31 +636,53 @@ SF.registerModule("FindNavigator", function () {
 
         newSubTokensCombo: function (index, controllerUrl) {
             SF.log("FindNavigator newSubTokensCombo");
-            var selectedColumn = $(this.pf("ddlTokens_" + index));
-            if (selectedColumn.length == 0) return;
+            var $selectedColumn = $(this.pf("ddlTokens_" + index));
+            if ($selectedColumn.length == 0) {
+                return;
+            }
 
+            var self = this;
+            var $btnAddFilter = $(this.pf("btnAddFilter"));
+            var $btnAddColumn = $(this.pf("btnAddColumn"));
+            
             //Clear child subtoken combos
             var self = this;
-            $("select,span")
-        .filter(function () {
-            return ($(this).attr("id").indexOf(SF.compose(self.findOptions.prefix, "ddlTokens_")) == 0)
-            || ($(this).attr("id").indexOf(SF.compose(self.findOptions.prefix, "lblddlTokens_")) == 0)
-        })
-        .filter(function () {
-            var currentId = $(this).attr("id");
-            var lastSeparatorIndex = currentId.lastIndexOf("_");
-            var currentIndex = currentId.substring(lastSeparatorIndex + 1, currentId.length);
-            return parseInt(currentIndex) > index;
-        })
-        .remove();
+            $selectedColumn.siblings("select,span")
+                .filter(function () {
+                    var elementId = $(this).attr("id");
+                    if (typeof elementId == "undefined") {
+                        return false;
+                    }
+                    if ((elementId.indexOf(SF.compose(self.findOptions.prefix, "ddlTokens_")) != 0)
+                        && (elementId.indexOf(SF.compose(self.findOptions.prefix, "lblddlTokens_")) != 0)) {
+                        return false;
+                    }
+                    var currentIndex = elementId.substring(elementId.lastIndexOf("_") + 1, elementId.length);
+                    return parseInt(currentIndex) > index;
+                })
+                .remove();
 
-            if (selectedColumn.children("option:selected").val() == "") return;
+            var $selectedOption = $selectedColumn.children("option:selected");
+            if ($selectedOption.val() == "") {
+                if (index == 0) {
+                    this.changeButtonState($btnAddFilter, lang.signum.selectToken);
+                    this.changeButtonState($btnAddColumn, lang.signum.selectToken);
+                }
+                else {
+                    var $prevSelectedOption = $(this.pf("ddlTokens_" + (parseInt(index, 10) - 1))).find("option:selected");
+                    this.changeButtonState($btnAddFilter, $prevSelectedOption.attr("data-filter"), function () { self.addFilter(); });
+                    this.changeButtonState($btnAddColumn, $prevSelectedOption.attr("data-column"), function () { self.addColumn(); });
+                }
+                return;
+            }
+
+            this.changeButtonState($btnAddFilter, $selectedOption.attr("data-filter"), function () { self.addFilter(); });
+            this.changeButtonState($btnAddColumn, $selectedOption.attr("data-column"), function () { self.addColumn(); });
 
             var tokenName = this.constructTokenName();
             var webQueryName = ((SF.isEmpty(this.findOptions.webQueryName)) ? $(this.pf(this.webQueryName)).val() : this.findOptions.webQueryName);
 
-            SF.ajax({
-                type: "POST",
+            $.ajax({
                 url: controllerUrl,
                 data: { "webQueryName": webQueryName, "tokenName": tokenName, "index": index, "prefix": this.findOptions.prefix },
                 async: false,
@@ -668,6 +690,19 @@ SF.registerModule("FindNavigator", function () {
                     $(self.pf("ddlTokens_" + index)).after(newCombo);
                 }
             });
+        },
+
+        changeButtonState: function ($button, disablingMessage, enableCallback) {
+            var hiddenId = $button.attr("id") + "temp";
+            if (typeof disablingMessage != "undefined") {
+                $button.addClass("ui-button-disabled").addClass("ui-state-disabled").attr("title", disablingMessage);
+                $button.unbind('click').bind('click', function (e) { e.preventDefault(); return false; });
+            }
+            else {
+                var self = this;
+                $button.removeClass("ui-button-disabled").removeClass("ui-state-disabled").attr("title", "");
+                $button.unbind('click').bind('click', enableCallback);
+            }
         },
 
         constructTokenName: function () {
@@ -701,8 +736,7 @@ SF.registerModule("FindNavigator", function () {
             };
 
             var self = this;
-            SF.ajax({
-                type: "POST",
+            $.ajax({
                 url: quickFilterUrl,
                 data: params,
                 async: false,
@@ -772,7 +806,6 @@ SF.registerModule("FindNavigator", function () {
             _viewOptions.prefix = SF.compose("New", _viewOptions.prefix);
             var self = this;
             return $.extend({
-                type: $(this.pf(SF.Keys.entityTypeName)).val(),
                 containerDiv: null,
                 onCancelled: null
             }, _viewOptions);
@@ -785,11 +818,33 @@ SF.registerModule("FindNavigator", function () {
             _viewOptions.prefix = SF.compose("New", _viewOptions.prefix);
             var self = this;
             return $.extend({
-                type: $(this.pf(SF.Keys.entityTypeName)).val(),
                 containerDiv: null,
                 requestExtraJsonData: this.requestDataForSearchPopupCreate(),
                 onCancelled: null
             }, _viewOptions);
+        },
+
+        getRuntimeType: function (typeChooserUrl, _onTypeFound) {
+            SF.log("FindNavigator getRuntimeType");
+            var typeStr = $(this.pf(SF.Keys.entityTypeNames)).val();
+            var types = typeStr.split(",");
+            if (types.length == 1)
+                return _onTypeFound(types[0]);
+
+            SF.openTypeChooser(this.findOptions.prefix, _onTypeFound, { controllerUrl: typeChooserUrl, types: typeStr });
+        },
+
+        typedCreate: function (viewOptions) {
+            SF.log("FindNavigator typedCreate");
+            if (SF.isEmpty(viewOptions.prefix)) {
+                var viewOptions = this.viewOptionsForSearchCreate(viewOptions);
+                new SF.ViewNavigator(viewOptions).navigate();
+            }
+            else {
+                var saveUrl = this.control().data("popup-save-url");
+                var viewOptions = this.viewOptionsForSearchPopupCreate(viewOptions);
+                new SF.ViewNavigator(viewOptions).createSave(saveUrl);
+            }
         },
 
         toggleSelectAll: function () {
@@ -800,17 +855,11 @@ SF.registerModule("FindNavigator", function () {
         }
     };
 
-    SF.FindNavigator.create = function (viewOptions) {
+    SF.FindNavigator.create = function (viewOptions, typeChooserUrl) {
         var findNavigator = new SF.FindNavigator({ prefix: viewOptions.prefix });
-        if (SF.isEmpty(viewOptions.prefix)) {
-            var viewOptions = findNavigator.viewOptionsForSearchCreate(viewOptions);
-            new SF.ViewNavigator(viewOptions).navigate();
-        }
-        else {
-            var saveUrl = this.control().data("popup-save-url");
-            var viewOptions = findNavigator.viewOptionsForSearchPopupCreate(viewOptions);
-            new SF.ViewNavigator(viewOptions).createSave(saveUrl);
-        }
+        var type = findNavigator.getRuntimeType(typeChooserUrl, function (type) {
+            findNavigator.typedCreate($.extend({ type: type }, viewOptions));
+        });
     }
 
     SF.FindNavigator.asyncSearchFinished = new Array();
@@ -840,5 +889,11 @@ SF.registerModule("FindNavigator", function () {
                 makeSearch();
             }
         }
-    }
+    };
+
+    $(".sf-subtokens-expander").live('click', function () {
+        var $this = $(this);
+        $this.next().show().focus().click();
+        $this.remove();
+    });
 });

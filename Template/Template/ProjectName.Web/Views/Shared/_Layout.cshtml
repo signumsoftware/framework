@@ -22,7 +22,7 @@
 </head>
 <body>
     <div id="wrap">
-        <header>
+        <header id="header">
             <div id="title">
                 <h1>@(Html.ActionLink("$custommessage$ Application", (HomeController h)=>h.Index())) </h1>
             </div>
@@ -36,10 +36,10 @@
             <div id="content">
                 @RenderBody()
             </div>
-            <div class="clear">
+            <div class="clearall">
             </div>
         </div>
-        <footer>
+        <footer id="footer">
             <span id="powered">Powered by <a href="http://www.signumframework.com">Signum Framework</a></span>
         </footer>
     </div>

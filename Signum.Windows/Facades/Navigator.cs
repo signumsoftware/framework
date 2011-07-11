@@ -193,12 +193,12 @@ namespace Signum.Windows
             Manager.Admin(adminOptions);
         }
 
-        internal static EntitySettings GetEntitySettings(Type type)
+        public static EntitySettings GetEntitySettings(Type type)
         {
             return Manager.GetEntitySettings(type);
         }
 
-        internal static QuerySettings GetQuerySettings(object queryName)
+        public static QuerySettings GetQuerySettings(object queryName)
         {
             return Manager.GetQuerySettings(queryName);
         }
@@ -322,6 +322,8 @@ namespace Signum.Windows
             {
                 //Looking for a better place to do this
                 PropertyRoute.SetFindImplementationsCallback(Server.FindImplementations);
+                QueryToken.EntityExtensions = (type, parent) => Server.Return((IDynamicQueryServer server) => server.ExternalQueryToken(type, parent));
+
                 EventManager.RegisterClassHandler(typeof(TextBox), TextBox.GotFocusEvent, new RoutedEventHandler(TextBox_GotFocus));
 
                 CompleteQuerySettings();

@@ -20,6 +20,7 @@ using Signum.Engine.Linq;
 using System.Data.SqlClient;
 using Signum.Services;
 using System.Globalization;
+using System.Threading;
 
 namespace Signum.Engine.Maps
 {
@@ -53,11 +54,11 @@ namespace Signum.Engine.Maps
             set { typeToId = value; }
         }
 
-        Dictionary<int, Table> idToTable;
-        internal Dictionary<int, Table> IdToTable
+        Dictionary<int, Type> idToType;
+        internal Dictionary<int, Type> IdToType
         {
-            get { return idToTable.ThrowIfNullC(errorType); }
-            set { idToTable = value; }
+            get { return idToType.ThrowIfNullC(errorType); }
+            set { idToType = value; }
         }
 
         Dictionary<Type, TypeDN> typeToDN;
@@ -86,6 +87,11 @@ namespace Signum.Engine.Maps
         {
             get { return typeToName; }
             set { typeToName = value; }
+        }
+
+        internal  Type GetType(int id)
+        {
+            return this.idToType[id]; 
         }
 
         #region Events
@@ -127,52 +133,40 @@ namespace Signum.Engine.Maps
             return (EntityEvents<T>)entityEvents.GetOrCreate(typeof(T), () => new EntityEvents<T>());
         }
 
-        internal void OnPreSaving(IdentifiableEntity entity, bool isRoot, ref bool graphModified)
+        internal void OnPreSaving(IdentifiableEntity entity, ref bool graphModified)
         {
             AssertAllowed(entity.GetType());
 
             IEntityEvents ee = entityEvents.TryGetC(entity.GetType());
 
             if (ee != null)
-                ee.OnPreSaving(entity, isRoot, ref graphModified);
+                ee.OnPreSaving(entity, ref graphModified);
 
-            entityEventsGlobal.OnPreSaving(entity, isRoot, ref graphModified);
+            entityEventsGlobal.OnPreSaving(entity, ref graphModified);
         }
 
-        internal void OnSaving(IdentifiableEntity entity, bool isRoot)
+        internal void OnSaving(IdentifiableEntity entity)
         {
             AssertAllowed(entity.GetType());
 
             IEntityEvents ee = entityEvents.TryGetC(entity.GetType());
 
             if (ee != null)
-                ee.OnSaving(entity, isRoot);
+                ee.OnSaving(entity);
 
-            entityEventsGlobal.OnSaving(entity, isRoot);
+            entityEventsGlobal.OnSaving(entity);
         }
 
-        internal void OnRetrieving(Type type, int[] ids, bool inQuery)
-        {
-            AssertAllowed(type);
-
-            IEntityEvents ee = entityEvents.TryGetC(type);
-
-            if (ee != null)
-                ee.OnRetrieving(type, ids, inQuery);
-
-            entityEventsGlobal.OnRetrieving(type, ids, inQuery);
-        }
-
-        internal void OnRetrieved(IdentifiableEntity entity, bool isRoot)
+        internal void OnRetrieved(IdentifiableEntity entity)
         {
             AssertAllowed(entity.GetType());
 
             IEntityEvents ee = entityEvents.TryGetC(entity.GetType());
 
             if (ee != null)
-                ee.OnRetrieved(entity, isRoot);
+                ee.OnRetrieved(entity);
 
-            entityEventsGlobal.OnRetrieved(entity, isRoot);
+            entityEventsGlobal.OnRetrieved(entity);
         }
 
 
@@ -348,7 +342,7 @@ namespace Signum.Engine.Maps
             return Tables.GetOrThrow(type, "Table {0} not loaded in schema");
         }
 
-        static Field FindField(IFieldFinder fieldFinder, MemberInfo[] members, bool throws)
+        internal static Field FindField(IFieldFinder fieldFinder, MemberInfo[] members, bool throws)
         {
             IFieldFinder current = fieldFinder;
             Field result = null;
@@ -410,24 +404,27 @@ namespace Signum.Engine.Maps
                 t.Fields.Values.Select(a => a.Field).OfType<FieldMList>().Select(f => (ITable)f.RelationalTable).PreAnd(t))
                 .ToDictionary(a => a.Name);
         }
+
+        public DirectedEdgedGraph<Table, bool> ToDirectedGraph()
+        {
+            return DirectedEdgedGraph<Table, bool>.Generate(Tables.Values, t => t.Fields.Values.SelectMany(f => f.Field.GetTables()));
+        }
     }
 
     internal interface IEntityEvents
     {
-        void OnPreSaving(IdentifiableEntity entity, bool isRoot, ref bool graphModified);
-        void OnSaving(IdentifiableEntity entity, bool isRoot);
-        void OnRetrieving(Type type, int[] ids, bool inQuery);
-        void OnRetrieved(IdentifiableEntity entity, bool isRoot);
+        void OnPreSaving(IdentifiableEntity entity, ref bool graphModified);
+        void OnSaving(IdentifiableEntity entity);
+        void OnRetrieved(IdentifiableEntity entity);
     }
 
     public class EntityEvents<T> : IEntityEvents
         where T : IdentifiableEntity
     {
-        public event PreSavingEntityEventHandler<T> PreSaving;
-        public event EntityEventHandler<T> Saving;
+        public event PreSavingEventHandler<T> PreSaving;
+        public event SavingEventHandler<T> Saving;
 
-        public event RetrivingEntitiesEventHandler Retrieving;
-        public event EntityEventHandler<T> Retrieved;
+        public event RetrievedEventHandler<T> Retrieved;
 
         public event FilterQueryEventHandler<T> FilterQuery;
 
@@ -449,35 +446,30 @@ namespace Signum.Engine.Maps
                     action(query);
         }
 
-        void IEntityEvents.OnPreSaving(IdentifiableEntity entity, bool isRoot, ref bool graphModified)
+        void IEntityEvents.OnPreSaving(IdentifiableEntity entity, ref bool graphModified)
         {
             if (PreSaving != null)
-                PreSaving((T)entity, isRoot, ref graphModified);
+                PreSaving((T)entity, ref graphModified);
         }
 
-        void IEntityEvents.OnSaving(IdentifiableEntity entity, bool isRoot)
+        void IEntityEvents.OnSaving(IdentifiableEntity entity)
         {
             if (Saving != null)
-                Saving((T)entity, isRoot);
+                Saving((T)entity);
+
         }
 
-        void IEntityEvents.OnRetrieving(Type type, int[] ids, bool inQuery)
-        {
-            if (Retrieving != null)
-                Retrieving(type, ids, inQuery);
-        }
-
-        void IEntityEvents.OnRetrieved(IdentifiableEntity entity, bool isRoot)
+        void IEntityEvents.OnRetrieved(IdentifiableEntity entity)
         {
             if (Retrieved != null)
-                Retrieved((T)entity, isRoot);
+                Retrieved((T)entity);
         }
     }
 
-    public delegate void PreSavingEntityEventHandler<T>(T ident, bool isRoot, ref bool graphModified) where T : IdentifiableEntity;
-    public delegate void EntityEventHandler<T>(T ident, bool isRoot) where T : IdentifiableEntity;
-    public delegate void SavedEntityEventHandler<T>(T ident, SavedEventArgs args) where T : IdentifiableEntity;
-    public delegate void RetrivingEntitiesEventHandler(Type type, int[] ids, bool inQuery);
+    public delegate void PreSavingEventHandler<T>(T ident, ref bool graphModified) where T : IdentifiableEntity;
+    public delegate void RetrievedEventHandler<T>(T ident) where T : IdentifiableEntity;    
+    public delegate void SavingEventHandler<T>(T ident) where T : IdentifiableEntity;
+    public delegate void SavedEventHandler<T>(T ident, SavedEventArgs args) where T : IdentifiableEntity;
     public delegate IQueryable<T> FilterQueryEventHandler<T>(IQueryable<T> query);
 
     public delegate void PreUnsafeDeleteHandler<T>(IQueryable<T> query);
@@ -509,7 +501,7 @@ namespace Signum.Engine.Maps
             if (table == null)
                 throw new ArgumentNullException("table");
 
-            if (fields == null || fields.Empty())
+            if (fields == null || fields.IsEmpty())
                 throw new InvalidOperationException("No fields");
 
             if (fields.OfType<FieldEmbedded>().Any())
@@ -525,7 +517,7 @@ namespace Signum.Engine.Maps
             if (table == null)
                 throw new ArgumentNullException("table");
 
-            if (columns == null || columns.Empty())
+            if (columns == null || columns.IsEmpty())
                 throw new ArgumentNullException("columns");
 
             this.Table = table;
@@ -534,7 +526,7 @@ namespace Signum.Engine.Maps
 
         public string IndexName
         {
-            get { return "IX_{0}_{1}".Formato(Table.Name, ColumnSignature()); }
+            get { return "IX_{0}_{1}".Formato(Table.Name, ColumnSignature()).Left(ConnectionScope.Current.MaxNameLength, false); }
         }
 
         public string ViewName
@@ -544,7 +536,7 @@ namespace Signum.Engine.Maps
                 if (string.IsNullOrEmpty(Where) || ConnectionScope.Current.DBMS != DBMS.SqlServer2005)
                     return null;
 
-                return "VIX_{0}_{1}".Formato(Table.Name, ColumnSignature());
+                return "VIX_{0}_{1}".Formato(Table.Name, ColumnSignature()).Left(ConnectionScope.Current.MaxNameLength, false);
             }
         }
 
@@ -559,19 +551,40 @@ namespace Signum.Engine.Maps
 
         public UniqueIndex WhereNotNull(params IColumn[] notNullColumns)
         {
-            if (notNullColumns == null || notNullColumns.Empty())
+            if (notNullColumns == null || notNullColumns.IsEmpty())
             {
                 Where = null;
                 return this;
             }
 
-            this.Where = notNullColumns.ToString(c => c.Name.SqlScape() + " IS NOT NULL", " AND ");
+            this.Where = notNullColumns.ToString(c => {
+                string res = c.Name.SqlScape() + " IS NOT NULL";
+                if (!IsString(c.SqlDbType))
+                    return res;
+
+                return res + " AND " + c.Name.SqlScape() + " <> ''";
+
+            }, " AND ");
             return this;
+        }
+
+        private bool IsString(SqlDbType sqlDbType)
+        {
+            switch (sqlDbType)
+            {
+                case SqlDbType.NText:
+                case SqlDbType.NVarChar:
+                case SqlDbType.Text:
+                case SqlDbType.VarChar:
+                    return true;
+            }
+
+            return false;
         }
 
         public UniqueIndex WhereNotNull(params Field[] notNullFields)
         {
-            if (notNullFields == null || notNullFields.Empty())
+            if (notNullFields == null || notNullFields.IsEmpty())
             {
                 Where = null;
                 return this;
@@ -618,7 +631,20 @@ namespace Signum.Engine.Maps
         public Type Type { get; private set; }
 
         public string Name { get; set; }
-        public bool Identity { get; set; }
+        bool identity = true;
+        public bool Identity
+        {
+            get { return identity; }
+            set
+            {
+                if (identity != value)
+                {
+                    identity = value;
+                    if (inserter != null && inserter.IsValueCreated) // not too fast
+                        inserter.ResetPublicationOnly();
+                }
+            }
+        }
         public bool IsView { get; internal set; }
         public string CleanTypeName { get; set; }
 
@@ -627,12 +653,9 @@ namespace Signum.Engine.Maps
 
         public List<UniqueIndex> MultiIndexes { get; set; }
 
-        public Func<object> Constructor { get; private set; }
-
         public Table(Type type)
         {
             this.Type = type;
-            this.Constructor = ReflectionTools.CreateConstructor<object>(type);
         }
 
         public override string ToString()
@@ -644,13 +667,9 @@ namespace Signum.Engine.Maps
         {
             Columns = Fields.Values.SelectMany(c => c.Field.Columns()).ToDictionary(c => c.Name);
 
-            int i = 0;
-            foreach (var col in Columns.Values)
-            {
-                col.Position = i++;
-            }
-
-            CompleteRetrieve();
+            inserter = new Lazy<InsertCache>(InitializeInsert, LazyThreadSafetyMode.PublicationOnly);
+            updater = new Lazy<UpdateCache>(InitializeUpdate, LazyThreadSafetyMode.None);
+            saveCollections = new Lazy<Action<IdentifiableEntity,Forbidden,bool>>(InitializeCollections, LazyThreadSafetyMode.None);
         }
 
         public Field GetField(MemberInfo value, bool throws)
@@ -724,6 +743,8 @@ namespace Signum.Engine.Maps
             }
             throw new NotImplementedException();
         }
+
+        internal abstract IEnumerable<KeyValuePair<Table, bool>> GetTables(); 
     }
 
     public enum IndexType
@@ -760,7 +781,6 @@ namespace Signum.Engine.Maps
     {
         string Name { get; }
         bool Nullable { get; }
-        int Position { get; set; }
         SqlDbType SqlDbType { get; }
         bool PrimaryKey { get; }
         bool Identity { get; }
@@ -785,7 +805,6 @@ namespace Signum.Engine.Maps
         int? IColumn.Size { get { return null; } }
         int? IColumn.Scale { get { return null; } }
         Table IColumn.ReferenceTable { get { return null; } }
-        public int Position { get; set; }
 
         Table table;
         public FieldPrimaryKey(Type fieldType, Table table)
@@ -811,6 +830,11 @@ namespace Signum.Engine.Maps
 
             return Enumerable.Empty<UniqueIndex>();
         }
+
+        internal override IEnumerable<KeyValuePair<Table, bool>> GetTables()
+        {
+            return Enumerable.Empty<KeyValuePair<Table, bool>>();
+        }
     }
 
     public partial class FieldValue : Field, IColumn
@@ -823,7 +847,6 @@ namespace Signum.Engine.Maps
         public int? Size { get; set; }
         public int? Scale { get; set; }
         Table IColumn.ReferenceTable { get { return null; } }
-        public int Position { get; set; }
 
         public FieldValue(Type fieldType)
             : base(fieldType)
@@ -845,6 +868,11 @@ namespace Signum.Engine.Maps
         {
             return new[] { this };
         }
+
+        internal override IEnumerable<KeyValuePair<Table, bool>> GetTables()
+        {
+            return Enumerable.Empty<KeyValuePair<Table, bool>>();
+        }
     }
 
     public partial class FieldEmbedded : Field, IFieldFinder
@@ -859,7 +887,6 @@ namespace Signum.Engine.Maps
             int? IColumn.Size { get { return null; } }
             int? IColumn.Scale { get { return null; } }
             public Table ReferenceTable { get { return null; } }
-            public int Position { get; set; }
         }
 
         public EmbeddedHasValueColumn HasValue { get; set; }
@@ -912,19 +939,23 @@ namespace Signum.Engine.Maps
         {
             return this.EmbeddedFields.Values.SelectMany(f => f.Field.GeneratUniqueIndexes(table));
         }
+
+        internal override IEnumerable<KeyValuePair<Table, bool>> GetTables()
+        {
+            return EmbeddedFields.Values.SelectMany(f => f.Field.GetTables());
+        }
     }
 
     public partial class FieldReference : Field, IColumn, IFieldReference
     {
         public string Name { get; set; }
         public bool Nullable { get; set; }
-        SqlDbType IColumn.SqlDbType { get { return SqlBuilder.PrimaryKeyType; } }
+        public SqlDbType SqlDbType { get { return SqlBuilder.PrimaryKeyType; } }
         bool IColumn.PrimaryKey { get { return false; } }
         bool IColumn.Identity { get { return false; } }
         int? IColumn.Size { get { return null; } }
         int? IColumn.Scale { get { return null; } }
         public Table ReferenceTable { get; set; }
-        public int Position { get; set; }
 
         public bool IsLite { get; set; }
 
@@ -943,6 +974,11 @@ namespace Signum.Engine.Maps
         public override IEnumerable<IColumn> Columns()
         {
             return new[] { this };
+        }
+
+        internal override IEnumerable<KeyValuePair<Table, bool>> GetTables()
+        {
+            yield return KVP.Create(ReferenceTable, IsLite); 
         }
     }
 
@@ -968,6 +1004,11 @@ namespace Signum.Engine.Maps
         {
             return ImplementationColumns.Values.Cast<IColumn>();
         }
+
+        internal override IEnumerable<KeyValuePair<Table, bool>> GetTables()
+        {
+            return ImplementationColumns.Select(a => KVP.Create(a.Value.ReferenceTable, IsLite)).ToList();
+        }
     }
 
     public partial class FieldImplementedByAll : Field, IFieldReference
@@ -982,6 +1023,11 @@ namespace Signum.Engine.Maps
         {
             return new[] { Column, ColumnTypes };
         }
+
+        internal override IEnumerable<KeyValuePair<Table, bool>> GetTables()
+        {
+            return Enumerable.Empty<KeyValuePair<Table, bool>>();
+        }
     }
 
     public partial class ImplementationColumn : IColumn
@@ -994,7 +1040,6 @@ namespace Signum.Engine.Maps
         int? IColumn.Size { get { return null; } }
         int? IColumn.Scale { get { return null; } }
         public Table ReferenceTable { get; set; }
-        public int Position { get; set; }
     }
 
     public partial class FieldMList : Field, IFieldFinder
@@ -1030,9 +1075,14 @@ namespace Signum.Engine.Maps
 
             return Enumerable.Empty<UniqueIndex>();
         }
+
+        internal override IEnumerable<KeyValuePair<Table, bool>> GetTables()
+        {
+            return RelationalTable.Field.GetTables();
+        }
     }
 
-    public partial class RelationalTable : ITable
+    public partial class RelationalTable : ITable, IFieldFinder
     {
         public class PrimaryKeyColumn : IColumn
         {
@@ -1044,45 +1094,6 @@ namespace Signum.Engine.Maps
             int? IColumn.Size { get { return null; } }
             int? IColumn.Scale { get { return null; } }
             Table IColumn.ReferenceTable { get { return null; } }
-            public int Position { get; set; }
-        }
-
-        public partial class BackReferenceColumn : Field, IColumn
-        {
-            public BackReferenceColumn(Type fieldType)
-                : base(fieldType)
-            {
-            }
-
-            public string Name { get; set; }
-            bool IColumn.Nullable { get { return false; } }
-            SqlDbType IColumn.SqlDbType { get { return SqlBuilder.PrimaryKeyType; } }
-            bool IColumn.PrimaryKey { get { return false; } }
-            bool IColumn.Identity { get { return false; } }
-            int? IColumn.Size { get { return null; } }
-            int? IColumn.Scale { get { return null; } }
-            public Table ReferenceTable { get; set; }
-            public int Position { get; set; }
-
-            public override IEnumerable<IColumn> Columns()
-            {
-                yield return this;
-            }
-
-            public override IEnumerable<UniqueIndex> GeneratUniqueIndexes(ITable table)
-            {
-                throw new NotImplementedException();
-            }
-
-            internal override Expression GetExpression(ProjectionToken token, string tableAlias, QueryBinder binder)
-            {
-                throw new NotImplementedException();
-            }
-
-            internal override Expression GenerateValue(ParameterExpression reader, ParameterExpression retriever)
-            {
-                throw new NotImplementedException();
-            }
         }
 
         public Dictionary<string, IColumn> Columns { get; set; }
@@ -1090,7 +1101,7 @@ namespace Signum.Engine.Maps
 
         public string Name { get; set; }
         public PrimaryKeyColumn PrimaryKey { get; set; }
-        public BackReferenceColumn BackReference { get; set; }
+        public FieldReference BackReference { get; set; }
         public Field Field { get; set; }
 
         public Type CollectionType { get; private set; }
@@ -1099,7 +1110,6 @@ namespace Signum.Engine.Maps
         public RelationalTable(Type collectionType)
         {
             this.CollectionType = collectionType;
-            this.Constructor = ReflectionTools.CreateConstructor<IList>(collectionType);
         }
 
         public override string ToString()
@@ -1111,13 +1121,7 @@ namespace Signum.Engine.Maps
         {
             Columns = new IColumn[] { PrimaryKey, BackReference }.Concat(Field.Columns()).ToDictionary(a => a.Name);
 
-            int i = 0;
-            foreach (var col in Columns.Values)
-            {
-                col.Position = i++;
-            }
-
-            CompleteRetrieve();
+            InitializeSaveSql();
         }
 
         public List<UniqueIndex> GeneratUniqueIndexes()
@@ -1128,6 +1132,20 @@ namespace Signum.Engine.Maps
                 result.AddRange(MultiIndexes);
 
             return result;
+        }
+
+        public Field GetField(MemberInfo value, bool throws)
+        {
+            if (value.Name == "Parent")
+                return this.BackReference;
+
+            if (value.Name == "Element")
+                return this.Field;
+
+            if (throws)
+                throw new InvalidOperationException("'{0}' not found".Formato(value.Name));
+
+            return null;
         }
     }
 

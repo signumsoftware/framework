@@ -40,8 +40,9 @@ namespace Signum.Engine.DynamicQuery
                         case PropertyRouteType.Root:
                             throw new InvalidOperationException("PropertyRoute can not be of RouteType Root");
                         case PropertyRouteType.Property:
-                            Format = propertyRoutes.Select(pr=> Reflector.FormatString(pr)).Distinct().Only();
-                            Unit = propertyRoutes.Select(pr=> pr.PropertyInfo.SingleAttribute<UnitAttribute>().TryCC(u => u.UnitName)).Distinct().Only();
+                            Format = GetFormat(propertyRoutes);
+                            Unit = GetUnit(propertyRoutes);
+                            Implementations = AggregateImplementations(PropertyRoutes);
                             return;
                         case PropertyRouteType.MListItems:
                             Format = Reflector.FormatString(propertyRoutes[0].Type);
@@ -49,6 +50,16 @@ namespace Signum.Engine.DynamicQuery
                     }
                 }
             }
+        }
+
+        internal static string GetUnit(PropertyRoute[] value)
+        {
+            return value.Select(pr => pr.PropertyInfo.SingleAttribute<UnitAttribute>().TryCC(u => u.UnitName)).Distinct().Only();
+        }
+
+        internal static string GetFormat(PropertyRoute[] value)
+        {
+            return value.Select(pr => Reflector.FormatString(pr)).Distinct().Only();
         }
 
         public ColumnDescriptionFactory(int index, MemberInfo mi, Meta meta)
@@ -68,43 +79,44 @@ namespace Signum.Engine.DynamicQuery
             if (meta is CleanMeta && ((CleanMeta)meta).PropertyRoutes.All(pr => pr.PropertyRouteType != PropertyRouteType.Root))
             {
                 PropertyRoutes = ((CleanMeta)meta).PropertyRoutes;
-                Implementations = AggregateImplementations(PropertyRoutes.Select(a => a.GetImplementations() ?? FakeImplementation(Type, a.Type)).NotNull());
             }
         }
 
-        private Entities.Implementations FakeImplementation(Type abstractType, Type concreteType)
+        internal static Implementations AggregateImplementations(PropertyRoute[] routes)
         {
-            abstractType = Reflector.ExtractLite(abstractType) ?? abstractType;
-            concreteType = Reflector.ExtractLite(concreteType) ?? concreteType;
+            Type type = routes.Select(a => a.Type).Distinct().Single().CleanType();
 
-            if (abstractType == concreteType)
-                return null;
-
-            if (!abstractType.IsAssignableFrom(concreteType))
-                throw new InvalidOperationException("{0} does not implement {1}");
-
-            return new ImplementedByAttribute(concreteType);
+            return AggregateImplementations(routes.Select(a => a.GetImplementations() ?? new ImplementedByAttribute(a.Type.CleanType())).NotNull(), type);
         }
 
-        private Implementations AggregateImplementations(IEnumerable<Implementations> collection)
+        private static Implementations AggregateImplementations(IEnumerable<Implementations> collection, Type type)
         {
-            if (collection.Empty())
+            if (collection.IsEmpty())
                 return null;
 
             var only = collection.Only();
             if (only != null)
-                return only; 
+            {
+                ImplementedByAttribute ib = only as ImplementedByAttribute;
+                if (ib != null && ib.ImplementedTypes.Length == 1 && ib.ImplementedTypes[0] == type)
+                    return null;
 
+                return only;
+            }
             ImplementedByAttribute iba = (ImplementedByAttribute)collection.FirstOrDefault(a => a.IsByAll);
             if (iba != null)
                 return iba;
 
-            return new ImplementedByAttribute(
-                collection
+            var types = collection
                 .Cast<ImplementedByAttribute>()
                 .SelectMany(ib => ib.ImplementedTypes)
                 .Distinct()
-                .ToArray());
+                .ToArray();
+
+            if (types.Length == 1 && types[0] == type)
+                return null;
+         
+            return new ImplementedByAttribute(types);
         }
 
         public string DisplayName()

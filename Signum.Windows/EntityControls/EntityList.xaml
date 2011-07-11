@@ -61,7 +61,8 @@
             ItemsSource="{Binding Path=Entities, ElementName=me, Mode=Default}" 
 			ItemTemplate="{Binding Path=EntityTemplate, ElementName=me, Mode=Default}" 
             ItemContainerStyle="{StaticResource AllBlueListBoxItem}"
-			HorizontalContentAlignment="Stretch"/>
+			HorizontalContentAlignment="Stretch"
+            MouseDoubleClick="listBox_MouseDoubleClick"/>
 		</Border>
 		<StackPanel Orientation="Vertical" HorizontalAlignment="Left" Grid.Column="1">
 			<Button Focusable="False" x:Name="btCreate" Click="btCreate_Click" Style="{DynamicResource RoundButton}" Content="{StaticResource Create}" ToolTip="{m:Loc Create}"/>

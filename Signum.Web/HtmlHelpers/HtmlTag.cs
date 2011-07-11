@@ -7,6 +7,7 @@ using System.Web.Routing;
 using System.Text;
 using Signum.Utilities;
 using System.Collections;
+using System.IO;
 
 namespace Signum.Web
 {
@@ -228,5 +229,7 @@ namespace Signum.Web
         {
             throw new NotImplementedException("just to use collection initializers");
         }
+
+        public System.IO.TextWriter TextWriter { get { return new StringWriter(sb); } }
     }
 }

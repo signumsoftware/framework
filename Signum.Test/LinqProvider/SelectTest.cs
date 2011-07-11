@@ -118,6 +118,12 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void SelectEntityWithLiteIb()
+        {
+            var list = Database.Query<AwardNominationDN>().Where(a => a.Award.Entity is GrammyAwardDN).ToList();
+        }
+
+        [TestMethod]
         public void SelectLiteUpcast()
         {
             var list = Database.Query<ArtistDN>()
@@ -180,7 +186,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelectLiteIBA()
         {
-            var list = Database.Query<NoteDN>().Select(a => a.Target.ToLite()).ToList();
+            var list = Database.Query<NoteWithDateDN>().Select(a => a.Target.ToLite()).ToList();
         }
 
         [TestMethod]
@@ -212,7 +218,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelectEntityIBA()
         {
-            var list = Database.Query<NoteDN>().Select(a => a.Target).ToList();
+            var list = Database.Query<NoteWithDateDN>().Select(a => a.Target).ToList();
         }
 
         [TestMethod]
@@ -252,7 +258,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelectCastIBA()
         {
-            var list = (from n in Database.Query<NoteDN>()
+            var list = (from n in Database.Query<NoteWithDateDN>()
                         select 
                         ((ArtistDN)n.Target).Name ??
                         ((AlbumDN)n.Target).Name ??
@@ -271,7 +277,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelectCastIsIBA()
         {
-            var list = (from n in Database.Query<NoteDN>()
+            var list = (from n in Database.Query<NoteWithDateDN>()
                         select n.Target is ArtistDN ?
                         ((ArtistDN)n.Target).Name :
                         ((BandDN)n.Target).Name).ToList(); //Just to full-nominate
@@ -328,21 +334,21 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelectThrowIntNullable()
         {
-            Assert2.Throws<SqlNullValueException>(() =>
+            Assert2.Throws<FieldReaderException>(() =>
                 Database.Query<AlbumDN>().Select(a => ((ArtistDN)a.Author).Id).ToArray());
         }
 
         [TestMethod]
         public void SelectThrowBoolNullable()
         {
-            Assert2.Throws<SqlNullValueException>(() =>
+            Assert2.Throws<FieldReaderException>(() =>
                 Database.Query<AlbumDN>().Select(a => ((ArtistDN)a.Author).Dead).ToArray());
         }
         
         [TestMethod]
         public void SelectThrowEnumNullable()
         {
-            Assert2.Throws<SqlNullValueException>(() =>
+            Assert2.Throws<FieldReaderException>(() =>
                 Database.Query<AlbumDN>().Select(a => ((ArtistDN)a.Author).Sex).ToArray());
         }
 
@@ -450,16 +456,21 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void SelectSingleCellWhere()
+        {
+            var list = Database.Query<BandDN>().Where(b => b.Members.OrderBy(a => a.Sex).Select(a => a.Sex).First() == Sex.Male).Select(a => a.Name).ToList();
+        }
+
+        [TestMethod]
         public void SelectSingleCellSingle()
         {
-            var list = Database.Query<BandDN>()
-                .Select(b => new
-                {
-                    FirstName = b.Members.Select(m => m.Name).First(),
-                    FirstOrDefaultName = b.Members.Select(m => m.Name).FirstOrDefault(),
-                    SingleName = b.Members.Take(1).Select(m => m.Name).Single(),
-                    SingleOrDefaultName = b.Members.Take(1).Select(m => m.Name).SingleOrDefault(),
-                }).ToList();
+            var list = Database.Query<BandDN>().Select(b => new
+            {
+                FirstName = b.Members.Select(m => m.Name).First(),
+                FirstOrDefaultName = b.Members.Select(m => m.Name).FirstOrDefault(),
+                SingleName = b.Members.Take(1).Select(m => m.Name).Single(),
+                SingleOrDefaultName = b.Members.Take(1).Select(m => m.Name).SingleOrDefault(),
+            }).ToList();
         }
 
         [TestMethod]
@@ -496,6 +507,27 @@ namespace Signum.Test.LinqProvider
         public void SelectOutsideLiteNull()
         {
             var awards = Database.Query<GrammyAwardDN>().Select(a => ((AmericanMusicAwardDN)(AwardDN)a).ToLite()).ToList();
+        }
+
+        [TestMethod]
+        public void SelectMListLite()
+        {
+            var lists = (from mle in Database.MListQuery((ArtistDN a) => a.Friends)
+                         select new { Artis = mle.Parent.Name, Friend = mle.Element.Entity.Name }).ToList();
+        }
+
+        [TestMethod]
+        public void SelectMListEntity()
+        {
+            var lists = (from mle in Database.MListQuery((BandDN a) => a.Members)
+                         select new { Band = mle.Parent.Name, Artis = mle.Element.Name }).ToList();
+        }
+
+        [TestMethod]
+        public void SelectMListEmbedded()
+        {
+            var lists = (from mle in Database.MListQuery((AlbumDN a) => a.Songs)
+                         select mle).ToList();
         }
     }
 

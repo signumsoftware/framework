@@ -157,7 +157,7 @@ namespace Signum.Utilities.ExpressionTrees
 
         protected override Expression Visit(Expression exp)
         {
-            if (Enum.IsDefined(typeof(ExpressionType), exp.NodeType))
+            if ( Enum.IsDefined(typeof(ExpressionType), exp.NodeType) && exp.NodeType <= ExpressionType.Assign)
                 return base.Visit(exp);
             else
                 builder.Append(exp.ToString());

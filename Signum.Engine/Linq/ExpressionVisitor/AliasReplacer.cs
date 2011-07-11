@@ -10,15 +10,15 @@ namespace Signum.Engine.Linq
 {
     internal class AliasReplacer : DbExpressionVisitor
     {
-        Dictionary<string, string> aliasMap;
+        Dictionary<Alias, Alias> aliasMap;
 
         private AliasReplacer() { }
 
-        public static Expression Replace(Expression source, Func<string> newAlias)
+        public static Expression Replace(Expression source)
         {
             AliasReplacer ap = new AliasReplacer()
             {
-                aliasMap = AliasGatherer.Gather(source).Reverse().ToDictionary(a => a, a => newAlias())
+                aliasMap = AliasGatherer.Gather(source).Reverse().ToDictionary(a => a, a => Alias.CloneAlias(a))
             };
 
             return ap.Visit(source);
@@ -46,10 +46,10 @@ namespace Signum.Engine.Linq
             ReadOnlyCollection<ColumnDeclaration> columns = this.VisitColumnDeclarations(select.Columns);
             ReadOnlyCollection<OrderExpression> orderBy = this.VisitOrderBy(select.OrderBy);
             ReadOnlyCollection<Expression> groupBy = this.VisitGroupBy(select.GroupBy);
-            string newAlias = aliasMap.TryGetC(select.Alias) ?? select.Alias;
+            Alias newAlias = aliasMap.TryGetC(select.Alias) ?? select.Alias;
 
             if (top != select.Top || from != select.From || where != select.Where || columns != select.Columns || orderBy != select.OrderBy || groupBy != select.GroupBy || newAlias != select.Alias)
-                return new SelectExpression(newAlias, false, top, columns, from, where, orderBy, groupBy);
+                return new SelectExpression(newAlias, select.Distinct, select.Reverse, top, columns, from, where, orderBy, groupBy);
 
             return select;
         }

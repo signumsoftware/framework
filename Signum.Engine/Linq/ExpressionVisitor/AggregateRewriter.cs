@@ -11,7 +11,7 @@ namespace Signum.Engine.Linq
     /// </summary>
     internal class AggregateRewriter : DbExpressionVisitor
     {
-        ILookup<string, AggregateSubqueryExpression> lookup;
+        ILookup<Alias, AggregateSubqueryExpression> lookup;
         Dictionary<AggregateSubqueryExpression, Expression> map;
 
         private AggregateRewriter(Expression expr)
@@ -37,7 +37,7 @@ namespace Signum.Engine.Linq
                     this.map.Add(ae, cd.GetReference(ae.GroupByAlias));
                     aggColumns.Add(cd);
                 }
-                return new SelectExpression(select.Alias, select.Distinct, select.Top, aggColumns, select.From, select.Where, select.OrderBy, select.GroupBy);
+                return new SelectExpression(select.Alias, select.Distinct, select.Reverse, select.Top, aggColumns, select.From, select.Where, select.OrderBy, select.GroupBy);
             }
             return select;
         }

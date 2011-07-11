@@ -42,8 +42,6 @@ namespace Signum.Web
             if (ec.ViewData != null)
                 vdd.AddRange(ec.ViewData); 
 
-            helper.PropagateSFKeys(vdd);
-
             helper.RenderPartial(ec.ViewName, vdd);
         }
 
@@ -67,8 +65,6 @@ namespace Signum.Web
             ViewDataDictionary vdd = new ViewDataDictionary(ntc);
             if (ec.ViewData != null)
                 vdd.AddRange(ec.ViewData);
-
-            helper.PropagateSFKeys(vdd);
 
             return helper.Partial(ec.ViewName, vdd);
         }

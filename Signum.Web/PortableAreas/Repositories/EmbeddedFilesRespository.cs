@@ -82,7 +82,7 @@ namespace Signum.Web.PortableAreas
             return file.Substring(VirtualPath.Length).Replace("/", ".");
         }
 
-        public bool IsEmpty { get { return this.resources.Empty();  } }
+        public bool IsEmpty { get { return this.resources.IsEmpty();  } }
 
         public override string ToString()
         {

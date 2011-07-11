@@ -121,11 +121,6 @@ namespace Signum.Web
             return Manager.GetOrCreateTabID(c);
         }
 
-        public static bool IsReactive(this ControllerBase controller)
-        {
-            return controller.ControllerContext.HttpContext.Request.Form.AllKeys.Contains(ViewDataKeys.Reactive);
-        }
-
         public static string TabID(this ControllerBase controller)
         {
             NameValueCollection form = controller.ControllerContext.HttpContext.Request.Form;
@@ -295,10 +290,11 @@ namespace Signum.Web
 
         public static MappingContext UntypedApplyChanges(this ModifiableEntity entity, ControllerContext controllerContext, string prefix, bool admin)
         {
-            return (MappingContext)miApplyChanges.GetInvoker(entity.GetType()).Invoke(entity, controllerContext, prefix, admin);
+            return miApplyChanges.GetInvoker(entity.GetType()).Invoke(entity, controllerContext, prefix, admin);
         }
 
-        static GenericInvoker miApplyChanges = GenericInvoker.Create(()=>new TypeDN().ApplyChanges(null, null, true));
+        static GenericInvoker<Func<ModifiableEntity, ControllerContext, string, bool, MappingContext>> miApplyChanges =
+            new GenericInvoker<Func<ModifiableEntity, ControllerContext, string, bool, MappingContext>>((me, cc, pr, ad) => ApplyChanges<TypeDN>((TypeDN)me, cc, pr, ad));
         public static MappingContext<T> ApplyChanges<T>(this T entity, ControllerContext controllerContext, string prefix, bool admin) where T : IRootEntity
         {
             SortedList<string, string> inputs = controllerContext.HttpContext.Request.Form.ToSortedList(prefix);
@@ -351,7 +347,7 @@ namespace Signum.Web
             return (Lite<T>)Manager.ExtractLite<T>(controller, prefix);
         }
 
-        public static List<Lite<T>> ExtractLitesList<T>(string commaSeparatedIds, bool retrive) where T : class, IIdentifiable
+        public static List<Lite<T>> ExtractLitesList<T>(string commaSeparatedIds, bool retrive) where T : IdentifiableEntity
         {
             if (!commaSeparatedIds.HasText())
                 return new List<Lite<T>>();
@@ -459,6 +455,7 @@ namespace Signum.Web
         public string NormalPageView = ViewPrefix.Formato("NormalPage");
         public string NormalControlView = ViewPrefix.Formato("NormalControl");
         public string PopupControlView = ViewPrefix.Formato("PopupControl");
+        public string PopupOkControlView = ViewPrefix.Formato("PopupOkControl");
         public string ChooserPopupView = ViewPrefix.Formato("ChooserPopup");
         public string SearchPopupControlView = ViewPrefix.Formato("SearchPopupControl");
         public string SearchPageView = ViewPrefix.Formato("SearchPage");
@@ -479,7 +476,8 @@ namespace Signum.Web
             "~/signum/Scripts/SF_Lines.js",
             "~/signum/Scripts/SF_ViewNavigator.js",
             "~/signum/Scripts/SF_FindNavigator.js",
-            "~/signum/Scripts/SF_Validator.js"
+            "~/signum/Scripts/SF_Validator.js",
+            "~/signum/Scripts/SF_Widgets.js"
         };
 
         public NavigationManager()
@@ -593,15 +591,6 @@ namespace Signum.Web
 
             if (Navigator.IsReadOnly(type, admin))
                 tc.ReadOnly = true;
-            
-            bool useSessionWhenNew = GraphExplorer.FromRoot((ModifiableEntity)entity).Any(m => (m as IIdentifiable).TryCS(i => i.IsNew) == true && m.GetType().HasAttribute<UseSessionWhenNew>());
-            bool isReactive = GraphExplorer.FromRoot((ModifiableEntity)entity).Any(m => m.GetType().HasAttribute<Reactive>());
-
-            if (useSessionWhenNew || isReactive)
-            {
-                controller.ViewData[ViewDataKeys.Reactive] = true;
-                controller.ControllerContext.HttpContext.Session[tabID] = entity;
-            }
         }
 
         public string GetTypeTitle(ModifiableEntity mod)
@@ -781,10 +770,17 @@ namespace Signum.Web
             ResultTable queryResult = DynamicQueryManager.Current.ExecuteQuery(request);
             
             controller.ViewData.Model = context;
-            
+
             controller.ViewData[ViewDataKeys.FindOptions] = findOptions;
-            controller.ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
             
+            QueryDescription qd = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
+            controller.ViewData[ViewDataKeys.QueryDescription] = qd;
+            
+            Type entitiesType = Reflector.ExtractLite(qd.Columns.Single(a => a.IsEntity).Type);
+            string message = CollectionElementToken.MultipliedMessage(request.Multiplications, entitiesType);
+            if (message.HasText())
+                controller.ViewData[ViewDataKeys.MultipliedMessage] = message;
+
             controller.ViewData[ViewDataKeys.Results] = queryResult;
 
             QuerySettings settings = QuerySettings[findOptions.QueryName];
@@ -837,9 +833,8 @@ namespace Signum.Web
 
         protected internal virtual MappingContext<T> ApplyChanges<T>(ControllerContext controllerContext, T entity, string prefix, Mapping<T> mapping, SortedList<string, string> inputs) where T : IRootEntity
         {
-            RootContext<T> ctx = new RootContext<T>(prefix, mapping, inputs, controllerContext) { Value = entity };
-            mapping.OnGetValue(ctx);
-            ctx.Finish();
+            RootContext<T> ctx = new RootContext<T>(prefix, inputs, controllerContext) { Value = entity };
+            mapping(ctx);
             return ctx;
         }
 
@@ -847,24 +842,24 @@ namespace Signum.Web
         {
             NameValueCollection form = controller.ControllerContext.HttpContext.Request.Form;
             
-            if (form.AllKeys.Any(s => s == ViewDataKeys.Reactive) && (string.IsNullOrEmpty(prefix) || !prefix.StartsWith("New")))
-            {
-                controller.ViewData[ViewDataKeys.Reactive] = true;
-                ModifiableEntity mod = (ModifiableEntity)controller.ControllerContext.HttpContext.Session[controller.TabID()];
-                if (mod == null)
-                    throw new InvalidOperationException(Resources.YourSessionHasTimedOutClickF5ToReloadTheEntity);
+            //if (form[ViewDataKeys.Reactive] != null && (string.IsNullOrEmpty(prefix) || !prefix.StartsWith("New")))
+            //{
+            //    controller.ViewData[ViewDataKeys.Reactive] = true;
+            //    ModifiableEntity mod = (ModifiableEntity)controller.ControllerContext.HttpContext.Session[controller.TabID()];
+            //    if (mod == null)
+            //        throw new InvalidOperationException(Resources.YourSessionHasTimedOutClickF5ToReloadTheEntity);
 
-                RuntimeInfo parentRuntimeInfo = RuntimeInfo.FromFormValue(form[EntityBaseKeys.RuntimeInfo]);
-                if (mod.GetType() == parentRuntimeInfo.RuntimeType &&
-                    (mod.GetType().IsEmbeddedEntity() || ((IIdentifiable)mod).IdOrNull == parentRuntimeInfo.IdOrNull))
-                {
-                    //if (clone == null || clone.Value) 
-                    //    return (ModifiableEntity)((ICloneable)mod).Clone();
-                    return mod;
-                }
-                else
-                    throw new InvalidOperationException(Resources.IncorrectEntityInSessionYouMustReloadThePageToContinue);
-            }
+            //    RuntimeInfo parentRuntimeInfo = RuntimeInfo.FromFormValue(form[EntityBaseKeys.RuntimeInfo]);
+            //    if (mod.GetType() == parentRuntimeInfo.RuntimeType &&
+            //        (mod.GetType().IsEmbeddedEntity() || ((IIdentifiable)mod).IdOrNull == parentRuntimeInfo.IdOrNull))
+            //    {
+            //        //if (clone == null || clone.Value) 
+            //        //    return (ModifiableEntity)((ICloneable)mod).Clone();
+            //        return mod;
+            //    }
+            //    else
+            //        throw new InvalidOperationException(Resources.IncorrectEntityInSessionYouMustReloadThePageToContinue);
+            //}
 
             RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(form[TypeContextUtilities.Compose(prefix ?? "", EntityBaseKeys.RuntimeInfo)]);
             if (runtimeInfo.IdOrNull != null)

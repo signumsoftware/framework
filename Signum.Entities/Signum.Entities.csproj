@@ -79,13 +79,22 @@
     <Compile Include="..\Signum.Utilities\Properties\Version.cs">
       <Link>Properties\Version.cs</Link>
     </Compile>
+    <Compile Include="DynamicQuery\Tokens\CountToken.cs" />
+    <Compile Include="DynamicQuery\Tokens\DateToken.cs" />
+    <Compile Include="DynamicQuery\Tokens\ExtensionToken.cs" />
+    <Compile Include="DynamicQuery\Tokens\CollectionElementToken.cs" />
+    <Compile Include="DynamicQuery\Tokens\EntityPropertyToken.cs" />
+    <Compile Include="DynamicQuery\Tokens\AsTypeToken.cs" />
+    <Compile Include="DynamicQuery\Tokens\ColumnToken.cs" />
+    <Compile Include="DynamicQuery\Tokens\MonthStartToken.cs" />
+    <Compile Include="DynamicQuery\Tokens\NetPropertyToken.cs" />
     <Compile Include="ModelEntity.cs" />
     <Compile Include="DynamicQuery\Column.cs" />
     <Compile Include="DynamicQuery\Filter.cs" />
     <Compile Include="DynamicQuery\Requests.cs" />
     <Compile Include="DynamicQuery\ResultTable.cs" />
     <Compile Include="DynamicQuery\QueryUtils.cs" />
-    <Compile Include="DynamicQuery\QueryToken.cs" />
+    <Compile Include="DynamicQuery\Tokens\QueryToken.cs" />
     <Compile Include="FieldAttributes.cs" />
     <Compile Include="Basics\Alert.cs" />
     <Compile Include="Basics\Color.cs" />

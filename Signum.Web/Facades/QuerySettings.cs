@@ -45,6 +45,13 @@ namespace Signum.Web
 
         public static Dictionary<PropertyRoute, Func<HtmlHelper, object, MvcHtmlString>> PropertyFormatters { get; set; }
 
+        Dictionary<string, Func<HtmlHelper, object, MvcHtmlString>> formatters;
+        public Dictionary<string, Func<HtmlHelper, object, MvcHtmlString>> Formatters
+        {
+            get { return formatters ?? (formatters = new Dictionary<string, Func<HtmlHelper, object, MvcHtmlString>>()); }
+            set { formatters = value; }
+        }
+
         static QuerySettings()
         {
             FormatRules = new List<FormatterRule>
@@ -91,7 +98,10 @@ namespace Signum.Web
             {
                 new EntityFormatterRule(l => true, (h,l) => 
                 {
-                    return h.Href(Navigator.ViewRoute(l.RuntimeType, l.Id), h.Encode(Resources.View));
+                    if (Navigator.IsViewable(l.RuntimeType, true))
+                        return h.Href(Navigator.ViewRoute(l.RuntimeType, l.Id), h.Encode(Resources.View));
+                    else
+                        return MvcHtmlString.Empty;
                 }),
             };
 
@@ -109,6 +119,10 @@ namespace Signum.Web
 
         public Func<HtmlHelper, object, MvcHtmlString> GetFormatter(Column column)
         {
+            Func<HtmlHelper, object, MvcHtmlString> cf;
+            if (formatters != null && formatters.TryGetValue(column.Name, out cf))
+                return cf; 
+
             PropertyRoute route = column.Token.GetPropertyRoute();
             if (route != null)
             {

@@ -24,6 +24,13 @@ namespace Signum.Web
 
         public string LabelText { get; set; }
 
+        string labelClass = "sf-label-line";
+        public string LabelClass
+        {
+            get { return labelClass; }
+            set { labelClass = value; }
+        }
+
         public readonly RouteValueDictionary LabelHtmlProps = new RouteValueDictionary();
 
         bool visible = true;
@@ -39,22 +46,6 @@ namespace Signum.Web
             get { return hideIfNull; }
             set { hideIfNull = value; }
         }
-
-        bool reloadOnChange = false;
-        public bool ReloadOnChange
-        {
-            get { return reloadOnChange; }
-            set { reloadOnChange = value; }
-        }
-
-        string reloadControllerUrl = RouteHelper.New().SignumAction("ReloadEntity");
-        public string ReloadControllerUrl 
-        {
-            get { return reloadControllerUrl; }
-            set { reloadControllerUrl = value; } 
-        }
-
-        public string ReloadFunction { get; set; }
 
         object untypedValue;
         public override object UntypedValue

@@ -14,7 +14,7 @@ namespace Signum.Engine.Linq
     internal class SubqueryRemover : DbExpressionVisitor
     {
         HashSet<SelectExpression> selectsToRemove;
-        Dictionary<string, Dictionary<string, Expression>> map;
+        Dictionary<Alias, Dictionary<string, Expression>> map;
 
         private SubqueryRemover() { }
 

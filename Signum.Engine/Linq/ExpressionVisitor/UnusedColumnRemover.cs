@@ -13,7 +13,7 @@ namespace Signum.Engine.Linq
 {
     internal class UnusedColumnRemover : DbExpressionVisitor
     {
-        Dictionary<string, HashSet<string>> allColumnsUsed = new Dictionary<string, HashSet<string>>();
+        Dictionary<Alias, HashSet<string>> allColumnsUsed = new Dictionary<Alias, HashSet<string>>();
 
         private UnusedColumnRemover() { }
 
@@ -57,7 +57,7 @@ namespace Signum.Engine.Linq
 
             if (columns != select.Columns || orderbys != select.OrderBy || where != select.Where || from != select.From || groupbys != select.GroupBy)
             {
-                return new SelectExpression(select.Alias, select.Distinct, select.Top, columns, from, where, orderbys, groupbys);
+                return new SelectExpression(select.Alias, select.Distinct, select.Reverse, select.Top, columns, from, where, orderbys, groupbys);
             }
 
             return select;
@@ -89,7 +89,7 @@ namespace Signum.Engine.Linq
             SelectExpression source = (SelectExpression)this.Visit(projection.Source);
             if (projector != projection.Projector || source != projection.Source)
             {
-                return new ProjectionExpression(source, projector, projection.UniqueFunction, projection.Token);
+                return new ProjectionExpression(source, projector, projection.UniqueFunction, projection.Token, projection.Type);
             }
             return projection;
         }

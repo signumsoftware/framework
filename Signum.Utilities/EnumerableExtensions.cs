@@ -21,12 +21,17 @@ namespace Signum.Utilities
 {
     public static class EnumerableExtensions
     {
-        public static bool Empty<T>(this IEnumerable<T> collection)
+        public static bool IsEmpty<T>(this IEnumerable<T> collection)
         {
             foreach (var item in collection)
                 return false;
 
             return true;
+        }
+
+        public static bool IsNullOrEmpty<T>(this IEnumerable<T> collection)
+        {
+            return collection == null || collection.IsEmpty();
         }
 
         public static IEnumerable<T> NotNull<T>(this IEnumerable<T> collection) where T : class
@@ -344,17 +349,18 @@ namespace Signum.Utilities
             return 0.To(height).Select(j => 0.To(width).ToString(i => table[i, j].PadChopRight(lengths[i]), " ")).ToString("\r\n");
         }
 
-        public static void WriteFormatedStringTable<T>(this IEnumerable<T> collection, TextWriter textWriter, string title)
+        public static void WriteFormatedStringTable<T>(this IEnumerable<T> collection, TextWriter textWriter, string title, bool longHeaders)
         {
             textWriter.WriteLine();
-            textWriter.WriteLine(title ?? "Tabla");
-            textWriter.WriteLine(collection.ToStringTable().FormatTable(false));
+            if (title.HasText())
+                textWriter.WriteLine(title);
+            textWriter.WriteLine(collection.ToStringTable().FormatTable(longHeaders));
             textWriter.WriteLine();
         }
 
-        public static void ToConsoleTable<T>(this IEnumerable<T> collection, string title)
+        public static void ToConsoleTable<T>(this IEnumerable<T> collection, string title = null, bool longHeader = false)
         {
-            collection.WriteFormatedStringTable(Console.Out, title);
+            collection.WriteFormatedStringTable(Console.Out, title, longHeader);
         }
 
         public static string ToWikiTable<T>(this IEnumerable<T> collection)
@@ -709,6 +715,11 @@ namespace Signum.Utilities
         public static HashSet<T> ToHashSet<T>(this IEnumerable<T> source)
         {
             return new HashSet<T>(source);
+        }
+
+        public static HashSet<T> ToHashSet<T>(this IEnumerable<T> source, IEqualityComparer<T> comparer)
+        {
+            return new HashSet<T>(source, comparer);
         }
 
         public static ReadOnlyCollection<T> ToReadOnly<T>(this IEnumerable<T> collection)

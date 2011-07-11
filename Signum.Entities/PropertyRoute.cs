@@ -71,8 +71,22 @@ namespace Signum.Entities
                 throw new ArgumentNullException("parent");
 
             if (!parent.Type.FollowC(a => a.BaseType).Contains(propertyInfo.DeclaringType))
-                throw new ArgumentException("PropertyInfo {0} not found on {1}".Formato(propertyInfo.PropertyName(), parent.Type));
+            {
+                if (parent.Type.GetInterfaces().Contains(propertyInfo.DeclaringType))
+                {
+                    var otherProperty = parent.Type.FollowC(a => a.BaseType)
+                        .Select(a => a.GetProperty(propertyInfo.Name, BindingFlags.Public | BindingFlags.Instance)).NotNull().First();
 
+                    if (otherProperty == null)
+                        throw new ArgumentException("PropertyInfo {0} not found on {1}".Formato(propertyInfo.PropertyName(), parent.Type));
+
+                    propertyInfo = otherProperty;
+                }
+                else
+                {
+                    throw new ArgumentException("PropertyInfo {0} not found on {1}".Formato(propertyInfo.PropertyName(), parent.Type));
+                }
+            }
             if (parent.Type.IsIIdentifiable() && parent.PropertyRouteType != PropertyRouteType.Root)
                 throw new ArgumentException("Parent can not be a non-root Identifiable");
 

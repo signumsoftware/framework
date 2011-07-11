@@ -44,16 +44,22 @@ namespace Signum.Engine.Linq
         }
 
         T Translate<T>(Expression expression, Func<ITranslateResult, T> continuation) //For debugging purposes
-        {
-            Expression cleaned = Clean(expression);
-            Expression filtered = QueryFilterer.Filter(cleaned);
-            ProjectionExpression binded = (ProjectionExpression)QueryBinder.Bind(filtered);
-            ProjectionExpression optimized = (ProjectionExpression)Optimize(binded);
+        {   
+            using (Alias.NewGenerator())
+            {
+                Expression cleaned = Clean(expression);
+                Expression filtered = QueryFilterer.Filter(cleaned);
 
-            ProjectionExpression flat = ChildProjectionFlattener.Flatten(optimized);
+                BinderTools tools = new BinderTools();
 
-            ITranslateResult result = TranslatorBuilder.Build(flat);
-            return continuation(result);
+                ProjectionExpression binded = (ProjectionExpression)QueryBinder.Bind(filtered, tools);
+                ProjectionExpression optimized = (ProjectionExpression)Optimize(binded, tools);
+
+                ProjectionExpression flat = ChildProjectionFlattener.Flatten(optimized);
+
+                ITranslateResult result = TranslatorBuilder.Build(flat);
+                return continuation(result);
+            }
         }
 
         public static Expression Clean(Expression expression)
@@ -63,41 +69,53 @@ namespace Signum.Engine.Linq
             return simplified;
         }
 
-        internal static Expression Optimize(Expression binded)
+        internal static Expression Optimize(Expression binded, BinderTools tools)
         {
             Expression rewrited = AggregateRewriter.Rewrite(binded);
-            Expression rebinded = QueryRebinder.Rebind(rewrited);
-            Expression projCleaned = EntityCleaner.Clean(rebinded);
-            Expression replaced = AliasProjectionReplacer.Replace(projCleaned);
-            Expression removed = CountOrderByRemover.Remove(replaced);
-            Expression columnCleaned = UnusedColumnRemover.Remove(removed);
+            Expression completed = EntityCompleter.Complete(rewrited, tools);
+            Expression orderRewrited = OrderByRewriter.Rewrite(completed);
+
+            Expression rebinded = QueryRebinder.Rebind(orderRewrited);
+
+            Expression replaced = AliasProjectionReplacer.Replace(rebinded);
+            Expression columnCleaned = UnusedColumnRemover.Remove(replaced);
             Expression rowFilled = RowNumberFiller.Fill(columnCleaned);
             Expression subqueryCleaned = RedundantSubqueryRemover.Remove(rowFilled);
-            return subqueryCleaned;
+
+            Expression rewriteConditions = ConditionsRewriter.Rewrite(subqueryCleaned);
+            return rewriteConditions;
         }
 
-        internal int Delete<T>(IQueryable<T> query)
-            where T : IdentifiableEntity
+        internal int Delete(IQueryable query)
         {
-            Expression cleaned = Clean(query.Expression);
-            Expression filtered = QueryFilterer.Filter(cleaned);
-            CommandExpression delete = new QueryBinder().BindDelete(filtered);
-            CommandExpression deleteOptimized = (CommandExpression)Optimize(delete);
-            CommandResult cr = TranslatorBuilder.BuildCommandResult(deleteOptimized);
+            using (Alias.NewGenerator())
+            {
+                Expression cleaned = Clean(query.Expression);
+                Expression filtered = QueryFilterer.Filter(cleaned);
 
-            return cr.Execute();
+                BinderTools tools = new BinderTools();
+                CommandExpression delete = new QueryBinder(tools).BindDelete(filtered);
+                CommandExpression deleteOptimized = (CommandExpression)Optimize(delete, tools);
+                CommandResult cr = TranslatorBuilder.BuildCommandResult(deleteOptimized);
+
+                return cr.Execute();
+            }
         }
 
         internal int Update<T>(IQueryable<T> query, Expression<Func<T, T>> set)
-            where T : IdentifiableEntity
         {
-            Expression cleaned = Clean(query.Expression);
-            Expression filtered = QueryFilterer.Filter(cleaned);
-            CommandExpression update = new QueryBinder().BindUpdate(filtered, set);
-            CommandExpression updateOptimized = (CommandExpression)Optimize(update);
-            CommandResult cr = TranslatorBuilder.BuildCommandResult(updateOptimized);
+            using (Alias.NewGenerator())
+            {
+                Expression cleaned = Clean(query.Expression);
+                Expression filtered = QueryFilterer.Filter(cleaned);
 
-            return cr.Execute();
+                BinderTools tools = new BinderTools();
+                CommandExpression update = new QueryBinder(tools).BindUpdate(filtered, set);
+                CommandExpression updateOptimized = (CommandExpression)Optimize(update, tools);
+                CommandResult cr = TranslatorBuilder.BuildCommandResult(updateOptimized);
+
+                return cr.Execute();
+            }
         }
     }
 }

@@ -127,7 +127,7 @@ namespace Signum.Engine.Exceptions
 
         protected EntityNotFoundException(SerializationInfo info, StreamingContext context) : base(info, context) { }
 
-        public EntityNotFoundException(Type type, int[] ids)
+        public EntityNotFoundException(Type type, params int[] ids)
             : base(Resources.EntityWithType0AndId1NotFound.Formato(type.Name, ids.ToString(", ")))
         {
             this.Type = type;
@@ -136,12 +136,18 @@ namespace Signum.Engine.Exceptions
     }
 
     [Serializable]
-    public class OrderByNotLastException : Exception
+    public class ConcurrencyException: Exception
     {
-        public OrderByNotLastException(SqlException inner)
-            : base("The translated query has an ORDERBY in a innner SELECT statement, write the query in a different way", inner)
-        {
+        public Type Type { get; private set; }
+        public int Id { get; private set; }
 
+        protected ConcurrencyException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+
+        public ConcurrencyException(Type type, int id)
+            : base(Resources.ConcurrencyErrorOnDatabaseTable0Id1.Formato(type.NiceName(), id))
+        {
+            this.Type = type;
+            this.Id = id;
         }
     }
 }

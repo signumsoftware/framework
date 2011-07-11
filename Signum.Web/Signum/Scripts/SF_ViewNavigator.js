@@ -65,8 +65,9 @@ SF.registerModule("ViewNavigator", function () {
                 throw "No ContainerDiv was specified to Navigator on viewSave mode";
             if ($('#' + this.viewOptions.containerDiv).length == 0)
                 $("body").append(SF.hiddenDiv(this.viewOptions.containerDiv, ""));
-            if (!SF.isEmpty(html))
+            if (!SF.isEmpty(html)) {
                 $('#' + this.viewOptions.containerDiv).html(html);
+            }
             if (this.isLoaded())
                 return this.showViewSave();
             else {
@@ -95,7 +96,7 @@ SF.registerModule("ViewNavigator", function () {
             if (SF.isEmpty(this.viewOptions.type))
                 throw "Type must be specified to Navigator on Navigate mode";
             var self = this;
-            this.callServer(function (url) { /*SF.ajax will handle the redirect*/ }); //SF.submit(url, self.viewOptions.requestExtraJsonData); });
+            this.callServer(function (url) { /*$.ajaxPrefilter will handle the redirect*/ }); 
         },
 
         isLoaded: function () {
@@ -153,6 +154,9 @@ SF.registerModule("ViewNavigator", function () {
                 onOk: function () { self.onCreateOk() },
                 onCancel: function () { self.onCreateCancel() }
             });
+
+            if (this.viewOptions.onLoaded != null)
+                this.viewOptions.onLoaded(this.tempDivId());
         },
 
         showCreateSave: function (newHtml, saveUrl) {
@@ -195,8 +199,7 @@ SF.registerModule("ViewNavigator", function () {
 
         callServer: function (onSuccess) {
             SF.log("ViewNavigator callServer");
-            SF.ajax({
-                type: "POST",
+            $.ajax({
                 url: this.viewOptions.controllerUrl,
                 data: this.constructRequestData(),
                 async: false,
@@ -271,33 +274,16 @@ SF.registerModule("ViewNavigator", function () {
     }
 
     SF.closePopup = function (prefix) {
-        $('#' + SF.compose(prefix, "panelPopup")).closest(".ui-dialog").remove();
+        $('#' + SF.compose(prefix, "panelPopup")).closest(".ui-dialog-content,.ui-dialog").remove();
     }
 
-    /* chooserOptions */
-    /* ids: List of ids */
-    /* title: Window title */
-
-    SF.openChooser = function (_prefix, onOptionClicked, jsonOptionsListFormat, onCancelled, chooserOptions) {
-        SF.log("openChooser");
-        //Construct popup
-        var tempDivId = SF.compose(_prefix, "Temp");
-        var requestData = "prefix=" + tempDivId;
-        if (SF.isEmpty(jsonOptionsListFormat)) {
-            requestData += "&types=" + SF.StaticInfo(_prefix).types();
-        }
-        else {
-            for (var i = 0; i < jsonOptionsListFormat.length; i++) {
-                requestData += "&buttons=" + jsonOptionsListFormat[i];  //This will Bind to the List<string> "buttons"
-                if (chooserOptions && chooserOptions.ids != null) requestData += "&ids=" + chooserOptions.ids[i];  //This will Bind to the List<string> "ids"            
-            }
-        }
-        if (chooserOptions && chooserOptions.title) requestData += "&title=" + chooserOptions.title;
-
-        SF.ajax({
-            type: "POST",
+    /* chooserOptions: controllerUrl & types*/
+    SF.openTypeChooser = function (prefix, onTypeChosen, chooserOptions) {
+        SF.log("openTypeChooser");
+        var tempDivId = SF.compose(prefix, "Temp");
+        $.ajax({
             url: chooserOptions.controllerUrl,
-            data: requestData,
+            data: { prefix: tempDivId, types: (SF.isEmpty(chooserOptions.types) ? SF.StaticInfo(prefix).types() : chooserOptions.types) },
             async: false,
             success: function (chooserHTML) {
                 $("body").append(SF.hiddenDiv(tempDivId, chooserHTML));
@@ -307,7 +293,7 @@ SF.registerModule("ViewNavigator", function () {
                     $('#' + this.id).unbind('click').click(function () {
                         var option = this.id;
                         $('#' + tempDivId).remove();
-                        onOptionClicked(option);
+                        onTypeChosen(option);
                     });
                 });
 
@@ -321,14 +307,48 @@ SF.registerModule("ViewNavigator", function () {
         });
     }
 
-    SF.relatedEntityCreate = function (viewOptions) {
-        var info = new SF.RuntimeInfo('');
-        var extraJson = {
-            sfIdRelated: info.id(),
-            sfRuntimeTypeRelated: info.runtimeType()
-        };
+    /* chooserOptions */
+    /* ids: List of ids */
+    /* title: Window title */
+    SF.openChooser = function (_prefix, onOptionClicked, jsonOptionsListFormat, onCancelled, chooserOptions) {
+        SF.log("openChooser");
+        //Construct popup
+        var tempDivId = SF.compose(_prefix, "Temp");
+        var requestData = "prefix=" + tempDivId;
+        if (SF.isEmpty(jsonOptionsListFormat)) {
+            throw "chooser options must be provider. Use openTypeChooser for automatic type chooser";
+        }
+        else {
+            for (var i = 0; i < jsonOptionsListFormat.length; i++) {
+                requestData += "&buttons=" + jsonOptionsListFormat[i];  //This will Bind to the List<string> "buttons"
+                if (chooserOptions && chooserOptions.ids != null) requestData += "&ids=" + chooserOptions.ids[i];  //This will Bind to the List<string> "ids"            
+            }
+        }
+        if (chooserOptions && chooserOptions.title) requestData += "&title=" + chooserOptions.title;
 
-        var navigator = new SF.ViewNavigator($.extend(viewOptions, { requestExtraJsonData: extraJson }));
-        navigator.createSave();
+        $.ajax({
+            url: chooserOptions.controllerUrl,
+            data: requestData,
+            async: false,
+            success: function (chooserHTML) {
+                $("body").append(SF.hiddenDiv(tempDivId, chooserHTML));
+                SF.triggerNewContent($("#" + tempDivId));
+                //Set continuation for each type button
+                $('#' + tempDivId + " :button").each(function () {
+                    $('#' + this.id).unbind('click').click(function () {
+                        var option = $(this).attr("data-id");
+                        $('#' + tempDivId).remove();
+                        onOptionClicked(option);
+                    });
+                });
+
+                $("#" + tempDivId).popup({ onCancel: function () {
+                    $('#' + tempDivId).remove();
+                    if (onCancelled != null)
+                        onCancelled();
+                }
+                });
+            }
+        });
     }
 });

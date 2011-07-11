@@ -38,7 +38,7 @@ namespace Signum.Engine.Linq
                 Expression projector = this.Visit(proj.Projector);
 
                 if (projector != proj.Projector)
-                    proj = new ProjectionExpression(proj.Source, projector, proj.UniqueFunction, proj.Token);
+                    proj = new ProjectionExpression(proj.Source, projector, proj.UniqueFunction, proj.Token, proj.Type);
 
                 currentSource = null;
                 return proj;
@@ -51,12 +51,12 @@ namespace Signum.Engine.Linq
                 {
                     Expression projector = Visit(proj.Projector);
 
-                    var key = Expression.Constant(0);
-                    var ciKVP = typeof(KeyValuePair<,>).MakeGenericType(key.Type, projector.Type).GetConstructor(new[] { key.Type, projector.Type });
-
+                    ConstantExpression key = Expression.Constant(0);
+                    Type kvpType = typeof(KeyValuePair<,>).MakeGenericType(key.Type, projector.Type);
+                    ConstructorInfo ciKVP = kvpType.GetConstructor(new[] { key.Type, projector.Type });
+                    Type projType = proj.UniqueFunction == null ? proj.Type.GetGenericTypeDefinition().MakeGenericType(kvpType) : kvpType;
                     return new ChildProjectionExpression(new ProjectionExpression(
-                        proj.Source,
-                        Expression.New(ciKVP, key, projector), proj.UniqueFunction, proj.Token),
+                            proj.Source, Expression.New(ciKVP, key, projector), proj.UniqueFunction, proj.Token, projType),
                         Expression.Constant(0));
 
                 }
@@ -67,11 +67,11 @@ namespace Signum.Engine.Linq
 
                     if (!IsKey(currentSource, columns))
                     {
-                        string aliasDistinct = currentSource.Alias + "D";
+                        Alias aliasDistinct = Alias.GetUniqueAlias(currentSource.Alias.Name + "D");
                         ColumnGenerator generatorDistinct = new ColumnGenerator();
 
                         List<ColumnDeclaration> columnDistinct = columns.Select(ce => generatorDistinct.MapColumn(ce)).ToList();
-                        external = new SelectExpression(aliasDistinct, true, null, columnDistinct, currentSource, null, null, null);
+                        external = new SelectExpression(aliasDistinct, true, false, null, columnDistinct, currentSource, null, null, null);
 
 
                         Dictionary<ColumnExpression, ColumnExpression> distinctReplacements = columnDistinct.ToDictionary(
@@ -95,8 +95,8 @@ namespace Signum.Engine.Linq
                     List<OrderExpression> innerOrders;
                     SelectExpression @internal = ExtractOrders(proj.Source, out innerOrders);
 
-                    string aliasSM = @internal.Alias + "SM";
-                    SelectExpression selectMany = new SelectExpression(aliasSM, false, null, columnsSMExternal.Concat(columnsSMInternal),
+                    Alias aliasSM = Alias.GetUniqueAlias(@internal.Alias.Name + "SM");
+                    SelectExpression selectMany = new SelectExpression(aliasSM, false, false, null, columnsSMExternal.Concat(columnsSMInternal),
                         new JoinExpression(JoinType.CrossApply,
                             external,
                             @internal, null), null, innerOrders, null);
@@ -114,13 +114,14 @@ namespace Signum.Engine.Linq
 
                     currentSource = old;
 
-                    var key = TupleReflection.TupleChainConstructor(columnsSMExternal.Select(cd => cd.GetReference(aliasSM)));
-                    var ciKVP = typeof(KeyValuePair<,>).MakeGenericType(key.Type, projector.Type).GetConstructor(new[] { key.Type, projector.Type });
-
+                    Expression key = TupleReflection.TupleChainConstructor(columnsSMExternal.Select(cd => cd.GetReference(aliasSM).Nullify()));
+                    Type kvpType = typeof(KeyValuePair<,>).MakeGenericType(key.Type, projector.Type);
+                    ConstructorInfo ciKVP = kvpType.GetConstructor(new[] { key.Type, projector.Type });
+                    Type projType = proj.UniqueFunction == null ? proj.Type.GetGenericTypeDefinition().MakeGenericType(kvpType) : kvpType;
                     return new ChildProjectionExpression(new ProjectionExpression(
                         selectMany,
-                        Expression.New(ciKVP, key, projector), proj.UniqueFunction, proj.Token),
-                        TupleReflection.TupleChainConstructor(columns));
+                        Expression.New(ciKVP, key, projector), proj.UniqueFunction, proj.Token, projType),
+                        TupleReflection.TupleChainConstructor(columns.Select(a=>a.Nullify())));
                 }
             }
         }
@@ -130,7 +131,7 @@ namespace Signum.Engine.Linq
             if (sel.Top != null || (sel.OrderBy == null || sel.OrderBy.Count == 0))
                 return sel;
 
-            return new SelectExpression(sel.Alias, sel.Distinct, sel.Top, sel.Columns, sel.From, sel.Where, null, sel.GroupBy);
+            return new SelectExpression(sel.Alias, sel.Distinct, sel.Reverse, sel.Top, sel.Columns, sel.From, sel.Where, null, sel.GroupBy);
         }
 
         private SelectExpression ExtractOrders(SelectExpression sel, out List<OrderExpression> innerOrders)
@@ -147,7 +148,7 @@ namespace Signum.Engine.Linq
 
                 innerOrders = newColumns.Select(kvp => new OrderExpression(kvp.Key.OrderType, kvp.Value.GetReference(sel.Alias))).ToList();
 
-                return new SelectExpression(sel.Alias, sel.Distinct, sel.Top, sel.Columns.Concat(newColumns.Values), sel.From, sel.Where, null, sel.GroupBy);
+                return new SelectExpression(sel.Alias, sel.Distinct, sel.Reverse, sel.Top, sel.Columns.Concat(newColumns.Values), sel.From, sel.Where, null, sel.GroupBy);
             }
         }
 
@@ -246,13 +247,13 @@ namespace Signum.Engine.Linq
 
         internal class ExternalColumnGatherer : DbExpressionVisitor
         {
-            string externalAlias;
+            Alias externalAlias;
 
             HashSet<ColumnExpression> columns = new HashSet<ColumnExpression>();
 
             private ExternalColumnGatherer() { }
 
-            public static HashSet<ColumnExpression> Gatherer(Expression source, string externalAlias)
+            public static HashSet<ColumnExpression> Gatherer(Expression source, Alias externalAlias)
             {
                 ExternalColumnGatherer ap = new ExternalColumnGatherer()
                 {

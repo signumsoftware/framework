@@ -154,7 +154,7 @@ namespace Signum.Engine.Maps
                 return false;
 
             if (FieldInfoAttributes(type, fi).OfType<NullableAttribute>().Any())
-                return false;
+                return true;
 
             return fieldType.IsValueType ? Nullable.GetUnderlyingType(fieldType) != null : true;
         }
@@ -261,6 +261,7 @@ namespace Signum.Engine.Maps
 
             desambiguatedNames[type] = cleanName;
         }
+
     }
 
     internal enum ReferenceFieldType

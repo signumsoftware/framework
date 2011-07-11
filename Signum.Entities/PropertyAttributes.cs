@@ -6,14 +6,6 @@ using System.Text;
 namespace Signum.Entities
 {
     [AttributeUsage(AttributeTargets.Property)]
-    public sealed class ReloadEntityOnChange : Attribute
-    {
-
-    }
-
-   
-
-    [AttributeUsage(AttributeTargets.Property)]
     public sealed class QueryablePropertyAttribute : Attribute
     {
         public bool AvailableForQueries { get; set; }

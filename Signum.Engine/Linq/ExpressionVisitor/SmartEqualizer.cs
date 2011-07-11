@@ -15,6 +15,12 @@ namespace Signum.Engine.Linq
 {
     internal static class SmartEqualizer
     {
+        public static Expression EqualNullableGroupBy(Expression e1, Expression e2)
+        {
+            return Expression.Or(Expression.Equal(e1.Nullify(), e2.Nullify()),
+                Expression.And(new IsNullExpression(e1), new IsNullExpression(e2)));
+        }
+
         public static Expression EqualNullable(Expression e1, Expression e2)
         {
             if (e1.Type.IsNullable() == e2.Type.IsNullable())
@@ -36,6 +42,9 @@ namespace Signum.Engine.Linq
 
         internal static Expression EntityIn(Expression newItem, IEnumerable<IdentifiableEntity> collection)
         {
+            if (collection.IsEmpty())
+                return SqlConstantExpression.False;
+
             Dictionary<Type, object[]> entityIDs = collection.AgGroupToDictionary(a => a.GetType(), gr => gr.Select(a => (object)(a.IdOrNull ?? int.MaxValue)).ToArray());
 
             return EntityIn(newItem, entityIDs);
@@ -43,6 +52,9 @@ namespace Signum.Engine.Linq
 
         internal static Expression EntityIn(LiteReferenceExpression liteReference, IEnumerable<Lite> collection)
         {
+            if (collection.IsEmpty())
+                return SqlConstantExpression.False;
+
             Dictionary<Type, object[]> entityIDs = collection.AgGroupToDictionary(a => a.RuntimeType, gr => gr.Select(a => (object)(a.IdOrNull ?? int.MaxValue)).ToArray());
 
             return EntityIn(liteReference.Reference, entityIDs); 
@@ -201,19 +213,18 @@ namespace Signum.Engine.Linq
         static Expression ToLiteReferenceExpression(Lite lite)
         {
             Expression id = Expression.Constant(lite.IdOrNull ?? int.MinValue);
-            Expression typeId = QueryBinder.TypeConstant(lite.RuntimeType);
 
             Type liteType = lite.GetType();
 
-            Expression fie = new FieldInitExpression(lite.RuntimeType, null, id, typeId, null, ProjectionToken.External);
+            FieldInitExpression fie = new FieldInitExpression(lite.RuntimeType, null, id, null, ProjectionToken.External);
 
             Type staticType = Reflector.ExtractLite(liteType);
-            if (staticType != fie.Type)
-                fie = new ImplementedByExpression(staticType, 
+            Expression reference = staticType == fie.Type? (Expression)fie: 
+                new ImplementedByExpression(staticType, 
                     new[] { new ImplementationColumnExpression(fie.Type, (FieldInitExpression)fie) }.ToReadOnly());
 
             return new LiteReferenceExpression(liteType,
-                fie, id, Expression.Constant(lite.ToStr), typeId);
+                reference, id, Expression.Constant(lite.ToStr), fie.TypeId);
         }
 
         static Expression ToFieldInitExpression(IIdentifiable ei)
@@ -222,7 +233,6 @@ namespace Signum.Engine.Linq
                 ei.GetType(),
                 null,
                 Expression.Constant(ei.IdOrNull ?? int.MinValue),
-                QueryBinder.TypeConstant(ei.GetType()),
                 null,
                 ProjectionToken.External);
         }

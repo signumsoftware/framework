@@ -48,7 +48,7 @@ namespace Signum.Engine
         {
             Schema current = Schema.Current; 
 
-            List<TypeDN> types = Administrator.UnsafeRetrieveAll<TypeDN>();
+            List<TypeDN> types = Database.RetrieveAll<TypeDN>();
 
             var dict = EnumerableExtensions.JoinStrict(
                 types, current.Tables.Keys, t => t.FullClassName, t => (Reflector.ExtractEnumProxy(t) ?? t).FullName,
@@ -57,7 +57,7 @@ namespace Signum.Engine
                 ).ToDictionary(a => a.type, a => a.typeDN);
 
             current.TypeToId = dict.SelectDictionary(k => k, v => v.Id);
-            current.IdToTable = current.TypeToId.ToDictionary(p => p.Value, p => current.Table(p.Key));
+            current.IdToType = current.TypeToId.ToDictionary(p => p.Value, p => current.Table(p.Key).Type);
 
             current.TypeToDN = dict;
             current.DnToType = dict.Inverse();

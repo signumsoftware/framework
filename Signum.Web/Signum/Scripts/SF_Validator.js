@@ -35,8 +35,7 @@ SF.registerModule("Validator", function () {
             var formChildren = SF.isEmpty(this.valOptions.parentDiv) ?
             $("form :input") : $("#" + this.valOptions.parentDiv + " :input")
                 .add("#" + SF.Keys.tabId)
-                .add("input:hidden[name=" + SF.Keys.antiForgeryToken + "]")
-                .add("#" + SF.Keys.reactive);
+                .add("input:hidden[name=" + SF.Keys.antiForgeryToken + "]");
 
             var searchControlInputs = $(".sf-search-control :input");
             formChildren = formChildren.not(searchControlInputs);
@@ -54,8 +53,7 @@ SF.registerModule("Validator", function () {
             SF.Notify.info(lang.signum.saving);
             var returnValue = false;
             var self = this;
-            SF.ajax({
-                type: "POST",
+            $.ajax({
                 url: this.valOptions.controllerUrl,
                 async: false,
                 data: this.constructRequestData(),
@@ -89,8 +87,7 @@ SF.registerModule("Validator", function () {
             SF.log("Validator validate");
             var returnValue = false;
             var self = this;
-            SF.ajax({
-                type: "POST",
+            $.ajax({
                 url: this.valOptions.controllerUrl,
                 async: false,
                 data: this.constructRequestData(),
@@ -229,7 +226,7 @@ SF.registerModule("Validator", function () {
             SF.log("PartialValidator constructRequestDataForSaving");
             var prefix = this.valOptions.prefix;
             var formChildren = $("#" + this.valOptions.parentDiv + " *, #" + SF.Keys.tabId + ", input:hidden[name=" + SF.Keys.antiForgeryToken + "]").add(SF.getInfoParams(prefix));
-            formChildren = formChildren.not(".sf-search-control *, #" + SF.Keys.reactive);
+            formChildren = formChildren.not(".sf-search-control *");
 
             var serializer = new SF.Serializer();
             serializer.add(formChildren.serialize());
@@ -240,7 +237,7 @@ SF.registerModule("Validator", function () {
 
             if (formChildren.filter(this.pf(SF.Keys.runtimeInfo)).length === 0) {
                 serializer.add(SF.compose(prefix, SF.Keys.runtimeInfo),
-                    new SF.RuntimeInfo(prefix).createValue(this.valOptions.type, '', 'n', ''));
+                    new SF.RuntimeInfo(prefix).createValue(this.valOptions.type, '', 'n'));
             }
 
             serializer.add(this.valOptions.requestExtraJsonData);
@@ -263,12 +260,10 @@ SF.registerModule("Validator", function () {
             SF.Notify.info(lang.signum.saving);
             var validatorResult = null;
             var self = this;
-            SF.ajax({
-                type: "POST",
+            $.ajax({
                 url: this.valOptions.controllerUrl,
                 async: false,
                 data: this.constructRequestDataForSaving(),
-                dataType: "JSON",
                 success: function (result) {
                     validatorResult = self.createValidatorResult(result);
                     self.showErrors(validatorResult.modelState);
@@ -284,10 +279,31 @@ SF.registerModule("Validator", function () {
 
         this.constructRequestDataForValidating = function () {
             SF.log("PartialValidator constructRequestDataForValidating");
-            var formChildren = SF.isEmpty(this.valOptions.parentDiv) ?
-                               $("form :input, #" + SF.Keys.tabId + ", input:hidden[name=" + SF.Keys.antiForgeryToken + "]") :
-                               $("#" + this.valOptions.parentDiv + " :input, #" + SF.Keys.tabId + ", input:hidden[name=" + SF.Keys.antiForgeryToken + "]");
-            formChildren = formChildren.not(".sf-search-control :input, #" + SF.Keys.reactive);
+
+            //Send main form to be able to construct a typecontext if EmbeddedEntity
+            var staticInfo = SF.StaticInfo(this.valOptions.prefix);
+            var isEmbedded = false;
+            if (staticInfo.find().length == 0 && !SF.isEmpty(this.valOptions.prefix)) { //If List => use parent
+                var lastPrefix = this.valOptions.prefix.substr(0, this.valOptions.prefix.lastIndexOf(SF.Keys.separator));
+                staticInfo = SF.StaticInfo(lastPrefix);
+            }
+            if (staticInfo.find().length > 0 && staticInfo.isEmbedded()) {
+                isEmbedded = true;
+            }
+
+            var formChildren = null;
+            if (isEmbedded) {
+                formChildren = $("form :input, #" + SF.Keys.tabId + ", input:hidden[name=" + SF.Keys.antiForgeryToken + "]");
+            }
+            if (!SF.isEmpty(this.valOptions.parentDiv)) {
+                if (formChildren == null) {
+                    formChildren = $("#" + this.valOptions.parentDiv + " :input, #" + SF.Keys.tabId + ", input:hidden[name=" + SF.Keys.antiForgeryToken + "]");
+                }
+                else {
+                    formChildren = formChildren.add($("#" + this.valOptions.parentDiv + " :input"));
+                }
+            }
+            formChildren = formChildren.not(".sf-search-control :input");
 
             var serializer = new SF.Serializer().add(formChildren.serialize());
 
@@ -300,17 +316,16 @@ SF.registerModule("Validator", function () {
 
                 if (SF.isEmpty(this.valOptions.type)) {
                     value = SF.isEmpty(info.runtimeType())
-                        ? info.createValue(SF.StaticInfo(this.valOptions.prefix).singleType(), info.id(), 'n', '')
+                        ? info.createValue(SF.StaticInfo(this.valOptions.prefix).singleType(), info.id(), 'n')
                         : infoField.val();
                 }
                 else {
                     if (infoField.length === 0) {
-                        value = info.createValue(this.valOptions.type, SF.isEmpty(!this.valOptions.id) ? this.valOptions.id : '', 'n', '');
+                        value = info.createValue(this.valOptions.type, SF.isEmpty(!this.valOptions.id) ? this.valOptions.id : '', 'n');
                     }
                     else {
                         var mixedVal = new SF.RuntimeInfo("Temp");
-                        var currTicks = ($('#' + SF.Keys.reactive).length > 0) ? new Date().getTime() : "";
-                        value = mixedVal.createValue(this.valOptions.type, this.valOptions.id, null, currTicks);
+                        value = mixedVal.createValue(this.valOptions.type, this.valOptions.id, null);
                     }
                 }
 
@@ -327,12 +342,10 @@ SF.registerModule("Validator", function () {
             SF.log("PartialValidator validate");
             var validatorResult = null;
             var self = this;
-            SF.ajax({
-                type: "POST",
+            $.ajax({
                 url: this.valOptions.controllerUrl,
                 async: false,
                 data: this.constructRequestDataForValidating(),
-                dataType: "json",
                 success: function (result) {
                     validatorResult = self.createValidatorResult(result);
                     self.showErrors(validatorResult.modelState);
@@ -344,7 +357,7 @@ SF.registerModule("Validator", function () {
 
     SF.PartialValidator.prototype = new SF.Validator();
 
-    SF.EntityIsValid = function (validationOptions, onSuccess) {
+    SF.EntityIsValid = function (validationOptions, onSuccess, sender) {
         SF.log("Validator EntityIsValid");
 
         SF.Notify.info(lang.signum.validating);
@@ -365,7 +378,12 @@ SF.registerModule("Validator", function () {
         if (isValid) {
             SF.Notify.clear();
             if (onSuccess != null) {
-                onSuccess();
+                if (typeof sender != "undefined") {
+                    onSuccess.call(sender);
+                }
+                else {
+                    onSuccess();
+                }
             }
         }
         else {

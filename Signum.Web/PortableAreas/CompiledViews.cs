@@ -28,7 +28,7 @@ namespace Signum.Web.PortableAreas
         }
 
 
-        public static void RegisterViews(Assembly assembly, string[] views)
+        public static void RegisterViews(Assembly assembly, params string[] views)
         {
             List<Type> viewsInArea = (from t in assembly.GetTypes()
                                       where t.IsSubclassOf(typeof(WebPageRenderingBase))

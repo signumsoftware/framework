@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Signum.Utilities;
+using System.Diagnostics;
+using System.Threading;
 
 namespace Signum.Test
 {
@@ -11,6 +13,20 @@ namespace Signum.Test
     public class StringDistanceTest
     {
         StringDistance d = new StringDistance();
+
+        [TestMethod]
+        public void Bla()
+        {
+            Lazy<string> val = new Lazy<string>(()=>"hola" + DateTime.Now.Ticks, LazyThreadSafetyMode.PublicationOnly);
+
+            val.ResetPublicationOnly(); //reset before initialized
+            var str1 = val.Value;
+            val.ResetPublicationOnly(); //reset after initialized
+
+            var str2 = val.Value;
+
+            Assert.AreNotEqual(str1, str2); 
+        }
 
         [TestMethod]
         public void LevenshteinDistance()

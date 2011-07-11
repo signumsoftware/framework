@@ -24,20 +24,13 @@ namespace Signum.Web
         public static MvcHtmlString BaseLineLabel(HtmlHelper helper, BaseLine baseLine, string idLabelFor)
         {
             return baseLine.LabelVisible && !baseLine.OnlyValue ?
-                           helper.Label(baseLine.Compose("lbl"), baseLine.LabelText ?? "", idLabelFor, "sf-label-line") :
-                           MvcHtmlString.Empty;
+                   helper.Label(baseLine.Compose("lbl"), baseLine.LabelText ?? "", idLabelFor, baseLine.LabelClass) :
+                   MvcHtmlString.Empty;
         }
 
         public static bool RequiresLoadAll(HtmlHelper helper, EntityBase eb)
         {
-            bool hasChanged = helper.GetChangeTicks(eb.ControlID) > 0;
-            
-            //To pre-load an entity in a Line, it has to have changed and also at least one of its properties
-            Dictionary<string, long> ticks = (Dictionary<string, long>)helper.ViewData[ViewDataKeys.ChangeTicks];
-            bool propertyHasChanged = ticks != null && ticks.Any(kvp => kvp.Value > 0 && kvp.Key.StartsWith(eb.ControlID) && kvp.Key != eb.ControlID);
-            
-            return (eb.IsNew == true) || 
-                   (eb.UntypedValue != null && hasChanged && propertyHasChanged);
+            return eb.IsNew == true;
         }
 
         public static MvcHtmlString RenderTypeContext(HtmlHelper helper, TypeContext typeContext, RenderMode mode, EntityBase line)
@@ -58,13 +51,8 @@ namespace Signum.Web
             else
             {
                 vdd = new ViewDataDictionary(tc);
-                helper.PropagateSFKeys(vdd);
             }
-
-
-            if (line.ReloadOnChange)
-                vdd[ViewDataKeys.Reactive] = true;
-
+            
             string partialViewName = line.PartialViewName;
             if (string.IsNullOrEmpty(partialViewName))
                 partialViewName = es.OnPartialViewName((ModifiableEntity)tc.UntypedValue);
@@ -200,6 +188,11 @@ namespace Signum.Web
         {
             Common.TaskSetImplementations(eb);
 
+            ConfigureEntityButtons(eb, entityType);
+        }
+
+        public static void ConfigureEntityButtons(EntityBase eb, Type entityType)
+        {
             if (eb.Implementations == null && Navigator.Manager.EntitySettings.ContainsKey(entityType))
             {
                 eb.Create = Navigator.IsCreable(entityType, false);

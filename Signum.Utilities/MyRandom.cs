@@ -12,8 +12,15 @@ namespace Signum.Utilities
 
         public static Random Current
         {
-            get { return random ?? (random = new Random()); }
+            get
+            {
+                if (random == null)
+                    random = new Random();
+                return random;
+            }
         }
+
+        public static object png { get; set; }
     }
 
     public static class RandomExtensions

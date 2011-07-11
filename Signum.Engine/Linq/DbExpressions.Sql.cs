@@ -55,6 +55,96 @@ namespace Signum.Engine.Linq
         ImplementedByAll,
         LiteReference,
         MList,
+        MListElement,
+    }
+
+    class Alias
+    {
+        public readonly string Name;  
+
+        Alias(string name)
+        {
+            this.Name = name;
+        }
+
+        public override string ToString()
+        {
+            return Name;
+        }
+
+        [ThreadStatic]
+        static AliasGenerator current;
+
+        public static Alias Raw(string name)
+        {
+            return new Alias(name);
+        }
+
+        public static Alias NextTableAlias(string tableName)
+        {
+            string abv = tableName.Any(char.IsUpper) ? new string(tableName.Where(c => char.IsUpper(c)).ToArray()) :
+                tableName.Any(a => a == '_') ? new string(tableName.Split(new[] { '_' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s[0]).ToArray()) : null;
+
+            if (string.IsNullOrEmpty(abv))
+                abv = tableName.Left(3, false);
+            else
+                abv = abv.ToLower();
+
+            return current.GetUniqueAlias(abv);
+        }
+
+        public static Alias CloneAlias(Alias alias)
+        {
+            return current.GetUniqueAlias(alias.Name + "b");
+        }
+
+        public static Alias NextSelectAlias()
+        {
+            return current.NextSelectAlias();
+        }
+
+        public static Alias GetUniqueAlias(string baseAlias)
+        {
+            return current.GetUniqueAlias(baseAlias);
+        }
+
+        public static IDisposable NewGenerator()
+        {
+            return current = new AliasGenerator { previous = current } ;
+        }
+
+        class AliasGenerator: IDisposable
+        {
+            public AliasGenerator previous;
+
+            HashSet<string> usedAliases = new HashSet<string>();
+
+            int selectAliasCount = 0;
+            public Alias NextSelectAlias()
+            {
+                return GetUniqueAlias("s" + (selectAliasCount++));
+            }
+
+            public Alias GetUniqueAlias(string baseAlias)
+            {
+                if (usedAliases.Add(baseAlias))
+                    return new Alias(baseAlias);
+
+                for (int i = 1; ; i++)
+                {
+                    string alias = baseAlias + i;
+
+                    if (usedAliases.Add(alias))
+                        return new Alias(alias);
+
+                }
+            }
+
+            public void Dispose()
+            {
+                current = previous;
+            }
+        }
     }
 
     internal abstract class DbExpression : Expression
@@ -82,7 +172,7 @@ namespace Signum.Engine.Linq
 
     internal abstract class SourceExpression : DbExpression
     {
-        public abstract string[] KnownAliases { get; }
+        public abstract Alias[] KnownAliases { get; }
 
         public SourceExpression(DbExpressionType nodeType)
             : base(nodeType, typeof(void))
@@ -92,9 +182,9 @@ namespace Signum.Engine.Linq
 
     internal abstract class SourceWithAliasExpression: SourceExpression
     {
-        public readonly string Alias;
+        public readonly Alias Alias;
 
-        public SourceWithAliasExpression(DbExpressionType nodeType, string alias)
+        public SourceWithAliasExpression(DbExpressionType nodeType, Alias alias)
             : base(nodeType)
         {
             this.Alias = alias;
@@ -109,12 +199,12 @@ namespace Signum.Engine.Linq
     {
         public readonly string Name;
 
-        public override string[] KnownAliases
+        public override Alias[] KnownAliases
         {
             get { return new[] { Alias }; }
         }
 
-        internal TableExpression(string alias, string name)
+        internal TableExpression(Alias alias, string name)
             : base(DbExpressionType.Table, alias)
         {
             this.Name = name;
@@ -131,10 +221,10 @@ namespace Signum.Engine.Linq
     /// </summary>
     internal class ColumnExpression : DbExpression, IEquatable<ColumnExpression>
     {
-        public readonly string Alias;
+        public readonly Alias Alias;
         public readonly string Name;
 
-        internal ColumnExpression(Type type, string alias, string name)
+        internal ColumnExpression(Type type, Alias alias, string name)
             : base(DbExpressionType.Column, type)
         {
             if (alias == null)
@@ -190,7 +280,7 @@ namespace Signum.Engine.Linq
                                    Expression.NiceToString();
         }
 
-        public ColumnExpression GetReference(string alias)
+        public ColumnExpression GetReference(Alias alias)
         {
             return new ColumnExpression(Expression.Type, alias, Name); 
         }
@@ -250,11 +340,13 @@ namespace Signum.Engine.Linq
     internal enum SelectRoles
     {
         Where = 1,
-        GroupBy = 2,
-        OrderBy = 4,
-        Select = 8,
-        Distinct = 16,
-        Top = 32
+        Aggregate = 2,
+        GroupBy = 4,
+ 	    Reverse = 8,
+        OrderBy = 16,
+        Select = 32,
+        Distinct = 64,
+        Top = 128
     }
     /// <summary>
     /// A custom expression node used to represent a SQL SELECT expression
@@ -268,17 +360,19 @@ namespace Signum.Engine.Linq
         public readonly ReadOnlyCollection<Expression> GroupBy;
         public readonly Expression Top;
         public readonly bool Distinct;
+        public readonly bool Reverse;
 
-        readonly string[] knownAliases; 
-        public override string[] KnownAliases
+        readonly Alias[] knownAliases;
+        public override Alias[] KnownAliases
         {
             get { return knownAliases; }
         }
 
-        internal SelectExpression(string alias, bool distinct, Expression top, IEnumerable<ColumnDeclaration> columns, SourceExpression from, Expression where, IEnumerable<OrderExpression> orderBy, IEnumerable<Expression> groupBy)
+        internal SelectExpression(Alias alias, bool distinct, bool reverse, Expression top, IEnumerable<ColumnDeclaration> columns, SourceExpression from, Expression where, IEnumerable<OrderExpression> orderBy, IEnumerable<Expression> groupBy)
             : base(DbExpressionType.Select, alias)
         {
             this.Distinct = distinct;
+            this.Reverse = reverse;
             this.Top = top;
             this.Columns = columns.ToReadOnly();
             this.From = from;
@@ -293,16 +387,27 @@ namespace Signum.Engine.Linq
             get 
             {
                 SelectRoles roles = (SelectRoles)0;
-                if (!Columns.All(cd => cd.Expression is ColumnExpression))
-                    roles |= SelectRoles.Select;
+
                 if (Where != null)
                     roles |= SelectRoles.Where;
+
                 if (GroupBy != null && GroupBy.Count > 0)
                     roles |= SelectRoles.GroupBy;
+                else if (Columns.Any(cd => AggregateFinder.HasAggregates(cd.Expression)))
+                    roles |= SelectRoles.Aggregate;
+
+ 				if (Reverse)
+                    roles |= SelectRoles.Reverse;
+
                 if (OrderBy != null && OrderBy.Count > 0)
                     roles |= SelectRoles.OrderBy;
+
+                if (!Columns.All(cd => cd.Expression is ColumnExpression))
+                    roles |= SelectRoles.Select;
+
                 if(Distinct)
                     roles |= SelectRoles.Distinct;
+                
                 if (Top != null)
                     roles |= SelectRoles.Top;
 
@@ -349,7 +454,7 @@ namespace Signum.Engine.Linq
         public readonly SourceExpression Right;
         public new readonly Expression Condition;
 
-        public override string[] KnownAliases
+        public override Alias[] KnownAliases
         {
             get { return Left.KnownAliases.Concat(Right.KnownAliases).ToArray(); }
         }
@@ -551,24 +656,89 @@ namespace Signum.Engine.Linq
         }
     }
 
+    internal static class ExpressionTools
+    {
+        public static Expression ToCondition(this IEnumerable<When> whens, Type returnType)
+        {
+            var @default = returnType.IsClass || returnType.IsNullable() ?
+                                Expression.Constant(null, returnType) :
+                                Convert(Expression.Constant(null, returnType.Nullify()), returnType);
+
+            var result = whens.Reverse().Aggregate(
+                @default, (acum, when) => Expression.Condition(when.Condition, Convert(when.Value, returnType), acum));
+
+            return result;
+        }
+
+        public static Expression Convert(Expression expression, Type returnType)
+        {
+            if (expression.Type == returnType)
+                return expression;
+
+            if (expression.Type.Nullify() == returnType)
+                return expression.Nullify();
+
+            if (expression.Type.UnNullify() == returnType)
+                return expression.UnNullify();
+
+            if (returnType.IsAssignableFrom(expression.Type) || expression.Type.IsAssignableFrom(returnType))
+                return Expression.Convert(expression, returnType);
+
+            throw new InvalidOperationException("Imposible to convert to {0} the expression: \r\n{1}"
+                .Formato(returnType.TypeName(), expression.NiceToString()));
+        }
+
+        public static Expression NotEqualsNulll(this Expression exp)
+        {
+            return Expression.NotEqual(exp.Nullify(), Expression.Constant(null, typeof(int?)));
+        }
+    }
+
     internal class CaseExpression : DbExpression
     {
         public readonly ReadOnlyCollection<When> Whens;
         public readonly Expression DefaultValue;
 
+        
         public CaseExpression(IEnumerable<When> whens, Expression defaultValue)
-            :base(DbExpressionType.Case, defaultValue.Type)
+            :base(DbExpressionType.Case, GetType(whens, defaultValue))
         {
-            if (whens.Any(w => w.Value.Type.UnNullify() != defaultValue.Type.UnNullify()))
+            if (whens.IsEmpty())
+                throw new ArgumentNullException("whens");
+
+            Type refType = this.Type.UnNullify();
+
+            if (whens.Any(w => w.Value.Type.UnNullify() != refType))
                 throw new ArgumentException("whens");
 
             this.Whens = whens.ToReadOnly();
             this.DefaultValue = defaultValue;
         }
 
+        static Type GetType(IEnumerable<When> whens, Expression defaultValue)
+        {
+            var types = whens.Select(w => w.Value.Type).ToList();
+            if (defaultValue != null)
+                types.Add(defaultValue.Type);
+
+            if (types.Any(a => a.IsNullable()))
+                types = types.Select(ReflectionExtensions.Nullify).ToList();
+
+            return types.Distinct().Single();
+        }
+
         public override string ToString()
         {
-            return "CASE\r\n{0}\r\n  ELSE {1}\r\nEND".Formato(Whens.ToString("\r\n"), DefaultValue.NiceToString());
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("CASE");
+            foreach (var w in Whens)
+                sb.AppendLine(w.ToString());
+
+            if(DefaultValue != null)
+                sb.AppendLine(DefaultValue.NiceToString()); 
+
+            sb.AppendLine("END");
+            return sb.ToString();
         }
     }
 
@@ -710,10 +880,10 @@ namespace Signum.Engine.Linq
 
     internal class AggregateSubqueryExpression : DbExpression
     {
-        public readonly string GroupByAlias;
+        public readonly Alias GroupByAlias;
         public readonly Expression AggregateInGroupSelect;
         public readonly ScalarExpression AggregateAsSubquery;
-        public AggregateSubqueryExpression(string groupByAlias, Expression aggregateInGroupSelect, ScalarExpression aggregateAsSubquery)
+        public AggregateSubqueryExpression(Alias groupByAlias, Expression aggregateInGroupSelect, ScalarExpression aggregateAsSubquery)
             : base(DbExpressionType.AggregateSubquery, aggregateAsSubquery.Type)
         {
             this.AggregateInGroupSelect = aggregateInGroupSelect;
@@ -780,10 +950,8 @@ namespace Signum.Engine.Linq
         public readonly UniqueFunction?  UniqueFunction;
         public readonly ProjectionToken Token; 
 
-        internal ProjectionExpression(SelectExpression source, Expression projector, UniqueFunction? uniqueFunction, ProjectionToken token)
-            : base(DbExpressionType.Projection,
-            uniqueFunction == null ? typeof(IQueryable<>).MakeGenericType(projector.Type) :
-            projector.Type)
+        internal ProjectionExpression(SelectExpression source, Expression projector, UniqueFunction? uniqueFunction, ProjectionToken token, Type resultType)
+            : base(DbExpressionType.Projection, resultType)
         {
             if (source == null)
                 throw new ArgumentNullException("source");
@@ -793,6 +961,10 @@ namespace Signum.Engine.Linq
 
             if (token == null)
                 throw new ArgumentNullException("token");
+
+            Type shouldImplement = uniqueFunction == null ? typeof(IEnumerable<>).MakeGenericType(projector.Type) : projector.Type;
+            if (!shouldImplement.IsAssignableFrom(resultType))
+                throw new InvalidOperationException("ProjectionType is {0} but should implement {1}".Formato(resultType.TypeName(), shouldImplement.TypeName()));  
 
             this.Source = source;
             this.Projector = projector;
@@ -875,12 +1047,12 @@ namespace Signum.Engine.Linq
 
     internal class UpdateExpression : CommandExpression
     {
-        public readonly Table Table;
+        public readonly ITable Table;
         public readonly ReadOnlyCollection<ColumnAssignment> Assigments; 
         public readonly SourceExpression Source;
         public readonly Expression Where;
 
-        public UpdateExpression(Table table, SourceExpression source, Expression where, IEnumerable<ColumnAssignment> assigments)
+        public UpdateExpression(ITable table, SourceExpression source, Expression where, IEnumerable<ColumnAssignment> assigments)
             :base(DbExpressionType.Update)
         {
             this.Table = table;

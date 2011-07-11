@@ -14,6 +14,7 @@ using Signum.Web.Properties;
 using Signum.Engine;
 using Signum.Utilities.DataStructures;
 using System.Web.Mvc;
+using Signum.Utilities.ExpressionTrees;
 #endregion
 
 namespace Signum.Web
@@ -30,10 +31,6 @@ namespace Signum.Web
         internal readonly PropertyPack PropertyPack;
         internal readonly PropertyRoute PropertyRoute; 
 
-        public abstract void AddOnFinish(Action action);
-
-        internal abstract void AddOnFinish(Action action, long ticks, string controlID);
-
         internal void AddChild(MappingContext context)
         {
             Debug.Assert(context.Parent == this && context.Next == null);
@@ -49,31 +46,15 @@ namespace Signum.Web
             }
         }
 
-        public abstract Dictionary<string, long> GetTicksDictionary();
-
         public IEnumerable<MappingContext> Children()
         {
             return FirstChild.FollowC(n => n.Next);
         }
 
-        public long? Ticks
-        {
-            get
-            {
-                if (Inputs.ContainsKey(TypeContext.Ticks))
-                    return Inputs[TypeContext.Ticks].ToLong();
-                else if (Inputs.ContainsKey(EntityBaseKeys.RuntimeInfo))
-                    return RuntimeInfo.FromFormValue(Inputs[EntityBaseKeys.RuntimeInfo]).TryCS(ri => ri.Ticks);
-                return null;
-            }
-        }
-
         public abstract ControllerContext ControllerContext { get; }
 
         public abstract object UntypedValue { get; }
-        public abstract Mapping UntypedMapping { get; }
 
-        public abstract MappingContext UntypedValidateMapping();
         public abstract MappingContext UntypedValidateGlobal();
 
         public string ControlID { get; private set; }
@@ -91,6 +72,11 @@ namespace Signum.Web
             get { return Root.GlobalInputs.GetOrThrow(ControlID, "'{0}' is not in the form"); }
         }
 
+        public bool Empty()
+        {
+            return !HasInput && Inputs.Count == 0;
+        }
+
         public abstract IDictionary<string, string> Inputs { get; }
 
         public List<string> Error
@@ -104,6 +90,7 @@ namespace Signum.Web
                     Root.GlobalErrors[ControlID] = value;
             }
         }
+
         public abstract IDictionary<string, List<string>> Errors { get; }
 
         public MappingContext(string controlID, PropertyPack propertyPack, PropertyRoute route)
@@ -113,9 +100,36 @@ namespace Signum.Web
             this.PropertyRoute = route; 
         }
 
-        internal abstract void ValidateInternal();
+        public bool Parse<V>(string property, out V value)
+        {
+            var mapping = Mapping.ForValue<V>();
 
-        public static ModifiableEntity FindSubentity(IdentifiableEntity entity, string prefix)
+            if (mapping == null)
+                throw new InvalidOperationException("No mapping for value {0}".Formato(typeof(V).TypeName()));
+
+            var sc = new SubContext<V>(TypeContextUtilities.Compose(this.ControlID, property), null, null, this);
+
+            value = mapping(sc);
+
+            return !sc.SupressChange;
+        }
+
+        public bool Parse<V>(out V value)
+        {
+            var mapping = Mapping.ForValue<V>();
+
+            if (mapping == null)
+                throw new InvalidOperationException("No mapping for value {0}".Formato(typeof(V).TypeName()));
+
+            var sc = new SubContext<V>(this.ControlID, null, null, this);
+
+            value = mapping(sc);
+
+            return !sc.SupressChange;
+        }
+
+
+        public static ModifiableEntity FindSubEntity(IdentifiableEntity entity, string prefix)
         {
             if (!prefix.HasText())
                 return entity;
@@ -214,13 +228,9 @@ namespace Signum.Web
             get { return Value; }
         }
 
-        public Mapping<T> Mapping { get; private set; }
-        public override Mapping UntypedMapping { get { return Mapping; } }
-
-        public MappingContext(string controlID, Mapping<T> mapping, PropertyPack propertyPack, PropertyRoute route)
+        public MappingContext(string controlID, PropertyPack propertyPack, PropertyRoute route)
             : base(controlID, propertyPack, route)
         {
-            this.Mapping = mapping;
         }
 
         internal bool SupressChange;
@@ -238,25 +248,20 @@ namespace Signum.Web
             return default(T);
         }
 
-        public T None(string errorKey, string error)
+        public T None(string property, string error)
         {
-            this.Errors.GetOrCreate(errorKey).Add(error);
+            this.Errors.GetOrCreate(property).Add(error);
             SupressChange = true;
             return default(T);
         }
 
-        public T ParentNone(string errorKey, string error)
+        public T ParentNone(string property, string error)
         {
-            this.Parent.Errors.GetOrCreate(errorKey).Add(error);
+            this.Parent.Errors.GetOrCreate(property).Add(error);
             SupressChange = true;
             return default(T);
         }
-
-        public bool Empty()
-        {
-            return !HasInput && Inputs.Count == 0;
-        }
-
+    
         public override MappingContext Parent
         {
             get { throw new NotImplementedException(); }
@@ -267,31 +272,13 @@ namespace Signum.Web
             get { throw new NotImplementedException(); }
         }
 
-        internal override void ValidateInternal()
-        {
-            Mapping.OnValidation(this);
-        }
-
-        public override  MappingContext UntypedValidateMapping()
-        {
-            return ValidateMapping();
-        }
-
         public override MappingContext UntypedValidateGlobal()
         {
             return ValidateGlobal();
         }
 
-        public  MappingContext<T> ValidateMapping()
-        {
-            Mapping.OnValidation(this);
-            return this;
-        }
-
         public MappingContext<T> ValidateGlobal()
         {
-            this.ValidateMapping();
-
             var globalErrors = CalculateGlobalErrors();
 
             //meter el resto en el diccionario
@@ -345,11 +332,8 @@ namespace Signum.Web
         IDictionary<string, List<string>> errors;
         public override IDictionary<string, List<string>> Errors { get { return errors; } }
 
-        // Ticks => ControlID, Action
-        SortedList<long, System.Tuple<string, Action>> actions = new SortedList<long, Tuple<string, Action>>();
-
-        public RootContext(string prefix, Mapping<T> mapping, SortedList<string, string> globalInputs, ControllerContext controllerContext) :
-            base(prefix, mapping, null, PropertyRoute.Root(typeof(T)))
+        public RootContext(string prefix, SortedList<string, string> globalInputs, ControllerContext controllerContext) :
+            base(prefix, null, PropertyRoute.Root(typeof(T)))
         {
             this.globalInputs = globalInputs;
             if (prefix.HasText())
@@ -363,33 +347,12 @@ namespace Signum.Web
                 this.errors = globalErrors;
             }
             this.controllerContext = controllerContext;
-        }
-
-        public void Finish()
-        {
-            foreach (var pair in actions.Values)
-                pair.Item2();
-        }
-
-        public override void AddOnFinish(Action action)
-        {
-            throw new InvalidOperationException();
-        }
-
-        internal override void AddOnFinish(Action action, long ticks, string controlID)
-        {
-            actions.GetOrCreate(ticks, () => new Tuple<string, Action>(controlID, action));
-        }
+        }  
 
         internal override MappingContext Next
         {
             get { throw new InvalidOperationException(); }
             set { throw new InvalidOperationException(); }
-        }
-
-        public override Dictionary<string, long> GetTicksDictionary()
-        {
-            return actions.ToDictionary(kvp => kvp.Value.Item1, kvp => kvp.Key);
         }
     }
 
@@ -429,28 +392,13 @@ namespace Signum.Web
         ContextualDictionary<List<string>> errors;
         public override IDictionary<string, List<string>> Errors { get { return errors; } }
 
-        public override void AddOnFinish(Action action)
-        {
-            root.AddOnFinish(action, Ticks.Value, ControlID);
-        }
-
-        internal override void AddOnFinish(Action action, long ticks, string controlID)
-        {
-            throw new InvalidOperationException();
-        }
-
-        public SubContext(string controlID, Mapping<T> mapping, PropertyPack propertyPack, PropertyRoute route, MappingContext parent) :
-            base(controlID, mapping, propertyPack, route)
+        public SubContext(string controlID, PropertyPack propertyPack, PropertyRoute route, MappingContext parent) :
+            base(controlID, propertyPack, route)
         {
             this.parent = parent;
             this.root = parent.Root;
             this.inputs = new ContextualSortedList<string>(parent.Inputs, controlID);
             this.errors = new ContextualDictionary<List<string>>(root.GlobalErrors, controlID);
-        } 
-
-        public override Dictionary<string, long> GetTicksDictionary()
-        {
-            throw new InvalidOperationException();
         }
     }
 

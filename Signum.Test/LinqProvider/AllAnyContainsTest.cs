@@ -103,7 +103,7 @@ namespace Signum.Test.LinqProvider
             var lites = Database.Query<ArtistDN>().Where(a => a.Dead).Select(a => a.ToLite<IIdentifiable>()).ToArray()
                 .Concat(Database.Query<BandDN>().Where(a => a.Name.StartsWith("Smash")).Select(a => a.ToLite<IIdentifiable>())).ToArray();
 
-            var albums = (from a in Database.Query<NoteDN>()
+            var albums = (from a in Database.Query<NoteWithDateDN>()
                           where lites.Contains(a.Target.ToLite())
                           select a.ToLite()).ToList();
         }
@@ -114,7 +114,7 @@ namespace Signum.Test.LinqProvider
             var entities = Database.Query<ArtistDN>().Where(a => a.Dead).Select(a => (IIdentifiable)a).ToArray()
                 .Concat(Database.Query<BandDN>().Where(a => a.Name.StartsWith("Smash")).Select(a => (IIdentifiable)a)).ToArray();
 
-            var albums = (from a in Database.Query<NoteDN>()
+            var albums = (from a in Database.Query<NoteWithDateDN>()
                           where entities.Contains(a.Target)
                           select a.ToLite()).ToList();
         }
@@ -155,6 +155,12 @@ namespace Signum.Test.LinqProvider
         public void AllSql()
         {
             BandDN sigur = Database.Query<BandDN>().Single(b => b.Members.All(a => a.Sex == Sex.Male));
+        }
+
+        [TestMethod]
+        public void RetrieveBand()
+        {
+            BandDN sigur = Database.Query<BandDN>().Single(b => b.Name.StartsWith("Sigur"));
         }
     }
 }
