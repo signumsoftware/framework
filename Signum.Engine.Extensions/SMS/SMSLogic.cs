@@ -14,6 +14,7 @@ using Signum.Engine.Operations;
 using Signum.Engine.Processes;
 using Signum.Entities.Processes;
 using Signum.Engine.Extensions.SMS;
+using System.Linq.Expressions;
 
 namespace Signum.Engine.SMS
 {
@@ -69,6 +70,24 @@ namespace Signum.Engine.SMS
             }
         }
 
+        //static Dictionary<Type, LambdaExpression> GetPhoneNumber = new Dictionary<Type, LambdaExpression>();
+
+        //public static void RegisterPhoneNumberProvider<T>(Expression<Func<T, string>> func)
+        //{
+        //    GetPhoneNumber.Add(typeof(T), func);
+        //}
+
+        //public string GetNumber(IdentifiableEntity entity)
+        //{
+
+        //}
+
+        //static GenericInvoker giGetNumber = GenericInvoker.Create(
+        //public string GetNumber<T>(T entity)
+        //{
+        //    return ((Expression<Func<T, string>>)GetPhoneNumber[typeof(T)]).Invoke(entity);
+        //}
+        
         #region processes
 
         public static void StartProcesses(SchemaBuilder sb, DynamicQueryManager dqm)
