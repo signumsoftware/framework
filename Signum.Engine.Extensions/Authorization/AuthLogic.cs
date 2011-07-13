@@ -236,6 +236,12 @@ namespace Signum.Engine.Authorization
             return roles.Value.CompilationOrderGroups().SelectMany(gr => gr.OrderBy(a => a.ToStr));
         }
 
+        internal static DirectedGraph<Lite<RoleDN>> RolesGraph()
+        {
+            return roles.Value;
+        }
+
+
         public static int Compare(Lite<RoleDN> role1, Lite<RoleDN> role2)
         {
             if (roles.Value.IndirectlyRelatedTo(role1).Contains(role2))

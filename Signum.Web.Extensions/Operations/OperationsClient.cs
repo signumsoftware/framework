@@ -12,6 +12,7 @@ using System.Web;
 using Signum.Entities.Basics;
 using Signum.Web.Extensions.Properties;
 using Signum.Entities.Reflection;
+using Signum.Engine.Maps;
 #endregion
 
 namespace Signum.Web.Operations
@@ -38,6 +39,21 @@ namespace Signum.Web.Operations
 
             if (contextualMenuInSearchWindow)
                 OperationsContextualItemsHelper.Start();
+        }
+
+        public static class Audit
+        {
+            public static List<string> SowSaveAndOperations()
+            {
+                return (from t in Schema.Current.Tables.Values
+                        where !t.Type.IsEmbeddedEntity()
+                        let es = Navigator.Manager.EntitySettings.TryGetC(t.Type)
+                        where es != null && es.OnShowSave() && OperationLogic.GetAllOperationInfos(t.Type)
+                                                                .Any(a => a.OperationType == OperationType.ConstructorFrom ||
+                                                                        a.OperationType == OperationType.Delete ||
+                                                                        a.OperationType == OperationType.Execute)
+                        select "Type {0} has registered operations but ShowSave = true".Formato(t.Type.Name)).ToList();
+            }
         }
     }
 

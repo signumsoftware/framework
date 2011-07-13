@@ -72,7 +72,7 @@ namespace Signum.Engine.Authorization
             return cache.GetAllowed(role, property);
         }
 
-        public static PropertyAllowed GetPropertyAllowed(PropertyRoute property)
+        public static PropertyAllowed GetPropertyAllowed(this PropertyRoute property)
         {
             return cache.GetAllowed(property);
         }

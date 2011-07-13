@@ -83,6 +83,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Audit\Audit.cs" />
     <Compile Include="Authorization\EmailModel.cs" />
     <Compile Include="Authorization\PasswordValidIntervalDN.cs" />
     <Compile Include="Authorization\ResetPasswordRequestDN.cs" />
