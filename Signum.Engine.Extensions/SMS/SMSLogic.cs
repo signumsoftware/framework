@@ -20,7 +20,7 @@ namespace Signum.Engine.SMS
 {
     public static class SMSLogic
     {
-        static Func<SMSMessageDN, string> SMSSendAction;
+        static Func<SMSMessageDN, string> SMSSendAndGetTicketAction;
         static Func<SMSTemplateDN, List<string>, List<string>> SMSMultipleSendAction;
         static Func<SMSMessageDN, SendState> SMSUpdateStatusAction;
 
@@ -70,23 +70,24 @@ namespace Signum.Engine.SMS
             }
         }
 
-        //static Dictionary<Type, LambdaExpression> GetPhoneNumber = new Dictionary<Type, LambdaExpression>();
+        static Dictionary<Type, LambdaExpression> phoneNumberProviders = new Dictionary<Type, LambdaExpression>();
 
-        //public static void RegisterPhoneNumberProvider<T>(Expression<Func<T, string>> func)
-        //{
-        //    GetPhoneNumber.Add(typeof(T), func);
-        //}
+        public static void RegisterPhoneNumberProvider<T>(Expression<Func<T, string>> func)
+        {
+            phoneNumberProviders.Add(typeof(T), func);
+        }
 
-        //public string GetNumber(IdentifiableEntity entity)
-        //{
+        public string GetPhoneNumber(IdentifiableEntity entity)
+        {
+            return giGetPhoneNumber.GetInvoker(entity.GetType())(entity);
+        }
 
-        //}
-
-        //static GenericInvoker giGetNumber = GenericInvoker.Create(
-        //public string GetNumber<T>(T entity)
-        //{
-        //    return ((Expression<Func<T, string>>)GetPhoneNumber[typeof(T)]).Invoke(entity);
-        //}
+        static GenericInvoker<Func<IdentifiableEntity, string>> giGetPhoneNumber = 
+            new GenericInvoker<Func<IdentifiableEntity,string>>(ie => GetPhoneNumber<IdentifiableEntity>(ie));
+        public static string GetPhoneNumber<T>(T entity)
+        {
+            return ((Expression<Func<T, string>>)phoneNumberProviders[typeof(T)]).Invoke(entity);
+        }
         
         #region processes
 
@@ -104,14 +105,14 @@ namespace Signum.Engine.SMS
                 ProcessLogic.Register(SMSMessageProcess.Send, new SMSMessageSendProcessAlgortihm());
                 ProcessLogic.Register(SMSMessageProcess.UpdateStatus, new SMSMessageUpdateStatusProcessAlgortihm());
 
-                new BasicConstructFromMany<ISMSDestinationOwner, ProcessExecutionDN>(SMSMessageOperations.Send)
+                new BasicConstructFromMany<IdentifiableEntity, ProcessExecutionDN>(SMSMessageOperations.Send)
                 {
-                    Constructor = (messages, args) => SendMessages(args.GetArg<SMSTemplateDN>(0), messages.RetrieveFromListOfLite())
+                    Construct = (messages, args) => SendMessages(args.GetArg<SMSTemplateDN>(0), messages.RetrieveFromListOfLite())
                 }.Register();
 
                 new BasicConstructFromMany<SMSMessageDN, ProcessExecutionDN>(SMSMessageOperations.UpdateStatus) 
                 {
-                    Constructor = (messages, _) => UpdateMessages(messages.RetrieveFromListOfLite())
+                    Construct = (messages, _) => UpdateMessages(messages.RetrieveFromListOfLite())
                 }.Register();
 
                 //TODO: 777 luis - hay que registrar correctamente el proceso para todos los mensajes del sistema
@@ -154,7 +155,7 @@ namespace Signum.Engine.SMS
         }
 
         public static ProcessExecutionDN SendMessages<T>(SMSTemplateDN template, List<T> recipientList)
-            where T : class, ISMSDestinationOwner
+            where T : class, IIdentifiable
         {
             SMSSendPackageDN package = new SMSSendPackageDN
             {
@@ -163,7 +164,7 @@ namespace Signum.Engine.SMS
 
             var packLite = package.ToLite();
 
-            recipientList.Select(r => template.CreateSMSMessage(r.DestinationNumber, packLite)).SaveList();
+            recipientList.Select(e => template.CreateSMSMessage(SMSLogic.GetPhoneNumber(e), packLite)).SaveList();
 
             var process = ProcessLogic.Create(SMSMessageProcess.Send, package);
 
@@ -176,7 +177,7 @@ namespace Signum.Engine.SMS
 
         public static void RegisterSMSSendAction(Func<SMSMessageDN, string> action)
         {
-            SMSSendAction = action;
+            SMSSendAndGetTicketAction = action;
         }
 
         public static void RegisterSMSMultipleSendAction(Func<SMSTemplateDN, List<string>, List<string>> action)
@@ -191,15 +192,15 @@ namespace Signum.Engine.SMS
 
         public static void SendSMS(SMSMessageDN message)
         {
-            if (SMSSendAction == null)
+            if (SMSSendAndGetTicketAction == null)
                 throw new InvalidOperationException("SMSSendAction was not established");
-            SendSMS(message, SMSSendAction);
+            SendSMS(message, SMSSendAndGetTicketAction);
         }
 
         //Allows concurrent custom sendProviders for one application
-        public static void SendSMS(SMSMessageDN message, Func<SMSMessageDN, string> send)
+        public static void SendSMS(SMSMessageDN message, Func<SMSMessageDN, string> sendAndGetTicket)
         {
-            message.MessageID = send(message);
+            message.MessageID = sendAndGetTicket(message);
             message.SendDate = DateTime.Now.TrimToSeconds();
             message.State = SMSMessageState.Sent;
             message.Save();
@@ -252,9 +253,10 @@ namespace Signum.Engine.SMS
         {
             GetState = m => m.State;
 
-            new ConstructFrom<SMSTemplateDN>(SMSMessageOperations.Create, SMSMessageState.Created)
+            new ConstructFrom<SMSTemplateDN>(SMSMessageOperations.Create)
             {
                 CanConstruct = t => !t.Active ? "The template must be Active to allow constructing SMS messages" : null,
+                ToState = SMSMessageState.Created,
                 Construct = (t, args) =>
                 {
                     var message = t.CreateSMSMessage();
@@ -263,16 +265,18 @@ namespace Signum.Engine.SMS
                 }
             }.Register();
 
-            new Goto(SMSMessageOperations.Send, SMSMessageState.Sent)
+            new Execute(SMSMessageOperations.Send)
             {
                 FromStates = new[] { SMSMessageState.Created },
+                ToState = SMSMessageState.Sent,
                 Execute = (t, args) => { SMSLogic.SendSMS(t, args.TryGetArgC<Func<SMSMessageDN, string>>(0)); }
             }.Register();
 
-            new Goto(SMSMessageOperations.UpdateStatus, SMSMessageState.Sent)
+            new Execute(SMSMessageOperations.UpdateStatus)
             {
                 FromStates = new[] { SMSMessageState.Sent },
-                Execute = (t, _) => { SMSLogic.UpdateMessageStatus(t, _.TryGetArgC<Func<SMSMessageDN, SendState>>(0)); }
+                ToState = SMSMessageState.Sent,
+                Execute = (t, args) => { SMSLogic.UpdateMessageStatus(t, args.TryGetArgC<Func<SMSMessageDN, SendState>>(0)); }
             }.Register();
         }
     }

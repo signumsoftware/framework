@@ -138,7 +138,6 @@
     <Compile Include="Scheduler\ScheduledTaskDN.cs" />
     <Compile Include="Scheduler\ScheduleRule.cs" />
     <Compile Include="Scheduler\Task.cs" />
-    <Compile Include="SMS\ISMSDestinationOwner.cs" />
     <Compile Include="SMS\SMSMessage.cs" />
     <Compile Include="SMS\SMSMessageTemplate.cs" />
     <Compile Include="SMS\SMSPackages.cs" />
