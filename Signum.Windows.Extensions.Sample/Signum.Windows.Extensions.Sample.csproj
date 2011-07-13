@@ -14,10 +14,14 @@
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
-    <SccProjectName>SAK</SccProjectName>
-    <SccLocalPath>SAK</SccLocalPath>
-    <SccAuxPath>SAK</SccAuxPath>
-    <SccProvider>SAK</SccProvider>
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccProvider>
+    </SccProvider>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <OldToolsVersion>4.0</OldToolsVersion>
@@ -94,8 +98,8 @@
     <Compile Include="Controls\Label.xaml.cs">
       <DependentUpon>Label.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\Note.xaml.cs">
-      <DependentUpon>Note.xaml</DependentUpon>
+    <Compile Include="Controls\NoteWithDate.xaml.cs">
+      <DependentUpon>NoteWithDate.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\PersonalAward.xaml.cs">
       <DependentUpon>PersonalAward.xaml</DependentUpon>
@@ -214,7 +218,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Controls\Note.xaml">
+    <Page Include="Controls\NoteWithDate.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
       <Generator>MSBuild:Compile</Generator>

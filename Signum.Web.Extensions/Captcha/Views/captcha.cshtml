@@ -2,10 +2,9 @@
 <script type="text/javascript">
     function solicitarCaptcha() {
         $('#ajax-loader').show();
-        SF.ajax({
-            type: "POST",
+        $.ajax({
             url: "Captcha.ashx/Refresh",
-            data: "",
+            data: {},
             async: false,
             success:
                    function (msg) {

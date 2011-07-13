@@ -17,7 +17,7 @@ namespace Signum.Web.Combine
 
         public override MvcHtmlString CombinedScript(HtmlHelper html, string[] files, ScriptType scriptType)
         {
-            if (files.Empty())
+            if (files.IsEmpty())
                 return null;
 
             var key = GetKey(files, scriptType); 
@@ -33,7 +33,7 @@ namespace Signum.Web.Combine
 
         public override string[] GerUrlsFor(string[] files, ScriptType scriptType)
         {
-            if (files.Empty())
+            if (files.IsEmpty())
                 return null;
 
             string key = GetKey(files, scriptType);

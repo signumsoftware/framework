@@ -45,11 +45,11 @@ namespace Signum.Engine.Extensions.Chart
                                                 uq.GroupResults,
                                             }).ToDynamic();
 
-                sb.Schema.EntityEvents<UserChartDN>().Retrieved += new EntityEventHandler<UserChartDN>(UserQueryLogic_Retrieved);
+                sb.Schema.EntityEvents<UserChartDN>().Retrieved += new RetrievedEventHandler<UserChartDN>(UserQueryLogic_Retrieved);
             }
         }
 
-        static void UserQueryLogic_Retrieved(UserChartDN userQuery, bool isRoot)
+        static void UserQueryLogic_Retrieved(UserChartDN userQuery)
         {
             object queryName = QueryLogic.ToQueryName(userQuery.Query.Key);
 
@@ -105,16 +105,18 @@ namespace Signum.Engine.Extensions.Chart
 
             if (dq.GetType().FollowC(t => t.BaseType).Any(t => t.IsInstantiationOf(typeof(DynamicQuery<>))))
             {
-                return (ResultTable)miExecuteChart.GetInvoker(dq.GetType().GetGenericArguments()[0])(request, dq);
+                return miExecuteChart.GetInvoker(dq.GetType().GetGenericArguments()[0])(request, dq);
             }
 
             throw new NotImplementedException(); 
         }
 
-        static GenericInvoker giGroupByE = GenericInvoker.Create(() => Enumerable.GroupBy<string, int, double>((IEnumerable<string>)null, (Func<string, int>)null, (Func<int, IEnumerable<string>, double>)null)); 
+        static GenericInvoker<Func<IEnumerable<object>, Delegate, Delegate, IEnumerable<object>>> giGroupByE =
+            new GenericInvoker<Func<IEnumerable<object>, Delegate, Delegate, IEnumerable<object>>>(
+                (col, ks, rs) => (IEnumerable<object>)Enumerable.GroupBy<string, int, double>((IEnumerable<string>)col, (Func<string, int>)ks, (Func<int, IEnumerable<string>, double>)rs)); 
         static IEnumerable<object> GroupBy(this IEnumerable<object> collection, LambdaExpression keySelector, LambdaExpression resultSelector)
         {
-            return (IEnumerable<object>)giGroupByE.GetInvoker(typeof(object), keySelector.Body.Type, typeof(object))(collection, keySelector.Compile(), resultSelector.Compile()); 
+            return giGroupByE.GetInvoker(typeof(object), keySelector.Body.Type, typeof(object))(collection, keySelector.Compile(), resultSelector.Compile()); 
         }
 
         static MethodInfo miGroupByQ = ReflectionTools.GetMethodInfo(() => Queryable.GroupBy<string, int, double>((IQueryable<string>)null, (Expression<Func<string, int>>)null, (Expression<Func<int, IEnumerable<string>, double>>)null)).GetGenericMethodDefinition();
@@ -126,22 +128,19 @@ namespace Signum.Engine.Extensions.Chart
 
         static LambdaExpression BuildKeySelector(IDynamicInfo dinamicInfo, ChartTokenDN[] groupTokens)
         {
-            ParameterExpression p = Expression.Parameter(typeof(object), "e");
-            var cast = Expression.Convert(p, dinamicInfo.TupleType);
-
             return Expression.Lambda(
-                TupleReflection.TupleChainConstructor(
-                      groupTokens.Select(a => TupleReflection.TupleChainProperty(cast, dinamicInfo.TokenIndices[a.Token]))), p);
+                TupleReflection.TupleChainConstructor(groupTokens.Select(a => a.Token.BuildExpression(dinamicInfo.Context))),
+                dinamicInfo.Context.Parameter);
         }
 
-        static LambdaExpression BuildResultSelector(ChartTokenDN[] chartTokens, ChartTokenDN[] groupTokens, IDynamicInfo dinamicInfo, Type keyTupleType, out Type resultSelectorTypleType)
+        static LambdaExpression BuildResultSelector(ChartTokenDN[] chartTokens, ChartTokenDN[] groupTokens, IDynamicInfo dynamicInfo, Type keyTupleType, out Type resultSelectorTypleType)
         {
             ParameterExpression pk = Expression.Parameter(keyTupleType, "key");
             ParameterExpression pg = Expression.Parameter(typeof(IEnumerable<object>), "e");
 
             var list = chartTokens.Select(ct => ct.Aggregate == null ?
                 TupleReflection.TupleChainProperty(pk, groupTokens.IndexOf(ct)) :
-                BuildAggregateExpression(pg, ct.Aggregate.Value, dinamicInfo.TupleType, dinamicInfo.TokenIndices[ct.Token])).ToArray();
+                BuildAggregateExpression(pg, ct.Aggregate.Value, Expression.Lambda(ct.Token.BuildExpression(dynamicInfo.Context), dynamicInfo.Context.Parameter))).ToArray();
 
             var constructor = TupleReflection.TupleChainConstructor(list);
 
@@ -150,15 +149,15 @@ namespace Signum.Engine.Extensions.Chart
             return Expression.Lambda(Expression.Convert(constructor, typeof(object)), pk, pg);
         }
 
-        static Expression BuildAggregateExpression(Expression collection, AggregateFunction aggregate, Type tupleType, int index)
+        static Expression BuildAggregateExpression(Expression collection, AggregateFunction aggregate, LambdaExpression lambda)
         {
             Type groupType = collection.Type.GetGenericInterfaces(typeof(IEnumerable<>)).Single("expression should be a IEnumerable").GetGenericArguments()[0];
 
             if (aggregate == AggregateFunction.Count)
                 return Expression.Call(typeof(Enumerable), "Count", new[] { groupType }, new[] { collection });
 
-            ParameterExpression a = Expression.Parameter(groupType, "a");
-            LambdaExpression lambda = Expression.Lambda(TupleReflection.TupleChainProperty(Expression.Convert(a, tupleType), index), a);
+            //ParameterExpression a = Expression.Parameter(groupType, "a");
+            //LambdaExpression lambda = Expression.Lambda(TupleReflection.TupleChainProperty(Expression.Convert(a, tupleType), index), a);
 
             if (aggregate == AggregateFunction.Min || aggregate == AggregateFunction.Max)
                 return Expression.Call(typeof(Enumerable), aggregate.ToString(), new[] { groupType, lambda.Body.Type }, new[] { collection, lambda });
@@ -166,7 +165,7 @@ namespace Signum.Engine.Extensions.Chart
                 return Expression.Call(typeof(Enumerable), aggregate.ToString(), new[] { groupType }, new[] { collection, lambda });
         }
 
-        static GenericInvoker miExecuteChart = GenericInvoker.Create(() => ExecuteChart<int>(null, null));
+        static GenericInvoker<Func<ChartRequest, IDynamicQuery, ResultTable>> miExecuteChart = new GenericInvoker<Func<ChartRequest, IDynamicQuery, ResultTable>>((req, dq) => ExecuteChart<int>(req, (DynamicQuery<int>)dq));
         static ResultTable ExecuteChart<T>(ChartRequest request, DynamicQuery<T> dq)
         {
             ChartTokenDN[] chartTokens = request.ChartTokens().ToArray(); 
@@ -178,16 +177,16 @@ namespace Signum.Engine.Extensions.Chart
             IDynamicInfo collection;
             if (dq is AutoDynamicQuery<T>)
             {
-                collection = ((AutoDynamicQuery<T>)dq).Query.Where(request.Filters).SelectDynamic(columns, null);
+                collection = ((AutoDynamicQuery<T>)dq).Query.ToDQueryable(dq.GetColumnDescriptions()).SelectMany(request.Multiplications).Where(request.Filters).Select(columns);
             }
             else
             {
-                collection = ((ManualDynamicQuery<T>)dq).Execute(new QueryRequest 
-                { 
-                    Columns = columns, 
-                    Filters = request.Filters, 
-                    QueryName = request.QueryName 
-                });
+                collection = ((ManualDynamicQuery<T>)dq).Execute(new QueryRequest
+                {
+                    Columns = columns,
+                    Filters = request.Filters,
+                    QueryName = request.QueryName
+                }, dq.GetColumnDescriptions());
             }
 
             if (!request.GroupResults)

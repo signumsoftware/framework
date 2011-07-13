@@ -13,10 +13,14 @@
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <SccProjectName>SAK</SccProjectName>
-    <SccLocalPath>SAK</SccLocalPath>
-    <SccAuxPath>SAK</SccAuxPath>
-    <SccProvider>SAK</SccProvider>
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccProvider>
+    </SccProvider>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <OldToolsVersion>4.0</OldToolsVersion>
@@ -57,6 +61,8 @@
   <ItemGroup>
     <Compile Include="Common.cs" />
     <Compile Include="ControlPanelTests.cs" />
+    <Compile Include="OperationsCtxMenuTests.cs" />
+    <Compile Include="WidgetsTests.cs" />
     <Compile Include="UserQueriesTests.cs" />
     <Compile Include="OperationsTests.cs" />
     <Compile Include="ReportsTests.cs" />
@@ -129,7 +135,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="otSearchControlEntityCtxMenu.orderedtest">
+    <None Include="otoperations_ctxmenu.orderedtest">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="otWidgets.orderedtest">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="otControlPanel.orderedtest">

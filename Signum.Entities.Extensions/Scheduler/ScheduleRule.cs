@@ -19,24 +19,7 @@ namespace Signum.Entities.Scheduler
     [Serializable]
     public abstract class ScheduleRuleDayDN : Entity, IScheduleRuleDN
     {
-        int hour;
-        [NumberBetweenValidator(0, 23), Format("00")]
-        public int Hour
-        {
-            get { return hour; }
-            set { SetToStr(ref hour, value, () => Hour); }
-        }
-
-        int minute;
-        [NumberBetweenValidator(0, 59), Format("00")]
-        public int Minute
-        {
-            get { return minute; }
-            set { SetToStr(ref minute, value, () => Minute); }
-        }
-
         DateTime startingOn = TimeZoneManager.Now.Date;
-        [DaysPrecissionValidator]
         public DateTime StartingOn
         {
             get { return startingOn; }
@@ -47,7 +30,7 @@ namespace Signum.Entities.Scheduler
 
         protected DateTime BaseNext()
         {
-            DateTime result = DateTimeExtensions.Max(TimeZoneManager.Now.Date, startingOn).AddHours(hour).AddMinutes(minute);
+            DateTime result = DateTimeExtensions.Max(TimeZoneManager.Now.Date, startingOn.Date).Add(startingOn.TimeOfDay); 
 
             if (result < TimeZoneManager.Now)
                 result = result.AddDays(1);
@@ -57,7 +40,7 @@ namespace Signum.Entities.Scheduler
 
         public override string ToString()
         {
-            return "{0:00}:{1:00}".Formato(Hour, Minute);
+            return startingOn.ToUserInterface().ToShortTimeString();
         }
     }
 

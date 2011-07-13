@@ -189,7 +189,7 @@ namespace Signum.Entities.Chart
 
         public static bool IsDateOnly(QueryToken token)
         {
-            if (token is MonthStartQueryToken || token is DateQueryToken)
+            if (token is MonthStartToken || token is DateToken)
                 return true;
 
             PropertyRoute route = token.GetPropertyRoute();

@@ -1,0 +1,8 @@
+﻿@using Signum.Test
+
+@using (var nc = Html.TypeContext<NoteWithDateDN>()) 
+{
+	@Html.EntityLine(nc, n => n.Target, el => el.ReadOnly = true)
+    @Html.ValueLine(nc, n => n.Text, vl => vl.ValueLineType = ValueLineType.TextArea)
+	@Html.ValueLine(nc, n => n.CreationTime)
+}

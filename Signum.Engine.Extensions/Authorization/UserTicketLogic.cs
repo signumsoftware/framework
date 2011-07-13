@@ -40,7 +40,7 @@ namespace Signum.Engine.Authorization
             }
         }
 
-        static void UserTicketLogic_Saving(UserDN ident, bool isRoot)
+        static void UserTicketLogic_Saving(UserDN ident)
         {
             Transaction.PreRealCommit += () =>
             {
@@ -79,7 +79,7 @@ namespace Signum.Engine.Authorization
         public static UserDN UpdateTicket(string device, ref string ticket)
         {
             using (Transaction tr = new Transaction())
-            {
+            { 
                 Tuple<int, string> pair = UserTicketDN.ParseTicket(ticket);
 
                 UserDN result = Database.Retrieve<UserDN>(pair.Item1);
@@ -112,7 +112,7 @@ namespace Signum.Engine.Authorization
 
             List<Lite<UserTicketDN>> tooMuch = user.Tickets().OrderByDescending(t => t.ConnectionDate).Select(t => t.ToLite()).ToList().Skip(MaxTicketsPerUser).ToList();
 
-            if (tooMuch.Empty()) return result;
+            if (tooMuch.IsEmpty()) return result;
 
             Database.DeleteList<UserTicketDN>(tooMuch);
 

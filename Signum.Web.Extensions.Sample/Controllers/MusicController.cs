@@ -37,9 +37,11 @@ namespace Signum.Web.Extensions.Sample
             AlbumFromBandModel model = new AlbumFromBandModel(band.ToLite());
 
             ViewData[ViewDataKeys.WriteSFInfo] = true;
-            ViewData[ViewDataKeys.OnOk] = JsValidator.EntityIsValid(prefix, new JsOperationExecutor(
-                new JsOperationOptions { Prefix = prefix, ControllerUrl = RouteHelper.New().Action("CreateAlbumFromBandOnOk", "Music") })
-                .OperationAjax(prefix, JsOpSuccess.DefaultDispatcher)).ToJS();
+            ViewData[ViewDataKeys.OnOk] = new JsOperationExecutor(new JsOperationOptions 
+                { 
+                    Prefix = prefix, 
+                    ControllerUrl = RouteHelper.New().Action("CreateAlbumFromBandOnOk", "Music") 
+                }).validateAndAjax().ToJS();
             
             return Navigator.PopupView(this, model, prefix);
         }

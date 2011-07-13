@@ -87,7 +87,7 @@ namespace Signum.Engine.Authorization
             return cache.GetAllowed(permissionKey);
         }
 
-        internal static bool IsAuthorizedFor(this Enum permissionKey, Lite<RoleDN> role)
+        public static bool IsAuthorized(this Enum permissionKey, Lite<RoleDN> role)
         {
             return cache.GetAllowed(role, permissionKey);
         }

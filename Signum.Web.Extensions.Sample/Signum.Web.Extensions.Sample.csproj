@@ -14,10 +14,15 @@
     <AssemblyName>Signum.Web.Extensions.Sample</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <MvcBuildViews>true</MvcBuildViews>
-    <SccProjectName>SAK</SccProjectName>
-    <SccLocalPath>SAK</SccLocalPath>
-    <SccAuxPath>SAK</SccAuxPath>
-    <SccProvider>SAK</SccProvider>
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccProvider>
+    </SccProvider>
+    <UseIISExpress>false</UseIISExpress>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -92,21 +97,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Content\cupertino\images\ui-bg_diagonals-thick_90_eeeeee_40x40.png" />
-    <Content Include="Content\cupertino\images\ui-bg_flat_15_cd0a0a_40x100.png" />
-    <Content Include="Content\cupertino\images\ui-bg_glass_100_e4f1fb_1x400.png" />
-    <Content Include="Content\cupertino\images\ui-bg_glass_50_3baae3_1x400.png" />
-    <Content Include="Content\cupertino\images\ui-bg_glass_80_d7ebf9_1x400.png" />
-    <Content Include="Content\cupertino\images\ui-bg_highlight-hard_100_f2f5f7_1x100.png" />
-    <Content Include="Content\cupertino\images\ui-bg_highlight-hard_70_000000_1x100.png" />
-    <Content Include="Content\cupertino\images\ui-bg_highlight-soft_100_deedf7_1x100.png" />
-    <Content Include="Content\cupertino\images\ui-bg_highlight-soft_25_ffef8f_1x100.png" />
-    <Content Include="Content\cupertino\images\ui-icons_2694e8_256x240.png" />
-    <Content Include="Content\cupertino\images\ui-icons_2e83ff_256x240.png" />
-    <Content Include="Content\cupertino\images\ui-icons_3d80b3_256x240.png" />
-    <Content Include="Content\cupertino\images\ui-icons_72a7cf_256x240.png" />
-    <Content Include="Content\cupertino\images\ui-icons_ffffff_256x240.png" />
-    <Content Include="Content\cupertino\jquery-ui-1.8.10.custom.css" />
     <Content Include="Content\site.css" />
     <Content Include="Content\smoothness\images\ui-bg_flat_0_aaaaaa_40x100.png" />
     <Content Include="Content\smoothness\images\ui-bg_flat_75_ffffff_40x100.png" />
@@ -121,13 +111,11 @@
     <Content Include="Content\smoothness\images\ui-icons_454545_256x240.png" />
     <Content Include="Content\smoothness\images\ui-icons_888888_256x240.png" />
     <Content Include="Content\smoothness\images\ui-icons_cd0a0a_256x240.png" />
-    <Content Include="Content\smoothness\jquery-ui-1.8.9.custom.css" />
+    <Content Include="Content\smoothness\jquery-ui-1.8.14.css" />
     <Content Include="Global.asax" />
     <Content Include="Images\calendar.png" />
-    <Content Include="Scripts\jquery-1.5.2.min.js" />
-    <Content Include="Scripts\jquery-ui-1.8.9.custom.min.js" />
-    <Content Include="Scripts\jquery-ui.js" />
-    <Content Include="Scripts\jquery-ui.min.js" />
+    <Content Include="Scripts\jquery-1.6.2.min.js" />
+    <Content Include="Scripts\jquery-ui-1.8.14.min.js" />
     <Content Include="Scripts\jquery.unobtrusive-ajax.js" />
     <Content Include="Scripts\jquery.unobtrusive-ajax.min.js" />
     <Content Include="Scripts\jquery.validate-vsdoc.js" />
@@ -154,7 +142,6 @@
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\Shared\LogOnUserControl.cshtml" />
     <Content Include="Views\Shared\Menu.cshtml" />
-    <Content Include="Views\Shared\WidgetView.cshtml" />
     <Content Include="Views\Music\AlbumFromBandModel.cshtml" />
     <Content Include="Views\Music\BandDetail.cshtml" />
     <Content Include="Views\Music\BandRepeater.cshtml" />
@@ -200,6 +187,7 @@
     <Content Include="Scripts\menu.js" />
     <Content Include="Scripts\widget.js" />
     <Content Include="ServerSample.svc" />
+    <Content Include="Views\Music\NoteWithDate.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Framework\Signum.Engine\Signum.Engine.csproj">

@@ -31,7 +31,6 @@ namespace Signum.Web.AuthAdmin
             {
                 Navigator.RegisterArea(typeof(AuthAdminClient));
 
-
                 if (Navigator.Manager.EntitySettings.ContainsKey(typeof(UserDN)))
                     Navigator.EntitySettings<UserDN>().PartialViewName = _ => ViewPrefix.Formato("User");
                 else
@@ -44,42 +43,37 @@ namespace Signum.Web.AuthAdmin
 
                 if (types)
                 {
-                    Register<TypeRulePack, TypeAllowedRule, TypeDN, TypeAllowed, TypeDN>("types", a => a.Resource, "Resource", false);
-
-                    Navigator.EmbeddedEntitySettings<TypeRulePack>().MappingDefault
-                        .GetProperty(m => m.Rules, rul =>
-                        ((EntityMapping<TypeAllowedRule>)((MListDictionaryMapping<TypeAllowedRule, TypeDN>)rul).ElementMapping)
-                                .GetProperty(a => a.Allowed, m => m.GetValue = ctx => ParseTypeAllowed(ctx.Inputs, null)));
+                    Register<TypeRulePack, TypeAllowedRule, TypeDN, TypeAllowed, TypeDN>("types", a => a.Resource, 
+                        ctx=> ParseTypeAllowed(ctx.Inputs, null), "Resource", false);
                 }
 
                 if (properties)
-                    Register<PropertyRulePack, PropertyAllowedRule, PropertyDN, PropertyAllowed, string>("properties", a => a.Resource.Path, "Resource_Path", true);
+                    Register<PropertyRulePack, PropertyAllowedRule, PropertyDN, PropertyAllowed, string>("properties", a => a.Resource.Path,
+                        Mapping.New<PropertyAllowed>(), "Resource_Path", true);
 
                 if (queries)
                 {
                     Navigator.Manager.EntitySettings.Add(typeof(QueryDN), new EntitySettings<QueryDN>(EntityType.Default));
-                    Register<QueryRulePack, QueryAllowedRule, QueryDN, bool, string>("queries", a => a.Resource.Key, "Resource_Key", true);
+                    Register<QueryRulePack, QueryAllowedRule, QueryDN, bool, string>("queries", a => a.Resource.Key,
+                        Mapping.New<bool>(), "Resource_Key", true);
                 }
 
                 if (operations)
-                    Register<OperationRulePack, OperationAllowedRule, OperationDN, bool, OperationDN>("operations", a => a.Resource, "Resource", true);
+                    Register<OperationRulePack, OperationAllowedRule, OperationDN, bool, OperationDN>("operations", a => a.Resource,
+                        Mapping.New<bool>(), "Resource", true);
 
                 if (permissions)
-                    Register<PermissionRulePack, PermissionAllowedRule, PermissionDN, bool, PermissionDN>("permissions", a => a.Resource, "Resource", false);
+                    Register<PermissionRulePack, PermissionAllowedRule, PermissionDN, bool, PermissionDN>("permissions", a => a.Resource,
+                        Mapping.New<bool>(), "Resource", false);
 
                 if (facadeMethods)
-                    Register<FacadeMethodRulePack, FacadeMethodAllowedRule, FacadeMethodDN, bool, string>("facadeMethods", a => a.Resource.ToString(), "Resource_Key", false);
+                    Register<FacadeMethodRulePack, FacadeMethodAllowedRule, FacadeMethodDN, bool, string>("facadeMethods", a => a.Resource.ToString(),
+                        Mapping.New<bool>(), "Resource_Key", false);
 
                 if (entityGroups)
                 {
-                    Register<EntityGroupRulePack, EntityGroupAllowedRule, EntityGroupDN, EntityGroupAllowedDN, EntityGroupDN>("entityGroups", a => a.Resource, "Resource", false);
-
-                    Navigator.EmbeddedEntitySettings<EntityGroupRulePack>().MappingDefault
-                        .GetProperty(m => m.Rules, rul =>
-                        ((EntityMapping<EntityGroupAllowedRule>)((MListDictionaryMapping<EntityGroupAllowedRule, EntityGroupDN>)rul).ElementMapping)
-                                .GetProperty(a => a.Allowed, m => m.GetValue = ctx =>
-                                    new EntityGroupAllowedDN(ParseTypeAllowed(ctx.Parent.Inputs, "In_"), ParseTypeAllowed(ctx.Parent.Inputs, "Out_"))
-                                ));
+                    Register<EntityGroupRulePack, EntityGroupAllowedRule, EntityGroupDN, EntityGroupAllowedDN, EntityGroupDN>("entityGroups", a => a.Resource,
+                        ctx =>new EntityGroupAllowedDN(ParseTypeAllowed(ctx.Parent.Inputs, "In_"), ParseTypeAllowed(ctx.Parent.Inputs, "Out_")), "Resource", false);
                 }
             }
         }
@@ -87,13 +81,13 @@ namespace Signum.Web.AuthAdmin
         public static TypeAllowed ParseTypeAllowed(IDictionary<string, string> dic, string inOut)
         {
             return TypeAllowedExtensions.Create(
-                ValueMapping.ParseHtmlBool(dic[inOut + "Create"]),
-                ValueMapping.ParseHtmlBool(dic[inOut + "Modify"]),
-                ValueMapping.ParseHtmlBool(dic[inOut + "Read"]),
-                ValueMapping.ParseHtmlBool(dic[inOut + "None"]));
+                Mapping.ParseHtmlBool(dic[inOut + "Create"]),
+                Mapping.ParseHtmlBool(dic[inOut + "Modify"]),
+                Mapping.ParseHtmlBool(dic[inOut + "Read"]),
+                Mapping.ParseHtmlBool(dic[inOut + "None"]));
         }
 
-        static void Register<T, AR, R, A, K>(string partialViewName, Func<AR, K> getKey, string getKeyRoute, bool embedded)
+        static void Register<T, AR, R, A, K>(string partialViewName, Func<AR, K> getKey,Mapping<A> allowedMapping,string getKeyRoute, bool embedded)
             where T : BaseRulePack<AR>
             where AR: AllowedRule<R, A>, new()
             where R : IdentifiableEntity
@@ -112,9 +106,8 @@ namespace Signum.Web.AuthAdmin
                     .SetProperty(m => m.Rules,
                         new MListDictionaryMapping<AR, K>(getKey, getKeyRoute)
                         {
-                            ElementMapping = new EntityMapping<AR>(false)
-                                    .SetProperty(p => p.Allowed, new ValueMapping<A>(), null)
-                        }, null)
+                            ElementMapping = new EntityMapping<AR>(false).SetProperty(p => p.Allowed, allowedMapping)
+                        })
             });
 
             ButtonBarEntityHelper.RegisterEntityButtons<T>((ControllerContext controllerContext, T entity, string viewName, string prefix) =>

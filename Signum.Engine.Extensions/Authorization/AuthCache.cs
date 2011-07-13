@@ -11,6 +11,7 @@ using System.Linq.Expressions;
 using System.Xml.Linq;
 using System.IO;
 using System.Data.SqlClient;
+using System.Threading;
 
 namespace Signum.Entities.Authorization
 {
@@ -44,12 +45,8 @@ namespace Signum.Entities.Authorization
         where AR : AllowedRule<R, A>, new()
         where R : IdentifiableEntity
     {
-  
-        Dictionary<Lite<RoleDN>, RoleAllowedCache> _runtimeRules;
-        Dictionary<Lite<RoleDN>, RoleAllowedCache> RuntimeRules
-        {
-            get { return Sync.Initialize(ref _runtimeRules, () => NewCache()); }
-        }
+
+        readonly Lazy<Dictionary<Lite<RoleDN>, RoleAllowedCache>> runtimeRules; 
 
          
         Func<R, K> ToKey;
@@ -59,6 +56,8 @@ namespace Signum.Entities.Authorization
 
         public AuthCache(SchemaBuilder sb, Func<R, K> toKey, Func<K, R> toEntity, DefaultBehaviour<A> max, DefaultBehaviour<A> min)
         {
+            runtimeRules = new Lazy<Dictionary<Lite<RoleDN>, RoleAllowedCache>>(this.NewCache, LazyThreadSafetyMode.PublicationOnly);
+
             this.ToKey = toKey;
             this.ToEntity = toEntity;
             this.Max = max;
@@ -85,19 +84,19 @@ namespace Signum.Entities.Authorization
 
         void Schema_InitializingCache()
         {
-            _runtimeRules = NewCache();
+            runtimeRules.Load();
         }
 
         void InvalidateCache()
         {
-            _runtimeRules = null; 
+            runtimeRules.ResetPublicationOnly();
         }
 
         DefaultRule IManualAuth<K, A>.GetDefaultRule(Lite<RoleDN> role)
         {
             var allowed = Database.Query<RT>().Where(a => a.Resource == null && a.Role == role).Select(a=>a.Allowed).ToList();
 
-            return allowed.Empty() || allowed[0].Equals(Max.BaseAllowed) ? DefaultRule.Max : DefaultRule.Min; 
+            return allowed.IsEmpty() || allowed[0].Equals(Max.BaseAllowed) ? DefaultRule.Max : DefaultRule.Min; 
         }
 
         void IManualAuth<K, A>.SetDefaultRule(Lite<RoleDN> role, DefaultRule behaviour)
@@ -202,7 +201,7 @@ namespace Signum.Entities.Authorization
             {
                 var behaviour = GetBehaviour(role);
                 var related = AuthLogic.RelatedTo(role);
-                if (related.Empty())
+                if (related.IsEmpty())
                     return behaviour.BaseAllowed;
                 else
                     return behaviour.MergeAllowed(related.Select(r => GetAllowed(r)));
@@ -240,16 +239,16 @@ namespace Signum.Entities.Authorization
             }
         }
 
-        void Schema_Saving(RT rule, bool isRoot)
+        void Schema_Saving(RT rule)
         {
             Transaction.RealCommit += () => InvalidateCache();
         }
 
         internal void GetRules(BaseRulePack<AR> rules, IEnumerable<R> resources)
         {
-            RoleAllowedCache cache = RuntimeRules[rules.Role];
+            RoleAllowedCache cache = runtimeRules.Value[rules.Role];
 
-            rules.SubRoles = AuthLogic.RelatedTo(rules.Role).ToList();
+            rules.SubRoles = AuthLogic.RelatedTo(rules.Role).ToMList();
             rules.DefaultRule = GetDefaultRule(rules.Role);
             rules.Rules = (from r in resources
                            let k = ToKey(r)
@@ -281,9 +280,9 @@ namespace Signum.Entities.Authorization
             InvalidateCache();
         }
 
-        private DefaultRule GetDefaultRule(Lite<RoleDN> role)
+        public DefaultRule GetDefaultRule(Lite<RoleDN> role)
         {
-            return RuntimeRules[role].GetDefaultRule(Max);
+            return runtimeRules.Value[role].GetDefaultRule(Max);
         }
 
         internal A GetAllowed(K key)
@@ -291,17 +290,17 @@ namespace Signum.Entities.Authorization
             if (!AuthLogic.IsEnabled)
                 return Max.BaseAllowed;
 
-            return RuntimeRules[RoleDN.Current.ToLite()].GetAllowed(key);
+            return runtimeRules.Value[RoleDN.Current.ToLite()].GetAllowed(key);
         }
 
         internal A GetAllowed(Lite<RoleDN> role, K key)
         {
-            return RuntimeRules[role].GetAllowed(key);
+            return runtimeRules.Value[role].GetAllowed(key);
         }
       
         internal DefaultDictionary<K, A> GetDefaultDictionary()
         {
-            return RuntimeRules[RoleDN.Current.ToLite()].DefaultDictionary();
+            return runtimeRules.Value[RoleDN.Current.ToLite()].DefaultDictionary();
         }
 
         public class RoleAllowedCache
@@ -319,7 +318,7 @@ namespace Signum.Entities.Authorization
                 A defaultAllowed;
                 Dictionary<K, A> tmpRules; 
 
-                if(baseCaches.Empty())
+                if(baseCaches.IsEmpty())
                 {
                     defaultAllowed = behaviour.BaseAllowed;
 
@@ -368,7 +367,7 @@ namespace Signum.Entities.Authorization
 
             public A GetAllowedBase(K k)
             {
-                return baseCaches.Empty() ? rules.DefaultAllowed :
+                return baseCaches.IsEmpty() ? rules.DefaultAllowed :
                        behaviour.MergeAllowed(baseCaches.Select(b => b.GetAllowed(k)));
             }
 

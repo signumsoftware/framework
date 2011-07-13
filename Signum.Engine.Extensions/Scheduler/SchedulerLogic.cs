@@ -116,9 +116,7 @@ namespace Signum.Engine.Scheduler
                  {
                      Entity = st.ToLite(),
                      st.Id,
-                     st.StartingOn,
-                     st.Hour,
-                     st.Minute,                     
+                     st.StartingOn                  
                  }).ToDynamic();
 
 
@@ -129,8 +127,6 @@ namespace Signum.Engine.Scheduler
                      Entity = st.ToLite(),
                      st.Id,
                      st.StartingOn,
-                     st.Hour,
-                     st.Minute,
                      st.Monday,
                      st.Wednesday,
                      st.Tuesday,                 
@@ -151,9 +147,6 @@ namespace Signum.Engine.Scheduler
                   st.Id,
                   st.StartingOn,
                   st.DayOfTheWeek,
-                  st.Hour,
-                  st.Minute,
-                  
               }).ToDynamic();
 
 
@@ -167,7 +160,7 @@ namespace Signum.Engine.Scheduler
             ReloadPlan();
         }
 
-        static void Schema_Saving(ScheduledTaskDN task, bool isRoot)
+        static void Schema_Saving(ScheduledTaskDN task)
         {
             if (!isSafeSave && task.Modified.Value)
             {

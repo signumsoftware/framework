@@ -20,6 +20,7 @@ using Signum.Windows.DynamicQuery;
 using Signum.Utilities.DataStructures;
 using System.Reflection;
 using Signum.Utilities.Reflection;
+using System.Collections.Specialized;
 
 namespace Signum.Windows.Chart
 {
@@ -38,6 +39,7 @@ namespace Signum.Windows.Chart
 
         public ResultTable resultTable;
         public QueryDescription Description;
+        public QuerySettings Settings { get; private set; }
         public Type EntityType;
 
         ChartRendererBase chartRenderer; 
@@ -82,7 +84,12 @@ namespace Signum.Windows.Chart
                     Value = f.Value
                 }));
 
+            ((INotifyCollectionChanged)filterBuilder.Filters).CollectionChanged += Filters_CollectionChanged;
+            Request.ChartRequestChanged += Request_ChartRequestChanged;
+   
+
             Description = Navigator.Manager.GetQueryDescription(Request.QueryName);
+            Settings = Navigator.GetQuerySettings(Request.QueryName);
             var entityColumn = Description.Columns.SingleOrDefault(a => a.IsEntity);
             EntityType = Reflector.ExtractLite(entityColumn.Type);
 
@@ -90,6 +97,16 @@ namespace Signum.Windows.Chart
             qtbFilters.SubTokensEvent += new Func<QueryToken, QueryToken[]>(qtbFilters_SubTokensEvent);
 
             SetTitle(); 
+        }
+
+        void Request_ChartRequestChanged()
+        {
+            UpdateMultiplyMessage();
+        }
+
+        void Filters_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            UpdateMultiplyMessage();
         }
 
         void SetTitle()
@@ -104,6 +121,14 @@ namespace Signum.Windows.Chart
                 niceQueryName = "- " + niceQueryName;
 
             tbQueryName.Text = niceQueryName;
+        }
+
+        public void UpdateMultiplyMessage()
+        {
+            string message = CollectionElementToken.MultipliedMessage(Request.Multiplications, EntityType);
+
+            tbMultiplications.Text = message;
+            brMultiplications.Visibility = message.HasText() ? Visibility.Visible : Visibility.Collapsed;
         }
 
         QueryToken[] qtbFilters_SubTokensEvent(QueryToken arg)
@@ -131,8 +156,6 @@ namespace Signum.Windows.Chart
         { 
             UpdateFilters();
             var request = Request;
-
-
 
             if (HasErrors())
                 return;
@@ -217,7 +240,7 @@ namespace Signum.Windows.Chart
             }
             catch (ChartNullException ex)
             {
-                ChartRequest cr = (ChartRequest)DataContext;
+                ChartRequest cr = Request;
 
                 ChartTokenDN ct = cr.GetToken(ex.ChartTokenName);
 
@@ -239,7 +262,7 @@ namespace Signum.Windows.Chart
         {
             if (queryToken is IntervalQueryToken)
             {
-                var filters = (IEnumerable<FilterOption>)miGetIntervalFilters.GetInvoker(queryToken.Type.GetGenericArguments())(queryToken.Parent, p);
+                var filters = miGetIntervalFilters.GetInvoker(queryToken.Type.GetGenericArguments())(queryToken.Parent, p);
 
                 return filters.ToArray();
             }
@@ -247,7 +270,8 @@ namespace Signum.Windows.Chart
                 return new[] { new FilterOption(queryToken.FullKey(), p) };
         }
 
-        static GenericInvoker miGetIntervalFilters = GenericInvoker.Create(() => GetIntervalFilters<int>(null, new NullableInterval<int>()));
+        static GenericInvoker<Func<QueryToken, object, IEnumerable<FilterOption>>> miGetIntervalFilters = new GenericInvoker<Func<QueryToken, object, IEnumerable<FilterOption>>>(
+            (qt, obj) => GetIntervalFilters<int>(qt, (NullableInterval<int>)obj));
         static IEnumerable<FilterOption> GetIntervalFilters<T>(QueryToken queryToken, NullableInterval<T> interval)
             where T: struct, IComparable<T>, IEquatable<T>
         {
@@ -339,7 +363,7 @@ namespace Signum.Windows.Chart
         DataTemplate CreateDataTemplate(ResultColumn c)
         {
             Binding b = new Binding("[{0}]".Formato(c.Index)) { Mode = BindingMode.OneTime };
-            DataTemplate dt = QuerySettings.GetFormatter(c.Column)(b);
+            DataTemplate dt = Settings.GetFormatter(c.Column)(b);
             return dt;
         }
 

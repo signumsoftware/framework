@@ -49,8 +49,8 @@ namespace Signum.Entities.Authorization
             internal set { Set(ref role, value, () => Role); }
         }
 
-        List<Lite<RoleDN>> subRoles;
-        public List<Lite<RoleDN>> SubRoles
+        MList<Lite<RoleDN>> subRoles;
+        public MList<Lite<RoleDN>> SubRoles
         {
             get { return subRoles; }
             set { Set(ref subRoles, value, () => SubRoles); }
@@ -58,7 +58,7 @@ namespace Signum.Entities.Authorization
 
         public string DefaultLabel
         {
-            get { return subRoles == null || subRoles.Empty() ? "Value" : "of " + subRoles.CommaAnd(); }
+            get { return subRoles == null || subRoles.IsEmpty() ? "Value" : "of " + subRoles.CommaAnd(); }
         }
 
         DefaultRule defaultRule;

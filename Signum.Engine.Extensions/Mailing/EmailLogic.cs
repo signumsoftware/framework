@@ -122,7 +122,7 @@ namespace Signum.Engine.Mailing
         #region database management
         static void Schema_Initializing()
         {
-            List<EmailTemplateDN> dbTemplates = Administrator.UnsafeRetrieveAll<EmailTemplateDN>();
+            List<EmailTemplateDN> dbTemplates = Database.RetrieveAll<EmailTemplateDN>();
 
             templateToDN = EnumerableExtensions.JoinStrict(
                 dbTemplates, templates.Keys, t => t.FullClassName, t => t.FullName,
@@ -187,7 +187,7 @@ namespace Signum.Engine.Mailing
 
                 OperationLogic.Register(new BasicConstructFromMany<EmailMessageDN, ProcessExecutionDN>(EmailOperations.ReSendEmails)
                 {
-                    Constructor = (messages, args) => ProcessLogic.Create(EmailProcesses.SendEmails, messages)
+                    Construct = (messages, args) => ProcessLogic.Create(EmailProcesses.SendEmails, messages)
                 });
 
                 dqm[typeof(EmailPackageDN)] = (from e in Database.Query<EmailPackageDN>()
@@ -456,7 +456,7 @@ namespace Signum.Engine.Mailing
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<SMTPConfigurationDN>();
-                sb.Schema.EntityEvents<SMTPConfigurationDN>().Saving += new EntityEventHandler<SMTPConfigurationDN>(EmailClientSettingsLogic_Saving);
+                sb.Schema.EntityEvents<SMTPConfigurationDN>().Saving += new SavingEventHandler<SMTPConfigurationDN>(EmailClientSettingsLogic_Saving);
 
                 dqm[typeof(SMTPConfigurationDN)] = (from s in Database.Query<SMTPConfigurationDN>()
                                                     select new
@@ -498,7 +498,7 @@ namespace Signum.Engine.Mailing
             }
         }
 
-        static void EmailClientSettingsLogic_Saving(SMTPConfigurationDN ident, bool isRoot)
+        static void EmailClientSettingsLogic_Saving(SMTPConfigurationDN ident)
         {
             if (ident.Modified.Value)
                 Transaction.RealCommit += () => smtpConfigurations = null;

@@ -25,9 +25,9 @@ namespace Signum.Web.Selenium
         {
             Process seleniumServerProcess = new Process();
             seleniumServerProcess.StartInfo.FileName = "java";
-            if (Explorer == WebExplorer.Firefox && System.IO.Directory.Exists("D:\\Signum\\Selenium"))
+            if (Explorer == WebExplorer.Firefox && System.IO.Directory.Exists("D:\\Selenium"))
                 seleniumServerProcess.StartInfo.Arguments =
-                    "-jar c:/selenium/selenium-server.jar -firefoxProfileTemplate D:\\Signum\\Selenium -timeout 3600";
+                    "-jar c:/selenium/selenium-server.jar -firefoxProfileTemplate D:\\Selenium -timeout 3600";
             else
                 seleniumServerProcess.StartInfo.Arguments =
                     "-jar c:/selenium/selenium-server.jar -timeout 3600";
@@ -191,20 +191,34 @@ namespace Signum.Web.Selenium
             selenium.Click(EntityMenuOptionLocator(menuId, optionId));
         }
 
+        public static bool EntityMenuOptionEnabled(this ISelenium selenium, string menuId, string optionId)
+        {
+            string locator = EntityMenuOptionLocator(menuId, optionId);
+            Assert.IsTrue(selenium.IsElementPresent(locator));
+            return !selenium.IsElementPresent("{0}.sf-disabled".Formato(locator));
+        }
+
         public static string ValidationSummarySelector(string prefix)
         {
             return "jq=#{0}sfGlobalValidationSummary".Formato(prefix);
         }
 
-        public static bool FormHasNErrors(this ISelenium selenium, int numberOfErrors)
+        public static bool FormHasNErrors(this ISelenium selenium, int? numberOfErrors)
         {
             return FormHasNErrors(selenium, numberOfErrors, "");
         }
 
-        public static bool FormHasNErrors(this ISelenium selenium, int numberOfErrors, string prefix)
+        public static bool FormHasNErrors(this ISelenium selenium, int? numberOfErrors, string prefix)
         {
-            return selenium.IsElementPresent("{0} > ul > li:nth-child({1})".Formato(ValidationSummarySelector(prefix), numberOfErrors)) &&
-                   !selenium.IsElementPresent("{0} > ul > li:nth-child({1})".Formato(ValidationSummarySelector(prefix), numberOfErrors + 1));
+            if (numberOfErrors.HasValue)
+            {
+                return selenium.IsElementPresent("{0} > ul > li:nth-child({1})".Formato(ValidationSummarySelector(prefix), numberOfErrors)) &&
+                       !selenium.IsElementPresent("{0} > ul > li:nth-child({1})".Formato(ValidationSummarySelector(prefix), numberOfErrors + 1));
+            }
+            else
+            {
+                return selenium.IsElementPresent("{0} > ul > li".Formato(ValidationSummarySelector(prefix)));
+            }
         }
 
         public static bool FormElementHasError(this ISelenium selenium, string elementId)

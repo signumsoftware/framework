@@ -44,7 +44,7 @@ namespace Signum.Test.Extensions
             }
         }
 
-        internal static void Dirty()
+        public static void Dirty()
         {
             started = false;
         }
@@ -56,7 +56,7 @@ namespace Signum.Test.Extensions
             DynamicQueryManager dqm = new DynamicQueryManager();
             ConnectionScope.Default = new Connection(connectionString, sb.Schema, dqm);
 
-            sb.Settings.OverrideTypeAttributes<IUserRelatedDN>(new ImplementedByAttribute());
+            sb.Settings.OverrideFieldAttributes((UserDN u) => u.Related, new ImplementedByAttribute());
             sb.Settings.OverrideFieldAttributes((ControlPanelDN cp) => cp.Related, new ImplementedByAttribute(typeof(UserDN), typeof(RoleDN)));
             sb.Settings.OverrideFieldAttributes((UserQueryDN uq) => uq.Related, new ImplementedByAttribute(typeof(UserDN), typeof(RoleDN)));
             sb.Settings.OverrideFieldAttributes((UserChartDN uq) => uq.Related, new ImplementedByAttribute(typeof(UserDN), typeof(RoleDN)));
@@ -90,6 +90,11 @@ namespace Signum.Test.Extensions
                 AllowsNew = false,
                 CanExecute = a => a.LastAward != null ? "Artist cannot have already an award" : null,
                 Execute = (a,para) => a.LastAward = new PersonalAwardDN() { Category = "Best Artist", Year = DateTime.Now.Year, Result = AwardResult.Won }
+            });
+
+            OperationLogic.Register(new BasicDelete<AlbumDN>(AlbumOperation.Delete)
+            {
+                Delete = (album, _) => album.Delete()
             });
 
             EntityGroupLogic.Register<LabelDN>(MusicGroups.JapanEntities, l => l.Country.Name.StartsWith(Signum.Test.Starter.Japan) || l.Owner != null && l.Owner.Entity.Country.Name.StartsWith(Signum.Test.Starter.Japan));

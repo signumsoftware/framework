@@ -111,7 +111,7 @@ namespace Signum.Engine.Files
             };
         }
 
-        static void FilePath_PreSaving(FilePathDN fp, bool isRoot, ref bool graphModified)
+        static void FilePath_PreSaving(FilePathDN fp, ref bool graphModified)
         {
             if (fp.IsNew && !unsafeMode)
             {
@@ -180,7 +180,7 @@ namespace Signum.Engine.Files
 
         public static byte[] GetByteArray(FilePathDN fp)
         {
-            return File.ReadAllBytes(fp.FullPhysicalPath);
+            return fp.BinaryFile ?? File.ReadAllBytes(fp.FullPhysicalPath);
         }
     }
 

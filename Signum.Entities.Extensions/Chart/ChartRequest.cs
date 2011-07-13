@@ -12,6 +12,7 @@ using System.ComponentModel;
 using Signum.Utilities.Reflection;
 using Signum.Entities.Basics;
 using Signum.Entities.Reports;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Chart
 {
@@ -199,7 +200,7 @@ namespace Signum.Entities.Chart
                         var ft = QueryUtils.TryGetFilterType(ct.Token.Type);
 
                         if (ft != FilterType.Number && ft != FilterType.DecimalNumber)
-                            return "{0} is not compatible with {1}".Formato(ct.Aggregate.NiceToString(), ft.NiceToString());
+                            return "{0} is not compatible with {1}".Formato(ct.Aggregate.NiceToString(), ft != null ? ft.NiceToString() : ct.Token.Type.TypeName());
                     }
                 }
                 else
@@ -319,6 +320,17 @@ namespace Signum.Entities.Chart
             if (SecondValue != null)
                 yield return SecondValue;
         }
+
+        public List<CollectionElementToken> Multiplications
+        {
+            get
+            {
+                HashSet<QueryToken> allTokens = ChartTokens().Select(a => a.Token)
+                    .Concat(Filters.Select(a => a.Token)).ToHashSet();
+
+                return CollectionElementToken.GetElements(allTokens);
+            }
+        }
     }
     
     [Serializable]
@@ -365,5 +377,7 @@ namespace Signum.Entities.Chart
         {
             return displayName;
         }
+
+        
     }
 }

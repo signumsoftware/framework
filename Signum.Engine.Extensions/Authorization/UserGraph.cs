@@ -18,29 +18,33 @@ namespace Signum.Engine.Authorization
         {
             GetState = u => u.State;
 
-            new Construct(UserOperation.Create, UserState.New)
+            new Construct(UserOperation.Create)
             {
+                ToState = UserState.New,
                 Construct = args => new UserDN { State = UserState.New }
             }.Register();
 
-            new Goto(UserOperation.SaveNew, UserState.Created)
+            new Execute(UserOperation.SaveNew)
             {
                 FromStates = new[] { UserState.New },
+                ToState = UserState.Created,
                 Execute = (u, _) => { u.State = UserState.Created; },
                 AllowsNew = true,
                 Lite = false
             }.Register();
 
-            new Goto(UserOperation.Save, UserState.Created)
+            new Execute(UserOperation.Save)
             {
                 FromStates = new[] { UserState.Created },
+                ToState = UserState.Created,
                 Execute = (u, _) => { },
                 Lite = false
             }.Register();
 
-            new Goto(UserOperation.Disable, UserState.Disabled)
+            new Execute(UserOperation.Disable)
             {
                 FromStates = new[] { UserState.Created },
+                ToState = UserState.Disabled,
                 Execute = (u, _) =>
                 {
                     u.AnulationDate = TimeZoneManager.Now;
@@ -50,9 +54,10 @@ namespace Signum.Engine.Authorization
                 Lite = true
             }.Register();
 
-            new Goto(UserOperation.Enable, UserState.Created)
+            new Execute(UserOperation.Enable)
             {
                 FromStates = new[] { UserState.Disabled },
+                ToState = UserState.Created,
                 Execute = (u, _) =>
                 {
                     u.AnulationDate = null;

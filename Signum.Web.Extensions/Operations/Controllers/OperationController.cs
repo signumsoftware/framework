@@ -48,9 +48,6 @@ namespace Signum.Web.Operations
                 }
 
                 entity = OperationLogic.ServiceExecute(entity, EnumLogic<OperationDN>.ToEnum(operationFullKey));
-
-                if (this.IsReactive())
-                    Session[this.TabID()] = entity;
             }
 
             if (prefix.HasText())

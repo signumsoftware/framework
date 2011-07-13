@@ -14,7 +14,7 @@ using System.Threading;
 using Signum.Engine;
 using Signum.Engine.Authorization;
 using Signum.Entities;
-using Signum.Web.Queries;
+using Signum.Web.UserQueries;
 using Signum.Web.Reports;
 using Signum.Web.Auth;
 using Signum.Web.AuthAdmin;
@@ -23,6 +23,7 @@ using Signum.Entities.ControlPanel;
 using Signum.Web.Combine;
 using System.Reflection;
 using Signum.Web.PortableAreas;
+using Signum.Web.Widgets;
 
 namespace Signum.Web.Extensions.Sample
 {
@@ -89,6 +90,10 @@ namespace Signum.Web.Extensions.Sample
             ControlPanelClient.Start();
 
             ReportsClient.Start(true, true);
+
+            QuickLinkWidgetHelper.Start();
+            NotesClient.Start();
+            AlertsClient.Start();
 
             MusicClient.Start();
 

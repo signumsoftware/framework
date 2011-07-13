@@ -57,7 +57,7 @@ namespace Signum.Windows.Authorization
             AuthClient.UpdateCacheEvent += new Action(AuthClient_UpdateCacheEvent);
         }
 
-        static GenericInvoker miAttachTypeEvent = GenericInvoker.Create(() => AttachTypeEvent<IdentifiableEntity>(null));
+        static GenericInvoker<Action<EntitySettings>> miAttachTypeEvent = new GenericInvoker<Action<EntitySettings>>(es => AttachTypeEvent<TypeDN>((EntitySettings<TypeDN>)es));
         private static void AttachTypeEvent<T>(EntitySettings<T> settings) where T : IdentifiableEntity
         {
             settings.IsCreable += admin => GetTypeAllowed(typeof(T)) == TypeAllowedBasic.Create;

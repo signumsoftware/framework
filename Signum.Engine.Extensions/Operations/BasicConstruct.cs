@@ -80,7 +80,7 @@ namespace Signum.Engine.Operations
             return Construct(args);
         }
 
-        public void AssertIsValid()
+        public virtual void AssertIsValid()
         {
             if (Construct == null)
                 throw new InvalidOperationException("Operation {0} does not have Constructor initialized".Formato(Key));

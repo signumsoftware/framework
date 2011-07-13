@@ -112,7 +112,7 @@ namespace Signum.Web.Operations
 
             return new JsOperationOptions
             {
-                OperationKey = EnumDN.UniqueKey(OperationInfo.Key),
+                Operation = OperationInfo.Key,
                 IsLite = OperationInfo.Lite,
                 Prefix = this.Prefix,
                 ControllerUrl = (JsValue<string>)controllerUrl,
@@ -149,7 +149,7 @@ namespace Signum.Web.Operations
             }
             return new JsOperationOptions
             {
-                OperationKey = EnumDN.UniqueKey(OperationInfo.Key),
+                Operation = OperationInfo.Key,
                 IsLite = OperationInfo.Lite,
                 Prefix = this.Prefix,
                 IsContextual = true,
@@ -157,7 +157,7 @@ namespace Signum.Web.Operations
                 RequestExtraJsonData = OperationSettings.TryCC(opt => opt.RequestExtraJsonData) ?? 
                     "{{{0}:'{1}'}}".Formato(
                         TypeContextUtilities.Compose(Prefix, EntityBaseKeys.RuntimeInfo), 
-                        "{0};{1};{2};{3}".Formato(Navigator.ResolveWebTypeName(Entity.GetType()), Entity.Id, "o", ""))
+                        "{0};{1};{2}".Formato(Navigator.ResolveWebTypeName(Entity.GetType()), Entity.Id, "o"))
             };
         }
     }
@@ -184,7 +184,7 @@ namespace Signum.Web.Operations
             
             return new JsOperationOptions
             {
-                OperationKey = EnumDN.UniqueKey(OperationInfo.Key),
+                Operation = OperationInfo.Key,
                 IsLite = OperationInfo.Lite,
                 Prefix = this.Prefix,
                 ControllerUrl = (JsValue<string>)controllerUrl,

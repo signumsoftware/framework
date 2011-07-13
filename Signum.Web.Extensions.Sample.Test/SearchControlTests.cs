@@ -39,7 +39,7 @@ namespace Signum.Web.Extensions.Sample.Test
         }
 
         [TestMethod]
-        public void Filters()
+        public void SearchControl001_Filters()
         {
             CheckLoginAndOpen(FindRoute("Album"));
 
@@ -123,7 +123,7 @@ namespace Signum.Web.Extensions.Sample.Test
         }
 
         [TestMethod]
-        public void FiltersInPopup()
+        public void SearchControl002_FiltersInPopup()
         {
             CheckLoginAndOpen(ViewRoute("Band", null));
 
@@ -198,7 +198,7 @@ namespace Signum.Web.Extensions.Sample.Test
         }
 
         [TestMethod]
-        public void Orders()
+        public void SearchControl003_Orders()
         {
             CheckLoginAndOpen(FindRoute("Album"));
 
@@ -227,7 +227,7 @@ namespace Signum.Web.Extensions.Sample.Test
         }
 
         [TestMethod]
-        public void OrdersInPopup()
+        public void SearchControl004_OrdersInPopup()
         {
             CheckLoginAndOpen(ViewRoute("Band", null));
 
@@ -268,7 +268,7 @@ namespace Signum.Web.Extensions.Sample.Test
         }
 
         [TestMethod]
-        public void UserColumns()
+        public void SearchControl005_UserColumns()
         {
             CheckLoginAndOpen(FindRoute("Album"));
 
@@ -286,7 +286,7 @@ namespace Signum.Web.Extensions.Sample.Test
 
             //Search with userColumns
             selenium.Search();
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SearchTestExtensions.CellSelector(1, 8)));
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SearchTestExtensions.CellSelector(selenium, 1, 8)));
 
             //Move columns
             Assert.IsFalse(selenium.CanMoveColumn(1, true));
@@ -298,12 +298,12 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.RemoveColumn(7, 8);
             selenium.WaitAjaxFinished(selenium.ThereAreNRows(0));
             selenium.Search();
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SearchTestExtensions.CellSelector(1, 7)));
-            Assert.IsTrue(!selenium.IsElementPresent(SearchTestExtensions.CellSelector(1, 8)));
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SearchTestExtensions.CellSelector(selenium, 1, 7)));
+            Assert.IsTrue(!selenium.IsElementPresent(SearchTestExtensions.CellSelector(selenium, 1, 8)));
         }
 
         [TestMethod]
-        public void UserColumnsInPopup()
+        public void SearchControl006_UserColumnsInPopup()
         {
             CheckLoginAndOpen(ViewRoute("Band", null));
 
@@ -328,112 +328,151 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.RemoveColumn(4, 8, prefix);
             selenium.WaitAjaxFinished(selenium.ThereAreNRows(0, prefix));
             selenium.Search(prefix);
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SearchTestExtensions.CellSelector(1, 7, prefix)));
-            Assert.IsTrue(!selenium.IsElementPresent(SearchTestExtensions.CellSelector(1, 8, prefix)));
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SearchTestExtensions.CellSelector(selenium, 1, 7, prefix)));
+            Assert.IsTrue(!selenium.IsElementPresent(SearchTestExtensions.CellSelector(selenium, 1, 8, prefix)));
         }
 
         [TestMethod]
-        public void EntityCtxMenu_OpExecute()
+        public void SearchControl007_ImplementedByFinder()
+        {
+            CheckLoginAndOpen(FindRoute("IAuthorDN"));
+            
+            selenium.Search();
+
+            //Results of implementing types
+            Assert.IsTrue(selenium.IsEntityInRow(1, new Lite<ArtistDN>(1).Key()));
+            Assert.IsTrue(selenium.IsEntityInRow(9, new Lite<BandDN>(1).Key()));
+
+            //Filters
+            selenium.FilterSelectToken(0, "label=Id", false);
+            selenium.AddFilter(0);
+            selenium.Type("value_0", "1");
+            selenium.Search();
+            selenium.WaitAjaxFinished(selenium.ThereAreNRows(2)); //Entity with id 1 of each type
+
+            selenium.DeleteFilter(0);
+            selenium.FilterSelectToken(0, "label=IAuthor", true);
+            selenium.ExpandTokens(1);
+            selenium.FilterSelectToken(1, "value=({0})".Formato(typeof(ArtistDN).FullName.Replace(".", ":")), true);
+            selenium.ExpandTokens(2);
+            selenium.FilterSelectToken(2, "Id", false);
+            selenium.AddFilter(0);
+            selenium.Type("value_0", "1"); 
+            selenium.Search();
+            selenium.WaitAjaxFinished(selenium.ThereAreNRows(1)); //only ArtistDN;1
+
+            //Create implemented type
+            selenium.SearchCreateWithImpl("Artist");
+            Assert.IsTrue(selenium.IsElementPresent("jq=#Dead")); //there's an artist valueline
+        }
+
+        [TestMethod]
+        public void SearchControl008_MultiplyFinder()
         {
             CheckLoginAndOpen(FindRoute("Artist"));
+            selenium.CheckAddFilterEnabled(false);
+            selenium.CheckAddColumnEnabled(false);
 
-            //Search
             selenium.Search();
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SearchTestExtensions.RowSelector(1)));
+            selenium.WaitAjaxFinished(selenium.ThereAreNRows(8));
 
-            string row1col1 = SearchTestExtensions.CellSelector(1, 1);
-            
-            //ArtistOperations.AssignPersonalAward
-            selenium.EntityContextMenu(1);
-            selenium.EntityContextMenuClick(1, 1);
-
-            Assert.IsTrue(Regex.IsMatch(selenium.GetConfirmation(), ".*"));
-            selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("{0} > a.sf-entity-ctxmenu-success".Formato(row1col1)));
-            Assert.IsFalse(selenium.IsElementPresent("{0} .sf-search-ctxmenu .sf-search-ctxmenu-overlay".Formato(row1col1)));
-
-            //For Michael Jackson there are no operations enabled
-            selenium.EntityContextMenu(5);
-            //There's not a menu with hrefs => only some text saying there are no operations
-            Assert.IsFalse(selenium.IsElementPresent("{0} a".Formato(SearchTestExtensions.EntityContextMenuSelector(5))));
-        }
-
-        [TestMethod]
-        public void EntityCtxMenu_OpConstructFrom_OpenPopup()
-        {
-            CheckLoginAndOpen(FindRoute("Band"));
-
-            //Search
+            //[Num]
+            selenium.FilterSelectToken(0, "label=Artist", true);
+            selenium.CheckAddFilterEnabled(true);
+            selenium.CheckAddColumnEnabled(true);
+            selenium.ExpandTokens(1);
+            selenium.CheckAddFilterEnabled(true);
+            selenium.CheckAddColumnEnabled(true);
+            selenium.FilterSelectToken(1, "label=Friends", true);
+            selenium.CheckAddFilterEnabled(false);
+            selenium.CheckAddColumnEnabled(false);
+            selenium.ExpandTokens(2);
+            selenium.FilterSelectToken(2, "value=Count", false);
+            selenium.CheckAddFilterEnabled(true);
+            selenium.CheckAddColumnEnabled(true);
+                        
+            selenium.AddFilter(0);
+            selenium.Type("value_0", "1");
             selenium.Search();
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SearchTestExtensions.RowSelector(1)));
+            selenium.AssertMultiplyMessage(false);
+            selenium.WaitAjaxFinished(selenium.ThereAreNRows(3));
             
-            string row1col1 = SearchTestExtensions.CellSelector(1, 1);
-            
-            //Band.CreateFromBand
-            selenium.EntityContextMenu(1);
-            selenium.EntityContextMenuClick(1, 1);
-
-            Assert.IsTrue(Regex.IsMatch(selenium.GetConfirmation(), ".*"));
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SeleniumExtensions.PopupSelector("New_")));
-
-            selenium.Type("New_Name", "ctxtest");
-            selenium.Type("New_Year", DateTime.Now.Year.ToString());
-            
-            selenium.LineFindAndSelectElements("New_Label_", false, new int[]{0});
-
-            selenium.Click("jq=#{0}btnOk".Formato("New_")); //Dont't call PopupOk helper => it makes an ajaxWait and then waitPageLoad fails
-            selenium.WaitForPageToLoad(PageLoadTimeout);
-            selenium.MainEntityHasId();
-        }
-
-        [TestMethod]
-        public void EntityCtxMenu_OpConstructFrom_Navigate()
-        {
-            CheckLoginAndOpen(FindRoute("Album"));
-
-            //Search
+            selenium.AddColumn("Entity.Friends.Count");
             selenium.Search();
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SearchTestExtensions.RowSelector(1)));
+            selenium.WaitAjaxFinished(selenium.ThereAreNRows(3));
+            selenium.AssertMultiplyMessage(false);
 
-            //Album.Clone
-            selenium.EntityContextMenu(1);
-            selenium.EntityContextMenuClick(1, 2);
+            selenium.FilterSelectToken(2, "value=", false);
+            selenium.CheckAddFilterEnabled(false);
+            selenium.CheckAddColumnEnabled(false);
 
-            Assert.IsTrue(Regex.IsMatch(selenium.GetConfirmation(), ".*"));
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#AlbumOperation_Save"));
+            selenium.DeleteFilter(0);
+            selenium.RemoveColumn(8, 8);
 
-            selenium.Type("Name", "ctxtest2");
-            selenium.Type("Year", DateTime.Now.Year.ToString());
+            //Element
+            selenium.FilterSelectToken(2, "value=Element", true);
+            selenium.CheckAddFilterEnabled(true);
+            selenium.CheckAddColumnEnabled(true);
+            
+            selenium.AddColumn("Entity.Friends.Count");
+            selenium.Search();
+            selenium.AssertMultiplyMessage(true);
+            selenium.WaitAjaxFinished(selenium.ThereAreNRows(10));
 
-            selenium.Click("AlbumOperation_Save");
-            selenium.WaitForPageToLoad(PageLoadTimeout);
-            selenium.MainEntityHasId();
-        }
+            selenium.AddFilter(0);
+            selenium.LineFindAndSelectElements("value_0_", false, new int[] { 2 });
+            selenium.Search();
+            selenium.AssertMultiplyMessage(true);
+            selenium.WaitAjaxFinished(selenium.ThereAreNRows(3));
 
-        [TestMethod]
-        public void EntityCtxMenu_OpDelete()
-        {
-            CheckLoginAndOpen(FindRoute("Album"));
+            selenium.DeleteFilter(0);
+            selenium.RemoveColumn(8, 8);
 
-            //Album.Delete
-            //Order by Id descending so we delete the last cloned album
-            int idCol = 2;
-            selenium.Sort(idCol, true);
-            selenium.Sort(idCol, false);
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SearchTestExtensions.RowSelector(1)));
+            //Any
+            selenium.FilterSelectToken(2, "value=Any", true);
+            selenium.CheckAddFilterEnabled(true);
+            selenium.CheckAddColumnEnabled(false);
 
-            Assert.IsTrue(selenium.IsElementPresent(SearchTestExtensions.RowSelector(14)));
-            Assert.IsFalse(selenium.IsElementPresent(SearchTestExtensions.RowSelector(15)));
+            selenium.AddFilter(0);
+            selenium.LineFindAndSelectElements("value_0_", false, new int[] { 2 });
+            selenium.Search();
+            selenium.AssertMultiplyMessage(false);
+            selenium.WaitAjaxFinished(selenium.ThereAreNRows(3));
 
-            string row1col1 = SearchTestExtensions.CellSelector(1, 1);
+            selenium.ExpandTokens(3);
+            selenium.FilterSelectToken(3, "value=Name", false);
+            selenium.AddFilter(1);
+            selenium.Type("value_1", "i");
+            selenium.Search();
+            selenium.AssertMultiplyMessage(false);
+            selenium.WaitAjaxFinished(selenium.ThereAreNRows(0));
+            selenium.Type("value_1", "arcy");
+            selenium.Search();
+            selenium.AssertMultiplyMessage(false);
+            selenium.WaitAjaxFinished(selenium.ThereAreNRows(3));
 
-            selenium.EntityContextMenu(1);
-            selenium.EntityContextMenuClick(1, 1);
+            selenium.DeleteFilter(1);
+            selenium.DeleteFilter(0);
 
-            Assert.IsTrue(Regex.IsMatch(selenium.GetConfirmation(), ".*"));
-            selenium.WaitForPageToLoad(PageLoadTimeout);
+            //All
+            selenium.FilterSelectToken(2, "value=All", true);
+            selenium.CheckAddFilterEnabled(true);
+            selenium.CheckAddColumnEnabled(false);
 
-            Assert.IsTrue(selenium.IsElementPresent(SearchTestExtensions.RowSelector(13)));
-            Assert.IsFalse(selenium.IsElementPresent(SearchTestExtensions.RowSelector(14)));
+            selenium.AddFilter(0);
+            selenium.FilterSelectOperation(0, "value=DistinctTo");
+            selenium.LineFindAndSelectElements("value_0_", false, new int[] { 2 });
+            selenium.Search();
+            selenium.AssertMultiplyMessage(false);
+            selenium.WaitAjaxFinished(selenium.ThereAreNRows(5));
+
+            selenium.ExpandTokens(3);
+            selenium.FilterSelectToken(3, "value=Name", false);
+            selenium.AddFilter(1);
+            selenium.Type("value_1", "Corgan");
+            selenium.Search();
+            selenium.AssertMultiplyMessage(false);
+            selenium.WaitAjaxFinished(selenium.ThereAreNRows(4));
         }
     }
 }

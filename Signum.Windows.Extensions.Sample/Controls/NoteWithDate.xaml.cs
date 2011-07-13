@@ -18,11 +18,11 @@ using Signum.Test;
 namespace Signum.Windows.Extensions.Sample.Controls
 {
     /// <summary>
-    /// Interaction logic for Note.xaml
+    /// Interaction logic for NoteWithDate.xaml
     /// </summary>
-    public partial class Note : UserControl
+    public partial class NoteWithDate : UserControl
     {
-        public Note()
+        public NoteWithDate()
         {
             InitializeComponent();
         }

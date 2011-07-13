@@ -9,7 +9,7 @@
         @Html.ProfilerEntry(e.Index.ToString(), e.FullIndex())@:.
         }
     @entry.Index.ToString())</h2>
-@Html.ActionLink("(View all)", "ViewAll")
+@Html.ActionLink("(View all)",(ProfilerController  pc)=>pc.Heavy()))
 <table class="sf-search-results">
     <tr>
         <th>

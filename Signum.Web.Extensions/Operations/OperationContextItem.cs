@@ -14,20 +14,7 @@ using Signum.Web.Extensions.Properties;
 
 namespace Signum.Web.Operations
 {
-    public class OperationsContextualItem : ContextualItem
-    {
-        public OperationsContextualItem()
-        {
-            DivCssClass = "sf-operations-ctxitem";
-        }
-
-        public override string ToString()
-        {
-            return Content;
-        }
-    }
-
-    public delegate OperationsContextualItem[] GetOperationsContextualItemDelegate(Lite lite);
+    public delegate ContextualItem[] GetOperationsContextualItemDelegate(Lite lite);
 
     public static class OperationsContextualItemsHelper
     {
@@ -45,19 +32,37 @@ namespace Signum.Web.Operations
 
         public static ContextualItem CreateContextualItem(ControllerContext controllerContext, Lite lite, object queryName, string prefix)
         {
-            List<OperationsContextualItem> operations = GetForLite(lite, queryName, prefix);
-            if (operations == null || operations.Count == 0) return null;
+            List<ContextualItem> operations = GetForLite(lite, queryName, prefix);
+            if (operations == null || operations.Count == 0) 
+                return null;
 
-            return new OperationsContextualItem
+            HtmlStringBuilder content = new HtmlStringBuilder();
+            using(content.Surround(new HtmlTag("ul").Class("sf-search-ctxmenu-operations")))
             {
-                //Label = "<span id='{0}'>{0}</span>".Formato("Operations"),
-                Id = "Operations",
-                Content = @"<div class='sf-operations-ctxitem sf-operations'><ul class='sf-operation-ctxmenu'>{0}</ul></div>".Formato(
-                    operations.ToString(ctx => "<li>" + ctx.IndividualOperationToString() + "</li>", "")),
+                string ctxItemClass = "sf-search-ctxitem";
+
+                content.AddLine(new HtmlTag("li")
+                    .Class(ctxItemClass + " sf-search-ctxitem-header")
+                    .InnerHtml(
+                        new HtmlTag("span").InnerHtml(Resources.Search_CtxMenuItem_Operations.EncodeHtml()))
+                    );
+
+                foreach(var operation in operations)
+                {
+                    content.AddLine(new HtmlTag("li")
+                        .Class(ctxItemClass)
+                        .InnerHtml(operation.IndividualOperationToString()));
+                }
+            }
+
+            return new ContextualItem
+            {
+                Id = TypeContextUtilities.Compose(prefix, "ctxItemOperations"),
+                Content = content.ToHtml().ToString()
             };
         }
 
-        private static MvcHtmlString IndividualOperationToString(this OperationsContextualItem oci)
+        private static MvcHtmlString IndividualOperationToString(this ContextualItem oci)
         {
             if (oci.Enabled)
                 oci.HtmlProps.Add("onclick", oci.OnClick);
@@ -65,14 +70,14 @@ namespace Signum.Web.Operations
             return new HtmlTag("a", oci.Id)
                         .Attrs(oci.HtmlProps)
                         .Attr("title", oci.AltText ?? "")
-                        .Class(oci.DivCssClass)
+                        .Class("sf-operation-ctxitem")
                         .SetInnerText(oci.Text)
                         .ToHtml();
         }
 
-        static OperationsContextualItem[] Empty = new OperationsContextualItem[0];
+        static ContextualItem[] Empty = new ContextualItem[0];
 
-        public static List<OperationsContextualItem> GetForLite(Lite lite, object queryName, string prefix)
+        public static List<ContextualItem> GetForLite(Lite lite, object queryName, string prefix)
         {
             IdentifiableEntity ident = Database.Retrieve(lite);
 

@@ -138,7 +138,7 @@ namespace Signum.Web.Auth
                     { UserOperation.SetPassword, new EntityOperationSettings 
                     { 
                         OnClick = ctx => new JsOperationConstructorFrom(ctx.Options("SetPassword","Auth"))
-                            .OperationAjax(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk),
+                            .ajax(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk),
                         IsContextualVisible = _ => false
                     }},
                 });
@@ -176,7 +176,7 @@ namespace Signum.Web.Auth
 
         }
 
-        static GenericInvoker miAttachEvents = GenericInvoker.Create(() => AttachEvents<Entity>(null));
+        static GenericInvoker<Action<EntitySettings>> miAttachEvents = new GenericInvoker<Action<EntitySettings>>(es => AttachEvents<TypeDN>((EntitySettings<TypeDN>)es));
         static void AttachEvents<T>(EntitySettings<T> settings) where T : IdentifiableEntity
         {
             settings.IsCreable += admin => TypeAuthLogic.GetTypeAllowed(typeof(T)).GetUI() == TypeAllowedBasic.Create;
@@ -203,7 +203,7 @@ namespace Signum.Web.Auth
             }
         }
 
-        static void AuthClient_Saving(UserDN ident, bool isRoot)
+        static void AuthClient_Saving(UserDN ident)
         {
             Transaction.RealCommit += () =>
             {

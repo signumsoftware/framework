@@ -8,7 +8,7 @@ using Signum.Entities.ControlPanel;
 using Signum.Entities.Authorization;
 using System.Reflection;
 using System.Web.Routing;
-using Signum.Web.Queries;
+using Signum.Web.UserQueries;
 using Signum.Entities;
 
 namespace Signum.Web.ControlPanel

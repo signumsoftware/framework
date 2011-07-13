@@ -2,15 +2,6 @@
 @using Signum.Web.ControlPanel
 @using Signum.Entities.Reports
 
-<script type="text/javascript">
-    function toggleCol(cbFillId, colInputId) {
-        if ($("#" + cbFillId + ":checked").length > 0)
-            $('#' + colInputId).val(1).attr('disabled', 'disabled');
-        else
-            $('#' + colInputId).attr('disabled', '');
-    }
-</script>
-
 @using (var tc = Html.TypeContext<PanelPart>())
 {
     using (var sc = tc.SubContext())
@@ -23,10 +14,10 @@
                 @{ string colId = null; }
                 @Html.ValueLine(sc, pp => pp.Column, vl => { vl.ValueHtmlProps["size"] = 2; colId = vl.ControlID; })
                 @{ string fillId = null; }
-                @Html.ValueLine(sc, pp => pp.Fill, vl => { vl.ValueHtmlProps["onclick"] = "toggleCol(this.id,'" + colId + "');"; fillId = vl.ControlID; })
+                @Html.ValueLine(sc, pp => pp.Fill, vl => { vl.ValueHtmlProps["onclick"] = "SF.ControlPanel.toggleFillColumn(this.id,'" + colId + "');"; fillId = vl.ControlID; })
         
             <script type="text/javascript">
-                $(document).ready(function () { toggleCol('@fillId', '@colId'); });
+                $(document).ready(function () { SF.ControlPanel.toggleFillColumn('@fillId', '@colId'); });
             </script>
     
                 @Html.ValueLine(sc, pp => pp.Title)
