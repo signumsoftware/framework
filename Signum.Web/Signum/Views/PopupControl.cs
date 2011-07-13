@@ -102,7 +102,7 @@ WriteLiteral(">\r\n                OK</button>                \r\n");
         }
 
 
-         if (ViewData.ContainsKey(ViewDataKeys.SaveVisible) && (bool)ViewData[ViewDataKeys.SaveVisible])
+         if (ViewData.ContainsKey(ViewDataKeys.SaveVisible) && (bool)ViewData[ViewDataKeys.SaveVisible] && Navigator.Manager.ShowSave(Model.UntypedValue.GetType(), false))
         {  
 
 WriteLiteral("            <button id=\"");
