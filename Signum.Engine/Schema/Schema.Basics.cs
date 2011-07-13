@@ -404,6 +404,11 @@ namespace Signum.Engine.Maps
                 t.Fields.Values.Select(a => a.Field).OfType<FieldMList>().Select(f => (ITable)f.RelationalTable).PreAnd(t))
                 .ToDictionary(a => a.Name);
         }
+
+        public DirectedEdgedGraph<Table, bool> ToDirectedGraph()
+        {
+            return DirectedEdgedGraph<Table, bool>.Generate(Tables.Values, t => t.Fields.Values.SelectMany(f => f.Field.GetTables()));
+        }
     }
 
     internal interface IEntityEvents
@@ -738,6 +743,8 @@ namespace Signum.Engine.Maps
             }
             throw new NotImplementedException();
         }
+
+        internal abstract IEnumerable<KeyValuePair<Table, bool>> GetTables(); 
     }
 
     public enum IndexType
@@ -823,6 +830,11 @@ namespace Signum.Engine.Maps
 
             return Enumerable.Empty<UniqueIndex>();
         }
+
+        internal override IEnumerable<KeyValuePair<Table, bool>> GetTables()
+        {
+            return Enumerable.Empty<KeyValuePair<Table, bool>>();
+        }
     }
 
     public partial class FieldValue : Field, IColumn
@@ -855,6 +867,11 @@ namespace Signum.Engine.Maps
         public override IEnumerable<IColumn> Columns()
         {
             return new[] { this };
+        }
+
+        internal override IEnumerable<KeyValuePair<Table, bool>> GetTables()
+        {
+            return Enumerable.Empty<KeyValuePair<Table, bool>>();
         }
     }
 
@@ -922,6 +939,11 @@ namespace Signum.Engine.Maps
         {
             return this.EmbeddedFields.Values.SelectMany(f => f.Field.GeneratUniqueIndexes(table));
         }
+
+        internal override IEnumerable<KeyValuePair<Table, bool>> GetTables()
+        {
+            return EmbeddedFields.Values.SelectMany(f => f.Field.GetTables());
+        }
     }
 
     public partial class FieldReference : Field, IColumn, IFieldReference
@@ -953,6 +975,11 @@ namespace Signum.Engine.Maps
         {
             return new[] { this };
         }
+
+        internal override IEnumerable<KeyValuePair<Table, bool>> GetTables()
+        {
+            yield return KVP.Create(ReferenceTable, IsLite); 
+        }
     }
 
     public partial class FieldEnum : FieldReference
@@ -977,6 +1004,11 @@ namespace Signum.Engine.Maps
         {
             return ImplementationColumns.Values.Cast<IColumn>();
         }
+
+        internal override IEnumerable<KeyValuePair<Table, bool>> GetTables()
+        {
+            return ImplementationColumns.Select(a => KVP.Create(a.Value.ReferenceTable, IsLite)).ToList();
+        }
     }
 
     public partial class FieldImplementedByAll : Field, IFieldReference
@@ -990,6 +1022,11 @@ namespace Signum.Engine.Maps
         public override IEnumerable<IColumn> Columns()
         {
             return new[] { Column, ColumnTypes };
+        }
+
+        internal override IEnumerable<KeyValuePair<Table, bool>> GetTables()
+        {
+            return Enumerable.Empty<KeyValuePair<Table, bool>>();
         }
     }
 
@@ -1037,6 +1074,11 @@ namespace Signum.Engine.Maps
                 throw new InvalidOperationException("Changing IndexType is not allowed for FieldMList");
 
             return Enumerable.Empty<UniqueIndex>();
+        }
+
+        internal override IEnumerable<KeyValuePair<Table, bool>> GetTables()
+        {
+            return RelationalTable.Field.GetTables();
         }
     }
 
