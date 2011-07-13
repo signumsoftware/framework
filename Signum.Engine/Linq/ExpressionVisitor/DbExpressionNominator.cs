@@ -90,8 +90,14 @@ namespace Signum.Engine.Linq
             return false; 
         }
 
+        Dictionary<ColumnExpression, ScalarExpression> replacements; 
+
         protected override Expression VisitColumn(ColumnExpression column)
         {
+            ScalarExpression scalar;
+            if (replacements != null && replacements.TryGetValue(column, out scalar))
+                return Visit(scalar);
+
             if ((IsFullNominateOrAggresive && !innerProjection) ||
                 existingAliases.Contains(column.Alias))
                 candidates.Add(column);
@@ -565,10 +571,20 @@ namespace Signum.Engine.Linq
         {
             if (proj.IsOneCell)
             {
+                var column = proj.Source.Columns.Single();
+
                 var select = (SelectExpression)base.Visit(proj.Source);
-                var scalar = new ScalarExpression(proj.Type, select);
-                var result = Replacer.Replace(proj.Projector, proj.Source.Columns.Single().GetReference(proj.Source.Alias), scalar);
-                candidates.Add(result);
+                var scalar = new ScalarExpression(column.Expression.Type, select);
+
+                var reference = column.GetReference(proj.Source.Alias);
+                
+                if (replacements == null)
+                    replacements = new Dictionary<ColumnExpression, ScalarExpression>(); 
+
+                replacements.Add(reference, scalar);
+                var result = Visit(proj.Projector);
+                replacements.Remove(reference);
+
                 return result;
             }
             else

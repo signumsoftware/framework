@@ -43,9 +43,9 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
-        public void OrderByThenBy()
+        public void OrderByGetType()
         {
-            var songsAlbum = Database.Query<ArtistDN>().OrderBy(a => a.Dead).ThenBy(a => a.Sex).ToList();
+            var songsAlbum = Database.Query<AlbumDN>().OrderBy(a => a.Author.GetType()).ToList();
         }
 
         [TestMethod]
@@ -107,6 +107,8 @@ namespace Signum.Test.LinqProvider
         {
             var songsAlbum = Database.Query<ArtistDN>().OrderBy(a => a.Dead).GroupBy(a => a.Sex, (s, gr) => new { Sex = s, Count = gr.Count() }).ToList();
         }
+
+
 
     }
 }

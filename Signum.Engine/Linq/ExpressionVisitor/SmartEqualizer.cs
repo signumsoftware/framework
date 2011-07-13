@@ -37,7 +37,99 @@ namespace Signum.Engine.Linq
                        (exp2 as NewExpression).Arguments, (o, i) => SmartEqualizer.PolymorphicEqual(o, i)).Aggregate((a, b) => Expression.And(a, b));
             }
 
-            return EntityEquals(exp1, exp2) ?? EqualNullable(exp1, exp2);
+            return EntityEquals(exp1, exp2) ?? TypeEquals(exp1, exp2) ?? EqualNullable(exp1, exp2);
+        }
+
+        private static Expression TypeEquals(Expression exp1, Expression exp2)
+        {
+            if (exp1.Type != typeof(Type) || exp2.Type != typeof(Type))
+                return null;
+
+            if(exp1.NodeType == ExpressionType.Conditional)
+                return DispachConditional((ConditionalExpression)exp1, exp2);
+
+
+            if(exp2.NodeType == ExpressionType.Conditional)
+                return DispachConditional((ConditionalExpression)exp2, exp1);
+
+            if(exp1.NodeType == ExpressionType.Constant)
+            {
+                if(exp2.NodeType == ExpressionType.Constant) return ConstantConstantEquals((ConstantExpression)exp1, (ConstantExpression)exp2);
+                else if(exp2.NodeType == (ExpressionType)DbExpressionType.TypeId) return ConstantTypeEquals((ConstantExpression)exp1, (TypeIdExpression)exp2);
+
+            }
+            else if(exp1.NodeType == ExpressionType.TypeIs)
+            {
+                if (exp2.NodeType == ExpressionType.Constant) return ConstantTypeEquals((ConstantExpression)exp2, (TypeIdExpression)exp1);
+                else if (exp2.NodeType == (ExpressionType)DbExpressionType.TypeId) return ConstantTypeEquals((ConstantExpression)exp1, (TypeIdExpression)exp2);
+            }
+
+            throw new InvalidOperationException("Impossible to resolve '{0}' equals '{1}'".Formato(exp1.NiceToString(), exp2.NiceToString()));
+        }
+
+        private static Expression DispachConditional(ConditionalExpression ce, Expression exp)
+        {
+            return SmartOr(SmartAnd(ce.Test, TypeEquals(ce.IfTrue, exp)), TypeEquals(ce.IfFalse, exp));
+        }
+
+        private static Expression SmartAnd(Expression e1, Expression e2)
+        {
+            if (e1 == SqlConstantExpression.True)
+                return e2;
+
+            if (e2 == SqlConstantExpression.True)
+                return e1;
+
+            if (e1 == SqlConstantExpression.False || e2 == SqlConstantExpression.False)
+                return SqlConstantExpression.False;
+
+            return Expression.And(e1, e2); 
+        }
+
+        private static Expression SmartOr(Expression e1, Expression e2)
+        {
+            if (e1 == SqlConstantExpression.False)
+                return e2;
+
+            if (e2 == SqlConstantExpression.False)
+                return e1;
+
+            if (e1 == SqlConstantExpression.True || e2 == SqlConstantExpression.True)
+                return SqlConstantExpression.True;
+
+            return Expression.Or(e1, e2);
+        }
+
+
+        private static Expression ConstantTypeEquals(ConstantExpression c, TypeIdExpression ti)
+        {
+            return Expression.Equal(QueryBinder.TypeConstant((Type)c.Value), ti.Column);
+        }
+
+        private static Expression ConstantConstantEquals(ConstantExpression c1, ConstantExpression c2)
+        {
+            if (c1.Value == null)
+            {
+                if (c2.Value == null)
+                    return SqlConstantExpression.True;
+                else
+                    return SqlConstantExpression.False;
+            }
+            else
+            {
+                if (c2.Value == null)
+                    return SqlConstantExpression.False;
+
+                if (c1.Value.Equals(c2.Value))
+                    return SqlConstantExpression.True;
+                else
+                    return SqlConstantExpression.False;
+            }
+        }
+
+        private static Expression ConstantConstantEquals(TypeIdExpression t1, TypeIdExpression t2)
+        {
+            return Expression.Equal(t1.Column, t2.Column);
         }
 
         internal static Expression EntityIn(Expression newItem, IEnumerable<IdentifiableEntity> collection)
@@ -75,7 +167,7 @@ namespace Signum.Engine.Linq
             ImplementedByAllExpression iba = newItem as ImplementedByAllExpression;
             if (iba != null)
                 return entityIDs.Select(kvp => Expression.And(
-                    EqualNullable(Expression.Constant(Schema.Current.TypeToId[kvp.Key]), iba.TypeId),
+                    EqualNullable(QueryBinder.TypeConstant(kvp.Key), iba.TypeId.Column),
                     InExpression.FromValues(iba.Id, kvp.Value))).Aggregate((a, b) => Expression.Or(a, b));
 
             throw new InvalidOperationException("EntityIn not defined for newItem of type {0}".Formato(newItem.Type.Name));
@@ -155,7 +247,7 @@ namespace Signum.Engine.Linq
 
         static Expression FieIbaEquals(FieldInitExpression fie, ImplementedByAllExpression iba)
         {
-            return Expression.And(EqualNullable(fie.ExternalId, iba.Id), EqualNullable(fie.TypeId, iba.TypeId));
+            return Expression.And(EqualNullable(fie.ExternalId, iba.Id), EqualNullable(QueryBinder.TypeConstant(fie.Type), iba.TypeId.Column));
         }
 
         static Expression IbIbEquals(ImplementedByExpression ib, ImplementedByExpression ib2)
@@ -170,7 +262,7 @@ namespace Signum.Engine.Linq
         {
             var list = ib.Implementations.Select(i => Expression.And(
                 EqualNullable(iba.Id, i.Field.ExternalId),
-                EqualNullable(iba.TypeId, i.Field.TypeId))).ToList();
+                EqualNullable(iba.TypeId.Column, QueryBinder.TypeConstant(i.Field.Type)))).ToList();
 
             if (list.Count == 0)
                 return SqlConstantExpression.False;
@@ -181,7 +273,7 @@ namespace Signum.Engine.Linq
 
         static Expression IbaIbaEquals(ImplementedByAllExpression iba, ImplementedByAllExpression iba2)
         {
-            return Expression.And(EqualNullable(iba.Id, iba2.Id), EqualNullable(iba.TypeId, iba2.TypeId)); 
+            return Expression.And(EqualNullable(iba.Id, iba2.Id), EqualNullable(iba.TypeId.Column, iba2.TypeId.Column)); 
         }
 
         static Expression EqualsToNull(Expression exp)
@@ -224,7 +316,7 @@ namespace Signum.Engine.Linq
                     new[] { new ImplementationColumnExpression(fie.Type, (FieldInitExpression)fie) }.ToReadOnly());
 
             return new LiteReferenceExpression(liteType,
-                reference, id, Expression.Constant(lite.ToStr), fie.TypeId);
+                reference, id, Expression.Constant(lite.ToStr), Expression.Constant(lite.RuntimeType));
         }
 
         static Expression ToFieldInitExpression(IIdentifiable ei)
