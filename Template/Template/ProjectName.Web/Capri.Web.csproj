@@ -97,7 +97,7 @@
     <Content Include="Content\smoothness\images\ui-icons_454545_256x240.png" />
     <Content Include="Content\smoothness\images\ui-icons_888888_256x240.png" />
     <Content Include="Content\smoothness\images\ui-icons_cd0a0a_256x240.png" />
-    <Content Include="Content\smoothness\jquery-ui-1.8.9.custom.css" />
+    <Content Include="Content\smoothness\jquery-ui-1.8.14.css" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="Server$custommessage$.svc" />
@@ -116,8 +116,8 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Scripts\" />
-    <Content Include="Scripts\jquery-1.5.min.js" />
-    <Content Include="Scripts\jquery-ui-1.8.9.custom.min.js" />
+    <Content Include="Scripts\jquery-1.6.2.min.js" />
+    <Content Include="Scripts\jquery-ui-1.8.14.min.js" />
     <Content Include="Scripts\newcontent.js" />
   </ItemGroup>
   <ItemGroup>

@@ -54,6 +54,7 @@ namespace Signum.Engine.Linq
         ImplementedBy,
         ImplementedByAll,
         LiteReference,
+        TypeId,
         MList,
         MListElement,
     }

@@ -25,7 +25,6 @@ namespace Signum.Engine.Linq
 
         public readonly Table Table;
         public readonly Expression ExternalId;
-        public Expression TypeId { get { return QueryBinder.TypeSqlConstant(Type); } }
         public readonly Expression OtherCondition; //Used for IBA only, 
         public readonly ProjectionToken Token;
 
@@ -276,10 +275,10 @@ namespace Signum.Engine.Linq
         public List<ImplementationColumnExpression> Implementations = new List<ImplementationColumnExpression>();
 
         public readonly Expression Id;
-        public readonly Expression TypeId;
+        public readonly TypeIdExpression TypeId;
         public readonly ProjectionToken Token;
 
-        public ImplementedByAllExpression(Type type, Expression id, Expression typeId, ProjectionToken token)
+        public ImplementedByAllExpression(Type type, Expression id, TypeIdExpression typeId, ProjectionToken token)
             : base(DbExpressionType.ImplementedByAll, type)
         {
             this.Id = id;
@@ -321,6 +320,25 @@ namespace Signum.Engine.Linq
         public override string ToString()
         {
             return "({0}).ToLite({1},{2},{3})".Formato(Reference.NiceToString(), Id.NiceToString(), ToStr.NiceToString(), TypeId.NiceToString());
+        }
+    }
+
+    internal class TypeIdExpression : DbExpression
+    {
+        public readonly Expression Column;
+
+        public TypeIdExpression(Expression column)
+            : base(DbExpressionType.TypeId, typeof(Type))
+        {
+            if (column == null || column.Type.UnNullify() != typeof(int))
+                throw new ArgumentException("typeId");
+
+            this.Column = column;
+        }
+
+        public override string ToString()
+        {
+            return "Schema.Current.IdToType({0})".Formato(Column.NiceToString());
         }
     }
 
