@@ -77,7 +77,7 @@ namespace Signum.Engine.SMS
             phoneNumberProviders.Add(typeof(T), func);
         }
 
-        public string GetPhoneNumber(IdentifiableEntity entity)
+        public static string GetPhoneNumber(IdentifiableEntity entity)
         {
             return giGetPhoneNumber.GetInvoker(entity.GetType())(entity);
         }
