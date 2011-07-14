@@ -40,6 +40,7 @@ SF.registerModule("Files", function () {
 
         this.upload = function () {
             SF.log("FLine upload");
+            this.runtimeInfo().setEntity(this.staticInfo().singleType(), '');
             $(this.pf(''))[0].setAttribute('value', $(this.pf(''))[0].value);
             $(this.pf('') + 'loading').show();
             var mform = $('form');
@@ -58,7 +59,9 @@ SF.registerModule("Files", function () {
             else {
                 this.prepareSyncUpload();
             }
-        }
+        };
+
+        this.updateButtonsDisplay = function (hasEntity) { };
     };
 
     /**

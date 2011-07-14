@@ -122,10 +122,10 @@ namespace Signum.Web.Files
             return sb.ToHtml();
         }
 
-        public static void FileLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property)
+        public static MvcHtmlString FileLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property)
             where S : IFile
         {
-            helper.FileLine<T, S>(tc, property, null);
+            return helper.FileLine<T, S>(tc, property, null);
         }
 
         public static MvcHtmlString FileLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property, Action<FileLine> settingsModifier)
