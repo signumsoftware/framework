@@ -110,6 +110,14 @@ namespace Signum.Engine
         static GenericInvoker<Func<int, IdentifiableEntity>> giRetrieve = new GenericInvoker<Func<int, IdentifiableEntity>>(id => Retrieve<IdentifiableEntity>(id));
         public static T Retrieve<T>(int id) where T : IdentifiableEntity
         {
+            if (EntityCache.Created)
+            {
+                T cached = EntityCache.Get<T>(id);
+
+                if (cached != null)
+                    return cached;
+            }
+
             return Database.Query<T>().Single(a => a.Id == id);
         }
 
@@ -240,15 +248,38 @@ namespace Signum.Engine
             if (ids == null)
                 throw new ArgumentNullException("ids");
 
-            var list = Database.Query<T>().Where(a => ids.Contains(a.Id)).ToList();
-
-            if (list.Count != ids.Count)
+            List<T> result = null;
+           
+            if (EntityCache.Created)
             {
-                int[] missing = ids.Except(list.Select(a => a.Id)).ToArray();
-                if (missing.Any())
-                    throw new EntityNotFoundException(typeof(T), missing);
+                result = ids.Select(id => EntityCache.Get<T>(id)).NotNull().ToList();
+                if (result.Count > 0)
+                    ids = ids.Except(result.Select(a => a.Id)).ToList();
             }
-            return list;
+
+            if (ids.Count > 0)
+            {
+                var toRetrieve = Database.Query<T>().Where(a => ids.Contains(a.Id)).ToList();
+
+                if (toRetrieve.Count != ids.Count)
+                {
+                    int[] missing = ids.Except(toRetrieve.Select(a => a.Id)).ToArray();
+                    if (missing.Any())
+                        throw new EntityNotFoundException(typeof(T), missing);
+                }
+
+                if (result == null)
+                    result = toRetrieve;
+                else
+                    result.AddRange(toRetrieve);
+            }
+            else
+            {
+                if (result == null)
+                    result = new List<T>();
+            }
+
+            return result;
         }
 
         public static List<IdentifiableEntity> RetrieveList(Type type, List<int> ids)

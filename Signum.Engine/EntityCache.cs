@@ -104,6 +104,7 @@ namespace Signum.Engine
             }
         }
 
+        public static bool Created { get { return stack != null && !stack.IsEmpty; } }
 
         public void Dispose()
         {

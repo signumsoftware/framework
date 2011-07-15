@@ -37,7 +37,10 @@ namespace Signum.Engine.Linq
             fie = new FieldInitExpression(fie.Type, fie.TableAlias, fie.ExternalId, null, fie.Token) { Bindings = fie.Bindings.ToList() };
 
             if (previousTypes.Contains(fie.Type))
+            {
                 fie.Bindings.Clear();
+                fie.TableAlias = null;
+            }
             else
                 fie.Complete(tools);
 
