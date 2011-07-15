@@ -42,6 +42,9 @@ SF.registerModule("Popup", function () {
                     if (options.onOk)
                         $this.find(".sf-ok-button").click(options.onOk);
 
+                    if (options.onSave)
+                        $this.find(".sf-save").click(options.onSave);
+
                     $this.dialog(o);
                 }
             });

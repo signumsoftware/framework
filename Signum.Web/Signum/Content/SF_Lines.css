@@ -54,6 +54,10 @@
     padding:3px;
 }
 
+.sf-field-list ul
+{
+    float:left;    
+}
 
 .sf-value-container
 {
@@ -109,14 +113,6 @@ a.sf-value-line, span.sf-value-line{
 }
 .sf-entity-line-detail {
     margin:6px 0;
-}
-
-.sf-field-list ul:after{
-    content: ".";
-    display: block;
-    height: 0;
-    clear: both;
-    visibility: hidden;
 }
 
 .sf-entity-line-detail .sf-field-inline .sf-field 

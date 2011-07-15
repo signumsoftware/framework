@@ -165,8 +165,8 @@ namespace Signum.Engine.Linq
 
             static MethodInfo miCached = ReflectionTools.GetMethodInfo((IRetriever r) => r.Cached<TypeDN>(null, null)).GetGenericMethodDefinition();
             static MethodInfo miRequest = ReflectionTools.GetMethodInfo((IRetriever r) => r.Request<TypeDN>(null)).GetGenericMethodDefinition();
-            static MethodInfo miRequestIBA = ReflectionTools.GetMethodInfo((IRetriever r) => r.RequestIBA<TypeDN>(1, 1)).GetGenericMethodDefinition();
-            static MethodInfo miRequestLiteIBA = ReflectionTools.GetMethodInfo((IRetriever r) => r.RequestLiteIBA<TypeDN>(1, 1)).GetGenericMethodDefinition();
+            static MethodInfo miRequestIBA = ReflectionTools.GetMethodInfo((IRetriever r) => r.RequestIBA<TypeDN>(1, null)).GetGenericMethodDefinition();
+            static MethodInfo miRequestLiteIBA = ReflectionTools.GetMethodInfo((IRetriever r) => r.RequestLiteIBA<TypeDN>(1, null)).GetGenericMethodDefinition();
 
             static MethodInfo miGetType = ReflectionTools.GetMethodInfo((Schema s) => s.GetType(1));
 
@@ -276,14 +276,20 @@ namespace Signum.Engine.Linq
             {
                 return Expression.Call(retriever, miRequestIBA.MakeGenericMethod(rba.Type),
                     Visit(NullifyColumn(rba.Id)),
-                    Visit(NullifyColumn(rba.TypeId)));
+                    Visit(NullifyColumn(rba.TypeId.Column)));
+            }
+
+            protected override Expression VisitTypeId(TypeIdExpression typeId)
+            {
+                var column = Visit(NullifyColumn(typeId.Column));
+
+                return (Expression)Expression.Call(Expression.Constant(Schema.Current), miGetType, column.UnNullify());
             }
 
             protected override Expression VisitLiteReference(LiteReferenceExpression lite)
             {
                 var id = Visit(NullifyColumn(lite.Id));
                 var toStr = Visit(lite.ToStr);
-                var typeId = Visit(NullifyColumn(lite.TypeId));
 
                 Type liteType = Reflector.ExtractLite(lite.Type);
 
@@ -291,18 +297,18 @@ namespace Signum.Engine.Linq
                     return Expression.Constant(null, lite.Type);
                 else if (toStr == null)
                 {
-                    return Expression.Call(retriever, miRequestLiteIBA.MakeGenericMethod(liteType), id.Nullify(), typeId.Nullify());
+                    var typeId = Visit(NullifyColumn(((TypeIdExpression)lite.TypeId).Column));
+
+                    return Expression.Call(retriever, miRequestLiteIBA.MakeGenericMethod(liteType), id.Nullify(), typeId);
                 }
                 else
                 {
-                    int? constantTypeId = ConstantValue(typeId);
+                    var typeId = Visit(lite.TypeId);
 
-                    Expression type = constantTypeId.HasValue ? 
-                            (Expression) Expression.Constant(Schema.Current.GetType(constantTypeId.Value)):
-                            (Expression) Expression.Call(Expression.Constant(Schema.Current), miGetType, typeId.UnNullify());
-
+                    Type constantTypeId = ConstantType(typeId);
+             
                     NewExpression liteConstructor;
-                    if (type.NodeType == ExpressionType.Constant && (Type)(((ConstantExpression)type).Value) == liteType)
+                    if (constantTypeId == liteType)
                     {
                         ConstructorInfo ciLite = lite.Type.GetConstructor(new[] { typeof(int), typeof(string) });
                         liteConstructor = Expression.New(ciLite, id.UnNullify(), toStr);
@@ -310,7 +316,7 @@ namespace Signum.Engine.Linq
                     else
                     {
                         ConstructorInfo ciLite = lite.Type.GetConstructor(new[] { typeof(Type), typeof(int), typeof(string) });
-                        liteConstructor = Expression.New(ciLite, type, id.UnNullify(), toStr);
+                        liteConstructor = Expression.New(ciLite, typeId, id.UnNullify(), toStr);
                     }
 
                     return Expression.Condition(id.NotEqualsNulll(), liteConstructor, Expression.Constant(null, lite.Type));
@@ -327,13 +333,13 @@ namespace Signum.Engine.Linq
                     Expression.Bind(type.GetProperty("Element"), Visit(mle.Element)));
             }
 
-            private int? ConstantValue(Expression typeId)
+            private Type ConstantType(Expression typeId)
             {
                 if (typeId.NodeType == ExpressionType.Convert)
                     typeId = ((UnaryExpression)typeId).Operand;
 
                 if (typeId.NodeType == ExpressionType.Constant)
-                    return (int)((ConstantExpression)typeId).Value;
+                    return (Type)((ConstantExpression)typeId).Value;
 
                 return null;
             }

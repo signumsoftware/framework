@@ -139,6 +139,11 @@ namespace Signum.Engine.Linq
             {
                 return this.BindContains(m.Type, m.Object, m.Arguments[0], m == root);
             }
+            else if (m.Object != null && m.Method.Name == "GetType")
+            {
+                var entity = Visit(m.Object);
+                return tools.GetEntityType(entity);
+            }
 
             MethodCallExpression result = (MethodCallExpression)base.VisitMethodCall(m);
             return BindMethodCall(result);
@@ -640,6 +645,10 @@ namespace Signum.Engine.Linq
             {
                 expr = ((MethodCallExpression)expr).Arguments[0]; 
             }
+            else if (expr.Type == typeof(Type))
+            {
+                expr = ExtractTypeId(expr); 
+            }
 
             projection = tools.ApplyExpansions(projection);
 
@@ -914,7 +923,7 @@ namespace Signum.Engine.Linq
                     }
 
                     if (pi.Name == "RuntimeType")
-                        break;
+                        return liteRef.TypeId;
                     
                     throw new InvalidOperationException("The member {0} of Lite is not accessible on queries".Formato(m.Member));
                 }
@@ -985,7 +994,7 @@ namespace Signum.Engine.Linq
             if (whens.Any(e => e.Value is ImplementedByAllExpression))
             {
                 Expression id = whens.Select(w => new When(w.Condition, tools.GetId(w.Value))).ToCondition(typeof(int?));
-                Expression typeId = whens.Select(w => new When(w.Condition, tools.GetTypeId(w.Value))).ToCondition(typeof(int?));
+                TypeIdExpression typeId = (TypeIdExpression)CombineWhens(whens.Select(w => new When(w.Condition, tools.GetEntityType(w.Value))).ToList(), typeof(Type));
 
                 return new ImplementedByAllExpression(returnType, id, typeId, CombineToken(whens.Select(a => GetToken(a.Value))));
             }
@@ -1036,7 +1045,40 @@ namespace Signum.Engine.Linq
             if (whens.Any(e => e.Value is MListExpression))
                 throw new InvalidOperationException("MList on ImplementedBy are not supported yet");
 
+            if (whens.Any(e => e.Value is TypeIdExpression))
+            {
+                return new TypeIdExpression(whens.Select(w => new When(w.Condition, ExtractTypeId(w.Value))).ToCondition(typeof(int?)));
+            }
+
             return whens.ToCondition(returnType);
+        }
+
+        internal static Expression ExtractTypeId(Expression exp)
+        {
+            if (exp.NodeType == ExpressionType.Convert)
+                exp = ((UnaryExpression)exp).Operand;
+
+            if(exp is TypeIdExpression)
+                return ((TypeIdExpression)exp).Column;
+
+            if (exp is ConstantExpression)
+            {
+                ConstantExpression ce = (ConstantExpression)exp;
+                Type type = (Type)ce.Value;
+                if (type == null)
+                    return BinderTools.NullId;
+
+                return TypeConstant(type);
+            }
+
+            if (exp is ConditionalExpression)
+            {
+                var cond = (ConditionalExpression)exp;
+
+                return Expression.Condition(cond.Test, ExtractTypeId(cond.IfTrue), ExtractTypeId(cond.IfFalse));
+            }
+
+            throw new InvalidOperationException("Impossible to extract TypeId from {0}".Formato(exp.NiceToString()));
         }
 
 
@@ -1107,8 +1149,7 @@ namespace Signum.Engine.Linq
             else if (operand.NodeType == (ExpressionType)DbExpressionType.ImplementedByAll)
             {
                 ImplementedByAllExpression riba = (ImplementedByAllExpression)operand;
-                int idType = Schema.Current.TypeToId.GetOrThrow(b.TypeOperand, "The type {0} is not registered in the database as a concrete table".Formato(b.TypeOperand.TypeName()));
-                return SmartEqualizer.EqualNullable(riba.TypeId, Expression.Constant(idType));
+                return SmartEqualizer.EqualNullable(riba.TypeId.Column, TypeConstant(b.TypeOperand));
             }
             return base.VisitTypeIs(b); 
         }
@@ -1194,9 +1235,7 @@ namespace Signum.Engine.Linq
 
                 if (imp == null)
                 {
-                    int idType = Schema.Current.TypeToId.GetOrThrow(uType, "The type {0} is not registered in the database as a concrete table".Formato(uType.TypeName()));
-
-                    Expression other = SmartEqualizer.EqualNullable(iba.TypeId, new SqlConstantExpression(idType));
+                    Expression other = SmartEqualizer.EqualNullable(iba.TypeId.Column, TypeConstant(uType));
 
                     FieldInitExpression result = new FieldInitExpression(uType, null, iba.Id, other, iba.Token); //Delay riba.TypeID to FillFie to make the SQL more clean
                     iba.Implementations.Add(new ImplementationColumnExpression(uType, result));
@@ -1209,14 +1248,11 @@ namespace Signum.Engine.Linq
             return null;
         }
 
-        internal static SqlConstantExpression TypeSqlConstant(Type type)
-        {
-            return new SqlConstantExpression(Schema.Current.TypeToId[type], typeof(int?));
-        }
-
         internal static ConstantExpression TypeConstant(Type type)
         {
-            return Expression.Constant(Schema.Current.TypeToId[type], typeof(int?));
+            int id = Schema.Current.TypeToId.GetOrThrow(type, "The type {0} is not registered in the database as a concrete table");
+
+            return Expression.Constant(id, typeof(int?));
         }
 
         //On Sql, nullability has no sense
@@ -1438,7 +1474,7 @@ namespace Signum.Engine.Linq
                     return new[]
                     {
                         AssignColumn(colIba.Id, fie.ExternalId),
-                        AssignColumn(colIba.TypeId, TypeConstant(fie.Type))
+                        AssignColumn(colIba.TypeId.Column, TypeConstant(fie.Type))
                     };
                 }
 
@@ -1448,7 +1484,7 @@ namespace Signum.Engine.Linq
                     return new[]
                     {
                         AssignColumn(colIba.Id, tools.Coalesce(typeof(int?), ib.Implementations.Select(e => e.Field.ExternalId))),
-                        AssignColumn(colIba.TypeId, ib.Implementations.Select(imp => 
+                        AssignColumn(colIba.TypeId.Column, ib.Implementations.Select(imp => 
                             new When(imp.Field.ExternalId.NotEqualsNulll(), TypeConstant(imp.Type))).ToList().ToCondition(typeof(int?)))
                     };
                 }
@@ -1459,7 +1495,7 @@ namespace Signum.Engine.Linq
                     return new[]
                     {
                         AssignColumn(colIba.Id, iba.Id),
-                        AssignColumn(colIba.TypeId, iba.TypeId)
+                        AssignColumn(colIba.TypeId.Column, iba.TypeId.Column)
                     };
                 }
             }
@@ -1511,7 +1547,7 @@ namespace Signum.Engine.Linq
                 return new[]
                 {
                     AssignColumn(colIba.Id, BinderTools.NullId),
-                    AssignColumn(colIba.TypeId, BinderTools.NullId)
+                    AssignColumn(colIba.TypeId.Column, BinderTools.NullId)
                 };
             }
             else if (colExpression is EmbeddedFieldInitExpression)

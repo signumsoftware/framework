@@ -78,6 +78,7 @@
       <Link>Properties\Version.cs</Link>
     </Compile>
     <Compile Include="ButtonBar\ButtonBar.cs" />
+    <Compile Include="Facades\ViewOptions.cs" />
     <Compile Include="HtmlHelpers\CalendarHelper.cs" />
     <Compile Include="Common.cs" />
     <Compile Include="Facades\Constructor.cs" />

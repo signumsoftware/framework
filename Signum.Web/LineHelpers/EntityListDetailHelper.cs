@@ -54,12 +54,12 @@ namespace Signum.Web
 
                 sb.Add(sbSelect.ToHtml());
 
-                sb.AddLine(new HtmlStringBuilder()
+                using (sb.Surround(new HtmlTag("ul")))
                 {
-                    ListBaseHelper.CreateButton(helper, listDetail, null).Surround("td").Surround("tr"),
-                    ListBaseHelper.FindButton(helper, listDetail).Surround("td").Surround("tr"),
-                    ListBaseHelper.RemoveButton(helper, listDetail).Surround("td").Surround("tr")
-                }.ToHtml().Surround("table"));
+                    sb.AddLine(ListBaseHelper.CreateButton(helper, listDetail, null).Surround("li"));
+                    sb.AddLine(ListBaseHelper.FindButton(helper, listDetail).Surround("li"));
+                    sb.AddLine(ListBaseHelper.RemoveButton(helper, listDetail).Surround("li"));
+                }
             }
 
             if (listDetail.DetailDiv == defaultDetailDiv)

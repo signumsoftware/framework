@@ -16,12 +16,32 @@ namespace Signum.Engine.Linq
             return pc.Visit(source);
         }
 
+        protected override Expression Visit(Expression exp)
+        {
+            if (exp == null)
+                return null;
+
+            if (exp.Type == typeof(Type))
+                return VisitType(exp);
+            else
+                return base.Visit(exp);
+        }
+
+        private Expression VisitType(Expression exp)
+        {
+            if (exp.NodeType == ExpressionType.Constant)
+                return exp;
+
+            return new TypeIdExpression(QueryBinder.ExtractTypeId(exp));
+        }
+
         protected override Expression VisitLiteReference(LiteReferenceExpression lite)
         {
             var newId = Visit(lite.Id);
             var newTypeId = Visit(lite.TypeId);
             var reference = Visit(lite.Reference);
-            return new LiteReferenceExpression(lite.Type, reference, newId, null, newTypeId);
+            var toStr = Visit(lite.ToStr);
+            return new LiteReferenceExpression(lite.Type, reference, newId, toStr, newTypeId);
         }
 
         protected override Expression VisitFieldInit(FieldInitExpression fieldInit)
@@ -42,7 +62,7 @@ namespace Signum.Engine.Linq
         protected override Expression VisitImplementedByAll(ImplementedByAllExpression reference)
         {
             var id = (ColumnExpression)Visit(reference.Id);
-            var typeId = (ColumnExpression)Visit(reference.TypeId);
+            var typeId = (TypeIdExpression)Visit(reference.TypeId);
 
             return new ImplementedByAllExpression(reference.Type, id, typeId, reference.Token);
         }
