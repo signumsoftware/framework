@@ -45,6 +45,30 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_1CE25D0248850DA18B7681B9F26C9846"
+        "OwnerKey" = "8:_3A5D9989EFD445EBABAEA1998951A510"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_1CE25D0248850DA18B7681B9F26C9846"
+        "OwnerKey" = "8:_9FA368D5C2E879EB7424360EA5698A22"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_1CE25D0248850DA18B7681B9F26C9846"
+        "OwnerKey" = "8:_53C6689F2AB34B8E89999C33D0CF4A12"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_1CE25D0248850DA18B7681B9F26C9846"
+        "OwnerKey" = "8:_D20548622614442B888F89F322E111B1"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_1DB4BCFDB1764F4689475C559D2061EF"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -53,30 +77,6 @@
         {
         "MsmKey" = "8:_24EE79652FE810241462912D7C2028DD"
         "OwnerKey" = "8:_E1B9ACED2DE44489A83333DE9256AA24"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_270EF8112CD0A49C0ABB3799DE81538F"
-        "OwnerKey" = "8:_3A5D9989EFD445EBABAEA1998951A510"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_270EF8112CD0A49C0ABB3799DE81538F"
-        "OwnerKey" = "8:_9FA368D5C2E879EB7424360EA5698A22"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_270EF8112CD0A49C0ABB3799DE81538F"
-        "OwnerKey" = "8:_53C6689F2AB34B8E89999C33D0CF4A12"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_270EF8112CD0A49C0ABB3799DE81538F"
-        "OwnerKey" = "8:_D20548622614442B888F89F322E111B1"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -261,42 +261,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_91C111B70E225FEF4C0DC406C6B73E14"
-        "OwnerKey" = "8:_270EF8112CD0A49C0ABB3799DE81538F"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_91C111B70E225FEF4C0DC406C6B73E14"
-        "OwnerKey" = "8:_9FA368D5C2E879EB7424360EA5698A22"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_91C111B70E225FEF4C0DC406C6B73E14"
-        "OwnerKey" = "8:_53C6689F2AB34B8E89999C33D0CF4A12"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_91C111B70E225FEF4C0DC406C6B73E14"
-        "OwnerKey" = "8:_D20548622614442B888F89F322E111B1"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_91C111B70E225FEF4C0DC406C6B73E14"
-        "OwnerKey" = "8:_8AE98C53996B4998BC563D68ECA11DD0"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_91C111B70E225FEF4C0DC406C6B73E14"
-        "OwnerKey" = "8:_3A5D9989EFD445EBABAEA1998951A510"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_9E69E3F0B1D546D4837F1E92A308354C"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -425,6 +389,42 @@
         {
         "MsmKey" = "8:_EAF4D59889694331BD9A37B3EA136021"
         "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_EFBA457197E0AA0402D529946C0C9DCD"
+        "OwnerKey" = "8:_1CE25D0248850DA18B7681B9F26C9846"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_EFBA457197E0AA0402D529946C0C9DCD"
+        "OwnerKey" = "8:_8AE98C53996B4998BC563D68ECA11DD0"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_EFBA457197E0AA0402D529946C0C9DCD"
+        "OwnerKey" = "8:_9FA368D5C2E879EB7424360EA5698A22"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_EFBA457197E0AA0402D529946C0C9DCD"
+        "OwnerKey" = "8:_53C6689F2AB34B8E89999C33D0CF4A12"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_EFBA457197E0AA0402D529946C0C9DCD"
+        "OwnerKey" = "8:_D20548622614442B888F89F322E111B1"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_EFBA457197E0AA0402D529946C0C9DCD"
+        "OwnerKey" = "8:_3A5D9989EFD445EBABAEA1998951A510"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -634,13 +634,13 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_270EF8112CD0A49C0ABB3799DE81538F"
+        "OwnerKey" = "8:_1CE25D0248850DA18B7681B9F26C9846"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_91C111B70E225FEF4C0DC406C6B73E14"
+        "OwnerKey" = "8:_EFBA457197E0AA0402D529946C0C9DCD"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -850,6 +850,37 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_1CE25D0248850DA18B7681B9F26C9846"
+            {
+            "AssemblyRegister" = "3:1"
+            "AssemblyIsInGAC" = "11:FALSE"
+            "AssemblyAsmDisplayName" = "8:Signum.Entities, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b6f529cd3458096d, processorArchitecture=MSIL"
+                "ScatterAssemblies"
+                {
+                    "_1CE25D0248850DA18B7681B9F26C9846"
+                    {
+                    "Name" = "8:Signum.Entities.dll"
+                    "Attributes" = "3:512"
+                    }
+                }
+            "SourcePath" = "8:Signum.Entities.dll"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_13CDED455DCC4762A8434339B3747797"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:TRUE"
+            "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_1DB4BCFDB1764F4689475C559D2061EF"
             {
             "SourcePath" = "8:..\\Snippets\\fieldString.snippet"
@@ -887,37 +918,6 @@
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_6FAAA5AE799240DEAB0195CA575DB236"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:TRUE"
-            "IsDependency" = "11:TRUE"
-            "IsolateTo" = "8:"
-            }
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_270EF8112CD0A49C0ABB3799DE81538F"
-            {
-            "AssemblyRegister" = "3:1"
-            "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:Signum.Entities, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b6f529cd3458096d, processorArchitecture=MSIL"
-                "ScatterAssemblies"
-                {
-                    "_270EF8112CD0A49C0ABB3799DE81538F"
-                    {
-                    "Name" = "8:Signum.Entities.dll"
-                    "Attributes" = "3:512"
-                    }
-                }
-            "SourcePath" = "8:Signum.Entities.dll"
-            "TargetName" = "8:"
-            "Tag" = "8:"
-            "Folder" = "8:_13CDED455DCC4762A8434339B3747797"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -1342,37 +1342,6 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_91C111B70E225FEF4C0DC406C6B73E14"
-            {
-            "AssemblyRegister" = "3:1"
-            "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:Signum.Utilities, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b6f529cd3458096d, processorArchitecture=MSIL"
-                "ScatterAssemblies"
-                {
-                    "_91C111B70E225FEF4C0DC406C6B73E14"
-                    {
-                    "Name" = "8:Signum.Utilities.dll"
-                    "Attributes" = "3:512"
-                    }
-                }
-            "SourcePath" = "8:Signum.Utilities.dll"
-            "TargetName" = "8:"
-            "Tag" = "8:"
-            "Folder" = "8:_13CDED455DCC4762A8434339B3747797"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:TRUE"
-            "IsDependency" = "11:TRUE"
-            "IsolateTo" = "8:"
-            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_9E69E3F0B1D546D4837F1E92A308354C"
             {
             "SourcePath" = "8:..\\Snippets\\entity.snippet"
@@ -1626,6 +1595,37 @@
             "Register" = "3:1"
             "Exclude" = "11:FALSE"
             "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_EFBA457197E0AA0402D529946C0C9DCD"
+            {
+            "AssemblyRegister" = "3:1"
+            "AssemblyIsInGAC" = "11:FALSE"
+            "AssemblyAsmDisplayName" = "8:Signum.Utilities, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b6f529cd3458096d, processorArchitecture=MSIL"
+                "ScatterAssemblies"
+                {
+                    "_EFBA457197E0AA0402D529946C0C9DCD"
+                    {
+                    "Name" = "8:Signum.Utilities.dll"
+                    "Attributes" = "3:512"
+                    }
+                }
+            "SourcePath" = "8:Signum.Utilities.dll"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_13CDED455DCC4762A8434339B3747797"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:TRUE"
+            "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_F3DB79DA5B2D0B385C12C85652163F5F"
@@ -2073,7 +2073,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Signum Framework 2.0"
         "ProductCode" = "8:{F8061C85-4F36-456B-86F2-15C2BB33669F}"
-        "PackageCode" = "8:{B2EABEDF-4C85-4F98-BFA9-71978274ECCD}"
+        "PackageCode" = "8:{B6A317D3-2382-43BB-82C8-39B9508755F2}"
         "UpgradeCode" = "8:{B7A27921-C916-4EF3-ACF0-1A1628B84A71}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
@@ -3295,7 +3295,7 @@
             }
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_3A5D9989EFD445EBABAEA1998951A510"
             {
-            "SourcePath" = "8:..\\Signum.Windows\\obj\\Debug\\Signum.Windows.dll"
+            "SourcePath" = "8:..\\Signum.Windows\\obj\\Release\\Signum.Windows.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_6FAAA5AE799240DEAB0195CA575DB236"
@@ -3463,7 +3463,7 @@
             }
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_8AE98C53996B4998BC563D68ECA11DD0"
             {
-            "SourcePath" = "8:..\\Signum.Entities\\obj\\Debug\\Signum.Entities.dll"
+            "SourcePath" = "8:..\\Signum.Entities\\obj\\Release\\Signum.Entities.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_6FAAA5AE799240DEAB0195CA575DB236"
@@ -3575,7 +3575,7 @@
             }
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_B481C66871B649638E14F6F902992511"
             {
-            "SourcePath" = "8:..\\Signum.Utilities\\obj\\Debug\\Signum.Utilities.dll"
+            "SourcePath" = "8:..\\Signum.Utilities\\obj\\Release\\Signum.Utilities.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_6FAAA5AE799240DEAB0195CA575DB236"
@@ -3603,7 +3603,7 @@
             }
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_D20548622614442B888F89F322E111B1"
             {
-            "SourcePath" = "8:..\\Signum.Engine\\obj\\Debug\\Signum.Engine.dll"
+            "SourcePath" = "8:..\\Signum.Engine\\obj\\Release\\Signum.Engine.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_6FAAA5AE799240DEAB0195CA575DB236"
@@ -3631,7 +3631,7 @@
             }
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_E1B9ACED2DE44489A83333DE9256AA24"
             {
-            "SourcePath" = "8:..\\Template\\WizardProjectName\\WizardProjectName\\obj\\Debug\\WizardProjectName.dll"
+            "SourcePath" = "8:..\\Template\\WizardProjectName\\WizardProjectName\\obj\\Release\\WizardProjectName.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_13CDED455DCC4762A8434339B3747797"
