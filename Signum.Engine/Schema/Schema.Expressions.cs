@@ -198,12 +198,12 @@ namespace Signum.Engine.Maps
         {
             Expression result = new ImplementedByAllExpression(IsLite ? Reflector.ExtractLite(FieldType) : FieldType,
                 new ColumnExpression(Column.ReferenceType(), tableAlias, Column.Name),
-                new ColumnExpression(Column.ReferenceType(), tableAlias, ColumnTypes.Name), token);
+                new TypeIdExpression(new ColumnExpression(Column.ReferenceType(), tableAlias, ColumnTypes.Name)), token);
 
             if (this.IsLite)
                 return tools.MakeLite(this.FieldType, result, null);
             else
-                return result; 
+                return result;
         }
     }
 }

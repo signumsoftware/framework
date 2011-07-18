@@ -110,6 +110,14 @@ namespace Signum.Test.LinqProvider
             var list = Database.Query<AlbumDN>().Select(a => a.ToLite(a.Label.Name)).ToList();
         }
 
+
+        [TestMethod]
+        public void SelectType()
+        {
+            var list = Database.Query<AlbumDN>()
+                .Select(a => a.GetType()).ToList();
+        }
+
         [TestMethod]
         public void SelectLiteIB()
         {
@@ -118,9 +126,35 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void SelectTypeIB()
+        {
+            var list = Database.Query<AlbumDN>()
+                .Select(a => a.Author.GetType()).ToList();
+        }
+
+        [TestMethod]
+        public void SelectTypeLiteIB()
+        {
+            var list = Database.Query<AwardNominationDN>()
+                .Select(a => a.Award.RuntimeType).ToList();
+        }
+
+        [TestMethod]
         public void SelectEntityWithLiteIb()
         {
             var list = Database.Query<AwardNominationDN>().Where(a => a.Award.Entity is GrammyAwardDN).ToList();
+        }
+
+        [TestMethod]
+        public void SelectEntityWithLiteIbType()
+        {
+            var list = Database.Query<AwardNominationDN>().Where(a => a.Award.Entity.GetType() == typeof(GrammyAwardDN)).ToList();
+        }
+
+        [TestMethod]
+        public void SelectEntityWithLiteIbRuntimeType()
+        {
+            var list = Database.Query<AwardNominationDN>().Where(a => a.Award.RuntimeType == typeof(GrammyAwardDN)).ToList();
         }
 
         [TestMethod]

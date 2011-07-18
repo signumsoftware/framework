@@ -141,6 +141,8 @@ namespace Signum.Engine.Linq
                     return this.VisitImplementedByAll((ImplementedByAllExpression)exp);
                 case (ExpressionType)DbExpressionType.LiteReference:
                     return this.VisitLiteReference((LiteReferenceExpression)exp);
+                case (ExpressionType)DbExpressionType.TypeId:
+                    return this.VisitTypeId((TypeIdExpression)exp);
                 case (ExpressionType)DbExpressionType.MList:
                     return this.VisitMList((MListExpression)exp);
                 case (ExpressionType)DbExpressionType.MListElement:
@@ -151,6 +153,7 @@ namespace Signum.Engine.Linq
             }
         }
 
+    
       
         protected virtual Expression VisitCommandAggregate(CommandAggregateExpression cea)
         {
@@ -211,6 +214,16 @@ namespace Signum.Engine.Linq
             return lite;
         }
 
+        protected virtual Expression VisitTypeId(TypeIdExpression typeId)
+        {
+            var column = Visit(typeId.Column);
+
+            if (column != typeId.Column)
+                return new TypeIdExpression(column);
+
+            return typeId;
+        }
+
         protected virtual Expression VisitMList(MListExpression ml)
         {
             var newBackID = Visit(ml.BackID);
@@ -258,7 +271,7 @@ namespace Signum.Engine.Linq
         protected virtual Expression VisitImplementedByAll(ImplementedByAllExpression reference)
         {
             var id = Visit(reference.Id);
-            var typeId = Visit(reference.TypeId);
+            var typeId = (TypeIdExpression)Visit(reference.TypeId);
             var implementations = reference.Implementations
                .NewIfChange(ri => Visit(ri.Field).Map(r => r == ri.Field ? ri : new ImplementationColumnExpression(ri.Type, (FieldInitExpression)r)));
 
