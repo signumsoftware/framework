@@ -1263,4 +1263,10 @@
   <data name="SMSTemplateState_Modified" xml:space="preserve">
     <value>Modificado</value>
   </data>
+  <data name="ChartRequest_Multiplications" xml:space="preserve">
+    <value>Multiplicaciones</value>
+  </data>
+  <data name="FileDN_Hash" xml:space="preserve">
+    <value>Hash</value>
+  </data>
 </root>
