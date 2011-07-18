@@ -21,12 +21,10 @@ namespace Signum.Web
     public class EntityLine : EntityBase
     {
         public bool Autocomplete { get; set; }
-        public bool Navigate { get; set; }
-        
-       public EntityLine(Type type, object untypedValue, Context parent, string controlID, PropertyRoute propertyRoute)
+
+        public EntityLine(Type type, object untypedValue, Context parent, string controlID, PropertyRoute propertyRoute)
             : base(type, untypedValue, parent, controlID, propertyRoute)
         {
-            Navigate = true;
             Autocomplete = true;        
         }
 
@@ -75,9 +73,14 @@ namespace Signum.Web
 
         public static JsInstruction JsCreate(EntityLine eline, JsViewOptions viewOptions)
         {
-            if (viewOptions.ControllerUrl == null)
+            if (eline.ViewMode == ViewMode.Navigate)
+            {
+                viewOptions.Navigate = true;
+                viewOptions.ControllerUrl = Navigator.ViewRoute(eline.Type.CleanType(), null);
+            }
+            else if (viewOptions.ControllerUrl == null)
                 viewOptions.ControllerUrl = RouteHelper.New().SignumAction("PopupView");
-
+            
             string createParams = ",".Combine(
                 viewOptions.TryCC(v => v.ToJS()),
                 eline.HasManyImplementations ? RouteHelper.New().SignumAction("GetTypeChooser").SingleQuote() : null);

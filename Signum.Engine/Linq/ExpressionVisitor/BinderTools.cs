@@ -58,7 +58,7 @@ namespace Signum.Engine.Linq
                 toStr = GetToStr(entity);
 
             Expression id = GetId(entity);
-            Expression typeId = GetTypeId(entity);
+            Expression typeId = GetEntityType(entity);
             return new LiteReferenceExpression(type, entity, id, toStr, typeId);
         }
 
@@ -111,10 +111,10 @@ namespace Signum.Engine.Linq
             throw new NotSupportedException();
         }
 
-        public Expression GetTypeId(Expression expression)
+        public Expression GetEntityType(Expression expression)
         {
             if (expression is FieldInitExpression)
-                return ((FieldInitExpression)expression).TypeId;
+                return Expression.Constant(((FieldInitExpression)expression).Type, typeof(Type));
 
             if (expression is ImplementedByExpression)
             {
@@ -124,12 +124,12 @@ namespace Signum.Engine.Linq
                     return NullId;
 
                 if (ib.Implementations.Count == 1)
-                    return ib.Implementations[0].Field.TypeId;//Not regular, but usefull
+                    return Expression.Constant(ib.Implementations[0].Field.Type, typeof(Type));//Not regular, but usefull
 
                 Expression aggregate = ib.Implementations.Select(imp => new When(
                         Expression.NotEqual(imp.Field.ExternalId, NullId),
-                        imp.Field.TypeId))
-                    .ToList().ToCondition(typeof(int?));
+                        Expression.Constant(imp.Field.Type, typeof(Type))))
+                    .ToList().ToCondition(typeof(Type));
 
                 return aggregate;
             }
@@ -137,7 +137,7 @@ namespace Signum.Engine.Linq
             if (expression is ImplementedByAllExpression)
                 return ((ImplementedByAllExpression)expression).TypeId;
 
-            throw new NotSupportedException();
+            return Expression.Constant(expression.Type, typeof(Type));
         }
 
         public Expression Coalesce(Type type, IEnumerable<Expression> exp)

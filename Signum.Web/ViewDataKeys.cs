@@ -13,7 +13,12 @@ namespace Signum.Web
         public const string GlobalErrors = "sfGlobalErrors"; //Key for Global Errors in ModelStateDictionary
         public const string Title = "Title";
         public const string CustomHtml = "sfCustomHtml";
+        
+        public const string OkVisible = "sfOkVisible";
         public const string OnOk = "sfOnOk";
+        public const string SaveVisible = "sfSaveVisible";
+        public const string OnSave = "sfOnSave";
+        
         public const string FindOptions = "sfFindOptions";
         public const string QueryDescription = "sfQueryDescription";
         public const string QueryName = "sfQueryName";

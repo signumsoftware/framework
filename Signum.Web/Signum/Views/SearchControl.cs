@@ -78,7 +78,7 @@ namespace ASP
     var entityColumn = queryDescription.Columns.Single(a => a.IsEntity);
     Type entitiesType = Reflector.ExtractLite(entityColumn.Type);
     Implementations implementations = entityColumn.Implementations;
-    bool viewable = findOptions.View && (implementations != null || Navigator.IsNavigable(entitiesType, true));
+    bool viewable = findOptions.View && (implementations != null || Navigator.IsViewable(entitiesType, true));
 
 
 WriteLiteral("<div id=\"");

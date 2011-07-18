@@ -9,7 +9,7 @@
    var entityColumn = queryDescription.Columns.Single(a => a.IsEntity);
    Type entitiesType = Reflector.ExtractLite(entityColumn.Type);
    Implementations implementations = entityColumn.Implementations;
-   bool viewable = findOptions.View && (implementations != null || Navigator.IsNavigable(entitiesType, true));
+   bool viewable = findOptions.View && (implementations != null || Navigator.IsViewable(entitiesType, true));
 
    ResultTable queryResult = (ResultTable)ViewData[ViewDataKeys.Results];
    Dictionary<int, Func<HtmlHelper, object, MvcHtmlString>> formatters = (Dictionary<int, Func<HtmlHelper, object, MvcHtmlString>>)ViewData[ViewDataKeys.Formatters];}

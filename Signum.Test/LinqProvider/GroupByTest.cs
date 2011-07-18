@@ -43,6 +43,20 @@ namespace Signum.Test.LinqProvider
             var list = Database.Query<ArtistDN>().GroupBy(a => a.Sex).ToList();
         }
 
+
+        //[TestMethod]
+        //public void GroupEntityByTypeFie()
+        //{
+        //    var list = Database.Query<AlbumDN>().GroupBy(a => a.GetType()).ToList();
+        //}
+
+
+        [TestMethod]
+        public void GroupEntityByTypeIb()
+        {
+            var list = Database.Query<AwardNominationDN>().GroupBy(a => a.Award.GetType()).ToList();
+        }
+
         [TestMethod]
         public void WhereGroup()
         {
@@ -79,6 +93,19 @@ namespace Signum.Test.LinqProvider
             var songsAlbum = (from a in Database.Query<ArtistDN>()
                               group a by a.Sex into g
                               select new { Sex = g.Key, DeadArtists = (int?)g.Count(a => a.Dead) }).ToList();
+        }
+
+        [TestMethod]
+        public void GroupEntityByTypeFieCount()
+        {
+            var list = Database.Query<AlbumDN>().GroupBy(a => a.GetType()).Select(gr => new { gr.Key, Count = gr.Count() }).ToList();
+        }
+
+
+        [TestMethod]
+        public void GroupEntityByTypeIbCount()
+        {
+            var list = Database.Query<AlbumDN>().GroupBy(a => a.Author.GetType()).Select(gr => new { gr.Key, Count = gr.Count() }).ToList();
         }
 
         [TestMethod]

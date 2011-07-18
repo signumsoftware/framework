@@ -4,13 +4,14 @@
 }
 @using (Html.BeginForm())
 {
-    <h2>
-        <span class="sf-entity-title">@(ViewBag.Title)</span>
-    </h2>
-     Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString());
+    <div id="divNormalControl">
+        <h2>
+            <span class="sf-entity-title">@(ViewBag.Title)</span>
+        </h2>
+        @{ Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString()); }
     
-    @Html.AntiForgeryToken()
-    @Html.ValidationSummaryAjax()
-
+        @Html.AntiForgeryToken()
+        @Html.ValidationSummaryAjax()
+    </div>
     <div class="clear"></div>   
 }
