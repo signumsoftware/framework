@@ -255,9 +255,9 @@ SF.registerModule("Operations", function () {
             }
 
             if (SF.isEmpty(newPrefix))
-                newPrefix = this.newPrefix();
+                newPrefix = null;
 
-            onAjaxSuccess = typeof onAjaxSuccess == "undefined" ? SF.opOpenPopup : onAjaxSuccess;
+            onAjaxSuccess = typeof onAjaxSuccess == "undefined" ? SF.opOnSuccessDispatcher : onAjaxSuccess;
 
             var onSuccess = function () {
                 this.ajax(newPrefix, onAjaxSuccess);
@@ -295,24 +295,6 @@ SF.registerModule("Operations", function () {
         SF.OperationManager.call(this, $.extend({
             controllerUrl: null
         }, _options));
-
-//        this.defaultDelete = function () {
-//            SF.log("DeleteExecutor defaultDelete");
-
-//            if (SF.Blocker.isEnabled()) {
-//                return false;
-//            }
-
-//            if (SF.isTrue(this.options.isLite)) {
-//                SF.Notify.info(lang.signum.executing);
-//                this.ajax(this.options.prefix, function () {
-//                    SF.Notify.info(lang.signum.executed, 2000);
-//                });
-//            }
-//            else {
-//                throw "Delete operation must be Lite";
-//            }
-//        };
 
         this.contextualDelete = function (runtimeType, id) {
             SF.log("DeleteExecutor contextualDelete");
@@ -376,7 +358,7 @@ SF.registerModule("Operations", function () {
             var self = this;
             $.ajax({
                 url: this.options.controllerUrl,
-                data: this.requestData(this.newPrefix(), items),
+                data: this.requestData(newPrefix, items),
                 success: function (operationResult) {
                     SF.Blocker.disable();
 
@@ -405,7 +387,7 @@ SF.registerModule("Operations", function () {
             }
 
             var onSuccess = function (items) {
-                this.ajax(this.newPrefix(), items, SF.opOpenPopup);
+                this.ajax(this.options.prefix, items, SF.opOnSuccessDispatcher);
             }
 
             var self = this;
@@ -432,37 +414,6 @@ SF.registerModule("Operations", function () {
     };
 
     SF.ConstructorFromMany.prototype = new SF.OperationManager();
-
-//    SF.reloadEntity = function (urlController, prefix, parentDiv) {
-//        var $partialViewName = $('#sfPartialViewName');
-//        var requestData = $("form :input,form :select").not(".sf-search-control :input,.sf-search-control :select").serialize() + "&prefix=" + prefix;
-//        if ($partialViewName.length === 1) {
-//            requestData += "&partialViewName=" + $partialViewName.val();
-//        }
-//        $.ajax({
-//            url: urlController,
-//            data: requestData,
-//            async: false,
-//            success: function (msg) {
-//                if (!SF.isEmpty(parentDiv)) {
-//                    $('#' + parentDiv + ' input[onblur]').attr('onblur', ''); // To avoid Chrome to fire onblur when replacing parentdiv content
-//                    $('#' + parentDiv).html(msg);
-//                    SF.triggerNewContent($('#' + parentDiv));
-//                }
-//                else {
-//                    if (SF.isEmpty(prefix)) {
-//                        $('#divNormalControl').html(msg);
-//                        SF.triggerNewContent($('#divNormalControl'));
-//                    }
-//                    else {
-//                        $('#' + SF.compose(prefix, "divMainControl") + ' input[onblur]').attr('onblur', ''); // To avoid Chrome to fire onblur when replacing popup content
-//                        $('#' + SF.compose(prefix, "divMainControl")).html(msg);
-//                        SF.triggerNewContent($('#' + SF.compose(prefix, "divMainControl")));
-//                    }
-//                }
-//            }
-//        });
-//    };
 
     SF.opDisableCtxmenu = function () {
         var clss = "sf-ctxmenu-active";
@@ -520,7 +471,7 @@ SF.registerModule("Operations", function () {
     SF.opOpenPopupNoDefaultOk = function (prefix, operationResult) {
         SF.log("OperationExecutor OpOpenPopupNoDefaultOk");
         SF.opDisableCtxmenu();
-        new SF.ViewNavigator({ prefix: prefix, onOk: function () { return false; } }).showCreateSave(operationResult);
+        new SF.ViewNavigator({ prefix: prefix, onOk: function () { return false; }, onSave: function () { return false; } }).showCreateSave(operationResult);
         SF.Notify.info(lang.signum.executed, 2000);
     };
 

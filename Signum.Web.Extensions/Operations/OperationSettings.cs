@@ -48,6 +48,7 @@ namespace Signum.Web.Operations
         }
 
         public Func<EntityOperationContext, bool> IsVisible { get; set; }
+        public bool IsVisibleOnOkPopup { get; set; }
         public Func<EntityOperationContext, JsInstruction> OnClick { get; set; }
         public Func<ContextualOperationContext, bool> IsContextualVisible { get; set; }
         public Func<ContextualOperationContext, JsInstruction> OnContextualClick { get; set; }

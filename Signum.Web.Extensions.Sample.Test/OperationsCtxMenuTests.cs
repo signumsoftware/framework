@@ -77,7 +77,7 @@ namespace Signum.Web.Extensions.Sample.Test
 
             selenium.LineFindAndSelectElements("New_Label_", false, new int[] { 0 });
 
-            selenium.Click("jq=#{0}btnOk".Formato("New_")); //Dont't call PopupOk helper => it makes an ajaxWait and then waitPageLoad fails
+            selenium.PopupSave("New_"); 
             selenium.WaitForPageToLoad(PageLoadTimeout);
             selenium.MainEntityHasId();
         }
