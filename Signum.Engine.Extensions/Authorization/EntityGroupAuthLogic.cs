@@ -109,7 +109,7 @@ namespace Signum.Engine.Authorization
         static void EntityGroupAuthLogic_Saving<T>(T ident)
             where T : IdentifiableEntity
         {
-            if (AuthLogic.IsEnabled && !saveDisabled && ident.Modified.Value)
+            if (!Schema.Current.InGlobalMode && AuthLogic.IsEnabled && !saveDisabled && ident.Modified.Value)
             {
                 if (ident.IsNew)
                 {
@@ -368,7 +368,7 @@ namespace Signum.Engine.Authorization
         public static IQueryable<T> WhereAllowed<T>(this IQueryable<T> query)
             where T : IdentifiableEntity
         {
-            if (!AuthLogic.IsEnabled)
+            if (Schema.Current.InGlobalMode || !AuthLogic.IsEnabled)
                 return query;
 
             return WhereIsAllowedFor<T>(query, TypeAllowedBasic.Read, ExecutionContext.Current);

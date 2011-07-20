@@ -34,7 +34,7 @@ namespace Signum.Engine.Authorization
                 AuthLogic.AssertStarted(sb);              
 
                 sb.Schema.EntityEventsGlobal.Saving += Schema_Saving; //because we need Modifications propagated
-                sb.Schema.EntityEventsGlobal.Retrieved += new RetrievedEventHandler<IdentifiableEntity>(EntityEventsGlobal_Retrieved);
+                sb.Schema.EntityEventsGlobal.Retrieved += EntityEventsGlobal_Retrieved;
                 sb.Schema.IsAllowedCallback += Schema_IsAllowedCallback;
 
                 cache = new AuthCache<RuleTypeDN, TypeAllowedRule, TypeDN, Type, TypeAllowed>(sb,
@@ -61,6 +61,9 @@ namespace Signum.Engine.Authorization
 
         static void Schema_Saving(IdentifiableEntity ident)
         {
+            if (Schema.Current.InGlobalMode)
+                return;
+
             if (ident.Modified.Value)
             {
                 TypeAllowedBasic access = cache.GetAllowed(ident.GetType()).GetDB();
@@ -72,8 +75,11 @@ namespace Signum.Engine.Authorization
             }
         }
 
-        static void EntityEventsGlobal_Retrieved(IdentifiableEntity ident)
+        static void EntityEventsGlobal_Retrieved(IdentifiableEntity ident, bool fromCache)
         {
+            if (Schema.Current.InGlobalMode)
+                return;
+
             Type type = ident.GetType();
             TypeAllowedBasic access = cache.GetAllowed(type).GetDB();
             if (access < TypeAllowedBasic.Read)
