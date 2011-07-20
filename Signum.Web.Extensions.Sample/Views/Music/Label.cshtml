@@ -2,5 +2,6 @@
 
 @using (var e = Html.TypeContext<LabelDN>()) 
 {
-	@Html.ValueLine(e, f => f.Name);
+	@Html.ValueLine(e, f => f.Name)
+    @Html.EntityCombo(e, f => f.Owner)
 }

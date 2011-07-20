@@ -31,64 +31,70 @@ namespace Signum.Web.Files
 
                 if (filePath)
                 {
-                    Navigator.AddSetting(new EntitySettings<FilePathDN>(EntityType.Default)
+                    var es = new EntitySettings<FilePathDN>(EntityType.Default);
+                    Navigator.AddSetting(es);
+                     
+                    var baseMapping = (Mapping<FilePathDN>)es.MappingDefault.AsEntityMapping().RemoveProperty(fp => fp.BinaryFile);
+
+                    es.MappingDefault = ctx =>
                     {
-                        MappingDefault = ctx =>
+                        RuntimeInfo runtimeInfo = ctx.GetRuntimeInfo();
+                        if (runtimeInfo.RuntimeType == null)
+                            return null;
+                        else
                         {
-                            RuntimeInfo runtimeInfo = ctx.GetRuntimeInfo();
-                            if (runtimeInfo.RuntimeType == null)
-                                return null;
-                            else
+                            if (runtimeInfo.IsNew)
                             {
-                                if (runtimeInfo.IsNew)
-                                {
-                                    string fileType = ctx.Inputs[FileLineKeys.FileType];
-                                    var fp = new FilePathDN(EnumLogic<FileTypeDN>.ToEnum(fileType));
+                                string fileType = ctx.Inputs[FileLineKeys.FileType];
+                                var fp = new FilePathDN(EnumLogic<FileTypeDN>.ToEnum(fileType));
 
-                                    HttpPostedFileBase hpf = ctx.ControllerContext.HttpContext.Request.Files[ctx.ControlID] as HttpPostedFileBase;
+                                HttpPostedFileBase hpf = ctx.ControllerContext.HttpContext.Request.Files[ctx.ControlID] as HttpPostedFileBase;
 
-                                    fp.FileName = Path.GetFileName(hpf.FileName);
-                                    fp.BinaryFile = hpf.InputStream.ReadAllBytes();
+                                fp.FileName = Path.GetFileName(hpf.FileName);
+                                fp.BinaryFile = hpf.InputStream.ReadAllBytes();
 
-                                    return fp;
-                                }
+                                return fp;
                             }
-
-                            return ctx.None();
                         }
-                    });
+
+                        return baseMapping(ctx);
+                    };
+
+                    es.MappingAdmin = es.MappingDefault;
                 }
 
                 if (embeddedFile)
                 {
-                    Navigator.AddSetting(new EmbeddedEntitySettings<EmbeddedFileDN>()
+                    var es = new EmbeddedEntitySettings<EmbeddedFileDN>();
+                    Navigator.AddSetting(es);
+
+                    var baseMapping = (Mapping<EmbeddedFileDN>) es.MappingDefault.AsEntityMapping().RemoveProperty(fp => fp.BinaryFile);
+
+                    es.MappingDefault = ctx =>
                     {
-                        MappingDefault = ctx =>
+                        RuntimeInfo runtimeInfo = ctx.GetRuntimeInfo();
+                        if (runtimeInfo.RuntimeType == null)
+                            return null;
+                        else
                         {
-                            RuntimeInfo runtimeInfo = ctx.GetRuntimeInfo();
-                            if (runtimeInfo.RuntimeType == null)
-                                return null;
-                            else
+                            if (runtimeInfo.IsNew)
                             {
-                                if (runtimeInfo.IsNew)
+                                var result = new EmbeddedFileDN();
+
+                                HttpPostedFileBase hpf = ctx.ControllerContext.HttpContext.Request.Files[ctx.ControlID] as HttpPostedFileBase;
+
+                                if (hpf.ContentLength != 0)
                                 {
-                                    var result = new EmbeddedFileDN();
-
-                                    HttpPostedFileBase hpf = ctx.ControllerContext.HttpContext.Request.Files[ctx.ControlID] as HttpPostedFileBase;
-
-                                    if (hpf.ContentLength != 0)
-                                    {
-                                        result.FileName = Path.GetFileName(hpf.FileName);
-                                        result.BinaryFile = hpf.InputStream.ReadAllBytes();
-                                    }
-
-                                    return result;
+                                    result.FileName = Path.GetFileName(hpf.FileName);
+                                    result.BinaryFile = hpf.InputStream.ReadAllBytes();
                                 }
-                            }
 
-                            return ctx.None();
+                                return result;
+                            }
                         }
-                    });
+
+                        return baseMapping(ctx);
+                    };
                 }
             }
         }

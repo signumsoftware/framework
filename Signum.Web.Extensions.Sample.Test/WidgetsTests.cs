@@ -71,7 +71,8 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SeleniumExtensions.PopupSelector(popupPrefix)));
 
             selenium.Type(popupPrefix + "Text", "note test");
-            selenium.PopupOk(popupPrefix);
+            selenium.PopupSave(popupPrefix);
+            selenium.WaitAjaxFinished(() => !selenium.IsElementPresent(SeleniumExtensions.PopupSelector(popupPrefix)));
 
             selenium.GetAlert();
             selenium.WaitAjaxFinished(() => selenium.EntityHasNNotes(1));
@@ -104,7 +105,8 @@ namespace Signum.Web.Extensions.Sample.Test
 
             selenium.Type(popupPrefix + "Text", "alert test");
             selenium.Type(popupPrefix + "AlertDate", DateTime.Today.AddDays(1).ToString("dd/MM/yyyy hh:mm"));
-            selenium.PopupOk(popupPrefix);
+            selenium.PopupSave(popupPrefix);
+            selenium.WaitAjaxFinished(() => !selenium.IsElementPresent(SeleniumExtensions.PopupSelector(popupPrefix)));
 
             selenium.GetAlert();
             selenium.WaitAjaxFinished(() => selenium.EntityHasNAlerts(1, future));
@@ -118,7 +120,8 @@ namespace Signum.Web.Extensions.Sample.Test
 
             selenium.Type(popupPrefix + "Text", "warned alert test");
             selenium.Type(popupPrefix + "AlertDate", DateTime.Today.AddDays(-1).ToString("dd/MM/yyyy hh:mm"));
-            selenium.PopupOk(popupPrefix);
+            selenium.PopupSave(popupPrefix);
+            selenium.WaitAjaxFinished(() => !selenium.IsElementPresent(SeleniumExtensions.PopupSelector(popupPrefix)));
 
             selenium.GetAlert();
             selenium.WaitAjaxFinished(() => selenium.EntityHasNAlerts(1, future));

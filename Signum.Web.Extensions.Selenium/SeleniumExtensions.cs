@@ -139,6 +139,11 @@ namespace Signum.Web.Selenium
             selenium.WaitAjaxFinished(() => !selenium.IsElementPresent(PopupSelector(prefix)));
         }
 
+        public static void PopupSave(this ISelenium selenium, string prefix)
+        {
+            EntityButtonClick(selenium, prefix + "ebSave");
+        }
+
         public static void MainEntityHasId(this ISelenium selenium)
         {
             Assert.IsTrue(selenium.IsElementPresent("jq=#divNormalControl[data-isnew=false]"));
