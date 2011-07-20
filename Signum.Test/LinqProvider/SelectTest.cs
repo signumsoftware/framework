@@ -563,6 +563,28 @@ namespace Signum.Test.LinqProvider
             var lists = (from mle in Database.MListQuery((AlbumDN a) => a.Songs)
                          select mle).ToList();
         }
+
+        [TestMethod]
+        public void SelectCache()
+        {
+            Connection.CommandCount = 0;
+            CacheLogic.Invalidate<AmericanMusicAwardDN>();
+            Database.RetrieveAll<AmericanMusicAwardDN>();
+            Assert.AreEqual(Connection.CommandCount, 1);
+
+            Connection.CommandCount = 0;
+            Database.RetrieveAll<AmericanMusicAwardDN>();
+            Assert.AreEqual(Connection.CommandCount, 0); //Cached
+
+            Connection.CommandCount = 0;
+            Database.Query<AmericanMusicAwardDN>().ToList();
+            Assert.AreEqual(Connection.CommandCount, 1); //Query
+
+
+            Connection.CommandCount = 0;
+            Database.Query<BandDN>().ToList();
+            Assert.AreEqual(Connection.CommandCount, 5); //MemberFriends + Members + Query + OtherAwards + GrammyAwards
+        }
     }
 
     public static class AuthorExtensions

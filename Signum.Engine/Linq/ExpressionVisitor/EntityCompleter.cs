@@ -36,7 +36,8 @@ namespace Signum.Engine.Linq
         {
             fie = new FieldInitExpression(fie.Type, fie.TableAlias, fie.ExternalId, null, fie.Token) { Bindings = fie.Bindings.ToList() };
 
-            if (previousTypes.Contains(fie.Type))
+            var cc = Schema.Current.CacheController(fie.Type);
+            if (previousTypes.Contains(fie.Type) || cc != null && cc.Enabled /*just to force cache before executing the query*/)
             {
                 fie.Bindings.Clear();
                 fie.TableAlias = null;
