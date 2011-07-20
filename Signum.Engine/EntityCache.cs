@@ -53,24 +53,29 @@ namespace Signum.Engine
                     Add(ident);
             }
 
-            IRetriever Retriever { get; set; }
+            IRetriever retriever;
 
             internal IRetriever NewRetriever()
             {
-                if (Retriever == null)
-                    Retriever = new RealRetriever(this);
+                if (retriever == null)
+                    retriever = new RealRetriever(this);
                 else
-                    Retriever = new ChildRetriever(Retriever, this);
+                    retriever = new ChildRetriever(retriever, this);
 
-                return Retriever;
+                return retriever;
             }
 
             internal void ReleaseRetriever(IRetriever retriever)
             {
-                if (retriever == null || retriever != Retriever)
+                if (this.retriever == null || this.retriever != retriever)
                     throw new InvalidOperationException("Inconsistent state of the retriever");
 
-                Retriever = retriever.Parent;
+                this.retriever = retriever.Parent;
+            }
+
+            internal bool HasRetriever
+            {
+                get{return retriever != null; }
             }
         }
 
@@ -104,6 +109,9 @@ namespace Signum.Engine
             }
         }
 
+        public static bool Created { get { return stack != null && !stack.IsEmpty; } }
+
+        internal static bool HasRetriever { get { return stack != null && !stack.IsEmpty && Current.HasRetriever; } }
 
         public void Dispose()
         {
@@ -165,7 +173,9 @@ namespace Signum.Engine
         {
             Current.ReleaseRetriever(retriever);
         }
-    
+
+
+        
     }
 
     [Serializable]

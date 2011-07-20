@@ -396,5 +396,15 @@ namespace Signum.Utilities
             }
             return sb.ToString(0, Math.Max(0, sb.Length - separator.Length));  // Remove at the end is faster
         }
+
+        public static StringBuilder AppendLines(this StringBuilder sb, IEnumerable<string> strings)
+        {
+            foreach (var item in strings)
+            {
+                sb.AppendLine(item); 
+            }
+
+            return sb;
+        }
     }
 }

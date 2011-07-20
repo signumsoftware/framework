@@ -56,7 +56,7 @@ namespace Signum.Web
                         {
                             int? id = entityCombo.IdOrNull;
 
-                            List<Lite> data = entityCombo.Data ?? AutoCompleteUtils.RetriveAllLite(entityCombo.Type.CleanType(), entityCombo.Implementations);
+                            List<Lite> data = entityCombo.Data ?? AutoCompleteUtils.RetrieveAllLite(entityCombo.Type.CleanType(), entityCombo.Implementations);
 
                             items.AddRange(
                                 data.Select(lite => new SelectListItem()

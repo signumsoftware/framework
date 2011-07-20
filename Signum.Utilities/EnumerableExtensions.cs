@@ -36,12 +36,20 @@ namespace Signum.Utilities
 
         public static IEnumerable<T> NotNull<T>(this IEnumerable<T> collection) where T : class
         {
-            return collection.Where(a => a != null);
+            foreach (var item in collection)
+            {
+                if (item != null)
+                    yield return item;
+            }
         }
 
         public static IEnumerable<T> NotNull<T>(this IEnumerable<T?> collection) where T : struct
         {
-            return collection.Where(a => a.HasValue).Select(a => a.Value);
+            foreach (var item in collection)
+            {
+                if (item.HasValue)
+                    yield return item.Value;
+            }
         }
 
         public static IEnumerable<T> And<T>(this IEnumerable<T> collection, T newItem)
