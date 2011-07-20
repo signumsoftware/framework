@@ -48,6 +48,7 @@ body
 	padding: 10px;
 	min-height: 400px;
 	border-left: 1px solid #CCC;
+	overflow: auto;
 }
 
 #footer
