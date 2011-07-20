@@ -76,7 +76,24 @@ namespace Signum.Entities
         public bool DoNotValidate { get; set; }
         public bool SkipPropertyValidation { get; set; }
         public bool SkipExternalPropertyValidation { get; set; }
-        public PropertyValidationEventHandler StaticPropertyValidation;
+        public event PropertyValidationEventHandler StaticPropertyValidation;
+
+        internal bool HasStaticPropertyValidation 
+        {
+            get { return StaticPropertyValidation != null; }
+        }
+
+        internal string OnStaticPropertyValidation(ModifiableEntity sender, PropertyInfo pi, object propertyValue)
+        {
+            foreach (PropertyValidationEventHandler item in StaticPropertyValidation.GetInvocationList())
+            {
+                string result = item(sender, pi, propertyValue);
+                if (result != null)
+                    return result;
+            }
+
+            return null;
+        }
     }
 
     public delegate string PropertyValidationEventHandler(ModifiableEntity sender, PropertyInfo pi, object propertyValue);
