@@ -347,13 +347,13 @@ namespace Signum.Web
             return (Lite<T>)Manager.ExtractLite<T>(controller, prefix);
         }
 
-        public static List<Lite<T>> ExtractLitesList<T>(string commaSeparatedIds, bool retrive) where T : IdentifiableEntity
+        public static List<Lite<T>> ExtractLitesList<T>(string commaSeparatedIds, bool retrieve) where T : IdentifiableEntity
         {
             if (!commaSeparatedIds.HasText())
                 return new List<Lite<T>>();
 
             var ids = commaSeparatedIds.Split(new[]{','},StringSplitOptions.RemoveEmptyEntries );
-            if (retrive)
+            if (retrieve)
                 return Database.RetrieveListLite<T>(ids.Select(i => int.Parse(i)).ToList());
 
             else
