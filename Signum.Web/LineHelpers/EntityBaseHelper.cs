@@ -62,10 +62,12 @@ namespace Signum.Web
                 case RenderMode.Content:
                     return helper.Partial(partialViewName, vdd);
                 case RenderMode.Popup:
-                    vdd.Add(ViewDataKeys.PartialViewName, partialViewName);
+                    vdd[ViewDataKeys.PartialViewName] = partialViewName;
+                    vdd[ViewDataKeys.OkVisible] = !line.ReadOnly;
                     return helper.Partial(Navigator.Manager.PopupControlView, vdd);
                 case RenderMode.PopupInDiv:
-                    vdd.Add(ViewDataKeys.PartialViewName, partialViewName);
+                    vdd[ViewDataKeys.PartialViewName] = partialViewName;
+                    vdd[ViewDataKeys.OkVisible] = !line.ReadOnly;
                     return helper.Div(typeContext.Compose(EntityBaseKeys.Entity),
                         helper.Partial(Navigator.Manager.PopupControlView, vdd),
                         "",
@@ -87,13 +89,16 @@ namespace Signum.Web
 
         public static MvcHtmlString ViewButton(HtmlHelper helper, EntityBase entityBase)
         {
-            if (!entityBase.View)
+            if (!entityBase.View || (entityBase is EntityLine && entityBase.ViewMode == ViewMode.Navigate))
+                return MvcHtmlString.Empty;
+
+            if (entityBase.ViewMode == ViewMode.Navigate && !entityBase.Type.CleanType().IsIIdentifiable())
                 return MvcHtmlString.Empty;
 
             var htmlAttr = new Dictionary<string, object>
             {
                 { "onclick", entityBase.GetViewing() },
-                { "data-icon", "ui-icon-circle-arrow-e" },
+                { "data-icon", entityBase.ViewMode == ViewMode.Popup ? "ui-icon-circle-arrow-e" : "ui-icon-arrowthick-1-e" },
                 { "data-text", false}
             };
 
@@ -113,10 +118,13 @@ namespace Signum.Web
             if (!entityBase.Create)
                 return MvcHtmlString.Empty;
 
+            if (entityBase.ViewMode == ViewMode.Navigate && !entityBase.Type.CleanType().IsIIdentifiable())
+                return MvcHtmlString.Empty;
+
             var htmlAttr = new Dictionary<string, object>
             {
                 { "onclick", entityBase.GetCreating() },
-                { "data-icon", "ui-icon-circle-plus" },
+                { "data-icon", entityBase.ViewMode == ViewMode.Popup ? "ui-icon-circle-plus" : "ui-icon-plusthick" },
                 { "data-text", false}
             };
 
@@ -195,13 +203,12 @@ namespace Signum.Web
         {
             if (eb.Implementations == null && Navigator.Manager.EntitySettings.ContainsKey(entityType))
             {
-                eb.Create = Navigator.IsCreable(entityType, false);
-                eb.View = Navigator.IsViewable(entityType, false);
-                eb.Find = Navigator.IsFindable(entityType);
+                eb.Create = eb.Create && Navigator.IsCreable(entityType, false);
+                eb.View = eb.View && Navigator.IsViewable(entityType, false);
+                eb.Find = eb.Find && Navigator.IsFindable(entityType);
 
-                EntityLine el = eb as EntityLine;
-                if (el != null)
-                    el.Navigate = Navigator.IsNavigable(entityType, false);
+                bool isLite = ((eb as EntityListBase).TryCC(elb => elb.ElementType) ?? eb.Type).IsLite();
+                eb.ViewMode = isLite ? ViewMode.Navigate : ViewMode.Popup;
             }
         }
     }

@@ -11,8 +11,7 @@ using Signum.Entities;
 namespace Signum.Web
 {
     public delegate ToolBarButton[] GetToolBarButtonEntityDelegate<T>(ControllerContext controllerContext, T entity, string partialViewName, string prefix);
-
-
+    
     public static class ButtonBarEntityHelper
     {
         static Dictionary<Type, List<Delegate>> entityButtons = new Dictionary<Type, List<Delegate>>();
@@ -48,8 +47,7 @@ namespace Signum.Web
             return links;
         }
     }
-
-
+    
     public delegate ToolBarButton[] GetToolBarButtonQueryDelegate(ControllerContext controllerContext, object queryName, Type entityType, string prefix);
 
     public static class ButtonBarQueryHelper

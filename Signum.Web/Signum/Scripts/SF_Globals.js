@@ -274,7 +274,7 @@ SF.registerModule("Globals", function () {
             }
         }
 
-        $form.attr("action", urlController).submit();
+        $form.attr("action", urlController)[0].submit();
         return false;
     };
 
@@ -301,8 +301,8 @@ SF.registerModule("Globals", function () {
         var currentForm = $("form");
         currentForm.after($form);
 
-        $form.submit()
-            .remove();
+        $form[0].submit();
+        $form.remove();
 
         return false;
     }
