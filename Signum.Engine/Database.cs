@@ -110,7 +110,33 @@ namespace Signum.Engine
         static GenericInvoker<Func<int, IdentifiableEntity>> giRetrieve = new GenericInvoker<Func<int, IdentifiableEntity>>(id => Retrieve<IdentifiableEntity>(id));
         public static T Retrieve<T>(int id) where T : IdentifiableEntity
         {
+            var cc = CanUseCache<T>();
+            if (cc != null)
+            {
+                var result = cc.GetEntity(id);
+                Schema.Current.OnRetrieved(result, true);
+                return result;
+            }
+
+            if (EntityCache.Created)
+            {
+                T cached = EntityCache.Get<T>(id);
+
+                if (cached != null)
+                    return cached;
+            }
+
             return Database.Query<T>().Single(a => a.Id == id);
+        }
+
+        private static CacheController<T> CanUseCache<T>() where T:IdentifiableEntity
+        {
+            CacheController<T> cc = Schema.Current.CacheController<T>();
+
+            if (cc != null && cc.Enabled && (EntityCache.HasRetriever || !Schema.Current.HasQueryFilter(typeof(T))))
+                return cc;
+
+            return null;
         }
 
         public static IdentifiableEntity Retrieve(Type type, int id)
@@ -144,6 +170,10 @@ namespace Signum.Engine
             where T : class, IIdentifiable
             where RT : IdentifiableEntity, T
         {
+            var cc = CanUseCache<RT>();
+            if (cc != null)
+                return cc.GetEntity(id).ToLite<T>();
+
             var result = Database.Query<RT>().Select(a => a.ToLite<T>()).First(a => a.Id == id);
             if (result == null)
                 throw new EntityNotFoundException(typeof(RT), id);
@@ -153,6 +183,10 @@ namespace Signum.Engine
 
         public static Lite<T> RetrieveLite<T>(int id) where T : IdentifiableEntity
         {
+            var cc = CanUseCache<T>();
+            if (cc != null)
+                return cc.GetEntity(id).ToLite();
+
             var result = Database.Query<T>().Select(a => a.ToLite()).First(a => a.Id == id);
             if (result == null)
                 throw new EntityNotFoundException(typeof(T), id);
@@ -178,6 +212,10 @@ namespace Signum.Engine
         public static string GetToStr<T>(int id)
             where T : IdentifiableEntity
         {
+            var cc = CanUseCache<T>();
+            if (cc != null)
+                return cc.GetEntity(id).ToString();
+
             return Database.Query<T>().Where(a => a.Id == id).Select(a => a.ToStr).First();
         }
 
@@ -203,6 +241,15 @@ namespace Signum.Engine
         public static List<T> RetrieveAll<T>()
             where T : IdentifiableEntity
         {
+            var cc = CanUseCache<T>();
+            if (cc != null)
+            {
+                var result = cc.GetAllEntities();
+                foreach (var item in result)
+                    Schema.Current.OnRetrieved(item, true);
+                return result;
+            }
+
             return Database.Query<T>().ToList();
         }
 
@@ -220,6 +267,10 @@ namespace Signum.Engine
         public static List<Lite<T>> RetrieveAllLite<T>()
             where T : IdentifiableEntity
         {
+            var cc = CanUseCache<T>();
+            if (cc != null)
+                return cc.GetAllEntities().Select(a => a.ToLite()).ToList();
+
             return Database.Query<T>().Select(e => e.ToLite()).ToList();
         }
 
@@ -240,15 +291,47 @@ namespace Signum.Engine
             if (ids == null)
                 throw new ArgumentNullException("ids");
 
-            var list = Database.Query<T>().Where(a => ids.Contains(a.Id)).ToList();
-
-            if (list.Count != ids.Count)
+            var cc = CanUseCache<T>();
+            if (cc != null)
             {
-                int[] missing = ids.Except(list.Select(a => a.Id)).ToArray();
-                if (missing.Any())
-                    throw new EntityNotFoundException(typeof(T), missing);
+                var list = cc.GetEntitiesList(ids);
+                foreach (var item in list)
+                    Schema.Current.OnRetrieved(item, true);
+                return list;
             }
-            return list;
+
+            List<T> result = null;
+           
+            if (EntityCache.Created)
+            {
+                result = ids.Select(id => EntityCache.Get<T>(id)).NotNull().ToList();
+                if (result.Count > 0)
+                    ids = ids.Except(result.Select(a => a.Id)).ToList();
+            }
+
+            if (ids.Count > 0)
+            {
+                var toRetrieve = Database.Query<T>().Where(a => ids.Contains(a.Id)).ToList();
+
+                if (toRetrieve.Count != ids.Count)
+                {
+                    int[] missing = ids.Except(toRetrieve.Select(a => a.Id)).ToArray();
+                    if (missing.Any())
+                        throw new EntityNotFoundException(typeof(T), missing);
+                }
+
+                if (result == null)
+                    result = toRetrieve;
+                else
+                    result.AddRange(toRetrieve);
+            }
+            else
+            {
+                if (result == null)
+                    result = new List<T>();
+            }
+
+            return result;
         }
 
         public static List<IdentifiableEntity> RetrieveList(Type type, List<int> ids)
@@ -267,6 +350,10 @@ namespace Signum.Engine
         {
             if (ids == null)
                 throw new ArgumentNullException("ids");
+
+            var cc = CanUseCache<T>();
+            if (cc != null)
+                return cc.GetAllEntities().Select(a => a.ToLite()).ToList();
 
             var result = Database.Query<T>().Where(a => ids.Contains(a.Id)).Select(a => a.ToLite()).ToList();
 

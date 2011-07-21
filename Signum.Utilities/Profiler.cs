@@ -110,7 +110,7 @@ namespace Signum.Utilities
             }
         }
 
-        public static IDisposable Log(string role = null, object aditionalData = null)
+        public static Tracer Log(string role = null, object aditionalData = null)
         {
             if (!Enabled)
                 return null;
@@ -121,6 +121,13 @@ namespace Signum.Utilities
                 return null;
             }
 
+            var saveCurrent = CreateNewEntry(role, aditionalData);
+
+            return new Tracer { saveCurrent = saveCurrent };
+        }
+
+        private static HeavyProfilerEntry CreateNewEntry(string role, object aditionalData)
+        {
             Stopwatch discount = Stopwatch.StartNew();
 
             var saveCurrent = current;
@@ -133,10 +140,17 @@ namespace Signum.Utilities
                 StackTrace = new StackTrace(1, true),
             };
 
-            discount.Stop(); 
-            
+            discount.Stop();
+
             current.Stopwatch = Stopwatch.StartNew();
-            return new Disposable(() =>
+            return saveCurrent;
+        }
+
+        public class Tracer : IDisposable
+        {
+            internal HeavyProfilerEntry saveCurrent;
+
+            public void Dispose()
             {
                 current.Stopwatch.Stop();
 
@@ -157,12 +171,22 @@ namespace Signum.Utilities
                         saveCurrent.Entries = new List<HeavyProfilerEntry>();
 
                     current.Index = saveCurrent.Entries.Count;
-                    current.Parent = saveCurrent; 
+                    current.Parent = saveCurrent;
                     saveCurrent.Entries.Add(current);
                 }
 
                 current = saveCurrent;
-            });
+            }
+        }
+
+        public static void Switch(this Tracer tracer, string role = null, object aditionalData = null)
+        {
+            if (tracer == null)
+                return;
+
+            tracer.Dispose();
+
+            tracer.saveCurrent = CreateNewEntry(role, aditionalData); 
         }
 
         public static void CleanCurrent() //To fix possible non-dispossed ones
@@ -175,6 +199,16 @@ namespace Signum.Utilities
             return from pe in Entries
                    from p in pe.Descendants().PreAnd(pe)
                    select p;
+        }
+
+        public static string FullToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (var item in Entries)
+            {
+                item.FullToString(sb, "");
+            }
+            return sb.ToString();
         }
 
         public static string GetFileLineAndNumber(this StackFrame frame)
@@ -273,11 +307,30 @@ namespace Signum.Utilities
 
         public override string ToString()
         {
-            if(Entries == null)
-                return Elapsed.NiceToString();
+            string basic = "{0} {1}".Formato(Elapsed.NiceToString(), Role);
 
-            return "{0} {1} --> ({2})".Formato(Elapsed.NiceToString(), Role,
-                GetDescendantRoles().ToString(kvp => "{0} {1}".Formato(kvp.Key, kvp.Value.ToString(this)), " | "));
+            if (Entries == null)
+                return basic;
+
+            return basic + " --> (" +
+                    GetDescendantRoles().ToString(kvp => "{0} {1}".Formato(kvp.Key, kvp.Value.ToString(this)), " | ")
+                    + ")";
+        }
+
+        public string FullToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            FullToString(sb, "");
+            return sb.ToString(); 
+        }
+
+        public void FullToString(StringBuilder sb, string ident)
+        {
+            sb.Append(ident); 
+            sb.AppendLine(this.ToString());
+            if (Entries != null)
+                foreach (var item in Entries)
+                    item.FullToString(sb, ident + "  "); 
         }
     }
 

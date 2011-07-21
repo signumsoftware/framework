@@ -139,15 +139,15 @@ namespace Signum.Engine.Exceptions
     public class ConcurrencyException: Exception
     {
         public Type Type { get; private set; }
-        public int Id { get; private set; }
+        public int[] Ids { get; private set; }
 
         protected ConcurrencyException(SerializationInfo info, StreamingContext context) : base(info, context) { }
 
-        public ConcurrencyException(Type type, int id)
-            : base(Resources.ConcurrencyErrorOnDatabaseTable0Id1.Formato(type.NiceName(), id))
+        public ConcurrencyException(Type type, params int[] ids)
+            : base(Resources.ConcurrencyErrorOnDatabaseTable0Id1.Formato(type.NiceName(), ids.ToString(", ")))
         {
             this.Type = type;
-            this.Id = id;
+            this.Ids = ids;
         }
     }
 }
