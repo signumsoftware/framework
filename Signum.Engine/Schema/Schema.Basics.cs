@@ -924,6 +924,14 @@ namespace Signum.Engine.Maps
         Table ReferenceTable { get; }
     }
 
+    public static partial class ColumnExtensions
+    {
+        public static string GetSqlDbTypeString(this IColumn column)
+        {
+            return column.SqlDbType.ToString().ToUpper(CultureInfo.InvariantCulture) + SqlBuilder.GetSizeScale(column.Size, column.Scale);
+        }
+    }
+
     public interface IFieldReference
     {
         bool IsLite { get; }

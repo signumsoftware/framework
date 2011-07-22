@@ -27,6 +27,14 @@ namespace Signum.Engine
             return CreateParameter(name, SqlBuilder.PrimaryKeyType, nullable, id);
         }
 
+        public static SqlParameter CreateParameter(string name, object value, Type type)
+        {
+            return CreateParameter(name,
+             Schema.Current.Settings.DefaultSqlType(type.UnNullify()),
+             type == null || type.IsByRef || type.IsNullable(), 
+             value);
+        }
+
         public static SqlParameter CreateParameter(string name, SqlDbType type, bool nullable, object value)
         {
             if (IsDate(type))
