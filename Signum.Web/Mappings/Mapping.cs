@@ -233,14 +233,19 @@ namespace Signum.Web
     {
         public Dictionary<Type, Delegate> AllowedMappings;
 
-        public Mapping<R> RegisterMapping<R>(Mapping<R> mapping) where R : ModifiableEntity
+        public AutoEntityMapping<T> RegisterMapping<R>(EntityMapping<R> mapping) where R : ModifiableEntity
+        {
+            return RegisterMapping((Mapping<R>) mapping);
+        }
+
+        public AutoEntityMapping<T> RegisterMapping<R>(Mapping<R> mapping) where R : ModifiableEntity
         {
             if (AllowedMappings == null)
                 AllowedMappings = new Dictionary<Type, Delegate>();
 
             AllowedMappings.Add(typeof(R), mapping);
 
-            return mapping;
+            return this;
         }
 
         public override T GetValue(MappingContext<T> ctx)
