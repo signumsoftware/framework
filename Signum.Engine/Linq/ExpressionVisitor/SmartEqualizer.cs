@@ -15,6 +15,10 @@ namespace Signum.Engine.Linq
 {
     internal static class SmartEqualizer
     {
+        static ConstantExpression True = Expression.Constant(true);
+        static ConstantExpression False = Expression.Constant(false);
+
+
         public static Expression EqualNullableGroupBy(Expression e1, Expression e2)
         {
             return Expression.Or(Expression.Equal(e1.Nullify(), e2.Nullify()),
@@ -74,32 +78,31 @@ namespace Signum.Engine.Linq
 
         private static Expression SmartAnd(Expression e1, Expression e2)
         {
-            if (e1 == SqlConstantExpression.True)
+            if (e1 == True)
                 return e2;
 
-            if (e2 == SqlConstantExpression.True)
+            if (e2 == True)
                 return e1;
 
-            if (e1 == SqlConstantExpression.False || e2 == SqlConstantExpression.False)
-                return SqlConstantExpression.False;
+            if (e1 == False || e2 == False)
+                return False;
 
             return Expression.And(e1, e2); 
         }
 
         private static Expression SmartOr(Expression e1, Expression e2)
         {
-            if (e1 == SqlConstantExpression.False)
+            if (e1 == False)
                 return e2;
 
-            if (e2 == SqlConstantExpression.False)
+            if (e2 == False)
                 return e1;
 
-            if (e1 == SqlConstantExpression.True || e2 == SqlConstantExpression.True)
-                return SqlConstantExpression.True;
+            if (e1 == True || e2 == True)
+                return True;
 
             return Expression.Or(e1, e2);
         }
-
 
         private static Expression ConstantTypeEquals(ConstantExpression c, TypeIdExpression ti)
         {
@@ -111,19 +114,19 @@ namespace Signum.Engine.Linq
             if (c1.Value == null)
             {
                 if (c2.Value == null)
-                    return SqlConstantExpression.True;
+                    return True;
                 else
-                    return SqlConstantExpression.False;
+                    return False;
             }
             else
             {
                 if (c2.Value == null)
-                    return SqlConstantExpression.False;
+                    return False;
 
                 if (c1.Value.Equals(c2.Value))
-                    return SqlConstantExpression.True;
+                    return True;
                 else
-                    return SqlConstantExpression.False;
+                    return False;
             }
         }
 
@@ -135,7 +138,7 @@ namespace Signum.Engine.Linq
         internal static Expression EntityIn(Expression newItem, IEnumerable<IdentifiableEntity> collection)
         {
             if (collection.IsEmpty())
-                return SqlConstantExpression.False;
+                return False;
 
             Dictionary<Type, object[]> entityIDs = collection.AgGroupToDictionary(a => a.GetType(), gr => gr.Select(a => (object)(a.IdOrNull ?? int.MaxValue)).ToArray());
 
@@ -145,7 +148,7 @@ namespace Signum.Engine.Linq
         internal static Expression EntityIn(LiteReferenceExpression liteReference, IEnumerable<Lite> collection)
         {
             if (collection.IsEmpty())
-                return SqlConstantExpression.False;
+                return False;
 
             Dictionary<Type, object[]> entityIDs = collection.AgGroupToDictionary(a => a.RuntimeType, gr => gr.Select(a => (object)(a.IdOrNull ?? int.MaxValue)).ToArray());
 
@@ -214,7 +217,7 @@ namespace Signum.Engine.Linq
                 if (tE2 == DbExpressionType.FieldInit) return EqualsToNull(((FieldInitExpression)e2).ExternalId);
                 else if (tE2 == DbExpressionType.ImplementedBy) return ((ImplementedByExpression)e2).Implementations.Select(a => EqualsToNull(a.Field.ExternalId)).Aggregate((a, b) => Expression.And(a, b));
                 else if (tE2 == DbExpressionType.ImplementedByAll) return EqualsToNull(((ImplementedByAllExpression)e2).Id);
-                else if (e2.IsNull()) return SqlConstantExpression.True;
+                else if (e2.IsNull()) return True;
                 else return null;
 
             else return null;
@@ -223,7 +226,7 @@ namespace Signum.Engine.Linq
         static Expression EmbeddedNullEquals(EmbeddedFieldInitExpression efie)
         {
             if (efie.HasValue == null)
-                return SqlConstantExpression.False; 
+                return False; 
 
             return Expression.Not(efie.HasValue);
         }
@@ -233,14 +236,14 @@ namespace Signum.Engine.Linq
             if (fie1.Type == fie2.Type)
                 return EqualNullable(fie1.ExternalId, fie2.ExternalId);
             else
-                return SqlConstantExpression.False;
+                return False;
         }
 
         static Expression FieIbEquals(FieldInitExpression fie, ImplementedByExpression ib)
         {
             var imp = ib.Implementations.SingleOrDefault(i => i.Type == fie.Type);
             if (imp == null)
-                return SqlConstantExpression.False;
+                return False;
 
             return EqualNullable(imp.Field.ExternalId, fie.ExternalId); 
         }
@@ -254,7 +257,7 @@ namespace Signum.Engine.Linq
         {
             var list = ib.Implementations.Join(ib2.Implementations, i => i.Type, j => j.Type, (i, j) => EqualNullable(i.Field.ExternalId, j.Field.ExternalId)).ToList();
             if(list.Count == 0)
-                return SqlConstantExpression.False;
+                return False;
             return list.Aggregate((e1, e2) => Expression.Or(e1, e2));
         }
 
@@ -265,7 +268,7 @@ namespace Signum.Engine.Linq
                 EqualNullable(iba.TypeId.Column, QueryBinder.TypeConstant(i.Field.Type)))).ToList();
 
             if (list.Count == 0)
-                return SqlConstantExpression.False;
+                return False;
 
             return list.Aggregate((e1, e2) => Expression.Or(e1, e2));
         }

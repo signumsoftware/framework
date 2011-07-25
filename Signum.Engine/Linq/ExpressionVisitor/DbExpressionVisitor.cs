@@ -265,9 +265,6 @@ namespace Signum.Engine.Linq
             return column;
         }
 
-
-    
-
         protected virtual Expression VisitImplementedByAll(ImplementedByAllExpression reference)
         {
             var id = Visit(reference.Id);
@@ -282,7 +279,6 @@ namespace Signum.Engine.Linq
             return reference;
         }
 
-      
         protected virtual Expression VisitImplementedBy(ImplementedByExpression reference)
         {
             var implementations = reference.Implementations

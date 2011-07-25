@@ -609,9 +609,6 @@ namespace Signum.Engine.Linq
 
     internal class SqlConstantExpression : DbExpression
     {
-        public static readonly Expression False = Expression.Equal(new SqlConstantExpression(1), new SqlConstantExpression(0));
-        public static readonly Expression True = Expression.Equal(new SqlConstantExpression(1), new SqlConstantExpression(1));
-
         public readonly object Value;
 
         public SqlConstantExpression(object value)
@@ -855,7 +852,7 @@ namespace Signum.Engine.Linq
             if (values == null) throw new ArgumentNullException("values");
 
             if (values.Length == 0)
-                return SqlConstantExpression.False;
+                return Expression.Constant(false);
 
             return new InExpression(expression, values);
         }
