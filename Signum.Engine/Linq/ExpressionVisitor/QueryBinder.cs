@@ -774,16 +774,18 @@ namespace Signum.Engine.Linq
             if (source != null && ExpressionCleaner.HasExpansions(source.Type, m.Method) && source is FieldInitExpression) //new expansions discovered
             {
                 Dictionary<ParameterExpression, Expression> replacements = new Dictionary<ParameterExpression, Expression>();
-                Func<Expression, Expression> replace = e =>
+                Func<Expression, ParameterInfo, Expression> replace = (e, pi) =>
                 {
-                    if (e == null || e.NodeType == ExpressionType.Quote || e.NodeType == ExpressionType.Lambda)
+                    if (e == null || e.NodeType == ExpressionType.Quote || e.NodeType == ExpressionType.Lambda || pi != null && pi.HasAttribute<EagerBindingAttribute>() )
                         return e;
                     ParameterExpression pe = Expression.Parameter(e.Type, "p" + replacements.Count);
                     replacements.Add(pe, e);
                     return pe; 
                 }; 
 
-                MethodCallExpression simple = Expression.Call(replace(m.Object), m.Method, m.Arguments.Select(replace).ToArray());
+                var parameters = m.Method.GetParameters();
+
+                MethodCallExpression simple = Expression.Call(replace(m.Object, null), m.Method, m.Arguments.Select((a, i) => replace(a, parameters[i])).ToArray());
 
                 Expression binded = ExpressionCleaner.BindMethodExpression(simple, true);
 
