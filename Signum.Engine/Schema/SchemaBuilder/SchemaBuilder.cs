@@ -52,12 +52,12 @@ namespace Signum.Engine.Maps
             AddUniqueIndex<T>(fields, null); 
         }
 
-        public void AddUniqueIndex<T>(Expression<Func<T, object>> fields, Expression<Func<T, object>> fieldsNotNull) where T : IdentifiableEntity
+        public void AddUniqueIndex<T>(Expression<Func<T, object>> fields, Expression<Func<T, object>> fieldsAllowRepeatedNull) where T : IdentifiableEntity
         {
             Schema schema = Schema.Current;
 
             Expression<Func<T, object>>[] fieldLambdas = Split(fields);
-            Expression<Func<T, object>>[] fieldsNotNullLambdas = Split(fieldsNotNull);
+            Expression<Func<T, object>>[] fieldsNotNullLambdas = Split(fieldsAllowRepeatedNull);
 
             Field[] colFields = fieldLambdas.Select(fun => schema.Field<T>(fun)).ToArray();
             Field[] colFieldsNotNull = fieldsNotNullLambdas.Select(fun => schema.Field<T>(fun)).ToArray();
