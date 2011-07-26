@@ -242,7 +242,7 @@ namespace Signum.Utilities
 
         public static string CommaOr<T>(this IEnumerable<T> collection)
         {
-            return CommaString(collection.Select(a=>a.ToString()).ToArray(), Resources.Or);
+            return CommaString(collection.Select(a => a.ToString()).ToArray(), Resources.Or);
         }
 
         public static string CommaOr<T>(this IEnumerable<T> collection, Func<T, string> toString)
@@ -261,7 +261,7 @@ namespace Signum.Utilities
         }
 
         static string CommaString(this string[] values, string lastSeparator)
-        {            
+        {
             if (values.Length == 0)
                 return "";
 
@@ -476,7 +476,7 @@ namespace Signum.Utilities
         }
 
         public static Interval<V> MinMaxPair<T, V>(this IEnumerable<T> collection, Func<T, V> valueSelector)
-            where V:struct, IComparable<V>, IEquatable<V>
+            where V : struct, IComparable<V>, IEquatable<V>
         {
             bool has = false;
             V min = default(V), max = default(V);
@@ -575,7 +575,7 @@ namespace Signum.Utilities
 
         public static List<IGrouping<T, T>> GroupWhen<T>(this IEnumerable<T> collection, Func<T, bool> isGroupKey)
         {
-            return GroupWhen(collection, isGroupKey, false); 
+            return GroupWhen(collection, isGroupKey, false);
         }
 
         public static List<IGrouping<T, T>> GroupWhen<T>(this IEnumerable<T> collection, Func<T, bool> isGroupKey, bool includeKeyInGroup)
@@ -588,7 +588,7 @@ namespace Signum.Utilities
                 {
                     group = new Grouping<T, T>(item);
                     if (includeKeyInGroup)
-                        group.Add(item); 
+                        group.Add(item);
                     result.Add(group);
                 }
                 else
@@ -804,6 +804,30 @@ namespace Signum.Utilities
             return oldDictionary.Select(p => resultSelector(p.Value, newDictionary[p.Key]));
         }
 
+
+        public static JoinStrictResult<O, N, R> JoinStrict<K, O, N, R>(
+        IEnumerable<O> oldCollection,
+        IEnumerable<N> newCollection,
+        Func<O, K> oldKeySelector,
+        Func<N, K> newKeySelector,
+        Func<O, N, R> resultSelector)
+        {
+            var result = new JoinStrictResult<O, N, R>();
+
+            var oldDictionary = oldCollection.ToDictionary(oldKeySelector);
+            var newDictionary = newCollection.ToDictionary(newKeySelector);
+
+            result.Extra = oldDictionary.Where(e => !newDictionary.ContainsKey(e.Key)).Select(e => e.Value).ToList();
+            result.Lacking = newDictionary.Where(e => !oldDictionary.ContainsKey(e.Key)).Select(e => e.Value).ToList();
+            if (!(result.Extra.Any() || result.Lacking.Any()))
+                result.Result = oldDictionary.Select(p => resultSelector(p.Value, newDictionary[p.Key])).Where(e=>e!=null).ToList();
+
+            return result;
+        }
+
+
+
+
         public static IEnumerable<Iteration<T>> Iterate<T>(this IEnumerable<T> collection)
         {
             using (IEnumerator<T> enumerator = collection.GetEnumerator())
@@ -826,6 +850,14 @@ namespace Signum.Utilities
         }
     }
 
+
+    public class JoinStrictResult<O, N, R>
+    {
+        public List<O> Extra;
+        public List<N> Lacking;
+        public List<R> Result;
+    }
+
     public enum BiSelectOptions
     {
         None,
@@ -839,7 +871,7 @@ namespace Signum.Utilities
     {
         readonly T value;
         readonly bool isFirst;
-        readonly bool isLast; 
+        readonly bool isLast;
         readonly int position;
 
         internal Iteration(T value, bool isFirst, bool isLast, int position)

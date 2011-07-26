@@ -176,6 +176,24 @@ namespace Signum.Web
             this.PropertyRoute = propertyRoute;
         }
 
+        public RuntimeInfo RuntimeInfo()
+        {
+            if (this.UntypedValue == null)
+                return new RuntimeInfo() { RuntimeType = null };
+
+            Type type = this.UntypedValue.GetType();
+            if (type.IsLite())
+                return new RuntimeInfo((Lite)this.UntypedValue);
+
+            if (type.IsEmbeddedEntity())
+                return new RuntimeInfo((EmbeddedEntity)this.UntypedValue);
+
+            if (type.IsIdentifiableEntity())
+                return new RuntimeInfo((IdentifiableEntity)this.UntypedValue);
+
+            throw new ArgumentException("Invalid type {0} for RuntimeInfo. It must be Lite, IdentifiableEntity or EmbeddedEntity".Formato(type));
+        }
+
         internal abstract TypeContext Clone(object newValue);
     }
     #endregion
