@@ -872,6 +872,9 @@ namespace Signum.Engine.Linq
                         }
                         else
                         {
+                            if (nex.Members == null)
+                                throw new InvalidOperationException("Impossible to bind '{0}' on '{1}'".Formato(m.Member.Name, nex.Constructor.ConstructorSignature()));
+
                             PropertyInfo pi = (PropertyInfo)m.Member;
                             return nex.Members.Zip(nex.Arguments).Single(p => ReflectionTools.PropertyEquals((PropertyInfo)p.Item1, pi)).Item2;
                         }
