@@ -120,7 +120,7 @@ namespace Signum.Web.Combine
             else
             {
                 if (virtualPath.StartsWith("~"))
-                    virtualPath = virtualPath.Substring(1); 
+                    virtualPath = VirtualPathUtility.ToAbsolute(virtualPath); 
 
                 using (Stream str = VirtualPathProvider.OpenFile(virtualPath))
                 using (StreamReader reader = new StreamReader(str))
