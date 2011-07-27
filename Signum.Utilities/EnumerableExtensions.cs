@@ -601,6 +601,33 @@ namespace Signum.Utilities
             return result;
         }
 
+        public static IEnumerable<IGrouping<K, T>> GroupWhenChange<T, K>(this IEnumerable<T> collection, Func<T, K> getGroupKey)
+        {
+            Grouping<K, T> current = null;
+
+            foreach (var item in collection)
+            {
+                if (current == null)
+                {
+                    current = new Grouping<K, T>(getGroupKey(item));
+                    current.Add(item);
+                }
+                else if (current.Key.Equals(getGroupKey(item)))
+                {
+                    current.Add(item);
+                }
+                else
+                {
+                    yield return current;
+                    current = new Grouping<K, T>(getGroupKey(item));
+                    current.Add(item);
+                }
+            }
+
+            if (current != null)
+                yield return current; 
+        }
+
         public static IEnumerable<T> Distinct<T, S>(this IEnumerable<T> collection, Func<T, S> func)
         {
             return collection.Distinct(new LambdaComparer<T, S>(func));
