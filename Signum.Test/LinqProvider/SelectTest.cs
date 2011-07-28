@@ -230,6 +230,12 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void SelectEntityNone()
+        {
+            var list = Database.Query<AlbumDN>().ToList();
+        }
+
+        [TestMethod]
         public void SelectEntitySelect()
         {
             var list = Database.Query<AlbumDN>().Select(a => a).ToList();

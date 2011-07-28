@@ -104,7 +104,7 @@
     <Compile Include="ExecutionContext.cs" />
     <Compile Include="Linq\DbExpressions.Sql.cs" />
     <Compile Include="Linq\DbQueryProvider.cs" />
-    <Compile Include="Linq\DbQueryUtils.cs" />
+    <Compile Include="Linq\ExpressionVisitor\DbQueryUtils.cs" />
     <Compile Include="Linq\ExpressionVisitor\AggregateRewriter.cs" />
     <Compile Include="Linq\ExpressionVisitor\AliasGatherer.cs" />
     <Compile Include="Linq\ExpressionVisitor\AliasProjectionReplacer.cs" />
