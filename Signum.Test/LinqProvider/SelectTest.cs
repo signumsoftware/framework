@@ -570,7 +570,7 @@ namespace Signum.Test.LinqProvider
                          select mle).ToList();
         }
 
-        [TestMethod]
+        //[TestMethod]
         public void SelectCache()
         {
             Connection.CommandCount = 0;
