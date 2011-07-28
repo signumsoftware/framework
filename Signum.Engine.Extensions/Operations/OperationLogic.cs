@@ -360,9 +360,14 @@ namespace Signum.Engine.Operations
         }
 
 
-        static List<IOperation> TypeOperations(Type type)
+        static IEnumerable<IOperation> TypeOperations(Type type)
         {
-            return operations.GetValue(type).Values.ToList();
+            var dic = operations.TryGetValue(type);
+
+            if (dic == null)
+                return Enumerable.Empty<IOperation>();
+
+            return dic.Values;
         }
 
         public static T GetArg<T>(this object[] args, int pos)
