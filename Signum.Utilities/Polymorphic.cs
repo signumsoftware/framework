@@ -125,7 +125,7 @@ namespace Signum.Utilities
             var result = TryGetValue(type);
          
             if (result == null)
-                throw new InvalidOperationException("No {0} defined for type {0}".Formato(typeof(T).Name, type));
+                throw new InvalidOperationException("No value defined for type {0}".Formato(type));
 
             return result; 
         }
