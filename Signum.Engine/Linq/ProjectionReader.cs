@@ -21,7 +21,7 @@ namespace Signum.Engine.Linq
 
         IRetriever Retriever { get; }
 
-        IEnumerable<S> Lookup<K, S>(ProjectionToken token, K key);
+        IEnumerable<S> LookupRequest<K, S>(ProjectionToken token, K key);
     }
 
     internal class ProjectionRowEnumerator<T> : IProjectionRow, IEnumerator<T>
@@ -80,15 +80,12 @@ namespace Signum.Engine.Linq
         public void Dispose()
         {
         }
- 
-        public IEnumerable<S> Lookup<K, S>(ProjectionToken token, K key)
-        {
-            Lookup<K, S> lookup = (Lookup<K, S>)lookups[token];
 
-            if (!lookup.Contains(key))
-                return Enumerable.Empty<S>();
-            else
-                return lookup[key];
+        public IEnumerable<S> LookupRequest<K, S>(ProjectionToken token, K key)
+        {
+            Dictionary<K, List<S>> dictionary = (Dictionary<K, List<S>>)lookups.GetOrCreate(token, () => (IEnumerable)new Dictionary<K, List<S>>());
+
+            return dictionary.GetOrCreate(key);
         }
     }
 

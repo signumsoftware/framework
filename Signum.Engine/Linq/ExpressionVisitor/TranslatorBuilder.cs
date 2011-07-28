@@ -31,7 +31,7 @@ namespace Signum.Engine.Linq
 
         static TranslateResult<T> BuildPrivate<T>(ProjectionExpression proj)
         {
-            var childs = ProjectionGatherer.Gatherer(proj); 
+            var childs = ChildProjectionGatherer.Gatherer(proj); 
             List<IChildProjection> childProjections = null;
             if (childs.Count > 0)
             {
@@ -123,13 +123,13 @@ namespace Signum.Engine.Linq
             }; 
         }
 
-        public class ProjectionGatherer : DbExpressionVisitor
+        public class ChildProjectionGatherer : DbExpressionVisitor
         {
             List<ChildProjectionExpression> list = new List<ChildProjectionExpression>();
 
             public static List<ChildProjectionExpression> Gatherer(ProjectionExpression proj)
             {
-                ProjectionGatherer pg = new ProjectionGatherer();
+                ChildProjectionGatherer pg = new ChildProjectionGatherer();
 
                 pg.Visit(proj);
 
@@ -139,9 +139,9 @@ namespace Signum.Engine.Linq
 
             protected override Expression VisitChildProjection(ChildProjectionExpression child)
             {
-                var result =  base.VisitChildProjection(child);
-
                 list.Add(child);
+                
+                var result =  base.VisitChildProjection(child);
 
                 return result;
             }
@@ -222,7 +222,7 @@ namespace Signum.Engine.Linq
                 if (outer != child.OuterKey)
                     child = new ChildProjectionExpression(child.Projection, outer); 
 
-                return scope.Lookup(row, child);
+                return scope.LookupRequests(row, child);
             }
 
             protected override Expression VisitProjection(ProjectionExpression proj)
@@ -350,20 +350,6 @@ namespace Signum.Engine.Linq
             {
                 return Expression.Constant(sce.Value, sce.Type);
             }
-
-            //protected override Expression VisitSqlFunction(SqlFunctionExpression sqlFunction)
-            //{
-            //    if (sqlFunction.SqlFunction == SqlFunction.COALESCE.ToString())
-            //    {
-            //        var result = sqlFunction.Arguments.Select(a => Visit(a.Nullify())).Aggregate((a, b) => Expression.Coalesce(a, b));
-
-            //        if (!sqlFunction.Type.IsNullable())
-            //            return result.UnNullify();
-            //        return result; 
-            //    }
-
-            //    return base.VisitSqlFunction(sqlFunction);
-            //}
         }
     }
 
@@ -385,13 +371,13 @@ namespace Signum.Engine.Linq
             return FieldReader.GetExpression(Expression.Property(row, miReader), position, type);
         }
 
-        static MethodInfo miLookup = ReflectionTools.GetMethodInfo((IProjectionRow row) => row.Lookup<int, double>(null, 0)).GetGenericMethodDefinition();
+        static MethodInfo miLookupRequest = ReflectionTools.GetMethodInfo((IProjectionRow row) => row.LookupRequest<int, double>(null, 0)).GetGenericMethodDefinition();
         
-        public Expression Lookup(Expression row, ChildProjectionExpression cProj)
+        public Expression LookupRequests(Expression row, ChildProjectionExpression cProj)
         {
             Type t = cProj.Projection.UniqueFunction == null ? cProj.Type.ElementType() : cProj.Type;
 
-            MethodInfo mi = miLookup.MakeGenericMethod(cProj.OuterKey.Type, t);
+            MethodInfo mi = miLookupRequest.MakeGenericMethod(cProj.OuterKey.Type, t);
 
             Expression call = Expression.Call(row, mi, Expression.Constant(cProj.Projection.Token), cProj.OuterKey);
 

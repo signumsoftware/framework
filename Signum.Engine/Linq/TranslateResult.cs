@@ -40,21 +40,28 @@ namespace Signum.Engine.Linq
         internal Func<SqlParameter[]> GetParameters;
         internal Expression<Func<IProjectionRow, KeyValuePair<K, V>>> ProjectorExpression;
 
-        public void Fill(Dictionary<ProjectionToken, IEnumerable> lookups, IRetriever retriever)
+        public void Fill(Dictionary<ProjectionToken, IEnumerable> childRequests, IRetriever retriever)
         {
+            Dictionary<K, List<V>> requests = (Dictionary<K, List<V>>)childRequests.TryGetC(Name);
+
+            if (requests == null)
+                return;
+
             SqlPreCommandSimple command = new SqlPreCommandSimple(CommandText, GetParameters().ToList());
             using (HeavyProfiler.Log("SQL", command.Sql))
             using (SqlDataReader reader = Executor.UnsafeExecuteDataReader(command))
             {
-                ProjectionRowEnumerator<KeyValuePair<K, V>> enumerator = new ProjectionRowEnumerator<KeyValuePair<K, V>>(reader, ProjectorExpression, lookups, retriever);
+                ProjectionRowEnumerator<KeyValuePair<K, V>> enumerator = new ProjectionRowEnumerator<KeyValuePair<K, V>>(reader, ProjectorExpression, childRequests, retriever);
 
                 IEnumerable<KeyValuePair<K, V>> enumerabe = new ProjectionRowEnumerable<KeyValuePair<K, V>>(enumerator);
 
                 try
                 {
                     var lookUp = enumerabe.ToLookup(a => a.Key, a => a.Value);
-
-                    lookups.Add(Name, lookUp);
+                    foreach (var kvp in requests)
+                    {
+                        kvp.Value.AddRange(lookUp[kvp.Key]);
+                    }
                 }
                 catch (SqlTypeException ex)
                 {
@@ -104,7 +111,6 @@ namespace Signum.Engine.Linq
 
                     SqlPreCommandSimple command = new SqlPreCommandSimple(CommandText, GetParameters().ToList());
 
-                  
                     using (HeavyProfiler.Log("SQL", command.Sql))
                     using (SqlDataReader reader = Executor.UnsafeExecuteDataReader(command))
                     {
