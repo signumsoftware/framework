@@ -46,10 +46,10 @@ namespace Signum.Engine.Scheduler
                 AuthLogic.AssertStarted(sb);
                 OperationLogic.AssertStarted(sb);
 
-                OperationLogic.Register(new BasicExecute<ITaskDN>(TaskOperation.ExecutePrivate)
+                new BasicExecute<ITaskDN>(TaskOperation.ExecutePrivate)
                 {
                     Execute = (ct, _) => { throw new NotImplementedException(); }
-                });
+                }.Register();
 
                 CustomTaskLogic.Start(sb, dqm);
                 sb.Include<ScheduledTaskDN>();

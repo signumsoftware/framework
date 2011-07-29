@@ -29,15 +29,11 @@ namespace Signum.Engine.Scheduler
 
                 sb.Include<CustomTaskExecutionDN>();
 
-                OperationLogic.Register(new BasicExecute<CustomTaskDN>(CustomTaskOperation.Execute)
+                new BasicExecute<CustomTaskDN>(CustomTaskOperation.Execute)
                 {
                     Execute = (ct, _) => Execute(EnumLogic<CustomTaskDN>.ToEnum(ct.Key))
-                });
+                }.Register();
 
-                OperationLogic.Register(new BasicExecute<CustomTaskDN>(TaskOperation.ExecutePrivate)
-                {
-                    Execute = (ct, _) =>  Execute(EnumLogic<CustomTaskDN>.ToEnum(ct.Key))
-                });
 
 
                 dqm[typeof(CustomTaskDN)] =

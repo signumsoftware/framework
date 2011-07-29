@@ -47,7 +47,7 @@ namespace Signum.Web.Operations
 
                 if (IsLite == null && Operation != null)
                 {
-                    IsLite = (OperationLogic.OperationsWithKey(Operation)[0] as IEntityOperation).TryCS(o => o.Lite);
+                    IsLite = OperationLogic.IsLite(Operation);
                 }
 
                 var builder = new JsOptionsBuilder(false)

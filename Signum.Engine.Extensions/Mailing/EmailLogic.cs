@@ -185,10 +185,10 @@ namespace Signum.Engine.Mailing
                 ProcessLogic.AssertStarted(sb);
                 ProcessLogic.Register(EmailProcesses.SendEmails, new SendEmailProcessAlgorithm());
 
-                OperationLogic.Register(new BasicConstructFromMany<EmailMessageDN, ProcessExecutionDN>(EmailOperations.ReSendEmails)
+                new BasicConstructFromMany<EmailMessageDN, ProcessExecutionDN>(EmailOperations.ReSendEmails)
                 {
                     Construct = (messages, args) => ProcessLogic.Create(EmailProcesses.SendEmails, messages)
-                });
+                }.Register();
 
                 dqm[typeof(EmailPackageDN)] = (from e in Database.Query<EmailPackageDN>()
                                                select new
