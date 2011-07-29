@@ -10,7 +10,7 @@ using System.Reflection;
 
 namespace Signum.Entities.Scheduler
 {
-    [ImplementedBy(typeof(ScheduleRuleDailyDN), typeof(ScheduleRuleWeeklyDN), typeof(ScheduleRuleWeekDaysDN))]
+    [ImplementedBy(typeof(ScheduleRuleDailyDN), typeof(ScheduleRuleWeeklyDN), typeof(ScheduleRuleWeekDaysDN), typeof(ScheduleRuleMinutelyDN), typeof(ScheduleRuleHourlyDN))]
     public interface IScheduleRuleDN : IIdentifiable
     {
         DateTime Next();
@@ -41,6 +41,109 @@ namespace Signum.Entities.Scheduler
         public override string ToString()
         {
             return startingOn.ToUserInterface().ToShortTimeString();
+        }
+    }
+
+    [Serializable]
+    public class ScheduleRuleMinutelyDN : Entity, IScheduleRuleDN
+    {
+        DateTime startingOn = TimeZoneManager.Now.Date;
+        public DateTime StartingOn
+        {
+            get { return startingOn; }
+            set { Set(ref startingOn, value, () => StartingOn); }
+        }
+
+        public DateTime Next()
+        {
+            DateTime next = DateTimeExtensions.Max(TimeZoneManager.Now, startingOn);
+
+            DateTime candidate = next.TrimToMinutes();
+
+            candidate = candidate.AddMinutes(-(candidate.Minute % eachMinute));
+
+            if (candidate < next)
+                candidate = candidate.AddMinutes(eachMinute);
+
+            return candidate; 
+        }
+
+        int eachMinute;
+        [NumberBetweenValidator(1, 60)]
+        public int EachMinute
+        {
+            get { return eachMinute; }
+            set { Set(ref eachMinute, value, () => EachMinute); }
+        }
+
+        public override string ToString()
+        {
+            return  Resources.Each0MinutesFrom1.Formato(eachMinute.ToString(), startingOn.ToUserInterface().ToShortDateString());
+        }
+
+        protected override string PropertyValidation(PropertyInfo pi)
+        {
+            if (pi.Is(() => EachMinute))
+            {
+                if ((60 % EachMinute) != 0)
+                    return Resources._0IsNotMultiple1.Formato(pi.NiceName(), 60);
+            }
+
+            return base.PropertyValidation(pi);
+        }
+    }
+
+    [Serializable]
+    public class ScheduleRuleHourlyDN : Entity, IScheduleRuleDN
+    {
+        DateTime startingOn = TimeZoneManager.Now.Date;
+        public DateTime StartingOn
+        {
+            get { return startingOn; }
+            set { Set(ref startingOn, value, () => StartingOn); }
+        }
+
+        public DateTime Next()
+        {
+            DateTime next = DateTimeExtensions.Max(TimeZoneManager.Now, startingOn);
+
+            DateTime candidate = next.TrimToHours();
+
+            candidate = candidate.AddHours(-(candidate.Hour % eachHour));
+
+            if (candidate < next)
+                candidate = candidate.AddHours(eachHour);
+
+            return candidate;
+        }
+
+        public static bool isValid(int time)
+        {
+            return (24 % time) == 0;
+        }
+
+        int eachHour;
+        [NumberBetweenValidator(1, 24)]
+        public int EachHour
+        {
+            get { return eachHour; }
+            set { Set(ref eachHour, value, () => EachHour); }
+        }
+
+        public override string ToString()
+        {
+            return Resources.Each0HoursFrom1.Formato(eachHour.ToString(), startingOn.ToUserInterface().ToShortDateString());
+        }
+
+        protected override string PropertyValidation(PropertyInfo pi)
+        {
+            if (pi.Is(() => EachHour))
+            {
+                if ((24 % EachHour) != 0)
+                    return Resources._0IsNotMultiple1.Formato(pi.NiceName(), 24);
+            }
+
+            return base.PropertyValidation(pi);
         }
     }
 

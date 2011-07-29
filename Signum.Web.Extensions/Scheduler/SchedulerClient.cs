@@ -40,12 +40,18 @@ namespace Signum.Web.Extensions.Scheduler
                     new EmbeddedEntitySettings<HolidayDN>(){ PartialViewName = _ => ViewPrefix.Formato("Holiday") },
                     new EntitySettings<CalendarDN>(EntityType.Default){ PartialViewName = _ => ViewPrefix.Formato("Calendar") },
                     new EntitySettings<CustomTaskDN>(EntityType.Default){ PartialViewName = _ => ViewPrefix.Formato("CustomTask") },
-                   // new EntitySettings<ScheduleRuleDayDN>(EntityType.Default){ PartialViewName = _ => ViewPrefix.Formato("Calendar") },
+                    //new EntitySettings<ScheduleRuleDayDN>(EntityType.Default){ PartialViewName = _ => ViewPrefix.Formato("Calendar") },
+                    new EntitySettings<ScheduleRuleMinutelyDN>(EntityType.Default) { PartialViewName = _ => ViewPrefix.Formato("ScheduleRuleMinutely") },
+                    new EntitySettings<ScheduleRuleHourlyDN>(EntityType.Default) { PartialViewName = _ => ViewPrefix.Formato("ScheduleRuleHourly") },
                 });
                 
                 Navigator.EntitySettings<ScheduleRuleDailyDN>().MappingAdmin.AsEntityMapping().SetProperty(srd => srd.StartingOn, MappingDate);
 
                 Navigator.EntitySettings<ScheduleRuleWeeklyDN>().MappingAdmin.AsEntityMapping().SetProperty(srw => srw.StartingOn, MappingDate);
+
+                Navigator.EntitySettings<ScheduleRuleMinutelyDN>().MappingAdmin.AsEntityMapping().SetProperty(srw => srw.StartingOn, MappingDate);
+
+                Navigator.EntitySettings<ScheduleRuleHourlyDN>().MappingAdmin.AsEntityMapping().SetProperty(srw => srw.StartingOn, MappingDate);
             }
         }
 
@@ -64,3 +70,4 @@ namespace Signum.Web.Extensions.Scheduler
         }
     }
 }
+
