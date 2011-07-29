@@ -230,6 +230,12 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void SelectEntityNone()
+        {
+            var list = Database.Query<AlbumDN>().ToList();
+        }
+
+        [TestMethod]
         public void SelectEntitySelect()
         {
             var list = Database.Query<AlbumDN>().Select(a => a).ToList();
@@ -564,7 +570,7 @@ namespace Signum.Test.LinqProvider
                          select mle).ToList();
         }
 
-        [TestMethod]
+        //[TestMethod]
         public void SelectCache()
         {
             Connection.CommandCount = 0;

@@ -215,12 +215,6 @@ namespace Signum.Engine.Linq
                 if (nex.Type.IsInstantiationOf(typeof(Grouping<,>)))
                     return (ProjectionExpression)nex.Arguments[1];
             }
-            else if(expression.NodeType == ExpressionType.Call)
-            {
-                var proj = BinderTools.ExtractMListProjection(((MethodCallExpression)expression));
-                if (proj != null)
-                    return proj;
-            }
 
             throw new InvalidOperationException("Impossible to convert in ProjectionExpression: \r\n" + expression.NiceToString()); 
         }
@@ -231,8 +225,6 @@ namespace Signum.Engine.Linq
                 expression = ((UnaryExpression)expression).Operand;
             return expression;
         }
-
-
 
         private Expression BindTake(Type resultType, Expression source, Expression count)
         {

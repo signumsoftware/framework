@@ -985,25 +985,14 @@ namespace Signum.Engine.Linq
     {
         public readonly ProjectionExpression Projection;
         public readonly Expression OuterKey;
+        public readonly bool IsLazyMList; 
 
-        internal ChildProjectionExpression(ProjectionExpression projection, Expression outerKey)
-            : base(DbExpressionType.ChildProjection, ProjectionClientType(projection))
+        internal ChildProjectionExpression(ProjectionExpression projection, Expression outerKey, bool isLazyMList, Type type)
+            : base(DbExpressionType.ChildProjection, type)
         {
             this.Projection = projection;
             this.OuterKey = outerKey;
-        }
-
-        static Type ProjectionClientType(ProjectionExpression projection)
-        {
-            if (!projection.Projector.Type.IsInstantiationOf(typeof(KeyValuePair<,>)))
-                throw new InvalidOperationException("projection's projector should create KeyValuePairs");
-
-            Type type = projection.Projector.Type.GetGenericArguments()[1];
-
-            if (projection.UniqueFunction != null)
-                return type;
-
-            return typeof(IEnumerable<>).MakeGenericType(new Type[] { type });
+            this.IsLazyMList = isLazyMList; 
         }
 
         public override string ToString()

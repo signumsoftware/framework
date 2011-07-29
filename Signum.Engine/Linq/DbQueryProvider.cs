@@ -47,17 +47,22 @@ namespace Signum.Engine.Linq
         {   
             using (Alias.NewGenerator())
             {
-                Expression cleaned = Clean(expression);
-                Expression filtered = QueryFilterer.Filter(cleaned);
+                ITranslateResult result;
 
-                BinderTools tools = new BinderTools();
+                using (HeavyProfiler.Log("LINQ"))
+                {
+                    Expression cleaned = Clean(expression);
+                    Expression filtered = QueryFilterer.Filter(cleaned);
 
-                ProjectionExpression binded = (ProjectionExpression)QueryBinder.Bind(filtered, tools);
-                ProjectionExpression optimized = (ProjectionExpression)Optimize(binded, tools);
+                    BinderTools tools = new BinderTools();
 
-                ProjectionExpression flat = ChildProjectionFlattener.Flatten(optimized);
+                    ProjectionExpression binded = (ProjectionExpression)QueryBinder.Bind(filtered, tools);
+                    ProjectionExpression optimized = (ProjectionExpression)Optimize(binded, tools);
 
-                ITranslateResult result = TranslatorBuilder.Build(flat);
+                    ProjectionExpression flat = ChildProjectionFlattener.Flatten(optimized);
+
+                    result = TranslatorBuilder.Build(flat);
+                }
                 return continuation(result);
             }
         }
@@ -90,14 +95,17 @@ namespace Signum.Engine.Linq
         {
             using (Alias.NewGenerator())
             {
-                Expression cleaned = Clean(query.Expression);
-                Expression filtered = QueryFilterer.Filter(cleaned);
+                CommandResult cr;
+                using (HeavyProfiler.Log("LINQ"))
+                {
+                    Expression cleaned = Clean(query.Expression);
+                    Expression filtered = QueryFilterer.Filter(cleaned);
 
-                BinderTools tools = new BinderTools();
-                CommandExpression delete = new QueryBinder(tools).BindDelete(filtered);
-                CommandExpression deleteOptimized = (CommandExpression)Optimize(delete, tools);
-                CommandResult cr = TranslatorBuilder.BuildCommandResult(deleteOptimized);
-
+                    BinderTools tools = new BinderTools();
+                    CommandExpression delete = new QueryBinder(tools).BindDelete(filtered);
+                    CommandExpression deleteOptimized = (CommandExpression)Optimize(delete, tools);
+                    cr = TranslatorBuilder.BuildCommandResult(deleteOptimized);
+                }
                 return cr.Execute();
             }
         }
@@ -106,14 +114,17 @@ namespace Signum.Engine.Linq
         {
             using (Alias.NewGenerator())
             {
-                Expression cleaned = Clean(query.Expression);
-                Expression filtered = QueryFilterer.Filter(cleaned);
+                CommandResult cr;
+                using (HeavyProfiler.Log("LINQ"))
+                {
+                    Expression cleaned = Clean(query.Expression);
+                    Expression filtered = QueryFilterer.Filter(cleaned);
 
-                BinderTools tools = new BinderTools();
-                CommandExpression update = new QueryBinder(tools).BindUpdate(filtered, set);
-                CommandExpression updateOptimized = (CommandExpression)Optimize(update, tools);
-                CommandResult cr = TranslatorBuilder.BuildCommandResult(updateOptimized);
-
+                    BinderTools tools = new BinderTools();
+                    CommandExpression update = new QueryBinder(tools).BindUpdate(filtered, set);
+                    CommandExpression updateOptimized = (CommandExpression)Optimize(update, tools);
+                    cr = TranslatorBuilder.BuildCommandResult(updateOptimized);
+                }
                 return cr.Execute();
             }
         }

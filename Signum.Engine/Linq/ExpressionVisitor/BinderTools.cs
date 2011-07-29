@@ -152,18 +152,8 @@ namespace Signum.Engine.Linq
 
             return exp.Reverse().Aggregate((ac, e) => Expression.Coalesce(e, ac));
         }
-        
-        static MethodInfo miToMListNotModified = ReflectionTools.GetMethodInfo((IEnumerable<int> col) => col.ToMListNotModified()).GetGenericMethodDefinition();
 
-        public static ProjectionExpression ExtractMListProjection(MethodCallExpression exp)
-        {
-            if (exp.Method.IsInstantiationOf(miToMListNotModified))
-                return (ProjectionExpression)exp.Arguments[0];
-
-            return null; 
-        }
-
-        internal MethodCallExpression MListProjection(MListExpression mle)
+        internal ProjectionExpression MListProjection(MListExpression mle)
         {
             RelationalTable tr = mle.RelationalTable;
 
@@ -186,7 +176,7 @@ namespace Signum.Engine.Linq
 
             proj = ApplyExpansions(proj);
 
-            return Expression.Call(miToMListNotModified.MakeGenericMethod(pc.Projector.Type), proj);
+            return proj;
         }
 
         internal Alias NextSelectAlias()

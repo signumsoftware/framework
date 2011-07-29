@@ -468,7 +468,7 @@ namespace Signum.Engine.Linq
 
             if (proj != child.Projection || key != child.OuterKey)
             {
-                return new ChildProjectionExpression(proj, key);
+                return new ChildProjectionExpression(proj, key, child.IsLazyMList, child.Type);
             }
             return child;
         }
