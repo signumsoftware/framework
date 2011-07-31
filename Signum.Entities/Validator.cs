@@ -6,12 +6,20 @@ using Signum.Utilities;
 using Signum.Utilities.Reflection;
 using System.Reflection;
 using System.Linq.Expressions;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities
 {
+    
+
     public static class Validator
     {
         static Dictionary<Type, Dictionary<string, PropertyPack>> validators = new Dictionary<Type, Dictionary<string, PropertyPack>>();
+
+        public static IsApplicableOf IsApplicable<V>() where V : ValidatorAttribute
+        {
+            return new IsApplicableOf { validatorType = typeof(V) };
+        }
 
         public static PropertyPack GetOrCreatePropertyPack<T, S>(Expression<Func<T, S>> property) where T : ModifiableEntity
         {
@@ -52,6 +60,34 @@ namespace Signum.Entities
         {
             PropertyInfo pi2 = ReflectionTools.BasePropertyInfo(property);
             return ReflectionTools.MemeberEquals(pi, pi2);
+        }
+
+        public class IsApplicableOf
+        {
+            internal Type validatorType;
+
+            public IsApplicableWhen<T> Of<T, S>(Expression<Func<T, S>> property)
+            where T : ModifiableEntity
+            {
+                var pp = GetOrCreatePropertyPack(property);
+
+                var val = pp.Validators.SingleOrDefault(v => v.GetType() == validatorType);
+
+                if (val == null)
+                    throw new InvalidOperationException("No '{0}' found on '{1}'".Formato(validatorType.NiceName(), pp.PropertyInfo.PropertyName()));
+
+                return new IsApplicableWhen<T> { validator = val };
+            }
+        }
+
+        public class IsApplicableWhen<T> where T : ModifiableEntity
+        {
+            internal ValidatorAttribute validator;
+
+            public void When(Func<T, bool> isApplicable)
+            {
+                validator.IsApplicable = m => isApplicable((T)m);
+            }
         }
     }
 
