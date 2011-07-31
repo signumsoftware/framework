@@ -34,7 +34,10 @@ namespace Signum.Engine.Scheduler
                     Execute = (ct, _) => Execute(EnumLogic<CustomTaskDN>.ToEnum(ct.Key))
                 }.Register();
 
-
+                new BasicExecute<CustomTaskDN>(TaskOperation.ExecutePrivate)
+                {
+                    Execute = (ct, _) => Execute(EnumLogic<CustomTaskDN>.ToEnum(ct.Key))
+                }.Register();
 
                 dqm[typeof(CustomTaskDN)] =
                       (from ct in Database.Query<CustomTaskDN>()
