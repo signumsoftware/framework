@@ -104,64 +104,6 @@ namespace Signum.Engine.Scheduler
 
 
                  }).ToDynamic();
-
-                //dqm[typeof(ScheduleRuleDailyDN)] =
-                //(from st in Database.Query<ScheduleRuleDailyDN>()
-                // select new
-                // {
-                //     Entity = st.ToLite(),
-                //     st.Id,
-                //     st.StartingOn                  
-                // }).ToDynamic();
-
-                //dqm[typeof(ScheduleRuleWeekDaysDN)] =
-                //(from st in Database.Query<ScheduleRuleWeekDaysDN>()
-                // select new
-                // {
-                //     Entity = st.ToLite(),
-                //     st.Id,
-                //     st.StartingOn,
-                //     st.Monday,
-                //     st.Wednesday,
-                //     st.Tuesday,                 
-                //     st.Friday,
-                //     st.Saturday,
-                //     st.Sunday,
-                //     st.Holiday,                    
-
-                // }).ToDynamic();
-
-                //dqm[typeof(ScheduleRuleWeeklyDN)] =
-                // (from st in Database.Query<ScheduleRuleWeeklyDN>()
-                //  select new
-                //  {
-                //      Entity = st.ToLite(),
-                //      st.Id,
-                //      st.StartingOn,
-                //      st.DayOfTheWeek,
-                //  }).ToDynamic();
-
-                //dqm[typeof(ScheduleRuleMinutelyDN)] =
-                // (from st in Database.Query<ScheduleRuleMinutelyDN>()
-                //  select new
-                //  {
-                //      Entity = st.ToLite(),
-                //      st.Id,
-                //      st.StartingOn,
-                //      st.EachMinute,
-                //  }).ToDynamic();
-
-                //dqm[typeof(ScheduleRuleHourlyDN)] =
-                //(from st in Database.Query<ScheduleRuleHourlyDN>()
-                // select new
-                // {
-                //     Entity = st.ToLite(),
-                //     st.Id,
-                //     st.StartingOn,
-                //     st.EachHour,
-                // }).ToDynamic();
-
-                CustomTaskLogic.Start(sb, dqm);
             }
         }
 
