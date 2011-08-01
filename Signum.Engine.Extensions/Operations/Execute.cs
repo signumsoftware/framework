@@ -64,17 +64,17 @@ namespace Signum.Engine.Operations
             if (error != null)
                 throw new ApplicationException(error);
 
+            LogOperationDN log = new LogOperationDN
+            {
+                Operation = EnumLogic<OperationDN>.ToEntity(Key),
+                Start = TimeZoneManager.Now,
+                User = UserDN.Current.ToLite()
+            };
+
             try
             {
                 using (Transaction tr = new Transaction())
                 {
-                    LogOperationDN log = new LogOperationDN
-                    {
-                        Operation = EnumLogic<OperationDN>.ToEntity(Key),
-                        Start = TimeZoneManager.Now,
-                        User = UserDN.Current.ToLite()
-                    };
-
                     OperationLogic.OnBeginOperation(this, (IdentifiableEntity)entity);
 
                     OnExecute((T)entity, parameters);
@@ -93,29 +93,26 @@ namespace Signum.Engine.Operations
             }
             catch (Exception ex)
             {  
-                OperationLogic.OnErrorOperation(this, (IdentifiableEntity)entity, ex);    
+                OperationLogic.OnErrorOperation(this, (IdentifiableEntity)entity, ex);
 
-                try
+                if (!entity.IsNew)
                 {
-                    using (Transaction tr2 = new Transaction(true))
+                    try
                     {
-                        var log = new LogOperationDN
+                        using (Transaction tr2 = new Transaction(true))
                         {
-                            Operation = EnumLogic<OperationDN>.ToEntity(Key),
-                            Start = TimeZoneManager.Now,
-                            Target = entity.ToLite<IIdentifiable>(),
-                            Exception = ex.Message,
-                            User = UserDN.Current.ToLite()
-                        };
+                            log.Exception = ex.Message;
+                            log.End = TimeZoneManager.Now;
+                           
+                            using (AuthLogic.User(AuthLogic.SystemUser))
+                                log.Save();
 
-                        using (AuthLogic.User(AuthLogic.SystemUser))
-                            log.Save();
-
-                        tr2.Commit();
+                            tr2.Commit();
+                        }
                     }
-                }
-                catch (Exception)
-                { 
+                    catch (Exception)
+                    {
+                    }
                 }
 
                 throw ex;

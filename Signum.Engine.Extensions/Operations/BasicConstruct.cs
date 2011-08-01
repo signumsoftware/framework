@@ -41,7 +41,6 @@ namespace Signum.Engine.Operations
              
              try
              {
-
                  using (Transaction tr = new Transaction())
                  {
                      LogOperationDN log = new LogOperationDN
