@@ -41,15 +41,6 @@ namespace Signum.Entities.Scheduler
             set { Set(ref customTask, value, () => CustomTask); }
         }
 
-
-        Lite<UserDN> User;
-        [NotNullValidator]
-        public Lite<UserDN> user
-        {
-            get { return User; }
-            set { Set(ref User, value, () => user); }
-        }
-
         DateTime startTime;
         public DateTime StartTime
         {

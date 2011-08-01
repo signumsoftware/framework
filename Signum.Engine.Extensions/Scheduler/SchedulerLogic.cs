@@ -84,7 +84,6 @@ namespace Signum.Engine.Scheduler
                      {
                          Entity = st.ToLite(),
                          st.Id,
-                         st.user,
                          st.StartTime,
                          st.EndTime,
                          st.Exception,
@@ -186,6 +185,7 @@ namespace Signum.Engine.Scheduler
                     ScheduledTaskDN st = priorityQueue.Pop(); //Exceed timer change
                     if (st.NextDate.HasValue && (st.NextDate - TimeZoneManager.Now) > MinimumSpan)
                     {
+                        priorityQueue.Push(st);
                         SetTimer();
                         return;
                     }

@@ -73,7 +73,6 @@ namespace Signum.Engine.Scheduler
         {
             CustomTaskExecutionDN cte = new CustomTaskExecutionDN
             {
-                user=UserDN.Current.ToLite(),
                 CustomTask = EnumLogic<CustomTaskDN>.ToEntity(key),
                 StartTime = TimeZoneManager.Now,
             };
