@@ -250,7 +250,7 @@ namespace Signum.Web.Selenium
 
         public static void SelectRowRadioButton(this ISelenium selenium, int rowIndexBase0)
         {
-            SelectRowRadioButton(selenium, rowIndexBase0);
+            SelectRowRadioButton(selenium, rowIndexBase0, "");
         }
 
         public static void SelectRowRadioButton(this ISelenium selenium, int rowIndexBase0, string prefix)
