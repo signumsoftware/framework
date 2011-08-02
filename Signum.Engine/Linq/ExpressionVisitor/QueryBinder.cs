@@ -373,6 +373,9 @@ namespace Signum.Engine.Linq
                 ConstantExpression ce = (ConstantExpression)source;
                 IEnumerable col = (IEnumerable)ce.Value;
 
+                if(newItem.Type == typeof(Type))
+                    return SmartEqualizer.TypeIn(newItem, col == null ? Enumerable.Empty<Type>() : col.Cast<Type>());
+
                 switch ((DbExpressionType)newItem.NodeType)
                 {
                     case DbExpressionType.LiteReference: return SmartEqualizer.EntityIn((LiteReferenceExpression)newItem, col == null ? Enumerable.Empty<Lite>() : col.Cast<Lite>());
@@ -1247,9 +1250,14 @@ namespace Signum.Engine.Linq
 
         internal static ConstantExpression TypeConstant(Type type)
         {
-            int id = Schema.Current.TypeToId.GetOrThrow(type, "The type {0} is not registered in the database as a concrete table");
+            int id = TypeId(type);
 
             return Expression.Constant(id, typeof(int?));
+        }
+
+        internal static int TypeId(Type type)
+        {
+            return Schema.Current.TypeToId.GetOrThrow(type, "The type {0} is not registered in the database as a concrete table");
         }
 
         //On Sql, nullability has no sense

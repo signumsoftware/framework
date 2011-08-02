@@ -8,6 +8,7 @@ using Signum.Engine.Maps;
 using System.Reflection;
 using Signum.Utilities.Reflection;
 using Signum.Entities;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.Linq
 {
@@ -114,7 +115,12 @@ namespace Signum.Engine.Linq
         public Expression GetEntityType(Expression expression)
         {
             if (expression is FieldInitExpression)
-                return Expression.Constant(((FieldInitExpression)expression).Type, typeof(Type));
+            {
+                FieldInitExpression fie = (FieldInitExpression)expression;
+                
+                return Expression.Condition(Expression.NotEqual(fie.ExternalId.Nullify(), NullId),
+                  Expression.Constant(expression.Type, typeof(Type)), Expression.Constant(null, typeof(Type))); 
+            }
 
             if (expression is ImplementedByExpression)
             {
