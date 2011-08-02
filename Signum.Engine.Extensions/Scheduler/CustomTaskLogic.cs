@@ -47,7 +47,7 @@ namespace Signum.Engine.Scheduler
                            Entity = ct.ToLite(),
                            ct.Id,
                            ct.Name,
-                           NumExecutions = (int?)g.Count(),
+                           NumExecutions = (int?) g.Count(),
                            LastExecution = (from cte2 in g
                                             where cte2.Id == g.Max(a => a.Id)
                                             select cte2.ToLite()).SingleOrDefault()

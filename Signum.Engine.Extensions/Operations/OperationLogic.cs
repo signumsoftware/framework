@@ -135,6 +135,8 @@ namespace Signum.Engine.Operations
         }
         #endregion
 
+
+
         public static void Register(this IOperation operation)
         {
             if (!operation.Type.IsIIdentifiable())
@@ -143,6 +145,16 @@ namespace Signum.Engine.Operations
             operation.AssertIsValid();
 
             operations.GetOrAdd(operation.Type).Add(operation.Key, operation);
+        }
+
+        public static void RegisterOverride(this IOperation operation)
+        {
+            if (!operation.Type.IsIIdentifiable())
+                throw new InvalidOperationException("Type {0} has to implement at least {1}".Formato(operation.Type));
+
+            operation.AssertIsValid();
+
+            operations.GetOrAdd(operation.Type)[operation.Key] = operation;
         }
 
         static OperationInfo ToOperationInfo(IOperation operation, string canExecute)
