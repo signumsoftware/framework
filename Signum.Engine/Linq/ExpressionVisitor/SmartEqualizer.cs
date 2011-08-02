@@ -50,11 +50,10 @@ namespace Signum.Engine.Linq
                 return null;
 
             if(exp1.NodeType == ExpressionType.Conditional)
-                return DispachConditional((ConditionalExpression)exp1, exp2);
-
+                return DispachConditionalTypes((ConditionalExpression)exp1, exp2);
 
             if(exp2.NodeType == ExpressionType.Conditional)
-                return DispachConditional((ConditionalExpression)exp2, exp1);
+                return DispachConditionalTypes((ConditionalExpression)exp2, exp1);
 
             if(exp1.NodeType == ExpressionType.Constant)
             {
@@ -62,16 +61,16 @@ namespace Signum.Engine.Linq
                 else if(exp2.NodeType == (ExpressionType)DbExpressionType.TypeId) return ConstantTypeEquals((ConstantExpression)exp1, (TypeIdExpression)exp2);
 
             }
-            else if(exp1.NodeType == ExpressionType.TypeIs)
+            else if(exp1.NodeType == (ExpressionType)DbExpressionType.TypeId)
             {
                 if (exp2.NodeType == ExpressionType.Constant) return ConstantTypeEquals((ConstantExpression)exp2, (TypeIdExpression)exp1);
-                else if (exp2.NodeType == (ExpressionType)DbExpressionType.TypeId) return ConstantTypeEquals((ConstantExpression)exp1, (TypeIdExpression)exp2);
+                else if (exp2.NodeType == (ExpressionType)DbExpressionType.TypeId) return TypeTypeEquals((TypeIdExpression)exp1, (TypeIdExpression)exp2);
             }
 
             throw new InvalidOperationException("Impossible to resolve '{0}' equals '{1}'".Formato(exp1.NiceToString(), exp2.NiceToString()));
         }
 
-        private static Expression DispachConditional(ConditionalExpression ce, Expression exp)
+        private static Expression DispachConditionalTypes(ConditionalExpression ce, Expression exp)
         {
             return SmartOr(SmartAnd(ce.Test, TypeEquals(ce.IfTrue, exp)), TypeEquals(ce.IfFalse, exp));
         }
@@ -130,9 +129,35 @@ namespace Signum.Engine.Linq
             }
         }
 
-        private static Expression ConstantConstantEquals(TypeIdExpression t1, TypeIdExpression t2)
+        private static Expression TypeTypeEquals(TypeIdExpression t1, TypeIdExpression t2)
         {
             return Expression.Equal(t1.Column, t2.Column);
+        }
+
+        internal static Expression TypeIn(Expression typeExpr, IEnumerable<Type> collection)
+        {
+            if (collection.IsNullOrEmpty())
+                return False;
+
+            if (typeExpr.NodeType == ExpressionType.Conditional)
+                return DispachConditionalTypesIn((ConditionalExpression)typeExpr, collection);
+
+            if (typeExpr.NodeType == ExpressionType.Constant)
+            {
+                Type type = (Type)((ConstantExpression)typeExpr).Value;
+
+                return collection.Contains(type) ? True : False;
+            }
+
+            if (typeExpr.NodeType == (ExpressionType)DbExpressionType.TypeId)
+                return InExpression.FromValues(((TypeIdExpression)typeExpr).Column, collection.Select(t => (object)QueryBinder.TypeId(t)).ToArray());
+
+            throw new InvalidOperationException("Impossible to resolve '{0}' in '{1}'".Formato(typeExpr.NiceToString(), collection.ToString(t=>t.TypeName(), ", ")));
+        }
+
+        private static Expression DispachConditionalTypesIn(ConditionalExpression ce, IEnumerable<Type> collection)
+        {
+            return SmartOr(SmartAnd(ce.Test, TypeIn(ce.IfTrue, collection)), TypeIn(ce.IfFalse, collection));
         }
 
         internal static Expression EntityIn(Expression newItem, IEnumerable<IdentifiableEntity> collection)
