@@ -145,6 +145,8 @@ namespace Signum.Engine.Scheduler
                 }
         }
 
+        static TimeSpan SchedulerMargin = TimeSpan.FromSeconds(0.5); //stabilize sub-day schedulers
+
         //Lock priorityQueue
         private static void SetTimer()
         {
@@ -158,7 +160,7 @@ namespace Signum.Engine.Scheduler
                 if (ts.TotalMilliseconds > int.MaxValue)
                     ts = TimeSpan.FromMilliseconds(int.MaxValue);
 
-                timer.Change((int)ts.TotalMilliseconds, Timeout.Infinite); // invoke after the timespan
+                timer.Change(ts.Add(SchedulerMargin), new TimeSpan(-1)); // invoke after the timespan
             }
         }
 
