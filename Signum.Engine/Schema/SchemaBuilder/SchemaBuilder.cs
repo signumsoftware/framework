@@ -167,12 +167,12 @@ namespace Signum.Engine.Maps
         HashSet<string> loadedModules = new HashSet<string>();
         public bool NotDefined(MethodBase methodBase)
         {
-            return loadedModules.Add(methodBase.DeclaringType.TypeName() + "." + methodBase.Name); 
+            return loadedModules.Add(methodBase.DeclaringType.FullName + "." + methodBase.Name); 
         }
 
         public void AssertDefined(MethodBase methodBase)
         {
-            string name = methodBase.DeclaringType.TypeName() + "." + methodBase.Name;
+            string name = methodBase.DeclaringType.FullName + "." + methodBase.Name;
 
             if (!loadedModules.Contains(name))
                 throw new ApplicationException("Call {0} first".Formato(name)); 
