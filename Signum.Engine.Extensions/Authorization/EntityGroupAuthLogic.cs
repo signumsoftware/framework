@@ -454,7 +454,7 @@ namespace Signum.Engine.Authorization
                 }
             }).Aggregate((a, b) => Expression.And(a, b));
 
-            Expression cleanBody = DbQueryProvider.Clean(body);
+            Expression cleanBody = DbQueryProvider.Clean(body, false);
 
             return cleanBody;
         }
@@ -495,7 +495,7 @@ namespace Signum.Engine.Authorization
 
             Expression body = Expression.New(ciDebugData, liteEntity, list);
 
-            Expression cleanBody = DbQueryProvider.Clean(body);
+            Expression cleanBody = DbQueryProvider.Clean(body, false);
 
             return cleanBody;
         }
