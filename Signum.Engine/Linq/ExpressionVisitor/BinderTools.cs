@@ -112,14 +112,14 @@ namespace Signum.Engine.Linq
             throw new NotSupportedException();
         }
 
+
         public Expression GetEntityType(Expression expression)
         {
             if (expression is FieldInitExpression)
             {
                 FieldInitExpression fie = (FieldInitExpression)expression;
-                
-                return Expression.Condition(Expression.NotEqual(fie.ExternalId.Nullify(), NullId),
-                  Expression.Constant(expression.Type, typeof(Type)), Expression.Constant(null, typeof(Type))); 
+
+                return Expression.Constant(expression.Type, typeof(Type));
             }
 
             if (expression is ImplementedByExpression)
@@ -143,7 +143,7 @@ namespace Signum.Engine.Linq
             if (expression is ImplementedByAllExpression)
                 return ((ImplementedByAllExpression)expression).TypeId;
 
-            return Expression.Constant(expression.Type, typeof(Type));
+            return null;
         }
 
         public Expression Coalesce(Type type, IEnumerable<Expression> exp)

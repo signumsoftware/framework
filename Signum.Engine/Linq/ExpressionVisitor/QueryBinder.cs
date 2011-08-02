@@ -141,12 +141,27 @@ namespace Signum.Engine.Linq
             }
             else if (m.Object != null && m.Method.Name == "GetType")
             {
-                var entity = Visit(m.Object);
-                return tools.GetEntityType(entity);
+                var expression = Visit(m.Object);
+
+                return GetType(expression);
             }
 
             MethodCallExpression result = (MethodCallExpression)base.VisitMethodCall(m);
             return BindMethodCall(result);
+        }
+
+        private Expression GetType(Expression expression)
+        {
+            if (expression is FieldInitExpression)
+            {
+                FieldInitExpression fie = (FieldInitExpression)expression;
+
+                return Expression.Condition(Expression.NotEqual(fie.ExternalId.Nullify(), BinderTools.NullId),
+                  Expression.Constant(fie.Type, typeof(Type)), Expression.Constant(null, typeof(Type)));
+            }
+
+            return tools.GetEntityType(expression) ?? Expression.Constant(expression.Type, typeof(Type));
+
         }
 
         private Expression MapAndVisitExpand(LambdaExpression lambda, ref ProjectionExpression p)
@@ -374,14 +389,14 @@ namespace Signum.Engine.Linq
                 IEnumerable col = (IEnumerable)ce.Value;
 
                 if(newItem.Type == typeof(Type))
-                    return SmartEqualizer.TypeIn(newItem, col == null ? Enumerable.Empty<Type>() : col.Cast<Type>());
+                    return SmartEqualizer.TypeIn(newItem, col == null ? Enumerable.Empty<Type>() : col.Cast<Type>().ToList());
 
                 switch ((DbExpressionType)newItem.NodeType)
                 {
-                    case DbExpressionType.LiteReference: return SmartEqualizer.EntityIn((LiteReferenceExpression)newItem, col == null ? Enumerable.Empty<Lite>() : col.Cast<Lite>());
+                    case DbExpressionType.LiteReference: return SmartEqualizer.EntityIn((LiteReferenceExpression)newItem, col == null ? Enumerable.Empty<Lite>() : col.Cast<Lite>().ToList());
                     case DbExpressionType.FieldInit:
                     case DbExpressionType.ImplementedBy:
-                    case DbExpressionType.ImplementedByAll: return SmartEqualizer.EntityIn(newItem, col == null ? Enumerable.Empty<IdentifiableEntity>() : col.Cast<IdentifiableEntity>());
+                    case DbExpressionType.ImplementedByAll: return SmartEqualizer.EntityIn(newItem, col == null ? Enumerable.Empty<IdentifiableEntity>() : col.Cast<IdentifiableEntity>().ToList());
                     default:
                         return InExpression.FromValues(newItem, col == null ? new object[0] : col.Cast<object>().ToArray());
                 }
@@ -784,7 +799,7 @@ namespace Signum.Engine.Linq
 
                 Expression binded = ExpressionCleaner.BindMethodExpression(simple, true);
 
-                Expression cleanedSimple = DbQueryProvider.Clean(binded);
+                Expression cleanedSimple = DbQueryProvider.Clean(binded, true);
                 map.AddRange(replacements);
                 Expression result = Visit(cleanedSimple);
                 map.RemoveRange(replacements.Keys);
@@ -827,7 +842,7 @@ namespace Signum.Engine.Linq
 
                 Expression binded = ExpressionCleaner.BindMemberExpression(simple, true);
 
-                Expression cleanedSimple = DbQueryProvider.Clean(binded);
+                Expression cleanedSimple = DbQueryProvider.Clean(binded, true);
                 map.Add(parameter, source);
                 Expression result = Visit(cleanedSimple);
                 map.Remove(parameter);
@@ -1366,7 +1381,7 @@ namespace Signum.Engine.Linq
             {
                 MemberAssignment ma = (MemberAssignment)m;
                 Expression colExpression = Visit(Expression.MakeMemberAccess(obj, ma.Member));
-                Expression cleaned = DbQueryProvider.Clean(ma.Expression);
+                Expression cleaned = DbQueryProvider.Clean(ma.Expression, true);
                 Expression expression = Visit(cleaned);
                 return Assign(colExpression, expression);
             }
