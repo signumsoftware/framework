@@ -75,7 +75,7 @@ Write(Html.Field("Start Date", Html.TextBox(e.Compose("Date"), d.Date.ToShortDat
 
                                                                                                                                           
     
-Write(Html.Field("Minutes", Html.TextBox(e.Compose("EachMinute"), d.Minute.ToString("15"))));
+Write(Html.Field("Minutes", Html.TextBox(e.Compose("EachMinute"), d.Minute.ToString("00"))));
 
                                                                                           
 }

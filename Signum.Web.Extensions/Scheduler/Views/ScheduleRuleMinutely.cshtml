@@ -5,5 +5,5 @@
 {
     DateTime d = e.Value.StartingOn.ToUserInterface();
     @Html.Field("Start Date", Html.TextBox(e.Compose("Date"), d.Date.ToShortDateString(), new { @class = "sf-value-line sf-datepicker" }))
-    @Html.Field("Minutes", Html.TextBox(e.Compose("EachMinute"), d.Minute.ToString("15")))
+    @Html.Field("Minutes", Html.TextBox(e.Compose("EachMinute"), d.Minute.ToString("00")))
 }

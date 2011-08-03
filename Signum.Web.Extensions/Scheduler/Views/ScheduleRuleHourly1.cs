@@ -71,13 +71,14 @@ WriteLiteral("\r\n");
 {
     DateTime d = e.Value.StartingOn.ToUserInterface();
     
+    
 Write(Html.Field("Start Date", Html.TextBox(e.Compose("Date"), d.Date.ToShortDateString(), new { @class = "sf-value-line sf-datepicker" })));
 
                                                                                                                                           
     
-Write(Html.Field("Hours", Html.TextBox(e.Compose("EachHour"), d.Minute.ToString("02"))));
+Write(Html.Field("Hours", Html.TextBox(e.Compose("EachHour"), d.Hour.ToString("00"))));
 
-                                                                                      
+                                                                                    
 }
 
         }
