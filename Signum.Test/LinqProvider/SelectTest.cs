@@ -322,6 +322,21 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void SelectCastIBACastOperator()
+        {
+            var list = (from n in Database.Query<NoteWithDateDN>()
+                        select n.Target).Cast<BandDN>().ToList();
+        }
+
+
+        [TestMethod]
+        public void SelectCastIBAOfTypeOperator()
+        {
+            var list = (from n in Database.Query<NoteWithDateDN>()
+                        select n.Target).OfType<BandDN>().ToList();
+        }
+
+        [TestMethod]
         public void SelectCastIsIB()
         {
             var list = (from a in Database.Query<AlbumDN>()

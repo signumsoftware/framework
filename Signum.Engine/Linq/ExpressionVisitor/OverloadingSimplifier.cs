@@ -79,6 +79,12 @@ namespace Signum.Engine.Linq
         static MethodInfo miReverseQ = ReflectionTools.GetMethodInfo(() => Queryable.Reverse((IQueryable<string>)null)).GetGenericMethodDefinition();
         static MethodInfo miReverseE = ReflectionTools.GetMethodInfo(() => Enumerable.Reverse((IEnumerable<string>)null)).GetGenericMethodDefinition();
 
+        static MethodInfo miCastQ = ReflectionTools.GetMethodInfo(() => Queryable.Cast<int>((IQueryable<string>)null)).GetGenericMethodDefinition();
+        static MethodInfo miCastE = ReflectionTools.GetMethodInfo(() => Enumerable.Cast<int>((IEnumerable<string>)null)).GetGenericMethodDefinition();
+
+        static MethodInfo miOfTypeQ = ReflectionTools.GetMethodInfo(() => Queryable.OfType<int>((IQueryable<string>)null)).GetGenericMethodDefinition();
+        static MethodInfo miOfTypeE = ReflectionTools.GetMethodInfo(() => Enumerable.OfType<int>((IEnumerable<string>)null)).GetGenericMethodDefinition();
+
         static int i = 0; 
 
         public static Expression Simplify(Expression expression)
@@ -245,6 +251,37 @@ namespace Signum.Engine.Linq
                     
                     return Expression.Call(mCount, Expression.Call(mWhere, source, predicate)); 
                 }
+
+                if (ReflectionTools.MethodEqual(mi, miCastE) || ReflectionTools.MethodEqual(mi, miCastQ))
+                {
+                    var source = Visit(m.GetArgument("source"));
+
+                    Type elemType = source.Type.ElementType();
+
+                    ParameterExpression pe = Expression.Parameter(elemType);
+
+                    var lambdaCast = Expression.Lambda(Expression.Convert(pe, paramTypes[0]), pe);
+
+                    return Expression.Call((query ? miSelectQ : miSelectE).MakeGenericMethod(elemType, paramTypes[0]), source, lambdaCast);
+                }
+
+                if (ReflectionTools.MethodEqual(mi, miOfTypeE) || ReflectionTools.MethodEqual(mi, miOfTypeQ))
+                {
+                    var source = Visit(m.GetArgument("source"));
+
+                    Type elemType = source.Type.ElementType();
+
+                    ParameterExpression pe = Expression.Parameter(elemType);
+
+                    var lambdaIs = Expression.Lambda(Expression.TypeIs(pe, paramTypes[0]), pe);
+
+                    var lambdaCast = Expression.Lambda(Expression.Convert(pe, paramTypes[0]), pe);
+
+                    var where = Expression.Call((query ? miWhereQ : miWhereE).MakeGenericMethod(elemType), source, lambdaIs);
+
+                    return Expression.Call((query ? miSelectQ : miSelectE).MakeGenericMethod(elemType, paramTypes[0]), where, lambdaCast);
+                }
+
 
 
                 if (mi.Name.Contains("Last"))
