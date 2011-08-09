@@ -34,7 +34,7 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitFieldInit(FieldInitExpression fie)
         {
-            fie = new FieldInitExpression(fie.Type, fie.TableAlias, fie.ExternalId, null, fie.Token) { Bindings = fie.Bindings.ToList() };
+            fie = new FieldInitExpression(fie.Type, fie.TableAlias, fie.ExternalId, fie.Token) { Bindings = fie.Bindings.ToList() };
 
             var cc = Schema.Current.CacheController(fie.Type);
             if (previousTypes.Contains(fie.Type) || cc != null && cc.Enabled /*just to force cache before executing the query*/)
@@ -53,7 +53,7 @@ namespace Signum.Engine.Linq
 
             var token = VisitProjectionToken(fie.Token);
 
-            var result = new FieldInitExpression(fie.Type, fie.TableAlias, id, null, token) { Bindings = bindings };
+            var result = new FieldInitExpression(fie.Type, fie.TableAlias, id, token) { Bindings = bindings };
 
             previousTypes = previousTypes.Pop();
 

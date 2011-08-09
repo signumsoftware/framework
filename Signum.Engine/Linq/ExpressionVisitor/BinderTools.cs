@@ -42,8 +42,7 @@ namespace Signum.Engine.Linq
                 var externalID = DbExpressionNominator.FullNominate(p.FieldInit.ExternalId);
 
                 Expression equal = SmartEqualizer.EqualNullable(externalID, p.FieldInit.GetFieldBinding(FieldInitExpression.IdField));
-                Expression condition = p.FieldInit.OtherCondition == null ? equal : Expression.And(p.FieldInit.OtherCondition, equal);
-                return new JoinExpression(JoinType.SingleRowLeftOuterJoin, e, p.Table, condition);
+                return new JoinExpression(JoinType.SingleRowLeftOuterJoin, e, p.Table, equal);
             });
 
             return new ProjectionExpression(

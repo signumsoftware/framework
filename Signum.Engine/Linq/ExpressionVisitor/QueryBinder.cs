@@ -1032,7 +1032,7 @@ namespace Signum.Engine.Linq
                     new ImplementationColumnExpression(g.Key,
                         new FieldInitExpression(g.Key, null,
                             CombineWhens(g.Value.Select(w=>new When(w.Condition, w.Fie.ExternalId)).ToList(), typeof(int?)),
-                            null, CombineToken(g.Value.Select(f => f.Fie.Token))))).ToReadOnly();
+                            CombineToken(g.Value.Select(f => f.Fie.Token))))).ToReadOnly();
 
                 if(implementations.Count == 1)
                     return implementations[0].Field;
@@ -1221,7 +1221,7 @@ namespace Signum.Engine.Linq
                 }
                 else
                 {
-                    return new FieldInitExpression(uType, null, Expression.Constant(null, typeof(int?)), null, fie.Token);
+                    return new FieldInitExpression(uType, null, Expression.Constant(null, typeof(int?)), fie.Token);
                 }               
             }
             if (operand.NodeType == (ExpressionType)DbExpressionType.ImplementedBy)
@@ -1232,7 +1232,7 @@ namespace Signum.Engine.Linq
 
                 if (fies.IsEmpty())
                 {
-                    return new FieldInitExpression(uType, null, Expression.Constant(null, typeof(int?)), null, ib.Implementations.First().Field.Token);
+                    return new FieldInitExpression(uType, null, Expression.Constant(null, typeof(int?)), ib.Implementations.First().Field.Token);
                 }
                 if (fies.Length == 1 && fies[0].Type == uType)
                     return fies[0];
@@ -1250,9 +1250,9 @@ namespace Signum.Engine.Linq
 
                 if (imp == null)
                 {
-                    Expression other = SmartEqualizer.EqualNullable(iba.TypeId.Column, TypeConstant(uType));
+                    var conditionalId = Expression.Condition(SmartEqualizer.EqualNullable(iba.TypeId.Column, TypeConstant(uType)), iba.Id, BinderTools.NullId);
 
-                    FieldInitExpression result = new FieldInitExpression(uType, null, iba.Id, other, iba.Token); //Delay riba.TypeID to FillFie to make the SQL more clean
+                    FieldInitExpression result = new FieldInitExpression(uType, null, conditionalId, iba.Token); //Delay riba.TypeID to FillFie to make the SQL more clean
                     iba.Implementations.Add(new ImplementationColumnExpression(uType, result));
                     return result;
                 }

@@ -336,7 +336,7 @@ namespace Signum.Engine.Linq
 
             Type liteType = lite.GetType();
 
-            FieldInitExpression fie = new FieldInitExpression(lite.RuntimeType, null, id, null, ProjectionToken.External);
+            FieldInitExpression fie = new FieldInitExpression(lite.RuntimeType, null, id, ProjectionToken.External);
 
             Type staticType = Reflector.ExtractLite(liteType);
             Expression reference = staticType == fie.Type? (Expression)fie: 
@@ -353,7 +353,6 @@ namespace Signum.Engine.Linq
                 ei.GetType(),
                 null,
                 Expression.Constant(ei.IdOrNull ?? int.MinValue),
-                null,
                 ProjectionToken.External);
         }
     }

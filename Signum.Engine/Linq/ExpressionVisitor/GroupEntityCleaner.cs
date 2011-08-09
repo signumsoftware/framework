@@ -48,7 +48,7 @@ namespace Signum.Engine.Linq
         {
             Expression newID = Visit(fieldInit.ExternalId);
 
-            return new FieldInitExpression(fieldInit.Type, null, newID, null, fieldInit.Token); // eliminamos los bindings
+            return new FieldInitExpression(fieldInit.Type, null, newID, fieldInit.Token); // eliminamos los bindings
         }
 
         protected override Expression VisitImplementedBy(ImplementedByExpression reference)
