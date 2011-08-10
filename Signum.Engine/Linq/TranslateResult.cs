@@ -162,12 +162,11 @@ namespace Signum.Engine.Linq
                 object result;
                 using (IRetriever retriever = EntityCache.NewRetriever())
                 {
-                    if (EagerProjections != null)
-                    {
+                    if (EagerProjections.Any() || LazyChildProjections.Any())
                         lookups = new Dictionary<ProjectionToken, IEnumerable>();
-                        foreach (var chils in EagerProjections)
-                            chils.Fill(lookups, retriever);
-                    }
+
+                    foreach (var chils in EagerProjections)
+                        chils.Fill(lookups, retriever);
 
                     SqlPreCommandSimple command = new SqlPreCommandSimple(CommandText, GetParameters().ToList());
 
@@ -180,7 +179,6 @@ namespace Signum.Engine.Linq
 
                         try
                         {
-
                             if (Unique == null)
                                 result = enumerable.ToList();
                             else
@@ -196,13 +194,11 @@ namespace Signum.Engine.Linq
                         }
                     }
 
-                    if (LazyChildProjections != null)
-                    {
-                        foreach (var chils in LazyChildProjections)
-                            chils.Fill(lookups, retriever);
-                    }
-                }
+                    foreach (var chils in LazyChildProjections)
+                        chils.Fill(lookups, retriever);
 
+                }
+            
                 return tr.Commit(result);
             }
         }
