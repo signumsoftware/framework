@@ -75,7 +75,7 @@ namespace Signum.Engine.Linq
         protected override Expression VisitImplementedByAll(ImplementedByAllExpression reference)
         {
             var id = (ColumnExpression)Visit(reference.Id);
-            var typeId = (TypeIdExpression)Visit(reference.TypeId);
+            var typeId = (TypeImplementedByAllExpression)Visit(reference.TypeId);
 
             if (id != reference.Id || typeId != reference.TypeId)
             {

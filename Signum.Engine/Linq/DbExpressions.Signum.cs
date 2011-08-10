@@ -273,10 +273,10 @@ namespace Signum.Engine.Linq
         public List<ImplementationColumnExpression> Implementations = new List<ImplementationColumnExpression>();
 
         public readonly Expression Id;
-        public readonly TypeIdExpression TypeId;
+        public readonly TypeImplementedByAllExpression TypeId;
         public readonly ProjectionToken Token;
 
-        public ImplementedByAllExpression(Type type, Expression id, TypeIdExpression typeId, ProjectionToken token)
+        public ImplementedByAllExpression(Type type, Expression id, TypeImplementedByAllExpression typeId, ProjectionToken token)
             : base(DbExpressionType.ImplementedByAll, type)
         {
             this.Id = id;
@@ -286,7 +286,7 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            return "ImplementedByAll{{ ID = {0}, Type = {1}}}".Formato(Id, TypeId);
+            return "ImplementedByAll{{ ID = {0}, Type = {1} }}".Formato(Id, TypeId);
         }
     }
 
@@ -321,22 +321,82 @@ namespace Signum.Engine.Linq
         }
     }
 
-    internal class TypeIdExpression : DbExpression
+    internal class TypeFieldInitExpression : DbExpression
     {
-        public readonly Expression Column;
+        public readonly Expression ExternalId;
+        public readonly Type TypeValue;
 
-        public TypeIdExpression(Expression column)
-            : base(DbExpressionType.TypeId, typeof(Type))
+        public TypeFieldInitExpression(Expression externalId, Type typeValue)
+            : base(DbExpressionType.TypeFieldInit, typeof(Type))
         {
-            if (column == null || column.Type.UnNullify() != typeof(int))
+            if (externalId == null || externalId.Type.UnNullify() != typeof(int))
                 throw new ArgumentException("typeId");
 
-            this.Column = column;
+            if (typeValue == null)
+                throw new ArgumentException("typeValue"); 
+
+            this.TypeValue = typeValue;
+            this.ExternalId = externalId;
         }
 
         public override string ToString()
         {
-            return "Schema.Current.IdToType({0})".Formato(Column.NiceToString());
+            return "TypeFie({0};{2})".Formato(TypeValue.TypeName(), ExternalId.NiceToString());
+        }
+    }
+
+    internal class TypeImplementedByExpression : DbExpression
+    {
+        public readonly ReadOnlyCollection<TypeImplementationColumnExpression> TypeImplementations;
+
+        public TypeImplementedByExpression(ReadOnlyCollection<TypeImplementationColumnExpression> typeImplementations)
+            : base(DbExpressionType.TypeImplementedBy, typeof(Type))
+        {
+            if (typeImplementations == null || typeImplementations.Any(a => a.ExternalId.Type.UnNullify() != typeof(int)))
+                throw new ArgumentException("typeId");
+
+            this.TypeImplementations = typeImplementations;
+        }
+
+        public override string ToString()
+        {
+            return "TypeIb({0})".Formato(TypeImplementations.ToString(" | "));
+        }
+    }
+
+    internal class TypeImplementationColumnExpression
+    {
+        public readonly Expression ExternalId;
+        public readonly Type Type;
+
+        public TypeImplementationColumnExpression(Type type, Expression externalId)
+        {
+            this.Type = type;
+            this.ExternalId = externalId;
+        }
+
+        public override string ToString()
+        {
+            return "{0};{1}".Formato(Type.TypeName(), ExternalId.NiceToString());
+        }
+    }
+
+    internal class TypeImplementedByAllExpression : DbExpression
+    {
+        public readonly Expression TypeColumn;
+
+        public TypeImplementedByAllExpression(Expression TypeColumn)
+            : base(DbExpressionType.TypeImplementedByAll, typeof(Type))
+        {
+            if (TypeColumn == null || TypeColumn.Type.UnNullify() != typeof(int))
+                throw new ArgumentException("typeId");
+
+            this.TypeColumn = TypeColumn;
+        }
+
+        public override string ToString()
+        {
+            return "TypeIba({0})".Formato(TypeColumn.NiceToString());
         }
     }
 

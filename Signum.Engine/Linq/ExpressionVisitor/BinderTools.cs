@@ -108,7 +108,7 @@ namespace Signum.Engine.Linq
             if (expression is ImplementedByAllExpression)
                 return ((ImplementedByAllExpression)expression).Id;
 
-            throw new NotSupportedException();
+            throw new NotSupportedException("Id for {0}".Formato(expression.NiceToString())); 
         }
 
 
@@ -118,7 +118,7 @@ namespace Signum.Engine.Linq
             {
                 FieldInitExpression fie = (FieldInitExpression)expression;
 
-                return Expression.Constant(expression.Type, typeof(Type));
+                return new TypeFieldInitExpression(fie.ExternalId, fie.Type);
             }
 
             if (expression is ImplementedByExpression)
@@ -126,17 +126,9 @@ namespace Signum.Engine.Linq
                 ImplementedByExpression ib = (ImplementedByExpression)expression;
 
                 if (ib.Implementations.Count == 0)
-                    return NullId;
+                    return Expression.Constant(null, typeof(Type));
 
-                if (ib.Implementations.Count == 1)
-                    return Expression.Constant(ib.Implementations[0].Field.Type, typeof(Type));//Not regular, but usefull
-
-                Expression aggregate = ib.Implementations.Select(imp => new When(
-                        Expression.NotEqual(imp.Field.ExternalId, NullId),
-                        Expression.Constant(imp.Field.Type, typeof(Type))))
-                    .ToList().ToCondition(typeof(Type));
-
-                return aggregate;
+                return new TypeImplementedByExpression(ib.Implementations.Select(imp => new TypeImplementationColumnExpression(imp.Type, imp.Field.ExternalId)).ToReadOnly()); 
             }
 
             if (expression is ImplementedByAllExpression)

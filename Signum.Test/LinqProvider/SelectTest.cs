@@ -136,7 +136,7 @@ namespace Signum.Test.LinqProvider
         public void SelectTypeIBA()
         {
             var list = Database.Query<NoteWithDateDN>()
-                .Select(a => a.Target.GetType()).ToList();
+                .Select(a => new { Type = a.Target.GetType(), Target = a.Target.ToLite() }).ToList();
         }
 
         [TestMethod]

@@ -561,7 +561,7 @@ namespace Signum.Engine.Linq
             if (candidates.Contains(operand) &&
                 (u.NodeType == ExpressionType.Not ||
                  u.NodeType == ExpressionType.Negate ||
-                 u.NodeType == ExpressionType.Convert && (/*u.Operand.Type.UnNullify() == u.Type.UnNullify() ||*/ IsFullNominate))) //Expand nullability
+                 u.NodeType == ExpressionType.Convert && (IsFullNominate || isAggresive && u.Operand.Type.UnNullify() == u.Type.UnNullify()))) //Expand nullability
                 candidates.Add(result);
 
             return result;
