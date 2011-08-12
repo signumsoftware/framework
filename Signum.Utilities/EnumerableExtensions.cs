@@ -839,21 +839,20 @@ namespace Signum.Utilities
         Func<N, K> newKeySelector,
         Func<O, N, R> resultSelector)
         {
-            var result = new JoinStrictResult<O, N, R>();
-
             var oldDictionary = oldCollection.ToDictionary(oldKeySelector);
             var newDictionary = newCollection.ToDictionary(newKeySelector);
 
-            result.Extra = oldDictionary.Where(e => !newDictionary.ContainsKey(e.Key)).Select(e => e.Value).ToList();
-            result.Lacking = newDictionary.Where(e => !oldDictionary.ContainsKey(e.Key)).Select(e => e.Value).ToList();
-            if (!(result.Extra.Any() || result.Lacking.Any()))
-                result.Result = oldDictionary.Select(p => resultSelector(p.Value, newDictionary[p.Key])).Where(e=>e!=null).ToList();
+            HashSet<K> commonKeys = oldDictionary.Keys.ToHashSet();
+            commonKeys.IntersectWith(newDictionary.Keys);
 
-            return result;
+            return new JoinStrictResult<O, N, R>
+            {
+                Extra = oldDictionary.Where(e => !newDictionary.ContainsKey(e.Key)).Select(e => e.Value).ToList(),
+                Lacking = newDictionary.Where(e => !oldDictionary.ContainsKey(e.Key)).Select(e => e.Value).ToList(),
+
+                Result = commonKeys.Select(k => resultSelector(oldDictionary[k], newDictionary[k])).ToList()
+            };
         }
-
-
-
 
         public static IEnumerable<Iteration<T>> Iterate<T>(this IEnumerable<T> collection)
         {

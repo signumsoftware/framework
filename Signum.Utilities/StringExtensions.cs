@@ -385,6 +385,7 @@ namespace Signum.Utilities
                     sb.Append(separator);
                 }
             }
+
             return sb.ToString(0, Math.Max(0, sb.Length - separator.Length));  // Remove at the end is faster
         }
 
@@ -399,6 +400,7 @@ namespace Signum.Utilities
                     sb.Append(separator);
                 }
             }
+
             return sb.ToString(0, Math.Max(0, sb.Length - separator.Length));  // Remove at the end is faster
         }
 
