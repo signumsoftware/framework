@@ -806,51 +806,51 @@ namespace Signum.Utilities
         #endregion
 
         public static IEnumerable<R> JoinStrict<K, O, N, R>(
-           IEnumerable<O> oldCollection,
-           IEnumerable<N> newCollection,
-           Func<O, K> oldKeySelector,
-           Func<N, K> newKeySelector,
+           IEnumerable<O> currentCollection,
+           IEnumerable<N> shouldCollection,
+           Func<O, K> currentKeySelector,
+           Func<N, K> shouldKeySelector,
            Func<O, N, R> resultSelector, string action)
         {
 
-            var oldDictionary = oldCollection.ToDictionary(oldKeySelector);
-            var newDictionary = newCollection.ToDictionary(newKeySelector);
+            var currentDictionary = currentCollection.ToDictionary(currentKeySelector);
+            var shouldDictionary = shouldCollection.ToDictionary(shouldKeySelector);
 
-            var oldOnly = oldDictionary.Keys.Where(k => !newDictionary.ContainsKey(k)).ToList();
-            var newOnly = newDictionary.Keys.Where(k => !oldDictionary.ContainsKey(k)).ToList();
+            var currentOnly = currentDictionary.Keys.Where(k => !shouldDictionary.ContainsKey(k)).ToList();
+            var shouldOnly = shouldDictionary.Keys.Where(k => !currentDictionary.ContainsKey(k)).ToList();
 
-            if (oldOnly.Count != 0)
-                if (newOnly.Count != 0)
-                    throw new InvalidOperationException("Error {0}\r\n Extra: {1}\r\n Lacking: {2}".Formato(action, oldOnly.ToString(", "), newOnly.ToString(", ")));
+            if (currentOnly.Count != 0)
+                if (shouldOnly.Count != 0)
+                    throw new InvalidOperationException("Error {0}\r\n Extra: {1}\r\n Lacking: {2}".Formato(action, currentOnly.ToString(", "), shouldOnly.ToString(", ")));
                 else
-                    throw new InvalidOperationException("Error {0}\r\n Extra: {1}".Formato(action, oldOnly.ToString(", ")));
+                    throw new InvalidOperationException("Error {0}\r\n Extra: {1}".Formato(action, currentOnly.ToString(", ")));
             else
-                if (newOnly.Count != 0)
-                    throw new InvalidOperationException("Error {0}\r\n Lacking: {1}".Formato(action, newOnly.ToString(", ")));
+                if (shouldOnly.Count != 0)
+                    throw new InvalidOperationException("Error {0}\r\n Lacking: {1}".Formato(action, shouldOnly.ToString(", ")));
 
-            return oldDictionary.Select(p => resultSelector(p.Value, newDictionary[p.Key]));
+            return currentDictionary.Select(p => resultSelector(p.Value, shouldDictionary[p.Key]));
         }
 
 
         public static JoinStrictResult<O, N, R> JoinStrict<K, O, N, R>(
-        IEnumerable<O> oldCollection,
-        IEnumerable<N> newCollection,
-        Func<O, K> oldKeySelector,
-        Func<N, K> newKeySelector,
+        IEnumerable<O> currentCollection,
+        IEnumerable<N> shouldCollection,
+        Func<O, K> currentKeySelector,
+        Func<N, K> shouldKeySelector,
         Func<O, N, R> resultSelector)
         {
-            var oldDictionary = oldCollection.ToDictionary(oldKeySelector);
-            var newDictionary = newCollection.ToDictionary(newKeySelector);
+            var currentDictionary = currentCollection.ToDictionary(currentKeySelector);
+            var newDictionary = shouldCollection.ToDictionary(shouldKeySelector);
 
-            HashSet<K> commonKeys = oldDictionary.Keys.ToHashSet();
+            HashSet<K> commonKeys = currentDictionary.Keys.ToHashSet();
             commonKeys.IntersectWith(newDictionary.Keys);
 
             return new JoinStrictResult<O, N, R>
             {
-                Extra = oldDictionary.Where(e => !newDictionary.ContainsKey(e.Key)).Select(e => e.Value).ToList(),
-                Lacking = newDictionary.Where(e => !oldDictionary.ContainsKey(e.Key)).Select(e => e.Value).ToList(),
+                Extra = currentDictionary.Where(e => !newDictionary.ContainsKey(e.Key)).Select(e => e.Value).ToList(),
+                Lacking = newDictionary.Where(e => !currentDictionary.ContainsKey(e.Key)).Select(e => e.Value).ToList(),
 
-                Result = commonKeys.Select(k => resultSelector(oldDictionary[k], newDictionary[k])).ToList()
+                Result = commonKeys.Select(k => resultSelector(currentDictionary[k], newDictionary[k])).ToList()
             };
         }
 
