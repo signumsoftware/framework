@@ -21,8 +21,15 @@ namespace Signum.Entities.SMS
     }
 
     public enum SMSMessageOperations
-    { 
+    {
         Create,
+        Send,
+        UpdateStatus,
+        SendProcess
+    }
+
+    public enum SMSMessageProcess
+    { 
         Send,
         UpdateStatus
     }
@@ -97,6 +104,20 @@ namespace Signum.Entities.SMS
         {
             get { return messageID; }
             set { Set(ref messageID, value, () => MessageID); }
+        }
+
+        Lite<SMSSendPackageDN> package;
+        public Lite<SMSSendPackageDN> Package
+        {
+            get { return package; }
+            set { Set(ref package, value, () => Package); }
+        }
+
+        Lite<SMSUpdatePackageDN> updatePackage;
+        public Lite<SMSUpdatePackageDN> UpdatePackage
+        {
+            get { return updatePackage; }
+            set { Set(ref updatePackage, value, () => UpdatePackage); }
         }
     }
 }

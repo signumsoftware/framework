@@ -140,6 +140,7 @@
     <Compile Include="Scheduler\Task.cs" />
     <Compile Include="SMS\SMSMessage.cs" />
     <Compile Include="SMS\SMSMessageTemplate.cs" />
+    <Compile Include="SMS\SMSPackages.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Framework\Signum.Entities\Signum.Entities.csproj">

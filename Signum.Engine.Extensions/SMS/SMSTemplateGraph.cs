@@ -9,7 +9,7 @@ namespace Signum.Engine.SMS
 {
     public class SMSTemplateGraph : Graph<SMSTemplateDN, SMSTemplateState>
     {
-        static SMSTemplateGraph()
+        public static void Register()
         {
             GetState = t => t.State;
             new Construct(SMSTemplateOperations.Create)
