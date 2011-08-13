@@ -58,7 +58,7 @@ namespace Signum.Entities.ControlPanel
             return ContainsContentExpression.Invoke(this, content);
         }
 
-        protected override string ChildPropertyValidation(ModifiableEntity sender, PropertyInfo pi, object propertyValue)
+        protected override string ChildPropertyValidation(ModifiableEntity sender, PropertyInfo pi)
         {
             if (sender is PanelPart)
             {
@@ -68,17 +68,15 @@ namespace Signum.Entities.ControlPanel
 
                 if (pi.Is(() => part.Column))
                 {
-                    int colNumber = int.Parse(propertyValue.ToString());
-
-                    if (colNumber > NumberOfColumns)
+                    if (part.Column > NumberOfColumns)
                         return Resources.ControlPanelDN_Part0IsInColumn1ButPanelHasOnly2Columns.Formato(index + 1, part.Column, NumberOfColumns);
 
-                    if (parts.Any(p => p != part && p.Row == part.Row && (p.Fill || p.Column == colNumber)))
+                    if (parts.Any(p => p != part && p.Row == part.Row && (p.Fill || p.Column == part.Column)))
                         return Resources.ControlPanelDN_Part0IsInColumn1WhichAlreadyHasOtherParts.Formato(index + 1, part.Column, part.Row);
                 }
             }
 
-            return base.ChildPropertyValidation(sender, pi, propertyValue);
+            return base.ChildPropertyValidation(sender, pi);
         }
 
         protected override string PropertyValidation(PropertyInfo pi)
