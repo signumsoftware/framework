@@ -373,6 +373,14 @@ namespace Signum.Utilities
             return value;
         }
 
+
+        public static V Extract<K, V>(this IDictionary<K, V> dictionary, K key, string message)
+        {
+            V value = dictionary.GetOrThrow(key, message);
+            dictionary.Remove(key);
+            return value;
+        }
+
         public static Dictionary<V, K> Inverse<K, V>(this IDictionary<K, V> dic)
         {
             return dic.ToDictionary(k => k.Value, k => k.Key);

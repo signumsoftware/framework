@@ -136,7 +136,7 @@ namespace Signum.Test.LinqProvider
         public void SelectTypeIBA()
         {
             var list = Database.Query<NoteWithDateDN>()
-                .Select(a => a.Target.GetType()).ToList();
+                .Select(a => new { Type = a.Target.GetType(), Target = a.Target.ToLite() }).ToList();
         }
 
         [TestMethod]
@@ -319,6 +319,21 @@ namespace Signum.Test.LinqProvider
                         ((AlbumDN)n.Target).Name ??
                         ((BandDN)n.Target).Name).ToList();
 
+        }
+
+        [TestMethod]
+        public void SelectCastIBACastOperator()
+        {
+            var list = (from n in Database.Query<NoteWithDateDN>()
+                        select n.Target).Cast<BandDN>().ToList();
+        }
+
+
+        [TestMethod]
+        public void SelectCastIBAOfTypeOperator()
+        {
+            var list = (from n in Database.Query<NoteWithDateDN>()
+                        select n.Target).OfType<BandDN>().ToList();
         }
 
         [TestMethod]

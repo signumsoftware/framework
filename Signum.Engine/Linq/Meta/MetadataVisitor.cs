@@ -65,7 +65,7 @@ namespace Signum.Engine.Linq
         {
             var cleaned = MetaEvaluator.Clean(expression);
 
-            var replaced = ExpressionReplacer.Replace(Expression.Invoke(cleaned, new MetaExpression(type, null)));
+            var replaced = ExpressionReplacer.Replace(Expression.Invoke(cleaned, Expression.Constant(null, type)));
 
             return new MetadataVisitor().Visit(replaced);
         }

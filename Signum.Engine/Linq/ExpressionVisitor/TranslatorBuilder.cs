@@ -199,8 +199,6 @@ namespace Signum.Engine.Linq
             static MethodInfo miRequestIBA = ReflectionTools.GetMethodInfo((IRetriever r) => r.RequestIBA<TypeDN>(1, null)).GetGenericMethodDefinition();
             static MethodInfo miRequestLiteIBA = ReflectionTools.GetMethodInfo((IRetriever r) => r.RequestLiteIBA<TypeDN>(1, null)).GetGenericMethodDefinition();
 
-            static MethodInfo miGetType = ReflectionTools.GetMethodInfo((Schema s) => s.GetType(1));
-
             Scope scope; 
         
 
@@ -307,14 +305,36 @@ namespace Signum.Engine.Linq
             {
                 return Expression.Call(retriever, miRequestIBA.MakeGenericMethod(rba.Type),
                     Visit(NullifyColumn(rba.Id)),
-                    Visit(NullifyColumn(rba.TypeId.Column)));
+                    Visit(NullifyColumn(rba.TypeId.TypeColumn)));
             }
 
-            protected override Expression VisitTypeId(TypeIdExpression typeId)
-            {
-                var column = Visit(NullifyColumn(typeId.Column));
+            static readonly ConstantExpression NullType = Expression.Constant(null, typeof(Type));
+            static readonly ConstantExpression NullId = Expression.Constant(null, typeof(int?));
 
-                return (Expression)Expression.Call(Expression.Constant(Schema.Current), miGetType, column.UnNullify());
+            protected override Expression VisitTypeFieldInit(TypeFieldInitExpression typeFie)
+            {
+                return Expression.Condition(
+                    Expression.NotEqual(Visit(NullifyColumn(typeFie.ExternalId)), NullId),
+                    Expression.Constant(typeFie.TypeValue, typeof(Type)),
+                    NullType);
+            }
+     
+            protected override Expression VisitTypeImplementedBy(TypeImplementedByExpression typeIb)
+            {
+                return typeIb.TypeImplementations.Reverse().Aggregate((Expression)NullType, (acum, imp) => Expression.Condition(
+                    Expression.NotEqual(Visit(NullifyColumn(imp.ExternalId)), NullId),
+                    Expression.Constant(imp.Type, typeof(Type)),
+                    acum));
+            }
+
+            static MethodInfo miGetType = ReflectionTools.GetMethodInfo((Schema s) => s.GetType(1));
+
+            protected override Expression VisitTypeImplementedByAll(TypeImplementedByAllExpression typeIba)
+            {
+                return Expression.Condition(
+                    Expression.NotEqual(Visit(NullifyColumn(typeIba.TypeColumn)), NullId),
+                    Expression.Call(Expression.Constant(Schema.Current), miGetType, Visit(typeIba.TypeColumn).UnNullify()),
+                    NullType);
             }
 
             protected override Expression VisitLiteReference(LiteReferenceExpression lite)
@@ -328,7 +348,7 @@ namespace Signum.Engine.Linq
                     return Expression.Constant(null, lite.Type);
                 else if (toStr == null)
                 {
-                    var typeId = Visit(NullifyColumn(((TypeIdExpression)lite.TypeId).Column));
+                    var typeId = Visit(NullifyColumn(((TypeImplementedByAllExpression)lite.TypeId).TypeColumn));
 
                     return Expression.Call(retriever, miRequestLiteIBA.MakeGenericMethod(liteType), id.Nullify(), typeId);
                 }
