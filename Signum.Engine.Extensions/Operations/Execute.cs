@@ -101,6 +101,7 @@ namespace Signum.Engine.Operations
                     {
                         using (Transaction tr2 = new Transaction(true))
                         {
+                            log.Target = entity.ToLite<IIdentifiable>();
                             log.Exception = ex.Message;
                             log.End = TimeZoneManager.Now;
                            
