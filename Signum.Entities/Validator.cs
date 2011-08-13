@@ -119,11 +119,11 @@ namespace Signum.Entities
             get { return StaticPropertyValidation != null; }
         }
 
-        internal string OnStaticPropertyValidation(ModifiableEntity sender, PropertyInfo pi, object propertyValue)
+        internal string OnStaticPropertyValidation(ModifiableEntity sender, PropertyInfo pi)
         {
             foreach (PropertyValidationEventHandler item in StaticPropertyValidation.GetInvocationList())
             {
-                string result = item(sender, pi, propertyValue);
+                string result = item(sender, pi);
                 if (result != null)
                     return result;
             }
@@ -132,5 +132,5 @@ namespace Signum.Entities
         }
     }
 
-    public delegate string PropertyValidationEventHandler(ModifiableEntity sender, PropertyInfo pi, object propertyValue);
+    public delegate string PropertyValidationEventHandler(ModifiableEntity sender, PropertyInfo pi);
 }

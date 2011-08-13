@@ -209,7 +209,7 @@ namespace Signum.Entities
 
         }
 
-        protected virtual string ChildPropertyValidation(ModifiableEntity sender, PropertyInfo pi, object propertyValue)
+        protected virtual string ChildPropertyValidation(ModifiableEntity sender, PropertyInfo pi)
         {
             return null;
         }
@@ -328,7 +328,7 @@ namespace Signum.Entities
             //External Validation
             if (!pp.SkipExternalPropertyValidation && ExternalPropertyValidation != null)
             {
-                string result = ExternalPropertyValidation(this, pp.PropertyInfo, propertyValue);
+                string result = ExternalPropertyValidation(this, pp.PropertyInfo);
                 if (result != null)
                     return result;
             }
@@ -336,7 +336,7 @@ namespace Signum.Entities
             //Static validation
             if (pp.HasStaticPropertyValidation)
             {
-                string result = pp.OnStaticPropertyValidation(this, pp.PropertyInfo, propertyValue);
+                string result = pp.OnStaticPropertyValidation(this, pp.PropertyInfo);
                 if (result != null)
                     return result;
             }
