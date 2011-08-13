@@ -178,35 +178,37 @@ namespace Signum.Entities.Chart
             return ChartUtils.CanGroupBy(chartResultType, GetTokenName(token));
         }
 
-        string token_ExternalPropertyValidation(ModifiableEntity sender, PropertyInfo pi, object propertyValue)
+        string token_ExternalPropertyValidation(ModifiableEntity sender, PropertyInfo pi)
         {
-            if (pi.Is((ChartTokenDN ct) => ct.Token))
-            {
-                ChartTokenDN ct = (ChartTokenDN)sender;              
+            ChartTokenDN ct = sender as ChartTokenDN;
 
-                return ChartUtils.ValidateProperty(chartResultType, GetTokenName(ct), (QueryToken)propertyValue);
-            }
-
-            if (pi.Is((ChartTokenDN ct) => ct.Aggregate))
+            if(ct != null)
             {
-                if (groupResults && ChartUtils.ShouldAggregate(chartResultType, GetTokenName((ChartTokenDN)sender)))
+                if (pi.Is(() => ct.Token))
                 {
-                    if (propertyValue == null)
-                        return Resources.ExpressionShouldBeSomeKindOfAggregate;
-
-                    ChartTokenDN ct = (ChartTokenDN)sender;
-                    if (ct.Token != null && (ct.Aggregate == AggregateFunction.Sum || ct.Aggregate == AggregateFunction.Average))
-                    {
-                        var ft = QueryUtils.TryGetFilterType(ct.Token.Type);
-
-                        if (ft != FilterType.Number && ft != FilterType.DecimalNumber)
-                            return "{0} is not compatible with {1}".Formato(ct.Aggregate.NiceToString(), ft != null ? ft.NiceToString() : ct.Token.Type.TypeName());
-                    }
+                    return ChartUtils.ValidateProperty(chartResultType, GetTokenName(ct), ct.Token);
                 }
-                else
+
+                if (pi.Is(() => ct.Aggregate))
                 {
-                    if (propertyValue != null)
-                        return "Expression can not be an aggregate";
+                    if (groupResults && ChartUtils.ShouldAggregate(chartResultType, GetTokenName((ChartTokenDN)sender)))
+                    {
+                        if (ct.Aggregate == null)
+                            return Resources.ExpressionShouldBeSomeKindOfAggregate;
+
+                        if (ct.Token != null && (ct.Aggregate == AggregateFunction.Sum || ct.Aggregate == AggregateFunction.Average))
+                        {
+                            var ft = QueryUtils.TryGetFilterType(ct.Token.Type);
+
+                            if (ft != FilterType.Number && ft != FilterType.DecimalNumber)
+                                return "{0} is not compatible with {1}".Formato(ct.Aggregate.NiceToString(), ft != null ? ft.NiceToString() : ct.Token.Type.TypeName());
+                        }
+                    }
+                    else
+                    {
+                        if (ct.Aggregate != null)
+                            return "Expression can not be an aggregate";
+                    }
                 }
             }
 
