@@ -165,8 +165,6 @@ namespace Signum.Engine
             sb.Schema.EntityEvents<T>().PreUnsafeDelete += CacheLogic_PreUnsafeDelete<T>;
         }
 
-     
-
         public static void Unregister<T>(SchemaBuilder sb) where T : IdentifiableEntity
         {
             cached.Remove(typeof(T));

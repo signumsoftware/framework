@@ -73,20 +73,6 @@ namespace Signum.Utilities
 
             return newDictionary;
         }
-
-        public static T GetOrAdd<T>(this Polymorphic<T> polymorophic, Type type) where T: class, new()
-        {
-            T value = polymorophic.GetDefinition(type);
-
-            if (value != null)
-                return value;
-
-            value = new T();
-
-            polymorophic.Add(type, value);
-
-            return value;
-        }
     }
 
     public delegate T PolymorphicMerger<T>(KeyValuePair<Type, T> currentValue, KeyValuePair<Type, T> baseValue, List<KeyValuePair<Type, T>> newInterfacesValues) where T : class;
@@ -132,7 +118,7 @@ namespace Signum.Utilities
 
         public T TryGetValue(Type type)
         {
-            IsAllowed(type);
+            AssertAllowed(type);
 
             return cached.GetOrAdd(type, TryGetValueInternal);
         }
@@ -185,5 +171,22 @@ namespace Signum.Utilities
         {
             get { return definitions.Values; }
         }    
+    }
+
+    public static class PolymorphicExtensions
+    {
+        public static T GetOrAdd<T>(this Polymorphic<T> polymorophic, Type type) where T : class, new()
+        {
+            T value = polymorophic.GetDefinition(type);
+
+            if (value != null)
+                return value;
+
+            value = new T();
+
+            polymorophic.Add(type, value);
+
+            return value;
+        }
     }
 }

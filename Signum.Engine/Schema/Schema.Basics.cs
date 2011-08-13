@@ -515,8 +515,6 @@ namespace Signum.Engine.Maps
 
         public CacheController<T> CacheController { get; set; }
 
-        public event Func<bool> HasCache;
-
         public event FilterQueryEventHandler<T> FilterQuery;
 
         public event PreUnsafeDeleteHandler<T> PreUnsafeDelete;
