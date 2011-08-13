@@ -5,6 +5,6 @@
 {
     @Html.ValueLine(e, f => f.NextDate)
     @Html.ValueLine(e, f => f.Suspended)
-    @Html.EntityLine(e, f => f.Task)
-    @Html.EntityLine(e, f => f.Rule)
+    @Html.EntityLine(e, f => f.Task, vl => vl.Create = false)
+    @Html.EntityLine(e, f => f.Rule, vl => vl.Find = false)
 }

@@ -45,12 +45,12 @@ namespace ASP
     using Signum.Entities.Scheduler;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
-    [System.Web.WebPages.PageVirtualPathAttribute("~/Scheduler/Views/CustomTaskExecution.cshtml")]
-    public class _Page_Scheduler_Views_CustomTaskExecution_cshtml : System.Web.Mvc.WebViewPage<dynamic>
+    [System.Web.WebPages.PageVirtualPathAttribute("~/Scheduler/Views/ScheduleRuleHourly.cshtml")]
+    public class _Page_Scheduler_Views_ScheduleRuleHourly_cshtml : System.Web.Mvc.WebViewPage<dynamic>
     {
 
 
-        public _Page_Scheduler_Views_CustomTaskExecution_cshtml()
+        public _Page_Scheduler_Views_ScheduleRuleHourly_cshtml()
         {
         }
         protected System.Web.HttpApplication ApplicationInstance
@@ -67,24 +67,18 @@ namespace ASP
 WriteLiteral("\r\n");
 
 
- using (var e = Html.TypeContext<CustomTaskExecutionDN>()) 
+ using (var e = Html.TypeContext<ScheduleRuleHourlyDN>())
 {
+    DateTime d = e.Value.StartingOn.ToUserInterface();
     
-Write(Html.EntityLine(e, f => f.CustomTask));
-
-                                          
-	
-Write(Html.ValueLine(e, f => f.StartTime));
-
-                                     
     
-Write(Html.ValueLine(e, f => f.EndTime));
+Write(Html.Field("Start Date", Html.TextBox(e.Compose("Date"), d.Date.ToShortDateString(), new { @class = "sf-value-line sf-datepicker" })));
 
-                                      
+                                                                                                                                          
     
-Write(Html.ValueLine(e, f => f.Exception));
+Write(Html.Field("Hours", Html.TextBox(e.Compose("EachHour"), d.Hour.ToString("00"))));
 
-                                        
+                                                                                    
 }
 
         }

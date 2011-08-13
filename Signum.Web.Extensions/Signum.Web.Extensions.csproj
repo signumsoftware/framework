@@ -440,6 +440,22 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
+    <Compile Include="Scheduler\CustomTaskClient.cs" />
+    <Compile Include="Scheduler\Views\CustomTask1.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>CustomTask.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Scheduler\Views\ScheduleRuleHourly1.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ScheduleRuleHourly.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Scheduler\Views\ScheduleRuleMinutely1.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ScheduleRuleMinutely.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Scheduler\Views\_ViewStart.cs">
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
       <AutoGen>True</AutoGen>
@@ -705,6 +721,18 @@
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>Calendar.cs</LastGenOutput>
     </None>
+    <Content Include="Scheduler\Views\ScheduleRuleMinutely.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>ScheduleRuleMinutely1.cs</LastGenOutput>
+    </Content>
+    <Content Include="Scheduler\Views\ScheduleRuleHourly.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>ScheduleRuleHourly1.cs</LastGenOutput>
+    </Content>
+    <Content Include="Scheduler\Views\CustomTask.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>CustomTask1.cs</LastGenOutput>
+    </Content>
     <None Include="Scheduler\Views\ScheduleRuleDaily.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>ScheduleRuleDaily.cs</LastGenOutput>

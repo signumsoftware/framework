@@ -60,10 +60,10 @@ namespace Signum.Engine.Processes
                 AuthLogic.AssertStarted(sb);
                 ProcessExecutionGraph.Register();
 
-                OperationLogic.Register(new BasicExecute<ProcessDN>(TaskOperation.ExecutePrivate)
+                new BasicExecute<ProcessDN>(TaskOperation.ExecutePrivate)
                 {
                     Execute = (pc, _) => ProcessLogic.Create(pc).ToLite().ExecuteLite(ProcessOperation.Execute)
-                });
+                }.Register();
 
                 sb.Schema.Initializing[InitLevel.Level4BackgroundProcesses] += Schema_InitializingApplication;
                 sb.Schema.EntityEvents<ProcessExecutionDN>().Saving += ProcessExecution_Saving;
