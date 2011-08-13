@@ -8,6 +8,7 @@ using Signum.Engine.Maps;
 using System.Reflection;
 using Signum.Utilities.Reflection;
 using Signum.Entities;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.Linq
 {
@@ -111,10 +112,15 @@ namespace Signum.Engine.Linq
             throw new NotSupportedException();
         }
 
+
         public Expression GetEntityType(Expression expression)
         {
             if (expression is FieldInitExpression)
-                return Expression.Constant(((FieldInitExpression)expression).Type, typeof(Type));
+            {
+                FieldInitExpression fie = (FieldInitExpression)expression;
+
+                return Expression.Constant(expression.Type, typeof(Type));
+            }
 
             if (expression is ImplementedByExpression)
             {
@@ -137,7 +143,7 @@ namespace Signum.Engine.Linq
             if (expression is ImplementedByAllExpression)
                 return ((ImplementedByAllExpression)expression).TypeId;
 
-            return Expression.Constant(expression.Type, typeof(Type));
+            return null;
         }
 
         public Expression Coalesce(Type type, IEnumerable<Expression> exp)
@@ -152,18 +158,8 @@ namespace Signum.Engine.Linq
 
             return exp.Reverse().Aggregate((ac, e) => Expression.Coalesce(e, ac));
         }
-        
-        static MethodInfo miToMListNotModified = ReflectionTools.GetMethodInfo((IEnumerable<int> col) => col.ToMListNotModified()).GetGenericMethodDefinition();
 
-        public static ProjectionExpression ExtractMListProjection(MethodCallExpression exp)
-        {
-            if (exp.Method.IsInstantiationOf(miToMListNotModified))
-                return (ProjectionExpression)exp.Arguments[0];
-
-            return null; 
-        }
-
-        internal MethodCallExpression MListProjection(MListExpression mle)
+        internal ProjectionExpression MListProjection(MListExpression mle)
         {
             RelationalTable tr = mle.RelationalTable;
 
@@ -186,7 +182,7 @@ namespace Signum.Engine.Linq
 
             proj = ApplyExpansions(proj);
 
-            return Expression.Call(miToMListNotModified.MakeGenericMethod(pc.Projector.Type), proj);
+            return proj;
         }
 
         internal Alias NextSelectAlias()

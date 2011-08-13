@@ -38,7 +38,7 @@ namespace Signum.Engine.Linq
             if (type == null) 
                 throw new ArgumentNullException("type");
 
-            if (!type.IsIIdentifiable())
+            if (!type.IsIdentifiableEntity())
                 throw new ArgumentException("type");
             
             if (externalId == null) 

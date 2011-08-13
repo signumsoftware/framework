@@ -265,9 +265,6 @@ namespace Signum.Engine.Linq
             return column;
         }
 
-
-    
-
         protected virtual Expression VisitImplementedByAll(ImplementedByAllExpression reference)
         {
             var id = Visit(reference.Id);
@@ -282,7 +279,6 @@ namespace Signum.Engine.Linq
             return reference;
         }
 
-      
         protected virtual Expression VisitImplementedBy(ImplementedByExpression reference)
         {
             var implementations = reference.Implementations
@@ -472,7 +468,7 @@ namespace Signum.Engine.Linq
 
             if (proj != child.Projection || key != child.OuterKey)
             {
-                return new ChildProjectionExpression(proj, key);
+                return new ChildProjectionExpression(proj, key, child.IsLazyMList, child.Type);
             }
             return child;
         }

@@ -119,6 +119,13 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void SelectTypeNull()
+        {
+            var list = Database.Query<LabelDN>()
+                .Select(a => new { Label = a.ToLite(), Owner = a.Owner, OwnerType = a.Owner.Entity.GetType() }).ToList();
+        }
+
+        [TestMethod]
         public void SelectLiteIB()
         {
             var list = Database.Query<AlbumDN>()
@@ -126,10 +133,10 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
-        public void SelectTypeIB()
+        public void SelectTypeIBA()
         {
-            var list = Database.Query<AlbumDN>()
-                .Select(a => a.Author.GetType()).ToList();
+            var list = Database.Query<NoteWithDateDN>()
+                .Select(a => a.Target.GetType()).ToList();
         }
 
         [TestMethod]
@@ -149,6 +156,14 @@ namespace Signum.Test.LinqProvider
         public void SelectEntityWithLiteIbType()
         {
             var list = Database.Query<AwardNominationDN>().Where(a => a.Award.Entity.GetType() == typeof(GrammyAwardDN)).ToList();
+        }
+
+        [TestMethod]
+        public void SelectEntityWithLiteIbTypeContains()
+        {
+            Type[] types = new Type[] { typeof(GrammyAwardDN) }; 
+
+            var list = Database.Query<AwardNominationDN>().Where(a => types.Contains(a.Award.Entity.GetType())).ToList();
         }
 
         [TestMethod]
@@ -225,6 +240,12 @@ namespace Signum.Test.LinqProvider
 
         [TestMethod]
         public void SelectEntity()
+        {
+            var list = Database.Query<AlbumDN>().ToList();
+        }
+
+        [TestMethod]
+        public void SelectEntityNone()
         {
             var list = Database.Query<AlbumDN>().ToList();
         }
@@ -564,7 +585,7 @@ namespace Signum.Test.LinqProvider
                          select mle).ToList();
         }
 
-        [TestMethod]
+        //[TestMethod]
         public void SelectCache()
         {
             Connection.CommandCount = 0;

@@ -28,7 +28,10 @@ namespace Signum.Engine.DynamicQuery
         }
 
         Dictionary<object, IDynamicQuery> queries = new Dictionary<object, IDynamicQuery>();
-        ExternalPolymorphicDictionary<string, ExtensionInfo> registeredExtensions = new ExternalPolymorphicDictionary<string, ExtensionInfo>(); 
+
+        Polymorphic<Dictionary<string, ExtensionInfo>> registeredExtensions =
+            new Polymorphic<Dictionary<string, ExtensionInfo>>(PolymorphicMerger.InheritDictionaryInterfaces,
+            typeof(IIdentifiable)); 
 
         public IDynamicQuery this[object queryName]
         {
@@ -123,16 +126,19 @@ namespace Signum.Engine.DynamicQuery
 
         private Expression BuildExtension(Type type, string key, Expression context)
         {
-            LambdaExpression lambda = registeredExtensions.TryGetValue(type, key).Lambda;
+            LambdaExpression lambda = registeredExtensions.GetValue(type)[key].Lambda;
 
-            return ExpressionReplacer.Replace(Expression.Invoke(lambda, context)); 
+            return ExpressionReplacer.Replace(Expression.Invoke(lambda, context));
         }
 
         public IEnumerable<QueryToken> GetExtensions(Type type, QueryToken parent)
         {
-            return registeredExtensions.GetAllKeys(type)
-                .Select(k => registeredExtensions.TryGetValue(type, k))
-                .Select(ei => ei.CreateToken(parent));
+            var dic = registeredExtensions.TryGetValue(type);
+            
+            if (dic == null)
+                return Enumerable.Empty<QueryToken>();
+
+            return dic.Values.Select(v => v.CreateToken(parent));
         }
 
         public ExtensionInfo RegisterExpression<E, S>(Expression<Func<E, S>> lambdaToMethod)
@@ -172,7 +178,9 @@ namespace Signum.Engine.DynamicQuery
                 NiceName = niceName,
             };
 
-            registeredExtensions.Add(typeof(E), key, result);
+            registeredExtensions.GetOrAdd(typeof(E))[key] = result;
+
+            registeredExtensions.ClearCache();
 
             return result;
         }

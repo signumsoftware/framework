@@ -47,6 +47,12 @@ namespace Signum.Utilities.ExpressionTrees
         }
     }
 
+    [AttributeUsage(AttributeTargets.Parameter)]
+    public sealed class EagerBindingAttribute : Attribute
+    {
+
+    }
+
     //The name of the field for the expression that defines the content
     [AttributeUsage(AttributeTargets.Method| AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
     public sealed class ExpressionFieldAttribute : Attribute

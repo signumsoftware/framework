@@ -292,7 +292,7 @@ namespace Signum.Entities
             }
         }
 
-        public string PropertyCheck<T, S>(Expression<Func<T, S>> property) where T : ModifiableEntity
+        public string PropertyCheck<T>(Expression<Func<T, object>> property) where T : ModifiableEntity
         {
             return PropertyCheck(Validator.GetOrCreatePropertyPack(property));
         }
@@ -301,7 +301,7 @@ namespace Signum.Entities
         {
             return PropertyCheck(Validator.GetOrCreatePropertyPack(GetType(), propertyName));
         }
-       
+
         public string PropertyCheck(PropertyPack pp)
         {
             if (pp.DoNotValidate)
@@ -312,7 +312,7 @@ namespace Signum.Entities
             //ValidatorAttributes
             foreach (var validator in pp.Validators)
             {
-                string result = validator.Error(pp.PropertyInfo, propertyValue);
+                string result = validator.Error(this, pp.PropertyInfo, propertyValue);
                 if (result != null)
                     return result;
             }
@@ -334,13 +334,12 @@ namespace Signum.Entities
             }
 
             //Static validation
-            if (pp.StaticPropertyValidation != null)
+            if (pp.HasStaticPropertyValidation)
             {
-                string result = pp.StaticPropertyValidation(this, pp.PropertyInfo, propertyValue);
+                string result = pp.OnStaticPropertyValidation(this, pp.PropertyInfo, propertyValue);
                 if (result != null)
                     return result;
             }
-
             return null;
         }
 

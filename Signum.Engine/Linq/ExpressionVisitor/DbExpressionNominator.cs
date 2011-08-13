@@ -439,7 +439,7 @@ namespace Signum.Engine.Linq
                 if (b.Left.IsNull())
                 {
                     if (b.Right.IsNull())
-                        return SqlConstantExpression.True;
+                        return Expression.Constant(true);
                     else
                         return new IsNullExpression(b.Right);
                 }
@@ -456,7 +456,7 @@ namespace Signum.Engine.Linq
                 if (b.Left.IsNull())
                 {
                     if (b.Right.IsNull())
-                        return SqlConstantExpression.False;
+                        return Expression.Constant(false);
                     else
                         return new IsNotNullExpression(b.Right);
                 }

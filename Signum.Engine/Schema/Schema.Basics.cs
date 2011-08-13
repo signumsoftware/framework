@@ -769,8 +769,8 @@ namespace Signum.Engine.Maps
             Columns = Fields.Values.SelectMany(c => c.Field.Columns()).ToDictionary(c => c.Name);
 
             inserter = new Lazy<InsertCache>(InitializeInsert, LazyThreadSafetyMode.PublicationOnly);
-            updater = new Lazy<UpdateCache>(InitializeUpdate, LazyThreadSafetyMode.None);
-            saveCollections = new Lazy<Action<IdentifiableEntity,Forbidden,bool>>(InitializeCollections, LazyThreadSafetyMode.None);
+            updater = new Lazy<UpdateCache>(InitializeUpdate, LazyThreadSafetyMode.PublicationOnly);
+            saveCollections = new Lazy<Action<IdentifiableEntity,Forbidden,bool>>(InitializeCollections, LazyThreadSafetyMode.PublicationOnly);
         }
 
         public Field GetField(MemberInfo value, bool throws)
@@ -922,6 +922,14 @@ namespace Signum.Engine.Maps
         int? Size { get; }
         int? Scale { get; }
         Table ReferenceTable { get; }
+    }
+
+    public static partial class ColumnExtensions
+    {
+        public static string GetSqlDbTypeString(this IColumn column)
+        {
+            return column.SqlDbType.ToString().ToUpper(CultureInfo.InvariantCulture) + SqlBuilder.GetSizeScale(column.Size, column.Scale);
+        }
     }
 
     public interface IFieldReference

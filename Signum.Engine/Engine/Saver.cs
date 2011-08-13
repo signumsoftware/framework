@@ -43,6 +43,7 @@ namespace Signum.Engine
 
             string error = GraphExplorer.Integrity(modifiables);
             if (error.HasText())
+                
                 throw new ApplicationException(error);
 
             GraphExplorer.PropagateModifications(modifiables.Inverse());

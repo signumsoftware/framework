@@ -9,6 +9,7 @@ using Signum.Utilities;
 using System.Collections;
 using Signum.Engine.DynamicQuery;
 using System.Data.SqlTypes;
+using Signum.Entities;
 
 namespace Signum.Engine.Linq
 {
@@ -29,9 +30,12 @@ namespace Signum.Engine.Linq
         void Fill(Dictionary<ProjectionToken, IEnumerable> lookups, IRetriever retriever);
 
         SqlPreCommandSimple PreCommand();
+
+        bool IsLazy { get; }
     }
 
-    class ChildProjection<K, V> : IChildProjection
+    
+    class EagerChildProjection<K, V>: IChildProjection
     {
         public ProjectionToken Name { get; set; }
 
@@ -67,18 +71,81 @@ namespace Signum.Engine.Linq
             }
         }
 
+        public SqlPreCommandSimple PreCommand()
+        {
+            return new SqlPreCommandSimple(CommandText, GetParameters().ToList());
+        }
+
+        public bool IsLazy
+        {
+            get { return false; }
+        }
+    }
+
+
+    class LazyChildProjection<K, V> : IChildProjection
+    {
+        public ProjectionToken Name { get; set; }
+
+        public string CommandText { get; set; }
+        internal Expression<Func<SqlParameter[]>> GetParametersExpression;
+        internal Func<SqlParameter[]> GetParameters;
+        internal Expression<Func<IProjectionRow, KeyValuePair<K, V>>> ProjectorExpression;
+
+        public void Fill(Dictionary<ProjectionToken, IEnumerable> lookups, IRetriever retriever)
+        {
+            Dictionary<K, MList<V>> requests = (Dictionary<K, MList<V>>)lookups.TryGetC(Name);
+
+            if (requests == null)
+                return;
+
+            SqlPreCommandSimple command = new SqlPreCommandSimple(CommandText, GetParameters().ToList());
+            using (HeavyProfiler.Log("SQL", command.Sql))
+            using (SqlDataReader reader = Executor.UnsafeExecuteDataReader(command))
+            {
+                ProjectionRowEnumerator<KeyValuePair<K, V>> enumerator = new ProjectionRowEnumerator<KeyValuePair<K, V>>(reader, ProjectorExpression, lookups, retriever);
+
+                IEnumerable<KeyValuePair<K, V>> enumerabe = new ProjectionRowEnumerable<KeyValuePair<K, V>>(enumerator);
+
+                try
+                {
+                    var lookUp = enumerabe.ToLookup(a => a.Key, a => a.Value);
+                    foreach (var kvp in requests)
+                    {
+                        var results = lookUp[kvp.Key];
+
+                        kvp.Value.AddRange(results);
+                        kvp.Value.Modified = null;
+                    }
+                }
+                catch (SqlTypeException ex)
+                {
+                    FieldReaderException fieldEx = enumerator.Reader.CreateFieldReaderException(ex);
+                    fieldEx.Command = command;
+                    fieldEx.Row = enumerator.Row;
+                    fieldEx.Projector = ProjectorExpression;
+                    throw fieldEx;
+                }
+            }
+        }
 
         public SqlPreCommandSimple PreCommand()
         {
             return new SqlPreCommandSimple(CommandText, GetParameters().ToList());
         }
-    };
 
+        public bool IsLazy
+        {
+            get { return true; }
+        }
+    }
+    
     class TranslateResult<T> : ITranslateResult
     {
         public UniqueFunction? Unique { get; set; }
 
-        internal List<IChildProjection> ChildProjections { get; set; }
+        internal List<IChildProjection> EagerProjections { get; set; }
+        internal List<IChildProjection> LazyChildProjections { get; set; }
 
         Dictionary<ProjectionToken, IEnumerable> lookups;
 
@@ -95,16 +162,14 @@ namespace Signum.Engine.Linq
                 object result;
                 using (IRetriever retriever = EntityCache.NewRetriever())
                 {
-                    if (ChildProjections != null)
-                    {
+                    if (EagerProjections.Any() || LazyChildProjections.Any())
                         lookups = new Dictionary<ProjectionToken, IEnumerable>();
-                        foreach (var chils in ChildProjections)
-                            chils.Fill(lookups, retriever);
-                    }
+
+                    foreach (var chils in EagerProjections)
+                        chils.Fill(lookups, retriever);
 
                     SqlPreCommandSimple command = new SqlPreCommandSimple(CommandText, GetParameters().ToList());
 
-                  
                     using (HeavyProfiler.Log("SQL", command.Sql))
                     using (SqlDataReader reader = Executor.UnsafeExecuteDataReader(command))
                     {
@@ -114,7 +179,6 @@ namespace Signum.Engine.Linq
 
                         try
                         {
-
                             if (Unique == null)
                                 result = enumerable.ToList();
                             else
@@ -129,8 +193,12 @@ namespace Signum.Engine.Linq
                             throw fieldEx;
                         }
                     }
-                }
 
+                    foreach (var chils in LazyChildProjections)
+                        chils.Fill(lookups, retriever);
+
+                }
+            
                 return tr.Commit(result);
             }
         }
@@ -146,30 +214,32 @@ namespace Signum.Engine.Linq
                 default:
                     throw new InvalidOperationException();
             }
-        } 
-
-        #region ITranslateResult Members
-
+        }
 
         public string CleanCommandText()
         {
             try
             {
+                SqlPreCommand eager = EagerProjections == null ? null : EagerProjections.Select(cp => cp.PreCommand()).Combine(Spacing.Double);
+
                 SqlPreCommand main = new SqlPreCommandSimple(CommandText, GetParameters().ToList());
 
-                if (ChildProjections != null)
-                    return ChildProjections.Select(c => c.PreCommand()).And(main).Combine(Spacing.Double).PlainSql();
+                SqlPreCommand lazy = LazyChildProjections  == null ? null : LazyChildProjections.Select(cp => cp.PreCommand()).Combine(Spacing.Double);
 
-                return main.PlainSql();
+                return SqlPreCommandConcat.Combine(Spacing.Double,
+                    eager == null ? null : new SqlPreCommandSimple("--------- Eager Client Joins ----------------"),
+                    eager,
+                    eager == null && lazy == null ? null : new SqlPreCommandSimple("--------- MAIN QUERY ------------------------"),
+                    main,
+                    lazy == null ? null :  new SqlPreCommandSimple("--------- Lazy Client Joins (if needed) -----"),
+                    lazy).PlainSql(); 
+
             }
             catch
             {
                 return CommandText;
             }
         }
-
-        #endregion
-
         public object DynamiQuery { get; set; }
     }
 

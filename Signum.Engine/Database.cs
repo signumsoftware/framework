@@ -493,7 +493,7 @@ namespace Signum.Engine
             }
         }
 
-        public static void Delete(Type type, IList<int> ids)
+        public static void DeleteList(Type type, IList<int> ids)
         {
             if (type == null)
                 throw new ArgumentNullException("type");
@@ -501,8 +501,8 @@ namespace Signum.Engine
             giDeleteList.GetInvoker(type)(ids);
         }
 
-        static GenericInvoker<Action<IList<int>>> giDeleteList = new GenericInvoker<Action<IList<int>>>(l => Delete<IdentifiableEntity>(l));
-        public static void Delete<T>(IList<int> ids)
+        static GenericInvoker<Action<IList<int>>> giDeleteList = new GenericInvoker<Action<IList<int>>>(l => DeleteList<IdentifiableEntity>(l));
+        public static void DeleteList<T>(IList<int> ids)
             where T : IdentifiableEntity
         {
             if (ids == null)
