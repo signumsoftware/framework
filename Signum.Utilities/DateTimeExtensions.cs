@@ -12,6 +12,19 @@ namespace Signum.Utilities
 {
     public static class DateTimeExtensions
     {
+
+
+        public static DateTime FirstDayOfMonth(this DateTime date)
+        {
+            return new DateTime(date.Year, date.Month, 1);        
+        }
+
+        public static DateTime LastDayOfMonth(this DateTime date)
+        {
+            return date.FirstDayOfMonth().AddMonths(1);
+        }
+
+
         /// <summary>
         /// Checks if the date is inside a C interval defined by the two given dates
         /// </summary>
