@@ -1,10 +1,17 @@
+﻿@using System.Configuration
+@using Signum.Web.Properties
 @using Signum.Entities.ControlPanel
 @using Signum.Web.ControlPanel
+@using Signum.Entities.DynamicQuery
 @using Signum.Entities.Reports
+@model PanelPart
 
-@using (var tc = Html.TypeContext<LinkListPartDN>())
-{
-    tc.ValueFirst = false;
-
-    @Html.EntityRepeater(tc, p => p.Links)
-}
+@{ var linkList = ((LinkListPartDN)Model.Content).Links; }
+<ul>
+    @foreach (LinkElement link in linkList)
+    {
+        <li>
+            @Html.Href(link.Link, link.Label)
+        </li>
+    }
+</ul>

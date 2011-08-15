@@ -1,31 +1,12 @@
+﻿@using System.Configuration
+@using Signum.Web.Properties
 @using Signum.Entities.ControlPanel
 @using Signum.Web.ControlPanel
-@using Signum.Entities.Reports
+@model PanelPart
 
-@using (var tc = Html.TypeContext<PanelPart>())
-{
-    using (var sc = tc.SubContext())
-    {
-        sc.ValueFirst = true;
-        
-        <div class="sf-field">
-            <div class="sf-value-container sf-value-inline">
-                @Html.ValueLine(sc, pp => pp.Row, vl => vl.ValueHtmlProps["size"] = 2)
-                @{ string colId = null; }
-                @Html.ValueLine(sc, pp => pp.Column, vl => { vl.ValueHtmlProps["size"] = 2; colId = vl.ControlID; })
-                @{ string fillId = null; }
-                @Html.ValueLine(sc, pp => pp.Fill, vl => { vl.ValueHtmlProps["onclick"] = "SF.ControlPanel.toggleFillColumn(this.id,'" + colId + "');"; fillId = vl.ControlID; })
-        
-            <script type="text/javascript">
-                $(document).ready(function () { SF.ControlPanel.toggleFillColumn('@fillId', '@colId'); });
-            </script>
-    
-                @Html.ValueLine(sc, pp => pp.Title)
-                @Html.EntityLine(sc, pp => pp.Content, el => el.Autocomplete = false)
-            </div>
-        </div>
-        
-
-        
-    }
-} 
+<div class="ui-widget ui-widget-content ui-corner-all sf-cp-part">
+    <div class="ui-widget-header ui-corner-all sf-cp-part-header">@Model.Title</div>
+    <div>
+        @{ Html.RenderPartial(ControlPanelClient.PanelPartViews[Model.Content.GetType()], Model); }
+    </div>
+</div>
