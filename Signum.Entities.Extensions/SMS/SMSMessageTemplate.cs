@@ -122,7 +122,7 @@ namespace Signum.Entities.SMS
             };            
         }
 
-        public SMSMessageDN CreateSMSMessage(string destinationNumber, Lite<SMSSendPackageDN> package)
+        public SMSMessageDN CreateSMSMessage(string destinationNumber, Lite<SMSPackageDN> package)
         {
             return new SMSMessageDN
             {
@@ -131,7 +131,7 @@ namespace Signum.Entities.SMS
                 From = this.from,
                 State = SMSMessageState.Created,
                 DestinationNumber = destinationNumber,
-                Package = package
+                SendPackage = package
             };
         }
     }

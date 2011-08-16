@@ -9,6 +9,10 @@ namespace Signum.Engine.SMS
 {
     public class SMSTemplateGraph : Graph<SMSTemplateDN, SMSTemplateState>
     {
+        static bool registered;
+        public static bool Registered { get { return registered; } }
+
+
         public static void Register()
         {
             GetState = t => t.State;
@@ -42,6 +46,8 @@ namespace Signum.Engine.SMS
                 ToState = SMSTemplateState.Modified,
                 Execute = (t, _) => { t.Active = false; }
             }.Register();
+
+            registered = true;
         }
     }
 }

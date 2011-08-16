@@ -22,12 +22,15 @@ using Signum.Entities.Chart;
 using Signum.Utilities.DataStructures;
 using Signum.Entities.Reports;
 using Signum.Engine.Reports;
+using Signum.Entities.Extensions.SMS;
+using Signum.Engine.SMS;
 
 
 namespace Signum.Services
 {
-    public abstract class ServerExtensions : ServerBasic, ILoginServer, IOperationServer, IQueryServer, IChartServer, IExcelReportServer, IUserQueryServer,
-        IQueryAuthServer, IPropertyAuthServer, ITypeAuthServer, IFacadeMethodAuthServer, IPermissionAuthServer, IOperationAuthServer, IEntityGroupAuthServer
+    public abstract class ServerExtensions : ServerBasic, ILoginServer, IOperationServer, IQueryServer, 
+        IChartServer, IExcelReportServer, IUserQueryServer, IQueryAuthServer, IPropertyAuthServer, 
+        ITypeAuthServer, IFacadeMethodAuthServer, IPermissionAuthServer, IOperationAuthServer, IEntityGroupAuthServer, ISmsServer
     {
         protected UserDN currentUser;
 
@@ -398,5 +401,12 @@ namespace Signum.Services
         }
         #endregion
 
+        #region SMS Members
+        public string GetPhoneNumber(IdentifiableEntity ie)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+                () => SMSLogic.GetPhoneNumber(ie));
+        }
+        #endregion
     }
 }

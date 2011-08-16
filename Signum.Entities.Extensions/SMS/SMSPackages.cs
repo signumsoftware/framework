@@ -8,7 +8,7 @@ using Signum.Utilities;
 
 namespace Signum.Entities.SMS
 {
-    public class SMSSendPackageDN : IdentifiableEntity, IProcessDataDN
+    public class SMSPackageDN : IdentifiableEntity, IProcessDataDN
     {
         [SqlDbType(Size = 200)]
         string name;
@@ -38,36 +38,4 @@ namespace Signum.Entities.SMS
             return "{0} ({1} lines{2})".Formato(Name, numLines, numErrors == 0 ? "" : ", {0} errors".Formato(numErrors));
         }
     }
-
-    public class SMSUpdatePackageDN : IdentifiableEntity, IProcessDataDN
-    {
-        [SqlDbType(Size = 200)]
-        string name;
-        [StringLengthValidator(AllowNulls = true, Max = 200)]
-        public string Name
-        {
-            get { return name; }
-            set { SetToStr(ref name, value, () => Name); }
-        }
-
-        int numLines;
-        public int NumLines
-        {
-            get { return numLines; }
-            set { SetToStr(ref numLines, value, () => NumLines); }
-        }
-
-        int numErrors;
-        public int NumErrors
-        {
-            get { return numErrors; }
-            set { SetToStr(ref numErrors, value, () => NumErrors); }
-        }
-
-        public override string ToString()
-        {
-            return "{0} ({1} lines{2})".Formato(Name, numLines, numErrors == 0 ? "" : ", {0} errors".Formato(numErrors));
-        }
-    }
-
 }
