@@ -66,27 +66,17 @@ namespace ASP
 
 
 
-WriteLiteral(@"
-<script type=""text/javascript"">
-    var SF = SF || {};
+WriteLiteral("\r\n");
 
-    SF.ControlPanel = (function () {
-        var toggleFillColumn = function (cbFillId, colInputId) {
-            if ($(""#"" + cbFillId + "":checked"").length > 0) {
-                $('#' + colInputId).val(1).attr('disabled', 'disabled');
-            }
-            else {
-                $('#' + colInputId).removeAttr('disabled');
-            }
-        };
 
-        return {
-            toggleFillColumn: toggleFillColumn
-        };
-    })();
-</script>
+Write(Html.ScriptsJs("~/ControlPanel/Scripts/SF_ControlPanel.js"));
 
-");
+WriteLiteral("\r\n");
+
+
+Write(Html.ScriptCss("~/ControlPanel/Content/SF_ControlPanel.css"));
+
+WriteLiteral("\r\n\r\n");
 
 
  using (var tc = Html.TypeContext<ControlPanelDN>())
@@ -107,10 +97,11 @@ Write(Html.ValueLine(tc, cp => cp.HomePage));
 Write(Html.ValueLine(tc, cp => cp.NumberOfColumns));
 
                                                  
-    
-Write(Html.EntityRepeater(tc, cp => cp.Parts));
+    Html.RenderPartial(ControlPanelClient.ViewPrefix.Formato("PanelParts"), tc.Value);
 
-                                            
+WriteLiteral("    <div class=\"clear\"></div>   \r\n");
+
+
 }
 
         }

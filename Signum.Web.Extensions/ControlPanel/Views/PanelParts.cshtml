@@ -1,0 +1,30 @@
+﻿@using System.Configuration
+@using Signum.Web.Properties
+@using Signum.Entities.ControlPanel
+@using Signum.Web.ControlPanel
+@model ControlPanelDN
+@if (Model.Parts != null)
+{
+    int rowNumber = Model.Parts.Max(p => p.Row);
+    <table id="sfCpContainer">
+        @for (int i = 0; i < rowNumber; i++)
+        { 
+            <tr>
+            @for (int j = 0; j < Model.NumberOfColumns; j++)
+            {
+                PanelPart pp = Model.Parts.SingleOrDefault(p => p.Row == i + 1 && (p.Column == j + 1 || p.Fill));
+                <td class="sf-cp-part-container" id=@("sfPanelPart_{0}_{1}".Formato(pp.Row, pp.Column)) @((pp != null && pp.Fill) ? ("colspan=" + Model.NumberOfColumns) : "")>
+                    @if (pp != null)
+                    {
+                        Html.RenderPartial(ControlPanelClient.ViewPrefix.Formato("PanelPart"), pp);
+                    }
+                </td>
+                    if (pp != null && pp.Fill)
+                    {
+                        j = Model.NumberOfColumns;
+                    }
+            }
+            </tr>
+        }
+    </table>
+}

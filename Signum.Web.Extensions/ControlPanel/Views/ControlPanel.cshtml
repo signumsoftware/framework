@@ -6,8 +6,7 @@
 @section head
 {
     @Html.ScriptsJs(Navigator.Manager.DefaultScripts().ToArray())
-    @Html.ScriptsJs("~/ControlPanel/Scripts/control-panel.js")
-    @Html.ScriptCss("~/ControlPanel/Content/control-panel.css")
+    @Html.ScriptCss("~/ControlPanel/Content/SF_ControlPanel.css")
 }
 
 @using (Html.BeginForm("DoPostBack", "Signum", "POST"))
@@ -16,31 +15,6 @@
     <h1>
         <a href="@Navigator.ViewRoute(typeof(ControlPanelDN), cp.Id)">@cp.DisplayName</a>
     </h1>
-    if (cp.Parts != null)
-    {
-        int rowNumber = cp.Parts.Max(p => p.Row);
-        <table id="sfCpContainer">
-            @for (int i = 0; i < rowNumber; i++)
-            { 
-                <tr>
-                @for (int j = 0; j < cp.NumberOfColumns; j++)
-                {
-                    PanelPart pp = cp.Parts.SingleOrDefault(p => p.Row == i + 1 && (p.Column == j + 1 || p.Fill));
-                    <td class="sf-cp-part-container" @((pp != null && pp.Fill) ? ("colspan=" + cp.NumberOfColumns) : "")>
-                        @if (pp != null)
-                        {
-                            Html.RenderPartial(ControlPanelClient.ViewPrefix.Formato("PanelPart"), pp);
-                        }
-                    </td>
-                        if (pp != null && pp.Fill)
-                        {
-                            j = cp.NumberOfColumns;
-                        }
-                }
-                </tr>
-            }
-        </table>
-    }
-    <div class="clear">
-    </div>   
+    Html.RenderPartial(ControlPanelClient.ViewPrefix.Formato("PanelParts"), cp);
+    <div class="clear"></div>   
  } 

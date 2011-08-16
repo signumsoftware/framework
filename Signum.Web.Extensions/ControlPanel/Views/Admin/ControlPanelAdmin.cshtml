@@ -2,24 +2,8 @@
 @using Signum.Web.ControlPanel
 @using System.Reflection
 
-<script type="text/javascript">
-    var SF = SF || {};
-
-    SF.ControlPanel = (function () {
-        var toggleFillColumn = function (cbFillId, colInputId) {
-            if ($("#" + cbFillId + ":checked").length > 0) {
-                $('#' + colInputId).val(1).attr('disabled', 'disabled');
-            }
-            else {
-                $('#' + colInputId).removeAttr('disabled');
-            }
-        };
-
-        return {
-            toggleFillColumn: toggleFillColumn
-        };
-    })();
-</script>
+@Html.ScriptsJs("~/ControlPanel/Scripts/SF_ControlPanel.js")
+@Html.ScriptCss("~/ControlPanel/Content/SF_ControlPanel.css")
 
 @using (var tc = Html.TypeContext<ControlPanelDN>())
 {
@@ -27,5 +11,6 @@
     @Html.ValueLine(tc, cp => cp.DisplayName)
     @Html.ValueLine(tc, cp => cp.HomePage)
     @Html.ValueLine(tc, cp => cp.NumberOfColumns)
-    @Html.EntityRepeater(tc, cp => cp.Parts)
+    Html.RenderPartial(ControlPanelClient.ViewPrefix.Formato("PanelParts"), tc.Value);
+    <div class="clear"></div>   
 }

@@ -46,12 +46,12 @@ namespace ASP
     using Signum.Web.ControlPanel;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
-    [System.Web.WebPages.PageVirtualPathAttribute("~/ControlPanel/Views/ControlPanel.cshtml")]
-    public class _Page_ControlPanel_Views_ControlPanel_cshtml : System.Web.Mvc.WebViewPage<dynamic>
+    [System.Web.WebPages.PageVirtualPathAttribute("~/ControlPanel/Views/PanelParts.cshtml")]
+    public class _Page_ControlPanel_Views_PanelParts_cshtml : System.Web.Mvc.WebViewPage<ControlPanelDN>
     {
 
 
-        public _Page_ControlPanel_Views_ControlPanel_cshtml()
+        public _Page_ControlPanel_Views_PanelParts_cshtml()
         {
         }
         protected System.Web.HttpApplication ApplicationInstance
@@ -67,52 +67,61 @@ namespace ASP
 
 
 
-WriteLiteral("\r\n");
 
 
-DefineSection("head", () => {
-
-WriteLiteral("\r\n    ");
-
-
-Write(Html.ScriptsJs(Navigator.Manager.DefaultScripts().ToArray()));
-
-WriteLiteral("\r\n    ");
-
-
-Write(Html.ScriptCss("~/ControlPanel/Content/SF_ControlPanel.css"));
-
-WriteLiteral("\r\n");
-
-
-});
-
-WriteLiteral("\r\n\r\n");
-
-
- using (Html.BeginForm("DoPostBack", "Signum", "POST"))
+ if (Model.Parts != null)
 {
-    ControlPanelDN cp = (ControlPanelDN)Model;
+    int rowNumber = Model.Parts.Max(p => p.Row);
 
-WriteLiteral("    <h1>\r\n        <a href=\"");
-
-
-            Write(Navigator.ViewRoute(typeof(ControlPanelDN), cp.Id));
-
-WriteLiteral("\">");
+WriteLiteral("    <table id=\"sfCpContainer\">\r\n");
 
 
-                                                                 Write(cp.DisplayName);
+         for (int i = 0; i < rowNumber; i++)
+        { 
 
-WriteLiteral("</a>\r\n    </h1>\r\n");
-
-
-    Html.RenderPartial(ControlPanelClient.ViewPrefix.Formato("PanelParts"), cp);
-
-WriteLiteral("    <div class=\"clear\"></div>   \r\n");
+WriteLiteral("            <tr>\r\n");
 
 
- } 
+             for (int j = 0; j < Model.NumberOfColumns; j++)
+            {
+                PanelPart pp = Model.Parts.SingleOrDefault(p => p.Row == i + 1 && (p.Column == j + 1 || p.Fill));
+
+WriteLiteral("                <td class=\"sf-cp-part-container\" id=");
+
+
+                                                Write("sfPanelPart_{0}_{1}".Formato(pp.Row, pp.Column));
+
+WriteLiteral(" ");
+
+
+                                                                                                    Write((pp != null && pp.Fill) ? ("colspan=" + Model.NumberOfColumns) : "");
+
+WriteLiteral(">\r\n");
+
+
+                     if (pp != null)
+                    {
+                        Html.RenderPartial(ControlPanelClient.ViewPrefix.Formato("PanelPart"), pp);
+                    }
+
+WriteLiteral("                </td>\r\n");
+
+
+                    if (pp != null && pp.Fill)
+                    {
+                        j = Model.NumberOfColumns;
+                    }
+            }
+
+WriteLiteral("            </tr>\r\n");
+
+
+        }
+
+WriteLiteral("    </table>\r\n");
+
+
+}
 
 
         }
