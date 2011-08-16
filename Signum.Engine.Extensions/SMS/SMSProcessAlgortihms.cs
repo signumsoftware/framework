@@ -22,10 +22,10 @@ namespace Signum.Engine.Extensions.SMS
 
         public FinalState Execute(IExecutingProcess executingProcess)
         {
-            SMSSendPackageDN package = (SMSSendPackageDN)executingProcess.Data;
+            SMSPackageDN package = (SMSPackageDN)executingProcess.Data;
 
             List<Lite<SMSMessageDN>> messages = (from message in Database.Query<SMSMessageDN>()
-                                                 where message.Package == package.ToLite() &&
+                                                 where message.SendPackage == package.ToLite() &&
                                                  message.State == SMSMessageState.Created
                                                  select message.ToLite()).ToList();
 
@@ -59,24 +59,17 @@ namespace Signum.Engine.Extensions.SMS
         }
     }
 
-    public class SMSMessageUpdateStatusProcessAlgortihm : IProcessAlgorithm
+    public class SMSMessageUpdateStatusProcessAlgorithm : IProcessAlgorithm
     {
-
         public Entities.Processes.IProcessDataDN CreateData(object[] args)
         {
-            SMSUpdatePackageDN package = new SMSUpdatePackageDN().Save();
+            SMSPackageDN package = new SMSPackageDN().Save();
 
-            //TODO: 777 luis - comprobar esta query y modificar para deshacer el doble from
             package.NumLines = (from m in Database.Query<SMSMessageDN>()
                                 where m.State == SMSMessageState.Sent
                                     && m.SendState != SendState.Delivered
                                     && m.SendState != SendState.Failed
-                                    && (m.UpdatePackage == null
-                                    || !Database.Query<ProcessExecutionDN>().Any(pe => 
-                                        pe.ProcessData.ToLite().Is(m.UpdatePackage.ToLite<IProcessDataDN>())
-                                        && (pe.State == ProcessState.Canceled
-                                        || pe.State == ProcessState.Error
-                                        || pe.State == ProcessState.Finished)))
+                                    && m.UpdatePackage == null
                                 select m).UnsafeUpdate(a => new SMSMessageDN { UpdatePackage = package.ToLite() });
 
             return package.Save();
@@ -86,10 +79,10 @@ namespace Signum.Engine.Extensions.SMS
 
         public FinalState Execute(IExecutingProcess executingProcess)
         {
-            SMSSendPackageDN package = (SMSSendPackageDN)executingProcess.Data;
+            SMSPackageDN package = (SMSPackageDN)executingProcess.Data;
 
             List<Lite<SMSMessageDN>> messages = (from message in Database.Query<SMSMessageDN>()
-                                                 where message.Package == package.ToLite() &&
+                                                 where message.UpdatePackage == package.ToLite() &&
                                                  message.SendState == SendState.None
                                                  select message.ToLite()).ToList();
 

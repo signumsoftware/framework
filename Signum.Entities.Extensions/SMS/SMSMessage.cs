@@ -5,6 +5,11 @@ using System.Text;
 
 namespace Signum.Entities.SMS
 {
+    public enum SMSProviderOperations
+    {
+        SendSMSMessage
+    }
+
     public enum SMSMessageState
     {
         Created,
@@ -12,24 +17,23 @@ namespace Signum.Entities.SMS
     }
 
     public enum SendState
-    { 
+    {
         None,
+        Queued,
+        Sent,
         Delivered,
         Failed,
-        Queued,
-        Sent    
     }
 
     public enum SMSMessageOperations
     {
         Create,
         Send,
-        UpdateStatus,
-        SendProcess
+        UpdateStatus
     }
 
     public enum SMSMessageProcess
-    { 
+    {
         Send,
         UpdateStatus
     }
@@ -90,7 +94,7 @@ namespace Signum.Entities.SMS
         }
 
         string destinationNumber;
-        [StringLengthValidator(AllowNulls=false)]
+        [StringLengthValidator(AllowNulls = false)]
         public string DestinationNumber
         {
             get { return destinationNumber; }
@@ -106,15 +110,15 @@ namespace Signum.Entities.SMS
             set { Set(ref messageID, value, () => MessageID); }
         }
 
-        Lite<SMSSendPackageDN> package;
-        public Lite<SMSSendPackageDN> Package
+        Lite<SMSPackageDN> sendpackage;
+        public Lite<SMSPackageDN> SendPackage
         {
-            get { return package; }
-            set { Set(ref package, value, () => Package); }
+            get { return sendpackage; }
+            set { Set(ref sendpackage, value, () => SendPackage); }
         }
 
-        Lite<SMSUpdatePackageDN> updatePackage;
-        public Lite<SMSUpdatePackageDN> UpdatePackage
+        Lite<SMSPackageDN> updatePackage;
+        public Lite<SMSPackageDN> UpdatePackage
         {
             get { return updatePackage; }
             set { Set(ref updatePackage, value, () => UpdatePackage); }

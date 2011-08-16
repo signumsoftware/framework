@@ -21,7 +21,7 @@ namespace Signum.Engine.SMS
     public static class SMSLogic
     {
         static Func<SMSMessageDN, string> SMSSendAndGetTicketAction;
-        static Func<SMSTemplateDN, List<string>, List<string>> SMSMultipleSendAction;
+        static Func<CreateMessageParams, List<string>, List<string>> SMSMultipleSendAction;
         static Func<SMSMessageDN, SendState> SMSUpdateStatusAction;
 
         public static void AssertStarted(SchemaBuilder sb)
@@ -72,56 +72,105 @@ namespace Signum.Engine.SMS
 
         static Dictionary<Type, LambdaExpression> phoneNumberProviders = new Dictionary<Type, LambdaExpression>();
 
-        public static void RegisterPhoneNumberProvider<T>(Expression<Func<T, string>> func)
+
+        public static void RegisterPhoneNumberProvider<T>(Expression<Func<T, string>> func) where T : IdentifiableEntity
         {
             phoneNumberProviders.Add(typeof(T), func);
+
+            new BasicConstructFromMany<T, ProcessExecutionDN>(SMSProviderOperations.SendSMSMessage)
+            {
+                Construct = (providers, args) =>
+                {
+                    var numbers = Database.Query<T>().Where(p => providers.Contains(p.ToLite()))
+                        .Select(func).AsEnumerable().NotNull().Distinct().ToList();
+
+                    CreateMessageParams createParams = args.GetArg<CreateMessageParams>(0);
+
+                    if (!createParams.Message.HasText())
+                        throw new ApplicationException("The text for the SMS message has not been set");
+
+                    SMSPackageDN package = new SMSPackageDN
+                    {
+                        NumLines = numbers.Count,
+                    }.Save();
+
+                    var packLite = package.ToLite();
+
+                    numbers.Select(n => createParams.CreateSMSMessage(n, packLite)).SaveList();
+
+                    var process = ProcessLogic.Create(SMSMessageProcess.Send, package);
+
+                    process.ToLite().ExecuteLite(ProcessOperation.Execute);
+
+                    return process;
+                }
+            }.Register();
         }
 
-        public static string GetPhoneNumber(IdentifiableEntity entity)
+        public class CreateMessageParams
         {
-            return giGetPhoneNumber.GetInvoker(entity.GetType())(entity);
+            public string Message;
+            public string From;
+
+            public SMSMessageDN CreateSMSMessage(string destinationNumber, Lite<SMSPackageDN> packLite)
+            {
+                return new SMSMessageDN
+                {
+                    Message = this.Message,
+                    From = this.From,
+                    State = SMSMessageState.Created,
+                    DestinationNumber = destinationNumber,
+                    SendPackage = packLite
+                };
+            }
+
+            public SMSMessageDN CreateSMSMessage()
+            {
+                return CreateSMSMessage(null);
+            }
+
+            public SMSMessageDN CreateSMSMessage(string destinationNumber)
+            {
+                return new SMSMessageDN
+                {
+                    Message = this.Message,
+                    From = this.From,
+                    State = SMSMessageState.Created,
+                    DestinationNumber = destinationNumber
+                };
+            }
+
         }
 
-        static GenericInvoker<Func<IdentifiableEntity, string>> giGetPhoneNumber = 
-            new GenericInvoker<Func<IdentifiableEntity,string>>(ie => GetPhoneNumber<IdentifiableEntity>(ie));
-        public static string GetPhoneNumber<T>(T entity)
+        public static string GetPhoneNumber<T>(T entity) where T : IIdentifiable
         {
             return ((Expression<Func<T, string>>)phoneNumberProviders[typeof(T)]).Invoke(entity);
         }
-        
+
         #region processes
 
         public static void StartProcesses(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                //TODO: 777 luis hay que hacer getoperationinfo para lanzar ex si no están registrados
-                //SMSMessageGraph.Register();
-                //SMSTemplateGraph.Register();
+                if (!SMSMessageGraph.Registered)
+                    throw new InvalidOperationException("SMSMessageGraph must be registered prior to start the processes");
 
-                sb.Include<SMSSendPackageDN>();
+                if (!SMSTemplateGraph.Registered)
+                    throw new InvalidOperationException("SMSTemplateGraph must be registered prior to start the processes");
+
+                sb.Include<SMSPackageDN>();
                 SMSLogic.AssertStarted(sb);
                 ProcessLogic.AssertStarted(sb);
                 ProcessLogic.Register(SMSMessageProcess.Send, new SMSMessageSendProcessAlgortihm());
-                ProcessLogic.Register(SMSMessageProcess.UpdateStatus, new SMSMessageUpdateStatusProcessAlgortihm());
+                ProcessLogic.Register(SMSMessageProcess.UpdateStatus, new SMSMessageUpdateStatusProcessAlgorithm());
 
-                new BasicConstructFromMany<IdentifiableEntity, ProcessExecutionDN>(SMSMessageOperations.Send)
-                {
-                    Construct = (messages, args) => SendMessages(args.GetArg<SMSTemplateDN>(0), messages.RetrieveFromListOfLite())
-                }.Register();
-
-                new BasicConstructFromMany<SMSMessageDN, ProcessExecutionDN>(SMSMessageOperations.UpdateStatus) 
+                new BasicConstructFromMany<SMSMessageDN, ProcessExecutionDN>(SMSMessageOperations.UpdateStatus)
                 {
                     Construct = (messages, _) => UpdateMessages(messages.RetrieveFromListOfLite())
                 }.Register();
 
-                //TODO: 777 luis - hay que registrar correctamente el proceso para todos los mensajes del sistema
-                //new BasicExecute<ProcessExecutionDN>(SMSMessageOperations.UpdateStatus)
-                //{
-                //    Execute = (_, __) => new SMSMessageUpdateStatusProcessAlgortihm().CreateData()
-                //}.Register();
-
-                dqm[typeof(SMSSendPackageDN)] = (from e in Database.Query<SMSSendPackageDN>()
+                dqm[typeof(SMSPackageDN)] = (from e in Database.Query<SMSPackageDN>()
                                              select new
                                              {
                                                  Entity = e.ToLite(),
@@ -135,7 +184,7 @@ namespace Signum.Engine.SMS
 
         private static ProcessExecutionDN UpdateMessages(List<SMSMessageDN> messages)
         {
-            SMSSendPackageDN package = new SMSSendPackageDN
+            SMSPackageDN package = new SMSPackageDN
             {
                 NumLines = messages.Count,
             }.Save();
@@ -145,7 +194,7 @@ namespace Signum.Engine.SMS
             if (messages.Any(m => m.State != SMSMessageState.Sent))
                 throw new ApplicationException("SMS messages must be sent prior to update the status");
 
-            messages.Select(m => m.Do(ms => ms.Package = packLite)).SaveList();
+            messages.Select(m => m.Do(ms => ms.SendPackage = packLite)).SaveList();
 
             var process = ProcessLogic.Create(SMSMessageProcess.Send, package);
 
@@ -154,24 +203,7 @@ namespace Signum.Engine.SMS
             return process;
         }
 
-        public static ProcessExecutionDN SendMessages<T>(SMSTemplateDN template, List<T> recipientList)
-            where T : class, IIdentifiable
-        {
-            SMSSendPackageDN package = new SMSSendPackageDN
-            {
-                NumLines = recipientList.Count,
-            }.Save();
 
-            var packLite = package.ToLite();
-
-            recipientList.Select(e => template.CreateSMSMessage(SMSLogic.GetPhoneNumber(e), packLite)).SaveList();
-
-            var process = ProcessLogic.Create(SMSMessageProcess.Send, package);
-
-            process.ToLite().ExecuteLite(ProcessOperation.Execute);
-
-            return process;
-        }
 
         #endregion
 
@@ -180,7 +212,7 @@ namespace Signum.Engine.SMS
             SMSSendAndGetTicketAction = action;
         }
 
-        public static void RegisterSMSMultipleSendAction(Func<SMSTemplateDN, List<string>, List<string>> action)
+        public static void RegisterSMSMultipleSendAction(Func<CreateMessageParams, List<string>, List<string>> action)
         {
             SMSMultipleSendAction = action;
         }
@@ -206,14 +238,14 @@ namespace Signum.Engine.SMS
             message.Save();
         }
 
-        public static List<SMSMessageDN> CreateAndSendMultipleSMSMessages(SMSTemplateDN template, List<string> phones)
+        public static List<SMSMessageDN> CreateAndSendMultipleSMSMessages(CreateMessageParams template, List<string> phones)
         {
             return CreateAndSendMultipleSMSMessages(template, phones, SMSMultipleSendAction);
         }
 
         //Allows concurrent custom sendProviders for one application
-        public static List<SMSMessageDN> CreateAndSendMultipleSMSMessages(SMSTemplateDN template,
-            List<string> phones, Func<SMSTemplateDN, List<string>, List<string>> send)
+        public static List<SMSMessageDN> CreateAndSendMultipleSMSMessages(CreateMessageParams template,
+            List<string> phones, Func<CreateMessageParams, List<string>, List<string>> send)
         {
             var messages = new List<SMSMessageDN>();
             var IDs = send(template, phones);
@@ -249,6 +281,9 @@ namespace Signum.Engine.SMS
 
     public class SMSMessageGraph : Graph<SMSMessageDN, SMSMessageState>
     {
+        static bool registered;
+        public static bool Registered { get { return registered; } }
+
         public static void Register()
         {
             GetState = m => m.State;
@@ -278,6 +313,8 @@ namespace Signum.Engine.SMS
                 ToState = SMSMessageState.Sent,
                 Execute = (t, args) => { SMSLogic.UpdateMessageStatus(t, args.TryGetArgC<Func<SMSMessageDN, SendState>>(0)); }
             }.Register();
+
+            registered = true;
         }
     }
 
