@@ -471,4 +471,10 @@
   <data name="UserQueries_UserQueries" xml:space="preserve">
     <value>User Queries</value>
   </data>
+  <data name="ControlPanel_CreateNewPart" xml:space="preserve">
+    <value>Create new part</value>
+  </data>
+  <data name="ControlPanel_YouMustSaveThePanelBeforeAddingParts" xml:space="preserve">
+    <value>You must save the panel before adding parts</value>
+  </data>
 </root>

@@ -5,12 +5,15 @@
 @Html.ScriptsJs("~/ControlPanel/Scripts/SF_ControlPanel.js")
 @Html.ScriptCss("~/ControlPanel/Content/SF_ControlPanel.css")
 
-@using (var tc = Html.TypeContext<ControlPanelDN>())
-{
-    @Html.EntityLine(tc, cp => cp.Related, el => el.Create = false)
-    @Html.ValueLine(tc, cp => cp.DisplayName)
-    @Html.ValueLine(tc, cp => cp.HomePage)
-    @Html.ValueLine(tc, cp => cp.NumberOfColumns)
-    Html.RenderPartial(ControlPanelClient.ViewPrefix.Formato("PanelParts"), tc.Value);
-    <div class="clear"></div>   
-}
+<div id="sfCpAdmin">
+    @using (var tc = Html.TypeContext<ControlPanelDN>())
+    {
+        @Html.EntityLine(tc, cp => cp.Related, el => el.Create = false)
+        @Html.ValueLine(tc, cp => cp.DisplayName)
+        @Html.ValueLine(tc, cp => cp.HomePage)
+        @Html.ValueLine(tc, cp => cp.NumberOfColumns)
+    
+        Html.RenderPartial(ControlPanelClient.AdminViewPrefix.Formato("PanelParts"), tc.Value);
+        <div class="clear"></div>   
+    }
+</div>

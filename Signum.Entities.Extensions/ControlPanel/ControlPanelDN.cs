@@ -47,7 +47,7 @@ namespace Signum.Entities.ControlPanel
         MList<PanelPart> parts = new MList<PanelPart>();
         public MList<PanelPart> Parts
         {
-            get { return parts.OrderBy(p => p.Row).ThenBy(p => p.Column).ToMList(); }
+            get { return parts; }
             set { Set(ref parts, value, () => Parts); }
         }
 
@@ -81,7 +81,7 @@ namespace Signum.Entities.ControlPanel
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if (pi.Is(() => Parts))
+            if (pi.Is(() => Parts) && Parts.Any())
             {
                 var rows = Parts.Select(p => p.Row).Distinct().ToList();
                 int maxRow = rows.Max();

@@ -5,11 +5,14 @@
 @using (var tc = Html.TypeContext<CountUserQueryElement>())
 {
     tc.ValueFirst = true;
-
-    <div class="sf-field">
-        <div class="sf-value-container sf-value-inline">
-            @Html.ValueLine(tc, cuq => cuq.Label)
-            @Html.EntityLine(tc, cuq => cuq.UserQuery, el => el.Create = false)
-        </div>
-    </div>
+    using (Html.FieldInline())
+    {
+        @Html.ValueLine(tc, cuq => cuq.Label)
+        @Html.EntityLine(tc, cuq => cuq.UserQuery, el => 
+        { 
+            el.Create = false;
+            el.Remove = false;
+            el.ViewMode = ViewMode.Navigate; 
+        })
+    }
 }

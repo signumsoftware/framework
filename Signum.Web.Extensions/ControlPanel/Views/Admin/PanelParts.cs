@@ -44,17 +44,14 @@ namespace ASP
     using Signum.Web.Properties;
     using Signum.Entities.ControlPanel;
     using Signum.Web.ControlPanel;
-    using Signum.Entities.DynamicQuery;
-    using Signum.Entities.Reports;
-    using Signum.Web.UserQueries;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
-    [System.Web.WebPages.PageVirtualPathAttribute("~/ControlPanel/Views/SearchControlPart.cshtml")]
-    public class _Page_ControlPanel_Views_SearchControlPart_cshtml : System.Web.Mvc.WebViewPage<PanelPart>
+    [System.Web.WebPages.PageVirtualPathAttribute("~/ControlPanel/Views/Admin/PanelParts.cshtml")]
+    public class _Page_ControlPanel_Views_Admin_PanelParts_cshtml : System.Web.Mvc.WebViewPage<ControlPanelDN>
     {
 
 
-        public _Page_ControlPanel_Views_SearchControlPart_cshtml()
+        public _Page_ControlPanel_Views_Admin_PanelParts_cshtml()
         {
         }
         protected System.Web.HttpApplication ApplicationInstance
@@ -72,23 +69,70 @@ namespace ASP
 
 
 
+ if (!Model.Parts.IsNullOrEmpty())
+{
+    int rowNumber = Model.Parts.Max(p => p.Row);
+    int columnWidth = (int)Math.Floor((decimal)(100 / Model.NumberOfColumns));
+
+WriteLiteral("    <table id=\"sfCpContainer\">\r\n");
 
 
-WriteLiteral("\r\n");
+         for (int i = 0; i < rowNumber; i++)
+        { 
+
+WriteLiteral("            <tr>\r\n");
 
 
-   
-    UserQueryDN uq = ((UserQueryPartDN)Model.Content).UserQuery;
-    object queryName = Navigator.Manager.QuerySettings.Keys.First(k => QueryUtils.GetQueryUniqueKey(k) == uq.Query.Key);
-    FindOptions fo = new FindOptions(queryName)
-    {
-        FilterMode = FilterMode.OnlyResults
-    };
+             for (int j = 0; j < Model.NumberOfColumns; j++)
+            {   
+                PanelPart pp = Model.Parts.SingleOrDefault(p => p.Row == i + 1 && (p.Column == j + 1 || p.Fill));
 
-    
-Write(Html.SearchControl(uq, fo, new Context(null, "r{0}c{1}".Formato(Model.Row, Model.Column))));
+WriteLiteral("                <td class=\"sf-cp-part-container\" data-row=\"");
 
-                                                                                               ;
+
+                                                       Write(i + 1);
+
+WriteLiteral("\" data-column=\"");
+
+
+                                                                              Write(j + 1);
+
+WriteLiteral("\" style=\"width:");
+
+
+                                                                                                     Write(columnWidth + "%");
+
+WriteLiteral("\" ");
+
+
+
+WriteLiteral(">\r\n");
+
+
+                     if (pp != null)
+                    {
+                        var ppTc = new TypeContext<ControlPanelDN>(Model, "").TypeElementContext(p => p.Parts).Where(pTc => pTc.Value == pp).First();
+                        Html.RenderPartial(ControlPanelClient.AdminViewPrefix.Formato("PanelPart"), ppTc);
+                    }
+
+WriteLiteral("                </td>\r\n");
+
+
+                if (pp != null && pp.Fill)
+                {
+                    j = Model.NumberOfColumns;
+                }
+            }
+
+WriteLiteral("            </tr>\r\n");
+
+
+        }
+
+WriteLiteral("    </table>\r\n");
+
+
+}
 
 
         }

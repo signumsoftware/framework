@@ -7,7 +7,7 @@
 @model PanelPart
 
 @{ var linkList = ((LinkListPartDN)Model.Content).Links; }
-<ul>
+<ul class="sf-cp-link-list">
     @foreach (LinkElement link in linkList)
     {
         <li>

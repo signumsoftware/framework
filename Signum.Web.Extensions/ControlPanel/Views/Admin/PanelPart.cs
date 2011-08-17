@@ -71,68 +71,44 @@ WriteLiteral("\r\n");
 
  using (var tc = Html.TypeContext<PanelPart>())
 {
-    using (var sc = tc.SubContext())
-    {
-        sc.ValueFirst = true;
-        
+    
+Write(Html.HiddenRuntimeInfo(tc));
 
-WriteLiteral("        <div class=\"sf-field\">\r\n            <div class=\"sf-value-container sf-val" +
-"ue-inline\">\r\n                ");
+                               
+    var part = tc.Value;
 
-
-           Write(Html.ValueLine(sc, pp => pp.Row, vl => vl.ValueHtmlProps["size"] = 2));
-
-WriteLiteral("\r\n");
+WriteLiteral(@"    <div class=""ui-widget ui-widget-content ui-corner-all sf-cp-part"">
+        <div class=""ui-widget-header ui-corner-all sf-cp-part-header"">
+            <button class=""sf-line-button sf-remove"" data-icon=""ui-icon-circle-close"" data-text=""false""></button>
+            ");
 
 
-                   string colId = null; 
+       Write(Html.ValueLine(tc, pp => pp.Title, vl => vl.LabelVisible = false));
 
-WriteLiteral("                ");
-
-
-           Write(Html.ValueLine(sc, pp => pp.Column, vl => { vl.ValueHtmlProps["size"] = 2; colId = vl.ControlID; }));
-
-WriteLiteral("\r\n");
+WriteLiteral("\r\n        </div>\r\n        <div>\r\n            ");
 
 
-                   string fillId = null; 
+       Write(Html.HiddenRuntimeInfo(tc, pp => pp.Content));
 
-WriteLiteral("                ");
-
-
-           Write(Html.ValueLine(sc, pp => pp.Fill, vl => { vl.ValueHtmlProps["onclick"] = "SF.ControlPanel.toggleFillColumn(this.id,'" + colId + "');"; fillId = vl.ControlID; }));
-
-WriteLiteral("\r\n        \r\n            <script type=\"text/javascript\">\r\n                $(docume" +
-"nt).ready(function () { SF.ControlPanel.toggleFillColumn(\'");
+WriteLiteral("\r\n            ");
 
 
-                                                                             Write(fillId);
+       Write(Html.EmbeddedControl(tc, pp => pp.Content, ecs => ecs.ViewName = ControlPanelClient.PanelPartAdminViews[part.Content.GetType()]));
 
-WriteLiteral("\', \'");
-
-
-                                                                                        Write(colId);
-
-WriteLiteral("\'); });\r\n            </script>\r\n    \r\n                ");
+WriteLiteral("\r\n        </div>\r\n        <div>\r\n            ");
 
 
-           Write(Html.ValueLine(sc, pp => pp.Title));
+       Write(Html.Hidden(tc.Compose("Row"), part.Row, new { @class = "sf-cp-part-row" }));
 
-WriteLiteral("\r\n                ");
-
-
-           Write(Html.EntityLine(sc, pp => pp.Content, el => el.Autocomplete = false));
-
-WriteLiteral("\r\n            </div>\r\n        </div>\r\n");
+WriteLiteral("\r\n            ");
 
 
-        
+       Write(Html.Hidden(tc.Compose("Column"), part.Column, new { @class = "sf-cp-part-col" }));
 
-        
-    }
+WriteLiteral("\r\n        </div>\r\n    </div>\r\n");
+
+
 }
-WriteLiteral(" ");
-
 
         }
     }

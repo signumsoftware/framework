@@ -76,33 +76,37 @@ WriteLiteral("\r\n");
 
 Write(Html.ScriptCss("~/ControlPanel/Content/SF_ControlPanel.css"));
 
-WriteLiteral("\r\n\r\n");
+WriteLiteral("\r\n\r\n<div id=\"sfCpAdmin\">\r\n");
 
 
- using (var tc = Html.TypeContext<ControlPanelDN>())
-{
-    
-Write(Html.EntityLine(tc, cp => cp.Related, el => el.Create = false));
+     using (var tc = Html.TypeContext<ControlPanelDN>())
+    {
+        
+   Write(Html.EntityLine(tc, cp => cp.Related, el => el.Create = false));
 
-                                                                   
-    
-Write(Html.ValueLine(tc, cp => cp.DisplayName));
-
-                                             
-    
-Write(Html.ValueLine(tc, cp => cp.HomePage));
-
-                                          
-    
-Write(Html.ValueLine(tc, cp => cp.NumberOfColumns));
+                                                                       
+        
+   Write(Html.ValueLine(tc, cp => cp.DisplayName));
 
                                                  
-    Html.RenderPartial(ControlPanelClient.ViewPrefix.Formato("PanelParts"), tc.Value);
+        
+   Write(Html.ValueLine(tc, cp => cp.HomePage));
 
-WriteLiteral("    <div class=\"clear\"></div>   \r\n");
+                                              
+        
+   Write(Html.ValueLine(tc, cp => cp.NumberOfColumns));
+
+                                                     
+    
+        Html.RenderPartial(ControlPanelClient.AdminViewPrefix.Formato("PanelParts"), tc.Value);
+
+WriteLiteral("        <div class=\"clear\"></div>   \r\n");
 
 
-}
+    }
+
+WriteLiteral("</div>");
+
 
         }
     }

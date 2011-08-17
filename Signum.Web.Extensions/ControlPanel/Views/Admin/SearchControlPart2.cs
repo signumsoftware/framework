@@ -49,12 +49,12 @@ namespace ASP
     using Signum.Web.UserQueries;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
-    [System.Web.WebPages.PageVirtualPathAttribute("~/ControlPanel/Views/SearchControlPart.cshtml")]
-    public class _Page_ControlPanel_Views_SearchControlPart_cshtml : System.Web.Mvc.WebViewPage<PanelPart>
+    [System.Web.WebPages.PageVirtualPathAttribute("~/ControlPanel/Views/Admin/SearchControlPart.cshtml")]
+    public class _Page_ControlPanel_Views_Admin_SearchControlPart_cshtml : System.Web.Mvc.WebViewPage<dynamic>
     {
 
 
-        public _Page_ControlPanel_Views_SearchControlPart_cshtml()
+        public _Page_ControlPanel_Views_Admin_SearchControlPart_cshtml()
         {
         }
         protected System.Web.HttpApplication ApplicationInstance
@@ -73,23 +73,16 @@ namespace ASP
 
 
 
-
 WriteLiteral("\r\n");
 
 
-   
-    UserQueryDN uq = ((UserQueryPartDN)Model.Content).UserQuery;
-    object queryName = Navigator.Manager.QuerySettings.Keys.First(k => QueryUtils.GetQueryUniqueKey(k) == uq.Query.Key);
-    FindOptions fo = new FindOptions(queryName)
-    {
-        FilterMode = FilterMode.OnlyResults
-    };
-
+ using(var tc = Html.TypeContext<UserQueryPartDN>())
+{
     
-Write(Html.SearchControl(uq, fo, new Context(null, "r{0}c{1}".Formato(Model.Row, Model.Column))));
+Write(Html.EntityLine(tc, pp => pp.UserQuery, el => el.Create = false));
 
-                                                                                               ;
-
+                                                                     
+}
 
         }
     }

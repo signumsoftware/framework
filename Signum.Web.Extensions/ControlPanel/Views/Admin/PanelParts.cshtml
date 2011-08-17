@@ -1,0 +1,32 @@
+﻿@using System.Configuration
+@using Signum.Web.Properties
+@using Signum.Entities.ControlPanel
+@using Signum.Web.ControlPanel
+@model ControlPanelDN
+@if (!Model.Parts.IsNullOrEmpty())
+{
+    int rowNumber = Model.Parts.Max(p => p.Row);
+    int columnWidth = (int)Math.Floor((decimal)(100 / Model.NumberOfColumns));
+    <table id="sfCpContainer">
+        @for (int i = 0; i < rowNumber; i++)
+        { 
+            <tr>
+            @for (int j = 0; j < Model.NumberOfColumns; j++)
+            {   
+                PanelPart pp = Model.Parts.SingleOrDefault(p => p.Row == i + 1 && (p.Column == j + 1 || p.Fill));
+                <td class="sf-cp-part-container" data-row="@(i + 1)" data-column="@(j + 1)" style="width:@(columnWidth + "%")" @*((pp != null && pp.Fill) ? ("colspan=" + Model.NumberOfColumns) : "")*@>
+                    @if (pp != null)
+                    {
+                        var ppTc = new TypeContext<ControlPanelDN>(Model, "").TypeElementContext(p => p.Parts).Where(pTc => pTc.Value == pp).First();
+                        Html.RenderPartial(ControlPanelClient.AdminViewPrefix.Formato("PanelPart"), ppTc);
+                    }
+                </td>
+                if (pp != null && pp.Fill)
+                {
+                    j = Model.NumberOfColumns;
+                }
+            }
+            </tr>
+        }
+    </table>
+}

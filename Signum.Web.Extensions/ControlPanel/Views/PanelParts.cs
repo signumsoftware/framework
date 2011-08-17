@@ -69,58 +69,49 @@ namespace ASP
 
 
 
- if (Model.Parts != null)
+ if (!Model.Parts.IsNullOrEmpty())
 {
     int rowNumber = Model.Parts.Max(p => p.Row);
+    //int columnWidth = (int)Math.Floor((decimal)(100 / Model.NumberOfColumns));
 
-WriteLiteral("    <table id=\"sfCpContainer\">\r\n");
+WriteLiteral("    <div id=\"sfCpContainer\">\r\n");
 
 
-         for (int i = 0; i < rowNumber; i++)
+         for (int col = 1; col <= Model.NumberOfColumns; col++)
         { 
 
-WriteLiteral("            <tr>\r\n");
+WriteLiteral("            <div class=\"sf-cp-div-column\">\r\n");
 
 
-             for (int j = 0; j < Model.NumberOfColumns; j++)
-            {
-                PanelPart pp = Model.Parts.SingleOrDefault(p => p.Row == i + 1 && (p.Column == j + 1 || p.Fill));
-
-WriteLiteral("                <td class=\"sf-cp-part-container\" id=");
-
-
-                                                Write("sfPanelPart_{0}_{1}".Formato(pp.Row, pp.Column));
-
-WriteLiteral(" ");
-
-
-                                                                                                    Write((pp != null && pp.Fill) ? ("colspan=" + Model.NumberOfColumns) : "");
-
-WriteLiteral(">\r\n");
-
-
-                     if (pp != null)
+                 for (int row = 1; row <= rowNumber; row++)
+                {
+                    PanelPart pp = Model.Parts.SingleOrDefault(p => p.Row == row && p.Column == col);
+                    if (pp != null)
                     {
-                        Html.RenderPartial(ControlPanelClient.ViewPrefix.Formato("PanelPart"), pp);
+
+WriteLiteral("                        <div class=\"sf-cp-part-container\">\r\n");
+
+
+                               Html.RenderPartial(ControlPanelClient.ViewPrefix.Formato("PanelPart"), pp);    
+
+WriteLiteral("                        </div>\r\n");
+
+
                     }
+                }
 
-WriteLiteral("                </td>\r\n");
-
-
-                    if (pp != null && pp.Fill)
-                    {
-                        j = Model.NumberOfColumns;
-                    }
-            }
-
-WriteLiteral("            </tr>\r\n");
+WriteLiteral("            </div>\r\n");
 
 
         }
 
-WriteLiteral("    </table>\r\n");
+WriteLiteral("    </div>\r\n");
 
 
+    
+    
+
+            
 }
 
 

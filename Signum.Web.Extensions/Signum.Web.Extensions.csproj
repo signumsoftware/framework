@@ -248,6 +248,16 @@
       <DesignTime>True</DesignTime>
     </Compile>
     <Compile Include="ControllerFilters\GZipFilter.cs" />
+    <Compile Include="ControlPanel\Views\Admin\PanelParts.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>PanelParts.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanel\Views\Admin\SearchControlPart2.cs">
+      <DependentUpon>SearchControlPart.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="ControlPanel\Views\CountSearchControlPart1.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -733,6 +743,14 @@
       <LastGenOutput>LinkListPart1.cs</LastGenOutput>
     </Content>
     <Content Include="ControlPanel\Views\PanelParts.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>PanelParts.cs</LastGenOutput>
+    </Content>
+    <Content Include="ControlPanel\Views\Admin\SearchControlPart.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>SearchControlPart2.cs</LastGenOutput>
+    </Content>
+    <Content Include="ControlPanel\Views\Admin\PanelParts.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>PanelParts.cs</LastGenOutput>
     </Content>

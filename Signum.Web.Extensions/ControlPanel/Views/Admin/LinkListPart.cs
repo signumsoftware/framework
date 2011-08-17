@@ -43,7 +43,6 @@ namespace ASP
     using System.Xml.Linq;
     using Signum.Entities.ControlPanel;
     using Signum.Web.ControlPanel;
-    using Signum.Entities.Reports;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/ControlPanel/Views/Admin/LinkListPart.cshtml")]
@@ -65,14 +64,11 @@ namespace ASP
         {
 
 
-
 WriteLiteral("\r\n");
 
 
  using (var tc = Html.TypeContext<LinkListPartDN>())
 {
-    tc.ValueFirst = false;
-
     
 Write(Html.EntityRepeater(tc, p => p.Links));
 

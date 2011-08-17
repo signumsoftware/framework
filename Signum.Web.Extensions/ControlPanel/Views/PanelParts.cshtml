@@ -3,28 +3,47 @@
 @using Signum.Entities.ControlPanel
 @using Signum.Web.ControlPanel
 @model ControlPanelDN
-@if (Model.Parts != null)
+@if (!Model.Parts.IsNullOrEmpty())
 {
     int rowNumber = Model.Parts.Max(p => p.Row);
-    <table id="sfCpContainer">
-        @for (int i = 0; i < rowNumber; i++)
+    //int columnWidth = (int)Math.Floor((decimal)(100 / Model.NumberOfColumns));
+    <div id="sfCpContainer">
+        @for (int col = 1; col <= Model.NumberOfColumns; col++)
         { 
-            <tr>
-            @for (int j = 0; j < Model.NumberOfColumns; j++)
-            {
-                PanelPart pp = Model.Parts.SingleOrDefault(p => p.Row == i + 1 && (p.Column == j + 1 || p.Fill));
-                <td class="sf-cp-part-container" id=@("sfPanelPart_{0}_{1}".Formato(pp.Row, pp.Column)) @((pp != null && pp.Fill) ? ("colspan=" + Model.NumberOfColumns) : "")>
-                    @if (pp != null)
+            <div class="sf-cp-div-column">
+                @for (int row = 1; row <= rowNumber; row++)
+                {
+                    PanelPart pp = Model.Parts.SingleOrDefault(p => p.Row == row && p.Column == col);
+                    if (pp != null)
                     {
-                        Html.RenderPartial(ControlPanelClient.ViewPrefix.Formato("PanelPart"), pp);
+                        <div class="sf-cp-part-container">
+                            @{ Html.RenderPartial(ControlPanelClient.ViewPrefix.Formato("PanelPart"), pp); }   
+                        </div>
                     }
-                </td>
-                    if (pp != null && pp.Fill)
-                    {
-                        j = Model.NumberOfColumns;
-                    }
-            }
-            </tr>
+                }
+            </div>
         }
-    </table>
+    </div>
+    
+    @*
+    int rowNumber = Model.Parts.Max(p => p.Row);
+    //int columnWidth = (int)Math.Floor((decimal)(100 / Model.NumberOfColumns));
+    <div id="sfCpContainer">
+        @for (int row = 1; row <= rowNumber; row++)
+        { 
+            <div class="sf-cp-div-row">
+                @for (int col = 1; col <= Model.NumberOfColumns; col++)
+                {
+                    PanelPart pp = Model.Parts.SingleOrDefault(p => p.Row == row && p.Column == col);
+                    if (pp != null)
+                    {
+                        <div class="sf-cp-part-container">
+                            @{ Html.RenderPartial(ControlPanelClient.ViewPrefix.Formato("PanelPart"), pp); }   
+                        </div>
+                    }
+                }
+            </div>
+            <div class="clearall"></div>
+        }
+    </div>*@
 }

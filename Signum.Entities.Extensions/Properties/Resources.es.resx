@@ -1008,9 +1008,6 @@
   <data name="EmailTemplateDN_FriendlyName" xml:space="preserve">
     <value>Nombre descriptivo</value>
   </data>
-  <data name="LinkListPartDN" xml:space="preserve">
-    <value>Elemento de lista de vínculo</value>
-  </data>
   <data name="Deleted" xml:space="preserve">
     <value>(Eliminado)</value>
   </data>
