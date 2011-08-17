@@ -132,8 +132,8 @@
   <data name="Alerts" xml:space="preserve">
     <value>Alertas</value>
   </data>
-  <data name="Checked" xml:space="preserve">
-    <value>Comprobadas</value>
+  <data name="Alerts_Future" xml:space="preserve">
+    <value>Futuro</value>
   </data>
   <data name="CreateAlert" xml:space="preserve">
     <value>Crear alerta</value>
@@ -141,8 +141,8 @@
   <data name="CreateNote" xml:space="preserve">
     <value>Crear nota</value>
   </data>
-  <data name="Future" xml:space="preserve">
-    <value>Futuras</value>
+  <data name="Alerts_Attended" xml:space="preserve">
+    <value>Asistió a</value>
   </data>
   <data name="Notes" xml:space="preserve">
     <value>Notas</value>
@@ -150,8 +150,8 @@
   <data name="ViewNotes" xml:space="preserve">
     <value>Ver notas</value>
   </data>
-  <data name="Warned" xml:space="preserve">
-    <value>Alertadas</value>
+  <data name="AlertCreated" xml:space="preserve">
+    <value>Alerta creada</value>
   </data>
   <data name="View" xml:space="preserve">
     <value>Ver</value>
@@ -327,7 +327,22 @@
   <data name="Signum_showFilters" xml:space="preserve">
     <value>Mostrar filtros</value>
   </data>
+  <data name="Alerts_NotAttended" xml:space="preserve">
+    <value>No asistió a</value>
+  </data>
   <data name="ChooseAType" xml:space="preserve">
-    <value>Elige un tipo</value>
+    <value>Elija un tipo</value>
+  </data>
+  <data name="InvalidFormat" xml:space="preserve">
+    <value>Formato no válido</value>
+  </data>
+  <data name="NoteCreated" xml:space="preserve">
+    <value>Nota creada</value>
+  </data>
+  <data name="Quicklinks" xml:space="preserve">
+    <value>Vínculos rápidos</value>
+  </data>
+  <data name="Signum_selectToken" xml:space="preserve">
+    <value>Seleccione un símbolo (token)</value>
   </data>
 </root>
