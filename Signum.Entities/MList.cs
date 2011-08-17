@@ -428,12 +428,5 @@ namespace Signum.Entities
             list.Modified = null;
             return list;
         }
-
-
-        //For Expression Trees only
-        public static T Element<T>(this IEnumerable<T> collection)
-        {
-            return default(T);
-        }
     }
 }
