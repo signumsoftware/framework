@@ -43,6 +43,7 @@ namespace Signum.Engine
 
             string error = GraphExplorer.Integrity(modifiables);
             if (error.HasText())
+                
                 throw new ApplicationException(error);
 
             GraphExplorer.PropagateModifications(modifiables.Inverse());
@@ -71,38 +72,36 @@ namespace Signum.Engine
 
             IEnumerable<HashSet<IdentifiableEntity>> groups = identifiables.CompilationOrderGroups();
 
-            Forbidden forbidden = new Forbidden();
-
             foreach (var group in groups)
             {
-                foreach (var ident in group)
-                {
-                    forbidden.Clear();
-                    if (backEdges != null)
-                        forbidden.UnionWith(backEdges.TryRelatedTo(ident));
-
-                    schema.Table(ident.GetType()).Save(ident, forbidden);
-                }
+                SaveGroup(schema, group, backEdges);
             }
 
             if (backEdges != null)
             {
                 var postSavings = backEdges.Edges.Select(e => e.From).ToHashSet();
-                foreach (var ident in postSavings)
-                {
-                    forbidden.Clear();
-                    if (backEdges != null)
-                        forbidden.UnionWith(backEdges.TryRelatedTo(ident));
 
-                    schema.Table(ident.GetType()).Save(ident, forbidden);
-                }
+                SaveGroup(schema, postSavings, null);
             }
 
             EntityCache.Add(identifiables);
             EntityCache.Add(notModified);
         }
 
-
-       
+        private static void SaveGroup(Schema schema, HashSet<IdentifiableEntity> group, DirectedGraph<IdentifiableEntity> backEdges)
+        {
+            foreach (var gr in group.GroupBy(a => new { Type = a.GetType(), a.IsNew }).ToList())
+            {
+                var table = schema.Table(gr.Key.Type);
+                if (gr.Key.IsNew)
+                {
+                    table.InsertMany(gr.ToList(), backEdges);
+                }
+                else
+                {
+                    table.UpdateMany(gr.ToList(), backEdges);
+                }
+            }
+        }
     }
 }

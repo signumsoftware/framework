@@ -28,7 +28,7 @@ namespace Signum.Web
 
         public static MvcHtmlString HiddenRuntimeInfo(this HtmlHelper helper, TypeContext tc)
         {
-            return helper.Hidden(tc.Compose(EntityBaseKeys.RuntimeInfo), new RuntimeInfo(tc).ToString());
+            return helper.Hidden(tc.Compose(EntityBaseKeys.RuntimeInfo), tc.RuntimeInfo().ToString());
         }
 
         public static MvcHtmlString HiddenStaticInfo(this HtmlHelper helper, EntityBase tc)
@@ -109,35 +109,41 @@ namespace Signum.Web
 
         public RuntimeInfo() { }
 
-        public RuntimeInfo(TypeContext tc)
+        public RuntimeInfo(Lite lite)
         {
-            if (tc.UntypedValue == null)
+            if (lite == null)
             {
                 RuntimeType = null;
                 return;
             }
-            
-            Type type = tc.UntypedValue.GetType();
-            if (type.IsLite())
+
+            RuntimeType = lite.RuntimeType;
+            IdOrNull = lite.IdOrNull;
+            IsNew = lite.IdOrNull == null;
+        }
+
+        public RuntimeInfo(EmbeddedEntity entity)
+        {
+            if (entity == null)
             {
-                Lite liteValue = tc.UntypedValue as Lite;
-                RuntimeType = liteValue.RuntimeType;
-                IdOrNull = liteValue.IdOrNull;
-                IsNew = liteValue.IdOrNull == null;
+                RuntimeType = null;
+                return;
             }
-            else if (type.IsEmbeddedEntity())
+
+            RuntimeType = entity.GetType();
+        }
+
+        public RuntimeInfo(IdentifiableEntity entity)
+        {
+            if (entity == null)
             {
-                RuntimeType = type;
+                RuntimeType = null;
+                return;
             }
-            else if (typeof(IdentifiableEntity).IsAssignableFrom(type))
-            {
-                RuntimeType = type;
-                IIdentifiable identifiable = tc.UntypedValue as IIdentifiable;
-                IdOrNull = identifiable.IdOrNull;
-                IsNew = identifiable.IdOrNull == null;
-            }
-            else
-                throw new ArgumentException("Invalid type {0} for RuntimeInfo. It must be Lite, IdentifiableEntity or EmbeddedEntity".Formato(type));
+
+            RuntimeType = entity.GetType();
+            IdOrNull = entity.IdOrNull;
+            IsNew = entity.IsNew;
         }
 
         public override string ToString()

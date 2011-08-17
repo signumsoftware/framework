@@ -95,7 +95,7 @@ namespace Signum.Engine
                 primaryKey ? " PRIMARY KEY" : "");
         }
 
-        private static string GetSizeScale(int? size, int? scale)
+        public static string GetSizeScale(int? size, int? scale)
         {
             if (size == null)
                 return "";

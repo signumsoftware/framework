@@ -33,8 +33,10 @@
                     @{ Html.RenderPartial("Menu", ViewData["current"] = Context.Request.RawUrl);}
                 </div>
             </div>
-            <div id="content">
-                @RenderBody()
+            <div id="contentContainer">
+            	<div id="content">
+                	@RenderBody()
+  				</div>              	
             </div>
             <div class="clearall">
             </div>

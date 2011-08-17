@@ -47,26 +47,31 @@ namespace Signum.Engine.Linq
         {   
             using (Alias.NewGenerator())
             {
-                Expression cleaned = Clean(expression);
-                Expression filtered = QueryFilterer.Filter(cleaned);
+                ITranslateResult result;
 
-                BinderTools tools = new BinderTools();
+                using (HeavyProfiler.Log("LINQ"))
+                {
+                    Expression cleaned = Clean(expression, true);
 
-                ProjectionExpression binded = (ProjectionExpression)QueryBinder.Bind(filtered, tools);
-                ProjectionExpression optimized = (ProjectionExpression)Optimize(binded, tools);
+                    BinderTools tools = new BinderTools();
 
-                ProjectionExpression flat = ChildProjectionFlattener.Flatten(optimized);
+                    ProjectionExpression binded = (ProjectionExpression)QueryBinder.Bind(cleaned, tools);
+                    ProjectionExpression optimized = (ProjectionExpression)Optimize(binded, tools);
 
-                ITranslateResult result = TranslatorBuilder.Build(flat);
+                    ProjectionExpression flat = ChildProjectionFlattener.Flatten(optimized);
+
+                    result = TranslatorBuilder.Build(flat);
+                }
                 return continuation(result);
             }
         }
 
-        public static Expression Clean(Expression expression)
+        public static Expression Clean(Expression expression, bool filter)
         {
             Expression clean = ExpressionCleaner.Clean(expression);
             Expression simplified = OverloadingSimplifier.Simplify(clean);
-            return simplified;
+            Expression filtered = QueryFilterer.Filter(simplified, filter);
+            return filtered;
         }
 
         internal static Expression Optimize(Expression binded, BinderTools tools)
@@ -90,14 +95,16 @@ namespace Signum.Engine.Linq
         {
             using (Alias.NewGenerator())
             {
-                Expression cleaned = Clean(query.Expression);
-                Expression filtered = QueryFilterer.Filter(cleaned);
+                CommandResult cr;
+                using (HeavyProfiler.Log("LINQ"))
+                {
+                    Expression cleaned = Clean(query.Expression, true);
 
-                BinderTools tools = new BinderTools();
-                CommandExpression delete = new QueryBinder(tools).BindDelete(filtered);
-                CommandExpression deleteOptimized = (CommandExpression)Optimize(delete, tools);
-                CommandResult cr = TranslatorBuilder.BuildCommandResult(deleteOptimized);
-
+                    BinderTools tools = new BinderTools();
+                    CommandExpression delete = new QueryBinder(tools).BindDelete(cleaned);
+                    CommandExpression deleteOptimized = (CommandExpression)Optimize(delete, tools);
+                    cr = TranslatorBuilder.BuildCommandResult(deleteOptimized);
+                }
                 return cr.Execute();
             }
         }
@@ -106,14 +113,16 @@ namespace Signum.Engine.Linq
         {
             using (Alias.NewGenerator())
             {
-                Expression cleaned = Clean(query.Expression);
-                Expression filtered = QueryFilterer.Filter(cleaned);
+                CommandResult cr;
+                using (HeavyProfiler.Log("LINQ"))
+                {
+                    Expression cleaned = Clean(query.Expression, true);
 
-                BinderTools tools = new BinderTools();
-                CommandExpression update = new QueryBinder(tools).BindUpdate(filtered, set);
-                CommandExpression updateOptimized = (CommandExpression)Optimize(update, tools);
-                CommandResult cr = TranslatorBuilder.BuildCommandResult(updateOptimized);
-
+                    BinderTools tools = new BinderTools();
+                    CommandExpression update = new QueryBinder(tools).BindUpdate(cleaned, set);
+                    CommandExpression updateOptimized = (CommandExpression)Optimize(update, tools);
+                    cr = TranslatorBuilder.BuildCommandResult(updateOptimized);
+                }
                 return cr.Execute();
             }
         }

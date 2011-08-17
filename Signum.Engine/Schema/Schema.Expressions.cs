@@ -40,7 +40,7 @@ namespace Signum.Engine.Maps
                 Schema.Current.AssertAllowed(Type);
 
                 Expression id = this.CreateBinding(token, tableAlias, FieldInitExpression.IdField, tools);
-                return new FieldInitExpression(this.Type, tableAlias, id, null, token)
+                return new FieldInitExpression(this.Type, tableAlias, id, token)
                 {
                     Bindings = { new FieldBinding(FieldInitExpression.IdField, id) }
                 };
@@ -125,7 +125,7 @@ namespace Signum.Engine.Maps
             Type cleanType = IsLite ? Reflector.ExtractLite(FieldType) : FieldType;
 
             var result = new FieldInitExpression(cleanType, null,
-                new ColumnExpression(this.ReferenceType(), tableAlias, Name), null, token);
+                new ColumnExpression(this.ReferenceType(), tableAlias, Name), token);
 
             if(this.IsLite)
                 return tools.MakeLite(this.FieldType, result, null);
@@ -180,8 +180,8 @@ namespace Signum.Engine.Maps
             var implementations = (from kvp in ImplementationColumns
                                    select new ImplementationColumnExpression(kvp.Key,
                                             new FieldInitExpression(kvp.Key, null,
-                                                new ColumnExpression(kvp.Value.ReferenceType(), tableAlias, kvp.Value.Name),
-                                                null, token))).ToReadOnly();
+                                                new ColumnExpression(kvp.Value.ReferenceType(), tableAlias, kvp.Value.Name), 
+                                                token))).ToReadOnly();
 
             var result = new ImplementedByExpression(IsLite ? Reflector.ExtractLite(FieldType) : FieldType, implementations);
 
@@ -198,7 +198,7 @@ namespace Signum.Engine.Maps
         {
             Expression result = new ImplementedByAllExpression(IsLite ? Reflector.ExtractLite(FieldType) : FieldType,
                 new ColumnExpression(Column.ReferenceType(), tableAlias, Column.Name),
-                new TypeIdExpression(new ColumnExpression(Column.ReferenceType(), tableAlias, ColumnTypes.Name)), token);
+                new TypeImplementedByAllExpression(new ColumnExpression(Column.ReferenceType(), tableAlias, ColumnTypes.Name)), token);
 
             if (this.IsLite)
                 return tools.MakeLite(this.FieldType, result, null);

@@ -76,7 +76,9 @@ namespace Signum.Web
 
             sb.AddLine(helper.HiddenRuntimeInfo(itemTC));
 
-            if (typeof(T).IsEmbeddedEntity() || EntityBaseHelper.RequiresLoadAll(helper, entityList))
+            if (typeof(T).IsEmbeddedEntity() || 
+                EntityBaseHelper.RequiresLoadAll(helper, entityList) || 
+                (itemTC.Value.GetType().IsIIdentifiable() && (itemTC.Value as IIdentifiable).IsNew))
                 sb.AddLine(EntityBaseHelper.RenderTypeContext(helper, itemTC, RenderMode.PopupInDiv, entityList));
             else if (itemTC.Value != null)
                 sb.Add(helper.Div(itemTC.Compose(EntityBaseKeys.Entity), null, "", new Dictionary<string, object> { { "style", "display:none" }, { "class", "sf-entity-list" } }));

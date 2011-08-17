@@ -29,7 +29,7 @@ namespace Signum.Engine.Linq
         Column,
         Select,
         Projection,
-        ChildProjection, 
+        ChildProjection,
         Join,
         Aggregate,
         AggregateSubquery,
@@ -37,7 +37,7 @@ namespace Signum.Engine.Linq
         SqlConstant,
         SqlEnum,
         SqlCast,
-        Case, 
+        Case,
         RowNumber,
         Like,
         In,
@@ -46,7 +46,7 @@ namespace Signum.Engine.Linq
         IsNull,
         IsNotNull,
         Update,
-        Delete, 
+        Delete,
         CommandAggregate,
         SelectRowCount,
         FieldInit = 2000,
@@ -54,7 +54,9 @@ namespace Signum.Engine.Linq
         ImplementedBy,
         ImplementedByAll,
         LiteReference,
-        TypeId,
+        TypeFieldInit,
+        TypeImplementedBy,
+        TypeImplementedByAll,
         MList,
         MListElement,
     }
@@ -609,9 +611,6 @@ namespace Signum.Engine.Linq
 
     internal class SqlConstantExpression : DbExpression
     {
-        public static readonly Expression False = Expression.Equal(new SqlConstantExpression(1), new SqlConstantExpression(0));
-        public static readonly Expression True = Expression.Equal(new SqlConstantExpression(1), new SqlConstantExpression(1));
-
         public readonly object Value;
 
         public SqlConstantExpression(object value)
@@ -855,7 +854,7 @@ namespace Signum.Engine.Linq
             if (values == null) throw new ArgumentNullException("values");
 
             if (values.Length == 0)
-                return SqlConstantExpression.False;
+                return Expression.Constant(false);
 
             return new InExpression(expression, values);
         }
@@ -988,25 +987,14 @@ namespace Signum.Engine.Linq
     {
         public readonly ProjectionExpression Projection;
         public readonly Expression OuterKey;
+        public readonly bool IsLazyMList; 
 
-        internal ChildProjectionExpression(ProjectionExpression projection, Expression outerKey)
-            : base(DbExpressionType.ChildProjection, ProjectionClientType(projection))
+        internal ChildProjectionExpression(ProjectionExpression projection, Expression outerKey, bool isLazyMList, Type type)
+            : base(DbExpressionType.ChildProjection, type)
         {
             this.Projection = projection;
             this.OuterKey = outerKey;
-        }
-
-        static Type ProjectionClientType(ProjectionExpression projection)
-        {
-            if (!projection.Projector.Type.IsInstantiationOf(typeof(KeyValuePair<,>)))
-                throw new InvalidOperationException("projection's projector should create KeyValuePairs");
-
-            Type type = projection.Projector.Type.GetGenericArguments()[1];
-
-            if (projection.UniqueFunction != null)
-                return type;
-
-            return typeof(IEnumerable<>).MakeGenericType(new Type[] { type });
+            this.IsLazyMList = isLazyMList; 
         }
 
         public override string ToString()

@@ -98,5 +98,19 @@ namespace Signum.Engine.SchemaInfoTables
         public string name;
     }
 
+    [SqlViewName("sys.sql_modules")]
+    public class SysSqlModules : IView
+    {
+        public int object_id;
+        public string definition; 
+    }
+
+    [SqlViewName("sys.procedures")]
+    public class SysProcedures : IView
+    {
+        public int object_id;
+        public string name;
+    }
+
 #pragma warning restore 649
 }

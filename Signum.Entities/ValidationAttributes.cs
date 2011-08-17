@@ -20,7 +20,7 @@ namespace Signum.Entities
     [AttributeUsage(AttributeTargets.Property, Inherited = true, AllowMultiple = true)]
     public abstract class ValidatorAttribute : Attribute
     {
-        public bool DisableOnCorrupt { get; set; }
+        public Func<ModifiableEntity, bool> IsApplicable; 
         public string ErrorMessage { get; set; }
 
         public int Order { get; set; }
@@ -29,9 +29,9 @@ namespace Signum.Entities
         //Used for documentation purposes only
         public abstract string HelpMessage { get; }
 
-        public string Error(PropertyInfo property, object value)
+        public string Error(ModifiableEntity entity, PropertyInfo property, object value)
         {
-            if (DisableOnCorrupt && !Corruption.Strict)
+            if (IsApplicable != null && !IsApplicable(entity))
                 return null;
 
             string defaultError = OverrideError(value);

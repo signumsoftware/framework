@@ -96,6 +96,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
+    <Compile Include="SaveTest.cs" />
     <Compile Include="Starter.cs" />
     <Compile Include="StringDistanceTest.cs" />
   </ItemGroup>

@@ -422,11 +422,5 @@ namespace Signum.Entities
             return new MList<T>(collection); 
         }
 
-        public static MList<T> ToMListNotModified<T>(this IEnumerable<T> collection)
-        {
-            var list =  new MList<T>(collection);
-            list.Modified = null;
-            return list;
-        }
     }
 }

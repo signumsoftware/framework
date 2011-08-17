@@ -16,15 +16,17 @@ namespace Signum.Engine.Linq
     {
         static GenericInvoker<Func<Schema, IQueryable, IQueryable>> miFilter = new GenericInvoker<Func<Schema, IQueryable, IQueryable>>((s,q) => s.OnFilterQuery<TypeDN>((IQueryable<TypeDN>)q));
 
+        bool filter;
+
         protected override Expression VisitConstant(ConstantExpression c)
         {
             if (typeof(IQueryable).IsAssignableFrom(c.Type))
             {
                 IQueryable query = (IQueryable)c.Value;
 
-                if (query.IsBase() && typeof(IdentifiableEntity).IsAssignableFrom(query.ElementType))
+                if (query.IsBase())
                 {
-                    IQueryable newQuery = miFilter.GetInvoker(c.Type.GetGenericArguments())(Schema.Current, query);
+                    IQueryable newQuery = filter && Schema.Current.Tables.ContainsKey(typeof(IdentifiableEntity)) ? miFilter.GetInvoker(c.Type.GetGenericArguments())(Schema.Current, query) : query;
 
                     if (newQuery != query)
                         return newQuery.Expression;
@@ -36,7 +38,7 @@ namespace Signum.Engine.Linq
                     /// <summary>
                     /// Replaces every expression like ConstantExpression{ Type = IQueryable, Value = complexExpr } by complexExpr
                     /// </summary>
-                    return DbQueryProvider.Clean(query.Expression);
+                    return DbQueryProvider.Clean(query.Expression, filter);
                 }
             }
 
@@ -44,9 +46,9 @@ namespace Signum.Engine.Linq
         }
 
         
-        internal static Expression Filter(Expression expression)
+        internal static Expression Filter(Expression expression, bool filter)
         {
-            return new QueryFilterer().Visit(expression);
+            return new QueryFilterer { filter = filter }.Visit(expression);
         }
     }
 }

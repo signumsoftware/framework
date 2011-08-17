@@ -18,8 +18,25 @@ namespace Signum.Test
 {
     public static class Starter
     {
-        static bool started = false; 
+        static bool startedAndLoaded = false;
         public static void StartAndLoad()
+        {
+            if (!startedAndLoaded)
+            {
+                Start(Settings.Default.SignumTest);
+
+                Administrator.TotalGeneration();
+
+                Schema.Current.Initialize();
+
+                Load();
+
+                startedAndLoaded = true;
+            }
+        }
+
+        static bool started = false; 
+        public static void Start()
         {
             if(!started)
             {
@@ -29,15 +46,13 @@ namespace Signum.Test
 
                 Schema.Current.Initialize();
 
-                Load();
-
                 started = true;
             }
         }
 
         internal static void Dirty()
         {
-            started = false;
+            started = startedAndLoaded = false;
         }
 
         public static void Start(string connectionString)
@@ -58,6 +73,10 @@ namespace Signum.Test
             sb.Include<AlertDN>();
             sb.Include<PersonalAwardDN>();
             sb.Include<AwardNominationDN>();
+
+            CacheLogic.Register<AmericanMusicAwardDN>(sb);
+            CacheLogic.Register<GrammyAwardDN>(sb);
+            CacheLogic.Register<PersonalAwardDN>(sb);
 
             dqm[typeof(AlbumDN)] = (from a in Database.Query<AlbumDN>()
                                     select new

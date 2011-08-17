@@ -55,7 +55,7 @@ namespace Signum.Engine.DynamicQuery
             return Database.Query<RT>().Where(a => a.ToStr.Contains(subString) && !a.toStr.StartsWith(subString)).Select(a => a.ToLite<LT>()).Take(count).AsEnumerable().OrderBy(l => l.ToStr).Cast<Lite>().ToList();
         }
 
-        public static List<Lite> RetriveAllLite(Type liteType, Implementations implementations)
+        public static List<Lite> RetrieveAllLite(Type liteType, Implementations implementations)
         {
             if (implementations == null)
             {

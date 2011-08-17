@@ -82,6 +82,7 @@
       <Link>Properties\Version.cs</Link>
     </Compile>
     <Compile Include="Administrator.cs" />
+    <Compile Include="CacheLogic.cs" />
     <Compile Include="Connection\CommandTimeout.cs" />
     <Compile Include="Connection\Connection.cs" />
     <Compile Include="Connection\ConnectionScope.cs" />
@@ -92,7 +93,6 @@
     <Compile Include="DynamicQuery\AutoDynamicQuery.cs" />
     <Compile Include="DynamicQuery\DynamicQuery.cs" />
     <Compile Include="DynamicQuery\ColumnDescriptionFactory.cs" />
-    <Compile Include="DynamicQuery\ExternalPolymorphicDictionary.cs" />
     <Compile Include="DynamicQuery\ManualDynamicQuery.cs" />
     <Compile Include="Engine\SqlUtils.cs" />
     <Compile Include="Exceptions.cs" />
@@ -104,7 +104,7 @@
     <Compile Include="ExecutionContext.cs" />
     <Compile Include="Linq\DbExpressions.Sql.cs" />
     <Compile Include="Linq\DbQueryProvider.cs" />
-    <Compile Include="Linq\DbQueryUtils.cs" />
+    <Compile Include="Linq\ExpressionVisitor\DbQueryUtils.cs" />
     <Compile Include="Linq\ExpressionVisitor\AggregateRewriter.cs" />
     <Compile Include="Linq\ExpressionVisitor\AliasGatherer.cs" />
     <Compile Include="Linq\ExpressionVisitor\AliasProjectionReplacer.cs" />

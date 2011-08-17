@@ -40,51 +40,51 @@ namespace Signum.Test.LinqProvider
         {
             var list = Database.Query<CountryDN>().ToList();
 
-            AssertRetrived(list);
+            AssertRetrieved(list);
         }
 
         [TestMethod]
-        public void RetriveWithEnum()
+        public void RetrieveWithEnum()
         {
             var list = Database.Query<GrammyAwardDN>().ToList();
 
-            AssertRetrived(list);
+            AssertRetrieved(list);
         }
 
 
         [TestMethod]
-        public void RetriveWithRelatedEntityAndLite()
+        public void RetrieveWithRelatedEntityAndLite()
         {
             var list = Database.Query<LabelDN>().ToList();
 
-            AssertRetrived(list);
+            AssertRetrieved(list);
         }
 
         [TestMethod]
-        public void RetriveWithIBA()
+        public void RetrieveWithIBA()
         {
             var list = Database.Query<NoteWithDateDN>().ToList();
 
-            AssertRetrived(list);
+            AssertRetrieved(list);
         }
 
         [TestMethod]
-        public void RetriveWithMList()
+        public void RetrieveWithMList()
         {
             var list = Database.Query<ArtistDN>().ToList();
 
-            AssertRetrived(list);
+            AssertRetrieved(list);
         }
 
         [TestMethod]
-        public void RetriveWithMListEmbedded()
+        public void RetrieveWithMListEmbedded()
         {
             var list = Database.Query<AlbumDN>().ToList();
 
-            AssertRetrived(list);
+            AssertRetrieved(list);
         }
 
-        private void AssertRetrived<T>(List<T> list) where T:Modifiable
+        private void AssertRetrieved<T>(List<T> list) where T:Modifiable
         {
             var graph = GraphExplorer.FromRoots(list);
 

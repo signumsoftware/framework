@@ -201,6 +201,7 @@ namespace Signum.Engine
                 {
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
+                        CommandCount++;
                         FieldReader fr = new FieldReader(reader);
                         int row = -1;
                         try
@@ -236,6 +237,7 @@ namespace Signum.Engine
             try
             {
                 SqlCommand cmd = NewCommand(preCommand, null);
+                CommandCount++;
                 return cmd.ExecuteReader();
             }
             catch (SqlException ex)

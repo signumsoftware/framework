@@ -52,12 +52,12 @@ namespace Signum.Engine.Maps
             AddUniqueIndex<T>(fields, null); 
         }
 
-        public void AddUniqueIndex<T>(Expression<Func<T, object>> fields, Expression<Func<T, object>> fieldsNotNull) where T : IdentifiableEntity
+        public void AddUniqueIndex<T>(Expression<Func<T, object>> fields, Expression<Func<T, object>> fieldsAllowRepeatedNull) where T : IdentifiableEntity
         {
             Schema schema = Schema.Current;
 
             Expression<Func<T, object>>[] fieldLambdas = Split(fields);
-            Expression<Func<T, object>>[] fieldsNotNullLambdas = Split(fieldsNotNull);
+            Expression<Func<T, object>>[] fieldsNotNullLambdas = Split(fieldsAllowRepeatedNull);
 
             Field[] colFields = fieldLambdas.Select(fun => schema.Field<T>(fun)).ToArray();
             Field[] colFieldsNotNull = fieldsNotNullLambdas.Select(fun => schema.Field<T>(fun)).ToArray();
@@ -167,12 +167,12 @@ namespace Signum.Engine.Maps
         HashSet<string> loadedModules = new HashSet<string>();
         public bool NotDefined(MethodBase methodBase)
         {
-            return loadedModules.Add(methodBase.DeclaringType.TypeName() + "." + methodBase.Name); 
+            return loadedModules.Add(methodBase.DeclaringType.FullName + "." + methodBase.Name); 
         }
 
         public void AssertDefined(MethodBase methodBase)
         {
-            string name = methodBase.DeclaringType.TypeName() + "." + methodBase.Name;
+            string name = methodBase.DeclaringType.FullName + "." + methodBase.Name;
 
             if (!loadedModules.Contains(name))
                 throw new ApplicationException("Call {0} first".Formato(name)); 
