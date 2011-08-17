@@ -459,4 +459,16 @@
   <data name="PasswordsAreDifferent" xml:space="preserve">
     <value>Las contraseñas son diferentes</value>
   </data>
+  <data name="Search_CtxMenuItem_Operations" xml:space="preserve">
+    <value>Operaciones</value>
+  </data>
+  <data name="UserQueries_CreateNew" xml:space="preserve">
+    <value>Crear</value>
+  </data>
+  <data name="UserQueries_Edit" xml:space="preserve">
+    <value>Editar</value>
+  </data>
+  <data name="UserQueries_UserQueries" xml:space="preserve">
+    <value>Consultas de usuarios</value>
+  </data>
 </root>

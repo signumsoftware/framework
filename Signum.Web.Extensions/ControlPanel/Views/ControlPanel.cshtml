@@ -6,9 +6,11 @@
 @section head
 {
     @Html.ScriptsJs(Navigator.Manager.DefaultScripts().ToArray())
+    @Html.ScriptsJs("~/ControlPanel/Scripts/control-panel.js")
+    @Html.ScriptCss("~/ControlPanel/Content/control-panel.css")
 }
 
-@using(Html.BeginForm("DoPostBack","Signum","POST"))
+@using (Html.BeginForm("DoPostBack", "Signum", "POST"))
 {
     ControlPanelDN cp = (ControlPanelDN)Model;
     <h1>
@@ -17,27 +19,27 @@
     if (cp.Parts != null)
     {
         int rowNumber = cp.Parts.Max(p => p.Row);
-    <table>
-        @for (int i = 0; i < rowNumber; i++)
-           { 
+        <table id="sfCpContainer">
+            @for (int i = 0; i < rowNumber; i++)
+            { 
                 <tr>
                 @for (int j = 0; j < cp.NumberOfColumns; j++)
-    {
-        PanelPart pp = cp.Parts.SingleOrDefault(p => p.Row == i + 1 && (p.Column == j + 1 || p.Fill));
-                    <td style="vertical-align:top;margin-right:20px" @((pp != null && pp.Fill) ? ("colspan=" + cp.NumberOfColumns) : "")>
+                {
+                    PanelPart pp = cp.Parts.SingleOrDefault(p => p.Row == i + 1 && (p.Column == j + 1 || p.Fill));
+                    <td class="sf-cp-part-container" @((pp != null && pp.Fill) ? ("colspan=" + cp.NumberOfColumns) : "")>
                         @if (pp != null)
-        {
-                            @PanelPartRenderer.Render(Html, pp)
-        }
-        </td>
-        if (pp != null && pp.Fill)
-                    {
-            j = cp.NumberOfColumns;
-    }
+                        {
+                            Html.RenderPartial(ControlPanelClient.ViewPrefix.Formato("PanelPart"), pp);
+                        }
+                    </td>
+                        if (pp != null && pp.Fill)
+                        {
+                            j = cp.NumberOfColumns;
+                        }
                 }
                 </tr>
-    }
-    </table>
+            }
+        </table>
     }
     <div class="clear">
     </div>   

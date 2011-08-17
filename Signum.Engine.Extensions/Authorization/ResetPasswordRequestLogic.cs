@@ -44,8 +44,7 @@ namespace Signum.Engine.Authorization
                     return new EmailContent
                     {
                         Subject = Resources.ResetPasswordCode,
-                        Body = EmailRenderer.Replace(EmailRenderer.ReadFromResourceStream(typeof(AuthLogic).Assembly,
-                           "Signum.Engine.Extensions.Authorization.ResetPasswordRequestMail.htm"),
+                        Body = EmailRenderer.Replace(typeof(AuthLogic).Assembly.ReadResourceStream("Signum.Engine.Extensions.Authorization.ResetPasswordRequestMail.htm"),
                                model, null, Resources.ResourceManager)
                     };
                 });
