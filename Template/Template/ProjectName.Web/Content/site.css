@@ -1,11 +1,10 @@
-﻿/* Default CSS rules are embedded in Signum.Web and are accessible via Signum/Content/LineStyles.css */
+/* Default CSS rules are embedded in Signum.Web and are accessible via Signum/Content/LineStyles.css */
 /* Feel free to override them as you wish here */
 
 body 
 {
     font-family: Arial, Helvetica, Verdana;
-    font-size: 13px;   
-    text-align: center; 
+    font-size: 13px;    
     background-color: #eee;
 }
 
@@ -42,12 +41,18 @@ body
     background-color: #fff;
 }
 
-#content
+#contentContainer
 {
 	margin-left: 145px;
-	padding: 10px;
+	padding: 5px;
 	min-height: 400px;
 	border-left: 1px solid #CCC;
+}
+
+#content
+{
+	overflow: auto;
+	padding: 5px;
 }
 
 #footer

@@ -31,7 +31,20 @@ namespace Signum.Engine.Linq
             if (exp == null)
                 return null;
 
-            if (!inSql || !IsBooleanExpression(exp) || IsSqlCondition(exp))
+            if (!inSql || !IsBooleanExpression(exp))
+                return exp;
+
+            if (exp.NodeType == ExpressionType.Constant)
+            {
+                bool? value = ((bool?)((ConstantExpression)exp).Value);
+                
+                if(value == true)
+                    return Expression.Equal(new SqlConstantExpression(1), new SqlConstantExpression(1));
+                else 
+                    return Expression.Equal(new SqlConstantExpression(1), new SqlConstantExpression(0));
+            }
+
+            if (IsSqlCondition(exp))
                 return exp;
 
             return Expression.Equal(exp, new SqlConstantExpression(true));
@@ -42,7 +55,13 @@ namespace Signum.Engine.Linq
             if (exp == null)
                 return null;
 
-            if (!inSql || !IsBooleanExpression(exp) || !IsSqlCondition(exp))
+            if (!inSql || !IsBooleanExpression(exp))
+                return exp;
+
+            if (exp.NodeType == ExpressionType.Constant)
+                return ((bool)((ConstantExpression)exp).Value) ? new SqlConstantExpression(1) : new SqlConstantExpression(0);
+
+            if (!IsSqlCondition(exp))
                 return exp;
 
             return new CaseExpression(new[] { new When(exp, new SqlConstantExpression(true)) }, new SqlConstantExpression(false));

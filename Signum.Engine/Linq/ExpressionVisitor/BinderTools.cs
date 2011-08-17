@@ -8,6 +8,7 @@ using Signum.Engine.Maps;
 using System.Reflection;
 using Signum.Utilities.Reflection;
 using Signum.Entities;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.Linq
 {
@@ -41,8 +42,7 @@ namespace Signum.Engine.Linq
                 var externalID = DbExpressionNominator.FullNominate(p.FieldInit.ExternalId);
 
                 Expression equal = SmartEqualizer.EqualNullable(externalID, p.FieldInit.GetFieldBinding(FieldInitExpression.IdField));
-                Expression condition = p.FieldInit.OtherCondition == null ? equal : Expression.And(p.FieldInit.OtherCondition, equal);
-                return new JoinExpression(JoinType.SingleRowLeftOuterJoin, e, p.Table, condition);
+                return new JoinExpression(JoinType.SingleRowLeftOuterJoin, e, p.Table, equal);
             });
 
             return new ProjectionExpression(
@@ -108,36 +108,33 @@ namespace Signum.Engine.Linq
             if (expression is ImplementedByAllExpression)
                 return ((ImplementedByAllExpression)expression).Id;
 
-            throw new NotSupportedException();
+            throw new NotSupportedException("Id for {0}".Formato(expression.NiceToString())); 
         }
+
 
         public Expression GetEntityType(Expression expression)
         {
             if (expression is FieldInitExpression)
-                return Expression.Constant(((FieldInitExpression)expression).Type, typeof(Type));
+            {
+                FieldInitExpression fie = (FieldInitExpression)expression;
+
+                return new TypeFieldInitExpression(fie.ExternalId, fie.Type);
+            }
 
             if (expression is ImplementedByExpression)
             {
                 ImplementedByExpression ib = (ImplementedByExpression)expression;
 
                 if (ib.Implementations.Count == 0)
-                    return NullId;
+                    return Expression.Constant(null, typeof(Type));
 
-                if (ib.Implementations.Count == 1)
-                    return Expression.Constant(ib.Implementations[0].Field.Type, typeof(Type));//Not regular, but usefull
-
-                Expression aggregate = ib.Implementations.Select(imp => new When(
-                        Expression.NotEqual(imp.Field.ExternalId, NullId),
-                        Expression.Constant(imp.Field.Type, typeof(Type))))
-                    .ToList().ToCondition(typeof(Type));
-
-                return aggregate;
+                return new TypeImplementedByExpression(ib.Implementations.Select(imp => new TypeImplementationColumnExpression(imp.Type, imp.Field.ExternalId)).ToReadOnly()); 
             }
 
             if (expression is ImplementedByAllExpression)
                 return ((ImplementedByAllExpression)expression).TypeId;
 
-            return Expression.Constant(expression.Type, typeof(Type));
+            return null;
         }
 
         public Expression Coalesce(Type type, IEnumerable<Expression> exp)
@@ -152,18 +149,8 @@ namespace Signum.Engine.Linq
 
             return exp.Reverse().Aggregate((ac, e) => Expression.Coalesce(e, ac));
         }
-        
-        static MethodInfo miToMListNotModified = ReflectionTools.GetMethodInfo((IEnumerable<int> col) => col.ToMListNotModified()).GetGenericMethodDefinition();
 
-        public static ProjectionExpression ExtractMListProjection(MethodCallExpression exp)
-        {
-            if (exp.Method.IsInstantiationOf(miToMListNotModified))
-                return (ProjectionExpression)exp.Arguments[0];
-
-            return null; 
-        }
-
-        internal MethodCallExpression MListProjection(MListExpression mle)
+        internal ProjectionExpression MListProjection(MListExpression mle)
         {
             RelationalTable tr = mle.RelationalTable;
 
@@ -186,7 +173,7 @@ namespace Signum.Engine.Linq
 
             proj = ApplyExpansions(proj);
 
-            return Expression.Call(miToMListNotModified.MakeGenericMethod(pc.Projector.Type), proj);
+            return proj;
         }
 
         internal Alias NextSelectAlias()

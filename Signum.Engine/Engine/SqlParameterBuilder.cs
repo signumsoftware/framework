@@ -27,6 +27,14 @@ namespace Signum.Engine
             return CreateParameter(name, SqlBuilder.PrimaryKeyType, nullable, id);
         }
 
+        public static SqlParameter CreateParameter(string name, object value, Type type)
+        {
+            return CreateParameter(name,
+             Schema.Current.Settings.DefaultSqlType(type.UnNullify()),
+             type == null || type.IsByRef || type.IsNullable(), 
+             value);
+        }
+
         public static SqlParameter CreateParameter(string name, SqlDbType type, bool nullable, object value)
         {
             if (IsDate(type))
@@ -42,9 +50,9 @@ namespace Signum.Engine
 
         static MethodInfo miAsserDateTime = ReflectionTools.GetMethodInfo(() => AssertDateTime(null));
 
-        public static MemberInitExpression ParameterFactory(string name, SqlDbType type, bool nullable, Expression value)
+        public static MemberInitExpression ParameterFactory(Expression name, SqlDbType type, bool nullable, Expression value)
         {
-            NewExpression newParam = Expression.New(typeof(SqlParameter).GetConstructor(new []{typeof(string), typeof(SqlDbType)}), Expression.Constant(name), Expression.Constant(type));
+            NewExpression newParam = Expression.New(typeof(SqlParameter).GetConstructor(new []{typeof(string), typeof(SqlDbType)}), name, Expression.Constant(type));
 
             Expression valueExpr = Expression.Convert(IsDate(type)?Expression.Call(miAsserDateTime, value.Nullify()): value, typeof(object));
 

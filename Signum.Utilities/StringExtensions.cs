@@ -34,6 +34,11 @@ namespace Signum.Utilities
                 throw new ArgumentException(errorMessage);
         }
 
+        public static bool Contains(this string source, string toCheck, StringComparison comp)
+        {
+            return source.IndexOf(toCheck, comp) >= 0;
+        }
+
         public static string Add(this string str, string part, string separator)
         {
             if (str.HasText())
@@ -380,6 +385,7 @@ namespace Signum.Utilities
                     sb.Append(separator);
                 }
             }
+
             return sb.ToString(0, Math.Max(0, sb.Length - separator.Length));  // Remove at the end is faster
         }
 
@@ -394,7 +400,18 @@ namespace Signum.Utilities
                     sb.Append(separator);
                 }
             }
+
             return sb.ToString(0, Math.Max(0, sb.Length - separator.Length));  // Remove at the end is faster
+        }
+
+        public static StringBuilder AppendLines(this StringBuilder sb, IEnumerable<string> strings)
+        {
+            foreach (var item in strings)
+            {
+                sb.AppendLine(item); 
+            }
+
+            return sb;
         }
     }
 }

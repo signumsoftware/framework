@@ -119,6 +119,13 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void SelectTypeNull()
+        {
+            var list = Database.Query<LabelDN>()
+                .Select(a => new { Label = a.ToLite(), Owner = a.Owner, OwnerType = a.Owner.Entity.GetType() }).ToList();
+        }
+
+        [TestMethod]
         public void SelectLiteIB()
         {
             var list = Database.Query<AlbumDN>()
@@ -126,10 +133,10 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
-        public void SelectTypeIB()
+        public void SelectTypeIBA()
         {
-            var list = Database.Query<AlbumDN>()
-                .Select(a => a.Author.GetType()).ToList();
+            var list = Database.Query<NoteWithDateDN>()
+                .Select(a => new { Type = a.Target.GetType(), Target = a.Target.ToLite() }).ToList();
         }
 
         [TestMethod]
@@ -149,6 +156,14 @@ namespace Signum.Test.LinqProvider
         public void SelectEntityWithLiteIbType()
         {
             var list = Database.Query<AwardNominationDN>().Where(a => a.Award.Entity.GetType() == typeof(GrammyAwardDN)).ToList();
+        }
+
+        [TestMethod]
+        public void SelectEntityWithLiteIbTypeContains()
+        {
+            Type[] types = new Type[] { typeof(GrammyAwardDN) }; 
+
+            var list = Database.Query<AwardNominationDN>().Where(a => types.Contains(a.Award.Entity.GetType())).ToList();
         }
 
         [TestMethod]
@@ -230,6 +245,12 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void SelectEntityNone()
+        {
+            var list = Database.Query<AlbumDN>().ToList();
+        }
+
+        [TestMethod]
         public void SelectEntitySelect()
         {
             var list = Database.Query<AlbumDN>().Select(a => a).ToList();
@@ -298,6 +319,21 @@ namespace Signum.Test.LinqProvider
                         ((AlbumDN)n.Target).Name ??
                         ((BandDN)n.Target).Name).ToList();
 
+        }
+
+        [TestMethod]
+        public void SelectCastIBACastOperator()
+        {
+            var list = (from n in Database.Query<NoteWithDateDN>()
+                        select n.Target).Cast<BandDN>().ToList();
+        }
+
+
+        [TestMethod]
+        public void SelectCastIBAOfTypeOperator()
+        {
+            var list = (from n in Database.Query<NoteWithDateDN>()
+                        select n.Target).OfType<BandDN>().ToList();
         }
 
         [TestMethod]
@@ -562,6 +598,28 @@ namespace Signum.Test.LinqProvider
         {
             var lists = (from mle in Database.MListQuery((AlbumDN a) => a.Songs)
                          select mle).ToList();
+        }
+
+        //[TestMethod]
+        public void SelectCache()
+        {
+            Connection.CommandCount = 0;
+            CacheLogic.Invalidate<AmericanMusicAwardDN>();
+            Database.RetrieveAll<AmericanMusicAwardDN>();
+            Assert.AreEqual(Connection.CommandCount, 1);
+
+            Connection.CommandCount = 0;
+            Database.RetrieveAll<AmericanMusicAwardDN>();
+            Assert.AreEqual(Connection.CommandCount, 0); //Cached
+
+            Connection.CommandCount = 0;
+            Database.Query<AmericanMusicAwardDN>().ToList();
+            Assert.AreEqual(Connection.CommandCount, 1); //Query
+
+
+            Connection.CommandCount = 0;
+            Database.Query<BandDN>().ToList();
+            Assert.AreEqual(Connection.CommandCount, 5); //MemberFriends + Members + Query + OtherAwards + GrammyAwards
         }
     }
 

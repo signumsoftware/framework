@@ -157,18 +157,37 @@ namespace Signum.Engine.Maps
             entityEventsGlobal.OnSaving(entity);
         }
 
-        internal void OnRetrieved(IdentifiableEntity entity)
+        internal void OnRetrieved(IdentifiableEntity entity, bool fromCache)
         {
             AssertAllowed(entity.GetType());
 
             IEntityEvents ee = entityEvents.TryGetC(entity.GetType());
 
             if (ee != null)
-                ee.OnRetrieved(entity);
+                ee.OnRetrieved(entity, fromCache);
 
-            entityEventsGlobal.OnRetrieved(entity);
+            entityEventsGlobal.OnRetrieved(entity, fromCache);
         }
 
+        internal ICacheController CacheController(Type type)
+        {
+            IEntityEvents ee = entityEvents.TryGetC(type);
+
+            if (ee == null)
+                return null;
+
+            return ee.CacheController;
+        }
+
+        internal CacheController<T> CacheController<T>() where T:IdentifiableEntity
+        {
+            EntityEvents<T> ee =  (EntityEvents<T>)entityEvents.TryGetC(typeof(T));
+
+            if (ee == null)
+                return null;
+
+            return ee.CacheController;
+        }
 
         internal IQueryable<T> OnFilterQuery<T>(IQueryable<T> query)
             where T : IdentifiableEntity
@@ -180,6 +199,15 @@ namespace Signum.Engine.Maps
                 return query;
 
             return ee.OnFilterQuery(query);
+        }
+
+        internal bool HasQueryFilter(Type type)
+        {
+            IEntityEvents ee = entityEvents.TryGetC(type);
+            if (ee == null)
+                return false;
+
+            return ee.HasQueryFilter;
         }
 
         public event Func<Replacements, SqlPreCommand> Synchronizing;
@@ -293,12 +321,14 @@ namespace Signum.Engine.Maps
 
         public void Initialize()
         {
-            Initializing.InitializeUntil(InitLevel.Level4BackgroundProcesses);
+            using (GlobalMode())
+                Initializing.InitializeUntil(InitLevel.Level4BackgroundProcesses);
         }
 
         public void InitializeUntil(InitLevel level)
         {
-            Initializing.InitializeUntil(level);
+            using (GlobalMode())
+                Initializing.InitializeUntil(level);
         }
 
         
@@ -409,13 +439,70 @@ namespace Signum.Engine.Maps
         {
             return DirectedEdgedGraph<Table, bool>.Generate(Tables.Values, t => t.Fields.Values.SelectMany(f => f.Field.GetTables()));
         }
+
+        ThreadLocal<bool> inGlobalMode = new ThreadLocal<bool>(() => false);
+        public bool InGlobalMode
+        {
+            get { return inGlobalMode.Value; }
+        }
+
+        internal IDisposable GlobalMode()
+        {
+            inGlobalMode.Value = true;
+            return new Disposable(() => inGlobalMode.Value = false);
+        }
     }
 
     internal interface IEntityEvents
     {
         void OnPreSaving(IdentifiableEntity entity, ref bool graphModified);
         void OnSaving(IdentifiableEntity entity);
-        void OnRetrieved(IdentifiableEntity entity);
+        void OnRetrieved(IdentifiableEntity entity, bool fromCache);
+
+
+        ICacheController CacheController { get; }
+
+        bool HasQueryFilter { get; }
+    }
+
+    public interface ICacheController
+    {
+        bool Enabled { get; }
+        IdentifiableEntity GetEntity(int id);
+        IList GetAllEntities();
+        IList GetEntitiesList(List<int> ids);
+        IdentifiableEntity GetOrRequest(int id);
+        bool Load();
+    }
+
+    public abstract class CacheController<T> : ICacheController where T : IdentifiableEntity
+    {
+        public abstract bool Enabled { get; }
+        public abstract bool Load();
+        public abstract T GetOrRequest(int id); 
+        public abstract T GetEntity(int id);
+        public abstract List<T> GetAllEntities();
+        public abstract List<T> GetEntitiesList(List<int> list);
+
+        IdentifiableEntity ICacheController.GetEntity(int id)
+        {
+            return GetEntity(id);
+        }
+
+        IdentifiableEntity ICacheController.GetOrRequest(int id)
+        {
+            return GetOrRequest(id);
+        }
+
+        IList ICacheController.GetAllEntities()
+        {
+            return GetAllEntities();
+        }
+
+        IList ICacheController.GetEntitiesList(List<int> ids)
+        {
+            return GetEntitiesList(ids);
+        }
     }
 
     public class EntityEvents<T> : IEntityEvents
@@ -425,6 +512,8 @@ namespace Signum.Engine.Maps
         public event SavingEventHandler<T> Saving;
 
         public event RetrievedEventHandler<T> Retrieved;
+
+        public CacheController<T> CacheController { get; set; }
 
         public event FilterQueryEventHandler<T> FilterQuery;
 
@@ -437,6 +526,11 @@ namespace Signum.Engine.Maps
                     query = filter(query);
 
             return query;
+        }
+
+        public bool HasQueryFilter
+        {
+            get { return FilterQuery != null; }
         }
 
         internal void OnPreUnsafeDelete(IQueryable<T> query)
@@ -459,15 +553,20 @@ namespace Signum.Engine.Maps
 
         }
 
-        void IEntityEvents.OnRetrieved(IdentifiableEntity entity)
+        void IEntityEvents.OnRetrieved(IdentifiableEntity entity, bool fromCache)
         {
             if (Retrieved != null)
-                Retrieved((T)entity);
+                Retrieved((T)entity, fromCache);
+        }
+
+        ICacheController IEntityEvents.CacheController
+        {
+            get { return CacheController; }
         }
     }
 
     public delegate void PreSavingEventHandler<T>(T ident, ref bool graphModified) where T : IdentifiableEntity;
-    public delegate void RetrievedEventHandler<T>(T ident) where T : IdentifiableEntity;    
+    public delegate void RetrievedEventHandler<T>(T ident, bool fromCache) where T : IdentifiableEntity;    
     public delegate void SavingEventHandler<T>(T ident) where T : IdentifiableEntity;
     public delegate void SavedEventHandler<T>(T ident, SavedEventArgs args) where T : IdentifiableEntity;
     public delegate IQueryable<T> FilterQueryEventHandler<T>(IQueryable<T> query);
@@ -668,8 +767,8 @@ namespace Signum.Engine.Maps
             Columns = Fields.Values.SelectMany(c => c.Field.Columns()).ToDictionary(c => c.Name);
 
             inserter = new Lazy<InsertCache>(InitializeInsert, LazyThreadSafetyMode.PublicationOnly);
-            updater = new Lazy<UpdateCache>(InitializeUpdate, LazyThreadSafetyMode.None);
-            saveCollections = new Lazy<Action<IdentifiableEntity,Forbidden,bool>>(InitializeCollections, LazyThreadSafetyMode.None);
+            updater = new Lazy<UpdateCache>(InitializeUpdate, LazyThreadSafetyMode.PublicationOnly);
+            saveCollections = new Lazy<Action<IdentifiableEntity,Forbidden,bool>>(InitializeCollections, LazyThreadSafetyMode.PublicationOnly);
         }
 
         public Field GetField(MemberInfo value, bool throws)
@@ -698,6 +797,40 @@ namespace Signum.Engine.Maps
                 result.AddRange(MultiIndexes);
 
             return result;
+        }
+
+        internal void InsertMany(List<IdentifiableEntity> list, DirectedGraph<IdentifiableEntity> graph)
+        {
+            var ic = inserter.Value;
+
+            foreach (var ls in list.Split_1_2_4_8_16())
+            {
+                switch (ls.Count)
+                {
+                    case 1: ic.Insert(ls[0], graph); break;
+                    case 2: ic.Insert2(ls, graph); break;
+                    case 4: ic.Insert4(ls, graph); break;
+                    case 8: ic.Insert8(ls, graph); break;
+                    case 16: ic.Insert16(ls, graph); break;
+                }
+            }
+        }
+
+        internal void UpdateMany(List<IdentifiableEntity> list, DirectedGraph<IdentifiableEntity> graph)
+        {
+            var uc = updater.Value;
+
+            foreach (var ls in list.Split_1_2_4_8_16())
+            {
+                switch (ls.Count)
+                {
+                    case 1: uc.Update(ls[0], graph); break;
+                    case 2: uc.Update2(ls, graph); break;
+                    case 4: uc.Update4(ls, graph); break;
+                    case 8: uc.Update8(ls, graph); break;
+                    case 16: uc.Update16(ls, graph); break;
+                }
+            }
         }
     }
 
@@ -787,6 +920,14 @@ namespace Signum.Engine.Maps
         int? Size { get; }
         int? Scale { get; }
         Table ReferenceTable { get; }
+    }
+
+    public static partial class ColumnExtensions
+    {
+        public static string GetSqlDbTypeString(this IColumn column)
+        {
+            return column.SqlDbType.ToString().ToUpper(CultureInfo.InvariantCulture) + SqlBuilder.GetSizeScale(column.Size, column.Scale);
+        }
     }
 
     public interface IFieldReference
@@ -1120,8 +1261,6 @@ namespace Signum.Engine.Maps
         public void GenerateColumns()
         {
             Columns = new IColumn[] { PrimaryKey, BackReference }.Concat(Field.Columns()).ToDictionary(a => a.Name);
-
-            InitializeSaveSql();
         }
 
         public List<UniqueIndex> GeneratUniqueIndexes()

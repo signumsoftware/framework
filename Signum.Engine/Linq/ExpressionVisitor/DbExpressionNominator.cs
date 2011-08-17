@@ -439,7 +439,7 @@ namespace Signum.Engine.Linq
                 if (b.Left.IsNull())
                 {
                     if (b.Right.IsNull())
-                        return SqlConstantExpression.True;
+                        return Expression.Constant(true);
                     else
                         return new IsNullExpression(b.Right);
                 }
@@ -456,7 +456,7 @@ namespace Signum.Engine.Linq
                 if (b.Left.IsNull())
                 {
                     if (b.Right.IsNull())
-                        return SqlConstantExpression.False;
+                        return Expression.Constant(false);
                     else
                         return new IsNotNullExpression(b.Right);
                 }
@@ -561,7 +561,7 @@ namespace Signum.Engine.Linq
             if (candidates.Contains(operand) &&
                 (u.NodeType == ExpressionType.Not ||
                  u.NodeType == ExpressionType.Negate ||
-                 u.NodeType == ExpressionType.Convert && (/*u.Operand.Type.UnNullify() == u.Type.UnNullify() ||*/ IsFullNominate))) //Expand nullability
+                 u.NodeType == ExpressionType.Convert && (IsFullNominate || isAggresive && u.Operand.Type.UnNullify() == u.Type.UnNullify()))) //Expand nullability
                 candidates.Add(result);
 
             return result;

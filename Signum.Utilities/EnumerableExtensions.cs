@@ -36,12 +36,20 @@ namespace Signum.Utilities
 
         public static IEnumerable<T> NotNull<T>(this IEnumerable<T> collection) where T : class
         {
-            return collection.Where(a => a != null);
+            foreach (var item in collection)
+            {
+                if (item != null)
+                    yield return item;
+            }
         }
 
         public static IEnumerable<T> NotNull<T>(this IEnumerable<T?> collection) where T : struct
         {
-            return collection.Where(a => a.HasValue).Select(a => a.Value);
+            foreach (var item in collection)
+            {
+                if (item.HasValue)
+                    yield return item.Value;
+            }
         }
 
         public static IEnumerable<T> And<T>(this IEnumerable<T> collection, T newItem)
@@ -234,7 +242,7 @@ namespace Signum.Utilities
 
         public static string CommaOr<T>(this IEnumerable<T> collection)
         {
-            return CommaString(collection.Select(a=>a.ToString()).ToArray(), Resources.Or);
+            return CommaString(collection.Select(a => a.ToString()).ToArray(), Resources.Or);
         }
 
         public static string CommaOr<T>(this IEnumerable<T> collection, Func<T, string> toString)
@@ -253,7 +261,7 @@ namespace Signum.Utilities
         }
 
         static string CommaString(this string[] values, string lastSeparator)
-        {            
+        {
             if (values.Length == 0)
                 return "";
 
@@ -468,7 +476,7 @@ namespace Signum.Utilities
         }
 
         public static Interval<V> MinMaxPair<T, V>(this IEnumerable<T> collection, Func<T, V> valueSelector)
-            where V:struct, IComparable<V>, IEquatable<V>
+            where V : struct, IComparable<V>, IEquatable<V>
         {
             bool has = false;
             V min = default(V), max = default(V);
@@ -567,7 +575,7 @@ namespace Signum.Utilities
 
         public static List<IGrouping<T, T>> GroupWhen<T>(this IEnumerable<T> collection, Func<T, bool> isGroupKey)
         {
-            return GroupWhen(collection, isGroupKey, false); 
+            return GroupWhen(collection, isGroupKey, false);
         }
 
         public static List<IGrouping<T, T>> GroupWhen<T>(this IEnumerable<T> collection, Func<T, bool> isGroupKey, bool includeKeyInGroup)
@@ -580,7 +588,7 @@ namespace Signum.Utilities
                 {
                     group = new Grouping<T, T>(item);
                     if (includeKeyInGroup)
-                        group.Add(item); 
+                        group.Add(item);
                     result.Add(group);
                 }
                 else
@@ -591,6 +599,33 @@ namespace Signum.Utilities
             }
 
             return result;
+        }
+
+        public static IEnumerable<IGrouping<K, T>> GroupWhenChange<T, K>(this IEnumerable<T> collection, Func<T, K> getGroupKey)
+        {
+            Grouping<K, T> current = null;
+
+            foreach (var item in collection)
+            {
+                if (current == null)
+                {
+                    current = new Grouping<K, T>(getGroupKey(item));
+                    current.Add(item);
+                }
+                else if (current.Key.Equals(getGroupKey(item)))
+                {
+                    current.Add(item);
+                }
+                else
+                {
+                    yield return current;
+                    current = new Grouping<K, T>(getGroupKey(item));
+                    current.Add(item);
+                }
+            }
+
+            if (current != null)
+                yield return current; 
         }
 
         public static IEnumerable<T> Distinct<T, S>(this IEnumerable<T> collection, Func<T, S> func)
@@ -771,29 +806,52 @@ namespace Signum.Utilities
         #endregion
 
         public static IEnumerable<R> JoinStrict<K, O, N, R>(
-           IEnumerable<O> oldCollection,
-           IEnumerable<N> newCollection,
-           Func<O, K> oldKeySelector,
-           Func<N, K> newKeySelector,
+           IEnumerable<O> currentCollection,
+           IEnumerable<N> shouldCollection,
+           Func<O, K> currentKeySelector,
+           Func<N, K> shouldKeySelector,
            Func<O, N, R> resultSelector, string action)
         {
 
-            var oldDictionary = oldCollection.ToDictionary(oldKeySelector);
-            var newDictionary = newCollection.ToDictionary(newKeySelector);
+            var currentDictionary = currentCollection.ToDictionary(currentKeySelector);
+            var shouldDictionary = shouldCollection.ToDictionary(shouldKeySelector);
 
-            var oldOnly = oldDictionary.Keys.Where(k => !newDictionary.ContainsKey(k)).ToList();
-            var newOnly = newDictionary.Keys.Where(k => !oldDictionary.ContainsKey(k)).ToList();
+            var currentOnly = currentDictionary.Keys.Where(k => !shouldDictionary.ContainsKey(k)).ToList();
+            var shouldOnly = shouldDictionary.Keys.Where(k => !currentDictionary.ContainsKey(k)).ToList();
 
-            if (oldOnly.Count != 0)
-                if (newOnly.Count != 0)
-                    throw new InvalidOperationException("Error {0}\r\n Extra: {1}\r\n Lacking: {2}".Formato(action, oldOnly.ToString(", "), newOnly.ToString(", ")));
+            if (currentOnly.Count != 0)
+                if (shouldOnly.Count != 0)
+                    throw new InvalidOperationException("Error {0}\r\n Extra: {1}\r\n Lacking: {2}".Formato(action, currentOnly.ToString(", "), shouldOnly.ToString(", ")));
                 else
-                    throw new InvalidOperationException("Error {0}\r\n Extra: {1}".Formato(action, oldOnly.ToString(", ")));
+                    throw new InvalidOperationException("Error {0}\r\n Extra: {1}".Formato(action, currentOnly.ToString(", ")));
             else
-                if (newOnly.Count != 0)
-                    throw new InvalidOperationException("Error {0}\r\n Lacking: {1}".Formato(action, newOnly.ToString(", ")));
+                if (shouldOnly.Count != 0)
+                    throw new InvalidOperationException("Error {0}\r\n Lacking: {1}".Formato(action, shouldOnly.ToString(", ")));
 
-            return oldDictionary.Select(p => resultSelector(p.Value, newDictionary[p.Key]));
+            return currentDictionary.Select(p => resultSelector(p.Value, shouldDictionary[p.Key]));
+        }
+
+
+        public static JoinStrictResult<O, N, R> JoinStrict<K, O, N, R>(
+        IEnumerable<O> currentCollection,
+        IEnumerable<N> shouldCollection,
+        Func<O, K> currentKeySelector,
+        Func<N, K> shouldKeySelector,
+        Func<O, N, R> resultSelector)
+        {
+            var currentDictionary = currentCollection.ToDictionary(currentKeySelector);
+            var newDictionary = shouldCollection.ToDictionary(shouldKeySelector);
+
+            HashSet<K> commonKeys = currentDictionary.Keys.ToHashSet();
+            commonKeys.IntersectWith(newDictionary.Keys);
+
+            return new JoinStrictResult<O, N, R>
+            {
+                Extra = currentDictionary.Where(e => !newDictionary.ContainsKey(e.Key)).Select(e => e.Value).ToList(),
+                Lacking = newDictionary.Where(e => !currentDictionary.ContainsKey(e.Key)).Select(e => e.Value).ToList(),
+
+                Result = commonKeys.Select(k => resultSelector(currentDictionary[k], newDictionary[k])).ToList()
+            };
         }
 
         public static IEnumerable<Iteration<T>> Iterate<T>(this IEnumerable<T> collection)
@@ -818,6 +876,14 @@ namespace Signum.Utilities
         }
     }
 
+
+    public class JoinStrictResult<O, N, R>
+    {
+        public List<O> Extra;
+        public List<N> Lacking;
+        public List<R> Result;
+    }
+
     public enum BiSelectOptions
     {
         None,
@@ -831,7 +897,7 @@ namespace Signum.Utilities
     {
         readonly T value;
         readonly bool isFirst;
-        readonly bool isLast; 
+        readonly bool isLast;
         readonly int position;
 
         internal Iteration(T value, bool isFirst, bool isLast, int position)

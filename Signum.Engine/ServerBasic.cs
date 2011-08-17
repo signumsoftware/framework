@@ -71,7 +71,7 @@ namespace Signum.Services
         public virtual List<Lite> RetrieveAllLite(Type liteType, Implementations implementations)
         {
             return Return(MethodInfo.GetCurrentMethod(), "RetrieveAllLite {0}".Formato(liteType),
-                () =>AutoCompleteUtils.RetriveAllLite(liteType, implementations));
+                () =>AutoCompleteUtils.RetrieveAllLite(liteType, implementations));
         }
 
         [SuggestUserInterface]
