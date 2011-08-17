@@ -29,7 +29,8 @@ namespace Signum.Entities.SMS
     {
         Create,
         Send,
-        UpdateStatus
+        UpdateStatus,
+        CreateUpdateStatusPackage
     }
 
     public enum SMSMessageProcess
@@ -86,13 +87,7 @@ namespace Signum.Entities.SMS
             set { Set(ref sendState, value, () => SendState); }
         }
 
-        string sourceNumber;
-        public string SourceNumber
-        {
-            get { return sourceNumber; }
-            set { Set(ref sourceNumber, value, () => SourceNumber); }
-        }
-
+        [NotNullable]
         string destinationNumber;
         [StringLengthValidator(AllowNulls = false)]
         public string DestinationNumber

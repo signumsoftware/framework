@@ -42,7 +42,6 @@ namespace Signum.Engine.SMS
                                                  m.Id,
                                                  Source = m.From,
                                                  m.DestinationNumber,
-                                                 m.SourceNumber,
                                                  m.State,
                                                  m.SendDate,
                                                  m.Template
@@ -165,7 +164,7 @@ namespace Signum.Engine.SMS
                 ProcessLogic.Register(SMSMessageProcess.Send, new SMSMessageSendProcessAlgortihm());
                 ProcessLogic.Register(SMSMessageProcess.UpdateStatus, new SMSMessageUpdateStatusProcessAlgorithm());
 
-                new BasicConstructFromMany<SMSMessageDN, ProcessExecutionDN>(SMSMessageOperations.UpdateStatus)
+                new BasicConstructFromMany<SMSMessageDN, ProcessExecutionDN>(SMSMessageOperations.CreateUpdateStatusPackage)
                 {
                     Construct = (messages, _) => UpdateMessages(messages.RetrieveFromListOfLite())
                 }.Register();
