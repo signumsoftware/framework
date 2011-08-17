@@ -45,12 +45,15 @@ namespace Signum.Engine.Extensions.Chart
                                                 uq.GroupResults,
                                             }).ToDynamic();
 
-                sb.Schema.EntityEvents<UserChartDN>().Retrieved += new RetrievedEventHandler<UserChartDN>(UserQueryLogic_Retrieved);
+                sb.Schema.EntityEvents<UserChartDN>().Retrieved += UserQueryLogic_Retrieved;
             }
         }
 
-        static void UserQueryLogic_Retrieved(UserChartDN userQuery)
+        static void UserQueryLogic_Retrieved(UserChartDN userQuery, bool fromCache)
         {
+            if (fromCache)
+                return;
+
             object queryName = QueryLogic.ToQueryName(userQuery.Query.Key);
 
             QueryDescription description = DynamicQueryManager.Current.QueryDescription(queryName);

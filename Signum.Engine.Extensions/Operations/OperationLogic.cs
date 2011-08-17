@@ -48,11 +48,11 @@ namespace Signum.Engine.Operations
             return LogOperationsExpression.Invoke(o);
         }
         
-        static ExternalPolymorphicDictionary<Enum, IOperation> operations = new ExternalPolymorphicDictionary<Enum, IOperation>();
+        static Polymorphic<Dictionary<Enum, IOperation>> operations = new Polymorphic<Dictionary<Enum, IOperation>>(PolymorphicMerger.InheritDictionaryInterfaces, typeof(IIdentifiable));
 
         public static HashSet<Enum> RegisteredOperations
         {
-            get { return operations.GetAllKeys(); }
+            get { return operations.OverridenValues.SelectMany(a => a.Keys).ToHashSet(); }
         }
 
         public static void AssertStarted(SchemaBuilder sb)
@@ -135,14 +135,26 @@ namespace Signum.Engine.Operations
         }
         #endregion
 
+
+
         public static void Register(this IOperation operation)
         {
             if (!operation.Type.IsIIdentifiable())
                 throw new InvalidOperationException("Type {0} has to implement at least {1}".Formato(operation.Type));
 
-            operation.AssertIsValid(); 
+            operation.AssertIsValid();
 
-            operations.Add(operation.Type, operation.Key, operation);
+            operations.GetOrAdd(operation.Type).Add(operation.Key, operation);
+        }
+
+        public static void RegisterOverride(this IOperation operation)
+        {
+            if (!operation.Type.IsIIdentifiable())
+                throw new InvalidOperationException("Type {0} has to implement at least {1}".Formato(operation.Type));
+
+            operation.AssertIsValid();
+
+            operations.GetOrAdd(operation.Type)[operation.Key] = operation;
         }
 
         static OperationInfo ToOperationInfo(IOperation operation, string canExecute)
@@ -326,7 +338,7 @@ namespace Signum.Engine.Operations
         static T Find<T>(Type type, Enum operationKey)
             where T : IOperation
         {
-            IOperation result = operations.TryGetValue(type, operationKey);
+            IOperation result = operations.TryGetValue(type).TryGetC(operationKey);
             if (result == null)
                 throw new InvalidOperationException("Operation {0} not found for type {1}".Formato(operationKey, type));
 
@@ -353,19 +365,21 @@ namespace Signum.Engine.Operations
             return result; 
         }
 
-        public static IOperation[] OperationsWithKey(Enum operationKey)
+        public static bool IsLite(Enum operationKey)
         {
-            var types = operations.ImplementingTypes(operationKey);
-
-            return types.Select(t => operations.TryGetValue(t, operationKey)).ToArray();
+            return operations.OverridenTypes.Select(t => operations.GetDefinition(t)).NotNull()
+                .Select(d => d.TryGetC(operationKey)).NotNull().OfType<IEntityOperation>().Select(a => a.Lite).FirstOrDefault();
         }
 
 
-        static List<IOperation> TypeOperations(Type type)
+        static IEnumerable<IOperation> TypeOperations(Type type)
         {
-            var keys = operations.GetAllKeys(type);
+            var dic = operations.TryGetValue(type);
 
-            return keys.Select(k => operations.TryGetValue(type, k)).ToList();
+            if (dic == null)
+                return Enumerable.Empty<IOperation>();
+
+            return dic.Values;
         }
 
         public static T GetArg<T>(this object[] args, int pos)
@@ -412,19 +426,19 @@ namespace Signum.Engine.Operations
 
         public static Type[] FindTypes(Enum operation)
         {
-            return operations.ImplementingTypes(operation);
+            return TypeLogic.DnToType.Values.Where(t => operations.TryGetValue(t).ContainsKey(operation)).ToArray();
         }
 
         internal static IEnumerable<Graph<E, S>.IGraphOperation> GraphOperations<E, S>()
             where E : IdentifiableEntity
             where S : struct
         {
-            return operations.RawDictionary.Values.SelectMany(d => d.Values).OfType<Graph<E, S>.IGraphOperation>();
+            return operations.OverridenValues.SelectMany(d => d.Values).OfType<Graph<E, S>.IGraphOperation>();
         }
 
         public static bool IsDefined(Type type, Enum operation)
         {
-            return operations.TryGetValue(type, operation) != null;
+            return operations.TryGetValue(type).TryGetC(operation) != null;
         }
     }
 

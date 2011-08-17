@@ -17,15 +17,15 @@
             <th>
                 Time
             </th>
-           
-            @foreach (var k in allKeys)
-            {
-                <th>@k Time
-                </th>
-            }
-             <th>
+            <th>
                 Direct Childs
             </th>
+            @foreach (var k in allKeys)
+            {
+                <th>
+                    @k Total Time
+                </th>
+            }
              <th>
                 Method
             </th>

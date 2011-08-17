@@ -291,4 +291,31 @@
   <data name="EndDateMustBeHigherThanStartDate" xml:space="preserve">
     <value>End date must be higher than start date</value>
   </data>
+  <data name="ScheduleRuleHourlyDN" xml:space="preserve">
+    <value>Each X Hours</value>
+  </data>
+  <data name="ScheduleRuleMinutelyDN" xml:space="preserve">
+    <value>Each X Minutes</value>
+  </data>
+  <data name="ScheduleRuleHourlyDN_NotMultiple" xml:space="preserve">
+    <value>Hour is not multiple of</value>
+  </data>
+  <data name="ScheduleRuleHourlyDN_NotValid" xml:space="preserve">
+    <value>Time selected is not valid</value>
+  </data>
+  <data name="ScheduleRuleMinutelyDN_NotMultiple" xml:space="preserve">
+    <value>Minute is not multiple of</value>
+  </data>
+  <data name="ScheduleRuleMinutelyDN_NotValid" xml:space="preserve">
+    <value>Time selected is not valid</value>
+  </data>
+  <data name="Each0HoursFrom1" xml:space="preserve">
+    <value>Each {0} hours from {1}</value>
+  </data>
+  <data name="Each0MinutesFrom1" xml:space="preserve">
+    <value>Each {0} minutes from {1}</value>
+  </data>
+  <data name="_0IsNotMultiple1" xml:space="preserve">
+    <value>{0} is not multiple of {1}</value>
+  </data>
 </root>

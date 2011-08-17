@@ -29,16 +29,15 @@ namespace Signum.Engine.Scheduler
 
                 sb.Include<CustomTaskExecutionDN>();
 
-                OperationLogic.Register(new BasicExecute<CustomTaskDN>(CustomTaskOperation.Execute)
+                new BasicExecute<CustomTaskDN>(CustomTaskOperation.Execute)
                 {
                     Execute = (ct, _) => Execute(EnumLogic<CustomTaskDN>.ToEnum(ct.Key))
-                });
+                }.Register();
 
-                OperationLogic.Register(new BasicExecute<CustomTaskDN>(TaskOperation.ExecutePrivate)
+                new BasicExecute<CustomTaskDN>(TaskOperation.ExecutePrivate)
                 {
-                    Execute = (ct, _) =>  Execute(EnumLogic<CustomTaskDN>.ToEnum(ct.Key))
-                });
-
+                    Execute = (ct, _) => Execute(EnumLogic<CustomTaskDN>.ToEnum(ct.Key))
+                }.Register();
 
                 dqm[typeof(CustomTaskDN)] =
                       (from ct in Database.Query<CustomTaskDN>()
@@ -48,7 +47,7 @@ namespace Signum.Engine.Scheduler
                            Entity = ct.ToLite(),
                            ct.Id,
                            ct.Name,
-                           NumExecutions = (int?)g.Count(),
+                           NumExecutions = (int?) g.Count(),
                            LastExecution = (from cte2 in g
                                             where cte2.Id == g.Max(a => a.Id)
                                             select cte2.ToLite()).SingleOrDefault()
@@ -74,7 +73,6 @@ namespace Signum.Engine.Scheduler
         {
             CustomTaskExecutionDN cte = new CustomTaskExecutionDN
             {
-                user=UserDN.Current.ToLite(),
                 CustomTask = EnumLogic<CustomTaskDN>.ToEntity(key),
                 StartTime = TimeZoneManager.Now,
             };

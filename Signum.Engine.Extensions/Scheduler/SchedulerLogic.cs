@@ -46,10 +46,10 @@ namespace Signum.Engine.Scheduler
                 AuthLogic.AssertStarted(sb);
                 OperationLogic.AssertStarted(sb);
 
-                OperationLogic.Register(new BasicExecute<ITaskDN>(TaskOperation.ExecutePrivate)
+                new BasicExecute<ITaskDN>(TaskOperation.ExecutePrivate)
                 {
                     Execute = (ct, _) => { throw new NotImplementedException(); }
-                });
+                }.Register();
 
                 CustomTaskLogic.Start(sb, dqm);
                 sb.Include<ScheduledTaskDN>();
@@ -78,23 +78,17 @@ namespace Signum.Engine.Scheduler
 
                   }).ToDynamic();
 
-
-         
-
-
                 dqm[typeof(CustomTaskExecutionDN)] =
                     (from st in Database.Query<CustomTaskExecutionDN>()
                      select new
                      {
                          Entity = st.ToLite(),
                          st.Id,
-                         st.user,
                          st.StartTime,
                          st.EndTime,
                          st.Exception,
 
                      }).ToDynamic();
-
 
                 dqm[typeof(ScheduledTaskDN)] =
                 (from st in Database.Query<ScheduledTaskDN>()
@@ -109,49 +103,6 @@ namespace Signum.Engine.Scheduler
 
 
                  }).ToDynamic();
-
-                dqm[typeof(ScheduleRuleDailyDN)] =
-                (from st in Database.Query<ScheduleRuleDailyDN>()
-                 select new
-                 {
-                     Entity = st.ToLite(),
-                     st.Id,
-                     st.StartingOn                  
-                 }).ToDynamic();
-
-
-                dqm[typeof(ScheduleRuleWeekDaysDN)] =
-                (from st in Database.Query<ScheduleRuleWeekDaysDN>()
-                 select new
-                 {
-                     Entity = st.ToLite(),
-                     st.Id,
-                     st.StartingOn,
-                     st.Monday,
-                     st.Wednesday,
-                     st.Tuesday,                 
-                     st.Friday,
-                     st.Saturday,
-                     st.Sunday,
-                     st.Holiday,                    
-
-                 }).ToDynamic();
-
-
-
-                dqm[typeof(ScheduleRuleWeeklyDN)] =
-             (from st in Database.Query<ScheduleRuleWeeklyDN>()
-              select new
-              {
-                  Entity = st.ToLite(),
-                  st.Id,
-                  st.StartingOn,
-                  st.DayOfTheWeek,
-              }).ToDynamic();
-
-
-
-                CustomTaskLogic.Start(sb, dqm);
             }
         }
 
@@ -194,6 +145,8 @@ namespace Signum.Engine.Scheduler
                 }
         }
 
+        static TimeSpan SchedulerMargin = TimeSpan.FromSeconds(0.5); //stabilize sub-day schedulers
+
         //Lock priorityQueue
         private static void SetTimer()
         {
@@ -207,7 +160,7 @@ namespace Signum.Engine.Scheduler
                 if (ts.TotalMilliseconds > int.MaxValue)
                     ts = TimeSpan.FromMilliseconds(int.MaxValue);
 
-                timer.Change((int)ts.TotalMilliseconds, Timeout.Infinite); // invoke after the timespan
+                timer.Change(ts.Add(SchedulerMargin), new TimeSpan(-1)); // invoke after the timespan
             }
         }
 
@@ -234,6 +187,7 @@ namespace Signum.Engine.Scheduler
                     ScheduledTaskDN st = priorityQueue.Pop(); //Exceed timer change
                     if (st.NextDate.HasValue && (st.NextDate - TimeZoneManager.Now) > MinimumSpan)
                     {
+                        priorityQueue.Push(st);
                         SetTimer();
                         return;
                     }
