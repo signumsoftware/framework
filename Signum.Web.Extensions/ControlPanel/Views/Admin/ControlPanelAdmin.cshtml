@@ -5,7 +5,7 @@
 @Html.ScriptsJs("~/ControlPanel/Scripts/SF_ControlPanel.js")
 @Html.ScriptCss("~/ControlPanel/Content/SF_ControlPanel.css")
 
-<div id="sfCpAdmin">
+<div>
     @using (var tc = Html.TypeContext<ControlPanelDN>())
     {
         @Html.EntityLine(tc, cp => cp.Related, el => el.Create = false)

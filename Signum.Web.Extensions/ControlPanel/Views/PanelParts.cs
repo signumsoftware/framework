@@ -72,46 +72,46 @@ namespace ASP
  if (!Model.Parts.IsNullOrEmpty())
 {
     int rowNumber = Model.Parts.Max(p => p.Row);
-    //int columnWidth = (int)Math.Floor((decimal)(100 / Model.NumberOfColumns));
 
-WriteLiteral("    <div id=\"sfCpContainer\">\r\n");
-
-
-         for (int col = 1; col <= Model.NumberOfColumns; col++)
-        { 
-
-WriteLiteral("            <div class=\"sf-cp-div-column\">\r\n");
+WriteLiteral("    <table id=\"sfCpContainer\">\r\n        <tr>\r\n");
 
 
-                 for (int row = 1; row <= rowNumber; row++)
-                {
-                    PanelPart pp = Model.Parts.SingleOrDefault(p => p.Row == row && p.Column == col);
-                    if (pp != null)
+             for (int col = 1; col <= Model.NumberOfColumns; col++)
+            { 
+
+WriteLiteral("                <td class=\"sf-cp-column\" data-column=\"");
+
+
+                                                 Write(col);
+
+WriteLiteral("\">\r\n");
+
+
+                     for (int row = 1; row <= rowNumber; row++)
                     {
+                        PanelPart pp = Model.Parts.SingleOrDefault(p => p.Row == row && p.Column == col);
+                        if (pp != null)
+                        {
 
-WriteLiteral("                        <div class=\"sf-cp-part-container\">\r\n");
-
-
-                               Html.RenderPartial(ControlPanelClient.ViewPrefix.Formato("PanelPart"), pp);    
-
-WriteLiteral("                        </div>\r\n");
+WriteLiteral("                            <div class=\"sf-cp-part-container\">\r\n");
 
 
+                                   Html.RenderPartial(ControlPanelClient.ViewPrefix.Formato("PanelPart"), pp);    
+
+WriteLiteral("                            </div>\r\n");
+
+
+                        }
                     }
-                }
 
-WriteLiteral("            </div>\r\n");
-
-
-        }
-
-WriteLiteral("    </div>\r\n");
+WriteLiteral("                </td>\r\n");
 
 
-    
-    
+            }
 
-            
+WriteLiteral("        </tr>\r\n    </table>\r\n");
+
+
 }
 
 

@@ -76,7 +76,7 @@ WriteLiteral("\r\n");
 
 Write(Html.ScriptCss("~/ControlPanel/Content/SF_ControlPanel.css"));
 
-WriteLiteral("\r\n\r\n<div id=\"sfCpAdmin\">\r\n");
+WriteLiteral("\r\n\r\n<div>\r\n");
 
 
      using (var tc = Html.TypeContext<ControlPanelDN>())

@@ -72,64 +72,51 @@ namespace ASP
  if (!Model.Parts.IsNullOrEmpty())
 {
     int rowNumber = Model.Parts.Max(p => p.Row);
-    int columnWidth = (int)Math.Floor((decimal)(100 / Model.NumberOfColumns));
 
-WriteLiteral("    <table id=\"sfCpContainer\">\r\n");
+WriteLiteral("    <table id=\"sfCpAdminContainer\">\r\n        <tr>\r\n");
 
 
-         for (int i = 0; i < rowNumber; i++)
+         for (int col = 1; col <= Model.NumberOfColumns; col++)
         { 
 
-WriteLiteral("            <tr>\r\n");
+WriteLiteral("            <td class=\"sf-cp-column\" data-column=\"");
 
 
-             for (int j = 0; j < Model.NumberOfColumns; j++)
-            {   
-                PanelPart pp = Model.Parts.SingleOrDefault(p => p.Row == i + 1 && (p.Column == j + 1 || p.Fill));
+                                             Write(col);
 
-WriteLiteral("                <td class=\"sf-cp-part-container\" data-row=\"");
+WriteLiteral("\">\r\n                <div class=\"sf-cp-droppable\"></div>\r\n");
 
 
-                                                       Write(i + 1);
-
-WriteLiteral("\" data-column=\"");
-
-
-                                                                              Write(j + 1);
-
-WriteLiteral("\" style=\"width:");
-
-
-                                                                                                     Write(columnWidth + "%");
-
-WriteLiteral("\" ");
-
-
-
-WriteLiteral(">\r\n");
-
-
-                     if (pp != null)
-                    {
-                        var ppTc = new TypeContext<ControlPanelDN>(Model, "").TypeElementContext(p => p.Parts).Where(pTc => pTc.Value == pp).First();
-                        Html.RenderPartial(ControlPanelClient.AdminViewPrefix.Formato("PanelPart"), ppTc);
-                    }
-
-WriteLiteral("                </td>\r\n");
-
-
-                if (pp != null && pp.Fill)
+                 for (int row = 1; row <= rowNumber; row++)
                 {
-                    j = Model.NumberOfColumns;
-                }
-            }
+                    PanelPart pp = Model.Parts.SingleOrDefault(p => p.Row == row && p.Column == col);
+                    if (pp != null)
+                    {
 
-WriteLiteral("            </tr>\r\n");
+WriteLiteral("                        <div class=\"sf-cp-part-container\">\r\n");
+
+
+                               
+                                var ppTc = new TypeContext<ControlPanelDN>(Model, "").TypeElementContext(p => p.Parts).Where(pTc => pTc.Value == pp).First();
+                                Html.RenderPartial(ControlPanelClient.AdminViewPrefix.Formato("PanelPart"), ppTc);    
+                            
+
+WriteLiteral("                        </div>\r\n");
+
+
+
+WriteLiteral("                        <div class=\"sf-cp-droppable\"></div>\r\n");
+
+
+                    }
+                }
+
+WriteLiteral("            </td>\r\n");
 
 
         }
 
-WriteLiteral("    </table>\r\n");
+WriteLiteral("        </tr>\r\n    </table>\r\n");
 
 
 }

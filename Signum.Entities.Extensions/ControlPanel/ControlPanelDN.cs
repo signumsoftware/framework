@@ -69,10 +69,10 @@ namespace Signum.Entities.ControlPanel
                 if (pi.Is(() => part.Column))
                 {
                     if (part.Column > NumberOfColumns)
-                        return Resources.ControlPanelDN_Part0IsInColumn1ButPanelHasOnly2Columns.Formato(index + 1, part.Column, NumberOfColumns);
+                        return Resources.ControlPanelDN_Part0IsInColumn1ButPanelHasOnly2Columns.Formato(part.Title, part.Column, NumberOfColumns);
 
                     if (parts.Any(p => p != part && p.Row == part.Row && (p.Fill || p.Column == part.Column)))
-                        return Resources.ControlPanelDN_Part0IsInColumn1WhichAlreadyHasOtherParts.Formato(index + 1, part.Column, part.Row);
+                        return Resources.ControlPanelDN_Part0IsInColumn1WhichAlreadyHasOtherParts.Formato(part.Title, part.Column, part.Row);
                 }
             }
 

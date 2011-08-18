@@ -1,85 +1,94 @@
 ﻿var SF = SF || {};
 
 SF.ControlPanel = (function () {
-    var createDraggables = function () {
-        $(".sf-cp-part").draggable({
-            handle: ".sf-cp-part-header",
-            snap: ".sf-cp-part-container",
-            revert: "invalid",
-            start: function (event, ui) {
-                //if last row has non-empty cells => add another row to allow to add a part to a full column
-                var $this = $(this);
-                var $table = $this.closest("table");
-                var $lastTr = $table.find("tr:last");
-                if ($lastTr.find("td").not(":empty").length > 0) {
-                    var $lastTd = $lastTr.find("td:last");
-                    var newRowIndex = parseInt($lastTd.attr("data-row"), 10) + 1;
-                    var numCols = $lastTd.attr("data-column");
-                    var $newTr = $("<tr></tr>");
-                    for (var i = 1; i <= numCols; i++) {
-                        var $td = $("<td></td>").addClass("sf-cp-part-container").attr("data-row", newRowIndex).attr("data-column", i);
-                        $newTr.append($td);
-                    }
-                    $table.append($newTr);
-                    createDroppables($this.closest("table").find("tr:last").find("td"));
-                }
+    var setDraggingState = function (active) {
+        if (active) {
+            $(".sf-cp-column").addClass("sf-cp-dragging");
+        }
+        else {
+            $(".sf-cp-dragging").removeClass("sf-cp-dragging");
+            //as I clone parts it's not done automatically:
+            $(".ui-draggable-dragging").removeClass("ui-draggable-dragging");
+        }
+    }
 
-                $(".sf-cp-part-container").addClass("sf-cp-dragging");
-            },
-            stop: function (event, ui) { $(".sf-cp-part-container").removeClass("sf-cp-dragging"); }
+    var restoreDroppableSize = function ($droppable) {
+        $droppable.css({
+            width: "inherit",
+            height: "20px"
+        });
+    };
+
+    var updateRowAndColIndexes = function ($column) {
+        var partRowClass = "sf-cp-part-row";
+        var partColumnClass = "sf-cp-part-col";
+
+        var column = $column.attr("data-column");
+
+        $column.find(".sf-cp-part").each(function (index) {
+            var $part = $(this);
+            $part.find("." + partRowClass).val(index + 1);
+            $part.find("." + partColumnClass).val(column);
+        });
+    };
+
+    var createDraggables = function ($target) {
+        $target.draggable({
+            handle: ".sf-cp-part-header",
+            revert: "invalid",
+            start: function (event, ui) { setDraggingState(true); },
+            stop: function (event, ui) { setDraggingState(false); }
         });
     };
 
     var createDroppables = function ($target) {
         $target.droppable({
-            hoverClass: "ui-state-highlight",
+            hoverClass: "ui-state-highlight sf-cp-droppable-active",
             tolerance: "pointer",
+            over: function (event, ui) {
+                var $draggedContainer = ui.draggable.closest(".sf-cp-part-container");
+                $(this).css({
+                    width: $draggedContainer.width(),
+                    height: $draggedContainer.height()
+                });
+            },
+            out: function (event, ui) {
+                restoreDroppableSize($(this));
+            },
             drop: function (event, ui) {
                 var $dragged = ui.draggable;
+                
                 var $startContainer = $dragged.closest(".sf-cp-part-container");
+                var $targetPlaceholder = $(this); //droppable
 
-                var $targetContainer = $(this); //droppable
-                var $replaced = $targetContainer.find(".sf-cp-part").not($dragged);
+                var $targetCol = $targetPlaceholder.closest(".sf-cp-column");
+                var $originCol = $startContainer.closest(".sf-cp-column");
 
-                var startRow = $startContainer.attr("data-row");
-                var startColumn = $startContainer.attr("data-column");
-                var targetRow = $targetContainer.attr("data-row");
-                var targetColumn = $targetContainer.attr("data-column");
+                //update html (drag new position is only visual)
+                var $newDroppable = $("<div></div>").addClass("sf-cp-droppable");
+                var $clonedPart = $startContainer.clone();
+                $targetPlaceholder.after($newDroppable).after($clonedPart);
 
-                // if target container is the same as start container => restore position
-                if ((startRow == targetRow) && (startColumn == targetColumn)) {
-                    $(".sf-cp-part").css({ top: 0, left: 0 });
-                    $(".sf-cp-part-container").removeClass("sf-cp-dragging");
-                    return;
-                }
-
-                //swap row and col indexes in hidden fields
-                var partRowClass = "sf-cp-part-row";
-                var partColumnClass = "sf-cp-part-col";
-
-                $dragged.find("." + partRowClass).val(targetRow);
-                $dragged.find("." + partColumnClass).val(targetColumn);
-
-                if ($replaced.length > 0) {
-                    $replaced.find("." + partRowClass).val(startRow);
-                    $replaced.find("." + partColumnClass).val(startColumn);
-                }
-
-                //drag has been only visual, now update html 
-                var targetOldHtml = $targetContainer.html();
-                $targetContainer.html($startContainer.html());
-                $startContainer.html(targetOldHtml);
                 $(".sf-cp-part").css({ top: 0, left: 0 });
 
-                //update draggable and droppable
-                $(".sf-cp-part").draggable("destroy");
-                createDraggables();
+                //clear old elements
+                $startContainer.next(".sf-cp-droppable").remove();
+                $startContainer.html("").remove(); //empty before removing to force jquery ui clear current draggable bindings
 
-                var $droppables = $(".sf-cp-part-container");
-                $droppables.droppable("destroy");
-                createDroppables($droppables);
+                //set all row and col number for target column parts
+                updateRowAndColIndexes($targetCol);
 
-                $droppables.removeClass("sf-cp-dragging");
+                //set all row and col number for origin column parts if it's different from target column
+                if ($originCol.index() != $targetCol.index()) {
+                    updateRowAndColIndexes($originCol);
+                }
+
+                //create draggable and droppable of new elements
+                createDroppables($newDroppable);
+                createDraggables($clonedPart.find(".sf-cp-part"));
+
+                setDraggingState(false);
+                restoreDroppableSize($targetPlaceholder);
             }
         });
     };
@@ -89,7 +98,7 @@ SF.ControlPanel = (function () {
     });
 
     $(function () {
-        createDraggables();
-        createDroppables($(".sf-cp-part-container"));
+        createDraggables($(".sf-cp-part"));
+        createDroppables($(".sf-cp-droppable"));
     });
 })();

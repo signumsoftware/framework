@@ -1,13 +1,17 @@
-﻿.sf-cp-div-column
+﻿.sf-cp-column
 {
-    float: left;
     vertical-align: top;   
+    min-width: 100px;
 }
 .sf-cp-part-container
 {
-    padding: 10px;    
+    padding: 0 10px;    
     vertical-align: top;
     min-height: 30px;    
+}
+#sfCpContainer .sf-cp-part-container
+{
+    padding: 10px; 
 }
 .sf-cp-part
 {
@@ -19,9 +23,13 @@
     line-height: 20px;
     margin-bottom: 2px;     
 }
-#sfCpAdmin .sf-cp-part-header
+#sfCpAdminContainer .sf-cp-part-header
 {
-    cursor: move;    
+    /*cursor: move;    */
+}
+#sfCpAdminContainer .ui-draggable-dragging
+{
+    cursor: default !important;    
 }
 .sf-cp-part-header .sf-remove
 {
@@ -34,7 +42,16 @@
 }
 .sf-cp-dragging
 {
-    border: dotted 1px #bbb;    
+    border: dotted 1px #bbb;
+}
+.sf-cp-droppable
+{
+    height: 20px;
+}
+.sf-cp-droppable-active
+{
+    border: dashed #888 4px !important;
+    height: 50px;
 }
 .sf-cp-part .sf-repeater-element
 {
