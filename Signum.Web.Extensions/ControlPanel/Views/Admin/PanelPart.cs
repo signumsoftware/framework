@@ -93,7 +93,7 @@ WriteLiteral("\r\n        </div>\r\n        <div>\r\n            ");
 WriteLiteral("\r\n            ");
 
 
-       Write(Html.EmbeddedControl(tc, pp => pp.Content, ecs => ecs.ViewName = ControlPanelClient.PanelPartAdminViews[part.Content.GetType()]));
+       Write(Html.EmbeddedControl(tc, pp => pp.Content, ecs => ecs.ViewName = ControlPanelClient.PanelPartViews[part.Content.GetType()].Admin));
 
 WriteLiteral("\r\n        </div>\r\n        <div>\r\n            ");
 

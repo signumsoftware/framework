@@ -286,7 +286,6 @@
     <Compile Include="Profiler\TimeTracker.cs" />
     <Compile Include="ControlPanel\Controllers\ControlPanelController.cs" />
     <Compile Include="ControlPanel\ControlPanelClient.cs" />
-    <Compile Include="ControlPanel\PanelPartRenderer.cs" />
     <Compile Include="ControlPanel\Views\ControlPanel.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

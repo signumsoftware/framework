@@ -11,7 +11,7 @@
         @Html.TextBox(prefix + "Title", Model.Title, new { style = "display:none" })
     </div>
     <div>
-        @{ Html.RenderPartial(ControlPanelClient.PanelPartViews[Model.Content.GetType()], Model); }
+        @{ Html.RenderPartial(ControlPanelClient.PanelPartViews[Model.Content.GetType()].FrontEnd, Model); }
     </div>
     <div>
         @Html.Hidden(prefix + "Row", Model.Row, new { @class = "sf-cp-part-row"})

@@ -34,13 +34,6 @@ namespace Signum.Entities.ControlPanel
             set { Set(ref column, value, () => Column); }
         }
 
-        bool fill;
-        public bool Fill
-        {
-            get { return fill; }
-            set { Set(ref fill, value, () => Fill); }
-        }
-
         [ImplementedBy(typeof(UserQueryPartDN), typeof(CountSearchControlPartDN), typeof(LinkListPartDN))]
         IIdentifiable content;
         public IIdentifiable Content

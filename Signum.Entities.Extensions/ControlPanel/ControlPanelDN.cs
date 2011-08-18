@@ -71,7 +71,7 @@ namespace Signum.Entities.ControlPanel
                     if (part.Column > NumberOfColumns)
                         return Resources.ControlPanelDN_Part0IsInColumn1ButPanelHasOnly2Columns.Formato(part.Title, part.Column, NumberOfColumns);
 
-                    if (parts.Any(p => p != part && p.Row == part.Row && (p.Fill || p.Column == part.Column)))
+                    if (parts.Any(p => p != part && p.Row == part.Row && p.Column == part.Column))
                         return Resources.ControlPanelDN_Part0IsInColumn1WhichAlreadyHasOtherParts.Formato(part.Title, part.Column, part.Row);
                 }
             }
@@ -91,6 +91,11 @@ namespace Signum.Entities.ControlPanel
             }
 
             return base.PropertyValidation(pi);
+        }
+
+        public override string ToString()
+        {
+            return DisplayName;
         }
     }
 }

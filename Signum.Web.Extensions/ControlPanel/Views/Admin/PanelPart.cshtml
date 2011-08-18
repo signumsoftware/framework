@@ -13,7 +13,7 @@
         </div>
         <div>
             @Html.HiddenRuntimeInfo(tc, pp => pp.Content)
-            @Html.EmbeddedControl(tc, pp => pp.Content, ecs => ecs.ViewName = ControlPanelClient.PanelPartAdminViews[part.Content.GetType()])
+            @Html.EmbeddedControl(tc, pp => pp.Content, ecs => ecs.ViewName = ControlPanelClient.PanelPartViews[part.Content.GetType()].Admin)
         </div>
         <div>
             @Html.Hidden(tc.Compose("Row"), part.Row, new { @class = "sf-cp-part-row" })

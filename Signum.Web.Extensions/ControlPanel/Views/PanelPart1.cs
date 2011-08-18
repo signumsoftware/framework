@@ -87,7 +87,7 @@ WriteLiteral("\r\n        ");
 WriteLiteral("\r\n    </div>\r\n    <div>\r\n");
 
 
-           Html.RenderPartial(ControlPanelClient.PanelPartViews[Model.Content.GetType()], Model); 
+           Html.RenderPartial(ControlPanelClient.PanelPartViews[Model.Content.GetType()].FrontEnd, Model); 
 
 WriteLiteral("    </div>\r\n    <div>\r\n        ");
 

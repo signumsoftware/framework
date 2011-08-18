@@ -21,18 +21,23 @@ namespace Signum.Web.ControlPanel
         public static string AdminViewPrefix = "~/ControlPanel/Views/Admin/{0}.cshtml";
         public static string ViewPrefix = "~/ControlPanel/Views/{0}.cshtml";
 
-        public static Dictionary<Type, string> PanelPartViews = new Dictionary<Type, string>()
+        public struct PartViews
         {
-            {typeof(UserQueryPartDN), ViewPrefix.Formato("SearchControlPart") },
-            {typeof(CountSearchControlPartDN), ViewPrefix.Formato("CountSearchControlPart") },
-            {typeof(LinkListPartDN), ViewPrefix.Formato("LinkListPart") },
-        };
+            public PartViews(string frontEnd, string admin)
+            {
+                FrontEnd = frontEnd;
+                Admin = admin;
+            }
 
-        public static Dictionary<Type, string> PanelPartAdminViews = new Dictionary<Type, string>()
+            public string FrontEnd;
+            public string Admin;
+        }
+
+        public static Dictionary<Type, PartViews> PanelPartViews = new Dictionary<Type, PartViews>()
         {
-            {typeof(UserQueryPartDN), AdminViewPrefix.Formato("SearchControlPart") },
-            {typeof(CountSearchControlPartDN), AdminViewPrefix.Formato("CountSearchControlPart") },
-            {typeof(LinkListPartDN), AdminViewPrefix.Formato("LinkListPart") },
+            { typeof(UserQueryPartDN), new PartViews(ViewPrefix.Formato("SearchControlPart"), AdminViewPrefix.Formato("SearchControlPart")) },
+            { typeof(CountSearchControlPartDN), new PartViews(ViewPrefix.Formato("CountSearchControlPart"), AdminViewPrefix.Formato("CountSearchControlPart")) },
+            { typeof(LinkListPartDN), new PartViews(ViewPrefix.Formato("LinkListPart"), AdminViewPrefix.Formato("LinkListPart")) },
         };
 
         public static void Start()
@@ -46,23 +51,19 @@ namespace Signum.Web.ControlPanel
                 Navigator.AddSettings(new List<EntitySettings>
                 {
                     new EntitySettings<ControlPanelDN>(EntityType.Default) { PartialViewName = e => AdminViewPrefix.Formato("ControlPanelAdmin") },
-                    new EmbeddedEntitySettings<PanelPart>() { PartialViewName = e => AdminViewPrefix.Formato("PanelPart") },
+                    new EmbeddedEntitySettings<PanelPart>(),
                     
                     new EntitySettings<UserQueryPartDN>(EntityType.Default),
 
-                    new EntitySettings<CountSearchControlPartDN>(EntityType.Default) { PartialViewName = e => AdminViewPrefix.Formato("CountSearchControlPart") },
+                    new EntitySettings<CountSearchControlPartDN>(EntityType.Default),
                     new EmbeddedEntitySettings<CountUserQueryElement>() { PartialViewName = e => AdminViewPrefix.Formato("CountUserQueryElement") },
                     
-                    new EntitySettings<LinkListPartDN>(EntityType.Default) { PartialViewName = e => AdminViewPrefix.Formato("LinkListPart") },
+                    new EntitySettings<LinkListPartDN>(EntityType.Default),
                     new EmbeddedEntitySettings<LinkElement>() { PartialViewName = e => AdminViewPrefix.Formato("LinkElement") },
                 });
 
                 Constructor.ConstructorManager.Constructors.Add(
                     typeof(ControlPanelDN), () => new ControlPanelDN { Related = UserDN.Current.ToLite<IdentifiableEntity>() });
-
-
-                //Navigator.EntitySettings<ControlPanelDN>().MappingDefault.AsEntityMapping()
-                //    .SetProperty(cp => cp.Parts, new MListDictionaryMapping<PanelPart, IIdentifiable>(pp => pp.Content, "Content"));
 
                 ButtonBarEntityHelper.RegisterEntityButtons<ControlPanelDN>((controllerCtx, panel, viewName, prefix) => 
                 {

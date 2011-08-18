@@ -78,6 +78,7 @@ WriteLiteral("    <table id=\"sfCpAdminContainer\">\r\n        <tr>\r\n");
 
          for (int col = 1; col <= Model.NumberOfColumns; col++)
         { 
+            
 
 WriteLiteral("            <td class=\"sf-cp-column\" data-column=\"");
 
