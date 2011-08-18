@@ -411,4 +411,34 @@
   <data name="AttemptToModifyLockedEntity0" xml:space="preserve">
     <value>Se intentó modificar la entidad bloqueada {0}</value>
   </data>
+  <data name="AlertDN_Attended" xml:space="preserve">
+    <value>Asistió a</value>
+  </data>
+  <data name="AlertDN_Future" xml:space="preserve">
+    <value>Futuro</value>
+  </data>
+  <data name="AlertDN_NotAttended" xml:space="preserve">
+    <value>No asistió</value>
+  </data>
+  <data name="AlertQueries_Attended" xml:space="preserve">
+    <value>Asistió a</value>
+  </data>
+  <data name="AlertQueries_Future" xml:space="preserve">
+    <value>Futuro</value>
+  </data>
+  <data name="AlertQueries_NotAttended" xml:space="preserve">
+    <value>No asistió</value>
+  </data>
+  <data name="CollectionElementType" xml:space="preserve">
+    <value>Tipo de elemento de colección</value>
+  </data>
+  <data name="CollectionElementType_All" xml:space="preserve">
+    <value>Todos</value>
+  </data>
+  <data name="CollectionElementType_Any" xml:space="preserve">
+    <value>Cualquiera</value>
+  </data>
+  <data name="CollectionElementType_Element" xml:space="preserve">
+    <value>Elemento</value>
+  </data>
 </root>
