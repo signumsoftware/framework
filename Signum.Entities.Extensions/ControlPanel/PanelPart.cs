@@ -123,7 +123,7 @@ namespace Signum.Entities.ControlPanel
         }
 
         string link;
-        [StringLengthValidator(AllowNulls=false, Min=2)]
+        [URLValidator, NotNullValidator]
         public string Link
         {
             get { return link; }

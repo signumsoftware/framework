@@ -5,11 +5,9 @@
 @using (var tc = Html.TypeContext<LinkElement>())
 {
     tc.ValueFirst = true;
-
-    <div class="sf-field">
-        <div class="sf-value-container sf-value-inline">
-            @Html.ValueLine(tc, l => l.Label)
-            @Html.ValueLine(tc, l => l.Link)
-        </div>
-    </div>
+    using (Html.FieldInline())
+    {
+        @Html.ValueLine(tc, l => l.Label)
+        @Html.ValueLine(tc, l => l.Link)
+    }
 }
