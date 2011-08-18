@@ -422,10 +422,5 @@ namespace Signum.Entities
             return new MList<T>(collection); 
         }
 
-        //For Expression Trees only
-        public static T Element<T>(this IEnumerable<T> collection)
-        {
-            return default(T);
-        }
     }
 }
