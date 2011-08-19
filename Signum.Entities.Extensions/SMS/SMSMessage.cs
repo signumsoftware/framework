@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.ComponentModel;
 
 namespace Signum.Entities.SMS
 {
@@ -27,6 +28,7 @@ namespace Signum.Entities.SMS
 
     public enum SMSMessageOperations
     {
+        [Description("Create SMS")]
         Create,
         Send,
         UpdateStatus,
@@ -117,6 +119,11 @@ namespace Signum.Entities.SMS
         {
             get { return updatePackage; }
             set { Set(ref updatePackage, value, () => UpdatePackage); }
+        }
+
+        public override string ToString()
+        {
+            return MessageID;
         }
     }
 }

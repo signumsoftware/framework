@@ -15,6 +15,7 @@ using System.Web.UI;
 using System.IO;
 using System.Web.Routing;
 using Signum.Entities.SMS;
+using Signum.Web.Operations;
 #endregion
 
 
@@ -32,6 +33,17 @@ namespace Signum.Web.SMS
                 Navigator.AddSettings(new List<EntitySettings>
                 {
                     new EntitySettings<SMSMessageDN>(EntityType.Admin){ PartialViewName = e => ViewPrefix.Formato("SMSMessage")},
+                    new EntitySettings<SMSTemplateDN>(EntityType.Admin){ PartialViewName = e => ViewPrefix.Formato("SMSTemplate")},
+                });
+
+                OperationsClient.Manager.Settings.AddRange(new Dictionary<Enum, OperationSettings>
+                {
+                    {SMSMessageOperations.Create, new EntityOperationSettings
+                    {
+                        GroupInMenu = false,
+                        OnClick = ctx => new JsOperationExecutor(ctx.Options("CreateSMS", "SMS"))
+                            .ajax(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk),
+                    }},
                 });
             }
         }

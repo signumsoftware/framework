@@ -1144,7 +1144,7 @@
     <value>Plantilla</value>
   </data>
   <data name="SMSMessageOperations_Create" xml:space="preserve">
-    <value>Crear</value>
+    <value>Crear mensaje</value>
   </data>
   <data name="SMSMessageOperations_Send" xml:space="preserve">
     <value>Enviar</value>

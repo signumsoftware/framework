@@ -1,5 +1,17 @@
 ﻿
-.toochars
+.warningchars
 {
-    background-color: Red;   
+    color: orange;
+}
+
+.nomorechars
+{
+    color: red;
+    font-weight:bold;
+}
+
+
+.backgroundred
+{
+    background-color: #CC3333;
 }

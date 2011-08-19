@@ -488,6 +488,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>SMSMessage.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="SMS\Views\SMSTemplate1.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SMSTemplate.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="UserQueries\Controller\UserQueriesController.cs" />
     <Compile Include="UserQueries\UserQueriesClient.cs" />
     <Compile Include="UserQueries\UserQueriesHelper.cs" />
@@ -981,6 +986,10 @@
     <Content Include="SMS\Views\SMSMessage.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>SMSMessage.cs</LastGenOutput>
+    </Content>
+    <Content Include="SMS\Views\SMSTemplate.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>SMSTemplate1.cs</LastGenOutput>
     </Content>
     <None Include="UserQueries\Views\QueryColumn.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>

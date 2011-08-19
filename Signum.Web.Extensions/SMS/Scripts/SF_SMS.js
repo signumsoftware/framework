@@ -2,6 +2,8 @@
 
 SKI.User = (function () {
     var SMSMaxTextLength = 0;
+    var SMSWarningTextLength = 0;
+
     var normalCharacters = new Array();
     var doubleCharacters = new Array();
 
@@ -31,26 +33,35 @@ SKI.User = (function () {
             data: {},
             success: function (data) {
                 SMSMaxTextLength = data.smsLength;
+                SMSWarningTextLength = data.smsWarningLength;
                 normalCharacters = data.normalChar;
                 doubleCharacters = data.doubleChar;
+                $('#numberofchar').html(characterstoend('#Message'));
             }
         });
     };
 
     $(function () {
         LoadLists($('#charactersleft').attr("data-url"));
-        $('#numerocaracteres').html(characterstoend('#Message'));
     });
 
     $('textarea#Message').keyup(function () {
         var charscounted = characterstoend('#Message');
-        $('#numerocaracteres').html(characterstoend('#Message'));
-        if (charscounted > SMSMaxTextLength) {
-            $('textarea#Message').addClass('toochars');
+        $('#numberofchar').html(characterstoend('#Message'));
+
+        $('#charactersleft > p').removeClass();
+        $('#Message').removeClass();
+        
+        if (charscounted == 0) {
+            $('#charactersleft > p').addClass('nomorechars');
+        } else {
+            if (charscounted < SMSWarningTextLength) {
+                $('#charactersleft > p').addClass('warningchars'); backgroundred
+                $('#Message').addClass('backgroundred');
+            }
         }
+
     });
-
-
 
     return {
         characterstoend: characterstoend

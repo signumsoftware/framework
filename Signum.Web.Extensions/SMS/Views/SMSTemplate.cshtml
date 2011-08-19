@@ -5,15 +5,10 @@
 
 @Html.ScriptCss("~/SMS/Content/SMS.css")
 
-@using (var e = Html.TypeContext<SMSMessageDN>())
+@using (var e = Html.TypeContext<SMSTemplateDN>())
 {   
-    @Html.ValueLine(e, s => s.MessageID, vl =>
-    {
-        vl.Visible = !e.Value.IsNew;
-        vl.ReadOnly = true;
-    })
-    @Html.EntityLine(e, s => s.Template)
-    @Html.ValueLine(e, s => s.DestinationNumber, vl => vl.ReadOnly = !e.Value.IsNew)
+    @Html.ValueLine(e, s => s.Name)
+    @Html.ValueLine(e, s => s.Active)
     @Html.ValueLine(e, s => s.Message, vl =>
         {
             vl.ValueLineType = ValueLineType.TextArea;
@@ -27,16 +22,9 @@
     
     
     @Html.ValueLine(e, s => s.From)
-    
-    if (!e.Value.IsNew)
-    {
-        <fieldset>
-            <legend>SMS Status</legend>
-            @Html.ValueLine(e, s => s.State, vl => vl.ReadOnly = true)
-            @Html.ValueLine(e, s => s.SendState, vl => vl.ReadOnly = true)
-
-        </fieldset>
-    }
+    @Html.ValueLine(e, s => s.StartDate)
+    @Html.ValueLine(e, s => s.EndDate)
+   
 }
 
 @Html.ScriptsJs("~/SMS/scripts/SF_SMS.js")

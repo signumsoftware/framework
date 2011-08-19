@@ -46,12 +46,12 @@ namespace ASP
     using Signum.Web.SMS;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
-    [System.Web.WebPages.PageVirtualPathAttribute("~/SMS/Views/SMSMessage.cshtml")]
-    public class _Page_SMS_Views_SMSMessage_cshtml : System.Web.Mvc.WebViewPage<dynamic>
+    [System.Web.WebPages.PageVirtualPathAttribute("~/SMS/Views/SMSTemplate.cshtml")]
+    public class _Page_SMS_Views_SMSTemplate_cshtml : System.Web.Mvc.WebViewPage<dynamic>
     {
 
 
-        public _Page_SMS_Views_SMSMessage_cshtml()
+        public _Page_SMS_Views_SMSTemplate_cshtml()
         {
         }
         protected System.Web.HttpApplication ApplicationInstance
@@ -75,24 +75,16 @@ Write(Html.ScriptCss("~/SMS/Content/SMS.css"));
 WriteLiteral("\r\n\r\n");
 
 
- using (var e = Html.TypeContext<SMSMessageDN>())
+ using (var e = Html.TypeContext<SMSTemplateDN>())
 {   
     
-Write(Html.ValueLine(e, s => s.MessageID, vl =>
-    {
-        vl.Visible = !e.Value.IsNew;
-        vl.ReadOnly = true;
-    }));
+Write(Html.ValueLine(e, s => s.Name));
 
-      
+                                   
     
-Write(Html.EntityLine(e, s => s.Template));
+Write(Html.ValueLine(e, s => s.Active));
 
-                                        
-    
-Write(Html.ValueLine(e, s => s.DestinationNumber, vl => vl.ReadOnly = !e.Value.IsNew));
-
-                                                                                    
+                                     
     
 Write(Html.ValueLine(e, s => s.Message, vl =>
         {
@@ -120,23 +112,14 @@ Write(Html.ValueLine(e, s => s.From));
 
                                    
     
-    if (!e.Value.IsNew)
-    {
+Write(Html.ValueLine(e, s => s.StartDate));
 
-WriteLiteral("        <fieldset>\r\n            <legend>SMS Status</legend>\r\n            ");
+                                        
+    
+Write(Html.ValueLine(e, s => s.EndDate));
 
-
-       Write(Html.ValueLine(e, s => s.State, vl => vl.ReadOnly = true));
-
-WriteLiteral("\r\n            ");
-
-
-       Write(Html.ValueLine(e, s => s.SendState, vl => vl.ReadOnly = true));
-
-WriteLiteral("\r\n\r\n        </fieldset>\r\n");
-
-
-    }
+                                      
+   
 }
 
 WriteLiteral("\r\n");

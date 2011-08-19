@@ -471,4 +471,13 @@
   <data name="UserQueries_UserQueries" xml:space="preserve">
     <value>User Queries</value>
   </data>
+  <data name="SMS_DestinationNumber" xml:space="preserve">
+    <value>Destination number</value>
+  </data>
+  <data name="SMS_PhoneNumber" xml:space="preserve">
+    <value>Phone number</value>
+  </data>
+  <data name="SMS_WriteTheDestinationNumber" xml:space="preserve">
+    <value>Write the destination number</value>
+  </data>
 </root>

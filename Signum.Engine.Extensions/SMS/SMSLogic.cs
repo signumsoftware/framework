@@ -295,7 +295,7 @@ namespace Signum.Engine.SMS
                 {
                     var message = t.CreateSMSMessage();
                     message.DestinationNumber = args.GetArg<string>(0);
-                    return t.CreateSMSMessage();
+                    return message;
                 }
             }.Register();
 
