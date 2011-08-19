@@ -82,9 +82,9 @@ Write(Html.ValueLine(e, s => s.Name));
 
                                    
     
-Write(Html.ValueLine(e, s => s.Active));
+Write(Html.ValueLine(e, s => s.Active, vl => vl.ReadOnly = true));
 
-                                     
+                                                               
     
 Write(Html.ValueLine(e, s => s.Message, vl =>
         {

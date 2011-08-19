@@ -12,29 +12,29 @@
         vl.Visible = !e.Value.IsNew;
         vl.ReadOnly = true;
     })
-    @Html.EntityLine(e, s => s.Template)
+    @Html.EntityLine(e, s => s.Template, vl => vl.Remove = false)
     @Html.ValueLine(e, s => s.DestinationNumber, vl => vl.ReadOnly = !e.Value.IsNew)
     @Html.ValueLine(e, s => s.Message, vl =>
         {
             vl.ValueLineType = ValueLineType.TextArea;
             vl.ValueHtmlProps["cols"] = "30";
             vl.ValueHtmlProps["rows"] = "6";
+            vl.ReadOnly = (e.Value.State != SMSMessageState.Created);
         })
+    if(e.Value.State == SMSMessageState.Created) {
+        <div id="charactersleft" data-url="@(Url.Action<SMSController>(s => s.GetDictionaries()))" style="margin-left: 150px;">
+            <p>Quedan disponibles <span id="numberofchar"></span> carácteres</p>
+        </div>
+    }
     
-    <div id="charactersleft" data-url="@(Url.Action<SMSController>(s => s.GetDictionaries()))" style="margin-left: 150px;">
-        <p>Quedan disponibles <span id="numberofchar"></span> carácteres</p>
-    </div>
-    
-    
-    @Html.ValueLine(e, s => s.From)
-    
-    if (!e.Value.IsNew)
+    @Html.ValueLine(e, s => s.From, vl => vl.ReadOnly = (e.Value.State != SMSMessageState.Created))
+
+    if (e.Value.State == SMSMessageState.Sent)
     {
         <fieldset>
             <legend>SMS Status</legend>
-            @Html.ValueLine(e, s => s.State, vl => vl.ReadOnly = true)
             @Html.ValueLine(e, s => s.SendState, vl => vl.ReadOnly = true)
-
+            @Html.ValueLine(e, s => s.SendDate, vl => vl.ReadOnly = true)
         </fieldset>
     }
 }

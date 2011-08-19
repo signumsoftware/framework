@@ -52,7 +52,7 @@ SKI.User = (function () {
         $('#charactersleft > p').removeClass();
         $('#Message').removeClass();
         
-        if (charscounted == 0) {
+        if (charscounted <= 0) {
             $('#charactersleft > p').addClass('nomorechars');
         } else {
             if (charscounted < SMSWarningTextLength) {

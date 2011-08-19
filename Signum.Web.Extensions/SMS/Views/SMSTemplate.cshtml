@@ -8,7 +8,7 @@
 @using (var e = Html.TypeContext<SMSTemplateDN>())
 {   
     @Html.ValueLine(e, s => s.Name)
-    @Html.ValueLine(e, s => s.Active)
+    @Html.ValueLine(e, s => s.Active, vl => vl.ReadOnly = true)
     @Html.ValueLine(e, s => s.Message, vl =>
         {
             vl.ValueLineType = ValueLineType.TextArea;

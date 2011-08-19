@@ -123,7 +123,7 @@ namespace Signum.Entities.SMS
 
         public override string ToString()
         {
-            return MessageID;
+            return "SMS " + MessageID;
         }
     }
 }

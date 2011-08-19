@@ -86,9 +86,9 @@ Write(Html.ValueLine(e, s => s.MessageID, vl =>
 
       
     
-Write(Html.EntityLine(e, s => s.Template));
+Write(Html.EntityLine(e, s => s.Template, vl => vl.Remove = false));
 
-                                        
+                                                                 
     
 Write(Html.ValueLine(e, s => s.DestinationNumber, vl => vl.ReadOnly = !e.Value.IsNew));
 
@@ -99,41 +99,42 @@ Write(Html.ValueLine(e, s => s.Message, vl =>
             vl.ValueLineType = ValueLineType.TextArea;
             vl.ValueHtmlProps["cols"] = "30";
             vl.ValueHtmlProps["rows"] = "6";
+            vl.ReadOnly = (e.Value.State != SMSMessageState.Created);
         }));
 
           
+    if(e.Value.State == SMSMessageState.Created) {
+
+WriteLiteral("        <div id=\"charactersleft\" data-url=\"");
+
+
+                                       Write(Url.Action<SMSController>(s => s.GetDictionaries()));
+
+WriteLiteral("\" style=\"margin-left: 150px;\">\r\n            <p>Quedan disponibles <span id=\"numbe" +
+"rofchar\"></span> carácteres</p>\r\n        </div>\r\n");
+
+
+    }
     
-
-WriteLiteral("    <div id=\"charactersleft\" data-url=\"");
-
-
-                                   Write(Url.Action<SMSController>(s => s.GetDictionaries()));
-
-WriteLiteral("\" style=\"margin-left: 150px;\">\r\n        <p>Quedan disponibles <span id=\"numberofc" +
-"har\"></span> carácteres</p>\r\n    </div>\r\n");
-
-
     
-    
-    
-Write(Html.ValueLine(e, s => s.From));
+Write(Html.ValueLine(e, s => s.From, vl => vl.ReadOnly = (e.Value.State != SMSMessageState.Created)));
 
-                                   
-    
-    if (!e.Value.IsNew)
+                                                                                                   
+
+    if (e.Value.State == SMSMessageState.Sent)
     {
 
 WriteLiteral("        <fieldset>\r\n            <legend>SMS Status</legend>\r\n            ");
 
 
-       Write(Html.ValueLine(e, s => s.State, vl => vl.ReadOnly = true));
+       Write(Html.ValueLine(e, s => s.SendState, vl => vl.ReadOnly = true));
 
 WriteLiteral("\r\n            ");
 
 
-       Write(Html.ValueLine(e, s => s.SendState, vl => vl.ReadOnly = true));
+       Write(Html.ValueLine(e, s => s.SendDate, vl => vl.ReadOnly = true));
 
-WriteLiteral("\r\n\r\n        </fieldset>\r\n");
+WriteLiteral("\r\n        </fieldset>\r\n");
 
 
     }
