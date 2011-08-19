@@ -55,7 +55,7 @@ namespace Signum.Web
 
         public static JsInstruction OpenTypeChooser(JsValue<string> prefix, JsFunction onOptionChosen, string[] typeNames)
         {
-            return "SF.openChooser({0}, {1}, {{controllerUrl:'{2}', types:'{3}'}});".Formato(
+            return "SF.openTypeChooser({0}, {1}, {{controllerUrl:'{2}', types:'{3}'}});".Formato(
                     prefix.ToJS(),
                     onOptionChosen.ToJS(),
                     RouteHelper.New().SignumAction("GetTypeChooser"),
