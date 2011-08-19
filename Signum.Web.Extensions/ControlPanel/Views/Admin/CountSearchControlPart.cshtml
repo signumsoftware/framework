@@ -4,7 +4,5 @@
 
 @using (var tc = Html.TypeContext<CountSearchControlPartDN>())
 {
-    tc.ValueFirst = false;
-
     @Html.EntityRepeater(tc, p => p.UserQueries)
 }

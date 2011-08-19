@@ -80,12 +80,7 @@ Write(Html.ScriptsJs(Navigator.Manager.DefaultScripts().ToArray()));
 WriteLiteral("\r\n    ");
 
 
-Write(Html.ScriptsJs("~/ControlPanel/Scripts/control-panel.js"));
-
-WriteLiteral("\r\n    ");
-
-
-Write(Html.ScriptCss("~/ControlPanel/Content/control-panel.css"));
+Write(Html.ScriptCss("~/ControlPanel/Content/SF_ControlPanel.css"));
 
 WriteLiteral("\r\n");
 
@@ -112,56 +107,9 @@ WriteLiteral("\">");
 WriteLiteral("</a>\r\n    </h1>\r\n");
 
 
-    if (cp.Parts != null)
-    {
-        int rowNumber = cp.Parts.Max(p => p.Row);
+    Html.RenderPartial(ControlPanelClient.ViewPrefix.Formato("PanelParts"), cp);
 
-WriteLiteral("        <table id=\"sfCpContainer\">\r\n");
-
-
-             for (int i = 0; i < rowNumber; i++)
-            { 
-
-WriteLiteral("                <tr>\r\n");
-
-
-                 for (int j = 0; j < cp.NumberOfColumns; j++)
-                {
-                    PanelPart pp = cp.Parts.SingleOrDefault(p => p.Row == i + 1 && (p.Column == j + 1 || p.Fill));
-
-WriteLiteral("                    <td class=\"sf-cp-part-container\" ");
-
-
-                                                 Write((pp != null && pp.Fill) ? ("colspan=" + cp.NumberOfColumns) : "");
-
-WriteLiteral(">\r\n");
-
-
-                         if (pp != null)
-                        {
-                            Html.RenderPartial(ControlPanelClient.ViewPrefix.Formato("PanelPart"), pp);
-                        }
-
-WriteLiteral("                    </td>\r\n");
-
-
-                        if (pp != null && pp.Fill)
-                        {
-                            j = cp.NumberOfColumns;
-                        }
-                }
-
-WriteLiteral("                </tr>\r\n");
-
-
-            }
-
-WriteLiteral("        </table>\r\n");
-
-
-    }
-
-WriteLiteral("    <div class=\"clear\">\r\n    </div>   \r\n");
+WriteLiteral("    <div class=\"clear\"></div>   \r\n");
 
 
  } 

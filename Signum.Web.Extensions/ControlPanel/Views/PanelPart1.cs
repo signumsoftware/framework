@@ -68,18 +68,38 @@ namespace ASP
 
 
 
-WriteLiteral("\r\n<div class=\"ui-widget ui-widget-content ui-corner-all sf-cp-part\">\r\n    <div cl" +
-"ass=\"ui-widget-header ui-corner-all sf-cp-part-header\">");
+WriteLiteral("           \r\n");
 
 
-                                                             Write(Model.Title);
+   string prefix = "Parts_{0}_{1}_".Formato(Model.Row, Model.Column); 
 
-WriteLiteral("</div>\r\n    <div>\r\n");
+WriteLiteral("<div class=\"ui-widget ui-widget-content ui-corner-all sf-cp-part\">\r\n    <div clas" +
+"s=\"ui-widget-header ui-corner-all sf-cp-part-header\">\r\n        ");
 
 
-           Html.RenderPartial(ControlPanelClient.PanelPartViews[Model.Content.GetType()], Model); 
+   Write(Model.Title);
 
-WriteLiteral("    </div>\r\n</div>");
+WriteLiteral("\r\n        ");
+
+
+   Write(Html.TextBox(prefix + "Title", Model.Title, new { style = "display:none" }));
+
+WriteLiteral("\r\n    </div>\r\n    <div>\r\n");
+
+
+           Html.RenderPartial(ControlPanelClient.PanelPartViews[Model.Content.GetType()].FrontEnd, Model); 
+
+WriteLiteral("    </div>\r\n    <div>\r\n        ");
+
+
+   Write(Html.Hidden(prefix + "Row", Model.Row, new { @class = "sf-cp-part-row"}));
+
+WriteLiteral("\r\n        ");
+
+
+   Write(Html.Hidden(prefix + "Column", Model.Column, new { @class = "sf-cp-part-col"}));
+
+WriteLiteral("\r\n    </div>\r\n</div>");
 
 
         }

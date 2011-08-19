@@ -66,52 +66,47 @@ namespace ASP
 
 
 
-WriteLiteral(@"
-<script type=""text/javascript"">
-    var SF = SF || {};
-
-    SF.ControlPanel = (function () {
-        var toggleFillColumn = function (cbFillId, colInputId) {
-            if ($(""#"" + cbFillId + "":checked"").length > 0) {
-                $('#' + colInputId).val(1).attr('disabled', 'disabled');
-            }
-            else {
-                $('#' + colInputId).removeAttr('disabled');
-            }
-        };
-
-        return {
-            toggleFillColumn: toggleFillColumn
-        };
-    })();
-</script>
-
-");
+WriteLiteral("\r\n");
 
 
- using (var tc = Html.TypeContext<ControlPanelDN>())
-{
-    
-Write(Html.EntityLine(tc, cp => cp.Related, el => el.Create = false));
+Write(Html.ScriptsJs("~/ControlPanel/Scripts/SF_ControlPanel.js"));
 
-                                                                   
-    
-Write(Html.ValueLine(tc, cp => cp.DisplayName));
+WriteLiteral("\r\n");
 
-                                             
-    
-Write(Html.ValueLine(tc, cp => cp.HomePage));
 
-                                          
-    
-Write(Html.ValueLine(tc, cp => cp.NumberOfColumns));
+Write(Html.ScriptCss("~/ControlPanel/Content/SF_ControlPanel.css"));
+
+WriteLiteral("\r\n\r\n<div>\r\n");
+
+
+     using (var tc = Html.TypeContext<ControlPanelDN>())
+    {
+        
+   Write(Html.EntityLine(tc, cp => cp.Related, el => el.Create = false));
+
+                                                                       
+        
+   Write(Html.ValueLine(tc, cp => cp.DisplayName));
 
                                                  
-    
-Write(Html.EntityRepeater(tc, cp => cp.Parts));
+        
+   Write(Html.ValueLine(tc, cp => cp.HomePage));
 
-                                            
-}
+                                              
+        
+   Write(Html.ValueLine(tc, cp => cp.NumberOfColumns));
+
+                                                     
+    
+        Html.RenderPartial(ControlPanelClient.AdminViewPrefix.Formato("PanelParts"), tc.Value);
+
+WriteLiteral("        <div class=\"clear\"></div>   \r\n");
+
+
+    }
+
+WriteLiteral("</div>");
+
 
         }
     }

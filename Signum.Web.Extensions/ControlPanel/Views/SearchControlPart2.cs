@@ -78,7 +78,7 @@ WriteLiteral("\r\n");
 
 
    
-    UserQueryDN uq = ((UserQueryDN)Model.Content);
+    UserQueryDN uq = ((UserQueryPartDN)Model.Content).UserQuery;
     object queryName = Navigator.Manager.QuerySettings.Keys.First(k => QueryUtils.GetQueryUniqueKey(k) == uq.Query.Key);
     FindOptions fo = new FindOptions(queryName)
     {
