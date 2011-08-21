@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Collections.Concurrent;
+using System.Reflection;
 
 namespace Signum.Utilities
 {
@@ -102,8 +103,27 @@ namespace Signum.Utilities
             this.minimumType = type;
         }
 
-        public Polymorphic() : this(PolymorphicMerger.InheritanceAndInterfaces<T>, null)
+        public Polymorphic(PolymorphicMerger<T> merger): this(merger, GetDefaultType(typeof(T)))
         {
+        }
+
+        public Polymorphic() : this(PolymorphicMerger.Inheritance<T>, GetDefaultType(typeof(T)))
+        {
+        }
+
+        private static Type GetDefaultType(Type type)
+        {
+            if (!typeof(Delegate).IsAssignableFrom(type))
+                return null;
+
+            MethodInfo mi = type.GetMethod("Invoke", BindingFlags.Public | BindingFlags.Instance);
+
+            var param = mi.GetParameters().FirstOrDefault();
+
+            if (param == null)
+                return null;
+
+            return param.ParameterType;
         }
 
         public T GetValue(Type type)
@@ -170,7 +190,7 @@ namespace Signum.Utilities
         public IEnumerable<T> OverridenValues
         {
             get { return definitions.Values; }
-        }    
+        }
     }
 
     public static class PolymorphicExtensions
@@ -187,6 +207,111 @@ namespace Signum.Utilities
             polymorophic.Add(type, value);
 
             return value;
+        }
+
+
+        public static void Register<T, S>(this Polymorphic<Action<T>> polymorphic, Action<S> action) where S:T
+        {
+            polymorphic.Add(typeof(S), t => action((S)t));
+        }
+
+        public static void Register<T, S, P0>(this Polymorphic<Action<T, P0>> polymorphic, Action<S, P0> action) where S : T
+        {
+            polymorphic.Add(typeof(S), (t, p0) => action((S)t, p0));
+        }
+
+        public static void Register<T, S, P0, P1>(this Polymorphic<Action<T, P0, P1>> polymorphic, Action<S, P0, P1> action) where S : T
+        {
+            polymorphic.Add(typeof(S), (t, p0, p1) => action((S)t, p0, p1));
+        }
+
+        public static void Register<T, S, P0, P1, P2>(this Polymorphic<Action<T, P0, P1, P2>> polymorphic, Action<S, P0, P1, P2> action) where S : T
+        {
+            polymorphic.Add(typeof(S), (t, p0, p1, p2) => action((S)t, p0, p1, p2));
+        }
+
+        public static void Register<T, S, P0, P1, P2, P3>(this Polymorphic<Action<T, P0, P1, P2, P3>> polymorphic, Action<S, P0, P1, P2, P3> action) where S : T
+        {
+            polymorphic.Add(typeof(S), (t, p0, p1, p2, p3) => action((S)t, p0, p1, p2, p3));
+        }
+
+
+        public static void Register<T, S, R>(this Polymorphic<Func<T, R>> polymorphic, Func<S, R> func) where S : T
+        {
+            polymorphic.Add(typeof(S), t => func((S)t));
+        }
+
+        public static void Register<T, S, P0, R>(this Polymorphic<Func<T, P0, R>> polymorphic, Func<S, P0, R> func) where S : T
+        {
+            polymorphic.Add(typeof(S), (t, p0) => func((S)t, p0));
+        }
+
+        public static void Register<T, S, P0, P1, R>(this Polymorphic<Func<T, P0, P1, R>> polymorphic, Func<S, P0, P1, R> func) where S : T
+        {
+            polymorphic.Add(typeof(S), (t, p0, p1) => func((S)t, p0, p1));
+        }
+
+        public static void Register<T, S, P0, P1, P2, R>(this Polymorphic<Func<T, P0, P1, P2, R>> polymorphic, Func<S, P0, P1, P2, R> func) where S : T
+        {
+            polymorphic.Add(typeof(S), (t, p0, p1, p2) => func((S)t, p0, p1, p2));
+        }
+
+        public static void Register<T, S, P0, P1, P2, P3, R>(this Polymorphic<Func<T, P0, P1, P2, P3, R>> polymorphic, Func<S, P0, P1, P2, P3, R> func) where S : T
+        {
+            polymorphic.Add(typeof(S), (t, p0, p1, p2, p3) => func((S)t, p0, p1, p2, p3));
+        }
+
+
+        public static void Invoke<T>(this Polymorphic<Action<T>> polymorphic, T instance)
+        {
+            polymorphic.GetValue(instance.GetType())(instance);
+        }
+
+        public static void Invoke<T, P0>(this Polymorphic<Action<T, P0>> polymorphic, T instance, P0 p0)
+        {
+            polymorphic.GetValue(instance.GetType())(instance, p0);
+        }
+
+        public static void Invoke<T, P0, P1>(this Polymorphic<Action<T, P0, P1>> polymorphic, T instance, P0 p0, P1 p1)
+        {
+            polymorphic.GetValue(instance.GetType())(instance, p0, p1);
+        }
+
+        public static void Call<T, P0, P1, P2>(this Polymorphic<Action<T, P0, P1, P2>> polymorphic, T instance, P0 p0, P1 p1, P2 p2)
+        {
+            polymorphic.GetValue(instance.GetType())(instance, p0, p1, p2);
+        }
+
+        public static void Invoke<T, P0, P1, P2, P3>(this Polymorphic<Action<T, P0, P1, P2, P3>> polymorphic, T instance, P0 p0, P1 p1, P2 p2, P3 p3)
+        {
+            polymorphic.GetValue(instance.GetType())(instance, p0, p1, p2, p3);
+        }
+
+
+
+        public static R Invoke<T, R>(this Polymorphic<Func<T, R>> polymorphic, T instance)
+        {
+            return polymorphic.GetValue(instance.GetType())(instance);
+        }
+
+        public static R Invoke<T, P0, R>(this Polymorphic<Func<T, P0, R>> polymorphic, T instance, P0 p0)
+        {
+            return polymorphic.GetValue(instance.GetType())(instance, p0);
+        }
+
+        public static R Invoke<T, P0, P1, R>(this Polymorphic<Func<T, P0, P1, R>> polymorphic, T instance, P0 p0, P1 p1)
+        {
+            return polymorphic.GetValue(instance.GetType())(instance, p0, p1);
+        }
+
+        public static R Invoke<T, P0, P1, P2, R>(this Polymorphic<Func<T, P0, P1, P2, R>> polymorphic, T instance, P0 p0, P1 p1, P2 p2)
+        {
+            return polymorphic.GetValue(instance.GetType())(instance, p0, p1, p2);
+        }
+
+        public static R Invoke<T, P0, P1, P2, P3, R>(this Polymorphic<Func<T, P0, P1, P2, P3, R>> polymorphic, T instance, P0 p0, P1 p1, P2 p2, P3 p3)
+        {
+            return polymorphic.GetValue(instance.GetType())(instance, p0, p1, p2, p3);
         }
     }
 }

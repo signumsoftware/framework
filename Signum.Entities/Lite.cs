@@ -66,6 +66,11 @@ namespace Signum.Entities
             protected set { entityOrNull = value; }
         }
 
+        public bool IsNew
+        {
+            get { return entityOrNull != null && entityOrNull.IsNew; }
+        }
+
         public T Entity 
         {
             get
