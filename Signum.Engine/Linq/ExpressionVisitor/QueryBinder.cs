@@ -767,6 +767,18 @@ namespace Signum.Engine.Linq
             if (source == null)
                 return m;
 
+            if (source.NodeType == ExpressionType.Conditional)
+            {
+                var con = (ConditionalExpression)source;
+                return DispatchConditional(m, con.Test, con.IfTrue, con.IfFalse);
+            }
+
+            if (source.NodeType == ExpressionType.Coalesce)
+            {
+                var bin = (BinaryExpression)source;
+                return DispatchConditional(m, Expression.NotEqual(bin.Left, Expression.Constant(null, bin.Left.Type)), bin.Left, bin.Right); 
+            }
+
             if (source != null && ExpressionCleaner.HasExpansions(source.Type, m.Method) && source is FieldInitExpression) //new expansions discovered
             {
                 Dictionary<ParameterExpression, Expression> replacements = new Dictionary<ParameterExpression, Expression>();
@@ -817,9 +829,42 @@ namespace Signum.Engine.Linq
             return m;
         }
 
+        private ConditionalExpression DispatchConditional(MethodCallExpression m, Expression test, Expression ifTrue, Expression ifFalse)
+        {
+            if (m.Method.IsExtensionMethod())
+            {
+                return Expression.Condition(test,
+                    BindMethodCall(Expression.Call(m.Method, m.Arguments.Skip(1).PreAnd(ifTrue))),
+                    BindMethodCall(Expression.Call(m.Method, m.Arguments.Skip(1).PreAnd(ifFalse))));
+            }
+            else
+            {
+                return Expression.Condition(test,
+                    BindMethodCall(Expression.Call(ifTrue, m.Method, m.Arguments)),
+                    BindMethodCall(Expression.Call(ifFalse, m.Method, m.Arguments)));
+            }
+        }
+
         public Expression BindMemberAccess(MemberExpression m)
         {
             Expression source = m.Expression;
+
+            if (source.NodeType == ExpressionType.Conditional)
+            {
+                var con = (ConditionalExpression)source;
+                return Expression.Condition(con.Test,
+                    BindMemberAccess(Expression.MakeMemberAccess(con.IfTrue, m.Member)),
+                    BindMemberAccess(Expression.MakeMemberAccess(con.IfFalse, m.Member)));
+            }
+
+            if (source.NodeType == ExpressionType.Coalesce)
+            {
+                var bin = (BinaryExpression)source;
+                return Expression.Condition(
+                    Expression.NotEqual(bin.Left, Expression.Constant(null, bin.Left.Type)),
+                    BindMemberAccess(Expression.MakeMemberAccess(bin.Left, m.Member)),
+                    BindMemberAccess(Expression.MakeMemberAccess(bin.Right, m.Member)));
+            }
 
             if (source != null && m.Member is PropertyInfo && ExpressionCleaner.HasExpansions(source.Type, (PropertyInfo)m.Member) && source is FieldInitExpression) //new expansions discovered
             {

@@ -87,7 +87,22 @@ namespace Signum.Engine.Linq
             }
 
             if (expression is ImplementedByAllExpression)
+            {
                 return null;
+            }
+
+            if (expression.NodeType == ExpressionType.Conditional)
+            {
+                var con = (ConditionalExpression)expression;
+                return Condition(con.Test, GetToStr(con.IfTrue), GetToStr(con.IfFalse));
+            }
+
+            if (expression.NodeType == ExpressionType.Coalesce)
+            {
+                var bin = (BinaryExpression)expression;
+                return Condition(Expression.NotEqual(GetId(bin.Left).Nullify(), NullId),
+                    GetToStr(bin.Left), GetToStr(bin.Right));
+            }
 
             throw new NotSupportedException();
         }
@@ -108,9 +123,21 @@ namespace Signum.Engine.Linq
             if (expression is ImplementedByAllExpression)
                 return ((ImplementedByAllExpression)expression).Id;
 
+            if (expression.NodeType == ExpressionType.Conditional)
+            {
+                var con = (ConditionalExpression)expression;
+                return Condition(con.Test, GetId(con.IfTrue), GetId(con.IfFalse));
+            }
+
+            if (expression.NodeType == ExpressionType.Coalesce)
+            {
+                var bin = (BinaryExpression)expression;
+
+                return Condition(Expression.NotEqual(GetId(bin.Left).Nullify(), NullId), GetId(bin.Left), GetId(bin.Right));
+            }
+
             throw new NotSupportedException("Id for {0}".Formato(expression.NiceToString())); 
         }
-
 
         public Expression GetEntityType(Expression expression)
         {
@@ -132,9 +159,34 @@ namespace Signum.Engine.Linq
             }
 
             if (expression is ImplementedByAllExpression)
+            {
                 return ((ImplementedByAllExpression)expression).TypeId;
+            }
+
+            if (expression.NodeType == ExpressionType.Conditional)
+            {
+                var con = (ConditionalExpression)expression;
+                return Condition(con.Test, GetEntityType(con.IfTrue), GetEntityType(con.IfFalse));
+            }
+
+            if (expression.NodeType == ExpressionType.Coalesce)
+            {
+                var bin = (BinaryExpression)expression;
+                return Condition(Expression.NotEqual(GetId(bin.Left).Nullify(), NullId),
+                    GetEntityType(bin.Left), GetEntityType(bin.Right));
+            }
 
             return null;
+        }
+
+        private static Expression Condition(Expression test, Expression ifTrue, Expression ifFalse)
+        {
+            if (ifTrue.Type.IsNullable() || ifFalse.Type.IsNullable())
+            {
+                ifTrue = ifTrue.Nullify();
+                ifFalse = ifFalse.Nullify();
+            }
+            return Expression.Condition(test, ifTrue, ifFalse);
         }
 
         public Expression Coalesce(Type type, IEnumerable<Expression> exp)

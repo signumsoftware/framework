@@ -354,6 +354,52 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void SelectConditionalMember()
+        {
+            var list = (from l in Database.Query<LabelDN>()
+                        select (l.Owner == null ? l : l.Owner.Entity).Name).ToList();
+
+        }
+
+        [TestMethod]
+        public void SelectConditionalToLite()
+        {
+            var list = (from l in Database.Query<LabelDN>()
+                        select (l.Owner == null ? l : l.Owner.Entity).ToLite()).ToList();
+        }
+
+        [TestMethod]
+        public void SelectConditionalGetType()
+        {
+            var list = (from l in Database.Query<LabelDN>()
+                        select (l.Owner == null ? l : l.Owner.Entity).GetType()).ToList();
+        }
+
+        [TestMethod]
+        public void SelectCoallesceMember()
+        {
+            var list = (from l in Database.Query<LabelDN>()
+                        select (l.Owner.Entity ?? l ).Name).ToList();
+
+        }
+
+        [TestMethod]
+        public void SelectCoallesceToLite()
+        {
+            var list = (from l in Database.Query<LabelDN>()
+                        select (l.Owner.Entity ?? l ).ToLite()).ToList();
+
+        }
+
+        [TestMethod]
+        public void SelectCoallesceGetType()
+        {
+            var list = (from l in Database.Query<LabelDN>()
+                        select (l.Owner.Entity ?? l).GetType()).ToList();
+
+        }
+
+        [TestMethod]
         public void SelectUpCast()
         {
             var list = (from n in Database.Query<ArtistDN>()
