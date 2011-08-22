@@ -50,5 +50,37 @@ namespace Signum.Utilities
 
             }
         }
+
+        static int BytesToRead = sizeof(Int64);
+        public static bool StreamsAreEqual(Stream first, Stream second)
+        {
+            int iterations = (int)Math.Ceiling((double)first.Length / BytesToRead);
+
+            byte[] one = new byte[BytesToRead];
+            byte[] two = new byte[BytesToRead];
+
+            for (int i = 0; i < iterations; i++)
+            {
+                first.Read(one, 0, BytesToRead);
+                second.Read(two, 0, BytesToRead);
+
+                if (BitConverter.ToInt64(one, 0) != BitConverter.ToInt64(two, 0))
+                    return false;
+            }
+
+            return true;
+        }
+
+        public static bool FilesAreEqual(FileInfo first, FileInfo second)
+        {
+            if (first.Length != second.Length)
+                return false;
+
+            using (FileStream s1 = first.OpenRead())
+            using (FileStream s2 = second.OpenRead())
+            {
+                return StreamsAreEqual(s1, s2);
+            }
+        }
     }
 }
