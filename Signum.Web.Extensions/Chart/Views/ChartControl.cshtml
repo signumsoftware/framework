@@ -1,0 +1,41 @@
+﻿@using Signum.Web
+@using Signum.Web.Extensions.Properties
+@using Signum.Entities.DynamicQuery
+@using Signum.Engine.DynamicQuery
+@using System.Configuration
+@using Signum.Entities.Reflection
+@using Signum.Entities
+@using Signum.Entities.Chart
+@using Signum.Web.Chart
+@model TypeContext<ChartRequest>
+
+@{ 
+    FindOptions findOptions = Model.Value.FindOptions;
+    QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
+    var entityColumn = queryDescription.Columns.Single(a => a.IsEntity);
+    Type entitiesType = Reflector.ExtractLite(entityColumn.Type);
+    Implementations implementations = entityColumn.Implementations;
+    bool viewable = findOptions.View && (implementations != null || Navigator.IsViewable(entitiesType, true));
+}
+
+<div id="@Model.Compose("divSearchControl")" class="sf-search-control sf-chart-control">
+    @Html.Hidden(Model.Compose("sfWebQueryName"), Navigator.ResolveWebQueryName(Model.Value.FindOptions.QueryName), new { disabled = "disabled" })
+    @Html.Hidden(Model.Compose("sfView"), viewable, new { disabled = "disabled" })
+
+    <div id="@Model.Compose("divFilters")">
+        @{ 
+            ViewData[ViewDataKeys.FindOptions] = findOptions;
+            Html.RenderPartial(Navigator.Manager.FilterBuilderView); 
+        }
+    </div>
+
+    @{ Html.RenderPartial(ChartClient.ChartBuilderView); }
+    
+    <div class="sf-query-button-bar">
+        <button type="submit" class="sf-query-button sf-draw" data-icon="ui-icon-search" id="@Model.Compose("qbDraw")" onclick="">@Resources.Chart_Draw</button>
+    </div>
+    
+    <div class="clearall"></div>
+</div>
+
+@Html.ScriptsJs("~/Chart/Scripts/SF_Chart.js")

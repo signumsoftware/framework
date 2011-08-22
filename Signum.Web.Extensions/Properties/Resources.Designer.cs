@@ -169,6 +169,33 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Chart.
+        /// </summary>
+        public static string Chart_Chart {
+            get {
+                return ResourceManager.GetString("Chart_Chart", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Draw.
+        /// </summary>
+        public static string Chart_Draw {
+            get {
+                return ResourceManager.GetString("Chart_Draw", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Query {0} is not allowed.
+        /// </summary>
+        public static string Chart_Query0IsNotAllowed {
+            get {
+                return ResourceManager.GetString("Chart_Query0IsNotAllowed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Confirm new password.
         /// </summary>
         public static string ConfirmNewPassword {

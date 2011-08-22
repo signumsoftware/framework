@@ -247,6 +247,23 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
+    <Compile Include="Chart\ChartClient.cs" />
+    <Compile Include="Chart\Controllers\ChartController.cs" />
+    <Compile Include="Chart\Views\ChartBuilder.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ChartBuilder.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Chart\Views\ChartControl1.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ChartControl.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Chart\Views\ChartToken1.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ChartToken.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="ControllerFilters\GZipFilter.cs" />
     <Compile Include="ControlPanel\Views\Admin\PanelParts.cs">
       <AutoGen>True</AutoGen>
@@ -687,6 +704,7 @@
     </None>
     <Content Include="Calendar\Content\calendar.css" />
     <Content Include="Calendar\Scripts\calendar.js" />
+    <Content Include="Chart\Scripts\SF_Chart.js" />
     <Content Include="ControlPanel\Content\SF_ControlPanel.css" />
     <Content Include="ControlPanel\Scripts\SF_ControlPanel.js" />
     <Content Include="ControlPanel\Views\_ViewStart.cshtml">
@@ -752,6 +770,18 @@
     <Content Include="ControlPanel\Views\Admin\PanelParts.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>PanelParts.cs</LastGenOutput>
+    </Content>
+    <Content Include="Chart\Views\ChartControl.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>ChartControl1.cs</LastGenOutput>
+    </Content>
+    <Content Include="Chart\Views\ChartBuilder.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>ChartBuilder.cs</LastGenOutput>
+    </Content>
+    <Content Include="Chart\Views\ChartToken.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>ChartToken1.cs</LastGenOutput>
     </Content>
     <None Include="Profiler\Views\Times.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>

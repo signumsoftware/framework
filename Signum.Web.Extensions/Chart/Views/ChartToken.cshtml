@@ -1,0 +1,27 @@
+﻿@using Signum.Web
+@using Signum.Web.Extensions.Properties
+@using Signum.Entities.DynamicQuery
+@using Signum.Engine.DynamicQuery
+@using System.Configuration
+@using Signum.Entities.Reflection
+@using Signum.Entities
+@using Signum.Entities.Chart
+@model TypeContext<ChartTokenDN>
+
+@using (var tc = Html.TypeContext<ChartTokenDN>())
+{
+    <div class="sf-chart-token">
+        @using (Html.FieldInline())
+        {
+            <span class="sf-label-line">PropertyLabel</span>
+            @Html.ValueLine(tc, ct => ct.Aggregate)
+            @Html.QueryTokenCombo(tc.Value.Token, tc)
+
+            @Html.ValueLine(tc, ct => ct.DisplayName)
+            @Html.ValueLine(tc, ct => ct.Format)
+            @Html.ValueLine(tc, ct => ct.Unit)
+            @Html.ValueLine(tc, ct => ct.OrderType)
+            @Html.ValueLine(tc, ct => ct.OrderPriority)
+        }
+    </div>
+}

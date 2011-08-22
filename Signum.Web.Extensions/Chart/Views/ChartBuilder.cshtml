@@ -1,0 +1,24 @@
+﻿@using Signum.Web
+@using Signum.Web.Extensions.Properties
+@using Signum.Entities.DynamicQuery
+@using Signum.Engine.DynamicQuery
+@using System.Configuration
+@using Signum.Entities.Reflection
+@using Signum.Entities
+@using Signum.Entities.Chart
+@model TypeContext<ChartRequest>
+
+
+<div id="@Model.Compose("chartBuilder")">
+    <div id="@Model.Compose("chartType")">
+            
+    </div>
+    <div id="@Model.Compose("chartType")">
+        @{
+            @Html.EmbeddedControl(Model, cr => cr.FirstDimension)
+            @Html.EmbeddedControl(Model, cr => cr.SecondDimension)
+            @Html.EmbeddedControl(Model, cr => cr.FirstValue)
+            @Html.EmbeddedControl(Model, cr => cr.SecondValue)
+        }
+    </div>
+</div>
