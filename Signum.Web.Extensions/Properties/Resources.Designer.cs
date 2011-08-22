@@ -178,6 +178,24 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Create new part.
+        /// </summary>
+        public static string ControlPanel_CreateNewPart {
+            get {
+                return ResourceManager.GetString("ControlPanel_CreateNewPart", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You must save the panel before adding parts.
+        /// </summary>
+        public static string ControlPanel_YouMustSaveThePanelBeforeAddingParts {
+            get {
+                return ResourceManager.GetString("ControlPanel_YouMustSaveThePanelBeforeAddingParts", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Create.
         /// </summary>
         public static string Create {

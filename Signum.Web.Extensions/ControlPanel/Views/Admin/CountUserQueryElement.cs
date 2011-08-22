@@ -72,22 +72,22 @@ WriteLiteral("\r\n");
  using (var tc = Html.TypeContext<CountUserQueryElement>())
 {
     tc.ValueFirst = true;
+    using (Html.FieldInline())
+    {
+        
+   Write(Html.ValueLine(tc, cuq => cuq.Label));
 
+                                             
+        
+   Write(Html.EntityLine(tc, cuq => cuq.UserQuery, el => 
+        { 
+            el.Create = false;
+            el.Remove = false;
+            el.ViewMode = ViewMode.Navigate; 
+        }));
 
-WriteLiteral("    <div class=\"sf-field\">\r\n        <div class=\"sf-value-container sf-value-inlin" +
-"e\">\r\n            ");
-
-
-       Write(Html.ValueLine(tc, cuq => cuq.Label));
-
-WriteLiteral("\r\n            ");
-
-
-       Write(Html.EntityLine(tc, cuq => cuq.UserQuery, el => el.Create = false));
-
-WriteLiteral("\r\n        </div>\r\n    </div>\r\n");
-
-
+          
+    }
 }
 
         }

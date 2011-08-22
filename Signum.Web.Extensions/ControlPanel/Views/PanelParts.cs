@@ -41,17 +41,17 @@ namespace ASP
     using System.Web.UI.WebControls.WebParts;
     using System.Web.UI.HtmlControls;
     using System.Xml.Linq;
+    using Signum.Web.Properties;
     using Signum.Entities.ControlPanel;
     using Signum.Web.ControlPanel;
-    using Signum.Entities.Reports;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
-    [System.Web.WebPages.PageVirtualPathAttribute("~/ControlPanel/Views/Admin/PanelPart.cshtml")]
-    public class _Page_ControlPanel_Views_Admin_PanelPart_cshtml : System.Web.Mvc.WebViewPage<dynamic>
+    [System.Web.WebPages.PageVirtualPathAttribute("~/ControlPanel/Views/PanelParts.cshtml")]
+    public class _Page_ControlPanel_Views_PanelParts_cshtml : System.Web.Mvc.WebViewPage<ControlPanelDN>
     {
 
 
-        public _Page_ControlPanel_Views_Admin_PanelPart_cshtml()
+        public _Page_ControlPanel_Views_PanelParts_cshtml()
         {
         }
         protected System.Web.HttpApplication ApplicationInstance
@@ -66,49 +66,54 @@ namespace ASP
 
 
 
-WriteLiteral("\r\n");
 
 
- using (var tc = Html.TypeContext<PanelPart>())
+
+ if (!Model.Parts.IsNullOrEmpty())
 {
-    
-Write(Html.HiddenRuntimeInfo(tc));
+    int rowNumber = Model.Parts.Max(p => p.Row);
 
-                               
-    var part = tc.Value;
-
-WriteLiteral(@"    <div class=""ui-widget ui-widget-content ui-corner-all sf-cp-part"">
-        <div class=""ui-widget-header ui-corner-all sf-cp-part-header"">
-            <button class=""sf-line-button sf-remove"" data-icon=""ui-icon-circle-close"" data-text=""false""></button>
-            ");
+WriteLiteral("    <table id=\"sfCpContainer\">\r\n        <tr>\r\n");
 
 
-       Write(Html.ValueLine(tc, pp => pp.Title, vl => vl.LabelVisible = false));
+             for (int col = 1; col <= Model.NumberOfColumns; col++)
+            { 
 
-WriteLiteral("\r\n        </div>\r\n        <div>\r\n            ");
-
-
-       Write(Html.HiddenRuntimeInfo(tc, pp => pp.Content));
-
-WriteLiteral("\r\n            ");
+WriteLiteral("                <td class=\"sf-cp-column\" data-column=\"");
 
 
-       Write(Html.EmbeddedControl(tc, pp => pp.Content, ecs => ecs.ViewName = ControlPanelClient.PanelPartViews[part.Content.GetType()].Admin));
+                                                 Write(col);
 
-WriteLiteral("\r\n        </div>\r\n        <div>\r\n            ");
-
-
-       Write(Html.Hidden(tc.Compose("Row"), part.Row, new { @class = "sf-cp-part-row" }));
-
-WriteLiteral("\r\n            ");
+WriteLiteral("\">\r\n");
 
 
-       Write(Html.Hidden(tc.Compose("Column"), part.Column, new { @class = "sf-cp-part-col" }));
+                     for (int row = 1; row <= rowNumber; row++)
+                    {
+                        PanelPart pp = Model.Parts.SingleOrDefault(p => p.Row == row && p.Column == col);
+                        if (pp != null)
+                        {
 
-WriteLiteral("\r\n        </div>\r\n    </div>\r\n");
+WriteLiteral("                            <div class=\"sf-cp-part-container\">\r\n");
+
+
+                                   Html.RenderPartial(ControlPanelClient.ViewPrefix.Formato("PanelPart"), pp);    
+
+WriteLiteral("                            </div>\r\n");
+
+
+                        }
+                    }
+
+WriteLiteral("                </td>\r\n");
+
+
+            }
+
+WriteLiteral("        </tr>\r\n    </table>\r\n");
 
 
 }
+
 
         }
     }

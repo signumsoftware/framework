@@ -41,17 +41,17 @@ namespace ASP
     using System.Web.UI.WebControls.WebParts;
     using System.Web.UI.HtmlControls;
     using System.Xml.Linq;
+    using Signum.Web.Properties;
     using Signum.Entities.ControlPanel;
     using Signum.Web.ControlPanel;
-    using Signum.Entities.Reports;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
-    [System.Web.WebPages.PageVirtualPathAttribute("~/ControlPanel/Views/Admin/PanelPart.cshtml")]
-    public class _Page_ControlPanel_Views_Admin_PanelPart_cshtml : System.Web.Mvc.WebViewPage<dynamic>
+    [System.Web.WebPages.PageVirtualPathAttribute("~/ControlPanel/Views/Admin/PanelParts.cshtml")]
+    public class _Page_ControlPanel_Views_Admin_PanelParts_cshtml : System.Web.Mvc.WebViewPage<ControlPanelDN>
     {
 
 
-        public _Page_ControlPanel_Views_Admin_PanelPart_cshtml()
+        public _Page_ControlPanel_Views_Admin_PanelParts_cshtml()
         {
         }
         protected System.Web.HttpApplication ApplicationInstance
@@ -66,49 +66,62 @@ namespace ASP
 
 
 
-WriteLiteral("\r\n");
 
 
- using (var tc = Html.TypeContext<PanelPart>())
+
+ if (!Model.Parts.IsNullOrEmpty())
 {
-    
-Write(Html.HiddenRuntimeInfo(tc));
+    int rowNumber = Model.Parts.Max(p => p.Row);
+
+WriteLiteral("    <table id=\"sfCpAdminContainer\">\r\n        <tr>\r\n");
+
+
+         for (int col = 1; col <= Model.NumberOfColumns; col++)
+        { 
+            
+
+WriteLiteral("            <td class=\"sf-cp-column\" data-column=\"");
+
+
+                                             Write(col);
+
+WriteLiteral("\">\r\n                <div class=\"sf-cp-droppable\"></div>\r\n");
+
+
+                 for (int row = 1; row <= rowNumber; row++)
+                {
+                    PanelPart pp = Model.Parts.SingleOrDefault(p => p.Row == row && p.Column == col);
+                    if (pp != null)
+                    {
+
+WriteLiteral("                        <div class=\"sf-cp-part-container\">\r\n");
+
 
                                
-    var part = tc.Value;
+                                var ppTc = new TypeContext<ControlPanelDN>(Model, "").TypeElementContext(p => p.Parts).Where(pTc => pTc.Value == pp).First();
+                                Html.RenderPartial(ControlPanelClient.AdminViewPrefix.Formato("PanelPart"), ppTc);    
+                            
 
-WriteLiteral(@"    <div class=""ui-widget ui-widget-content ui-corner-all sf-cp-part"">
-        <div class=""ui-widget-header ui-corner-all sf-cp-part-header"">
-            <button class=""sf-line-button sf-remove"" data-icon=""ui-icon-circle-close"" data-text=""false""></button>
-            ");
-
-
-       Write(Html.ValueLine(tc, pp => pp.Title, vl => vl.LabelVisible = false));
-
-WriteLiteral("\r\n        </div>\r\n        <div>\r\n            ");
+WriteLiteral("                        </div>\r\n");
 
 
-       Write(Html.HiddenRuntimeInfo(tc, pp => pp.Content));
 
-WriteLiteral("\r\n            ");
-
-
-       Write(Html.EmbeddedControl(tc, pp => pp.Content, ecs => ecs.ViewName = ControlPanelClient.PanelPartViews[part.Content.GetType()].Admin));
-
-WriteLiteral("\r\n        </div>\r\n        <div>\r\n            ");
+WriteLiteral("                        <div class=\"sf-cp-droppable\"></div>\r\n");
 
 
-       Write(Html.Hidden(tc.Compose("Row"), part.Row, new { @class = "sf-cp-part-row" }));
+                    }
+                }
 
-WriteLiteral("\r\n            ");
+WriteLiteral("            </td>\r\n");
 
 
-       Write(Html.Hidden(tc.Compose("Column"), part.Column, new { @class = "sf-cp-part-col" }));
+        }
 
-WriteLiteral("\r\n        </div>\r\n    </div>\r\n");
+WriteLiteral("        </tr>\r\n    </table>\r\n");
 
 
 }
+
 
         }
     }

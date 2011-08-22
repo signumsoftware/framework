@@ -34,19 +34,29 @@ namespace Signum.Entities.ControlPanel
             set { Set(ref column, value, () => Column); }
         }
 
-        bool fill;
-        public bool Fill
-        {
-            get { return fill; }
-            set { Set(ref fill, value, () => Fill); }
-        }
-
-        [ImplementedBy(typeof(UserQueryDN), typeof(CountSearchControlPartDN), typeof(LinkListPartDN))]
+        [ImplementedBy(typeof(UserQueryPartDN), typeof(CountSearchControlPartDN), typeof(LinkListPartDN))]
         IIdentifiable content;
         public IIdentifiable Content
         {
             get { return content; }
             set { Set(ref content, value, () => Content); }
+        }
+    }
+
+    [Serializable]
+    public class UserQueryPartDN : Entity
+    {
+        UserQueryDN userQuery;
+        [NotNullValidator]
+        public UserQueryDN UserQuery
+        {
+            get { return userQuery; }
+            set { Set(ref userQuery, value, () => UserQuery); }
+        }
+
+        public override string ToString()
+        {
+            return userQuery.TryCC(uq => uq.DisplayName);
         }
     }
 
@@ -62,7 +72,7 @@ namespace Signum.Entities.ControlPanel
 
         public override string ToString()
         {
-            return UserQueries.ToString(uq => uq.Label, ", ");
+            return "{0} {1}".Formato(userQueries.Count, typeof(UserQueryDN).NicePluralName());
         }
     }
 
@@ -97,7 +107,7 @@ namespace Signum.Entities.ControlPanel
 
         public override string ToString()
         {
-            return Links.ToString(uq => uq.Label, ", ");
+            return "{0} {1}".Formato(links.Count, typeof(LinkElement).NicePluralName());
         }
     }
 
@@ -113,7 +123,7 @@ namespace Signum.Entities.ControlPanel
         }
 
         string link;
-        [StringLengthValidator(AllowNulls=false, Min=2)]
+        [URLValidator, NotNullValidator]
         public string Link
         {
             get { return link; }

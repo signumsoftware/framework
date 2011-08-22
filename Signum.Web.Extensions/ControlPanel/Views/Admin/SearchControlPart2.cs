@@ -41,17 +41,20 @@ namespace ASP
     using System.Web.UI.WebControls.WebParts;
     using System.Web.UI.HtmlControls;
     using System.Xml.Linq;
+    using Signum.Web.Properties;
     using Signum.Entities.ControlPanel;
     using Signum.Web.ControlPanel;
+    using Signum.Entities.DynamicQuery;
     using Signum.Entities.Reports;
+    using Signum.Web.UserQueries;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
-    [System.Web.WebPages.PageVirtualPathAttribute("~/ControlPanel/Views/Admin/PanelPart.cshtml")]
-    public class _Page_ControlPanel_Views_Admin_PanelPart_cshtml : System.Web.Mvc.WebViewPage<dynamic>
+    [System.Web.WebPages.PageVirtualPathAttribute("~/ControlPanel/Views/Admin/SearchControlPart.cshtml")]
+    public class _Page_ControlPanel_Views_Admin_SearchControlPart_cshtml : System.Web.Mvc.WebViewPage<dynamic>
     {
 
 
-        public _Page_ControlPanel_Views_Admin_PanelPart_cshtml()
+        public _Page_ControlPanel_Views_Admin_SearchControlPart_cshtml()
         {
         }
         protected System.Web.HttpApplication ApplicationInstance
@@ -66,48 +69,19 @@ namespace ASP
 
 
 
+
+
+
+
 WriteLiteral("\r\n");
 
 
- using (var tc = Html.TypeContext<PanelPart>())
+ using(var tc = Html.TypeContext<UserQueryPartDN>())
 {
     
-Write(Html.HiddenRuntimeInfo(tc));
+Write(Html.EntityLine(tc, pp => pp.UserQuery, el => el.Create = false));
 
-                               
-    var part = tc.Value;
-
-WriteLiteral(@"    <div class=""ui-widget ui-widget-content ui-corner-all sf-cp-part"">
-        <div class=""ui-widget-header ui-corner-all sf-cp-part-header"">
-            <button class=""sf-line-button sf-remove"" data-icon=""ui-icon-circle-close"" data-text=""false""></button>
-            ");
-
-
-       Write(Html.ValueLine(tc, pp => pp.Title, vl => vl.LabelVisible = false));
-
-WriteLiteral("\r\n        </div>\r\n        <div>\r\n            ");
-
-
-       Write(Html.HiddenRuntimeInfo(tc, pp => pp.Content));
-
-WriteLiteral("\r\n            ");
-
-
-       Write(Html.EmbeddedControl(tc, pp => pp.Content, ecs => ecs.ViewName = ControlPanelClient.PanelPartViews[part.Content.GetType()].Admin));
-
-WriteLiteral("\r\n        </div>\r\n        <div>\r\n            ");
-
-
-       Write(Html.Hidden(tc.Compose("Row"), part.Row, new { @class = "sf-cp-part-row" }));
-
-WriteLiteral("\r\n            ");
-
-
-       Write(Html.Hidden(tc.Compose("Column"), part.Column, new { @class = "sf-cp-part-col" }));
-
-WriteLiteral("\r\n        </div>\r\n    </div>\r\n");
-
-
+                                                                     
 }
 
         }

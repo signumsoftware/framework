@@ -82,7 +82,6 @@ namespace Signum.Engine.ControlPanel
             EntityGroupLogic.Register<LinkListPartDN>(newEntityGroupKey,
                  uq => Database.Query<ControlPanelDN>().WhereInGroup(newEntityGroupKey).Any(cp => cp.ContainsContent(uq)),
                  uq => Database.Query<ControlPanelDN>().WhereIsApplicable(newEntityGroupKey).Any(cp => cp.ContainsContent(uq)));
-
         }
 
         public static void RegisterRoleEntityGroup(SchemaBuilder sb, Enum newEntityGroupKey)
@@ -100,8 +99,6 @@ namespace Signum.Engine.ControlPanel
             EntityGroupLogic.Register<LinkListPartDN>(newEntityGroupKey,
                  uq => Database.Query<ControlPanelDN>().WhereInGroup(newEntityGroupKey).Any(cp => cp.ContainsContent(uq)),
                  uq => Database.Query<ControlPanelDN>().WhereIsApplicable(newEntityGroupKey).Any(cp => cp.ContainsContent(uq)));
-
-
         }
     }
 }

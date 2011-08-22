@@ -77,7 +77,7 @@ WriteLiteral("\r\n");
 
    var linkList = ((LinkListPartDN)Model.Content).Links; 
 
-WriteLiteral("<ul>\r\n");
+WriteLiteral("<ul class=\"sf-cp-link-list\">\r\n");
 
 
      foreach (LinkElement link in linkList)

@@ -480,4 +480,10 @@
   <data name="SMS_WriteTheDestinationNumber" xml:space="preserve">
     <value>Write the destination number:</value>
   </data>
+  <data name="ControlPanel_CreateNewPart" xml:space="preserve">
+    <value>Create new part</value>
+  </data>
+  <data name="ControlPanel_YouMustSaveThePanelBeforeAddingParts" xml:space="preserve">
+    <value>You must save the panel before adding parts</value>
+  </data>
 </root>
