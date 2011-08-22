@@ -111,7 +111,7 @@ WriteLiteral("        <div id=\"charactersleft\" data-url=\"");
                                        Write(Url.Action<SMSController>(s => s.GetDictionaries()));
 
 WriteLiteral("\" style=\"margin-left: 150px;\">\r\n            <p>Quedan disponibles <span id=\"numbe" +
-"rofchar\"></span> carácteres</p>\r\n        </div>\r\n");
+"rofchar\"></span> caracteres</p>\r\n        </div>\r\n");
 
 
     }

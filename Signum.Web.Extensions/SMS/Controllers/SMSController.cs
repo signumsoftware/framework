@@ -44,9 +44,14 @@ namespace Signum.Web.SMS
         {
             var template = this.ExtractEntity<SMSTemplateDN>("");
 
-            ValueLineBoxModel model = new ValueLineBoxModel(template, ValueLineBoxType.String, Resources.SMS_WriteTheDestinationNumber, Resources.SMS_PhoneNumber);
+            ValueLineBoxModel model = new ValueLineBoxModel(template, ValueLineBoxType.String, Resources.SMS_PhoneNumber, Resources.SMS_WriteTheDestinationNumber);
 
-            ViewData[ViewDataKeys.OnOk] = JsValidator.EntityIsValid(prefix,
+            ViewData[ViewDataKeys.OnOk] = JsValidator.EntityIsValid(
+                new JsValidatorOptions 
+                { 
+                    Prefix = prefix,
+                    ControllerUrl = Url.Action<SMSController>(sc => sc.CreateSMSValidate(prefix))
+                },
                 new JsFunction() 
                 {
                     Js.Submit(Url.Action<SMSController>(sc => sc.CreateSMSOnOk(prefix)),
@@ -61,10 +66,38 @@ namespace Signum.Web.SMS
         }
 
         [HttpPost]
+        public ActionResult CreateSMSValidate(string prefix)
+        {
+            var ctx = this.ExtractEntity<ValueLineBoxModel>(prefix).ApplyChanges(this.ControllerContext, prefix, true).ValidateGlobal();
+            
+            if (ctx.GlobalErrors.Any())
+            {
+                ModelState.FromContext(ctx);
+                return JsonAction.ModelState(ModelState);
+            }
+            
+            var destinationNumber = ctx.Value.StringValue;
+            if (!TelephoneValidatorAttribute.TelephoneRegex.IsMatch(destinationNumber))
+            {
+                ModelState.AddModelError(prefix, "Telephone is not valid");
+                return JsonAction.ModelState(ModelState);
+            }
+
+            if (ctx.GlobalErrors.Any())
+            {
+                ModelState.FromContext(ctx);
+            }
+            
+            return JsonAction.ModelState(ModelState);
+        }
+
+        [HttpPost]
         public ActionResult CreateSMSOnOk(string prefix)
         {
+            var ctx = this.ExtractEntity<ValueLineBoxModel>(prefix).ApplyChanges(this.ControllerContext, prefix, true);
+            var destinationNumber = ctx.Value.StringValue;
+
             var template = this.ExtractEntity<SMSTemplateDN>("");
-            var destinationNumber = this.ExtractEntity<ValueLineBoxModel>(prefix).ApplyChanges(this.ControllerContext, prefix, true).Value.StringValue;
 
             var sms = template.ToLite().ConstructFromLite<SMSMessageDN>(SMSMessageOperations.Create, destinationNumber).Save();
 

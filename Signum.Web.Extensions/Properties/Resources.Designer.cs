@@ -862,7 +862,7 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Destination number.
+        ///   Looks up a localized string similar to New SMS.
         /// </summary>
         public static string SMS_DestinationNumber {
             get {
@@ -880,7 +880,7 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Write the destination number.
+        ///   Looks up a localized string similar to Write the destination number:.
         /// </summary>
         public static string SMS_WriteTheDestinationNumber {
             get {

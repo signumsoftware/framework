@@ -91,7 +91,7 @@ namespace Signum.Entities.SMS
 
         [NotNullable]
         string destinationNumber;
-        [StringLengthValidator(AllowNulls = false)]
+        [StringLengthValidator(AllowNulls = false, Min = 9, Max = 20), TelephoneValidator]
         public string DestinationNumber
         {
             get { return destinationNumber; }

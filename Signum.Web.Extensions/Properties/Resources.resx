@@ -472,12 +472,12 @@
     <value>User Queries</value>
   </data>
   <data name="SMS_DestinationNumber" xml:space="preserve">
-    <value>Destination number</value>
+    <value>New SMS</value>
   </data>
   <data name="SMS_PhoneNumber" xml:space="preserve">
     <value>Phone number</value>
   </data>
   <data name="SMS_WriteTheDestinationNumber" xml:space="preserve">
-    <value>Write the destination number</value>
+    <value>Write the destination number:</value>
   </data>
 </root>
