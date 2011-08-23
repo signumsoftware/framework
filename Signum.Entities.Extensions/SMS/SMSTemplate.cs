@@ -207,13 +207,13 @@ namespace Signum.Entities.SMS
             int count = text.Length;
             foreach (var l in text.ToCharArray())
             {
-                if (!SMSCharacters.NormalCharacters.ContainsKey(l))
+                if (!SMSCharacters.NormalCharacters.ContainsKey(l)) 
                 {
-                    if (SMSCharacters.DoubleCharacters.ContainsKey(l))
+                    if (SMSCharacters.DoubleCharacters.ContainsKey(l)) 
                         count += 1;
                     else
                     {
-                        maxLength = 60;
+                        maxLength = 60;  
                         count = text.Length;
                         break;
                     }

@@ -140,7 +140,7 @@
     <Compile Include="Scheduler\Task.cs" />
     <Compile Include="SMS\ISmsServer.cs" />
     <Compile Include="SMS\SMSMessage.cs" />
-    <Compile Include="SMS\SMSMessageTemplate.cs" />
+    <Compile Include="SMS\SMSTemplate.cs" />
     <Compile Include="SMS\SMSPackages.cs" />
   </ItemGroup>
   <ItemGroup>
