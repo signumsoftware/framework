@@ -88,10 +88,15 @@ namespace Signum.Web
 
         public static MvcHtmlString EnumComboBox(this HtmlHelper helper, ValueLine valueLine)
         {
-            Enum value = (Enum)valueLine.UntypedValue;
+            Enum value = valueLine.UntypedValue as Enum;
 
             if (valueLine.ReadOnly)
-                return helper.Span(valueLine.ControlID, value != null ? value.NiceToString() : "", "sf-value-line");
+            {
+                MvcHtmlString result = MvcHtmlString.Empty;
+                if (valueLine.WriteHiddenOnReadonly)
+                    result = result.Concat(helper.Hidden(valueLine.ControlID, valueLine.UntypedValue.ToString()));
+                return result.Concat(helper.Span("", value != null ? value.NiceToString() : valueLine.UntypedValue.TryToString(), "sf-value-line"));
+            }
 
             StringBuilder sb = new StringBuilder();
             List<SelectListItem> items = valueLine.EnumComboItems;
@@ -134,7 +139,12 @@ namespace Signum.Web
                 value = value.Value.ToUserInterface();
 
             if (valueLine.ReadOnly)
-                return helper.Span(valueLine.ControlID, value.TryToString(valueLine.Format), "sf-value-line");
+            {
+                MvcHtmlString result = MvcHtmlString.Empty;
+                if (valueLine.WriteHiddenOnReadonly)
+                    result = result.Concat(helper.Hidden(valueLine.ControlID, value.TryToString(valueLine.Format)));
+                return result.Concat(helper.Span("", value.TryToString(valueLine.Format), "sf-value-line"));
+            }
 
             valueLine.ValueHtmlProps.AddCssClass("maskedEdit");
 
@@ -202,7 +212,12 @@ namespace Signum.Web
                            valueLine.UntypedValue.TryToString() ?? "";
 
             if (valueLine.ReadOnly)
-                return helper.Span(valueLine.ControlID, value, "sf-value-line");
+            {
+                MvcHtmlString result = MvcHtmlString.Empty;
+                if (valueLine.WriteHiddenOnReadonly)
+                    result = result.Concat(helper.Hidden(valueLine.ControlID, value));
+                return result.Concat(helper.Span("", value, "sf-value-line"));
+            }
 
             if (!valueLine.ValueHtmlProps.ContainsKey("autocomplete"))
                 valueLine.ValueHtmlProps.Add("autocomplete", "off");
@@ -222,7 +237,12 @@ namespace Signum.Web
         public static MvcHtmlString NumericTextbox(this HtmlHelper helper, ValueLine valueLine)
         {
             if (valueLine.ReadOnly)
-                return helper.Span(valueLine.ControlID, valueLine.UntypedValue.TryToString() ?? "", "sf-value-line");
+            {
+                MvcHtmlString result = MvcHtmlString.Empty;
+                if (valueLine.WriteHiddenOnReadonly)
+                    result = result.Concat(helper.Hidden(valueLine.ControlID, valueLine.UntypedValue.TryToString() ?? ""));
+                return result.Concat(helper.Span("", valueLine.UntypedValue.TryToString() ?? "", "sf-value-line"));
+            }
 
             valueLine.ValueHtmlProps.Add("onkeydown", Reflector.IsDecimalNumber(valueLine.Type) ? "return SF.InputValidator.isDecimal(event);" : "return SF.InputValidator.isNumber(event);");
 
@@ -232,7 +252,12 @@ namespace Signum.Web
         public static MvcHtmlString TextAreaInLine(this HtmlHelper helper, ValueLine valueLine)
         {
             if (valueLine.ReadOnly)
-                return helper.Span(valueLine.ControlID, (string)valueLine.UntypedValue, "sf-value-line");
+            {
+                MvcHtmlString result = MvcHtmlString.Empty;
+                if (valueLine.WriteHiddenOnReadonly)
+                    result = result.Concat(helper.Hidden(valueLine.ControlID, (string)valueLine.UntypedValue));
+                return result.Concat(helper.Span("", (string)valueLine.UntypedValue, "sf-value-line"));
+            }
 
             valueLine.ValueHtmlProps.Add("autocomplete", "off");
             if (valueLine.ValueHtmlProps.ContainsKey("onblur"))
@@ -258,7 +283,12 @@ namespace Signum.Web
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
             if (valueLine.ReadOnly)
+            {
+                if (valueLine.WriteHiddenOnReadonly)
+                    sb.AddLine(helper.Hidden(valueLine.ControlID, value ?? false));
+                
                 valueLine.ValueHtmlProps.Add("disabled", "disabled");
+            }
 
             valueLine.ValueHtmlProps.Add("name", valueLine.ControlID);
 
