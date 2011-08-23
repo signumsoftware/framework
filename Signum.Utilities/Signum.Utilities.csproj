@@ -73,6 +73,7 @@
     <Compile Include="AboutTools.cs" />
     <Compile Include="ArrayExtensions.cs" />
     <Compile Include="ConsoleSwitch.cs" />
+    <Compile Include="DataStructures\HashsetComparer.cs" />
     <Compile Include="DataStructures\MinMax.cs" />
     <Compile Include="DataStructures\ScopedDictionary.cs" />
     <Compile Include="DescriptionAttributes.cs" />
