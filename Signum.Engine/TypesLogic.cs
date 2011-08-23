@@ -123,14 +123,27 @@ namespace Signum.Engine
             return Schema.Current.TypeToDN.Where(a => type.IsAssignableFrom(a.Key)).Select(a => a.Value.ToLite()).ToList();
         }
 
-        public static Lite ParseLite(Type staticType, string value)
+        public static Lite ParseLite(Type staticType, string liteKey)
         {
-            return Lite.ParseLite(staticType, value, TryGetType);
+            return Lite.ParseLite(staticType, liteKey, TryGetType);
         }
 
-        public static string TryParseLite(Type liteType, string liteKey, out Lite lite)
+        public static Lite<T> ParseLite<T>(string liteKey) where T : class, IIdentifiable
         {
-            return Lite.TryParseLite(liteType, liteKey, TryGetType, out lite);
+            return (Lite<T>)Lite.ParseLite(typeof(T), liteKey, TryGetType);
+        }
+
+        public static string TryParseLite(Type staticType, string liteKey, out Lite lite)
+        {
+            return Lite.TryParseLite(staticType, liteKey, TryGetType, out lite);
+        }
+
+        public static string TryParseLite<T>(Type staticType, string liteKey, out Lite<T> lite) where T : class, IIdentifiable
+        {
+            Lite untypedLite;
+            var result = Lite.TryParseLite(staticType, liteKey, TryGetType, out untypedLite);
+            lite = (Lite<T>)untypedLite;
+            return result;
         }
 
         public static Type GetType(string cleanName)
