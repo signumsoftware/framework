@@ -36,15 +36,15 @@ namespace Signum.Web.SMS
                     new EntitySettings<SMSTemplateDN>(EntityType.NotSaving){ PartialViewName = e => ViewPrefix.Formato("SMSTemplate")},
                 });
 
-                OperationsClient.Manager.Settings.AddRange(new Dictionary<Enum, OperationSettings>
-                {
-                    {SMSMessageOperations.Create, new EntityOperationSettings
-                    {
-                        GroupInMenu = false,
-                        OnClick = ctx => new JsOperationExecutor(ctx.Options("CreateSMS", "SMS"))
-                            .ajax(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk),
-                    }},
-                });
+                //OperationsClient.Manager.Settings.AddRange(new Dictionary<Enum, OperationSettings>
+                //{
+                //    {SMSMessageOperations.Create, new EntityOperationSettings
+                //    {
+                //        GroupInMenu = false,
+                //        OnClick = ctx => new JsOperationExecutor(ctx.Options("CreateSMS", "SMS"))
+                //            .ajax(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk),
+                //    }},
+                //});
             }
         }
     }

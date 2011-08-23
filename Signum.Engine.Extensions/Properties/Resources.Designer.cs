@@ -566,24 +566,6 @@ namespace Signum.Engine.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to SMSMessageGraph must be registered prior to start the processes.
-        /// </summary>
-        internal static string SMSMessageGraphMustBeRegistered {
-            get {
-                return ResourceManager.GetString("SMSMessageGraphMustBeRegistered", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to SMSTemplateGraph must be registered prior to start the processes.
-        /// </summary>
-        internal static string SMSTemplateGraphMustBeRegistered {
-            get {
-                return ResourceManager.GetString("SMSTemplateGraphMustBeRegistered", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to string.
         /// </summary>
         internal static string String {
@@ -661,6 +643,15 @@ namespace Signum.Engine.Extensions.Properties {
         internal static string ThereAreNoResultsToWrite {
             get {
                 return ResourceManager.GetString("ThereAreNoResultsToWrite", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The template must be Active to construct SMS messages.
+        /// </summary>
+        internal static string TheTemplateMustBeActiveToConstructSMSMessages {
+            get {
+                return ResourceManager.GetString("TheTemplateMustBeActiveToConstructSMSMessages", resourceCulture);
             }
         }
         

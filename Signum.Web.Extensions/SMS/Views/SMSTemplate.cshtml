@@ -2,9 +2,7 @@
 @using Signum.Entities.SMS;
 @using Signum.Web;
 @using Signum.Web.SMS;
-
 @Html.ScriptCss("~/SMS/Content/SMS.css")
-
 @using (var e = Html.TypeContext<SMSTemplateDN>())
 {   
     @Html.ValueLine(e, s => s.Name)
@@ -16,15 +14,15 @@
             vl.ValueHtmlProps["rows"] = "6";
         })
     
-    <div id="charactersleft" data-url="@(Url.Action<SMSController>(s => s.GetDictionaries()))" style="margin-left: 150px;">
-        <p>Quedan disponibles <span id="numberofchar"></span> carácteres</p>
-    </div>
-    
+    <div id="sfCharactersLeft" data-url="@(Url.Action<SMSController>(s => s.GetDictionaries()))">
+        <p>
+            Caracteres restantes: <span id="sfCharsLeft"></span>
+        </p>
+    </div>    
     
     @Html.ValueLine(e, s => s.From)
     @Html.ValueLine(e, s => s.StartDate)
     @Html.ValueLine(e, s => s.EndDate)
    
 }
-
-@Html.ScriptsJs("~/SMS/scripts/SF_SMS.js")
+@Html.ScriptsJs("~/SMS/Scripts/SF_SMS.js")

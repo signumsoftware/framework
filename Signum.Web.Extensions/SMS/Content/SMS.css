@@ -1,17 +1,25 @@
-﻿
-.warningchars
+﻿.sf-sms-warning
 {
-    color: orange;
+    color: #FE642E;
 }
 
-.nomorechars
+.sf-sms-no-more-chars
 {
     color: red;
     font-weight:bold;
 }
 
-
-.backgroundred
+.sf-sms-red
 {
-    background-color: #CC3333;
+    background-color: #F5A9A9;
+}
+
+.sf-sms-highlight
+{
+    font-weight:bold;    
+}
+
+#sfCharactersLeft
+{
+    margin-left: 150px;
 }

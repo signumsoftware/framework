@@ -86,9 +86,14 @@ Write(Html.ValueLine(e, s => s.MessageID, vl =>
 
       
     
-Write(Html.EntityLine(e, s => s.Template, vl => vl.Remove = false));
+Write(Html.EntityLine(e, s => s.Template, vl => 
+    {
+        vl.Create = false;
+        vl.Remove = false;
+        vl.HideIfNull = true;
+    }));
 
-                                                                 
+      
     
 Write(Html.ValueLine(e, s => s.DestinationNumber, vl => vl.ReadOnly = !e.Value.IsNew));
 
@@ -105,17 +110,20 @@ Write(Html.ValueLine(e, s => s.Message, vl =>
           
     if(e.Value.State == SMSMessageState.Created) {
 
-WriteLiteral("        <div id=\"charactersleft\" data-url=\"");
+WriteLiteral("        <div id=\"sfCharactersLeft\" data-url=\"");
 
 
-                                       Write(Url.Action<SMSController>(s => s.GetDictionaries()));
+                                         Write(Url.Action<SMSController>(s => s.GetDictionaries()));
 
-WriteLiteral("\" style=\"margin-left: 150px;\">\r\n            <p>Quedan disponibles <span id=\"numbe" +
-"rofchar\"></span> caracteres</p>\r\n        </div>\r\n");
+WriteLiteral("\">\r\n            <p>Caracteres restantes: <span id=\"sfCharsLeft\"></span></p>\r\n    " +
+"    </div>\r\n");
 
 
     }
-    
+
+WriteLiteral("    <br />\r\n");
+
+
     
 Write(Html.ValueLine(e, s => s.From, vl => vl.ReadOnly = (e.Value.State != SMSMessageState.Created)));
 
@@ -143,7 +151,7 @@ WriteLiteral("\r\n        </fieldset>\r\n");
 WriteLiteral("\r\n");
 
 
-Write(Html.ScriptsJs("~/SMS/scripts/SF_SMS.js"));
+Write(Html.ScriptsJs("~/SMS/Scripts/SF_SMS.js"));
 
 
         }

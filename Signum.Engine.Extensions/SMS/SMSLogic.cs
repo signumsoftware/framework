@@ -233,7 +233,7 @@ namespace Signum.Engine.SMS
         {
             message.MessageID = sendAndGetTicket(message);
             message.SendDate = DateTime.Now.TrimToSeconds();
-            message.State = SMSMessageState.Sent;
+            message.SendState = SendState.Sent;
             message.Save();
         }
 
@@ -289,28 +289,44 @@ namespace Signum.Engine.SMS
 
             new ConstructFrom<SMSTemplateDN>(SMSMessageOperations.Create)
             {
-                CanConstruct = t => !t.Active ? "The template must be Active to allow constructing SMS messages" : null,
+                CanConstruct = t => !t.Active ? Resources.TheTemplateMustBeActiveToConstructSMSMessages : null,
                 ToState = SMSMessageState.Created,
                 Construct = (t, args) =>
                 {
                     var message = t.CreateSMSMessage();
-                    message.DestinationNumber = args.GetArg<string>(0);
+                    message.DestinationNumber = args.TryGetArgC<string>(0);
                     return message;
                 }
             }.Register();
 
             new Execute(SMSMessageOperations.Send)
             {
+                AllowsNew = true,
+                Lite = false,
                 FromStates = new[] { SMSMessageState.Created },
                 ToState = SMSMessageState.Sent,
-                Execute = (t, args) => { SMSLogic.SendSMS(t, args.TryGetArgC<Func<SMSMessageDN, string>>(0)); }
+                Execute = (t, args) =>
+                {
+                    var func = args.TryGetArgC<Func<SMSMessageDN, string>>(0);
+                    if (func != null)
+                        SMSLogic.SendSMS(t, func);
+                    else
+                        SMSLogic.SendSMS(t);
+                }
             }.Register();
 
             new Execute(SMSMessageOperations.UpdateStatus)
             {
                 FromStates = new[] { SMSMessageState.Sent },
                 ToState = SMSMessageState.Sent,
-                Execute = (t, args) => { SMSLogic.UpdateMessageStatus(t, args.TryGetArgC<Func<SMSMessageDN, SendState>>(0)); }
+                Execute = (t, args) => 
+                {
+                    var func = args.TryGetArgC<Func<SMSMessageDN, SendState>>(0);
+                    if (func != null)
+                        SMSLogic.UpdateMessageStatus(t, func);
+                    else
+                        SMSLogic.UpdateMessageStatus(t);
+                }
             }.Register();
 
             registered = true;

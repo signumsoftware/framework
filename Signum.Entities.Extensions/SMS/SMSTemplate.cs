@@ -152,7 +152,7 @@ namespace Signum.Entities.SMS
         {
             LoadDoublePeriod(91, 94);
             LoadDoublePeriod(123, 126);
-            DoubleCharacters.Add(Convert.ToChar(128), 128);
+            DoubleCharacters.Add('€', (ushort)'€');
         }
 
         private static void LoadDoublePeriod(int a, int b)
@@ -165,7 +165,8 @@ namespace Signum.Entities.SMS
 
         private static void FillNormalCharacaters()
         {
-            LoadNormalPeriod(32, 90);
+            NormalCharacters.Add(' ', (ushort)' ');
+            LoadNormalPeriod(33, 90);
             LoadNormalPeriod(97, 122);
 
             LoadNormalRange(10, 13, 95);
@@ -187,7 +188,6 @@ namespace Signum.Entities.SMS
                 NormalCharacters.Add(Convert.ToChar(c), c);
             }
         }
-
 
         private static void LoadNormalPeriod(int a, int b)
         {

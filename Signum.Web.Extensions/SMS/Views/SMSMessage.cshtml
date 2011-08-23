@@ -12,7 +12,12 @@
         vl.Visible = !e.Value.IsNew;
         vl.ReadOnly = true;
     })
-    @Html.EntityLine(e, s => s.Template, vl => vl.Remove = false)
+    @Html.EntityLine(e, s => s.Template, vl => 
+    {
+        vl.Create = false;
+        vl.Remove = false;
+        vl.HideIfNull = true;
+    })
     @Html.ValueLine(e, s => s.DestinationNumber, vl => vl.ReadOnly = !e.Value.IsNew)
     @Html.ValueLine(e, s => s.Message, vl =>
         {
@@ -22,11 +27,11 @@
             vl.ReadOnly = (e.Value.State != SMSMessageState.Created);
         })
     if(e.Value.State == SMSMessageState.Created) {
-        <div id="charactersleft" data-url="@(Url.Action<SMSController>(s => s.GetDictionaries()))" style="margin-left: 150px;">
-            <p>Quedan disponibles <span id="numberofchar"></span> caracteres</p>
+        <div id="sfCharactersLeft" data-url="@(Url.Action<SMSController>(s => s.GetDictionaries()))">
+            <p>Caracteres restantes: <span id="sfCharsLeft"></span></p>
         </div>
     }
-    
+    <br />
     @Html.ValueLine(e, s => s.From, vl => vl.ReadOnly = (e.Value.State != SMSMessageState.Created))
 
     if (e.Value.State == SMSMessageState.Sent)
@@ -39,4 +44,4 @@
     }
 }
 
-@Html.ScriptsJs("~/SMS/scripts/SF_SMS.js")
+@Html.ScriptsJs("~/SMS/Scripts/SF_SMS.js")

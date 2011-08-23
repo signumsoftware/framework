@@ -1,70 +1,70 @@
-﻿var SKI = SKI || {};
+﻿var SF = SF || {};
 
-SKI.User = (function () {
-    var SMSMaxTextLength = 0;
-    var SMSWarningTextLength = 0;
+SF.SMS = (function () {
+    var SMSMaxTextLength;
+    var SMSWarningTextLength;
 
-    var normalCharacters = new Array();
-    var doubleCharacters = new Array();
+    var normalCharacters;
+    var doubleCharacters;
 
-    var characterstoend = function (textarea) {
-        var $block = $(textarea);
-        var text = $block.val();
+    var charactersToEnd = function ($textarea) {
+        var text = $textarea.val();
         var count = text.length;
         var maxLength = SMSMaxTextLength;
-
         for (var l = 0; l < text.length; l++) {
-            if (normalCharacters.indexOf(text.charAt(l)) == -1) {
-                if (doubleCharacters.indexOf(text.charAt(l)) != -1) {
+            var current = text.charAt(l);
+            if (normalCharacters.indexOf(current) == -1) {
+                if (doubleCharacters.indexOf(current) != -1) {
                     count++;
-                } else {
+                }
+                else {
                     maxLength = 60;
                     count = text.length;
                     break;
                 }
             }
         }
-        return SMSMaxTextLength - count;
+        return maxLength - count;
     };
 
-    function LoadLists(dir) {
+    function loadLists(url) {
         $.ajax({
-            url: dir,
+            url: url,
             data: {},
             success: function (data) {
                 SMSMaxTextLength = data.smsLength;
                 SMSWarningTextLength = data.smsWarningLength;
                 normalCharacters = data.normalChar;
                 doubleCharacters = data.doubleChar;
-                $('#numberofchar').html(characterstoend('#Message'));
+                $('#sfCharsLeft').html(SMSMaxTextLength);
             }
         });
     };
 
     $(function () {
-        LoadLists($('#charactersleft').attr("data-url"));
+        loadLists($('#sfCharactersLeft').attr("data-url"));
     });
 
     $('textarea#Message').keyup(function () {
-        var charscounted = characterstoend('#Message');
-        $('#numberofchar').html(characterstoend('#Message'));
+        var $textarea = $('#Message');
+        var $charsLeft = $('#sfCharsLeft');
+        var $charactersLeft = $('#sfCharactersLeft > p');
 
-        $('#charactersleft > p').removeClass();
-        $('#Message').removeClass();
-        
-        if (charscounted <= 0) {
-            $('#charactersleft > p').addClass('nomorechars');
-        } else {
-            if (charscounted < SMSWarningTextLength) {
-                $('#charactersleft > p').addClass('warningchars'); backgroundred
-                $('#Message').addClass('backgroundred');
-            }
+        var numberCharsLeft = charactersToEnd($textarea);
+        $charsLeft.html(numberCharsLeft);
+
+        $charactersLeft.removeClass('sf-sms-no-more-chars').removeClass('sf-sms-warning');
+        $textarea.removeClass('sf-sms-red');
+        $charsLeft.removeClass('sf-sms-highlight');
+
+        if (numberCharsLeft < 0) {
+            $charactersLeft.addClass('sf-sms-no-more-chars');
+            $charsLeft.addClass('sf-sms-highlight');
+            $textarea.addClass('sf-sms-red');
         }
-
+        else if (numberCharsLeft < SMSWarningTextLength) {
+            $charactersLeft.addClass('sf-sms-warning');
+            $charsLeft.addClass('sf-sms-highlight');
+        }
     });
-
-    return {
-        characterstoend: characterstoend
-    };
-
 })();

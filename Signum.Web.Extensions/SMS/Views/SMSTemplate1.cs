@@ -67,12 +67,10 @@ namespace ASP
 
 
 
-WriteLiteral("\r\n");
-
 
 Write(Html.ScriptCss("~/SMS/Content/SMS.css"));
 
-WriteLiteral("\r\n\r\n");
+WriteLiteral("\r\n");
 
 
  using (var e = Html.TypeContext<SMSTemplateDN>())
@@ -96,16 +94,15 @@ Write(Html.ValueLine(e, s => s.Message, vl =>
           
     
 
-WriteLiteral("    <div id=\"charactersleft\" data-url=\"");
+WriteLiteral("    <div id=\"sfCharactersLeft\" data-url=\"");
 
 
-                                   Write(Url.Action<SMSController>(s => s.GetDictionaries()));
+                                     Write(Url.Action<SMSController>(s => s.GetDictionaries()));
 
-WriteLiteral("\" style=\"margin-left: 150px;\">\r\n        <p>Quedan disponibles <span id=\"numberofc" +
-"har\"></span> carácteres</p>\r\n    </div>\r\n");
+WriteLiteral("\">\r\n        <p>\r\n            Caracteres restantes: <span id=\"sfCharsLeft\"></span>" +
+"\r\n        </p>\r\n    </div>    \r\n");
 
 
-    
     
     
 Write(Html.ValueLine(e, s => s.From));
@@ -122,10 +119,10 @@ Write(Html.ValueLine(e, s => s.EndDate));
    
 }
 
+
+Write(Html.ScriptsJs("~/SMS/Scripts/SF_SMS.js"));
+
 WriteLiteral("\r\n");
-
-
-Write(Html.ScriptsJs("~/SMS/scripts/SF_SMS.js"));
 
 
         }
