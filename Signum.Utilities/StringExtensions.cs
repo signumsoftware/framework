@@ -67,72 +67,67 @@ namespace Signum.Utilities
 
         public static string Left(this string str, int numChars)
         {
-            return Left(str, numChars, true);
+            if (numChars > str.Length)
+                throw new InvalidOperationException("String '{0}' is too short".Formato(str));
+
+            return str.Substring(0, numChars);
         }
 
-        public static string Left(this string str, int numChars, bool throws)
+        public static string TryLeft(this string str, int numChars)
         {
             if (numChars > str.Length)
-            {
-                if (throws)
-                    throw new InvalidOperationException("String '{0}' is too short".Formato(str));
                 return str;
-            }
 
             return str.Substring(0, numChars);
         }
 
         public static string Right(this string str, int numChars)
         {
-            return Right(str, numChars, true);
+            if (numChars > str.Length)
+                    throw new InvalidOperationException("String '{0}' is too short".Formato(str));
+
+            return str.Substring(str.Length - numChars, numChars);
         }
 
-        public static string Right(this string str, int numChars, bool throws)
+        public static string TryRight(this string str, int numChars)
         {
             if (numChars > str.Length)
-            {
-                if (throws)
-                    throw new InvalidOperationException("String '{0}' is too short".Formato(str));
                 return str;
-            }
 
             return str.Substring(str.Length - numChars, numChars);
         }
 
         public static string RemoveLeft(this string str, int numChars)
         {
-            return str.RemoveLeft(numChars, true);
+            if (numChars > str.Length)
+                    throw new InvalidOperationException("String '{0}' is too short".Formato(str));
+
+            return str.Substring(numChars);
         }
 
-        public static string RemoveLeft(this string str, int numChars, bool throws)
+        public static string TryRemoveLeft(this string str, int numChars)
         {
             if (numChars > str.Length)
-            {
-                if (throws)
-                    throw new InvalidOperationException("String '{0}' is too short".Formato(str));
                 return "";
-            }
 
             return str.Substring(numChars);
         }
 
         public static string RemoveRight(this string str, int numChars)
         {
-            return str.RemoveRight(numChars, true);
-        }
-
-        public static string RemoveRight(this string str, int numChars, bool throws)
-        {
             if (numChars > str.Length)
-            {
-                if (throws)
-                    throw new InvalidOperationException("String '{0}' is too short".Formato(str));
-                return "";
-            }
+                throw new InvalidOperationException("String '{0}' is too short".Formato(str));
 
             return str.Substring(0, str.Length - numChars);
         }
 
+        public static string TryRemoveRight(this string str, int numChars)
+        {
+            if (numChars > str.Length)
+                return "";
+
+            return str.Substring(0, str.Length - numChars);
+        }
 
         public static string PadChopRight(this string str, int length)
         {
