@@ -5,6 +5,7 @@ using System.Text;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Reflection;
+using System.Xml.Linq;
 
 namespace Signum.Utilities
 {
@@ -132,6 +133,9 @@ namespace Signum.Utilities
 
             var saveCurrent = current;
 
+            if (aditionalData is string)
+                aditionalData = string.Intern((string)aditionalData); 
+
             current = new HeavyProfilerEntry()
             {
                 Discount = discount,
@@ -201,15 +205,47 @@ namespace Signum.Utilities
                    select p;
         }
 
-        public static string FullToString()
+        public static XDocument FullXDocument()
         {
-            StringBuilder sb = new StringBuilder();
-            foreach (var item in Entries)
-            {
-                item.FullToString(sb, "");
-            }
-            return sb.ToString();
+            TimeSpan timeSpan = new TimeSpan(Entries.Sum(a => a.Elapsed.Ticks));
+
+            return new XDocument(
+                new XElement("Logs", new XAttribute("TotalTime", timeSpan.NiceToString()),
+                    Entries.Select(e => e.FullXml(timeSpan)))); 
         }
+
+        public static XDocument SqlStatisticsXDocument()
+        {
+            var statistics = SqlStatistics();
+
+            return new XDocument(
+                new XElement("Sqls",
+                        statistics.Select(a => new XElement("Sql",
+                            new XAttribute("Sum", a.Sum.NiceToString()),
+                            new XAttribute("Count", a.Count),
+                            new XAttribute("Avg", a.Avg.NiceToString()),
+                            new XAttribute("Min", a.Min.NiceToString()),
+                            new XAttribute("Max", a.Max.NiceToString()),
+                            new XElement("Query", a.Query),
+                            new XElement("References", a.References)))));
+        }
+
+        public static IOrderedEnumerable<SqlProfileResume> SqlStatistics()
+        {
+            var statistics = AllEntries().Where(a => a.Role == "SQL").GroupBy(a => (string)a.AditionalData).Select(gr =>
+                        new SqlProfileResume
+                        {
+                            Query = gr.Key,
+                            Count = gr.Count(),
+                            Sum = new TimeSpan(gr.Sum(a => a.Elapsed.Ticks)),
+                            Avg = new TimeSpan((long)gr.Average((a => a.Elapsed.Ticks))),
+                            Min = new TimeSpan(gr.Min((a => a.Elapsed.Ticks))),
+                            Max = new TimeSpan(gr.Max((a => a.Elapsed.Ticks))),
+                            References = gr.Select(a => a.FullIndex()).ToList(),
+                        }).OrderByDescending(a => a.Sum);
+            return statistics;
+        }
+
 
         public static string GetFileLineAndNumber(this StackFrame frame)
         {
@@ -219,7 +255,7 @@ namespace Signum.Utilities
                 return null;
 
             if (fileName.Length > 70)
-                fileName = "..." + fileName.Right(67, false);
+                fileName = "..." + fileName.TryRight(67);
 
             return fileName + " ({0})".Formato(frame.GetFileLineNumber());
         }
@@ -317,21 +353,29 @@ namespace Signum.Utilities
                     + ")";
         }
 
-        public string FullToString()
+        public XElement FullXml(TimeSpan elapsedParent)
         {
-            StringBuilder sb = new StringBuilder();
-            FullToString(sb, "");
-            return sb.ToString(); 
+            return new XElement("Log",
+                new XAttribute("Ratio", "{0:p}".Formato(this.Elapsed.Ticks / (double)elapsedParent.Ticks)),
+                new XAttribute("Time", Elapsed.NiceToString()),
+                new XAttribute("Role", Role ?? ""),
+                new XAttribute("Data", (AditionalData.TryToString() ?? "").TryLeft(100)),
+                new XAttribute("FullIndex", this.FullIndex()),
+                new XAttribute("Resume", GetDescendantRoles().ToString(kvp => "{0} {1}".Formato(kvp.Key, kvp.Value.ToString(this)), " | ")),
+                Entries == null ? new XElement[0] : Entries.Select(e => e.FullXml(this.Elapsed))
+                );
         }
+    }
 
-        public void FullToString(StringBuilder sb, string ident)
-        {
-            sb.Append(ident); 
-            sb.AppendLine(this.ToString());
-            if (Entries != null)
-                foreach (var item in Entries)
-                    item.FullToString(sb, ident + "  "); 
-        }
+    public class SqlProfileResume
+    {
+        public string Query;
+        public int Count;
+        public TimeSpan Sum;
+        public TimeSpan Avg;
+        public TimeSpan Min;
+        public TimeSpan Max;
+        public List<string> References;
     }
 
     public class ProfileResume
