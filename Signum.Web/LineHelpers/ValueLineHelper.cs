@@ -236,16 +236,9 @@ namespace Signum.Web
 
         public static MvcHtmlString NumericTextbox(this HtmlHelper helper, ValueLine valueLine)
         {
-            if (valueLine.ReadOnly)
-            {
-                MvcHtmlString result = MvcHtmlString.Empty;
-                if (valueLine.WriteHiddenOnReadonly)
-                    result = result.Concat(helper.Hidden(valueLine.ControlID, valueLine.UntypedValue.TryToString() ?? ""));
-                return result.Concat(helper.Span("", valueLine.UntypedValue.TryToString() ?? "", "sf-value-line"));
-            }
-
-            valueLine.ValueHtmlProps.Add("onkeydown", Reflector.IsDecimalNumber(valueLine.Type) ? "return SF.InputValidator.isDecimal(event);" : "return SF.InputValidator.isNumber(event);");
-
+            if (!valueLine.ReadOnly)
+                valueLine.ValueHtmlProps.Add("onkeydown", Reflector.IsDecimalNumber(valueLine.Type) ? "return SF.InputValidator.isDecimal(event);" : "return SF.InputValidator.isNumber(event);");    
+            
             return helper.TextboxInLine(valueLine, InputType.Text);
         }
 
