@@ -309,7 +309,7 @@ namespace Signum.Web.Auth
         }
 
         [HttpPost]
-        public ActionResult ResetPasswordSetNew(string code, Lite<ResetPasswordRequestDN> rpr)
+        public ActionResult ResetPasswordSetNew(Lite<ResetPasswordRequestDN> rpr)
         {
             ResetPasswordRequestDN request = null;
             try
@@ -340,7 +340,7 @@ namespace Signum.Web.Auth
                 {
                     Database.Save(context.Value);
                     //remove pending requests
-                    Database.Query<ResetPasswordRequestDN>().Where(r => r.User.Email == user.Email && r.Code == code).UnsafeDelete();
+                    Database.Query<ResetPasswordRequestDN>().Where(r => r.User.Email == user.Email && r.Code == request.Code).UnsafeDelete();
                 }
 
                 return RedirectToAction("ResetPasswordSuccess");
