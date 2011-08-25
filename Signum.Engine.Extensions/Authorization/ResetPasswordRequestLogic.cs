@@ -51,20 +51,24 @@ namespace Signum.Engine.Authorization
             }
         }
 
-        public static void ResetPasswordRequest(UserDN user, Func<ResetPasswordRequestDN, string> urlGenerator)
-        {
+        public static ResetPasswordRequestDN ResetPasswordRequest(UserDN user)
+        { 
             //Remove old previous requests
             Database.Query<ResetPasswordRequestDN>()
                 .Where(r => r.User.Is(user) && r.RequestDate < TimeZoneManager.Now.AddMonths(1))
                 .UnsafeDelete();
 
-            ResetPasswordRequestDN rpr = new ResetPasswordRequestDN()
+            return new ResetPasswordRequestDN()
             {
                 Code = MyRandom.Current.NextString(5),
                 User = user,
                 RequestDate = TimeZoneManager.Now,
             }.Save();
+        }
 
+        public static void ResetPasswordRequestAndSendEmail(UserDN user, Func<ResetPasswordRequestDN, string> urlGenerator)
+        {
+            var rpr = ResetPasswordRequest(user);
 
             new ResetPasswordRequestMail
             {

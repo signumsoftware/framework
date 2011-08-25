@@ -246,7 +246,7 @@ namespace Signum.Web.Auth
                         throw new ApplicationException(Resources.ThereSNotARegisteredUserWithThatEmailAddress);
 
                     //since this is an url sent by email, it should contain the domain name
-                    ResetPasswordRequestLogic.ResetPasswordRequest(user, rpr => 
+                    ResetPasswordRequestLogic.ResetPasswordRequestAndSendEmail(user, rpr => 
                         Request.Url.Scheme + System.Uri.SchemeDelimiter + Request.Url.Host + (Request.Url.Port != 80 ? (":" + Request.Url.Port ) : "") + RouteHelper.New().Action("ResetPasswordCode", "Auth", new { email = rpr.User.Email, code = rpr.Code }));
                 }
 
