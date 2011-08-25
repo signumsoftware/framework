@@ -28,9 +28,16 @@ namespace Signum.Utilities
         }
 
 
-        public static void Sort<T, A>(this List<T> list, Func<T, A> keySelector)
+        public static void Sort<T, A>(this List<T> list, Func<T, A> element)
+            where A : IComparable<A>
         {
-            list.Sort(new LambdaComparer<T, A>(keySelector));
+            list.Sort((a, b) => element(a).CompareTo(element(b)));
+        }
+
+        public static void SortDescending<T, A>(this List<T> list, Func<T, A> element)
+           where A : IComparable<A>
+        {
+            list.Sort((a, b) => element(b).CompareTo(element(a)));
         }
 
         public static void RemoveAll<T>(this IList<T> list, Func<T, bool> condition)
