@@ -10,6 +10,7 @@ using Signum.Utilities.ExpressionTrees;
 using System.Linq.Expressions;
 using Signum.Utilities.Reflection;
 using System.Text.RegularExpressions;
+using System.Xml.Linq;
 
 namespace Signum.Entities
 {
@@ -499,6 +500,11 @@ namespace Signum.Entities
                 return lite1.Id == lite2.Id;
             else
                 return object.ReferenceEquals(lite1.EntityOrNull, lite2.EntityOrNull);
+        }
+
+        public static XDocument EntityDGML(this IdentifiableEntity entity)
+        {
+            return GraphExplorer.FromRoot(entity).EntityDGML(); 
         }
     }
 }
