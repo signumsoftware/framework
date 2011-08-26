@@ -126,7 +126,12 @@ namespace Signum.Engine
                     return cached;
             }
 
-            return Database.Query<T>().Single(a => a.Id == id);
+            var retrieved = Database.Query<T>().SingleOrDefault(a => a.Id == id);
+
+            if (retrieved == null)
+                throw new EntityNotFoundException(typeof(T), id);
+
+            return retrieved; 
         }
 
         private static CacheController<T> CanUseCache<T>() where T:IdentifiableEntity
@@ -174,7 +179,7 @@ namespace Signum.Engine
             if (cc != null)
                 return cc.GetEntity(id).ToLite<T>();
 
-            var result = Database.Query<RT>().Select(a => a.ToLite<T>()).First(a => a.Id == id);
+            var result = Database.Query<RT>().Select(a => a.ToLite<T>()).SingleOrDefault(a => a.Id == id);
             if (result == null)
                 throw new EntityNotFoundException(typeof(RT), id);
 
@@ -187,7 +192,7 @@ namespace Signum.Engine
             if (cc != null)
                 return cc.GetEntity(id).ToLite();
 
-            var result = Database.Query<T>().Select(a => a.ToLite()).First(a => a.Id == id);
+            var result = Database.Query<T>().Select(a => a.ToLite()).SingleOrDefault(a => a.Id == id);
             if (result == null)
                 throw new EntityNotFoundException(typeof(T), id);
             return result;
