@@ -422,6 +422,9 @@ namespace Signum.Web
 
         public static void RegisterArea(Type clientType, string areaName)
         {
+            if (areaName.Left(1) == "/")
+                throw new SystemException("Invalid start character / in {0}".Formato(areaName));
+
             CompiledViews.RegisterArea(clientType.Assembly, areaName);
             SignumControllerFactory.RegisterControllersLike(clientType, areaName);
 
