@@ -71,8 +71,6 @@
     display:block;
 }
 
-.sf-value-ext {float:right; margin-left:10px;}
-
 .sf-value-line, .sf-entity-list{float:left;}
 
 a.sf-value-line, span.sf-value-line{
