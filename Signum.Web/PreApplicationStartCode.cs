@@ -9,6 +9,7 @@ using Signum.Web.PortableAreas;
 using System.Web.Compilation;
 using Signum.Web.Properties;
 using Signum.Web.Controllers;
+using Signum.Entities.DynamicQuery;
 
 [assembly: PreApplicationStartMethod(typeof(Signum.Web.PreApplicationStartCode), "Start")]
 
@@ -36,6 +37,7 @@ namespace Signum.Web
 
             ModelBinders.Binders.DefaultBinder = new LiteModelBinder();
             ModelBinders.Binders.Add(typeof(FindOptions), new FindOptionsModelBinder());
+            ModelBinders.Binders.Add(typeof(QueryRequest), new QueryRequestModelBinder());
         }
     }
 

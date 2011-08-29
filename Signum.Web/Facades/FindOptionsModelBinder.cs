@@ -96,7 +96,7 @@ namespace Signum.Web
         }
 
         //name1,operation1,value1;name2,operation2,value2; being values CSV encoded
-        static Regex filterRegex = new Regex(
+        internal static Regex FilterRegex = new Regex(
             "(?<token>[^;,]+),(?<op>[^;,]+),(?<value>'(?:[^']+|'')*'|[^;,]*);".Replace('\'', '"'),
             RegexOptions.Multiline | RegexOptions.ExplicitCapture);
 
@@ -111,7 +111,7 @@ namespace Signum.Web
             if (!field.HasText())
                 return result;
 
-            var matches = filterRegex.Matches(field).Cast<Match>();
+            var matches = FilterRegex.Matches(field).Cast<Match>();
 
             return matches.Select(m =>
             {
@@ -129,7 +129,7 @@ namespace Signum.Web
         }
 
         //order1,-order2; minus symbol indicating descending
-        static Regex orderRegex = new Regex(
+        internal static Regex OrderRegex = new Regex(
             "(?<token>-?[^;,]+);".Replace('\'', '"'),
             RegexOptions.Multiline | RegexOptions.ExplicitCapture);
 
@@ -143,7 +143,7 @@ namespace Signum.Web
             if (!field.HasText())
                 return result;
 
-            var matches = orderRegex.Matches(field).Cast<Match>();
+            var matches = OrderRegex.Matches(field).Cast<Match>();
 
             return matches.Select(m =>
             {
@@ -159,7 +159,7 @@ namespace Signum.Web
         }
 
         //columnName1,displayName1;columnName2,displayName2; being displayNames CSV encoded
-        static Regex columnRegex = new Regex(
+        internal static Regex ColumnRegex = new Regex(
             "(?<token>[^;,]+)(,(?<name>'(?:[^']+|'')*'|[^;,]*))?;".Replace('\'', '"'),
             RegexOptions.Multiline | RegexOptions.ExplicitCapture);
 
@@ -173,7 +173,7 @@ namespace Signum.Web
             if (!field.HasText())
                 return result;
 
-            var matches = columnRegex.Matches(field).Cast<Match>();
+            var matches = ColumnRegex.Matches(field).Cast<Match>();
 
             return matches.Select(m =>
             {
@@ -187,7 +187,7 @@ namespace Signum.Web
             }).ToList();
         }
 
-        static string DecodeValue(string s)
+        internal static string DecodeValue(string s)
         {
             if (s.StartsWith("\""))
             {

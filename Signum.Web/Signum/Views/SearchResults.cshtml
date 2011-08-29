@@ -4,20 +4,21 @@
 @using Signum.Engine
 @model Context
 
-@{ FindOptions findOptions = (FindOptions)ViewData[ViewDataKeys.FindOptions];
+@{ 
    QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
    var entityColumn = queryDescription.Columns.Single(a => a.IsEntity);
    Type entitiesType = Reflector.ExtractLite(entityColumn.Type);
    Implementations implementations = entityColumn.Implementations;
-   bool viewable = findOptions.View && (implementations != null || Navigator.IsViewable(entitiesType, true));
-
+   bool viewable = (bool)ViewData[ViewDataKeys.View] && (implementations != null || Navigator.IsViewable(entitiesType, true));
+   bool? allowMultiple = (bool?)ViewData[ViewDataKeys.AllowMultiple];
+   
    ResultTable queryResult = (ResultTable)ViewData[ViewDataKeys.Results];
    Dictionary<int, Func<HtmlHelper, object, MvcHtmlString>> formatters = (Dictionary<int, Func<HtmlHelper, object, MvcHtmlString>>)ViewData[ViewDataKeys.Formatters];}
 
 @if (ViewData.ContainsKey(ViewDataKeys.MultipliedMessage))
 { 
     <tr class="sf-tr-multiply">
-        <td class="sf-td-multiply ui-state-highlight" colspan="@(queryResult.Columns.Count() + (viewable ? 1 : 0) + (findOptions.AllowMultiple.HasValue ? 1 : 0))">
+        <td class="sf-td-multiply ui-state-highlight" colspan="@(queryResult.Columns.Count() + (viewable ? 1 : 0) + (allowMultiple.HasValue ? 1 : 0))">
             <span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span>
             @ViewData[ViewDataKeys.MultipliedMessage]
         </td>
@@ -28,10 +29,10 @@
 {
     Lite entityField = row.Entity;
     <tr data-entity="@entityField.Key()">
-        @if (findOptions.AllowMultiple.HasValue)
+        @if (allowMultiple.HasValue)
         {
             <td>
-                @if (findOptions.AllowMultiple.Value)
+                @if (allowMultiple.Value)
                 {
                     @Html.CheckBox(
                         Model.Compose("rowSelection", row.Index.ToString()),
