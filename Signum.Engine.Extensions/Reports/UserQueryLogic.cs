@@ -37,7 +37,22 @@ namespace Signum.Engine.Reports
                                             }).ToDynamic(); 
 
                 sb.Schema.EntityEvents<UserQueryDN>().Retrieved += UserQueryLogic_Retrieved;
+                sb.Schema.EntityEvents<UserQueryDN>().PreSaving += UserQueryLogic_PreSaving;
             }
+        }
+
+        static void UserQueryLogic_PreSaving(UserQueryDN userQuery, ref bool graphModified)
+        {
+            if (!userQuery.IsNew || userQuery.queryName == null)
+                return;
+
+
+            userQuery.Query = QueryLogic.RetrieveOrGenerateQuery(userQuery.queryName);
+
+            QueryDescription description = DynamicQueryManager.Current.QueryDescription(userQuery.queryName);
+
+            userQuery.ParseData(description);
+
         }
 
         static void UserQueryLogic_Retrieved(UserQueryDN userQuery, bool fromCache)
@@ -50,13 +65,13 @@ namespace Signum.Engine.Reports
             QueryDescription description = DynamicQueryManager.Current.QueryDescription(queryName);
 
             foreach (var f in userQuery.Filters)
-                f.PostRetrieving(description);
+                f.ParseData(description);
 
             foreach (var c in userQuery.Columns)
-                c.PostRetrieving(description);
+                c.ParseData(description);
 
             foreach (var o in userQuery.Orders)
-                o.PostRetrieving(description);
+                o.ParseData(description);
         }
 
         public static List<Lite<UserQueryDN>> GetUserQueries(object queryName)

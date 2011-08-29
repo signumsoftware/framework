@@ -45,11 +45,24 @@ namespace Signum.Engine.Extensions.Chart
                                                 uq.GroupResults,
                                             }).ToDynamic();
 
-                sb.Schema.EntityEvents<UserChartDN>().Retrieved += UserQueryLogic_Retrieved;
+                sb.Schema.EntityEvents<UserChartDN>().Retrieved += ChartLogic_Retrieved;
+                sb.Schema.EntityEvents<UserChartDN>().PreSaving += ChartLogic_PreSaving;
             }
         }
 
-        static void UserQueryLogic_Retrieved(UserChartDN userQuery, bool fromCache)
+        static void ChartLogic_PreSaving(UserChartDN userChart, ref bool graphModified)
+        {
+            if (userChart.IsNew && userChart.queryName != null)
+            {
+                userChart.Query = QueryLogic.RetrieveOrGenerateQuery(userChart.queryName);
+
+                QueryDescription description = DynamicQueryManager.Current.QueryDescription(userChart.queryName);
+
+                userChart.ParseData(description);
+            }
+        }
+
+        static void ChartLogic_Retrieved(UserChartDN userQuery, bool fromCache)
         {
             if (fromCache)
                 return;
@@ -58,22 +71,8 @@ namespace Signum.Engine.Extensions.Chart
 
             QueryDescription description = DynamicQueryManager.Current.QueryDescription(queryName);
 
-            foreach (var f in userQuery.Filters)
-                f.PostRetrieving(description);
-
-            if (userQuery.FirstDimension != null)
-                userQuery.FirstDimension.PostRetrieving(description);
-
-            if (userQuery.SecondDimension != null)
-                userQuery.SecondDimension.PostRetrieving(description);
-
-            if (userQuery.FirstValue != null)
-                userQuery.FirstValue.PostRetrieving(description);
-
-            if (userQuery.SecondValue != null)
-                userQuery.SecondValue.PostRetrieving(description);
+            userQuery.ParseData(description);
         }
-
 
         public static List<Lite<UserChartDN>> GetUserCharts(object queryName)
         {

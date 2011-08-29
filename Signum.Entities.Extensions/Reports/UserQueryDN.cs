@@ -14,6 +14,15 @@ namespace Signum.Entities.Reports
     [Serializable]
     public class UserQueryDN : Entity
     {
+        public UserQueryDN() { }
+        public UserQueryDN(object queryName)
+        {
+            this.queryName = queryName;
+        }
+
+        [Ignore]
+        internal object queryName;
+        
         QueryDN query;
         [NotNullValidator]
         public QueryDN Query
@@ -97,6 +106,21 @@ namespace Signum.Entities.Reports
         {
             return displayName;
         }
+
+        internal void ParseData(QueryDescription description)
+        {
+            if (Filters != null)
+                foreach (var f in Filters)
+                    f.ParseData(description);
+
+            if (Columns != null)
+                foreach (var c in Columns)
+                    c.ParseData(description);
+
+            if (Orders != null)
+                foreach (var o in Orders)
+                    o.ParseData(description);
+        }
     }
 
     [Serializable]
@@ -130,7 +154,7 @@ namespace Signum.Entities.Reports
             tokenString = token.FullKey();
         }
 
-        public abstract void PostRetrieving(QueryDescription queryDescription);
+        public abstract void ParseData(QueryDescription queryDescription);
     }
 
     [Serializable]
@@ -150,7 +174,7 @@ namespace Signum.Entities.Reports
             set { Set(ref orderType, value, () => OrderType); }
         }
 
-        public override void PostRetrieving(QueryDescription queryDescription)
+        public override void ParseData(QueryDescription queryDescription)
         {
             Token = QueryUtils.Parse(tokenString, queryDescription);
             CleanSelfModified();
@@ -180,7 +204,7 @@ namespace Signum.Entities.Reports
         }
 
 
-        public override void PostRetrieving(QueryDescription queryDescription)
+        public override void ParseData(QueryDescription queryDescription)
         {
             Token = QueryUtils.Parse(tokenString, queryDescription);
             CleanSelfModified();
@@ -221,6 +245,15 @@ namespace Signum.Entities.Reports
     [Serializable]
     public class QueryFilterDN : QueryTokenDN
     {
+        public QueryFilterDN() { }
+
+        public QueryFilterDN(string columnName, object value)
+        {
+            this.TokenString = columnName;
+            this.value = value;
+            this.operation = FilterOperation.EqualTo;
+        }
+
         FilterOperation operation;
         public FilterOperation Operation
         {
@@ -245,16 +278,28 @@ namespace Signum.Entities.Reports
             set { this.value = value; }
         }
 
-        public override void PostRetrieving(QueryDescription queryDescription)
+        public override void ParseData(QueryDescription queryDescription)
         {
             Token = QueryUtils.Parse(tokenString, queryDescription);
 
-            object val;
-            string error = FilterValueConverter.TryParse(ValueString, Token.Type, out val);
-            if (string.IsNullOrEmpty(error))
+            if (value != null)
+            {
+                if (string.IsNullOrEmpty(valueString))
+                    throw new InvalidOperationException("Value and ValueString defined at the same time");
+
+                ValueString = FilterValueConverter.ToString(value, Token.Type);
+            }
+            else
+            {
+                object val;
+                string error = FilterValueConverter.TryParse(ValueString, Token.Type, out val);
+                if (error.HasText())
+                    throw new InvalidOperationException(error);
+
                 Value = val; //Executed on server only
 
-            CleanSelfModified();
+                CleanSelfModified();
+            }
         }
 
         protected override void TokenChanged()

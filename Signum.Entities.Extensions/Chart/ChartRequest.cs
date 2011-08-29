@@ -338,6 +338,15 @@ namespace Signum.Entities.Chart
     [Serializable]
     public class UserChartDN : ChartBase
     {
+        public UserChartDN() { }
+
+        public UserChartDN(object queryName) 
+        {
+            this.queryName = queryName;
+        }
+
+        internal object queryName;
+
         QueryDN query;
         [NotNullValidator]
         public QueryDN Query
@@ -380,6 +389,23 @@ namespace Signum.Entities.Chart
             return displayName;
         }
 
-        
+        internal void ParseData(QueryDescription description)
+        {
+            if (Filters != null)
+                foreach (var f in Filters)
+                    f.ParseData(description);
+
+            if (FirstDimension != null)
+                FirstDimension.ParseData(description);
+
+            if (SecondDimension != null)
+                SecondDimension.ParseData(description);
+
+            if (FirstValue != null)
+                FirstValue.ParseData(description);
+
+            if (SecondValue != null)
+                SecondValue.ParseData(description);
+        }
     }
 }
