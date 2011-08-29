@@ -438,11 +438,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Statistics.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Profiler\Views\Statistics.cs">
-      <DependentUpon>Statistics.cshtml</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <Compile Include="Profiler\Views\HeavyDetails.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
