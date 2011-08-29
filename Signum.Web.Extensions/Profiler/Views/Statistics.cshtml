@@ -1,0 +1,55 @@
+@using Signum.Utilities.ExpressionTrees
+@using Signum.Web.Profiler
+@model IOrderedEnumerable<SqlProfileResume>
+<h2>@ViewData[ViewDataKeys.Title]</h2>
+<div>
+@Html.ActionLink("Root Entries", "Heavy")
+</div>
+<table class="sf-search-results">
+    <thead>
+        <tr>
+            <th>
+                Count
+            </th>
+            <th>
+                Sum
+            </th>
+            <th>
+                Avg
+            </th>
+            <th>
+                Min
+            </th>
+            <th>
+                Max
+            </th>
+            <th>
+                Query
+            </th>
+            <th>
+               References
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Count</td>
+                <td>@item.Sum.NiceToString()</td>
+                <td>@item.Avg.NiceToString()</td>
+                <td>@item.Min.NiceToString()</td>
+                <td>@item.Max.NiceToString()</td>
+                <td>@item.Query</td>
+                <td>
+                   @foreach (var r in item.References)
+                   {
+                       @Html.ActionLink(r, (ProfilerController pc) => pc.HeavyRoute(r))
+                   }
+                </td>  
+            </tr>
+        }
+
+      
+    </tbody>
+</table>
