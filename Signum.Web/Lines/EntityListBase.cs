@@ -17,6 +17,7 @@ namespace Signum.Web
     public static class EntityListBaseKeys
     {
         public const string Index = "sfIndex";
+        public const string ListPresent = "sfListPresent";
     }
 
     public abstract class EntityListBase : EntityBase
