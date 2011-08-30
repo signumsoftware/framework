@@ -248,15 +248,15 @@
       <DesignTime>True</DesignTime>
     </Compile>
     <Compile Include="ControllerFilters\GZipFilter.cs" />
-    <Compile Include="ControlPanel\Views\Admin\PanelParts.cs">
+    <Compile Include="ControlPanel\Views\Admin\PanelParts1.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>PanelParts.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="ControlPanel\Views\Admin\SearchControlPart2.cs">
-      <DependentUpon>SearchControlPart.cshtml</DependentUpon>
+    <Compile Include="ControlPanel\Views\Admin\SearchControlPart.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
+      <DependentUpon>SearchControlPart.cshtml</DependentUpon>
     </Compile>
     <Compile Include="ControlPanel\Views\CountSearchControlPart1.cs">
       <AutoGen>True</AutoGen>
@@ -500,6 +500,18 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
+    <Compile Include="SMS\Controllers\SMSController.cs" />
+    <Compile Include="SMS\SMSClient.cs" />
+    <Compile Include="SMS\Views\SMSMessage.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SMSMessage.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="SMS\Views\SMSTemplate1.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SMSTemplate.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="UserQueries\Controller\UserQueriesController.cs" />
     <Compile Include="UserQueries\UserQueriesClient.cs" />
     <Compile Include="UserQueries\UserQueriesHelper.cs" />
@@ -692,8 +704,8 @@
     </None>
     <Content Include="Calendar\Content\calendar.css" />
     <Content Include="Calendar\Scripts\calendar.js" />
-    <Content Include="ControlPanel\Content\SF_ControlPanel.css" />
-    <Content Include="ControlPanel\Scripts\SF_ControlPanel.js" />
+    <Content Include="ControlPanel\Content\control-panel.css" />
+    <Content Include="ControlPanel\Scripts\control-panel.js" />
     <Content Include="ControlPanel\Views\_ViewStart.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>_ViewStart.cs</LastGenOutput>
@@ -746,21 +758,21 @@
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>LinkListPart1.cs</LastGenOutput>
     </Content>
-    <Content Include="ControlPanel\Views\PanelParts.cshtml">
-      <Generator>MvcRazorClassGenerator</Generator>
-      <LastGenOutput>PanelParts.cs</LastGenOutput>
-    </Content>
-    <Content Include="ControlPanel\Views\Admin\SearchControlPart.cshtml">
-      <Generator>MvcRazorClassGenerator</Generator>
-      <LastGenOutput>SearchControlPart2.cs</LastGenOutput>
-    </Content>
-    <Content Include="ControlPanel\Views\Admin\PanelParts.cshtml">
-      <Generator>MvcRazorClassGenerator</Generator>
-      <LastGenOutput>PanelParts.cs</LastGenOutput>
-    </Content>
     <Content Include="Profiler\Views\Statistics.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>Statistics1.cs</LastGenOutput>
+    </Content>
+    <Content Include="ControlPanel\Views\Admin\PanelParts.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>PanelParts1.cs</LastGenOutput>
+    </Content>
+    <Content Include="ControlPanel\Views\Admin\SearchControlPart.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>SearchControlPart.cs</LastGenOutput>
+    </Content>
+    <Content Include="ControlPanel\Views\PanelParts.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>PanelParts.cs</LastGenOutput>
     </Content>
     <None Include="Profiler\Views\Times.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
@@ -830,6 +842,8 @@
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>Holiday.cs</LastGenOutput>
     </None>
+    <Content Include="SMS\Content\SMS.css" />
+    <Content Include="SMS\Scripts\SF_SMS.js" />
     <Content Include="Web.config" />
     <Content Include="Basic\Views\Web.config" />
     <Content Include="Captcha\Views\Web.config" />
@@ -1003,6 +1017,14 @@
     <Content Include="Scheduler\Views\_ViewStart.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>_ViewStart.cs</LastGenOutput>
+    </Content>
+    <Content Include="SMS\Views\SMSMessage.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>SMSMessage.cs</LastGenOutput>
+    </Content>
+    <Content Include="SMS\Views\SMSTemplate.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>SMSTemplate1.cs</LastGenOutput>
     </Content>
     <None Include="UserQueries\Views\QueryColumn.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>

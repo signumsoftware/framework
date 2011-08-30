@@ -1,0 +1,25 @@
+﻿.sf-sms-warning
+{
+    color: #FE642E;
+}
+
+.sf-sms-no-more-chars
+{
+    color: red;
+    font-weight:bold;
+}
+
+.sf-sms-red
+{
+    background-color: #F5A9A9;
+}
+
+.sf-sms-highlight
+{
+    font-weight:bold;    
+}
+
+#sfCharactersLeft
+{
+    margin-left: 150px;
+}

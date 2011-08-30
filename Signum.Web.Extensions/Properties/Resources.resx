@@ -471,6 +471,15 @@
   <data name="UserQueries_UserQueries" xml:space="preserve">
     <value>User Queries</value>
   </data>
+  <data name="SMS_DestinationNumber" xml:space="preserve">
+    <value>New SMS</value>
+  </data>
+  <data name="SMS_PhoneNumber" xml:space="preserve">
+    <value>Phone number</value>
+  </data>
+  <data name="SMS_WriteTheDestinationNumber" xml:space="preserve">
+    <value>Write the destination number:</value>
+  </data>
   <data name="ControlPanel_CreateNewPart" xml:space="preserve">
     <value>Create new part</value>
   </data>

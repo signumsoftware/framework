@@ -880,6 +880,33 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to New SMS.
+        /// </summary>
+        public static string SMS_DestinationNumber {
+            get {
+                return ResourceManager.GetString("SMS_DestinationNumber", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Phone number.
+        /// </summary>
+        public static string SMS_PhoneNumber {
+            get {
+                return ResourceManager.GetString("SMS_PhoneNumber", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Write the destination number:.
+        /// </summary>
+        public static string SMS_WriteTheDestinationNumber {
+            get {
+                return ResourceManager.GetString("SMS_WriteTheDestinationNumber", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Source.
         /// </summary>
         public static string Source {

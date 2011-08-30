@@ -2,9 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.ComponentModel;
 
 namespace Signum.Entities.SMS
 {
+    public enum SMSProviderOperations
+    {
+        SendSMSMessage
+    }
+
     public enum SMSMessageState
     {
         Created,
@@ -12,17 +18,25 @@ namespace Signum.Entities.SMS
     }
 
     public enum SendState
-    { 
+    {
         None,
+        Queued,
+        Sent,
         Delivered,
         Failed,
-        Queued,
-        Sent    
     }
 
     public enum SMSMessageOperations
-    { 
+    {
+        [Description("Create SMS")]
         Create,
+        Send,
+        UpdateStatus,
+        CreateUpdateStatusPackage
+    }
+
+    public enum SMSMessageProcess
+    {
         Send,
         UpdateStatus
     }
@@ -75,15 +89,9 @@ namespace Signum.Entities.SMS
             set { Set(ref sendState, value, () => SendState); }
         }
 
-        string sourceNumber;
-        public string SourceNumber
-        {
-            get { return sourceNumber; }
-            set { Set(ref sourceNumber, value, () => SourceNumber); }
-        }
-
+        [NotNullable]
         string destinationNumber;
-        [StringLengthValidator(AllowNulls=false)]
+        [StringLengthValidator(AllowNulls = false, Min = 9, Max = 20), TelephoneValidator]
         public string DestinationNumber
         {
             get { return destinationNumber; }
@@ -97,6 +105,25 @@ namespace Signum.Entities.SMS
         {
             get { return messageID; }
             set { Set(ref messageID, value, () => MessageID); }
+        }
+
+        Lite<SMSPackageDN> sendpackage;
+        public Lite<SMSPackageDN> SendPackage
+        {
+            get { return sendpackage; }
+            set { Set(ref sendpackage, value, () => SendPackage); }
+        }
+
+        Lite<SMSPackageDN> updatePackage;
+        public Lite<SMSPackageDN> UpdatePackage
+        {
+            get { return updatePackage; }
+            set { Set(ref updatePackage, value, () => UpdatePackage); }
+        }
+
+        public override string ToString()
+        {
+            return "SMS " + MessageID;
         }
     }
 }

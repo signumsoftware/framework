@@ -27,7 +27,9 @@ namespace Signum.Entities.SMS
     [Serializable]
     public class SMSTemplateDN : Entity
     {
+        [SqlDbType(Size = 100)]
         string name;
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name
         {
             get { return name; }
@@ -50,7 +52,7 @@ namespace Signum.Entities.SMS
             set { Set(ref from, value, () => From); }
         }
 
-        SMSTemplateState state;
+        SMSTemplateState state = SMSTemplateState.Created;
         public SMSTemplateState State
         {
             get { return state; }
@@ -64,7 +66,7 @@ namespace Signum.Entities.SMS
             set { Set(ref active, value, () => Active); }
         }
 
-        DateTime startDate = DateTime.Now;
+        DateTime startDate = TimeZoneManager.Now.TrimToMinutes();
         [MinutesPrecissionValidator]
         public DateTime StartDate
         {
@@ -98,7 +100,17 @@ namespace Signum.Entities.SMS
             return base.PropertyValidation(pi);
         }
 
+        public override string ToString()
+        {
+            return Name;
+        }
+
         public SMSMessageDN CreateSMSMessage()
+        {
+            return CreateSMSMessage(null);
+        }
+
+        public SMSMessageDN CreateSMSMessage(string destinationNumber) 
         {
             return new SMSMessageDN 
             { 
@@ -106,6 +118,20 @@ namespace Signum.Entities.SMS
                 Message = this.message,
                 From = this.from,
                 State = SMSMessageState.Created,
+                DestinationNumber = destinationNumber
+            };            
+        }
+
+        public SMSMessageDN CreateSMSMessage(string destinationNumber, Lite<SMSPackageDN> package)
+        {
+            return new SMSMessageDN
+            {
+                Template = this.ToLite(),
+                Message = this.message,
+                From = this.from,
+                State = SMSMessageState.Created,
+                DestinationNumber = destinationNumber,
+                SendPackage = package
             };
         }
     }
@@ -126,7 +152,7 @@ namespace Signum.Entities.SMS
         {
             LoadDoublePeriod(91, 94);
             LoadDoublePeriod(123, 126);
-            DoubleCharacters.Add(Convert.ToChar(128), 128);
+            DoubleCharacters.Add('€', (ushort)'€');
         }
 
         private static void LoadDoublePeriod(int a, int b)
@@ -139,7 +165,8 @@ namespace Signum.Entities.SMS
 
         private static void FillNormalCharacaters()
         {
-            LoadNormalPeriod(32, 90);
+            NormalCharacters.Add(' ', (ushort)' ');
+            LoadNormalPeriod(33, 90);
             LoadNormalPeriod(97, 122);
 
             LoadNormalRange(10, 13, 95);
@@ -162,7 +189,6 @@ namespace Signum.Entities.SMS
             }
         }
 
-
         private static void LoadNormalPeriod(int a, int b)
         {
             for (int i = a; i <= b; i++)
@@ -181,13 +207,13 @@ namespace Signum.Entities.SMS
             int count = text.Length;
             foreach (var l in text.ToCharArray())
             {
-                if (!SMSCharacters.NormalCharacters.ContainsKey(l))
+                if (!SMSCharacters.NormalCharacters.ContainsKey(l)) 
                 {
-                    if (SMSCharacters.DoubleCharacters.ContainsKey(l))
+                    if (SMSCharacters.DoubleCharacters.ContainsKey(l)) 
                         count += 1;
                     else
                     {
-                        maxLength = 60;
+                        maxLength = 60;  
                         count = text.Length;
                         break;
                     }

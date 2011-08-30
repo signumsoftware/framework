@@ -331,4 +331,7 @@
   <data name="ThePasswordMustHaveBetween7And15CharactersEachOfThemBeingANumber09OrALetter" xml:space="preserve">
     <value>The password must have between 7 and 15 characters, each of them being a number 0-9 or a letter</value>
   </data>
+  <data name="TheTemplateMustBeActiveToConstructSMSMessages" xml:space="preserve">
+    <value>The template must be Active to construct SMS messages</value>
+  </data>
 </root>
