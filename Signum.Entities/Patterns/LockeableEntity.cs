@@ -38,14 +38,9 @@ namespace Signum.Entities.Patterns
                 return false;
 
             if (this.locked)
-                throw new ApplicationException( Resources.AttemptToModifyLockedEntity0.Formato(this.ToString()));
+                throw new ApplicationException(Resources.AttemptToModifyLockedEntity0.Formato(this.ToString()));
             
             return base.Set<T>(ref field, value, property);
-        }
-
-        protected internal override void PreSaving(ref bool graphModified)
-        {
-            UnsafeSet(ref toStr, ToString(), () => ToStr);
         }
     }
 }
