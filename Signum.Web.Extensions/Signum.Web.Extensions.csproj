@@ -248,6 +248,16 @@
       <DesignTime>True</DesignTime>
     </Compile>
     <Compile Include="ControllerFilters\GZipFilter.cs" />
+    <Compile Include="ControlPanel\Views\Admin\PanelParts1.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>PanelParts.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanel\Views\Admin\SearchControlPart.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SearchControlPart.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="ControlPanel\Views\CountSearchControlPart1.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -262,6 +272,11 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>PanelPart.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanel\Views\PanelParts.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>PanelParts.cshtml</DependentUpon>
     </Compile>
     <Compile Include="ControlPanel\Views\SearchControlPart2.cs">
       <AutoGen>True</AutoGen>
@@ -746,6 +761,18 @@
     <Content Include="Profiler\Views\Statistics.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>Statistics1.cs</LastGenOutput>
+    </Content>
+    <Content Include="ControlPanel\Views\Admin\PanelParts.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>PanelParts1.cs</LastGenOutput>
+    </Content>
+    <Content Include="ControlPanel\Views\Admin\SearchControlPart.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>SearchControlPart.cs</LastGenOutput>
+    </Content>
+    <Content Include="ControlPanel\Views\PanelParts.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>PanelParts.cs</LastGenOutput>
     </Content>
     <None Include="Profiler\Views\Times.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
