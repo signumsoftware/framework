@@ -248,6 +248,11 @@ namespace Signum.Entities.UserQueries
     {
         public QueryFilterDN() { }
 
+        public QueryFilterDN(string columnName)
+        {
+            this.TokenString = columnName;
+        }
+
         public QueryFilterDN(string columnName, object value)
         {
             this.TokenString = columnName;
