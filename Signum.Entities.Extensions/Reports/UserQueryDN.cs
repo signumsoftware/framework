@@ -49,7 +49,7 @@ namespace Signum.Entities.Reports
         } 
 
         [NotNullable]
-        MList<QueryFilterDN> filters;
+        MList<QueryFilterDN> filters = new MList<QueryFilterDN>();
         public MList<QueryFilterDN> Filters
         {
             get { return filters; }
@@ -57,7 +57,7 @@ namespace Signum.Entities.Reports
         }
 
         [NotNullable]
-        MList<QueryOrderDN> orders;
+        MList<QueryOrderDN> orders = new MList<QueryOrderDN>();
         public MList<QueryOrderDN> Orders
         {
             get { return orders; }
@@ -72,7 +72,7 @@ namespace Signum.Entities.Reports
         }
 
         [NotNullable]
-        MList<QueryColumnDN> columns;
+        MList<QueryColumnDN> columns = new MList<QueryColumnDN>();
         public MList<QueryColumnDN>  Columns
         {
             get { return columns; }
@@ -284,7 +284,7 @@ namespace Signum.Entities.Reports
 
             if (value != null)
             {
-                if (string.IsNullOrEmpty(valueString))
+                if (valueString.HasText())
                     throw new InvalidOperationException("Value and ValueString defined at the same time");
 
                 ValueString = FilterValueConverter.ToString(value, Token.Type);
@@ -293,10 +293,8 @@ namespace Signum.Entities.Reports
             {
                 object val;
                 string error = FilterValueConverter.TryParse(ValueString, Token.Type, out val);
-                if (error.HasText())
-                    throw new InvalidOperationException(error);
-
-                Value = val; //Executed on server only
+                if (string.IsNullOrEmpty(error))
+                    Value = val; //Executed on server only
 
                 CleanSelfModified();
             }

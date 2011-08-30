@@ -37,15 +37,13 @@ namespace Signum.Engine.Reports
                                             }).ToDynamic(); 
 
                 sb.Schema.EntityEvents<UserQueryDN>().Retrieved += UserQueryLogic_Retrieved;
-                sb.Schema.EntityEvents<UserQueryDN>().PreSaving += UserQueryLogic_PreSaving;
             }
         }
 
-        static void UserQueryLogic_PreSaving(UserQueryDN userQuery, ref bool graphModified)
+        public static UserQueryDN ParseAndSave(this UserQueryDN userQuery)
         {
             if (!userQuery.IsNew || userQuery.queryName == null)
-                return;
-
+                throw new InvalidOperationException("userQuery should be new and have queryName"); 
 
             userQuery.Query = QueryLogic.RetrieveOrGenerateQuery(userQuery.queryName);
 
@@ -53,7 +51,9 @@ namespace Signum.Engine.Reports
 
             userQuery.ParseData(description);
 
+            return userQuery.Save();
         }
+
 
         static void UserQueryLogic_Retrieved(UserQueryDN userQuery, bool fromCache)
         {

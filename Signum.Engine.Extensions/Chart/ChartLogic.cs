@@ -46,20 +46,21 @@ namespace Signum.Engine.Extensions.Chart
                                             }).ToDynamic();
 
                 sb.Schema.EntityEvents<UserChartDN>().Retrieved += ChartLogic_Retrieved;
-                sb.Schema.EntityEvents<UserChartDN>().PreSaving += ChartLogic_PreSaving;
             }
         }
 
-        static void ChartLogic_PreSaving(UserChartDN userChart, ref bool graphModified)
+        public static UserChartDN ParseData(this UserChartDN userChart)
         {
-            if (userChart.IsNew && userChart.queryName != null)
-            {
-                userChart.Query = QueryLogic.RetrieveOrGenerateQuery(userChart.queryName);
+            if (!userChart.IsNew || userChart.queryName == null)
+                throw new InvalidOperationException("userChart should be new and have queryName");
 
-                QueryDescription description = DynamicQueryManager.Current.QueryDescription(userChart.queryName);
+            userChart.Query = QueryLogic.RetrieveOrGenerateQuery(userChart.queryName);
 
-                userChart.ParseData(description);
-            }
+            QueryDescription description = DynamicQueryManager.Current.QueryDescription(userChart.queryName);
+
+            userChart.ParseData(description);
+
+            return userChart;
         }
 
         static void ChartLogic_Retrieved(UserChartDN userQuery, bool fromCache)
