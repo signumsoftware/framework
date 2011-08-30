@@ -42,7 +42,7 @@ namespace Signum.Web
 
         public virtual MvcHtmlString ToHtml(HtmlHelper helper)
         {
-            if (enabled && OnClick.HasText())
+            if (enabled && (OnClick.HasText() || Href.HasText()))
                 HtmlProps.Add("onclick", OnClick);
             else
                 DivCssClass = DivCssClass + " sf-disabled";

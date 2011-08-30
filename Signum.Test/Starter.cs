@@ -211,7 +211,7 @@ namespace Signum.Test
                                                     .Where(request.Filters)
                                                     .OrderBy(request.Orders)
                                                     .Select(request.Columns)
-                                                    .TryTake(request.Limit).ToArray();
+                                                    .TryTake(request.MaxItems).ToArray();
 
 
                                         var two = (from a in Database.Query<BandDN>()
@@ -228,9 +228,9 @@ namespace Signum.Test
                                                     .Where(request.Filters)
                                                     .OrderBy(request.Orders)
                                                     .Select(request.Columns)
-                                                    .TryTake(request.Limit).ToArray();
+                                                    .TryTake(request.MaxItems).ToArray();
 
-                                        return one.Concat(two).OrderBy(request.Orders).TryTake(request.Limit);
+                                        return one.Concat(two).OrderBy(request.Orders).TryTake(request.MaxItems);
                                     })
                                     .Column(a => a.Entity, cl => cl.Implementations = new ImplementedByAttribute(typeof(ArtistDN), typeof(BandDN)))
                                     .Column(a => a.LastAward, cl => cl.Implementations = new ImplementedByAllAttribute());
