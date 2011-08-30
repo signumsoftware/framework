@@ -17,6 +17,8 @@ using Signum.Entities.ControlPanel;
 using Signum.Entities.Reports;
 using Signum.Engine.Extensions.Chart;
 using Signum.Entities.Chart;
+using Signum.Engine.UserQueries;
+using Signum.Entities.UserQueries;
 
 namespace Signum.Test.Extensions
 {
