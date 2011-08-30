@@ -28,30 +28,26 @@ namespace Signum.Web.Reports
     public class ReportController : Controller
     {
         [HttpPost]
-        public ActionResult ToExcelPlain(FindOptions findOptions, string prefix)
+        public ActionResult ToExcelPlain(QueryRequest request, string prefix)
         {
-            if (!Navigator.IsFindable(findOptions.QueryName))
-                throw new UnauthorizedAccessException(Signum.Web.Properties.Resources.ViewForType0IsNotAllowed.Formato(findOptions.QueryName));
-
-            QueryRequest request = findOptions.ToQueryRequest();
+            if (!Navigator.IsFindable(request.QueryName))
+                throw new UnauthorizedAccessException(Signum.Web.Properties.Resources.ViewForType0IsNotAllowed.Formato(request.QueryName));
 
             ResultTable queryResult = DynamicQueryManager.Current.ExecuteQuery(request);
             byte[] binaryFile = PlainExcelGenerator.WritePlainExcel(queryResult);
 
-            return File(binaryFile, MimeType.FromExtension(".xlsx"), Navigator.ResolveWebQueryName(findOptions.QueryName) + ".xlsx");
+            return File(binaryFile, MimeType.FromExtension(".xlsx"), Navigator.ResolveWebQueryName(request.QueryName) + ".xlsx");
         }
 
         [HttpPost]
-        public ActionResult ExcelReport(FindOptions findOptions, Lite<ExcelReportDN> excelReport, string prefix)
+        public ActionResult ExcelReport(QueryRequest request, Lite<ExcelReportDN> excelReport, string prefix)
         {
-            if (!Navigator.IsFindable(findOptions.QueryName))
-                throw new UnauthorizedAccessException(Signum.Web.Properties.Resources.ViewForType0IsNotAllowed.Formato(findOptions.QueryName));
+            if (!Navigator.IsFindable(request.QueryName))
+                throw new UnauthorizedAccessException(Signum.Web.Properties.Resources.ViewForType0IsNotAllowed.Formato(request.QueryName));
 
-            QueryRequest request = findOptions.ToQueryRequest();
-           
             byte[] file = ReportsLogic.ExecuteExcelReport(excelReport, request);
 
-            return File(file, MimeType.FromExtension(".xlsx"), Navigator.ResolveWebQueryName(findOptions.QueryName)  + "-" + DateTime.Now.ToString("yyyyMMdd-HHmmss") + ".xlsx");
+            return File(file, MimeType.FromExtension(".xlsx"), Navigator.ResolveWebQueryName(request.QueryName) + "-" + DateTime.Now.ToString("yyyyMMdd-HHmmss") + ".xlsx");
             //Known Bug in IE: When the file dialog is shown, if Open is chosen the Excel will be broken as a result of IE automatically adding [1] to the name. 
             //There's not workaround for this, so either click on Save instead of Open, or use Firefox or Chrome
         }
