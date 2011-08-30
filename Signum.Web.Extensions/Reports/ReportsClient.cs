@@ -18,6 +18,7 @@ using Signum.Engine;
 using Signum.Entities.DynamicQuery;
 using Signum.Engine.Basics;
 using Signum.Entities.Files;
+using Signum.Entities.UserQueries;
 #endregion
 
 namespace Signum.Web.Reports
