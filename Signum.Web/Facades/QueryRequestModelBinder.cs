@@ -52,7 +52,7 @@ namespace Signum.Web
             {
                 int aux;
                 if (int.TryParse(parameters["top"], out aux))
-                    qr.Limit = aux;
+                    qr.MaxItems = aux;
             }
 
             return qr;
