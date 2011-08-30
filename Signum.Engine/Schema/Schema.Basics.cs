@@ -695,7 +695,7 @@ namespace Signum.Engine.Maps
             this.WhereNotNull(notNullFields.Where(a => !IsComplexIB(a)).SelectMany(a => a.Columns()).ToArray());
 
             if (notNullFields.Any(IsComplexIB))
-                this.Where += " AND " + notNullFields.Where(IsComplexIB).ToString(f => "({0})".Formato(f.Columns().ToString(c => c.Name.SqlScape() + " IS NOT NULL", " OR ")), " AND ");
+                this.Where = " AND ".Combine(this.Where, notNullFields.Where(IsComplexIB).ToString(f => "({0})".Formato(f.Columns().ToString(c => c.Name.SqlScape() + " IS NOT NULL", " OR ")), " AND "));
 
             return this;
         }
