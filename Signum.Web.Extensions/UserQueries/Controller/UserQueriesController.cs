@@ -22,6 +22,7 @@ using Signum.Entities.Basics;
 using Signum.Engine.Basics;
 using Signum.Entities.Authorization;
 using Signum.Entities.UserQueries;
+using Signum.Engine.UserQueries;
 #endregion
 
 namespace Signum.Web.UserQueries
@@ -37,12 +38,14 @@ namespace Signum.Web.UserQueries
             return Navigator.Find(this, fo);
         }
 
-        public ActionResult Create(FindOptions findOptions)
+        public ActionResult Create(QueryRequest request)
         {
-            if (!Navigator.IsFindable(findOptions.QueryName))
-                throw new UnauthorizedAccessException(Resources.ViewForType0IsNotAllowed.Formato(findOptions.QueryName));
+            if (!Navigator.IsFindable(request.QueryName))
+                throw new UnauthorizedAccessException(Resources.ViewForType0IsNotAllowed.Formato(request.QueryName));
+            
+            var userQuery = request.ToUserQuery();
 
-            var userQuery = findOptions.ToUserQuery(UserDN.Current.ToLite<IdentifiableEntity>());
+            userQuery.Related = UserDN.Current.ToLite<IdentifiableEntity>();
 
             return Navigator.View(this, userQuery);
         }
