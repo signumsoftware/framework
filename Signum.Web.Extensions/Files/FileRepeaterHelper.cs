@@ -30,6 +30,7 @@ namespace Signum.Web.Files
             sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, fileRepeater));
 
             sb.AddLine(helper.HiddenStaticInfo(fileRepeater));
+            sb.AddLine(helper.Hidden(fileRepeater.Compose(EntityListBaseKeys.ListPresent), ""));
 
             sb.AddLine(ListBaseHelper.CreateButton(helper, fileRepeater, new Dictionary<string, object> { { "title", fileRepeater.AddElementLinkText } }));
             using (sb.Surround(new HtmlTag("div").IdName(fileRepeater.Compose(EntityRepeaterKeys.ItemsContainer))))

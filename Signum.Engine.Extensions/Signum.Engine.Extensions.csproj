@@ -148,7 +148,7 @@
     <Compile Include="Reports\ExcelExtensions.cs" />
     <Compile Include="Reports\PlainExcelGenerator.cs" />
     <Compile Include="Reports\ReportsLogic.cs" />
-    <Compile Include="Reports\UserQueryLogic.cs" />
+    <Compile Include="UserQueries\UserQueryLogic.cs" />
     <Compile Include="Scheduler\SchedulerLogic.cs" />
     <Compile Include="Scheduler\CustomTaskLogic.cs" />
     <Compile Include="ServerExtensions.cs" />

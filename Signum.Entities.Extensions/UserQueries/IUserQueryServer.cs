@@ -5,7 +5,7 @@ using System.Text;
 using System.ServiceModel;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
-using Signum.Entities.Reports;
+using Signum.Entities.UserQueries;
 
 namespace Signum.Services
 {

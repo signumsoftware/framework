@@ -4,15 +4,16 @@ using System.Linq;
 using System.Text;
 using Signum.Engine.Maps;
 using System.Reflection;
-using Signum.Entities.Reports;
+using Signum.Entities.UserQueries;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Basics;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.Authorization;
 using Signum.Engine.Authorization;
+using Signum.Entities.Reports;
 
-namespace Signum.Engine.Reports
+namespace Signum.Engine.UserQueries
 {
     public static class UserQueryLogic
     {
@@ -40,6 +41,21 @@ namespace Signum.Engine.Reports
             }
         }
 
+        public static UserQueryDN ParseAndSave(this UserQueryDN userQuery)
+        {
+            if (!userQuery.IsNew || userQuery.queryName == null)
+                throw new InvalidOperationException("userQuery should be new and have queryName"); 
+
+            userQuery.Query = QueryLogic.RetrieveOrGenerateQuery(userQuery.queryName);
+
+            QueryDescription description = DynamicQueryManager.Current.QueryDescription(userQuery.queryName);
+
+            userQuery.ParseData(description);
+
+            return userQuery.Save();
+        }
+
+
         static void UserQueryLogic_Retrieved(UserQueryDN userQuery, bool fromCache)
         {
             if (fromCache)
@@ -50,13 +66,13 @@ namespace Signum.Engine.Reports
             QueryDescription description = DynamicQueryManager.Current.QueryDescription(queryName);
 
             foreach (var f in userQuery.Filters)
-                f.PostRetrieving(description);
+                f.ParseData(description);
 
             foreach (var c in userQuery.Columns)
-                c.PostRetrieving(description);
+                c.ParseData(description);
 
             foreach (var o in userQuery.Orders)
-                o.PostRetrieving(description);
+                o.ParseData(description);
         }
 
         public static List<Lite<UserQueryDN>> GetUserQueries(object queryName)

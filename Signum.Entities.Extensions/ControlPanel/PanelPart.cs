@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Signum.Utilities;
 using Signum.Entities.Reports;
+using Signum.Entities.UserQueries;
 
 namespace Signum.Entities.ControlPanel
 {

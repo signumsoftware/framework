@@ -418,6 +418,11 @@
     </Compile>
     <Compile Include="Profiler\ProfilerClient.cs" />
     <Compile Include="Profiler\Controllers\ProfilerController.cs" />
+    <Compile Include="Profiler\Views\Statistics1.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Statistics.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Profiler\Views\HeavyDetails.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -737,6 +742,10 @@
     <Content Include="ControlPanel\Views\LinkListPart.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>LinkListPart1.cs</LastGenOutput>
+    </Content>
+    <Content Include="Profiler\Views\Statistics.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>Statistics1.cs</LastGenOutput>
     </Content>
     <None Include="Profiler\Views\Times.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>

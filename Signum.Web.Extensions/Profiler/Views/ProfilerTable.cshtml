@@ -62,7 +62,7 @@
                     @(entry.Type.TypeName()).@entry.Method.Name
                 </td>
                 <td>
-                    @entry.AditionalData.TryCC(o => o.ToString().Left(50, false))
+                    @entry.AditionalData.TryCC(o => o.ToString().TryLeft(50))
                 </td>
             </tr>
         }

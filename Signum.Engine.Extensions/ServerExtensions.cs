@@ -24,6 +24,8 @@ using Signum.Entities.Reports;
 using Signum.Engine.Reports;
 using Signum.Entities.Extensions.SMS;
 using Signum.Engine.SMS;
+using Signum.Entities.UserQueries;
+using Signum.Engine.UserQueries;
 
 
 namespace Signum.Services

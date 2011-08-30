@@ -16,6 +16,8 @@ using Signum.Engine.Reports;
 using Signum.Engine;
 using Signum.Web.Extensions.Properties;
 using Signum.Engine.Basics;
+using Signum.Entities.UserQueries;
+using Signum.Engine.UserQueries;
 
 namespace Signum.Web.UserQueries
 {

@@ -1,6 +1,5 @@
 @using Signum.Utilities.ExpressionTrees
 @using Signum.Web.Profiler
-
 <h2>@ViewData[ViewDataKeys.Title]</h2>
 <div>
     @if (HeavyProfiler.Enabled)
@@ -14,13 +13,8 @@
     }
     
     @Html.ActionLink("Clean", "Clean")
-    
+   
 
-    @if(ViewBag.Slowest)
-    {
-        @Html.ActionLink("Root Entries", "Heavy")
-    }else{
         @Html.ActionLink("Slowest SQLs", "HeavySlowest")        
-    }
 </div>
 @{ Html.RenderPartial(ProfilerClient.ViewPrefix.Formato("ProfilerTable"), (object)Model);}

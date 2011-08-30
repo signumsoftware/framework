@@ -28,21 +28,19 @@ namespace Signum.Web.Profiler
             ProfilerPermissions.ViewHeavyProfiler.Authorize();
 
             ViewData[ViewDataKeys.Title] = "Root entries";
-            ViewBag.Slowest = false;
             return View(ProfilerClient.ViewPrefix.Formato("HeavyList"), Signum.Utilities.HeavyProfiler.Entries); 
         }
 
         [AcceptVerbs(HttpVerbs.Get)]
-        public ActionResult HeavySlowest(int? top)
+        public ActionResult HeavySlowest()
         {
             ProfilerPermissions.ViewHeavyProfiler.Authorize();
 
-            var list = Signum.Utilities.HeavyProfiler.AllEntries().Where(a => a.Role == "SQL").OrderByDescending(a => a.Elapsed).Take(top ?? 50).ToList();
+            var list = Signum.Utilities.HeavyProfiler.SqlStatistics().ToList();
 
             ViewData[ViewDataKeys.Title] = "Slowest SQLs";
-            ViewBag.Slowest = true;
 
-            return View(ProfilerClient.ViewPrefix.Formato("HeavyList"), list);
+            return View(ProfilerClient.ViewPrefix.Formato("Statistics"), list);
         }
 
         [AcceptVerbs(HttpVerbs.Get)]

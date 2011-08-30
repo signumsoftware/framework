@@ -95,7 +95,7 @@ namespace Signum.Entities.Authorization
         }
 
         string email;
-        [NotNullValidator, EMailValidator]
+        [EMailValidator]
         public string Email
         {
             get { return email; }

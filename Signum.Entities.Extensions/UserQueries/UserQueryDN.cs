@@ -8,12 +8,22 @@ using Signum.Utilities;
 using Signum.Utilities.Reflection;
 using System.Globalization;
 using System.Reflection;
+using Signum.Entities.Reports;
 
-namespace Signum.Entities.Reports
+namespace Signum.Entities.UserQueries
 {
     [Serializable]
     public class UserQueryDN : Entity
     {
+        public UserQueryDN() { }
+        public UserQueryDN(object queryName)
+        {
+            this.queryName = queryName;
+        }
+
+        [Ignore]
+        internal object queryName;
+        
         QueryDN query;
         [NotNullValidator]
         public QueryDN Query
@@ -40,7 +50,7 @@ namespace Signum.Entities.Reports
         } 
 
         [NotNullable]
-        MList<QueryFilterDN> filters;
+        MList<QueryFilterDN> filters = new MList<QueryFilterDN>();
         public MList<QueryFilterDN> Filters
         {
             get { return filters; }
@@ -48,7 +58,7 @@ namespace Signum.Entities.Reports
         }
 
         [NotNullable]
-        MList<QueryOrderDN> orders;
+        MList<QueryOrderDN> orders = new MList<QueryOrderDN>();
         public MList<QueryOrderDN> Orders
         {
             get { return orders; }
@@ -63,7 +73,7 @@ namespace Signum.Entities.Reports
         }
 
         [NotNullable]
-        MList<QueryColumnDN> columns;
+        MList<QueryColumnDN> columns = new MList<QueryColumnDN>();
         public MList<QueryColumnDN>  Columns
         {
             get { return columns; }
@@ -96,6 +106,21 @@ namespace Signum.Entities.Reports
         public override string ToString()
         {
             return displayName;
+        }
+
+        internal void ParseData(QueryDescription description)
+        {
+            if (Filters != null)
+                foreach (var f in Filters)
+                    f.ParseData(description);
+
+            if (Columns != null)
+                foreach (var c in Columns)
+                    c.ParseData(description);
+
+            if (Orders != null)
+                foreach (var o in Orders)
+                    o.ParseData(description);
         }
     }
 
@@ -130,7 +155,7 @@ namespace Signum.Entities.Reports
             tokenString = token.FullKey();
         }
 
-        public abstract void PostRetrieving(QueryDescription queryDescription);
+        public abstract void ParseData(QueryDescription queryDescription);
     }
 
     [Serializable]
@@ -150,7 +175,7 @@ namespace Signum.Entities.Reports
             set { Set(ref orderType, value, () => OrderType); }
         }
 
-        public override void PostRetrieving(QueryDescription queryDescription)
+        public override void ParseData(QueryDescription queryDescription)
         {
             Token = QueryUtils.Parse(tokenString, queryDescription);
             CleanSelfModified();
@@ -180,7 +205,7 @@ namespace Signum.Entities.Reports
         }
 
 
-        public override void PostRetrieving(QueryDescription queryDescription)
+        public override void ParseData(QueryDescription queryDescription)
         {
             Token = QueryUtils.Parse(tokenString, queryDescription);
             CleanSelfModified();
@@ -221,6 +246,15 @@ namespace Signum.Entities.Reports
     [Serializable]
     public class QueryFilterDN : QueryTokenDN
     {
+        public QueryFilterDN() { }
+
+        public QueryFilterDN(string columnName, object value)
+        {
+            this.TokenString = columnName;
+            this.value = value;
+            this.operation = FilterOperation.EqualTo;
+        }
+
         FilterOperation operation;
         public FilterOperation Operation
         {
@@ -245,16 +279,26 @@ namespace Signum.Entities.Reports
             set { this.value = value; }
         }
 
-        public override void PostRetrieving(QueryDescription queryDescription)
+        public override void ParseData(QueryDescription queryDescription)
         {
             Token = QueryUtils.Parse(tokenString, queryDescription);
 
-            object val;
-            string error = FilterValueConverter.TryParse(ValueString, Token.Type, out val);
-            if (string.IsNullOrEmpty(error))
-                Value = val; //Executed on server only
+            if (value != null)
+            {
+                if (valueString.HasText())
+                    throw new InvalidOperationException("Value and ValueString defined at the same time");
 
-            CleanSelfModified();
+                ValueString = FilterValueConverter.ToString(value, Token.Type);
+            }
+            else
+            {
+                object val;
+                string error = FilterValueConverter.TryParse(ValueString, Token.Type, out val);
+                if (string.IsNullOrEmpty(error))
+                    Value = val; //Executed on server only
+
+                CleanSelfModified();
+            }
         }
 
         protected override void TokenChanged()
