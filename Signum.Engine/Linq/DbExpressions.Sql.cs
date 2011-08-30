@@ -89,7 +89,7 @@ namespace Signum.Engine.Linq
                 tableName.Any(a => a == '_') ? new string(tableName.Split(new[] { '_' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s[0]).ToArray()) : null;
 
             if (string.IsNullOrEmpty(abv))
-                abv = tableName.Left(3, false);
+                abv = tableName.TryLeft(3);
             else
                 abv = abv.ToLower();
 

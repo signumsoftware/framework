@@ -206,14 +206,9 @@ namespace Signum.Web
             return Manager.QueryCount(options);
         }
 
-        public static PartialViewResult Search(ControllerBase controller, FindOptions findOptions, int? top, Context context)
+        public static PartialViewResult Search(ControllerBase controller, QueryRequest request, bool? allowMultiple, bool view, string prefix)
         {
-            return Manager.Search(controller, findOptions, top, context);
-        }
-
-        public static PartialViewResult Search(ControllerBase controller, FindOptions findOptions, int? top, string prefix)
-        {
-            return Manager.Search(controller, findOptions, top, new Context(null, prefix));
+            return Manager.Search(controller, request, allowMultiple, view, new Context(null, prefix));
         }
 
         public static string SearchTitle(object queryName)
@@ -422,6 +417,9 @@ namespace Signum.Web
 
         public static void RegisterArea(Type clientType, string areaName)
         {
+            if (areaName.Left(1) == "/")
+                throw new SystemException("Invalid start character / in {0}".Formato(areaName));
+
             CompiledViews.RegisterArea(clientType.Assembly, areaName);
             SignumControllerFactory.RegisterControllersLike(clientType, areaName);
 
@@ -756,20 +754,19 @@ namespace Signum.Web
                 return QueryUtils.GetNiceName(queryName);
         }
 
-        protected internal virtual PartialViewResult Search(ControllerBase controller, FindOptions findOptions, int? top, Context context)
+        protected internal virtual PartialViewResult Search(ControllerBase controller, QueryRequest request, bool? allowMultiple, bool view, Context context)
         {
-            if (!Navigator.IsFindable(findOptions.QueryName))
-                throw new UnauthorizedAccessException(Resources.ViewForType0IsNotAllowed.Formato(findOptions.QueryName));
-
-            QueryRequest request = findOptions.ToQueryRequest(); 
+            if (!Navigator.IsFindable(request.QueryName))
+                throw new UnauthorizedAccessException(Resources.ViewForType0IsNotAllowed.Formato(request.QueryName));
 
             ResultTable queryResult = DynamicQueryManager.Current.ExecuteQuery(request);
             
             controller.ViewData.Model = context;
 
-            controller.ViewData[ViewDataKeys.FindOptions] = findOptions;
-            
-            QueryDescription qd = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
+            controller.ViewData[ViewDataKeys.AllowMultiple] = allowMultiple;
+            controller.ViewData[ViewDataKeys.View] = view;
+
+            QueryDescription qd = DynamicQueryManager.Current.QueryDescription(request.QueryName);
             controller.ViewData[ViewDataKeys.QueryDescription] = qd;
             
             Type entitiesType = Reflector.ExtractLite(qd.Columns.Single(a => a.IsEntity).Type);
@@ -779,7 +776,7 @@ namespace Signum.Web
 
             controller.ViewData[ViewDataKeys.Results] = queryResult;
 
-            QuerySettings settings = QuerySettings[findOptions.QueryName];
+            QuerySettings settings = QuerySettings[request.QueryName];
             controller.ViewData[ViewDataKeys.Formatters] = queryResult.Columns.Select((c, i)=>new {c,i}).ToDictionary(c=>c.i, c =>settings.GetFormatter(c.c.Column));
 
             return new PartialViewResult

@@ -26,7 +26,9 @@ namespace Signum.Engine.Linq
 
                 if (query.IsBase())
                 {
-                    IQueryable newQuery = filter && Schema.Current.Tables.ContainsKey(typeof(IdentifiableEntity)) ? miFilter.GetInvoker(c.Type.GetGenericArguments())(Schema.Current, query) : query;
+                    Type identType = c.Type.GetGenericArguments().Single();
+
+                    IQueryable newQuery = filter && Schema.Current.Tables.ContainsKey(identType) ? miFilter.GetInvoker(identType)(Schema.Current, query) : query;
 
                     if (newQuery != query)
                         return newQuery.Expression;

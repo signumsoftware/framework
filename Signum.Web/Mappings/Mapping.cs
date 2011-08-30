@@ -573,7 +573,7 @@ namespace Signum.Web
 
         public IEnumerable<MappingContext<S>> GenerateItemContexts(MappingContext<MList<S>> ctx)
         {
-            IList<string> inputKeys = (IList<string>)ctx.Inputs.Keys;
+            List<string> inputKeys = ctx.Inputs.Keys.Where(k => k != EntityListBaseKeys.ListPresent).ToList();
 
             PropertyRoute route = ctx.PropertyRoute.Add("Item");
 
