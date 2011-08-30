@@ -210,37 +210,6 @@ namespace Signum.Entities.UserQueries
             Token = QueryUtils.Parse(tokenString, queryDescription);
             CleanSelfModified();
         }
-
-        public static Tuple<ColumnOptionsMode, MList<QueryColumnDN>> SmartColumns(List<Column> current, List<ColumnDescription> descriptions)
-        {
-            var ideal = (from cd in descriptions
-                         where !cd.IsEntity
-                         select new Column(cd)).ToList();
-
-            if(current.Count < ideal.Count)
-            {
-                List<Column> toRemove = new List<Column>(); 
-                int j = 0;
-                for (int i = 0; i < ideal.Count; i++)
-			    {
-                    if (j < current.Count && current[j].Equals(ideal[i]))
-                        j++;
-                    else
-                        toRemove.Add(ideal[i]); 			 
-			    }
-
-                if(toRemove.Count + current.Count == ideal.Count)
-                    return Tuple.Create(ColumnOptionsMode.Remove, toRemove.Select(c=> new QueryColumnDN{ Token = c.Token }).ToMList());
-            }
-            else
-            {
-                if(current.Zip(ideal).All(t=>t.Item1.Equals(t.Item2)))
-                    return Tuple.Create(ColumnOptionsMode.Add, current.Skip(ideal.Count).Select(c=> new QueryColumnDN(c)).ToMList()); 
-
-            }
-
-            return Tuple.Create(ColumnOptionsMode.Replace, current.Select(c=> new QueryColumnDN(c)).ToMList()); 
-        }
     }
 
     [Serializable]
@@ -332,6 +301,64 @@ namespace Signum.Entities.UserQueries
             }
 
             return null;
+        }
+    }
+
+    public static class UserQueryUtils
+    {
+        public static UserQueryDN ToUserQuery(this QueryRequest request, QueryDescription qd, QueryDN query)
+        {
+            var tuple = SmartColumns(request.Columns, qd.Columns);
+
+            return new UserQueryDN
+            {
+                Query = query,
+                Filters = request.Filters.Select(f => new QueryFilterDN 
+                { 
+                    Token = f.Token, 
+                    Operation = f.Operation, 
+                    ValueString = FilterValueConverter.ToString(f.Value, f.Token.Type) 
+                }).ToMList(),
+                ColumnsMode = tuple.Item1,
+                Columns = tuple.Item2,
+                Orders = request.Orders.Select(oo => new QueryOrderDN 
+                { 
+                    Token = oo.Token, 
+                    OrderType = oo.OrderType 
+                }).ToMList(),
+                MaxItems = request.MaxItems
+            };
+        }
+
+        public static Tuple<ColumnOptionsMode, MList<QueryColumnDN>> SmartColumns(List<Column> current, List<ColumnDescription> descriptions)
+        {
+            var ideal = (from cd in descriptions
+                         where !cd.IsEntity
+                         select new Column(cd)).ToList();
+
+            if (current.Count < ideal.Count)
+            {
+                List<Column> toRemove = new List<Column>();
+                int j = 0;
+                for (int i = 0; i < ideal.Count; i++)
+                {
+                    if (j < current.Count && current[j].Equals(ideal[i]))
+                        j++;
+                    else
+                        toRemove.Add(ideal[i]);
+                }
+
+                if (toRemove.Count + current.Count == ideal.Count)
+                    return Tuple.Create(ColumnOptionsMode.Remove, toRemove.Select(c => new QueryColumnDN { Token = c.Token }).ToMList());
+            }
+            else
+            {
+                if (current.Zip(ideal).All(t => t.Item1.Equals(t.Item2)))
+                    return Tuple.Create(ColumnOptionsMode.Add, current.Skip(ideal.Count).Select(c => new QueryColumnDN(c)).ToMList());
+
+            }
+
+            return Tuple.Create(ColumnOptionsMode.Replace, current.Select(c => new QueryColumnDN(c)).ToMList());
         }
     }
 }

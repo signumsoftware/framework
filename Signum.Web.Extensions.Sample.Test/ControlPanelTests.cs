@@ -19,6 +19,8 @@ using Signum.Web.UserQueries;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
 using Signum.Engine.DynamicQuery;
+using Signum.Entities.UserQueries;
+using Signum.Engine.UserQueries;
 
 namespace Signum.Web.Extensions.Sample.Test
 {
@@ -31,22 +33,15 @@ namespace Signum.Web.Extensions.Sample.Test
             {
                 object queryName = typeof(AlbumDN);
                 QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-
-                UserQueryDN userQuery = new FindOptions(queryName)
+                
+                UserQueryDN userQuery = new UserQueryDN(queryName)
                 {
-                    FilterOptions = new List<FilterOption>
+                    DisplayName = "test",
+                    Filters= 
                     {
-                        new FilterOption("Id", 3) 
-                        {
-                            Token = QueryUtils.Parse("Id", qd),
-                            Operation = FilterOperation.GreaterThan 
-                        }
+                        new QueryFilterDN("Id", 3) { Operation = FilterOperation.GreaterThan }
                     },
-                    ColumnOptionsMode = ColumnOptionsMode.Add
-                }.ToUserQuery(null);
-                userQuery.DisplayName = "test";
-
-                userQuery.Save();
+                }.ParseAndSave();
             }
         }
 

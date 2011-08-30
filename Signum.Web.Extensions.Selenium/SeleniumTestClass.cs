@@ -45,12 +45,12 @@ namespace Signum.Web.Selenium
             {
                 if (!Cleaned)
                 {
-                    //if (selenium != null)
-                    //{
-                    //    selenium.Stop();
-                    //    selenium.ShutDownSeleniumServer();
-                    //}
-                    //SeleniumExtensions.KillSelenium(seleniumServerProcess);
+                    if (selenium != null)
+                    {
+                        selenium.Stop();
+                        selenium.ShutDownSeleniumServer();
+                    }
+                    SeleniumExtensions.KillSelenium(seleniumServerProcess);
                 }
                 Cleaned = true;
             }

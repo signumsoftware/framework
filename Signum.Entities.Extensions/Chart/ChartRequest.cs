@@ -346,6 +346,7 @@ namespace Signum.Entities.Chart
             this.queryName = queryName;
         }
 
+        [Ignore]
         internal object queryName;
 
         QueryDN query;

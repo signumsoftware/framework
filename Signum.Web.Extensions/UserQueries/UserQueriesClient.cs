@@ -218,22 +218,5 @@ namespace Signum.Web.UserQueries
             result.ApplyUserQuery(userQuery);
             return result;
         }
-
-        public static UserQueryDN ToUserQuery(this FindOptions findOptions, Lite<IdentifiableEntity> related)
-        {
-            QueryDescription qd = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
-            var tuple = QueryColumnDN.SmartColumns(findOptions.ColumnOptions.Select(co => co.ToColumn(qd)).ToList(), qd.Columns);
-
-            return new UserQueryDN
-            {
-                Related = related,
-                Query = QueryLogic.RetrieveOrGenerateQuery(findOptions.QueryName),
-                Filters = findOptions.FilterOptions.Where(fo => !fo.Frozen).Select(fo => new QueryFilterDN { Token = fo.Token, Operation = fo.Operation, Value = fo.Value, ValueString = FilterValueConverter.ToString(fo.Value, fo.Token.Type) }).ToMList(),
-                ColumnsMode = tuple.Item1,
-                Columns = tuple.Item2,
-                Orders = findOptions.OrderOptions.Select(oo => new QueryOrderDN { Token = oo.Token, OrderType = oo.OrderType }).ToMList(),
-                MaxItems = findOptions.Top
-            };
-        }
     }
 }
