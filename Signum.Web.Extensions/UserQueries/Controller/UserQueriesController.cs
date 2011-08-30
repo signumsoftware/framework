@@ -21,6 +21,7 @@ using Signum.Entities.Reports;
 using Signum.Entities.Basics;
 using Signum.Engine.Basics;
 using Signum.Entities.Authorization;
+using Signum.Entities.UserQueries;
 #endregion
 
 namespace Signum.Web.UserQueries

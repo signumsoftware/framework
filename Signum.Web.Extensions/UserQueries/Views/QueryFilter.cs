@@ -42,7 +42,7 @@ namespace ASP
     using System.Web.UI.HtmlControls;
     using System.Xml.Linq;
     using Signum.Engine;
-    using Signum.Entities.Reports;
+    using Signum.Entities.UserQueries;
     using Signum.Web.UserQueries;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]

@@ -13,6 +13,7 @@ using Signum.Utilities.Reflection;
 using Signum.Entities.Basics;
 using Signum.Entities.Reports;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Entities.UserQueries;
 
 namespace Signum.Entities.Chart
 {

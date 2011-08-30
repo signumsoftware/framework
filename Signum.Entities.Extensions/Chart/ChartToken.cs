@@ -10,6 +10,7 @@ using Signum.Utilities.ExpressionTrees;
 using System.ComponentModel;
 using Signum.Entities.Reports;
 using Signum.Entities.Extensions.Properties;
+using Signum.Entities.UserQueries;
 
 namespace Signum.Entities.Chart
 {

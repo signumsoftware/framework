@@ -8,8 +8,9 @@ using Signum.Utilities;
 using Signum.Utilities.Reflection;
 using System.Globalization;
 using System.Reflection;
+using Signum.Entities.Reports;
 
-namespace Signum.Entities.Reports
+namespace Signum.Entities.UserQueries
 {
     [Serializable]
     public class UserQueryDN : Entity

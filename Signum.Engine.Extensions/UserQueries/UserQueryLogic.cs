@@ -4,15 +4,16 @@ using System.Linq;
 using System.Text;
 using Signum.Engine.Maps;
 using System.Reflection;
-using Signum.Entities.Reports;
+using Signum.Entities.UserQueries;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Basics;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.Authorization;
 using Signum.Engine.Authorization;
+using Signum.Entities.Reports;
 
-namespace Signum.Engine.Reports
+namespace Signum.Engine.UserQueries
 {
     public static class UserQueryLogic
     {

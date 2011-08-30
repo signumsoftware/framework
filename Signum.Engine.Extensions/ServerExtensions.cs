@@ -22,6 +22,8 @@ using Signum.Entities.Chart;
 using Signum.Utilities.DataStructures;
 using Signum.Entities.Reports;
 using Signum.Engine.Reports;
+using Signum.Entities.UserQueries;
+using Signum.Engine.UserQueries;
 
 
 namespace Signum.Services

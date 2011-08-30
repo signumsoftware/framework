@@ -12,6 +12,7 @@ using Signum.Entities.Authorization;
 using Signum.Utilities;
 using Signum.Engine.Authorization;
 using Signum.Engine.Basics;
+using Signum.Engine.UserQueries;
 
 namespace Signum.Engine.ControlPanel
 {
