@@ -155,18 +155,13 @@ WriteLiteral("    \r\n");
         bool filtersVisible = findOptions.FilterMode == FilterMode.Visible;
      
 
-WriteLiteral("    \r\n    <div id=\"");
+WriteLiteral("    \r\n    <div style=\"display:");
 
 
-        Write(Model.Compose("divFilters"));
+                    Write(filtersAlwaysHidden ? "none" : "block");
 
-WriteLiteral("\" style=\"display:");
-
-
-                                                      Write(filtersAlwaysHidden ? "none" : "block");
-
-WriteLiteral("\" >\r\n        <div class=\"sf-fields-list\">\r\n            <div class=\"ui-widget sf-f" +
-"ilters\" ");
+WriteLiteral("\">\r\n        <div class=\"sf-fields-list\">\r\n            <div class=\"ui-widget sf-fi" +
+"lters\" ");
 
 
                                           Write(filtersVisible ? "" : "style=display:none");
