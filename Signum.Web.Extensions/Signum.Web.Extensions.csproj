@@ -721,6 +721,8 @@
     </None>
     <Content Include="Calendar\Content\calendar.css" />
     <Content Include="Calendar\Scripts\calendar.js" />
+    <Content Include="Chart\Content\SF_Chart.css" />
+    <Content Include="Chart\Images\chartType.png" />
     <Content Include="ControlPanel\Content\SF_ControlPanel.css" />
     <Content Include="ControlPanel\Scripts\SF_ControlPanel.js" />
     <Content Include="Chart\Scripts\SF_Chart.js" />
@@ -806,6 +808,7 @@
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>ChartToken1.cs</LastGenOutput>
     </Content>
+    <None Include="Chart\Images\chartType.psd" />
     <None Include="Profiler\Views\Times.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>Times.cs</LastGenOutput>

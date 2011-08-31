@@ -6,19 +6,48 @@
 @using Signum.Entities.Reflection
 @using Signum.Entities
 @using Signum.Entities.Chart
+@using Signum.Web.Chart
+@using Signum.Utilities
 @model TypeContext<ChartRequest>
 
+@{ QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription]; }
 
-<div id="@Model.Compose("chartBuilder")">
-    <div id="@Model.Compose("chartType")">
-            
-    </div>
-    <div id="@Model.Compose("chartType")">
-        @{
-            @Html.EmbeddedControl(Model, cr => cr.FirstDimension)
-            @Html.EmbeddedControl(Model, cr => cr.SecondDimension)
-            @Html.EmbeddedControl(Model, cr => cr.FirstValue)
-            @Html.EmbeddedControl(Model, cr => cr.SecondValue)
-        }
-    </div>
-</div>
+<table class="sf-chart-builder">
+    <tr>
+        <td class="ui-widget ui-widget-content ui-corner-all sf-chart-type" data-url="@(Url.Action<ChartController>(cc => cc.ChangeType(Model.ControlID)))">
+            <div class="ui-widget-header">
+                @typeof(ChartType).NiceName()
+                @Html.Hidden(Model.Compose("ChartType"), Model.Value.ChartType.ToString())
+            </div>
+            @foreach(var group in ChartUtils.ChartTypePosition.GroupBy(ctp => ctp.Row).OrderBy(group => group.Key))
+            {
+                foreach (var type in group.OrderBy(ctp => ctp.Column))
+                { 
+                    <div class="@ChartClient.ChartTypeImgClass(Model.Value, type.ChartType)" data-related="@type.ChartType.ToString()" title="@type.ChartType.NiceToString()"></div>
+                }
+                <div class="clearall"></div>
+            }
+        </td>
+        <td class="ui-widget ui-widget-content ui-corner-all sf-chart-tokens">
+            <div class="ui-widget-header">@Resources.Chart_ChartSettings</div>
+            @{
+                if (Model.Value.FirstDimension != null)
+                {
+                    @Html.EmbeddedControl(Model, cr => cr.FirstDimension, ec => ec.ViewData[ViewDataKeys.QueryName] = queryDescription.QueryName)
+                }
+                if (Model.Value.SecondDimension != null)
+                {
+                    @Html.EmbeddedControl(Model, cr => cr.SecondDimension, ec => ec.ViewData[ViewDataKeys.QueryName] = queryDescription.QueryName)
+                }
+                if (Model.Value.FirstValue != null)
+                {
+                    @Html.EmbeddedControl(Model, cr => cr.FirstValue, ec => ec.ViewData[ViewDataKeys.QueryName] = queryDescription.QueryName)
+                }
+                if (Model.Value.SecondValue != null)
+                {
+                    @Html.EmbeddedControl(Model, cr => cr.SecondValue, ec => ec.ViewData[ViewDataKeys.QueryName] = queryDescription.QueryName)
+                }
+            }
+        </td>
+    </tr>
+</table>

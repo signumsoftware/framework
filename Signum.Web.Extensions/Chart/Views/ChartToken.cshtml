@@ -10,12 +10,16 @@
 
 @using (var tc = Html.TypeContext<ChartTokenDN>())
 {
+    if (tc.Value == null)
+    {
+        tc.Value = new ChartTokenDN();
+    }
     <div class="sf-chart-token">
         @using (Html.FieldInline())
         {
-            <span class="sf-label-line">PropertyLabel</span>
+            <span class="sf-label-line">@tc.Value.PropertyLabel</span>
             @Html.ValueLine(tc, ct => ct.Aggregate)
-            @Html.QueryTokenCombo(tc.Value.Token, tc)
+            @Html.QueryTokenCombo(tc.Value.Token, ViewData[ViewDataKeys.QueryName], tc)
 
             @Html.ValueLine(tc, ct => ct.DisplayName)
             @Html.ValueLine(tc, ct => ct.Format)

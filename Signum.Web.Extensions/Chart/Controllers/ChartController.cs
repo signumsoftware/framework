@@ -7,6 +7,8 @@ using Signum.Web.Extensions.Properties;
 using Signum.Entities.Chart;
 using Signum.Engine.DynamicQuery;
 using Signum.Utilities;
+using Signum.Entities.Reflection;
+using Signum.Entities;
 
 namespace Signum.Web.Chart
 {
@@ -23,14 +25,29 @@ namespace Signum.Web.Chart
             {
                 Filters = findOptions.FilterOptions.Select(fo => fo.ToFilter()).ToList()
             };
-
-            //new FilterOption{ 
-
-            ViewData[ViewDataKeys.PartialViewName] = ChartClient.ChartControlView;
-            ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
-            ViewData[ViewDataKeys.Title] = Navigator.Manager.SearchTitle(findOptions.QueryName);
             
-            return View(Navigator.Manager.SearchPageView, request);
+            var queryDescription = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
+
+            var entityColumn = queryDescription.Columns.Single(a => a.IsEntity);
+            Type entitiesType = Reflector.ExtractLite(entityColumn.Type);
+            Implementations implementations = entityColumn.Implementations;
+            
+            ViewData[ViewDataKeys.PartialViewName] = ChartClient.ChartControlView;
+            ViewData[ViewDataKeys.Title] = Navigator.Manager.SearchTitle(findOptions.QueryName);
+            ViewData[ViewDataKeys.QueryDescription] = queryDescription;
+            ViewData[ViewDataKeys.FilterOptions] = findOptions.FilterOptions;
+            ViewData[ViewDataKeys.View] = findOptions.View && (implementations != null || Navigator.IsViewable(entitiesType, true));
+            
+            return View(Navigator.Manager.SearchPageView,  new TypeContext<ChartRequest>(request, ""));
+        }
+
+        public PartialViewResult ChangeType(string prefix)
+        {
+            var request = this.ExtractEntity<ChartRequest>(prefix).ApplyChanges(this.ControllerContext, prefix, true).Value;
+
+            ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(request.QueryName);
+
+            return PartialView(ChartClient.ChartBuilderView, new TypeContext<ChartRequest>(request, prefix));
         }
     }
 }

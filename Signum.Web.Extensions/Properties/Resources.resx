@@ -495,4 +495,7 @@
   <data name="Chart_Query0IsNotAllowed" xml:space="preserve">
     <value>Query {0} is not allowed</value>
   </data>
+  <data name="Chart_ChartSettings" xml:space="preserve">
+    <value>Chart settings</value>
+  </data>
 </root>

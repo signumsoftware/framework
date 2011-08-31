@@ -178,6 +178,15 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Chart settings.
+        /// </summary>
+        public static string Chart_ChartSettings {
+            get {
+                return ResourceManager.GetString("Chart_ChartSettings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Draw.
         /// </summary>
         public static string Chart_Draw {

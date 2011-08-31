@@ -46,6 +46,7 @@ namespace ASP
     using Signum.Engine.DynamicQuery;
     using Signum.Entities.Reflection;
     using Signum.Entities.Chart;
+    using Signum.Web.Chart;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Chart/Views/ChartBuilder.cshtml")]
@@ -74,44 +75,103 @@ namespace ASP
 
 
 
-WriteLiteral("\r\n\r\n<div id=\"");
 
 
-    Write(Model.Compose("chartBuilder"));
-
-WriteLiteral("\">\r\n    <div id=\"");
+WriteLiteral("\r\n");
 
 
-        Write(Model.Compose("chartType"));
+   QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription]; 
 
-WriteLiteral("\">\r\n            \r\n    </div>\r\n    <div id=\"");
-
-
-        Write(Model.Compose("chartType"));
-
-WriteLiteral("\">\r\n");
+WriteLiteral("\r\n<table class=\"sf-chart-builder\">\r\n    <tr>\r\n        <td class=\"ui-widget ui-wid" +
+"get-content ui-corner-all sf-chart-type\" data-url=\"");
 
 
-          
+                                                                                  Write(Url.Action<ChartController>(cc => cc.ChangeType(Model.ControlID)));
+
+WriteLiteral("\">\r\n            <div class=\"ui-widget-header\">\r\n                ");
+
+
+           Write(typeof(ChartType).NiceName());
+
+WriteLiteral("\r\n                ");
+
+
+           Write(Html.Hidden(Model.Compose("ChartType"), Model.Value.ChartType.ToString()));
+
+WriteLiteral("\r\n            </div>\r\n");
+
+
+             foreach(var group in ChartUtils.ChartTypePosition.GroupBy(ctp => ctp.Row).OrderBy(group => group.Key))
+            {
+                foreach (var type in group.OrderBy(ctp => ctp.Column))
+                { 
+
+WriteLiteral("                    <div class=\"");
+
+
+                           Write(ChartClient.ChartTypeImgClass(Model.Value, type.ChartType));
+
+WriteLiteral("\" data-related=\"");
+
+
+                                                                                                      Write(type.ChartType.ToString());
+
+WriteLiteral("\" title=\"");
+
+
+                                                                                                                                         Write(type.ChartType.NiceToString());
+
+WriteLiteral("\"></div>\r\n");
+
+
+                }
+
+WriteLiteral("                <div class=\"clearall\"></div>\r\n");
+
+
+            }
+
+WriteLiteral("        </td>\r\n        <td class=\"ui-widget ui-widget-content ui-corner-all sf-ch" +
+"art-tokens\">\r\n            <div class=\"ui-widget-header\">");
+
+
+                                     Write(Resources.Chart_ChartSettings);
+
+WriteLiteral("</div>\r\n");
+
+
+              
+                if (Model.Value.FirstDimension != null)
+                {
+                    
+               Write(Html.EmbeddedControl(Model, cr => cr.FirstDimension, ec => ec.ViewData[ViewDataKeys.QueryName] = queryDescription.QueryName));
+
+                                                                                                                                                 
+                }
+                if (Model.Value.SecondDimension != null)
+                {
+                    
+               Write(Html.EmbeddedControl(Model, cr => cr.SecondDimension, ec => ec.ViewData[ViewDataKeys.QueryName] = queryDescription.QueryName));
+
+                                                                                                                                                  
+                }
+                if (Model.Value.FirstValue != null)
+                {
+                    
+               Write(Html.EmbeddedControl(Model, cr => cr.FirstValue, ec => ec.ViewData[ViewDataKeys.QueryName] = queryDescription.QueryName));
+
+                                                                                                                                             
+                }
+                if (Model.Value.SecondValue != null)
+                {
+                    
+               Write(Html.EmbeddedControl(Model, cr => cr.SecondValue, ec => ec.ViewData[ViewDataKeys.QueryName] = queryDescription.QueryName));
+
+                                                                                                                                              
+                }
             
-       Write(Html.EmbeddedControl(Model, cr => cr.FirstDimension));
 
-                                                                 
-            
-       Write(Html.EmbeddedControl(Model, cr => cr.SecondDimension));
-
-                                                                  
-            
-       Write(Html.EmbeddedControl(Model, cr => cr.FirstValue));
-
-                                                             
-            
-       Write(Html.EmbeddedControl(Model, cr => cr.SecondValue));
-
-                                                              
-        
-
-WriteLiteral("    </div>\r\n</div>");
+WriteLiteral("        </td>\r\n    </tr>\r\n</table>");
 
 
         }

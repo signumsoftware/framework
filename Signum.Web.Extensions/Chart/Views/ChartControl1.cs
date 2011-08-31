@@ -79,50 +79,62 @@ namespace ASP
 WriteLiteral("\r\n");
 
 
+Write(Html.ScriptCss("~/Chart/Content/SF_Chart.css"));
+
+WriteLiteral("\r\n\r\n");
+
+
    
-    FindOptions findOptions = Model.Value.FindOptions;
     QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
-    var entityColumn = queryDescription.Columns.Single(a => a.IsEntity);
-    Type entitiesType = Reflector.ExtractLite(entityColumn.Type);
-    Implementations implementations = entityColumn.Implementations;
-    bool viewable = findOptions.View && (implementations != null || Navigator.IsViewable(entitiesType, true));
+    List<FilterOption> filterOptions = (List<FilterOption>)ViewData[ViewDataKeys.FilterOptions];
 
 
 WriteLiteral("\r\n<div id=\"");
 
 
-    Write(Model.Compose("divSearchControl"));
+    Write(Model.Compose("divChartControl"));
 
 WriteLiteral("\" class=\"sf-search-control sf-chart-control\">\r\n    ");
 
 
-Write(Html.Hidden(Model.Compose("sfWebQueryName"), Navigator.ResolveWebQueryName(Model.Value.FindOptions.QueryName), new { disabled = "disabled" }));
+Write(Html.HiddenRuntimeInfo(Model));
 
-WriteLiteral("\r\n    ");
-
-
-Write(Html.Hidden(Model.Compose("sfView"), viewable, new { disabled = "disabled" }));
-
-WriteLiteral("\r\n\r\n    <div id=\"");
+WriteLiteral("\r\n    \r\n    <div>\r\n        <div class=\"sf-fields-list\">\r\n            <div class=\"" +
+"ui-widget sf-filters\">\r\n                <div class=\"ui-widget-header ui-corner-t" +
+"op sf-filters-body\">\r\n                    ");
 
 
-        Write(Model.Compose("divFilters"));
+               Write(Html.TokensCombo(queryDescription, Model));
 
-WriteLiteral("\">\r\n");
+WriteLiteral("\r\n                \r\n                    ");
 
 
-           
-            ViewData[ViewDataKeys.FindOptions] = findOptions;
-            Html.RenderPartial(Navigator.Manager.FilterBuilderView); 
-        
+               Write(Html.Href(
+                            Model.Compose("btnAddFilter"), 
+                            Signum.Web.Properties.Resources.FilterBuilder_AddFilter, 
+                            "",
+                            Signum.Web.Properties.Resources.Signum_selectToken,
+                            "sf-query-button sf-add-filter sf-disabled", 
+                            new Dictionary<string, object> 
+                            { 
+                                { "data-icon", "ui-icon-arrowthick-1-s" },
+                                { "data-url", Url.SignumAction("AddFilter") }
+                            }));
 
-WriteLiteral("    </div>\r\n\r\n");
+WriteLiteral("\r\n                </div>  \r\n");
+
+
+                   
+                    Html.RenderPartial(Navigator.Manager.FilterBuilderView); 
+                
+
+WriteLiteral("            </div>\r\n        </div>\r\n    </div>\r\n\r\n");
 
 
        Html.RenderPartial(ChartClient.ChartBuilderView); 
 
 WriteLiteral("    \r\n    <div class=\"sf-query-button-bar\">\r\n        <button type=\"submit\" class=" +
-"\"sf-query-button sf-draw\" data-icon=\"ui-icon-search\" id=\"");
+"\"sf-query-button sf-draw\" data-icon=\"ui-icon-pencil\" id=\"");
 
 
                                                                                         Write(Model.Compose("qbDraw"));

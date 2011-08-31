@@ -79,6 +79,10 @@ WriteLiteral("\r\n");
 
  using (var tc = Html.TypeContext<ChartTokenDN>())
 {
+    if (tc.Value == null)
+    {
+        tc.Value = new ChartTokenDN();
+    }
 
 WriteLiteral("    <div class=\"sf-chart-token\">\r\n");
 
@@ -86,7 +90,12 @@ WriteLiteral("    <div class=\"sf-chart-token\">\r\n");
          using (Html.FieldInline())
         {
 
-WriteLiteral("            <span class=\"sf-label-line\">PropertyLabel</span>\r\n");
+WriteLiteral("            <span class=\"sf-label-line\">");
+
+
+                                   Write(tc.Value.PropertyLabel);
+
+WriteLiteral("</span>\r\n");
 
 
             
@@ -94,9 +103,9 @@ WriteLiteral("            <span class=\"sf-label-line\">PropertyLabel</span>\r\n
 
                                                    
             
-       Write(Html.QueryTokenCombo(tc.Value.Token, tc));
+       Write(Html.QueryTokenCombo(tc.Value.Token, ViewData[ViewDataKeys.QueryName], tc));
 
-                                                     
+                                                                                       
 
             
        Write(Html.ValueLine(tc, ct => ct.DisplayName));

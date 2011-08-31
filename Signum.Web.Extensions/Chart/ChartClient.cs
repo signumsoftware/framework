@@ -41,11 +41,23 @@ namespace Signum.Web.Chart
                     Id = TypeContextUtilities.Compose(prefix, "qbChartNew"),
                     AltText = chartNewText,
                     Text = chartNewText,
-                    Href = "",
-                    //OnClick =  Js.SubmitOnly(RouteHelper.New().Action("Create", "UserQueries"), new JsFindNavigator(prefix).requestData()).ToJS(),
+                    OnClick =  Js.SubmitOnly(RouteHelper.New().Action("Index", "Chart"), new JsFindNavigator(prefix).requestData()).ToJS(),
                     DivCssClass = ToolBarButton.DefaultQueryCssClass
                 }
             };
+        }
+
+        public static string ChartTypeImgClass(ChartBase chart, ChartType type)
+        {
+            string css = "sf-chart-img sf-chart-img-" + type.ToString().ToLower();
+
+            if (ChartUtils.GetChartResultType(type) == chart.ChartResultType)
+                css += " sf-chart-img-equiv";
+
+            if (type == chart.ChartType)
+                css += " sf-chart-img-curr";
+            
+            return css;
         }
     }
 }

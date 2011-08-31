@@ -69,53 +69,55 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.Type("DisplayName", "Control Panel Home Page");
             selenium.Click("HomePage");
             selenium.Type("NumberOfColumns", "2");
-                
-            string partsPrefix = "Parts_";
-
-            //SearchControlPart with userquery created in UQ_Create test
-            string part0 = "{0}0_".Formato(partsPrefix);
-            selenium.LineCreate(partsPrefix, false, 0);
-            selenium.RepeaterWaitUntilItemLoaded(partsPrefix, 0);
-            SetPartBasicProperties(selenium, part0, 1, 1, true, "Last Albums");
-            selenium.LineFindWithImplAndSelectElements("{0}Content_".Formato(part0), "UserQuery", false, new int[]{0});
-                
-            //CountSearchControlPart with userquery created in UQ_Create test
-            string part1 = "{0}1_".Formato(partsPrefix);
-            selenium.LineCreate(partsPrefix, false, 1);
-            selenium.RepeaterWaitUntilItemLoaded(partsPrefix, 1);
-            SetPartBasicProperties(selenium, part1, 2, 1, false, "My Count Controls");
-            string part1content = "{0}Content_".Formato(part1);
-            selenium.LineCreateWithImpl(part1content, true, "CountSearchControlPart");
-            string part1contentUserQueries = "{0}UserQueries_".Formato(part1content);
-            selenium.LineCreate(part1contentUserQueries, false);
-            selenium.RepeaterWaitUntilItemLoaded(part1contentUserQueries, 0);
-            selenium.Type("{0}0_Label".Formato(part1contentUserQueries), "Last Albums Count");
-
-            selenium.LineFindAndSelectElements("{0}0_UserQuery_".Formato(part1contentUserQueries), false, new int[] { 0 });
-            
-            selenium.PopupOk(part1content);
-
-            //LinkListPart
-            string part2 = "{0}2_".Formato(partsPrefix);
-            selenium.LineCreate(partsPrefix, false, 2);
-            selenium.RepeaterWaitUntilItemLoaded(partsPrefix, 2);
-            SetPartBasicProperties(selenium, part2, 2, 2, false, "My Links");
-            string part2content = "{0}Content_".Formato(part2);
-            selenium.LineCreateWithImpl(part2content, true, "LinkListPart");
-            string part2contentLinks = "{0}Links_".Formato(part2content);
-            CreateLinkListPart(selenium, part2contentLinks, 0, "Best Band", "http://localhost/Signum.Web.Extensions.Sample/View/Band/1");
-            CreateLinkListPart(selenium, part2contentLinks, 1, "Best Artist", "http://localhost/Signum.Web.Extensions.Sample/View/Artist/1");
-            selenium.PopupOk(part2content);
 
             selenium.EntityButtonSaveClick();
             selenium.WaitForPageToLoad(PageLoadTimeout);
 
-            //view
-            selenium.Open("/Signum.Web.Extensions.Sample/");
+            string partsPrefix = "Parts_";
+
+            //SearchControlPart with userquery created in UQ_Create test
+            CreateNewPart("UserQueryPart");
+            string part0 = partsPrefix + "0_";
+            selenium.Type(part0 + "Title", "Last Albums");
+            selenium.LineFindAndSelectElements(part0 + "Content_UserQuery_", false, new int[]{ 0 });
+
+            //CountSearchControlPart with userquery created in UQ_Create test
+            CreateNewPart("CountSearchControlPart");
+            string part1 = partsPrefix + "1_";
+            selenium.Type(part1 + "Title", "My Count Controls");
+            string part1ContentUQsPrefix = part1 + "Content_UserQueries_";
+            selenium.LineCreate(part1ContentUQsPrefix, false, 0);
+            selenium.RepeaterWaitUntilItemLoaded(part1ContentUQsPrefix, 0);
+            selenium.LineFindAndSelectElements(part1ContentUQsPrefix + "0_UserQuery_", false, new int[] { 0 });
+            
+            //LinkListPart - drag to second column
+            CreateNewPart("LinkListPart");
+            string part2 = partsPrefix + "2_";
+            selenium.Type(part2 + "Title", "My Links");
+            CreateLinkListPartItem(selenium, part2, 0, "Best Band", "http://localhost/Signum.Web.Extensions.Sample/View/Band/1");
+            CreateLinkListPartItem(selenium, part2, 1, "Best Artist", "http://localhost/Signum.Web.Extensions.Sample/View/Artist/1");
+            selenium.MouseDown("jq=#sfCpAdminContainer td[data-column=1] .sf-cp-part:eq(2)");
+            selenium.MouseMove("jq=#sfCpAdminContainer td[data-column=2] .sf-cp-droppable");
+            selenium.MouseUp("jq=#sfCpAdminContainer td[data-column=2] .sf-cp-droppable");
+
+            //selenium.EntityButtonSaveClick();
+            //selenium.WaitForPageToLoad(PageLoadTimeout);
+
+            ////view
+            //selenium.Open("/Signum.Web.Extensions.Sample/");
+            //selenium.WaitForPageToLoad(PageLoadTimeout);
+            //Assert.IsTrue(selenium.IsElementPresent("{0} #r1c1_divSearchControl".Formato(PartFrontEndSelector(1, 1))));
+            //Assert.IsTrue(selenium.IsElementPresent("{0} #lblr2c1 + a.count-search".Formato(PartFrontEndSelector(2, 1))));
+            //Assert.IsTrue(selenium.IsElementPresent("{0} li:nth-child(2) > a".Formato(PartFrontEndSelector(2, 2))));
+        }
+
+        void CreateNewPart(string partType)
+        {
+            selenium.EntityButtonClick("CreatePart");
+
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SeleniumExtensions.PopupSelector("New_")));
+            selenium.Click(partType);
             selenium.WaitForPageToLoad(PageLoadTimeout);
-            Assert.IsTrue(selenium.IsElementPresent("{0} #r1c1_divSearchControl".Formato(PartFrontEndSelector(1, 1))));
-            Assert.IsTrue(selenium.IsElementPresent("{0} #lblr2c1 + a.count-search".Formato(PartFrontEndSelector(2, 1))));
-            Assert.IsTrue(selenium.IsElementPresent("{0} li:nth-child(2) > a".Formato(PartFrontEndSelector(2, 2))));
         }
 
         string PartFrontEndSelector(int rowIndexBase1, int colIndexBase1)
@@ -123,21 +125,15 @@ namespace Signum.Web.Extensions.Sample.Test
             return "jq=table > tbody > tr:nth-child({0}) > td:nth-child({1})".Formato(rowIndexBase1, colIndexBase1);
         }
 
-        void CreateLinkListPart(ISelenium selenium, string partPrefix, int linkIndexBase0, string label, string link)
+        void CreateLinkListPartItem(ISelenium selenium, string partPrefix, int linkIndexBase0, string label, string link)
         {
-            selenium.LineCreate(partPrefix, false, linkIndexBase0);
-            selenium.RepeaterWaitUntilItemLoaded(partPrefix, linkIndexBase0);
-            selenium.Type("{0}{1}_Label".Formato(partPrefix, linkIndexBase0), label);
-            selenium.Type("{0}{1}_Link".Formato(partPrefix, linkIndexBase0), link);
-        }
+            string partContentLinksPrefix = partPrefix + "Content_Links_";
 
-        void SetPartBasicProperties(ISelenium selenium, string partPrefix, int rowIndexBase1, int colIndexBase1, bool fillRow, string partTitle)
-        {
-            selenium.Type("{0}Row".Formato(partPrefix), rowIndexBase1.ToString());
-            selenium.Type("{0}Column".Formato(partPrefix), colIndexBase1.ToString());
-            if (fillRow)
-                selenium.Click("{0}Fill".Formato(partPrefix));
-            selenium.Type("{0}Title".Formato(partPrefix), partTitle);
+            selenium.LineCreate(partContentLinksPrefix, false, 0);
+            selenium.RepeaterWaitUntilItemLoaded(partContentLinksPrefix, 0);
+            string partContentLinksItemPrefix = partContentLinksPrefix + linkIndexBase0 + "_";
+            selenium.Type(partContentLinksItemPrefix + "Label", label);
+            selenium.Type(partContentLinksItemPrefix + "Link", link);
         }
     }
 }

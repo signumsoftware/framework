@@ -9,30 +9,45 @@
 @using Signum.Web.Chart
 @model TypeContext<ChartRequest>
 
+@Html.ScriptCss("~/Chart/Content/SF_Chart.css")
+
 @{ 
-    FindOptions findOptions = Model.Value.FindOptions;
     QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
-    var entityColumn = queryDescription.Columns.Single(a => a.IsEntity);
-    Type entitiesType = Reflector.ExtractLite(entityColumn.Type);
-    Implementations implementations = entityColumn.Implementations;
-    bool viewable = findOptions.View && (implementations != null || Navigator.IsViewable(entitiesType, true));
+    List<FilterOption> filterOptions = (List<FilterOption>)ViewData[ViewDataKeys.FilterOptions];
 }
 
-<div id="@Model.Compose("divSearchControl")" class="sf-search-control sf-chart-control">
-    @Html.Hidden(Model.Compose("sfWebQueryName"), Navigator.ResolveWebQueryName(Model.Value.FindOptions.QueryName), new { disabled = "disabled" })
-    @Html.Hidden(Model.Compose("sfView"), viewable, new { disabled = "disabled" })
-
-    <div id="@Model.Compose("divFilters")">
-        @{ 
-            ViewData[ViewDataKeys.FindOptions] = findOptions;
-            Html.RenderPartial(Navigator.Manager.FilterBuilderView); 
-        }
+<div id="@Model.Compose("divChartControl")" class="sf-search-control sf-chart-control">
+    @Html.HiddenRuntimeInfo(Model)
+    
+    <div>
+        <div class="sf-fields-list">
+            <div class="ui-widget sf-filters">
+                <div class="ui-widget-header ui-corner-top sf-filters-body">
+                    @Html.TokensCombo(queryDescription, Model)
+                
+                    @Html.Href(
+                            Model.Compose("btnAddFilter"), 
+                            Signum.Web.Properties.Resources.FilterBuilder_AddFilter, 
+                            "",
+                            Signum.Web.Properties.Resources.Signum_selectToken,
+                            "sf-query-button sf-add-filter sf-disabled", 
+                            new Dictionary<string, object> 
+                            { 
+                                { "data-icon", "ui-icon-arrowthick-1-s" },
+                                { "data-url", Url.SignumAction("AddFilter") }
+                            })
+                </div>  
+                @{ 
+                    Html.RenderPartial(Navigator.Manager.FilterBuilderView); 
+                }
+            </div>
+        </div>
     </div>
 
     @{ Html.RenderPartial(ChartClient.ChartBuilderView); }
     
     <div class="sf-query-button-bar">
-        <button type="submit" class="sf-query-button sf-draw" data-icon="ui-icon-search" id="@Model.Compose("qbDraw")" onclick="">@Resources.Chart_Draw</button>
+        <button type="submit" class="sf-query-button sf-draw" data-icon="ui-icon-pencil" id="@Model.Compose("qbDraw")" onclick="">@Resources.Chart_Draw</button>
     </div>
     
     <div class="clearall"></div>
