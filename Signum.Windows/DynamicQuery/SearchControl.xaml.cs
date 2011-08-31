@@ -485,7 +485,7 @@ namespace Signum.Windows
                 Filters = FilterOptions.Select(f => f.ToFilter()).ToList(),
                 Orders = OrderOptions.Select(o => o.ToOrder()).ToList(),
                 Columns = CurrentColumns.ToList(),
-                Limit = MaxItemsCount
+                MaxItems = MaxItemsCount
             };
 
             return request;
