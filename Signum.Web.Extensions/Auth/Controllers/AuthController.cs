@@ -246,7 +246,7 @@ namespace Signum.Web.Auth
                         throw new ApplicationException(Resources.ThereSNotARegisteredUserWithThatEmailAddress);
 
                     //since this is an url sent by email, it should contain the domain name
-                    ResetPasswordRequestLogic.ResetPasswordRequest(user, rpr => 
+                    ResetPasswordRequestLogic.ResetPasswordRequestAndSendEmail(user, rpr => 
                         Request.Url.Scheme + System.Uri.SchemeDelimiter + Request.Url.Host + (Request.Url.Port != 80 ? (":" + Request.Url.Port ) : "") + RouteHelper.New().Action("ResetPasswordCode", "Auth", new { email = rpr.User.Email, code = rpr.Code }));
                 }
 
@@ -309,7 +309,7 @@ namespace Signum.Web.Auth
         }
 
         [HttpPost]
-        public ActionResult ResetPasswordSetNew(string code, Lite<ResetPasswordRequestDN> rpr)
+        public ActionResult ResetPasswordSetNew(Lite<ResetPasswordRequestDN> rpr)
         {
             ResetPasswordRequestDN request = null;
             try
@@ -340,7 +340,7 @@ namespace Signum.Web.Auth
                 {
                     Database.Save(context.Value);
                     //remove pending requests
-                    Database.Query<ResetPasswordRequestDN>().Where(r => r.User.Email == user.Email && r.Code == code).UnsafeDelete();
+                    Database.Query<ResetPasswordRequestDN>().Where(r => r.User.Email == user.Email && r.Code == request.Code).UnsafeDelete();
                 }
 
                 return RedirectToAction("ResetPasswordSuccess");

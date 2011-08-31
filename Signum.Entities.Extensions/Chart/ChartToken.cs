@@ -10,6 +10,7 @@ using Signum.Utilities.ExpressionTrees;
 using System.ComponentModel;
 using Signum.Entities.Reports;
 using Signum.Entities.Extensions.Properties;
+using Signum.Entities.UserQueries;
 
 namespace Signum.Entities.Chart
 {
@@ -203,7 +204,7 @@ namespace Signum.Entities.Chart
             tokenString = token == null ? null : token.FullKey();
         }
 
-        public override void PostRetrieving(QueryDescription queryDescription)
+        public override void ParseData(QueryDescription queryDescription)
         {
             Token = tokenString.HasText() ? QueryUtils.Parse(tokenString, token => SubTokensChart(token, queryDescription.Columns)) : null;
             CleanSelfModified();

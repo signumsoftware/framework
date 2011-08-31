@@ -123,7 +123,7 @@
     <Compile Include="Processes\Process.cs" />
     <Compile Include="Processes\Package.cs" />
     <Compile Include="Profiler\ProfilerPermissions.cs" />
-    <Compile Include="Reports\IUserQueryServer.cs" />
+    <Compile Include="UserQueries\IUserQueryServer.cs" />
     <Compile Include="Reports\ExcelReportDN.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
@@ -133,13 +133,15 @@
     </Compile>
     <Compile Include="Reports\FilterValueConverter.cs" />
     <Compile Include="Reports\IExcelReportServer.cs" />
-    <Compile Include="Reports\UserQueryDN.cs" />
+    <Compile Include="UserQueries\UserQueryDN.cs" />
     <Compile Include="Scheduler\CalendarDN.cs" />
     <Compile Include="Scheduler\ScheduledTaskDN.cs" />
     <Compile Include="Scheduler\ScheduleRule.cs" />
     <Compile Include="Scheduler\Task.cs" />
+    <Compile Include="SMS\ISmsServer.cs" />
     <Compile Include="SMS\SMSMessage.cs" />
-    <Compile Include="SMS\SMSMessageTemplate.cs" />
+    <Compile Include="SMS\SMSTemplate.cs" />
+    <Compile Include="SMS\SMSPackages.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Framework\Signum.Entities\Signum.Entities.csproj">

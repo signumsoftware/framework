@@ -164,7 +164,7 @@ WriteLiteral(".");
 WriteLiteral("\r\n                </td>\r\n                <td>\r\n                    ");
 
 
-               Write(entry.AditionalData.TryCC(o => o.ToString().Left(50, false)));
+               Write(entry.AditionalData.TryCC(o => o.ToString().TryLeft(50)));
 
 WriteLiteral("\r\n                </td>\r\n            </tr>\r\n");
 

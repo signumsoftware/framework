@@ -45,12 +45,12 @@ namespace ASP
     using Signum.Web.Profiler;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
-    [System.Web.WebPages.PageVirtualPathAttribute("~/Profiler/Views/HeavyList.cshtml")]
-    public class _Page_Profiler_Views_HeavyList_cshtml : System.Web.Mvc.WebViewPage<dynamic>
+    [System.Web.WebPages.PageVirtualPathAttribute("~/Profiler/Views/Statistics.cshtml")]
+    public class _Page_Profiler_Views_Statistics_cshtml : System.Web.Mvc.WebViewPage<IOrderedEnumerable<SqlProfileResume>>
     {
 
 
-        public _Page_Profiler_Views_HeavyList_cshtml()
+        public _Page_Profiler_Views_Statistics_cshtml()
         {
         }
         protected System.Web.HttpApplication ApplicationInstance
@@ -64,6 +64,7 @@ namespace ASP
         {
 
 
+
 WriteLiteral("<h2>");
 
 
@@ -72,36 +73,90 @@ Write(ViewData[ViewDataKeys.Title]);
 WriteLiteral("</h2>\r\n<div>\r\n");
 
 
-     if (HeavyProfiler.Enabled)
-    {
-        
-   Write(Html.ActionLink("Disable", "Disable"));
+Write(Html.ActionLink("Root Entries", "Heavy"));
 
-                                              
-    }
-    else
-    {
-        
-   Write(Html.ActionLink("Enable", "Enable"));
+WriteLiteral(@"
+</div>
+<table class=""sf-search-results"">
+    <thead>
+        <tr>
+            <th>
+                Count
+            </th>
+            <th>
+                Sum
+            </th>
+            <th>
+                Avg
+            </th>
+            <th>
+                Min
+            </th>
+            <th>
+                Max
+            </th>
+            <th>
+                Query
+            </th>
+            <th>
+               References
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+");
 
-                                            
 
-    }
+         foreach (var item in Model)
+        {
 
-WriteLiteral("    \r\n    ");
-
-
-Write(Html.ActionLink("Clean", "Clean"));
-
-WriteLiteral("\r\n   \r\n\r\n        ");
+WriteLiteral("            <tr>\r\n                <td>");
 
 
-   Write(Html.ActionLink("Slowest SQLs", "HeavySlowest"));
+               Write(item.Count);
 
-WriteLiteral("        \r\n</div>\r\n");
+WriteLiteral("</td>\r\n                <td>");
 
 
-   Html.RenderPartial(ProfilerClient.ViewPrefix.Formato("ProfilerTable"), (object)Model);
+               Write(item.Sum.NiceToString());
+
+WriteLiteral("</td>\r\n                <td>");
+
+
+               Write(item.Avg.NiceToString());
+
+WriteLiteral("</td>\r\n                <td>");
+
+
+               Write(item.Min.NiceToString());
+
+WriteLiteral("</td>\r\n                <td>");
+
+
+               Write(item.Max.NiceToString());
+
+WriteLiteral("</td>\r\n                <td>");
+
+
+               Write(item.Query);
+
+WriteLiteral("</td>\r\n                <td>\r\n");
+
+
+                    foreach (var r in item.References)
+                   {
+                       
+                  Write(Html.ActionLink(r, (ProfilerController pc) => pc.HeavyRoute(r)));
+
+                                                                                       
+                   }
+
+WriteLiteral("                </td>  \r\n            </tr>\r\n");
+
+
+        }
+
+WriteLiteral("\r\n      \r\n    </tbody>\r\n</table>\r\n");
 
 
         }

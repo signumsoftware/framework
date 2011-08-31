@@ -148,11 +148,12 @@
     <Compile Include="Reports\ExcelExtensions.cs" />
     <Compile Include="Reports\PlainExcelGenerator.cs" />
     <Compile Include="Reports\ReportsLogic.cs" />
-    <Compile Include="Reports\UserQueryLogic.cs" />
+    <Compile Include="UserQueries\UserQueryLogic.cs" />
     <Compile Include="Scheduler\SchedulerLogic.cs" />
     <Compile Include="Scheduler\CustomTaskLogic.cs" />
     <Compile Include="ServerExtensions.cs" />
     <Compile Include="SMS\SMSLogic.cs" />
+    <Compile Include="SMS\SMSProcessAlgortihms.cs" />
     <Compile Include="SMS\SMSTemplateGraph.cs" />
     <Compile Include="WikiMarkup\WikiParserExtensions.cs" />
   </ItemGroup>

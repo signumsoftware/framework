@@ -1,0 +1,47 @@
+﻿@using Signum.Engine
+@using Signum.Entities.SMS;
+@using Signum.Web;
+@using Signum.Web.SMS;
+
+@Html.ScriptCss("~/SMS/Content/SMS.css")
+
+@using (var e = Html.TypeContext<SMSMessageDN>())
+{   
+    @Html.ValueLine(e, s => s.MessageID, vl =>
+    {
+        vl.Visible = !e.Value.IsNew;
+        vl.ReadOnly = true;
+    })
+    @Html.EntityLine(e, s => s.Template, vl => 
+    {
+        vl.Create = false;
+        vl.Remove = false;
+        vl.HideIfNull = true;
+    })
+    @Html.ValueLine(e, s => s.DestinationNumber, vl => vl.ReadOnly = !e.Value.IsNew)
+    @Html.ValueLine(e, s => s.Message, vl =>
+        {
+            vl.ValueLineType = ValueLineType.TextArea;
+            vl.ValueHtmlProps["cols"] = "30";
+            vl.ValueHtmlProps["rows"] = "6";
+            vl.ReadOnly = (e.Value.State != SMSMessageState.Created);
+        })
+    if(e.Value.State == SMSMessageState.Created) {
+        <div id="sfCharactersLeft" data-url="@(Url.Action<SMSController>(s => s.GetDictionaries()))">
+            <p>Caracteres restantes: <span id="sfCharsLeft"></span></p>
+        </div>
+    }
+    <br />
+    @Html.ValueLine(e, s => s.From, vl => vl.ReadOnly = (e.Value.State != SMSMessageState.Created))
+
+    if (e.Value.State == SMSMessageState.Sent)
+    {
+        <fieldset>
+            <legend>SMS Status</legend>
+            @Html.ValueLine(e, s => s.SendState, vl => vl.ReadOnly = true)
+            @Html.ValueLine(e, s => s.SendDate, vl => vl.ReadOnly = true)
+        </fieldset>
+    }
+}
+
+@Html.ScriptsJs("~/SMS/Scripts/SF_SMS.js")

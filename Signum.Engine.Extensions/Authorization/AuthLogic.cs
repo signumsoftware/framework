@@ -342,7 +342,7 @@ namespace Signum.Engine.Authorization
             PermissionAuthLogic.Start(sb);
         }
 
-        internal static Lite<RoleDN>[] CurrentRoles()
+        public static Lite<RoleDN>[] CurrentRoles()
         {
             return roles.Value.IndirectlyRelatedTo(RoleDN.Current.ToLite()).And(RoleDN.Current.ToLite()).ToArray();
         }

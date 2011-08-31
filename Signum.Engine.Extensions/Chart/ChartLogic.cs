@@ -45,11 +45,25 @@ namespace Signum.Engine.Extensions.Chart
                                                 uq.GroupResults,
                                             }).ToDynamic();
 
-                sb.Schema.EntityEvents<UserChartDN>().Retrieved += UserQueryLogic_Retrieved;
+                sb.Schema.EntityEvents<UserChartDN>().Retrieved += ChartLogic_Retrieved;
             }
         }
 
-        static void UserQueryLogic_Retrieved(UserChartDN userQuery, bool fromCache)
+        public static UserChartDN ParseData(this UserChartDN userChart)
+        {
+            if (!userChart.IsNew || userChart.queryName == null)
+                throw new InvalidOperationException("userChart should be new and have queryName");
+
+            userChart.Query = QueryLogic.RetrieveOrGenerateQuery(userChart.queryName);
+
+            QueryDescription description = DynamicQueryManager.Current.QueryDescription(userChart.queryName);
+
+            userChart.ParseData(description);
+
+            return userChart;
+        }
+
+        static void ChartLogic_Retrieved(UserChartDN userQuery, bool fromCache)
         {
             if (fromCache)
                 return;
@@ -58,22 +72,8 @@ namespace Signum.Engine.Extensions.Chart
 
             QueryDescription description = DynamicQueryManager.Current.QueryDescription(queryName);
 
-            foreach (var f in userQuery.Filters)
-                f.PostRetrieving(description);
-
-            if (userQuery.FirstDimension != null)
-                userQuery.FirstDimension.PostRetrieving(description);
-
-            if (userQuery.SecondDimension != null)
-                userQuery.SecondDimension.PostRetrieving(description);
-
-            if (userQuery.FirstValue != null)
-                userQuery.FirstValue.PostRetrieving(description);
-
-            if (userQuery.SecondValue != null)
-                userQuery.SecondValue.PostRetrieving(description);
+            userQuery.ParseData(description);
         }
-
 
         public static List<Lite<UserChartDN>> GetUserCharts(object queryName)
         {
