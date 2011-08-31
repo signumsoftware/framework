@@ -131,7 +131,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Reports\FilterValueConverter.cs" />
+    <Compile Include="UserQueries\FilterValueConverter.cs" />
     <Compile Include="Reports\IExcelReportServer.cs" />
     <Compile Include="UserQueries\UserQueryDN.cs" />
     <Compile Include="Scheduler\CalendarDN.cs" />

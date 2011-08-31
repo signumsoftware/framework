@@ -20,6 +20,7 @@ using Signum.Test;
 using Signum.Windows.Extensions.Sample.Controls;
 using Signum.Entities.DynamicQuery;
 using Signum.Windows.Chart;
+using Signum.Windows.UserQueries;
 
 namespace Signum.Windows.Extensions.Sample
 {

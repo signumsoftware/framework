@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using Signum.Windows.Reports;
 using Signum.Entities;
-using Signum.Entities.Reports;
 using Signum.Services;
 using System.Reflection;
 using Signum.Entities.DynamicQuery;
+using Signum.Entities.UserQueries;
 
-namespace Signum.Windows.Reports
+namespace Signum.Windows.UserQueries
 {
     public class UserQueryClient
     {
@@ -26,31 +26,11 @@ namespace Signum.Windows.Reports
         internal static UserQueryDN FromSearchControl(SearchControl searchControl)
         {
             QueryDescription description = Navigator.Manager.GetQueryDescription(searchControl.QueryName);
+            var query = QueryClient.GetQuery(searchControl.QueryName);
 
-            var columns = QueryColumnDN.SmartColumns(searchControl.CurrentColumns.ToList(), description.Columns);
+            var req = searchControl.GetQueryRequest();
 
-            return new UserQueryDN
-            {
-                Query = QueryClient.GetQuery(searchControl.QueryName),
-
-                Filters = searchControl.FilterOptions.Where(a=>!a.Frozen).Select(f => new QueryFilterDN
-                {
-                    Token = f.Token,
-                    Operation = f.Operation,
-                    ValueString = FilterValueConverter.ToString(f.RealValue, f.Token.Type),
-                }).ToMList(),
-
-                ColumnsMode = columns.Item1,
-                Columns = columns.Item2,
-
-                Orders = searchControl.OrderOptions.Select(fo => new QueryOrderDN
-                {
-                    Token = fo.Token,
-                    OrderType = fo.OrderType,
-                }).ToMList(),
-
-                MaxItems = searchControl.MaxItemsCount
-            };
+            return req.ToUserQuery(description, query);
         }
 
         internal static void ToSearchControl(UserQueryDN uq, SearchControl searchControl)
@@ -73,6 +53,9 @@ namespace Signum.Windows.Reports
                 Path = of.Token.FullKey(),
                 OrderType = of.OrderType,
             }).ToList();
+
+            Navigator.Manager.SetFilterTokens(searchControl.QueryName, filters);
+            Navigator.Manager.SetOrderTokens(searchControl.QueryName, orders); 
                      
             searchControl.Reinitialize(filters, columns, uq.ColumnsMode, orders);
 
