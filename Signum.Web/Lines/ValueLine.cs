@@ -23,6 +23,8 @@ namespace Signum.Web
         public string RadioButtonLabelTrue = Resources.Yes;
         public string RadioButtonLabelFalse = Resources.No;
 
+        public bool WriteHiddenOnReadonly { get; set; }
+
         public ValueLine(Type type, object untypedValue, Context parent, string controlID, PropertyRoute propertyRoute)
             : base(type, untypedValue, parent, controlID, propertyRoute)
         {

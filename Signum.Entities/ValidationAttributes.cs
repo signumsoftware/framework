@@ -449,10 +449,8 @@ namespace Signum.Entities
         protected override string OverrideError(object value)
         {
             IList list = (IList)value;
-            if (list == null)
-                return null;
 
-            int val = list.Count;
+            int val = list == null? 0: list.Count;
 
             if ((ComparisonType == ComparisonType.EqualTo && val.CompareTo(number) == 0) ||
                 (ComparisonType == ComparisonType.DistinctTo && val.CompareTo(number) != 0) ||

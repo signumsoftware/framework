@@ -573,7 +573,7 @@ namespace Signum.Web
 
         public IEnumerable<MappingContext<S>> GenerateItemContexts(MappingContext<MList<S>> ctx)
         {
-            IList<string> inputKeys = (IList<string>)ctx.Inputs.Keys;
+            List<string> inputKeys = ctx.Inputs.Keys.Where(k => k != EntityListBaseKeys.ListPresent).ToList();
 
             PropertyRoute route = ctx.PropertyRoute.Add("Item");
 
@@ -658,6 +658,8 @@ namespace Signum.Web
 
         public string Route { get; set; }
 
+        public Func<S, bool> FilterElements;
+
         public Mapping<K> KeyPropertyMapping{get;set;}
         
         public MListDictionaryMapping(Func<S, K> getKey, string route)
@@ -675,7 +677,8 @@ namespace Signum.Web
                 return ctx.None();
 
             MList<S> list = ctx.Value;
-            var dic = list.ToDictionary(GetKey);
+
+            var dic = (FilterElements == null ? list : list.Where(FilterElements)).ToDictionary(GetKey);
 
             PropertyRoute route = ctx.PropertyRoute.Add("Item");
 

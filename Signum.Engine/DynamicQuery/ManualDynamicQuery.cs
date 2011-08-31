@@ -52,7 +52,7 @@ namespace Signum.Engine.DynamicQuery
             {
                 QueryName = request.QueryName,
                 Filters = request.Filters,
-                Limit = 2,
+                MaxItems = 2,
                 Orders = request.Orders,
                 Columns = new List<Column> { new Column(this.EntityColumn().BuildColumnDescription()) }
             };

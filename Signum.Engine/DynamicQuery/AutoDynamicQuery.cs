@@ -37,7 +37,7 @@ namespace Signum.Engine.DynamicQuery
                 .Where(request.Filters)
                 .OrderBy(request.Orders)
                 .Select(request.Columns)
-                .TryTake(request.Limit);
+                .TryTake(request.MaxItems);
 
             DEnumerable<T> array = result.ToArray();
 

@@ -182,12 +182,7 @@ namespace Signum.Entities.Reflection
             return result;
         }
 
-        public static XDocument SuperDGML(ModifiableEntity graph)
-        {
-            return FromRoot(graph).SuperDGML(); 
-        }
-
-        public static XDocument SuperDGML(this DirectedGraph<Modifiable> graph)
+        public static XDocument EntityDGML(this DirectedGraph<Modifiable> graph)
         {
             return graph.ToDGML(n =>
                 n is IdentifiableEntity ? GetAttributes((IdentifiableEntity)n): 

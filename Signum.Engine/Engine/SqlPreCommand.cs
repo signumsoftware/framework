@@ -63,6 +63,8 @@ namespace Signum.Engine
 
             return new SqlPreCommandConcat(spacing, sentences);
         }
+
+        public abstract SqlPreCommand Clone(); 
     }
 
     public static class SqlPreCommandExtensions
@@ -173,6 +175,13 @@ namespace Signum.Engine
                 sb.Append(regex.Replace(Sql, m => dic.TryGetC(m.Value) ?? m.Value));
             }
         }
+
+        public override SqlPreCommand Clone()
+        {
+            return new SqlPreCommandSimple(Sql, Parameters == null ? null : Parameters
+                .Select(p => new SqlParameter(p.ParameterName, p.Value) { IsNullable = p.IsNullable, SqlDbType = p.SqlDbType })
+                .ToList());
+        }
     }
 
     public class SqlPreCommandConcat : SqlPreCommand
@@ -246,6 +255,11 @@ namespace Signum.Engine
             }
 
             if (borrar) sb.Remove(sb.Length - sep.Length, sep.Length);
+        }
+
+        public override SqlPreCommand Clone()
+        {
+            return new SqlPreCommandConcat(Spacing, Commands.Select(c => c.Clone()).ToArray());  
         }
     }
 

@@ -23,7 +23,7 @@ namespace Signum.Engine
 
         public static void Save(IdentifiableEntity ident) 
         {
-            Save(() =>{ using(HeavyProfiler.Log("GraphExplorer")) return GraphExplorer.FromRoot(ident);});
+            Save(() => GraphExplorer.FromRoot(ident));
         }
 
         static readonly IdentifiableEntity[] None = new IdentifiableEntity[0];
@@ -43,7 +43,6 @@ namespace Signum.Engine
 
             string error = GraphExplorer.Integrity(modifiables);
             if (error.HasText())
-                
                 throw new ApplicationException(error);
 
             GraphExplorer.PropagateModifications(modifiables.Inverse());

@@ -237,9 +237,9 @@ namespace Signum.Web.Controllers
         }
 
         [HttpPost]
-        public PartialViewResult Search(FindOptions findOptions, int? top, string prefix)
+        public PartialViewResult Search(QueryRequest queryRequest, bool? allowMultiple, bool view, string prefix)
         {
-            return Navigator.Search(this, findOptions, top, prefix);
+            return Navigator.Search(this, queryRequest, allowMultiple, view, prefix);
         }
 
         [HttpPost]

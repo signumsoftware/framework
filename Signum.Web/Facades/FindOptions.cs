@@ -178,7 +178,7 @@ namespace Signum.Web
                 Filters = FilterOptions.Select(fo => fo.ToFilter()).ToList(),
                 Orders = OrderOptions.Select(fo => fo.ToOrder()).ToList(),
                 Columns = ColumnOptions.Select(co => co.ToColumn(qd)).ToList(),
-                Limit = top,
+                MaxItems = top,
             };
         }
 

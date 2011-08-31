@@ -10,6 +10,7 @@ using Signum.Utilities.ExpressionTrees;
 using System.Linq.Expressions;
 using Signum.Utilities.Reflection;
 using System.Text.RegularExpressions;
+using System.Xml.Linq;
 
 namespace Signum.Entities
 {
@@ -64,6 +65,11 @@ namespace Signum.Entities
         {
             get { return entityOrNull; }
             protected set { entityOrNull = value; }
+        }
+
+        public bool IsNew
+        {
+            get { return entityOrNull != null && entityOrNull.IsNew; }
         }
 
         public T Entity 
@@ -266,10 +272,10 @@ namespace Signum.Entities
 
         static Regex regex = new Regex(@"(?<type>.+);(?<id>.+)(;(?<toStr>.+))?");
 
-        public static Lite ParseLite(Type liteType, string liteKey, Func<string, Type> resolveType)
+        public static Lite ParseLite(Type staticType, string liteKey, Func<string, Type> resolveType)
         {
             Lite result;
-            string error = TryParseLite(liteType, liteKey, resolveType, out result);
+            string error = TryParseLite(staticType, liteKey, resolveType, out result);
             if (error == null)
             {
                 return result;
@@ -280,7 +286,7 @@ namespace Signum.Entities
             }
         }
 
-        public static string TryParseLite(Type liteType, string liteKey, Func<string, Type> resolveType, out Lite result)
+        public static string TryParseLite(Type staticType, string liteKey, Func<string, Type> resolveType, out Lite result)
         {
             result = null;
             if (string.IsNullOrEmpty(liteKey))
@@ -300,7 +306,7 @@ namespace Signum.Entities
 
             string toStr = match.Groups["toStr"].Value; //maybe null
 
-            result = Lite.Create(liteType, id, type, toStr);
+            result = Lite.Create(staticType, id, type, toStr);
             return null;
         }
 
@@ -494,6 +500,11 @@ namespace Signum.Entities
                 return lite1.Id == lite2.Id;
             else
                 return object.ReferenceEquals(lite1.EntityOrNull, lite2.EntityOrNull);
+        }
+
+        public static XDocument EntityDGML(this IdentifiableEntity entity)
+        {
+            return GraphExplorer.FromRoot(entity).EntityDGML(); 
         }
     }
 }
