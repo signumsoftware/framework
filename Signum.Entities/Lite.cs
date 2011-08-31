@@ -236,7 +236,7 @@ namespace Signum.Entities
         public string ToStr
         {
             get { return toStr; }
-            internal set { toStr = value; }
+            set { toStr = value; }
         }
 
         public override bool Equals(object obj)

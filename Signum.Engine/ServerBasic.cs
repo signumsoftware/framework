@@ -123,6 +123,13 @@ namespace Signum.Services
             return Return(MethodInfo.GetCurrentMethod(),
                 () => TypeLogic.TypesAssignableFrom(type));
         }
+
+        [SuggestUserInterface]
+        public virtual string GetToStr(Type type, int id)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+                () => Database.GetToStr(type, id));
+        }
         #endregion
 
         #region IDynamicQueryServer
@@ -168,5 +175,8 @@ namespace Signum.Services
                () => DynamicQueryManager.Current.GetExtensions(type, parent).ToList());
         }
         #endregion
+
+
+       
     }
 }

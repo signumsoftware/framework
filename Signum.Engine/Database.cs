@@ -208,9 +208,14 @@ namespace Signum.Engine
             if (lite == null)
                 return null;
 
-            lite.ToStr = giGetToStr.GetInvoker(lite.RuntimeType)(lite.Id);
+            lite.ToStr = GetToStr(lite.RuntimeType, lite.Id);
 
             return lite;
+        }
+
+        public static string GetToStr(Type type, int id)
+        {
+            return giGetToStr.GetInvoker(type)(id);
         }
 
         static GenericInvoker<Func<int, string>> giGetToStr = new GenericInvoker<Func<int, string>>(id => GetToStr<IdentifiableEntity>(id));

@@ -65,7 +65,7 @@ namespace Signum.Engine
             current.TypeToName = current.Tables.SelectDictionary(k => k, v => v.CleanTypeName);
             current.NameToType = current.TypeToName.Inverse("CleanTypeNames");
         }
-
+        
         public static Dictionary<TypeDN, Type> TryDNToType(Replacements replacements)
         {
             return (from dn in Administrator.TryRetrieveAll<TypeDN>(replacements)

@@ -24,7 +24,11 @@ namespace Signum.Windows
 
         static Server()
         {
-            Connecting += () => ServerTypes = current.ServerTypes();
+            Connecting += () =>
+            {
+                ServerTypes = current.ServerTypes();
+                NameToType = ServerTypes.ToDictionary(a => a.Value.CleanName, a => a.Key);
+            };
         }
 
         public static void SetNewServerCallback(Func<IBaseServer> server)
@@ -264,15 +268,16 @@ namespace Signum.Windows
         }
 
         public static Dictionary<Type, TypeDN> ServerTypes { get; private set; }
+        public static Dictionary<string, Type> NameToType { get; private set; }
 
-        public static Type TryGetType(string typeName)
+        public static Type TryGetType(string cleanName)
         {
-            return ServerTypes.Keys.Where(t => t.Name == typeName).SingleOrDefault();
+            return NameToType.TryGetC(cleanName);
         }
 
-        public static Type GetType(string typeName)
+        public static Type GetType(string cleanName)
         {
-            return ServerTypes.Keys.Where(t => t.Name == typeName).Single("Type {0} not found in the Server".Formato(typeName));
+            return NameToType.GetOrThrow(cleanName, "Type {0} not found in the Server");
         }
 
         public static string GetCleanName(Type type)
@@ -290,9 +295,18 @@ namespace Signum.Windows
             return Lite.TryParseLite(liteType, liteKey, TryGetType, out result);
         }
 
-        //public static void Execute(Action<global::Signum.Services.ILoginServer> action)
-        //{
-        //    throw new NotImplementedException();
-        //}
+        public static Lite<T> FillToStr<T>(this Lite<T> lite) where T : class, IIdentifiable
+        {
+           lite.ToStr = Return((IBaseServer s) => s.GetToStr(lite.RuntimeType, lite.Id));
+
+           return lite;
+        }
+
+        public static Lite FillToStr(Lite lite)
+        {
+            lite.ToStr = Return((IBaseServer s) => s.GetToStr(lite.RuntimeType, lite.Id));
+
+            return lite;
+        }
     }
 }
