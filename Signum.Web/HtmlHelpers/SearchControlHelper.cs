@@ -182,6 +182,21 @@ namespace Signum.Web
             return sb.ToHtml();
         }
 
+        public static MvcHtmlString TokensCombo(this HtmlHelper helper, QueryDescription queryDescription, Context context)
+        {
+            var columns = new HtmlStringBuilder();
+            columns.AddLine(new HtmlTag("option").Attr("value", "").SetInnerText("-").ToHtml());
+            foreach (var c in queryDescription.Columns)
+            {
+                var option = new HtmlTag("option")
+                    .Attr("value", c.Name)
+                    .SetInnerText(c.DisplayName);
+                columns.AddLine(option.ToHtml());
+            }
+
+            return TokensCombo(helper, queryDescription.QueryName, columns, context, 0, false);
+        }
+
         public static MvcHtmlString TokensCombo(this HtmlHelper helper, object queryName, HtmlStringBuilder options, Context context, int index, bool writeExpander)
         {
             MvcHtmlString expander = null;
