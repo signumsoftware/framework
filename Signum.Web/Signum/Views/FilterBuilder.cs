@@ -112,7 +112,6 @@ WriteLiteral("\r\n                \r\n                ");
                         "sf-query-button sf-add-filter sf-disabled", 
                         new Dictionary<string, object> 
                         { 
-                            //{ "onclick", "new SF.FindNavigator({{prefix:'{0}'}}).addFilter('{1}');".Formato(context.ControlID, Url.SignumAction("AddFilter")) },
                             { "data-icon", "ui-icon-arrowthick-1-s" },
                             { "data-url", Url.SignumAction("AddFilter") }
                         }));
@@ -131,7 +130,6 @@ WriteLiteral("\r\n\r\n");
                         "sf-query-button sf-add-column sf-disabled", 
                         new Dictionary<string, object> 
                         { 
-                            //{ "onclick", "new SF.FindNavigator({{prefix:'{0}'}}).addColumn('{1}');".Formato(context.ControlID, Url.SignumAction("GetColumnName")) }, 
                             { "data-icon", "ui-icon-arrowthick-1-e" },
                             { "data-url", Url.SignumAction("GetColumnName") }
                         }));
