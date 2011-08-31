@@ -48,9 +48,11 @@ namespace Signum.Windows.Chart
             {
                 Query = QueryClient.GetQuery(request.QueryName),
 
-                GroupResults = request.GroupResults,
-
-                ChartType = request.ChartType,
+                Chart=
+                {
+                    GroupResults = request.Chart.GroupResults,
+                    ChartType = request.Chart.ChartType,
+                },
 
                 Filters = request.Filters.Select(f => new QueryFilterDN
                 {
@@ -60,10 +62,10 @@ namespace Signum.Windows.Chart
                 }).ToMList(),
             };
 
-            Assign(result.FirstDimension, request.FirstDimension);
-            Assign(result.SecondDimension, request.SecondDimension);
-            Assign(result.FirstValue, request.FirstValue);
-            Assign(result.SecondValue, request.SecondValue);
+            Assign(result.Chart.FirstDimension, request.Chart.FirstDimension);
+            Assign(result.Chart.SecondDimension, request.Chart.SecondDimension);
+            Assign(result.Chart.FirstValue, request.Chart.FirstValue);
+            Assign(result.Chart.SecondValue, request.Chart.SecondValue);
 
             return result;
         }
@@ -90,9 +92,11 @@ namespace Signum.Windows.Chart
         {
             var result = new ChartRequest(QueryClient.GetQueryName(uq.Query.Key))
             {
-                GroupResults = uq.GroupResults,
-
-                ChartType = uq.ChartType,
+                Chart = 
+                {
+                    GroupResults = uq.Chart.GroupResults,
+                    ChartType = uq.Chart.ChartType,
+                },
 
                 Filters = uq.Filters.Select(qf => new Filter
                 {
@@ -102,10 +106,10 @@ namespace Signum.Windows.Chart
                 }).ToList(),
             };
 
-            Assign(result.FirstDimension, uq.FirstDimension);
-            Assign(result.SecondDimension, uq.SecondDimension);
-            Assign(result.FirstValue, uq.FirstValue);
-            Assign(result.SecondValue, uq.SecondValue);
+            Assign(result.Chart.FirstDimension, uq.Chart.FirstDimension);
+            Assign(result.Chart.SecondDimension, uq.Chart.SecondDimension);
+            Assign(result.Chart.FirstValue, uq.Chart.FirstValue);
+            Assign(result.Chart.SecondValue, uq.Chart.SecondValue);
 
             return result;
 

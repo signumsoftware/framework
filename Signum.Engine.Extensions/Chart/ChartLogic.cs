@@ -40,9 +40,9 @@ namespace Signum.Engine.Extensions.Chart
                                                 uq.Id,
                                                 uq.DisplayName,
                                                 Filters = uq.Filters.Count,
-                                                uq.ChartType,
-                                                uq.ChartResultType,
-                                                uq.GroupResults,
+                                                uq.Chart.ChartType,
+                                                uq.Chart.ChartResultType,
+                                                uq.Chart.GroupResults,
                                             }).ToDynamic();
 
                 sb.Schema.EntityEvents<UserChartDN>().Retrieved += ChartLogic_Retrieved;
@@ -174,7 +174,7 @@ namespace Signum.Engine.Extensions.Chart
             ChartTokenDN[] chartTokens = request.ChartTokens().ToArray(); 
             List<Column> columns = chartTokens.Select(t=>t.CreateSimpleColumn()).ToList();
 
-            if (!request.GroupResults)
+            if (!request.Chart.GroupResults)
                 columns.Add(new _EntityColumn(dq.EntityColumn().BuildColumnDescription()));
 
             IDynamicInfo collection;
@@ -192,7 +192,7 @@ namespace Signum.Engine.Extensions.Chart
                 }, dq.GetColumnDescriptions());
             }
 
-            if (!request.GroupResults)
+            if (!request.Chart.GroupResults)
             {
                 var orders = (from ct in chartTokens
                               where ct.OrderPriority.HasValue

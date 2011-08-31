@@ -43,14 +43,14 @@ namespace Signum.Windows.Chart
             chart.AxesX.Clear();
             chart.AxesY.Clear();
 
-            if (ChartRequest.ChartType != ChartType.Pie && ChartRequest.ChartType != ChartType.Doughnout)
+            if (ChartRequest.Chart.ChartType != ChartType.Pie && ChartRequest.Chart.ChartType != ChartType.Doughnout)
             {
-                chart.AxesX.Add(new Axis { Title = ChartRequest.FirstDimension.GetTitle() });
+                chart.AxesX.Add(new Axis { Title = ChartRequest.Chart.FirstDimension.GetTitle() });
 
-                if (ChartRequest.ChartResultType == ChartResultType.TypeValue || ChartRequest.ChartResultType == ChartResultType.TypeTypeValue)
-                    chart.AxesY.Add(new Axis { Title = ChartRequest.FirstValue.GetTitle() });
+                if (ChartRequest.Chart.ChartResultType == ChartResultType.TypeValue || ChartRequest.Chart.ChartResultType == ChartResultType.TypeTypeValue)
+                    chart.AxesY.Add(new Axis { Title = ChartRequest.Chart.FirstValue.GetTitle() });
                 else
-                    chart.AxesY.Add(new Axis { Title = ChartRequest.SecondDimension.GetTitle() });
+                    chart.AxesY.Add(new Axis { Title = ChartRequest.Chart.SecondDimension.GetTitle() });
             }
         }
 
@@ -60,7 +60,7 @@ namespace Signum.Windows.Chart
         {
             //LabelText = "#AxisXLabel, #YValue",
 
-            switch (ChartRequest.ChartResultType)
+            switch (ChartRequest.Chart.ChartResultType)
             {
                 case ChartResultType.TypeValue:
                     {
@@ -70,12 +70,12 @@ namespace Signum.Windows.Chart
                         {
                             new DataSeries 
                             { 
-                                RenderAs = ToRenderAs(ChartRequest.ChartType),
+                                RenderAs = ToRenderAs(ChartRequest.Chart.ChartType),
                             }
                             .AddPoints(list.Select(r => 
                                 new DataPoint 
                                 { 
-                                    AxisXLabel = Format(r.Key, ChartRequest.FirstDimension.Format), 
+                                    AxisXLabel = Format(r.Key, ChartRequest.Chart.FirstDimension.Format), 
                                     YValue = ToDouble(r.Value, ChartTokenName.FirstValue) 
                                 } 
                              ))
@@ -96,18 +96,18 @@ namespace Signum.Windows.Chart
                             new DataSeries
                             {
                                 LegendText = ss.ToString(),
-                                RenderAs = ToRenderAs(ChartRequest.ChartType),
+                                RenderAs = ToRenderAs(ChartRequest.Chart.ChartType),
                                 //YValueFormatString = ChartRequest.FirstValue.Format
                             }.AddPoints(series.Select((s, i) =>
                             {
                                 double? d = array[i, j];
                                 DataPoint p = new DataPoint();
 
-                                p.AxisXLabel = Format(s, ChartRequest.FirstDimension.Format);
+                                p.AxisXLabel = Format(s, ChartRequest.Chart.FirstDimension.Format);
 
                                 if (d != null)
                                     p.YValue = d.Value;
-                                else if (ChartRequest.ChartType == ChartType.StackedAreas || ChartRequest.ChartType == ChartType.TotalAreas)
+                                else if (ChartRequest.Chart.ChartType == ChartType.StackedAreas || ChartRequest.Chart.ChartType == ChartType.TotalAreas)
                                     p.YValue = 0;
 
                                 return p;
@@ -116,7 +116,7 @@ namespace Signum.Windows.Chart
                 case ChartResultType.Points:
                     return new[]{ new DataSeries
                     { 
-                        RenderAs = ToRenderAs(ChartRequest.ChartType),
+                        RenderAs = ToRenderAs(ChartRequest.Chart.ChartType),
                         //MaxWidth = this.Width
                         //XValueFormatString = ChartRequest.FirstDimension.Format,
                         //YValueFormatString = ChartRequest.SecondDimension.Format,
@@ -131,7 +131,7 @@ namespace Signum.Windows.Chart
                 case ChartResultType.Bubbles:
                     return new[]{ new DataSeries
                     { 
-                        RenderAs = ToRenderAs(ChartRequest.ChartType),
+                        RenderAs = ToRenderAs(ChartRequest.Chart.ChartType),
                         //XValueFormatString = ChartRequest.FirstDimension.Format,
                         //YValueFormatString = ChartRequest.SecondDimension.Format,
                         //ZValueFormatString = ChartRequest.SecondValue.Format,

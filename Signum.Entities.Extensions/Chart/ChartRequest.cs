@@ -18,9 +18,8 @@ using Signum.Entities.UserQueries;
 namespace Signum.Entities.Chart
 {
     [Serializable]
-    public abstract class ChartBase : IdentifiableEntity
+    public class ChartBase : EmbeddedEntity
     {
-
         public ChartBase()
         {
             UpdateTokens();
@@ -156,9 +155,26 @@ namespace Signum.Entities.Chart
             Notify(property);
         }
 
-        
+        [field: NonSerialized, Ignore]
+        public event Action ChartRequestChanged;
 
-        protected abstract void NotifyChange(bool needNewQuery);
+        protected void NotifyChange(bool needNewQuery)
+        {
+            if (needNewQuery)
+                this.NeedNewQuery = true;
+
+            if (ChartRequestChanged != null)
+                ChartRequestChanged();
+        }
+
+        [NonSerialized]
+        bool needNewQuery;
+        [AvoidLocalization]
+        public bool NeedNewQuery
+        {
+            get { return needNewQuery; }
+            set { Set(ref needNewQuery, value, () => NeedNewQuery); }
+        }
 
         bool token_ShouldAggregateEvent(ChartTokenDN token)
         {
@@ -267,8 +283,13 @@ namespace Signum.Entities.Chart
     }
 
     [Serializable]
-    public class ChartRequest : ChartBase
+    public class ChartRequest : ModelEntity
     {
+        public ChartRequest(object queryName)
+        {
+            this.queryName = queryName;
+        }
+
         object queryName;
         [NotNullValidator]
         public object QueryName
@@ -283,45 +304,28 @@ namespace Signum.Entities.Chart
             set { Set(ref filters, value, () => Filters); }
         }
 
-        public ChartRequest(object queryName)
+        [NotNullable]
+        ChartBase chart = new ChartBase();
+        [NotNullValidator]
+        public ChartBase Chart
         {
-            this.queryName = queryName;
-        }
-
-        [NonSerialized]
-        bool needNewQuery;
-        [AvoidLocalization]
-        public bool NeedNewQuery
-        {
-            get { return needNewQuery; }
-            set { Set(ref needNewQuery, value, () => NeedNewQuery); }
-        }
-
-        [field: NonSerialized]
-        public event Action ChartRequestChanged;
-
-        protected override void NotifyChange(bool needNewQuery)
-        {
-            if (needNewQuery)
-                this.NeedNewQuery = true;
-
-            if (ChartRequestChanged != null)
-                ChartRequestChanged();
-        }
+            get { return chart; }
+            set { Set(ref chart, value, () => Chart); }
+        }     
 
         public IEnumerable<ChartTokenDN> ChartTokens()
         {
-            if(FirstDimension != null)
-                yield return FirstDimension;
+            if (chart.FirstDimension != null)
+                yield return chart.FirstDimension;
 
-            if (SecondDimension != null)
-                yield return SecondDimension;
+            if (chart.SecondDimension != null)
+                yield return chart.SecondDimension;
 
-            if (FirstValue != null)
-                yield return FirstValue;
+            if (chart.FirstValue != null)
+                yield return chart.FirstValue;
 
-            if (SecondValue != null)
-                yield return SecondValue;
+            if (chart.SecondValue != null)
+                yield return chart.SecondValue;
         }
 
         public List<CollectionElementToken> Multiplications
@@ -337,7 +341,7 @@ namespace Signum.Entities.Chart
     }
     
     [Serializable]
-    public class UserChartDN : ChartBase
+    public class UserChartDN : Entity
     {
         public UserChartDN() { }
 
@@ -382,8 +386,13 @@ namespace Signum.Entities.Chart
             set { Set(ref filters, value, () => Filters); }
         }
 
-        protected override void NotifyChange(bool needNewQuery)
+        [NotNullable]
+        ChartBase chart = new ChartBase();
+        [NotNullValidator]
+        public ChartBase Chart
         {
+            get { return chart; }
+            set { Set(ref chart, value, () => Chart); }
         }
 
         public override string ToString()
@@ -397,17 +406,17 @@ namespace Signum.Entities.Chart
                 foreach (var f in Filters)
                     f.ParseData(description);
 
-            if (FirstDimension != null)
-                FirstDimension.ParseData(description);
+            if (chart.FirstDimension != null)
+                chart.FirstDimension.ParseData(description);
 
-            if (SecondDimension != null)
-                SecondDimension.ParseData(description);
+            if (chart.SecondDimension != null)
+                chart.SecondDimension.ParseData(description);
 
-            if (FirstValue != null)
-                FirstValue.ParseData(description);
+            if (chart.FirstValue != null)
+                chart.FirstValue.ParseData(description);
 
-            if (SecondValue != null)
-                SecondValue.ParseData(description);
+            if (chart.SecondValue != null)
+                chart.SecondValue.ParseData(description);
         }
     }
 }

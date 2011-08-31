@@ -17,13 +17,13 @@
         <td class="ui-widget ui-widget-content ui-corner-all sf-chart-type" data-url="@(Url.Action<ChartController>(cc => cc.ChangeType(Model.ControlID)))">
             <div class="ui-widget-header">
                 @typeof(ChartType).NiceName()
-                @Html.Hidden(Model.Compose("ChartType"), Model.Value.ChartType.ToString())
+                @Html.Hidden(Model.Compose("ChartType"), Model.Value.Chart.ChartType.ToString())
             </div>
             @foreach(var group in ChartUtils.ChartTypePosition.GroupBy(ctp => ctp.Row).OrderBy(group => group.Key))
             {
                 foreach (var type in group.OrderBy(ctp => ctp.Column))
                 { 
-                    <div class="@ChartClient.ChartTypeImgClass(Model.Value, type.ChartType)" data-related="@type.ChartType.ToString()" title="@type.ChartType.NiceToString()"></div>
+                    <div class="@ChartClient.ChartTypeImgClass(Model.Value.Chart, type.ChartType)" data-related="@type.ChartType.ToString()" title="@type.ChartType.NiceToString()"></div>
                 }
                 <div class="clearall"></div>
             }
@@ -31,21 +31,21 @@
         <td class="ui-widget ui-widget-content ui-corner-all sf-chart-tokens">
             <div class="ui-widget-header">@Resources.Chart_ChartSettings</div>
             @{
-                if (Model.Value.FirstDimension != null)
+                if (Model.Value.Chart.FirstDimension != null)
                 {
-                    @Html.EmbeddedControl(Model, cr => cr.FirstDimension, ec => ec.ViewData[ViewDataKeys.QueryName] = queryDescription.QueryName)
+                    @Html.EmbeddedControl(Model, cr => cr.Chart.FirstDimension, ec => ec.ViewData[ViewDataKeys.QueryName] = queryDescription.QueryName)
                 }
-                if (Model.Value.SecondDimension != null)
+                if (Model.Value.Chart.SecondDimension != null)
                 {
-                    @Html.EmbeddedControl(Model, cr => cr.SecondDimension, ec => ec.ViewData[ViewDataKeys.QueryName] = queryDescription.QueryName)
+                    @Html.EmbeddedControl(Model, cr => cr.Chart.SecondDimension, ec => ec.ViewData[ViewDataKeys.QueryName] = queryDescription.QueryName)
                 }
-                if (Model.Value.FirstValue != null)
+                if (Model.Value.Chart.FirstValue != null)
                 {
-                    @Html.EmbeddedControl(Model, cr => cr.FirstValue, ec => ec.ViewData[ViewDataKeys.QueryName] = queryDescription.QueryName)
+                    @Html.EmbeddedControl(Model, cr => cr.Chart.FirstValue, ec => ec.ViewData[ViewDataKeys.QueryName] = queryDescription.QueryName)
                 }
-                if (Model.Value.SecondValue != null)
+                if (Model.Value.Chart.SecondValue != null)
                 {
-                    @Html.EmbeddedControl(Model, cr => cr.SecondValue, ec => ec.ViewData[ViewDataKeys.QueryName] = queryDescription.QueryName)
+                    @Html.EmbeddedControl(Model, cr => cr.Chart.SecondValue, ec => ec.ViewData[ViewDataKeys.QueryName] = queryDescription.QueryName)
                 }
             }
         </td>
