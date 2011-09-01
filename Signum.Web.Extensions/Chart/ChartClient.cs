@@ -25,10 +25,31 @@ namespace Signum.Web.Chart
 
                 Navigator.AddSettings(new List<EntitySettings>
                 {
+                    new EmbeddedEntitySettings<ChartRequest>(),
+                    new EmbeddedEntitySettings<ChartBase>(),
                     new EmbeddedEntitySettings<ChartTokenDN> { PartialViewName = _ => ViewPrefix.Formato("ChartToken") }
                 });
 
+                Mapping.RegisterValue<ChartRequest>(new ChartRequestMapping().GetValue);
+
                 ButtonBarQueryHelper.GetButtonBarForQueryName += new GetToolBarButtonQueryDelegate(ButtonBarQueryHelper_GetButtonBarForQueryName);
+            }
+        }
+
+        class ChartRequestMapping : EntityMapping<ChartRequest>
+        {
+            public ChartRequestMapping()
+                : base(true)
+            {
+
+            }
+
+            public override ChartRequest GetValue(MappingContext<ChartRequest> ctx)
+            {
+                ctx.Value = new ChartRequest(Navigator.ResolveQueryName(ctx.Inputs[ViewDataKeys.QueryName]));
+                SetProperties(ctx);
+                RecursiveValidation(ctx);
+                return ctx.Value;
             }
         }
 

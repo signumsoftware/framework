@@ -99,9 +99,19 @@ WriteLiteral("\" class=\"sf-search-control sf-chart-control\">\r\n    ");
 
 Write(Html.HiddenRuntimeInfo(Model));
 
-WriteLiteral("\r\n    \r\n    <div>\r\n        <div class=\"sf-fields-list\">\r\n            <div class=\"" +
-"ui-widget sf-filters\">\r\n                <div class=\"ui-widget-header ui-corner-t" +
-"op sf-filters-body\">\r\n                    ");
+WriteLiteral("\r\n    ");
+
+
+Write(Html.HiddenRuntimeInfo(Model, cr => cr.Chart));
+
+WriteLiteral("\r\n    ");
+
+
+Write(Html.Hidden(Model.Compose(ViewDataKeys.QueryName), Navigator.ResolveWebQueryName(queryDescription.QueryName)));
+
+WriteLiteral("\r\n    <div>\r\n        <div class=\"sf-fields-list\">\r\n            <div class=\"ui-wid" +
+"get sf-filters\">\r\n                <div class=\"ui-widget-header ui-corner-top sf-" +
+"filters-body\">\r\n                    ");
 
 
                Write(Html.TokensCombo(queryDescription, Model));

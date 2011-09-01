@@ -96,7 +96,7 @@ WriteLiteral("\">\r\n            <div class=\"ui-widget-header\">\r\n           
 WriteLiteral("\r\n                ");
 
 
-           Write(Html.Hidden(Model.Compose("ChartType"), Model.Value.Chart.ChartType.ToString()));
+           Write(Html.Hidden(Model.Compose("Chart", "ChartType"), Model.Value.Chart.ChartType.ToString()));
 
 WriteLiteral("\r\n            </div>\r\n");
 

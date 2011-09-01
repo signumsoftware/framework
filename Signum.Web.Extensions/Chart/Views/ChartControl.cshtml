@@ -18,7 +18,8 @@
 
 <div id="@Model.Compose("divChartControl")" class="sf-search-control sf-chart-control">
     @Html.HiddenRuntimeInfo(Model)
-    
+    @Html.HiddenRuntimeInfo(Model, cr => cr.Chart)
+    @Html.Hidden(Model.Compose(ViewDataKeys.QueryName), Navigator.ResolveWebQueryName(queryDescription.QueryName))
     <div>
         <div class="sf-fields-list">
             <div class="ui-widget sf-filters">

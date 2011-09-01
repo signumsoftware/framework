@@ -41,13 +41,26 @@ namespace Signum.Web.Chart
             return View(Navigator.Manager.SearchPageView,  new TypeContext<ChartRequest>(request, ""));
         }
 
+        [HttpPost]
         public PartialViewResult ChangeType(string prefix)
         {
-            var request = this.ExtractEntity<ChartRequest>(prefix).ApplyChanges(this.ControllerContext, prefix, true).Value;
+            var request = ExtractChartRequest(prefix);   
 
             ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(request.QueryName);
 
             return PartialView(ChartClient.ChartBuilderView, new TypeContext<ChartRequest>(request, prefix));
+        }
+
+        [HttpPost]
+        public PartialViewResult Draw(string prefix)
+        {
+            return null;
+        }
+
+        ChartRequest ExtractChartRequest(string prefix)
+        {
+            return new ChartRequest(Navigator.ResolveQueryName(Request.Form[TypeContextUtilities.Compose(prefix, ViewDataKeys.QueryName)]))
+                    .ApplyChanges(this.ControllerContext, prefix, true).Value;
         }
     }
 }
