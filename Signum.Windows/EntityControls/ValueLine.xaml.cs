@@ -322,7 +322,7 @@ namespace Signum.Windows
 
         public virtual UpdateSourceTrigger GetUpdateSourceTrigger(ValueLine vl)
         {
-            if (vl.ValueLineType == ValueLineType.Number)
+            if (vl.ValueLineType == ValueLineType.Number || vl.ValueLineType == ValueLineType.Boolean)
                 return UpdateSourceTrigger.PropertyChanged; 
 
             return UpdateSourceTrigger.LostFocus;

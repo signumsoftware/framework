@@ -110,7 +110,7 @@ namespace Signum.Web
                         return error;
                     break;
                 case ValueLineBoxType.String:
-                    if (stringValue == null)
+                    if (string.IsNullOrEmpty(stringValue))
                         return error;
                     break;
                 default:
