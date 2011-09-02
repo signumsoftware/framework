@@ -9,6 +9,7 @@ using Signum.Engine.DynamicQuery;
 using Signum.Utilities;
 using Signum.Entities.Reflection;
 using Signum.Entities;
+using Signum.Engine.Extensions.Chart;
 
 namespace Signum.Web.Chart
 {
@@ -47,14 +48,30 @@ namespace Signum.Web.Chart
             var request = ExtractChartRequest(prefix);   
 
             ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(request.QueryName);
-
+            
             return PartialView(ChartClient.ChartBuilderView, new TypeContext<ChartRequest>(request, prefix));
         }
 
         [HttpPost]
         public PartialViewResult Draw(string prefix)
         {
-            return null;
+            var request = ExtractChartRequest(prefix);
+
+            var resultTable = ChartLogic.ExecuteChart(request);
+
+            var queryDescription = DynamicQueryManager.Current.QueryDescription(request.QueryName);
+            var querySettings = Navigator.QuerySettings(request.QueryName);
+
+            var entityColumn = queryDescription.Columns.Single(a => a.IsEntity);
+            Type entitiesType = Reflector.ExtractLite(entityColumn.Type);
+            Implementations implementations = entityColumn.Implementations;
+
+            ViewData[ViewDataKeys.Results] = resultTable;
+
+            ViewData[ViewDataKeys.View] = implementations != null || Navigator.IsViewable(entitiesType, true);
+            ViewData[ViewDataKeys.Formatters] = resultTable.Columns.Select((c, i) => new { c, i }).ToDictionary(c => c.i, c => querySettings.GetFormatter(c.c.Column));
+
+            return PartialView(ChartClient.ChartResultsView, new TypeContext<ChartRequest>(request, prefix));
         }
 
         ChartRequest ExtractChartRequest(string prefix)

@@ -332,10 +332,12 @@ namespace Signum.Entities.Chart
         {
             get
             {
-                HashSet<QueryToken> allTokens = ChartTokens().Select(a => a.Token)
-                    .Concat(Filters.Select(a => a.Token)).ToHashSet();
+                var allTokens = ChartTokens().Select(a => a.Token);
 
-                return CollectionElementToken.GetElements(allTokens);
+                if (Filters != null)
+                    allTokens = allTokens.Concat(Filters.Select(a => a.Token));
+
+                return CollectionElementToken.GetElements(allTokens.ToHashSet());
             }
         }
     }

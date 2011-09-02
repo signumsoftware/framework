@@ -259,6 +259,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ChartControl.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Chart\Views\ChartResults.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ChartResults.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Chart\Views\ChartToken1.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -809,6 +814,10 @@
       <LastGenOutput>ChartToken1.cs</LastGenOutput>
     </Content>
     <None Include="Chart\Images\chartType.psd" />
+    <Content Include="Chart\Views\ChartResults.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>ChartResults.cs</LastGenOutput>
+    </Content>
     <None Include="Profiler\Views\Times.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>Times.cs</LastGenOutput>

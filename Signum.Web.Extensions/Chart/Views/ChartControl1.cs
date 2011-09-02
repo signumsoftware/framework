@@ -87,6 +87,7 @@ WriteLiteral("\r\n\r\n");
    
     QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
     List<FilterOption> filterOptions = (List<FilterOption>)ViewData[ViewDataKeys.FilterOptions];
+    bool viewable = (bool)ViewData[ViewDataKeys.View];
 
 
 WriteLiteral("\r\n<div id=\"");
@@ -144,17 +145,32 @@ WriteLiteral("            </div>\r\n        </div>\r\n    </div>\r\n\r\n");
        Html.RenderPartial(ChartClient.ChartBuilderView); 
 
 WriteLiteral("    \r\n    <div class=\"sf-query-button-bar\">\r\n        <button type=\"submit\" class=" +
-"\"sf-query-button sf-draw\" data-icon=\"ui-icon-pencil\" id=\"");
+"\"sf-query-button sf-chart-draw\" data-icon=\"ui-icon-pencil\" id=\"");
 
 
-                                                                                        Write(Model.Compose("qbDraw"));
+                                                                                              Write(Model.Compose("qbDraw"));
 
-WriteLiteral("\" onclick=\"\">");
+WriteLiteral("\" data-url=\"");
 
 
-                                                                                                                             Write(Resources.Chart_Draw);
+                                                                                                                                   Write(Url.Action<ChartController>(cc => cc.Draw(Model.ControlID)));
 
-WriteLiteral("</button>\r\n    </div>\r\n    \r\n    <div class=\"clearall\"></div>\r\n</div>\r\n\r\n");
+WriteLiteral("\">");
+
+
+                                                                                                                                                                                                  Write(Resources.Chart_Draw);
+
+WriteLiteral("</button>\r\n    </div>\r\n    \r\n    <div class=\"clearall\"></div>\r\n\r\n    <div id=\"");
+
+
+        Write(Model.Compose("divResults"));
+
+WriteLiteral("\" class=\"ui-widget ui-corner-all sf-search-results-container\">\r\n");
+
+
+           Html.RenderPartial(ChartClient.ChartResultsView); 
+
+WriteLiteral("    </div>\r\n</div>\r\n\r\n");
 
 
 Write(Html.ScriptsJs("~/Chart/Scripts/SF_Chart.js"));

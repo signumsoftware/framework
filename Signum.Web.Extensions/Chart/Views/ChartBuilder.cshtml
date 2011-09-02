@@ -33,18 +33,22 @@
             @{
                 if (Model.Value.Chart.FirstDimension != null)
                 {
+                    @Html.HiddenRuntimeInfo(Model, cr => cr.Chart.FirstDimension)
                     @Html.EmbeddedControl(Model, cr => cr.Chart.FirstDimension, ec => ec.ViewData[ViewDataKeys.QueryName] = queryDescription.QueryName)
                 }
                 if (Model.Value.Chart.SecondDimension != null)
                 {
+                    @Html.HiddenRuntimeInfo(Model, cr => cr.Chart.SecondDimension)
                     @Html.EmbeddedControl(Model, cr => cr.Chart.SecondDimension, ec => ec.ViewData[ViewDataKeys.QueryName] = queryDescription.QueryName)
                 }
                 if (Model.Value.Chart.FirstValue != null)
                 {
+                    @Html.HiddenRuntimeInfo(Model, cr => cr.Chart.FirstValue)
                     @Html.EmbeddedControl(Model, cr => cr.Chart.FirstValue, ec => ec.ViewData[ViewDataKeys.QueryName] = queryDescription.QueryName)
                 }
                 if (Model.Value.Chart.SecondValue != null)
                 {
+                    @Html.HiddenRuntimeInfo(Model, cr => cr.Chart.SecondValue)
                     @Html.EmbeddedControl(Model, cr => cr.Chart.SecondValue, ec => ec.ViewData[ViewDataKeys.QueryName] = queryDescription.QueryName)
                 }
             }
