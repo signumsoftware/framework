@@ -41,16 +41,15 @@ namespace ASP
     using System.Web.UI.WebControls.WebParts;
     using System.Web.UI.HtmlControls;
     using System.Xml.Linq;
-    using Signum.Utilities.ExpressionTrees;
     using Signum.Web.Profiler;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
-    [System.Web.WebPages.PageVirtualPathAttribute("~/Profiler/Views/Statistics.cshtml")]
-    public class _Page_Profiler_Views_Statistics_cshtml : System.Web.Mvc.WebViewPage<IOrderedEnumerable<SqlProfileResume>>
+    [System.Web.WebPages.PageVirtualPathAttribute("~/Profiler/Views/ProfilerButtons.cshtml")]
+    public class _Page_Profiler_Views_ProfilerButtons_cshtml : System.Web.Mvc.WebViewPage<dynamic>
     {
 
 
-        public _Page_Profiler_Views_Statistics_cshtml()
+        public _Page_Profiler_Views_ProfilerButtons_cshtml()
         {
         }
         protected System.Web.HttpApplication ApplicationInstance
@@ -63,47 +62,32 @@ namespace ASP
         public override void Execute()
         {
 
+WriteLiteral("<a href=\"");
 
 
+    Write(Url.Action((ProfilerController pc) => pc.Disable()));
 
-             
-    SqlProfileResumeOrder order = ViewBag.Order;
-
-
-WriteLiteral("<h2>");
+WriteLiteral("\" class=\"sf-button\" style=\"");
 
 
-Write(ViewData[ViewDataKeys.Title]);
+                                                                                    Write(HeavyProfiler.Enabled ? "" : "display:none");
 
-WriteLiteral("</h2>\r\n<div>\r\n  ");
-
-
-Write(Html.Partial(ProfilerClient.ViewPrefix.Formato("ProfilerButtons")));
-
-WriteLiteral("\r\n  ");
+WriteLiteral(";color:red\" id=\"sfProfileDisable\">\r\nDisable\r\n</a>\r\n<a href=\"");
 
 
-Write(Html.ActionLink("Root Entries", "Heavy", new {@class = "sf-button" }));
+    Write(Url.Action((ProfilerController pc) => pc.Enable()));
 
-WriteLiteral("\r\n</div>\r\n\r\n");
-
-
-Write(Html.Partial(ProfilerClient.ViewPrefix.Formato("StatisticsTable")));
-
-WriteLiteral("\r\n");
+WriteLiteral("\" class=\"sf-button\"  style=\"");
 
 
-Write(Html.ScriptsJs("~/Profiler/Scripts/SF_Profiler.js"));
+                                                                                    Write(!HeavyProfiler.Enabled ? "" : "display:none");
 
-WriteLiteral("\r\n<script language=\"javascript\">\r\n    $(function () {\r\n        SF.Profiler.init(f" +
-"unction () {\r\n            $.ajax({\r\n                url: \"");
+WriteLiteral("\" id=\"sfProfileEnable\">\r\nEnable\r\n</a>\r\n<a href=\"");
 
 
-                 Write(Url.Action((ProfilerController p) => p.Statistics(order)));
+    Write(Url.Action((ProfilerController pc) => pc.Clean()));
 
-WriteLiteral("\",\r\n                success: function(data){\r\n                    $(\"table.sf-sta" +
-"ts-table\").replaceWith(data); \r\n                }\r\n             }); \r\n        })" +
-";\r\n        SF.Profiler.initStats();\r\n    });\r\n</script>\r\n");
+WriteLiteral("\" class=\"sf-button\" id=\"sfProfileClear\">\r\nClean\r\n</a>");
 
 
         }
