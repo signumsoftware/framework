@@ -241,7 +241,7 @@ namespace Signum.Utilities
                             Avg = new TimeSpan((long)gr.Average((a => a.Elapsed.Ticks))),
                             Min = new TimeSpan(gr.Min((a => a.Elapsed.Ticks))),
                             Max = new TimeSpan(gr.Max((a => a.Elapsed.Ticks))),
-                            References = gr.Select(a => a.FullIndex()).ToList(),
+                            References = gr.Select(a => new SqlProfileReference { FullKey = a.FullIndex(), Elapsed = a.Elapsed }).ToList(),
                         }).OrderByDescending(a => a.Sum);
             return statistics;
         }
@@ -375,7 +375,13 @@ namespace Signum.Utilities
         public TimeSpan Avg;
         public TimeSpan Min;
         public TimeSpan Max;
-        public List<string> References;
+        public List<SqlProfileReference> References;
+    }
+
+    public class SqlProfileReference
+    {
+        public string FullKey;
+        public TimeSpan Elapsed;
     }
 
     public class ProfileResume
