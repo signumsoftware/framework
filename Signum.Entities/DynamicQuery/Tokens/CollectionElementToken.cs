@@ -72,9 +72,9 @@ namespace Signum.Entities.DynamicQuery
             return ElementType == CollectionElementType.All || ElementType == CollectionElementType.Any;
         }
 
-        public override PropertyRoute GetPropertyRoute()
+        public override FieldRoute GetPropertyRoute()
         {
-            PropertyRoute parent = Parent.GetPropertyRoute();
+            FieldRoute parent = Parent.GetPropertyRoute();
             if (parent == null)
                 return null;
 

@@ -30,7 +30,7 @@ namespace Signum.Web
 
         public int? MaxElements { get; set; }
 
-        public EntityRepeater(Type type, object untypedValue, Context parent, string controlID, PropertyRoute propertyRoute)
+        public EntityRepeater(Type type, object untypedValue, Context parent, string controlID, FieldRoute propertyRoute)
             : base(type, untypedValue, parent, controlID, propertyRoute)
         {
             RemoveElementLinkText = Resources.Remove;

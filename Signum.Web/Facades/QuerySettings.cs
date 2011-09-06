@@ -43,7 +43,7 @@ namespace Signum.Web
         public static List<FormatterRule> FormatRules { get; set; }
         public static List<EntityFormatterRule> EntityFormatRules { get; set; }
 
-        public static Dictionary<PropertyRoute, Func<HtmlHelper, object, MvcHtmlString>> PropertyFormatters { get; set; }
+        public static Dictionary<FieldRoute, Func<HtmlHelper, object, MvcHtmlString>> PropertyFormatters { get; set; }
 
         Dictionary<string, Func<HtmlHelper, object, MvcHtmlString>> formatters;
         public Dictionary<string, Func<HtmlHelper, object, MvcHtmlString>> Formatters
@@ -105,7 +105,7 @@ namespace Signum.Web
                 }),
             };
 
-            PropertyFormatters = new Dictionary<PropertyRoute, Func<HtmlHelper, object, MvcHtmlString>>();
+            PropertyFormatters = new Dictionary<FieldRoute, Func<HtmlHelper, object, MvcHtmlString>>();
         }
 
         public static MvcHtmlString AlignCenter(MvcHtmlString innerHTML)
@@ -123,7 +123,7 @@ namespace Signum.Web
             if (formatters != null && formatters.TryGetValue(column.Name, out cf))
                 return cf; 
 
-            PropertyRoute route = column.Token.GetPropertyRoute();
+            FieldRoute route = column.Token.GetPropertyRoute();
             if (route != null)
             {
                 var formatter = QuerySettings.PropertyFormatters.TryGetC(route);
@@ -138,7 +138,7 @@ namespace Signum.Web
         public static void RegisterPropertyFormat<T>(Expression<Func<T, object>> property, Func<HtmlHelper, object, MvcHtmlString> formatter)
          where T : IRootEntity
         {
-            PropertyFormatters.Add(PropertyRoute.Construct(property), formatter);
+            PropertyFormatters.Add(FieldRoute.Construct(property), formatter);
         }
     }
 

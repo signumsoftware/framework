@@ -26,7 +26,7 @@ namespace Signum.Web
         public List<Lite> Data { get; set; }
         public int Size { get; set; }
 
-        public EntityCombo(Type type, object untypedValue, Context parent, string controlID, PropertyRoute propertyRoute)
+        public EntityCombo(Type type, object untypedValue, Context parent, string controlID, FieldRoute propertyRoute)
             : base(type, untypedValue, parent, controlID, propertyRoute)
         {
             Size = 0;

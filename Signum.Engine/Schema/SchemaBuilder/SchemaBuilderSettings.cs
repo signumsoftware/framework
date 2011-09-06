@@ -15,13 +15,7 @@ namespace Signum.Engine.Maps
 {
     public class SchemaSettings
     {
-        class SchemaTypeSettings
-        {
-            public Attribute[] TypeAttributes;
-            public Dictionary<string, Attribute[]> FieldAttributes = new Dictionary<string, Attribute[]>(); 
-        }
-
-        Dictionary<Type, SchemaTypeSettings> types = new Dictionary<Type,SchemaTypeSettings>();
+        public Dictionary<FieldRoute, Attribute[]> OverridenAttributes = new Dictionary<FieldRoute, Attribute[]>();
 
         public Dictionary<Type, SqlDbType> TypeValues = new Dictionary<Type, SqlDbType>
         {
@@ -64,55 +58,27 @@ namespace Signum.Engine.Maps
             {SqlDbType.Decimal, 2}, 
         };
 
-        public bool IsTypeAttributesOverriden<T>()
+        public bool IsOverriden<T>(Expression<Func<T, object>> fieldRoute) where T : IdentifiableEntity
         {
-            return IsTypeAttributesOverriden(typeof(T));
+            return IsOverriden(FieldRoute.Construct(fieldRoute));
         }
 
-        public bool IsTypeAttributesOverriden(Type type)
+        private bool IsOverriden(FieldRoute route)
         {
-            var t = types.TryGetC(type);
-            return t != null && t.TypeAttributes != null;
+            return OverridenAttributes.ContainsKey(route);
         }
 
-        public void OverrideTypeAttributes<T>(params Attribute[] attributes) where T : IIdentifiable
+        public void OverrideAttributes<T>(Expression<Func<T, object>> fieldRoute, params Attribute[] attributes)
+            where T : IdentifiableEntity
         {
-            OverrideTypeAttributes(typeof(T), attributes); 
+            OverrideAttributes(FieldRoute.Construct(fieldRoute), attributes);
         }
 
-        public void OverrideTypeAttributes(Type type, params Attribute[] attributes)
-        {
-            AssertCorrect(attributes, AttributeTargets.Class);
-            types.GetOrCreate(type).TypeAttributes = attributes;
-        }
-
-        public bool IsFieldAttributesOverriden<T, R>(Expression<Func<T, R>> propertyOrField)
-        {
-            MemberInfo mi = ReflectionTools.GetMemberInfo(propertyOrField);
-            Type type = ReflectionTools.GetReceiverType(propertyOrField);
-            FieldInfo fi = Reflector.FindFieldInfo(type, mi, true);
-            return IsFieldAttributesOverriden(typeof(T), fi.Name);
-        }
-
-        private bool IsFieldAttributesOverriden(Type type, string fieldName)
-        {
-            var t = types.TryGetC(type);
-            return t != null && t.FieldAttributes.ContainsKey(fieldName);
-        }
-
-        public void OverrideFieldAttributes<T, R>(Expression<Func<T, R>> lambda, params Attribute[] attributes)
-        {
-            MemberInfo mi = ReflectionTools.GetMemberInfo(lambda);
-            Type type = ReflectionTools.GetReceiverType(lambda);
-            FieldInfo fi = Reflector.FindFieldInfo(type, mi, true); 
-            OverrideFieldAttributes(typeof(T), fi.Name, attributes); 
-        }
-
-        public void OverrideFieldAttributes(Type type, string fieldName, params Attribute[] attributes)
+        public void OverrideAttributes(FieldRoute route, params Attribute[] attributes)
         {
             AssertCorrect(attributes, AttributeTargets.Field);
 
-            types.GetOrCreate(type).FieldAttributes[fieldName] = attributes;
+            OverridenAttributes.Add(route, attributes);
         }
 
         private void AssertCorrect(Attribute[] attributes, AttributeTargets attributeTargets)
@@ -123,104 +89,85 @@ namespace Signum.Engine.Maps
                 throw new InvalidOperationException("The following attributes ar not compatible with targets {0}: {1}".Formato(attributeTargets, incorrects.ToString(a => a.GetType().Name, ", ")));
         }
 
-        public Attribute[] TypeAttributes(Type type)
+        public Attribute[] Attributes<T>(Expression<Func<T, object>> fieldRoute)
         {
-            return types.TryGetC(type).TryCC(a => a.TypeAttributes) ?? type.GetCustomAttributes(false).Cast<Attribute>().ToArray(); 
+            return Attributes(fieldRoute);
         }
 
-        public Attribute[] FieldInfoAttributes<T, R>(Expression<Func<T, R>> propertyOrField)
+        public Attribute[] Attributes(FieldRoute fieldRoute)
         {
-            MemberInfo mi = ReflectionTools.GetMemberInfo(propertyOrField);
-            Type type = ReflectionTools.GetReceiverType(propertyOrField);
-            FieldInfo fi = Reflector.FindFieldInfo(type, mi, true);
-            return FieldInfoAttributes(type, fi);
+            var overriden = OverridenAttributes.TryGetC(fieldRoute) ; 
+
+            if(overriden!= null)
+                return overriden; 
+
+            switch (fieldRoute.FieldRouteType)
+	        {
+                case FieldRouteType.Field: 
+                    return fieldRoute.FieldInfo.GetCustomAttributes(false).Cast<Attribute>().ToArray(); 
+                case FieldRouteType.LiteEntity: 
+                    return fieldRoute.Parent.FieldInfo.GetCustomAttributes(false).Cast<Attribute>().ToArray();
+
+                default:
+                    throw new InvalidOperationException("Route of type {0} not supported for this method".Formato(fieldRoute.FieldRouteType));
+	        }
         }
 
-        public Attribute[] FieldInfoAttributes(Type type, FieldInfo fi)
-        {
-            var result = type.For(t => t != fi.DeclaringType.BaseType, t => t.BaseType)
-                .Select(t=>types.TryGetC(t).TryCC(a => a.FieldAttributes.TryGetC(fi.Name)))
-                .NotNull().FirstOrDefault();
-
-            return result ?? fi.GetCustomAttributes(false).Cast<Attribute>().ToArray();
-        }
-
-        internal bool IsNullable(Type type, FieldInfo fi, Type fieldType, bool forceNull)
+        internal bool IsNullable(FieldRoute fieldRoute, bool forceNull)
         {
             if (forceNull)
                 return true;
 
-            if (FieldInfoAttributes(type, fi).OfType<NotNullableAttribute>().Any())
+            if (Attributes(fieldRoute).OfType<NotNullableAttribute>().Any())
                 return false;
 
-            if (FieldInfoAttributes(type, fi).OfType<NullableAttribute>().Any())
+            if (Attributes(fieldRoute).OfType<NullableAttribute>().Any())
                 return true;
 
-            return fieldType.IsValueType ? Nullable.GetUnderlyingType(fieldType) != null : true;
+            return !fieldRoute.Type.IsValueType || fieldRoute.Type.IsNullable();
         }
 
-        internal IndexType GetIndexType(Type type, FieldInfo fi)
+        internal IndexType GetIndexType(FieldRoute fieldRoute)
         {
-            var att = FieldInfoAttributes(type, fi);
+            var att = Attributes(fieldRoute);
 
             UniqueIndexAttribute at = att.OfType<UniqueIndexAttribute>().SingleOrDefault();
 
             return at == null ? IndexType.None :
                 at.AllowMultipleNulls ? IndexType.UniqueMultipleNulls :
-                IndexType.Unique; 
+                IndexType.Unique;
         }
 
-         public bool ImplementedBy<T, R>(Expression<Func<T, R>> propertyOrField, Type typeToImplement)
-         {
-             var imp = GetImplementations(propertyOrField);
-             return imp != null && imp.ImplementedBy(typeToImplement); 
-         }
-
-         public void AssertImplementedBy<T, R>(Expression<Func<T, R>> propertyOrField, Type typeToImplement)
-         {
-             MemberInfo mi = ReflectionTools.GetMemberInfo(propertyOrField);
-             Type type = ReflectionTools.GetReceiverType(propertyOrField);
-             FieldInfo fi = Reflector.FindFieldInfo(type, mi, true);
-             var imp = GetImplementations(type, fi);
-
-             if (imp == null || !imp.ImplementedBy(typeToImplement))
-             {
-                 throw new InvalidOperationException("Field {0} from {1} is not ImplementedBy {2}".Formato(fi.Name, type.Name, typeToImplement.Name));
-             }
-         }
-
-         public Implementations GetImplementations<T, R>(Expression<Func<T, R>> propertyOrField)
-         {
-             MemberInfo mi = ReflectionTools.GetMemberInfo(propertyOrField);
-             Type type = ReflectionTools.GetReceiverType(propertyOrField);
-             FieldInfo fi = Reflector.FindFieldInfo(type, mi, true);
-             return GetImplementations(type, fi);
-         }
-
-        internal Implementations GetImplementations(Type type, FieldInfo fi)
+        public bool ImplementedBy<T>(Expression<Func<T, object>> fieldRoute, Type typeToImplement) where T : IdentifiableEntity
         {
-            var fieldAtt = FieldInfoAttributes(type, fi);
+            var imp = GetImplementations(fieldRoute);
+            return imp != null && imp.ImplementedBy(typeToImplement);
+        }
+
+        public void AssertImplementedBy<T>(Expression<Func<T, object>> fieldRoute, Type typeToImplement) where T : IdentifiableEntity
+        {
+            var route = FieldRoute.Construct(fieldRoute);
+
+            var imp = GetImplementations(route);
+
+            if (imp == null || !imp.ImplementedBy(typeToImplement))
+                throw new InvalidOperationException("Route {0} is not ImplementedBy {2}".Formato(route, typeToImplement.Name));
+        }
+
+        public Implementations GetImplementations<T>(Expression<Func<T, object>> fieldRoute) where T : IdentifiableEntity
+        {
+            return GetImplementations(FieldRoute.Construct(fieldRoute));
+        }
+
+        internal Implementations GetImplementations(FieldRoute route)
+        {
+            var fieldAtt = Attributes(route);
 
             ImplementedByAttribute ib = fieldAtt.OfType<ImplementedByAttribute>().SingleOrDefault();
             ImplementedByAllAttribute iba = fieldAtt.OfType<ImplementedByAllAttribute>().SingleOrDefault();
 
             if (ib != null && iba != null)
-                throw new NotSupportedException("Field {0} contains both {1} and {2}".Formato(fi, ib.GetType(), iba.GetType()));
-
-            if (ib != null) return ib;
-            if (iba != null) return iba;
-
-            Type entityType = fi.FieldType;
-            entityType = entityType.ElementType() ?? entityType;
-            entityType = Reflector.ExtractLite(entityType) ?? entityType; 
-
-            var typeAtt = TypeAttributes(entityType);
-
-            ib = typeAtt.OfType<ImplementedByAttribute>().SingleOrDefault();
-            iba = typeAtt.OfType<ImplementedByAllAttribute>().SingleOrDefault();
-
-            if (ib != null && iba != null)
-                throw new NotSupportedException("Type {0} contains both {1} and {2}".Formato(entityType, ib.GetType(), iba.GetType()));
+                throw new NotSupportedException("Route {0} contains both {1} and {2}".Formato(route, ib.GetType().Name, iba.GetType().Name));
 
             if (ib != null) return ib;
             if (iba != null) return iba;
@@ -228,30 +175,39 @@ namespace Signum.Engine.Maps
             return null;
         }
 
-        internal SqlDbType? GetSqlDbType(Type type, FieldInfo fi, Type fieldType)
+        internal SqlDbType? GetSqlDbType(FieldRoute fieldRoute)
         {
-            SqlDbTypeAttribute att = FieldInfoAttributes(type, fi).OfType<SqlDbTypeAttribute>().SingleOrDefault();
+            SqlDbTypeAttribute att = Attributes(fieldRoute).OfType<SqlDbTypeAttribute>().SingleOrDefault();
 
-            return att.TryCS(a => a.HasSqlDbType ? a.SqlDbType : (SqlDbType?)null) ?? TypeValues.TryGetS(fieldType.UnNullify());
+            if (att != null && att.HasSqlDbType)
+                return att.SqlDbType;
+
+            return TypeValues.TryGetS(fieldRoute.Type);
         }
 
-        internal int? GetSqlSize(Type type, FieldInfo fi, SqlDbType sqlDbType)
+        internal int? GetSqlSize(FieldRoute fieldRoute, SqlDbType sqlDbType)
         {
-            SqlDbTypeAttribute att = FieldInfoAttributes(type, fi).OfType<SqlDbTypeAttribute>().SingleOrDefault();
+            SqlDbTypeAttribute att = Attributes(fieldRoute).OfType<SqlDbTypeAttribute>().SingleOrDefault();
 
-            return att.TryCS(a => a.HasSize ? a.Size : (int?)null) ?? defaultSize.TryGetS(sqlDbType);
+            if (att != null && att.HasSize)
+                return att.Size;
+
+            return defaultSize.TryGetS(sqlDbType);
         }
 
-        internal int? GetSqlScale(Type type, FieldInfo fi, SqlDbType sqlDbType)
+        internal int? GetSqlScale(FieldRoute fieldRoute, SqlDbType sqlDbType)
         {
-            SqlDbTypeAttribute att = FieldInfoAttributes(type, fi).OfType<SqlDbTypeAttribute>().SingleOrDefault();
+            SqlDbTypeAttribute att = Attributes(fieldRoute).OfType<SqlDbTypeAttribute>().SingleOrDefault();
 
-            return att.TryCS(a => a.HasScale ? a.Scale : (int?)null) ?? defaultScale.TryGetS(sqlDbType);
+            if (att != null && att.HasScale)
+                return att.Scale;
+
+            return defaultScale.TryGetS(sqlDbType);
         }
 
         internal SqlDbType DefaultSqlType(Type type)
         {
-            return this.TypeValues.GetOrThrow(type, "Type {0} not registered"); 
+            return this.TypeValues.GetOrThrow(type, "Type {0} not registered");
         }
 
         public void Desambiguate(Type type, string cleanName)

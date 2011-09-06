@@ -127,7 +127,7 @@ namespace Signum.Web
         {
             TypeContext<S> context = Common.WalkExpression(tc, property);
 
-            EntityLine el = new EntityLine(typeof(S), context.Value, context, null, context.PropertyRoute);
+            EntityLine el = new EntityLine(typeof(S), context.Value, context, null, context.FieldRoute);
 
             EntityBaseHelper.ConfigureEntityBase(el, el.CleanRuntimeType ?? el.Type.CleanType());
 

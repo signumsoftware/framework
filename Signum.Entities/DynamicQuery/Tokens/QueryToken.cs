@@ -35,7 +35,7 @@ namespace Signum.Entities.DynamicQuery
 
         protected abstract Expression BuildExpressionInternal(BuildExpressionContext context);
 
-        public abstract PropertyRoute GetPropertyRoute();
+        public abstract FieldRoute GetPropertyRoute();
         public abstract Implementations Implementations();
         public abstract bool IsAllowed();
 

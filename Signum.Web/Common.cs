@@ -39,16 +39,16 @@ namespace Signum.Web
         #region Tasks
         public static void TaskSetLabelText(BaseLine bl)
         {
-            if (bl != null && bl.PropertyRoute.PropertyRouteType == PropertyRouteType.Property)
-                bl.LabelText = bl.PropertyRoute.PropertyInfo.NiceName();
+            if (bl != null && bl.FieldRoute.FieldRouteType == FieldRouteType.Field)
+                bl.LabelText = bl.FieldRoute.PropertyInfo.NiceName();
         }
 
         static void TaskSetUnitText(BaseLine bl)
         {
             ValueLine vl = bl as ValueLine;
-            if (vl != null && vl.PropertyRoute.PropertyRouteType == PropertyRouteType.Property)
+            if (vl != null && vl.FieldRoute.FieldRouteType == FieldRouteType.Field)
             {
-                UnitAttribute ua = bl.PropertyRoute.PropertyInfo.SingleAttribute<UnitAttribute>();
+                UnitAttribute ua = bl.FieldRoute.FieldInfo.SingleAttribute<UnitAttribute>();
                 if (ua != null)
                     vl.UnitText = ua.UnitName;
             }
@@ -57,9 +57,9 @@ namespace Signum.Web
         static void TaskSetFormatText(BaseLine bl)
         {
             ValueLine vl = bl as ValueLine;
-            if (vl != null && bl.PropertyRoute.PropertyRouteType == PropertyRouteType.Property)
+            if (vl != null && bl.FieldRoute.FieldRouteType == FieldRouteType.Field)
             {
-                string format = Reflector.FormatString(bl.PropertyRoute);
+                string format = Reflector.FormatString(bl.FieldRoute);
                 if (format != null)
                     vl.Format = format;
             }
@@ -70,7 +70,7 @@ namespace Signum.Web
             EntityBase eb = bl as EntityBase;
             if (eb != null)
             {
-                PropertyRoute route = bl.PropertyRoute;
+                FieldRoute route = bl.FieldRoute;
 
                 if (Reflector.IsMList(bl.Type))
                     route = route.Add("Item");
@@ -91,9 +91,9 @@ namespace Signum.Web
 
         public static void TaskSetReadOnly(BaseLine bl)
         {
-            if (bl != null && bl.PropertyRoute.PropertyRouteType == PropertyRouteType.Property)
+            if (bl != null && bl.FieldRoute.FieldRouteType == FieldRouteType.Field)
             {
-                if (bl.PropertyRoute.PropertyInfo.IsReadOnly() || bl.ReadOnly)
+                if (bl.FieldRoute.PropertyInfo.IsReadOnly() || bl.ReadOnly)
                 {
                     bl.ReadOnly = true;
                 }
@@ -103,9 +103,9 @@ namespace Signum.Web
         public static void TaskSetHtmlProperties(BaseLine bl)
         {
             ValueLine vl = bl as ValueLine;
-            if (vl != null && bl.PropertyRoute.PropertyRouteType == PropertyRouteType.Property)
+            if (vl != null && bl.FieldRoute.FieldRouteType == FieldRouteType.Field)
             {
-                var atribute = bl.PropertyRoute.PropertyInfo.SingleAttribute<StringLengthValidatorAttribute>();
+                var atribute = bl.FieldRoute.FieldInfo.SingleAttribute<StringLengthValidatorAttribute>();
                 if (atribute != null)
                 {
                     int max = atribute.Max; //-1 if not set

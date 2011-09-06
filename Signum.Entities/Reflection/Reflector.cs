@@ -300,12 +300,12 @@ namespace Signum.Entities.Reflection
             }
         }
 
-        public static string FormatString(PropertyRoute route)
+        public static string FormatString(FieldRoute route)
         {
-            if (route.PropertyRouteType != PropertyRouteType.Property)
+            if (route.FieldRouteType != FieldRouteType.Field)
                 throw new InvalidOperationException("PropertyRoute of type Property expected");
 
-            FormatAttribute format = route.PropertyInfo.SingleAttribute<FormatAttribute>();
+            FormatAttribute format = route.FieldInfo.SingleAttribute<FormatAttribute>();
             if(format != null)
                 return format.Format;
 

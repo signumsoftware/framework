@@ -105,7 +105,7 @@ namespace Signum.Web
                 items = new List<SelectListItem>();
 
                 if (valueLine.Type.IsNullable() &&
-                   (!Validator.GetOrCreatePropertyPack(valueLine.PropertyRoute).Validators.OfType<NotNullValidatorAttribute>().Any() || valueLine.UntypedValue == null))
+                   (!Validator.GetOrCreatePropertyPack(valueLine.FieldRoute).Validators.OfType<NotNullValidatorAttribute>().Any() || valueLine.UntypedValue == null))
                 {
                     items.Add(new SelectListItem() { Text = "-", Value = "" });
                 }
@@ -182,16 +182,16 @@ namespace Signum.Web
 
         public static InputType GetInputType(ValueLine valueLine)
         {
-            if (valueLine.PropertyRoute == null) return InputType.Text;
-            var pp = Validator.GetOrCreatePropertyPack(valueLine.PropertyRoute);
+            if (valueLine.FieldRoute == null) return InputType.Text;
+            var pp = Validator.GetOrCreatePropertyPack(valueLine.FieldRoute);
 
             if (pp == null) return InputType.Text;
 
-            if (Validator.GetOrCreatePropertyPack(valueLine.PropertyRoute)
+            if (Validator.GetOrCreatePropertyPack(valueLine.FieldRoute)
                     .Validators.OfType<EMailValidatorAttribute>().SingleOrDefault() != null)
                 return InputType.Email;
 
-            if (Validator.GetOrCreatePropertyPack(valueLine.PropertyRoute)
+            if (Validator.GetOrCreatePropertyPack(valueLine.FieldRoute)
                 .Validators.OfType<URLValidatorAttribute>().SingleOrDefault() != null)
                 return InputType.Url;
 
@@ -314,7 +314,7 @@ namespace Signum.Web
         {
             TypeContext<S> context = (TypeContext<S>)Common.WalkExpression(tc, property);
 
-            ValueLine vl = new ValueLine(typeof(S), context.Value, context, null, context.PropertyRoute);
+            ValueLine vl = new ValueLine(typeof(S), context.Value, context, null, context.FieldRoute);
 
             Common.FireCommonTasks(vl);
 
@@ -333,7 +333,7 @@ namespace Signum.Web
         {
             TypeContext<S> context = (TypeContext<S>)Common.WalkExpression(tc, property);
 
-            ValueLine hl = new ValueLine(typeof(S), context.Value, context, null, context.PropertyRoute);
+            ValueLine hl = new ValueLine(typeof(S), context.Value, context, null, context.FieldRoute);
 
             Common.FireCommonTasks(hl);
 

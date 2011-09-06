@@ -336,7 +336,7 @@ namespace Signum.Engine.Maps
 
         static Schema()
         {
-            PropertyRoute.SetFindImplementationsCallback(pr => Schema.Current.FindImplementations(pr));
+            FieldRoute.SetFindImplementationsCallback(pr => Schema.Current.FindImplementations(pr));
         }
 
         internal Schema(SchemaSettings settings)
@@ -393,14 +393,14 @@ namespace Signum.Engine.Maps
             return result;
         }
 
-        public Implementations FindImplementations(PropertyRoute route)
+        public Implementations FindImplementations(FieldRoute route)
         {
             Type type = route.RootType;
 
             if (!Tables.ContainsKey(type))
                 return null;
 
-            Field field = FindField(Table(type), route.Properties, false);
+            Field field = FindField(Table(type), route.Fields, false);
 
             FieldImplementedBy ibField = field as FieldImplementedBy;
             if (ibField != null)

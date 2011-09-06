@@ -113,7 +113,7 @@ namespace Signum.Web
         {
             TypeContext<S> context = Common.WalkExpression(tc, property);
 
-            EntityCombo ec = new EntityCombo(typeof(S), context.Value, context, null, context.PropertyRoute);
+            EntityCombo ec = new EntityCombo(typeof(S), context.Value, context, null, context.FieldRoute);
 
             EntityBaseHelper.ConfigureEntityBase(ec, ec.CleanRuntimeType ?? ec.Type.CleanType());
 

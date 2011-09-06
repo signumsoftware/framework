@@ -22,7 +22,7 @@ namespace Signum.Web
 
     public abstract class EntityListBase : EntityBase
     {
-        public EntityListBase(Type type, object untypedValue, Context parent, string controlID, PropertyRoute propertyRoute)
+        public EntityListBase(Type type, object untypedValue, Context parent, string controlID, FieldRoute propertyRoute)
             : base(type, untypedValue, parent, controlID, propertyRoute)
         {
         }

@@ -82,7 +82,7 @@ namespace Signum.Services
         }
 
         [SuggestUserInterface]
-        public virtual Implementations FindImplementations(PropertyRoute entityPath)
+        public virtual Implementations FindImplementations(FieldRoute entityPath)
         {
             return Return(MethodInfo.GetCurrentMethod(),
                 () => Schema.Current.FindImplementations(entityPath));

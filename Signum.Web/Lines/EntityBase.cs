@@ -25,7 +25,7 @@ namespace Signum.Web
 
     public abstract class EntityBase : BaseLine
     {
-        public EntityBase(Type type, object untypedValue, Context parent, string controlID, PropertyRoute propertyRoute)
+        public EntityBase(Type type, object untypedValue, Context parent, string controlID, FieldRoute propertyRoute)
             : base(type, untypedValue, parent, controlID, propertyRoute)
         {
             View = true;

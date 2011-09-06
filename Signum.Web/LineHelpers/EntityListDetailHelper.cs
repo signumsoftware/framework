@@ -125,7 +125,7 @@ namespace Signum.Web
         {
             TypeContext<MList<S>> context = Common.WalkExpression(tc, property);
 
-            EntityListDetail el = new EntityListDetail(context.Type, context.UntypedValue, context, null, context.PropertyRoute);
+            EntityListDetail el = new EntityListDetail(context.Type, context.UntypedValue, context, null, context.FieldRoute);
 
             EntityBaseHelper.ConfigureEntityBase(el, Reflector.ExtractLite(typeof(S)) ?? typeof(S));
 

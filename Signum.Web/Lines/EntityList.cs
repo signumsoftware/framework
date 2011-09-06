@@ -18,7 +18,7 @@ namespace Signum.Web
 {
     public class EntityList : EntityListBase
     {
-        public EntityList(Type type, object untypedValue, Context parent, string controlID, PropertyRoute propertyRoute)
+        public EntityList(Type type, object untypedValue, Context parent, string controlID, FieldRoute propertyRoute)
             : base(type, untypedValue, parent, controlID, propertyRoute)
         {
         }

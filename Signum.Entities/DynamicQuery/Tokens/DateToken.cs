@@ -62,7 +62,7 @@ namespace Signum.Entities.DynamicQuery
             return Expression.Property(exp.UnNullify(), miDate).Nullify();
         }
 
-        public override PropertyRoute GetPropertyRoute()
+        public override FieldRoute GetPropertyRoute()
         {
             return Parent.GetPropertyRoute();
         }
