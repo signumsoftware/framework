@@ -55,7 +55,7 @@ namespace Signum.Web.Files
             return OnChanged ?? DefaultOnChanged();
         }
 
-        public FileLine(Type type, object untypedValue, Context parent, string controlID, PropertyRoute propertyRoute)
+        public FileLine(Type type, object untypedValue, Context parent, string controlID, FieldRoute propertyRoute)
             : base(type, untypedValue, parent, controlID, propertyRoute)
         {
             Download = true;

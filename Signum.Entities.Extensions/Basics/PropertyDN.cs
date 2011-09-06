@@ -12,8 +12,8 @@ namespace Signum.Entities.Basics
         public PropertyDN() { }
 
         [field: Ignore]
-        PropertyRoute route;
-        public PropertyRoute Route
+        FieldRoute route;
+        public FieldRoute Route
         {
             get { return route; }
             set { route = value; }

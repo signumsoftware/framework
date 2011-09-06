@@ -20,7 +20,7 @@ namespace Signum.Engine.Help
 {
     public static class HelpGenerator
     {
-        public static string GetPropertyHelp(PropertyRoute pr)
+        public static string GetPropertyHelp(FieldRoute pr)
         {
             string validations = Validator.GetOrCreatePropertyPack(pr).Validators.CommaAnd(v => v.HelpMessage);
 
@@ -75,7 +75,7 @@ namespace Signum.Engine.Help
             }
         }
 
-        static string EntityProperty(PropertyRoute pr, Type propertyType, string typeName)
+        static string EntityProperty(FieldRoute pr, Type propertyType, string typeName)
         {
             if (pr.PropertyInfo.IsDefaultName())
                 return
@@ -86,7 +86,7 @@ namespace Signum.Engine.Help
                     propertyType.GetGenderAwareResource(() => Resources._0IsA1).Formato(pr.PropertyInfo.NiceName(), typeName);
         }
 
-        static string ValueType(PropertyRoute pr)
+        static string ValueType(FieldRoute pr)
         {
             Type type = pr.Type;
             string format = Reflector.FormatString(pr);
@@ -126,7 +126,7 @@ namespace Signum.Engine.Help
             return type.NiceName();
         }
 
-        static string PropertyLink(this PropertyRoute route)
+        static string PropertyLink(this FieldRoute route)
         {
             string cleanName = TypeLogic.GetCleanName(route.RootType);
             return "[p:" + cleanName + "." + route.PropertyString() + "]";

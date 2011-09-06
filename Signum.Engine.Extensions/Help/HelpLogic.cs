@@ -87,7 +87,7 @@ namespace Signum.Engine.Help
             return HelpLogic.EntityUrl(entityType) + "#" + "o-" + OperationDN.UniqueKey(operation).Replace('.', '_');
         }
 
-        public static string PropertyUrl(PropertyRoute route)
+        public static string PropertyUrl(FieldRoute route)
         {
             return HelpLogic.EntityUrl(route.RootType) + "#" + "p-" + route.PropertyString();
         }

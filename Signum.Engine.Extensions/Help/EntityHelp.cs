@@ -41,7 +41,7 @@ namespace Signum.Engine.Help
                 Type = t,
                 Language = CultureInfo.CurrentCulture.Name,
                 Description = "",
-                Properties = PropertyRoute.GenerateRoutes(t)
+                Properties = FieldRoute.GenerateRoutes(t)
                             .ToDictionary(
                                 pp => pp.PropertyString(),
                                 pp => new PropertyHelp(pp, HelpGenerator.GetPropertyHelp(pp))),
@@ -107,7 +107,7 @@ namespace Signum.Engine.Help
                 Language = element.Attribute(_Language).Value,
                 Properties = EnumerableExtensions.JoinStrict(
                     element.Element(_Properties).TryCC(ps => ps.Elements(_Property)) ?? new XElement[0],
-                    PropertyRoute.GenerateRoutes(type),
+                    FieldRoute.GenerateRoutes(type),
                     x => x.Attribute(_Name).Value,
                     pp => pp.PropertyString(),
                     (x, pp) => new KeyValuePair<string, PropertyHelp>(
@@ -383,16 +383,16 @@ namespace Signum.Engine.Help
 
     public class PropertyHelp
     {
-        public PropertyHelp(PropertyRoute propertyRoute, string info)
+        public PropertyHelp(FieldRoute propertyRoute, string info)
         {
-            if(propertyRoute.PropertyRouteType != PropertyRouteType.Property)
+            if(propertyRoute.FieldRouteType != FieldRouteType.Field)
                 throw new ArgumentException("propertyRoute should be of type Property"); 
 
             this.PropertyRoute = propertyRoute;
             this.Info = info;
         }
 
-        public PropertyHelp(PropertyRoute propertyRoute, string info, string userDescription)
+        public PropertyHelp(FieldRoute propertyRoute, string info, string userDescription)
             : this(propertyRoute, info)
         {
             this.UserDescription = userDescription;
@@ -401,7 +401,7 @@ namespace Signum.Engine.Help
         public string Info { get; private set; }
         public string UserDescription { get; set; }
         public PropertyInfo PropertyInfo { get { return PropertyRoute.PropertyInfo; } }
-        public PropertyRoute PropertyRoute { get; private set; }
+        public FieldRoute PropertyRoute { get; private set; }
 
         public override string ToString()
         {

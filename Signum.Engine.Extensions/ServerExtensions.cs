@@ -202,7 +202,7 @@ namespace Signum.Services
              () => PropertyAuthLogic.SetPropertyRules(rules));
         }
 
-        public DefaultDictionary<PropertyRoute, PropertyAllowed> AuthorizedProperties()
+        public DefaultDictionary<FieldRoute, PropertyAllowed> AuthorizedProperties()
         {
             return Return(MethodInfo.GetCurrentMethod(),
               () => PropertyAuthLogic.AuthorizedProperties());

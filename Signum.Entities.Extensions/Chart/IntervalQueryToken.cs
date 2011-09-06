@@ -336,7 +336,7 @@ namespace Signum.Entities.Chart
         }
 
 
-        public override PropertyRoute GetPropertyRoute()
+        public override FieldRoute GetPropertyRoute()
         {
             return Parent.GetPropertyRoute(); 
         }
@@ -402,7 +402,7 @@ namespace Signum.Entities.Chart
             return Expression.Constant(1); 
         }
 
-        public override PropertyRoute GetPropertyRoute()
+        public override FieldRoute GetPropertyRoute()
         {
             return null;
         }

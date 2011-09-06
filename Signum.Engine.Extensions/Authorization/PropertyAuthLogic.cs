@@ -17,9 +17,9 @@ namespace Signum.Engine.Authorization
 {
     public static class PropertyAuthLogic
     {
-        static AuthCache<RulePropertyDN, PropertyAllowedRule, PropertyDN, PropertyRoute, PropertyAllowed> cache;
+        static AuthCache<RulePropertyDN, PropertyAllowedRule, PropertyDN, FieldRoute, PropertyAllowed> cache;
 
-        public static IManualAuth<PropertyRoute, PropertyAllowed> Manual { get { return cache; } }
+        public static IManualAuth<FieldRoute, PropertyAllowed> Manual { get { return cache; } }
 
         public static bool IsStarted { get { return cache != null; } }
 
@@ -30,7 +30,7 @@ namespace Signum.Engine.Authorization
                 AuthLogic.AssertStarted(sb);
                 PropertyLogic.Start(sb);
 
-                cache = new AuthCache<RulePropertyDN, PropertyAllowedRule, PropertyDN, PropertyRoute, PropertyAllowed>(sb,
+                cache = new AuthCache<RulePropertyDN, PropertyAllowedRule, PropertyDN, FieldRoute, PropertyAllowed>(sb,
                     PropertyLogic.GetPropertyRoute,
                     PropertyLogic.GetEntity,
                     AuthUtils.MaxProperty,
@@ -38,7 +38,7 @@ namespace Signum.Engine.Authorization
 
                 if (queries)
                 {
-                    PropertyRoute.SetIsAllowedCallback(pp => GetPropertyAllowed(pp) > PropertyAllowed.None);
+                    FieldRoute.SetIsAllowedCallback(pp => GetPropertyAllowed(pp) > PropertyAllowed.None);
                 }
 
                 AuthLogic.ExportToXml += () => cache.ExportXml("Properties", "Property", p => p.Type.CleanName + "|" + p.Path, pa => pa.ToString());
@@ -46,7 +46,7 @@ namespace Signum.Engine.Authorization
                 {
                     var arr = s.Split('|');
                     Type type = TypeLogic.GetType(arr[0]);
-                    var property =  PropertyLogic.GetEntity(PropertyRoute.Parse(type, arr[1]));
+                    var property =  PropertyLogic.GetEntity(FieldRoute.Parse(type, arr[1]));
                     if (property.IsNew)
                         property.Save();
                     return property;
@@ -67,24 +67,24 @@ namespace Signum.Engine.Authorization
             cache.SetRules(rules, r => r.Type == rules.Type); 
         }
 
-        public static PropertyAllowed GetPropertyAllowed(Lite<RoleDN> role, PropertyRoute property)
+        public static PropertyAllowed GetPropertyAllowed(Lite<RoleDN> role, FieldRoute property)
         {
             return cache.GetAllowed(role, property);
         }
 
-        public static PropertyAllowed GetPropertyAllowed(this PropertyRoute property)
+        public static PropertyAllowed GetPropertyAllowed(this FieldRoute property)
         {
             return cache.GetAllowed(property);
         }
 
-        public static DefaultDictionary<PropertyRoute, PropertyAllowed> AuthorizedProperties()
+        public static DefaultDictionary<FieldRoute, PropertyAllowed> AuthorizedProperties()
         {
             return cache.GetDefaultDictionary();
         }
 
         public static AuthThumbnail? GetAllowedThumbnail(Lite<RoleDN> role, Type entityType)
         {
-            return PropertyRoute.GenerateRoutes(entityType).Select(pr => cache.GetAllowed(role, pr)).Collapse();
+            return FieldRoute.GenerateRoutes(entityType).Select(pr => cache.GetAllowed(role, pr)).Collapse();
         }
     }
 }
