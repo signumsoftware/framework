@@ -156,6 +156,7 @@ namespace Signum.Engine.Files
                 if (!Directory.Exists(path))
                     Directory.CreateDirectory(path);
                 File.WriteAllBytes(fp.FullPhysicalPath, fp.BinaryFile);
+                fp.BinaryFile = null; 
             }
             catch (IOException ex)
             {
