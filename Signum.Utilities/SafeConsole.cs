@@ -59,7 +59,6 @@ namespace Signum.Utilities
 
         static string FormatString(string format, object[] parameters)
         {
-            
             string s = string.Format(format, parameters);
             if (needToClear)
                 s = s.PadRight(Console.WindowWidth - 2);
