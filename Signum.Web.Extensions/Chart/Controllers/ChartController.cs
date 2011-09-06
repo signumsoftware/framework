@@ -10,6 +10,8 @@ using Signum.Utilities;
 using Signum.Entities.Reflection;
 using Signum.Entities;
 using Signum.Engine.Extensions.Chart;
+using Signum.Entities.DynamicQuery;
+using Signum.Entities.UserQueries;
 
 namespace Signum.Web.Chart
 {
@@ -72,12 +74,45 @@ namespace Signum.Web.Chart
             ViewData[ViewDataKeys.Formatters] = resultTable.Columns.Select((c, i) => new { c, i }).ToDictionary(c => c.i, c => querySettings.GetFormatter(c.c.Column));
 
             return PartialView(ChartClient.ChartResultsView, new TypeContext<ChartRequest>(request, prefix));
-        }
+        }        
 
         ChartRequest ExtractChartRequest(string prefix)
         {
             return new ChartRequest(Navigator.ResolveQueryName(Request.Form[TypeContextUtilities.Compose(prefix, ViewDataKeys.QueryName)]))
-                    .ApplyChanges(this.ControllerContext, prefix, true).Value;
+                    .ApplyChanges(this.ControllerContext, prefix, mappingChartRequest).Value;
         }
+
+        static EntityMapping<ChartTokenDN> mappingChartToken = new EntityMapping<ChartTokenDN>(true)
+            .SetProperty(ct => ct.Token, ctx =>
+            {
+                var tokenName = "";
+
+                var chartTokenInputs = ctx.Parent.Inputs;
+                bool stop = false;
+                for (var i = 0; !stop; i++)
+                {
+                    var subtokenName = chartTokenInputs.TryGetC("ddlTokens_" + i);
+                    if (string.IsNullOrEmpty(subtokenName))
+                        stop = true;
+                    else
+                        tokenName = tokenName.HasText() ? (tokenName + "." + subtokenName) : subtokenName;
+                }
+
+                if (string.IsNullOrEmpty(tokenName))
+                    return null;
+
+                var qd = DynamicQueryManager.Current.QueryDescription(
+                    Navigator.ResolveQueryName(ctx.GlobalInputs[TypeContextUtilities.Compose(ctx.Root.ControlID, ViewDataKeys.QueryName)]));
+
+                return QueryUtils.Parse(tokenName, qd);
+            });
+
+        static EntityMapping<ChartRequest> mappingChartRequest = new EntityMapping<ChartRequest>(true)
+            .SetProperty(cr => cr.Chart, new EntityMapping<ChartBase>(true)
+                .SetProperty(cb => cb.FirstDimension, mappingChartToken)
+                .SetProperty(cb => cb.SecondDimension, mappingChartToken)
+                .SetProperty(cb => cb.FirstValue, mappingChartToken)
+                .SetProperty(cb => cb.SecondValue, mappingChartToken));
+
     }
 }

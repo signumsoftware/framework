@@ -7,6 +7,8 @@ using Signum.Web;
 using Signum.Web.Extensions.Properties;
 using Signum.Entities.Chart;
 using Signum.Utilities;
+using Signum.Engine.DynamicQuery;
+using Signum.Entities.DynamicQuery;
 
 namespace Signum.Web.Chart
 {
@@ -31,26 +33,7 @@ namespace Signum.Web.Chart
                     new EmbeddedEntitySettings<ChartTokenDN> { PartialViewName = _ => ViewPrefix.Formato("ChartToken") }
                 });
 
-                Mapping.RegisterValue<ChartRequest>(new ChartRequestMapping().GetValue);
-
                 ButtonBarQueryHelper.GetButtonBarForQueryName += new GetToolBarButtonQueryDelegate(ButtonBarQueryHelper_GetButtonBarForQueryName);
-            }
-        }
-
-        class ChartRequestMapping : EntityMapping<ChartRequest>
-        {
-            public ChartRequestMapping()
-                : base(true)
-            {
-
-            }
-
-            public override ChartRequest GetValue(MappingContext<ChartRequest> ctx)
-            {
-                ctx.Value = new ChartRequest(Navigator.ResolveQueryName(ctx.Inputs[ViewDataKeys.QueryName]));
-                SetProperties(ctx);
-                RecursiveValidation(ctx);
-                return ctx.Value;
             }
         }
 
