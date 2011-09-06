@@ -144,7 +144,7 @@ WriteLiteral("\r\n                        </th>\r\n");
 WriteLiteral("            </tr>\r\n        </thead>\r\n        <tbody class=\"ui-widget-content\">\r\n");
 
 
-             if (queryResult.Rows.Any())
+             if (!queryResult.Rows.Any())
             {
 
 WriteLiteral("                <tr>\r\n                    <td colspan=\"");

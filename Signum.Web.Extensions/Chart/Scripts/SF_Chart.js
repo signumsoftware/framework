@@ -23,7 +23,16 @@ SF.Chart = (function () {
             url: $this.attr("data-url"),
             data: $chartControl.find(":input").serialize(),
             success: function (result) {
-                $chartControl.find(".sf-search-results-container").html(result);
+                if (typeof result === "object") {
+                    if (typeof result.ModelState != "undefined") {
+                        var modelState = result.ModelState;
+                        returnValue = new SF.Validator().showErrors(modelState, true);
+                        SF.Notify.error(lang.signum.error, 2000);
+                    }
+                }
+                else {
+                    $chartControl.find(".sf-search-results-container").html(result);
+                }
             }
         });
     });

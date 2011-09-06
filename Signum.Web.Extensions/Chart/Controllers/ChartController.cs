@@ -47,7 +47,7 @@ namespace Signum.Web.Chart
         [HttpPost]
         public PartialViewResult ChangeType(string prefix)
         {
-            var request = ExtractChartRequest(prefix);   
+            var request = ExtractChartRequestCtx(prefix).Value;   
 
             ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(request.QueryName);
             
@@ -55,9 +55,17 @@ namespace Signum.Web.Chart
         }
 
         [HttpPost]
-        public PartialViewResult Draw(string prefix)
+        public ActionResult Draw(string prefix)
         {
-            var request = ExtractChartRequest(prefix);
+            var requestCtx = ExtractChartRequestCtx(prefix).ValidateGlobal();
+
+            if (requestCtx.GlobalErrors.Any())
+            {
+                ModelState.FromContext(requestCtx);
+                return JsonAction.ModelState(ModelState);
+            }
+
+            var request = requestCtx.Value;
 
             var resultTable = ChartLogic.ExecuteChart(request);
 
@@ -76,10 +84,10 @@ namespace Signum.Web.Chart
             return PartialView(ChartClient.ChartResultsView, new TypeContext<ChartRequest>(request, prefix));
         }        
 
-        ChartRequest ExtractChartRequest(string prefix)
+        MappingContext<ChartRequest> ExtractChartRequestCtx(string prefix)
         {
             return new ChartRequest(Navigator.ResolveQueryName(Request.Form[TypeContextUtilities.Compose(prefix, ViewDataKeys.QueryName)]))
-                    .ApplyChanges(this.ControllerContext, prefix, mappingChartRequest).Value;
+                    .ApplyChanges(this.ControllerContext, prefix, mappingChartRequest);
         }
 
         static EntityMapping<ChartTokenDN> mappingChartToken = new EntityMapping<ChartTokenDN>(true)
@@ -107,12 +115,19 @@ namespace Signum.Web.Chart
                 return QueryUtils.Parse(tokenName, qd);
             });
 
+        static List<Entities.DynamicQuery.Filter> ExtractChartFilters(MappingContext<List<Entities.DynamicQuery.Filter>> ctx)
+        {
+            var filters = new List<Entities.DynamicQuery.Filter>();
+
+            return filters;
+        }
+        
         static EntityMapping<ChartRequest> mappingChartRequest = new EntityMapping<ChartRequest>(true)
             .SetProperty(cr => cr.Chart, new EntityMapping<ChartBase>(true)
                 .SetProperty(cb => cb.FirstDimension, mappingChartToken)
                 .SetProperty(cb => cb.SecondDimension, mappingChartToken)
                 .SetProperty(cb => cb.FirstValue, mappingChartToken)
-                .SetProperty(cb => cb.SecondValue, mappingChartToken));
-
+                .SetProperty(cb => cb.SecondValue, mappingChartToken))
+            .SetProperty(cr => cr.Filters, ctx => ExtractChartFilters(ctx));
     }
 }

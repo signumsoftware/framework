@@ -46,7 +46,7 @@ else
             </tr>
         </thead>
         <tbody class="ui-widget-content">
-            @if (queryResult.Rows.Any())
+            @if (!queryResult.Rows.Any())
             {
                 <tr>
                     <td colspan="@(queryResult.Columns.Count() + (viewable ? 1 : 0))">@Resources.Signum_noResults</td>
