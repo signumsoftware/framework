@@ -20,12 +20,12 @@ namespace Signum.Utilities.DataStructures
             return obj.Aggregate(0, (acum, o) => acum ^ comparer.GetHashCode(o));
         }
 
-        public bool Equals(object x, object y)
+        bool IEqualityComparer.Equals(object x, object y)
         {
             return Equals((HashSet<T>)x, (HashSet<T>)y);
         }
 
-        public int GetHashCode(object obj)
+        int IEqualityComparer.GetHashCode(object obj)
         {
             return GetHashCode((HashSet<T>)obj); 
         }
