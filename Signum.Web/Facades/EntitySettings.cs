@@ -227,21 +227,23 @@ namespace Signum.Web
             WebTypeName = typeof(T).Name;
         }
 
-        public Dictionary<FieldRoute, Implementations> OverrideImplementations { get; set; }
+        public Dictionary<PropertyRoute, Implementations> OverrideImplementations { get; set; }
 
-        public Implementations FindImplementations(FieldRoute route)
+        public Implementations FindImplementations(PropertyRoute route)
         {
-            if (route.FieldRouteType == FieldRouteType.Root)
+            if (route.PropertyRouteType == PropertyRouteType.Root)
                 return null;
+
+            if (!typeof(ModelEntity).IsAssignableFrom(route.RootType))
+                throw new InvalidOperationException("Route out"); 
 
             if (OverrideImplementations != null && OverrideImplementations.ContainsKey(route))
                 return OverrideImplementations[route];
             
-            var fieldInfo = Reflector.FindFieldInfo(route.FieldInfo.DeclaringType, route.FieldInfo, false);
-            if (fieldInfo == null)
+            if (route.FieldInfo == null)
                 return null;
             else
-                return fieldInfo.SingleAttribute<Implementations>();
+                return route.FieldInfo.SingleAttribute<Implementations>();
         }
     }
 

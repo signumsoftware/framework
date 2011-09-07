@@ -21,7 +21,7 @@ namespace Signum.Web
         public string DefaultDetailDiv { get; private set; }
         public string DetailDiv { get; set; }
 
-        public EntityLineDetail(Type type, object untypedValue, Context parent, string controlID, FieldRoute propertyRoute)
+        public EntityLineDetail(Type type, object untypedValue, Context parent, string controlID, PropertyRoute propertyRoute)
             : base(type, untypedValue, parent, controlID, propertyRoute)
         {
             DefaultDetailDiv = DetailDiv = this.Compose(EntityBaseKeys.Detail);

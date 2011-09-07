@@ -80,11 +80,11 @@ namespace Signum.Entities.DynamicQuery
         {
             if (PropertyInfo.PropertyType.UnNullify() == typeof(DateTime))
             {
-                FieldRoute route = this.GetPropertyRoute();
+                PropertyRoute route = this.GetPropertyRoute();
 
                 if (route != null)
                 {
-                    var att = Validator.GetOrCreatePropertyPack(route.Parent.Type, route.FieldInfo.Name).TryCC(pp =>
+                    var att = Validator.GetOrCreatePropertyPack(route.Parent.Type, route.PropertyInfo.Name).TryCC(pp =>
                         pp.Validators.OfType<DateTimePrecissionValidatorAttribute>().SingleOrDefault());
                     if (att != null)
                     {
@@ -113,19 +113,19 @@ namespace Signum.Entities.DynamicQuery
 
         public override bool IsAllowed()
         {
-            FieldRoute route = GetPropertyRoute();
+            PropertyRoute route = GetPropertyRoute();
 
             return Parent.IsAllowed() && (route == null || route.IsAllowed());
         }
 
-        public override FieldRoute GetPropertyRoute()
+        public override PropertyRoute GetPropertyRoute()
         {
-            FieldRoute parent = Parent.GetPropertyRoute();
+            PropertyRoute parent = Parent.GetPropertyRoute();
             if (parent == null)
             {
                 Type type = Reflector.ExtractLite(Parent.Type); //Because Parent.Type is always a lite
                 if (type != null)
-                    return FieldRoute.Root(type).Add(PropertyInfo);
+                    return PropertyRoute.Root(type).Add(PropertyInfo);
 
                 return null;
             }
@@ -133,7 +133,7 @@ namespace Signum.Entities.DynamicQuery
             {
                 Type type = Reflector.ExtractLite(parent.Type); //Because Add doesn't work with lites
                 if (type != null)
-                    return FieldRoute.Root(type).Add(PropertyInfo);
+                    return PropertyRoute.Root(type).Add(PropertyInfo);
 
                 return parent.Add(PropertyInfo);
             }

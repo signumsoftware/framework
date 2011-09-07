@@ -264,12 +264,12 @@ namespace Signum.Web
             if (typeof(T) == runtimeType || typeof(T).IsEmbeddedEntity())
                 return GetRuntimeValue<T>(ctx, ctx.PropertyRoute);
 
-            return miGetRuntimeValue.GetInvoker(runtimeType)(this, ctx, FieldRoute.Root(runtimeType));
+            return miGetRuntimeValue.GetInvoker(runtimeType)(this, ctx, PropertyRoute.Root(runtimeType));
         }
 
-        static GenericInvoker<Func<AutoEntityMapping<T>, MappingContext<T>, FieldRoute, T>> miGetRuntimeValue = 
-           new GenericInvoker<Func<AutoEntityMapping<T>, MappingContext<T>, FieldRoute, T>>((aem, mc, pr)=>aem.GetRuntimeValue<T>(mc, pr));
-        public R GetRuntimeValue<R>(MappingContext<T> ctx, FieldRoute route)
+        static GenericInvoker<Func<AutoEntityMapping<T>, MappingContext<T>, PropertyRoute, T>> miGetRuntimeValue = 
+           new GenericInvoker<Func<AutoEntityMapping<T>, MappingContext<T>, PropertyRoute, T>>((aem, mc, pr)=>aem.GetRuntimeValue<T>(mc, pr));
+        public R GetRuntimeValue<R>(MappingContext<T> ctx, PropertyRoute route)
             where R : class, T 
         {
             if (AllowedMappings != null && !AllowedMappings.ContainsKey(typeof(R)))
@@ -339,7 +339,7 @@ namespace Signum.Web
             public SubContext<P> CreateSubContext(MappingContext<T> parent)
             {
                 string newControlId = TypeContextUtilities.Compose(parent.ControlID, PropertyPack.PropertyInfo.Name);
-                FieldRoute route = parent.PropertyRoute.Add(this.PropertyPack.PropertyInfo);
+                PropertyRoute route = parent.PropertyRoute.Add(this.PropertyPack.PropertyInfo);
 
                 SubContext<P> ctx = new SubContext<P>(newControlId, PropertyPack, route, parent);
                 if (parent.Value != null)
@@ -575,7 +575,7 @@ namespace Signum.Web
         {
             List<string> inputKeys = ctx.Inputs.Keys.Where(k => k != EntityListBaseKeys.ListPresent).ToList();
 
-            FieldRoute route = ctx.PropertyRoute.Add("Item");
+            PropertyRoute route = ctx.PropertyRoute.Add("Item");
 
             for (int i = 0; i < inputKeys.Count; i++)
             {
@@ -680,7 +680,7 @@ namespace Signum.Web
 
             var dic = (FilterElements == null ? list : list.Where(FilterElements)).ToDictionary(GetKey);
 
-            FieldRoute route = ctx.PropertyRoute.Add("Item");
+            PropertyRoute route = ctx.PropertyRoute.Add("Item");
 
             foreach (MappingContext<S> itemCtx in GenerateItemContexts(ctx))
             {

@@ -287,7 +287,7 @@ namespace Signum.Windows
 
         static void TaskColumnSetReadOnly(DataGridColumn column, string route, PropertyRoute context)
         {
-            bool isReadOnly = context.PropertyRouteType == PropertyRouteType.Property && context.PropertyInfo.IsReadOnly();
+            bool isReadOnly = context.PropertyRouteType == PropertyRouteType.FieldOrProperty && context.PropertyInfo.IsReadOnly();
 
             if (isReadOnly && column.NotSet(DataGridColumn.IsReadOnlyProperty))
             {
@@ -304,7 +304,7 @@ namespace Signum.Windows
 
             if (colBound.Binding == null)
             {
-                bool isReadOnly = context.PropertyRouteType == PropertyRouteType.Property && context.PropertyInfo.IsReadOnly();
+                bool isReadOnly = context.PropertyRouteType == PropertyRouteType.FieldOrProperty && context.PropertyInfo.IsReadOnly();
                 colBound.Binding = new Binding(route)
                 {
                     Mode = isReadOnly ? BindingMode.OneWay : BindingMode.TwoWay,
@@ -357,7 +357,7 @@ namespace Signum.Windows
                 FrameworkElement.DataContextProperty;
 
 
-            bool isReadOnly = context.PropertyRouteType == PropertyRouteType.Property && context.PropertyInfo.IsReadOnly();
+            bool isReadOnly = context.PropertyRouteType == PropertyRouteType.FieldOrProperty && context.PropertyInfo.IsReadOnly();
 
             if (!BindingOperations.IsDataBound(fe, valueProperty))
             {
@@ -403,7 +403,7 @@ namespace Signum.Windows
         static void TaskSetUnitText(FrameworkElement fe, string route, PropertyRoute context)
         {
             ValueLine vl = fe as ValueLine;
-            if (vl != null && vl.NotSet(ValueLine.UnitTextProperty) && context.PropertyRouteType == PropertyRouteType.Property)
+            if (vl != null && vl.NotSet(ValueLine.UnitTextProperty) && context.PropertyRouteType == PropertyRouteType.FieldOrProperty)
             {
                 UnitAttribute ua = context.PropertyInfo.SingleAttribute<UnitAttribute>();
                 if (ua != null)
@@ -414,7 +414,7 @@ namespace Signum.Windows
         static void TaskSetFormatText(FrameworkElement fe, string route, PropertyRoute context)
         {
             ValueLine vl = fe as ValueLine;
-            if (vl != null && vl.NotSet(ValueLine.FormatProperty) && context.PropertyRouteType == PropertyRouteType.Property)
+            if (vl != null && vl.NotSet(ValueLine.FormatProperty) && context.PropertyRouteType == PropertyRouteType.FieldOrProperty)
             {
                 string format = Reflector.FormatString(context);
                 if (format != null)
@@ -424,7 +424,7 @@ namespace Signum.Windows
 
         public static void TaskSetIsReadonly(FrameworkElement fe, string route, PropertyRoute context)
         {
-            bool isReadOnly = context.PropertyRouteType == PropertyRouteType.Property && context.PropertyInfo.IsReadOnly();
+            bool isReadOnly = context.PropertyRouteType == PropertyRouteType.FieldOrProperty && context.PropertyInfo.IsReadOnly();
 
             if (isReadOnly && fe.NotSet(Common.IsReadOnlyProperty) && (fe is ValueLine || fe is EntityLine || fe is EntityCombo || fe is TextArea))
             {
@@ -462,7 +462,7 @@ namespace Signum.Windows
         static void TaskSetNotNullItemsSource(FrameworkElement fe, string route, PropertyRoute context)
         {
             ValueLine vl = fe as ValueLine;
-            if (vl != null && vl.NotSet(ValueLine.ItemSourceProperty) && context.PropertyRouteType == PropertyRouteType.Property)
+            if (vl != null && vl.NotSet(ValueLine.ItemSourceProperty) && context.PropertyRouteType == PropertyRouteType.FieldOrProperty)
             {
                 if(context.Type.IsNullable() && context.Type.UnNullify().IsEnum &&
                    Validator.GetOrCreatePropertyPack(context).Validators.OfType<NotNullableAttribute>().Any())

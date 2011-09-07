@@ -22,8 +22,8 @@ namespace Signum.Web
 
     class TypeContextExpression : Expression
     {
-        readonly FieldRoute route;
-        public FieldRoute Route
+        readonly PropertyRoute route;
+        public PropertyRoute Route
         {
             get { return route; }
         }
@@ -41,7 +41,7 @@ namespace Signum.Web
 
         public readonly PropertyInfo[] Properties;
 
-        internal TypeContextExpression(PropertyInfo[] properties, Type type, FieldRoute route)
+        internal TypeContextExpression(PropertyInfo[] properties, Type type, PropertyRoute route)
         {
             this.type = type;
             this.Properties = properties;
@@ -62,7 +62,7 @@ namespace Signum.Web
         {
             var mag = new MemberAccessGatherer()
             {
-                replacements = { { lambda.Parameters[0], new TypeContextExpression(new PropertyInfo[0], typeof(T), tc.FieldRoute) } }
+                replacements = { { lambda.Parameters[0], new TypeContextExpression(new PropertyInfo[0], typeof(T), tc.PropertyRoute) } }
             };
 
             TypeContextExpression result = Cast(mag.Visit(lambda.Body));
@@ -103,7 +103,7 @@ namespace Signum.Web
             if (u.NodeType == ExpressionType.TypeAs || u.NodeType == ExpressionType.Convert)
             {
                 var tce = Cast(Visit(u.Operand));
-                return new TypeContextExpression(tce.Properties, u.Type, FieldRoute.Root(u.Type));
+                return new TypeContextExpression(tce.Properties, u.Type, PropertyRoute.Root(u.Type));
             }
 
             return base.VisitUnary(u);

@@ -29,7 +29,7 @@ namespace Signum.Web
         internal abstract MappingContext Next { get; set; }
         
         internal readonly PropertyPack PropertyPack;
-        internal readonly FieldRoute PropertyRoute; 
+        internal readonly PropertyRoute PropertyRoute; 
 
         internal void AddChild(MappingContext context)
         {
@@ -93,7 +93,7 @@ namespace Signum.Web
 
         public abstract IDictionary<string, List<string>> Errors { get; }
 
-        public MappingContext(string controlID, PropertyPack propertyPack, FieldRoute route)
+        public MappingContext(string controlID, PropertyPack propertyPack, PropertyRoute route)
         {
             this.ControlID = controlID ?? "";
             this.PropertyPack = propertyPack;
@@ -228,7 +228,7 @@ namespace Signum.Web
             get { return Value; }
         }
 
-        public MappingContext(string controlID, PropertyPack propertyPack, FieldRoute route)
+        public MappingContext(string controlID, PropertyPack propertyPack, PropertyRoute route)
             : base(controlID, propertyPack, route)
         {
         }
@@ -333,7 +333,7 @@ namespace Signum.Web
         public override IDictionary<string, List<string>> Errors { get { return errors; } }
 
         public RootContext(string prefix, SortedList<string, string> globalInputs, ControllerContext controllerContext) :
-            base(prefix, null, FieldRoute.Root(typeof(T)))
+            base(prefix, null, PropertyRoute.Root(typeof(T)))
         {
             this.globalInputs = globalInputs;
             if (prefix.HasText())
@@ -392,7 +392,7 @@ namespace Signum.Web
         ContextualDictionary<List<string>> errors;
         public override IDictionary<string, List<string>> Errors { get { return errors; } }
 
-        public SubContext(string controlID, PropertyPack propertyPack, FieldRoute route, MappingContext parent) :
+        public SubContext(string controlID, PropertyPack propertyPack, PropertyRoute route, MappingContext parent) :
             base(controlID, propertyPack, route)
         {
             this.parent = parent;

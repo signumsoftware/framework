@@ -25,8 +25,8 @@ namespace Signum.Engine.DynamicQuery
         public string Unit { get; set; }
         public Implementations Implementations { get; set; }
 
-        FieldRoute[] propertyRoutes;
-        public FieldRoute[] PropertyRoutes
+        PropertyRoute[] propertyRoutes;
+        public PropertyRoute[] PropertyRoutes
         {
             get { return propertyRoutes; }
             set
@@ -34,17 +34,17 @@ namespace Signum.Engine.DynamicQuery
                 propertyRoutes = value;
                 if (propertyRoutes != null)
                 {
-                    switch (propertyRoutes[0].FieldRouteType)
+                    switch (propertyRoutes[0].PropertyRouteType)
                     {
-                        case FieldRouteType.LiteEntity:
-                        case FieldRouteType.Root:
+                        case PropertyRouteType.LiteEntity:
+                        case PropertyRouteType.Root:
                             throw new InvalidOperationException("PropertyRoute can not be of RouteType Root");
-                        case FieldRouteType.Field:
+                        case PropertyRouteType.FieldOrProperty:
                             Format = GetFormat(propertyRoutes);
                             Unit = GetUnit(propertyRoutes);
                             Implementations = AggregateImplementations(PropertyRoutes);
                             return;
-                        case FieldRouteType.MListItems:
+                        case PropertyRouteType.MListItems:
                             Format = Reflector.FormatString(propertyRoutes[0].Type);
                             return;
                     }
@@ -52,12 +52,12 @@ namespace Signum.Engine.DynamicQuery
             }
         }
 
-        internal static string GetUnit(FieldRoute[] value)
+        internal static string GetUnit(PropertyRoute[] value)
         {
-            return value.Select(pr => pr.FieldInfo.SingleAttribute<UnitAttribute>().TryCC(u => u.UnitName)).Distinct().Only();
+            return value.Select(pr => pr.PropertyInfo.SingleAttribute<UnitAttribute>().TryCC(u => u.UnitName)).Distinct().Only();
         }
 
-        internal static string GetFormat(FieldRoute[] value)
+        internal static string GetFormat(PropertyRoute[] value)
         {
             return value.Select(pr => Reflector.FormatString(pr)).Distinct().Only();
         }
@@ -76,13 +76,13 @@ namespace Signum.Engine.DynamicQuery
             if (IsEntity && cleanType == null)
                 throw new InvalidOperationException("Entity must be a Lite");
 
-            if (meta is CleanMeta && ((CleanMeta)meta).PropertyRoutes.All(pr => pr.FieldRouteType != FieldRouteType.Root))
+            if (meta is CleanMeta && ((CleanMeta)meta).PropertyRoutes.All(pr => pr.PropertyRouteType != PropertyRouteType.Root))
             {
                 PropertyRoutes = ((CleanMeta)meta).PropertyRoutes;
             }
         }
 
-        internal static Implementations AggregateImplementations(FieldRoute[] routes)
+        internal static Implementations AggregateImplementations(PropertyRoute[] routes)
         {
             Type type = routes.Select(a => a.Type).Distinct().Single().CleanType();
 
@@ -128,8 +128,8 @@ namespace Signum.Engine.DynamicQuery
                 return this.Type.NiceName();
 
             if (propertyRoutes != null && 
-                propertyRoutes[0].FieldRouteType == FieldRouteType.Field &&
-                propertyRoutes[0].FieldInfo.Name == Name)
+                propertyRoutes[0].PropertyRouteType == PropertyRouteType.FieldOrProperty &&
+                propertyRoutes[0].PropertyInfo.Name == Name)
             {
                 var result = propertyRoutes.Select(pr=>pr.PropertyInfo.NiceName()).Only();
                 if (result != null)
@@ -142,7 +142,7 @@ namespace Signum.Engine.DynamicQuery
         public void SetPropertyRoutes<T>(params Expression<Func<T, object>>[] expression)
             where T : IdentifiableEntity
         {
-            PropertyRoutes = expression.Select(exp => FieldRoute.Construct(exp)).ToArray();
+            PropertyRoutes = expression.Select(exp => PropertyRoute.Construct(exp)).ToArray();
         }
 
         public bool IsEntity

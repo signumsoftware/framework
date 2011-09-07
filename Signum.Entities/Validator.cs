@@ -27,12 +27,12 @@ namespace Signum.Entities
             return GetOrCreatePropertyPack(typeof(T), ReflectionTools.GetPropertyInfo(property).Name);
         }
 
-        public static PropertyPack GetOrCreatePropertyPack(FieldRoute route)
+        public static PropertyPack GetOrCreatePropertyPack(PropertyRoute route)
         {
-            if (route.FieldRouteType != FieldRouteType.Field)
+            if (route.PropertyRouteType != PropertyRouteType.FieldOrProperty)
                 throw new InvalidOperationException("PropertyRoute of type Property expected");
 
-            return GetOrCreatePropertyPack(route.Parent.Type, Reflector.FindPropertyInfo(route.FieldInfo).Name);
+            return GetOrCreatePropertyPack(route.Parent.Type, route.PropertyInfo.Name);
         }
 
         public static PropertyPack GetOrCreatePropertyPack(Type type, string property)

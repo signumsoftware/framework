@@ -37,7 +37,7 @@ namespace Signum.Services
         List<Lite> FindLiteLike(Type liteType, Implementations implementations, string subString, int count);
 
         [OperationContract, NetDataContract]
-        Implementations FindImplementations(FieldRoute entityPath);
+        Implementations FindImplementations(PropertyRoute entityPath);
 
         [OperationContract, NetDataContract]
         Dictionary<Type, TypeDN> ServerTypes();

@@ -206,7 +206,7 @@ namespace Signum.Engine.Linq
                 MetaExpression meta = expression as MetaExpression;
                 if (meta != null && meta.Meta is CleanMeta)
                 {
-                    FieldRoute route = ((CleanMeta)meta.Meta).PropertyRoutes.Single("Metas doesn't work over polymorphic MLists").Add("Item");
+                    PropertyRoute route = ((CleanMeta)meta.Meta).PropertyRoutes.Single("Metas doesn't work over polymorphic MLists").Add("Item");
 
                     return new MetaProjectorExpression(expression.Type,
                         new MetaExpression(elementType,
@@ -384,7 +384,7 @@ namespace Signum.Engine.Linq
 
             if (typeof(ModifiableEntity).IsAssignableFrom(source.Type) || typeof(IIdentifiable).IsAssignableFrom(source.Type))
             {
-                var pi = Reflector.FindPropertyInfo(member);
+                var pi = member as PropertyInfo ??  Reflector.FindPropertyInfo((FieldInfo)member);
 
                 if (pi == null)
                     return new MetaExpression(memberType, null);
@@ -393,19 +393,19 @@ namespace Signum.Engine.Linq
 
                 if (meta.Meta is CleanMeta)
                 {
-                    FieldRoute[] routes = ((CleanMeta)meta.Meta).PropertyRoutes.SelectMany(r=>GetRoutes(r, source.Type, pi.Name)).ToArray();
+                    PropertyRoute[] routes = ((CleanMeta)meta.Meta).PropertyRoutes.SelectMany(r=>GetRoutes(r, source.Type, pi.Name)).ToArray();
 
                     return new MetaExpression(memberType, new CleanMeta(routes));
                 }
                             
                 if (typeof(IRootEntity).IsAssignableFrom(source.Type)) //Works for simple entities and also for interface casting
-                    return new MetaExpression(memberType, new CleanMeta(new[]{ FieldRoute.Root(source.Type).Add(pi)}));
+                    return new MetaExpression(memberType, new CleanMeta(new[]{ PropertyRoute.Root(source.Type).Add(pi)}));
             }
 
             return MakeDirtyMeta(memberType, source);
         }
 
-        private static FieldRoute[] GetRoutes(FieldRoute route, Type type, string piName)
+        private static PropertyRoute[] GetRoutes(PropertyRoute route, Type type, string piName)
         {
             Implementations imp = route.GetImplementations();
 
@@ -414,7 +414,7 @@ namespace Signum.Engine.Linq
             else if (imp.IsByAll)
                 throw new InvalidOperationException("Metas doesn't work on ImplementedByAll");
             else
-                return ((ImplementedByAttribute)imp).ImplementedTypes.Where(t=>type.IsAssignableFrom(t)).Select(t => FieldRoute.Root(t).Add(piName)).ToArray();
+                return ((ImplementedByAttribute)imp).ImplementedTypes.Where(t=>type.IsAssignableFrom(t)).Select(t => PropertyRoute.Root(t).Add(piName)).ToArray();
         }
 
         protected override Expression VisitTypeIs(TypeBinaryExpression b)

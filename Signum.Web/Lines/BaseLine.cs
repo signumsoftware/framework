@@ -15,7 +15,7 @@ namespace Signum.Web
 {
     public abstract class BaseLine : TypeContext
     {
-        protected BaseLine(Type type, object untypedValue, Context parent, string controlID, FieldRoute propertyRoute)
+        protected BaseLine(Type type, object untypedValue, Context parent, string controlID, PropertyRoute propertyRoute)
             : base(parent, controlID, propertyRoute)
         {
             this.type = type;

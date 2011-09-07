@@ -535,7 +535,7 @@ namespace Signum.Engine
         {
             PropertyInfo pi = ReflectionTools.GetPropertyInfo(mlistProperty);
 
-            var list = (FieldMList)Schema.Current.Table<E>().GetField(pi, true);
+            var list = (FieldMList)Schema.Current.Table<E>().GetField(pi);
 
             return new SignumTable<MListElement<E, V>>(DbQueryProvider.Single, list.RelationalTable);
         }

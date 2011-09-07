@@ -73,7 +73,7 @@ namespace Signum.Entities.DynamicQuery
             return Parent.IsAllowed();
         }
 
-        public override FieldRoute GetPropertyRoute()
+        public override PropertyRoute GetPropertyRoute()
         {
             return null;
         }

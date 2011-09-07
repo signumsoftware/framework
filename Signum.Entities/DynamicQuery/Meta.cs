@@ -20,9 +20,9 @@ namespace Signum.Entities.DynamicQuery
     [Serializable]
     public class CleanMeta : Meta
     {
-        public FieldRoute[] PropertyRoutes;
+        public PropertyRoute[] PropertyRoutes;
 
-        public CleanMeta(FieldRoute[] propertyRoutes)
+        public CleanMeta(PropertyRoute[] propertyRoutes)
         {
             this.PropertyRoutes = propertyRoutes;
         }

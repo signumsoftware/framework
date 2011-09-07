@@ -60,7 +60,7 @@ namespace Signum.Entities.DynamicQuery
                 if (Column.PropertyRoutes != null)
                 {
                     DateTimePrecision? precission =
-                        Column.PropertyRoutes.Select(pr => Validator.GetOrCreatePropertyPack(pr.Parent.Type, pr.FieldInfo.Name)
+                        Column.PropertyRoutes.Select(pr => Validator.GetOrCreatePropertyPack(pr.Parent.Type, pr.PropertyInfo.Name)
                         .Validators.OfType<DateTimePrecissionValidatorAttribute>().SingleOrDefault())
                         .Select(dtp => dtp.TryCS(d => d.Precision)).Distinct().Only();
 
@@ -86,14 +86,14 @@ namespace Signum.Entities.DynamicQuery
             return true;  //If it wasn't, sould be filtered before
         }
 
-        public override FieldRoute GetPropertyRoute()
+        public override PropertyRoute GetPropertyRoute()
         {
             if (Column.PropertyRoutes != null)
                 return Column.PropertyRoutes[0]; //HACK: compatibility with IU entitiy elements
 
             Type type = Reflector.ExtractLite(Type);
             if (type != null && typeof(IdentifiableEntity).IsAssignableFrom(type))
-                return FieldRoute.Root(type);
+                return PropertyRoute.Root(type);
 
             return null;
         }

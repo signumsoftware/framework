@@ -168,12 +168,12 @@ namespace Signum.Web
 
         public abstract Type Type { get; }
 
-        public FieldRoute FieldRoute { get; private set; }
+        public PropertyRoute PropertyRoute { get; private set; }
 
-        protected TypeContext(Context parent, string controlID, FieldRoute fieldRoute)
+        protected TypeContext(Context parent, string controlID, PropertyRoute route)
             :base(parent, controlID)
         {
-            this.FieldRoute = fieldRoute;
+            this.PropertyRoute = route;
         }
 
         public RuntimeInfo RuntimeInfo()
@@ -209,12 +209,12 @@ namespace Signum.Web
         }
 
         public TypeContext(T value, string controlID)
-            : base(null, controlID, FieldRoute.Root(typeof(T)))
+            : base(null, controlID, PropertyRoute.Root(typeof(T)))
         {
             Value = value;
         }
 
-        protected TypeContext(T value, TypeContext parent, string controlID, FieldRoute route)
+        protected TypeContext(T value, TypeContext parent, string controlID, PropertyRoute route)
             : base(parent, controlID, route)
         {
             Value = value;
@@ -228,7 +228,7 @@ namespace Signum.Web
 
         public TypeContext<T> SubContext()
         {
-            return new TypeContext<T>(this.Value, this, null, FieldRoute);
+            return new TypeContext<T>(this.Value, this, null, PropertyRoute);
         }
 
         public TypeContext<S> SubContext<S>(Expression<Func<T, S>> property)
@@ -243,7 +243,7 @@ namespace Signum.Web
 
         internal override TypeContext Clone(object newValue)
         {
-            return new TypeContext<T>((T)newValue, (TypeContext)Parent, ControlID, FieldRoute);
+            return new TypeContext<T>((T)newValue, (TypeContext)Parent, ControlID, PropertyRoute);
         }
     }
     #endregion
@@ -253,7 +253,7 @@ namespace Signum.Web
     {
         PropertyInfo[] properties;
 
-        public TypeSubContext(T value, TypeContext parent, PropertyInfo[] properties, FieldRoute route)
+        public TypeSubContext(T value, TypeContext parent, PropertyInfo[] properties, PropertyRoute route)
             : base(value, parent.ThrowIfNullC(""), properties.ToString(a => a.Name, Separator), route)
         {
             this.properties = properties;
@@ -266,7 +266,7 @@ namespace Signum.Web
 
         internal override TypeContext Clone(object newValue)
         {
-            return new TypeSubContext<T>((T)newValue, (TypeContext)Parent, Properties, FieldRoute);
+            return new TypeSubContext<T>((T)newValue, (TypeContext)Parent, Properties, PropertyRoute);
         }
     }
     #endregion
@@ -277,7 +277,7 @@ namespace Signum.Web
         public int Index { get; private set; }
 
         public TypeElementContext(T value, TypeContext parent, int index)
-            : base(value, parent, index.ToString(), parent.FieldRoute.Add("Item"))
+            : base(value, parent, index.ToString(), parent.PropertyRoute.Add("Item"))
         {
             this.Index = index;
         }

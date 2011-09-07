@@ -67,7 +67,7 @@ namespace Signum.Entities.DynamicQuery
             return BuildLite(result).Nullify();
         }
 
-        public override FieldRoute GetPropertyRoute()
+        public override PropertyRoute GetPropertyRoute()
         {
             return null;
         }

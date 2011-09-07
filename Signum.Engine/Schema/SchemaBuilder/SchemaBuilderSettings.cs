@@ -15,7 +15,7 @@ namespace Signum.Engine.Maps
 {
     public class SchemaSettings
     {
-        public Dictionary<FieldRoute, Attribute[]> OverridenAttributes = new Dictionary<FieldRoute, Attribute[]>();
+        public Dictionary<PropertyRoute, Attribute[]> OverridenAttributes = new Dictionary<PropertyRoute, Attribute[]>();
 
         public Dictionary<Type, SqlDbType> TypeValues = new Dictionary<Type, SqlDbType>
         {
@@ -58,23 +58,23 @@ namespace Signum.Engine.Maps
             {SqlDbType.Decimal, 2}, 
         };
 
-        public bool IsOverriden<T>(Expression<Func<T, object>> fieldRoute) where T : IdentifiableEntity
+        public bool IsOverriden<T>(Expression<Func<T, object>> route) where T : IdentifiableEntity
         {
-            return IsOverriden(FieldRoute.Construct(fieldRoute));
+            return IsOverriden(PropertyRoute.Construct(route));
         }
 
-        private bool IsOverriden(FieldRoute route)
+        private bool IsOverriden(PropertyRoute route)
         {
             return OverridenAttributes.ContainsKey(route);
         }
 
-        public void OverrideAttributes<T>(Expression<Func<T, object>> fieldRoute, params Attribute[] attributes)
+        public void OverrideAttributes<T>(Expression<Func<T, object>> route, params Attribute[] attributes)
             where T : IdentifiableEntity
         {
-            OverrideAttributes(FieldRoute.Construct(fieldRoute), attributes);
+            OverrideAttributes(PropertyRoute.Construct(route), attributes);
         }
 
-        public void OverrideAttributes(FieldRoute route, params Attribute[] attributes)
+        public void OverrideAttributes(PropertyRoute route, params Attribute[] attributes)
         {
             AssertCorrect(attributes, AttributeTargets.Field);
 
@@ -89,77 +89,77 @@ namespace Signum.Engine.Maps
                 throw new InvalidOperationException("The following attributes ar not compatible with targets {0}: {1}".Formato(attributeTargets, incorrects.ToString(a => a.GetType().Name, ", ")));
         }
 
-        public Attribute[] Attributes<T>(Expression<Func<T, object>> fieldRoute)
+        public Attribute[] Attributes<T>(Expression<Func<T, object>> route)
         {
-            return Attributes(fieldRoute);
+            return Attributes(route);
         }
 
-        public Attribute[] Attributes(FieldRoute fieldRoute)
+        public Attribute[] Attributes(PropertyRoute route)
         {
-            var overriden = OverridenAttributes.TryGetC(fieldRoute) ; 
+            var overriden = OverridenAttributes.TryGetC(route) ; 
 
             if(overriden!= null)
                 return overriden; 
 
-            switch (fieldRoute.FieldRouteType)
+            switch (route.PropertyRouteType)
 	        {
-                case FieldRouteType.Field: 
-                    return fieldRoute.FieldInfo.GetCustomAttributes(false).Cast<Attribute>().ToArray(); 
-                case FieldRouteType.LiteEntity: 
-                    return fieldRoute.Parent.FieldInfo.GetCustomAttributes(false).Cast<Attribute>().ToArray();
+                case PropertyRouteType.FieldOrProperty: 
+                    return route.FieldInfo.GetCustomAttributes(false).Cast<Attribute>().ToArray(); 
+                case PropertyRouteType.MListItems: 
+                    return route.Parent.FieldInfo.GetCustomAttributes(false).Cast<Attribute>().ToArray();
 
                 default:
-                    throw new InvalidOperationException("Route of type {0} not supported for this method".Formato(fieldRoute.FieldRouteType));
+                    throw new InvalidOperationException("Route of type {0} not supported for this method".Formato(route.PropertyRouteType));
 	        }
         }
 
-        internal bool IsNullable(FieldRoute fieldRoute, bool forceNull)
+        internal bool IsNullable(PropertyRoute route, bool forceNull)
         {
             if (forceNull)
                 return true;
 
-            if (Attributes(fieldRoute).OfType<NotNullableAttribute>().Any())
+            var attrs = Attributes(route);
+
+            if (attrs.OfType<NotNullableAttribute>().Any())
                 return false;
 
-            if (Attributes(fieldRoute).OfType<NullableAttribute>().Any())
+            if (attrs.OfType<NullableAttribute>().Any())
                 return true;
 
-            return !fieldRoute.Type.IsValueType || fieldRoute.Type.IsNullable();
+            return !route.Type.IsValueType || route.Type.IsNullable();
         }
 
-        internal IndexType GetIndexType(FieldRoute fieldRoute)
+        internal IndexType GetIndexType(PropertyRoute route)
         {
-            var att = Attributes(fieldRoute);
-
-            UniqueIndexAttribute at = att.OfType<UniqueIndexAttribute>().SingleOrDefault();
+            UniqueIndexAttribute at = Attributes(route).OfType<UniqueIndexAttribute>().SingleOrDefault();
 
             return at == null ? IndexType.None :
                 at.AllowMultipleNulls ? IndexType.UniqueMultipleNulls :
                 IndexType.Unique;
         }
 
-        public bool ImplementedBy<T>(Expression<Func<T, object>> fieldRoute, Type typeToImplement) where T : IdentifiableEntity
+        public bool ImplementedBy<T>(Expression<Func<T, object>> route, Type typeToImplement) where T : IdentifiableEntity
         {
-            var imp = GetImplementations(fieldRoute);
+            var imp = GetImplementations(route);
             return imp != null && imp.ImplementedBy(typeToImplement);
         }
 
-        public void AssertImplementedBy<T>(Expression<Func<T, object>> fieldRoute, Type typeToImplement) where T : IdentifiableEntity
+        public void AssertImplementedBy<T>(Expression<Func<T, object>> route, Type typeToImplement) where T : IdentifiableEntity
         {
-            var route = FieldRoute.Construct(fieldRoute);
+            var propRoute = PropertyRoute.Construct(route);
 
-            var imp = GetImplementations(route);
+            var imp = GetImplementations(propRoute);
 
             if (imp == null || !imp.ImplementedBy(typeToImplement))
                 throw new InvalidOperationException("Route {0} is not ImplementedBy {2}".Formato(route, typeToImplement.Name));
         }
 
-        public Implementations GetImplementations<T>(Expression<Func<T, object>> fieldRoute) where T : IdentifiableEntity
+        public Implementations GetImplementations<T>(Expression<Func<T, object>> route) where T : IdentifiableEntity
         {
-            return GetImplementations(FieldRoute.Construct(fieldRoute));
+            return GetImplementations(PropertyRoute.Construct(route));
         }
 
-        internal Implementations GetImplementations(FieldRoute route)
+        internal Implementations GetImplementations(PropertyRoute route)
         {
             var fieldAtt = Attributes(route);
 
@@ -175,19 +175,19 @@ namespace Signum.Engine.Maps
             return null;
         }
 
-        internal SqlDbType? GetSqlDbType(FieldRoute fieldRoute)
+        internal SqlDbType? GetSqlDbType(PropertyRoute route)
         {
-            SqlDbTypeAttribute att = Attributes(fieldRoute).OfType<SqlDbTypeAttribute>().SingleOrDefault();
+            SqlDbTypeAttribute att = Attributes(route).OfType<SqlDbTypeAttribute>().SingleOrDefault();
 
             if (att != null && att.HasSqlDbType)
                 return att.SqlDbType;
 
-            return TypeValues.TryGetS(fieldRoute.Type);
+            return TypeValues.TryGetS(route.Type.UnNullify());
         }
 
-        internal int? GetSqlSize(FieldRoute fieldRoute, SqlDbType sqlDbType)
+        internal int? GetSqlSize(PropertyRoute route, SqlDbType sqlDbType)
         {
-            SqlDbTypeAttribute att = Attributes(fieldRoute).OfType<SqlDbTypeAttribute>().SingleOrDefault();
+            SqlDbTypeAttribute att = Attributes(route).OfType<SqlDbTypeAttribute>().SingleOrDefault();
 
             if (att != null && att.HasSize)
                 return att.Size;
@@ -195,9 +195,9 @@ namespace Signum.Engine.Maps
             return defaultSize.TryGetS(sqlDbType);
         }
 
-        internal int? GetSqlScale(FieldRoute fieldRoute, SqlDbType sqlDbType)
+        internal int? GetSqlScale(PropertyRoute route, SqlDbType sqlDbType)
         {
-            SqlDbTypeAttribute att = Attributes(fieldRoute).OfType<SqlDbTypeAttribute>().SingleOrDefault();
+            SqlDbTypeAttribute att = Attributes(route).OfType<SqlDbTypeAttribute>().SingleOrDefault();
 
             if (att != null && att.HasScale)
                 return att.Scale;
@@ -217,7 +217,6 @@ namespace Signum.Engine.Maps
 
             desambiguatedNames[type] = cleanName;
         }
-
     }
 
     internal enum ReferenceFieldType
