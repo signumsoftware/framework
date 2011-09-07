@@ -5,7 +5,7 @@
    var roles = entries.Select(a => a.GetDescendantRoles()).ToList();
    var allKeys = roles.SelectMany(a => a.Keys).Distinct().Order().ToList();
 }
-<table class="sf-search-results">
+<table class="sf-search-results sf-profiler-table">
     <thead>
         <tr>
             <th>

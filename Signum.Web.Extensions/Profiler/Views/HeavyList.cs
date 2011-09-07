@@ -69,39 +69,33 @@ WriteLiteral("<h2>");
 
 Write(ViewData[ViewDataKeys.Title]);
 
-WriteLiteral("</h2>\r\n<div>\r\n");
+WriteLiteral("</h2>\r\n<div>\r\n    ");
 
 
-     if (HeavyProfiler.Enabled)
-    {
-        
-   Write(Html.ActionLink("Disable", "Disable"));
+Write(Html.Partial(ProfilerClient.ViewPrefix.Formato("ProfilerButtons")));
 
-                                              
-    }
-    else
-    {
-        
-   Write(Html.ActionLink("Enable", "Enable"));
-
-                                            
-
-    }
-
-WriteLiteral("    \r\n    ");
+WriteLiteral("\r\n    ");
 
 
-Write(Html.ActionLink("Clean", "Clean"));
+Write(Html.ActionLink("Slowest SQLs", (ProfilerController pc) => pc.Statistics(SqlProfileResumeOrder.Sum)));
 
-WriteLiteral("\r\n   \r\n\r\n        ");
-
-
-   Write(Html.ActionLink("Slowest SQLs", "HeavySlowest"));
-
-WriteLiteral("        \r\n</div>\r\n");
+WriteLiteral("\r\n</div>\r\n");
 
 
    Html.RenderPartial(ProfilerClient.ViewPrefix.Formato("ProfilerTable"), (object)Model);
+
+
+Write(Html.ScriptsJs("~/Profiler/Scripts/SF_Profiler.js"));
+
+WriteLiteral("\r\n<script language=\"javascript\">\r\n    $(function () {\r\n        SF.Profiler.init(f" +
+"unction () {\r\n            $.ajax({\r\n                url: \"");
+
+
+                 Write(Url.Action((ProfilerController p) => p.Heavy()));
+
+WriteLiteral("\",\r\n                success: function (data) {\r\n                    $(\"table.sf-p" +
+"rofiler-table\").replaceWith(data);\r\n                }\r\n            });\r\n        " +
+"});\r\n    });\r\n</script>\r\n");
 
 
         }

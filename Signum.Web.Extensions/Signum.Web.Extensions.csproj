@@ -433,6 +433,16 @@
     </Compile>
     <Compile Include="Profiler\ProfilerClient.cs" />
     <Compile Include="Profiler\Controllers\ProfilerController.cs" />
+    <Compile Include="Profiler\Views\StatisticsTable1.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>StatisticsTable.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Profiler\Views\ProfilerButtons.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ProfilerButtons.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Profiler\Views\Statistics1.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -758,6 +768,7 @@
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>LinkListPart1.cs</LastGenOutput>
     </Content>
+    <Content Include="Profiler\Scripts\SF_Profiler.js" />
     <Content Include="Profiler\Views\Statistics.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>Statistics1.cs</LastGenOutput>
@@ -773,6 +784,14 @@
     <Content Include="ControlPanel\Views\PanelParts.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>PanelParts.cs</LastGenOutput>
+    </Content>
+    <Content Include="Profiler\Views\ProfilerButtons.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>ProfilerButtons.cs</LastGenOutput>
+    </Content>
+    <Content Include="Profiler\Views\StatisticsTable.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>StatisticsTable1.cs</LastGenOutput>
     </Content>
     <None Include="Profiler\Views\Times.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>

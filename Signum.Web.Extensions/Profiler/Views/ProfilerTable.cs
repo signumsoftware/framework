@@ -72,7 +72,7 @@ WriteLiteral("\r\n");
    var allKeys = roles.SelectMany(a => a.Keys).Distinct().Order().ToList();
 
 
-WriteLiteral(@"<table class=""sf-search-results"">
+WriteLiteral(@"<table class=""sf-search-results sf-profiler-table"">
     <thead>
         <tr>
             <th>
