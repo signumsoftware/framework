@@ -72,6 +72,20 @@ namespace Signum.Web
             };
         }
 
+        public static DateTime DateHourMinute(MappingContext<DateTime> ctx)
+        {
+            if (ctx.Parent.Empty())
+                return ctx.None();
+
+            DateTime dateStart;
+            int hours;
+            int mins;
+            if (ctx.Parent.Parse("Date", out dateStart) & ctx.Parent.Parse("Hour", out hours) & ctx.Parent.Parse("Minute", out mins))
+                return dateStart.AddHours(hours).AddMinutes(mins);
+
+            return ctx.None();
+        }
+
         public static void RegisterValue<T>(Mapping<T> mapping)
         {
             MappingRepository<T>.Mapping = mapping;
