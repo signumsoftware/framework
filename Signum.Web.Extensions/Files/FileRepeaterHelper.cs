@@ -66,7 +66,7 @@ namespace Signum.Web.Files
                 {
                     TypeContext<FilePathDN> tc = (TypeContext<FilePathDN>)TypeContextUtilities.CleanTypeContext(itemTC);
 
-                    using (FileLine fl = new FileLine(typeof(FilePathDN), tc.Value, itemTC, "", tc.FieldRoute) { Remove = false })
+                    using (FileLine fl = new FileLine(typeof(FilePathDN), tc.Value, itemTC, "", tc.PropertyRoute) { Remove = false })
                         sb.AddLine(helper.InternalFileLine(fl));
                 }
             }
@@ -85,7 +85,7 @@ namespace Signum.Web.Files
         {
             TypeContext<MList<S>> context = Common.WalkExpression(tc, property);
 
-            FileRepeater fl = new FileRepeater(context.Type, context.UntypedValue, context, null, context.FieldRoute);
+            FileRepeater fl = new FileRepeater(context.Type, context.UntypedValue, context, null, context.PropertyRoute);
 
             //Navigator.ConfigureEntityBase(el, Reflector.ExtractLite(typeof(S)) ?? typeof(S), false);
             Common.FireCommonTasks(fl);

@@ -14,6 +14,7 @@ namespace Signum.Entities.Mailing
     [Serializable]
     public class EmailMessageDN : Entity
     {
+        [ImplementedBy(typeof(UserDN))]
         Lite<IEmailOwnerDN> recipient;
         [NotNullValidator]
         public Lite<IEmailOwnerDN> Recipient
@@ -110,7 +111,6 @@ namespace Signum.Entities.Mailing
         Received
     }
 
-    [ImplementedBy(typeof(UserDN))]
     public interface IEmailOwnerDN : IIdentifiable
     {
         string Email { get; }

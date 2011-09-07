@@ -217,11 +217,11 @@ namespace Signum.Web.Help
                         int index= link.IndexOf("."); 
                         string type = link.Substring(0, index); 
                         string rest = link.Substring(index +1);
-                        FieldRoute route = FieldRoute.Parse(TypeLogic.TryGetType(type), rest);
+                        PropertyRoute route = PropertyRoute.Parse(TypeLogic.TryGetType(type), rest);
                         //TODO: NiceToString de la propiedad
                         return new WikiLink(
                             HelpLogic.PropertyUrl(route),
-                            route.Fields.ToString(p => p.NiceName(), "-"));
+                            route.Properties.ToString(p => p.NiceName(), "-"));
 
                     case WikiFormat.QueryLink:
                         object o = QueryLogic.TryToQueryName(link);

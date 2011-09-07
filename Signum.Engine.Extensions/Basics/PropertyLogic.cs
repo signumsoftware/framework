@@ -63,7 +63,7 @@ namespace Signum.Engine.Basics
 
         public static List<PropertyDN> GenerateProperties(Type type, TypeDN typeDN)
         {
-            return FieldRoute.GenerateRoutes(type).Select(pr =>
+            return PropertyRoute.GenerateRoutes(type).Select(pr =>
                 new PropertyDN
                 {
                     Route = pr,
@@ -72,12 +72,12 @@ namespace Signum.Engine.Basics
                 }).ToList();
         }
 
-        public static FieldRoute GetPropertyRoute(PropertyDN route)
+        public static PropertyRoute GetPropertyRoute(PropertyDN route)
         {
-            return FieldRoute.Parse(TypeLogic.DnToType[route.Type], route.Path);
+            return PropertyRoute.Parse(TypeLogic.DnToType[route.Type], route.Path);
         }
 
-        public static PropertyDN GetEntity(FieldRoute route)
+        public static PropertyDN GetEntity(PropertyRoute route)
         {
             TypeDN type = TypeLogic.TypeToDN[route.RootType];
             string path = route.PropertyString();

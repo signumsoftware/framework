@@ -38,7 +38,7 @@ namespace Signum.Web.Files
                     .InnerHtml(MvcHtmlString.Create("$(function(){ SF.Loader.loadJs('" + RouteHelper.New().Content("~/Files/Scripts/SF_Files.js") + "'); });"))
                     .ToHtml());
 
-                if (fileLine.FieldRoute.FieldInfo.FieldType == typeof(FilePathDN))
+                if (fileLine.PropertyRoute.Type == typeof(FilePathDN))
                 {
                     FilePathDN filePath = value as FilePathDN;
                     if (filePath != null)
@@ -133,7 +133,7 @@ namespace Signum.Web.Files
         {
             TypeContext<S> context = Common.WalkExpression(tc, property);
 
-            FileLine fl = new FileLine(context.Type, context.UntypedValue, context, "", context.FieldRoute);
+            FileLine fl = new FileLine(context.Type, context.UntypedValue, context, "", context.PropertyRoute);
 
             Common.FireCommonTasks(fl);
 

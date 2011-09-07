@@ -192,9 +192,9 @@ namespace Signum.Entities.Chart
             if (token is MonthStartToken || token is DateToken)
                 return true;
 
-            FieldRoute route = token.GetPropertyRoute();
+            PropertyRoute route = token.GetPropertyRoute();
 
-            if (route != null && route.FieldRouteType == FieldRouteType.Field)
+            if (route != null && route.PropertyRouteType == PropertyRouteType.FieldOrProperty)
             {
 
                 var pp = Validator.GetOrCreatePropertyPack(route);

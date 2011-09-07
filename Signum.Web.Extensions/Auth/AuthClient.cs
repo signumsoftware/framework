@@ -186,9 +186,9 @@ namespace Signum.Web.Auth
 
         static void TaskAuthorizeProperties(BaseLine bl)
         {
-            if (bl.FieldRoute.FieldRouteType == FieldRouteType.Field)
+            if (bl.PropertyRoute.PropertyRouteType == PropertyRouteType.FieldOrProperty)
             {
-                switch (PropertyAuthLogic.GetPropertyAllowed(bl.FieldRoute))
+                switch (PropertyAuthLogic.GetPropertyAllowed(bl.PropertyRoute))
                 {
                     case PropertyAllowed.None:
                         bl.Visible = false;
