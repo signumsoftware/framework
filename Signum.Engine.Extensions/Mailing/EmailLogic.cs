@@ -195,7 +195,7 @@ namespace Signum.Engine.Mailing
                                                {
                                                    Entity = e.ToLite(),
                                                    e.Id,
-                                                   e.Error,
+                                                   e.Name,
                                                    e.NumLines,
                                                    e.NumErrors,
                                                }).ToDynamic();
