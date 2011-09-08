@@ -924,7 +924,7 @@ namespace Signum.Engine.Linq
                 case (ExpressionType)DbExpressionType.FieldInit:
                 {
                     FieldInitExpression fie = (FieldInitExpression)source;
-                    FieldInfo fi = Reflector.FindFieldInfo(fie.Type, m.Member, false);
+                    FieldInfo fi = m.Member as FieldInfo ?? Reflector.FindFieldInfo(fie.Type, (PropertyInfo)m.Member);
 
                     if (fi == null)
                         throw new InvalidOperationException("The member {0} of {1} is not accesible on queries".Formato(m.Member.Name, fie.Type.TypeName()));
@@ -941,7 +941,7 @@ namespace Signum.Engine.Linq
                 case (ExpressionType)DbExpressionType.EmbeddedFieldInit:
                 {
                     EmbeddedFieldInitExpression efie = (EmbeddedFieldInitExpression)source;
-                    FieldInfo fi = Reflector.FindFieldInfo(efie.Type, m.Member, true);
+                    FieldInfo fi = m.Member as FieldInfo ?? Reflector.FindFieldInfo(efie.Type, (PropertyInfo)m.Member);
 
                     if (fi == null)
                         throw new InvalidOperationException("The member {0} of {1} is not accesible on queries".Formato(m.Member.Name, efie.Type.TypeName()));
@@ -997,7 +997,7 @@ namespace Signum.Engine.Linq
                 case (ExpressionType)DbExpressionType.ImplementedByAll:
                 {
                     ImplementedByAllExpression iba = (ImplementedByAllExpression)source;
-                    FieldInfo fi = Reflector.FindFieldInfo(iba.Type, m.Member, false);
+                    FieldInfo fi = m.Member as FieldInfo ?? Reflector.FindFieldInfo(iba.Type, (PropertyInfo)m.Member);
                     if (fi != null && fi.FieldEquals((IdentifiableEntity ie) => ie.id))
                         return iba.Id;
 

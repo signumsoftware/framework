@@ -17,8 +17,19 @@ namespace Signum.Entities
     {
         Type type;
         public PropertyRouteType PropertyRouteType { get; private set; } 
-        public PropertyInfo PropertyInfo { get; private set;}
+        public FieldInfo FieldInfo { get; private set;}
+        public PropertyInfo PropertyInfo { get; private set; }
         public PropertyRoute Parent { get; private set;}
+
+        public MemberInfo[] Members
+        {
+            get { return this.FollowC(a => a.Parent).Select(a => a.FieldInfo ?? (MemberInfo)a.PropertyInfo).Reverse().Skip(1).ToArray(); }
+        }
+
+        public PropertyInfo[] Properties
+        {
+            get { return this.FollowC(a => a.Parent).Select(a => a.PropertyInfo).Reverse().Skip(1).ToArray(); }
+        }
 
         public static PropertyRoute Construct<T>(Expression<Func<T, object>> expression)
             where T : IRootEntity
@@ -27,97 +38,112 @@ namespace Signum.Entities
 
             foreach (var mi in Reflector.GetMemberList(expression))
             {
-                result = result.Add((PropertyInfo)mi);
+                result = result.Add(mi); 
             }
             return result;
         }
 
-        public PropertyRoute Add(string propertyName)
+        public PropertyRoute Add(string fieldOrProperty)
         {
-            PropertyInfo pi = Type.GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
+            MemberInfo mi = (MemberInfo)Type.GetProperty(fieldOrProperty, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance) ??
+                            (MemberInfo)Type.GetField(fieldOrProperty, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 
-            if (pi == null)
-                throw new InvalidOperationException("{0} of {1} does not exist".Formato(propertyName, this));
+            if (mi == null)
+                throw new InvalidOperationException("{0} of {1} does not exist".Formato(fieldOrProperty, this));
 
-            return Add(pi);
+            return Add(mi);
         }
 
-        public PropertyRoute Add(PropertyInfo propertyInfo)
+        public PropertyRoute Add(MemberInfo fieldOrProperty)
         {
-            if (this.Type.IsIIdentifiable())
+            if (this.Type.IsIIdentifiable() && PropertyRouteType != PropertyRouteType.Root)
             {
                 Implementations imp = GetImplementations();
 
                 ImplementedByAttribute ib = imp as ImplementedByAttribute;
                 if (ib != null && ib.ImplementedTypes.Length == 1)
                 {
-                    return new PropertyRoute(Root(ib.ImplementedTypes.Single()), propertyInfo); 
+                    return new PropertyRoute(Root(ib.ImplementedTypes.Single()), fieldOrProperty); 
                 }
 
                 if (imp != null)
                     throw new InvalidOperationException("Attempt to make a PropertyRoute on a {0}. Cast first".Formato(imp.GetType()));
 
-                return new PropertyRoute(Root(this.Type), propertyInfo);
+                return new PropertyRoute(Root(this.Type), fieldOrProperty);
             }
-            return new PropertyRoute(this, propertyInfo);
+            return new PropertyRoute(this, fieldOrProperty);
         }
 
-        PropertyRoute(PropertyRoute parent, PropertyInfo propertyInfo)
+        PropertyRoute(PropertyRoute parent, MemberInfo fieldOrProperty)
         {
-            if (propertyInfo == null)
-                throw new ArgumentNullException("propertyInfo");
+            if (fieldOrProperty == null)
+                throw new ArgumentNullException("fieldOrProperty");
 
             if (parent == null)
                 throw new ArgumentNullException("parent");
 
-            if (!parent.Type.FollowC(a => a.BaseType).Contains(propertyInfo.DeclaringType))
-            {
-                if (parent.Type.GetInterfaces().Contains(propertyInfo.DeclaringType))
-                {
-                    var otherProperty = parent.Type.FollowC(a => a.BaseType)
-                        .Select(a => a.GetProperty(propertyInfo.Name, BindingFlags.Public | BindingFlags.Instance)).NotNull().First();
+            this.Parent = parent;
 
-                    if (otherProperty == null)
-                        throw new ArgumentException("PropertyInfo {0} not found on {1}".Formato(propertyInfo.PropertyName(), parent.Type));
 
-                    propertyInfo = otherProperty;
-                }
-                else
-                {
-                    throw new ArgumentException("PropertyInfo {0} not found on {1}".Formato(propertyInfo.PropertyName(), parent.Type));
-                }
-            }
             if (parent.Type.IsIIdentifiable() && parent.PropertyRouteType != PropertyRouteType.Root)
                 throw new ArgumentException("Parent can not be a non-root Identifiable");
 
-            if (Reflector.IsMList(parent.Type))
+            if (fieldOrProperty is PropertyInfo && Reflector.IsMList(parent.Type))
             {
-                if (propertyInfo.Name != "Item")
-                    throw new NotSupportedException("PropertyInfo {0} is not supported".Formato(propertyInfo.Name)); 
+                if (fieldOrProperty.Name != "Item")
+                    throw new NotSupportedException("PropertyInfo {0} is not supported".Formato(fieldOrProperty.Name));
 
+                PropertyInfo = (PropertyInfo)fieldOrProperty;
                 PropertyRouteType = PropertyRouteType.MListItems;
             }
-            else if (Reflector.IsLite(parent.Type))
+            else if (fieldOrProperty is PropertyInfo && Reflector.IsLite(parent.Type))
             {
-                if (propertyInfo.Name != "Entity" && propertyInfo.Name != "EntityOrNull")
-                    throw new NotSupportedException("PropertyInfo {0} is not supported".Formato(propertyInfo.Name));
+                if (fieldOrProperty.Name != "Entity" && fieldOrProperty.Name != "EntityOrNull")
+                    throw new NotSupportedException("PropertyInfo {0} is not supported".Formato(fieldOrProperty.Name));
 
+                PropertyInfo = (PropertyInfo)fieldOrProperty;
                 PropertyRouteType = PropertyRouteType.LiteEntity;
             }
-            else if (typeof(ModifiableEntity).IsAssignableFrom(parent.Type))
+            else if (typeof(ModifiableEntity).IsAssignableFrom(parent.Type) || typeof(IRootEntity).IsAssignableFrom(parent.Type))
             {
-                PropertyRouteType = PropertyRouteType.Property;
+                PropertyRouteType = PropertyRouteType.FieldOrProperty;
+                if (fieldOrProperty is PropertyInfo)
+                {
+                    if (!parent.Type.FollowC(a => a.BaseType).Contains(fieldOrProperty.DeclaringType))
+                    {
+                        var pi = (PropertyInfo)fieldOrProperty;
+
+                        if (!parent.Type.GetInterfaces().Contains(fieldOrProperty.DeclaringType))
+                            throw new ArgumentException("PropertyInfo {0} not found on {1}".Formato(pi.PropertyName(), parent.Type));
+
+                        var otherProperty = parent.Type.FollowC(a => a.BaseType)
+                            .Select(a => a.GetProperty(fieldOrProperty.Name, BindingFlags.Public | BindingFlags.Instance)).NotNull().First();
+
+                        if (otherProperty == null)
+                            throw new ArgumentException("PropertyInfo {0} not found on {1}".Formato(pi.PropertyName(), parent.Type));
+
+                        fieldOrProperty = otherProperty;
+                    }
+
+                    PropertyInfo = (PropertyInfo)fieldOrProperty;
+                    FieldInfo = Reflector.TryFindFieldInfo(Parent.Type, PropertyInfo);
+                }
+                else
+                {
+                    FieldInfo = (FieldInfo)fieldOrProperty;
+                    PropertyInfo = Reflector.TryFindPropertyInfo(FieldInfo);
+                }
             }
             else
                 throw new NotSupportedException("Properties of {0} not supported".Formato(parent.Type));
 
-            this.PropertyInfo = propertyInfo;
-            this.Parent = parent;
+         
+            
         }
 
-        public static PropertyRoute Root(Type propertyRouteRoot)
+        public static PropertyRoute Root(Type rootEntity)
         {
-            return new PropertyRoute(propertyRouteRoot);
+            return new PropertyRoute(rootEntity);
         }
 
         PropertyRoute(Type type)
@@ -132,16 +158,24 @@ namespace Signum.Entities
             this.PropertyRouteType = PropertyRouteType.Root;
         }
 
-        public Type Type { get { return type ?? PropertyInfo.PropertyType; } }
-        public Type RootType { get { return type ?? Parent.RootType; } }
-
-        public PropertyInfo[] Properties
+        public Type Type
         {
             get
             {
-                return this.FollowC(a => a.Parent).Select(a => a.PropertyInfo).Reverse().Skip(1).ToArray();
+                if (type != null)
+                    return type;
+
+                if (FieldInfo != null)
+                    return FieldInfo.FieldType;
+
+                if (PropertyInfo != null)
+                    return PropertyInfo.PropertyType;
+
+                throw new InvalidOperationException("No FieldInfo or PropertyInfo"); 
             }
         }
+
+        public Type RootType { get { return type ?? Parent.RootType; } }
 
         public override string ToString()
         {
@@ -149,8 +183,8 @@ namespace Signum.Entities
             {
                 case PropertyRouteType.Root:
                     return "({0})".Formato(type.Name);
-                case PropertyRouteType.Property:
-                    return Parent.ToString() + (Parent.PropertyRouteType == PropertyRouteType.MListItems ? "" : ".") + PropertyInfo.Name;
+                case PropertyRouteType.FieldOrProperty:
+                    return Parent.ToString() + (Parent.PropertyRouteType == PropertyRouteType.MListItems ? "" : ".") + (PropertyInfo != null ? PropertyInfo.Name : FieldInfo.Name);
                 case PropertyRouteType.MListItems:
                     return Parent.ToString() + "/";
                 case PropertyRouteType.LiteEntity:
@@ -165,11 +199,11 @@ namespace Signum.Entities
             {
                 case PropertyRouteType.Root:
                     throw new InvalidOperationException("Root has no PropertyString");
-                case PropertyRouteType.Property:
+                case PropertyRouteType.FieldOrProperty:
                     switch (Parent.PropertyRouteType)
                     {
-                        case PropertyRouteType.Root: return PropertyInfo.Name;
-                        case PropertyRouteType.Property: return Parent.PropertyString() + "." + PropertyInfo.Name;
+                        case PropertyRouteType.Root: return (PropertyInfo != null ? PropertyInfo.Name : FieldInfo.Name);
+                        case PropertyRouteType.FieldOrProperty: return Parent.PropertyString() + "." + (PropertyInfo != null ? PropertyInfo.Name : FieldInfo.Name);
                         case PropertyRouteType.MListItems: return Parent.PropertyString() + PropertyInfo.Name;
                         default: throw new InvalidOperationException();
                     }
@@ -228,19 +262,19 @@ namespace Signum.Entities
             PropertyRoute root = PropertyRoute.Root(type);
             List<PropertyRoute> result = new List<PropertyRoute>();
 
-            foreach (var pi in Reflector.PublicInstancePropertiesInOrder(type))
+            foreach (PropertyInfo pi in Reflector.PublicInstancePropertiesInOrder(type))
             {
-                PropertyRoute property = root.Add(pi);
-                result.Add(property);
+                PropertyRoute route = root.Add(pi);
+                result.Add(route);
 
                 if (Reflector.IsEmbeddedEntity(pi.PropertyType))
-                    result.AddRange(GenerateEmbeddedProperties(property));
+                    result.AddRange(GenerateEmbeddedProperties(route));
 
                 if (Reflector.IsMList(pi.PropertyType))
                 {
                     Type colType = pi.PropertyType.ElementType();
                     if (Reflector.IsEmbeddedEntity(colType))
-                        result.AddRange(GenerateEmbeddedProperties(property.Add("Item")));
+                        result.AddRange(GenerateEmbeddedProperties(route.Add("Item")));
                 }
             }
 
@@ -270,7 +304,7 @@ namespace Signum.Entities
             if (Type != other.Type)
                 return false;
 
-            if (!ReflectionTools.PropertyEquals(PropertyInfo, other.PropertyInfo))
+            if (!ReflectionTools.FieldEquals(FieldInfo, other.FieldInfo))
                 return false;
 
             return object.Equals(Parent, other.Parent); 
@@ -278,10 +312,7 @@ namespace Signum.Entities
 
         public override int GetHashCode()
         {
-            if (PropertyInfo != null)
-                return PropertyInfo.Name.GetHashCode();
-
-            return type.GetHashCode();
+            return this.ToString().GetHashCode();
         }
 
         public override bool Equals(object obj)
@@ -303,7 +334,7 @@ namespace Signum.Entities
     public enum PropertyRouteType
     {
         Root,
-        Property,
+        FieldOrProperty,
         LiteEntity, 
         MListItems,
     }

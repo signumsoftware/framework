@@ -234,14 +234,16 @@ namespace Signum.Web
             if (route.PropertyRouteType == PropertyRouteType.Root)
                 return null;
 
+            if (!typeof(ModelEntity).IsAssignableFrom(route.RootType))
+                throw new InvalidOperationException("Route out"); 
+
             if (OverrideImplementations != null && OverrideImplementations.ContainsKey(route))
                 return OverrideImplementations[route];
             
-            var fieldInfo = Reflector.FindFieldInfo(route.PropertyInfo.DeclaringType, route.PropertyInfo, false);
-            if (fieldInfo == null)
+            if (route.FieldInfo == null)
                 return null;
             else
-                return fieldInfo.SingleAttribute<Implementations>();
+                return route.FieldInfo.SingleAttribute<Implementations>();
         }
     }
 

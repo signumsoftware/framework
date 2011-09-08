@@ -170,10 +170,10 @@ namespace Signum.Web
 
         public PropertyRoute PropertyRoute { get; private set; }
 
-        protected TypeContext(Context parent, string controlID, PropertyRoute propertyRoute)
+        protected TypeContext(Context parent, string controlID, PropertyRoute route)
             :base(parent, controlID)
         {
-            this.PropertyRoute = propertyRoute;
+            this.PropertyRoute = route;
         }
 
         public RuntimeInfo RuntimeInfo()

@@ -39,7 +39,7 @@ namespace Signum.Engine.DynamicQuery
                         case PropertyRouteType.LiteEntity:
                         case PropertyRouteType.Root:
                             throw new InvalidOperationException("PropertyRoute can not be of RouteType Root");
-                        case PropertyRouteType.Property:
+                        case PropertyRouteType.FieldOrProperty:
                             Format = GetFormat(propertyRoutes);
                             Unit = GetUnit(propertyRoutes);
                             Implementations = AggregateImplementations(PropertyRoutes);
@@ -128,7 +128,7 @@ namespace Signum.Engine.DynamicQuery
                 return this.Type.NiceName();
 
             if (propertyRoutes != null && 
-                propertyRoutes[0].PropertyRouteType == PropertyRouteType.Property &&
+                propertyRoutes[0].PropertyRouteType == PropertyRouteType.FieldOrProperty &&
                 propertyRoutes[0].PropertyInfo.Name == Name)
             {
                 var result = propertyRoutes.Select(pr=>pr.PropertyInfo.NiceName()).Only();

@@ -384,7 +384,7 @@ namespace Signum.Engine.Linq
 
             if (typeof(ModifiableEntity).IsAssignableFrom(source.Type) || typeof(IIdentifiable).IsAssignableFrom(source.Type))
             {
-                var pi = Reflector.FindPropertyInfo(member);
+                var pi = member as PropertyInfo ??  Reflector.FindPropertyInfo((FieldInfo)member);
 
                 if (pi == null)
                     return new MetaExpression(memberType, null);
