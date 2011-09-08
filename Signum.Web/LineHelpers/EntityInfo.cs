@@ -40,7 +40,7 @@ namespace Signum.Web
 
         public static MvcHtmlString HiddenRuntimeInfo<T, S>(this HtmlHelper helper, TypeContext<T> parent, Expression<Func<T, S>> property)
         {
-            TypeContext<S> typeContext = (TypeContext<S>)Common.WalkExpression(parent, property);
+            TypeContext<S> typeContext = Common.WalkExpression(parent, property);
             return helper.HiddenRuntimeInfo(typeContext);
         }
     }
