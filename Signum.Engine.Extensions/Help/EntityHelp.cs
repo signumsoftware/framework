@@ -385,7 +385,7 @@ namespace Signum.Engine.Help
     {
         public PropertyHelp(PropertyRoute propertyRoute, string info)
         {
-            if(propertyRoute.PropertyRouteType != PropertyRouteType.Property)
+            if(propertyRoute.PropertyRouteType != PropertyRouteType.FieldOrProperty)
                 throw new ArgumentException("propertyRoute should be of type Property"); 
 
             this.PropertyRoute = propertyRoute;

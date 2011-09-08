@@ -38,7 +38,7 @@ namespace Signum.Web.Files
                     .InnerHtml(MvcHtmlString.Create("$(function(){ SF.Loader.loadJs('" + RouteHelper.New().Content("~/Files/Scripts/SF_Files.js") + "'); });"))
                     .ToHtml());
 
-                if (fileLine.PropertyRoute.PropertyInfo.PropertyType == typeof(FilePathDN))
+                if (fileLine.PropertyRoute.Type == typeof(FilePathDN))
                 {
                     FilePathDN filePath = value as FilePathDN;
                     if (filePath != null)

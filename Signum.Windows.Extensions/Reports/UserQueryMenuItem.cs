@@ -15,6 +15,7 @@ using Prop = Signum.Windows.Extensions.Properties;
 using Signum.Services;
 using System.Windows.Documents;
 using Signum.Utilities;
+using Signum.Entities.UserQueries;
 
 namespace Signum.Windows.Reports
 {
