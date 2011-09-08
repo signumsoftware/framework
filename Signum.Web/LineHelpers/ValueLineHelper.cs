@@ -151,10 +151,8 @@ namespace Signum.Web
             if (valueLine.DatePickerOptions.ShowAge)
                 valueLine.ValueHtmlProps.AddCssClass("hasAge");
 
-            if (valueLine.ValueHtmlProps.ContainsKey("onblur"))
-                valueLine.ValueHtmlProps["onblur"] = "this.setAttribute('value', this.value); " + valueLine.ValueHtmlProps["onblur"];
-            else
-                valueLine.ValueHtmlProps.Add("onblur", "this.setAttribute('value', this.value);");
+
+            valueLine.ValueHtmlProps["onblur"] = "this.setAttribute('value', this.value); " + valueLine.ValueHtmlProps.TryGetC("onblur");        
             
             string jsDataFormat = DatePickerOptions.JsDateFormat(valueLine.Format ?? "g");
 
@@ -169,6 +167,10 @@ namespace Signum.Web
                 valueLine.ValueHtmlProps.AddCssClass("sf-datepicker");
                 valueLine.ValueHtmlProps["data-format"] =  valueLine.DatePickerOptions.Format;
             }
+
+            if (!valueLine.ValueHtmlProps.ContainsKey("placeholder") && jsDataFormat.HasText())
+                valueLine.ValueHtmlProps["placeholder"] = jsDataFormat.ToLower();
+
             MvcHtmlString returnString = helper.TextBox(valueLine.ControlID, value.TryToString(valueLine.Format), valueLine.ValueHtmlProps);
             
             if (!isDefaultDatepicker)
@@ -208,7 +210,7 @@ namespace Signum.Web
 
         public static MvcHtmlString TextboxInLine(this HtmlHelper helper, ValueLine valueLine, InputType inputType)
         {
-            string value = (valueLine.UntypedValue as IFormattable).TryToString(valueLine.Format) ?? 
+            string value = (valueLine.UntypedValue as IFormattable).TryToString(valueLine.Format) ??
                            valueLine.UntypedValue.TryToString() ?? "";
 
             if (valueLine.ReadOnly)
@@ -224,10 +226,7 @@ namespace Signum.Web
             else
                 valueLine.ValueHtmlProps.Remove("autocomplete");
 
-            if (valueLine.ValueHtmlProps.ContainsKey("onblur"))
-                valueLine.ValueHtmlProps["onblur"] = "this.setAttribute('value', this.value); " + valueLine.ValueHtmlProps["onblur"];
-            else
-                valueLine.ValueHtmlProps.Add("onblur", "this.setAttribute('value', this.value);");
+            valueLine.ValueHtmlProps["onblur"] = "this.setAttribute('value', this.value); " + valueLine.ValueHtmlProps.TryGetC("onblur");
 
             valueLine.ValueHtmlProps["type"] = inputType.ToString().ToLower();
 
@@ -253,10 +252,7 @@ namespace Signum.Web
             }
 
             valueLine.ValueHtmlProps.Add("autocomplete", "off");
-            if (valueLine.ValueHtmlProps.ContainsKey("onblur"))
-                valueLine.ValueHtmlProps["onblur"] = "this.setAttribute('value', this.value); " + valueLine.ValueHtmlProps["onblur"];
-            else
-                valueLine.ValueHtmlProps.Add("onblur", "this.setAttribute('value', this.value);");
+            valueLine.ValueHtmlProps["onblur"] = "this.setAttribute('value', this.value); " + valueLine.ValueHtmlProps.TryGetC("onblur");
 
             return helper.TextArea(valueLine.ControlID, (string)valueLine.UntypedValue, valueLine.ValueHtmlProps);
         }
@@ -312,7 +308,7 @@ namespace Signum.Web
 
         public static MvcHtmlString ValueLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property, Action<ValueLine> settingsModifier)
         {
-            TypeContext<S> context = (TypeContext<S>)Common.WalkExpression(tc, property);
+            TypeContext<S> context = Common.WalkExpression(tc, property);
 
             ValueLine vl = new ValueLine(typeof(S), context.Value, context, null, context.PropertyRoute);
 
@@ -331,7 +327,7 @@ namespace Signum.Web
 
         public static MvcHtmlString HiddenLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property, Action<ValueLine> settingsModifier)
         {
-            TypeContext<S> context = (TypeContext<S>)Common.WalkExpression(tc, property);
+            TypeContext<S> context = Common.WalkExpression(tc, property);
 
             ValueLine hl = new ValueLine(typeof(S), context.Value, context, null, context.PropertyRoute);
 
