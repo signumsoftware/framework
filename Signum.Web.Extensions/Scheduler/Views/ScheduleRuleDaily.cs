@@ -70,20 +70,18 @@ WriteLiteral("\r\n");
 
 
  using (var e = Html.TypeContext<ScheduleRuleDailyDN>())
-{
-    DateTime d = e.Value.StartingOn.ToUserInterface();
-    
-Write(Html.Field("Start Date", Html.TextBox(e.Compose("Date"), d.Date.ToShortDateString(), new { @class = "sf-value-line sf-datepicker", dateFormat = CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern })));
+{    
+    using (Html.FieldInline())
+    {        
+        
+   Write(Html.ValueLine(e, srd => srd.StartingOn, vl => { vl.Format = "d"; }));
 
-                                                                                                                                                                                                                   
-    
-Write(Html.Field("Hour", Html.TextBox(e.Compose("Hour"), d.Hour.ToString("00"))));
+                                                                             
+        
+   Write(Html.HourMinute(e, srd => srd.StartingOn));
 
-                                                                               
-    
-Write(Html.Field("Minute", Html.TextBox(e.Compose("Minute"), d.Minute.ToString("00"))));
-
-                                                                                     
+                                                  
+    }
 }
 
         }
