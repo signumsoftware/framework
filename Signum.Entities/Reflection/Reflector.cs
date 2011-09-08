@@ -275,7 +275,7 @@ namespace Signum.Entities.Reflection
             if (fi != null && !fi.HasAttribute<IgnoreAttribute>())
                 return true;
 
-            if (!ExpressionCleaner.HasExpansions(type, pi))
+            if (ExpressionCleaner.HasExpansions(type, pi))
                 return true;
 
             return false;
