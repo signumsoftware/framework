@@ -1,0 +1,23 @@
+﻿<?xml version="1.0"?>
+<VSTemplate xmlns="http://schemas.microsoft.com/developer/vstemplate/2005" Version="2.0.0" Type="ProjectGroup">
+  <TemplateData>
+    <Name>Signum Framework 2.0 Client - Server</Name>
+    <Description>Full Signum Framework Architecture for a client - server application</Description>
+    <Icon>__TemplateIcon.ico</Icon>
+    <ProjectType>CSharp</ProjectType>
+    <SortOrder>1000</SortOrder>
+    <DefaultName>Project</DefaultName>
+    <ProvideDefaultName>true</ProvideDefaultName>
+    <LocationField>Enabled</LocationField>
+    <EnableLocationBrowseButton>true</EnableLocationBrowseButton>
+  </TemplateData>
+  <TemplateContent>
+    <ProjectCollection>
+      <ProjectTemplateLink ProjectName="$projectname$.Entities" >.\ProjectName.Entities\MyTemplate.vstemplate</ProjectTemplateLink>
+      <ProjectTemplateLink ProjectName="$projectname$.Logic">.\ProjectName.Logic\MyTemplate.vstemplate</ProjectTemplateLink>
+      <ProjectTemplateLink ProjectName="$projectname$.Load">.\ProjectName.Load\MyTemplate.vstemplate</ProjectTemplateLink>
+      <ProjectTemplateLink ProjectName="$projectname$.Web">.\ProjectName.Web\MyTemplate.vstemplate</ProjectTemplateLink>
+      <ProjectTemplateLink ProjectName="$projectname$.Windows">.\ProjectName.Windows\MyTemplate.vstemplate</ProjectTemplateLink>
+    </ProjectCollection>
+  </TemplateContent>
+</VSTemplate>

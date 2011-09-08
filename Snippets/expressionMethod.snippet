@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<CodeSnippets  xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>Expression Method</Title>
+      <Shortcut>expressionMethod</Shortcut>
+      <Description>New Extension Method with Linq Support</Description>
+      <Author>Signum Software</Author>
+      <SnippetTypes>
+        <SnippetType>Expansion</SnippetType>
+      </SnippetTypes>
+    </Header>
+    <Snippet>
+      <Declarations>
+        <Literal>
+          <ID>methodName</ID>
+          <ToolTip>NameOfTheMethod</ToolTip>
+          <Default>Method</Default>
+        </Literal>
+        <Literal>
+          <ID>type</ID>
+          <ToolTip>Type</ToolTip>
+          <Default>IdentifiableEntity</Default>
+        </Literal>
+        <Literal>
+          <ID>paramName</ID>
+          <ToolTip>Parameter Name</ToolTip>
+          <Default>entity</Default>
+        </Literal>
+        <Literal>
+          <ID>returnType</ID>
+          <ToolTip>Return Type</ToolTip>
+          <Default>int</Default>
+        </Literal>
+      </Declarations>
+      <Code Language="csharp">
+        <![CDATA[static Expression<Func<$type$, $returnType$>> $methodName$Expression = 
+            $paramName$ => ; 
+        public static $returnType$ $methodName$(this $type$ $paramName$)
+        {
+            return $methodName$Expression.Invoke($paramName$);
+        }]]>
+      </Code>
+    </Snippet>
+  </CodeSnippet>
+</CodeSnippets>

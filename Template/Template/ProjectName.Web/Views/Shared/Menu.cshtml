@@ -1,0 +1,16 @@
+﻿@using $custommessage$.Entities
+
+@(new WebMenuItem
+    {
+        Children =
+        {
+            new WebMenuItem 
+            { 
+                Text="Entities", 
+                Children = 
+                {
+                    new WebMenuItem { Link = new FindOptions(typeof(MyEntityDN)) }
+                },
+            }
+        }
+    }.ToHtml((string)ViewData["current"],"")) 

@@ -1,0 +1,129 @@
+﻿@using Signum.Web.Properties
+@using Signum.Entities.DynamicQuery
+@using Signum.Engine.DynamicQuery
+@using System.Configuration
+@using Signum.Entities.Reflection
+@using Signum.Web.Properties
+@model Context
+@{ 
+    FindOptions findOptions = (FindOptions)ViewData[ViewDataKeys.FindOptions];
+    QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
+    Type entitiesType = Reflector.ExtractLite(queryDescription.Columns.Single(a => a.IsEntity).Type);
+    bool viewable = findOptions.View && Navigator.IsNavigable(entitiesType, true);}
+<div id="@Model.Compose("divSearchControl")" 
+     class="sf-search-control" 
+     data-quickfilter-url="@Url.SignumAction("QuickFilter")"
+     data-search-url="@Url.SignumAction("Search")"
+     data-popup-save-url="@Url.SignumAction("TrySavePartial")"
+     @(findOptions.EntityContextMenu ? " data-entity-ctx-menu-url=" + Url.SignumAction("GetContextualPanel") : "")
+     >
+
+    @Html.Hidden(Model.Compose("sfWebQueryName"), Navigator.ResolveWebQueryName(findOptions.QueryName), new { disabled = "disabled" })
+    @Html.Hidden(Model.Compose("sfAllowMultiple"), findOptions.AllowMultiple.ToString(), new { disabled = "disabled" })
+    @Html.Hidden(Model.Compose("sfView"), viewable, new { disabled = "disabled" })
+    @Html.Hidden(Model.Compose("sfEntityTypeName"), Navigator.ResolveWebTypeName(entitiesType), new { disabled = "disabled" })
+    
+    @if(findOptions.SearchOnLoad)
+    {
+        <script type="text/javascript">
+            $(document).ready(function () { { SF.FindNavigator.searchOnLoad('@Model.ControlID'); } });
+            </script>    
+    }
+    
+    @{
+        bool filtersAlwaysHidden = findOptions.FilterMode == FilterMode.AlwaysHidden || findOptions.FilterMode == FilterMode.OnlyResults;
+        bool filtersVisible = findOptions.FilterMode == FilterMode.Visible;
+     }
+    
+    <div id="@Model.Compose("divFilters")" style="display:@(filtersAlwaysHidden ? "none" : "block")" >
+        @{ Html.RenderPartial(Navigator.Manager.FilterBuilderView, ViewData);}
+    </div>
+    
+    @if (!filtersAlwaysHidden)
+    {
+        @Html.Href("",
+                (filtersVisible ? Resources.Signum_hideFilters : Resources.Signum_showFilters),
+                "",
+                (filtersVisible ? Resources.Signum_hideFilters : Resources.Signum_showFilters),
+                "sf-query-button" + " sf-filters-header" + (filtersVisible ? "" : " close"),
+                new Dictionary<string, object> 
+                { 
+                    { "onclick", "new SF.FindNavigator({{prefix: '{0}'}}).toggleFilters(this)".Formato(Model.ControlID) },
+                    { "data-icon", filtersVisible ? "ui-icon-triangle-1-n" : "ui-icon-triangle-1-e" }
+                })
+    }
+    
+    <div class="sf-query-button-bar">
+        <button type="submit" class="sf-query-button sf-search" data-icon="ui-icon-search" id="@Model.Compose("qbSearch")" onclick="@("new SF.FindNavigator({{prefix:'{0}',searchControllerUrl:'{1}'}}).search();return false;".Formato(Model.ControlID, Url.SignumAction("Search")))">@Resources.Search</button>
+        @if (findOptions.Create && Navigator.IsCreable(entitiesType, true) && viewable)
+        {
+            string creating = findOptions.Creating.HasText() ? findOptions.Creating :
+                "SF.FindNavigator.create({{prefix:'{0}',controllerUrl:'{1}'}});return false;".Formato(Model.ControlID, Url.SignumAction(string.IsNullOrEmpty(Model.ControlID) ? "Create" : "PopupCreate"));
+            <a class="sf-query-button" data-icon="ui-icon-plusthick" data-text="false" id="@Model.Compose("qbSearchCreate")" onclick="@creating">@Resources.Search_Create</a>
+        }
+        @ButtonBarQueryHelper.GetButtonBarElementsForQuery(this.ViewContext, findOptions.QueryName, entitiesType, Model.ControlID).ToString(Html)
+    </div>
+    @if (findOptions.FilterMode != FilterMode.OnlyResults)
+    {
+        <div class="clearall">
+        </div>
+    }
+    <div id="@Model.Compose("divResults")" class="ui-widget ui-corner-all sf-search-results-container">
+        <table id="@Model.Compose("tblResults")" class="sf-search-results">
+            <thead class="ui-widget-header ui-corner-top">
+                <tr>
+                    @if (findOptions.AllowMultiple.HasValue)
+                    {
+                        <th class="ui-state-default th-col-selection">
+                            @if (findOptions.AllowMultiple.Value)
+                            {
+                                @Html.CheckBox(Model.Compose("cbSelectAll"), false, new { onclick = "javascript:new SF.FindNavigator({{prefix:'{0}'}}).toggleSelectAll();".Formato(Model.ControlID) })
+                            }
+                        </th>
+                    }
+                    @if (viewable)
+                    {
+                        <th class="ui-state-default th-col-entity">
+                        </th>
+                    }
+                    @{List<Column> columns = findOptions.MergeColumns(); }
+                    @foreach (var col in columns)
+                    {
+                        var order = findOptions.OrderOptions.FirstOrDefault(oo => oo.Token.FullKey() == col.Name);
+                        OrderType? orderType = null;
+                        if (order != null)
+                        {
+                            orderType = order.OrderType;
+                        }
+                        <th class="ui-state-default @((orderType == null) ? "" : (orderType == OrderType.Ascending ? "sf-header-sort-down" : "sf-header-sort-up"))">
+                            <input type="hidden" value="@col.Name" />
+                            @col.DisplayName
+                        </th>
+                    }
+                </tr>
+            </thead>
+            <tbody class="ui-widget-content">
+                <tr>
+                    <td colspan="@(columns.Count + (viewable ? 1 : 0) + (findOptions.AllowMultiple.HasValue ? 1 : 0))">@Resources.Signum_noResults</td>
+                </tr>
+            </tbody>
+            <tfoot>
+            </tfoot>
+        </table>
+        
+        <div class="ui-widget-header ui-corner-bottom sf-search-footer" style="display:@((findOptions.FilterMode != FilterMode.OnlyResults) ? "block" : "none")">
+            @Html.Span(null, Resources.SearchControl_ShowNRows_Show)
+            @{ int? top = findOptions.Top ?? Navigator.Manager.QuerySettings.GetOrThrow(findOptions.QueryName, "Missing QuerySettings for QueryName {0}").Top;}
+            @HtmlHelperExtenders.InputType("text", Model.Compose("sfTop"), top.TryToString(), new Dictionary<string, object> { { "size", "3" }, { "onkeydown", "return SF.InputValidator.isNumber(event)" } })
+            @Html.Span(null, Resources.SearchControl_ShowNRows_Rows + ".")
+            @Html.Span(Model.Compose("rowsFoundCount"), "0", "rows-found-count")
+            @Html.Span(null, Resources.SearchControl_RowsFound, "rows-found-count")
+
+            @Html.Hidden(Model.Compose("sfOrders"), findOptions.OrderOptions.Empty() ? "" :
+                    (findOptions.OrderOptions.ToString(oo => (oo.OrderType == OrderType.Ascending ? "" : "-") + oo.Token.FullKey(), ";") + ";"))
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    new SF.FindNavigator({ prefix: "@Model.ControlID" }).initialize();
+</script>

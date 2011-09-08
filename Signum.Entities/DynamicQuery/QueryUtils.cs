@@ -1,0 +1,219 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using Signum.Utilities;
+using Signum.Entities.Reflection;
+using Signum.Entities.Properties;
+using System.Reflection;
+using Signum.Utilities.Reflection;
+using System.Linq.Expressions;
+using System.Globalization;
+
+namespace Signum.Entities.DynamicQuery
+{
+    public static class QueryUtils
+    {
+        public static string GetQueryUniqueKey(object queryKey)
+        {
+            return
+                queryKey is Type ? ((Type)queryKey).FullName :
+                queryKey is Enum ? "{0}.{1}".Formato(queryKey.GetType().Name, queryKey.ToString()) :
+                queryKey.ToString();
+        }
+
+
+        public static string GetNiceName(object queryName)
+        {
+            return GetNiceName(queryName, null); 
+        }
+
+        public static string GetNiceName(object queryName, CultureInfo ci)
+        {
+            return
+                queryName is Type ? ((Type)queryName).NicePluralName() :
+                queryName is Enum ? ((Enum)queryName).NiceToString() :
+                queryName.ToString();
+        }
+
+        public static FilterType GetFilterType(Type type)
+        {
+            FilterType? filterType = TryGetFilterType(type);
+
+            if(filterType == null)
+                throw new NotSupportedException("Type {0} not supported".Formato(type));
+
+            return filterType.Value;
+        }
+
+        public static FilterType? TryGetFilterType(Type type)
+        {
+            if (type.IsEnum)
+                return FilterType.Enum;
+
+            switch (Type.GetTypeCode(type.UnNullify()))
+            {
+                case TypeCode.Boolean:
+                    return FilterType.Boolean;
+                case TypeCode.Double:
+                case TypeCode.Decimal:
+                case TypeCode.Single:
+                    return FilterType.DecimalNumber;
+                case TypeCode.Byte:
+                case TypeCode.SByte:
+                case TypeCode.Int16:
+                case TypeCode.Int32:
+                case TypeCode.Int64:
+                case TypeCode.UInt16:
+                case TypeCode.UInt32:
+                case TypeCode.UInt64:
+                    return FilterType.Number;
+                case TypeCode.DateTime:
+                    return FilterType.DateTime;
+                case TypeCode.Char:
+                case TypeCode.String:
+                    return FilterType.String;
+                case TypeCode.Object:
+                    if (Reflector.ExtractLite(type) != null)
+                        return FilterType.Lite;
+
+                    if (type.IsIIdentifiable())
+                        return FilterType.Lite;
+
+                    if (type.IsEmbeddedEntity())
+                        return FilterType.Embedded;
+
+                    goto default;
+                default:
+                    return null;
+
+            }
+        }
+
+        public static List<FilterOperation> GetFilterOperations(FilterType filtertype)
+        {
+            return FilterOperations[filtertype];
+        }
+
+        static Dictionary<FilterType, List<FilterOperation>> FilterOperations = new Dictionary<FilterType, List<FilterOperation>>
+        {
+            { 
+                FilterType.String, new List<FilterOperation>
+                {
+                    FilterOperation.Contains,
+                    FilterOperation.StartsWith,
+                    FilterOperation.EndsWith,
+                    FilterOperation.EqualTo,
+                    FilterOperation.DistinctTo, 
+                }
+            },
+            { 
+                FilterType.DateTime, new List<FilterOperation>
+                {
+                    FilterOperation.EqualTo,
+                    FilterOperation.DistinctTo, 
+                    FilterOperation.GreaterThan,
+                    FilterOperation.GreaterThanOrEqual,
+                    FilterOperation.LessThan,
+                    FilterOperation.LessThanOrEqual
+                }
+            },
+            { 
+                FilterType.Number, new List<FilterOperation>
+                {
+                    FilterOperation.EqualTo,
+                    FilterOperation.DistinctTo, 
+                    FilterOperation.GreaterThan,
+                    FilterOperation.GreaterThanOrEqual,
+                    FilterOperation.LessThan,
+                    FilterOperation.LessThanOrEqual,
+                }
+            },
+            { 
+                FilterType.DecimalNumber, new List<FilterOperation>
+                {
+                    FilterOperation.EqualTo,
+                    FilterOperation.DistinctTo, 
+                    FilterOperation.GreaterThan,
+                    FilterOperation.GreaterThanOrEqual,
+                    FilterOperation.LessThan,
+                    FilterOperation.LessThanOrEqual,
+                }
+            },
+            { 
+                FilterType.Enum, new List<FilterOperation>
+                {
+                    FilterOperation.EqualTo,
+                    FilterOperation.DistinctTo, 
+                }
+            },
+            { 
+                FilterType.Lite, new List<FilterOperation>
+                {
+                    FilterOperation.EqualTo,
+                    FilterOperation.DistinctTo,
+                }
+            },
+            { 
+                FilterType.Embedded, new List<FilterOperation>
+                {
+                    FilterOperation.EqualTo,
+                    FilterOperation.DistinctTo,
+                }
+            },
+            { 
+                FilterType.Boolean, new List<FilterOperation>
+                {
+                    FilterOperation.EqualTo,
+                    FilterOperation.DistinctTo,    
+                }
+            },
+        };
+
+        public static QueryToken[] SubTokens(QueryToken token, IEnumerable<ColumnDescription> columnDescriptions)
+        {
+            if (token == null)
+                return columnDescriptions.Select(s => QueryToken.NewColumn(s)).ToArray();
+            else
+                return token.SubTokens();
+        }
+
+        public static QueryToken Parse(string tokenString, QueryDescription description)
+        {
+            return Parse(tokenString, t => SubTokens(t, description.Columns));
+        }
+
+        public static QueryToken Parse(string tokenString, Func<QueryToken, QueryToken[]> subTokens)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(tokenString))
+                    throw new ArgumentNullException("tokenString"); 
+
+                string[] parts = tokenString.Split('.');
+
+                string firstPart = parts.First();
+
+                QueryToken result = subTokens(null).Select(t => t.MatchPart(firstPart)).NotNull().Single(
+                    Resources.Column0NotFound.Formato(firstPart),
+                    Resources.MoreThanOneColumnNamed0.Formato(firstPart));
+
+                foreach (var part in parts.Skip(1))
+                {
+                    result = subTokens(result).Select(t => t.MatchPart(part)).NotNull().Single(
+                          Resources.Token0NotCompatibleWith1.Formato(part, result),
+                          Resources.MoreThanOneTokenWithKey0FoundOn1.Formato(part, result));
+                }
+
+                return result;
+            }
+            catch (Exception e)
+            {
+                throw new FormatException("Invalid QueryToken string", e);
+            }
+        }
+
+
+       
+    }
+}
