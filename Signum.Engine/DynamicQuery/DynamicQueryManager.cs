@@ -173,16 +173,21 @@ namespace Signum.Engine.DynamicQuery
         public ExtensionInfo RegisterExpression<E, S>(Expression<Func<E, S>> extensionLambda, Func<string> niceName, string key) 
             where E : class, IIdentifiable
         {
-            var result = new ExtensionInfo(typeof(S), key, extensionLambda, typeof(E))
+            var extension = new ExtensionInfo(typeof(S), key, extensionLambda, typeof(E))
             {   
                 NiceName = niceName,
             };
 
-            registeredExtensions.GetOrAdd(typeof(E))[key] = result;
+            return RegisterExpression(extension);
+        }
+
+        private ExtensionInfo RegisterExpression(ExtensionInfo extension)
+        {
+            registeredExtensions.GetOrAdd(extension.EntityType)[extension.Key] = extension;
 
             registeredExtensions.ClearCache();
 
-            return result;
+            return extension;
         }
     }
 
@@ -191,12 +196,16 @@ namespace Signum.Engine.DynamicQuery
         public ExtensionInfo(Type type, string key, LambdaExpression lambda, Type entityType)
         {
             this.Type = type;
+            this.EntityType = entityType;
             this.Key = key;
             this.Lambda = lambda;
 
             Expression e = MetadataVisitor.JustVisit(lambda, entityType);
 
-            MetaExpression me = e as MetaExpression ?? (e as MetaProjectorExpression).TryCC(a => a.Projector as MetaExpression);
+            if (e is MetaProjectorExpression)
+                e = ((MetaProjectorExpression)e).Projector;
+
+            MetaExpression me = e as MetaExpression;
             CleanMeta cm = me == null ? null : me.Meta as CleanMeta;
 
             if (cm != null)
@@ -206,10 +215,11 @@ namespace Signum.Engine.DynamicQuery
                 this.Implementations = ColumnDescriptionFactory.AggregateImplementations(cm.PropertyRoutes);
             }
 
-            IsAllowed = () => me.Meta == null || me.Meta.IsAllowed();
+            IsAllowed = () => me == null || me.Meta == null || me.Meta.IsAllowed();
         }
 
         public readonly Type Type;
+        public readonly Type EntityType;
         public readonly string Key; 
 
         internal readonly LambdaExpression Lambda;
@@ -219,7 +229,7 @@ namespace Signum.Engine.DynamicQuery
         public Implementations Implementations;
         public Func<bool> IsAllowed;
 
-        internal ExtensionToken CreateToken(QueryToken parent)
+        protected internal virtual ExtensionToken CreateToken(QueryToken parent)
         {
             return new ExtensionToken(parent, Key, Type, Unit, Format, Implementations, IsAllowed()) { DisplayName = NiceName() }; 
         }

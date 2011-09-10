@@ -39,14 +39,14 @@ namespace Signum.Web
         #region Tasks
         public static void TaskSetLabelText(BaseLine bl)
         {
-            if (bl != null && bl.PropertyRoute.PropertyRouteType == PropertyRouteType.Property)
+            if (bl != null && bl.PropertyRoute.PropertyRouteType == PropertyRouteType.FieldOrProperty)
                 bl.LabelText = bl.PropertyRoute.PropertyInfo.NiceName();
         }
 
         static void TaskSetUnitText(BaseLine bl)
         {
             ValueLine vl = bl as ValueLine;
-            if (vl != null && vl.PropertyRoute.PropertyRouteType == PropertyRouteType.Property)
+            if (vl != null && vl.PropertyRoute.PropertyRouteType == PropertyRouteType.FieldOrProperty)
             {
                 UnitAttribute ua = bl.PropertyRoute.PropertyInfo.SingleAttribute<UnitAttribute>();
                 if (ua != null)
@@ -57,7 +57,7 @@ namespace Signum.Web
         static void TaskSetFormatText(BaseLine bl)
         {
             ValueLine vl = bl as ValueLine;
-            if (vl != null && bl.PropertyRoute.PropertyRouteType == PropertyRouteType.Property)
+            if (vl != null && bl.PropertyRoute.PropertyRouteType == PropertyRouteType.FieldOrProperty)
             {
                 string format = Reflector.FormatString(bl.PropertyRoute);
                 if (format != null)
@@ -91,7 +91,7 @@ namespace Signum.Web
 
         public static void TaskSetReadOnly(BaseLine bl)
         {
-            if (bl != null && bl.PropertyRoute.PropertyRouteType == PropertyRouteType.Property)
+            if (bl != null && bl.PropertyRoute.PropertyRouteType == PropertyRouteType.FieldOrProperty)
             {
                 if (bl.PropertyRoute.PropertyInfo.IsReadOnly() || bl.ReadOnly)
                 {
@@ -103,7 +103,7 @@ namespace Signum.Web
         public static void TaskSetHtmlProperties(BaseLine bl)
         {
             ValueLine vl = bl as ValueLine;
-            if (vl != null && bl.PropertyRoute.PropertyRouteType == PropertyRouteType.Property)
+            if (vl != null && bl.PropertyRoute.PropertyRouteType == PropertyRouteType.FieldOrProperty)
             {
                 var atribute = bl.PropertyRoute.PropertyInfo.SingleAttribute<StringLengthValidatorAttribute>();
                 if (atribute != null)

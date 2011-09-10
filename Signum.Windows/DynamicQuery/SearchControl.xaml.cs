@@ -77,12 +77,12 @@ namespace Signum.Windows
             set { SetValue(AllowUserColumnsProperty, value); }
         }
 
-        public static readonly DependencyProperty MaxItemsCountProperty =
-            DependencyProperty.Register("MaxItemsCount", typeof(int?), typeof(SearchControl), new UIPropertyMetadata(200));
-        public int? MaxItemsCount
+        public static readonly DependencyProperty MaxItemsProperty =
+            DependencyProperty.Register("MaxItems", typeof(int?), typeof(SearchControl), new UIPropertyMetadata(200));
+        public int? MaxItems
         {
-            get { return (int?)GetValue(MaxItemsCountProperty); }
-            set { SetValue(MaxItemsCountProperty, value); }
+            get { return (int?)GetValue(MaxItemsProperty); }
+            set { SetValue(MaxItemsProperty, value); }
         }
 
         public static readonly DependencyProperty ItemsCountProperty =
@@ -485,7 +485,7 @@ namespace Signum.Windows
                 Filters = FilterOptions.Select(f => f.ToFilter()).ToList(),
                 Orders = OrderOptions.Select(o => o.ToOrder()).ToList(),
                 Columns = CurrentColumns.ToList(),
-                Limit = MaxItemsCount
+                MaxItems = MaxItems
             };
 
             return request;
@@ -514,7 +514,7 @@ namespace Signum.Windows
             lvResult.Background = Brushes.White;
             lvResult.Focus();
             tbResultados.Visibility = Visibility.Visible;
-            tbResultados.Foreground = resultTable.Rows.Length == MaxItemsCount ? Brushes.Red : Brushes.Black;
+            tbResultados.Foreground = resultTable.Rows.Length == MaxItems ? Brushes.Red : Brushes.Black;
             OnQueryResultChanged(false);
         }
 

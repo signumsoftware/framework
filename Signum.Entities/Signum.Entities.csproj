@@ -79,6 +79,7 @@
     <Compile Include="..\Signum.Utilities\Properties\Version.cs">
       <Link>Properties\Version.cs</Link>
     </Compile>
+    <Compile Include="DynamicQuery\Tokens\BagPropertyToken.cs" />
     <Compile Include="DynamicQuery\Tokens\CountToken.cs" />
     <Compile Include="DynamicQuery\Tokens\DateToken.cs" />
     <Compile Include="DynamicQuery\Tokens\ExtensionToken.cs" />

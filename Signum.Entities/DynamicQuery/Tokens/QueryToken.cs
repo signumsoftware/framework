@@ -85,17 +85,22 @@ namespace Signum.Entities.DynamicQuery
                 }
 
                 return new[] { EntityPropertyToken.IdProperty(this), EntityPropertyToken.ToStrProperty(this) }
-                    .Concat(EntityProperties(cleanType)).Concat(OnEntityExtension(cleanType, this)).ToArray();
+                    .Concat(EntityProperties(cleanType).Concat(OnEntityExtension(cleanType, this)).OrderBy(a => a.ToString())).ToArray();
             }
-            
-            if (cleanType.IsEmbeddedEntity())
+
+            if (type.IsEmbeddedEntity())
             {
-                return EntityProperties(cleanType).ToArray();
+                return EntityProperties(type).OrderBy(a => a.ToString()).ToArray();
             }
 
             if(type != typeof(string) && type.ElementType() != null)
             {
                 return CollectionProperties(this);
+            }
+
+            if (typeof(IQueryTokenBag).IsAssignableFrom(type))
+            {
+                return BagProperties(type).OrderBy(a => a.ToString()).ToArray();
             }
 
             return null;
@@ -150,7 +155,13 @@ namespace Signum.Entities.DynamicQuery
         {
             return Reflector.PublicInstancePropertiesInOrder(type)
                   .Where(p => Reflector.QueryableProperty(type, p))
-                  .Select(p => (QueryToken)new EntityPropertyToken(this, p)).OrderBy(a => a.ToString());
+                  .Select(p => (QueryToken)new EntityPropertyToken(this, p));
+        }
+
+        IEnumerable<QueryToken> BagProperties(Type type)
+        {
+            return Reflector.PublicInstancePropertiesInOrder(type)
+                  .Select(p => (QueryToken)new BagPropertyToken(this, p));
         }
 
         static MethodInfo miToLite = ReflectionTools.GetMethodInfo((IdentifiableEntity ident) => ident.ToLite()).GetGenericMethodDefinition();

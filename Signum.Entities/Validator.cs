@@ -7,6 +7,7 @@ using Signum.Utilities.Reflection;
 using System.Reflection;
 using System.Linq.Expressions;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Entities.Reflection;
 
 namespace Signum.Entities
 {
@@ -28,7 +29,7 @@ namespace Signum.Entities
 
         public static PropertyPack GetOrCreatePropertyPack(PropertyRoute route)
         {
-            if (route.PropertyRouteType != PropertyRouteType.Property)
+            if (route.PropertyRouteType != PropertyRouteType.FieldOrProperty)
                 throw new InvalidOperationException("PropertyRoute of type Property expected");
 
             return GetOrCreatePropertyPack(route.Parent.Type, route.PropertyInfo.Name);

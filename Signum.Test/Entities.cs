@@ -41,7 +41,7 @@ namespace Signum.Test
         }
     }
 
-    [ImplementedBy(typeof(ArtistDN), typeof(BandDN))]
+
     public interface IAuthorDN : IIdentifiable
     {
         string Name { get; }
@@ -160,6 +160,8 @@ namespace Signum.Test
             set { Set(ref members, value, () => Members); }
         }
 
+
+        [ImplementedBy(typeof(GrammyAwardDN), typeof(AmericanMusicAwardDN))]
         AwardDN lastAward;
         public AwardDN LastAward
         {
@@ -167,6 +169,7 @@ namespace Signum.Test
             set { Set(ref lastAward, value, () => LastAward); }
         }
 
+        [ImplementedBy(typeof(GrammyAwardDN), typeof(AmericanMusicAwardDN))]
         MList<AwardDN> otherAwards;
         public MList<AwardDN> OtherAwards 
         {
@@ -194,7 +197,7 @@ namespace Signum.Test
         }
     }
 
-    [Serializable, ImplementedBy(typeof(GrammyAwardDN), typeof(AmericanMusicAwardDN))]
+    [Serializable]
     public abstract class AwardDN : Entity
     {
         int year;
@@ -313,6 +316,7 @@ namespace Signum.Test
             set { Set(ref year, value, () => Year); }
         }
 
+        [ImplementedBy(typeof(ArtistDN), typeof(BandDN))]
         IAuthorDN author;
         [NotNullValidator]
         public IAuthorDN Author
@@ -377,6 +381,7 @@ namespace Signum.Test
     [Serializable]
     public class AwardNominationDN : Entity
     {
+        [ImplementedBy(typeof(ArtistDN), typeof(BandDN))]
         Lite<IAuthorDN> author;
         public Lite<IAuthorDN> Author
         {
