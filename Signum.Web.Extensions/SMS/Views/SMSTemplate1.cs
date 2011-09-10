@@ -44,6 +44,7 @@ namespace ASP
     using Signum.Engine;
     using Signum.Entities.SMS;
     using Signum.Web.SMS;
+    using Signum.Engine.SMS;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/SMS/Views/SMSTemplate.cshtml")]
@@ -68,6 +69,8 @@ namespace ASP
 
 
 
+
+
 Write(Html.ScriptCss("~/SMS/Content/SMS.css"));
 
 WriteLiteral("\r\n");
@@ -83,27 +86,80 @@ Write(Html.ValueLine(e, s => s.Name));
 Write(Html.ValueLine(e, s => s.Active, vl => vl.ReadOnly = true));
 
                                                                
-    
-Write(Html.ValueLine(e, s => s.Message, vl =>
+
+
+WriteLiteral("    <div id=\"sfTemplateText\">\r\n        ");
+
+
+   Write(Html.ValueLine(e, s => s.Message, vl =>
         {
             vl.ValueLineType = ValueLineType.TextArea;
             vl.ValueHtmlProps["cols"] = "30";
             vl.ValueHtmlProps["rows"] = "6";
         }));
 
-          
+WriteLiteral("\r\n        <div id=\"sfCharactersLeft\" data-url=\"");
+
+
+                                         Write(Url.Action<SMSController>(s => s.GetDictionaries()));
+
+WriteLiteral(@""">
+            <p>
+                Remaining characters: <span id=""sfCharsLeft""></span>
+            </p>
+        </div>
+        <div>
+            <input type=""button"" class=""sf-button"" id=""sfRemoveNoSMSChars"" value=""Remove non valid characters"" data-url=""");
+
+
+                                                                                                                     Write(Url.Action<SMSController>(s => s.RemoveNoSMSCharacters("")));
+
+WriteLiteral("\"/>\r\n        </div>\r\n    </div>\r\n");
+
+
     
 
-WriteLiteral("    <div id=\"sfCharactersLeft\" data-url=\"");
+WriteLiteral("    <div id=\"sfTemplateLiterals\">\r\n");
 
 
-                                     Write(Url.Action<SMSController>(s => s.GetDictionaries()));
+         using (Html.FieldInline())
+        {
+            
+       Write(Html.EntityCombo(e, s => s.AssociatedType, ec =>
+            {
+                ec.Data = SMSLogic.RegisteredDataObjectProviders().Select(rt => (Lite)rt).ToList();
+                ec.OnEntityChanged = "SF.SMS.fillLiterals()";
+                ec.ComboHtmlProperties["class"] = "sf-associated-type";
+                ec.ComboHtmlProperties["data-url"] = Url.Action<SMSController>(s => s.GetLiteralsForType(ec.ControlID));
+                ec.ComboHtmlProperties["data-control-id"] = ec.ControlID;
+            }));
 
-WriteLiteral("\">\r\n        <p>\r\n            Caracteres restantes: <span id=\"sfCharsLeft\"></span>" +
-"\r\n        </p>\r\n    </div>    \r\n");
+              
+        }
+
+WriteLiteral("        ");
+
+
+    Write(new HtmlTag("select").Attr("multiple", "multiple").Id("sfLiterals").ToHtml());
+
+WriteLiteral("\r\n        <br />\r\n        <input type=\"button\" class=\"sf-button\" id=\"sfInsertLite" +
+"ral\" value=\"Insert\" />\r\n    </div>\r\n");
 
 
     
+
+WriteLiteral("    <div class=\"clearall\"></div>\r\n");
+
+
+    
+    
+Write(Html.ValueLine(e, s => s.RemoveNoSMSCharacters));
+
+                                                    
+    
+Write(Html.ValueLine(e, s => s.MessageLengthExceeded));
+
+                                                    
     
 Write(Html.ValueLine(e, s => s.From));
 

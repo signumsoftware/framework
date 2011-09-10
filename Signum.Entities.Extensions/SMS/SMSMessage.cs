@@ -8,7 +8,8 @@ namespace Signum.Entities.SMS
 {
     public enum SMSProviderOperations
     {
-        SendSMSMessage
+        SendSMSMessage,
+        SendSMSMessagesFromTemplate
     }
 
     public enum SMSMessageState
@@ -32,7 +33,8 @@ namespace Signum.Entities.SMS
         Create,
         Send,
         UpdateStatus,
-        CreateUpdateStatusPackage
+        CreateUpdateStatusPackage,
+        CreateSMSMessageFromTemplate
     }
 
     public enum SMSMessageProcess

@@ -15,6 +15,8 @@ using Signum.Engine.Processes;
 using Signum.Entities.Processes;
 using Signum.Engine.Extensions.SMS;
 using System.Linq.Expressions;
+using Signum.Entities.Basics;
+using System.Text.RegularExpressions;
 
 namespace Signum.Engine.SMS
 {
@@ -54,8 +56,9 @@ namespace Signum.Engine.SMS
                                                   t.Id,
                                                   t.Name,
                                                   IsActive = t.IsActiveNow(),
-                                                  Message = t.Message.Etc(20),
+                                                  Message = t.Message.Etc(50),
                                                   Source = t.From,
+                                                  AssociatedType = t.AssociatedType.ToLite(),
                                                   t.State,
                                                   t.StartDate,
                                                   t.EndDate,
@@ -71,10 +74,9 @@ namespace Signum.Engine.SMS
 
         static Dictionary<Type, LambdaExpression> phoneNumberProviders = new Dictionary<Type, LambdaExpression>();
 
-
         public static void RegisterPhoneNumberProvider<T>(Expression<Func<T, string>> func) where T : IdentifiableEntity
         {
-            phoneNumberProviders.Add(typeof(T), func);
+            phoneNumberProviders[typeof(T)] = func;
 
             new BasicConstructFromMany<T, ProcessExecutionDN>(SMSProviderOperations.SendSMSMessage)
             {
@@ -95,7 +97,7 @@ namespace Signum.Engine.SMS
 
                     var packLite = package.ToLite();
 
-                    numbers.Select(n => createParams.CreateSMSMessage(n, packLite)).SaveList();
+                    numbers.Select(n => createParams.CreateStaticSMSMessage(n, packLite)).SaveList();
 
                     var process = ProcessLogic.Create(SMSMessageProcess.Send, package);
 
@@ -106,12 +108,13 @@ namespace Signum.Engine.SMS
             }.Register();
         }
 
+        [Serializable]
         public class CreateMessageParams
         {
             public string Message;
             public string From;
 
-            public SMSMessageDN CreateSMSMessage(string destinationNumber, Lite<SMSPackageDN> packLite)
+            public SMSMessageDN CreateStaticSMSMessage(string destinationNumber, Lite<SMSPackageDN> packLite)
             {
                 return new SMSMessageDN
                 {
@@ -122,29 +125,188 @@ namespace Signum.Engine.SMS
                     SendPackage = packLite
                 };
             }
-
-            public SMSMessageDN CreateSMSMessage()
-            {
-                return CreateSMSMessage(null);
-            }
-
-            public SMSMessageDN CreateSMSMessage(string destinationNumber)
-            {
-                return new SMSMessageDN
-                {
-                    Message = this.Message,
-                    From = this.From,
-                    State = SMSMessageState.Created,
-                    DestinationNumber = destinationNumber
-                };
-            }
-
         }
 
         public static string GetPhoneNumber<T>(T entity) where T : IIdentifiable
         {
             return ((Expression<Func<T, string>>)phoneNumberProviders[typeof(T)]).Invoke(entity);
         }
+
+        #region Message composition
+
+        static Dictionary<Type, LambdaExpression> dataObjectProviders = new Dictionary<Type, LambdaExpression>();
+
+        public static List<Lite<TypeDN>> RegisteredDataObjectProviders()
+        {
+            return dataObjectProviders.Keys.Select(t => TypeLogic.ToTypeDN(t).ToLite()).ToList();
+        }
+
+        public static List<string> GetLiteralsFromDataObjectProvider(Type type)
+        {
+            if (!dataObjectProviders.ContainsKey(type))
+                throw new ArgumentOutOfRangeException("The type {0} is not a registered data provider"
+                    .Formato(type.FullName));
+
+            return dataObjectProviders[type].GetType().GetGenericArguments()[0]
+                .GetGenericArguments()[1].GetProperties().Select(p => "{{{0}}}".Formato(p.Name)).ToList();
+        }
+
+        public static void RegisterDataObjectProvider<T, A>(Expression<Func<T, A>> func) where T : IdentifiableEntity
+        {
+            dataObjectProviders[typeof(T)] = func;
+
+            new BasicConstructFromMany<T, ProcessExecutionDN>(SMSProviderOperations.SendSMSMessagesFromTemplate)
+            {
+                Construct = (providers, args) =>
+                {
+                    var template = args.GetArg<SMSTemplateDN>(0);
+
+                    if (TypeLogic.DnToType[template.AssociatedType] != typeof(T))
+                        throw new ArgumentException("The SMS template is associated with the type {0} instead of {1}"
+                            .Formato(template.AssociatedType.FullClassName, typeof(T).FullName));
+
+                    var phoneFunc = (Expression<Func<T, string>>)phoneNumberProviders.
+                        GetOrThrow(typeof(T), "{0} is not registered as PhoneNumberProvider");
+
+                    var numbers = Database.Query<T>().Where(p => providers.Contains(p.ToLite()))
+                          .Select(p => new
+                          {
+                              Phone = phoneFunc.Invoke(p),
+                              Data = func.Invoke(p)
+                          }).Where(n => !n.Phone.HasText()).AsEnumerable().ToList();
+
+                    SMSPackageDN package = new SMSPackageDN { NumLines = numbers.Count, }.Save();
+                    var packLite = package.ToLite();
+
+                    numbers.Select(n => new SMSMessageDN
+                    {
+                        Message = template.ComposeMessage(n.Data),
+                        From = template.From,
+                        DestinationNumber = n.Phone,
+                        SendPackage = packLite,
+                        State = SMSMessageState.Created,
+                    }).SaveList();
+
+                    var process = ProcessLogic.Create(SMSMessageProcess.Send, package);
+
+                    process.ToLite().ExecuteLite(ProcessOperation.Execute);
+
+                    return process;
+                }
+            }.Register();
+
+            new BasicConstructFrom<T, SMSMessageDN>(SMSMessageOperations.CreateSMSMessageFromTemplate)
+            {
+                Construct = (provider, args) =>
+                {
+                    var template = args.GetArg<SMSTemplateDN>(0);
+
+                    if (TypeLogic.DnToType[template.AssociatedType] != typeof(T))
+                        throw new ArgumentException("The SMS template is associated with the type {0} instead of {1}"
+                            .Formato(template.AssociatedType.FullClassName, typeof(T).FullName));
+
+                    var phoneFunc = (Expression<Func<T, string>>)phoneNumberProviders.
+                        GetOrThrow(typeof(T), "{0} is not registered as PhoneNumberProvider");
+
+                    template.MessageLengthExceeded = MessageLengthExceeded.Allowed;
+
+                    return new SMSMessageDN
+                    {
+                        Message = template.ComposeMessage(func.Invoke(provider)),
+                        From = template.From,
+                        DestinationNumber = GetPhoneNumber(provider),
+                        State = SMSMessageState.Created,
+                    };
+                }
+            }.Register();
+        }
+
+        static string literalDelimiterStart = "{";
+        public static string LiteralDelimiterStart
+        {
+            get { return literalDelimiterStart; }
+        }
+
+        static string literalDelimiterEnd = "}";
+        public static string LiteralDelimiterEnd
+        {
+            get { return literalDelimiterEnd; }
+        }
+
+
+        static Regex literalFinder = new Regex(@"{(?<name>[_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}][_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}\p{Nd}]*)}");
+
+        static string ComposeMessage(this SMSTemplateDN template, object o)
+        {
+            if (o == null)
+                return template.Message;
+
+            var matches = literalFinder.Matches(template.Message);
+
+            if (matches.Count == 0)
+                return template.Message;
+
+            Type t = o.GetType();
+
+            var combinations = (from Match m in literalFinder.Matches(template.Message)
+                                select new Combination
+                                {
+                                    Name = m.Groups["name"].Value,
+                                    Value = t.GetProperty(m.Groups["name"].Value).TryCC(fi => fi.GetValue(o, null)).TryToString()
+                                }).ToList();
+
+            return CombineText(template, combinations);
+        }
+
+        internal class Combination
+        {
+            public string Name;
+            public string Value;
+        }
+
+        static string CombineText(SMSTemplateDN template, List<Combination> combinations)
+        {
+            string text = template.Message;
+            if (template.RemoveNoSMSCharacters)
+            {
+                text = SMSCharacters.RemoveNoSMSCharacters(template.Message);
+                combinations.ForEach(c => c.Value = SMSCharacters.RemoveNoSMSCharacters(c.Value));
+            }
+            return CombineText(text, combinations, template.MessageLengthExceeded);
+
+        }
+
+        static string CombineText(string text, List<Combination> combinations, MessageLengthExceeded onExceeded)
+        {
+            string result = literalFinder.Replace(text, m => combinations.Single(c => c.Name == m.Groups["name"].Value).Value);
+            int remainingLength = SMSCharacters.RemainingLength(result);
+            if (remainingLength < 0)
+            {
+                switch (onExceeded)
+                {
+                    case MessageLengthExceeded.NotAllowed:
+                        throw new ApplicationException("The text for the SMS message exceeds the limit");
+                    case MessageLengthExceeded.Allowed:
+                        break;
+                    case MessageLengthExceeded.TextPruning:
+                        return result.RemoveRight(Math.Abs(remainingLength));
+                }
+            }
+
+            return result;
+        }
+
+
+        internal class CombinedLiteral
+        {
+            public string Name;
+            public string Value;
+        }
+
+
+        #endregion
+
+
 
         #region processes
 
@@ -234,6 +396,7 @@ namespace Signum.Engine.SMS
             message.MessageID = sendAndGetTicket(message);
             message.SendDate = DateTime.Now.TrimToSeconds();
             message.SendState = SendState.Sent;
+            message.State = SMSMessageState.Sent;
             message.Save();
         }
 
@@ -251,7 +414,7 @@ namespace Signum.Engine.SMS
             var sendDate = DateTime.Now.TrimToSeconds();
             for (int i = 0; i < phones.Count; i++)
             {
-                var message = template.CreateSMSMessage();
+                var message = new SMSMessageDN { Message = template.Message, From = template.From }; 
                 message.SendDate = sendDate;
                 message.SendState = SendState.Sent;
                 message.DestinationNumber = phones[i];
@@ -293,7 +456,7 @@ namespace Signum.Engine.SMS
                 ToState = SMSMessageState.Created,
                 Construct = (t, args) =>
                 {
-                    var message = t.CreateSMSMessage();
+                    var message = t.CreateStaticSMSMessage();
                     message.DestinationNumber = args.TryGetArgC<string>(0);
                     return message;
                 }
@@ -319,7 +482,7 @@ namespace Signum.Engine.SMS
             {
                 FromStates = new[] { SMSMessageState.Sent },
                 ToState = SMSMessageState.Sent,
-                Execute = (t, args) => 
+                Execute = (t, args) =>
                 {
                     var func = args.TryGetArgC<Func<SMSMessageDN, SendState>>(0);
                     if (func != null)

@@ -115,8 +115,18 @@ WriteLiteral("        <div id=\"sfCharactersLeft\" data-url=\"");
 
                                          Write(Url.Action<SMSController>(s => s.GetDictionaries()));
 
-WriteLiteral("\">\r\n            <p>Caracteres restantes: <span id=\"sfCharsLeft\"></span></p>\r\n    " +
+WriteLiteral("\">\r\n            <p>Remaining characters: <span id=\"sfCharsLeft\"></span></p>\r\n    " +
 "    </div>\r\n");
+
+
+
+WriteLiteral("        <div>\r\n            <input type=\"button\" class=\"sf-button\" id=\"sfRemoveNoS" +
+"MSChars\" value=\"Remove non valid characters\" data-url=\"");
+
+
+                                                                                                                     Write(Url.Action<SMSController>(s => s.RemoveNoSMSCharacters("")));
+
+WriteLiteral("\"/>\r\n        </div>\r\n");
 
 
     }

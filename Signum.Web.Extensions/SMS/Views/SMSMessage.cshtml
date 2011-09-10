@@ -28,7 +28,10 @@
         })
     if(e.Value.State == SMSMessageState.Created) {
         <div id="sfCharactersLeft" data-url="@(Url.Action<SMSController>(s => s.GetDictionaries()))">
-            <p>Caracteres restantes: <span id="sfCharsLeft"></span></p>
+            <p>Remaining characters: <span id="sfCharsLeft"></span></p>
+        </div>
+        <div>
+            <input type="button" class="sf-button" id="sfRemoveNoSMSChars" value="Remove non valid characters" data-url="@(Url.Action<SMSController>(s => s.RemoveNoSMSCharacters("")))"/>
         </div>
     }
     <br />

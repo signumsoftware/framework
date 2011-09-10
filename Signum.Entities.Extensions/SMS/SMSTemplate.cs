@@ -19,7 +19,7 @@ namespace Signum.Entities.SMS
     public enum SMSTemplateOperations
     { 
         Create,
-        Modify,
+        Save,
         Disable,
         Enable
     }
@@ -36,6 +36,13 @@ namespace Signum.Entities.SMS
             set { Set(ref name, value, () => Name); }
         }
 
+        TypeDN associatedType;
+        public TypeDN AssociatedType
+        {
+            get { return associatedType; }
+            set { Set(ref associatedType, value, () => AssociatedType); }
+        }
+
         string message;
         [StringLengthValidator(AllowNulls = false, Max = SMSCharacters.TripleSMSMaxTextLength)]
         public string Message
@@ -50,6 +57,20 @@ namespace Signum.Entities.SMS
         {
             get { return from; }
             set { Set(ref from, value, () => From); }
+        }
+
+        MessageLengthExceeded messageLengthExceeded = MessageLengthExceeded.NotAllowed;
+        public MessageLengthExceeded MessageLengthExceeded
+        {
+            get { return messageLengthExceeded; }
+            set { Set(ref messageLengthExceeded, value, () => MessageLengthExceeded); }
+        }
+
+        bool removeNoSMSCharacters = true;
+        public bool RemoveNoSMSCharacters
+        {
+            get { return removeNoSMSCharacters; }
+            set { Set(ref removeNoSMSCharacters, value, () => RemoveNoSMSCharacters); }
         }
 
         SMSTemplateState state = SMSTemplateState.Created;
@@ -105,12 +126,12 @@ namespace Signum.Entities.SMS
             return Name;
         }
 
-        public SMSMessageDN CreateSMSMessage()
+        public SMSMessageDN CreateStaticSMSMessage()
         {
-            return CreateSMSMessage(null);
+            return CreateStaticSMSMessage(null);
         }
 
-        public SMSMessageDN CreateSMSMessage(string destinationNumber) 
+        public SMSMessageDN CreateStaticSMSMessage(string destinationNumber) 
         {
             return new SMSMessageDN 
             { 
@@ -121,110 +142,13 @@ namespace Signum.Entities.SMS
                 DestinationNumber = destinationNumber
             };            
         }
-
-        public SMSMessageDN CreateSMSMessage(string destinationNumber, Lite<SMSPackageDN> package)
-        {
-            return new SMSMessageDN
-            {
-                Template = this.ToLite(),
-                Message = this.message,
-                From = this.from,
-                State = SMSMessageState.Created,
-                DestinationNumber = destinationNumber,
-                SendPackage = package
-            };
-        }
     }
 
-
-    public static class SMSCharacters
-    {
-        public static Dictionary<char, int> NormalCharacters = new Dictionary<char, int>();
-        public static Dictionary<char, int> DoubleCharacters = new Dictionary<char, int>();
-
-        static SMSCharacters()
-        {
-            FillNormalCharacaters();
-            FillDoubleCharacters();
-        }
-
-        private static void FillDoubleCharacters()
-        {
-            LoadDoublePeriod(91, 94);
-            LoadDoublePeriod(123, 126);
-            DoubleCharacters.Add('€', (ushort)'€');
-        }
-
-        private static void LoadDoublePeriod(int a, int b)
-        {
-            for (int i = a; i <= b; i++)
-            {
-                DoubleCharacters.Add(Convert.ToChar(i), i);
-            }
-        }
-
-        private static void FillNormalCharacaters()
-        {
-            NormalCharacters.Add(' ', (ushort)' ');
-            LoadNormalPeriod(33, 90);
-            LoadNormalPeriod(97, 122);
-
-            LoadNormalRange(10, 13, 95);
-            LoadNormalRange(161, 163, 165, 167, 191, 201, 209, 214, 216, 220,
-            228, 230, 233, 246, 252);
-
-            LoadNormalPeriod(196, 199);
-
-            LoadNormalPeriod(223, 224);
-            LoadNormalPeriod(235, 236);
-            LoadNormalPeriod(241, 242);
-            LoadNormalPeriod(248, 249);
-        }
-
-        private static void LoadNormalRange(params int[] caracter)
-        {
-            foreach (int c in caracter)
-            {
-                NormalCharacters.Add(Convert.ToChar(c), c);
-            }
-        }
-
-        private static void LoadNormalPeriod(int a, int b)
-        {
-            for (int i = a; i <= b; i++)
-            {
-                NormalCharacters.Add(Convert.ToChar(i), i);
-            }
-        }
-
-        public const int SMSMaxTextLength = 160; //default length for SMS messages
-        public const int TripleSMSMaxTextLength = 160 * 3;
-
-        public static int CharactersToEnd(string text, int maxLength)
-        {
-            if (maxLength == 0)
-                maxLength = SMSMaxTextLength;
-            int count = text.Length;
-            foreach (var l in text.ToCharArray())
-            {
-                if (!SMSCharacters.NormalCharacters.ContainsKey(l)) 
-                {
-                    if (SMSCharacters.DoubleCharacters.ContainsKey(l)) 
-                        count += 1;
-                    else
-                    {
-                        maxLength = 60;  
-                        count = text.Length;
-                        break;
-                    }
-                }
-            }
-            return maxLength - count;
-        }
-
-        public static int CharactersToEnd(string text)
-        {
-            return CharactersToEnd(text, 0);
-        }
+    public enum MessageLengthExceeded
+    { 
+        NotAllowed,
+        Allowed,
+        TextPruning,
     }
+
 }

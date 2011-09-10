@@ -36,15 +36,28 @@ namespace Signum.Web.SMS
                     new EntitySettings<SMSTemplateDN>(EntityType.NotSaving){ PartialViewName = e => ViewPrefix.Formato("SMSTemplate")},
                 });
 
-                //OperationsClient.Manager.Settings.AddRange(new Dictionary<Enum, OperationSettings>
-                //{
-                //    {SMSMessageOperations.Create, new EntityOperationSettings
-                //    {
-                //        GroupInMenu = false,
-                //        OnClick = ctx => new JsOperationExecutor(ctx.Options("CreateSMS", "SMS"))
-                //            .ajax(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk),
-                //    }},
-                //});
+                OperationsClient.Manager.Settings.AddRange(new Dictionary<Enum, OperationSettings> 
+                {
+                    {SMSMessageOperations.CreateSMSMessageFromTemplate, new EntityOperationSettings
+                    {
+                        OnClick = ctx => new JsOperationExecutor(ctx.Options("CreateSMSMessageFromTemplate", "SMS"))
+                        .ajax(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk)
+                    }},
+
+                    {SMSProviderOperations.SendSMSMessagesFromTemplate, new QueryOperationSettings
+                    {
+                        RequestExtraJsonData = "function(){ return { providerWebQueryName: $('#sfWebQueryName').val() }; }",
+                        OnClick = ctx => new JsFindNavigator(ctx.Prefix).hasSelectedItems(
+                            new JsFunction("items")
+                            {
+                                new JsOperationConstructorFromMany(ctx.Options("SendMultipleSMSMessageFromTemplate","SMS")).ajaxSelected(
+                                    Js.NewPrefix(ctx.Prefix),
+                                    new JsValue<string>("items").ToJS(),
+                                    JsOpSuccess.OpenPopupNoDefaultOk)
+                            }),
+                        }
+                    },
+                });
             }
         }
     }
