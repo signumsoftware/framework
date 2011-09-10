@@ -13,7 +13,7 @@ namespace Signum.Entities
         public long Ticks
         {
             get { return ticks; }
-            internal set { ticks = value; }
+            set { ticks = value; }
         }
     }
 }
