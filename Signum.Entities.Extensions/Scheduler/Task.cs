@@ -20,7 +20,6 @@ namespace Signum.Entities.Scheduler
         Execute,
     }
 
-    [ImplementedBy(typeof(CustomTaskDN), typeof(ProcessDN)), ]
     public interface ITaskDN : IIdentifiable
     {
     }

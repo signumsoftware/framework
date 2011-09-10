@@ -221,7 +221,7 @@ namespace Signum.Web.Help
                         //TODO: NiceToString de la propiedad
                         return new WikiLink(
                             HelpLogic.PropertyUrl(route),
-                            route.Properties.ToString(p=>p.NiceName(), "-"));
+                            route.Properties.ToString(p => p.NiceName(), "-"));
 
                     case WikiFormat.QueryLink:
                         object o = QueryLogic.TryToQueryName(link);

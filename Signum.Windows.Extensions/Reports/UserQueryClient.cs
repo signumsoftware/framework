@@ -8,6 +8,7 @@ using Signum.Entities.Reports;
 using Signum.Services;
 using System.Reflection;
 using Signum.Entities.DynamicQuery;
+using Signum.Entities.UserQueries;
 
 namespace Signum.Windows.Reports
 {
@@ -27,30 +28,7 @@ namespace Signum.Windows.Reports
         {
             QueryDescription description = Navigator.Manager.GetQueryDescription(searchControl.QueryName);
 
-            var columns = QueryColumnDN.SmartColumns(searchControl.CurrentColumns.ToList(), description.Columns);
-
-            return new UserQueryDN
-            {
-                Query = QueryClient.GetQuery(searchControl.QueryName),
-
-                Filters = searchControl.FilterOptions.Where(a=>!a.Frozen).Select(f => new QueryFilterDN
-                {
-                    Token = f.Token,
-                    Operation = f.Operation,
-                    ValueString = FilterValueConverter.ToString(f.RealValue, f.Token.Type),
-                }).ToMList(),
-
-                ColumnsMode = columns.Item1,
-                Columns = columns.Item2,
-
-                Orders = searchControl.OrderOptions.Select(fo => new QueryOrderDN
-                {
-                    Token = fo.Token,
-                    OrderType = fo.OrderType,
-                }).ToMList(),
-
-                MaxItems = searchControl.MaxItemsCount
-            };
+            return searchControl.GetQueryRequest().ToUserQuery(description, QueryClient.GetQuery(searchControl.QueryName));
         }
 
         internal static void ToSearchControl(UserQueryDN uq, SearchControl searchControl)
@@ -76,7 +54,7 @@ namespace Signum.Windows.Reports
                      
             searchControl.Reinitialize(filters, columns, uq.ColumnsMode, orders);
 
-            searchControl.MaxItemsCount = uq.MaxItems;
+            searchControl.MaxItems = uq.MaxItems;
         }
     }
 }

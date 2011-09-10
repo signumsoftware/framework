@@ -44,7 +44,7 @@ namespace Signum.Windows.Authorization
 
         static void Common_RouteTask(FrameworkElement fe, string route, PropertyRoute context)
         {
-            if (context.PropertyRouteType == PropertyRouteType.Property)
+            if (context.PropertyRouteType == PropertyRouteType.FieldOrProperty)
             {
                 switch (GetPropertyAllowed(context))
                 {

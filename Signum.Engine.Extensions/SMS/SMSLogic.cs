@@ -336,7 +336,7 @@ namespace Signum.Engine.SMS
                                              {
                                                  Entity = e.ToLite(),
                                                  e.Id,
-                                                 e.Error,
+                                                 e.Name,
                                                  e.NumLines,
                                                  e.NumErrors,
                                              }).ToDynamic();

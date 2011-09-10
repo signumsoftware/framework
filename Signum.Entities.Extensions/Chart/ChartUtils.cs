@@ -194,7 +194,7 @@ namespace Signum.Entities.Chart
 
             PropertyRoute route = token.GetPropertyRoute();
 
-            if (route != null && route.PropertyRouteType == PropertyRouteType.Property)
+            if (route != null && route.PropertyRouteType == PropertyRouteType.FieldOrProperty)
             {
 
                 var pp = Validator.GetOrCreatePropertyPack(route);
