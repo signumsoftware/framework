@@ -111,9 +111,9 @@ namespace Signum.Web.Operations
             return new JsInstruction(() => "{0}.ajaxSelected()".Formato(this.ToJS()));
         }
 
-        public JsInstruction ajaxSelected(string newPrefix, string querySelectedItems, JsFunction onSuccess)
+        public JsInstruction ajaxSelected(string newPrefix, JsFunction onSuccess)
         {
-            return new JsInstruction(() => "{0}.ajaxSelected(\'{1}\',{2},{3})".Formato(this.ToJS(), newPrefix, querySelectedItems, onSuccess.ToJS()));
+            return new JsInstruction(() => "{0}.ajaxSelected(\'{1}\',{2})".Formato(this.ToJS(), newPrefix, onSuccess.ToJS()));
         }
 
         public JsInstruction submitSelected()

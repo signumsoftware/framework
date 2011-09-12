@@ -379,7 +379,7 @@ SF.registerModule("Operations", function () {
             });
         };
 
-        this.ajaxSelected = function () {
+        this.ajaxSelected = function (newPrefix, onAjaxSuccess) {
             SF.log("ConstructorFromMany ajaxSelected");
 
             if (SF.Blocker.isEnabled()) {
@@ -387,7 +387,7 @@ SF.registerModule("Operations", function () {
             }
 
             var onSuccess = function (items) {
-                this.ajax(this.options.prefix, items, SF.opOnSuccessDispatcher);
+                this.ajax(newPrefix, items, onAjaxSuccess || SF.opOnSuccessDispatcher);
             }
 
             var self = this;
