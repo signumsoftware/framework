@@ -462,6 +462,15 @@ namespace Signum.Engine.Maps
             inGlobalMode.Value = true;
             return new Disposable(() => inGlobalMode.Value = false);
         }
+
+        public static Lazy<T> GlobalLazy<T>(Func<T> func)
+        {
+            return new Lazy<T>(() =>
+            {
+                using (Schema.Current.GlobalMode())
+                    return func();
+            }, LazyThreadSafetyMode.PublicationOnly);
+        }
     }
 
     internal interface IEntityEvents
