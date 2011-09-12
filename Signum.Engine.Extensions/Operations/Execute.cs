@@ -115,7 +115,6 @@ namespace Signum.Engine.Operations
                     {
                     }
                 }
-
                 throw ex;
             }
         }
@@ -124,7 +123,6 @@ namespace Signum.Engine.Operations
         {
             Execute(entity, args); 
         }
-
 
         public virtual void AssertIsValid()
         {
