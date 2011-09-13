@@ -337,8 +337,8 @@ namespace Signum.Engine.Linq
                 Type oType = predicate.Parameters[0].Type;
                 Expression[] exp = ((IEnumerable)constSource.Value).Cast<object>().Select(o => Expression.Invoke(predicate, Expression.Constant(o, oType))).ToArray();
 
-                Expression where = isAll ? exp.Aggregate((a, b) => Expression.And(a, b)) :
-                                           exp.Aggregate((a, b) => Expression.Or(a, b));
+                Expression where = isAll ? (exp.IsEmpty() ? SmartEqualizer.True : exp.Aggregate((a, b) => Expression.And(a, b))) :
+                                           (exp.IsEmpty() ? SmartEqualizer.False : exp.Aggregate((a, b) => Expression.Or(a, b)));
 
                 return this.Visit(where);
             }
@@ -1318,6 +1318,9 @@ namespace Signum.Engine.Linq
                     return Expression.Coalesce(left, right, b.Conversion);
                 else
                 {
+                    if (left is ProjectionExpression || right is ProjectionExpression)
+                        throw new InvalidOperationException("Comparing {0} and {1} is not valid in SQL".Formato(b.Left.NiceToString(), b.Right.NiceToString())); 
+
                     if (left.Type.IsNullable() == right.Type.IsNullable())
                         return Expression.MakeBinary(b.NodeType, left, right, b.IsLiftedToNull, b.Method);
                     else

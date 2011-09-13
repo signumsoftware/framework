@@ -15,8 +15,8 @@ namespace Signum.Engine.Linq
 {
     internal static class SmartEqualizer
     {
-        static ConstantExpression True = Expression.Constant(true);
-        static ConstantExpression False = Expression.Constant(false);
+        public static ConstantExpression True = Expression.Constant(true);
+        public static ConstantExpression False = Expression.Constant(false);
 
 
         public static Expression EqualNullableGroupBy(Expression e1, Expression e2)
