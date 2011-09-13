@@ -64,11 +64,8 @@ namespace Signum.Engine.UserQueries
         }
 
 
-        static void UserQueryLogic_Retrieved(UserQueryDN userQuery, bool fromCache)
+        static void UserQueryLogic_Retrieved(UserQueryDN userQuery)
         {
-            if (fromCache)
-                return;
-
             object queryName = QueryLogic.ToQueryName(userQuery.Query.Key);
 
             QueryDescription description = DynamicQueryManager.Current.QueryDescription(queryName);

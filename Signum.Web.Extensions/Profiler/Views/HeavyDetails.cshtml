@@ -5,11 +5,10 @@
 <h2>
     Profiler Entry (
     @foreach (var e in entry.FollowC(a => a.Parent).Skip(1).Reverse())
-    {
-        @Html.ProfilerEntry(e.Index.ToString(), e.FullIndex())@:.
-        }
+    {@Html.ProfilerEntry(e.Index.ToString(), e.FullIndex())@:.
+    }
     @entry.Index.ToString())</h2>
-@Html.ActionLink("(View all)",(ProfilerController  pc)=>pc.Heavy()))
+@Html.ActionLink("(View all)",(ProfilerController  pc)=>pc.Heavy())
 <table class="sf-search-results">
     <tr>
         <th>
@@ -104,9 +103,15 @@
         @for (int i = 0; i < entry.StackTrace.FrameCount; i++)
         {
             var frame = entry.StackTrace.GetFrame(i);
+            var type = frame.GetMethod().DeclaringType;
             <tr>
                 <td>
-                    @frame.GetMethod().DeclaringType.TryCC(t => t.TypeName())
+                @if (type != null)
+                {
+                    var color = Signum.Utilities.DataStructures.ColorGenerator.ColorFor(type.Assembly.FullName.GetHashCode());
+                    
+                    <span style="color:@color">@frame.GetMethod().DeclaringType.TryCC(t => t.TypeName())</span>
+                }
                 </td>
                 <td>
                     @frame.GetMethod().Name

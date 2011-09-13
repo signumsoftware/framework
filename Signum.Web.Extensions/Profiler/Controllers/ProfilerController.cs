@@ -104,7 +104,6 @@ namespace Signum.Web.Profiler
             return null;
         }
 
-
         [AcceptVerbs(HttpVerbs.Get)]
         public ActionResult Times(int? clear)
         {

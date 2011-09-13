@@ -75,7 +75,7 @@ namespace Signum.Engine.Authorization
             }
         }
 
-        static void EntityEventsGlobal_Retrieved(IdentifiableEntity ident, bool fromCache)
+        static void EntityEventsGlobal_Retrieved(IdentifiableEntity ident)
         {
             if (Schema.Current.InGlobalMode)
                 return;

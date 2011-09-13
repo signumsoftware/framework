@@ -29,7 +29,7 @@ namespace Signum.Web.Captcha
                 image,
                 null,
                 DateTime.Now.AddSeconds(Signum.Web.Captcha.CaptchaImage.CacheTimeOut.Value),
-                Cache.NoSlidingExpiration,
+                System.Web.Caching.Cache.NoSlidingExpiration,
                 CacheItemPriority.NotRemovable,
                 null);
 
