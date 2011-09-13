@@ -53,13 +53,13 @@ namespace Signum.Web.Reports
                     if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(QueryDN)))
                         Navigator.Manager.EntitySettings.Add(typeof(QueryDN), new EntitySettings<QueryDN>(EntityType.Default));
 
-                    ButtonBarEntityHelper.RegisterEntityButtons<ExcelReportDN>((controllerContext, entity, partialViewName, prefix) =>
+                    ButtonBarEntityHelper.RegisterEntityButtons<ExcelReportDN>((ctx, entity) =>
                     {
                         var buttons = new List<ToolBarButton>
                         {
                             new ToolBarButton 
                             { 
-                                Id = TypeContextUtilities.Compose(prefix, "ebReportSave"),
+                                Id = TypeContextUtilities.Compose(ctx.Prefix, "ebReportSave"),
                                 Text = Signum.Web.Properties.Resources.Save, 
                                 OnClick = Js.Submit(RouteHelper.New().Action("Save", "Report")).ToJS()
                             }
@@ -69,7 +69,7 @@ namespace Signum.Web.Reports
                         {
                             buttons.Add(new ToolBarButton
                             {
-                                Id = TypeContextUtilities.Compose(prefix, "ebReportDelete"),
+                                Id = TypeContextUtilities.Compose(ctx.Prefix, "ebReportDelete"),
                                 Text = Resources.Delete,
                                 OnClick = Js.Confirm(Resources.AreYouSureOfDeletingReport0.Formato(entity.DisplayName),
                                                     Js.AjaxCall(RouteHelper.New().Action("Delete", "Report"), "{{excelReport:{0}}}".Formato(entity.Id), null)).ToJS(),
@@ -77,7 +77,7 @@ namespace Signum.Web.Reports
 
                             buttons.Add(new ToolBarButton
                             {
-                                Id = TypeContextUtilities.Compose(prefix, "ebReportDownload"),
+                                Id = TypeContextUtilities.Compose(ctx.Prefix, "ebReportDownload"),
                                 Text = Resources.Download,
                                 OnClick = "window.open('" + RouteHelper.New().Action("DownloadTemplate", "Report", new { excelReport = entity.Id } ) + "');",
                             });

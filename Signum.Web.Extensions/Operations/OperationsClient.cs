@@ -61,7 +61,7 @@ namespace Signum.Web.Operations
     {
         public Dictionary<Enum, OperationSettings> Settings = new Dictionary<Enum, OperationSettings>();
 
-        internal ToolBarButton[] ButtonBar_GetButtonBarElement(ControllerContext controllerContext, ModifiableEntity entity, string partialViewName, string prefix)
+        internal ToolBarButton[] ButtonBar_GetButtonBarElement(ToolBarButtonContext ctx, ModifiableEntity entity)
         {
             IdentifiableEntity ident = entity as IdentifiableEntity;
 
@@ -73,22 +73,22 @@ namespace Signum.Web.Operations
             var contexts =
                     from oi in list
                     let os = (EntityOperationSettings)Settings.TryGetC(oi.Key)
-                    let ctx = new EntityOperationContext
+                    let octx = new EntityOperationContext
                     {
                          Entity = ident,
                          OperationSettings = os,
                          OperationInfo = oi,
-                         PartialViewName = partialViewName,
-                         Prefix = prefix
+                         PartialViewName = ctx.PartialViewName,
+                         Prefix = ctx.Prefix
                     }
-                    where (string.IsNullOrEmpty(prefix) || os.TryCS(sett => sett.IsVisibleOnOkPopup) == true) &&
-                          (os == null || os.IsVisible == null || os.IsVisible(ctx))
-                    select ctx;
+                    where (ctx.Buttons == ViewButtons.Save || os.TryCS(sett => sett.IsVisibleOnOkPopup) == true) &&
+                          (os == null || os.IsVisible == null || os.IsVisible(octx))
+                    select octx;
 
             List<ToolBarButton> buttons = contexts
                 .Where(oi => oi.OperationInfo.OperationType != OperationType.ConstructorFrom || 
                             (oi.OperationInfo.OperationType == OperationType.ConstructorFrom && oi.OperationSettings != null && !oi.OperationSettings.GroupInMenu))
-                .Select(ctx => OperationButtonFactory.Create(ctx))
+                .Select(octx => OperationButtonFactory.Create(octx))
                 .ToList();
 
             var constructFroms = contexts.Where(oi => oi.OperationInfo.OperationType == OperationType.ConstructorFrom && 
@@ -102,7 +102,7 @@ namespace Signum.Web.Operations
                     AltText = createText,
                     Text = createText,
                     DivCssClass = ToolBarButton.DefaultEntityDivCssClass,
-                    Items = constructFroms.Select(ctx => OperationButtonFactory.Create(ctx)).ToList()
+                    Items = constructFroms.Select(octx => OperationButtonFactory.Create(octx)).ToList()
                 });
             }
 
