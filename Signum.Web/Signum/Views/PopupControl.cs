@@ -128,7 +128,13 @@ WriteLiteral("</button>                \r\n");
 WriteLiteral("        ");
 
 
-   Write(ButtonBarEntityHelper.GetForEntity(this.ViewContext, (ModifiableEntity)Model.UntypedValue, ViewData[ViewDataKeys.PartialViewName].ToString(), Model.ControlID).ToString(Html));
+   Write(ButtonBarEntityHelper.GetForEntity(new ToolBarButtonContext
+        { 
+           Buttons = (ViewButtons)ViewData[ViewDataKeys.ViewButtons],
+           ControllerContext = this.ViewContext,
+           PartialViewName = ViewData[ViewDataKeys.PartialViewName].ToString(),
+           Prefix =  Model.ControlID
+        },  (ModifiableEntity)Model.UntypedValue).ToString(Html));
 
 WriteLiteral("\r\n    </div>\r\n    ");
 
