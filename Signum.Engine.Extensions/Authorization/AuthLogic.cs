@@ -46,8 +46,7 @@ namespace Signum.Engine.Authorization
             set { anonymousUser = value; }
         }
 
-        static readonly Lazy<DirectedGraph<Lite<RoleDN>>> roles = 
-            new Lazy<DirectedGraph<Lite<RoleDN>>>(Cache, LazyThreadSafetyMode.PublicationOnly); 
+        static readonly Lazy<DirectedGraph<Lite<RoleDN>>> roles =  Schema.GlobalLazy(Cache); 
 
         public static event Action RolesModified;
 

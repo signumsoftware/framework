@@ -220,6 +220,14 @@ namespace Signum.Engine.Mailing
 
         public static EmailMessageDN CreateEmailMessage(IEmailModel model, Lite<EmailPackageDN> package)
         {
+
+            if (model == null)
+                throw new ArgumentNullException("model");
+
+            if (model.To == null)
+                throw new ArgumentNullException("model.To");
+
+
             using (Sync.ChangeBothCultures(model.To.CultureInfo))
             {
                 EmailContent content = GetTemplate(model.GetType())(model);
