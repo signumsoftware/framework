@@ -60,7 +60,7 @@ namespace Signum.Engine.Cache
                 {
                     if (query.Any(e => kvp.Value.Contains(e.ToLite())))
                     {
-                        Transaction.RealCommit += () => InvalidateAll(kvp.Key);
+                        InvalidateAll(kvp.Key);
                     }
                 }
             }
@@ -73,7 +73,7 @@ namespace Signum.Engine.Cache
                     {
                         if(kvp.Value.Contains(ident.ToLite()))
                         {
-                            Transaction.RealCommit += ()=>InvalidateAll(kvp.Key);
+                            InvalidateAll(kvp.Key);
                         }
                     }
                 }
@@ -219,14 +219,12 @@ namespace Signum.Engine.Cache
 
             void UnsafeUpdated(IQueryable<T> query)
             {
-                Transaction.RealCommit -= InvalidateAllConnected;
-                Transaction.RealCommit += InvalidateAllConnected;
+                InvalidateAllConnected();
             }
 
             void PreUnsafeDelete(IQueryable<T> query)
             {
-                Transaction.RealCommit -= Invalidate;
-                Transaction.RealCommit += Invalidate;
+                Invalidate();
             }
 
             void Saving(T ident)
@@ -235,13 +233,11 @@ namespace Signum.Engine.Cache
                 {
                     if (ident.IsNew)
                     {
-                        Transaction.RealCommit -= Invalidate;
-                        Transaction.RealCommit += Invalidate;
+                        Invalidate();
                     }
                     else
                     {
-                        Transaction.RealCommit -= InvalidateAllConnected;
-                        Transaction.RealCommit += InvalidateAllConnected;
+                        InvalidateAllConnected();
                     }
                 }
             }
