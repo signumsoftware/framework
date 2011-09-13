@@ -10,15 +10,14 @@ using Signum.Utilities.Reflection;
 
 namespace Signum.Engine
 {
-    interface IRetriever : IDisposable
+    public interface IRetriever : IDisposable
     {
-        T Cached<T>(int? id, Action<T> complete) where T : IdentifiableEntity;
+        T Complete<T>(int? id, Action<T> complete) where T : IdentifiableEntity;
         T Request<T>(int? id) where T : IdentifiableEntity;
         T RequestIBA<T>(int? id, int? typeId) where T : class, IIdentifiable;
+        T RequestIBA<T>(int? id, Type type) where T : class, IIdentifiable;
         Lite<T> RequestLiteIBA<T>(int? id, int? typeId) where T : class, IIdentifiable;
         IRetriever Parent { get; }
-
-        void ForceAddRequests<T>(IEnumerable<T> entities) where T : IdentifiableEntity;
     }
 
     class RealRetriever : IRetriever
@@ -35,12 +34,20 @@ namespace Signum.Engine
 
         EntityCache.RealEntityCache entityCache;
         Dictionary<IdentityTuple, IdentifiableEntity> retrieved = new Dictionary<IdentityTuple, IdentifiableEntity>();
-        Dictionary<IdentityTuple, IdentifiableEntity> requests;
-        Dictionary<IdentityTuple, List<Lite>> liteRequests; 
-        HashSet<IdentityTuple> fromCache;
-        HashSet<ICacheController> cacheControllers;
+        Dictionary<Type, Dictionary<int, IdentifiableEntity>> requests;
+        Dictionary<IdentityTuple, List<Lite>> liteRequests;
 
-        public T Cached<T>(int? id, Action<T> complete) where T : IdentifiableEntity
+        bool TryGetRequest(IdentityTuple key, out IdentifiableEntity value)
+        {   
+            Dictionary<int, IdentifiableEntity> dic;
+            if (requests != null && requests.TryGetValue(key.Type, out dic) && dic.TryGetValue(key.Id, out value))
+                return true;
+
+            value = null;
+            return false;
+        }
+
+        public T Complete<T>(int? id, Action<T> complete) where T : IdentifiableEntity
         {
             if (id == null)
                 return null;
@@ -55,15 +62,14 @@ namespace Signum.Engine
                 return (T)result;
 
             T entity;
-            if (requests != null && requests.TryGetValue(tuple, out result))
+            if (TryGetRequest(tuple, out result))
             {
                 entity = (T)result;
-                requests.Remove(tuple);
+                requests[typeof(T)].Remove(id.Value);
             }
             else
             {
-                entity = Constructor<T>.Call();
-                entity.id = id.Value;
+                entity = EntityCache.Construct<T>(id.Value);
             }
 
             complete(entity);
@@ -72,7 +78,8 @@ namespace Signum.Engine
             return entity;
         }
 
-
+        static GenericInvoker<Func<RealRetriever, int?, IdentifiableEntity>> giRequest =
+            new GenericInvoker<Func<RealRetriever, int?, IdentifiableEntity>>((rr, id) => rr.Request<IdentifiableEntity>(id));
         public T Request<T>(int? id) where T : IdentifiableEntity
         {
             if (id == null)
@@ -87,31 +94,25 @@ namespace Signum.Engine
             if (retrieved.TryGetValue(tuple, out ident))
                 return (T)ident;
 
-            if (requests != null && requests.TryGetValue(tuple, out ident))
+            ident = (T)requests.TryGetC(typeof(T)).TryGetC(id.Value);
+            if (ident != null)
                 return (T)ident;
 
-            var cc = Schema.Current.CacheController<T>();
-            if (cc != null)
-            {
-                var result = cc.GetOrRequest(id.Value);
-                retrieved.Add(tuple, result);
-                if (fromCache == null)
-                    fromCache = new HashSet<IdentityTuple>();
-                fromCache.Add(tuple);
-
-                if (cacheControllers == null)
-                    cacheControllers = new HashSet<ICacheController>();
-                cacheControllers.Add(cc);
-                return result;
-            }
-
-            T entity = Constructor<T>.Call();
-            entity.id = id.Value;
+            T entity = EntityCache.Construct<T>(id.Value);
             if (requests == null)
-                requests = new Dictionary<IdentityTuple, IdentifiableEntity>();
+                requests = new Dictionary<Type,Dictionary<int,IdentifiableEntity>>();
 
-            requests.Add(tuple, entity);
+            requests.GetOrCreate(tuple.Type).Add(tuple.Id, entity);
+
             return entity;
+        }
+
+        public T RequestIBA<T>(int? id, Type type) where T : class, IIdentifiable
+        {
+            if (id == null)
+                return null;
+
+            return (T)(IIdentifiable)giRequest.GetInvoker(type)(this, id); 
         }
 
         public T RequestIBA<T>(int? id, int? typeId) where T : class, IIdentifiable
@@ -121,51 +122,7 @@ namespace Signum.Engine
 
             Type type = Schema.Current.IdToType[typeId.Value];
 
-            IdentityTuple tuple = new IdentityTuple(type, id.Value);
-
-            IdentifiableEntity ident;
-            if (entityCache.TryGetValue(tuple, out ident))
-                return (T)(IIdentifiable)ident;
-
-            if (retrieved.TryGetValue(tuple, out ident))
-                return (T)(IIdentifiable)ident;
-
-            if (requests != null && requests.TryGetValue(tuple, out ident))
-                return (T)(IIdentifiable)ident;
-
-            var cc = Schema.Current.CacheController(type);
-            if (cc != null && cc.Enabled)
-            {
-                var result = cc.GetOrRequest(id.Value); 
-                retrieved.Add(tuple, result);
-
-                if (fromCache == null)
-                    fromCache = new HashSet<IdentityTuple>();
-                fromCache.Add(tuple);
-
-                if (cacheControllers == null)
-                    cacheControllers = new HashSet<ICacheController>();
-
-                cacheControllers.Add(cc);
-                return (T)(IIdentifiable)result;
-            }
-
-            T entity = (T)giConstruct.GetInvoker(type)(id.Value);
-
-            if (requests == null)
-                requests = new Dictionary<IdentityTuple, IdentifiableEntity>(); 
-
-            requests.Add(tuple, (IdentifiableEntity)(IIdentifiable)entity);
-
-            return entity;
-        }
-
-        static GenericInvoker<Func<int, IIdentifiable>> giConstruct = new GenericInvoker<Func<int, IIdentifiable>>(id => Construct<TypeDN>(id));
-        static T Construct<T>(int id) where T:IdentifiableEntity
-        {
-            var entity = Constructor<T>.Call();
-            entity.id = id;
-            return entity;
+            return (T)(IIdentifiable)giRequest.GetInvoker(type)(this, id); 
         }
 
         public Lite<T> RequestLiteIBA<T>(int? id, int? typeId) where T : class, IIdentifiable
@@ -181,18 +138,60 @@ namespace Signum.Engine
             liteRequests.GetOrCreate(tuple).Add(result);
             return result;
         }
-
+        
         public void Dispose()
         {
             if (requests != null)
             {
                 while (requests.Count > 0)
                 {
-                    var group = requests.GroupBy(a => a.Key.Type, a => a.Key).OrderByDescending(a => a.Count()).First();
+                    var group = requests.WithMax(a => a.Value.Count);
 
-                    Database.RetrieveList(group.Key, group.Select(t => t.Id).ToList());
+                    var dic = group.Value;
+                    ICacheController cc = Schema.Current.CacheController(group.Key);
 
-                    requests.RemoveRange(group);
+                    if (cc != null && cc.IsComplete)
+                    {
+                        cc.Load();
+
+                        while (dic.Count > 0)
+                        {
+                            IdentifiableEntity ident = dic.Values.First();
+
+                            cc.CompleteCache(ident, this);
+
+                            retrieved.Add(new IdentityTuple(ident), ident);
+                            dic.Remove(ident.Id);
+                        }
+                    }
+                    else if (cc != null && !cc.IsComplete)
+                    {
+                        List<int> remaining =  new List<int>();
+                        while (dic.Count > 0)
+                        {
+                            IdentifiableEntity ident = dic.Values.First();
+
+                            if (cc.CompleteCache(ident, this))
+                            {
+                                retrieved.Add(new IdentityTuple(ident), ident);
+                                dic.Remove(ident.Id);
+                            }
+                            else
+                            {
+                                remaining.Add(ident.Id);
+                            }
+                        }
+
+                        if (remaining.Count > 0)
+                            Database.RetrieveList(group.Key, remaining);
+                    }
+                    else
+                    {
+                        Database.RetrieveList(group.Key, dic.Keys.ToList());
+                    }
+
+                    if (dic.Count == 0)
+                        requests.Remove(group.Key);
                 }
             }
 
@@ -216,19 +215,12 @@ namespace Signum.Engine
                 }
             }
 
-            if (cacheControllers != null)
-            {
-                foreach (var cc in cacheControllers)
-                {
-                    cc.Load();
-                }
-            }
-
             foreach (var kvp in retrieved)
             {
                 IdentifiableEntity entity = kvp.Value;
+
                 entity.PostRetrieving();
-                Schema.Current.OnRetrieved(entity, fromCache == null ? false : fromCache.Contains(kvp.Key));
+                Schema.Current.OnRetrieved(entity);
                 entity.Modified = null;
                 entity.IsNew = false;
 
@@ -236,15 +228,6 @@ namespace Signum.Engine
             }
 
             entityCache.ReleaseRetriever(this);
-        }
-
-
-        public void ForceAddRequests<T>(IEnumerable<T> entities) where T : IdentifiableEntity
-        {
-            if (requests != null)
-                throw new InvalidOperationException("requests should be null");
-
-            requests = entities.ToDictionary(e => new IdentityTuple(e), e => (IdentifiableEntity)e);
         }
     }
 
@@ -258,14 +241,19 @@ namespace Signum.Engine
             this.Cache = cache;
         }
 
-        public T Cached<T>(int? id, Action<T> complete) where T : IdentifiableEntity
+        public T Complete<T>(int? id, Action<T> complete) where T : IdentifiableEntity
         {
-            return Parent.Cached<T>(id, complete);
+            return Parent.Complete<T>(id, complete);
         }
 
         public T Request<T>(int? id) where T : IdentifiableEntity
         {
             return Parent.Request<T>(id);
+        }
+
+        public T RequestIBA<T>(int? id, Type type) where T : class, IIdentifiable
+        {
+            return Parent.RequestIBA<T>(id, type);
         }
 
         public T RequestIBA<T>(int? id, int? typeId) where T : class, IIdentifiable
@@ -281,26 +269,6 @@ namespace Signum.Engine
         public void Dispose()
         {
             EntityCache.ReleaseRetriever(this);
-        }
-
-
-        public void ForceAddRequests<T>(IEnumerable<T> entities) where T : IdentifiableEntity
-        {
-            throw new InvalidOperationException("ForceAddRequests works with RealRetriever only"); 
-        }
-    }
-
-    static class Constructor<T> where T:IdentifiableEntity
-    {
-        static Func<T> call;
-        public static Func<T> Call
-        {
-            get
-            {
-                if (call == null)
-                    call = Expression.Lambda<Func<T>>(Expression.New(typeof(T))).Compile();
-                return call;
-            }
         }
     }
 }
