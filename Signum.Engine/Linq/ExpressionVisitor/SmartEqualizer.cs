@@ -46,7 +46,6 @@ namespace Signum.Engine.Linq
             if (result != null)
                 return result;
 
-            
             result = EntityEquals(exp1, exp2);
             if(result != null)
                 return result;
@@ -60,8 +59,8 @@ namespace Signum.Engine.Linq
 
         private static Expression ConditionalEquals(Expression exp1, Expression exp2)
         {
-            if (Schema.Current.Settings.TypeValues.ContainsKey(exp1.Type) ||
-                Schema.Current.Settings.TypeValues.ContainsKey(exp2.Type) && exp1.NodeType == ExpressionType.Conditional)
+            if ((Schema.Current.Settings.TypeValues.ContainsKey(exp1.Type) ||
+                Schema.Current.Settings.TypeValues.ContainsKey(exp2.Type)) && exp1.NodeType == ExpressionType.Conditional && exp2.NodeType == ExpressionType.Conditional)
                 return null;
 
             if (exp1.NodeType == ExpressionType.Conditional)
