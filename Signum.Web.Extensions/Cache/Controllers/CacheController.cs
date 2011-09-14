@@ -59,7 +59,7 @@ namespace Signum.Web.Cache
         [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult Clean()
         {
-            CachePermissions.ViewCache.Authorize();
+            CachePermissions.InvalidateCache.Authorize();
 
             CacheLogic.InvalidateAll(); 
             return null;

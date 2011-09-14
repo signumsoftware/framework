@@ -12,6 +12,9 @@ using System.Collections.Concurrent;
 using Signum.Utilities.DataStructures;
 using Signum.Entities.Reflection;
 using Signum.Utilities.Reflection;
+using System.Reflection;
+using Signum.Entities.Cache;
+using Signum.Engine.Authorization;
 
 namespace Signum.Engine.Cache
 {
@@ -314,6 +317,14 @@ namespace Signum.Engine.Cache
             var oldDisabled = TemporallyDisabled;
             TemporallyDisabled = true;
             return new Disposable(() => TemporallyDisabled = oldDisabled); 
+        }
+
+        public static void Start(SchemaBuilder sb)
+        {
+            if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+            {
+                PermissionAuthLogic.RegisterTypes(typeof(CachePermissions));
+            }
         }
 
         static GenericInvoker<Action<SchemaBuilder>> giCacheTable = new GenericInvoker<Action<SchemaBuilder>>(sb => CacheTable<IdentifiableEntity>(sb));
