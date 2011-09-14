@@ -71,7 +71,7 @@ namespace ASP
 
 
 WriteLiteral("<table class=\"sf-search-results sf-stats-table\">\r\n    <thead>\r\n        <tr>\r\n    " +
-"        <th class=\"");
+"        <th>\r\n                Query\r\n            </th>\r\n            <th class=\"");
 
 
                    Write(order == SqlProfileResumeOrder.Count ? "sf-header-sort-up" : "");
@@ -121,15 +121,15 @@ WriteLiteral("\">\r\n                ");
 
            Write(Html.ActionLink("Max", (ProfilerController pc) => pc.Statistics(SqlProfileResumeOrder.Max)));
 
-WriteLiteral("\r\n            </th>\r\n            <th>\r\n                Query\r\n            </th>\r\n" +
-"            <th>\r\n               References\r\n            </th>\r\n        </tr>\r\n " +
-"   </thead>\r\n    <tbody>\r\n");
+WriteLiteral("\r\n            </th>\r\n            <th>\r\n               References\r\n            </t" +
+"h>\r\n        </tr>\r\n    </thead>\r\n    <tbody>\r\n");
 
 
          foreach (var item in Model)
         {
 
-WriteLiteral("            <tr>\r\n                <td>");
+WriteLiteral("            <tr>\r\n                <td><a class=\"sf-stats-show\">Show</a></td>\r\n   " +
+"             <td>");
 
 
                Write(item.Count);
@@ -154,8 +154,7 @@ WriteLiteral("</td>\r\n                <td>");
 
                Write(item.Max.NiceToString());
 
-WriteLiteral("</td>\r\n                <td><a class=\"sf-stats-show\">Show</a></td>\r\n              " +
-"  <td>\r\n");
+WriteLiteral("</td>\r\n                <td>\r\n");
 
 
                     foreach (var r in item.References.Iterate())

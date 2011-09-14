@@ -221,6 +221,18 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
+    <Compile Include="Cache\Controllers\CacheController.cs" />
+    <Compile Include="Cache\CacheClient.cs" />
+    <Compile Include="Cache\Views\Statistics1.cs">
+      <DependentUpon>Statistics.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Cache\Views\_ViewStart.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>_ViewStart.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Calendar\CalendarClient.cs" />
     <Compile Include="Calendar\Views\Calendar.cs">
       <AutoGen>True</AutoGen>
@@ -712,6 +724,7 @@
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>_ViewStart.cs</LastGenOutput>
     </None>
+    <Content Include="Cache\Scripts\SF_Cache.js" />
     <Content Include="Calendar\Content\calendar.css" />
     <Content Include="Calendar\Scripts\calendar.js" />
     <Content Include="ControlPanel\Content\control-panel.css" />
@@ -748,6 +761,15 @@
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>Calendar.cs</LastGenOutput>
     </Content>
+    <Content Include="Cache\Views\_ViewStart.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>_ViewStart.cs</LastGenOutput>
+    </Content>
+    <Content Include="Cache\Views\Statistics.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>Statistics1.cs</LastGenOutput>
+    </Content>
+    <Content Include="Cache\Views\Web.config" />
     <None Include="Captcha\Views\_ViewStart.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>_ViewStart.cs</LastGenOutput>

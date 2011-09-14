@@ -52,9 +52,14 @@ namespace Signum.Engine.Authorization
                     if (u.PasswordNeverExpires)
                         return null;
 
-                    var ivp = Database.Query<PasswordExpiresIntervalDN>().Where(p => p.Enabled).FirstOrDefault();
+                    PasswordExpiresIntervalDN ivp = null;
+                    using (AuthLogic.Disable())
+                        ivp = Database.Query<PasswordExpiresIntervalDN>().Where(p => p.Enabled).FirstOrDefault();
+                    
                     if (ivp == null)
                         return null;
+
+
 
                     if (TimeZoneManager.Now > u.PasswordSetDate.AddDays((double)ivp.Days).AddDays((double)-ivp.DaysWarning))
                         return Resources.PasswordNearExpired;
