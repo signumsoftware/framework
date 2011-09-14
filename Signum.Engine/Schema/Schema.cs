@@ -393,7 +393,7 @@ namespace Signum.Engine.Maps
                 if (current == null)
                     return null;
 
-                result = current.GetField(mi);
+                result = current.TryGetField(mi);
 
                 if (result == null)
                     return null;
