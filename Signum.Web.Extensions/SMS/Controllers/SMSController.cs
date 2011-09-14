@@ -104,7 +104,7 @@ namespace Signum.Web.SMS
                   new JsFunction() 
                 {
                        Js.Submit(RouteHelper.New().Action("SendMultipleMessageFromTemplate", "SMS"),
-                        "function() {{ return {{ smsTemplateID: {0}, idProviders: {1}, webTypeName: {2} }} }}"
+                        "function() {{ return {{ smsTemplateID: {0}, idProviders: '{1}', webTypeName: '{2}' }} }}"
                         .Formato(new JsFindNavigator(prefix).splitSelectedIds().ToJS(), ids.ToString(","), webTypeName))
                 }).ToJS();
 
@@ -126,8 +126,10 @@ namespace Signum.Web.SMS
         {
             Type entitiesType = Navigator.ResolveType(webTypeName);
 
-            var process = OperationLogic.ServiceConstructFromMany(Database.RetrieveAllLite(entitiesType), 
-                typeof(ProcessExecutionDN), SMSProviderOperations.SendSMSMessagesFromTemplate,
+            var process = OperationLogic.ServiceConstructFromMany(
+                Database.RetrieveListLite(entitiesType, idProviders.Split(',').Select(id => int.Parse(id)).ToList()), 
+                entitiesType, //typeof(ProcessExecutionDN), 
+                SMSProviderOperations.SendSMSMessagesFromTemplate, 
                 Database.Retrieve<SMSTemplateDN>(int.Parse(smsTemplateID)));
 
             return Navigator.View(this, process);

@@ -47,16 +47,9 @@ namespace Signum.Web.SMS
                     {SMSProviderOperations.SendSMSMessagesFromTemplate, new QueryOperationSettings
                     {
                         RequestExtraJsonData = "function(){ return { providerWebQueryName: $('#sfWebQueryName').val() }; }",
-                        OnClick = ctx => new JsFindNavigator(ctx.Prefix).hasSelectedItems(
-                            new JsFunction("items")
-                            {
-                                new JsOperationConstructorFromMany(ctx.Options("SendMultipleSMSMessageFromTemplate","SMS")).ajaxSelected(
-                                    Js.NewPrefix(ctx.Prefix),
-                                    new JsValue<string>("items").ToJS(),
-                                    JsOpSuccess.OpenPopupNoDefaultOk)
-                            }),
-                        }
-                    },
+                        OnClick = ctx => new JsOperationConstructorFromMany(ctx.Options("SendMultipleSMSMessageFromTemplate","SMS"))
+                                .ajaxSelected(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk),
+                    }},
                 });
             }
         }
