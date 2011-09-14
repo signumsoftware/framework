@@ -61,6 +61,7 @@
 
 .sf-value-container
 {
+    overflow: hidden;
 	float: left;
 }
 
