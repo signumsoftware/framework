@@ -17,18 +17,6 @@ namespace Signum.Web
     {
         public static ValueLineConfigurator Configurator = new ValueLineConfigurator();
 
-        /// <summary>
-        /// HTML5 Input types
-        /// </summary>
-        public enum InputType
-        {
-            Text,
-            Number,
-            Email,
-            Url,
-            Hidden
-        }
-
         private static MvcHtmlString InternalValueLine(this HtmlHelper helper, ValueLine valueLine)
         {
             if (!valueLine.Visible || (valueLine.HideIfNull && valueLine.UntypedValue == null))
@@ -182,24 +170,6 @@ namespace Signum.Web
             return returnString;
         }
 
-        public static InputType GetInputType(ValueLine valueLine)
-        {
-            if (valueLine.PropertyRoute == null) return InputType.Text;
-            var pp = Validator.GetOrCreatePropertyPack(valueLine.PropertyRoute);
-
-            if (pp == null) return InputType.Text;
-
-            if (Validator.GetOrCreatePropertyPack(valueLine.PropertyRoute)
-                    .Validators.OfType<EMailValidatorAttribute>().SingleOrDefault() != null)
-                return InputType.Email;
-
-            if (Validator.GetOrCreatePropertyPack(valueLine.PropertyRoute)
-                .Validators.OfType<URLValidatorAttribute>().SingleOrDefault() != null)
-                return InputType.Url;
-
-            return InputType.Text;
-        }
-
         public static MvcHtmlString Hidden(this HtmlHelper helper, ValueLine valueLine)
         {
             if (valueLine.ReadOnly)
@@ -208,7 +178,7 @@ namespace Signum.Web
             return HtmlHelperExtenders.InputType("hidden", valueLine.ControlID, valueLine.UntypedValue.TryToString() ?? "", valueLine.ValueHtmlProps);
         }
 
-        public static MvcHtmlString TextboxInLine(this HtmlHelper helper, ValueLine valueLine, InputType inputType)
+        public static MvcHtmlString TextboxInLine(this HtmlHelper helper, ValueLine valueLine)
         {
             string value = (valueLine.UntypedValue as IFormattable).TryToString(valueLine.Format) ??
                            valueLine.UntypedValue.TryToString() ?? "";
@@ -228,7 +198,7 @@ namespace Signum.Web
 
             valueLine.ValueHtmlProps["onblur"] = "this.setAttribute('value', this.value); " + valueLine.ValueHtmlProps.TryGetC("onblur");
 
-            valueLine.ValueHtmlProps["type"] = inputType.ToString().ToLower();
+            valueLine.ValueHtmlProps["type"] = "text";
 
             return helper.TextBox(valueLine.ControlID, value, valueLine.ValueHtmlProps);
         }
@@ -238,7 +208,7 @@ namespace Signum.Web
             if (!valueLine.ReadOnly)
                 valueLine.ValueHtmlProps.Add("onkeydown", Reflector.IsDecimalNumber(valueLine.Type) ? "return SF.InputValidator.isDecimal(event);" : "return SF.InputValidator.isNumber(event);");    
             
-            return helper.TextboxInLine(valueLine, InputType.Text);
+            return helper.TextboxInLine(valueLine);
         }
 
         public static MvcHtmlString TextAreaInLine(this HtmlHelper helper, ValueLine valueLine)
@@ -383,7 +353,7 @@ namespace Signum.Web
 
         public Dictionary<ValueLineType, Func<HtmlHelper, ValueLine, MvcHtmlString>> Constructor = new Dictionary<ValueLineType, Func<HtmlHelper, ValueLine, MvcHtmlString>>()
         {
-            {ValueLineType.TextBox, (helper, valueLine) => helper.TextboxInLine(valueLine, ValueLineHelper.GetInputType(valueLine))},
+            {ValueLineType.TextBox, (helper, valueLine) => helper.TextboxInLine(valueLine)},
             {ValueLineType.TextArea, (helper, valueLine) => helper.TextAreaInLine(valueLine)},
             {ValueLineType.Boolean, (helper, valueLine) => helper.CheckBox(valueLine)},
             {ValueLineType.RadioButtons, (helper, valueLine) => helper.RadioButtons(valueLine)},
