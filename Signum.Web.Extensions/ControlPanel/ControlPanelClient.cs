@@ -18,6 +18,8 @@ namespace Signum.Web.ControlPanel
 {
     public class ControlPanelClient
     {
+        public static long RefreshMilliseconds = 300000; //5 minutes
+
         public static string AdminViewPrefix = "~/ControlPanel/Views/Admin/{0}.cshtml";
         public static string ViewPrefix = "~/ControlPanel/Views/{0}.cshtml";
 

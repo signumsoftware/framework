@@ -727,8 +727,8 @@
     <Content Include="Cache\Scripts\SF_Cache.js" />
     <Content Include="Calendar\Content\calendar.css" />
     <Content Include="Calendar\Scripts\calendar.js" />
-    <Content Include="ControlPanel\Content\control-panel.css" />
-    <Content Include="ControlPanel\Scripts\control-panel.js" />
+    <Content Include="ControlPanel\Content\SF_ControlPanel.css" />
+    <Content Include="ControlPanel\Scripts\SF_ControlPanel.js" />
     <Content Include="ControlPanel\Views\_ViewStart.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>_ViewStart.cs</LastGenOutput>
