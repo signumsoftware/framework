@@ -77,6 +77,8 @@ namespace Signum.Web
                 FilterOptions = findOptions.FilterOptions
             });
 
+            findOptions.SearchOnLoad = true;
+
             JsFindOptions foptions = new JsFindOptions
             {
                 Prefix = prefix,
