@@ -61,7 +61,7 @@
 
 .sf-value-container
 {
-	overflow:hidden;
+	float: left;
 }
 
 .sf-value-container .sf-value-line, .sf-value-container .sf-entity-list 
@@ -74,7 +74,7 @@
 .sf-value-line, .sf-entity-list{float:left;}
 
 a.sf-value-line, span.sf-value-line{
-    padding:3px 0;
+    padding:5px 0;
 	overflow:hidden;
 	_overflow:visible;
 	zoom:1;
