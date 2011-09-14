@@ -18,6 +18,7 @@ using Signum.Engine.DynamicQuery;
 using Signum.Engine.Extensions.Properties;
 using Signum.Entities.Reflection;
 using System.Linq.Expressions;
+using Signum.Entities.Basics;
 
 namespace Signum.Engine.Operations
 {
@@ -131,7 +132,7 @@ namespace Signum.Engine.Operations
         public static void AssertOperationAllowed(Enum operationKey)
         {
             if (!OperationAllowed(operationKey))
-                throw new UnauthorizedAccessException(Resources.Operation0IsNotAuthorized.Formato(operationKey.NiceToString()));
+                throw new UnauthorizedAccessException(Resources.Operation01IsNotAuthorized.Formato(operationKey.NiceToString(), EnumDN.UniqueKey(operationKey)));
         }
         #endregion
 

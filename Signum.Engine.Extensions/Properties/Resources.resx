@@ -202,8 +202,8 @@
   <data name="ImpossibleToExecute0FromState1" xml:space="preserve">
     <value>Impossible to execute {0} from state {1}</value>
   </data>
-  <data name="Operation0IsNotAuthorized" xml:space="preserve">
-    <value>Operation {0} is not Authorized</value>
+  <data name="Operation01IsNotAuthorized" xml:space="preserve">
+    <value>Operation {0} ({1}) is not Authorized</value>
   </data>
   <data name="ConstructsANew0_m" xml:space="preserve">
     <value>Constructs a new {0}</value>
