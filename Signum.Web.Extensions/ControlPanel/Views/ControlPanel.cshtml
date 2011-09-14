@@ -7,6 +7,14 @@
 {
     @Html.ScriptsJs(Navigator.Manager.DefaultScripts().ToArray())
     @Html.ScriptCss("~/ControlPanel/Content/SF_ControlPanel.css")
+
+    <script type="text/javascript">
+        $(function () {
+            setTimeout(function () {
+                window.location.href = window.location.href;
+            }, @ControlPanelClient.RefreshMilliseconds);
+        });
+    </script>
 }
 
 @using (Html.BeginForm("DoPostBack", "Signum", "POST"))
