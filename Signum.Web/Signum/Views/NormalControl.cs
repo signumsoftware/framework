@@ -134,7 +134,13 @@ WriteLiteral("</a>  \r\n");
 WriteLiteral("    ");
 
 
-Write(ButtonBarEntityHelper.GetForEntity(this.ViewContext, modifiable, ViewData[ViewDataKeys.PartialViewName].ToString(), Model.ControlID).ToString(Html));
+Write(ButtonBarEntityHelper.GetForEntity(new ToolBarButtonContext
+    { 
+        Buttons = ViewButtons.Save,
+        ControllerContext = this.ViewContext,
+        PartialViewName = ViewData[ViewDataKeys.PartialViewName].ToString(),
+        Prefix =  Model.ControlID
+    },  (ModifiableEntity)Model.UntypedValue).ToString(Html));
 
 WriteLiteral("\r\n</div>\r\n\r\n<div class=\"clearall\"></div>\r\n<div class=\"validationSummaryAjax\">\r\n  " +
 "  ");

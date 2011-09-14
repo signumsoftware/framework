@@ -15,6 +15,7 @@ using Signum.Engine.Exceptions;
 using System.Collections;
 using Signum.Utilities.Reflection;
 using Signum.Engine.Properties;
+using System.Threading;
 
 namespace Signum.Engine
 {
@@ -110,12 +111,14 @@ namespace Signum.Engine
         static GenericInvoker<Func<int, IdentifiableEntity>> giRetrieve = new GenericInvoker<Func<int, IdentifiableEntity>>(id => Retrieve<IdentifiableEntity>(id));
         public static T Retrieve<T>(int id) where T : IdentifiableEntity
         {
-            var cc = CanUseCache<T>();
+            var cc = CanUseCache<T>(false);
             if (cc != null)
             {
-                var result = cc.GetEntity(id);
-                Schema.Current.OnRetrieved(result, true);
-                return result;
+                using (new EntityCache())
+                using (var r = EntityCache.NewRetriever())
+                {
+                    return r.Request<T>(id);
+                }
             }
 
             if (EntityCache.Created)
@@ -134,11 +137,11 @@ namespace Signum.Engine
             return retrieved; 
         }
 
-        private static CacheController<T> CanUseCache<T>() where T:IdentifiableEntity
+        private static CacheController<T> CanUseCache<T>(bool onlyComplete) where T : IdentifiableEntity
         {
             CacheController<T> cc = Schema.Current.CacheController<T>();
 
-            if (cc != null && cc.Enabled && (EntityCache.HasRetriever || !Schema.Current.HasQueryFilter(typeof(T))))
+            if (cc != null && cc.Enabled && (!onlyComplete || cc.IsComplete) && (EntityCache.HasRetriever || !Schema.Current.HasQueryFilter(typeof(T))))
                 return cc;
 
             return null;
@@ -175,9 +178,9 @@ namespace Signum.Engine
             where T : class, IIdentifiable
             where RT : IdentifiableEntity, T
         {
-            var cc = CanUseCache<RT>();
+            var cc = CanUseCache<RT>(true);
             if (cc != null)
-                return cc.GetEntity(id).ToLite<T>();
+                return cc.RetriveLite(id).ToLite<T>();
 
             var result = Database.Query<RT>().Select(a => a.ToLite<T>()).SingleOrDefault(a => a.Id == id);
             if (result == null)
@@ -188,9 +191,9 @@ namespace Signum.Engine
 
         public static Lite<T> RetrieveLite<T>(int id) where T : IdentifiableEntity
         {
-            var cc = CanUseCache<T>();
+            var cc = CanUseCache<T>(true);
             if (cc != null)
-                return cc.GetEntity(id).ToLite();
+                return cc.RetriveLite(id);
 
             var result = Database.Query<T>().Select(a => a.ToLite()).SingleOrDefault(a => a.Id == id);
             if (result == null)
@@ -217,9 +220,9 @@ namespace Signum.Engine
         public static string GetToStr<T>(int id)
             where T : IdentifiableEntity
         {
-            var cc = CanUseCache<T>();
+            var cc = CanUseCache<T>(true);
             if (cc != null)
-                return cc.GetEntity(id).ToString();
+                return cc.RetriveLite(id).ToString();
 
             return Database.Query<T>().Where(a => a.Id == id).Select(a => a.ToStr).First();
         }
@@ -246,13 +249,14 @@ namespace Signum.Engine
         public static List<T> RetrieveAll<T>()
             where T : IdentifiableEntity
         {
-            var cc = CanUseCache<T>();
+            var cc = CanUseCache<T>(true);
             if (cc != null)
             {
-                var result = cc.GetAllEntities();
-                foreach (var item in result)
-                    Schema.Current.OnRetrieved(item, true);
-                return result;
+                using (new EntityCache())
+                using (var r = EntityCache.NewRetriever())
+                {
+                    return cc.GetAllIds().Select(id => r.Request<T>(id)).ToList();
+                }
             }
 
             return Database.Query<T>().ToList();
@@ -272,9 +276,11 @@ namespace Signum.Engine
         public static List<Lite<T>> RetrieveAllLite<T>()
             where T : IdentifiableEntity
         {
-            var cc = CanUseCache<T>();
+            var cc = CanUseCache<T>(true);
             if (cc != null)
-                return cc.GetAllEntities().Select(a => a.ToLite()).ToList();
+            {
+                return cc.GetAllIds().Select(id => cc.RetriveLite(id)).ToList();
+            }
 
             return Database.Query<T>().Select(e => e.ToLite()).ToList();
         }
@@ -296,13 +302,14 @@ namespace Signum.Engine
             if (ids == null)
                 throw new ArgumentNullException("ids");
 
-            var cc = CanUseCache<T>();
+            var cc = CanUseCache<T>(false);
             if (cc != null)
             {
-                var list = cc.GetEntitiesList(ids);
-                foreach (var item in list)
-                    Schema.Current.OnRetrieved(item, true);
-                return list;
+                using(new EntityCache())
+                using (var rr = EntityCache.NewRetriever())
+                {
+                    return ids.Select(id => rr.Request<T>(id)).ToList();
+                }
             }
 
             List<T> result = null;
@@ -356,10 +363,11 @@ namespace Signum.Engine
             if (ids == null)
                 throw new ArgumentNullException("ids");
 
-            var cc = CanUseCache<T>();
+            var cc = CanUseCache<T>(true);
             if (cc != null)
-                return cc.GetAllEntities().Select(a => a.ToLite()).ToList();
-
+            {   
+                return ids.Select(id => cc.RetriveLite(id)).ToList();
+            }
             var result = Database.Query<T>().Where(a => ids.Contains(a.Id)).Select(a => a.ToLite()).ToList();
 
             if (result.Count != ids.Count)
@@ -611,8 +619,15 @@ namespace Signum.Engine
             if (query == null)
                 throw new ArgumentNullException("query");
 
-            int rows = DbQueryProvider.Single.Delete(query);
-            return rows; 
+
+            using (Transaction tr = new Transaction())
+            {
+                Schema.Current.EntityEvents<E>().OnPreUnsafeUpdated(query.Select(mle => mle.Parent));
+
+                int rows = DbQueryProvider.Single.Delete(query);
+
+                return tr.Commit(rows);
+            }
         }
 
         /// <param name="updateConstructor">Use a object initializer to make the update (no entity will be created)</param>
@@ -622,8 +637,14 @@ namespace Signum.Engine
             if (query == null)
                 throw new ArgumentNullException("query");
 
-            int rows = DbQueryProvider.Single.Update<T>(query, updateConstructor);
-            return rows;
+            using (Transaction tr = new Transaction())
+            {
+                Schema.Current.EntityEvents<T>().OnPreUnsafeUpdated(query);
+
+                int rows = DbQueryProvider.Single.Update<T>(query, updateConstructor);
+
+                return tr.Commit(rows);
+            }
         }
 
         /// <param name="updateConstructor">Use a object initializer to make the update (no entity will be created)</param>
@@ -633,8 +654,14 @@ namespace Signum.Engine
             if (query == null)
                 throw new ArgumentNullException("query");
 
-            int rows = DbQueryProvider.Single.Update(query, updateConstructor);
-            return rows;
+            using (Transaction tr = new Transaction())
+            {
+                Schema.Current.EntityEvents<E>().OnPreUnsafeUpdated(query.Select(q => q.Parent));
+
+                int rows = DbQueryProvider.Single.Update(query, updateConstructor);
+
+                return tr.Commit(rows);
+            }
         }
     }
 

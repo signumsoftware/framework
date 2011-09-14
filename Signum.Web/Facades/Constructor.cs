@@ -125,7 +125,7 @@ namespace Signum.Web
             {
                 case VisualConstructStyle.PopupView:
                     TypeContext tc = TypeContextUtilities.UntypedNew(ident, prefix);
-                    return Navigator.PopupOpen(controller, new ViewOkOptions(tc));
+                    return Navigator.PopupOpen(controller, new ViewSaveOptions(tc));
                 case VisualConstructStyle.PartialView:
                     return Navigator.PartialView(controller, ident, prefix);
                 case VisualConstructStyle.View:

@@ -124,7 +124,7 @@ namespace Signum.Web
                 Id = TypeContextUtilities.Compose(prefix, "ctxItemQuickLinks"),
                 Content = content.ToHtml().ToString()
             };
-        }     
+        }
     }
 
     public abstract class QuickLink : ToolBarButton

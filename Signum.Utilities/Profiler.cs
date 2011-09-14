@@ -134,14 +134,14 @@ namespace Signum.Utilities
             var saveCurrent = current;
 
             if (aditionalData is string)
-                aditionalData = string.Intern((string)aditionalData); 
+                aditionalData = string.Intern((string)aditionalData);
 
             current = new HeavyProfilerEntry()
             {
                 Discount = discount,
                 Role = role,
                 AditionalData = aditionalData,
-                StackTrace = new StackTrace(1, true),
+                StackTrace = new StackTrace(2, true),
             };
 
             discount.Stop();

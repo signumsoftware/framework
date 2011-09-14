@@ -10,7 +10,16 @@ using Signum.Entities;
  
 namespace Signum.Web
 {
-    public delegate ToolBarButton[] GetToolBarButtonEntityDelegate<T>(ControllerContext controllerContext, T entity, string partialViewName, string prefix);
+
+    public class ToolBarButtonContext
+    {
+        public ControllerContext ControllerContext { get; internal set; }
+        public string PartialViewName { get; internal set; }
+        public string Prefix{ get; internal set; }
+        public ViewButtons Buttons { get; internal set; }
+    }
+
+    public delegate ToolBarButton[] GetToolBarButtonEntityDelegate<T>(ToolBarButtonContext ctx, T entity);
     
     public static class ButtonBarEntityHelper
     {
@@ -28,15 +37,15 @@ namespace Signum.Web
             globalButtons.Add(getToolBarButtons);
         }
 
-        public static List<ToolBarButton> GetForEntity(ControllerContext controllerContext, ModifiableEntity entity, string partialViewName, string prefix)
+        public static List<ToolBarButton> GetForEntity(ToolBarButtonContext ctx, ModifiableEntity entity)
         {
             List<ToolBarButton> links = new List<ToolBarButton>();
 
-            links.AddRange(globalButtons.SelectMany(a => a(controllerContext, entity, partialViewName, prefix) ?? Enumerable.Empty<ToolBarButton>()).NotNull());
+            links.AddRange(globalButtons.SelectMany(a => a(ctx, entity) ?? Enumerable.Empty<ToolBarButton>()).NotNull());
 
             List<Delegate> list = entityButtons.TryGetC(entity.GetType());
             if (list != null)
-                links.AddRange(list.SelectMany(a => ((ToolBarButton[])a.DynamicInvoke(controllerContext, entity, partialViewName, prefix)) ?? Enumerable.Empty<ToolBarButton>()).NotNull());
+                links.AddRange(list.SelectMany(a => ((ToolBarButton[])a.DynamicInvoke(a, entity)) ?? Enumerable.Empty<ToolBarButton>()).NotNull());
 
             foreach (var l in links)
             {

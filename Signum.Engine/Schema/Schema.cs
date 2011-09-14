@@ -150,16 +150,16 @@ namespace Signum.Engine.Maps
             entityEventsGlobal.OnSaving(entity);
         }
 
-        internal void OnRetrieved(IdentifiableEntity entity, bool fromCache)
+        internal void OnRetrieved(IdentifiableEntity entity)
         {
             AssertAllowed(entity.GetType());
 
             IEntityEvents ee = entityEvents.TryGetC(entity.GetType());
 
             if (ee != null)
-                ee.OnRetrieved(entity, fromCache);
+                ee.OnRetrieved(entity);
 
-            entityEventsGlobal.OnRetrieved(entity, fromCache);
+            entityEventsGlobal.OnRetrieved(entity);
         }
 
         internal ICacheController CacheController(Type type)
@@ -448,7 +448,7 @@ namespace Signum.Engine.Maps
 
         public DirectedEdgedGraph<Table, bool> ToDirectedGraph()
         {
-            return DirectedEdgedGraph<Table, bool>.Generate(Tables.Values, t => t.Fields.Values.SelectMany(f => f.Field.GetTables()));
+            return DirectedEdgedGraph<Table, bool>.Generate(Tables.Values, t => t.DependentTables());
         }
 
         ThreadLocal<bool> inGlobalMode = new ThreadLocal<bool>(() => false);
@@ -457,10 +457,19 @@ namespace Signum.Engine.Maps
             get { return inGlobalMode.Value; }
         }
 
-        internal IDisposable GlobalMode()
+        public IDisposable GlobalMode()
         {
             inGlobalMode.Value = true;
             return new Disposable(() => inGlobalMode.Value = false);
+        }
+
+        public static Lazy<T> GlobalLazy<T>(Func<T> func)
+        {
+            return new Lazy<T>(() =>
+            {
+                using (Schema.Current.GlobalMode())
+                    return func();
+            }, LazyThreadSafetyMode.PublicationOnly);
         }
     }
 
@@ -468,8 +477,7 @@ namespace Signum.Engine.Maps
     {
         void OnPreSaving(IdentifiableEntity entity, ref bool graphModified);
         void OnSaving(IdentifiableEntity entity);
-        void OnRetrieved(IdentifiableEntity entity, bool fromCache);
-
+        void OnRetrieved(IdentifiableEntity entity);
 
         ICacheController CacheController { get; }
 
@@ -479,41 +487,34 @@ namespace Signum.Engine.Maps
     public interface ICacheController
     {
         bool Enabled { get; }
-        IdentifiableEntity GetEntity(int id);
-        IList GetAllEntities();
-        IList GetEntitiesList(List<int> ids);
-        IdentifiableEntity GetOrRequest(int id);
+        bool IsComplete { get; }
         bool Load();
+
+        IEnumerable<int> GetAllIds();
+
+        bool CompleteCache(IdentifiableEntity entity, IRetriever retriver);
     }
 
-    public abstract class CacheController<T> : ICacheController where T : IdentifiableEntity
+    public abstract class CacheController<T> : ICacheController 
+        where T : IdentifiableEntity
     {
         public abstract bool Enabled { get; }
+        public abstract bool IsComplete { get; }
         public abstract bool Load();
-        public abstract T GetOrRequest(int id);
-        public abstract T GetEntity(int id);
-        public abstract List<T> GetAllEntities();
-        public abstract List<T> GetEntitiesList(List<int> list);
 
-        IdentifiableEntity ICacheController.GetEntity(int id)
+        public abstract IEnumerable<int> GetAllIds();
+
+        bool ICacheController.CompleteCache(IdentifiableEntity entity, IRetriever retriver)
         {
-            return GetEntity(id);
+            return CompleteCache((T)entity, retriver);
         }
 
-        IdentifiableEntity ICacheController.GetOrRequest(int id)
-        {
-            return GetOrRequest(id);
-        }
+        public abstract bool CompleteCache(T entity, IRetriever retriver);
 
-        IList ICacheController.GetAllEntities()
-        {
-            return GetAllEntities();
-        }
+        public abstract Lite<T> RetriveLite(int id);
 
-        IList ICacheController.GetEntitiesList(List<int> ids)
-        {
-            return GetEntitiesList(ids);
-        }
+
+       
     }
 
     public class EntityEvents<T> : IEntityEvents
@@ -528,7 +529,9 @@ namespace Signum.Engine.Maps
 
         public event FilterQueryEventHandler<T> FilterQuery;
 
-        public event PreUnsafeDeleteHandler<T> PreUnsafeDelete;
+        public event QueryHandler<T> PreUnsafeDelete;
+
+        public event QueryHandler<T> PreUnsafeUpdated;
 
         internal IQueryable<T> OnFilterQuery(IQueryable<T> query)
         {
@@ -547,8 +550,16 @@ namespace Signum.Engine.Maps
         internal void OnPreUnsafeDelete(IQueryable<T> query)
         {
             if (PreUnsafeDelete != null)
-                foreach (PreUnsafeDeleteHandler<T> action in PreUnsafeDelete.GetInvocationList().Reverse())
+                foreach (QueryHandler<T> action in PreUnsafeDelete.GetInvocationList().Reverse())
                     action(query);
+        }
+
+        internal void OnPreUnsafeUpdated(IQueryable<T> query)
+        {
+            if (PreUnsafeUpdated != null)
+                foreach (QueryHandler<T> action in PreUnsafeUpdated.GetInvocationList().Reverse())
+                    action(query);
+
         }
 
         void IEntityEvents.OnPreSaving(IdentifiableEntity entity, ref bool graphModified)
@@ -564,10 +575,10 @@ namespace Signum.Engine.Maps
 
         }
 
-        void IEntityEvents.OnRetrieved(IdentifiableEntity entity, bool fromCache)
+        void IEntityEvents.OnRetrieved(IdentifiableEntity entity)
         {
             if (Retrieved != null)
-                Retrieved((T)entity, fromCache);
+                Retrieved((T)entity);
         }
 
         ICacheController IEntityEvents.CacheController
@@ -577,12 +588,12 @@ namespace Signum.Engine.Maps
     }
 
     public delegate void PreSavingEventHandler<T>(T ident, ref bool graphModified) where T : IdentifiableEntity;
-    public delegate void RetrievedEventHandler<T>(T ident, bool fromCache) where T : IdentifiableEntity;
+    public delegate void RetrievedEventHandler<T>(T ident) where T : IdentifiableEntity;
     public delegate void SavingEventHandler<T>(T ident) where T : IdentifiableEntity;
     public delegate void SavedEventHandler<T>(T ident, SavedEventArgs args) where T : IdentifiableEntity;
     public delegate IQueryable<T> FilterQueryEventHandler<T>(IQueryable<T> query);
 
-    public delegate void PreUnsafeDeleteHandler<T>(IQueryable<T> query);
+    public delegate void QueryHandler<T>(IQueryable<T> query);
 
     public delegate void InitEventHandler();
     public delegate void SyncEventHandler();

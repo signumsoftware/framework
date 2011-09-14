@@ -25,7 +25,13 @@
     {
         <a id="ebSave" class="sf-entity-button sf-save" onclick="new SF.Validator({controllerUrl:'@Url.SignumAction("TrySave")'}).trySave();">@Resources.Save</a>  
     }
-    @ButtonBarEntityHelper.GetForEntity(this.ViewContext, modifiable, ViewData[ViewDataKeys.PartialViewName].ToString(), Model.ControlID).ToString(Html)
+    @ButtonBarEntityHelper.GetForEntity(new ToolBarButtonContext
+    { 
+        Buttons = ViewButtons.Save,
+        ControllerContext = this.ViewContext,
+        PartialViewName = ViewData[ViewDataKeys.PartialViewName].ToString(),
+        Prefix =  Model.ControlID
+    },  (ModifiableEntity)Model.UntypedValue).ToString(Html)
 </div>
 
 <div class="clearall"></div>

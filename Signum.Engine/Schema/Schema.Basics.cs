@@ -158,6 +158,11 @@ namespace Signum.Engine.Maps
                 }
             }
         }
+
+        public IEnumerable<KeyValuePair<Table, bool>> DependentTables()
+        {
+            return Fields.Values.SelectMany(f => f.Field.GetTables());
+        }
     }
 
     public class EntityField
