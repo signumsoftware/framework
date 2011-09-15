@@ -42,8 +42,6 @@ else {
             });
         };
 
-        $(function () { init(); });
-
         var charactersToEnd = function ($textarea) {
             var text = $textarea.val();
             var count = text.length;
@@ -143,4 +141,6 @@ else {
             fillLiterals: fillLiterals
         };
     })();
+
+    $(function () { SF.SMS.init(); });
 }

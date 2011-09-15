@@ -51,7 +51,7 @@ namespace Signum.Entities.SMS
             set { Set(ref message, value, () => Message); }
         }
 
-        string from;
+        string from = SMSMessageDN.DefaultFrom;
         [StringLengthValidator(AllowNulls = false)]
         public string From
         {
