@@ -265,9 +265,13 @@ namespace Signum.Engine.Cache
                 get { return pack.IsValueCreated ? pack.Value.List.Count : (int?)null; }
             }
 
+            public event Action Invalidation;
+
             public void Invalidate()
             {
                 pack.ResetPublicationOnly();
+                if (Invalidation == null)
+                    Invalidation(); 
             }
 
             public override bool Load()
@@ -362,6 +366,8 @@ namespace Signum.Engine.Cache
                 invalidations.Add(rType, type);
             }
         }
+
+         
     
         static CacheLogicController<T> GetController<T>() where T : IdentifiableEntity
         {
@@ -392,12 +398,12 @@ namespace Signum.Engine.Cache
                     select new CacheStatistics
                     {
                         Type = kvp.Key,
-                        CacheType = CacheLogic.GetCacheController(kvp.Key).Value,
+                        CacheType = CacheLogic.GetCacheType(kvp.Key).Value,
                         Count = kvp.Value.Count, 
                     }).ToList();
         }
 
-        public static CacheControllerType? GetCacheController(Type type)
+        public static CacheType? GetCacheType(Type type)
         {
             var controller = controllers.TryGetC(type);
 
@@ -405,10 +411,10 @@ namespace Signum.Engine.Cache
                 return null;
 
             if(controller.GetType().IsInstantiationOf(typeof(CacheLogicController<>)))
-                return CacheControllerType.Cached;
+                return CacheType.Cached;
 
             if (controller.GetType().IsInstantiationOf(typeof(SemiCached<>)))
-                return CacheControllerType.Semi;
+                return CacheType.Semi;
 
             throw new InvalidOperationException("Not expected");
         }
@@ -420,9 +426,14 @@ namespace Signum.Engine.Cache
                 item.Value.Invalidate();
             }
         }
+
+        public static void OnInvalidation<T>(Action action) where T : IdentifiableEntity
+        {
+            GetController<T>().Invalidation += action;
+        }
     }
 
-    public enum CacheControllerType
+    public enum CacheType
     {
         Cached,
         Semi,
@@ -432,7 +443,7 @@ namespace Signum.Engine.Cache
     public class CacheStatistics
     {
         public Type Type;
-        public CacheControllerType CacheType;
+        public CacheType CacheType;
         public int? Count;
     }
 }
