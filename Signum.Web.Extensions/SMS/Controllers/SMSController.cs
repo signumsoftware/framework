@@ -77,7 +77,7 @@ namespace Signum.Web.SMS
                 FilterOptions = new List<FilterOption> 
                 { 
                     { new FilterOption("IsActive", true) { Frozen = true } },
-                    { new FilterOption("AssociatedType", TypeLogic.ToTypeDN(ie.GetType()).ToLite()) { Frozen = true } }
+                    { new FilterOption("AssociatedType", TypeLogic.ToTypeDN(ie.GetType()).ToLite()) }
                 },
                 AllowMultiple = false
             }, prefix);

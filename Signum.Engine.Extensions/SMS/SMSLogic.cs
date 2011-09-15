@@ -201,7 +201,8 @@ namespace Signum.Engine.SMS
                 {
                     var template = args.GetArg<SMSTemplateDN>(0);
 
-                    if (TypeLogic.DnToType[template.AssociatedType] != typeof(T))
+                    if (template.AssociatedType != null &&
+                        TypeLogic.DnToType[template.AssociatedType] != typeof(T))
                         throw new ArgumentException("The SMS template is associated with the type {0} instead of {1}"
                             .Formato(template.AssociatedType.FullClassName, typeof(T).FullName));
 
