@@ -39,7 +39,7 @@ namespace Signum.Engine.Extensions.SMS
 
                 try
                 {
-                    ms.ToLite().ExecuteLite(SMSMessageOperations.Send);
+                    ms.Execute(SMSMessageOperations.Send);
                 }
                 catch (Exception)
                 {
@@ -55,7 +55,7 @@ namespace Signum.Engine.Extensions.SMS
                 }
             }
 
-            throw new NotImplementedException();
+            return FinalState.Finished;
         }
     }
 
@@ -112,7 +112,7 @@ namespace Signum.Engine.Extensions.SMS
                 }
             }
 
-            throw new NotImplementedException();
+            return FinalState.Finished;
         }
     }
 }
