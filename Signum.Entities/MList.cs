@@ -136,7 +136,6 @@ namespace Signum.Entities
         public void Sort()
         {
             innerList.Sort();
-            selfModified = true;
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset)); 
         }
 
@@ -144,7 +143,6 @@ namespace Signum.Entities
             where S : IComparable<S>
         {
             innerList.Sort((a, b) => element(a).CompareTo(element(b)));
-            selfModified = true;
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
         }
 
@@ -152,21 +150,18 @@ namespace Signum.Entities
             where S : IComparable<S>
         {
             innerList.Sort((a, b) => element(b).CompareTo(element(a)));
-            selfModified = true;
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset)); 
         }
 
         public void Sort(Comparison<T> comparison)
         {
             innerList.Sort(comparison);
-            selfModified = true;
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset)); 
         }
 
         public void Sort(IComparer<T> comparer)
         {
             innerList.Sort(comparer);
-            selfModified = true;
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset)); 
         }
 
