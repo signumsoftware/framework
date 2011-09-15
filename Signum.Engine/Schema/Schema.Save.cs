@@ -829,7 +829,7 @@ namespace Signum.Engine.Maps
         Type CheckType(Type type)
         {
             if(type != null && !ImplementationColumns.ContainsKey(type))
-                throw new InvalidOperationException("Type {0} is not a mapped type ({1})".Formato(type.Name, ImplementationColumns.Keys.ToString(k => k.Name, ", ")));
+                throw new InvalidOperationException("Type {0} is not in the list of ImplementedBy:\r\n{1}".Formato(type.Name, ImplementationColumns.ToString(kvp =>"{0} -> {1}".Formato(kvp.Key.Name, kvp.Value.Name), "\r\n")));
 
             return type;
         }
