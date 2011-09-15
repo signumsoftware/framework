@@ -544,7 +544,7 @@ namespace Signum.Engine.Maps
 
         public Field TryGetField(MemberInfo member)
         {
-            if (member.Name != "Item")
+            if (member.Name == "Item")
                 return RelationalTable.Field;
 
             return null;
