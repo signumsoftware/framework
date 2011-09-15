@@ -16,6 +16,7 @@ using System.IO;
 using System.Web.Routing;
 using Signum.Entities.SMS;
 using Signum.Web.Operations;
+using Signum.Web.Extensions.SMS.Models;
 #endregion
 
 
@@ -34,6 +35,10 @@ namespace Signum.Web.SMS
                 {
                     new EntitySettings<SMSMessageDN>(EntityType.NotSaving){ PartialViewName = e => ViewPrefix.Formato("SMSMessage")},
                     new EntitySettings<SMSTemplateDN>(EntityType.NotSaving){ PartialViewName = e => ViewPrefix.Formato("SMSTemplate")},
+                    new EntitySettings<SMSSendPackageDN>(EntityType.ServerOnly){ PartialViewName = e => ViewPrefix.Formato("SMSSendPackage") },
+                    new EntitySettings<SMSUpdatePackageDN>(EntityType.ServerOnly){ PartialViewName = e => ViewPrefix.Formato("SMSUpdatePackage") },
+
+                    new EmbeddedEntitySettings<MultipleSMSModel>() { PartialViewName = e => ViewPrefix.Formato("MultipleSMS"), ShowSave = false},
                 });
 
                 OperationsClient.Manager.Settings.AddRange(new Dictionary<Enum, OperationSettings> 
@@ -47,9 +52,33 @@ namespace Signum.Web.SMS
                     {SMSProviderOperations.SendSMSMessagesFromTemplate, new QueryOperationSettings
                     {
                         RequestExtraJsonData = "function(){ return { providerWebQueryName: $('#sfWebQueryName').val() }; }",
-                        OnClick = ctx => new JsOperationConstructorFromMany(ctx.Options("SendMultipleSMSMessageFromTemplate","SMS"))
+                        OnClick = ctx => new JsOperationConstructorFromMany(ctx.Options("SendMultipleSMSMessagesFromTemplate","SMS"))
                                 .ajaxSelected(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk),
                     }},
+
+                    {SMSProviderOperations.SendSMSMessage, new QueryOperationSettings
+                    {
+                        RequestExtraJsonData = "function(){ return { providerWebQueryName: $('#sfWebQueryName').val() }; }",
+                        OnClick = ctx => new JsOperationConstructorFromMany(ctx.Options("SendMultipleSMSMessages","SMS"))
+                                .ajaxSelected(ctx.Prefix, JsOpSuccess.DefaultDispatcher),
+                    }},
+                });
+
+                ButtonBarEntityHelper.RegisterEntityButtons<MultipleSMSModel>((ctx, entity) => 
+                {
+                    return new ToolBarButton[]
+                    {
+                        new ToolBarButton 
+                        { 
+                            Id = "Send", 
+                            Text = "Send Message", 
+                            DivCssClass = ToolBarButton.DefaultEntityDivCssClass,
+                            OnClick = new JsOperationExecutor(new JsOperationOptions
+                            {
+                                ControllerUrl = RouteHelper.New().Action<SMSController>(cu => cu.SendMultipleMessages())
+                            }).validateAndAjax().ToJS()
+                        }
+                    };
                 });
             }
         }

@@ -22,7 +22,7 @@ namespace Signum.Engine.Extensions.SMS
 
         public FinalState Execute(IExecutingProcess executingProcess)
         {
-            SMSPackageDN package = (SMSPackageDN)executingProcess.Data;
+            SMSSendPackageDN package = (SMSSendPackageDN)executingProcess.Data;
 
             List<Lite<SMSMessageDN>> messages = (from message in Database.Query<SMSMessageDN>()
                                                  where message.SendPackage == package.ToLite() &&
@@ -63,13 +63,10 @@ namespace Signum.Engine.Extensions.SMS
     {
         public Entities.Processes.IProcessDataDN CreateData(object[] args)
         {
-            SMSPackageDN package = new SMSPackageDN().Save();
+            SMSUpdatePackageDN package = new SMSUpdatePackageDN().Save();
 
             package.NumLines = (from m in Database.Query<SMSMessageDN>()
-                                where m.State == SMSMessageState.Sent
-                                    && m.SendState != SendState.Delivered
-                                    && m.SendState != SendState.Failed
-                                    && m.UpdatePackage == null
+                                where m.State == SMSMessageState.Sent && m.UpdatePackage == null
                                 select m).UnsafeUpdate(a => new SMSMessageDN { UpdatePackage = package.ToLite() });
 
             return package.Save();
@@ -79,11 +76,11 @@ namespace Signum.Engine.Extensions.SMS
 
         public FinalState Execute(IExecutingProcess executingProcess)
         {
-            SMSPackageDN package = (SMSPackageDN)executingProcess.Data;
+            SMSUpdatePackageDN package = (SMSUpdatePackageDN)executingProcess.Data;
 
             List<Lite<SMSMessageDN>> messages = (from message in Database.Query<SMSMessageDN>()
                                                  where message.UpdatePackage == package.ToLite() &&
-                                                 message.SendState == SendState.None
+                                                 message.State == SMSMessageState.Sent
                                                  select message.ToLite()).ToList();
 
             int lastPercentage = 0;

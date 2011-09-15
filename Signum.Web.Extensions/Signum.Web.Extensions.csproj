@@ -523,16 +523,32 @@
       <DesignTime>True</DesignTime>
     </Compile>
     <Compile Include="SMS\Controllers\SMSController.cs" />
+    <Compile Include="SMS\Models\MultipleSMSModel.cs" />
     <Compile Include="SMS\SMSClient.cs" />
+    <Compile Include="SMS\Views\MultipleSMS.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>MultipleSMS.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="SMS\Views\SMSMessage.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>SMSMessage.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="SMS\Views\SMSSendPackage.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SMSSendPackage.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="SMS\Views\SMSTemplate1.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>SMSTemplate.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="SMS\Views\SMSUpdatePackage.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SMSUpdatePackage.cshtml</DependentUpon>
     </Compile>
     <Compile Include="UserQueries\Controller\UserQueriesController.cs" />
     <Compile Include="UserQueries\UserQueriesClient.cs" />
@@ -1066,6 +1082,18 @@
     <Content Include="SMS\Views\SMSTemplate.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>SMSTemplate1.cs</LastGenOutput>
+    </Content>
+    <Content Include="SMS\Views\SMSUpdatePackage.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>SMSUpdatePackage.cs</LastGenOutput>
+    </Content>
+    <Content Include="SMS\Views\SMSSendPackage.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>SMSSendPackage.cs</LastGenOutput>
+    </Content>
+    <Content Include="SMS\Views\MultipleSMS.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>MultipleSMS.cs</LastGenOutput>
     </Content>
     <None Include="UserQueries\Views\QueryColumn.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>

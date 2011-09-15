@@ -139,29 +139,20 @@ Write(Html.ValueLine(e, s => s.From, vl => vl.ReadOnly = (e.Value.State != SMSMe
 
                                                                                                    
 
-    if (e.Value.State == SMSMessageState.Sent)
+    if (e.Value.State != SMSMessageState.Created)
     {
+        
+   Write(Html.ValueLine(e, s => s.SendDate, vl => vl.ReadOnly = true));
 
-WriteLiteral("        <fieldset>\r\n            <legend>SMS Status</legend>\r\n            ");
+                                                                     
+        
+   Write(Html.ValueLine(e, s => s.State, vl => vl.ReadOnly = true));
 
-
-       Write(Html.ValueLine(e, s => s.SendState, vl => vl.ReadOnly = true));
-
-WriteLiteral("\r\n            ");
-
-
-       Write(Html.ValueLine(e, s => s.SendDate, vl => vl.ReadOnly = true));
-
-WriteLiteral("\r\n        </fieldset>\r\n");
-
-
+                                                                  
     }
 }
 
 WriteLiteral("\r\n");
-
-
-Write(Html.ScriptsJs("~/SMS/Scripts/SF_SMS.js"));
 
 
         }
