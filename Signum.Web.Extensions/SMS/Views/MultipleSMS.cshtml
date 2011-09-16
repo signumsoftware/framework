@@ -1,0 +1,28 @@
+﻿@using Signum.Engine
+@using Signum.Entities.SMS;
+@using Signum.Web;
+@using Signum.Web.SMS;
+@using Signum.Web.Extensions.SMS.Models
+@Html.ScriptCss("~/SMS/Content/SMS.css")
+@using (var e = Html.TypeContext<MultipleSMSModel>())
+{
+    @Html.ValueLine(e, s => s.Message, vl =>
+   {
+       vl.ValueLineType = ValueLineType.TextArea;
+       vl.ValueHtmlProps["cols"] = "30";
+       vl.ValueHtmlProps["rows"] = "6";
+   })
+    <div id="sfCharactersLeft" data-url="@(Url.Action<SMSController>(s => s.GetDictionaries()))">
+        <p>
+            Remaining characters: <span id="sfCharsLeft"></span>
+        </p>
+    </div>
+    <div>
+        <input type="button" class="sf-button" id="sfRemoveNoSMSChars" value="Remove non valid characters" data-url="@(Url.Action<SMSController>(s => s.RemoveNoSMSCharacters("")))"/>
+    </div>
+    <br />
+    @Html.ValueLine(e, s => s.From)
+    @Html.Hidden(e.Compose("ProvidersIds"), e.Value.ProvidersIds);
+    @Html.Hidden(e.Compose("WebTypeName"), e.Value.WebTypeName);
+}
+@Html.ScriptsJs("~/SMS/Scripts/SF_SMS.js")

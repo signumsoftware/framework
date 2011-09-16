@@ -37,14 +37,10 @@
     <br />
     @Html.ValueLine(e, s => s.From, vl => vl.ReadOnly = (e.Value.State != SMSMessageState.Created))
 
-    if (e.Value.State == SMSMessageState.Sent)
+    if (e.Value.State != SMSMessageState.Created)
     {
-        <fieldset>
-            <legend>SMS Status</legend>
-            @Html.ValueLine(e, s => s.SendState, vl => vl.ReadOnly = true)
-            @Html.ValueLine(e, s => s.SendDate, vl => vl.ReadOnly = true)
-        </fieldset>
+        @Html.ValueLine(e, s => s.SendDate, vl => vl.ReadOnly = true)
+        @Html.ValueLine(e, s => s.State, vl => vl.ReadOnly = true)
     }
 }
 
-@Html.ScriptsJs("~/SMS/Scripts/SF_SMS.js")
