@@ -459,8 +459,9 @@ namespace Signum.Engine.Maps
 
         public IDisposable GlobalMode()
         {
+            var oldValue = inGlobalMode.Value; 
             inGlobalMode.Value = true;
-            return new Disposable(() => inGlobalMode.Value = false);
+            return new Disposable(() => inGlobalMode.Value = oldValue);
         }
 
         public static Lazy<T> GlobalLazy<T>(Func<T> func)
@@ -512,9 +513,6 @@ namespace Signum.Engine.Maps
         public abstract bool CompleteCache(T entity, IRetriever retriver);
 
         public abstract Lite<T> RetriveLite(int id);
-
-
-       
     }
 
     public class EntityEvents<T> : IEntityEvents
