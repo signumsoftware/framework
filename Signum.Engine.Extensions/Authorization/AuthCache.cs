@@ -287,7 +287,7 @@ namespace Signum.Entities.Authorization
 
         internal A GetAllowed(K key)
         {
-            if (!AuthLogic.IsEnabled)
+            if (!AuthLogic.IsEnabled || Schema.Current.InGlobalMode)
                 return Max.BaseAllowed;
 
             return runtimeRules.Value[RoleDN.Current.ToLite()].GetAllowed(key);

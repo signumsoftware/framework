@@ -270,7 +270,7 @@ namespace Signum.Engine.Cache
             public void Invalidate()
             {
                 pack.ResetPublicationOnly();
-                if (Invalidation == null)
+                if (Invalidation != null)
                     Invalidation(); 
             }
 
