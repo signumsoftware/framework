@@ -14,6 +14,7 @@ using System.Threading;
 using System.Linq.Expressions;
 using Signum.Entities.Reflection;
 using System.Collections;
+using Signum.Utilities.Reflection;
 
 namespace Signum.Engine.Maps
 {
@@ -464,14 +465,31 @@ namespace Signum.Engine.Maps
             return new Disposable(() => inGlobalMode.Value = oldValue);
         }
 
+      
+
+        static List<object> registeredLazyList = new List<object>();  
         public static Lazy<T> GlobalLazy<T>(Func<T> func)
         {
-            return new Lazy<T>(() =>
+            var result =  new Lazy<T>(() =>
             {
                 using (Schema.Current.GlobalMode())
                     return func();
             }, LazyThreadSafetyMode.PublicationOnly);
+
+            registeredLazyList.Add(result);
+
+            return result; 
         }
+
+        public static void ResetAllLazy()
+        {
+            foreach (var lazy in registeredLazyList)
+            {
+                giReset.GetInvoker(lazy.GetType())(lazy);
+            }
+        }
+
+        static GenericInvoker<Action<object>> giReset = new GenericInvoker<Action<object>>(obj => ((Lazy<int>)obj).ResetPublicationOnly());
     }
 
     internal interface IEntityEvents
