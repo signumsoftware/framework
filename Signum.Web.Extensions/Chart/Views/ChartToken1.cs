@@ -103,9 +103,9 @@ WriteLiteral("</span>\r\n");
 
                                                    
             
-       Write(Html.QueryTokenCombo(tc.Value.Token, ViewData[ViewDataKeys.QueryName], tc));
+       Write(Html.Field("Token", Html.QueryTokenCombo(tc.Value.Token, ViewData[ViewDataKeys.QueryName], tc)));
 
-                                                                                       
+                                                                                                            
 
             
        Write(Html.ValueLine(tc, ct => ct.DisplayName));
