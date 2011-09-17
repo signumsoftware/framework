@@ -554,5 +554,15 @@ namespace Signum.Engine.Mailing
 
             return client;
         }
+
+        public static SmtpClient GenerateSmtpClient(this Lite<SMTPConfigurationDN> config)
+        {
+            return GenerateSmtpClient(config.ToString(), false);
+        }
+
+        public static SmtpClient GenerateSmtpClient(this Lite<SMTPConfigurationDN> config, bool defaultIfNotPresent)
+        {
+            return GenerateSmtpClient(config.TryCC(c => c.ToString()), defaultIfNotPresent);
+        }
     }
 }

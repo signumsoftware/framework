@@ -295,6 +295,16 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>SearchControlPart.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Mailing\Views\Newsletter.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Newsletter.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Mailing\Views\SMTPConfiguration.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SMTPConfiguration.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Profiler\TimeTracker.cs" />
     <Compile Include="ControlPanel\Controllers\ControlPanelController.cs" />
     <Compile Include="ControlPanel\ControlPanelClient.cs" />
@@ -830,6 +840,14 @@
     <Content Include="Profiler\Views\StatisticsTable.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>StatisticsTable1.cs</LastGenOutput>
+    </Content>
+    <Content Include="Mailing\Views\SMTPConfiguration.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>SMTPConfiguration.cs</LastGenOutput>
+    </Content>
+    <Content Include="Mailing\Views\Newsletter.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>Newsletter.cs</LastGenOutput>
     </Content>
     <None Include="Profiler\Views\Times.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>

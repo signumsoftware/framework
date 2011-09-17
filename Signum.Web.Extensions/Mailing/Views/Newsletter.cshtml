@@ -1,0 +1,45 @@
+﻿@using Ski.Entities.Newsletter
+
+@using (var nc = Html.TypeContext<NewsletterDN>())
+{
+    bool editable = nc.Value.State == NewsletterState.Saved;
+    
+    <div class="@(editable ? "" : "sf-tabs")">
+        @if (!editable)
+        {
+            <ul>
+                <li><a href="#emTabMain">Newsletter</a></li>
+                <li><a href="#emTabSend">Newsletter</a></li>
+            </ul>
+        }
+        <div id="emTabMain">
+            @Html.ValueLine(nc, n => n.Name)
+            @Html.ValueLine(nc, n => n.State, vl => vl.ReadOnly = true)
+            @Html.ValueLine(nc, n => n.Subject)
+            @Html.ValueLine(nc, n => n.HtmlBody, vl =>
+            {
+                vl.ValueLineType = ValueLineType.TextArea;
+                vl.ValueHtmlProps["cols"] = "30";
+                vl.ValueHtmlProps["rows"] = "6";
+                vl.ReadOnly = !editable;
+            })
+            @Html.EntityLine(nc, n => n.SMTPConfig)
+            @Html.ValueLine(nc, n => n.From)
+        </div>
+        @if (!editable)
+        {
+            <div id="emTabSend">
+                @Html.ValueLine(nc, n => n.NumLines)
+                @Html.ValueLine(nc, n => n.NumErrors)
+                <fieldset>
+                    <legend>Emails sent</legend>
+                    @Html.SearchControl(new FindOptions(typeof(NewsLetterSendDN))
+                    {
+                        FilterOptions = { new FilterOption("Newsletter", nc.Value) { Frozen = true } },
+                        SearchOnLoad = true,
+                    }, new Context(nc, "ncSent"))
+                </fieldset>
+            </div>
+        }
+    </div>    
+}
