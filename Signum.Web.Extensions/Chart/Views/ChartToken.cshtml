@@ -19,7 +19,7 @@
         {
             <span class="sf-label-line">@tc.Value.PropertyLabel</span>
             @Html.ValueLine(tc, ct => ct.Aggregate)
-            @Html.QueryTokenCombo(tc.Value.Token, ViewData[ViewDataKeys.QueryName], tc)
+            @Html.Field("Token", Html.QueryTokenCombo(tc.Value.Token, ViewData[ViewDataKeys.QueryName], tc))
 
             @Html.ValueLine(tc, ct => ct.DisplayName)
             @Html.ValueLine(tc, ct => ct.Format)
