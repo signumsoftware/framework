@@ -157,8 +157,13 @@ namespace Signum.Engine.Cache
                 return false;
             }
         }
-  
-        class CacheLogicController<T> : CacheController<T>, ICacheLogicController
+
+        interface IInvalidable
+        {
+            event Action Invalidation;
+        }
+
+        class CacheLogicController<T> : CacheController<T>, ICacheLogicController, IInvalidable
             where T : IdentifiableEntity
         {
             class Pack
@@ -430,6 +435,25 @@ namespace Signum.Engine.Cache
         public static void OnInvalidation<T>(Action action) where T : IdentifiableEntity
         {
             GetController<T>().Invalidation += action;
+        }
+
+
+
+        public static Lazy<T> InvalidateWithCache<T>(this Lazy<T> lazy, params Type[] types)
+        {
+            Action action = () => lazy.ResetPublicationOnly();
+
+            foreach (var t in types)
+            {
+                var val =controllers.GetOrThrow(t, "{0} is not registered in CacheLogic") as IInvalidable;
+
+                if(val == null)
+                    throw new InvalidOperationException("{0} is Semi-Cached".Formato(t));
+
+                val.Invalidation += action;
+            }
+
+            return lazy;
         }
     }
 
