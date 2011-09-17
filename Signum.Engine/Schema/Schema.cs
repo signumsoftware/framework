@@ -473,7 +473,11 @@ namespace Signum.Engine.Maps
             var result =  new Lazy<T>(() =>
             {
                 using (Schema.Current.GlobalMode())
-                    return func();
+                using (new EntityCache(true))
+                using (Transaction tr = new Transaction(true))
+                {
+                    return tr.Commit(func());
+                }
             }, LazyThreadSafetyMode.PublicationOnly);
 
             registeredLazyList.Add(result);
