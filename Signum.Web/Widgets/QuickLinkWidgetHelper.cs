@@ -151,6 +151,7 @@ namespace Signum.Web
         {
             Text = text;
             Url = url;
+            IsVisible = true;
         }
 
         public override MvcHtmlString Execute()
