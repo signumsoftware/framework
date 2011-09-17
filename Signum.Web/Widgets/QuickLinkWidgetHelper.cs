@@ -40,6 +40,8 @@ namespace Signum.Web
             if (list != null)
                 links.AddRange(list.SelectMany(a => (QuickLink[])a.DynamicInvoke(ident, partialViewName, prefix) ?? Empty).NotNull());
 
+            links = links.Where(l => l.IsVisible).ToList();
+
             return links;
         }
 
