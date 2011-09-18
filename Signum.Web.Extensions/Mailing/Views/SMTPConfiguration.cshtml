@@ -1,0 +1,13 @@
+﻿@using Signum.Entities.Mailing
+
+@using (var sc = Html.TypeContext<SMTPConfigurationDN>()) 
+{
+	@Html.ValueLine(sc, s => s.Name)
+	@Html.ValueLine(sc, s => s.Port)
+	@Html.ValueLine(sc, s => s.Host)
+	@Html.ValueLine(sc, s => s.UseDefaultCredentials)
+	@Html.ValueLine(sc, s => s.Username)
+	@Html.ValueLine(sc, s => s.Password)
+	@Html.ValueLine(sc, s => s.EnableSSL)
+    @Html.EntityList(sc, s => s.ClientCertificationFiles)
+}
