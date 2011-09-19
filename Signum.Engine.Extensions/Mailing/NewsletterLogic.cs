@@ -83,7 +83,7 @@ namespace Ski.Logic.Newsletter
 
                     var process = ProcessLogic.Create(NewsletterProcessOperations.Send, n);
 
-                    process.ToLite().ExecuteLite(ProcessOperation.Execute);
+                    process.Execute(ProcessOperation.Execute);
 
                     n.State = NewsletterState.Sent;
                 }
