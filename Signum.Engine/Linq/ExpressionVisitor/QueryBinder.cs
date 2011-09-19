@@ -924,7 +924,7 @@ namespace Signum.Engine.Linq
                 case (ExpressionType)DbExpressionType.FieldInit:
                 {
                     FieldInitExpression fie = (FieldInitExpression)source;
-                    FieldInfo fi = m.Member as FieldInfo ?? Reflector.FindFieldInfo(fie.Type, (PropertyInfo)m.Member);
+                    FieldInfo fi = m.Member as FieldInfo ?? Reflector.TryFindFieldInfo(fie.Type, (PropertyInfo)m.Member);
 
                     if (fi == null)
                         throw new InvalidOperationException("The member {0} of {1} is not accesible on queries".Formato(m.Member.Name, fie.Type.TypeName()));
@@ -1318,7 +1318,8 @@ namespace Signum.Engine.Linq
                     return Expression.Coalesce(left, right, b.Conversion);
                 else
                 {
-                    if (left is ProjectionExpression || right is ProjectionExpression)
+                    if (left is ProjectionExpression && !((ProjectionExpression)left).IsOneCell  ||
+                        right is ProjectionExpression && !((ProjectionExpression)right).IsOneCell)
                         throw new InvalidOperationException("Comparing {0} and {1} is not valid in SQL".Formato(b.Left.NiceToString(), b.Right.NiceToString())); 
 
                     if (left.Type.IsNullable() == right.Type.IsNullable())
