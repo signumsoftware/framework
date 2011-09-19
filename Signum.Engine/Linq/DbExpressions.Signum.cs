@@ -341,7 +341,7 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            return "TypeFie({0};{2})".Formato(TypeValue.TypeName(), ExternalId.NiceToString());
+            return "TypeFie({0};{1})".Formato(TypeValue.TypeName(), ExternalId.NiceToString());
         }
     }
 
