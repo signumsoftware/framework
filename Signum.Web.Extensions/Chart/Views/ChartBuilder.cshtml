@@ -12,12 +12,13 @@
 
 @{ QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription]; }
 
-<table class="sf-chart-builder">
+<table class="sf-chart-builder" data-url="@(Url.Action<ChartController>(cc => cc.UpdateChartBuilder(Model.ControlID)))">
     <tr>
-        <td class="ui-widget ui-widget-content ui-corner-all sf-chart-type" data-url="@(Url.Action<ChartController>(cc => cc.ChangeType(Model.ControlID)))">
+        <td class="ui-widget ui-widget-content ui-corner-all sf-chart-type">
             <div class="ui-widget-header">
                 @typeof(ChartType).NiceName()
                 @Html.Hidden(Model.Compose("Chart", "ChartType"), Model.Value.Chart.ChartType.ToString())
+                @Html.Hidden(Model.Compose("Chart", "GroupResults"), Model.Value.Chart.GroupResults, new { @class = "sf-chart-group-results" })
             </div>
             @foreach(var group in ChartUtils.ChartTypePosition.GroupBy(ctp => ctp.Row).OrderBy(group => group.Key))
             {

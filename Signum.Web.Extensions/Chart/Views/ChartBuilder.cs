@@ -82,13 +82,13 @@ WriteLiteral("\r\n");
 
    QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription]; 
 
-WriteLiteral("\r\n<table class=\"sf-chart-builder\">\r\n    <tr>\r\n        <td class=\"ui-widget ui-wid" +
-"get-content ui-corner-all sf-chart-type\" data-url=\"");
+WriteLiteral("\r\n<table class=\"sf-chart-builder\" data-url=\"");
 
 
-                                                                                  Write(Url.Action<ChartController>(cc => cc.ChangeType(Model.ControlID)));
+                                      Write(Url.Action<ChartController>(cc => cc.UpdateChartBuilder(Model.ControlID)));
 
-WriteLiteral("\">\r\n            <div class=\"ui-widget-header\">\r\n                ");
+WriteLiteral("\">\r\n    <tr>\r\n        <td class=\"ui-widget ui-widget-content ui-corner-all sf-cha" +
+"rt-type\">\r\n            <div class=\"ui-widget-header\">\r\n                ");
 
 
            Write(typeof(ChartType).NiceName());
@@ -97,6 +97,11 @@ WriteLiteral("\r\n                ");
 
 
            Write(Html.Hidden(Model.Compose("Chart", "ChartType"), Model.Value.Chart.ChartType.ToString()));
+
+WriteLiteral("\r\n                ");
+
+
+           Write(Html.Hidden(Model.Compose("Chart", "GroupResults"), Model.Value.Chart.GroupResults, new { @class = "sf-chart-group-results" }));
 
 WriteLiteral("\r\n            </div>\r\n");
 

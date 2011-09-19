@@ -5,7 +5,8 @@
 @using System.Web.Mvc
 @using Signum.Entities
 @using Signum.Web
-@model Context
+@using Signum.Entities.Chart
+@model TypeContext<ChartRequest>
 
 @{ 
     ResultTable queryResult = (ResultTable)ViewData[ViewDataKeys.Results];
@@ -22,7 +23,7 @@ else
     <table id="@Model.Compose("tblResults")" class="sf-search-results">
         <thead class="ui-widget-header ui-corner-top">
             <tr>
-                @if (viewable)
+                @if (!Model.Value.Chart.GroupResults && viewable)
                 {
                     <th class="ui-state-default th-col-entity">
                     </th>
@@ -56,21 +57,35 @@ else
             {
                 foreach (var row in queryResult.Rows)
                 {
-                    Lite entityField = row.Entity;
-                    <tr data-entity="@entityField.Key()">
-                        @if (viewable)
-                        {
-                            <td>
-                                @QuerySettings.EntityFormatRules.Last(fr => fr.IsApplyable(entityField)).Formatter(Html, entityField)
-                            </td>
-                        }
-                        @foreach (var col in queryResult.Columns)
-                        {
-                            <td>
-                                @formatters[col.Index](Html, row[col])
-                            </td>
-                        }
-                    </tr>
+                    if (Model.Value.Chart.GroupResults)
+                    {
+                        <tr>
+                            @foreach (var col in queryResult.Columns)
+                            {
+                                <td>
+                                    @formatters[col.Index](Html, row[col])
+                                </td>
+                            }   
+                        </tr>
+                    }
+                    else
+                    {
+                        Lite entityField = row.Entity;
+                        <tr data-entity="@entityField.Key()">
+                            @if (entityField != null && viewable)
+                            {
+                                <td>
+                                    @QuerySettings.EntityFormatRules.Last(fr => fr.IsApplyable(entityField)).Formatter(Html, entityField)
+                                </td>
+                            }
+                            @foreach (var col in queryResult.Columns)
+                            {
+                                <td>
+                                    @formatters[col.Index](Html, row[col])
+                                </td>
+                            }
+                        </tr>
+                    }
                 }
             }
         </tbody>

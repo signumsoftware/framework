@@ -18,7 +18,19 @@
         @using (Html.FieldInline())
         {
             <span class="sf-label-line">@tc.Value.PropertyLabel</span>
-            @Html.ValueLine(tc, ct => ct.Aggregate)
+            if (tc.Value.GroupByVisible)
+            { 
+                var groupCheck = new HtmlTag("input").IdName(tc.Compose("group")).Attr("type", "checkbox").Class("sf-chart-group-trigger");
+                if (((TypeContext<ChartRequest>)tc.Parent).Value.Chart.GroupResults)
+                {
+                    groupCheck.Attr("checked", "checked");
+                }
+                @Html.Field("Group", groupCheck.ToHtmlSelf())
+            }
+            if (tc.Value.ShouldAggregate)
+            {
+                @Html.ValueLine(tc, ct => ct.Aggregate)
+            }
             @Html.Field("Token", Html.QueryTokenCombo(tc.Value.Token, ViewData[ViewDataKeys.QueryName], tc))
 
             @Html.ValueLine(tc, ct => ct.DisplayName)

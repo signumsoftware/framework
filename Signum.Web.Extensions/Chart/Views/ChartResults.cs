@@ -45,10 +45,11 @@ namespace ASP
     using Signum.Entities.Reflection;
     using Signum.Web.Properties;
     using Signum.Engine;
+    using Signum.Entities.Chart;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Chart/Views/ChartResults.cshtml")]
-    public class _Page_Chart_Views_ChartResults_cshtml : System.Web.Mvc.WebViewPage<Context>
+    public class _Page_Chart_Views_ChartResults_cshtml : System.Web.Mvc.WebViewPage<TypeContext<ChartRequest>>
     {
 
 
@@ -64,6 +65,7 @@ namespace ASP
         }
         public override void Execute()
         {
+
 
 
 
@@ -103,7 +105,7 @@ WriteLiteral("\" class=\"sf-search-results\">\r\n        <thead class=\"ui-widge
 "p\">\r\n            <tr>\r\n");
 
 
-                 if (viewable)
+                 if (!Model.Value.Chart.GroupResults && viewable)
                 {
 
 WriteLiteral("                    <th class=\"ui-state-default th-col-entity\">\r\n                " +
@@ -165,46 +167,72 @@ WriteLiteral("</td>\r\n                </tr>\r\n");
             {
                 foreach (var row in queryResult.Rows)
                 {
-                    Lite entityField = row.Entity;
+                    if (Model.Value.Chart.GroupResults)
+                    {
 
-WriteLiteral("                    <tr data-entity=\"");
+WriteLiteral("                        <tr>\r\n");
 
 
-                                Write(entityField.Key());
+                             foreach (var col in queryResult.Columns)
+                            {
+
+WriteLiteral("                                <td>\r\n                                    ");
+
+
+                               Write(formatters[col.Index](Html, row[col]));
+
+WriteLiteral("\r\n                                </td>\r\n");
+
+
+                            }   
+
+WriteLiteral("                        </tr>\r\n");
+
+
+                    }
+                    else
+                    {
+                        Lite entityField = row.Entity;
+
+WriteLiteral("                        <tr data-entity=\"");
+
+
+                                    Write(entityField.Key());
 
 WriteLiteral("\">\r\n");
 
 
-                         if (viewable)
-                        {
+                             if (entityField != null && viewable)
+                            {
 
-WriteLiteral("                            <td>\r\n                                ");
-
-
-                           Write(QuerySettings.EntityFormatRules.Last(fr => fr.IsApplyable(entityField)).Formatter(Html, entityField));
-
-WriteLiteral("\r\n                            </td>\r\n");
+WriteLiteral("                                <td>\r\n                                    ");
 
 
-                        }
+                               Write(QuerySettings.EntityFormatRules.Last(fr => fr.IsApplyable(entityField)).Formatter(Html, entityField));
+
+WriteLiteral("\r\n                                </td>\r\n");
 
 
-                         foreach (var col in queryResult.Columns)
-                        {
-
-WriteLiteral("                            <td>\r\n                                ");
+                            }
 
 
-                           Write(formatters[col.Index](Html, row[col]));
+                             foreach (var col in queryResult.Columns)
+                            {
 
-WriteLiteral("\r\n                            </td>\r\n");
-
-
-                        }
-
-WriteLiteral("                    </tr>\r\n");
+WriteLiteral("                                <td>\r\n                                    ");
 
 
+                               Write(formatters[col.Index](Html, row[col]));
+
+WriteLiteral("\r\n                                </td>\r\n");
+
+
+                            }
+
+WriteLiteral("                        </tr>\r\n");
+
+
+                    }
                 }
             }
 

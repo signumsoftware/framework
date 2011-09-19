@@ -45,7 +45,7 @@ namespace Signum.Web.Chart
         }
 
         [HttpPost]
-        public PartialViewResult ChangeType(string prefix)
+        public PartialViewResult UpdateChartBuilder(string prefix)
         {
             var request = ExtractChartRequestCtx(prefix).Value;   
 

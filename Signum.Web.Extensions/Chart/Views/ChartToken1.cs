@@ -98,10 +98,25 @@ WriteLiteral("            <span class=\"sf-label-line\">");
 WriteLiteral("</span>\r\n");
 
 
-            
-       Write(Html.ValueLine(tc, ct => ct.Aggregate));
+            if (tc.Value.GroupByVisible)
+            { 
+                var groupCheck = new HtmlTag("input").IdName(tc.Compose("group")).Attr("type", "checkbox").Class("sf-chart-group-trigger");
+                if (((TypeContext<ChartRequest>)tc.Parent).Value.Chart.GroupResults)
+                {
+                    groupCheck.Attr("checked", "checked");
+                }
+                
+           Write(Html.Field("Group", groupCheck.ToHtmlSelf()));
 
-                                                   
+                                                             
+            }
+            if (tc.Value.ShouldAggregate)
+            {
+                
+           Write(Html.ValueLine(tc, ct => ct.Aggregate));
+
+                                                       
+            }
             
        Write(Html.Field("Token", Html.QueryTokenCombo(tc.Value.Token, ViewData[ViewDataKeys.QueryName], tc)));
 
