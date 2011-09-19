@@ -474,9 +474,8 @@ namespace Signum.Engine.Maps
             {
                 using (Schema.Current.GlobalMode())
                 using (new EntityCache(true))
-                using (Transaction tr = new Transaction(true))
                 {
-                    return tr.Commit(func());
+                    return func();
                 }
             }, LazyThreadSafetyMode.PublicationOnly);
 
