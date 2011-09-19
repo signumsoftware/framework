@@ -488,11 +488,16 @@ namespace Signum.Engine.Maps
         {
             foreach (var lazy in registeredLazyList)
             {
-                giReset.GetInvoker(lazy.GetType())(lazy);
+                giReset.GetInvoker(lazy.GetType().GetGenericArguments().Single())(lazy);
             }
         }
 
-        static GenericInvoker<Action<object>> giReset = new GenericInvoker<Action<object>>(obj => ((Lazy<int>)obj).ResetPublicationOnly());
+        static GenericInvoker<Action<object>> giReset = new GenericInvoker<Action<object>>(obj => ResetPublicationOnly<int>(obj));
+
+        static void ResetPublicationOnly<T>(object obj)
+        {
+            ((Lazy<T>)obj).ResetPublicationOnly(); 
+        }
     }
 
     internal interface IEntityEvents
