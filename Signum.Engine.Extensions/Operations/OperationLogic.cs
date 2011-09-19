@@ -347,9 +347,9 @@ namespace Signum.Engine.Operations
             if (result.Lite)
             {
                 var list = GraphExplorer.FromRoot(entity).Where(a => a.SelfModified);
-                throw new InvalidOperationException("Operation {0} needs a Lite or a fresh entity, but the entity is modifie:\r\n {0}".Formato(result.Key, list.ToString("\r\n")));
+                if (list.Any())
+                    throw new InvalidOperationException("Operation {0} needs a Lite or a fresh entity, but the entity has changes:\r\n {0}".Formato(result.Key, list.ToString("\r\n")));
             }
-               
 
             return result;
         }
