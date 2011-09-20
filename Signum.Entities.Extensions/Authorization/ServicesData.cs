@@ -76,7 +76,7 @@ namespace Signum.Entities.Authorization
             internal set { Set(ref type, value, () => Type); }
         }
 
-        MList<T> rules;
+        MList<T> rules = new MList<T>();
         public MList<T> Rules
         {
             get { return rules; }
