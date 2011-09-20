@@ -101,6 +101,7 @@
     <Compile Include="Basics\PropertyDN.cs" />
     <Compile Include="Basics\QueryDN.cs" />
     <Compile Include="Basics\FacadeMethodDN.cs" />
+    <Compile Include="Cache\CachePermissions.cs" />
     <Compile Include="Chart\ChartToken.cs" />
     <Compile Include="Chart\ChartRequest.cs" />
     <Compile Include="Chart\ChartUtils.cs" />
@@ -116,6 +117,7 @@
     <Compile Include="Files\IFileServer.cs" />
     <Compile Include="Mailing\EmailMessage.cs" />
     <Compile Include="Mailing\EmailTemplate.cs" />
+    <Compile Include="Mailing\Newsletter.cs" />
     <Compile Include="Mailing\SMTPConfiguration.cs" />
     <Compile Include="Operations\IOperationServer.cs" />
     <Compile Include="Operations\OperationDN.cs" />
@@ -123,6 +125,7 @@
     <Compile Include="Processes\Process.cs" />
     <Compile Include="Processes\Package.cs" />
     <Compile Include="Profiler\ProfilerPermissions.cs" />
+    <Compile Include="SMS\SMSCharacters.cs" />
     <Compile Include="UserQueries\IUserQueryServer.cs" />
     <Compile Include="Reports\ExcelReportDN.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -82,7 +82,14 @@ WriteLiteral("\r\n    ");
 
 Write(Html.ScriptCss("~/ControlPanel/Content/SF_ControlPanel.css"));
 
-WriteLiteral("\r\n");
+WriteLiteral("\r\n\r\n    <script type=\"text/javascript\">\r\n        $(function () {\r\n            set" +
+"Timeout(function () {\r\n                window.location.href = window.location.hr" +
+"ef;\r\n            }, ");
+
+
+          Write(ControlPanelClient.RefreshMilliseconds);
+
+WriteLiteral(");\r\n        });\r\n    </script>\r\n");
 
 
 });

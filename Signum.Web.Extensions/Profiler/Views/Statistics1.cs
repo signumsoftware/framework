@@ -65,98 +65,45 @@ namespace ASP
 
 
 
+
+             
+    SqlProfileResumeOrder order = ViewBag.Order;
+
+
 WriteLiteral("<h2>");
 
 
 Write(ViewData[ViewDataKeys.Title]);
 
-WriteLiteral("</h2>\r\n<div>\r\n");
+WriteLiteral("</h2>\r\n<div>\r\n  ");
 
 
-Write(Html.ActionLink("Root Entries", "Heavy"));
+Write(Html.Partial(ProfilerClient.ViewPrefix.Formato("ProfilerButtons")));
 
-WriteLiteral(@"
-</div>
-<table class=""sf-search-results"">
-    <thead>
-        <tr>
-            <th>
-                Count
-            </th>
-            <th>
-                Sum
-            </th>
-            <th>
-                Avg
-            </th>
-            <th>
-                Min
-            </th>
-            <th>
-                Max
-            </th>
-            <th>
-                Query
-            </th>
-            <th>
-               References
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-");
+WriteLiteral("\r\n  ");
 
 
-         foreach (var item in Model)
-        {
+Write(Html.ActionLink("Root Entries", "Heavy", new {@class = "sf-button" }));
 
-WriteLiteral("            <tr>\r\n                <td>");
-
-
-               Write(item.Count);
-
-WriteLiteral("</td>\r\n                <td>");
+WriteLiteral("\r\n</div>\r\n\r\n");
 
 
-               Write(item.Sum.NiceToString());
+Write(Html.Partial(ProfilerClient.ViewPrefix.Formato("StatisticsTable")));
 
-WriteLiteral("</td>\r\n                <td>");
-
-
-               Write(item.Avg.NiceToString());
-
-WriteLiteral("</td>\r\n                <td>");
+WriteLiteral("\r\n");
 
 
-               Write(item.Min.NiceToString());
+Write(Html.ScriptsJs("~/Profiler/Scripts/SF_Profiler.js"));
 
-WriteLiteral("</td>\r\n                <td>");
-
-
-               Write(item.Max.NiceToString());
-
-WriteLiteral("</td>\r\n                <td>");
+WriteLiteral("\r\n<script language=\"javascript\">\r\n    $(function () {\r\n        SF.Profiler.init(f" +
+"unction () {\r\n            $.ajax({\r\n                url: \"");
 
 
-               Write(item.Query);
+                 Write(Url.Action((ProfilerController p) => p.Statistics(order)));
 
-WriteLiteral("</td>\r\n                <td>\r\n");
-
-
-                    foreach (var r in item.References)
-                   {
-                       
-                  Write(Html.ActionLink(r, (ProfilerController pc) => pc.HeavyRoute(r)));
-
-                                                                                       
-                   }
-
-WriteLiteral("                </td>  \r\n            </tr>\r\n");
-
-
-        }
-
-WriteLiteral("\r\n      \r\n    </tbody>\r\n</table>\r\n");
+WriteLiteral("\",\r\n                success: function(data){\r\n                    $(\"table.sf-sta" +
+"ts-table\").replaceWith(data); \r\n                }\r\n             }); \r\n        })" +
+";\r\n        SF.Profiler.initStats();\r\n    });\r\n</script>\r\n");
 
 
         }

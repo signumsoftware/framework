@@ -19,8 +19,8 @@ namespace Signum.Web.Files
 {
     public class FileRepeater : EntityRepeater
     {
-        public FileRepeater(Type type, object untypedValue, Context parent, string controlID, PropertyRoute propertyRoute)
-            : base(type, untypedValue, parent, controlID, propertyRoute)
+        public FileRepeater(Type type, object untypedValue, Context parent, string controlID, PropertyRoute route)
+            : base(type, untypedValue, parent, controlID, route)
         {
 
         }

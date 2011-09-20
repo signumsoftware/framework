@@ -18,6 +18,8 @@ namespace Signum.Web.ControlPanel
 {
     public class ControlPanelClient
     {
+        public static long RefreshMilliseconds = 300000; //5 minutes
+
         public static string AdminViewPrefix = "~/ControlPanel/Views/Admin/{0}.cshtml";
         public static string ViewPrefix = "~/ControlPanel/Views/{0}.cshtml";
 
@@ -65,13 +67,13 @@ namespace Signum.Web.ControlPanel
                 Constructor.ConstructorManager.Constructors.Add(
                     typeof(ControlPanelDN), () => new ControlPanelDN { Related = UserDN.Current.ToLite<IdentifiableEntity>() });
 
-                ButtonBarEntityHelper.RegisterEntityButtons<ControlPanelDN>((controllerCtx, panel, viewName, prefix) => 
+                ButtonBarEntityHelper.RegisterEntityButtons<ControlPanelDN>((ctx, panel) => 
                 {
                     return new ToolBarButton[]
                     {
                         new ToolBarButton
                         {
-                            Id = TypeContextUtilities.Compose(prefix, "CreatePart"),
+                            Id = TypeContextUtilities.Compose(ctx.Prefix, "CreatePart"),
                             Text = Resources.ControlPanel_CreateNewPart,
                             Enabled = panel.IsNew ? false : true,
                             AltText = panel.IsNew ? Resources.ControlPanel_YouMustSaveThePanelBeforeAddingParts : Resources.ControlPanel_CreateNewPart,

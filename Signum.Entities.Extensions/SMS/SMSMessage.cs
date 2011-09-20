@@ -8,23 +8,26 @@ namespace Signum.Entities.SMS
 {
     public enum SMSProviderOperations
     {
-        SendSMSMessage
+        SendSMSMessage,
+        SendSMSMessagesFromTemplate
     }
 
     public enum SMSMessageState
     {
         Created,
-        Sent
-    }
-
-    public enum SendState
-    {
-        None,
-        Queued,
         Sent,
         Delivered,
         Failed,
     }
+
+    //public enum SendState
+    //{
+    //    None,
+    //    Queued,
+    //    Sent,
+    //    Delivered,
+    //    Failed,
+    //}
 
     public enum SMSMessageOperations
     {
@@ -32,7 +35,8 @@ namespace Signum.Entities.SMS
         Create,
         Send,
         UpdateStatus,
-        CreateUpdateStatusPackage
+        CreateUpdateStatusPackage,
+        CreateSMSMessageFromTemplate
     }
 
     public enum SMSMessageProcess
@@ -44,6 +48,8 @@ namespace Signum.Entities.SMS
     [Serializable]
     public class SMSMessageDN : Entity
     {
+        public static string DefaultFrom;
+
         Lite<SMSTemplateDN> template;
         public Lite<SMSTemplateDN> Template
         {
@@ -59,7 +65,7 @@ namespace Signum.Entities.SMS
             set { Set(ref message, value, () => Message); }
         }
 
-        string from;
+        string from = DefaultFrom;
         [StringLengthValidator(AllowNulls = false)]
         public string From
         {
@@ -82,12 +88,12 @@ namespace Signum.Entities.SMS
             set { Set(ref state, value, () => State); }
         }
 
-        SendState sendState;
-        public SendState SendState
-        {
-            get { return sendState; }
-            set { Set(ref sendState, value, () => SendState); }
-        }
+        //SendState sendState;
+        //public SendState SendState
+        //{
+        //    get { return sendState; }
+        //    set { Set(ref sendState, value, () => SendState); }
+        //}
 
         [NotNullable]
         string destinationNumber;
@@ -107,15 +113,15 @@ namespace Signum.Entities.SMS
             set { Set(ref messageID, value, () => MessageID); }
         }
 
-        Lite<SMSPackageDN> sendpackage;
-        public Lite<SMSPackageDN> SendPackage
+        Lite<SMSSendPackageDN> sendpackage;
+        public Lite<SMSSendPackageDN> SendPackage
         {
             get { return sendpackage; }
             set { Set(ref sendpackage, value, () => SendPackage); }
         }
 
-        Lite<SMSPackageDN> updatePackage;
-        public Lite<SMSPackageDN> UpdatePackage
+        Lite<SMSUpdatePackageDN> updatePackage;
+        public Lite<SMSUpdatePackageDN> UpdatePackage
         {
             get { return updatePackage; }
             set { Set(ref updatePackage, value, () => UpdatePackage); }

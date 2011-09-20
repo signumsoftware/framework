@@ -8,7 +8,21 @@ using Signum.Utilities;
 
 namespace Signum.Entities.SMS
 {
-    public class SMSPackageDN : IdentifiableEntity, IProcessDataDN
+    [Serializable]
+    public class SMSSendPackageDN : SMSPackageDN
+    {
+
+    }
+
+
+    [Serializable]
+    public class SMSUpdatePackageDN : SMSPackageDN
+    {
+
+    }
+
+    [Serializable]
+    public abstract class SMSPackageDN : IdentifiableEntity, IProcessDataDN
     {
         [SqlDbType(Size = 200)]
         string name;

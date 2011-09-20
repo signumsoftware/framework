@@ -2,19 +2,20 @@
 @using Signum.Web.Profiler
 <h2>@ViewData[ViewDataKeys.Title]</h2>
 <div>
-    @if (HeavyProfiler.Enabled)
-    {
-        @Html.ActionLink("Disable", "Disable")
-    }
-    else
-    {
-        @Html.ActionLink("Enable", "Enable")
-
-    }
-    
-    @Html.ActionLink("Clean", "Clean")
-   
-
-        @Html.ActionLink("Slowest SQLs", "HeavySlowest")        
+    @Html.Partial(ProfilerClient.ViewPrefix.Formato("ProfilerButtons"))
+    @Html.ActionLink("Slowest SQLs", (ProfilerController pc) => pc.Statistics(SqlProfileResumeOrder.Sum))
 </div>
 @{ Html.RenderPartial(ProfilerClient.ViewPrefix.Formato("ProfilerTable"), (object)Model);}
+@Html.ScriptsJs("~/Profiler/Scripts/SF_Profiler.js")
+<script language="javascript">
+    $(function () {
+        SF.Profiler.init(function () {
+            $.ajax({
+                url: "@Url.Action((ProfilerController p) => p.Heavy())",
+                success: function (data) {
+                    $("table.sf-profiler-table").replaceWith(data);
+                }
+            });
+        });
+    });
+</script>

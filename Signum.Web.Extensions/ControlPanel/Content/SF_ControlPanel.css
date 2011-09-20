@@ -23,10 +23,6 @@
     line-height: 20px;
     margin-bottom: 2px;     
 }
-#sfCpAdminContainer .sf-cp-part-header
-{
-    /*cursor: move;    */
-}
 #sfCpAdminContainer .ui-draggable-dragging
 {
     cursor: default !important;    
@@ -73,5 +69,5 @@
 }
 .sf-cp-count-uq-list .sf-field
 {
-    min-width: inherit !important;    
+    min-width: 135px;    
 }

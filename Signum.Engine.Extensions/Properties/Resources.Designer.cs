@@ -485,11 +485,11 @@ namespace Signum.Engine.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Operation {0} is not Authorized.
+        ///   Looks up a localized string similar to Operation {0} ({1}) is not Authorized.
         /// </summary>
-        internal static string Operation0IsNotAuthorized {
+        internal static string Operation01IsNotAuthorized {
             get {
-                return ResourceManager.GetString("Operation0IsNotAuthorized", resourceCulture);
+                return ResourceManager.GetString("Operation01IsNotAuthorized", resourceCulture);
             }
         }
         

@@ -30,7 +30,7 @@ namespace Signum.Engine.Files
                 EnumLogic<FileTypeDN>.Start(sb, () => fileTypes.Keys.ToHashSet());
 
                 sb.Schema.EntityEvents<FilePathDN>().PreSaving += FilePath_PreSaving;
-                sb.Schema.EntityEvents<FilePathDN>().PreUnsafeDelete +=new PreUnsafeDeleteHandler<FilePathDN>(FilePathLogic_PreUnsafeDelete);
+                sb.Schema.EntityEvents<FilePathDN>().PreUnsafeDelete +=new QueryHandler<FilePathDN>(FilePathLogic_PreUnsafeDelete);
 
                 dqm[typeof(FileRepositoryDN)] = (from r in Database.Query<FileRepositoryDN>()
                                                  select new
@@ -156,6 +156,7 @@ namespace Signum.Engine.Files
                 if (!Directory.Exists(path))
                     Directory.CreateDirectory(path);
                 File.WriteAllBytes(fp.FullPhysicalPath, fp.BinaryFile);
+                fp.BinaryFile = null; 
             }
             catch (IOException ex)
             {

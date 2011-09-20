@@ -1,70 +1,146 @@
 ﻿var SF = SF || {};
 
-SF.SMS = (function () {
-    var SMSMaxTextLength;
-    var SMSWarningTextLength;
+if (typeof SF.SMS != "undefined") {
+    SF.SMS.init();
+}
+else {
+    SF.SMS = (function () {
+        var SMSMaxTextLength;
+        var SMSWarningTextLength;
 
-    var normalCharacters;
-    var doubleCharacters;
+        var normalCharacters;
+        var doubleCharacters;
 
-    var charactersToEnd = function ($textarea) {
-        var text = $textarea.val();
-        var count = text.length;
-        var maxLength = SMSMaxTextLength;
-        for (var l = 0; l < text.length; l++) {
-            var current = text.charAt(l);
-            if (normalCharacters.indexOf(current) == -1) {
-                if (doubleCharacters.indexOf(current) != -1) {
-                    count++;
-                }
-                else {
-                    maxLength = 60;
-                    count = text.length;
-                    break;
+        var init = function () {
+            loadLists($('#sfCharactersLeft').attr("data-url"));
+            remainingCharacters();
+            fillLiterals();
+
+            $('textarea#Message').keyup(function () {
+                remainingCharacters();
+            });
+
+            $('#sfRemoveNoSMSChars').click(function () {
+                var $textarea = $('#Message');
+                $.ajax({
+                    dataType: "text",
+                    url: $(this).attr("data-url"),
+                    data: { text: $textarea.val() },
+                    success: function (result) {
+                        $textarea.val(result);
+                        remainingCharacters();
+                    }
+                });
+            });
+
+            $("#sfLiterals").dblclick(function () {
+                insertLiteral();
+            });
+
+            $("#sfInsertLiteral").click(function () {
+                insertLiteral();
+            });
+        };
+
+        var charactersToEnd = function ($textarea) {
+            var text = $textarea.val();
+            var count = text.length;
+            var maxLength = SMSMaxTextLength;
+            for (var l = 0; l < text.length; l++) {
+                var current = text.charAt(l);
+                if (normalCharacters.indexOf(current) == -1) {
+                    if (doubleCharacters.indexOf(current) != -1) {
+                        count++;
+                    }
+                    else {
+                        maxLength = 60;
+                        count = text.length;
+                        break;
+                    }
                 }
             }
-        }
-        return maxLength - count;
-    };
+            return maxLength - count;
+        };
 
-    function loadLists(url) {
-        $.ajax({
-            url: url,
-            data: {},
-            success: function (data) {
-                SMSMaxTextLength = data.smsLength;
-                SMSWarningTextLength = data.smsWarningLength;
-                normalCharacters = data.normalChar;
-                doubleCharacters = data.doubleChar;
-                $('#sfCharsLeft').html(SMSMaxTextLength);
+        var loadLists = function (url) {
+            $.ajax({
+                url: url,
+                data: {},
+                async: false,
+                success: function (data) {
+                    SMSMaxTextLength = data.smsLength;
+                    SMSWarningTextLength = data.smsWarningLength;
+                    normalCharacters = data.normalChar;
+                    doubleCharacters = data.doubleChar;
+                    $('#sfCharsLeft').html(SMSMaxTextLength);
+                }
+            });
+        };
+
+        var remainingCharacters = function () {
+            var $textarea = $('#Message');
+            var $remainingChars = $('#sfCharsLeft');
+            var $remainingCharacters = $('#sfCharactersLeft > p');
+
+            var numberCharsLeft = charactersToEnd($textarea);
+            $remainingChars.html(numberCharsLeft);
+
+            $remainingCharacters.removeClass('sf-sms-no-more-chars').removeClass('sf-sms-warning');
+            $textarea.removeClass('sf-sms-red');
+            $remainingChars.removeClass('sf-sms-highlight');
+
+            if (numberCharsLeft < 0) {
+                $remainingCharacters.addClass('sf-sms-no-more-chars');
+                $remainingChars.addClass('sf-sms-highlight');
+                $textarea.addClass('sf-sms-red');
             }
-        });
-    };
+            else if (numberCharsLeft < SMSWarningTextLength) {
+                $remainingCharacters.addClass('sf-sms-warning');
+                $remainingChars.addClass('sf-sms-highlight');
+            }
+        };
 
-    $(function () {
-        loadLists($('#sfCharactersLeft').attr("data-url"));
-    });
+        var fillLiterals = function () {
+            var $combo = $(".sf-associated-type");
+            var prefix = $combo.attr("data-control-id");
+            var url = $combo.attr("data-url");
+            var $list = $("#sfLiterals");
+            if ($list.length == 0) {
+                return;
+            }
+            var runtimeInfo = new SF.RuntimeInfo(prefix);
+            if (SF.isEmpty(runtimeInfo.runtimeType())) {
+                $list.html("");
+                return;
+            }
+            $.ajax({
+                url: url,
+                data: runtimeInfo.find().serialize(),
+                success: function (data) {
+                    $list.html("");
+                    for (var i = 0; i < data.literals.length; i++) {
+                        $list.append($("<option>").val(data.literals[i]).html(data.literals[i]));
+                    }
+                    remainingCharacters();
+                }
+            });
+        };
 
-    $('textarea#Message').keyup(function () {
-        var $textarea = $('#Message');
-        var $charsLeft = $('#sfCharsLeft');
-        var $charactersLeft = $('#sfCharactersLeft > p');
+        var insertLiteral = function () {
+            var selected = $("#sfLiterals").find(":selected").val();
+            if (selected == "") {
+                alert("No element selected");
+                return;
+            }
+            var $message = $('#Message');
+            $message.val($message.val() + selected);
+        };
 
-        var numberCharsLeft = charactersToEnd($textarea);
-        $charsLeft.html(numberCharsLeft);
+        return {
+            init: init, 
+            fillLiterals: fillLiterals
+        };
+    })();
 
-        $charactersLeft.removeClass('sf-sms-no-more-chars').removeClass('sf-sms-warning');
-        $textarea.removeClass('sf-sms-red');
-        $charsLeft.removeClass('sf-sms-highlight');
-
-        if (numberCharsLeft < 0) {
-            $charactersLeft.addClass('sf-sms-no-more-chars');
-            $charsLeft.addClass('sf-sms-highlight');
-            $textarea.addClass('sf-sms-red');
-        }
-        else if (numberCharsLeft < SMSWarningTextLength) {
-            $charactersLeft.addClass('sf-sms-warning');
-            $charsLeft.addClass('sf-sms-highlight');
-        }
-    });
-})();
+    $(function () { SF.SMS.init(); });
+}

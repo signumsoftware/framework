@@ -195,7 +195,7 @@ namespace Signum.Engine.Mailing
                                                {
                                                    Entity = e.ToLite(),
                                                    e.Id,
-                                                   e.Error,
+                                                   e.Name,
                                                    e.NumLines,
                                                    e.NumErrors,
                                                }).ToDynamic();
@@ -220,6 +220,14 @@ namespace Signum.Engine.Mailing
 
         public static EmailMessageDN CreateEmailMessage(IEmailModel model, Lite<EmailPackageDN> package)
         {
+
+            if (model == null)
+                throw new ArgumentNullException("model");
+
+            if (model.To == null)
+                throw new ArgumentNullException("model.To");
+
+
             using (Sync.ChangeBothCultures(model.To.CultureInfo))
             {
                 EmailContent content = GetTemplate(model.GetType())(model);
@@ -368,7 +376,7 @@ namespace Signum.Engine.Mailing
 
             var process = ProcessLogic.Create(EmailProcesses.SendEmails, package);
 
-            process.ToLite().ExecuteLite(ProcessOperation.Execute);
+            process.Execute(ProcessOperation.Execute);
 
             return process;
         }
@@ -402,7 +410,7 @@ namespace Signum.Engine.Mailing
 
             var process = ProcessLogic.Create(EmailProcesses.SendEmails, package);
 
-            process.ToLite().ExecuteLite(ProcessOperation.Execute);
+            process.Execute(ProcessOperation.Execute);
 
             return process;
         }
@@ -545,6 +553,16 @@ namespace Signum.Engine.Mailing
             }
 
             return client;
+        }
+
+        public static SmtpClient GenerateSmtpClient(this Lite<SMTPConfigurationDN> config)
+        {
+            return GenerateSmtpClient(config.ToString(), false);
+        }
+
+        public static SmtpClient GenerateSmtpClient(this Lite<SMTPConfigurationDN> config, bool defaultIfNotPresent)
+        {
+            return GenerateSmtpClient(config.TryCC(c => c.ToString()), defaultIfNotPresent);
         }
     }
 }

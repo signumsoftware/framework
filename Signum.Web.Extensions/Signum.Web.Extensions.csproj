@@ -221,6 +221,18 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
+    <Compile Include="Cache\Controllers\CacheController.cs" />
+    <Compile Include="Cache\CacheClient.cs" />
+    <Compile Include="Cache\Views\Statistics1.cs">
+      <DependentUpon>Statistics.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Cache\Views\_ViewStart.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>_ViewStart.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Calendar\CalendarClient.cs" />
     <Compile Include="Calendar\Views\Calendar.cs">
       <AutoGen>True</AutoGen>
@@ -304,6 +316,16 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>SearchControlPart.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Mailing\Views\Newsletter.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Newsletter.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Mailing\Views\SMTPConfiguration.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SMTPConfiguration.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Profiler\TimeTracker.cs" />
     <Compile Include="ControlPanel\Controllers\ControlPanelController.cs" />
@@ -455,6 +477,16 @@
     </Compile>
     <Compile Include="Profiler\ProfilerClient.cs" />
     <Compile Include="Profiler\Controllers\ProfilerController.cs" />
+    <Compile Include="Profiler\Views\StatisticsTable1.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>StatisticsTable.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Profiler\Views\ProfilerButtons.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ProfilerButtons.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Profiler\Views\Statistics1.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -523,16 +555,32 @@
       <DesignTime>True</DesignTime>
     </Compile>
     <Compile Include="SMS\Controllers\SMSController.cs" />
+    <Compile Include="SMS\Models\MultipleSMSModel.cs" />
     <Compile Include="SMS\SMSClient.cs" />
+    <Compile Include="SMS\Views\MultipleSMS.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>MultipleSMS.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="SMS\Views\SMSMessage.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>SMSMessage.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="SMS\Views\SMSSendPackage.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SMSSendPackage.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="SMS\Views\SMSTemplate1.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>SMSTemplate.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="SMS\Views\SMSUpdatePackage.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SMSUpdatePackage.cshtml</DependentUpon>
     </Compile>
     <Compile Include="UserQueries\Controller\UserQueriesController.cs" />
     <Compile Include="UserQueries\UserQueriesClient.cs" />
@@ -724,12 +772,11 @@
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>_ViewStart.cs</LastGenOutput>
     </None>
+    <Content Include="Cache\Scripts\SF_Cache.js" />
     <Content Include="Calendar\Content\calendar.css" />
     <Content Include="Calendar\Scripts\calendar.js" />
     <Content Include="Chart\Content\SF_Chart.css" />
     <Content Include="Chart\Images\chartType.png" />
-    <Content Include="ControlPanel\Content\SF_ControlPanel.css" />
-    <Content Include="ControlPanel\Scripts\SF_ControlPanel.js" />
     <Content Include="Chart\Scripts\SF_Chart.js" />
     <Content Include="ControlPanel\Content\SF_ControlPanel.css" />
     <Content Include="ControlPanel\Scripts\SF_ControlPanel.js" />
@@ -765,6 +812,15 @@
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>Calendar.cs</LastGenOutput>
     </Content>
+    <Content Include="Cache\Views\_ViewStart.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>_ViewStart.cs</LastGenOutput>
+    </Content>
+    <Content Include="Cache\Views\Statistics.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>Statistics1.cs</LastGenOutput>
+    </Content>
+    <Content Include="Cache\Views\Web.config" />
     <None Include="Captcha\Views\_ViewStart.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>_ViewStart.cs</LastGenOutput>
@@ -785,6 +841,7 @@
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>LinkListPart1.cs</LastGenOutput>
     </Content>
+    <Content Include="Profiler\Scripts\SF_Profiler.js" />
     <Content Include="Profiler\Views\Statistics.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>Statistics1.cs</LastGenOutput>
@@ -817,6 +874,22 @@
     <Content Include="Chart\Views\ChartResults.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>ChartResults.cs</LastGenOutput>
+    </Content>
+    <Content Include="Profiler\Views\ProfilerButtons.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>ProfilerButtons.cs</LastGenOutput>
+    </Content>
+    <Content Include="Profiler\Views\StatisticsTable.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>StatisticsTable1.cs</LastGenOutput>
+    </Content>
+    <Content Include="Mailing\Views\SMTPConfiguration.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>SMTPConfiguration.cs</LastGenOutput>
+    </Content>
+    <Content Include="Mailing\Views\Newsletter.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>Newsletter.cs</LastGenOutput>
     </Content>
     <None Include="Profiler\Views\Times.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
@@ -1069,6 +1142,18 @@
     <Content Include="SMS\Views\SMSTemplate.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>SMSTemplate1.cs</LastGenOutput>
+    </Content>
+    <Content Include="SMS\Views\SMSUpdatePackage.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>SMSUpdatePackage.cs</LastGenOutput>
+    </Content>
+    <Content Include="SMS\Views\SMSSendPackage.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>SMSSendPackage.cs</LastGenOutput>
+    </Content>
+    <Content Include="SMS\Views\MultipleSMS.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>MultipleSMS.cs</LastGenOutput>
     </Content>
     <None Include="UserQueries\Views\QueryColumn.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>

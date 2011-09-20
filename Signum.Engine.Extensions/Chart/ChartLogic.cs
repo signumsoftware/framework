@@ -63,11 +63,8 @@ namespace Signum.Engine.Extensions.Chart
             return userChart;
         }
 
-        static void ChartLogic_Retrieved(UserChartDN userQuery, bool fromCache)
+        static void ChartLogic_Retrieved(UserChartDN userQuery)
         {
-            if (fromCache)
-                return;
-
             object queryName = QueryLogic.ToQueryName(userQuery.Query.Key);
 
             QueryDescription description = DynamicQueryManager.Current.QueryDescription(queryName);

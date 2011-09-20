@@ -98,6 +98,7 @@ namespace Signum.Web.Files
                 sb.AppendLine("parDoc.getElementById('{0}').value='{1}';".Formato(TypeContextUtilities.Compose(formFieldId, EntityBaseKeys.RuntimeInfo), new RuntimeInfo(fp).ToString()));
                 sb.AppendLine("parDoc.getElementById('{0}').style.display='none';".Formato(TypeContextUtilities.Compose(formFieldId,"DivNew")));
                 sb.AppendLine("parDoc.getElementById('{0}').style.display='block';".Formato(TypeContextUtilities.Compose(formFieldId,"DivOld")));
+                sb.AppendLine("parDoc.getElementById('{0}').style.display='block';".Formato(TypeContextUtilities.Compose(formFieldId, "btnRemove")));
             }
             else
             {

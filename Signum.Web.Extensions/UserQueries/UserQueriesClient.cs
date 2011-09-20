@@ -85,15 +85,15 @@ namespace Signum.Web.UserQueries
 
                 ButtonBarQueryHelper.GetButtonBarForQueryName += new GetToolBarButtonQueryDelegate(ButtonBarQueryHelper_GetButtonBarForQueryName);
 
-                ButtonBarEntityHelper.RegisterEntityButtons<UserQueryDN>((controllerContext, entity, partialViewName, prefix) =>
+                ButtonBarEntityHelper.RegisterEntityButtons<UserQueryDN>((ctx, entity) =>
                 {
                     var buttons = new List<ToolBarButton>
                     {
                         new ToolBarButton 
                         { 
-                            Id = TypeContextUtilities.Compose(prefix, "ebUserQuerySave"),
+                            Id = TypeContextUtilities.Compose(ctx.Prefix, "ebUserQuerySave"),
                             Text = Signum.Web.Properties.Resources.Save, 
-                            OnClick = JsValidator.EntityIsValid(prefix, 
+                            OnClick = JsValidator.EntityIsValid(ctx.Prefix, 
                                 Js.Submit(RouteHelper.New().Action<UserQueriesController>(uqc => uqc.Save()))).ToJS()
                         }
                     };
@@ -102,7 +102,7 @@ namespace Signum.Web.UserQueries
                     {
                         buttons.Add(new ToolBarButton
                         {
-                            Id = TypeContextUtilities.Compose(prefix, "ebUserQueryDelete"),
+                            Id = TypeContextUtilities.Compose(ctx.Prefix, "ebUserQueryDelete"),
                             Text = Resources.Delete,
                             OnClick = Js.Confirm(Resources.AreYouSureOfDeletingQuery0.Formato(entity.DisplayName), 
                                                 Js.Submit(RouteHelper.New().Action<UserQueriesController>(uqc => uqc.Delete(entity.ToLite())))).ToJS()

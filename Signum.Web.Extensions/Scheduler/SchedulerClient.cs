@@ -45,26 +45,14 @@ namespace Signum.Web.Extensions.Scheduler
                     new EntitySettings<ScheduleRuleHourlyDN>(EntityType.Default) { PartialViewName = _ => ViewPrefix.Formato("ScheduleRuleHourly") },
                 });
 
-                Navigator.EntitySettings<ScheduleRuleDailyDN>().MappingAdmin.AsEntityMapping().SetProperty(srd => srd.StartingOn, MappingDate);
-                Navigator.EntitySettings<ScheduleRuleWeeklyDN>().MappingAdmin.AsEntityMapping().SetProperty(srw => srw.StartingOn, MappingDate);
-                Navigator.EntitySettings<ScheduleRuleMinutelyDN>().MappingAdmin.AsEntityMapping().SetProperty(srw => srw.StartingOn, MappingDate);
-                Navigator.EntitySettings<ScheduleRuleHourlyDN>().MappingAdmin.AsEntityMapping().SetProperty(srw => srw.StartingOn, MappingDate);
+                Navigator.EntitySettings<ScheduleRuleDailyDN>().MappingAdmin.AsEntityMapping().SetProperty(srd => srd.StartingOn, Mapping.DateHourMinute);
+                Navigator.EntitySettings<ScheduleRuleWeeklyDN>().MappingAdmin.AsEntityMapping().SetProperty(srw => srw.StartingOn, Mapping.DateHourMinute);
+                Navigator.EntitySettings<ScheduleRuleMinutelyDN>().MappingAdmin.AsEntityMapping().SetProperty(srw => srw.StartingOn, Mapping.DateHourMinute);
+                Navigator.EntitySettings<ScheduleRuleHourlyDN>().MappingAdmin.AsEntityMapping().SetProperty(srw => srw.StartingOn, Mapping.DateHourMinute);
             }
         }
 
-        public static DateTime MappingDate(MappingContext<DateTime> ctx)
-        {
-            if (ctx.Parent.Empty())
-                return ctx.None();
-
-            DateTime dateStart; 
-            int hours; 
-            int mins;
-            if (ctx.Parent.Parse("Date", out dateStart) & ctx.Parent.Parse("Hour", out hours) & ctx.Parent.Parse("Minute", out mins))
-                return dateStart.AddHours(hours).AddMinutes(mins);
-
-            return ctx.None();
-        }
+        
     }
 }
 

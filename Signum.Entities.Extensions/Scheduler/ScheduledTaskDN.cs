@@ -7,12 +7,14 @@ using Signum.Entities;
 using Signum.Utilities;
 using Signum.Entities.Extensions.Properties;
 using Signum.Utilities.Reflection;
+using Signum.Entities.Processes;
 
 namespace Signum.Entities.Scheduler
 {
     [Serializable]
     public class ScheduledTaskDN : IdentifiableEntity
     {
+        [ImplementedBy(typeof(ScheduleRuleDailyDN), typeof(ScheduleRuleWeeklyDN), typeof(ScheduleRuleWeekDaysDN), typeof(ScheduleRuleMinutelyDN), typeof(ScheduleRuleHourlyDN))]
         IScheduleRuleDN rule;
         [NotNullValidator]
         public IScheduleRuleDN Rule
@@ -21,6 +23,7 @@ namespace Signum.Entities.Scheduler
             set { SetToStr(ref rule, value, () => Rule); }
         }
 
+        [ImplementedBy(typeof(CustomTaskDN), typeof(ProcessDN))]
         ITaskDN task;
         [NotNullValidator]
         public ITaskDN Task

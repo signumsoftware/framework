@@ -26,11 +26,8 @@ namespace Signum.Windows.UserQueries
         internal static UserQueryDN FromSearchControl(SearchControl searchControl)
         {
             QueryDescription description = Navigator.Manager.GetQueryDescription(searchControl.QueryName);
-            var query = QueryClient.GetQuery(searchControl.QueryName);
 
-            var req = searchControl.GetQueryRequest();
-
-            return req.ToUserQuery(description, query);
+            return searchControl.GetQueryRequest().ToUserQuery(description, QueryClient.GetQuery(searchControl.QueryName));
         }
 
         internal static void ToSearchControl(UserQueryDN uq, SearchControl searchControl)
@@ -59,7 +56,7 @@ namespace Signum.Windows.UserQueries
                      
             searchControl.Reinitialize(filters, columns, uq.ColumnsMode, orders);
 
-            searchControl.MaxItemsCount = uq.MaxItems;
+            searchControl.MaxItems = uq.MaxItems;
         }
     }
 }

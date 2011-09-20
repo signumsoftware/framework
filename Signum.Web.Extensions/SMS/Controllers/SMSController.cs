@@ -21,6 +21,9 @@ using Signum.Entities.Basics;
 using Signum.Engine.Basics;
 using Signum.Entities.SMS;
 using Signum.Engine.Operations;
+using Signum.Engine.SMS;
+using Signum.Entities.Processes;
+using Signum.Web.Extensions.SMS.Models;
 #endregion
 
 namespace Signum.Web.SMS
@@ -39,69 +42,136 @@ namespace Signum.Web.SMS
                 });
         }
 
-        //[HttpPost]
-        //public ActionResult CreateSMS(string prefix)
-        //{
-        //    var template = this.ExtractEntity<SMSTemplateDN>("");
+        [HttpPost]
+        public ContentResult RemoveNoSMSCharacters(string text)
+        {
+            return Content(SMSCharacters.RemoveNoSMSCharacters(text));
+        }
 
-        //    ValueLineBoxModel model = new ValueLineBoxModel(template, ValueLineBoxType.String, Resources.SMS_PhoneNumber, Resources.SMS_WriteTheDestinationNumber);
+        [HttpPost]
+        public JsonResult GetLiteralsForType(string prefix)
+        {
+            var type = this.ExtractEntity<TypeDN>(prefix);
+            return Json(new
+            {
+                literals = SMSLogic.GetLiteralsFromDataObjectProvider(TypeLogic.ToType(type))
+            });
+        }
 
-        //    ViewData[ViewDataKeys.OnOk] = JsValidator.EntityIsValid(
-        //        new JsValidatorOptions 
-        //        { 
-        //            Prefix = prefix,
-        //            ControllerUrl = Url.Action<SMSController>(sc => sc.CreateSMSValidate(prefix))
-        //        },
-        //        new JsFunction() 
-        //        {
-        //            Js.Submit(Url.Action<SMSController>(sc => sc.CreateSMSOnOk(prefix)),
-        //              "function() {{ return SF.Popup.serializeJson('{0}'); }}".Formato(prefix))
-        //        }).ToJS();
+        [HttpPost]
+        public PartialViewResult CreateSMSMessageFromTemplate(string prefix)
+        {
+            ViewData[ViewDataKeys.OnOk] = new JsFindNavigator(prefix).hasSelectedItems(
+                  new JsFunction() 
+                {
+                       Js.Submit(RouteHelper.New().Action("CreateMessageFromTemplate", "SMS"),
+                        "function() {{ return {{ smsTemplateID: {0} }} }}".Formato(new JsFindNavigator(prefix).splitSelectedIds().ToJS()))
+                }).ToJS();
 
-        //    ViewData[ViewDataKeys.Title] = Resources.SMS_DestinationNumber;
-        //    ViewData[ViewDataKeys.WriteSFInfo] = true;
+            var ie = this.ExtractEntity<IdentifiableEntity>(null);
 
-        //    var tc = new TypeContext<ValueLineBoxModel>(model, prefix);
-        //    return this.PopupOpen(new ViewOkOptions(tc));
-        //}
+            ViewData[ViewDataKeys.Title] = "Select the template";
 
-        //[HttpPost]
-        //public ActionResult CreateSMSValidate(string prefix)
-        //{
-        //    var ctx = this.ExtractEntity<ValueLineBoxModel>(prefix).ApplyChanges(this.ControllerContext, prefix, true).ValidateGlobal();
-            
-        //    if (ctx.GlobalErrors.Any())
-        //    {
-        //        ModelState.FromContext(ctx);
-        //        return JsonAction.ModelState(ModelState);
-        //    }
-            
-        //    var destinationNumber = ctx.Value.StringValue;
-        //    if (!TelephoneValidatorAttribute.TelephoneRegex.IsMatch(destinationNumber))
-        //    {
-        //        ModelState.AddModelError(prefix, "Telephone is not valid");
-        //        return JsonAction.ModelState(ModelState);
-        //    }
+            return Navigator.PartialFind(this, new FindOptions(typeof(SMSTemplateDN))
+            {
+                FilterOptions = new List<FilterOption> 
+                { 
+                    { new FilterOption("IsActive", true) { Frozen = true } },
+                    { new FilterOption("AssociatedType", TypeLogic.ToTypeDN(ie.GetType()).ToLite()) }
+                },
+                AllowMultiple = false
+            }, prefix);
+        }
 
-        //    if (ctx.GlobalErrors.Any())
-        //    {
-        //        ModelState.FromContext(ctx);
-        //    }
-            
-        //    return JsonAction.ModelState(ModelState);
-        //}
+        [HttpPost]
+        public ActionResult CreateMessageFromTemplate(string smsTemplateID)
+        {
+            var ie = this.ExtractLite<IdentifiableEntity>(null);
+            var template = Database.Retrieve<SMSTemplateDN>(int.Parse(smsTemplateID));
+            var message = ie.ConstructFromLite<SMSMessageDN>(SMSMessageOperations.CreateSMSMessageFromTemplate, template);
+            return Navigator.View(this, message);
+        }
 
-        //[HttpPost]
-        //public ActionResult CreateSMSOnOk(string prefix)
-        //{
-        //    var ctx = this.ExtractEntity<ValueLineBoxModel>(prefix).ApplyChanges(this.ControllerContext, prefix, true);
-        //    var destinationNumber = ctx.Value.StringValue;
+        [HttpPost]
+        public PartialViewResult SendMultipleSMSMessagesFromTemplate(List<int> ids, string providerWebQueryName, string prefix)
+        {
+            QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(Navigator.ResolveQueryName(providerWebQueryName));
+            Type entitiesType = Reflector.ExtractLite(queryDescription.Columns.Single(a => a.IsEntity).Type);
+            var webTypeName = Navigator.ResolveWebTypeName(entitiesType);
 
-        //    var template = this.ExtractEntity<SMSTemplateDN>("");
+            //TODO: Anto ConstructorFromMany no pasa prefijo nuevo
+            prefix = Js.NewPrefix(prefix);
+            ViewData[ViewDataKeys.OnOk] = new JsFindNavigator(prefix).hasSelectedItems(
+                  new JsFunction() 
+                {
+                       Js.Submit(RouteHelper.New().Action("SendMultipleMessagesFromTemplate", "SMS"),
+                        "function() {{ return {{ smsTemplateID: {0}, idProviders: '{1}', webTypeName: '{2}' }} }}"
+                        .Formato(new JsFindNavigator(prefix).splitSelectedIds().ToJS(), ids.ToString(","), webTypeName))
+                }).ToJS();
 
-        //    var sms = template.ToLite().ConstructFromLite<SMSMessageDN>(SMSMessageOperations.Create, destinationNumber).Save();
+            ViewData[ViewDataKeys.Title] = "Select the template";
 
-        //    return Redirect(Navigator.ViewRoute(sms));
-        //}
+            return Navigator.PartialFind(this, new FindOptions(typeof(SMSTemplateDN))
+            {
+                FilterOptions = new List<FilterOption> 
+                { 
+                    { new FilterOption("IsActive", true) { Frozen = true } },
+                    { new FilterOption("AssociatedType", TypeLogic.ToTypeDN(entitiesType).ToLite()) }
+                },
+                AllowMultiple = false
+            }, prefix);
+        }
+
+        [HttpPost]
+        public ActionResult SendMultipleMessagesFromTemplate(string idProviders, string smsTemplateID, string webTypeName)
+        {
+            Type entitiesType = Navigator.ResolveType(webTypeName);
+
+            var process = OperationLogic.ServiceConstructFromMany(
+                Database.RetrieveListLite(entitiesType, idProviders.Split(',').Select(id => int.Parse(id)).ToList()),
+                entitiesType,
+                SMSProviderOperations.SendSMSMessagesFromTemplate,
+                Database.Retrieve<SMSTemplateDN>(int.Parse(smsTemplateID)));
+
+            return Redirect(Navigator.ViewRoute(process));
+        }
+
+        [HttpPost]
+        public PartialViewResult SendMultipleSMSMessages(List<int> ids, string providerWebQueryName, string prefix)
+        {
+            QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(Navigator.ResolveQueryName(providerWebQueryName));
+            Type entitiesType = Reflector.ExtractLite(queryDescription.Columns.Single(a => a.IsEntity).Type);
+            var webTypeName = Navigator.ResolveWebTypeName(entitiesType);
+
+            var model = new MultipleSMSModel
+            {
+                ProvidersIds = ids.ToString("_"),
+                WebTypeName = webTypeName,
+            };
+
+            return Navigator.NormalControl(this, model);
+        }
+
+        [HttpPost]
+        public ActionResult SendMultipleMessages()
+        {
+            var model = this.ExtractEntity<MultipleSMSModel>(null).ApplyChanges(this.ControllerContext, null, true).Value;
+
+            var cp = new Signum.Engine.SMS.SMSLogic.CreateMessageParams
+            {
+                Message = model.Message,
+                From = model.From
+            };
+
+            Type entitiesType = Navigator.ResolveType(model.WebTypeName);
+
+            var process = OperationLogic.ServiceConstructFromMany(
+                Database.RetrieveListLite(entitiesType, model.ProvidersIds.Split('_').Select(id => int.Parse(id)).ToList()),
+                entitiesType,
+                SMSProviderOperations.SendSMSMessage,
+                cp);
+
+            return JsonAction.Redirect(Navigator.ViewRoute(process));
+        }
     }
 }

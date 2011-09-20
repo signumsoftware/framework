@@ -22,7 +22,7 @@ namespace Signum.Engine.SMS
                 Construct = _ => new SMSTemplateDN { State = SMSTemplateState.Created },
             }.Register();
 
-            new Execute(SMSTemplateOperations.Modify)
+            new Execute(SMSTemplateOperations.Save)
             {
                 Lite = false,
                 AllowsNew = true,

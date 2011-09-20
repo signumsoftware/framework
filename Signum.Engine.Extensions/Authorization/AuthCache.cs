@@ -56,7 +56,7 @@ namespace Signum.Entities.Authorization
 
         public AuthCache(SchemaBuilder sb, Func<R, K> toKey, Func<K, R> toEntity, DefaultBehaviour<A> max, DefaultBehaviour<A> min)
         {
-            runtimeRules = new Lazy<Dictionary<Lite<RoleDN>, RoleAllowedCache>>(this.NewCache, LazyThreadSafetyMode.PublicationOnly);
+            runtimeRules = Schema.GlobalLazy(this.NewCache);
 
             this.ToKey = toKey;
             this.ToEntity = toEntity;
@@ -287,7 +287,7 @@ namespace Signum.Entities.Authorization
 
         internal A GetAllowed(K key)
         {
-            if (!AuthLogic.IsEnabled)
+            if (!AuthLogic.IsEnabled || Schema.Current.InGlobalMode)
                 return Max.BaseAllowed;
 
             return runtimeRules.Value[RoleDN.Current.ToLite()].GetAllowed(key);

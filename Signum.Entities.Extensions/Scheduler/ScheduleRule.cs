@@ -10,7 +10,6 @@ using System.Reflection;
 
 namespace Signum.Entities.Scheduler
 {
-    [ImplementedBy(typeof(ScheduleRuleDailyDN), typeof(ScheduleRuleWeeklyDN), typeof(ScheduleRuleWeekDaysDN), typeof(ScheduleRuleMinutelyDN), typeof(ScheduleRuleHourlyDN))]
     public interface IScheduleRuleDN : IIdentifiable
     {
         DateTime Next();
