@@ -14,6 +14,7 @@ using System.Threading;
 using System.Linq.Expressions;
 using Signum.Entities.Reflection;
 using System.Collections;
+using Signum.Utilities.Reflection;
 
 namespace Signum.Engine.Maps
 {
@@ -459,17 +460,43 @@ namespace Signum.Engine.Maps
 
         public IDisposable GlobalMode()
         {
+            var oldValue = inGlobalMode.Value; 
             inGlobalMode.Value = true;
-            return new Disposable(() => inGlobalMode.Value = false);
+            return new Disposable(() => inGlobalMode.Value = oldValue);
         }
 
+      
+
+        static List<object> registeredLazyList = new List<object>();  
         public static Lazy<T> GlobalLazy<T>(Func<T> func)
         {
-            return new Lazy<T>(() =>
+            var result =  new Lazy<T>(() =>
             {
                 using (Schema.Current.GlobalMode())
+                using (new EntityCache(true))
+                {
                     return func();
+                }
             }, LazyThreadSafetyMode.PublicationOnly);
+
+            registeredLazyList.Add(result);
+
+            return result; 
+        }
+
+        public static void ResetAllLazy()
+        {
+            foreach (var lazy in registeredLazyList)
+            {
+                giReset.GetInvoker(lazy.GetType().GetGenericArguments().Single())(lazy);
+            }
+        }
+
+        static GenericInvoker<Action<object>> giReset = new GenericInvoker<Action<object>>(obj => ResetPublicationOnly<int>(obj));
+
+        static void ResetPublicationOnly<T>(object obj)
+        {
+            ((Lazy<T>)obj).ResetPublicationOnly(); 
         }
     }
 
@@ -512,9 +539,6 @@ namespace Signum.Engine.Maps
         public abstract bool CompleteCache(T entity, IRetriever retriver);
 
         public abstract Lite<T> RetriveLite(int id);
-
-
-       
     }
 
     public class EntityEvents<T> : IEntityEvents
