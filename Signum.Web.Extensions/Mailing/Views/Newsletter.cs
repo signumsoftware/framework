@@ -116,10 +116,12 @@ WriteLiteral("\r\n");
 
                                                                   
 
-WriteLiteral("                <fieldset>\r\n                    <legend>Message</legend>\r\n       " +
-"             <iframe id=\"newsBodyContent\" name=\"frameNewImage\" src=\"about:blank\"" +
-" class=\"sf-email-htmlbody\">\r\n                    </iframe>\r\n                </fi" +
-"eldset>\r\n");
+WriteLiteral(@"                <fieldset>
+                    <legend>Message</legend>
+                    <iframe id=""newsBodyContent"" name=""frameNewImage"" src=""about:blank"" class=""sf-email-htmlbody"" frameborder=""0"">
+                    </iframe>
+                </fieldset>
+");
 
 
             }
@@ -147,8 +149,8 @@ WriteLiteral("\r\n                    <br />\r\n                    <input type=
 WriteLiteral(@"                <div id=""newsPreviewContent"">
                     <fieldset>
                         <legend>Message</legend>
-                        <iframe id=""newsBodyContentPreview"" name=""frameNewImage"" src=""about:blank"" class=""sf-email-htmlbody"">
-                        </iframe>
+                        <iframe id=""newsBodyContentPreview"" name=""frameNewImage"" src=""about:blank"" class=""sf-email-htmlbody""
+                            frameborder=""0""></iframe>
                         <br />
                         <input type=""button"" class=""sf-button"" id=""newsEditContentButton"" value=""Edit content"" />
                     </fieldset>
