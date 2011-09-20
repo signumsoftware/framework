@@ -85,7 +85,7 @@ namespace Signum.Engine.Mailing
 
                     var process = ProcessLogic.Create(NewsletterOperations.Send, n);
 
-                    process.ToLite().ExecuteLite(ProcessOperation.Execute);
+                    process.Execute(ProcessOperation.Execute);
 
                     n.State = NewsletterState.Sent;
                 }

@@ -201,7 +201,7 @@ namespace Signum.Engine.Scheduler
                         try
                         {
                             using (AuthLogic.User(AuthLogic.SystemUser))
-                                st.Task.ToLite().ExecuteLite(TaskOperation.ExecutePrivate);
+                                st.Task.Execute(TaskOperation.ExecutePrivate);
                         }
                         catch (Exception e)
                         {

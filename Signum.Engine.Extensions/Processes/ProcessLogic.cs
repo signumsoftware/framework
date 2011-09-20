@@ -62,7 +62,7 @@ namespace Signum.Engine.Processes
 
                 new BasicExecute<ProcessDN>(TaskOperation.ExecutePrivate)
                 {
-                    Execute = (pc, _) => ProcessLogic.Create(pc).ToLite().ExecuteLite(ProcessOperation.Execute)
+                    Execute = (pc, _) => ProcessLogic.Create(pc).Execute(ProcessOperation.Execute)
                 }.Register();
 
                 sb.Schema.Initializing[InitLevel.Level4BackgroundProcesses] += Schema_InitializingApplication;

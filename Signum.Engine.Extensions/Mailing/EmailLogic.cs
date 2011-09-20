@@ -376,7 +376,7 @@ namespace Signum.Engine.Mailing
 
             var process = ProcessLogic.Create(EmailProcesses.SendEmails, package);
 
-            process.ToLite().ExecuteLite(ProcessOperation.Execute);
+            process.Execute(ProcessOperation.Execute);
 
             return process;
         }
@@ -410,7 +410,7 @@ namespace Signum.Engine.Mailing
 
             var process = ProcessLogic.Create(EmailProcesses.SendEmails, package);
 
-            process.ToLite().ExecuteLite(ProcessOperation.Execute);
+            process.Execute(ProcessOperation.Execute);
 
             return process;
         }
