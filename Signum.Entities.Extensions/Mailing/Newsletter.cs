@@ -83,6 +83,14 @@ namespace Signum.Entities.Mailing
 
         public static Lite<SMTPConfigurationDN> DefaultSMTPConfig;
         public static string DefaultFrom;
+
+        string overrideEmail;
+        [EMailValidator]
+        public string OverrideEmail
+        {
+            get { return overrideEmail; }
+            set { Set(ref overrideEmail, value, () => OverrideEmail); }
+        }
     }
 
     [Serializable]

@@ -47,21 +47,24 @@ namespace Signum.Engine.Mailing
 
                 Parallel.ForEach(groups, s =>
                 {
-                    try
+                    if (newsletter.OverrideEmail != EmailLogic.DoNotSend)
                     {
-                        var client = newsletter.SMTPConfig.GenerateSmtpClient(true);
-                        var message = new MailMessage();
-                        message.From = new MailAddress(newsletter.From);
-                        message.To.Add(s.Email);
-                        message.IsBodyHtml = true;
-                        message.Body = newsletter.HtmlBody;
-                        message.Subject = newsletter.Subject;
-                        client.Send(message);
-                    }
-                    catch (Exception ex)
-                    {
-                        numErrors++;
-                        s.Error = ex.Message;
+                        try
+                        {
+                            var client = newsletter.SMTPConfig.GenerateSmtpClient(true);
+                            var message = new MailMessage();
+                            message.From = new MailAddress(newsletter.From);
+                            message.To.Add(newsletter.OverrideEmail ?? s.Email);
+                            message.IsBodyHtml = true;
+                            message.Body = newsletter.HtmlBody;
+                            message.Subject = newsletter.Subject;
+                            client.Send(message);
+                        }
+                        catch (Exception ex)
+                        {
+                            numErrors++;
+                            s.Error = ex.Message;
+                        }
                     }
                 });
 
