@@ -7,7 +7,7 @@ using Signum.Entities.Processes;
 using Signum.Entities.Mailing;
 using Signum.Utilities;
 
-namespace Ski.Entities.Newsletter
+namespace Signum.Entities.Mailing
 {
     [Serializable]
     public class NewsletterDN : Entity, IProcessDataDN
@@ -60,7 +60,7 @@ namespace Ski.Entities.Newsletter
             set { Set(ref subject, value, () => Subject); }
         }
 
-        Lite<SMTPConfigurationDN> smtpConfig;
+        Lite<SMTPConfigurationDN> smtpConfig = DefaultSMTPConfig;
         public Lite<SMTPConfigurationDN> SMTPConfig
         {
             get { return smtpConfig; }
@@ -68,7 +68,7 @@ namespace Ski.Entities.Newsletter
         }
 
         [NotNullable, SqlDbType(Size = 50)]
-        string from;
+        string from = DefaultFrom;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 50), EMailValidator]
         public string From
         {
@@ -80,10 +80,13 @@ namespace Ski.Entities.Newsletter
         {
             return name;
         }
+
+        public static Lite<SMTPConfigurationDN> DefaultSMTPConfig;
+        public static string DefaultFrom;
     }
 
     [Serializable]
-    public class NewsLetterSendDN : Entity
+    public class NewsletterDeliveryDN : Entity
     {
         bool sent;
         public bool Sent
@@ -100,11 +103,11 @@ namespace Ski.Entities.Newsletter
             set { Set(ref sendDate, value, () => SendDate); }
         }
 
-        Lite<IEmailOwnerDN> emailOwner;
-        public Lite<IEmailOwnerDN> EmailOwner
+        Lite<IEmailOwnerDN> recipient;
+        public Lite<IEmailOwnerDN> Recipient
         {
-            get { return emailOwner; }
-            set { Set(ref emailOwner, value, () => EmailOwner); }
+            get { return recipient; }
+            set { Set(ref recipient, value, () => Recipient); }
         }
 
         Lite<NewsletterDN> newsletter;
@@ -128,11 +131,6 @@ namespace Ski.Entities.Newsletter
     public enum NewsletterOperations
     { 
         Save,
-        Send
-    }
-
-    public enum NewsletterProcessOperations
-    { 
         Send
     }
 

@@ -41,7 +41,7 @@ namespace ASP
     using System.Web.UI.WebControls.WebParts;
     using System.Web.UI.HtmlControls;
     using System.Xml.Linq;
-    using Ski.Entities.Newsletter;
+    using Signum.Entities.Mailing;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Mailing/Views/Newsletter.cshtml")]
@@ -61,6 +61,9 @@ namespace ASP
         }
         public override void Execute()
         {
+
+
+Write(Html.ScriptCss("~/Mailing/Content/Mail.css"));
 
 WriteLiteral("\r\n");
 
@@ -82,7 +85,7 @@ WriteLiteral("\">\r\n");
         {
 
 WriteLiteral("            <ul>\r\n                <li><a href=\"#emTabMain\">Newsletter</a></li>\r\n " +
-"               <li><a href=\"#emTabSend\">Newsletter</a></li>\r\n            </ul>\r\n" +
+"               <li><a href=\"#emTabSend\">Deliveries</a></li>\r\n            </ul>\r\n" +
 "");
 
 
@@ -103,21 +106,62 @@ WriteLiteral("\r\n            ");
 
        Write(Html.ValueLine(nc, n => n.Subject));
 
-WriteLiteral("\r\n            ");
+WriteLiteral("\r\n");
 
 
-       Write(Html.ValueLine(nc, n => n.HtmlBody, vl =>
+             if (!editable)
             {
-                vl.ValueLineType = ValueLineType.TextArea;
-                vl.ValueHtmlProps["cols"] = "30";
-                vl.ValueHtmlProps["rows"] = "6";
-                vl.ReadOnly = !editable;
-            }));
+                
+           Write(Html.Hidden("htmlBodyContent", nc.Value.HtmlBody));
 
-WriteLiteral("\r\n            ");
+                                                                  
+
+WriteLiteral("                <fieldset>\r\n                    <legend>Message</legend>\r\n       " +
+"             <iframe id=\"newsBodyContent\" name=\"frameNewImage\" src=\"about:blank\"" +
+" class=\"sf-email-htmlbody\">\r\n                    </iframe>\r\n                </fi" +
+"eldset>\r\n");
 
 
-       Write(Html.EntityLine(nc, n => n.SMTPConfig));
+            }
+            else
+            {
+
+WriteLiteral("                <div id=\"newsEditContent\">\r\n                    ");
+
+
+               Write(Html.ValueLine(nc, n => n.HtmlBody, vl =>
+                    {
+                        vl.ValueLineType = ValueLineType.TextArea;
+                        vl.ValueHtmlProps["cols"] = "30";
+                        vl.ValueHtmlProps["rows"] = "6";
+                        vl.ValueHtmlProps["class"] = "sf-email-htmlwrite";
+                        vl.ReadOnly = !editable;
+                    }));
+
+WriteLiteral("\r\n                    <br />\r\n                    <input type=\"button\" class=\"sf-" +
+"button\" id=\"newsPreviewContentButton\" value=\"Preview content\" />\r\n              " +
+"  </div>\r\n");
+
+
+
+WriteLiteral(@"                <div id=""newsPreviewContent"">
+                    <fieldset>
+                        <legend>Message</legend>
+                        <iframe id=""newsBodyContentPreview"" name=""frameNewImage"" src=""about:blank"" class=""sf-email-htmlbody"">
+                        </iframe>
+                        <br />
+                        <input type=""button"" class=""sf-button"" id=""newsEditContentButton"" value=""Edit content"" />
+                    </fieldset>
+                </div>
+");
+
+
+            }
+
+WriteLiteral("            ");
+
+
+       Write(Html.EntityCombo(nc, n => n.SMTPConfig));
 
 WriteLiteral("\r\n            ");
 
@@ -140,15 +184,15 @@ WriteLiteral("\r\n                ");
 
            Write(Html.ValueLine(nc, n => n.NumErrors));
 
-WriteLiteral("\r\n                <fieldset>\r\n                    <legend>Emails sent</legend>\r\n " +
-"                   ");
+WriteLiteral("\r\n                <fieldset>\r\n                    <legend>Email recipients</legen" +
+"d>\r\n                    ");
 
 
-               Write(Html.SearchControl(new FindOptions(typeof(NewsLetterSendDN))
-                    {
-                        FilterOptions = { new FilterOption("Newsletter", nc.Value) { Frozen = true } },
-                        SearchOnLoad = true,
-                    }, new Context(nc, "ncSent")));
+               Write(Html.SearchControl(new FindOptions(typeof(NewsletterDeliveryDN))
+               {
+                   FilterOptions = { new FilterOption("Newsletter", nc.Value) { Frozen = true } },
+                   SearchOnLoad = true,
+               }, new Context(nc, "ncSent")));
 
 WriteLiteral("\r\n                </fieldset>\r\n            </div>\r\n");
 
@@ -159,6 +203,11 @@ WriteLiteral("    </div>    \r\n");
 
 
 }
+
+
+Write(Html.ScriptsJs("~/Mailing/Scripts/SF_Mail.js"));
+
+WriteLiteral("\r\n");
 
 
         }

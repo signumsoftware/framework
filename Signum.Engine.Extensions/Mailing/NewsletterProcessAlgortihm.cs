@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Signum.Engine.Processes;
-using Ski.Entities.Newsletter;
 using Signum.Entities;
 using Signum.Engine;
 using Signum.Engine.Mailing;
@@ -11,8 +10,9 @@ using Signum.Entities.Processes;
 using System.Net.Mail;
 using Signum.Utilities;
 using System.Threading.Tasks;
+using Signum.Entities.Mailing;
 
-namespace Ski.Logic.Newsletter
+namespace Signum.Engine.Mailing
 {
     class NewsletterProcessAlgortihm : IProcessAlgorithm
     {
@@ -27,52 +27,80 @@ namespace Ski.Logic.Newsletter
         {
             NewsletterDN newsletter = (NewsletterDN)executingProcess.Data;
 
-            var lines = (from e in Database.Query<NewsLetterSendDN>()
+            var lines = (from e in Database.Query<NewsletterDeliveryDN>()
                          where e.Newsletter.RefersTo(newsletter) && !e.Sent
                          select new SendLine
                          {
                              Send = e.ToLite(),
-                             Email = e.EmailOwner.Entity.Email,
+                             Email = e.Recipient.Entity.Email,
                          }).ToList();
 
             int lastPercentage = 0;
+            int numErrors = newsletter.NumErrors;
+            int processed = 0;
             foreach (var groups in lines.GroupsOf(20))
             {
+                processed += groups.Count;
+
                 if (executingProcess.Suspended)
                     return FinalState.Suspended;
 
                 Parallel.ForEach(groups, s =>
                 {
-                    if (executingProcess.Suspended)
-                        return;
                     try
                     {
                         var client = newsletter.SMTPConfig.GenerateSmtpClient(true);
-                        client.Send(newsletter.From, s.Email, newsletter.Subject, newsletter.HtmlBody);
-                        s.Send.InDB().UnsafeUpdate(sn => new NewsLetterSendDN
-                        {
-                            Sent = true,
-                            SendDate = DateTime.Now.TrimToSeconds(),
-                        });
+                        var message = new MailMessage();
+                        message.From = new MailAddress(newsletter.From);
+                        message.To.Add(s.Email);
+                        message.IsBodyHtml = true;
+                        message.Body = newsletter.HtmlBody;
+                        message.Subject = newsletter.Subject;
+                        client.Send(message);
                     }
                     catch (Exception ex)
                     {
-                        newsletter.NumErrors++;
-                        newsletter.Save();
-                        s.Send.InDB().UnsafeUpdate(sn => new NewsLetterSendDN
-                        {
-                            Sent = true,
-                            SendDate = DateTime.Now.TrimToSeconds(),
-                            Error = ex.Message
-                        });
+                        numErrors++;
+                        s.Error = ex.Message;
                     }
                 });
 
-                int percentage = (NotificationSteps * 20) / lines.Count;
-                if (percentage != lastPercentage)
+                using (var tr = new Transaction())
                 {
-                    executingProcess.ProgressChanged(percentage * 100 / NotificationSteps);
-                    lastPercentage = percentage;
+                    int percentage = (NotificationSteps * processed) / lines.Count;
+                    if (percentage != lastPercentage)
+                    {
+                        executingProcess.ProgressChanged(percentage * 100 / NotificationSteps);
+                        lastPercentage = percentage;
+                    }
+
+                    if (numErrors != 0)
+                        newsletter.InDB().UnsafeUpdate(n => new NewsletterDN { NumErrors = numErrors });
+
+                    var failed = groups.Extract(sl => sl.Error.HasText()).GroupBy(sl => sl.Error, sl => sl.Send);
+                    foreach (var f in failed)
+                    {
+                        Database.Query<NewsletterDeliveryDN>().Where(nd => f.Contains(nd.ToLite()))
+                            .UnsafeUpdate(nd => new NewsletterDeliveryDN
+                            {
+                                Sent = true,
+                                SendDate = DateTime.Now.TrimToSeconds(),
+                                Error = f.Key
+                            });
+                    }
+
+                    if (groups.Any())
+                    {
+                        var sent = groups.Select(sl => sl.Send).ToList();
+                        Database.Query<NewsletterDeliveryDN>().Where(nd => sent.Contains(nd.ToLite()))
+                            .UnsafeUpdate(nd => new NewsletterDeliveryDN
+                            {
+                                Sent = true,
+                                SendDate = DateTime.Now.TrimToSeconds(),
+                            });
+                    }
+
+                    tr.Commit();
                 }
             }
 
@@ -81,8 +109,9 @@ namespace Ski.Logic.Newsletter
 
         private class SendLine
         {
-            public Lite<NewsLetterSendDN> Send;
+            public Lite<NewsletterDeliveryDN> Send;
             public string Email;
+            public string Error;
         }
     }
 }

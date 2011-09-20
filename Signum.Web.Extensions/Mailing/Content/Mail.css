@@ -1,0 +1,31 @@
+﻿.sf-email-htmlbody
+{
+    margin-left: 100px;
+    margin-top: 10px;
+    width: 623px;
+    border: 2px, solid, orange;    
+}
+
+.sf-email-htmlwrite
+{
+    width: 623px;
+    height: 228px;
+}
+
+#newsPreviewContentButton
+{
+    margin-left: 110px;
+    margin-bottom: 10px;
+
+}
+
+#newsEditContentButton
+{
+    margin-left: 100px;  
+    margin-top: 10px;   
+}
+
+#newsPreviewContent
+{
+    display: none;
+}
