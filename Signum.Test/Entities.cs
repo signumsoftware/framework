@@ -101,7 +101,7 @@ namespace Signum.Test
             set { Set(ref lastAward, value, () => LastAward); }
         }
 
-        MList<Lite<ArtistDN>> friends;
+        MList<Lite<ArtistDN>> friends = new MList<Lite<ArtistDN>>();
         public MList<Lite<ArtistDN>> Friends
         {
             get { return friends; }
