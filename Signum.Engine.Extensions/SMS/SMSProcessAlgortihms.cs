@@ -93,7 +93,7 @@ namespace Signum.Engine.Extensions.SMS
 
                 try
                 {
-                    ms.ToLite().ExecuteLite(SMSMessageOperations.UpdateStatus);
+                    ms.Execute(SMSMessageOperations.UpdateStatus);
                 }
                 catch (Exception)
                 {

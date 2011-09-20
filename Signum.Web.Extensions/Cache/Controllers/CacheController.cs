@@ -61,7 +61,8 @@ namespace Signum.Web.Cache
         {
             CachePermissions.InvalidateCache.Authorize();
 
-            CacheLogic.InvalidateAll(); 
+            CacheLogic.InvalidateAll();
+            Schema.ResetAllLazy(); 
             return null;
         }
     }

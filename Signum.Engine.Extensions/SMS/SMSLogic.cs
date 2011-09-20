@@ -101,7 +101,7 @@ namespace Signum.Engine.SMS
 
                     var process = ProcessLogic.Create(SMSMessageProcess.Send, package);
 
-                    process.ToLite().ExecuteLite(ProcessOperation.Execute);
+                    process.Execute(ProcessOperation.Execute);
 
                     return process;
                 }
@@ -189,7 +189,7 @@ namespace Signum.Engine.SMS
 
                     var process = ProcessLogic.Create(SMSMessageProcess.Send, package);
 
-                    process.ToLite().ExecuteLite(ProcessOperation.Execute);
+                    process.Execute(ProcessOperation.Execute);
 
                     return process;
                 }
@@ -371,7 +371,7 @@ namespace Signum.Engine.SMS
 
             var process = ProcessLogic.Create(SMSMessageProcess.Send, package);
 
-            process.ToLite().ExecuteLite(ProcessOperation.Execute);
+            process.Execute(ProcessOperation.Execute);
 
             return process;
         }

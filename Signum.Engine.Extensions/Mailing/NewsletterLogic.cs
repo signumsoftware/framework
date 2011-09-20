@@ -7,23 +7,22 @@ using Signum.Utilities;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using System.Reflection;
-using Ski.Entities.Newsletter;
 using Signum.Engine;
 using Signum.Engine.Operations;
 using Signum.Engine.Processes;
 using Signum.Entities.Processes;
 using Signum.Entities.Mailing;
 
-namespace Ski.Logic.Newsletter
+namespace Signum.Engine.Mailing
 {
     public static class NewsletterLogic
     {
-        public static void Start(DynamicQueryManager dqm, SchemaBuilder sb)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<NewsletterDN>();
-                sb.Include<NewsLetterSendDN>();
+                sb.Include<NewsletterDeliveryDN>();
                 ProcessLogic.AssertStarted(sb);
                 ProcessLogic.Register(NewsletterOperations.Send, new NewsletterProcessAlgortihm());
 
@@ -34,21 +33,24 @@ namespace Ski.Logic.Newsletter
                                                 Entity = n.ToLite(),
                                                 n.Id,
                                                 Nombre = n.Name,
-                                                Texto = n.HtmlBody.Etc(50),
+                                                Texto = n.HtmlBody.Etc(100),
                                                 Estado = n.State
                                              }).ToDynamic();
 
 
-                dqm[typeof(NewsLetterSendDN)] = (from e in Database.Query<NewsLetterSendDN>()
+                dqm[typeof(NewsletterDeliveryDN)] = (from e in Database.Query<NewsletterDeliveryDN>()
                                              select new
                                              {
                                                  Entity = e.ToLite(),
                                                  e.Id,
                                                  e.Newsletter,
-                                                 e.EmailOwner,
+                                                 e.Recipient,
                                                  e.Sent,
-                                                 e.SendDate
+                                                 e.SendDate,
+                                                 Error = e.Error.Etc(50)
                                              }).ToDynamic();
+
+                NewsletterGraph.Register();
             }
         }
     }
@@ -75,17 +77,18 @@ namespace Ski.Logic.Newsletter
                 Execute = (n, args) => 
                 {
                     var p = args.GetArg<List<Lite<IEmailOwnerDN>>>(0);
-                    p.Select(ie => new NewsLetterSendDN 
+                    p.Select(ie => new NewsletterDeliveryDN 
                     {
-                        EmailOwner = ie,
+                        Recipient = ie,
                         Newsletter = n.ToLite()
                     }).ToList().SaveList();
 
-                    var process = ProcessLogic.Create(NewsletterProcessOperations.Send, n);
+                    var process = ProcessLogic.Create(NewsletterOperations.Send, n);
 
-                    process.ToLite().ExecuteLite(ProcessOperation.Execute);
+                    n.OverrideEmail = EmailLogic.OnEmailAddress();
 
                     n.State = NewsletterState.Sent;
+                    process.Execute(ProcessOperation.Execute);
                 }
             }.Register();
         }
