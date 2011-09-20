@@ -251,17 +251,17 @@ namespace Signum.Engine.Linq
                 if (outer != child.OuterKey)
                     child = new ChildProjectionExpression(child.Projection, outer, child.IsLazyMList, child.Type); 
 
-                return scope.Lookup(row, child);
+                return scope.LookupEager(row, child);
             }
 
-            protected override Expression VisitMListChildProjection(ChildProjectionExpression child, MemberExpression field)
+            protected Expression VisitMListChildProjection(ChildProjectionExpression child, MemberExpression field)
             {
                 Expression outer = Visit(child.OuterKey);
 
                 if (outer != child.OuterKey)
                     child = new ChildProjectionExpression(child.Projection, outer, child.IsLazyMList, child.Type);
 
-                return scope.Lookup(row, child);
+                return scope.LookupMList(row, child, field);
             }
 
             protected override Expression VisitProjection(ProjectionExpression proj)
@@ -282,17 +282,14 @@ namespace Signum.Engine.Linq
                 var block = Expression.Block(
                     fieldInit.Bindings
                     .Where(a => !ReflectionTools.FieldEquals(FieldInitExpression.IdField, a.FieldInfo))
-                    .Select(b => 
+                    .Select(b =>
                         {
-                            var field = Expression.Field(e, b.FieldInfo); 
+                            var field = Expression.Field(e, b.FieldInfo);
 
-                            var value = b.Binding is ChildProjectionExpression? VisitChildProjection( 
+                            var value = b.Binding is ChildProjectionExpression ? VisitMListChildProjection((ChildProjectionExpression)b.Binding, field) :
+                                Convert(Visit(b.Binding), b.FieldInfo.FieldType);
 
-                            if() && ((ChildProjectionExpression)b.Binding).IsLazyMList)
-
-
-                            return Expression.Assign(field,
-                             Convert(Visit(b.Binding), b.FieldInfo.FieldType));
+                            return Expression.Assign(field, value);
                         }
                     ));
 
@@ -450,7 +447,7 @@ namespace Signum.Engine.Linq
             return FieldReader.GetExpression(Expression.Property(row, miReader), position, type);
         }
 
-        static MethodInfo miLookupRequest = ReflectionTools.GetMethodInfo((IProjectionRow row) => row.LookupRequest<int, double>(null, 0)).GetGenericMethodDefinition();
+        static MethodInfo miLookupRequest = ReflectionTools.GetMethodInfo((IProjectionRow row) => row.LookupRequest<int, double>(null, 0, null)).GetGenericMethodDefinition();
         static MethodInfo miLookup = ReflectionTools.GetMethodInfo((IProjectionRow row) => row.Lookup<int, double>(null, 0)).GetGenericMethodDefinition();
 
         public Expression LookupEager(Expression row, ChildProjectionExpression cProj)
@@ -471,7 +468,7 @@ namespace Signum.Engine.Linq
             return Expression.Call(miUnique.MakeGenericMethod(type), call);
         }
 
-        public Exception LookupMList(Expression row, ChildProjectionExpression cProj)
+        public Expression LookupMList(Expression row, ChildProjectionExpression cProj, MemberExpression field)
         {
             if (!cProj.IsLazyMList)
                 throw new InvalidOperationException("Not IsLazyMList not expected at this stage");
@@ -484,7 +481,7 @@ namespace Signum.Engine.Linq
 
             MethodInfo mi = miLookupRequest.MakeGenericMethod(cProj.OuterKey.Type, cProj.Type.ElementType());
 
-            return Expression.Convert(Expression.Call(row, mi, Expression.Constant(cProj.Projection.Token), cProj.OuterKey), cProj.Type);
+            return Expression.Call(row, mi, Expression.Constant(cProj.Projection.Token), cProj.OuterKey, field);
         }
 
         static MethodInfo miSingle = ReflectionTools.GetMethodInfo(() => Enumerable.Single<int>(null)).GetGenericMethodDefinition();

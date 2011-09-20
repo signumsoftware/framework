@@ -22,7 +22,7 @@ namespace Signum.Engine.Linq
         IRetriever Retriever { get; }
 
         IEnumerable<S> Lookup<K, S>(ProjectionToken token, K key);
-        MList<S> LookupRequest<K, S>(ProjectionToken token, K key);
+        MList<S> LookupRequest<K, S>(ProjectionToken token, K key, MList<S> field);
     }
 
     internal class ProjectionRowEnumerator<T> : IProjectionRow, IEnumerator<T>
@@ -92,11 +92,11 @@ namespace Signum.Engine.Linq
                 return lookup[key];
         }
 
-        public MList<S> LookupRequest<K, S>(ProjectionToken token, K key)
+        public MList<S> LookupRequest<K, S>(ProjectionToken token, K key, MList<S> field)
         {
             Dictionary<K, MList<S>> dictionary = (Dictionary<K, MList<S>>)lookups.GetOrCreate(token, () => (IEnumerable)new Dictionary<K, MList<S>>());
 
-            return dictionary.GetOrCreate(key);
+            return dictionary.GetOrCreate(key, () => field != null && field.Count == 0 ? field : new MList<S>());
         }
     }
 
