@@ -59,7 +59,7 @@ namespace Signum.Windows.SMS
 
         private void VisualCharactersToEnd()
         {
-            int chLeft = SMSCharacters.CharactersToEnd(text.Text);
+            int chLeft = SMSCharacters.RemainingLength(text.Text);
             charactersLeft.Text = chLeft.ToString();
             if (chLeft < 0)
             {
