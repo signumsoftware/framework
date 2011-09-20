@@ -322,6 +322,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Newsletter.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Mailing\Views\NewsletterDelivery1.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>NewsletterDelivery.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Mailing\Views\SMTPConfiguration.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -791,6 +796,8 @@
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>_ViewStart.cs</LastGenOutput>
     </Content>
+    <Content Include="Mailing\Content\Mail.css" />
+    <Content Include="Mailing\Scripts\SF_Mail.js" />
     <Content Include="Mailing\Views\_ViewStart.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>_ViewStart.cs</LastGenOutput>
@@ -890,6 +897,10 @@
     <Content Include="Mailing\Views\Newsletter.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>Newsletter.cs</LastGenOutput>
+    </Content>
+    <Content Include="Mailing\Views\NewsletterDelivery.cshtml">
+      <LastGenOutput>NewsletterDelivery1.cs</LastGenOutput>
+      <Generator>MvcRazorClassGenerator</Generator>
     </Content>
     <None Include="Profiler\Views\Times.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>

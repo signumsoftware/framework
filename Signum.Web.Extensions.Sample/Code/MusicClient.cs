@@ -47,7 +47,7 @@ namespace Signum.Web.Extensions.Sample
                     };
                 });
 
-                ButtonBarEntityHelper.RegisterEntityButtons<AlbumDN>((ctx, entity, partialViewName, prefix) =>
+                ButtonBarEntityHelper.RegisterEntityButtons<AlbumDN>((ctx, entity) =>
                 {
                     if (entity.IsNew)
                         return null;
@@ -57,13 +57,13 @@ namespace Signum.Web.Extensions.Sample
                         new ToolBarButton
                         {
                             DivCssClass = ToolBarButton.DefaultEntityDivCssClass,
-                            Id = TypeContextUtilities.Compose(prefix, "CloneWithData"),
+                            Id = TypeContextUtilities.Compose(ctx.Prefix, "CloneWithData"),
                             Text = "Clone with data",
                             OnClick = new JsOperationConstructorFrom(new JsOperationOptions
                             { 
                                 ControllerUrl = RouteHelper.New().Action("CloneWithData", "Music"),
-                                Prefix = prefix
-                            }).ajax(Js.NewPrefix(prefix), JsOpSuccess.OpenPopupNoDefaultOk).ToJS()
+                                Prefix = ctx.Prefix
+                            }).ajax(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk).ToJS()
                         }
                     };
                 });
