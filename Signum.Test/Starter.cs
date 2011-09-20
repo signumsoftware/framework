@@ -260,7 +260,7 @@ namespace Signum.Test
                 Name = "Siamese Dream",
                 Year = 1993,
                 Author = smashingPumpkins,
-                Songs = new MList<SongDN> { new SongDN { Name = "Disarm" } },
+                Songs = { new SongDN { Name = "Disarm" } },
                 Label = virgin
             }.Save();
 
@@ -269,7 +269,7 @@ namespace Signum.Test
                 Name = "Mellon Collie and the Infinite Sadness",
                 Year = 1995,
                 Author = smashingPumpkins,
-                Songs = new MList<SongDN> 
+                Songs = 
                 { 
                     new SongDN { Name = "Zero", Duration = 123 }, 
                     new SongDN { Name = "1976" }, 
@@ -290,7 +290,7 @@ namespace Signum.Test
                 Name = "Zeitgeist",
                 Year = 2007,
                 Author = smashingPumpkins,
-                Songs = new MList<SongDN> { new SongDN { Name = "Tarantula" } },
+                Songs = { new SongDN { Name = "Tarantula" } },
                 BonusTrack = new SongDN{Name = "1976"},
                 Label = wea,
             }.Save();
@@ -300,7 +300,7 @@ namespace Signum.Test
                 Name = "American Gothic", 
                 Year = 2008,
                 Author = smashingPumpkins,
-                Songs = new MList<SongDN> { new SongDN { Name = "The Rose March", Duration = 276 } },
+                Songs = { new SongDN { Name = "The Rose March", Duration = 276 } },
                 Label = wea,
             }.Save();
 
@@ -323,7 +323,7 @@ namespace Signum.Test
                 Name = "Ben",
                 Year = 1972,
                 Author = michael,
-                Songs = new MList<SongDN> { new SongDN { Name = "Ben" } },
+                Songs = { new SongDN { Name = "Ben" } },
                 BonusTrack = new SongDN{Name = "Michael"},
                 Label = universal,
             }.Save();
