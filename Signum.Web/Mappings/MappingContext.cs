@@ -128,6 +128,26 @@ namespace Signum.Web
             return !sc.SupressChange;
         }
 
+        public bool IsEmpty(string property)
+        {
+            if (Inputs[property].HasText())
+            {
+                this.Errors.GetOrCreate(property).Add(Resources.InvalidFormat);
+                return false;
+            }
+            return true;
+        }
+
+        public bool IsEmpty()
+        {
+            if (Input.HasText())
+            {
+                this.Error.Add(Resources.InvalidFormat);
+                return false;
+            }
+            return true;
+        }
+
 
         public static ModifiableEntity FindSubEntity(IdentifiableEntity entity, string prefix)
         {

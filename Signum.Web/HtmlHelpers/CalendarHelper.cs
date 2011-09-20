@@ -8,6 +8,10 @@ using Signum.Web.Properties;
 using System.Globalization;
 using System.Web.Script.Serialization;
 using System.Web;
+using System.Linq.Expressions;
+using Signum.Web.Lines;
+using System.Web.Mvc.Html;
+using Signum.Entities;
 
 namespace Signum.Web
 {
@@ -200,6 +204,72 @@ namespace Signum.Web
                 "</script>");
 
             return MvcHtmlString.Create(sb.ToString());
-        }     
+        }
+
+        public static MvcHtmlString HourMinute<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property)
+        {
+            return helper.HourMinute(tc, property, null);
+        }
+
+        public static MvcHtmlString HourMinute<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property, Action<HourMinuteLine> settingsModifier)
+        {
+            TypeContext<S> context = Common.WalkExpression(tc, property);
+
+            HourMinuteLine line = new HourMinuteLine(typeof(S), context.Value, context, null, context.PropertyRoute);
+
+            Common.FireCommonTasks(line);
+
+            if (settingsModifier != null)
+                settingsModifier(line);
+
+            return HourMinuteInternal(helper, line);
+        }
+
+        private static MvcHtmlString HourMinuteInternal(HtmlHelper helper, HourMinuteLine line)
+        {
+            if (!line.Visible || (line.HideIfNull && line.UntypedValue == null))
+                return MvcHtmlString.Empty;
+
+            HtmlStringBuilder sb = new HtmlStringBuilder();
+
+            DateTime? date = ((DateTime?)line.UntypedValue).TrySS(d => d.ToUserInterface());
+
+            WriteField(sb, helper, line, Signum.Entities.Properties.Resources.Hour, "Hour", date == null ? "" : date.Value.Hour.ToString("00")); 
+
+            sb.Add(helper.Span("", ":", "sf-value-line sf-time-separator", new Dictionary<string, object> { { "style", "font-weight:bold" } }));
+
+            WriteField(sb, helper, line, Signum.Entities.Properties.Resources.Minute, "Minute", date == null ? "" : date.Value.Minute.ToString("00")); 
+
+            return sb.ToHtml();
+        }
+
+        private static void WriteField(HtmlStringBuilder sb, HtmlHelper helper, HourMinuteLine line, string label, string name, string value)
+        {
+            using (sb.Surround(new HtmlTag("div").Class("sf-field")))
+            {
+                if (line.LabelVisible)
+                    sb.Add(new HtmlTag("div").Class("sf-label-line").SetInnerText(label));
+
+                using (sb.Surround(new HtmlTag("div").Class("sf-value-container")))
+                {
+                    if (line.ReadOnly)
+                    {
+                        sb.Add(new HtmlTag("span").Class("sf-value-line").SetInnerText(value));
+
+                        if (line.WriteHiddenOnReadonly)
+                            sb.Add(helper.Hidden(line.Compose(name), value));
+                    }
+                    else
+                    {
+                        line.ValueHtmlProps["onblur"] = "this.setAttribute('value', this.value); " + line.ValueHtmlProps.TryGetC("onblur");
+
+                        line.ValueHtmlProps["size"] = "2";
+                        line.ValueHtmlProps["class"] = "sf-value-line";
+
+                        sb.Add(helper.TextBox(line.Compose(name), value, line.ValueHtmlProps));
+                    }
+                }
+            }
+        }
     }
 }

@@ -69,7 +69,7 @@ namespace Signum.Web.Controllers
             IdentifiableEntity entity = (IdentifiableEntity)result;
 
             TypeContext tc = TypeContextUtilities.UntypedNew(entity, prefix);
-            return this.PopupOpen(new ViewOkOptions(tc) { PartialViewName = url });
+            return this.PopupOpen(new ViewSaveOptions(tc) { PartialViewName = url });
         }
 
         public PartialViewResult PopupView(string runtimeType, int? id, string prefix, bool? readOnly, string url)

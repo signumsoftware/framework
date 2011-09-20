@@ -618,6 +618,7 @@ namespace Signum.Web
                 cleanTC.ReadOnly = true;
 
             ViewButtons buttons = viewOptions.GetViewButtons();
+            controller.ViewData[ViewDataKeys.ViewButtons] = buttons;
             controller.ViewData[ViewDataKeys.OkVisible] = buttons == ViewButtons.Ok;
             controller.ViewData[ViewDataKeys.SaveVisible] = buttons == ViewButtons.Save && ShowSave(cleanType, viewOptions.Admin) && !isReadOnly;
 

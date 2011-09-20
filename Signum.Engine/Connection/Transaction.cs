@@ -139,13 +139,25 @@ namespace Signum.Engine
             {
                 if (Started)
                 {
-                    if (PreRealCommit != null)
-                        PreRealCommit(); 
+                    while (PreRealCommit != null)
+                    {
+                        foreach (Action item in PreRealCommit.GetInvocationList())
+                        {
+                            item();
+                            PreRealCommit -= item;
+                        }
+                    }
 
                     Transaction.Commit();
 
-                    if (RealCommit != null)
-                        RealCommit();  
+                    while (RealCommit != null)
+                    {
+                        foreach (Action item in RealCommit.GetInvocationList())
+                        {
+                            item();
+                            RealCommit -= item;
+                        }
+                    }
                 }
             }
 
@@ -277,13 +289,25 @@ namespace Signum.Engine
             {
                 if (Started)
                 {
-                    if (PreRealCommit != null)
-                        PreRealCommit();
+                    while (PreRealCommit != null)
+                    {
+                        foreach (Action item in PreRealCommit.GetInvocationList())
+                        {
+                            item();
+                            PreRealCommit -= item;
+                        }
+                    }
 
                     //Transaction.Commit();
 
-                    if (RealCommit != null)
-                        RealCommit();
+                    while (RealCommit != null)
+                    {
+                        foreach (Action item in RealCommit.GetInvocationList())
+                        {
+                            item();
+                            RealCommit -= item;
+                        }
+                    }
                 }
             }
 

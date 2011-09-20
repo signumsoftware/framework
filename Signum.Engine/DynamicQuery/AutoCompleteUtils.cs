@@ -59,23 +59,21 @@ namespace Signum.Engine.DynamicQuery
         {
             if (implementations == null)
             {
-                return miAllLite.GetInvoker(liteType, liteType)();
+                return Database.RetrieveAllLite(liteType);
             }
 
             if (implementations.IsByAll)
                 throw new InvalidOperationException("ImplementedByAll is not supported for RetrieAllLite");
 
-            return (from type in ((ImplementedByAttribute)implementations).ImplementedTypes
-                    from l in miAllLite.GetInvoker(liteType, type)()
-                    select l).ToList();
+            return ((ImplementedByAttribute)implementations).ImplementedTypes.SelectMany(type => Database.RetrieveAllLite(type)).ToList();
         }
 
         static GenericInvoker<Func<List<Lite>>> miAllLite = new GenericInvoker<Func<List<Lite>>>(() => AllLite<TypeDN, TypeDN>());
-        static List<Lite> AllLite<LT, RT>()
-            where LT : class, IIdentifiable
-            where RT : IdentifiableEntity, LT
+        static List<Lite> AllLite<ST, RT>()
+            where ST : class, IIdentifiable
+            where RT : IdentifiableEntity, ST
         {
-            return Database.Query<RT>().Select(a => a.ToLite<LT>()).AsEnumerable().Cast<Lite>().ToList();
+            return Database.Query<RT>().Select(a => a.ToLite<ST>()).AsEnumerable().Cast<Lite>().ToList();
         }
     }
 }

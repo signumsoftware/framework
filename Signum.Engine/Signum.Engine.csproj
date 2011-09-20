@@ -82,7 +82,6 @@
       <Link>Properties\Version.cs</Link>
     </Compile>
     <Compile Include="Administrator.cs" />
-    <Compile Include="CacheLogic.cs" />
     <Compile Include="Connection\CommandTimeout.cs" />
     <Compile Include="Connection\Connection.cs" />
     <Compile Include="Connection\ConnectionScope.cs" />
@@ -150,6 +149,7 @@
       <AutoGen>True</AutoGen>
     </Compile>
     <Compile Include="Retriever.cs" />
+    <Compile Include="Schema\Schema.cs" />
     <Compile Include="Schema\Schema.Delete.cs" />
     <Compile Include="Schema\Schema.Expressions.cs" />
     <Compile Include="Schema\Schema.Basics.cs" />
@@ -160,6 +160,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="EntityCache.cs" />
     <Compile Include="Engine\SqlBuilder.cs" />
+    <Compile Include="Schema\UniqueIndex.cs" />
     <Compile Include="ServerBasic.cs" />
     <Compile Include="TypesLogic.cs" />
   </ItemGroup>

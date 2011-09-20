@@ -30,7 +30,7 @@ namespace Signum.Entities
         public abstract bool ImplementedBy(Type type);
     }
 
-    [Serializable, AttributeUsage(AttributeTargets.Field | AttributeTargets.Class | AttributeTargets.Interface)]
+    [Serializable, AttributeUsage(AttributeTargets.Field)]
     public sealed class ImplementedByAttribute : Implementations
     {
         Type[] implementedTypes;
@@ -56,7 +56,7 @@ namespace Signum.Entities
         }
     }
 
-    [Serializable, AttributeUsage(AttributeTargets.Field | AttributeTargets.Class | AttributeTargets.Interface)]
+    [Serializable, AttributeUsage(AttributeTargets.Field)]
     public sealed class ImplementedByAllAttribute : Implementations
     {
         public ImplementedByAllAttribute()

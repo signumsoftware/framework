@@ -64,10 +64,12 @@ namespace Signum.Web
                 case RenderMode.Popup:
                     vdd[ViewDataKeys.PartialViewName] = partialViewName;
                     vdd[ViewDataKeys.OkVisible] = !line.ReadOnly;
+                    vdd[ViewDataKeys.ViewButtons] = ViewButtons.Ok;
                     return helper.Partial(Navigator.Manager.PopupControlView, vdd);
                 case RenderMode.PopupInDiv:
                     vdd[ViewDataKeys.PartialViewName] = partialViewName;
                     vdd[ViewDataKeys.OkVisible] = !line.ReadOnly;
+                    vdd[ViewDataKeys.ViewButtons] = ViewButtons.Ok;
                     return helper.Div(typeContext.Compose(EntityBaseKeys.Entity),
                         helper.Partial(Navigator.Manager.PopupControlView, vdd),
                         "",

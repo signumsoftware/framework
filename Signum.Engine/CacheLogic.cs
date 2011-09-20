@@ -42,11 +42,10 @@ namespace Signum.Engine
 
             public CacheLogicController()
             {
-                pack = new Lazy<Pack>(() =>
+                pack = Schema.GlobalLazy(() =>
                 { 
                     using(new EntityCache(true))
                     using (Disable())
-                    using(Schema.Current.GlobalMode())
                     {
                         if (requests == null || requests.IsEmpty())
                         {
@@ -62,7 +61,7 @@ namespace Signum.Engine
                             }
                         }
                     }
-                }, LazyThreadSafetyMode.PublicationOnly);
+                });
             }
 
             public override bool Enabled

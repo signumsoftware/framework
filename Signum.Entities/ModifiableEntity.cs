@@ -20,7 +20,7 @@ using System.Collections;
 namespace Signum.Entities
 {
     [Serializable]
-    public abstract class ModifiableEntity : Modifiable, INotifyPropertyChanged, IDataErrorInfo, ICloneable
+    public abstract class ModifiableEntity : Modifiable, INotifyPropertyChanged, IDataErrorInfo
     {
         [Ignore]
         bool selfModified = true;
@@ -356,20 +356,6 @@ namespace Signum.Entities
         public Dictionary<ModifiableEntity, string> FullIntegrityCheckDictionary()
         {
             return GraphExplorer.IntegrityDictionary(GraphExplorer.FromRoot(this));
-        }
-
-        #endregion
-
-        #region ICloneable Members
-        object ICloneable.Clone()
-        {
-            BinaryFormatter bf = new BinaryFormatter();
-            using (MemoryStream stream = new MemoryStream())
-            {
-                bf.Serialize(stream, this);
-                stream.Seek(0, SeekOrigin.Begin);
-                return bf.Deserialize(stream);
-            }
         }
 
         #endregion

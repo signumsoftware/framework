@@ -337,8 +337,8 @@ namespace Signum.Engine.Linq
                 Type oType = predicate.Parameters[0].Type;
                 Expression[] exp = ((IEnumerable)constSource.Value).Cast<object>().Select(o => Expression.Invoke(predicate, Expression.Constant(o, oType))).ToArray();
 
-                Expression where = isAll ? exp.Aggregate((a, b) => Expression.And(a, b)) :
-                                           exp.Aggregate((a, b) => Expression.Or(a, b));
+                Expression where = isAll ? (exp.IsEmpty() ? SmartEqualizer.True : exp.Aggregate((a, b) => Expression.And(a, b))) :
+                                           (exp.IsEmpty() ? SmartEqualizer.False : exp.Aggregate((a, b) => Expression.Or(a, b)));
 
                 return this.Visit(where);
             }
@@ -924,7 +924,7 @@ namespace Signum.Engine.Linq
                 case (ExpressionType)DbExpressionType.FieldInit:
                 {
                     FieldInitExpression fie = (FieldInitExpression)source;
-                    FieldInfo fi = Reflector.FindFieldInfo(fie.Type, m.Member, false);
+                    FieldInfo fi = m.Member as FieldInfo ?? Reflector.FindFieldInfo(fie.Type, (PropertyInfo)m.Member);
 
                     if (fi == null)
                         throw new InvalidOperationException("The member {0} of {1} is not accesible on queries".Formato(m.Member.Name, fie.Type.TypeName()));
@@ -941,7 +941,7 @@ namespace Signum.Engine.Linq
                 case (ExpressionType)DbExpressionType.EmbeddedFieldInit:
                 {
                     EmbeddedFieldInitExpression efie = (EmbeddedFieldInitExpression)source;
-                    FieldInfo fi = Reflector.FindFieldInfo(efie.Type, m.Member, true);
+                    FieldInfo fi = m.Member as FieldInfo ?? Reflector.FindFieldInfo(efie.Type, (PropertyInfo)m.Member);
 
                     if (fi == null)
                         throw new InvalidOperationException("The member {0} of {1} is not accesible on queries".Formato(m.Member.Name, efie.Type.TypeName()));
@@ -997,7 +997,7 @@ namespace Signum.Engine.Linq
                 case (ExpressionType)DbExpressionType.ImplementedByAll:
                 {
                     ImplementedByAllExpression iba = (ImplementedByAllExpression)source;
-                    FieldInfo fi = Reflector.FindFieldInfo(iba.Type, m.Member, false);
+                    FieldInfo fi = m.Member as FieldInfo ?? Reflector.FindFieldInfo(iba.Type, (PropertyInfo)m.Member);
                     if (fi != null && fi.FieldEquals((IdentifiableEntity ie) => ie.id))
                         return iba.Id;
 
@@ -1318,6 +1318,9 @@ namespace Signum.Engine.Linq
                     return Expression.Coalesce(left, right, b.Conversion);
                 else
                 {
+                    if (left is ProjectionExpression || right is ProjectionExpression)
+                        throw new InvalidOperationException("Comparing {0} and {1} is not valid in SQL".Formato(b.Left.NiceToString(), b.Right.NiceToString())); 
+
                     if (left.Type.IsNullable() == right.Type.IsNullable())
                         return Expression.MakeBinary(b.NodeType, left, right, b.IsLiftedToNull, b.Method);
                     else

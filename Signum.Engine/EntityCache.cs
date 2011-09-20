@@ -164,7 +164,7 @@ namespace Signum.Engine
             return Current.Get(type, id);
         }
 
-        internal static IRetriever NewRetriever()
+        public static IRetriever NewRetriever()
         {
             return Current.NewRetriever();
         }
@@ -174,8 +174,26 @@ namespace Signum.Engine
             Current.ReleaseRetriever(retriever);
         }
 
+        public static T Construct<T>(int id) where T : IdentifiableEntity
+        {
+            var result = Constructor<T>.Call();
+            result.id = id;
+            return result;
+        }
 
-        
+        static class Constructor<T> where T : IdentifiableEntity
+        {
+            static Func<T> call;
+            public static Func<T> Call
+            {
+                get
+                {
+                    if (call == null)
+                        call = Expression.Lambda<Func<T>>(Expression.New(typeof(T))).Compile();
+                    return call;
+                }
+            }
+        }
     }
 
     [Serializable]
