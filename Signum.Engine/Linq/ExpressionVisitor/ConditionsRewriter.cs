@@ -59,7 +59,15 @@ namespace Signum.Engine.Linq
                 return exp;
 
             if (exp.NodeType == ExpressionType.Constant)
-                return ((bool)((ConstantExpression)exp).Value) ? new SqlConstantExpression(1) : new SqlConstantExpression(0);
+            {
+                switch (((bool?)((ConstantExpression)exp).Value))
+                {
+                    case false: return new SqlConstantExpression(0, exp.Type);
+                    case true: return new SqlConstantExpression(1, exp.Type);
+                    case null: return new SqlConstantExpression(null, exp.Type);
+                }
+                throw new InvalidOperationException("Entity");
+            }
 
             if (!IsSqlCondition(exp))
                 return exp;
