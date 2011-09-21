@@ -837,8 +837,8 @@
   <data name="OperationDN" xml:space="preserve">
     <value>Operación</value>
   </data>
-  <data name="CustomTaskExecutionDN_user" xml:space="preserve">
-    <value>usuario</value>
+  <data name="NewsletterDeliveryDN_Recipient" xml:space="preserve">
+    <value>Destinatario</value>
   </data>
   <data name="ChartTokenDN_Format" xml:space="preserve">
     <value>Formato</value>
@@ -861,8 +861,8 @@
   <data name="PanelPart_Content" xml:space="preserve">
     <value>Contenido</value>
   </data>
-  <data name="PanelPart_Fill" xml:space="preserve">
-    <value>Llenar</value>
+  <data name="NewsletterDeliveryDN_Newsletter" xml:space="preserve">
+    <value>Newsletter</value>
   </data>
   <data name="PanelPart_Row" xml:space="preserve">
     <value>Fila</value>
@@ -1101,20 +1101,20 @@
   <data name="PasswordExpiresIntervalDN" xml:space="preserve">
     <value>Intervalo caducidad contraseña</value>
   </data>
-  <data name="SendState_Delivered" xml:space="preserve">
-    <value>Entregado</value>
-  </data>
-  <data name="SendState_Failed" xml:space="preserve">
+  <data name="NewsletterDeliveryDN_Error" xml:space="preserve">
     <value>Error</value>
   </data>
-  <data name="SendState_None" xml:space="preserve">
-    <value>Ninguno</value>
+  <data name="NewsletterDeliveryDN" xml:space="preserve">
+    <value>Entrega de Newsletter</value>
   </data>
-  <data name="SendState_Queued" xml:space="preserve">
-    <value>En la cola</value>
+  <data name="MessageLengthExceeded_TextPruning" xml:space="preserve">
+    <value>Poda de texto</value>
   </data>
-  <data name="SendState_Sent" xml:space="preserve">
-    <value>Enviado</value>
+  <data name="MessageLengthExceeded_NotAllowed" xml:space="preserve">
+    <value>No está permitido</value>
+  </data>
+  <data name="MessageLengthExceeded_Allowed" xml:space="preserve">
+    <value>Permitido</value>
   </data>
   <data name="SMSMessageDN" xml:space="preserve">
     <value>Mensaje SMS</value>
@@ -1131,11 +1131,11 @@
   <data name="SMSMessageDN_SendDate" xml:space="preserve">
     <value>Fecha de envío</value>
   </data>
-  <data name="SMSMessageDN_SendState" xml:space="preserve">
-    <value>Estado del envío</value>
+  <data name="Each0MinutesFrom1" xml:space="preserve">
+    <value>Cada minuto {0} desde {1}</value>
   </data>
-  <data name="SMSMessageDN_SourceNumber" xml:space="preserve">
-    <value>Número de origen</value>
+  <data name="Each0HoursFrom1" xml:space="preserve">
+    <value>Cada hora {0} desde {1}</value>
   </data>
   <data name="SMSMessageDN_State" xml:space="preserve">
     <value>Estado</value>
@@ -1188,8 +1188,8 @@
   <data name="SMSTemplateOperations_Enable" xml:space="preserve">
     <value>Activar</value>
   </data>
-  <data name="SMSTemplateOperations_Modify" xml:space="preserve">
-    <value>Modificar</value>
+  <data name="_0IsNotMultiple1" xml:space="preserve">
+    <value>{0} no es múltiple de {1}</value>
   </data>
   <data name="SMSTemplateDN_Active" xml:space="preserve">
     <value>Activo</value>
@@ -1268,5 +1268,140 @@
   </data>
   <data name="FileDN_Hash" xml:space="preserve">
     <value>Hash</value>
+  </data>
+  <data name="NewsletterDeliveryDN_SendDate" xml:space="preserve">
+    <value>Fecha de envío</value>
+  </data>
+  <data name="NewsletterDeliveryDN_Sent" xml:space="preserve">
+    <value>Enviado</value>
+  </data>
+  <data name="NewsletterDN" xml:space="preserve">
+    <value>Newsletter</value>
+  </data>
+  <data name="NewsletterDN_From" xml:space="preserve">
+    <value>De</value>
+  </data>
+  <data name="NewsletterDN_HtmlBody" xml:space="preserve">
+    <value>Cuerpo HTML</value>
+  </data>
+  <data name="NewsletterDN_Name" xml:space="preserve">
+    <value>Nombre</value>
+  </data>
+  <data name="NewsletterDN_NumErrors" xml:space="preserve">
+    <value>Num errores</value>
+  </data>
+  <data name="NewsletterDN_NumLines" xml:space="preserve">
+    <value>Núm líneas</value>
+  </data>
+  <data name="NewsletterDN_OverrideEmail" xml:space="preserve">
+    <value>Email sobreescrito</value>
+  </data>
+  <data name="NewsletterDN_SMTPConfig" xml:space="preserve">
+    <value>SMTPConfig</value>
+  </data>
+  <data name="NewsletterDN_State" xml:space="preserve">
+    <value>Estado</value>
+  </data>
+  <data name="NewsletterDN_Subject" xml:space="preserve">
+    <value>Asunto</value>
+  </data>
+  <data name="NewsletterOperations_Save" xml:space="preserve">
+    <value>Guardar</value>
+  </data>
+  <data name="NewsletterOperations_Send" xml:space="preserve">
+    <value>Enviar</value>
+  </data>
+  <data name="NewsletterState_Saved" xml:space="preserve">
+    <value>Guardado</value>
+  </data>
+  <data name="NewsletterState_Sent" xml:space="preserve">
+    <value>Enviado</value>
+  </data>
+  <data name="ScheduleRuleHourlyDN" xml:space="preserve">
+    <value>Cada x horas</value>
+  </data>
+  <data name="ScheduleRuleHourlyDN_EachHour" xml:space="preserve">
+    <value>Cada hora</value>
+  </data>
+  <data name="ScheduleRuleHourlyDN_NotMultiple" xml:space="preserve">
+    <value>Hora no es múltiple de</value>
+  </data>
+  <data name="ScheduleRuleHourlyDN_NotValid" xml:space="preserve">
+    <value>Tiempo seleccionado no es válido</value>
+  </data>
+  <data name="ScheduleRuleHourlyDN_StartingOn" xml:space="preserve">
+    <value>A partir de</value>
+  </data>
+  <data name="ScheduleRuleMinutelyDN" xml:space="preserve">
+    <value>Cada x minutos</value>
+  </data>
+  <data name="ScheduleRuleMinutelyDN_EachMinute" xml:space="preserve">
+    <value>Cada minuto</value>
+  </data>
+  <data name="ScheduleRuleMinutelyDN_NotMultiple" xml:space="preserve">
+    <value>Minuto no es múltiple de</value>
+  </data>
+  <data name="ScheduleRuleMinutelyDN_NotValid" xml:space="preserve">
+    <value>Tiempo seleccionado no es válido</value>
+  </data>
+  <data name="ScheduleRuleMinutelyDN_StartingOn" xml:space="preserve">
+    <value>A partir de</value>
+  </data>
+  <data name="SMSMessageDN_SendPackage" xml:space="preserve">
+    <value>Enviar paquete</value>
+  </data>
+  <data name="SMSMessageDN_UpdatePackage" xml:space="preserve">
+    <value>Paquete de actualización</value>
+  </data>
+  <data name="SMSMessageOperations_CreateSMSMessageFromTemplate" xml:space="preserve">
+    <value>Crear SMSMessage desde plantilla</value>
+  </data>
+  <data name="SMSMessageOperations_CreateUpdateStatusPackage" xml:space="preserve">
+    <value>Crear paquete de actualización de estado</value>
+  </data>
+  <data name="SMSMessageState_Delivered" xml:space="preserve">
+    <value>Entregado</value>
+  </data>
+  <data name="SMSMessageState_Failed" xml:space="preserve">
+    <value>Fallido</value>
+  </data>
+  <data name="SMSPackageDN_Name" xml:space="preserve">
+    <value>Nombre</value>
+  </data>
+  <data name="SMSPackageDN_NumErrors" xml:space="preserve">
+    <value>Num errores</value>
+  </data>
+  <data name="SMSPackageDN_NumLines" xml:space="preserve">
+    <value>Num lineas</value>
+  </data>
+  <data name="SMSProviderOperations_SendSMSMessage" xml:space="preserve">
+    <value>Enviar mensaje SMS</value>
+  </data>
+  <data name="SMSProviderOperations_SendSMSMessagesFromTemplate" xml:space="preserve">
+    <value>Enviar mensajes SMS de plantilla</value>
+  </data>
+  <data name="SMSSendPackageDN" xml:space="preserve">
+    <value>Paquete de envios SMS</value>
+  </data>
+  <data name="SMSTemplateDN_AssociatedType" xml:space="preserve">
+    <value>Tipo asociado</value>
+  </data>
+  <data name="SMSTemplateDN_MessageLengthExceeded" xml:space="preserve">
+    <value>Longitud del mensaje superada</value>
+  </data>
+  <data name="SMSTemplateDN_RemoveNoSMSCharacters" xml:space="preserve">
+    <value>Quitar No SMSCharacters</value>
+  </data>
+  <data name="SMSTemplateOperations_Save" xml:space="preserve">
+    <value>Guardar</value>
+  </data>
+  <data name="SMSUpdatePackageDN" xml:space="preserve">
+    <value>Paquete de actualización de SMS</value>
+  </data>
+  <data name="UserQueryPartDN" xml:space="preserve">
+    <value>Parte consulta de usuario</value>
+  </data>
+  <data name="UserQueryPartDN_UserQuery" xml:space="preserve">
+    <value>Consulta de usuario</value>
   </data>
 </root>
