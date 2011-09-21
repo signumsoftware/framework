@@ -156,6 +156,11 @@ Write(Html.ValueLine(e, s => s.From, vl => vl.ReadOnly = (e.Value.State != SMSMe
 Write(Html.ScriptsJs("~/SMS/Scripts/SF_SMS.js"));
 
 
+Write(Html.ScriptsJs("~/SMS/Scripts/SF_SMS.js"));
+
+WriteLiteral("\r\n\r\n\r\n");
+
+
         }
     }
 }
