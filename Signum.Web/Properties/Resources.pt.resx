@@ -135,8 +135,8 @@
   <data name="CalendarToday" xml:space="preserve">
     <value>Hoje</value>
   </data>
-  <data name="Checked" xml:space="preserve">
-    <value>Verificado</value>
+  <data name="Alerts_Future" xml:space="preserve">
+    <value>Futuro</value>
   </data>
   <data name="CreateAlert" xml:space="preserve">
     <value>Criar alerta</value>
@@ -162,8 +162,8 @@
   <data name="Signum_addFilter" xml:space="preserve">
     <value>Adicionar filtro</value>
   </data>
-  <data name="Future" xml:space="preserve">
-    <value>Futuro</value>
+  <data name="Alerts_Attended" xml:space="preserve">
+    <value>Frequentou</value>
   </data>
   <data name="SearchControl_ShowNRows_Show" xml:space="preserve">
     <value>Mostrar</value>
@@ -237,8 +237,8 @@
   <data name="ViewNotes" xml:space="preserve">
     <value>Ver notas</value>
   </data>
-  <data name="Warned" xml:space="preserve">
-    <value>Advertido</value>
+  <data name="AlertCreated" xml:space="preserve">
+    <value>Alerta criado</value>
   </data>
   <data name="Yes" xml:space="preserve">
     <value>Sim</value>
@@ -326,5 +326,17 @@
   </data>
   <data name="Signum_showFilters" xml:space="preserve">
     <value>Visualizar filtros</value>
+  </data>
+  <data name="Alerts_NotAttended" xml:space="preserve">
+    <value>Não participou</value>
+  </data>
+  <data name="ChooseAType" xml:space="preserve">
+    <value>Escolha um tipo</value>
+  </data>
+  <data name="InvalidFormat" xml:space="preserve">
+    <value>Formato inválido</value>
+  </data>
+  <data name="NoteCreated" xml:space="preserve">
+    <value>Nota criada</value>
   </data>
 </root>
