@@ -471,13 +471,4 @@
   <data name="UserQueries_UserQueries" xml:space="preserve">
     <value>Consultas de usuarios</value>
   </data>
-  <data name="SMS_DestinationNumber" xml:space="preserve">
-    <value>Nuevo SMS</value>
-  </data>
-  <data name="SMS_PhoneNumber" xml:space="preserve">
-    <value>Número de teléfono</value>
-  </data>
-  <data name="SMS_WriteTheDestinationNumber" xml:space="preserve">
-    <value>Escriba el número del destinatario:</value>
-  </data>
 </root>

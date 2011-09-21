@@ -1263,4 +1263,10 @@
   <data name="UserState_New" xml:space="preserve">
     <value>Novo</value>
   </data>
+  <data name="ChartRequest_Multiplications" xml:space="preserve">
+    <value>Multiplicações</value>
+  </data>
+  <data name="FileDN_Hash" xml:space="preserve">
+    <value>Hash</value>
+  </data>
 </root>
