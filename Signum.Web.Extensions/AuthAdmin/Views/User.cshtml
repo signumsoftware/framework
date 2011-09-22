@@ -1,4 +1,4 @@
-@using (var e = Html.TypeContext<UserDN>())
+﻿@using (var e = Html.TypeContext<UserDN>())
 {
     @Html.ValueLine(e, f => f.UserName, vl => vl.ValueHtmlProps["size"] = 50)
     if (e.Value.IsNew || (ViewData["NewPwd"] != null && bool.Parse(ViewData["NewPwd"].ToString())))
