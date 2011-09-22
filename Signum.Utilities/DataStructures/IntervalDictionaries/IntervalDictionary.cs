@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Collections;
@@ -48,7 +48,7 @@ namespace Signum.Utilities.DataStructures
             if (interval.IsEmpty)
                 return;
 
-            if (dic.Count != 0) // no vacío
+            if (dic.Count != 0) // no vacï¿½o
             {
                 int index = PossibleIndex(interval.Min);
 
