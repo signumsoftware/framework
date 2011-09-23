@@ -137,7 +137,6 @@
     <Compile Include="Operations\Graph.cs" />
     <Compile Include="Operations\OperationLogic.cs" />
     <Compile Include="Operations\Typle.cs" />
-    <Compile Include="Processes\BlockingQueue.cs" />
     <Compile Include="Processes\PackageLogic.cs" />
     <Compile Include="Processes\ProcessLogic.cs" />
     <Compile Include="Profiler\ProfilerLogic.cs" />

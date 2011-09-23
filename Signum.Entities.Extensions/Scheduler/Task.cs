@@ -10,11 +10,6 @@ using Signum.Entities.Authorization;
 
 namespace Signum.Entities.Scheduler
 {
-    public enum TaskOperation
-    {
-        ExecutePrivate
-    }
-
     public enum CustomTaskOperation
     {
         Execute,
