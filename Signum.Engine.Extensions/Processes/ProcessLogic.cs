@@ -20,18 +20,20 @@ using Signum.Entities.Scheduler;
 using System.Reflection;
 using Signum.Utilities.Reflection;
 using Signum.Entities.Authorization;
+using System.Collections.Concurrent;
+using System.Threading.Tasks;
+using Signum.Engine.Scheduler;
 
 namespace Signum.Engine.Processes
 {
     public static class ProcessLogic
     {
-        static BlockingQueue<ExecutingProcess> processQueue = new BlockingQueue<ExecutingProcess>();
+        static BlockingCollection<ExecutingProcess> processQueue = new BlockingCollection<ExecutingProcess>();
 
         static ImmutableAVLTree<int, ExecutingProcess> currentProcesses = ImmutableAVLTree<int, ExecutingProcess>.Empty;
 
         static Dictionary<Enum, IProcessAlgorithm> registeredProcesses = new Dictionary<Enum, IProcessAlgorithm>();
 
-        static Thread[] threads;
         static int numberOfThreads;
 
         static Timer timer = new Timer(new TimerCallback(DispatchEvents), // main timer
@@ -60,10 +62,8 @@ namespace Signum.Engine.Processes
                 AuthLogic.AssertStarted(sb);
                 ProcessExecutionGraph.Register();
 
-                new BasicExecute<ProcessDN>(TaskOperation.ExecutePrivate)
-                {
-                    Execute = (pc, _) => ProcessLogic.Create(pc).Execute(ProcessOperation.Execute)
-                }.Register();
+                SchedulerLogic.ExecuteTask.Register((ProcessDN p)=>
+                    ProcessLogic.Create(p).Execute(ProcessOperation.Execute));
 
                 sb.Schema.Initializing[InitLevel.Level4BackgroundProcesses] += Schema_InitializingApplication;
                 sb.Schema.EntityEvents<ProcessExecutionDN>().Saving += ProcessExecution_Saving;
@@ -178,6 +178,9 @@ namespace Signum.Engine.Processes
 
         static void Execute(ProcessExecutionDN pe)
         {
+            if (pe.State != ProcessState.Queued || currentProcesses.Contains(pe.Id))
+                return; 
+
             var ep = new ExecutingProcess
             {
                 Algorithm = registeredProcesses[EnumLogic<ProcessDN>.ToEnum(pe.Process.Key)],
@@ -185,7 +188,7 @@ namespace Signum.Engine.Processes
                 Execution = pe,
             };
 
-            processQueue.Enqueue(ep);
+            processQueue.Add(ep);
             Sync.SafeUpdate(ref currentProcesses, tree => tree.Add(pe.Id, ep));
         }
 
@@ -210,17 +213,12 @@ namespace Signum.Engine.Processes
 
                 foreach (var pe in pes)
                 {
-                    pe.Queue();
+                    pe.SetAsQueue();
                     pe.Save();
                 }
 
-                threads = 0.To(numberOfThreads).Select(i => new Thread(DoWork)).ToArray();
-
-                for (int i = 0; i < threads.Length; i++)
-                {
-                    threads[i].Start(i);
-                }
-
+                Task.Factory.StartNew(DoWork, TaskCreationOptions.LongRunning); 
+           
                 RefreshPlan();
             }
         }
@@ -255,7 +253,6 @@ namespace Signum.Engine.Processes
             using (new EntityCache(true))
             using (AuthLogic.Disable())
             {
-
                 var pes = (from pe in Database.Query<ProcessExecutionDN>()
                            where pe.State == ProcessState.Planned && pe.PlannedDate <= TimeZoneManager.Now
                            orderby pe.PlannedDate
@@ -263,7 +260,7 @@ namespace Signum.Engine.Processes
 
                 foreach (var pe in pes)
                 {
-                    pe.Queue();
+                    pe.SetAsQueue();
                     pe.Save();
                 }
 
@@ -282,22 +279,25 @@ namespace Signum.Engine.Processes
             registeredProcesses.Add(processKey, logic);
         }
 
-        static void DoWork(object number)
+        static void DoWork()
         {
-            using (AuthLogic.User(UserDN.Current != null ? UserDN.Current : AuthLogic.SystemUser))
+            foreach (var ep in processQueue.GetConsumingEnumerable())
             {
-                foreach (var ep in processQueue)
+                Task.Factory.StartNew(() =>
                 {
-                    try
+                    using (AuthLogic.User(AuthLogic.SystemUser))
                     {
-                        ep.Execute();
+                        try
+                        {
+                            ep.Execute();
+                        }
+                        finally
+                        {
+                            using (AuthLogic.User(AuthLogic.SystemUser))
+                                Sync.SafeUpdate(ref currentProcesses, tree => tree.Remove(ep.Execution.Id));
+                        }
                     }
-                    finally
-                    {
-                        using (AuthLogic.User(AuthLogic.SystemUser))
-                            Sync.SafeUpdate(ref currentProcesses, tree => tree.Remove(ep.Execution.Id));
-                    }
-                }
+                });
             }
         }
 
@@ -403,7 +403,7 @@ namespace Signum.Engine.Processes
                     ToState = ProcessState.Queued,
                     Execute = (pe, _) =>
                     {
-                        pe.Queue();
+                        pe.SetAsQueue();
                         pe.Save();
                     }
                 }.Register();
@@ -424,12 +424,12 @@ namespace Signum.Engine.Processes
 
         public static ProcessExecutionDN Create(Enum processKey, params object[] args)
         {
-            return Create(EnumLogic<ProcessDN>.ToEntity(processKey), args);
+            return EnumLogic<ProcessDN>.ToEntity(processKey).ConstructFrom<ProcessExecutionDN>(ProcessOperation.FromProcess, args);
         }
 
         public static ProcessExecutionDN Create(Enum processKey, IProcessDataDN processData)
         {
-            return Create(EnumLogic<ProcessDN>.ToEntity(processKey), processData);
+            return EnumLogic<ProcessDN>.ToEntity(processKey).ConstructFrom<ProcessExecutionDN>(ProcessOperation.FromProcess, processData);
         }
 
         public static ProcessExecutionDN Create(ProcessDN process, params object[] args)
