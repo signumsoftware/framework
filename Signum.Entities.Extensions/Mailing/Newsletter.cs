@@ -26,7 +26,7 @@ namespace Signum.Entities.Mailing
             set { SetToStr(ref numErrors, value, () => NumErrors); }
         }
 
-        [NotNullable, SqlDbType(Size = 100), UniqueIndex]
+        [NotNullable, SqlDbType(Size = 100)]
         string name;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name
