@@ -471,6 +471,12 @@
   <data name="UserQueries_UserQueries" xml:space="preserve">
     <value>Consultas de usuarios</value>
   </data>
+  <data name="ControlPanel_CreateNewPart" xml:space="preserve">
+    <value>Crear nueva parte</value>
+  </data>
+  <data name="ControlPanel_YouMustSaveThePanelBeforeAddingParts" xml:space="preserve">
+    <value>Debe guardar el panel antes de agregar partes</value>
+  </data>
   <data name="SMS_DestinationNumber" xml:space="preserve">
     <value>Nuevo SMS</value>
   </data>
@@ -478,6 +484,6 @@
     <value>Número de teléfono</value>
   </data>
   <data name="SMS_WriteTheDestinationNumber" xml:space="preserve">
-    <value>Escriba el número del destinatario:</value>
+    <value>Escribir el número del destinatario:</value>
   </data>
 </root>

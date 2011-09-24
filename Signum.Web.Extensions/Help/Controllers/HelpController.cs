@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -50,7 +50,7 @@ namespace Signum.Web.Help
 
             ViewData["nameSpace"] = relatedTypes;
 
-            //Buscamos en qué fichero se encuentra
+            //Buscamos en quï¿½ fichero se encuentra
             EntityHelp eh = HelpLogic.GetEntityHelp(type);
 
             return View(HelpClient.ViewEntityUrl, eh);

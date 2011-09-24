@@ -1,4 +1,4 @@
-namespace Signum.Excel
+﻿namespace Signum.Excel
 {
     using System;
     using System.CodeDom;

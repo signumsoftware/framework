@@ -68,7 +68,7 @@ namespace Signum.Entities.Files
             set { Set(ref active, value, () => Active); }
         }
 
-        MList<FileTypeDN> fileTypes;
+        MList<FileTypeDN> fileTypes = new MList<FileTypeDN>();
         public MList<FileTypeDN> FileTypes
         {
             get { return fileTypes; }

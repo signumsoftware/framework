@@ -26,7 +26,7 @@ namespace Signum.Web.Mailing
         public static string ViewPrefix = "~/Mailing/Views/{0}.cshtml";
 
 
-        public static void Start()
+        public static void Start(bool smtpConfig, bool newsletter)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -36,7 +36,19 @@ namespace Signum.Web.Mailing
                     new EntitySettings<EmailMessageDN>(EntityType.Default){ PartialViewName = e => ViewPrefix.Formato("EmailMessage")},
                     new EntitySettings<EmailPackageDN>(EntityType.Default){ PartialViewName = e => ViewPrefix.Formato("EmailPackage")},
                     new EntitySettings<EmailTemplateDN>(EntityType.ServerOnly),
+                    new EntitySettings<SMTPConfigurationDN>(EntityType.ServerOnly) { PartialViewName = e => ViewPrefix.Formato("SMTPConfiguration") },
                     new EntitySettings<SMTPConfigurationDN>(EntityType.Admin) { PartialViewName = e => ViewPrefix.Formato("SMTPConfiguration") },
+                });
+
+                if (smtpConfig)
+                    Navigator.AddSettings(new List<EntitySettings>
+                {
+                    new EntitySettings<SMTPConfigurationDN>(EntityType.ServerOnly) { PartialViewName = e => ViewPrefix.Formato("SMTPConfiguration") },
+                });
+
+                if (newsletter)
+                    Navigator.AddSettings(new List<EntitySettings>
+                {
                     new EntitySettings<NewsletterDN>(EntityType.NotSaving) { PartialViewName = e => ViewPrefix.Formato("Newsletter") },
                     new EntitySettings<NewsletterDeliveryDN>(EntityType.ServerOnly) { PartialViewName = e => ViewPrefix.Formato("NewsletterDelivery") },
                 });
