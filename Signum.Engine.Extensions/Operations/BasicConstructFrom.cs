@@ -76,11 +76,11 @@ namespace Signum.Engine.Operations
                         User = UserDN.Current.ToLite()
                     };
 
-                    OperationLogic.OnBeginOperation(this, (IdentifiableEntity)entity);
+                    OnBeginOperation((IdentifiableEntity)entity);
 
-                    T result = OnConstruct((F)entity, args);
+                    T result = Construct((F)entity, args);
 
-                    OperationLogic.OnEndOperation(this, result);
+                    OnEndOperation(result);
 
                     if (!result.IsNew)
                     {
@@ -100,9 +100,14 @@ namespace Signum.Engine.Operations
             }
         }
 
-        protected virtual T OnConstruct(F entity, object[] args)
+        protected virtual void OnBeginOperation(IdentifiableEntity entity)
         {
-            return Construct(entity, args);
+            OperationLogic.OnBeginOperation(this, entity);
+        }
+
+        protected virtual void OnEndOperation(T result)
+        {
+            OperationLogic.OnEndOperation(this, result);
         }
 
 
