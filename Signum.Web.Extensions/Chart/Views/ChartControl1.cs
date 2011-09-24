@@ -84,6 +84,13 @@ Write(Html.ScriptCss("~/Chart/Content/SF_Chart.css"));
 WriteLiteral("\r\n\r\n");
 
 
+Write(Html.ScriptsJs("~/Chart/Scripts/SF_Chart.js",
+                "~/scripts/d3.min.js",
+                "~/scripts/chart-test.js"));
+
+WriteLiteral("\r\n\r\n");
+
+
    
     QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
     List<FilterOption> filterOptions = (List<FilterOption>)ViewData[ViewDataKeys.FilterOptions];
@@ -121,11 +128,11 @@ WriteLiteral("\r\n                \r\n                    ");
 
 
                Write(Html.Href(
-                            Model.Compose("btnAddFilter"), 
-                            Signum.Web.Properties.Resources.FilterBuilder_AddFilter, 
+                            Model.Compose("btnAddFilter"),
+                            Signum.Web.Properties.Resources.FilterBuilder_AddFilter,
                             "",
                             Signum.Web.Properties.Resources.Signum_selectToken,
-                            "sf-query-button sf-add-filter sf-disabled", 
+                            "sf-query-button sf-add-filter sf-disabled",
                             new Dictionary<string, object> 
                             { 
                                 { "data-icon", "ui-icon-arrowthick-1-s" },
@@ -170,10 +177,7 @@ WriteLiteral("\" class=\"ui-widget ui-corner-all sf-search-results-container\">\
 
            Html.RenderPartial(ChartClient.ChartResultsView); 
 
-WriteLiteral("    </div>\r\n</div>\r\n\r\n");
-
-
-Write(Html.ScriptsJs("~/Chart/Scripts/SF_Chart.js"));
+WriteLiteral("    </div>\r\n</div>");
 
 
         }

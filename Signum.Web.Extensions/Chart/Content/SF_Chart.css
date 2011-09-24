@@ -49,3 +49,46 @@
 .sf-chart-img-multilines { background-position: -120px -40px }
 .sf-chart-img-stackedareas { background-position: -120px -80px }
 .sf-chart-img-totalareas { background-position: -120px -120px }
+
+.sf-chart-container
+{
+    width: 100%;
+    min-height: 400px;    
+}
+.sf-chart-container svg
+{
+    shape-rendering: crispEdges;         
+}
+.sf-chart-container line.x-ruler, .sf-chart-container line.y-ruler
+{
+    stroke: #ccc;   
+}
+.sf-chart-container line.x-axis, .sf-chart-container line.y-axis, .sf-chart-container line.x-axis-tick, .sf-chart-container line.y-axis-tick
+{
+    stroke: #000;    
+}
+.sf-chart-container text.x-axis-token-label, .sf-chart-container text.y-axis-token-label
+{
+    font-weight: bold;    
+}
+.sf-chart-container rect.shape
+{
+    fill: steelblue;
+    stroke: white;
+}
+.sf-chart-container path.shape
+{
+    stroke: steelblue;
+}
+.sf-chart-container circle.point
+{
+    fill: steelblue;
+}
+.sf-chart-code-container
+{
+    padding: 5px;    
+}
+.sf-chart-code textarea
+{
+    width: 100%;
+}

@@ -9,6 +9,9 @@ using Signum.Entities.Chart;
 using Signum.Utilities;
 using Signum.Engine.DynamicQuery;
 using Signum.Entities.DynamicQuery;
+using System.Web.Script.Serialization;
+using Signum.Entities;
+using Signum.Engine;
 
 namespace Signum.Web.Chart
 {
@@ -50,6 +53,30 @@ namespace Signum.Web.Chart
                     DivCssClass = ToolBarButton.DefaultQueryCssClass
                 }
             };
+        }
+
+        public static object DataJson(ChartRequest request, ResultTable resultTable)
+        {
+            return new
+            {
+                labels = request.ChartTokens().Select((t, i) => KVP.Create("token" + (i + 1), t.DisplayName.HasText() ? t.DisplayName : t.Token.NiceName())).ToDictionary(),
+                values = resultTable.Rows.Select(r => resultTable.Columns.Select((c, i) => KVP.Create("token" + (i + 1), Convert(r[c]))).ToDictionary()).ToList()
+            };
+        }
+
+        private static object Convert(object p)
+        {
+            if (p is Lite)
+            {
+                Lite l = (Lite)p;
+                return new
+                {
+                    key = l.Key(),
+                    toStr = l.ToStr
+                };
+            }
+            else
+                return p;
         }
 
         public static string ChartTypeImgClass(ChartBase chart, ChartType type)
