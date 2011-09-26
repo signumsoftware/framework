@@ -75,11 +75,11 @@ namespace Signum.Engine.Operations
             {
                 using (Transaction tr = new Transaction())
                 {
-                    OperationLogic.OnBeginOperation(this, (IdentifiableEntity)entity);
+                    OnBeginOperation((T)entity);
 
-                    OnExecute((T)entity, parameters);
+                    Execute((T)entity, parameters);
 
-                    OperationLogic.OnEndOperation(this, (IdentifiableEntity)entity);
+                    OnEndOperation((T)entity);
 
                     entity.Save(); //Nothing happens if already saved
 
@@ -119,9 +119,14 @@ namespace Signum.Engine.Operations
             }
         }
 
-        protected virtual void OnExecute(T entity, object[] args)
+        protected virtual void OnBeginOperation(T entity)
         {
-            Execute(entity, args); 
+            OperationLogic.OnBeginOperation(this, entity);
+        }
+
+        protected virtual void OnEndOperation(T entity)
+        {
+            OperationLogic.OnEndOperation(this, entity);
         }
 
         public virtual void AssertIsValid()

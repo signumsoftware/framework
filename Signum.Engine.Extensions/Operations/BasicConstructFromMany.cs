@@ -51,11 +51,11 @@ namespace Signum.Engine.Operations
                         User = UserDN.Current.ToLite()
                     };
 
-                    OperationLogic.OnBeginOperation(this, null);
+                    OnBeginOperation();
 
                     T result = OnConstruct(lites.Select(l => l.ToLite<F>()).ToList(), args);
 
-                    OperationLogic.OnEndOperation(this, result);
+                    OnEndOperation(result);
 
                     if (!result.IsNew)
                     {
@@ -73,6 +73,16 @@ namespace Signum.Engine.Operations
                 OperationLogic.OnErrorOperation(this, null, e);
                 throw;
             }
+        }
+
+        protected virtual void OnBeginOperation()
+        {
+            OperationLogic.OnBeginOperation(this, null);
+        }
+
+        protected virtual void OnEndOperation(T result)
+        {
+            OperationLogic.OnEndOperation(this, result);
         }
 
         protected virtual T OnConstruct(List<Lite<F>> lites, object[] args)

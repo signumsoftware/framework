@@ -10,9 +10,10 @@ function magicRadios($ctx) {
     $links.find("input:radio").hide();
     $links.each(updateBackground);
 
-    $links.live("click", function() {
+    $links.click(function() {
         var $tr = $(this).parent("td").parent("tr");
         var radio = $(":radio", this);
+        $(".cbLink :radio", $tr).attr("checked", false);
         radio.attr("checked", true);
         $(".sf-overriden", $tr).attr("checked", radio.val() != $("input[name$=Base]", $tr).val());
         $(".cbLink", $tr).each(updateBackground);
@@ -30,7 +31,7 @@ function magicCheckBoxes($ctx) {
     $links.each(updateBackground);
 
     $links.bind("mousedown", function() { this.onselectstart = function() { return false }; });
-    $links.live("click", function(evt) {
+    $links.click(function(evt) {
         var $tr = $(this).parent("td").parent("tr");
 
         var cb = $(":checkbox", this);
@@ -77,7 +78,6 @@ function openDialog(e) {
         },
         onLoaded: function (divId) {
             magicRadios($("#" + divId));
-
         }
     });
     navigator.createSave();

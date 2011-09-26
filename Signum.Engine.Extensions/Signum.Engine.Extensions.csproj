@@ -132,8 +132,8 @@
     <Compile Include="Operations\BasicConstruct.cs" />
     <Compile Include="Operations\BasicConstructFrom.cs" />
     <Compile Include="Operations\BasicConstructFromMany.cs" />
-    <Compile Include="Operations\Delete.cs" />
-    <Compile Include="Operations\Execute.cs" />
+    <Compile Include="Operations\BasicDelete.cs" />
+    <Compile Include="Operations\BasicExecute.cs" />
     <Compile Include="Operations\Graph.cs" />
     <Compile Include="Operations\OperationLogic.cs" />
     <Compile Include="Operations\Typle.cs" />

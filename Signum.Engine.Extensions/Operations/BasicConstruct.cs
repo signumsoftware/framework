@@ -50,11 +50,11 @@ namespace Signum.Engine.Operations
                          User = UserDN.Current.ToLite()
                      };
 
-                     OperationLogic.OnBeginOperation(this, null);
+                     OnBeginOperation();
 
-                     T entity = OnConstruct(args);
+                     T entity = Construct(args);
 
-                     OperationLogic.OnEndOperation(this, entity);
+                     OnEndOperation(entity);
 
                      if (!entity.IsNew)
                      {
@@ -74,9 +74,14 @@ namespace Signum.Engine.Operations
              }
         }
 
-        protected virtual T OnConstruct(object[] args)
+        protected virtual void OnBeginOperation()
         {
-            return Construct(args);
+            OperationLogic.OnBeginOperation(this, null);
+        }
+
+        protected virtual void OnEndOperation(T entity)
+        {
+            OperationLogic.OnEndOperation(this, entity);
         }
 
         public virtual void AssertIsValid()

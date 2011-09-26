@@ -10,6 +10,7 @@ using Signum.Engine.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using Signum.Utilities;
+using Signum.Entities.Cache;
 
 namespace Signum.Engine.Cache
 {
@@ -30,19 +31,23 @@ namespace Signum.Engine.Cache
             ParameterExpression origin = Expression.Parameter(type, "origin");
             ParameterExpression retriever = Expression.Parameter(typeof(IRetriever), "retriever");
 
-            var block = Expression.Block(
-                table.Fields.Values
+            var list = table.Fields.Values
                 .Where(f => !(f.Field is FieldPrimaryKey))
                 .Select(f => Expression.Assign(
                     Expression.Field(me, f.FieldInfo),
-                    Clone(Expression.Field(origin, f.FieldInfo), f.Field, retriever)))
-                );
+                    Clone(Expression.Field(origin, f.FieldInfo), f.Field, retriever))).ToList<Expression>();
 
-            var lambda = Expression.Lambda(typeof(Action<,,>).MakeGenericType(type, type, typeof(IRetriever)), block, me, origin, retriever);
+            if(typeof(IAfterClone).IsAssignableFrom(type))
+            {
+                list.Add(Expression.Call(me, miAfterClone, new[] { origin }));
+            }
+
+            var lambda = Expression.Lambda(typeof(Action<,,>).MakeGenericType(type, type, typeof(IRetriever)), Expression.Block(list), me, origin, retriever);
 
             return lambda.Compile();
         }
 
+        static MethodInfo miAfterClone = ReflectionTools.GetMethodInfo((IAfterClone ac) => ac.AfterClone(null));
         static MethodInfo miRequest = ReflectionTools.GetMethodInfo((IRetriever r) => r.Request<IdentifiableEntity>(0)).GetGenericMethodDefinition();
         static MethodInfo miRequestIBA = ReflectionTools.GetMethodInfo((IRetriever r) => r.RequestIBA<IdentifiableEntity>(0, typeof(IdentifiableEntity))).GetGenericMethodDefinition();
         static MethodInfo miGetType = ReflectionTools.GetMethodInfo((IdentifiableEntity ie) => ie.GetType());
@@ -135,11 +140,5 @@ namespace Signum.Engine.Cache
         {
             return Expression.Call(retriever, miRequest.MakeGenericMethod(type), Expression.Property(origin, "IdOrNull"));
         }
-    }
-
-    public interface IAfterClone<T> : IIdentifiable
-        where T : IIdentifiable
-    {
-        void AfterClone(T original);
     }
 }
