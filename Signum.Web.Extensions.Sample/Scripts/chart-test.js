@@ -510,11 +510,30 @@ SF.Chart.MultiLines.prototype = $.extend({}, new SF.Chart.Lines(), {
 });
 
 (function () { 
+    var dataTV = 
+    {
+       labels: {eje1: "Color", valor: "Altura"},  
+       serie: [{eje1: "Negro", valor: "1,80"},  
+               {eje1: "Blanco", valor: "1,70"}]
+
+    };
+
+    var dataTV = 
+    {
+       labels: {token1: "Color", token2: "Sexo", token3: "Altura"},  
+       token1: ["Negro", "Blanco", "Amarillo"],
+       serie: [{token2: "Hombre", valores : [1.80, null, 1.60]},
+              [{token2: "Mujer", valores : [1.70, 1.80, null]},
+
+    };
+
+
     var data = {
         labels:{"token1":"Album","token2":"Author","token3":"Id"},
-        series:[
-            {"token2": {"key":"Band;1","toStr":"Smashing Pumpkins"}, "values":[
-                {"token1":{"key":"Album;1","toStr":"Siamese Dream"},"token3":1},
+        token1: { label: "Album", values: :{"key":"Album;1","toStr":"Siamese Dream"}, :{"key":"Album;1","toStr":"Siamese Dream"}, :{"key":"Album;1","toStr":"Siamese Dream"} } 
+        token2: ...
+        series:[[0, 2, 7], 
+            {"token2": 0, "values":[{"token1":0, token3: 1],
                 {"token1":{"key":"Album;2","toStr":"Mellon Collie and the Infinite Sadness"},"token3":2},
                 {"token1":{"key":"Album;3","toStr":"Zeitgeist"},"token3":3},
                 {"token1":{"key":"Album;4","toStr":"American Gothic"},"token3":4}
