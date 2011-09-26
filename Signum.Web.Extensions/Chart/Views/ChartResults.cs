@@ -280,12 +280,7 @@ WriteLiteral("            <script type=\"text/javascript\">\r\n\r\n             
               Write(divSelector);
 
 WriteLiteral("\').closest(\'.sf-tabs\').bind( \"tabsshow\", function(event, ui) {\r\n                 " +
-"   var myChart = SF.Chart.Factory.getGraphType(\'");
-
-
-                                                            Write(Model.Value.Chart.ChartType.ToString());
-
-WriteLiteral("\');\r\n                \r\n                    var $chartContainer = $(\'");
+"   var $chartContainer = $(\'");
 
 
                                         Write(divSelector);
@@ -296,7 +291,13 @@ WriteLiteral("\');\r\n                    var width = $chartContainer.width();\r
 
                           Write(Html.Json(ChartClient.DataJson(Model.Value, queryResult)));
 
-WriteLiteral(";\r\n\r\n                    var code = SF.Chart.Factory.createChartSVG(\'");
+WriteLiteral(";\r\n\r\n                    var myChart = SF.Chart.Factory.getGraphType(\'");
+
+
+                                                            Write(Model.Value.Chart.ChartType.ToString());
+
+WriteLiteral("\');\r\n                \r\n                    var code = SF.Chart.Factory.createChar" +
+"tSVG(\'");
 
 
                                                            Write(divSelector);

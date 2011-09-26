@@ -57,11 +57,33 @@ namespace Signum.Web.Chart
 
         public static object DataJson(ChartRequest request, ResultTable resultTable)
         {
-            return new
-            {
-                labels = request.ChartTokens().Select((t, i) => KVP.Create("token" + (i + 1), t.DisplayName.HasText() ? t.DisplayName : t.Token.NiceName())).ToDictionary(),
-                values = resultTable.Rows.Select(r => resultTable.Columns.Select((c, i) => KVP.Create("token" + (i + 1), Convert(r[c]))).ToDictionary()).ToList()
-            };
+            var labelDictionary = request.ChartTokens()
+                .Select((t, i) => KVP.Create("token" + (i + 1), t.DisplayName.HasText() ? t.DisplayName : t.Token.NiceName()))
+                .ToDictionary();
+
+            switch (request.Chart.ChartResultType)
+            { 
+                case ChartResultType.TypeValue:
+                    return new
+                    {
+                        labels = labelDictionary,
+                        values = resultTable.Rows.Select(r => resultTable.Columns.Select((c, i) => KVP.Create("token" + (i + 1), Convert(r[c]))).ToDictionary()).ToList()
+                    };
+                case ChartResultType.TypeTypeValue:
+                    //Results grouped in series for distinct token2
+                    return new
+                    {
+                        labels = labelDictionary,
+                        series = resultTable.Rows.Select(r => resultTable.Columns.Select((c, i) => KVP.Create("token" + (i + 1), Convert(r[c]))).ToDictionary())
+                            .GroupBy(dic => dic["token2"]).Select(gr => new
+                            {
+                                token2 = gr.Key,
+                                values = gr.Select(t => new { token1 = t["token1"], token3 = t["token3"] }).ToList()
+                            }).ToList()
+                    };
+                default:
+                    throw new NotImplementedException("");
+            }
         }
 
         private static object Convert(object p)

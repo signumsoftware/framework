@@ -71,19 +71,6 @@
 {
     font-weight: bold;    
 }
-.sf-chart-container rect.shape
-{
-    fill: steelblue;
-    stroke: white;
-}
-.sf-chart-container path.shape
-{
-    stroke: steelblue;
-}
-.sf-chart-container circle.point
-{
-    fill: steelblue;
-}
 .sf-chart-code-container
 {
     padding: 5px;    

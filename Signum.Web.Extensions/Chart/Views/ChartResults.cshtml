@@ -106,14 +106,14 @@ else
             <script type="text/javascript">
 
                 $('@divSelector').closest('.sf-tabs').bind( "tabsshow", function(event, ui) {
-                    var myChart = SF.Chart.Factory.getGraphType('@Model.Value.Chart.ChartType.ToString()');
-                
                     var $chartContainer = $('@divSelector');
                     var width = $chartContainer.width();
                     var height = $chartContainer.height();
 
                     var data = @Html.Json(ChartClient.DataJson(Model.Value, queryResult));
 
+                    var myChart = SF.Chart.Factory.getGraphType('@Model.Value.Chart.ChartType.ToString()');
+                
                     var code = SF.Chart.Factory.createChartSVG('@divSelector') + 
                         myChart.paintChart();
 
