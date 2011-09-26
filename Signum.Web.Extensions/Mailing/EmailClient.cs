@@ -36,14 +36,12 @@ namespace Signum.Web.Mailing
                     new EntitySettings<EmailMessageDN>(EntityType.Default){ PartialViewName = e => ViewPrefix.Formato("EmailMessage")},
                     new EntitySettings<EmailPackageDN>(EntityType.Default){ PartialViewName = e => ViewPrefix.Formato("EmailPackage")},
                     new EntitySettings<EmailTemplateDN>(EntityType.ServerOnly),
-                    new EntitySettings<SMTPConfigurationDN>(EntityType.ServerOnly) { PartialViewName = e => ViewPrefix.Formato("SMTPConfiguration") },
-                    new EntitySettings<SMTPConfigurationDN>(EntityType.Admin) { PartialViewName = e => ViewPrefix.Formato("SMTPConfiguration") },
                 });
 
                 if (smtpConfig)
                     Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<SMTPConfigurationDN>(EntityType.ServerOnly) { PartialViewName = e => ViewPrefix.Formato("SMTPConfiguration") },
+                    new EntitySettings<SMTPConfigurationDN>(EntityType.Admin) { PartialViewName = e => ViewPrefix.Formato("SMTPConfiguration") },
                 });
 
                 if (newsletter)
