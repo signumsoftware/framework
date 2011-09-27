@@ -57,29 +57,76 @@ namespace Signum.Web.Chart
 
         public static object DataJson(ChartRequest request, ResultTable resultTable)
         {
-            var labelDictionary = request.ChartTokens()
-                .Select((t, i) => KVP.Create("token" + (i + 1), t.DisplayName.HasText() ? t.DisplayName : t.Token.NiceName()))
-                .ToDictionary();
+            var chart = request.Chart;
 
-            switch (request.Chart.ChartResultType)
+            switch (chart.ChartResultType)
             { 
                 case ChartResultType.TypeValue:
                     return new
                     {
-                        labels = labelDictionary,
-                        values = resultTable.Rows.Select(r => resultTable.Columns.Select((c, i) => KVP.Create("token" + (i + 1), Convert(r[c]))).ToDictionary()).ToList()
+                        labels = new 
+                        {
+                            dimension1 = chart.Dimension1.GetTitle(),
+                            value1 = chart.Value1.GetTitle() 
+                        },
+                        serie = resultTable.Rows.Select(r => new { dimension1 = Convert(r[0]), value1 = Convert(r[1]) }).ToList()
                     };
                 case ChartResultType.TypeTypeValue:
-                    //Results grouped in series for distinct token2
+                    
+                    var dimension1Values = resultTable.Rows.Select(r => r[0]).Distinct().ToList();
+
                     return new
                     {
-                        labels = labelDictionary,
-                        series = resultTable.Rows.Select(r => resultTable.Columns.Select((c, i) => KVP.Create("token" + (i + 1), Convert(r[c]))).ToDictionary())
-                            .GroupBy(dic => dic["token2"]).Select(gr => new
-                            {
-                                token2 = gr.Key,
-                                values = gr.Select(t => new { token1 = t["token1"], token3 = t["token3"] }).ToList()
-                            }).ToList()
+                        labels = new 
+                        {
+                            dimension1 = chart.Dimension1.GetTitle(),
+                            dimension2 = chart.Dimension2.GetTitle(),
+                            value1 = chart.Value1.GetTitle() 
+                        },
+                        dimension1 = dimension1Values.Select(Convert).ToList(),
+                        series = resultTable.Rows.Select(r => r[1]).Distinct().Select(d2 => new 
+                        { 
+                            dimension2 = Convert(d2),
+                            values = (dimension1Values
+                                .Select(d1 => resultTable.Rows.FirstOrDefault(r => object.Equals(r[0], d1) && object.Equals(r[1], d2))
+                                .TryCC(r => r[2]))).ToList()
+                        }).ToList()
+                    };
+
+                case ChartResultType.Points:
+                    return new
+                    {
+                        labels = new
+                        {
+                            value1 = chart.Value1.GetTitle(),
+                            dimension1 = chart.Dimension1.GetTitle(),
+                            dimension2 = chart.Dimension2.GetTitle(),
+                        },
+                        points = resultTable.Rows.Select(r => new 
+                        { 
+                            value1 = Convert(r[2]), 
+                            dimension1 = Convert(r[0]), 
+                            dimension2 = Convert(r[1]) 
+                        }).ToList()
+                    };
+
+                case ChartResultType.Bubbles:
+                    return new
+                    {
+                        labels = new
+                        {
+                            value1 = chart.Value1.GetTitle(),
+                            dimension1 = chart.Dimension1.GetTitle(),
+                            dimension2 = chart.Dimension2.GetTitle(),
+                            value2 = chart.Value2.GetTitle()
+                        },
+                        points = resultTable.Rows.Select(r => new
+                        {
+                            value1 = Convert(r[2]),
+                            dimension1 = Convert(r[0]),
+                            dimension2 = Convert(r[1]),
+                            value2 = Convert(r[3])
+                        }).ToList()
                     };
                 default:
                     throw new NotImplementedException("");

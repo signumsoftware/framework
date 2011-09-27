@@ -65,50 +65,26 @@ SF.Chart.ChartBase.prototype = {
             ".attr('y2', xAxisTopPosition - padding);" + this.br + this.br;
     },
 
-    defaultColorLegend: function () {
-        return "//paint color legend" + this.br +
-            "var legendScale = d3.scale.ordinal().domain($.map(data.series, function (s, i) { return i; })).rangeBands([0, width - yAxisLeftPosition - padding])," + this.brt +
-            "legendRectWidth = 10," + this.brt +
-            "legendLabelWidth = legendScale.rangeBand() - (2 * labelMargin) - legendRectWidth;" + this.br +
-            this.br +
-            "chart.append('svg:g').attr('class', 'color-legend').attr('transform', 'translate(' + yAxisLeftPosition + ', ' + padding + ')')" + this.brt +
-            ".enterData(data.series, 'rect', 'color-rect')" + this.brt +
-            ".attr('x', function(e, i) { return (legendRectWidth + legendLabelWidth + (2 * labelMargin)) * i; })" + this.brt +
-            ".attr('width', legendRectWidth).attr('height', fontSize)" + this.brt +
-            ".attr('fill', function(s) { return color(JSON.stringify(s.token2)); });" + this.br +
-            this.br +
-            "chart.append('svg:g').attr('class', 'color-legend').attr('transform', 'translate(' + (yAxisLeftPosition + labelMargin + legendRectWidth) + ', ' + (padding + fontSize) + ')')" + this.brt +
-            ".enterData(data.series, 'text', 'color-text')" + this.brt +
-            ".attr('x', function(e, i) { return (legendRectWidth + legendLabelWidth + (2 * labelMargin)) * i; })" + this.brt +
-            ".text(function(s) { return myChart.getTokenLabel(s.token2); });" + this.br + this.br;
-    },
-
     paintLegend: function () {
         return "";
-    },
-
-    getPathPoints: function (points) {
-        var result = "M";
-        $.each(points, function (i, p) {
-            result += " " + p.x + " " + p.y;
-        });
-        return result;
     },
 
     getTokenLabel: function (tokenValue) {
         return tokenValue.toStr || tokenValue;
     },
 
-    getValuesInAllSeries: function (series, tokenName) {
-        var result = [];
-        for (var s = 0; s < series.length; s++) {
-            for (var v = 0; v < series[s].values.length; v++) {
-                var value = series[s].values[v];
-                if (result.indexOf(value[tokenName]) < 0) {
-                    result.push(value[tokenName]);
-                }
+    getPathPoints: function (points) {
+        var result = "";
+        var jump = true;
+        $.each(points, function (i, p) {
+            if (p.x == null || p.y == null) {
+                jump = true;
             }
-        }
+            else {
+                result += (jump ? " M " : " ") + p.x + " " + p.y;
+                jump = false;
+            }
+        });
         return result;
     },
 
@@ -139,20 +115,20 @@ SF.Chart.Bars.prototype = $.extend({}, new SF.Chart.ChartBase(), {
             "padding= " + this.padding + "," + this.brt +
             "yAxisLeftPosition = padding + fontSize + yAxisLabelWidth + (2 * labelMargin) + ticksLength," + this.brt +
             "xAxisTopPosition = height - padding - (fontSize * 2) - (labelMargin * 2) - ticksLength," + this.brt +
-            "color = (data.values.length < 10 ? d3.scale.category10() : d3.scale.category20()).domain([0, $.map(data.values, function(v) { return JSON.stringify(v); })]);" + this.br + this.br;
+            "color = (data.serie.length < 10 ? d3.scale.category10() : d3.scale.category20()).domain([0, $.map(data.serie, function(v) { return JSON.stringify(v); })]);" + this.br + this.br;
     },
 
     getXAxis: function () {
         return "//x axis scale" + this.br +
             "var x = d3.scale.linear()" + this.brt +
-            ".domain([0, d3.max($.map(data.values, function (e) { return myChart.getTokenLabel(e.token2); }))])" + this.brt +
+            ".domain([0, d3.max($.map(data.serie, function (e) { return myChart.getTokenLabel(e.value1); }))])" + this.brt +
             ".range([0, width - yAxisLeftPosition - padding]);" + this.br + this.br;
     },
 
     getYAxis: function () {
         return "//y axis scale" + this.br +
             "var y = d3.scale.ordinal()" + this.brt +
-            ".domain($.map(data.values, function (e) { return JSON.stringify(e); }))" + this.brt +
+            ".domain($.map(data.serie, function (e) { return JSON.stringify(e); }))" + this.brt +
             ".rangeBands([0, xAxisTopPosition - padding- (2 * chartAxisPadding)]);" + this.br + this.br;
     },
 
@@ -182,43 +158,43 @@ SF.Chart.Bars.prototype = $.extend({}, new SF.Chart.ChartBase(), {
             "chart.append('svg:g').attr('class', 'x-axis-token-label').attr('transform', 'translate(' + (yAxisLeftPosition + ((width - yAxisLeftPosition) / 2)) + ', ' + height + ')')" + this.brt +
             ".append('svg:text').attr('class', 'x-axis-token-label')" + this.brt +
             ".attr('text-anchor', 'middle')" + this.brt +
-            ".text(data.labels.token2);" + this.br + this.br;
+            ".text(data.labels.value1);" + this.br + this.br;
     },
 
     paintYAxisRuler: function () {
         return "//paint y-axis ticks" + this.br +
             "chart.append('svg:g').attr('class', 'y-axis-tick').attr('transform', 'translate(' + (yAxisLeftPosition - ticksLength) + ', ' + (padding + chartAxisPadding + (y.rangeBand() / 2)) + ')')" + this.brt +
-            ".enterData(data.values, 'line', 'y-axis-tick')" + this.brt +
+            ".enterData(data.serie, 'line', 'y-axis-tick')" + this.brt +
             ".attr('x2', ticksLength)" + this.brt +
             ".attr('y1', function (v) { return y(JSON.stringify(v)); })" + this.brt +
             ".attr('y2', function (v) { return y(JSON.stringify(v)); });" + this.br +
             this.br +
             "//paint y-axis tick labels" + this.br +
             "chart.append('svg:g').attr('class', 'y-axis-tick-label').attr('transform', 'translate(' + (yAxisLeftPosition - ticksLength - labelMargin) + ', ' + (padding + chartAxisPadding + (y.rangeBand() * 2 / 3)) + ')')" + this.brt +
-            ".enterData(data.values, 'text', 'y-axis-tick-label')" + this.brt +
+            ".enterData(data.serie, 'text', 'y-axis-tick-label')" + this.brt +
             ".attr('y', function (v) { return y(JSON.stringify(v)); })" + this.brt +
             ".attr('text-anchor', 'end')" + this.brt +
             ".attr('width', yAxisLabelWidth)" + this.brt +
-            ".text(function (v) { return myChart.getTokenLabel(v.token1); });" + this.br +
+            ".text(function (v) { return myChart.getTokenLabel(v.dimension1); });" + this.br +
             this.br +
             "//paint y-axis - token label" + this.br +
             "chart.append('svg:g').attr('class', 'y-axis-token-label').attr('transform', 'translate(' + fontSize + ', ' + (xAxisTopPosition / 2) + ') rotate(270)')" + this.brt +
             ".append('svg:text').attr('class', 'y-axis-token-label')" + this.brt +
             ".attr('text-anchor', 'start')" + this.brt +
-            ".text(data.labels.token1);" + this.br + this.br;
+            ".text(data.labels.dimension1);" + this.br + this.br;
     },
 
     paintGraph: function () {
         return "//paint graph" + this.br +
             "chart.append('svg:g').attr('class', 'shape').attr('transform' ,'translate(' + yAxisLeftPosition + ', ' + (padding + chartAxisPadding) + ')')" + this.brt +
-            ".enterData(data.values, 'rect', 'shape')" + this.brt +
-            ".attr('width', function (v) { return x(myChart.getTokenLabel(v.token2)); })" + this.brt +
+            ".enterData(data.serie, 'rect', 'shape')" + this.brt +
+            ".attr('width', function (v) { return x(myChart.getTokenLabel(v.value1)); })" + this.brt +
             ".attr('height', y.rangeBand)" + this.brt +
             ".attr('y', function (v) { return y(JSON.stringify(v)); })" + this.brt +
             ".attr('fill', function (v) { return color(JSON.stringify(v)); })" + this.brt +
             ".attr('stroke', '#fff')" + this.brt +
             ".append('svg:title')" + this.brt +
-            ".text(function(d) { return data.labels.token1 + ': ' + myChart.getTokenLabel(d.token1) + ', ' + data.labels.token2 + ': ' + d.token2; });" + this.br + this.br;
+            ".text(function(d) { return myChart.getTokenLabel(d.dimension1) + ': ' + myChart.getTokenLabel(d.value1); });" + this.br + this.br;
     }
 });
 
@@ -237,44 +213,44 @@ SF.Chart.Columns.prototype = $.extend({}, new SF.Chart.ChartBase(), {
             "padding= " + this.padding + "," + this.brt +
             "yAxisLeftPosition = padding + fontSize + yAxisLabelWidth + (2 * labelMargin) + ticksLength," + this.brt +
             "xAxisTopPosition = height - padding - (fontSize * 3) - (labelMargin * 3) - ticksLength," + this.brt +
-            "color = (data.values.length < 10 ? d3.scale.category10() : d3.scale.category20()).domain([0, $.map(data.values, function(v) { return JSON.stringify(v); })]);" + this.br + this.br;
+            "color = (data.serie.length < 10 ? d3.scale.category10() : d3.scale.category20()).domain([0, $.map(data.serie, function(v) { return JSON.stringify(v); })]);" + this.br + this.br;
     },
 
     getXAxis: function () {
         return "//x axis scale" + this.br +
             "var x = d3.scale.ordinal()" + this.brt +
-            ".domain($.map(data.values, function (e) { return JSON.stringify(e); }))" + this.brt +
+            ".domain($.map(data.serie, function (e) { return JSON.stringify(e); }))" + this.brt +
             ".rangeBands([0, width - yAxisLeftPosition - padding - (2 * chartAxisPadding)]);" + this.br + this.br;
     },
 
     getYAxis: function () {
         return "//y axis scale" + this.br +
             "var y = d3.scale.linear()" + this.brt +
-            ".domain([0, d3.max($.map(data.values, function (e) { return myChart.getTokenLabel(e.token2); }))])" + this.brt +
+            ".domain([0, d3.max($.map(data.serie, function (e) { return myChart.getTokenLabel(e.value1); }))])" + this.brt +
             ".range([0, xAxisTopPosition - padding]);" + this.br + this.br;
     },
 
     paintXAxisRuler: function () {
         return "//paint x-axis ticks" + this.br +
             "chart.append('svg:g').attr('class', 'x-axis-tick').attr('transform', 'translate(' + (yAxisLeftPosition + (x.rangeBand() / 2)) + ', ' + xAxisTopPosition + ')')" + this.brt +
-            ".enterData(data.values, 'line', 'x-axis-tick')" + this.brt +
+            ".enterData(data.serie, 'line', 'x-axis-tick')" + this.brt +
             ".attr('y2', function (v, i) { return (i%2 == 0 ? ticksLength : (ticksLength + fontSize + labelMargin)); })" + this.brt +
             ".attr('x1', function (v) { return x(JSON.stringify(v)); })" + this.brt +
             ".attr('x2', function (v) { return x(JSON.stringify(v)); });" + this.br +
             this.br +
             "//paint x-axis tick labels" + this.br +
             "chart.append('svg:g').attr('class', 'x-axis-tick-label').attr('transform', 'translate(' + (yAxisLeftPosition + (x.rangeBand() / 2)) + ', ' + (xAxisTopPosition + ticksLength + labelMargin + fontSize) + ')')" + this.brt +
-            ".enterData(data.values, 'text', 'x-axis-tick-label')" + this.brt +
+            ".enterData(data.serie, 'text', 'x-axis-tick-label')" + this.brt +
             ".attr('x', function (v) { return x(JSON.stringify(v)); })" + this.brt +
             ".attr('y', function (v, i) { return (i%2 == 0 ? 0 : (fontSize + labelMargin)); })" + this.brt +
             ".attr('text-anchor', 'middle')" + this.brt +
-            ".text(function (v) { return myChart.getTokenLabel(v.token1); });" + this.br +
+            ".text(function (v) { return myChart.getTokenLabel(v.dimension1); });" + this.br +
             this.br +
             "//paint x-axis - token label" + this.br +
             "chart.append('svg:g').attr('class', 'x-axis-token-label').attr('transform', 'translate(' + (yAxisLeftPosition + ((width - yAxisLeftPosition) / 2)) + ', ' + (height) + ')')" + this.brt +
             ".append('svg:text').attr('class', 'x-axis-token-label')" + this.brt +
             ".attr('text-anchor', 'middle')" + this.brt +
-            ".text(data.labels.token1);" + this.br + this.br;
+            ".text(data.labels.dimension1);" + this.br + this.br;
     },
 
     paintYAxisRuler: function () {
@@ -305,20 +281,20 @@ SF.Chart.Columns.prototype = $.extend({}, new SF.Chart.ChartBase(), {
             "chart.append('svg:g').attr('class', 'y-axis-token-label').attr('transform', 'translate(' + fontSize + ', ' + (xAxisTopPosition / 2) + ') rotate(270)')" + this.brt +
             ".append('svg:text').attr('class', 'y-axis-token-label')" + this.brt +
             ".attr('text-anchor', 'middle')" + this.brt +
-            ".text(data.labels.token2);" + this.br + this.br;
+            ".text(data.labels.value1);" + this.br + this.br;
     },
 
     paintGraph: function () {
         return "//paint graph" + this.br +
             "chart.append('svg:g').attr('class', 'shape').attr('transform' ,'translate(' + (yAxisLeftPosition + chartAxisPadding) + ', ' + xAxisTopPosition + ') scale(1, -1)')" + this.brt +
-            ".enterData(data.values, 'rect', 'shape')" + this.brt +
-            ".attr('height', function (v) { return y(myChart.getTokenLabel(v.token2)); })" + this.brt +
+            ".enterData(data.serie, 'rect', 'shape')" + this.brt +
+            ".attr('height', function (v) { return y(myChart.getTokenLabel(v.value1)); })" + this.brt +
             ".attr('width', x.rangeBand)" + this.brt +
             ".attr('x', function (v) { return x(JSON.stringify(v)); })" + this.brt +
             ".attr('fill', function (v) { return color(JSON.stringify(v)); })" + this.brt +
             ".attr('stroke', '#fff')" + this.brt +
             ".append('svg:title')" + this.brt +
-            ".text(function(d) { return data.labels.token1 + ': ' + myChart.getTokenLabel(d.token1) + ', \\n' + data.labels.token2 + ': ' + myChart.getTokenLabel(d.token2); });" + this.br + this.br;
+            ".text(function(d) { return myChart.getTokenLabel(d.dimension1) + ': ' + myChart.getTokenLabel(d.value1); });" + this.br + this.br;
     }
 });
 
@@ -348,35 +324,42 @@ SF.Chart.Lines.prototype = $.extend({}, new SF.Chart.Columns(), {
             ".attr('fill', 'none')" + this.brt +
             ".attr('stroke-width', 3)" + this.brt +
             ".attr('shape-rendering', 'initial')" + this.brt +
-            ".attr('d', myChart.getPathPoints($.map(data.values, function(v) { return {x: x(JSON.stringify(v)), y: y(myChart.getTokenLabel(v.token2))};})))" + this.br +
+            ".attr('d', myChart.getPathPoints($.map(data.serie, function(v) { return {x: x(JSON.stringify(v)), y: y(myChart.getTokenLabel(v.value1))};})))" + this.br +
             this.br +
             "//paint graph - hover area trigger" + this.br +
             "chart.append('svg:g').attr('class', 'hover-trigger').attr('transform' ,'translate(' + (yAxisLeftPosition + chartAxisPadding + (x.rangeBand() / 2)) + ', ' + xAxisTopPosition + ') scale(1, -1)')" + this.brt +
-            ".enterData(data.values, 'circle', 'hover-trigger')" + this.brt +
+            ".enterData(data.serie, 'circle', 'hover-trigger')" + this.brt +
             ".attr('cx', function(v) { return x(JSON.stringify(v)); })" + this.brt +
-            ".attr('cy', function(v) { return y(myChart.getTokenLabel(v.token2)); })" + this.brt +
+            ".attr('cy', function(v) { return y(myChart.getTokenLabel(v.value1)); })" + this.brt +
             ".attr('r', 15)" + this.brt +
             ".attr('fill', '#fff')" + this.brt +
             ".attr('fill-opacity', 0)" + this.brt +
             ".attr('stroke', 'none')" + this.brt +
             ".append('svg:title')" + this.brt +
-            ".text(function(d) { return data.labels.token1 + ': ' + myChart.getTokenLabel(d.token1) + ', \\n' + data.labels.token2 + ': ' + myChart.getTokenLabel(d.token2); })" + this.br +
+            ".text(function(d) { return myChart.getTokenLabel(d.dimension1) + ': ' + myChart.getTokenLabel(d.value1); })" + this.br +
             this.br +
             "//paint graph - points" + this.br +
             "chart.append('svg:g').attr('class', 'point').attr('transform' ,'translate(' + (yAxisLeftPosition + chartAxisPadding + (x.rangeBand() / 2)) + ', ' + xAxisTopPosition + ') scale(1, -1)')" + this.brt +
-            ".enterData(data.values, 'circle', 'point')" + this.brt +
+            ".enterData(data.serie, 'circle', 'point')" + this.brt +
             ".attr('fill', color)" + this.brt +
             ".attr('r', 5)" + this.brt +
             ".attr('cx', function(v) { return x(JSON.stringify(v)); })" + this.brt +
-            ".attr('cy', function(v) { return y(myChart.getTokenLabel(v.token2)); });" + this.br + this.br;
+            ".attr('cy', function(v) { return y(myChart.getTokenLabel(v.value1)); });" + this.br + this.br;
     }
 });
 
-
-SF.Chart.MultiLines = function () {
-    SF.Chart.Lines.call(this);
+SF.Chart.TypeTypeValue = function () {
+    SF.Chart.ChartBase.call(this);
 }
-SF.Chart.MultiLines.prototype = $.extend({}, new SF.Chart.Lines(), {
+SF.Chart.TypeTypeValue.prototype = $.extend({}, new SF.Chart.ChartBase(), {
+
+    getMaxValue1: function(series) {
+        var completeArray = [];
+        $.each(series, function(i, s) {
+            $.merge(completeArray, s.values);
+        });
+        return d3.max(completeArray);
+    },
 
     init: function () {
         return "//config variables" + this.br +
@@ -388,27 +371,29 @@ SF.Chart.MultiLines.prototype = $.extend({}, new SF.Chart.Lines(), {
             "padding= " + this.padding + "," + this.brt +
             "yAxisLeftPosition = padding + fontSize + yAxisLabelWidth + (2 * labelMargin) + ticksLength," + this.brt +
             "xAxisTopPosition = height - padding - (fontSize * 3) - (labelMargin * 3) - ticksLength," + this.brt +
-            "xValues = myChart.getValuesInAllSeries(data.series, 'token1')," + this.brt +
-            "yValues = myChart.getValuesInAllSeries(data.series, 'token3')," + this.brt +
-            "color = (data.series.length < 10 ? d3.scale.category10() : d3.scale.category20()).domain([0, $.map(data.series, function(s) { return JSON.stringify(s.token2); })]);" + this.br + this.br;
+            "color = (data.series.length < 10 ? d3.scale.category10() : d3.scale.category20()).domain([0, $.map(data.series, function(s) { return JSON.stringify(s.dimension2); })]);" + this.br + this.br;
     },
 
     getXAxis: function () {
         return "//x axis scale" + this.br +
             "var x = d3.scale.ordinal()" + this.brt +
-            ".domain($.map(xValues, function (v) { return JSON.stringify(v); }))" + this.brt +
+            ".domain($.map(data.dimension1, function (v) { return JSON.stringify(v); }))" + this.brt +
             ".rangeBands([0, width - yAxisLeftPosition - padding - (2 * chartAxisPadding)]);" + this.br + this.br;
-        //            "//x axis subscale" + this.br
-        //        "var xSubscale = d3.scale.ordinal()" + this.brt +
-        //            ".domain(d3.range(data.series.length))" + this.brt +
-        //            ".rangeBands([0, x.rangeBand()]);" + this.br + this.br;
     },
 
     getYAxis: function () {
         return "//y axis scale" + this.br +
             "var y = d3.scale.linear()" + this.brt +
-            ".domain([0, d3.max($.map(yValues, function (v) { return myChart.getTokenLabel(v); }))])" + this.brt +
+            ".domain([0, myChart.getMaxValue1(data.series)])" + this.brt +
             ".range([0, xAxisTopPosition - padding - fontSize - labelMargin]);" + this.br + this.br;
+    },
+
+    paintXAxis: function () {
+        return "//paint x-axis" + this.br +
+            "chart.append('svg:g').attr('class', 'x-axis').attr('transform', 'translate(' + yAxisLeftPosition + ', ' + xAxisTopPosition + ')')" + this.brt +
+            ".append('svg:line')" + this.brt +
+            ".attr('class', 'x-axis')" + this.brt +
+            ".attr('x2', width - yAxisLeftPosition - padding);" + this.br + this.br;
     },
 
     paintYAxis: function () {
@@ -422,14 +407,14 @@ SF.Chart.MultiLines.prototype = $.extend({}, new SF.Chart.Lines(), {
     paintXAxisRuler: function () {
         return "//paint x-axis ticks" + this.br +
             "chart.append('svg:g').attr('class', 'x-axis-tick').attr('transform', 'translate(' + (yAxisLeftPosition + (x.rangeBand() / 2)) + ', ' + xAxisTopPosition + ')')" + this.brt +
-            ".enterData(xValues, 'line', 'x-axis-tick')" + this.brt +
+            ".enterData(data.dimension1, 'line', 'x-axis-tick')" + this.brt +
             ".attr('y2', function (v, i) { return (i%2 == 0 ? ticksLength : (ticksLength + fontSize + labelMargin)); })" + this.brt +
             ".attr('x1', function (v) { return x(JSON.stringify(v)); })" + this.brt +
             ".attr('x2', function (v) { return x(JSON.stringify(v)); });" + this.br +
             this.br +
             "//paint x-axis tick labels" + this.br +
             "chart.append('svg:g').attr('class', 'x-axis-tick-label').attr('transform', 'translate(' + (yAxisLeftPosition + (x.rangeBand() / 2)) + ', ' + (xAxisTopPosition + ticksLength + labelMargin + fontSize) + ')')" + this.brt +
-            ".enterData(xValues, 'text', 'x-axis-tick-label')" + this.brt +
+            ".enterData(data.dimension1, 'text', 'x-axis-tick-label')" + this.brt +
             ".attr('x', function (v) { return x(JSON.stringify(v)); })" + this.brt +
             ".attr('y', function (v, i) { return (i%2 == 0 ? 0 : (fontSize + labelMargin)); })" + this.brt +
             ".attr('text-anchor', 'middle')" + this.brt +
@@ -439,7 +424,7 @@ SF.Chart.MultiLines.prototype = $.extend({}, new SF.Chart.Lines(), {
             "chart.append('svg:g').attr('class', 'x-axis-token-label').attr('transform', 'translate(' + (yAxisLeftPosition + ((width - yAxisLeftPosition) / 2)) + ', ' + (height) + ')')" + this.brt +
             ".append('svg:text').attr('class', 'x-axis-token-label')" + this.brt +
             ".attr('text-anchor', 'middle')" + this.brt +
-            ".text(data.labels.token1);" + this.br + this.br;
+            ".text(data.labels.dimension1);" + this.br + this.br;
     },
 
     paintYAxisRuler: function () {
@@ -470,87 +455,134 @@ SF.Chart.MultiLines.prototype = $.extend({}, new SF.Chart.Lines(), {
             "chart.append('svg:g').attr('class', 'y-axis-token-label').attr('transform', 'translate(' + fontSize + ', ' + ((xAxisTopPosition - fontSize - labelMargin) / 2) + ') rotate(270)')" + this.brt +
             ".append('svg:text').attr('class', 'y-axis-token-label')" + this.brt +
             ".attr('text-anchor', 'middle')" + this.brt +
-            ".text(data.labels.token3);" + this.br + this.br;
+            ".text(data.labels.value1);" + this.br + this.br;
     },
 
     paintLegend: function () {
-        return this.defaultColorLegend();
-    },
+        return "//paint color legend" + this.br +
+            "var legendScale = d3.scale.ordinal().domain($.map(data.series, function (s, i) { return i; })).rangeBands([0, width - yAxisLeftPosition - padding])," + this.brt +
+            "legendRectWidth = 10," + this.brt +
+            "legendLabelWidth = legendScale.rangeBand() - (2 * labelMargin) - legendRectWidth;" + this.br +
+            this.br +
+            "chart.append('svg:g').attr('class', 'color-legend').attr('transform', 'translate(' + yAxisLeftPosition + ', ' + padding + ')')" + this.brt +
+            ".enterData(data.series, 'rect', 'color-rect')" + this.brt +
+            ".attr('x', function(e, i) { return (legendRectWidth + legendLabelWidth + (2 * labelMargin)) * i; })" + this.brt +
+            ".attr('width', legendRectWidth).attr('height', fontSize)" + this.brt +
+            ".attr('fill', function(s) { return color(JSON.stringify(s.dimension2)); });" + this.br +
+            this.br +
+            "chart.append('svg:g').attr('class', 'color-legend').attr('transform', 'translate(' + (yAxisLeftPosition + labelMargin + legendRectWidth) + ', ' + (padding + fontSize) + ')')" + this.brt +
+            ".enterData(data.series, 'text', 'color-text')" + this.brt +
+            ".attr('x', function(e, i) { return (legendRectWidth + legendLabelWidth + (2 * labelMargin)) * i; })" + this.brt +
+            ".text(function(s) { return myChart.getTokenLabel(s.dimension2); });" + this.br + this.br;
+    }
+});
+
+SF.Chart.MultiLines = function () {
+    SF.Chart.TypeTypeValue.call(this);
+}
+SF.Chart.MultiLines.prototype = $.extend({}, new SF.Chart.TypeTypeValue(), {
 
     paintGraph: function () {
         return "//paint graph - line" + this.br +
             "chart.enterData(data.series, 'g', 'shape-serie').attr('transform' ,'translate(' + (yAxisLeftPosition + chartAxisPadding + (x.rangeBand() / 2)) + ', ' + xAxisTopPosition + ') scale(1, -1)')" + this.brt +
             ".append('svg:path').attr('class', 'shape')" + this.brt +
-            ".attr('stroke', function(s) { return color(JSON.stringify(s.token2)); })" + this.brt +
+            ".attr('stroke', function(s) { return color(JSON.stringify(s.dimension2)); })" + this.brt +
             ".attr('fill', 'none')" + this.brt +
             ".attr('stroke-width', 3)" + this.brt +
             ".attr('shape-rendering', 'initial')" + this.brt +
-            ".attr('d', function(serie) { return myChart.getPathPoints($.map(serie.values, function(v) { return {x: x(JSON.stringify(v.token1)), y: y(myChart.getTokenLabel(v.token3))};})); });" + this.br +
+            ".attr('d', function(s) { return myChart.getPathPoints($.map(s.values, function(v, i) { return { x: x(JSON.stringify(data.dimension1[i])), y: (SF.isEmpty(v) ? null : y(v)) }; }) )})" + this.br +
             this.br +
             "//paint graph - hover area trigger" + this.br +
             "chart.enterData(data.series, 'g', 'hover-trigger-serie').attr('transform' ,'translate(' + (yAxisLeftPosition + chartAxisPadding + (x.rangeBand() / 2)) + ', ' + xAxisTopPosition + ') scale(1, -1)')" + this.brt +
             ".enterData(function(s) { return s.values; }, 'circle', 'hover-trigger')" + this.brt +
-            ".attr('cx', function(v) { return x(JSON.stringify(v.token1)); })" + this.brt +
-            ".attr('cy', function(v) { return y(myChart.getTokenLabel(v.token3)); })" + this.brt +
-            ".attr('r', 15)" + this.brt +
+            ".attr('cx', function(v, i) { return x(JSON.stringify(data.dimension1[i])); })" + this.brt +
+            ".attr('cy', function(v) { return SF.isEmpty(v) ? 0 : y(myChart.getTokenLabel(v)); })" + this.brt +
+            ".attr('r', function(v) { return SF.isEmpty(v) ? 0 : 15; })" + this.brt +
             ".attr('fill', '#fff')" + this.brt +
             ".attr('fill-opacity', 0)" + this.brt +
             ".attr('stroke', 'none')" + this.brt +
             ".append('svg:title')" + this.brt +
-            ".text(function(d) { return data.labels.token1 + ': ' + myChart.getTokenLabel(d.token1) + ', \\n' + data.labels.token3 + ': ' + myChart.getTokenLabel(d.token3); })" + this.br +
+            ".text(function(v) { return v; })" + this.br +
             this.br +
             "//paint graph - points" + this.br +
             "chart.enterData(data.series, 'g', 'point-serie').attr('transform' ,'translate(' + (yAxisLeftPosition + chartAxisPadding + (x.rangeBand() / 2)) + ', ' + xAxisTopPosition + ') scale(1, -1)')" + this.brt +
-            ".enterData(function(s) { return $.map(s.values, function(v){ return { token2: s.token2, value: v }; }); }, 'circle', 'point')" + this.brt +
-            ".attr('fill', function(pair) { return color(JSON.stringify(pair.token2)); })" + this.brt +
-            ".attr('r', 5)" + this.brt +
-            ".attr('cx', function(pair) { return x(JSON.stringify(pair.value.token1)); })" + this.brt +
-            ".attr('cy', function(pair) { return y(myChart.getTokenLabel(pair.value.token3)); });" + this.br + this.br;
+            ".enterData(function(s) { return $.map(s.values, function(v){ return { dimension2: s.dimension2, value: v }; }); }, 'circle', 'point')" + this.brt +
+            ".attr('fill', function(pair) { return color(JSON.stringify(pair.dimension2)); })" + this.brt +
+            ".attr('fill-opacity', function(pair) { SF.isEmpty(pair.value) ? 0 : 100; })" + this.brt +
+            ".attr('r', function(pair) { return SF.isEmpty(pair.value) ? 0 : 5; })" + this.brt +
+            ".attr('cx', function(pair, i) { return x(JSON.stringify(data.dimension1[i])); })" + this.brt +
+            ".attr('cy', function(pair) { return SF.isEmpty(pair.value) ? 0 : y(myChart.getTokenLabel(pair.value)); });" + this.br + this.br;
     }
 });
 
 (function () { 
     var dataTV = 
     {
-       labels: {eje1: "Color", valor: "Altura"},  
-       serie: [{eje1: "Negro", valor: "1,80"},  
-               {eje1: "Blanco", valor: "1,70"}]
-
+       labels: {dimension1: "Color", value1: "Altura"},  
+       serie: [{dimension1: "Negro", value1: "1,80"},  
+               {dimension1: "Blanco", value1: "1,70"}]
     };
 
-    var dataTV = 
+    var dataTTV = 
     {
-       labels: {token1: "Color", token2: "Sexo", token3: "Altura"},  
-       token1: ["Negro", "Blanco", "Amarillo"],
-       serie: [{token2: "Hombre", valores : [1.80, null, 1.60]},
-              [{token2: "Mujer", valores : [1.70, 1.80, null]},
+       labels: {dimension1: "Color", dimension2: "Sexo", value1: "Altura"},  
+       dimension1: ["Negro", "Blanco", "Amarillo"],
+       series: [{dimension2: "Hombre", values : [1.80, null, 1.60]},
+                {dimension2: "Mujer", values : [1.70, 1.80, null]}]
 
     };
 
+    var dataPoints = 
+    {
+       labels: { value1: "Sexo", dimension1: "Altura", dimension2: "Peso" },
+       points: [{ value1: "Hombre", dimension1: "1,80", dimension2: "70" },  
+               { value1: "Hombre", dimension1: "1,80", dimension2: "70" }]
+    };
+
+    var dataBubbles = 
+    {
+       labels: { value1: "Sexo", dimension1: "Altura", dimension2: "Peso", value2: "Edad" },  
+       points: [{ value1: "Hombre", dimension1: "1,80", dimension2: "70", value2: "0" },  
+               { value1: "Hombre", dimension1: "1,80", dimension2: "70", value2: "1" }]
+    };
+
+//    var dataTV = {
+//        labels: { dimension1:"Album", value1:"Id" },
+//        serie:[
+//            {"dimension1":{"key":"Album;1","toStr":"Siamese Dream"},"value1":1},
+//            {"dimension1":{"key":"Album;2","toStr":"Mellon Collie and the Infinite Sadness"},"value1":2},
+//            {"dimension1":{"key":"Album;3","toStr":"Zeitgeist"},"value1":3},
+//            {"dimension1":{"key":"Album;4","toStr":"American Gothic"},"value1":4},
+//            {"dimension1":{"key":"Album;5","toStr":"Ben"},"value1":5},
+//            {"dimension1":{"key":"Album;6","toStr":"Thriller"},"value1":6},
+//            {"dimension1":{"key":"Album;7","toStr":"Bad"},"value1":7},
+//            {"dimension1":{"key":"Album;8","toStr":"Dangerous"},"value1":8},
+//            {"dimension1":{"key":"Album;9","toStr":"HIStory"},"value1":9},
+//            {"dimension1":{"key":"Album;10","toStr":"Blood on the Dance Floor"},"value1":10},
+//            {"dimension1":{"key":"Album;11","toStr":"Ágaetis byrjun"},"value1":11},
+//            {"dimension1":{"key":"Album;12","toStr":"Takk..."},"value1":12}
+//        ]
+//    };
 
     var data = {
-        labels:{"token1":"Album","token2":"Author","token3":"Id"},
-        token1: { label: "Album", values: :{"key":"Album;1","toStr":"Siamese Dream"}, :{"key":"Album;1","toStr":"Siamese Dream"}, :{"key":"Album;1","toStr":"Siamese Dream"} } 
-        token2: ...
-        series:[[0, 2, 7], 
-            {"token2": 0, "values":[{"token1":0, token3: 1],
-                {"token1":{"key":"Album;2","toStr":"Mellon Collie and the Infinite Sadness"},"token3":2},
-                {"token1":{"key":"Album;3","toStr":"Zeitgeist"},"token3":3},
-                {"token1":{"key":"Album;4","toStr":"American Gothic"},"token3":4}
-            ]},
-            {"token2":{"key":"Artist;5","toStr":"Michael Jackson"},"values":[
-                {"token1":{"key":"Album;5","toStr":"Ben"},"token3":5},
-                {"token1":{"key":"Album;6","toStr":"Thriller"},"token3":6},
-                {"token1":{"key":"Album;7","toStr":"Bad"},"token3":7},
-                {"token1":{"key":"Album;8","toStr":"Dangerous"},"token3":8},
-                {"token1":{"key":"Album;9","toStr":"HIStory"},"token3":9},
-                {"token1":{"key":"Album;10","toStr":"Blood on the Dance Floor"},"token3":10}
-            ]},
-            {"token2":{"key":"Band;2","toStr":"Sigur Ros"},"values":[
-                {"token1":{"key":"Album;11","toStr":"Ágaetis byrjun"},"token3":11},
-                {"token1":{"key":"Album;12","toStr":"Takk..."},"token3":12}
-            ]}
-        ]};
+        labels: { dimension1:"Album", dimension2:"Author", value1:"[Num] de Songs" },
+        dimension1: [{"key":"Album;1","toStr":"Siamese Dream"},
+                     {"key":"Album;2","toStr":"Mellon Collie and the Infinite Sadness"},
+                     {"key":"Album;3","toStr":"Zeitgeist"},
+                     {"key":"Album;4","toStr":"American Gothic"},
+                     {"key":"Album;5","toStr":"Ben"},
+                     {"key":"Album;6","toStr":"Thriller"},
+                     {"key":"Album;7","toStr":"Bad"},
+                     {"key":"Album;8","toStr":"Dangerous"},
+                     {"key":"Album;9","toStr":"HIStory"},
+                     {"key":"Album;10","toStr":"Blood on the Dance Floor"},
+                     {"key":"Album;11","toStr":"Ágaetis byrjun"},
+                     {"key":"Album;12","toStr":"Takk..."}],
+        series: [{"dimension2":{"key":"Band;1","toStr":"Smashing Pumpkins"},"values":[1,3,1,1,null,null,null,null,null,null,null,null]},
+                 {"dimension2":{"key":"Artist;5","toStr":"Michael Jackson"},"values":[null,null,null,null,1,3,4,3,2,2,null,null]},
+                 {"dimension2":{"key":"Band;2","toStr":"Sigur Ros"},"values":[null,null,null,null,null,null,null,null,null,null,1,3]}
+                ]
+    };
 
     var $chartContainer = $('.sf-chart-container');
     var width = $chartContainer.width();

@@ -146,49 +146,49 @@ WriteLiteral("</div>\r\n");
 
 
               
-                if (Model.Value.Chart.FirstDimension != null)
+                if (Model.Value.Chart.Dimension1 != null)
                 {
                     
-               Write(Html.HiddenRuntimeInfo(Model, cr => cr.Chart.FirstDimension));
-
-                                                                                 
-                    
-               Write(Html.EmbeddedControl(Model, cr => cr.Chart.FirstDimension, ec => ec.ViewData[ViewDataKeys.QueryName] = queryDescription.QueryName));
-
-                                                                                                                                                       
-                }
-                if (Model.Value.Chart.SecondDimension != null)
-                {
-                    
-               Write(Html.HiddenRuntimeInfo(Model, cr => cr.Chart.SecondDimension));
-
-                                                                                  
-                    
-               Write(Html.EmbeddedControl(Model, cr => cr.Chart.SecondDimension, ec => ec.ViewData[ViewDataKeys.QueryName] = queryDescription.QueryName));
-
-                                                                                                                                                        
-                }
-                if (Model.Value.Chart.FirstValue != null)
-                {
-                    
-               Write(Html.HiddenRuntimeInfo(Model, cr => cr.Chart.FirstValue));
+               Write(Html.HiddenRuntimeInfo(Model, cr => cr.Chart.Dimension1));
 
                                                                              
                     
-               Write(Html.EmbeddedControl(Model, cr => cr.Chart.FirstValue, ec => ec.ViewData[ViewDataKeys.QueryName] = queryDescription.QueryName));
+               Write(Html.EmbeddedControl(Model, cr => cr.Chart.Dimension1, ec => ec.ViewData[ViewDataKeys.QueryName] = queryDescription.QueryName));
 
                                                                                                                                                    
                 }
-                if (Model.Value.Chart.SecondValue != null)
+                if (Model.Value.Chart.Dimension2 != null)
                 {
                     
-               Write(Html.HiddenRuntimeInfo(Model, cr => cr.Chart.SecondValue));
+               Write(Html.HiddenRuntimeInfo(Model, cr => cr.Chart.Dimension2));
 
-                                                                              
+                                                                             
                     
-               Write(Html.EmbeddedControl(Model, cr => cr.Chart.SecondValue, ec => ec.ViewData[ViewDataKeys.QueryName] = queryDescription.QueryName));
+               Write(Html.EmbeddedControl(Model, cr => cr.Chart.Dimension2, ec => ec.ViewData[ViewDataKeys.QueryName] = queryDescription.QueryName));
 
-                                                                                                                                                    
+                                                                                                                                                   
+                }
+                if (Model.Value.Chart.Value1 != null)
+                {
+                    
+               Write(Html.HiddenRuntimeInfo(Model, cr => cr.Chart.Value1));
+
+                                                                         
+                    
+               Write(Html.EmbeddedControl(Model, cr => cr.Chart.Value1, ec => ec.ViewData[ViewDataKeys.QueryName] = queryDescription.QueryName));
+
+                                                                                                                                               
+                }
+                if (Model.Value.Chart.Value2 != null)
+                {
+                    
+               Write(Html.HiddenRuntimeInfo(Model, cr => cr.Chart.Value2));
+
+                                                                         
+                    
+               Write(Html.EmbeddedControl(Model, cr => cr.Chart.Value2, ec => ec.ViewData[ViewDataKeys.QueryName] = queryDescription.QueryName));
+
+                                                                                                                                               
                 }
             
 
