@@ -256,23 +256,23 @@ SF.Chart.Columns.prototype = $.extend({}, new SF.Chart.ChartBase(), {
     paintYAxisRuler: function () {
         return "//paint y-axis - ruler" + this.br +
             "var yTicks = y.ticks(8);" + this.br +
-            "chart.append('svg:g').attr('class', 'y-ruler').attr('transform', 'translate(' + yAxisLeftPosition + ', ' + padding + ')')" + this.brt +
+            "chart.append('svg:g').attr('class', 'y-ruler').attr('transform', 'translate(' + yAxisLeftPosition + ', ' + xAxisTopPosition + ')')" + this.brt +
             ".enterData(yTicks, 'line', 'y-ruler')" + this.brt +
             ".attr('x2', width - yAxisLeftPosition - padding)" + this.brt +
-            ".attr('y1', y)" + this.brt +
-            ".attr('y2', y);" + this.br +
+            ".attr('y1', function(t) { return -y(t); })" + this.brt +
+            ".attr('y2', function(t) { return -y(t); });" + this.br +
             this.br +
             "//paint y-axis - ticks" + this.br +
-            "chart.append('svg:g').attr('class', 'y-axis-tick').attr('transform', 'translate(' + (yAxisLeftPosition - ticksLength) + ', ' + padding + ')')" + this.brt +
+            "chart.append('svg:g').attr('class', 'y-axis-tick').attr('transform', 'translate(' + (yAxisLeftPosition - ticksLength) + ', ' + xAxisTopPosition + ')')" + this.brt +
             ".enterData(yTicks, 'line', 'y-axis-tick')" + this.brt +
             ".attr('x2', ticksLength)" + this.brt +
-            ".attr('y1', y)" + this.brt +
-            ".attr('y2', y);" + this.br +
+            ".attr('y1', function(t) { return -y(t); })" + this.brt +
+            ".attr('y2', function(t) { return -y(t); });" + this.br +
             this.br +
             "//paint y-axis - tick labels" + this.br +
-            "chart.append('svg:g').attr('class', 'y-axis-tick-label').attr('transform', 'translate(' + (yAxisLeftPosition - ticksLength - labelMargin) + ', ' + padding + ')')" + this.brt +
+            "chart.append('svg:g').attr('class', 'y-axis-tick-label').attr('transform', 'translate(' + (yAxisLeftPosition - ticksLength - labelMargin) + ', ' + xAxisTopPosition + ')')" + this.brt +
             ".enterData(yTicks, 'text', 'y-axis-tick-label')" + this.brt +
-            ".attr('y', function(t) { return y(yTicks[yTicks.length-1] - t); })" + this.brt +
+            ".attr('y', function(t) { return -y(t); })" + this.brt +
             ".attr('dominant-baseline', 'middle')" + this.brt +
             ".attr('text-anchor', 'end')" + this.brt +
             ".text(String);" + this.br +
@@ -361,6 +361,30 @@ SF.Chart.TypeTypeValue.prototype = $.extend({}, new SF.Chart.ChartBase(), {
         return d3.max(completeArray);
     },
 
+    createCountArray: function (length) {
+        var countArray = [];
+        for (var i = 0; i < length; i++) {
+            countArray.push(0);
+        }
+        return countArray;
+    },
+
+    axisMaxStacked: function (series) {
+        var dimensionCount = series[0].values.length;
+        var countArray = this.createCountArray(dimensionCount);
+        
+        $.each(series, function (i, serie) {
+            for (var i = 0; i < dimensionCount; i++) {
+                var v = serie.values[i];
+                if (!SF.isEmpty(v)) {
+                    countArray[i] += v;
+                }
+            }
+        });
+
+        return d3.max(countArray);
+    },
+
     init: function () {
         return "//config variables" + this.br +
             "var yAxisLabelWidth = 25," + this.brt +
@@ -429,24 +453,24 @@ SF.Chart.TypeTypeValue.prototype = $.extend({}, new SF.Chart.ChartBase(), {
 
     paintYAxisRuler: function () {
         return "//paint y-axis - ruler" + this.br +
-            "var yTicks = y.ticks(8);" + this.br +
-            "chart.append('svg:g').attr('class', 'y-ruler').attr('transform', 'translate(' + yAxisLeftPosition + ', ' + (padding + fontSize + labelMargin) + ')')" + this.brt +
+            "var yTicks = y.ticks(10);" + this.br +
+            "chart.append('svg:g').attr('class', 'y-ruler').attr('transform', 'translate(' + yAxisLeftPosition + ', ' + xAxisTopPosition + ')')" + this.brt +
             ".enterData(yTicks, 'line', 'y-ruler')" + this.brt +
             ".attr('x2', width - yAxisLeftPosition - padding)" + this.brt +
-            ".attr('y1', y)" + this.brt +
-            ".attr('y2', y);" + this.br +
+            ".attr('y1', function(t) { return -y(t); })" + this.brt +
+            ".attr('y2', function(t) { return -y(t); });" + this.br +
             this.br +
             "//paint y-axis - ticks" + this.br +
-            "chart.append('svg:g').attr('class', 'y-axis-tick').attr('transform', 'translate(' + (yAxisLeftPosition - ticksLength) + ', ' + (padding + fontSize + labelMargin) + ')')" + this.brt +
+            "chart.append('svg:g').attr('class', 'y-axis-tick').attr('transform', 'translate(' + (yAxisLeftPosition - ticksLength) + ', ' + xAxisTopPosition + ')')" + this.brt +
             ".enterData(yTicks, 'line', 'y-axis-tick')" + this.brt +
             ".attr('x2', ticksLength)" + this.brt +
-            ".attr('y1', y)" + this.brt +
-            ".attr('y2', y);" + this.br +
+            ".attr('y1', function(t) { return -y(t); })" + this.brt +
+            ".attr('y2', function(t) { return -y(t); });" + this.br +
             this.br +
             "//paint y-axis - tick labels" + this.br +
-            "chart.append('svg:g').attr('class', 'y-axis-tick-label').attr('transform', 'translate(' + (yAxisLeftPosition - ticksLength - labelMargin) + ', ' + (padding + fontSize + labelMargin) + ')')" + this.brt +
+            "chart.append('svg:g').attr('class', 'y-axis-tick-label').attr('transform', 'translate(' + (yAxisLeftPosition - ticksLength - labelMargin) + ', ' + xAxisTopPosition + ')')" + this.brt +
             ".enterData(yTicks, 'text', 'y-axis-tick-label')" + this.brt +
-            ".attr('y', function(t) { return y(yTicks[yTicks.length-1] - t); })" + this.brt +
+            ".attr('y', function(t) { return -y(t); })" + this.brt +
             ".attr('dominant-baseline', 'middle')" + this.brt +
             ".attr('text-anchor', 'end')" + this.brt +
             ".text(String);" + this.br +
@@ -541,6 +565,34 @@ SF.Chart.MultiColumns.prototype = $.extend({}, new SF.Chart.TypeTypeValue(), {
     }
 });
 
+SF.Chart.StackedColumns = function () {
+    SF.Chart.TypeTypeValue.call(this);
+};
+SF.Chart.StackedColumns.prototype = $.extend({}, new SF.Chart.TypeTypeValue(), {
+
+    getYAxis: function () {
+        return "//y axis scale" + this.br +
+            "var y = d3.scale.linear()" + this.brt +
+            ".domain([0, myChart.axisMaxStacked(data.series)])" + this.brt +
+            ".range([0, xAxisTopPosition - padding - fontSize - labelMargin]);" + this.br + this.br;
+    },
+
+    paintGraph: function () {
+        return "//paint graph" + this.br +
+            "var countArray = myChart.createCountArray(data.dimension1.length);" + this.br +
+            "chart.enterData(data.series, 'g', 'shape-serie').attr('transform' ,'translate(' + (yAxisLeftPosition + chartAxisPadding) + ', ' + xAxisTopPosition + ') scale(1, -1)')" + this.brt +
+            ".enterData(function(s) { return $.map(s.values, function(v){ return { dimension2: s.dimension2, value: v }; }); }, 'rect', 'shape')" + this.brt +
+            ".attr('stroke', function(pair) { return SF.isEmpty(pair.value) ? 'none' : '#fff'; })" + this.brt +
+            ".attr('fill', function(pair) { return SF.isEmpty(pair.value) ? 'none' : color(JSON.stringify(pair.dimension2)); })" + this.brt +
+            ".attr('transform',  function(pair, i) { return 'translate(' + x(JSON.stringify(data.dimension1[i])) + ', 0)'; })" + this.brt +
+            ".attr('width', x.rangeBand())" + this.brt +
+            ".attr('height', function(pair, i) { return SF.isEmpty(pair.value) ? 0 : y(myChart.getTokenLabel(pair.value)); })" + this.brt +
+            ".attr('y', function(pair, i) { if (SF.isEmpty(pair.value)) { return 0; } else { var offset = y(countArray[i]); countArray[i] += pair.value; return offset; } })" + this.brt +
+            ".append('svg:title')" + this.brt +
+            ".text(function(pair, i) { return SF.isEmpty(pair.value) ? null : myChart.getTokenLabel(data.dimension1[i]) + ', ' + myChart.getTokenLabel(pair.dimension2) + ': ' + myChart.getTokenLabel(pair.value); })" + this.br +
+            this.br + this.br;
+    }
+});
 
 (function () {
     var dataTV =
@@ -637,7 +689,7 @@ SF.Chart.MultiColumns.prototype = $.extend({}, new SF.Chart.TypeTypeValue(), {
     var width = $chartContainer.width();
     var height = $chartContainer.height();
 
-    var myChart = SF.Chart.Factory.getGraphType('MultiColumns');
+    var myChart = SF.Chart.Factory.getGraphType('StackedColumns');
 
     var code = SF.Chart.Factory.createChartSVG('.sf-chart-container') +
         myChart.paintChart();
