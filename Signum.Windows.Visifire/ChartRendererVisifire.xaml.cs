@@ -45,12 +45,12 @@ namespace Signum.Windows.Chart
 
             if (ChartRequest.Chart.ChartType != ChartType.Pie && ChartRequest.Chart.ChartType != ChartType.Doughnout)
             {
-                chart.AxesX.Add(new Axis { Title = ChartRequest.Chart.FirstDimension.GetTitle() });
+                chart.AxesX.Add(new Axis { Title = ChartRequest.Chart.Dimension1.GetTitle() });
 
                 if (ChartRequest.Chart.ChartResultType == ChartResultType.TypeValue || ChartRequest.Chart.ChartResultType == ChartResultType.TypeTypeValue)
-                    chart.AxesY.Add(new Axis { Title = ChartRequest.Chart.FirstValue.GetTitle() });
+                    chart.AxesY.Add(new Axis { Title = ChartRequest.Chart.Value1.GetTitle() });
                 else
-                    chart.AxesY.Add(new Axis { Title = ChartRequest.Chart.SecondDimension.GetTitle() });
+                    chart.AxesY.Add(new Axis { Title = ChartRequest.Chart.Dimension2.GetTitle() });
             }
         }
 
@@ -75,7 +75,7 @@ namespace Signum.Windows.Chart
                             .AddPoints(list.Select(r => 
                                 new DataPoint 
                                 { 
-                                    AxisXLabel = Format(r.Key, ChartRequest.Chart.FirstDimension.Format), 
+                                    AxisXLabel = Format(r.Key, ChartRequest.Chart.Dimension1.Format), 
                                     YValue = ToDouble(r.Value, ChartTokenName.FirstValue) 
                                 } 
                              ))
@@ -103,7 +103,7 @@ namespace Signum.Windows.Chart
                                 double? d = array[i, j];
                                 DataPoint p = new DataPoint();
 
-                                p.AxisXLabel = Format(s, ChartRequest.Chart.FirstDimension.Format);
+                                p.AxisXLabel = Format(s, ChartRequest.Chart.Dimension1.Format);
 
                                 if (d != null)
                                     p.YValue = d.Value;
@@ -123,7 +123,7 @@ namespace Signum.Windows.Chart
                     }
                     .AddPoints(ResultTable.Rows.Select(r => new DataPoint
                     {
-                         XValue = ToDouble(r[0], ChartTokenName.FirstDimension),
+                         XValue = ToDouble(r[0], ChartTokenName.Dimension1),
                          YValue = ToDouble(r[1], ChartTokenName.SecondDimension),
                          Color = ToColor(r[2]),
                     }))
@@ -138,7 +138,7 @@ namespace Signum.Windows.Chart
                     }
                     .AddPoints(ResultTable.Rows.Select(r => new DataPoint
                     {
-                         XValue = ToDouble(r[0], ChartTokenName.FirstDimension),
+                         XValue = ToDouble(r[0], ChartTokenName.Dimension1),
                          YValue = ToDouble(r[1], ChartTokenName.SecondDimension),
                          Color = ToColor(r[2]),
                          ZValue = ToDouble(r[3], ChartTokenName.SecondValue),

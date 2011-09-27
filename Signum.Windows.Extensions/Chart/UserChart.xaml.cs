@@ -62,10 +62,10 @@ namespace Signum.Windows.Chart
                 }).ToMList(),
             };
 
-            Assign(result.Chart.FirstDimension, request.Chart.FirstDimension);
-            Assign(result.Chart.SecondDimension, request.Chart.SecondDimension);
-            Assign(result.Chart.FirstValue, request.Chart.FirstValue);
-            Assign(result.Chart.SecondValue, request.Chart.SecondValue);
+            Assign(result.Chart.Dimension1, request.Chart.Dimension1);
+            Assign(result.Chart.Dimension2, request.Chart.Dimension2);
+            Assign(result.Chart.Value1, request.Chart.Value1);
+            Assign(result.Chart.Value2, request.Chart.Value2);
 
             return result;
         }
@@ -106,10 +106,10 @@ namespace Signum.Windows.Chart
                 }).ToList(),
             };
 
-            Assign(result.Chart.FirstDimension, uq.Chart.FirstDimension);
-            Assign(result.Chart.SecondDimension, uq.Chart.SecondDimension);
-            Assign(result.Chart.FirstValue, uq.Chart.FirstValue);
-            Assign(result.Chart.SecondValue, uq.Chart.SecondValue);
+            Assign(result.Chart.Dimension1, uq.Chart.Dimension1);
+            Assign(result.Chart.Dimension2, uq.Chart.Dimension2);
+            Assign(result.Chart.Value1, uq.Chart.Value1);
+            Assign(result.Chart.Value2, uq.Chart.Value2);
 
             return result;
 

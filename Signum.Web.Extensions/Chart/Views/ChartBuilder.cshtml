@@ -32,25 +32,25 @@
         <td class="ui-widget ui-widget-content ui-corner-all sf-chart-tokens">
             <div class="ui-widget-header">@Resources.Chart_ChartSettings</div>
             @{
-                if (Model.Value.Chart.FirstDimension != null)
+                if (Model.Value.Chart.Dimension1 != null)
                 {
-                    @Html.HiddenRuntimeInfo(Model, cr => cr.Chart.FirstDimension)
-                    @Html.EmbeddedControl(Model, cr => cr.Chart.FirstDimension, ec => ec.ViewData[ViewDataKeys.QueryName] = queryDescription.QueryName)
+                    @Html.HiddenRuntimeInfo(Model, cr => cr.Chart.Dimension1)
+                    @Html.EmbeddedControl(Model, cr => cr.Chart.Dimension1, ec => ec.ViewData[ViewDataKeys.QueryName] = queryDescription.QueryName)
                 }
-                if (Model.Value.Chart.SecondDimension != null)
+                if (Model.Value.Chart.Dimension2 != null)
                 {
-                    @Html.HiddenRuntimeInfo(Model, cr => cr.Chart.SecondDimension)
-                    @Html.EmbeddedControl(Model, cr => cr.Chart.SecondDimension, ec => ec.ViewData[ViewDataKeys.QueryName] = queryDescription.QueryName)
+                    @Html.HiddenRuntimeInfo(Model, cr => cr.Chart.Dimension2)
+                    @Html.EmbeddedControl(Model, cr => cr.Chart.Dimension2, ec => ec.ViewData[ViewDataKeys.QueryName] = queryDescription.QueryName)
                 }
-                if (Model.Value.Chart.FirstValue != null)
+                if (Model.Value.Chart.Value1 != null)
                 {
-                    @Html.HiddenRuntimeInfo(Model, cr => cr.Chart.FirstValue)
-                    @Html.EmbeddedControl(Model, cr => cr.Chart.FirstValue, ec => ec.ViewData[ViewDataKeys.QueryName] = queryDescription.QueryName)
+                    @Html.HiddenRuntimeInfo(Model, cr => cr.Chart.Value1)
+                    @Html.EmbeddedControl(Model, cr => cr.Chart.Value1, ec => ec.ViewData[ViewDataKeys.QueryName] = queryDescription.QueryName)
                 }
-                if (Model.Value.Chart.SecondValue != null)
+                if (Model.Value.Chart.Value2 != null)
                 {
-                    @Html.HiddenRuntimeInfo(Model, cr => cr.Chart.SecondValue)
-                    @Html.EmbeddedControl(Model, cr => cr.Chart.SecondValue, ec => ec.ViewData[ViewDataKeys.QueryName] = queryDescription.QueryName)
+                    @Html.HiddenRuntimeInfo(Model, cr => cr.Chart.Value2)
+                    @Html.EmbeddedControl(Model, cr => cr.Chart.Value2, ec => ec.ViewData[ViewDataKeys.QueryName] = queryDescription.QueryName)
                 }
             }
         </td>

@@ -113,6 +113,13 @@ namespace Signum.Web.Chart
                     Navigator.ResolveQueryName(ctx.GlobalInputs[TypeContextUtilities.Compose(ctx.Root.ControlID, ViewDataKeys.QueryName)]));
 
                 return QueryUtils.Parse(tokenName, qd);
+            })
+            .SetProperty(ct => ct.DisplayName, ctx =>
+            {
+                if (string.IsNullOrEmpty(ctx.Input))
+                    return ctx.None();
+
+                return ctx.Input;
             });
 
         static List<Entities.DynamicQuery.Filter> ExtractChartFilters(MappingContext<List<Entities.DynamicQuery.Filter>> ctx)
@@ -124,10 +131,10 @@ namespace Signum.Web.Chart
         
         static EntityMapping<ChartRequest> mappingChartRequest = new EntityMapping<ChartRequest>(true)
             .SetProperty(cr => cr.Chart, new EntityMapping<ChartBase>(true)
-                .SetProperty(cb => cb.FirstDimension, mappingChartToken)
-                .SetProperty(cb => cb.SecondDimension, mappingChartToken)
-                .SetProperty(cb => cb.FirstValue, mappingChartToken)
-                .SetProperty(cb => cb.SecondValue, mappingChartToken))
+                .SetProperty(cb => cb.Dimension1, mappingChartToken)
+                .SetProperty(cb => cb.Dimension2, mappingChartToken)
+                .SetProperty(cb => cb.Value1, mappingChartToken)
+                .SetProperty(cb => cb.Value2, mappingChartToken))
             .SetProperty(cr => cr.Filters, ctx => ExtractChartFilters(ctx));
     }
 }

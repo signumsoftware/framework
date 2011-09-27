@@ -85,20 +85,20 @@
 
         <GroupBox Grid.Column="1" Header="Chart Settings" Style="{DynamicResource EntityGroupBox}" Margin="0,0,2,2" Background="{DynamicResource BlueBackground}">
             <StackPanel Grid.IsSharedSizeScope="True" Margin="5" HorizontalAlignment="Stretch">
-                <c:ChartToken x:Name="qtbFirstDimesion"
-                        m:Common.Route="FirstDimension"
+                <c:ChartToken x:Name="qtbDimension1"
+                        m:Common.Route="Dimension1"
                         GroupResults="{Binding DataContext.GroupResults, ElementName=me}"
                         Visibility="{Binding Converter={x:Static m:Converters.NullToVisibility}}"/>
-                <c:ChartToken x:Name="qtbSecondDimension"
-                        m:Common.Route="SecondDimension"  
+                <c:ChartToken x:Name="qtbDimension2"
+                        m:Common.Route="Dimension2"  
                         GroupResults="{Binding DataContext.GroupResults, ElementName=me}"
                         Visibility="{Binding Converter={x:Static m:Converters.NullToVisibility}}"/>
-                <c:ChartToken x:Name="qtbFirstValue"
-                        m:Common.Route="FirstValue"
+                <c:ChartToken x:Name="qtbValue1"
+                        m:Common.Route="Value1"
                         GroupResults="{Binding DataContext.GroupResults, ElementName=me}"
                         Visibility="{Binding Converter={x:Static m:Converters.NullToVisibility}}"/>
-                <c:ChartToken x:Name="qtbSecondValue"
-                        m:Common.Route="SecondValue"  
+                <c:ChartToken x:Name="qtbValue2"
+                        m:Common.Route="Value2"  
                         GroupResults="{Binding DataContext.GroupResults, ElementName=me}"
                         Visibility="{Binding Converter={x:Static m:Converters.NullToVisibility}}"/>
             </StackPanel>
