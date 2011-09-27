@@ -106,7 +106,7 @@ namespace Signum.Web.Operations
             if (ctx.OperationInfo.OperationType != OperationType.ConstructorFromMany)
                 throw new InvalidOperationException("Invalid Operation Type '{0}' in the construction of the operation '{1}'".Formato(ctx.OperationInfo.OperationType.ToString(), EnumDN.UniqueKey(ctx.OperationInfo.Key)));
 
-            return new JsOperationConstructorFromMany(ctx.Options()).ajaxSelected();
+            return new JsOperationConstructorFromMany(ctx.Options()).ajaxSelected(Js.NewPrefix(ctx.Prefix), JsOpSuccess.DefaultDispatcher);
         }
     }
 }

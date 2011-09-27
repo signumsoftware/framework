@@ -15,11 +15,14 @@ using Signum.Entities.Processes;
 using Signum.Engine.Authorization;
 using Signum.Engine.DynamicQuery;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace Signum.Engine.Scheduler
 {
     public static class SchedulerLogic
     {
+        public static Polymorphic<Action<ITaskDN>> ExecuteTask = new Polymorphic<Action<ITaskDN>>(); 
+
         public static event Action<string, Exception> Error;
 
         static PriorityQueue<ScheduledTaskDN> priorityQueue = new PriorityQueue<ScheduledTaskDN>(new LambdaComparer<ScheduledTaskDN, DateTime>(st => st.NextDate.Value));
@@ -46,10 +49,7 @@ namespace Signum.Engine.Scheduler
                 AuthLogic.AssertStarted(sb);
                 OperationLogic.AssertStarted(sb);
 
-                new BasicExecute<ITaskDN>(TaskOperation.ExecutePrivate)
-                {
-                    Execute = (ct, _) => { throw new NotImplementedException(); }
-                }.Register();
+                ExecuteTask.Register((ITaskDN t) => { throw new NotImplementedException("SchedulerLogic.ExecuteTask not registered for {0}".Formato(t.GetType().Name)); });
 
                 CustomTaskLogic.Start(sb, dqm);
                 sb.Include<ScheduledTaskDN>();
@@ -196,18 +196,18 @@ namespace Signum.Engine.Scheduler
                         st.Save();
                     priorityQueue.Push(st);
 
-                    new Thread(() =>
+                    Task.Factory.StartNew(() =>
                     {
                         try
                         {
                             using (AuthLogic.User(AuthLogic.SystemUser))
-                                st.Task.Execute(TaskOperation.ExecutePrivate);
+                                ExecuteTask.Invoke(st.Task);
                         }
                         catch (Exception e)
                         {
                             OnError("Error executing task '{0}' with rule '{1}'".Formato(st.Task, st.Rule), e);
                         }
-                    }).Start();
+                    });
 
                     SetTimer();
                 }

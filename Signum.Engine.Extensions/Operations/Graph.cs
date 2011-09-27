@@ -56,17 +56,22 @@ namespace Signum.Engine.Operations
                 return base.OnCanExecute(entity);
             }
 
-            protected override void OnExecute(E entity, object[] args)
+            protected override void OnBeginOperation(E entity)
             {
+                base.OnBeginOperation(entity);
+
                 S oldState = Graph<E, S>.GetState(entity);
 
                 Graph<E, S>.OnExitState(oldState, entity);
-
-                base.OnExecute(entity, args);
-
-                Graph<E, S>.AssertEnterState(entity, this);
             }
 
+            protected override void OnEndOperation(E entity)
+            {
+                Graph<E, S>.AssertEnterState(entity, this);
+
+                base.OnEndOperation(entity);
+            }
+        
             public override void AssertIsValid()
             {
                 base.AssertIsValid();
@@ -128,13 +133,11 @@ namespace Signum.Engine.Operations
             {
             }
 
-            protected override E OnConstruct(object[] args)
+            protected override void OnEndOperation(E entity)
             {
-                E result = base.OnConstruct(args);
+                Graph<E, S>.AssertEnterState((E)entity, this);
 
-                Graph<E, S>.AssertEnterState(result, this);
-
-                return result;
+                base.OnEndOperation(entity);
             }
 
             public override string ToString()
@@ -167,14 +170,13 @@ namespace Signum.Engine.Operations
             {
             }
 
-            protected override E OnConstruct(F entity, object[] args)
+            protected override void OnEndOperation(E result)
             {
-                E result = base.OnConstruct(entity, args);
-
                 Graph<E, S>.AssertEnterState(result, this);
 
-                return result;
+                base.OnEndOperation(result);
             }
+
 
             public override string ToString()
             {
@@ -205,13 +207,11 @@ namespace Signum.Engine.Operations
             {
             }
 
-            protected override E OnConstruct(List<Lite<F>> lites, object[] args)
+            protected override void OnEndOperation(E result)
             {
-                E result = base.OnConstruct(lites, args);
+                Graph<E, S>.AssertEnterState(result, this);
 
-                Graph<E,S>.AssertEnterState(result, this);
-
-                return result;
+                base.OnEndOperation(result);
             }
 
             public override string ToString()

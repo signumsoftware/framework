@@ -381,7 +381,7 @@ namespace Signum.Entities.Chart
         }
 
         [NotNullable]
-        MList<QueryFilterDN> filters;
+        MList<QueryFilterDN> filters = new MList<QueryFilterDN>();
         public MList<QueryFilterDN> Filters
         {
             get { return filters; }

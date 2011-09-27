@@ -178,7 +178,7 @@ namespace Signum.Entities.Processes
             }
         }
 
-        public void Queue()
+        internal void SetAsQueue()
         {
             State = ProcessState.Queued;
             QueuedDate = TimeZoneManager.Now;

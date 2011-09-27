@@ -98,7 +98,7 @@ namespace Signum.Web.Selenium
             }
         }
 
-        public const string DefaultPageLoadTimeout = "10000"; // 1.66666667 mins
+        public const string DefaultPageLoadTimeout = "20000"; // 1.66666667 mins
         public const string PageLoadLongTimeout = "20000"; //  > 3 mins
 
         public const int DefaultAjaxTimeout = 10000;

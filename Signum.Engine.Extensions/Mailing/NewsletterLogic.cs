@@ -84,12 +84,11 @@ namespace Signum.Engine.Mailing
                     }).ToList().SaveList();
 
                     var process = ProcessLogic.Create(NewsletterOperations.Send, n);
+                    process.Execute(ProcessOperation.Execute);
 
                     n.OverrideEmail = EmailLogic.OnEmailAddress();
-
                     n.State = NewsletterState.Sent;
-                    process.Execute(ProcessOperation.Execute);
-                }
+               }
             }.Register();
         }
     }

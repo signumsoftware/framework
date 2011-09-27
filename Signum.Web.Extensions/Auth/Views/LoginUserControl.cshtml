@@ -1,4 +1,4 @@
-@if (Session[AuthController.SessionUserKey] != null)
+﻿@if (Session[AuthController.SessionUserKey] != null)
 {
     @:Usuario: <span class="username">@Session[AuthController.SessionUserKey]</span>
     <span class="separator">|</span>@Html.ActionLink("Logout", "Logout", "Auth", null, new { @class = "sf-logout" })

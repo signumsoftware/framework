@@ -475,7 +475,7 @@ namespace Signum.Engine.Authorization
 
             var sureNotallowed = pairs.Where(p => (p.EntityGroup.IsApplicable == null || p.EntityGroup.IsApplicable.Resume == true) && !p.AllowedIn && !p.AllowedOut);
             if (sureNotallowed.Any())
-                return Expression.New(ciDebugData, liteEntity, Expression.Constant(sureNotallowed.Select(p => new GroupDebugData(p, false, false))));
+                return Expression.New(ciDebugData, liteEntity, Expression.Constant(sureNotallowed.Select(p => new GroupDebugData(p, false, false)).ToList()));
 
             Expression list = Expression.ListInit(Expression.New(typeof(List<GroupDebugData>)), pairs.Select(p =>
             {

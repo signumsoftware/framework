@@ -445,9 +445,9 @@ namespace Signum.Engine.Cache
 
             foreach (var t in types)
             {
-                var val =controllers.GetOrThrow(t, "{0} is not registered in CacheLogic") as IInvalidable;
+                var val = controllers.GetOrThrow(t, "{0} is not registered in CacheLogic") as IInvalidable;
 
-                if(val == null)
+                if (val == null)
                     throw new InvalidOperationException("{0} is Semi-Cached".Formato(t));
 
                 val.Invalidation += action;

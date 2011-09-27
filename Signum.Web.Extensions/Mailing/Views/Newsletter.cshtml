@@ -21,7 +21,7 @@
                 @Html.Hidden("htmlBodyContent", nc.Value.HtmlBody)
                 <fieldset>
                     <legend>Message</legend>
-                    <iframe id="newsBodyContent" name="frameNewImage" src="about:blank" class="sf-email-htmlbody">
+                    <iframe id="newsBodyContent" name="frameNewImage" src="about:blank" class="sf-email-htmlbody" frameborder="0">
                     </iframe>
                 </fieldset>
             }
@@ -42,8 +42,8 @@
                 <div id="newsPreviewContent">
                     <fieldset>
                         <legend>Message</legend>
-                        <iframe id="newsBodyContentPreview" name="frameNewImage" src="about:blank" class="sf-email-htmlbody">
-                        </iframe>
+                        <iframe id="newsBodyContentPreview" name="frameNewImage" src="about:blank" class="sf-email-htmlbody"
+                            frameborder="0"></iframe>
                         <br />
                         <input type="button" class="sf-button" id="newsEditContentButton" value="Edit content" />
                     </fieldset>
