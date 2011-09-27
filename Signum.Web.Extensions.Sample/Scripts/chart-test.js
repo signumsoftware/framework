@@ -534,7 +534,10 @@ SF.Chart.MultiColumns.prototype = $.extend({}, new SF.Chart.TypeTypeValue(), {
             ".attr('x', function(pair, i) { return xSubscale(JSON.stringify(pair.dimension2)); })" + this.brt +
             ".attr('transform',  function(pair, i) { return 'translate(' + x(JSON.stringify(data.dimension1[i])) + ', 0)'; })" + this.brt +
             ".attr('width', xSubscale.rangeBand())" + this.brt +
-            ".attr('height', function(pair, i) { return SF.isEmpty(pair.value) ? 0 : y(myChart.getTokenLabel(pair.value)); });" + this.br + this.br;
+            ".attr('height', function(pair, i) { return SF.isEmpty(pair.value) ? 0 : y(myChart.getTokenLabel(pair.value)); })" + this.brt +
+            ".append('svg:title')" + this.brt +
+            ".text(function(pair, i) { return SF.isEmpty(pair.value) ? null : myChart.getTokenLabel(data.dimension1[i]) + ', ' + myChart.getTokenLabel(pair.dimension2) + ': ' + myChart.getTokenLabel(pair.value); })" + this.br +
+             + this.br + this.br;
     }
 });
 
