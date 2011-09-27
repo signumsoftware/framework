@@ -515,82 +515,128 @@ SF.Chart.MultiLines.prototype = $.extend({}, new SF.Chart.TypeTypeValue(), {
     }
 });
 
-(function () { 
-    var dataTV = 
+SF.Chart.MultiColumns = function () {
+    SF.Chart.TypeTypeValue.call(this);
+};
+SF.Chart.MultiColumns.prototype = $.extend({}, new SF.Chart.TypeTypeValue(), {
+
+    paintGraph: function () {
+        return "//graph x-subscale" + this.br +
+            "var xSubscale = d3.scale.ordinal()" + this.brt +
+            ".domain($.map(data.series, function (s) { return JSON.stringify(s.dimension2); }))" + this.brt +
+            ".rangeBands([0, x.rangeBand()]);" + this.br +
+            this.br +
+            "//paint graph" + this.br +
+            "chart.enterData(data.series, 'g', 'shape-serie').attr('transform' ,'translate(' + (yAxisLeftPosition + chartAxisPadding) + ', ' + xAxisTopPosition + ') scale(1, -1)')" + this.brt +
+            ".enterData(function(s) { return $.map(s.values, function(v){ return { dimension2: s.dimension2, value: v }; }); }, 'rect', 'shape')" + this.brt +
+            ".attr('stroke', function(pair) { return SF.isEmpty(pair.value) ? 'none' : '#fff'; })" + this.brt +
+            ".attr('fill', function(pair) { return SF.isEmpty(pair.value) ? 'none' : color(JSON.stringify(pair.dimension2)); })" + this.brt +
+            ".attr('x', function(pair, i) { return xSubscale(JSON.stringify(pair.dimension2)); })" + this.brt +
+            ".attr('transform',  function(pair, i) { return 'translate(' + x(JSON.stringify(data.dimension1[i])) + ', 0)'; })" + this.brt +
+            ".attr('width', xSubscale.rangeBand())" + this.brt +
+            ".attr('height', function(pair, i) { return SF.isEmpty(pair.value) ? 0 : y(myChart.getTokenLabel(pair.value)); });" + this.br + this.br;
+    }
+});
+
+
+(function () {
+    var dataTV =
     {
-       labels: {dimension1: "Color", value1: "Altura"},  
-       serie: [{dimension1: "Negro", value1: "1,80"},  
-               {dimension1: "Blanco", value1: "1,70"}]
+        labels: { dimension1: "Color", value1: "Altura" },
+        serie: [{ dimension1: "Negro", value1: "1,80" },
+               { dimension1: "Blanco", value1: "1,70"}]
     };
 
-    var dataTTV = 
+    var dataTTV =
     {
-       labels: {dimension1: "Color", dimension2: "Sexo", value1: "Altura"},  
-       dimension1: ["Negro", "Blanco", "Amarillo"],
-       series: [{dimension2: "Hombre", values : [1.80, null, 1.60]},
-                {dimension2: "Mujer", values : [1.70, 1.80, null]}]
+        labels: { dimension1: "Color", dimension2: "Sexo", value1: "Altura" },
+        dimension1: ["Negro", "Blanco", "Amarillo"],
+        series: [{ dimension2: "Hombre", values: [1.80, null, 1.60] },
+                { dimension2: "Mujer", values: [1.70, 1.80, null]}]
 
     };
 
-    var dataPoints = 
+    var dataPoints =
     {
-       labels: { value1: "Sexo", dimension1: "Altura", dimension2: "Peso" },
-       points: [{ value1: "Hombre", dimension1: "1,80", dimension2: "70" },  
-               { value1: "Hombre", dimension1: "1,80", dimension2: "70" }]
+        labels: { value1: "Sexo", dimension1: "Altura", dimension2: "Peso" },
+        points: [{ value1: "Hombre", dimension1: "1,80", dimension2: "70" },
+               { value1: "Hombre", dimension1: "1,80", dimension2: "70"}]
     };
 
-    var dataBubbles = 
+    var dataBubbles =
     {
-       labels: { value1: "Sexo", dimension1: "Altura", dimension2: "Peso", value2: "Edad" },  
-       points: [{ value1: "Hombre", dimension1: "1,80", dimension2: "70", value2: "0" },  
-               { value1: "Hombre", dimension1: "1,80", dimension2: "70", value2: "1" }]
+        labels: { value1: "Sexo", dimension1: "Altura", dimension2: "Peso", value2: "Edad" },
+        points: [{ value1: "Hombre", dimension1: "1,80", dimension2: "70", value2: "0" },
+               { value1: "Hombre", dimension1: "1,80", dimension2: "70", value2: "1"}]
     };
 
-//    var dataTV = {
-//        labels: { dimension1:"Album", value1:"Id" },
-//        serie:[
-//            {"dimension1":{"key":"Album;1","toStr":"Siamese Dream"},"value1":1},
-//            {"dimension1":{"key":"Album;2","toStr":"Mellon Collie and the Infinite Sadness"},"value1":2},
-//            {"dimension1":{"key":"Album;3","toStr":"Zeitgeist"},"value1":3},
-//            {"dimension1":{"key":"Album;4","toStr":"American Gothic"},"value1":4},
-//            {"dimension1":{"key":"Album;5","toStr":"Ben"},"value1":5},
-//            {"dimension1":{"key":"Album;6","toStr":"Thriller"},"value1":6},
-//            {"dimension1":{"key":"Album;7","toStr":"Bad"},"value1":7},
-//            {"dimension1":{"key":"Album;8","toStr":"Dangerous"},"value1":8},
-//            {"dimension1":{"key":"Album;9","toStr":"HIStory"},"value1":9},
-//            {"dimension1":{"key":"Album;10","toStr":"Blood on the Dance Floor"},"value1":10},
-//            {"dimension1":{"key":"Album;11","toStr":"Ágaetis byrjun"},"value1":11},
-//            {"dimension1":{"key":"Album;12","toStr":"Takk..."},"value1":12}
-//        ]
+    //    var dataTV = {
+    //        labels: { dimension1:"Album", value1:"Id" },
+    //        serie:[
+    //            {"dimension1":{"key":"Album;1","toStr":"Siamese Dream"},"value1":1},
+    //            {"dimension1":{"key":"Album;2","toStr":"Mellon Collie and the Infinite Sadness"},"value1":2},
+    //            {"dimension1":{"key":"Album;3","toStr":"Zeitgeist"},"value1":3},
+    //            {"dimension1":{"key":"Album;4","toStr":"American Gothic"},"value1":4},
+    //            {"dimension1":{"key":"Album;5","toStr":"Ben"},"value1":5},
+    //            {"dimension1":{"key":"Album;6","toStr":"Thriller"},"value1":6},
+    //            {"dimension1":{"key":"Album;7","toStr":"Bad"},"value1":7},
+    //            {"dimension1":{"key":"Album;8","toStr":"Dangerous"},"value1":8},
+    //            {"dimension1":{"key":"Album;9","toStr":"HIStory"},"value1":9},
+    //            {"dimension1":{"key":"Album;10","toStr":"Blood on the Dance Floor"},"value1":10},
+    //            {"dimension1":{"key":"Album;11","toStr":"Ágaetis byrjun"},"value1":11},
+    //            {"dimension1":{"key":"Album;12","toStr":"Takk..."},"value1":12}
+    //        ]
+    //    };
+
+//    var dataMultiLine = {
+//        labels: { dimension1: "Album", dimension2: "Author", value1: "[Num] de Songs" },
+//        dimension1: [{ "key": "Album;1", "toStr": "Siamese Dream" },
+//                     { "key": "Album;2", "toStr": "Mellon Collie and the Infinite Sadness" },
+//                     { "key": "Album;3", "toStr": "Zeitgeist" },
+//                     { "key": "Album;4", "toStr": "American Gothic" },
+//                     { "key": "Album;5", "toStr": "Ben" },
+//                     { "key": "Album;6", "toStr": "Thriller" },
+//                     { "key": "Album;7", "toStr": "Bad" },
+//                     { "key": "Album;8", "toStr": "Dangerous" },
+//                     { "key": "Album;9", "toStr": "HIStory" },
+//                     { "key": "Album;10", "toStr": "Blood on the Dance Floor" },
+//                     { "key": "Album;11", "toStr": "Ágaetis byrjun" },
+//                     { "key": "Album;12", "toStr": "Takk..."}],
+//        series: [{ "dimension2": { "key": "Band;1", "toStr": "Smashing Pumpkins" }, "values": [1, 3, 1, 1, null, null, null, null, null, null, null, null] },
+//                 { "dimension2": { "key": "Artist;5", "toStr": "Michael Jackson" }, "values": [null, null, null, null, 1, 3, 4, 3, 2, 2, null, null] },
+//                 { "dimension2": { "key": "Band;2", "toStr": "Sigur Ros" }, "values": [null, null, null, null, null, null, null, null, null, null, 1, 3] }
+//                ]
 //    };
 
-    var data = {
-        labels: { dimension1:"Album", dimension2:"Author", value1:"[Num] de Songs" },
-        dimension1: [{"key":"Album;1","toStr":"Siamese Dream"},
-                     {"key":"Album;2","toStr":"Mellon Collie and the Infinite Sadness"},
-                     {"key":"Album;3","toStr":"Zeitgeist"},
-                     {"key":"Album;4","toStr":"American Gothic"},
-                     {"key":"Album;5","toStr":"Ben"},
-                     {"key":"Album;6","toStr":"Thriller"},
-                     {"key":"Album;7","toStr":"Bad"},
-                     {"key":"Album;8","toStr":"Dangerous"},
-                     {"key":"Album;9","toStr":"HIStory"},
-                     {"key":"Album;10","toStr":"Blood on the Dance Floor"},
-                     {"key":"Album;11","toStr":"Ágaetis byrjun"},
-                     {"key":"Album;12","toStr":"Takk..."}],
-        series: [{"dimension2":{"key":"Band;1","toStr":"Smashing Pumpkins"},"values":[1,3,1,1,null,null,null,null,null,null,null,null]},
-                 {"dimension2":{"key":"Artist;5","toStr":"Michael Jackson"},"values":[null,null,null,null,1,3,4,3,2,2,null,null]},
-                 {"dimension2":{"key":"Band;2","toStr":"Sigur Ros"},"values":[null,null,null,null,null,null,null,null,null,null,1,3]}
-                ]
+    var data = { 
+        labels: { dimension1: "Author", dimension2: "Album", value1: "[Num] de Songs" },
+        dimension1: [
+            {"key":"Band;1","toStr":"Smashing Pumpkins"},
+            {"key":"Artist;5","toStr":"Michael Jackson"},
+            {"key":"Band;2","toStr":"Sigur Ros"}],
+        series:[
+            {"dimension2":{"key":"Album;1","toStr":"Siamese Dream"},"values":[1,null,null]},
+            {"dimension2":{"key":"Album;2","toStr":"Mellon Collie and the Infinite Sadness"},"values":[3,null,null]},
+            {"dimension2":{"key":"Album;3","toStr":"Zeitgeist"},"values":[1,null,null]},
+            {"dimension2":{"key":"Album;4","toStr":"American Gothic"},"values":[1,null,null]},
+            {"dimension2":{"key":"Album;5","toStr":"Ben"},"values":[null,1,null]},
+            {"dimension2":{"key":"Album;6","toStr":"Thriller"},"values":[null,3,null]},
+            {"dimension2":{"key":"Album;7","toStr":"Bad"},"values":[null,4,null]},
+            {"dimension2":{"key":"Album;8","toStr":"Dangerous"},"values":[null,3,null]},
+            {"dimension2":{"key":"Album;9","toStr":"HIStory"},"values":[null,2,null]},
+            {"dimension2":{"key":"Album;10","toStr":"Blood on the Dance Floor"},"values":[null,2,null]},
+            {"dimension2":{"key":"Album;11","toStr":"Ágaetis byrjun"},"values":[null,null,1]},
+            {"dimension2":{"key":"Album;12","toStr":"Takk..."},"values":[null,null,3]}
+        ]
     };
 
     var $chartContainer = $('.sf-chart-container');
     var width = $chartContainer.width();
     var height = $chartContainer.height();
 
-    var myChart = SF.Chart.Factory.getGraphType('MultiLines');
-                
-    var code = SF.Chart.Factory.createChartSVG('.sf-chart-container') + 
+    var myChart = SF.Chart.Factory.getGraphType('MultiColumns');
+
+    var code = SF.Chart.Factory.createChartSVG('.sf-chart-container') +
         myChart.paintChart();
 
     SF.log(code);
