@@ -29,7 +29,7 @@ namespace Signum.Web.AuthAdmin
 
         public ViewResult Permissions(Lite<RoleDN> role)
         {
-            return Navigator.View(this, PermissionAuthLogic.GetPermissionRules(role.FillToStr()), true);
+            return Navigator.View(this, PermissionAuthLogic.GetPermissionRules(role.FillToStr()));
         }
 
         [HttpPost]
@@ -47,7 +47,7 @@ namespace Signum.Web.AuthAdmin
 
         public ViewResult FacadeMethods(Lite<RoleDN> role)
         {
-            return Navigator.View(this, FacadeMethodAuthLogic.GetFacadeMethodRules(role.FillToStr()), true);
+            return Navigator.View(this, FacadeMethodAuthLogic.GetFacadeMethodRules(role.FillToStr()));
         }
 
         [HttpPost]
@@ -65,7 +65,7 @@ namespace Signum.Web.AuthAdmin
 
         public ViewResult EntityGroups(Lite<RoleDN> role)
         {
-            return Navigator.View(this, EntityGroupAuthLogic.GetEntityGroupRules(role.FillToStr()), true);
+            return Navigator.View(this, EntityGroupAuthLogic.GetEntityGroupRules(role.FillToStr()));
         }
 
         [HttpPost]
@@ -83,7 +83,7 @@ namespace Signum.Web.AuthAdmin
 
         public ViewResult Types(Lite<RoleDN> role)
         {
-            return Navigator.View(this, TypeAuthLogic.GetTypeRules(role.FillToStr()), true);
+            return Navigator.View(this, TypeAuthLogic.GetTypeRules(role.FillToStr()));
         }
 
         [HttpPost]

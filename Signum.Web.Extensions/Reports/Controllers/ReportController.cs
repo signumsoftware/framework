@@ -98,7 +98,7 @@ namespace Signum.Web.Reports
             {
                 this.ModelState.FromContext(context);
                 // It's a submit, I cannot return ModelState
-                return Navigator.View(this, report, true);
+                return Navigator.View(this, report);
             }
 
             Database.Save(report);
