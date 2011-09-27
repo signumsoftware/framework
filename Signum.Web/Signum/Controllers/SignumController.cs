@@ -31,7 +31,7 @@ namespace Signum.Web.Controllers
             Type t = Navigator.ResolveType(webTypeName);
 
             if (id.HasValue && id.Value > 0)
-                return Navigator.View(this, Database.Retrieve(t, id.Value), true); //Always admin
+                return Navigator.View(this, Database.Retrieve(t, id.Value)); 
 
             IdentifiableEntity entity = null;
             object result = Constructor.Construct(t);
@@ -40,7 +40,7 @@ namespace Signum.Web.Controllers
             else
                 throw new InvalidOperationException("Invalid result type for a Constructor");
              
-            return Navigator.View(this, entity, true); //Always admin
+            return Navigator.View(this, entity); 
         }
 
         public ActionResult Create(string runtimeType, string prefix)
@@ -136,7 +136,7 @@ namespace Signum.Web.Controllers
 
             string newUrl = Navigator.ViewRoute(ident.GetType(), ident.Id);
             if (HttpContext.Request.UrlReferrer.AbsolutePath.Contains(newUrl))
-                return Navigator.View(this, ident, true);
+                return Navigator.View(this, ident);
             else
                 return JsonAction.Redirect(newUrl);
         }

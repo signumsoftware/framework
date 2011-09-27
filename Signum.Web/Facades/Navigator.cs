@@ -83,37 +83,22 @@ namespace Signum.Web
 
         public static ViewResult View(ControllerBase controller, IRootEntity entity)
         {
-            return Manager.View(controller, entity, null, true); 
-        }
-
-        public static ViewResult View(ControllerBase controller, IRootEntity entity, bool admin)
-        {
-            return Manager.View(controller, entity, null, admin); 
+            return Manager.View(controller, entity, null); 
         }
 
         public static ViewResult View(ControllerBase controller, IRootEntity entity, string partialViewName)
         {
-            return Manager.View(controller, entity, partialViewName, true);
+            return Manager.View(controller, entity, partialViewName);
         }
-
-        public static ViewResult View(ControllerBase controller, IRootEntity entity, string partialViewName, bool admin)
-        {
-            return Manager.View(controller, entity, partialViewName, admin);
-        }
-
+     
         public static PartialViewResult NormalControl(ControllerBase controller, IRootEntity entity)
         {
-            return Manager.NormalControl(controller, entity, null, true); 
+            return Manager.NormalControl(controller, entity, null); 
         }
-
-        public static PartialViewResult NormalControl(ControllerBase controller, IRootEntity entity, bool admin)
-        {
-            return Manager.NormalControl(controller, entity, null, admin); 
-        }
-
+    
         public static PartialViewResult NormalControl(ControllerBase controller, IRootEntity entity, string partialViewName)
         {
-            return Manager.NormalControl(controller, entity, partialViewName, true);
+            return Manager.NormalControl(controller, entity, partialViewName);
         }
 
         public static string GetOrCreateTabID(ControllerBase c)
@@ -136,23 +121,6 @@ namespace Signum.Web
         {
             return Manager.PopupOpen(controller, viewOptions);
         }
-
-        //public static PartialViewResult PopupView(this ControllerBase controller, TypeContext tc)
-        //{
-        //    return Manager.PopupView(controller, tc, null);
-        //}
-
-        //public static PartialViewResult PopupView(this ControllerBase controller, IRootEntity entity, string prefix)
-        //{
-        //    TypeContext tc = TypeContextUtilities.UntypedNew(entity, prefix);
-        //    return Manager.PopupView(controller, tc, null);
-        //}
-
-        //public static PartialViewResult PopupView(this ControllerBase controller, IRootEntity entity, string prefix, string partialViewName)
-        //{
-        //    TypeContext tc = TypeContextUtilities.UntypedNew(entity, prefix);
-        //    return Manager.PopupView(controller, tc, partialViewName);
-        //}
 
         public static PartialViewResult PartialView(this ControllerBase controller, TypeContext tc)
         {
@@ -375,27 +343,27 @@ namespace Signum.Web
             return Manager.ResolveQueryName(webQueryName);
         }
 
-        public static bool IsViewable(Type type, bool admin)
+        public static bool IsViewable(Type type, EntitySettingsContext ctx)
         {
-            return Manager.IsViewable(type, admin);
+            return Manager.IsViewable(type, ctx);
         }
-        public static bool IsViewable(ModifiableEntity entity, bool admin)
+        public static bool IsViewable(ModifiableEntity entity, EntitySettingsContext ctx)
         {
-            return Manager.IsViewable(entity, admin);
-        }
-
-        public static bool IsReadOnly(Type type, bool admin)
-        {
-            return Manager.IsReadOnly(type, admin);
-        }
-        public static bool IsReadOnly(ModifiableEntity entity, bool admin)
-        {
-            return Manager.IsReadOnly(entity, admin);
+            return Manager.IsViewable(entity, ctx);
         }
 
-        public static bool IsCreable(Type type, bool admin)
+        public static bool IsReadOnly(Type type, EntitySettingsContext ctx)
         {
-            return Manager.IsCreable(type, admin);
+            return Manager.IsReadOnly(type, ctx);
+        }
+        public static bool IsReadOnly(ModifiableEntity entity, EntitySettingsContext ctx)
+        {
+            return Manager.IsReadOnly(entity, ctx);
+        }
+
+        public static bool IsCreable(Type type, EntitySettingsContext ctx)
+        {
+            return Manager.IsCreable(type, ctx);
         }
         public static bool IsFindable(object queryName)
         {
@@ -538,9 +506,9 @@ namespace Signum.Web
             return Guid.NewGuid().ToString();
         }
 
-        protected internal virtual ViewResult View(ControllerBase controller, IRootEntity entity, string partialViewName, bool admin)
+        protected internal virtual ViewResult View(ControllerBase controller, IRootEntity entity, string partialViewName)
         {
-            FillViewDataForViewing(controller, entity, partialViewName, admin);
+            FillViewDataForViewing(controller, entity, partialViewName, EntitySettingsContext.Navigate);
 
             return new ViewResult()
             {
@@ -551,9 +519,9 @@ namespace Signum.Web
             };
         }
 
-        protected internal virtual PartialViewResult NormalControl(ControllerBase controller, IRootEntity entity, string partialViewName, bool admin)
+        protected internal virtual PartialViewResult NormalControl(ControllerBase controller, IRootEntity entity, string partialViewName)
         {
-            FillViewDataForViewing(controller, entity, partialViewName, admin);
+            FillViewDataForViewing(controller, entity, partialViewName, EntitySettingsContext.Navigate);
 
             return new PartialViewResult()
             {
@@ -563,7 +531,7 @@ namespace Signum.Web
             };
         }
 
-        private void FillViewDataForViewing(ControllerBase controller, IRootEntity entity, string partialViewName, bool admin)
+        private void FillViewDataForViewing(ControllerBase controller, IRootEntity entity, string partialViewName, EntitySettingsContext ctx)
         { 
             Type type = entity.GetType();
             
@@ -575,10 +543,10 @@ namespace Signum.Web
             string tabID = GetOrCreateTabID(controller);
             controller.ViewData[ViewDataKeys.TabId] = tabID;
 
-            if (!Navigator.IsViewable(type, admin))
+            if (!Navigator.IsViewable(type, ctx))
                 throw new UnauthorizedAccessException(Resources.ViewForType0IsNotAllowed.Formato(type));
 
-            if (Navigator.IsReadOnly(type, admin))
+            if (Navigator.IsReadOnly(type, ctx))
                 tc.ReadOnly = true;
         }
 
@@ -607,20 +575,20 @@ namespace Signum.Web
             TypeContext cleanTC = TypeContextUtilities.CleanTypeContext(viewOptions.TypeContext);
             Type cleanType = cleanTC.UntypedValue.GetType();
 
-            if (!Navigator.IsViewable(cleanType, false))
+            if (!Navigator.IsViewable(cleanType, viewOptions.Context))
                 throw new UnauthorizedAccessException(Resources.ViewForType0IsNotAllowed.Formato(cleanType.Name));
 
             controller.ViewData.Model = cleanTC;
             controller.ViewData[ViewDataKeys.PartialViewName] = viewOptions.PartialViewName ?? Navigator.OnPartialViewName((ModifiableEntity)cleanTC.UntypedValue);
 
-            bool isReadOnly = viewOptions.ReadOnly ?? Navigator.IsReadOnly(cleanType, viewOptions.Admin);
+            bool isReadOnly = viewOptions.ReadOnly ?? Navigator.IsReadOnly(cleanType, viewOptions.Context);
             if (isReadOnly)
                 cleanTC.ReadOnly = true;
 
             ViewButtons buttons = viewOptions.GetViewButtons();
             controller.ViewData[ViewDataKeys.ViewButtons] = buttons;
             controller.ViewData[ViewDataKeys.OkVisible] = buttons == ViewButtons.Ok;
-            controller.ViewData[ViewDataKeys.SaveVisible] = buttons == ViewButtons.Save && ShowSave(cleanType, viewOptions.Admin) && !isReadOnly;
+            controller.ViewData[ViewDataKeys.SaveVisible] = buttons == ViewButtons.Save && ShowSave(cleanType) && !isReadOnly;
 
             return new PartialViewResult
             {
@@ -635,12 +603,12 @@ namespace Signum.Web
             TypeContext cleanTC = TypeContextUtilities.CleanTypeContext(tc);
             Type cleanType = cleanTC.UntypedValue.GetType();
 
-            if (!Navigator.IsViewable(cleanType, false))
+            if (!Navigator.IsViewable(cleanType, EntitySettingsContext.Content))
                 throw new Exception(Resources.ViewForType0IsNotAllowed.Formato(cleanType.Name));
 
             controller.ViewData.Model = cleanTC;
 
-            if (Navigator.IsReadOnly(cleanType, true/*not always*/))
+            if (Navigator.IsReadOnly(cleanType, EntitySettingsContext.Content))
                 cleanTC.ReadOnly = true;
 
             return new PartialViewResult
@@ -870,49 +838,49 @@ namespace Signum.Web
             return new Lite<T>(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value);
         }
 
-        protected internal virtual bool IsViewable(Type type, bool admin)
+        protected internal virtual bool IsViewable(Type type, EntitySettingsContext ctx)
         {
             EntitySettings es = EntitySettings.TryGetC(type);
             if (es == null)
                 return false;
 
-            return es.OnIsViewable(null, admin);
+            return es.OnIsViewable(null, ctx);
         }
 
-        protected internal virtual bool IsViewable(ModifiableEntity entity, bool admin)
+        protected internal virtual bool IsViewable(ModifiableEntity entity, EntitySettingsContext ctx)
         {
             EntitySettings es = EntitySettings.TryGetC(entity.GetType());
             if (es == null)
                 return false;
 
-            return es.OnIsViewable(entity, admin);
+            return es.OnIsViewable(entity, ctx);
         }
 
-        protected internal virtual bool IsReadOnly(Type type, bool admin)
+        protected internal virtual bool IsReadOnly(Type type, EntitySettingsContext ctx)
         {
             EntitySettings es = EntitySettings.TryGetC(type);
             if (es == null)
                 return false;
 
-            return es.OnIsReadOnly(null, admin);
+            return es.OnIsReadOnly(null, ctx);
         }
 
-        protected internal virtual bool IsReadOnly(ModifiableEntity entity, bool admin)
+        protected internal virtual bool IsReadOnly(ModifiableEntity entity, EntitySettingsContext ctx)
         {
             EntitySettings es = EntitySettings.TryGetC(entity.GetType());
             if (es == null)
                 return false;
 
-            return es.OnIsReadOnly(entity, admin);
+            return es.OnIsReadOnly(entity, ctx);
         }
 
-        protected internal virtual bool IsCreable(Type type, bool admin)
+        protected internal virtual bool IsCreable(Type type, EntitySettingsContext ctx)
         {
             EntitySettings es = EntitySettings.TryGetC(type);
             if (es == null)
                 return true;
 
-            return es.OnIsCreable(admin);
+            return es.OnIsCreable(ctx);
         }
 
         protected internal virtual bool IsFindable(object queryName)
@@ -928,7 +896,7 @@ namespace Signum.Web
             return qs.OnIsFindable();
         }
 
-        public virtual bool ShowSave(Type type, bool admin)
+        public virtual bool ShowSave(Type type)
         {
             EntitySettings es = EntitySettings.TryGetC(type);
             if (es != null)

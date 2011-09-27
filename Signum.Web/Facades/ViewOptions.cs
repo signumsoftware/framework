@@ -9,7 +9,7 @@ namespace Signum.Web
     {
         public bool? ReadOnly { get; set; }
 
-        public bool Admin { get; set; }
+        public EntitySettingsContext Context { get; set; }
 
         public string PartialViewName { get; set; }
 

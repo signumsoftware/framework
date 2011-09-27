@@ -21,9 +21,9 @@ namespace Signum.Web
         public abstract Delegate UntypedMappingDefault { get; }
         public abstract Delegate UntypedMappingAdmin { get; }
 
-        public abstract bool OnIsReadOnly(ModifiableEntity entity, bool isAdmin);
-        public abstract bool OnIsViewable(ModifiableEntity entity, bool isAdmin);
-        public abstract bool OnIsCreable(bool isAdmin);
+        public abstract bool OnIsReadOnly(ModifiableEntity entity, EntitySettingsContext ctx);
+        public abstract bool OnIsViewable(ModifiableEntity entity, EntitySettingsContext ctx);
+        public abstract bool OnIsCreable(EntitySettingsContext ctx);
         public abstract bool OnShowSave();
 
         public abstract string OnPartialViewName(ModifiableEntity entity);
@@ -54,39 +54,39 @@ namespace Signum.Web
         public override Delegate UntypedMappingDefault { get { return MappingDefault; } }
         public override Delegate UntypedMappingAdmin { get { return MappingAdmin; } }
 
-        public override bool OnIsReadOnly(ModifiableEntity entity, bool isAdmin)
+        public override bool OnIsReadOnly(ModifiableEntity entity, EntitySettingsContext ctx)
         {
             if (IsReadOnly != null)
-                foreach (Func<T, bool, bool> item in IsReadOnly.GetInvocationList())
+                foreach (Func<T, EntitySettingsContext, bool> item in IsReadOnly.GetInvocationList())
                 {
-                    if (item((T)entity, isAdmin))
+                    if (item((T)entity, ctx))
                         return true;
                 }
 
             return false;
         }
 
-        public override bool OnIsViewable(ModifiableEntity entity, bool isAdmin)
+        public override bool OnIsViewable(ModifiableEntity entity, EntitySettingsContext ctx)
         {
             if (PartialViewName == null)
                 return false;
 
             if (IsViewable != null)
-                foreach (Func<T, bool, bool> item in IsViewable.GetInvocationList())
+                foreach (Func<T, EntitySettingsContext, bool> item in IsViewable.GetInvocationList())
                 {
-                    if (!item((T)entity, isAdmin))
+                    if (!item((T)entity, ctx))
                         return false;
                 }
 
             return true;
         }
 
-        public override bool OnIsCreable(bool isAdmin)
+        public override bool OnIsCreable(EntitySettingsContext ctx)
         {
             if (IsCreable != null)
-                foreach (Func<bool, bool> item in IsCreable.GetInvocationList())
+                foreach (Func<EntitySettingsContext, bool> item in IsCreable.GetInvocationList())
                 {
-                    if (!item(isAdmin))
+                    if (!item(ctx))
                         return false;
                 }
 
@@ -98,9 +98,9 @@ namespace Signum.Web
             return ShowSave;
         }
 
-        public Func<bool, bool> IsCreable { get; set; }
-        public Func<T, bool, bool> IsReadOnly { get; set; }
-        public Func<T, bool, bool> IsViewable { get; set; }      
+        public Func<EntitySettingsContext, bool> IsCreable { get; set; }
+        public Func<T, EntitySettingsContext, bool> IsReadOnly { get; set; }
+        public Func<T, EntitySettingsContext, bool> IsViewable { get; set; }      
 
         public bool ShowSave { get; set; }
    
@@ -121,8 +121,8 @@ namespace Signum.Web
                     break;
                 case EntityType.Admin:
                     ShowSave = true;
-                    IsCreable = admin => admin;
-                    IsViewable = (_, admin) => admin;
+                    IsCreable = ctx => ctx == EntitySettingsContext.Navigate;
+                    IsViewable = (_, ctx) => ctx == EntitySettingsContext.Navigate;
                     MappingAdmin = new EntityMapping<T>(true).GetValue;
                     MappingDefault = new EntityMapping<T>(false).GetValue;
                     break;
@@ -131,15 +131,14 @@ namespace Signum.Web
                     MappingAdmin = MappingDefault = new EntityMapping<T>(true).GetValue;
                     break;
                 case EntityType.ServerOnly:
-                    ShowSave = false;
-                    IsReadOnly = (_, admin) => true;
-                    IsCreable = admin => false;
+                    IsReadOnly = (_, ctx) => true;
+                    IsCreable = ctx => false;
                     MappingAdmin = MappingDefault = new EntityMapping<T>(false).GetValue;
                     break;
                 case EntityType.Content:
                     ShowSave = false;
-                    IsCreable = admin => false;
-                    IsViewable = (_, admin) => false;
+                    IsCreable = ctx =>  ctx == EntitySettingsContext.Content;
+                    IsViewable = (_, ctx) => ctx == EntitySettingsContext.Content;
                     MappingAdmin = null;
                     MappingDefault = new EntityMapping<T>(true).GetValue;
                     break;
@@ -147,6 +146,13 @@ namespace Signum.Web
                     break;
             }
         }
+    }
+
+    public enum EntitySettingsContext
+    {
+        Navigate,
+        Popup,
+        Content,
     }
 
     public class EmbeddedEntitySettings<T> : EntitySettings, IImplementationsFinder where T : EmbeddedEntity
@@ -162,7 +168,7 @@ namespace Signum.Web
         public override Delegate UntypedMappingDefault { get { return MappingDefault; } }
         public override Delegate UntypedMappingAdmin { get { return MappingDefault; } }
 
-        public override bool OnIsReadOnly(ModifiableEntity entity, bool isAdmin)
+        public override bool OnIsReadOnly(ModifiableEntity entity, EntitySettingsContext ctx)
         {
             if (IsReadOnly != null)
                 foreach (Func<T, bool> item in IsReadOnly.GetInvocationList())
@@ -174,7 +180,7 @@ namespace Signum.Web
             return false;
         }
 
-        public override bool OnIsViewable(ModifiableEntity entity, bool isAdmin)
+        public override bool OnIsViewable(ModifiableEntity entity, EntitySettingsContext ctx)
         {
             if (PartialViewName == null)
                 return false;
@@ -189,7 +195,7 @@ namespace Signum.Web
             return true;
         }
 
-        public override bool OnIsCreable(bool isAdmin)
+        public override bool OnIsCreable(EntitySettingsContext ctx)
         {
             if (IsCreable != null)
                 foreach (Func<bool> item in IsCreable.GetInvocationList())

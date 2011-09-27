@@ -165,6 +165,11 @@ namespace Signum.Web
                        (UntypedValue as Lite).TryCC(l => l.ToStr);
             }
         }
+
+        protected internal virtual EntitySettingsContext EntitySettingsContext
+        {
+            get { return Web.EntitySettingsContext.Popup; }
+        }
     }
 
     public enum ViewMode

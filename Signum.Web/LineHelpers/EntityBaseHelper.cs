@@ -205,8 +205,8 @@ namespace Signum.Web
         {
             if (eb.Implementations == null && Navigator.Manager.EntitySettings.ContainsKey(entityType))
             {
-                eb.Create = eb.Create && Navigator.IsCreable(entityType, false);
-                eb.View = eb.View && Navigator.IsViewable(entityType, false);
+                eb.Create = eb.Create && Navigator.IsCreable(entityType, eb.EntitySettingsContext);
+                eb.View = eb.View && Navigator.IsViewable(entityType, eb.EntitySettingsContext);
                 eb.Find = eb.Find && Navigator.IsFindable(entityType);
 
                 bool isLite = ((eb as EntityListBase).TryCC(elb => elb.ElementType) ?? eb.Type).IsLite();

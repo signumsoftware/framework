@@ -25,7 +25,7 @@ namespace Signum.Web
                 Database.FillToStr(lite);
 
             string key = lite.Key();
-            MvcHtmlString result = Navigator.IsViewable(lite.RuntimeType, admin) ?
+            MvcHtmlString result = Navigator.IsViewable(lite.RuntimeType, admin ? EntitySettingsContext.Navigate : EntitySettingsContext.Popup) ?
                 helper.Href("",
                     lite.ToStr,
                     Navigator.ViewRoute(lite),
