@@ -764,6 +764,36 @@ SF.Chart.StackedBars.prototype = $.extend({}, new SF.Chart.HorizontalTypeTypeVal
     }
 });
 
+SF.Chart.TotalBars = function () {
+    SF.Chart.HorizontalTypeTypeValue.call(this);
+};
+SF.Chart.TotalBars.prototype = $.extend({}, new SF.Chart.HorizontalTypeTypeValue(), {
+
+    getXAxis: function () {
+        return "//x axis scale" + this.br +
+            "var x = d3.scale.linear()" + this.brt +
+            ".domain([0, 100])" + this.brt +
+            ".range([0, width - yAxisLeftPosition - padding]);" + this.br + this.br;
+    },
+
+    paintGraph: function () {
+        return "//paint graph" + this.br +
+            "var countArray = myChart.createCountArray(data.series);" + this.br +
+            "var emptyCountArray = myChart.createEmptyCountArray(data.dimension1.length);" + this.br +
+            "chart.enterData(data.series, 'g', 'shape-serie').attr('transform' ,'translate(' + yAxisLeftPosition + ', ' + (padding + fontSize + labelMargin + chartAxisPadding) + ')')" + this.brt +
+            ".enterData(function(s) { return $.map(s.values, function(v){ return { dimension2: s.dimension2, value: v }; }); }, 'rect', 'shape')" + this.brt +
+            ".attr('stroke', function(pair) { return SF.isEmpty(pair.value) ? 'none' : '#fff'; })" + this.brt +
+            ".attr('fill', function(pair) { return SF.isEmpty(pair.value) ? 'none' : color(JSON.stringify(pair.dimension2)); })" + this.brt +
+            ".attr('transform',  function(pair, i) { return 'translate(0, ' + y(JSON.stringify(data.dimension1[i])) + ')'; })" + this.brt +
+            ".attr('height', y.rangeBand())" + this.brt +
+            ".attr('width', function(pair, i) { return SF.isEmpty(pair.value) ? 0 : x((100 * pair.value) / countArray[i]); })" + this.brt +
+            ".attr('x', function(pair, i) { if (SF.isEmpty(pair.value)) { return 0; } else { var offset = emptyCountArray[i]; emptyCountArray[i] += pair.value; return x((100 * offset) / countArray[i]); } })" + this.brt +
+            ".append('svg:title')" + this.brt +
+            ".text(function(pair, i) { return SF.isEmpty(pair.value) ? null : myChart.getTokenLabel(data.dimension1[i]) + ', ' + myChart.getTokenLabel(pair.dimension2) + ': ' + myChart.getTokenLabel(pair.value); })" + this.br +
+             +this.br + this.br;
+    }
+});
+
 (function () {
     var dataTV =
     {
@@ -859,7 +889,7 @@ SF.Chart.StackedBars.prototype = $.extend({}, new SF.Chart.HorizontalTypeTypeVal
     var width = $chartContainer.width();
     var height = $chartContainer.height();
 
-    var myChart = SF.Chart.Factory.getGraphType('StackedBars');
+    var myChart = SF.Chart.Factory.getGraphType('TotalBars');
 
     var code = SF.Chart.Factory.createChartSVG('.sf-chart-container') +
         myChart.paintChart();
