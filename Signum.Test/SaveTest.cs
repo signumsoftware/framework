@@ -30,8 +30,8 @@ namespace Signum.Test
         {
             ArtistDN m = new ArtistDN() { Name = "Michael" };
             ArtistDN f = new ArtistDN() { Name = "Frank" };
-            m.Friends = new MList<Lite<ArtistDN>>() { f.ToLiteFat() };
-            f.Friends = new MList<Lite<ArtistDN>>() { m.ToLiteFat() };
+            m.Friends.Add(f.ToLiteFat());
+            f.Friends.Add(m.ToLiteFat());
 
             Database.SaveParams(m, f);
 
@@ -47,7 +47,7 @@ namespace Signum.Test
         public void SaveSelfCycle()
         {
             ArtistDN m = new ArtistDN() { Name = "Michael" };
-            m.Friends = new MList<Lite<ArtistDN>>() { m.ToLiteFat() };
+            m.Friends.Add(m.ToLiteFat());
 
             m.Save();
 

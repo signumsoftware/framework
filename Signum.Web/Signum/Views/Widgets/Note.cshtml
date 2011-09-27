@@ -1,4 +1,4 @@
-@using Signum.Entities.Basics
+﻿@using Signum.Entities.Basics
 @using (var tc = Html.TypeContext<NoteDN>())
 {
     @Html.EntityLine(tc, n => n.Target, el => el.ReadOnly = true)

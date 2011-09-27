@@ -414,14 +414,14 @@ namespace Signum.Web
             else
                 ctx.Value = val;
 
-            SetProperties(ctx);
+            SetValueProperties(ctx);
 
             RecursiveValidation(ctx);
 
             return val;
         }
 
-        public virtual void SetProperties(MappingContext<T> ctx)
+        public virtual void SetValueProperties(MappingContext<T> ctx)
         {
             foreach (PropertyMapping item in Properties.Values)
             {

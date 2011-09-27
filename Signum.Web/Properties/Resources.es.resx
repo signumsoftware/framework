@@ -133,7 +133,7 @@
     <value>Alertas</value>
   </data>
   <data name="Alerts_Future" xml:space="preserve">
-    <value>Futuro</value>
+    <value>Futuras</value>
   </data>
   <data name="CreateAlert" xml:space="preserve">
     <value>Crear alerta</value>
@@ -142,7 +142,7 @@
     <value>Crear nota</value>
   </data>
   <data name="Alerts_Attended" xml:space="preserve">
-    <value>Asistió a</value>
+    <value>Atendidas</value>
   </data>
   <data name="Notes" xml:space="preserve">
     <value>Notas</value>
@@ -328,7 +328,7 @@
     <value>Mostrar filtros</value>
   </data>
   <data name="Alerts_NotAttended" xml:space="preserve">
-    <value>No asistió a</value>
+    <value>Sin atender</value>
   </data>
   <data name="ChooseAType" xml:space="preserve">
     <value>Elija un tipo</value>

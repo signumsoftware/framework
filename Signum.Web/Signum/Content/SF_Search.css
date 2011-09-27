@@ -154,12 +154,12 @@
 }
 .sf-search-results th.sf-header-sort-down
 {
-    background: url(../images/desc.gif) no-repeat scroll left 11px;
+    background: url(../images/asc.gif) no-repeat scroll left 11px;
     text-indent: 10px;
 }
 .sf-search-results th.sf-header-sort-up
 {
-    background: url(../images/asc.gif) no-repeat scroll left 11px;
+    background: url(../images/desc.gif) no-repeat scroll left 11px;
     text-indent: 10px;
 }
 .sf-search-results tbody tr:hover

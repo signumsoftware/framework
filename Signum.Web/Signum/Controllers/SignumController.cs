@@ -56,7 +56,7 @@ namespace Signum.Web.Controllers
 
             ViewData[ViewDataKeys.WriteSFInfo] = true;
 
-            object result = Constructor.VisualConstruct(this, type, prefix, VisualConstructStyle.PopupView);
+            object result = Constructor.VisualConstruct(this, type, prefix, VisualConstructStyle.PopupCreate);
             if (result.GetType() == typeof(PartialViewResult))
                 return (PartialViewResult)result;
 

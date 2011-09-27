@@ -251,13 +251,24 @@ namespace Signum.Engine.Linq
                 if (outer != child.OuterKey)
                     child = new ChildProjectionExpression(child.Projection, outer, child.IsLazyMList, child.Type); 
 
-                return scope.Lookup(row, child);
+                return scope.LookupEager(row, child);
+            }
+
+            protected Expression VisitMListChildProjection(ChildProjectionExpression child, MemberExpression field)
+            {
+                Expression outer = Visit(child.OuterKey);
+
+                if (outer != child.OuterKey)
+                    child = new ChildProjectionExpression(child.Projection, outer, child.IsLazyMList, child.Type);
+
+                return scope.LookupMList(row, child, field);
             }
 
             protected override Expression VisitProjection(ProjectionExpression proj)
             {
                 throw new InvalidOperationException("No ProjectionExpressions expected at this stage"); 
             }
+
 
             protected override Expression VisitFieldInit(FieldInitExpression fieldInit)
             {
@@ -271,14 +282,28 @@ namespace Signum.Engine.Linq
                 var block = Expression.Block(
                     fieldInit.Bindings
                     .Where(a => !ReflectionTools.FieldEquals(FieldInitExpression.IdField, a.FieldInfo))
-                    .Select(b => Expression.Assign(
-                        Expression.Field(e, b.FieldInfo),
-                        ExpressionTools.Convert(Visit(b.Binding), b.FieldInfo.FieldType)
-                    )));
+                    .Select(b =>
+                        {
+                            var field = Expression.Field(e, b.FieldInfo);
+
+                            var value = b.Binding is ChildProjectionExpression ? VisitMListChildProjection((ChildProjectionExpression)b.Binding, field) :
+                                Convert(Visit(b.Binding), b.FieldInfo.FieldType);
+
+                            return Expression.Assign(field, value);
+                        }
+                    ));
 
                 LambdaExpression lambda = Expression.Lambda(typeof(Action<>).MakeGenericType(fieldInit.Type), block, e);
 
                 return Expression.Call(retriever, miCached.MakeGenericMethod(fieldInit.Type), id, lambda);
+            }
+
+            private Expression Convert(Expression expression, Type type)
+            {
+                if (expression.Type == type)
+                    return expression;
+
+                return Expression.Convert(expression, type); 
             }
 
             static PropertyInfo piModified = ReflectionTools.GetPropertyInfo((ModifiableEntity me) => me.Modified);
@@ -422,37 +447,41 @@ namespace Signum.Engine.Linq
             return FieldReader.GetExpression(Expression.Property(row, miReader), position, type);
         }
 
-        static MethodInfo miLookupRequest = ReflectionTools.GetMethodInfo((IProjectionRow row) => row.LookupRequest<int, double>(null, 0)).GetGenericMethodDefinition();
+        static MethodInfo miLookupRequest = ReflectionTools.GetMethodInfo((IProjectionRow row) => row.LookupRequest<int, double>(null, 0, null)).GetGenericMethodDefinition();
         static MethodInfo miLookup = ReflectionTools.GetMethodInfo((IProjectionRow row) => row.Lookup<int, double>(null, 0)).GetGenericMethodDefinition();
 
-        public Expression Lookup(Expression row, ChildProjectionExpression cProj)
+        public Expression LookupEager(Expression row, ChildProjectionExpression cProj)
         {
             if (cProj.IsLazyMList)
-            {
-                if (!cProj.Type.IsMList())
-                    throw new InvalidOperationException("Lazy ChildProyection of type '{0}' instead of MList".Formato(cProj.Type.TypeName()));
+                throw new InvalidOperationException("IsLazyMList not expected at this stage");
 
-                if (cProj.Projection.UniqueFunction != null)
-                    throw new InvalidOperationException("Lazy ChildProyection with UniqueFunction '{0}'".Formato(cProj.Projection.UniqueFunction));
+            Type type = cProj.Projection.UniqueFunction == null ? cProj.Type.ElementType() : cProj.Type;
 
-                MethodInfo mi = miLookupRequest.MakeGenericMethod(cProj.OuterKey.Type, cProj.Type.ElementType());
+            MethodInfo mi = miLookup.MakeGenericMethod(cProj.OuterKey.Type, type);
 
-                return Expression.Convert(Expression.Call(row, mi, Expression.Constant(cProj.Projection.Token), cProj.OuterKey), cProj.Type);
-            }
-            else
-            {
-                Type type = cProj.Projection.UniqueFunction == null ? cProj.Type.ElementType() : cProj.Type;
+            Expression call = Expression.Call(row, mi, Expression.Constant(cProj.Projection.Token), cProj.OuterKey);
 
-                MethodInfo mi = miLookup.MakeGenericMethod(cProj.OuterKey.Type, type);
+            if (cProj.Projection.UniqueFunction == null)
+                return call;
 
-                Expression call = Expression.Call(row, mi, Expression.Constant(cProj.Projection.Token), cProj.OuterKey);
+            MethodInfo miUnique = UniqueMethod(cProj.Projection.UniqueFunction.Value);
+            return Expression.Call(miUnique.MakeGenericMethod(type), call);
+        }
 
-                if (cProj.Projection.UniqueFunction == null)
-                    return call;
+        public Expression LookupMList(Expression row, ChildProjectionExpression cProj, MemberExpression field)
+        {
+            if (!cProj.IsLazyMList)
+                throw new InvalidOperationException("Not IsLazyMList not expected at this stage");
 
-                MethodInfo miUnique = UniqueMethod(cProj.Projection.UniqueFunction.Value);
-                return Expression.Call(miUnique.MakeGenericMethod(type), call);
-            }
+            if (!cProj.Type.IsMList())
+                throw new InvalidOperationException("Lazy ChildProyection of type '{0}' instead of MList".Formato(cProj.Type.TypeName()));
+
+            if (cProj.Projection.UniqueFunction != null)
+                throw new InvalidOperationException("Lazy ChildProyection with UniqueFunction '{0}'".Formato(cProj.Projection.UniqueFunction));
+
+            MethodInfo mi = miLookupRequest.MakeGenericMethod(cProj.OuterKey.Type, cProj.Type.ElementType());
+
+            return Expression.Call(row, mi, Expression.Constant(cProj.Projection.Token), cProj.OuterKey, field);
         }
 
         static MethodInfo miSingle = ReflectionTools.GetMethodInfo(() => Enumerable.Single<int>(null)).GetGenericMethodDefinition();

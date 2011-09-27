@@ -101,7 +101,7 @@ namespace Signum.Test
             set { Set(ref lastAward, value, () => LastAward); }
         }
 
-        MList<Lite<ArtistDN>> friends;
+        MList<Lite<ArtistDN>> friends = new MList<Lite<ArtistDN>>();
         public MList<Lite<ArtistDN>> Friends
         {
             get { return friends; }
@@ -153,7 +153,7 @@ namespace Signum.Test
             set { SetToStr(ref name, value, () => Name); }
         }
 
-        MList<ArtistDN> members;
+        MList<ArtistDN> members = new MList<ArtistDN>();
         public MList<ArtistDN> Members
         {
             get { return members; }
@@ -170,7 +170,7 @@ namespace Signum.Test
         }
 
         [ImplementedBy(typeof(GrammyAwardDN), typeof(AmericanMusicAwardDN))]
-        MList<AwardDN> otherAwards;
+        MList<AwardDN> otherAwards = new MList<AwardDN>();
         public MList<AwardDN> OtherAwards 
         {
             get { return otherAwards; }
@@ -325,7 +325,7 @@ namespace Signum.Test
             set { Set(ref author, value, () => Author); }
         }
 
-        MList<SongDN> songs;
+        MList<SongDN> songs = new MList<SongDN>();
         public MList<SongDN> Songs
         {
             get { return songs; }

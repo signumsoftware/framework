@@ -466,6 +466,23 @@ namespace Signum.Engine.Maps
     public partial class FieldEnum : FieldReference
     {
         public FieldEnum(Type fieldType) : base(fieldType) { }
+
+        public override string ToString()
+        {
+            return "{0} -> {1} {4} ({2}) {3}".Formato(
+                Name,
+                "-",
+                IsLite ? "Lite" : "",
+                Nullable ? "Nullable" : "",
+                IndexType.DefaultToNull().ToString());
+        }
+
+        internal override IEnumerable<KeyValuePair<Table, bool>> GetTables()
+        {
+            if (ReferenceTable == null)
+                yield break; 
+            yield return KVP.Create(ReferenceTable, IsLite);
+        }
     }
 
     public partial class FieldImplementedBy : Field, IFieldReference
