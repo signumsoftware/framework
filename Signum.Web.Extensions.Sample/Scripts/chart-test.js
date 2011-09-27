@@ -353,15 +353,15 @@ SF.Chart.TypeTypeValue = function () {
 }
 SF.Chart.TypeTypeValue.prototype = $.extend({}, new SF.Chart.ChartBase(), {
 
-    getMaxValue1: function(series) {
+    getMaxValue1: function (series) {
         var completeArray = [];
-        $.each(series, function(i, s) {
+        $.each(series, function (i, s) {
             $.merge(completeArray, s.values);
         });
         return d3.max(completeArray);
     },
 
-    createCountArray: function (length) {
+    createEmptyCountArray: function (length) {
         var countArray = [];
         for (var i = 0; i < length; i++) {
             countArray.push(0);
@@ -369,10 +369,10 @@ SF.Chart.TypeTypeValue.prototype = $.extend({}, new SF.Chart.ChartBase(), {
         return countArray;
     },
 
-    axisMaxStacked: function (series) {
+    createCountArray: function (series) {
         var dimensionCount = series[0].values.length;
-        var countArray = this.createCountArray(dimensionCount);
-        
+        var countArray = this.createEmptyCountArray(dimensionCount);
+
         $.each(series, function (i, serie) {
             for (var i = 0; i < dimensionCount; i++) {
                 var v = serie.values[i];
@@ -382,7 +382,7 @@ SF.Chart.TypeTypeValue.prototype = $.extend({}, new SF.Chart.ChartBase(), {
             }
         });
 
-        return d3.max(countArray);
+        return countArray;
     },
 
     init: function () {
@@ -573,13 +573,13 @@ SF.Chart.StackedColumns.prototype = $.extend({}, new SF.Chart.TypeTypeValue(), {
     getYAxis: function () {
         return "//y axis scale" + this.br +
             "var y = d3.scale.linear()" + this.brt +
-            ".domain([0, myChart.axisMaxStacked(data.series)])" + this.brt +
+            ".domain([0, d3.max(myChart.createCountArray(data.series))])" + this.brt +
             ".range([0, xAxisTopPosition - padding - fontSize - labelMargin]);" + this.br + this.br;
     },
 
     paintGraph: function () {
         return "//paint graph" + this.br +
-            "var countArray = myChart.createCountArray(data.dimension1.length);" + this.br +
+            "var countArray = myChart.createEmptyCountArray(data.dimension1.length);" + this.br +
             "chart.enterData(data.series, 'g', 'shape-serie').attr('transform' ,'translate(' + (yAxisLeftPosition + chartAxisPadding) + ', ' + xAxisTopPosition + ') scale(1, -1)')" + this.brt +
             ".enterData(function(s) { return $.map(s.values, function(v){ return { dimension2: s.dimension2, value: v }; }); }, 'rect', 'shape')" + this.brt +
             ".attr('stroke', function(pair) { return SF.isEmpty(pair.value) ? 'none' : '#fff'; })" + this.brt +
@@ -588,6 +588,36 @@ SF.Chart.StackedColumns.prototype = $.extend({}, new SF.Chart.TypeTypeValue(), {
             ".attr('width', x.rangeBand())" + this.brt +
             ".attr('height', function(pair, i) { return SF.isEmpty(pair.value) ? 0 : y(myChart.getTokenLabel(pair.value)); })" + this.brt +
             ".attr('y', function(pair, i) { if (SF.isEmpty(pair.value)) { return 0; } else { var offset = y(countArray[i]); countArray[i] += pair.value; return offset; } })" + this.brt +
+            ".append('svg:title')" + this.brt +
+            ".text(function(pair, i) { return SF.isEmpty(pair.value) ? null : myChart.getTokenLabel(data.dimension1[i]) + ', ' + myChart.getTokenLabel(pair.dimension2) + ': ' + myChart.getTokenLabel(pair.value); })" + this.br +
+            this.br + this.br;
+    }
+});
+
+SF.Chart.TotalColumns = function () {
+    SF.Chart.TypeTypeValue.call(this);
+};
+SF.Chart.TotalColumns.prototype = $.extend({}, new SF.Chart.TypeTypeValue(), {
+
+    getYAxis: function () {
+        return "//y axis scale" + this.br +
+            "var y = d3.scale.linear()" + this.brt +
+            ".domain([0, 100])" + this.brt +
+            ".range([0, xAxisTopPosition - padding - fontSize - labelMargin]);" + this.br + this.br;
+    },
+
+    paintGraph: function () {
+        return "//paint graph" + this.br +
+            "var countArray = myChart.createCountArray(data.series);" + this.br +
+            "var emptyCountArray = myChart.createEmptyCountArray(data.dimension1.length);" + this.br +
+            "chart.enterData(data.series, 'g', 'shape-serie').attr('transform' ,'translate(' + (yAxisLeftPosition + chartAxisPadding) + ', ' + xAxisTopPosition + ') scale(1, -1)')" + this.brt +
+            ".enterData(function(s) { return $.map(s.values, function(v){ return { dimension2: s.dimension2, value: v }; }); }, 'rect', 'shape')" + this.brt +
+            ".attr('stroke', function(pair) { return SF.isEmpty(pair.value) ? 'none' : '#fff'; })" + this.brt +
+            ".attr('fill', function(pair) { return SF.isEmpty(pair.value) ? 'none' : color(JSON.stringify(pair.dimension2)); })" + this.brt +
+            ".attr('transform',  function(pair, i) { return 'translate(' + x(JSON.stringify(data.dimension1[i])) + ', 0)'; })" + this.brt +
+            ".attr('width', x.rangeBand())" + this.brt +
+            ".attr('height', function(pair, i) { return SF.isEmpty(pair.value) ? 0 : y((100 *pair.value) / countArray[i]); })" + this.brt +
+            ".attr('y', function(pair, i) { if (SF.isEmpty(pair.value)) { return 0; } else { var offset = emptyCountArray[i]; emptyCountArray[i] += pair.value; return y((100 * offset) / countArray[i]); } })" + this.brt +
             ".append('svg:title')" + this.brt +
             ".text(function(pair, i) { return SF.isEmpty(pair.value) ? null : myChart.getTokenLabel(data.dimension1[i]) + ', ' + myChart.getTokenLabel(pair.dimension2) + ': ' + myChart.getTokenLabel(pair.value); })" + this.br +
             this.br + this.br;
@@ -689,7 +719,7 @@ SF.Chart.StackedColumns.prototype = $.extend({}, new SF.Chart.TypeTypeValue(), {
     var width = $chartContainer.width();
     var height = $chartContainer.height();
 
-    var myChart = SF.Chart.Factory.getGraphType('StackedColumns');
+    var myChart = SF.Chart.Factory.getGraphType('TotalColumns');
 
     var code = SF.Chart.Factory.createChartSVG('.sf-chart-container') +
         myChart.paintChart();
