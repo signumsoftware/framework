@@ -735,6 +735,35 @@ SF.Chart.MultiBars.prototype = $.extend({}, new SF.Chart.HorizontalTypeTypeValue
     }
 });
 
+SF.Chart.StackedBars = function () {
+    SF.Chart.HorizontalTypeTypeValue.call(this);
+};
+SF.Chart.StackedBars.prototype = $.extend({}, new SF.Chart.HorizontalTypeTypeValue(), {
+
+    getXAxis: function () {
+        return "//x axis scale" + this.br +
+            "var x = d3.scale.linear()" + this.brt +
+            ".domain([0, d3.max(myChart.createCountArray(data.series))])" + this.brt +
+            ".range([0, width - yAxisLeftPosition - padding]);" + this.br + this.br;
+    },
+
+    paintGraph: function () {
+        return "//paint graph" + this.br +
+            "var countArray = myChart.createEmptyCountArray(data.dimension1.length);" + this.br +
+            "chart.enterData(data.series, 'g', 'shape-serie').attr('transform' ,'translate(' + yAxisLeftPosition + ', ' + (padding + fontSize + labelMargin + chartAxisPadding) + ')')" + this.brt +
+            ".enterData(function(s) { return $.map(s.values, function(v){ return { dimension2: s.dimension2, value: v }; }); }, 'rect', 'shape')" + this.brt +
+            ".attr('stroke', function(pair) { return SF.isEmpty(pair.value) ? 'none' : '#fff'; })" + this.brt +
+            ".attr('fill', function(pair) { return SF.isEmpty(pair.value) ? 'none' : color(JSON.stringify(pair.dimension2)); })" + this.brt +
+            ".attr('transform',  function(pair, i) { return 'translate(0, ' + y(JSON.stringify(data.dimension1[i])) + ')'; })" + this.brt +
+            ".attr('height', y.rangeBand())" + this.brt +
+            ".attr('width', function(pair, i) { return SF.isEmpty(pair.value) ? 0 : x(myChart.getTokenLabel(pair.value)); })" + this.brt +
+            ".attr('x', function(pair, i) { if (SF.isEmpty(pair.value)) { return 0; } else { var offset = x(countArray[i]); countArray[i] += pair.value; return offset; } })" + this.brt +
+            ".append('svg:title')" + this.brt +
+            ".text(function(pair, i) { return SF.isEmpty(pair.value) ? null : myChart.getTokenLabel(data.dimension1[i]) + ', ' + myChart.getTokenLabel(pair.dimension2) + ': ' + myChart.getTokenLabel(pair.value); })" + this.br +
+             +this.br + this.br;
+    }
+});
+
 (function () {
     var dataTV =
     {
@@ -830,7 +859,7 @@ SF.Chart.MultiBars.prototype = $.extend({}, new SF.Chart.HorizontalTypeTypeValue
     var width = $chartContainer.width();
     var height = $chartContainer.height();
 
-    var myChart = SF.Chart.Factory.getGraphType('MultiBars');
+    var myChart = SF.Chart.Factory.getGraphType('StackedBars');
 
     var code = SF.Chart.Factory.createChartSVG('.sf-chart-container') +
         myChart.paintChart();
