@@ -40,7 +40,7 @@ namespace Signum.Entities.DynamicQuery
 
         public ResultTable(params ResultColumn[] columns)
         {
-            int rows = columns.Select(a => a.Values.Length).Distinct().Single("Unsyncronized number of rows in the results");
+            int rows = columns.Select(a => a.Values.Length).Distinct().SingleEx(()=>"Unsyncronized number of rows in the results");
 
             ResultColumn entityColumn = columns.Where(c => c.Column is _EntityColumn).SingleOrDefault(); ;
             if (entityColumn != null)
@@ -99,7 +99,7 @@ namespace Signum.Entities.DynamicQuery
 
         public T GetValue<T>(string columnName)
         {
-            return (T)this[Table.Columns.Where(c => c.Column.Name == columnName).Single("column not found")];
+            return (T)this[Table.Columns.Where(c => c.Column.Name == columnName).SingleEx(()=>"column not found")];
         }
 
         public T GetValue<T>(int columnIndex)

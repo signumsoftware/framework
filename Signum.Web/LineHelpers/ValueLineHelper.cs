@@ -111,7 +111,7 @@ namespace Signum.Web
             }
             else
                 if (value != null)
-                    items.Where(e => e.Value == value.ToString()).Single("Not value present in ValueLine", "More than one values present in ValueLine").Selected = true;
+                    items.Where(e => e.Value == value.ToString()).SingleEx(()=>"Not value present in ValueLine", ()=> "More than one values present in ValueLine").Selected = true;
 
             return helper.DropDownList(valueLine.ControlID, items, valueLine.ValueHtmlProps);
         }

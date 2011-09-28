@@ -1131,7 +1131,7 @@ namespace Signum.Engine.Linq
 
         ProjectionToken CombineToken(IEnumerable<ProjectionToken> tokens)
         {
-            return tokens.NotNull().Distinct().SingleOrDefault("Different ProjectionTokens");
+            return tokens.NotNull().Distinct().SingleOrDefaultEx(() => "Different ProjectionTokens");
         }
 
         ProjectionToken GetToken(Expression expression)

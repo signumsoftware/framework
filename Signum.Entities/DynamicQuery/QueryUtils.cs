@@ -194,15 +194,15 @@ namespace Signum.Entities.DynamicQuery
 
                 string firstPart = parts.First();
 
-                QueryToken result = subTokens(null).Select(t => t.MatchPart(firstPart)).NotNull().Single(
-                    Resources.Column0NotFound.Formato(firstPart),
-                    Resources.MoreThanOneColumnNamed0.Formato(firstPart));
+                QueryToken result = subTokens(null).Select(t => t.MatchPart(firstPart)).NotNull().SingleEx(
+                    ()=>Resources.Column0NotFound.Formato(firstPart),
+                    () => Resources.MoreThanOneColumnNamed0.Formato(firstPart));
 
                 foreach (var part in parts.Skip(1))
                 {
-                    result = subTokens(result).Select(t => t.MatchPart(part)).NotNull().Single(
-                          Resources.Token0NotCompatibleWith1.Formato(part, result),
-                          Resources.MoreThanOneTokenWithKey0FoundOn1.Formato(part, result));
+                    result = subTokens(result).Select(t => t.MatchPart(part)).NotNull().SingleEx(
+                          () => Resources.Token0NotCompatibleWith1.Formato(part, result),
+                          () => Resources.MoreThanOneTokenWithKey0FoundOn1.Formato(part, result));
                 }
 
                 return result;
