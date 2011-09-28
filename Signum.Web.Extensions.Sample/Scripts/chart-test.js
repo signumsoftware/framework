@@ -853,6 +853,108 @@ SF.Chart.TotalAreas.prototype = $.extend({}, new SF.Chart.TypeTypeValue(), {
     }
 });
 
+SF.Chart.Points = function () {
+    SF.Chart.ChartBase.call(this);
+};
+SF.Chart.Points.prototype = $.extend({}, new SF.Chart.ChartBase(), {
+
+    init: function () {
+        return "//config variables" + this.br +
+            "var yAxisLabelWidth = 25," + this.brt +
+            "fontSize= " + this.fontSize + "," + this.brt +
+            "ticksLength= " + this.ticksLength + "," + this.brt +
+            "labelMargin= " + this.labelMargin + "," + this.brt +
+            "chartAxisPadding= " + this.chartAxisPadding + "," + this.brt +
+            "padding= " + this.padding + "," + this.brt +
+            "yAxisLeftPosition = padding + fontSize + yAxisLabelWidth + (2 * labelMargin) + ticksLength," + this.brt +
+            "xAxisTopPosition = height - padding - (fontSize * 2) - (labelMargin * 2) - ticksLength," + this.brt +
+            "color = (data.points.length < 10 ? d3.scale.category10() : d3.scale.category20()).domain([0, $.map(data.points, function(v) { return JSON.stringify(v); })]);" + this.br + this.br;
+    },
+
+    getXAxis: function () {
+        return "//x axis scale" + this.br +
+            "var x = d3.scale.linear()" + this.brt +
+            ".domain([0, d3.max($.map(data.points, function (e) { return e.dimension1; }))])" + this.brt +
+            ".range([0, width - yAxisLeftPosition - padding]);" + this.br + this.br;
+    },
+
+    getYAxis: function () {
+        return "//y axis scale" + this.br +
+            "var y = d3.scale.linear()" + this.brt +
+            ".domain([0, d3.max($.map(data.points, function (e) { return e.dimension2; }))])" + this.brt +
+            ".range([0, xAxisTopPosition - padding]);" + this.br + this.br;
+    },
+
+    paintXAxisRuler: function () {
+        return "//paint x-axis - ticks" + this.br +
+            "var xTicks = x.ticks(10);" + this.br +
+            "chart.append('svg:g').attr('class', 'x-axis-tick').attr('transform', 'translate(' + yAxisLeftPosition + ', ' + xAxisTopPosition + ')')" + this.brt +
+            ".enterData(xTicks, 'line', 'x-axis-tick')" + this.brt +
+            ".attr('x1', x)" + this.brt +
+            ".attr('x2', x)" + this.brt +
+            ".attr('y2', ticksLength);" + this.br +
+            this.br +
+            "//paint x-axis - tick labels" + this.br +
+            "chart.append('svg:g').attr('class', 'x-axis-tick-label').attr('transform', 'translate(' + yAxisLeftPosition + ', ' + (xAxisTopPosition + ticksLength + labelMargin + fontSize) + ')')" + this.brt +
+            ".enterData(xTicks, 'text', 'x-axis-tick-label')" + this.brt +
+            ".attr('x', x)" + this.brt +
+            ".attr('text-anchor', 'middle')" + this.brt +
+            ".text(String);" + this.br +
+            this.br +
+            "//paint x-axis - token label" + this.br +
+            "chart.append('svg:g').attr('class', 'x-axis-token-label').attr('transform', 'translate(' + (yAxisLeftPosition + ((width - yAxisLeftPosition) / 2)) + ', ' + height + ')')" + this.brt +
+            ".append('svg:text').attr('class', 'x-axis-token-label')" + this.brt +
+            ".attr('text-anchor', 'middle')" + this.brt +
+            ".text(data.labels.dimension1);" + this.br + this.br;
+    },
+
+    paintYAxisRuler: function () {
+        return "//paint y-axis - ruler" + this.br +
+            "var yTicks = y.ticks(8);" + this.br +
+            "chart.append('svg:g').attr('class', 'y-ruler').attr('transform', 'translate(' + yAxisLeftPosition + ', ' + xAxisTopPosition + ')')" + this.brt +
+            ".enterData(yTicks, 'line', 'y-ruler')" + this.brt +
+            ".attr('x2', width - yAxisLeftPosition - padding)" + this.brt +
+            ".attr('y1', function(t) { return -y(t); })" + this.brt +
+            ".attr('y2', function(t) { return -y(t); });" + this.br +
+            this.br +
+            "//paint y-axis - ticks" + this.br +
+            "chart.append('svg:g').attr('class', 'y-axis-tick').attr('transform', 'translate(' + (yAxisLeftPosition - ticksLength) + ', ' + xAxisTopPosition + ')')" + this.brt +
+            ".enterData(yTicks, 'line', 'y-axis-tick')" + this.brt +
+            ".attr('x2', ticksLength)" + this.brt +
+            ".attr('y1', function(t) { return -y(t); })" + this.brt +
+            ".attr('y2', function(t) { return -y(t); });" + this.br +
+            this.br +
+            "//paint y-axis - tick labels" + this.br +
+            "chart.append('svg:g').attr('class', 'y-axis-tick-label').attr('transform', 'translate(' + (yAxisLeftPosition - ticksLength - labelMargin) + ', ' + xAxisTopPosition + ')')" + this.brt +
+            ".enterData(yTicks, 'text', 'y-axis-tick-label')" + this.brt +
+            ".attr('y', function(t) { return -y(t); })" + this.brt +
+            ".attr('dominant-baseline', 'middle')" + this.brt +
+            ".attr('text-anchor', 'end')" + this.brt +
+            ".text(String);" + this.br +
+            this.br +
+            "//paint y-axis - token label" + this.br +
+            "chart.append('svg:g').attr('class', 'y-axis-token-label').attr('transform', 'translate(' + fontSize + ', ' + (xAxisTopPosition / 2) + ') rotate(270)')" + this.brt +
+            ".append('svg:text').attr('class', 'y-axis-token-label')" + this.brt +
+            ".attr('text-anchor', 'middle')" + this.brt +
+            ".text(data.labels.dimension2);" + this.br + this.br;
+    },
+
+    paintGraph: function () {
+        return "//paint graph" + this.br +
+            "chart.enterData(data.points, 'g', 'shape-serie').attr('transform' ,'translate(' + yAxisLeftPosition + ', ' + xAxisTopPosition + ') scale(1, -1)')" + this.brt +
+            ".append('svg:circle').attr('class', 'shape')" + this.brt +
+            ".attr('stroke', function(p) { return color(JSON.stringify(p)); })" + this.brt +
+            ".attr('fill', function(p) { return color(JSON.stringify(p)); })" + this.brt +
+            ".attr('shape-rendering', 'initial')" + this.brt +
+            ".attr('r', 5)" + this.brt +
+            ".attr('cx', function(p) { return x(p.dimension1); })" + this.brt +
+            ".attr('cy', function(p) { return y(p.dimension2); })" + this.brt +
+            ".append('svg:title')" + this.brt +
+            ".text(function(p) { return myChart.getTokenLabel(p.value1) + ': ' + p.dimension1 + ', ' + p.dimension2; })" + this.br +
+             this.br;
+    }
+});
+
 (function () {
     var dataTV =
     {
@@ -922,25 +1024,43 @@ SF.Chart.TotalAreas.prototype = $.extend({}, new SF.Chart.TypeTypeValue(), {
 //                ]
 //    };
 
-    var data = { 
-        labels: { dimension1: "Author", dimension2: "Album", value1: "[Num] de Songs" },
-        dimension1: [
-            {"key":"Band;1","toStr":"Smashing Pumpkins"},
-            {"key":"Artist;5","toStr":"Michael Jackson"},
-            {"key":"Band;2","toStr":"Sigur Ros"}],
-        series:[
-            {"dimension2":{"key":"Album;1","toStr":"Siamese Dream"},"values":[1,null,null]},
-            {"dimension2":{"key":"Album;2","toStr":"Mellon Collie and the Infinite Sadness"},"values":[3,null,null]},
-            {"dimension2":{"key":"Album;3","toStr":"Zeitgeist"},"values":[1,null,null]},
-            {"dimension2":{"key":"Album;4","toStr":"American Gothic"},"values":[1,null,null]},
-            {"dimension2":{"key":"Album;5","toStr":"Ben"},"values":[null,1,null]},
-            {"dimension2":{"key":"Album;6","toStr":"Thriller"},"values":[null,3,null]},
-            {"dimension2":{"key":"Album;7","toStr":"Bad"},"values":[null,4,null]},
-            {"dimension2":{"key":"Album;8","toStr":"Dangerous"},"values":[null,3,null]},
-            {"dimension2":{"key":"Album;9","toStr":"HIStory"},"values":[null,2,null]},
-            {"dimension2":{"key":"Album;10","toStr":"Blood on the Dance Floor"},"values":[null,2,null]},
-            {"dimension2":{"key":"Album;11","toStr":"Ágaetis byrjun"},"values":[null,null,1]},
-            {"dimension2":{"key":"Album;12","toStr":"Takk..."},"values":[null,null,3]}
+//    var dataTTV = { 
+//        labels: { dimension1: "Author", dimension2: "Album", value1: "[Num] de Songs" },
+//        dimension1: [
+//            {"key":"Band;1","toStr":"Smashing Pumpkins"},
+//            {"key":"Artist;5","toStr":"Michael Jackson"},
+//            {"key":"Band;2","toStr":"Sigur Ros"}],
+//        series:[
+//            {"dimension2":{"key":"Album;1","toStr":"Siamese Dream"},"values":[1,null,null]},
+//            {"dimension2":{"key":"Album;2","toStr":"Mellon Collie and the Infinite Sadness"},"values":[3,null,null]},
+//            {"dimension2":{"key":"Album;3","toStr":"Zeitgeist"},"values":[1,null,null]},
+//            {"dimension2":{"key":"Album;4","toStr":"American Gothic"},"values":[1,null,null]},
+//            {"dimension2":{"key":"Album;5","toStr":"Ben"},"values":[null,1,null]},
+//            {"dimension2":{"key":"Album;6","toStr":"Thriller"},"values":[null,3,null]},
+//            {"dimension2":{"key":"Album;7","toStr":"Bad"},"values":[null,4,null]},
+//            {"dimension2":{"key":"Album;8","toStr":"Dangerous"},"values":[null,3,null]},
+//            {"dimension2":{"key":"Album;9","toStr":"HIStory"},"values":[null,2,null]},
+//            {"dimension2":{"key":"Album;10","toStr":"Blood on the Dance Floor"},"values":[null,2,null]},
+//            {"dimension2":{"key":"Album;11","toStr":"Ágaetis byrjun"},"values":[null,null,1]},
+//            {"dimension2":{"key":"Album;12","toStr":"Takk..."},"values":[null,null,3]}
+//        ]
+//    };
+
+    var data = {
+        labels: { value1: "Album", dimension1: "Id", dimension2: "[Num] de Songs" },
+        points: [
+            {"value1":{"key":"Album;1","toStr":"Siamese Dream"},"dimension1":1,"dimension2":1},
+            {"value1":{"key":"Album;2","toStr":"Mellon Collie and the Infinite Sadness"},"dimension1":2,"dimension2":3},
+            {"value1":{"key":"Album;3","toStr":"Zeitgeist"},"dimension1":3,"dimension2":1},
+            {"value1":{"key":"Album;4","toStr":"American Gothic"},"dimension1":4,"dimension2":1},
+            {"value1":{"key":"Album;5","toStr":"Ben"},"dimension1":5,"dimension2":1},
+            {"value1":{"key":"Album;6","toStr":"Thriller"},"dimension1":6,"dimension2":3},
+            {"value1":{"key":"Album;7","toStr":"Bad"},"dimension1":7,"dimension2":4},
+            {"value1":{"key":"Album;8","toStr":"Dangerous"},"dimension1":8,"dimension2":3},
+            {"value1":{"key":"Album;9","toStr":"HIStory"},"dimension1":9,"dimension2":2},
+            {"value1":{"key":"Album;10","toStr":"Blood on the Dance Floor"},"dimension1":10,"dimension2":2},
+            {"value1":{"key":"Album;11","toStr":"Ágaetis byrjun"},"dimension1":11,"dimension2":1},
+            {"value1":{"key":"Album;12","toStr":"Takk..."},"dimension1":12,"dimension2":3}
         ]
     };
 
@@ -948,7 +1068,7 @@ SF.Chart.TotalAreas.prototype = $.extend({}, new SF.Chart.TypeTypeValue(), {
     var width = $chartContainer.width();
     var height = $chartContainer.height();
 
-    var myChart = SF.Chart.Factory.getGraphType('TotalAreas');
+    var myChart = SF.Chart.Factory.getGraphType('Points');
 
     var code = SF.Chart.Factory.createChartSVG('.sf-chart-container') +
         myChart.paintChart();
