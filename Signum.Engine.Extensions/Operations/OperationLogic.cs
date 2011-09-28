@@ -48,12 +48,44 @@ namespace Signum.Engine.Operations
         {
             return LogOperationsExpression.Invoke(o);
         }
-        
+
         static Polymorphic<Dictionary<Enum, IOperation>> operations = new Polymorphic<Dictionary<Enum, IOperation>>(PolymorphicMerger.InheritDictionaryInterfaces, typeof(IIdentifiable));
 
         public static HashSet<Enum> RegisteredOperations
         {
             get { return operations.OverridenValues.SelectMany(a => a.Keys).ToHashSet(); }
+        }
+
+
+        public static readonly HashSet<Type> ProtectedSaveTypes = new HashSet<Type>();
+
+        [ThreadStatic]
+        static ImmutableStack<Type> ignoredTypes;
+
+        public static bool IsSaveProtected(Type type)
+        {
+            return ProtectedSaveTypes.Contains(type) && (ignoredTypes == null || !ignoredTypes.Contains(type));
+        }
+
+        public static IDisposable AllowSave<T>()
+        {
+            return AllowSave(typeof(T));
+        }
+
+        private static IDisposable AllowSave(Type type)
+        {
+            if (ignoredTypes == null)
+                ignoredTypes = ImmutableStack<Type>.Empty;
+
+            ignoredTypes = ignoredTypes.Push(type);
+
+            return new Disposable(() =>
+            {
+                if (ignoredTypes == null || ignoredTypes.Peek() != type)
+                    throw new InvalidOperationException("Unsyncronized stack of OperationLogic.ignoredTypes");
+
+                ignoredTypes = ignoredTypes.Pop();
+            });
         }
 
         public static void AssertStarted(SchemaBuilder sb)
@@ -93,7 +125,17 @@ namespace Signum.Engine.Operations
                                             }).ToDynamic();
 
                 dqm.RegisterExpression((OperationDN o) => o.LogOperations());
+
+                sb.Schema.EntityEventsGlobal.Saving += EntityEventsGlobal_Saving;
             }
+        }
+
+        static void EntityEventsGlobal_Saving(IdentifiableEntity ident)
+        {
+            if (ident.Modified == true && IsSaveProtected(ident.GetType()))
+                throw new InvalidOperationException("Saving {0} is controlled by the operations. Use OperationLogic.AllowSave() or execute {1}".Formato(
+                    ident.GetType().NiceName(),
+                    operations.GetValue(ident.GetType()).Keys.CommaOr(k => EnumDN.UniqueKey(k)))); 
         }
 
         #region Events
@@ -146,6 +188,11 @@ namespace Signum.Engine.Operations
             operation.AssertIsValid();
 
             operations.GetOrAdd(operation.Type).Add(operation.Key, operation);
+
+            if (operation is IExecuteOperation && ((IEntityOperation)operation).Lite == false)
+            {
+                ProtectedSaveTypes.Add(operation.Type); 
+            }
         }
 
         public static void RegisterOverride(this IOperation operation)

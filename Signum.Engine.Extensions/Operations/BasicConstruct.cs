@@ -38,40 +38,43 @@ namespace Signum.Engine.Operations
         IIdentifiable IConstructOperation.Construct(params object[] args)
         {
             OperationLogic.AssertOperationAllowed(Key);
-             
-             try
-             {
-                 using (Transaction tr = new Transaction())
-                 {
-                     LogOperationDN log = new LogOperationDN
-                     {
-                         Operation = EnumLogic<OperationDN>.ToEntity(Key),
-                         Start = TimeZoneManager.Now,
-                         User = UserDN.Current.ToLite()
-                     };
 
-                     OnBeginOperation();
+            using (OperationLogic.AllowSave<T>())
+            {
+                try
+                {
+                    using (Transaction tr = new Transaction())
+                    {
+                        LogOperationDN log = new LogOperationDN
+                        {
+                            Operation = EnumLogic<OperationDN>.ToEntity(Key),
+                            Start = TimeZoneManager.Now,
+                            User = UserDN.Current.ToLite()
+                        };
 
-                     T entity = Construct(args);
+                        OnBeginOperation();
 
-                     OnEndOperation(entity);
+                        T entity = Construct(args);
 
-                     if (!entity.IsNew)
-                     {
-                         log.Target = entity.ToLite<IIdentifiable>();
-                         log.End = TimeZoneManager.Now;
-                         using (AuthLogic.User(AuthLogic.SystemUser))
-                             log.Save();
-                     }
+                        OnEndOperation(entity);
 
-                     return tr.Commit(entity);
-                 }
-             }
-             catch (Exception ex)
-             {
-                 OperationLogic.OnErrorOperation(this, null, ex);
-                 throw;
-             }
+                        if (!entity.IsNew)
+                        {
+                            log.Target = entity.ToLite<IIdentifiable>();
+                            log.End = TimeZoneManager.Now;
+                            using (AuthLogic.User(AuthLogic.SystemUser))
+                                log.Save();
+                        }
+
+                        return tr.Commit(entity);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    OperationLogic.OnErrorOperation(this, null, ex);
+                    throw;
+                }
+            }
         }
 
         protected virtual void OnBeginOperation()

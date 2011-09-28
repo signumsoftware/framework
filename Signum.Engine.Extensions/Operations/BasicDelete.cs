@@ -62,59 +62,62 @@ namespace Signum.Engine.Operations
             if (error != null)
                 throw new ApplicationException(error);
 
-            try
+            using (OperationLogic.AllowSave<T>())
             {
-                using (Transaction tr = new Transaction())
-                {
-                    LogOperationDN log = new LogOperationDN
-                    {
-                        Operation = EnumLogic<OperationDN>.ToEntity(Key),
-                        Start = TimeZoneManager.Now,
-                        User = UserDN.Current.ToLite()
-                    };
-
-                    OperationLogic.OnBeginOperation(this, (IdentifiableEntity)entity);
-
-                    OnDelete((T)entity, parameters);
-
-                    OperationLogic.OnEndOperation(this, (IdentifiableEntity)entity);
-
-                    log.Target = entity.ToLite<IIdentifiable>(); //in case AllowsNew == true
-                    log.End = TimeZoneManager.Now;
-                    using (AuthLogic.User(AuthLogic.SystemUser))
-                        log.Save();
-
-                    tr.Commit();
-                }
-            }
-            catch (Exception ex)
-            {  
-                OperationLogic.OnErrorOperation(this, (IdentifiableEntity)entity, ex);    
-
                 try
                 {
-                    using (Transaction tr2 = new Transaction(true))
+                    using (Transaction tr = new Transaction())
                     {
-                        var log = new LogOperationDN
+                        LogOperationDN log = new LogOperationDN
                         {
                             Operation = EnumLogic<OperationDN>.ToEntity(Key),
                             Start = TimeZoneManager.Now,
-                            Target = entity.ToLite<IIdentifiable>(),
-                            Exception = ex.Message,
                             User = UserDN.Current.ToLite()
                         };
 
+                        OperationLogic.OnBeginOperation(this, (IdentifiableEntity)entity);
+
+                        OnDelete((T)entity, parameters);
+
+                        OperationLogic.OnEndOperation(this, (IdentifiableEntity)entity);
+
+                        log.Target = entity.ToLite<IIdentifiable>(); //in case AllowsNew == true
+                        log.End = TimeZoneManager.Now;
                         using (AuthLogic.User(AuthLogic.SystemUser))
                             log.Save();
 
-                        tr2.Commit();
+                        tr.Commit();
                     }
                 }
-                catch (Exception)
-                { 
-                }
+                catch (Exception ex)
+                {
+                    OperationLogic.OnErrorOperation(this, (IdentifiableEntity)entity, ex);
 
-                throw ex;
+                    try
+                    {
+                        using (Transaction tr2 = new Transaction(true))
+                        {
+                            var log = new LogOperationDN
+                            {
+                                Operation = EnumLogic<OperationDN>.ToEntity(Key),
+                                Start = TimeZoneManager.Now,
+                                Target = entity.ToLite<IIdentifiable>(),
+                                Exception = ex.Message,
+                                User = UserDN.Current.ToLite()
+                            };
+
+                            using (AuthLogic.User(AuthLogic.SystemUser))
+                                log.Save();
+
+                            tr2.Commit();
+                        }
+                    }
+                    catch (Exception)
+                    {
+                    }
+
+                    throw ex;
+                }
             }
         }
 
