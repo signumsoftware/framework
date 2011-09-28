@@ -16,6 +16,7 @@ using System.Data;
 using System.Text.RegularExpressions;
 using Signum.Utilities.Properties;
 using System.Collections;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Utilities
 {
@@ -91,12 +92,14 @@ namespace Signum.Utilities
             return -1;
         }
 
-        public static T Single<T>(this IEnumerable<T> collection, string errorMessage)
+        public static T SingleEx<T>(this IEnumerable<T> collection)
         {
-            return collection.Single<T>(errorMessage, errorMessage);
+            return collection.SingleEx<T>(
+                () => "Sequence contains no {0}".Formato(typeof(T).TypeName()),
+                () => "Sequence contains more than one {0}".Formato(typeof(T).TypeName()));
         }
 
-        public static T Single<T>(this IEnumerable<T> collection, string errorZero, string errorMoreThanOne)
+        public static T SingleEx<T>(this IEnumerable<T> collection, Func<string> errorZero, Func<string> errorMoreThanOne)
         {
             if (collection == null)
                 throw new ArgumentNullException("collection");
@@ -104,7 +107,7 @@ namespace Signum.Utilities
             using (IEnumerator<T> enumerator = collection.GetEnumerator())
             {
                 if (!enumerator.MoveNext())
-                    throw new InvalidOperationException(errorZero);
+                    throw new InvalidOperationException(errorZero());
 
                 T current = enumerator.Current;
 
@@ -112,10 +115,18 @@ namespace Signum.Utilities
                     return current;
             }
 
-            throw new InvalidOperationException(errorMoreThanOne);
+            throw new InvalidOperationException(errorMoreThanOne());
         }
 
-        public static T SingleOrDefault<T>(this IEnumerable<T> collection, string errorMessage)
+
+
+        public static T SingleOrDefaultEx<T>(this IEnumerable<T> collection)
+        {
+            return collection.SingleOrDefaultEx<T>(
+                () => "Sequence contains more than one {0}".Formato(typeof(T).TypeName()));
+        }
+
+        public static T SingleOrDefaultEx<T>(this IEnumerable<T> collection, Func<string> errorMorethanOne)
         {
             if (collection == null)
                 throw new ArgumentNullException("collection");
@@ -131,10 +142,16 @@ namespace Signum.Utilities
                     return current;
             }
 
-            throw new InvalidOperationException(errorMessage);
+            throw new InvalidOperationException(errorMorethanOne());
         }
 
-        public static T First<T>(this IEnumerable<T> collection, string errorMessage)
+        public static T FirstEx<T>(this IEnumerable<T> collection)
+        {
+            return collection.FirstEx<T>(
+                () => "Sequence contains no {0}".Formato(typeof(T).TypeName()));
+        }
+
+        public static T FirstEx<T>(this IEnumerable<T> collection, Func<string> errorZero)
         {
             if (collection == null)
                 throw new ArgumentNullException("collection");
@@ -142,13 +159,19 @@ namespace Signum.Utilities
             using (IEnumerator<T> enumerator = collection.GetEnumerator())
             {
                 if (!enumerator.MoveNext())
-                    throw new InvalidOperationException(errorMessage);
+                    throw new InvalidOperationException(errorZero());
 
                 return enumerator.Current;
             }
         }
 
-        public static T SingleOrMany<T>(this IEnumerable<T> collection, string errorZero)
+        public static T SingleOrManyEx<T>(this IEnumerable<T> collection)
+        {
+            return collection.SingleOrManyEx(
+                        () => "Sequence contains no {0}".Formato(typeof(T).TypeName()));
+        }
+
+        public static T SingleOrManyEx<T>(this IEnumerable<T> collection, Func<string> errorZero)
         {
             if (collection == null)
                 throw new ArgumentNullException("collection");
@@ -156,7 +179,7 @@ namespace Signum.Utilities
             using (IEnumerator<T> enumerator = collection.GetEnumerator())
             {
                 if (!enumerator.MoveNext())
-                    throw new InvalidOperationException(errorZero);
+                    throw new InvalidOperationException(errorZero());
 
                 T current = enumerator.Current;
 

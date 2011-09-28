@@ -498,6 +498,21 @@ namespace Signum.Engine.Maps
         {
             ((Lazy<T>)obj).ResetPublicationOnly(); 
         }
+
+        public static void LoadAllLazy()
+        {
+            foreach (var lazy in registeredLazyList)
+            {
+                giLoadLazy.GetInvoker(lazy.GetType().GetGenericArguments().Single())(lazy);
+            }
+        }
+
+        static GenericInvoker<Action<object>> giLoadLazy = new GenericInvoker<Action<object>>(obj => LoadLazy<int>(obj));
+
+        static void LoadLazy<T>(object obj)
+        {
+            ((Lazy<T>)obj).Load();
+        }
     }
 
     internal interface IEntityEvents
