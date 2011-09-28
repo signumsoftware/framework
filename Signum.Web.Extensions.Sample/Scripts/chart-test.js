@@ -959,17 +959,27 @@ SF.Chart.Bubbles = function () {
     SF.Chart.Points.call(this);
 };
 SF.Chart.Bubbles.prototype = $.extend({}, new SF.Chart.Points(), {
+
+    getSizeScale: function (data, area) {
+        var sum = 0;
+        $.each(data.points, function (i, p) {
+            sum += p.value2;
+        });
+
+        return d3.scale.linear()
+            .domain([0, sum])
+            .range([0, area]);
+    },
+
     paintGraph: function () {
         return "//paint graph" + this.br +
-            "var sizeScale = d3.scale.linear()" + this.brt +
-            ".domain([d3.min($.map(data.points, function (e) { return e.value2; })), d3.max($.map(data.points, function (e) { return e.value2; }))])" + this.brt +
-            ".range([10, 70]);" + this.br + 
+            "var sizeScale = myChart.getSizeScale(data, (width - yAxisLeftPosition) * (height - xAxisTopPosition));" + this.br +
             "chart.enterData(data.points, 'g', 'shape-serie').attr('transform' ,'translate(' + yAxisLeftPosition + ', ' + xAxisTopPosition + ') scale(1, -1)')" + this.brt +
             ".append('svg:circle').attr('class', 'shape')" + this.brt +
             ".attr('stroke', function(p) { return color(JSON.stringify(p)); })" + this.brt +
             ".attr('fill', function(p) { return color(JSON.stringify(p)); })" + this.brt +
             ".attr('shape-rendering', 'initial')" + this.brt +
-            ".attr('r', function(p) { debugger; return sizeScale(p.value2); })" + this.brt +
+            ".attr('r', function(p) { return Math.sqrt(sizeScale(p.value2)/Math.PI); })" + this.brt +
             ".attr('cx', function(p) { return x(p.dimension1); })" + this.brt +
             ".attr('cy', function(p) { return y(p.dimension2); })" + this.brt +
             ".append('svg:title')" + this.brt +
