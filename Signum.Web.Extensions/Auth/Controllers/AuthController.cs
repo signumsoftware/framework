@@ -240,7 +240,7 @@ namespace Signum.Web.Auth
                 using (AuthLogic.Disable())
                 {
                     //Check the email belongs to a user
-                    UserDN user = Database.Query<UserDN>().Where(u => u.Email == email).SingleOrDefault(Resources.EmailNotExistsDatabase);
+                    UserDN user = Database.Query<UserDN>().Where(u => u.Email == email).SingleOrDefaultEx(() => Resources.EmailNotExistsDatabase);
 
                     if (user == null)
                         throw new ApplicationException(Resources.ThereSNotARegisteredUserWithThatEmailAddress);
@@ -288,7 +288,7 @@ namespace Signum.Web.Auth
             {
                 rpr = Database.Query<ResetPasswordRequestDN>()
                     .Where(r => r.User.Email == email && r.Code == code)
-                    .SingleOrDefault(Resources.TheConfirmationCodeThatYouHaveJustSentIsInvalid);
+                    .SingleOrDefaultEx(()=>Resources.TheConfirmationCodeThatYouHaveJustSentIsInvalid);
             }
             TempData["ResetPasswordRequest"] = rpr;
 

@@ -50,7 +50,7 @@ namespace Signum.Engine.Basics
         public static FacadeMethodDN RetrieveOrGenerateFacadeMethod(string facadeMethod)
         {
             MethodInfo mi = ServiceMethodInfos.Where(m => m.Key() == facadeMethod)
-                .Single("Method not found in registered Service Interfaces");
+                .SingleEx(()=>"Method not found in registered Service Interfaces");
 
             return Database.Query<FacadeMethodDN>().SingleOrDefault(a => a.Match(mi)) ?? new FacadeMethodDN(mi);
         }
@@ -86,9 +86,9 @@ namespace Signum.Engine.Basics
                             let map = decType.GetInterfaceMap(inter)
                             let index = map.TargetMethods.IndexOf(m => ReflectionTools.MethodEqual(m, mi2))
                             where index != -1
-                            select map.InterfaceMethods[index]).Single(
-                                "{0} is not an implementation of any interface".Formato(mi2.Name),
-                                "{0} is implementing many interfaces".Formato(mi2.Name));
+                            select map.InterfaceMethods[index]).SingleEx(
+                                ()=>"{0} is not an implementation of any interface".Formato(mi2.Name),
+                                () => "{0} is implementing many interfaces".Formato(mi2.Name));
                 });
         }
 

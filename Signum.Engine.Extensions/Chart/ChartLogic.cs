@@ -151,7 +151,7 @@ namespace Signum.Engine.Extensions.Chart
 
         static Expression BuildAggregateExpression(Expression collection, AggregateFunction aggregate, LambdaExpression lambda)
         {
-            Type groupType = collection.Type.GetGenericInterfaces(typeof(IEnumerable<>)).Single("expression should be a IEnumerable").GetGenericArguments()[0];
+            Type groupType = collection.Type.GetGenericInterfaces(typeof(IEnumerable<>)).SingleEx(()=>"expression should be a IEnumerable").GetGenericArguments()[0];
 
             if (aggregate == AggregateFunction.Count)
                 return Expression.Call(typeof(Enumerable), "Count", new[] { groupType }, new[] { collection });
