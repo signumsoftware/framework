@@ -119,6 +119,11 @@ namespace Signum.Utilities
                 () => "Sequence contains more than one {0}".Formato(typeof(T).TypeName()));
         }
 
+        public static T SingleEx<T>(this IEnumerable<T> collection, Func<string> error)
+        {
+            return collection.SingleEx(error, error);
+        }
+
         public static T SingleEx<T>(this IEnumerable<T> collection, Func<string> errorZero, Func<string> errorMoreThanOne)
         {
             if (collection == null)

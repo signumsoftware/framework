@@ -50,7 +50,7 @@ namespace Signum.Web
 
             if (WriteIndex == Web.WriteIndex.ForSavedEntities)
             {
-                IdentifiableEntity ie = tc.Parent.FollowC(a => a.Parent).OfType<TypeContext>().Select(a=>a.UntypedValue).OfType<IdentifiableEntity>().First("Parent entity not found");
+                IdentifiableEntity ie = tc.Parent.FollowC(a => a.Parent).OfType<TypeContext>().Select(a => a.UntypedValue).OfType<IdentifiableEntity>().FirstEx(() => "Parent entity not found");
                 return !ie.IsNew; 
             }
 

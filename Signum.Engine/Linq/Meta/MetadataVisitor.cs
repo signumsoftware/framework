@@ -206,7 +206,7 @@ namespace Signum.Engine.Linq
                 MetaExpression meta = expression as MetaExpression;
                 if (meta != null && meta.Meta is CleanMeta)
                 {
-                    PropertyRoute route = ((CleanMeta)meta.Meta).PropertyRoutes.Single("Metas doesn't work over polymorphic MLists").Add("Item");
+                    PropertyRoute route = ((CleanMeta)meta.Meta).PropertyRoutes.SingleEx(()=>"Metas don't work over polymorphic MLists").Add("Item");
 
                     return new MetaProjectorExpression(expression.Type,
                         new MetaExpression(elementType,
