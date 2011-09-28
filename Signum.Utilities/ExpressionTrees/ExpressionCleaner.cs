@@ -15,7 +15,7 @@ namespace Signum.Utilities.ExpressionTrees
 	/// </summary>
 	public interface IMethodExpander
 	{
-        Expression Expand(Expression instance, Expression[] arguments, Type[] typeArguments);
+        Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi);
 	}
 
 	/// <summary>
@@ -138,7 +138,7 @@ namespace Signum.Utilities.ExpressionTrees
                 Expression exp = expander.Expand(
                     m.Object,
                     m.Arguments.ToArray(),
-                    m.Method.IsGenericMethod ? m.Method.GetGenericArguments() : null);
+                    m.Method);
 
                 return exp;
             }

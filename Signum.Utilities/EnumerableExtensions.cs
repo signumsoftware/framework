@@ -92,6 +92,26 @@ namespace Signum.Utilities
             return -1;
         }
 
+        class UniqueExExpander : IMethodExpander
+        {
+            public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
+            {
+ 	            
+            }
+        }
+
+        [MethodExpander(typeof(UniqueExExpander))]
+        public static T SingleEx<T>(this IEnumerable<T> collection, Func<T, bool> predicate)
+        {
+            return collection.Where(predicate).SingleEx();
+        }
+
+        [MethodExpander(typeof(UniqueExExpander))]
+        public static T SingleEx<T>(this IQueryable<T> query, Expression<Func<T, bool>> predicate)
+        {
+            return query.Where(predicate).SingleEx();
+        }
+
         public static T SingleEx<T>(this IEnumerable<T> collection)
         {
             return collection.SingleEx<T>(
@@ -118,7 +138,17 @@ namespace Signum.Utilities
             throw new InvalidOperationException(errorMoreThanOne());
         }
 
+        [MethodExpander(typeof(UniqueExExpander))]
+        public static T SingleOrDefaultEx<T>(this IEnumerable<T> collection, Func<T, bool> predicate)
+        {
+            return collection.Where(predicate).SingleOrDefaultEx();
+        }
 
+        [MethodExpander(typeof(UniqueExExpander))]
+        public static T SingleOrDefaultEx<T>(this IQueryable<T> query, Expression<Func<T, bool>> predicate)
+        {
+            return query.Where(predicate).SingleOrDefaultEx();
+        }
 
         public static T SingleOrDefaultEx<T>(this IEnumerable<T> collection)
         {
@@ -145,6 +175,18 @@ namespace Signum.Utilities
             throw new InvalidOperationException(errorMorethanOne());
         }
 
+        [MethodExpander(typeof(UniqueExExpander))]
+        public static T FirstEx<T>(this IEnumerable<T> collection, Func<T, bool> predicate)
+        {
+            return collection.Where(predicate).FirstEx();
+        }
+
+        [MethodExpander(typeof(UniqueExExpander))]
+        public static T FirstEx<T>(this IQueryable<T> query, Expression<Func<T, bool>> predicate)
+        {
+            return query.Where(predicate).FirstEx();
+        }
+
         public static T FirstEx<T>(this IEnumerable<T> collection)
         {
             return collection.FirstEx<T>(
@@ -163,6 +205,18 @@ namespace Signum.Utilities
 
                 return enumerator.Current;
             }
+        }
+
+         [MethodExpander(typeof(UniqueExExpander))]
+        public static T SingleOrManyEx<T>(this IEnumerable<T> collection, Func<T, bool> predicate)
+        {
+            return collection.Where(predicate).FirstEx();
+        }
+
+        [MethodExpander(typeof(UniqueExExpander))]
+        public static T SingleOrManyEx<T>(this IQueryable<T> query, Expression<Func<T, bool>> predicate)
+        {
+            return query.Where(predicate).FirstEx();
         }
 
         public static T SingleOrManyEx<T>(this IEnumerable<T> collection)
