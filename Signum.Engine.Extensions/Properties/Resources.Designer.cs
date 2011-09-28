@@ -701,6 +701,15 @@ namespace Signum.Engine.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Your username is: {0}.
+        /// </summary>
+        internal static string YourUsernameIs0 {
+            get {
+                return ResourceManager.GetString("YourUsernameIs0", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to your version.
         /// </summary>
         internal static string YourVersion {
