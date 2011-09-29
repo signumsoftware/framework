@@ -987,25 +987,36 @@ SF.Chart.Bubbles.prototype = $.extend({}, new SF.Chart.Points(), {
              this.br;
     }
 });
+
+SF.Chart.Pie = function () {
+    SF.Chart.ChartBase.call(this);
+};
+SF.Chart.Pie.prototype = $.extend({}, new SF.ChartBase.Points(), {
+
+    paintGraph: function () {
+        return "";
+    }
+});
+
 (function () {
 
-    //    var dataTV = {
-    //        labels: { dimension1:"Album", value1:"Id" },
-    //        serie:[
-    //            {"dimension1":{"key":"Album;1","toStr":"Siamese Dream"},"value1":1},
-    //            {"dimension1":{"key":"Album;2","toStr":"Mellon Collie and the Infinite Sadness"},"value1":2},
-    //            {"dimension1":{"key":"Album;3","toStr":"Zeitgeist"},"value1":3},
-    //            {"dimension1":{"key":"Album;4","toStr":"American Gothic"},"value1":4},
-    //            {"dimension1":{"key":"Album;5","toStr":"Ben"},"value1":5},
-    //            {"dimension1":{"key":"Album;6","toStr":"Thriller"},"value1":6},
-    //            {"dimension1":{"key":"Album;7","toStr":"Bad"},"value1":7},
-    //            {"dimension1":{"key":"Album;8","toStr":"Dangerous"},"value1":8},
-    //            {"dimension1":{"key":"Album;9","toStr":"HIStory"},"value1":9},
-    //            {"dimension1":{"key":"Album;10","toStr":"Blood on the Dance Floor"},"value1":10},
-    //            {"dimension1":{"key":"Album;11","toStr":"Ágaetis byrjun"},"value1":11},
-    //            {"dimension1":{"key":"Album;12","toStr":"Takk..."},"value1":12}
-    //        ]
-    //    };
+        var data = {
+            labels: { dimension1:"Album", value1:"Id" },
+            serie:[
+                {"dimension1":{"key":"Album;1","toStr":"Siamese Dream"},"value1":1},
+                {"dimension1":{"key":"Album;2","toStr":"Mellon Collie and the Infinite Sadness"},"value1":2},
+                {"dimension1":{"key":"Album;3","toStr":"Zeitgeist"},"value1":3},
+                {"dimension1":{"key":"Album;4","toStr":"American Gothic"},"value1":4},
+                {"dimension1":{"key":"Album;5","toStr":"Ben"},"value1":5},
+                {"dimension1":{"key":"Album;6","toStr":"Thriller"},"value1":6},
+                {"dimension1":{"key":"Album;7","toStr":"Bad"},"value1":7},
+                {"dimension1":{"key":"Album;8","toStr":"Dangerous"},"value1":8},
+                {"dimension1":{"key":"Album;9","toStr":"HIStory"},"value1":9},
+                {"dimension1":{"key":"Album;10","toStr":"Blood on the Dance Floor"},"value1":10},
+                {"dimension1":{"key":"Album;11","toStr":"Ágaetis byrjun"},"value1":11},
+                {"dimension1":{"key":"Album;12","toStr":"Takk..."},"value1":12}
+            ]
+        };
 
     //    var dataMultiLine = {
     //        labels: { dimension1: "Album", dimension2: "Author", value1: "[Num] de Songs" },
@@ -1067,29 +1078,29 @@ SF.Chart.Bubbles.prototype = $.extend({}, new SF.Chart.Points(), {
     //        ]
     //    };
 
-    var data = {
-        labels: { value1: "Album", dimension1: "[Num] de Songs", dimension2: "[Num] de Songs", value2: "Year" },
-        points: [
-            { "value1": { "key": "Album;1", "toStr": "Siamese Dream" }, "dimension1": 1, "dimension2": 1, "value2": 1993 },
-            { "value1": { "key": "Album;2", "toStr": "Mellon Collie and the Infinite Sadness" }, "dimension1": 2, "dimension2": 3, "value2": 1995 },
-            { "value1": { "key": "Album;3", "toStr": "Zeitgeist" }, "dimension1": 3, "dimension2": 1, "value2": 2007 },
-            { "value1": { "key": "Album;4", "toStr": "American Gothic" }, "dimension1": 4, "dimension2": 1, "value2": 2008 },
-            { "value1": { "key": "Album;5", "toStr": "Ben" }, "dimension1": 5, "dimension2": 1, "value2": 1972 },
-            { "value1": { "key": "Album;6", "toStr": "Thriller" }, "dimension1": 6, "dimension2": 3, "value2": 1982 },
-            { "value1": { "key": "Album;7", "toStr": "Bad" }, "dimension1": 7, "dimension2": 4, "value2": 1989 },
-            { "value1": { "key": "Album;8", "toStr": "Dangerous" }, "dimension1": 8, "dimension2": 3, "value2": 1991 },
-            { "value1": { "key": "Album;9", "toStr": "HIStory" }, "dimension1": 9, "dimension2": 2, "value2": 1995 },
-            { "value1": { "key": "Album;10", "toStr": "Blood on the Dance Floor" }, "dimension1": 10, "dimension2": 2, "value2": 1995 },
-            { "value1": { "key": "Album;11", "toStr": "Ágaetis byrjun" }, "dimension1": 11, "dimension2": 1, "value2": 1999 },
-            { "value1": { "key": "Album;12", "toStr": "Takk..." }, "dimension1": 12, "dimension2": 3, "value2": 2005 }
-        ]
-    };
+//    var dataBubbles = {
+//        labels: { value1: "Album", dimension1: "[Num] de Songs", dimension2: "[Num] de Songs", value2: "Year" },
+//        points: [
+//            { "value1": { "key": "Album;1", "toStr": "Siamese Dream" }, "dimension1": 1, "dimension2": 1, "value2": 1993 },
+//            { "value1": { "key": "Album;2", "toStr": "Mellon Collie and the Infinite Sadness" }, "dimension1": 2, "dimension2": 3, "value2": 1995 },
+//            { "value1": { "key": "Album;3", "toStr": "Zeitgeist" }, "dimension1": 3, "dimension2": 1, "value2": 2007 },
+//            { "value1": { "key": "Album;4", "toStr": "American Gothic" }, "dimension1": 4, "dimension2": 1, "value2": 2008 },
+//            { "value1": { "key": "Album;5", "toStr": "Ben" }, "dimension1": 5, "dimension2": 1, "value2": 1972 },
+//            { "value1": { "key": "Album;6", "toStr": "Thriller" }, "dimension1": 6, "dimension2": 3, "value2": 1982 },
+//            { "value1": { "key": "Album;7", "toStr": "Bad" }, "dimension1": 7, "dimension2": 4, "value2": 1989 },
+//            { "value1": { "key": "Album;8", "toStr": "Dangerous" }, "dimension1": 8, "dimension2": 3, "value2": 1991 },
+//            { "value1": { "key": "Album;9", "toStr": "HIStory" }, "dimension1": 9, "dimension2": 2, "value2": 1995 },
+//            { "value1": { "key": "Album;10", "toStr": "Blood on the Dance Floor" }, "dimension1": 10, "dimension2": 2, "value2": 1995 },
+//            { "value1": { "key": "Album;11", "toStr": "Ágaetis byrjun" }, "dimension1": 11, "dimension2": 1, "value2": 1999 },
+//            { "value1": { "key": "Album;12", "toStr": "Takk..." }, "dimension1": 12, "dimension2": 3, "value2": 2005 }
+//        ]
+//    };
 
     var $chartContainer = $('.sf-chart-container');
     var width = $chartContainer.width();
     var height = $chartContainer.height();
 
-    var myChart = SF.Chart.Factory.getGraphType('Bubbles');
+    var myChart = SF.Chart.Factory.getGraphType('Pie');
 
     var code = SF.Chart.Factory.createChartSVG('.sf-chart-container') +
         myChart.paintChart();
