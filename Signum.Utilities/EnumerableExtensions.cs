@@ -32,13 +32,13 @@ namespace Signum.Utilities
             {
                 bool query = mi.GetParameters()[0].ParameterType.IsInstantiationOf(typeof(IQueryable<>));
 
-                var whereMi = (query? miWhereE: miWhereQ).MakeGenericMethod(mi.GetGenericArguments());
+                var whereMi = (query ? miWhereE : miWhereQ).MakeGenericMethod(mi.GetGenericArguments());
 
                 var whereExpr = Expression.Call(mi, arguments[0]);
 
                 var uniqueMi = mi.DeclaringType.GetMethods().SingleEx(m => m.Name == mi.Name && m.IsGenericMethod && m.GetParameters().Length < mi.GetParameters().Length);
 
-                return Expression.Call(uniqueMi.MakeGenericMethod(mi.GetGenericArguments()), whereExpr); 
+                return Expression.Call(uniqueMi.MakeGenericMethod(mi.GetGenericArguments()), whereExpr);
             }
         }
 
@@ -57,15 +57,15 @@ namespace Signum.Utilities
             {
                 if (predicate(item))
                 {
-                    if(found)
-                        throw new InvalidOperationException("Sequence contains more than one {0}".Formato(typeof(T).TypeName());
+                    if (found)
+                        throw new InvalidOperationException("Sequence contains more than one {0}".Formato(typeof(T).TypeName()));
 
                     result = item;
                     found = true;
                 }
             }
-          
-            throw new InvalidOperationException( "Sequence contains no {0}".Formato(typeof(T).TypeName()));
+
+            throw new InvalidOperationException("Sequence contains no {0}".Formato(typeof(T).TypeName()));
         }
 
         [MethodExpander(typeof(UniqueExExpander))]
@@ -174,12 +174,10 @@ namespace Signum.Utilities
             foreach (T item in collection)
             {
                 if (predicate(item))
-                {
-                    return result;
-                }
+                    return item;
             }
-          
-            throw new InvalidOperationException( "Sequence contains no {0}".Formato(typeof(T).TypeName()));
+
+            throw new InvalidOperationException("Sequence contains no {0}".Formato(typeof(T).TypeName()));
         }
 
         [MethodExpander(typeof(UniqueExExpander))]
@@ -779,7 +777,7 @@ namespace Signum.Utilities
             }
 
             if (current != null)
-                yield return current; 
+                yield return current;
         }
 
         public static IEnumerable<T> Distinct<T, S>(this IEnumerable<T> collection, Func<T, S> func)

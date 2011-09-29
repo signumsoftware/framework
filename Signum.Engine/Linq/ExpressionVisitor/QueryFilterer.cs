@@ -9,6 +9,7 @@ using Signum.Engine.Maps;
 using Signum.Entities;
 using System.Reflection;
 using Signum.Utilities.Reflection;
+using Signum.Utilities;
 
 namespace Signum.Engine.Linq
 {
