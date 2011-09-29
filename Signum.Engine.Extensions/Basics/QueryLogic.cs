@@ -11,6 +11,7 @@ using Signum.Entities.DynamicQuery;
 using Signum.Entities;
 using Signum.Utilities.Reflection;
 using Signum.Entities.Reports;
+using Signum.Entities.UserQueries;
 
 namespace Signum.Engine.Basics
 {

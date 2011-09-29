@@ -1,0 +1,58 @@
+﻿@using Signum.Web
+@using Signum.Web.Extensions.Properties
+@using Signum.Entities.DynamicQuery
+@using Signum.Engine.DynamicQuery
+@using System.Configuration
+@using Signum.Entities.Reflection
+@using Signum.Entities
+@using Signum.Entities.Chart
+@using Signum.Web.Chart
+@using Signum.Utilities
+@model TypeContext<ChartRequest>
+
+@{ QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription]; }
+
+<table class="sf-chart-builder" data-url="@(Url.Action<ChartController>(cc => cc.UpdateChartBuilder(Model.ControlID)))">
+    <tr>
+        <td class="ui-widget ui-widget-content ui-corner-all sf-chart-type">
+            <div class="ui-widget-header">
+                @typeof(ChartType).NiceName()
+                @Html.Hidden(Model.Compose("Chart", "ChartType"), Model.Value.Chart.ChartType.ToString(), new { @class = "sf-chart-type-value" })
+                @Html.Hidden(Model.Compose("Chart", "GroupResults"), Model.Value.Chart.GroupResults, new { @class = "sf-chart-group-results" })
+            </div>
+            @foreach(var group in ChartUtils.ChartTypePosition.GroupBy(ctp => ctp.Row).OrderBy(group => group.Key))
+            {
+                foreach (var type in group.OrderBy(ctp => ctp.Column))
+                { 
+                    <div class="@ChartClient.ChartTypeImgClass(Model.Value.Chart, type.ChartType)" data-related="@type.ChartType.ToString()" title="@type.ChartType.NiceToString()"></div>
+                }
+                <div class="clearall"></div>
+            }
+        </td>
+        <td class="ui-widget ui-widget-content ui-corner-all sf-chart-tokens">
+            <div class="ui-widget-header">@Resources.Chart_ChartSettings</div>
+            @{
+                if (Model.Value.Chart.Dimension1 != null)
+                {
+                    @Html.HiddenRuntimeInfo(Model, cr => cr.Chart.Dimension1)
+                    @Html.EmbeddedControl(Model, cr => cr.Chart.Dimension1, ec => ec.ViewData[ViewDataKeys.QueryName] = queryDescription.QueryName)
+                }
+                if (Model.Value.Chart.Dimension2 != null)
+                {
+                    @Html.HiddenRuntimeInfo(Model, cr => cr.Chart.Dimension2)
+                    @Html.EmbeddedControl(Model, cr => cr.Chart.Dimension2, ec => ec.ViewData[ViewDataKeys.QueryName] = queryDescription.QueryName)
+                }
+                if (Model.Value.Chart.Value1 != null)
+                {
+                    @Html.HiddenRuntimeInfo(Model, cr => cr.Chart.Value1)
+                    @Html.EmbeddedControl(Model, cr => cr.Chart.Value1, ec => ec.ViewData[ViewDataKeys.QueryName] = queryDescription.QueryName)
+                }
+                if (Model.Value.Chart.Value2 != null)
+                {
+                    @Html.HiddenRuntimeInfo(Model, cr => cr.Chart.Value2)
+                    @Html.EmbeddedControl(Model, cr => cr.Chart.Value2, ec => ec.ViewData[ViewDataKeys.QueryName] = queryDescription.QueryName)
+                }
+            }
+        </td>
+    </tr>
+</table>

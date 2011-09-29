@@ -4,13 +4,12 @@ using System.Linq;
 using System.Text;
 using Signum.Windows.Reports;
 using Signum.Entities;
-using Signum.Entities.Reports;
 using Signum.Services;
 using System.Reflection;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.UserQueries;
 
-namespace Signum.Windows.Reports
+namespace Signum.Windows.UserQueries
 {
     public class UserQueryClient
     {
@@ -51,6 +50,9 @@ namespace Signum.Windows.Reports
                 Path = of.Token.FullKey(),
                 OrderType = of.OrderType,
             }).ToList();
+
+            Navigator.Manager.SetFilterTokens(searchControl.QueryName, filters);
+            Navigator.Manager.SetOrderTokens(searchControl.QueryName, orders); 
                      
             searchControl.Reinitialize(filters, columns, uq.ColumnsMode, orders);
 

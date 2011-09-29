@@ -20,8 +20,6 @@ namespace Signum.Windows.Scheduler
             {
                 Navigator.AddSetting(new EntitySettings<ScheduledTaskDN>(EntityType.Default) { View = e => new ScheduledTask(), Icon = Image("clock.png") });
 
-                OperationClient.AddSetting(new EntityOperationSettings<ScheduledTaskDN>(TaskOperation.ExecutePrivate){ IsVisible = entity => false });
-
                 Navigator.AddSetting(new EntitySettings<CustomTaskDN>(EntityType.ServerOnly) { View = e => new CustomTask(), Icon = Image("customTask.png") });
                 Navigator.AddSetting(new EntitySettings<CustomTaskExecutionDN>(EntityType.ServerOnly) { View = e => new CustomTaskExecution(), Icon = Image("customTaskExecution.png") });
 

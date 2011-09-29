@@ -259,6 +259,28 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
+    <Compile Include="Chart\ChartClient.cs" />
+    <Compile Include="Chart\Controllers\ChartController.cs" />
+    <Compile Include="Chart\Views\ChartBuilder.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ChartBuilder.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Chart\Views\ChartControl1.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ChartControl.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Chart\Views\ChartResults.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ChartResults.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Chart\Views\ChartToken1.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ChartToken.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="ControllerFilters\GZipFilter.cs" />
     <Compile Include="ControlPanel\Views\Admin\PanelParts1.cs">
       <AutoGen>True</AutoGen>
@@ -758,6 +780,9 @@
     <Content Include="Cache\Scripts\SF_Cache.js" />
     <Content Include="Calendar\Content\calendar.css" />
     <Content Include="Calendar\Scripts\calendar.js" />
+    <Content Include="Chart\Content\SF_Chart.css" />
+    <Content Include="Chart\Images\chartType.png" />
+    <Content Include="Chart\Scripts\SF_Chart.js" />
     <Content Include="ControlPanel\Content\SF_ControlPanel.css" />
     <Content Include="ControlPanel\Scripts\SF_ControlPanel.js" />
     <Content Include="ControlPanel\Views\_ViewStart.cshtml">
@@ -839,6 +864,23 @@
     <Content Include="ControlPanel\Views\PanelParts.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>PanelParts.cs</LastGenOutput>
+    </Content>
+    <Content Include="Chart\Views\ChartControl.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>ChartControl1.cs</LastGenOutput>
+    </Content>
+    <Content Include="Chart\Views\ChartBuilder.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>ChartBuilder.cs</LastGenOutput>
+    </Content>
+    <Content Include="Chart\Views\ChartToken.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>ChartToken1.cs</LastGenOutput>
+    </Content>
+    <None Include="Chart\Images\chartType.psd" />
+    <Content Include="Chart\Views\ChartResults.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>ChartResults.cs</LastGenOutput>
     </Content>
     <Content Include="Profiler\Views\ProfilerButtons.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>

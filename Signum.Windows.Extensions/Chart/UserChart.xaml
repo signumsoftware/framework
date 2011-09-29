@@ -33,6 +33,6 @@
                 </DataTemplate>
             </m:EntityRepeater.EntityTemplate>
         </m:EntityRepeater>
-        <c:ChartBuilder/>
+        <c:ChartBuilder m:Common.Route="Chart" x:Name="chartBuilder"/>
     </StackPanel>
 </UserControl>
