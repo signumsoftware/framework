@@ -39,7 +39,7 @@ namespace Signum.Web.Chart
             ViewData[ViewDataKeys.Title] = Navigator.Manager.SearchTitle(findOptions.QueryName);
             ViewData[ViewDataKeys.QueryDescription] = queryDescription;
             ViewData[ViewDataKeys.FilterOptions] = findOptions.FilterOptions;
-            ViewData[ViewDataKeys.View] = findOptions.View && (implementations != null || Navigator.IsViewable(entitiesType, true));
+            ViewData[ViewDataKeys.View] = findOptions.View && (implementations != null || Navigator.IsViewable(entitiesType, EntitySettingsContext.Admin));
             
             return View(Navigator.Manager.SearchPageView,  new TypeContext<ChartRequest>(request, ""));
         }
@@ -78,7 +78,7 @@ namespace Signum.Web.Chart
 
             ViewData[ViewDataKeys.Results] = resultTable;
 
-            ViewData[ViewDataKeys.View] = implementations != null || Navigator.IsViewable(entitiesType, true);
+            ViewData[ViewDataKeys.View] = implementations != null || Navigator.IsViewable(entitiesType, EntitySettingsContext.Admin);
             ViewData[ViewDataKeys.Formatters] = resultTable.Columns.Select((c, i) => new { c, i }).ToDictionary(c => c.i, c => querySettings.GetFormatter(c.c.Column));
 
             return PartialView(ChartClient.ChartResultsView, new TypeContext<ChartRequest>(request, prefix));
