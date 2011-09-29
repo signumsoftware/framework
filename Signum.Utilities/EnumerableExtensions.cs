@@ -36,7 +36,7 @@ namespace Signum.Utilities
 
                 var whereExpr = Expression.Call(mi, arguments[0]);
 
-                var uniqueMi = mi.DeclaringType.GetMethods().Single(m => m.Name == mi.Name && m.IsGenericMethod && m.GetParameters().Length < mi.GetParameters().Length);
+                var uniqueMi = mi.DeclaringType.GetMethods().SingleEx(m => m.Name == mi.Name && m.IsGenericMethod && m.GetParameters().Length < mi.GetParameters().Length);
 
                 return Expression.Call(uniqueMi.MakeGenericMethod(mi.GetGenericArguments()), whereExpr); 
             }
@@ -45,7 +45,27 @@ namespace Signum.Utilities
         [MethodExpander(typeof(UniqueExExpander))]
         public static T SingleEx<T>(this IEnumerable<T> collection, Func<T, bool> predicate)
         {
-            return collection.Where(predicate).SingleEx();
+            if (collection == null)
+                throw new ArgumentNullException("collection");
+
+            if (predicate == null)
+                throw new ArgumentNullException("predicate");
+
+            T result = default(T);
+            bool found = false;
+            foreach (T item in collection)
+            {
+                if (predicate(item))
+                {
+                    if(found)
+                        throw new InvalidOperationException("Sequence contains more than one {0}".Formato(typeof(T).TypeName());
+
+                    result = item;
+                    found = true;
+                }
+            }
+          
+            throw new InvalidOperationException( "Sequence contains no {0}".Formato(typeof(T).TypeName()));
         }
 
         [MethodExpander(typeof(UniqueExExpander))]
@@ -88,7 +108,27 @@ namespace Signum.Utilities
         [MethodExpander(typeof(UniqueExExpander))]
         public static T SingleOrDefaultEx<T>(this IEnumerable<T> collection, Func<T, bool> predicate)
         {
-            return collection.Where(predicate).SingleOrDefaultEx();
+            if (collection == null)
+                throw new ArgumentNullException("collection");
+
+            if (predicate == null)
+                throw new ArgumentNullException("predicate");
+
+            T result = default(T);
+            bool found = false;
+            foreach (T item in collection)
+            {
+                if (predicate(item))
+                {
+                    if (found)
+                        throw new InvalidOperationException("Sequence contains more than one {0}".Formato(typeof(T).TypeName()));
+
+                    result = item;
+                    found = true;
+                }
+            }
+
+            return default(T);
         }
 
         [MethodExpander(typeof(UniqueExExpander))]
@@ -125,7 +165,21 @@ namespace Signum.Utilities
         [MethodExpander(typeof(UniqueExExpander))]
         public static T FirstEx<T>(this IEnumerable<T> collection, Func<T, bool> predicate)
         {
-            return collection.Where(predicate).FirstEx();
+            if (collection == null)
+                throw new ArgumentNullException("collection");
+
+            if (predicate == null)
+                throw new ArgumentNullException("predicate");
+
+            foreach (T item in collection)
+            {
+                if (predicate(item))
+                {
+                    return result;
+                }
+            }
+          
+            throw new InvalidOperationException( "Sequence contains no {0}".Formato(typeof(T).TypeName()));
         }
 
         [MethodExpander(typeof(UniqueExExpander))]
