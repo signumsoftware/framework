@@ -155,22 +155,68 @@ WriteLiteral("    \r\n");
         bool filtersVisible = findOptions.FilterMode == FilterMode.Visible;
      
 
-WriteLiteral("    \r\n    <div id=\"");
+WriteLiteral("    \r\n    <div style=\"display:");
 
 
-        Write(Model.Compose("divFilters"));
+                    Write(filtersAlwaysHidden ? "none" : "block");
 
-WriteLiteral("\" style=\"display:");
-
-
-                                                      Write(filtersAlwaysHidden ? "none" : "block");
-
-WriteLiteral("\" >\r\n");
+WriteLiteral("\">\r\n        <div class=\"sf-fields-list\">\r\n            <div class=\"ui-widget sf-fi" +
+"lters\" ");
 
 
-           Html.RenderPartial(Navigator.Manager.FilterBuilderView, ViewData);
+                                          Write(filtersVisible ? "" : "style=display:none");
 
-WriteLiteral("    </div>\r\n    \r\n");
+WriteLiteral(">\r\n                <div class=\"ui-widget-header ui-corner-top sf-filters-body\">\r\n" +
+"                    ");
+
+
+               Write(Html.TokensCombo(queryDescription, Model));
+
+WriteLiteral("\r\n                \r\n                    ");
+
+
+               Write(Html.Href(
+                            Model.Compose("btnAddFilter"), 
+                            Resources.FilterBuilder_AddFilter, 
+                            "",
+                            Resources.Signum_selectToken,
+                            "sf-query-button sf-add-filter sf-disabled", 
+                            new Dictionary<string, object> 
+                            { 
+                                { "data-icon", "ui-icon-arrowthick-1-s" },
+                                { "data-url", Url.SignumAction("AddFilter") }
+                            }));
+
+WriteLiteral("\r\n\r\n");
+
+
+                     if (findOptions.AllowUserColumns.HasValue ? findOptions.AllowUserColumns.Value : Navigator.Manager.AllowUserColumns(Model.ControlID))
+                    {
+                        
+                   Write(Html.Href(
+                            Model.Compose("btnAddColumn"), 
+                            Resources.FilterBuilder_AddColumn, 
+                            "",
+                            Resources.Signum_selectToken,
+                            "sf-query-button sf-add-column sf-disabled", 
+                            new Dictionary<string, object> 
+                            { 
+                                { "data-icon", "ui-icon-arrowthick-1-e" },
+                                { "data-url", Url.SignumAction("GetColumnName") }
+                            }));
+
+                              
+                    }
+
+WriteLiteral("                </div>\r\n");
+
+
+                   
+                    ViewData[ViewDataKeys.FilterOptions] = findOptions.FilterOptions;
+                    Html.RenderPartial(Navigator.Manager.FilterBuilderView); 
+                
+
+WriteLiteral("            </div>\r\n        </div>\r\n    </div>\r\n    \r\n");
 
 
      if (!filtersAlwaysHidden)

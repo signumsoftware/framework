@@ -316,14 +316,6 @@ namespace Signum.Web.Controllers
             if (subtokens == null)
                 return Content("");
 
-            //var items = subtokens.Select(t => new SelectListItem
-            //{
-            //    Text = t.ToString(),
-            //    Value = t.Key,
-            //    Selected = false
-            //}).ToList();
-            //items.Insert(0, new SelectListItem { Text = "-", Selected = true, Value = "" });
-
             var items = new HtmlStringBuilder();
             items.AddLine(new HtmlTag("option").Attr("value", "").SetInnerText("-").ToHtml());
             foreach (var t in subtokens)

@@ -47,6 +47,9 @@ namespace Signum.Services
 
         [OperationContract, NetDataContract]
         List<Lite<TypeDN>> TypesAssignableFrom(Type type);
+
+        [OperationContract, NetDataContract]
+        string GetToStr(Type type, int id);
     }
 
     [AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]

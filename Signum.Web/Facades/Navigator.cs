@@ -622,7 +622,7 @@ namespace Signum.Web
         protected internal virtual ViewResult Find(ControllerBase controller, FindOptions findOptions)
         {
             if (!Navigator.IsFindable(findOptions.QueryName))
-                throw new UnauthorizedAccessException(Resources.ViewForType0IsNotAllowed.Formato(findOptions.QueryName));
+                throw new UnauthorizedAccessException(Resources.Query0IsNotAllowed.Formato(findOptions.QueryName));
 
             Navigator.SetTokens(findOptions.QueryName, findOptions.FilterOptions);
 
@@ -714,7 +714,7 @@ namespace Signum.Web
             };
         }
 
-        protected internal virtual string SearchTitle(object queryName)
+        public virtual string SearchTitle(object queryName)
         {
             QuerySettings qs = QuerySettings.TryGetC(queryName);
             if (qs != null && qs.Title != null)

@@ -184,19 +184,26 @@ namespace Signum.Web
             return sb.ToHtml();
         }
 
+        public static MvcHtmlString TokensCombo(this HtmlHelper helper, QueryDescription queryDescription, Context context)
+        {
+            var columns = new HtmlStringBuilder();
+            columns.AddLine(new HtmlTag("option").Attr("value", "").SetInnerText("-").ToHtml());
+            foreach (var c in queryDescription.Columns)
+            {
+                var option = new HtmlTag("option")
+                    .Attr("value", c.Name)
+                    .SetInnerText(c.DisplayName);
+                columns.AddLine(option.ToHtml());
+            }
+
+            return TokensCombo(helper, queryDescription.QueryName, columns, context, 0, false);
+        }
+
         public static MvcHtmlString TokensCombo(this HtmlHelper helper, object queryName, HtmlStringBuilder options, Context context, int index, bool writeExpander)
         {
             MvcHtmlString expander = null;
             if (writeExpander)
                 expander = helper.TokensComboExpander(context, index);
-
-            //MvcHtmlString drop = helper.DropDownList(context.Compose("ddlTokens_" + index), items,
-            //    new
-            //    {
-            //        style = (writeExpander) ? "display:none" : "",
-            //        onchange = "javascript:new SF.FindNavigator({{prefix:\"{0}\",webQueryName:\"{1}\"}})".Formato(context.ControlID, Navigator.ResolveWebQueryName(queryName)) + 
-            //                   ".newSubTokensCombo(" + index + ",'" + RouteHelper.New().SignumAction("NewSubTokensCombo") + "');"
-            //    });
 
             MvcHtmlString drop = new HtmlTag("select").IdName(context.Compose("ddlTokens_" + index))
                 .Attrs(new
@@ -218,15 +225,10 @@ namespace Signum.Web
                 "[...]",
                 "sf-subtokens-expander",
                 null);
-                //new Dictionary<string, object>
-                //{ 
-                //    { "onclick", "$('#{0}').remove();$('#{1}').show().focus().click();".Formato(context.Compose("lblddlTokens_" + index), context.Compose("ddlTokens_" + index))}
-                //});
         }
 
-        public static MvcHtmlString QueryTokenCombo(this HtmlHelper helper, QueryToken queryToken, Context context)
+        public static MvcHtmlString QueryTokenCombo(this HtmlHelper helper, QueryToken queryToken, object queryName, Context context)
         {
-            var queryName = helper.ViewData[ViewDataKeys.QueryName];
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
             
             var tokenPath = queryToken.FollowC(qt => qt.Parent).Reverse().NotNull().ToList();
@@ -235,13 +237,6 @@ namespace Signum.Web
                 queryToken = tokenPath[0];
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
-
-            //var items = qd.Columns.Select(c => new SelectListItem
-            //{
-            //    Text = c.DisplayName,
-            //    Value = c.Name,
-            //    Selected = queryToken != null && c.Name == queryToken.Key
-            //}).ToList();
             
             var items = new HtmlStringBuilder();
             items.Add(new HtmlTag("option").Attr("value", "").SetInnerText("-").ToHtml());
@@ -263,14 +258,6 @@ namespace Signum.Web
                 QueryToken[] subtokens = t.SubTokens();
                 if (subtokens != null)
                 {
-                    //var subitems = subtokens.Select(qt => new SelectListItem
-                    //{
-                    //    Text = qt.ToString(),
-                    //    Value = qt.Key,
-                    //    Selected = i + 1 < tokenPath.Count && qt.Key == tokenPath[i+1].Key
-                    //}).ToList();
-                    //subitems.Insert(0, new SelectListItem { Text = "-", Selected = true, Value = "" });
-
                     var subitems = new HtmlStringBuilder();
                     subitems.AddLine(new HtmlTag("option").Attr("value", "").SetInnerText("-").ToHtml());
                     foreach(var qt in subtokens)

@@ -22,6 +22,7 @@ namespace Signum.Web
         public const string OnSave = "sfOnSave";
         
         public const string FindOptions = "sfFindOptions";
+        public const string FilterOptions = "sfFilterOptions";
         public const string View = "sfView";
         public const string AllowMultiple = "sfAllowMultiple";
         public const string QueryDescription = "sfQueryDescription";
