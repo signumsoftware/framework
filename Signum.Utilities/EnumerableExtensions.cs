@@ -65,6 +65,9 @@ namespace Signum.Utilities
                 }
             }
 
+            if (found)
+                return result;
+
             throw new InvalidOperationException("Sequence contains no {0}".Formato(typeof(T).TypeName()));
         }
 
@@ -128,7 +131,7 @@ namespace Signum.Utilities
                 }
             }
 
-            return default(T);
+            return result;
         }
 
         [MethodExpander(typeof(UniqueExExpander))]
