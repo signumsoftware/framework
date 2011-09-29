@@ -508,7 +508,7 @@ namespace Signum.Web
 
         protected internal virtual ViewResult View(ControllerBase controller, IRootEntity entity, string partialViewName)
         {
-            FillViewDataForViewing(controller, entity, partialViewName, EntitySettingsContext.Navigate);
+            FillViewDataForViewing(controller, entity, partialViewName, EntitySettingsContext.Admin);
 
             return new ViewResult()
             {
@@ -521,7 +521,7 @@ namespace Signum.Web
 
         protected internal virtual PartialViewResult NormalControl(ControllerBase controller, IRootEntity entity, string partialViewName)
         {
-            FillViewDataForViewing(controller, entity, partialViewName, EntitySettingsContext.Navigate);
+            FillViewDataForViewing(controller, entity, partialViewName, EntitySettingsContext.Admin);
 
             return new PartialViewResult()
             {

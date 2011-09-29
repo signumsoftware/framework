@@ -26,6 +26,8 @@ namespace Signum.Web
         public int? Top { get; set; }
         public string WebQueryName { get; set; }
 
+        public bool? AllowMultiple { get; set; }
+
         public Func<object, bool> IsFindable;
 
         public bool OnIsFindable()
@@ -98,7 +100,7 @@ namespace Signum.Web
             {
                 new EntityFormatterRule(l => true, (h,l) => 
                 {
-                    if (Navigator.IsViewable(l.RuntimeType, EntitySettingsContext.Navigate))
+                    if (Navigator.IsViewable(l.RuntimeType, EntitySettingsContext.Admin))
                         return h.Href(Navigator.ViewRoute(l.RuntimeType, l.Id), h.Encode(Resources.View));
                     else
                         return MvcHtmlString.Empty;

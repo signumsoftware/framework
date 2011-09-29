@@ -78,7 +78,7 @@ namespace ASP
     var entityColumn = queryDescription.Columns.Single(a => a.IsEntity);
     Type entitiesType = Reflector.ExtractLite(entityColumn.Type);
     Implementations implementations = entityColumn.Implementations;
-    bool viewable = findOptions.View && (implementations != null || Navigator.IsViewable(entitiesType, EntitySettingsContext.Navigate));
+    bool viewable = findOptions.View && (implementations != null || Navigator.IsViewable(entitiesType, EntitySettingsContext.Admin));
 
 
 WriteLiteral("<div id=\"");
@@ -260,7 +260,7 @@ WriteLiteral("\">");
 WriteLiteral("</button>\r\n");
 
 
-         if (findOptions.Create && (implementations != null || Navigator.IsCreable(entitiesType, EntitySettingsContext.Navigate)) && viewable)
+         if (findOptions.Create && (implementations != null || Navigator.IsCreable(entitiesType, EntitySettingsContext.Admin)) && viewable)
         {
             bool hasManyImplementations = implementations != null && !implementations.IsByAll && ((ImplementedByAttribute)implementations).ImplementedTypes.Length > 1;
             string creating = findOptions.Creating.HasText() ? findOptions.Creating :
