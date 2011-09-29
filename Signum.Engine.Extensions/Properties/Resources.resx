@@ -334,4 +334,7 @@
   <data name="TheTemplateMustBeActiveToConstructSMSMessages" xml:space="preserve">
     <value>The template must be Active to construct SMS messages</value>
   </data>
+  <data name="YourUsernameIs0" xml:space="preserve">
+    <value>Your username is: {0}</value>
+  </data>
 </root>
