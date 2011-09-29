@@ -79,7 +79,11 @@ namespace ASP
     Type entitiesType = Reflector.ExtractLite(entityColumn.Type);
     Implementations implementations = entityColumn.Implementations;
     bool viewable = findOptions.View && (implementations != null || Navigator.IsViewable(entitiesType, EntitySettingsContext.Admin));
-    bool? allowMultiple = findOptions.AllowMultiple ?? Navigator.QuerySettings(findOptions.QueryName).AllowMultiple;
+    bool? allowMultiple = findOptions.AllowMultiple;
+    if (findOptions.FilterMode != FilterMode.OnlyResults)
+    {
+        allowMultiple = Navigator.QuerySettings(findOptions.QueryName).AllowMultiple;
+    }
 
 
 WriteLiteral("<div id=\"");
