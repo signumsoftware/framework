@@ -100,7 +100,7 @@ WriteLiteral("</span>\r\n");
 
             if (tc.Value.GroupByVisible)
             { 
-                var groupCheck = new HtmlTag("input").IdName(tc.Compose("group")).Attr("type", "checkbox").Class("sf-chart-group-trigger");
+                var groupCheck = new HtmlTag("input").IdName(tc.Compose("group")).Attr("type", "checkbox").Attr("value", "True").Class("sf-chart-group-trigger");
                 if (((TypeContext<ChartRequest>)tc.Parent).Value.Chart.GroupResults)
                 {
                     groupCheck.Attr("checked", "checked");
@@ -109,6 +109,10 @@ WriteLiteral("</span>\r\n");
            Write(Html.Field("Group", groupCheck.ToHtmlSelf()));
 
                                                              
+                
+           Write(Html.Hidden(tc.Compose("group"), ((TypeContext<ChartRequest>)tc.Parent).Value.Chart.GroupResults));
+
+                                                                                                                  
             }
             if (tc.Value.ShouldAggregate)
             {
@@ -122,10 +126,6 @@ WriteLiteral("</span>\r\n");
 
                                                                                                             
 
-            
-       Write(Html.ValueLine(tc, ct => ct.DisplayName));
-
-                                                     
             
        Write(Html.ValueLine(tc, ct => ct.Format));
 
@@ -142,6 +142,10 @@ WriteLiteral("</span>\r\n");
        Write(Html.ValueLine(tc, ct => ct.OrderPriority));
 
                                                        
+            
+       Write(Html.ValueLine(tc, ct => ct.DisplayName));
+
+                                                     
         }
 
 WriteLiteral("    </div>\r\n");

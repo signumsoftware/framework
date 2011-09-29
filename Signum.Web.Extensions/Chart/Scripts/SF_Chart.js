@@ -18,7 +18,7 @@ SF.Chart.Builder = (function () {
 
     $(".sf-chart-img").live("click", function () {
         var $this = $(this);
-        $this.closest(".sf-chart-type").find(".ui-widget-header :hidden").val($this.attr("data-related"));
+        $this.closest(".sf-chart-type").find(".ui-widget-header .sf-chart-type-value").val($this.attr("data-related"));
         var $chartControl = $this.closest(".sf-chart-control");
         updateChartBuilder($chartControl);
 

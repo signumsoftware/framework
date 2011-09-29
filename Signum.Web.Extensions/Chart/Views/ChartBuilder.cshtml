@@ -17,7 +17,7 @@
         <td class="ui-widget ui-widget-content ui-corner-all sf-chart-type">
             <div class="ui-widget-header">
                 @typeof(ChartType).NiceName()
-                @Html.Hidden(Model.Compose("Chart", "ChartType"), Model.Value.Chart.ChartType.ToString())
+                @Html.Hidden(Model.Compose("Chart", "ChartType"), Model.Value.Chart.ChartType.ToString(), new { @class = "sf-chart-type-value" })
                 @Html.Hidden(Model.Compose("Chart", "GroupResults"), Model.Value.Chart.GroupResults, new { @class = "sf-chart-group-results" })
             </div>
             @foreach(var group in ChartUtils.ChartTypePosition.GroupBy(ctp => ctp.Row).OrderBy(group => group.Key))

@@ -96,7 +96,7 @@ WriteLiteral("\">\r\n    <tr>\r\n        <td class=\"ui-widget ui-widget-content
 WriteLiteral("\r\n                ");
 
 
-           Write(Html.Hidden(Model.Compose("Chart", "ChartType"), Model.Value.Chart.ChartType.ToString()));
+           Write(Html.Hidden(Model.Compose("Chart", "ChartType"), Model.Value.Chart.ChartType.ToString(), new { @class = "sf-chart-type-value" }));
 
 WriteLiteral("\r\n                ");
 
