@@ -124,7 +124,7 @@ WriteLiteral("\r\n                </th>\r\n            </tr>\r\n        </thead>
                                                                              
             }
 
-WriteLiteral("        </tbody>\r\n    </table>\r\n</div>");
+WriteLiteral("        </tbody>\r\n    </table>\r\n</div>\r\n");
 
 
         }

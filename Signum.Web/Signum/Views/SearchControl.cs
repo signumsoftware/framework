@@ -79,6 +79,7 @@ namespace ASP
     Type entitiesType = Reflector.ExtractLite(entityColumn.Type);
     Implementations implementations = entityColumn.Implementations;
     bool viewable = findOptions.View && (implementations != null || Navigator.IsViewable(entitiesType, EntitySettingsContext.Admin));
+    bool? allowMultiple = findOptions.AllowMultiple ?? Navigator.QuerySettings(findOptions.QueryName).AllowMultiple;
 
 
 WriteLiteral("<div id=\"");
@@ -114,7 +115,7 @@ Write(Html.Hidden(Model.Compose("sfWebQueryName"), Navigator.ResolveWebQueryName
 WriteLiteral("\r\n    ");
 
 
-Write(Html.Hidden(Model.Compose("sfAllowMultiple"), findOptions.AllowMultiple.ToString(), new { disabled = "disabled" }));
+Write(Html.Hidden(Model.Compose("sfAllowMultiple"), allowMultiple.ToString(), new { disabled = "disabled" }));
 
 WriteLiteral("\r\n    ");
 
@@ -321,13 +322,13 @@ WriteLiteral("\" class=\"sf-search-results\">\r\n            <thead class=\"ui-w
 "r-top\">\r\n                <tr>\r\n");
 
 
-                     if (findOptions.AllowMultiple.HasValue)
+                     if (allowMultiple.HasValue)
                     {
 
 WriteLiteral("                        <th class=\"ui-state-default th-col-selection\">\r\n");
 
 
-                             if (findOptions.AllowMultiple.Value)
+                             if (allowMultiple.Value)
                             {
                                 
                            Write(Html.CheckBox(Model.Compose("cbSelectAll"), false, new { onclick = "javascript:new SF.FindNavigator({{prefix:'{0}'}}).toggleSelectAll();".Formato(Model.ControlID) }));
@@ -387,12 +388,12 @@ WriteLiteral("                </tr>\r\n            </thead>\r\n            <tbod
 "content\">\r\n                <tr>\r\n                    <td colspan=\"");
 
 
-                             Write(columns.Count + (viewable ? 1 : 0) + (findOptions.AllowMultiple.HasValue ? 1 : 0));
+                             Write(columns.Count + (viewable ? 1 : 0) + (allowMultiple.HasValue ? 1 : 0));
 
 WriteLiteral("\">");
 
 
-                                                                                                                  Write(Resources.Signum_noResults);
+                                                                                                      Write(Resources.Signum_noResults);
 
 WriteLiteral("</td>\r\n                </tr>\r\n            </tbody>\r\n            <tfoot>\r\n        " +
 "    </tfoot>\r\n        </table>\r\n        \r\n        <div class=\"ui-widget-header u" +

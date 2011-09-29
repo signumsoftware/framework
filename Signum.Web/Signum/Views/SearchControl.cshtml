@@ -12,6 +12,7 @@
     Type entitiesType = Reflector.ExtractLite(entityColumn.Type);
     Implementations implementations = entityColumn.Implementations;
     bool viewable = findOptions.View && (implementations != null || Navigator.IsViewable(entitiesType, EntitySettingsContext.Admin));
+    bool? allowMultiple = findOptions.AllowMultiple ?? Navigator.QuerySettings(findOptions.QueryName).AllowMultiple;
 }
 <div id="@Model.Compose("divSearchControl")" 
      class="sf-search-control" 
@@ -22,7 +23,7 @@
      >
 
     @Html.Hidden(Model.Compose("sfWebQueryName"), Navigator.ResolveWebQueryName(findOptions.QueryName), new { disabled = "disabled" })
-    @Html.Hidden(Model.Compose("sfAllowMultiple"), findOptions.AllowMultiple.ToString(), new { disabled = "disabled" })
+    @Html.Hidden(Model.Compose("sfAllowMultiple"), allowMultiple.ToString(), new { disabled = "disabled" })
     @Html.Hidden(Model.Compose("sfView"), viewable, new { disabled = "disabled" })
     @Html.Hidden(Model.Compose("sfEntityTypeNames"), 
                                implementations == null ? Navigator.ResolveWebTypeName(entitiesType) :
@@ -120,10 +121,10 @@
         <table id="@Model.Compose("tblResults")" class="sf-search-results">
             <thead class="ui-widget-header ui-corner-top">
                 <tr>
-                    @if (findOptions.AllowMultiple.HasValue)
+                    @if (allowMultiple.HasValue)
                     {
                         <th class="ui-state-default th-col-selection">
-                            @if (findOptions.AllowMultiple.Value)
+                            @if (allowMultiple.Value)
                             {
                                 @Html.CheckBox(Model.Compose("cbSelectAll"), false, new { onclick = "javascript:new SF.FindNavigator({{prefix:'{0}'}}).toggleSelectAll();".Formato(Model.ControlID) })
                             }
@@ -152,7 +153,7 @@
             </thead>
             <tbody class="ui-widget-content">
                 <tr>
-                    <td colspan="@(columns.Count + (viewable ? 1 : 0) + (findOptions.AllowMultiple.HasValue ? 1 : 0))">@Resources.Signum_noResults</td>
+                    <td colspan="@(columns.Count + (viewable ? 1 : 0) + (allowMultiple.HasValue ? 1 : 0))">@Resources.Signum_noResults</td>
                 </tr>
             </tbody>
             <tfoot>
