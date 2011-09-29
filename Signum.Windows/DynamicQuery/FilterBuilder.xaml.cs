@@ -60,6 +60,11 @@ namespace Signum.Windows
             Type type = f.Token.Type;
             if (type.IsLite())
             {
+                Lite lite = f.RealValue as Lite;
+
+               if (lite != null && string.IsNullOrEmpty(lite.ToStr))
+                    Server.FillToStr(lite);
+
                 Type cleanType = Reflector.ExtractLite(type);
 
                 if (Reflector.IsLowPopulation(cleanType) && !(implementations is ImplementedByAllAttribute))

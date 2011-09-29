@@ -42,8 +42,45 @@
         bool filtersVisible = findOptions.FilterMode == FilterMode.Visible;
      }
     
-    <div id="@Model.Compose("divFilters")" style="display:@(filtersAlwaysHidden ? "none" : "block")" >
-        @{ Html.RenderPartial(Navigator.Manager.FilterBuilderView, ViewData);}
+    <div style="display:@(filtersAlwaysHidden ? "none" : "block")">
+        <div class="sf-fields-list">
+            <div class="ui-widget sf-filters" @(filtersVisible ? "" : "style=display:none")>
+                <div class="ui-widget-header ui-corner-top sf-filters-body">
+                    @Html.TokensCombo(queryDescription, Model)
+                
+                    @Html.Href(
+                            Model.Compose("btnAddFilter"), 
+                            Resources.FilterBuilder_AddFilter, 
+                            "",
+                            Resources.Signum_selectToken,
+                            "sf-query-button sf-add-filter sf-disabled", 
+                            new Dictionary<string, object> 
+                            { 
+                                { "data-icon", "ui-icon-arrowthick-1-s" },
+                                { "data-url", Url.SignumAction("AddFilter") }
+                            })
+
+                    @if (findOptions.AllowUserColumns.HasValue ? findOptions.AllowUserColumns.Value : Navigator.Manager.AllowUserColumns(Model.ControlID))
+                    {
+                        @Html.Href(
+                            Model.Compose("btnAddColumn"), 
+                            Resources.FilterBuilder_AddColumn, 
+                            "",
+                            Resources.Signum_selectToken,
+                            "sf-query-button sf-add-column sf-disabled", 
+                            new Dictionary<string, object> 
+                            { 
+                                { "data-icon", "ui-icon-arrowthick-1-e" },
+                                { "data-url", Url.SignumAction("GetColumnName") }
+                            })
+                    }
+                </div>
+                @{ 
+                    ViewData[ViewDataKeys.FilterOptions] = findOptions.FilterOptions;
+                    Html.RenderPartial(Navigator.Manager.FilterBuilderView); 
+                }
+            </div>
+        </div>
     </div>
     
     @if (!filtersAlwaysHidden)

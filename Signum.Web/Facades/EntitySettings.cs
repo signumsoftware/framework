@@ -121,8 +121,8 @@ namespace Signum.Web
                     break;
                 case EntityType.Admin:
                     ShowSave = true;
-                    IsCreable = ctx => ctx == EntitySettingsContext.Navigate;
-                    IsViewable = (_, ctx) => ctx == EntitySettingsContext.Navigate;
+                    IsCreable = ctx => ctx == EntitySettingsContext.Admin;
+                    IsViewable = (_, ctx) => ctx == EntitySettingsContext.Admin;
                     MappingAdmin = new EntityMapping<T>(true).GetValue;
                     MappingDefault = new EntityMapping<T>(false).GetValue;
                     break;
@@ -150,8 +150,8 @@ namespace Signum.Web
 
     public enum EntitySettingsContext
     {
-        Navigate,
-        Popup,
+        Admin,
+        Default,
         Content,
     }
 

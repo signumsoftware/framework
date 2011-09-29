@@ -339,4 +339,7 @@
   <data name="Alerts_NotAttended" xml:space="preserve">
     <value>Not attended</value>
   </data>
+  <data name="Query0IsNotAllowed" xml:space="preserve">
+    <value>Query {0} is not allowed</value>
+  </data>
 </root>

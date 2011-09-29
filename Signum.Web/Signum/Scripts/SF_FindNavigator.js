@@ -426,7 +426,7 @@ SF.registerModule("FindNavigator", function () {
             var found = false;
             var currIndex;
             var oldOrder = "";
-            for (var currIndex = 0; currIndex < currOrderArray.length && !found; currIndex++) {
+            for (currIndex = 0; currIndex < currOrderArray.length && !found; currIndex++) {
                 found = currOrderArray[currIndex] == columnName;
                 if (found) {
                     oldOrder = "";
@@ -439,7 +439,7 @@ SF.registerModule("FindNavigator", function () {
                 }
             }
             var newOrder = found ? (oldOrder == "" ? "-" : "") : "";
-            var currOrder = $(this.pf(this.orders));
+            currOrder = $(this.pf(this.orders));
             if (!multiCol) {
                 this.control().find(".sf-search-results-container th").removeClass("sf-header-sort-up sf-header-sort-down");
                 currOrder.val(newOrder + columnName + ";");
@@ -641,7 +641,6 @@ SF.registerModule("FindNavigator", function () {
                 return;
             }
 
-            var self = this;
             var $btnAddFilter = $(this.pf("btnAddFilter"));
             var $btnAddColumn = $(this.pf("btnAddColumn"));
             
@@ -794,9 +793,9 @@ SF.registerModule("FindNavigator", function () {
         },
 
         requestDataForSearchPopupCreate: function () {
-            var requestData = this.serializeFilters();
-            var requestData = $.extend(requestData, { webQueryName: ((SF.isEmpty(this.findOptions.webQueryName)) ? $(this.pf(this.webQueryName)).val() : this.findOptions.webQueryName) });
-            return requestData;
+            return $.extend(this.serializeFilters(), {
+                webQueryName: ((SF.isEmpty(this.findOptions.webQueryName)) ? $(this.pf(this.webQueryName)).val() : this.findOptions.webQueryName) 
+            });
         },
 
         viewOptionsForSearchCreate: function (_viewOptions) {
@@ -837,13 +836,13 @@ SF.registerModule("FindNavigator", function () {
         typedCreate: function (viewOptions) {
             SF.log("FindNavigator typedCreate");
             if (SF.isEmpty(viewOptions.prefix)) {
-                var viewOptions = this.viewOptionsForSearchCreate(viewOptions);
-                new SF.ViewNavigator(viewOptions).navigate();
+                var fullViewOptions = this.viewOptionsForSearchCreate(viewOptions);
+                new SF.ViewNavigator(fullViewOptions).navigate();
             }
             else {
                 var saveUrl = this.control().data("popup-save-url");
-                var viewOptions = this.viewOptionsForSearchPopupCreate(viewOptions);
-                new SF.ViewNavigator(viewOptions).createSave(saveUrl);
+                var fullViewOptions = this.viewOptionsForSearchPopupCreate(viewOptions);
+                new SF.ViewNavigator(fullViewOptions).createSave(saveUrl);
             }
         },
 

@@ -168,7 +168,7 @@ namespace Signum.Web
 
         protected internal virtual EntitySettingsContext EntitySettingsContext
         {
-            get { return Web.EntitySettingsContext.Popup; }
+            get { return Web.EntitySettingsContext.Default; }
         }
     }
 
