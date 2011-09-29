@@ -103,10 +103,15 @@ namespace Signum.Test.LinqProvider
         {
             var artists = Database.Query<ArtistDN>();
 
-            Assert2.Throws<InvalidOperationException>(() => artists.Where(a => a.Dead && !a.Dead).SingleEx(() => "X", () => "X"), "X");
-            Assert2.Throws<InvalidOperationException>(() => artists.Where(a => a.Sex == Sex.Male).SingleEx(() => "X", () => "X"), "X");
-            Assert2.Throws<InvalidOperationException>(() => artists.Where(a => a.Sex == Sex.Male).SingleOrDefaultEx(() => "X"), "X");
+            Assert2.Throws<InvalidOperationException>(() => artists.Where(a => a.Dead && !a.Dead).SingleEx(() => "Y"), "Y");
+            Assert2.Throws<InvalidOperationException>(() => artists.Where(a => a.Sex == Sex.Male).SingleEx(() => "X", ()=>"Y"), "Y");
+            Assert2.Throws<InvalidOperationException>(() => artists.Where(a => a.Sex == Sex.Male).SingleOrDefaultEx(() => "Y"), "Y");
             Assert2.Throws<InvalidOperationException>(() => artists.Where(a => a.Dead && !a.Dead).FirstEx(() => "X"), "X");
+
+            Assert2.Throws<InvalidOperationException>(() => artists.SingleEx(a => a.Dead && !a.Dead),typeof(ArtistDN).Name);
+            Assert2.Throws<InvalidOperationException>(() => artists.SingleEx(a => a.Sex == Sex.Male), typeof(ArtistDN).Name);
+            Assert2.Throws<InvalidOperationException>(() => artists.SingleOrDefaultEx(a => a.Sex == Sex.Male), typeof(ArtistDN).Name);
+            Assert2.Throws<InvalidOperationException>(() => artists.FirstEx(a => a.Dead && !a.Dead), typeof(ArtistDN).Name);
 
 
             Assert2.Throws<InvalidOperationException>(() => artists.Where(a => a.Dead && !a.Dead).SingleOrManyEx(() => "X"), "X");

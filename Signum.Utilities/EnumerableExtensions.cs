@@ -20,83 +20,25 @@ using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Utilities
 {
-    public static class EnumerableExtensions
+
+    public static class EnumerableUniqueExtensions
     {
-        public static bool IsEmpty<T>(this IEnumerable<T> collection)
-        {
-            foreach (var item in collection)
-                return false;
-
-            return true;
-        }
-
-        public static bool IsNullOrEmpty<T>(this IEnumerable<T> collection)
-        {
-            return collection == null || collection.IsEmpty();
-        }
-
-        public static IEnumerable<T> NotNull<T>(this IEnumerable<T> collection) where T : class
-        {
-            foreach (var item in collection)
-            {
-                if (item != null)
-                    yield return item;
-            }
-        }
-
-        public static IEnumerable<T> NotNull<T>(this IEnumerable<T?> collection) where T : struct
-        {
-            foreach (var item in collection)
-            {
-                if (item.HasValue)
-                    yield return item.Value;
-            }
-        }
-
-        public static IEnumerable<T> And<T>(this IEnumerable<T> collection, T newItem)
-        {
-            foreach (var item in collection)
-                yield return item;
-            yield return newItem;
-        }
-
-        public static IEnumerable<T> PreAnd<T>(this IEnumerable<T> collection, T newItem)
-        {
-            yield return newItem;
-            foreach (var item in collection)
-                yield return item;
-        }
-
-        public static int IndexOf<T>(this IEnumerable<T> collection, T item)
-        {
-            int i = 0;
-            foreach (var val in collection)
-            {
-                if (EqualityComparer<T>.Default.Equals(item, val))
-                    return i;
-                i++;
-            }
-            return -1;
-        }
-
-        public static int IndexOf<T>(this IEnumerable<T> collection, Func<T, bool> condition)
-        {
-
-            int i = 0;
-            foreach (var val in collection)
-            {
-                if (condition(val))
-                    return i;
-                i++;
-            }
-            return -1;
-        }
-
         class UniqueExExpander : IMethodExpander
         {
+            static MethodInfo miWhereE = ReflectionTools.GetMethodInfo(() => Enumerable.Where<int>(null, a => false));
+            static MethodInfo miWhereQ = ReflectionTools.GetMethodInfo(() => Queryable.Where<int>(null, a => false));
+
             public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
             {
- 	            
+                bool query = mi.GetParameters()[0].ParameterType.IsInstantiationOf(typeof(IQueryable<>));
+
+                var whereMi = (query? miWhereE: miWhereQ).MakeGenericMethod(mi.GetGenericArguments());
+
+                var whereExpr = Expression.Call(mi, arguments[0]);
+
+                var uniqueMi = mi.DeclaringType.GetMethods().Single(m => m.Name == mi.Name && m.IsGenericMethod && m.GetParameters().Length < mi.GetParameters().Length);
+
+                return Expression.Call(uniqueMi.MakeGenericMethod(mi.GetGenericArguments()), whereExpr); 
             }
         }
 
@@ -212,7 +154,7 @@ namespace Signum.Utilities
             }
         }
 
-         [MethodExpander(typeof(UniqueExExpander))]
+        [MethodExpander(typeof(UniqueExExpander))]
         public static T SingleOrManyEx<T>(this IEnumerable<T> collection, Func<T, bool> predicate)
         {
             return collection.Where(predicate).FirstEx();
@@ -288,6 +230,82 @@ namespace Signum.Utilities
                 return current;
             }
         }
+    }
+
+
+    public static class EnumerableExtensions
+    {
+        public static bool IsEmpty<T>(this IEnumerable<T> collection)
+        {
+            foreach (var item in collection)
+                return false;
+
+            return true;
+        }
+
+        public static bool IsNullOrEmpty<T>(this IEnumerable<T> collection)
+        {
+            return collection == null || collection.IsEmpty();
+        }
+
+        public static IEnumerable<T> NotNull<T>(this IEnumerable<T> collection) where T : class
+        {
+            foreach (var item in collection)
+            {
+                if (item != null)
+                    yield return item;
+            }
+        }
+
+        public static IEnumerable<T> NotNull<T>(this IEnumerable<T?> collection) where T : struct
+        {
+            foreach (var item in collection)
+            {
+                if (item.HasValue)
+                    yield return item.Value;
+            }
+        }
+
+        public static IEnumerable<T> And<T>(this IEnumerable<T> collection, T newItem)
+        {
+            foreach (var item in collection)
+                yield return item;
+            yield return newItem;
+        }
+
+        public static IEnumerable<T> PreAnd<T>(this IEnumerable<T> collection, T newItem)
+        {
+            yield return newItem;
+            foreach (var item in collection)
+                yield return item;
+        }
+
+        public static int IndexOf<T>(this IEnumerable<T> collection, T item)
+        {
+            int i = 0;
+            foreach (var val in collection)
+            {
+                if (EqualityComparer<T>.Default.Equals(item, val))
+                    return i;
+                i++;
+            }
+            return -1;
+        }
+
+        public static int IndexOf<T>(this IEnumerable<T> collection, Func<T, bool> condition)
+        {
+
+            int i = 0;
+            foreach (var val in collection)
+            {
+                if (condition(val))
+                    return i;
+                i++;
+            }
+            return -1;
+        }
+
+
 
         public static string ToString<T>(this IEnumerable<T> collection, string separator)
         {

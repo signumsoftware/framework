@@ -447,12 +447,12 @@ namespace Signum.Entities
         {
             static MethodInfo miToLazy = ReflectionTools.GetMethodInfo((TypeDN type) => type.ToLite()).GetGenericMethodDefinition();
 
-            public Expression Expand(Expression instance, Expression[] arguments, Type[] typeArguments)
+            public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
             {
                 Expression lite = arguments[0];
                 Expression entity = arguments[1];
 
-               return Expression.Equal(lite, Expression.Call(null, miToLazy.MakeGenericMethod(typeArguments[0]), entity));
+                return Expression.Equal(lite, Expression.Call(null, miToLazy.MakeGenericMethod(mi.GetGenericArguments()[0]), entity));
             }
         }
 
@@ -477,7 +477,7 @@ namespace Signum.Entities
 
         class IsExpander : IMethodExpander
         {
-            public Expression Expand(Expression instance, Expression[] arguments, Type[] typeArguments)
+            public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
             {
                 return Expression.Equal(arguments[0], arguments[1]);
             }
