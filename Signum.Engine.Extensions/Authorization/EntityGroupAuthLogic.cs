@@ -334,7 +334,7 @@ namespace Signum.Engine.Authorization
 
         class IsAllowedForExpander : IMethodExpander
         {
-            public Expression Expand(Expression instance, Expression[] arguments, Type[] typeArguments)
+            public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
             {
                 TypeAllowedBasic allowed = (TypeAllowedBasic)ExpressionEvaluator.Eval(arguments[1]);
 
@@ -350,7 +350,7 @@ namespace Signum.Engine.Authorization
 
         class IsAllowedForDebugExpander : IMethodExpander
         {
-            public Expression Expand(Expression instance, Expression[] arguments, Type[] typeArguments)
+            public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
             {
                 TypeAllowedBasic allowed = (TypeAllowedBasic)ExpressionEvaluator.Eval(arguments[1]);
 
@@ -572,9 +572,9 @@ namespace Signum.Engine.Authorization
 
         class WhereAllowedExpander : IMethodExpander
         {
-            public Expression Expand(Expression instance, Expression[] arguments, Type[] typeArguments)
+            public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
             {
-                return miCallWhereAllowed.GetInvoker(typeArguments).Invoke(arguments[0]);
+                return miCallWhereAllowed.GetInvoker(mi.GetGenericArguments()).Invoke(arguments[0]);
             }
 
             static GenericInvoker<Func<Expression, Expression>> miCallWhereAllowed = new GenericInvoker<Func<Expression, Expression>>(exp => CallWhereAllowed<TypeDN>(exp));
@@ -589,12 +589,12 @@ namespace Signum.Engine.Authorization
 
         class WhereIsAllowedForExpander : IMethodExpander
         {
-            public Expression Expand(Expression instance, Expression[] arguments, Type[] typeArguments)
+            public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
             {
                 TypeAllowedBasic allowed = (TypeAllowedBasic)ExpressionEvaluator.Eval(arguments[1]);
                 ExecutionContext context = (ExecutionContext)ExpressionEvaluator.Eval(arguments[2]);
 
-                return miCallWhereIsAllowedFor.GetInvoker(typeArguments)(arguments[0], allowed, context);
+                return miCallWhereIsAllowedFor.GetInvoker(mi.GetGenericArguments())(arguments[0], allowed, context);
             }
 
             static GenericInvoker<Func<Expression, TypeAllowedBasic, ExecutionContext, Expression>> miCallWhereIsAllowedFor = new GenericInvoker<Func<Expression, TypeAllowedBasic, ExecutionContext, Expression>>((ex, tab, ec) => CallWhereIsAllowedFor<TypeDN>(ex, tab, ec));
