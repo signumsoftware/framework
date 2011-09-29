@@ -84,7 +84,7 @@ namespace Signum.Engine.DynamicQuery
 
         internal static Implementations AggregateImplementations(PropertyRoute[] routes)
         {
-            Type type = routes.Select(a => a.Type).Distinct().Single().CleanType();
+            Type type = routes.Select(a => a.Type).Distinct().SingleEx().CleanType();
 
             return AggregateImplementations(routes.Select(a => a.GetImplementations() ?? new ImplementedByAttribute(a.Type.CleanType())).NotNull(), type);
         }

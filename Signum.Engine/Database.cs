@@ -129,7 +129,7 @@ namespace Signum.Engine
                     return cached;
             }
 
-            var retrieved = Database.Query<T>().SingleOrDefault(a => a.Id == id);
+            var retrieved = Database.Query<T>().SingleOrDefaultEx(a => a.Id == id);
 
             if (retrieved == null)
                 throw new EntityNotFoundException(typeof(T), id);
@@ -182,7 +182,7 @@ namespace Signum.Engine
             if (cc != null)
                 return cc.RetriveLite(id).ToLite<T>();
 
-            var result = Database.Query<RT>().Select(a => a.ToLite<T>()).SingleOrDefault(a => a.Id == id);
+            var result = Database.Query<RT>().Select(a => a.ToLite<T>()).SingleOrDefaultEx(a => a.Id == id);
             if (result == null)
                 throw new EntityNotFoundException(typeof(RT), id);
 
@@ -195,7 +195,7 @@ namespace Signum.Engine
             if (cc != null)
                 return cc.RetriveLite(id);
 
-            var result = Database.Query<T>().Select(a => a.ToLite()).SingleOrDefault(a => a.Id == id);
+            var result = Database.Query<T>().Select(a => a.ToLite()).SingleOrDefaultEx(a => a.Id == id);
             if (result == null)
                 throw new EntityNotFoundException(typeof(T), id);
             return result;
@@ -224,7 +224,7 @@ namespace Signum.Engine
             if (cc != null)
                 return cc.RetriveLite(id).ToString();
 
-            return Database.Query<T>().Where(a => a.Id == id).Select(a => a.ToStr).First();
+            return Database.Query<T>().Where(a => a.Id == id).Select(a => a.ToStr).FirstEx();
         }
 
         #endregion

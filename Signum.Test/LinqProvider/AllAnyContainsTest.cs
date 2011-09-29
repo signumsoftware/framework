@@ -58,7 +58,7 @@ namespace Signum.Test.LinqProvider
         {
             var artistsInBands = Database.Query<BandDN>().SelectMany(b => b.Members).Select(a => a.ToLite()).ToList();
 
-            var michael = Database.Query<ArtistDN>().Single(a => !artistsInBands.Contains(a.ToLite()));
+            var michael = Database.Query<ArtistDN>().SingleEx(a => !artistsInBands.Contains(a.ToLite()));
         }
 
         [TestMethod]
@@ -66,7 +66,7 @@ namespace Signum.Test.LinqProvider
         {
             var artistsInBands = Database.Query<BandDN>().SelectMany(b => b.Members).Select(a => a).ToList();
 
-            var michael = Database.Query<ArtistDN>().Single(a => !artistsInBands.Contains(a));
+            var michael = Database.Query<ArtistDN>().SingleEx(a => !artistsInBands.Contains(a));
         }
 
         [TestMethod]
@@ -136,7 +136,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void AnySql()
         {
-            BandDN smashing = Database.Query<BandDN>().Single(b => b.Members.Any(a => a.Sex == Sex.Female));
+            BandDN smashing = Database.Query<BandDN>().SingleEx(b => b.Members.Any(a => a.Sex == Sex.Female));
         }
 
         [TestMethod]
@@ -154,13 +154,13 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void AllSql()
         {
-            BandDN sigur = Database.Query<BandDN>().Single(b => b.Members.All(a => a.Sex == Sex.Male));
+            BandDN sigur = Database.Query<BandDN>().SingleEx(b => b.Members.All(a => a.Sex == Sex.Male));
         }
 
         [TestMethod]
         public void RetrieveBand()
         {
-            BandDN sigur = Database.Query<BandDN>().Single(b => b.Name.StartsWith("Sigur"));
+            BandDN sigur = Database.Query<BandDN>().SingleEx(b => b.Name.StartsWith("Sigur"));
         }
     }
 }

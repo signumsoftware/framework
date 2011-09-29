@@ -51,12 +51,12 @@ namespace Signum.Utilities
 
         public static T SingleAttribute<T>(this ICustomAttributeProvider mi) where T : Attribute
         {
-            return mi.GetCustomAttributes(typeof(T), false).Cast<T>().SingleOrDefault();
+            return mi.GetCustomAttributes(typeof(T), false).Cast<T>().SingleOrDefaultEx();
         }
 
         public static T SingleAttributeInherit<T>(this ICustomAttributeProvider mi) where T : Attribute
         {
-            return mi.GetCustomAttributes(typeof(T), true).Cast<T>().SingleOrDefault();
+            return mi.GetCustomAttributes(typeof(T), true).Cast<T>().SingleOrDefaultEx();
         }
 
         public static bool IsInstantiationOf(this Type type, Type genericTypeDefinition)
@@ -103,7 +103,7 @@ namespace Signum.Utilities
                 return null;
 
             return ft.GetInterfaces().PreAnd(ft)
-                .SingleOrDefault(ti => ti.IsGenericType && ti.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+                .SingleOrDefaultEx(ti => ti.IsGenericType && ti.GetGenericTypeDefinition() == typeof(IEnumerable<>))
                 .TryCC(ti => ti.GetGenericArguments()[0]);
         }
 

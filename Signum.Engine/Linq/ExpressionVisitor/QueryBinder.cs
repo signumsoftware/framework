@@ -110,7 +110,7 @@ namespace Signum.Engine.Linq
             {
                 Expression toStr = Visit(m.TryGetArgument("toStr")); //could be null
 
-                if (m.Method.GetParameters().First().ParameterType == typeof(Lite))
+                if (m.Method.GetParameters().FirstEx().ParameterType == typeof(Lite))
                 {
                     LiteReferenceExpression liteRef = (LiteReferenceExpression)Visit(m.GetArgument("lite"));
 
@@ -896,7 +896,7 @@ namespace Signum.Engine.Linq
                 case ExpressionType.MemberInit:
                     return ((MemberInitExpression)source).Bindings
                         .OfType<MemberAssignment>()
-                        .Single(a => ReflectionTools.MemeberEquals(a.Member, m.Member)).Expression;
+                        .SingleEx(a => ReflectionTools.MemeberEquals(a.Member, m.Member)).Expression;
                 case ExpressionType.New:
                     {
                         NewExpression nex = (NewExpression)source;
@@ -917,7 +917,7 @@ namespace Signum.Engine.Linq
                                 throw new InvalidOperationException("Impossible to bind '{0}' on '{1}'".Formato(m.Member.Name, nex.Constructor.ConstructorSignature()));
 
                             PropertyInfo pi = (PropertyInfo)m.Member;
-                            return nex.Members.Zip(nex.Arguments).Single(p => ReflectionTools.PropertyEquals((PropertyInfo)p.Item1, pi)).Item2;
+                            return nex.Members.Zip(nex.Arguments).SingleEx(p => ReflectionTools.PropertyEquals((PropertyInfo)p.Item1, pi)).Item2;
                         }
                         break; 
                     }
@@ -1027,7 +1027,7 @@ namespace Signum.Engine.Linq
                 return Expression.Constant(null, returnType.Nullify());
 
             if (whens.Count == 1)
-                return whens.Single().Value;
+                return whens.SingleEx().Value;
 
             if (whens.All(e => e.Value is LiteReferenceExpression))
             {
@@ -1264,7 +1264,7 @@ namespace Signum.Engine.Linq
 
                 if (fies.IsEmpty())
                 {
-                    return new FieldInitExpression(uType, null, Expression.Constant(null, typeof(int?)), ib.Implementations.First().Field.Token);
+                    return new FieldInitExpression(uType, null, Expression.Constant(null, typeof(int?)), ib.Implementations.FirstEx().Field.Token);
                 }
                 if (fies.Length == 1 && fies[0].Type == uType)
                     return fies[0];
@@ -1278,7 +1278,7 @@ namespace Signum.Engine.Linq
                 if (uType.IsAssignableFrom(iba.Type))
                     return new ImplementedByAllExpression(uType, iba.Id, iba.TypeId, iba.Token);
 
-                ImplementationColumnExpression imp = iba.Implementations.SingleOrDefault(ri => ri.Type == uType);
+                ImplementationColumnExpression imp = iba.Implementations.SingleOrDefaultEx(ri => ri.Type == uType);
 
                 if (imp == null)
                 {
@@ -1479,7 +1479,7 @@ namespace Signum.Engine.Linq
                 EmbeddedFieldInitExpression efie2 = efie.FieldEmbedded.GetConstantExpression(ce.Value, this);
 
                 var bindings = efie.Bindings.SelectMany(b => Assign(b.Binding,
-                    efie2.Bindings.Single(b2 => ReflectionTools.FieldEquals(b.FieldInfo, b2.FieldInfo)).Binding));
+                    efie2.Bindings.SingleEx(b2 => ReflectionTools.FieldEquals(b.FieldInfo, b2.FieldInfo)).Binding));
 
                 if(efie.HasValue != null)
                 {
@@ -1518,7 +1518,7 @@ namespace Signum.Engine.Linq
                         throw new InvalidOperationException("No implementation for type(s) {0} found".Formato(types.ToString(t => t.Name, ", ")));
 
                     return colIb.Implementations.Select(cImp => AssignColumn(cImp.Field.ExternalId,
-                            ib.Implementations.SingleOrDefault(imp => imp.Type == cImp.Type).TryCC(imp => imp.Field.ExternalId) ?? BinderTools.NullId)).ToArray();
+                            ib.Implementations.SingleOrDefaultEx(imp => imp.Type == cImp.Type).TryCC(imp => imp.Field.ExternalId) ?? BinderTools.NullId)).ToArray();
                 }
 
             }

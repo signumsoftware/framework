@@ -42,7 +42,7 @@ namespace Signum.Entities.DynamicQuery
         {
             int rows = columns.Select(a => a.Values.Length).Distinct().SingleEx(()=>"Unsyncronized number of rows in the results");
 
-            ResultColumn entityColumn = columns.Where(c => c.Column is _EntityColumn).SingleOrDefault(); ;
+            ResultColumn entityColumn = columns.Where(c => c.Column is _EntityColumn).SingleOrDefaultEx(); ;
             if (entityColumn != null)
             {
                 this.EntityColumn = ((ColumnToken)entityColumn.Column.Token).Column;

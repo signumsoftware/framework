@@ -91,7 +91,7 @@ namespace Signum.Utilities.Reflection
                 throw new InvalidOperationException("fieldExpressions is empty"); 
 
             Type type = TupleChainType(fieldExpressions.Select(e => e.Type));
-            ConstructorInfo ci = type.GetConstructors().Single();
+            ConstructorInfo ci = type.GetConstructors().SingleEx();
 
             if (count >= 8)
                 return Expression.New(ci, fieldExpressions.Take(7).And(TupleChainConstructor(fieldExpressions.Skip(7))));

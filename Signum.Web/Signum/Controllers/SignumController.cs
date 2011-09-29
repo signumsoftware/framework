@@ -253,7 +253,7 @@ namespace Signum.Web.Controllers
                 QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
                 fo.Token = QueryUtils.Parse(tokenName, qd);
             }
-            fo.Operation = QueryUtils.GetFilterOperations(QueryUtils.GetFilterType(fo.Token.Type)).First();
+            fo.Operation = QueryUtils.GetFilterOperations(QueryUtils.GetFilterType(fo.Token.Type)).FirstEx();
 
             return Content(SearchControlHelper.NewFilter(CreateHtmlHelper(this), queryName, fo, new Context(null, prefix), index).ToHtmlString());
         }
@@ -293,7 +293,7 @@ namespace Signum.Web.Controllers
                 QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
                 fo.Token = QueryUtils.Parse(tokenName, qd); 
             }
-            fo.Operation = QueryUtils.GetFilterOperations(QueryUtils.GetFilterType(fo.Token.Type)).First();
+            fo.Operation = QueryUtils.GetFilterOperations(QueryUtils.GetFilterType(fo.Token.Type)).FirstEx();
             
             try
             {

@@ -724,7 +724,7 @@ namespace Signum.Engine.Linq
             if (types.Any(a => a.IsNullable()))
                 types = types.Select(ReflectionExtensions.Nullify).ToList();
 
-            return types.Distinct().Single();
+            return types.Distinct().SingleEx();
         }
 
         public override string ToString()

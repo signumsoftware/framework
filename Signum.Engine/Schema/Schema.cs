@@ -488,7 +488,7 @@ namespace Signum.Engine.Maps
         {
             foreach (var lazy in registeredLazyList)
             {
-                giReset.GetInvoker(lazy.GetType().GetGenericArguments().Single())(lazy);
+                giReset.GetInvoker(lazy.GetType().GetGenericArguments().SingleEx())(lazy);
             }
         }
 

@@ -74,10 +74,10 @@ WriteLiteral("\r\n");
 
    
    QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
-   var entityColumn = queryDescription.Columns.Single(a => a.IsEntity);
+   var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
    Type entitiesType = Reflector.ExtractLite(entityColumn.Type);
    Implementations implementations = entityColumn.Implementations;
-   bool viewable = (bool)ViewData[ViewDataKeys.View] && (implementations != null || Navigator.IsViewable(entitiesType, EntitySettingsContext.Navigate));
+   bool viewable = (bool)ViewData[ViewDataKeys.View] && (implementations != null || Navigator.IsViewable(entitiesType, EntitySettingsContext.Admin));
    bool? allowMultiple = (bool?)ViewData[ViewDataKeys.AllowMultiple];
    
    ResultTable queryResult = (ResultTable)ViewData[ViewDataKeys.Results];

@@ -51,7 +51,7 @@ namespace Signum.Engine.Linq
 
         public Expression GetOrCreateFieldBinding(FieldInfo fi, BinderTools tools)
         {
-            FieldBinding binding = Bindings.SingleOrDefault(fb => ReflectionTools.FieldEquals(fi, fb.FieldInfo));
+            FieldBinding binding = Bindings.SingleOrDefaultEx(fb => ReflectionTools.FieldEquals(fi, fb.FieldInfo));
             if (binding != null)
                 return binding.Binding;
 
@@ -78,7 +78,7 @@ namespace Signum.Engine.Linq
 
         public Expression GetFieldBinding(FieldInfo fi)
         {
-            FieldBinding binding = Bindings.Single(fb => ReflectionTools.FieldEquals(fi, fb.FieldInfo));
+            FieldBinding binding = Bindings.SingleEx(fb => ReflectionTools.FieldEquals(fi, fb.FieldInfo));
 
             return binding.Binding;
         }
@@ -153,7 +153,7 @@ namespace Signum.Engine.Linq
 
         public Expression GetBinding(FieldInfo fi)
         {
-            return Bindings.Single(fb => ReflectionTools.FieldEquals(fi, fb.FieldInfo)).Binding;
+            return Bindings.SingleEx(fb => ReflectionTools.FieldEquals(fi, fb.FieldInfo)).Binding;
         }
 
         public override string ToString()
@@ -226,7 +226,7 @@ namespace Signum.Engine.Linq
 
         public Expression TryGetPropertyBinding(PropertyInfo pi)
         {
-            PropertyBinding binding = PropertyBindings.SingleOrDefault(fb => ReflectionTools.PropertyEquals(pi, fb.PropertyInfo));
+            PropertyBinding binding = PropertyBindings.SingleOrDefaultEx(fb => ReflectionTools.PropertyEquals(pi, fb.PropertyInfo));
 
             if (binding == null) 
                 return null;

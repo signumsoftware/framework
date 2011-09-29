@@ -148,7 +148,7 @@ namespace Signum.Engine
                                               ForeingKeyName = (from fkc in Database.View<SysForeignKeyColumns>()
                                                                 where fkc.parent_object_id == c.object_id && fkc.parent_column_id == c.column_id
                                                                 join fk in Database.View<SysForeignKeys>().DefaultIfEmpty() on fkc.constraint_object_id equals fk.object_id
-                                                                select fk.name).SingleOrDefault(),
+                                                                select fk.name).SingleOrDefaultEx(),
                                           }).ToDictionary(a => a.Name),
 
                                 Indices = (from i in Database.View<SysIndexes>()

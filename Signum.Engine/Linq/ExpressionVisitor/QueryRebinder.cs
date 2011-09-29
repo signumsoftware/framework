@@ -146,7 +146,7 @@ namespace Signum.Engine.Linq
             {
                 if (col.Alias == currentAlias)
                 {
-                    Expression expr = columns.Single(cd => cd.Name == col.Name).Expression;
+                    Expression expr = columns.SingleEx(cd => cd.Name == col.Name).Expression;
 
                     askedColumns[col] = expr.NodeType == (ExpressionType)DbExpressionType.SqlConstant? expr: col;
                 }

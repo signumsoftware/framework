@@ -409,7 +409,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelectEntityEquals()
         {
-            ArtistDN michael = Database.Query<ArtistDN>().Single(a => a.Dead);
+            ArtistDN michael = Database.Query<ArtistDN>().SingleEx(a => a.Dead);
 
             var list = Database.Query<AlbumDN>().Select(a => a.Author == michael).ToList(); 
         }
@@ -417,7 +417,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelectBoolExpression()
         {
-            ArtistDN michael = Database.Query<ArtistDN>().Single(a => a.Dead);
+            ArtistDN michael = Database.Query<ArtistDN>().SingleEx(a => a.Dead);
 
             var list = Database.Query<AlbumDN>().Select(a => a.Author == michael).ToList();
         }
@@ -574,7 +574,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelectSingleCellWhere()
         {
-            var list = Database.Query<BandDN>().Where(b => b.Members.OrderBy(a => a.Sex).Select(a => a.Sex).First() == Sex.Male).Select(a => a.Name).ToList();
+            var list = Database.Query<BandDN>().Where(b => b.Members.OrderBy(a => a.Sex).Select(a => a.Sex).FirstEx() == Sex.Male).Select(a => a.Name).ToList();
         }
 
         [TestMethod]
@@ -582,17 +582,17 @@ namespace Signum.Test.LinqProvider
         {
             var list = Database.Query<BandDN>().Select(b => new
             {
-                FirstName = b.Members.Select(m => m.Name).First(),
+                FirstName = b.Members.Select(m => m.Name).FirstEx(),
                 FirstOrDefaultName = b.Members.Select(m => m.Name).FirstOrDefault(),
-                SingleName = b.Members.Take(1).Select(m => m.Name).Single(),
-                SingleOrDefaultName = b.Members.Take(1).Select(m => m.Name).SingleOrDefault(),
+                SingleName = b.Members.Take(1).Select(m => m.Name).SingleEx(),
+                SingleOrDefaultName = b.Members.Take(1).Select(m => m.Name).SingleOrDefaultEx(),
             }).ToList();
         }
 
         [TestMethod]
         public void SelectMemoryEntity()
         {
-            var artist = Database.Query<ArtistDN>().First();
+            var artist = Database.Query<ArtistDN>().FirstEx();
 
             var songs = Database.Query<AlbumDN>().Select(a => new
             {
@@ -604,7 +604,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelectMemoryLite()
         {
-            var artist = Database.Query<ArtistDN>().Select(a=>a.ToLite()).First();
+            var artist = Database.Query<ArtistDN>().Select(a=>a.ToLite()).FirstEx();
 
             var songs = Database.Query<AlbumDN>().Select(a => new
             {

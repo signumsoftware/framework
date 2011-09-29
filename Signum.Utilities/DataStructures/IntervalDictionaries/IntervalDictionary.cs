@@ -238,7 +238,7 @@ namespace Signum.Utilities.DataStructures
                 if (dic.Count == 0)
                     return null;
 
-                return dic.First().Key.Min;
+                return dic.FirstEx().Key.Min;
             }
         }
 

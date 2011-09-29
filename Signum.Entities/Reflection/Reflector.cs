@@ -167,7 +167,7 @@ namespace Signum.Entities.Reflection
                     {
                         MethodCallExpression mce = (MethodCallExpression)e;
 
-                        var parent = mce.Method.IsExtensionMethod() ? mce.Arguments.First() : mce.Object;
+                        var parent = mce.Method.IsExtensionMethod() ? mce.Arguments.FirstEx() : mce.Object;
 
                         if (parent != null && parent.Type.ElementType() == e.Type)
                             return parent;
@@ -199,7 +199,7 @@ namespace Signum.Entities.Reflection
                 {
                     MethodCallExpression mce = (MethodCallExpression)e;
 
-                    var parent = mce.Method.IsExtensionMethod() ? mce.Arguments.First() : mce.Object; 
+                    var parent = mce.Method.IsExtensionMethod() ? mce.Arguments.FirstEx() : mce.Object; 
 
                     if(parent != null && parent.Type.ElementType() == e.Type)
                         return parent.Type.GetProperty("Item");
@@ -325,15 +325,15 @@ namespace Signum.Entities.Reflection
             var pp = Validator.GetOrCreatePropertyPack(route);
             if (pp != null)
             {
-                DateTimePrecissionValidatorAttribute datetimePrecission = pp.Validators.OfType<DateTimePrecissionValidatorAttribute>().SingleOrDefault();
+                DateTimePrecissionValidatorAttribute datetimePrecission = pp.Validators.OfType<DateTimePrecissionValidatorAttribute>().SingleOrDefaultEx();
                 if (datetimePrecission != null)
                     return datetimePrecission.FormatString;
 
-                DecimalsValidatorAttribute decimals = pp.Validators.OfType<DecimalsValidatorAttribute>().SingleOrDefault();
+                DecimalsValidatorAttribute decimals = pp.Validators.OfType<DecimalsValidatorAttribute>().SingleOrDefaultEx();
                 if (decimals != null)
                     return "N" + decimals.DecimalPlaces;
 
-                StringCaseValidatorAttribute stringCase = pp.Validators.OfType<StringCaseValidatorAttribute>().SingleOrDefault();
+                StringCaseValidatorAttribute stringCase = pp.Validators.OfType<StringCaseValidatorAttribute>().SingleOrDefaultEx();
                 if (stringCase != null)
                     return stringCase.TextCase == Case.Lowercase ? "L" : "U";
             }

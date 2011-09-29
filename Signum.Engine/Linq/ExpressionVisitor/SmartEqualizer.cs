@@ -179,7 +179,7 @@ namespace Signum.Engine.Linq
 
             Type type = (Type)ce.Value;
 
-            var typeImp = typeIb.TypeImplementations.SingleOrDefault(imp => imp.Type == type);
+            var typeImp = typeIb.TypeImplementations.SingleOrDefaultEx(imp => imp.Type == type);
 
             if (typeImp == null)
                 return False;
@@ -221,7 +221,7 @@ namespace Signum.Engine.Linq
 
         private static Expression TypeFieIbEquals(TypeFieldInitExpression typeFie, TypeImplementedByExpression typeIb)
         {
-            var typeImp = typeIb.TypeImplementations.SingleOrDefault(imp => imp.Type == typeFie.TypeValue);
+            var typeImp = typeIb.TypeImplementations.SingleOrDefaultEx(imp => imp.Type == typeFie.TypeValue);
 
             if (typeImp == null)
                 return False;
@@ -418,7 +418,7 @@ namespace Signum.Engine.Linq
 
         static Expression FieIbEquals(FieldInitExpression fie, ImplementedByExpression ib)
         {
-            var imp = ib.Implementations.SingleOrDefault(i => i.Type == fie.Type);
+            var imp = ib.Implementations.SingleOrDefaultEx(i => i.Type == fie.Type);
             if (imp == null)
                 return False;
 
