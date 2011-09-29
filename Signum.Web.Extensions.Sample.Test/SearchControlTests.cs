@@ -313,7 +313,7 @@ namespace Signum.Web.Extensions.Sample.Test
             string prefix = "Members_0_"; //prefix for all the popup
 
             //User columns are not present in popup
-            Assert.IsFalse(selenium.IsElementPresent("jq=#{0}divFilters .sf-add-column".Formato(prefix)));
+            Assert.IsFalse(selenium.IsElementPresent("jq=#{0}divSearchControl .sf-add-column".Formato(prefix)));
 
             //Edit names
             selenium.EditColumnName(5, "Male", prefix);

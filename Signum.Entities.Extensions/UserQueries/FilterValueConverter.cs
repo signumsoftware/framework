@@ -12,7 +12,7 @@ using Signum.Entities.Reflection;
 using Signum.Services;
 using Signum.Entities.Authorization;
 
-namespace Signum.Entities.Reports
+namespace Signum.Entities.UserQueries
 {
     public static class FilterValueConverter
     {

@@ -18,7 +18,7 @@ using Signum.Entities;
 using System.Reflection;
 using Signum.Services;
 
-namespace Signum.Windows.Reports
+namespace Signum.Windows.UserQueries
 {
     public partial class UserQuery : UserControl
     {

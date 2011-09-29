@@ -66,10 +66,10 @@ namespace Signum.Windows.Chart
         void ChartBuilder_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             if (e.OldValue != null)
-                ((ChartRequest)e.NewValue).ChartRequestChanged -= ReDrawChart;
+                ((ChartRequest)e.NewValue).Chart.ChartRequestChanged -= ReDrawChart;
 
             if (e.NewValue != null)
-                ((ChartRequest)e.NewValue).ChartRequestChanged += ReDrawChart;
+                ((ChartRequest)e.NewValue).Chart.ChartRequestChanged += ReDrawChart;
         }
 
         void ChartWindow_Loaded(object sender, RoutedEventArgs e)
@@ -85,10 +85,10 @@ namespace Signum.Windows.Chart
                 }));
 
             ((INotifyCollectionChanged)filterBuilder.Filters).CollectionChanged += Filters_CollectionChanged;
-            Request.ChartRequestChanged += Request_ChartRequestChanged;
-   
+            Request.Chart.ChartRequestChanged += Request_ChartRequestChanged;
 
-            Description = Navigator.Manager.GetQueryDescription(Request.QueryName);
+
+            chartBuilder.Description = Description = Navigator.Manager.GetQueryDescription(Request.QueryName);
             Settings = Navigator.GetQuerySettings(Request.QueryName);
             var entityColumn = Description.Columns.SingleOrDefault(a => a.IsEntity);
             EntityType = Reflector.ExtractLite(entityColumn.Type);
@@ -165,7 +165,7 @@ namespace Signum.Windows.Chart
                 () => resultTable = Server.Return((IChartServer cs) => cs.ExecuteChart(request)),
                 () =>
                 {
-                    request.NeedNewQuery = false;
+                    request.Chart.NeedNewQuery = false;
                     ReDrawChart();
                 },
                 () => execute.IsEnabled = true);
@@ -178,7 +178,7 @@ namespace Signum.Windows.Chart
 
         private void ReDrawChart()
         {
-            if (!Request.NeedNewQuery)
+            if (!Request.Chart.NeedNewQuery)
             {
                 if (resultTable != null)
                     SetResults();
@@ -189,7 +189,7 @@ namespace Signum.Windows.Chart
         {
             GraphExplorer.PreSaving(() => GraphExplorer.FromRoot(Request));
 
-            string errors = Request.IdentifiableIntegrityCheck();
+            string errors = Request.FullIntegrityCheck();
 
             if (string.IsNullOrEmpty(errors))
                 return false;
@@ -209,7 +209,7 @@ namespace Signum.Windows.Chart
                 AddListViewColumn(t.Item1, t.Item2);
             }
 
-            if (Request.GroupResults)
+            if (Request.Chart.GroupResults)
             {
                 //so the values don't get affected till next SetResults
                 var filters = Request.Filters.Select(f => new FilterOption { Path = f.Token.FullKey(), Value = f.Value, Operation = f.Operation }).ToList();
@@ -242,7 +242,7 @@ namespace Signum.Windows.Chart
             {
                 ChartRequest cr = Request;
 
-                ChartTokenDN ct = cr.GetToken(ex.ChartTokenName);
+                ChartTokenDN ct = cr.Chart.GetToken(ex.ChartTokenName);
 
                 string message = "There are null values in {0} ({1}). \r\n Filter values?".Formato(ct.Token.ToString(), ct.PropertyLabel);
 

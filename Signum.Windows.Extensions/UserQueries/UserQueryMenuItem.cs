@@ -10,14 +10,13 @@ using System.Windows.Media.Imaging;
 using System.Windows.Controls;
 using System.IO;
 using Microsoft.Win32;
-using Signum.Entities.Reports;
 using Prop = Signum.Windows.Extensions.Properties;
 using Signum.Services;
 using System.Windows.Documents;
 using Signum.Utilities;
 using Signum.Entities.UserQueries;
 
-namespace Signum.Windows.Reports
+namespace Signum.Windows.UserQueries
 {
     public class UserQueryMenuItem : SearchControlMenuItem
     {

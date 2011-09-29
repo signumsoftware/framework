@@ -1,0 +1,44 @@
+﻿@using Signum.Web
+@using Signum.Web.Extensions.Properties
+@using Signum.Entities.DynamicQuery
+@using Signum.Engine.DynamicQuery
+@using System.Configuration
+@using Signum.Entities.Reflection
+@using Signum.Entities
+@using Signum.Entities.Chart
+@model TypeContext<ChartTokenDN>
+
+@using (var tc = Html.TypeContext<ChartTokenDN>())
+{
+    if (tc.Value == null)
+    {
+        tc.Value = new ChartTokenDN();
+    }
+    <div class="sf-chart-token">
+        @using (Html.FieldInline())
+        {
+            <span class="sf-label-line">@tc.Value.PropertyLabel</span>
+            if (tc.Value.GroupByVisible)
+            { 
+                var groupCheck = new HtmlTag("input").IdName(tc.Compose("group")).Attr("type", "checkbox").Attr("value", "True").Class("sf-chart-group-trigger");
+                if (((TypeContext<ChartRequest>)tc.Parent).Value.Chart.GroupResults)
+                {
+                    groupCheck.Attr("checked", "checked");
+                }
+                @Html.Field("Group", groupCheck.ToHtmlSelf())
+                @Html.Hidden(tc.Compose("group"), ((TypeContext<ChartRequest>)tc.Parent).Value.Chart.GroupResults)
+            }
+            if (tc.Value.ShouldAggregate)
+            {
+                @Html.ValueLine(tc, ct => ct.Aggregate)
+            }
+            @Html.Field("Token", Html.QueryTokenCombo(tc.Value.Token, ViewData[ViewDataKeys.QueryName], tc))
+
+            @Html.ValueLine(tc, ct => ct.Format)
+            @Html.ValueLine(tc, ct => ct.Unit)
+            @Html.ValueLine(tc, ct => ct.OrderType)
+            @Html.ValueLine(tc, ct => ct.OrderPriority)
+            @Html.ValueLine(tc, ct => ct.DisplayName)
+        }
+    </div>
+}

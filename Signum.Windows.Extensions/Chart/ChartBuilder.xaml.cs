@@ -42,6 +42,7 @@ namespace Signum.Windows.Chart
         public QueryDescription Description;
         public Type EntityType;
 
+
    
         public ChartBase Request
         {
@@ -57,14 +58,10 @@ namespace Signum.Windows.Chart
 
         void ChartBuilder_Loaded(object sender, RoutedEventArgs e)
         {
-            object queryName = Request is ChartRequest ? ((ChartRequest)Request).QueryName : QueryClient.GetQueryName(((UserChartDN)Request).Query.Key);
-             
-            Description = Navigator.Manager.GetQueryDescription(queryName);
-
-            qtbFirstDimesion.ColumnDescriptions = Description.Columns;
-            qtbSecondDimension.ColumnDescriptions = Description.Columns;
-            qtbFirstValue.ColumnDescriptions = Description.Columns;
-            qtbSecondValue.ColumnDescriptions = Description.Columns;           
+            qtbDimension1.ColumnDescriptions = Description.Columns;
+            qtbDimension2.ColumnDescriptions = Description.Columns;
+            qtbValue1.ColumnDescriptions = Description.Columns;
+            qtbValue2.ColumnDescriptions = Description.Columns;           
         }
     }
 
