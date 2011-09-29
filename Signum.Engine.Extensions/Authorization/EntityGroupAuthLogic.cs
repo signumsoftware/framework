@@ -270,7 +270,7 @@ namespace Signum.Engine.Authorization
                 throw new InvalidOperationException("The entity {0} is new".Formato(entity));
 
             using (DisableQueries())
-                return entity.InDB().Select(e => e.IsAllowedForDebug(allowed, executionContext)).Single();
+                return entity.InDB().Select(e => e.IsAllowedForDebug(allowed, executionContext)).SingleEx();
         }
 
         public static void AssertAllowed(this Lite lite, TypeAllowedBasic allowed)
@@ -329,7 +329,7 @@ namespace Signum.Engine.Authorization
                 return null;
 
             using (DisableQueries())
-                return lite.ToLite<T>().InDB().Select(a => a.IsAllowedForDebug(allowed, executionContext)).Single();
+                return lite.ToLite<T>().InDB().Select(a => a.IsAllowedForDebug(allowed, executionContext)).SingleEx();
         }
 
         class IsAllowedForExpander : IMethodExpander

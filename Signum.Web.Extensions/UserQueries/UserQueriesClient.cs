@@ -128,7 +128,7 @@ namespace Signum.Web.UserQueries
 
             foreach (var uq in UserQueryLogic.GetUserQueries(queryName))
             {
-                string uqName = uq.InDB().Select(q => q.DisplayName).SingleOrDefault();
+                string uqName = uq.InDB().Select(q => q.DisplayName).SingleOrDefaultEx();
                 items.Add(new ToolBarButton
                 {
                     Text = uqName,

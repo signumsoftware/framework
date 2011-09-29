@@ -81,7 +81,7 @@ namespace Signum.Engine.Basics
         {
             TypeDN type = TypeLogic.TypeToDN[route.RootType];
             string path = route.PropertyString();
-            return Database.Query<PropertyDN>().SingleOrDefault(f => f.Type == type && f.Path == path).TryDoC(pi => pi.Route = route) ??
+            return Database.Query<PropertyDN>().SingleOrDefaultEx(f => f.Type == type && f.Path == path).TryDoC(pi => pi.Route = route) ??
                  new PropertyDN
                  {
                      Route = route,

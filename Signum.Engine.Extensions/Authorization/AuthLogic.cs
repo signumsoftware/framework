@@ -130,8 +130,8 @@ namespace Signum.Engine.Authorization
                 using (new EntityCache())
                 using (AuthLogic.Disable())
                 {
-                    if (SystemUserName != null) SystemUser = Database.Query<UserDN>().Single(a => a.UserName == SystemUserName);
-                    if (AnonymousUserName != null) AnonymousUser = Database.Query<UserDN>().Single(a => a.UserName == AnonymousUserName); //TODO: OLMO hay que proporcianarlo siempre?
+                    if (SystemUserName != null) SystemUser = Database.Query<UserDN>().SingleEx(a => a.UserName == SystemUserName);
+                    if (AnonymousUserName != null) AnonymousUser = Database.Query<UserDN>().SingleEx(a => a.UserName == AnonymousUserName); //TODO: OLMO hay que proporcianarlo siempre?
                 }
             }
         }
@@ -217,7 +217,7 @@ namespace Signum.Engine.Authorization
 
         public static UserDN RetrieveUser(string username)
         {
-            return Database.Query<UserDN>().SingleOrDefault(u => u.UserName == username);
+            return Database.Query<UserDN>().SingleOrDefaultEx(u => u.UserName == username);
         }
 
         public static IDisposable User(UserDN user)

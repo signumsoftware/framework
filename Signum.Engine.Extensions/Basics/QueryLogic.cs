@@ -88,7 +88,7 @@ namespace Signum.Engine.Basics
 
         public static QueryDN RetrieveOrGenerateQuery(object queryName)
         {
-            return Database.Query<QueryDN>().SingleOrDefault(a => a.Key == QueryUtils.GetQueryUniqueKey(queryName)) ??
+            return Database.Query<QueryDN>().SingleOrDefaultEx(a => a.Key == QueryUtils.GetQueryUniqueKey(queryName)) ??
                 CreateQuery(queryName);
         }
 

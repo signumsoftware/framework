@@ -13,7 +13,7 @@
                 <td class="sf-cp-column" data-column="@col">
                     @for (int row = 1; row <= rowNumber; row++)
                     {
-                        PanelPart pp = Model.Parts.SingleOrDefault(p => p.Row == row && p.Column == col);
+                        PanelPart pp = Model.Parts.SingleOrDefaultEx(p => p.Row == row && p.Column == col);
                         if (pp != null)
                         {
                             <div class="sf-cp-part-container">

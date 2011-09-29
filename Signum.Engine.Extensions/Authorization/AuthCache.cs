@@ -436,7 +436,7 @@ namespace Signum.Entities.Authorization
                 },
                 (role, list, x) =>
                 {
-                    var def = list.SingleOrDefault(a => a.Resource == null);
+                    var def = list.SingleOrDefaultEx(a => a.Resource == null);
                     var max = x.Attribute("Default") == null || x.Attribute("Default").Value != "Min";
                     SqlPreCommand defSql = SetDefault(table, def, max, role);
 
