@@ -26,7 +26,7 @@ namespace Signum.Utilities
             if (conflicts.Count() > 1)
                 throw new InvalidOperationException("Ambiguity for type {0} between interfaces {1}".Formato(currentValue.Key.Name, newInterfacesValues.CommaAnd(t => t.Key.Name)));
 
-            return conflicts.Select(a => a.Value).SingleOrDefault(); 
+            return conflicts.Select(a => a.Value).SingleOrDefaultEx(); 
         }
 
          public static Dictionary<K, V> InheritDictionary<K, V>(KeyValuePair<Type, Dictionary<K, V>> currentValue, KeyValuePair<Type, Dictionary<K, V>> baseValue, List<KeyValuePair<Type, Dictionary<K, V>>> newInterfacesValues)
@@ -69,7 +69,7 @@ namespace Signum.Utilities
                 if (types.Count > 1)
                     throw new InvalidOperationException("Ambiguity for key {0} in type {0} between interfaces {1}".Formato(item, currentValue.Key.Name, types.CommaAnd(t => t.Key.Name)));
 
-                newDictionary[item] = types.Single().Value;
+                newDictionary[item] = types.SingleEx().Value;
             }
 
             return newDictionary;

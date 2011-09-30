@@ -571,7 +571,7 @@ namespace Signum.Engine.Linq
         {
             if (proj.IsOneCell)
             {
-                var column = proj.Source.Columns.Single();
+                var column = proj.Source.Columns.SingleEx();
 
                 var select = (SelectExpression)base.Visit(proj.Source);
                 var scalar = new ScalarExpression(column.Expression.Type, select);

@@ -488,7 +488,7 @@ namespace Signum.Engine.Maps
         {
             foreach (var lazy in registeredLazyList)
             {
-                giReset.GetInvoker(lazy.GetType().GetGenericArguments().Single())(lazy);
+                giReset.GetInvoker(lazy.GetType().GetGenericArguments().SingleEx())(lazy);
             }
         }
 
@@ -497,21 +497,6 @@ namespace Signum.Engine.Maps
         static void ResetPublicationOnly<T>(object obj)
         {
             ((Lazy<T>)obj).ResetPublicationOnly(); 
-        }
-
-        public static void LoadAllLazy()
-        {
-            foreach (var lazy in registeredLazyList)
-            {
-                giLoadLazy.GetInvoker(lazy.GetType().GetGenericArguments().Single())(lazy);
-            }
-        }
-
-        static GenericInvoker<Action<object>> giLoadLazy = new GenericInvoker<Action<object>>(obj => LoadLazy<int>(obj));
-
-        static void LoadLazy<T>(object obj)
-        {
-            ((Lazy<T>)obj).Load();
         }
     }
 

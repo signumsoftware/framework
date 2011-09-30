@@ -5,6 +5,7 @@ using Signum.Utilities.Properties;
 using System.Globalization;
 using Signum.Utilities.ExpressionTrees;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace Signum.Utilities.DataStructures
 {
@@ -137,7 +138,7 @@ namespace Signum.Utilities.DataStructures
 
     class IntervalMethodExpander: IMethodExpander
     {
-        public Expression  Expand(Expression instance, Expression[] arguments, Type[] typeArguments)
+        public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
         {
             if (instance.Type.IsInstantiationOf(typeof(Interval<>)))
                 return Expression.And( //min <= value && value < max;                    

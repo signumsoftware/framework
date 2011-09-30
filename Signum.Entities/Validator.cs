@@ -72,7 +72,7 @@ namespace Signum.Entities
             {
                 var pp = GetOrCreatePropertyPack(property);
 
-                var val = pp.Validators.SingleOrDefault(v => v.GetType() == validatorType);
+                var val = pp.Validators.SingleOrDefaultEx(v => v.GetType() == validatorType);
 
                 if (val == null)
                     throw new InvalidOperationException("No '{0}' found on '{1}'".Formato(validatorType.NiceName(), pp.PropertyInfo.PropertyName()));

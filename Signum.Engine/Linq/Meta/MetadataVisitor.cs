@@ -365,7 +365,7 @@ namespace Signum.Engine.Linq
                 case ExpressionType.MemberInit:
                     return ((MemberInitExpression)source).Bindings
                         .OfType<MemberAssignment>()
-                        .Single(a => ReflectionTools.MemeberEquals(a.Member, member)).Expression;
+                        .SingleEx(a => ReflectionTools.MemeberEquals(a.Member, member)).Expression;
                 case ExpressionType.New:
                     NewExpression nex = (NewExpression)source;
                     if (nex.Type.IsInstantiationOf(typeof(Grouping<,>)) && member.Name == "Key")
@@ -376,7 +376,7 @@ namespace Signum.Engine.Linq
                     if (nex.Members != null)
                     {
                         PropertyInfo pi = (PropertyInfo)member;
-                        return nex.Members.Zip(nex.Arguments).Single(p => ReflectionTools.PropertyEquals((PropertyInfo)p.Item1, pi)).Item2;
+                        return nex.Members.Zip(nex.Arguments).SingleEx(p => ReflectionTools.PropertyEquals((PropertyInfo)p.Item1, pi)).Item2;
                     }
 
                     break;

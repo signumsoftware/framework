@@ -103,7 +103,7 @@ namespace Signum.Utilities
 
             List<MemberEntry<T>> members = MemberEntryFactory.GenerateList<T>(MemberOptions.Fields | MemberOptions.Properties | MemberOptions.Untyped | MemberOptions.Setters);
 
-            string regex = @"^((?<val>'(?:[^']+|'')*'|[^;\r\n]*))?((?!($|\r\n));(?<val>'(?:[^']+|'')*'|[^;\r\n]*))*($|\r\n)".Replace('\'', '"').Replace(';', culture.TextInfo.ListSeparator.Single());
+            string regex = @"^((?<val>'(?:[^']+|'')*'|[^;\r\n]*))?((?!($|\r\n));(?<val>'(?:[^']+|'')*'|[^;\r\n]*))*($|\r\n)".Replace('\'', '"').Replace(';', culture.TextInfo.ListSeparator.SingleEx());
             using (StreamReader sr = new StreamReader(stream, encoding))
             {
                 string str = sr.ReadToEnd().Trim();

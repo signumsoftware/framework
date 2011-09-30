@@ -78,7 +78,7 @@ namespace Signum.Engine.Exceptions
                 TableType = Schema.Current.Tables
                     .Where(kvp => kvp.Value.Name == TableName)
                     .Select(p => p.Key)
-                    .SingleOrDefault();
+                    .SingleOrDefaultEx();
             }
 
             if(inner.Message.Contains("INSERT"))
@@ -92,7 +92,7 @@ namespace Signum.Engine.Exceptions
                     ReferedTableType = Schema.Current.Tables
                                     .Where(kvp => kvp.Value.Name == ReferedTableName)
                                     .Select(p => p.Key)
-                                    .SingleOrDefault();
+                                    .SingleOrDefaultEx();
 
                     ReferedTableType = Reflector.ExtractEnumProxy(ReferedTableType) ?? ReferedTableType; 
                 }

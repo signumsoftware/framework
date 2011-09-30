@@ -129,7 +129,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
                 int count = Database.Query<AlbumDN>().UnsafeUpdate(a => new AlbumDN { BonusTrack = song });
 
                 Assert.IsFalse(Database.Query<AlbumDN>().Any(a => a.BonusTrack == null));
-                Assert.AreEqual(Database.Query<AlbumDN>().Select(a => a.BonusTrack.Name).Distinct().Single(), "Mana Mana");
+                Assert.AreEqual(Database.Query<AlbumDN>().Select(a => a.BonusTrack.Name).Distinct().SingleEx(), "Mana Mana");
 
                 tr.Commit();
             }
@@ -149,7 +149,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [TestMethod]
         public void UpdateFie()
         {
-            LabelDN label = Database.Query<LabelDN>().First();
+            LabelDN label = Database.Query<LabelDN>().FirstEx();
 
             int count = Database.Query<AlbumDN>().UnsafeUpdate(a => new AlbumDN { Label = label });
         }
@@ -157,7 +157,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [TestMethod]
         public void UpdateFieToLite()
         {
-            LabelDN label = Database.Query<LabelDN>().First();
+            LabelDN label = Database.Query<LabelDN>().FirstEx();
 
             int count = Database.Query<LabelDN>().UnsafeUpdate(a => new LabelDN { Owner = label.ToLite() });
         }
@@ -180,7 +180,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [TestMethod]
         public void UpdateIbFie()
         {
-            ArtistDN michael = Database.Query<ArtistDN>().Single(a => a.Dead);
+            ArtistDN michael = Database.Query<ArtistDN>().SingleEx(a => a.Dead);
 
             int count = Database.Query<AlbumDN>().UnsafeUpdate(a => new AlbumDN { Author = michael });
         }
@@ -194,7 +194,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [TestMethod]
         public void UpdateIbaFie()
         {
-            ArtistDN michael = Database.Query<ArtistDN>().Single(a => a.Dead);
+            ArtistDN michael = Database.Query<ArtistDN>().SingleEx(a => a.Dead);
 
             int count = Database.Query<NoteWithDateDN>().UnsafeUpdate(n => new NoteWithDateDN {  Target = michael });
         }
@@ -221,7 +221,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [TestMethod]
         public void UpdateMListLite()
         {
-            ArtistDN artist = Database.Query<ArtistDN>().First();
+            ArtistDN artist = Database.Query<ArtistDN>().FirstEx();
 
             int count = Database.MListQuery((ArtistDN a) => a.Friends).UnsafeUpdate(a => new MListElement<ArtistDN, Lite<ArtistDN>>
             {
@@ -235,7 +235,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [TestMethod]
         public void UpdateMListEntity()
         {
-            ArtistDN artist = Database.Query<ArtistDN>().First();
+            ArtistDN artist = Database.Query<ArtistDN>().FirstEx();
 
             int count = Database.MListQuery((BandDN a) => a.Members).UnsafeUpdate(b => new MListElement<BandDN, ArtistDN>
             {

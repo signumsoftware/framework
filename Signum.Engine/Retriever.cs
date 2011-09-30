@@ -156,7 +156,7 @@ namespace Signum.Engine
 
                         while (dic.Count > 0)
                         {
-                            IdentifiableEntity ident = dic.Values.First();
+                            IdentifiableEntity ident = dic.Values.FirstEx();
 
                             cc.CompleteCache(ident, this);
 
@@ -169,7 +169,7 @@ namespace Signum.Engine
                         List<int> remaining =  new List<int>();
                         while (dic.Count > 0)
                         {
-                            IdentifiableEntity ident = dic.Values.First();
+                            IdentifiableEntity ident = dic.Values.FirstEx();
 
                             if (cc.CompleteCache(ident, this))
                             {
@@ -199,7 +199,7 @@ namespace Signum.Engine
             {
                 while (liteRequests.Count > 0)
                 {
-                    var group = liteRequests.GroupBy(a => a.Key.Type).OrderByDescending(a => a.Count()).First();
+                    var group = liteRequests.GroupBy(a => a.Key.Type).OrderByDescending(a => a.Count()).FirstEx();
 
                     var lites = Database.RetrieveListLite(group.Key, group.Select(a => a.Key.Id).ToList());
 

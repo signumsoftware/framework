@@ -63,7 +63,7 @@ namespace Signum.Engine.DynamicQuery
         public DynamicQuery<T> Column<S>(Expression<Func<T, S>> column, Action<ColumnDescriptionFactory> change)
         {
             MemberInfo member = ReflectionTools.GetMemberInfo(column);
-            ColumnDescriptionFactory col = StaticColumns.Single(a => a.Name == member.Name);
+            ColumnDescriptionFactory col = StaticColumns.SingleEx(a => a.Name == member.Name);
             change(col);
 
             return this;
@@ -394,10 +394,10 @@ namespace Signum.Engine.DynamicQuery
         {
             switch (uniqueType)
             {
-                case UniqueType.First: return collection.First();
+                case UniqueType.First: return collection.FirstEx();
                 case UniqueType.FirstOrDefault: return collection.FirstOrDefault();
-                case UniqueType.Single: return collection.Single();
-                case UniqueType.SingleOrDefault: return collection.SingleOrDefault();
+                case UniqueType.Single: return collection.SingleEx();
+                case UniqueType.SingleOrDefault: return collection.SingleOrDefaultEx();
                 case UniqueType.SingleOrMany: return collection.SingleOrMany();
                 case UniqueType.Only: return collection.Only();
                 default: throw new InvalidOperationException();

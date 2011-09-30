@@ -192,7 +192,7 @@ namespace Signum.Entities.DynamicQuery
 
                 string[] parts = tokenString.Split('.');
 
-                string firstPart = parts.First();
+                string firstPart = parts.FirstEx();
 
                 QueryToken result = subTokens(null).Select(t => t.MatchPart(firstPart)).NotNull().SingleEx(
                     ()=>Resources.Column0NotFound.Formato(firstPart),

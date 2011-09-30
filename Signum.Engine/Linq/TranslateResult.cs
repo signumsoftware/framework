@@ -207,10 +207,10 @@ namespace Signum.Engine.Linq
         {
             switch (uniqueFunction)
             {
-                case UniqueFunction.First:  return enumerable.First();
+                case UniqueFunction.First:  return enumerable.FirstEx();
                 case UniqueFunction.FirstOrDefault: return enumerable.FirstOrDefault();
-                case UniqueFunction.Single: return enumerable.Single();
-                case UniqueFunction.SingleOrDefault: return enumerable.SingleOrDefault();
+                case UniqueFunction.Single: return enumerable.SingleEx();
+                case UniqueFunction.SingleOrDefault: return enumerable.SingleOrDefaultEx();
                 default:
                     throw new InvalidOperationException();
             }

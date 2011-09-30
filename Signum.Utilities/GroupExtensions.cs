@@ -31,7 +31,7 @@ namespace Signum.Utilities
             int c = collection.Count();
             if (c == 0) throw new InvalidOperationException("No element exists with key '{0}'".Formato(key));
             if (c > 1) throw new InvalidOperationException("There's more than one element with key '{0}'".Formato(key));
-            return collection.Single();
+            return collection.SingleEx();
         }
 
         public static Dictionary<K, List<T>> GroupToDictionary<T, K>(this IEnumerable<T> collection, Func<T, K> keySelector)

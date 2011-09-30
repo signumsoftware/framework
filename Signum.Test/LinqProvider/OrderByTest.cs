@@ -51,7 +51,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void OrderByFirst()
         {
-            var songsAlbum = Database.Query<ArtistDN>().OrderBy(a => a.Dead).First();
+            var songsAlbum = Database.Query<ArtistDN>().OrderBy(a => a.Dead).FirstEx();
         }
 
         [TestMethod]
@@ -75,13 +75,13 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void OrderByTakeReverse()
         {
-            var michael = Database.Query<ArtistDN>().OrderByDescending(a => a.Dead).Take(2).Reverse().First(); //reverse ignored
+            var michael = Database.Query<ArtistDN>().OrderByDescending(a => a.Dead).Take(2).Reverse().FirstEx(); //reverse ignored
         }
 
         [TestMethod]
         public void OrderByTakeOrderBy()
         {
-            var michael = Database.Query<ArtistDN>().OrderByDescending(a => a.Dead).Take(2).OrderBy(a=>a.Name).First(); //reverse ignored
+            var michael = Database.Query<ArtistDN>().OrderByDescending(a => a.Dead).Take(2).OrderBy(a=>a.Name).FirstEx(); //reverse ignored
         }
 
         [TestMethod]

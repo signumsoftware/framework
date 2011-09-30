@@ -20,6 +20,274 @@ using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Utilities
 {
+
+    public static class EnumerableUniqueExtensions
+    {
+        class UniqueExExpander : IMethodExpander
+        {
+            static MethodInfo miWhereE = ReflectionTools.GetMethodInfo(() => Enumerable.Where<int>(null, a => false));
+            static MethodInfo miWhereQ = ReflectionTools.GetMethodInfo(() => Queryable.Where<int>(null, a => false));
+
+            public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
+            {
+                bool query = mi.GetParameters()[0].ParameterType.IsInstantiationOf(typeof(IQueryable<>));
+
+                var whereMi = (query ? miWhereE : miWhereQ).MakeGenericMethod(mi.GetGenericArguments());
+
+                var whereExpr = Expression.Call(mi, arguments[0]);
+
+                var uniqueMi = mi.DeclaringType.GetMethods().SingleEx(m => m.Name == mi.Name && m.IsGenericMethod && m.GetParameters().Length < mi.GetParameters().Length);
+
+                return Expression.Call(uniqueMi.MakeGenericMethod(mi.GetGenericArguments()), whereExpr);
+            }
+        }
+
+        [MethodExpander(typeof(UniqueExExpander))]
+        public static T SingleEx<T>(this IEnumerable<T> collection, Func<T, bool> predicate)
+        {
+            if (collection == null)
+                throw new ArgumentNullException("collection");
+
+            if (predicate == null)
+                throw new ArgumentNullException("predicate");
+
+            T result = default(T);
+            bool found = false;
+            foreach (T item in collection)
+            {
+                if (predicate(item))
+                {
+                    if (found)
+                        throw new InvalidOperationException("Sequence contains more than one {0}".Formato(typeof(T).TypeName()));
+
+                    result = item;
+                    found = true;
+                }
+            }
+
+            if (found)
+                return result;
+
+            throw new InvalidOperationException("Sequence contains no {0}".Formato(typeof(T).TypeName()));
+        }
+
+        [MethodExpander(typeof(UniqueExExpander))]
+        public static T SingleEx<T>(this IQueryable<T> query, Expression<Func<T, bool>> predicate)
+        {
+            return query.Where(predicate).SingleEx();
+        }
+
+        public static T SingleEx<T>(this IEnumerable<T> collection)
+        {
+            return collection.SingleEx<T>(
+                () => "Sequence contains no {0}".Formato(typeof(T).TypeName()),
+                () => "Sequence contains more than one {0}".Formato(typeof(T).TypeName()));
+        }
+
+        public static T SingleEx<T>(this IEnumerable<T> collection, Func<string> error)
+        {
+            return collection.SingleEx(error, error);
+        }
+
+        public static T SingleEx<T>(this IEnumerable<T> collection, Func<string> errorZero, Func<string> errorMoreThanOne)
+        {
+            if (collection == null)
+                throw new ArgumentNullException("collection");
+
+            using (IEnumerator<T> enumerator = collection.GetEnumerator())
+            {
+                if (!enumerator.MoveNext())
+                    throw new InvalidOperationException(errorZero());
+
+                T current = enumerator.Current;
+
+                if (!enumerator.MoveNext())
+                    return current;
+            }
+
+            throw new InvalidOperationException(errorMoreThanOne());
+        }
+
+        [MethodExpander(typeof(UniqueExExpander))]
+        public static T SingleOrDefaultEx<T>(this IEnumerable<T> collection, Func<T, bool> predicate)
+        {
+            if (collection == null)
+                throw new ArgumentNullException("collection");
+
+            if (predicate == null)
+                throw new ArgumentNullException("predicate");
+
+            T result = default(T);
+            bool found = false;
+            foreach (T item in collection)
+            {
+                if (predicate(item))
+                {
+                    if (found)
+                        throw new InvalidOperationException("Sequence contains more than one {0}".Formato(typeof(T).TypeName()));
+
+                    result = item;
+                    found = true;
+                }
+            }
+
+            return result;
+        }
+
+        [MethodExpander(typeof(UniqueExExpander))]
+        public static T SingleOrDefaultEx<T>(this IQueryable<T> query, Expression<Func<T, bool>> predicate)
+        {
+            return query.Where(predicate).SingleOrDefaultEx();
+        }
+
+        public static T SingleOrDefaultEx<T>(this IEnumerable<T> collection)
+        {
+            return collection.SingleOrDefaultEx<T>(
+                () => "Sequence contains more than one {0}".Formato(typeof(T).TypeName()));
+        }
+
+        public static T SingleOrDefaultEx<T>(this IEnumerable<T> collection, Func<string> errorMorethanOne)
+        {
+            if (collection == null)
+                throw new ArgumentNullException("collection");
+
+            using (IEnumerator<T> enumerator = collection.GetEnumerator())
+            {
+                if (!enumerator.MoveNext())
+                    return default(T);
+
+                T current = enumerator.Current;
+
+                if (!enumerator.MoveNext())
+                    return current;
+            }
+
+            throw new InvalidOperationException(errorMorethanOne());
+        }
+
+        [MethodExpander(typeof(UniqueExExpander))]
+        public static T FirstEx<T>(this IEnumerable<T> collection, Func<T, bool> predicate)
+        {
+            if (collection == null)
+                throw new ArgumentNullException("collection");
+
+            if (predicate == null)
+                throw new ArgumentNullException("predicate");
+
+            foreach (T item in collection)
+            {
+                if (predicate(item))
+                    return item;
+            }
+
+            throw new InvalidOperationException("Sequence contains no {0}".Formato(typeof(T).TypeName()));
+        }
+
+        [MethodExpander(typeof(UniqueExExpander))]
+        public static T FirstEx<T>(this IQueryable<T> query, Expression<Func<T, bool>> predicate)
+        {
+            return query.Where(predicate).FirstEx();
+        }
+
+        public static T FirstEx<T>(this IEnumerable<T> collection)
+        {
+            return collection.FirstEx<T>(
+                () => "Sequence contains no {0}".Formato(typeof(T).TypeName()));
+        }
+
+        public static T FirstEx<T>(this IEnumerable<T> collection, Func<string> errorZero)
+        {
+            if (collection == null)
+                throw new ArgumentNullException("collection");
+
+            using (IEnumerator<T> enumerator = collection.GetEnumerator())
+            {
+                if (!enumerator.MoveNext())
+                    throw new InvalidOperationException(errorZero());
+
+                return enumerator.Current;
+            }
+        }
+
+        [MethodExpander(typeof(UniqueExExpander))]
+        public static T SingleOrManyEx<T>(this IEnumerable<T> collection, Func<T, bool> predicate)
+        {
+            return collection.Where(predicate).FirstEx();
+        }
+
+        [MethodExpander(typeof(UniqueExExpander))]
+        public static T SingleOrManyEx<T>(this IQueryable<T> query, Expression<Func<T, bool>> predicate)
+        {
+            return query.Where(predicate).FirstEx();
+        }
+
+        public static T SingleOrManyEx<T>(this IEnumerable<T> collection)
+        {
+            return collection.SingleOrManyEx(
+                        () => "Sequence contains no {0}".Formato(typeof(T).TypeName()));
+        }
+
+        public static T SingleOrManyEx<T>(this IEnumerable<T> collection, Func<string> errorZero)
+        {
+            if (collection == null)
+                throw new ArgumentNullException("collection");
+
+            using (IEnumerator<T> enumerator = collection.GetEnumerator())
+            {
+                if (!enumerator.MoveNext())
+                    throw new InvalidOperationException(errorZero());
+
+                T current = enumerator.Current;
+
+                if (enumerator.MoveNext())
+                    return default(T);
+
+                return current;
+            }
+        }
+
+        //Throws exception if 0, returns if one, returns default if many
+        public static T SingleOrMany<T>(this IEnumerable<T> collection)
+        {
+            if (collection == null)
+                throw new ArgumentNullException("collection");
+
+            using (IEnumerator<T> enumerator = collection.GetEnumerator())
+            {
+                if (!enumerator.MoveNext())
+                    throw new InvalidOperationException("The collection has no elements");
+
+                T current = enumerator.Current;
+
+                if (enumerator.MoveNext())
+                    return default(T);
+
+                return current;
+            }
+        }
+
+        //returns default if 0 or many, returns if one
+        public static T Only<T>(this IEnumerable<T> collection)
+        {
+            if (collection == null)
+                throw new ArgumentNullException("collection");
+
+            using (IEnumerator<T> enumerator = collection.GetEnumerator())
+            {
+                if (!enumerator.MoveNext())
+                    return default(T);
+
+                T current = enumerator.Current;
+
+                if (enumerator.MoveNext())
+                    return default(T);
+
+                return current;
+            }
+        }
+    }
+
+
     public static class EnumerableExtensions
     {
         public static bool IsEmpty<T>(this IEnumerable<T> collection)
@@ -92,148 +360,7 @@ namespace Signum.Utilities
             return -1;
         }
 
-        public static T SingleEx<T>(this IEnumerable<T> collection)
-        {
-            return collection.SingleEx<T>(
-                () => "Sequence contains no {0}".Formato(typeof(T).TypeName()),
-                () => "Sequence contains more than one {0}".Formato(typeof(T).TypeName()));
-        }
 
-        public static T SingleEx<T>(this IEnumerable<T> collection, Func<string> error)
-        {
-            return collection.SingleEx(error, error);
-        }
-
-        public static T SingleEx<T>(this IEnumerable<T> collection, Func<string> errorZero, Func<string> errorMoreThanOne)
-        {
-            if (collection == null)
-                throw new ArgumentNullException("collection");
-
-            using (IEnumerator<T> enumerator = collection.GetEnumerator())
-            {
-                if (!enumerator.MoveNext())
-                    throw new InvalidOperationException(errorZero());
-
-                T current = enumerator.Current;
-
-                if (!enumerator.MoveNext())
-                    return current;
-            }
-
-            throw new InvalidOperationException(errorMoreThanOne());
-        }
-
-
-
-        public static T SingleOrDefaultEx<T>(this IEnumerable<T> collection)
-        {
-            return collection.SingleOrDefaultEx<T>(
-                () => "Sequence contains more than one {0}".Formato(typeof(T).TypeName()));
-        }
-
-        public static T SingleOrDefaultEx<T>(this IEnumerable<T> collection, Func<string> errorMorethanOne)
-        {
-            if (collection == null)
-                throw new ArgumentNullException("collection");
-
-            using (IEnumerator<T> enumerator = collection.GetEnumerator())
-            {
-                if (!enumerator.MoveNext())
-                    return default(T);
-
-                T current = enumerator.Current;
-
-                if (!enumerator.MoveNext())
-                    return current;
-            }
-
-            throw new InvalidOperationException(errorMorethanOne());
-        }
-
-        public static T FirstEx<T>(this IEnumerable<T> collection)
-        {
-            return collection.FirstEx<T>(
-                () => "Sequence contains no {0}".Formato(typeof(T).TypeName()));
-        }
-
-        public static T FirstEx<T>(this IEnumerable<T> collection, Func<string> errorZero)
-        {
-            if (collection == null)
-                throw new ArgumentNullException("collection");
-
-            using (IEnumerator<T> enumerator = collection.GetEnumerator())
-            {
-                if (!enumerator.MoveNext())
-                    throw new InvalidOperationException(errorZero());
-
-                return enumerator.Current;
-            }
-        }
-
-        public static T SingleOrManyEx<T>(this IEnumerable<T> collection)
-        {
-            return collection.SingleOrManyEx(
-                        () => "Sequence contains no {0}".Formato(typeof(T).TypeName()));
-        }
-
-        public static T SingleOrManyEx<T>(this IEnumerable<T> collection, Func<string> errorZero)
-        {
-            if (collection == null)
-                throw new ArgumentNullException("collection");
-
-            using (IEnumerator<T> enumerator = collection.GetEnumerator())
-            {
-                if (!enumerator.MoveNext())
-                    throw new InvalidOperationException(errorZero());
-
-                T current = enumerator.Current;
-
-                if (enumerator.MoveNext())
-                    return default(T);
-
-                return current;
-            }
-        }
-
-        //Throws exception if 0, returns if one, returns default if many
-        public static T SingleOrMany<T>(this IEnumerable<T> collection)
-        {
-            if (collection == null)
-                throw new ArgumentNullException("collection");
-
-            using (IEnumerator<T> enumerator = collection.GetEnumerator())
-            {
-                if (!enumerator.MoveNext())
-                    throw new InvalidOperationException("The collection has no elements");
-
-                T current = enumerator.Current;
-
-                if (enumerator.MoveNext())
-                    return default(T);
-
-                return current;
-            }
-        }
-
-        //returns default if 0 or many, returns if one
-        public static T Only<T>(this IEnumerable<T> collection)
-        {
-            if (collection == null)
-                throw new ArgumentNullException("collection");
-
-            using (IEnumerator<T> enumerator = collection.GetEnumerator())
-            {
-                if (!enumerator.MoveNext())
-                    return default(T);
-
-                T current = enumerator.Current;
-
-                if (enumerator.MoveNext())
-                    return default(T);
-
-                return current;
-            }
-        }
 
         public static string ToString<T>(this IEnumerable<T> collection, string separator)
         {
@@ -653,7 +780,7 @@ namespace Signum.Utilities
             }
 
             if (current != null)
-                yield return current; 
+                yield return current;
         }
 
         public static IEnumerable<T> Distinct<T, S>(this IEnumerable<T> collection, Func<T, S> func)

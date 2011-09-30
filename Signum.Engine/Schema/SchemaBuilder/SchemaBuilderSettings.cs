@@ -131,7 +131,7 @@ namespace Signum.Engine.Maps
 
         internal IndexType GetIndexType(PropertyRoute route)
         {
-            UniqueIndexAttribute at = Attributes(route).OfType<UniqueIndexAttribute>().SingleOrDefault();
+            UniqueIndexAttribute at = Attributes(route).OfType<UniqueIndexAttribute>().SingleOrDefaultEx();
 
             return at == null ? IndexType.None :
                 at.AllowMultipleNulls ? IndexType.UniqueMultipleNulls :
@@ -163,8 +163,8 @@ namespace Signum.Engine.Maps
         {
             var fieldAtt = Attributes(route);
 
-            ImplementedByAttribute ib = fieldAtt.OfType<ImplementedByAttribute>().SingleOrDefault();
-            ImplementedByAllAttribute iba = fieldAtt.OfType<ImplementedByAllAttribute>().SingleOrDefault();
+            ImplementedByAttribute ib = fieldAtt.OfType<ImplementedByAttribute>().SingleOrDefaultEx();
+            ImplementedByAllAttribute iba = fieldAtt.OfType<ImplementedByAllAttribute>().SingleOrDefaultEx();
 
             if (ib != null && iba != null)
                 throw new NotSupportedException("Route {0} contains both {1} and {2}".Formato(route, ib.GetType().Name, iba.GetType().Name));
@@ -177,7 +177,7 @@ namespace Signum.Engine.Maps
 
         internal SqlDbType? GetSqlDbType(PropertyRoute route)
         {
-            SqlDbTypeAttribute att = Attributes(route).OfType<SqlDbTypeAttribute>().SingleOrDefault();
+            SqlDbTypeAttribute att = Attributes(route).OfType<SqlDbTypeAttribute>().SingleOrDefaultEx();
 
             if (att != null && att.HasSqlDbType)
                 return att.SqlDbType;
@@ -187,7 +187,7 @@ namespace Signum.Engine.Maps
 
         internal int? GetSqlSize(PropertyRoute route, SqlDbType sqlDbType)
         {
-            SqlDbTypeAttribute att = Attributes(route).OfType<SqlDbTypeAttribute>().SingleOrDefault();
+            SqlDbTypeAttribute att = Attributes(route).OfType<SqlDbTypeAttribute>().SingleOrDefaultEx();
 
             if (att != null && att.HasSize)
                 return att.Size;
@@ -197,7 +197,7 @@ namespace Signum.Engine.Maps
 
         internal int? GetSqlScale(PropertyRoute route, SqlDbType sqlDbType)
         {
-            SqlDbTypeAttribute att = Attributes(route).OfType<SqlDbTypeAttribute>().SingleOrDefault();
+            SqlDbTypeAttribute att = Attributes(route).OfType<SqlDbTypeAttribute>().SingleOrDefaultEx();
 
             if (att != null && att.HasScale)
                 return att.Scale;

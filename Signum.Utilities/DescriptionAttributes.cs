@@ -179,7 +179,7 @@ namespace Signum.Utilities
         public static ResourceManager GetDefaultResourceManager(this Assembly assembly)
         {
             string[] resourceFiles = assembly.GetManifestResourceNames();
-            string name = resourceFiles.Single(a => a.Contains("Resources.resources"));
+            string name = resourceFiles.SingleEx(a => a.Contains("Resources.resources"));
             return new ResourceManager(name.Replace(".resources", ""), assembly);
         }
     }

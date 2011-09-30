@@ -63,7 +63,7 @@ namespace Signum.Entities
                 ImplementedByAttribute ib = imp as ImplementedByAttribute;
                 if (ib != null && ib.ImplementedTypes.Length == 1)
                 {
-                    return new PropertyRoute(Root(ib.ImplementedTypes.Single()), fieldOrProperty); 
+                    return new PropertyRoute(Root(ib.ImplementedTypes.SingleEx()), fieldOrProperty); 
                 }
 
                 if (imp != null)
@@ -117,7 +117,7 @@ namespace Signum.Entities
                             throw new ArgumentException("PropertyInfo {0} not found on {1}".Formato(pi.PropertyName(), parent.Type));
 
                         var otherProperty = parent.Type.FollowC(a => a.BaseType)
-                            .Select(a => a.GetProperty(fieldOrProperty.Name, BindingFlags.Public | BindingFlags.Instance)).NotNull().First();
+                            .Select(a => a.GetProperty(fieldOrProperty.Name, BindingFlags.Public | BindingFlags.Instance)).NotNull().FirstEx();
 
                         if (otherProperty == null)
                             throw new ArgumentException("PropertyInfo {0} not found on {1}".Formato(pi.PropertyName(), parent.Type));
