@@ -498,7 +498,7 @@ namespace Signum.Windows
         public static Window FindCurrentWindow(this FrameworkElement fe)
         {
             return fe.FollowC(a => (FrameworkElement)(a.Parent ?? a.TemplatedParent))
-                      .Select(a => Common.GetCurrentWindow(a) ?? a as Window).NotNull().First("Parent window not found");
+                      .Select(a => Common.GetCurrentWindow(a) ?? a as Window).NotNull().FirstEx(() => "Parent window not found");
         }
 
         public static IDisposable OverrideCursor(System.Windows.Input.Cursor cursor)
