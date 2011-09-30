@@ -116,7 +116,7 @@ namespace Signum.Engine.Basics
 
         class IsInGroupExpander : IMethodExpander
         {
-            public Expression Expand(Expression instance, Expression[] arguments, Type[] typeArguments)
+            public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
             {
                 Expression entity = arguments[0];
                 Enum eg = (Enum)ExpressionEvaluator.Eval(arguments[1]);
@@ -135,7 +135,7 @@ namespace Signum.Engine.Basics
 
         class IsApplicableExpander : IMethodExpander
         {
-            public Expression Expand(Expression instance, Expression[] arguments, Type[] typeArguments)
+            public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
             {
                 Expression entity = arguments[0];
                 Enum eg = (Enum)ExpressionEvaluator.Eval(arguments[1]);
@@ -160,9 +160,9 @@ namespace Signum.Engine.Basics
         {
             static MethodInfo miWhere = ReflectionTools.GetMethodInfo(() => Queryable.Where<int>(null, i => i == 0)).GetGenericMethodDefinition();
 
-            public Expression Expand(Expression instance, Expression[] arguments, Type[] typeArguments)
+            public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
             {  
-                Type type = typeArguments[0];
+                Type type = mi.GetGenericArguments()[0];
 
                 Expression query = arguments[0];
                 Enum group = (Enum)ExpressionEvaluator.Eval(arguments[1]);
@@ -192,9 +192,9 @@ namespace Signum.Engine.Basics
         {
             static MethodInfo miWhere = ReflectionTools.GetMethodInfo(() => Queryable.Where<int>(null, i => i == 0)).GetGenericMethodDefinition();
 
-            public Expression Expand(Expression instance, Expression[] arguments, Type[] typeArguments)
+            public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
             {
-                Type type = typeArguments[0];
+                Type type = mi.GetGenericArguments()[0];
 
                 Expression query = arguments[0];
                 Enum group = (Enum)ExpressionEvaluator.Eval(arguments[1]);

@@ -59,7 +59,7 @@ namespace Signum.Engine.Reports
                 
                 CellBuilder cb = PlainExcelGenerator.CellBuilder;
                 
-                SheetData sheetData = worksheetPart.Worksheet.Descendants<SheetData>().Single();
+                SheetData sheetData = worksheetPart.Worksheet.Descendants<SheetData>().SingleEx();
 
                 List<ColumnData> columnEquivalences = GetColumnsEquivalences(document, sheetData, results);
 
@@ -85,7 +85,7 @@ namespace Signum.Engine.Reports
                 foreach (PivotTableCacheDefinitionPart ptpart in pivotTableParts)
                 {
                     PivotCacheDefinition pcd = ptpart.PivotCacheDefinition;
-                    WorksheetSource wss = pcd.Descendants<WorksheetSource>().First();
+                    WorksheetSource wss = pcd.Descendants<WorksheetSource>().FirstEx();
                     wss.Reference.Value = "A1:" + GetExcelColumn(columnEquivalences.Count(ce => !ce.IsNew) - 1) + (results.Rows.Count() + 1).ToString();
                     
                     pcd.RefreshOnLoad = true;
@@ -102,11 +102,11 @@ namespace Signum.Engine.Reports
         {
             var resultsCols = results.Columns.ToDictionary(c => c.Column.DisplayName);
 
-            var headerCells = sheetData.Descendants<Row>().First().Descendants<Cell>().ToList();
+            var headerCells = sheetData.Descendants<Row>().FirstEx().Descendants<Cell>().ToList();
             var templateCols = headerCells.ToDictionary(c => document.GetCellValue(c));
 
             var rowDataCellTemplates = sheetData.Descendants<Row>()
-                .First(r => IsValidRowDataTemplate(r, headerCells))
+                .FirstEx(r => IsValidRowDataTemplate(r, headerCells))
                 .Descendants<Cell>().ToList();
 
             var dic = templateCols.OuterJoinDictionaryCC(resultsCols, (name, cell, resultCol) =>
@@ -153,7 +153,7 @@ namespace Signum.Engine.Reports
             
             //they must be in the same column
             //If cellReferences of HeaderCell and DataCell differ only in the number they are on the same column
-            var firstDifferentCharacter = headerLastCellReference.Zip(dataCellReference).First(t => t.Item1 != t.Item2);
+            var firstDifferentCharacter = headerLastCellReference.Zip(dataCellReference).FirstEx(t => t.Item1 != t.Item2);
             int number;
             return int.TryParse(firstDifferentCharacter.Item1.ToString(), out number);
         }

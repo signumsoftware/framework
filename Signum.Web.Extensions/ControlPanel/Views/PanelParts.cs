@@ -89,7 +89,7 @@ WriteLiteral("\">\r\n");
 
                      for (int row = 1; row <= rowNumber; row++)
                     {
-                        PanelPart pp = Model.Parts.SingleOrDefault(p => p.Row == row && p.Column == col);
+                        PanelPart pp = Model.Parts.SingleOrDefaultEx(p => p.Row == row && p.Column == col);
                         if (pp != null)
                         {
 

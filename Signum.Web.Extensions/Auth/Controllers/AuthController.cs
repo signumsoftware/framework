@@ -205,7 +205,7 @@ namespace Signum.Web.Auth
         private void RestoreCleanCurrentUser()
         {
             //Restore clean UserDN from database
-            Thread.CurrentPrincipal = Database.Query<UserDN>().Where(u => u.Is(UserDN.Current)).Single();
+            Thread.CurrentPrincipal = Database.Query<UserDN>().Where(u => u.Is(UserDN.Current)).SingleEx();
             Session[AuthController.SessionUserKey] = Thread.CurrentPrincipal;
         }
 
@@ -320,7 +320,7 @@ namespace Signum.Web.Auth
                     request = rpr.Retrieve();
                     user = Database.Query<UserDN>()
                         .Where(u => u.Email == request.User.Email)
-                        .Single();
+                        .SingleEx();
                 }
 
                 var context = user.ApplyChanges(this.ControllerContext, "", UserMapping.ChangePassword).ValidateGlobal();

@@ -27,7 +27,7 @@ namespace Signum.Web.Processes
         public ContentResult GetProgressExecution(int id)
         {
             decimal progress = Database.Query<ProcessExecutionDN>().Where(pe => 
-                    pe.Id == id).Select(pe => pe.Progress).Single() ?? 100;
+                    pe.Id == id).Select(pe => pe.Progress).SingleEx() ?? 100;
 
             return Content(Math.Round(progress, 0).ToString());
         }

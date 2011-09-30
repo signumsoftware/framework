@@ -52,7 +52,7 @@ namespace Signum.Engine.Basics
             MethodInfo mi = ServiceMethodInfos.Where(m => m.Key() == facadeMethod)
                 .SingleEx(()=>"Method not found in registered Service Interfaces");
 
-            return Database.Query<FacadeMethodDN>().SingleOrDefault(a => a.Match(mi)) ?? new FacadeMethodDN(mi);
+            return Database.Query<FacadeMethodDN>().SingleOrDefaultEx(a => a.Match(mi)) ?? new FacadeMethodDN(mi);
         }
 
         public static List<FacadeMethodDN> RetrieveOrGenerateFacadeMethods()
@@ -117,7 +117,7 @@ namespace Signum.Engine.Basics
 
         public static MethodInfo FindMethodInfo(FacadeMethodDN fm)
         {
-            return methods.Single(mi => fm.Match(mi));
+            return methods.SingleEx(mi => fm.Match(mi));
         }
     }
 }

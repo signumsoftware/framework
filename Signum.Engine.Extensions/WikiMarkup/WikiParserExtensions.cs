@@ -68,7 +68,7 @@ namespace Signum.Engine.WikiMarkup
                         .Cast<Func<string, string>>()
                         .Select(a => a(text))
                         .NotNull()
-                        .First();
+                        .FirstEx();
                 }
                 catch
                 {

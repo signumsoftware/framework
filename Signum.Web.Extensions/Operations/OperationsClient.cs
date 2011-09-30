@@ -156,7 +156,7 @@ namespace Signum.Web.Operations
             if (!type.IsIIdentifiable())
                 return null;
 
-            OperationInfo constructor = OperationLogic.ServiceGetConstructorOperationInfos(type).SingleOrDefault();
+            OperationInfo constructor = OperationLogic.ServiceGetConstructorOperationInfos(type).SingleOrDefaultEx();
 
             if (constructor == null)
                 return null;

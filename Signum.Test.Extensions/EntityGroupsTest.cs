@@ -119,7 +119,7 @@ namespace Signum.Test.Extensions
                 Assert2.Throws<UnauthorizedAccessException>(() => Database.Retrieve<LabelDN>(1));
                 using (EntityGroupAuthLogic.DisableQueries())
                 {
-                    Assert2.Throws<UnauthorizedAccessException>(() => Database.Query<LabelDN>().Single(r => r.Name == "Virgin"));
+                    Assert2.Throws<UnauthorizedAccessException>(() => Database.Query<LabelDN>().SingleEx(r => r.Name == "Virgin"));
                 }
             }
         }
@@ -132,7 +132,7 @@ namespace Signum.Test.Extensions
                 Assert2.Throws<UnauthorizedAccessException>(() => Database.Retrieve<AlbumDN>(1)); 
                 using (EntityGroupAuthLogic.DisableQueries())
                 {
-                    Assert2.Throws<UnauthorizedAccessException>(() => Database.Query<AlbumDN>().Single(r => r.Name == "Siamese Dream"));
+                    Assert2.Throws<UnauthorizedAccessException>(() => Database.Query<AlbumDN>().SingleEx(r => r.Name == "Siamese Dream"));
                 }
             }
         }
@@ -184,34 +184,34 @@ namespace Signum.Test.Extensions
             {
                 //Because of target
                 {
-                    var label = Database.Query<LabelDN>().Single(l => l.Name == "MJJ");
+                    var label = Database.Query<LabelDN>().SingleEx(l => l.Name == "MJJ");
                     label.Owner.Retrieve().Country.Name = "Spain";
                     Assert2.Throws<UnauthorizedAccessException>(() => label.Save());
                 }
 
                 {
-                    var label = Database.Query<LabelDN>().Single(l => l.Name == "MJJ");
-                    label.Owner = Database.Query<LabelDN>().Where(l => l.Name == "Virgin").Select(a => a.ToLite()).Single();
+                    var label = Database.Query<LabelDN>().SingleEx(l => l.Name == "MJJ");
+                    label.Owner = Database.Query<LabelDN>().Where(l => l.Name == "Virgin").Select(a => a.ToLite()).SingleEx();
                     Assert2.Throws<UnauthorizedAccessException>(() => label.Save());
                 }
 
 
                 //Because of origin
                 {
-                    var label = Database.Query<LabelDN>().Single(l => l.Name == "Virgin");
+                    var label = Database.Query<LabelDN>().SingleEx(l => l.Name == "Virgin");
                     label.Country.Name = "Japan Empire";
                     Assert2.Throws<UnauthorizedAccessException>(() => label.Save());
                 }
 
                 {
-                    var label = Database.Query<LabelDN>().Single(l => l.Name == "WEA International");
+                    var label = Database.Query<LabelDN>().SingleEx(l => l.Name == "WEA International");
                     label.Owner.Retrieve().Name = "Japan Empire";
                     Assert2.Throws<UnauthorizedAccessException>(() => label.Save());
                 }
 
                 {
-                    var label = Database.Query<LabelDN>().Single(l => l.Name == "WEA International");
-                    label.Owner = Database.Query<LabelDN>().Where(l => l.Name == "Sony").Select(a => a.ToLite()).Single();
+                    var label = Database.Query<LabelDN>().SingleEx(l => l.Name == "WEA International");
+                    label.Owner = Database.Query<LabelDN>().Where(l => l.Name == "Sony").Select(a => a.ToLite()).SingleEx();
                     Assert2.Throws<UnauthorizedAccessException>(() => label.Save());
                 }
             }

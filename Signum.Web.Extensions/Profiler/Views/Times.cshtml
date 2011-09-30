@@ -77,7 +77,7 @@
        long maxValue = maxWitdh;
        if (TimeTracker.IdentifiedElapseds.Count > 0)
        {
-           maxValue = TimeTracker.IdentifiedElapseds.OrderByDescending(p => p.Value.MaxTime).First().Value.MaxTime;
+           maxValue = TimeTracker.IdentifiedElapseds.OrderByDescending(p => p.Value.MaxTime).FirstEx().Value.MaxTime;
        }
 
        double ratio = 1;

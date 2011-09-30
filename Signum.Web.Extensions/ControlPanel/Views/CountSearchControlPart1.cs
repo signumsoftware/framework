@@ -79,7 +79,7 @@ WriteLiteral("\r\n<div class=\"sf-cp-count-uq-list\">\r\n");
 
      foreach (CountUserQueryElement uq in ((CountSearchControlPartDN)Model.Content).UserQueries)
     {
-        object queryName = Navigator.Manager.QuerySettings.Keys.First(k => QueryUtils.GetQueryUniqueKey(k) == uq.UserQuery.Query.Key);
+        object queryName = Navigator.Manager.QuerySettings.Keys.FirstEx(k => QueryUtils.GetQueryUniqueKey(k) == uq.UserQuery.Query.Key);
         FindOptions fo = new FindOptions(queryName)
         {
             FilterMode = FilterMode.Hidden

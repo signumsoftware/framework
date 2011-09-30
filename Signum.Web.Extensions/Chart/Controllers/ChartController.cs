@@ -31,7 +31,7 @@ namespace Signum.Web.Chart
             
             var queryDescription = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
 
-            var entityColumn = queryDescription.Columns.Single(a => a.IsEntity);
+            var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
             Type entitiesType = Reflector.ExtractLite(entityColumn.Type);
             Implementations implementations = entityColumn.Implementations;
             
@@ -72,7 +72,7 @@ namespace Signum.Web.Chart
             var queryDescription = DynamicQueryManager.Current.QueryDescription(request.QueryName);
             var querySettings = Navigator.QuerySettings(request.QueryName);
 
-            var entityColumn = queryDescription.Columns.Single(a => a.IsEntity);
+            var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
             Type entitiesType = Reflector.ExtractLite(entityColumn.Type);
             Implementations implementations = entityColumn.Implementations;
 

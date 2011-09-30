@@ -48,7 +48,7 @@ namespace Signum.Engine.Scheduler
                            NumExecutions = (int?) g.Count(),
                            LastExecution = (from cte2 in g
                                             where cte2.Id == g.Max(a => a.Id)
-                                            select cte2.ToLite()).SingleOrDefault()
+                                            select cte2.ToLite()).SingleOrDefaultEx()
                        }).ToDynamic()
                        .Column(a => a.NumExecutions, c => c.OverrideDisplayName = () => Resources.Executions)
                        .Column(a => a.LastExecution, c => c.OverrideDisplayName = () => Resources.LastExecution);
