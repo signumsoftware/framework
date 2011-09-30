@@ -75,9 +75,7 @@ namespace Signum.Web.Auth
         [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult SaveUser(string prefix)
         {
-            var context = (Request.Form.AllKeys.Any(k => k.EndsWith(UserMapping.NewPasswordKey))) ?
-                this.ExtractEntity<UserDN>(prefix).ApplyChanges(this.ControllerContext, prefix, UserMapping.NewUser).ValidateGlobal() :
-                this.ExtractEntity<UserDN>(prefix).ApplyChanges(this.ControllerContext, prefix, true).ValidateGlobal();
+            var context = this.ExtractEntity<UserDN>(prefix).ApplyChanges(this.ControllerContext, prefix, true).ValidateGlobal();
 
             if (context.GlobalErrors.Any())
             { 
@@ -85,7 +83,7 @@ namespace Signum.Web.Auth
                 return JsonAction.ModelState(ModelState);
             }
 
-            context.Value.Execute(UserOperation.SaveNew);
+            context.Value.Execute(UserOperation.Save);
             return JsonAction.Redirect(Navigator.ViewRoute(context.Value));
         }
 

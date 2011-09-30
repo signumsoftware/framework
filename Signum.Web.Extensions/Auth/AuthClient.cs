@@ -141,6 +141,19 @@ namespace Signum.Web.Auth
                             .ajax(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk),
                         IsContextualVisible = _ => false
                     }},
+
+                    { UserOperation.SaveNew, new EntityOperationSettings 
+                    { 
+                        OnClick = ctx => new JsOperationExecutor(ctx.Options("SaveNewUser","Auth"))
+                            .validateAndAjax()
+                    }},
+
+                    { UserOperation.Save, new EntityOperationSettings 
+                    { 
+                        OnClick = ctx => new JsOperationExecutor(ctx.Options("SaveUser","Auth"))
+                            .validateAndAjax(),
+                        IsContextualVisible = _ => false
+                    }},
                 });
 
 
