@@ -114,8 +114,7 @@ else
 
                     var myChart = SF.Chart.Factory.getGraphType('@Model.Value.Chart.ChartType.ToString()');
                 
-                    var code = SF.Chart.Factory.createChartSVG('@divSelector') + 
-                        myChart.paintChart();
+                    var code = myChart.createChartSVG('@divSelector') + myChart.paintChart();
 
                     $('#@(Model.Compose("sfChartCode")) textarea').val(code);
 

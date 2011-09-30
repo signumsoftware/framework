@@ -296,13 +296,12 @@ WriteLiteral(";\r\n\r\n                    var myChart = SF.Chart.Factory.getGra
 
                                                             Write(Model.Value.Chart.ChartType.ToString());
 
-WriteLiteral("\');\r\n                \r\n                    var code = SF.Chart.Factory.createChar" +
-"tSVG(\'");
+WriteLiteral("\');\r\n                \r\n                    var code = myChart.createChartSVG(\'");
 
 
-                                                           Write(divSelector);
+                                                  Write(divSelector);
 
-WriteLiteral("\') + \r\n                        myChart.paintChart();\r\n\r\n                    $(\'#");
+WriteLiteral("\') + myChart.paintChart();\r\n\r\n                    $(\'#");
 
 
                     Write(Model.Compose("sfChartCode"));
