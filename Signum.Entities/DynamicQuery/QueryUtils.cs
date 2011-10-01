@@ -48,10 +48,15 @@ namespace Signum.Entities.DynamicQuery
 
         public static FilterType? TryGetFilterType(Type type)
         {
-            if (type.IsEnum)
+            var uType = type.UnNullify();
+
+            if (uType == typeof(Guid))
+                return FilterType.Guid;
+
+            if (uType.IsEnum)
                 return FilterType.Enum;
 
-            switch (Type.GetTypeCode(type.UnNullify()))
+            switch (Type.GetTypeCode(uType))
             {
                 case TypeCode.Boolean:
                     return FilterType.Boolean;
@@ -70,6 +75,7 @@ namespace Signum.Entities.DynamicQuery
                     return FilterType.Number;
                 case TypeCode.DateTime:
                     return FilterType.DateTime;
+
                 case TypeCode.Char:
                 case TypeCode.String:
                     return FilterType.String;
@@ -142,6 +148,13 @@ namespace Signum.Entities.DynamicQuery
             },
             { 
                 FilterType.Enum, new List<FilterOperation>
+                {
+                    FilterOperation.EqualTo,
+                    FilterOperation.DistinctTo, 
+                }
+            },
+            { 
+                FilterType.Guid, new List<FilterOperation>
                 {
                     FilterOperation.EqualTo,
                     FilterOperation.DistinctTo, 

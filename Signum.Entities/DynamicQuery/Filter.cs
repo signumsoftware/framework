@@ -116,6 +116,7 @@ namespace Signum.Entities.DynamicQuery
         Embedded,
         Boolean, 
         Enum,
+        Guid,
     }
 
     public enum UniqueType
