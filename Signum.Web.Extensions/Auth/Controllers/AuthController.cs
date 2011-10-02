@@ -323,7 +323,8 @@ namespace Signum.Web.Auth
 
                 var context = user.ApplyChanges(this.ControllerContext, "", UserMapping.ChangePassword).ValidateGlobal();
 
-                if (context.GlobalErrors.Any())
+                if (!context.Errors.TryGetC(UserMapping.NewPasswordKey).IsNullOrEmpty() ||
+                    !context.Errors.TryGetC(UserMapping.NewPasswordBisKey).IsNullOrEmpty())
                 {
                     ViewData["Title"] = Resources.ChangePassword;
                     ModelState.FromContext(context);
