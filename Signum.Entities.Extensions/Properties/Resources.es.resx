@@ -448,7 +448,7 @@
     <value>Prefijo web</value>
   </data>
   <data name="UserOperation_SaveNew" xml:space="preserve">
-    <value>Guardar</value>
+    <value>Alta</value>
   </data>
   <data name="FileRepositoryDN_FileTypes" xml:space="preserve">
     <value>Tipos de archivo</value>
@@ -597,20 +597,20 @@
   <data name="ChartBase_ChartType" xml:space="preserve">
     <value>Tipo de gráfico</value>
   </data>
-  <data name="ChartBase_FirstDimension" xml:space="preserve">
-    <value>Primera dimensión</value>
+  <data name="ChartRequest_Chart" xml:space="preserve">
+    <value>Gráfico</value>
   </data>
-  <data name="ChartBase_FirstValue" xml:space="preserve">
-    <value>Primer valor</value>
+  <data name="ChartBase_Value2" xml:space="preserve">
+    <value>Valor2</value>
   </data>
   <data name="ChartBase_GroupResults" xml:space="preserve">
     <value>Agrupar resultados</value>
   </data>
-  <data name="ChartBase_SecondDimension" xml:space="preserve">
-    <value>Segunda dimensión</value>
+  <data name="ChartBase_Value1" xml:space="preserve">
+    <value>Valor1</value>
   </data>
-  <data name="ChartBase_SecondValue" xml:space="preserve">
-    <value>Segundo valor</value>
+  <data name="ChartBase_Dimension2" xml:space="preserve">
+    <value>Dimensión2</value>
   </data>
   <data name="ChartRequest_Filters" xml:space="preserve">
     <value>Filtros</value>
@@ -1053,8 +1053,8 @@
   <data name="ProcessOperation_Suspend" xml:space="preserve">
     <value>Suspender</value>
   </data>
-  <data name="TaskOperation_ExecutePrivate" xml:space="preserve">
-    <value>Ejecutar privado</value>
+  <data name="ChartBase_Dimension1" xml:space="preserve">
+    <value>Dimensión1</value>
   </data>
   <data name="UserOperation_Create" xml:space="preserve">
     <value>Crear</value>
@@ -1143,8 +1143,8 @@
   <data name="SMSMessageDN_Template" xml:space="preserve">
     <value>Plantilla</value>
   </data>
-  <data name="SMSMessageOperations_Create" xml:space="preserve">
-    <value>Crear</value>
+  <data name="ChartBase" xml:space="preserve">
+    <value>Gráfico Base</value>
   </data>
   <data name="SMSMessageOperations_Send" xml:space="preserve">
     <value>Enviar</value>
@@ -1403,5 +1403,11 @@
   </data>
   <data name="UserQueryPartDN_UserQuery" xml:space="preserve">
     <value>Consulta de usuario</value>
+  </data>
+  <data name="SMSMessageOperations_CreateSMS" xml:space="preserve">
+    <value>Crear SMS</value>
+  </data>
+  <data name="UserChartDN_Chart" xml:space="preserve">
+    <value>Gráfico</value>
   </data>
 </root>

@@ -486,4 +486,16 @@
   <data name="SMS_WriteTheDestinationNumber" xml:space="preserve">
     <value>Escribir el número del destinatario:</value>
   </data>
+  <data name="Chart_Chart" xml:space="preserve">
+    <value>Gráfico</value>
+  </data>
+  <data name="Chart_ChartSettings" xml:space="preserve">
+    <value>Configuración del gráfico</value>
+  </data>
+  <data name="Chart_Draw" xml:space="preserve">
+    <value>Dibujar</value>
+  </data>
+  <data name="Chart_Query0IsNotAllowed" xml:space="preserve">
+    <value>No se permite la consulta {0}</value>
+  </data>
 </root>
