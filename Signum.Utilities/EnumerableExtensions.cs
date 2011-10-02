@@ -79,9 +79,21 @@ namespace Signum.Utilities
 
         public static T SingleEx<T>(this IEnumerable<T> collection)
         {
-            return collection.SingleEx<T>(
-                () => "Sequence contains no {0}".Formato(typeof(T).TypeName()),
-                () => "Sequence contains more than one {0}".Formato(typeof(T).TypeName()));
+            if (collection == null)
+                throw new ArgumentNullException("collection");
+
+            using (IEnumerator<T> enumerator = collection.GetEnumerator())
+            {
+                if (!enumerator.MoveNext())
+                    throw new InvalidOperationException("Sequence contains no {0}".Formato(typeof(T).TypeName()));
+
+                T current = enumerator.Current;
+
+                if (!enumerator.MoveNext())
+                    return current;
+            }
+
+            throw new InvalidOperationException("Sequence contains more than one {0}".Formato(typeof(T).TypeName()));
         }
 
         public static T SingleEx<T>(this IEnumerable<T> collection, Func<string> error)
@@ -142,8 +154,21 @@ namespace Signum.Utilities
 
         public static T SingleOrDefaultEx<T>(this IEnumerable<T> collection)
         {
-            return collection.SingleOrDefaultEx<T>(
-                () => "Sequence contains more than one {0}".Formato(typeof(T).TypeName()));
+            if (collection == null)
+                throw new ArgumentNullException("collection");
+
+            using (IEnumerator<T> enumerator = collection.GetEnumerator())
+            {
+                if (!enumerator.MoveNext())
+                    return default(T);
+
+                T current = enumerator.Current;
+
+                if (!enumerator.MoveNext())
+                    return current;
+            }
+
+            throw new InvalidOperationException("Sequence contains more than one {0}".Formato(typeof(T).TypeName()));
         }
 
         public static T SingleOrDefaultEx<T>(this IEnumerable<T> collection, Func<string> errorMorethanOne)
@@ -191,8 +216,16 @@ namespace Signum.Utilities
 
         public static T FirstEx<T>(this IEnumerable<T> collection)
         {
-            return collection.FirstEx<T>(
-                () => "Sequence contains no {0}".Formato(typeof(T).TypeName()));
+            if (collection == null)
+                throw new ArgumentNullException("collection");
+
+            using (IEnumerator<T> enumerator = collection.GetEnumerator())
+            {
+                if (!enumerator.MoveNext())
+                    throw new InvalidOperationException("Sequence contains no {0}".Formato(typeof(T).TypeName()));
+
+                return enumerator.Current;
+            }
         }
 
         public static T FirstEx<T>(this IEnumerable<T> collection, Func<string> errorZero)
@@ -223,8 +256,21 @@ namespace Signum.Utilities
 
         public static T SingleOrManyEx<T>(this IEnumerable<T> collection)
         {
-            return collection.SingleOrManyEx(
-                        () => "Sequence contains no {0}".Formato(typeof(T).TypeName()));
+            if (collection == null)
+                throw new ArgumentNullException("collection");
+
+            using (IEnumerator<T> enumerator = collection.GetEnumerator())
+            {
+                if (!enumerator.MoveNext())
+                    throw new InvalidOperationException("Sequence contains no {0}".Formato(typeof(T).TypeName()));
+
+                T current = enumerator.Current;
+
+                if (enumerator.MoveNext())
+                    return default(T);
+
+                return current;
+            }
         }
 
         public static T SingleOrManyEx<T>(this IEnumerable<T> collection, Func<string> errorZero)
