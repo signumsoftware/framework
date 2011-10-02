@@ -8,6 +8,7 @@ using System.Reflection;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
 using Signum.Entities.Reflection;
+using Signum.Entities.Properties;
 
 namespace Signum.Entities.DynamicQuery
 {
@@ -145,8 +146,7 @@ namespace Signum.Entities.DynamicQuery
             if (elements.IsEmpty())
                 return null;
 
-
-            return "The number of {0} is being multiplied by {1}".Formato(entityType.NiceName(), elements.CommaAnd(a => a.Parent.ToString()));
+            return Resources.TheNumberOf0IsBeingMultipliedBy1.Formato(entityType.NiceName(), elements.CommaAnd(a => a.Parent.ToString()));
         }
     }
 

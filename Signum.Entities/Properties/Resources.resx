@@ -348,4 +348,7 @@
   <data name="AttemptToModifyLockedEntity0" xml:space="preserve">
     <value>Attempt to modify locked entity {0}</value>
   </data>
+  <data name="TheNumberOf0IsBeingMultipliedBy1" xml:space="preserve">
+    <value>The number of {0} is being multiplied by {1}</value>
+  </data>
 </root>
