@@ -18,6 +18,6 @@
 
     @Html.ValueLine(e, f => f.Email, vl => vl.ValueHtmlProps["size"] = 30)
     @Html.EntityLine(e, f => f.Role)
-    @Html.ValueLine(e, f => f.State)
+    @Html.ValueLine(e, f => f.State, v => v.ReadOnly = true)
     @Html.EntityLine(e, f => f.Related)
 } 
