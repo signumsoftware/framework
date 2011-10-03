@@ -31,17 +31,16 @@ namespace Signum.Engine.DynamicQuery
         {
             request.Columns.Insert(0, new _EntityColumn(EntityColumn().BuildColumnDescription()));
 
-            DQueryable<T> result = Query
+            DQueryable<T> query = Query
                 .ToDQueryable(GetColumnDescriptions())
                 .SelectMany(request.Multiplications)
                 .Where(request.Filters)
                 .OrderBy(request.Orders)
-                .Select(request.Columns)
-                .TryTake(request.MaxItems);
+                .Select(request.Columns);
 
-            DEnumerable<T> array = result.ToArray();
+            var result = query.TryPaginate(request.ElementsPerPage, request.CurrentPage);
 
-            return array.ToResultTable(request.Columns);
+            return result.ToResultTable(request);
         }
 
         public override int ExecuteQueryCount(QueryCountRequest request)

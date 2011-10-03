@@ -62,14 +62,14 @@ namespace Signum.Web
             set { this.columnOptions = value; }
         }
 
-        int? top;
+        int? elementsPerPage;
         /// <summary>
         /// If null, use QuerySettings one
         /// </summary>
-        public int? Top
+        public int? ElementsPerPage
         {
-            get { return top; }
-            set { top = value; }
+            get { return elementsPerPage; }
+            set { elementsPerPage = value; }
         }
 
         bool topEmpty;
@@ -138,7 +138,7 @@ namespace Signum.Web
 
             string options = new Sequence<string>
             {
-                Top.HasValue ? "top=" + Top.Value : null,
+                ElementsPerPage.HasValue ? "elems=" + ElementsPerPage.Value : null,
                 SearchOnLoad ? "searchOnLoad=true" : null,
                 !Create ? "create=false": null, 
                 !View ? "view=false": null, 
@@ -178,7 +178,7 @@ namespace Signum.Web
                 Filters = FilterOptions.Select(fo => fo.ToFilter()).ToList(),
                 Orders = OrderOptions.Select(fo => fo.ToOrder()).ToList(),
                 Columns = ColumnOptions.Select(co => co.ToColumn(qd)).ToList(),
-                MaxItems = top,
+                ElementsPerPage = elementsPerPage,
             };
         }
 

@@ -19,7 +19,18 @@ namespace Signum.Entities.DynamicQuery
 
         public int? ElementsPerPage { get; set; }
 
-        public int PageIndex { get; set; }
+        public int CurrentPage { get; set; }
+
+        public int? MaxElementIndex
+        {
+            get
+            {
+                if (ElementsPerPage == null)
+                    return null;
+
+                return (ElementsPerPage * (CurrentPage + 1)) - 1; 
+            }
+        }
 
         public List<CollectionElementToken> Multiplications
         {

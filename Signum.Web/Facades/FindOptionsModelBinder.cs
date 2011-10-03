@@ -82,11 +82,11 @@ namespace Signum.Web
             if (parameters.AllKeys.Contains("view"))
                 fo.View = bool.Parse(parameters["view"]);
 
-            if (parameters.AllKeys.Contains("top"))
+            if (parameters.AllKeys.Contains("elems"))
             {
-                int aux;
-                if (int.TryParse(parameters["top"], out aux))
-                    fo.Top = aux;
+                int elems;
+                if (int.TryParse(parameters["elems"], out elems))
+                    fo.ElementsPerPage = elems;
             }
 
             if (parameters.AllKeys.Contains("searchOnLoad"))

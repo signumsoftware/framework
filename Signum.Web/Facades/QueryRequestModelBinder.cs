@@ -48,11 +48,22 @@ namespace Signum.Web
             qr.Orders = ExtractOrderOptions(controllerContext.HttpContext, queryDescription);
             qr.Columns = ExtractColumnsOptions(controllerContext.HttpContext, queryDescription);
 
-            if (parameters.AllKeys.Contains("top"))
+            if (parameters.AllKeys.Contains("elems"))
             {
-                int aux;
-                if (int.TryParse(parameters["top"], out aux))
-                    qr.MaxItems = aux;
+                int elems;
+                if (int.TryParse(parameters["elems"], out elems))
+                    qr.ElementsPerPage = elems;
+            }
+
+            if (parameters.AllKeys.Contains("page"))
+            {
+                int page;
+                if (int.TryParse(parameters["page"], out page))
+                    qr.CurrentPage = page;
+            }
+            else
+            {
+                qr.CurrentPage = 0;
             }
 
             return qr;

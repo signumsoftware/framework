@@ -414,12 +414,12 @@ WriteLiteral("\">\r\n            ");
 WriteLiteral("\r\n");
 
 
-               int? top = findOptions.Top ?? (findOptions.TopEmpty ? null : Navigator.Manager.QuerySettings.GetOrThrow(findOptions.QueryName, "Missing QuerySettings for QueryName {0}").Top);
+               int? elems = findOptions.ElementsPerPage ?? (findOptions.TopEmpty ? null : Navigator.Manager.QuerySettings.GetOrThrow(findOptions.QueryName, "Missing QuerySettings for QueryName {0}").ElementsPerPage);
 
 WriteLiteral("            ");
 
 
-       Write(HtmlHelperExtenders.InputType("text", Model.Compose("sfTop"), top.TryToString(), new Dictionary<string, object> { { "size", "3" }, { "onkeydown", "return SF.InputValidator.isNumber(event)" } }));
+       Write(HtmlHelperExtenders.InputType("text", Model.Compose("sfTop"), elems.TryToString(), new Dictionary<string, object> { { "size", "3" }, { "onkeydown", "return SF.InputValidator.isNumber(event)" } }));
 
 WriteLiteral("\r\n            ");
 
