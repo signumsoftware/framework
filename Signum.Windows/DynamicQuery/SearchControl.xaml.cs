@@ -77,12 +77,20 @@ namespace Signum.Windows
             set { SetValue(AllowUserColumnsProperty, value); }
         }
 
-        public static readonly DependencyProperty MaxItemsProperty =
-            DependencyProperty.Register("MaxItems", typeof(int?), typeof(SearchControl), new UIPropertyMetadata(200));
-        public int? MaxItems
+        public static readonly DependencyProperty ElementsPerPageProperty =
+            DependencyProperty.Register("ElementsPerPage", typeof(int?), typeof(SearchControl), new UIPropertyMetadata(200));
+        public int? ElementsPerPage
         {
-            get { return (int?)GetValue(MaxItemsProperty); }
-            set { SetValue(MaxItemsProperty, value); }
+            get { return (int?)GetValue(ElementsPerPageProperty); }
+            set { SetValue(ElementsPerPageProperty, value); }
+        }
+
+        public static readonly DependencyProperty CurrentPageProperty =
+           DependencyProperty.Register("CurrentPage", typeof(int), typeof(SearchControl), new UIPropertyMetadata(0));
+        public int CurrentPage
+        {
+            get { return (int)GetValue(CurrentPageProperty); }
+            set { SetValue(CurrentPageProperty, value); }
         }
 
         public static readonly DependencyProperty ItemsCountProperty =
@@ -485,7 +493,7 @@ namespace Signum.Windows
                 Filters = FilterOptions.Select(f => f.ToFilter()).ToList(),
                 Orders = OrderOptions.Select(o => o.ToOrder()).ToList(),
                 Columns = CurrentColumns.ToList(),
-                MaxItems = MaxItems
+                ElementsPerPage = ElementsPerPage
             };
 
             return request;
@@ -514,7 +522,7 @@ namespace Signum.Windows
             lvResult.Background = Brushes.White;
             lvResult.Focus();
             tbResultados.Visibility = Visibility.Visible;
-            tbResultados.Foreground = resultTable.Rows.Length == MaxItems ? Brushes.Red : Brushes.Black;
+            tbResultados.Foreground = resultTable.Rows.Length == ElementsPerPage ? Brushes.Red : Brushes.Black;
             OnQueryResultChanged(false);
         }
 
