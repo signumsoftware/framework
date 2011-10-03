@@ -187,7 +187,7 @@ namespace Signum.Web
             }).ToList();
         }
 
-        internal static string DecodeValue(string s)
+        public static string DecodeValue(string s)
         {
             if (s.StartsWith("\""))
             {
@@ -202,7 +202,7 @@ namespace Signum.Web
             }
         }
 
-        internal static object Convert(string value, Type type)
+        public static object Convert(string value, Type type)
         {
             if (type.UnNullify() == typeof(bool))
             {
