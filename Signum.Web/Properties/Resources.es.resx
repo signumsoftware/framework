@@ -345,4 +345,7 @@
   <data name="Signum_selectToken" xml:space="preserve">
     <value>Seleccione un símbolo (token)</value>
   </data>
+  <data name="Query0IsNotAllowed" xml:space="preserve">
+    <value>No se permite la consulta {0}</value>
+  </data>
 </root>
