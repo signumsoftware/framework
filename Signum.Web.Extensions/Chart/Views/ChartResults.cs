@@ -274,41 +274,53 @@ WriteLiteral("\" class=\"sf-chart-code\">\r\n            <div class=\"sf-chart-c
 
                MvcHtmlString divSelector = MvcHtmlString.Create("#" + Model.Compose("sfChartContainer") + " > .sf-chart-container"); 
 
-WriteLiteral("            <script type=\"text/javascript\">\r\n\r\n                $(\'");
+WriteLiteral("            <script type=\"text/javascript\">\r\n                $(\'");
 
 
               Write(divSelector);
 
 WriteLiteral("\').closest(\'.sf-tabs\').bind( \"tabsshow\", function(event, ui) {\r\n                 " +
-"   var $chartContainer = $(\'");
+"   if (ui.panel.id == \'");
 
 
-                                        Write(divSelector);
+                                    Write(Model.Compose("sfChartContainer"));
 
-WriteLiteral("\');\r\n                    var width = $chartContainer.width();\r\n                  " +
-"  var height = $chartContainer.height();\r\n\r\n                    var data = ");
-
-
-                          Write(Html.Json(ChartClient.DataJson(Model.Value, queryResult)));
-
-WriteLiteral(";\r\n\r\n                    var myChart = SF.Chart.Factory.getGraphType(\'");
+WriteLiteral("\') {\r\n                        var $chartContainer = $(\'");
 
 
-                                                            Write(Model.Value.Chart.ChartType.ToString());
+                                            Write(divSelector);
 
-WriteLiteral("\');\r\n                \r\n                    var code = myChart.createChartSVG(\'");
+WriteLiteral(@"');
+                        
+                        $chartContainer.html("""");
+                        
+                        var width = $chartContainer.width();
+                        var height = $chartContainer.height();
+
+                        var data = ");
 
 
-                                                  Write(divSelector);
+                              Write(Html.Json(ChartClient.DataJson(Model.Value, queryResult)));
 
-WriteLiteral("\') + myChart.paintChart();\r\n\r\n                    $(\'#");
+WriteLiteral(";\r\n\r\n                        var myChart = SF.Chart.Factory.getGraphType(\'");
 
 
-                    Write(Model.Compose("sfChartCode"));
+                                                                Write(Model.Value.Chart.ChartType.ToString());
 
-WriteLiteral(" textarea\').val(code);\r\n\r\n                    SF.log(code);\r\n                    " +
-"eval(code);\r\n                });\r\n\r\n            </script>\r\n        </div>\r\n    <" +
-"/div>\r\n");
+WriteLiteral("\');\r\n                \r\n                        var $codeArea = $(\'#");
+
+
+                                        Write(Model.Compose("sfChartCode"));
+
+WriteLiteral(" textarea\');\r\n                        if ($codeArea.val() == \'\') {\r\n             " +
+"               $codeArea.val(myChart.createChartSVG(\'");
+
+
+                                                             Write(divSelector);
+
+WriteLiteral("\') + myChart.paintChart());\r\n                        }\r\n\r\n                       " +
+" eval($codeArea.val());\r\n                    }\r\n                });\r\n           " +
+" </script>\r\n        </div>\r\n    </div>\r\n");
 
 
 }

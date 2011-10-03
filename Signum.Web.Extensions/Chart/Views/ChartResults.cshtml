@@ -104,24 +104,27 @@ else
             </div>
             @{ MvcHtmlString divSelector = MvcHtmlString.Create("#" + Model.Compose("sfChartContainer") + " > .sf-chart-container"); }
             <script type="text/javascript">
-
                 $('@divSelector').closest('.sf-tabs').bind( "tabsshow", function(event, ui) {
-                    var $chartContainer = $('@divSelector');
-                    var width = $chartContainer.width();
-                    var height = $chartContainer.height();
+                    if (ui.panel.id == '@(Model.Compose("sfChartContainer"))') {
+                        var $chartContainer = $('@divSelector');
+                        
+                        $chartContainer.html("");
+                        
+                        var width = $chartContainer.width();
+                        var height = $chartContainer.height();
 
-                    var data = @Html.Json(ChartClient.DataJson(Model.Value, queryResult));
+                        var data = @Html.Json(ChartClient.DataJson(Model.Value, queryResult));
 
-                    var myChart = SF.Chart.Factory.getGraphType('@Model.Value.Chart.ChartType.ToString()');
+                        var myChart = SF.Chart.Factory.getGraphType('@Model.Value.Chart.ChartType.ToString()');
                 
-                    var code = myChart.createChartSVG('@divSelector') + myChart.paintChart();
+                        var $codeArea = $('#@(Model.Compose("sfChartCode")) textarea');
+                        if ($codeArea.val() == '') {
+                            $codeArea.val(myChart.createChartSVG('@divSelector') + myChart.paintChart());
+                        }
 
-                    $('#@(Model.Compose("sfChartCode")) textarea').val(code);
-
-                    SF.log(code);
-                    eval(code);
+                        eval($codeArea.val());
+                    }
                 });
-
             </script>
         </div>
     </div>
