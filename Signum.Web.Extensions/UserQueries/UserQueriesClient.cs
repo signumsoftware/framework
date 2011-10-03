@@ -206,7 +206,7 @@ namespace Signum.Web.UserQueries
                 OrderType = qo.OrderType
             }));
 
-            findOptions.Top = userQuery.ElementsPerPage;
+            findOptions.ElementsPerPage = userQuery.ElementsPerPage;
             findOptions.TopEmpty = userQuery.ElementsPerPage == null;
         }
 
