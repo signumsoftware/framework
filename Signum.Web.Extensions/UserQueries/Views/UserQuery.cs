@@ -118,7 +118,7 @@ Write(Html.ValueLine(e, f => f.DisplayName));
 
                                           
     
-Write(Html.ValueLine(e, f => f.MaxItems));
+Write(Html.ValueLine(e, f => f.ElementsPerPage));
 
                                        
     
