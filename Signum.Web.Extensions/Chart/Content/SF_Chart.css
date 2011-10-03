@@ -50,6 +50,53 @@
 .sf-chart-img-stackedareas { background-position: -120px -80px }
 .sf-chart-img-totalareas { background-position: -120px -120px }
 
+.sf-chart-tokens table
+{
+    width: 100%;    
+}
+.sf-chart-tokens td, .sf-chart-tokens th 
+{
+    text-align: left;
+    vertical-align: middle;   
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 5px;
+}
+.sf-chart-tokens th.sf-chart-token-narrow
+{  
+    padding-right: 20px;
+}
+.sf-chart-tokens th.sf-chart-token-wide
+{
+    width: 100%;    
+    padding-right: 5px;
+}
+.sf-chart-tokens td
+{
+    padding-right: 5px;    
+}
+.sf-chart-token td
+{
+    border-top: 1px solid #AAA;     
+}
+.sf-chart-token td:first-child
+{
+    font-weight: bold;    
+}
+.sf-chart-token-config td
+{
+    border-top: 1px dashed #AAA;     
+}
+.sf-chart-token-config-trigger
+{
+    float: right;
+    cursor: pointer;    
+}
+.sf-chart-tokens .sf-field
+{
+    min-width: inherit;    
+}
+
 .sf-chart-container
 {
     width: 100%;

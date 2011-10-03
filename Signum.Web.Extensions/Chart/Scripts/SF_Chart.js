@@ -40,6 +40,10 @@ SF.Chart.Builder = (function () {
         updateChartBuilder($this.closest(".sf-chart-control"));
     });
 
+    $(".sf-chart-token-config-trigger").live("click", function () {
+        $(this).closest(".sf-chart-token").next().toggle();
+    });
+
     $(".sf-chart-draw").live("click", function (e) {
         e.preventDefault();
         var $this = $(this);
@@ -56,6 +60,7 @@ SF.Chart.Builder = (function () {
                     }
                 }
                 else {
+                    new SF.Validator().showErrors(null);
                     $chartControl.find(".sf-search-results-container").html(result);
                     SF.triggerNewContent($chartControl.find(".sf-search-results-container"));
                 }

@@ -142,7 +142,19 @@ WriteLiteral("        </td>\r\n        <td class=\"ui-widget ui-widget-content u
 
                                      Write(Resources.Chart_ChartSettings);
 
-WriteLiteral("</div>\r\n");
+WriteLiteral("</div>\r\n            <table>\r\n                <tr>\r\n                    <th class=" +
+"\"sf-chart-token-narrow\">");
+
+
+                                                 Write(Resources.Chart_Dimension);
+
+WriteLiteral("</th>\r\n                    <th class=\"sf-chart-token-narrow\">");
+
+
+                                                 Write(Resources.Chart_Group);
+
+WriteLiteral("</th>\r\n                    <th class=\"sf-chart-token-wide\">Token</th>\r\n          " +
+"      </tr>\r\n");
 
 
               
@@ -192,7 +204,7 @@ WriteLiteral("</div>\r\n");
                 }
             
 
-WriteLiteral("        </td>\r\n    </tr>\r\n</table>");
+WriteLiteral("            </table>\r\n        </td>\r\n    </tr>\r\n</table>");
 
 
         }

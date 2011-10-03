@@ -14,31 +14,40 @@
     {
         tc.Value = new ChartTokenDN();
     }
-    <div class="sf-chart-token">
-        @using (Html.FieldInline())
-        {
-            <span class="sf-label-line">@tc.Value.PropertyLabel</span>
-            if (tc.Value.GroupByVisible)
+    <tr class="sf-chart-token">
+        <td>@tc.Value.PropertyLabel</td>
+        <td>
+            @if (tc.Value.GroupByVisible)
             { 
                 var groupCheck = new HtmlTag("input").IdName(tc.Compose("group")).Attr("type", "checkbox").Attr("value", "True").Class("sf-chart-group-trigger");
                 if (((TypeContext<ChartRequest>)tc.Parent).Value.Chart.GroupResults)
                 {
                     groupCheck.Attr("checked", "checked");
                 }
-                @Html.Field("Group", groupCheck.ToHtmlSelf())
+                @groupCheck.ToHtmlSelf()
                 @Html.Hidden(tc.Compose("group"), ((TypeContext<ChartRequest>)tc.Parent).Value.Chart.GroupResults)
             }
-            if (tc.Value.ShouldAggregate)
+            @if (tc.Value.ShouldAggregate)
             {
-                @Html.ValueLine(tc, ct => ct.Aggregate)
+                @Html.ValueLine(tc, ct => ct.Aggregate, vl => vl.LabelVisible = false)
             }
-            @Html.Field("Token", Html.QueryTokenCombo(tc.Value.Token, ViewData[ViewDataKeys.QueryName], tc))
-
-            @Html.ValueLine(tc, ct => ct.Format)
-            @Html.ValueLine(tc, ct => ct.Unit)
-            @Html.ValueLine(tc, ct => ct.OrderType)
-            @Html.ValueLine(tc, ct => ct.OrderPriority)
-            @Html.ValueLine(tc, ct => ct.DisplayName)
-        }
-    </div>
+        </td>
+        <td>
+            @Html.QueryTokenCombo(tc.Value.Token, ViewData[ViewDataKeys.QueryName], tc)
+            <a class="sf-chart-token-config-trigger">@Resources.Chart_ToggleInfo</a>
+        </td>
+    </tr>
+    <tr class="sf-chart-token-config" style="display:none">
+        <td></td>
+        <td colspan="2">
+            @using (Html.FieldInline()) 
+            { 
+                @Html.ValueLine(tc, ct => ct.DisplayName)
+                @Html.ValueLine(tc, ct => ct.Format, vl => vl.ValueHtmlProps["size"] = 4)
+                @Html.ValueLine(tc, ct => ct.Unit, vl => vl.ValueHtmlProps["size"] = 2)
+                @Html.ValueLine(tc, ct => ct.OrderType) 
+                @Html.ValueLine(tc, ct => ct.OrderPriority, vl => vl.ValueHtmlProps["size"] = 2)
+            }
+        </td>
+    </tr>
 }
