@@ -1,0 +1,27 @@
+﻿<UserControl x:Class="Signum.Windows.ElementsInPageLabel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:m="clr-namespace:Signum.Windows"
+             mc:Ignorable="d" x:Name="me">
+
+    <StackPanel Orientation="Horizontal">
+        <TextBlock Visibility="{Binding TotalElements, ElementName=me, Converter={x:Static m:ElementsInPageLabel.CountToVisibility}}">
+            <InlineUIContainer>
+                <TextBlock Text="{Binding StartElementIndex, ElementName=me}" TextWrapping="Wrap" FontWeight="Bold" />
+            </InlineUIContainer>
+            <Run Text="-"/>
+            <InlineUIContainer>
+                <TextBlock Text="{Binding EndElementIndex, ElementName=me}" TextWrapping="Wrap" FontWeight="Bold" />
+            </InlineUIContainer>
+            <Run Text="{m:Loc Of}"/>
+        </TextBlock>
+        <TextBlock>
+            <InlineUIContainer>
+                <TextBlock Text="{Binding TotalElements, ElementName=me}" TextWrapping="Wrap" FontWeight="Bold" />
+            </InlineUIContainer>
+            <Run Text="{m:Loc Results}"/>
+        </TextBlock>
+    </StackPanel>
+</UserControl>

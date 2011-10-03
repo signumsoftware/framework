@@ -435,4 +435,10 @@
   <data name="RestoreAll" xml:space="preserve">
     <value>Restaurar todas</value>
   </data>
+  <data name="PageSize" xml:space="preserve">
+    <value>Tamaño página:</value>
+  </data>
+  <data name="All" xml:space="preserve">
+    <value>Todos</value>
+  </data>
 </root>

@@ -368,4 +368,10 @@ Lose changes?</value>
   <data name="RestoreAll" xml:space="preserve">
     <value>Restore all</value>
   </data>
+  <data name="PageSize" xml:space="preserve">
+    <value>Page size:</value>
+  </data>
+  <data name="All" xml:space="preserve">
+    <value>All</value>
+  </data>
 </root>

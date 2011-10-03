@@ -521,8 +521,8 @@ namespace Signum.Windows
             ItemsCount = lvResult.Items.Count;
             lvResult.Background = Brushes.White;
             lvResult.Focus();
-            tbResultados.Visibility = Visibility.Visible;
-            tbResultados.Foreground = resultTable.Rows.Length == ElementsPerPage ? Brushes.Red : Brushes.Black;
+            //tbResultados.Visibility = Visibility.Visible;
+            //tbResultados.Foreground = resultTable.Rows.Length == ElementsPerPage ? Brushes.Red : Brushes.Black;
             OnQueryResultChanged(false);
         }
 
@@ -530,7 +530,7 @@ namespace Signum.Windows
         {
             OnQueryResultChanged(true);
             resultTable = null;
-            tbResultados.Visibility = Visibility.Hidden;
+            //tbResultados.Visibility = Visibility.Hidden;
             lvResult.ItemsSource = null;
             lvResult.Background = Brushes.WhiteSmoke;
         }

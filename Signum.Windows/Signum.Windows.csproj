@@ -93,12 +93,33 @@
     <Reference Include="PresentationFramework">
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
     </Reference>
+    <Page Include="DynamicQuery\ElementsInPageLabel.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="DynamicQuery\ElementsPerPageSelector.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="DynamicQuery\PageSelector.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="ErrorSummary.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Compile Include="DynamicQuery\ElementsInPageLabel.xaml.cs">
+      <DependentUpon>ElementsInPageLabel.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="DynamicQuery\ElementsPerPageSelector.xaml.cs">
+      <DependentUpon>ElementsPerPageSelector.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="DynamicQuery\PageSelector.xaml.cs">
+      <DependentUpon>PageSelector.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ErrorSummary.xaml.cs">
       <DependentUpon>ErrorSummary.xaml</DependentUpon>
     </Compile>
