@@ -17,7 +17,9 @@ namespace Signum.Entities.DynamicQuery
 
         public List<Order> Orders { get; set; }
 
-        public int? MaxItems { get; set; }
+        public int? ElementsPerPage { get; set; }
+
+        public int PageIndex { get; set; }
 
         public List<CollectionElementToken> Multiplications
         {
