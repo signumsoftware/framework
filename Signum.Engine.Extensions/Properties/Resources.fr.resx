@@ -316,9 +316,6 @@
   <data name="_0IsACalculated1" xml:space="preserve">
     <value>{0} is a calculated {1}</value>
   </data>
-  <data name="Any" xml:space="preserve">
-    <value>toute</value>
-  </data>
   <data name="ExpiredPassword" xml:space="preserve">
     <value>Mot de passe a expiré</value>
   </data>

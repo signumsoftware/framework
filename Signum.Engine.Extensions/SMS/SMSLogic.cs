@@ -462,7 +462,7 @@ namespace Signum.Engine.SMS
         {
             GetState = m => m.State;
 
-            new ConstructFrom<SMSTemplateDN>(SMSMessageOperations.Create)
+            new ConstructFrom<SMSTemplateDN>(SMSMessageOperations.CreateSMS)
             {
                 CanConstruct = t => !t.Active ? Resources.TheTemplateMustBeActiveToConstructSMSMessages : null,
                 ToState = SMSMessageState.Created,

@@ -244,8 +244,8 @@
   <data name="OfThe0_m" xml:space="preserve">
     <value>Do {0}</value>
   </data>
-  <data name="Operation0IsNotAuthorized" xml:space="preserve">
-    <value>Operação {0} não está autorizada</value>
+  <data name="Any" xml:space="preserve">
+    <value>qualquer</value>
   </data>
   <data name="OrNull" xml:space="preserve">
     <value>ou nulo</value>
@@ -316,9 +316,6 @@
   <data name="_0IsACalculated1" xml:space="preserve">
     <value>{0} é um calculado {1}</value>
   </data>
-  <data name="Any" xml:space="preserve">
-    <value>qualquer</value>
-  </data>
   <data name="ExpiredPassword" xml:space="preserve">
     <value>Senha expirada</value>
   </data>
@@ -330,5 +327,14 @@
   </data>
   <data name="ThePasswordMustHaveBetween7And15CharactersEachOfThemBeingANumber09OrALetter" xml:space="preserve">
     <value>A senha deve ter entre 7 e 15 caracteres, sendo cada um deles um número de 0 a 9 ou uma letra</value>
+  </data>
+  <data name="Operation01IsNotAuthorized" xml:space="preserve">
+    <value>Operação {0} ({1}) não está autorizada</value>
+  </data>
+  <data name="TheTemplateMustBeActiveToConstructSMSMessages" xml:space="preserve">
+    <value>O modelo deve estar ativo para construir mensagens SMS</value>
+  </data>
+  <data name="YourUsernameIs0" xml:space="preserve">
+    <value>Seu nome de usuário é: {0}</value>
   </data>
 </root>
