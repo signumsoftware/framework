@@ -288,12 +288,10 @@ namespace Signum.Entities.Reflection
 
             LowPopulationAttribute lpa = type.SingleAttribute<LowPopulationAttribute>();
             if (lpa != null)
-                return lpa.Low;
+                return true;
 
-            return !typeof(Entity).IsAssignableFrom(type) && !type.IsInterface;
+            return false;
         }
-
-
 
         public static Func<IFormattable, string> GetPropertyFormatter(string format, string unitName)
         {
