@@ -28,7 +28,7 @@ else
             <li><a href="@("#" + Model.Compose("sfChartCode"))">Code</a></li>
         </ul>
         <div id="@Model.Compose("sfChartContainer")">
-            <div class="sf-chart-container"></div>
+            <div class="sf-chart-container" data-open-url="@(Url.Action<ChartController>(cc => cc.OpenSubgroup(Model.ControlID)))"></div>
         </div>
         <div id="@Model.Compose("sfChartData")">
             <table id="@Model.Compose("tblResults")" class="sf-search-results">

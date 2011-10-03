@@ -69,7 +69,18 @@ namespace Signum.Web.Chart
                             dimension1 = chart.Dimension1.GetTitle(),
                             value1 = chart.Value1.GetTitle() 
                         },
-                        serie = resultTable.Rows.Select(r => new { dimension1 = Convert(r[0]), value1 = Convert(r[1]) }).ToList()
+                        serie = chart.GroupResults ? 
+                            resultTable.Rows.Select(r => new Dictionary<string, object>
+                            { 
+                                { "dimension1", Convert(r[0]) }, 
+                                { "value1", Convert(r[1]) }
+                            }).ToList() :
+                            resultTable.Rows.Select(r => new Dictionary<string, object>
+                            { 
+                                { "dimension1", Convert(r[0]) }, 
+                                { "value1", Convert(r[1]) },
+                                { "entity", r.Entity.Key() }
+                            }).ToList()
                     };
                 case ChartResultType.TypeTypeValue:
                     

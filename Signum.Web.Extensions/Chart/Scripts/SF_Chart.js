@@ -50,7 +50,7 @@ SF.Chart.Builder = (function () {
         var $chartControl = $this.closest(".sf-chart-control");
         $.ajax({
             url: $this.attr("data-url"),
-            data: $chartControl.find(":input").serialize(),
+            data: $chartControl.find(":input").serialize() + "&filters=" + new SF.FindNavigator().serializeFilters(),
             success: function (result) {
                 if (typeof result === "object") {
                     if (typeof result.ModelState != "undefined") {
@@ -145,6 +145,11 @@ SF.Chart.ChartBase.prototype = {
         return result;
     },
 
+    bindEvents: function () {
+        return "//bind mouse events" + this.br +
+            "myChart.bindMouseDblclick();" + this.br;
+    },
+
     paintChart: function () {
         return this.init() +
         this.getXAxis() +
@@ -154,7 +159,43 @@ SF.Chart.ChartBase.prototype = {
         this.paintGraph() +
         this.paintXAxis() +
         this.paintYAxis() +
-        this.paintLegend();
+        this.paintLegend() +
+        this.bindEvents();
+    },
+
+    bindMouseDblclick: function () {
+        $('.shape,.slice').not('g').click(function () {
+            var $this = $(this);
+
+            var extractAttribute = function ($shape, attrName) {
+                var att = $shape.attr("data-" + attrName);
+                if (typeof att != "undefined" && att != false && !SF.isEmpty(att)) {
+                    return "&" + attrName + "=" + att;
+                }
+                else {
+                    return "";
+                }
+            };
+
+            var serializeData = function ($shape) {
+                var data = $shape.closest(".sf-chart-control").find(":input").serialize();
+                data += "&filters=" + new SF.FindNavigator().serializeFilters();
+                data += extractAttribute($shape, "d1");
+                data += extractAttribute($shape, "d2");
+                data += extractAttribute($shape, "v1");
+                data += extractAttribute($shape, "v2");
+                data += extractAttribute($shape, "entity");
+                return data;
+            };
+
+            $.ajax({
+                url: $this.closest('.sf-chart-container').attr('data-open-url'),
+                data: serializeData($this),
+                success: function (popup) {
+                    new SF.ViewNavigator({ prefix: "New" }).showViewOk(popup);
+                }
+            })
+        });
     }
 };
 
@@ -345,13 +386,15 @@ SF.Chart.Columns.prototype = $.extend({}, new SF.Chart.ChartBase(), {
         return "//paint graph" + this.br +
             "chart.append('svg:g').attr('class', 'shape').attr('transform' ,'translate(' + (yAxisLeftPosition + chartAxisPadding) + ', ' + xAxisTopPosition + ') scale(1, -1)')" + this.brt +
             ".enterData(data.serie, 'rect', 'shape')" + this.brt +
-            ".attr('height', function (v) { return y(myChart.getTokenLabel(v.value1)); })" + this.brt +
+            ".attr('height', function (v) { return y(v.value1); })" + this.brt +
             ".attr('width', x.rangeBand)" + this.brt +
             ".attr('x', function (v) { return x(JSON.stringify(v)); })" + this.brt +
             ".attr('fill', function (v) { return color(JSON.stringify(v)); })" + this.brt +
             ".attr('stroke', '#fff')" + this.brt +
+            ".attr('data-d1', function(v) { return v.dimension1.key || v.dimension1; })" + this.brt +
+            ".attr('data-entity', function(v) { return v.entity || ''; })" + this.brt +
             ".append('svg:title')" + this.brt +
-            ".text(function(d) { return myChart.getTokenLabel(d.dimension1) + ': ' + myChart.getTokenLabel(d.value1); });" + this.br + this.br;
+            ".text(function(d) { return myChart.getTokenLabel(d.dimension1) + ': ' + d.value1; });" + this.br + this.br;
     }
 });
 

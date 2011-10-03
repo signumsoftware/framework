@@ -118,8 +118,12 @@ WriteLiteral("\">Code</a></li>\r\n        </ul>\r\n        <div id=\"");
 
             Write(Model.Compose("sfChartContainer"));
 
-WriteLiteral("\">\r\n            <div class=\"sf-chart-container\"></div>\r\n        </div>\r\n        <" +
-"div id=\"");
+WriteLiteral("\">\r\n            <div class=\"sf-chart-container\" data-open-url=\"");
+
+
+                                                       Write(Url.Action<ChartController>(cc => cc.OpenSubgroup(Model.ControlID)));
+
+WriteLiteral("\"></div>\r\n        </div>\r\n        <div id=\"");
 
 
             Write(Model.Compose("sfChartData"));

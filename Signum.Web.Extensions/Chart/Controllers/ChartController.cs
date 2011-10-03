@@ -12,6 +12,8 @@ using Signum.Entities;
 using Signum.Engine.Extensions.Chart;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.UserQueries;
+using System.Collections.Specialized;
+using Signum.Engine;
 
 namespace Signum.Web.Chart
 {
@@ -82,7 +84,7 @@ namespace Signum.Web.Chart
             ViewData[ViewDataKeys.Formatters] = resultTable.Columns.Select((c, i) => new { c, i }).ToDictionary(c => c.i, c => querySettings.GetFormatter(c.c.Column));
 
             return PartialView(ChartClient.ChartResultsView, new TypeContext<ChartRequest>(request, prefix));
-        }        
+        }
 
         MappingContext<ChartRequest> ExtractChartRequestCtx(string prefix)
         {
@@ -124,9 +126,10 @@ namespace Signum.Web.Chart
 
         static List<Entities.DynamicQuery.Filter> ExtractChartFilters(MappingContext<List<Entities.DynamicQuery.Filter>> ctx)
         {
-            var filters = new List<Entities.DynamicQuery.Filter>();
+            var qd = DynamicQueryManager.Current.QueryDescription(
+                Navigator.ResolveQueryName(ctx.GlobalInputs[TypeContextUtilities.Compose(ctx.Root.ControlID, ViewDataKeys.QueryName)]));
 
-            return filters;
+            return FindOptionsModelBinder.ExtractFilterOptions(ctx.ControllerContext.HttpContext, qd).Select(fo => fo.ToFilter()).ToList();
         }
         
         static EntityMapping<ChartRequest> mappingChartRequest = new EntityMapping<ChartRequest>(true)
@@ -136,5 +139,60 @@ namespace Signum.Web.Chart
                 .SetProperty(cb => cb.Value1, mappingChartToken)
                 .SetProperty(cb => cb.Value2, mappingChartToken))
             .SetProperty(cr => cr.Filters, ctx => ExtractChartFilters(ctx));
+
+        public ActionResult OpenSubgroup(string prefix)
+        {
+            var chartRequest = ExtractChartRequestCtx(prefix).Value;
+
+            if (chartRequest.Chart.GroupResults)
+            {
+                var filters = chartRequest.Filters.Select(f => new FilterOption { Token = f.Token, Value = f.Value, Operation = f.Operation }).ToList();
+
+                var chartTokenFilters = new List<FilterOption>
+                {
+                    AddFilter(chartRequest.Chart.Dimension1, "d1"),
+                    AddFilter(chartRequest.Chart.Dimension2, "d2"),
+                    AddFilter(chartRequest.Chart.Value1, "v1"),
+                    AddFilter(chartRequest.Chart.Value2, "v2")
+                };
+
+                filters.AddRange(chartTokenFilters.NotNull());
+
+                return Navigator.PartialFind(this, new FindOptions(chartRequest.QueryName)
+                {
+                    FilterOptions = filters,
+                    SearchOnLoad = true
+                }, "New");
+            }
+            else
+            {
+                string entity = Request.Params["entity"];
+                if (string.IsNullOrEmpty(entity))
+                    throw new Exception("If the chart is not grouping, entity must be provided");
+                 
+                var queryDescription = DynamicQueryManager.Current.QueryDescription(chartRequest.QueryName);
+                var querySettings = Navigator.QuerySettings(chartRequest.QueryName);
+
+                var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
+                Type entitiesType = Reflector.ExtractLite(entityColumn.Type);
+
+                Lite lite = TypeLogic.ParseLite(entitiesType, entity);
+                return Navigator.PopupOpen(this, new ViewOkOptions(TypeContextUtilities.UntypedNew(Database.Retrieve(lite), "New")));
+            }
+        }
+
+        private FilterOption AddFilter(ChartTokenDN chartToken, string key)
+        {
+            if (chartToken == null || chartToken.Aggregate != null)
+                return null;
+            
+            var token = chartToken.Token;
+            return new FilterOption
+            {
+                Token = token,
+                Operation = FilterOperation.EqualTo,
+                Value = FindOptionsModelBinder.Convert(FindOptionsModelBinder.DecodeValue(Request.Params[key]), token.Type)
+            };
+        }
     }
 }
