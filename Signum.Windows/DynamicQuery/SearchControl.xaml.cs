@@ -521,6 +521,16 @@ namespace Signum.Windows
             ItemsCount = lvResult.Items.Count;
             lvResult.Background = Brushes.White;
             lvResult.Focus();
+            elementsInPageLabel.Visibility = Visibility.Visible;
+            elementsInPageLabel.TotalPages = resultTable.TotalPages;
+            elementsInPageLabel.StartElementIndex = resultTable.StartElementIndex;
+            elementsInPageLabel.EndElementIndex = resultTable.EndElementIndex;
+
+            elementsPerPageSelector.ElementsPerPage = resultTable.ElementsPerPage;
+
+            pageSelector.CurrentPage = resultTable.CurrentPage;
+            pageSelector.TotalPages = resultTable.TotalPages;
+            
             //tbResultados.Visibility = Visibility.Visible;
             //tbResultados.Foreground = resultTable.Rows.Length == ElementsPerPage ? Brushes.Red : Brushes.Black;
             OnQueryResultChanged(false);
@@ -530,7 +540,8 @@ namespace Signum.Windows
         {
             OnQueryResultChanged(true);
             resultTable = null;
-            //tbResultados.Visibility = Visibility.Hidden;
+            pageSelector.Visibility = Visibility.Hidden;
+            elementsInPageLabel.Visibility = Visibility.Hidden;
             lvResult.ItemsSource = null;
             lvResult.Background = Brushes.WhiteSmoke;
         }

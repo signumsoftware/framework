@@ -77,9 +77,9 @@ namespace Signum.Entities.DynamicQuery
 
         public int? ElementsPerPage { get; private set; }
 
-        public int? TotalPages
+        public int TotalPages
         {
-            get { return ElementsPerPage.HasValue ? (int?)null : (TotalElements + ElementsPerPage.Value - 1) / ElementsPerPage.Value; } //Round up
+            get { return ElementsPerPage.HasValue ? 1 : (TotalElements + ElementsPerPage.Value - 1) / ElementsPerPage.Value; } //Round up
         }
 
         public int? StartElementIndex

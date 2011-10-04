@@ -168,8 +168,8 @@
                 </Style>
             </ListView.ItemContainerStyle>
         </ListView>
-        <DockPanel Height="24" Visibility="{Binding ShowFooter, Converter={x:Static m:Converters.BoolToVisibility}, ElementName=me}" Orientation="Horizontal" Grid.Row="4" Margin="6,4,100,4" HorizontalAlignment="Left"  >
-            <m:ElementsInPageLabel x:Name="elementsInPageLabel" HorizontalAlignment="Center" DockPanel.Dock="Left"/>
+        <DockPanel Height="24" Visibility="{Binding ShowFooter, Converter={x:Static m:Converters.BoolToVisibility}, ElementName=me}" Grid.Row="4" Margin="6,4,100,4" HorizontalAlignment="Left" LastChildFill="True" >
+            <m:ElementsInPageLabel x:Name="elementsInPageLabel" HorizontalAlignment="Center" DockPanel.Dock="Left" MinWidth="150"/>
             <m:ElementsPerPageSelector x:Name="elementsPerPageSelector" DockPanel.Dock="Left"/>
             <m:PageSelector x:Name="pageSelector" HorizontalAlignment="Right"/>
             <!--<TextBlock TextWrapping="Wrap" x:Name="tbResultados" Visibility="Hidden" VerticalAlignment="Center" Margin="0,0,5,0">
