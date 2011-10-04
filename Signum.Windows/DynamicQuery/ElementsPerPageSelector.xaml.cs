@@ -21,16 +21,21 @@ namespace Signum.Windows
     public partial class ElementsPerPageSelector : UserControl
     {
         public static readonly DependencyProperty ElementsPerPageProperty =
-            DependencyProperty.Register("ElementsPerPage", typeof(int?), typeof(ElementsPerPageSelector), new UIPropertyMetadata(0));
-        public int? ElementsPerPage
+            DependencyProperty.Register("ElementsPerPage", typeof(int), typeof(ElementsPerPageSelector), new UIPropertyMetadata(0));
+        public int ElementsPerPage
         {
-            get { return (int?)GetValue(ElementsPerPageProperty); }
+            get { return (int)GetValue(ElementsPerPageProperty); }
             set { SetValue(ElementsPerPageProperty, value); }
         }
 
         public ElementsPerPageSelector()
         {
             InitializeComponent();
+        }
+
+        private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
         }
     }
 }

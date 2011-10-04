@@ -16,7 +16,11 @@
     </UserControl.Resources>
     <StackPanel Orientation="Horizontal">
         <Label Content="{m:Loc PageSize}"/>
+<<<<<<< HEAD
         <ComboBox SelectedValue="{Binding ElementsPerPage, ElementName=me}" VerticalAlignment="Center">
+=======
+        <ComboBox SelectedValue="{Binding ElementsPerPage, ElementName=me}" VerticalAlignment="Center" SelectionChanged="ComboBox_SelectionChanged">
+>>>>>>> master
             <ComboBox.Items>
                 <ComboBoxItem Content="5"/>
                 <ComboBoxItem Content="10"/>
