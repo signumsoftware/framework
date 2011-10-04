@@ -217,8 +217,14 @@ namespace Signum.Entities.Chart
                         {
                             var ft = QueryUtils.TryGetFilterType(ct.Token.Type);
 
-                            if (ft != FilterType.Number && ft != FilterType.DecimalNumber)
-                                return "{0} is not compatible with {1}".Formato(ct.Aggregate.NiceToString(), ft != null ? ft.NiceToString() : ct.Token.Type.TypeName());
+                            if (ft == FilterType.Number || ft == FilterType.DecimalNumber)
+                                return null;
+
+                            if (ft == FilterType.Boolean && ct.Aggregate == AggregateFunction.Average)
+                                return null;
+
+                            return "{0} is not compatible with {1}".Formato(ct.Aggregate.NiceToString(), 
+                                ft != null ? ft.NiceToString() : ct.Token.Type.TypeName());
                         }
                     }
                     else

@@ -84,21 +84,15 @@ WriteLiteral("\r\n");
         tc.Value = new ChartTokenDN();
     }
 
-WriteLiteral("    <div class=\"sf-chart-token\">\r\n");
+WriteLiteral("    <tr class=\"sf-chart-token\">\r\n        <td>");
 
 
-         using (Html.FieldInline())
-        {
+       Write(tc.Value.PropertyLabel);
 
-WriteLiteral("            <span class=\"sf-label-line\">");
-
-
-                                   Write(tc.Value.PropertyLabel);
-
-WriteLiteral("</span>\r\n");
+WriteLiteral("</td>\r\n        <td>\r\n");
 
 
-            if (tc.Value.GroupByVisible)
+             if (tc.Value.GroupByVisible)
             { 
                 var groupCheck = new HtmlTag("input").IdName(tc.Compose("group")).Attr("type", "checkbox").Attr("value", "True").Class("sf-chart-group-trigger");
                 if (((TypeContext<ChartRequest>)tc.Parent).Value.Chart.GroupResults)
@@ -106,49 +100,67 @@ WriteLiteral("</span>\r\n");
                     groupCheck.Attr("checked", "checked");
                 }
                 
-           Write(Html.Field("Group", groupCheck.ToHtmlSelf()));
+           Write(groupCheck.ToHtmlSelf());
 
-                                                             
+                                        
                 
            Write(Html.Hidden(tc.Compose("group"), ((TypeContext<ChartRequest>)tc.Parent).Value.Chart.GroupResults));
 
                                                                                                                   
             }
-            if (tc.Value.ShouldAggregate)
+
+
+             if (tc.Value.ShouldAggregate)
             {
                 
-           Write(Html.ValueLine(tc, ct => ct.Aggregate));
+           Write(Html.ValueLine(tc, ct => ct.Aggregate, vl => vl.LabelVisible = false));
 
-                                                       
+                                                                                      
             }
-            
-       Write(Html.Field("Token", Html.QueryTokenCombo(tc.Value.Token, ViewData[ViewDataKeys.QueryName], tc)));
 
-                                                                                                            
+WriteLiteral("        </td>\r\n        <td>\r\n            ");
 
-            
-       Write(Html.ValueLine(tc, ct => ct.Format));
 
-                                                
-            
-       Write(Html.ValueLine(tc, ct => ct.Unit));
+       Write(Html.QueryTokenCombo(tc.Value.Token, ViewData[ViewDataKeys.QueryName], tc));
 
-                                              
-            
-       Write(Html.ValueLine(tc, ct => ct.OrderType));
+WriteLiteral("\r\n            <a class=\"sf-chart-token-config-trigger\">");
 
-                                                   
-            
-       Write(Html.ValueLine(tc, ct => ct.OrderPriority));
 
-                                                       
-            
-       Write(Html.ValueLine(tc, ct => ct.DisplayName));
+                                                Write(Resources.Chart_ToggleInfo);
 
-                                                     
-        }
+WriteLiteral("</a>\r\n        </td>\r\n    </tr>\r\n");
 
-WriteLiteral("    </div>\r\n");
+
+
+WriteLiteral("    <tr class=\"sf-chart-token-config\" style=\"display:none\">\r\n        <td></td>\r\n " +
+"       <td colspan=\"2\">\r\n");
+
+
+             using (Html.FieldInline()) 
+            { 
+                
+           Write(Html.ValueLine(tc, ct => ct.DisplayName));
+
+                                                         
+                
+           Write(Html.ValueLine(tc, ct => ct.Format, vl => vl.ValueHtmlProps["size"] = 4));
+
+                                                                                         
+                
+           Write(Html.ValueLine(tc, ct => ct.Unit, vl => vl.ValueHtmlProps["size"] = 2));
+
+                                                                                       
+                
+           Write(Html.ValueLine(tc, ct => ct.OrderType));
+
+                                                        
+                
+           Write(Html.ValueLine(tc, ct => ct.OrderPriority, vl => vl.ValueHtmlProps["size"] = 2));
+
+                                                                                                
+            }
+
+WriteLiteral("        </td>\r\n    </tr>\r\n");
 
 
 }

@@ -498,4 +498,13 @@
   <data name="Chart_ChartSettings" xml:space="preserve">
     <value>Chart settings</value>
   </data>
+  <data name="Chart_Dimension" xml:space="preserve">
+    <value>Dimension</value>
+  </data>
+  <data name="Chart_Group" xml:space="preserve">
+    <value>Group</value>
+  </data>
+  <data name="Chart_ToggleInfo" xml:space="preserve">
+    <value>Toggle info</value>
+  </data>
 </root>

@@ -187,6 +187,15 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Dimension.
+        /// </summary>
+        public static string Chart_Dimension {
+            get {
+                return ResourceManager.GetString("Chart_Dimension", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Draw.
         /// </summary>
         public static string Chart_Draw {
@@ -196,11 +205,29 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Group.
+        /// </summary>
+        public static string Chart_Group {
+            get {
+                return ResourceManager.GetString("Chart_Group", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Query {0} is not allowed.
         /// </summary>
         public static string Chart_Query0IsNotAllowed {
             get {
                 return ResourceManager.GetString("Chart_Query0IsNotAllowed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Toggle info.
+        /// </summary>
+        public static string Chart_ToggleInfo {
+            get {
+                return ResourceManager.GetString("Chart_ToggleInfo", resourceCulture);
             }
         }
         

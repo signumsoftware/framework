@@ -31,6 +31,12 @@
         </td>
         <td class="ui-widget ui-widget-content ui-corner-all sf-chart-tokens">
             <div class="ui-widget-header">@Resources.Chart_ChartSettings</div>
+            <table>
+                <tr>
+                    <th class="sf-chart-token-narrow">@Resources.Chart_Dimension</th>
+                    <th class="sf-chart-token-narrow">@Resources.Chart_Group</th>
+                    <th class="sf-chart-token-wide">Token</th>
+                </tr>
             @{
                 if (Model.Value.Chart.Dimension1 != null)
                 {
@@ -53,6 +59,7 @@
                     @Html.EmbeddedControl(Model, cr => cr.Chart.Value2, ec => ec.ViewData[ViewDataKeys.QueryName] = queryDescription.QueryName)
                 }
             }
+            </table>
         </td>
     </tr>
 </table>
