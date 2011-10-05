@@ -465,11 +465,14 @@ namespace Signum.Engine.DynamicQuery
             if (!elementsPerPage.HasValue)
                 return new DEnumerableCount<T>(query.Query.ToArray(), query.Context, query.Query.Count());
 
+            if (currentPage <= 0)
+                throw new InvalidOperationException("currentPage should be greater than zero");
+
             int totalElements = query.Query.Count();
 
             var q = query.Query;
-            if (currentPage != 0)
-                q = q.Skip(currentPage * elementsPerPage.Value);
+            if (currentPage != 1)
+                q = q.Skip((currentPage - 1) * elementsPerPage.Value);
 
             q = q.Take(elementsPerPage.Value);
 

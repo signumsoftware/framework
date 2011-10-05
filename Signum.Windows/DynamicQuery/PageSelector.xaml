@@ -23,8 +23,8 @@
                 <Setter Property="Background" Value="{DynamicResource LightBlueBackground}"/>
             </Style>
         </StackPanel.Resources>
-        <Button x:Name="btPrevious" Content="&lt;&lt;" FontWeight="Bold" Background="{DynamicResource BlueBackground}" Margin="0,0,5,0"/>
-        <StackPanel Orientation="Horizontal" x:Name="spPages">
+        <Button x:Name="btPrevious" Content="&lt;&lt;" FontWeight="Bold" Background="{DynamicResource BlueBackground}" Margin="0,0,5,0" Click="btPrevious_Click" Style="{DynamicResource pageButton}"/>
+        <StackPanel Orientation="Horizontal" x:Name="spPages" ButtonBase.Click="spPages_Click">
             <!--<Button Content="1"/>
             <Label Content="..."/>
             <Button Content="50"/>
@@ -35,6 +35,6 @@
             <Label Content="..."/>
             <Button Content="100"/>-->
         </StackPanel>
-        <Button x:Name="btNext" Content="&gt;&gt;" FontWeight="Bold" Background="{DynamicResource BlueBackground}"  Margin="5,0,0,0"/>
+        <Button x:Name="btNext" Content="&gt;&gt;" FontWeight="Bold" Background="{DynamicResource BlueBackground}"  Margin="5,0,0,0" Click="btNext_Click" Style="{DynamicResource pageButton}"/>
     </StackPanel>
 </UserControl>

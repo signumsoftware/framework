@@ -139,6 +139,14 @@ namespace Signum.Windows
 
             ButtonsChanged();
             searchControl.Loaded += new RoutedEventHandler(searchControl_Loaded);
+            searchControl.ClearSize += new EventHandler(searchControl_ClearSize);
+        }
+
+        void searchControl_ClearSize(object sender, EventArgs e)
+        {
+            ClearValue(WidthProperty);
+            ClearValue(HeightProperty);
+            this.SizeToContent = System.Windows.SizeToContent.WidthAndHeight;
         }
 
         public SearchWindow()
@@ -169,7 +177,6 @@ namespace Signum.Windows
             btOk.Visibility = ok ? Visibility.Visible : Visibility.Collapsed;
             btCancel.Visibility = ok ? Visibility.Visible : Visibility.Collapsed;
             
-            btClose.Visibility = !ok ? Visibility.Visible : Visibility.Collapsed;
             searchControl.IsAdmin = !ok;
 
             if (ok)
@@ -198,6 +205,11 @@ namespace Signum.Windows
             OkAndClose();
         }
 
+        private void Cancel_Click(object sender, RoutedEventArgs e)
+        {
+            DialogResult = false;
+        }
+
         private void OkAndClose()
         {
             if (MultiSelection)
@@ -206,16 +218,6 @@ namespace Signum.Windows
                 SelectedItem = searchControl.SelectedItem;
 
             DialogResult = true;
-        }
-
-        private void Cancel_Click(object sender, RoutedEventArgs e)
-        {
-            DialogResult = false;
-        }
-
-        private void Close_Click(object sender, RoutedEventArgs e)
-        {
-            Close();
         }
 
         void searchControl_DoubleClick()

@@ -337,7 +337,7 @@
     <value>Límite:</value>
   </data>
   <data name="Results" xml:space="preserve">
-    <value>Resultados.</value>
+    <value>resultados.</value>
   </data>
   <data name="Field" xml:space="preserve">
     <value>Campo</value>
@@ -435,10 +435,13 @@
   <data name="RestoreAll" xml:space="preserve">
     <value>Restaurar todas</value>
   </data>
-  <data name="PageSize" xml:space="preserve">
-    <value>Tamaño página:</value>
+  <data name="Rows" xml:space="preserve">
+    <value>Filas:</value>
   </data>
   <data name="All" xml:space="preserve">
-    <value>Todos</value>
+    <value>Todas</value>
+  </data>
+  <data name="Of" xml:space="preserve">
+    <value>de</value>
   </data>
 </root>

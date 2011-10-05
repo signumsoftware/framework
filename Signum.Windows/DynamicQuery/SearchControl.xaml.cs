@@ -78,7 +78,7 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty ElementsPerPageProperty =
-            DependencyProperty.Register("ElementsPerPage", typeof(int?), typeof(SearchControl), new UIPropertyMetadata(200));
+            DependencyProperty.Register("ElementsPerPage", typeof(int?), typeof(SearchControl), new UIPropertyMetadata(200, (s, e) => ((SearchControl)s).ElementsPerPage_Changed()));
         public int? ElementsPerPage
         {
             get { return (int?)GetValue(ElementsPerPageProperty); }
@@ -86,7 +86,7 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty CurrentPageProperty =
-           DependencyProperty.Register("CurrentPage", typeof(int), typeof(SearchControl), new UIPropertyMetadata(0));
+           DependencyProperty.Register("CurrentPage", typeof(int), typeof(SearchControl), new UIPropertyMetadata(1));
         public int CurrentPage
         {
             get { return (int)GetValue(CurrentPageProperty); }
@@ -271,7 +271,11 @@ namespace Signum.Windows
             this.Loaded -= SearchControl_Loaded;
 
             if (DesignerProperties.GetIsInDesignMode(this) || QueryName == null)
+            {
+                tokenBuilder.Token = null;
+                tokenBuilder.SubTokensEvent += q => new QueryToken[0];
                 return;
+            }
 
             Settings = Navigator.GetQuerySettings(QueryName);
 
@@ -493,7 +497,8 @@ namespace Signum.Windows
                 Filters = FilterOptions.Select(f => f.ToFilter()).ToList(),
                 Orders = OrderOptions.Select(o => o.ToOrder()).ToList(),
                 Columns = CurrentColumns.ToList(),
-                ElementsPerPage = ElementsPerPage
+                ElementsPerPage = ElementsPerPage,
+                CurrentPage = CurrentPage,
             };
 
             return request;
@@ -525,9 +530,11 @@ namespace Signum.Windows
             elementsInPageLabel.TotalPages = resultTable.TotalPages;
             elementsInPageLabel.StartElementIndex = resultTable.StartElementIndex;
             elementsInPageLabel.EndElementIndex = resultTable.EndElementIndex;
+            elementsInPageLabel.TotalElements = resultTable.TotalElements;
 
-            elementsPerPageSelector.ElementsPerPage = resultTable.ElementsPerPage;
+            pageSizeSelector.PageSize = resultTable.ElementsPerPage;
 
+            pageSelector.Visibility = System.Windows.Visibility.Visible;
             pageSelector.CurrentPage = resultTable.CurrentPage;
             pageSelector.TotalPages = resultTable.TotalPages;
             
@@ -540,10 +547,33 @@ namespace Signum.Windows
         {
             OnQueryResultChanged(true);
             resultTable = null;
-            pageSelector.Visibility = Visibility.Hidden;
             elementsInPageLabel.Visibility = Visibility.Hidden;
+            pageSelector.Visibility = Visibility.Hidden;
             lvResult.ItemsSource = null;
             lvResult.Background = Brushes.WhiteSmoke;
+        }
+
+        void pageSelector_Changed(object sender, RoutedEventArgs e)
+        {
+            Width = this.ActualWidth;
+            Height = this.ActualHeight;
+            Search(); 
+        }
+
+
+        public event EventHandler ClearSize; 
+
+        void ElementsPerPage_Changed()
+        {
+            if (IsLoaded)
+            {
+                CurrentPage = 1;
+                ClearValue(WidthProperty);
+                ClearValue(HeightProperty);
+                if (ClearSize != null)
+                    ClearSize(this, new EventArgs()); 
+                Search();
+            }
         }
 
         void OnQueryResultChanged(bool cleaning)

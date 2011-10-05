@@ -262,7 +262,7 @@
     <value>Invalid date format</value>
   </data>
   <data name="Results" xml:space="preserve">
-    <value>Results.</value>
+    <value>results.</value>
   </data>
   <data name="Limitation" xml:space="preserve">
     <value>Limitation:</value>
@@ -368,10 +368,13 @@ Lose changes?</value>
   <data name="RestoreAll" xml:space="preserve">
     <value>Restore all</value>
   </data>
-  <data name="PageSize" xml:space="preserve">
-    <value>Page size:</value>
+  <data name="Rows" xml:space="preserve">
+    <value>Rows:</value>
   </data>
   <data name="All" xml:space="preserve">
     <value>All</value>
+  </data>
+  <data name="Of" xml:space="preserve">
+    <value>of</value>
   </data>
 </root>

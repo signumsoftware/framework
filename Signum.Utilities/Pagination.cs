@@ -17,7 +17,7 @@ namespace Signum.Utilities
 
         public int EndElementIndex
         {
-            get { return StartElementIndex + Elements.Count; }
+            get { return StartElementIndex + Elements.Count - 1; }
         }
 
         public int TotalElements { get; private set; }

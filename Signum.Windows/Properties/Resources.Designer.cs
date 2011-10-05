@@ -541,6 +541,15 @@ namespace Signum.Windows.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to of.
+        /// </summary>
+        internal static string Of {
+            get {
+                return ResourceManager.GetString("Of", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Ok.
         /// </summary>
         internal static string Ok {
@@ -564,15 +573,6 @@ namespace Signum.Windows.Properties {
         internal static string Operation {
             get {
                 return ResourceManager.GetString("Operation", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Page size:.
-        /// </summary>
-        internal static string PageSize {
-            get {
-                return ResourceManager.GetString("PageSize", resourceCulture);
             }
         }
         
@@ -658,11 +658,20 @@ namespace Signum.Windows.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Results..
+        ///   Looks up a localized string similar to results..
         /// </summary>
         internal static string Results {
             get {
                 return ResourceManager.GetString("Results", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Rows:.
+        /// </summary>
+        internal static string Rows {
+            get {
+                return ResourceManager.GetString("Rows", resourceCulture);
             }
         }
         

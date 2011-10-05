@@ -18,24 +18,19 @@ namespace Signum.Windows
     /// <summary>
     /// Interaction logic for Pagination.xaml
     /// </summary>
-    public partial class ElementsPerPageSelector : UserControl
+    public partial class PageSizeSelector : UserControl
     {
-        public static readonly DependencyProperty ElementsPerPageProperty =
-            DependencyProperty.Register("ElementsPerPage", typeof(int), typeof(ElementsPerPageSelector), new UIPropertyMetadata(0));
-        public int ElementsPerPage
+        public static readonly DependencyProperty PageSizeProperty =
+            DependencyProperty.Register("PageSize", typeof(int?), typeof(PageSizeSelector), new FrameworkPropertyMetadata(0, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+        public int? PageSize
         {
-            get { return (int)GetValue(ElementsPerPageProperty); }
-            set { SetValue(ElementsPerPageProperty, value); }
+            get { return (int?)GetValue(PageSizeProperty); }
+            set { SetValue(PageSizeProperty, value); }
         }
 
-        public ElementsPerPageSelector()
+        public PageSizeSelector()
         {
             InitializeComponent();
-        }
-
-        private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-
         }
     }
 }

@@ -12,6 +12,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Signum.Utilities;
+using Signum.Utilities.DataStructures;
 
 namespace Signum.Windows
 {
@@ -21,7 +22,8 @@ namespace Signum.Windows
     public partial class PageSelector : UserControl
     {
         public static readonly DependencyProperty CurrentPageProperty =
-            DependencyProperty.Register("CurrentPage", typeof(int), typeof(PageSelector), new UIPropertyMetadata(1, (s, e) => ((PageSelector)s).RefreshButtons()));
+            DependencyProperty.Register("CurrentPage", typeof(int), typeof(PageSelector), new FrameworkPropertyMetadata(1,  FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
+                (s, e) => ((PageSelector)s).RefreshButtons()));
         public int CurrentPage
         {
             get { return (int)GetValue(CurrentPageProperty); }
@@ -35,6 +37,15 @@ namespace Signum.Windows
             get { return (int)GetValue(TotalPagesProperty); }
             set { SetValue(TotalPagesProperty, value); }
         }
+        
+        public static readonly RoutedEvent PageChangedEvent = EventManager.RegisterRoutedEvent(
+            "PageChanged", RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(PageSelector));
+        public event RoutedEventHandler PageChanged
+        {
+            add { AddHandler(PageChangedEvent, value); }
+            remove { RemoveHandler(PageChangedEvent, value); }
+        }
+
 
         public PageSelector()
         {
@@ -58,36 +69,67 @@ namespace Signum.Windows
 
             spPages.Children.Clear();
 
-            if (1 < CurrentPage)
+            Interval<int> interval = new Interval<int>(
+                Math.Max(1, CurrentPage - 2),
+                Math.Min(CurrentPage + 2, TotalPages));
+
+
+
+            if (interval.Min != 1)
+            {
                 spPages.Children.Add(CreateButton(1));
+                if (interval.Min - 1 != 1)
+                    spPages.Children.Add(CreateLabel("..."));
+            }
 
-            if (1 < CurrentPage - 2)
-                spPages.Children.Add(CreateLabel("..."));
-
-            for (int i = Math.Max(2, CurrentPage - 2); i < CurrentPage; i++) 
+            for (int i = interval.Min; i < CurrentPage; i++)
                 spPages.Children.Add(CreateButton(i));
 
-            CreateLabel(CurrentPage.ToString());
+            spPages.Children.Add(CreateLabel(CurrentPage.ToString()));
 
-            for (int i = CurrentPage + 1; i < TotalPages - 1; i++)
+            for (int i = CurrentPage + 1; i <= interval.Max; i++) 
                 spPages.Children.Add(CreateButton(i));
 
-            if (CurrentPage + 2 < TotalPages )
-                spPages.Children.Add(CreateLabel("..."));
-
-
-            if (CurrentPage <  TotalPages)
+            if (interval.Max != TotalPages)
+            {
+                if (interval.Max + 1 != TotalPages)
+                    spPages.Children.Add(CreateLabel("..."));
                 spPages.Children.Add(CreateButton(TotalPages));
+            }
         }
 
         private UIElement CreateButton(int p)
         {
-            return new Button { Content = p }; 
+            return new Button { Content = p, BorderThickness = new Thickness(0) }; 
         }
 
         private UIElement CreateLabel(string p)
         {
             return new Label { Content = p };
+        }
+
+        private void btPrevious_Click(object sender, RoutedEventArgs e)
+        {
+            SetPage(CurrentPage - 1);
+        }
+
+        private void btNext_Click(object sender, RoutedEventArgs e)
+        {
+            SetPage(CurrentPage + 1);
+        }
+
+        private void spPages_Click(object sender, RoutedEventArgs e)
+        {
+            SetPage((int)((Button)e.OriginalSource).Content);
+        }
+
+        private void SetPage(int p)
+        {
+            if (1 <= p && p <= TotalPages)
+            {
+                CurrentPage = p;
+                RaiseEvent(new RoutedEventArgs(PageChangedEvent));
+            }
         }
     }
 }

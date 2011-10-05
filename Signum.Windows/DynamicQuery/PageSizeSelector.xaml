@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="Signum.Windows.ElementsPerPageSelector"
+﻿<UserControl x:Class="Signum.Windows.PageSizeSelector"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -15,19 +15,15 @@
         
     </UserControl.Resources>
     <StackPanel Orientation="Horizontal">
-        <Label Content="{m:Loc PageSize}"/>
-<<<<<<< HEAD
-        <ComboBox SelectedValue="{Binding ElementsPerPage, ElementName=me}" VerticalAlignment="Center">
-=======
-        <ComboBox SelectedValue="{Binding ElementsPerPage, ElementName=me}" VerticalAlignment="Center" SelectionChanged="ComboBox_SelectionChanged">
->>>>>>> master
+        <Label Content="{m:Loc Rows}"/>
+        <ComboBox SelectedValue="{Binding PageSize, ElementName=me}" SelectedValuePath="Tag" VerticalAlignment="Center">
             <ComboBox.Items>
-                <ComboBoxItem Content="5"/>
-                <ComboBoxItem Content="10"/>
-                <ComboBoxItem Content="20"/>
-                <ComboBoxItem Content="50"/>
-                <ComboBoxItem Content="100"/>
-                <ComboBoxItem Content="200"/>
+                <ComboBoxItem Content="5" Tag="5"/>
+                <ComboBoxItem Content="10" Tag="10"/>
+                <ComboBoxItem Content="20" Tag="20"/>
+                <ComboBoxItem Content="50" Tag="50"/>
+                <ComboBoxItem Content="100" Tag="100"/>
+                <ComboBoxItem Content="200" Tag="200"/>
                 <ComboBoxItem Content="{m:Loc All}" Tag="{x:Null}"/>
             </ComboBox.Items>
         </ComboBox>

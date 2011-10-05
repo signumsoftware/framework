@@ -21,10 +21,10 @@ namespace Signum.Windows
     /// </summary>
     public partial class ElementsInPageLabel : UserControl
     {
-        public static readonly IValueConverter CountToVisibility = ConverterFactory.New((int a) => a == 0 ? Visibility.Collapsed : Visibility.Visible);
-
+       
         public static readonly DependencyProperty StartElementIndexProperty =
-            DependencyProperty.Register("StartElementIndex", typeof(int?), typeof(ElementsInPageLabel), new UIPropertyMetadata(0));
+            DependencyProperty.Register("StartElementIndex", typeof(int?), typeof(ElementsInPageLabel), new UIPropertyMetadata(0, (s,e)=>((ElementsInPageLabel)s).Refresh()));
+
         public int? StartElementIndex
         {
             get { return (int?)GetValue(StartElementIndexProperty); }
@@ -32,15 +32,15 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty EndElementIndexProperty =
-            DependencyProperty.Register("EndElementIndex", typeof(int?), typeof(ElementsInPageLabel), new UIPropertyMetadata(0));
+            DependencyProperty.Register("EndElementIndex", typeof(int?), typeof(ElementsInPageLabel), new UIPropertyMetadata(0, (s,e)=>((ElementsInPageLabel)s).Refresh()));
         public int? EndElementIndex
         {
             get { return (int?)GetValue(EndElementIndexProperty); }
             set { SetValue(EndElementIndexProperty, value); }
         }
 
-        public static readonly DependencyProperty TotalElementsProperty = 
-            DependencyProperty.Register("TotalElements", typeof(int), typeof(ElementsInPageLabel), new UIPropertyMetadata(0));
+        public static readonly DependencyProperty TotalElementsProperty =
+            DependencyProperty.Register("TotalElements", typeof(int), typeof(ElementsInPageLabel), new UIPropertyMetadata(0, (s, e) => ((ElementsInPageLabel)s).Refresh()));
         public int TotalElements
         {
             get { return (int)GetValue(TotalElementsProperty); }
@@ -48,7 +48,7 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty TotalPagesProperty =
-          DependencyProperty.Register("TotalPages", typeof(int), typeof(ElementsInPageLabel), new UIPropertyMetadata(0));
+          DependencyProperty.Register("TotalPages", typeof(int), typeof(ElementsInPageLabel), new UIPropertyMetadata(0, (s, e) => ((ElementsInPageLabel)s).Refresh()));
         public int TotalPages
         {
             get { return (int)GetValue(TotalPagesProperty); }
@@ -58,6 +58,25 @@ namespace Signum.Windows
         public ElementsInPageLabel()
         {
             InitializeComponent();
+        }
+
+
+        private void Refresh()
+        {
+            tb.Inlines.Clear();
+
+            if (TotalPages > 1)
+            {
+                tb.Inlines.Add(new Run(StartElementIndex.ToString()) { FontWeight = FontWeights.Bold });
+                tb.Inlines.Add(new Run(" - "));
+                tb.Inlines.Add(new Run(EndElementIndex.ToString()) { FontWeight = FontWeights.Bold });
+                tb.Inlines.Add(new Run(Signum.Windows.Properties.Resources.Of));
+                tb.Inlines.Add(new Run(" "));
+            }
+
+            tb.Inlines.Add(new Run(TotalElements.ToString()) { FontWeight = FontWeights.Bold });
+            tb.Inlines.Add(new Run(Signum.Windows.Properties.Resources.Results)); 
+
         }
     }
 }

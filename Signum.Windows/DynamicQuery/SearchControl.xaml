@@ -168,10 +168,10 @@
                 </Style>
             </ListView.ItemContainerStyle>
         </ListView>
-        <DockPanel Height="24" Visibility="{Binding ShowFooter, Converter={x:Static m:Converters.BoolToVisibility}, ElementName=me}" Grid.Row="4" Margin="6,4,100,4" HorizontalAlignment="Left" LastChildFill="True" >
-            <m:ElementsInPageLabel x:Name="elementsInPageLabel" HorizontalAlignment="Center" DockPanel.Dock="Left" MinWidth="150"/>
-            <m:ElementsPerPageSelector x:Name="elementsPerPageSelector" DockPanel.Dock="Left"/>
-            <m:PageSelector x:Name="pageSelector" HorizontalAlignment="Right"/>
+        <DockPanel Height="24" Visibility="{Binding ShowFooter, Converter={x:Static m:Converters.BoolToVisibility}, ElementName=me}"  Grid.Row="4" Margin="6,4,6,4" >
+            <m:ElementsInPageLabel x:Name="elementsInPageLabel" VerticalAlignment="Center"  MinWidth="150" Visibility="Hidden"  DockPanel.Dock="Left" />
+            <m:PageSizeSelector x:Name="pageSizeSelector" VerticalAlignment="Center" PageSize="{Binding ElementsPerPage, ElementName=me}" DockPanel.Dock="Left"/>
+            <m:PageSelector x:Name="pageSelector" VerticalAlignment="Center" Visibility="Hidden"  PageChanged="pageSelector_Changed" CurrentPage="{Binding CurrentPage, ElementName=me}" DockPanel.Dock="Right" HorizontalAlignment="Right" />
             <!--<TextBlock TextWrapping="Wrap" x:Name="tbResultados" Visibility="Hidden" VerticalAlignment="Center" Margin="0,0,5,0">
                 <InlineUIContainer>
         		    <TextBlock Text="{Binding Items.Count, ElementName=lvResult, Mode=Default}" TextWrapping="Wrap" FontWeight="Bold" />

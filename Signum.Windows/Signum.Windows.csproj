@@ -98,7 +98,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="DynamicQuery\ElementsPerPageSelector.xaml">
+    <Page Include="DynamicQuery\PageSizeSelector.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -115,8 +115,8 @@
     <Compile Include="DynamicQuery\ElementsInPageLabel.xaml.cs">
       <DependentUpon>ElementsInPageLabel.xaml</DependentUpon>
     </Compile>
-    <Compile Include="DynamicQuery\ElementsPerPageSelector.xaml.cs">
-      <DependentUpon>ElementsPerPageSelector.xaml</DependentUpon>
+    <Compile Include="DynamicQuery\PageSizeSelector.xaml.cs">
+      <DependentUpon>PageSizeSelector.xaml</DependentUpon>
     </Compile>
     <Compile Include="DynamicQuery\PageSelector.xaml.cs">
       <DependentUpon>PageSelector.xaml</DependentUpon>
@@ -608,6 +608,10 @@
     <Resource Include="Images\calendar.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
