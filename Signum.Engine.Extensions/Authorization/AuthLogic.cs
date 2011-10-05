@@ -31,7 +31,7 @@ namespace Signum.Engine.Authorization
 
 
         public static string SystemUserName { get; set; }
-        public static UserDN systemUser;
+        static UserDN systemUser;
         public static UserDN SystemUser
         {
             get { return systemUser.ThrowIfNullC("SystemUser not loaded, Initialize to Level1SimpleEntities"); }
@@ -39,7 +39,7 @@ namespace Signum.Engine.Authorization
         }
 
         public static string AnonymousUserName { get; set; }
-        public static UserDN anonymousUser;
+        static UserDN anonymousUser;
         public static UserDN AnonymousUser
         {
             get { return anonymousUser.ThrowIfNullC("AnonymousUser not loaded, Initialize to Level1SimpleEntities"); }
