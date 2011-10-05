@@ -136,7 +136,8 @@ namespace Signum.Web.Files
             //HttpContext.Response.TransmitFile(path);
 
             string path = fp.FullPhysicalPath;
-            return File(path,  MimeType.FromFileName(path));
+            return File(FilePathLogic.GetByteArray(fp), MimeType.FromExtension(path), fp.FileName);
+            //return File(path,  MimeType.FromFileName(path)); <--this cannot handle dots inside path
         }
     }
 }
