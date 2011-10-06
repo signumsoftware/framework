@@ -207,8 +207,7 @@ namespace Signum.Test
                                                     .Where(request.Filters)
                                                     .OrderBy(request.Orders)
                                                     .Select(request.Columns)
-                                                    .TryTake(request.MaxElementIndex)
-                                                    .ToArray();
+                                                    .TryPaginatePartial(request.MaxElementIndex);
 
 
                                         var two = (from a in Database.Query<BandDN>()
@@ -225,8 +224,7 @@ namespace Signum.Test
                                                     .Where(request.Filters)
                                                     .OrderBy(request.Orders)
                                                     .Select(request.Columns)
-                                                    .TryTake(request.MaxElementIndex)
-                                                    .ToArray();
+                                                    .TryPaginatePartial(request.MaxElementIndex);
 
                                         return one.Concat(two).OrderBy(request.Orders).TryPaginate(request.ElementsPerPage, request.CurrentPage);
                                     })
