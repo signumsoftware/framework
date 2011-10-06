@@ -63,7 +63,7 @@ namespace Signum.Web
             }
             else
             {
-                qr.CurrentPage = 0;
+                qr.CurrentPage = 1;
             }
 
             return qr;

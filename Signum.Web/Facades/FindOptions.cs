@@ -72,14 +72,14 @@ namespace Signum.Web
             set { elementsPerPage = value; }
         }
 
-        bool topEmpty;
+        bool elementsPerPageEmpty;
         /// <summary>
         /// Force empty top (if set to true, Top will be ignored)
         /// </summary>
-        public bool TopEmpty
+        public bool ElementsPerPageEmpty
         {
-            get { return topEmpty; }
-            set { topEmpty = value; }
+            get { return elementsPerPageEmpty; }
+            set { elementsPerPageEmpty = value; }
         }
 
         public FindOptions() { }

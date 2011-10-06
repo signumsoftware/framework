@@ -83,7 +83,12 @@ WriteLiteral("\r\n");
    ResultTable queryResult = (ResultTable)ViewData[ViewDataKeys.Results];
    Dictionary<int, Func<HtmlHelper, object, MvcHtmlString>> formatters = (Dictionary<int, Func<HtmlHelper, object, MvcHtmlString>>)ViewData[ViewDataKeys.Formatters];
 
-WriteLiteral("\r\n");
+WriteLiteral("\r\n ");
+
+
+Write(queryResult.TotalElements);
+
+WriteLiteral("\r\n\r\n");
 
 
  if (ViewData.ContainsKey(ViewDataKeys.MultipliedMessage))

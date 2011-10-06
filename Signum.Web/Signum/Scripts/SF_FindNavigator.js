@@ -10,7 +10,7 @@ SF.registerModule("FindNavigator", function () {
             allowMultiple: null,
             create: true,
             view: true,
-            top: null,
+            elems: null,
             filters: null, //List of filter names "token1,operation1,value1;token2,operation2,value2"
             filterMode: null,
             orders: null, //A Json array like ["columnName1","-columnName2"] => will order by columnname1 asc, then by columnname2 desc
@@ -29,7 +29,7 @@ SF.registerModule("FindNavigator", function () {
     SF.FindNavigator.prototype = {
 
         webQueryName: "sfWebQueryName",
-        top: "sfTop",
+        elems: "sfElems",
         allowMultiple: "sfAllowMultiple",
         view: "sfView",
         orders: "sfOrders",
@@ -287,20 +287,22 @@ SF.registerModule("FindNavigator", function () {
                     $btnSearch.val(lang.signum.search).toggleClass("sf-loading");
                     var $control = self.control();
                     var $tbody = $control.find(".sf-search-results-container tbody");
+
+                    var index = r.indexOf('<');
+                    if(index == -1) index = r.length;
+
+                    var rowCount = r.substring(0, index); 
+                    r = r.substring(index); 
+
                     if (!SF.isEmpty(r)) {
                         $tbody.html(r);
                         SF.triggerNewContent($control.find(".sf-search-results-container tbody"));
-                        var rowCount = $control.find(".sf-search-results-container tbody tr:not(.sf-tr-multiply)").length;
                         $control.find(self.pf("rowsFoundCount")).html(rowCount);
-                        $control.find(".rows-found-count-maximum").removeClass("rows-found-count-maximum");
-                        if (rowCount == $(self.pf("sfTop")).val()) {
-                            $control.find(".rows-found-count").addClass("rows-found-count-maximum");
-                        }
                     }
                     else {
                         $tbody.html("");
                     }
-                    if ($tbody.find("tr:not(.sf-tr-multiply)").length == 0) {
+                    if (rowCount == 0) {
                         var columns = $(self.pf("divResults th")).length;
                         $tbody.append("<tr><td class=\"sf-td-no-results\" colspan=\"" + columns + "\">" + lang.signum.noResults + "</td></tr>")
                         $control.find(self.pf("rowsFoundCount")).html(0);
@@ -317,7 +319,7 @@ SF.registerModule("FindNavigator", function () {
         requestDataForSearch: function () {
             var requestData = new Object();
             requestData["webQueryName"] = $(this.pf(this.webQueryName)).val();
-            requestData["top"] = $(this.pf(this.top)).val();
+            requestData["elems"] = $(this.pf(this.elems)).val();
             requestData["allowMultiple"] = $(this.pf(this.allowMultiple)).val();
 
             var canView = $(this.pf(this.view)).val();
@@ -335,7 +337,7 @@ SF.registerModule("FindNavigator", function () {
         requestDataForOpenFinder: function () {
             var requestData = {};
             requestData["webQueryName"] = this.findOptions.webQueryName;
-            requestData["top"] = this.findOptions.top;
+            requestData["elems"] = this.findOptions.elems;
             requestData["allowMultiple"] = this.findOptions.allowMultiple;
             if (this.findOptions.view == false)
                 requestData["view"] = this.findOptions.view;
@@ -643,7 +645,7 @@ SF.registerModule("FindNavigator", function () {
 
             var $btnAddFilter = $(this.pf("btnAddFilter"));
             var $btnAddColumn = $(this.pf("btnAddColumn"));
-            
+
             //Clear child subtoken combos
             var self = this;
             $selectedColumn.siblings("select,span")
@@ -794,7 +796,7 @@ SF.registerModule("FindNavigator", function () {
 
         requestDataForSearchPopupCreate: function () {
             return $.extend(this.serializeFilters(), {
-                webQueryName: ((SF.isEmpty(this.findOptions.webQueryName)) ? $(this.pf(this.webQueryName)).val() : this.findOptions.webQueryName) 
+                webQueryName: ((SF.isEmpty(this.findOptions.webQueryName)) ? $(this.pf(this.webQueryName)).val() : this.findOptions.webQueryName)
             });
         },
 

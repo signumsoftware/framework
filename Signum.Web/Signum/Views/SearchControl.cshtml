@@ -166,8 +166,8 @@
         
         <div class="ui-widget-header ui-corner-bottom sf-search-footer" style="display:@((findOptions.FilterMode != FilterMode.OnlyResults) ? "block" : "none")">
             @Html.Span(null, Resources.SearchControl_ShowNRows_Show)
-            @{ int? elems = findOptions.ElementsPerPage ?? (findOptions.TopEmpty ? null : Navigator.Manager.QuerySettings.GetOrThrow(findOptions.QueryName, "Missing QuerySettings for QueryName {0}").ElementsPerPage);}
-            @HtmlHelperExtenders.InputType("text", Model.Compose("sfTop"), elems.TryToString(), new Dictionary<string, object> { { "size", "3" }, { "onkeydown", "return SF.InputValidator.isNumber(event)" } })
+            @{ int? elems = findOptions.ElementsPerPage ?? (findOptions.ElementsPerPageEmpty ? null : Navigator.Manager.QuerySettings.GetOrThrow(findOptions.QueryName, "Missing QuerySettings for QueryName {0}").ElementsPerPage);}
+            @HtmlHelperExtenders.InputType("text", Model.Compose("sfElems"), elems.TryToString(), new Dictionary<string, object> { { "size", "3" }, { "onkeydown", "return SF.InputValidator.isNumber(event)" } })
             @Html.Span(null, Resources.SearchControl_ShowNRows_Rows + ".")
             @Html.Span(Model.Compose("rowsFoundCount"), "0", "rows-found-count")
             @Html.Span(null, Resources.SearchControl_RowsFound, "rows-found-count")
