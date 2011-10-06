@@ -207,7 +207,7 @@ namespace Signum.Web.UserQueries
             }));
 
             findOptions.ElementsPerPage = userQuery.ElementsPerPage;
-            findOptions.TopEmpty = userQuery.ElementsPerPage == null;
+            findOptions.ElementsPerPageEmpty = userQuery.ElementsPerPage == null;
         }
 
         public static FindOptions ToFindOptions(this UserQueryDN userQuery)
