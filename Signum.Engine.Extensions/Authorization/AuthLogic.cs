@@ -113,7 +113,7 @@ namespace Signum.Engine.Authorization
                     Execute = (u, args) =>
                     {
                         string newPassword = args.TryGetArgC<string>(0);
-                        AuthLogic.ChangePassword(u.UserName, u.PasswordHash, Security.EncodePassword(newPassword));
+                        u.PasswordHash = Security.EncodePassword(newPassword);
                     }
                 }.Register();
             }
