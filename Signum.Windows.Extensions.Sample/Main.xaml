@@ -24,6 +24,7 @@
 
                 <MenuItem Tag="{m:Explore QueryName={x:Type st:ArtistDN}}"/>
                 <MenuItem Tag="{m:Explore QueryName={x:Type st:BandDN}}"/>
+                <MenuItem Tag="{m:Explore QueryName={x:Type st:IAuthorDN}}"/>
                 <MenuItem Tag="{m:Explore QueryName={x:Type st:NoteWithDateDN}}"/>
                 <MenuItem Tag="{m:Explore QueryName={x:Type st:LabelDN}}"/>
 
