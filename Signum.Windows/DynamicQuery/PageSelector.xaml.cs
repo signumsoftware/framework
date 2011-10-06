@@ -100,7 +100,7 @@ namespace Signum.Windows
 
         private UIElement CreateButton(int p)
         {
-            return new Button { Content = p, BorderThickness = new Thickness(0) }; 
+            return new Button { Content = p }; 
         }
 
         private UIElement CreateLabel(string p)

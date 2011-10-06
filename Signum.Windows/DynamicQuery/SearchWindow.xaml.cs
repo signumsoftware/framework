@@ -140,6 +140,14 @@ namespace Signum.Windows
             ButtonsChanged();
             searchControl.Loaded += new RoutedEventHandler(searchControl_Loaded);
             searchControl.ClearSize += new EventHandler(searchControl_ClearSize);
+            searchControl.FixSize += new EventHandler(searchControl_FixSize);
+        }
+
+        void searchControl_FixSize(object sender, EventArgs e)
+        {
+            this.Width = this.ActualWidth;
+            this.Height = this.ActualHeight;
+            this.SizeToContent = System.Windows.SizeToContent.Manual;
         }
 
         void searchControl_ClearSize(object sender, EventArgs e)
@@ -173,9 +181,7 @@ namespace Signum.Windows
         void ButtonsChanged()
         {
             bool ok = Mode == SearchMode.Find;
-
-            btOk.Visibility = ok ? Visibility.Visible : Visibility.Collapsed;
-            btCancel.Visibility = ok ? Visibility.Visible : Visibility.Collapsed;
+            spOkCancel.Visibility =  ok ? Visibility.Visible : Visibility.Collapsed;
             
             searchControl.IsAdmin = !ok;
 

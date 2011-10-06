@@ -555,12 +555,12 @@ namespace Signum.Windows
 
         void pageSelector_Changed(object sender, RoutedEventArgs e)
         {
-            Width = this.ActualWidth;
-            Height = this.ActualHeight;
+            if (FixSize != null)
+                FixSize(this, new EventArgs()); 
             Search(); 
         }
 
-
+        public event EventHandler FixSize; 
         public event EventHandler ClearSize; 
 
         void ElementsPerPage_Changed()
@@ -568,8 +568,6 @@ namespace Signum.Windows
             if (IsLoaded)
             {
                 CurrentPage = 1;
-                ClearValue(WidthProperty);
-                ClearValue(HeightProperty);
                 if (ClearSize != null)
                     ClearSize(this, new EventArgs()); 
                 Search();
