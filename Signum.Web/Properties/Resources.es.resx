@@ -177,14 +177,8 @@
   <data name="Type0NotAllowed" xml:space="preserve">
     <value>El tipo {0} no está permitido</value>
   </data>
-  <data name="Average" xml:space="preserve">
-    <value>Medio</value>
-  </data>
   <data name="Signum_enterTheNewColumnName" xml:space="preserve">
     <value>Escriba el nuevo nombre de columna</value>
-  </data>
-  <data name="ExecutedXTimes" xml:space="preserve">
-    <value>Ejecutado x veces</value>
   </data>
   <data name="Field" xml:space="preserve">
     <value>Campo</value>
@@ -194,12 +188,6 @@
   </data>
   <data name="Signum_addFilter" xml:space="preserve">
     <value>Agregar filtro</value>
-  </data>
-  <data name="Maximum" xml:space="preserve">
-    <value>Máximo</value>
-  </data>
-  <data name="Minimum" xml:space="preserve">
-    <value>Mínimo</value>
   </data>
   <data name="Name" xml:space="preserve">
     <value>Nombre</value>
@@ -239,9 +227,6 @@
   </data>
   <data name="FilterBuilder_DeleteFilter" xml:space="preserve">
     <value>Eliminar filtro</value>
-  </data>
-  <data name="Excel" xml:space="preserve">
-    <value>Excel</value>
   </data>
   <data name="NoResults" xml:space="preserve">
     <value>No hay resultados</value>

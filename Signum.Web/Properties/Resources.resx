@@ -168,26 +168,14 @@
   <data name="Type0NotAllowed" xml:space="preserve">
     <value>Type {0} not allowed</value>
   </data>
-  <data name="Average" xml:space="preserve">
-    <value>Average</value>
-  </data>
   <data name="FilterBuilder_DeleteFilter" xml:space="preserve">
     <value>Delete Filter</value>
-  </data>
-  <data name="ExecutedXTimes" xml:space="preserve">
-    <value>Executed x times</value>
   </data>
   <data name="Field" xml:space="preserve">
     <value>Field</value>
   </data>
   <data name="Signum_hideFilters" xml:space="preserve">
     <value>Hide filters</value>
-  </data>
-  <data name="Maximum" xml:space="preserve">
-    <value>Maximum</value>
-  </data>
-  <data name="Minimum" xml:space="preserve">
-    <value>Minimum</value>
   </data>
   <data name="Name" xml:space="preserve">
     <value>Name</value>
@@ -209,9 +197,6 @@
   </data>
   <data name="SearchControl_ShowNRows_Show" xml:space="preserve">
     <value>Show</value>
-  </data>
-  <data name="Excel" xml:space="preserve">
-    <value>Excel</value>
   </data>
   <data name="CalendarClose" xml:space="preserve">
     <value>Done</value>

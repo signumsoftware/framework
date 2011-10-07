@@ -178,15 +178,6 @@ namespace Signum.Entities.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &apos;{0}&apos; is not a valid identifier.
-        /// </summary>
-        public static string _0IsNotAValidIdentifier {
-            get {
-                return ResourceManager.GetString("_0IsNotAValidIdentifier", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to {0} is not set.
         /// </summary>
         public static string _0IsNotSet {
@@ -520,15 +511,6 @@ namespace Signum.Entities.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Text.
-        /// </summary>
-        public static string IdentifiableEntity_ToStr {
-            get {
-                return ResourceManager.GetString("IdentifiableEntity_ToStr", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Id not valid.
         /// </summary>
         public static string IdNotValid {
@@ -552,15 +534,6 @@ namespace Signum.Entities.Properties {
         public static string InvalidFormat {
             get {
                 return ResourceManager.GetString("InvalidFormat", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Locked.
-        /// </summary>
-        public static string LockeableEntity_Locked {
-            get {
-                return ResourceManager.GetString("LockeableEntity_Locked", resourceCulture);
             }
         }
         

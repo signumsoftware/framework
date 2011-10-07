@@ -115,15 +115,6 @@ namespace Signum.Web.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Average.
-        /// </summary>
-        public static string Average {
-            get {
-                return ResourceManager.GetString("Average", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Done.
         /// </summary>
         public static string CalendarClose {
@@ -183,24 +174,6 @@ namespace Signum.Web.Properties {
         public static string CreateNote {
             get {
                 return ResourceManager.GetString("CreateNote", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Excel.
-        /// </summary>
-        public static string Excel {
-            get {
-                return ResourceManager.GetString("Excel", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Executed x times.
-        /// </summary>
-        public static string ExecutedXTimes {
-            get {
-                return ResourceManager.GetString("ExecutedXTimes", resourceCulture);
             }
         }
         
@@ -291,24 +264,6 @@ namespace Signum.Web.Properties {
         public static string LineButton_View {
             get {
                 return ResourceManager.GetString("LineButton_View", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Maximum.
-        /// </summary>
-        public static string Maximum {
-            get {
-                return ResourceManager.GetString("Maximum", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Minimum.
-        /// </summary>
-        public static string Minimum {
-            get {
-                return ResourceManager.GetString("Minimum", resourceCulture);
             }
         }
         

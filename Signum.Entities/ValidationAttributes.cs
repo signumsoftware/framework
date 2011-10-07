@@ -578,7 +578,8 @@ namespace Signum.Entities
         Uppercase,
         Lowercase
     }
-
+    
+    [ForceLocalization]
     public enum ComparisonType
     {
         EqualTo,
