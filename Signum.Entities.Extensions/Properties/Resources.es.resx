@@ -300,12 +300,6 @@
   <data name="ScheduleRuleDailyDN" xml:space="preserve">
     <value>Diariamente</value>
   </data>
-  <data name="ScheduleRuleDayDN_Hour" xml:space="preserve">
-    <value>Hora</value>
-  </data>
-  <data name="ScheduleRuleDayDN_Minute" xml:space="preserve">
-    <value>Minuto</value>
-  </data>
   <data name="ScheduleRuleWeekDaysDN" xml:space="preserve">
     <value>Días de la semana</value>
   </data>
@@ -563,9 +557,6 @@
   </data>
   <data name="PackageDN_Name" xml:space="preserve">
     <value>Nombre</value>
-  </data>
-  <data name="BasicPermissions_AdminRules" xml:space="preserve">
-    <value>Administrar reglas</value>
   </data>
   <data name="ControlPanelDN_Part0IsInColumn1ButPanelHasOnly2Columns" xml:space="preserve">
     <value>La parte {0} está en la columna {1} pero el panel sólo tiene {2} columnas</value>
@@ -1323,12 +1314,6 @@
   <data name="ScheduleRuleHourlyDN_EachHour" xml:space="preserve">
     <value>Cada hora</value>
   </data>
-  <data name="ScheduleRuleHourlyDN_NotMultiple" xml:space="preserve">
-    <value>Hora no es múltiple de</value>
-  </data>
-  <data name="ScheduleRuleHourlyDN_NotValid" xml:space="preserve">
-    <value>Tiempo seleccionado no es válido</value>
-  </data>
   <data name="ScheduleRuleHourlyDN_StartingOn" xml:space="preserve">
     <value>A partir de</value>
   </data>
@@ -1337,12 +1322,6 @@
   </data>
   <data name="ScheduleRuleMinutelyDN_EachMinute" xml:space="preserve">
     <value>Cada minuto</value>
-  </data>
-  <data name="ScheduleRuleMinutelyDN_NotMultiple" xml:space="preserve">
-    <value>Minuto no es múltiple de</value>
-  </data>
-  <data name="ScheduleRuleMinutelyDN_NotValid" xml:space="preserve">
-    <value>Tiempo seleccionado no es válido</value>
   </data>
   <data name="ScheduleRuleMinutelyDN_StartingOn" xml:space="preserve">
     <value>A partir de</value>
