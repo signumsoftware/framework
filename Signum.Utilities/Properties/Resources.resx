@@ -123,9 +123,6 @@
   <data name="_0Days" xml:space="preserve">
     <value>{0} Days</value>
   </data>
-  <data name="_0HasNoFreeBits" xml:space="preserve">
-    <value>{0:X} has no free bits</value>
-  </data>
   <data name="_0Hour" xml:space="preserve">
     <value>{0} Hour</value>
   </data>
@@ -153,9 +150,6 @@
   <data name="_0Year" xml:space="preserve">
     <value>{0} Year</value>
   </data>
-  <data name="_0Year1Month2Day" xml:space="preserve">
-    <value>{0} Year(s), {1} Month(s), {2} Day(s)</value>
-  </data>
   <data name="_0Years" xml:space="preserve">
     <value>{0} Years</value>
   </data>
@@ -167,21 +161,6 @@
   </data>
   <data name="DateThis" xml:space="preserve">
     <value>This {0}</value>
-  </data>
-  <data name="DateTimePrecision_Days" xml:space="preserve">
-    <value>Days</value>
-  </data>
-  <data name="DateTimePrecision_Hours" xml:space="preserve">
-    <value>Hours</value>
-  </data>
-  <data name="DateTimePrecision_Milliseconds" xml:space="preserve">
-    <value>Milliseconds</value>
-  </data>
-  <data name="DateTimePrecision_Minutes" xml:space="preserve">
-    <value>Minutes</value>
-  </data>
-  <data name="DateTimePrecision_Seconds" xml:space="preserve">
-    <value>Seconds</value>
   </data>
   <data name="EnterYourSelection" xml:space="preserve">
     <value>Enter your selection: </value>

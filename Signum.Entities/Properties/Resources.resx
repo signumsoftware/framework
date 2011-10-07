@@ -150,9 +150,6 @@
   <data name="_0IsNotAllowedOnState1" xml:space="preserve">
     <value>{0} is not allowed on state {1}</value>
   </data>
-  <data name="_0IsNotAValidIdentifier" xml:space="preserve">
-    <value>'{0}' is not a valid identifier</value>
-  </data>
   <data name="And" xml:space="preserve">
     <value> and </value>
   </data>
@@ -264,9 +261,6 @@
   <data name="InvalidFormat" xml:space="preserve">
     <value>Invalid Format</value>
   </data>
-  <data name="LockeableEntity_Locked" xml:space="preserve">
-    <value>Locked</value>
-  </data>
   <data name="Lowercase" xml:space="preserve">
     <value>lowercase</value>
   </data>
@@ -341,9 +335,6 @@
   </data>
   <data name="_0IsNotSet" xml:space="preserve">
     <value>{0} is not set</value>
-  </data>
-  <data name="IdentifiableEntity_ToStr" xml:space="preserve">
-    <value>Text</value>
   </data>
   <data name="AttemptToModifyLockedEntity0" xml:space="preserve">
     <value>Attempt to modify locked entity {0}</value>

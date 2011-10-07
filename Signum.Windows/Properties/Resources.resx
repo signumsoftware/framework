@@ -117,9 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="File" xml:space="preserve">
-    <value>File</value>
-  </data>
   <data name="Note" xml:space="preserve">
     <value>Note:</value>
   </data>
@@ -134,12 +131,6 @@
   </data>
   <data name="NoFilterSelected" xml:space="preserve">
     <value>No filter selected</value>
-  </data>
-  <data name="NoAdminControlFor0" xml:space="preserve">
-    <value>There is no AdminControl for {0}</value>
-  </data>
-  <data name="Column" xml:space="preserve">
-    <value>Column</value>
   </data>
   <data name="CreateNew" xml:space="preserve">
     <value>Create new</value>
@@ -167,12 +158,6 @@
   </data>
   <data name="MoveUp" xml:space="preserve">
     <value>Move up</value>
-  </data>
-  <data name="OpenFile" xml:space="preserve">
-    <value>Open File</value>
-  </data>
-  <data name="SaveFile" xml:space="preserve">
-    <value>Save File</value>
   </data>
   <data name="ViewFile" xml:space="preserve">
     <value>View File</value>
@@ -228,9 +213,6 @@
   <data name="Filters" xml:space="preserve">
     <value>Filters</value>
   </data>
-  <data name="Links" xml:space="preserve">
-    <value>Links</value>
-  </data>
   <data name="Notes" xml:space="preserve">
     <value>Notes</value>
   </data>
@@ -239,9 +221,6 @@
   </data>
   <data name="FinderOf0" xml:space="preserve">
     <value>Finder of {0}</value>
-  </data>
-  <data name="Finder" xml:space="preserve">
-    <value>Finder</value>
   </data>
   <data name="Value" xml:space="preserve">
     <value>Value</value>
@@ -364,8 +343,5 @@ Lose changes?</value>
   </data>
   <data name="SessionExpired" xml:space="preserve">
     <value>Sesion Expired</value>
-  </data>
-  <data name="RestoreAll" xml:space="preserve">
-    <value>Restore all</value>
   </data>
 </root>
