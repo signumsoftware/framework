@@ -56,7 +56,7 @@ namespace Signum.Windows.UserQueries
                      
             searchControl.Reinitialize(filters, columns, uq.ColumnsMode, orders);
 
-            searchControl.MaxItems = uq.MaxItems;
+            searchControl.ElementsPerPage = uq.ElementsPerPage;
         }
     }
 }

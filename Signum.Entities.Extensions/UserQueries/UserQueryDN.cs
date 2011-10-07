@@ -80,12 +80,12 @@ namespace Signum.Entities.UserQueries
             set { Set(ref columns, value, () => Columns); }
         }
 
-        int? maxItems;
+        int? elementsPerPage;
         [NumberIsValidator(ComparisonType.GreaterThan, 0)]
-        public int? MaxItems
+        public int? ElementsPerPage
         {
-            get { return maxItems; }
-            set { Set(ref maxItems, value, () => MaxItems); }
+            get { return elementsPerPage; }
+            set { Set(ref elementsPerPage, value, () => ElementsPerPage); }
         }
 
         protected override void PostRetrieving()
@@ -326,7 +326,7 @@ namespace Signum.Entities.UserQueries
                     Token = oo.Token, 
                     OrderType = oo.OrderType 
                 }).ToMList(),
-                MaxItems = request.MaxItems
+                ElementsPerPage = request.ElementsPerPage
             };
         }
 

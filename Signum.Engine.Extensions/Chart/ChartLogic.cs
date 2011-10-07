@@ -196,13 +196,16 @@ namespace Signum.Engine.Extensions.Chart
                               orderby ct.OrderPriority.Value
                               select new Order(ct.Token, ct.OrderType.Value)).ToList();
 
-                DEnumerable<T> result;
+                object[] result;
                 if (collection is DQueryable<T>)
-                    result = ((DQueryable<T>)collection).OrderBy(orders).ToArray();
+                    result = ((DQueryable<T>)collection).OrderBy(orders).Query.ToArray();
                 else
-                    result = ((DEnumerable<T>)collection).OrderBy(orders).ToArray();
+                    result = ((DEnumerable<T>)collection).OrderBy(orders).Collection.ToArray();
 
-                return result.ToResultTable(columns);
+                var cols = columns.Select(c => Tuple.Create(c,
+                    Expression.Lambda(c.Token.BuildExpression(collection.Context), collection.Context.Parameter))).ToList();
+
+                return result.ToResultTable(cols, result.Length, 0, null);
             }
             else
             {
@@ -228,7 +231,7 @@ namespace Signum.Engine.Extensions.Chart
                 var cols = columns.Select((c, i) =>
                     Tuple.Create(c, TupleReflection.TupleChainPropertyLambda(resultType, i))).ToList();
 
-                return result.ToResultTable(cols);
+                return result.ToResultTable(cols, cols.Count, 0, null);
             }
         }
 

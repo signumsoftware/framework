@@ -206,8 +206,8 @@ namespace Signum.Web.UserQueries
                 OrderType = qo.OrderType
             }));
 
-            findOptions.Top = userQuery.MaxItems;
-            findOptions.TopEmpty = userQuery.MaxItems == null;
+            findOptions.ElementsPerPage = userQuery.ElementsPerPage;
+            findOptions.ElementsPerPageEmpty = userQuery.ElementsPerPage == null;
         }
 
         public static FindOptions ToFindOptions(this UserQueryDN userQuery)
