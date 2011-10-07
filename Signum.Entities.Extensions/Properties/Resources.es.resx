@@ -483,8 +483,8 @@
   <data name="UserQueryDN_Orders" xml:space="preserve">
     <value>Ordenes</value>
   </data>
-  <data name="UserQueryDN_MaxItems" xml:space="preserve">
-    <value>Max. Resultados</value>
+  <data name="UserQueryDN_ElementsPerPage" xml:space="preserve">
+    <value>Elementos por página</value>
   </data>
   <data name="QueryDN" xml:space="preserve">
     <value>Query</value>
