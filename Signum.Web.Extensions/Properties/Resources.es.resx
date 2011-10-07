@@ -117,9 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AreYouSureOfDeletingTheEntity012" xml:space="preserve">
-    <value>¿Está seguro de eliminar del sistema la entidad {0} ({1}:{2})?</value>
-  </data>
   <data name="ConfirmNewPassword" xml:space="preserve">
     <value>Confirmar nueva contraseña</value>
   </data>
@@ -129,17 +126,8 @@
   <data name="Appendices" xml:space="preserve">
     <value>Apéndices</value>
   </data>
-  <data name="CurrentPassword" xml:space="preserve">
-    <value>Contraseña actual</value>
-  </data>
   <data name="ChangePassword" xml:space="preserve">
     <value>Cambiar contraseña</value>
-  </data>
-  <data name="ChangePasswordExplanation" xml:space="preserve">
-    <value>Utilice el siguiente formulario para cambiar su contraseña</value>
-  </data>
-  <data name="EmailIsNotValid" xml:space="preserve">
-    <value>El email es diferente del email guardado</value>
   </data>
   <data name="EmailMustHaveAValue" xml:space="preserve">
     <value>El correo electrónico debe tener un valor</value>
@@ -150,23 +138,11 @@
   <data name="HelpDocumentation" xml:space="preserve">
     <value>Documentación de ayuda</value>
   </data>
-  <data name="InvalidNewPassword" xml:space="preserve">
-    <value>La nueva contraseña es incorrecta</value>
-  </data>
-  <data name="InvalidOperationType0inTheConstructionOfOperation1" xml:space="preserve">
-    <value>El tipo de operación {{0}} es inválido para la operación {{1}}</value>
-  </data>
   <data name="InvalidUsernameOrPassword" xml:space="preserve">
     <value>El nombre de usuario o la contraseña son incorrectos</value>
   </data>
   <data name="Key0NotFound" xml:space="preserve">
     <value>Clave {0} no encontrada</value>
-  </data>
-  <data name="MailBody_RememberPassword" xml:space="preserve">
-    <value>Le enviamos este correo por haber solicitado que le recordemos su contraseña. Por seguridad, hemos generado una contraseña aleatoria, que luego podrá cambiar.&lt;br/&gt;&lt;br/&gt;La contraseña es &lt;b&gt;{0}&lt;/b&gt;</value>
-  </data>
-  <data name="MailSubject_RememberPassword" xml:space="preserve">
-    <value>Recordatorio de contraseña</value>
   </data>
   <data name="Message" xml:space="preserve">
     <value>Mensaje</value>
@@ -180,20 +156,8 @@
   <data name="PasswordHasBeenChangedSuccessfully" xml:space="preserve">
     <value>La contraseña se ha cambiado con éxito</value>
   </data>
-  <data name="PasswordHasBeenSent" xml:space="preserve">
-    <value>La contraseña ha sido enviada a la dirección de correo electrónico proporcionada {0}</value>
-  </data>
-  <data name="PasswordMustHave0orMoreCharacters" xml:space="preserve">
-    <value>La contraseña debe tener {0} o más caracteres</value>
-  </data>
   <data name="PasswordMustHaveAValue" xml:space="preserve">
     <value>Se debe especificar la contraseña</value>
-  </data>
-  <data name="Property0DoesNotExistInType1" xml:space="preserve">
-    <value>La propiedad {0} no existe en el tipo {1}</value>
-  </data>
-  <data name="Property0HasNoValue" xml:space="preserve">
-    <value>La propiedad {0} no tiene un valor</value>
   </data>
   <data name="Property0NotExistsInType1" xml:space="preserve">
     <value>La propiedad {0} no existe en el tipo {1}</value>
@@ -213,14 +177,8 @@
   <data name="TheSpecifiedPasswordsDontMatch" xml:space="preserve">
     <value>Las contraseñas especificadas no coinciden</value>
   </data>
-  <data name="UserNameAlreadyExists" xml:space="preserve">
-    <value>El nombre de usuario elegido ya está registrado, debe elegir otro distinto</value>
-  </data>
   <data name="UserNameMustHaveAValue" xml:space="preserve">
     <value>Se debe introducir el nombre de usuario</value>
-  </data>
-  <data name="YouMustEnterTheCurrentPassword" xml:space="preserve">
-    <value>Debe especificar la contraseña actual</value>
   </data>
   <data name="YouMustRepeatTheNewPassword" xml:space="preserve">
     <value>Debes repetir la nueva contraseña</value>
@@ -285,20 +243,8 @@
   <data name="TypesAscx_Type" xml:space="preserve">
     <value>Tipo</value>
   </data>
-  <data name="EntityGroupsAscx_All" xml:space="preserve">
-    <value>Todos</value>
-  </data>
   <data name="EntityGroupsAscx_EntityGroup" xml:space="preserve">
     <value>Grupos de Entidades</value>
-  </data>
-  <data name="EntityGroupsAscx_In" xml:space="preserve">
-    <value>Dentro</value>
-  </data>
-  <data name="EntityGroupsAscx_None" xml:space="preserve">
-    <value>Ninguno</value>
-  </data>
-  <data name="EntityGroupsAscx_Out" xml:space="preserve">
-    <value>Fuera</value>
   </data>
   <data name="EntityGroupsAscx_Overriden" xml:space="preserve">
     <value>Sobrescrito</value>
@@ -366,9 +312,6 @@
   <data name="QueriesAscx_Query" xml:space="preserve">
     <value>Query</value>
   </data>
-  <data name="ThereAreATotalOf0Errors" xml:space="preserve">
-    <value>Hay un total de {0} errores</value>
-  </data>
   <data name="ViewsChecker" xml:space="preserve">
     <value>Comprobador de Vistas</value>
   </data>
@@ -416,12 +359,6 @@
   </data>
   <data name="ViewName" xml:space="preserve">
     <value>Nombre de la vista</value>
-  </data>
-  <data name="PasswordReseted" xml:space="preserve">
-    <value>Su contraseña ha sido restablecida</value>
-  </data>
-  <data name="YourNewPasswordIs0" xml:space="preserve">
-    <value>Su nueva contraseña es {0}</value>
   </data>
   <data name="TypesAscx_Queries" xml:space="preserve">
     <value>Consultas</value>
@@ -476,15 +413,6 @@
   </data>
   <data name="ControlPanel_YouMustSaveThePanelBeforeAddingParts" xml:space="preserve">
     <value>Debe guardar el panel antes de agregar partes</value>
-  </data>
-  <data name="SMS_DestinationNumber" xml:space="preserve">
-    <value>Nuevo SMS</value>
-  </data>
-  <data name="SMS_PhoneNumber" xml:space="preserve">
-    <value>Número de teléfono</value>
-  </data>
-  <data name="SMS_WriteTheDestinationNumber" xml:space="preserve">
-    <value>Escribir el número del destinatario:</value>
   </data>
   <data name="Chart_Chart" xml:space="preserve">
     <value>Gráfico</value>

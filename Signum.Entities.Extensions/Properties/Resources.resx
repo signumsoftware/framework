@@ -126,12 +126,6 @@
   <data name="ScheduleRuleDailyDN" xml:space="preserve">
     <value>Dialy</value>
   </data>
-  <data name="ScheduleRuleDayDN_Hour" xml:space="preserve">
-    <value>Hour</value>
-  </data>
-  <data name="ScheduleRuleDayDN_Minute" xml:space="preserve">
-    <value>Minute</value>
-  </data>
   <data name="ScheduleRuleWeekDaysDN" xml:space="preserve">
     <value>Days of week</value>
   </data>
@@ -228,9 +222,6 @@
   <data name="FilePathDN_FileLengthString" xml:space="preserve">
     <value>File Length</value>
   </data>
-  <data name="LogOperationDN_Plural" xml:space="preserve">
-    <value>Operation Logs</value>
-  </data>
   <data name="UserQueryDN" xml:space="preserve">
     <value>User Query</value>
   </data>
@@ -254,9 +245,6 @@
   </data>
   <data name="EmailPackageDN_NumLines" xml:space="preserve">
     <value>Num. Lines</value>
-  </data>
-  <data name="BasicPermissions_AdminRules" xml:space="preserve">
-    <value>Admin rules</value>
   </data>
   <data name="ExpressionShouldHaveAContinousAmountOfValues" xml:space="preserve">
     <value>Expression should have a continous amount of values</value>
@@ -296,18 +284,6 @@
   </data>
   <data name="ScheduleRuleMinutelyDN" xml:space="preserve">
     <value>Each X Minutes</value>
-  </data>
-  <data name="ScheduleRuleHourlyDN_NotMultiple" xml:space="preserve">
-    <value>Hour is not multiple of</value>
-  </data>
-  <data name="ScheduleRuleHourlyDN_NotValid" xml:space="preserve">
-    <value>Time selected is not valid</value>
-  </data>
-  <data name="ScheduleRuleMinutelyDN_NotMultiple" xml:space="preserve">
-    <value>Minute is not multiple of</value>
-  </data>
-  <data name="ScheduleRuleMinutelyDN_NotValid" xml:space="preserve">
-    <value>Time selected is not valid</value>
   </data>
   <data name="Each0HoursFrom1" xml:space="preserve">
     <value>Each {0} hours from {1}</value>

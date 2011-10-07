@@ -88,15 +88,6 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Are you sure of deleting from the system the entity {0} ({1}:{2})?.
-        /// </summary>
-        public static string AreYouSureOfDeletingTheEntity012 {
-            get {
-                return ResourceManager.GetString("AreYouSureOfDeletingTheEntity012", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Buscador.
         /// </summary>
         public static string Buscador {
@@ -156,15 +147,6 @@ namespace Signum.Web.Extensions.Properties {
         public static string ChangePasswordAspx_WriteActualPasswordAndNewOne {
             get {
                 return ResourceManager.GetString("ChangePasswordAspx_WriteActualPasswordAndNewOne", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Use this form to change your password.
-        /// </summary>
-        public static string ChangePasswordExplanation {
-            get {
-                return ResourceManager.GetString("ChangePasswordExplanation", resourceCulture);
             }
         }
         
@@ -268,15 +250,6 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Current password.
-        /// </summary>
-        public static string CurrentPassword {
-            get {
-                return ResourceManager.GetString("CurrentPassword", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Delete.
         /// </summary>
         public static string Delete {
@@ -291,15 +264,6 @@ namespace Signum.Web.Extensions.Properties {
         public static string Download {
             get {
                 return ResourceManager.GetString("Download", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The email is different from the stored email.
-        /// </summary>
-        public static string EmailIsNotValid {
-            get {
-                return ResourceManager.GetString("EmailIsNotValid", resourceCulture);
             }
         }
         
@@ -340,47 +304,11 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to All.
-        /// </summary>
-        public static string EntityGroupsAscx_All {
-            get {
-                return ResourceManager.GetString("EntityGroupsAscx_All", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Entity Group.
         /// </summary>
         public static string EntityGroupsAscx_EntityGroup {
             get {
                 return ResourceManager.GetString("EntityGroupsAscx_EntityGroup", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to In.
-        /// </summary>
-        public static string EntityGroupsAscx_In {
-            get {
-                return ResourceManager.GetString("EntityGroupsAscx_In", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to None.
-        /// </summary>
-        public static string EntityGroupsAscx_None {
-            get {
-                return ResourceManager.GetString("EntityGroupsAscx_None", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Out.
-        /// </summary>
-        public static string EntityGroupsAscx_Out {
-            get {
-                return ResourceManager.GetString("EntityGroupsAscx_Out", resourceCulture);
             }
         }
         
@@ -520,24 +448,6 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Invalid new password.
-        /// </summary>
-        public static string InvalidNewPassword {
-            get {
-                return ResourceManager.GetString("InvalidNewPassword", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Invalid Operation Type {{0}} in the construction of the operation {{1}}.
-        /// </summary>
-        public static string InvalidOperationType0inTheConstructionOfOperation1 {
-            get {
-                return ResourceManager.GetString("InvalidOperationType0inTheConstructionOfOperation1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Invalid username or password.
         /// </summary>
         public static string InvalidUsernameOrPassword {
@@ -561,24 +471,6 @@ namespace Signum.Web.Extensions.Properties {
         public static string LoginEnter {
             get {
                 return ResourceManager.GetString("LoginEnter", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to We are sending you this email as you have requested to remember your password. For your safety, we have generated a new random password, that you will be able to modify later.&lt;br/&gt;&lt;br/&gt;The password is &lt;b&gt;{0}&lt;/b&gt;.
-        /// </summary>
-        public static string MailBody_RememberPassword {
-            get {
-                return ResourceManager.GetString("MailBody_RememberPassword", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Remember Password.
-        /// </summary>
-        public static string MailSubject_RememberPassword {
-            get {
-                return ResourceManager.GetString("MailSubject_RememberPassword", resourceCulture);
             }
         }
         
@@ -664,38 +556,11 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The password has been sent to the provided mail account {0}.
-        /// </summary>
-        public static string PasswordHasBeenSent {
-            get {
-                return ResourceManager.GetString("PasswordHasBeenSent", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The password must have {0} or more characters.
-        /// </summary>
-        public static string PasswordMustHave0orMoreCharacters {
-            get {
-                return ResourceManager.GetString("PasswordMustHave0orMoreCharacters", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The password must have a value.
         /// </summary>
         public static string PasswordMustHaveAValue {
             get {
                 return ResourceManager.GetString("PasswordMustHaveAValue", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Your password has been reseted.
-        /// </summary>
-        public static string PasswordReseted {
-            get {
-                return ResourceManager.GetString("PasswordReseted", resourceCulture);
             }
         }
         
@@ -828,24 +693,6 @@ namespace Signum.Web.Extensions.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Property {0} does not exist in type {1}.
         /// </summary>
-        public static string Property0DoesNotExistInType1 {
-            get {
-                return ResourceManager.GetString("Property0DoesNotExistInType1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Property {0} has no value.
-        /// </summary>
-        public static string Property0HasNoValue {
-            get {
-                return ResourceManager.GetString("Property0HasNoValue", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Property {0} does not exist in type {1}.
-        /// </summary>
         public static string Property0NotExistsInType1 {
             get {
                 return ResourceManager.GetString("Property0NotExistsInType1", resourceCulture);
@@ -943,33 +790,6 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to New SMS.
-        /// </summary>
-        public static string SMS_DestinationNumber {
-            get {
-                return ResourceManager.GetString("SMS_DestinationNumber", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Phone number.
-        /// </summary>
-        public static string SMS_PhoneNumber {
-            get {
-                return ResourceManager.GetString("SMS_PhoneNumber", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Write the destination number:.
-        /// </summary>
-        public static string SMS_WriteTheDestinationNumber {
-            get {
-                return ResourceManager.GetString("SMS_WriteTheDestinationNumber", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Source.
         /// </summary>
         public static string Source {
@@ -1002,15 +822,6 @@ namespace Signum.Web.Extensions.Properties {
         public static string TheConfirmationCodeThatYouHaveJustSentIsInvalid {
             get {
                 return ResourceManager.GetString("TheConfirmationCodeThatYouHaveJustSentIsInvalid", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to There are a total of {0} errors.
-        /// </summary>
-        public static string ThereAreATotalOf0Errors {
-            get {
-                return ResourceManager.GetString("ThereAreATotalOf0Errors", resourceCulture);
             }
         }
         
@@ -1132,15 +943,6 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The provided User Name is already registered, please choose another one.
-        /// </summary>
-        public static string UserNameAlreadyExists {
-            get {
-                return ResourceManager.GetString("UserNameAlreadyExists", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The user name must have a value.
         /// </summary>
         public static string UserNameMustHaveAValue {
@@ -1204,29 +1006,11 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to You must enter the current password.
-        /// </summary>
-        public static string YouMustEnterTheCurrentPassword {
-            get {
-                return ResourceManager.GetString("YouMustEnterTheCurrentPassword", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to You must repeat the new password.
         /// </summary>
         public static string YouMustRepeatTheNewPassword {
             get {
                 return ResourceManager.GetString("YouMustRepeatTheNewPassword", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Your new password is {0}.
-        /// </summary>
-        public static string YourNewPasswordIs0 {
-            get {
-                return ResourceManager.GetString("YourNewPasswordIs0", resourceCulture);
             }
         }
     }
