@@ -441,7 +441,4 @@
   <data name="CollectionElementType_Element" xml:space="preserve">
     <value>Elemento</value>
   </data>
-  <data name="TheNumberOf0IsBeingMultipliedBy1" xml:space="preserve">
-    <value>El numero de {0} se está multiplicando por {1}</value>
-  </data>
 </root>
