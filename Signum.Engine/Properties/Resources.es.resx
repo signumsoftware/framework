@@ -120,9 +120,6 @@
   <data name="_0HasBeenRenamedIn1" xml:space="preserve">
     <value>¿Se ha renombrado '{0}' en {1}??</value>
   </data>
-  <data name="CannotInsertDuplicatedFields0On1Table" xml:space="preserve">
-    <value>No se pueden insertar duplicados en el campo {0} de la tabla {1}</value>
-  </data>
   <data name="ConcurrencyErrorOnDatabaseTable0Id1" xml:space="preserve">
     <value>Error de concurrencia en la base de datos, Tabla = {0}, Id = {1}</value>
   </data>
@@ -149,8 +146,5 @@
   </data>
   <data name="UnauthorizedAccessTo0Because1" xml:space="preserve">
     <value>Acceso denegado a {0} porque {1}</value>
-  </data>
-  <data name="NotAuthorizedToRetrieve01" xml:space="preserve">
-    <value>No autorizado para recuperar {0} {1}</value>
   </data>
 </root>
