@@ -12,9 +12,9 @@ namespace Signum.Engine.DynamicQuery
 {
     public class ManualDynamicQuery<T> : DynamicQuery<T>
     {
-        public Func<QueryRequest, List<ColumnDescription>, DEnumerable<T>> Execute { get; private set; }
+        public Func<QueryRequest, List<ColumnDescription>, DEnumerableCount<T>> Execute { get; private set; }
 
-        public ManualDynamicQuery(Func<QueryRequest, List<ColumnDescription>, DEnumerable<T>> execute)
+        public ManualDynamicQuery(Func<QueryRequest, List<ColumnDescription>, DEnumerableCount<T>> execute)
         {
             if (execute == null)
                 throw new ArgumentNullException("execute");
@@ -28,9 +28,9 @@ namespace Signum.Engine.DynamicQuery
         {
             request.Columns.Insert(0, new _EntityColumn(EntityColumn().BuildColumnDescription()));
 
-            DEnumerable<T> manualResult = Execute(request, GetColumnDescriptions());
+            DEnumerableCount<T> manualResult = Execute(request, GetColumnDescriptions());
 
-            return manualResult.ToResultTable(request.Columns); 
+            return manualResult.ToResultTable(request); 
         }
 
         public override int ExecuteQueryCount(QueryCountRequest request)
@@ -52,7 +52,7 @@ namespace Signum.Engine.DynamicQuery
             {
                 QueryName = request.QueryName,
                 Filters = request.Filters,
-                MaxItems = 2,
+                ElementsPerPage = 2,
                 Orders = request.Orders,
                 Columns = new List<Column> { new Column(this.EntityColumn().BuildColumnDescription()) }
             };

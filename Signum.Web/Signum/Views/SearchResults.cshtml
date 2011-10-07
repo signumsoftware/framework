@@ -15,6 +15,8 @@
    ResultTable queryResult = (ResultTable)ViewData[ViewDataKeys.Results];
    Dictionary<int, Func<HtmlHelper, object, MvcHtmlString>> formatters = (Dictionary<int, Func<HtmlHelper, object, MvcHtmlString>>)ViewData[ViewDataKeys.Formatters];}
 
+ @queryResult.TotalElements
+
 @if (ViewData.ContainsKey(ViewDataKeys.MultipliedMessage))
 { 
     <tr class="sf-tr-multiply">

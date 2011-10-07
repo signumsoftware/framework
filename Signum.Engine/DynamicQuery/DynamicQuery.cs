@@ -97,6 +97,17 @@ namespace Signum.Engine.DynamicQuery
         public BuildExpressionContext Context { get; private set; }
     }
 
+    public class DQueryableCount<T> : DEnumerable<T>
+    {
+        public DQueryableCount(IQueryable<object> query, BuildExpressionContext context, int totalElements) :
+            base(query, context)
+        {
+            this.TotalElements = totalElements;
+        }
+
+        public int TotalElements { get; private set; }
+    }
+
     public class DEnumerable<T> : IDynamicInfo
     {
         public DEnumerable(IEnumerable<object> collection, BuildExpressionContext context)
@@ -109,6 +120,17 @@ namespace Signum.Engine.DynamicQuery
         public BuildExpressionContext Context { get; private set; }
     }
 
+    public class DEnumerableCount<T> : DEnumerable<T> 
+    {
+        public DEnumerableCount(IEnumerable<object> collection, BuildExpressionContext context, int totalElements) :
+            base(collection, context)
+        {
+            this.TotalElements = totalElements;
+        }
+
+        public int TotalElements {get; private set;}
+    }
+
     public static class DynamicQuery
     {
         public static DynamicQuery<T> ToDynamic<T>(this IQueryable<T> query)
@@ -116,7 +138,7 @@ namespace Signum.Engine.DynamicQuery
             return new AutoDynamicQuery<T>(query); 
         }
 
-        public static DynamicQuery<T> Manual<T>(Func<QueryRequest, List<ColumnDescription>, DEnumerable<T>> execute)
+        public static DynamicQuery<T> Manual<T>(Func<QueryRequest, List<ColumnDescription>, DEnumerableCount<T>> execute)
         {
             return new ManualDynamicQuery<T>(execute); 
         }
@@ -163,6 +185,16 @@ namespace Signum.Engine.DynamicQuery
                     other.Context.TupleType.TypeName()));
 
             return new DEnumerable<T>(collection.Collection.Concat(other.Collection), collection.Context); 
+        }
+
+        public static DEnumerableCount<T> Concat<T>(this DEnumerableCount<T> collection, DEnumerableCount<T> other)
+        {
+            if (collection.Context.TupleType != other.Context.TupleType)
+                throw new InvalidOperationException("Enumerable's TupleType does not match Other's one.\r\n Enumerable: {0}: \r\n Other:  {1}".Formato(
+                    collection.Context.TupleType.TypeName(),
+                    other.Context.TupleType.TypeName()));
+
+            return new DEnumerableCount<T>(collection.Collection.Concat(other.Collection), collection.Context, collection.TotalElements + other.TotalElements);
         }
 
         class TupleResult
@@ -357,6 +389,16 @@ namespace Signum.Engine.DynamicQuery
             return new DEnumerable<T>(collection.Collection.OrderBy(pairs), collection.Context);
         }
 
+        public static DEnumerableCount<T> OrderBy<T>(this DEnumerableCount<T> collection, List<Order> orders)
+        {
+            var pairs = orders.Select(o => Tuple.Create(
+                    Expression.Lambda(o.Token.BuildExpression(collection.Context), collection.Context.Parameter),
+                   o.OrderType)).ToList();
+
+
+            return new DEnumerableCount<T>(collection.Collection.OrderBy(pairs), collection.Context, collection.TotalElements);
+        }
+
         public static IEnumerable<object> OrderBy(this IEnumerable<object> collection, List<Tuple<LambdaExpression, OrderType>> orders)
         {
             if (orders == null || orders.Count == 0)
@@ -407,20 +449,6 @@ namespace Signum.Engine.DynamicQuery
         #endregion
 
         #region TryTake
-        public static IQueryable<T> TryTake<T>(this IQueryable<T> query, int? num)
-        {
-            if (num.HasValue)
-                return query.Take(num.Value);
-            return query;
-        }
-
-        public static IEnumerable<T> TryTake<T>(this IEnumerable<T> collection, int? num)
-        {
-            if (num.HasValue)
-                return collection.Take(num.Value);
-            return collection;
-        }
-
         public static DQueryable<T> TryTake<T>(this DQueryable<T> query, int? num)
         {
             if (num.HasValue)
@@ -436,42 +464,124 @@ namespace Signum.Engine.DynamicQuery
         }
         #endregion
 
+        #region TryPaginatePartial
+        public static DEnumerableCount<T> TryPaginatePartial<T>(this DQueryable<T> query, int? num)
+        {
+            int count = query.Query.Count();
+
+            if (num.HasValue)
+                return new DEnumerableCount<T>(query.Query.Take(num.Value).ToList(), query.Context, count);
+
+            return new DEnumerableCount<T>(query.Query.ToList(), query.Context, count);
+        }
+
+        public static DEnumerableCount<T> TryPaginatePartial<T>(this DEnumerable<T> collection, int? num)
+        {
+            int count = collection.Collection.Count(); 
+
+            if (num.HasValue)
+                return new DEnumerableCount<T>(collection.Collection.Take(num.Value), collection.Context, count);
+
+            return new DEnumerableCount<T>(collection.Collection, collection.Context, count);
+        }
+        #endregion
+
+        #region Paginate
+
+        public static DEnumerableCount<T> TryPaginate<T>(this DQueryable<T> query, int? elementsPerPage, int currentPage)
+        {
+            if (!elementsPerPage.HasValue)
+                return new DEnumerableCount<T>(query.Query.ToArray(), query.Context, query.Query.Count());
+
+            if (currentPage <= 0)
+                throw new InvalidOperationException("currentPage should be greater than zero");
+
+            int totalElements = query.Query.Count();
+
+            var q = query.Query;
+            if (currentPage != 1)
+                q = q.Skip((currentPage - 1) * elementsPerPage.Value);
+
+            q = q.Take(elementsPerPage.Value);
+
+            return new DEnumerableCount<T>(q.ToArray(), query.Context, totalElements);
+        }
+
+        public static DEnumerableCount<T> TryPaginate<T>(this DEnumerable<T> collection, int? elementsPerPage, int currentPage)
+        {
+            if (!elementsPerPage.HasValue)
+                return new DEnumerableCount<T>(collection.Collection, collection.Context, collection.Collection.Count());
+
+            if (currentPage <= 0)
+                throw new InvalidOperationException("currentPage should be greater than zero");
+
+            int totalElements = collection.Collection.Count();
+            var c = collection.Collection;
+            if (currentPage != 1)
+                c = c.Skip((currentPage - 1) * elementsPerPage.Value);
+
+            c = c.Take(elementsPerPage.Value);
+
+            return new DEnumerableCount<T>(c, collection.Context, totalElements);
+        }
+
+        public static DEnumerableCount<T> TryPaginate<T>(this DEnumerableCount<T> collection, int? elementsPerPage, int currentPage)
+        {
+            if (!elementsPerPage.HasValue)
+                return new DEnumerableCount<T>(collection.Collection, collection.Context, collection.TotalElements);
+
+            if (currentPage <= 0)
+                throw new InvalidOperationException("currentPage should be greater than zero");
+
+            var c = collection.Collection;
+            if (currentPage != 1)
+                c = c.Skip((currentPage - 1) * elementsPerPage.Value);
+
+            c = c.Take(elementsPerPage.Value);
+
+            return new DEnumerableCount<T>(c, collection.Context, collection.TotalElements);
+        }
+
+        #endregion
+
         public static Dictionary<string, Meta> QueryMetadata(IQueryable query)
         {
             return MetadataVisitor.GatherMetadata(query.Expression); 
         }
 
-        public static DEnumerable<T> AsEnumerable<T>(this DQueryable<T> query)
-        {
-            return new DEnumerable<T>(query.Query.AsEnumerable(), query.Context);
-        }
+        //public static DEnumerable<T> AsEnumerable<T>(this DQueryable<T> query)
+        //{
+        //    return new DEnumerable<T>(query.Query.AsEnumerable(), query.Context);
+        //}
 
-        public static DEnumerable<T> ToArray<T>(this DQueryable<T> query)
-        {
-            return new DEnumerable<T>(query.Query.ToArray(), query.Context);
-        }
+        //public static DEnumerable<T> ToArray<T>(this DQueryable<T> query)
+        //{
+        //    return new DEnumerable<T>(query.Query.ToArray(), query.Context);
+        //}
 
-        public static DEnumerable<T> ToArray<T>(this DEnumerable<T> query)
-        {
-            return new DEnumerable<T>(query.Collection.ToArray(), query.Context);
-        }
+        //public static DEnumerable<T> ToArray<T>(this DEnumerable<T> query)
+        //{
+        //    return new DEnumerable<T>(query.Collection.ToArray(), query.Context);
+        //}
 
-        public static ResultTable ToResultTable<T>(this DEnumerable<T> collection, List<Column> columns)
+        public static ResultTable ToResultTable<T>(this DEnumerableCount<T> collection, QueryRequest req)
         {
             object[] array = collection.Collection as object[] ?? collection.Collection.ToArray();
 
-            return ToResultTable(array, columns.Select(c => Tuple.Create(c,
-                Expression.Lambda(c.Token.BuildExpression(collection.Context), collection.Context.Parameter))).ToList());
+            var columnAccesors = req.Columns.Select(c => Tuple.Create(c,
+                Expression.Lambda(c.Token.BuildExpression(collection.Context), collection.Context.Parameter))).ToList();
+
+            return ToResultTable(array, columnAccesors, collection.TotalElements, req.CurrentPage, req.ElementsPerPage);
         }
 
-        public static ResultTable ToResultTable(this object[] result, List<Tuple<Column, LambdaExpression>> columnAccesors)
+        public static ResultTable ToResultTable(this object[] result, List<Tuple<Column, LambdaExpression>> columnAccesors, int totalElements, int currentPage, int? elementsPerPage)
         {
             var columnValues = columnAccesors.Select(c => new ResultColumn(
                 c.Item1,
                 miGetValues.GetInvoker(c.Item1.Type)(result, c.Item2.Compile()))
              ).ToArray();
 
-            return new ResultTable(columnValues);
+            return new ResultTable(columnValues, totalElements, currentPage, elementsPerPage);
         }
 
         static GenericInvoker<Func<object[], Delegate, Array>> miGetValues = new GenericInvoker<Func<object[], Delegate, Array>>((objs, del) => GetValues<int>(objs, (Func<object, int>)del));

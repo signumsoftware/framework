@@ -11,7 +11,7 @@ namespace Signum.Web
     {
         public JsValue<string> Prefix { get; set; }
         public FindOptions FindOptions { get; set; }
-        public JsValue<int?> Top { get; set; }
+        public JsValue<int?> ElementsPerPage { get; set; }
         /// <summary>
         /// To be called to open a Find window
         /// </summary>
@@ -34,7 +34,7 @@ namespace Signum.Web
                 JsOptionsBuilder options = new JsOptionsBuilder(true)
                 {
                     {"prefix", Prefix.TryCC(t=>t.ToJS())},
-                    {"top", Top.TryCC(t=>t.ToJS()) },
+                    {"elems", ElementsPerPage.TryCC(t=>t.ToJS()) },
                     {"navigatorControllerUrl", NavigatorControllerUrl.TryCC(t=>t.ToJS()) ?? RouteHelper.New().SignumAction("PartialFind").SingleQuote() },
                     {"searchControllerUrl",SearchControllerUrl.TryCC(t=>t.ToJS()) ?? RouteHelper.New().SignumAction("Search").SingleQuote() },
                     {"onOk",OnOk.TryCC(t=>t.ToJS())},

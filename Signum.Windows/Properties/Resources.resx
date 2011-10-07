@@ -241,7 +241,7 @@
     <value>Invalid date format</value>
   </data>
   <data name="Results" xml:space="preserve">
-    <value>Results.</value>
+    <value>results.</value>
   </data>
   <data name="Limitation" xml:space="preserve">
     <value>Limitation:</value>
@@ -343,5 +343,14 @@ Lose changes?</value>
   </data>
   <data name="SessionExpired" xml:space="preserve">
     <value>Sesion Expired</value>
+  </data>
+  <data name="Rows" xml:space="preserve">
+    <value>Rows:</value>
+  </data>
+  <data name="All" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="Of" xml:space="preserve">
+    <value>of</value>
   </data>
 </root>

@@ -23,7 +23,7 @@ namespace Signum.Web
         public object QueryName { get; private set; }
 
         public Func<string> Title { get; set; }
-        public int? Top { get; set; }
+        public int? ElementsPerPage { get; set; }
         public string WebQueryName { get; set; }
 
         public bool? AllowMultiple { get; set; }

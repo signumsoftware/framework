@@ -467,7 +467,7 @@ namespace Signum.Web
                     foreach (object o in DynamicQueryManager.Current.GetQueryNames())
                     {
                         if (!QuerySettings.ContainsKey(o))
-                            QuerySettings.Add(o, new QuerySettings(o) { Top = QueryMaxResults });
+                            QuerySettings.Add(o, new QuerySettings(o) { ElementsPerPage = QueryMaxResults });
                         if (!QuerySettings[o].WebQueryName.HasText())
                             QuerySettings[o].WebQueryName = GenerateWebQueryName(o);
                     }

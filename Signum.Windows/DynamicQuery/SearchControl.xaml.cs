@@ -77,12 +77,20 @@ namespace Signum.Windows
             set { SetValue(AllowUserColumnsProperty, value); }
         }
 
-        public static readonly DependencyProperty MaxItemsProperty =
-            DependencyProperty.Register("MaxItems", typeof(int?), typeof(SearchControl), new UIPropertyMetadata(200));
-        public int? MaxItems
+        public static readonly DependencyProperty ElementsPerPageProperty =
+            DependencyProperty.Register("ElementsPerPage", typeof(int?), typeof(SearchControl), new UIPropertyMetadata(200, (s, e) => ((SearchControl)s).ElementsPerPage_Changed()));
+        public int? ElementsPerPage
         {
-            get { return (int?)GetValue(MaxItemsProperty); }
-            set { SetValue(MaxItemsProperty, value); }
+            get { return (int?)GetValue(ElementsPerPageProperty); }
+            set { SetValue(ElementsPerPageProperty, value); }
+        }
+
+        public static readonly DependencyProperty CurrentPageProperty =
+           DependencyProperty.Register("CurrentPage", typeof(int), typeof(SearchControl), new UIPropertyMetadata(1));
+        public int CurrentPage
+        {
+            get { return (int)GetValue(CurrentPageProperty); }
+            set { SetValue(CurrentPageProperty, value); }
         }
 
         public static readonly DependencyProperty ItemsCountProperty =
@@ -263,7 +271,11 @@ namespace Signum.Windows
             this.Loaded -= SearchControl_Loaded;
 
             if (DesignerProperties.GetIsInDesignMode(this) || QueryName == null)
+            {
+                tokenBuilder.Token = null;
+                tokenBuilder.SubTokensEvent += q => new QueryToken[0];
                 return;
+            }
 
             Settings = Navigator.GetQuerySettings(QueryName);
 
@@ -485,7 +497,8 @@ namespace Signum.Windows
                 Filters = FilterOptions.Select(f => f.ToFilter()).ToList(),
                 Orders = OrderOptions.Select(o => o.ToOrder()).ToList(),
                 Columns = CurrentColumns.ToList(),
-                MaxItems = MaxItems
+                ElementsPerPage = ElementsPerPage,
+                CurrentPage = CurrentPage,
             };
 
             return request;
@@ -513,8 +526,20 @@ namespace Signum.Windows
             ItemsCount = lvResult.Items.Count;
             lvResult.Background = Brushes.White;
             lvResult.Focus();
-            tbResultados.Visibility = Visibility.Visible;
-            tbResultados.Foreground = resultTable.Rows.Length == MaxItems ? Brushes.Red : Brushes.Black;
+            elementsInPageLabel.Visibility = Visibility.Visible;
+            elementsInPageLabel.TotalPages = resultTable.TotalPages;
+            elementsInPageLabel.StartElementIndex = resultTable.StartElementIndex;
+            elementsInPageLabel.EndElementIndex = resultTable.EndElementIndex;
+            elementsInPageLabel.TotalElements = resultTable.TotalElements;
+
+            pageSizeSelector.PageSize = resultTable.ElementsPerPage;
+
+            pageSelector.Visibility = System.Windows.Visibility.Visible;
+            pageSelector.CurrentPage = resultTable.CurrentPage;
+            pageSelector.TotalPages = resultTable.TotalPages;
+            
+            //tbResultados.Visibility = Visibility.Visible;
+            //tbResultados.Foreground = resultTable.Rows.Length == ElementsPerPage ? Brushes.Red : Brushes.Black;
             OnQueryResultChanged(false);
         }
 
@@ -522,9 +547,31 @@ namespace Signum.Windows
         {
             OnQueryResultChanged(true);
             resultTable = null;
-            tbResultados.Visibility = Visibility.Hidden;
+            elementsInPageLabel.Visibility = Visibility.Hidden;
+            pageSelector.Visibility = Visibility.Hidden;
             lvResult.ItemsSource = null;
             lvResult.Background = Brushes.WhiteSmoke;
+        }
+
+        void pageSelector_Changed(object sender, RoutedEventArgs e)
+        {
+            if (FixSize != null)
+                FixSize(this, new EventArgs()); 
+            Search(); 
+        }
+
+        public event EventHandler FixSize; 
+        public event EventHandler ClearSize; 
+
+        void ElementsPerPage_Changed()
+        {
+            if (IsLoaded)
+            {
+                CurrentPage = 1;
+                if (ClearSize != null)
+                    ClearSize(this, new EventArgs()); 
+                Search();
+            }
         }
 
         void OnQueryResultChanged(bool cleaning)

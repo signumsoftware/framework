@@ -139,6 +139,22 @@ namespace Signum.Windows
 
             ButtonsChanged();
             searchControl.Loaded += new RoutedEventHandler(searchControl_Loaded);
+            searchControl.ClearSize += new EventHandler(searchControl_ClearSize);
+            searchControl.FixSize += new EventHandler(searchControl_FixSize);
+        }
+
+        void searchControl_FixSize(object sender, EventArgs e)
+        {
+            this.Width = this.ActualWidth;
+            this.Height = this.ActualHeight;
+            this.SizeToContent = System.Windows.SizeToContent.Manual;
+        }
+
+        void searchControl_ClearSize(object sender, EventArgs e)
+        {
+            ClearValue(WidthProperty);
+            ClearValue(HeightProperty);
+            this.SizeToContent = System.Windows.SizeToContent.WidthAndHeight;
         }
 
         public SearchWindow()
@@ -165,11 +181,8 @@ namespace Signum.Windows
         void ButtonsChanged()
         {
             bool ok = Mode == SearchMode.Find;
-
-            btOk.Visibility = ok ? Visibility.Visible : Visibility.Collapsed;
-            btCancel.Visibility = ok ? Visibility.Visible : Visibility.Collapsed;
+            spOkCancel.Visibility =  ok ? Visibility.Visible : Visibility.Collapsed;
             
-            btClose.Visibility = !ok ? Visibility.Visible : Visibility.Collapsed;
             searchControl.IsAdmin = !ok;
 
             if (ok)
@@ -198,6 +211,11 @@ namespace Signum.Windows
             OkAndClose();
         }
 
+        private void Cancel_Click(object sender, RoutedEventArgs e)
+        {
+            DialogResult = false;
+        }
+
         private void OkAndClose()
         {
             if (MultiSelection)
@@ -206,16 +224,6 @@ namespace Signum.Windows
                 SelectedItem = searchControl.SelectedItem;
 
             DialogResult = true;
-        }
-
-        private void Cancel_Click(object sender, RoutedEventArgs e)
-        {
-            DialogResult = false;
-        }
-
-        private void Close_Click(object sender, RoutedEventArgs e)
-        {
-            Close();
         }
 
         void searchControl_DoubleClick()
