@@ -81,6 +81,6 @@
             </m:EntityList>
         </GroupBox>
 
-        <m:ValueLine m:Common.Route="MaxItems" />
+        <m:ValueLine m:Common.Route="ElementsPerPage" />
     </StackPanel>
 </UserControl>
