@@ -10,7 +10,7 @@ namespace Signum.Utilities
 {
     public class ConsoleSwitch<K, V>: IEnumerable<V>
     {
-        Dictionary<string, Tuple<V, string>> dictionary = new Dictionary<string, Tuple<V, string>>();
+        Dictionary<string, Tuple<V, string>> dictionary = new Dictionary<string, Tuple<V, string>>(StringComparer.InvariantCultureIgnoreCase);
         string welcomeMessage;
 
         public ConsoleSwitch()
@@ -103,10 +103,8 @@ namespace Signum.Utilities
 
         public V GetValue(string line)
         {
-            return dictionary.Where(kvp => string.Equals(kvp.Key.ToString(), line, StringComparison.InvariantCultureIgnoreCase)).SingleEx(()=>Resources.NoOptionWithKey0Found.Formato(line), ()=>"")
-                .Value.Item1;
+            return dictionary.GetOrThrow(line, Resources.NoOptionWithKey0Found).Item1;
         }
-
    
         public IEnumerator<V> GetEnumerator()
         {
