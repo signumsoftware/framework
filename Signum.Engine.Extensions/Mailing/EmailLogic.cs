@@ -35,6 +35,8 @@ namespace Signum.Engine.Mailing
     public interface IEmailModel
     {
         IEmailOwnerDN To { get; set; }
+        string Cc { get; set; }
+        string Bcc { get; set; }  
     }
 
     public class EmailModel<T> : IEmailModel
@@ -47,6 +49,9 @@ namespace Signum.Engine.Mailing
             get { return To; }
             set { To = (T)value; }
         }
+
+        public string Cc { get; set; }
+        public string Bcc { get; set; }  
     }
 
     public static class EmailLogic
@@ -236,6 +241,8 @@ namespace Signum.Engine.Mailing
                 {
                     State = EmailState.Created,
                     Recipient = model.To.ToLite(),
+                    Bcc = model.Bcc,
+                    Cc = model.Cc,
                     Template = GetTemplateDN(model.GetType()),
                     Subject = content.Subject,
                     Body = content.Body,
@@ -358,6 +365,11 @@ namespace Signum.Engine.Mailing
                 Body = emailMessage.Body,
                 IsBodyHtml = true,
             };
+
+            if(emailMessage.Bcc.HasText())
+                message.Bcc.AddRange( emailMessage.Bcc.Split(';').Select(a => new MailAddress(a)).ToList());
+            if (emailMessage.Cc.HasText())
+                message.Bcc.AddRange(emailMessage.Cc.Split(';').Select(a => new MailAddress(a)).ToList());
             return message;
         }
 

@@ -23,6 +23,21 @@ namespace Signum.Entities.Mailing
             set { Set(ref recipient, value, () => Recipient); }
         }
 
+        string bcc;
+        public string Bcc
+        {
+            get { return bcc; }
+            set { Set(ref bcc, value, () => Bcc); }
+        }
+
+        string cc;
+        public string Cc
+        {
+            get { return cc; }
+            set { Set(ref cc, value, () => Cc); }
+        }
+
+
         Lite<EmailTemplateDN> template;
         [NotNullValidator]
         public Lite<EmailTemplateDN> Template
