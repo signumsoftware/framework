@@ -149,9 +149,21 @@ namespace Signum.Windows.Authorization
         public List<MutableTypeAllowedRule> SubNodes { get; set; } //Will be TypeAccesRule or NamespaceNode
     }
 
-    public class MutableTypeAllowedRule : EmbeddedEntity
+    public class MutableTypeAllowedRule : ModelEntity
     {
-        public TypeAllowedBuilderDN Allowed { get; private set; }
+        [NotifyChildProperty]
+        TypeAllowedBuilderDN allowed;
+        public TypeAllowedBuilderDN Allowed
+        {
+            get { return allowed; }
+            set { Set(ref allowed, value, () => Allowed); }
+        }
+
+        TypeAllowed allowedBase;
+        public TypeAllowed AllowedBase
+        {
+            get { return allowedBase; }
+        }
 
         public TypeDN Resource { get; set; }
 
@@ -161,8 +173,8 @@ namespace Signum.Windows.Authorization
 
         public MutableTypeAllowedRule(TypeAllowedRule rule)
         {
-            this.Allowed = new TypeAllowedBuilderDN(rule.AllowedBase, rule.Allowed);
-
+            this.allowed = new TypeAllowedBuilderDN(rule.Allowed);
+            this.allowedBase = rule.AllowedBase; 
             this.Resource = rule.Resource;
             
             this.Properties = rule.Properties;
@@ -176,13 +188,26 @@ namespace Signum.Windows.Authorization
             {
                 Resource = Resource,
 
-                AllowedBase =  Allowed.TypeAllowedBase,
+                AllowedBase = AllowedBase,
                 Allowed = Allowed.TypeAllowed,
 
                 Properties = Properties,
                 Operations = Operations,
                 Queries = Queries,
             };
+        }
+
+        protected override void ChildPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (sender == Allowed && e.PropertyName == "TypeAllowed")
+                Notify(() => Overriden);
+
+            base.ChildPropertyChanged(sender, e);
+        }
+
+        public bool Overriden
+        {
+            get { return !allowedBase.Equals(Allowed.TypeAllowed); }
         }
     }
 }

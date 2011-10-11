@@ -10,20 +10,16 @@
     WindowStartupLocation="CenterOwner"
     SizeToContent="WidthAndHeight"
     Title="Entity Group Rules" x:Name="me" MinWidth="300" MinHeight="300" m:Common.TypeContext="authdn:EntityGroupRulePack">
-	<Window.Resources>
-		<ResourceDictionary>
-			<ResourceDictionary.MergedDictionaries>
-				<ResourceDictionary Source="AuthResources.xaml"/>
-			</ResourceDictionary.MergedDictionaries>
-		</ResourceDictionary>
-	</Window.Resources>
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="AuthResources.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
     <DockPanel>
         <m:ButtonBar  DockPanel.Dock="Top" SaveClick="btSave_Click" SaveVisible="True" ReloadClick="btReload_Click" ReloadVisible="True"/>
         <m:EntityLine VerticalAlignment="Top" m:Common.Route="Role" DockPanel.Dock="Top"/>
-        <StackPanel Orientation="Horizontal" DockPanel.Dock="Top">
-            <m:ValueLine m:Common.Route="DefaultRule" />
-            <TextBlock Text="{Binding DefaultLabel}" VerticalAlignment="Center" Margin="5"/>
-        </StackPanel>
         <ListView x:Name="listView" IsSynchronizedWithCurrentItem="True">
             <ListView.ItemContainerStyle>
                 <Style TargetType="ListViewItem">
@@ -32,64 +28,39 @@
             </ListView.ItemContainerStyle>
             <ListView.View>
                 <GridView AllowsColumnReorder="False">
-                    <GridViewColumn Header="Entity Group" DisplayMemberBinding="{Binding Resource}" />
-                    <GridViewColumn Header="">
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Vertical">
-                                    <TextBlock Text="In"/>
-                                    <TextBlock Text="Out"/>
-                                </StackPanel>
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
+                    <GridViewColumn Header="Entity Group" DisplayMemberBinding="{Binding Resource, Converter={x:Static m:Converters.EnumDescriptionConverter}}" />
                     <GridViewColumn Header="Create" Width="40">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <StackPanel Orientation="Vertical">
-                                    <ToggleButton IsChecked="{Binding Path=InGroup.Create}" Style="{StaticResource SphereRadioButton}" Background="Lime"/>
-                                    <ToggleButton IsChecked="{Binding Path=OutGroup.Create}" Style="{StaticResource SphereRadioButton}" Background="Lime"/>
-                                </StackPanel>
+                                <ToggleButton IsChecked="{Binding Path=Allowed.Create}" Style="{StaticResource SphereRadioButton}" Background="Lime"/>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
                     <GridViewColumn Header="Modify" Width="40">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <StackPanel Orientation="Vertical">
-                                    <ToggleButton IsChecked="{Binding Path=InGroup.Modify}" Style="{StaticResource SphereRadioButton}" Background="YellowGreen"/>
-                                    <ToggleButton IsChecked="{Binding Path=OutGroup.Modify}" Style="{StaticResource SphereRadioButton}" Background="YellowGreen"/>
-                                </StackPanel>
+                                <ToggleButton IsChecked="{Binding Path=Allowed.Modify}" Style="{StaticResource SphereRadioButton}" Background="YellowGreen"/>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
                     <GridViewColumn Header="Read" Width="40">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <StackPanel Orientation="Vertical">
-                                    <ToggleButton IsChecked="{Binding Path=InGroup.Read}" Style="{StaticResource SphereRadioButton}" Background="Yellow" />
-                                    <ToggleButton IsChecked="{Binding Path=OutGroup.Read}" Style="{StaticResource SphereRadioButton}" Background="Yellow" />
-                                </StackPanel>
+                                <ToggleButton IsChecked="{Binding Path=Allowed.Read}" Style="{StaticResource SphereRadioButton}" Background="Yellow" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
                     <GridViewColumn Header="None" Width="40">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <StackPanel>
-                                    <ToggleButton IsChecked="{Binding Path=InGroup.None}" Style="{StaticResource SphereRadioButton}" Background="Red" />
-                                    <ToggleButton IsChecked="{Binding Path=OutGroup.None}" Style="{StaticResource SphereRadioButton}" Background="Red" />
-                                </StackPanel>
+                                <ToggleButton IsChecked="{Binding Path=Allowed.None}" Style="{StaticResource SphereRadioButton}" Background="Red" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Header="Overriden" Width="60">
+                    <GridViewColumn Header="Priority" Width="60">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <StackPanel>
-                                    <CheckBox  IsEnabled="False" IsChecked="{Binding InGroup.Overriden,Mode=OneWay}" />
-                                    <CheckBox  IsEnabled="False" IsChecked="{Binding OutGroup.Overriden,Mode=OneWay}" />
-                                </StackPanel>
+                                <TextBox   Text="{Binding Priority}" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>

@@ -48,23 +48,22 @@ namespace Signum.Windows.Authorization
         {
             var result = Server.Return((IEntityGroupAuthServer s)=>s.GetEntityGroupAllowedRules(Role));
             DataContext = result;
-            listView.ItemsSource = result.Rules.Select(r => new MutableEntityGroupRule(r)).ToList();
+            listView.ItemsSource = result.Rules.Select(r => new EntityGroupRuleBuilderDN(r.Allowed){ Priority = r.Priority, Resource = r.Resource}).ToList();
         }
 
         private void btSave_Click(object sender, RoutedEventArgs e)
         {
             var result = (EntityGroupRulePack)DataContext;
 
-            result.Rules = ((List<MutableEntityGroupRule>)listView.ItemsSource).Select(m => m.ToRule()).ToMList();
+            result.Rules = ((List<EntityGroupRuleBuilderDN>)listView.ItemsSource).Select(m => new EntityGroupAllowedRule
+            {
+                Allowed = m.Allowed.TypeAllowed,
+                Priority = m.Priority,
+                Resource = m.Resource,
+            }).ToMList();
 
             Server.Execute((IEntityGroupAuthServer s) => s.SetEntityGroupAllowedRules(result));
             Load();
-        }
-
-        class AllowedRuleProxy
-        {
-            public AllowedRule<EntityGroupDN, EntityGroupAllowedDN> Rule { get; set; }
-         
         }
 
         private void btClose_Click(object sender, RoutedEventArgs e)
@@ -79,21 +78,29 @@ namespace Signum.Windows.Authorization
 
     }
 
-    public class TypeAllowedBuilderDN : Entity
+    public class EntityGroupRuleBuilderDN
     {
-        public TypeAllowedBuilderDN(TypeAllowed typeAllowedBase, TypeAllowed typeAllowed)
+        public EntityGroupRuleBuilderDN(TypeAllowed allowed)
         {
-            this.typeAllowedBase = typeAllowedBase;
+            this.Allowed = new TypeAllowedBuilderDN(allowed);
+        }
+
+        public TypeAllowedBuilderDN Allowed { get; private set; }
+
+        public int Priority { get; set; }
+
+        public Enum Resource { get; set; }
+    }
+
+    public class TypeAllowedBuilderDN : ModelEntity
+    {
+        public TypeAllowedBuilderDN( TypeAllowed typeAllowed)
+        {
             this.typeAllowed = typeAllowed;
         }
 
-        TypeAllowed typeAllowedBase;
-        public TypeAllowed TypeAllowedBase { get { return typeAllowedBase; } }
-
-
         TypeAllowed typeAllowed;
         public TypeAllowed TypeAllowed { get { return typeAllowed; } }
-
 
         public bool Create
         {
@@ -151,39 +158,8 @@ namespace Signum.Windows.Authorization
             Notify(() => Modify);
             Notify(() => Read);
             Notify(() => None);
-            Notify(() => Overriden);
+            Notify(() => TypeAllowed);
         }
 
-        public bool Overriden
-        {
-            get { return !typeAllowedBase.Equals(typeAllowed); }
-        }
-    }
-
-    public class MutableEntityGroupRule : EmbeddedEntity
-    {
-        public TypeAllowedBuilderDN InGroup { get; private set; }
-
-        public TypeAllowedBuilderDN OutGroup { get; private set; }
-
-        public EntityGroupDN Resource { get; set; }
-
-        public MutableEntityGroupRule(EntityGroupAllowedRule rule)
-        {
-            InGroup = new TypeAllowedBuilderDN(rule.AllowedBase.InGroup, rule.Allowed.InGroup);
-            OutGroup = new TypeAllowedBuilderDN(rule.AllowedBase.OutGroup, rule.Allowed.OutGroup); 
-            
-            this.Resource = rule.Resource; 
-        }
-
-        public EntityGroupAllowedRule ToRule()
-        {
-            return new EntityGroupAllowedRule
-            {
-                Resource = Resource,
-                AllowedBase = new EntityGroupAllowedDN(InGroup.TypeAllowedBase, OutGroup.TypeAllowedBase),
-                Allowed = new EntityGroupAllowedDN(InGroup.TypeAllowed, OutGroup.TypeAllowed)
-            };
-        }
     }
 }

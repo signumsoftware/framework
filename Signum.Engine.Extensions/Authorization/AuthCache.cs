@@ -461,12 +461,12 @@ namespace Signum.Entities.Authorization
         }
 
 
-        static string Comment(Lite<RoleDN> role, R resource, A allowed)
+        internal static string Comment(Lite<RoleDN> role, R resource, A allowed)
         {
             return "{0} {1} for {2} ({3})".Formato(typeof(R).NiceName(), resource.ToStr, role, allowed);
         }
 
-        static string Comment(Lite<RoleDN> role, R resource, A from, A to)
+        internal static string Comment(Lite<RoleDN> role, R resource, A from, A to)
         {
             return "{0} {1} for {2} ({3} -> {4})".Formato(typeof(R).NiceName(), resource.ToStr, role, from, to);
         }

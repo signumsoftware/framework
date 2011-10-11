@@ -91,7 +91,7 @@ namespace Signum.Entities.Authorization
     }
 
     [Serializable, AvoidLocalization]
-    public abstract class AllowedRule<R, A> : EmbeddedEntity
+    public abstract class AllowedRule<R, A> : ModelEntity
         where R : IdentifiableEntity
     {
         A allowedBase;
@@ -239,8 +239,27 @@ namespace Signum.Entities.Authorization
     public class FacadeMethodAllowedRule : AllowedRule<FacadeMethodDN, bool> { } 
 
     [Serializable]
-    public class EntityGroupRulePack : BaseRulePack<EntityGroupAllowedRule>
+    public class EntityGroupRulePack : ModelEntity
     {
+        public EntityGroupRulePack(Lite<RoleDN> role)
+        {
+            this.role = role;
+        }
+
+        Lite<RoleDN> role;
+        [NotNullValidator]
+        public Lite<RoleDN> Role
+        {
+            get { return role; }
+        }
+
+        MList<EntityGroupAllowedRule> rules = new MList<EntityGroupAllowedRule>();
+        public MList<EntityGroupAllowedRule> Rules
+        {
+            get { return rules; }
+            set { Set(ref rules, value, () => Rules); }
+        }
+
         public override string ToString()
         {
             return Resources._0RulesFor1.Formato(typeof(EntityGroupDN).NiceName(), Role);
@@ -248,5 +267,33 @@ namespace Signum.Entities.Authorization
     }
 
     [Serializable]
-    public class EntityGroupAllowedRule : AllowedRule<EntityGroupDN, EntityGroupAllowedDN> { }
+    public class EntityGroupAllowedRule : ModelEntity
+    {
+        TypeAllowed allowed;
+        public TypeAllowed Allowed
+        {
+            get { return allowed; }
+            set { Set(ref allowed, value, () => Allowed); }
+        }
+
+        Enum resource;
+        public Enum Resource
+        {
+            get { return resource; }
+            set { Set(ref resource, value, () => Resource); }
+        }
+        
+
+        int priority;
+        public int Priority
+        {
+            get { return priority; }
+            set { Set(ref priority, value, () => Priority); }
+        }
+
+        public override string ToString()
+        {
+            return "{0} <- {1}".Formato(allowed, resource == null ? "[Fallback]" : resource.NiceToString());
+        }
+    }
 }

@@ -1,4 +1,9 @@
-﻿table.ruleTable th
+﻿table.ruleTable
+{
+    vertical-align: middle;
+}
+
+table.ruleTable th
 {
     padding:2px;
 }

@@ -97,8 +97,7 @@ namespace Signum.Engine.UserQueries
             sb.Schema.Settings.AssertImplementedBy((UserQueryDN uq) => uq.Related, typeof(UserDN));
 
             EntityGroupLogic.Register<UserQueryDN>(newEntityGroupKey, 
-                uq => uq.Related.RefersTo(UserDN.Current), 
-                uq => uq.Related != null && uq.Related.Entity is UserDN); 
+                uq => uq.Related.RefersTo(UserDN.Current)); 
         }
 
         public static void RegisterRoleEntityGroup(SchemaBuilder sb, Enum newEntityGroupKey)
@@ -106,8 +105,7 @@ namespace Signum.Engine.UserQueries
             sb.Schema.Settings.AssertImplementedBy((UserQueryDN uq) => uq.Related, typeof(RoleDN));
 
             EntityGroupLogic.Register<UserQueryDN>(newEntityGroupKey, 
-                uq => AuthLogic.CurrentRoles().Contains(uq.Related.ToLite<RoleDN>()),
-                uq => uq.Related != null && uq.Related.Entity is RoleDN);
+                uq => AuthLogic.CurrentRoles().Contains(uq.Related.ToLite<RoleDN>()));
         }
     }
 }

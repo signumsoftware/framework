@@ -6,6 +6,7 @@ using Signum.Utilities;
 using Signum.Entities.Basics;
 using Signum.Entities.Operations;
 using System.Text.RegularExpressions;
+using System.Reflection;
 
 namespace Signum.Entities.Authorization
 {
@@ -28,7 +29,6 @@ namespace Signum.Entities.Authorization
             set { Set(ref resource, value, () => Resource); }
         }
 
-        [NotNullable] //sometimes A is an EmbeddedEntity
         A allowed;
         public A Allowed
         {
@@ -58,76 +58,60 @@ namespace Signum.Entities.Authorization
     public class RulePropertyDN : RuleDN<PropertyDN, PropertyAllowed> { }
 
     [Serializable]
-    public class RuleEntityGroupDN : RuleDN<EntityGroupDN, EntityGroupAllowedDN> { }
+    public class RuleEntityGroupDN : IdentifiableEntity
+    {
+        Lite<RoleDN> role;
+        [NotNullValidator]
+        public Lite<RoleDN> Role
+        {
+            get { return role; }
+            set { Set(ref role, value, () => Role); }
+        }
+
+        EntityGroupDN resource;
+        public EntityGroupDN Resource
+        {
+            get { return resource; }
+            set { Set(ref resource, value, () => Resource); }
+        }
+
+        TypeAllowed allowed;
+        public TypeAllowed Allowed
+        {
+            get { return allowed; }
+            set { Set(ref allowed, value, () => Allowed); }
+        }
+
+        int priority;
+        [NumberIsValidator(Entities.ComparisonType.GreaterThanOrEqual, 0)]
+        public int Priority
+        {
+            get { return priority; }
+            set { Set(ref priority, value, () => Priority); }
+        }
+
+        protected override void PreSaving(ref bool graphModified)
+        {
+            this.toStr = this.ToString();
+        }
+
+        protected override string PropertyValidation(PropertyInfo pi)
+        {
+            if (pi.Is(() => Priority))
+            {
+                if (priority == 0 && resource != null)
+                    return "Priority shouldn't be 0 for non-Fallback groups";
+
+                if (priority != 0 && resource == null)
+                    return "Priority should be 0 for Fallback group"; 
+            }
+
+            return base.PropertyValidation(pi);
+        }  
+    }
 
     [Serializable]
     public class RuleTypeDN : RuleDN<TypeDN, TypeAllowed> { }
-
-    [Serializable, AvoidLocalization]
-    public class EntityGroupAllowedDN : EmbeddedEntity, IEquatable<EntityGroupAllowedDN>
-    {
-        public static readonly EntityGroupAllowedDN CreateCreate = new EntityGroupAllowedDN(TypeAllowed.Create, TypeAllowed.Create);
-        public static readonly EntityGroupAllowedDN NoneNone = new EntityGroupAllowedDN(TypeAllowed.None, TypeAllowed.None);
-
-        private EntityGroupAllowedDN() { }
-
-        public EntityGroupAllowedDN(TypeAllowed inGroup, TypeAllowed outGroup)
-        {
-            this.inGroup = inGroup;
-            this.outGroup = outGroup;
-        }
-
-        TypeAllowed inGroup;
-        public TypeAllowed InGroup
-        {
-            get { return inGroup; }
-        }
-
-        TypeAllowed outGroup;
-        public TypeAllowed OutGroup
-        {
-            get { return outGroup; }
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (obj is EntityGroupAllowedDN)
-                return Equals((EntityGroupAllowedDN)obj);
-
-            return false;
-        }
-
-        public bool Equals(EntityGroupAllowedDN other)
-        {
-            return this == other || this.InGroup == other.InGroup && this.OutGroup == other.OutGroup;
-        }
-
-        public override int GetHashCode()
-        {
-            return inGroup.GetHashCode() ^ OutGroup.GetHashCode() << 5;
-        }
-
-        public override string ToString()
-        {
-            return "[In = {0}, Out = {1}]".Formato(inGroup, outGroup);
-        }
-
-        public bool IsActive
-        {
-            get { return !this.Equals(CreateCreate); }
-        }
-
-        public static EntityGroupAllowedDN Parse(string str)
-        {
-            Match m = Regex.Match(str, @"^\[In = (?<in>.*?), Out = (?<out>.*?)\]$");
-
-            if (!m.Success)
-                throw new FormatException("'{0}' is not a valid {1}".Formato(str, typeof(EntityGroupAllowedDN).Name));
-
-            return new EntityGroupAllowedDN(EnumExtensions.ToEnum<TypeAllowed>(m.Groups["in"].Value), 
-                                            EnumExtensions.ToEnum<TypeAllowed>(m.Groups["out"].Value)); 
-        }
-    }
 
     public enum PropertyAllowed
     {

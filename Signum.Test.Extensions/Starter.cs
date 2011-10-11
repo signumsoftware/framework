@@ -67,7 +67,7 @@ namespace Signum.Test.Extensions
             UserTicketLogic.Start(sb, dqm);
             OperationLogic.Start(sb, dqm);
 
-            EntityGroupAuthLogic.Start(sb, true);
+            EntityGroupAuthLogic.Start(sb, false);
             AuthLogic.StartAllModules(sb, dqm);
             
             QueryLogic.Start(sb);
@@ -165,18 +165,26 @@ namespace Signum.Test.Extensions
                 Schema.Current.InitializeUntil(InitLevel.Level3MainEntities);
                 Signum.Test.Starter.Load();
 
-                EntityGroupAuthLogic.Manual.SetAllowed(externalUser.ToLite(), MusicGroups.JapanEntities,
-                    new EntityGroupAllowedDN(TypeAllowed.Create, TypeAllowed.None));
-
-                EntityGroupAuthLogic.Manual.SetAllowed(externalUser.ToLite(), MusicGroups.UserEntities,
-                    new EntityGroupAllowedDN(TypeAllowed.Create, TypeAllowed.None));
-                EntityGroupAuthLogic.Manual.SetAllowed(externalUser.ToLite(), MusicGroups.RoleEntities,
-                    new EntityGroupAllowedDN(TypeAllowed.Read, TypeAllowed.None));
-
-                EntityGroupAuthLogic.Manual.SetAllowed(internalUser.ToLite(), MusicGroups.UserEntities,
-                    new EntityGroupAllowedDN(TypeAllowed.Create, TypeAllowed.None));
-                EntityGroupAuthLogic.Manual.SetAllowed(internalUser.ToLite(), MusicGroups.RoleEntities,
-                    new EntityGroupAllowedDN(TypeAllowed.Read, TypeAllowed.None));
+                EntityGroupAuthLogic.SetEntityGroupRules(new EntityGroupRulePack(externalUser.ToLite())
+                {
+                     Rules = 
+                     {
+                         new EntityGroupAllowedRule { Priority = 3, Allowed = TypeAllowed.Create, Resource = MusicGroups.JapanEntities},
+                         new EntityGroupAllowedRule { Priority = 2, Allowed = TypeAllowed.Create, Resource = MusicGroups.UserEntities},
+                         new EntityGroupAllowedRule { Priority = 1, Allowed = TypeAllowed.Read, Resource = MusicGroups.RoleEntities},
+                         new EntityGroupAllowedRule { Priority = 0, Allowed = TypeAllowed.None, Resource = null},
+                     }
+                });
+                
+                EntityGroupAuthLogic.SetEntityGroupRules(new EntityGroupRulePack(internalUser.ToLite())
+                {
+                     Rules = 
+                     {
+                         new EntityGroupAllowedRule { Priority = 2, Allowed = TypeAllowed.Create, Resource = MusicGroups.UserEntities},
+                         new EntityGroupAllowedRule { Priority = 1, Allowed = TypeAllowed.Read, Resource = MusicGroups.RoleEntities},
+                         new EntityGroupAllowedRule { Priority = 0, Allowed = TypeAllowed.None, Resource = null},
+                     }
+                }); 
 
                 AuthLogic.InvalidateCache(); 
             }

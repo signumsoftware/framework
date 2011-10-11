@@ -20,14 +20,55 @@ using Signum.Engine.Linq;
 using Signum.Engine.Extensions.Properties;
 using Signum.Entities.Operations;
 using Signum.Engine.Exceptions;
+using System.Data.SqlClient;
+using System.Xml.Linq;
 
 namespace Signum.Engine.Authorization
 {
     public static class EntityGroupAuthLogic
     {
-        static AuthCache<RuleEntityGroupDN, EntityGroupAllowedRule, EntityGroupDN, Enum, EntityGroupAllowedDN> cache;
+        static Lazy<Dictionary<Lite<RoleDN>, List<EntityGroupLine>>> cache = Schema.GlobalLazy(() =>
+        {
+            var allGroups = EntityGroupLogic.Groups.And(null);
 
-        public static IManualAuth<Enum, EntityGroupAllowedDN> Manual { get { return cache; } }
+            var dic = Database.Query<RuleEntityGroupDN>().ToList().AgGroupToDictionary(a => a.Role, gr =>
+            {
+                return (from k in allGroups
+                        let eg = k == null ? null : EnumLogic<EntityGroupDN>.ToEntity(k)
+                        select new EntityGroupLine
+                        {
+                            Key = k,
+                            Allowed = gr.SingleOrDefaultEx(sd => sd.Resource.Is(eg)).TryCS(r => r.Allowed) ?? TypeAllowed.Create,
+                            Priority = gr.SingleOrDefaultEx(sd => sd.Resource.Is(eg)).TryCS(r => r.Priority) ?? 0
+                        }).OrderByDescending(a => a.Priority).ToList();
+            });
+
+            var rolesGraph = AuthLogic.RolesGraph();
+
+            foreach (var role in rolesGraph)
+            {
+                var list = dic.GetOrCreate(role, new Func<List<EntityGroupLine>>(() =>
+                {
+                    var roles = rolesGraph.RelatedTo(role);
+                    if (roles.IsEmpty())
+                        return allGroups.Select(k => new EntityGroupLine
+                        {
+                            Key = k,
+                            Allowed = TypeAllowed.Create,
+                            Priority = 0
+                        }).ToList();
+                    else
+                        return roles.Select(r => dic[r]).SingleOrDefaultEx(() =>
+                            "Ambigous entity group rule script for role {0} (inheriting {1})".Formato(role, roles.CommaAnd()));
+                }));
+            }
+          
+            return dic;
+        }); 
+        
+        //static AuthCache<RuleEntityGroupDN, EntityGroupAllowedRule, EntityGroupDN, Enum, EntityGroupAllowedDN> cache;
+
+        //public static IManualAuth<Enum, EntityGroupAllowedDN> Manual { get { return cache; } }
 
         public static bool IsStarted { get { return cache != null; } }
 
@@ -38,6 +79,10 @@ namespace Signum.Engine.Authorization
                 AuthLogic.AssertStarted(sb);
                 EntityGroupLogic.Start(sb);
 
+                sb.Include<RuleEntityGroupDN>();
+
+                sb.AddUniqueIndex<RuleEntityGroupDN>(r => new { r.Role, r.Resource }); 
+
                 if (registerEntitiesWithNoGroup)
                 {
                     PermissionAuthLogic.RegisterPermissions(BasicPermissions.EntitiesWithNoGroup);
@@ -46,21 +91,123 @@ namespace Signum.Engine.Authorization
                         "The entity '{0}' has no EntityGroups registered and the permission '{1}' is denied".Formato(t.NiceName(), BasicPermissions.EntitiesWithNoGroup.NiceToString());
                 }
 
-                cache = new AuthCache<RuleEntityGroupDN, EntityGroupAllowedRule, EntityGroupDN, Enum, EntityGroupAllowedDN>(sb,
-                     EnumLogic<EntityGroupDN>.ToEnum,
-                     EnumLogic<EntityGroupDN>.ToEntity,
-                     AuthUtils.MaxEntityGroup,
-                     AuthUtils.MinEntityGroup);
-
                 sb.Schema.Initializing[InitLevel.Level0SyncEntities] += Schema_InitializingRegisterEvents;
 
-                AuthLogic.ExportToXml += () => cache.ExportXml("EntityGroups", "EntityGroup", p => p.Key, b => b.ToString());
-                AuthLogic.ImportFromXml += (x, roles) => cache.ImportXml(x, "EntityGroups", "EntityGroup", roles, EnumLogic<EntityGroupDN>.ToEntity, EntityGroupAllowedDN.Parse);
+                AuthLogic.ExportToXml += AuthLogic_ExportToXml;
+                AuthLogic.ImportFromXml += AuthLogic_ImportFromXml;
+         
+                sb.Schema.Initializing[InitLevel.Level1SimpleEntities] += Schema_InitializingCache;
+                sb.Schema.EntityEvents<RuleEntityGroupDN>().Saving += Schema_Saving;
+                AuthLogic.RolesModified += InvalidateCache;
+
+                sb.Schema.Table<RuleEntityGroupDN>().PreDeleteSqlSync += AuthCache_PreDeleteSqlSync;
             }
         }
 
+        static SqlPreCommand AuthLogic_ImportFromXml(XElement element, Dictionary<string, Lite<RoleDN>> roles)
+        {
+            var current = Database.RetrieveAll<RuleEntityGroupDN>().GroupToDictionary(a => a.Role);
+            var should = element.Element("EntityGroups").Elements("Role").ToDictionary(x => roles[x.Attribute("Name").Value]);
+
+            Table table = Schema.Current.Table(typeof(RuleEntityGroupDN));
+
+            return Synchronizer.SynchronizeScript(current, should,
+              (role, listRules) => listRules.Select(rt => table.DeleteSqlSync(rt)).Combine(Spacing.Simple),
+              (role, x) =>
+              {
+                  return (from xr in x.Elements("EntityGroup")
+                          let r = EnumLogic<EntityGroupDN>.ToEntity(xr.Attribute("Resource").Value)
+                          let a = xr.Attribute("Allowed").Value.ToEnum<TypeAllowed>()
+                          select table.InsertSqlSync(new RuleEntityGroupDN
+                          {
+                              Resource = r,
+                              Role = role,
+                              Allowed = a
+                          }, Comment(role, r, a))).Combine(Spacing.Simple);
+              },
+              (role, list, x) =>
+              {
+                  return Synchronizer.SynchronizeScript(
+                      list.Where(a => a.Resource != null).ToDictionary(a => a.Resource),
+                      x.Elements("EntityGroup").ToDictionary(a => EnumLogic<EntityGroupDN>.ToEntity(a.Attribute("Resource").Value)),
+                      (r, rt) => table.DeleteSqlSync(rt, Comment(role, r, rt.Allowed)),
+                      (r, xr) =>
+                      {
+                          var a = xr.Attribute("Allowed").Value.ToEnum<TypeAllowed>();
+                          return table.InsertSqlSync(new RuleEntityGroupDN { Resource = r, Role = role, Allowed = a }, Comment(role, r, a));
+                      },
+                      (r, pr, xr) =>
+                      {
+                          var oldA = pr.Allowed;
+                          pr.Allowed = xr.Attribute("Allowed").Value.ToEnum<TypeAllowed>();
+                          return table.UpdateSqlSync(pr, Comment(role, r, oldA, pr.Allowed));
+                      }, Spacing.Simple);
+              }, Spacing.Double);
+
+        }
+
+        internal static string Comment(Lite<RoleDN> role, EntityGroupDN resource, TypeAllowed allowed)
+        {
+            return "{0} {1} for {2} ({3})".Formato(typeof(EntityGroupDN).NiceName(), resource.ToStr, role, allowed);
+        }
+
+        internal static string Comment(Lite<RoleDN> role, EntityGroupDN resource, TypeAllowed from, TypeAllowed to)
+        {
+            return "{0} {1} for {2} ({3} -> {4})".Formato(typeof(EntityGroupDN).NiceName(), resource.ToStr, role, from, to);
+        }
+
+        static XElement AuthLogic_ExportToXml()
+        {
+            var list = Database.RetrieveAll<RuleEntityGroupDN>();
+
+            var specificRules = list.Where(a => a.Resource != null).AgGroupToDictionary(a => a.Role, gr => gr.ToDictionary(a => a.Resource, a => a.Allowed));
+
+            return new XElement("EntityGroups",
+                (from r in AuthLogic.RolesInOrder()
+                 select new XElement("Role",
+                     new XAttribute("Name", r.ToStr),
+                     specificRules.TryGetC(r).TryCC(dic =>
+                         from kvp in dic
+                         let resource = kvp.Key.Key
+                         let allowed = kvp.Value.ToString()
+                         orderby resource
+                         select new XElement("EntityGroup",
+                            new XAttribute("Resource", resource),
+                            new XAttribute("Allowed", allowed))
+                     ))
+                 ));
+        }
+
+        static SqlPreCommand AuthCache_PreDeleteSqlSync(IdentifiableEntity arg)
+        {
+            var t = Schema.Current.Table<RuleEntityGroupDN>();
+            var f = (FieldReference)t.Fields["resource"].Field;
+
+            var param = SqlParameterBuilder.CreateReferenceParameter("id", false, arg.Id);
+
+            return new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}".Formato(t.Name, f.Name, param.ParameterName), new List<SqlParameter> { param });
+        }
+
+        static void Schema_Saving(RuleEntityGroupDN rule)
+        {
+            Transaction.RealCommit += () => InvalidateCache();
+        }
+
+        static void Schema_InitializingCache()
+        {
+            cache.Load();
+        }
+
+        static void InvalidateCache()
+        {
+            cache.ResetPublicationOnly();
+        }
+
+    
         static void Schema_InitializingRegisterEvents()
         {
+            cache.Load();
+
             foreach (var type in EntityGroupLogic.Types)
             {
                 miRegister.GetInvoker(type)(Schema.Current);
@@ -143,6 +290,13 @@ namespace Signum.Engine.Authorization
             }
         }
 
+        private static bool IsAllwaysAllowed(Type type, TypeAllowedBasic allowed)
+        {
+            var mm = MinMaxPair(ExecutionContext.Current == ExecutionContext.UserInterface, type);
+
+            return mm.Min >= allowed;
+        }
+
 
         static void Transaction_PreRealCommit()
         {
@@ -203,7 +357,7 @@ namespace Signum.Engine.Authorization
                     List<DebugData> debugInfo = Database.Query<T>().Where(a => notFound.Contains(a.Id))
                         .Select(a => a.IsAllowedForDebug(typeAllowed, ExecutionContext.Current)).ToList();
 
-                    string details = debugInfo.ToString(a => "  {0} because {1}".Formato(a.Lite, a.Errors()), "\r\n");
+                    string details = debugInfo.ToString(a => "  {0} because {1}".Formato(a.Lite, a.Error), "\r\n");
 
                     throw new UnauthorizedAccessException(Resources.NotAuthorizedTo0The1WithId2.Formato(
                         typeAllowed.NiceToString(),
@@ -223,6 +377,20 @@ namespace Signum.Engine.Authorization
                 throw new UnauthorizedAccessException(Resources.NotAuthorizedTo0The1WithId2.Formato(allowed.NiceToString().ToLower(), ident.GetType().NiceName(), ident.Id));
         }
 
+        public static void AssertAllowed(this Lite lite, TypeAllowedBasic allowed)
+        {
+            AssertAllowed(lite, allowed, ExecutionContext.Current);
+        }
+
+        public static void AssertAllowed(this Lite lite, TypeAllowedBasic allowed, ExecutionContext executionContext)
+        {
+            if (lite.IdOrNull == null)
+                AssertAllowed(lite.UntypedEntityOrNull, allowed, executionContext);
+
+            if (!lite.IsAllowedFor(allowed, executionContext))
+                throw new UnauthorizedAccessException(Resources.NotAuthorizedTo0The1WithId2.Formato(allowed.NiceToString().ToLower(), lite.RuntimeType.NiceName(), lite.Id));
+        }
+
         [MethodExpander(typeof(IsAllowedForExpander))]
         public static bool IsAllowedFor(this IIdentifiable ident, TypeAllowedBasic allowed)
         {
@@ -235,7 +403,7 @@ namespace Signum.Engine.Authorization
             return miIsAllowedForEntity.GetInvoker(ident.GetType()).Invoke(ident, allowed, executionContext);
         }
 
-        static GenericInvoker<Func<IIdentifiable, TypeAllowedBasic, ExecutionContext, bool>> miIsAllowedForEntity 
+        static GenericInvoker<Func<IIdentifiable, TypeAllowedBasic, ExecutionContext, bool>> miIsAllowedForEntity
             = new GenericInvoker<Func<IIdentifiable, TypeAllowedBasic, ExecutionContext, bool>>((ie, tab, ec) => IsAllowedFor<IdentifiableEntity>((IdentifiableEntity)ie, tab, ec));
         [MethodExpander(typeof(IsAllowedForExpander))]
         static bool IsAllowedFor<T>(this T entity, TypeAllowedBasic allowed, ExecutionContext executionContext)
@@ -249,42 +417,6 @@ namespace Signum.Engine.Authorization
 
             using (DisableQueries())
                 return entity.InDB().WhereIsAllowedFor(allowed, executionContext).Any();
-        }
-
-        [MethodExpander(typeof(IsAllowedForDebugExpander))]
-        public static DebugData IsAllowedForDebug(this IIdentifiable ident, TypeAllowedBasic allowed, ExecutionContext executionContext)
-        {
-            return miIsAllowedForDebugEntity.GetInvoker(ident.GetType()).Invoke((IdentifiableEntity)ident, allowed, executionContext);
-        }
-
-        static GenericInvoker<Func<IIdentifiable, TypeAllowedBasic, ExecutionContext, DebugData>> miIsAllowedForDebugEntity =
-            new GenericInvoker<Func<IIdentifiable, TypeAllowedBasic, ExecutionContext, DebugData>>((ii, tab, ec) => IsAllowedForDebug<IdentifiableEntity>((IdentifiableEntity)ii, tab, ec));
-        [MethodExpander(typeof(IsAllowedForDebugExpander))]
-        static DebugData IsAllowedForDebug<T>(this T entity, TypeAllowedBasic allowed, ExecutionContext executionContext)
-            where T : IdentifiableEntity
-        {
-            if (!AuthLogic.IsEnabled)
-                return null;
-
-            if (entity.IsNew)
-                throw new InvalidOperationException("The entity {0} is new".Formato(entity));
-
-            using (DisableQueries())
-                return entity.InDB().Select(e => e.IsAllowedForDebug(allowed, executionContext)).SingleEx();
-        }
-
-        public static void AssertAllowed(this Lite lite, TypeAllowedBasic allowed)
-        {
-            AssertAllowed(lite, allowed, ExecutionContext.Current);
-        }
-
-        public static void AssertAllowed(this Lite lite, TypeAllowedBasic allowed, ExecutionContext executionContext)
-        {
-            if (lite.IdOrNull == null)
-                AssertAllowed(lite.UntypedEntityOrNull, allowed, executionContext);
-
-            if (!lite.IsAllowedFor(allowed, executionContext))
-                throw new UnauthorizedAccessException(Resources.NotAuthorizedTo0The1WithId2.Formato(allowed.NiceToString().ToLower(), lite.RuntimeType.NiceName(), lite.Id));
         }
 
         [MethodExpander(typeof(IsAllowedForExpander))]
@@ -312,26 +444,6 @@ namespace Signum.Engine.Authorization
                 return lite.ToLite<T>().InDB().WhereIsAllowedFor(allowed, executionContext).Any();
         }
 
-
-        [MethodExpander(typeof(IsAllowedForExpander))]
-        public static DebugData IsAllowedForDebug(this Lite lite, TypeAllowedBasic allowed, ExecutionContext executionContext)
-        {
-            return miIsAllowedForDebugLite.GetInvoker(lite.RuntimeType).Invoke(lite, allowed, executionContext);
-        }
-
-        static GenericInvoker<Func<Lite, TypeAllowedBasic, ExecutionContext, DebugData>> miIsAllowedForDebugLite = 
-            new GenericInvoker<Func<Lite, TypeAllowedBasic, ExecutionContext, DebugData>>((l, tab, ec) => IsAllowedForDebug<IdentifiableEntity>(l, tab, ec));
-        [MethodExpander(typeof(IsAllowedForExpander))]
-        static DebugData IsAllowedForDebug<T>(this Lite lite, TypeAllowedBasic allowed, ExecutionContext executionContext)
-             where T : IdentifiableEntity
-        {
-            if (!AuthLogic.IsEnabled)
-                return null;
-
-            using (DisableQueries())
-                return lite.ToLite<T>().InDB().Select(a => a.IsAllowedForDebug(allowed, executionContext)).SingleEx();
-        }
-
         class IsAllowedForExpander : IMethodExpander
         {
             public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
@@ -347,6 +459,46 @@ namespace Signum.Engine.Authorization
             }
         }
 
+        [MethodExpander(typeof(IsAllowedForDebugExpander))]
+        public static DebugData IsAllowedForDebug(this IIdentifiable ident, TypeAllowedBasic allowed, ExecutionContext executionContext)
+        {
+            return miIsAllowedForDebugEntity.GetInvoker(ident.GetType()).Invoke((IdentifiableEntity)ident, allowed, executionContext);
+        }
+
+        static GenericInvoker<Func<IIdentifiable, TypeAllowedBasic, ExecutionContext, DebugData>> miIsAllowedForDebugEntity =
+            new GenericInvoker<Func<IIdentifiable, TypeAllowedBasic, ExecutionContext, DebugData>>((ii, tab, ec) => IsAllowedForDebug<IdentifiableEntity>((IdentifiableEntity)ii, tab, ec));
+        [MethodExpander(typeof(IsAllowedForDebugExpander))]
+        static DebugData IsAllowedForDebug<T>(this T entity, TypeAllowedBasic allowed, ExecutionContext executionContext)
+            where T : IdentifiableEntity
+        {
+            if (!AuthLogic.IsEnabled)
+                return null;
+
+            if (entity.IsNew)
+                throw new InvalidOperationException("The entity {0} is new".Formato(entity));
+
+            using (DisableQueries())
+                return entity.InDB().Select(e => e.IsAllowedForDebug(allowed, executionContext)).SingleEx();
+        } 
+
+        [MethodExpander(typeof(IsAllowedForDebugExpander))]
+        public static DebugData IsAllowedForDebug(this Lite lite, TypeAllowedBasic allowed, ExecutionContext executionContext)
+        {
+            return miIsAllowedForDebugLite.GetInvoker(lite.RuntimeType).Invoke(lite, allowed, executionContext);
+        }
+
+        static GenericInvoker<Func<Lite, TypeAllowedBasic, ExecutionContext, DebugData>> miIsAllowedForDebugLite =
+            new GenericInvoker<Func<Lite, TypeAllowedBasic, ExecutionContext, DebugData>>((l, tab, ec) => IsAllowedForDebug<IdentifiableEntity>(l, tab, ec));
+        [MethodExpander(typeof(IsAllowedForDebugExpander))]
+        static DebugData IsAllowedForDebug<T>(this Lite lite, TypeAllowedBasic allowed, ExecutionContext executionContext)
+             where T : IdentifiableEntity
+        {
+            if (!AuthLogic.IsEnabled)
+                return null;
+
+            using (DisableQueries())
+                return lite.ToLite<T>().InDB().Select(a => a.IsAllowedForDebug(allowed, executionContext)).SingleEx();
+        }
 
         class IsAllowedForDebugExpander : IMethodExpander
         {
@@ -391,185 +543,6 @@ namespace Signum.Engine.Authorization
             return result;
         }
 
-        internal class EntityGroupTuple
-        {
-            public Enum Key;
-            public bool AllowedIn;
-            public bool AllowedOut;
-            public IEntityGroupInfo EntityGroup;
-        }
-
-        private static List<EntityGroupTuple> GetPairs(Type type, TypeAllowedBasic allowed, ExecutionContext executionContext)
-        {
-            if (!Schema.Current.Tables.ContainsKey(type))
-                throw new InvalidOperationException("{0} is not included in the schema".Formato(type));
-
-            bool userInterface = executionContext == ExecutionContext.UserInterface;
-
-            var pairs = (from eg in EntityGroupLogic.GroupsFor(type)
-                         let allowedDN = cache.GetAllowed(eg)
-                         let entityGroup = EntityGroupLogic.GetEntityGroupInfo(eg, type)
-                         select new EntityGroupTuple
-                         {
-                             Key = eg,
-                             AllowedIn = allowedDN.InGroup.Get(userInterface) >= allowed,
-                             AllowedOut = allowedDN.OutGroup.Get(userInterface) >= allowed,
-                             EntityGroup = entityGroup,
-                         }).ToList();
-
-            pairs.RemoveAll(p => p.AllowedIn && p.AllowedOut);
-            pairs.RemoveAll(p => p.EntityGroup.IsApplicable != null && p.EntityGroup.IsApplicable.Resume == false);
-            return pairs;
-        }
-
-        static bool IsAllwaysAllowed(Type type, TypeAllowedBasic allowed)
-        {
-            return GetPairs(type, allowed, ExecutionContext.Current).IsEmpty();
-        }
-
-        internal static Expression IsAllowedExpression(Expression entity, TypeAllowedBasic allowed, ExecutionContext executionContext)
-        {
-            var pairs = GetPairs(entity.Type, allowed, executionContext);
-
-            if (pairs.Count == 0)
-                return null;
-
-            if (pairs.Any(p => (p.EntityGroup.IsApplicable == null || p.EntityGroup.IsApplicable.Resume == true) && !p.AllowedIn && !p.AllowedOut))
-                return Expression.Constant(false);
-
-            Expression body = pairs.Select(p =>
-            {
-                if (p.EntityGroup.IsApplicable == null || p.EntityGroup.IsApplicable.Resume == true)
-                {
-                    return p.AllowedIn ? p.EntityGroup.IsInGroup.UntypedExpression.InvokeLambda(entity) :
-                                        Expression.Not(p.EntityGroup.IsInGroup.UntypedExpression.InvokeLambda(entity));
-                }
-                else
-                {
-                    var notApplicable = (Expression)Expression.Not(p.EntityGroup.IsApplicable.UntypedExpression.InvokeLambda(entity));
-
-                    return p.AllowedIn ? Expression.Or(notApplicable, p.EntityGroup.IsInGroup.UntypedExpression.InvokeLambda(entity)) :
-                           p.AllowedOut ? Expression.Or(notApplicable, Expression.Not(p.EntityGroup.IsInGroup.UntypedExpression.InvokeLambda(entity))) :
-                           notApplicable;
-                }
-            }).Aggregate((a, b) => Expression.And(a, b));
-
-            Expression cleanBody = DbQueryProvider.Clean(body, false);
-
-            return cleanBody;
-        }
-
-        static ConstructorInfo ciDebugData = ReflectionTools.GetConstuctorInfo(() => new DebugData(null, null));
-        static ConstructorInfo ciGroupDebugData = ReflectionTools.GetConstuctorInfo(() => new GroupDebugData(null, true));
-        static ConstructorInfo ciGroupDebugDataApplicable = ReflectionTools.GetConstuctorInfo(() => new GroupDebugData(null, true, true));
-        static MethodInfo miToLite = ReflectionTools.GetMethodInfo((IdentifiableEntity a) => a.ToLite()).GetGenericMethodDefinition();
-
-        internal static Expression IsAllowedExpressionDebug(Expression entity, TypeAllowedBasic allowed, ExecutionContext executionContext)
-        {
-            var pairs = GetPairs(entity.Type, allowed, executionContext);
-
-            Expression liteEntity = Expression.Call(null, miToLite.MakeGenericMethod(entity.Type), entity);
-
-            if (pairs.Count == 0)
-                return Expression.New(ciDebugData, liteEntity, Expression.Constant(new List<GroupDebugData>()));
-
-            var sureNotallowed = pairs.Where(p => (p.EntityGroup.IsApplicable == null || p.EntityGroup.IsApplicable.Resume == true) && !p.AllowedIn && !p.AllowedOut);
-            if (sureNotallowed.Any())
-                return Expression.New(ciDebugData, liteEntity, Expression.Constant(sureNotallowed.Select(p => new GroupDebugData(p, false, false)).ToList()));
-
-            Expression list = Expression.ListInit(Expression.New(typeof(List<GroupDebugData>)), pairs.Select(p =>
-            {
-                if (p.EntityGroup.IsApplicable == null || p.EntityGroup.IsApplicable.Resume == true)
-                {
-                    return Expression.New(ciGroupDebugData, Expression.Constant(p),
-                        p.EntityGroup.IsInGroup.UntypedExpression.InvokeLambda(entity));
-                }
-                else
-                {
-                    return Expression.New(ciGroupDebugDataApplicable, Expression.Constant(p),
-                        p.EntityGroup.IsApplicable.UntypedExpression.InvokeLambda(entity),
-                        p.EntityGroup.IsInGroup.UntypedExpression.InvokeLambda(entity));
-
-                }
-            }).ToArray());
-
-            Expression body = Expression.New(ciDebugData, liteEntity, list);
-
-            Expression cleanBody = DbQueryProvider.Clean(body, false);
-
-            return cleanBody;
-        }
-
-        public class DebugData
-        {
-            public DebugData(Lite lite, List<GroupDebugData> groups)
-            {
-                this.Lite = lite;
-                this.Groups = groups;
-            }
-            bool IsAllowed { get { return Groups.All(g => g.IsAllowed); } }
-            public Lite Lite { get; private set; }
-            public List<GroupDebugData> Groups { get; private set; }
-
-            internal string Errors()
-            {
-                return Groups.Where(a => !a.IsAllowed).CommaAnd(a => a.Description());
-            }
-        }
-
-        public class GroupDebugData
-        {
-            EntityGroupTuple tuple;
-
-            internal GroupDebugData(EntityGroupTuple tuple, bool inGroup)
-            {
-                this.tuple = tuple;
-                this.IsApplicable = null;
-                this.InGroup = inGroup;
-            }
-
-            internal GroupDebugData(EntityGroupTuple tuple, bool isApplicable, bool inGroup)
-            {
-                this.tuple = tuple;
-                this.IsApplicable = isApplicable;
-                if (isApplicable)
-                    this.InGroup = inGroup;
-            }
-
-            public Enum Key { get { return tuple.Key; } }
-            public bool AllowedIn { get { return tuple.AllowedIn; } }
-            public bool AllowedOut { get { return tuple.AllowedOut; } }
-            public bool? IsApplicable { get; private set; }
-            public bool? InGroup { get; private set; }
-
-            public bool IsAllowed
-            {
-                get
-                {
-                    if (IsApplicable == false)
-                        return true;
-
-                    return InGroup.Value ? AllowedIn : AllowedOut;
-                }
-            }
-
-            internal string Description()
-            {
-                return "({0})".Formato(", ".Combine(
-                    Key.NiceToString(),
-                    IsApplicable == true ? "IsApplicable" : null,
-                    InGroup == true ? "InGroup" : "Not InGroup",
-                    InGroup == true ? (this.AllowedIn ? "AllowedIn" : "Not AllowedIn") :
-                                     (this.AllowedOut ? "AllowedOut" : "Not AllowedOut")));
-            }
-        }
-
-
-        static Expression InvokeLambda(this LambdaExpression lambda, Expression p)
-        {
-            return (Expression)Expression.Invoke(lambda, p);
-        }
-
         class WhereAllowedExpander : IMethodExpander
         {
             public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
@@ -607,6 +580,168 @@ namespace Signum.Engine.Authorization
             }
         }
 
+        public static Expression IsAllowedExpression(Expression entity, TypeAllowedBasic allowed, ExecutionContext executionContext)
+        {
+            bool userInterface = executionContext == ExecutionContext.UserInterface;
+
+            Expression True = Expression.Constant(true);
+
+            var expression = cache.Value[RoleDN.Current.ToLite()].AsEnumerable().Reverse().Aggregate(True, (acum, line)=>
+            {
+                var inv = GetExpression(line.Key, entity);
+
+                if (inv == null)
+                    return acum;
+
+                if (line.Allowed.Get(userInterface) >= allowed)
+                    return SmartOr(inv, acum);
+                else
+                    return SmartAnd(SmartNot(inv), acum);
+            });
+
+            return DbQueryProvider.Clean(expression, false);
+        }
+
+        private static Expression GetExpression(Enum key, Expression entity)
+        {
+            if (key == null)
+                return Expression.Constant(true);
+
+            var lambda = EntityGroupLogic.TryEntityGroupExpression(key, entity.Type);
+
+            if (lambda == null)
+                return null;
+
+            if (lambda.Body.NodeType == ExpressionType.Constant)
+                return lambda.Body;
+
+            return (Expression)Expression.Invoke(lambda, entity); 
+        }
+
+        static Expression SmartAnd(Expression a, Expression b)
+        {
+            var valA = a.SimpleValue(); 
+            if(valA == true)
+                return b;
+
+            var valB = b.SimpleValue(); 
+            if(valB == true)
+                return a;
+
+            if(valA == false || valB == false)
+                 return Expression.Constant(false);
+
+            return Expression.And(a, b); 
+        }
+
+        static Expression SmartOr(Expression a, Expression b)
+        {
+            var valA = a.SimpleValue();
+            if (valA == false)
+                return b;
+
+            var valB = b.SimpleValue();
+            if (valB == false)
+                return a;
+
+            if (valA == true || valB == true)
+                return Expression.Constant(true);
+
+            return Expression.Or(a, b);
+        }
+
+        static Expression SmartNot(Expression a)
+        {
+            var val = a.SimpleValue();
+            if (val.HasValue)
+                return Expression.Constant(!val.Value);
+
+            return Expression.Not(a);
+        }
+
+        static ConstructorInfo ciDebugData = ReflectionTools.GetConstuctorInfo(() => new DebugData(null, TypeAllowed.Create, true,  null));
+        static ConstructorInfo ciGroupDebugData = ReflectionTools.GetConstuctorInfo(() => new GroupDebugData(null, true, TypeAllowed.Create));
+        static MethodInfo miToLite = ReflectionTools.GetMethodInfo((IdentifiableEntity a) => a.ToLite()).GetGenericMethodDefinition();
+
+        internal static Expression IsAllowedExpressionDebug(Expression entity, TypeAllowedBasic allowed, ExecutionContext executionContext)
+        {
+            bool userInterface = executionContext == ExecutionContext.UserInterface;
+
+            Type type = entity.Type;
+
+            var list = (from line in cache.Value[RoleDN.Current.ToLite()]
+                        let exp = GetExpression(line.Key, entity)
+                        where exp != null
+                        select Expression.New(ciGroupDebugData, Expression.Constant(line.Key), exp, Expression.Constant( line.Allowed))).ToArray();
+
+            Expression newList = Expression.ListInit(Expression.New(typeof(List<GroupDebugData>)), list);
+
+
+
+            Expression liteEntity = Expression.Call(null, miToLite.MakeGenericMethod(entity.Type), entity);
+
+            return Expression.New(ciDebugData, liteEntity, Expression.Constant(allowed), Expression.Constant(userInterface), newList);
+        }
+
+        public class DebugData
+        {
+            public DebugData(Lite lite, TypeAllowed requested, bool userInterface, List<GroupDebugData> groups)
+            {
+                this.Lite = lite;
+                this.Requested = requested;
+                this.UserInterface = userInterface;
+                this.Groups = groups;
+            }
+            
+            public Lite Lite { get; private set; }
+            public TypeAllowed Requested { get; private set; }
+            public bool UserInterface { get; private set; }
+
+            public List<GroupDebugData> Groups { get; private set; }
+
+            public bool Allowed
+            {
+                get
+                {
+                    foreach (var item in Groups.AsEnumerable())
+                    {
+                        if(item.InGroup)
+                            return Requested.Get(UserInterface)<= item.Allowed.Get(UserInterface);
+                    }
+
+                    return true;
+                }
+            }
+
+            public string Error 
+            {
+                get
+                {
+                    var item = Groups.FirstOrDefault(a => a.InGroup);
+
+                    if (item == null || Requested.Get(UserInterface) <= item.Allowed.Get(UserInterface))
+                        return null;
+
+                    return "{0} belongs to {1} that is {2} (less than {3})".Formato(Lite, item.Key, item.Allowed, item.Allowed.Get(UserInterface), Requested.Get(UserInterface));
+                }
+            }
+        }
+
+        public class GroupDebugData
+        {
+            public Enum Key { get; private set; }
+            public bool InGroup { get; private set; }
+            public TypeAllowed Allowed { get; private set; }
+
+            internal GroupDebugData(Enum key, bool inGroup, TypeAllowed allowed)
+            {
+                this.Key = key;
+                this.InGroup = inGroup;
+                this.Allowed = allowed;
+            }
+        }
+
+     
         public static DynamicQuery<T> ToDynamicDisableAutoFilter<T>(this IQueryable<T> query)
         {
             return new AutoDynamicQueryNoFilter<T>(query);
@@ -645,70 +780,56 @@ namespace Signum.Engine.Authorization
 
         public static EntityGroupRulePack GetEntityGroupRules(Lite<RoleDN> roleLite)
         {
-            EntityGroupRulePack result = new EntityGroupRulePack { Role = roleLite };
-            cache.GetRules(result, EnumLogic<EntityGroupDN>.AllEntities());
-            return result;
+            return new EntityGroupRulePack(roleLite)
+            {
+                Rules = cache.Value[roleLite].Select(a => new EntityGroupAllowedRule
+                {
+                    Allowed = a.Allowed,
+                    Resource = a.Key,
+                    Priority = a.Priority,
+                }).ToMList(),
+            };
         }
 
         public static void SetEntityGroupRules(EntityGroupRulePack rules)
         {
-            cache.SetRules(rules, r => true);
-        }
+            using (Transaction tr = new Transaction(true))
+            {
+                Database.Query<RuleEntityGroupDN>().Where(r => r.Role == rules.Role).UnsafeDelete();
 
-        public static EntityGroupAllowedDN GetEntityGroupAllowed(Lite<RoleDN> role, Enum entityGroupKey)
-        {
-            return cache.GetAllowed(role, entityGroupKey);
-        }
+                rules.Rules.Select(r => new RuleEntityGroupDN
+                {
+                    Resource = r.Resource == null ? null : EnumLogic<EntityGroupDN>.ToEntity(r.Resource),
+                    Role = rules.Role,
+                    Priority = r.Priority,
+                    Allowed = r.Allowed,
+                }).SaveList();
 
-        public static EntityGroupAllowedDN GetEntityGroupAllowed(Enum entityGroupKey)
-        {
-            return cache.GetAllowed(entityGroupKey);
+                tr.Commit();
+            }
         }
 
         public static Dictionary<Type, MinMax<TypeAllowedBasic>> GetEntityGroupTypesAllowed(bool userInterface)
         {
             return EntityGroupLogic.Types.ToDictionary(t => t,
-                t => EntityGroupLogic.GroupsFor(t)
-                    .Select(eg => Possibilities(t, eg, userInterface))
-                    .CartesianProduct()
-                    .Select(col => col.MinAllowed())
-                    .WithMinMaxPair(a => (int)a));
+                t => MinMaxPair(userInterface, t));
         }
 
-        //returns Create insted of extension when not null
-        static TypeAllowedBasic MinAllowed(this IEnumerable<TypeAllowedBasic?> collection)
+        private static MinMax<TypeAllowedBasic> MinMaxPair(bool userInterface, Type t)
         {
-            TypeAllowedBasic min = TypeAllowedBasic.Create;
+            var collection = from line in cache.Value[RoleDN.Current.ToLite()]
+                             let exp = line.Key == null ? null : EntityGroupLogic.TryEntityGroupExpression(line.Key, t)
+                             where line.Key == null || exp != null
+                             select new { Allowed = line.Allowed.Get(userInterface), InGroup = line.Key == null ? true : exp.SimpleValue() };
 
-            foreach (var item in collection.NotNull())
-            {
-                if (item < min)
-                    min = item;
-            }
-
-            return min;
+            return collection.Where(a => a.InGroup != false).TakeWhile(a => a.InGroup != true).Select(a => a.Allowed).WithMinMaxPair(a => (int)a);
         }
+    }
 
-        static IEnumerable<TypeAllowedBasic?> Possibilities(Type type, Enum entityGroup, bool userInterface)
-        {
-            IEntityGroupInfo egi = EntityGroupLogic.GetEntityGroupInfo(entityGroup, type);
-
-            if (egi.IsApplicable != null)
-            {
-                if (egi.IsApplicable.Resume == false)
-                {
-                    yield return null;
-                    yield break;
-                }
-                else if (egi.IsApplicable.Resume == null)
-                    yield return null;
-            }
-
-            EntityGroupAllowedDN access = cache.GetAllowed(entityGroup);
-            if ((egi.IsInGroup.Resume ?? true) == true)
-                yield return access.InGroup.Get(userInterface);
-            if ((egi.IsInGroup.Resume ?? false) == false)
-                yield return access.OutGroup.Get(userInterface);
-        }
+    public class EntityGroupLine
+    {
+        public Enum Key;
+        public TypeAllowed Allowed;
+        public int Priority;
     }
 }

@@ -19,15 +19,6 @@ namespace Signum.Engine.Authorization
         public static readonly DefaultBehaviour<TypeAllowed> MaxType = new DefaultBehaviour<TypeAllowed>(TypeAllowed.Create, MaxTypeAllowed);
         public static readonly DefaultBehaviour<TypeAllowed> MinType = new DefaultBehaviour<TypeAllowed>(TypeAllowed.None, MinTypeAllowed);
 
-        public static readonly DefaultBehaviour<EntityGroupAllowedDN> MaxEntityGroup = new DefaultBehaviour<EntityGroupAllowedDN>(EntityGroupAllowedDN.CreateCreate,
-            col => new EntityGroupAllowedDN(
-                MaxTypeAllowed(col.Select(a => a.InGroup)),
-                MaxTypeAllowed(col.Select(a => a.OutGroup))));
-        public static readonly DefaultBehaviour<EntityGroupAllowedDN> MinEntityGroup = new DefaultBehaviour<EntityGroupAllowedDN>(EntityGroupAllowedDN.NoneNone,
-               col => new EntityGroupAllowedDN(
-                MinTypeAllowed(col.Select(a => a.InGroup)),
-                MinTypeAllowed(col.Select(a => a.OutGroup))));
-
         static TypeAllowed MaxTypeAllowed(this IEnumerable<TypeAllowed> collection)
         {
             TypeAllowed result = TypeAllowed.None;

@@ -44,7 +44,7 @@ namespace Signum.Web.AuthAdmin
                 if (types)
                 {
                     Register<TypeRulePack, TypeAllowedRule, TypeDN, TypeAllowed, TypeDN>("types", a => a.Resource, 
-                        ctx=> ParseTypeAllowed(ctx.Inputs, null), "Resource", false);
+                        ctx=> ParseTypeAllowed(ctx.Inputs), "Resource", false);
                 }
 
                 if (properties)
@@ -72,35 +72,33 @@ namespace Signum.Web.AuthAdmin
 
                 if (entityGroups)
                 {
-                    Register<EntityGroupRulePack, EntityGroupAllowedRule, EntityGroupDN, EntityGroupAllowedDN, EntityGroupDN>("entityGroups", a => a.Resource,
-                        ctx =>new EntityGroupAllowedDN(ParseTypeAllowed(ctx.Parent.Inputs, "In_"), ParseTypeAllowed(ctx.Parent.Inputs, "Out_")), "Resource", false);
+                    RegisterEntityGroups();
                 }
             }
         }
 
-        public static TypeAllowed ParseTypeAllowed(IDictionary<string, string> dic, string inOut)
+        static TypeAllowed ParseTypeAllowed(IDictionary<string, string> dic)
         {
             return TypeAllowedExtensions.Create(
-                Mapping.ParseHtmlBool(dic[inOut + "Create"]),
-                Mapping.ParseHtmlBool(dic[inOut + "Modify"]),
-                Mapping.ParseHtmlBool(dic[inOut + "Read"]),
-                Mapping.ParseHtmlBool(dic[inOut + "None"]));
+                Mapping.ParseHtmlBool(dic["Create"]),
+                Mapping.ParseHtmlBool(dic["Modify"]),
+                Mapping.ParseHtmlBool(dic["Read"]),
+                Mapping.ParseHtmlBool(dic["None"]));
         }
 
-        static void Register<T, AR, R, A, K>(string partialViewName, Func<AR, K> getKey,Mapping<A> allowedMapping,string getKeyRoute, bool embedded)
+        static void Register<T, AR, R, A, K>(string partialViewName, Func<AR, K> getKey, Mapping<A> allowedMapping, string getKeyRoute, bool embedded)
             where T : BaseRulePack<AR>
-            where AR: AllowedRule<R, A>, new()
+            where AR : AllowedRule<R, A>, new()
             where R : IdentifiableEntity
-
         {
             if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(R)))
                 Navigator.AddSetting(new EntitySettings<R>(EntityType.ServerOnly));
-            
+
             string viewPrefix = "~/authAdmin/Views/{0}.cshtml";
             Navigator.AddSetting(new EmbeddedEntitySettings<T>()
             {
                 ShowSave = false,
-                PartialViewName = e =>  viewPrefix.Formato(partialViewName),
+                PartialViewName = e => viewPrefix.Formato(partialViewName),
                 MappingDefault = new EntityMapping<T>(false)
                     .CreateProperty(m => m.DefaultRule)
                     .SetProperty(m => m.Rules,
@@ -110,6 +108,38 @@ namespace Signum.Web.AuthAdmin
                         })
             });
 
+            RegisterSaveButton<T>(partialViewName, embedded);
+        }
+
+        static void RegisterEntityGroups()
+        {
+            string partialViewName = "entityGroups";
+
+            if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(EntityGroupDN)))
+                Navigator.AddSetting(new EntitySettings<EntityGroupDN>(EntityType.ServerOnly));
+
+            string viewPrefix = "~/authAdmin/Views/{0}.cshtml";
+            Navigator.AddSetting(new EmbeddedEntitySettings<EntityGroupRulePack>()
+            {
+                ShowSave = false,
+                PartialViewName = e => viewPrefix.Formato(partialViewName),
+                MappingDefault = new EntityMapping<EntityGroupRulePack>(false)
+                    .SetProperty(m => m.Rules,
+                        new MListDictionaryMapping<EntityGroupAllowedRule, string>(a => a.Resource == null? "[FALLBACK]": EnumDN.UniqueKey(a.Resource), "Resource")
+                        {
+                            ElementMapping = new EntityMapping<EntityGroupAllowedRule>(false)
+                            .SetProperty(p => p.Allowed, ctx=>ParseTypeAllowed(ctx.Parent.Inputs))
+                            .CreateProperty(p=>p.Priority)
+                        })
+            });
+
+            RegisterSaveButton<EntityGroupRulePack>(partialViewName, false);
+        }
+
+
+        private static void RegisterSaveButton<T>(string partialViewName, bool embedded)
+            where T : ModifiableEntity
+        {
             ButtonBarEntityHelper.RegisterEntityButtons<T>((ctx, entity) =>
                 new[] { new ToolBarButton { 
                     OnClick = (embedded ? "postDialog('{0}', '{1}')" :  "SF.submit('{0}', '{1}')").Formato(
@@ -119,5 +149,6 @@ namespace Signum.Web.AuthAdmin
                 } 
                 });
         }
+
     }
 }
