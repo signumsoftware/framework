@@ -314,7 +314,7 @@ namespace Signum.Engine.Mailing
                     emailMessage.Received = null;
                     emailMessage.Save();
 
-                    client.SendAsync(message, new EmailUser { EmailMessage = emailMessage, User = UserDN.Current });
+                    client.Send(message/*,new EmailUser { EmailMessage = emailMessage, User = UserDN.Current }*/);
                 }
                 else
                 {
@@ -367,9 +367,9 @@ namespace Signum.Engine.Mailing
             };
 
             if(emailMessage.Bcc.HasText())
-                message.Bcc.AddRange( emailMessage.Bcc.Split(';').Select(a => new MailAddress(a)).ToList());
+                message.Bcc.AddRange(emailMessage.Bcc.Split( new [] {';'},StringSplitOptions.RemoveEmptyEntries).Select(a => new MailAddress(a)).ToList());
             if (emailMessage.Cc.HasText())
-                message.Bcc.AddRange(emailMessage.Cc.Split(';').Select(a => new MailAddress(a)).ToList());
+                message.CC.AddRange(emailMessage.Cc.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Select(a => new MailAddress(a)).ToList());
             return message;
         }
 
