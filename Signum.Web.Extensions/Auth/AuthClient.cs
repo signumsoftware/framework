@@ -61,6 +61,7 @@ namespace Signum.Web.Auth
 
                 if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(UserDN)))
                     Navigator.AddSetting(new EntitySettings<UserDN>(EntityType.Default));
+
                 Navigator.EntitySettings<UserDN>().ShowSave = false;
 
                 if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(RoleDN)))
@@ -132,7 +133,6 @@ namespace Signum.Web.Auth
                     }
                 };
 
-
                 OperationsClient.Manager.Settings.AddRange(new Dictionary<Enum, OperationSettings>
                 {
                     { UserOperation.SetPassword, new EntityOperationSettings 
@@ -155,8 +155,6 @@ namespace Signum.Web.Auth
                         IsContextualVisible = _ => false
                     }},
                 });
-
-
             }
         }
 
@@ -192,9 +190,15 @@ namespace Signum.Web.Auth
         static GenericInvoker<Action<EntitySettings>> miAttachEvents = new GenericInvoker<Action<EntitySettings>>(es => AttachEvents<TypeDN>((EntitySettings<TypeDN>)es));
         static void AttachEvents<T>(EntitySettings<T> settings) where T : IdentifiableEntity
         {
-            settings.IsCreable += admin => TypeAuthLogic.GetTypeAllowed(typeof(T)).GetUI() == TypeAllowedBasic.Create;
-            settings.IsReadOnly += (_, admin) => TypeAuthLogic.GetTypeAllowed(typeof(T)).GetUI() <= TypeAllowedBasic.Read;
-            settings.IsViewable += (_, admin) => TypeAuthLogic.GetTypeAllowed(typeof(T)).GetUI() >= TypeAllowedBasic.Read;
+            settings.IsCreable += admin => TypeAuthLogic.GetAllowed(typeof(T)).Max().GetUI() == TypeAllowedBasic.Create;
+
+            settings.IsReadOnly += (entity, admin) => entity == null ?
+                TypeAuthLogic.GetAllowed(typeof(T)).Max().GetUI() >= TypeAllowedBasic.Modify : 
+                !entity.IsAllowedFor(TypeAllowedBasic.Modify);
+
+            settings.IsViewable += (entity, admin) => entity == null ? 
+                TypeAuthLogic.GetAllowed(typeof(T)).Max().GetUI() >= TypeAllowedBasic.Read: 
+                entity.IsAllowedFor(TypeAllowedBasic.Read);
         }
 
         static void TaskAuthorizeProperties(BaseLine bl)

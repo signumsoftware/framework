@@ -56,24 +56,44 @@ namespace Signum.Entities.Authorization
 
     [Serializable]
     public class RulePropertyDN : RuleDN<PropertyDN, PropertyAllowed> { }
+   
+    [Serializable]
+    public class RuleTypeDN : RuleDN<TypeDN, TypeAllowed> 
+    {
+        [ValidateChildProperty]
+        MList<RuleTypeConditionDN> conditions = new MList<RuleTypeConditionDN>();
+        public MList<RuleTypeConditionDN> Conditions
+        {
+            get { return conditions; }
+            set { Set(ref conditions, value, () => Conditions); }
+        }
+
+        protected override void PreSaving(ref bool graphModified)
+        {
+            this.Conditions.ForEach((a, i) => a.Order = i); 
+
+            base.PreSaving(ref graphModified);
+        }
+
+        protected override void PostRetrieving()
+        {
+            this.Conditions.Sort(a => a.Order);
+
+            base.PostRetrieving();
+        }
+    }
 
     [Serializable]
-    public class RuleEntityGroupDN : IdentifiableEntity
+    public class RuleTypeConditionDN : EmbeddedEntity, IEquatable<RuleTypeConditionDN>
     {
-        Lite<RoleDN> role;
+        TypeConditionNameDN condition;
         [NotNullValidator]
-        public Lite<RoleDN> Role
+        public TypeConditionNameDN Condition
         {
-            get { return role; }
-            set { Set(ref role, value, () => Role); }
+            get { return condition; }
+            set { Set(ref condition, value, () => Condition); }
         }
 
-        EntityGroupDN resource;
-        public EntityGroupDN Resource
-        {
-            get { return resource; }
-            set { Set(ref resource, value, () => Resource); }
-        }
 
         TypeAllowed allowed;
         public TypeAllowed Allowed
@@ -82,36 +102,19 @@ namespace Signum.Entities.Authorization
             set { Set(ref allowed, value, () => Allowed); }
         }
 
-        int priority;
-        [NumberIsValidator(Entities.ComparisonType.GreaterThanOrEqual, 0)]
-        public int Priority
+        int order;
+        public int Order
         {
-            get { return priority; }
-            set { Set(ref priority, value, () => Priority); }
+            get { return order; }
+            set { Set(ref order, value, () => Order); }
         }
 
-        protected override void PreSaving(ref bool graphModified)
+        public bool Equals(RuleTypeConditionDN other)
         {
-            this.toStr = this.ToString();
+            return this.condition.Equals(other.condition) 
+                && this.allowed == other.allowed; 
         }
-
-        protected override string PropertyValidation(PropertyInfo pi)
-        {
-            if (pi.Is(() => Priority))
-            {
-                if (priority == 0 && resource != null)
-                    return "Priority shouldn't be 0 for non-Fallback groups";
-
-                if (priority != 0 && resource == null)
-                    return "Priority should be 0 for Fallback group"; 
-            }
-
-            return base.PropertyValidation(pi);
-        }  
     }
-
-    [Serializable]
-    public class RuleTypeDN : RuleDN<TypeDN, TypeAllowed> { }
 
     public enum PropertyAllowed
     {

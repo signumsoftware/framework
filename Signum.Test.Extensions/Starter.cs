@@ -19,6 +19,7 @@ using Signum.Engine.Extensions.Chart;
 using Signum.Entities.Chart;
 using Signum.Engine.UserQueries;
 using Signum.Entities.UserQueries;
+using Signum.Entities.Basics;
 
 namespace Signum.Test.Extensions
 {
@@ -67,8 +68,7 @@ namespace Signum.Test.Extensions
             UserTicketLogic.Start(sb, dqm);
             OperationLogic.Start(sb, dqm);
 
-            EntityGroupAuthLogic.Start(sb, false);
-            AuthLogic.StartAllModules(sb, dqm);
+            AuthLogic.StartAllModules(sb, dqm, typeof(IServerSample));
             
             QueryLogic.Start(sb);
             UserQueryLogic.Start(sb, dqm);
@@ -99,8 +99,8 @@ namespace Signum.Test.Extensions
                 Delete = (album, _) => album.Delete()
             });
 
-            EntityGroupLogic.Register<LabelDN>(MusicGroups.JapanEntities, l => l.Country.Name.StartsWith(Signum.Test.Starter.Japan) || l.Owner != null && l.Owner.Entity.Country.Name.StartsWith(Signum.Test.Starter.Japan));
-            EntityGroupLogic.Register<AlbumDN>(MusicGroups.JapanEntities, a => a.Label.IsInGroup(MusicGroups.JapanEntities));
+            TypeConditionLogic.Register<LabelDN>(MusicGroups.JapanEntities, l => l.Country.Name.StartsWith(Signum.Test.Starter.Japan) || l.Owner != null && l.Owner.Entity.Country.Name.StartsWith(Signum.Test.Starter.Japan));
+            TypeConditionLogic.Register<AlbumDN>(MusicGroups.JapanEntities, a => a.Label.InCondition(MusicGroups.JapanEntities));
         }
 
         public static void Load()
@@ -165,29 +165,43 @@ namespace Signum.Test.Extensions
                 Schema.Current.InitializeUntil(InitLevel.Level3MainEntities);
                 Signum.Test.Starter.Load();
 
-                EntityGroupAuthLogic.SetEntityGroupRules(new EntityGroupRulePack(externalUser.ToLite())
-                {
-                     Rules = 
-                     {
-                         new EntityGroupAllowedRule { Priority = 3, Allowed = TypeAllowed.Create, Resource = MusicGroups.JapanEntities},
-                         new EntityGroupAllowedRule { Priority = 2, Allowed = TypeAllowed.Create, Resource = MusicGroups.UserEntities},
-                         new EntityGroupAllowedRule { Priority = 1, Allowed = TypeAllowed.Read, Resource = MusicGroups.RoleEntities},
-                         new EntityGroupAllowedRule { Priority = 0, Allowed = TypeAllowed.None, Resource = null},
-                     }
-                });
+                TypeConditionUsersRoles(externalUser.ToLite());
                 
-                EntityGroupAuthLogic.SetEntityGroupRules(new EntityGroupRulePack(internalUser.ToLite())
-                {
-                     Rules = 
-                     {
-                         new EntityGroupAllowedRule { Priority = 2, Allowed = TypeAllowed.Create, Resource = MusicGroups.UserEntities},
-                         new EntityGroupAllowedRule { Priority = 1, Allowed = TypeAllowed.Read, Resource = MusicGroups.RoleEntities},
-                         new EntityGroupAllowedRule { Priority = 0, Allowed = TypeAllowed.None, Resource = null},
-                     }
-                }); 
+                TypeAuthLogic.Manual.SetAllowed(externalUser.ToLite(), typeof(LabelDN), 
+                    new TypeAllowedAndConditions(TypeAllowed.None, 
+                            new TypeConditionRule(MusicGroups.JapanEntities, TypeAllowed.Create)));
+
+                TypeAuthLogic.Manual.SetAllowed(externalUser.ToLite(), typeof(LabelDN), 
+                    new TypeAllowedAndConditions(TypeAllowed.None,
+                            new TypeConditionRule(MusicGroups.JapanEntities, TypeAllowed.Create)));
+
+                TypeConditionUsersRoles(internalUser.ToLite());
 
                 AuthLogic.InvalidateCache(); 
             }
+        }
+
+        private static void TypeConditionUsersRoles(Lite<RoleDN> role)
+        {
+            TypeAuthLogic.Manual.SetAllowed(role, typeof(UserQueryDN),
+                new TypeAllowedAndConditions(TypeAllowed.None,
+                        new TypeConditionRule(MusicGroups.RoleEntities, TypeAllowed.Read),
+                        new TypeConditionRule(MusicGroups.UserEntities, TypeAllowed.Create)));
+
+            TypeAuthLogic.Manual.SetAllowed(role, typeof(ControlPanelDN),
+                new TypeAllowedAndConditions(TypeAllowed.None,
+                        new TypeConditionRule(MusicGroups.RoleEntities, TypeAllowed.Read),
+                        new TypeConditionRule(MusicGroups.UserEntities, TypeAllowed.Create)));
+
+            TypeAuthLogic.Manual.SetAllowed(role, typeof(UserChartDN),
+                new TypeAllowedAndConditions(TypeAllowed.None,
+                        new TypeConditionRule(MusicGroups.RoleEntities, TypeAllowed.Read),
+                        new TypeConditionRule(MusicGroups.UserEntities, TypeAllowed.Create)));
+
+            TypeAuthLogic.Manual.SetAllowed(role, typeof(LinkListPartDN),
+              new TypeAllowedAndConditions(TypeAllowed.None,
+                      new TypeConditionRule(MusicGroups.RoleEntities, TypeAllowed.Read),
+                      new TypeConditionRule(MusicGroups.UserEntities, TypeAllowed.Create)));
         }
     }
 

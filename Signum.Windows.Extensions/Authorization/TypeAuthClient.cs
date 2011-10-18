@@ -15,7 +15,7 @@ namespace Signum.Windows.Authorization
 {
     public static class TypeAuthClient
     {
-        static DefaultDictionary<Type, TypeAllowed> typeRules; 
+        static DefaultDictionary<Type, TypeAllowedAndConditions> typeRules; 
 
         public static bool Started { get; private set; }
 
@@ -60,14 +60,28 @@ namespace Signum.Windows.Authorization
         static GenericInvoker<Action<EntitySettings>> miAttachTypeEvent = new GenericInvoker<Action<EntitySettings>>(es => AttachTypeEvent<TypeDN>((EntitySettings<TypeDN>)es));
         private static void AttachTypeEvent<T>(EntitySettings<T> settings) where T : IdentifiableEntity
         {
-            settings.IsCreable += admin => GetTypeAllowed(typeof(T)) == TypeAllowedBasic.Create;
-            settings.IsReadOnly += (entity, admin) => GetTypeAllowed(typeof(T)) <= TypeAllowedBasic.Read;
-            settings.IsViewable += (entity, admin) => GetTypeAllowed(typeof(T)) >= TypeAllowedBasic.Read;
+            settings.IsCreable += admin => typeRules.GetAllowed(typeof(T)).Max().GetUI() == TypeAllowedBasic.Create;
+
+            settings.IsReadOnly += (entity, admin) => entity == null ?
+                typeRules.GetAllowed(typeof(T)).Max().GetUI() >= TypeAllowedBasic.Modify :
+                !entity.IsAllowedFor(TypeAllowedBasic.Modify);
+
+            settings.IsViewable += (entity, admin) => entity == null ?
+                typeRules.GetAllowed(typeof(T)).Max().GetUI() >= TypeAllowedBasic.Read :
+                entity.IsAllowedFor(TypeAllowedBasic.Read);
         }
 
-        static TypeAllowedBasic GetTypeAllowed(Type type)
+        public static bool IsAllowedFor(this IdentifiableEntity entity, TypeAllowedBasic requested)
         {
-            return typeRules.GetAllowed(type).GetUI();
+            TypeAllowedAndConditions tac = typeRules.GetAllowed(entity.GetType());
+
+            if (requested <= tac.Min().GetUI())
+                return true;
+
+            if (tac.Max().GetUI() < requested)
+                return false;
+
+            return Server.Return((ITypeAuthServer s) => s.IsAllowedFor(entity.ToLite(), requested));
         }
 
         static void AuthClient_UpdateCacheEvent()
@@ -88,7 +102,7 @@ namespace Signum.Windows.Authorization
 
                 if (type != null && Navigator.Manager.EntitySettings.ContainsKey(type))
                 {
-                    if (GetTypeAllowed(type) == TypeAllowedBasic.None)
+                    if (typeRules.GetAllowed(type).Max().GetUI() < TypeAllowedBasic.Read)
                         menuItem.Visibility = Visibility.Collapsed;
                 }
             }

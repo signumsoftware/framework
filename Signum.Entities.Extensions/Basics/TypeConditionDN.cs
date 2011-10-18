@@ -7,8 +7,8 @@ using Signum.Entities.Basics;
 namespace Signum.Entities.Basics
 {
     [Serializable]
-    public class EntityGroupDN : EnumDN
+    public class TypeConditionNameDN : EnumDN
     {
-
+    
     }
 }

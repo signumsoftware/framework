@@ -5,6 +5,7 @@ using System.Text;
 using Signum.Utilities;
 using Signum.Entities.Basics;
 using Signum.Entities.Authorization;
+using Signum.Entities;
 
 namespace Signum.Engine.Authorization
 {

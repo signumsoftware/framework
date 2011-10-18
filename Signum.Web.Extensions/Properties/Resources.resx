@@ -435,4 +435,7 @@
   <data name="Chart_ToggleInfo" xml:space="preserve">
     <value>Toggle info</value>
   </data>
+  <data name="_0Rules" xml:space="preserve">
+    <value>{0} rules</value>
+  </data>
 </root>

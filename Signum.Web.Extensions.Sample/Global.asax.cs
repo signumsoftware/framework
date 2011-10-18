@@ -82,9 +82,21 @@ namespace Signum.Web.Extensions.Sample
             Navigator.Start(new NavigationManager());
             Constructor.Start(new ConstructorManager());
             OperationsClient.Start(new OperationManager(), true);
-            
-            AuthClient.Start(true, true, true, true, false);
-            AuthAdminClient.Start(true, true, true, true, true, true, true);
+
+            AuthClient.Start(
+                types: true, 
+                property: true, 
+                queries: true, 
+                resetPassword: true,
+                passwordExpiration: false);
+           
+            AuthAdminClient.Start(
+                types: true, 
+                properties: true, 
+                queries: true, 
+                operations: true, 
+                permissions: true, 
+                facadeMethods: false);
 
             ContextualItemsHelper.Start();
             UserQueriesClient.Start();

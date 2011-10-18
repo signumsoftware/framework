@@ -333,7 +333,7 @@ namespace Signum.Engine.Authorization
             TypeAuthLogic.Start(sb);
             PropertyAuthLogic.Start(sb, true);
 
-            if (serviceInterfaces != null)
+            if (serviceInterfaces != null && serviceInterfaces.Any())
                 FacadeMethodAuthLogic.Start(sb, serviceInterfaces);
 
             QueryAuthLogic.Start(sb, dqm);

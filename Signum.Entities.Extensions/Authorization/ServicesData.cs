@@ -7,6 +7,7 @@ using Signum.Entities;
 using Signum.Utilities;
 using Signum.Entities.Operations;
 using Signum.Entities.Extensions.Properties;
+using System.Collections.ObjectModel;
 
 namespace Signum.Entities.Authorization
 {
@@ -148,7 +149,7 @@ namespace Signum.Entities.Authorization
     }
 
     [Serializable]
-    public class TypeAllowedRule : AllowedRule<TypeDN, TypeAllowed> 
+    public class TypeAllowedRule : AllowedRule<TypeDN, TypeAllowedAndConditions> 
     {
         AuthThumbnail? properties;
         public AuthThumbnail? Properties
@@ -169,6 +170,89 @@ namespace Signum.Entities.Authorization
         {
             get { return queries; }
             set { Set(ref queries, value, () => Queries); }
+        }
+
+        ReadOnlyCollection<Enum> availableConditions;
+        public ReadOnlyCollection<Enum> AvailableConditions
+        {
+            get { return availableConditions; }
+            set { Set(ref availableConditions, value, () => AvailableConditions); }
+        }
+    }
+
+    [Serializable]
+    public class TypeAllowedAndConditions : ModelEntity, IEquatable<TypeAllowedAndConditions>
+    {
+        public TypeAllowedAndConditions(TypeAllowed @base, params TypeConditionRule[] conditions)
+        {
+            this.@base = @base;
+            this.conditions.AddRange(conditions); 
+        }
+
+        TypeAllowed @base;
+        public TypeAllowed Base
+        {
+            get { return @base; }
+            set { Set(ref @base, value, () => Base); }
+        }
+
+        MList<TypeConditionRule> conditions = new MList<TypeConditionRule>();
+        public MList<TypeConditionRule> Conditions
+        {
+            get { return conditions; }
+            set { Set(ref conditions, value, () => Conditions); }
+        }
+
+        public bool Equals(TypeAllowedAndConditions other)
+        {
+            return this.@base.Equals(other.@base) &&
+                this.conditions.SequenceEqual(other.conditions);
+        }
+
+        public TypeAllowed Min()
+        {
+            if (!conditions.Any())
+                return @base;
+
+            return (TypeAllowed)Math.Min((int)@base, conditions.Select(a => (int)a.Allowed).Min());
+        }
+
+        public TypeAllowed Max()
+        {
+            if (!conditions.Any())
+                return @base;
+
+            return (TypeAllowed)Math.Max((int)@base, conditions.Select(a => (int)a.Allowed).Max());
+        }
+    }
+
+    [Serializable]
+    public class TypeConditionRule : EmbeddedEntity, IEquatable<TypeConditionRule>
+    {
+        public TypeConditionRule(Enum conditionName, TypeAllowed allowed)
+        {
+            this.conditionName = conditionName;
+            this.allowed = allowed;
+        }
+
+        Enum conditionName;
+        public Enum ConditionName
+        {
+            get { return conditionName; }
+            set { Set(ref conditionName, value, () => ConditionName); }
+        }
+
+        TypeAllowed allowed;
+        public TypeAllowed Allowed
+        {
+            get { return allowed; }
+            set { Set(ref allowed, value, () => Allowed); }
+        }
+
+        public bool Equals(TypeConditionRule other)
+        {
+            return conditionName.Equals(other.conditionName) && 
+                allowed.Equals(other.allowed);
         }
     }
 
@@ -237,63 +321,4 @@ namespace Signum.Entities.Authorization
     }
     [Serializable]
     public class FacadeMethodAllowedRule : AllowedRule<FacadeMethodDN, bool> { } 
-
-    [Serializable]
-    public class EntityGroupRulePack : ModelEntity
-    {
-        public EntityGroupRulePack(Lite<RoleDN> role)
-        {
-            this.role = role;
-        }
-
-        Lite<RoleDN> role;
-        [NotNullValidator]
-        public Lite<RoleDN> Role
-        {
-            get { return role; }
-        }
-
-        MList<EntityGroupAllowedRule> rules = new MList<EntityGroupAllowedRule>();
-        public MList<EntityGroupAllowedRule> Rules
-        {
-            get { return rules; }
-            set { Set(ref rules, value, () => Rules); }
-        }
-
-        public override string ToString()
-        {
-            return Resources._0RulesFor1.Formato(typeof(EntityGroupDN).NiceName(), Role);
-        }
-    }
-
-    [Serializable]
-    public class EntityGroupAllowedRule : ModelEntity
-    {
-        TypeAllowed allowed;
-        public TypeAllowed Allowed
-        {
-            get { return allowed; }
-            set { Set(ref allowed, value, () => Allowed); }
-        }
-
-        Enum resource;
-        public Enum Resource
-        {
-            get { return resource; }
-            set { Set(ref resource, value, () => Resource); }
-        }
-        
-
-        int priority;
-        public int Priority
-        {
-            get { return priority; }
-            set { Set(ref priority, value, () => Priority); }
-        }
-
-        public override string ToString()
-        {
-            return "{0} <- {1}".Formato(allowed, resource == null ? "[Fallback]" : resource.NiceToString());
-        }
-    }
 }

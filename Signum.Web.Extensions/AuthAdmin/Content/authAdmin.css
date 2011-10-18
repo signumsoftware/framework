@@ -170,5 +170,12 @@ table.ruleTable tr:hover
 }
 
 
+span.group.inactive
+{
+    color:#CCC
+}
 
-
+span.group.active
+{
+    color:black
+}

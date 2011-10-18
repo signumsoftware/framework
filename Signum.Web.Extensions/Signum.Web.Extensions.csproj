@@ -91,11 +91,6 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
-    <Compile Include="AuthAdmin\Views\EntityGroups.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>EntityGroups.cshtml</DependentUpon>
-    </Compile>
     <Compile Include="AuthAdmin\Views\FacadeMethods.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -729,10 +724,6 @@
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>PasswordValidInterval.cs</LastGenOutput>
     </Content>
-    <None Include="AuthAdmin\Views\EntityGroups.cshtml">
-      <Generator>MvcRazorClassGenerator</Generator>
-      <LastGenOutput>EntityGroups.cs</LastGenOutput>
-    </None>
     <None Include="AuthAdmin\Views\FacadeMethods.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>FacadeMethods.cs</LastGenOutput>

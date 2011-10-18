@@ -96,7 +96,7 @@
     <Compile Include="Authorization\UserDN.cs" />
     <Compile Include="Basics\HourMinuteDN.cs" />
     <Compile Include="Basics\DateSpanDN.cs" />
-    <Compile Include="Basics\EntityGroupDN.cs" />
+    <Compile Include="Basics\TypeConditionDN.cs" />
     <Compile Include="Basics\EnumDN.cs" />
     <Compile Include="Basics\PropertyDN.cs" />
     <Compile Include="Basics\QueryDN.cs" />
