@@ -33,7 +33,7 @@ namespace Signum.Web.Selenium
 
         public static void SetElementsPerPageToFinder(this ISelenium selenium, string elementsPerPage, string prefix)
         {
-            selenium.Type("{0}sfElems".Formato(prefix), elementsPerPage);
+            selenium.Select("{0}sfElems".Formato(prefix), "value=" + elementsPerPage);
         }
 
         public static void ToggleFilters(this ISelenium selenium, bool show)

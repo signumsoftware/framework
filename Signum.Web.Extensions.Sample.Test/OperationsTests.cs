@@ -168,12 +168,11 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.QueryMenuOptionClick(constructorsMenuId, "AlbumOperation_CreateEmptyGreatestHitsAlbum");
             selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SeleniumExtensions.EntityButtonLocator("AlbumOperation_Save")));
 
-            selenium.Type("Name", "test greatest empty");
-            selenium.Select("Label", "label=Virgin");
+            selenium.Type("New_Name", "test greatest empty");
+            selenium.Select("New_Label", "label=Virgin");
 
             selenium.EntityButtonClick("AlbumOperation_Save");
-            selenium.WaitForPageToLoad(PageLoadTimeout);
-            Assert.IsTrue(selenium.IsElementPresent(SeleniumExtensions.EntityButtonLocator("AlbumOperation_Modify")));
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SeleniumExtensions.EntityButtonLocator("AlbumOperation_Modify")));
         }
 
         [TestMethod]
