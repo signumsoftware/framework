@@ -1,11 +1,11 @@
 ﻿@using Signum.Web.AuthAdmin
-@Html.DynamicCss("~/authAdmin/Content/authAdmin.css")
-@Html.ScriptsJs("~/authAdmin/Scripts/authAdmin.js")
+@Html.DynamicCss("~/authAdmin/Content/SF_AuthAdmin.css")
+@Html.ScriptsJs("~/authAdmin/Scripts/SF_AuthAdmin.js")
 <script type="text/javascript">
     $(function () {
-        magicCheckBoxes($(document));
-        treeView();
-        $(".ruleTable a.miniButton").click(openDialog); 
+        SF.Auth.multiSelRadios($(document));
+        SF.Auth.treeView();
+        $(".sf-auth-rules .sf-submodule-trigger").click(SF.Auth.openDialog); 
     });
 </script>
 @using (var tc = Html.TypeContext<TypeRulePack>())
@@ -13,7 +13,7 @@
     @Html.EntityLine(tc, f => f.Role)
     @Html.ValueLine(tc, f => f.DefaultRule, vl => { vl.UnitText = tc.Value.DefaultLabel; })
 
-    <table class="ruleTable">
+    <table class="sf-auth-rules">
         <thead>
             <tr>
                 <th>@Resources.TypesAscx_Type
@@ -49,63 +49,61 @@
         {
             <tr>
                 <td colspan="6">
-                    <a class="namespace">
-                        <div class="treeView @(iter.IsLast ? "tvExpandedLast" : "tvExpanded")">
-                        </div>
+                    <a class="sf-auth-namespace">
+                        <span class="sf-auth-tree @(iter.IsLast ? "sf-auth-expanded-last" : "sf-auth-expanded")">
+                        </span>
                         <img src="@Url.Content("~/authAdmin/Images/namespace.png")" />
-                        @Html.Span(null, iter.Value.Key, "namespace")
+                        <span class="sf-auth-namespace-name">@iter.Value.Key</span>
                     </a>
                 </td>
             </tr>
                    foreach (var iter2 in iter.Value.OrderBy(a => a.Value.Resource.FriendlyName).Iterate())
                    {
                        var item = iter2.Value;
-            <tr>
+            <tr data-namespace="@iter.Value.Key">
                 <td>
-                    <div class="treeView @(iter.IsLast ? "tvBlank" : "tvLine")">
+                    <div class="sf-auth-tree @(iter.IsLast ? "sf-auth-blank" : "sf-auth-line")">
                     </div>
-                    <div class="treeView @(iter2.IsLast ? "tvLeafLast" : "tvLeaf")">
+                    <div class="sf-auth-tree @(iter2.IsLast ? "sf-auth-leaf-last" : "sf-auth-leaf")">
                     </div>
                     <img src="@Url.Content("~/authAdmin/Images/class.png")" />
-                    @Html.Span(null, item.Value.Resource.FriendlyName)
+                    <span>@item.Value.Resource.FriendlyName</span>
                     @Html.HiddenRuntimeInfo(item, i => i.Resource)
                     @Html.Hidden(item.Compose("AllowedBase"), item.Value.AllowedBase.Base.ToStringParts() + (item.Value.AllowedBase.Conditions.IsEmpty()? "":( ";" + item.Value.AllowedBase.Conditions.ToString(a=>"{0}-{1}".Formato(a.ConditionName, a.Allowed.ToStringParts()), ";"))))
-                    @Html.Span(null, iter.Value.Key, "namespace", new Dictionary<string, object> { { "style", "display:none" } })
                 </td>
                 <td>
-                    <a class="cbLink create">
+                    <a class="sf-auth-chooser sf-auth-create">
                         @Html.CheckBox(item.Compose("Allowed_Create"), item.Value.Allowed.Base.IsActive(TypeAllowedBasic.Create), new { tag = "Create" })
                     </a>
                 </td>
                 <td>
-                    <a class="cbLink modify">
+                    <a class="sf-auth-chooser sf-auth-modify">
                         @Html.CheckBox(item.Compose("Allowed_Modify"), item.Value.Allowed.Base.IsActive(TypeAllowedBasic.Modify), new { tag = "Modify" })
                     </a>
                 </td>
                 <td>
-                    <a class="cbLink read">
+                    <a class="sf-auth-chooser sf-auth-read">
                         @Html.CheckBox(item.Compose("Allowed_Read"), item.Value.Allowed.Base.IsActive(TypeAllowedBasic.Read), new { tag = "Read" })
                     </a>
                 </td>
                 <td>
-                    <a class="cbLink none">
+                    <a class="sf-auth-chooser sf-auth-none">
                         @Html.CheckBox(item.Compose("Allowed_None"), item.Value.Allowed.Base.IsActive(TypeAllowedBasic.None), new { tag = "None" })
                     </a>
                 </td>
                 <td>
-                    @Html.CheckBox(item.Compose("Overriden"), item.Value.Overriden, new { disabled = "disabled", @class = "sf-overriden" })
+                    @Html.CheckBox(item.Compose("Overriden"), item.Value.Overriden, new { disabled = "disabled", @class = "sf-auth-overriden" })
                 </td>
                 @if (Navigator.Manager.EntitySettings.ContainsKey(typeof(PropertyRulePack)))
                 {
                     <td>
                         @if (item.Value.Properties.HasValue)
                         {
-                            <a class="miniButton" href="@Url.Action((AuthAdminController a) => a.Properties(tc.Value.Role, item.Value.Resource.ToLite(), null))">
-                                <div class="property">
-                                    <div class="thumb @item.Value.Properties.ToString().ToLower()">
-                                    </div>
-                                </div>
-                            </a>
+                            <div class="sf-auth-property">
+                                <a class="sf-submodule-trigger" href="@Url.Action((AuthAdminController a) => a.Properties(tc.Value.Role, item.Value.Resource.ToLite(), null))">
+                                    <span class="sf-auth-thumb sf-auth-@item.Value.Properties.ToString().ToLower()"></span>
+                                </a>
+                            </div>
                         }
                     </td>
                 }
@@ -114,12 +112,11 @@
                     <td>
                         @if (item.Value.Operations.HasValue)
                         {
-                            <a class="miniButton" href="@Url.Action((AuthAdminController a) => a.Operations(tc.Value.Role, item.Value.Resource.ToLite(), null))">
-                                <div class="operation">
-                                    <div class="thumb @item.Value.Operations.ToString().ToLower()">
-                                    </div>
-                                </div>
-                            </a>
+                            <div class="sf-auth-operation">
+                                <a class="sf-submodule-trigger" href="@Url.Action((AuthAdminController a) => a.Operations(tc.Value.Role, item.Value.Resource.ToLite(), null))">
+                                    <span class="sf-auth-thumb sf-auth-@item.Value.Operations.ToString().ToLower()"></span>
+                                </a>
+                            </div>
                         }
                     </td>
                 }
@@ -128,12 +125,11 @@
                     <td>
                         @if (item.Value.Queries.HasValue)
                         {
-                            <a class="miniButton" href="@Url.Action((AuthAdminController a) => a.Queries(tc.Value.Role, item.Value.Resource.ToLite(), null))">
-                                <div class="query">
-                                    <div class="thumb @item.Value.Queries.ToString().ToLower()">
-                                    </div>
-                                </div>
-                            </a>
+                            <div class="sf-auth-query">
+                                <a class="sf-submodule-trigger" href="@Url.Action((AuthAdminController a) => a.Queries(tc.Value.Role, item.Value.Resource.ToLite(), null))">
+                                    <span class="sf-auth-thumb sf-auth-@item.Value.Queries.ToString().ToLower()"></span>
+                                </a>
+                            </div>
                         }
                     </td>
                 }

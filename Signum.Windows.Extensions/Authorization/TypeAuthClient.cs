@@ -63,7 +63,7 @@ namespace Signum.Windows.Authorization
             settings.IsCreable += admin => typeRules.GetAllowed(typeof(T)).Max().GetUI() == TypeAllowedBasic.Create;
 
             settings.IsReadOnly += (entity, admin) => entity == null ?
-                typeRules.GetAllowed(typeof(T)).Max().GetUI() >= TypeAllowedBasic.Modify :
+                typeRules.GetAllowed(typeof(T)).Max().GetUI() < TypeAllowedBasic.Modify :
                 !entity.IsAllowedFor(TypeAllowedBasic.Modify);
 
             settings.IsViewable += (entity, admin) => entity == null ?

@@ -707,7 +707,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="AuthAdmin\Content\authAdmin.css" />
+    <Content Include="AuthAdmin\Content\SF_AuthAdmin.css" />
     <Content Include="AuthAdmin\Images\class.png" />
     <Content Include="AuthAdmin\Images\namespace.png" />
     <Content Include="AuthAdmin\Images\operation.png" />
@@ -719,7 +719,7 @@
     <Content Include="AuthAdmin\Images\radioYellow.png" />
     <Content Include="AuthAdmin\Images\thumb.png" />
     <Content Include="AuthAdmin\Images\treeView.png" />
-    <Content Include="AuthAdmin\Scripts\authAdmin.js" />
+    <Content Include="AuthAdmin\Scripts\SF_AuthAdmin.js" />
     <Content Include="AuthAdmin\Views\PasswordValidInterval.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>PasswordValidInterval.cs</LastGenOutput>

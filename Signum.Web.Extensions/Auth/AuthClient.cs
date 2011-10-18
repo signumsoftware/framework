@@ -193,7 +193,7 @@ namespace Signum.Web.Auth
             settings.IsCreable += admin => TypeAuthLogic.GetAllowed(typeof(T)).Max().GetUI() == TypeAllowedBasic.Create;
 
             settings.IsReadOnly += (entity, admin) => entity == null ?
-                TypeAuthLogic.GetAllowed(typeof(T)).Max().GetUI() >= TypeAllowedBasic.Modify : 
+                TypeAuthLogic.GetAllowed(typeof(T)).Max().GetUI() < TypeAllowedBasic.Modify : 
                 !entity.IsAllowedFor(TypeAllowedBasic.Modify);
 
             settings.IsViewable += (entity, admin) => entity == null ? 
