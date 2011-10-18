@@ -11,16 +11,19 @@
    Implementations implementations = entityColumn.Implementations;
    bool viewable = (bool)ViewData[ViewDataKeys.View] && (implementations != null || Navigator.IsViewable(entitiesType, EntitySettingsContext.Admin));
    bool? allowMultiple = (bool?)ViewData[ViewDataKeys.AllowMultiple];
+
+   FilterMode filterMode = (FilterMode)ViewData[ViewDataKeys.FilterMode];
    
    ResultTable queryResult = (ResultTable)ViewData[ViewDataKeys.Results];
-   Dictionary<int, Func<HtmlHelper, object, MvcHtmlString>> formatters = (Dictionary<int, Func<HtmlHelper, object, MvcHtmlString>>)ViewData[ViewDataKeys.Formatters];}
+   Dictionary<int, Func<HtmlHelper, object, MvcHtmlString>> formatters = (Dictionary<int, Func<HtmlHelper, object, MvcHtmlString>>)ViewData[ViewDataKeys.Formatters];
 
- @queryResult.TotalElements
+   int columnsCount = queryResult.Columns.Count() + (viewable ? 1 : 0) + (allowMultiple.HasValue ? 1 : 0);
+}
 
 @if (ViewData.ContainsKey(ViewDataKeys.MultipliedMessage))
 { 
     <tr class="sf-tr-multiply">
-        <td class="sf-td-multiply ui-state-highlight" colspan="@(queryResult.Columns.Count() + (viewable ? 1 : 0) + (allowMultiple.HasValue ? 1 : 0))">
+        <td class="sf-td-multiply ui-state-highlight" colspan="@columnsCount">
             <span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span>
             @ViewData[ViewDataKeys.MultipliedMessage]
         </td>
@@ -63,3 +66,16 @@
         }
     </tr>
 }
+
+@if (queryResult.Rows.IsNullOrEmpty())
+{
+    <tr>
+        <td colspan="@columnsCount">@Resources.Signum_noResults</td>
+    </tr>
+}
+
+@{ 
+    ViewData[ViewDataKeys.ElementsPerPage] = queryResult.ElementsPerPage ?? Navigator.Manager.QuerySettings.GetOrThrow(queryDescription.QueryName, "Missing QuerySettings for QueryName {0}").ElementsPerPage;
+    ViewData[ViewDataKeys.SearchControlColumnsCount] = columnsCount;
+}
+@Html.Partial(Navigator.Manager.PaginationView, Model)

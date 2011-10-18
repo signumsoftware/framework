@@ -30,9 +30,11 @@ SF.registerModule("FindNavigator", function () {
 
         webQueryName: "sfWebQueryName",
         elems: "sfElems",
+        page: "sfPage",
         allowMultiple: "sfAllowMultiple",
         view: "sfView",
         orders: "sfOrders",
+        filterMode: "sfFilterMode",
 
         pf: function (s) {
             return "#" + SF.compose(this.findOptions.prefix, s);
@@ -75,7 +77,7 @@ SF.registerModule("FindNavigator", function () {
                 return false;
             });
 
-            $(this.pf("tblResults td:not(.sf-td-no-results):not(.sf-td-multiply)")).live('contextmenu', function (e) {
+            $(this.pf("tblResults td:not(.sf-td-no-results):not(.sf-td-multiply,.sf-search-footer-pagination)")).live('contextmenu', function (e) {
                 if (!closeMyOpenedCtxMenu(e.target)) {
                     return false;
                 }
@@ -142,6 +144,12 @@ SF.registerModule("FindNavigator", function () {
 
                 self.moveColumn($elem, e);
                 return false;
+            });
+
+            $(this.pf(".sf-pagination-button")).live('click', function () {
+                SF.log("pagination button click");
+                $(self.pf(self.page)).val($(this).attr("data-page"));
+                self.search();
             });
         },
 
@@ -288,25 +296,12 @@ SF.registerModule("FindNavigator", function () {
                     var $control = self.control();
                     var $tbody = $control.find(".sf-search-results-container tbody");
 
-                    var index = r.indexOf('<');
-                    if(index == -1) index = r.length;
-
-                    var rowCount = r.substring(0, index); 
-                    r = r.substring(index); 
-
                     if (!SF.isEmpty(r)) {
                         $tbody.html(r);
                         SF.triggerNewContent($control.find(".sf-search-results-container tbody"));
-                        $control.find(self.pf("rowsFoundCount")).html(rowCount);
                     }
                     else {
                         $tbody.html("");
-                    }
-                    if (rowCount == 0) {
-                        var columns = $(self.pf("divResults th")).length;
-                        $tbody.append("<tr><td class=\"sf-td-no-results\" colspan=\"" + columns + "\">" + lang.signum.noResults + "</td></tr>")
-                        $control.find(self.pf("rowsFoundCount")).html(0);
-                        $control.find(".rows-found-count-maximum").removeClass("rows-found-count-maximum");
                     }
                 },
                 error: function () {
@@ -320,12 +315,14 @@ SF.registerModule("FindNavigator", function () {
             var requestData = new Object();
             requestData["webQueryName"] = $(this.pf(this.webQueryName)).val();
             requestData["elems"] = $(this.pf(this.elems)).val();
+            requestData["page"] = $(this.pf(this.page)).val();
             requestData["allowMultiple"] = $(this.pf(this.allowMultiple)).val();
 
             var canView = $(this.pf(this.view)).val();
             requestData["view"] = (SF.isEmpty(canView) ? true : canView);
 
             requestData["filters"] = this.serializeFilters();
+            requestData["filterMode"] = $(this.pf(this.filterMode)).val();
             requestData["orders"] = this.serializeOrders();
             requestData["columns"] = this.serializeColumns();
             requestData["columnMode"] = 'Replace';
@@ -573,7 +570,9 @@ SF.registerModule("FindNavigator", function () {
             else {
                 throw "No direction was given to FindNavigator moveColumn";
             }
-            $(this.pf("tblResults tbody")).html("");
+            var $tbody = $(this.pf("tblResults tbody"));
+            $tbody.find("tr:not('.sf-search-footer')").remove();
+            $tbody.prepend($("<tr></tr>").append($("<td></td>").attr("colspan", $tbody.find(".sf-search-footer td").attr("colspan"))));
         },
 
         removeColumn: function ($th) {
@@ -581,7 +580,9 @@ SF.registerModule("FindNavigator", function () {
 
             $th.remove();
 
-            $(this.pf("tblResults tbody")).html("");
+            var $tbody = $(this.pf("tblResults tbody"));
+            $tbody.find("tr:not('.sf-search-footer')").remove();
+            $tbody.prepend($("<tr></tr>").append($("<td></td>").attr("colspan", $tbody.find(".sf-search-footer td").attr("colspan"))));
         },
 
         toggleFilters: function (elem) {

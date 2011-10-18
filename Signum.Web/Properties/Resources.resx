@@ -195,9 +195,6 @@
   <data name="Value" xml:space="preserve">
     <value>Value</value>
   </data>
-  <data name="SearchControl_ShowNRows_Show" xml:space="preserve">
-    <value>Show</value>
-  </data>
   <data name="CalendarClose" xml:space="preserve">
     <value>Done</value>
   </data>
@@ -291,12 +288,6 @@
   <data name="Signum_reorderColumn_MoveRight" xml:space="preserve">
     <value>Move right</value>
   </data>
-  <data name="SearchControl_RowsFound" xml:space="preserve">
-    <value>rows found</value>
-  </data>
-  <data name="SearchControl_ShowNRows_Rows" xml:space="preserve">
-    <value>rows</value>
-  </data>
   <data name="Signum_selectToken" xml:space="preserve">
     <value>Select a token</value>
   </data>
@@ -326,5 +317,14 @@
   </data>
   <data name="Query0IsNotAllowed" xml:space="preserve">
     <value>Query {0} is not allowed</value>
+  </data>
+  <data name="SearchControl_Pagination_Of" xml:space="preserve">
+    <value>of</value>
+  </data>
+  <data name="SearchControl_Pagination_Results" xml:space="preserve">
+    <value>results</value>
+  </data>
+  <data name="SearchControl_Pagination_RowsPerPage" xml:space="preserve">
+    <value>Rows per page</value>
   </data>
 </root>

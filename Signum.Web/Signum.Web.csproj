@@ -150,6 +150,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>NormalPage.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Signum\Views\Pagination.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Pagination.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Signum\Views\PopupControl.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -252,6 +257,10 @@
     <Content Include="Signum\Views\PopupOkControl.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>PopupOkControl1.cs</LastGenOutput>
+    </Content>
+    <Content Include="Signum\Views\Pagination.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>Pagination.cs</LastGenOutput>
     </Content>
     <None Include="Signum\Views\SearchResults.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>

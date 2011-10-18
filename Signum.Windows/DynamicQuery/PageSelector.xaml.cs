@@ -73,8 +73,6 @@ namespace Signum.Windows
                 Math.Max(1, CurrentPage - 2),
                 Math.Min(CurrentPage + 2, TotalPages));
 
-
-
             if (interval.Min != 1)
             {
                 spPages.Children.Add(CreateButton(1));

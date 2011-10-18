@@ -174,9 +174,9 @@ namespace Signum.Web
             return Manager.QueryCount(options);
         }
 
-        public static PartialViewResult Search(ControllerBase controller, QueryRequest request, bool? allowMultiple, bool view, string prefix)
+        public static PartialViewResult Search(ControllerBase controller, QueryRequest request, bool? allowMultiple, bool view, FilterMode filterMode, string prefix)
         {
-            return Manager.Search(controller, request, allowMultiple, view, new Context(null, prefix));
+            return Manager.Search(controller, request, allowMultiple, view, filterMode, new Context(null, prefix));
         }
 
         public static string SearchTitle(object queryName)
@@ -419,6 +419,7 @@ namespace Signum.Web
         public string SearchControlView = ViewPrefix.Formato("SearchControl");
         public string SearchResultsView = ViewPrefix.Formato("SearchResults");
         public string FilterBuilderView = ViewPrefix.Formato("FilterBuilder");
+        public string PaginationView = ViewPrefix.Formato("Pagination");
         public string ValueLineBoxView = ViewPrefix.Formato("ValueLineBox");
         
         protected Dictionary<string, Type> WebTypeNames { get; private set; }
@@ -723,7 +724,7 @@ namespace Signum.Web
                 return QueryUtils.GetNiceName(queryName);
         }
 
-        protected internal virtual PartialViewResult Search(ControllerBase controller, QueryRequest request, bool? allowMultiple, bool view, Context context)
+        protected internal virtual PartialViewResult Search(ControllerBase controller, QueryRequest request, bool? allowMultiple, bool view, FilterMode filterMode, Context context)
         {
             if (!Navigator.IsFindable(request.QueryName))
                 throw new UnauthorizedAccessException(Resources.ViewForType0IsNotAllowed.Formato(request.QueryName));
@@ -734,6 +735,7 @@ namespace Signum.Web
 
             controller.ViewData[ViewDataKeys.AllowMultiple] = allowMultiple;
             controller.ViewData[ViewDataKeys.View] = view;
+            controller.ViewData[ViewDataKeys.FilterMode] = filterMode;
 
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(request.QueryName);
             controller.ViewData[ViewDataKeys.QueryDescription] = qd;

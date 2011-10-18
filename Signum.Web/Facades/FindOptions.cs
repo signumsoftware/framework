@@ -74,7 +74,7 @@ namespace Signum.Web
 
         bool elementsPerPageEmpty;
         /// <summary>
-        /// Force empty top (if set to true, Top will be ignored)
+        /// Force empty ElementsPerPage (if set to true, ElementsPerPage will be ignored)
         /// </summary>
         public bool ElementsPerPageEmpty
         {
