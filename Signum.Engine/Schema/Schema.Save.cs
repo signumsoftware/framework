@@ -449,7 +449,14 @@ namespace Signum.Engine.Maps
 
             var ic = inserter.Value;
 
-            return new SqlPreCommandSimple(AddComment(ic.SqlInsertPattern("", false), comment), ic.InsertParameters(ident, new Forbidden(), "")); 
+            SqlPreCommandSimple insert = new SqlPreCommandSimple(AddComment(ic.SqlInsertPattern("", false), comment), ic.InsertParameters(ident, new Forbidden(), ""));
+
+            var collections = (from f in this.Fields
+                               let ml = f.Value.Field as FieldMList
+                               where ml != null
+                               select ml.RelationalTable.insertCache.GetInsertSync(ident, (Modifiable)f.Value.Getter(ident))).Combine(Spacing.Simple);
+
+            return SqlPreCommand.Combine(Spacing.Simple, insert, collections); 
         }
 
         static string AddComment(string sql, string comment)
@@ -477,8 +484,15 @@ namespace Signum.Engine.Maps
 
             var uc = updater.Value;
 
-            return new SqlPreCommandSimple(AddComment(uc.SqlUpdatePattern("", false), comment),
+            SqlPreCommandSimple update = new SqlPreCommandSimple(AddComment(uc.SqlUpdatePattern("", false), comment),
                 uc.UpdateParameters(ident, (ident as Entity).TryCS(a => a.Ticks) ?? -1, new Forbidden(), ""));
+
+            var collections = (from f in this.Fields
+                               let ml = f.Value.Field as FieldMList
+                               where ml != null
+                               select ml.RelationalTable.insertCache.GetUpdateSync(ident, (Modifiable)f.Value.Getter(ident))).Combine(Spacing.Simple);
+
+            return SqlPreCommand.Combine(Spacing.Simple, update, collections); 
         }
 
         public class Trio
@@ -517,10 +531,19 @@ namespace Signum.Engine.Maps
                 parameters)));
         }
     }
+ 
 
     public partial class RelationalTable
     {
-        internal class InsertCache<T>
+        public InsertCache insertCache;
+
+        public interface InsertCache
+        {
+             SqlPreCommand GetUpdateSync(IdentifiableEntity parent, Modifiable mlist);
+             SqlPreCommand GetInsertSync(IdentifiableEntity parent, Modifiable mlist);
+        }
+
+        internal class InsertCache<T> : InsertCache
         {
             public string sqlDelete;
             public Func<string, string> sqlInsert;
@@ -542,7 +565,7 @@ namespace Signum.Engine.Maps
                 }
                 else
                 {
-                    if (collection.Modified == false) // no es modificado ??
+                    if (collection.Modified == false)
                         return;
 
                     if (forbidden.IsEmpty)
@@ -565,10 +588,34 @@ namespace Signum.Engine.Maps
                     }
                 }
             }
+
+            public SqlPreCommand GetUpdateSync(IdentifiableEntity parent, Modifiable mlist)
+            {
+                if (parent.IsNew)
+                    return GetInsertSync(parent, mlist);
+
+                return SqlPreCommand.Combine(Spacing.Double,
+                    new SqlPreCommandSimple(sqlDelete, new List<SqlParameter> { DeleteParameter(parent) }),
+                    GetInsertSync(parent, mlist)); 
+            }
+
+
+            public SqlPreCommand GetInsertSync(IdentifiableEntity parent, Modifiable mlist)
+            {
+                var list = (MList<T>)mlist;
+
+                if (list.Modified == false)
+                    return null;
+
+                return list.Select(e => new SqlPreCommandSimple(sqlInsert(""), InsertParameters(parent, e, new Forbidden(), ""))).Combine(Spacing.Double);
+            }
         }
 
         internal InsertCache<T> CreateCache<T>()
         {
+            if (insertCache != null)
+                throw new InvalidOperationException("Call this method once");
+
             InsertCache<T> result = new InsertCache<T>();
 
             result.sqlDelete = "DELETE {0} WHERE {1} = @{1}".Formato(Name.SqlScape(), BackReference.Name);
@@ -599,6 +646,8 @@ namespace Signum.Engine.Maps
             result.Insert4 = GetInsert(result, 4);
             result.Insert8 = GetInsert(result, 8);
             result.Insert16 = GetInsert(result, 16);
+
+            insertCache = result;
 
             return result;
         }

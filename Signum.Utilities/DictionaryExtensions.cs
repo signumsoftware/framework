@@ -162,6 +162,27 @@ namespace Signum.Utilities
             return set.ToDictionary(k => k, k => mixer(k, dic1[k], dic2[k]));
         }
 
+        public static Dictionary<K, R> JoinDictionaryStrict<K, C, S, R>(
+           Dictionary<K, C> currentDictionary,
+           Dictionary<K, S> shouldDictionary,
+           Func<C, S, R> resultSelector, string action)
+        {
+
+            var currentOnly = currentDictionary.Keys.Where(k => !shouldDictionary.ContainsKey(k)).ToList();
+            var shouldOnly = shouldDictionary.Keys.Where(k => !currentDictionary.ContainsKey(k)).ToList();
+
+            if (currentOnly.Count != 0)
+                if (shouldOnly.Count != 0)
+                    throw new InvalidOperationException("Error {0}\r\n Extra: {1}\r\n Lacking: {2}".Formato(action, currentOnly.ToString(", "), shouldOnly.ToString(", ")));
+                else
+                    throw new InvalidOperationException("Error {0}\r\n Extra: {1}".Formato(action, currentOnly.ToString(", ")));
+            else
+                if (shouldOnly.Count != 0)
+                    throw new InvalidOperationException("Error {0}\r\n Lacking: {1}".Formato(action, shouldOnly.ToString(", ")));
+
+            return currentDictionary.ToDictionary(kvp => kvp.Key, kvp => resultSelector(kvp.Value, shouldDictionary[kvp.Key]));
+        }
+ 
         public static void JoinDictionaryForeach<K, V1, V2>(this IDictionary<K, V1> dic1, IDictionary<K, V2> dic2, Action<K, V1, V2> action)
         {
             HashSet<K> set = new HashSet<K>();
@@ -170,6 +191,30 @@ namespace Signum.Utilities
 
             foreach (var k in set)
                 action(k, dic1[k], dic2[k]);
+        }
+
+        public static void JoinDictionaryForeachStrict<K, C, S>(
+            Dictionary<K, C> currentDictionary,
+            Dictionary<K, S> shouldDictionary,
+            Action<K, C, S> mixAction, string action)
+        {
+
+            var currentOnly = currentDictionary.Keys.Where(k => !shouldDictionary.ContainsKey(k)).ToList();
+            var shouldOnly = shouldDictionary.Keys.Where(k => !currentDictionary.ContainsKey(k)).ToList();
+
+            if (currentOnly.Count != 0)
+                if (shouldOnly.Count != 0)
+                    throw new InvalidOperationException("Error {0}\r\n Extra: {1}\r\n Lacking: {2}".Formato(action, currentOnly.ToString(", "), shouldOnly.ToString(", ")));
+                else
+                    throw new InvalidOperationException("Error {0}\r\n Extra: {1}".Formato(action, currentOnly.ToString(", ")));
+            else
+                if (shouldOnly.Count != 0)
+                    throw new InvalidOperationException("Error {0}\r\n Lacking: {1}".Formato(action, shouldOnly.ToString(", ")));
+
+            foreach (var kvp in currentDictionary)
+            {
+                mixAction(kvp.Key, kvp.Value, shouldDictionary[kvp.Key]);
+            }
         }
 
         public static Dictionary<K, V3> OuterJoinDictionaryCC<K, V1, V2, V3>(this IDictionary<K, V1> dic1, IDictionary<K, V2> dic2, Func<K, V1, V2, V3> mixer)
