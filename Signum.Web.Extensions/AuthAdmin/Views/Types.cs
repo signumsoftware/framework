@@ -67,16 +67,16 @@ namespace ASP
         {
 
 
-Write(Html.DynamicCss("~/authAdmin/Content/authAdmin.css"));
+Write(Html.DynamicCss("~/authAdmin/Content/SF_AuthAdmin.css"));
 
 WriteLiteral("\r\n");
 
 
-Write(Html.ScriptsJs("~/authAdmin/Scripts/authAdmin.js"));
+Write(Html.ScriptsJs("~/authAdmin/Scripts/SF_AuthAdmin.js"));
 
-WriteLiteral("\r\n<script type=\"text/javascript\">\r\n    $(function () {\r\n        magicCheckBoxes($" +
-"(document));\r\n        treeView();\r\n        $(\".ruleTable a.miniButton\").click(op" +
-"enDialog); \r\n    });\r\n</script>\r\n");
+WriteLiteral("\r\n<script type=\"text/javascript\">\r\n    $(function () {\r\n        SF.Auth.multiSelR" +
+"adios($(document));\r\n        SF.Auth.treeView();\r\n        $(\".sf-auth-rules .sf-" +
+"submodule-trigger\").click(SF.Auth.openDialog); \r\n    });\r\n</script>\r\n");
 
 
  using (var tc = Html.TypeContext<TypeRulePack>())
@@ -91,8 +91,8 @@ Write(Html.ValueLine(tc, f => f.DefaultRule, vl => { vl.UnitText = tc.Value.Defa
                                                                                            
 
 
-WriteLiteral("    <table class=\"ruleTable\">\r\n        <thead>\r\n            <tr>\r\n               " +
-" <th>");
+WriteLiteral("    <table class=\"sf-auth-rules\">\r\n        <thead>\r\n            <tr>\r\n           " +
+"     <th>");
 
 
                Write(Resources.TypesAscx_Type);
@@ -173,50 +173,54 @@ WriteLiteral("            </tr>\r\n        </thead>\r\n");
         {
 
 WriteLiteral("            <tr>\r\n                <td colspan=\"6\">\r\n                    <a class=" +
-"\"namespace\">\r\n                        <div class=\"treeView ");
+"\"sf-auth-namespace\">\r\n                        <span class=\"sf-auth-tree ");
 
 
-                                         Write(iter.IsLast ? "tvExpandedLast" : "tvExpanded");
+                                              Write(iter.IsLast ? "sf-auth-expanded-last" : "sf-auth-expanded");
 
-WriteLiteral("\">\r\n                        </div>\r\n                        <img src=\"");
+WriteLiteral("\">\r\n                        </span>\r\n                        <img src=\"");
 
 
                              Write(Url.Content("~/authAdmin/Images/namespace.png"));
 
-WriteLiteral("\" />\r\n                        ");
+WriteLiteral("\" />\r\n                        <span class=\"sf-auth-namespace-name\">");
 
 
-                   Write(Html.Span(null, iter.Value.Key, "namespace"));
+                                                        Write(iter.Value.Key);
 
-WriteLiteral("\r\n                    </a>\r\n                </td>\r\n            </tr>\r\n");
+WriteLiteral("</span>\r\n                    </a>\r\n                </td>\r\n            </tr>\r\n");
 
 
                    foreach (var iter2 in iter.Value.OrderBy(a => a.Value.Resource.FriendlyName).Iterate())
                    {
                        var item = iter2.Value;
 
-WriteLiteral("            <tr>\r\n                <td>\r\n                    <div class=\"treeView " +
-"");
+WriteLiteral("            <tr data-namespace=\"");
 
 
-                                     Write(iter.IsLast ? "tvBlank" : "tvLine");
+                           Write(iter.Value.Key);
 
-WriteLiteral("\">\r\n                    </div>\r\n                    <div class=\"treeView ");
+WriteLiteral("\">\r\n                <td>\r\n                    <div class=\"sf-auth-tree ");
 
 
-                                     Write(iter2.IsLast ? "tvLeafLast" : "tvLeaf");
+                                         Write(iter.IsLast ? "sf-auth-blank" : "sf-auth-line");
+
+WriteLiteral("\">\r\n                    </div>\r\n                    <div class=\"sf-auth-tree ");
+
+
+                                         Write(iter2.IsLast ? "sf-auth-leaf-last" : "sf-auth-leaf");
 
 WriteLiteral("\">\r\n                    </div>\r\n                    <img src=\"");
 
 
                          Write(Url.Content("~/authAdmin/Images/class.png"));
 
-WriteLiteral("\" />\r\n                    ");
+WriteLiteral("\" />\r\n                    <span>");
 
 
-               Write(Html.Span(null, item.Value.Resource.FriendlyName));
+                     Write(item.Value.Resource.FriendlyName);
 
-WriteLiteral("\r\n                    ");
+WriteLiteral("</span>\r\n                    ");
 
 
                Write(Html.HiddenRuntimeInfo(item, i => i.Resource));
@@ -226,31 +230,27 @@ WriteLiteral("\r\n                    ");
 
                Write(Html.Hidden(item.Compose("AllowedBase"), item.Value.AllowedBase.Base.ToStringParts() + (item.Value.AllowedBase.Conditions.IsEmpty()? "":( ";" + item.Value.AllowedBase.Conditions.ToString(a=>"{0}-{1}".Formato(a.ConditionName, a.Allowed.ToStringParts()), ";")))));
 
-WriteLiteral("\r\n                    ");
-
-
-               Write(Html.Span(null, iter.Value.Key, "namespace", new Dictionary<string, object> { { "style", "display:none" } }));
-
-WriteLiteral("\r\n                </td>\r\n                <td>\r\n                    <a class=\"cbLi" +
-"nk create\">\r\n                        ");
+WriteLiteral("\r\n                </td>\r\n                <td>\r\n                    <a class=\"sf-a" +
+"uth-chooser sf-auth-create\">\r\n                        ");
 
 
                    Write(Html.CheckBox(item.Compose("Allowed_Create"), item.Value.Allowed.Base.IsActive(TypeAllowedBasic.Create), new { tag = "Create" }));
 
 WriteLiteral("\r\n                    </a>\r\n                </td>\r\n                <td>\r\n        " +
-"            <a class=\"cbLink modify\">\r\n                        ");
+"            <a class=\"sf-auth-chooser sf-auth-modify\">\r\n                        " +
+"");
 
 
                    Write(Html.CheckBox(item.Compose("Allowed_Modify"), item.Value.Allowed.Base.IsActive(TypeAllowedBasic.Modify), new { tag = "Modify" }));
 
 WriteLiteral("\r\n                    </a>\r\n                </td>\r\n                <td>\r\n        " +
-"            <a class=\"cbLink read\">\r\n                        ");
+"            <a class=\"sf-auth-chooser sf-auth-read\">\r\n                        ");
 
 
                    Write(Html.CheckBox(item.Compose("Allowed_Read"), item.Value.Allowed.Base.IsActive(TypeAllowedBasic.Read), new { tag = "Read" }));
 
 WriteLiteral("\r\n                    </a>\r\n                </td>\r\n                <td>\r\n        " +
-"            <a class=\"cbLink none\">\r\n                        ");
+"            <a class=\"sf-auth-chooser sf-auth-none\">\r\n                        ");
 
 
                    Write(Html.CheckBox(item.Compose("Allowed_None"), item.Value.Allowed.Base.IsActive(TypeAllowedBasic.None), new { tag = "None" }));
@@ -259,7 +259,7 @@ WriteLiteral("\r\n                    </a>\r\n                </td>\r\n         
 "            ");
 
 
-               Write(Html.CheckBox(item.Compose("Overriden"), item.Value.Overriden, new { disabled = "disabled", @class = "sf-overriden" }));
+               Write(Html.CheckBox(item.Compose("Overriden"), item.Value.Overriden, new { disabled = "disabled", @class = "sf-auth-overriden" }));
 
 WriteLiteral("\r\n                </td>\r\n");
 
@@ -273,19 +273,19 @@ WriteLiteral("                    <td>\r\n");
                          if (item.Value.Properties.HasValue)
                         {
 
-WriteLiteral("                            <a class=\"miniButton\" href=\"");
+WriteLiteral("                            <div class=\"sf-auth-property\">\r\n                     " +
+"           <a class=\"sf-submodule-trigger\" href=\"");
 
 
-                                                   Write(Url.Action((AuthAdminController a) => a.Properties(tc.Value.Role, item.Value.Resource.ToLite(), null)));
+                                                                 Write(Url.Action((AuthAdminController a) => a.Properties(tc.Value.Role, item.Value.Resource.ToLite(), null)));
 
-WriteLiteral("\">\r\n                                <div class=\"property\">\r\n                     " +
-"               <div class=\"thumb ");
+WriteLiteral("\">\r\n                                    <span class=\"sf-auth-thumb sf-auth-");
 
 
-                                                 Write(item.Value.Properties.ToString().ToLower());
+                                                                  Write(item.Value.Properties.ToString().ToLower());
 
-WriteLiteral("\">\r\n                                    </div>\r\n                                <" +
-"/div>\r\n                            </a>\r\n");
+WriteLiteral("\"></span>\r\n                                </a>\r\n                            </di" +
+"v>\r\n");
 
 
                         }
@@ -305,19 +305,19 @@ WriteLiteral("                    <td>\r\n");
                          if (item.Value.Operations.HasValue)
                         {
 
-WriteLiteral("                            <a class=\"miniButton\" href=\"");
+WriteLiteral("                            <div class=\"sf-auth-operation\">\r\n                    " +
+"            <a class=\"sf-submodule-trigger\" href=\"");
 
 
-                                                   Write(Url.Action((AuthAdminController a) => a.Operations(tc.Value.Role, item.Value.Resource.ToLite(), null)));
+                                                                 Write(Url.Action((AuthAdminController a) => a.Operations(tc.Value.Role, item.Value.Resource.ToLite(), null)));
 
-WriteLiteral("\">\r\n                                <div class=\"operation\">\r\n                    " +
-"                <div class=\"thumb ");
+WriteLiteral("\">\r\n                                    <span class=\"sf-auth-thumb sf-auth-");
 
 
-                                                 Write(item.Value.Operations.ToString().ToLower());
+                                                                  Write(item.Value.Operations.ToString().ToLower());
 
-WriteLiteral("\">\r\n                                    </div>\r\n                                <" +
-"/div>\r\n                            </a>\r\n");
+WriteLiteral("\"></span>\r\n                                </a>\r\n                            </di" +
+"v>\r\n");
 
 
                         }
@@ -337,19 +337,19 @@ WriteLiteral("                    <td>\r\n");
                          if (item.Value.Queries.HasValue)
                         {
 
-WriteLiteral("                            <a class=\"miniButton\" href=\"");
+WriteLiteral("                            <div class=\"sf-auth-query\">\r\n                        " +
+"        <a class=\"sf-submodule-trigger\" href=\"");
 
 
-                                                   Write(Url.Action((AuthAdminController a) => a.Queries(tc.Value.Role, item.Value.Resource.ToLite(), null)));
+                                                                 Write(Url.Action((AuthAdminController a) => a.Queries(tc.Value.Role, item.Value.Resource.ToLite(), null)));
 
-WriteLiteral("\">\r\n                                <div class=\"query\">\r\n                        " +
-"            <div class=\"thumb ");
+WriteLiteral("\">\r\n                                    <span class=\"sf-auth-thumb sf-auth-");
 
 
-                                                 Write(item.Value.Queries.ToString().ToLower());
+                                                                  Write(item.Value.Queries.ToString().ToLower());
 
-WriteLiteral("\">\r\n                                    </div>\r\n                                <" +
-"/div>\r\n                            </a>\r\n");
+WriteLiteral("\"></span>\r\n                                </a>\r\n                            </di" +
+"v>\r\n");
 
 
                         }

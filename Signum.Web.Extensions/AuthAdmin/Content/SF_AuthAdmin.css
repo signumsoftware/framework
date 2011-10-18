@@ -1,42 +1,44 @@
-﻿table.ruleTable
+﻿.sf-auth-rules
 {
     vertical-align: middle;
 }
-
-table.ruleTable th
+.sf-auth-rules th
 {
     padding:2px;
 }
-
-table.ruleTable .overriden
+.sf-auth-rules .sf-auth-overriden
 {
     text-align:center;
 }
-
-table.ruleTable a:hover 
+.sf-auth-rules a:hover 
 {
 	cursor:pointer;
 }
-
-table.ruleTable .property
+.sf-auth-rules .sf-auth-property
 {
     background-image: url(../images/property.png);
     background-repeat: no-repeat;
 }
-
-table.ruleTable .operation
+.sf-auth-rules .sf-auth-operation
 {
     background-image: url(../images/operation.png);
     background-repeat: no-repeat;
 }
-
-table.ruleTable .query
+.sf-auth-rules .sf-auth-query
 {
     background-image: url(../images/query.png);
     background-repeat: no-repeat;
 }
+.sf-auth-rules tr.first
+{
+    border-top: 1px gray solid
+}
+.sf-auth-rules tr:hover
+{
+    background-color: #F0F0F0
+}
 
-a.cbLink
+.sf-auth-chooser
 {
     display: block;
     text-decoration: none;
@@ -47,46 +49,38 @@ a.cbLink
     height: 16px;
     background-position:  0 -32px; 
 }
-
-a.cbLink:hover
+.sf-auth-chooser:hover
 {
     background-position: 0 -48px!; 
 }
-
-a.cbDisabled
+.sf-auth-chooser.sf-auth-read 
+{
+    background-image: url(../images/radioYellow.png);
+}
+.sf-auth-chooser.sf-auth-modify, .sf-auth-chooser.sf-auth-allowed
+{
+    background-image: url(../images/radioGreen.png);
+}
+.sf-auth-chooser.sf-auth-create
+{
+    background-image: url(../images/radioBlue.png);
+}
+.sf-auth-chooser.sf-auth-none, .sf-auth-chooser.sf-auth-not-allowed
+{
+    background-image: url(../images/radioRed.png);
+}
+.sf-auth-chooser-disabled
 {
     background-position: 0 0px; 
 }
-
-a.cbDisabled:hover
+.sf-auth-chooser-disabled:hover
 {
     background-position: 0 -16px; 
 }
 
-a.cbLink.read 
+.sf-auth-tree
 {
-    background-image: url(../images/radioYellow.png);
-}
-
-a.cbLink.modify, a.cbLink.allowed
-{
-    background-image: url(../images/radioGreen.png);
-}
-
-a.cbLink.create
-{
-    background-image: url(../images/radioBlue.png);
-}
-
-a.cbLink.none, a.cbLink.not-allowed
-{
-    background-image: url(../images/radioRed.png);
-}
-
-
-
-.treeView
-{
+    display: block;
     float:left;
     width: 16px;
     height: 22px;
@@ -94,79 +88,57 @@ a.cbLink.none, a.cbLink.not-allowed
     text-decoration: none;
     cursor:pointer;
 }
-
-.tvLeaf
+.sf-auth-tree.sf-auth-leaf
 {
     background-position: 0px 0px; 
 }
-
-.tvLeafLast
+.sf-auth-tree.sf-auth-leaf-last
 {
     background-position: 0px -22px; 
 }
-
-.tvClosed
-{
-    
+.sf-auth-tree.sf-auth-closed
+{    
     background-position: -16px 0px; 
 }
-
-.tvClosedLast
+.sf-auth-tree.sf-auth-closed-last
 {
     background-position: -16px -22px; 
 }
-
-.tvExpanded
+.sf-auth-tree.sf-auth-expanded
 {
     background-position: -32px 0px; 
 }
-
-.tvExpandedLast
+.sf-auth-tree.sf-auth-expanded-last
 {
     background-position: -32px -22px; 
 }
-
-.tvLine
+.sf-auth-tree.sf-auth-line
 {
     background-position: -48px 0px; 
 }
-
-.tvBlank
+.sf-auth-tree.sf-auth-blank
 {
     background-position: -48px -22px; 
 }
 
-.thumb
+.sf-auth-thumb
 {
+   display:block;
    background-image: url("../images/thumb.png");
    width:16px;
    height:16px;
 }
-
-.thumb.none
+.sf-auth-thumb.sf-auth-none
 {
     background-position: 0px 0px; 
 }
-
-.thumb.mix
+.sf-auth-thumb.sf-auth-mix
 {
     background-position: 0px -16px; 
 }
-
-.thumb.all
+.sf-auth-thumb.sf-auth-all
 {
     background-position: 0px -32px; 
-}
-
-tr.first
-{
-    border-top: 1px gray solid
-}
-
-
-table.ruleTable tr:hover
-{
-    background-color: #F0F0F0
 }
 
 
