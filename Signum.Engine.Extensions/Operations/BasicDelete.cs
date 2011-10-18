@@ -114,7 +114,7 @@ namespace Signum.Engine.Operations
                 { 
                 }
 
-                throw ex;
+                throw;
             }
         }
 
