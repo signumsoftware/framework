@@ -257,7 +257,7 @@ namespace Signum.Windows.Authorization
         {
             get 
             {
-                if (!allowedBase.Equals(Allowed.TypeAllowed))
+                if (!allowedBase.Base.Equals(Allowed.TypeAllowed))
                     return true;
 
                 return !allowedBase.Conditions.SequenceEqual(Conditions.Select(a => 

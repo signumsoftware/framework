@@ -63,6 +63,14 @@ namespace Signum.Entities.Authorization
         string TypeAuthCache_StaticPropertyValidation(ModifiableEntity sender, PropertyInfo pi)
         {
             RuleTypeDN rt = (RuleTypeDN)sender;
+            if (rt.Resource == null)
+            {
+                if (rt.Conditions.Any())
+                    return "Default {0} should not have conditions".Formato(typeof(RuleTypeDN).NiceName());
+
+                return null;
+            }
+            
             Type type = TypeLogic.DnToType[rt.Resource];
             var conditions = rt.Conditions.Where(a => !TypeConditionLogic.IsDefined(type, EnumLogic<TypeConditionNameDN>.ToEnum(a.Condition)));
 
@@ -297,7 +305,8 @@ namespace Signum.Entities.Authorization
                     if(!pr.Conditions.SequenceEqual(shouldConditions))
                         pr.Conditions = shouldConditions;
 
-                    pr.Save();
+                    if (pr.SelfModified)
+                        pr.Save();
                 });
 
             InvalidateCache();
@@ -438,12 +447,13 @@ namespace Signum.Entities.Authorization
                          let resource = kvp.Key.CleanName
                          orderby resource
                          select new XElement("Type",
+                            new XAttribute("Allowed", kvp.Value.Allowed.ToString()),
                             new XAttribute("Resource", resource),
-                            new XAttribute("Allowed", kvp.Value.ToString()),
                             from c in kvp.Value.Conditions
                             select new XElement("Condition",
-                                new XAttribute("Name", c.Condition.Name),
-                                new XAttribute("Allowed", c.Allowed.ToString())))
+                                new XAttribute("Name", c.Condition.Key),
+                                new XAttribute("Allowed", c.Allowed.ToString()))
+                                )
                      ))
                  ));
         }
@@ -488,12 +498,27 @@ namespace Signum.Entities.Authorization
                         (r, xr) =>
                         {
                             var a = xr.Attribute("Allowed").Value.ToEnum<TypeAllowed>();
-                            return table.InsertSqlSync(new RuleTypeDN { Resource = r, Role = role, Allowed = a }, Comment(role, r, a));
+                            var conditions = xr.Descendants("Condition").Select(xc=>new RuleTypeConditionDN
+                            { 
+                                Condition = EnumLogic<TypeConditionNameDN>.ToEntity(xr.Attribute("Name").Value),
+                                Allowed = xc.Attribute("Allowed").Value.ToEnum<TypeAllowed>()
+                            }).ToMList();
+
+                            return table.InsertSqlSync(new RuleTypeDN { Resource = r, Role = role, Allowed = a, Conditions = conditions}, Comment(role, r, a));
                         },
                         (r, pr, xr) =>
                         {
                             var oldA = pr.Allowed;
                             pr.Allowed = xr.Attribute("Allowed").Value.ToEnum<TypeAllowed>();
+                            var conditions = xr.Descendants("Condition").Select(xc => new RuleTypeConditionDN
+                            {
+                                Condition = EnumLogic<TypeConditionNameDN>.ToEntity(xr.Attribute("Name").Value),
+                                Allowed = xc.Attribute("Allowed").Value.ToEnum<TypeAllowed>()
+                            }).ToMList();
+
+                            if (!pr.Conditions.SequenceEqual(conditions))
+                                pr.Conditions = conditions;
+
                             return table.UpdateSqlSync(pr, Comment(role, r, oldA, pr.Allowed));
                         }, Spacing.Simple);
 

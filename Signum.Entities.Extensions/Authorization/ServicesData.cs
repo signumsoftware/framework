@@ -209,6 +209,12 @@ namespace Signum.Entities.Authorization
                 this.conditions.SequenceEqual(other.conditions);
         }
 
+        public override bool Equals(object obj)
+        {
+            var other = obj as TypeAllowedAndConditions;
+            return other != null && Equals(other);
+        }
+
         public TypeAllowed Min()
         {
             if (!conditions.Any())
