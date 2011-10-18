@@ -108,7 +108,7 @@
 }
 .sf-search-footer span
 {
-    padding: 5px 2px;
+    padding: 5px 2px 0 2px;
     font-weight:normal;
 }
 .sf-search-footer span.sf-pagination-strong
