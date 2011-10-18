@@ -215,7 +215,7 @@ WriteLiteral("\r\n");
 
 
    
-    ViewData[ViewDataKeys.ElementsPerPage] = queryResult.ElementsPerPage ?? Navigator.Manager.QuerySettings.GetOrThrow(queryDescription.QueryName, "Missing QuerySettings for QueryName {0}").ElementsPerPage;
+    ViewData[ViewDataKeys.ElementsPerPage] = queryResult.ElementsPerPage;
     ViewData[ViewDataKeys.SearchControlColumnsCount] = columnsCount;
 
 

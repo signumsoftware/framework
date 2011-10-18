@@ -155,12 +155,20 @@ WriteLiteral("</span>\r\n");
 WriteLiteral("        </div>\r\n        <div class=\"sf-pagination-center\">\r\n            <span>");
 
 
-             Write(Resources.SearchControl_Pagination_RowsPerPage);
+             Write(Resources.SearchControl_Pagination_Rows);
 
-WriteLiteral("</span>\r\n            ");
+WriteLiteral("</span>\r\n");
 
 
-       Write(HtmlHelperExtenders.InputType("text", Model.Compose("sfElems"), elems.TryToString(), new Dictionary<string, object> { { "size", "3" }, { "onkeydown", "return SF.InputValidator.isNumber(event)" } }));
+               
+                var topItems = new List<int> { 5, 10, 20, 50, 100, 200 }.Select(i => new SelectListItem { Text = i.ToString(), Value = i.ToString(), Selected = i.ToString() == elems.TryToString() }).ToList();
+                topItems.Add(new SelectListItem { Text = Resources.SearchControl_Pagination_All, Value = "", Selected = elems == null });
+            
+
+WriteLiteral("            ");
+
+
+       Write(Html.DropDownList(Model.Compose("sfElems"), topItems, new { @class = "sf-pagination-size" }));
 
 WriteLiteral("\r\n        </div>\r\n        <div class=\"sf-pagination-right\">\r\n");
 

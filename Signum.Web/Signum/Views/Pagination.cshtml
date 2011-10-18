@@ -30,8 +30,12 @@
             }
         </div>
         <div class="sf-pagination-center">
-            <span>@Resources.SearchControl_Pagination_RowsPerPage</span>
-            @HtmlHelperExtenders.InputType("text", Model.Compose("sfElems"), elems.TryToString(), new Dictionary<string, object> { { "size", "3" }, { "onkeydown", "return SF.InputValidator.isNumber(event)" } })
+            <span>@Resources.SearchControl_Pagination_Rows</span>
+            @{ 
+                var topItems = new List<int> { 5, 10, 20, 50, 100, 200 }.Select(i => new SelectListItem { Text = i.ToString(), Value = i.ToString(), Selected = i.ToString() == elems.TryToString() }).ToList();
+                topItems.Add(new SelectListItem { Text = Resources.SearchControl_Pagination_All, Value = "", Selected = elems == null });
+            }
+            @Html.DropDownList(Model.Compose("sfElems"), topItems, new { @class = "sf-pagination-size" })
         </div>
         <div class="sf-pagination-right">
             @if (resultTable != null)

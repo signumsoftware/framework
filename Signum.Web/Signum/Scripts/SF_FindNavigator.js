@@ -146,9 +146,14 @@ SF.registerModule("FindNavigator", function () {
                 return false;
             });
 
-            $(this.pf(".sf-pagination-button")).live('click', function () {
+            $(this.pf("tblResults") + " .sf-pagination-button").live('click', function () {
                 SF.log("pagination button click");
                 $(self.pf(self.page)).val($(this).attr("data-page"));
+                self.search();
+            });
+
+            $(this.pf("sfElems")).live('change', function () {
+                SF.log("page size changed");
                 self.search();
             });
         },

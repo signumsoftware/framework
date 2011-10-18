@@ -134,6 +134,11 @@
 {
     text-align: right;
 }
+.sf-pagination-size
+{
+    padding: 2px 2px;
+    margin: 0;    
+}
 .sf-search-results
 {
     width:100%;

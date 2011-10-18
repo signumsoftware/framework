@@ -324,7 +324,10 @@
   <data name="SearchControl_Pagination_Results" xml:space="preserve">
     <value>results</value>
   </data>
-  <data name="SearchControl_Pagination_RowsPerPage" xml:space="preserve">
-    <value>Rows per page</value>
+  <data name="SearchControl_Pagination_Rows" xml:space="preserve">
+    <value>Rows</value>
+  </data>
+  <data name="SearchControl_Pagination_All" xml:space="preserve">
+    <value>All</value>
   </data>
 </root>

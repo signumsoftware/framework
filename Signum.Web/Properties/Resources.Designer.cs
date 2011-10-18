@@ -403,6 +403,15 @@ namespace Signum.Web.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to All.
+        /// </summary>
+        public static string SearchControl_Pagination_All {
+            get {
+                return ResourceManager.GetString("SearchControl_Pagination_All", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to of.
         /// </summary>
         public static string SearchControl_Pagination_Of {
@@ -421,11 +430,11 @@ namespace Signum.Web.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Rows per page.
+        ///   Looks up a localized string similar to Rows.
         /// </summary>
-        public static string SearchControl_Pagination_RowsPerPage {
+        public static string SearchControl_Pagination_Rows {
             get {
-                return ResourceManager.GetString("SearchControl_Pagination_RowsPerPage", resourceCulture);
+                return ResourceManager.GetString("SearchControl_Pagination_Rows", resourceCulture);
             }
         }
         
