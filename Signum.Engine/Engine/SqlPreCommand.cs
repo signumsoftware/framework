@@ -182,6 +182,20 @@ namespace Signum.Engine
                 .Select(p => new SqlParameter(p.ParameterName, p.Value) { IsNullable = p.IsNullable, SqlDbType = p.SqlDbType })
                 .ToList());
         }
+
+        public SqlPreCommandSimple AddComment(string comment)
+        {
+            if (comment.HasText())
+            {
+                int index = Sql.IndexOf("\r\n");
+                if (index == -1)
+                    Sql = Sql + " -- " + comment;
+                else
+                    Sql = Sql.Insert(index, " -- " + comment);
+            }
+
+            return this;
+        }
     }
 
     public class SqlPreCommandConcat : SqlPreCommand

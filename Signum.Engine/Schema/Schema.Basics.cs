@@ -85,7 +85,7 @@ namespace Signum.Engine.Maps
 
             inserter = new Lazy<InsertCache>(InitializeInsert, LazyThreadSafetyMode.PublicationOnly);
             updater = new Lazy<UpdateCache>(InitializeUpdate, LazyThreadSafetyMode.PublicationOnly);
-            saveCollections = new Lazy<Action<IdentifiableEntity,Forbidden,bool>>(InitializeCollections, LazyThreadSafetyMode.PublicationOnly);
+            saveCollections = new Lazy<CollectionsCache>(InitializeCollections, LazyThreadSafetyMode.PublicationOnly);
         }
 
         public Field GetField(MemberInfo member)

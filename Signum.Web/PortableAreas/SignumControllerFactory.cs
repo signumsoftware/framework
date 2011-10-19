@@ -7,6 +7,7 @@ using System.Web.Routing;
 using System.Reflection;
 using Signum.Utilities;
 using System.Linq.Expressions;
+using System.Diagnostics;
 
 namespace Signum.Web.PortableAreas
 {
@@ -75,6 +76,7 @@ namespace Signum.Web.PortableAreas
         } 
         #endregion
 
+        [DebuggerStepThrough]
         public override IController CreateController(RequestContext requestContext, string controllerName)
         {
             var controller = base.CreateController(requestContext, controllerName);
