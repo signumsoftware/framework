@@ -206,7 +206,7 @@ namespace Signum.Windows.Authorization
 
         public TypeRuleBuilder(TypeAllowedRule rule)
         {
-            this.allowed = new TypeAllowedBuilder(rule.Allowed.Base);
+            this.allowed = new TypeAllowedBuilder(rule.Allowed.Fallback);
             this.conditions = rule.Allowed.Conditions.Select(c => new TypeConditionRuleBuilder(c.ConditionName, c.Allowed)).ToMList();
             this.availableConditions = rule.AvailableConditions;
             this.allowedBase = rule.AllowedBase; 
@@ -232,10 +232,8 @@ namespace Signum.Windows.Authorization
                 Resource = Resource,
 
                 AllowedBase = AllowedBase,
-                Allowed = new TypeAllowedAndConditions(Allowed.TypeAllowed)
-                {
-                    Conditions = Conditions.Select(a=>new TypeConditionRule(a.ConditionName, a.Allowed.TypeAllowed)).ToMList()
-                },
+                Allowed = new TypeAllowedAndConditions(Allowed.TypeAllowed, 
+                    Conditions.Select(a=>new TypeConditionRule(a.ConditionName, a.Allowed.TypeAllowed)).ToReadOnly()),
 
                 AvailableConditions = this.AvailableConditions,
 
@@ -257,7 +255,7 @@ namespace Signum.Windows.Authorization
         {
             get 
             {
-                if (!allowedBase.Base.Equals(Allowed.TypeAllowed))
+                if (!allowedBase.Fallback.Equals(Allowed.TypeAllowed))
                     return true;
 
                 return !allowedBase.Conditions.SequenceEqual(Conditions.Select(a => 

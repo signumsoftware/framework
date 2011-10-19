@@ -97,6 +97,24 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Add condition.
+        /// </summary>
+        public static string AuthAdmin_AddCondition {
+            get {
+                return ResourceManager.GetString("AuthAdmin_AddCondition", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Remove condition.
+        /// </summary>
+        public static string AuthAdmin_RemoveCondition {
+            get {
+                return ResourceManager.GetString("AuthAdmin_RemoveCondition", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Buscador.
         /// </summary>
         public static string Buscador {

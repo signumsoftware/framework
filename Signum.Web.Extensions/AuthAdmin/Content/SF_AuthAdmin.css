@@ -1,10 +1,10 @@
-﻿.sf-auth-rules
-{
-    vertical-align: middle;
-}
-.sf-auth-rules th
+﻿.sf-auth-rules th
 {
     padding:2px;
+}
+.sf-auth-rules td
+{
+    vertical-align: top;    
 }
 .sf-auth-rules .sf-auth-overriden
 {
@@ -36,6 +36,30 @@
 .sf-auth-rules tr:hover
 {
     background-color: #F0F0F0
+}
+.sf-auth-rules span
+{
+    line-height: 22px;    
+}
+.sf-auth-rules .sf-auth-namespace-name
+{
+    vertical-align: top;    
+}
+.sf-auth-rules .sf-auth-namespace img
+{
+    margin-top: 3px;    
+}
+.sf-auth-rules .sf-auth-condition .sf-auth-label
+{
+    font-style: italic;
+}
+.sf-auth-rules .sf-line-button
+{
+    margin: 5px 0 5px 3px;    
+}
+.sf-auth-rules .sf-auth-label
+{
+    margin-left: 3px;    
 }
 
 .sf-auth-chooser

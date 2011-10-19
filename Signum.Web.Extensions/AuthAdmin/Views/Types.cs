@@ -46,6 +46,7 @@ namespace ASP
     using System.Web.UI.HtmlControls;
     using System.Xml.Linq;
     using Signum.Web.AuthAdmin;
+    using Signum.Entities.Basics;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/AuthAdmin/Views/Types.cshtml")]
@@ -67,6 +68,7 @@ namespace ASP
         {
 
 
+
 Write(Html.DynamicCss("~/authAdmin/Content/SF_AuthAdmin.css"));
 
 WriteLiteral("\r\n");
@@ -74,9 +76,28 @@ WriteLiteral("\r\n");
 
 Write(Html.ScriptsJs("~/authAdmin/Scripts/SF_AuthAdmin.js"));
 
-WriteLiteral("\r\n<script type=\"text/javascript\">\r\n    $(function () {\r\n        SF.Auth.multiSelR" +
-"adios($(document));\r\n        SF.Auth.treeView();\r\n        $(\".sf-auth-rules .sf-" +
-"submodule-trigger\").click(SF.Auth.openDialog); \r\n    });\r\n</script>\r\n");
+WriteLiteral(@"
+<script type=""text/javascript"">
+    $(function () {
+        SF.Auth.multiSelRadios($(document));
+        SF.Auth.treeView();
+        $("".sf-auth-rules .sf-submodule-trigger"").click(SF.Auth.openDialog);
+        $("".sf-auth-rules .sf-remove"").live('click', SF.Auth.removeCondition);
+        $("".sf-auth-rules .sf-create"").live('click', function (e) {
+            e.preventDefault();
+            SF.Auth.chooseConditionToAdd($(this), '");
+
+
+                                              Write(Url.Action("GetChooser", "Signum"));
+
+WriteLiteral("\', \"Choose condition\");\r\n        });\r\n    });\r\n</script>\r\n");
+
+
+  
+    bool propertyRules = Navigator.Manager.EntitySettings.ContainsKey(typeof(PropertyRulePack));
+    bool operationRules = Navigator.Manager.EntitySettings.ContainsKey(typeof(OperationRulePack));
+    bool queryRules = Navigator.Manager.EntitySettings.ContainsKey(typeof(QueryRulePack));
+
 
 
  using (var tc = Html.TypeContext<TypeRulePack>())
@@ -125,7 +146,7 @@ WriteLiteral("\r\n                </th>\r\n                <th>");
 WriteLiteral("\r\n                </th>\r\n");
 
 
-                 if (Navigator.Manager.EntitySettings.ContainsKey(typeof(PermissionRulePack)))
+                 if (propertyRules)
                 {
 
 WriteLiteral("                    <th>");
@@ -139,7 +160,7 @@ WriteLiteral("\r\n                    </th>\r\n");
                 }
 
 
-                 if (Navigator.Manager.EntitySettings.ContainsKey(typeof(OperationRulePack)))
+                 if (operationRules)
                 {
 
 WriteLiteral("                    <th>");
@@ -153,7 +174,7 @@ WriteLiteral("\r\n                    </th>\r\n");
                 }
 
 
-                 if (Navigator.Manager.EntitySettings.ContainsKey(typeof(QueryRulePack)))
+                 if (queryRules)
                 {
 
 WriteLiteral("                    <th>");
@@ -173,12 +194,12 @@ WriteLiteral("            </tr>\r\n        </thead>\r\n");
         {
 
 WriteLiteral("            <tr>\r\n                <td colspan=\"6\">\r\n                    <a class=" +
-"\"sf-auth-namespace\">\r\n                        <span class=\"sf-auth-tree ");
+"\"sf-auth-namespace\"><span class=\"sf-auth-tree ");
 
 
-                                              Write(iter.IsLast ? "sf-auth-expanded-last" : "sf-auth-expanded");
+                                                                       Write(iter.IsLast ? "sf-auth-expanded-last" : "sf-auth-expanded");
 
-WriteLiteral("\">\r\n                        </span>\r\n                        <img src=\"");
+WriteLiteral("\">\r\n                    </span>\r\n                        <img src=\"");
 
 
                              Write(Url.Content("~/authAdmin/Images/namespace.png"));
@@ -188,17 +209,22 @@ WriteLiteral("\" />\r\n                        <span class=\"sf-auth-namespace-n
 
                                                         Write(iter.Value.Key);
 
-WriteLiteral("</span>\r\n                    </a>\r\n                </td>\r\n            </tr>\r\n");
+WriteLiteral("</span> </a>\r\n                </td>\r\n            </tr>\r\n");
 
 
-                   foreach (var iter2 in iter.Value.OrderBy(a => a.Value.Resource.FriendlyName).Iterate())
-                   {
-                       var item = iter2.Value;
+            foreach (var iter2 in iter.Value.OrderBy(a => a.Value.Resource.FriendlyName).Iterate())
+            {
+                var item = iter2.Value;
 
-WriteLiteral("            <tr data-namespace=\"");
+WriteLiteral("            <tr class=\"sf-auth-type\" data-ns=\"");
 
 
-                           Write(iter.Value.Key);
+                                         Write(iter.Value.Key);
+
+WriteLiteral("\" data-type=\"");
+
+
+                                                                     Write(item.Value.Resource.ClassName);
 
 WriteLiteral("\">\r\n                <td>\r\n                    <div class=\"sf-auth-tree ");
 
@@ -210,15 +236,42 @@ WriteLiteral("\">\r\n                    </div>\r\n                    <div clas
 
                                          Write(iter2.IsLast ? "sf-auth-leaf-last" : "sf-auth-leaf");
 
-WriteLiteral("\">\r\n                    </div>\r\n                    <img src=\"");
+WriteLiteral("\">\r\n                    </div>\r\n");
 
 
-                         Write(Url.Content("~/authAdmin/Images/class.png"));
+                     if (!item.Value.AvailableConditions.IsNullOrEmpty())
+                    {
 
-WriteLiteral("\" />\r\n                    <span>");
+WriteLiteral("                        <a title=\"");
 
 
-                     Write(item.Value.Resource.FriendlyName);
+                             Write(Resources.AuthAdmin_AddCondition);
+
+WriteLiteral("\" class=\"sf-line-button sf-create\" data-icon=\"ui-icon-circle-plus\" data-text=\"fal" +
+"se\" style=\"");
+
+
+                                                                                                                                                           Write(item.Value.Allowed.Conditions.Count == item.Value.AvailableConditions.Count ? "display:none" : "");
+
+WriteLiteral("\">\r\n                        </a>\r\n");
+
+
+
+WriteLiteral("                        <input type=\"hidden\" disabled=\"disabled\" class=\"sf-auth-a" +
+"vailable-conditions\" value=\"");
+
+
+                                                                                                        Write(item.Value.AvailableConditions.Select(ac => EnumDN.UniqueKey(ac)).ToString(","));
+
+WriteLiteral("\" />\r\n");
+
+
+                    }
+
+WriteLiteral("                    <span class=\"sf-auth-label\">");
+
+
+                                           Write(item.Value.Resource.FriendlyName);
 
 WriteLiteral("</span>\r\n                    ");
 
@@ -228,35 +281,56 @@ WriteLiteral("</span>\r\n                    ");
 WriteLiteral("\r\n                    ");
 
 
-               Write(Html.Hidden(item.Compose("AllowedBase"), item.Value.AllowedBase.Base.ToStringParts() + (item.Value.AllowedBase.Conditions.IsEmpty()? "":( ";" + item.Value.AllowedBase.Conditions.ToString(a=>"{0}-{1}".Formato(a.ConditionName, a.Allowed.ToStringParts()), ";")))));
+               Write(Html.Hidden(item.Compose("AllowedBase"), item.Value.AllowedBase.Fallback.ToStringParts() + (item.Value.AllowedBase.Conditions.IsEmpty() ? "" : (";" + item.Value.AllowedBase.Conditions.ToString(a => "{0}-{1}".Formato(a.ConditionName, a.Allowed.ToStringParts()), ";")))));
 
-WriteLiteral("\r\n                </td>\r\n                <td>\r\n                    <a class=\"sf-a" +
-"uth-chooser sf-auth-create\">\r\n                        ");
-
-
-                   Write(Html.CheckBox(item.Compose("Allowed_Create"), item.Value.Allowed.Base.IsActive(TypeAllowedBasic.Create), new { tag = "Create" }));
-
-WriteLiteral("\r\n                    </a>\r\n                </td>\r\n                <td>\r\n        " +
-"            <a class=\"sf-auth-chooser sf-auth-modify\">\r\n                        " +
-"");
+WriteLiteral("\r\n                </td>\r\n");
 
 
-                   Write(Html.CheckBox(item.Compose("Allowed_Modify"), item.Value.Allowed.Base.IsActive(TypeAllowedBasic.Modify), new { tag = "Modify" }));
+                 using (var fallback = item.SubContext(a => a.Allowed.Fallback))
+                {
 
-WriteLiteral("\r\n                    </a>\r\n                </td>\r\n                <td>\r\n        " +
-"            <a class=\"sf-auth-chooser sf-auth-read\">\r\n                        ");
-
-
-                   Write(Html.CheckBox(item.Compose("Allowed_Read"), item.Value.Allowed.Base.IsActive(TypeAllowedBasic.Read), new { tag = "Read" }));
-
-WriteLiteral("\r\n                    </a>\r\n                </td>\r\n                <td>\r\n        " +
-"            <a class=\"sf-auth-chooser sf-auth-none\">\r\n                        ");
+WriteLiteral("                    <td>\r\n                        <a class=\"sf-auth-chooser sf-au" +
+"th-create\">\r\n                            ");
 
 
-                   Write(Html.CheckBox(item.Compose("Allowed_None"), item.Value.Allowed.Base.IsActive(TypeAllowedBasic.None), new { tag = "None" }));
+                       Write(Html.CheckBox(fallback.Compose("Create"), fallback.Value.IsActive(TypeAllowedBasic.Create), new Dictionary<string, object> { { "data-tag", "Create" } }));
 
-WriteLiteral("\r\n                    </a>\r\n                </td>\r\n                <td>\r\n        " +
-"            ");
+WriteLiteral("\r\n                        </a>\r\n                    </td>\r\n");
+
+
+
+WriteLiteral("                    <td>\r\n                        <a class=\"sf-auth-chooser sf-au" +
+"th-modify\">\r\n                            ");
+
+
+                       Write(Html.CheckBox(fallback.Compose("Modify"), fallback.Value.IsActive(TypeAllowedBasic.Modify), new Dictionary<string, object> { { "data-tag", "Modify" } }));
+
+WriteLiteral("\r\n                        </a>\r\n                    </td>\r\n");
+
+
+
+WriteLiteral("                    <td>\r\n                        <a class=\"sf-auth-chooser sf-au" +
+"th-read\">\r\n                            ");
+
+
+                       Write(Html.CheckBox(fallback.Compose("Read"), fallback.Value.IsActive(TypeAllowedBasic.Read), new Dictionary<string, object> { { "data-tag", "Read" } }));
+
+WriteLiteral("\r\n                        </a>\r\n                    </td>\r\n");
+
+
+
+WriteLiteral("                    <td>\r\n                        <a class=\"sf-auth-chooser sf-au" +
+"th-none\">\r\n                            ");
+
+
+                       Write(Html.CheckBox(fallback.Compose("None"), fallback.Value.IsActive(TypeAllowedBasic.None), new Dictionary<string, object> { { "data-tag", "None" } }));
+
+WriteLiteral("\r\n                        </a>\r\n                    </td>\r\n");
+
+
+                }
+
+WriteLiteral("                <td class=\"sf-auth-type-only\">\r\n                    ");
 
 
                Write(Html.CheckBox(item.Compose("Overriden"), item.Value.Overriden, new { disabled = "disabled", @class = "sf-auth-overriden" }));
@@ -264,10 +338,10 @@ WriteLiteral("\r\n                    </a>\r\n                </td>\r\n         
 WriteLiteral("\r\n                </td>\r\n");
 
 
-                 if (Navigator.Manager.EntitySettings.ContainsKey(typeof(PropertyRulePack)))
+                 if (propertyRules)
                 {
 
-WriteLiteral("                    <td>\r\n");
+WriteLiteral("                    <td class=\"sf-auth-type-only\">\r\n");
 
 
                          if (item.Value.Properties.HasValue)
@@ -284,8 +358,8 @@ WriteLiteral("\">\r\n                                    <span class=\"sf-auth-t
 
                                                                   Write(item.Value.Properties.ToString().ToLower());
 
-WriteLiteral("\"></span>\r\n                                </a>\r\n                            </di" +
-"v>\r\n");
+WriteLiteral("\">\r\n                                    </span></a>\r\n                            " +
+"</div>\r\n");
 
 
                         }
@@ -296,10 +370,10 @@ WriteLiteral("                    </td>\r\n");
                 }
 
 
-                 if (Navigator.Manager.EntitySettings.ContainsKey(typeof(OperationRulePack)))
+                 if (operationRules)
                 {
 
-WriteLiteral("                    <td>\r\n");
+WriteLiteral("                    <td class=\"sf-auth-type-only\">\r\n");
 
 
                          if (item.Value.Operations.HasValue)
@@ -316,8 +390,8 @@ WriteLiteral("\">\r\n                                    <span class=\"sf-auth-t
 
                                                                   Write(item.Value.Operations.ToString().ToLower());
 
-WriteLiteral("\"></span>\r\n                                </a>\r\n                            </di" +
-"v>\r\n");
+WriteLiteral("\">\r\n                                    </span></a>\r\n                            " +
+"</div>\r\n");
 
 
                         }
@@ -328,10 +402,10 @@ WriteLiteral("                    </td>\r\n");
                 }
 
 
-                 if (Navigator.Manager.EntitySettings.ContainsKey(typeof(QueryRulePack)))
+                 if (queryRules)
                 {
 
-WriteLiteral("                    <td>\r\n");
+WriteLiteral("                    <td class=\"sf-auth-type-only\">\r\n");
 
 
                          if (item.Value.Queries.HasValue)
@@ -362,7 +436,109 @@ WriteLiteral("                    </td>\r\n");
 WriteLiteral("            </tr>\r\n");
 
 
-                   }
+                    var conditions = item.Compose("Allowed", "Conditions"); 
+                
+                    foreach (var conditionIter in item.Value.Allowed.Conditions.Select((c, i) => new { Condition = c, Index = i, ControlId =  TypeContextUtilities.Compose(conditions, i.ToString())}).Iterate())
+                    {
+                        var condition = conditionIter.Value.Condition;
+                        var controlId = conditionIter.Value.ControlId;
+                        
+
+WriteLiteral("            <tr class=\"sf-auth-condition\" data-ns=\"");
+
+
+                                              Write(iter.Value.Key);
+
+WriteLiteral("\" data-type=\"");
+
+
+                                                                          Write(item.Value.Resource.ClassName);
+
+WriteLiteral("\" data-condition=\"");
+
+
+                                                                                                                          Write(EnumDN.UniqueKey(condition.ConditionName));
+
+WriteLiteral("\" data-index=\"");
+
+
+                                                                                                                                                                                  Write(conditionIter.Value.Index);
+
+WriteLiteral("\">\r\n                <td>\r\n                    <div class=\"sf-auth-tree ");
+
+
+                                         Write(iter.IsLast ? "sf-auth-blank" : "sf-auth-line");
+
+WriteLiteral("\">\r\n                    </div>\r\n                    <div class=\"sf-auth-tree ");
+
+
+                                         Write(iter2.IsLast ? "sf-auth-blank" : "sf-auth-line");
+
+WriteLiteral("\">\r\n                    </div>\r\n                    <div class=\"sf-auth-tree ");
+
+
+                                         Write(conditionIter.IsLast ? "sf-auth-leaf-last" : "sf-auth-leaf");
+
+WriteLiteral("\">\r\n                    </div>\r\n                    <a title=\"");
+
+
+                         Write(Resources.AuthAdmin_RemoveCondition);
+
+WriteLiteral("\" class=\"sf-line-button sf-remove\" data-icon=\"ui-icon-circle-close\" data-text=\"fa" +
+"lse\">\r\n                    </a><span class=\"sf-auth-label\">");
+
+
+                                               Write(condition.ConditionName.NiceToString());
+
+WriteLiteral("</span>\r\n                    ");
+
+
+               Write(Html.Hidden(TypeContextUtilities.Compose(controlId, "ConditionName"), EnumDN.UniqueKey(condition.ConditionName)));
+
+WriteLiteral("\r\n                </td>\r\n                \r\n");
+
+
+                  var allowed = TypeContextUtilities.Compose(controlId, "Allowed");
+
+WriteLiteral("                \r\n                    <td>\r\n                        <a class=\"sf-" +
+"auth-chooser sf-auth-create\">\r\n                            ");
+
+
+                       Write(Html.CheckBox(TypeContextUtilities.Compose(allowed, "Create"), condition.Allowed.IsActive(TypeAllowedBasic.Create), new Dictionary<string, object> { { "data-tag", "Create" } }));
+
+WriteLiteral("\r\n                        </a>\r\n                    </td>\r\n                    <t" +
+"d>\r\n                        <a class=\"sf-auth-chooser sf-auth-modify\">\r\n        " +
+"                    ");
+
+
+                       Write(Html.CheckBox(TypeContextUtilities.Compose(allowed, "Modify"), condition.Allowed.IsActive(TypeAllowedBasic.Modify), new Dictionary<string, object> { { "data-tag", "Modify" } }));
+
+WriteLiteral("\r\n                        </a>\r\n                    </td>\r\n                    <t" +
+"d>\r\n                        <a class=\"sf-auth-chooser sf-auth-read\">\r\n          " +
+"                  ");
+
+
+                       Write(Html.CheckBox(TypeContextUtilities.Compose(allowed, "Read"), condition.Allowed.IsActive(TypeAllowedBasic.Read), new Dictionary<string, object> { { "data-tag", "Read" } }));
+
+WriteLiteral("\r\n                        </a>\r\n                    </td>\r\n                    <t" +
+"d>\r\n                        <a class=\"sf-auth-chooser sf-auth-none\">\r\n          " +
+"                  ");
+
+
+                       Write(Html.CheckBox(TypeContextUtilities.Compose(allowed, "None"), condition.Allowed.IsActive(TypeAllowedBasic.None), new Dictionary<string, object> { { "data-tag", "None" } }));
+
+WriteLiteral("\r\n                        </a>\r\n                    </td>\r\n                \r\n    " +
+"            <td colspan=\"");
+
+
+                         Write(1 + (propertyRules ? 1 : 0) + (operationRules ? 1 : 0) + (queryRules ? 1 : 0));
+
+WriteLiteral("\">\r\n                </td>\r\n            </tr>\r\n");
+
+
+                    }
+                
+            }
         }
 
 WriteLiteral("    </table>\r\n");

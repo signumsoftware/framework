@@ -165,7 +165,7 @@ namespace Signum.Engine.Authorization
         public static TypeAllowedAndConditions GetAllowed(Type type)
         {
             if (!TypeLogic.TypeToDN.ContainsKey(type))
-                return new TypeAllowedAndConditions(TypeAllowed.Create);
+                return AuthUtils.MaxType.BaseAllowed;
 
             return cache.GetAllowed(type);
         }
@@ -218,9 +218,9 @@ namespace Signum.Engine.Authorization
 
                 return (from r in AuthLogic.RolesGraph()
                         from t in graph
-                        where !t.Type.IsEnumProxy() && TypeAuthLogic.GetAllowed(r, t.Type).Base.GetDB() > TypeAllowedBasic.None
+                        where !t.Type.IsEnumProxy() && TypeAuthLogic.GetAllowed(r, t.Type).Fallback.GetDB() > TypeAllowedBasic.None
                         from t2 in graph.IndirectlyRelatedTo(t, kvp => kvp.Value)
-                        where !t2.Type.IsEnumProxy() && TypeAuthLogic.GetAllowed(r, t2.Type).Base.GetDB() == TypeAllowedBasic.None
+                        where !t2.Type.IsEnumProxy() && TypeAuthLogic.GetAllowed(r, t2.Type).Fallback.GetDB() == TypeAllowedBasic.None
                         select "Role {0} can retrieve '{1}' but not '{2}'".Formato(r, t.Type.Name, t2.Type.Name)).ToList();
             }
         }
