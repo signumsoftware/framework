@@ -102,21 +102,50 @@
     min-width: 1024px;
     z-index: 100;
 }
-.sf-search-footer input
+.sf-search-results td.sf-search-footer-pagination
 {
+     padding: 0 7px;   
 }
 .sf-search-footer span
 {
-    padding: 5px 2px;
+    padding: 5px 2px 0 2px;
     font-weight:normal;
 }
-/*.sf-search-footer .rows-found-count-maximum
+.sf-search-footer span.sf-pagination-strong
 {
-    font-weight:bold;
-}*/
+    font-weight: bold;
+}
+.sf-search-footer div
+{
+    float: left;
+    width: 33%;
+    height: 24px;
+}
+.sf-pagination-left span
+{
+    display: block;
+    float: left;
+}
+.sf-pagination-center
+{
+    text-align: center;   
+}
+.sf-pagination-right
+{
+    text-align: right;
+}
+.sf-pagination-size
+{
+    padding: 2px 2px;
+    margin: 0;    
+}
 .sf-search-results
 {
     width:100%;
+}
+.sf-search-footer input[type=button]
+{
+    cursor: pointer;
 }
 .sf-search-results a[title=Navigate]
 {

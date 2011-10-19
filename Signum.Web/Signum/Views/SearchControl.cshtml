@@ -29,11 +29,14 @@
     @Html.Hidden(Model.Compose("sfWebQueryName"), Navigator.ResolveWebQueryName(findOptions.QueryName), new { disabled = "disabled" })
     @Html.Hidden(Model.Compose("sfAllowMultiple"), allowMultiple.ToString(), new { disabled = "disabled" })
     @Html.Hidden(Model.Compose("sfView"), viewable, new { disabled = "disabled" })
+    @Html.Hidden(Model.Compose("sfFilterMode"), findOptions.FilterMode.ToString(), new { disabled = "disabled" })
+    @Html.Hidden(Model.Compose("sfOrders"), findOptions.OrderOptions.IsEmpty() ? "" :
+        (findOptions.OrderOptions.ToString(oo => (oo.OrderType == OrderType.Ascending ? "" : "-") + oo.Token.FullKey(), ";") + ";"))
     @Html.Hidden(Model.Compose("sfEntityTypeNames"), 
-                               implementations == null ? Navigator.ResolveWebTypeName(entitiesType) :
-                                                      implementations.IsByAll ? "[All]" :
-                                                      ((ImplementedByAttribute)implementations).ImplementedTypes.ToString(t => Navigator.ResolveWebTypeName(t), ","), 
-                               new { disabled = "disabled" })
+        implementations == null ? Navigator.ResolveWebTypeName(entitiesType) :
+                                implementations.IsByAll ? "[All]" :
+                                ((ImplementedByAttribute)implementations).ImplementedTypes.ToString(t => Navigator.ResolveWebTypeName(t), ","), 
+        new { disabled = "disabled" })
     
     @if(findOptions.SearchOnLoad)
     {
@@ -156,25 +159,18 @@
                 </tr>
             </thead>
             <tbody class="ui-widget-content">
+                @{ int columnsCount = columns.Count + (viewable ? 1 : 0) + (allowMultiple.HasValue ? 1 : 0); }
                 <tr>
-                    <td colspan="@(columns.Count + (viewable ? 1 : 0) + (allowMultiple.HasValue ? 1 : 0))">@Resources.Signum_noResults</td>
+                    <td colspan="@columnsCount">@Resources.Signum_noResults</td>
                 </tr>
+                @{ 
+                    ViewData[ViewDataKeys.ElementsPerPage] = findOptions.ElementsPerPage ?? (findOptions.ElementsPerPageEmpty ? null : Navigator.Manager.QuerySettings.GetOrThrow(findOptions.QueryName, "Missing QuerySettings for QueryName {0}").ElementsPerPage);
+                    ViewData[ViewDataKeys.FilterMode] = findOptions.FilterMode;
+                    ViewData[ViewDataKeys.SearchControlColumnsCount] = columnsCount;
+                }
+                @Html.Partial(Navigator.Manager.PaginationView, Model)
             </tbody>
-            <tfoot>
-            </tfoot>
         </table>
-        
-        <div class="ui-widget-header ui-corner-bottom sf-search-footer" style="display:@((findOptions.FilterMode != FilterMode.OnlyResults) ? "block" : "none")">
-            @Html.Span(null, Resources.SearchControl_ShowNRows_Show)
-            @{ int? elems = findOptions.ElementsPerPage ?? (findOptions.ElementsPerPageEmpty ? null : Navigator.Manager.QuerySettings.GetOrThrow(findOptions.QueryName, "Missing QuerySettings for QueryName {0}").ElementsPerPage);}
-            @HtmlHelperExtenders.InputType("text", Model.Compose("sfElems"), elems.TryToString(), new Dictionary<string, object> { { "size", "3" }, { "onkeydown", "return SF.InputValidator.isNumber(event)" } })
-            @Html.Span(null, Resources.SearchControl_ShowNRows_Rows + ".")
-            @Html.Span(Model.Compose("rowsFoundCount"), "0", "rows-found-count")
-            @Html.Span(null, Resources.SearchControl_RowsFound, "rows-found-count")
-
-            @Html.Hidden(Model.Compose("sfOrders"), findOptions.OrderOptions.IsEmpty() ? "" :
-                    (findOptions.OrderOptions.ToString(oo => (oo.OrderType == OrderType.Ascending ? "" : "-") + oo.Token.FullKey(), ";") + ";"))
-        </div>
     </div>
 </div>
 <script type="text/javascript">

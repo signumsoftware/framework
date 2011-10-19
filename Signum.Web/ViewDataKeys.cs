@@ -25,6 +25,9 @@ namespace Signum.Web
         public const string FilterOptions = "sfFilterOptions";
         public const string View = "sfView";
         public const string AllowMultiple = "sfAllowMultiple";
+        public const string FilterMode = "sfFilterMode";
+        public const string ElementsPerPage = "sfElementsPerPage";
+        public const string SearchControlColumnsCount = "sfSearchControlColumnsCount";
         public const string QueryDescription = "sfQueryDescription";
         public const string QueryName = "sfQueryName";
         public const string Results = "sfResults";
