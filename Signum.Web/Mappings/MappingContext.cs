@@ -15,6 +15,7 @@ using Signum.Engine;
 using Signum.Utilities.DataStructures;
 using System.Web.Mvc;
 using Signum.Utilities.ExpressionTrees;
+using System.Linq.Expressions;
 #endregion
 
 namespace Signum.Web
@@ -376,7 +377,7 @@ namespace Signum.Web
         }
     }
 
-    internal class SubContext<T> : MappingContext<T>
+    public class SubContext<T> : MappingContext<T>
     {
         MappingContext parent;
         public override MappingContext Parent { get { return parent; } }
@@ -522,12 +523,12 @@ namespace Signum.Web
         }
     }
 
-    internal class ContextualSortedList<V> : IDictionary<string, V>, ICollection<KeyValuePair<string, V>>
+    class ContextualSortedList<V> : IDictionary<string, V>, ICollection<KeyValuePair<string, V>>
     {
         SortedList<string, V> global;
         int startIndex;
         int endIndex;
-        string ControlID;
+        public string ControlID { get; private set; }
 
         public ContextualSortedList(IDictionary<string, V> sortedList, string controlID)
         {
@@ -541,7 +542,6 @@ namespace Signum.Web
             int endParent = csl == null ? sortedList.Count : csl.endIndex;
             this.global = csl == null ? (SortedList<string, V>)sortedList : csl.global;
 
-            
             for (int i = startParent; i < endParent; i++)
             {
                 if (global.Keys[i].StartsWith(ControlID))

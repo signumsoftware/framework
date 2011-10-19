@@ -258,7 +258,29 @@ namespace Signum.Web
             return vals[0] == "true" || vals[0] == "True";
         }
 
-      
+        public static List<string> IndexPrefixes(this IDictionary<string, string> inputs)
+        {
+            return inputs.Keys
+                .Where(k => k != EntityListBaseKeys.ListPresent)
+                .Select(str => str.Substring(0, str.IndexOf(TypeContext.Separator)))
+                .Distinct()
+                .OrderBy(a => int.Parse(a))
+                .ToList();
+        }
+
+        public static List<IDictionary<string, string>> IndexSubDictionaries(this IDictionary<string, string> inputs)
+        {
+            return inputs.IndexPrefixes().Select(pf => inputs.SubDictionary(pf)).ToList(); 
+        }
+
+        public static IDictionary<string, string> SubDictionary(this IDictionary<string, string> sortedList, string nameToAppend)
+        {
+            var csl = sortedList as ContextualSortedList<string>;
+
+            string controlID = csl == null ? nameToAppend : csl.ControlID + nameToAppend;
+
+            return new ContextualSortedList<string>(sortedList, controlID);
+        }
     }
 
     public abstract class BaseMapping<T>
@@ -615,27 +637,15 @@ namespace Signum.Web
 
         public IEnumerable<MappingContext<S>> GenerateItemContexts(MappingContext<MList<S>> ctx)
         {
-            List<string> inputKeys = ctx.Inputs.Keys.Where(k => k != EntityListBaseKeys.ListPresent).ToList();
-
             PropertyRoute route = ctx.PropertyRoute.Add("Item");
 
-            for (int i = 0; i < inputKeys.Count; i++)
+            foreach (var index in ctx.Inputs.IndexPrefixes())
             {
-                string subControlID = inputKeys[i];
-
-                if (Mapping.specialProperties.Contains(subControlID))
-                    continue;
-
-                string index = subControlID.Substring(0, subControlID.IndexOf(TypeContext.Separator));
-
                 SubContext<S> itemCtx = new SubContext<S>(TypeContextUtilities.Compose(ctx.ControlID, index), null, route, ctx);
 
                 yield return itemCtx;
-
-                i += itemCtx.Inputs.Count - 1;
             }
         }
-
     }
 
     public class MListMapping<S> : BaseMListMapping<S>
