@@ -22,6 +22,11 @@ namespace Signum.Engine.Maps
 {
     public struct Forbidden
     {
+        public Forbidden(IdentifiableEntity entity)
+        {
+            this.set = new HashSet<IdentifiableEntity> { entity }; 
+        }
+
         public Forbidden(DirectedGraph<IdentifiableEntity> graph, IdentifiableEntity entity)
         {
             this.set = graph == null ? null : graph.TryRelatedTo(entity);
@@ -435,7 +440,6 @@ namespace Signum.Engine.Maps
                                 list.Select(a => a.saveCollection).PreAnd(castEntity)), paramIdent, paramForbidden, paramIsNew).Compile(),
 
                     SaveCollectionsSync = ident => miniList.Select(a => a.cache.RelationalInsertsSync((Modifiable)a.Getter(ident), ident)).Combine(Spacing.Double)
-
                 }; 
             }
         }
@@ -466,7 +470,7 @@ namespace Signum.Engine.Maps
             ident.PreSaving(ref dirty);
 
             var ic = inserter.Value;
-            SqlPreCommandSimple insert = new SqlPreCommandSimple(AddComment(ic.SqlInsertPattern("", false), comment), ic.InsertParameters(ident, new Forbidden(), ""));
+            SqlPreCommandSimple insert = new SqlPreCommandSimple(ic.SqlInsertPattern("", false), ic.InsertParameters(ident, new Forbidden(), "")).AddComment(comment);
             
             var cc = saveCollections.Value;
             if(cc == null)
@@ -474,20 +478,15 @@ namespace Signum.Engine.Maps
 
             SqlPreCommand collections = cc.SaveCollectionsSync(ident);
 
-            return SqlPreCommand.Combine(Spacing.Simple, insert, collections); 
+            if (collections == null)
+                return insert;
+
+            SqlPreCommand setParent = new SqlPreCommandSimple("SET @idParent = SCOPE_IDENTITY()"); 
+
+            return SqlPreCommand.Combine(Spacing.Simple, insert, setParent, collections); 
         }
 
-        static string AddComment(string sql, string comment)
-        {
-            if (string.IsNullOrEmpty(comment))
-                return sql;
-
-            int index = sql.IndexOf("\r\n");
-            if (index == -1)
-                return sql + " -- " + comment;
-            else
-                return sql.Insert(index, " -- " + comment); 
-        }
+        
 
         public SqlPreCommand UpdateSqlSync(IdentifiableEntity ident, string comment = null)
         {   
@@ -501,8 +500,8 @@ namespace Signum.Engine.Maps
                 return null;
 
             var uc = updater.Value;
-            SqlPreCommandSimple update = new SqlPreCommandSimple(AddComment(uc.SqlUpdatePattern("", false), comment),
-                uc.UpdateParameters(ident, (ident as Entity).TryCS(a => a.Ticks) ?? -1, new Forbidden(), ""));
+            SqlPreCommandSimple update = new SqlPreCommandSimple(uc.SqlUpdatePattern("", false),
+                uc.UpdateParameters(ident, (ident as Entity).TryCS(a => a.Ticks) ?? -1, new Forbidden(), "")).AddComment(comment);
 
             var cc = saveCollections.Value;
             if (cc == null)
@@ -611,13 +610,23 @@ namespace Signum.Engine.Maps
                 if (list.Modified == false)
                     return null;
 
-                var insert = list.Select(e => new SqlPreCommandSimple(sqlInsert(""), InsertParameters(parent, e, new Forbidden(), ""))).Combine(Spacing.Simple);
+                var sqlIns = sqlInsert(""); 
 
                 if (parent.IsNew)
-                    return insert;
-
-                return SqlPreCommand.Combine(Spacing.Simple,
-                    new SqlPreCommandSimple(sqlDelete, new List<SqlParameter> { DeleteParameter(parent) }), insert); 
+                {
+                    return list.Select(e =>
+                    {
+                        var parameters = InsertParameters(parent, e, new Forbidden(parent), "");
+                        parameters.RemoveAt(0);
+                        return new SqlPreCommandSimple(sqlIns, parameters).AddComment(e.ToString());
+                    }).Combine(Spacing.Simple);
+                }
+                else
+                {
+                    return SqlPreCommand.Combine(Spacing.Simple,
+                        new SqlPreCommandSimple(sqlDelete, new List<SqlParameter> { DeleteParameter(parent) }),
+                        list.Select(e => new SqlPreCommandSimple(sqlIns, InsertParameters(parent, e, new Forbidden(), "")).AddComment(e.ToString())).Combine(Spacing.Simple)); 
+                }
             }
         }
 
