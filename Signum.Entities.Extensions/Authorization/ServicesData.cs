@@ -183,46 +183,58 @@ namespace Signum.Entities.Authorization
     [Serializable]
     public class TypeAllowedAndConditions : ModelEntity, IEquatable<TypeAllowedAndConditions>
     {
-        public TypeAllowedAndConditions(TypeAllowed @base, params TypeConditionRule[] conditions)
+        public TypeAllowedAndConditions(TypeAllowed fallback, ReadOnlyCollection<TypeConditionRule> conditions)
         {
-            this.@base = @base;
-            this.conditions.AddRange(conditions); 
+            this.fallback = fallback;
+            this.conditions = conditions;
         }
 
-        TypeAllowed @base;
-        public TypeAllowed Base
+        public TypeAllowedAndConditions(TypeAllowed fallback, params TypeConditionRule[] conditions)
         {
-            get { return @base; }
-            set { Set(ref @base, value, () => Base); }
+            this.fallback = fallback;
+            this.conditions = conditions.ToReadOnly();
         }
 
-        MList<TypeConditionRule> conditions = new MList<TypeConditionRule>();
-        public MList<TypeConditionRule> Conditions
+        readonly TypeAllowed fallback;
+        public TypeAllowed Fallback
+        {
+            get { return fallback; }
+        }
+
+        readonly ReadOnlyCollection<TypeConditionRule> conditions;
+        public ReadOnlyCollection<TypeConditionRule> Conditions
         {
             get { return conditions; }
-            set { Set(ref conditions, value, () => Conditions); }
         }
 
         public bool Equals(TypeAllowedAndConditions other)
         {
-            return this.@base.Equals(other.@base) &&
+            return this.fallback.Equals(other.fallback) &&
                 this.conditions.SequenceEqual(other.conditions);
         }
 
         public TypeAllowed Min()
         {
             if (!conditions.Any())
-                return @base;
+                return fallback;
 
-            return (TypeAllowed)Math.Min((int)@base, conditions.Select(a => (int)a.Allowed).Min());
+            return (TypeAllowed)Math.Min((int)fallback, conditions.Select(a => (int)a.Allowed).Min());
         }
 
         public TypeAllowed Max()
         {
             if (!conditions.Any())
-                return @base;
+                return fallback;
 
-            return (TypeAllowed)Math.Max((int)@base, conditions.Select(a => (int)a.Allowed).Max());
+            return (TypeAllowed)Math.Max((int)fallback, conditions.Select(a => (int)a.Allowed).Max());
+        }
+
+        public override string ToString()
+        {
+            if (conditions.IsEmpty())
+                return Fallback.ToString();
+
+            return "{0} | {1}".Formato(Fallback, conditions.ToString(c=>"{0} {1}".Formato(c.ConditionName, c.Allowed), " | "));
         }
     }
 

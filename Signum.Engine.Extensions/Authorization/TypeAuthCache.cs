@@ -39,10 +39,10 @@ namespace Signum.Entities.Authorization
     {
         readonly Lazy<Dictionary<Lite<RoleDN>, RoleAllowedCache>> runtimeRules;
 
-        DefaultBehaviour<TypeAllowed> Min;
-        DefaultBehaviour<TypeAllowed> Max;
+        DefaultBehaviour<TypeAllowedAndConditions> Min;
+        DefaultBehaviour<TypeAllowedAndConditions> Max;
 
-        public TypeAuthCache(SchemaBuilder sb, DefaultBehaviour<TypeAllowed> max, DefaultBehaviour<TypeAllowed> min)
+        public TypeAuthCache(SchemaBuilder sb, DefaultBehaviour<TypeAllowedAndConditions> max, DefaultBehaviour<TypeAllowedAndConditions> min)
         {
             runtimeRules = Schema.GlobalLazy(this.NewCache);
 
@@ -99,13 +99,13 @@ namespace Signum.Entities.Authorization
             return allowed.IsEmpty() || allowed[0].Equals(Max.BaseAllowed) ? DefaultRule.Max : DefaultRule.Min; 
         }
 
-        void IManualAuth<Type, TypeAllowedAndConditions>.SetDefaultRule(Lite<RoleDN> role, DefaultRule behaviour)
+        void IManualAuth<Type, TypeAllowedAndConditions>.SetDefaultRule(Lite<RoleDN> role, DefaultRule defaultRule)
         {
-            if (((IManualAuth<Type, TypeAllowedAndConditions>)this).GetDefaultRule(role) == behaviour)
+            if (((IManualAuth<Type, TypeAllowedAndConditions>)this).GetDefaultRule(role) == defaultRule)
                 return;
 
             IQueryable<RuleTypeDN> query = Database.Query<RuleTypeDN>().Where(a => a.Resource == null && a.Role == role);
-            if (behaviour == DefaultRule.Max)
+            if (defaultRule == DefaultRule.Max)
             {
                 if (query.UnsafeDelete() == 0)
                     throw new InvalidOperationException("Inconsistency in the data");
@@ -118,7 +118,7 @@ namespace Signum.Entities.Authorization
                 {
                     Role = role,
                     Resource = null,
-                    Allowed = Min.BaseAllowed,
+                    Allowed = Min.BaseAllowed.Fallback,
                 }.Save();
             }
 
@@ -161,17 +161,17 @@ namespace Signum.Entities.Authorization
 
         public class ManualResourceCache
         {
-            readonly Dictionary<Lite<RoleDN>, TypeAllowed> defaultRules;
+            readonly Dictionary<Lite<RoleDN>, TypeAllowedAndConditions> defaultRules;
             readonly Dictionary<Lite<RoleDN>, TypeAllowedAndConditions> specificRules;
 
-            readonly DefaultBehaviour<TypeAllowed> Min;
-            readonly DefaultBehaviour<TypeAllowed> Max;
+            readonly DefaultBehaviour<TypeAllowedAndConditions> Min;
+            readonly DefaultBehaviour<TypeAllowedAndConditions> Max;
 
-            public ManualResourceCache(TypeDN resource, DefaultBehaviour<TypeAllowed> min, DefaultBehaviour<TypeAllowed> max)
+            public ManualResourceCache(TypeDN resource, DefaultBehaviour<TypeAllowedAndConditions> min, DefaultBehaviour<TypeAllowedAndConditions> max)
             {
                 var list =  Database.Query<RuleTypeDN>().Where(r=>r.Resource == resource || r.Resource == null).ToList();
 
-                defaultRules = list.Where(a => a.Resource == null).ToDictionary(a => a.Role, a =>  a.Allowed);
+                defaultRules = list.Where(a => a.Resource == null).ToDictionary(a => a.Role, a => a.ToTypeAllowedAndConditions());
 
                 specificRules = list.Where(a => a.Resource != null).ToDictionary(a => a.Role, a => a.ToTypeAllowedAndConditions());
 
@@ -188,7 +188,7 @@ namespace Signum.Entities.Authorization
                 return GetAllowedBase(role);
             }
 
-            DefaultBehaviour<TypeAllowed> GetBehaviour(Lite<RoleDN> role)
+            DefaultBehaviour<TypeAllowedAndConditions> GetBehaviour(Lite<RoleDN> role)
             {
                 return defaultRules.TryGet(role, Max.BaseAllowed).Equals(Max.BaseAllowed) ? Max : Min;
             }
@@ -198,15 +198,12 @@ namespace Signum.Entities.Authorization
                 var behaviour = GetBehaviour(role);
                 var related = AuthLogic.RelatedTo(role);
                 if (related.IsEmpty())
-                    return new TypeAllowedAndConditions(behaviour.BaseAllowed);
+                    return behaviour.BaseAllowed;
                 else
                 {
                     var baseRules = related.Select(r => GetAllowed(r)).ToList();
 
-                    return new TypeAllowedAndConditions(behaviour.MergeAllowed(baseRules.Select(a => a.Base)))
-                    {
-                        Conditions = baseRules.Only().TryCC(a => a.Conditions) ?? new MList<TypeConditionRule>()
-                    }; 
+                    return behaviour.MergeAllowed(baseRules);
                 }     
             }
         }
@@ -224,9 +221,9 @@ namespace Signum.Entities.Authorization
                 if (errors.HasText())
                     throw new InvalidOperationException(errors); 
 
-                Dictionary<Lite<RoleDN>, TypeAllowed> defaultBehaviours =
+                Dictionary<Lite<RoleDN>, TypeAllowedAndConditions> defaultBehaviours =
                     rules.Where(a => a.Resource == null)
-                    .Select(a => new { a.Role, a.Allowed }).ToDictionary(a => a.Role, a => a.Allowed);
+                    .ToDictionary(ru => ru.Role, ru => ru.ToTypeAllowedAndConditions());
 
                 Dictionary<Lite<RoleDN>, Dictionary<Type, TypeAllowedAndConditions>> realRules =
                    rules.Where(a => a.Resource != null)
@@ -286,7 +283,7 @@ namespace Signum.Entities.Authorization
                 (type, ar) => ar.Allowed.ToRuleType(rules.Role, type).Save() ,
                 (type, pr, ar) =>
                 {
-                    pr.Allowed = ar.Allowed.Base;
+                    pr.Allowed = ar.Allowed.Fallback;
 
                     var shouldConditions = ar.Allowed.Conditions.Select(a => new RuleTypeConditionDN
                     {
@@ -311,7 +308,7 @@ namespace Signum.Entities.Authorization
         internal TypeAllowedAndConditions GetAllowed(Type key)
         {
             if (!AuthLogic.IsEnabled || Schema.Current.InGlobalMode)
-                return new TypeAllowedAndConditions(Max.BaseAllowed);
+                return Max.BaseAllowed;
 
             return runtimeRules.Value[RoleDN.Current.ToLite()].GetAllowed(key);
         }
@@ -328,11 +325,11 @@ namespace Signum.Entities.Authorization
 
         public class RoleAllowedCache
         {
-            readonly DefaultBehaviour<TypeAllowed> behaviour;
+            readonly DefaultBehaviour<TypeAllowedAndConditions> behaviour;
             readonly DefaultDictionary<Type, TypeAllowedAndConditions> rules; 
             readonly List<RoleAllowedCache> baseCaches;
 
-            public RoleAllowedCache(DefaultBehaviour<TypeAllowed> behaviour, List<RoleAllowedCache> baseCaches, Dictionary<Type, TypeAllowedAndConditions> newValues)
+            public RoleAllowedCache(DefaultBehaviour<TypeAllowedAndConditions> behaviour, List<RoleAllowedCache> baseCaches, Dictionary<Type, TypeAllowedAndConditions> newValues)
             {
                 this.behaviour = behaviour;
 
@@ -343,13 +340,13 @@ namespace Signum.Entities.Authorization
 
                 if(baseCaches.IsEmpty())
                 {
-                    defaultAllowed = new TypeAllowedAndConditions (behaviour.BaseAllowed);
+                    defaultAllowed = behaviour.BaseAllowed;
 
                     tmpRules = newValues; 
                 }
                 else
                 {
-                    defaultAllowed = new TypeAllowedAndConditions(behaviour.MergeAllowed(baseCaches.Select(a => a.rules.DefaultAllowed.Base)));
+                    defaultAllowed = behaviour.MergeAllowed(baseCaches.Select(a => a.rules.DefaultAllowed));
 
                     var keys = baseCaches.Where(b => b.rules.DefaultAllowed.Equals(defaultAllowed) && b.rules != null).SelectMany(a => a.rules.ExplicitKeys).ToHashSet();
 
@@ -358,10 +355,7 @@ namespace Signum.Entities.Authorization
                         tmpRules = keys.ToDictionary(k => k, k =>
                         {
                             var baseRules = baseCaches.Select(b => b.GetAllowed(k)).ToList();
-                            return new TypeAllowedAndConditions(behaviour.MergeAllowed(baseRules.Select(a => a.Base)))
-                            {
-                                Conditions = baseRules.Only().TryCC(a => a.Conditions) ?? new MList<TypeConditionRule>()
-                            };
+                            return behaviour.MergeAllowed(baseRules);
                         }); 
                             
                         if (newValues != null)
@@ -403,13 +397,10 @@ namespace Signum.Entities.Authorization
 
                 var baseRules = baseCaches.Select(b => b.GetAllowed(k)).ToList();
 
-                return new TypeAllowedAndConditions(behaviour.MergeAllowed(baseRules.Select(a => a.Base)))
-                {
-                    Conditions = baseRules.Only().TryCC(a => a.Conditions) ?? new MList<TypeConditionRule>()
-                };
+                return behaviour.MergeAllowed(baseRules);
             }
 
-            public DefaultRule GetDefaultRule(DefaultBehaviour<TypeAllowed> max)
+            public DefaultRule GetDefaultRule(DefaultBehaviour<TypeAllowedAndConditions> max)
             {
                 return behaviour == max ? DefaultRule.Max : DefaultRule.Min;
             }
@@ -424,7 +415,7 @@ namespace Signum.Entities.Authorization
         {
             var list = Database.RetrieveAll<RuleTypeDN>();
 
-            var defaultRules = list.Where(a => a.Resource == null).ToDictionary(a => a.Role, a => a.Allowed);
+            var defaultRules = list.Where(a => a.Resource == null).ToDictionary(a => a.Role, a => a.ToTypeAllowedAndConditions());
             var specificRules = list.Where(a => a.Resource != null).AgGroupToDictionary(a => a.Role, gr => gr.ToDictionary(a => a.Resource));
 
             return new XElement("Types",
@@ -531,13 +522,13 @@ namespace Signum.Entities.Authorization
                     {
                         Role = role,
                         Resource = null,
-                        Allowed = Min.BaseAllowed
+                        Allowed = Min.BaseAllowed.Fallback
                     }, comment + " ({0})".Formato(Min.BaseAllowed));
                 }
                 else if (!def.Allowed.Equals(Min.BaseAllowed))
                 {
                     var old = def.Allowed;
-                    def.Allowed = Min.BaseAllowed;
+                    def.Allowed = Min.BaseAllowed.Fallback;
                     return table.UpdateSqlSync(def, comment + "({0} -> {1})".Formato(old, Min.BaseAllowed));
                 }
 

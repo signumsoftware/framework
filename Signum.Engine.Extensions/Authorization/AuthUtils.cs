@@ -6,6 +6,7 @@ using Signum.Utilities;
 using Signum.Entities.Basics;
 using Signum.Entities.Authorization;
 using Signum.Entities;
+using System.Collections.ObjectModel;
 
 namespace Signum.Engine.Authorization
 {
@@ -17,8 +18,18 @@ namespace Signum.Engine.Authorization
         public static readonly DefaultBehaviour<PropertyAllowed> MaxProperty = new DefaultBehaviour<PropertyAllowed>(PropertyAllowed.Modify, MaxPropertyAllowed);
         public static readonly DefaultBehaviour<PropertyAllowed> MinProperty = new DefaultBehaviour<PropertyAllowed>(PropertyAllowed.None, MinPropertyAllowed);
 
-        public static readonly DefaultBehaviour<TypeAllowed> MaxType = new DefaultBehaviour<TypeAllowed>(TypeAllowed.Create, MaxTypeAllowed);
-        public static readonly DefaultBehaviour<TypeAllowed> MinType = new DefaultBehaviour<TypeAllowed>(TypeAllowed.None, MinTypeAllowed);
+        static ReadOnlyCollection<TypeConditionRule> None = Enumerable.Empty<TypeConditionRule>().ToReadOnly();
+
+        public static readonly DefaultBehaviour<TypeAllowedAndConditions> MaxType = new DefaultBehaviour<TypeAllowedAndConditions>(
+            new TypeAllowedAndConditions(TypeAllowed.Create),
+            baseRules => new TypeAllowedAndConditions(baseRules.Select(a=>a.Fallback).MaxTypeAllowed(),
+                baseRules.Only().TryCC(a => a.Conditions) ?? None));
+
+        public static readonly DefaultBehaviour<TypeAllowedAndConditions> MinType = new DefaultBehaviour<TypeAllowedAndConditions>(
+              new TypeAllowedAndConditions(TypeAllowed.None),
+            baseRules => new TypeAllowedAndConditions(baseRules.Select(a=>a.Fallback).MinTypeAllowed(),
+                baseRules.Only().TryCC(a => a.Conditions) ?? None));
+            
 
         static TypeAllowed MaxTypeAllowed(this IEnumerable<TypeAllowed> collection)
         {

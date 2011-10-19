@@ -708,7 +708,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="AuthAdmin\Content\SF_AuthAdmin.css" />
-    <Content Include="AuthAdmin\Images\class.png" />
     <Content Include="AuthAdmin\Images\namespace.png" />
     <Content Include="AuthAdmin\Images\operation.png" />
     <Content Include="AuthAdmin\Images\property.png" />

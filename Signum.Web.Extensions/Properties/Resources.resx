@@ -438,4 +438,10 @@
   <data name="_0Rules" xml:space="preserve">
     <value>{0} rules</value>
   </data>
+  <data name="AuthAdmin_AddCondition" xml:space="preserve">
+    <value>Add condition</value>
+  </data>
+  <data name="AuthAdmin_RemoveCondition" xml:space="preserve">
+    <value>Remove condition</value>
+  </data>
 </root>

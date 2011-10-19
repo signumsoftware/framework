@@ -379,7 +379,7 @@ namespace Signum.Engine.Authorization
 
             TypeAllowedAndConditions tac = cache.GetAllowed(entity.GetType());
 
-            Expression baseValue = Expression.Constant(tac.Base.Get(userInterface) >= allowed);
+            Expression baseValue = Expression.Constant(tac.Fallback.Get(userInterface) >= allowed);
 
             var expression = tac.Conditions.Reverse().Aggregate(baseValue, (acum, tacRule) =>
             {
@@ -406,7 +406,7 @@ namespace Signum.Engine.Authorization
 
             TypeAllowedAndConditions tac = cache.GetAllowed(entity.GetType());
 
-            Expression baseValue = Expression.Constant(tac.Base.Get(userInterface) >= allowed);
+            Expression baseValue = Expression.Constant(tac.Fallback.Get(userInterface) >= allowed);
 
             var list = (from line in tac.Conditions
                         select Expression.New(ciGroupDebugData, Expression.Constant(line.ConditionName),
@@ -525,7 +525,7 @@ namespace Signum.Engine.Authorization
             {
                 Role = role,
                 Resource = resource,
-                Allowed = allowed.Base,
+                Allowed = allowed.Fallback,
                 Conditions = allowed.Conditions.Select(a => new RuleTypeConditionDN
                 {
                     Allowed = a.Allowed,
@@ -536,10 +536,8 @@ namespace Signum.Engine.Authorization
 
         public static TypeAllowedAndConditions ToTypeAllowedAndConditions(this RuleTypeDN rule)
         {
-            return new TypeAllowedAndConditions(rule.Allowed)
-            {
-                Conditions = rule.Conditions.Select(c => new TypeConditionRule(EnumLogic<TypeConditionNameDN>.ToEnum(c.Condition), c.Allowed)).ToMList()
-            };
+            return new TypeAllowedAndConditions(rule.Allowed,
+                rule.Conditions.Select(c => new TypeConditionRule(EnumLogic<TypeConditionNameDN>.ToEnum(c.Condition), c.Allowed)).ToReadOnly());
         }
     }
 }

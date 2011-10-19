@@ -18,6 +18,7 @@ using System.Linq.Expressions;
 using Signum.Engine.Maps;
 using System.Web.Routing;
 using Signum.Web.Extensions.Properties;
+using Signum.Engine.Basics;
 
 namespace Signum.Web.AuthAdmin
 {
@@ -43,8 +44,7 @@ namespace Signum.Web.AuthAdmin
 
                 if (types)
                 {
-                    Register<TypeRulePack, TypeAllowedRule, TypeDN, TypeAllowedAndConditions, TypeDN>("types", a => a.Resource, 
-                        ctx=> ParseTypeAllowed(ctx.Inputs), "Resource", false);
+                    RegisterTypes();
                 }
 
                 if (properties)
@@ -82,13 +82,13 @@ namespace Signum.Web.AuthAdmin
             }
         }
 
-        static TypeAllowedAndConditions ParseTypeAllowed(IDictionary<string, string> dic)
+        static TypeAllowed ParseTypeAllowed(IDictionary<string, string> dic)
         {
-            return new TypeAllowedAndConditions(TypeAllowedExtensions.Create(
+            return TypeAllowedExtensions.Create(
                 Mapping.ParseHtmlBool(dic["Create"]),
                 Mapping.ParseHtmlBool(dic["Modify"]),
                 Mapping.ParseHtmlBool(dic["Read"]),
-                Mapping.ParseHtmlBool(dic["None"])));
+                Mapping.ParseHtmlBool(dic["None"]));
         }
 
         static void Register<T, AR, R, A, K>(string partialViewName, Func<AR, K> getKey, Mapping<A> allowedMapping, string getKeyRoute, bool embedded)
@@ -116,31 +116,36 @@ namespace Signum.Web.AuthAdmin
             RegisterSaveButton<T>(partialViewName, embedded);
         }
 
-        //static void RegisterEntityGroups()
-        //{
-        //    string partialViewName = "entityGroups";
+        static void RegisterTypes()
+        {
+            if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(TypeDN)))
+                Navigator.AddSetting(new EntitySettings<TypeDN>(EntityType.ServerOnly));
 
-        //    if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(TypeConditionDN)))
-        //        Navigator.AddSetting(new EntitySettings<TypeConditionDN>(EntityType.ServerOnly));
+            Navigator.AddSetting(new EmbeddedEntitySettings<TypeConditionRule>());
 
-        //    string viewPrefix = "~/authAdmin/Views/{0}.cshtml";
-        //    Navigator.AddSetting(new EmbeddedEntitySettings<EntityGroupRulePack>()
-        //    {
-        //        ShowSave = false,
-        //        PartialViewName = e => viewPrefix.Formato(partialViewName),
-        //        MappingDefault = new EntityMapping<EntityGroupRulePack>(false)
-        //            .SetProperty(m => m.Rules,
-        //                new MListDictionaryMapping<EntityGroupAllowedRule, string>(a => a.Resource == null? "[FALLBACK]": EnumDN.UniqueKey(a.Resource), "Resource")
-        //                {
-        //                    ElementMapping = new EntityMapping<EntityGroupAllowedRule>(false)
-        //                    .SetProperty(p => p.Allowed, ctx=>ParseTypeAllowed(ctx.Parent.Inputs))
-        //                    .CreateProperty(p=>p.Priority)
-        //                })
-        //    });
+            string viewPrefix = "~/authAdmin/Views/{0}.cshtml";
+            Navigator.AddSetting(new EmbeddedEntitySettings<TypeRulePack>()
+            {
+                ShowSave = false,
+                PartialViewName = e => viewPrefix.Formato("types"),
+                MappingDefault = new EntityMapping<TypeRulePack>(false)
+                    .CreateProperty(m => m.DefaultRule)
+                    .SetProperty(m => m.Rules,
+                        new MListDictionaryMapping<TypeAllowedRule, TypeDN>(a => a.Resource, "Resource")
+                        {
+                            ElementMapping = new EntityMapping<TypeAllowedRule>(false)
+                            .SetProperty(p => p.Allowed, ctx => new TypeAllowedAndConditions(
+                                ParseTypeAllowed(ctx.Inputs.SubDictionary("Fallback")),
+                                ctx.Inputs.SubDictionary("Conditions").IndexSubDictionaries().Select(d =>
+                                    new TypeConditionRule(
+                                        EnumLogic<TypeConditionNameDN>.ToEnum(d["ConditionName"]),
+                                        ParseTypeAllowed(d.SubDictionary("Allowed")))
+                                   ).ToReadOnly()))
+                        })
+            });
 
-        //    RegisterSaveButton<EntityGroupRulePack>(partialViewName, false);
-        //}
-
+            RegisterSaveButton<TypeRulePack>("types", false);
+        }
 
         private static void RegisterSaveButton<T>(string partialViewName, bool embedded)
             where T : ModifiableEntity
