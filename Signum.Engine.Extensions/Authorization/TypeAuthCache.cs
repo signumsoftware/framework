@@ -498,11 +498,7 @@ namespace Signum.Entities.Authorization
                         (r, xr) =>
                         {
                             var a = xr.Attribute("Allowed").Value.ToEnum<TypeAllowed>();
-                            var conditions = xr.Descendants("Condition").Select(xc=>new RuleTypeConditionDN
-                            { 
-                                Condition = EnumLogic<TypeConditionNameDN>.ToEntity(xr.Attribute("Name").Value),
-                                Allowed = xc.Attribute("Allowed").Value.ToEnum<TypeAllowed>()
-                            }).ToMList();
+                            var conditions = Conditions(xr);
 
                             return table.InsertSqlSync(new RuleTypeDN { Resource = r, Role = role, Allowed = a, Conditions = conditions}, Comment(role, r, a));
                         },
@@ -510,11 +506,7 @@ namespace Signum.Entities.Authorization
                         {
                             var oldA = pr.Allowed;
                             pr.Allowed = xr.Attribute("Allowed").Value.ToEnum<TypeAllowed>();
-                            var conditions = xr.Descendants("Condition").Select(xc => new RuleTypeConditionDN
-                            {
-                                Condition = EnumLogic<TypeConditionNameDN>.ToEntity(xr.Attribute("Name").Value),
-                                Allowed = xc.Attribute("Allowed").Value.ToEnum<TypeAllowed>()
-                            }).ToMList();
+                            var conditions = Conditions(xr);
 
                             if (!pr.Conditions.SequenceEqual(conditions))
                                 pr.Conditions = conditions;
@@ -524,6 +516,15 @@ namespace Signum.Entities.Authorization
 
                     return SqlPreCommand.Combine(Spacing.Simple, defSql, restSql);
                 }, Spacing.Double);
+        }
+
+        private static MList<RuleTypeConditionDN> Conditions(XElement xr)
+        {
+            return xr.Descendants("Condition").Select(xc => new RuleTypeConditionDN
+            {
+                Condition = EnumLogic<TypeConditionNameDN>.ToEntity(xc.Attribute("Name").Value),
+                Allowed = xc.Attribute("Allowed").Value.ToEnum<TypeAllowed>()
+            }).ToMList();
         }
 
 
