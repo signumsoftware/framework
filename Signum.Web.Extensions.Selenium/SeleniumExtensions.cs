@@ -11,7 +11,7 @@ using Signum.Utilities;
 namespace Signum.Web.Selenium
 {
     public enum WebExplorer
-    { 
+    {
         IE,
         Chrome,
         Firefox
@@ -31,7 +31,7 @@ namespace Signum.Web.Selenium
             else
                 seleniumServerProcess.StartInfo.Arguments =
                     "-jar c:/selenium/selenium-server.jar -timeout 3600";
-            
+
             seleniumServerProcess.Start();
             return seleniumServerProcess;
         }
@@ -42,13 +42,14 @@ namespace Signum.Web.Selenium
                 4444,
                 Explorer == WebExplorer.Firefox ? "*chrome" : Explorer == WebExplorer.IE ? "*iexplore" : "*googlechrome",
                 "http://localhost/");
-            
-                selenium.Start();
-            
+
+            StartSelenium(selenium);
+
+            selenium.SetTimeout("600000");
             selenium.SetSpeed("200");
             //selenium.SetSpeed("1000");
-            
-            selenium.SetTimeout("600000");
+
+
 
             selenium.AddLocationStrategy("jq",
             "var loc = locator; " +
@@ -75,6 +76,27 @@ namespace Signum.Web.Selenium
         );
 
             return selenium;
+        }
+
+        private static void StartSelenium(ISelenium selenium)
+        {
+            bool starting = true;
+            int attempts = 0;
+            while (starting)
+            {
+                try
+                {
+                    selenium.Start();
+                    starting = false;
+                }
+                catch (Exception)
+                {
+                    attempts += 1;
+                    System.Threading.Thread.Sleep(3000);
+                    if (attempts > 3)
+                        throw new ApplicationException("Could not start selenium");
+                }
+            }
         }
 
         public static void KillSelenium(Process seleniumProcess)
@@ -165,7 +187,7 @@ namespace Signum.Web.Selenium
         public static string EntityButtonLocator(string buttonId)
         {
             //check of css class is redundant but it must be in the html, so good for testing
-            return "jq=#{0}.sf-entity-button".Formato(buttonId); 
+            return "jq=#{0}.sf-entity-button".Formato(buttonId);
         }
 
         public static string EntityMenuOptionLocator(string menuId, string optionId)

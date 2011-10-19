@@ -280,4 +280,7 @@
   <data name="NotAuthorizedTo01" xml:space="preserve">
     <value>Not authorized to {0} {1}</value>
   </data>
+  <data name="YourUsernameIs0" xml:space="preserve">
+    <value>Your username is: {0}</value>
+  </data>
 </root>

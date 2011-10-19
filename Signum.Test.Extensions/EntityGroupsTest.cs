@@ -14,6 +14,7 @@ using Signum.Test.Extensions.Properties;
 using Signum.Services;
 using Signum.Engine.Basics;
 using Signum.Utilities;
+using System.Xml.Linq;
 
 namespace Signum.Test.Extensions
 {
@@ -216,5 +217,13 @@ namespace Signum.Test.Extensions
                 }
             }
         }
+
+        //[TestMethod]
+        //public void ImportAuthRules()
+        //{
+        //    AuthLogic.GloballyEnabled = false;
+        //    var rules = AuthLogic.ImportRulesScript(XDocument.Load(@"C:\Users\olmo.SIGNUMS\Desktop\AuthRules.xml")); 
+        //}
+
     }
 }

@@ -35,6 +35,8 @@ namespace Signum.Engine.Mailing
     public interface IEmailModel
     {
         IEmailOwnerDN To { get; set; }
+        string Cc { get; set; }
+        string Bcc { get; set; }  
     }
 
     public class EmailModel<T> : IEmailModel
@@ -47,6 +49,9 @@ namespace Signum.Engine.Mailing
             get { return To; }
             set { To = (T)value; }
         }
+
+        public string Cc { get; set; }
+        public string Bcc { get; set; }  
     }
 
     public static class EmailLogic
@@ -236,6 +241,8 @@ namespace Signum.Engine.Mailing
                 {
                     State = EmailState.Created,
                     Recipient = model.To.ToLite(),
+                    Bcc = model.Bcc,
+                    Cc = model.Cc,
                     Template = GetTemplateDN(model.GetType()),
                     Subject = content.Subject,
                     Body = content.Body,
@@ -307,7 +314,7 @@ namespace Signum.Engine.Mailing
                     emailMessage.Received = null;
                     emailMessage.Save();
 
-                    client.SendAsync(message, new EmailUser { EmailMessage = emailMessage, User = UserDN.Current });
+                    client.Send(message/*,new EmailUser { EmailMessage = emailMessage, User = UserDN.Current }*/);
                 }
                 else
                 {
@@ -358,6 +365,11 @@ namespace Signum.Engine.Mailing
                 Body = emailMessage.Body,
                 IsBodyHtml = true,
             };
+
+            if(emailMessage.Bcc.HasText())
+                message.Bcc.AddRange(emailMessage.Bcc.Split( new [] {';'},StringSplitOptions.RemoveEmptyEntries).Select(a => new MailAddress(a)).ToList());
+            if (emailMessage.Cc.HasText())
+                message.CC.AddRange(emailMessage.Cc.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Select(a => new MailAddress(a)).ToList());
             return message;
         }
 

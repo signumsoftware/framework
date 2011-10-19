@@ -45,10 +45,8 @@ namespace Signum.Entities.Authorization
         where AR : AllowedRule<R, A>, new()
         where R : IdentifiableEntity
     {
-
         readonly Lazy<Dictionary<Lite<RoleDN>, RoleAllowedCache>> runtimeRules; 
 
-         
         Func<R, K> ToKey;
         Func<K, R> ToEntity;
         DefaultBehaviour<A> Min;
@@ -275,7 +273,12 @@ namespace Signum.Entities.Authorization
             Synchronizer.Synchronize(current, should,
                 (p, pr) => pr.Delete(),
                 (p, ar) => new RT { Resource = p, Role = rules.Role, Allowed = ar.Allowed }.Save(),
-                (p, pr, ar) => { pr.Allowed = ar.Allowed; pr.Save(); });
+                (p, pr, ar) =>
+                {
+                    pr.Allowed = ar.Allowed;
+                    if (pr.SelfModified)
+                        pr.Save();
+                });
 
             InvalidateCache();
         }
