@@ -218,12 +218,12 @@ namespace Signum.Test.Extensions
             }
         }
 
-        [TestMethod]
-        public void ImportAuthRules()
-        {
-            AuthLogic.GloballyEnabled = false;
-            var rules = AuthLogic.ImportRulesScript(XDocument.Load(@"C:\Users\olmo.SIGNUMS\Desktop\AuthRules.xml")); 
-        }
+        //[TestMethod]
+        //public void ImportAuthRules()
+        //{
+        //    AuthLogic.GloballyEnabled = false;
+        //    var rules = AuthLogic.ImportRulesScript(XDocument.Load(@"C:\Users\olmo.SIGNUMS\Desktop\AuthRules.xml")); 
+        //}
 
     }
 }

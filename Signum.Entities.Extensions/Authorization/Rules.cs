@@ -114,6 +114,11 @@ namespace Signum.Entities.Authorization
             return this.condition.Equals(other.condition) 
                 && this.allowed == other.allowed; 
         }
+
+        public override string ToString()
+        {
+            return "{0} ({1})".Formato(condition, allowed);
+        }
     }
 
     public enum PropertyAllowed
