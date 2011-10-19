@@ -100,8 +100,8 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.MouseMove("jq=#sfCpAdminContainer td[data-column=2] .sf-cp-droppable");
             selenium.MouseUp("jq=#sfCpAdminContainer td[data-column=2] .sf-cp-droppable");
 
-            //selenium.EntityButtonSaveClick();
-            //selenium.WaitForPageToLoad(PageLoadTimeout);
+            selenium.EntityButtonSaveClick();
+            selenium.WaitForPageToLoad(PageLoadTimeout);
 
             ////view
             //selenium.Open("/Signum.Web.Extensions.Sample/");

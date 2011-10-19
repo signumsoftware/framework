@@ -64,9 +64,12 @@ namespace Signum.Engine.Files
 
                 FilePathDN.UrlPathEncode = HttpUtility.UrlPathEncode;
 
-                sb.AddUniqueIndex<FilePathDN>(f => new { f.Sufix, f.Repository }); 
+                sb.AddUniqueIndex<FilePathDN>(f => new { f.Sufix, f.Repository });
+
+                dqm.RegisterExpression((FilePathDN fp) => new WebImage { FullWebPath = fp.FullWebPath }, () => typeof(WebImage).NiceName(), "Image");
             }
         }
+
 
         static void FilePathLogic_PreUnsafeDelete(IQueryable<FilePathDN> query)
         {

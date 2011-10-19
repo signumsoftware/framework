@@ -129,5 +129,9 @@ namespace Signum.Entities.Files
         }
     }
 
-
+    [Serializable, ForceLocalization]
+    public class WebImage
+    {
+        public string FullWebPath;
+    }
 }

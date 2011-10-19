@@ -319,4 +319,7 @@
   <data name="TheTemplateMustBeActiveToConstructSMSMessages" xml:space="preserve">
     <value>La plantilla debe estar activa para crear un SMS</value>
   </data>
+  <data name="YourUsernameIs0" xml:space="preserve">
+    <value>Su nombre de usuario es: {0}</value>
+  </data>
 </root>

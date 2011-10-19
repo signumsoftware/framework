@@ -1389,4 +1389,13 @@
   <data name="UserChartDN_Chart" xml:space="preserve">
     <value>Gráfico</value>
   </data>
+  <data name="EmailMessageDN_Bcc" xml:space="preserve">
+    <value>CCO</value>
+  </data>
+  <data name="EmailMessageDN_Cc" xml:space="preserve">
+    <value>CC</value>
+  </data>
+  <data name="WebImage" xml:space="preserve">
+    <value>Imagen</value>
+  </data>
 </root>
