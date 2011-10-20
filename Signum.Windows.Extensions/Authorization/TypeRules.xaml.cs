@@ -219,10 +219,19 @@ namespace Signum.Windows.Authorization
             this.RebindEvents();
         }
 
+        protected override void ChildPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            Notify(() => Overriden);
+
+            base.ChildPropertyChanged(sender, e);
+        }
+
         protected override void ChildCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
         {
             Notify(() => Overriden);
-            Notify(() => CanAdd); 
+            Notify(() => CanAdd);
+
+            base.ChildCollectionChanged(sender, args);
         }
 
         public TypeAllowedRule ToRule()
@@ -243,13 +252,7 @@ namespace Signum.Windows.Authorization
             };
         }
 
-        protected override void ChildPropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            if (sender == Allowed && e.PropertyName == "TypeAllowed")
-                Notify(() => Overriden);
-
-            base.ChildPropertyChanged(sender, e);
-        }
+    
 
         public bool Overriden
         {
@@ -271,7 +274,14 @@ namespace Signum.Windows.Authorization
 
     public class TypeConditionRuleBuilder : ModelEntity
     {
-        public TypeAllowedBuilder Allowed { get; private set; }
+        [NotifyChildProperty]
+        TypeAllowedBuilder allowed;
+        public TypeAllowedBuilder Allowed
+        {
+            get { return allowed; }
+            private set { Set(ref allowed, value, () => Allowed); }
+        }
+
         public Enum ConditionName { get; private set; }
 
         public string ConditionNiceToString { get { return ConditionName.NiceToString(); } }
@@ -280,6 +290,11 @@ namespace Signum.Windows.Authorization
         {
             this.ConditionName = conditionName;
             this.Allowed = new TypeAllowedBuilder(allowed);
+        }
+
+        protected override void ChildPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            Notify(() => Allowed);
         }
     }
 

@@ -90,7 +90,12 @@ WriteLiteral(@"
 
                                               Write(Url.Action("GetChooser", "Signum"));
 
-WriteLiteral("\', \"Choose condition\");\r\n        });\r\n    });\r\n</script>\r\n");
+WriteLiteral("\', \'");
+
+
+                                                                                     Write(Resources.AuthAdmin_ChooseACondition);
+
+WriteLiteral("\');\r\n        });\r\n    });\r\n</script>\r\n");
 
 
   
@@ -221,12 +226,12 @@ WriteLiteral("            <tr class=\"sf-auth-type\" data-ns=\"");
 
                                          Write(iter.Value.Key);
 
-WriteLiteral("\" data-type=\"");
+WriteLiteral("\" ");
 
 
-                                                                     Write(item.Value.Resource.ClassName);
+                                                          Write(Html.Raw(item.Value.AvailableConditions.Any() ? ("data-type=\"" + item.Value.Resource.ClassName  + "\"") : ""));
 
-WriteLiteral("\">\r\n                <td>\r\n                    <div class=\"sf-auth-tree ");
+WriteLiteral(">\r\n                <td>\r\n                    <div class=\"sf-auth-tree ");
 
 
                                          Write(iter.IsLast ? "sf-auth-blank" : "sf-auth-line");
@@ -261,7 +266,7 @@ WriteLiteral("                        <input type=\"hidden\" disabled=\"disabled
 "vailable-conditions\" value=\"");
 
 
-                                                                                                        Write(item.Value.AvailableConditions.Select(ac => EnumDN.UniqueKey(ac)).ToString(","));
+                                                                                                        Write(item.Value.AvailableConditions.ToString(ac => "{0}|{1}".Formato(EnumDN.UniqueKey(ac), ac.NiceToString()), ","));
 
 WriteLiteral("\" />\r\n");
 
@@ -281,7 +286,7 @@ WriteLiteral("</span>\r\n                    ");
 WriteLiteral("\r\n                    ");
 
 
-               Write(Html.Hidden(item.Compose("AllowedBase"), item.Value.AllowedBase.Fallback.ToStringParts() + (item.Value.AllowedBase.Conditions.IsEmpty() ? "" : (";" + item.Value.AllowedBase.Conditions.ToString(a => "{0}-{1}".Formato(a.ConditionName, a.Allowed.ToStringParts()), ";")))));
+               Write(Html.Hidden(item.Compose("AllowedBase"), item.Value.AllowedBase.Fallback.ToStringParts() + (item.Value.AllowedBase.Conditions.IsEmpty() ? "" : (";" + item.Value.AllowedBase.Conditions.ToString(a => "{0}-{1}".Formato(EnumDN.UniqueKey(a.ConditionName), a.Allowed.ToStringParts()), ";")))));
 
 WriteLiteral("\r\n                </td>\r\n");
 

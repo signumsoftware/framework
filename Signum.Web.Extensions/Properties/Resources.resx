@@ -444,4 +444,7 @@
   <data name="AuthAdmin_RemoveCondition" xml:space="preserve">
     <value>Remove condition</value>
   </data>
+  <data name="AuthAdmin_ChooseACondition" xml:space="preserve">
+    <value>Choose a condition</value>
+  </data>
 </root>

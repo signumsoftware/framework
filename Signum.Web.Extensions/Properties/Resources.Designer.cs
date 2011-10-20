@@ -106,6 +106,15 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Choose a condition.
+        /// </summary>
+        public static string AuthAdmin_ChooseACondition {
+            get {
+                return ResourceManager.GetString("AuthAdmin_ChooseACondition", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Remove condition.
         /// </summary>
         public static string AuthAdmin_RemoveCondition {
