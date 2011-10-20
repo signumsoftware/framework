@@ -165,7 +165,7 @@ SF.Auth = (function () {
         $newTr.find("td.sf-auth-type-only").html("");
 
         var $create = $newTr.find(".sf-create");
-        $create.prev(".sf-auth-tree").removeClass().addClass("sf-auth-tree sf-auth-blank");
+        $create.prev(".sf-auth-tree").removeClass().addClass($typeTr.find(".sf-create").prev(".sf-auth-tree").hasClass("sf-auth-leaf") ? "sf-auth-tree sf-auth-line" : "sf-auth-tree sf-auth-blank");
         $create.before($("<div></div>").addClass("sf-auth-tree sf-auth-leaf-last"));
         $create.removeClass("sf-create").addClass("sf-remove");
         $create.find(".ui-icon").removeClass("ui-icon-circle-plus").addClass("ui-icon-circle-close");
