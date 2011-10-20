@@ -22,7 +22,7 @@
     bool viewable = (bool)ViewData[ViewDataKeys.View];
 }
 
-<div id="@Model.Compose("divChartControl")" class="sf-search-control sf-chart-control">
+<div id="@Model.Compose("divChartControl")" class="sf-search-control sf-chart-control" data-prefix="@Model.ControlID">
     @Html.HiddenRuntimeInfo(Model)
     @Html.HiddenRuntimeInfo(Model, cr => cr.Chart)
     @Html.Hidden(Model.Compose(ViewDataKeys.QueryName), Navigator.ResolveWebQueryName(queryDescription.QueryName))
