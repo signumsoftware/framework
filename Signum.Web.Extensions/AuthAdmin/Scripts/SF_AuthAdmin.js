@@ -1,16 +1,16 @@
 ﻿var SF = SF || {};
 
 SF.Auth = (function () {
-    var coloredRadios = function ($ctx) {
-        var updateBackground = function () {
-            var $this = $(this);
-            $this.toggleClass("sf-auth-chooser-disabled", !$this.find(":radio").attr("checked"));
-        };
+    var updateColoredBackground = function () {
+        var $this = $(this);
+        $this.toggleClass("sf-auth-chooser-disabled", !$this.find(":radio").attr("checked"));
+    };
 
+    var coloredRadios = function ($ctx) {
         var $links = $ctx.find(".sf-auth-rules .sf-auth-chooser");
 
         $links.find(":radio").hide();
-        $links.each(updateBackground);
+        $links.each(updateColoredBackground);
 
         $links.click(function () {
             var $this = $(this);
@@ -18,21 +18,25 @@ SF.Auth = (function () {
             $tr.find(".sf-auth-chooser :radio").attr("checked", false);
             var $radio = $this.find(":radio");
             $radio.attr("checked", true);
-            $tr.find(".sf-auth-overriden").attr("checked", $radio.val() != $tr.find("input[name$=Base]").val());
-            $tr.find(".sf-auth-chooser").each(updateBackground);
+            $tr.find(".sf-auth-overriden").attr("checked", $radio.val() != $tr.find("input[name$=AllowedBase]").val());
+            $tr.find(".sf-auth-chooser").each(updateColoredBackground);
         });
     };
 
-    var multiSelRadios = function ($ctx) {
-        var updateBackground = function () {
-            var $this = $(this);
-            $this.toggleClass("sf-auth-chooser-disabled", !$this.find(":checkbox").attr("checked"));
-        };
+    var updateMultiSelBackground = function () {
+        var $this = $(this);
+        $this.toggleClass("sf-auth-chooser-disabled", !$this.find(":checkbox").attr("checked"));
+    };
 
+    var multiSelToStringParts = function ($tr) {
+        return $.map($tr.find(".sf-auth-chooser :checkbox:checked"), function (a) { return $(a).attr("data-tag"); }).join(",");
+    };
+
+    var multiSelRadios = function ($ctx) {
         var $links = $ctx.find(".sf-auth-chooser");
 
         $links.find(":checkbox").hide();
-        $links.each(updateBackground);
+        $links.each(updateMultiSelBackground);
 
         $links.bind("mousedown", function () {
             this.onselectstart = function () { return false; };
@@ -55,10 +59,25 @@ SF.Auth = (function () {
                 }
             }
 
-            var total = $.map($tr.find(".sf-auth-chooser :checkbox:checked"), function (a) { return $(a).attr("data-tag"); }).join(",");
+            var total = "";
+            var type = $tr.attr("data-type");
+            if (typeof type == "undefined") {
+                total = multiSelToStringParts($tr);
+                $tr.find(".sf-auth-overriden").attr("checked", total != $tr.find("input[name$=AllowedBase]").val());
+            } 
+            else {
+                var $groupTrs = findTrsInGroup($tr.attr("data-ns"), type);
+                var $typeTr = $groupTrs.filter(".sf-auth-type");
+                total = multiSelToStringParts($typeTr);
+                var $conditionTrs = $groupTrs.not(".sf-auth-type");
+                $conditionTrs.each(function (i, e) {
+                    var $ctr = $(e);
+                    total += ";" + $ctr.attr("data-condition") + "-" + multiSelToStringParts($ctr);
+                });
+                $typeTr.find(".sf-auth-overriden").attr("checked", total != $typeTr.find("input[name$=AllowedBase]").val());
+            }            
 
-            $tr.find(".sf-auth-overriden").attr("checked", total != $tr.find("input[name$=Base]").val());
-            $tr.find(".sf-auth-chooser").each(updateBackground);
+            $tr.find(".sf-auth-chooser").each(updateMultiSelBackground);
         });
     };
 
@@ -122,14 +141,24 @@ SF.Auth = (function () {
         var type = $tr.attr("data-type");
         var conditions = $tr.find(".sf-auth-available-conditions").val().split(",");
         var $rules = $(".sf-auth-rules tr");
-        var conditionsNotSet = conditions.filter(function (c) { return $rules.filter("[data-ns='" + ns + "'][data-type='" + type + "'][data-condition='" + c + "']").length == 0; });
-        SF.openChooser("New", function (chosenCondition) { addCondition($tr, chosenCondition); }, conditionsNotSet, null, { controllerUrl: url, title: title });
+        var conditionsNotSet = conditions.filter(function (c) { return $rules.filter("[data-ns='" + ns + "'][data-type='" + type + "'][data-condition='" + c.split("|")[0] + "']").length == 0; });
+        SF.openChooser("New",
+            function (chosenCondition) { addCondition($tr, chosenCondition); },
+            $.map(conditionsNotSet, function (c) { return c.split("|")[1]; }),
+            null,
+            {
+                controllerUrl: url,
+                title: title,
+                ids: $.map(conditionsNotSet, function (c) { return c.split("|")[0]; })
+            });
     };
 
     var addCondition = function ($typeTr, condition) {
         var $newTr = $typeTr.clone();
         $newTr.attr("data-condition", condition);
-        $newTr.find(".sf-auth-label").html(condition);
+
+        var conditionNiceName = $typeTr.find(".sf-auth-available-conditions").val().split(",").filter(function (c) { return c.split("|")[0] == condition; })[0].split("|")[1];
+        $newTr.find(".sf-auth-label").html(conditionNiceName);
 
         $newTr.removeClass("sf-auth-type").addClass("sf-auth-condition");
         $newTr.find(".sf-auth-available-conditions").remove();
@@ -154,7 +183,7 @@ SF.Auth = (function () {
         $newTr.attr("data-index", lastConditionIndex);
 
         $newTr.find("td:first input[type='hidden']").remove();
-        $newTr.find(".sf-auth-chooser input").each(function(i, e){
+        $newTr.find(".sf-auth-chooser input").each(function (i, e) {
             var $input = $(e);
             var newId = $input.attr("name").replace("Fallback", "Conditions_" + lastConditionIndex + "_Allowed");
             $input.attr("name", newId);
@@ -165,7 +194,7 @@ SF.Auth = (function () {
         var fullName = $newTr.find(".sf-auth-chooser:first input").attr("name");
         fullName = fullName.substring(0, fullName.lastIndexOf("Allowed")) + "ConditionName";
         var $conditionName = $("<input>").attr("type", "hidden").val(condition).attr("id", fullName).attr("name", fullName);
-        $newTr.find("td:first").append($conditionName);        
+        $newTr.find("td:first").append($conditionName);
 
         multiSelRadios($newTr);
         $lastTrInGroup.after($newTr);
