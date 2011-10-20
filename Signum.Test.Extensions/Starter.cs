@@ -55,52 +55,57 @@ namespace Signum.Test.Extensions
 
         public static void Start(string connectionString)
         {
-            SchemaBuilder sb = new SchemaBuilder();
-            DynamicQueryManager dqm = new DynamicQueryManager();
-            ConnectionScope.Default = new Connection(connectionString, sb.Schema, dqm);
-
-            sb.Settings.OverrideAttributes((UserDN u) => u.Related, new ImplementedByAttribute());
-            sb.Settings.OverrideAttributes((ControlPanelDN cp) => cp.Related, new ImplementedByAttribute(typeof(UserDN), typeof(RoleDN)));
-            sb.Settings.OverrideAttributes((UserQueryDN uq) => uq.Related, new ImplementedByAttribute(typeof(UserDN), typeof(RoleDN)));
-            sb.Settings.OverrideAttributes((UserChartDN uq) => uq.Related, new ImplementedByAttribute(typeof(UserDN), typeof(RoleDN)));
-
-            AuthLogic.Start(sb, dqm, "System", "Anonymous");
-            UserTicketLogic.Start(sb, dqm);
-            OperationLogic.Start(sb, dqm);
-
-            AuthLogic.StartAllModules(sb, dqm, typeof(IServerSample));
-            
-            QueryLogic.Start(sb);
-            UserQueryLogic.Start(sb, dqm);
-            UserQueryLogic.RegisterUserEntityGroup(sb, MusicGroups.UserEntities);
-            UserQueryLogic.RegisterRoleEntityGroup(sb, MusicGroups.RoleEntities);
-            ControlPanelLogic.Start(sb, dqm);
-            ControlPanelLogic.RegisterUserEntityGroup(sb, MusicGroups.UserEntities);
-            ControlPanelLogic.RegisterRoleEntityGroup(sb, MusicGroups.RoleEntities);
-            ChartLogic.Start(sb, dqm);
-            ChartLogic.RegisterUserEntityGroup(sb, MusicGroups.UserEntities);
-            ChartLogic.RegisterRoleEntityGroup(sb, MusicGroups.RoleEntities);
-
-            ReportsLogic.Start(sb, dqm, true);
-
-            Signum.Test.Starter.StartMusic(sb, dqm);
-
-            AlbumGraph.Register();
-            OperationLogic.Register(new BasicExecute<ArtistDN>(ArtistOperation.AssignPersonalAward)
+            if (!started)
             {
-                Lite = true,
-                AllowsNew = false,
-                CanExecute = a => a.LastAward != null ? "Artist cannot have already an award" : null,
-                Execute = (a,para) => a.LastAward = new PersonalAwardDN() { Category = "Best Artist", Year = DateTime.Now.Year, Result = AwardResult.Won }
-            });
+                SchemaBuilder sb = new SchemaBuilder();
+                DynamicQueryManager dqm = new DynamicQueryManager();
+                ConnectionScope.Default = new Connection(connectionString, sb.Schema, dqm);
 
-            OperationLogic.Register(new BasicDelete<AlbumDN>(AlbumOperation.Delete)
-            {
-                Delete = (album, _) => album.Delete()
-            });
+                sb.Settings.OverrideAttributes((UserDN u) => u.Related, new ImplementedByAttribute());
+                sb.Settings.OverrideAttributes((ControlPanelDN cp) => cp.Related, new ImplementedByAttribute(typeof(UserDN), typeof(RoleDN)));
+                sb.Settings.OverrideAttributes((UserQueryDN uq) => uq.Related, new ImplementedByAttribute(typeof(UserDN), typeof(RoleDN)));
+                sb.Settings.OverrideAttributes((UserChartDN uq) => uq.Related, new ImplementedByAttribute(typeof(UserDN), typeof(RoleDN)));
 
-            TypeConditionLogic.Register<LabelDN>(MusicGroups.JapanEntities, l => l.Country.Name.StartsWith(Signum.Test.Starter.Japan) || l.Owner != null && l.Owner.Entity.Country.Name.StartsWith(Signum.Test.Starter.Japan));
-            TypeConditionLogic.Register<AlbumDN>(MusicGroups.JapanEntities, a => a.Label.InCondition(MusicGroups.JapanEntities));
+                AuthLogic.Start(sb, dqm, "System", "Anonymous");
+                UserTicketLogic.Start(sb, dqm);
+                OperationLogic.Start(sb, dqm);
+
+                AuthLogic.StartAllModules(sb, dqm, typeof(IServerSample));
+
+                QueryLogic.Start(sb);
+                UserQueryLogic.Start(sb, dqm);
+                UserQueryLogic.RegisterUserEntityGroup(sb, MusicGroups.UserEntities);
+                UserQueryLogic.RegisterRoleEntityGroup(sb, MusicGroups.RoleEntities);
+                ControlPanelLogic.Start(sb, dqm);
+                ControlPanelLogic.RegisterUserEntityGroup(sb, MusicGroups.UserEntities);
+                ControlPanelLogic.RegisterRoleEntityGroup(sb, MusicGroups.RoleEntities);
+                ChartLogic.Start(sb, dqm);
+                ChartLogic.RegisterUserEntityGroup(sb, MusicGroups.UserEntities);
+                ChartLogic.RegisterRoleEntityGroup(sb, MusicGroups.RoleEntities);
+
+                ReportsLogic.Start(sb, dqm, true);
+
+                Signum.Test.Starter.StartMusic(sb, dqm);
+
+                AlbumGraph.Register();
+                OperationLogic.Register(new BasicExecute<ArtistDN>(ArtistOperation.AssignPersonalAward)
+                {
+                    Lite = true,
+                    AllowsNew = false,
+                    CanExecute = a => a.LastAward != null ? "Artist cannot have already an award" : null,
+                    Execute = (a, para) => a.LastAward = new PersonalAwardDN() { Category = "Best Artist", Year = DateTime.Now.Year, Result = AwardResult.Won }
+                });
+
+                OperationLogic.Register(new BasicDelete<AlbumDN>(AlbumOperation.Delete)
+                {
+                    Delete = (album, _) => album.Delete()
+                });
+
+                TypeConditionLogic.Register<LabelDN>(MusicGroups.JapanEntities, l => l.Country.Name.StartsWith(Signum.Test.Starter.Japan) || l.Owner != null && l.Owner.Entity.Country.Name.StartsWith(Signum.Test.Starter.Japan));
+                TypeConditionLogic.Register<AlbumDN>(MusicGroups.JapanEntities, a => a.Label.InCondition(MusicGroups.JapanEntities));
+
+                started = true;
+            }
         }
 
         public static void Load()
