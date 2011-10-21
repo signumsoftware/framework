@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<CodeSnippets  xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+	<CodeSnippet Format="1.0.0">
+		<Header>
+			<Title>Transaccion</Title>
+			<Shortcut>tran</Shortcut>
+			<Description>New Transacction</Description>
+			<Author>Signum Framework</Author>
+			<SnippetTypes>
+				<SnippetType>Expansion</SnippetType>
+				<SnippetType>SurroundsWith</SnippetType>
+			</SnippetTypes>
+		</Header>
+		<Snippet>
+      <Imports>
+        <Import>
+          <Namespace>Signum.Entities</Namespace>
+          <Namespace>Signum.Utilities</Namespace>
+          <Namespace>Signum.Engine</Namespace>
+        </Import>
+      </Imports>
+			<Code Language="csharp"><![CDATA[using (Transaction tr = new Transaction())
+{
+	$selected$
+    tr.Commit();
+}
+]]>
+			</Code>
+		</Snippet>
+	</CodeSnippet>
+</CodeSnippets>

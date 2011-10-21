@@ -1,0 +1,32 @@
+﻿/* top message */
+#sf-message-area {
+    font-size:12px;
+    left:50%;
+    overflow:hidden;
+    position:fixed;
+    top:0;
+    z-index:100000;
+}
+
+#sf-message-area .sf-message-area-text-container {
+    font-weight:bold;
+    overflow:hidden;
+    text-align:center;
+    white-space:nowrap;
+    background-color:#fff1a8;
+    -moz-border-radius-bottomleft:4px;
+    -moz-border-radius-bottomright:4px;
+    -webkit-border-radius-bottomleft:4px;
+    -webkit-border-radius-bottomright:4px;
+    border-radius-bottomleft:4px;
+    border-radius-bottomright:4px;
+    padding:4px;
+}
+
+#sf-message-area .sf-message-area-text-container.sf-ok {
+    background-color:#BFFF9F;
+}
+
+#sf-message-area .sf-message-area-text-container.sf-error {
+    background-color:#FFAFAF;
+}

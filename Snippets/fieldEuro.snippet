@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<CodeSnippets  xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+	<CodeSnippet Format="1.0.0">
+		<Header>
+			<Title>fieldEuro</Title>
+			<Shortcut>fieldEuro</Shortcut>
+			<Description>Campo Importe en euros</Description>
+			<Author>Signum Software</Author>
+			<SnippetTypes>
+				<SnippetType>Expansion</SnippetType>
+			</SnippetTypes>
+		</Header>
+		<Snippet>
+      <Imports>
+        <Import>
+          <Namespace>Signum.Entities</Namespace>
+          <Namespace>Signum.Utilities</Namespace>
+        </Import>
+      </Imports>
+      <Declarations>
+        <Literal>
+          <ID>field</ID>
+          <ToolTip>Field</ToolTip>
+          <Default>importe</Default>
+          <Function></Function>
+        </Literal>
+        <Literal>
+          <ID>property</ID>
+          <ToolTip>Property</ToolTip>
+          <Default>Importe</Default>
+          <Function></Function>
+        </Literal>
+      </Declarations>
+			<Code Language="csharp">
+				<![CDATA[decimal $field$;
+        [DecimalsValidatorAttribute, Unit("€")]
+        public decimal $property$
+        {
+            get { return $field$; }
+            set { Set(ref $field$, value, () => $property$); }
+        }$end$]]>
+			</Code>
+		</Snippet>
+	</CodeSnippet>
+</CodeSnippets>
