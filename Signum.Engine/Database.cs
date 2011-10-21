@@ -75,7 +75,7 @@ namespace Signum.Engine
             if (lite == null)
                 throw new ArgumentNullException("lite");
 
-            if (lite.EntityOrNull == null)
+           if (lite.EntityOrNull == null)
                 lite.SetEntity(Retrieve(lite.RuntimeType, lite.Id));
 
             return lite.EntityOrNull;
