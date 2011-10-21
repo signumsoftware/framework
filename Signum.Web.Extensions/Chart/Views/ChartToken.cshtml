@@ -29,7 +29,7 @@
             }
             @if (tc.Value.ShouldAggregate)
             {
-                @Html.ValueLine(tc, ct => ct.Aggregate, vl => vl.LabelVisible = false)
+                @Html.ValueLine(tc, ct => ct.Aggregate, vl => { vl.LabelVisible = false; vl.ValueHtmlProps["class"] = "sf-chart-token-aggregate";})
             }
         </td>
         <td>

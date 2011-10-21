@@ -183,7 +183,7 @@ namespace Signum.Web.Chart
 
         private FilterOption AddFilter(ChartTokenDN chartToken, string key)
         {
-            if (chartToken == null || chartToken.Aggregate != null)
+            if (chartToken == null || chartToken.Aggregate != null || !Request.Params.AllKeys.Contains(key))
                 return null;
             
             var token = chartToken.Token;

@@ -114,7 +114,7 @@
 {
     stroke: #000;    
 }
-.sf-chart-container text.x-axis-token-label, .sf-chart-container text.y-axis-token-label
+.sf-chart-container text.x-axis-token-label, .sf-chart-container text.y-axis-token-label, text.sf-chart-strong
 {
     font-weight: bold;    
 }

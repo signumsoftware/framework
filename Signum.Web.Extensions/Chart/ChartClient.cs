@@ -12,6 +12,9 @@ using Signum.Entities.DynamicQuery;
 using System.Web.Script.Serialization;
 using Signum.Entities;
 using Signum.Engine;
+using System.Web.Routing;
+using System.Web.Mvc;
+using Signum.Entities.Basics;
 
 namespace Signum.Web.Chart
 {
@@ -37,6 +40,9 @@ namespace Signum.Web.Chart
                 });
 
                 ButtonBarQueryHelper.GetButtonBarForQueryName += new GetToolBarButtonQueryDelegate(ButtonBarQueryHelper_GetButtonBarForQueryName);
+
+                RouteTable.Routes.MapRoute(null, "ChartFor/{webQueryName}",
+                    new { controller = "Chart", action = "Index", webQueryName = "" });
             }
         }
 
@@ -153,6 +159,15 @@ namespace Signum.Web.Chart
                 {
                     key = l.Key(),
                     toStr = l.ToStr
+                };
+            }
+            else if (p is Enum)
+            {
+                Enum e = (Enum)p;
+                return new
+                {
+                    key = e.ToString(),
+                    toStr = e.NiceToString()
                 };
             }
             else
