@@ -22,6 +22,8 @@ using Signum.Utilities.Reflection;
 using System.ComponentModel;
 using System.Web;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading;
+using System.Linq.Expressions;
 
 namespace Signum.Engine.Mailing
 {
@@ -314,7 +316,7 @@ namespace Signum.Engine.Mailing
                     emailMessage.Received = null;
                     emailMessage.Save();
 
-                    client.Send(message/*,new EmailUser { EmailMessage = emailMessage, User = UserDN.Current }*/);
+                    client.SendAsync(message, new EmailUser { EmailMessage = emailMessage, User = UserDN.Current });
                 }
                 else
                 {
@@ -336,19 +338,31 @@ namespace Signum.Engine.Mailing
         static void client_SendCompleted(object sender, AsyncCompletedEventArgs e)
         {
             EmailUser emailUser = (EmailUser)e.UserState;
-            EmailMessageDN em = emailUser.EmailMessage;
-            if (e.Error != null)
-            {
-                em.Exception = e.Error.Message;
-                em.State = EmailState.SentError;
-            }
-            else
-            {
-                em.State = EmailState.Sent;
-                em.Sent = TimeZoneManager.Now;
-            }
             using (AuthLogic.User(emailUser.User))
-                em.Save();
+            {
+                Expression<Func<EmailMessageDN, EmailMessageDN>> updater;
+                if (e.Error != null)
+                    updater = em => new EmailMessageDN
+                    {
+                        Exception = e.Error.Message,
+                        State = EmailState.SentError
+                    };
+                else
+                    updater = em => new EmailMessageDN
+                    {
+                        State = EmailState.Sent,
+                        Sent = TimeZoneManager.Now
+                    };
+
+                for (int i = 0; i < 4; i++)
+                {
+                    if (emailUser.EmailMessage.InDB().UnsafeUpdate(updater) > 0)
+                        return;
+
+                    if (i != 3)
+                        Thread.Sleep(3000);
+                }
+            }
         }
 
         static MailMessage CreateMailMessage(EmailMessageDN emailMessage)
