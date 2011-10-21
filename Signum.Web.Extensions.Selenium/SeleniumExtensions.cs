@@ -93,7 +93,7 @@ namespace Signum.Web.Selenium
                 {
                     attempts += 1;
                     System.Threading.Thread.Sleep(3000);
-                    if (attempts > 3)
+                    if (attempts > 8)
                         throw new ApplicationException("Could not start selenium");
                 }
             }
