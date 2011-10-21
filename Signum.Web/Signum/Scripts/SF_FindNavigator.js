@@ -41,7 +41,7 @@ SF.registerModule("FindNavigator", function () {
         },
 
         control: function () {
-            return $(this.pf("divSearchControl"));
+            return $(".sf-search-control[data-prefix='" + this.findOptions.prefix + "']");
         },
 
         tempDivId: function () {

@@ -91,7 +91,12 @@ WriteLiteral("<div id=\"");
 
     Write(Model.Compose("divSearchControl"));
 
-WriteLiteral("\" \r\n     class=\"sf-search-control\" \r\n     data-quickfilter-url=\"");
+WriteLiteral("\" \r\n     class=\"sf-search-control\" \r\n     data-prefix=\"");
+
+
+             Write(Model.ControlID);
+
+WriteLiteral("\" \r\n     data-quickfilter-url=\"");
 
 
                       Write(Url.SignumAction("QuickFilter"));
