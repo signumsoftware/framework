@@ -55,6 +55,8 @@ namespace Signum.Entities.Authorization
             sb.Schema.EntityEvents<RuleTypeDN>().Saving += Schema_Saving;
             AuthLogic.RolesModified += InvalidateCache;
 
+            sb.AddUniqueIndex<RuleTypeDN>(rt => new { rt.Resource, rt.Role });
+
             sb.Schema.Table<TypeDN>().PreDeleteSqlSync += new Func<IdentifiableEntity, SqlPreCommand>(AuthCache_PreDeleteSqlSync);
 
             Validator.GetOrCreatePropertyPack((RuleTypeDN r) => r.Conditions).StaticPropertyValidation += TypeAuthCache_StaticPropertyValidation;
@@ -464,15 +466,16 @@ namespace Signum.Entities.Authorization
                     var max = x.Attribute("Default") == null || x.Attribute("Default").Value != "Min";
                     SqlPreCommand defSql = SetDefault(table, null, max, role);
 
-                    SqlPreCommand restSql = (from xr in x.Elements("Type")
-                                             let r = TypeLogic.TypeToDN[TypeLogic.GetType(xr.Attribute("Resource").Value)]
-                                             let a = xr.Attribute("Allowed").Value.ToEnum<TypeAllowed>()
-                                             select table.InsertSqlSync(new RuleTypeDN
-                                             {
-                                                 Resource = r,
-                                                 Role = role,
-                                                 Allowed = a
-                                             }, Comment(role, r, a))).Combine(Spacing.Simple);
+                    var dic = x.Elements("Type").ToDictionary(
+                        xr => TypeLogic.TypeToDN[TypeLogic.GetType(xr.Attribute("Resource").Value)],
+                        xr => xr.Attribute("Allowed").Value.ToEnum<TypeAllowed>(), "Type rules for {0}".Formato(role));
+
+                    SqlPreCommand restSql = dic.Select(kvp => table.InsertSqlSync(new RuleTypeDN
+                    {
+                        Resource = kvp.Key,
+                        Role = role,
+                        Allowed = kvp.Value
+                    }, Comment(role, kvp.Key, kvp.Value))).Combine(Spacing.Simple);
 
                     return SqlPreCommand.Combine(Spacing.Simple, defSql, restSql);
                 },
@@ -484,7 +487,7 @@ namespace Signum.Entities.Authorization
 
                     SqlPreCommand restSql = Synchronizer.SynchronizeScript(
                         list.Where(a => a.Resource != null).ToDictionary(a => a.Resource),
-                        x.Elements("Type").ToDictionary(a => TypeLogic.TypeToDN[TypeLogic.GetType(a.Attribute("Resource").Value)]),
+                        x.Elements("Type").ToDictionary(a => TypeLogic.TypeToDN[TypeLogic.GetType(a.Attribute("Resource").Value)], "Type rules for {0}".Formato(role)),
                         (r, rt) => table.DeleteSqlSync(rt, Comment(role, r, rt.Allowed)),
                         (r, xr) =>
                         {

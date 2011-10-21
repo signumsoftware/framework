@@ -36,6 +36,11 @@ namespace Signum.Entities.Authorization
             set { Set(ref allowed, value, () => Allowed); }
         }
 
+        public override string ToString()
+        {
+            return "{0} for {1} <- {2}".Formato(resource, role, allowed);
+        }
+
         protected override void PreSaving(ref bool graphModified)
         {
             this.toStr = this.ToString();

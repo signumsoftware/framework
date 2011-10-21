@@ -67,6 +67,8 @@ namespace Signum.Entities.Authorization
             sb.Schema.EntityEvents<RT>().Saving += Schema_Saving;
             AuthLogic.RolesModified += InvalidateCache;
 
+            sb.AddUniqueIndex<RT>(rt => new { rt.Resource, rt.Role });
+
             sb.Schema.Table<R>().PreDeleteSqlSync += new Func<IdentifiableEntity, SqlPreCommand>(AuthCache_PreDeleteSqlSync);
         }
 
@@ -425,15 +427,16 @@ namespace Signum.Entities.Authorization
                     var max = x.Attribute("Default") == null || x.Attribute("Default").Value != "Min";
                     SqlPreCommand defSql = SetDefault(table, null, max, role);
 
-                    SqlPreCommand restSql = (from xr in x.Elements(elementName)
-                                             let r = toResource(xr.Attribute("Resource").Value)
-                                             let a = parseAllowed(xr.Attribute("Allowed").Value)
-                                             select table.InsertSqlSync(new RT
-                                             {
-                                                 Resource = r,
-                                                 Role = role,
-                                                 Allowed = a
-                                             }, Comment(role, r, a))).Combine(Spacing.Simple);
+                    var dic = x.Elements(elementName).ToDictionary(
+                        xr => toResource(xr.Attribute("Resource").Value),
+                        xr => parseAllowed(xr.Attribute("Allowed").Value), "{0} rules for {1}".Formato(typeof(R).NiceName(), role));
+
+                    SqlPreCommand restSql = dic.Select(kvp => table.InsertSqlSync(new RT
+                    {
+                        Resource = kvp.Key,
+                        Role = role,
+                        Allowed = kvp.Value
+                    }, Comment(role, kvp.Key, kvp.Value))).Combine(Spacing.Simple);
 
                     return SqlPreCommand.Combine(Spacing.Simple, defSql, restSql);
                 },
