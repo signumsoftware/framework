@@ -25,7 +25,7 @@ namespace Signum.Web.Cache
 {
     public class CacheController : Controller
     {
-        public ActionResult Statistics()
+        public ActionResult View()
         {
             CachePermissions.ViewCache.Authorize();
 
