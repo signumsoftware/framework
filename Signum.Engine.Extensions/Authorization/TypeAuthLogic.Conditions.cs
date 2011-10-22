@@ -377,13 +377,15 @@ namespace Signum.Engine.Authorization
         {
             bool userInterface = executionContext == ExecutionContext.UserInterface;
 
-            TypeAllowedAndConditions tac = cache.GetAllowed(entity.GetType());
+            Type type = entity.Type;
+
+            TypeAllowedAndConditions tac = cache.GetAllowed(type);
 
             Expression baseValue = Expression.Constant(tac.Fallback.Get(userInterface) >= allowed);
 
             var expression = tac.Conditions.Reverse().Aggregate(baseValue, (acum, tacRule) =>
             {
-                var lambda = TypeConditionLogic.GetExpression(entity.GetType(), tacRule.ConditionName);
+                var lambda = TypeConditionLogic.GetExpression(type, tacRule.ConditionName);
 
                 var exp = (Expression)Expression.Invoke(lambda, entity);
 
@@ -404,13 +406,15 @@ namespace Signum.Engine.Authorization
         {
             bool userInterface = executionContext == ExecutionContext.UserInterface;
 
-            TypeAllowedAndConditions tac = cache.GetAllowed(entity.GetType());
+            Type type = entity.Type;
+
+            TypeAllowedAndConditions tac = cache.GetAllowed(type);
 
             Expression baseValue = Expression.Constant(tac.Fallback.Get(userInterface) >= allowed);
 
             var list = (from line in tac.Conditions
                         select Expression.New(ciGroupDebugData, Expression.Constant(line.ConditionName),
-                        Expression.Invoke(TypeConditionLogic.GetExpression(entity.GetType(), line.ConditionName), entity),
+                        Expression.Invoke(TypeConditionLogic.GetExpression(type, line.ConditionName), entity),
                         Expression.Constant(line.Allowed))).ToArray();
 
             Expression newList = Expression.ListInit(Expression.New(typeof(List<ConditionDebugData>)), list);
