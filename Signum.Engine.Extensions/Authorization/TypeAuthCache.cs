@@ -440,8 +440,8 @@ namespace Signum.Entities.Authorization
                          let resource = kvp.Key.CleanName
                          orderby resource
                          select new XElement("Type",
-                            new XAttribute("Allowed", kvp.Value.Allowed.ToString()),
                             new XAttribute("Resource", resource),
+                            new XAttribute("Allowed", kvp.Value.Allowed.ToString()),
                             from c in kvp.Value.Conditions
                             select new XElement("Condition",
                                 new XAttribute("Name", c.Condition.Key),
