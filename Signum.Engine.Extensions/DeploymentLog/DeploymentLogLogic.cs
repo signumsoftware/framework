@@ -5,12 +5,12 @@ using System.Text;
 using Signum.Engine.Maps;
 using System.Reflection;
 using Signum.Engine.DynamicQuery;
-using Signum.Entities.DeploymentLog;
+using Signum.Entities.Logging;
 using Signum.Entities;
 
-namespace Signum.Engine.DeploymentLog
+namespace Signum.Engine.Logging
 {
-    public static class DeploymentLogLogic
+    public static class LoggingLogic
     {
         public static Func<string> GetCurrentVersion; 
 
@@ -19,36 +19,34 @@ namespace Signum.Engine.DeploymentLog
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<DeploymentLogDN>();
-                
-                dqm[typeof(DeploymentLogDN)] = (from r in Database.Query<DeploymentLogDN>()
-                                                select new
-                                                {
-                                                    Entity = r.ToLite(),
-                                                    r.Id,
-                                                    r.CreationDate,
-                                                    r.Version,
-                                                    r.Description,
-                                                    DatabaseHost = r.DataSourceName,
-                                                    DataBaseName = r.DatabaseName,
-                                                    r.MachineName,
-                                                }).ToDynamic(); 
+
+                dqm[typeof(DeploymentLogDN)] =
+                    (from r in Database.Query<DeploymentLogDN>()
+                     select new
+                     {
+                         Entity = r.ToLite(),
+                         r.Id,
+                         r.CreationDate,
+                         r.Version,
+                         r.Description,
+                         DatabaseHost = r.DataSourceName,
+                         DataBaseName = r.DatabaseName,
+                         r.MachineName,
+                     }).ToDynamic();
             }
         }
 
-        public static void Log(string description)
+        public static void LogDeployment(string description)
         {
-          var dl=  new DeploymentLogDN
+            new DeploymentLogDN
             {
-                CreationDate = TimeZoneManager.Now, 
+                CreationDate = TimeZoneManager.Now,
                 Version = GetCurrentVersion(),
                 Description = description,
                 DataSourceName = ConnectionScope.Current.DataSourceName(),
                 DatabaseName = ConnectionScope.Current.DatabaseName(),
                 MachineName = Environment.MachineName,
-            };
-          dl.Save();
-
-
+            }.Save();
         }
     }
 }
