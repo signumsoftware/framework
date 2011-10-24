@@ -29,7 +29,6 @@ namespace Signum.Engine.Extensions.Chart
             {
                 QueryLogic.Start(sb);
 
-
                 sb.Include<UserChartDN>();
 
                 dqm[typeof(UserChartDN)] = (from uq in Database.Query<UserChartDN>()

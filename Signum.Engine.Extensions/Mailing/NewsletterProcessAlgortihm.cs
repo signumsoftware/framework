@@ -88,7 +88,7 @@ namespace Signum.Engine.Mailing
                             {
                                 Sent = true,
                                 SendDate = DateTime.Now.TrimToSeconds(),
-                                Error = f.Key
+                                Exception = f.Key
                             });
                     }
 
