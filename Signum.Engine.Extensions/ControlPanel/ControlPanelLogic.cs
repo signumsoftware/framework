@@ -65,7 +65,7 @@ namespace Signum.Engine.ControlPanel
             var panels = Database.Query<ControlPanelDN>().Where(cp => cp.Related.Entity is RoleDN && cp.HomePage)
                 .Select(cp => new { ControlPanel = cp.ToLite(), Role = ((RoleDN)cp.Related.Entity).ToLite() }).ToList();
 
-            var hs = AuthLogic.RolesGraph().IndirectlyRelatedTo(RoleDN.Current.ToLite());
+            var hs = AuthLogic.RolesGraph().IndirectlyRelatedTo(RoleDN.Current.ToLite(), true);
 
             return panels.Where(p => hs.Contains(p.Role)).OrderByDescending(p => AuthLogic.Rank(p.Role)).FirstOrDefault().TryCC(p => p.ControlPanel);
         }
