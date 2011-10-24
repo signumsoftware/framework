@@ -198,6 +198,7 @@ namespace Signum.Engine.Linq
             static MethodInfo miRequest = ReflectionTools.GetMethodInfo((IRetriever r) => r.Request<TypeDN>(null)).GetGenericMethodDefinition();
             static MethodInfo miRequestIBA = ReflectionTools.GetMethodInfo((IRetriever r) => r.RequestIBA<TypeDN>(1, 1)).GetGenericMethodDefinition();
             static MethodInfo miRequestLiteIBA = ReflectionTools.GetMethodInfo((IRetriever r) => r.RequestLiteIBA<TypeDN>(1, null)).GetGenericMethodDefinition();
+            static MethodInfo miEmbeddedPostRetrieving = ReflectionTools.GetMethodInfo((IRetriever r) => r.EmbeddedPostRetrieving<EmbeddedEntity>(null)).GetGenericMethodDefinition();
 
             Scope scope; 
         
@@ -286,7 +287,8 @@ namespace Signum.Engine.Linq
                         {
                             var field = Expression.Field(e, b.FieldInfo);
 
-                            var value = b.Binding is ChildProjectionExpression ? VisitMListChildProjection((ChildProjectionExpression)b.Binding, field) :
+                            var value = b.Binding is ChildProjectionExpression ? 
+                                VisitMListChildProjection((ChildProjectionExpression)b.Binding, field) :
                                 Convert(Visit(b.Binding), b.FieldInfo.FieldType);
 
                             return Expression.Assign(field, value);
@@ -314,11 +316,13 @@ namespace Signum.Engine.Linq
             {
                 Expression ctor = Expression.MemberInit(Expression.New(efie.Type),
                        efie.Bindings.Select(b => Expression.Bind(b.FieldInfo, Visit(b.Binding))).And(resetModified));
-                
-                if (efie.HasValue == null)
-                    return ctor;
 
-                return Expression.Condition(Expression.Equal(Visit(efie.HasValue.Nullify()), Expression.Constant(true, typeof(bool?))), ctor, Expression.Constant(null, ctor.Type));
+                var entity = Expression.Call(retriever, miEmbeddedPostRetrieving.MakeGenericMethod(efie.Type), ctor);
+
+                if (efie.HasValue == null)
+                    return entity;
+
+                return Expression.Condition(Expression.Equal(Visit(efie.HasValue.Nullify()), Expression.Constant(true, typeof(bool?))), entity, Expression.Constant(null, ctor.Type));
             }
 
             protected override Expression VisitImplementedBy(ImplementedByExpression rb)

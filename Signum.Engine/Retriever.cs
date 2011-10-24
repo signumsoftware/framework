@@ -17,6 +17,7 @@ namespace Signum.Engine
         T RequestIBA<T>(int? id, int? typeId) where T : class, IIdentifiable;
         T RequestIBA<T>(int? id, Type type) where T : class, IIdentifiable;
         Lite<T> RequestLiteIBA<T>(int? id, int? typeId) where T : class, IIdentifiable;
+        T EmbeddedPostRetrieving<T>(T entity) where T : EmbeddedEntity; 
         IRetriever Parent { get; }
     }
 
@@ -36,6 +37,7 @@ namespace Signum.Engine
         Dictionary<IdentityTuple, IdentifiableEntity> retrieved = new Dictionary<IdentityTuple, IdentifiableEntity>();
         Dictionary<Type, Dictionary<int, IdentifiableEntity>> requests;
         Dictionary<IdentityTuple, List<Lite>> liteRequests;
+        List<EmbeddedEntity> embeddedPostRetrieving;
 
         bool TryGetRequest(IdentityTuple key, out IdentifiableEntity value)
         {   
@@ -138,6 +140,16 @@ namespace Signum.Engine
             liteRequests.GetOrCreate(tuple).Add(result);
             return result;
         }
+
+        public T EmbeddedPostRetrieving<T>(T entity) where T : EmbeddedEntity
+        {
+            if (embeddedPostRetrieving == null)
+                embeddedPostRetrieving = new List<EmbeddedEntity>();
+
+            embeddedPostRetrieving.Add(entity);
+
+            return entity;
+        }
         
         public void Dispose()
         {
@@ -227,6 +239,12 @@ namespace Signum.Engine
                 entityCache.Add(kvp.Key, entity);
             }
 
+            if(embeddedPostRetrieving != null)
+                foreach (var embedded in embeddedPostRetrieving)
+                {
+                    embedded.PostRetrieving(); 
+                }
+
             entityCache.ReleaseRetriever(this);
         }
     }
@@ -266,9 +284,16 @@ namespace Signum.Engine
             return Parent.RequestLiteIBA<T>(id, typeId);
         }
 
+        public T EmbeddedPostRetrieving<T>(T entity) where T : EmbeddedEntity
+        {
+            return Parent.EmbeddedPostRetrieving(entity);
+        }
+
         public void Dispose()
         {
             EntityCache.ReleaseRetriever(this);
         }
+
+        
     }
 }
