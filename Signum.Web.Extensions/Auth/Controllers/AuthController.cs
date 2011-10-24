@@ -531,7 +531,7 @@ namespace Signum.Web.Auth
 
             Thread.CurrentPrincipal = newUser;
 
-            if (System.Web.HttpContext.Current != null)
+            if (System.Web.HttpContext.Current != null && System.Web.HttpContext.Current.Session[SessionUserKey] != null)
                 System.Web.HttpContext.Current.Session[SessionUserKey] = newUser;
         }
 
