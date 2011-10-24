@@ -468,14 +468,19 @@ namespace Signum.Entities.Authorization
 
                     var dic = x.Elements("Type").ToDictionary(
                         xr => TypeLogic.TypeToDN[TypeLogic.GetType(xr.Attribute("Resource").Value)],
-                        xr => xr.Attribute("Allowed").Value.ToEnum<TypeAllowed>(), "Type rules for {0}".Formato(role));
+                        xr => new
+                        {
+                            Allowed = xr.Attribute("Allowed").Value.ToEnum<TypeAllowed>(),
+                            Condition = Conditions(xr)
+                        }, "Type rules for {0}".Formato(role));
 
                     SqlPreCommand restSql = dic.Select(kvp => table.InsertSqlSync(new RuleTypeDN
                     {
                         Resource = kvp.Key,
                         Role = role,
-                        Allowed = kvp.Value
-                    }, Comment(role, kvp.Key, kvp.Value))).Combine(Spacing.Simple);
+                        Allowed = kvp.Value.Allowed,
+                        Conditions =  kvp.Value.Condition
+                    }, Comment(role, kvp.Key, kvp.Value.Allowed))).Combine(Spacing.Simple);
 
                     return SqlPreCommand.Combine(Spacing.Simple, defSql, restSql);
                 },
