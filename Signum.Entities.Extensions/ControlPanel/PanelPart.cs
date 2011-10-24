@@ -5,6 +5,7 @@ using System.Text;
 using Signum.Utilities;
 using Signum.Entities.Reports;
 using Signum.Entities.UserQueries;
+using Signum.Entities.Chart;
 
 namespace Signum.Entities.ControlPanel
 {
@@ -35,7 +36,7 @@ namespace Signum.Entities.ControlPanel
             set { Set(ref column, value, () => Column); }
         }
 
-        [ImplementedBy(typeof(UserQueryPartDN), typeof(CountSearchControlPartDN), typeof(LinkListPartDN))]
+        [ImplementedBy(typeof(UserChartPartDN), typeof(UserQueryPartDN), typeof(CountSearchControlPartDN), typeof(LinkListPartDN))]
         IIdentifiable content;
         public IIdentifiable Content
         {
@@ -58,6 +59,23 @@ namespace Signum.Entities.ControlPanel
         public override string ToString()
         {
             return userQuery.TryCC(uq => uq.DisplayName);
+        }
+    }
+
+    [Serializable]
+    public class UserChartPartDN : Entity
+    {
+        UserChartDN userChart;
+        [NotNullValidator]
+        public UserChartDN UserChart
+        {
+            get { return userChart; }
+            set { Set(ref userChart, value, () => UserChart); }
+        }
+
+        public override string ToString()
+        {
+            return userChart.TryCC(uq => uq.DisplayName);
         }
     }
 

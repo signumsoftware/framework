@@ -9,6 +9,10 @@
     vertical-align: top;
     min-height: 30px;    
 }
+#sfCpContainer
+{
+    width: 100%;
+}
 #sfCpContainer .sf-cp-part-container
 {
     padding: 10px; 

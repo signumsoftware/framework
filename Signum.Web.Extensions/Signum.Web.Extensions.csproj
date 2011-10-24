@@ -297,6 +297,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>SearchControlPart.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="ControlPanel\Views\Admin\UserChartPart1.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>UserChartPart.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="ControlPanel\Views\CountSearchControlPart1.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -321,6 +326,11 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>SearchControlPart.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanel\Views\UserChartPart.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>UserChartPart.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Mailing\Views\Newsletter.cs">
       <AutoGen>True</AutoGen>
@@ -911,6 +921,14 @@
     <Content Include="Chart\Views\UserChart.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>UserChart.cs</LastGenOutput>
+    </Content>
+    <Content Include="ControlPanel\Views\Admin\UserChartPart.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>UserChartPart1.cs</LastGenOutput>
+    </Content>
+    <Content Include="ControlPanel\Views\UserChartPart.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>UserChartPart.cs</LastGenOutput>
     </Content>
     <None Include="Profiler\Views\Times.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>

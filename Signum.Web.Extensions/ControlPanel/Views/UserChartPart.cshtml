@@ -1,0 +1,61 @@
+﻿@using System.Configuration
+@using Signum.Web.Properties
+@using Signum.Entities.ControlPanel
+@using Signum.Web.ControlPanel
+@using Signum.Entities.DynamicQuery
+@using Signum.Entities.Chart
+@using Signum.Web.Chart
+@using Signum.Engine.Extensions.Chart
+@using Signum.Engine.DynamicQuery
+@model PanelPart
+
+@Html.ScriptsJs("~/Chart/Scripts/SF_Chart.js",
+                "~/scripts/d3/d3.min.js",
+                "~/scripts/d3/d3.geom.min.js",
+                "~/scripts/d3/d3.layout.min.js")
+@Html.ScriptCss("~/Chart/Content/SF_Chart.css")
+
+@{ 
+    UserChartDN uc = ((UserChartPartDN)Model.Content).UserChart;
+    ChartRequest request = UserChartDN.ToRequest(uc);
+
+    using (var ucTc = new TypeContext<ChartRequest>(request, "r{0}c{1}".Formato(Model.Row, Model.Column)))
+    {
+        ResultTable resultTable = ChartLogic.ExecuteChart(request);
+
+        <div id="@ucTc.Compose("divChartControl")" class="sf-search-control sf-chart-control" data-prefix="@ucTc.ControlID">
+            <div style="display:none">
+                @Html.HiddenRuntimeInfo(ucTc)
+                @Html.HiddenRuntimeInfo(ucTc, cr => cr.Chart)
+                @Html.Hidden(ucTc.Compose(ViewDataKeys.QueryName), Navigator.ResolveWebQueryName(request.QueryName))
+        
+                @using (var chart = ucTc.SubContext(cr => cr.Chart))
+                {
+                    ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(request.QueryName);
+                    Html.RenderPartial(ChartClient.ChartBuilderView, chart);
+                }
+            </div>
+            <div id="@ucTc.Compose("sfChartContainer")">
+                <div class="sf-chart-container" data-open-url="@(Url.Action<ChartController>(cc => cc.OpenSubgroup(ucTc.ControlID)))"></div>
+            </div>
+        </div>
+        MvcHtmlString divSelector = MvcHtmlString.Create("#" + ucTc.Compose("sfChartContainer") + " > .sf-chart-container");
+        <script type="text/javascript">
+            $(function() {
+                var $chartContainer = $('@divSelector');
+                        
+                $chartContainer.html("");
+                        
+                var width = $chartContainer.width();
+                var height = $chartContainer.height();
+
+                var data = @Html.Json(ChartClient.DataJson(ucTc.Value, resultTable));
+
+                var myChart = SF.Chart.Factory.getGraphType('@ucTc.Value.Chart.ChartType.ToString()');
+                
+                eval(myChart.createChartSVG('@divSelector') + myChart.paintChart());
+            });
+        </script>
+    
+    }
+}

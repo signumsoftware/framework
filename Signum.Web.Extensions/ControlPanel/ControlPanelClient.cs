@@ -37,6 +37,7 @@ namespace Signum.Web.ControlPanel
 
         public static Dictionary<Type, PartViews> PanelPartViews = new Dictionary<Type, PartViews>()
         {
+            { typeof(UserChartPartDN), new PartViews(ViewPrefix.Formato("UserChartPart"), AdminViewPrefix.Formato("UserChartPart")) },
             { typeof(UserQueryPartDN), new PartViews(ViewPrefix.Formato("SearchControlPart"), AdminViewPrefix.Formato("SearchControlPart")) },
             { typeof(CountSearchControlPartDN), new PartViews(ViewPrefix.Formato("CountSearchControlPart"), AdminViewPrefix.Formato("CountSearchControlPart")) },
             { typeof(LinkListPartDN), new PartViews(ViewPrefix.Formato("LinkListPart"), AdminViewPrefix.Formato("LinkListPart")) },
@@ -55,6 +56,7 @@ namespace Signum.Web.ControlPanel
                     new EntitySettings<ControlPanelDN>(EntityType.Default) { PartialViewName = e => AdminViewPrefix.Formato("ControlPanelAdmin") },
                     new EmbeddedEntitySettings<PanelPart>(),
                     
+                    new EntitySettings<UserChartPartDN>(EntityType.Default),
                     new EntitySettings<UserQueryPartDN>(EntityType.Default),
 
                     new EntitySettings<CountSearchControlPartDN>(EntityType.Default),
