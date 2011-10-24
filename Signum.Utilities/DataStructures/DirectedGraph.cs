@@ -179,15 +179,19 @@ namespace Signum.Utilities.DataStructures
             return this.Where(n => Connected(n, node));
         }
 
-        /// <summary>
-        /// Recursive relationships
-        /// </summary>
         public HashSet<T> IndirectlyRelatedTo(T node)
         {
+            return IndirectlyRelatedTo(node, false);
+        }
+
+        public HashSet<T> IndirectlyRelatedTo(T node, bool includeParentNode)
+        {
             HashSet<T> set = new HashSet<T>();
+            if (includeParentNode)
+                set.Add(node);
             IndirectlyRelatedTo(node, set);
             return set;
-        }
+        } 
 
         void IndirectlyRelatedTo(T node, HashSet<T> set)
         {
