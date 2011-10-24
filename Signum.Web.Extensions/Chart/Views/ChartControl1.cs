@@ -96,6 +96,9 @@ WriteLiteral("\r\n\r\n");
     QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
     List<FilterOption> filterOptions = (List<FilterOption>)ViewData[ViewDataKeys.FilterOptions];
     bool viewable = (bool)ViewData[ViewDataKeys.View];
+    
+    var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
+    Type entitiesType = Reflector.ExtractLite(entityColumn.Type);
 
 
 WriteLiteral("\r\n<div id=\"");
@@ -155,10 +158,13 @@ WriteLiteral("\r\n                </div>  \r\n");
 WriteLiteral("            </div>\r\n        </div>\r\n    </div>\r\n\r\n");
 
 
-       Html.RenderPartial(ChartClient.ChartBuilderView); 
+     using (var chart = Model.SubContext(cr => cr.Chart))
+    {
+        Html.RenderPartial(ChartClient.ChartBuilderView, chart);
+    }
 
-WriteLiteral("    \r\n    <div class=\"sf-query-button-bar\">\r\n        <button type=\"submit\" class=" +
-"\"sf-query-button sf-chart-draw\" data-icon=\"ui-icon-pencil\" id=\"");
+WriteLiteral("    <div class=\"sf-query-button-bar\">\r\n        <button type=\"submit\" class=\"sf-qu" +
+"ery-button sf-chart-draw\" data-icon=\"ui-icon-pencil\" id=\"");
 
 
                                                                                               Write(Model.Compose("qbDraw"));
@@ -173,7 +179,12 @@ WriteLiteral("\">");
 
                                                                                                                                                                                                   Write(Resources.Chart_Draw);
 
-WriteLiteral("</button>\r\n    </div>\r\n    \r\n    <div class=\"clearall\"></div>\r\n\r\n    <div id=\"");
+WriteLiteral("</button>\r\n        ");
+
+
+   Write(ChartClient.GetChartMenu(this.ViewContext, queryDescription.QueryName, entitiesType, Model.ControlID).ToString(Html));
+
+WriteLiteral("\r\n    </div>\r\n    \r\n    <div class=\"clearall\"></div>\r\n\r\n    <div id=\"");
 
 
         Write(Model.Compose("divResults"));

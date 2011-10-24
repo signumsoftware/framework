@@ -49,7 +49,7 @@ namespace ASP
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Chart/Views/ChartToken.cshtml")]
-    public class _Page_Chart_Views_ChartToken_cshtml : System.Web.Mvc.WebViewPage<TypeContext<ChartTokenDN>>
+    public class _Page_Chart_Views_ChartToken_cshtml : System.Web.Mvc.WebViewPage<dynamic>
     {
 
 
@@ -65,7 +65,6 @@ namespace ASP
         }
         public override void Execute()
         {
-
 
 
 
@@ -95,7 +94,8 @@ WriteLiteral("</td>\r\n        <td>\r\n");
              if (tc.Value.GroupByVisible)
             { 
                 var groupCheck = new HtmlTag("input").IdName(tc.Compose("group")).Attr("type", "checkbox").Attr("value", "True").Class("sf-chart-group-trigger");
-                if (((TypeContext<ChartRequest>)tc.Parent).Value.Chart.GroupResults)
+                bool groupResults = ((TypeContext<ChartBase>)tc.Parent).Value.GroupResults;
+                if (groupResults)
                 {
                     groupCheck.Attr("checked", "checked");
                 }
@@ -104,9 +104,9 @@ WriteLiteral("</td>\r\n        <td>\r\n");
 
                                         
                 
-           Write(Html.Hidden(tc.Compose("group"), ((TypeContext<ChartRequest>)tc.Parent).Value.Chart.GroupResults));
+           Write(Html.Hidden(tc.Compose("group"), groupResults));
 
-                                                                                                                  
+                                                               
             }
 
 

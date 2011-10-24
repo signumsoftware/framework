@@ -6,7 +6,6 @@
 @using Signum.Entities.Reflection
 @using Signum.Entities
 @using Signum.Entities.Chart
-@model TypeContext<ChartTokenDN>
 
 @using (var tc = Html.TypeContext<ChartTokenDN>())
 {
@@ -20,12 +19,13 @@
             @if (tc.Value.GroupByVisible)
             { 
                 var groupCheck = new HtmlTag("input").IdName(tc.Compose("group")).Attr("type", "checkbox").Attr("value", "True").Class("sf-chart-group-trigger");
-                if (((TypeContext<ChartRequest>)tc.Parent).Value.Chart.GroupResults)
+                bool groupResults = ((TypeContext<ChartBase>)tc.Parent).Value.GroupResults;
+                if (groupResults)
                 {
                     groupCheck.Attr("checked", "checked");
                 }
                 @groupCheck.ToHtmlSelf()
-                @Html.Hidden(tc.Compose("group"), ((TypeContext<ChartRequest>)tc.Parent).Value.Chart.GroupResults)
+                @Html.Hidden(tc.Compose("group"), groupResults)
             }
             @if (tc.Value.ShouldAggregate)
             {

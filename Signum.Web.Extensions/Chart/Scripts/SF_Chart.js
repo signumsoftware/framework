@@ -4,6 +4,10 @@ SF.Chart = SF.Chart || {};
 
 SF.Chart.Builder = (function () {
 
+    var requestProcessedData = function (prefix) {
+        return { filters: new SF.FindNavigator({ prefix: prefix }).serializeFilters() };
+    };
+
     var updateChartBuilder = function ($chartControl) {
         var $chartBuilder = $chartControl.find(".sf-chart-builder");
         $.ajax({
@@ -74,6 +78,10 @@ SF.Chart.Builder = (function () {
             }
         });
     });
+
+    return {
+        requestProcessedData: requestProcessedData
+    };
 })();
 
 var SF = SF || {};

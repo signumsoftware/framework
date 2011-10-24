@@ -44,7 +44,7 @@ namespace Signum.Web.UserQueries
                     while (tokenStr.EndsWith("."))
                         tokenStr = tokenStr.Substring(0, tokenStr.Length - 1);
 
-                    string queryKey = ((MappingContext<UserQueryDN>)ctx.Parent.Parent.Parent.Parent).Inputs[TypeContextUtilities.Compose("Query", "Key")];
+                    string queryKey = ctx.Parent.Parent.Parent.Parent.Inputs[TypeContextUtilities.Compose("Query", "Key")];
                     object queryName = QueryLogic.ToQueryName(queryKey);
                     QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
                     return QueryUtils.Parse(tokenStr, qd);

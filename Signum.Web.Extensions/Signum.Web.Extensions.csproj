@@ -281,6 +281,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ChartToken.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Chart\Views\UserChart.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>UserChart.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="ControllerFilters\GZipFilter.cs" />
     <Compile Include="ControlPanel\Views\Admin\PanelParts1.cs">
       <AutoGen>True</AutoGen>
@@ -902,6 +907,10 @@
     <Content Include="Mailing\Views\NewsletterDelivery.cshtml">
       <LastGenOutput>NewsletterDelivery1.cs</LastGenOutput>
       <Generator>MvcRazorClassGenerator</Generator>
+    </Content>
+    <Content Include="Chart\Views\UserChart.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>UserChart.cs</LastGenOutput>
     </Content>
     <None Include="Profiler\Views\Times.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>

@@ -14,11 +14,14 @@ using Signum.Entities.DynamicQuery;
 using Signum.Entities.UserQueries;
 using System.Collections.Specialized;
 using Signum.Engine;
+using Signum.Entities.Authorization;
+using Signum.Engine.Basics;
 
 namespace Signum.Web.Chart
 {
     public class ChartController : Controller
     {
+        #region chart
         public ActionResult Index(FindOptions findOptions)
         {
             if (!Navigator.IsFindable(findOptions.QueryName))
@@ -30,18 +33,27 @@ namespace Signum.Web.Chart
             {
                 Filters = findOptions.FilterOptions.Select(fo => fo.ToFilter()).ToList()
             };
-            
-            var queryDescription = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
+
+            var queryDescription = DynamicQueryManager.Current.QueryDescription(request.QueryName);
 
             var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
             Type entitiesType = Reflector.ExtractLite(entityColumn.Type);
             Implementations implementations = entityColumn.Implementations;
             
+            return OpenChartRequest(request, 
+                findOptions.FilterOptions,
+                findOptions.View && (implementations != null || Navigator.IsViewable(entitiesType, EntitySettingsContext.Admin)));
+        }
+
+        ViewResult OpenChartRequest(ChartRequest request, List<FilterOption> filterOptions, bool view)
+        { 
+            var queryDescription = DynamicQueryManager.Current.QueryDescription(request.QueryName);
+
             ViewData[ViewDataKeys.PartialViewName] = ChartClient.ChartControlView;
-            ViewData[ViewDataKeys.Title] = Navigator.Manager.SearchTitle(findOptions.QueryName);
+            ViewData[ViewDataKeys.Title] = Navigator.Manager.SearchTitle(request.QueryName);
             ViewData[ViewDataKeys.QueryDescription] = queryDescription;
-            ViewData[ViewDataKeys.FilterOptions] = findOptions.FilterOptions;
-            ViewData[ViewDataKeys.View] = findOptions.View && (implementations != null || Navigator.IsViewable(entitiesType, EntitySettingsContext.Admin));
+            ViewData[ViewDataKeys.FilterOptions] = filterOptions;
+            ViewData[ViewDataKeys.View] = view;
             
             return View(Navigator.Manager.SearchPageView,  new TypeContext<ChartRequest>(request, ""));
         }
@@ -53,7 +65,7 @@ namespace Signum.Web.Chart
 
             ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(request.QueryName);
             
-            return PartialView(ChartClient.ChartBuilderView, new TypeContext<ChartRequest>(request, prefix));
+            return PartialView(ChartClient.ChartBuilderView, new TypeContext<ChartRequest>(request, prefix).SubContext(cr => cr.Chart));
         }
 
         [HttpPost]
@@ -89,56 +101,8 @@ namespace Signum.Web.Chart
         MappingContext<ChartRequest> ExtractChartRequestCtx(string prefix)
         {
             return new ChartRequest(Navigator.ResolveQueryName(Request.Form[TypeContextUtilities.Compose(prefix, ViewDataKeys.QueryName)]))
-                    .ApplyChanges(this.ControllerContext, prefix, mappingChartRequest);
+                    .ApplyChanges(this.ControllerContext, prefix, ChartClient.MappingChartRequest);
         }
-
-        static EntityMapping<ChartTokenDN> mappingChartToken = new EntityMapping<ChartTokenDN>(true)
-            .SetProperty(ct => ct.Token, ctx =>
-            {
-                var tokenName = "";
-
-                var chartTokenInputs = ctx.Parent.Inputs;
-                bool stop = false;
-                for (var i = 0; !stop; i++)
-                {
-                    var subtokenName = chartTokenInputs.TryGetC("ddlTokens_" + i);
-                    if (string.IsNullOrEmpty(subtokenName))
-                        stop = true;
-                    else
-                        tokenName = tokenName.HasText() ? (tokenName + "." + subtokenName) : subtokenName;
-                }
-
-                if (string.IsNullOrEmpty(tokenName))
-                    return null;
-
-                var qd = DynamicQueryManager.Current.QueryDescription(
-                    Navigator.ResolveQueryName(ctx.GlobalInputs[TypeContextUtilities.Compose(ctx.Root.ControlID, ViewDataKeys.QueryName)]));
-
-                return QueryUtils.Parse(tokenName, qd);
-            })
-            .SetProperty(ct => ct.DisplayName, ctx =>
-            {
-                if (string.IsNullOrEmpty(ctx.Input))
-                    return ctx.None();
-
-                return ctx.Input;
-            });
-
-        static List<Entities.DynamicQuery.Filter> ExtractChartFilters(MappingContext<List<Entities.DynamicQuery.Filter>> ctx)
-        {
-            var qd = DynamicQueryManager.Current.QueryDescription(
-                Navigator.ResolveQueryName(ctx.GlobalInputs[TypeContextUtilities.Compose(ctx.Root.ControlID, ViewDataKeys.QueryName)]));
-
-            return FindOptionsModelBinder.ExtractFilterOptions(ctx.ControllerContext.HttpContext, qd).Select(fo => fo.ToFilter()).ToList();
-        }
-        
-        static EntityMapping<ChartRequest> mappingChartRequest = new EntityMapping<ChartRequest>(true)
-            .SetProperty(cr => cr.Chart, new EntityMapping<ChartBase>(true)
-                .SetProperty(cb => cb.Dimension1, mappingChartToken)
-                .SetProperty(cb => cb.Dimension2, mappingChartToken)
-                .SetProperty(cb => cb.Value1, mappingChartToken)
-                .SetProperty(cb => cb.Value2, mappingChartToken))
-            .SetProperty(cr => cr.Filters, ctx => ExtractChartFilters(ctx));
 
         public ActionResult OpenSubgroup(string prefix)
         {
@@ -194,5 +158,50 @@ namespace Signum.Web.Chart
                 Value = FindOptionsModelBinder.Convert(FindOptionsModelBinder.DecodeValue(Request.Params[key]), token.Type)
             };
         }
+        #endregion
+
+        #region user chart
+        public ActionResult CreateUserChart(string prefix)
+        {
+            var request = ExtractChartRequestCtx(prefix).Value;
+
+            if (!Navigator.IsFindable(request.QueryName))
+                throw new UnauthorizedAccessException(Resources.Chart_Query0IsNotAllowed.Formato(request.QueryName));
+
+            var userChart = UserChartDN.FromRequest(request);
+
+            userChart.Related = UserDN.Current.ToLite<IdentifiableEntity>();
+
+            ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(request.QueryName);
+
+            return Navigator.View(this, userChart);
+        }
+
+        public ActionResult ViewUserChart(Lite<UserChartDN> lite)
+        {
+            UserChartDN uc = Database.Retrieve<UserChartDN>(lite);
+
+            ChartRequest request = UserChartDN.ToRequest(uc);
+
+            var queryDescription = DynamicQueryManager.Current.QueryDescription(request.QueryName);
+
+            var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
+            Type entitiesType = Reflector.ExtractLite(entityColumn.Type);
+            Implementations implementations = entityColumn.Implementations;
+
+            return OpenChartRequest(request,
+                request.Filters.Select(f => new FilterOption { Token = f.Token, Operation = f.Operation, Value = f.Value }).ToList(),
+                (implementations != null || Navigator.IsViewable(entitiesType, EntitySettingsContext.Admin)));
+        }
+
+        public ActionResult DeleteUserChart(Lite<UserChartDN> lite)
+        {
+            var queryName = QueryLogic.ToQueryName(lite.InDB().Select(uq => uq.Query.Key).FirstEx());
+
+            Database.Delete<UserChartDN>(lite);
+
+            return Redirect(Navigator.FindRoute(queryName));
+        }
+        #endregion
     }
 }

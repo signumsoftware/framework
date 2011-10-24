@@ -1,0 +1,59 @@
+﻿@using Signum.Web
+@using Signum.Web.Extensions.Properties
+@using Signum.Entities.DynamicQuery
+@using Signum.Engine.DynamicQuery
+@using System.Configuration
+@using Signum.Entities.Reflection
+@using Signum.Entities
+@using Signum.Entities.Chart
+@using Signum.Web.Chart
+@using Signum.Engine.Basics
+
+@Html.ScriptsJs("~/Chart/Scripts/SF_Chart.js")
+@Html.ScriptCss("~/Chart/Content/SF_Chart.css")
+
+<style type="text/css">
+.sf-chart-control .sf-repeater-element
+{
+    padding: 2px 10px;
+}
+.sf-chart-control .sf-repeater-element legend
+{
+    float: left;
+    margin-right: 10px;
+}
+</style>
+
+<div class="sf-chart-control" data-prefix="@Model.ControlID">
+    @using (var uc = Html.TypeContext<UserChartDN>())
+    {
+        object queryName = QueryLogic.ToQueryName(uc.Value.Query.Key);
+        ViewData[ViewDataKeys.QueryName] = queryName; //To be use inside Repeaters
+        @Html.Hidden(uc.Compose(ViewDataKeys.QueryName), Navigator.ResolveWebQueryName(queryName))
+
+        using (var query = uc.SubContext(tc => tc.Query))
+        {
+            @Html.HiddenRuntimeInfo(query)
+        
+            @Html.Hidden(query.Compose("Key"), query.Value.Key)
+            @Html.Hidden(query.Compose("DisplayName"), query.Value.DisplayName)
+
+            @Html.Field("Query", Navigator.IsFindable(queryName) ?
+                new HtmlTag("a").Class("sf-value-line").Attr("href", Navigator.FindRoute(queryName)).InnerHtml(query.Value.DisplayName.EncodeHtml()).ToHtml() :
+                Html.Span("spanQuery", query.Value.DisplayName, "sf-value-line"))
+
+            <div class="clearall"></div>
+        }
+    
+        @Html.EntityLine(uc, tc => tc.Related, el => el.Create = false)
+        @Html.ValueLine(uc, tc => tc.DisplayName)
+
+        @Html.EntityRepeater(uc, tc => tc.Filters, er => { er.PreserveViewData = true; })
+
+        using (var chart = uc.SubContext(tc => tc.Chart))
+        {
+            @Html.HiddenRuntimeInfo(chart)
+            Html.RenderPartial(ChartClient.ChartBuilderView, chart);
+        }
+    }
+</div>

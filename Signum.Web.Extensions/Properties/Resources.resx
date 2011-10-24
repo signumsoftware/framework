@@ -435,4 +435,16 @@
   <data name="Chart_ToggleInfo" xml:space="preserve">
     <value>Toggle info</value>
   </data>
+  <data name="UserChart_CreateNew" xml:space="preserve">
+    <value>Create</value>
+  </data>
+  <data name="UserChart_Edit" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="UserChart_UserCharts" xml:space="preserve">
+    <value>User charts</value>
+  </data>
+  <data name="Chart_AreYouSureOfDeletingUserChart0" xml:space="preserve">
+    <value>Are you sure of deleting user chart {0}?</value>
+  </data>
 </root>

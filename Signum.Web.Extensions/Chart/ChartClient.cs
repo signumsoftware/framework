@@ -15,6 +15,8 @@ using Signum.Engine;
 using System.Web.Routing;
 using System.Web.Mvc;
 using Signum.Entities.Basics;
+using Signum.Engine.Basics;
+using Signum.Engine.Extensions.Chart;
 
 namespace Signum.Web.Chart
 {
@@ -36,14 +38,96 @@ namespace Signum.Web.Chart
                 {
                     new EmbeddedEntitySettings<ChartRequest>(),
                     new EmbeddedEntitySettings<ChartBase>(),
-                    new EmbeddedEntitySettings<ChartTokenDN> { PartialViewName = _ => ViewPrefix.Formato("ChartToken") }
+                    new EmbeddedEntitySettings<ChartTokenDN> { PartialViewName = _ => ViewPrefix.Formato("ChartToken") },
+
+                    new EntitySettings<UserChartDN>(EntityType.Default) 
+                    { 
+                        PartialViewName = _ => ViewPrefix.Formato("UserChart"),
+                        MappingAdmin = new EntityMapping<UserChartDN>(true)
+                            .SetProperty(cr => cr.Chart, new EntityMapping<ChartBase>(true)
+                                .SetProperty(cb => cb.Dimension1, mappingChartToken)
+                                .SetProperty(cb => cb.Dimension2, mappingChartToken)
+                                .SetProperty(cb => cb.Value1, mappingChartToken)
+                                .SetProperty(cb => cb.Value2, mappingChartToken))
+                    },
                 });
 
                 ButtonBarQueryHelper.GetButtonBarForQueryName += new GetToolBarButtonQueryDelegate(ButtonBarQueryHelper_GetButtonBarForQueryName);
 
                 RouteTable.Routes.MapRoute(null, "ChartFor/{webQueryName}",
                     new { controller = "Chart", action = "Index", webQueryName = "" });
+
+                RouteTable.Routes.MapRoute(null, "UC/{webQueryName}/{lite}",
+                     new { controller = "Chart", action = "ViewUserChart" });
+
+                UserChartDN.SetConverters(query => QueryLogic.ToQueryName(query.Key), queryname => QueryLogic.RetrieveOrGenerateQuery(queryname));
+
+                ButtonBarEntityHelper.RegisterEntityButtons<UserChartDN>((ctx, entity) =>
+                {
+                    var buttons = new List<ToolBarButton> {};
+                    
+                    if (!entity.IsNew)
+                    {
+                        buttons.Add(new ToolBarButton
+                        {
+                            Id = TypeContextUtilities.Compose(ctx.Prefix, "ebUserChartDelete"),
+                            Text = Resources.Delete,
+                            OnClick = Js.Confirm(Resources.Chart_AreYouSureOfDeletingUserChart0.Formato(entity.DisplayName),
+                                Js.Submit(RouteHelper.New().Action<ChartController>(cc => cc.DeleteUserChart(entity.ToLite())))).ToJS()
+                        });
+                    }
+
+                    return buttons.ToArray();
+                });
             }
+        }
+
+        static EntityMapping<ChartTokenDN> mappingChartToken = new EntityMapping<ChartTokenDN>(true)
+            .SetProperty(ct => ct.Token, ctx =>
+            {
+                var tokenName = "";
+
+                var chartTokenInputs = ctx.Parent.Inputs;
+                bool stop = false;
+                for (var i = 0; !stop; i++)
+                {
+                    var subtokenName = chartTokenInputs.TryGetC("ddlTokens_" + i);
+                    if (string.IsNullOrEmpty(subtokenName))
+                        stop = true;
+                    else
+                        tokenName = tokenName.HasText() ? (tokenName + "." + subtokenName) : subtokenName;
+                }
+
+                if (string.IsNullOrEmpty(tokenName))
+                    return null;
+
+                var qd = DynamicQueryManager.Current.QueryDescription(
+                    Navigator.ResolveQueryName(ctx.GlobalInputs[TypeContextUtilities.Compose(ctx.Root.ControlID, ViewDataKeys.QueryName)]));
+
+                return QueryUtils.Parse(tokenName, qd);
+            })
+            .SetProperty(ct => ct.DisplayName, ctx =>
+            {
+                if (string.IsNullOrEmpty(ctx.Input))
+                    return ctx.None();
+
+                return ctx.Input;
+            });
+
+        public static EntityMapping<ChartRequest> MappingChartRequest = new EntityMapping<ChartRequest>(true)
+            .SetProperty(cr => cr.Chart, new EntityMapping<ChartBase>(true)
+                .SetProperty(cb => cb.Dimension1, mappingChartToken)
+                .SetProperty(cb => cb.Dimension2, mappingChartToken)
+                .SetProperty(cb => cb.Value1, mappingChartToken)
+                .SetProperty(cb => cb.Value2, mappingChartToken))
+            .SetProperty(cr => cr.Filters, ctx => ExtractChartFilters(ctx));
+
+        static List<Entities.DynamicQuery.Filter> ExtractChartFilters(MappingContext<List<Entities.DynamicQuery.Filter>> ctx)
+        {
+            var qd = DynamicQueryManager.Current.QueryDescription(
+                Navigator.ResolveQueryName(ctx.GlobalInputs[TypeContextUtilities.Compose(ctx.Root.ControlID, ViewDataKeys.QueryName)]));
+
+            return FindOptionsModelBinder.ExtractFilterOptions(ctx.ControllerContext.HttpContext, qd).Select(fo => fo.ToFilter()).ToList();
         }
 
         static ToolBarButton[] ButtonBarQueryHelper_GetButtonBarForQueryName(System.Web.Mvc.ControllerContext controllerContext, object queryName, Type entityType, string prefix)
@@ -57,6 +141,66 @@ namespace Signum.Web.Chart
                     Text = chartNewText,
                     OnClick =  Js.SubmitOnly(RouteHelper.New().Action("Index", "Chart"), new JsFindNavigator(prefix).requestData()).ToJS(),
                     DivCssClass = ToolBarButton.DefaultQueryCssClass
+                }
+            };
+        }
+
+        public static List<ToolBarButton> GetChartMenu(ControllerContext controllerContext, object queryName, Type entityType, string prefix)
+        {
+            var items = new List<ToolBarButton>();
+
+            Lite<UserChartDN> currentUserChart = null;
+            string url = (controllerContext.RouteData.Route as Route).TryCC(r => r.Url);
+            if (url.HasText() && url.Contains("UC"))
+                currentUserChart = new Lite<UserChartDN>(int.Parse(controllerContext.RouteData.Values["lite"].ToString()));
+
+            foreach (var uc in ChartLogic.GetUserCharts(queryName))
+            {
+                string ucName = uc.InDB().Select(q => q.DisplayName).SingleOrDefaultEx();
+                items.Add(new ToolBarButton
+                {
+                    Text = ucName,
+                    AltText = ucName,
+                    Href = RouteHelper.New().Action<ChartController>(c => c.ViewUserChart(uc)),
+                    DivCssClass = ToolBarButton.DefaultQueryCssClass + (currentUserChart.Is(uc) ? " sf-userchart-selected" : "")
+                });
+            }
+
+            if (items.Count > 0)
+                items.Add(new ToolBarSeparator());
+
+            string uqNewText = Resources.UserChart_CreateNew;
+            items.Add(new ToolBarButton
+            {
+                Id = TypeContextUtilities.Compose(prefix, "qbUserChartNew"),
+                AltText = uqNewText,
+                Text = uqNewText,
+                OnClick = Js.Submit(RouteHelper.New().Action("CreateUserChart", "Chart"), "SF.Chart.Builder.requestProcessedData({0})".Formato(prefix)).ToJS(),
+                DivCssClass = ToolBarButton.DefaultQueryCssClass
+            });
+
+            if (currentUserChart != null)
+            {
+                string ucEditText = Resources.UserChart_Edit;
+                items.Add(new ToolBarButton
+                {
+                    Id = TypeContextUtilities.Compose(prefix, "qbUserChartEdit"),
+                    AltText = ucEditText,
+                    Text = ucEditText,
+                    Href = Navigator.ViewRoute(currentUserChart),
+                    DivCssClass = ToolBarButton.DefaultQueryCssClass
+                });
+            }
+
+            string ucUserChartText = Resources.UserChart_UserCharts;
+            return new List<ToolBarButton> {
+                new ToolBarMenu
+                {
+                    Id = TypeContextUtilities.Compose(prefix, "tmUserCharts"),
+                    AltText = ucUserChartText,
+                    Text = ucUserChartText,
+                    DivCssClass = ToolBarButton.DefaultQueryCssClass,
+                    Items = items
                 }
             };
         }

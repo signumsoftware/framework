@@ -350,12 +350,12 @@ namespace Signum.Entities.Chart
     
     [Serializable]
     public class UserChartDN : Entity
-    {
-        public UserChartDN() { }
-
-        public UserChartDN(object queryName) 
+    { 
+        [HiddenProperty]
+        public object QueryName
         {
-            this.queryName = queryName;
+            get { return ToQueryName(query); }
+            set { Query = ToQueryDN(value);}
         }
 
         [Ignore]
@@ -425,6 +425,88 @@ namespace Signum.Entities.Chart
 
             if (chart.Value2 != null)
                 chart.Value2.ParseData(description);
+        }
+
+        static Func<QueryDN, object> ToQueryName;
+        static Func<object, QueryDN> ToQueryDN;
+
+        public static void SetConverters(Func<QueryDN, object> toQueryName, Func<object, QueryDN> toQueryDN)
+        {
+            ToQueryName = toQueryName;
+            ToQueryDN = toQueryDN; 
+        }
+
+        public static UserChartDN FromRequest(ChartRequest request)
+        {
+            var result = new UserChartDN
+            {
+                QueryName = request.QueryName,
+
+                Chart =
+                {
+                    GroupResults = request.Chart.GroupResults,
+                    ChartType = request.Chart.ChartType,
+                },
+
+                Filters = request.Filters.Select(f => new QueryFilterDN
+                {
+                    Token = f.Token,
+                    Operation = f.Operation,
+                    ValueString = FilterValueConverter.ToString(f.Value, f.Token.Type),
+                }).ToMList(),
+            };
+
+            Assign(result.Chart.Dimension1, request.Chart.Dimension1);
+            Assign(result.Chart.Dimension2, request.Chart.Dimension2);
+            Assign(result.Chart.Value1, request.Chart.Value1);
+            Assign(result.Chart.Value2, request.Chart.Value2);
+
+            return result;
+        }
+
+        private static void Assign(ChartTokenDN result, ChartTokenDN request)
+        {
+            if (request == null || result == null)
+                return;
+
+            if (request.Token != null)
+                result.Token = request.Token.Clone();
+
+            result.Aggregate = request.Aggregate;
+
+            result.Unit = request.Unit;
+            result.Format = request.Format;
+            result.DisplayName = request.DisplayName;
+
+            result.OrderPriority = request.OrderPriority;
+            result.OrderType = request.OrderType;
+        }
+
+        public static ChartRequest ToRequest(UserChartDN uq)
+        {
+            var result = new ChartRequest(uq.QueryName)
+            {
+                Chart =
+                {
+                    GroupResults = uq.Chart.GroupResults,
+                    ChartType = uq.Chart.ChartType,
+                },
+
+                Filters = uq.Filters.Select(qf => new Filter
+                {
+                    Token = qf.Token,
+                    Operation = qf.Operation,
+                    Value = qf.Value
+                }).ToList(),
+            };
+
+            Assign(result.Chart.Dimension1, uq.Chart.Dimension1);
+            Assign(result.Chart.Dimension2, uq.Chart.Dimension2);
+            Assign(result.Chart.Value1, uq.Chart.Value1);
+            Assign(result.Chart.Value2, uq.Chart.Value2);
+
+            return result;
+
         }
     }
 }

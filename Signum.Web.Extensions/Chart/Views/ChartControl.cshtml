@@ -20,6 +20,9 @@
     QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
     List<FilterOption> filterOptions = (List<FilterOption>)ViewData[ViewDataKeys.FilterOptions];
     bool viewable = (bool)ViewData[ViewDataKeys.View];
+    
+    var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
+    Type entitiesType = Reflector.ExtractLite(entityColumn.Type);
 }
 
 <div id="@Model.Compose("divChartControl")" class="sf-search-control sf-chart-control" data-prefix="@Model.ControlID">
@@ -51,10 +54,13 @@
         </div>
     </div>
 
-    @{ Html.RenderPartial(ChartClient.ChartBuilderView); }
-    
+    @using (var chart = Model.SubContext(cr => cr.Chart))
+    {
+        Html.RenderPartial(ChartClient.ChartBuilderView, chart);
+    }
     <div class="sf-query-button-bar">
         <button type="submit" class="sf-query-button sf-chart-draw" data-icon="ui-icon-pencil" id="@Model.Compose("qbDraw")" data-url="@(Url.Action<ChartController>(cc => cc.Draw(Model.ControlID)))">@Resources.Chart_Draw</button>
+        @ChartClient.GetChartMenu(this.ViewContext, queryDescription.QueryName, entitiesType, Model.ControlID).ToString(Html)
     </div>
     
     <div class="clearall"></div>
