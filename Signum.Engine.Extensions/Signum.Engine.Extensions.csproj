@@ -90,12 +90,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Authorization\AuthCache.cs" />
+    <Compile Include="Authorization\TypeAuthCache.cs" />
     <Compile Include="Authorization\PasswordExpiresLogic.cs" />
     <Compile Include="Authorization\ResetPasswordRequestLogic.cs" />
     <Compile Include="Authorization\UserTicketLogic.cs" />
     <Compile Include="Authorization\AuthUtils.cs" />
     <Compile Include="Authorization\AuthLogic.cs" />
-    <Compile Include="Authorization\EntityGroupAuthLogic.cs" />
+    <Compile Include="Authorization\TypeAuthLogic.Conditions.cs" />
     <Compile Include="Authorization\PropertyAuthLogic.cs" />
     <Compile Include="Authorization\OperationAuthLogic.cs" />
     <Compile Include="Authorization\PermissionAuthLogic.cs" />
@@ -103,7 +104,7 @@
     <Compile Include="Authorization\FacadeMethodAuthLogic.cs" />
     <Compile Include="Authorization\QueryAuthLogic.cs" />
     <Compile Include="Authorization\UserGraph.cs" />
-    <Compile Include="Basics\EntityGroupLogic.cs" />
+    <Compile Include="Basics\TypeConditionLogic.cs" />
     <Compile Include="Basics\EnumLogic.cs" />
     <Compile Include="Basics\FacadeMethodLogic.cs" />
     <Compile Include="Basics\PropertyLogic.cs" />
@@ -114,7 +115,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ControlPanel\ControlPanelLogic.cs" />
-    <Compile Include="DeploymentLog\DeploymentLogLogic.cs" />
+    <Compile Include="Logging\LoggingLogic.cs" />
     <Compile Include="Files\FilePathLogic.cs" />
     <Compile Include="Help\AppendixHelp.cs" />
     <Compile Include="Help\QueryHelp.cs" />

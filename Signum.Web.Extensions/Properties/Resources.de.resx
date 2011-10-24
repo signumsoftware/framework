@@ -459,4 +459,7 @@
   <data name="PasswordsAreDifferent" xml:space="preserve">
     <value>Die Passwörter sind unterschiedlich</value>
   </data>
+  <data name="_0Rules" xml:space="preserve">
+    <value>{0} rules</value>
+  </data>
 </root>

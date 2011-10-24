@@ -333,7 +333,7 @@ namespace Signum.Engine.Authorization
             TypeAuthLogic.Start(sb);
             PropertyAuthLogic.Start(sb, true);
 
-            if (serviceInterfaces != null)
+            if (serviceInterfaces != null && serviceInterfaces.Any())
                 FacadeMethodAuthLogic.Start(sb, serviceInterfaces);
 
             QueryAuthLogic.Start(sb, dqm);
@@ -341,9 +341,9 @@ namespace Signum.Engine.Authorization
             PermissionAuthLogic.Start(sb);
         }
 
-        public static Lite<RoleDN>[] CurrentRoles()
+        public static HashSet<Lite<RoleDN>> CurrentRoles()
         {
-            return roles.Value.IndirectlyRelatedTo(RoleDN.Current.ToLite()).And(RoleDN.Current.ToLite()).ToArray();
+            return roles.Value.IndirectlyRelatedTo(RoleDN.Current.ToLite(), true);
         }
 
         internal static int Rank(Lite<RoleDN> role)
@@ -399,10 +399,13 @@ namespace Signum.Engine.Authorization
             if (result == null && dbOnlyWarnings == null)
                 return null;
 
+            var declareParent = result.Leaves().Any(l => l.Sql.StartsWith("SET @idParent")) ? new SqlPreCommandSimple("DECLARE @idParent INT") : null;
+
             return SqlPreCommand.Combine(Spacing.Triple,
                 new SqlPreCommandSimple("-- BEGIN AUTH SYNC SCRIPT"),
                 new SqlPreCommandSimple("use {0}".Formato(ConnectionScope.Current.DatabaseName())),
                 dbOnlyWarnings,
+                declareParent,
                 result,
                 new SqlPreCommandSimple("-- END AUTH SYNC SCRIPT"));
         }

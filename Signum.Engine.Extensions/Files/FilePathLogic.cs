@@ -13,6 +13,7 @@ using Signum.Engine.DynamicQuery;
 using System.Reflection;
 using System.Diagnostics;
 using System.Web;
+using System.Linq.Expressions;
 
 namespace Signum.Engine.Files
 {
@@ -66,10 +67,16 @@ namespace Signum.Engine.Files
 
                 sb.AddUniqueIndex<FilePathDN>(f => new { f.Sufix, f.Repository });
 
-                dqm.RegisterExpression((FilePathDN fp) => new WebImage { FullWebPath = fp.FullWebPath }, () => typeof(WebImage).NiceName(), "Image");
+                dqm.RegisterExpression((FilePathDN fp) => fp.WebImage(), () => typeof(WebImage).NiceName(), "Image");
             }
         }
 
+        static Expression<Func<FilePathDN, WebImage>> WebImageExpression =
+            fp => new WebImage { FullWebPath = fp.FullWebPath }; 
+        public static WebImage WebImage(this FilePathDN fp)
+        {
+            return WebImageExpression.Invoke(fp);
+        }
 
         static void FilePathLogic_PreUnsafeDelete(IQueryable<FilePathDN> query)
         {

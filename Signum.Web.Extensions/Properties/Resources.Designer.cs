@@ -61,6 +61,15 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} rules.
+        /// </summary>
+        public static string _0Rules {
+            get {
+                return ResourceManager.GetString("_0Rules", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Appendices.
         /// </summary>
         public static string Appendices {
@@ -84,6 +93,33 @@ namespace Signum.Web.Extensions.Properties {
         public static string AreYouSureOfDeletingReport0 {
             get {
                 return ResourceManager.GetString("AreYouSureOfDeletingReport0", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Add condition.
+        /// </summary>
+        public static string AuthAdmin_AddCondition {
+            get {
+                return ResourceManager.GetString("AuthAdmin_AddCondition", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Choose a condition.
+        /// </summary>
+        public static string AuthAdmin_ChooseACondition {
+            get {
+                return ResourceManager.GetString("AuthAdmin_ChooseACondition", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Remove condition.
+        /// </summary>
+        public static string AuthAdmin_RemoveCondition {
+            get {
+                return ResourceManager.GetString("AuthAdmin_RemoveCondition", resourceCulture);
             }
         }
         

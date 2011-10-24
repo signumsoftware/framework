@@ -447,4 +447,16 @@
   <data name="Chart_AreYouSureOfDeletingUserChart0" xml:space="preserve">
     <value>Are you sure of deleting user chart {0}?</value>
   </data>
+  <data name="_0Rules" xml:space="preserve">
+    <value>{0} rules</value>
+  </data>
+  <data name="AuthAdmin_AddCondition" xml:space="preserve">
+    <value>Add condition</value>
+  </data>
+  <data name="AuthAdmin_RemoveCondition" xml:space="preserve">
+    <value>Remove condition</value>
+  </data>
+  <data name="AuthAdmin_ChooseACondition" xml:space="preserve">
+    <value>Choose a condition</value>
+  </data>
 </root>

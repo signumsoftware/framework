@@ -82,7 +82,14 @@ namespace Signum.Windows.Extensions.Sample
                 }
             });
 
-            AuthClient.Start(true, true, true, true, true, true, true, false);
+            AuthClient.Start(
+                types: true,
+                property: true, 
+                queries: true, 
+                permissions: true, 
+                operations: true, 
+                facadeMethods: true, 
+                defaultPasswordExpiresLogic: false);
 
             //ProcessClient.Start();
             //SchedulerClient.Start();

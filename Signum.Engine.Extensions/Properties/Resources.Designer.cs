@@ -296,6 +296,15 @@ namespace Signum.Engine.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Not authorized to {0} {1}.
+        /// </summary>
+        internal static string NotAuthorizedTo01 {
+            get {
+                return ResourceManager.GetString("NotAuthorizedTo01", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Not authorized to {0} the {1} with Id {2}.
         /// </summary>
         internal static string NotAuthorizedTo0The1WithId2 {

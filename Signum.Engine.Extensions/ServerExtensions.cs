@@ -32,7 +32,7 @@ namespace Signum.Services
 {
     public abstract class ServerExtensions : ServerBasic, ILoginServer, IOperationServer, IQueryServer, 
         IChartServer, IExcelReportServer, IUserQueryServer, IQueryAuthServer, IPropertyAuthServer, 
-        ITypeAuthServer, IFacadeMethodAuthServer, IPermissionAuthServer, IOperationAuthServer, IEntityGroupAuthServer, ISmsServer
+        ITypeAuthServer, IFacadeMethodAuthServer, IPermissionAuthServer, IOperationAuthServer, ISmsServer
     {
         protected UserDN currentUser;
 
@@ -223,10 +223,16 @@ namespace Signum.Services
               () => TypeAuthLogic.SetTypeRules(rules));
         }
 
-        public DefaultDictionary<Type, TypeAllowed> AuthorizedTypes()
+        public DefaultDictionary<Type, TypeAllowedAndConditions> AuthorizedTypes()
         {
             return Return(MethodInfo.GetCurrentMethod(),
               () => TypeAuthLogic.AuthorizedTypes());
+        }
+
+        public bool IsAllowedFor(Lite lite, TypeAllowedBasic allowed)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+             () => TypeAuthLogic.IsAllowedFor(lite, allowed, Signum.Engine.ExecutionContext.Current));
         }
 
         #endregion
@@ -308,33 +314,6 @@ namespace Signum.Services
         {
             return Return(MethodInfo.GetCurrentMethod(),
             () => OperationAuthLogic.OperationRules());
-        }
-        #endregion
-
-        #region IEntityGroupAuthServer Members
-
-        public EntityGroupRulePack GetEntityGroupAllowedRules(Lite<RoleDN> role)
-        {
-            return Return(MethodInfo.GetCurrentMethod(),
-             () => EntityGroupAuthLogic.GetEntityGroupRules(role));
-        }
-
-        public void SetEntityGroupAllowedRules(EntityGroupRulePack rules)
-        {
-            Execute(MethodInfo.GetCurrentMethod(),
-               () => EntityGroupAuthLogic.SetEntityGroupRules(rules));
-        }
-
-        public Dictionary<Type, MinMax<TypeAllowedBasic>> GetEntityGroupTypesAllowed()
-        {
-            return Return(MethodInfo.GetCurrentMethod(),
-           () => EntityGroupAuthLogic.GetEntityGroupTypesAllowed(true));
-        }
-
-        public bool IsAllowedFor(Lite lite, TypeAllowedBasic allowed)
-        {
-            return Return(MethodInfo.GetCurrentMethod(),
-             () => EntityGroupAuthLogic.IsAllowedFor(lite, allowed, Signum.Engine.ExecutionContext.Current));
         }
         #endregion
 

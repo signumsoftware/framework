@@ -1,11 +1,11 @@
-﻿@Html.DynamicCss("~/authAdmin/Content/authAdmin.css")
+﻿@Html.DynamicCss("~/authAdmin/Content/SF_AuthAdmin.css")
 @using (var tc = Html.TypeContext<PropertyRulePack>())
 {
     @Html.EntityLine(tc, f => f.Role)
     @Html.ValueLine(tc, f => f.DefaultRule, vl => { vl.UnitText = tc.Value.DefaultLabel; })
     @Html.EntityLine(tc, f => f.Type)
 
-    <table class="ruleTable" id="properties">
+    <table class="sf-auth-rules" id="properties">
         <thead>
             <tr>
                 <th>
@@ -34,22 +34,22 @@
                     @Html.Hidden(item.Compose("AllowedBase"), item.Value.AllowedBase)
                 </td>
                 <td>
-                    <a class="cbLink modify">
+                    <a class="sf-auth-chooser sf-auth-modify">
                         @Html.RadioButton(item.Compose("Allowed"), "Modify", item.Value.Allowed == PropertyAllowed.Modify)
                     </a>
                 </td>
                 <td>
-                    <a class="cbLink read">
+                    <a class="sf-auth-chooser sf-auth-read">
                         @Html.RadioButton(item.Compose("Allowed"), "Read", item.Value.Allowed == PropertyAllowed.Read)
                     </a>
                 </td>
                 <td>
-                    <a class="cbLink none">
+                    <a class="sf-auth-chooser sf-auth-none">
                         @Html.RadioButton(item.Compose("Allowed"), "None", item.Value.Allowed == PropertyAllowed.None)
                     </a>
                 </td>
                 <td>
-                    @Html.CheckBox(item.Compose("Overriden"), item.Value.Overriden, new { disabled = "disabled", @class = "sf-overriden" })
+                    @Html.CheckBox(item.Compose("Overriden"), item.Value.Overriden, new { disabled = "disabled", @class = "sf-auth-overriden" })
                 </td>
             </tr>
         }

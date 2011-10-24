@@ -65,41 +65,37 @@ namespace Signum.Engine.ControlPanel
             var panels = Database.Query<ControlPanelDN>().Where(cp => cp.Related.Entity is RoleDN && cp.HomePage)
                 .Select(cp => new { ControlPanel = cp.ToLite(), Role = ((RoleDN)cp.Related.Entity).ToLite() }).ToList();
 
-            return panels.OrderByDescending(p => AuthLogic.Rank(p.Role)).FirstOrDefault().TryCC(p => p.ControlPanel);
+            var hs = AuthLogic.RolesGraph().IndirectlyRelatedTo(RoleDN.Current.ToLite(), true);
+
+            return panels.Where(p => hs.Contains(p.Role)).OrderByDescending(p => AuthLogic.Rank(p.Role)).FirstOrDefault().TryCC(p => p.ControlPanel);
         }
 
         public static void RegisterUserEntityGroup(SchemaBuilder sb, Enum newEntityGroupKey)
         {
             sb.Schema.Settings.AssertImplementedBy((ControlPanelDN uq) => uq.Related, typeof(UserDN));
 
-            EntityGroupLogic.Register<ControlPanelDN>(newEntityGroupKey,
-                uq => uq.Related.RefersTo(UserDN.Current),
-                uq => uq.Related != null && uq.Related.Entity is UserDN);
+            TypeConditionLogic.Register<ControlPanelDN>(newEntityGroupKey,
+                uq => uq.Related.RefersTo(UserDN.Current));
 
-            EntityGroupLogic.Register<CountSearchControlPartDN>(newEntityGroupKey,
-                 uq => Database.Query<ControlPanelDN>().WhereInGroup(newEntityGroupKey).Any(cp => cp.ContainsContent(uq)),
-                 uq => Database.Query<ControlPanelDN>().WhereIsApplicable(newEntityGroupKey).Any(cp => cp.ContainsContent(uq)));
+            TypeConditionLogic.Register<CountSearchControlPartDN>(newEntityGroupKey,
+                 cscp => Database.Query<ControlPanelDN>().WhereCondition(newEntityGroupKey).Any(cp => cp.ContainsContent(cscp)));
 
-            EntityGroupLogic.Register<LinkListPartDN>(newEntityGroupKey,
-                 uq => Database.Query<ControlPanelDN>().WhereInGroup(newEntityGroupKey).Any(cp => cp.ContainsContent(uq)),
-                 uq => Database.Query<ControlPanelDN>().WhereIsApplicable(newEntityGroupKey).Any(cp => cp.ContainsContent(uq)));
+            TypeConditionLogic.Register<LinkListPartDN>(newEntityGroupKey,
+                 llp => Database.Query<ControlPanelDN>().WhereCondition(newEntityGroupKey).Any(cp => cp.ContainsContent(llp)));
         }
 
         public static void RegisterRoleEntityGroup(SchemaBuilder sb, Enum newEntityGroupKey)
         {
             sb.Schema.Settings.AssertImplementedBy((ControlPanelDN uq) => uq.Related, typeof(RoleDN));
 
-            EntityGroupLogic.Register<ControlPanelDN>(newEntityGroupKey,
-                uq => AuthLogic.CurrentRoles().Contains(uq.Related.ToLite<RoleDN>()),
-                uq => uq.Related != null && uq.Related.Entity is RoleDN);
+            TypeConditionLogic.Register<ControlPanelDN>(newEntityGroupKey,
+                uq => AuthLogic.CurrentRoles().Contains(uq.Related.ToLite<RoleDN>()));
 
-            EntityGroupLogic.Register<CountSearchControlPartDN>(newEntityGroupKey,
-                 uq => Database.Query<ControlPanelDN>().WhereInGroup(newEntityGroupKey).Any(cp => cp.ContainsContent(uq)),
-                 uq => Database.Query<ControlPanelDN>().WhereIsApplicable(newEntityGroupKey).Any(cp => cp.ContainsContent(uq)));
+            TypeConditionLogic.Register<CountSearchControlPartDN>(newEntityGroupKey,
+                 uq => Database.Query<ControlPanelDN>().WhereCondition(newEntityGroupKey).Any(cp => cp.ContainsContent(uq)));
 
-            EntityGroupLogic.Register<LinkListPartDN>(newEntityGroupKey,
-                 uq => Database.Query<ControlPanelDN>().WhereInGroup(newEntityGroupKey).Any(cp => cp.ContainsContent(uq)),
-                 uq => Database.Query<ControlPanelDN>().WhereIsApplicable(newEntityGroupKey).Any(cp => cp.ContainsContent(uq)));
+            TypeConditionLogic.Register<LinkListPartDN>(newEntityGroupKey,
+                 uq => Database.Query<ControlPanelDN>().WhereCondition(newEntityGroupKey).Any(cp => cp.ContainsContent(uq)));
         }
     }
 }

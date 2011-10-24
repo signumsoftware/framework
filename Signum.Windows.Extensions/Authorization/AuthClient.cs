@@ -28,7 +28,7 @@ namespace Signum.Windows.Authorization
                 UpdateCacheEvent();
         }
 
-        public static void Start(bool types, bool property, bool queries, bool permissions, bool operations, bool facadeMethods, bool entityGroups, bool defaultPasswordExpiresLogic)
+        public static void Start(bool types, bool property, bool queries, bool permissions, bool operations, bool facadeMethods, bool defaultPasswordExpiresLogic)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -39,8 +39,7 @@ namespace Signum.Windows.Authorization
                 if (queries) QueryAuthClient.Start();
                 if (permissions) PermissionAuthClient.Start();
                 if (facadeMethods) FacadeMethodAuthClient.Start();
-                if (entityGroups) EntityGroupAuthClient.Start();
-                if(operations)OperationAuthClient.Start();
+                if (operations) OperationAuthClient.Start();
 
                 UpdateCache();
 

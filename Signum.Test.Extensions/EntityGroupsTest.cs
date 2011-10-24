@@ -14,11 +14,12 @@ using Signum.Test.Extensions.Properties;
 using Signum.Services;
 using Signum.Engine.Basics;
 using Signum.Utilities;
+using System.Xml.Linq;
 
 namespace Signum.Test.Extensions
 {
     [TestClass]
-    public class EntityGroupsTest
+    public class TypeConditionTest
     {
 
         [ClassInitialize()]
@@ -42,12 +43,12 @@ namespace Signum.Test.Extensions
 
 
         [TestMethod]
-        public void EntityGroupsAuthDisable()
+        public void TypeConditionAuthDisable()
         {
             using (AuthLogic.Disable())
             {
                 Assert.AreEqual(AllLab, Database.Query<LabelDN>().Count());
-                Assert.AreEqual(JapLab, Database.Query<LabelDN>().Count(r => r.IsInGroup(MusicGroups.JapanEntities)));
+                Assert.AreEqual(JapLab, Database.Query<LabelDN>().Count(r => r.InCondition(MusicGroups.JapanEntities)));
 
                 Assert.AreEqual(AllLab, Database.RetrieveAll<LabelDN>().Count);
                 Assert.AreEqual(AllLab, Database.RetrieveAllLite<LabelDN>().Count);
@@ -57,12 +58,12 @@ namespace Signum.Test.Extensions
         }
 
         [TestMethod]
-        public void EntityGroupsQueryableAuthDisable()
+        public void TypeConditionQueryableAuthDisable()
         {
             using (AuthLogic.Disable())
             {
                 Assert.AreEqual(AllAlb, Database.Query<AlbumDN>().Count());
-                Assert.AreEqual(JapAlb, Database.Query<AlbumDN>().Count(r => r.IsInGroup(MusicGroups.JapanEntities)));
+                Assert.AreEqual(JapAlb, Database.Query<AlbumDN>().Count(r => r.InCondition(MusicGroups.JapanEntities)));
 
                 Assert.AreEqual(AllAlb, Database.RetrieveAll<AlbumDN>().Count);
                 Assert.AreEqual(AllAlb, Database.RetrieveAllLite<AlbumDN>().Count);
@@ -72,17 +73,17 @@ namespace Signum.Test.Extensions
         }
 
         [TestMethod]
-        public void EntityGroupsBart()
+        public void TypeConditionExternal()
         {
             using (AuthLogic.UnsafeUser("external"))
             {
                 Assert.AreEqual(JapLab, Database.Query<LabelDN>().Count());
-                Assert.AreEqual(JapLab, Database.Query<LabelDN>().Count(r => r.IsInGroup(MusicGroups.JapanEntities)));
+                Assert.AreEqual(JapLab, Database.Query<LabelDN>().Count(r => r.InCondition(MusicGroups.JapanEntities)));
 
                 Assert.AreEqual(JapLab, Database.RetrieveAll<LabelDN>().Count);
                 Assert.AreEqual(JapLab, Database.RetrieveAllLite<LabelDN>().Count);
 
-                using (EntityGroupAuthLogic.DisableQueries())
+                using (TypeAuthLogic.DisableQueryFilter())
                 {
                     Assert.AreEqual(AllLab, Database.Query<LabelDN>().Count());
                     Assert.AreEqual(AllLab, Database.RetrieveAllLite<LabelDN>().Count);
@@ -92,17 +93,17 @@ namespace Signum.Test.Extensions
         }
 
         [TestMethod]
-        public void EntityGroupsBartQueryable()
+        public void TypeConditionExternalQueryable()
         {
             using (AuthLogic.UnsafeUser("external"))
             {
                 Assert.AreEqual(JapAlb, Database.Query<AlbumDN>().Count());
-                Assert.AreEqual(JapAlb, Database.Query<AlbumDN>().Count(r => r.IsInGroup(MusicGroups.JapanEntities)));
+                Assert.AreEqual(JapAlb, Database.Query<AlbumDN>().Count(r => r.InCondition(MusicGroups.JapanEntities)));
 
                 Assert.AreEqual(JapAlb, Database.RetrieveAll<AlbumDN>().Count);
                 Assert.AreEqual(JapAlb, Database.RetrieveAllLite<AlbumDN>().Count);
 
-                using (EntityGroupAuthLogic.DisableQueries())
+                using (TypeAuthLogic.DisableQueryFilter())
                 {
                     Assert.AreEqual(AllAlb, Database.Query<AlbumDN>().Count());
                     Assert.AreEqual(AllAlb, Database.RetrieveAllLite<AlbumDN>().Count);
@@ -112,12 +113,12 @@ namespace Signum.Test.Extensions
         }
 
         [TestMethod]
-        public void EntityGroupRetrieve()
+        public void TypeConditionRetrieve()
         {
             using (AuthLogic.UnsafeUser("external"))
             {
                 Assert2.Throws<UnauthorizedAccessException>(() => Database.Retrieve<LabelDN>(1));
-                using (EntityGroupAuthLogic.DisableQueries())
+                using (TypeAuthLogic.DisableQueryFilter())
                 {
                     Assert2.Throws<UnauthorizedAccessException>(() => Database.Query<LabelDN>().SingleEx(r => r.Name == "Virgin"));
                 }
@@ -125,12 +126,12 @@ namespace Signum.Test.Extensions
         }
 
         [TestMethod]
-        public void EntityGroupRetrieveQueryable()
+        public void TypeConditionRetrieveQueryable()
         {
             using (AuthLogic.UnsafeUser("external"))
             {
                 Assert2.Throws<UnauthorizedAccessException>(() => Database.Retrieve<AlbumDN>(1)); 
-                using (EntityGroupAuthLogic.DisableQueries())
+                using (TypeAuthLogic.DisableQueryFilter())
                 {
                     Assert2.Throws<UnauthorizedAccessException>(() => Database.Query<AlbumDN>().SingleEx(r => r.Name == "Siamese Dream"));
                 }
@@ -138,7 +139,7 @@ namespace Signum.Test.Extensions
         }
 
         [TestMethod]
-        public void EntityGroupUpdate()
+        public void TypeConditionUpdate()
         {
             using (AuthLogic.UnsafeUser("external"))
             using (Transaction tr = new Transaction())
@@ -151,7 +152,7 @@ namespace Signum.Test.Extensions
         }
 
         [TestMethod]
-        public void EntityGroupDelete()
+        public void TypeConditionDelete()
         {
             using (AuthLogic.UnsafeUser("external"))
             using (Transaction tr = new Transaction())
@@ -164,7 +165,7 @@ namespace Signum.Test.Extensions
         }
 
         [TestMethod]
-        public void EntityGroupJoin()
+        public void TypeConditionJoin()
         {
             using (AuthLogic.UnsafeUser("external"))
             {
@@ -177,10 +178,10 @@ namespace Signum.Test.Extensions
         }
 
         [TestMethod]
-        public void EntityGroupSaveOut()
+        public void TypeConditionSaveOut()
         {
             using (AuthLogic.UnsafeUser("external"))
-            using (EntityGroupAuthLogic.DisableQueries())
+            using (TypeAuthLogic.DisableQueryFilter())
             {
                 //Because of target
                 {
@@ -216,5 +217,13 @@ namespace Signum.Test.Extensions
                 }
             }
         }
+
+        //[TestMethod]
+        //public void ImportAuthRules()
+        //{
+        //    AuthLogic.GloballyEnabled = false;
+        //    var rules = AuthLogic.ImportRulesScript(XDocument.Load(@"C:\Users\olmo.SIGNUMS\Desktop\AuthRules.xml")); 
+        //}
+
     }
 }

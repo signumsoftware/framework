@@ -6,6 +6,7 @@ using Signum.Utilities;
 using Signum.Entities.Basics;
 using Signum.Entities.Operations;
 using System.Text.RegularExpressions;
+using System.Reflection;
 
 namespace Signum.Entities.Authorization
 {
@@ -28,12 +29,16 @@ namespace Signum.Entities.Authorization
             set { Set(ref resource, value, () => Resource); }
         }
 
-        [NotNullable] //sometimes A is an EmbeddedEntity
         A allowed;
         public A Allowed
         {
             get { return allowed; }
             set { Set(ref allowed, value, () => Allowed); }
+        }
+
+        public override string ToString()
+        {
+            return "{0} for {1} <- {2}".Formato(resource, role, allowed);
         }
 
         protected override void PreSaving(ref bool graphModified)
@@ -56,76 +61,68 @@ namespace Signum.Entities.Authorization
 
     [Serializable]
     public class RulePropertyDN : RuleDN<PropertyDN, PropertyAllowed> { }
-
+   
     [Serializable]
-    public class RuleEntityGroupDN : RuleDN<EntityGroupDN, EntityGroupAllowedDN> { }
-
-    [Serializable]
-    public class RuleTypeDN : RuleDN<TypeDN, TypeAllowed> { }
-
-    [Serializable, AvoidLocalization]
-    public class EntityGroupAllowedDN : EmbeddedEntity, IEquatable<EntityGroupAllowedDN>
+    public class RuleTypeDN : RuleDN<TypeDN, TypeAllowed> 
     {
-        public static readonly EntityGroupAllowedDN CreateCreate = new EntityGroupAllowedDN(TypeAllowed.Create, TypeAllowed.Create);
-        public static readonly EntityGroupAllowedDN NoneNone = new EntityGroupAllowedDN(TypeAllowed.None, TypeAllowed.None);
-
-        private EntityGroupAllowedDN() { }
-
-        public EntityGroupAllowedDN(TypeAllowed inGroup, TypeAllowed outGroup)
+        [ValidateChildProperty]
+        MList<RuleTypeConditionDN> conditions = new MList<RuleTypeConditionDN>();
+        public MList<RuleTypeConditionDN> Conditions
         {
-            this.inGroup = inGroup;
-            this.outGroup = outGroup;
+            get { return conditions; }
+            set { Set(ref conditions, value, () => Conditions); }
         }
 
-        TypeAllowed inGroup;
-        public TypeAllowed InGroup
+        protected override void PreSaving(ref bool graphModified)
         {
-            get { return inGroup; }
+            this.Conditions.ForEach((a, i) => a.Order = i); 
+
+            base.PreSaving(ref graphModified);
         }
 
-        TypeAllowed outGroup;
-        public TypeAllowed OutGroup
+        protected override void PostRetrieving()
         {
-            get { return outGroup; }
+            this.Conditions.Sort(a => a.Order);
+
+            base.PostRetrieving();
+        }
+    }
+
+    [Serializable]
+    public class RuleTypeConditionDN : EmbeddedEntity, IEquatable<RuleTypeConditionDN>
+    {
+        TypeConditionNameDN condition;
+        [NotNullValidator]
+        public TypeConditionNameDN Condition
+        {
+            get { return condition; }
+            set { Set(ref condition, value, () => Condition); }
         }
 
-        public override bool Equals(object obj)
-        {
-            if (obj is EntityGroupAllowedDN)
-                return Equals((EntityGroupAllowedDN)obj);
 
-            return false;
+        TypeAllowed allowed;
+        public TypeAllowed Allowed
+        {
+            get { return allowed; }
+            set { Set(ref allowed, value, () => Allowed); }
         }
 
-        public bool Equals(EntityGroupAllowedDN other)
+        int order;
+        public int Order
         {
-            return this == other || this.InGroup == other.InGroup && this.OutGroup == other.OutGroup;
+            get { return order; }
+            set { Set(ref order, value, () => Order); }
         }
 
-        public override int GetHashCode()
+        public bool Equals(RuleTypeConditionDN other)
         {
-            return inGroup.GetHashCode() ^ OutGroup.GetHashCode() << 5;
+            return this.condition.Equals(other.condition) 
+                && this.allowed == other.allowed; 
         }
 
         public override string ToString()
         {
-            return "[In = {0}, Out = {1}]".Formato(inGroup, outGroup);
-        }
-
-        public bool IsActive
-        {
-            get { return !this.Equals(CreateCreate); }
-        }
-
-        public static EntityGroupAllowedDN Parse(string str)
-        {
-            Match m = Regex.Match(str, @"^\[In = (?<in>.*?), Out = (?<out>.*?)\]$");
-
-            if (!m.Success)
-                throw new FormatException("'{0}' is not a valid {1}".Formato(str, typeof(EntityGroupAllowedDN).Name));
-
-            return new EntityGroupAllowedDN(EnumExtensions.ToEnum<TypeAllowed>(m.Groups["in"].Value), 
-                                            EnumExtensions.ToEnum<TypeAllowed>(m.Groups["out"].Value)); 
+            return "{0} ({1})".Formato(condition, allowed);
         }
     }
 

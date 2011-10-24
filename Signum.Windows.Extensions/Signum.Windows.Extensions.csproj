@@ -101,10 +101,6 @@
     <Compile Include="Authorization\PropertyAuthClient.cs" />
     <Compile Include="Authorization\PermissionAuthClient.cs" />
     <Compile Include="Authorization\OperationAuthClient.cs" />
-    <Compile Include="Authorization\EntityGroupAuthClient.cs" />
-    <Compile Include="Authorization\EntityGroupRules.xaml.cs">
-      <DependentUpon>EntityGroupRules.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Authorization\OperationRules.xaml.cs">
       <DependentUpon>OperationRules.xaml</DependentUpon>
     </Compile>
@@ -305,12 +301,6 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Authorization\PasswordValidInterval.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Authorization\EntityGroupRules.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

@@ -91,11 +91,6 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
-    <Compile Include="AuthAdmin\Views\EntityGroups.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>EntityGroups.cshtml</DependentUpon>
-    </Compile>
     <Compile Include="AuthAdmin\Views\FacadeMethods.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -331,6 +326,22 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>UserChartPart.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Logging\LoggingClient.cs" />
+    <Compile Include="Logging\Views\DeploymentLog.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>DeploymentLog.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Logging\Views\ExceptionLog1.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ExceptionLog.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Logging\Views\_ViewStart.cs">
+      <DependentUpon>_ViewStart.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
     </Compile>
     <Compile Include="Mailing\Views\Newsletter.cs">
       <AutoGen>True</AutoGen>
@@ -727,8 +738,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="AuthAdmin\Content\authAdmin.css" />
-    <Content Include="AuthAdmin\Images\class.png" />
+    <Content Include="AuthAdmin\Content\SF_AuthAdmin.css" />
     <Content Include="AuthAdmin\Images\namespace.png" />
     <Content Include="AuthAdmin\Images\operation.png" />
     <Content Include="AuthAdmin\Images\property.png" />
@@ -739,15 +749,11 @@
     <Content Include="AuthAdmin\Images\radioYellow.png" />
     <Content Include="AuthAdmin\Images\thumb.png" />
     <Content Include="AuthAdmin\Images\treeView.png" />
-    <Content Include="AuthAdmin\Scripts\authAdmin.js" />
+    <Content Include="AuthAdmin\Scripts\SF_AuthAdmin.js" />
     <Content Include="AuthAdmin\Views\PasswordValidInterval.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>PasswordValidInterval.cs</LastGenOutput>
     </Content>
-    <None Include="AuthAdmin\Views\EntityGroups.cshtml">
-      <Generator>MvcRazorClassGenerator</Generator>
-      <LastGenOutput>EntityGroups.cs</LastGenOutput>
-    </None>
     <None Include="AuthAdmin\Views\FacadeMethods.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>FacadeMethods.cs</LastGenOutput>
@@ -929,6 +935,19 @@
     <Content Include="ControlPanel\Views\UserChartPart.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>UserChartPart.cs</LastGenOutput>
+    </Content>
+    <Content Include="Logging\Views\_ViewStart.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>_ViewStart.cs</LastGenOutput>
+    </Content>
+    <Content Include="Logging\Views\Web.config" />
+    <Content Include="Logging\Views\ExceptionLog.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>ExceptionLog1.cs</LastGenOutput>
+    </Content>
+    <Content Include="Logging\Views\DeploymentLog.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>DeploymentLog.cs</LastGenOutput>
     </Content>
     <None Include="Profiler\Views\Times.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>

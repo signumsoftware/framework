@@ -15,6 +15,7 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="AuthResources.xaml"/>
                 <ResourceDictionary Source="TreeViewColumnResources.xaml"/>
+                <ResourceDictionary Source="pack://application:,,,/Signum.Windows;Component/Resources.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Window.Resources>
@@ -68,18 +69,18 @@
             ScrollViewer.ScrollChanged="treeView_ScrollChanged">
             <TreeView.ItemContainerStyle>
                 <Style TargetType="TreeViewItem" BasedOn="{StaticResource TreeViewItemStyle1}">
-                    <Setter Property="IsExpanded" Value="{Binding Expanded, Mode=TwoWay}"/>
+                    <Setter Property="IsExpanded" Value="True"/>
                 </Style>
             </TreeView.ItemContainerStyle>
 
             <TreeView.ItemTemplateSelector>
                 <m:TypeDataTemplateSelector>
-                    <HierarchicalDataTemplate DataType="{x:Static auth:TypeRules.GroupType}" ItemsSource="{Binding SubNodes}"  >
-                        <TextBlock HorizontalAlignment="Left" FontWeight="SemiBold"  VerticalAlignment="Center" Text="{Binding Name}" />
+                    <HierarchicalDataTemplate DataType="{x:Static auth:TypeRules.GroupType}" ItemsSource="{Binding SubNodes}" >
+                        <TextBlock HorizontalAlignment="Left" FontWeight="SemiBold"  VerticalAlignment="Center" Text="{Binding Name}"/>
                     </HierarchicalDataTemplate>
 
-                    <HierarchicalDataTemplate DataType="{x:Static auth:TypeRules.RuleType}">
-                        <Grid ShowGridLines="True">
+                    <HierarchicalDataTemplate DataType="{x:Static auth:TypeRules.RuleType}" ItemsSource="{Binding Conditions}" >
+                        <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
 
@@ -93,12 +94,15 @@
                                 <ColumnDefinition Width="58" />
                                 <ColumnDefinition Width="58" />
                             </Grid.ColumnDefinitions>
-                            <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Text="{Binding Resource.FriendlyName}" Grid.Column="0" />
+                            <StackPanel Orientation="Horizontal" Grid.Column="0">
+                                <Button Style="{StaticResource RoundButton}"  Content="{StaticResource Create}" Visibility="{Binding CanAdd, Converter={x:Static m:Converters.BoolToVisibility}}" Click="addCondition_Click"/>
+                                <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Text="{Binding Resource.FriendlyName}"  />
+                            </StackPanel>
                             <ToggleButton HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="{Binding Path=Allowed.Create}" Style="{StaticResource SphereRadioButton}" Background="Cyan" Grid.Column="1"/>
                             <ToggleButton HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="{Binding Path=Allowed.Modify}" Style="{StaticResource SphereRadioButton}" Background="GreenYellow" Grid.Column="2" />
                             <ToggleButton HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="{Binding Path=Allowed.Read}" Style="{StaticResource SphereRadioButton}" Background="Yellow" Grid.Column="3"  />
                             <ToggleButton HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="{Binding Path=Allowed.None}" Style="{StaticResource SphereRadioButton}" Background="Red" Grid.Column="4"  />
-                            <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" IsEnabled="False" IsChecked="{Binding Path=Allowed.Overriden,Mode=OneWay}" Grid.Column="5"  />
+                            <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" IsEnabled="False" IsChecked="{Binding Path=Overriden,Mode=OneWay}" Grid.Column="5"  />
                             
                             <Button Click="properties_Click" x:Name="properties" Style="{StaticResource ThinButtonStyle}" ToolTip="{m:Loc View}" Grid.Column="6" RenderOptions.BitmapScalingMode="NearestNeighbor" 
                                     Visibility="{Binding Properties, Converter={x:Static m:Converters.NullToVisibility}}" HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -129,8 +133,37 @@
                             </Button>
                         </Grid>
                     </HierarchicalDataTemplate>
+
+
+                    <HierarchicalDataTemplate DataType="{x:Static auth:TypeRules.ConditionType}">
+                        <Grid Background="#2C5899FF">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+
+                                <ColumnDefinition Width="38" />
+                                <ColumnDefinition Width="38" />
+                                <ColumnDefinition Width="38" />
+                                <ColumnDefinition Width="38" />
+
+                                <ColumnDefinition Width="58" />
+                                <ColumnDefinition Width="58" />
+                                <ColumnDefinition Width="58" />
+                                <ColumnDefinition Width="58" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Orientation="Horizontal" Grid.Column="0">
+                                <Button Style="{StaticResource RoundButton}"  Content="{StaticResource Remove}" Click="removeCondition_Click"/>
+                                <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Text="{Binding ConditionNiceToString}" Grid.Column="0" />
+                            </StackPanel>
+                            <ToggleButton HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="{Binding Path=Allowed.Create}" Style="{StaticResource SphereRadioButton}" Background="Cyan" Grid.Column="1"/>
+                            <ToggleButton HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="{Binding Path=Allowed.Modify}" Style="{StaticResource SphereRadioButton}" Background="GreenYellow" Grid.Column="2" />
+                            <ToggleButton HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="{Binding Path=Allowed.Read}" Style="{StaticResource SphereRadioButton}" Background="Yellow" Grid.Column="3"  />
+                            <ToggleButton HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="{Binding Path=Allowed.None}" Style="{StaticResource SphereRadioButton}" Background="Red" Grid.Column="4"  />
+                        </Grid>
+                    </HierarchicalDataTemplate>
                 </m:TypeDataTemplateSelector>
             </TreeView.ItemTemplateSelector>
+
+         
         </TreeView>
     </DockPanel>
 </Window>
