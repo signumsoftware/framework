@@ -341,9 +341,9 @@ namespace Signum.Engine.Authorization
             PermissionAuthLogic.Start(sb);
         }
 
-        public static Lite<RoleDN>[] CurrentRoles()
+        public static HashSet<Lite<RoleDN>> CurrentRoles()
         {
-            return roles.Value.IndirectlyRelatedTo(RoleDN.Current.ToLite()).And(RoleDN.Current.ToLite()).ToArray();
+            return roles.Value.IndirectlyRelatedTo(RoleDN.Current.ToLite(), true);
         }
 
         internal static int Rank(Lite<RoleDN> role)
