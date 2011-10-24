@@ -22,6 +22,11 @@ namespace Signum.Engine.Maps
 {
     public struct Forbidden
     {
+        public Forbidden(IdentifiableEntity entity)
+        {
+            this.set = new HashSet<IdentifiableEntity> { entity }; 
+        }
+
         public Forbidden(DirectedGraph<IdentifiableEntity> graph, IdentifiableEntity entity)
         {
             this.set = graph == null ? null : graph.TryRelatedTo(entity);
@@ -389,11 +394,18 @@ namespace Signum.Engine.Maps
             }
         }
 
-        Lazy<Action<IdentifiableEntity, Forbidden, bool>> saveCollections;
+        class CollectionsCache
+        {
+            public Func<IdentifiableEntity, SqlPreCommand> SaveCollectionsSync; 
+            public Action<IdentifiableEntity, Forbidden, bool> SaveCollections;
+        }
 
-        static GenericInvoker<Func<RelationalTable, object>> giCreateCache  = new GenericInvoker<Func<RelationalTable,object>>((RelationalTable rt)=>rt.CreateCache<int>());
-   
-        Action<IdentifiableEntity, Forbidden, bool> InitializeCollections()
+        Lazy<CollectionsCache> saveCollections;
+
+        static GenericInvoker<Func<RelationalTable, RelationalTable.IInsertCache>> giCreateCache = new GenericInvoker<Func<RelationalTable, RelationalTable.IInsertCache>>(
+            (RelationalTable rt)=>rt.CreateCache<int>());
+
+        CollectionsCache InitializeCollections()
         {
             var paramIdent = Expression.Parameter(typeof(IdentifiableEntity), "ident");
             var paramForbidden = Expression.Parameter(typeof(Forbidden), "forbidden");
@@ -403,22 +415,32 @@ namespace Signum.Engine.Maps
 
             var castEntity = Expression.Assign(entity, Expression.Convert(paramIdent, Type));
 
-            var calls = (from ef in Fields.Values
-                         where ef.Field is FieldMList
-                         let rt = ((FieldMList)ef.Field).RelationalTable
-                         let cache = giCreateCache.GetInvoker(rt.Field.FieldType)(rt)
-                         select (Expression)Expression.Call(Expression.Constant(cache),
-                               cache.GetType().GetMethod("RelationalInserts",  BindingFlags.NonPublic | BindingFlags.Instance),
-                               Expression.Field(entity, ef.FieldInfo), paramIsNew, paramIdent, paramForbidden)).ToList();
+            var list = (from ef in Fields.Values
+                        where ef.Field is FieldMList
+                        let rt = ((FieldMList)ef.Field).RelationalTable
+                        let cache = giCreateCache.GetInvoker(rt.Field.FieldType)(rt)
+                        select new
+                        {
+                            saveCollection = (Expression)Expression.Call(Expression.Constant(cache),
+                               cache.GetType().GetMethod("RelationalInserts", BindingFlags.NonPublic | BindingFlags.Instance),
+                               Expression.Field(entity, ef.FieldInfo), paramIdent, paramIsNew, paramForbidden),
 
-            if (calls.IsEmpty())
+                            ef.Getter,
+                            cache
+                        }).ToList();
+
+            if (list.IsEmpty())
                 return null;
             else
             {
-                var exp = Expression.Lambda<Action<IdentifiableEntity, Forbidden, bool>>(Expression.Block(new[] { entity },
-                    calls.PreAnd(castEntity)), paramIdent, paramForbidden, paramIsNew);
+                var miniList = list.Select(a => new { a.Getter, a.cache }).ToList();
+                return new CollectionsCache
+                {
+                    SaveCollections = Expression.Lambda<Action<IdentifiableEntity, Forbidden, bool>>(Expression.Block(new[] { entity },
+                                list.Select(a => a.saveCollection).PreAnd(castEntity)), paramIdent, paramForbidden, paramIsNew).Compile(),
 
-                return exp.Compile();
+                    SaveCollectionsSync = ident => miniList.Select(a => a.cache.RelationalInsertsSync((Modifiable)a.Getter(ident), ident)).Combine(Spacing.Double)
+                }; 
             }
         }
 
@@ -430,7 +452,7 @@ namespace Signum.Engine.Maps
                 ident.Modified = null;
 
             if (saveCollections.Value != null)
-                saveCollections.Value(ident, forbidden, true);
+                saveCollections.Value.SaveCollections(ident, forbidden, true);
         }
 
         internal void FinishUpdate(IdentifiableEntity ident, Forbidden forbidden)
@@ -439,7 +461,7 @@ namespace Signum.Engine.Maps
                 ident.Modified = null;
 
             if (saveCollections.Value != null)
-                saveCollections.Value(ident, forbidden, false);
+                saveCollections.Value.SaveCollections(ident, forbidden, false);
         }
 
         public SqlPreCommand InsertSqlSync(IdentifiableEntity ident, string comment = null)
@@ -448,21 +470,23 @@ namespace Signum.Engine.Maps
             ident.PreSaving(ref dirty);
 
             var ic = inserter.Value;
+            SqlPreCommandSimple insert = new SqlPreCommandSimple(ic.SqlInsertPattern("", false), ic.InsertParameters(ident, new Forbidden(), "")).AddComment(comment);
+            
+            var cc = saveCollections.Value;
+            if(cc == null)
+                return insert;
 
-            return new SqlPreCommandSimple(AddComment(ic.SqlInsertPattern("", false), comment), ic.InsertParameters(ident, new Forbidden(), "")); 
+            SqlPreCommand collections = cc.SaveCollectionsSync(ident);
+
+            if (collections == null)
+                return insert;
+
+            SqlPreCommand setParent = new SqlPreCommandSimple("SET @idParent = SCOPE_IDENTITY()"); 
+
+            return SqlPreCommand.Combine(Spacing.Simple, insert, setParent, collections); 
         }
 
-        static string AddComment(string sql, string comment)
-        {
-            if (string.IsNullOrEmpty(comment))
-                return sql;
-
-            int index = sql.IndexOf("\r\n");
-            if (index == -1)
-                return sql + " -- " + comment;
-            else
-                return sql.Insert(index, " -- " + comment); 
-        }
+        
 
         public SqlPreCommand UpdateSqlSync(IdentifiableEntity ident, string comment = null)
         {   
@@ -476,9 +500,16 @@ namespace Signum.Engine.Maps
                 return null;
 
             var uc = updater.Value;
+            SqlPreCommandSimple update = new SqlPreCommandSimple(uc.SqlUpdatePattern("", false),
+                uc.UpdateParameters(ident, (ident as Entity).TryCS(a => a.Ticks) ?? -1, new Forbidden(), "")).AddComment(comment);
 
-            return new SqlPreCommandSimple(AddComment(uc.SqlUpdatePattern("", false), comment),
-                uc.UpdateParameters(ident, (ident as Entity).TryCS(a => a.Ticks) ?? -1, new Forbidden(), ""));
+            var cc = saveCollections.Value;
+            if (cc == null)
+                return update;
+
+            SqlPreCommand collections = cc.SaveCollectionsSync(ident);
+
+            return SqlPreCommand.Combine(Spacing.Simple, update, collections); 
         }
 
         public class Trio
@@ -517,10 +548,16 @@ namespace Signum.Engine.Maps
                 parameters)));
         }
     }
+ 
 
     public partial class RelationalTable
     {
-        internal class InsertCache<T>
+        internal interface IInsertCache
+        {
+            SqlPreCommand RelationalInsertsSync(Modifiable mlist, IdentifiableEntity parent);
+        }
+
+        internal class InsertCache<T> : IInsertCache
         {
             public string sqlDelete;
             public Func<string, string> sqlInsert;
@@ -533,7 +570,7 @@ namespace Signum.Engine.Maps
             public Action<List<T>, IdentifiableEntity, Forbidden> Insert8;
             public Action<List<T>, IdentifiableEntity, Forbidden> Insert16;
 
-            internal void RelationalInserts(MList<T> collection, bool newEntity, IdentifiableEntity ident, Forbidden forbidden)
+            internal void RelationalInserts(MList<T> collection, IdentifiableEntity ident, bool newEntity, Forbidden forbidden)
             {
                 if (collection == null)
                 {
@@ -542,7 +579,7 @@ namespace Signum.Engine.Maps
                 }
                 else
                 {
-                    if (collection.Modified == false) // no es modificado ??
+                    if (collection.Modified == false)
                         return;
 
                     if (forbidden.IsEmpty)
@@ -563,6 +600,32 @@ namespace Signum.Engine.Maps
                             default: throw new InvalidOperationException("Unexpected list.Count {0}".Formato(list.Count)); 
                         }
                     }
+                }
+            }
+
+            public SqlPreCommand RelationalInsertsSync(Modifiable mlist, IdentifiableEntity parent)
+            {
+                var list = (MList<T>)mlist;
+
+                if (list.Modified == false)
+                    return null;
+
+                var sqlIns = sqlInsert(""); 
+
+                if (parent.IsNew)
+                {
+                    return list.Select(e =>
+                    {
+                        var parameters = InsertParameters(parent, e, new Forbidden(parent), "");
+                        parameters.RemoveAt(0);
+                        return new SqlPreCommandSimple(sqlIns, parameters).AddComment(e.ToString());
+                    }).Combine(Spacing.Simple);
+                }
+                else
+                {
+                    return SqlPreCommand.Combine(Spacing.Simple,
+                        new SqlPreCommandSimple(sqlDelete, new List<SqlParameter> { DeleteParameter(parent) }),
+                        list.Select(e => new SqlPreCommandSimple(sqlIns, InsertParameters(parent, e, new Forbidden(), "")).AddComment(e.ToString())).Combine(Spacing.Simple)); 
                 }
             }
         }

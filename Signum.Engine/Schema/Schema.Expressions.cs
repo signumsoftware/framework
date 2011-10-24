@@ -58,7 +58,6 @@ namespace Signum.Engine.Maps
 
     public partial class RelationalTable
     {
-
         internal ColumnExpression RowIdExpression(Alias tableAlias)
         {
             return new ColumnExpression(typeof(int), tableAlias, ((IColumn)this.PrimaryKey).Name);

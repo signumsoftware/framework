@@ -534,8 +534,6 @@ namespace Signum.Web
 
         private void FillViewDataForViewing(ControllerBase controller, IRootEntity entity, string partialViewName, EntitySettingsContext ctx)
         { 
-            Type type = entity.GetType();
-            
             TypeContext tc = TypeContextUtilities.UntypedNew(entity, "");
             controller.ViewData.Model = tc; 
 
@@ -544,11 +542,22 @@ namespace Signum.Web
             string tabID = GetOrCreateTabID(controller);
             controller.ViewData[ViewDataKeys.TabId] = tabID;
 
-            if (!Navigator.IsViewable(type, ctx))
-                throw new UnauthorizedAccessException(Resources.ViewForType0IsNotAllowed.Formato(type));
+            if (entity is ModifiableEntity)
+            {
+                if (!Navigator.IsViewable((ModifiableEntity)entity, ctx))
+                    throw new UnauthorizedAccessException(Resources.ViewForType0IsNotAllowed.Formato(entity.GetType()));
 
-            if (Navigator.IsReadOnly(type, ctx))
-                tc.ReadOnly = true;
+                if (Navigator.IsReadOnly((ModifiableEntity)entity, ctx))
+                    tc.ReadOnly = true;
+            }
+            else
+            {
+                if (!Navigator.IsViewable(entity.GetType(), ctx))
+                    throw new UnauthorizedAccessException(Resources.ViewForType0IsNotAllowed.Formato(entity.GetType()));
+
+                if (Navigator.IsReadOnly(entity.GetType(), ctx))
+                    tc.ReadOnly = true;
+            }
         }
 
         public string GetTypeTitle(ModifiableEntity mod)

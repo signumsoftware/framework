@@ -1006,12 +1006,12 @@ namespace Signum.Utilities
         }
         #endregion
 
-        public static IEnumerable<R> JoinStrict<K, O, N, R>(
-           IEnumerable<O> currentCollection,
-           IEnumerable<N> shouldCollection,
-           Func<O, K> currentKeySelector,
-           Func<N, K> shouldKeySelector,
-           Func<O, N, R> resultSelector, string action)
+        public static IEnumerable<R> JoinStrict<K, C, S, R>(
+           IEnumerable<C> currentCollection,
+           IEnumerable<S> shouldCollection,
+           Func<C, K> currentKeySelector,
+           Func<S, K> shouldKeySelector,
+           Func<C, S, R> resultSelector, string action)
         {
 
             var currentDictionary = currentCollection.ToDictionary(currentKeySelector);
@@ -1033,12 +1033,12 @@ namespace Signum.Utilities
         }
 
 
-        public static JoinStrictResult<O, N, R> JoinStrict<K, O, N, R>(
-        IEnumerable<O> currentCollection,
-        IEnumerable<N> shouldCollection,
-        Func<O, K> currentKeySelector,
-        Func<N, K> shouldKeySelector,
-        Func<O, N, R> resultSelector)
+        public static JoinStrictResult<C, S, R> JoinStrict<K, C, S, R>(
+            IEnumerable<C> currentCollection,
+            IEnumerable<S> shouldCollection,
+            Func<C, K> currentKeySelector,
+            Func<S, K> shouldKeySelector,
+            Func<C, S, R> resultSelector)
         {
             var currentDictionary = currentCollection.ToDictionary(currentKeySelector);
             var newDictionary = shouldCollection.ToDictionary(shouldKeySelector);
@@ -1046,7 +1046,7 @@ namespace Signum.Utilities
             HashSet<K> commonKeys = currentDictionary.Keys.ToHashSet();
             commonKeys.IntersectWith(newDictionary.Keys);
 
-            return new JoinStrictResult<O, N, R>
+            return new JoinStrictResult<C, S, R>
             {
                 Extra = currentDictionary.Where(e => !newDictionary.ContainsKey(e.Key)).Select(e => e.Value).ToList(),
                 Lacking = newDictionary.Where(e => !currentDictionary.ContainsKey(e.Key)).Select(e => e.Value).ToList(),

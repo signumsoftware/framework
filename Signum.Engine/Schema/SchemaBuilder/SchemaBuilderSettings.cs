@@ -151,7 +151,7 @@ namespace Signum.Engine.Maps
             var imp = GetImplementations(propRoute);
 
             if (imp == null || !imp.ImplementedBy(typeToImplement))
-                throw new InvalidOperationException("Route {0} is not ImplementedBy {2}".Formato(route, typeToImplement.Name));
+                throw new InvalidOperationException("Route {0} is not ImplementedBy {1}".Formato(propRoute, typeToImplement.Name));
         }
 
         public Implementations GetImplementations<T>(Expression<Func<T, object>> route) where T : IdentifiableEntity

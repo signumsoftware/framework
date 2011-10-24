@@ -13,10 +13,17 @@ namespace Signum.Engine.Maps
     {
         public SqlPreCommand DeleteSqlSync(IdentifiableEntity ident, string comment = null)
         {
-            return SqlPreCommand.Combine(Spacing.Simple,
-                OnPreDeleteSqlSync(ident),
-                new SqlPreCommandSimple("DELETE {0} WHERE id = {1} --{2}".Formato(Name.SqlScape(), ident.Id, comment ?? ident.ToStr))
-                );
+            var pre = OnPreDeleteSqlSync(ident);
+            var collections = (from m in this.Fields
+                               let ml = m.Value.Field as FieldMList
+                               where ml != null
+                               select new SqlPreCommandSimple("DELETE {0} WHERE {1} = {2} --{3}"
+                                   .Formato(ml.RelationalTable.Name.SqlScape(), ml.RelationalTable.BackReference.Name.SqlScape(), ident.Id, comment ?? ident.ToStr))).Combine(Spacing.Simple);
+
+            var main = new SqlPreCommandSimple("DELETE {0} WHERE {1} = {2} --{3}"
+                    .Formato(Name.SqlScape(), "Id", ident.Id, comment ?? ident.ToStr));
+
+            return SqlPreCommand.Combine(Spacing.Simple, pre, collections, main);
         }
 
         public event Func<IdentifiableEntity, SqlPreCommand> PreDeleteSqlSync;
