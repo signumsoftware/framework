@@ -312,6 +312,22 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>SearchControlPart.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Logging\LoggingClient.cs" />
+    <Compile Include="Logging\Views\DeploymentLog.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>DeploymentLog.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Logging\Views\ExceptionLog1.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ExceptionLog.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Logging\Views\_ViewStart.cs">
+      <DependentUpon>_ViewStart.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="Mailing\Views\Newsletter.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -892,6 +908,19 @@
     <Content Include="Mailing\Views\NewsletterDelivery.cshtml">
       <LastGenOutput>NewsletterDelivery1.cs</LastGenOutput>
       <Generator>MvcRazorClassGenerator</Generator>
+    </Content>
+    <Content Include="Logging\Views\_ViewStart.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>_ViewStart.cs</LastGenOutput>
+    </Content>
+    <Content Include="Logging\Views\Web.config" />
+    <Content Include="Logging\Views\ExceptionLog.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>ExceptionLog1.cs</LastGenOutput>
+    </Content>
+    <Content Include="Logging\Views\DeploymentLog.cshtml">
+      <Generator>MvcRazorClassGenerator</Generator>
+      <LastGenOutput>DeploymentLog.cs</LastGenOutput>
     </Content>
     <None Include="Profiler\Views\Times.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
