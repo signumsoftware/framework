@@ -91,7 +91,7 @@ namespace Signum.Engine.Authorization
 
         static string Schema_IsAllowedCallback(Type type)
         {
-            var allowed = cache.GetAllowed(type);
+            var allowed = GetAllowed(type);
 
             if (allowed.Max().GetDB() == TypeAllowedBasic.None)
                 return "Type '{0}' is set to None".Formato(type.NiceName());
@@ -105,7 +105,7 @@ namespace Signum.Engine.Authorization
         {
             if (ident.Modified.Value)
             {
-                TypeAllowedAndConditions access = cache.GetAllowed(ident.GetType());
+                TypeAllowedAndConditions access = GetAllowed(ident.GetType());
 
                 var requested = ident.IsNew ? TypeAllowedBasic.Create : TypeAllowedBasic.Modify;
 
@@ -124,11 +124,8 @@ namespace Signum.Engine.Authorization
 
         static void EntityEventsGlobal_Retrieved(IdentifiableEntity ident)
         {
-            if (Schema.Current.InGlobalMode)
-                return;
-
             Type type = ident.GetType();
-            TypeAllowedBasic access = cache.GetAllowed(type).Max().GetDB();
+            TypeAllowedBasic access = GetAllowed(type).Max().GetDB();
             if (access < TypeAllowedBasic.Read)
                 throw new UnauthorizedAccessException(Resources.NotAuthorizedToRetrieve0.Formato(type.NicePluralName()));
         }
@@ -164,10 +161,17 @@ namespace Signum.Engine.Authorization
 
         public static TypeAllowedAndConditions GetAllowed(Type type)
         {
+            if (!AuthLogic.IsEnabled || Schema.Current.InGlobalMode)
+                return AuthUtils.MaxType.BaseAllowed;
+
             if (!TypeLogic.TypeToDN.ContainsKey(type))
                 return AuthUtils.MaxType.BaseAllowed;
 
-            return cache.GetAllowed(type);
+            TypeAllowed? temp = TypeAuthLogic.GetTemporallyAllowed(type);
+            if (temp.HasValue)
+                return new TypeAllowedAndConditions(temp.Value); 
+
+            return cache.GetAllowed(RoleDN.Current.ToLite(), type);
         }
 
         public static TypeAllowedAndConditions GetAllowed(Lite<RoleDN> role, Type type)
@@ -178,6 +182,33 @@ namespace Signum.Engine.Authorization
         public static DefaultDictionary<Type, TypeAllowedAndConditions> AuthorizedTypes()
         {
             return cache.GetDefaultDictionary();
+        }
+
+        [ThreadStatic]
+        static ImmutableStack<Tuple<Type, TypeAllowed>> temporallyAllowed;
+
+        public static IDisposable AllowTemporally<T>(TypeAllowed typeAllowed)
+            where T : IdentifiableEntity
+        {
+            var old = temporallyAllowed;
+
+            temporallyAllowed = (temporallyAllowed ?? ImmutableStack<Tuple<Type, TypeAllowed>>.Empty).Push(Tuple.Create(typeof(T), typeAllowed));
+
+            return new Disposable(() => temporallyAllowed = old);
+        }
+
+        internal static TypeAllowed? GetTemporallyAllowed(Type type)
+        {
+            var ta = temporallyAllowed;
+            if (ta == null || ta.IsEmpty)
+                return null;
+
+            var pair = temporallyAllowed.FirstOrDefault(a => a.Item1 == type);
+
+            if (pair == null)
+                return null;
+
+            return pair.Item2;
         }
 
         public static class Audit

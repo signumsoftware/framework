@@ -64,19 +64,22 @@ namespace Signum.Engine.Authorization
             cache.SetRules(rules, r => true);
         }
 
-        public static bool SetFacadeMethodAllowed(Lite<RoleDN> role, MethodInfo mi)
+        public static bool GetFacadeMethodAllowed(Lite<RoleDN> role, MethodInfo mi)
         {
             return cache.GetAllowed(role, FacadeMethodLogic.Normalize(mi).Key());
         }
 
-        public static bool SetFacadeMethodAllowed(MethodInfo mi)
+        public static bool GetFacadeMethodAllowed(MethodInfo mi)
         {
-            return cache.GetAllowed(FacadeMethodLogic.Normalize(mi).Key());
+            if (!AuthLogic.IsEnabled || Schema.Current.InGlobalMode)
+                return true;
+
+            return cache.GetAllowed(RoleDN.Current.ToLite(), FacadeMethodLogic.Normalize(mi).Key());
         }
 
         public static void AuthorizeAccess(MethodInfo mi)
         {
-            if (!cache.GetAllowed(FacadeMethodLogic.Normalize(mi).Key()))
+            if (!GetFacadeMethodAllowed(mi))
                 throw new UnauthorizedAccessException(Resources.AccessToFacadeMethod0IsNotAllowed.Formato(mi.Name));
         }
     }
