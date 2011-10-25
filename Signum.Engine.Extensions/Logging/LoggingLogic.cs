@@ -99,7 +99,7 @@ namespace Signum.Engine.Logging
                     tr.Commit();
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 if (ThrowLogingErrors)
                     throw;

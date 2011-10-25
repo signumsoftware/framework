@@ -219,6 +219,11 @@ namespace Signum.Entities.Authorization
             return other != null && Equals(other);
         }
 
+        public override int GetHashCode()
+        {
+            return this.fallback.GetHashCode();
+        }
+
         public TypeAllowed Min()
         {
             if (!conditions.Any())

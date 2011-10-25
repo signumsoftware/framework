@@ -126,12 +126,12 @@ namespace Signum.Entities.Mailing
         }
 
         [SqlDbType(Size = int.MaxValue)]
-        string error;
+        string exception;
         [StringLengthValidator(AllowNulls = true, Max = int.MaxValue)]
-        public string Error
+        public string Exception
         {
-            get { return error; }
-            set { Set(ref error, value, () => Error); }
+            get { return exception; }
+            set { Set(ref exception, value, () => Exception); }
         }
     }
 
