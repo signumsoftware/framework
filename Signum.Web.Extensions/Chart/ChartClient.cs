@@ -281,7 +281,7 @@ namespace Signum.Web.Chart
                         {
                             dimension2 = d2Converter(dim2),
                             values = (dimension1Values
-                                .Select(dim1 => resultTable.Rows.FirstOrDefault(r => object.Equals(r[0], d1Converter) && object.Equals(r[1], dim2))
+                                .Select(dim1 => resultTable.Rows.FirstOrDefault(r => object.Equals(r[0], dim1) && object.Equals(r[1], dim2))
                                 .TryCC(r => r[2]))).ToList()
                         }).ToList()
                     };
