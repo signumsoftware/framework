@@ -96,6 +96,10 @@
 {
     min-width: inherit;    
 }
+.sf-chart-token .sf-query-token
+{
+    float: left;    
+}
 
 .sf-chart-container
 {

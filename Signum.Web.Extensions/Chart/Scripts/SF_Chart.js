@@ -8,7 +8,7 @@ SF.Chart.Builder = (function () {
         return { filters: new SF.FindNavigator({ prefix: prefix }).serializeFilters() };
     };
 
-    var updateChartBuilder = function ($chartControl) {
+    var updateChartBuilder = function ($chartControl, callback) {
         var $chartBuilder = $chartControl.find(".sf-chart-builder");
         $.ajax({
             url: $chartBuilder.attr("data-url"),
@@ -16,6 +16,9 @@ SF.Chart.Builder = (function () {
             success: function (result) {
                 $chartBuilder.replaceWith(result);
                 SF.triggerNewContent($chartControl.find(".sf-chart-builder"));
+                if (typeof callback != "undefined") {
+                    callback();
+                }
             }
         });
     };
@@ -51,7 +54,13 @@ SF.Chart.Builder = (function () {
     $(".sf-chart-token-aggregate").live("change", function () {
         var $this = $(this);
         if ($this.val() == "Count") {
-            updateChartBuilder($this.closest(".sf-chart-control"));
+            var id = this.id;
+            updateChartBuilder($this.closest(".sf-chart-control"), function () {
+                $("#" + id).closest(".sf-chart-token").find(".sf-query-token").hide();
+            });
+        }
+        else {
+            $this.closest(".sf-chart-token").find(".sf-query-token").show();
         }
     });
 

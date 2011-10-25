@@ -33,7 +33,9 @@
             }
         </td>
         <td>
-            @Html.QueryTokenCombo(tc.Value.Token, ViewData[ViewDataKeys.QueryName], tc)
+            <div class="sf-query-token">
+                @Html.QueryTokenCombo(tc.Value.Token, ViewData[ViewDataKeys.QueryName], tc)
+            </div>
             <a class="sf-chart-token-config-trigger">@Resources.Chart_ToggleInfo</a>
         </td>
     </tr>

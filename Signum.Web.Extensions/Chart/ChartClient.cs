@@ -112,6 +112,34 @@ namespace Signum.Web.Chart
                     return ctx.None();
 
                 return ctx.Input;
+            })
+            .SetProperty(ct => ct.Format, ctx =>
+            {
+                if (string.IsNullOrEmpty(ctx.Input))
+                    return ctx.None();
+
+                return ctx.Input;
+            })
+            .SetProperty(ct => ct.Unit, ctx =>
+            {
+                if (string.IsNullOrEmpty(ctx.Input))
+                    return ctx.None();
+
+                return ctx.Input;
+            })
+            .SetProperty(ct => ct.OrderType, ctx =>
+            {
+                if (string.IsNullOrEmpty(ctx.Input))
+                    return ctx.None();
+                 
+                return ctx.Input.ToEnum<OrderType>();
+            })
+            .SetProperty(ct => ct.OrderPriority, ctx =>
+            {
+                if (string.IsNullOrEmpty(ctx.Input))
+                    return ctx.None();
+
+                return ctx.Input.ToInt();
             });
 
         public static EntityMapping<ChartRequest> MappingChartRequest = new EntityMapping<ChartRequest>(true)
@@ -209,6 +237,11 @@ namespace Signum.Web.Chart
         {
             var chart = request.Chart;
 
+            var d1Converter = chart.Dimension1.Converter();
+            var d2Converter = chart.Dimension2.Converter();
+            var v1Converter = chart.Value1.Converter();
+            var v2Converter = chart.Value2.Converter();
+
             switch (chart.ChartResultType)
             { 
                 case ChartResultType.TypeValue:
@@ -222,18 +255,17 @@ namespace Signum.Web.Chart
                         serie = chart.GroupResults ? 
                             resultTable.Rows.Select(r => new Dictionary<string, object>
                             { 
-                                { "dimension1", Convert(r[0]) }, 
-                                { "value1", Convert(r[1]) }
+                                { "dimension1", d1Converter(r[0]) }, 
+                                { "value1", v1Converter(r[1]) }
                             }).ToList() :
                             resultTable.Rows.Select(r => new Dictionary<string, object>
                             { 
-                                { "dimension1", Convert(r[0]) }, 
-                                { "value1", Convert(r[1]) },
+                                { "dimension1", d1Converter(r[0]) }, 
+                                { "value1", v1Converter(r[1]) },
                                 { "entity", r.Entity.Key() }
                             }).ToList()
                     };
                 case ChartResultType.TypeTypeValue:
-                    
                     var dimension1Values = resultTable.Rows.Select(r => r[0]).Distinct().ToList();
 
                     return new
@@ -244,12 +276,12 @@ namespace Signum.Web.Chart
                             dimension2 = chart.Dimension2.GetTitle(),
                             value1 = chart.Value1.GetTitle() 
                         },
-                        dimension1 = dimension1Values.Select(Convert).ToList(),
-                        series = resultTable.Rows.Select(r => r[1]).Distinct().Select(d2 => new 
-                        { 
-                            dimension2 = Convert(d2),
+                        dimension1 = dimension1Values.Select(d1Converter).ToList(),
+                        series = resultTable.Rows.Select(r => r[1]).Distinct().Select(dim2 => new 
+                        {
+                            dimension2 = d2Converter(dim2),
                             values = (dimension1Values
-                                .Select(d1 => resultTable.Rows.FirstOrDefault(r => object.Equals(r[0], d1) && object.Equals(r[1], d2))
+                                .Select(dim1 => resultTable.Rows.FirstOrDefault(r => object.Equals(r[0], d1Converter) && object.Equals(r[1], dim2))
                                 .TryCC(r => r[2]))).ToList()
                         }).ToList()
                     };
@@ -264,14 +296,15 @@ namespace Signum.Web.Chart
                             dimension2 = chart.Dimension2.GetTitle(),
                         },
                         points = resultTable.Rows.Select(r => new 
-                        { 
-                            value1 = Convert(r[2]), 
-                            dimension1 = Convert(r[0]), 
-                            dimension2 = Convert(r[1]) 
+                        {
+                            value1 = v1Converter(r[2]),
+                            dimension1 = d1Converter(r[0]),
+                            dimension2 = d2Converter(r[1]) 
                         }).ToList()
                     };
 
                 case ChartResultType.Bubbles:
+
                     return new
                     {
                         labels = new
@@ -283,10 +316,10 @@ namespace Signum.Web.Chart
                         },
                         points = resultTable.Rows.Select(r => new
                         {
-                            value1 = Convert(r[2]),
-                            dimension1 = Convert(r[0]),
-                            dimension2 = Convert(r[1]),
-                            value2 = Convert(r[3])
+                            value1 = v1Converter(r[2]),
+                            dimension1 = d1Converter(r[0]),
+                            dimension2 = d2Converter(r[1]),
+                            value2 = v2Converter(r[3])
                         }).ToList()
                     };
                 default:
@@ -294,37 +327,60 @@ namespace Signum.Web.Chart
             }
         }
 
-        private static object Convert(object p)
+        private static Func<object,object> Converter(this ChartTokenDN token)
         {
-            if (p is Lite)
+            if (token == null)
+                return null;
+
+            if (typeof(Lite).IsAssignableFrom( token.Type))
             {
-                Lite l = (Lite)p;
-                return new
+                return p =>
                 {
-                    key = l.Key(),
-                    toStr = l.ToStr
+                    Lite l = (Lite)p;
+                    return new
+                    {
+                        key = l.Key(),
+                        toStr = l.ToStr
+                    };
                 };
             }
-            else if (p is Enum)
+            else if (token.Type.UnNullify().IsEnum)
             {
-                Enum e = (Enum)p;
-                return new
+                return p =>
                 {
-                    key = e.ToString(),
-                    toStr = e.NiceToString()
+                    Enum e = (Enum)p;
+                    return new
+                    {
+                        key = e.ToString(),
+                        toStr = e.NiceToString()
+                    };
                 };
             }
-            else if (p is DateTime)
+            else if (typeof(IFormattable).IsAssignableFrom(token.Type.UnNullify()) && token.Format.HasText())
             {
-                DateTime e = (DateTime)p;
-                return new
+                return p =>
                 {
-                    key = e,
-                    toStr = e.ToShortDateString(),
+                    return new
+                    {
+                        key = p,
+                        toStr = (p as IFormattable).TryToString(token.Format) ?? p.TryToString() ?? ""
+                    };
+                };
+            }
+            else if (typeof(DateTime) == token.Type.UnNullify())
+            {
+                return p =>
+                {
+                    DateTime e = (DateTime)p;
+                    return new
+                    {
+                        key = e,
+                        toStr = e.TryToString(),
+                    };
                 };
             }
             else
-                return p;
+                return p => p;
         }
 
         public static string ChartTypeImgClass(ChartBase chart, ChartType type)
