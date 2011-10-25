@@ -82,8 +82,15 @@ WriteLiteral("\r\n");
     {
         tc.Value = new ChartTokenDN();
     }
+    ChartBase chart = ((TypeContext<ChartBase>)tc.Parent).Value;
+    
 
-WriteLiteral("    <tr class=\"sf-chart-token\">\r\n        <td>");
+WriteLiteral("    <tr class=\"sf-chart-token\" data-token=\"");
+
+
+                                      Write(chart.GetTokenName(tc.Value));
+
+WriteLiteral("\">\r\n        <td>");
 
 
        Write(tc.Value.PropertyLabel);
@@ -94,7 +101,7 @@ WriteLiteral("</td>\r\n        <td>\r\n");
              if (tc.Value.GroupByVisible)
             { 
                 var groupCheck = new HtmlTag("input").IdName(tc.Compose("group")).Attr("type", "checkbox").Attr("value", "True").Class("sf-chart-group-trigger");
-                bool groupResults = ((TypeContext<ChartBase>)tc.Parent).Value.GroupResults;
+                bool groupResults = chart.GroupResults;
                 if (groupResults)
                 {
                     groupCheck.Attr("checked", "checked");

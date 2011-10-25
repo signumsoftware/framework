@@ -145,7 +145,7 @@ namespace Signum.Entities.UserQueries
             set { if (Set(ref token, value, () => Token)) TokenChanged(); }
         }
 
-        protected virtual void TokenChanged()
+        public virtual void TokenChanged()
         {
 
         }
@@ -275,7 +275,7 @@ namespace Signum.Entities.UserQueries
             }
         }
 
-        protected override void TokenChanged()
+        public override void TokenChanged()
         {
             Notify(() => Operation);
             Notify(() => ValueString);

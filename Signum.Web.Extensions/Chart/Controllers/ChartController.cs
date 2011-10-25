@@ -61,7 +61,9 @@ namespace Signum.Web.Chart
         [HttpPost]
         public PartialViewResult UpdateChartBuilder(string prefix)
         {
-            var request = ExtractChartRequestCtx(prefix).Value;   
+            var lastToken = Request["lastTokenChanged"];
+            
+            var request = ExtractChartRequestCtx(prefix, lastToken.HasText() ? (ChartTokenName?)lastToken.ToEnum<ChartTokenName>() : null).Value;   
 
             ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(request.QueryName);
             
@@ -71,7 +73,7 @@ namespace Signum.Web.Chart
         [HttpPost]
         public ActionResult Draw(string prefix)
         {
-            var requestCtx = ExtractChartRequestCtx(prefix).ValidateGlobal();
+            var requestCtx = ExtractChartRequestCtx(prefix, null).ValidateGlobal();
 
             if (requestCtx.GlobalErrors.Any())
             {
@@ -98,15 +100,28 @@ namespace Signum.Web.Chart
             return PartialView(ChartClient.ChartResultsView, new TypeContext<ChartRequest>(request, prefix));
         }
 
-        MappingContext<ChartRequest> ExtractChartRequestCtx(string prefix)
+        MappingContext<ChartRequest> ExtractChartRequestCtx(string prefix, ChartTokenName? lastTokenChanged)
         {
-            return new ChartRequest(Navigator.ResolveQueryName(Request.Form[TypeContextUtilities.Compose(prefix, ViewDataKeys.QueryName)]))
+            var ctx = new ChartRequest(Navigator.ResolveQueryName(Request.Form[TypeContextUtilities.Compose(prefix, ViewDataKeys.QueryName)]))
                     .ApplyChanges(this.ControllerContext, prefix, ChartClient.MappingChartRequest);
+
+            var ch = ctx.Value.Chart;
+            switch (lastTokenChanged)
+            {
+                case ChartTokenName.Dimension1: ch.Dimension1.TokenChanged(); break;
+                case ChartTokenName.Dimension2: ch.Dimension2.TokenChanged(); break;
+                case ChartTokenName.Value1: ch.Value1.TokenChanged(); break;
+                case ChartTokenName.Value2: ch.Value2.TokenChanged(); break;
+                default:
+                    break;
+            }
+
+            return ctx;
         }
 
         public ActionResult OpenSubgroup(string prefix)
         {
-            var chartRequest = ExtractChartRequestCtx(prefix).Value;
+            var chartRequest = ExtractChartRequestCtx(prefix, null).Value;
 
             if (chartRequest.Chart.GroupResults)
             {
@@ -163,7 +178,7 @@ namespace Signum.Web.Chart
         #region user chart
         public ActionResult CreateUserChart(string prefix)
         {
-            var request = ExtractChartRequestCtx(prefix).Value;
+            var request = ExtractChartRequestCtx(prefix, null).Value;
 
             if (!Navigator.IsFindable(request.QueryName))
                 throw new UnauthorizedAccessException(Resources.Chart_Query0IsNotAllowed.Formato(request.QueryName));

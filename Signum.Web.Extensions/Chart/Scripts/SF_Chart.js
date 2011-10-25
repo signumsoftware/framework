@@ -8,11 +8,15 @@ SF.Chart.Builder = (function () {
         return { filters: new SF.FindNavigator({ prefix: prefix }).serializeFilters() };
     };
 
-    var updateChartBuilder = function ($chartControl, callback) {
+    var updateChartBuilder = function ($chartControl, tokenChanged, callback) {
         var $chartBuilder = $chartControl.find(".sf-chart-builder");
+        var data = $chartControl.find(":input").serialize() + "&filters=" + new SF.FindNavigator({ prefix: $chartControl.attr("data-prefix") }).serializeFilters();
+        if (!SF.isEmpty(tokenChanged)) {
+            data += "&lastTokenChanged=" + tokenChanged;
+        }
         $.ajax({
             url: $chartBuilder.attr("data-url"),
-            data: $chartControl.find(":input").serialize() + "&filters=" + new SF.FindNavigator({ prefix: $chartControl.attr("data-prefix") }).serializeFilters(),
+            data: data,
             success: function (result) {
                 $chartBuilder.replaceWith(result);
                 SF.triggerNewContent($chartControl.find(".sf-chart-builder"));
@@ -55,13 +59,18 @@ SF.Chart.Builder = (function () {
         var $this = $(this);
         if ($this.val() == "Count") {
             var id = this.id;
-            updateChartBuilder($this.closest(".sf-chart-control"), function () {
+            updateChartBuilder($this.closest(".sf-chart-control"), null, function () {
                 $("#" + id).closest(".sf-chart-token").find(".sf-query-token").hide();
             });
         }
         else {
             $this.closest(".sf-chart-token").find(".sf-query-token").show();
         }
+    });
+
+    $(".sf-query-token select").live("change", function () {
+        var $this = $(this);
+        updateChartBuilder($this.closest(".sf-chart-control"), $this.closest("tr").attr("data-token"));
     });
 
     $(".sf-chart-draw").live("click", function (e) {

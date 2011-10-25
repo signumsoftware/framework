@@ -36,7 +36,7 @@ namespace Signum.Entities.Chart
 
         }
 
-        protected override void TokenChanged()
+        public override void TokenChanged()
         {
             NotifyChange(true);
 

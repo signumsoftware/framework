@@ -13,13 +13,15 @@
     {
         tc.Value = new ChartTokenDN();
     }
-    <tr class="sf-chart-token">
+    ChartBase chart = ((TypeContext<ChartBase>)tc.Parent).Value;
+    
+    <tr class="sf-chart-token" data-token="@chart.GetTokenName(tc.Value)">
         <td>@tc.Value.PropertyLabel</td>
         <td>
             @if (tc.Value.GroupByVisible)
             { 
                 var groupCheck = new HtmlTag("input").IdName(tc.Compose("group")).Attr("type", "checkbox").Attr("value", "True").Class("sf-chart-group-trigger");
-                bool groupResults = ((TypeContext<ChartBase>)tc.Parent).Value.GroupResults;
+                bool groupResults = chart.GroupResults;
                 if (groupResults)
                 {
                     groupCheck.Attr("checked", "checked");
