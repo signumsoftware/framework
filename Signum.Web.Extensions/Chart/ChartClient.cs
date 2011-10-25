@@ -314,6 +314,15 @@ namespace Signum.Web.Chart
                     toStr = e.NiceToString()
                 };
             }
+            else if (p is DateTime)
+            {
+                DateTime e = (DateTime)p;
+                return new
+                {
+                    key = e,
+                    toStr = e.ToShortDateString(),
+                };
+            }
             else
                 return p;
         }
