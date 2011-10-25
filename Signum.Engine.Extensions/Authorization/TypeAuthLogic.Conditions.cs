@@ -373,23 +373,23 @@ namespace Signum.Engine.Authorization
             }
         }
 
-        public static Expression IsAllowedExpression(Expression entity, TypeAllowedBasic allowed, ExecutionContext executionContext)
+        public static Expression IsAllowedExpression(Expression entity, TypeAllowedBasic requested, ExecutionContext executionContext)
         {
             bool userInterface = executionContext == ExecutionContext.UserInterface;
-
+            
             Type type = entity.Type;
-
+          
             TypeAllowedAndConditions tac = cache.GetAllowed(type);
 
-            Expression baseValue = Expression.Constant(tac.Fallback.Get(userInterface) >= allowed);
+            Expression baseValue = Expression.Constant(tac.Fallback.Get(userInterface) >= requested);
 
-            var expression = tac.Conditions.Reverse().Aggregate(baseValue, (acum, tacRule) =>
+            var expression = tac.Conditions.Aggregate(baseValue, (acum, tacRule) =>
             {
                 var lambda = TypeConditionLogic.GetExpression(type, tacRule.ConditionName);
 
                 var exp = (Expression)Expression.Invoke(lambda, entity);
 
-                if (tacRule.Allowed.Get(userInterface) >= allowed)
+                if (tacRule.Allowed.Get(userInterface) >= requested)
                     return Expression.Or(exp, acum);
                 else
                     return Expression.And(Expression.Not(exp), acum);
@@ -398,11 +398,12 @@ namespace Signum.Engine.Authorization
             return DbQueryProvider.Clean(expression, false);
         }
 
-        static ConstructorInfo ciDebugData = ReflectionTools.GetConstuctorInfo(() => new DebugData(null, TypeAllowed.Create, true, TypeAllowed.Create,  null));
+
+        static ConstructorInfo ciDebugData = ReflectionTools.GetConstuctorInfo(() => new DebugData(null, TypeAllowedBasic.Create, true, TypeAllowed.Create,  null));
         static ConstructorInfo ciGroupDebugData = ReflectionTools.GetConstuctorInfo(() => new ConditionDebugData(null, true, TypeAllowed.Create));
         static MethodInfo miToLite = ReflectionTools.GetMethodInfo((IdentifiableEntity a) => a.ToLite()).GetGenericMethodDefinition();
 
-        internal static Expression IsAllowedExpressionDebug(Expression entity, TypeAllowedBasic allowed, ExecutionContext executionContext)
+        internal static Expression IsAllowedExpressionDebug(Expression entity, TypeAllowedBasic requested, ExecutionContext executionContext)
         {
             bool userInterface = executionContext == ExecutionContext.UserInterface;
 
@@ -410,10 +411,10 @@ namespace Signum.Engine.Authorization
 
             TypeAllowedAndConditions tac = cache.GetAllowed(type);
 
-            Expression baseValue = Expression.Constant(tac.Fallback.Get(userInterface) >= allowed);
+            Expression baseValue = Expression.Constant(tac.Fallback.Get(userInterface) >= requested);
 
             var list = (from line in tac.Conditions
-                        select Expression.New(ciGroupDebugData, Expression.Constant(line.ConditionName),
+                        select Expression.New(ciGroupDebugData, Expression.Constant(line.ConditionName, typeof(Enum)),
                         Expression.Invoke(TypeConditionLogic.GetExpression(type, line.ConditionName), entity),
                         Expression.Constant(line.Allowed))).ToArray();
 
@@ -421,23 +422,27 @@ namespace Signum.Engine.Authorization
 
             Expression liteEntity = Expression.Call(null, miToLite.MakeGenericMethod(entity.Type), entity);
 
-            return Expression.New(ciDebugData, liteEntity, Expression.Constant(allowed), Expression.Constant(userInterface), baseValue, newList);
+            return Expression.New(ciDebugData, liteEntity, 
+                Expression.Constant(requested), 
+                Expression.Constant(userInterface), 
+                Expression.Constant(tac.Fallback),
+                newList);
         }
 
         public class DebugData
         {
-            public DebugData(Lite lite, TypeAllowed requested, bool userInterface, TypeAllowed allowed, List<ConditionDebugData> groups)
+            public DebugData(Lite lite, TypeAllowedBasic requested, bool userInterface, TypeAllowed fallback, List<ConditionDebugData> groups)
             {
                 this.Lite = lite;
                 this.Requested = requested;
-                this.Allowed = allowed;
+                this.Fallback = fallback;
                 this.UserInterface = userInterface;
                 this.Conditions = groups;
             }
             
             public Lite Lite { get; private set; }
-            public TypeAllowed Requested { get; private set; }
-            public TypeAllowed Allowed { get; private set; }
+            public TypeAllowedBasic Requested { get; private set; }
+            public TypeAllowed Fallback { get; private set; }
             public bool UserInterface { get; private set; }
 
             public List<ConditionDebugData> Conditions { get; private set; }
@@ -449,10 +454,10 @@ namespace Signum.Engine.Authorization
                     foreach (var item in Conditions.AsEnumerable().Reverse())
                     {
                         if(item.InGroup)
-                            return Requested.Get(UserInterface)<= item.Allowed.Get(UserInterface);
+                            return Requested <= item.Allowed.Get(UserInterface);
                     }
 
-                    return Requested.Get(UserInterface) <= Allowed.Get(UserInterface);
+                    return Requested <= Fallback.Get(UserInterface);
                 }
             }
 
@@ -463,12 +468,12 @@ namespace Signum.Engine.Authorization
                     foreach (var cond in Conditions.AsEnumerable().Reverse())
                     {
                         if (cond.InGroup)
-                            return Requested.Get(UserInterface) <= cond.Allowed.Get(UserInterface) ? null :
-                                "{0} belongs to {1} that is {2} (less than {3})".Formato(Lite, cond.ConditionName, cond.Allowed.Get(UserInterface), Requested.Get(UserInterface));
+                            return Requested <= cond.Allowed.Get(UserInterface) ? null :
+                                "{0} belongs to {1} that is {2} (less than {3})".Formato(Lite, cond.ConditionName, cond.Allowed.Get(UserInterface), Requested);
                     }
 
-                    return Requested.Get(UserInterface) <= Allowed.Get(UserInterface) ? null :
-                        "The base value for {0} is {1} (less than {2}) and {3} does not belong to any condition".Formato(Lite.RuntimeType.TypeName(), Allowed.Get(UserInterface), Requested.Get(UserInterface), Lite);
+                    return Requested <= Fallback.Get(UserInterface) ? null :
+                        "The base value for {0} is {1} (less than {2}) and {3} does not belong to any condition".Formato(Lite.RuntimeType.TypeName(), Fallback.Get(UserInterface), Requested, Lite);
                 }
             }
         }
@@ -542,6 +547,33 @@ namespace Signum.Engine.Authorization
         {
             return new TypeAllowedAndConditions(rule.Allowed,
                 rule.Conditions.Select(c => new TypeConditionRule(EnumLogic<TypeConditionNameDN>.ToEnum(c.Condition), c.Allowed)).ToReadOnly());
+        }
+
+        [ThreadStatic]
+        static ImmutableStack<Tuple<Type, TypeAllowed>> temporallyAllowed;
+
+        public static IDisposable AllowTemporally<T>(TypeAllowed typeAllowed)
+            where T: IdentifiableEntity
+        {
+            var old = temporallyAllowed;
+
+            temporallyAllowed = (temporallyAllowed ?? ImmutableStack<Tuple<Type, TypeAllowed>>.Empty).Push(Tuple.Create(typeof(T), typeAllowed));
+
+            return new Disposable(() => temporallyAllowed = old); 
+        }
+
+        internal static TypeAllowed? GetTemporallyAllowed(Type type)
+        {
+            var ta = temporallyAllowed;
+            if (ta == null || ta.IsEmpty)
+                return null;
+
+            var pair = temporallyAllowed.FirstOrDefault(a => a.Item1 == type);
+            
+            if (pair == null)
+                return null;
+
+            return pair.Item2;
         }
     }
 }
