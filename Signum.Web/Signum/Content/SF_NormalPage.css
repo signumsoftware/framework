@@ -1,13 +1,12 @@
-﻿
-.sf-main-control {
+﻿.sf-main-control {
     display:block;
     clear:both;
     padding-bottom:5px; /* hack to prevent vertical scrollbars on popups due to the use of sf-line:after */
 }
 
-
-/* dropdowns */
-
+/*--------------
+--dropdowns-----
+--------------*/
 .sf-dropdown .sf-menu-button {
     position:absolute;
     z-index:2;
@@ -15,21 +14,17 @@
     list-style:none;
     margin-left:-5px;
 }
-
 .sf-dropdown.sf-open .sf-menu-button
 {
 	display:block;
 	-moz-border-shadow: 0 2px 8px #ddd;
 	-webkit-border-shadow: 0 2px 8px #ddd;
-	border-shadow: 0 2px 8px #ddd;
-	
+	border-shadow: 0 2px 8px #ddd;	
 }
-
 .sf-dropdown.sf-open .sf-menu-button:hover
 {
 	background-color:#ffffee;
 }
-
 .sf-dropdown a
 {
     white-space: nowrap;
@@ -38,13 +33,11 @@
     max-width:200px;
     text-align:left;
 }
-
 .sf-dropdown .sf-menu-button
 {
     margin-left: -1em;
     margin-top: 0.4em;
 }
-
 .sf-dropdown .sf-menu-button > li
 {
 	margin-left:0px !important;
@@ -55,18 +48,18 @@
 	height:1px;
 	background-color:#ddd;
 }
-
 .sf-dropdown .sf-menu-button > li a:hover, .sf-dropdown .sf-menu-button > li div:hover
 {
 	background-color:#eee;
 }
-
 .sf-dropdown .sf-menu-button .sf-toolbar-menu-separator
 {
 	border-top:1px solid #bbb;
 }
 
-/* entity title */
+/*-----------------
+--entity title-----
+-----------------*/
 .sf-normal-control-header
 {
     margin: auto;
@@ -74,25 +67,22 @@
     vertical-align: top;
     margin-bottom: 0.5em;
 }
-
 .sf-type-nice-name 
 {
     float:left;
     font-size:12px;
     color:#000;
     padding: 1px 5px;
+    line-height: 18px;
 }
-
 .sf-entity-id {
     clear:right;
     font-size:13px;
     color:#3E818F;
 }
-
 .sf-separator {
     color:#ccc;
 }
-
 .sf-entity-title {
     display:block;
     font-size:18px;
@@ -102,7 +92,9 @@
     line-height: 1.2em;
 }
 
-/* button-bar */
+/*-----------------
+--button-bar-------
+-----------------*/
 .sf-button-bar, .sf-button-bar li, .sf-query-button-bar, .sf-query-button-bar li
 {
     display:inline-block;
@@ -115,18 +107,17 @@
 {
     margin-bottom:20px;
 }
-
 .sf-entity-button.sf-disabled:hover {
     text-decoration:none;
     cursor:default;
 }
-
 .sf-entity-button.sf-disabled {
     color:#aaa;
 }
 
-/* UI Blocker */
-
+/*--------------
+--UI Blocker----
+--------------*/
 .sf-ui-blocker {
     display:block;
     position:fixed;
@@ -139,17 +130,14 @@
     -khtml-opacity:0.5;
     opacity:0.5;
 }
-
 .clearall 
 {
     clear:both;
 }
-
 .ui-tabs .ui-tabs-panel {
     overflow: auto;
     max-width:100%;
 }
-
 fieldset {
     border: 1px solid #BBB;
     padding: 5px 10px 10px 10px;
@@ -160,12 +148,10 @@ fieldset {
     border-bottom-right-radius: 4px 4px;
     border-bottom-left-radius: 4px 4px;
 }
-
 legend
 {
     background-color: #fff; /*IE fix*/    
 }
-
 .sf-chooser-button
 {
     width: 100%;    
