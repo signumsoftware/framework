@@ -193,7 +193,7 @@ namespace Signum.Entities.Chart
             return new IntervalQueryToken(this.Parent) { Intervals = m.Groups["pattern"].Value.Replace(',', '.') };
         }
 
-        protected override QueryToken[] SubTokensInternal()
+        protected override List<QueryToken> SubTokensInternal()
         {
             return null;
         }
@@ -392,9 +392,9 @@ namespace Signum.Entities.Chart
             get { return "All"; }
         }
 
-        protected override QueryToken[] SubTokensInternal()
+        protected override List<QueryToken> SubTokensInternal()
         {
-            return null;
+            return new List<QueryToken>();
         }
 
         protected override Expression BuildExpressionInternal(BuildExpressionContext context)
