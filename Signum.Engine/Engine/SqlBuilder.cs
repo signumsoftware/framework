@@ -61,7 +61,27 @@ namespace Signum.Engine
 
         internal static SqlPreCommand AlterTableAddColumn(string table, IColumn column)
         {
-            return new SqlPreCommandSimple("ALTER TABLE {0} ADD {1} -- DEFAULT( )".Formato(table, CreateField(column)));
+            return new SqlPreCommandSimple("ALTER TABLE {0} ADD {1}{2}".Formato(table, CreateField(column), !column.Nullable ? "-- DEFAULT(" + (IsNumber(column.SqlDbType) ? "0" : " ") + ")" : null));
+        }
+
+        private static bool IsNumber(SqlDbType sqlDbType)
+        {
+            switch (sqlDbType)
+            {
+                case SqlDbType.BigInt:
+                case SqlDbType.Float:
+                case SqlDbType.Decimal:
+                case SqlDbType.Int:
+                case SqlDbType.Bit:
+                case SqlDbType.Money:
+                case SqlDbType.Real:
+                case SqlDbType.TinyInt:
+                case SqlDbType.SmallInt:
+                case SqlDbType.SmallMoney:
+                    return true;
+            }
+
+            return false;
         }
 
         internal static SqlPreCommand AlterTableAlterColumn(string table, IColumn column)
