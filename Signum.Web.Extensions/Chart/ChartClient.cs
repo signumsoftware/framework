@@ -356,6 +356,19 @@ namespace Signum.Web.Chart
                     };
                 };
             }
+            else if (typeof(DateTime) == token.Type.UnNullify())
+            {
+
+                return p =>
+                {
+                    DateTime? e = (DateTime?)p;
+                    return new
+                    {
+                        key = e.TryToString("u"),
+                        toStr = token.Format.HasText() ? e.TryToString(token.Format) : p.TryToString()
+                    };
+                };
+            }
             else if (typeof(IFormattable).IsAssignableFrom(token.Type.UnNullify()) && token.Format.HasText())
             {
                 return p =>
@@ -363,19 +376,7 @@ namespace Signum.Web.Chart
                     return new
                     {
                         key = p,
-                        toStr = (p as IFormattable).TryToString(token.Format) ?? p.TryToString() ?? ""
-                    };
-                };
-            }
-            else if (typeof(DateTime) == token.Type.UnNullify())
-            {
-                return p =>
-                {
-                    DateTime e = (DateTime)p;
-                    return new
-                    {
-                        key = e,
-                        toStr = e.TryToString(),
+                        toStr = ((IFormattable)p).TryToString(token.Format)
                     };
                 };
             }

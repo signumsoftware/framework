@@ -16,6 +16,7 @@ using System.Collections.Specialized;
 using Signum.Engine;
 using Signum.Entities.Authorization;
 using Signum.Engine.Basics;
+using System.Web.Script.Serialization;
 
 namespace Signum.Web.Chart
 {
@@ -129,10 +130,10 @@ namespace Signum.Web.Chart
 
                 var chartTokenFilters = new List<FilterOption>
                 {
-                    AddFilter(chartRequest.Chart.Dimension1, "d1"),
-                    AddFilter(chartRequest.Chart.Dimension2, "d2"),
-                    AddFilter(chartRequest.Chart.Value1, "v1"),
-                    AddFilter(chartRequest.Chart.Value2, "v2")
+                    AddFilter(chartRequest, chartRequest.Chart.Dimension1, "d1"),
+                    AddFilter(chartRequest, chartRequest.Chart.Dimension2, "d2"),
+                    AddFilter(chartRequest, chartRequest.Chart.Value1, "v1"),
+                    AddFilter(chartRequest, chartRequest.Chart.Value2, "v2")
                 };
 
                 filters.AddRange(chartTokenFilters.NotNull());
@@ -160,17 +161,21 @@ namespace Signum.Web.Chart
             }
         }
 
-        private FilterOption AddFilter(ChartTokenDN chartToken, string key)
+        private FilterOption AddFilter(ChartRequest request, ChartTokenDN chartToken, string key)
         {
-            if (chartToken == null || chartToken.Aggregate != null || !Request.Params.AllKeys.Contains(key))
+            if (chartToken == null || chartToken.Aggregate != null)
                 return null;
-            
+
+            bool hasKey = Request.Params.AllKeys.Contains(key);
+            var value = hasKey ? Request.Params[key] : null;
+
             var token = chartToken.Token;
+
             return new FilterOption
             {
                 Token = token,
                 Operation = FilterOperation.EqualTo,
-                Value = FindOptionsModelBinder.Convert(FindOptionsModelBinder.DecodeValue(Request.Params[key]), token.Type)
+                Value = hasKey ? FindOptionsModelBinder.Convert(FindOptionsModelBinder.DecodeValue(value), token.Type) : null
             };
         }
         #endregion

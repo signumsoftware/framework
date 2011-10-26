@@ -36,8 +36,7 @@ SF.Chart.Builder = (function () {
         var $resultsContainer = $chartControl.find(".sf-search-results-container");
         if ($this.hasClass("sf-chart-img-equiv")) {
             if ($resultsContainer.find("svg").length > 0) {
-                //TODO do not call server again to regenerate chart
-                $chartControl.find(".sf-chart-draw").click();
+                SF.Chart.Builder.reDraw($chartControl.find(".sf-chart-container"), true);
             }
         }
         else {
@@ -97,14 +96,29 @@ SF.Chart.Builder = (function () {
         });
     });
 
+    var reDraw = function ($chartContainer, force) {
+        $chartContainer.html("");
+
+        var data = $chartContainer.data("data");
+        var width = $chartContainer.width();
+        var height = $chartContainer.height();
+        
+        var $chartControl = $chartContainer.closest(".sf-chart-control");
+        var myChart = SF.Chart.Factory.getGraphType($chartControl.find(".ui-widget-header .sf-chart-type-value").val());
+            
+        var $codeArea = $chartControl.find('.sf-chart-code-container textarea');
+        if ($codeArea.val() == '' || force) {
+            $codeArea.val(myChart.createChartSVG("#" + $chartControl.attr("id") + " .sf-chart-container") + myChart.paintChart());
+        }
+
+        eval($codeArea.val());
+    };
+
     return {
-        requestProcessedData: requestProcessedData
+        requestProcessedData: requestProcessedData,
+        reDraw: reDraw
     };
 })();
-
-var SF = SF || {};
-
-SF.Chart = SF.Chart || {};
 
 SF.Chart.Factory = (function () {
     var br = "\n",
@@ -167,11 +181,11 @@ SF.Chart.ChartBase.prototype = {
     },
 
     getTokenLabel: function (tokenValue) {
-        return !SF.isEmpty(tokenValue) ? (tokenValue.toStr || tokenValue) : tokenValue;
+        return !SF.isEmpty(tokenValue) ? (typeof tokenValue.toStr != "undefined" ? tokenValue.toStr : tokenValue) : tokenValue;
     },
 
     getTokenKey: function (tokenValue) {
-        return !SF.isEmpty(tokenValue) ? (tokenValue.key || tokenValue) : tokenValue;
+        return !SF.isEmpty(tokenValue) ? (typeof tokenValue.key != "undefined" ? tokenValue.key : tokenValue) : tokenValue;
     },
 
     getPathPoints: function (points) {
@@ -213,7 +227,7 @@ SF.Chart.ChartBase.prototype = {
 
             var extractAttribute = function ($shape, attrName) {
                 var att = $shape.attr("data-" + attrName);
-                if (typeof att != "undefined" && att != false && !SF.isEmpty(att)) {
+                if (typeof att != "undefined") {
                     return "&" + attrName + "=" + att;
                 }
                 else {
@@ -439,11 +453,12 @@ SF.Chart.Columns.prototype = $.extend({}, new SF.Chart.ChartBase(), {
             "//paint x-axis tick labels" + this.br +
             "var yHalf = (xAxisTopPosition - padding) / 2;" + this.br +
             "if (x.rangeBand() > fontSize) {" + this.brt +
-            "chart.append('svg:g').attr('class', 'x-axis-tick-label').attr('transform', 'translate(' + (yAxisLeftPosition + (x.rangeBand() / 2) + (fontSize / 2)) + ', ' + (xAxisTopPosition - labelMargin) + ') rotate(270)')" + this.brt +
+            "chart.append('svg:g').attr('class', 'x-axis-tick-label').attr('transform', 'translate(' + (yAxisLeftPosition + (x.rangeBand() / 2) + (fontSize / 2)) + ', ' + xAxisTopPosition + ') rotate(270)')" + this.brt +
             ".enterData(data.serie, 'text', 'x-axis-tick-label sf-chart-strong')" + this.brt +
-            ".attr('x', function (v) { var posy = y(myChart.getTokenKey(v.value1)); return posy >= yHalf ? 0 : posy; })" + this.brt +
+            ".attr('x', function (v) { var posy = y(myChart.getTokenKey(v.value1)); return posy >= yHalf ? posy - labelMargin : posy + labelMargin; })" + this.brt +
             ".attr('y', function (v) { return x(JSON.stringify(v)) })" + this.brt +
-            ".attr('fill', function(v) { return y(myChart.getTokenKey(v.value1)) >= yHalf ? '#fff' : color(JSON.stringify(v)); })" + this.brt +
+            ".attr('text-anchor', function(v) { return y(myChart.getTokenKey(v.value1)) >= yHalf ? 'end' : 'start'; })" + this.brt +
+	        ".attr('fill', function(v) { return y(myChart.getTokenKey(v.value1)) >= yHalf ? '#fff' : color(JSON.stringify(v)); })" + this.brt +
             ".text(function (v) { return myChart.getTokenLabel(v.dimension1); });" + this.br +
             "}" + this.br + +this.br;
     }
