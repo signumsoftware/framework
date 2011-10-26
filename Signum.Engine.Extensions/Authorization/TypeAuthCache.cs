@@ -316,19 +316,6 @@ namespace Signum.Entities.Authorization
             return runtimeRules.Value[role].GetDefaultRule(Max);
         }
 
-        internal TypeAllowedAndConditions GetAllowed(Type key)
-        {
-            if (!AuthLogic.IsEnabled || Schema.Current.InGlobalMode)
-                return Max.BaseAllowed;
-
-            TypeAllowed? temp = TypeAuthLogic.GetTemporallyAllowed(key);
-            if (temp.HasValue)
-                return new TypeAllowedAndConditions(temp.Value); 
-
-           
-            return runtimeRules.Value[RoleDN.Current.ToLite()].GetAllowed(key);
-        }
-
         internal TypeAllowedAndConditions GetAllowed(Lite<RoleDN> role, Type key)
         {
             return runtimeRules.Value[role].GetAllowed(key);

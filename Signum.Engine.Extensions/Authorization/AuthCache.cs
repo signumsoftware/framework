@@ -290,14 +290,6 @@ namespace Signum.Entities.Authorization
             return runtimeRules.Value[role].GetDefaultRule(Max);
         }
 
-        internal A GetAllowed(K key)
-        {
-            if (!AuthLogic.IsEnabled || Schema.Current.InGlobalMode)
-                return Max.BaseAllowed;
-
-            return runtimeRules.Value[RoleDN.Current.ToLite()].GetAllowed(key);
-        }
-
         internal A GetAllowed(Lite<RoleDN> role, K key)
         {
             return runtimeRules.Value[role].GetAllowed(key);

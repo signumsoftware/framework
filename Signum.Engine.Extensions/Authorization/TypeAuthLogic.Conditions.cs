@@ -379,7 +379,7 @@ namespace Signum.Engine.Authorization
             
             Type type = entity.Type;
           
-            TypeAllowedAndConditions tac = cache.GetAllowed(type);
+            TypeAllowedAndConditions tac = GetAllowed(type);
 
             Expression baseValue = Expression.Constant(tac.Fallback.Get(userInterface) >= requested);
 
@@ -409,7 +409,7 @@ namespace Signum.Engine.Authorization
 
             Type type = entity.Type;
 
-            TypeAllowedAndConditions tac = cache.GetAllowed(type);
+            TypeAllowedAndConditions tac = GetAllowed(type);
 
             Expression baseValue = Expression.Constant(tac.Fallback.Get(userInterface) >= requested);
 
@@ -547,33 +547,6 @@ namespace Signum.Engine.Authorization
         {
             return new TypeAllowedAndConditions(rule.Allowed,
                 rule.Conditions.Select(c => new TypeConditionRule(EnumLogic<TypeConditionNameDN>.ToEnum(c.Condition), c.Allowed)).ToReadOnly());
-        }
-
-        [ThreadStatic]
-        static ImmutableStack<Tuple<Type, TypeAllowed>> temporallyAllowed;
-
-        public static IDisposable AllowTemporally<T>(TypeAllowed typeAllowed)
-            where T: IdentifiableEntity
-        {
-            var old = temporallyAllowed;
-
-            temporallyAllowed = (temporallyAllowed ?? ImmutableStack<Tuple<Type, TypeAllowed>>.Empty).Push(Tuple.Create(typeof(T), typeAllowed));
-
-            return new Disposable(() => temporallyAllowed = old); 
-        }
-
-        internal static TypeAllowed? GetTemporallyAllowed(Type type)
-        {
-            var ta = temporallyAllowed;
-            if (ta == null || ta.IsEmpty)
-                return null;
-
-            var pair = temporallyAllowed.FirstOrDefault(a => a.Item1 == type);
-            
-            if (pair == null)
-                return null;
-
-            return pair.Item2;
         }
     }
 }

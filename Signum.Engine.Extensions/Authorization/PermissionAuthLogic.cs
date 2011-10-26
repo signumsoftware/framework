@@ -78,13 +78,16 @@ namespace Signum.Engine.Authorization
  
         public static void Authorize(this Enum permissionKey)
         {
-            if (!cache.GetAllowed(permissionKey))
+            if (!IsAuthorized(permissionKey))
                 throw new UnauthorizedAccessException("Permission '{0}' is denied".Formato(permissionKey));
         }
 
         public static bool IsAuthorized(this Enum permissionKey)
         {
-            return cache.GetAllowed(permissionKey);
+            if (!AuthLogic.IsEnabled || Schema.Current.InGlobalMode)
+                return true;
+
+            return cache.GetAllowed(RoleDN.Current.ToLite(), permissionKey);
         }
 
         public static bool IsAuthorized(this Enum permissionKey, Lite<RoleDN> role)
@@ -107,16 +110,6 @@ namespace Signum.Engine.Authorization
         public static void SetPermissionRules(PermissionRulePack rules)
         {
             cache.SetRules(rules, r => true);
-        }
-
-        public static bool GetPermissionAllowed(Lite<RoleDN> role, Enum permissionKey)
-        {
-            return cache.GetAllowed(role, permissionKey);
-        }
-
-        public static bool GetPermissionAllowed(Enum permissionKey)
-        {
-            return cache.GetAllowed(permissionKey);
         }
     }
 }
