@@ -144,11 +144,11 @@ namespace Signum.Web.Chart
 
         public static EntityMapping<ChartRequest> MappingChartRequest = new EntityMapping<ChartRequest>(true)
             .SetProperty(cr => cr.Chart, new EntityMapping<ChartBase>(true)
-                .SetProperty(cb => cb.Dimension1, mappingChartToken)
-                .SetProperty(cb => cb.Dimension2, mappingChartToken)
-                .SetProperty(cb => cb.Value1, mappingChartToken)
-                .SetProperty(cb => cb.Value2, mappingChartToken))
-            .SetProperty(cr => cr.Filters, ctx => ExtractChartFilters(ctx));
+                .SetProperty(cb => cb.Dimension1, ctx => { if (ctx.Value == null) return ctx.None(); else return mappingChartToken.GetValue(ctx); })
+                .SetProperty(cb => cb.Dimension2, ctx => { if (ctx.Value == null) return ctx.None(); else return mappingChartToken.GetValue(ctx); })
+                .SetProperty(cb => cb.Value1, ctx => { if (ctx.Value == null) return ctx.None(); else return mappingChartToken.GetValue(ctx); })
+                .SetProperty(cb => cb.Value2, ctx => { if (ctx.Value == null) return ctx.None(); else return mappingChartToken.GetValue(ctx); }))
+                .SetProperty(cr => cr.Filters, ctx => ExtractChartFilters(ctx));
 
         static List<Entities.DynamicQuery.Filter> ExtractChartFilters(MappingContext<List<Entities.DynamicQuery.Filter>> ctx)
         {

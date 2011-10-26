@@ -343,17 +343,17 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
-    <Compile Include="Mailing\Views\Newsletter.cs">
+    <Compile Include="Combine\Mailing\Views\Newsletter.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Newsletter.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Mailing\Views\NewsletterDelivery1.cs">
+    <Compile Include="Combine\Mailing\Views\NewsletterDelivery1.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>NewsletterDelivery.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Mailing\Views\SMTPConfiguration.cs">
+    <Compile Include="Combine\Mailing\Views\SMTPConfiguration.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>SMTPConfiguration.cshtml</DependentUpon>
@@ -456,18 +456,18 @@
       <DesignTime>True</DesignTime>
     </Compile>
     <Compile Include="HttpModules\WhitespaceModule.cs" />
-    <Compile Include="Mailing\EmailClient.cs" />
-    <Compile Include="Mailing\Views\EmailMessage.cs">
+    <Compile Include="Combine\Mailing\EmailClient.cs" />
+    <Compile Include="Combine\Mailing\Views\EmailMessage.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>EmailMessage.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Mailing\Views\EmailPackage.cs">
+    <Compile Include="Combine\Mailing\Views\EmailPackage.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>EmailPackage.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Mailing\Views\_ViewStart.cs">
+    <Compile Include="Combine\Mailing\Views\_ViewStart.cs">
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -818,9 +818,9 @@
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>_ViewStart.cs</LastGenOutput>
     </Content>
-    <Content Include="Mailing\Content\Mail.css" />
-    <Content Include="Mailing\Scripts\SF_Mail.js" />
-    <Content Include="Mailing\Views\_ViewStart.cshtml">
+    <Content Include="Combine\Mailing\Content\Mail.css" />
+    <Content Include="Combine\Mailing\Scripts\SF_Mail.js" />
+    <Content Include="Combine\Mailing\Views\_ViewStart.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>_ViewStart.cs</LastGenOutput>
     </Content>
@@ -912,15 +912,15 @@
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>StatisticsTable1.cs</LastGenOutput>
     </Content>
-    <Content Include="Mailing\Views\SMTPConfiguration.cshtml">
+    <Content Include="Combine\Mailing\Views\SMTPConfiguration.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>SMTPConfiguration.cs</LastGenOutput>
     </Content>
-    <Content Include="Mailing\Views\Newsletter.cshtml">
+    <Content Include="Combine\Mailing\Views\Newsletter.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>Newsletter.cs</LastGenOutput>
     </Content>
-    <Content Include="Mailing\Views\NewsletterDelivery.cshtml">
+    <Content Include="Combine\Mailing\Views\NewsletterDelivery.cshtml">
       <LastGenOutput>NewsletterDelivery1.cs</LastGenOutput>
       <Generator>MvcRazorClassGenerator</Generator>
     </Content>
@@ -1024,7 +1024,7 @@
     <Content Include="Captcha\Views\Web.config" />
     <Content Include="ControlPanel\Views\Web.config" />
     <Content Include="Help\Views\Web.config" />
-    <Content Include="Mailing\Views\Web.config" />
+    <Content Include="Combine\Mailing\Views\Web.config" />
     <Content Include="Processes\Views\Web.config" />
     <Content Include="Profiler\Views\Web.config" />
     <Content Include="UserQueries\Views\Web.config" />
@@ -1165,11 +1165,11 @@
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>ViewNamespace.cs</LastGenOutput>
     </None>
-    <None Include="Mailing\Views\EmailMessage.cshtml">
+    <None Include="Combine\Mailing\Views\EmailMessage.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>EmailMessage.cs</LastGenOutput>
     </None>
-    <None Include="Mailing\Views\EmailPackage.cshtml">
+    <None Include="Combine\Mailing\Views\EmailPackage.cshtml">
       <Generator>MvcRazorClassGenerator</Generator>
       <LastGenOutput>EmailPackage.cs</LastGenOutput>
     </None>
