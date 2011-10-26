@@ -50,7 +50,7 @@ namespace Signum.Entities.DynamicQuery
         string key;
         public override string Key { get { return key; } }
 
-        protected override QueryToken[] SubTokensInternal()
+        protected override List<QueryToken> SubTokensInternal()
         {
             return base.SubTokensBase(type, implementations);  
         }

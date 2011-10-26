@@ -251,36 +251,35 @@ namespace Signum.Web
             }
 
             sb.AddLine(SearchControlHelper.TokensCombo(helper, queryName, items, context, 0, false));
-            
+
             for (int i = 0; i < tokenPath.Count; i++)
             {
                 QueryToken t = tokenPath[i];
-                QueryToken[] subtokens = t.SubTokens();
-                if (subtokens != null)
+                List<QueryToken> subtokens = t.SubTokens();
+
+                var subitems = new HtmlStringBuilder();
+                subitems.AddLine(new HtmlTag("option").Attr("value", "").SetInnerText("-").ToHtml());
+                foreach (var qt in subtokens)
                 {
-                    var subitems = new HtmlStringBuilder();
-                    subitems.AddLine(new HtmlTag("option").Attr("value", "").SetInnerText("-").ToHtml());
-                    foreach(var qt in subtokens)
-                    {
-                        var option = new HtmlTag("option")
-                            .Attr("value", qt.Key)
-                            .SetInnerText(qt.ToString());
-                        if (i + 1 < tokenPath.Count && qt.Key == tokenPath[i+1].Key)
-                            option.Attr("selected", "selected");
+                    var option = new HtmlTag("option")
+                        .Attr("value", qt.Key)
+                        .SetInnerText(qt.ToString());
+                    if (i + 1 < tokenPath.Count && qt.Key == tokenPath[i + 1].Key)
+                        option.Attr("selected", "selected");
 
-                        string canColumn = QueryUtils.CanColumn(qt);
-                        if (canColumn.HasText())
-                            option.Attr("data-column", canColumn);
+                    string canColumn = QueryUtils.CanColumn(qt);
+                    if (canColumn.HasText())
+                        option.Attr("data-column", canColumn);
 
-                        string canFilter = QueryUtils.CanFilter(qt);
-                        if (canFilter.HasText())
-                            option.Attr("data-filter", canFilter);
+                    string canFilter = QueryUtils.CanFilter(qt);
+                    if (canFilter.HasText())
+                        option.Attr("data-filter", canFilter);
 
-                        subitems.AddLine(option.ToHtml());
-                    }
-
-                    sb.AddLine(SearchControlHelper.TokensCombo(helper, queryName, subitems, context, i + 1, (i + 1 >= tokenPath.Count)));
+                    subitems.AddLine(option.ToHtml());
                 }
+
+                sb.AddLine(SearchControlHelper.TokensCombo(helper, queryName, subitems, context, i + 1, (i + 1 >= tokenPath.Count)));
+
             }
             
             return sb.ToHtml();

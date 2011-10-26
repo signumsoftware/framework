@@ -48,9 +48,9 @@ namespace Signum.Entities.DynamicQuery
             get { return "Date"; }
         }
 
-        protected override QueryToken[] SubTokensInternal()
+        protected override List<QueryToken> SubTokensInternal()
         {
-            return null;
+            return new List<QueryToken>();
         }
 
         static PropertyInfo miDate = ReflectionTools.GetPropertyInfo((DateTime d) => d.Date);

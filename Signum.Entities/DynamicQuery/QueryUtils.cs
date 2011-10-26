@@ -183,10 +183,10 @@ namespace Signum.Entities.DynamicQuery
             },
         };
 
-        public static QueryToken[] SubTokens(QueryToken token, IEnumerable<ColumnDescription> columnDescriptions)
+        public static List<QueryToken> SubTokens(QueryToken token, IEnumerable<ColumnDescription> columnDescriptions)
         {
             if (token == null)
-                return columnDescriptions.Select(s => QueryToken.NewColumn(s)).ToArray();
+                return columnDescriptions.Select(s => QueryToken.NewColumn(s)).ToList();
             else
                 return token.SubTokens();
         }
@@ -196,7 +196,7 @@ namespace Signum.Entities.DynamicQuery
             return Parse(tokenString, t => SubTokens(t, description.Columns));
         }
 
-        public static QueryToken Parse(string tokenString, Func<QueryToken, QueryToken[]> subTokens)
+        public static QueryToken Parse(string tokenString, Func<QueryToken, List<QueryToken>> subTokens)
         {
             try
             {

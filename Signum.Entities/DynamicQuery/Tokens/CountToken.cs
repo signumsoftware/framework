@@ -48,9 +48,9 @@ namespace Signum.Entities.DynamicQuery
             return BuildLite(result.Nullify());
         }
 
-        protected override QueryToken[] SubTokensInternal()
+        protected override List<QueryToken> SubTokensInternal()
         {
-            return null;
+            return new List<QueryToken>();
         }
 
         public override string Format
