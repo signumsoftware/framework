@@ -76,7 +76,7 @@ namespace Signum.Windows.Chart
                                 new DataPoint 
                                 { 
                                     AxisXLabel = Format(r.Key, ChartRequest.Chart.Dimension1.Format), 
-                                    YValue = ToDouble(r.Value, ChartTokenName.FirstValue) 
+                                    YValue = ToDouble(r.Value, ChartTokenName.Value1) 
                                 } 
                              ))
                         };
@@ -88,7 +88,7 @@ namespace Signum.Windows.Chart
                         List<object> subSeries = ResultTable.Rows.Select(r => r[1] ?? NullValue).Distinct().ToList();
 
                         double?[,] array = ResultTable.Rows.ToArray(
-                            r => (double?)ToDouble(r[2], ChartTokenName.FirstValue), 
+                            r => (double?)ToDouble(r[2], ChartTokenName.Value1), 
                             r => series.IndexOf(r[0] ?? NullValue), 
                             r => subSeries.IndexOf(r[1] ?? NullValue), series.Count, subSeries.Count);
 
@@ -124,7 +124,7 @@ namespace Signum.Windows.Chart
                     .AddPoints(ResultTable.Rows.Select(r => new DataPoint
                     {
                          XValue = ToDouble(r[0], ChartTokenName.Dimension1),
-                         YValue = ToDouble(r[1], ChartTokenName.SecondDimension),
+                         YValue = ToDouble(r[1], ChartTokenName.Dimension2),
                          Color = ToColor(r[2]),
                     }))
                     };
@@ -139,9 +139,9 @@ namespace Signum.Windows.Chart
                     .AddPoints(ResultTable.Rows.Select(r => new DataPoint
                     {
                          XValue = ToDouble(r[0], ChartTokenName.Dimension1),
-                         YValue = ToDouble(r[1], ChartTokenName.SecondDimension),
+                         YValue = ToDouble(r[1], ChartTokenName.Dimension2),
                          Color = ToColor(r[2]),
-                         ZValue = ToDouble(r[3], ChartTokenName.SecondValue),
+                         ZValue = ToDouble(r[3], ChartTokenName.Value2),
                     }))
                     };
             }

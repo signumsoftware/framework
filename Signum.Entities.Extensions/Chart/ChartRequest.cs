@@ -112,9 +112,9 @@ namespace Signum.Entities.Chart
         protected void UpdateTokens()
         {
             SetToken(ref dimension1, ChartUtils.IsVisible(chartResultType, ChartTokenName.Dimension1), () => Dimension1);
-            SetToken(ref dimension2, ChartUtils.IsVisible(chartResultType, ChartTokenName.SecondDimension), () => Dimension2);
-            SetToken(ref value1, ChartUtils.IsVisible(chartResultType, ChartTokenName.FirstValue), () => Value1);
-            SetToken(ref value2, ChartUtils.IsVisible(chartResultType, ChartTokenName.SecondValue), () => Value2);
+            SetToken(ref dimension2, ChartUtils.IsVisible(chartResultType, ChartTokenName.Dimension2), () => Dimension2);
+            SetToken(ref value1, ChartUtils.IsVisible(chartResultType, ChartTokenName.Value1), () => Value1);
+            SetToken(ref value2, ChartUtils.IsVisible(chartResultType, ChartTokenName.Value2), () => Value2);
         }
 
         void SetToken(ref ChartTokenDN token, bool should, Expression<Func<ChartTokenDN>> property)
@@ -261,15 +261,15 @@ namespace Signum.Entities.Chart
             token.PropertyLabeleEvent += token_PropertyLabeleEvent;
         }
 
-        ChartTokenName GetTokenName(ChartTokenDN token)
+        public ChartTokenName GetTokenName(ChartTokenDN token)
         {
             if (token == null)
                 throw new ArgumentNullException("token");
 
             if (token == dimension1) return ChartTokenName.Dimension1;
-            if (token == dimension2) return ChartTokenName.SecondDimension;
-            if (token == value1) return ChartTokenName.FirstValue;
-            if (token == value2) return ChartTokenName.SecondValue;
+            if (token == dimension2) return ChartTokenName.Dimension2;
+            if (token == value1) return ChartTokenName.Value1;
+            if (token == value2) return ChartTokenName.Value2;
 
             throw new InvalidOperationException("token not found");
         }
@@ -279,9 +279,9 @@ namespace Signum.Entities.Chart
             switch (chartTokenName)
             {
                 case ChartTokenName.Dimension1: return dimension1;
-                case ChartTokenName.SecondDimension: return dimension2;
-                case ChartTokenName.FirstValue: return value1;
-                case ChartTokenName.SecondValue: return value2;
+                case ChartTokenName.Dimension2: return dimension2;
+                case ChartTokenName.Value1: return value1;
+                case ChartTokenName.Value2: return value2;
             }
 
             return null;

@@ -16,6 +16,7 @@ using System.Collections.Specialized;
 using Signum.Engine;
 using Signum.Entities.Authorization;
 using Signum.Engine.Basics;
+using System.Web.Script.Serialization;
 
 namespace Signum.Web.Chart
 {
@@ -61,7 +62,9 @@ namespace Signum.Web.Chart
         [HttpPost]
         public PartialViewResult UpdateChartBuilder(string prefix)
         {
-            var request = ExtractChartRequestCtx(prefix).Value;   
+            var lastToken = Request["lastTokenChanged"];
+            
+            var request = ExtractChartRequestCtx(prefix, lastToken.HasText() ? (ChartTokenName?)lastToken.ToEnum<ChartTokenName>() : null).Value;   
 
             ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(request.QueryName);
             
@@ -71,7 +74,7 @@ namespace Signum.Web.Chart
         [HttpPost]
         public ActionResult Draw(string prefix)
         {
-            var requestCtx = ExtractChartRequestCtx(prefix).ValidateGlobal();
+            var requestCtx = ExtractChartRequestCtx(prefix, null).ValidateGlobal();
 
             if (requestCtx.GlobalErrors.Any())
             {
@@ -98,15 +101,28 @@ namespace Signum.Web.Chart
             return PartialView(ChartClient.ChartResultsView, new TypeContext<ChartRequest>(request, prefix));
         }
 
-        MappingContext<ChartRequest> ExtractChartRequestCtx(string prefix)
+        MappingContext<ChartRequest> ExtractChartRequestCtx(string prefix, ChartTokenName? lastTokenChanged)
         {
-            return new ChartRequest(Navigator.ResolveQueryName(Request.Form[TypeContextUtilities.Compose(prefix, ViewDataKeys.QueryName)]))
+            var ctx = new ChartRequest(Navigator.ResolveQueryName(Request.Form[TypeContextUtilities.Compose(prefix, ViewDataKeys.QueryName)]))
                     .ApplyChanges(this.ControllerContext, prefix, ChartClient.MappingChartRequest);
+
+            var ch = ctx.Value.Chart;
+            switch (lastTokenChanged)
+            {
+                case ChartTokenName.Dimension1: ch.Dimension1.TokenChanged(); break;
+                case ChartTokenName.Dimension2: ch.Dimension2.TokenChanged(); break;
+                case ChartTokenName.Value1: ch.Value1.TokenChanged(); break;
+                case ChartTokenName.Value2: ch.Value2.TokenChanged(); break;
+                default:
+                    break;
+            }
+
+            return ctx;
         }
 
         public ActionResult OpenSubgroup(string prefix)
         {
-            var chartRequest = ExtractChartRequestCtx(prefix).Value;
+            var chartRequest = ExtractChartRequestCtx(prefix, null).Value;
 
             if (chartRequest.Chart.GroupResults)
             {
@@ -114,10 +130,10 @@ namespace Signum.Web.Chart
 
                 var chartTokenFilters = new List<FilterOption>
                 {
-                    AddFilter(chartRequest.Chart.Dimension1, "d1"),
-                    AddFilter(chartRequest.Chart.Dimension2, "d2"),
-                    AddFilter(chartRequest.Chart.Value1, "v1"),
-                    AddFilter(chartRequest.Chart.Value2, "v2")
+                    AddFilter(chartRequest, chartRequest.Chart.Dimension1, "d1"),
+                    AddFilter(chartRequest, chartRequest.Chart.Dimension2, "d2"),
+                    AddFilter(chartRequest, chartRequest.Chart.Value1, "v1"),
+                    AddFilter(chartRequest, chartRequest.Chart.Value2, "v2")
                 };
 
                 filters.AddRange(chartTokenFilters.NotNull());
@@ -145,17 +161,21 @@ namespace Signum.Web.Chart
             }
         }
 
-        private FilterOption AddFilter(ChartTokenDN chartToken, string key)
+        private FilterOption AddFilter(ChartRequest request, ChartTokenDN chartToken, string key)
         {
-            if (chartToken == null || chartToken.Aggregate != null || !Request.Params.AllKeys.Contains(key))
+            if (chartToken == null || chartToken.Aggregate != null)
                 return null;
-            
+
+            bool hasKey = Request.Params.AllKeys.Contains(key);
+            var value = hasKey ? Request.Params[key] : null;
+
             var token = chartToken.Token;
+
             return new FilterOption
             {
                 Token = token,
                 Operation = FilterOperation.EqualTo,
-                Value = FindOptionsModelBinder.Convert(FindOptionsModelBinder.DecodeValue(Request.Params[key]), token.Type)
+                Value = hasKey ? FindOptionsModelBinder.Convert(FindOptionsModelBinder.DecodeValue(value), token.Type) : null
             };
         }
         #endregion
@@ -163,7 +183,7 @@ namespace Signum.Web.Chart
         #region user chart
         public ActionResult CreateUserChart(string prefix)
         {
-            var request = ExtractChartRequestCtx(prefix).Value;
+            var request = ExtractChartRequestCtx(prefix, null).Value;
 
             if (!Navigator.IsFindable(request.QueryName))
                 throw new UnauthorizedAccessException(Resources.Chart_Query0IsNotAllowed.Formato(request.QueryName));

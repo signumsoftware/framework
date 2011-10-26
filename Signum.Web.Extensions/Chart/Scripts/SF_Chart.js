@@ -8,11 +8,15 @@ SF.Chart.Builder = (function () {
         return { filters: new SF.FindNavigator({ prefix: prefix }).serializeFilters() };
     };
 
-    var updateChartBuilder = function ($chartControl, callback) {
+    var updateChartBuilder = function ($chartControl, tokenChanged, callback) {
         var $chartBuilder = $chartControl.find(".sf-chart-builder");
+        var data = $chartControl.find(":input").serialize() + "&filters=" + new SF.FindNavigator({ prefix: $chartControl.attr("data-prefix") }).serializeFilters();
+        if (!SF.isEmpty(tokenChanged)) {
+            data += "&lastTokenChanged=" + tokenChanged;
+        }
         $.ajax({
             url: $chartBuilder.attr("data-url"),
-            data: $chartControl.find(":input").serialize() + "&filters=" + new SF.FindNavigator({ prefix: $chartControl.attr("data-prefix") }).serializeFilters(),
+            data: data,
             success: function (result) {
                 $chartBuilder.replaceWith(result);
                 SF.triggerNewContent($chartControl.find(".sf-chart-builder"));
@@ -32,8 +36,7 @@ SF.Chart.Builder = (function () {
         var $resultsContainer = $chartControl.find(".sf-search-results-container");
         if ($this.hasClass("sf-chart-img-equiv")) {
             if ($resultsContainer.find("svg").length > 0) {
-                //TODO do not call server again to regenerate chart
-                $chartControl.find(".sf-chart-draw").click();
+                SF.Chart.Builder.reDraw($chartControl.find(".sf-chart-container"), true);
             }
         }
         else {
@@ -55,13 +58,18 @@ SF.Chart.Builder = (function () {
         var $this = $(this);
         if ($this.val() == "Count") {
             var id = this.id;
-            updateChartBuilder($this.closest(".sf-chart-control"), function () {
+            updateChartBuilder($this.closest(".sf-chart-control"), null, function () {
                 $("#" + id).closest(".sf-chart-token").find(".sf-query-token").hide();
             });
         }
         else {
             $this.closest(".sf-chart-token").find(".sf-query-token").show();
         }
+    });
+
+    $(".sf-query-token select").live("change", function () {
+        var $this = $(this);
+        updateChartBuilder($this.closest(".sf-chart-control"), $this.closest("tr").attr("data-token"));
     });
 
     $(".sf-chart-draw").live("click", function (e) {
@@ -88,14 +96,29 @@ SF.Chart.Builder = (function () {
         });
     });
 
+    var reDraw = function ($chartContainer, force) {
+        $chartContainer.html("");
+
+        var data = $chartContainer.data("data");
+        var width = $chartContainer.width();
+        var height = $chartContainer.height();
+        
+        var $chartControl = $chartContainer.closest(".sf-chart-control");
+        var myChart = SF.Chart.Factory.getGraphType($chartControl.find(".ui-widget-header .sf-chart-type-value").val());
+            
+        var $codeArea = $chartControl.find('.sf-chart-code-container textarea');
+        if ($codeArea.val() == '' || force) {
+            $codeArea.val(myChart.createChartSVG("#" + $chartControl.attr("id") + " .sf-chart-container") + myChart.paintChart());
+        }
+
+        eval($codeArea.val());
+    };
+
     return {
-        requestProcessedData: requestProcessedData
+        requestProcessedData: requestProcessedData,
+        reDraw: reDraw
     };
 })();
-
-var SF = SF || {};
-
-SF.Chart = SF.Chart || {};
 
 SF.Chart.Factory = (function () {
     var br = "\n",
@@ -158,11 +181,11 @@ SF.Chart.ChartBase.prototype = {
     },
 
     getTokenLabel: function (tokenValue) {
-        return !SF.isEmpty(tokenValue) ? (tokenValue.toStr || tokenValue) : tokenValue;
+        return !SF.isEmpty(tokenValue) ? (typeof tokenValue.toStr != "undefined" ? tokenValue.toStr : tokenValue) : tokenValue;
     },
 
     getTokenKey: function (tokenValue) {
-        return !SF.isEmpty(tokenValue) ? (tokenValue.key || tokenValue) : tokenValue;
+        return !SF.isEmpty(tokenValue) ? (typeof tokenValue.key != "undefined" ? tokenValue.key : tokenValue) : tokenValue;
     },
 
     getPathPoints: function (points) {
@@ -204,7 +227,7 @@ SF.Chart.ChartBase.prototype = {
 
             var extractAttribute = function ($shape, attrName) {
                 var att = $shape.attr("data-" + attrName);
-                if (typeof att != "undefined" && att != false && !SF.isEmpty(att)) {
+                if (typeof att != "undefined") {
                     return "&" + attrName + "=" + att;
                 }
                 else {
@@ -253,7 +276,7 @@ SF.Chart.Bars.prototype = $.extend({}, new SF.Chart.ChartBase(), {
     getXAxis: function () {
         return "//x axis scale" + this.br +
             "var x = d3.scale.linear()" + this.brt +
-            ".domain([0, d3.max($.map(data.serie, function (e) { return myChart.getTokenLabel(e.value1); }))])" + this.brt +
+            ".domain([0, d3.max($.map(data.serie, function (e) { return myChart.getTokenKey(e.value1); }))])" + this.brt +
             ".range([0, width - yAxisLeftPosition - padding]);" + this.br + this.br;
     },
 
@@ -304,7 +327,7 @@ SF.Chart.Bars.prototype = $.extend({}, new SF.Chart.ChartBase(), {
             "//paint y-axis - token label" + this.br +
             "chart.append('svg:g').attr('class', 'y-axis-token-label').attr('transform', 'translate(' + fontSize + ', ' + (xAxisTopPosition / 2) + ') rotate(270)')" + this.brt +
             ".append('svg:text').attr('class', 'y-axis-token-label')" + this.brt +
-            ".attr('text-anchor', 'start')" + this.brt +
+            ".attr('text-anchor', 'middle')" + this.brt +
             ".text(data.labels.dimension1);" + this.br + this.br;
     },
 
@@ -312,7 +335,7 @@ SF.Chart.Bars.prototype = $.extend({}, new SF.Chart.ChartBase(), {
         return "//paint graph" + this.br +
             "chart.append('svg:g').attr('class', 'shape').attr('transform' ,'translate(' + yAxisLeftPosition + ', ' + (padding + chartAxisPadding) + ')')" + this.brt +
             ".enterData(data.serie, 'rect', 'shape')" + this.brt +
-            ".attr('width', function (v) { return x(myChart.getTokenLabel(v.value1)); })" + this.brt +
+            ".attr('width', function (v) { return x(myChart.getTokenKey(v.value1)); })" + this.brt +
             ".attr('height', y.rangeBand)" + this.brt +
             ".attr('y', function (v) { return y(JSON.stringify(v)); })" + this.brt +
             ".attr('fill', function (v) { return color(JSON.stringify(v)); })" + this.brt +
@@ -327,9 +350,9 @@ SF.Chart.Bars.prototype = $.extend({}, new SF.Chart.ChartBase(), {
             "if (y.rangeBand() > fontSize) {" + this.brt +
             "chart.append('svg:g').attr('class', 'y-axis-tick-label').attr('transform', 'translate(' + (yAxisLeftPosition + labelMargin) + ', ' + (padding + chartAxisPadding + (y.rangeBand() / 2) + (fontSize / 2)) + ')')" + this.brt +
             ".enterData(data.serie, 'text', 'y-axis-tick-label sf-chart-strong')" + this.brt +
-            ".attr('x', function(v) { var posx = x(myChart.getTokenLabel(v.value1)); return posx >= xHalf ? 0 : posx; })" + this.brt +
+            ".attr('x', function(v) { var posx = x(myChart.getTokenKey(v.value1)); return posx >= xHalf ? 0 : posx; })" + this.brt +
             ".attr('y', function (v) { return y(JSON.stringify(v)); })" + this.brt +
-            ".attr('fill', function(v) { return x(myChart.getTokenLabel(v.value1)) >= xHalf ? '#fff' : color(JSON.stringify(v)); })" + this.brt +
+            ".attr('fill', function(v) { return x(myChart.getTokenKey(v.value1)) >= xHalf ? '#fff' : color(JSON.stringify(v)); })" + this.brt +
             ".text(function (v) { return myChart.getTokenLabel(v.dimension1); });" + this.br +
             "}" + this.br + this.br;
     }
@@ -363,7 +386,7 @@ SF.Chart.Columns.prototype = $.extend({}, new SF.Chart.ChartBase(), {
     getYAxis: function () {
         return "//y axis scale" + this.br +
             "var y = d3.scale.linear()" + this.brt +
-            ".domain([0, d3.max($.map(data.serie, function (e) { return myChart.getTokenLabel(e.value1); }))])" + this.brt +
+            ".domain([0, d3.max($.map(data.serie, function (e) { return myChart.getTokenKey(e.value1); }))])" + this.brt +
             ".range([0, xAxisTopPosition - padding]);" + this.br + this.br;
     },
 
@@ -417,7 +440,7 @@ SF.Chart.Columns.prototype = $.extend({}, new SF.Chart.ChartBase(), {
         return "//paint graph" + this.br +
             "chart.append('svg:g').attr('class', 'shape').attr('transform' ,'translate(' + (yAxisLeftPosition + chartAxisPadding) + ', ' + xAxisTopPosition + ') scale(1, -1)')" + this.brt +
             ".enterData(data.serie, 'rect', 'shape')" + this.brt +
-            ".attr('height', function (v) { return y(v.value1); })" + this.brt +
+            ".attr('height', function (v) { return y(myChart.getTokenKey(v.value1)); })" + this.brt +
             ".attr('width', x.rangeBand)" + this.brt +
             ".attr('x', function (v) { return x(JSON.stringify(v)); })" + this.brt +
             ".attr('fill', function (v) { return color(JSON.stringify(v)); })" + this.brt +
@@ -425,16 +448,17 @@ SF.Chart.Columns.prototype = $.extend({}, new SF.Chart.ChartBase(), {
             ".attr('data-d1', function(v) { return myChart.getTokenKey(v.dimension1); })" + this.brt +
             ".attr('data-entity', function(v) { return v.entity || ''; })" + this.brt +
             ".append('svg:title')" + this.brt +
-            ".text(function(d) { return myChart.getTokenLabel(d.dimension1) + ': ' + d.value1; });" + this.br +
+            ".text(function(d) { return myChart.getTokenLabel(d.dimension1) + ': ' + myChart.getTokenLabel(d.value1); });" + this.br +
             this.br +
             "//paint x-axis tick labels" + this.br +
             "var yHalf = (xAxisTopPosition - padding) / 2;" + this.br +
             "if (x.rangeBand() > fontSize) {" + this.brt +
-            "chart.append('svg:g').attr('class', 'x-axis-tick-label').attr('transform', 'translate(' + (yAxisLeftPosition + (x.rangeBand() / 2) + (fontSize / 2)) + ', ' + (xAxisTopPosition - labelMargin) + ') rotate(270)')" + this.brt +
+            "chart.append('svg:g').attr('class', 'x-axis-tick-label').attr('transform', 'translate(' + (yAxisLeftPosition + (x.rangeBand() / 2) + (fontSize / 2)) + ', ' + xAxisTopPosition + ') rotate(270)')" + this.brt +
             ".enterData(data.serie, 'text', 'x-axis-tick-label sf-chart-strong')" + this.brt +
-            ".attr('x', function (v) { var posy = y(v.value1); return posy >= yHalf ? 0 : posy; })" + this.brt +
+            ".attr('x', function (v) { var posy = y(myChart.getTokenKey(v.value1)); return posy >= yHalf ? posy - labelMargin : posy + labelMargin; })" + this.brt +
             ".attr('y', function (v) { return x(JSON.stringify(v)) })" + this.brt +
-            ".attr('fill', function(v) { return y(v.value1) >= yHalf ? '#fff' : color(JSON.stringify(v)); })" + this.brt +
+            ".attr('text-anchor', function(v) { return y(myChart.getTokenKey(v.value1)) >= yHalf ? 'end' : 'start'; })" + this.brt +
+	        ".attr('fill', function(v) { return y(myChart.getTokenKey(v.value1)) >= yHalf ? '#fff' : color(JSON.stringify(v)); })" + this.brt +
             ".text(function (v) { return myChart.getTokenLabel(v.dimension1); });" + this.br +
             "}" + this.br + +this.br;
     }
@@ -489,13 +513,13 @@ SF.Chart.Lines.prototype = $.extend({}, new SF.Chart.Columns(), {
             ".attr('fill', 'none')" + this.brt +
             ".attr('stroke-width', 3)" + this.brt +
             ".attr('shape-rendering', 'initial')" + this.brt +
-            ".attr('d', myChart.getPathPoints($.map(data.serie, function(v) { return {x: x(JSON.stringify(v)), y: y(myChart.getTokenLabel(v.value1))};})))" + this.br +
+            ".attr('d', myChart.getPathPoints($.map(data.serie, function(v) { return {x: x(JSON.stringify(v)), y: y(myChart.getTokenKey(v.value1))};})))" + this.br +
             this.br +
             "//paint graph - hover area trigger" + this.br +
             "chart.append('svg:g').attr('class', 'hover-trigger').attr('transform' ,'translate(' + (yAxisLeftPosition + chartAxisPadding + (x.rangeBand() / 2)) + ', ' + xAxisTopPosition + ') scale(1, -1)')" + this.brt +
             ".enterData(data.serie, 'circle', 'hover-trigger')" + this.brt +
             ".attr('cx', function(v) { return x(JSON.stringify(v)); })" + this.brt +
-            ".attr('cy', function(v) { return y(myChart.getTokenLabel(v.value1)); })" + this.brt +
+            ".attr('cy', function(v) { return y(myChart.getTokenKey(v.value1)); })" + this.brt +
             ".attr('r', 15)" + this.brt +
             ".attr('fill', '#fff')" + this.brt +
             ".attr('fill-opacity', 0)" + this.brt +
@@ -511,7 +535,7 @@ SF.Chart.Lines.prototype = $.extend({}, new SF.Chart.Columns(), {
             ".attr('fill', color)" + this.brt +
             ".attr('r', 5)" + this.brt +
             ".attr('cx', function(v) { return x(JSON.stringify(v)); })" + this.brt +
-            ".attr('cy', function(v) { return y(myChart.getTokenLabel(v.value1)); })" + this.brt +
+            ".attr('cy', function(v) { return y(myChart.getTokenKey(v.value1)); })" + this.brt +
             ".attr('data-d1', function(v) { return myChart.getTokenKey(v.dimension1); })" + this.brt +
             ".attr('data-entity', function(v) { return v.entity || ''; })" + this.brt +
             ".append('svg:title')" + this.brt +
@@ -530,7 +554,8 @@ SF.Chart.TypeTypeValue.prototype = $.extend({}, new SF.Chart.ChartBase(), {
         $.each(series, function (i, s) {
             $.merge(completeArray, s.values);
         });
-        return d3.max(completeArray);
+        var self = this;
+        return d3.max($.map(completeArray, function (e) { return self.getTokenKey(e); }));
     },
 
     createEmptyCountArray: function (length) {
@@ -545,11 +570,12 @@ SF.Chart.TypeTypeValue.prototype = $.extend({}, new SF.Chart.ChartBase(), {
         var dimensionCount = series[0].values.length;
         var countArray = this.createEmptyCountArray(dimensionCount);
 
+        var self = this;
         $.each(series, function (i, serie) {
             for (var i = 0; i < dimensionCount; i++) {
                 var v = serie.values[i];
                 if (!SF.isEmpty(v)) {
-                    countArray[i] += v;
+                    countArray[i] += self.getTokenKey(v);
                 }
             }
         });
@@ -686,13 +712,13 @@ SF.Chart.MultiLines.prototype = $.extend({}, new SF.Chart.TypeTypeValue(), {
             ".attr('fill', 'none')" + this.brt +
             ".attr('stroke-width', 3)" + this.brt +
             ".attr('shape-rendering', 'initial')" + this.brt +
-            ".attr('d', function(s) { return myChart.getPathPoints($.map(s.values, function(v, i) { return { x: x(JSON.stringify(data.dimension1[i])), y: (SF.isEmpty(v) ? null : y(v)) }; }) )})" + this.br +
+            ".attr('d', function(s) { return myChart.getPathPoints($.map(s.values, function(v, i) { return { x: x(JSON.stringify(data.dimension1[i])), y: (SF.isEmpty(v) ? null : y(myChart.getTokenKey(v))) }; }) )})" + this.br +
             this.br +
             "//paint graph - hover area trigger" + this.br +
             "chart.enterData(data.series, 'g', 'hover-trigger-serie').attr('transform' ,'translate(' + (yAxisLeftPosition + chartAxisPadding + (x.rangeBand() / 2)) + ', ' + xAxisTopPosition + ') scale(1, -1)')" + this.brt +
             ".enterData(function(s) { return $.map(s.values, function(v){ return { dimension2: s.dimension2, value: v }; }); }, 'circle', 'point')" + this.brt +
             ".attr('cx', function(pair, i) { return x(JSON.stringify(data.dimension1[i])); })" + this.brt +
-            ".attr('cy', function(pair) { return SF.isEmpty(pair) ? 0 : y(myChart.getTokenLabel(pair.value)); })" + this.brt +
+            ".attr('cy', function(pair) { return SF.isEmpty(pair) ? 0 : y(myChart.getTokenKey(pair.value)); })" + this.brt +
             ".attr('r', function(pair) { return SF.isEmpty(pair.value) ? 0 : 15; })" + this.brt +
             ".attr('fill', '#fff')" + this.brt +
             ".attr('fill-opacity', 0)" + this.brt +
@@ -709,7 +735,7 @@ SF.Chart.MultiLines.prototype = $.extend({}, new SF.Chart.TypeTypeValue(), {
             ".attr('fill-opacity', function(pair) { SF.isEmpty(pair.value) ? 0 : 100; })" + this.brt +
             ".attr('r', function(pair) { return SF.isEmpty(pair.value) ? 0 : 5; })" + this.brt +
             ".attr('cx', function(pair, i) { return x(JSON.stringify(data.dimension1[i])); })" + this.brt +
-            ".attr('cy', function(pair) { return SF.isEmpty(pair.value) ? 0 : y(myChart.getTokenLabel(pair.value)); })" + this.brt +
+            ".attr('cy', function(pair) { return SF.isEmpty(pair.value) ? 0 : y(myChart.getTokenKey(pair.value)); })" + this.brt +
             ".attr('data-d1', function(pair, i) { return myChart.getTokenKey(data.dimension1[i]); })" + this.brt +
             ".attr('data-d2', function(pair) { return myChart.getTokenKey(pair.dimension2); })" + this.brt +
             ".append('svg:title')" + this.brt +
@@ -737,7 +763,7 @@ SF.Chart.MultiColumns.prototype = $.extend({}, new SF.Chart.TypeTypeValue(), {
             ".attr('x', function(pair, i) { return xSubscale(JSON.stringify(pair.dimension2)); })" + this.brt +
             ".attr('transform',  function(pair, i) { return 'translate(' + x(JSON.stringify(data.dimension1[i])) + ', 0)'; })" + this.brt +
             ".attr('width', xSubscale.rangeBand())" + this.brt +
-            ".attr('height', function(pair, i) { return SF.isEmpty(pair.value) ? 0 : y(myChart.getTokenLabel(pair.value)); })" + this.brt +
+            ".attr('height', function(pair, i) { return SF.isEmpty(pair.value) ? 0 : y(myChart.getTokenKey(pair.value)); })" + this.brt +
             ".attr('data-d1', function(pair, i) { return myChart.getTokenKey(data.dimension1[i]); })" + this.brt +
             ".attr('data-d2', function(pair) { return myChart.getTokenKey(pair.dimension2); })" + this.brt +
             ".append('svg:title')" + this.brt +
@@ -795,7 +821,7 @@ SF.Chart.StackedColumns.prototype = $.extend({}, new SF.Chart.TypeTypeValue(), {
             ".attr('fill', function(pair) { return SF.isEmpty(pair.value) ? 'none' : color(JSON.stringify(pair.dimension2)); })" + this.brt +
             ".attr('transform', function(pair, i) { return 'translate(' + x(JSON.stringify(data.dimension1[i])) + ', 0)'; })" + this.brt +
             ".attr('width', x.rangeBand())" + this.brt +
-            ".attr('height', function(pair, i) { return SF.isEmpty(pair.value) ? 0 : y(myChart.getTokenLabel(pair.value)); })" + this.brt +
+            ".attr('height', function(pair, i) { return SF.isEmpty(pair.value) ? 0 : y(myChart.getTokenKey(pair.value)); })" + this.brt +
             ".attr('y', function(pair, i) { if (SF.isEmpty(pair.value)) { return 0; } else { var offset = y(emptyCountArray[i]); emptyCountArray[i] += pair.value; return offset; } })" + this.brt +
             ".attr('data-d1', function(pair, i) { return myChart.getTokenKey(data.dimension1[i]); })" + this.brt +
             ".attr('data-d2', function(pair) { return myChart.getTokenKey(pair.dimension2); })" + this.brt +
@@ -840,8 +866,8 @@ SF.Chart.TotalColumns.prototype = $.extend({}, new SF.Chart.StackedColumns(), {
             ".attr('fill', function(pair) { return SF.isEmpty(pair.value) ? 'none' : color(JSON.stringify(pair.dimension2)); })" + this.brt +
             ".attr('transform',  function(pair, i) { return 'translate(' + x(JSON.stringify(data.dimension1[i])) + ', 0)'; })" + this.brt +
             ".attr('width', x.rangeBand())" + this.brt +
-            ".attr('height', function(pair, i) { return SF.isEmpty(pair.value) ? 0 : y((100 *pair.value) / countArray[i]); })" + this.brt +
-            ".attr('y', function(pair, i) { if (SF.isEmpty(pair.value)) { return 0; } else { var offset = emptyCountArray[i]; emptyCountArray[i] += pair.value; return y((100 * offset) / countArray[i]); } })" + this.brt +
+            ".attr('height', function(pair, i) { return SF.isEmpty(pair.value) ? 0 : y((100 * myChart.getTokenKey(pair.value)) / countArray[i]); })" + this.brt +
+            ".attr('y', function(pair, i) { if (SF.isEmpty(pair.value)) { return 0; } else { var offset = emptyCountArray[i]; emptyCountArray[i] += myChart.getTokenKey(pair.value); return y((100 * offset) / countArray[i]); } })" + this.brt +
             ".attr('data-d1', function(pair, i) { return myChart.getTokenKey(data.dimension1[i]); })" + this.brt +
             ".attr('data-d2', function(pair) { return myChart.getTokenKey(pair.dimension2); })" + this.brt +
             ".append('svg:title')" + this.brt +
@@ -1260,8 +1286,9 @@ SF.Chart.Bubbles.prototype = $.extend({}, new SF.Chart.Points(), {
 
     getSizeScale: function (data, area) {
         var sum = 0;
+        var self = this;
         $.each(data.points, function (i, p) {
-            sum += p.value2;
+            sum += self.getTokenKey(p.value2);
         });
 
         return d3.scale.linear()
@@ -1277,12 +1304,12 @@ SF.Chart.Bubbles.prototype = $.extend({}, new SF.Chart.Points(), {
             ".attr('stroke', function(p) { return color(JSON.stringify(p)); })" + this.brt +
             ".attr('fill', function(p) { return color(JSON.stringify(p)); })" + this.brt +
             ".attr('shape-rendering', 'initial')" + this.brt +
-            ".attr('r', function(p) { return Math.sqrt(sizeScale(p.value2)/Math.PI); })" + this.brt +
+            ".attr('r', function(p) { return Math.sqrt(sizeScale(myChart.getTokenKey(p.value2))/Math.PI); })" + this.brt +
             ".attr('cx', function(p) { return x(p.dimension1); })" + this.brt +
             ".attr('cy', function(p) { return y(p.dimension2); })" + this.brt +
             ".attr('data-v1', function(p) { return myChart.getTokenKey(p.value1); })" + this.brt +
             ".append('svg:title')" + this.brt +
-            ".text(function(p) { return '(' + p.dimension1 + ', ' + p.dimension2 + ') ' + myChart.getTokenLabel(p.value1) + ': ' + p.value2; })" + this.br +
+            ".text(function(p) { return '(' + p.dimension1 + ', ' + p.dimension2 + ') ' + myChart.getTokenLabel(p.value1) + ': ' + myChart.getTokenLabel(p.value2); })" + this.br +
              this.br;
     }
 });
@@ -1333,7 +1360,7 @@ SF.Chart.Pie.prototype = $.extend({}, new SF.Chart.ChartBase(), {
     paintGraph: function () {
         return "//paint graph" + this.br +
             "var arc = d3.svg.arc().outerRadius(r).innerRadius(rInner);" + this.br +
-            "var pie = d3.layout.pie().value(function(v) { return v.value1; });" + this.br + this.br +
+            "var pie = d3.layout.pie().value(function(v) { return myChart.getTokenKey(v.value1); });" + this.br + this.br +
             "chart.append('svg:g').data([data.serie]).attr('class', 'shape').attr('transform', 'translate(' + (width / 2) + ', ' + (height / 2) + ')')" + this.brt +
             ".enterData(pie, 'g', 'slice')" + this.brt +
             ".append('svg:path').attr('class', 'shape')" + this.brt +
@@ -1343,7 +1370,7 @@ SF.Chart.Pie.prototype = $.extend({}, new SF.Chart.ChartBase(), {
             ".attr('data-d1', function(slice) { return myChart.getTokenKey(slice.data.dimension1); })" + this.brt +
             ".attr('data-entity', function(slice) { return slice.data.entity || ''; })" + this.brt +
             ".append('svg:title')" + this.brt +
-            ".text(function(slice) { return myChart.getTokenLabel(slice.data.dimension1) + ': ' + slice.data.value1; });" + this.br + this.br;
+            ".text(function(slice) { return myChart.getTokenLabel(slice.data.dimension1) + ': ' + myChart.getTokenLabel(slice.data.value1); });" + this.br + this.br;
     }
 });
 

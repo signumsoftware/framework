@@ -72,7 +72,7 @@ namespace Signum.Web.AuthAdmin
                         Mapping.New<bool>(), "Resource_Key", false);
 
                 QuickLinkWidgetHelper.RegisterEntityLinks<RoleDN>((RoleDN entity, string partialViewName, string prefix) =>
-                     !BasicPermissions.AdminRules.IsAuthorized() ? null :
+                     entity.IsNew || !BasicPermissions.AdminRules.IsAuthorized() ? null :
                      new[]
                      {
                          types ? new QuickLinkAction(Resources._0Rules.Formato(typeof(TypeDN).NiceName()), RouteHelper.New().Action((AuthAdminController c)=>c.Types(entity.ToLite()))): null,
