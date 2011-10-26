@@ -63,6 +63,7 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -72,6 +73,7 @@
   <ItemGroup>
     <Compile Include="AboutTools.cs" />
     <Compile Include="ArrayExtensions.cs" />
+    <Compile Include="ColorExtensions.cs" />
     <Compile Include="ConsoleSwitch.cs" />
     <Compile Include="DataStructures\HashsetComparer.cs" />
     <Compile Include="DataStructures\MinMax.cs" />

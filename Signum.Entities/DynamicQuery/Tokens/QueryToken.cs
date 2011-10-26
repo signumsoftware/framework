@@ -22,7 +22,7 @@ namespace Signum.Entities.DynamicQuery
         public abstract string Unit { get; }
         public abstract Type Type { get; }
         public abstract string Key { get; }
-        protected abstract QueryToken[] SubTokensInternal();
+        protected abstract List<QueryToken> SubTokensInternal();
 
         public Expression BuildExpression(BuildExpressionContext context)
         {
@@ -53,17 +53,17 @@ namespace Signum.Entities.DynamicQuery
             return new ColumnToken(column);
         }
 
-        public QueryToken[] SubTokens()
+        public List<QueryToken> SubTokens()
         {
             var result = this.SubTokensInternal();
 
-            if (result == null)
-                return null;
+            if (result.IsEmpty())
+                return new List<QueryToken>();
 
-            return result.Where(t => t.IsAllowed()).ToArray();
+            return result.Where(t => t.IsAllowed()).ToList();
         }
 
-        protected QueryToken[] SubTokensBase(Type type, Implementations implementations)
+        protected List<QueryToken> SubTokensBase(Type type, Implementations implementations)
         {
             if (type.UnNullify() == typeof(DateTime))
             {
@@ -78,19 +78,19 @@ namespace Signum.Entities.DynamicQuery
                     if (implementations.IsByAll)
                         return null; // new[] { EntityPropertyToken.IdProperty(this) };
 
-                    return ((ImplementedByAttribute)implementations).ImplementedTypes.Select(t => (QueryToken)new AsTypeToken(this, t)).ToArray();
+                    return ((ImplementedByAttribute)implementations).ImplementedTypes.Select(t => (QueryToken)new AsTypeToken(this, t)).ToList();
 
                     //return new[] { EntityPropertyToken.IdProperty(this), EntityPropertyToken.ToStrProperty(this) }
                     //    .Concat(asPropesties).Concat(EntityProperties(cleanType)).ToArray();
                 }
 
                 return new[] { EntityPropertyToken.IdProperty(this), EntityPropertyToken.ToStrProperty(this) }
-                    .Concat(EntityProperties(cleanType).Concat(OnEntityExtension(cleanType, this)).OrderBy(a => a.ToString())).ToArray();
+                    .Concat(EntityProperties(cleanType).Concat(OnEntityExtension(cleanType, this)).OrderBy(a => a.ToString())).ToList();
             }
 
             if (type.IsEmbeddedEntity())
             {
-                return EntityProperties(type).OrderBy(a => a.ToString()).ToArray();
+                return EntityProperties(type).OrderBy(a => a.ToString()).ToList();
             }
 
             if(type != typeof(string) && type.ElementType() != null)
@@ -100,10 +100,10 @@ namespace Signum.Entities.DynamicQuery
 
             if (typeof(IQueryTokenBag).IsAssignableFrom(type))
             {
-                return BagProperties(type).OrderBy(a => a.ToString()).ToArray();
+                return BagProperties(type).OrderBy(a => a.ToString()).ToList();
             }
 
-            return null;
+            return new List<QueryToken>();
         }
 
         public static IEnumerable<QueryToken> OnEntityExtension(Type type, QueryToken parent)
@@ -117,11 +117,11 @@ namespace Signum.Entities.DynamicQuery
         public static Func<Type, QueryToken, IEnumerable<QueryToken>>  EntityExtensions;
         
 
-        public static QueryToken[] DateTimeProperties(QueryToken parent, DateTimePrecision precission)
+        public static List<QueryToken> DateTimeProperties(QueryToken parent, DateTimePrecision precission)
         {
             string utc = TimeZoneManager.Mode == TimeZoneMode.Utc ? "Utc - " : "";
 
-            return new QueryToken[]
+            return new List<QueryToken>
             {
                 new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Year), utc + Resources.Year), 
                 new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Month), utc + Resources.Month), 
@@ -132,10 +132,10 @@ namespace Signum.Entities.DynamicQuery
                 precission < DateTimePrecision.Minutes ? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Minute), utc + Resources.Minute), 
                 precission < DateTimePrecision.Seconds ? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Second), utc + Resources.Second), 
                 precission < DateTimePrecision.Milliseconds? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Millisecond), utc + Resources.Millisecond), 
-            }.NotNull().ToArray();
+            }.NotNull().ToList();
         }
 
-        public static QueryToken[] CollectionProperties(QueryToken parent)
+        public static List<QueryToken> CollectionProperties(QueryToken parent)
         {
             return new QueryToken[]
             {
@@ -143,7 +143,7 @@ namespace Signum.Entities.DynamicQuery
                 parent.HasAllOrAny() ?null: new CollectionElementToken(parent, CollectionElementType.Element),
                 new CollectionElementToken(parent, CollectionElementType.Any),
                 new CollectionElementToken(parent, CollectionElementType.All),
-            }.NotNull().ToArray();
+            }.NotNull().ToList();
         }
 
         public virtual bool HasAllOrAny()

@@ -49,9 +49,9 @@ namespace Signum.Entities.DynamicQuery
             get { return "MonthStart"; }
         }
 
-        protected override QueryToken[] SubTokensInternal()
+        protected override List<QueryToken> SubTokensInternal()
         {
-            return null;
+            return new List<QueryToken>();
         }
 
         static MethodInfo miMonthStart = ReflectionTools.GetMethodInfo(() => DateTimeExtensions.MonthStart(DateTime.MinValue));

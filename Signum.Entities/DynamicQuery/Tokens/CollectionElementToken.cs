@@ -43,7 +43,7 @@ namespace Signum.Entities.DynamicQuery
 
 
 
-        protected override QueryToken[] SubTokensInternal()
+        protected override List<QueryToken> SubTokensInternal()
         {
             return SubTokensBase(Type, Implementations());
         }

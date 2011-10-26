@@ -53,7 +53,7 @@ namespace Signum.Entities.DynamicQuery
             throw new InvalidOperationException("BuildExpressionInternal not supported for ColumnToken");
         }
 
-        protected override QueryToken[] SubTokensInternal()
+        protected override List<QueryToken> SubTokensInternal()
         {
             if (Column.Type.UnNullify() == typeof(DateTime))
             {
