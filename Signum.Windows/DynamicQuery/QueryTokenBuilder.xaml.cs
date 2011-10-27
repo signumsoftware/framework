@@ -52,9 +52,9 @@ namespace Signum.Windows
             UpdateTokenList(Token);
         }
 
-        public event Func<QueryToken, QueryToken[]> SubTokensEvent;
+        public event Func<QueryToken, List<QueryToken>> SubTokensEvent;
 
-        QueryToken[] OnSubTokens(QueryToken token)
+        List<QueryToken> OnSubTokens(QueryToken token)
         {
             if (SubTokensEvent != null)
                 return SubTokensEvent(token);
@@ -79,12 +79,12 @@ namespace Signum.Windows
             sp.Children.Clear(); 
             for (int i = 0; i < tokens.Count + 1; i++)
 			{
-                QueryToken[] subTokens = OnSubTokens(i == 0 ? null : tokens[i - 1]);
+                List<QueryToken> subTokens = OnSubTokens(i == 0 ? null : tokens[i - 1]);
 
-                if (i == tokens.Count && subTokens == null || subTokens.Length == 0)
+                if (i == tokens.Count && subTokens == null || subTokens.Count == 0)
                     break;
 
-                int index = i == tokens.Count ? -1: Array.FindIndex(subTokens, a=>a.Key == tokens[i].Key);
+                int index = i == tokens.Count ? -1: subTokens.IndexOf(a=>a.Key == tokens[i].Key);
 
                 ComboBox cb = new ComboBox()
                 {
@@ -102,10 +102,10 @@ namespace Signum.Windows
             ComboBox cb = (ComboBox)e.OriginalSource;
             int index = (int)cb.Tag;
             QueryToken newToken = (QueryToken)cb.SelectedItem;
-            QueryToken[] subTokens = OnSubTokens(newToken);
+            List<QueryToken> subTokens = OnSubTokens(newToken);
 
             sp.Children.RemoveRange(index + 1, sp.Children.Count - (index + 1)); //all
-            if (subTokens != null && subTokens.Length != 0)
+            if (subTokens != null && subTokens.Count != 0)
                 sp.Children.Add(new ComboBox
                 {
                     Tag = index + 1,
