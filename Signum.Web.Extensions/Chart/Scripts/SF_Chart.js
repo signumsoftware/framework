@@ -1198,14 +1198,14 @@ SF.Chart.Points.prototype = $.extend({}, new SF.Chart.ChartBase(), {
     getXAxis: function () {
         return "//x axis scale" + this.br +
             "var x = d3.scale.linear()" + this.brt +
-            ".domain([0, d3.max($.map(data.points, function (e) { return e.dimension1; }))])" + this.brt +
+            ".domain([0, d3.max($.map(data.points, function (e) { return myChart.getTokenKey(e.dimension1); }))])" + this.brt +
             ".range([0, width - yAxisLeftPosition - padding]);" + this.br + this.br;
     },
 
     getYAxis: function () {
         return "//y axis scale" + this.br +
             "var y = d3.scale.linear()" + this.brt +
-            ".domain([0, d3.max($.map(data.points, function (e) { return e.dimension2; }))])" + this.brt +
+            ".domain([0, d3.max($.map(data.points, function (e) { return myChart.getTokenKey(e.dimension2); }))])" + this.brt +
             ".range([0, xAxisTopPosition - padding]);" + this.br + this.br;
     },
 
@@ -1271,11 +1271,11 @@ SF.Chart.Points.prototype = $.extend({}, new SF.Chart.ChartBase(), {
             ".attr('fill', function(p) { return color(JSON.stringify(p)); })" + this.brt +
             ".attr('shape-rendering', 'initial')" + this.brt +
             ".attr('r', 5)" + this.brt +
-            ".attr('cx', function(p) { return x(p.dimension1); })" + this.brt +
-            ".attr('cy', function(p) { return y(p.dimension2); })" + this.brt +
+            ".attr('cx', function(p) { return x(myChart.getTokenKey(p.dimension1)); })" + this.brt +
+            ".attr('cy', function(p) { return y(myChart.getTokenKey(p.dimension2)); })" + this.brt +
             ".attr('data-v1', function(p) { return myChart.getTokenKey(p.value1); })" + this.brt +
             ".append('svg:title')" + this.brt +
-            ".text(function(p) { return myChart.getTokenLabel(p.value1) + ': ' + p.dimension1 + ', ' + p.dimension2; })" + this.br +
+            ".text(function(p) { return myChart.getTokenLabel(p.value1) + ': ' + myChart.getTokenLabel(p.dimension1) + ', ' + myChart.getTokenLabel(p.dimension2); })" + this.br +
              this.br;
     }
 });
@@ -1306,11 +1306,11 @@ SF.Chart.Bubbles.prototype = $.extend({}, new SF.Chart.Points(), {
             ".attr('fill', function(p) { return color(JSON.stringify(p)); })" + this.brt +
             ".attr('shape-rendering', 'initial')" + this.brt +
             ".attr('r', function(p) { return Math.sqrt(sizeScale(myChart.getTokenKey(p.value2))/Math.PI); })" + this.brt +
-            ".attr('cx', function(p) { return x(p.dimension1); })" + this.brt +
-            ".attr('cy', function(p) { return y(p.dimension2); })" + this.brt +
+            ".attr('cx', function(p) { return x(myChart.getTokenKey(p.dimension1)); })" + this.brt +
+            ".attr('cy', function(p) { return y(myChart.getTokenKey(p.dimension2)); })" + this.brt +
             ".attr('data-v1', function(p) { return myChart.getTokenKey(p.value1); })" + this.brt +
             ".append('svg:title')" + this.brt +
-            ".text(function(p) { return '(' + p.dimension1 + ', ' + p.dimension2 + ') ' + myChart.getTokenLabel(p.value1) + ': ' + myChart.getTokenLabel(p.value2); })" + this.br +
+            ".text(function(p) { return '(' + myChart.getTokenLabel(p.dimension1) + ', ' + myChart.getTokenLabel(p.dimension2) + ') ' + myChart.getTokenLabel(p.value1) + ': ' + myChart.getTokenLabel(p.value2); })" + this.br +
              this.br;
     }
 });
