@@ -53,7 +53,7 @@
 
                 var myChart = SF.Chart.Factory.getGraphType('@ucTc.Value.Chart.ChartType.ToString()');
                 
-                eval(myChart.createChartSVG('@divSelector') + myChart.paintChart());
+                eval(myChart.createChartSVG('@divSelector') + myChart.paintChart('@divSelector'));
             });
         </script>
     

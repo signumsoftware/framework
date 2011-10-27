@@ -102,13 +102,14 @@ SF.Chart.Builder = (function () {
         var data = $chartContainer.data("data");
         var width = $chartContainer.width();
         var height = $chartContainer.height();
-        
+
         var $chartControl = $chartContainer.closest(".sf-chart-control");
         var myChart = SF.Chart.Factory.getGraphType($chartControl.find(".ui-widget-header .sf-chart-type-value").val());
-            
+
         var $codeArea = $chartControl.find('.sf-chart-code-container textarea');
         if ($codeArea.val() == '' || force) {
-            $codeArea.val(myChart.createChartSVG("#" + $chartControl.attr("id") + " .sf-chart-container") + myChart.paintChart());
+            var containerSelector = "#" + $chartControl.attr("id") + " .sf-chart-container";
+            $codeArea.val(myChart.createChartSVG(containerSelector) + myChart.paintChart(containerSelector));
         }
 
         eval($codeArea.val());
@@ -203,12 +204,12 @@ SF.Chart.ChartBase.prototype = {
         return result;
     },
 
-    bindEvents: function () {
+    bindEvents: function (containerSelector) {
         return "//bind mouse events" + this.br +
-            "myChart.bindMouseDblclick();" + this.br;
+            "myChart.bindMouseClick($('" + containerSelector + "'));" + this.br;
     },
 
-    paintChart: function () {
+    paintChart: function (containerSelector) {
         return this.init() +
         this.getXAxis() +
         this.getYAxis() +
@@ -218,11 +219,11 @@ SF.Chart.ChartBase.prototype = {
         this.paintXAxis() +
         this.paintYAxis() +
         this.paintLegend() +
-        this.bindEvents();
-    },
+        this.bindEvents(containerSelector);
+    }, 
 
-    bindMouseDblclick: function () {
-        $('.shape,.slice,.hover-trigger,.point').not('g').click(function () {
+    bindMouseClick: function ($chartContainer) {
+        $chartContainer.find('.shape,.slice,.hover-trigger,.point').not('g').click(function () {
             var $this = $(this);
 
             var extractAttribute = function ($shape, attrName) {

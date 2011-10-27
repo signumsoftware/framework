@@ -175,7 +175,12 @@ WriteLiteral("\');\r\n                \r\n                eval(myChart.createCha
 
                                         Write(divSelector);
 
-WriteLiteral("\') + myChart.paintChart());\r\n            });\r\n        </script>\r\n");
+WriteLiteral("\') + myChart.paintChart(\'");
+
+
+                                                                             Write(divSelector);
+
+WriteLiteral("\'));\r\n            });\r\n        </script>\r\n");
 
 
     
