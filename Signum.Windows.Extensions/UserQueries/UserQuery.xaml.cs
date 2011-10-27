@@ -35,8 +35,8 @@ namespace Signum.Windows.UserQueries
             set { SetValue(QueryDescriptionProperty, value); }
         }
 
-      
-        private QueryToken[] QueryTokenBuilder_SubTokensEvent(QueryToken token)
+
+        private List<QueryToken> QueryTokenBuilder_SubTokensEvent(QueryToken token)
         {
             return QueryUtils.SubTokens(token, QueryDescription.Columns);
         }
