@@ -273,7 +273,7 @@ namespace Signum.Windows
             if (DesignerProperties.GetIsInDesignMode(this) || QueryName == null)
             {
                 tokenBuilder.Token = null;
-                tokenBuilder.SubTokensEvent += q => new QueryToken[0];
+                tokenBuilder.SubTokensEvent += q => new List<QueryToken>();
                 return;
             }
 
@@ -334,7 +334,7 @@ namespace Signum.Windows
             UpdateMultiplyMessage();                       
         }
 
-        QueryToken[] tokenBuilder_SubTokensEvent(QueryToken arg)
+        List<QueryToken> tokenBuilder_SubTokensEvent(QueryToken arg)
         {
             string canColumn = QueryUtils.CanColumn(arg);
             btCreateColumn.IsEnabled = string.IsNullOrEmpty(canColumn);
