@@ -43,7 +43,7 @@ namespace Signum.Windows.Chart
             chartBuilder.Description = QueryDescription;
         }
 
-        private QueryToken[] QueryTokenBuilderFilter_SubTokensEvent(QueryToken token)
+        private List<QueryToken> QueryTokenBuilderFilter_SubTokensEvent(QueryToken token)
         {
             return QueryUtils.SubTokens(token, QueryDescription.Columns);
         }

@@ -48,7 +48,7 @@ namespace Signum.Windows.Chart
             this.Loaded += new RoutedEventHandler(OnLoad);
         }
 
-        private QueryToken[] token_SubTokensEvent(QueryToken token)
+        private List<QueryToken> token_SubTokensEvent(QueryToken token)
         {
             return ChartTokenDN.SubTokensChart(token, ColumnDescriptions);
         }

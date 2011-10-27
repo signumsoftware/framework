@@ -94,7 +94,7 @@ namespace Signum.Windows.Chart
             EntityType = Reflector.ExtractLite(entityColumn.Type);
 
             qtbFilters.Token = null;
-            qtbFilters.SubTokensEvent += new Func<QueryToken, QueryToken[]>(qtbFilters_SubTokensEvent);
+            qtbFilters.SubTokensEvent += new Func<QueryToken, List<QueryToken>>(qtbFilters_SubTokensEvent);
 
             SetTitle(); 
         }
@@ -131,7 +131,7 @@ namespace Signum.Windows.Chart
             brMultiplications.Visibility = message.HasText() ? Visibility.Visible : Visibility.Collapsed;
         }
 
-        QueryToken[] qtbFilters_SubTokensEvent(QueryToken arg)
+        List<QueryToken> qtbFilters_SubTokensEvent(QueryToken arg)
         {
             return QueryUtils.SubTokens(arg, Description.Columns);
         }
