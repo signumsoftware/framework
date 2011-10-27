@@ -362,9 +362,11 @@ namespace Signum.Web.Chart
                 return p =>
                 {
                     DateTime? e = (DateTime?)p;
+                    if (e != null)
+                        e = e.Value.ToUserInterface();
                     return new
                     {
-                        key = e.TryToString("u"),
+                        key = e.TryToString("s"),
                         toStr = token.Format.HasText() ? e.TryToString(token.Format) : p.TryToString()
                     };
                 };
