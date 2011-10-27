@@ -76,15 +76,15 @@ namespace Signum.Windows
 
         void UpdateCombo()
         {
-            sp.Children.Clear(); 
-            for (int i = 0; i < tokens.Count + 1; i++)
-			{
+            sp.Children.Clear();
+            for (int i = 0; i < tokens.Count; i++)
+            {
                 List<QueryToken> subTokens = OnSubTokens(i == 0 ? null : tokens[i - 1]);
 
-                if (i == tokens.Count && subTokens == null || subTokens.Count == 0)
+                if (i == tokens.Count && subTokens.IsEmpty())
                     break;
 
-                int index = i == tokens.Count ? -1: subTokens.IndexOf(a=>a.Key == tokens[i].Key);
+                int index = i == tokens.Count ? -1 : subTokens.IndexOf(a => a.Key == tokens[i].Key);
 
                 ComboBox cb = new ComboBox()
                 {
@@ -92,8 +92,8 @@ namespace Signum.Windows
                     ItemsSource = subTokens,
                     SelectedIndex = index,
                 };
-                sp.Children.Add(cb); 
-			}
+                sp.Children.Add(cb);
+            }
         }
 
 
@@ -105,7 +105,7 @@ namespace Signum.Windows
             List<QueryToken> subTokens = OnSubTokens(newToken);
 
             sp.Children.RemoveRange(index + 1, sp.Children.Count - (index + 1)); //all
-            if (subTokens != null && subTokens.Count != 0)
+            if (subTokens.Any())
                 sp.Children.Add(new ComboBox
                 {
                     Tag = index + 1,
