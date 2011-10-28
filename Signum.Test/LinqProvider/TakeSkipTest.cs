@@ -76,5 +76,47 @@ namespace Signum.Test.LinqProvider
         {
             var skipArtist = Database.Query<ArtistDN>().OrderBy(a => a.Name).Skip(2).Take(1).ToList();
         }
+
+        [TestMethod]
+        public void OrderBySelectPaginate()
+        {
+            TestPaginate(Database.Query<ArtistDN>().OrderBy(a => a.Name).Select(a => a.Name));
+        }
+
+        [TestMethod]
+        public void OrderByDescendingSelectPaginate()
+        {
+            TestPaginate(Database.Query<ArtistDN>().OrderByDescending(a => a.Name).Select(a => a.Name));
+        }
+
+        [TestMethod]
+        public void OrderByThenBySelectPaginate()
+        {
+            TestPaginate(Database.Query<ArtistDN>().OrderBy(a => a.Name).ThenBy(a => a.Id).Select(a => a.Name));
+        }
+
+        [TestMethod]
+        public void SelectOrderByPaginate()
+        {
+            TestPaginate(Database.Query<ArtistDN>().Select(a => a.Name).OrderBy(a => a));
+        }
+
+        [TestMethod]
+        public void SelectOrderByDescendingPaginate()
+        {
+            TestPaginate(Database.Query<ArtistDN>().Select(a => a.Name).OrderByDescending(a => a));
+        }
+
+        private void TestPaginate<T>(IQueryable<T> query)
+        {
+            var list = query.ToList();
+
+            int pageSize = 2;
+
+            var list2 = 0.To(((list.Count / pageSize) + 1)).SelectMany(page =>
+                query.Skip(pageSize * page).Take(pageSize).ToList()).ToList();
+
+            Assert.IsTrue(list.SequenceEqual(list2)); 
+        }
     }
 }

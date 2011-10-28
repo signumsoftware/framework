@@ -163,15 +163,15 @@ namespace Signum.Engine.Linq
             return result;
         }
 
-        private Expression MapAndVisitExpandWithIndex(LambdaExpression lambda, ref ProjectionExpression p, out ReadOnlyCollection<OrderExpression> orderExpression)
+        private Expression MapAndVisitExpandWithIndex(LambdaExpression lambda, ref ProjectionExpression p)
         {
-            bool hasOrder = p.Source.OrderBy != null && !p.Source.OrderBy.IsEmpty();
+            var orders = p.Source.FollowC(a => a.From as SelectExpression).TakeWhile(s => !s.Distinct && s.GroupBy.IsNullOrEmpty()).Select(s => s.OrderBy).FirstOrDefault(o => !o.IsNullOrEmpty());
 
-            RowNumberExpression rne = new RowNumberExpression(p.Source.OrderBy); //if its null should be filled in a later stage
+            RowNumberExpression rne = new RowNumberExpression(orders); //if its null should be filled in a later stage
 
-            if (hasOrder) // remove order
-                p = new ProjectionExpression(new SelectExpression(p.Source.Alias, p.Source.Distinct, p.Source.Reverse, p.Source.Top, p.Source.Columns, p.Source.From, p.Source.Where, null, p.Source.GroupBy),
-                    p.Projector, p.UniqueFunction, p.Token, p.Type);
+            //if (hasOrder) // remove order
+            //    p = new ProjectionExpression(new SelectExpression(p.Source.Alias, p.Source.Distinct, p.Source.Reverse, p.Source.Top, p.Source.Columns, p.Source.From, p.Source.Where, null, p.Source.GroupBy),
+            //        p.Projector, p.UniqueFunction, p.Token, p.Type);
 
             ColumnDeclaration cd = new ColumnDeclaration("_rowNum", Expression.Subtract(rne, new SqlConstantExpression(1)));
 
@@ -190,8 +190,6 @@ namespace Signum.Engine.Linq
             p = new ProjectionExpression(
                     new SelectExpression(alias, false, false, null, pc.Columns.PreAnd(cd), p.Source, null, null, null),
                     pc.Projector, null, p.Token, p.Type);
-
-            orderExpression = hasOrder ? new[] { new OrderExpression(OrderType.Ascending, ce) }.ToReadOnly() : null;
 
             return result;
         }
@@ -434,9 +432,8 @@ namespace Signum.Engine.Linq
         private Expression BindWhere(Type resultType, Expression source, LambdaExpression predicate)
         {
             ProjectionExpression projection = this.VisitCastProjection(source);
-            ReadOnlyCollection<OrderExpression> order = null;
             Expression exp = predicate.Parameters.Count == 1 ? MapAndVisitExpand(predicate, ref projection) :
-                                                               MapAndVisitExpandWithIndex(predicate, ref projection, out order);
+                                                               MapAndVisitExpandWithIndex(predicate, ref projection);
 
             if (exp.NodeType == ExpressionType.Constant && ((bool)((ConstantExpression)exp).Value))
                 return projection;
@@ -446,21 +443,20 @@ namespace Signum.Engine.Linq
             Alias alias = tools.NextSelectAlias();
             ProjectedColumns pc = ColumnProjector.ProjectColumns(projection, alias);
             return new ProjectionExpression(
-                new SelectExpression(alias, false, false, null, pc.Columns, projection.Source, where, order, null),
+                new SelectExpression(alias, false, false, null, pc.Columns, projection.Source, where, null, null),
                 pc.Projector, null, pc.Token, resultType);
         }
 
         private Expression BindSelect(Type resultType, Expression source, LambdaExpression selector)
         {
             ProjectionExpression projection = this.VisitCastProjection(source);
-            ReadOnlyCollection<OrderExpression> order = null; 
             Expression expression = selector.Parameters.Count == 1 ? MapAndVisitExpand(selector, ref projection) :
-                                                                     MapAndVisitExpandWithIndex(selector, ref projection, out order);
+                                                                     MapAndVisitExpandWithIndex(selector, ref projection);
 
             Alias alias = tools.NextSelectAlias();
             ProjectedColumns pc = ColumnProjector.ProjectColumns(expression, alias, projection.Source.KnownAliases, new[] { projection.Token });
             return new ProjectionExpression(
-                new SelectExpression(alias, false, false, null, pc.Columns, projection.Source, null, order, null),
+                new SelectExpression(alias, false, false, null, pc.Columns, projection.Source, null, null, null),
                 pc.Projector, null, pc.Token, resultType);
         }
 
@@ -469,10 +465,9 @@ namespace Signum.Engine.Linq
             ProjectionExpression projection = this.VisitCastProjection(source);
 
             bool outer = OverloadingSimplifier.ExtractDefaultIfEmpty(ref collectionSelector);
-            ReadOnlyCollection<OrderExpression> order = null; 
             Expression collectionExpression = collectionSelector.Parameters.Count == 1 ?
                 MapAndVisitExpand(collectionSelector, ref projection) :
-                MapAndVisitExpandWithIndex(collectionSelector, ref projection, out order); 
+                MapAndVisitExpandWithIndex(collectionSelector, ref projection); 
 
             ProjectionExpression collectionProjection = AsProjection(collectionExpression);
 
@@ -503,7 +498,7 @@ namespace Signum.Engine.Linq
             JoinExpression join = new JoinExpression(joinType, projection.Source, collectionProjection.Source, null);
 
             return new ProjectionExpression(
-                new SelectExpression(alias, false, false, null, pc.Columns, join, null, order, null),
+                new SelectExpression(alias, false, false, null, pc.Columns, join, null, null, null),
                 pc.Projector, null, pc.Token, resultType);
         }
 
