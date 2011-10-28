@@ -227,11 +227,10 @@ namespace Signum.Web.Auth
 
         static void AuthClient_Saving(UserDN ident)
         {
-            if (ident.Modified == true)
+            if (ident.Modified == true && ident.Is(UserDN.Current))
                 Transaction.RealCommit += () =>
                 {
-                    if (ident.Is(UserDN.Current))
-                        AuthController.UpdateSessionUser();
+                     AuthController.UpdateSessionUser();
                 };
         }
     }
