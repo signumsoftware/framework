@@ -97,6 +97,17 @@ namespace Signum.Web.ControlPanel
                         }
                     };
                 });
+
+                QuickLinkWidgetHelper.RegisterEntityLinks<ControlPanelDN>((entity, partialview, prefix) =>
+                {
+                    if (entity.IsNew)
+                        return null;
+
+                    return new QuickLink[]
+                    {
+                        new QuickLinkAction(Signum.Web.Properties.Resources.View, RouteHelper.New().Action<ControlPanelController>(cpc => cpc.View(entity.ToLite())))
+                    };
+                });
             }
         }
     }
