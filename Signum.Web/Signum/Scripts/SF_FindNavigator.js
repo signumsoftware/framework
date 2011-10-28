@@ -884,10 +884,9 @@ SF.registerModule("FindNavigator", function () {
             makeSearch();
         }
         else {
-            var $tabContainer = $button.parents(".sf-tabs").first();
-            if ($tabContainer.length) {
-                $tabContainer.find("a").click(
-                function () {
+            var $tabContainer = $button.closest(".sf-tabs");
+            if ($tabContainer.length > 0) {
+                $tabContainer.bind("tabsshow", function () {
                     if ($("#" + SF.compose(prefix, "divResults")).is(':visible')) {
                         makeSearch();
                     }

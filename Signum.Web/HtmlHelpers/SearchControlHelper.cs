@@ -50,7 +50,7 @@ namespace Signum.Web
 
             //helper.ViewData[ViewDataKeys.FindOptions] = findOptions;
             //helper.ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
-            
+
             //if (!helper.ViewData.ContainsKey(ViewDataKeys.Title))
             //    helper.ViewData[ViewDataKeys.Title] = Navigator.Manager.SearchTitle(findOptions.QueryName);
 
@@ -82,15 +82,15 @@ namespace Signum.Web
             JsFindOptions foptions = new JsFindOptions
             {
                 Prefix = prefix,
-                FindOptions = findOptions            
+                FindOptions = findOptions
             };
 
-           string result = options.Navigate ?
-               "<a class=\"count-search sf-value-line\" href='{0}'>{1}</a>".Formato(foptions.FindOptions.ToString(), count) :
-               "<span class=\"count-search sf-value-line\">{0}</span>".Formato(count);
+            string result = options.Navigate ?
+                "<a class=\"count-search sf-value-line\" href='{0}'>{1}</a>".Formato(foptions.FindOptions.ToString(), count) :
+                "<span class=\"count-search sf-value-line\">{0}</span>".Formato(count);
 
-           if (options.PopupView)
-           {
+            if (options.PopupView)
+            {
                 var htmlAttr = new Dictionary<string, object>
                 {
                     { "onclick", "javascript:new SF.FindNavigator({0}).openFinder();".Formato(foptions.ToJS()) },
@@ -98,15 +98,15 @@ namespace Signum.Web
                     { "data-text", false}
                 };
 
-               result += helper.Href(prefix + "csbtnView",
-                     Resources.LineButton_View,
-                     "",
-                     Resources.LineButton_View,
-                     "sf-line-button sf-view",
-                     htmlAttr);
-           }
+                result += helper.Href(prefix + "csbtnView",
+                      Resources.LineButton_View,
+                      "",
+                      Resources.LineButton_View,
+                      "sf-line-button sf-view",
+                      htmlAttr);
+            }
 
-           return MvcHtmlString.Create(result);
+            return MvcHtmlString.Create(result);
         }
 
         public static MvcHtmlString NewFilter(this HtmlHelper helper, object queryName, FilterOption filterOptions, Context context, int index)
@@ -143,12 +143,12 @@ namespace Signum.Web
                             htmlAttr));
                     }
                 }
-                
-                using (sb.Surround(new HtmlTag("td"))) 
+
+                using (sb.Surround(new HtmlTag("td")))
                 {
                     sb.AddLine(helper.HiddenAnonymous(filterOptions.Token.FullKey()));
 
-                    foreach(var t in filterOptions.Token.FollowC(tok => tok.Parent).Reverse())
+                    foreach (var t in filterOptions.Token.FollowC(tok => tok.Parent).Reverse())
                         sb.AddLine(new HtmlTag("span").Class("sf-filter-token ui-widget-content ui-corner-all").SetInnerText(t.ToString()).ToHtml());
                 }
 
@@ -180,7 +180,7 @@ namespace Signum.Web
                         sb.AddLine(PrintValueField(helper, valueContext, filterOptions));
                 }
             }
-            
+
             return sb.ToHtml();
         }
 
@@ -215,13 +215,13 @@ namespace Signum.Web
                 .InnerHtml(options.ToHtml())
                 .ToHtml();
 
-            return expander == null? drop: expander.Concat(drop);
+            return expander == null ? drop : expander.Concat(drop);
         }
 
         private static MvcHtmlString TokensComboExpander(this HtmlHelper helper, Context context, int index)
-        { 
+        {
             return helper.Span(
-                context.Compose("lblddlTokens_" + index), 
+                context.Compose("lblddlTokens_" + index),
                 "[...]",
                 "sf-subtokens-expander",
                 null);
@@ -230,14 +230,14 @@ namespace Signum.Web
         public static MvcHtmlString QueryTokenCombo(this HtmlHelper helper, QueryToken queryToken, object queryName, Context context)
         {
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-            
+
             var tokenPath = queryToken.FollowC(qt => qt.Parent).Reverse().NotNull().ToList();
 
             if (tokenPath.Count > 0)
                 queryToken = tokenPath[0];
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
-            
+
             var items = new HtmlStringBuilder();
             items.Add(new HtmlTag("option").Attr("value", "").SetInnerText("-").ToHtml());
             foreach (var c in qd.Columns)
@@ -256,32 +256,33 @@ namespace Signum.Web
             {
                 QueryToken t = tokenPath[i];
                 List<QueryToken> subtokens = t.SubTokens();
-
-                var subitems = new HtmlStringBuilder();
-                subitems.AddLine(new HtmlTag("option").Attr("value", "").SetInnerText("-").ToHtml());
-                foreach (var qt in subtokens)
+                if (!subtokens.IsEmpty())
                 {
-                    var option = new HtmlTag("option")
-                        .Attr("value", qt.Key)
-                        .SetInnerText(qt.ToString());
-                    if (i + 1 < tokenPath.Count && qt.Key == tokenPath[i + 1].Key)
-                        option.Attr("selected", "selected");
+                    var subitems = new HtmlStringBuilder();
+                    subitems.AddLine(new HtmlTag("option").Attr("value", "").SetInnerText("-").ToHtml());
+                    foreach (var qt in subtokens)
+                    {
+                        var option = new HtmlTag("option")
+                            .Attr("value", qt.Key)
+                            .SetInnerText(qt.ToString());
+                        if (i + 1 < tokenPath.Count && qt.Key == tokenPath[i + 1].Key)
+                            option.Attr("selected", "selected");
 
-                    string canColumn = QueryUtils.CanColumn(qt);
-                    if (canColumn.HasText())
-                        option.Attr("data-column", canColumn);
+                        string canColumn = QueryUtils.CanColumn(qt);
+                        if (canColumn.HasText())
+                            option.Attr("data-column", canColumn);
 
-                    string canFilter = QueryUtils.CanFilter(qt);
-                    if (canFilter.HasText())
-                        option.Attr("data-filter", canFilter);
+                        string canFilter = QueryUtils.CanFilter(qt);
+                        if (canFilter.HasText())
+                            option.Attr("data-filter", canFilter);
 
-                    subitems.AddLine(option.ToHtml());
+                        subitems.AddLine(option.ToHtml());
+                    }
+
+                    sb.AddLine(SearchControlHelper.TokensCombo(helper, queryName, subitems, context, i + 1, (i + 1 >= tokenPath.Count)));
                 }
-
-                sb.AddLine(SearchControlHelper.TokensCombo(helper, queryName, subitems, context, i + 1, (i + 1 >= tokenPath.Count)));
-
             }
-            
+
             return sb.ToHtml();
         }
 
@@ -289,7 +290,7 @@ namespace Signum.Web
         {
             if (filterOption.Token.Type.IsLite())
             {
-                Lite lite = (Lite)Common.Convert(filterOption.Value, filterOption.Token.Type); 
+                Lite lite = (Lite)Common.Convert(filterOption.Value, filterOption.Token.Type);
                 if (lite != null && string.IsNullOrEmpty(lite.ToStr))
                     Database.FillToStr(lite);
 
@@ -310,7 +311,7 @@ namespace Signum.Web
                 {
                     EntityLine el = new EntityLine(filterOption.Token.Type, lite, parent, "", filterOption.Token.GetPropertyRoute())
                     {
-                         Implementations = filterOption.Token.Implementations(),
+                        Implementations = filterOption.Token.Implementations(),
                     };
                     if (el.Implementations.TryCS(i => i.IsByAll) == true)
                         el.Autocomplete = false;
@@ -325,7 +326,7 @@ namespace Signum.Web
             }
             else if (filterOption.Token.Type.IsEmbeddedEntity())
             {
-                EmbeddedEntity lite = (EmbeddedEntity)Common.Convert(filterOption.Value, filterOption.Token.Type); 
+                EmbeddedEntity lite = (EmbeddedEntity)Common.Convert(filterOption.Value, filterOption.Token.Type);
                 EntityLine el = new EntityLine(filterOption.Token.Type, lite, parent, "", filterOption.Token.GetPropertyRoute())
                 {
                     Implementations = filterOption.Token.Implementations(),

@@ -19,8 +19,6 @@ namespace Signum.Utilities
                 return random;
             }
         }
-
-        public static object png { get; set; }
     }
 
     public static class RandomExtensions

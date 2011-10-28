@@ -313,7 +313,7 @@ namespace Signum.Web.Controllers
             object queryName = Navigator.ResolveQueryName(webQueryName);
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
             List<QueryToken> subtokens = QueryUtils.Parse(tokenName, t => QueryUtils.SubTokens(t, qd.Columns)).SubTokens();
-            if (subtokens == null)
+            if (subtokens.IsEmpty())
                 return Content("");
 
             var items = new HtmlStringBuilder();
