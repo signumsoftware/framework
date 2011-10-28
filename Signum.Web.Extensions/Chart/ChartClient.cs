@@ -99,7 +99,7 @@ namespace Signum.Web.Chart
                 }
 
                 if (string.IsNullOrEmpty(tokenName))
-                    return null;
+                    return ctx.None();
 
                 var qd = DynamicQueryManager.Current.QueryDescription(
                     Navigator.ResolveQueryName(ctx.GlobalInputs[TypeContextUtilities.Compose(ctx.Root.ControlID, ViewDataKeys.QueryName)]));

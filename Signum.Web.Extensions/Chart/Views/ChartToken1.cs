@@ -125,13 +125,18 @@ WriteLiteral("</td>\r\n        <td>\r\n");
                                                                                                                                                    
             }
 
-WriteLiteral("        </td>\r\n        <td>\r\n            <div class=\"sf-query-token\">\r\n          " +
-"      ");
+WriteLiteral("        </td>\r\n        <td>\r\n            <div class=\"sf-query-token\">\r\n");
 
 
-           Write(Html.QueryTokenCombo(tc.Value.Token, ViewData[ViewDataKeys.QueryName], tc));
+                 if (tc.Value.Aggregate != AggregateFunction.Count)
+                {
+                    
+               Write(Html.QueryTokenCombo(tc.Value.Token, ViewData[ViewDataKeys.QueryName], tc));
 
-WriteLiteral("\r\n            </div>\r\n            <a class=\"sf-chart-token-config-trigger\">");
+                                                                                               
+                }
+
+WriteLiteral("            </div>\r\n            <a class=\"sf-chart-token-config-trigger\">");
 
 
                                                 Write(Resources.Chart_ToggleInfo);
