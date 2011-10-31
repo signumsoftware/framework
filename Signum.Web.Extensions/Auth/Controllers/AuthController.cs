@@ -525,6 +525,10 @@ namespace Signum.Web.Auth
         }
         #endregion
 
+
+
+        public static Action<UserDN> OnUpdatedSessionUser;
+
         public static void UpdateSessionUser()
         {
             var newUser = UserDN.Current.ToLite().Retrieve();
@@ -533,6 +537,9 @@ namespace Signum.Web.Auth
 
             if (System.Web.HttpContext.Current != null && System.Web.HttpContext.Current.Session[SessionUserKey] != null)
                 System.Web.HttpContext.Current.Session[SessionUserKey] = newUser;
+
+            if (OnUpdatedSessionUser != null)
+                OnUpdatedSessionUser(newUser); 
         }
 
         public static void AddUserSession(UserDN user)

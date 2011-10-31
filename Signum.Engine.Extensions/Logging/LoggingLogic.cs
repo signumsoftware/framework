@@ -75,7 +75,7 @@ namespace Signum.Engine.Logging
 
         public static bool ThrowLogingErrors = true;
 
-        public static void LogException(Exception ex, string controllerName, string actionName, string userAgent, string requestUrl)
+        public static void LogException(Exception ex, string controllerName, string actionName, string userAgent, string requestUrl,string data)
         {
             try
             {
@@ -93,7 +93,8 @@ namespace Signum.Engine.Logging
                         UserAgent = userAgent,
                         ControllerName = controllerName,
                         ActionName = actionName,
-                        Context = GetContext == null ? null : GetContext(ex)
+                        Context = GetContext == null ? null : GetContext(ex),
+                        Data=data
                     }.Save();
 
                     tr.Commit();

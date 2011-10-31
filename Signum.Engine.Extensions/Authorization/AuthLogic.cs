@@ -112,8 +112,8 @@ namespace Signum.Engine.Authorization
                     Lite = true,
                     Execute = (u, args) =>
                     {
-                        string newPassword = args.TryGetArgC<string>(0);
-                        u.PasswordHash = Security.EncodePassword(newPassword);
+                        string passwordHash = args.TryGetArgC<string>(0);
+                        u.PasswordHash = passwordHash;
                     }
                 }.Register();
             }

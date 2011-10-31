@@ -72,7 +72,13 @@ namespace Signum.Web.Auth
                     Navigator.AddSetting(new EntitySettings<PasswordExpiresIntervalDN>(EntityType.Admin) { PartialViewName = _ => ViewPrefix.Formato("PasswordValidInterval") });                  
                 }
 
-                Navigator.AddSetting(new EmbeddedEntitySettings<SetPasswordModel>() { PartialViewName = _ => ViewPrefix.Formato("SetPassword") });
+                Navigator.AddSetting(new EmbeddedEntitySettings<SetPasswordModel>()
+                {
+                    PartialViewName = _ => ViewPrefix.Formato("SetPassword"),
+                    MappingDefault = new EntityMapping<SetPasswordModel>(false)
+                    .SetProperty(a => a.Password, ctx => UserMapping.GetNewPassword(ctx, UserMapping.NewPasswordKey, UserMapping.NewPasswordBisKey))
+                    .CreateProperty(a => a.User)
+                });
 
                 if (property)
                     Common.CommonTask += new CommonTask(TaskAuthorizeProperties);
@@ -221,11 +227,10 @@ namespace Signum.Web.Auth
 
         static void AuthClient_Saving(UserDN ident)
         {
-            if (ident.Modified == true)
+            if (ident.Modified == true && ident.Is(UserDN.Current))
                 Transaction.RealCommit += () =>
                 {
-                    if (ident.Is(UserDN.Current))
-                        AuthController.UpdateSessionUser();
+                     AuthController.UpdateSessionUser();
                 };
         }
     }
