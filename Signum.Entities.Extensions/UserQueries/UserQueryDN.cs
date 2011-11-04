@@ -127,9 +127,9 @@ namespace Signum.Entities.UserQueries
     [Serializable]
     public abstract class QueryTokenDN : EmbeddedEntity
     {
-        [NotNullable, SqlDbType(Size = 100)]
+        [NotNullable]
         protected string tokenString;
-        [StringLengthValidator(AllowNulls = false, Min = 1, Max = 100), AvoidLocalization]
+        [StringLengthValidator(AllowNulls = false, Min = 1), AvoidLocalization]
         public string TokenString
         {
             get { return tokenString; }
