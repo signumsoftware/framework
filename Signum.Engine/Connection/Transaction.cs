@@ -201,6 +201,8 @@ namespace Signum.Engine
             string savePointName;
             public bool RolledBack { get; private set; }
             public bool Started { get; private set; }
+            public event Action RealCommit;
+            public event Action PreRealCommit;
 
             public NamedTransaction(ICoreTransaction parent, string savePointName)
             {
@@ -208,18 +210,7 @@ namespace Signum.Engine
                 this.savePointName = savePointName;
             }
 
-            public event Action RealCommit
-            {
-                add { parent.RealCommit += value; }
-                remove { parent.RealCommit -= value; }
-            }
-
-            public event Action PreRealCommit
-            {
-                add { parent.PreRealCommit += value; }
-                remove { parent.PreRealCommit -= value; }
-            }
-
+        
             public SqlConnection Connection { get { return parent.Connection; } }
             public SqlTransaction Transaction { get { return parent.Transaction; } }
             public DateTime Time { get { return parent.Time; } }
@@ -244,7 +235,26 @@ namespace Signum.Engine
                 }
             }
 
-            public void Commit() { }
+            public void Commit() 
+            {
+                while (PreRealCommit != null)
+                {
+                    foreach (Action item in PreRealCommit.GetInvocationList())
+                    {
+                        item();
+                        PreRealCommit -= item;
+                    }
+                }
+
+                while (RealCommit != null)
+                {
+                    foreach (Action item in RealCommit.GetInvocationList())
+                    {
+                        item();
+                        RealCommit -= item;
+                    }
+                }
+            }
 
             public ICoreTransaction Finish() { return parent; }
 
