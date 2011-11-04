@@ -1,13 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D7CFF730-3891-4DD2-86F4-86F76E48FFDE}"
-	ProjectSection(SolutionItems) = preProject
-		Local.testsettings = Local.testsettings
-		Signum.Framework.vsmdi = Signum.Framework.vsmdi
-		TraceAndTestImpact.testsettings = TraceAndTestImpact.testsettings
-	EndProjectSection
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Signum.Utilities", "Signum.Utilities\Signum.Utilities.csproj", "{F7D3F72D-741D-4F67-8CF8-CD41B9035FED}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Signum.Entities", "Signum.Entities\Signum.Entities.csproj", "{F2B51D08-498D-4C9F-8112-9521A7762B02}"

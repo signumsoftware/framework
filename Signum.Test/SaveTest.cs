@@ -16,7 +16,7 @@ namespace Signum.Test
         [ClassInitialize()]
         public static void MyClassInitialize(TestContext testContext)
         {
-            Starter.Start();
+            Starter.StartAndLoad();
         }
 
         [TestInitialize]
@@ -28,81 +28,99 @@ namespace Signum.Test
         [TestMethod]
         public void SaveCycle()
         {
-            ArtistDN m = new ArtistDN() { Name = "Michael" };
-            ArtistDN f = new ArtistDN() { Name = "Frank" };
-            m.Friends.Add(f.ToLiteFat());
-            f.Friends.Add(m.ToLiteFat());
+            using (Transaction tr = new Transaction())
+            {
+                ArtistDN m = new ArtistDN() { Name = "Michael" };
+                ArtistDN f = new ArtistDN() { Name = "Frank" };
+                m.Friends.Add(f.ToLiteFat());
+                f.Friends.Add(m.ToLiteFat());
 
-            Database.SaveParams(m, f);
+                Database.SaveParams(m, f);
 
-            var list = Database.RetrieveAll<ArtistDN>();
+                var list = Database.Query<ArtistDN>().Where(a=>a == m || a == f).ToList();
 
-            Assert.IsTrue(list[0].Friends.Contains(list[1].ToLite()));
-            Assert.IsTrue(list[1].Friends.Contains(list[0].ToLite()));
+                Assert.IsTrue(list[0].Friends.Contains(list[1].ToLite()));
+                Assert.IsTrue(list[1].Friends.Contains(list[0].ToLite()));
 
-            Starter.Dirty();
+                //tr.Commit();
+            }
+
         }
 
         [TestMethod]
         public void SaveSelfCycle()
         {
-            ArtistDN m = new ArtistDN() { Name = "Michael" };
-            m.Friends.Add(m.ToLiteFat());
+            using (Transaction tr = new Transaction())
+            {
+                ArtistDN m = new ArtistDN() { Name = "Michael" };
+                m.Friends.Add(m.ToLiteFat());
 
-            m.Save();
+                m.Save();
 
-            var m2 = m.ToLite().RetrieveAndForget();
+                var m2 = m.ToLite().RetrieveAndForget();
 
-            Assert.IsTrue(m2.Friends.Contains(m2.ToLite()));
+                Assert.IsTrue(m2.Friends.Contains(m2.ToLite()));
 
-            Starter.Dirty();
+                //tr.Commit();
+            }
+
         }
-
 
         [TestMethod]
         public void SaveMany()
         {
-            Type[] types = typeof(int).Assembly.GetTypes().Where(a => a.Name.Length > 3 && a.Name.StartsWith("A")).ToArray();
-            
-            var list = types.Select(t=>new ArtistDN() { Name = t.Name}).ToList();
-            
-            list.SaveList();
+            using (Transaction tr = new Transaction())
+            {
+                var prev =  Database.Query<ArtistDN>().Count();
 
-            Assert.AreEqual(types.Length, Database.Query<ArtistDN>().Count());
+                Type[] types = typeof(int).Assembly.GetTypes().Where(a => a.Name.Length > 3 && a.Name.StartsWith("A")).ToArray();
 
-            list.ForEach(a => a.Name += "Updated");
+                var list = types.Select(t => new ArtistDN() { Name = t.Name }).ToList();
 
-            list.SaveList(); 
+                list.SaveList();
 
-            Starter.Dirty();
+                Assert.AreEqual(prev + types.Length, Database.Query<ArtistDN>().Count());
+
+                list.ForEach(a => a.Name += "Updated");
+
+                list.SaveList();
+
+                //tr.Commit();
+            }
         }
 
         [TestMethod]
         public void SaveManyMList()
         {
-            Type[] types = typeof(int).Assembly.GetTypes().Where(a => a.Name.Length > 3 && a.Name.StartsWith("A")).ToArray();
-
-            AlbumDN album = new AlbumDN()
+            using (Transaction tr = new Transaction())
             {
-                Name = "System Greatest hits",
-                Author = new ArtistDN { Name = ".Net Framework" },
-                Year = 2001,
-                Songs = types.Select(t => new SongDN() { Name = t.Name }).ToMList()
-            }.Save();
+                var prev = Database.MListQuery((AlbumDN a) => a.Songs).Count();
 
-            Assert2.AssertAll(GraphExplorer.FromRoot(album), a => a.SelfModified == false && a.Modified == null);
+                Type[] types = typeof(int).Assembly.GetTypes().Where(a => a.Name.Length > 3 && a.Name.StartsWith("A")).ToArray();
 
-            Assert.AreEqual(types.Length, Database.MListQuery((AlbumDN a) => a.Songs).Count());
+                AlbumDN album = new AlbumDN()
+                {
+                    Name = "System Greatest hits",
+                    Author = new ArtistDN { Name = ".Net Framework" },
+                    Year = 2001,
+                    Songs = types.Select(t => new SongDN() { Name = t.Name }).ToMList()
+                }.Save();
 
-            album.Name += "Updated";
+                Assert2.AssertAll(GraphExplorer.FromRoot(album), a => a.SelfModified == false && a.Modified == null);
 
-            album.Save();
+                Assert.AreEqual(prev + types.Length, Database.MListQuery((AlbumDN a) => a.Songs).Count());
 
-            album.Songs.ForEach(a => a.Name = "Updated");
+                album.Name += "Updated";
 
-            album.Save();
+                album.Save();
 
-            Starter.Dirty();
+                album.Songs.ForEach(a => a.Name = "Updated");
+
+                album.Save();
+
+                //tr.Commit();
+            }
+
         }
     }
 }

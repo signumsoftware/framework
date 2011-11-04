@@ -27,111 +27,174 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [TestInitialize]
         public void Initialize()
         {
-            Starter.Dirty();
-
             Connection.CurrentLog = new DebugTextWriter();
         }
 
         [TestMethod]
         public void DeleteAll()
         {
-            int count = Database.Query<AlbumDN>().UnsafeDelete();
+            using (Transaction tr = new Transaction())
+            {
+                int count = Database.Query<AlbumDN>().UnsafeDelete();
+
+                //tr.Commit();
+            }
+
         }
 
         [TestMethod]
         public void Delete()
         {
-            int count = Database.Query<AlbumDN>().Where(a => a.Year < 1990).UnsafeDelete();
+            using (Transaction tr = new Transaction())
+            {
+                int count = Database.Query<AlbumDN>().Where(a => a.Year < 1990).UnsafeDelete();
+
+                //tr.Commit();
+            }
         }
 
         [TestMethod]
         public void DeleteJoin()
         {
-            int count = Database.Query<AlbumDN>().Where(a => ((ArtistDN)a.Author).Dead).UnsafeDelete();
+            using (Transaction tr = new Transaction())
+            {
+                int count = Database.Query<AlbumDN>().Where(a => ((ArtistDN)a.Author).Dead).UnsafeDelete();
+                //tr.Commit();
+            }
         }
 
 
         [TestMethod]
         public void DeleteMListLite()
         {
-            int count = Database.MListQuery((ArtistDN a) => a.Friends).UnsafeDelete(); 
+            using (Transaction tr = new Transaction())
+            {
+                int count = Database.MListQuery((ArtistDN a) => a.Friends).UnsafeDelete();
+                //tr.Commit();
+            }
         }
 
         [TestMethod]
         public void DeleteMListEntity()
         {
-            int count = Database.MListQuery((BandDN a) => a.Members).UnsafeDelete();
+            using (Transaction tr = new Transaction())
+            {
+                int count = Database.MListQuery((BandDN a) => a.Members).UnsafeDelete();
+
+                //tr.Commit();
+            }
         }
 
         [TestMethod]
         public void DeleteMListEmbedded()
         {
-            int count = Database.MListQuery((AlbumDN a) => a.Songs).UnsafeDelete();
+            using (Transaction tr = new Transaction())
+            {
+                int count = Database.MListQuery((AlbumDN a) => a.Songs).UnsafeDelete();
+
+                //tr.Commit();
+            }
         }
 
 
         [TestMethod]
         public void DeleteManual()
         {
-            var list = Database.Query<AlbumDN>().Where(a => ((ArtistDN)a.Author).Dead).Select(a => a.ToLite()).ToList();
+            using (Transaction tr = new Transaction())
+            {
+                var list = Database.Query<AlbumDN>().Where(a => ((ArtistDN)a.Author).Dead).Select(a => a.ToLite()).ToList();
 
-            Database.DeleteList(list);
+                Database.DeleteList(list);
+                //tr.Commit();
+            }
+
         }
 
 
         [TestMethod]
         public void UpdateValue()
         {
-            int count = Database.Query<AlbumDN>().UnsafeUpdate(a => new AlbumDN { Year = a.Year * 2 });
+            using (Transaction tr = new Transaction())
+            {
+                int count = Database.Query<AlbumDN>().UnsafeUpdate(a => new AlbumDN { Year = a.Year * 2 });
+                //tr.Commit();
+            }
+
         }
 
         [TestMethod]
         public void UpdateValueSqlFunction()
         {
-            int count = Database.Query<AlbumDN>().UnsafeUpdate(a => new AlbumDN { Name = a.Name.ToUpper() });
+            using (Transaction tr = new Transaction())
+            {
+                int count = Database.Query<AlbumDN>().UnsafeUpdate(a => new AlbumDN { Name = a.Name.ToUpper() });
+                //tr.Commit();
+            }
+
         }
 
         [TestMethod]
         public void UpdateValueNull()
         {
-            int count = Database.Query<NoteWithDateDN>().UnsafeUpdate(a => new NoteWithDateDN { Text = null });
+            using (Transaction tr = new Transaction())
+            {
+                int count = Database.Query<NoteWithDateDN>().UnsafeUpdate(a => new NoteWithDateDN { Text = null });
+                //tr.Commit();
+            }
+
         }
 
         [TestMethod]
         public void UpdateValueConstant()
         {
-            int count = Database.Query<AlbumDN>().Where(a => a.Year < 1990).UnsafeUpdate(a => new AlbumDN { Year = 1990 });
+            using (Transaction tr = new Transaction())
+            {
+                int count = Database.Query<AlbumDN>().Where(a => a.Year < 1990).UnsafeUpdate(a => new AlbumDN { Year = 1990 });
+                //tr.Commit();
+            }
+
         }
 
         [TestMethod]
         public void UpdateEnum()
         {
-            int count = Database.Query<ArtistDN>().UnsafeUpdate(a => new ArtistDN { Sex = a.Sex == Sex.Female ? Sex.Male : Sex.Female });
+            using (Transaction tr = new Transaction())
+            {
+                int count = Database.Query<ArtistDN>().UnsafeUpdate(a => new ArtistDN { Sex = a.Sex == Sex.Female ? Sex.Male : Sex.Female });
+                //tr.Commit();
+            }
+
         }
 
         [TestMethod]
         public void UpdateEnumConstant()
         {
-            int count = Database.Query<ArtistDN>().UnsafeUpdate(a => new ArtistDN { Sex = Sex.Male });
+            using (Transaction tr = new Transaction())
+            {
+                int count = Database.Query<ArtistDN>().UnsafeUpdate(a => new ArtistDN { Sex = Sex.Male });
+                //tr.Commit();
+            }
+
         }
 
         [TestMethod]
         public void UpdateEfie()
         {
-            SongDN song = new SongDN
-            {
-                 Name = "Mana Mana",
-                 Duration = 184,
-            };
-
             using (Transaction tr = new Transaction())
             {
+                SongDN song = new SongDN
+                {
+                    Name = "Mana Mana",
+                    Duration = 184,
+                };
+
+
                 int count = Database.Query<AlbumDN>().UnsafeUpdate(a => new AlbumDN { BonusTrack = song });
 
                 Assert.IsFalse(Database.Query<AlbumDN>().Any(a => a.BonusTrack == null));
                 Assert.AreEqual(Database.Query<AlbumDN>().Select(a => a.BonusTrack.Name).Distinct().SingleEx(), "Mana Mana");
 
-                tr.Commit();
+                //tr.Commit();
             }
 
         }
@@ -139,119 +202,189 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [TestMethod]
         public void UpdateEfieNull()
         {
-            int count = Database.Query<AlbumDN>().UnsafeUpdate(a => new AlbumDN { BonusTrack = null });
+            using (Transaction tr = new Transaction())
+            {
+                int count = Database.Query<AlbumDN>().UnsafeUpdate(a => new AlbumDN { BonusTrack = null });
 
-            Assert.IsTrue(Database.Query<AlbumDN>().All(a => a.BonusTrack == null));
-            Assert.IsTrue(Database.Query<AlbumDN>().All(a => a.BonusTrack.Name == null));
+                Assert.IsTrue(Database.Query<AlbumDN>().All(a => a.BonusTrack == null));
+                Assert.IsTrue(Database.Query<AlbumDN>().All(a => a.BonusTrack.Name == null));
+                //tr.Commit();
+            }
+
         }
 
 
         [TestMethod]
         public void UpdateFie()
         {
-            LabelDN label = Database.Query<LabelDN>().FirstEx();
+            using (Transaction tr = new Transaction())
+            {
+                LabelDN label = Database.Query<LabelDN>().FirstEx();
 
-            int count = Database.Query<AlbumDN>().UnsafeUpdate(a => new AlbumDN { Label = label });
+                int count = Database.Query<AlbumDN>().UnsafeUpdate(a => new AlbumDN { Label = label });
+                //tr.Commit();
+            }
+
         }
 
         [TestMethod]
         public void UpdateFieToLite()
         {
-            LabelDN label = Database.Query<LabelDN>().FirstEx();
+            using (Transaction tr = new Transaction())
+            {
+                LabelDN label = Database.Query<LabelDN>().FirstEx();
 
-            int count = Database.Query<LabelDN>().UnsafeUpdate(a => new LabelDN { Owner = label.ToLite() });
+                int count = Database.Query<LabelDN>().UnsafeUpdate(a => new LabelDN { Owner = label.ToLite() });
+                //tr.Commit();
+            }
+
         }
 
 
         [TestMethod, ExpectedException(typeof(InvalidOperationException), "The entity is New")]
         public void UpdateFieNew()
         {
-            LabelDN label = new LabelDN();
+            using (Transaction tr = new Transaction())
+            {
+                LabelDN label = new LabelDN();
 
-            int count = Database.Query<AlbumDN>().UnsafeUpdate(a => new AlbumDN { Label = label });
+                int count = Database.Query<AlbumDN>().UnsafeUpdate(a => new AlbumDN { Label = label });
+                //tr.Commit();
+            }
+
         }
 
         [TestMethod]
         public void UpdateFieNull()
         {
-            int count = Database.Query<AlbumDN>().UnsafeUpdate(a => new AlbumDN { Label = null });
+            using (Transaction tr = new Transaction())
+            {
+                int count = Database.Query<AlbumDN>().UnsafeUpdate(a => new AlbumDN { Label = null });
+                //tr.Commit();
+            }
+
         }
 
         [TestMethod]
         public void UpdateIbFie()
         {
-            ArtistDN michael = Database.Query<ArtistDN>().SingleEx(a => a.Dead);
+            using (Transaction tr = new Transaction())
+            {
+                ArtistDN michael = Database.Query<ArtistDN>().SingleEx(a => a.Dead);
 
-            int count = Database.Query<AlbumDN>().UnsafeUpdate(a => new AlbumDN { Author = michael });
+                int count = Database.Query<AlbumDN>().UnsafeUpdate(a => new AlbumDN { Author = michael });
+                //tr.Commit();
+            }
+
         }
 
 
         public void UpdateIbNull()
         {
-            int count = Database.Query<AlbumDN>().UnsafeUpdate(a => new AlbumDN { Author = null });
+            using (Transaction tr = new Transaction())
+            {
+                int count = Database.Query<AlbumDN>().UnsafeUpdate(a => new AlbumDN { Author = null });
+                //tr.Commit();
+            }
+
         }
 
         [TestMethod]
         public void UpdateIbaFie()
         {
-            ArtistDN michael = Database.Query<ArtistDN>().SingleEx(a => a.Dead);
+            using (Transaction tr = new Transaction())
+            {
+                ArtistDN michael = Database.Query<ArtistDN>().SingleEx(a => a.Dead);
 
-            int count = Database.Query<NoteWithDateDN>().UnsafeUpdate(n => new NoteWithDateDN {  Target = michael });
+                int count = Database.Query<NoteWithDateDN>().UnsafeUpdate(n => new NoteWithDateDN { Target = michael });
+                //tr.Commit();
+            }
+
         }
 
         [TestMethod]
         public void UpdateIbaNull()
         {
-            int count = Database.Query<NoteWithDateDN>().UnsafeUpdate(n => new NoteWithDateDN { Target = null });
+            using (Transaction tr = new Transaction())
+            {
+                int count = Database.Query<NoteWithDateDN>().UnsafeUpdate(n => new NoteWithDateDN { Target = null });
+                //tr.Commit();
+            }
+
         }
 
         [TestMethod]
         public void UpdateEmbeddedField()
         {
-            int count = Database.Query<AlbumDN>().UnsafeUpdate(a => new AlbumDN { BonusTrack = { Name = a.BonusTrack.Name + " - " } });
+            using (Transaction tr = new Transaction())
+            {
+                int count = Database.Query<AlbumDN>().UnsafeUpdate(a => new AlbumDN { BonusTrack = { Name = a.BonusTrack.Name + " - " } });
+                //tr.Commit();
+            }
+
         }
 
         [TestMethod]
         public void UpdateEmbeddedNull()
         {
-            int count = Database.Query<AlbumDN>().UnsafeUpdate(a => new AlbumDN { BonusTrack = null });
+            using (Transaction tr = new Transaction())
+            {
+                int count = Database.Query<AlbumDN>().UnsafeUpdate(a => new AlbumDN { BonusTrack = null });
+                //tr.Commit();
+            }
+
         }
 
 
         [TestMethod]
         public void UpdateMListLite()
         {
-            ArtistDN artist = Database.Query<ArtistDN>().FirstEx();
-
-            int count = Database.MListQuery((ArtistDN a) => a.Friends).UnsafeUpdate(a => new MListElement<ArtistDN, Lite<ArtistDN>>
+            using (Transaction tr = new Transaction())
             {
-                Element = artist.ToLite(),
-                Parent = artist
-            });
+                ArtistDN artist = Database.Query<ArtistDN>().FirstEx();
 
-            var list = Database.MListQuery((ArtistDN a) => a.Friends); 
+                int count = Database.MListQuery((ArtistDN a) => a.Friends).UnsafeUpdate(a => new MListElement<ArtistDN, Lite<ArtistDN>>
+                {
+                    Element = artist.ToLite(),
+                    Parent = artist
+                });
+
+                var list = Database.MListQuery((ArtistDN a) => a.Friends);
+                //tr.Commit();
+            }
+
         }
 
         [TestMethod]
         public void UpdateMListEntity()
         {
-            ArtistDN artist = Database.Query<ArtistDN>().FirstEx();
-
-            int count = Database.MListQuery((BandDN a) => a.Members).UnsafeUpdate(b => new MListElement<BandDN, ArtistDN>
+            using (Transaction tr = new Transaction())
             {
-                Element = artist
-            });
+                ArtistDN artist = Database.Query<ArtistDN>().FirstEx();
+
+                int count = Database.MListQuery((BandDN a) => a.Members).UnsafeUpdate(b => new MListElement<BandDN, ArtistDN>
+                {
+                    Element = artist
+                });
+                //tr.Commit();
+            }
+
         }
 
         [TestMethod]
         public void UpdateMListEmbedded()
         {
-            int count = Database.MListQuery((AlbumDN a) => a.Songs).UnsafeUpdate(b => new MListElement<AlbumDN, SongDN>
+            using (Transaction tr = new Transaction())
             {
-                Element = { Duration = 3 }
-            });
+                int count = Database.MListQuery((AlbumDN a) => a.Songs).UnsafeUpdate(b => new MListElement<AlbumDN, SongDN>
+                {
+                    Element = { Duration = 3 }
+                });
 
-            var list = Database.MListQuery((AlbumDN a) => a.Songs);
+                var list = Database.MListQuery((AlbumDN a) => a.Songs);
+                //tr.Commit();
+            }
+
         }
 
     }
