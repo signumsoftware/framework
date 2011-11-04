@@ -176,7 +176,7 @@ namespace Signum.Test.Extensions
                     new TypeAllowedAndConditions(TypeAllowed.None, 
                             new TypeConditionRule(MusicGroups.JapanEntities, TypeAllowed.Create)));
 
-                TypeAuthLogic.Manual.SetAllowed(externalUser.ToLite(), typeof(LabelDN), 
+                TypeAuthLogic.Manual.SetAllowed(externalUser.ToLite(), typeof(AlbumDN), 
                     new TypeAllowedAndConditions(TypeAllowed.None,
                             new TypeConditionRule(MusicGroups.JapanEntities, TypeAllowed.Create)));
 
