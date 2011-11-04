@@ -35,9 +35,7 @@ namespace Signum.Test
         public void RawEntity()
         {
             var dic = DynamicQuery.QueryMetadata(Database.Query<NoteWithDateDN>());
-            Assert.AreEqual(dic.Count, typeof(NoteWithDateDN).GetProperties(BindingFlags.Instance | BindingFlags.Public).Length);
-
-            Assert.IsTrue(dic.Values.All(m => m is CleanMeta));
+            Assert.IsNull(dic);
         }
 
         [TestMethod]
