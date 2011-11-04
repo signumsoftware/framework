@@ -29,10 +29,13 @@ namespace Signum.Engine.Linq
                 {
                     Type identType = c.Type.GetGenericArguments().SingleEx();
 
-                    IQueryable newQuery = filter && Schema.Current.Tables.ContainsKey(identType) ? miFilter.GetInvoker(identType)(Schema.Current, query) : query;
-
-                    if (newQuery != query)
-                        return newQuery.Expression;
+                    if (filter && Schema.Current.Tables.ContainsKey(identType))
+                    {
+                        IQueryable newQuery = miFilter.GetInvoker(identType)(Schema.Current, query);
+                        
+                        if (newQuery != query)
+                            return newQuery.Expression;
+                    }
 
                     return c;
                 }
