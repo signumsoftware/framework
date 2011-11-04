@@ -15,6 +15,7 @@ using Signum.Services;
 using Signum.Engine.Basics;
 using Signum.Utilities;
 using System.Xml.Linq;
+using Signum.Engine.Exceptions;
 
 namespace Signum.Test.Extensions
 {
@@ -117,26 +118,14 @@ namespace Signum.Test.Extensions
         {
             using (AuthLogic.UnsafeUser("external"))
             {
-                Assert2.Throws<UnauthorizedAccessException>(() => Database.Retrieve<LabelDN>(1));
+                Assert2.Throws<EntityNotFoundException>(() => Database.Retrieve<LabelDN>(1));
                 using (TypeAuthLogic.DisableQueryFilter())
                 {
-                    Assert2.Throws<UnauthorizedAccessException>(() => Database.Query<LabelDN>().SingleEx(r => r.Name == "Virgin"));
+                    Database.Query<LabelDN>().SingleEx(r => r.Name == "Virgin");
                 }
             }
         }
 
-        [TestMethod]
-        public void TypeConditionRetrieveQueryable()
-        {
-            using (AuthLogic.UnsafeUser("external"))
-            {
-                Assert2.Throws<UnauthorizedAccessException>(() => Database.Retrieve<AlbumDN>(1)); 
-                using (TypeAuthLogic.DisableQueryFilter())
-                {
-                    Assert2.Throws<UnauthorizedAccessException>(() => Database.Query<AlbumDN>().SingleEx(r => r.Name == "Siamese Dream"));
-                }
-            }
-        }
 
         [TestMethod]
         public void TypeConditionUpdate()
