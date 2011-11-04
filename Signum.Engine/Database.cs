@@ -410,7 +410,7 @@ namespace Signum.Engine
             using (Transaction tr = new Transaction())
             {
                 var dic = lites.AgGroupToDictionary(a => a.RuntimeType, gr =>
-                    giRetrieveList.GetInvoker(gr.Key)(gr.Select(a => a.Id).ToList()));
+                    RetrieveList(gr.Key, gr.Select(a => a.Id).ToList()).ToDictionary(a => a.Id));
 
                 var result = lites.Select(l => (IdentifiableEntity)dic[l.RuntimeType][l.Id]).ToList(); // keep same order
 
