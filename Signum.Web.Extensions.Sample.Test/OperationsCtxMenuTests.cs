@@ -20,7 +20,7 @@ namespace Signum.Web.Extensions.Sample.Test
         [ClassInitialize]
         public static void ClassInitialize(TestContext testContext)
         {
-            Common.Start(testContext);
+            Common.Start();
         }
 
         [ClassCleanup]
