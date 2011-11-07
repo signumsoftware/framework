@@ -36,6 +36,7 @@ namespace Signum.Web.Extensions.Sample.Test
                 
                 UserQueryDN userQuery = new UserQueryDN(queryName)
                 {
+                    Related = Database.Query<RoleDN>().Where(r=>r.Name == "InternalUser").Select(a=>a.ToLite<IdentifiableEntity>()).Single(),
                     DisplayName = "test",
                     Filters= 
                     {
@@ -48,7 +49,7 @@ namespace Signum.Web.Extensions.Sample.Test
         [ClassInitialize]
         public static void ClassInitialize(TestContext testContext)
         {
-            Common.Start(testContext);
+            Common.Start();
         }
 
         [ClassCleanup]

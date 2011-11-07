@@ -25,13 +25,13 @@ namespace Signum.Test.Extensions
 {
     public static class Starter
     {
-        static bool started = false;
+        static bool hasData = false;
         public static void StartAndLoad(string connectionString)
         {
-            if (!started)
-            {
-                Start(connectionString);
+            Start(connectionString);
 
+            if (!hasData)
+            {
                 Administrator.TotalGeneration();
 
                 using (AuthLogic.Disable())
@@ -43,16 +43,16 @@ namespace Signum.Test.Extensions
                     Schema.Current.Initialize();
                 }
 
-                started = true;
+                hasData = true;
             }
         }
 
         public static void Dirty()
         {
-            started = false;
+            hasData = false;
         }
 
-
+        static bool started = false;
         public static void Start(string connectionString)
         {
             if (!started)
@@ -176,7 +176,7 @@ namespace Signum.Test.Extensions
                     new TypeAllowedAndConditions(TypeAllowed.None, 
                             new TypeConditionRule(MusicGroups.JapanEntities, TypeAllowed.Create)));
 
-                TypeAuthLogic.Manual.SetAllowed(externalUser.ToLite(), typeof(LabelDN), 
+                TypeAuthLogic.Manual.SetAllowed(externalUser.ToLite(), typeof(AlbumDN), 
                     new TypeAllowedAndConditions(TypeAllowed.None,
                             new TypeConditionRule(MusicGroups.JapanEntities, TypeAllowed.Create)));
 

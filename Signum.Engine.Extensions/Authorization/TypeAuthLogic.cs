@@ -41,10 +41,13 @@ namespace Signum.Engine.Authorization
                 sb.Schema.EntityEventsGlobal.Retrieved += EntityEventsGlobal_Retrieved;
                 sb.Schema.IsAllowedCallback += Schema_IsAllowedCallback;
 
-                 foreach (var type in TypeConditionLogic.Types)
+                sb.Schema.Initializing[InitLevel.Level0SyncEntities] += () =>
                 {
-                    miRegister.GetInvoker(type)(Schema.Current);
-                }
+                    foreach (var type in TypeConditionLogic.Types)
+                    {
+                        miRegister.GetInvoker(type)(Schema.Current);
+                    }
+                };
 
                 cache = new TypeAuthCache(sb,
                     AuthUtils.MaxType, 
