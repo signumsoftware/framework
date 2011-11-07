@@ -35,26 +35,6 @@ namespace Signum.Test
             }
         }
 
-        static bool started = false; 
-        public static void Start()
-        {
-            if(!started)
-            {
-                Start(Settings.Default.SignumTest); 
-
-                Administrator.TotalGeneration();
-
-                Schema.Current.Initialize();
-
-                started = true;
-            }
-        }
-
-        internal static void Dirty()
-        {
-            started = startedAndLoaded = false;
-        }
-
         public static void Start(string connectionString)
         {
             SchemaBuilder sb = new SchemaBuilder();

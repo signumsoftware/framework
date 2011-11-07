@@ -488,9 +488,9 @@ namespace Signum.Engine.Linq
             return Expression.Call(row, mi, Expression.Constant(cProj.Projection.Token), cProj.OuterKey, field);
         }
 
-        static MethodInfo miSingle = ReflectionTools.GetMethodInfo(() => Enumerable.Single<int>(null)).GetGenericMethodDefinition();
-        static MethodInfo miSingleOrDefault = ReflectionTools.GetMethodInfo(() => Enumerable.SingleOrDefault<int>(null)).GetGenericMethodDefinition();
-        static MethodInfo miFirst = ReflectionTools.GetMethodInfo(() => Enumerable.First<int>(null)).GetGenericMethodDefinition();
+        static MethodInfo miSingle = ReflectionTools.GetMethodInfo(() => EnumerableUniqueExtensions.SingleEx<int>(null)).GetGenericMethodDefinition();
+        static MethodInfo miSingleOrDefault = ReflectionTools.GetMethodInfo(() => EnumerableUniqueExtensions.SingleOrDefaultEx<int>(null)).GetGenericMethodDefinition();
+        static MethodInfo miFirst = ReflectionTools.GetMethodInfo(() => EnumerableUniqueExtensions.FirstEx<int>(null)).GetGenericMethodDefinition();
         static MethodInfo miFirstOrDefault = ReflectionTools.GetMethodInfo(() => Enumerable.FirstOrDefault<int>(null)).GetGenericMethodDefinition();
 
         internal MethodInfo UniqueMethod(UniqueFunction uniqueFunction)

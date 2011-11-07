@@ -15,9 +15,10 @@ namespace Signum.Test
         StringDistance d = new StringDistance();
 
         [TestMethod]
-        public void Bla()
+        public void ResetLazy()
         {
-            Lazy<string> val = new Lazy<string>(()=>"hola" + DateTime.Now.Ticks, LazyThreadSafetyMode.PublicationOnly);
+            int i = 0;
+            Lazy<string> val = new Lazy<string>(()=>"hola" + i++, LazyThreadSafetyMode.PublicationOnly);
 
             val.ResetPublicationOnly(); //reset before initialized
             var str1 = val.Value;

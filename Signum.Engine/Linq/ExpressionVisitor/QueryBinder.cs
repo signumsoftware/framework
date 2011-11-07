@@ -135,7 +135,7 @@ namespace Signum.Engine.Linq
 
                 return Expression.Convert((ColumnExpression)fi.ExternalId, m.Method.DeclaringType.GetGenericArguments()[0]);
             }
-            else if (m.Object != null && (typeof(ICollection).IsAssignableFrom(m.Method.DeclaringType) || m.Method.DeclaringType.IsInstantiationOf(typeof(ICollection<>))) && m.Method.Name == "Contains")
+            else if (m.Object != null && typeof(IEnumerable).IsAssignableFrom(m.Method.DeclaringType) && typeof(string) != m.Method.DeclaringType && m.Method.Name == "Contains")
             {
                 return this.BindContains(m.Type, m.Object, m.Arguments[0], m == root);
             }

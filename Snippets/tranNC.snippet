@@ -2,9 +2,9 @@
 <CodeSnippets  xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
 	<CodeSnippet Format="1.0.0">
 		<Header>
-			<Title>Transaction</Title>
-			<Shortcut>tran</Shortcut>
-			<Description>New Transaction</Description>
+			<Title>Transaction No Commit</Title>
+			<Shortcut>tranNC</Shortcut>
+			<Description>New Transaction for unit tests</Description>
 			<Author>Signum Framework</Author>
 			<SnippetTypes>
 				<SnippetType>Expansion</SnippetType>
@@ -22,7 +22,7 @@
 			<Code Language="csharp"><![CDATA[using (Transaction tr = new Transaction())
 {
 	$selected$
-    tr.Commit();
+    //tr.Commit();
 }
 ]]>
 			</Code>
