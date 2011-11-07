@@ -164,7 +164,7 @@ namespace Signum.Engine
             return Current.Get(type, id);
         }
 
-        public static IRetriever NewRetriever()
+        internal static IRetriever NewRetriever()
         {
             return Current.NewRetriever();
         }
