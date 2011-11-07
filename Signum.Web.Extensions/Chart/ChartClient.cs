@@ -339,8 +339,8 @@ namespace Signum.Web.Chart
                     Lite l = (Lite)p;
                     return new
                     {
-                        key = l.Key(),
-                        toStr = l.ToStr
+                        key = l.TryCC(li => li.Key()),
+                        toStr = l.TryCC(li => li.ToStr)
                     };
                 };
             }
@@ -351,8 +351,8 @@ namespace Signum.Web.Chart
                     Enum e = (Enum)p;
                     return new
                     {
-                        key = e.ToString(),
-                        toStr = e.NiceToString()
+                        key = e.TryToString(),
+                        toStr = e.TryCC(en => en.NiceToString())
                     };
                 };
             }
