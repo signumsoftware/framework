@@ -216,7 +216,7 @@ namespace Signum.Web
                 return null;
             }
             if (type.UnNullify().IsLite())
-                return TypeLogic.ParseLite(Reflector.ExtractLite(type), value);
+                return Database.FillToStr(TypeLogic.ParseLite(Reflector.ExtractLite(type), value));
 
             return ReflectionTools.Parse(value, type); 
         }

@@ -801,9 +801,10 @@ SF.registerModule("FindNavigator", function () {
         },
 
         requestDataForSearchPopupCreate: function () {
-            return $.extend(this.serializeFilters(), {
+            return {
+                filters: this.serializeFilters(),
                 webQueryName: ((SF.isEmpty(this.findOptions.webQueryName)) ? $(this.pf(this.webQueryName)).val() : this.findOptions.webQueryName)
-            });
+            };
         },
 
         viewOptionsForSearchCreate: function (_viewOptions) {
