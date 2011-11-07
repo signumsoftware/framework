@@ -44,12 +44,12 @@ namespace ASP
     using Signum.Entities.Mailing;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
-    [System.Web.WebPages.PageVirtualPathAttribute("~/Combine/Mailing/Views/NewsletterDelivery.cshtml")]
-    public class _Page_Combine_Mailing_Views_NewsletterDelivery_cshtml : System.Web.Mvc.WebViewPage<dynamic>
+    [System.Web.WebPages.PageVirtualPathAttribute("~/Mailing/Views/NewsletterDelivery.cshtml")]
+    public class _Page_Mailing_Views_NewsletterDelivery_cshtml : System.Web.Mvc.WebViewPage<dynamic>
     {
 
 
-        public _Page_Combine_Mailing_Views_NewsletterDelivery_cshtml()
+        public _Page_Mailing_Views_NewsletterDelivery_cshtml()
         {
         }
         protected System.Web.HttpApplication ApplicationInstance

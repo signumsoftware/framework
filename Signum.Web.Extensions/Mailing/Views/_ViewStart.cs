@@ -41,15 +41,14 @@ namespace ASP
     using System.Web.UI.WebControls.WebParts;
     using System.Web.UI.HtmlControls;
     using System.Xml.Linq;
-    using Signum.Entities.Mailing;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
-    [System.Web.WebPages.PageVirtualPathAttribute("~/Combine/Mailing/Views/SMTPConfiguration.cshtml")]
-    public class _Page_Combine_Mailing_Views_SMTPConfiguration_cshtml : System.Web.Mvc.WebViewPage<dynamic>
+    [System.Web.WebPages.PageVirtualPathAttribute("~/Mailing/Views/_ViewStart.cshtml")]
+    public class _Page_Mailing_Views__ViewStart_cshtml : System.Web.Mvc.ViewStartPage
     {
 
 
-        public _Page_Combine_Mailing_Views_SMTPConfiguration_cshtml()
+        public _Page_Mailing_Views__ViewStart_cshtml()
         {
         }
         protected System.Web.HttpApplication ApplicationInstance
@@ -62,44 +61,8 @@ namespace ASP
         public override void Execute()
         {
 
-WriteLiteral("\r\n");
-
-
- using (var sc = Html.TypeContext<SMTPConfigurationDN>()) 
-{
-	
-Write(Html.ValueLine(sc, s => s.Name));
-
-                                 
-	
-Write(Html.ValueLine(sc, s => s.Port));
-
-                                 
-	
-Write(Html.ValueLine(sc, s => s.Host));
-
-                                 
-	
-Write(Html.ValueLine(sc, s => s.UseDefaultCredentials));
-
-                                                  
-	
-Write(Html.ValueLine(sc, s => s.Username));
-
-                                     
-	
-Write(Html.ValueLine(sc, s => s.Password));
-
-                                     
-	
-Write(Html.ValueLine(sc, s => s.EnableSSL));
-
-                                      
-    
-Write(Html.EntityList(sc, s => s.ClientCertificationFiles));
-
-                                                         
-}
+  
+    Layout = "~/Views/Shared/_Layout.cshtml";
 
 
         }
