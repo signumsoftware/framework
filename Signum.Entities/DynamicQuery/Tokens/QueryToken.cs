@@ -78,7 +78,8 @@ namespace Signum.Entities.DynamicQuery
                     if (implementations.IsByAll)
                         return null; // new[] { EntityPropertyToken.IdProperty(this) };
 
-                    return ((ImplementedByAttribute)implementations).ImplementedTypes.Select(t => (QueryToken)new AsTypeToken(this, t)).ToList();
+                    return ((ImplementedByAttribute)implementations).ImplementedTypes.Select(t => (QueryToken)new AsTypeToken(this, t))
+                        .Concat(OnEntityExtension(cleanType, this).OrderBy(a => a.ToString())).ToList();
 
                     //return new[] { EntityPropertyToken.IdProperty(this), EntityPropertyToken.ToStrProperty(this) }
                     //    .Concat(asPropesties).Concat(EntityProperties(cleanType)).ToArray();
