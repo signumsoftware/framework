@@ -90,7 +90,7 @@ WriteLiteral("\">\r\n                <div class=\"sf-cp-droppable\"></div>\r\n")
 
                  for (int row = 1; row <= rowNumber; row++)
                 {
-                    PanelPart pp = Model.Parts.SingleOrDefault(p => p.Row == row && p.Column == col);
+                    PanelPart pp = Model.Parts.SingleOrDefaultEx(p => p.Row == row && p.Column == col);
                     if (pp != null)
                     {
 
@@ -98,7 +98,7 @@ WriteLiteral("                        <div class=\"sf-cp-part-container\">\r\n")
 
 
                                
-                                var ppTc = new TypeContext<ControlPanelDN>(Model, "").TypeElementContext(p => p.Parts).Where(pTc => pTc.Value == pp).First();
+                                var ppTc = new TypeContext<ControlPanelDN>(Model, "").TypeElementContext(p => p.Parts).Where(pTc => pTc.Value == pp).FirstEx();
                                 Html.RenderPartial(ControlPanelClient.AdminViewPrefix.Formato("PanelPart"), ppTc);    
                             
 

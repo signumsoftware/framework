@@ -11,6 +11,7 @@ using Signum.Entities.DynamicQuery;
 using Signum.Entities;
 using Signum.Utilities.Reflection;
 using Signum.Entities.Reports;
+using Signum.Entities.UserQueries;
 
 namespace Signum.Engine.Basics
 {
@@ -88,7 +89,7 @@ namespace Signum.Engine.Basics
 
         public static QueryDN RetrieveOrGenerateQuery(object queryName)
         {
-            return Database.Query<QueryDN>().SingleOrDefault(a => a.Key == QueryUtils.GetQueryUniqueKey(queryName)) ??
+            return Database.Query<QueryDN>().SingleOrDefaultEx(a => a.Key == QueryUtils.GetQueryUniqueKey(queryName)) ??
                 CreateQuery(queryName);
         }
 

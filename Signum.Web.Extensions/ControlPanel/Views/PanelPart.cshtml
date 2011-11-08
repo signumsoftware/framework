@@ -7,7 +7,7 @@
 @{ string prefix = "Parts_{0}_{1}_".Formato(Model.Row, Model.Column); }
 <div class="ui-widget ui-widget-content ui-corner-all sf-cp-part">
     <div class="ui-widget-header ui-corner-all sf-cp-part-header">
-        @Model.Title
+        @Model.ToString()
         @Html.TextBox(prefix + "Title", Model.Title, new { style = "display:none" })
     </div>
     <div>

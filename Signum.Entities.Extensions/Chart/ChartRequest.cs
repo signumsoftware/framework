@@ -18,9 +18,8 @@ using Signum.Entities.UserQueries;
 namespace Signum.Entities.Chart
 {
     [Serializable]
-    public abstract class ChartBase : IdentifiableEntity
+    public class ChartBase : EmbeddedEntity
     {
-
         public ChartBase()
         {
             UpdateTokens();
@@ -66,37 +65,37 @@ namespace Signum.Entities.Chart
             }
         }
 
-        ChartTokenDN firstDimension;
-        public ChartTokenDN FirstDimension
+        ChartTokenDN dimension1;
+        public ChartTokenDN Dimension1
         {
-            get { return firstDimension; }
+            get { return dimension1; }
         }
 
-        ChartTokenDN secondDimension;
-        public ChartTokenDN SecondDimension
+        ChartTokenDN dimension2;
+        public ChartTokenDN Dimension2
         {
-            get { return secondDimension; }
+            get { return dimension2; }
         }
 
-        ChartTokenDN firstValue;
-        public ChartTokenDN FirstValue
+        ChartTokenDN value1;
+        public ChartTokenDN Value1
         {
-            get { return firstValue; }
+            get { return value1; }
         }
 
-        ChartTokenDN secondValue;
-        public ChartTokenDN SecondValue
+        ChartTokenDN value2;
+        public ChartTokenDN Value2
         {
-            get { return secondValue; }
+            get { return value2; }
         }
 
 
         void UpdateGroup()
         {
-            UpdateTokenGroup(firstDimension);
-            UpdateTokenGroup(secondDimension);
-            UpdateTokenGroup(firstValue);
-            UpdateTokenGroup(secondValue);
+            UpdateTokenGroup(dimension1);
+            UpdateTokenGroup(dimension2);
+            UpdateTokenGroup(value1);
+            UpdateTokenGroup(value2);
         }
 
         void UpdateTokenGroup(ChartTokenDN token)
@@ -112,10 +111,10 @@ namespace Signum.Entities.Chart
 
         protected void UpdateTokens()
         {
-            SetToken(ref firstDimension, ChartUtils.IsVisible(chartResultType, ChartTokenName.FirstDimension), () => FirstDimension);
-            SetToken(ref secondDimension, ChartUtils.IsVisible(chartResultType, ChartTokenName.SecondDimension), () => SecondDimension);
-            SetToken(ref firstValue, ChartUtils.IsVisible(chartResultType, ChartTokenName.FirstValue), () => FirstValue);
-            SetToken(ref secondValue, ChartUtils.IsVisible(chartResultType, ChartTokenName.SecondValue), () => SecondValue);
+            SetToken(ref dimension1, ChartUtils.IsVisible(chartResultType, ChartTokenName.Dimension1), () => Dimension1);
+            SetToken(ref dimension2, ChartUtils.IsVisible(chartResultType, ChartTokenName.Dimension2), () => Dimension2);
+            SetToken(ref value1, ChartUtils.IsVisible(chartResultType, ChartTokenName.Value1), () => Value1);
+            SetToken(ref value2, ChartUtils.IsVisible(chartResultType, ChartTokenName.Value2), () => Value2);
         }
 
         void SetToken(ref ChartTokenDN token, bool should, Expression<Func<ChartTokenDN>> property)
@@ -156,9 +155,26 @@ namespace Signum.Entities.Chart
             Notify(property);
         }
 
-        
+        [field: NonSerialized, Ignore]
+        public event Action ChartRequestChanged;
 
-        protected abstract void NotifyChange(bool needNewQuery);
+        protected void NotifyChange(bool needNewQuery)
+        {
+            if (needNewQuery)
+                this.NeedNewQuery = true;
+
+            if (ChartRequestChanged != null)
+                ChartRequestChanged();
+        }
+
+        [NonSerialized]
+        bool needNewQuery;
+        [AvoidLocalization]
+        public bool NeedNewQuery
+        {
+            get { return needNewQuery; }
+            set { Set(ref needNewQuery, value, () => NeedNewQuery); }
+        }
 
         bool token_ShouldAggregateEvent(ChartTokenDN token)
         {
@@ -201,8 +217,14 @@ namespace Signum.Entities.Chart
                         {
                             var ft = QueryUtils.TryGetFilterType(ct.Token.Type);
 
-                            if (ft != FilterType.Number && ft != FilterType.DecimalNumber)
-                                return "{0} is not compatible with {1}".Formato(ct.Aggregate.NiceToString(), ft != null ? ft.NiceToString() : ct.Token.Type.TypeName());
+                            if (ft == FilterType.Number || ft == FilterType.DecimalNumber)
+                                return null;
+
+                            if (ft == FilterType.Boolean && ct.Aggregate == AggregateFunction.Average)
+                                return null;
+
+                            return "{0} is not compatible with {1}".Formato(ct.Aggregate.NiceToString(), 
+                                ft != null ? ft.NiceToString() : ct.Token.Type.TypeName());
                         }
                     }
                     else
@@ -220,11 +242,11 @@ namespace Signum.Entities.Chart
         {
             base.RebindEvents();
 
-            RebindEvents(firstDimension);
-            RebindEvents(firstValue);
+            RebindEvents(dimension1);
+            RebindEvents(value1);
 
-            RebindEvents(secondDimension);
-            RebindEvents(secondValue);             
+            RebindEvents(dimension2);
+            RebindEvents(value2);             
         }
 
         private void RebindEvents(ChartTokenDN token)
@@ -239,15 +261,15 @@ namespace Signum.Entities.Chart
             token.PropertyLabeleEvent += token_PropertyLabeleEvent;
         }
 
-        ChartTokenName GetTokenName(ChartTokenDN token)
+        public ChartTokenName GetTokenName(ChartTokenDN token)
         {
             if (token == null)
                 throw new ArgumentNullException("token");
 
-            if (token == firstDimension) return ChartTokenName.FirstDimension;
-            if (token == secondDimension) return ChartTokenName.SecondDimension;
-            if (token == firstValue) return ChartTokenName.FirstValue;
-            if (token == secondValue) return ChartTokenName.SecondValue;
+            if (token == dimension1) return ChartTokenName.Dimension1;
+            if (token == dimension2) return ChartTokenName.Dimension2;
+            if (token == value1) return ChartTokenName.Value1;
+            if (token == value2) return ChartTokenName.Value2;
 
             throw new InvalidOperationException("token not found");
         }
@@ -256,10 +278,10 @@ namespace Signum.Entities.Chart
         {
             switch (chartTokenName)
             {
-                case ChartTokenName.FirstDimension: return firstDimension;
-                case ChartTokenName.SecondDimension: return secondDimension;
-                case ChartTokenName.FirstValue: return firstValue;
-                case ChartTokenName.SecondValue: return secondValue;
+                case ChartTokenName.Dimension1: return dimension1;
+                case ChartTokenName.Dimension2: return dimension2;
+                case ChartTokenName.Value1: return value1;
+                case ChartTokenName.Value2: return value2;
             }
 
             return null;
@@ -267,8 +289,13 @@ namespace Signum.Entities.Chart
     }
 
     [Serializable]
-    public class ChartRequest : ChartBase
+    public class ChartRequest : ModelEntity
     {
+        public ChartRequest(object queryName)
+        {
+            this.queryName = queryName;
+        }
+
         object queryName;
         [NotNullValidator]
         public object QueryName
@@ -283,67 +310,52 @@ namespace Signum.Entities.Chart
             set { Set(ref filters, value, () => Filters); }
         }
 
-        public ChartRequest(object queryName)
+        [NotNullable]
+        ChartBase chart = new ChartBase();
+        [NotNullValidator]
+        public ChartBase Chart
         {
-            this.queryName = queryName;
-        }
-
-        [NonSerialized]
-        bool needNewQuery;
-        [AvoidLocalization]
-        public bool NeedNewQuery
-        {
-            get { return needNewQuery; }
-            set { Set(ref needNewQuery, value, () => NeedNewQuery); }
-        }
-
-        [field: NonSerialized]
-        public event Action ChartRequestChanged;
-
-        protected override void NotifyChange(bool needNewQuery)
-        {
-            if (needNewQuery)
-                this.NeedNewQuery = true;
-
-            if (ChartRequestChanged != null)
-                ChartRequestChanged();
-        }
+            get { return chart; }
+            set { Set(ref chart, value, () => Chart); }
+        }     
 
         public IEnumerable<ChartTokenDN> ChartTokens()
         {
-            if(FirstDimension != null)
-                yield return FirstDimension;
+            if (chart.Dimension1 != null)
+                yield return chart.Dimension1;
 
-            if (SecondDimension != null)
-                yield return SecondDimension;
+            if (chart.Dimension2 != null)
+                yield return chart.Dimension2;
 
-            if (FirstValue != null)
-                yield return FirstValue;
+            if (chart.Value1 != null)
+                yield return chart.Value1;
 
-            if (SecondValue != null)
-                yield return SecondValue;
+            if (chart.Value2 != null)
+                yield return chart.Value2;
         }
 
         public List<CollectionElementToken> Multiplications
         {
             get
             {
-                HashSet<QueryToken> allTokens = ChartTokens().Select(a => a.Token)
-                    .Concat(Filters.Select(a => a.Token)).ToHashSet();
+                var allTokens = ChartTokens().Select(a => a.Token);
 
-                return CollectionElementToken.GetElements(allTokens);
+                if (Filters != null)
+                    allTokens = allTokens.Concat(Filters.Select(a => a.Token));
+
+                return CollectionElementToken.GetElements(allTokens.ToHashSet());
             }
         }
     }
     
     [Serializable]
-    public class UserChartDN : ChartBase
-    {
-        public UserChartDN() { }
-
-        public UserChartDN(object queryName) 
+    public class UserChartDN : Entity
+    { 
+        [HiddenProperty]
+        public object QueryName
         {
-            this.queryName = queryName;
+            get { return ToQueryName(query); }
+            set { Query = ToQueryDN(value);}
         }
 
         [Ignore]
@@ -382,8 +394,13 @@ namespace Signum.Entities.Chart
             set { Set(ref filters, value, () => Filters); }
         }
 
-        protected override void NotifyChange(bool needNewQuery)
+        [NotNullable]
+        ChartBase chart = new ChartBase();
+        [NotNullValidator]
+        public ChartBase Chart
         {
+            get { return chart; }
+            set { Set(ref chart, value, () => Chart); }
         }
 
         public override string ToString()
@@ -397,17 +414,99 @@ namespace Signum.Entities.Chart
                 foreach (var f in Filters)
                     f.ParseData(description);
 
-            if (FirstDimension != null)
-                FirstDimension.ParseData(description);
+            if (chart.Dimension1 != null)
+                chart.Dimension1.ParseData(description);
 
-            if (SecondDimension != null)
-                SecondDimension.ParseData(description);
+            if (chart.Dimension2 != null)
+                chart.Dimension2.ParseData(description);
 
-            if (FirstValue != null)
-                FirstValue.ParseData(description);
+            if (chart.Value1 != null)
+                chart.Value1.ParseData(description);
 
-            if (SecondValue != null)
-                SecondValue.ParseData(description);
+            if (chart.Value2 != null)
+                chart.Value2.ParseData(description);
+        }
+
+        static Func<QueryDN, object> ToQueryName;
+        static Func<object, QueryDN> ToQueryDN;
+
+        public static void SetConverters(Func<QueryDN, object> toQueryName, Func<object, QueryDN> toQueryDN)
+        {
+            ToQueryName = toQueryName;
+            ToQueryDN = toQueryDN; 
+        }
+
+        public static UserChartDN FromRequest(ChartRequest request)
+        {
+            var result = new UserChartDN
+            {
+                QueryName = request.QueryName,
+
+                Chart =
+                {
+                    GroupResults = request.Chart.GroupResults,
+                    ChartType = request.Chart.ChartType,
+                },
+
+                Filters = request.Filters.Select(f => new QueryFilterDN
+                {
+                    Token = f.Token,
+                    Operation = f.Operation,
+                    ValueString = FilterValueConverter.ToString(f.Value, f.Token.Type),
+                }).ToMList(),
+            };
+
+            Assign(result.Chart.Dimension1, request.Chart.Dimension1);
+            Assign(result.Chart.Dimension2, request.Chart.Dimension2);
+            Assign(result.Chart.Value1, request.Chart.Value1);
+            Assign(result.Chart.Value2, request.Chart.Value2);
+
+            return result;
+        }
+
+        private static void Assign(ChartTokenDN result, ChartTokenDN request)
+        {
+            if (request == null || result == null)
+                return;
+
+            if (request.Token != null)
+                result.Token = request.Token.Clone();
+
+            result.Aggregate = request.Aggregate;
+
+            result.Unit = request.Unit;
+            result.Format = request.Format;
+            result.DisplayName = request.DisplayName;
+
+            result.OrderPriority = request.OrderPriority;
+            result.OrderType = request.OrderType;
+        }
+
+        public static ChartRequest ToRequest(UserChartDN uq)
+        {
+            var result = new ChartRequest(uq.QueryName)
+            {
+                Chart =
+                {
+                    GroupResults = uq.Chart.GroupResults,
+                    ChartType = uq.Chart.ChartType,
+                },
+
+                Filters = uq.Filters.Select(qf => new Filter
+                {
+                    Token = qf.Token,
+                    Operation = qf.Operation,
+                    Value = qf.Value
+                }).ToList(),
+            };
+
+            Assign(result.Chart.Dimension1, uq.Chart.Dimension1);
+            Assign(result.Chart.Dimension2, uq.Chart.Dimension2);
+            Assign(result.Chart.Value1, uq.Chart.Value1);
+            Assign(result.Chart.Value2, uq.Chart.Value2);
+
+            return result;
+
         }
     }
 }

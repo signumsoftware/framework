@@ -29,7 +29,7 @@ namespace Signum.Web.Extensions.Sample.Test
         [ClassInitialize]
         public static void ClassInitialize(TestContext testContext)
         {
-            Common.Start(testContext);
+            Common.Start();
         }
 
         [ClassCleanup]
@@ -110,16 +110,14 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.DeleteFilter(0);
 
             //Top
-            selenium.SetTopToFinder("5");
+            selenium.SetElementsPerPageToFinder("5");
             selenium.Search();
             selenium.WaitAjaxFinished(selenium.ThereAreNRows(5));
-            Assert.IsTrue(selenium.IsElementPresent("jq=#rowsFoundCount:contains(5)"));
-            Assert.IsTrue(selenium.IsElementPresent("jq=.rows-found-count-maximum"));
-            selenium.SetTopToFinder(""); 
+            Assert.IsTrue(selenium.IsElementPresent("jq=.sf-pagination-left:contains('5')"));
+            selenium.SetElementsPerPageToFinder(""); 
             selenium.Search();
             selenium.WaitAjaxFinished(selenium.ThereAreNRows(12));
-            Assert.IsTrue(selenium.IsElementPresent("jq=#rowsFoundCount:contains(12)"));
-            Assert.IsFalse(selenium.IsElementPresent("jq=.rows-found-count-maximum"));
+            Assert.IsTrue(selenium.IsElementPresent("jq=.sf-pagination-left:contains('12')"));
         }
 
         [TestMethod]
@@ -189,10 +187,10 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.DeleteFilter(0, prefix);
 
             //Top
-            selenium.SetTopToFinder("5", prefix);
+            selenium.SetElementsPerPageToFinder("5", prefix);
             selenium.Search(prefix);
             selenium.WaitAjaxFinished(selenium.ThereAreNRows(5, prefix));
-            selenium.SetTopToFinder("", prefix); 
+            selenium.SetElementsPerPageToFinder("", prefix); 
             selenium.Search(prefix);
             selenium.WaitAjaxFinished(selenium.ThereAreNRows(8, prefix));
         }
@@ -313,7 +311,7 @@ namespace Signum.Web.Extensions.Sample.Test
             string prefix = "Members_0_"; //prefix for all the popup
 
             //User columns are not present in popup
-            Assert.IsFalse(selenium.IsElementPresent("jq=#{0}divFilters .sf-add-column".Formato(prefix)));
+            Assert.IsFalse(selenium.IsElementPresent("jq=#{0}divSearchControl .sf-add-column".Formato(prefix)));
 
             //Edit names
             selenium.EditColumnName(5, "Male", prefix);

@@ -31,8 +31,7 @@ namespace Signum.Entities.SMS
 
     public enum SMSMessageOperations
     {
-        [Description("Create SMS")]
-        Create,
+        CreateSMS,
         Send,
         UpdateStatus,
         CreateUpdateStatusPackage,

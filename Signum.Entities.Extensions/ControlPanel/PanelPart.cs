@@ -5,6 +5,9 @@ using System.Text;
 using Signum.Utilities;
 using Signum.Entities.Reports;
 using Signum.Entities.UserQueries;
+using Signum.Entities.Chart;
+using System.Reflection;
+using Signum.Entities.Extensions.Properties;
 
 namespace Signum.Entities.ControlPanel
 {
@@ -12,7 +15,6 @@ namespace Signum.Entities.ControlPanel
     public class PanelPart : EmbeddedEntity
     {
         string title;
-        [StringLengthValidator(AllowNulls=false, Min=1)]
         public string Title
         {
             get { return title; }
@@ -35,12 +37,28 @@ namespace Signum.Entities.ControlPanel
             set { Set(ref column, value, () => Column); }
         }
 
-        [ImplementedBy(typeof(UserQueryPartDN), typeof(CountSearchControlPartDN), typeof(LinkListPartDN))]
+        [ImplementedBy(typeof(UserChartPartDN), typeof(UserQueryPartDN), typeof(CountSearchControlPartDN), typeof(LinkListPartDN))]
         IIdentifiable content;
         public IIdentifiable Content
         {
             get { return content; }
             set { Set(ref content, value, () => Content); }
+        }
+
+        public override string ToString()
+        {
+            return title.HasText() ? title : content.ToString();
+        }
+
+        protected override string PropertyValidation(PropertyInfo pi)
+        {
+            if (pi.Is(() => Title) && string.IsNullOrEmpty(title))
+            {
+                if (content != null && (content.GetType() == typeof(CountSearchControlPartDN) || content.GetType() == typeof(LinkListPartDN)))
+                    return Resources.ControlPanelDN_PartTitleMustBeSpecifiedForListParts;
+            }
+
+            return base.PropertyValidation(pi);
         }
     }
 
@@ -58,6 +76,23 @@ namespace Signum.Entities.ControlPanel
         public override string ToString()
         {
             return userQuery.TryCC(uq => uq.DisplayName);
+        }
+    }
+
+    [Serializable]
+    public class UserChartPartDN : Entity
+    {
+        UserChartDN userChart;
+        [NotNullValidator]
+        public UserChartDN UserChart
+        {
+            get { return userChart; }
+            set { Set(ref userChart, value, () => UserChart); }
+        }
+
+        public override string ToString()
+        {
+            return userChart.TryCC(uq => uq.DisplayName);
         }
     }
 

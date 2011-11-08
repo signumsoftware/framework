@@ -13,6 +13,11 @@ namespace Signum.Web.ControlPanel
 {
     public class ControlPanelController : Controller
     {
+        public ViewResult View(Lite<ControlPanelDN> panel)
+        { 
+            return View(ControlPanelClient.ViewPrefix.Formato("ControlPanel"), panel.Retrieve());
+        }
+
         public ActionResult AddNewPart()
         {
             string partType = Request.Form["newPartType"];

@@ -279,7 +279,7 @@ namespace Signum.Engine.SMS
 
         static string CombineText(string text, List<Combination> combinations, MessageLengthExceeded onExceeded)
         {
-            string result = literalFinder.Replace(text, m => combinations.Single(c => c.Name == m.Groups["name"].Value).Value);
+            string result = literalFinder.Replace(text, m => combinations.SingleEx(c => c.Name == m.Groups["name"].Value).Value);
             int remainingLength = SMSCharacters.RemainingLength(result);
             if (remainingLength < 0)
             {
@@ -462,7 +462,7 @@ namespace Signum.Engine.SMS
         {
             GetState = m => m.State;
 
-            new ConstructFrom<SMSTemplateDN>(SMSMessageOperations.Create)
+            new ConstructFrom<SMSTemplateDN>(SMSMessageOperations.CreateSMS)
             {
                 CanConstruct = t => !t.Active ? Resources.TheTemplateMustBeActiveToConstructSMSMessages : null,
                 ToState = SMSMessageState.Created,

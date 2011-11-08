@@ -31,7 +31,7 @@ namespace Signum.Engine.Authorization
 
 
         public static string SystemUserName { get; set; }
-        public static UserDN systemUser;
+        static UserDN systemUser;
         public static UserDN SystemUser
         {
             get { return systemUser.ThrowIfNullC("SystemUser not loaded, Initialize to Level1SimpleEntities"); }
@@ -39,7 +39,7 @@ namespace Signum.Engine.Authorization
         }
 
         public static string AnonymousUserName { get; set; }
-        public static UserDN anonymousUser;
+        static UserDN anonymousUser;
         public static UserDN AnonymousUser
         {
             get { return anonymousUser.ThrowIfNullC("AnonymousUser not loaded, Initialize to Level1SimpleEntities"); }
@@ -112,8 +112,8 @@ namespace Signum.Engine.Authorization
                     Lite = true,
                     Execute = (u, args) =>
                     {
-                        string newPassword = args.TryGetArgC<string>(0);
-                        AuthLogic.ChangePassword(u.UserName, u.PasswordHash, Security.EncodePassword(newPassword));
+                        string passwordHash = args.TryGetArgC<string>(0);
+                        u.PasswordHash = passwordHash;
                     }
                 }.Register();
             }
@@ -130,8 +130,8 @@ namespace Signum.Engine.Authorization
                 using (new EntityCache())
                 using (AuthLogic.Disable())
                 {
-                    if (SystemUserName != null) SystemUser = Database.Query<UserDN>().Single(a => a.UserName == SystemUserName);
-                    if (AnonymousUserName != null) AnonymousUser = Database.Query<UserDN>().Single(a => a.UserName == AnonymousUserName); //TODO: OLMO hay que proporcianarlo siempre?
+                    if (SystemUserName != null) SystemUser = Database.Query<UserDN>().SingleEx(a => a.UserName == SystemUserName);
+                    if (AnonymousUserName != null) AnonymousUser = Database.Query<UserDN>().SingleEx(a => a.UserName == AnonymousUserName); //TODO: OLMO hay que proporcianarlo siempre?
                 }
             }
         }
@@ -217,7 +217,7 @@ namespace Signum.Engine.Authorization
 
         public static UserDN RetrieveUser(string username)
         {
-            return Database.Query<UserDN>().SingleOrDefault(u => u.UserName == username);
+            return Database.Query<UserDN>().SingleOrDefaultEx(u => u.UserName == username);
         }
 
         public static IDisposable User(UserDN user)
@@ -333,7 +333,7 @@ namespace Signum.Engine.Authorization
             TypeAuthLogic.Start(sb);
             PropertyAuthLogic.Start(sb, true);
 
-            if (serviceInterfaces != null)
+            if (serviceInterfaces != null && serviceInterfaces.Any())
                 FacadeMethodAuthLogic.Start(sb, serviceInterfaces);
 
             QueryAuthLogic.Start(sb, dqm);
@@ -341,9 +341,9 @@ namespace Signum.Engine.Authorization
             PermissionAuthLogic.Start(sb);
         }
 
-        public static Lite<RoleDN>[] CurrentRoles()
+        public static HashSet<Lite<RoleDN>> CurrentRoles()
         {
-            return roles.Value.IndirectlyRelatedTo(RoleDN.Current.ToLite()).And(RoleDN.Current.ToLite()).ToArray();
+            return roles.Value.IndirectlyRelatedTo(RoleDN.Current.ToLite(), true);
         }
 
         internal static int Rank(Lite<RoleDN> role)
@@ -399,10 +399,13 @@ namespace Signum.Engine.Authorization
             if (result == null && dbOnlyWarnings == null)
                 return null;
 
+            var declareParent = result.Leaves().Any(l => l.Sql.StartsWith("SET @idParent")) ? new SqlPreCommandSimple("DECLARE @idParent INT") : null;
+
             return SqlPreCommand.Combine(Spacing.Triple,
                 new SqlPreCommandSimple("-- BEGIN AUTH SYNC SCRIPT"),
                 new SqlPreCommandSimple("use {0}".Formato(ConnectionScope.Current.DatabaseName())),
                 dbOnlyWarnings,
+                declareParent,
                 result,
                 new SqlPreCommandSimple("-- END AUTH SYNC SCRIPT"));
         }

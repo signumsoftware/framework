@@ -73,53 +73,53 @@ namespace Signum.Engine.Operations
 
             using (OperationLogic.AllowSave<T>())
             {
-                try
+            try
+            {
+                using (Transaction tr = new Transaction())
                 {
-                    using (Transaction tr = new Transaction())
-                    {
-                        OnBeginOperation((T)entity);
+                    OnBeginOperation((T)entity);
 
-                        Execute((T)entity, parameters);
+                    Execute((T)entity, parameters);
 
-                        OnEndOperation((T)entity);
+                    OnEndOperation((T)entity);
 
-                        entity.Save(); //Nothing happens if already saved
+                    entity.Save(); //Nothing happens if already saved
 
-                        log.Target = entity.ToLite<IIdentifiable>(); //in case AllowsNew == true
-                        log.End = TimeZoneManager.Now;
-                        using (AuthLogic.User(AuthLogic.SystemUser))
-                            log.Save();
+                    log.Target = entity.ToLite<IIdentifiable>(); //in case AllowsNew == true
+                    log.End = TimeZoneManager.Now;
+                    using (AuthLogic.User(AuthLogic.SystemUser))
+                        log.Save();
 
-                        tr.Commit();
-                    }
-                }
-                catch (Exception ex)
-                {
-                    OperationLogic.OnErrorOperation(this, (IdentifiableEntity)entity, ex);
-
-                    if (!entity.IsNew)
-                    {
-                        try
-                        {
-                            using (Transaction tr2 = new Transaction(true))
-                            {
-                                log.Target = entity.ToLite<IIdentifiable>();
-                                log.Exception = ex.Message;
-                                log.End = TimeZoneManager.Now;
-
-                                using (AuthLogic.User(AuthLogic.SystemUser))
-                                    log.Save();
-
-                                tr2.Commit();
-                            }
-                        }
-                        catch (Exception)
-                        {
-                        }
-                    }
-                    throw ex;
+                    tr.Commit();
                 }
             }
+            catch (Exception ex)
+            {  
+                OperationLogic.OnErrorOperation(this, (IdentifiableEntity)entity, ex);
+
+                if (!entity.IsNew)
+                {
+                    try
+                    {
+                        using (Transaction tr2 = new Transaction(true))
+                        {
+                            log.Target = entity.ToLite<IIdentifiable>();
+                            log.Exception = ex.Message;
+                            log.End = TimeZoneManager.Now;
+                           
+                            using (AuthLogic.User(AuthLogic.SystemUser))
+                                log.Save();
+
+                            tr2.Commit();
+                        }
+                    }
+                    catch (Exception)
+                    {
+                    }
+                }
+                throw;
+            }
+        }
         }
 
         protected virtual void OnBeginOperation(T entity)

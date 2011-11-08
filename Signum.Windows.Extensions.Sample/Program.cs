@@ -81,6 +81,14 @@ namespace Signum.Windows.Extensions.Sample
                 return result;
             }
 
+            if (Application.Current == null || Application.Current.CheckAccess())
+                return Login(result);
+            else
+                return Application.Current.Dispatcher.Return(() => Login(result));       
+        }
+
+        private static IServerSample Login(IServerSample result)
+        {
             Login login = new Login
             {
                 Title = "Music Database",

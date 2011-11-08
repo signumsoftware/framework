@@ -96,7 +96,7 @@ namespace Signum.Web.SMS
         public PartialViewResult SendMultipleSMSMessagesFromTemplate(List<int> ids, string providerWebQueryName, string prefix)
         {
             QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(Navigator.ResolveQueryName(providerWebQueryName));
-            Type entitiesType = Reflector.ExtractLite(queryDescription.Columns.Single(a => a.IsEntity).Type);
+            Type entitiesType = Reflector.ExtractLite(queryDescription.Columns.SingleEx(a => a.IsEntity).Type);
             var webTypeName = Navigator.ResolveWebTypeName(entitiesType);
 
             //TODO: Anto ConstructorFromMany no pasa prefijo nuevo
@@ -140,7 +140,7 @@ namespace Signum.Web.SMS
         public PartialViewResult SendMultipleSMSMessages(List<int> ids, string providerWebQueryName, string prefix)
         {
             QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(Navigator.ResolveQueryName(providerWebQueryName));
-            Type entitiesType = Reflector.ExtractLite(queryDescription.Columns.Single(a => a.IsEntity).Type);
+            Type entitiesType = Reflector.ExtractLite(queryDescription.Columns.SingleEx(a => a.IsEntity).Type);
             var webTypeName = Navigator.ResolveWebTypeName(entitiesType);
 
             var model = new MultipleSMSModel

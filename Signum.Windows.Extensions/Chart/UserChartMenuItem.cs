@@ -136,7 +136,7 @@ namespace Signum.Windows.Chart
 
                 CurrentUserChart = userChart.Retrieve();
 
-                this.ChartRequest = UserChart.ToRequest(CurrentUserChart);
+                this.ChartRequest = UserChartDN.ToRequest(CurrentUserChart);
 
                 this.ChartWindow.GenerateChart();
             }
@@ -146,7 +146,7 @@ namespace Signum.Windows.Chart
         {
             e.Handled = true;
 
-            UserChartDN userChart = UserChart.FromRequest(ChartRequest);
+            UserChartDN userChart = UserChartDN.FromRequest(ChartRequest);
 
             userChart = Navigator.View(userChart, new ViewOptions
             {

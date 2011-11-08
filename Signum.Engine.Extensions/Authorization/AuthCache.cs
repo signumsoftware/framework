@@ -45,10 +45,8 @@ namespace Signum.Entities.Authorization
         where AR : AllowedRule<R, A>, new()
         where R : IdentifiableEntity
     {
-
         readonly Lazy<Dictionary<Lite<RoleDN>, RoleAllowedCache>> runtimeRules; 
 
-         
         Func<R, K> ToKey;
         Func<K, R> ToEntity;
         DefaultBehaviour<A> Min;
@@ -68,6 +66,8 @@ namespace Signum.Entities.Authorization
             sb.Schema.Initializing[InitLevel.Level1SimpleEntities] += Schema_InitializingCache;
             sb.Schema.EntityEvents<RT>().Saving += Schema_Saving;
             AuthLogic.RolesModified += InvalidateCache;
+
+            sb.AddUniqueIndex<RT>(rt => new { rt.Resource, rt.Role });
 
             sb.Schema.Table<R>().PreDeleteSqlSync += new Func<IdentifiableEntity, SqlPreCommand>(AuthCache_PreDeleteSqlSync);
         }
@@ -275,7 +275,12 @@ namespace Signum.Entities.Authorization
             Synchronizer.Synchronize(current, should,
                 (p, pr) => pr.Delete(),
                 (p, ar) => new RT { Resource = p, Role = rules.Role, Allowed = ar.Allowed }.Save(),
-                (p, pr, ar) => { pr.Allowed = ar.Allowed; pr.Save(); });
+                (p, pr, ar) =>
+                {
+                    pr.Allowed = ar.Allowed;
+                    if (pr.SelfModified)
+                        pr.Save();
+                });
 
             InvalidateCache();
         }
@@ -283,14 +288,6 @@ namespace Signum.Entities.Authorization
         public DefaultRule GetDefaultRule(Lite<RoleDN> role)
         {
             return runtimeRules.Value[role].GetDefaultRule(Max);
-        }
-
-        internal A GetAllowed(K key)
-        {
-            if (!AuthLogic.IsEnabled || Schema.Current.InGlobalMode)
-                return Max.BaseAllowed;
-
-            return runtimeRules.Value[RoleDN.Current.ToLite()].GetAllowed(key);
         }
 
         internal A GetAllowed(Lite<RoleDN> role, K key)
@@ -422,21 +419,22 @@ namespace Signum.Entities.Authorization
                     var max = x.Attribute("Default") == null || x.Attribute("Default").Value != "Min";
                     SqlPreCommand defSql = SetDefault(table, null, max, role);
 
-                    SqlPreCommand restSql = (from xr in x.Elements(elementName)
-                                             let r = toResource(xr.Attribute("Resource").Value)
-                                             let a = parseAllowed(xr.Attribute("Allowed").Value)
-                                             select table.InsertSqlSync(new RT
-                                             {
-                                                 Resource = r,
-                                                 Role = role,
-                                                 Allowed = a
-                                             }, Comment(role, r, a))).Combine(Spacing.Simple);
+                    var dic = x.Elements(elementName).ToDictionary(
+                        xr => toResource(xr.Attribute("Resource").Value),
+                        xr => parseAllowed(xr.Attribute("Allowed").Value), "{0} rules for {1}".Formato(typeof(R).NiceName(), role));
+
+                    SqlPreCommand restSql = dic.Select(kvp => table.InsertSqlSync(new RT
+                    {
+                        Resource = kvp.Key,
+                        Role = role,
+                        Allowed = kvp.Value
+                    }, Comment(role, kvp.Key, kvp.Value))).Combine(Spacing.Simple);
 
                     return SqlPreCommand.Combine(Spacing.Simple, defSql, restSql);
                 },
                 (role, list, x) =>
                 {
-                    var def = list.SingleOrDefault(a => a.Resource == null);
+                    var def = list.SingleOrDefaultEx(a => a.Resource == null);
                     var max = x.Attribute("Default") == null || x.Attribute("Default").Value != "Min";
                     SqlPreCommand defSql = SetDefault(table, def, max, role);
 
@@ -461,12 +459,12 @@ namespace Signum.Entities.Authorization
         }
 
 
-        static string Comment(Lite<RoleDN> role, R resource, A allowed)
+        internal static string Comment(Lite<RoleDN> role, R resource, A allowed)
         {
             return "{0} {1} for {2} ({3})".Formato(typeof(R).NiceName(), resource.ToStr, role, allowed);
         }
 
-        static string Comment(Lite<RoleDN> role, R resource, A from, A to)
+        internal static string Comment(Lite<RoleDN> role, R resource, A from, A to)
         {
             return "{0} {1} for {2} ({3} -> {4})".Formato(typeof(R).NiceName(), resource.ToStr, role, from, to);
         }

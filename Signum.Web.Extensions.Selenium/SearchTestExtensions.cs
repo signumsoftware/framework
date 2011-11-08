@@ -26,14 +26,14 @@ namespace Signum.Web.Selenium
             selenium.WaitAjaxFinished(() => selenium.IsElementPresent(RowSelector(selenium, 1, prefix)));
         }
 
-        public static void SetTopToFinder(this ISelenium selenium, string top)
+        public static void SetElementsPerPageToFinder(this ISelenium selenium, string elementsPerPage)
         {
-            SetTopToFinder(selenium, top, "");
+            SetElementsPerPageToFinder(selenium, elementsPerPage, "");
         }
 
-        public static void SetTopToFinder(this ISelenium selenium, string top, string prefix)
+        public static void SetElementsPerPageToFinder(this ISelenium selenium, string elementsPerPage, string prefix)
         {
-            selenium.Type("{0}sfTop".Formato(prefix), top);
+            selenium.Select("{0}sfElems".Formato(prefix), "value=" + elementsPerPage);
         }
 
         public static void ToggleFilters(this ISelenium selenium, bool show)
@@ -133,7 +133,10 @@ namespace Signum.Web.Selenium
         {
             string cellSelector = SearchTestExtensions.CellSelector(selenium, rowIndexBase1, columnIndexBase1, prefix);
             selenium.ContextMenu(cellSelector);
-            selenium.Click("{0} .quickfilter".Formato(cellSelector));
+            
+            string quickFilterSelector = "{0} .quickfilter".Formato(cellSelector);
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(quickFilterSelector));
+            selenium.Click(quickFilterSelector);
             selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#{0}tblFilters #{0}trFilter_{1}".Formato(prefix, filterIndexBase0)));
         }
 
@@ -236,6 +239,7 @@ namespace Signum.Web.Selenium
             if (selenium.HasMultiplyMessage(true, prefix))
                 rowIndexBase1 += 1;
             return "{0}:nth-child({1})".Formato(RowSelector(prefix), rowIndexBase1);
+            //return "{0}:not(.sf-tr-multiply):eq({1})".Formato(RowSelector(prefix), rowIndexBase1 - 1);
         }
 
         public static string CellSelector(ISelenium selenium, int rowIndexBase1, int columnIndexBase1)
@@ -491,14 +495,13 @@ namespace Signum.Web.Selenium
         public static Func<bool> ThereAreNRows(this ISelenium selenium, int n, string prefix)
         {
             if (n == 0)
-            {
-                return () => !selenium.IsElementPresent(RowSelector(selenium, n, prefix));
-            }
-            else
-            {
-                return () => selenium.IsElementPresent(RowSelector(selenium, n, prefix)) &&
-                             !selenium.IsElementPresent(RowSelector(selenium, n + 1, prefix));
-            }
+                n = 1; //there will be a row with the "no results" message
+
+            string footerRow = RowSelector(selenium, n + 1, prefix);
+            string noRow = RowSelector(selenium, n + 2, prefix);
+
+            return () => selenium.IsElementPresent(footerRow) &&
+                !selenium.IsElementPresent(noRow);
         }
 
         public static Func<bool> ThereAreNRows(this ISelenium selenium, int n)

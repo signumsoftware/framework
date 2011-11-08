@@ -62,25 +62,6 @@ namespace Signum.Web.AuthAdmin
             return RedirectToAction("FacadeMethods", new { role = role.Id });
         }
 
-
-        public ViewResult EntityGroups(Lite<RoleDN> role)
-        {
-            return Navigator.View(this, EntityGroupAuthLogic.GetEntityGroupRules(role.FillToStr()));
-        }
-
-        [HttpPost]
-        public ActionResult EntityGroups(FormCollection form)
-        {
-            Lite<RoleDN> role = this.ExtractLite<RoleDN>("Role");
-
-            var prp = EntityGroupAuthLogic.GetEntityGroupRules(role).ApplyChanges(ControllerContext, "", true); ;
-
-            EntityGroupAuthLogic.SetEntityGroupRules(prp.Value);
-
-            return RedirectToAction("EntityGroups", new { role = role.Id });
-        }
-
-
         public ViewResult Types(Lite<RoleDN> role)
         {
             return Navigator.View(this, TypeAuthLogic.GetTypeRules(role.FillToStr()));

@@ -23,6 +23,21 @@ namespace Signum.Entities.Mailing
             set { Set(ref recipient, value, () => Recipient); }
         }
 
+        string bcc;
+        public string Bcc
+        {
+            get { return bcc; }
+            set { Set(ref bcc, value, () => Bcc); }
+        }
+
+        string cc;
+        public string Cc
+        {
+            get { return cc; }
+            set { Set(ref cc, value, () => Cc); }
+        }
+
+
         Lite<EmailTemplateDN> template;
         [NotNullValidator]
         public Lite<EmailTemplateDN> Template
@@ -52,9 +67,9 @@ namespace Signum.Entities.Mailing
             set { Set(ref received, value, () => Received); }
         }
 
-        [SqlDbType(Size = 400)]
+        [SqlDbType(Size = int.MaxValue)]
         string subject;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 400)]
+        [StringLengthValidator(AllowNulls = false, Min = 3)]
         public string Subject
         {
             get { return subject; }
@@ -63,15 +78,16 @@ namespace Signum.Entities.Mailing
 
         [SqlDbType(Size = int.MaxValue)]
         string body;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = int.MaxValue)]
+        [StringLengthValidator(AllowNulls = false, Min = 3)]
         public string Body
         {
             get { return body; }
             set { Set(ref body, value, () => Body); }
         }
 
+        [SqlDbType(Size = int.MaxValue)]
         string exception;
-        [StringLengthValidator(AllowNulls = true, Max = int.MaxValue)]
+        [StringLengthValidator(AllowNulls = true)]
         public string Exception
         {
             get { return exception; }

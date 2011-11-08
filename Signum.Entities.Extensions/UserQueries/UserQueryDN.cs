@@ -80,12 +80,12 @@ namespace Signum.Entities.UserQueries
             set { Set(ref columns, value, () => Columns); }
         }
 
-        int? maxItems;
+        int? elementsPerPage;
         [NumberIsValidator(ComparisonType.GreaterThan, 0)]
-        public int? MaxItems
+        public int? ElementsPerPage
         {
-            get { return maxItems; }
-            set { Set(ref maxItems, value, () => MaxItems); }
+            get { return elementsPerPage; }
+            set { Set(ref elementsPerPage, value, () => ElementsPerPage); }
         }
 
         protected override void PostRetrieving()
@@ -127,9 +127,9 @@ namespace Signum.Entities.UserQueries
     [Serializable]
     public abstract class QueryTokenDN : EmbeddedEntity
     {
-        [NotNullable, SqlDbType(Size = 100)]
+        [NotNullable]
         protected string tokenString;
-        [StringLengthValidator(AllowNulls = false, Min = 1, Max = 100), AvoidLocalization]
+        [StringLengthValidator(AllowNulls = false, Min = 1), AvoidLocalization]
         public string TokenString
         {
             get { return tokenString; }
@@ -145,7 +145,7 @@ namespace Signum.Entities.UserQueries
             set { if (Set(ref token, value, () => Token)) TokenChanged(); }
         }
 
-        protected virtual void TokenChanged()
+        public virtual void TokenChanged()
         {
 
         }
@@ -275,7 +275,7 @@ namespace Signum.Entities.UserQueries
             }
         }
 
-        protected override void TokenChanged()
+        public override void TokenChanged()
         {
             Notify(() => Operation);
             Notify(() => ValueString);
@@ -326,7 +326,7 @@ namespace Signum.Entities.UserQueries
                     Token = oo.Token, 
                     OrderType = oo.OrderType 
                 }).ToMList(),
-                MaxItems = request.MaxItems
+                ElementsPerPage = request.ElementsPerPage
             };
         }
 

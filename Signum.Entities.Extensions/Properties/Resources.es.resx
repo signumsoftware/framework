@@ -300,12 +300,6 @@
   <data name="ScheduleRuleDailyDN" xml:space="preserve">
     <value>Diariamente</value>
   </data>
-  <data name="ScheduleRuleDayDN_Hour" xml:space="preserve">
-    <value>Hora</value>
-  </data>
-  <data name="ScheduleRuleDayDN_Minute" xml:space="preserve">
-    <value>Minuto</value>
-  </data>
   <data name="ScheduleRuleWeekDaysDN" xml:space="preserve">
     <value>Días de la semana</value>
   </data>
@@ -448,7 +442,7 @@
     <value>Prefijo web</value>
   </data>
   <data name="UserOperation_SaveNew" xml:space="preserve">
-    <value>Guardar</value>
+    <value>Alta</value>
   </data>
   <data name="FileRepositoryDN_FileTypes" xml:space="preserve">
     <value>Tipos de archivo</value>
@@ -489,8 +483,8 @@
   <data name="UserQueryDN_Orders" xml:space="preserve">
     <value>Ordenes</value>
   </data>
-  <data name="UserQueryDN_MaxItems" xml:space="preserve">
-    <value>Max. Resultados</value>
+  <data name="UserQueryDN_ElementsPerPage" xml:space="preserve">
+    <value>Elementos por página</value>
   </data>
   <data name="QueryDN" xml:space="preserve">
     <value>Query</value>
@@ -564,9 +558,6 @@
   <data name="PackageDN_Name" xml:space="preserve">
     <value>Nombre</value>
   </data>
-  <data name="BasicPermissions_AdminRules" xml:space="preserve">
-    <value>Administrar reglas</value>
-  </data>
   <data name="ControlPanelDN_Part0IsInColumn1ButPanelHasOnly2Columns" xml:space="preserve">
     <value>La parte {0} está en la columna {1} pero el panel sólo tiene {2} columnas</value>
   </data>
@@ -597,20 +588,20 @@
   <data name="ChartBase_ChartType" xml:space="preserve">
     <value>Tipo de gráfico</value>
   </data>
-  <data name="ChartBase_FirstDimension" xml:space="preserve">
-    <value>Primera dimensión</value>
+  <data name="ChartRequest_Chart" xml:space="preserve">
+    <value>Gráfico</value>
   </data>
-  <data name="ChartBase_FirstValue" xml:space="preserve">
-    <value>Primer valor</value>
+  <data name="ChartBase_Value2" xml:space="preserve">
+    <value>Valor2</value>
   </data>
   <data name="ChartBase_GroupResults" xml:space="preserve">
     <value>Agrupar resultados</value>
   </data>
-  <data name="ChartBase_SecondDimension" xml:space="preserve">
-    <value>Segunda dimensión</value>
+  <data name="ChartBase_Value1" xml:space="preserve">
+    <value>Valor1</value>
   </data>
-  <data name="ChartBase_SecondValue" xml:space="preserve">
-    <value>Segundo valor</value>
+  <data name="ChartBase_Dimension2" xml:space="preserve">
+    <value>Dimensión2</value>
   </data>
   <data name="ChartRequest_Filters" xml:space="preserve">
     <value>Filtros</value>
@@ -1053,8 +1044,8 @@
   <data name="ProcessOperation_Suspend" xml:space="preserve">
     <value>Suspender</value>
   </data>
-  <data name="TaskOperation_ExecutePrivate" xml:space="preserve">
-    <value>Ejecutar privado</value>
+  <data name="ChartBase_Dimension1" xml:space="preserve">
+    <value>Dimensión1</value>
   </data>
   <data name="UserOperation_Create" xml:space="preserve">
     <value>Crear</value>
@@ -1143,8 +1134,8 @@
   <data name="SMSMessageDN_Template" xml:space="preserve">
     <value>Plantilla</value>
   </data>
-  <data name="SMSMessageOperations_Create" xml:space="preserve">
-    <value>Crear</value>
+  <data name="ChartBase" xml:space="preserve">
+    <value>Gráfico Base</value>
   </data>
   <data name="SMSMessageOperations_Send" xml:space="preserve">
     <value>Enviar</value>
@@ -1323,12 +1314,6 @@
   <data name="ScheduleRuleHourlyDN_EachHour" xml:space="preserve">
     <value>Cada hora</value>
   </data>
-  <data name="ScheduleRuleHourlyDN_NotMultiple" xml:space="preserve">
-    <value>Hora no es múltiple de</value>
-  </data>
-  <data name="ScheduleRuleHourlyDN_NotValid" xml:space="preserve">
-    <value>Tiempo seleccionado no es válido</value>
-  </data>
   <data name="ScheduleRuleHourlyDN_StartingOn" xml:space="preserve">
     <value>A partir de</value>
   </data>
@@ -1337,12 +1322,6 @@
   </data>
   <data name="ScheduleRuleMinutelyDN_EachMinute" xml:space="preserve">
     <value>Cada minuto</value>
-  </data>
-  <data name="ScheduleRuleMinutelyDN_NotMultiple" xml:space="preserve">
-    <value>Minuto no es múltiple de</value>
-  </data>
-  <data name="ScheduleRuleMinutelyDN_NotValid" xml:space="preserve">
-    <value>Tiempo seleccionado no es válido</value>
   </data>
   <data name="ScheduleRuleMinutelyDN_StartingOn" xml:space="preserve">
     <value>A partir de</value>
@@ -1403,5 +1382,20 @@
   </data>
   <data name="UserQueryPartDN_UserQuery" xml:space="preserve">
     <value>Consulta de usuario</value>
+  </data>
+  <data name="SMSMessageOperations_CreateSMS" xml:space="preserve">
+    <value>Crear SMS</value>
+  </data>
+  <data name="UserChartDN_Chart" xml:space="preserve">
+    <value>Gráfico</value>
+  </data>
+  <data name="EmailMessageDN_Bcc" xml:space="preserve">
+    <value>CCO</value>
+  </data>
+  <data name="EmailMessageDN_Cc" xml:space="preserve">
+    <value>CC</value>
+  </data>
+  <data name="WebImage" xml:space="preserve">
+    <value>Imagen</value>
   </data>
 </root>

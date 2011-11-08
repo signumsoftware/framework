@@ -22,6 +22,8 @@ using Signum.Utilities.Reflection;
 using System.ComponentModel;
 using System.Web;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading;
+using System.Linq.Expressions;
 
 namespace Signum.Engine.Mailing
 {
@@ -35,6 +37,8 @@ namespace Signum.Engine.Mailing
     public interface IEmailModel
     {
         IEmailOwnerDN To { get; set; }
+        string Cc { get; set; }
+        string Bcc { get; set; }  
     }
 
     public class EmailModel<T> : IEmailModel
@@ -47,6 +51,9 @@ namespace Signum.Engine.Mailing
             get { return To; }
             set { To = (T)value; }
         }
+
+        public string Cc { get; set; }
+        public string Bcc { get; set; }  
     }
 
     public static class EmailLogic
@@ -236,6 +243,8 @@ namespace Signum.Engine.Mailing
                 {
                     State = EmailState.Created,
                     Recipient = model.To.ToLite(),
+                    Bcc = model.Bcc,
+                    Cc = model.Cc,
                     Template = GetTemplateDN(model.GetType()),
                     Subject = content.Subject,
                     Body = content.Body,
@@ -329,19 +338,31 @@ namespace Signum.Engine.Mailing
         static void client_SendCompleted(object sender, AsyncCompletedEventArgs e)
         {
             EmailUser emailUser = (EmailUser)e.UserState;
-            EmailMessageDN em = emailUser.EmailMessage;
-            if (e.Error != null)
-            {
-                em.Exception = e.Error.Message;
-                em.State = EmailState.SentError;
-            }
-            else
-            {
-                em.State = EmailState.Sent;
-                em.Sent = TimeZoneManager.Now;
-            }
             using (AuthLogic.User(emailUser.User))
-                em.Save();
+            {
+                Expression<Func<EmailMessageDN, EmailMessageDN>> updater;
+                if (e.Error != null)
+                    updater = em => new EmailMessageDN
+                    {
+                        Exception = e.Error.Message,
+                        State = EmailState.SentError
+                    };
+                else
+                    updater = em => new EmailMessageDN
+                    {
+                        State = EmailState.Sent,
+                        Sent = TimeZoneManager.Now
+                    };
+
+                for (int i = 0; i < 4; i++)
+                {
+                    if (emailUser.EmailMessage.InDB().UnsafeUpdate(updater) > 0)
+                        return;
+
+                    if (i != 3)
+                        Thread.Sleep(3000);
+                }
+            }
         }
 
         static MailMessage CreateMailMessage(EmailMessageDN emailMessage)
@@ -358,6 +379,11 @@ namespace Signum.Engine.Mailing
                 Body = emailMessage.Body,
                 IsBodyHtml = true,
             };
+
+            if(emailMessage.Bcc.HasText())
+                message.Bcc.AddRange(emailMessage.Bcc.Split( new [] {';'},StringSplitOptions.RemoveEmptyEntries).Select(a => new MailAddress(a)).ToList());
+            if (emailMessage.Cc.HasText())
+                message.CC.AddRange(emailMessage.Cc.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Select(a => new MailAddress(a)).ToList());
             return message;
         }
 

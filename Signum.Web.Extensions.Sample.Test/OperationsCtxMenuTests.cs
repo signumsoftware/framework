@@ -20,7 +20,7 @@ namespace Signum.Web.Extensions.Sample.Test
         [ClassInitialize]
         public static void ClassInitialize(TestContext testContext)
         {
-            Common.Start(testContext);
+            Common.Start();
         }
 
         [ClassCleanup]
@@ -118,8 +118,7 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.Sort(idCol, false);
             selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SearchTestExtensions.RowSelector(selenium, 1)));
 
-            Assert.IsTrue(selenium.IsElementPresent(SearchTestExtensions.RowSelector(selenium, 14)));
-            Assert.IsFalse(selenium.IsElementPresent(SearchTestExtensions.RowSelector(selenium, 15)));
+            selenium.WaitAjaxFinished(selenium.ThereAreNRows(14));
 
             string row1col1 = SearchTestExtensions.CellSelector(selenium, 1, 1);
 
@@ -130,9 +129,8 @@ namespace Signum.Web.Extensions.Sample.Test
             selenium.WaitForPageToLoad(PageLoadTimeout);
 
             selenium.Search();
-            
-            Assert.IsTrue(selenium.IsElementPresent(SearchTestExtensions.RowSelector(selenium, 13)));
-            Assert.IsFalse(selenium.IsElementPresent(SearchTestExtensions.RowSelector(selenium, 14)));
+
+            selenium.WaitAjaxFinished(selenium.ThereAreNRows(13));
         }
     }
 }

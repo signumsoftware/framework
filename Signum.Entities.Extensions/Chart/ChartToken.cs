@@ -36,7 +36,7 @@ namespace Signum.Entities.Chart
 
         }
 
-        protected override void TokenChanged()
+        public override void TokenChanged()
         {
             NotifyChange(true);
 
@@ -206,13 +206,20 @@ namespace Signum.Entities.Chart
 
         public override void ParseData(QueryDescription queryDescription)
         {
-            Token = tokenString.HasText() ? QueryUtils.Parse(tokenString, token => SubTokensChart(token, queryDescription.Columns)) : null;
+            if (string.IsNullOrEmpty(tokenString))
+                Token = null;
+            else if (tokenString == "All" && this.aggregate == AggregateFunction.Count)
+                Token = new CountAllToken();
+            else
+                Token = QueryUtils.Parse(tokenString, token => SubTokensChart(token, queryDescription.Columns));
+
             CleanSelfModified();
         }
 
+
         static readonly QueryToken[] Empty = new QueryToken[0];
 
-        public static QueryToken[] SubTokensChart(QueryToken token, IEnumerable<ColumnDescription> columnDescriptions)
+        public static List<QueryToken> SubTokensChart(QueryToken token, IEnumerable<ColumnDescription> columnDescriptions)
         {
             var result = QueryUtils.SubTokens(token, columnDescriptions);
 
@@ -222,7 +229,7 @@ namespace Signum.Entities.Chart
 
                 if (ft == FilterType.Number || ft == FilterType.DecimalNumber)
                 {
-                    return (result ?? Empty).And(new IntervalQueryToken(token)).ToArray();
+                    result.Add(new IntervalQueryToken(token));
                 }
             }
 

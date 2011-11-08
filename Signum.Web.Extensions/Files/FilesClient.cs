@@ -15,6 +15,7 @@ using Signum.Entities.Files;
 using System.Web.Routing;
 using System.IO;
 using Signum.Engine.Basics;
+using Signum.Engine.Files;
 #endregion
 
 namespace Signum.Web.Files
@@ -97,6 +98,14 @@ namespace Signum.Web.Files
                     };
                 }
             }
+
+            QuerySettings.FormatRules.Add(new FormatterRule(
+                   col => col.Type == typeof(WebImage),
+                   col => (help, obj) => ((WebImage)obj).FullWebPath == null ? null :
+                       new MvcHtmlString("<img src='" + 
+                           RouteHelper.New().Content(((WebImage)obj).FullWebPath) +
+                           "' alt='" + typeof(WebImage).NiceName() + "' class='sf-search-control-image' />")
+             ));
         }
     }
 }

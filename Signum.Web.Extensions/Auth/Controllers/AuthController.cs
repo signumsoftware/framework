@@ -75,9 +75,7 @@ namespace Signum.Web.Auth
         [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult SaveUser(string prefix)
         {
-            var context = (Request.Form.AllKeys.Any(k => k.EndsWith(UserMapping.NewPasswordKey))) ?
-                this.ExtractEntity<UserDN>(prefix).ApplyChanges(this.ControllerContext, prefix, UserMapping.NewUser).ValidateGlobal() :
-                this.ExtractEntity<UserDN>(prefix).ApplyChanges(this.ControllerContext, prefix, true).ValidateGlobal();
+            var context = this.ExtractEntity<UserDN>(prefix).ApplyChanges(this.ControllerContext, prefix, true).ValidateGlobal();
 
             if (context.GlobalErrors.Any())
             { 
@@ -85,7 +83,7 @@ namespace Signum.Web.Auth
                 return JsonAction.ModelState(ModelState);
             }
 
-            context.Value.Execute(UserOperation.SaveNew);
+            context.Value.Execute(UserOperation.Save);
             return JsonAction.Redirect(Navigator.ViewRoute(context.Value));
         }
 
@@ -205,7 +203,7 @@ namespace Signum.Web.Auth
         private void RestoreCleanCurrentUser()
         {
             //Restore clean UserDN from database
-            Thread.CurrentPrincipal = Database.Query<UserDN>().Where(u => u.Is(UserDN.Current)).Single();
+            Thread.CurrentPrincipal = Database.Query<UserDN>().Where(u => u.Is(UserDN.Current)).SingleEx();
             Session[AuthController.SessionUserKey] = Thread.CurrentPrincipal;
         }
 
@@ -240,7 +238,7 @@ namespace Signum.Web.Auth
                 using (AuthLogic.Disable())
                 {
                     //Check the email belongs to a user
-                    UserDN user = Database.Query<UserDN>().Where(u => u.Email == email).SingleOrDefault(Resources.EmailNotExistsDatabase);
+                    UserDN user = Database.Query<UserDN>().Where(u => u.Email == email).SingleOrDefaultEx(() => Resources.EmailNotExistsDatabase);
 
                     if (user == null)
                         throw new ApplicationException(Resources.ThereSNotARegisteredUserWithThatEmailAddress);
@@ -288,7 +286,7 @@ namespace Signum.Web.Auth
             {
                 rpr = Database.Query<ResetPasswordRequestDN>()
                     .Where(r => r.User.Email == email && r.Code == code)
-                    .SingleOrDefault(Resources.TheConfirmationCodeThatYouHaveJustSentIsInvalid);
+                    .SingleOrDefaultEx(()=>Resources.TheConfirmationCodeThatYouHaveJustSentIsInvalid);
             }
             TempData["ResetPasswordRequest"] = rpr;
 
@@ -320,12 +318,13 @@ namespace Signum.Web.Auth
                     request = rpr.Retrieve();
                     user = Database.Query<UserDN>()
                         .Where(u => u.Email == request.User.Email)
-                        .Single();
+                        .SingleEx();
                 }
 
                 var context = user.ApplyChanges(this.ControllerContext, "", UserMapping.ChangePassword).ValidateGlobal();
 
-                if (context.GlobalErrors.Any())
+                if (!context.Errors.TryGetC(UserMapping.NewPasswordKey).IsNullOrEmpty() ||
+                    !context.Errors.TryGetC(UserMapping.NewPasswordBisKey).IsNullOrEmpty())
                 {
                     ViewData["Title"] = Resources.ChangePassword;
                     ModelState.FromContext(context);
@@ -526,14 +525,21 @@ namespace Signum.Web.Auth
         }
         #endregion
 
+
+
+        public static Action<UserDN> OnUpdatedSessionUser;
+
         public static void UpdateSessionUser()
         {
             var newUser = UserDN.Current.ToLite().Retrieve();
 
             Thread.CurrentPrincipal = newUser;
 
-            if (System.Web.HttpContext.Current != null)
+            if (System.Web.HttpContext.Current != null && System.Web.HttpContext.Current.Session[SessionUserKey] != null)
                 System.Web.HttpContext.Current.Session[SessionUserKey] = newUser;
+
+            if (OnUpdatedSessionUser != null)
+                OnUpdatedSessionUser(newUser); 
         }
 
         public static void AddUserSession(UserDN user)

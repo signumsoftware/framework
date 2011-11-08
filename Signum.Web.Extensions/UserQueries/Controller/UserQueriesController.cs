@@ -52,7 +52,7 @@ namespace Signum.Web.UserQueries
 
         public ActionResult Delete(Lite<UserQueryDN> lite)
         {
-            var queryName = QueryLogic.ToQueryName(lite.InDB().Select(uq => uq.Query.Key).First());
+            var queryName = QueryLogic.ToQueryName(lite.InDB().Select(uq => uq.Query.Key).FirstEx());
 
             Database.Delete<UserQueryDN>(lite);
 

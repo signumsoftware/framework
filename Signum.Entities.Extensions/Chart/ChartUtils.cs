@@ -73,12 +73,12 @@ namespace Signum.Entities.Chart
             switch (crt)
             {
                 case ChartResultType.TypeValue:
-                    if (tokenType == ChartTokenName.FirstDimension)
+                    if (tokenType == ChartTokenName.Dimension1)
                         return
                             type == ChartType.Pie || type == ChartType.Doughnout ? ChartLabel.Sections :
                             type == ChartType.Bars ? ChartLabel.VerticalAxis : ChartLabel.HorizontalAxis;
 
-                    if (tokenType == ChartTokenName.FirstValue)
+                    if (tokenType == ChartTokenName.Value1)
                         return
                             type == ChartType.Pie || type == ChartType.Doughnout ? ChartLabel.Angle :
                             type == ChartType.Bars ? ChartLabel.Width : ChartLabel.Height;
@@ -86,29 +86,29 @@ namespace Signum.Entities.Chart
                 case ChartResultType.TypeTypeValue:
                     bool isBar = type == ChartType.MultiBars || type == ChartType.TotalBars || type == ChartType.StackedBars;
 
-                    if (tokenType == ChartTokenName.FirstDimension)
+                    if (tokenType == ChartTokenName.Dimension1)
                         return isBar ? ChartLabel.VerticalAxis : ChartLabel.HorizontalAxis;
 
-                    if (tokenType == ChartTokenName.SecondDimension)
+                    if (tokenType == ChartTokenName.Dimension2)
                         return type == ChartType.MultiLines ? ChartLabel.Lines :
                                type == ChartType.StackedAreas || type == ChartType.TotalAreas ? ChartLabel.Areas : ChartLabel.SubGroups;
 
-                    if (tokenType == ChartTokenName.FirstValue)
+                    if (tokenType == ChartTokenName.Value1)
                         return isBar ? ChartLabel.Width : ChartLabel.Height;
 
                     break;
                 case ChartResultType.Bubbles:
                 case ChartResultType.Points:
-                    if (tokenType == ChartTokenName.FirstDimension)
+                    if (tokenType == ChartTokenName.Dimension1)
                         return ChartLabel.XAxis;
 
-                    if (tokenType == ChartTokenName.SecondDimension)
+                    if (tokenType == ChartTokenName.Dimension2)
                         return ChartLabel.YAxis;
 
-                    if (tokenType == ChartTokenName.FirstValue)
+                    if (tokenType == ChartTokenName.Value1)
                         return ChartLabel.Color;
 
-                    if (crt == ChartResultType.Bubbles && tokenType == ChartTokenName.SecondValue)
+                    if (crt == ChartResultType.Bubbles && tokenType == ChartTokenName.Value2)
                         return ChartLabel.Size;
 
                     break;
@@ -123,44 +123,44 @@ namespace Signum.Entities.Chart
             switch (crt)
             {
                 case ChartResultType.TypeValue:
-                    if (name == ChartTokenName.FirstDimension && !IsDiscrete(token))
+                    if (name == ChartTokenName.Dimension1 && !IsDiscrete(token))
                         return Resources.ExpressionShouldHaveADiscreteAmountOfValues;
 
-                    if (name == ChartTokenName.FirstValue && !IsContinuous(token))
+                    if (name == ChartTokenName.Value1 && !IsContinuous(token))
                         return Resources.ExpressionShouldHaveAContinousAmountOfValues;
 
                     break;
                 case ChartResultType.TypeTypeValue:
-                    if (name == ChartTokenName.FirstDimension && !IsDiscrete(token))
+                    if (name == ChartTokenName.Dimension1 && !IsDiscrete(token))
                         return Resources.ExpressionShouldHaveADiscreteAmountOfValues;
 
-                    if (name == ChartTokenName.SecondDimension && !IsDiscrete(token))
+                    if (name == ChartTokenName.Dimension2 && !IsDiscrete(token))
                         return Resources.ExpressionShouldHaveADiscreteAmountOfValues;
 
-                    if (name == ChartTokenName.FirstValue && !IsContinuous(token))
+                    if (name == ChartTokenName.Value1 && !IsContinuous(token))
                         return Resources.ExpressionShouldHaveAContinousAmountOfValues;
 
                     break;
                 case ChartResultType.Points:
-                    if (name == ChartTokenName.FirstDimension && !IsContinuous(token))
+                    if (name == ChartTokenName.Dimension1 && !IsContinuous(token))
                         return Resources.ExpressionShouldHaveAContinousAmountOfValues;
 
-                    if (name == ChartTokenName.SecondDimension && !IsContinuous(token))
+                    if (name == ChartTokenName.Dimension2 && !IsContinuous(token))
                         return Resources.ExpressionShouldHaveAContinousAmountOfValues;
 
                     //Color could be discrete or not
 
                     break;
                 case ChartResultType.Bubbles:
-                    if (name == ChartTokenName.FirstDimension && !IsContinuous(token))
+                    if (name == ChartTokenName.Dimension1 && !IsContinuous(token))
                         return Resources.ExpressionShouldHaveAContinousAmountOfValues;
 
-                    if (name == ChartTokenName.SecondDimension && !IsContinuous(token))
+                    if (name == ChartTokenName.Dimension2 && !IsContinuous(token))
                         return Resources.ExpressionShouldHaveAContinousAmountOfValues;
 
                     //Color could be discrete or not
 
-                    if (name == ChartTokenName.SecondValue && !IsContinuous(token))
+                    if (name == ChartTokenName.Value2 && !IsContinuous(token))
                         return Resources.ExpressionShouldHaveAContinousAmountOfValues;
 
                     break;
@@ -200,7 +200,7 @@ namespace Signum.Entities.Chart
                 var pp = Validator.GetOrCreatePropertyPack(route);
                 if (pp != null)
                 {
-                    DateTimePrecissionValidatorAttribute datetimePrecission = pp.Validators.OfType<DateTimePrecissionValidatorAttribute>().SingleOrDefault();
+                    DateTimePrecissionValidatorAttribute datetimePrecission = pp.Validators.OfType<DateTimePrecissionValidatorAttribute>().SingleOrDefaultEx();
 
                     if (datetimePrecission != null && datetimePrecission.Precision == DateTimePrecision.Days)
                         return true;
@@ -228,19 +228,19 @@ namespace Signum.Entities.Chart
             switch (crt)
             {
                 case ChartResultType.TypeValue: return
-                    name == ChartTokenName.FirstDimension ||
-                    name == ChartTokenName.FirstValue;
+                    name == ChartTokenName.Dimension1 ||
+                    name == ChartTokenName.Value1;
 
                 case ChartResultType.TypeTypeValue:
                 case ChartResultType.Points: return
-                    name == ChartTokenName.FirstDimension ||
-                    name == ChartTokenName.SecondDimension ||
-                    name == ChartTokenName.FirstValue;
+                    name == ChartTokenName.Dimension1 ||
+                    name == ChartTokenName.Dimension2 ||
+                    name == ChartTokenName.Value1;
                 case ChartResultType.Bubbles: return
-                    name == ChartTokenName.FirstDimension ||
-                    name == ChartTokenName.SecondDimension ||
-                    name == ChartTokenName.FirstValue ||
-                    name == ChartTokenName.SecondValue;
+                    name == ChartTokenName.Dimension1 ||
+                    name == ChartTokenName.Dimension2 ||
+                    name == ChartTokenName.Value1 ||
+                    name == ChartTokenName.Value2;
             }
             throw new InvalidOperationException();
         }
@@ -251,18 +251,18 @@ namespace Signum.Entities.Chart
             {
                 case ChartResultType.TypeValue:
                 case ChartResultType.TypeTypeValue:
-                    return name == ChartTokenName.FirstValue;
+                    return name == ChartTokenName.Value1;
 
                 case ChartResultType.Points:
                     return
-                        name == ChartTokenName.FirstDimension ||
-                        name == ChartTokenName.SecondDimension;
+                        name == ChartTokenName.Dimension1 ||
+                        name == ChartTokenName.Dimension2;
 
                 case ChartResultType.Bubbles:
                     return
-                        name == ChartTokenName.FirstDimension ||
-                        name == ChartTokenName.SecondDimension ||
-                        name == ChartTokenName.SecondValue;
+                        name == ChartTokenName.Dimension1 ||
+                        name == ChartTokenName.Dimension2 ||
+                        name == ChartTokenName.Value2;
             }
 
             return false;
@@ -273,14 +273,14 @@ namespace Signum.Entities.Chart
             switch (crt)
             {
                 case ChartResultType.TypeValue:
-                    return name == ChartTokenName.FirstDimension;
+                    return name == ChartTokenName.Dimension1;
 
                 case ChartResultType.TypeTypeValue:
-                    return name == ChartTokenName.FirstDimension || name == ChartTokenName.SecondDimension;
+                    return name == ChartTokenName.Dimension1 || name == ChartTokenName.Dimension2;
 
                 case ChartResultType.Bubbles:
                 case ChartResultType.Points:
-                    return name == ChartTokenName.FirstValue;
+                    return name == ChartTokenName.Value1;
             }
 
             return false;
@@ -325,10 +325,10 @@ namespace Signum.Entities.Chart
 
     public enum ChartTokenName
     {
-        FirstDimension,
-        SecondDimension,
-        FirstValue,
-        SecondValue
+        Dimension1,
+        Dimension2,
+        Value1,
+        Value2
     }
 
 

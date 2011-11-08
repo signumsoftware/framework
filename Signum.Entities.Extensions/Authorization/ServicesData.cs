@@ -7,6 +7,7 @@ using Signum.Entities;
 using Signum.Utilities;
 using Signum.Entities.Operations;
 using Signum.Entities.Extensions.Properties;
+using System.Collections.ObjectModel;
 
 namespace Signum.Entities.Authorization
 {
@@ -91,7 +92,7 @@ namespace Signum.Entities.Authorization
     }
 
     [Serializable, AvoidLocalization]
-    public abstract class AllowedRule<R, A> : EmbeddedEntity
+    public abstract class AllowedRule<R, A> : ModelEntity
         where R : IdentifiableEntity
     {
         A allowedBase;
@@ -148,7 +149,7 @@ namespace Signum.Entities.Authorization
     }
 
     [Serializable]
-    public class TypeAllowedRule : AllowedRule<TypeDN, TypeAllowed> 
+    public class TypeAllowedRule : AllowedRule<TypeDN, TypeAllowedAndConditions> 
     {
         AuthThumbnail? properties;
         public AuthThumbnail? Properties
@@ -169,6 +170,112 @@ namespace Signum.Entities.Authorization
         {
             get { return queries; }
             set { Set(ref queries, value, () => Queries); }
+        }
+
+        ReadOnlyCollection<Enum> availableConditions;
+        public ReadOnlyCollection<Enum> AvailableConditions
+        {
+            get { return availableConditions; }
+            set { Set(ref availableConditions, value, () => AvailableConditions); }
+        }
+    }
+
+    [Serializable]
+    public class TypeAllowedAndConditions : ModelEntity, IEquatable<TypeAllowedAndConditions>
+    {
+        public TypeAllowedAndConditions(TypeAllowed fallback, ReadOnlyCollection<TypeConditionRule> conditions)
+        {
+            this.fallback = fallback;
+            this.conditions = conditions;
+        }
+
+        public TypeAllowedAndConditions(TypeAllowed fallback, params TypeConditionRule[] conditions)
+        {
+            this.fallback = fallback;
+            this.conditions = conditions.ToReadOnly();
+        }
+
+        readonly TypeAllowed fallback;
+        public TypeAllowed Fallback
+        {
+            get { return fallback; }
+        }
+
+        readonly ReadOnlyCollection<TypeConditionRule> conditions;
+        public ReadOnlyCollection<TypeConditionRule> Conditions
+        {
+            get { return conditions; }
+        }
+
+        public bool Equals(TypeAllowedAndConditions other)
+        {
+            return this.fallback.Equals(other.fallback) &&
+                this.conditions.SequenceEqual(other.conditions);
+        }
+
+        public override bool Equals(object obj)
+        {
+            var other = obj as TypeAllowedAndConditions;
+            return other != null && Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            return this.fallback.GetHashCode();
+        }
+
+        public TypeAllowed Min()
+        {
+            if (!conditions.Any())
+                return fallback;
+
+            return (TypeAllowed)Math.Min((int)fallback, conditions.Select(a => (int)a.Allowed).Min());
+        }
+
+        public TypeAllowed Max()
+        {
+            if (!conditions.Any())
+                return fallback;
+
+            return (TypeAllowed)Math.Max((int)fallback, conditions.Select(a => (int)a.Allowed).Max());
+        }
+
+        public override string ToString()
+        {
+            if (conditions.IsEmpty())
+                return Fallback.ToString();
+
+            return "{0} | {1}".Formato(Fallback, conditions.ToString(c=>"{0} {1}".Formato(c.ConditionName, c.Allowed), " | "));
+        }
+    }
+
+    [Serializable]
+    public class TypeConditionRule : EmbeddedEntity, IEquatable<TypeConditionRule>
+    {
+        public TypeConditionRule(Enum conditionName, TypeAllowed allowed)
+        {
+            this.conditionName = conditionName;
+            this.allowed = allowed;
+        }
+
+        Enum conditionName;
+        public Enum ConditionName
+        {
+            get { return conditionName; }
+            set { Set(ref conditionName, value, () => ConditionName); }
+        }
+
+        TypeAllowed allowed;
+        public TypeAllowed Allowed
+        {
+            get { return allowed; }
+            set { Set(ref allowed, value, () => Allowed); }
+        }
+
+        public bool Equals(TypeConditionRule other)
+        {
+            return conditionName.Equals(other.conditionName) && 
+                allowed.Equals(other.allowed);
         }
     }
 
@@ -237,16 +344,4 @@ namespace Signum.Entities.Authorization
     }
     [Serializable]
     public class FacadeMethodAllowedRule : AllowedRule<FacadeMethodDN, bool> { } 
-
-    [Serializable]
-    public class EntityGroupRulePack : BaseRulePack<EntityGroupAllowedRule>
-    {
-        public override string ToString()
-        {
-            return Resources._0RulesFor1.Formato(typeof(EntityGroupDN).NiceName(), Role);
-        }
-    }
-
-    [Serializable]
-    public class EntityGroupAllowedRule : AllowedRule<EntityGroupDN, EntityGroupAllowedDN> { }
 }

@@ -29,7 +29,6 @@ namespace Signum.Engine.Extensions.Chart
             {
                 QueryLogic.Start(sb);
 
-
                 sb.Include<UserChartDN>();
 
                 dqm[typeof(UserChartDN)] = (from uq in Database.Query<UserChartDN>()
@@ -40,9 +39,9 @@ namespace Signum.Engine.Extensions.Chart
                                                 uq.Id,
                                                 uq.DisplayName,
                                                 Filters = uq.Filters.Count,
-                                                uq.ChartType,
-                                                uq.ChartResultType,
-                                                uq.GroupResults,
+                                                uq.Chart.ChartType,
+                                                uq.Chart.ChartResultType,
+                                                uq.Chart.GroupResults,
                                             }).ToDynamic();
 
                 sb.Schema.EntityEvents<UserChartDN>().Retrieved += ChartLogic_Retrieved;
@@ -88,14 +87,14 @@ namespace Signum.Engine.Extensions.Chart
         {
             sb.Schema.Settings.AssertImplementedBy((UserChartDN uq) => uq.Related, typeof(UserDN));
 
-            EntityGroupLogic.Register<UserChartDN>(newEntityGroupKey, uq => uq.Related.RefersTo(UserDN.Current));
+            TypeConditionLogic.Register<UserChartDN>(newEntityGroupKey, uq => uq.Related.RefersTo(UserDN.Current));
         }
 
         public static void RegisterRoleEntityGroup(SchemaBuilder sb, Enum newEntityGroupKey)
         {
             sb.Schema.Settings.AssertImplementedBy((UserChartDN uq) => uq.Related, typeof(RoleDN));
 
-            EntityGroupLogic.Register<UserChartDN>(newEntityGroupKey, uq => AuthLogic.CurrentRoles().Contains(uq.Related.ToLite<RoleDN>()));
+            TypeConditionLogic.Register<UserChartDN>(newEntityGroupKey, uq => AuthLogic.CurrentRoles().Contains(uq.Related.ToLite<RoleDN>()));
         }
 
 
@@ -151,7 +150,7 @@ namespace Signum.Engine.Extensions.Chart
 
         static Expression BuildAggregateExpression(Expression collection, AggregateFunction aggregate, LambdaExpression lambda)
         {
-            Type groupType = collection.Type.GetGenericInterfaces(typeof(IEnumerable<>)).Single("expression should be a IEnumerable").GetGenericArguments()[0];
+            Type groupType = collection.Type.GetGenericInterfaces(typeof(IEnumerable<>)).SingleEx(()=>"expression should be a IEnumerable").GetGenericArguments()[0];
 
             if (aggregate == AggregateFunction.Count)
                 return Expression.Call(typeof(Enumerable), "Count", new[] { groupType }, new[] { collection });
@@ -171,7 +170,7 @@ namespace Signum.Engine.Extensions.Chart
             ChartTokenDN[] chartTokens = request.ChartTokens().ToArray(); 
             List<Column> columns = chartTokens.Select(t=>t.CreateSimpleColumn()).ToList();
 
-            if (!request.GroupResults)
+            if (!request.Chart.GroupResults)
                 columns.Add(new _EntityColumn(dq.EntityColumn().BuildColumnDescription()));
 
             IDynamicInfo collection;
@@ -189,20 +188,23 @@ namespace Signum.Engine.Extensions.Chart
                 }, dq.GetColumnDescriptions());
             }
 
-            if (!request.GroupResults)
+            if (!request.Chart.GroupResults)
             {
                 var orders = (from ct in chartTokens
                               where ct.OrderPriority.HasValue
                               orderby ct.OrderPriority.Value
                               select new Order(ct.Token, ct.OrderType.Value)).ToList();
 
-                DEnumerable<T> result;
+                object[] result;
                 if (collection is DQueryable<T>)
-                    result = ((DQueryable<T>)collection).OrderBy(orders).ToArray();
+                    result = ((DQueryable<T>)collection).OrderBy(orders).Query.ToArray();
                 else
-                    result = ((DEnumerable<T>)collection).OrderBy(orders).ToArray();
+                    result = ((DEnumerable<T>)collection).OrderBy(orders).Collection.ToArray();
 
-                return result.ToResultTable(columns);
+                var cols = columns.Select(c => Tuple.Create(c,
+                    Expression.Lambda(c.Token.BuildExpression(collection.Context), collection.Context.Parameter))).ToList();
+
+                return result.ToResultTable(cols, result.Length, 0, null);
             }
             else
             {
@@ -228,7 +230,7 @@ namespace Signum.Engine.Extensions.Chart
                 var cols = columns.Select((c, i) =>
                     Tuple.Create(c, TupleReflection.TupleChainPropertyLambda(resultType, i))).ToList();
 
-                return result.ToResultTable(cols);
+                return result.ToResultTable(cols, cols.Count, 0, null);
             }
         }
 

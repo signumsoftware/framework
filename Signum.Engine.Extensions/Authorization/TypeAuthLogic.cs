@@ -16,14 +16,17 @@ using Signum.Engine.Extensions.Properties;
 using Signum.Entities.Reflection;
 using Signum.Entities.DynamicQuery;
 using Signum.Utilities.DataStructures;
+using Signum.Utilities.Reflection;
+using Signum.Engine.Exceptions;
+using System.Data.SqlClient;
 
 namespace Signum.Engine.Authorization
 {
-    public static class TypeAuthLogic
+    public static partial class TypeAuthLogic
     {
-        static AuthCache<RuleTypeDN, TypeAllowedRule, TypeDN, Type, TypeAllowed> cache;
+        static TypeAuthCache cache;
 
-        public static IManualAuth<Type, TypeAllowed> Manual { get { return cache; } }
+        public static IManualAuth<Type, TypeAllowedAndConditions> Manual { get { return cache; } }
 
         public static bool IsStarted { get { return cache != null; } }
 
@@ -31,20 +34,29 @@ namespace Signum.Engine.Authorization
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                AuthLogic.AssertStarted(sb);              
+                AuthLogic.AssertStarted(sb);
+                TypeConditionLogic.Start(sb); 
 
                 sb.Schema.EntityEventsGlobal.Saving += Schema_Saving; //because we need Modifications propagated
                 sb.Schema.EntityEventsGlobal.Retrieved += EntityEventsGlobal_Retrieved;
                 sb.Schema.IsAllowedCallback += Schema_IsAllowedCallback;
 
-                cache = new AuthCache<RuleTypeDN, TypeAllowedRule, TypeDN, Type, TypeAllowed>(sb,
-                    dn => TypeLogic.DnToType[dn],
-                    type => TypeLogic.TypeToDN[type],
+                sb.Schema.Initializing[InitLevel.Level0SyncEntities] += () =>
+                {
+                    foreach (var type in TypeConditionLogic.Types)
+                    {
+                        miRegister.GetInvoker(type)(Schema.Current);
+                    }
+                };
+
+                cache = new TypeAuthCache(sb,
                     AuthUtils.MaxType, 
                     AuthUtils.MinType);
 
-                AuthLogic.ExportToXml += () => cache.ExportXml("Types", "Type", t => t.CleanName, ta => ta.ToString());
-                AuthLogic.ImportFromXml += (x, roles) => cache.ImportXml(x, "Types", "Type", roles, s => TypeLogic.TypeToDN[TypeLogic.GetType(s)], EnumExtensions.ToEnum<TypeAllowed>);
+                AuthLogic.ExportToXml += () => cache.ExportXml();
+                AuthLogic.ImportFromXml += (x, roles) => cache.ImportXml(x,  roles);
+
+                sb.Schema.Table<RuleTypeDN>().PreDeleteSqlSync += AuthCache_PreDeleteSqlSync;
 
                 Signum.Entities.Audit.Register(Audit.CyclesInRoles);
                 Signum.Entities.Audit.Register(Audit.UnsafeRoles);
@@ -53,35 +65,70 @@ namespace Signum.Engine.Authorization
         }
 
       
+        static GenericInvoker<Action<Schema>> miRegister = 
+            new GenericInvoker<Action<Schema>>(s => RegisterSchemaEvent<TypeDN>(s));
+        static void RegisterSchemaEvent<T>(Schema sender)
+             where T : IdentifiableEntity
+        {
+            sender.EntityEvents<T>().FilterQuery += new FilterQueryEventHandler<T>(EntityGroupAuthLogic_FilterQuery);
+        }
+
+        static SqlPreCommand AuthCache_PreDeleteSqlSync(IdentifiableEntity arg)
+        {
+            var t = Schema.Current.Table<RuleTypeDN>();
+            var rec = (FieldReference)t.Fields["resource"].Field;
+            var cond = (FieldMList)t.Fields["conditions"].Field;
+            var param = SqlParameterBuilder.CreateReferenceParameter("id", false, arg.Id);
+
+            var conditions = new SqlPreCommandSimple("DELETE cond FROM {0} cond INNER JOIN {1} r ON cond.{2} = r.{3} WHERE r.{4} = {5}".Formato(
+                cond.RelationalTable.Name.SqlScape(), t.Name.SqlScape(), cond.RelationalTable.BackReference.Name.SqlScape(), "Id", rec.Name.SqlScape(), param.ParameterName.SqlScape()), new List<SqlParameter> { param });
+            var rule = new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}".Formato(t.Name.SqlScape(), rec.Name.SqlScape(), param.ParameterName.SqlScape()), new List<SqlParameter> { param });
+
+            return SqlPreCommand.Combine(Spacing.Simple, conditions, rule); 
+        }
+
+        public static void AssertStarted(SchemaBuilder sb)
+        {
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => TypeAuthLogic.Start(null)));
+        }
 
         static string Schema_IsAllowedCallback(Type type)
         {
-            return cache.GetAllowed(type).GetDB() != TypeAllowedBasic.None ? null : "Type '{0}' is set to None".Formato(type.NiceName());
+            var allowed = GetAllowed(type);
+
+            if (allowed.Max().GetDB() == TypeAllowedBasic.None)
+                return "Type '{0}' is set to None".Formato(type.NiceName());
+
+            return null;
         }
+
+   
 
         static void Schema_Saving(IdentifiableEntity ident)
         {
-            if (Schema.Current.InGlobalMode)
-                return;
-
             if (ident.Modified.Value)
             {
-                TypeAllowedBasic access = cache.GetAllowed(ident.GetType()).GetDB();
+                TypeAllowedAndConditions access = GetAllowed(ident.GetType());
 
-                if (access == TypeAllowedBasic.Create || (!ident.IsNew && access == TypeAllowedBasic.Modify))
+                var requested = ident.IsNew ? TypeAllowedBasic.Create : TypeAllowedBasic.Modify;
+
+                var min = access.Min().GetDB();
+                var max = access.Max().GetDB();
+                if (requested <= min)
                     return;
 
-                throw new UnauthorizedAccessException(Resources.NotAuthorizedToSave0.Formato(ident.GetType()));
+                if (max < requested)
+                    throw new UnauthorizedAccessException(Resources.NotAuthorizedTo0The1WithId2.Formato(requested.NiceToString(), ident.GetType().NiceName(), ident.IdOrNull));
+
+                Schema_Saving_Instance(ident);
             }
         }
 
+
         static void EntityEventsGlobal_Retrieved(IdentifiableEntity ident)
         {
-            if (Schema.Current.InGlobalMode)
-                return;
-
             Type type = ident.GetType();
-            TypeAllowedBasic access = cache.GetAllowed(type).GetDB();
+            TypeAllowedBasic access = GetAllowed(type).Max().GetDB();
             if (access < TypeAllowedBasic.Read)
                 throw new UnauthorizedAccessException(Resources.NotAuthorizedToRetrieve0.Formato(type.NicePluralName()));
         }
@@ -115,22 +162,56 @@ namespace Signum.Engine.Authorization
             cache.SetRules(rules, r => true);
         }
 
-        public static TypeAllowed GetTypeAllowed(Type type)
+        public static TypeAllowedAndConditions GetAllowed(Type type)
         {
-            if (!TypeLogic.TypeToDN.ContainsKey(type))
-                return TypeAllowed.Create;
+            if (!AuthLogic.IsEnabled || Schema.Current.InGlobalMode)
+                return AuthUtils.MaxType.BaseAllowed;
 
-            return cache.GetAllowed(type);
+            if (!TypeLogic.TypeToDN.ContainsKey(type))
+                return AuthUtils.MaxType.BaseAllowed;
+
+            TypeAllowed? temp = TypeAuthLogic.GetTemporallyAllowed(type);
+            if (temp.HasValue)
+                return new TypeAllowedAndConditions(temp.Value); 
+
+            return cache.GetAllowed(RoleDN.Current.ToLite(), type);
         }
 
-        public static TypeAllowed GetTypeAllowed(Lite<RoleDN> role, Type type)
+        public static TypeAllowedAndConditions GetAllowed(Lite<RoleDN> role, Type type)
         {
             return cache.GetAllowed(role, type);
         }
 
-        public static DefaultDictionary<Type, TypeAllowed> AuthorizedTypes()
+        public static DefaultDictionary<Type, TypeAllowedAndConditions> AuthorizedTypes()
         {
             return cache.GetDefaultDictionary();
+        }
+
+        [ThreadStatic]
+        static ImmutableStack<Tuple<Type, TypeAllowed>> temporallyAllowed;
+
+        public static IDisposable AllowTemporally<T>(TypeAllowed typeAllowed)
+            where T : IdentifiableEntity
+        {
+            var old = temporallyAllowed;
+
+            temporallyAllowed = (temporallyAllowed ?? ImmutableStack<Tuple<Type, TypeAllowed>>.Empty).Push(Tuple.Create(typeof(T), typeAllowed));
+
+            return new Disposable(() => temporallyAllowed = old);
+        }
+
+        internal static TypeAllowed? GetTemporallyAllowed(Type type)
+        {
+            var ta = temporallyAllowed;
+            if (ta == null || ta.IsEmpty)
+                return null;
+
+            var pair = temporallyAllowed.FirstOrDefault(a => a.Item1 == type);
+
+            if (pair == null)
+                return null;
+
+            return pair.Item2;
         }
 
         public static class Audit
@@ -154,7 +235,7 @@ namespace Signum.Engine.Authorization
             {
                 return (from r in AuthLogic.RolesGraph()
                         from t in Schema.Current.Tables.Keys.Where(a=>!a.IsEnumProxy())
-                        let ua = TypeAuthLogic.GetTypeAllowed(r,t).GetUI()
+                        let ua = GetAllowed(r,t).Min().GetUI()
                         let qns = (from qn in DynamicQueryManager.Current.GetQueries(t)
                                    where  QueryAuthLogic.GetQueryAllowed(r, qn) != (ua == TypeAllowedBasic.None)
                                    select qn).ToList()
@@ -171,9 +252,9 @@ namespace Signum.Engine.Authorization
 
                 return (from r in AuthLogic.RolesGraph()
                         from t in graph
-                        where !t.Type.IsEnumProxy() && TypeAuthLogic.GetTypeAllowed(r, t.Type).GetDB() > TypeAllowedBasic.None
+                        where !t.Type.IsEnumProxy() && TypeAuthLogic.GetAllowed(r, t.Type).Fallback.GetDB() > TypeAllowedBasic.None
                         from t2 in graph.IndirectlyRelatedTo(t, kvp => kvp.Value)
-                        where !t2.Type.IsEnumProxy() && TypeAuthLogic.GetTypeAllowed(r, t2.Type).GetDB() == TypeAllowedBasic.None
+                        where !t2.Type.IsEnumProxy() && TypeAuthLogic.GetAllowed(r, t2.Type).Fallback.GetDB() == TypeAllowedBasic.None
                         select "Role {0} can retrieve '{1}' but not '{2}'".Formato(r, t.Type.Name, t2.Type.Name)).ToList();
             }
         }

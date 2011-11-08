@@ -16,6 +16,13 @@ namespace Signum.Engine.Mailing
 {
     class NewsletterProcessAlgortihm : IProcessAlgorithm
     {
+        class SendLine
+        {
+            public Lite<NewsletterDeliveryDN> Send;
+            public string Email;
+            public string Error;
+        }
+
         public IProcessDataDN CreateData(object[] args)
         {
             throw new NotImplementedException();
@@ -88,7 +95,7 @@ namespace Signum.Engine.Mailing
                             {
                                 Sent = true,
                                 SendDate = DateTime.Now.TrimToSeconds(),
-                                Error = f.Key
+                                Exception = f.Key
                             });
                     }
 
@@ -110,11 +117,6 @@ namespace Signum.Engine.Mailing
             return FinalState.Finished;
         }
 
-        private class SendLine
-        {
-            public Lite<NewsletterDeliveryDN> Send;
-            public string Email;
-            public string Error;
-        }
+       
     }
 }

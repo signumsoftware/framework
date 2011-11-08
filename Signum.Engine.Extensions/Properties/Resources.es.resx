@@ -120,9 +120,6 @@
   <data name="TheEntity0IsNew" xml:space="preserve">
     <value>La entidad {0} es nueva</value>
   </data>
-  <data name="QueryOf0Connecting1" xml:space="preserve">
-    <value>Consulta de {0} que relaciona {1}</value>
-  </data>
   <data name="QueryOf0" xml:space="preserve">
     <value>Consulta de {0}</value>
   </data>
@@ -250,9 +247,6 @@
   <data name="_0IsACollectionOfElements1" xml:space="preserve">
     <value>{0} es una colección de elementos {1}</value>
   </data>
-  <data name="EmailIsNotValid" xml:space="preserve">
-    <value>El correo electrónico es diferente del almacenado en el sistema</value>
-  </data>
   <data name="ConstructsANew0" xml:space="preserve">
     <value>Construye un nuevo {0}</value>
   </data>
@@ -274,20 +268,11 @@
   <data name="Call0Over1OfThe2" xml:space="preserve">
     <value>Ejecuta {0} sobre {1} del {2}</value>
   </data>
-  <data name="BelongsToAnotherKindOkLinqProvider" xml:space="preserve">
-    <value>{0} peretenece a otro tipo de Linq Provider</value>
-  </data>
   <data name="HelpNotLoaded" xml:space="preserve">
     <value>Ayuda no cargada</value>
   </data>
-  <data name="NoHelpFor0" xml:space="preserve">
-    <value>No hay ayuda para {0}</value>
-  </data>
   <data name="NotRegisteredInEmailLogic" xml:space="preserve">
     <value>{0} no está resgistrado en EmailLogic</value>
-  </data>
-  <data name="NotRegistered" xml:space="preserve">
-    <value>{0} no está registrado</value>
   </data>
   <data name="ProcessExecution0IsNotRunningAnymore" xml:space="preserve">
     <value>El ProcessExecution {0} ya no está ejecutándose</value>
@@ -320,7 +305,7 @@
     <value>{0} es un {1} calculado</value>
   </data>
   <data name="Any" xml:space="preserve">
-    <value>cualquier</value>
+    <value>algún</value>
   </data>
   <data name="ExpiredPassword" xml:space="preserve">
     <value>Contraseña caducada</value>
@@ -333,5 +318,8 @@
   </data>
   <data name="TheTemplateMustBeActiveToConstructSMSMessages" xml:space="preserve">
     <value>La plantilla debe estar activa para crear un SMS</value>
+  </data>
+  <data name="YourUsernameIs0" xml:space="preserve">
+    <value>Su nombre de usuario es: {0}</value>
   </data>
 </root>

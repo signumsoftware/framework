@@ -44,7 +44,7 @@ namespace Signum.Web.UserQueries
                     while (tokenStr.EndsWith("."))
                         tokenStr = tokenStr.Substring(0, tokenStr.Length - 1);
 
-                    string queryKey = ((MappingContext<UserQueryDN>)ctx.Parent.Parent.Parent.Parent).Inputs[TypeContextUtilities.Compose("Query", "Key")];
+                    string queryKey = ctx.Parent.Parent.Parent.Parent.Inputs[TypeContextUtilities.Compose("Query", "Key")];
                     object queryName = QueryLogic.ToQueryName(queryKey);
                     QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
                     return QueryUtils.Parse(tokenStr, qd);
@@ -128,7 +128,7 @@ namespace Signum.Web.UserQueries
 
             foreach (var uq in UserQueryLogic.GetUserQueries(queryName))
             {
-                string uqName = uq.InDB().Select(q => q.DisplayName).SingleOrDefault();
+                string uqName = uq.InDB().Select(q => q.DisplayName).SingleOrDefaultEx();
                 items.Add(new ToolBarButton
                 {
                     Text = uqName,
@@ -206,8 +206,8 @@ namespace Signum.Web.UserQueries
                 OrderType = qo.OrderType
             }));
 
-            findOptions.Top = userQuery.MaxItems;
-            findOptions.TopEmpty = userQuery.MaxItems == null;
+            findOptions.ElementsPerPage = userQuery.ElementsPerPage;
+            findOptions.ElementsPerPageEmpty = userQuery.ElementsPerPage == null;
         }
 
         public static FindOptions ToFindOptions(this UserQueryDN userQuery)

@@ -117,23 +117,11 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AreYouSureOfDeletingTheEntity012" xml:space="preserve">
-    <value>Are you sure of deleting from the system the entity {0} ({1}:{2})?</value>
-  </data>
   <data name="ConfirmNewPassword" xml:space="preserve">
     <value>Confirm new password</value>
   </data>
-  <data name="CurrentPassword" xml:space="preserve">
-    <value>Current password</value>
-  </data>
   <data name="ChangePassword" xml:space="preserve">
     <value>Change password</value>
-  </data>
-  <data name="ChangePasswordExplanation" xml:space="preserve">
-    <value>Use this form to change your password</value>
-  </data>
-  <data name="EmailIsNotValid" xml:space="preserve">
-    <value>The email is different from the stored email</value>
   </data>
   <data name="EmailMustHaveAValue" xml:space="preserve">
     <value>The email must have a value</value>
@@ -144,23 +132,11 @@
   <data name="HelpDocumentation" xml:space="preserve">
     <value>Help documentation</value>
   </data>
-  <data name="InvalidNewPassword" xml:space="preserve">
-    <value>Invalid new password</value>
-  </data>
-  <data name="InvalidOperationType0inTheConstructionOfOperation1" xml:space="preserve">
-    <value>Invalid Operation Type {{0}} in the construction of the operation {{1}}</value>
-  </data>
   <data name="InvalidUsernameOrPassword" xml:space="preserve">
     <value>Invalid username or password</value>
   </data>
   <data name="Key0NotFound" xml:space="preserve">
     <value>Key {0} not found</value>
-  </data>
-  <data name="MailBody_RememberPassword" xml:space="preserve">
-    <value>We are sending you this email as you have requested to remember your password. For your safety, we have generated a new random password, that you will be able to modify later.&lt;br/&gt;&lt;br/&gt;The password is &lt;b&gt;{0}&lt;/b&gt;</value>
-  </data>
-  <data name="MailSubject_RememberPassword" xml:space="preserve">
-    <value>Remember Password</value>
   </data>
   <data name="Message" xml:space="preserve">
     <value>Message</value>
@@ -174,20 +150,8 @@
   <data name="PasswordHasBeenChangedSuccessfully" xml:space="preserve">
     <value>The password has been changed successfully</value>
   </data>
-  <data name="PasswordHasBeenSent" xml:space="preserve">
-    <value>The password has been sent to the provided mail account {0}</value>
-  </data>
-  <data name="PasswordMustHave0orMoreCharacters" xml:space="preserve">
-    <value>The password must have {0} or more characters</value>
-  </data>
   <data name="PasswordMustHaveAValue" xml:space="preserve">
     <value>The password must have a value</value>
-  </data>
-  <data name="Property0DoesNotExistInType1" xml:space="preserve">
-    <value>Property {0} does not exist in type {1}</value>
-  </data>
-  <data name="Property0HasNoValue" xml:space="preserve">
-    <value>Property {0} has no value</value>
   </data>
   <data name="Property0NotExistsInType1" xml:space="preserve">
     <value>Property {0} does not exist in type {1}</value>
@@ -204,17 +168,11 @@
   <data name="TheSpecifiedPasswordsDontMatch" xml:space="preserve">
     <value>The specified passwords don't match</value>
   </data>
-  <data name="UserNameAlreadyExists" xml:space="preserve">
-    <value>The provided User Name is already registered, please choose another one</value>
-  </data>
   <data name="UserNameMustHaveAValue" xml:space="preserve">
     <value>The user name must have a value</value>
   </data>
   <data name="ViewName" xml:space="preserve">
     <value>View name</value>
-  </data>
-  <data name="YouMustEnterTheCurrentPassword" xml:space="preserve">
-    <value>You must enter the current password</value>
   </data>
   <data name="YouMustRepeatTheNewPassword" xml:space="preserve">
     <value>You must repeat the new password</value>
@@ -255,12 +213,6 @@
   <data name="GoBackToLoginPage" xml:space="preserve">
     <value>Go back to login page</value>
   </data>
-  <data name="PasswordReseted" xml:space="preserve">
-    <value>Your password has been reseted</value>
-  </data>
-  <data name="YourNewPasswordIs0" xml:space="preserve">
-    <value>Your new password is {0}</value>
-  </data>
   <data name="TypesAscx_Create" xml:space="preserve">
     <value>Create</value>
   </data>
@@ -288,20 +240,8 @@
   <data name="TypesAscx_Type" xml:space="preserve">
     <value>Type</value>
   </data>
-  <data name="EntityGroupsAscx_All" xml:space="preserve">
-    <value>All</value>
-  </data>
   <data name="EntityGroupsAscx_EntityGroup" xml:space="preserve">
     <value>Entity Group</value>
-  </data>
-  <data name="EntityGroupsAscx_In" xml:space="preserve">
-    <value>In</value>
-  </data>
-  <data name="EntityGroupsAscx_None" xml:space="preserve">
-    <value>None</value>
-  </data>
-  <data name="EntityGroupsAscx_Out" xml:space="preserve">
-    <value>Out</value>
   </data>
   <data name="EntityGroupsAscx_Overriden" xml:space="preserve">
     <value>Overriden</value>
@@ -368,9 +308,6 @@
   </data>
   <data name="QueriesAscx_Query" xml:space="preserve">
     <value>Query</value>
-  </data>
-  <data name="ThereAreATotalOf0Errors" xml:space="preserve">
-    <value>There are a total of {0} errors</value>
   </data>
   <data name="ViewsChecker" xml:space="preserve">
     <value>Views Checker</value>
@@ -471,19 +408,55 @@
   <data name="UserQueries_UserQueries" xml:space="preserve">
     <value>User Queries</value>
   </data>
-  <data name="SMS_DestinationNumber" xml:space="preserve">
-    <value>New SMS</value>
-  </data>
-  <data name="SMS_PhoneNumber" xml:space="preserve">
-    <value>Phone number</value>
-  </data>
-  <data name="SMS_WriteTheDestinationNumber" xml:space="preserve">
-    <value>Write the destination number:</value>
-  </data>
   <data name="ControlPanel_CreateNewPart" xml:space="preserve">
     <value>Create new part</value>
   </data>
   <data name="ControlPanel_YouMustSaveThePanelBeforeAddingParts" xml:space="preserve">
     <value>You must save the panel before adding parts</value>
+  </data>
+  <data name="Chart_Chart" xml:space="preserve">
+    <value>Chart</value>
+  </data>
+  <data name="Chart_Draw" xml:space="preserve">
+    <value>Draw</value>
+  </data>
+  <data name="Chart_Query0IsNotAllowed" xml:space="preserve">
+    <value>Query {0} is not allowed</value>
+  </data>
+  <data name="Chart_ChartSettings" xml:space="preserve">
+    <value>Chart settings</value>
+  </data>
+  <data name="Chart_Dimension" xml:space="preserve">
+    <value>Dimension</value>
+  </data>
+  <data name="Chart_Group" xml:space="preserve">
+    <value>Group</value>
+  </data>
+  <data name="Chart_ToggleInfo" xml:space="preserve">
+    <value>Toggle info</value>
+  </data>
+  <data name="UserChart_CreateNew" xml:space="preserve">
+    <value>Create</value>
+  </data>
+  <data name="UserChart_Edit" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="UserChart_UserCharts" xml:space="preserve">
+    <value>User charts</value>
+  </data>
+  <data name="Chart_AreYouSureOfDeletingUserChart0" xml:space="preserve">
+    <value>Are you sure of deleting user chart {0}?</value>
+  </data>
+  <data name="_0Rules" xml:space="preserve">
+    <value>{0} rules</value>
+  </data>
+  <data name="AuthAdmin_AddCondition" xml:space="preserve">
+    <value>Add condition</value>
+  </data>
+  <data name="AuthAdmin_RemoveCondition" xml:space="preserve">
+    <value>Remove condition</value>
+  </data>
+  <data name="AuthAdmin_ChooseACondition" xml:space="preserve">
+    <value>Choose a condition</value>
   </data>
 </root>

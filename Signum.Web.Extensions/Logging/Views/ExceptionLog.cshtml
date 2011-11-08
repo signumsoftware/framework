@@ -1,0 +1,20 @@
+﻿@using Signum.Entities.Logging
+
+@using (var e = Html.TypeContext<ExceptionLogDN>())
+{
+    @Html.ValueLine(e, f => f.CreationDate)<text>(</text>@e.Value.CreationDate.ToUserInterface().ToAgoString()<text>)</text>
+
+    @Html.ValueLine(e, f => f.ThreadId)
+    @Html.ValueLine(e, f => f.RequestUrl)
+    @Html.ValueLine(e, f => f.UserAgent)
+    @Html.ValueLine(e, f => f.ActionName)
+    @Html.ValueLine(e, f => f.ControllerName)
+
+    @Html.EntityLine(e, f => f.User)
+    @Html.EntityLine(e, f => f.Context)
+
+    <h3>@e.Value.ExceptionType</h3>
+    <pre>@e.Value.ExceptionMessage</pre>
+    <h3>StackTrace</h3>
+    <pre>@e.Value.StackTrace</pre>
+}
