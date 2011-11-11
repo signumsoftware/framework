@@ -42,6 +42,7 @@ namespace ASP
     using System.Web.UI.HtmlControls;
     using System.Xml.Linq;
     using Signum.Entities.Mailing;
+    using Signum.Entities.Reflection;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Mailing/Views/Newsletter.cshtml")]
@@ -61,6 +62,7 @@ namespace ASP
         }
         public override void Execute()
         {
+
 
 
 Write(Html.ScriptCss("~/Mailing/Content/Mail.css"));
@@ -96,7 +98,12 @@ WriteLiteral("        <div id=\"emTabMain\">\r\n            ");
 
        Write(Html.ValueLine(nc, n => n.Name));
 
-WriteLiteral("\r\n            ");
+WriteLiteral("\r\n           \r\n            ");
+
+
+       Write(Html.HiddenRuntimeInfo(nc, n => n.Query));
+
+WriteLiteral("\r\n        \r\n            ");
 
 
        Write(Html.ValueLine(nc, n => n.State, vl => vl.ReadOnly = true));

@@ -1,4 +1,5 @@
 ﻿@using Signum.Entities.Mailing
+@using Signum.Entities.Reflection
 @Html.ScriptCss("~/Mailing/Content/Mail.css")
 @using (var nc = Html.TypeContext<NewsletterDN>())
 {
@@ -14,6 +15,9 @@
         }
         <div id="emTabMain">
             @Html.ValueLine(nc, n => n.Name)
+           
+            @Html.HiddenRuntimeInfo(nc, n => n.Query)
+        
             @Html.ValueLine(nc, n => n.State, vl => vl.ReadOnly = true)
             @Html.ValueLine(nc, n => n.Subject)
             @if (!editable)

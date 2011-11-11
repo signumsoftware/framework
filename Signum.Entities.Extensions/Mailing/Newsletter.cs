@@ -6,6 +6,7 @@ using Signum.Entities;
 using Signum.Entities.Processes;
 using Signum.Entities.Mailing;
 using Signum.Utilities;
+using Signum.Entities.Basics;
 
 namespace Signum.Entities.Mailing
 {
@@ -35,7 +36,7 @@ namespace Signum.Entities.Mailing
             set { SetToStr(ref name, value, () => Name); }
         }
 
-        NewsletterState  state;
+        NewsletterState  state = NewsletterState.Created;
         public NewsletterState  State
         {
             get { return state; }
@@ -69,7 +70,7 @@ namespace Signum.Entities.Mailing
 
         [NotNullable, SqlDbType(Size = 50)]
         string from = DefaultFrom;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 50), EMailValidator]
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 50)]
         public string From
         {
             get { return from; }
@@ -90,6 +91,13 @@ namespace Signum.Entities.Mailing
         {
             get { return overrideEmail; }
             set { Set(ref overrideEmail, value, () => OverrideEmail); }
+        }
+
+        QueryDN query;
+        public QueryDN Query
+        {
+            get { return query; }
+            set { Set(ref query, value, () => Query); }
         }
     }
 
@@ -137,13 +145,17 @@ namespace Signum.Entities.Mailing
 
 
     public enum NewsletterOperations
-    { 
+    {
         Save,
-        Send
+        Send,
+        AddRecipients,
+        RemoveRecipients,
+        CreateFromThis,
     }
 
     public enum NewsletterState
     { 
+        Created,
         Saved,
         Sent
     }
