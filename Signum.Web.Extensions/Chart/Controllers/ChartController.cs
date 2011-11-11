@@ -166,6 +166,9 @@ namespace Signum.Web.Chart
             if (chartToken == null || chartToken.Aggregate != null)
                 return null;
 
+            if (key == "d1" && (request.Chart.ChartType == ChartType.StackedAreas || request.Chart.ChartType == ChartType.TotalAreas))
+                return null;
+
             bool hasKey = Request.Params.AllKeys.Contains(key);
             var value = hasKey ? Request.Params[key] : null;
 

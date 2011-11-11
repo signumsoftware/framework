@@ -624,12 +624,15 @@ SF.Chart.TypeTypeValue.prototype = $.extend({}, new SF.Chart.ChartBase(), {
             ".attr('x2', function (v) { return x(JSON.stringify(v)); });" + this.br +
             this.br +
             "//paint x-axis tick labels" + this.br +
+            "if ((x.rangeBand() * 2) > yAxisLabelWidth)" + this.br +
+            "{" + this.brt +
             "chart.append('svg:g').attr('class', 'x-axis-tick-label').attr('transform', 'translate(' + (yAxisLeftPosition + (x.rangeBand() / 2)) + ', ' + (xAxisTopPosition + ticksLength + labelMargin + fontSize) + ')')" + this.brt +
             ".enterData(data.dimension1, 'text', 'x-axis-tick-label')" + this.brt +
             ".attr('x', function (v) { return x(JSON.stringify(v)); })" + this.brt +
             ".attr('y', function (v, i) { return (i%2 == 0 ? 0 : (fontSize + labelMargin)); })" + this.brt +
             ".attr('text-anchor', 'middle')" + this.brt +
             ".text(function (v) { return myChart.getTokenLabel(v); });" + this.br +
+            "}" + this.br + 
             this.br +
             "//paint x-axis - token label" + this.br +
             "chart.append('svg:g').attr('class', 'x-axis-token-label').attr('transform', 'translate(' + (yAxisLeftPosition + ((width - yAxisLeftPosition) / 2)) + ', ' + (height) + ')')" + this.brt +
@@ -675,6 +678,8 @@ SF.Chart.TypeTypeValue.prototype = $.extend({}, new SF.Chart.ChartBase(), {
             "legendRectWidth = 10," + this.brt +
             "legendLabelWidth = legendScale.rangeBand() - (2 * labelMargin) - legendRectWidth;" + this.br +
             this.br +
+            "if (legendLabelWidth + labelMargin + legendRectWidth > yAxisLabelWidth)" + this.br +
+            "{" + this.brt +
             "chart.append('svg:g').attr('class', 'color-legend').attr('transform', 'translate(' + yAxisLeftPosition + ', ' + padding + ')')" + this.brt +
             ".enterData(data.series, 'rect', 'color-rect')" + this.brt +
             ".attr('x', function(e, i) { return (legendRectWidth + legendLabelWidth + (2 * labelMargin)) * i; })" + this.brt +
@@ -684,7 +689,8 @@ SF.Chart.TypeTypeValue.prototype = $.extend({}, new SF.Chart.ChartBase(), {
             "chart.append('svg:g').attr('class', 'color-legend').attr('transform', 'translate(' + (yAxisLeftPosition + labelMargin + legendRectWidth) + ', ' + (padding + fontSize) + ')')" + this.brt +
             ".enterData(data.series, 'text', 'color-text')" + this.brt +
             ".attr('x', function(e, i) { return (legendRectWidth + legendLabelWidth + (2 * labelMargin)) * i; })" + this.brt +
-            ".text(function(s) { return myChart.getTokenLabel(s.dimension2); });" + this.br + this.br;
+            ".text(function(s) { return myChart.getTokenLabel(s.dimension2); });" + this.br +
+            "}" + this.br + this.br;
     }
 });
 
