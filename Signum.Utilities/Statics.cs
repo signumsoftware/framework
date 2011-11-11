@@ -17,7 +17,7 @@ namespace Signum.Utilities
             return variable;
         }
 
-        public static void CleanThread(string name)
+        public static void CleanThread()
         {
             threadVariables.Clear();
         }
