@@ -23,7 +23,7 @@ namespace Signum.Test
         {
             if (!startedAndLoaded)
             {
-                Start(Settings.Default.SignumTest);
+                Start(UserConnections.Replace(Settings.Default.SignumTest));
 
                 Administrator.TotalGeneration();
 
