@@ -491,7 +491,10 @@ namespace Signum.Engine.DynamicQuery
         public static DEnumerableCount<T> TryPaginate<T>(this DQueryable<T> query, int? elementsPerPage, int currentPage)
         {
             if (!elementsPerPage.HasValue)
-                return new DEnumerableCount<T>(query.Query.ToArray(), query.Context, query.Query.Count());
+            {
+                var array = query.Query.ToArray();
+                return new DEnumerableCount<T>(array, query.Context, array.Length);
+            }
 
             if (currentPage <= 0)
                 throw new InvalidOperationException("currentPage should be greater than zero");
