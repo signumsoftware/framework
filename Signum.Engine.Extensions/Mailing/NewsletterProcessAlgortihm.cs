@@ -50,12 +50,13 @@ namespace Signum.Engine.Mailing
             var queryName = QueryLogic.ToQueryName(newsletter.Query.Key);
 
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-            var newsletterElement = QueryUtils.Parse("Entity.Newsletters.Element", qd);
-            var email = QueryUtils.Parse("Entity.Email", qd); 
+            var newsletterDeliveryElementToken = QueryUtils.Parse("Entity.NewsletterDeliveries.Element", qd);
+            var newsletterToken = QueryUtils.Parse("Entity.NewsletterDeliveries.Element.Newsletter", qd);
+            var emailToken = QueryUtils.Parse("Entity.Email", qd); 
 
-            var tokens = new List<QueryToken>(); 
-            tokens.Add(newsletterElement);
-            tokens.Add(email); 
+            var tokens = new List<QueryToken>();
+            tokens.Add(newsletterDeliveryElementToken);
+            tokens.Add(emailToken); 
             tokens.AddRange(NewsletterLogic.GetTokens(queryName, newsletter.Subject)); 
             tokens.AddRange(NewsletterLogic.GetTokens(queryName, newsletter.HtmlBody));
 
@@ -68,11 +69,12 @@ namespace Signum.Engine.Mailing
                 { 
                     new Filter
                     { 
+                        Token = newsletterToken,
                         Operation = FilterOperation.EqualTo, 
                         Value = newsletter.ToLite(), 
-                        Token = newsletterElement,
                     }
                 },
+                Orders = new List<Order>(),
                 Columns = tokens.Select(t => new Column(t, t.NiceName())).ToList(),
                 ElementsPerPage = null,
             }); 
@@ -85,7 +87,7 @@ namespace Signum.Engine.Mailing
                     Row = r,
                 });
 
-            var dic = tokens.Select((t,i)=>KVP.Create(t.Key, i)).ToDictionary();
+            var dic = tokens.Select((t,i)=>KVP.Create(t.FullKey(), i)).ToDictionary();
 
             int lastPercentage = 0;
             int numErrors = newsletter.NumErrors;
@@ -105,7 +107,7 @@ namespace Signum.Engine.Mailing
                         {
                             var client = newsletter.SMTPConfig.GenerateSmtpClient(true);
                             var message = new MailMessage();
-                            message.From = new MailAddress(newsletter.From);
+                            message.From = new MailAddress(newsletter.From, newsletter.DiplayFrom);
                             message.To.Add(newsletter.OverrideEmail ?? s.Email);
                             message.IsBodyHtml = true;
                             message.Body = NewsletterLogic.TokenRegex.Replace(newsletter.HtmlBody, m =>

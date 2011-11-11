@@ -16,11 +16,19 @@ using Signum.Entities.Basics;
 using System.Text.RegularExpressions;
 using Signum.Engine.Basics;
 using Signum.Entities.DynamicQuery;
+using System.Linq.Expressions;
 
 namespace Signum.Engine.Mailing
 {
     public static class NewsletterLogic
     {
+        static Expression<Func<IEmailOwnerDN, IQueryable<NewsletterDeliveryDN>>> NewsletterDeliveriesExpression =
+            eo => Database.Query<NewsletterDeliveryDN>().Where(d => d.Recipient.RefersTo(eo));
+        public static IQueryable<NewsletterDeliveryDN> NewsletterDeliveries(this IEmailOwnerDN eo)
+        {
+            return NewsletterDeliveriesExpression.Invoke(eo);
+        }
+
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))

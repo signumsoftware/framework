@@ -77,6 +77,15 @@ namespace Signum.Entities.Mailing
             set { Set(ref from, value, () => From); }
         }
 
+        [NotNullable, SqlDbType(Size = 50)]
+        string displayFrom = DefaultDisplayFrom;
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 50)]
+        public string DiplayFrom
+        {
+            get { return displayFrom; }
+            set { Set(ref displayFrom, value, () => DiplayFrom); }
+        }
+
         public override string ToString()
         {
             return name;
@@ -84,6 +93,7 @@ namespace Signum.Entities.Mailing
 
         public static Lite<SMTPConfigurationDN> DefaultSMTPConfig;
         public static string DefaultFrom;
+        public static string DefaultDisplayFrom;
 
         string overrideEmail;
         [EMailValidator]
