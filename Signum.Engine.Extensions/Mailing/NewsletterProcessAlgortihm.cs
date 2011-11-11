@@ -113,12 +113,12 @@ namespace Signum.Engine.Mailing
                             message.Body = NewsletterLogic.TokenRegex.Replace(newsletter.HtmlBody, m =>
                             {
                                 var index = dic[m.Groups["token"].Value];
-                                return s.Row[index].ToString(); 
+                                return s.Row[index].TryToString(); 
                             });
                             message.Subject = NewsletterLogic.TokenRegex.Replace(newsletter.Subject, m =>
                             {
                                 var index = dic[m.Groups["token"].Value];
-                                return s.Row[index].ToString();
+                                return s.Row[index].TryToString();
                             });
                             client.Send(message);
                         }

@@ -164,7 +164,8 @@ namespace Signum.Engine.Mailing
                 Execute = (n, args) =>
                 {
                     var p = args.GetArg<List<Lite<IEmailOwnerDN>>>(0);
-                    p.Select(ie => new NewsletterDeliveryDN
+                    var existent = Database.Query<NewsletterDeliveryDN>().Where(d => d.Newsletter.RefersTo(n)).Select(d => d.Recipient).ToList();
+                    p.Except(existent).Select(ie => new NewsletterDeliveryDN
                     {
                         Recipient = ie,
                         Newsletter = n.ToLite()
