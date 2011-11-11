@@ -42,6 +42,7 @@ namespace ASP
     using System.Web.UI.HtmlControls;
     using System.Xml.Linq;
     using Signum.Entities.Mailing;
+    using Signum.Entities.Reflection;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("MvcRazorClassGenerator", "1.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Mailing/Views/Newsletter.cshtml")]
@@ -63,25 +64,24 @@ namespace ASP
         {
 
 
+
 Write(Html.ScriptCss("~/Mailing/Content/Mail.css"));
 
 WriteLiteral("\r\n");
 
 
  using (var nc = Html.TypeContext<NewsletterDN>())
-{
-    bool editable = nc.Value.State == NewsletterState.Saved;
-    
+{  
 
 WriteLiteral("    <div class=\"");
 
 
-            Write(editable ? "" : "sf-tabs");
+            Write(nc.Value.State == NewsletterState.Created ? "" : "sf-tabs");
 
 WriteLiteral("\">\r\n");
 
 
-         if (!editable)
+         if (!nc.Value.IsNew)
         {
 
 WriteLiteral("            <ul>\r\n                <li><a href=\"#emTabMain\">Newsletter</a></li>\r\n " +
@@ -96,7 +96,12 @@ WriteLiteral("        <div id=\"emTabMain\">\r\n            ");
 
        Write(Html.ValueLine(nc, n => n.Name));
 
-WriteLiteral("\r\n            ");
+WriteLiteral("\r\n           \r\n            ");
+
+
+       Write(Html.HiddenRuntimeInfo(nc, n => n.Query));
+
+WriteLiteral("\r\n        \r\n            ");
 
 
        Write(Html.ValueLine(nc, n => n.State, vl => vl.ReadOnly = true));
@@ -109,7 +114,7 @@ WriteLiteral("\r\n            ");
 WriteLiteral("\r\n");
 
 
-             if (!editable)
+             if (nc.Value.State == NewsletterState.Sent)
             {
                 
            Write(Html.Hidden("htmlBodyContent", nc.Value.HtmlBody));
@@ -137,7 +142,7 @@ WriteLiteral("                <div id=\"newsEditContent\">\r\n                  
                         vl.ValueHtmlProps["cols"] = "30";
                         vl.ValueHtmlProps["rows"] = "6";
                         vl.ValueHtmlProps["class"] = "sf-email-htmlwrite";
-                        vl.ReadOnly = !editable;
+                        vl.ReadOnly = nc.Value.State == NewsletterState.Sent;
                     }));
 
 WriteLiteral("\r\n                    <br />\r\n                    <input type=\"button\" class=\"sf-" +
@@ -170,10 +175,15 @@ WriteLiteral("\r\n            ");
 
        Write(Html.ValueLine(nc, n => n.From));
 
+WriteLiteral("\r\n            ");
+
+
+       Write(Html.ValueLine(nc, n => n.DiplayFrom));
+
 WriteLiteral("\r\n        </div>\r\n");
 
 
-         if (!editable)
+         if (!nc.Value.IsNew)
         {
 
 WriteLiteral("            <div id=\"emTabSend\">\r\n                ");

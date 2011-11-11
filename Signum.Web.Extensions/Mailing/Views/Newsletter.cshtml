@@ -1,11 +1,10 @@
 ﻿@using Signum.Entities.Mailing
+@using Signum.Entities.Reflection
 @Html.ScriptCss("~/Mailing/Content/Mail.css")
 @using (var nc = Html.TypeContext<NewsletterDN>())
-{
-    bool editable = nc.Value.State == NewsletterState.Saved;
-    
-    <div class="@(editable ? "" : "sf-tabs")">
-        @if (!editable)
+{  
+    <div class="@(nc.Value.State == NewsletterState.Created ? "" : "sf-tabs")">
+        @if (!nc.Value.IsNew)
         {
             <ul>
                 <li><a href="#emTabMain">Newsletter</a></li>
@@ -14,9 +13,12 @@
         }
         <div id="emTabMain">
             @Html.ValueLine(nc, n => n.Name)
+           
+            @Html.HiddenRuntimeInfo(nc, n => n.Query)
+        
             @Html.ValueLine(nc, n => n.State, vl => vl.ReadOnly = true)
             @Html.ValueLine(nc, n => n.Subject)
-            @if (!editable)
+            @if (nc.Value.State == NewsletterState.Sent)
             {
                 @Html.Hidden("htmlBodyContent", nc.Value.HtmlBody)
                 <fieldset>
@@ -34,7 +36,7 @@
                         vl.ValueHtmlProps["cols"] = "30";
                         vl.ValueHtmlProps["rows"] = "6";
                         vl.ValueHtmlProps["class"] = "sf-email-htmlwrite";
-                        vl.ReadOnly = !editable;
+                        vl.ReadOnly = nc.Value.State == NewsletterState.Sent;
                     })
                     <br />
                     <input type="button" class="sf-button" id="newsPreviewContentButton" value="Preview content" />
@@ -51,8 +53,9 @@
             }
             @Html.EntityCombo(nc, n => n.SMTPConfig)
             @Html.ValueLine(nc, n => n.From)
+            @Html.ValueLine(nc, n => n.DiplayFrom)
         </div>
-        @if (!editable)
+        @if (!nc.Value.IsNew)
         {
             <div id="emTabSend">
                 @Html.ValueLine(nc, n => n.NumLines)

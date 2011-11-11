@@ -11,6 +11,10 @@ using System.Net.Mail;
 using Signum.Utilities;
 using System.Threading.Tasks;
 using Signum.Entities.Mailing;
+using Signum.Engine.DynamicQuery;
+using Signum.Entities.DynamicQuery;
+using System.Text.RegularExpressions;
+using Signum.Engine.Basics;
 
 namespace Signum.Engine.Mailing
 {
@@ -18,6 +22,7 @@ namespace Signum.Engine.Mailing
     {
         class SendLine
         {
+            public ResultRow Row; 
             public Lite<NewsletterDeliveryDN> Send;
             public string Email;
             public string Error;
@@ -34,25 +39,67 @@ namespace Signum.Engine.Mailing
         {
             NewsletterDN newsletter = (NewsletterDN)executingProcess.Data;
 
-            var lines = (from e in Database.Query<NewsletterDeliveryDN>()
-                         where e.Newsletter.RefersTo(newsletter) && !e.Sent
-                         select new SendLine
-                         {
-                             Send = e.ToLite(),
-                             Email = e.Recipient.Entity.Email,
-                         }).ToList();
+            //var lines = (from e in Database.Query<NewsletterDeliveryDN>()
+            //             where e.Newsletter.RefersTo(newsletter) && !e.Sent
+            //             select new SendLine
+            //             {
+            //                 Send = e.ToLite(),
+            //                 Email = e.Recipient.Entity.Email,
+            //             }).ToList();
+
+            var queryName = QueryLogic.ToQueryName(newsletter.Query.Key);
+
+            QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
+            var newsletterDeliveryElementToken = QueryUtils.Parse("Entity.NewsletterDeliveries.Element", qd);
+            var newsletterToken = QueryUtils.Parse("Entity.NewsletterDeliveries.Element.Newsletter", qd);
+            var emailToken = QueryUtils.Parse("Entity.Email", qd); 
+
+            var tokens = new List<QueryToken>();
+            tokens.Add(newsletterDeliveryElementToken);
+            tokens.Add(emailToken); 
+            tokens.AddRange(NewsletterLogic.GetTokens(queryName, newsletter.Subject)); 
+            tokens.AddRange(NewsletterLogic.GetTokens(queryName, newsletter.HtmlBody));
+
+            tokens = tokens.Distinct().ToList();
+
+            var resultTable = DynamicQueryManager.Current.ExecuteQuery(new QueryRequest
+            {
+                QueryName = queryName,
+                Filters = new List<Filter>
+                { 
+                    new Filter
+                    { 
+                        Token = newsletterToken,
+                        Operation = FilterOperation.EqualTo, 
+                        Value = newsletter.ToLite(), 
+                    }
+                },
+                Orders = new List<Order>(),
+                Columns = tokens.Select(t => new Column(t, t.NiceName())).ToList(),
+                ElementsPerPage = null,
+            }); 
+
+            var lines = resultTable.Rows.Select(r => 
+                new SendLine 
+                {
+                    Send = (Lite<NewsletterDeliveryDN>)r[0],  
+                    Email = (string)r[1],  
+                    Row = r,
+                });
+
+            var dic = tokens.Select((t,i)=>KVP.Create(t.FullKey(), i)).ToDictionary();
 
             int lastPercentage = 0;
             int numErrors = newsletter.NumErrors;
             int processed = 0;
-            foreach (var groups in lines.GroupsOf(20))
+            foreach (var group in lines.GroupsOf(20))
             {
-                processed += groups.Count;
+                processed += group.Count;
 
                 if (executingProcess.Suspended)
                     return FinalState.Suspended;
 
-                Parallel.ForEach(groups, s =>
+                Parallel.ForEach(group, s =>
                 {
                     if (newsletter.OverrideEmail != EmailLogic.DoNotSend)
                     {
@@ -60,11 +107,19 @@ namespace Signum.Engine.Mailing
                         {
                             var client = newsletter.SMTPConfig.GenerateSmtpClient(true);
                             var message = new MailMessage();
-                            message.From = new MailAddress(newsletter.From);
+                            message.From = new MailAddress(newsletter.From, newsletter.DiplayFrom);
                             message.To.Add(newsletter.OverrideEmail ?? s.Email);
                             message.IsBodyHtml = true;
-                            message.Body = newsletter.HtmlBody;
-                            message.Subject = newsletter.Subject;
+                            message.Body = NewsletterLogic.TokenRegex.Replace(newsletter.HtmlBody, m =>
+                            {
+                                var index = dic[m.Groups["token"].Value];
+                                return s.Row[index].ToString(); 
+                            });
+                            message.Subject = NewsletterLogic.TokenRegex.Replace(newsletter.Subject, m =>
+                            {
+                                var index = dic[m.Groups["token"].Value];
+                                return s.Row[index].ToString();
+                            });
                             client.Send(message);
                         }
                         catch (Exception ex)
@@ -77,7 +132,7 @@ namespace Signum.Engine.Mailing
 
                 using (var tr = new Transaction())
                 {
-                    int percentage = (NotificationSteps * processed) / lines.Count;
+                    int percentage = (NotificationSteps * processed) / lines.Count();
                     if (percentage != lastPercentage)
                     {
                         executingProcess.ProgressChanged(percentage * 100 / NotificationSteps);
@@ -87,7 +142,7 @@ namespace Signum.Engine.Mailing
                     if (numErrors != 0)
                         newsletter.InDB().UnsafeUpdate(n => new NewsletterDN { NumErrors = numErrors });
 
-                    var failed = groups.Extract(sl => sl.Error.HasText()).GroupBy(sl => sl.Error, sl => sl.Send);
+                    var failed = group.Extract(sl => sl.Error.HasText()).GroupBy(sl => sl.Error, sl => sl.Send);
                     foreach (var f in failed)
                     {
                         Database.Query<NewsletterDeliveryDN>().Where(nd => f.Contains(nd.ToLite()))
@@ -99,9 +154,9 @@ namespace Signum.Engine.Mailing
                             });
                     }
 
-                    if (groups.Any())
+                    if (group.Any())
                     {
-                        var sent = groups.Select(sl => sl.Send).ToList();
+                        var sent = group.Select(sl => sl.Send).ToList();
                         Database.Query<NewsletterDeliveryDN>().Where(nd => sent.Contains(nd.ToLite()))
                             .UnsafeUpdate(nd => new NewsletterDeliveryDN
                             {
@@ -116,7 +171,5 @@ namespace Signum.Engine.Mailing
 
             return FinalState.Finished;
         }
-
-       
     }
 }
