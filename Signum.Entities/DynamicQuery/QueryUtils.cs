@@ -222,7 +222,7 @@ namespace Signum.Entities.DynamicQuery
             }
             catch (Exception e)
             {
-                throw new FormatException("Invalid QueryToken string", e);
+                throw new FormatException("Invalid query token: " + e.Message, e);
             }
         }
 
