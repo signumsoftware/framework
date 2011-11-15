@@ -8,9 +8,13 @@ SF.Chart.Builder = (function () {
         return { filters: new SF.FindNavigator({ prefix: prefix }).serializeFilters() };
     };
 
+    var requestData = function (prefix) {
+        return $(".sf-chart-control[data-prefix='" + prefix + "']").find(":input").serialize() + "&filters=" + new SF.FindNavigator({ prefix: prefix }).serializeFilters();
+    }
+
     var updateChartBuilder = function ($chartControl, tokenChanged) {
         var $chartBuilder = $chartControl.find(".sf-chart-builder");
-        var data = $chartControl.find(":input").serialize() + "&filters=" + new SF.FindNavigator({ prefix: $chartControl.attr("data-prefix") }).serializeFilters();
+        var data = requestData($chartControl.attr("data-prefix"));
         if (!SF.isEmpty(tokenChanged)) {
             data += "&lastTokenChanged=" + tokenChanged;
         }
@@ -66,7 +70,7 @@ SF.Chart.Builder = (function () {
         var $chartControl = $this.closest(".sf-chart-control");
         $.ajax({
             url: $this.attr("data-url"),
-            data: $chartControl.find(":input").serialize() + "&filters=" + new SF.FindNavigator().serializeFilters(),
+            data: requestData($chartControl.attr("data-prefix")),
             success: function (result) {
                 if (typeof result === "object") {
                     if (typeof result.ModelState != "undefined") {
@@ -103,9 +107,25 @@ SF.Chart.Builder = (function () {
         eval($codeArea.val());
     };
 
+    var exportData = function (prefix, validateUrl, exportUrl) {
+        var $chartControl = $(".sf-chart-control[data-prefix='" + prefix + "']");
+        var $inputs = $chartControl.find(":input").not(":button");
+
+        var data = requestProcessedData(prefix);
+        $inputs.each(function () {
+            data[this.id] = $(this).val();
+        });
+
+        SF.EntityIsValid({ prefix: prefix, controllerUrl: validateUrl, requestExtraJsonData: data }, function () {
+            SF.submitOnly(exportUrl, data)
+        });
+    };
+
     return {
         requestProcessedData: requestProcessedData,
-        reDraw: reDraw
+        requestData: requestData,
+        reDraw: reDraw,
+        exportData: exportData
     };
 })();
 
@@ -208,7 +228,7 @@ SF.Chart.ChartBase.prototype = {
         this.paintYAxis() +
         this.paintLegend() +
         this.bindEvents(containerSelector);
-    }, 
+    },
 
     bindMouseClick: function ($chartContainer) {
         $chartContainer.find('.shape,.slice,.hover-trigger,.point').not('g').click(function () {
@@ -235,13 +255,7 @@ SF.Chart.ChartBase.prototype = {
                 return data;
             };
 
-            $.ajax({
-                url: $this.closest('.sf-chart-container').attr('data-open-url'),
-                data: serializeData($this),
-                success: function (popup) {
-                    new SF.ViewNavigator({ prefix: "New" }).showViewOk(popup);
-                }
-            })
+            window.open($this.closest('.sf-chart-container').attr('data-open-url') + "?" + serializeData($this));
         });
     }
 };

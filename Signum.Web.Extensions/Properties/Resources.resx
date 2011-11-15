@@ -459,4 +459,7 @@
   <data name="AuthAdmin_ChooseACondition" xml:space="preserve">
     <value>Choose a condition</value>
   </data>
+  <data name="UserChart_ExportData" xml:space="preserve">
+    <value>Export data</value>
+  </data>
 </root>

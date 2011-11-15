@@ -1006,6 +1006,15 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Export data.
+        /// </summary>
+        public static string UserChart_ExportData {
+            get {
+                return ResourceManager.GetString("UserChart_ExportData", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to User charts.
         /// </summary>
         public static string UserChart_UserCharts {
