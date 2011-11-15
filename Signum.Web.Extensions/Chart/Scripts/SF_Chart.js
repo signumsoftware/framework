@@ -228,7 +228,7 @@ SF.Chart.ChartBase.prototype = {
         this.paintYAxis() +
         this.paintLegend() +
         this.bindEvents(containerSelector);
-    }, 
+    },
 
     bindMouseClick: function ($chartContainer) {
         $chartContainer.find('.shape,.slice,.hover-trigger,.point').not('g').click(function () {
@@ -255,13 +255,7 @@ SF.Chart.ChartBase.prototype = {
                 return data;
             };
 
-            $.ajax({
-                url: $this.closest('.sf-chart-container').attr('data-open-url'),
-                data: serializeData($this),
-                success: function (popup) {
-                    new SF.ViewNavigator({ prefix: "New" }).showViewOk(popup);
-                }
-            })
+            window.open($this.closest('.sf-chart-container').attr('data-open-url') + "?" + serializeData($this));
         });
     }
 };

@@ -104,8 +104,8 @@ namespace Signum.Web.Chart
 
         MappingContext<ChartRequest> ExtractChartRequestCtx(string prefix, ChartTokenName? lastTokenChanged)
         {
-            var ctx = new ChartRequest(Navigator.ResolveQueryName(Request.Form[TypeContextUtilities.Compose(prefix, ViewDataKeys.QueryName)]))
-                    .ApplyChanges(this.ControllerContext, prefix, ChartClient.MappingChartRequest);
+            var ctx = new ChartRequest(Navigator.ResolveQueryName(Request.Params[TypeContextUtilities.Compose(prefix, ViewDataKeys.QueryName)]))
+                    .ApplyChanges(this.ControllerContext, prefix, ChartClient.MappingChartRequest, Request.Params.ToSortedList(prefix));
 
             var ch = ctx.Value.Chart;
             switch (lastTokenChanged)
@@ -139,11 +139,11 @@ namespace Signum.Web.Chart
 
                 filters.AddRange(chartTokenFilters.NotNull());
 
-                return Navigator.PartialFind(this, new FindOptions(chartRequest.QueryName)
+                return Navigator.Find(this, new FindOptions(chartRequest.QueryName)
                 {
                     FilterOptions = filters,
                     SearchOnLoad = true
-                }, "New");
+                });
             }
             else
             {
@@ -158,7 +158,7 @@ namespace Signum.Web.Chart
                 Type entitiesType = Reflector.ExtractLite(entityColumn.Type);
 
                 Lite lite = TypeLogic.ParseLite(entitiesType, entity);
-                return Navigator.PopupOpen(this, new ViewOkOptions(TypeContextUtilities.UntypedNew(Database.Retrieve(lite), "New")));
+                return Navigator.View(this, Database.Retrieve(lite));
             }
         }
 
@@ -177,6 +177,7 @@ namespace Signum.Web.Chart
 
             return new FilterOption
             {
+                ColumnName = token.Key,
                 Token = token,
                 Operation = FilterOperation.EqualTo,
                 Value = hasKey ? FindOptionsModelBinder.Convert(FindOptionsModelBinder.DecodeValue(value), token.Type) : null
