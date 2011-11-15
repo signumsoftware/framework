@@ -35,7 +35,7 @@ namespace Signum.Web
             {
                 return new ViewResult
                 {
-                    ViewName = NavigationManager.ViewPrefix.Formato("Error"),
+                    ViewName = Navigator.Manager.ErrorPageView,
                     ViewData = new ViewDataDictionary<HandleErrorInfo>(model)
                     {
                         {ViewDataKeys.Title, model.Exception.Message}
