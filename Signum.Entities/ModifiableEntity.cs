@@ -307,14 +307,17 @@ namespace Signum.Entities
             if (pp.DoNotValidate)
                 return null;
 
-            object propertyValue = pp.GetValue(this);
-
-            //ValidatorAttributes
-            foreach (var validator in pp.Validators)
+            if (pp.Validators.Count > 0)
             {
-                string result = validator.Error(this, pp.PropertyInfo, propertyValue);
-                if (result != null)
-                    return result;
+                object propertyValue = pp.GetValue(this);
+
+                //ValidatorAttributes
+                foreach (var validator in pp.Validators)
+                {
+                    string result = validator.Error(this, pp.PropertyInfo, propertyValue);
+                    if (result != null)
+                        return result;
+                }
             }
 
             //Internal Validation
