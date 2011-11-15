@@ -17,6 +17,7 @@ using Signum.Engine;
 using Signum.Entities.Authorization;
 using Signum.Engine.Basics;
 using System.Web.Script.Serialization;
+using Signum.Engine.Reports;
 
 namespace Signum.Web.Chart
 {
@@ -180,6 +181,30 @@ namespace Signum.Web.Chart
                 Operation = FilterOperation.EqualTo,
                 Value = hasKey ? FindOptionsModelBinder.Convert(FindOptionsModelBinder.DecodeValue(value), token.Type) : null
             };
+        }
+
+        [HttpPost]
+        public JsonResult Validate(string prefix)
+        {
+            var requestCtx = ExtractChartRequestCtx(prefix, null).ValidateGlobal();
+
+            ModelState.FromContext(requestCtx);
+            return JsonAction.ModelState(ModelState);
+        }
+
+        [HttpPost]
+        public ActionResult ExportData(string prefix)
+        {
+            var request = ExtractChartRequestCtx(prefix, null).Value;
+
+            if (!Navigator.IsFindable(request.QueryName))
+                throw new UnauthorizedAccessException(Resources.Chart_Query0IsNotAllowed.Formato(request.QueryName));
+
+            var resultTable = ChartLogic.ExecuteChart(request);
+
+            byte[] binaryFile = PlainExcelGenerator.WritePlainExcel(resultTable);
+
+            return File(binaryFile, MimeType.FromExtension(".xlsx"), Navigator.ResolveWebQueryName(request.QueryName) + ".xlsx");
         }
         #endregion
 

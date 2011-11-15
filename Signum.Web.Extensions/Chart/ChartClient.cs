@@ -17,6 +17,7 @@ using System.Web.Mvc;
 using Signum.Entities.Basics;
 using Signum.Engine.Basics;
 using Signum.Engine.Extensions.Chart;
+using Signum.Web.Reports;
 
 namespace Signum.Web.Chart
 {
@@ -221,7 +222,8 @@ namespace Signum.Web.Chart
             }
 
             string ucUserChartText = Resources.UserChart_UserCharts;
-            return new List<ToolBarButton> {
+            var buttons = new List<ToolBarButton> 
+            {
                 new ToolBarMenu
                 {
                     Id = TypeContextUtilities.Compose(prefix, "tmUserCharts"),
@@ -231,6 +233,21 @@ namespace Signum.Web.Chart
                     Items = items
                 }
             };
+
+            if (ReportsClient.ToExcelPlain)
+            {
+                string ucExportDataText = Resources.UserChart_ExportData;
+                buttons.Add(new ToolBarButton
+                {
+                    Id = TypeContextUtilities.Compose(prefix, "qbUserChartExportData"),
+                    AltText = ucExportDataText,
+                    Text = ucExportDataText,
+                    OnClick = "SF.Chart.Builder.exportData('{0}', '{1}', '{2}')".Formato(prefix, RouteHelper.New().Action("Validate", "Chart"), RouteHelper.New().Action("ExportData", "Chart")),
+                    DivCssClass = ToolBarButton.DefaultQueryCssClass
+                });
+            }
+
+            return buttons;
         }
 
         public static object DataJson(ChartRequest request, ResultTable resultTable)
