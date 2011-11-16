@@ -39,23 +39,22 @@ namespace Signum.Entities
 
     public static class Corruption
     {
-        [ThreadStatic]
-        static bool allowed = false;
+        static readonly IVariable<bool> allowed = Statics.ThreadVariable<bool>("corruptionAllowed");
 
-        public static bool Strict { get { return !allowed; } }
+        public static bool Strict { get { return !allowed.Value; } }
 
         public static IDisposable Allow()
         {
-            if (allowed) return null;
-            allowed = true;
-            return new Disposable(() => allowed = false);
+            if (allowed.Value) return null;
+            allowed.Value = true;
+            return new Disposable(() => allowed.Value = false);
         }
 
         public static IDisposable Deny()
         {
-            if (!allowed) return null;
-            allowed = false;
-            return new Disposable(() => allowed = true);
+            if (!allowed.Value) return null;
+            allowed.Value = false;
+            return new Disposable(() => allowed.Value = true);
         }
     }
 

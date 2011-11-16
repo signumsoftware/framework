@@ -162,12 +162,9 @@ namespace Signum.Web
             set { constrainInput = value; }
         }
 
-        [ThreadStatic]
-        static string defaultculture;
         public static string DefaultCulture
         {
-            get { return defaultculture ?? CultureInfo.CurrentCulture.Name.Substring(0, 2); }
-            set { defaultculture = value; }
+            get { return CultureInfo.CurrentCulture.Name.Substring(0, 2); }
         }
 
         public override string ToString()

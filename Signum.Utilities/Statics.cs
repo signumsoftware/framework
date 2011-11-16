@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Security.Principal;
 
 namespace Signum.Utilities
 {
@@ -64,7 +65,6 @@ namespace Signum.Utilities
             }
         }
 
-
         static Dictionary<string, IUntypedVariable> sessionVariables = new Dictionary<string, IUntypedVariable>();
 
         public static IVariable<T> SessionVariable<T>(string name)
@@ -73,7 +73,6 @@ namespace Signum.Utilities
             sessionVariables.AddOrThrow(name, variable, "Session variable {0} already defined");
             return variable;
         }
-
 
         static ISessionFactory sessionFactory;
         public static ISessionFactory SessionFactory
@@ -86,6 +85,11 @@ namespace Signum.Utilities
                 return sessionFactory;
             }
             set { sessionFactory = value; }
+        }
+
+        public static IVariable<IPrincipal> CurrentPrincipal
+        {
+            get { return sessionFactory.CurrentPrincipal; }
         }
     }
 
@@ -104,6 +108,8 @@ namespace Signum.Utilities
     public interface ISessionFactory
     {
         IVariable<T> CreateVariable<T>(string name);
+
+        IPrincipal CurrentPrincipal { get; set; }
     }
 
     public class StaticSessionFactory : ISessionFactory
@@ -111,6 +117,18 @@ namespace Signum.Utilities
         public IVariable<T> CreateVariable<T>(string name)
         {
             return new StaticVariable<T>(name);
+        }
+
+        public IPrincipal CurrentPrincipal
+        {
+            get
+            {
+                return Thread.CurrentPrincipal;
+            }
+            set
+            {
+                Thread.CurrentPrincipal = value;
+            }
         }
 
         class StaticVariable<T> : IVariable<T>
@@ -147,7 +165,7 @@ namespace Signum.Utilities
     {
         public ISessionFactory Factory;
 
-        static IVariable<Dictionary<string, object>> overridenSession = Statics.ThreadVariable<Dictionary<string, object>>("overridenSession");
+        static readonly IVariable<Dictionary<string, object>> overridenSession = Statics.ThreadVariable<Dictionary<string, object>>("overridenSession");
 
         public ScopeSessionFactory(ISessionFactory factory)
         {

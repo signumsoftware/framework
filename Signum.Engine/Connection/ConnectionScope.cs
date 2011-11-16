@@ -9,48 +9,32 @@ namespace Signum.Engine
 {
     public class ConnectionScope: IDisposable
     {
-        [ThreadStatic]
-        private static Stack<BaseConnection> stack;
+        static readonly IVariable<BaseConnection> currentConnection = Statics.ThreadVariable<BaseConnection>("connection");
 
-        private bool disposed = false;
+        BaseConnection oldConnection;
 
         public ConnectionScope(BaseConnection connection)
-        { 
-            if (stack == null)
-                stack = new Stack<BaseConnection>();
+        {
+            oldConnection = currentConnection.Value;
 
-            stack.Push(connection);        
+            currentConnection.Value = connection;
         }
 
         public void Dispose()
         {
-            if (!disposed)
-            {
-                stack.Pop();
-
-                if (stack.Count == 0)
-                    stack = null;
-            }
-
-            disposed = true;
+            currentConnection.Value = oldConnection;
         }
 
         public static BaseConnection Current
         {
-            get 
-            {
-                if (stack == null || stack.Count == 0)
-                    return Default;
-
-                return stack.Peek();
-            }
+            get { return currentConnection.Value ?? Default; }
         }
 
-        static BaseConnection _default;
+        static BaseConnection @default;
         public static BaseConnection Default
         {
-            get { return _default; }
-            set { _default = value; }
+            get { return @default; }
+            set { @default = value; }
         }
     }
 }

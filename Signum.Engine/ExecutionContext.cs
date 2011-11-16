@@ -22,18 +22,18 @@ namespace Signum.Engine
 
         public static ExecutionContext UserInterface = new ExecutionContext("UserInterface");  
 
-        [ThreadStatic]
-        static ExecutionContext current;
+        static readonly IVariable<ExecutionContext> currentExecutionContext = Statics.ThreadVariable<ExecutionContext>("executionContext");
+
         public static ExecutionContext Current
         {
-            get { return current; }
+            get { return currentExecutionContext.Value; }
         }
 
         public static IDisposable Scope(ExecutionContext executionContext)
         {
-            var oldValue = current;
-            current = executionContext;
-            return new Disposable(() => current = oldValue);
+            var oldValue = currentExecutionContext.Value;
+            currentExecutionContext.Value = executionContext;
+            return new Disposable(() => currentExecutionContext.Value = oldValue);
         }
     }
 }

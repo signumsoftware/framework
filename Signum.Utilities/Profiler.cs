@@ -98,8 +98,8 @@ namespace Signum.Utilities
 
         public static bool Enabled { get; set; }
 
-        [ThreadStatic]
-        static HeavyProfilerEntry current;
+        static readonly IVariable<HeavyProfilerEntry> current = Statics.ThreadVariable<HeavyProfilerEntry>("heavy"); 
+
         public static readonly List<HeavyProfilerEntry> Entries = new List<HeavyProfilerEntry>();
 
         public static void Clean()
@@ -131,12 +131,12 @@ namespace Signum.Utilities
         {
             Stopwatch discount = Stopwatch.StartNew();
 
-            var saveCurrent = current;
+            var saveCurrent = current.Value;
 
             if (aditionalData is string)
                 aditionalData = string.Intern((string)aditionalData);
 
-            current = new HeavyProfilerEntry()
+            var newCurrent = current.Value = new HeavyProfilerEntry()
             {
                 Discount = discount,
                 Role = role,
@@ -146,7 +146,7 @@ namespace Signum.Utilities
 
             discount.Stop();
 
-            current.Stopwatch = Stopwatch.StartNew();
+            newCurrent.Stopwatch = Stopwatch.StartNew();
             return saveCurrent;
         }
 
@@ -156,7 +156,8 @@ namespace Signum.Utilities
 
             public void Dispose()
             {
-                current.Stopwatch.Stop();
+                var cur = current.Value;
+                cur.Stopwatch.Stop();
 
                 TotalEntriesCount++;
 
@@ -164,9 +165,9 @@ namespace Signum.Utilities
                 {
                     lock (Entries)
                     {
-                        current.Index = Entries.Count;
-                        current.Parent = null;
-                        Entries.Add(current);
+                        cur.Index = Entries.Count;
+                        cur.Parent = null;
+                        Entries.Add(cur);
                     }
                 }
                 else
@@ -174,12 +175,12 @@ namespace Signum.Utilities
                     if (saveCurrent.Entries == null)
                         saveCurrent.Entries = new List<HeavyProfilerEntry>();
 
-                    current.Index = saveCurrent.Entries.Count;
-                    current.Parent = saveCurrent;
-                    saveCurrent.Entries.Add(current);
+                    cur.Index = saveCurrent.Entries.Count;
+                    cur.Parent = saveCurrent;
+                    saveCurrent.Entries.Add(cur);
                 }
 
-                current = saveCurrent;
+                current.Value = saveCurrent;
             }
         }
 
@@ -195,7 +196,7 @@ namespace Signum.Utilities
 
         public static void CleanCurrent() //To fix possible non-dispossed ones
         {
-            current = null; 
+            current.Value = null; 
         }
 
         public static IEnumerable<HeavyProfilerEntry> AllEntries()

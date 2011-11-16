@@ -27,7 +27,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         [TestInitialize]
         public void Initialize()
         {
-            Connection.CurrentLog = new DebugTextWriter();
+            Connection.CurrentLogger = new DebugTextWriter();
         }
 
         [TestMethod]

@@ -34,16 +34,16 @@ namespace Signum.Engine
         public Schema Schema { get; private set; }
         public DynamicQueryManager DynamicQueryManager { get; private set; }
 
-        [ThreadStatic]
-        static TextWriter log;
-        public static TextWriter CurrentLog
+        static readonly IVariable<TextWriter> logger = Statics.ThreadVariable<TextWriter>("connectionlogger");
+        public static TextWriter CurrentLogger
         {
-            get { return log; }
-            set { log = value; }
+            get { return logger.Value; }
+            set { logger.Value = value; }
         }
 
         protected static void Log(SqlPreCommandSimple pcs)
         {
+            var log = logger.Value;
             if (log != null)
             {
                 log.WriteLine(pcs.Sql);
@@ -93,7 +93,16 @@ namespace Signum.Engine
         public int? CommandTimeout
         {
             get { return commandTimeout; }
+
             set { commandTimeout = value; }
+        }
+
+        static readonly IVariable<int?> scopeTimeout = Statics.ThreadVariable<int?>("scopeTimeout"); 
+        public IDisposable CommandTimeoutScope(int? timeout)
+        {
+            var old = scopeTimeout.Value;
+            scopeTimeout.Value = timeout;
+            return new Disposable(() => scopeTimeout.Value = timeout); 
         }
 
         public string ConnectionString
@@ -102,8 +111,12 @@ namespace Signum.Engine
             set { connectionString = value; }
         }
 
-        [ThreadStatic]
-        public static long CommandCount = 0;
+        static readonly IVariable<long> commandCountVariable = Statics.ThreadVariable<long>("commandCount");
+        public static long CommandCount
+        {
+            get { return commandCountVariable.Value; }
+            set { commandCountVariable.Value = value; }
+        }
 
         SqlConnection EnsureConnection()
         {
@@ -120,7 +133,7 @@ namespace Signum.Engine
         {
             SqlCommand cmd = new SqlCommand();
 
-            int? timeout = CommandTimeoutScope.Current ?? CommandTimeout;
+            int? timeout = scopeTimeout.Value ?? CommandTimeout;
             if (timeout.HasValue)
                 cmd.CommandTimeout = timeout.Value;
 

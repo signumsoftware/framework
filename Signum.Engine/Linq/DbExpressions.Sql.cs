@@ -75,8 +75,7 @@ namespace Signum.Engine.Linq
             return Name;
         }
 
-        [ThreadStatic]
-        static AliasGenerator current;
+        static readonly IVariable<AliasGenerator> current = Statics.ThreadVariable<AliasGenerator>("aliasGenerator");
 
         public static Alias Raw(string name)
         {
@@ -93,27 +92,27 @@ namespace Signum.Engine.Linq
             else
                 abv = abv.ToLower();
 
-            return current.GetUniqueAlias(abv);
+            return current.Value.GetUniqueAlias(abv);
         }
 
         public static Alias CloneAlias(Alias alias)
         {
-            return current.GetUniqueAlias(alias.Name + "b");
+            return current.Value.GetUniqueAlias(alias.Name + "b");
         }
 
         public static Alias NextSelectAlias()
         {
-            return current.NextSelectAlias();
+            return current.Value.NextSelectAlias();
         }
 
         public static Alias GetUniqueAlias(string baseAlias)
         {
-            return current.GetUniqueAlias(baseAlias);
+            return current.Value.GetUniqueAlias(baseAlias);
         }
 
         public static IDisposable NewGenerator()
         {
-            return current = new AliasGenerator { previous = current } ;
+            return current.Value = new AliasGenerator { previous = current.Value };
         }
 
         class AliasGenerator: IDisposable
@@ -145,7 +144,7 @@ namespace Signum.Engine.Linq
 
             public void Dispose()
             {
-                current = previous;
+                current.Value = previous;
             }
         }
     }
