@@ -174,7 +174,7 @@ namespace Signum.Engine.Processes
 
         public override void ExecuteLine(PackageLineDN pl, PackageDN package)
         {
-            OperationLogic.ExecuteLite<T>(pl.Target.ToLite<T>(), OperationKey);
+            pl.Target.ToLite<T>().ExecuteLite<T>(OperationKey);
         }
 
         protected override PackageDN CreatePackage(object[] args)

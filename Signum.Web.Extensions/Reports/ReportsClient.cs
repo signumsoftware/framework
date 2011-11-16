@@ -25,7 +25,7 @@ namespace Signum.Web.Reports
 {
     public class ReportsClient
     {
-        static bool ToExcelPlain;
+        public static bool ToExcelPlain { get; private set; }
         static bool ExcelReport;
 
         public static void Start(bool toExcelPlain, bool excelReport)

@@ -30,7 +30,7 @@ namespace Signum.Web.Selenium
                     "-jar c:/selenium/selenium-server.jar -firefoxProfileTemplate D:\\Selenium -timeout 3600";
             else
                 seleniumServerProcess.StartInfo.Arguments =
-                    "-jar c:/selenium/selenium-server.jar -timeout 3600";
+                    "-jar c:/selenium/selenium-server.jar -log selenium.log -timeout 3600";
 
             seleniumServerProcess.Start();
             return seleniumServerProcess;

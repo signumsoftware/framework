@@ -8,9 +8,13 @@ SF.Chart.Builder = (function () {
         return { filters: new SF.FindNavigator({ prefix: prefix }).serializeFilters() };
     };
 
+    var requestData = function (prefix) {
+        return $(".sf-chart-control[data-prefix='" + prefix + "']").find(":input").serialize() + "&filters=" + new SF.FindNavigator({ prefix: prefix }).serializeFilters();
+    }
+
     var updateChartBuilder = function ($chartControl, tokenChanged) {
         var $chartBuilder = $chartControl.find(".sf-chart-builder");
-        var data = $chartControl.find(":input").serialize() + "&filters=" + new SF.FindNavigator({ prefix: $chartControl.attr("data-prefix") }).serializeFilters();
+        var data = requestData($chartControl.attr("data-prefix"));
         if (!SF.isEmpty(tokenChanged)) {
             data += "&lastTokenChanged=" + tokenChanged;
         }
@@ -66,7 +70,7 @@ SF.Chart.Builder = (function () {
         var $chartControl = $this.closest(".sf-chart-control");
         $.ajax({
             url: $this.attr("data-url"),
-            data: $chartControl.find(":input").serialize() + "&filters=" + new SF.FindNavigator().serializeFilters(),
+            data: requestData($chartControl.attr("data-prefix")),
             success: function (result) {
                 if (typeof result === "object") {
                     if (typeof result.ModelState != "undefined") {
@@ -103,9 +107,25 @@ SF.Chart.Builder = (function () {
         eval($codeArea.val());
     };
 
+    var exportData = function (prefix, validateUrl, exportUrl) {
+        var $chartControl = $(".sf-chart-control[data-prefix='" + prefix + "']");
+        var $inputs = $chartControl.find(":input").not(":button");
+
+        var data = requestProcessedData(prefix);
+        $inputs.each(function () {
+            data[this.id] = $(this).val();
+        });
+
+        SF.EntityIsValid({ prefix: prefix, controllerUrl: validateUrl, requestExtraJsonData: data }, function () {
+            SF.submitOnly(exportUrl, data)
+        });
+    };
+
     return {
         requestProcessedData: requestProcessedData,
-        reDraw: reDraw
+        requestData: requestData,
+        reDraw: reDraw,
+        exportData: exportData
     };
 })();
 
@@ -208,7 +228,7 @@ SF.Chart.ChartBase.prototype = {
         this.paintYAxis() +
         this.paintLegend() +
         this.bindEvents(containerSelector);
-    }, 
+    },
 
     bindMouseClick: function ($chartContainer) {
         $chartContainer.find('.shape,.slice,.hover-trigger,.point').not('g').click(function () {
@@ -235,13 +255,7 @@ SF.Chart.ChartBase.prototype = {
                 return data;
             };
 
-            $.ajax({
-                url: $this.closest('.sf-chart-container').attr('data-open-url'),
-                data: serializeData($this),
-                success: function (popup) {
-                    new SF.ViewNavigator({ prefix: "New" }).showViewOk(popup);
-                }
-            })
+            window.open($this.closest('.sf-chart-container').attr('data-open-url') + "?" + serializeData($this));
         });
     }
 };
@@ -624,12 +638,15 @@ SF.Chart.TypeTypeValue.prototype = $.extend({}, new SF.Chart.ChartBase(), {
             ".attr('x2', function (v) { return x(JSON.stringify(v)); });" + this.br +
             this.br +
             "//paint x-axis tick labels" + this.br +
+            "if ((x.rangeBand() * 2) > yAxisLabelWidth)" + this.br +
+            "{" + this.brt +
             "chart.append('svg:g').attr('class', 'x-axis-tick-label').attr('transform', 'translate(' + (yAxisLeftPosition + (x.rangeBand() / 2)) + ', ' + (xAxisTopPosition + ticksLength + labelMargin + fontSize) + ')')" + this.brt +
             ".enterData(data.dimension1, 'text', 'x-axis-tick-label')" + this.brt +
             ".attr('x', function (v) { return x(JSON.stringify(v)); })" + this.brt +
             ".attr('y', function (v, i) { return (i%2 == 0 ? 0 : (fontSize + labelMargin)); })" + this.brt +
             ".attr('text-anchor', 'middle')" + this.brt +
             ".text(function (v) { return myChart.getTokenLabel(v); });" + this.br +
+            "}" + this.br + 
             this.br +
             "//paint x-axis - token label" + this.br +
             "chart.append('svg:g').attr('class', 'x-axis-token-label').attr('transform', 'translate(' + (yAxisLeftPosition + ((width - yAxisLeftPosition) / 2)) + ', ' + (height) + ')')" + this.brt +
@@ -675,6 +692,8 @@ SF.Chart.TypeTypeValue.prototype = $.extend({}, new SF.Chart.ChartBase(), {
             "legendRectWidth = 10," + this.brt +
             "legendLabelWidth = legendScale.rangeBand() - (2 * labelMargin) - legendRectWidth;" + this.br +
             this.br +
+            "if (legendLabelWidth + labelMargin + legendRectWidth > yAxisLabelWidth)" + this.br +
+            "{" + this.brt +
             "chart.append('svg:g').attr('class', 'color-legend').attr('transform', 'translate(' + yAxisLeftPosition + ', ' + padding + ')')" + this.brt +
             ".enterData(data.series, 'rect', 'color-rect')" + this.brt +
             ".attr('x', function(e, i) { return (legendRectWidth + legendLabelWidth + (2 * labelMargin)) * i; })" + this.brt +
@@ -684,7 +703,8 @@ SF.Chart.TypeTypeValue.prototype = $.extend({}, new SF.Chart.ChartBase(), {
             "chart.append('svg:g').attr('class', 'color-legend').attr('transform', 'translate(' + (yAxisLeftPosition + labelMargin + legendRectWidth) + ', ' + (padding + fontSize) + ')')" + this.brt +
             ".enterData(data.series, 'text', 'color-text')" + this.brt +
             ".attr('x', function(e, i) { return (legendRectWidth + legendLabelWidth + (2 * labelMargin)) * i; })" + this.brt +
-            ".text(function(s) { return myChart.getTokenLabel(s.dimension2); });" + this.br + this.br;
+            ".text(function(s) { return myChart.getTokenLabel(s.dimension2); });" + this.br +
+            "}" + this.br + this.br;
     }
 });
 
