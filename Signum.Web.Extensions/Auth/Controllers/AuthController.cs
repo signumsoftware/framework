@@ -47,8 +47,6 @@ namespace Signum.Web.Auth
             return RouteHelper.New().Action("Index", "Home");
         };
 
-        public const string SessionUserKey = "user";
-
         [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult SaveNewUser(string prefix)
         {

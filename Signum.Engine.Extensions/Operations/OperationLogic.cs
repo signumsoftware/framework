@@ -59,12 +59,13 @@ namespace Signum.Engine.Operations
 
         public static readonly HashSet<Type> ProtectedSaveTypes = new HashSet<Type>();
 
-        [ThreadStatic]
-        static ImmutableStack<Type> ignoredTypes;
+        static readonly IVariable<ImmutableStack<Type>> ignoredTypes = Statics.ThreadVariable<ImmutableStack<Type>>("variable"); 
 
         public static bool IsSaveProtected(Type type)
         {
-            return ProtectedSaveTypes.Contains(type) && (ignoredTypes == null || !ignoredTypes.Contains(type));
+            var it = ignoredTypes.Value;
+
+            return ProtectedSaveTypes.Contains(type) && (it == null || !it.Contains(type));
         }
 
         public static IDisposable AllowSave<T>()
@@ -74,18 +75,9 @@ namespace Signum.Engine.Operations
 
         private static IDisposable AllowSave(Type type)
         {
-            if (ignoredTypes == null)
-                ignoredTypes = ImmutableStack<Type>.Empty;
+            ignoredTypes.Value = (ignoredTypes.Value ?? ImmutableStack<Type>.Empty).Push(type);
 
-            ignoredTypes = ignoredTypes.Push(type);
-
-            return new Disposable(() =>
-            {
-                if (ignoredTypes == null || ignoredTypes.Peek() != type)
-                    throw new InvalidOperationException("Unsyncronized stack of OperationLogic.ignoredTypes");
-
-                ignoredTypes = ignoredTypes.Pop();
-            });
+            return new Disposable(() => ignoredTypes.Value = ignoredTypes.Value.Pop());
         }
 
         public static void AssertStarted(SchemaBuilder sb)

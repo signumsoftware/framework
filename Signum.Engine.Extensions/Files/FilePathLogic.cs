@@ -86,7 +86,7 @@ namespace Signum.Engine.Files
             {
                 foreach (var fullPath in list)
                 {
-                    if (unsafeMode)
+                    if (unsafeMode.Value)
                         Debug.WriteLine(fullPath);
                     else
                         File.Delete(fullPath);
@@ -97,13 +97,13 @@ namespace Signum.Engine.Files
 
         const long ERROR_DISK_FULL = 112L; // see winerror.h
 
-        [ThreadStatic]
-        static bool unsafeMode = false;
+        static readonly IVariable<bool> unsafeMode = Statics.ThreadVariable<bool>("filePathUnsafeMode");
 
         public static IDisposable UnsafeMode()
         {
-            unsafeMode = true;
-            return new Disposable(() => unsafeMode = false);
+            if (unsafeMode.Value) return null;
+            unsafeMode.Value = true;
+            return new Disposable(() => unsafeMode.Value = false);
         }
 
         public static FilePathDN UnsafeLoad(FileRepositoryDN repository, FileTypeDN fileType, string fullPath)
@@ -123,7 +123,7 @@ namespace Signum.Engine.Files
 
         static void FilePath_PreSaving(FilePathDN fp, ref bool graphModified)
         {
-            if (fp.IsNew && !unsafeMode)
+            if (fp.IsNew && !unsafeMode.Value)
             {
                 using (new EntityCache(true))
                 {

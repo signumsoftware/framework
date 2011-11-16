@@ -27,28 +27,26 @@ namespace Signum.Engine.Authorization
 {
     public static partial class TypeAuthLogic
     {
-        [ThreadStatic]
-        static bool queryFilterDisabled;
+        static readonly IVariable<bool> queryFilterDisabled = Statics.ThreadVariable<bool>("queryFilterDisabled");
         public static IDisposable DisableQueryFilter()
         {
-            bool oldQueriesDisabled = queryFilterDisabled;
-            queryFilterDisabled = true;
-            return new Disposable(() => queryFilterDisabled = oldQueriesDisabled);
+            if (queryFilterDisabled.Value) return null;
+            queryFilterDisabled.Value = true;
+            return new Disposable(() => queryFilterDisabled.Value = false);
         }
 
-        [ThreadStatic]
-        static bool saveDisabled;
+        static readonly IVariable<bool> saveDisabled = Statics.ThreadVariable<bool>("saveDisabled");
         public static IDisposable DisableSave()
         {
-            bool oldSaveDisabled = saveDisabled;
-            saveDisabled = true;
-            return new Disposable(() => saveDisabled = oldSaveDisabled);
+            if (saveDisabled.Value) return null;
+            saveDisabled.Value = true;
+            return new Disposable(() => saveDisabled.Value = false);
         }
 
         static IQueryable<T> EntityGroupAuthLogic_FilterQuery<T>(IQueryable<T> query)
             where T : IdentifiableEntity
         {
-            if (!queryFilterDisabled)
+            if (!queryFilterDisabled.Value)
                 return WhereAllowed<T>(query);
             return query;
         }

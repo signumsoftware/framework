@@ -264,26 +264,25 @@ namespace Signum.Engine.Authorization
             set { gloaballyEnabled = value; }
         }
 
-        [ThreadStatic]
-        static bool temporallyDisabled;
+        static readonly IVariable<bool> tempDisabled = Statics.ThreadVariable<bool>("authTempDisabled");  
 
         public static IDisposable Disable()
         {
-            bool lastValue = temporallyDisabled;
-            temporallyDisabled = true;
-            return new Disposable(() => temporallyDisabled = lastValue);
+            if (tempDisabled.Value) return null;
+            tempDisabled.Value = true;
+            return new Disposable(() => tempDisabled.Value = false);
         }
 
         public static IDisposable Enable()
         {
-            bool lastValue = temporallyDisabled;
-            temporallyDisabled = false;
-            return new Disposable(() => temporallyDisabled = lastValue);
+            if (!tempDisabled.Value) return null;
+            tempDisabled.Value = false;
+            return new Disposable(() => tempDisabled.Value = true);
         }
 
         public static bool IsEnabled
         {
-            get { return !temporallyDisabled && gloaballyEnabled; }
+            get { return !tempDisabled.Value && gloaballyEnabled; }
         }
 
         public static UserDN Login(string username, string passwordHash)

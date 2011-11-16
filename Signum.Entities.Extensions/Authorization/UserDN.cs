@@ -19,12 +19,10 @@ namespace Signum.Entities.Authorization
     [Serializable]
     public class UserDN : Entity, IPrincipal, IEmailOwnerDN
     {
-
         public UserDN()
         {
             PasswordHash = Guid.NewGuid().ToString();
         }
-
 
         public static Func<string, string> ValidatePassword = p =>
         {
@@ -153,7 +151,8 @@ namespace Signum.Entities.Authorization
 
         public static UserDN Current
         {
-            get { return Thread.CurrentPrincipal as UserDN; }
+            get { return (UserDN)Statics.CurrentPrincipal.Value; }
+            set { Statics.CurrentPrincipal.Value = value; }
         }
     }
 

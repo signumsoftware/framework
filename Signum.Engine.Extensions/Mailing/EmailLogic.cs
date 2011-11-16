@@ -62,21 +62,19 @@ namespace Signum.Engine.Mailing
 
         public static Func<string> OverrideEmailAddress = () => null;
 
-        [ThreadStatic]
-        static string overrideEmailAddressForProcess;
+        static readonly IVariable<string> overrideEmailAddressForProcess = Statics.ThreadVariable<string>("overrideEmailAddressForProcess");
         internal static IDisposable OverrideEmailAddressForProcess(string emailAddress)
         {
-            var old = overrideEmailAddressForProcess;
-            overrideEmailAddressForProcess = emailAddress;
-            return new Disposable(() => overrideEmailAddressForProcess = old);
+            var old = overrideEmailAddressForProcess.Value;
+            overrideEmailAddressForProcess.Value = emailAddress;
+            return new Disposable(() => overrideEmailAddressForProcess.Value = old);
         }
 
-        internal static string OnEmailAddress()
+        internal static string OnOverrideEmailAddress()
         {
-            if (overrideEmailAddressForProcess.HasText())
-                return overrideEmailAddressForProcess;
-
-            return OverrideEmailAddress();
+            var oea = overrideEmailAddressForProcess.Value;
+            
+            return oea ?? OverrideEmailAddress();
         }
 
         public static Func<SmtpClient> SmtpClientBuilder;
@@ -367,7 +365,7 @@ namespace Signum.Engine.Mailing
 
         static MailMessage CreateMailMessage(EmailMessageDN emailMessage)
         {
-            var address = OnEmailAddress();
+            var address = OnOverrideEmailAddress();
 
             if (address == DoNotSend)
                 return null;
@@ -393,7 +391,7 @@ namespace Signum.Engine.Mailing
             EmailPackageDN package = new EmailPackageDN
             {
                 NumLines = emails.Count,
-                OverrideEmailAddress = OnEmailAddress()
+                OverrideEmailAddress = OnOverrideEmailAddress()
             }.Save();
 
             var packLite = package.ToLite();
@@ -419,7 +417,7 @@ namespace Signum.Engine.Mailing
             EmailPackageDN package = new EmailPackageDN
             {
                 NumLines = recipientList.Count,
-                OverrideEmailAddress = EmailLogic.OnEmailAddress()
+                OverrideEmailAddress = EmailLogic.OnOverrideEmailAddress()
             }.Save();
 
             var lite = package.ToLite();

@@ -204,7 +204,7 @@ namespace Signum.Engine.Mailing
                     var process = ProcessLogic.Create(NewsletterOperations.Send, n);
                     process.Execute(ProcessOperation.Execute);
 
-                    n.OverrideEmail = EmailLogic.OnEmailAddress();
+                    n.OverrideEmail = EmailLogic.OnOverrideEmailAddress();
                     n.State = NewsletterState.Sent;
                 }
             }.Register();

@@ -98,27 +98,22 @@ namespace Signum.Engine.Authorization
             return cache.GetDefaultDictionary();
         }
 
-        
-
-        [ThreadStatic]
-        static ImmutableStack<Enum> temporallyAllowed;
+        static readonly IVariable<ImmutableStack<Enum>> tempAllowed = Statics.ThreadVariable<ImmutableStack<Enum>>("authTempOperationsAllowed");
 
         public static IDisposable AllowTemporally(Enum operationKey)
         {
-            var old = temporallyAllowed;
+            tempAllowed.Value = (tempAllowed.Value ?? ImmutableStack<Enum>.Empty).Push(operationKey);
 
-            temporallyAllowed = (temporallyAllowed ?? ImmutableStack<Enum>.Empty).Push(operationKey);
-
-            return new Disposable(() => temporallyAllowed = old);
+            return new Disposable(() => tempAllowed.Value = tempAllowed.Value.Pop());
         }
 
         internal static bool GetTemporallyAllowed(Enum operationKey)
         {
-            var ta = temporallyAllowed;
+            var ta = tempAllowed.Value;
             if (ta == null || ta.IsEmpty)
                 return false;
 
-            return temporallyAllowed.Contains(operationKey);
+            return ta.Contains(operationKey);
         }
     }
 }

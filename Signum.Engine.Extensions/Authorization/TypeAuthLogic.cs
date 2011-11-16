@@ -102,11 +102,9 @@ namespace Signum.Engine.Authorization
             return null;
         }
 
-   
-
         static void Schema_Saving(IdentifiableEntity ident)
         {
-            if (ident.Modified.Value)
+            if (ident.Modified.Value && !saveDisabled.Value)
             {
                 TypeAllowedAndConditions access = GetAllowed(ident.GetType());
 
@@ -187,26 +185,23 @@ namespace Signum.Engine.Authorization
             return cache.GetDefaultDictionary();
         }
 
-        [ThreadStatic]
-        static ImmutableStack<Tuple<Type, TypeAllowed>> temporallyAllowed;
+        static readonly IVariable<ImmutableStack<Tuple<Type, TypeAllowed>>> tempAllowed = Statics.ThreadVariable<ImmutableStack<Tuple<Type, TypeAllowed>>>("temporallyAllowed");
 
         public static IDisposable AllowTemporally<T>(TypeAllowed typeAllowed)
             where T : IdentifiableEntity
         {
-            var old = temporallyAllowed;
+            tempAllowed.Value = (tempAllowed.Value ?? ImmutableStack<Tuple<Type, TypeAllowed>>.Empty).Push(Tuple.Create(typeof(T), typeAllowed));
 
-            temporallyAllowed = (temporallyAllowed ?? ImmutableStack<Tuple<Type, TypeAllowed>>.Empty).Push(Tuple.Create(typeof(T), typeAllowed));
-
-            return new Disposable(() => temporallyAllowed = old);
+            return new Disposable(() => tempAllowed.Value = tempAllowed.Value.Pop());
         }
 
         internal static TypeAllowed? GetTemporallyAllowed(Type type)
         {
-            var ta = temporallyAllowed;
+            var ta = tempAllowed.Value;
             if (ta == null || ta.IsEmpty)
                 return null;
 
-            var pair = temporallyAllowed.FirstOrDefault(a => a.Item1 == type);
+            var pair = ta.FirstOrDefault(a => a.Item1 == type);
 
             if (pair == null)
                 return null;
