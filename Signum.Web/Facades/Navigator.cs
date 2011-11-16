@@ -421,6 +421,7 @@ namespace Signum.Web
         public string FilterBuilderView = ViewPrefix.Formato("FilterBuilder");
         public string PaginationView = ViewPrefix.Formato("Pagination");
         public string ValueLineBoxView = ViewPrefix.Formato("ValueLineBox");
+        public string ErrorPageView = ViewPrefix.Formato("Error");
         
         protected Dictionary<string, Type> WebTypeNames { get; private set; }
         protected Dictionary<string, object> WebQueryNames { get; private set; }

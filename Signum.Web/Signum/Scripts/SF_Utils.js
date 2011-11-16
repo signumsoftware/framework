@@ -265,27 +265,31 @@ SF.Notify = (function () {
 SF.InputValidator = {
     isNumber: function (e) {
         var c = e.keyCode;
-            return ((c >= 48 && c <= 57) || //0-9
-			(c >= 96 && c <= 105) ||  //NumPad 0-9
-			(c == 8) || //BackSpace
-			(c == 9) || //Tab
-			(c == 12) || //Clear
-			(c == 27) || //Escape
-			(c == 37) || //Left
-			(c == 39) || //Right
-			(c == 46) || //Delete
-			(c == 36) || //Home
-			(c == 35) || //End
-			(c == 109) || //NumPad -
-            (c == 189));
+            return ((c >= 48 && c <= 57) /*0-9*/ || 
+			(c >= 96 && c <= 105) /*NumPad 0-9*/ ||
+			(c == 8) /*BackSpace*/ ||
+			(c == 9) /*Tab*/ || 
+			(c == 12) /*Clear*/ || 
+			(c == 27) /*Escape*/ || 
+			(c == 37) /*Left*/ || 
+			(c == 39) /*Right*/ || 
+			(c == 46) /*Delete*/ || 
+			(c == 36) /*Home*/ || 
+			(c == 35) /*End*/ || 
+			(c == 109) /*NumPad -*/ ||
+            (c == 189) /*-*/ ||
+            (e.ctrlKey && c == 86) /*Ctrl + v*/ ||
+            (e.ctrlKey && c == 67) /*Ctrl + v*/
+        );
     },
 
     isDecimal: function (e) {
         var c = e.keyCode;
         return (
-            this.isNumber(e) || (c == 110) || //NumPad Decimal
-            (c == 190) || //.
-			(c == 188) //,
+            this.isNumber(e) || 
+            (c == 110) /*NumPad Decimal*/ ||
+            (c == 190) /*.*/ ||
+			(c == 188) /*,*/
 		);
     }
 };
