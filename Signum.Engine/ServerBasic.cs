@@ -22,6 +22,8 @@ namespace Signum.Services
             return SuggestUserInterfaceAttribute.Suggests(mi) == true ? ExecutionContext.UserInterface : null;
         }
 
+        protected Dictionary
+
         protected T Return<T>(MethodBase mi, Func<T> function)
         {
             return Return(mi, mi.Name, function);
@@ -31,6 +33,7 @@ namespace Signum.Services
         {
             try
             {
+                using (ScopeSessionFactory.OverrideSession(
                 using (ExecutionContext.Scope(GetDefaultExecutionContext(mi, description)))
                 {
                     return function();

@@ -98,7 +98,7 @@ namespace Signum.Engine
         }
 
         static readonly Variable<int?> scopeTimeout = Statics.ThreadVariable<int?>("scopeTimeout"); 
-        public IDisposable CommandTimeoutScope(int? timeout)
+        public static IDisposable CommandTimeoutScope(int? timeout)
         {
             var old = scopeTimeout.Value;
             scopeTimeout.Value = timeout;
