@@ -17,7 +17,7 @@ using System.Text.RegularExpressions;
 namespace Signum.Entities.Authorization
 {
     [Serializable]
-    public class UserDN : Entity, IPrincipal, IEmailOwnerDN
+    public class UserDN : Entity, IEmailOwnerDN
     {
         public UserDN()
         {
@@ -100,17 +100,6 @@ namespace Signum.Entities.Authorization
             set { Set(ref email, value, () => Email); }
         }
 
-        IIdentity IPrincipal.Identity
-        {
-            get { return null; }
-        }
-
-        bool IPrincipal.IsInRole(string role)
-        {
-            return this.role.Name == role;
-        }
-
-
         DateTime? anulationDate;
         public DateTime? AnulationDate
         {
@@ -134,7 +123,6 @@ namespace Signum.Entities.Authorization
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-
             if (pi.Is(() => State))
             {
                 if (anulationDate != null && state != UserState.Disabled)
@@ -149,10 +137,24 @@ namespace Signum.Entities.Authorization
             return userName;
         }
 
+        static readonly Variable<UserDN> sessionUser = Statics.SessionVariable<UserDN>("user");
+        static readonly Variable<UserDN> threadUser = Statics.ThreadVariable<UserDN>("threadUser");
+
+        public static void SetSessionUser(UserDN user)
+        {
+            sessionUser.Value = user;
+        }
+
+        internal static IDisposable Scope(UserDN user)
+        {
+            var old = threadUser.Value;
+            threadUser.Value = user;
+            return new Disposable(() =>  threadUser.Value = old); 
+        }
+
         public static UserDN Current
         {
-            get { return (UserDN)Statics.CurrentPrincipal.Value; }
-            set { Statics.CurrentPrincipal.Value = value; }
+            get { return threadUser.Value ?? sessionUser.Value; }
         }
     }
 

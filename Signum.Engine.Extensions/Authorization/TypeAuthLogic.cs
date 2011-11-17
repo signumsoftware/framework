@@ -185,7 +185,7 @@ namespace Signum.Engine.Authorization
             return cache.GetDefaultDictionary();
         }
 
-        static readonly IVariable<ImmutableStack<Tuple<Type, TypeAllowed>>> tempAllowed = Statics.ThreadVariable<ImmutableStack<Tuple<Type, TypeAllowed>>>("temporallyAllowed");
+        static readonly Variable<ImmutableStack<Tuple<Type, TypeAllowed>>> tempAllowed = Statics.ThreadVariable<ImmutableStack<Tuple<Type, TypeAllowed>>>("temporallyAllowed");
 
         public static IDisposable AllowTemporally<T>(TypeAllowed typeAllowed)
             where T : IdentifiableEntity

@@ -27,7 +27,7 @@ namespace Signum.Engine.Authorization
 {
     public static partial class TypeAuthLogic
     {
-        static readonly IVariable<bool> queryFilterDisabled = Statics.ThreadVariable<bool>("queryFilterDisabled");
+        static readonly Variable<bool> queryFilterDisabled = Statics.ThreadVariable<bool>("queryFilterDisabled");
         public static IDisposable DisableQueryFilter()
         {
             if (queryFilterDisabled.Value) return null;
@@ -35,7 +35,7 @@ namespace Signum.Engine.Authorization
             return new Disposable(() => queryFilterDisabled.Value = false);
         }
 
-        static readonly IVariable<bool> saveDisabled = Statics.ThreadVariable<bool>("saveDisabled");
+        static readonly Variable<bool> saveDisabled = Statics.ThreadVariable<bool>("saveDisabled");
         public static IDisposable DisableSave()
         {
             if (saveDisabled.Value) return null;

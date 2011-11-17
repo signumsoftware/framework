@@ -97,7 +97,7 @@ namespace Signum.Engine.Files
 
         const long ERROR_DISK_FULL = 112L; // see winerror.h
 
-        static readonly IVariable<bool> unsafeMode = Statics.ThreadVariable<bool>("filePathUnsafeMode");
+        static readonly Variable<bool> unsafeMode = Statics.ThreadVariable<bool>("filePathUnsafeMode");
 
         public static IDisposable UnsafeMode()
         {

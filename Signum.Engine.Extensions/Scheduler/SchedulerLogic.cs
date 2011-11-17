@@ -16,6 +16,7 @@ using Signum.Engine.Authorization;
 using Signum.Engine.DynamicQuery;
 using System.Reflection;
 using System.Threading.Tasks;
+using Signum.Entities.Authorization;
 
 namespace Signum.Engine.Scheduler
 {
@@ -32,7 +33,7 @@ namespace Signum.Engine.Scheduler
                                 Timeout.Infinite,
                                 Timeout.Infinite);
 
-        static readonly IVariable<bool> avoidReloadPlan = Statics.ThreadVariable<bool>("avoidReloadSchedulerPlan");
+        static readonly Variable<bool> avoidReloadPlan = Statics.ThreadVariable<bool>("avoidReloadSchedulerPlan");
 
         static IDisposable AvoidReloadPlanOnSave()
         {
@@ -199,7 +200,7 @@ namespace Signum.Engine.Scheduler
                     {
                         try
                         {
-                            using (AuthLogic.User(AuthLogic.SystemUser))
+                            using (UserDN.Scope(AuthLogic.SystemUser))
                                 ExecuteTask.Invoke(st.Task);
                         }
                         catch (Exception e)

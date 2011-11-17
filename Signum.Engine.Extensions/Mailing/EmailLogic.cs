@@ -62,7 +62,7 @@ namespace Signum.Engine.Mailing
 
         public static Func<string> OverrideEmailAddress = () => null;
 
-        static readonly IVariable<string> overrideEmailAddressForProcess = Statics.ThreadVariable<string>("overrideEmailAddressForProcess");
+        static readonly Variable<string> overrideEmailAddressForProcess = Statics.ThreadVariable<string>("overrideEmailAddressForProcess");
         internal static IDisposable OverrideEmailAddressForProcess(string emailAddress)
         {
             var old = overrideEmailAddressForProcess.Value;
@@ -336,7 +336,7 @@ namespace Signum.Engine.Mailing
         static void client_SendCompleted(object sender, AsyncCompletedEventArgs e)
         {
             EmailUser emailUser = (EmailUser)e.UserState;
-            using (AuthLogic.User(emailUser.User))
+            using (UserDN.Scope(emailUser.User))
             {
                 Expression<Func<EmailMessageDN, EmailMessageDN>> updater;
                 if (e.Error != null)

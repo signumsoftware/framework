@@ -318,7 +318,7 @@ namespace Signum.Engine.Cache
 
         public static bool GloballyDisabled { get; set; }
 
-        static readonly IVariable<bool> tempDisabled = Statics.ThreadVariable<bool>("cacheTempDisabled");
+        static readonly Variable<bool> tempDisabled = Statics.ThreadVariable<bool>("cacheTempDisabled");
 
         public static IDisposable Disable()
         {

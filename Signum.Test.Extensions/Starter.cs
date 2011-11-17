@@ -168,7 +168,8 @@ namespace Signum.Test.Extensions
                 }.Save();
 
                 Schema.Current.InitializeUntil(InitLevel.Level3MainEntities);
-                Signum.Test.Starter.Load();
+                using (OperationLogic.AllowSave<AlbumDN>())
+                    Signum.Test.Starter.Load();
 
                 TypeConditionUsersRoles(externalUser.ToLite());
                 

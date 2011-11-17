@@ -98,7 +98,7 @@ namespace Signum.Engine.Authorization
             return cache.GetDefaultDictionary();
         }
 
-        static readonly IVariable<ImmutableStack<Enum>> tempAllowed = Statics.ThreadVariable<ImmutableStack<Enum>>("authTempOperationsAllowed");
+        static readonly Variable<ImmutableStack<Enum>> tempAllowed = Statics.ThreadVariable<ImmutableStack<Enum>>("authTempOperationsAllowed");
 
         public static IDisposable AllowTemporally(Enum operationKey)
         {

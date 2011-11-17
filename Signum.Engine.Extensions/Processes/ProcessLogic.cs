@@ -285,7 +285,7 @@ namespace Signum.Engine.Processes
             {
                 Task.Factory.StartNew(() =>
                 {
-                    using (AuthLogic.User(AuthLogic.SystemUser))
+                    using (UserDN.Scope(AuthLogic.SystemUser))
                     {
                         try
                         {
@@ -293,8 +293,7 @@ namespace Signum.Engine.Processes
                         }
                         finally
                         {
-                            using (AuthLogic.User(AuthLogic.SystemUser))
-                                Sync.SafeUpdate(ref currentProcesses, tree => tree.Remove(ep.Execution.Id));
+                            Sync.SafeUpdate(ref currentProcesses, tree => tree.Remove(ep.Execution.Id));
                         }
                     }
                 });
@@ -498,7 +497,7 @@ namespace Signum.Engine.Processes
 
         public void Execute()
         {
-            using (AuthLogic.User(AuthLogic.SystemUser))
+            using (UserDN.Scope(AuthLogic.SystemUser))
             {
                 Execution.State = ProcessState.Executing;
                 Execution.ExecutionStart = TimeZoneManager.Now;

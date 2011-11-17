@@ -40,7 +40,7 @@ namespace Signum.Services
         {
             try
             {
-                using (AuthLogic.User(currentUser))
+                using (UserDN.Scope(currentUser))
                 {
                     FacadeMethodAuthLogic.AuthorizeAccess((MethodInfo)mi);
 

@@ -59,7 +59,7 @@ namespace Signum.Engine.Operations
 
         public static readonly HashSet<Type> ProtectedSaveTypes = new HashSet<Type>();
 
-        static readonly IVariable<ImmutableStack<Type>> ignoredTypes = Statics.ThreadVariable<ImmutableStack<Type>>("variable"); 
+        static readonly Variable<ImmutableStack<Type>> ignoredTypes = Statics.ThreadVariable<ImmutableStack<Type>>("variable"); 
 
         public static bool IsSaveProtected(Type type)
         {

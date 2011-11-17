@@ -212,22 +212,12 @@ namespace Signum.Engine.Authorization
                     throw new ApplicationException(Signum.Engine.Extensions.Properties.Resources.Username0IsNotValid.Formato(username));
             }
 
-            return User(user);
+            return UserDN.Scope(user);
         }
 
         public static UserDN RetrieveUser(string username)
         {
             return Database.Query<UserDN>().SingleOrDefaultEx(u => u.UserName == username);
-        }
-
-        public static IDisposable User(UserDN user)
-        {
-            IPrincipal old = Thread.CurrentPrincipal;
-            Thread.CurrentPrincipal = user;
-            return new Disposable(() =>
-            {
-                Thread.CurrentPrincipal = old;
-            });
         }
 
         public static IEnumerable<Lite<RoleDN>> RolesInOrder()
@@ -264,7 +254,7 @@ namespace Signum.Engine.Authorization
             set { gloaballyEnabled = value; }
         }
 
-        static readonly IVariable<bool> tempDisabled = Statics.ThreadVariable<bool>("authTempDisabled");  
+        static readonly Variable<bool> tempDisabled = Statics.ThreadVariable<bool>("authTempDisabled");  
 
         public static IDisposable Disable()
         {
