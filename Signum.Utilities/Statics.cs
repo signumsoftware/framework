@@ -148,6 +148,8 @@ namespace Signum.Utilities
 
         public static IDisposable OverrideSession(Dictionary<string, object> sessionDictionary)
         {
+            if (!(Statics.SessionFactory is ScopeSessionFactory))
+                throw new InvalidOperationException("Impossible to OverrideSession because Statics.SessionFactory is not a ScopeSessionFactory"); 
             var old = overridenSession.Value;
             overridenSession.Value = sessionDictionary;
             return new Disposable(() => overridenSession.Value = old);
