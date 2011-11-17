@@ -59,11 +59,12 @@ namespace Signum.Engine.Operations
 
         public static readonly HashSet<Type> ProtectedSaveTypes = new HashSet<Type>();
 
-        static readonly Variable<ImmutableStack<Type>> ignoredTypes = Statics.ThreadVariable<ImmutableStack<Type>>("variable"); 
+        static readonly Variable<ImmutableStack<Type>> allowedTypes = Statics.ThreadVariable<ImmutableStack<Type>>("saveOperationsAllowedTypes");
+        static readonly Variable<bool> globallyAllowed = Statics.ThreadVariable<bool>("saveOperationsGloballyAllowed"); 
 
         public static bool IsSaveProtected(Type type)
         {
-            var it = ignoredTypes.Value;
+            var it = allowedTypes.Value;
 
             return ProtectedSaveTypes.Contains(type) && (it == null || !it.Contains(type));
         }
@@ -75,9 +76,16 @@ namespace Signum.Engine.Operations
 
         private static IDisposable AllowSave(Type type)
         {
-            ignoredTypes.Value = (ignoredTypes.Value ?? ImmutableStack<Type>.Empty).Push(type);
+            allowedTypes.Value = (allowedTypes.Value ?? ImmutableStack<Type>.Empty).Push(type);
 
-            return new Disposable(() => ignoredTypes.Value = ignoredTypes.Value.Pop());
+            return new Disposable(() => allowedTypes.Value = allowedTypes.Value.Pop());
+        }
+
+        public static IDisposable AllowSaveGlobally()
+        {
+            if (globallyAllowed.Value) return null;
+            globallyAllowed.Value = true;
+            return new Disposable(() => globallyAllowed.Value = false);
         }
 
         public static void AssertStarted(SchemaBuilder sb)
@@ -468,6 +476,8 @@ namespace Signum.Engine.Operations
         {
             return operations.TryGetValue(type).TryGetC(operation) != null;
         }
+
+     
     }
 
     public delegate void OperationHandler(IOperation operation, IIdentifiable entity);

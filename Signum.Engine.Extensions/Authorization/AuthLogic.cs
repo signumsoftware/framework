@@ -439,5 +439,10 @@ namespace Signum.Engine.Authorization
 
             return null;
         }
+
+        public static bool IsLogged()
+        {
+            return UserDN.Current == null || UserDN.Current.Is(AnonymousUser);
+        }
     }
 }

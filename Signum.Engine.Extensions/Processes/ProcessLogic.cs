@@ -497,37 +497,41 @@ namespace Signum.Engine.Processes
 
         public void Execute()
         {
-            using (UserDN.Scope(AuthLogic.SystemUser))
+            using (ScopeSessionFactory.OverrideSession())
             {
+                UserDN.SetSessionUser(AuthLogic.SystemUser);
+
                 Execution.State = ProcessState.Executing;
                 Execution.ExecutionStart = TimeZoneManager.Now;
                 Execution.Progress = 0;
                 Execution.Save();
-            }
 
-            try
-            {
-                FinalState state = Algorithm.Execute(this);
-                if (state == FinalState.Finished)
+                try
                 {
-                    Execution.ExecutionEnd = TimeZoneManager.Now;
-                    Execution.State = ProcessState.Finished;
-                    Execution.Progress = null;
+                    FinalState state = Algorithm.Execute(this);
+
+                    if (state == FinalState.Finished)
+                    {
+                        Execution.ExecutionEnd = TimeZoneManager.Now;
+                        Execution.State = ProcessState.Finished;
+                        Execution.Progress = null;
+                        Execution.Save();
+                    }
+                    else
+                    {
+                        Execution.SuspendDate = TimeZoneManager.Now;
+                        Execution.State = ProcessState.Suspended;
+                        Execution.Save();
+                    }
+
+                }
+                catch (Exception e)
+                {
+                    Execution.State = ProcessState.Error;
+                    Execution.ExceptionDate = TimeZoneManager.Now;
+                    Execution.Exception = e.Message;
                     Execution.Save();
                 }
-                else
-                {
-                    Execution.SuspendDate = TimeZoneManager.Now;
-                    Execution.State = ProcessState.Suspended;
-                    Execution.Save();
-                }
-            }
-            catch (Exception e)
-            {
-                Execution.State = ProcessState.Error;
-                Execution.ExceptionDate = TimeZoneManager.Now;
-                Execution.Exception = e.Message;
-                Execution.Save();
             }
         }
 

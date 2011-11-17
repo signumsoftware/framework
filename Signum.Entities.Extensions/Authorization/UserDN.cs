@@ -145,7 +145,7 @@ namespace Signum.Entities.Authorization
             sessionUser.Value = user;
         }
 
-        internal static IDisposable Scope(UserDN user)
+        public static IDisposable Scope(UserDN user)
         {
             var old = threadUser.Value;
             threadUser.Value = user;

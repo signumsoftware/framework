@@ -25,6 +25,7 @@ using System.Reflection;
 using Signum.Web.PortableAreas;
 using Signum.Web.Widgets;
 using Signum.Web.Chart;
+using Signum.Utilities;
 
 namespace Signum.Web.Extensions.Sample
 {
@@ -66,6 +67,8 @@ namespace Signum.Web.Extensions.Sample
         protected void Application_Start()
         {   
             Signum.Test.Extensions.Starter.Start(UserConnections.Replace(Settings.Default.ConnectionString));
+
+            Statics.SessionFactory = new ScopeSessionFactory(new AspNetSessionFactory());
 
             using (AuthLogic.Disable())
             {
