@@ -9,7 +9,7 @@ namespace Signum.Engine
 {
     public class ConnectionScope: IDisposable
     {
-        static readonly IVariable<BaseConnection> currentConnection = Statics.ThreadVariable<BaseConnection>("connection");
+        static readonly Variable<BaseConnection> currentConnection = Statics.ThreadVariable<BaseConnection>("connection");
 
         BaseConnection oldConnection;
 

@@ -34,7 +34,7 @@ namespace Signum.Engine
             UnexpectedBehaviourCallback("TRANSACTION ROLLBACKED!", new StackTrace(2, true));
         }
 
-        static readonly IVariable<Dictionary<BaseConnection, ICoreTransaction>> currents = Statics.ThreadVariable<Dictionary<BaseConnection, ICoreTransaction>>("transactions");
+        static readonly Variable<Dictionary<BaseConnection, ICoreTransaction>> currents = Statics.ThreadVariable<Dictionary<BaseConnection, ICoreTransaction>>("transactions");
 
         bool commited;
         ICoreTransaction coreTransaction; 
@@ -452,7 +452,7 @@ namespace Signum.Engine
 
         public static bool HasTransaction
         {
-            get { return currents != null && currents.Value.ContainsKey(ConnectionScope.Current); }
+            get { return currents.Value != null && currents.Value.ContainsKey(ConnectionScope.Current); }
         }
 
         public static SqlConnection CurrentConnection

@@ -75,7 +75,7 @@ namespace Signum.Engine.Linq
             return Name;
         }
 
-        static readonly IVariable<AliasGenerator> current = Statics.ThreadVariable<AliasGenerator>("aliasGenerator");
+        static readonly Variable<AliasGenerator> current = Statics.ThreadVariable<AliasGenerator>("aliasGenerator");
 
         public static Alias Raw(string name)
         {

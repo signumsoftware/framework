@@ -39,7 +39,7 @@ namespace Signum.Entities
 
     public static class Corruption
     {
-        static readonly IVariable<bool> allowed = Statics.ThreadVariable<bool>("corruptionAllowed");
+        static readonly Variable<bool> allowed = Statics.ThreadVariable<bool>("corruptionAllowed");
 
         public static bool Strict { get { return !allowed.Value; } }
 

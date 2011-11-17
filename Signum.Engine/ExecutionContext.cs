@@ -22,7 +22,7 @@ namespace Signum.Engine
 
         public static ExecutionContext UserInterface = new ExecutionContext("UserInterface");  
 
-        static readonly IVariable<ExecutionContext> currentExecutionContext = Statics.ThreadVariable<ExecutionContext>("executionContext");
+        static readonly Variable<ExecutionContext> currentExecutionContext = Statics.ThreadVariable<ExecutionContext>("executionContext");
 
         public static ExecutionContext Current
         {

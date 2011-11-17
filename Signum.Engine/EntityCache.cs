@@ -80,7 +80,7 @@ namespace Signum.Engine
         }
 
 
-        static readonly IVariable<RealEntityCache> currentCache = Statics.ThreadVariable<RealEntityCache>("cache");
+        static readonly Variable<RealEntityCache> currentCache = Statics.ThreadVariable<RealEntityCache>("cache");
 
 
         RealEntityCache oldCache;

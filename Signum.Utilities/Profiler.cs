@@ -98,7 +98,7 @@ namespace Signum.Utilities
 
         public static bool Enabled { get; set; }
 
-        static readonly IVariable<HeavyProfilerEntry> current = Statics.ThreadVariable<HeavyProfilerEntry>("heavy"); 
+        static readonly Variable<HeavyProfilerEntry> current = Statics.ThreadVariable<HeavyProfilerEntry>("heavy"); 
 
         public static readonly List<HeavyProfilerEntry> Entries = new List<HeavyProfilerEntry>();
 

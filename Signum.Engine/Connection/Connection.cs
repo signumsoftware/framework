@@ -34,7 +34,7 @@ namespace Signum.Engine
         public Schema Schema { get; private set; }
         public DynamicQueryManager DynamicQueryManager { get; private set; }
 
-        static readonly IVariable<TextWriter> logger = Statics.ThreadVariable<TextWriter>("connectionlogger");
+        static readonly Variable<TextWriter> logger = Statics.ThreadVariable<TextWriter>("connectionlogger");
         public static TextWriter CurrentLogger
         {
             get { return logger.Value; }
@@ -97,7 +97,7 @@ namespace Signum.Engine
             set { commandTimeout = value; }
         }
 
-        static readonly IVariable<int?> scopeTimeout = Statics.ThreadVariable<int?>("scopeTimeout"); 
+        static readonly Variable<int?> scopeTimeout = Statics.ThreadVariable<int?>("scopeTimeout"); 
         public IDisposable CommandTimeoutScope(int? timeout)
         {
             var old = scopeTimeout.Value;
@@ -111,7 +111,7 @@ namespace Signum.Engine
             set { connectionString = value; }
         }
 
-        static readonly IVariable<long> commandCountVariable = Statics.ThreadVariable<long>("commandCount");
+        static readonly Variable<long> commandCountVariable = Statics.ThreadVariable<long>("commandCount");
         public static long CommandCount
         {
             get { return commandCountVariable.Value; }
