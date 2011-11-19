@@ -80,7 +80,6 @@
     </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Audit\Audit.cs" />
@@ -102,6 +101,7 @@
     <Compile Include="Basics\QueryDN.cs" />
     <Compile Include="Basics\FacadeMethodDN.cs" />
     <Compile Include="Cache\CachePermissions.cs" />
+    <Compile Include="Chart\AggregateToken.cs" />
     <Compile Include="Chart\ChartToken.cs" />
     <Compile Include="Chart\ChartRequest.cs" />
     <Compile Include="Chart\ChartUtils.cs" />

@@ -47,50 +47,13 @@ namespace Signum.Entities.Chart
 
                 Format = Token.Format;
                 Unit = Token.Unit;
-                DisplayName = Aggregate == AggregateFunction.Count ? "Count" : Token.NiceName();
+                DisplayName = Token.NiceName();
             }
             else
             {
                 Format = null;
                 Unit = null;
                 DisplayName = null;
-            }
-
-            Notify(() => Aggregate);   
-        }
-
-        AggregateFunction? aggregate;
-        public AggregateFunction? Aggregate
-        {
-            get { return aggregate; }
-            set
-            {
-                if (Set(ref aggregate, value, () => Aggregate))
-                {
-                    if (aggregate == AggregateFunction.Count)
-                        Token = new CountAllToken();
-                    else if (Token is CountAllToken)
-                        Token = null; 
-
-                    NotifyChange(true);
-
-                    Notify(() => Token);
-                }
-            }
-        }
-
-        public Type Type
-        {
-
-            get
-            {
-                if (Token == null)
-                    return null;
-
-                if (aggregate == AggregateFunction.Average && QueryUtils.GetFilterType(Token.Type) == FilterType.Number)
-                    return Token.Type.IsNullable() ? typeof(double?) : typeof(double);
-
-                return Token.Type;
             }
         }
 
@@ -135,6 +98,11 @@ namespace Signum.Entities.Chart
         public bool GroupByVisible { get { return GroupByVisibleEvent(this); } }
 
         [field: NonSerialized, Ignore]
+        internal event Func<ChartTokenDN, bool> GroupingEvent;
+        [AvoidLocalization]
+        public bool Grouping { get { return GroupingEvent(this); } }
+
+        [field: NonSerialized, Ignore]
         internal event Func<ChartTokenDN, bool> ShouldAggregateEvent;
         [AvoidLocalization]
         public bool ShouldAggregate { get { return ShouldAggregateEvent(this); } }
@@ -164,18 +132,6 @@ namespace Signum.Entities.Chart
             Notify(() => GroupByVisible);
             Notify(() => PropertyLabel);
             Notify(() => ShouldAggregate);
-            Notify(() => Aggregate);
-        }
-
-        internal void NotifyGroup()
-        {
-            Notify(() => GroupByVisible);
-            Notify(() => ShouldAggregate);
-        }
-
-        public override string ToString()
-        {
-            return " ".Combine(Aggregate, Token);
         }
 
         protected override string PropertyValidation(PropertyInfo pi)
@@ -206,43 +162,59 @@ namespace Signum.Entities.Chart
 
         public override void ParseData(QueryDescription queryDescription)
         {
-            if (string.IsNullOrEmpty(tokenString))
-                Token = null;
-            else if (tokenString == "All" && this.aggregate == AggregateFunction.Count)
-                Token = new CountAllToken();
-            else
-                Token = QueryUtils.Parse(tokenString, token => SubTokensChart(token, queryDescription.Columns));
+            Token = QueryUtils.Parse(tokenString, token => SubTokensChart(token, queryDescription.Columns));
 
             CleanSelfModified();
         }
 
-
-        static readonly QueryToken[] Empty = new QueryToken[0];
-
-        public static List<QueryToken> SubTokensChart(QueryToken token, IEnumerable<ColumnDescription> columnDescriptions)
+        public List<QueryToken> SubTokensChart(QueryToken token, IEnumerable<ColumnDescription> columnDescriptions)
         {
             var result = QueryUtils.SubTokens(token, columnDescriptions);
 
-            if (token != null)
+            if (this.Grouping)
             {
-                FilterType? ft = QueryUtils.TryGetFilterType(token.Type);
-
-                if (ft == FilterType.Number || ft == FilterType.DecimalNumber)
+                if (this.ShouldAggregate)
                 {
-                    result.Add(new IntervalQueryToken(token));
+                    if (token == null)
+                    {
+                        result.Add(new AggregateToken(null, AggregateFunction.Count));
+                    }
+                    else
+                    {
+                        FilterType? ft = QueryUtils.TryGetFilterType(token.Type);
+
+                        if (ft == FilterType.Number || ft == FilterType.DecimalNumber || ft == FilterType.Boolean)
+                        {
+                            result.Add(new AggregateToken(token, AggregateFunction.Average));
+                            result.Add(new AggregateToken(token, AggregateFunction.Sum));
+
+                            result.Add(new AggregateToken(token, AggregateFunction.Min));
+                            result.Add(new AggregateToken(token, AggregateFunction.Max));
+                        }
+                        else if (ft == FilterType.DateTime) /*ft == FilterType.String || */
+                        {
+                            result.Add(new AggregateToken(token, AggregateFunction.Min));
+                            result.Add(new AggregateToken(token, AggregateFunction.Max));
+                        }
+                    }
+                }
+                else
+                {
+                    FilterType? ft = QueryUtils.TryGetFilterType(token.Type);
+
+                    if (ft == FilterType.Number || ft == FilterType.DecimalNumber)
+                    {
+                        result.Add(new IntervalQueryToken(token));
+                    }
                 }
             }
 
-            return result;       
-        } 
+            return result;
+        }
 
-        internal Column CreateSimpleColumn()
+        internal Column CreateColumn()
         {
             return new Column(Token, DisplayName); 
         }
-
-
-       
-
     }
 }

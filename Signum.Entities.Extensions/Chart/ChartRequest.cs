@@ -92,21 +92,10 @@ namespace Signum.Entities.Chart
 
         void UpdateGroup()
         {
-            UpdateTokenGroup(dimension1);
-            UpdateTokenGroup(dimension2);
-            UpdateTokenGroup(value1);
-            UpdateTokenGroup(value2);
-        }
-
-        void UpdateTokenGroup(ChartTokenDN token)
-        {
-            if (token == null)
-                return;
-
-            if (token.Aggregate != null && !GroupResults)
-                token.Aggregate = null;
-
-            token.NotifyGroup();
+            dimension1.NotifyAll();
+            dimension2.NotifyAll();
+            value1.NotifyAll();
+            value2.NotifyAll();
         }
 
         protected void UpdateTokens()
@@ -199,39 +188,25 @@ namespace Signum.Entities.Chart
         {
             ChartTokenDN ct = sender as ChartTokenDN;
 
-            if(ct != null)
+            if (ct != null)
             {
                 if (pi.Is(() => ct.Token))
                 {
-                    return ChartUtils.ValidateProperty(chartResultType, GetTokenName(ct), ct.Token);
-                }
-
-                if (pi.Is(() => ct.Aggregate))
-                {
-                    if (groupResults && ChartUtils.ShouldAggregate(chartResultType, GetTokenName((ChartTokenDN)sender)))
+                    if (groupResults)
                     {
-                        if (ct.Aggregate == null)
-                            return Resources.ExpressionShouldBeSomeKindOfAggregate;
-
-                        if (ct.Token != null && (ct.Aggregate == AggregateFunction.Sum || ct.Aggregate == AggregateFunction.Average))
+                        if (ChartUtils.ShouldAggregate(chartResultType, GetTokenName((ChartTokenDN)sender)))
                         {
-                            var ft = QueryUtils.TryGetFilterType(ct.Token.Type);
-
-                            if (ft == FilterType.Number || ft == FilterType.DecimalNumber)
-                                return null;
-
-                            if (ft == FilterType.Boolean && ct.Aggregate == AggregateFunction.Average)
-                                return null;
-
-                            return "{0} is not compatible with {1}".Formato(ct.Aggregate.NiceToString(), 
-                                ft != null ? ft.NiceToString() : ct.Token.Type.TypeName());
+                            if (!(ct.Token is AggregateToken))
+                                return Resources.ExpressionShouldBeSomeKindOfAggregate;
+                        }
+                        else
+                        {
+                            if (ct.Token is AggregateToken)
+                                return Resources.ExpressionCanNotBeAnAggregate;
                         }
                     }
-                    else
-                    {
-                        if (ct.Aggregate != null)
-                            return "Expression can not be an aggregate";
-                    }
+
+                    return ChartUtils.ValidateProperty(chartResultType, GetTokenName(ct), ct.Token);
                 }
             }
 
@@ -259,6 +234,7 @@ namespace Signum.Entities.Chart
             token.ShouldAggregateEvent += token_ShouldAggregateEvent;
             token.GroupByVisibleEvent += token_GroupByVisibleEvent;
             token.PropertyLabeleEvent += token_PropertyLabeleEvent;
+
         }
 
         public ChartTokenName GetTokenName(ChartTokenDN token)
@@ -303,7 +279,7 @@ namespace Signum.Entities.Chart
             get { return queryName; }
         }
 
-        List<Filter> filters;
+        List<Filter> filters = new List<Filter>();
         public List<Filter> Filters
         {
             get { return filters; }
@@ -317,10 +293,17 @@ namespace Signum.Entities.Chart
         {
             get { return chart; }
             set { Set(ref chart, value, () => Chart); }
-        }     
+        }
+
+        List<Order> orders = new List<Order>();
+        public List<Order> Orders
+        {
+            get { return orders; }
+            set { Set(ref orders, value, () => Orders); }
+        }
 
         public IEnumerable<ChartTokenDN> ChartTokens()
-        {
+        {   
             if (chart.Dimension1 != null)
                 yield return chart.Dimension1;
 
@@ -334,17 +317,17 @@ namespace Signum.Entities.Chart
                 yield return chart.Value2;
         }
 
-        public List<CollectionElementToken> Multiplications
+        public List<QueryToken> AllTokens()
         {
-            get
-            {
-                var allTokens = ChartTokens().Select(a => a.Token);
+            var allTokens = ChartTokens().Select(a => a.Token).ToList();
 
-                if (Filters != null)
-                    allTokens = allTokens.Concat(Filters.Select(a => a.Token));
+            if (Filters != null)
+                allTokens.AddRange(Filters.Select(a => a.Token));
 
-                return CollectionElementToken.GetElements(allTokens.ToHashSet());
-            }
+            if (Orders != null)
+                allTokens.AddRange(Orders.Select(a => a.Token));
+
+            return allTokens;
         }
     }
     
@@ -403,6 +386,14 @@ namespace Signum.Entities.Chart
             set { Set(ref chart, value, () => Chart); }
         }
 
+        [NotNullable]
+        MList<QueryOrderDN> orders = new MList<QueryOrderDN>();
+        public MList<QueryOrderDN> Orders
+        {
+            get { return orders; }
+            set { Set(ref orders, value, () => Orders); }
+        }
+
         public override string ToString()
         {
             return displayName;
@@ -442,18 +433,24 @@ namespace Signum.Entities.Chart
             {
                 QueryName = request.QueryName,
 
-                Chart =
-                {
-                    GroupResults = request.Chart.GroupResults,
-                    ChartType = request.Chart.ChartType,
-                },
-
                 Filters = request.Filters.Select(f => new QueryFilterDN
                 {
                     Token = f.Token,
                     Operation = f.Operation,
                     ValueString = FilterValueConverter.ToString(f.Value, f.Token.Type),
                 }).ToMList(),
+                
+                Chart =
+                {
+                    GroupResults = request.Chart.GroupResults,
+                    ChartType = request.Chart.ChartType,
+                },
+
+                Orders = request.Orders.Select(o=>new QueryOrderDN
+                {
+                     Token = o.Token,
+                     OrderType = o.OrderType
+                }).ToMList()
             };
 
             Assign(result.Chart.Dimension1, request.Chart.Dimension1);
@@ -464,6 +461,15 @@ namespace Signum.Entities.Chart
             return result;
         }
 
+        protected override void PreSaving(ref bool graphModified)
+        {
+            base.PreSaving(ref graphModified);
+
+            if (Orders != null)
+                for (int i = 0; i < Orders.Count; i++)
+                    Orders[i].Index = i;
+        }
+
         private static void Assign(ChartTokenDN result, ChartTokenDN request)
         {
             if (request == null || result == null)
@@ -471,8 +477,6 @@ namespace Signum.Entities.Chart
 
             if (request.Token != null)
                 result.Token = request.Token.Clone();
-
-            result.Aggregate = request.Aggregate;
 
             result.Unit = request.Unit;
             result.Format = request.Format;
@@ -486,18 +490,20 @@ namespace Signum.Entities.Chart
         {
             var result = new ChartRequest(uq.QueryName)
             {
-                Chart =
-                {
-                    GroupResults = uq.Chart.GroupResults,
-                    ChartType = uq.Chart.ChartType,
-                },
-
                 Filters = uq.Filters.Select(qf => new Filter
                 {
                     Token = qf.Token,
                     Operation = qf.Operation,
                     Value = qf.Value
                 }).ToList(),
+                
+                Chart =
+                {
+                    GroupResults = uq.Chart.GroupResults,
+                    ChartType = uq.Chart.ChartType,
+                },
+
+                Orders = uq.Orders.Select(o => new Order(o.Token, o.OrderType)).ToList(),
             };
 
             Assign(result.Chart.Dimension1, uq.Chart.Dimension1);

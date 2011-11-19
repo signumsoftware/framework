@@ -167,16 +167,124 @@ namespace Signum.Engine.Extensions.Chart
         static GenericInvoker<Func<ChartRequest, IDynamicQuery, ResultTable>> miExecuteChart = new GenericInvoker<Func<ChartRequest, IDynamicQuery, ResultTable>>((req, dq) => ExecuteChart<int>(req, (DynamicQuery<int>)dq));
         static ResultTable ExecuteChart<T>(ChartRequest request, DynamicQuery<T> dq)
         {
-            ChartTokenDN[] chartTokens = request.ChartTokens().ToArray(); 
-            List<Column> columns = chartTokens.Select(t=>t.CreateSimpleColumn()).ToList();
+            ChartTokenDN[] chartTokens = request.ChartTokens().ToArray();
+            List<Column> columns = chartTokens.Select(t => t.CreateColumn()).ToList();
+
+            var allTokens = request.AllTokens();
+            
+            var multiplications = CollectionElementToken.GetElements(allTokens.ToHashSet());
 
             if (!request.Chart.GroupResults)
+            {
+                BuildExpressionContext context;
+                object[] values;
+                if (dq is AutoDynamicQuery<T>)
+                {
+                    DQueryable<T> query = ((AutoDynamicQuery<T>)dq).Query.ToDQueryable(dq.GetColumnDescriptions())
+                        .SelectMany(multiplications)
+                        .Where(request.Filters)
+                        .OrderBy(request.Orders)
+                        .Select(columns);
+
+                    return ResultTable(query.Context, query.Query.ToArray());
+
+                    context = query.Context;
+                    values = query.Query.ToArray();
+                }
+                else
+                {
+                    DEnumerableCount<T> collection = ((ManualDynamicQuery<T>)dq).Execute(new QueryRequest
+                    {
+                        Columns = columns,
+                        Filters = request.Filters,
+                        QueryName = request.QueryName,
+                        Orders = request.Orders,
+                    }, dq.GetColumnDescriptions());
+
+                    context = collection.Context;
+                    values = collection.Collection.ToArray();
+                }
+
+            }
+            else
+            {
+                var simpleFilters = request.Filters.Where(f => !(f.Token is AggregateToken)).ToList();
+                var aggregateFilters = request.Filters.Where(f => f.Token is AggregateToken).ToList();
+                var aggregateOrders = request.Filters.Where(o=>o.Token is AggregateToken).ToList();
+                
+                var groupColumns = columns.Select(a => a.Token)
+                    .Concat(aggregateFilters.Select(a => a.Token))
+                    .Concat(aggregateOrders.Select(o => o.Token)).Distinct().Select(t => new Column(t, t.NiceName())).ToList();
+
+                
+                BuildExpressionContext context; 
+                object[] values;
+                if (dq is AutoDynamicQuery<T>)
+                {
+                    DQueryable<T> query = ((AutoDynamicQuery<T>)dq).Query.ToDQueryable(dq.GetColumnDescriptions())
+                        .SelectMany(multiplications)
+                        .Where(request.Filters)
+                        .Select(groupColumns);
+
+                    ChartTokenDN[] groupTokens = chartTokens.Where(t => !(t.Token is AggregateToken)).ToArray();
+                    LambdaExpression keySelector = BuildKeySelector(collection, groupTokens);
+
+                    Type resultType;
+                    LambdaExpression resultSelector = BuildResultSelector(chartTokens, groupTokens, collection, keySelector.Body.Type, out resultType);
+
+                    context = query.Context;
+                    values = query.Query.ToArray();
+
+
+
+
+                }
+                else
+                {
+                    DEnumerableCount<T> collection = ((ManualDynamicQuery<T>)dq).Execute(new QueryRequest
+                    { 
+                        Columns = columns,
+                        Filters = request.Filters,
+                        QueryName = request.QueryName,
+                    }, dq.GetColumnDescriptions());
+
+                    context = collection.Context;
+                    values = collection.Collection.ToArray();
+                }
+
+                var cols = columns.Select(c => Tuple.Create(c,
+                    Expression.Lambda(c.Token.BuildExpression(context), context.Parameter))).ToList();
+
+                return values.ToResultTable(cols, values.Length, 0, null);
+            }
+
+        }
+
+        private static ResultTable ResultTable(object[] values, List<Column> columns, BuildExpressionContext context)
+        {
+            var cols = columns.Select(c => Tuple.Create(c,
+                Expression.Lambda(c.Token.BuildExpression(context), context.Parameter))).ToList();
+
+            return values.ToResultTable(cols, values.Length, 0, null);
+        }
+        
+        static ResultTable ExecuteChartOld<T>(ChartRequest request, DynamicQuery<T> dq)
+        {
+            ChartTokenDN[] chartTokens = request.ChartTokens().ToArray();
+            List<Column> columns = chartTokens.Select(t => t.CreateColumn()).ToList();
+            
+            if (!request.Chart.GroupResults)
                 columns.Add(new _EntityColumn(dq.EntityColumn().BuildColumnDescription()));
+
+            
 
             IDynamicInfo collection;
             if (dq is AutoDynamicQuery<T>)
             {
-                collection = ((AutoDynamicQuery<T>)dq).Query.ToDQueryable(dq.GetColumnDescriptions()).SelectMany(request.Multiplications).Where(request.Filters).Select(columns);
+                collection = ((AutoDynamicQuery<T>)dq).Query.ToDQueryable(dq.GetColumnDescriptions())
+                    .SelectMany(request.Multiplications)
+                    .Where(request.Filters)
+                    .Select(columns);
             }
             else
             {
