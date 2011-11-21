@@ -255,7 +255,8 @@ SF.Chart.ChartBase.prototype = {
                 return data;
             };
 
-            window.open($this.closest('.sf-chart-container').attr('data-open-url') + "?" + serializeData($this));
+            var url = $this.closest('.sf-chart-container').attr('data-open-url');
+            window.open(url + (url.indexOf("?") >= 0 ? "&" : "?") + serializeData($this));
         });
     }
 };
