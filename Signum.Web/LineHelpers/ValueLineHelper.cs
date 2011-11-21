@@ -92,8 +92,8 @@ namespace Signum.Web
             {
                 items = new List<SelectListItem>();
 
-                if (valueLine.Type.IsNullable() &&
-                   (!Validator.GetOrCreatePropertyPack(valueLine.PropertyRoute).Validators.OfType<NotNullValidatorAttribute>().Any() || valueLine.UntypedValue == null))
+                if (valueLine.UntypedValue == null ||
+                    valueLine.Type.IsNullable() && (valueLine.PropertyRoute == null || !Validator.GetOrCreatePropertyPack(valueLine.PropertyRoute).Validators.OfType<NotNullValidatorAttribute>().Any()))
                 {
                     items.Add(new SelectListItem() { Text = "-", Value = "" });
                 }
