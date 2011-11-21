@@ -284,22 +284,21 @@ namespace Signum.Web.Chart
                     };
                 case ChartResultType.TypeTypeValue:
                     var dimension1Values = resultTable.Rows.Select(r => r[0]).Distinct().ToList();
+                    var dic1dic0 = resultTable.Rows.AgGroupToDictionary(r=>r[1], gr=>gr.ToDictionary(r=>r[0], r=>r[2]));
 
                     return new
                     {
-                        labels = new 
+                        labels = new
                         {
                             dimension1 = chart.Dimension1.GetTitle(),
                             dimension2 = chart.Dimension2.GetTitle(),
-                            value1 = chart.Value1.GetTitle() 
+                            value1 = chart.Value1.GetTitle()
                         },
                         dimension1 = dimension1Values.Select(d1Converter).ToList(),
-                        series = resultTable.Rows.Select(r => r[1]).Distinct().Select(dim2 => new 
+                        series = dic1dic0.Select(kvp =>new
                         {
-                            dimension2 = d2Converter(dim2),
-                            values = (dimension1Values
-                                .Select(dim1 => resultTable.Rows.FirstOrDefault(r => object.Equals(r[0], dim1) && object.Equals(r[1], dim2))
-                                .TryCC(r => r[2]))).ToList()
+                            dimension2 = d2Converter(kvp.Key),
+                            values = dimension1Values.Select(dim1 => kvp.Value.TryGetC(dim1)).ToList(),
                         }).ToList()
                     };
 
