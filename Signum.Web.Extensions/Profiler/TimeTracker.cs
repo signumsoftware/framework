@@ -22,13 +22,23 @@ namespace Signum.Web.Profiler
 
         public override void OnActionExecuted(ActionExecutedContext filterContext)
         {
-            IDisposable elapsed = (IDisposable)filterContext.Controller.ViewData.TryGetC("elapsed");
-            if (elapsed != null)
-                elapsed.Dispose();
+            if (filterContext.Result == null)
+            {
+                IDisposable elapsed = (IDisposable)filterContext.Controller.ViewData.TryGetC("elapsed");
+                if (elapsed != null)
+                    elapsed.Dispose();
+            }
 
             IDisposable profiler = (IDisposable)filterContext.Controller.ViewData.TryGetC("profiler");
             if (profiler != null)
                 profiler.Dispose();
+        }
+
+        public override void OnResultExecuted(ResultExecutedContext filterContext)
+        {
+            IDisposable elapsed = (IDisposable)filterContext.Controller.ViewData.TryGetC("elapsed");
+            if (elapsed != null)
+                elapsed.Dispose();
         }
     }
 }
