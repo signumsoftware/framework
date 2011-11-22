@@ -442,7 +442,7 @@ namespace Signum.Engine.Authorization
 
         public static bool IsLogged()
         {
-            return UserDN.Current == null || UserDN.Current.Is(AnonymousUser);
+            return UserDN.Current != null && !UserDN.Current.Is(AnonymousUser);
         }
     }
 }
