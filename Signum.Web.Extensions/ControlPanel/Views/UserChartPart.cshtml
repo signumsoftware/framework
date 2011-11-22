@@ -18,10 +18,12 @@
 @{ 
     UserChartDN uc = ((UserChartPartDN)Model.Content).UserChart;
     ChartRequest request = UserChartDN.ToRequest(uc);
-
+ 
     using (var ucTc = new TypeContext<ChartRequest>(request, "r{0}c{1}".Formato(Model.Row, Model.Column)))
     {
         ResultTable resultTable = ChartLogic.ExecuteChart(request);
+
+        var json = ChartClient.DataJson(ucTc.Value, resultTable);
 
         <div id="@ucTc.Compose("divChartControl")" class="sf-search-control sf-chart-control" data-prefix="@ucTc.ControlID">
             <div style="display:none">
@@ -49,7 +51,7 @@
                 var width = $chartContainer.width();
                 var height = $chartContainer.height();
 
-                var data = @Html.Json(ChartClient.DataJson(ucTc.Value, resultTable));
+                var data = @Html.Json(json);
 
                 var myChart = SF.Chart.Factory.getGraphType('@ucTc.Value.Chart.ChartType.ToString()');
                 

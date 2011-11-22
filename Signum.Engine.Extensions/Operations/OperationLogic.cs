@@ -93,6 +93,8 @@ namespace Signum.Engine.Operations
                                             }).ToDynamic();
 
                 dqm.RegisterExpression((OperationDN o) => o.LogOperations());
+             
+
             }
         }
 
