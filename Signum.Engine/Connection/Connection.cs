@@ -111,13 +111,6 @@ namespace Signum.Engine
             set { connectionString = value; }
         }
 
-        static readonly Variable<long> commandCountVariable = Statics.ThreadVariable<long>("commandCount");
-        public static long CommandCount
-        {
-            get { return commandCountVariable.Value; }
-            set { commandCountVariable.Value = value; }
-        }
-
         SqlConnection EnsureConnection()
         {
             if (Transaction.HasTransaction)
@@ -169,7 +162,6 @@ namespace Signum.Engine
                 try
                 {
                     object result = cmd.ExecuteScalar();
-                    CommandCount++;
                     return result;
                 }
                 catch (SqlException ex)
@@ -191,7 +183,6 @@ namespace Signum.Engine
                 try
                 {
                     int result = cmd.ExecuteNonQuery();
-                    CommandCount++;
                     return result;
                 }
                 catch (SqlException ex)
@@ -214,7 +205,6 @@ namespace Signum.Engine
                 {
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
-                        CommandCount++;
                         FieldReader fr = new FieldReader(reader);
                         int row = -1;
                         try
@@ -250,7 +240,6 @@ namespace Signum.Engine
             try
             {
                 SqlCommand cmd = NewCommand(preCommand, null);
-                CommandCount++;
                 return cmd.ExecuteReader();
             }
             catch (SqlException ex)
@@ -274,7 +263,6 @@ namespace Signum.Engine
 
                     DataTable result = new DataTable();
                     da.Fill(result);
-                    CommandCount++;
                     return result;
                 }
                 catch (SqlException ex)
@@ -298,7 +286,6 @@ namespace Signum.Engine
                     SqlDataAdapter da = new SqlDataAdapter(cmd);
                     DataSet result = new DataSet();
                     da.Fill(result);
-                    CommandCount++;
                     return result;
                 }
                 catch (SqlException ex)
