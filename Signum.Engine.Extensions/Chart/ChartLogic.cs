@@ -186,9 +186,7 @@ namespace Signum.Engine.Extensions.Chart
             ChartTokenDN[] chartTokens = request.ChartTokens().ToArray();
             List<Column> columns = chartTokens.Select(t => t.CreateColumn()).ToList();
 
-            var allTokens = request.AllTokens();
-            
-            var multiplications = CollectionElementToken.GetElements(allTokens.ToHashSet());
+            var multiplications = request.Multiplications;;
 
             if (!request.Chart.GroupResults)
             {
@@ -220,19 +218,16 @@ namespace Signum.Engine.Extensions.Chart
                 var simpleFilters = request.Filters.Where(f => !(f.Token is AggregateToken)).ToList();
                 var aggregateFilters = request.Filters.Where(f => f.Token is AggregateToken).ToList();
 
-                var keys = columns.Select(t=>t.Token).Where(t => !(t is AggregateToken)); 
+                var keys = columns.Select(t=>t.Token).Where(t => !(t is AggregateToken)).ToHashSet(); 
 
-                var allAggregates = columns.Select(t=>t.Token)
-                    .Concat(request.Filters.Select(t=>t.Token))
-                    .Concat(request.Orders.Select(t=>t.Token)).OfType<AggregateToken>(); 
-
+                var allAggregates = request.AllTokens().OfType<AggregateToken>().ToHashSet(); 
                 
                 if (dq is AutoDynamicQuery<T>)
                 {
                     DQueryable<T> query = ((AutoDynamicQuery<T>)dq).Query.ToDQueryable(dq.GetColumnDescriptions())
                         .SelectMany(multiplications)
                         .Where(simpleFilters)
-                        .GroupBy(keys.ToHashSet(), allAggregates.ToHashSet())
+                        .GroupBy(keys, allAggregates)
                         .Where(aggregateFilters)
                         .OrderBy(request.Orders);    
                         
@@ -249,7 +244,7 @@ namespace Signum.Engine.Extensions.Chart
 
 
                     var groupCollection = plainCollection
-                        .GroupBy(keys.ToHashSet(), allAggregates.ToHashSet())
+                        .GroupBy(keys, allAggregates)
                         .Where(aggregateFilters)
                         .OrderBy(request.Orders);
 

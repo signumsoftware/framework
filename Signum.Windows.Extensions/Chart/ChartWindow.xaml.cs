@@ -213,12 +213,12 @@ namespace Signum.Windows.Chart
             {
                 //so the values don't get affected till next SetResults
                 var filters = Request.Filters.Select(f => new FilterOption { Path = f.Token.FullKey(), Value = f.Value, Operation = f.Operation }).ToList();
-                var charTokens = Request.ChartTokens().Select(t => new { t.Token, t.Aggregate }).ToArray();
+                var keyColunns = Request.ChartTokens()
+                    .Zip(resultTable.Columns, (t, c) => new { t.Token, Column = c })
+                    .Where(a => !(a.Token is AggregateToken)).ToArray();
 
                 getFilters =
-                    rr => filters.Concat(charTokens.Zip(resultTable.Columns)
-                    .Where(t => t.Item1.Aggregate == null)
-                    .SelectMany(t => GetTokenFilters(t.Item1.Token, rr[t.Item2]))).ToList();
+                    rr => keyColunns.SelectMany(t => GetTokenFilters(t.Token, rr[t.Column])).ToList();
             }
             else getFilters = null;
 

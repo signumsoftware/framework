@@ -348,7 +348,9 @@ namespace Signum.Web.Chart
             if (token == null)
                 return null;
 
-            if (typeof(Lite).IsAssignableFrom( token.Type))
+            var type = token.Token.Type.UnNullify();
+
+            if (typeof(Lite).IsAssignableFrom(type))
             {
                 return p =>
                 {
@@ -360,7 +362,7 @@ namespace Signum.Web.Chart
                     };
                 };
             }
-            else if (token.Type.UnNullify().IsEnum)
+            else if (type.IsEnum)
             {
                 return p =>
                 {
@@ -372,7 +374,7 @@ namespace Signum.Web.Chart
                     };
                 };
             }
-            else if (typeof(DateTime) == token.Type.UnNullify())
+            else if (typeof(DateTime) == type)
             {
 
                 return p =>
@@ -387,7 +389,7 @@ namespace Signum.Web.Chart
                     };
                 };
             }
-            else if (typeof(IFormattable).IsAssignableFrom(token.Type.UnNullify()) && token.Format.HasText())
+            else if (typeof(IFormattable).IsAssignableFrom(type) && token.Format.HasText())
             {
                 return p =>
                 {

@@ -329,6 +329,11 @@ namespace Signum.Entities.Chart
 
             return allTokens;
         }
+
+        public List<CollectionElementToken> Multiplications
+        {
+            get { return CollectionElementToken.GetElements(AllTokens().ToHashSet()); }
+        }
     }
     
     [Serializable]

@@ -50,7 +50,7 @@ namespace Signum.Windows.Chart
 
         private List<QueryToken> token_SubTokensEvent(QueryToken token)
         {
-            return ChartTokenDN.SubTokensChart(token, ColumnDescriptions);
+            return ((ChartTokenDN)DataContext).SubTokensChart(token, ColumnDescriptions);
         }
 
         private void UpdateGroup()
