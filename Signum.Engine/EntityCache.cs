@@ -114,7 +114,7 @@ namespace Signum.Engine
 
         public static bool Created { get { return currentCache.Value != null; } }
 
-        internal static bool HasRetriever { get { return currentCache.Value.HasRetriever; } }
+        internal static bool HasRetriever { get { return currentCache.Value != null && currentCache.Value.HasRetriever; } }
 
         public void Dispose()
         {

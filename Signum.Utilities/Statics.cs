@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Security.Principal;
 using Signum.Utilities.Reflection;
+using System.Collections;
 
 namespace Signum.Utilities
 {
@@ -103,7 +104,28 @@ namespace Signum.Utilities
 
         public bool IsClean
         {
-            get { return Value == null || Value.Equals(typeof(T)); }
+            get
+            {
+                if (Value == null)
+                    return true;
+
+                if (Value.Equals(default(T)))
+                    return true;
+
+                var col = Value as IEnumerable;
+
+                if (col != null)
+                {
+                    foreach (var item in col)
+                    {
+                        return false;
+                    }
+
+                    return true;
+                }
+
+                return false;
+            }
         }
     }
 
