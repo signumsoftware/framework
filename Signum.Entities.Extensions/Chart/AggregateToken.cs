@@ -12,7 +12,7 @@ namespace Signum.Entities.Chart
     [Serializable]
     public class AggregateToken : QueryToken
     {
-        AggregateFunction function;
+        public AggregateFunction AggregateFunction { get; private set; }
 
         public AggregateToken(QueryToken parent, AggregateFunction function)
             : base(parent)
@@ -29,27 +29,27 @@ namespace Signum.Entities.Chart
                     throw new ArgumentNullException("parent");
             }
 
-            this.function = function;
+            this.AggregateFunction = function;
         }
 
         public override string ToString()
         {
-            return function.NiceToString();
+            return AggregateFunction.NiceToString();
         }
 
         public override string NiceName()
         {
-            if(function == AggregateFunction.Count)
-                return function.NiceToString();
+            if(AggregateFunction == AggregateFunction.Count)
+                return AggregateFunction.NiceToString();
 
-            return "{0} of {1}".Formato(function.NiceToString(), Parent.ToString());  
+            return "{0} of {1}".Formato(AggregateFunction.NiceToString(), Parent.ToString());  
         }
 
         public override string Format
         {
             get
             {
-                if (function == AggregateFunction.Count)
+                if (AggregateFunction == AggregateFunction.Count)
                     return null;
                 return Parent.Format;
             }
@@ -59,7 +59,7 @@ namespace Signum.Entities.Chart
         {
             get
             {
-                if (function == AggregateFunction.Count)
+                if (AggregateFunction == AggregateFunction.Count)
                     return null;
                 return Parent.Unit;
             }
@@ -69,12 +69,12 @@ namespace Signum.Entities.Chart
         {
             get
             {
-                if (function == AggregateFunction.Count)
+                if (AggregateFunction == AggregateFunction.Count)
                     return typeof(int);
 
                 var pType = Parent.Type;
 
-                if (function == AggregateFunction.Average && 
+                if (AggregateFunction == AggregateFunction.Average && 
                     (pType.UnNullify() == typeof(int) || 
                      pType.UnNullify() == typeof(long) ||
                      pType.UnNullify() == typeof(bool)))
@@ -88,7 +88,7 @@ namespace Signum.Entities.Chart
 
         public override string Key
         {
-            get { return function.ToString(); }
+            get { return AggregateFunction.ToString(); }
         }
 
         protected override List<QueryToken> SubTokensInternal()
@@ -98,12 +98,12 @@ namespace Signum.Entities.Chart
 
         protected override Expression BuildExpressionInternal(BuildExpressionContext context)
         {
-            throw new NotImplementedException();
+            throw new InvalidOperationException("AggregateToken does not support this method");
         }
 
         public override PropertyRoute GetPropertyRoute()
         {
-            if (function == AggregateFunction.Count)
+            if (AggregateFunction == AggregateFunction.Count)
                 return null;
 
             return Parent.GetPropertyRoute(); 
@@ -121,7 +121,7 @@ namespace Signum.Entities.Chart
 
         public override QueryToken Clone()
         {
-            if (function == AggregateFunction.Count)
+            if (AggregateFunction == AggregateFunction.Count)
                 return new AggregateToken(null, AggregateFunction.Count);
             else
                 return new AggregateToken(Parent.Clone(), AggregateFunction.Count);
