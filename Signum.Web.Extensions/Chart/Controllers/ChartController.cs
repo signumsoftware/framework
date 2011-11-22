@@ -177,7 +177,7 @@ namespace Signum.Web.Chart
 
             return new FilterOption
             {
-                ColumnName = token.Key,
+                ColumnName = token.FullKey(),
                 Token = token,
                 Operation = FilterOperation.EqualTo,
                 Value = hasKey ? FindOptionsModelBinder.Convert(FindOptionsModelBinder.DecodeValue(value), token.Type) : null

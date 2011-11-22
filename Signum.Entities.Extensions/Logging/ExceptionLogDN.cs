@@ -41,7 +41,6 @@ namespace Signum.Entities.Logging
         }
 
         int exceptionMessageHash;
-        [Format("X")]
         public int ExceptionMessageHash
         {
             get { return exceptionMessageHash; }
@@ -64,7 +63,6 @@ namespace Signum.Entities.Logging
         }
 
         int stackTraceHash;
-        [Format("X")]
         public int StackTraceHash
         {
             get { return stackTraceHash; }
@@ -87,9 +85,9 @@ namespace Signum.Entities.Logging
             set { Set(ref userAgent, value, () => UserAgent); }
         }
 
-        [NotNullable, SqlDbType(Size = 500)]
+        [NotNullable, SqlDbType(Size = int.MaxValue)]
         string requestUrl;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 500)]
+        [StringLengthValidator(AllowNulls = false, Min = 3)]
         public string RequestUrl
         {
             get { return requestUrl; }

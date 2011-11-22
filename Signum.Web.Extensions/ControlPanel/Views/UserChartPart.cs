@@ -97,10 +97,12 @@ WriteLiteral("\r\n\r\n");
    
     UserChartDN uc = ((UserChartPartDN)Model.Content).UserChart;
     ChartRequest request = UserChartDN.ToRequest(uc);
-
+ 
     using (var ucTc = new TypeContext<ChartRequest>(request, "r{0}c{1}".Formato(Model.Row, Model.Column)))
     {
         ResultTable resultTable = ChartLogic.ExecuteChart(request);
+
+        var json = ChartClient.DataJson(ucTc.Value, resultTable);
 
 
 WriteLiteral("        <div id=\"");
@@ -163,7 +165,7 @@ WriteLiteral("\');\r\n                        \r\n                $chartContaine
 "         var height = $chartContainer.height();\r\n\r\n                var data = ");
 
 
-                      Write(Html.Json(ChartClient.DataJson(ucTc.Value, resultTable)));
+                      Write(Html.Json(json));
 
 WriteLiteral(";\r\n\r\n                var myChart = SF.Chart.Factory.getGraphType(\'");
 
