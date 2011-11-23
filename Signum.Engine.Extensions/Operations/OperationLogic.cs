@@ -72,7 +72,7 @@ namespace Signum.Engine.Operations
             return ProtectedSaveTypes.Contains(type) && (it == null || !it.Contains(type));
         }
 
-        public static IDisposable AllowSave<T>()
+        public static IDisposable AllowSave<T>() where T : class, IIdentifiable
         {
             return AllowSave(typeof(T));
         }

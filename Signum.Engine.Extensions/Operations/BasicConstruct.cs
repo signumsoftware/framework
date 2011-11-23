@@ -19,7 +19,7 @@ namespace Signum.Engine.Operations
     }
 
     public class BasicConstruct<T> : IConstructOperation
-        where T: IIdentifiable
+        where T: class, IIdentifiable
     {
         public Enum Key { get; private set; }        
         public Type Type { get { return typeof(T); } }
