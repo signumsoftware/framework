@@ -123,6 +123,7 @@ namespace Signum.Entities.Chart
                     token.ExternalPropertyValidation += token_ExternalPropertyValidation;
                     token.ShouldAggregateEvent += token_ShouldAggregateEvent;
                     token.GroupByVisibleEvent += token_GroupByVisibleEvent;
+                    token.GroupingEvent += token_GroupingEvent;
                     token.PropertyLabeleEvent += token_PropertyLabeleEvent;
                 }
                 else
@@ -142,12 +143,18 @@ namespace Signum.Entities.Chart
                     token.ExternalPropertyValidation -= token_ExternalPropertyValidation;
                     token.ShouldAggregateEvent -= token_ShouldAggregateEvent;
                     token.GroupByVisibleEvent -= token_GroupByVisibleEvent;
+                    token.GroupingEvent -= token_GroupingEvent;
                     token.PropertyLabeleEvent -= token_PropertyLabeleEvent;
                     token = null;
                 }
             }
 
             Notify(property);
+        }
+
+        bool token_GroupingEvent(ChartTokenDN arg)
+        {
+            return this.GroupResults;
         }
 
         [field: NonSerialized, Ignore]
@@ -239,6 +246,7 @@ namespace Signum.Entities.Chart
             token.ExternalPropertyValidation += token_ExternalPropertyValidation;
             token.ShouldAggregateEvent += token_ShouldAggregateEvent;
             token.GroupByVisibleEvent += token_GroupByVisibleEvent;
+            token.GroupingEvent += token_GroupingEvent;
             token.PropertyLabeleEvent += token_PropertyLabeleEvent;
 
         }
@@ -492,9 +500,6 @@ namespace Signum.Entities.Chart
             result.Unit = request.Unit;
             result.Format = request.Format;
             result.DisplayName = request.DisplayName;
-
-            result.OrderPriority = request.OrderPriority;
-            result.OrderType = request.OrderType;
         }
 
         public static ChartRequest ToRequest(UserChartDN uq)

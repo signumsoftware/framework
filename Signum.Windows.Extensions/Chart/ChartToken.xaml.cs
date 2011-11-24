@@ -67,6 +67,8 @@ namespace Signum.Windows.Chart
 
             if (PreLoad != null)
                 PreLoad(this, EventArgs.Empty);
+
+            UpdateGroup(); 
         }
     }
 }

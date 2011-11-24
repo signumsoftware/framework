@@ -24,8 +24,7 @@ namespace Signum.Entities.Chart
             }
             else
             {
-
-                if (parent != null)
+                if (parent == null)
                     throw new ArgumentNullException("parent");
             }
 
@@ -116,6 +115,9 @@ namespace Signum.Entities.Chart
 
         public override bool IsAllowed()
         {
+            if (AggregateFunction == Chart.AggregateFunction.Count)
+                return true;
+
             return Parent.IsAllowed();
         }
 

@@ -307,19 +307,19 @@ namespace Signum.Windows.Chart
             {
                 foreach (var col in columnInfos)
                 {
-                    col.ChartToken.OrderPriority = null;
-                    col.ChartToken.OrderType = null;
+                //    col.ChartToken.OrderPriority = null;
+                //    col.ChartToken.OrderType = null;
                 }
             }
 
             if (ci.OrderInfo != null)
             {
-                ci.ChartToken.OrderType = ci.ChartToken.OrderType == OrderType.Ascending ? OrderType.Descending : OrderType.Ascending; ;
+                //ci.ChartToken.OrderType = ci.ChartToken.OrderType == OrderType.Ascending ? OrderType.Descending : OrderType.Ascending; ;
             }
             else
             {
-                ci.ChartToken.OrderType = OrderType.Ascending;
-                ci.ChartToken.OrderPriority = 1; 
+                //ci.ChartToken.OrderType = OrderType.Ascending;
+                //ci.ChartToken.OrderPriority = 1; 
             }
 
             GenerateChart();
@@ -348,8 +348,8 @@ namespace Signum.Windows.Chart
                 Tag = columnInfo
             };
 
-            if (ct.OrderPriority.HasValue)
-                columnInfo.OrderInfo = new ColumnOrderInfo(header, ct.OrderType.Value, ct.OrderPriority.Value); 
+            //if (ct.OrderPriority.HasValue)
+            //    columnInfo.OrderInfo = new ColumnOrderInfo(header, ct.OrderType.Value, ct.OrderPriority.Value); 
 
             GridViewColumn column = new GridViewColumn
             {

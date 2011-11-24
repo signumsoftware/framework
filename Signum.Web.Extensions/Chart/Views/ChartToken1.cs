@@ -152,14 +152,6 @@ WriteLiteral("    <tr class=\"sf-chart-token-config\" style=\"display:none\">\r\
            Write(Html.ValueLine(tc, ct => ct.Unit, vl => vl.ValueHtmlProps["size"] = 2));
 
                                                                                        
-                
-           Write(Html.ValueLine(tc, ct => ct.OrderType));
-
-                                                        
-                
-           Write(Html.ValueLine(tc, ct => ct.OrderPriority, vl => vl.ValueHtmlProps["size"] = 2));
-
-                                                                                                
             }
 
 WriteLiteral("        </td>\r\n    </tr>\r\n");

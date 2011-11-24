@@ -26,11 +26,6 @@ namespace Signum.Entities.Chart
     [Serializable]
     public class ChartTokenDN : QueryTokenDN
     {
-        static ChartTokenDN()
-        {
-
-        }
-
         public ChartTokenDN()
         {
 
@@ -78,19 +73,6 @@ namespace Signum.Entities.Chart
             set { if (Set(ref displayName, value, () => DisplayName)) NotifyChange(false); }
         }
 
-        OrderType? orderType;
-        public OrderType? OrderType
-        {
-            get { return orderType; }
-            set { if (Set(ref orderType, value, () => OrderType))Notify(() => OrderPriority); }
-        }
-
-        int? orderPriority;
-        public int? OrderPriority
-        {
-            get { return orderPriority; }
-            set { if (Set(ref orderPriority, value, () => OrderPriority))Notify(() => OrderType); }
-        }
 
         [field: NonSerialized, Ignore]
         internal event Func<ChartTokenDN, bool> GroupByVisibleEvent;
@@ -139,12 +121,6 @@ namespace Signum.Entities.Chart
             if(pi.Is(()=>Token) && Token is IDataErrorInfo)
             {
                 return ((IDataErrorInfo)Token).Error;
-            }
-
-            if (pi.Is(() => OrderPriority) || pi.Is(() => OrderType))
-            {
-                if ((OrderPriority == null) != (OrderType == null))
-                    return "Order properties mismatch";
             }
 
             return base.PropertyValidation(pi);
@@ -198,7 +174,7 @@ namespace Signum.Entities.Chart
                         }
                     }
                 }
-                else
+                else if (token != null)
                 {
                     FilterType? ft = QueryUtils.TryGetFilterType(token.Type);
 

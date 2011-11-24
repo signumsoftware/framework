@@ -127,20 +127,6 @@ namespace Signum.Web.Chart
                     return ctx.None();
 
                 return ctx.Input;
-            })
-            .SetProperty(ct => ct.OrderType, ctx =>
-            {
-                if (string.IsNullOrEmpty(ctx.Input))
-                    return ctx.None();
-                 
-                return ctx.Input.ToEnum<OrderType>();
-            })
-            .SetProperty(ct => ct.OrderPriority, ctx =>
-            {
-                if (string.IsNullOrEmpty(ctx.Input))
-                    return ctx.None();
-
-                return ctx.Input.ToInt();
             });
 
         public static EntityMapping<ChartRequest> MappingChartRequest = new EntityMapping<ChartRequest>(true)
